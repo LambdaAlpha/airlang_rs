@@ -1,5 +1,9 @@
-use airlang::hello::hello_world;
+mod repl;
+
+use env_logger;
 
 fn main() {
-    hello_world()
+    env_logger::init();
+
+    repl::repl();
 }
