@@ -22,7 +22,7 @@ pub fn repl() {
 }
 
 fn print_version() {
-    let version = include_str!("../air/Version.air");
+    let version = include_str!("../air/version.air");
     let version = airlang::eval(version);
     println!("🜁 air {version}");
 }
