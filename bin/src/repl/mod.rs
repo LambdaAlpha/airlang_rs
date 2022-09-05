@@ -16,13 +16,13 @@ pub fn repl() {
             break;
         }
 
-        let result = airlang::eval(&src);
+        let result = airlang::interpret(&src);
         println!("{result}");
     }
 }
 
 fn print_version() {
     let version = include_str!("../air/version.air");
-    let version = airlang::eval(version);
+    let version = airlang::interpret(version);
     println!("🜁 air {version}");
 }

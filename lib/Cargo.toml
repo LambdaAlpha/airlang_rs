@@ -9,3 +9,9 @@ description = "The Air Programming Language"
 
 [dependencies]
 log = "0.4"
+regex = "1.6.0"
+
+[dependencies.rug]
+version = "1.17"
+default-features = false
+features = ["integer", "float"]
