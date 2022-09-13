@@ -11,7 +11,7 @@ pub struct Lexer<T: LexerConfig> {
     pub config: T,
 }
 
-#[derive(PartialEq, Debug)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq))]
 pub enum Token {
     Delimeter,
     Bool(bool),
@@ -23,9 +23,18 @@ pub enum Token {
     Bytes(Bytes),
 }
 
-#[derive(Debug)]
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub struct LexerError {
     pub msg: String,
+}
+
+impl LexerError {
+    pub fn new(msg: String) -> LexerError {
+        LexerError { msg }
+    }
+    pub fn err<T>(msg: String) -> Result<T, LexerError> {
+        Err(LexerError { msg })
+    }
 }
 
 pub trait LexerConfig {
@@ -48,9 +57,7 @@ impl<T: LexerConfig> Lexer<T> {
 
             let captures = lexer.pattern().captures(rest);
             if captures.is_none() {
-                return Err(LexerError {
-                    msg: "pattern matching failed".to_owned(),
-                });
+                return LexerError::err("pattern matching failed".to_owned());
             }
             let captures = captures.unwrap();
 

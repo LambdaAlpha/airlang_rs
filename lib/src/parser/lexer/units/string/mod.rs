@@ -65,9 +65,7 @@ impl UnitLexer for StringLexer {
                         let i = u32::from_str_radix(codepoint.as_str(), 16).unwrap();
                         let i = char::from_u32(i);
                         if i.is_none() {
-                            return Err(LexerError {
-                                msg: format!("invalid unicode {codepoint}"),
-                            });
+                            return LexerError::err(format!("invalid unicode {codepoint}"));
                         }
                         i.unwrap()
                     }

@@ -28,6 +28,8 @@ impl NumLexer {
         ([eE](?P<exp_sign>[+\\-]?)(?P<exp>[0-9](?:[0-9_]*[0-9])?))? #exponent
         ([pP](?P<prec>[0-9](?:[0-9_]*[0-9])?))? # precision
         )
+        |
+        (?P<symbol>[+\\-])
         ",
             )
             .unwrap(),
@@ -40,6 +42,9 @@ impl UnitLexer for NumLexer {
         &self.pattern
     }
     fn lexing(&self, captures: &regex::Captures) -> Result<Token, LexerError> {
+        if let Some(symbol) = captures.name("symbol") {
+            return Ok(Token::Symbol(symbol.as_str().to_owned()));
+        }
         let sign = captures.name("sign").unwrap().as_str();
         let sign = if sign == "-" { "-" } else { "+" };
 
@@ -90,4 +95,4 @@ impl UnitLexer for NumLexer {
 }
 
 // todo refine float parse
-static LOG_2_10: f64 = 3.3219280948873626;
+const LOG_2_10: f64 = 3.3219280948873626;

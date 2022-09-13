@@ -4,6 +4,8 @@ use crate::parser::lexer::Token::{self, *};
 
 pub fn expected() -> Vec<Token> {
     vec![
+        Symbol("+".to_owned()),
+        Symbol("-".to_owned()),
         parse_radix("0", 10),
         parse_radix("00", 10),
         parse_radix("+0", 10),

@@ -21,9 +21,7 @@ pub fn test_unit_lexing(
 
         let captures = lexer.pattern().captures(rest);
         if captures.is_none() {
-            return Err(LexerError {
-                msg: "pattern matching failed".to_owned(),
-            });
+            return LexerError::err("pattern matching failed".to_owned());
         }
         let captures = captures.unwrap();
 

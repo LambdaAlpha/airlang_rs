@@ -6,8 +6,11 @@ pub fn interpret(src: &str) -> String {
 }
 
 pub fn parse(src: &str) -> Val {
-    // todo impl
-    return Val::Bytes(Box::new(src.as_bytes().to_vec()));
+    let result = parser::parse(src);
+    match result {
+        Ok(val) => val,
+        Err(_) => Val::bytes(vec![]),
+    }
 }
 
 pub fn eval(src: Val) -> Val {

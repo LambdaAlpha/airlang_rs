@@ -3,6 +3,8 @@ mod test;
 
 use regex::Regex;
 
+use crate::utils;
+
 use super::super::LexerError;
 use super::super::Token;
 use super::super::UnitLexer;
@@ -16,11 +18,13 @@ impl SymbolLexer {
         SymbolLexer {
             pattern: Regex::new(
                 "(?x)
-                [[:punct:]]+_[a-zA-Z0-9_]*[a-zA-Z0-9]+[a-zA-Z0-9_]*
+                (?P<single_punct>[[:punct:]&&[^']])
                 |
-                _[a-zA-Z0-9_]*[a-zA-Z0-9]+[a-zA-Z0-9_]*
+                (?P<punct_postfix>'[[:punct:]]*_[a-zA-Z0-9_]*[a-zA-Z0-9]+[a-zA-Z0-9_]*)
                 |
-                [[:punct:]]+
+                (?P<multi_punct>'[[:punct:]]+)
+                |
+                '(?P<bytes>[0-9a-fA-F]{2}(?:(?:[0-9a-fA-F]{2}|_)*[0-9a-fA-F]{2})?|t|f|)
                 ",
             )
             .unwrap(),
@@ -33,6 +37,26 @@ impl UnitLexer for SymbolLexer {
         &self.pattern
     }
     fn lexing(&self, captures: &regex::Captures) -> Result<Token, LexerError> {
-        Ok(Token::Symbol(captures.get(0).unwrap().as_str().to_owned()))
+        let single_punct = captures.name("single_punct");
+        if single_punct.is_some() {
+            return Ok(Token::Symbol(captures.get(0).unwrap().as_str().to_owned()));
+        }
+        let punct_postfix = captures.name("punct_postfix");
+        if punct_postfix.is_some() {
+            return Ok(Token::Symbol(captures.get(0).unwrap().as_str().to_owned()));
+        }
+        let multi_punct = captures.name("multi_punct");
+        if multi_punct.is_some() {
+            return Ok(Token::Symbol(captures.get(0).unwrap().as_str().to_owned()));
+        }
+        let token = match captures.name("bytes").unwrap().as_str() {
+            "t" => Token::Bool(true),
+            "f" => Token::Bool(false),
+            hex => {
+                let hex = hex.replace("_", "");
+                Token::Bytes(utils::conversion::hex_str_to_vec_u8(hex.as_str()).unwrap())
+            }
+        };
+        Ok(token)
     }
 }

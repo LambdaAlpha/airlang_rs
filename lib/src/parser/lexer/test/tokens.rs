@@ -6,6 +6,7 @@ pub fn expected() -> Vec<Token> {
     vec![
         String("abc".to_owned()),
         Letter("abc".to_owned()),
+        Symbol("+".to_owned()),
         Int(Integer::from_str("123").unwrap()),
         Int(Integer::from_str("-123").unwrap()),
         Bool(true),
