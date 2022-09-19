@@ -9,8 +9,12 @@ pub fn hex_str_to_vec_u8(s: &str) -> Result<Vec<u8>, ParseIntError> {
 
 pub fn u8_array_to_hex_string(bytes: &[u8]) -> String {
     let mut s = String::with_capacity(bytes.len() * 2);
-    for &b in bytes {
-        write!(&mut s, "{:02x}", b).unwrap();
-    }
+    u8_array_to_hex_string_mut(bytes, &mut s);
     s
+}
+
+pub fn u8_array_to_hex_string_mut(bytes: &[u8], s: &mut String) {
+    for &b in bytes {
+        write!(s, "{:02x}", b).unwrap();
+    }
 }

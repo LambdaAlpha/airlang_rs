@@ -18,7 +18,7 @@ pub fn parse(tokens: Vec<Token>) -> Vec<FlatNode> {
             Token::Letter(l) => FlatNode::Atom(AtomNode::Letter(l)),
             Token::String(s) => FlatNode::Atom(AtomNode::String(s)),
             Token::Bytes(b) => FlatNode::Atom(AtomNode::Bytes(b)),
-            Token::Delimeter => continue,
+            Token::Delimeter(_) => continue,
         };
         nodes.push(node);
     }

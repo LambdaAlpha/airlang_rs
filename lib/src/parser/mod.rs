@@ -4,25 +4,24 @@ use crate::val::Val;
 
 mod lexer;
 mod pass;
+mod stringify;
 #[cfg(test)]
 mod test;
 
 #[cfg_attr(debug_assertions, derive(Debug))]
-pub struct ParserError {
+pub struct ParseError {
     pub msg: String,
 }
 
-impl ParserError {
-    pub fn new(msg: String) -> ParserError {
-        ParserError { msg }
-    }
+pub type ParseResult<T> = Result<T, ParseError>;
 
-    pub fn err<T>(msg: String) -> Result<T, ParserError> {
-        Err(ParserError { msg })
+impl ParseError {
+    pub fn err<T>(msg: String) -> ParseResult<T> {
+        Err(ParseError { msg })
     }
 }
 
-pub fn parse(src: &str) -> Result<Val, ParserError> {
+pub fn parse(src: &str) -> ParseResult<Val> {
     let lexer = Lexer {
         config: AirLexerConfig::new(),
     };
@@ -36,6 +35,9 @@ pub fn parse(src: &str) -> Result<Val, ParserError> {
             let val = val::parse(infix)?;
             Ok(val)
         }
-        Err(e) => ParserError::err(e.msg),
+        Err(e) => ParseError::err(e.msg),
     }
 }
+
+#[allow(dead_code)]
+pub use stringify::{stringify_comfort, stringify_compat, stringify_pretty};

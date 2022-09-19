@@ -1,19 +1,21 @@
-use super::prefix::PrefixNode;
+use super::prefix::{PrefixNode, PrefixNodes};
 use super::AtomNode;
-use crate::parser::ParserError;
+use crate::parser::ParseResult;
 
 pub enum PostfixNode {
     Atom(AtomNode),
     Symbol(String),
-    Infix(Vec<PostfixNode>),
-    List(Vec<Vec<PostfixNode>>),
-    Map(Vec<(Vec<PostfixNode>, Vec<PostfixNode>)>),
-    Ltree(Vec<PostfixNode>, Vec<Vec<PostfixNode>>),
-    Mtree(Vec<PostfixNode>, Vec<(Vec<PostfixNode>, Vec<PostfixNode>)>),
-    Top(Vec<PostfixNode>),
+    Infix(PostfixNodes),
+    List(Vec<PostfixNodes>),
+    Map(Vec<(PostfixNodes, PostfixNodes)>),
+    Ltree(PostfixNodes, Vec<PostfixNodes>),
+    Mtree(PostfixNodes, Vec<(PostfixNodes, PostfixNodes)>),
+    Top(PostfixNodes),
 }
 
-pub fn parse(prefix_nodes: Vec<PrefixNode>) -> Result<Vec<PostfixNode>, ParserError> {
+pub type PostfixNodes = Vec<PostfixNode>;
+
+pub fn parse(prefix_nodes: PrefixNodes) -> ParseResult<PostfixNodes> {
     let mut postfix_nodes = Vec::new();
     let mut iter = prefix_nodes.into_iter();
     let mut op_left = None;
@@ -61,7 +63,7 @@ pub fn parse(prefix_nodes: Vec<PrefixNode>) -> Result<Vec<PostfixNode>, ParserEr
     Ok(postfix_nodes)
 }
 
-fn parse_list(prefix_nodes: Vec<Vec<PrefixNode>>) -> Result<Vec<Vec<PostfixNode>>, ParserError> {
+fn parse_list(prefix_nodes: Vec<PrefixNodes>) -> ParseResult<Vec<PostfixNodes>> {
     let mut list = Vec::with_capacity(prefix_nodes.len());
     for node in prefix_nodes {
         list.push(parse(node)?)
@@ -70,8 +72,8 @@ fn parse_list(prefix_nodes: Vec<Vec<PrefixNode>>) -> Result<Vec<Vec<PostfixNode>
 }
 
 fn parse_map(
-    prefix_nodes: Vec<(Vec<PrefixNode>, Vec<PrefixNode>)>,
-) -> Result<Vec<(Vec<PostfixNode>, Vec<PostfixNode>)>, ParserError> {
+    prefix_nodes: Vec<(PrefixNodes, PrefixNodes)>,
+) -> ParseResult<Vec<(PostfixNodes, PostfixNodes)>> {
     let mut map = Vec::with_capacity(prefix_nodes.len());
     for pair in prefix_nodes {
         map.push((parse(pair.0)?, parse(pair.1)?))

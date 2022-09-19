@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod test;
-
 use crate::num::{ops::CompleteRound, Complete, Float, Integer};
+use crate::parser::lexer::LexResult;
 use regex::Regex;
+use std::fmt::Write;
 
-use super::super::LexerError;
 use super::super::Token;
 use super::super::UnitLexer;
 
@@ -41,7 +41,7 @@ impl UnitLexer for NumLexer {
     fn pattern(&self) -> &Regex {
         &self.pattern
     }
-    fn lexing(&self, captures: &regex::Captures) -> Result<Token, LexerError> {
+    fn lexing(&self, captures: &regex::Captures) -> LexResult<Token> {
         if let Some(symbol) = captures.name("symbol") {
             return Ok(Token::Symbol(symbol.as_str().to_owned()));
         }
@@ -92,7 +92,22 @@ impl UnitLexer for NumLexer {
             ))
         }
     }
+    fn stringify(&self, token: &Token, s: &mut String) {
+        match token {
+            Token::Int(i) => s.push_str(&i.to_string()),
+            Token::Float(f) => {
+                let (b, digits, exp) = f.to_sign_string_exp(10, None);
+                let sign = if b { "-" } else { "" };
+                let exp = if exp.is_some() { exp.unwrap() } else { 0 };
+                let exp = if exp == 0 {
+                    "".to_owned()
+                } else {
+                    format!("e{exp}")
+                };
+                write!(s, "{sign}0.{digits}{exp}").unwrap();
+            }
+            Token::Symbol(symbol) => s.push_str(&symbol),
+            _ => {}
+        }
+    }
 }
-
-// todo refine float parse
-const LOG_2_10: f64 = 3.3219280948873626;

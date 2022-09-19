@@ -20,7 +20,6 @@ pub fn eval(src: Val) -> Val {
 
 pub mod val;
 
-#[allow(dead_code)]
 mod parser;
 #[allow(dead_code)]
 mod utils;

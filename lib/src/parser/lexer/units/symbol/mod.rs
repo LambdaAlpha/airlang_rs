@@ -3,9 +3,9 @@ mod test;
 
 use regex::Regex;
 
+use crate::parser::lexer::LexResult;
 use crate::utils;
 
-use super::super::LexerError;
 use super::super::Token;
 use super::super::UnitLexer;
 
@@ -36,7 +36,7 @@ impl UnitLexer for SymbolLexer {
     fn pattern(&self) -> &Regex {
         &self.pattern
     }
-    fn lexing(&self, captures: &regex::Captures) -> Result<Token, LexerError> {
+    fn lexing(&self, captures: &regex::Captures) -> LexResult<Token> {
         let single_punct = captures.name("single_punct");
         if single_punct.is_some() {
             return Ok(Token::Symbol(captures.get(0).unwrap().as_str().to_owned()));
@@ -58,5 +58,16 @@ impl UnitLexer for SymbolLexer {
             }
         };
         Ok(token)
+    }
+    fn stringify(&self, token: &Token, s: &mut String) {
+        match token {
+            Token::Bool(b) => s.push_str(if *b { "'t" } else { "'f" }),
+            Token::Symbol(symbol) => s.push_str(symbol),
+            Token::Bytes(bytes) => {
+                s.push('\'');
+                utils::conversion::u8_array_to_hex_string_mut(bytes, s);
+            }
+            _ => {}
+        }
     }
 }

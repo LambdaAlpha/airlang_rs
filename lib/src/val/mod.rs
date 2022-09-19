@@ -1,6 +1,11 @@
-use std::{collections::HashMap, hash::Hash};
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Display},
+    hash::Hash,
+};
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+use crate::parser;
+
 #[derive(PartialEq, Eq)]
 pub enum Val {
     Bytes(Box<Bytes>),
@@ -34,6 +39,18 @@ impl Val {
     }
 }
 
+impl Display for Val {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", parser::stringify_pretty(self))
+    }
+}
+
+impl Debug for Val {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", parser::stringify_pretty(self))
+    }
+}
+
 impl Hash for Val {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
@@ -56,7 +73,6 @@ pub type List = Vec<Val>;
 
 pub type Map = HashMap<Val, Val>;
 
-#[cfg_attr(debug_assertions, derive(Debug))]
 #[derive(PartialEq, Eq, Hash)]
 pub struct Ltree {
     pub root: Val,
@@ -69,7 +85,6 @@ impl Ltree {
     }
 }
 
-#[cfg_attr(debug_assertions, derive(Debug))]
 #[derive(PartialEq, Eq)]
 pub struct Mtree {
     pub root: Val,

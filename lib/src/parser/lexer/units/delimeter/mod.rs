@@ -1,6 +1,7 @@
 use regex::Regex;
 
-use super::super::LexerError;
+use crate::parser::lexer::LexResult;
+
 use super::super::Token;
 use super::super::UnitLexer;
 
@@ -20,7 +21,15 @@ impl UnitLexer for DelimeterLexer {
     fn pattern(&self) -> &Regex {
         &self.pattern
     }
-    fn lexing(&self, _: &regex::Captures) -> Result<Token, LexerError> {
-        Ok(Token::Delimeter)
+    fn lexing(&self, captures: &regex::Captures) -> LexResult<Token> {
+        Ok(Token::Delimeter(
+            captures.get(0).unwrap().as_str().to_owned(),
+        ))
+    }
+    fn stringify(&self, token: &Token, s: &mut String) {
+        match token {
+            Token::Delimeter(d) => s.push_str(&d),
+            _ => {}
+        }
     }
 }

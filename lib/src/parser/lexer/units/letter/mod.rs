@@ -3,7 +3,8 @@ mod test;
 
 use regex::Regex;
 
-use super::super::LexerError;
+use crate::parser::lexer::LexResult;
+
 use super::super::Token;
 use super::super::UnitLexer;
 
@@ -23,7 +24,13 @@ impl UnitLexer for LetterLexer {
     fn pattern(&self) -> &Regex {
         &self.pattern
     }
-    fn lexing(&self, captures: &regex::Captures) -> Result<Token, LexerError> {
+    fn lexing(&self, captures: &regex::Captures) -> LexResult<Token> {
         Ok(Token::Letter(captures.get(0).unwrap().as_str().to_owned()))
+    }
+    fn stringify(&self, token: &Token, s: &mut String) {
+        match token {
+            Token::Letter(l) => s.push_str(&l),
+            _ => {}
+        }
     }
 }

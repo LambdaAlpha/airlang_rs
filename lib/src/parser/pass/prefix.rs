@@ -1,19 +1,21 @@
-use super::deep::DeepNode;
+use super::deep::{DeepNode, DeepNodes};
 use super::AtomNode;
-use crate::parser::ParserError;
+use crate::parser::{ParseError, ParseResult};
 
 const COMMENT_PREFIX: &str = "#";
 
 pub enum PrefixNode {
     Atom(AtomNode),
     Symbol(String),
-    List(Vec<Vec<PrefixNode>>),
-    Map(Vec<(Vec<PrefixNode>, Vec<PrefixNode>)>),
-    Infix(Vec<PrefixNode>),
-    Top(Vec<PrefixNode>),
+    List(Vec<PrefixNodes>),
+    Map(Vec<(PrefixNodes, PrefixNodes)>),
+    Infix(PrefixNodes),
+    Top(PrefixNodes),
 }
 
-pub fn parse(deep_nodes: Vec<DeepNode>) -> Result<Vec<PrefixNode>, ParserError> {
+pub type PrefixNodes = Vec<PrefixNode>;
+
+pub fn parse(deep_nodes: DeepNodes) -> ParseResult<PrefixNodes> {
     let mut iter = deep_nodes.into_iter();
     let mut prefix_nodes = Vec::new();
     while let Some(deep_node) = iter.next() {
@@ -22,7 +24,7 @@ pub fn parse(deep_nodes: Vec<DeepNode>) -> Result<Vec<PrefixNode>, ParserError> 
             DeepNode::Symbol(s) => match s.as_str() {
                 COMMENT_PREFIX => {
                     if iter.next().is_none() {
-                        return ParserError::err("expect comment body".to_owned());
+                        return ParseError::err("expect comment body".to_owned());
                     } else {
                         continue;
                     }

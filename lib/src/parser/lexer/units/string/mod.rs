@@ -3,7 +3,9 @@ mod test;
 
 use regex::Regex;
 
-use super::super::LexerError;
+use crate::parser::lexer::LexResult;
+
+use super::super::LexError;
 use super::super::Token;
 use super::super::UnitLexer;
 
@@ -38,7 +40,7 @@ impl UnitLexer for StringLexer {
     fn pattern(&self) -> &Regex {
         &self.pattern
     }
-    fn lexing(&self, captures: &regex::Captures) -> Result<Token, LexerError> {
+    fn lexing(&self, captures: &regex::Captures) -> LexResult<Token> {
         let m = captures.name("body").unwrap();
         let s = self.delimeter_pattern.replace_all(m.as_str(), "");
         let mut ns = String::new();
@@ -65,7 +67,7 @@ impl UnitLexer for StringLexer {
                         let i = u32::from_str_radix(codepoint.as_str(), 16).unwrap();
                         let i = char::from_u32(i);
                         if i.is_none() {
-                            return LexerError::err(format!("invalid unicode {codepoint}"));
+                            return LexError::err(format!("invalid unicode {codepoint}"));
                         }
                         i.unwrap()
                     }
@@ -82,5 +84,25 @@ impl UnitLexer for StringLexer {
             }
         }
         Ok(Token::String(ns))
+    }
+    fn stringify(&self, token: &Token, s: &mut String) {
+        match token {
+            Token::String(s1) => {
+                s.push('"');
+                for c in s1.chars() {
+                    let escaped = match c {
+                        '\\' => "\\\\".to_owned(),
+                        '\n' => "\\n".to_owned(),
+                        '\r' => "\\r".to_owned(),
+                        '\t' => "\\t".to_owned(),
+                        '"' => "\\\"".to_owned(),
+                        _ => c.to_string(),
+                    };
+                    s.push_str(&escaped);
+                }
+                s.push('"');
+            }
+            _ => {}
+        }
     }
 }

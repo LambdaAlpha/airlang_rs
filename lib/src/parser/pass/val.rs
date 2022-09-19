@@ -1,15 +1,16 @@
 use crate::num::{Float, Integer};
 
+use crate::parser::ParseResult;
 use crate::val::{List, Map};
-use crate::{parser::ParserError, val::Val};
+use crate::{parser::ParseError, val::Val};
 
-use super::infix::InfixNode;
+use super::infix::{InfixNode, InfixNodes};
 
-pub fn parse(infix_nodes: Vec<InfixNode>) -> Result<Val, ParserError> {
+pub fn parse(infix_nodes: InfixNodes) -> ParseResult<Val> {
     parse_expect_one(infix_nodes)
 }
 
-fn parse_one(node: InfixNode) -> Result<Val, ParserError> {
+fn parse_one(node: InfixNode) -> ParseResult<Val> {
     match node {
         InfixNode::Atom(a) => match a {
             super::AtomNode::Bool(b) => Ok(bool(b)),
@@ -29,22 +30,22 @@ fn parse_one(node: InfixNode) -> Result<Val, ParserError> {
     }
 }
 
-fn parse_expect_one(nodes: Vec<InfixNode>) -> Result<Val, ParserError> {
+fn parse_expect_one(nodes: InfixNodes) -> ParseResult<Val> {
     if nodes.len() == 1 {
         Ok(parse_one(nodes.into_iter().next().unwrap())?)
     } else {
-        ParserError::err("expect exactly one value".to_owned())
+        ParseError::err("expect exactly one value".to_owned())
     }
 }
 
-fn parse_list(nodes: Vec<Vec<InfixNode>>) -> Result<Val, ParserError> {
+fn parse_list(nodes: Vec<InfixNodes>) -> ParseResult<Val> {
     let mut list = List::with_capacity(nodes.len());
     for node in nodes {
         list.push(parse_expect_one(node)?);
     }
     Ok(Val::list(list))
 }
-fn parse_map(nodes: Vec<(Vec<InfixNode>, Vec<InfixNode>)>) -> Result<Val, ParserError> {
+fn parse_map(nodes: Vec<(InfixNodes, InfixNodes)>) -> ParseResult<Val> {
     let mut map = Map::new();
     for node in nodes {
         map.insert(parse_expect_one(node.0)?, parse_expect_one(node.1)?);
@@ -56,14 +57,14 @@ fn parse_itree(
     left: Box<InfixNode>,
     mid: Box<InfixNode>,
     right: Box<InfixNode>,
-) -> Result<Val, ParserError> {
+) -> ParseResult<Val> {
     let left = parse_one(*left)?;
     let mid = parse_one(*mid)?;
     let right = parse_one(*right)?;
     Ok(Val::ltree1(mid, vec![left, right]))
 }
 
-fn parse_ltree(root: Vec<InfixNode>, leaves: Vec<Vec<InfixNode>>) -> Result<Val, ParserError> {
+fn parse_ltree(root: InfixNodes, leaves: Vec<InfixNodes>) -> ParseResult<Val> {
     let root = parse_expect_one(root)?;
     let leaves = parse_list(leaves)?;
     match leaves {
@@ -72,10 +73,7 @@ fn parse_ltree(root: Vec<InfixNode>, leaves: Vec<Vec<InfixNode>>) -> Result<Val,
     }
 }
 
-fn parse_mtree(
-    root: Vec<InfixNode>,
-    leaves: Vec<(Vec<InfixNode>, Vec<InfixNode>)>,
-) -> Result<Val, ParserError> {
+fn parse_mtree(root: InfixNodes, leaves: Vec<(InfixNodes, InfixNodes)>) -> ParseResult<Val> {
     let root = parse_expect_one(root)?;
     let leaves = parse_map(leaves)?;
     match leaves {
@@ -94,10 +92,6 @@ pub fn int(i: &Integer) -> Val {
 
 pub fn float(f: &Float) -> Val {
     Val::bytes(f.to_string_radix(32, None).into_bytes())
-}
-
-pub fn str(s: &str) -> Val {
-    Val::bytes(s.as_bytes().to_vec())
 }
 
 pub fn string(s: String) -> Val {
