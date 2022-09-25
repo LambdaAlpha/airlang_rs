@@ -1,33 +1,33 @@
-use crate::val::{Map, Val};
+use crate::val::{List, Map, Val};
 
 pub fn expected() -> Val {
-    Val::list(vec![
-        Val::ltree1(Val::letter("a".to_owned()), vec![]),
-        Val::ltree1(
+    Val::from(vec![
+        Val::ltree(Val::letter("a".to_owned()), vec![]),
+        Val::ltree(
             Val::letter("a".to_owned()),
-            vec![Val::ltree1(Val::letter("a".to_owned()), vec![])],
+            vec![Val::ltree(Val::letter("a".to_owned()), vec![])],
         ),
-        Val::ltree1(Val::ltree1(Val::letter("a".to_owned()), vec![]), vec![]),
-        Val::ltree1(Val::list(vec![]), vec![]),
-        Val::mtree1(Val::letter("a".to_owned()), Map::from([])),
-        Val::mtree1(
+        Val::ltree(Val::ltree(Val::letter("a".to_owned()), vec![]), vec![]),
+        Val::ltree(Val::from(vec![] as List), vec![]),
+        Val::mtree(Val::letter("a".to_owned()), Map::from([])),
+        Val::mtree(
             Val::letter("a".to_owned()),
             Map::from([(
-                Val::mtree1(Val::letter("b".to_owned()), Map::from([])),
-                Val::mtree1(Val::letter("c".to_owned()), Map::from([])),
+                Val::mtree(Val::letter("b".to_owned()), Map::from([])),
+                Val::mtree(Val::letter("c".to_owned()), Map::from([])),
             )]),
         ),
-        Val::mtree1(
-            Val::mtree1(Val::letter("a".to_owned()), Map::from([])),
+        Val::mtree(
+            Val::mtree(Val::letter("a".to_owned()), Map::from([])),
             Map::from([]),
         ),
-        Val::mtree1(Val::map(Map::from([])), Map::from([])),
-        Val::mtree1(
-            Val::ltree1(Val::letter("a".to_owned()), vec![]),
+        Val::mtree(Val::from(Map::from([])), Map::from([])),
+        Val::mtree(
+            Val::ltree(Val::letter("a".to_owned()), vec![]),
             Map::from([]),
         ),
-        Val::ltree1(
-            Val::mtree1(Val::letter("a".to_owned()), Map::from([])),
+        Val::ltree(
+            Val::mtree(Val::letter("a".to_owned()), Map::from([])),
             vec![],
         ),
     ])

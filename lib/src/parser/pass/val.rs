@@ -11,11 +11,11 @@ pub fn parse(infix_nodes: InfixNodes) -> ParseResult<Val> {
 fn parse_one(node: InfixNode) -> ParseResult<Val> {
     match node {
         InfixNode::Atom(a) => match a {
-            super::AtomNode::Bool(b) => Ok(Val::bool(b)),
-            super::AtomNode::Int(i) => Ok(Val::int(i)),
-            super::AtomNode::Float(f) => Ok(Val::float(f)),
-            super::AtomNode::Bytes(b) => Ok(Val::bytes(b)),
-            super::AtomNode::String(s) => Ok(Val::string(s)),
+            super::AtomNode::Bool(b) => Ok(Val::from(b)),
+            super::AtomNode::Int(i) => Ok(Val::from(i)),
+            super::AtomNode::Float(f) => Ok(Val::from(f)),
+            super::AtomNode::Bytes(b) => Ok(Val::from(b)),
+            super::AtomNode::String(s) => Ok(Val::from(s)),
             super::AtomNode::Letter(s) => Ok(Val::letter(s)),
         },
         InfixNode::Symbol(s) => Ok(Val::symbol(s)),
@@ -40,14 +40,14 @@ fn parse_list(nodes: Vec<InfixNodes>) -> ParseResult<Val> {
     for node in nodes {
         list.push(parse_expect_one(node)?);
     }
-    Ok(Val::list(list))
+    Ok(Val::from(list))
 }
 fn parse_map(nodes: Vec<(InfixNodes, InfixNodes)>) -> ParseResult<Val> {
     let mut map = Map::new();
     for node in nodes {
         map.insert(parse_expect_one(node.0)?, parse_expect_one(node.1)?);
     }
-    Ok(Val::map(map))
+    Ok(Val::from(map))
 }
 
 fn parse_itree(
@@ -58,14 +58,14 @@ fn parse_itree(
     let left = parse_one(*left)?;
     let mid = parse_one(*mid)?;
     let right = parse_one(*right)?;
-    Ok(Val::infix1(left, mid, right))
+    Ok(Val::infix(left, mid, right))
 }
 
 fn parse_ltree(root: InfixNodes, leaves: Vec<InfixNodes>) -> ParseResult<Val> {
     let root = parse_expect_one(root)?;
     let leaves = parse_list(leaves)?;
     match leaves {
-        Val::List(l) => Ok(Val::ltree1(root, *l)),
+        Val::List(l) => Ok(Val::ltree(root, *l)),
         _ => unreachable!(),
     }
 }
@@ -74,7 +74,7 @@ fn parse_mtree(root: InfixNodes, leaves: Vec<(InfixNodes, InfixNodes)>) -> Parse
     let root = parse_expect_one(root)?;
     let leaves = parse_map(leaves)?;
     match leaves {
-        Val::Map(m) => Ok(Val::mtree1(root, *m)),
+        Val::Map(m) => Ok(Val::mtree(root, *m)),
         _ => unreachable!(),
     }
 }

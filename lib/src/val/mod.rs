@@ -24,50 +24,80 @@ pub enum Val {
 }
 
 impl Val {
-    pub fn bool(b: Bool) -> Val {
-        Val::Bool(b)
-    }
-    pub fn int(i: Int) -> Val {
-        Val::Int(Box::new(i))
-    }
-    pub fn float(f: Float) -> Val {
-        Val::Float(Box::new(f))
-    }
-    pub fn string(s: String) -> Val {
-        Val::String(Box::new(s))
-    }
     pub fn letter(s: String) -> Val {
         Val::Letter(Box::new(s))
     }
     pub fn symbol(s: String) -> Val {
         Val::Symbol(Box::new(s))
     }
-    pub fn bytes(b: Bytes) -> Val {
-        Val::Bytes(Box::new(b))
-    }
-    pub fn list(l: List) -> Val {
-        Val::List(Box::new(l))
-    }
-    pub fn map(m: Map) -> Val {
-        Val::Map(Box::new(m))
-    }
-    pub fn ltree(ltree: Ltree) -> Val {
-        Val::Ltree(Box::new(ltree))
-    }
-    pub fn ltree1(root: Val, leaves: List) -> Val {
+    pub fn ltree(root: Val, leaves: List) -> Val {
         Val::Ltree(Box::new(Ltree { root, leaves }))
     }
-    pub fn mtree(mtree: Mtree) -> Val {
-        Val::Mtree(Box::new(mtree))
-    }
-    pub fn mtree1(root: Val, leaves: Map) -> Val {
+    pub fn mtree(root: Val, leaves: Map) -> Val {
         Val::Mtree(Box::new(Mtree { root, leaves }))
     }
-    pub fn infix(infix: Infix) -> Val {
-        Val::Infix(Box::new(infix))
-    }
-    pub fn infix1(left: Val, infix: Val, right: Val) -> Val {
+    pub fn infix(left: Val, infix: Val, right: Val) -> Val {
         Val::Infix(Box::new(Infix { infix, left, right }))
+    }
+}
+
+impl From<Bool> for Val {
+    fn from(b: Bool) -> Self {
+        Val::Bool(b)
+    }
+}
+
+impl From<Int> for Val {
+    fn from(i: Int) -> Self {
+        Val::Int(Box::new(i))
+    }
+}
+
+impl From<Float> for Val {
+    fn from(f: Float) -> Self {
+        Val::Float(Box::new(f))
+    }
+}
+
+impl From<String> for Val {
+    fn from(s: String) -> Self {
+        Val::String(Box::new(s))
+    }
+}
+
+impl From<Bytes> for Val {
+    fn from(b: Bytes) -> Self {
+        Val::Bytes(Box::new(b))
+    }
+}
+
+impl From<List> for Val {
+    fn from(l: List) -> Self {
+        Val::List(Box::new(l))
+    }
+}
+
+impl From<Map> for Val {
+    fn from(m: Map) -> Self {
+        Val::Map(Box::new(m))
+    }
+}
+
+impl From<Ltree> for Val {
+    fn from(ltree: Ltree) -> Self {
+        Val::Ltree(Box::new(ltree))
+    }
+}
+
+impl From<Mtree> for Val {
+    fn from(mtree: Mtree) -> Self {
+        Val::Mtree(Box::new(mtree))
+    }
+}
+
+impl From<Infix> for Val {
+    fn from(infix: Infix) -> Self {
+        Val::Infix(Box::new(infix))
     }
 }
 

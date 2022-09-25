@@ -2,16 +2,16 @@ use std::str::FromStr;
 
 use crate::num::Integer;
 
-use crate::val::{Map, Val};
+use crate::val::{List, Map, Val};
 
 pub fn expected() -> Val {
-    Val::list(vec![
-        Val::list(vec![]),
-        Val::list(vec![int("2"), int("5")]),
-        Val::map(Map::from([])),
-        Val::map(Map::from([(int("2"), int("5")), (int("8"), int("9"))])),
-        Val::ltree1(Val::letter("b".to_owned()), vec![]),
-        Val::infix1(
+    Val::from(vec![
+        Val::from(vec![] as List),
+        Val::from(vec![int("2"), int("5")]),
+        Val::from(Map::from([])),
+        Val::from(Map::from([(int("2"), int("5")), (int("8"), int("9"))])),
+        Val::ltree(Val::letter("b".to_owned()), vec![]),
+        Val::infix(
             Val::letter("b".to_owned()),
             Val::letter("e".to_owned()),
             Val::letter("g".to_owned()),
@@ -20,5 +20,5 @@ pub fn expected() -> Val {
 }
 
 fn int(s: &str) -> Val {
-    Val::int(Integer::from_str(s).unwrap())
+    Val::from(Integer::from_str(s).unwrap())
 }

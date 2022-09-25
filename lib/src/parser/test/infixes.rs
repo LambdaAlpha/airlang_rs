@@ -1,54 +1,66 @@
 use std::str::FromStr;
 
 use crate::num::Integer;
-use crate::val::Val;
+use crate::val::{List, Val};
 
 pub fn expected() -> Val {
-    Val::list(vec![
-        Val::infix1(int("1"), Val::symbol("&".to_owned()), int("2")),
-        Val::infix1(
-            Val::infix1(int("1"), Val::symbol("&".to_owned()), int("2")),
+    Val::from(vec![
+        Val::infix(int("1"), Val::symbol("&".to_owned()), int("2")),
+        Val::infix(
+            Val::infix(int("1"), Val::symbol("&".to_owned()), int("2")),
             Val::symbol("*".to_owned()),
             int("3"),
         ),
-        Val::infix1(int("1"), Val::symbol("&".to_owned()), Val::list(vec![])),
-        Val::infix1(Val::list(vec![]), Val::symbol("&".to_owned()), int("1")),
-        Val::infix1(
-            Val::ltree1(int("1"), vec![]),
+        Val::infix(
+            int("1"),
             Val::symbol("&".to_owned()),
-            Val::ltree1(int("2"), vec![]),
+            Val::from(vec![] as List),
         ),
-        Val::infix1(int("1"), Val::letter("a".to_owned()), int("2")),
-        Val::infix1(
-            Val::infix1(int("1"), Val::letter("a".to_owned()), int("2")),
+        Val::infix(
+            Val::from(vec![] as List),
+            Val::symbol("&".to_owned()),
+            int("1"),
+        ),
+        Val::infix(
+            Val::ltree(int("1"), vec![]),
+            Val::symbol("&".to_owned()),
+            Val::ltree(int("2"), vec![]),
+        ),
+        Val::infix(int("1"), Val::letter("a".to_owned()), int("2")),
+        Val::infix(
+            Val::infix(int("1"), Val::letter("a".to_owned()), int("2")),
             Val::letter("b".to_owned()),
             int("3"),
         ),
-        Val::infix1(int("1"), Val::letter("a".to_owned()), Val::list(vec![])),
-        Val::infix1(Val::list(vec![]), Val::letter("a".to_owned()), int("1")),
-        Val::infix1(
-            Val::ltree1(int("1"), vec![]),
-            Val::letter("a".to_owned()),
-            Val::ltree1(int("2"), vec![]),
-        ),
-        Val::infix1(int("1"), Val::list(vec![]), int("2")),
-        Val::infix1(int("1"), int("2"), int("3")),
-        Val::infix1(
+        Val::infix(
             int("1"),
-            Val::infix1(int("2"), int("3"), int("4")),
-            int("5"),
+            Val::letter("a".to_owned()),
+            Val::from(vec![] as List),
         ),
-        Val::infix1(
-            Val::infix1(
+        Val::infix(
+            Val::from(vec![] as List),
+            Val::letter("a".to_owned()),
+            int("1"),
+        ),
+        Val::infix(
+            Val::ltree(int("1"), vec![]),
+            Val::letter("a".to_owned()),
+            Val::ltree(int("2"), vec![]),
+        ),
+        Val::infix(int("1"), Val::from(vec![] as List), int("2")),
+        Val::infix(int("1"), int("2"), int("3")),
+        Val::infix(int("1"), Val::infix(int("2"), int("3"), int("4")), int("5")),
+        Val::infix(
+            Val::infix(
                 int("1"),
                 Val::symbol("&".to_owned()),
-                Val::infix1(int("2"), Val::symbol("*".to_owned()), int("3")),
+                Val::infix(int("2"), Val::symbol("*".to_owned()), int("3")),
             ),
             Val::symbol("%".to_owned()),
             int("4"),
         ),
-        Val::infix1(
-            Val::infix1(
+        Val::infix(
+            Val::infix(
                 Val::symbol("+".to_owned()),
                 int("1"),
                 Val::symbol("-".to_owned()),
@@ -58,16 +70,16 @@ pub fn expected() -> Val {
         ),
         Val::letter("a".to_owned()),
         Val::symbol("&".to_owned()),
-        Val::ltree1(
-            Val::infix1(int("1"), Val::symbol("&".to_owned()), int("2")),
+        Val::ltree(
+            Val::infix(int("1"), Val::symbol("&".to_owned()), int("2")),
             vec![],
         ),
-        Val::ltree1(Val::letter("a".to_owned()), vec![]),
-        Val::list(vec![]),
-        Val::infix1(int("1"), Val::symbol("&".to_owned()), int("2")),
+        Val::ltree(Val::letter("a".to_owned()), vec![]),
+        Val::from(vec![] as List),
+        Val::infix(int("1"), Val::symbol("&".to_owned()), int("2")),
     ])
 }
 
 fn int(s: &str) -> Val {
-    Val::int(Integer::from_str(s).unwrap())
+    Val::from(Integer::from_str(s).unwrap())
 }

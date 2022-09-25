@@ -1,4 +1,4 @@
-use val::Val;
+use val::{Bytes, Val};
 
 pub fn interpret(src: &str) -> String {
     // todo impl
@@ -9,7 +9,7 @@ pub fn parse(src: &str) -> Val {
     let result = parser::parse(src);
     match result {
         Ok(val) => val,
-        Err(_) => Val::bytes(vec![]),
+        Err(_) => Val::from(vec![] as Bytes),
     }
 }
 
