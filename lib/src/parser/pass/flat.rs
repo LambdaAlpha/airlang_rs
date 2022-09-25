@@ -2,6 +2,7 @@ use crate::parser::Token;
 
 use super::AtomNode;
 
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub enum FlatNode {
     Symbol(String),
     Atom(AtomNode),

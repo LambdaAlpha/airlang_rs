@@ -4,13 +4,13 @@ use crate::parser::{ParseError, ParseResult};
 
 const COMMENT_PREFIX: &str = "#";
 
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub enum PrefixNode {
     Atom(AtomNode),
     Symbol(String),
     List(Vec<PrefixNodes>),
     Map(Vec<(PrefixNodes, PrefixNodes)>),
-    Infix(PrefixNodes),
-    Top(PrefixNodes),
+    Wrap(PrefixNodes),
 }
 
 pub type PrefixNodes = Vec<PrefixNode>;
@@ -54,22 +54,13 @@ pub fn parse(deep_nodes: DeepNodes) -> ParseResult<PrefixNodes> {
                 }
                 PrefixNode::Map(map)
             }
-            DeepNode::Infix(i) => {
+            DeepNode::Wrap(i) => {
                 let nodes = parse(i)?;
                 // drop comments
                 if nodes.is_empty() {
                     continue;
                 } else {
-                    PrefixNode::Infix(nodes)
-                }
-            }
-            DeepNode::Top(t) => {
-                let nodes = parse(t)?;
-                // drop comments
-                if nodes.is_empty() {
-                    continue;
-                } else {
-                    PrefixNode::Top(nodes)
+                    PrefixNode::Wrap(nodes)
                 }
             }
         };

@@ -4,6 +4,7 @@ use crate::parser::{ParseError, ParseResult};
 use super::postfix::PostfixNodes;
 use super::AtomNode;
 
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub enum InfixNode {
     Symbol(String),
     Atom(AtomNode),
@@ -12,16 +13,15 @@ pub enum InfixNode {
     Itree(Box<InfixNode>, Box<InfixNode>, Box<InfixNode>),
     Ltree(InfixNodes, Vec<InfixNodes>),
     Mtree(InfixNodes, Vec<(InfixNodes, InfixNodes)>),
-    Top(InfixNodes),
 }
 
 pub type InfixNodes = Vec<InfixNode>;
 
 pub fn parse(postfix_nodes: PostfixNodes) -> ParseResult<InfixNodes> {
-    parse_infix(postfix_nodes, false)
+    parse_infix(postfix_nodes)
 }
 
-fn parse_infix(postfix_nodes: PostfixNodes, is_infix_mode: bool) -> ParseResult<InfixNodes> {
+fn parse_infix(postfix_nodes: PostfixNodes) -> ParseResult<InfixNodes> {
     let mut infix_nodes = Vec::new();
     let mut iter = postfix_nodes.into_iter();
     let mut op_left = None;
@@ -30,35 +30,26 @@ fn parse_infix(postfix_nodes: PostfixNodes, is_infix_mode: bool) -> ParseResult<
         let infix_node = match postfix_node {
             PostfixNode::Atom(a) => InfixNode::Atom(a),
             PostfixNode::Symbol(s) => InfixNode::Symbol(s),
-            PostfixNode::Infix(n) => {
-                let result = parse_infix(n, true)?;
-                let node = result.into_iter().next().unwrap();
-                match node {
-                    InfixNode::Symbol(s) => InfixNode::Atom(AtomNode::String(s)),
-                    _ => node,
-                }
+            PostfixNode::Wrap(n) => {
+                let result = parse_infix(n)?;
+                result.into_iter().next().unwrap()
             }
             PostfixNode::List(l) => InfixNode::List(parse_list(l)?),
             PostfixNode::Map(m) => InfixNode::Map(parse_map(m)?),
             PostfixNode::Ltree(root, leaves) => {
-                let root = parse_infix(root, false)?;
+                let root = parse_infix(root)?;
                 let list = parse_list(leaves)?;
                 InfixNode::Ltree(root, list)
             }
             PostfixNode::Mtree(root, leaves) => {
-                let root = parse_infix(root, false)?;
+                let root = parse_infix(root)?;
                 let map = parse_map(leaves)?;
                 InfixNode::Mtree(root, map)
             }
-            PostfixNode::Top(v) => InfixNode::Top(parse_infix(v, false)?),
         };
-        let is_symbol = matches!(infix_node, InfixNode::Symbol(_));
         match op_left {
             Some(left) => match op_mid {
                 Some(mid) => {
-                    if !is_infix_mode && is_symbol {
-                        return ParseError::err("expect a left value but got a infix".to_owned());
-                    }
                     op_left = Some(InfixNode::Itree(
                         Box::new(left),
                         Box::new(mid),
@@ -67,20 +58,12 @@ fn parse_infix(postfix_nodes: PostfixNodes, is_infix_mode: bool) -> ParseResult<
                     op_mid = None;
                 }
                 None => {
-                    if is_infix_mode || is_symbol {
-                        op_mid = Some(infix_node);
-                        // to pass borrow check
-                        op_left = Some(left);
-                    } else {
-                        infix_nodes.push(left);
-                        op_left = Some(infix_node);
-                    }
+                    op_mid = Some(infix_node);
+                    // to pass borrow check
+                    op_left = Some(left);
                 }
             },
             None => {
-                if !is_infix_mode && is_symbol {
-                    return ParseError::err("expect a left value but got a infix".to_owned());
-                }
                 op_left = Some(infix_node);
             }
         }

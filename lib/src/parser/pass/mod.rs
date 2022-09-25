@@ -8,6 +8,7 @@ pub mod postfix;
 pub mod prefix;
 pub mod val;
 
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub enum AtomNode {
     Bool(bool),
     Int(Integer),

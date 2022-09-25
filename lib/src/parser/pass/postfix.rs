@@ -2,15 +2,15 @@ use super::prefix::{PrefixNode, PrefixNodes};
 use super::AtomNode;
 use crate::parser::ParseResult;
 
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub enum PostfixNode {
     Atom(AtomNode),
     Symbol(String),
-    Infix(PostfixNodes),
+    Wrap(PostfixNodes),
     List(Vec<PostfixNodes>),
     Map(Vec<(PostfixNodes, PostfixNodes)>),
     Ltree(PostfixNodes, Vec<PostfixNodes>),
     Mtree(PostfixNodes, Vec<(PostfixNodes, PostfixNodes)>),
-    Top(PostfixNodes),
 }
 
 pub type PostfixNodes = Vec<PostfixNode>;
@@ -23,30 +23,21 @@ pub fn parse(prefix_nodes: PrefixNodes) -> ParseResult<PostfixNodes> {
         let postfix_node = match prefix_node {
             PrefixNode::Atom(a) => PostfixNode::Atom(a),
             PrefixNode::Symbol(s) => PostfixNode::Symbol(s),
-            PrefixNode::Infix(i) => PostfixNode::Infix(parse(i)?),
+            PrefixNode::Wrap(i) => PostfixNode::Wrap(parse(i)?),
             PrefixNode::List(l) => PostfixNode::List(parse_list(l)?),
             PrefixNode::Map(m) => PostfixNode::Map(parse_map(m)?),
-            PrefixNode::Top(v) => PostfixNode::Top(parse(v)?),
         };
         match postfix_node {
             PostfixNode::List(list) => match op_left {
-                Some(left_node) => match left_node {
-                    PostfixNode::Symbol(_) => {
-                        postfix_nodes.push(left_node);
-                        op_left = Some(PostfixNode::List(list));
-                    }
-                    _ => op_left = Some(PostfixNode::Ltree(vec![left_node], list)),
-                },
+                Some(left_node) => {
+                    op_left = Some(PostfixNode::Ltree(vec![left_node], list));
+                }
                 None => op_left = Some(PostfixNode::List(list)),
             },
             PostfixNode::Map(map) => match op_left {
-                Some(left_node) => match left_node {
-                    PostfixNode::Symbol(_) => {
-                        postfix_nodes.push(left_node);
-                        op_left = Some(PostfixNode::Map(map));
-                    }
-                    _ => op_left = Some(PostfixNode::Mtree(vec![left_node], map)),
-                },
+                Some(left_node) => {
+                    op_left = Some(PostfixNode::Mtree(vec![left_node], map));
+                }
                 None => op_left = Some(PostfixNode::Map(map)),
             },
             _ => {

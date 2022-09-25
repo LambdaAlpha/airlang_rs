@@ -4,18 +4,44 @@ use std::{
     hash::Hash,
 };
 
+use crate::num;
 use crate::parser;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq)]
 pub enum Val {
+    Bool(Bool),
+    Int(Box<Int>),
+    Float(Box<Float>),
+    Letter(Box<String>),
+    Symbol(Box<String>),
+    String(Box<String>),
     Bytes(Box<Bytes>),
     List(Box<List>),
     Map(Box<Map>),
     Ltree(Box<Ltree>),
     Mtree(Box<Mtree>),
+    Infix(Box<Infix>),
 }
 
 impl Val {
+    pub fn bool(b: Bool) -> Val {
+        Val::Bool(b)
+    }
+    pub fn int(i: Int) -> Val {
+        Val::Int(Box::new(i))
+    }
+    pub fn float(f: Float) -> Val {
+        Val::Float(Box::new(f))
+    }
+    pub fn string(s: String) -> Val {
+        Val::String(Box::new(s))
+    }
+    pub fn letter(s: String) -> Val {
+        Val::Letter(Box::new(s))
+    }
+    pub fn symbol(s: String) -> Val {
+        Val::Symbol(Box::new(s))
+    }
     pub fn bytes(b: Bytes) -> Val {
         Val::Bytes(Box::new(b))
     }
@@ -37,6 +63,12 @@ impl Val {
     pub fn mtree1(root: Val, leaves: Map) -> Val {
         Val::Mtree(Box::new(Mtree { root, leaves }))
     }
+    pub fn infix(infix: Infix) -> Val {
+        Val::Infix(Box::new(infix))
+    }
+    pub fn infix1(left: Val, infix: Val, right: Val) -> Val {
+        Val::Infix(Box::new(Infix { infix, left, right }))
+    }
 }
 
 impl Display for Val {
@@ -54,6 +86,12 @@ impl Debug for Val {
 impl Hash for Val {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
+            Val::Bool(b) => b.hash(state),
+            Val::Int(i) => i.hash(state),
+            Val::Float(f) => f.as_ord().hash(state),
+            Val::String(s) => s.hash(state),
+            Val::Letter(s) => s.hash(state),
+            Val::Symbol(s) => s.hash(state),
             Val::Bytes(b) => b.hash(state),
             Val::List(l) => l.hash(state),
             Val::Map(m) => {
@@ -63,9 +101,22 @@ impl Hash for Val {
             }
             Val::Ltree(lt) => lt.hash(state),
             Val::Mtree(mt) => mt.hash(state),
+            Val::Infix(i) => i.hash(state),
         }
     }
 }
+
+impl Eq for Val {
+    fn assert_receiver_is_total_eq(&self) {}
+}
+
+pub type Bool = bool;
+
+pub type Int = num::Integer;
+
+pub type Float = num::Float;
+
+pub type String = std::string::String;
 
 pub type Bytes = Vec<u8>;
 
@@ -104,4 +155,11 @@ impl Hash for Mtree {
             i.hash(state);
         }
     }
+}
+
+#[derive(PartialEq, Eq, Hash)]
+pub struct Infix {
+    pub infix: Val,
+    pub left: Val,
+    pub right: Val,
 }
