@@ -6,7 +6,7 @@ pub fn interpret(src: &str) -> String {
 }
 
 pub fn parse(src: &str) -> Val {
-    let result = parser::parse(src);
+    let result = grammar::parse(src);
     match result {
         Ok(val) => val,
         Err(_) => Val::from(vec![] as Bytes),
@@ -20,7 +20,7 @@ pub fn eval(src: Val) -> Val {
 
 pub mod val;
 
-mod parser;
+mod grammar;
 #[allow(dead_code)]
 mod utils;
 use rug as num;

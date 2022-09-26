@@ -4,8 +4,8 @@ use std::{
     hash::Hash,
 };
 
+use crate::grammar;
 use crate::num;
-use crate::parser;
 
 #[derive(PartialEq)]
 pub enum Val {
@@ -103,13 +103,13 @@ impl From<Infix> for Val {
 
 impl Display for Val {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", parser::stringify_pretty(self))
+        write!(f, "{}", grammar::stringify_pretty(self))
     }
 }
 
 impl Debug for Val {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", parser::stringify_pretty(self))
+        write!(f, "{}", grammar::stringify_pretty(self))
     }
 }
 
