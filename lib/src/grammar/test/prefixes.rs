@@ -7,9 +7,9 @@ use crate::val::{List, Map, Val};
 pub(crate) fn expected() -> Val {
     Val::from(vec![
         Val::from(vec![] as List),
-        Val::from(vec![int("2"), int("5")]),
+        Val::from(vec![int("2"), int("5"), int("7")]),
         Val::from(Map::from([])),
-        Val::from(Map::from([(int("2"), int("5")), (int("8"), int("9"))])),
+        Val::from(Map::from([(int("2"), int("5")), (int("12"), int("13"))])),
         Val::ltree(Val::letter("b".to_owned()), vec![]),
         Val::infix(
             Val::letter("b".to_owned()),

@@ -79,7 +79,7 @@ fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepN
         DeepFlag::None => parse_wrap(items),
         DeepFlag::List => ParseError::err("unexpected end of list".to_owned()),
         DeepFlag::Map => ParseError::err("unexpected end of map".to_owned()),
-        DeepFlag::Wrap => ParseError::err("unexpected end of infix".to_owned()),
+        DeepFlag::Wrap => ParseError::err("unexpected end of wrap".to_owned()),
     }
 }
 
@@ -116,48 +116,38 @@ fn parse_map(items: Vec<Item>) -> ParseResult<DeepNode> {
     let mut value = Vec::new();
     let mut is_key = true;
     for item in items {
-        if is_key {
-            match item {
-                Item::Node(node) => {
+        match item {
+            Item::Node(node) => {
+                if is_key {
                     key.push(node);
-                }
-                Item::Seperator => return ParseError::err(format!("unexpected {}", SEPERATOR)),
-                Item::MapKvSeperator => {
-                    if key.is_empty() {
-                        return ParseError::err(format!("unexpected {}", SEPERATOR));
-                    } else {
-                        is_key = false;
-                    }
-                }
-            }
-        } else {
-            match item {
-                Item::Node(node) => {
+                } else {
                     value.push(node);
                 }
-                Item::Seperator => {
-                    if value.is_empty() {
-                        return ParseError::err(format!("unexpected {}", SEPERATOR));
-                    } else {
-                        map.push((key, value));
-                        key = Vec::new();
-                        value = Vec::new();
-                        is_key = true;
-                    }
-                }
-                Item::MapKvSeperator => {
+            }
+            Item::Seperator => {
+                if key.is_empty() {
                     return ParseError::err(format!("unexpected {}", SEPERATOR));
+                } else {
+                    map.push((key, value));
+                    key = Vec::new();
+                    value = Vec::new();
+                    is_key = true;
+                }
+            }
+            Item::MapKvSeperator => {
+                if !is_key || key.is_empty() {
+                    return ParseError::err(format!("unexpected {}", SEPERATOR));
+                } else {
+                    is_key = false;
                 }
             }
         }
     }
 
-    if key.is_empty() {
-        Ok(DeepNode::Map(map))
-    } else {
+    if !key.is_empty() {
         map.push((key, value));
-        Ok(DeepNode::Map(map))
     }
+    Ok(DeepNode::Map(map))
 }
 
 fn parse_wrap(items: Vec<Item>) -> ParseResult<DeepNode> {

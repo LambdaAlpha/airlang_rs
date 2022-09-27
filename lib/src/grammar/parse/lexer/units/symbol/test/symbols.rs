@@ -36,6 +36,7 @@ pub(crate) fn expected() -> Vec<Token> {
         Symbol("?".to_owned()),
         Symbol("'".to_owned()),
         Symbol("''".to_owned()),
+        Symbol("\"".to_owned()),
         Symbol("_".to_owned()),
         Symbol("`".to_owned()),
         Symbol("_a".to_owned()),
