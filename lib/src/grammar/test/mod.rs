@@ -1,4 +1,7 @@
-use crate::{grammar::parse, val::Val};
+use crate::{
+    grammar::{parse, ParseError},
+    val::Val,
+};
 
 use super::ParseResult;
 
@@ -80,4 +83,16 @@ fn test_val_to_string(src: &str) -> ParseResult<()> {
     let new_values = parse(&string)?;
     assert_eq!(values, new_values);
     Ok(())
+}
+
+#[test]
+fn test_parse_error_send() {
+    fn assert_send<T: Send>() {}
+    assert_send::<ParseError>();
+}
+
+#[test]
+fn test_parse_error_sync() {
+    fn assert_sync<T: Sync>() {}
+    assert_sync::<ParseError>();
 }

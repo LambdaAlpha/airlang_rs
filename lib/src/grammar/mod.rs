@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use self::parse::{deep, infix, lexer, postfix, prefix, val};
 use crate::val::Val;
 
@@ -19,7 +21,7 @@ const WRAP_RIGHT: &str = "]";
 
 const COMMENT_PREFIX: &str = "#";
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 #[allow(dead_code)]
 pub(crate) struct ParseError {
     pub(crate) msg: String,
@@ -46,3 +48,15 @@ pub(crate) fn parse(src: &str) -> ParseResult<Val> {
 #[allow(unused_imports)]
 #[allow(dead_code)]
 pub(crate) use stringify::{stringify_comfort, stringify_compat, stringify_pretty};
+
+impl Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl std::error::Error for ParseError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+}
