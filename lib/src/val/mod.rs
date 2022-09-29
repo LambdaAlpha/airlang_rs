@@ -7,7 +7,7 @@ use std::{
 use crate::grammar;
 use crate::num;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Val {
     Bool(Bool),
     Int(Box<Int>),
@@ -154,7 +154,7 @@ pub type List = Vec<Val>;
 
 pub type Map = HashMap<Val, Val>;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Ltree {
     pub root: Val,
     pub leaves: List,
@@ -166,7 +166,7 @@ impl Ltree {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct Mtree {
     pub root: Val,
     pub leaves: Map,
@@ -187,7 +187,7 @@ impl Hash for Mtree {
     }
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Infix {
     pub infix: Val,
     pub left: Val,

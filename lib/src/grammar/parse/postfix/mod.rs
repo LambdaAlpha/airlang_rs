@@ -2,7 +2,7 @@ use super::prefix::{PrefixNode, PrefixNodes};
 use super::AtomNode;
 use crate::grammar::ParseResult;
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 pub(crate) enum PostfixNode {
     Atom(AtomNode),
     Symbol(String),

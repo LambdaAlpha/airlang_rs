@@ -9,7 +9,7 @@ pub(crate) mod postfix;
 pub(crate) mod prefix;
 pub(crate) mod val;
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 pub(crate) enum AtomNode {
     Bool(bool),
     Int(Integer),

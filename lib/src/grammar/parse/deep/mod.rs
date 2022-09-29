@@ -7,7 +7,7 @@ use crate::grammar::{
     SEPERATOR, WRAP_LEFT, WRAP_RIGHT,
 };
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 pub(crate) enum DeepNode {
     Symbol(String),
     Atom(AtomNode),

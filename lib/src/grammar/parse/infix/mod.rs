@@ -4,7 +4,7 @@ use crate::grammar::{ParseError, ParseResult};
 use super::postfix::PostfixNodes;
 use super::AtomNode;
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 pub(crate) enum InfixNode {
     Symbol(String),
     Atom(AtomNode),

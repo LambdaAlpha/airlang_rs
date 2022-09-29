@@ -15,3 +15,10 @@ regex = "1.6.0"
 version = "1.17"
 default-features = false
 features = ["integer", "float"]
+
+[dev-dependencies]
+criterion = "0.4.0"
+
+[[bench]]
+name = "bench_main"
+harness = false

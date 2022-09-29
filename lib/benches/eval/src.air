@@ -1,0 +1,6 @@
+# "bench eval"
+seq(
+  x = [1 + 1],
+  y = {x: read(x)},
+  print("y is {}", y),
+)

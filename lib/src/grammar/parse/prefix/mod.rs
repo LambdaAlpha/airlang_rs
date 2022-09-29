@@ -2,7 +2,7 @@ use super::deep::{DeepNode, DeepNodes};
 use super::AtomNode;
 use crate::grammar::{ParseError, ParseResult, COMMENT_PREFIX};
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 pub(crate) enum PrefixNode {
     Atom(AtomNode),
     Symbol(String),

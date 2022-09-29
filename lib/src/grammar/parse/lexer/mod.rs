@@ -13,7 +13,7 @@ use self::config::AirLexerConfig;
 
 use super::AtomNode;
 
-#[cfg_attr(debug_assertions, derive(Debug))]
+#[derive(Debug)]
 pub(crate) enum FlatNode {
     Symbol(String),
     Atom(AtomNode),
@@ -39,7 +39,7 @@ pub(crate) fn parse(src: &str) -> ParseResult<Vec<FlatNode>> {
     Ok(nodes)
 }
 
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq))]
+#[derive(Debug, PartialEq)]
 pub(crate) enum Token {
     Delimeter(String),
     Bool(bool),
