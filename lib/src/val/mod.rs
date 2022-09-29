@@ -1,8 +1,9 @@
 use std::{
-    collections::HashMap,
     fmt::{Debug, Display},
     hash::Hash,
 };
+
+use rustc_hash::FxHashMap;
 
 use crate::grammar;
 use crate::num;
@@ -152,7 +153,19 @@ pub type Bytes = Vec<u8>;
 
 pub type List = Vec<Val>;
 
-pub type Map = HashMap<Val, Val>;
+pub type Map = FxHashMap<Val, Val>;
+
+pub mod map {
+    use super::{Map, Val};
+
+    pub fn from<const N: usize>(pairs: [(Val, Val); N]) -> Map {
+        let mut map = Map::default();
+        for pair in pairs {
+            map.insert(pair.0, pair.1);
+        }
+        map
+    }
+}
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Ltree {

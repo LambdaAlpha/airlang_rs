@@ -43,7 +43,7 @@ fn parse_list(nodes: Vec<InfixNodes>) -> ParseResult<Val> {
     Ok(Val::from(list))
 }
 fn parse_map(nodes: Vec<(InfixNodes, InfixNodes)>) -> ParseResult<Val> {
-    let mut map = Map::new();
+    let mut map = Map::default();
     for node in nodes {
         map.insert(parse_expect_one(node.0)?, parse_expect_one(node.1)?);
     }

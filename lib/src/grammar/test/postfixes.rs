@@ -1,4 +1,4 @@
-use crate::val::{List, Map, Val};
+use crate::val::{map, List, Val};
 
 pub(crate) fn expected() -> Val {
     Val::from(vec![
@@ -9,25 +9,25 @@ pub(crate) fn expected() -> Val {
         ),
         Val::ltree(Val::ltree(Val::letter("a".to_owned()), vec![]), vec![]),
         Val::ltree(Val::from(vec![] as List), vec![]),
-        Val::mtree(Val::letter("a".to_owned()), Map::from([])),
+        Val::mtree(Val::letter("a".to_owned()), map::from([])),
         Val::mtree(
             Val::letter("a".to_owned()),
-            Map::from([(
-                Val::mtree(Val::letter("b".to_owned()), Map::from([])),
-                Val::mtree(Val::letter("c".to_owned()), Map::from([])),
+            map::from([(
+                Val::mtree(Val::letter("b".to_owned()), map::from([])),
+                Val::mtree(Val::letter("c".to_owned()), map::from([])),
             )]),
         ),
         Val::mtree(
-            Val::mtree(Val::letter("a".to_owned()), Map::from([])),
-            Map::from([]),
+            Val::mtree(Val::letter("a".to_owned()), map::from([])),
+            map::from([]),
         ),
-        Val::mtree(Val::from(Map::from([])), Map::from([])),
+        Val::mtree(Val::from(map::from([])), map::from([])),
         Val::mtree(
             Val::ltree(Val::letter("a".to_owned()), vec![]),
-            Map::from([]),
+            map::from([]),
         ),
         Val::ltree(
-            Val::mtree(Val::letter("a".to_owned()), Map::from([])),
+            Val::mtree(Val::letter("a".to_owned()), map::from([])),
             vec![],
         ),
     ])

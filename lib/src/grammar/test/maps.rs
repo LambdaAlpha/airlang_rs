@@ -1,22 +1,22 @@
 use std::str::FromStr;
 
 use crate::num::Integer;
-use crate::val::{Map, Val};
+use crate::val::{map, Val};
 
 pub(crate) fn expected() -> Val {
     Val::from(vec![
-        Val::from(Map::from([])),
-        Val::from(Map::from([(int("1"), int("2"))])),
-        Val::from(Map::from([(int("1"), int("2"))])),
-        Val::from(Map::from([(int("1"), int("2")), (int("3"), int("4"))])),
-        Val::from(Map::from([(int("1"), int("2")), (int("3"), int("4"))])),
-        Val::from(Map::from([(
-            Val::from(Map::from([])),
-            Val::from(Map::from([])),
+        Val::from(map::from([])),
+        Val::from(map::from([(int("1"), int("2"))])),
+        Val::from(map::from([(int("1"), int("2"))])),
+        Val::from(map::from([(int("1"), int("2")), (int("3"), int("4"))])),
+        Val::from(map::from([(int("1"), int("2")), (int("3"), int("4"))])),
+        Val::from(map::from([(
+            Val::from(map::from([])),
+            Val::from(map::from([])),
         )])),
-        Val::from(Map::from([(
-            Val::from(Map::from([(int("1"), int("2"))])),
-            Val::from(Map::from([(int("3"), int("4"))])),
+        Val::from(map::from([(
+            Val::from(map::from([(int("1"), int("2"))])),
+            Val::from(map::from([(int("3"), int("4"))])),
         )])),
     ])
 }
