@@ -1,6 +1,7 @@
 mod booleans;
 mod bytes;
 mod symbols;
+mod units;
 
 use super::{super::test::test_unit_lexing, ParseResult, SymbolLexer, Token};
 
@@ -10,6 +11,15 @@ fn test_lexing_symbols() -> ParseResult<()> {
         include_str!("./symbols.air"),
         &SymbolLexer::new(),
         symbols::expected,
+    )
+}
+
+#[test]
+fn test_lexing_units() -> ParseResult<()> {
+    test_unit_lexing(
+        include_str!("./units.air"),
+        &SymbolLexer::new(),
+        units::expected,
     )
 }
 

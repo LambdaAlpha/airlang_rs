@@ -70,6 +70,7 @@ struct StringifyConfig {
 
 fn stringify(val: &Val, s: &mut String, config: &StringifyConfig, indent: usize) {
     match val {
+        Val::Unit => stringify_unit(s),
         Val::Bool(b) => stringify_bool(*b, s),
         Val::Int(i) => stringify_int(i, s),
         Val::Float(f) => stringify_float(f, s),
@@ -83,6 +84,10 @@ fn stringify(val: &Val, s: &mut String, config: &StringifyConfig, indent: usize)
         Val::Mtree(mtree) => stringify_mtree(mtree, s, config, indent),
         Val::Infix(infix) => stringify_infix(infix, s, config, indent),
     }
+}
+
+fn stringify_unit(s: &mut String) {
+    s.push_str("'u")
 }
 
 fn stringify_bool(b: bool, s: &mut String) {

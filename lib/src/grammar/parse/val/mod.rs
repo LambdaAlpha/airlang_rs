@@ -11,6 +11,7 @@ pub(crate) fn parse(infix_nodes: InfixNodes) -> ParseResult<Val> {
 fn parse_one(node: InfixNode) -> ParseResult<Val> {
     match node {
         InfixNode::Atom(a) => match a {
+            super::AtomNode::Unit => Ok(Val::Unit),
             super::AtomNode::Bool(b) => Ok(Val::from(b)),
             super::AtomNode::Int(i) => Ok(Val::from(i)),
             super::AtomNode::Float(f) => Ok(Val::from(f)),

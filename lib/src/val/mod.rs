@@ -10,6 +10,7 @@ use crate::num;
 
 #[derive(PartialEq, Clone)]
 pub enum Val {
+    Unit,
     Bool(Bool),
     Int(Box<Int>),
     Float(Box<Float>),
@@ -39,6 +40,12 @@ impl Val {
     }
     pub fn infix(left: Val, infix: Val, right: Val) -> Val {
         Val::Infix(Box::new(Infix { infix, left, right }))
+    }
+}
+
+impl From<()> for Val {
+    fn from(_: ()) -> Self {
+        Val::Unit
     }
 }
 
@@ -117,6 +124,7 @@ impl Debug for Val {
 impl Hash for Val {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
+            Val::Unit => ().hash(state),
             Val::Bool(b) => b.hash(state),
             Val::Int(i) => i.hash(state),
             Val::Float(f) => f.as_ord().hash(state),

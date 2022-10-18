@@ -11,6 +11,7 @@ pub(crate) mod val;
 
 #[derive(Debug)]
 pub(crate) enum AtomNode {
+    Unit,
     Bool(bool),
     Int(Integer),
     Float(Float),

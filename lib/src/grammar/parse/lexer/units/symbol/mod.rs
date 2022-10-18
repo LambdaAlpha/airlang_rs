@@ -29,6 +29,8 @@ impl SymbolLexer {
                 |
                 {0}(?P<bool>t|f)
                 |
+                {0}(?P<unit>u)
+                |
                 {0}
                 ",
                 SYMBOL_PREFIX
@@ -43,6 +45,11 @@ impl UnitLexer for SymbolLexer {
         &self.pattern
     }
     fn lexing(&self, captures: &regex::Captures) -> ParseResult<Token> {
+        let unit = captures.name("unit");
+        if unit.is_some() {
+            return Ok(Token::Unit);
+        }
+
         let boolean = captures.name("bool");
         if boolean.is_some() {
             return Ok(Token::Bool(matches!(boolean.unwrap().as_str(), "t")));

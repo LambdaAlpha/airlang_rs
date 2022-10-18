@@ -25,6 +25,7 @@ pub(crate) fn parse(src: &str) -> ParseResult<Vec<FlatNode>> {
     let mut nodes = Vec::with_capacity(tokens.len());
     for token in tokens {
         let node = match token {
+            Token::Unit => FlatNode::Atom(AtomNode::Unit),
             Token::Bool(b) => FlatNode::Atom(AtomNode::Bool(b)),
             Token::Int(i) => FlatNode::Atom(AtomNode::Int(i)),
             Token::Float(f) => FlatNode::Atom(AtomNode::Float(f)),
@@ -42,6 +43,7 @@ pub(crate) fn parse(src: &str) -> ParseResult<Vec<FlatNode>> {
 #[derive(Debug, PartialEq)]
 pub(crate) enum Token {
     Delimeter(String),
+    Unit,
     Bool(bool),
     Int(Integer),
     Float(Float),
