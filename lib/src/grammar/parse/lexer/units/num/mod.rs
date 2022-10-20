@@ -1,9 +1,11 @@
-#[cfg(test)]
-mod test;
-use crate::num::{ops::CompleteRound, Complete, Float, Integer};
 use regex::Regex;
 
+use crate::num::{Complete, Float, Integer, ops::CompleteRound};
+
 use super::super::{ParseResult, Token, UnitLexer};
+
+#[cfg(test)]
+mod test;
 
 pub(crate) struct NumLexer {
     pattern: Regex,

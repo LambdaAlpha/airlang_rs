@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod test;
-
 use regex::Regex;
 
 use crate::grammar::ParseResult;
@@ -9,6 +6,9 @@ use crate::utils;
 
 use super::super::Token;
 use super::super::UnitLexer;
+
+#[cfg(test)]
+mod test;
 
 pub(crate) struct SymbolLexer {
     pattern: Regex,

@@ -1,12 +1,12 @@
-#[cfg(test)]
-mod test;
-
 use regex::Regex;
 
 use crate::grammar::lexer::ParseResult;
 
 use super::super::Token;
 use super::super::UnitLexer;
+
+#[cfg(test)]
+mod test;
 
 pub(crate) struct LetterLexer {
     pattern: Regex,

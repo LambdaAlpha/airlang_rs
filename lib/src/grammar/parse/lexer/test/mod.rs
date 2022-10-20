@@ -1,6 +1,6 @@
-mod tokens;
-
 use super::{ParseResult, Token};
+
+mod tokens;
 
 fn test_lexing<F: Fn() -> Vec<Token>>(src: &str, f: F) -> ParseResult<()> {
     let real_tokens = super::lexing(src)?;

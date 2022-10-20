@@ -1,7 +1,7 @@
+use super::{NumLexer, ParseResult, super::test::test_unit_lexing};
+
 mod floats;
 mod ints;
-
-use super::{super::test::test_unit_lexing, NumLexer, ParseResult};
 
 #[test]
 fn test_lexing_ints() -> ParseResult<()> {

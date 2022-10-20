@@ -1,8 +1,8 @@
-use crate::grammar::parse::postfix::PostfixNode;
 use crate::grammar::{ParseError, ParseResult};
+use crate::grammar::parse::postfix::PostfixNode;
 
-use super::postfix::PostfixNodes;
 use super::AtomNode;
+use super::postfix::PostfixNodes;
 
 #[derive(Debug)]
 pub(crate) enum InfixNode {

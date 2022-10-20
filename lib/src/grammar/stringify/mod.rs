@@ -7,7 +7,7 @@ use crate::{
 };
 
 use super::{
-    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPERATOR, MAP_LEFT, MAP_RIGHT, SEPERATOR, SYMBOL_PREFIX,
+    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, SEPARATOR, SYMBOL_PREFIX,
     WRAP_LEFT, WRAP_RIGHT,
 };
 
@@ -19,8 +19,8 @@ pub(crate) fn stringify_compat(repr: &Repr) -> String {
         indent: "".to_owned(),
         before_first: "".to_owned(),
         after_last: "".to_owned(),
-        seperator: SEPERATOR.to_owned(),
-        kv_seperator: MAP_KV_SEPERATOR.to_owned(),
+        separator: SEPARATOR.to_owned(),
+        kv_separator: MAP_KV_SEPARATOR.to_owned(),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -34,8 +34,8 @@ pub(crate) fn stringify_comfort(repr: &Repr) -> String {
         indent: "".to_owned(),
         before_first: "".to_owned(),
         after_last: "".to_owned(),
-        seperator: format!("{} ", SEPERATOR),
-        kv_seperator: format!("{} ", MAP_KV_SEPERATOR),
+        separator: format!("{} ", SEPARATOR),
+        kv_separator: format!("{} ", MAP_KV_SEPARATOR),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -48,9 +48,9 @@ pub(crate) fn stringify_pretty(repr: &Repr) -> String {
     let config = StringifyConfig {
         indent: INDENT.to_owned(),
         before_first: "\n".to_owned(),
-        after_last: format!("{}\n", SEPERATOR),
-        seperator: format!("{}\n", SEPERATOR),
-        kv_seperator: format!("{} ", MAP_KV_SEPERATOR),
+        after_last: format!("{}\n", SEPARATOR),
+        separator: format!("{}\n", SEPARATOR),
+        kv_separator: format!("{} ", MAP_KV_SEPARATOR),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -62,8 +62,8 @@ struct StringifyConfig {
     indent: String,
     before_first: String,
     after_last: String,
-    seperator: String,
-    kv_seperator: String,
+    separator: String,
+    kv_separator: String,
     left_padding: String,
     right_padding: String,
 }
@@ -142,7 +142,7 @@ fn stringify_bytes(bytes: &Bytes, s: &mut String) {
     utils::conversion::u8_array_to_hex_string_mut(bytes, s);
 }
 
-fn stringigy_wrapped(repr: &Repr, s: &mut String, config: &StringifyConfig, indent: usize) {
+fn stringify_wrapped(repr: &Repr, s: &mut String, config: &StringifyConfig, indent: usize) {
     s.push_str(WRAP_LEFT);
     s.push_str(&config.left_padding);
     stringify(repr, s, config, indent);
@@ -169,9 +169,9 @@ fn stringify_list(list: &List, s: &mut String, config: &StringifyConfig, indent:
     for repr in list.iter() {
         s.push_str(&config.indent.repeat(indent + 1));
         stringify(repr, s, config, indent + 1);
-        s.push_str(&config.seperator);
+        s.push_str(&config.separator);
     }
-    s.truncate(s.len() - config.seperator.len());
+    s.truncate(s.len() - config.separator.len());
     s.push_str(&config.after_last);
 
     s.push_str(&config.indent.repeat(indent));
@@ -189,7 +189,7 @@ fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: us
         let pair = map.iter().next().unwrap();
         s.push_str(&config.left_padding);
         stringify(pair.0, s, config, indent);
-        s.push_str(&config.kv_seperator);
+        s.push_str(&config.kv_separator);
         stringify(pair.1, s, config, indent);
         s.push_str(&config.right_padding);
         s.push_str(MAP_RIGHT);
@@ -200,11 +200,11 @@ fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: us
     for pair in map.iter() {
         s.push_str(&config.indent.repeat(indent + 1));
         stringify(pair.0, s, config, indent + 1);
-        s.push_str(&config.kv_seperator);
+        s.push_str(&config.kv_separator);
         stringify(pair.1, s, config, indent + 1);
-        s.push_str(&config.seperator);
+        s.push_str(&config.separator);
     }
-    s.truncate(s.len() - config.seperator.len());
+    s.truncate(s.len() - config.separator.len());
     s.push_str(&config.after_last);
 
     s.push_str(&config.indent.repeat(indent));
@@ -213,7 +213,7 @@ fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: us
 
 fn stringify_ltree(ltree: &Ltree, s: &mut String, config: &StringifyConfig, indent: usize) {
     if matches!(ltree.root, Repr::Infix(_)) {
-        stringigy_wrapped(&ltree.root, s, config, indent);
+        stringify_wrapped(&ltree.root, s, config, indent);
     } else {
         stringify(&ltree.root, s, config, indent);
     }
@@ -222,7 +222,7 @@ fn stringify_ltree(ltree: &Ltree, s: &mut String, config: &StringifyConfig, inde
 
 fn stringify_mtree(mtree: &Mtree, s: &mut String, config: &StringifyConfig, indent: usize) {
     if matches!(mtree.root, Repr::Infix(_)) {
-        stringigy_wrapped(&mtree.root, s, config, indent);
+        stringify_wrapped(&mtree.root, s, config, indent);
     } else {
         stringify(&mtree.root, s, config, indent);
     }
@@ -233,13 +233,13 @@ fn stringify_infix(infix: &Infix, s: &mut String, config: &StringifyConfig, inde
     stringify(&infix.left, s, config, indent);
     s.push(' ');
     if matches!(infix.infix, Repr::List(_) | Repr::Map(_) | Repr::Infix(_)) {
-        stringigy_wrapped(&infix.infix, s, config, indent);
+        stringify_wrapped(&infix.infix, s, config, indent);
     } else {
         stringify(&infix.infix, s, config, indent);
     }
     s.push(' ');
     if matches!(infix.right, Repr::List(_) | Repr::Map(_) | Repr::Infix(_)) {
-        stringigy_wrapped(&infix.right, s, config, indent);
+        stringify_wrapped(&infix.right, s, config, indent);
     } else {
         stringify(&infix.right, s, config, indent);
     }

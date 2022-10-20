@@ -1,5 +1,6 @@
-use airlang;
 use std::io::{self, Write};
+
+use airlang;
 
 pub fn repl() {
     print_version();

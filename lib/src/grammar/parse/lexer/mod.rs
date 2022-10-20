@@ -33,7 +33,7 @@ pub(crate) fn parse(src: &str) -> ParseResult<Vec<FlatNode>> {
             Token::Letter(l) => FlatNode::Atom(AtomNode::Letter(l)),
             Token::String(s) => FlatNode::Atom(AtomNode::String(s)),
             Token::Bytes(b) => FlatNode::Atom(AtomNode::Bytes(b)),
-            Token::Delimeter(_) => continue,
+            Token::Delimiter(_) => continue,
         };
         nodes.push(node);
     }
@@ -42,7 +42,7 @@ pub(crate) fn parse(src: &str) -> ParseResult<Vec<FlatNode>> {
 
 #[derive(Debug, PartialEq)]
 pub(crate) enum Token {
-    Delimeter(String),
+    Delimiter(String),
     Unit,
     Bool(bool),
     Int(Integer),
@@ -80,7 +80,7 @@ fn lexing(src: &str) -> ParseResult<Vec<Token>> {
         let m0 = captures.get(0).unwrap();
         rest = &rest[m0.end()..];
         let token = lexer.lexing(&captures)?;
-        if !matches!(token, Token::Delimeter(_)) {
+        if !matches!(token, Token::Delimiter(_)) {
             tokens.push(token);
         }
     }

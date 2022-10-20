@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod test;
-
 use regex::Regex;
 
 use crate::grammar::lexer::ParseResult;
@@ -9,9 +6,12 @@ use super::super::ParseError;
 use super::super::Token;
 use super::super::UnitLexer;
 
+#[cfg(test)]
+mod test;
+
 pub(crate) struct StringLexer {
     pattern: Regex,
-    delimeter_pattern: Regex,
+    delimiter_pattern: Regex,
 }
 
 impl StringLexer {
@@ -30,8 +30,8 @@ impl StringLexer {
         \"
         ",
             )
-            .unwrap(),
-            delimeter_pattern: Regex::new("[ \\t\\r\\n]*[\\t\\r\\n]+[ \\t\\r\\n]*").unwrap(),
+                .unwrap(),
+            delimiter_pattern: Regex::new("[ \\t\\r\\n]*[\\t\\r\\n]+[ \\t\\r\\n]*").unwrap(),
         }
     }
 }
@@ -42,7 +42,7 @@ impl UnitLexer for StringLexer {
     }
     fn lexing(&self, captures: &regex::Captures) -> ParseResult<Token> {
         let m = captures.name("body").unwrap();
-        let s = self.delimeter_pattern.replace_all(m.as_str(), "");
+        let s = self.delimiter_pattern.replace_all(m.as_str(), "");
         let mut ns = String::new();
         let mut escape = false;
         let mut iter = s.chars().into_iter();

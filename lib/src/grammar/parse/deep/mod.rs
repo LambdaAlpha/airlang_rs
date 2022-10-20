@@ -1,11 +1,12 @@
 use std::vec::IntoIter;
 
-use super::lexer::FlatNode;
-use super::AtomNode;
 use crate::grammar::{
-    ParseError, ParseResult, LIST_LEFT, LIST_RIGHT, MAP_KV_SEPERATOR, MAP_LEFT, MAP_RIGHT,
-    SEPERATOR, WRAP_LEFT, WRAP_RIGHT,
+    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, ParseError, ParseResult,
+    SEPARATOR, WRAP_LEFT, WRAP_RIGHT,
 };
+
+use super::AtomNode;
+use super::lexer::FlatNode;
 
 #[derive(Debug)]
 pub(crate) enum DeepNode {
@@ -36,8 +37,8 @@ pub(crate) fn parse(flat_nodes: Vec<FlatNode>) -> ParseResult<DeepNodes> {
 
 enum Item {
     Node(DeepNode),
-    Seperator,
-    MapKvSeperator,
+    Separator,
+    MapKvSeparator,
 }
 
 fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepNode> {
@@ -67,8 +68,8 @@ fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepN
                         _ => ParseError::err(format!("unexpected {}", WRAP_RIGHT)),
                     }
                 }
-                SEPERATOR => Item::Seperator,
-                MAP_KV_SEPERATOR => Item::MapKvSeperator,
+                SEPARATOR => Item::Separator,
+                MAP_KV_SEPARATOR => Item::MapKvSeparator,
                 _ => Item::Node(DeepNode::Symbol(s)),
             },
         };
@@ -91,16 +92,16 @@ fn parse_list(items: Vec<Item>) -> ParseResult<DeepNode> {
             Item::Node(node) => {
                 value.push(node);
             }
-            Item::Seperator => {
+            Item::Separator => {
                 if value.is_empty() {
-                    return ParseError::err(format!("unexpected {}", SEPERATOR));
+                    return ParseError::err(format!("unexpected {}", SEPARATOR));
                 } else {
                     list.push(value);
                     value = Vec::new();
                 }
             }
-            Item::MapKvSeperator => {
-                return ParseError::err(format!("unexpected {} in list", MAP_KV_SEPERATOR))
+            Item::MapKvSeparator => {
+                return ParseError::err(format!("unexpected {} in list", MAP_KV_SEPARATOR))
             }
         }
     }
@@ -124,9 +125,9 @@ fn parse_map(items: Vec<Item>) -> ParseResult<DeepNode> {
                     value.push(node);
                 }
             }
-            Item::Seperator => {
+            Item::Separator => {
                 if key.is_empty() {
-                    return ParseError::err(format!("unexpected {}", SEPERATOR));
+                    return ParseError::err(format!("unexpected {}", SEPARATOR));
                 } else {
                     map.push((key, value));
                     key = Vec::new();
@@ -134,9 +135,9 @@ fn parse_map(items: Vec<Item>) -> ParseResult<DeepNode> {
                     is_key = true;
                 }
             }
-            Item::MapKvSeperator => {
+            Item::MapKvSeparator => {
                 if !is_key || key.is_empty() {
-                    return ParseError::err(format!("unexpected {}", SEPERATOR));
+                    return ParseError::err(format!("unexpected {}", SEPARATOR));
                 } else {
                     is_key = false;
                 }
@@ -157,11 +158,11 @@ fn parse_wrap(items: Vec<Item>) -> ParseResult<DeepNode> {
             Item::Node(node) => {
                 list.push(node);
             }
-            Item::Seperator => {
-                return ParseError::err(format!("unexpected {} in wrap", SEPERATOR));
+            Item::Separator => {
+                return ParseError::err(format!("unexpected {} in wrap", SEPARATOR));
             }
-            Item::MapKvSeperator => {
-                return ParseError::err(format!("unexpected {} in wrap", MAP_KV_SEPERATOR))
+            Item::MapKvSeparator => {
+                return ParseError::err(format!("unexpected {} in wrap", MAP_KV_SEPARATOR))
             }
         }
     }

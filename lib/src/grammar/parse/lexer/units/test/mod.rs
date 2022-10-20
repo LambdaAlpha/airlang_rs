@@ -1,5 +1,5 @@
 use crate::grammar::{
-    parse::lexer::{units::delimeter::DelimeterLexer, Token, UnitLexer},
+    parse::lexer::{Token, UnitLexer, units::delimiter::DelimiterLexer},
     ParseError, ParseResult,
 };
 
@@ -14,7 +14,7 @@ pub(crate) fn test_unit_lexing(
 }
 
 fn unit_lexing(src: &str, unit_lexer: &impl UnitLexer) -> ParseResult<Vec<Token>> {
-    let delimeter_lexer = DelimeterLexer::new();
+    let delimiter_lexer = DelimiterLexer::new();
 
     let mut tokens = Vec::<Token>::new();
     let mut rest = &src[..];
@@ -23,7 +23,7 @@ fn unit_lexing(src: &str, unit_lexer: &impl UnitLexer) -> ParseResult<Vec<Token>
         let is_delimeter = matches!(first, ' ' | '\t' | '\r' | '\n');
 
         let lexer: &dyn UnitLexer = if is_delimeter {
-            &delimeter_lexer
+            &delimiter_lexer
         } else {
             unit_lexer
         };

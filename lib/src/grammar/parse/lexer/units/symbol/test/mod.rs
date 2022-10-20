@@ -1,9 +1,9 @@
+use super::{ParseResult, super::test::test_unit_lexing, SymbolLexer, Token};
+
 mod booleans;
 mod bytes;
 mod symbols;
 mod units;
-
-use super::{super::test::test_unit_lexing, ParseResult, SymbolLexer, Token};
 
 #[test]
 fn test_lexing_symbols() -> ParseResult<()> {

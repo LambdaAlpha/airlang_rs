@@ -1,6 +1,8 @@
-use super::Token::{self, *};
-use crate::num::Integer;
 use std::str::FromStr;
+
+use crate::num::Integer;
+
+use super::Token::{self, *};
 
 pub(crate) fn expected() -> Vec<Token> {
     vec![

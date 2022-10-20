@@ -1,4 +1,4 @@
-use crate::num::{ops::CompleteRound, Float};
+use crate::num::{Float, ops::CompleteRound};
 
 use super::super::Token;
 

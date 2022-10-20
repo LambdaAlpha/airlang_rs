@@ -9,17 +9,17 @@
     path_statements,
     patterns_in_fns_without_body,
     private_in_public,
-    unconditional_recursion,
-    unused,
-    unused_allocation,
-    unused_comparisons,
-    unused_parens,
-    while_true
+unconditional_recursion,
+unused,
+unused_allocation,
+unused_comparisons,
+unused_parens,
+while_true
 )]
 
-mod repl;
-
 use env_logger;
+
+mod repl;
 
 fn main() {
     env_logger::init();

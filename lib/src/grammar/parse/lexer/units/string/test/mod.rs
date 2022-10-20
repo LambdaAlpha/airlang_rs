@@ -1,6 +1,7 @@
-use super::super::test::test_unit_lexing;
-use super::StringLexer;
 use crate::grammar::lexer::ParseResult;
+
+use super::StringLexer;
+use super::super::test::test_unit_lexing;
 
 mod strings;
 

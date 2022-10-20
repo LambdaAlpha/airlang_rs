@@ -1,13 +1,13 @@
 use super::{
-    units::{
-        delimeter::DelimeterLexer, letter::LetterLexer, num::NumLexer, string::StringLexer,
+    LexerConfig,
+    ParseError, ParseResult, UnitLexer, units::{
+        delimiter::DelimiterLexer, letter::LetterLexer, num::NumLexer, string::StringLexer,
         symbol::SymbolLexer,
     },
-    LexerConfig, ParseError, ParseResult, UnitLexer,
 };
 
 pub(crate) struct AirLexerConfig {
-    delimeter_lexer: DelimeterLexer,
+    delimiter_lexer: DelimiterLexer,
     num_lexer: NumLexer,
     symbol_lexer: SymbolLexer,
     letter_lexer: LetterLexer,
@@ -17,7 +17,7 @@ pub(crate) struct AirLexerConfig {
 impl AirLexerConfig {
     pub(crate) fn new() -> AirLexerConfig {
         AirLexerConfig {
-            delimeter_lexer: DelimeterLexer::new(),
+            delimiter_lexer: DelimiterLexer::new(),
             num_lexer: NumLexer::new(),
             symbol_lexer: SymbolLexer::new(),
             letter_lexer: LetterLexer::new(),
@@ -29,7 +29,7 @@ impl AirLexerConfig {
 impl LexerConfig for AirLexerConfig {
     fn dispatch_char(&self, c: char) -> ParseResult<&dyn UnitLexer> {
         match c {
-            ' ' | '\t' | '\r' | '\n' => Ok(&self.delimeter_lexer),
+            ' ' | '\t' | '\r' | '\n' => Ok(&self.delimiter_lexer),
             'a'..='z' | 'A'..='Z' => Ok(&self.letter_lexer),
             '0'..='9' | '+' | '-' => Ok(&self.num_lexer),
             '"' => Ok(&self.string_lexer),

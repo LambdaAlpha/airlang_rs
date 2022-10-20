@@ -1,6 +1,7 @@
-use super::deep::{DeepNode, DeepNodes};
+use crate::grammar::{COMMENT_PREFIX, ParseError, ParseResult};
+
 use super::AtomNode;
-use crate::grammar::{ParseError, ParseResult, COMMENT_PREFIX};
+use super::deep::{DeepNode, DeepNodes};
 
 #[derive(Debug)]
 pub(crate) enum PrefixNode {

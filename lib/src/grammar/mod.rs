@@ -15,8 +15,8 @@ mod test;
 
 const SYMBOL_PREFIX: &str = "'";
 
-const SEPERATOR: &str = ",";
-const MAP_KV_SEPERATOR: &str = ":";
+const SEPARATOR: &str = ",";
+const MAP_KV_SEPARATOR: &str = ":";
 const LIST_LEFT: &str = "(";
 const LIST_RIGHT: &str = ")";
 const MAP_LEFT: &str = "{";
@@ -46,7 +46,7 @@ pub(crate) fn parse(src: &str) -> ParseResult<Repr> {
     let prefix = prefix::parse(deep)?;
     let postfix = postfix::parse(prefix)?;
     let infix = infix::parse(postfix)?;
-    let repr = self::parse::repr::parse(infix)?;
+    let repr = parse::repr::parse(infix)?;
     Ok(repr)
 }
 

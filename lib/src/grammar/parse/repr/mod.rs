@@ -33,7 +33,7 @@ fn parse_expect_one(nodes: InfixNodes) -> ParseResult<Repr> {
     if nodes.len() == 1 {
         Ok(parse_one(nodes.into_iter().next().unwrap())?)
     } else {
-        ParseError::err("expect exactly one reprue".to_owned())
+        ParseError::err("expect exactly one repr".to_owned())
     }
 }
 

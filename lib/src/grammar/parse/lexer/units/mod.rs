@@ -1,4 +1,4 @@
-pub(crate) mod delimeter;
+pub(crate) mod delimiter;
 pub(crate) mod letter;
 pub(crate) mod num;
 pub(crate) mod string;

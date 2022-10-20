@@ -1,6 +1,7 @@
-use super::prefix::{PrefixNode, PrefixNodes};
-use super::AtomNode;
 use crate::grammar::ParseResult;
+
+use super::AtomNode;
+use super::prefix::{PrefixNode, PrefixNodes};
 
 #[derive(Debug)]
 pub(crate) enum PostfixNode {

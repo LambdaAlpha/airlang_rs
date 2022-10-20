@@ -5,24 +5,24 @@ use crate::grammar::lexer::ParseResult;
 use super::super::Token;
 use super::super::UnitLexer;
 
-pub(crate) struct DelimeterLexer {
+pub(crate) struct DelimiterLexer {
     pattern: Regex,
 }
 
-impl DelimeterLexer {
-    pub(crate) fn new() -> DelimeterLexer {
-        DelimeterLexer {
+impl DelimiterLexer {
+    pub(crate) fn new() -> DelimiterLexer {
+        DelimiterLexer {
             pattern: Regex::new(r"[ \t\r\n]+").unwrap(),
         }
     }
 }
 
-impl UnitLexer for DelimeterLexer {
+impl UnitLexer for DelimiterLexer {
     fn pattern(&self) -> &Regex {
         &self.pattern
     }
     fn lexing(&self, captures: &regex::Captures) -> ParseResult<Token> {
-        Ok(Token::Delimeter(
+        Ok(Token::Delimiter(
             captures.get(0).unwrap().as_str().to_owned(),
         ))
     }
