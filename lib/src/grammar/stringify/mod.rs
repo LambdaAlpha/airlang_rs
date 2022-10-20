@@ -1,9 +1,9 @@
 use std::fmt::Write;
 
 use crate::{
+    grammar::repr::{Bytes, Float, Infix, List, Ltree, Map, Mtree, Repr},
     num::Integer,
     utils,
-    val::{Bytes, Float, Infix, List, Ltree, Map, Mtree, Val},
 };
 
 use super::{
@@ -13,7 +13,7 @@ use super::{
 
 const INDENT: &str = "  ";
 
-pub(crate) fn stringify_compat(val: &Val) -> String {
+pub(crate) fn stringify_compat(repr: &Repr) -> String {
     let mut str = String::new();
     let config = StringifyConfig {
         indent: "".to_owned(),
@@ -24,11 +24,11 @@ pub(crate) fn stringify_compat(val: &Val) -> String {
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
-    stringify(val, &mut str, &config, 0);
+    stringify(repr, &mut str, &config, 0);
     str
 }
 
-pub(crate) fn stringify_comfort(val: &Val) -> String {
+pub(crate) fn stringify_comfort(repr: &Repr) -> String {
     let mut str = String::new();
     let config = StringifyConfig {
         indent: "".to_owned(),
@@ -39,11 +39,11 @@ pub(crate) fn stringify_comfort(val: &Val) -> String {
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
-    stringify(val, &mut str, &config, 0);
+    stringify(repr, &mut str, &config, 0);
     str
 }
 
-pub(crate) fn stringify_pretty(val: &Val) -> String {
+pub(crate) fn stringify_pretty(repr: &Repr) -> String {
     let mut str = String::new();
     let config = StringifyConfig {
         indent: INDENT.to_owned(),
@@ -54,7 +54,7 @@ pub(crate) fn stringify_pretty(val: &Val) -> String {
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
-    stringify(val, &mut str, &config, 0);
+    stringify(repr, &mut str, &config, 0);
     str
 }
 
@@ -68,21 +68,21 @@ struct StringifyConfig {
     right_padding: String,
 }
 
-fn stringify(val: &Val, s: &mut String, config: &StringifyConfig, indent: usize) {
-    match val {
-        Val::Unit => stringify_unit(s),
-        Val::Bool(b) => stringify_bool(*b, s),
-        Val::Int(i) => stringify_int(i, s),
-        Val::Float(f) => stringify_float(f, s),
-        Val::String(str) => stringify_string(str, s),
-        Val::Letter(str) => stringify_letter(str, s),
-        Val::Symbol(str) => stringify_symbol(str, s),
-        Val::Bytes(bytes) => stringify_bytes(bytes, s),
-        Val::List(list) => stringify_list(list, s, config, indent),
-        Val::Map(map) => stringify_map(map, s, config, indent),
-        Val::Ltree(ltree) => stringify_ltree(ltree, s, config, indent),
-        Val::Mtree(mtree) => stringify_mtree(mtree, s, config, indent),
-        Val::Infix(infix) => stringify_infix(infix, s, config, indent),
+fn stringify(repr: &Repr, s: &mut String, config: &StringifyConfig, indent: usize) {
+    match repr {
+        Repr::Unit => stringify_unit(s),
+        Repr::Bool(b) => stringify_bool(*b, s),
+        Repr::Int(i) => stringify_int(i, s),
+        Repr::Float(f) => stringify_float(f, s),
+        Repr::String(str) => stringify_string(str, s),
+        Repr::Letter(str) => stringify_letter(str, s),
+        Repr::Symbol(str) => stringify_symbol(str, s),
+        Repr::Bytes(bytes) => stringify_bytes(bytes, s),
+        Repr::List(list) => stringify_list(list, s, config, indent),
+        Repr::Map(map) => stringify_map(map, s, config, indent),
+        Repr::Ltree(ltree) => stringify_ltree(ltree, s, config, indent),
+        Repr::Mtree(mtree) => stringify_mtree(mtree, s, config, indent),
+        Repr::Infix(infix) => stringify_infix(infix, s, config, indent),
     }
 }
 
@@ -142,10 +142,10 @@ fn stringify_bytes(bytes: &Bytes, s: &mut String) {
     utils::conversion::u8_array_to_hex_string_mut(bytes, s);
 }
 
-fn stringigy_wrapped(val: &Val, s: &mut String, config: &StringifyConfig, indent: usize) {
+fn stringigy_wrapped(repr: &Repr, s: &mut String, config: &StringifyConfig, indent: usize) {
     s.push_str(WRAP_LEFT);
     s.push_str(&config.left_padding);
-    stringify(val, s, config, indent);
+    stringify(repr, s, config, indent);
     s.push_str(&config.right_padding);
     s.push_str(WRAP_RIGHT);
 }
@@ -166,9 +166,9 @@ fn stringify_list(list: &List, s: &mut String, config: &StringifyConfig, indent:
     }
 
     s.push_str(&config.before_first);
-    for val in list.iter() {
+    for repr in list.iter() {
         s.push_str(&config.indent.repeat(indent + 1));
-        stringify(val, s, config, indent + 1);
+        stringify(repr, s, config, indent + 1);
         s.push_str(&config.seperator);
     }
     s.truncate(s.len() - config.seperator.len());
@@ -212,7 +212,7 @@ fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: us
 }
 
 fn stringify_ltree(ltree: &Ltree, s: &mut String, config: &StringifyConfig, indent: usize) {
-    if matches!(ltree.root, Val::Infix(_)) {
+    if matches!(ltree.root, Repr::Infix(_)) {
         stringigy_wrapped(&ltree.root, s, config, indent);
     } else {
         stringify(&ltree.root, s, config, indent);
@@ -221,7 +221,7 @@ fn stringify_ltree(ltree: &Ltree, s: &mut String, config: &StringifyConfig, inde
 }
 
 fn stringify_mtree(mtree: &Mtree, s: &mut String, config: &StringifyConfig, indent: usize) {
-    if matches!(mtree.root, Val::Infix(_)) {
+    if matches!(mtree.root, Repr::Infix(_)) {
         stringigy_wrapped(&mtree.root, s, config, indent);
     } else {
         stringify(&mtree.root, s, config, indent);
@@ -232,13 +232,13 @@ fn stringify_mtree(mtree: &Mtree, s: &mut String, config: &StringifyConfig, inde
 fn stringify_infix(infix: &Infix, s: &mut String, config: &StringifyConfig, indent: usize) {
     stringify(&infix.left, s, config, indent);
     s.push(' ');
-    if matches!(infix.infix, Val::List(_) | Val::Map(_) | Val::Infix(_)) {
+    if matches!(infix.infix, Repr::List(_) | Repr::Map(_) | Repr::Infix(_)) {
         stringigy_wrapped(&infix.infix, s, config, indent);
     } else {
         stringify(&infix.infix, s, config, indent);
     }
     s.push(' ');
-    if matches!(infix.right, Val::List(_) | Val::Map(_) | Val::Infix(_)) {
+    if matches!(infix.right, Repr::List(_) | Repr::Map(_) | Repr::Infix(_)) {
         stringigy_wrapped(&infix.right, s, config, indent);
     } else {
         stringify(&infix.right, s, config, indent);

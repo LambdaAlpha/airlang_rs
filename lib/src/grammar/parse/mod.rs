@@ -1,13 +1,14 @@
-use super::{ParseError, ParseResult};
+use crate::grammar::repr::Bytes;
 use crate::num::{Float, Integer};
-use crate::val::Bytes;
+
+use super::{ParseError, ParseResult};
 
 pub(crate) mod deep;
 pub(crate) mod infix;
 pub(crate) mod lexer;
 pub(crate) mod postfix;
 pub(crate) mod prefix;
-pub(crate) mod val;
+pub(crate) mod repr;
 
 #[derive(Debug)]
 pub(crate) enum AtomNode {

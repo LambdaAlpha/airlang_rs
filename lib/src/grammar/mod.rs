@@ -1,9 +1,14 @@
 use std::fmt::Display;
 
-use self::parse::{deep, infix, lexer, postfix, prefix, val};
-use crate::val::Val;
+#[allow(unused_imports)]
+#[allow(dead_code)]
+pub(crate) use stringify::{stringify_comfort, stringify_compat, stringify_pretty};
+
+use self::parse::{deep, infix, lexer, postfix, prefix};
+use self::repr::Repr;
 
 mod parse;
+pub mod repr;
 mod stringify;
 #[cfg(test)]
 mod test;
@@ -35,19 +40,15 @@ impl ParseError {
     }
 }
 
-pub(crate) fn parse(src: &str) -> ParseResult<Val> {
+pub(crate) fn parse(src: &str) -> ParseResult<Repr> {
     let flat = lexer::parse(src)?;
     let deep = deep::parse(flat)?;
     let prefix = prefix::parse(deep)?;
     let postfix = postfix::parse(prefix)?;
     let infix = infix::parse(postfix)?;
-    let val = val::parse(infix)?;
-    Ok(val)
+    let repr = self::parse::repr::parse(infix)?;
+    Ok(repr)
 }
-
-#[allow(unused_imports)]
-#[allow(dead_code)]
-pub(crate) use stringify::{stringify_comfort, stringify_compat, stringify_pretty};
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

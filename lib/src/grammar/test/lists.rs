@@ -1,20 +1,20 @@
 use std::str::FromStr;
 
+use crate::grammar::repr::{List, Repr};
 use crate::num::Integer;
-use crate::val::{List, Val};
 
-pub(crate) fn expected() -> Val {
-    Val::from(vec![
-        Val::from(vec![] as List),
-        Val::from(vec![int("1")]),
-        Val::from(vec![int("1")]),
-        Val::from(vec![int("1"), int("2")]),
-        Val::from(vec![int("1"), int("2")]),
-        Val::from(vec![Val::from(vec![] as List)]),
-        Val::from(vec![Val::from(vec![] as List), Val::from(vec![] as List)]),
+pub(crate) fn expected() -> Repr {
+    Repr::from(vec![
+        Repr::from(vec![] as List),
+        Repr::from(vec![int("1")]),
+        Repr::from(vec![int("1")]),
+        Repr::from(vec![int("1"), int("2")]),
+        Repr::from(vec![int("1"), int("2")]),
+        Repr::from(vec![Repr::from(vec![] as List)]),
+        Repr::from(vec![Repr::from(vec![] as List), Repr::from(vec![] as List)]),
     ])
 }
 
-fn int(s: &str) -> Val {
-    Val::from(Integer::from_str(s).unwrap())
+fn int(s: &str) -> Repr {
+    Repr::from(Integer::from_str(s).unwrap())
 }

@@ -1,7 +1,4 @@
-use crate::{
-    grammar::{parse, ParseError},
-    val::Val,
-};
+use crate::grammar::{parse, ParseError, repr::Repr};
 
 use super::ParseResult;
 
@@ -41,7 +38,7 @@ fn test_parse_postfixes() -> ParseResult<()> {
     test_parse(src, postfixes::expected)
 }
 
-fn test_parse(src: &str, expected: impl Fn() -> Val) -> ParseResult<()> {
+fn test_parse(src: &str, expected: impl Fn() -> Repr) -> ParseResult<()> {
     let values = parse(src)?;
     assert_eq!(values, expected());
     Ok(())
@@ -50,34 +47,34 @@ fn test_parse(src: &str, expected: impl Fn() -> Val) -> ParseResult<()> {
 #[test]
 fn test_lists_to_string() -> ParseResult<()> {
     let src = include_str!("./lists.air");
-    test_val_to_string(src)
+    test_repr_to_string(src)
 }
 
 #[test]
 fn test_maps_to_string() -> ParseResult<()> {
     let src = include_str!("./maps.air");
-    test_val_to_string(src)
+    test_repr_to_string(src)
 }
 
 #[test]
 fn test_prefixes_to_string() -> ParseResult<()> {
     let src = include_str!("./prefixes.air");
-    test_val_to_string(src)
+    test_repr_to_string(src)
 }
 
 #[test]
 fn test_infixes_to_string() -> ParseResult<()> {
     let src = include_str!("./infixes.air");
-    test_val_to_string(src)
+    test_repr_to_string(src)
 }
 
 #[test]
 fn test_postfixes_to_string() -> ParseResult<()> {
     let src = include_str!("./postfixes.air");
-    test_val_to_string(src)
+    test_repr_to_string(src)
 }
 
-fn test_val_to_string(src: &str) -> ParseResult<()> {
+fn test_repr_to_string(src: &str) -> ParseResult<()> {
     let values = parse(src)?;
     let string = values.to_string();
     let new_values = parse(&string)?;

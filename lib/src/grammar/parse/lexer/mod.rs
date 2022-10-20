@@ -1,17 +1,17 @@
+use regex::{Captures, Regex};
+
+use crate::grammar::repr::Bytes;
+use crate::num::{Float, Integer};
+
+use super::{ParseError, ParseResult};
+use super::AtomNode;
+
+use self::config::AirLexerConfig;
+
 mod config;
 #[cfg(test)]
 mod test;
 mod units;
-
-use crate::num::{Float, Integer};
-use crate::val::Bytes;
-use regex::{Captures, Regex};
-
-use super::{ParseError, ParseResult};
-
-use self::config::AirLexerConfig;
-
-use super::AtomNode;
 
 #[derive(Debug)]
 pub(crate) enum FlatNode {
