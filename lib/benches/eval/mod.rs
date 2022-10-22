@@ -1,5 +1,6 @@
-use airlang::{eval, parse};
 use criterion::{black_box, Criterion};
+
+use airlang::{eval, parse};
 
 pub(crate) fn bench_eval(c: &mut Criterion) {
     c.bench_function("eval", |b| {

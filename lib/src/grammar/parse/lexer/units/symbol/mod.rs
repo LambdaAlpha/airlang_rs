@@ -35,7 +35,7 @@ impl SymbolLexer {
                 ",
                 SYMBOL_PREFIX
             ))
-            .unwrap(),
+                .unwrap(),
         }
     }
 }

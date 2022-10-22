@@ -20,9 +20,9 @@ fn unit_lexing(src: &str, unit_lexer: &impl UnitLexer) -> ParseResult<Vec<Token>
     let mut rest = &src[..];
     while !rest.is_empty() {
         let first = rest.chars().next().unwrap();
-        let is_delimeter = matches!(first, ' ' | '\t' | '\r' | '\n');
+        let is_delimiter = matches!(first, ' ' | '\t' | '\r' | '\n');
 
-        let lexer: &dyn UnitLexer = if is_delimeter {
+        let lexer: &dyn UnitLexer = if is_delimiter {
             &delimiter_lexer
         } else {
             unit_lexer
@@ -36,7 +36,7 @@ fn unit_lexing(src: &str, unit_lexer: &impl UnitLexer) -> ParseResult<Vec<Token>
 
         let m0 = captures.get(0).unwrap();
         rest = &rest[m0.end()..];
-        if !is_delimeter {
+        if !is_delimiter {
             let token = unit_lexer.lexing(&captures)?;
             tokens.push(token);
         }

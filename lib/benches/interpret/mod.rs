@@ -1,5 +1,6 @@
-use airlang::interpret;
 use criterion::{black_box, Criterion};
+
+use airlang::interpret;
 
 pub(crate) fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {

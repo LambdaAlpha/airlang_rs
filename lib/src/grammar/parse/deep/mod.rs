@@ -52,21 +52,21 @@ fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepN
                     return match flag {
                         DeepFlag::List => parse_list(items),
                         _ => ParseError::err(format!("unexpected {}", LIST_RIGHT)),
-                    }
+                    };
                 }
                 MAP_LEFT => Item::Node(parse_one(iter, DeepFlag::Map)?),
                 MAP_RIGHT => {
                     return match flag {
                         DeepFlag::Map => parse_map(items),
                         _ => ParseError::err(format!("unexpected {}", MAP_RIGHT)),
-                    }
+                    };
                 }
                 WRAP_LEFT => Item::Node(parse_one(iter, DeepFlag::Wrap)?),
                 WRAP_RIGHT => {
                     return match flag {
                         DeepFlag::Wrap => parse_wrap(items),
                         _ => ParseError::err(format!("unexpected {}", WRAP_RIGHT)),
-                    }
+                    };
                 }
                 SEPARATOR => Item::Separator,
                 MAP_KV_SEPARATOR => Item::MapKvSeparator,
@@ -101,7 +101,7 @@ fn parse_list(items: Vec<Item>) -> ParseResult<DeepNode> {
                 }
             }
             Item::MapKvSeparator => {
-                return ParseError::err(format!("unexpected {} in list", MAP_KV_SEPARATOR))
+                return ParseError::err(format!("unexpected {} in list", MAP_KV_SEPARATOR));
             }
         }
     }
@@ -162,7 +162,7 @@ fn parse_wrap(items: Vec<Item>) -> ParseResult<DeepNode> {
                 return ParseError::err(format!("unexpected {} in wrap", SEPARATOR));
             }
             Item::MapKvSeparator => {
-                return ParseError::err(format!("unexpected {} in wrap", MAP_KV_SEPARATOR))
+                return ParseError::err(format!("unexpected {} in wrap", MAP_KV_SEPARATOR));
             }
         }
     }

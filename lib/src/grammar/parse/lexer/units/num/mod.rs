@@ -31,7 +31,7 @@ impl NumLexer {
         (?P<symbol>[+\\-])
         ",
             )
-            .unwrap(),
+                .unwrap(),
         }
     }
 }
