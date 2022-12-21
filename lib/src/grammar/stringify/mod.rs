@@ -7,7 +7,7 @@ use crate::{
 };
 
 use super::{
-    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, SEPARATOR, SYMBOL_PREFIX,
+    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, SEPARATOR,
     WRAP_LEFT, WRAP_RIGHT,
 };
 
@@ -131,9 +131,6 @@ fn stringify_letter(str: &String, s: &mut String) {
 }
 
 fn stringify_symbol(str: &String, s: &mut String) {
-    if str.len() > 1 {
-        s.push_str(SYMBOL_PREFIX)
-    }
     s.push_str(str)
 }
 
