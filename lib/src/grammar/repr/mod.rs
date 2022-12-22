@@ -63,8 +63,8 @@ impl Repr {
     }
 }
 
-impl From<()> for Repr {
-    fn from(_: ()) -> Self {
+impl From<Unit> for Repr {
+    fn from(_: Unit) -> Self {
         Repr::Unit
     }
 }
@@ -140,6 +140,8 @@ impl Debug for Repr {
         write!(f, "{}", grammar::stringify_pretty(self))
     }
 }
+
+pub type Unit = ();
 
 pub type Bool = bool;
 
