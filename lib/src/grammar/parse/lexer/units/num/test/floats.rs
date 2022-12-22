@@ -1,21 +1,20 @@
-use crate::num::{Float, ops::CompleteRound};
+use crate::grammar::repr::Float;
 
 use super::super::Token;
 
 pub(crate) fn expected() -> Vec<Token> {
     vec![
-        parse("0.0", None),
-        parse("+0.0", None),
-        parse("-0.0", None),
-        parse("0.", None),
-        parse("1.", None),
-        parse("1e2", None),
-        parse("1", Some(54)),
-        parse("-123.455666e-123", Some(55)),
-        parse("1.111111111111111111111111111111e100", None),
+        float(true, "0", "0", true, "0"),
+        float(true, "0", "0", true, "0"),
+        float(false, "0", "0", true, "0"),
+        float(true, "0", "", true, "0"),
+        float(true, "1", "", true, "0"),
+        float(true, "1", "", true, "2"),
+        float(false, "123", "455666", false, "123"),
+        float(true, "1", "111111111111111111111111111111", true, "100"),
     ]
 }
 
-fn parse(s: &str, precision: Option<u32>) -> Token {
-    Token::Float(Float::parse(s).unwrap().complete(precision.unwrap_or(53)))
+fn float(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digits: &str) -> Token {
+    Token::Float(Float::new(sign, integral.to_owned(), fractional.to_owned(), exp_sign, exp_digits.to_owned()))
 }

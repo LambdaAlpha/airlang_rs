@@ -2,9 +2,9 @@ use std::fmt::Write;
 
 use crate::{
     grammar::repr::{Bytes, Float, Infix, List, Ltree, Map, Mtree, Repr},
-    num::Integer,
     utils,
 };
+use crate::grammar::repr::Int;
 
 use super::{
     LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, SEPARATOR,
@@ -94,20 +94,38 @@ fn stringify_bool(b: bool, s: &mut String) {
     s.push_str(if b { "'t" } else { "'f" })
 }
 
-fn stringify_int(i: &Integer, s: &mut String) {
-    s.push_str(&i.to_string())
+fn stringify_int(i: &Int, s: &mut String) {
+    if !i.sign {
+        s.push_str("-")
+    }
+    if i.radix == 2 {
+        s.push_str("0b")
+    } else if i.radix == 16 {
+        s.push_str("0x")
+    }
+    s.push_str(&*i.digits)
 }
 
 fn stringify_float(f: &Float, s: &mut String) {
-    let (b, digits, exp) = f.to_sign_string_exp(10, None);
-    let sign = if b { "-" } else { "" };
-    let exp = if exp.is_some() { exp.unwrap() } else { 0 };
-    let exp = if exp == 0 {
+    let sign = if f.sign {
         "".to_owned()
     } else {
-        format!("e{exp}")
+        "-".to_owned()
     };
-    write!(s, "{sign}0.{digits}{exp}").unwrap();
+    let integral = &f.integral;
+    let fractional = &f.fractional;
+    let exp_sign = if f.exp_sign {
+        "".to_owned()
+    } else {
+        "-".to_owned()
+    };
+    let exp_digits = &f.exp_digits;
+    let exp = if f.exp_digits == "0".repeat(f.exp_digits.len()) {
+        "".to_owned()
+    } else {
+        format!("e{exp_sign}{exp_digits}")
+    };
+    write!(s, "{sign}{integral}.{fractional}{exp}").unwrap();
 }
 
 fn stringify_string(str: &String, s: &mut String) {
@@ -185,9 +203,9 @@ fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: us
     if map.len() == 1 {
         let pair = map.iter().next().unwrap();
         s.push_str(&config.left_padding);
-        stringify(pair.0, s, config, indent);
+        stringify(&pair.0, s, config, indent);
         s.push_str(&config.kv_separator);
-        stringify(pair.1, s, config, indent);
+        stringify(&pair.1, s, config, indent);
         s.push_str(&config.right_padding);
         s.push_str(MAP_RIGHT);
         return;
@@ -196,9 +214,9 @@ fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: us
     s.push_str(&config.before_first);
     for pair in map.iter() {
         s.push_str(&config.indent.repeat(indent + 1));
-        stringify(pair.0, s, config, indent + 1);
+        stringify(&pair.0, s, config, indent + 1);
         s.push_str(&config.kv_separator);
-        stringify(pair.1, s, config, indent + 1);
+        stringify(&pair.1, s, config, indent + 1);
         s.push_str(&config.separator);
     }
     s.truncate(s.len() - config.separator.len());

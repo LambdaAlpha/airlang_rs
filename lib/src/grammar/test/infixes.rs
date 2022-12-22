@@ -1,10 +1,7 @@
-use std::str::FromStr;
-
-use crate::grammar::repr::{List, Repr};
-use crate::num::Integer;
+use crate::grammar::repr::{Int, Repr};
 
 pub(crate) fn expected() -> Repr {
-    Repr::from(vec![
+    Repr::list(vec![
         Repr::infix(int("1"), Repr::symbol("&".to_owned()), int("2")),
         Repr::infix(
             Repr::infix(int("1"), Repr::symbol("&".to_owned()), int("2")),
@@ -14,10 +11,10 @@ pub(crate) fn expected() -> Repr {
         Repr::infix(
             int("1"),
             Repr::symbol("&".to_owned()),
-            Repr::from(vec![] as List),
+            Repr::list(vec![]),
         ),
         Repr::infix(
-            Repr::from(vec![] as List),
+            Repr::list(vec![]),
             Repr::symbol("&".to_owned()),
             int("1"),
         ),
@@ -35,10 +32,10 @@ pub(crate) fn expected() -> Repr {
         Repr::infix(
             int("1"),
             Repr::letter("a".to_owned()),
-            Repr::from(vec![] as List),
+            Repr::list(vec![]),
         ),
         Repr::infix(
-            Repr::from(vec![] as List),
+            Repr::list(vec![]),
             Repr::letter("a".to_owned()),
             int("1"),
         ),
@@ -47,7 +44,7 @@ pub(crate) fn expected() -> Repr {
             Repr::letter("a".to_owned()),
             Repr::ltree(int("2"), vec![]),
         ),
-        Repr::infix(int("1"), Repr::from(vec![] as List), int("2")),
+        Repr::infix(int("1"), Repr::list(vec![]), int("2")),
         Repr::infix(int("1"), int("2"), int("3")),
         Repr::infix(
             int("1"),
@@ -79,11 +76,11 @@ pub(crate) fn expected() -> Repr {
             vec![],
         ),
         Repr::ltree(Repr::letter("a".to_owned()), vec![]),
-        Repr::from(vec![] as List),
+        Repr::list(vec![]),
         Repr::infix(int("1"), Repr::symbol("&".to_owned()), int("2")),
     ])
 }
 
 fn int(s: &str) -> Repr {
-    Repr::from(Integer::from_str(s).unwrap())
+    Repr::int(Int::new(true, 10, s.to_owned()))
 }

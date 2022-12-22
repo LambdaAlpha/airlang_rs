@@ -1,14 +1,11 @@
-use std::str::FromStr;
-
-use crate::grammar::repr::{List, map, Repr};
-use crate::num::Integer;
+use crate::grammar::repr::{Int, Repr};
 
 pub(crate) fn expected() -> Repr {
-    Repr::from(vec![
-        Repr::from(vec![] as List),
-        Repr::from(vec![int("2"), int("5"), int("7")]),
-        Repr::from(map::from([])),
-        Repr::from(map::from([(int("2"), int("5")), (int("12"), int("13"))])),
+    Repr::list(vec![
+        Repr::list(vec![]),
+        Repr::list(vec![int("2"), int("5"), int("7")]),
+        Repr::map(vec![]),
+        Repr::map(vec![(int("2"), int("5")), (int("12"), int("13"))]),
         Repr::ltree(Repr::letter("b".to_owned()), vec![]),
         Repr::infix(
             Repr::letter("b".to_owned()),
@@ -19,5 +16,5 @@ pub(crate) fn expected() -> Repr {
 }
 
 fn int(s: &str) -> Repr {
-    Repr::from(Integer::from_str(s).unwrap())
+    Repr::int(Int::new(true, 10, s.to_owned()))
 }

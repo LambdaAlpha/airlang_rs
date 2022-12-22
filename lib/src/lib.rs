@@ -17,9 +17,7 @@ unused_parens,
 while_true
 )]
 
-use rug as num;
-
-use grammar::repr::{Bytes, Repr};
+use grammar::repr::Repr;
 
 pub fn interpret(src: &str) -> String {
     // todo impl
@@ -30,7 +28,7 @@ pub fn parse(src: &str) -> Repr {
     let result = grammar::parse(src);
     match result {
         Ok(val) => val,
-        Err(_) => Repr::from(vec![] as Bytes),
+        Err(_) => Repr::bytes(vec![]),
     }
 }
 

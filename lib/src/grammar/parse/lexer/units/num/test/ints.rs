@@ -1,4 +1,4 @@
-use crate::num::{Complete, Integer};
+use crate::grammar::repr::Int;
 
 use super::super::Token::{self, *};
 
@@ -6,28 +6,28 @@ pub(crate) fn expected() -> Vec<Token> {
     vec![
         Symbol("+".to_owned()),
         Symbol("-".to_owned()),
-        parse_radix("0", 10),
-        parse_radix("00", 10),
-        parse_radix("+0", 10),
-        parse_radix("-0", 10),
-        parse_radix("123", 10),
-        parse_radix("+123", 10),
-        parse_radix("-123", 10),
-        parse_radix("01", 10),
-        parse_radix("+01", 10),
-        parse_radix("-01", 10),
-        parse_radix("0", 16),
-        parse_radix("00", 16),
-        parse_radix("012345", 16),
-        parse_radix("a0b1c2d3", 16),
-        parse_radix("0", 2),
-        parse_radix("1101", 2),
-        parse_radix("11111111222222223333333344444444", 10),
-        parse_radix("9999999900000000aaaaaaaabbbbbbbbcccccccc", 16),
-        parse_radix("1223334444", 10),
+        int(true, "0", 10),
+        int(true, "00", 10),
+        int(true, "0", 10),
+        int(false, "0", 10),
+        int(true, "123", 10),
+        int(true, "123", 10),
+        int(false, "123", 10),
+        int(true, "01", 10),
+        int(true, "01", 10),
+        int(false, "01", 10),
+        int(true, "0", 16),
+        int(true, "00", 16),
+        int(true, "012345", 16),
+        int(true, "a0b1c2d3", 16),
+        int(true, "0", 2),
+        int(true, "1101", 2),
+        int(true, "11111111222222223333333344444444", 10),
+        int(true, "9999999900000000aaaaaaaabbbbbbbbcccccccc", 16),
+        int(true, "1223334444", 10),
     ]
 }
 
-fn parse_radix(s: &str, radix: i32) -> Token {
-    Int(Integer::parse_radix(s, radix).unwrap().complete())
+fn int(sign: bool, s: &str, radix: u8) -> Token {
+    Int(Int::new(sign, radix, s.to_owned()))
 }

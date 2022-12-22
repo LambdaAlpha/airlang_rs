@@ -13,11 +13,11 @@ fn parse_one(node: InfixNode) -> ParseResult<Repr> {
     match node {
         InfixNode::Atom(a) => match a {
             super::AtomNode::Unit => Ok(Repr::Unit),
-            super::AtomNode::Bool(b) => Ok(Repr::from(b)),
-            super::AtomNode::Int(i) => Ok(Repr::from(i)),
-            super::AtomNode::Float(f) => Ok(Repr::from(f)),
-            super::AtomNode::Bytes(b) => Ok(Repr::from(b)),
-            super::AtomNode::String(s) => Ok(Repr::from(s)),
+            super::AtomNode::Bool(b) => Ok(Repr::bool(b)),
+            super::AtomNode::Int(i) => Ok(Repr::int(i)),
+            super::AtomNode::Float(f) => Ok(Repr::float(f)),
+            super::AtomNode::Bytes(b) => Ok(Repr::bytes(b)),
+            super::AtomNode::String(s) => Ok(Repr::string(s)),
             super::AtomNode::Letter(s) => Ok(Repr::letter(s)),
         },
         InfixNode::Symbol(s) => Ok(Repr::symbol(s)),
@@ -42,15 +42,15 @@ fn parse_list(nodes: Vec<InfixNodes>) -> ParseResult<Repr> {
     for node in nodes {
         list.push(parse_expect_one(node)?);
     }
-    Ok(Repr::from(list))
+    Ok(Repr::list(list))
 }
 
 fn parse_map(nodes: Vec<(InfixNodes, InfixNodes)>) -> ParseResult<Repr> {
-    let mut map = Map::default();
+    let mut map = Map::with_capacity(nodes.len());
     for node in nodes {
-        map.insert(parse_expect_one(node.0)?, parse_expect_one(node.1)?);
+        map.push((parse_expect_one(node.0)?, parse_expect_one(node.1)?));
     }
-    Ok(Repr::from(map))
+    Ok(Repr::map(map))
 }
 
 fn parse_itree(

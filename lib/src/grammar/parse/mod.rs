@@ -1,5 +1,4 @@
-use crate::grammar::repr::Bytes;
-use crate::num::{Float, Integer};
+use crate::grammar::repr::{Bytes, Float, Int};
 
 use super::{ParseError, ParseResult};
 
@@ -14,7 +13,7 @@ pub(crate) mod repr;
 pub(crate) enum AtomNode {
     Unit,
     Bool(bool),
-    Int(Integer),
+    Int(Int),
     Float(Float),
     Bytes(Bytes),
     String(String),

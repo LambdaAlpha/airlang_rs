@@ -1,12 +1,8 @@
 use std::{
     fmt::{Debug, Display},
-    hash::Hash,
 };
 
-use rustc_hash::FxHashMap;
-
 use crate::grammar;
-use crate::num;
 
 #[derive(PartialEq, Clone)]
 pub enum Repr {
@@ -26,11 +22,35 @@ pub enum Repr {
 }
 
 impl Repr {
+    pub fn unit() -> Repr {
+        Repr::Unit
+    }
+    pub fn bool(b: Bool) -> Repr {
+        Repr::Bool(b)
+    }
+    pub fn int(i: Int) -> Repr {
+        Repr::Int(Box::new(i))
+    }
+    pub fn float(f: Float) -> Repr {
+        Repr::Float(Box::new(f))
+    }
     pub fn letter(s: String) -> Repr {
         Repr::Letter(Box::new(s))
     }
     pub fn symbol(s: String) -> Repr {
         Repr::Symbol(Box::new(s))
+    }
+    pub fn string(s: String) -> Repr {
+        Repr::String(Box::new(s))
+    }
+    pub fn bytes(b: Bytes) -> Repr {
+        Repr::Bytes(Box::new(b))
+    }
+    pub fn list(l: List) -> Repr {
+        Repr::List(Box::new(l))
+    }
+    pub fn map(m: Map) -> Repr {
+        Repr::Map(Box::new(m))
     }
     pub fn ltree(root: Repr, leaves: List) -> Repr {
         Repr::Ltree(Box::new(Ltree { root, leaves }))
@@ -121,39 +141,35 @@ impl Debug for Repr {
     }
 }
 
-impl Hash for Repr {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        match self {
-            Repr::Unit => ().hash(state),
-            Repr::Bool(b) => b.hash(state),
-            Repr::Int(i) => i.hash(state),
-            Repr::Float(f) => f.as_ord().hash(state),
-            Repr::String(s) => s.hash(state),
-            Repr::Letter(s) => s.hash(state),
-            Repr::Symbol(s) => s.hash(state),
-            Repr::Bytes(b) => b.hash(state),
-            Repr::List(l) => l.hash(state),
-            Repr::Map(m) => {
-                for i in m.iter() {
-                    i.hash(state);
-                }
-            }
-            Repr::Ltree(lt) => lt.hash(state),
-            Repr::Mtree(mt) => mt.hash(state),
-            Repr::Infix(i) => i.hash(state),
-        }
+pub type Bool = bool;
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Int {
+    pub sign: bool,
+    pub radix: u8,
+    pub digits: std::string::String,
+}
+
+impl Int {
+    pub fn new(sign: bool, radix: u8, digits: String) -> Self {
+        Self { sign, radix, digits }
     }
 }
 
-impl Eq for Repr {
-    fn assert_receiver_is_total_eq(&self) {}
+#[derive(Debug, PartialEq, Clone)]
+pub struct Float {
+    pub sign: bool,
+    pub integral: std::string::String,
+    pub fractional: std::string::String,
+    pub exp_sign: bool,
+    pub exp_digits: std::string::String,
 }
 
-pub type Bool = bool;
-
-pub type Int = num::Integer;
-
-pub type Float = num::Float;
+impl Float {
+    pub fn new(sign: bool, integral: String, fractional: String, exp_sign: bool, exp_digits: String) -> Self {
+        Self { sign, integral, fractional, exp_sign, exp_digits }
+    }
+}
 
 pub type String = std::string::String;
 
@@ -161,56 +177,41 @@ pub type Bytes = Vec<u8>;
 
 pub type List = Vec<Repr>;
 
-pub type Map = FxHashMap<Repr, Repr>;
+pub type Map = Vec<(Repr, Repr)>;
 
-pub mod map {
-    use super::{Map, Repr};
-
-    pub fn from<const N: usize>(pairs: [(Repr, Repr); N]) -> Map {
-        let mut map = Map::default();
-        for pair in pairs {
-            map.insert(pair.0, pair.1);
-        }
-        map
-    }
-}
-
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Ltree {
     pub root: Repr,
     pub leaves: List,
 }
 
 impl Ltree {
-    pub fn new(root: Repr, leaves: List) -> Ltree {
-        Ltree { root, leaves }
+    pub fn new(root: Repr, leaves: List) -> Self {
+        Self { root, leaves }
     }
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Mtree {
     pub root: Repr,
     pub leaves: Map,
 }
 
 impl Mtree {
-    pub fn new(root: Repr, leaves: Map) -> Mtree {
-        Mtree { root, leaves }
+    pub fn new(root: Repr, leaves: Map) -> Self {
+        Self { root, leaves }
     }
 }
 
-impl Hash for Mtree {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.root.hash(state);
-        for i in self.leaves.iter() {
-            i.hash(state);
-        }
-    }
-}
-
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Infix {
     pub infix: Repr,
     pub left: Repr,
     pub right: Repr,
+}
+
+impl Infix {
+    pub fn new(infix: Repr, left: Repr, right: Repr) -> Self {
+        Self { infix, left, right }
+    }
 }

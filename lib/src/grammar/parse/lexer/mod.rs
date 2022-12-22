@@ -1,7 +1,6 @@
 use regex::{Captures, Regex};
 
-use crate::grammar::repr::Bytes;
-use crate::num::{Float, Integer};
+use crate::grammar::repr::{Bytes, Float, Int};
 
 use super::{ParseError, ParseResult};
 use super::AtomNode;
@@ -45,7 +44,7 @@ pub(crate) enum Token {
     Delimiter(String),
     Unit,
     Bool(bool),
-    Int(Integer),
+    Int(Int),
     Float(Float),
     Symbol(String),
     Letter(String),

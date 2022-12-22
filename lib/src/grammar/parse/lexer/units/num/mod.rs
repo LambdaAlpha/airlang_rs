@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::num::{Complete, Float, Integer, ops::CompleteRound};
+use crate::grammar::repr::{Float, Int};
 
 use super::super::{ParseResult, Token, UnitLexer};
 
@@ -25,7 +25,6 @@ impl NumLexer {
         (?P<dec>[0-9](?:[0-9_]*[0-9])?) # decimal
         ((?P<point>\.)(?P<frac>[0-9](?:[0-9_]*[0-9])?)?)? # fraction
         ([eE](?P<exp_sign>[+\\-]?)(?P<exp>[0-9](?:[0-9_]*[0-9])?))? #exponent
-        ([pP](?P<prec>[0-9](?:[0-9_]*[0-9])?))? # precision
         )
         |
         (?P<symbol>[+\\-])
@@ -45,21 +44,19 @@ impl UnitLexer for NumLexer {
             return Ok(Token::Symbol(symbol.as_str().to_owned()));
         }
         let sign = captures.name("sign").unwrap().as_str();
-        let sign = if sign == "-" { "-" } else { "+" };
+        let sign = sign != "-";
 
         if let Some(binary) = captures.name("bin") {
             let binary = binary.as_str().replace("_", "");
-            let binary = format!("{sign}{binary}");
             return Ok(Token::Int(
-                Integer::parse_radix(binary.as_str(), 2).unwrap().complete(),
+                Int::new(sign, 2, binary),
             ));
         }
 
         if let Some(hex) = captures.name("hex") {
             let hex = hex.as_str().replace("_", "");
-            let hex = format!("{sign}{hex}");
             return Ok(Token::Int(
-                Integer::parse_radix(hex.as_str(), 16).unwrap().complete(),
+                Int::new(sign, 16, hex),
             ));
         }
 
@@ -73,21 +70,16 @@ impl UnitLexer for NumLexer {
         if point != None || exponent != None || precision != None {
             let fraction = fraction.map_or("".to_owned(), |m| m.as_str().replace("_", ""));
             let exponent = exponent.map_or("0".to_owned(), |m| m.as_str().replace("_", ""));
-            let exp_sign = exp_sign.map_or("+".to_owned(), |m| {
-                if m.as_str() == "-" { "-" } else { "+" }.to_owned()
+            let exp_sign = exp_sign.map_or(true, |m| {
+                m.as_str() != "-"
             });
-            let num = format!("{sign}{decimal}.{fraction}e{exp_sign}{exponent}");
-            // todo default precision algorithm
-            let precision = precision.map_or("53".to_owned(), |m| m.as_str().replace("_", ""));
-            let precision = u32::from_str_radix(precision.as_str(), 10).unwrap();
 
             Ok(Token::Float(
-                Float::parse(num.as_str()).unwrap().complete(precision),
+                Float::new(sign, decimal, fraction, exp_sign, exponent)
             ))
         } else {
-            let decimal = format!("{sign}{decimal}");
             Ok(Token::Int(
-                Integer::parse(decimal.as_str()).unwrap().complete(),
+                Int::new(sign, 10, decimal)
             ))
         }
     }
