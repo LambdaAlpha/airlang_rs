@@ -26,8 +26,6 @@ impl NumLexer {
         ((?P<point>\.)(?P<frac>[0-9](?:[0-9_]*[0-9])?)?)? # fraction
         ([eE](?P<exp_sign>[+\\-]?)(?P<exp>[0-9](?:[0-9_]*[0-9])?))? #exponent
         )
-        |
-        (?P<symbol>[+\\-])
         ",
             )
                 .unwrap(),
@@ -40,9 +38,6 @@ impl UnitLexer for NumLexer {
         &self.pattern
     }
     fn lexing(&self, captures: &regex::Captures) -> ParseResult<Token> {
-        if let Some(symbol) = captures.name("symbol") {
-            return Ok(Token::Symbol(symbol.as_str().to_owned()));
-        }
         let sign = captures.name("sign").unwrap().as_str();
         let sign = sign != "-";
 

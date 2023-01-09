@@ -13,7 +13,7 @@ mod stringify;
 #[cfg(test)]
 mod test;
 
-const SYMBOL_PREFIX: &str = "'";
+const PRESERVE_PREFIX: &str = "'";
 
 const SEPARATOR: &str = ",";
 const MAP_KV_SEPARATOR: &str = ":";

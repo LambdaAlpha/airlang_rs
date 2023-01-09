@@ -4,8 +4,6 @@ use super::super::Token::{self, *};
 
 pub(crate) fn expected() -> Vec<Token> {
     vec![
-        Symbol("+".to_owned()),
-        Symbol("-".to_owned()),
         int(true, "0", 10),
         int(true, "00", 10),
         int(true, "0", 10),

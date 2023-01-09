@@ -53,7 +53,7 @@ pub(crate) enum Token {
 }
 
 pub(crate) trait LexerConfig {
-    fn dispatch_char(&self, c: char) -> ParseResult<&dyn UnitLexer>;
+    fn dispatch_char(&self, c: char, next: Option<char>) -> ParseResult<&dyn UnitLexer>;
 }
 
 pub(crate) trait UnitLexer {
@@ -68,7 +68,7 @@ fn lexing(src: &str) -> ParseResult<Vec<Token>> {
     while !rest.is_empty() {
         let first = rest.chars().next().unwrap();
 
-        let lexer = config.dispatch_char(first)?;
+        let lexer = config.dispatch_char(first, rest.chars().nth(1))?;
 
         let captures = lexer.pattern().captures(rest);
         if captures.is_none() {
