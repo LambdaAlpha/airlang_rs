@@ -1,14 +1,29 @@
-use std::fmt::Write;
-
-use crate::{
-    grammar::repr::{Bytes, Float, Infix, List, Ltree, Map, Mtree, Repr},
-    utils,
-};
-use crate::grammar::repr::Int;
-
-use super::{
-    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, SEPARATOR,
-    WRAP_LEFT, WRAP_RIGHT,
+use {
+    super::{
+        LIST_LEFT,
+        LIST_RIGHT,
+        MAP_KV_SEPARATOR,
+        MAP_LEFT,
+        MAP_RIGHT,
+        SEPARATOR,
+        WRAP_LEFT,
+        WRAP_RIGHT,
+    },
+    crate::{
+        grammar::repr::{
+            Bytes,
+            Float,
+            Infix,
+            Int,
+            List,
+            Ltree,
+            Map,
+            Mtree,
+            Repr,
+        },
+        utils,
+    },
+    std::fmt::Write,
 };
 
 const INDENT: &str = "  ";

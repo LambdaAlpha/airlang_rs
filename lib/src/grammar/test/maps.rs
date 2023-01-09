@@ -1,4 +1,7 @@
-use crate::grammar::repr::{Int, Repr};
+use crate::grammar::repr::{
+    Int,
+    Repr,
+};
 
 pub(crate) fn expected() -> Repr {
     Repr::list(vec![
@@ -7,10 +10,7 @@ pub(crate) fn expected() -> Repr {
         Repr::map(vec![(int("1"), int("2"))]),
         Repr::map(vec![(int("1"), int("2")), (int("3"), int("4"))]),
         Repr::map(vec![(int("1"), int("2")), (int("3"), int("4"))]),
-        Repr::map(vec![(
-            Repr::map(vec![]),
-            Repr::map(vec![]),
-        )]),
+        Repr::map(vec![(Repr::map(vec![]), Repr::map(vec![]))]),
         Repr::map(vec![(
             Repr::map(vec![(int("1"), int("2"))]),
             Repr::map(vec![(int("3"), int("4"))]),

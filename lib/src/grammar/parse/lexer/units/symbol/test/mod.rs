@@ -1,7 +1,12 @@
-use super::{ParseResult, super::test::test_unit_lexing, SymbolLexer, Token};
+use crate::grammar::{
+    parse::lexer::units::{
+        symbol::SymbolLexer,
+        test::test_unit_lexing,
+    },
+    ParseResult,
+};
 
 mod symbols;
-
 
 #[test]
 fn test_lexing_symbols() -> ParseResult<()> {
@@ -11,5 +16,3 @@ fn test_lexing_symbols() -> ParseResult<()> {
         symbols::expected,
     )
 }
-
-

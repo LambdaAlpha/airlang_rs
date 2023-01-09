@@ -1,4 +1,7 @@
-use super::Token::{self, *};
+use crate::grammar::parse::lexer::{
+    Token,
+    Token::Symbol,
+};
 
 pub(crate) fn expected() -> Vec<Token> {
     vec![

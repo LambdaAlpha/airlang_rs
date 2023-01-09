@@ -1,8 +1,11 @@
+use criterion::{
+    criterion_group,
+    criterion_main,
+};
+
 mod eval;
 mod interpret;
 mod parse;
-
-use criterion::{criterion_group, criterion_main};
 
 criterion_group!(
     benches,

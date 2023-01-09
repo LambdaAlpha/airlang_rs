@@ -1,4 +1,10 @@
-use super::{NumLexer, ParseResult, super::test::test_unit_lexing};
+use crate::grammar::{
+    parse::lexer::units::{
+        num::NumLexer,
+        test::test_unit_lexing,
+    },
+    ParseResult,
+};
 
 mod floats;
 mod ints;

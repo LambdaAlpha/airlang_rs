@@ -1,9 +1,13 @@
-use regex::Regex;
-
-use crate::grammar::lexer::ParseResult;
-
-use super::super::Token;
-use super::super::UnitLexer;
+use {
+    crate::grammar::{
+        lexer::ParseResult,
+        parse::lexer::{
+            Token,
+            UnitLexer,
+        },
+    },
+    regex::Regex,
+};
 
 #[cfg(test)]
 mod test;

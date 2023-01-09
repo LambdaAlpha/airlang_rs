@@ -1,6 +1,10 @@
-use std::io::{self, Write};
-
-use airlang;
+use {
+    airlang,
+    std::io::{
+        self,
+        Write,
+    },
+};
 
 pub fn repl() {
     print_version();

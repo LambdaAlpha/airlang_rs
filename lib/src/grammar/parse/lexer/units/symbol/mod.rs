@@ -1,10 +1,14 @@
-use regex::Regex;
-
-use crate::grammar::ParseResult;
-use crate::grammar::PRESERVE_PREFIX;
-
-use super::super::Token;
-use super::super::UnitLexer;
+use {
+    crate::grammar::{
+        parse::lexer::{
+            Token,
+            UnitLexer,
+        },
+        ParseResult,
+        PRESERVE_PREFIX,
+    },
+    regex::Regex,
+};
 
 #[cfg(test)]
 mod test;

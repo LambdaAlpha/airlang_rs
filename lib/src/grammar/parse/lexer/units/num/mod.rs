@@ -1,8 +1,17 @@
-use regex::Regex;
-
-use crate::grammar::repr::{Float, Int};
-
-use super::super::{ParseResult, Token, UnitLexer};
+use {
+    crate::grammar::{
+        parse::lexer::{
+            Token,
+            UnitLexer,
+        },
+        repr::{
+            Float,
+            Int,
+        },
+        ParseResult,
+    },
+    regex::Regex,
+};
 
 #[cfg(test)]
 mod test;
@@ -28,7 +37,7 @@ impl NumLexer {
         )
         ",
             )
-                .unwrap(),
+            .unwrap(),
         }
     }
 }
@@ -43,16 +52,12 @@ impl UnitLexer for NumLexer {
 
         if let Some(binary) = captures.name("bin") {
             let binary = binary.as_str().replace("_", "");
-            return Ok(Token::Int(
-                Int::new(sign, 2, binary),
-            ));
+            return Ok(Token::Int(Int::new(sign, 2, binary)));
         }
 
         if let Some(hex) = captures.name("hex") {
             let hex = hex.as_str().replace("_", "");
-            return Ok(Token::Int(
-                Int::new(sign, 16, hex),
-            ));
+            return Ok(Token::Int(Int::new(sign, 16, hex)));
         }
 
         let decimal = captures.name("dec").unwrap().as_str().replace("_", "");
@@ -65,17 +70,13 @@ impl UnitLexer for NumLexer {
         if point != None || exponent != None || precision != None {
             let fraction = fraction.map_or("".to_owned(), |m| m.as_str().replace("_", ""));
             let exponent = exponent.map_or("0".to_owned(), |m| m.as_str().replace("_", ""));
-            let exp_sign = exp_sign.map_or(true, |m| {
-                m.as_str() != "-"
-            });
+            let exp_sign = exp_sign.map_or(true, |m| m.as_str() != "-");
 
-            Ok(Token::Float(
-                Float::new(sign, decimal, fraction, exp_sign, exponent)
-            ))
+            Ok(Token::Float(Float::new(
+                sign, decimal, fraction, exp_sign, exponent,
+            )))
         } else {
-            Ok(Token::Int(
-                Int::new(sign, 10, decimal)
-            ))
+            Ok(Token::Int(Int::new(sign, 10, decimal)))
         }
     }
 }

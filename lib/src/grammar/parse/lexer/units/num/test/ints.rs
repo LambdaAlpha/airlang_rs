@@ -1,6 +1,10 @@
-use crate::grammar::repr::Int;
-
-use super::super::Token::{self, *};
+use crate::{
+    grammar,
+    grammar::parse::lexer::{
+        Token,
+        Token::Int,
+    },
+};
 
 pub(crate) fn expected() -> Vec<Token> {
     vec![
@@ -27,5 +31,5 @@ pub(crate) fn expected() -> Vec<Token> {
 }
 
 fn int(sign: bool, s: &str, radix: u8) -> Token {
-    Int(Int::new(sign, radix, s.to_owned()))
+    Int(grammar::repr::Int::new(sign, radix, s.to_owned()))
 }

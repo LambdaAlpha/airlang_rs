@@ -1,11 +1,22 @@
-use regex::{Captures, Regex};
-
-use crate::grammar::repr::{Bytes, Float, Int};
-
-use super::{ParseError, ParseResult};
-use super::AtomNode;
-
-use self::config::AirLexerConfig;
+use {
+    crate::grammar::{
+        parse::{
+            lexer::config::AirLexerConfig,
+            AtomNode,
+        },
+        repr::{
+            Bytes,
+            Float,
+            Int,
+        },
+        ParseError,
+        ParseResult,
+    },
+    regex::{
+        Captures,
+        Regex,
+    },
+};
 
 mod config;
 #[cfg(test)]

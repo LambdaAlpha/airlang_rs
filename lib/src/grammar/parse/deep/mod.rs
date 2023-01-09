@@ -1,12 +1,22 @@
-use std::vec::IntoIter;
-
-use crate::grammar::{
-    LIST_LEFT, LIST_RIGHT, MAP_KV_SEPARATOR, MAP_LEFT, MAP_RIGHT, ParseError, ParseResult,
-    SEPARATOR, WRAP_LEFT, WRAP_RIGHT,
+use {
+    crate::grammar::{
+        parse::{
+            lexer::FlatNode,
+            AtomNode,
+        },
+        ParseError,
+        ParseResult,
+        LIST_LEFT,
+        LIST_RIGHT,
+        MAP_KV_SEPARATOR,
+        MAP_LEFT,
+        MAP_RIGHT,
+        SEPARATOR,
+        WRAP_LEFT,
+        WRAP_RIGHT,
+    },
+    std::vec::IntoIter,
 };
-
-use super::AtomNode;
-use super::lexer::FlatNode;
 
 #[derive(Debug)]
 pub(crate) enum DeepNode {

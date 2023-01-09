@@ -1,6 +1,11 @@
 use crate::grammar::{
-    parse::lexer::{Token, UnitLexer, units::delimiter::DelimiterLexer},
-    ParseError, ParseResult,
+    parse::lexer::{
+        units::delimiter::DelimiterLexer,
+        Token,
+        UnitLexer,
+    },
+    ParseError,
+    ParseResult,
 };
 
 pub(crate) fn test_unit_lexing(

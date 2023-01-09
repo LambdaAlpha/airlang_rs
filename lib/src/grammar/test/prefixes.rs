@@ -1,4 +1,7 @@
-use crate::grammar::repr::{Int, Repr};
+use crate::grammar::repr::{
+    Int,
+    Repr,
+};
 
 pub(crate) fn expected() -> Repr {
     Repr::list(vec![

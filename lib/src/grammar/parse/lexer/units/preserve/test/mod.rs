@@ -1,6 +1,10 @@
-use crate::grammar::parse::lexer::units::preserve::PreserveLexer;
-
-use super::{ParseResult, super::test::test_unit_lexing, Token};
+use crate::grammar::{
+    parse::lexer::units::{
+        preserve::PreserveLexer,
+        test::test_unit_lexing,
+    },
+    ParseResult,
+};
 
 mod booleans;
 mod bytes;

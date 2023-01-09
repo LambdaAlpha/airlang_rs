@@ -1,4 +1,7 @@
-use std::{fmt::Write, num::ParseIntError};
+use std::{
+    fmt::Write,
+    num::ParseIntError,
+};
 
 pub(crate) fn hex_str_to_vec_u8(s: &str) -> Result<Vec<u8>, ParseIntError> {
     (0..s.len())

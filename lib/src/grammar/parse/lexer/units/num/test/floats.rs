@@ -1,6 +1,7 @@
-use crate::grammar::repr::Float;
-
-use super::super::Token;
+use crate::grammar::{
+    parse::lexer::Token,
+    repr::Float,
+};
 
 pub(crate) fn expected() -> Vec<Token> {
     vec![
@@ -16,5 +17,11 @@ pub(crate) fn expected() -> Vec<Token> {
 }
 
 fn float(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digits: &str) -> Token {
-    Token::Float(Float::new(sign, integral.to_owned(), fractional.to_owned(), exp_sign, exp_digits.to_owned()))
+    Token::Float(Float::new(
+        sign,
+        integral.to_owned(),
+        fractional.to_owned(),
+        exp_sign,
+        exp_digits.to_owned(),
+    ))
 }

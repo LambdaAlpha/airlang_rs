@@ -1,6 +1,9 @@
-use crate::grammar::{parse, ParseError, repr::Repr};
-
-use super::ParseResult;
+use crate::grammar::{
+    parse,
+    repr::Repr,
+    ParseError,
+    ParseResult,
+};
 
 mod infixes;
 mod lists;

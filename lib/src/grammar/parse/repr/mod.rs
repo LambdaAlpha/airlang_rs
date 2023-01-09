@@ -1,9 +1,16 @@
 use crate::grammar::{
+    parse::infix::{
+        InfixNode,
+        InfixNodes,
+    },
+    repr::{
+        List,
+        Map,
+        Repr,
+    },
     ParseError,
-    ParseResult, repr::{List, Map, Repr},
+    ParseResult,
 };
-
-use super::infix::{InfixNode, InfixNodes};
 
 pub(crate) fn parse(infix_nodes: InfixNodes) -> ParseResult<Repr> {
     parse_expect_one(infix_nodes)

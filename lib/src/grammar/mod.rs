@@ -1,11 +1,23 @@
-use std::fmt::Display;
-
 #[allow(unused_imports)]
 #[allow(dead_code)]
-pub(crate) use stringify::{stringify_comfort, stringify_compat, stringify_pretty};
-
-use self::parse::{deep, infix, lexer, postfix, prefix};
-use self::repr::Repr;
+pub(crate) use stringify::{
+    stringify_comfort,
+    stringify_compat,
+    stringify_pretty,
+};
+use {
+    crate::grammar::{
+        parse::{
+            deep,
+            infix,
+            lexer,
+            postfix,
+            prefix,
+        },
+        repr::Repr,
+    },
+    std::fmt::Display,
+};
 
 mod parse;
 pub mod repr;

@@ -1,10 +1,14 @@
-use regex::Regex;
-
-use crate::grammar::lexer::ParseResult;
-
-use super::super::ParseError;
-use super::super::Token;
-use super::super::UnitLexer;
+use {
+    crate::grammar::{
+        lexer::ParseResult,
+        parse::lexer::{
+            Token,
+            UnitLexer,
+        },
+        ParseError,
+    },
+    regex::Regex,
+};
 
 #[cfg(test)]
 mod test;
@@ -30,7 +34,7 @@ impl StringLexer {
         \"
         ",
             )
-                .unwrap(),
+            .unwrap(),
             delimiter_pattern: Regex::new("[ \\t\\r\\n]*[\\t\\r\\n]+[ \\t\\r\\n]*").unwrap(),
         }
     }

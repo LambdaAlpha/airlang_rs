@@ -1,6 +1,8 @@
-use crate::grammar::repr::{Bytes, Float, Int};
-
-use super::{ParseError, ParseResult};
+use crate::grammar::repr::{
+    Bytes,
+    Float,
+    Int,
+};
 
 pub(crate) mod deep;
 pub(crate) mod infix;

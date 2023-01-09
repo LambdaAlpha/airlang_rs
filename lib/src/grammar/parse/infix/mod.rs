@@ -1,8 +1,14 @@
-use crate::grammar::{ParseError, ParseResult};
-use crate::grammar::parse::postfix::PostfixNode;
-
-use super::AtomNode;
-use super::postfix::PostfixNodes;
+use crate::grammar::{
+    parse::{
+        postfix::{
+            PostfixNode,
+            PostfixNodes,
+        },
+        AtomNode,
+    },
+    ParseError,
+    ParseResult,
+};
 
 #[derive(Debug)]
 pub(crate) enum InfixNode {

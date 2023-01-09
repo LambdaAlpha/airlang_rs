@@ -17,18 +17,9 @@ pub(crate) fn expected() -> Repr {
                 Repr::mtree(Repr::letter("c".to_owned()), vec![]),
             )],
         ),
-        Repr::mtree(
-            Repr::mtree(Repr::letter("a".to_owned()), vec![]),
-            vec![],
-        ),
+        Repr::mtree(Repr::mtree(Repr::letter("a".to_owned()), vec![]), vec![]),
         Repr::mtree(Repr::map(vec![]), vec![]),
-        Repr::mtree(
-            Repr::ltree(Repr::letter("a".to_owned()), vec![]),
-            vec![],
-        ),
-        Repr::ltree(
-            Repr::mtree(Repr::letter("a".to_owned()), vec![]),
-            vec![],
-        ),
+        Repr::mtree(Repr::ltree(Repr::letter("a".to_owned()), vec![]), vec![]),
+        Repr::ltree(Repr::mtree(Repr::letter("a".to_owned()), vec![]), vec![]),
     ])
 }

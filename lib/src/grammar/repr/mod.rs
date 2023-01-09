@@ -1,8 +1,10 @@
-use std::{
-    fmt::{Debug, Display},
+use {
+    crate::grammar,
+    std::fmt::{
+        Debug,
+        Display,
+    },
 };
-
-use crate::grammar;
 
 #[derive(PartialEq, Clone)]
 pub enum Repr {
@@ -154,7 +156,11 @@ pub struct Int {
 
 impl Int {
     pub fn new(sign: bool, radix: u8, digits: String) -> Self {
-        Self { sign, radix, digits }
+        Self {
+            sign,
+            radix,
+            digits,
+        }
     }
 }
 
@@ -168,8 +174,20 @@ pub struct Float {
 }
 
 impl Float {
-    pub fn new(sign: bool, integral: String, fractional: String, exp_sign: bool, exp_digits: String) -> Self {
-        Self { sign, integral, fractional, exp_sign, exp_digits }
+    pub fn new(
+        sign: bool,
+        integral: String,
+        fractional: String,
+        exp_sign: bool,
+        exp_digits: String,
+    ) -> Self {
+        Self {
+            sign,
+            integral,
+            fractional,
+            exp_sign,
+            exp_digits,
+        }
     }
 }
 

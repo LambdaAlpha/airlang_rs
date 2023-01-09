@@ -1,4 +1,7 @@
-use super::{ParseResult, Token};
+use crate::grammar::{
+    parse::lexer::Token,
+    ParseResult,
+};
 
 mod tokens;
 

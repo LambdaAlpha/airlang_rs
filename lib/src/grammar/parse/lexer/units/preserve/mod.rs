@@ -1,11 +1,17 @@
-use regex::Regex;
-
-use crate::grammar::lexer::ParseResult;
-use crate::grammar::PRESERVE_PREFIX;
-use crate::utils;
-
-use super::super::Token;
-use super::super::UnitLexer;
+use {
+    crate::{
+        grammar::{
+            lexer::ParseResult,
+            parse::lexer::{
+                Token,
+                UnitLexer,
+            },
+            PRESERVE_PREFIX,
+        },
+        utils,
+    },
+    regex::Regex,
+};
 
 #[cfg(test)]
 mod test;
@@ -26,7 +32,8 @@ impl PreserveLexer {
                 {0}(?P<unit>u)
                 ",
                 PRESERVE_PREFIX
-            )).unwrap(),
+            ))
+            .unwrap(),
         }
     }
 }

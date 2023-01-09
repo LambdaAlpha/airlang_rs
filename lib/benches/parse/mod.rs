@@ -1,6 +1,10 @@
-use criterion::{black_box, Criterion};
-
-use airlang::parse;
+use {
+    airlang::parse,
+    criterion::{
+        black_box,
+        Criterion,
+    },
+};
 
 pub(crate) fn bench_parse(c: &mut Criterion) {
     c.bench_function("parse", |b| {

@@ -1,11 +1,18 @@
-use crate::grammar::parse::lexer::units::preserve::PreserveLexer;
-
-use super::{
-    LexerConfig,
-    ParseError, ParseResult, UnitLexer, units::{
-        delimiter::DelimiterLexer, letter::LetterLexer, num::NumLexer, string::StringLexer,
-        symbol::SymbolLexer,
+use crate::grammar::{
+    parse::lexer::{
+        units::{
+            delimiter::DelimiterLexer,
+            letter::LetterLexer,
+            num::NumLexer,
+            preserve::PreserveLexer,
+            string::StringLexer,
+            symbol::SymbolLexer,
+        },
+        LexerConfig,
+        UnitLexer,
     },
+    ParseError,
+    ParseResult,
 };
 
 pub(crate) struct AirLexerConfig {
