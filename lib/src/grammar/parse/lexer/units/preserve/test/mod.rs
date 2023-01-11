@@ -7,7 +7,6 @@ use crate::grammar::{
 };
 
 mod booleans;
-mod bytes;
 mod units;
 
 #[test]
@@ -25,14 +24,5 @@ fn test_lexing_booleans() -> ParseResult<()> {
         include_str!("./booleans.air"),
         &PreserveLexer::new(),
         booleans::expected,
-    )
-}
-
-#[test]
-fn test_lexing_bytes() -> ParseResult<()> {
-    test_unit_lexing(
-        include_str!("./bytes.air"),
-        &PreserveLexer::new(),
-        bytes::expected,
     )
 }

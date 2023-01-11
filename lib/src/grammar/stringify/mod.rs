@@ -1,14 +1,4 @@
 use {
-    super::{
-        LIST_LEFT,
-        LIST_RIGHT,
-        MAP_KV_SEPARATOR,
-        MAP_LEFT,
-        MAP_RIGHT,
-        SEPARATOR,
-        WRAP_LEFT,
-        WRAP_RIGHT,
-    },
     crate::{
         grammar::repr::{
             Bytes,
@@ -24,6 +14,16 @@ use {
         utils,
     },
     std::fmt::Write,
+    super::{
+        LIST_LEFT,
+        LIST_RIGHT,
+        MAP_KV_SEPARATOR,
+        MAP_LEFT,
+        MAP_RIGHT,
+        SEPARATOR,
+        WRAP_LEFT,
+        WRAP_RIGHT,
+    },
 };
 
 const INDENT: &str = "  ";
@@ -168,7 +168,7 @@ fn stringify_symbol(str: &String, s: &mut String) {
 }
 
 fn stringify_bytes(bytes: &Bytes, s: &mut String) {
-    s.push('\'');
+    s.push_str("1x");
     utils::conversion::u8_array_to_hex_string_mut(bytes, s);
 }
 

@@ -1,14 +1,17 @@
 use {
-    crate::grammar::{
-        parse::lexer::{
-            Token,
-            UnitLexer,
+    crate::{
+        grammar::{
+            parse::lexer::{
+                Token,
+                UnitLexer,
+            },
+            repr::{
+                Float,
+                Int,
+            },
+            ParseResult,
         },
-        repr::{
-            Float,
-            Int,
-        },
-        ParseResult,
+        utils,
     },
     regex::Regex,
 };
@@ -25,6 +28,10 @@ impl NumLexer {
         NumLexer {
             pattern: Regex::new(
                 r"(?x)
+        1[bB](?P<bytes_bin>(?:[01]{8}|_)*)
+        |
+        1[xX](?P<bytes_hex>(?:[0-9a-fA-F]{2}|_)*)
+        |
         (?P<sign>[+\\-]?)
         (?:
         0[bB](?P<bin>[01](?:[01_]*[01])?) # binary
@@ -47,6 +54,20 @@ impl UnitLexer for NumLexer {
         &self.pattern
     }
     fn lexing(&self, captures: &regex::Captures) -> ParseResult<Token> {
+        let bytes_bin = captures.name("bytes_bin");
+        if bytes_bin.is_some() {
+            let bin = bytes_bin.unwrap().as_str().replace("_", "");
+            let bytes = utils::conversion::bin_str_to_vec_u8(bin.as_str()).unwrap();
+            return Ok(Token::Bytes(bytes));
+        }
+
+        let bytes_hex = captures.name("bytes_hex");
+        if bytes_hex.is_some() {
+            let hex = bytes_hex.unwrap().as_str().replace("_", "");
+            let bytes = utils::conversion::hex_str_to_vec_u8(hex.as_str()).unwrap();
+            return Ok(Token::Bytes(bytes));
+        }
+
         let sign = captures.name("sign").unwrap().as_str();
         let sign = sign != "-";
 

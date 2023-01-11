@@ -78,12 +78,15 @@ fn lexing(src: &str) -> ParseResult<Vec<Token>> {
     let mut rest = &src[..];
     while !rest.is_empty() {
         let first = rest.chars().next().unwrap();
+        let next = rest.chars().nth(1);
 
-        let lexer = config.dispatch_char(first, rest.chars().nth(1))?;
+        let lexer = config.dispatch_char(first, next)?;
 
         let captures = lexer.pattern().captures(rest);
         if captures.is_none() {
-            return ParseError::err("pattern matching failed".to_owned());
+            return ParseError::err(format!(
+                "pattern matching failed on first: {first}, next: {next:?}"
+            ));
         }
         let captures = captures.unwrap();
 

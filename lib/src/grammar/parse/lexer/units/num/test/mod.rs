@@ -8,6 +8,7 @@ use crate::grammar::{
 
 mod floats;
 mod ints;
+mod bytes;
 
 #[test]
 fn test_lexing_ints() -> ParseResult<()> {
@@ -20,5 +21,14 @@ fn test_lexing_floats() -> ParseResult<()> {
         include_str!("./floats.air"),
         &NumLexer::new(),
         floats::expected,
+    )
+}
+
+#[test]
+fn test_lexing_bytes() -> ParseResult<()> {
+    test_unit_lexing(
+        include_str!("./bytes.air"),
+        &NumLexer::new(),
+        bytes::expected,
     )
 }
