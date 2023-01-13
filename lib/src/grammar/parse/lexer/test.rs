@@ -13,6 +13,6 @@ fn test_lexing<F: Fn() -> Vec<Token>>(src: &str, f: F) -> ParseResult<()> {
 
 #[test]
 fn test_lexing_tokens() -> ParseResult<()> {
-    let src = include_str!("./tokens.air");
+    let src = include_str!("./test/tokens.air");
     test_lexing(src, tokens::expected)
 }

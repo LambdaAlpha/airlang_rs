@@ -11,7 +11,7 @@ mod letters;
 #[test]
 fn test_lexing_letters() -> ParseResult<()> {
     test_unit_lexing(
-        include_str!("./letters.air"),
+        include_str!("./test/letters.air"),
         &LetterLexer::new(),
         letters::expected,
     )

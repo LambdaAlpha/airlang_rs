@@ -5,11 +5,11 @@ use {
                 Token,
                 UnitLexer,
             },
+            ParseResult,
             repr::{
                 Float,
                 Int,
             },
-            ParseResult,
         },
         utils,
     },

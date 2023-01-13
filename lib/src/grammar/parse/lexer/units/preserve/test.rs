@@ -12,7 +12,7 @@ mod units;
 #[test]
 fn test_lexing_units() -> ParseResult<()> {
     test_unit_lexing(
-        include_str!("./units.air"),
+        include_str!("./test/units.air"),
         &PreserveLexer::new(),
         units::expected,
     )
@@ -21,7 +21,7 @@ fn test_lexing_units() -> ParseResult<()> {
 #[test]
 fn test_lexing_booleans() -> ParseResult<()> {
     test_unit_lexing(
-        include_str!("./booleans.air"),
+        include_str!("./test/booleans.air"),
         &PreserveLexer::new(),
         booleans::expected,
     )

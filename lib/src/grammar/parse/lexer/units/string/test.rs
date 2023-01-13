@@ -11,7 +11,7 @@ mod strings;
 #[test]
 fn test_lexing_strings() -> ParseResult<()> {
     test_unit_lexing(
-        include_str!("./strings.air"),
+        include_str!("./test/strings.air"),
         &StringLexer::new(),
         strings::expected,
     )

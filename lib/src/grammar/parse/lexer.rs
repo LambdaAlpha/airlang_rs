@@ -1,16 +1,16 @@
 use {
     crate::grammar::{
         parse::{
-            lexer::config::AirLexerConfig,
             AtomNode,
+            lexer::config::AirLexerConfig,
         },
+        ParseError,
+        ParseResult,
         repr::{
             Bytes,
             Float,
             Int,
         },
-        ParseError,
-        ParseResult,
     },
     regex::{
         Captures,

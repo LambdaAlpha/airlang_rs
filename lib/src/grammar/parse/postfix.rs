@@ -1,10 +1,10 @@
 use crate::grammar::{
     parse::{
+        AtomNode,
         prefix::{
             PrefixNode,
             PrefixNodes,
         },
-        AtomNode,
     },
     ParseResult,
 };

@@ -13,31 +13,31 @@ mod prefixes;
 
 #[test]
 fn test_parse_lists() -> ParseResult<()> {
-    let src = include_str!("./lists.air");
+    let src = include_str!("./test/lists.air");
     test_parse(src, lists::expected)
 }
 
 #[test]
 fn test_parse_maps() -> ParseResult<()> {
-    let src = include_str!("./maps.air");
+    let src = include_str!("./test/maps.air");
     test_parse(src, maps::expected)
 }
 
 #[test]
 fn test_parse_prefixes() -> ParseResult<()> {
-    let src = include_str!("./prefixes.air");
+    let src = include_str!("./test/prefixes.air");
     test_parse(src, prefixes::expected)
 }
 
 #[test]
 fn test_parse_infixes() -> ParseResult<()> {
-    let src = include_str!("./infixes.air");
+    let src = include_str!("./test/infixes.air");
     test_parse(src, infixes::expected)
 }
 
 #[test]
 fn test_parse_postfixes() -> ParseResult<()> {
-    let src = include_str!("./postfixes.air");
+    let src = include_str!("./test/postfixes.air");
     test_parse(src, postfixes::expected)
 }
 
@@ -49,31 +49,31 @@ fn test_parse(src: &str, expected: impl Fn() -> Repr) -> ParseResult<()> {
 
 #[test]
 fn test_lists_to_string() -> ParseResult<()> {
-    let src = include_str!("./lists.air");
+    let src = include_str!("./test/lists.air");
     test_repr_to_string(src)
 }
 
 #[test]
 fn test_maps_to_string() -> ParseResult<()> {
-    let src = include_str!("./maps.air");
+    let src = include_str!("./test/maps.air");
     test_repr_to_string(src)
 }
 
 #[test]
 fn test_prefixes_to_string() -> ParseResult<()> {
-    let src = include_str!("./prefixes.air");
+    let src = include_str!("./test/prefixes.air");
     test_repr_to_string(src)
 }
 
 #[test]
 fn test_infixes_to_string() -> ParseResult<()> {
-    let src = include_str!("./infixes.air");
+    let src = include_str!("./test/infixes.air");
     test_repr_to_string(src)
 }
 
 #[test]
 fn test_postfixes_to_string() -> ParseResult<()> {
-    let src = include_str!("./postfixes.air");
+    let src = include_str!("./test/postfixes.air");
     test_repr_to_string(src)
 }
 

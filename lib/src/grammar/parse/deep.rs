@@ -1,16 +1,16 @@
 use {
     crate::grammar::{
-        parse::{
-            lexer::FlatNode,
-            AtomNode,
-        },
-        ParseError,
-        ParseResult,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_KV_SEPARATOR,
         MAP_LEFT,
         MAP_RIGHT,
+        parse::{
+            AtomNode,
+            lexer::FlatNode,
+        },
+        ParseError,
+        ParseResult,
         SEPARATOR,
         WRAP_LEFT,
         WRAP_RIGHT,

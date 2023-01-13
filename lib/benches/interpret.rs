@@ -8,7 +8,7 @@ use {
 
 pub(crate) fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
-        let s = include_str!("src.air");
+        let s = include_str!("./interpret/src.air");
         b.iter(|| {
             interpret(black_box(s));
         })

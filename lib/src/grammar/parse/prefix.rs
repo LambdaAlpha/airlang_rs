@@ -1,14 +1,14 @@
 use crate::grammar::{
+    COMMENT_PREFIX,
     parse::{
+        AtomNode,
         deep::{
             DeepNode,
             DeepNodes,
         },
-        AtomNode,
     },
     ParseError,
     ParseResult,
-    COMMENT_PREFIX,
 };
 
 #[derive(Debug)]
