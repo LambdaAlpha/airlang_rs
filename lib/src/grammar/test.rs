@@ -10,6 +10,7 @@ mod lists;
 mod maps;
 mod postfixes;
 mod prefixes;
+mod top;
 
 #[test]
 fn test_parse_lists() -> ParseResult<()> {
@@ -39,6 +40,12 @@ fn test_parse_infixes() -> ParseResult<()> {
 fn test_parse_postfixes() -> ParseResult<()> {
     let src = include_str!("./test/postfixes.air");
     test_parse(src, postfixes::expected)
+}
+
+#[test]
+fn test_parse_top() -> ParseResult<()> {
+    let src = include_str!("./test/top.air");
+    test_parse(src, top::expected)
 }
 
 fn test_parse(src: &str, expected: impl Fn() -> Repr) -> ParseResult<()> {
@@ -74,6 +81,12 @@ fn test_infixes_to_string() -> ParseResult<()> {
 #[test]
 fn test_postfixes_to_string() -> ParseResult<()> {
     let src = include_str!("./test/postfixes.air");
+    test_repr_to_string(src)
+}
+
+#[test]
+fn test_top_to_string() -> ParseResult<()> {
+    let src = include_str!("./test/top.air");
     test_repr_to_string(src)
 }
 

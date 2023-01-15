@@ -1,16 +1,16 @@
 use {
     crate::grammar::{
         parse::{
-            AtomNode,
             lexer::config::AirLexerConfig,
+            AtomNode,
         },
-        ParseError,
-        ParseResult,
         repr::{
             Bytes,
             Float,
             Int,
         },
+        ParseError,
+        ParseResult,
     },
     regex::{
         Captures,
@@ -29,7 +29,9 @@ pub(crate) enum FlatNode {
     Atom(AtomNode),
 }
 
-pub(crate) fn parse(src: &str) -> ParseResult<Vec<FlatNode>> {
+pub(crate) type FlatNodes = Vec<FlatNode>;
+
+pub(crate) fn parse(src: &str) -> ParseResult<FlatNodes> {
     let tokens = lexing(src)?;
 
     let mut nodes = Vec::with_capacity(tokens.len());

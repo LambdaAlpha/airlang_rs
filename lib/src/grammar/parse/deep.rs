@@ -1,16 +1,19 @@
 use {
     crate::grammar::{
+        parse::{
+            lexer::{
+                FlatNode,
+                FlatNodes,
+            },
+            AtomNode,
+        },
+        ParseError,
+        ParseResult,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_KV_SEPARATOR,
         MAP_LEFT,
         MAP_RIGHT,
-        parse::{
-            AtomNode,
-            lexer::FlatNode,
-        },
-        ParseError,
-        ParseResult,
         SEPARATOR,
         WRAP_LEFT,
         WRAP_RIGHT,
@@ -22,9 +25,17 @@ use {
 pub(crate) enum DeepNode {
     Symbol(String),
     Atom(AtomNode),
-    List(Vec<DeepNodes>),
-    Map(Vec<(DeepNodes, DeepNodes)>),
+    // split last item
+    List(Vec<DeepNodes>, DeepNodes),
+    // split last item
+    Map(Vec<(DeepNodes, DeepNodes)>, MapItem),
     Wrap(DeepNodes),
+}
+
+#[derive(Debug)]
+pub(crate) enum MapItem {
+    Unit(DeepNodes),
+    Pair(DeepNodes, DeepNodes),
 }
 
 pub(crate) type DeepNodes = Vec<DeepNode>;
@@ -36,13 +47,16 @@ enum DeepFlag {
     Wrap,
 }
 
-pub(crate) fn parse(flat_nodes: Vec<FlatNode>) -> ParseResult<DeepNodes> {
+pub(crate) fn parse(flat_nodes: FlatNodes) -> ParseResult<DeepNodes> {
     let mut iter = flat_nodes.into_iter();
-    let deep_node = parse_one(&mut iter, DeepFlag::None)?;
-    match deep_node {
-        DeepNode::Wrap(nodes) => Ok(nodes),
-        _ => Ok(vec![deep_node]),
+    let mut deep_nodes = Vec::new();
+    let mut has_next = true;
+    while has_next {
+        let parse_info = parse_one(&mut iter, DeepFlag::None)?;
+        has_next = parse_info.has_next;
+        deep_nodes.push(parse_info.node);
     }
+    Ok(deep_nodes)
 }
 
 enum Item {
@@ -51,30 +65,48 @@ enum Item {
     MapKvSeparator,
 }
 
-fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepNode> {
+struct ParseInfo {
+    node: DeepNode,
+    has_next: bool,
+}
+
+fn parse_one_node(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepNode> {
+    Ok(parse_one(iter, flag)?.node)
+}
+
+fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<ParseInfo> {
     let mut items = Vec::new();
     while let Some(current) = iter.next() {
         let deep_node: Item = match current {
             FlatNode::Atom(a) => Item::Node(DeepNode::Atom(a)),
             FlatNode::Symbol(s) => match s.as_str() {
-                LIST_LEFT => Item::Node(parse_one(iter, DeepFlag::List)?),
+                LIST_LEFT => Item::Node(parse_one_node(iter, DeepFlag::List)?),
                 LIST_RIGHT => {
                     return match flag {
-                        DeepFlag::List => parse_list(items),
+                        DeepFlag::List => Ok(ParseInfo {
+                            node: parse_list(items)?,
+                            has_next: true,
+                        }),
                         _ => ParseError::err(format!("unexpected {}", LIST_RIGHT)),
                     };
                 }
-                MAP_LEFT => Item::Node(parse_one(iter, DeepFlag::Map)?),
+                MAP_LEFT => Item::Node(parse_one_node(iter, DeepFlag::Map)?),
                 MAP_RIGHT => {
                     return match flag {
-                        DeepFlag::Map => parse_map(items),
+                        DeepFlag::Map => Ok(ParseInfo {
+                            node: parse_map(items)?,
+                            has_next: true,
+                        }),
                         _ => ParseError::err(format!("unexpected {}", MAP_RIGHT)),
                     };
                 }
-                WRAP_LEFT => Item::Node(parse_one(iter, DeepFlag::Wrap)?),
+                WRAP_LEFT => Item::Node(parse_one_node(iter, DeepFlag::Wrap)?),
                 WRAP_RIGHT => {
                     return match flag {
-                        DeepFlag::Wrap => parse_wrap(items),
+                        DeepFlag::Wrap => Ok(ParseInfo {
+                            node: parse_wrap(items)?,
+                            has_next: true,
+                        }),
                         _ => ParseError::err(format!("unexpected {}", WRAP_RIGHT)),
                     };
                 }
@@ -87,7 +119,10 @@ fn parse_one(iter: &mut IntoIter<FlatNode>, flag: DeepFlag) -> ParseResult<DeepN
     }
 
     match flag {
-        DeepFlag::None => parse_wrap(items),
+        DeepFlag::None => Ok(ParseInfo {
+            node: parse_wrap(items)?,
+            has_next: false,
+        }),
         DeepFlag::List => ParseError::err("unexpected end of list".to_owned()),
         DeepFlag::Map => ParseError::err("unexpected end of map".to_owned()),
         DeepFlag::Wrap => ParseError::err("unexpected end of wrap".to_owned()),
@@ -103,22 +138,15 @@ fn parse_list(items: Vec<Item>) -> ParseResult<DeepNode> {
                 value.push(node);
             }
             Item::Separator => {
-                if value.is_empty() {
-                    return ParseError::err(format!("unexpected {}", SEPARATOR));
-                } else {
-                    list.push(value);
-                    value = Vec::new();
-                }
+                list.push(value);
+                value = Vec::new();
             }
             Item::MapKvSeparator => {
                 return ParseError::err(format!("unexpected {} in list", MAP_KV_SEPARATOR));
             }
         }
     }
-    if !value.is_empty() {
-        list.push(value);
-    }
-    Ok(DeepNode::List(list))
+    Ok(DeepNode::List(list, value))
 }
 
 fn parse_map(items: Vec<Item>) -> ParseResult<DeepNode> {
@@ -126,6 +154,7 @@ fn parse_map(items: Vec<Item>) -> ParseResult<DeepNode> {
     let mut key = Vec::new();
     let mut value = Vec::new();
     let mut is_key = true;
+    let mut is_pair = false;
     for item in items {
         match item {
             Item::Node(node) => {
@@ -136,29 +165,30 @@ fn parse_map(items: Vec<Item>) -> ParseResult<DeepNode> {
                 }
             }
             Item::Separator => {
-                if key.is_empty() {
-                    return ParseError::err(format!("unexpected {}", SEPARATOR));
-                } else {
+                if is_pair {
                     map.push((key, value));
-                    key = Vec::new();
-                    value = Vec::new();
-                    is_key = true;
+                } else {
+                    return ParseError::err(format!("unexpected {}", SEPARATOR));
                 }
+
+                key = Vec::new();
+                value = Vec::new();
+                is_key = true;
+                is_pair = false;
             }
             Item::MapKvSeparator => {
-                if !is_key || key.is_empty() {
-                    return ParseError::err(format!("unexpected {}", SEPARATOR));
-                } else {
-                    is_key = false;
-                }
+                is_key = false;
+                is_pair = true;
             }
         }
     }
 
-    if !key.is_empty() {
-        map.push((key, value));
-    }
-    Ok(DeepNode::Map(map))
+    let last = if is_pair {
+        MapItem::Pair(key, value)
+    } else {
+        MapItem::Unit(key)
+    };
+    Ok(DeepNode::Map(map, last))
 }
 
 fn parse_wrap(items: Vec<Item>) -> ParseResult<DeepNode> {
