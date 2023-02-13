@@ -37,9 +37,10 @@ pub use {
     repr::Repr,
 };
 
-use crate::{
-    semantics::ReprError,
-    types::Unit,
+use crate::semantics::{
+    eval,
+    val::Val,
+    ReprError,
 };
 
 pub fn parse(src: &str) -> Result<Repr, ParseError> {
@@ -50,8 +51,10 @@ pub fn stringify(src: &Repr) -> String {
     src.to_string()
 }
 
-pub fn interpret(_: &Repr) -> Result<Repr, ReprError> {
-    Ok(Repr::Unit(Unit))
+pub fn interpret(src: &Repr) -> Result<Repr, ReprError> {
+    let input = Val::from(src);
+    let output = eval(input);
+    output.try_into()
 }
 
 pub(crate) mod grammar;
