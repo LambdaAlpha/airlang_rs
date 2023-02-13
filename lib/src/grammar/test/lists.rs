@@ -1,20 +1,19 @@
-use crate::grammar::repr::{
-    Int,
-    Repr,
+use crate::{
+    grammar::test::{
+        list,
+        positive_decimal_int as int,
+    },
+    repr::Repr,
 };
 
-pub(crate) fn expected() -> Repr {
-    Repr::list(vec![
-        Repr::list(vec![]),
-        Repr::list(vec![int("1")]),
-        Repr::list(vec![int("1")]),
-        Repr::list(vec![int("1"), int("2")]),
-        Repr::list(vec![int("1"), int("2")]),
-        Repr::list(vec![Repr::list(vec![])]),
-        Repr::list(vec![Repr::list(vec![]), Repr::list(vec![])]),
-    ])
-}
-
-fn int(s: &str) -> Repr {
-    Repr::int(Int::new(true, 10, s.to_owned()))
+pub(crate) fn expected() -> Vec<Repr> {
+    vec![
+        list(vec![]),
+        list(vec![int("1")]),
+        list(vec![int("1")]),
+        list(vec![int("1"), int("2")]),
+        list(vec![int("1"), int("2")]),
+        list(vec![list(vec![])]),
+        list(vec![list(vec![]), list(vec![])]),
+    ]
 }

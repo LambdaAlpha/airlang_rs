@@ -1,41 +1,48 @@
 use {
-    crate::{
-        grammar::repr::{
-            Bytes,
-            Float,
-            Infix,
-            Int,
-            List,
-            Ltree,
-            Map,
-            Mtree,
-            Repr,
-        },
-        utils,
-    },
-    std::fmt::Write,
     super::{
         LIST_LEFT,
         LIST_RIGHT,
-        MAP_KV_SEPARATOR,
         MAP_LEFT,
         MAP_RIGHT,
+        PAIR_SEPARATOR,
         SEPARATOR,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
+    crate::{
+        grammar::PRESERVE_PREFIX,
+        repr::{
+            CallRepr,
+            ListRepr,
+            MapRepr,
+            Repr,
+        },
+        types::{
+            Bytes,
+            Float,
+            Int,
+        },
+        utils,
+        Repr::Pair,
+    },
+    Repr::{
+        Call,
+        List,
+        Map,
+    },
 };
 
-const INDENT: &str = "  ";
+pub(crate) const INDENT: &str = "  ";
 
+#[allow(dead_code)]
 pub(crate) fn stringify_compat(repr: &Repr) -> String {
     let mut str = String::new();
-    let config = StringifyConfig {
+    let config = StringifyFormat {
         indent: "".to_owned(),
         before_first: "".to_owned(),
         after_last: "".to_owned(),
-        separator: SEPARATOR.to_owned(),
-        kv_separator: MAP_KV_SEPARATOR.to_owned(),
+        separator: SEPARATOR.to_string(),
+        pair_separator: PAIR_SEPARATOR.to_string(),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -43,14 +50,15 @@ pub(crate) fn stringify_compat(repr: &Repr) -> String {
     str
 }
 
+#[allow(dead_code)]
 pub(crate) fn stringify_comfort(repr: &Repr) -> String {
     let mut str = String::new();
-    let config = StringifyConfig {
+    let config = StringifyFormat {
         indent: "".to_owned(),
         before_first: "".to_owned(),
         after_last: "".to_owned(),
         separator: format!("{} ", SEPARATOR),
-        kv_separator: format!("{} ", MAP_KV_SEPARATOR),
+        pair_separator: format!("{} ", PAIR_SEPARATOR),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -58,14 +66,15 @@ pub(crate) fn stringify_comfort(repr: &Repr) -> String {
     str
 }
 
+#[allow(dead_code)]
 pub(crate) fn stringify_pretty(repr: &Repr) -> String {
     let mut str = String::new();
-    let config = StringifyConfig {
+    let config = StringifyFormat {
         indent: INDENT.to_owned(),
         before_first: "\n".to_owned(),
         after_last: format!("{}\n", SEPARATOR),
         separator: format!("{}\n", SEPARATOR),
-        kv_separator: format!("{} ", MAP_KV_SEPARATOR),
+        pair_separator: format!("{} ", PAIR_SEPARATOR),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -73,74 +82,54 @@ pub(crate) fn stringify_pretty(repr: &Repr) -> String {
     str
 }
 
-struct StringifyConfig {
-    indent: String,
-    before_first: String,
-    after_last: String,
-    separator: String,
-    kv_separator: String,
-    left_padding: String,
-    right_padding: String,
+pub(crate) struct StringifyFormat {
+    pub(crate) indent: String,
+    pub(crate) before_first: String,
+    pub(crate) after_last: String,
+    pub(crate) separator: String,
+    pub(crate) pair_separator: String,
+    pub(crate) left_padding: String,
+    pub(crate) right_padding: String,
 }
 
-fn stringify(repr: &Repr, s: &mut String, config: &StringifyConfig, indent: usize) {
+pub(crate) fn stringify(repr: &Repr, s: &mut String, format: &StringifyFormat, indent: usize) {
     match repr {
-        Repr::Unit => stringify_unit(s),
-        Repr::Bool(b) => stringify_bool(*b, s),
+        Repr::Unit(_) => stringify_unit(s),
+        Repr::Bool(b) => stringify_bool(b.bool(), s),
         Repr::Int(i) => stringify_int(i, s),
         Repr::Float(f) => stringify_float(f, s),
+        Repr::Bytes(bytes) => stringify_bytes(bytes, s),
         Repr::String(str) => stringify_string(str, s),
         Repr::Letter(str) => stringify_letter(str, s),
         Repr::Symbol(str) => stringify_symbol(str, s),
-        Repr::Bytes(bytes) => stringify_bytes(bytes, s),
-        Repr::List(list) => stringify_list(list, s, config, indent),
-        Repr::Map(map) => stringify_map(map, s, config, indent),
-        Repr::Ltree(ltree) => stringify_ltree(ltree, s, config, indent),
-        Repr::Mtree(mtree) => stringify_mtree(mtree, s, config, indent),
-        Repr::Infix(infix) => stringify_infix(infix, s, config, indent),
+        Repr::Pair(p) => stringify_pair(&p.first, &p.second, s, format, indent),
+        Call(c) => stringify_call(c, s, format, indent),
+        List(list) => stringify_list(list, s, format, indent),
+        Map(map) => stringify_map(map, s, format, indent),
     }
 }
 
 fn stringify_unit(s: &mut String) {
-    s.push_str("'u")
+    s.push(PRESERVE_PREFIX);
+    s.push_str("u")
 }
 
 fn stringify_bool(b: bool, s: &mut String) {
-    s.push_str(if b { "'t" } else { "'f" })
+    s.push(PRESERVE_PREFIX);
+    s.push_str(if b { "t" } else { "f" })
 }
 
 fn stringify_int(i: &Int, s: &mut String) {
-    if !i.sign {
-        s.push_str("-")
-    }
-    if i.radix == 2 {
-        s.push_str("0b")
-    } else if i.radix == 16 {
-        s.push_str("0x")
-    }
-    s.push_str(&*i.digits)
+    s.push_str(&i.to_string())
 }
 
 fn stringify_float(f: &Float, s: &mut String) {
-    let sign = if f.sign {
-        "".to_owned()
-    } else {
-        "-".to_owned()
-    };
-    let integral = &f.integral;
-    let fractional = &f.fractional;
-    let exp_sign = if f.exp_sign {
-        "".to_owned()
-    } else {
-        "-".to_owned()
-    };
-    let exp_digits = &f.exp_digits;
-    let exp = if f.exp_digits == "0".repeat(f.exp_digits.len()) {
-        "".to_owned()
-    } else {
-        format!("e{exp_sign}{exp_digits}")
-    };
-    write!(s, "{sign}{integral}.{fractional}{exp}").unwrap();
+    s.push_str(&f.to_string())
+}
+
+fn stringify_bytes(bytes: &Bytes, s: &mut String) {
+    s.push_str("1x");
+    utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
 }
 
 fn stringify_string(str: &String, s: &mut String) {
@@ -167,110 +156,254 @@ fn stringify_symbol(str: &String, s: &mut String) {
     s.push_str(str)
 }
 
-fn stringify_bytes(bytes: &Bytes, s: &mut String) {
-    s.push_str("1x");
-    utils::conversion::u8_array_to_hex_string_mut(bytes, s);
+fn stringify_pair(
+    first: &Repr,
+    second: &Repr,
+    s: &mut String,
+    format: &StringifyFormat,
+    indent: usize,
+) {
+    match first {
+        Call(c) => {
+            match &c.arg {
+                List(_) | Map(_) => {
+                    // a():b
+                    // a{}:b
+                    stringify(first, s, format, indent);
+                }
+                _ => {
+                    // [a b]:c
+                    // [a b c]:d
+                    stringify_wrapped(first, s, format, indent);
+                }
+            }
+        }
+        _ => {
+            // a:b
+            // a:b:c
+            // ():a
+            // {}:a
+            stringify(first, s, format, indent);
+        }
+    }
+    s.push_str(&format.pair_separator);
+    match second {
+        Call(_) | Pair(_) => {
+            // a:[b()]
+            // a:[b{}]
+            // a:[b c d]
+            // a:[b c]
+            // a:[b:c]
+            stringify_wrapped(second, s, format, indent);
+        }
+        _ => {
+            // a:b
+            // a:()
+            // a:{}
+            stringify(second, s, format, indent);
+        }
+    }
 }
 
-fn stringify_wrapped(repr: &Repr, s: &mut String, config: &StringifyConfig, indent: usize) {
-    s.push_str(WRAP_LEFT);
-    s.push_str(&config.left_padding);
-    stringify(repr, s, config, indent);
-    s.push_str(&config.right_padding);
-    s.push_str(WRAP_RIGHT);
+fn stringify_call(call: &CallRepr, s: &mut String, format: &StringifyFormat, indent: usize) {
+    match &call.arg {
+        Pair(p) => {
+            match &p.first {
+                Call(c) => {
+                    match &c.arg {
+                        Pair(_) | List(_) | Map(_) => {
+                            // a() b c
+                            // a{} b c
+                            // a b c d e
+                            stringify(&p.first, s, format, indent)
+                        }
+                        _ => {
+                            // [a b] c d
+                            stringify_wrapped(&p.first, s, format, indent)
+                        }
+                    }
+                }
+                _ => {
+                    // a:b c d
+                    // () a b
+                    // {} a b
+                    // a b c
+                    stringify(&p.first, s, format, indent)
+                }
+            }
+            s.push(' ');
+            match &call.func {
+                List(_) | Map(_) => {
+                    // a [()] b
+                    // a [{}] b
+                    stringify_wrapped(&call.func, s, format, indent)
+                }
+                Call(c) => {
+                    match &c.arg {
+                        List(_) | Map(_) => {
+                            // a b() c
+                            // a b{} c
+                            stringify(&call.func, s, format, indent)
+                        }
+                        _ => {
+                            // a [b c d] e
+                            // a [b c] d
+                            stringify_wrapped(&call.func, s, format, indent)
+                        }
+                    }
+                }
+                _ => {
+                    // a b c
+                    // a b:c d
+                    stringify(&call.func, s, format, indent)
+                }
+            }
+            s.push(' ');
+            match &p.second {
+                Call(c) => {
+                    match &c.arg {
+                        List(_) | Map(_) => {
+                            // a b c()
+                            // a b c{}
+                            stringify(&p.second, s, format, indent)
+                        }
+                        _ => {
+                            // a b [c d e]
+                            // a b [c d]
+                            stringify_wrapped(&p.second, s, format, indent)
+                        }
+                    }
+                }
+                List(_) | Map(_) => {
+                    // a b [()]
+                    // a b [{}]
+                    stringify_wrapped(&p.second, s, format, indent)
+                }
+                _ => {
+                    // a b c
+                    // a b c:d
+                    stringify(&p.second, s, format, indent)
+                }
+            }
+        }
+        _ => {
+            match &call.func {
+                Call(c) => {
+                    match &c.arg {
+                        List(_) | Map(_) => {
+                            // a() b
+                            // a{} b
+                            stringify(&call.func, s, format, indent)
+                        }
+                        _ => {
+                            // [a b c] d
+                            // [a b] c
+                            stringify_wrapped(&call.func, s, format, indent)
+                        }
+                    }
+                }
+                _ => {
+                    // a b
+                    // () a
+                    // {} a
+                    // a:b c
+                    stringify(&call.func, s, format, indent)
+                }
+            }
+            match &call.arg {
+                List(_) | Map(_) => {
+                    // a()
+                    // a{}
+                    stringify(&call.arg, s, format, indent)
+                }
+                Call(c) => {
+                    match &c.arg {
+                        List(_) | Map(_) => {
+                            // a b()
+                            // a b{}
+                            s.push(' ');
+                            stringify(&call.arg, s, format, indent)
+                        }
+                        _ => {
+                            // a [b c]
+                            // a [b c d]
+                            s.push(' ');
+                            stringify_wrapped(&call.arg, s, format, indent)
+                        }
+                    }
+                }
+                _ => {
+                    // a b
+                    // a b:c
+                    s.push(' ');
+                    stringify(&call.arg, s, format, indent)
+                }
+            }
+        }
+    }
 }
 
-fn stringify_list(list: &List, s: &mut String, config: &StringifyConfig, indent: usize) {
-    s.push_str(LIST_LEFT);
+fn stringify_wrapped(repr: &Repr, s: &mut String, format: &StringifyFormat, indent: usize) {
+    s.push(WRAP_LEFT);
+    s.push_str(&format.left_padding);
+    stringify(repr, s, format, indent);
+    s.push_str(&format.right_padding);
+    s.push(WRAP_RIGHT);
+}
+
+fn stringify_list(list: &ListRepr, s: &mut String, format: &StringifyFormat, indent: usize) {
+    s.push(LIST_LEFT);
     if list.is_empty() {
-        s.push_str(LIST_RIGHT);
+        s.push(LIST_RIGHT);
         return;
     }
 
     if list.len() == 1 {
-        s.push_str(&config.left_padding);
-        stringify(list.first().unwrap(), s, config, indent);
-        s.push_str(&config.right_padding);
-        s.push_str(LIST_RIGHT);
+        s.push_str(&format.left_padding);
+        stringify(list.first().unwrap(), s, format, indent);
+        s.push_str(&format.right_padding);
+        s.push(LIST_RIGHT);
         return;
     }
 
-    s.push_str(&config.before_first);
+    s.push_str(&format.before_first);
     for repr in list.iter() {
-        s.push_str(&config.indent.repeat(indent + 1));
-        stringify(repr, s, config, indent + 1);
-        s.push_str(&config.separator);
+        s.push_str(&format.indent.repeat(indent + 1));
+        stringify(repr, s, format, indent + 1);
+        s.push_str(&format.separator);
     }
-    s.truncate(s.len() - config.separator.len());
-    s.push_str(&config.after_last);
+    s.truncate(s.len() - format.separator.len());
+    s.push_str(&format.after_last);
 
-    s.push_str(&config.indent.repeat(indent));
-    s.push_str(LIST_RIGHT);
+    s.push_str(&format.indent.repeat(indent));
+    s.push(LIST_RIGHT);
 }
 
-fn stringify_map(map: &Map, s: &mut String, config: &StringifyConfig, indent: usize) {
-    s.push_str(MAP_LEFT);
+fn stringify_map(map: &MapRepr, s: &mut String, format: &StringifyFormat, indent: usize) {
+    s.push(MAP_LEFT);
     if map.is_empty() {
-        s.push_str(MAP_RIGHT);
+        s.push(MAP_RIGHT);
         return;
     }
 
     if map.len() == 1 {
         let pair = map.iter().next().unwrap();
-        s.push_str(&config.left_padding);
-        stringify(&pair.0, s, config, indent);
-        s.push_str(&config.kv_separator);
-        stringify(&pair.1, s, config, indent);
-        s.push_str(&config.right_padding);
-        s.push_str(MAP_RIGHT);
+        s.push_str(&format.left_padding);
+        stringify_pair(pair.0, pair.1, s, format, indent);
+        s.push_str(&format.right_padding);
+        s.push(MAP_RIGHT);
         return;
     }
 
-    s.push_str(&config.before_first);
+    s.push_str(&format.before_first);
     for pair in map.iter() {
-        s.push_str(&config.indent.repeat(indent + 1));
-        stringify(&pair.0, s, config, indent + 1);
-        s.push_str(&config.kv_separator);
-        stringify(&pair.1, s, config, indent + 1);
-        s.push_str(&config.separator);
+        s.push_str(&format.indent.repeat(indent + 1));
+        stringify_pair(pair.0, pair.1, s, format, indent + 1);
+        s.push_str(&format.separator);
     }
-    s.truncate(s.len() - config.separator.len());
-    s.push_str(&config.after_last);
+    s.truncate(s.len() - format.separator.len());
+    s.push_str(&format.after_last);
 
-    s.push_str(&config.indent.repeat(indent));
-    s.push_str(MAP_RIGHT);
-}
-
-fn stringify_ltree(ltree: &Ltree, s: &mut String, config: &StringifyConfig, indent: usize) {
-    if matches!(ltree.root, Repr::Infix(_)) {
-        stringify_wrapped(&ltree.root, s, config, indent);
-    } else {
-        stringify(&ltree.root, s, config, indent);
-    }
-    stringify_list(&ltree.leaves, s, config, indent);
-}
-
-fn stringify_mtree(mtree: &Mtree, s: &mut String, config: &StringifyConfig, indent: usize) {
-    if matches!(mtree.root, Repr::Infix(_)) {
-        stringify_wrapped(&mtree.root, s, config, indent);
-    } else {
-        stringify(&mtree.root, s, config, indent);
-    }
-    stringify_map(&mtree.leaves, s, config, indent);
-}
-
-fn stringify_infix(infix: &Infix, s: &mut String, config: &StringifyConfig, indent: usize) {
-    stringify(&infix.left, s, config, indent);
-    s.push(' ');
-    if matches!(infix.infix, Repr::List(_) | Repr::Map(_) | Repr::Infix(_)) {
-        stringify_wrapped(&infix.infix, s, config, indent);
-    } else {
-        stringify(&infix.infix, s, config, indent);
-    }
-    s.push(' ');
-    if matches!(infix.right, Repr::List(_) | Repr::Map(_) | Repr::Infix(_)) {
-        stringify_wrapped(&infix.right, s, config, indent);
-    } else {
-        stringify(&infix.right, s, config, indent);
-    }
+    s.push_str(&format.indent.repeat(indent));
+    s.push(MAP_RIGHT);
 }

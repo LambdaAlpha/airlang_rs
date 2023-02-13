@@ -9,16 +9,18 @@ description = "The Air Programming Language"
 
 [dependencies]
 log = "0.4"
-regex = "1.6.0"
-rustc-hash = "1.1.0"
+rustc-hash = "1"
+thiserror = "1"
+nom = "7"
 
 [dependencies.rug]
-version = "1.17"
+version = "1"
 default-features = false
 features = ["integer", "float"]
 
 [dev-dependencies]
-criterion = "0.4.0"
+criterion = "0.4"
+env_logger = "0.10.0"
 
 [[bench]]
 name = "bench_main"

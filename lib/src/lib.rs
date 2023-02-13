@@ -1,7 +1,5 @@
 #![deny(
     bad_style,
-    const_err,
-    dead_code,
     improper_ctypes,
     non_shorthand_field_patterns,
     no_mangle_generic_items,
@@ -10,33 +8,55 @@
     patterns_in_fns_without_body,
     private_in_public,
     unconditional_recursion,
-    unused,
-    unused_allocation,
-    unused_comparisons,
-    unused_parens,
     while_true
 )]
+#![cfg_attr(
+    not(debug_assertions),
+    deny(
+        dead_code,
+        unused,
+        unused_allocation,
+        unused_comparisons,
+        unused_parens,
+    )
+)]
+#![allow(incomplete_features)]
+#![feature(
+    trait_upcasting,
+    trait_alias,
+    never_type,
+    allocator_api,
+    const_type_id,
+    arc_unwrap_or_clone,
+    iter_array_chunks,
+    slice_concat_trait
+)]
 
-use grammar::repr::Repr;
+pub use {
+    grammar::ParseError,
+    repr::Repr,
+};
 
-pub fn interpret(src: &str) -> String {
-    // todo impl
-    return src.to_string();
+use crate::{
+    semantics::ReprError,
+    types::Unit,
+};
+
+pub fn parse(src: &str) -> Result<Repr, ParseError> {
+    src.parse::<Repr>()
 }
 
-pub fn parse(src: &str) -> Repr {
-    let result = grammar::parse(src);
-    match result {
-        Ok(val) => val,
-        Err(_) => Repr::bytes(vec![]),
-    }
+pub fn stringify(src: &Repr) -> String {
+    src.to_string()
 }
 
-pub fn eval(src: Repr) -> Repr {
-    // todo impl
-    return src;
+pub fn interpret(_: &Repr) -> Result<Repr, ReprError> {
+    Ok(Repr::Unit(Unit))
 }
 
-pub mod grammar;
+pub(crate) mod grammar;
+pub(crate) mod repr;
+pub(crate) mod semantics;
+pub(crate) mod types;
 #[allow(dead_code)]
-mod utils;
+pub(crate) mod utils;
