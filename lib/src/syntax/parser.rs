@@ -1,6 +1,11 @@
 use {
     crate::{
-        grammar::{
+        repr::{
+            CallRepr,
+            PairRepr,
+            Repr,
+        },
+        syntax::{
             COMMENT_PREFIX,
             LIST_LEFT,
             LIST_RIGHT,
@@ -11,11 +16,6 @@ use {
             SEPARATOR,
             WRAP_LEFT,
             WRAP_RIGHT,
-        },
-        repr::{
-            CallRepr,
-            PairRepr,
-            Repr,
         },
         types::{
             Bool,

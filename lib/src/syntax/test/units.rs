@@ -1,8 +1,8 @@
 use crate::{
-    grammar::test::bool,
     repr::Repr,
+    syntax::test::unit,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {
-    vec![bool(false), bool(true)]
+    vec![unit()]
 }

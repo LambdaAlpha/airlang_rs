@@ -1,11 +1,11 @@
 use crate::{
-    grammar::test::{
+    repr::Repr,
+    syntax::test::{
         infix,
         list,
         ltree,
         positive_decimal_int as int,
     },
-    repr::Repr,
 };
 
 pub fn expected() -> Vec<Repr> {

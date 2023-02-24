@@ -1,6 +1,5 @@
 use {
     crate::{
-        grammar::parse,
         repr::{
             CallRepr,
             ListRepr,
@@ -8,6 +7,7 @@ use {
             PairRepr,
             Repr,
         },
+        syntax::parse,
         types::{
             Bool,
             Float,
@@ -117,24 +117,32 @@ fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
 
 fn test_parse(src: &str, expected: impl FnOnce() -> Vec<Repr>) -> Result<(), Box<dyn Error>> {
     let sources = src.split("# ===");
-    let mut repr_list = Vec::new();
-    for s in sources {
-        repr_list.push(parse(dbg!(s)).map_err(|e| {
-            println!("{e}");
+
+    for (s, expected_repr) in sources.zip(expected()) {
+        let real_repr = parse(s).map_err(|e| {
+            eprintln!("{e}");
             e
-        })?);
+        })?;
+        assert_eq!(
+            real_repr, expected_repr,
+            "src: {}, real: {} != expected: {}",
+            s, real_repr, expected_repr
+        );
     }
-    assert_eq!(repr_list, expected());
     Ok(())
 }
 
-fn test_stringify(src: &str) -> Result<(), Box<dyn Error>> {
+fn test_generate(src: &str) -> Result<(), Box<dyn Error>> {
     let sources = src.split("# ===");
     for s in sources {
-        let repr = parse(dbg!(s))?;
-        let string = dbg!(repr.to_string());
+        let repr = parse(s)?;
+        let string = repr.to_string();
         let new_repr = parse(&string)?;
-        assert_eq!(repr, new_repr);
+        assert_eq!(
+            repr, new_repr,
+            "src: {}, repr: {} != new_repr: {}",
+            s, repr, new_repr
+        );
     }
     Ok(())
 }
@@ -142,7 +150,7 @@ fn test_stringify(src: &str) -> Result<(), Box<dyn Error>> {
 fn test_parse_illegal(src: &str) -> Result<(), Box<dyn Error>> {
     let sources = src.split("# ===");
     for s in sources {
-        assert!(matches!(parse(dbg!(s)), Err(_)));
+        assert!(matches!(parse(s), Err(_)), "src: {} shouldn't parse", s);
     }
     Ok(())
 }
@@ -152,9 +160,9 @@ fn test_parse_bad(src: &str) -> Result<(), Box<dyn Error>> {
 
     for test in tests {
         let (i1, i2) = test.split_once("# ---").unwrap();
-        let i1 = parse(dbg!(i1))?;
-        let i2 = parse(dbg!(i2))?;
-        assert_eq!(i1, i2);
+        let i1 = parse(i1)?;
+        let i2 = parse(i2)?;
+        assert_eq!(i1, i2, "src1: {} != scr2: {}", i1, i2);
     }
     Ok(())
 }
@@ -165,8 +173,8 @@ fn test_parse_units() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_units() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/units.air"))
+fn test_generate_units() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/units.air"))
 }
 
 #[test]
@@ -175,8 +183,8 @@ fn test_parse_booleans() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_booleans() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/booleans.air"))
+fn test_generate_booleans() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/booleans.air"))
 }
 
 #[test]
@@ -185,8 +193,8 @@ fn test_parse_ints() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_ints() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/ints.air"))
+fn test_generate_ints() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/ints.air"))
 }
 
 #[test]
@@ -195,8 +203,8 @@ fn test_parse_floats() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_floats() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/floats.air"))
+fn test_generate_floats() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/floats.air"))
 }
 
 #[test]
@@ -205,8 +213,8 @@ fn test_parse_bytes() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_bytes() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/bytes.air"))
+fn test_generate_bytes() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/bytes.air"))
 }
 
 #[test]
@@ -215,8 +223,8 @@ fn test_parse_letters() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_letters() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/letters.air"))
+fn test_generate_letters() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/letters.air"))
 }
 
 #[test]
@@ -225,8 +233,8 @@ fn test_parse_symbols() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_symbols() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/symbols.air"))
+fn test_generate_symbols() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/symbols.air"))
 }
 
 #[test]
@@ -235,8 +243,8 @@ fn test_parse_strings() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_strings() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/strings.air"))
+fn test_generate_strings() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/strings.air"))
 }
 #[test]
 fn test_parse_pairs() -> Result<(), Box<dyn Error>> {
@@ -244,8 +252,8 @@ fn test_parse_pairs() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_pairs() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/pairs.air"))
+fn test_generate_pairs() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/pairs.air"))
 }
 
 #[test]
@@ -254,8 +262,8 @@ fn test_parse_calls() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_calls() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/calls.air"))
+fn test_generate_calls() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/calls.air"))
 }
 
 #[test]
@@ -264,8 +272,8 @@ fn test_parse_wraps() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_wraps() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/wraps.air"))
+fn test_generate_wraps() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/wraps.air"))
 }
 
 #[test]
@@ -274,8 +282,8 @@ fn test_parse_lists() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_lists() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/lists.air"))
+fn test_generate_lists() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/lists.air"))
 }
 
 #[test]
@@ -284,8 +292,8 @@ fn test_parse_maps() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_maps() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/maps.air"))
+fn test_generate_maps() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/maps.air"))
 }
 
 #[test]
@@ -294,8 +302,8 @@ fn test_parse_comments() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_comments() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/comments.air"))
+fn test_generate_comments() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/comments.air"))
 }
 
 #[test]
@@ -304,8 +312,8 @@ fn test_parse_infixes() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_stringify_infixes() -> Result<(), Box<dyn Error>> {
-    test_stringify(include_str!("test/infixes.air"))
+fn test_generate_infixes() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/infixes.air"))
 }
 
 #[test]

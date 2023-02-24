@@ -1,5 +1,6 @@
 use crate::{
-    grammar::test::{
+    repr::Repr,
+    syntax::test::{
         call,
         infix,
         letter,
@@ -9,7 +10,6 @@ use crate::{
         mtree,
         pair,
     },
-    Repr,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {

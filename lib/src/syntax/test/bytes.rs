@@ -1,6 +1,6 @@
 use crate::{
-    grammar::test::bytes,
     repr::Repr,
+    syntax::test::bytes,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {

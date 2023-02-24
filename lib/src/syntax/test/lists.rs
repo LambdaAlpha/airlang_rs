@@ -1,9 +1,9 @@
 use crate::{
-    grammar::test::{
+    repr::Repr,
+    syntax::test::{
         list,
         positive_decimal_int as int,
     },
-    repr::Repr,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {

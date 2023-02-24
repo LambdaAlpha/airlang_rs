@@ -1,10 +1,10 @@
 use crate::{
-    grammar::test::{
+    repr::Repr,
+    syntax::test::{
         list,
         ltree,
         symbol,
     },
-    repr::Repr,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {

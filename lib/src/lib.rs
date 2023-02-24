@@ -32,34 +32,15 @@
     slice_concat_trait
 )]
 
-pub use {
-    grammar::ParseError,
-    repr::Repr,
-};
+pub mod repr;
 
-use crate::semantics::{
-    eval,
-    val::Val,
-    ReprError,
-};
+#[cfg(feature = "syntax")]
+pub mod syntax;
 
-pub fn parse(src: &str) -> Result<Repr, ParseError> {
-    src.parse::<Repr>()
-}
+#[cfg(feature = "semantics")]
+pub mod semantics;
 
-pub fn stringify(src: &Repr) -> String {
-    src.to_string()
-}
-
-pub fn interpret(src: &Repr) -> Result<Repr, ReprError> {
-    let input = Val::from(src);
-    let output = eval(input);
-    output.try_into()
-}
-
-pub(crate) mod grammar;
-pub(crate) mod repr;
-pub(crate) mod semantics;
 pub(crate) mod types;
+
 #[allow(dead_code)]
 pub(crate) mod utils;

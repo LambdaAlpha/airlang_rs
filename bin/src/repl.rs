@@ -1,8 +1,8 @@
 use {
     airlang::{
         self,
-        interpret,
-        parse,
+        semantics::interpret,
+        syntax::parse,
     },
     std::{
         error::Error,

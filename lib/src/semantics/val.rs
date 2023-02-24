@@ -22,13 +22,8 @@ use {
             Symbol,
             Unit,
         },
-        ParseError,
     },
-    std::{
-        rc::Rc,
-        str::FromStr,
-        string::String as StdString,
-    },
+    std::rc::Rc,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -46,7 +41,7 @@ pub(crate) enum Val {
     List(Rc<ListVal>),
     Map(Rc<MapVal>),
     // todo more val
-    Others(Rc<StdVal>),
+    Extend(Rc<ExtendVal>),
 }
 
 pub(crate) type PairVal = Pair<Rc<Val>, Rc<Val>>;
@@ -140,8 +135,8 @@ impl Val {
             None
         }
     }
-    pub fn others(&self) -> Option<&Rc<StdVal>> {
-        if let Val::Others(v) = self {
+    pub fn extend(&self) -> Option<&Rc<ExtendVal>> {
+        if let Val::Extend(v) = self {
             Some(v)
         } else {
             None
@@ -227,9 +222,9 @@ impl From<Rc<MapVal>> for Val {
     }
 }
 
-impl From<Rc<StdVal>> for Val {
-    fn from(value: Rc<StdVal>) -> Self {
-        Val::Others(value)
+impl From<Rc<ExtendVal>> for Val {
+    fn from(value: Rc<ExtendVal>) -> Self {
+        Val::Extend(value)
     }
 }
 
@@ -537,19 +532,5 @@ impl TryInto<MapRepr> for Rc<MapVal> {
     }
 }
 
-impl FromStr for Val {
-    type Err = ParseError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(s.parse::<Repr>()?.into())
-    }
-}
-
-impl TryInto<StdString> for &Val {
-    type Error = ReprError;
-    fn try_into(self) -> Result<StdString, Self::Error> {
-        Ok((&<_ as TryInto<Repr>>::try_into(self)?).into())
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct StdVal;
+pub struct ExtendVal;

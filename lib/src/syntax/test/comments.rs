@@ -1,5 +1,6 @@
 use crate::{
-    grammar::test::{
+    repr::Repr,
+    syntax::test::{
         infix,
         letter,
         list,
@@ -7,7 +8,6 @@ use crate::{
         map,
         positive_decimal_int as int,
     },
-    repr::Repr,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {

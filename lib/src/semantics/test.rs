@@ -1,7 +1,8 @@
+#![cfg(feature = "syntax")]
 use {
     crate::{
-        interpret,
-        parse,
+        semantics::interpret,
+        syntax::parse,
     },
     std::error::Error,
 };
@@ -12,10 +13,14 @@ fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
 
     for test in tests {
         let (i, o) = test.split_once("# ---").unwrap();
-        let src = parse(dbg!(i))?;
+        let src = parse(i)?;
         let ret = interpret(&src)?;
-        let ret_expected = parse(dbg!(o))?;
-        assert_eq!(ret, ret_expected);
+        let ret_expected = parse(o)?;
+        assert_eq!(
+            ret, ret_expected,
+            "input: {}, real output: {} != expected output: {}",
+            i, ret, o
+        );
     }
     Ok(())
 }
