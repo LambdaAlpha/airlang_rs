@@ -85,7 +85,6 @@ use {
     std::{
         num::ParseIntError,
         primitive::char as StdChar,
-        rc::Rc,
     },
 };
 
@@ -375,7 +374,7 @@ where
 {
     let letters = take_while1(|c: char| c.is_alphanumeric() || c == '_');
     let f = map(letters, |s: &'a str| {
-        Repr::Letter(Rc::new(Letter::new(s.to_owned())))
+        Repr::Letter(Letter::new(s.to_owned()))
     });
     context("letter", f)(src)
 }
@@ -394,7 +393,7 @@ where
 {
     let symbol_letter_digit = take_while(|c| is_symbol(c) || c.is_alphanumeric());
     let f = map(symbol_letter_digit, |s: &'a str| {
-        Repr::Symbol(Rc::new(Symbol::new(s.to_owned())))
+        Repr::Symbol(Symbol::new(s.to_owned()))
     });
     context("symbol", f)(src)
 }
@@ -417,7 +416,7 @@ where
         string
     });
     let delimited_string = delimited(char('"'), cut(collect_fragments), cut(char('"')));
-    let f = map(delimited_string, |s| Repr::String(Rc::new(s.into())));
+    let f = map(delimited_string, |s| Repr::String(s.into()));
     context("string", f)(src)
 }
 
@@ -517,7 +516,7 @@ where
     ));
     let f = map_res(digits, |(sign, digits): (Option<StdChar>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 16);
-        Ok(Repr::Int(Rc::new(i)))
+        Ok(Repr::Int(i))
     });
     context("hex_int", f)(src)
 }
@@ -535,7 +534,7 @@ where
     ));
     let f = map_res(digits, |(sign, digits): (Option<StdChar>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 2);
-        Ok(Repr::Int(Rc::new(i)))
+        Ok(Repr::Int(i))
     });
     context("bin_int", f)(src)
 }
@@ -547,9 +546,9 @@ where
     let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
     let tagged_digits = preceded(tag_no_case("1x"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
-        Ok(Repr::Bytes(Rc::new(Bytes::from(
+        Ok(Repr::Bytes(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
-        ))))
+        )))
     });
     context("hex_bytes", f)(src)
 }
@@ -563,9 +562,9 @@ where
     });
     let tagged_digits = preceded(tag_no_case("1b"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
-        Ok(Repr::Bytes(Rc::new(Bytes::from(
+        Ok(Repr::Bytes(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
-        ))))
+        )))
     });
     context("bin_bytes", f)(src)
 }
@@ -592,7 +591,7 @@ where
         )| {
             if fractional.is_none() && exponential.is_none() {
                 let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &integral, 10);
-                Ok(Repr::Int(Rc::new(i)))
+                Ok(Repr::Int(i))
             } else {
                 let f = Float::from_parts(
                     !matches!(sign, Some('-')),
@@ -601,7 +600,7 @@ where
                     !matches!(exponential, Some((Some('-'), _))),
                     exponential.as_ref().map_or("", |(_, exp)| exp),
                 );
-                Ok(Repr::Float(Rc::new(f)))
+                Ok(Repr::Float(f))
             }
         },
     );

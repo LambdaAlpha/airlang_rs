@@ -1,19 +1,16 @@
-use {
-    crate::types::{
-        Bool,
-        Bytes,
-        Call,
-        Float,
-        Int,
-        Letter,
-        List,
-        Map,
-        Pair,
-        Str,
-        Symbol,
-        Unit,
-    },
-    std::rc::Rc,
+use crate::types::{
+    Bool,
+    Bytes,
+    Call,
+    Float,
+    Int,
+    Letter,
+    List,
+    Map,
+    Pair,
+    Str,
+    Symbol,
+    Unit,
 };
 
 #[derive(PartialEq, Eq, Clone, Hash)]
@@ -21,12 +18,12 @@ use {
 pub enum Repr {
     Unit(Unit),
     Bool(Bool),
-    Int(Rc<Int>),
-    Float(Rc<Float>),
-    Bytes(Rc<Bytes>),
-    Letter(Rc<Letter>),
-    Symbol(Rc<Symbol>),
-    String(Rc<Str>),
+    Int(Int),
+    Float(Float),
+    Bytes(Bytes),
+    Letter(Letter),
+    Symbol(Symbol),
+    String(Str),
     Pair(Box<PairRepr>),
     Call(Box<CallRepr>),
     List(ListRepr),
@@ -53,42 +50,42 @@ impl Repr {
             None
         }
     }
-    pub fn int(&self) -> Option<&Rc<Int>> {
+    pub fn int(&self) -> Option<&Int> {
         if let Repr::Int(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn float(&self) -> Option<&Rc<Float>> {
+    pub fn float(&self) -> Option<&Float> {
         if let Repr::Float(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn bytes(&self) -> Option<&Rc<Bytes>> {
+    pub fn bytes(&self) -> Option<&Bytes> {
         if let Repr::Bytes(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn letter(&self) -> Option<&Rc<Letter>> {
+    pub fn letter(&self) -> Option<&Letter> {
         if let Repr::Letter(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn symbol(&self) -> Option<&Rc<Symbol>> {
+    pub fn symbol(&self) -> Option<&Symbol> {
         if let Repr::Symbol(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn string(&self) -> Option<&Rc<Str>> {
+    pub fn string(&self) -> Option<&Str> {
         if let Repr::String(v) = self {
             Some(v)
         } else {
@@ -137,38 +134,38 @@ impl From<Bool> for Repr {
     }
 }
 
-impl From<Rc<Int>> for Repr {
-    fn from(i: Rc<Int>) -> Self {
+impl From<Int> for Repr {
+    fn from(i: Int) -> Self {
         Repr::Int(i)
     }
 }
 
-impl From<Rc<Float>> for Repr {
-    fn from(f: Rc<Float>) -> Self {
+impl From<Float> for Repr {
+    fn from(f: Float) -> Self {
         Repr::Float(f)
     }
 }
 
-impl From<Rc<Bytes>> for Repr {
-    fn from(b: Rc<Bytes>) -> Self {
+impl From<Bytes> for Repr {
+    fn from(b: Bytes) -> Self {
         Repr::Bytes(b)
     }
 }
 
-impl From<Rc<Letter>> for Repr {
-    fn from(l: Rc<Letter>) -> Self {
+impl From<Letter> for Repr {
+    fn from(l: Letter) -> Self {
         Repr::Letter(l)
     }
 }
 
-impl From<Rc<Symbol>> for Repr {
-    fn from(s: Rc<Symbol>) -> Self {
+impl From<Symbol> for Repr {
+    fn from(s: Symbol) -> Self {
         Repr::Symbol(s)
     }
 }
 
-impl From<Rc<Str>> for Repr {
-    fn from(s: Rc<Str>) -> Self {
+impl From<Str> for Repr {
+    fn from(s: Str) -> Self {
         Repr::String(s)
     }
 }

@@ -104,7 +104,7 @@ pub(crate) fn generate(repr: &Repr, s: &mut String, format: &GenerateFormat, ind
         Repr::String(str) => generate_string(str, s),
         Repr::Letter(str) => generate_letter(str, s),
         Repr::Symbol(str) => generate_symbol(str, s),
-        Repr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent),
+        Pair(p) => generate_pair(&p.first, &p.second, s, format, indent),
         Call(c) => generate_call(c, s, format, indent),
         List(list) => generate_list(list, s, format, indent),
         Map(map) => generate_map(map, s, format, indent),

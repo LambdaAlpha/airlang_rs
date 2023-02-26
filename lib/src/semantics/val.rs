@@ -1,53 +1,61 @@
-use {
-    crate::{
-        repr::{
-            CallRepr,
-            ListRepr,
-            MapRepr,
-            PairRepr,
-            Repr,
-        },
-        semantics::ReprError,
-        types::{
-            Bool,
-            Bytes,
-            Call,
-            Float,
-            Int,
-            Letter,
-            List,
-            Map,
-            Pair,
-            Str,
-            Symbol,
-            Unit,
-        },
+use crate::{
+    repr::{
+        CallRepr,
+        ListRepr,
+        MapRepr,
+        PairRepr,
+        Repr,
     },
-    std::rc::Rc,
+    semantics::ReprError,
+    types::{
+        Bool,
+        BoxRef,
+        Bytes,
+        Call,
+        Float,
+        ImRef,
+        Int,
+        Letter,
+        List,
+        Map,
+        MutRef,
+        Pair,
+        Str,
+        Symbol,
+        Unit,
+    },
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Val {
     Unit(Unit),
     Bool(Bool),
-    Int(Rc<Int>),
-    Float(Rc<Float>),
-    Bytes(Rc<Bytes>),
-    Letter(Rc<Letter>),
-    Symbol(Rc<Symbol>),
-    String(Rc<Str>),
-    Pair(Rc<PairVal>),
-    Call(Rc<CallVal>),
-    List(Rc<ListVal>),
-    Map(Rc<MapVal>),
+    Int(Int),
+    Float(Float),
+    Bytes(Bytes),
+    Letter(Letter),
+    Symbol(Symbol),
+    String(Str),
+    Pair(Box<PairVal>),
+    Call(Box<CallVal>),
+    List(ListVal),
+    Map(MapVal),
+
+    BoxRef(BoxRefVal),
+    ImRef(ImRefVal),
+    MutRef(MutRefVal),
+
     // todo more val
-    Extend(Rc<ExtendVal>),
+    Extend(ExtendVal),
 }
 
-pub(crate) type PairVal = Pair<Rc<Val>, Rc<Val>>;
-pub(crate) type CallVal = Call<Rc<Val>, Rc<Val>>;
-pub(crate) type ListVal = List<Rc<Val>>;
-pub(crate) type MapVal = Map<Rc<Val>, Rc<Val>>;
+pub(crate) type PairVal = Pair<Val, Val>;
+pub(crate) type CallVal = Call<Val, Val>;
+pub(crate) type ListVal = List<Val>;
+pub(crate) type MapVal = Map<Repr, Val>;
+pub(crate) type BoxRefVal = BoxRef<Val>;
+pub(crate) type ImRefVal = ImRef<Val>;
+pub(crate) type MutRefVal = MutRef<Val>;
 
 #[allow(dead_code)]
 impl Val {
@@ -65,77 +73,98 @@ impl Val {
             None
         }
     }
-    pub fn int(&self) -> Option<&Rc<Int>> {
+    pub fn int(&self) -> Option<&Int> {
         if let Val::Int(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn float(&self) -> Option<&Rc<Float>> {
+    pub fn float(&self) -> Option<&Float> {
         if let Val::Float(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn bytes(&self) -> Option<&Rc<Bytes>> {
+    pub fn bytes(&self) -> Option<&Bytes> {
         if let Val::Bytes(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn string(&self) -> Option<&Rc<Str>> {
+    pub fn string(&self) -> Option<&Str> {
         if let Val::String(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn letter(&self) -> Option<&Rc<Letter>> {
+    pub fn letter(&self) -> Option<&Letter> {
         if let Val::Letter(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn symbol(&self) -> Option<&Rc<Symbol>> {
+    pub fn symbol(&self) -> Option<&Symbol> {
         if let Val::Symbol(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn pair(&self) -> Option<&Rc<PairVal>> {
+    pub fn pair(&self) -> Option<&Box<PairVal>> {
         if let Val::Pair(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn call(&self) -> Option<&Rc<CallVal>> {
+    pub fn call(&self) -> Option<&Box<CallVal>> {
         if let Val::Call(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn list(&self) -> Option<&Rc<ListVal>> {
+    pub fn list(&self) -> Option<&ListVal> {
         if let Val::List(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn map(&self) -> Option<&Rc<MapVal>> {
+    pub fn map(&self) -> Option<&MapVal> {
         if let Val::Map(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn extend(&self) -> Option<&Rc<ExtendVal>> {
+    pub fn box_ref(&self) -> Option<&BoxRefVal> {
+        if let Val::BoxRef(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+    pub fn im_ref(&self) -> Option<&ImRefVal> {
+        if let Val::ImRef(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+    pub fn mut_ref(&self) -> Option<&MutRefVal> {
+        if let Val::MutRef(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+    pub fn extended(&self) -> Option<&ExtendVal> {
         if let Val::Extend(v) = self {
             Some(v)
         } else {
@@ -162,68 +191,86 @@ impl From<Bool> for Val {
     }
 }
 
-impl From<Rc<Int>> for Val {
-    fn from(value: Rc<Int>) -> Self {
+impl From<Int> for Val {
+    fn from(value: Int) -> Self {
         Val::Int(value)
     }
 }
 
-impl From<Rc<Float>> for Val {
-    fn from(value: Rc<Float>) -> Self {
+impl From<Float> for Val {
+    fn from(value: Float) -> Self {
         Val::Float(value)
     }
 }
 
-impl From<Rc<Bytes>> for Val {
-    fn from(value: Rc<Bytes>) -> Self {
+impl From<Bytes> for Val {
+    fn from(value: Bytes) -> Self {
         Val::Bytes(value)
     }
 }
 
-impl From<Rc<Str>> for Val {
-    fn from(value: Rc<Str>) -> Self {
+impl From<Str> for Val {
+    fn from(value: Str) -> Self {
         Val::String(value)
     }
 }
 
-impl From<Rc<Letter>> for Val {
-    fn from(value: Rc<Letter>) -> Self {
+impl From<Letter> for Val {
+    fn from(value: Letter) -> Self {
         Val::Letter(value)
     }
 }
 
-impl From<Rc<Symbol>> for Val {
-    fn from(value: Rc<Symbol>) -> Self {
+impl From<Symbol> for Val {
+    fn from(value: Symbol) -> Self {
         Val::Symbol(value)
     }
 }
 
-impl From<Rc<PairVal>> for Val {
-    fn from(value: Rc<PairVal>) -> Self {
+impl From<Box<PairVal>> for Val {
+    fn from(value: Box<PairVal>) -> Self {
         Val::Pair(value)
     }
 }
 
-impl From<Rc<CallVal>> for Val {
-    fn from(value: Rc<CallVal>) -> Self {
+impl From<Box<CallVal>> for Val {
+    fn from(value: Box<CallVal>) -> Self {
         Val::Call(value)
     }
 }
 
-impl From<Rc<ListVal>> for Val {
-    fn from(value: Rc<ListVal>) -> Self {
+impl From<ListVal> for Val {
+    fn from(value: ListVal) -> Self {
         Val::List(value)
     }
 }
 
-impl From<Rc<MapVal>> for Val {
-    fn from(value: Rc<MapVal>) -> Self {
+impl From<MapVal> for Val {
+    fn from(value: MapVal) -> Self {
         Val::Map(value)
     }
 }
 
-impl From<Rc<ExtendVal>> for Val {
-    fn from(value: Rc<ExtendVal>) -> Self {
+impl From<BoxRefVal> for Val {
+    fn from(value: BoxRefVal) -> Self {
+        Val::BoxRef(value)
+    }
+}
+
+impl From<ImRefVal> for Val {
+    fn from(value: ImRefVal) -> Self {
+        Val::ImRef(value)
+    }
+}
+
+impl From<MutRefVal> for Val {
+    fn from(value: MutRefVal) -> Self {
+        Val::MutRef(value)
+    }
+}
+
+impl From<ExtendVal> for Val {
+    fn from(value: ExtendVal) -> Self {
         Val::Extend(value)
     }
 }
@@ -233,16 +280,16 @@ impl From<&Repr> for Val {
         match value {
             Repr::Unit(u) => Val::Unit(u.clone()),
             Repr::Bool(b) => Val::Bool(b.clone()),
-            Repr::Int(i) => Val::Int((*i).clone()),
-            Repr::Float(f) => Val::Float((*f).clone()),
-            Repr::Bytes(b) => Val::Bytes((*b).clone()),
-            Repr::Letter(l) => Val::Letter((*l).clone()),
-            Repr::Symbol(s) => Val::Symbol((*s).clone()),
-            Repr::String(s) => Val::String((*s).clone()),
-            Repr::Pair(p) => Val::Pair(Rc::new(PairVal::from(&**p))),
-            Repr::Call(c) => Val::Call(Rc::new(CallVal::from(&**c))),
-            Repr::List(l) => Val::List(Rc::new(ListVal::from(l))),
-            Repr::Map(m) => Val::Map(Rc::new(MapVal::from(m))),
+            Repr::Int(i) => Val::Int(i.clone()),
+            Repr::Float(f) => Val::Float(f.clone()),
+            Repr::Bytes(b) => Val::Bytes(b.clone()),
+            Repr::Letter(l) => Val::Letter(l.clone()),
+            Repr::Symbol(s) => Val::Symbol(s.clone()),
+            Repr::String(s) => Val::String(s.clone()),
+            Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(&**p))),
+            Repr::Call(c) => Val::Call(Box::new(CallVal::from(&**c))),
+            Repr::List(l) => Val::List(ListVal::from(l)),
+            Repr::Map(m) => Val::Map(MapVal::from(m)),
         }
     }
 }
@@ -258,10 +305,10 @@ impl From<Repr> for Val {
             Repr::Letter(l) => Val::Letter(l),
             Repr::Symbol(s) => Val::Symbol(s),
             Repr::String(s) => Val::String(s),
-            Repr::Pair(p) => Val::Pair(Rc::new(PairVal::from(*p))),
-            Repr::Call(c) => Val::Call(Rc::new(CallVal::from(*c))),
-            Repr::List(l) => Val::List(Rc::new(ListVal::from(l))),
-            Repr::Map(m) => Val::Map(Rc::new(MapVal::from(m))),
+            Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(*p))),
+            Repr::Call(c) => Val::Call(Box::new(CallVal::from(*c))),
+            Repr::List(l) => Val::List(ListVal::from(l)),
+            Repr::Map(m) => Val::Map(MapVal::from(m)),
         }
     }
 }
@@ -284,8 +331,8 @@ impl TryInto<Repr> for &Val {
             Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
                 &**c,
             )?))),
-            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(&**l)?)),
-            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(&**m)?)),
+            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
+            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
             _ => Err(ReprError {}),
         }
     }
@@ -303,8 +350,12 @@ impl TryInto<Repr> for Val {
             Val::Letter(l) => Ok(Repr::Letter(l)),
             Val::Symbol(s) => Ok(Repr::Symbol(s)),
             Val::String(s) => Ok(Repr::String(s)),
-            Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(p)?))),
-            Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(c)?))),
+            Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
+                *p,
+            )?))),
+            Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
+                *c,
+            )?))),
             Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
             Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
             _ => Err(ReprError {}),
@@ -312,31 +363,15 @@ impl TryInto<Repr> for Val {
     }
 }
 
-impl TryInto<Repr> for Rc<Val> {
-    type Error = ReprError;
-    fn try_into(self) -> Result<Repr, Self::Error> {
-        match Rc::try_unwrap(self) {
-            Ok(v) => Ok(v.try_into()?),
-            Err(r) => Ok((&*r).try_into()?),
-        }
-    }
-}
-
 impl From<&PairRepr> for PairVal {
     fn from(value: &PairRepr) -> Self {
-        PairVal::new(
-            Rc::new(Val::from(&value.first)),
-            Rc::new(Val::from(&value.second)),
-        )
+        PairVal::new(Val::from(&value.first), Val::from(&value.second))
     }
 }
 
 impl From<PairRepr> for PairVal {
     fn from(value: PairRepr) -> Self {
-        PairVal::new(
-            Rc::new(Val::from(value.first)),
-            Rc::new(Val::from(value.second)),
-        )
+        PairVal::new(Val::from(value.first), Val::from(value.second))
     }
 }
 
@@ -344,8 +379,8 @@ impl TryInto<PairRepr> for &PairVal {
     type Error = ReprError;
     fn try_into(self) -> Result<PairRepr, Self::Error> {
         Ok(PairRepr::new(
-            (&*self.first).try_into()?,
-            (&*self.second).try_into()?,
+            (&self.first).try_into()?,
+            (&self.second).try_into()?,
         ))
     }
 }
@@ -360,31 +395,15 @@ impl TryInto<PairRepr> for PairVal {
     }
 }
 
-impl TryInto<PairRepr> for Rc<PairVal> {
-    type Error = ReprError;
-    fn try_into(self) -> Result<PairRepr, Self::Error> {
-        match Rc::try_unwrap(self) {
-            Ok(v) => Ok(v.try_into()?),
-            Err(r) => Ok((&*r).try_into()?),
-        }
-    }
-}
-
 impl From<&CallRepr> for CallVal {
     fn from(value: &CallRepr) -> Self {
-        CallVal::new(
-            Rc::new(Val::from(&value.func)),
-            Rc::new(Val::from(&value.arg)),
-        )
+        CallVal::new(Val::from(&value.func), Val::from(&value.arg))
     }
 }
 
 impl From<CallRepr> for CallVal {
     fn from(value: CallRepr) -> Self {
-        CallVal::new(
-            Rc::new(Val::from(value.func)),
-            Rc::new(Val::from(value.arg)),
-        )
+        CallVal::new(Val::from(value.func), Val::from(value.arg))
     }
 }
 
@@ -392,8 +411,8 @@ impl TryInto<CallRepr> for &CallVal {
     type Error = ReprError;
     fn try_into(self) -> Result<CallRepr, Self::Error> {
         Ok(CallRepr::new(
-            (&*self.func).try_into()?,
-            (&*self.arg).try_into()?,
+            (&self.func).try_into()?,
+            (&self.arg).try_into()?,
         ))
     }
 }
@@ -405,23 +424,9 @@ impl TryInto<CallRepr> for CallVal {
     }
 }
 
-impl TryInto<CallRepr> for Rc<CallVal> {
-    type Error = ReprError;
-    fn try_into(self) -> Result<CallRepr, Self::Error> {
-        match Rc::try_unwrap(self) {
-            Ok(v) => Ok(v.try_into()?),
-            Err(r) => Ok((&*r).try_into()?),
-        }
-    }
-}
-
 impl From<&ListRepr> for ListVal {
     fn from(value: &ListRepr) -> Self {
-        value
-            .iter()
-            .map(|v| Rc::new(v.into()))
-            .collect::<Vec<Rc<Val>>>()
-            .into()
+        value.iter().map(|v| v.into()).collect::<Vec<Val>>().into()
     }
 }
 
@@ -429,8 +434,8 @@ impl From<ListRepr> for ListVal {
     fn from(value: ListRepr) -> Self {
         <_ as Into<Vec<Repr>>>::into(value)
             .into_iter()
-            .map(|v| Rc::new(v.into()))
-            .collect::<Vec<Rc<Val>>>()
+            .map(|v| v.into())
+            .collect::<Vec<Val>>()
             .into()
     }
 }
@@ -438,7 +443,7 @@ impl From<ListRepr> for ListVal {
 impl TryInto<ListRepr> for ListVal {
     type Error = ReprError;
     fn try_into(self) -> Result<ListRepr, Self::Error> {
-        <_ as Into<Vec<Rc<Val>>>>::into(self)
+        <_ as Into<Vec<Val>>>::into(self)
             .into_iter()
             .map(|v| v.try_into())
             .collect::<Result<Vec<Repr>, Self::Error>>()
@@ -450,19 +455,9 @@ impl TryInto<ListRepr> for &ListVal {
     type Error = ReprError;
     fn try_into(self) -> Result<ListRepr, Self::Error> {
         self.iter()
-            .map(|v| (&**v).try_into())
+            .map(|v| v.try_into())
             .collect::<Result<Vec<Repr>, Self::Error>>()
             .map(|v| v.into())
-    }
-}
-
-impl TryInto<ListRepr> for Rc<ListVal> {
-    type Error = ReprError;
-    fn try_into(self) -> Result<ListRepr, Self::Error> {
-        match Rc::try_unwrap(self) {
-            Ok(v) => Ok(v.try_into()?),
-            Err(r) => Ok((&*r).try_into()?),
-        }
     }
 }
 
@@ -470,12 +465,7 @@ impl From<&MapRepr> for MapVal {
     fn from(value: &MapRepr) -> Self {
         value
             .into_iter()
-            .map(|(k, v)| {
-                (
-                    Rc::new(<_ as Into<Val>>::into(k)),
-                    Rc::new(<_ as Into<Val>>::into(v)),
-                )
-            })
+            .map(|(k, v)| (k.clone(), <_ as Into<Val>>::into(v)))
             .collect()
     }
 }
@@ -484,12 +474,7 @@ impl From<MapRepr> for MapVal {
     fn from(value: MapRepr) -> Self {
         value
             .into_iter()
-            .map(|(k, v)| {
-                (
-                    Rc::new(<_ as Into<Val>>::into(k)),
-                    Rc::new(<_ as Into<Val>>::into(v)),
-                )
-            })
+            .map(|(k, v)| (k, <_ as Into<Val>>::into(v)))
             .collect()
     }
 }
@@ -499,10 +484,7 @@ impl TryInto<MapRepr> for &MapVal {
     fn try_into(self) -> Result<MapRepr, Self::Error> {
         self.into_iter()
             .map::<Result<(Repr, Repr), Self::Error>, _>(|(k, v)| {
-                Ok((
-                    <_ as TryInto<Repr>>::try_into(&**k)?,
-                    <_ as TryInto<Repr>>::try_into(&**v)?,
-                ))
+                Ok((k.clone(), <_ as TryInto<Repr>>::try_into(v)?))
             })
             .collect::<Result<MapRepr, Self::Error>>()
     }
@@ -513,24 +495,11 @@ impl TryInto<MapRepr> for MapVal {
     fn try_into(self) -> Result<MapRepr, Self::Error> {
         self.into_iter()
             .map::<Result<(Repr, Repr), Self::Error>, _>(|(k, v)| {
-                Ok((
-                    <_ as TryInto<Repr>>::try_into(k)?,
-                    <_ as TryInto<Repr>>::try_into(v)?,
-                ))
+                Ok((k, <_ as TryInto<Repr>>::try_into(v)?))
             })
             .collect::<Result<MapRepr, Self::Error>>()
     }
 }
 
-impl TryInto<MapRepr> for Rc<MapVal> {
-    type Error = ReprError;
-    fn try_into(self) -> Result<MapRepr, Self::Error> {
-        match Rc::try_unwrap(self) {
-            Ok(v) => Ok(v.try_into()?),
-            Err(r) => Ok((&*r).try_into()?),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ExtendVal;

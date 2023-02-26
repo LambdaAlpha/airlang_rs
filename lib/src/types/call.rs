@@ -2,8 +2,8 @@ use std::hash::Hash;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Call<A, B> {
-    pub(crate) func: A,
-    pub(crate) arg: B,
+    pub func: A,
+    pub arg: B,
 }
 
 impl<A, B> Call<A, B> {

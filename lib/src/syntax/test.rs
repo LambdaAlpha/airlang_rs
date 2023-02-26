@@ -18,10 +18,7 @@ use {
             Unit,
         },
     },
-    std::{
-        error::Error,
-        rc::Rc,
-    },
+    std::error::Error,
 };
 
 mod booleans;
@@ -49,33 +46,33 @@ fn bool(b: bool) -> Repr {
 }
 
 fn int(sign: bool, s: &str, radix: u8) -> Repr {
-    Repr::Int(Rc::new(Int::from_sign_string_radix(sign, s, radix)))
+    Repr::Int(Int::from_sign_string_radix(sign, s, radix))
 }
 
 fn positive_decimal_int(s: &str) -> Repr {
-    Repr::Int(Rc::new(Int::from_sign_string_radix(true, s, 10)))
+    Repr::Int(Int::from_sign_string_radix(true, s, 10))
 }
 
 fn float(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digits: &str) -> Repr {
-    Repr::Float(Rc::new(Float::from_parts(
+    Repr::Float(Float::from_parts(
         sign, integral, fractional, exp_sign, exp_digits,
-    )))
+    ))
 }
 
 fn bytes(b: Vec<u8>) -> Repr {
-    Repr::Bytes(Rc::new(b.into()))
+    Repr::Bytes(b.into())
 }
 
 fn letter(s: &str) -> Repr {
-    Repr::Letter(Rc::new(Letter::new(s.to_owned())))
+    Repr::Letter(Letter::new(s.to_owned()))
 }
 
 fn symbol(s: &str) -> Repr {
-    Repr::Symbol(Rc::new(Symbol::new(s.to_owned())))
+    Repr::Symbol(Symbol::new(s.to_owned()))
 }
 
 fn string(s: &str) -> Repr {
-    Repr::String(Rc::new(s.into()))
+    Repr::String(s.into())
 }
 
 fn pair(first: Repr, second: Repr) -> Repr {
