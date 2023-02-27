@@ -9,6 +9,10 @@ use std::{
         Formatter,
     },
     marker::PhantomData,
+    ops::{
+        Deref,
+        DerefMut,
+    },
     ptr::{
         self,
         NonNull,
@@ -88,8 +92,11 @@ impl<D> ImRef<D> {
     pub(crate) fn state(&self) -> CellState {
         self.raw.state()
     }
+}
 
-    pub(crate) fn deref(&self) -> &D {
+impl<D> Deref for ImRef<D> {
+    type Target = D;
+    fn deref(&self) -> &Self::Target {
         // SAFETY: when self is alive there is no mutable ref and data hasn't been dropped
         unsafe { self.raw.deref() }
     }
@@ -135,14 +142,24 @@ impl<D> MutRef<D> {
         self.raw.state()
     }
 
-    pub(crate) fn deref_mut(&mut self) -> &mut D {
-        // SAFETY: we have exclusive ref and data hasn't been dropped
-        unsafe { self.raw.deref_mut() }
-    }
-
     pub(crate) fn delete(self) {
         // SAFETY: we have exclusive ref and we consume self when delete, so we won't delete twice
         unsafe { self.raw.drop_data() }
+    }
+}
+
+impl<D> Deref for MutRef<D> {
+    type Target = D;
+    fn deref(&self) -> &Self::Target {
+        // SAFETY: we have exclusive ref and data hasn't been dropped
+        unsafe { self.raw.deref() }
+    }
+}
+
+impl<D> DerefMut for MutRef<D> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        // SAFETY: we have exclusive ref and data hasn't been dropped
+        unsafe { self.raw.deref_mut() }
     }
 }
 

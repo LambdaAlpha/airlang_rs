@@ -1,8 +1,14 @@
-use crate::types::{
-    BoxRef,
-    CellState,
-    ImRef,
-    MutRef,
+use {
+    crate::types::{
+        BoxRef,
+        CellState,
+        ImRef,
+        MutRef,
+    },
+    std::ops::{
+        Deref,
+        DerefMut,
+    },
 };
 
 // explicitly drop all variables to make their lifetime clear
@@ -150,16 +156,12 @@ fn test_deref() -> Result<(), CellState> {
 
 #[test]
 fn test_deref_mut() -> Result<(), CellState> {
-    let i = ImRef::new("".to_owned());
-    assert_eq!(i.deref(), "");
-    let b = i.ref_box()?;
-    drop(i);
-    let mut m = b.ref_mut()?;
-    let s = m.deref_mut();
-    s.push('1');
-    let b = m.ref_box()?;
-    drop(m);
-    let i = b.ref_im()?;
-    assert_eq!(i.deref(), "1");
+    let mut m = MutRef::new("".to_owned());
+    assert_eq!(m.deref(), "");
+    {
+        let s = m.deref_mut();
+        s.push('1');
+    }
+    assert_eq!(m.deref(), "1");
     Ok(())
 }
