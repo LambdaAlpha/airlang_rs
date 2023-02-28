@@ -134,7 +134,7 @@ fn generate_bytes(bytes: &Bytes, s: &mut String) {
     utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
 }
 
-fn generate_string(str: &String, s: &mut String) {
+fn generate_string(str: &str, s: &mut String) {
     s.push('"');
     for c in str.chars() {
         let escaped = match c {
@@ -150,11 +150,11 @@ fn generate_string(str: &String, s: &mut String) {
     s.push('"');
 }
 
-fn generate_letter(str: &String, s: &mut String) {
+fn generate_letter(str: &str, s: &mut String) {
     s.push_str(str)
 }
 
-fn generate_symbol(str: &String, s: &mut String) {
+fn generate_symbol(str: &str, s: &mut String) {
     s.push_str(str)
 }
 

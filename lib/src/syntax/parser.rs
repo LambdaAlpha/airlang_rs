@@ -24,6 +24,7 @@ use {
             Int,
             Letter,
             Map,
+            Str,
             Symbol,
             Unit,
         },
@@ -373,9 +374,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let letters = take_while1(|c: char| c.is_alphanumeric() || c == '_');
-    let f = map(letters, |s: &'a str| {
-        Repr::Letter(Letter::new(s.to_owned()))
-    });
+    let f = map(letters, |s: &'a str| Repr::Letter(Letter::from_str(s)));
     context("letter", f)(src)
 }
 
@@ -393,7 +392,7 @@ where
 {
     let symbol_letter_digit = take_while(|c| is_symbol(c) || c.is_alphanumeric());
     let f = map(symbol_letter_digit, |s: &'a str| {
-        Repr::Symbol(Symbol::new(s.to_owned()))
+        Repr::Symbol(Symbol::from_str(s))
     });
     context("symbol", f)(src)
 }
@@ -416,7 +415,7 @@ where
         string
     });
     let delimited_string = delimited(char('"'), cut(collect_fragments), cut(char('"')));
-    let f = map(delimited_string, |s| Repr::String(s.into()));
+    let f = map(delimited_string, |s| Repr::String(Str::from(s)));
     context("string", f)(src)
 }
 

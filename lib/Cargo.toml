@@ -15,6 +15,7 @@ log = "0.4"
 rustc-hash = "1"
 thiserror = "1"
 nom = "7"
+smartstring = "1"
 
 [dependencies.rug]
 version = "1"

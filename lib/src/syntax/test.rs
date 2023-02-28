@@ -14,6 +14,7 @@ use {
             Int,
             Letter,
             Map,
+            Str,
             Symbol,
             Unit,
         },
@@ -64,15 +65,15 @@ fn bytes(b: Vec<u8>) -> Repr {
 }
 
 fn letter(s: &str) -> Repr {
-    Repr::Letter(Letter::new(s.to_owned()))
+    Repr::Letter(Letter::from_str(s))
 }
 
 fn symbol(s: &str) -> Repr {
-    Repr::Symbol(Symbol::new(s.to_owned()))
+    Repr::Symbol(Symbol::from_str(s))
 }
 
 fn string(s: &str) -> Repr {
-    Repr::String(s.into())
+    Repr::String(Str::from(s))
 }
 
 fn pair(first: Repr, second: Repr) -> Repr {
