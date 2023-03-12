@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "airlang"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "criterion",
  "env_logger",
@@ -27,7 +27,7 @@ dependencies = [
 
 [[package]]
 name = "airlang_bin"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "airlang",
  "env_logger",
