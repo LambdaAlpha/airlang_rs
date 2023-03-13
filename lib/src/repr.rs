@@ -1,9 +1,10 @@
 use crate::types::{
+    Apply,
     Bool,
     Bytes,
-    Call,
     Float,
     Int,
+    Inverse,
     Letter,
     List,
     Map,
@@ -25,13 +26,15 @@ pub enum Repr {
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairRepr>),
-    Call(Box<CallRepr>),
+    Apply(Box<ApplyRepr>),
+    Inverse(Box<InverseRepr>),
     List(ListRepr),
     Map(MapRepr),
 }
 
 pub type PairRepr = Pair<Repr, Repr>;
-pub type CallRepr = Call<Repr, Repr>;
+pub type ApplyRepr = Apply<Repr, Repr>;
+pub type InverseRepr = Inverse<Repr, Repr>;
 pub type ListRepr = List<Repr>;
 pub type MapRepr = Map<Repr, Repr>;
 
@@ -99,8 +102,15 @@ impl Repr {
             None
         }
     }
-    pub fn call(&self) -> Option<&Box<CallRepr>> {
-        if let Repr::Call(v) = self {
+    pub fn apply(&self) -> Option<&Box<ApplyRepr>> {
+        if let Repr::Apply(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+    pub fn inverse(&self) -> Option<&Box<InverseRepr>> {
+        if let Repr::Inverse(v) = self {
             Some(v)
         } else {
             None
@@ -176,9 +186,15 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
-impl From<Box<CallRepr>> for Repr {
-    fn from(c: Box<CallRepr>) -> Self {
-        Repr::Call(c)
+impl From<Box<ApplyRepr>> for Repr {
+    fn from(a: Box<ApplyRepr>) -> Self {
+        Repr::Apply(a)
+    }
+}
+
+impl From<Box<InverseRepr>> for Repr {
+    fn from(i: Box<InverseRepr>) -> Self {
+        Repr::Inverse(i)
     }
 }
 

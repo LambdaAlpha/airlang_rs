@@ -1,12 +1,14 @@
 use {
     crate::{
         repr::{
-            CallRepr,
+            ApplyRepr,
+            InverseRepr,
             PairRepr,
             Repr,
         },
         syntax::{
             COMMENT_PREFIX,
+            INVERSE_SEPARATOR,
             LIST_LEFT,
             LIST_RIGHT,
             MAP_LEFT,
@@ -151,12 +153,25 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let tagged_repr = preceded(char(PAIR_SEPARATOR), normed(token));
-    let f = map_opt(tagged_repr, |token| match token.tag {
-        TokenTag::DEFAULT => Some(token.repr),
-        TokenTag::WRAP => Some(token.repr),
-        TokenTag::Pair => None,
-    });
+    let f = map_opt(tagged_repr, unwrap_token);
     context("pair", f)(src)
+}
+
+fn inverse_output<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let tagged_repr = preceded(char(INVERSE_SEPARATOR), normed(token));
+    let f = map_opt(tagged_repr, unwrap_token);
+    context("inverse", f)(src)
+}
+
+fn unwrap_token(token: TaggedRepr) -> Option<Repr> {
+    match token.tag {
+        TokenTag::Default => Some(token.repr),
+        TokenTag::Wrap => Some(token.repr),
+        _ => None,
+    }
 }
 
 fn token<'a, E>(src: &'a str) -> IResult<&'a str, TaggedRepr, E>
@@ -182,14 +197,16 @@ where
         MAP_LEFT => repr_map,
         WRAP_LEFT => wrap,
         PAIR_SEPARATOR => pair_second,
+        INVERSE_SEPARATOR => inverse_output,
         LIST_RIGHT | MAP_RIGHT | WRAP_RIGHT | SEPARATOR | COMMENT_PREFIX => fail,
         s if s.is_ascii_punctuation() => symbol,
         _ => fail,
     };
     let tag = match first {
-        WRAP_LEFT => TokenTag::WRAP,
+        WRAP_LEFT => TokenTag::Wrap,
         PAIR_SEPARATOR => TokenTag::Pair,
-        _ => TokenTag::DEFAULT,
+        INVERSE_SEPARATOR => TokenTag::Inverse,
+        _ => TokenTag::Default,
     };
     let f = tag_repr(tag, parser);
     context("token", f)(src)
@@ -205,9 +222,10 @@ where
 
 #[derive(Copy, Clone)]
 enum TokenTag {
-    DEFAULT,
-    WRAP,
+    Default,
+    Wrap,
     Pair,
+    Inverse,
 }
 
 struct TaggedRepr {
@@ -235,13 +253,13 @@ where
         let first = iter
             .array_chunks::<2>()
             .fold(first, |left, [middle, right]| {
-                Repr::Call(Box::new(CallRepr::new(
+                Repr::Apply(Box::new(ApplyRepr::new(
                     middle,
                     Repr::Pair(Box::new(PairRepr::new(left, right))),
                 )))
             });
         if let Some(second) = last {
-            Repr::Call(Box::new(CallRepr::new(first, second)))
+            Repr::Apply(Box::new(ApplyRepr::new(first, second)))
         } else {
             first
         }
@@ -262,30 +280,38 @@ where
             }
             let mut tokens = tokens.unwrap();
             let repr = match item.tag {
-                TokenTag::DEFAULT => {
+                TokenTag::Default => {
                     if tokens.is_empty() {
                         item.repr
                     } else {
                         match item.repr {
                             Repr::List(list) => {
                                 let last = tokens.pop().unwrap();
-                                Repr::Call(Box::new(CallRepr::new(last, Repr::List(list))))
+                                Repr::Apply(Box::new(ApplyRepr::new(last, Repr::List(list))))
                             }
                             Repr::Map(map) => {
                                 let last = tokens.pop().unwrap();
-                                Repr::Call(Box::new(CallRepr::new(last, Repr::Map(map))))
+                                Repr::Apply(Box::new(ApplyRepr::new(last, Repr::Map(map))))
                             }
                             other => other,
                         }
                     }
                 }
-                TokenTag::WRAP => item.repr,
+                TokenTag::Wrap => item.repr,
                 TokenTag::Pair => {
                     if tokens.is_empty() {
                         return None;
                     } else {
                         let last = tokens.pop().unwrap();
                         Repr::Pair(Box::new(PairRepr::new(last, item.repr)))
+                    }
+                }
+                TokenTag::Inverse => {
+                    if tokens.is_empty() {
+                        return None;
+                    } else {
+                        let last = tokens.pop().unwrap();
+                        Repr::Inverse(Box::new(InverseRepr::new(last, item.repr)))
                     }
                 }
             };
@@ -381,7 +407,7 @@ where
 fn is_symbol(c: char) -> bool {
     match c {
         LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
-        | PAIR_SEPARATOR => false,
+        | PAIR_SEPARATOR | INVERSE_SEPARATOR => false,
         c => c.is_ascii_punctuation(),
     }
 }

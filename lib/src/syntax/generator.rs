@@ -11,15 +11,20 @@ use {
     },
     crate::{
         repr::{
-            CallRepr,
+            ApplyRepr,
+            InverseRepr,
             ListRepr,
             MapRepr,
             Repr::{
                 self,
+                Inverse,
                 Pair,
             },
         },
-        syntax::PRESERVE_PREFIX,
+        syntax::{
+            INVERSE_SEPARATOR,
+            PRESERVE_PREFIX,
+        },
         types::{
             Bytes,
             Float,
@@ -28,7 +33,7 @@ use {
         utils,
     },
     Repr::{
-        Call,
+        Apply,
         List,
         Map,
     },
@@ -105,7 +110,8 @@ pub(crate) fn generate(repr: &Repr, s: &mut String, format: &GenerateFormat, ind
         Repr::Letter(str) => generate_letter(str, s),
         Repr::Symbol(str) => generate_symbol(str, s),
         Pair(p) => generate_pair(&p.first, &p.second, s, format, indent),
-        Call(c) => generate_call(c, s, format, indent),
+        Apply(c) => generate_apply(c, s, format, indent),
+        Inverse(i) => generate_inverse(i, s, format, indent),
         List(list) => generate_list(list, s, format, indent),
         Map(map) => generate_map(map, s, format, indent),
     }
@@ -158,6 +164,67 @@ fn generate_symbol(str: &str, s: &mut String) {
     s.push_str(str)
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+enum Association {
+    // a b
+    Combine,
+    // a b c
+    Infix,
+    // a(), a{}, a:b, a?b
+    Postfix,
+    // a, (), {}, [a]
+    Delimited,
+}
+
+fn association_of(repr: &Repr) -> Association {
+    match repr {
+        Pair(_) => Association::Postfix,
+        Apply(a) => match &a.input {
+            Pair(_) => Association::Infix,
+            List(_) | Map(_) => Association::Postfix,
+            _ => Association::Combine,
+        },
+        Inverse(_) => Association::Postfix,
+        _ => Association::Delimited,
+    }
+}
+
+fn is_prefix(_: &Repr) -> bool {
+    false
+}
+
+fn is_postfix(repr: &Repr) -> bool {
+    matches!(repr, List(_) | Map(_))
+}
+
+fn wrap(wrap: bool, repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
+    if wrap {
+        generate_wrapped(repr, s, format, indent);
+    } else {
+        generate(repr, s, format, indent)
+    }
+}
+
+fn wrap_if_le(
+    threshold: Association,
+    repr: &Repr,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) {
+    wrap(association_of(repr) <= threshold, repr, s, format, indent)
+}
+
+fn wrap_if_lt(
+    threshold: Association,
+    repr: &Repr,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) {
+    wrap(association_of(repr) < threshold, repr, s, format, indent)
+}
+
 fn generate_pair(
     first: &Repr,
     second: &Repr,
@@ -165,184 +232,48 @@ fn generate_pair(
     format: &GenerateFormat,
     indent: usize,
 ) {
-    match first {
-        Call(c) => {
-            match &c.arg {
-                List(_) | Map(_) => {
-                    // a():b
-                    // a{}:b
-                    generate(first, s, format, indent);
-                }
-                _ => {
-                    // [a b]:c
-                    // [a b c]:d
-                    generate_wrapped(first, s, format, indent);
-                }
-            }
-        }
-        _ => {
-            // a:b
-            // a:b:c
-            // ():a
-            // {}:a
-            generate(first, s, format, indent);
-        }
-    }
+    wrap_if_lt(Association::Postfix, first, s, format, indent);
     s.push_str(&format.pair_separator);
-    match second {
-        Call(_) | Pair(_) => {
-            // a:[b()]
-            // a:[b{}]
-            // a:[b c d]
-            // a:[b c]
-            // a:[b:c]
-            generate_wrapped(second, s, format, indent);
+    wrap_if_le(Association::Postfix, second, s, format, indent);
+}
+
+fn generate_apply(apply: &ApplyRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
+    match &apply.input {
+        Pair(p) => {
+            let wrap_left = is_prefix(&p.first) || association_of(&p.first) < Association::Infix;
+            wrap(wrap_left, &p.first, s, format, indent);
+
+            s.push(' ');
+
+            let wrap_middle = is_prefix(&apply.func)
+                || is_postfix(&apply.func)
+                || association_of(&apply.func) <= Association::Infix;
+            wrap(wrap_middle, &apply.func, s, format, indent);
+
+            s.push(' ');
+
+            let wrap_right =
+                is_postfix(&p.second) || association_of(&p.second) <= Association::Infix;
+            wrap(wrap_right, &p.second, s, format, indent)
+        }
+        List(_) | Map(_) => {
+            wrap_if_lt(Association::Postfix, &apply.func, s, format, indent);
+            generate(&apply.input, s, format, indent)
         }
         _ => {
-            // a:b
-            // a:()
-            // a:{}
-            generate(second, s, format, indent);
+            wrap_if_le(Association::Combine, &apply.func, s, format, indent);
+            s.push(' ');
+            let wrap_input = association_of(&apply.input) <= Association::Combine
+                || matches!(&apply.input, Apply(_));
+            wrap(wrap_input, &apply.input, s, format, indent);
         }
     }
 }
 
-fn generate_call(call: &CallRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
-    match &call.arg {
-        Pair(p) => {
-            match &p.first {
-                Call(c) => {
-                    match &c.arg {
-                        Pair(_) | List(_) | Map(_) => {
-                            // a() b c
-                            // a{} b c
-                            // a b c d e
-                            generate(&p.first, s, format, indent)
-                        }
-                        _ => {
-                            // [a b] c d
-                            generate_wrapped(&p.first, s, format, indent)
-                        }
-                    }
-                }
-                _ => {
-                    // a:b c d
-                    // () a b
-                    // {} a b
-                    // a b c
-                    generate(&p.first, s, format, indent)
-                }
-            }
-            s.push(' ');
-            match &call.func {
-                List(_) | Map(_) => {
-                    // a [()] b
-                    // a [{}] b
-                    generate_wrapped(&call.func, s, format, indent)
-                }
-                Call(c) => {
-                    match &c.arg {
-                        List(_) | Map(_) => {
-                            // a b() c
-                            // a b{} c
-                            generate(&call.func, s, format, indent)
-                        }
-                        _ => {
-                            // a [b c d] e
-                            // a [b c] d
-                            generate_wrapped(&call.func, s, format, indent)
-                        }
-                    }
-                }
-                _ => {
-                    // a b c
-                    // a b:c d
-                    generate(&call.func, s, format, indent)
-                }
-            }
-            s.push(' ');
-            match &p.second {
-                Call(c) => {
-                    match &c.arg {
-                        List(_) | Map(_) => {
-                            // a b c()
-                            // a b c{}
-                            generate(&p.second, s, format, indent)
-                        }
-                        _ => {
-                            // a b [c d e]
-                            // a b [c d]
-                            generate_wrapped(&p.second, s, format, indent)
-                        }
-                    }
-                }
-                List(_) | Map(_) => {
-                    // a b [()]
-                    // a b [{}]
-                    generate_wrapped(&p.second, s, format, indent)
-                }
-                _ => {
-                    // a b c
-                    // a b c:d
-                    generate(&p.second, s, format, indent)
-                }
-            }
-        }
-        _ => {
-            match &call.func {
-                Call(c) => {
-                    match &c.arg {
-                        List(_) | Map(_) => {
-                            // a() b
-                            // a{} b
-                            generate(&call.func, s, format, indent)
-                        }
-                        _ => {
-                            // [a b c] d
-                            // [a b] c
-                            generate_wrapped(&call.func, s, format, indent)
-                        }
-                    }
-                }
-                _ => {
-                    // a b
-                    // () a
-                    // {} a
-                    // a:b c
-                    generate(&call.func, s, format, indent)
-                }
-            }
-            match &call.arg {
-                List(_) | Map(_) => {
-                    // a()
-                    // a{}
-                    generate(&call.arg, s, format, indent)
-                }
-                Call(c) => {
-                    match &c.arg {
-                        List(_) | Map(_) => {
-                            // a b()
-                            // a b{}
-                            s.push(' ');
-                            generate(&call.arg, s, format, indent)
-                        }
-                        _ => {
-                            // a [b c]
-                            // a [b c d]
-                            s.push(' ');
-                            generate_wrapped(&call.arg, s, format, indent)
-                        }
-                    }
-                }
-                _ => {
-                    // a b
-                    // a b:c
-                    s.push(' ');
-                    generate(&call.arg, s, format, indent)
-                }
-            }
-        }
-    }
+fn generate_inverse(inverse: &InverseRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
+    wrap_if_lt(Association::Postfix, &inverse.func, s, format, indent);
+    s.push(INVERSE_SEPARATOR);
+    wrap_if_le(Association::Postfix, &inverse.output, s, format, indent);
 }
 
 fn generate_wrapped(repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {

@@ -30,7 +30,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("<"),
         symbol(">"),
         symbol("/"),
-        symbol("?"),
         symbol("+="),
         symbol("<="),
         symbol("->"),

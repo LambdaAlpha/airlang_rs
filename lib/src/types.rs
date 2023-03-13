@@ -7,11 +7,12 @@ pub(crate) use self::refer::{
     MutRef,
 };
 pub(crate) use self::{
+    apply::Apply,
     bool::Bool,
     bytes::Bytes,
-    call::Call,
     float::Float,
     int::Int,
+    inverse::Inverse,
     letter::Letter,
     list::List,
     map::Map,
@@ -21,11 +22,12 @@ pub(crate) use self::{
     unit::Unit,
 };
 
+mod apply;
 mod bool;
 mod bytes;
-mod call;
 mod float;
 mod int;
+mod inverse;
 mod letter;
 mod list;
 mod map;

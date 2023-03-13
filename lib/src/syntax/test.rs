@@ -1,7 +1,8 @@
 use {
     crate::{
         repr::{
-            CallRepr,
+            ApplyRepr,
+            InverseRepr,
             ListRepr,
             MapRepr,
             PairRepr,
@@ -22,13 +23,14 @@ use {
     std::error::Error,
 };
 
+mod applies;
 mod booleans;
 mod bytes;
-mod calls;
 mod comments;
 mod floats;
 mod infixes;
 mod ints;
+mod inverses;
 mod letters;
 mod lists;
 mod maps;
@@ -80,8 +82,12 @@ fn pair(first: Repr, second: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
 }
 
-fn call(func: Repr, arg: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(func, arg)))
+fn apply(func: Repr, input: Repr) -> Repr {
+    Repr::Apply(Box::new(ApplyRepr::new(func, input)))
+}
+
+fn inverse(func: Repr, output: Repr) -> Repr {
+    Repr::Inverse(Box::new(InverseRepr::new(func, output)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -93,21 +99,21 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
 }
 
 fn ltree(root: Repr, leaves: Vec<Repr>) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(
+    Repr::Apply(Box::new(ApplyRepr::new(
         root,
         Repr::List(ListRepr::from(leaves)),
     )))
 }
 
 fn mtree(root: Repr, leaves: Vec<(Repr, Repr)>) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(
+    Repr::Apply(Box::new(ApplyRepr::new(
         root,
         Repr::Map(MapRepr::from_iter(leaves)),
     )))
 }
 
 fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(
+    Repr::Apply(Box::new(ApplyRepr::new(
         middle,
         Repr::Pair(Box::new(PairRepr::new(left, right))),
     )))
@@ -255,13 +261,23 @@ fn test_generate_pairs() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_calls() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/calls.air"), calls::expected)
+fn test_parse_applies() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/applies.air"), applies::expected)
 }
 
 #[test]
-fn test_generate_calls() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/calls.air"))
+fn test_generate_applies() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/applies.air"))
+}
+
+#[test]
+fn test_parse_inverses() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/inverses.air"), inverses::expected)
+}
+
+#[test]
+fn test_generate_inverses() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/inverses.air"))
 }
 
 #[test]
