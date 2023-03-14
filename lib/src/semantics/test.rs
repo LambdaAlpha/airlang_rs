@@ -1,4 +1,3 @@
-#![cfg(feature = "syntax")]
 use {
     crate::{
         semantics::interpret,

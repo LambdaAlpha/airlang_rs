@@ -1,5 +1,4 @@
 #[allow(unused)]
-#[cfg(feature = "semantics")]
 pub(crate) use self::refer::{
     BoxRef,
     CellState,
@@ -32,9 +31,7 @@ mod letter;
 mod list;
 mod map;
 mod pair;
+mod refer;
 mod string;
 mod symbol;
 mod unit;
-
-#[cfg(feature = "semantics")]
-mod refer;

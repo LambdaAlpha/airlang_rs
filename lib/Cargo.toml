@@ -5,11 +5,6 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "The Air Programming Language"
 
-[features]
-default = ["syntax", "semantics"]
-syntax = []
-semantics = []
-
 [dependencies]
 log = "0.4"
 rustc-hash = "1"

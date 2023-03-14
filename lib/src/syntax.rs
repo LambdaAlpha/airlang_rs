@@ -10,13 +10,7 @@ use {
         },
         Finish,
     },
-    std::{
-        fmt::{
-            Debug,
-            Display,
-        },
-        str::FromStr,
-    },
+    std::fmt::Debug,
     thiserror::Error,
 };
 
@@ -58,36 +52,4 @@ pub fn parse(src: &str) -> Result<Repr, ParseError> {
 
 pub fn generate(src: &Repr) -> String {
     generate_pretty(src)
-}
-
-impl Display for Repr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate(self))
-    }
-}
-
-impl Debug for Repr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate(self))
-    }
-}
-
-impl TryFrom<&str> for Repr {
-    type Error = ParseError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        parse(value)
-    }
-}
-
-impl FromStr for Repr {
-    type Err = ParseError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse(s)
-    }
-}
-
-impl Into<String> for &Repr {
-    fn into(self) -> String {
-        generate(self)
-    }
 }

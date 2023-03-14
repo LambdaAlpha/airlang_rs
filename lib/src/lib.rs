@@ -34,10 +34,8 @@
 
 pub mod repr;
 
-#[cfg(feature = "syntax")]
 pub mod syntax;
 
-#[cfg(feature = "semantics")]
 pub mod semantics;
 
 pub(crate) mod types;

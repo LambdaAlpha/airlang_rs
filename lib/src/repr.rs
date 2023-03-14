@@ -1,21 +1,36 @@
-use crate::types::{
-    Apply,
-    Bool,
-    Bytes,
-    Float,
-    Int,
-    Inverse,
-    Letter,
-    List,
-    Map,
-    Pair,
-    Str,
-    Symbol,
-    Unit,
+use {
+    crate::{
+        syntax::{
+            generate,
+            parse,
+            ParseError,
+        },
+        types::{
+            Apply,
+            Bool,
+            Bytes,
+            Float,
+            Int,
+            Inverse,
+            Letter,
+            List,
+            Map,
+            Pair,
+            Str,
+            Symbol,
+            Unit,
+        },
+    },
+    std::{
+        fmt::{
+            Debug,
+            Display,
+        },
+        str::FromStr,
+    },
 };
 
 #[derive(PartialEq, Eq, Clone, Hash)]
-#[cfg_attr(not(feature = "syntax"), derive(Debug))]
 pub enum Repr {
     Unit(Unit),
     Bool(Bool),
@@ -207,5 +222,37 @@ impl From<ListRepr> for Repr {
 impl From<MapRepr> for Repr {
     fn from(m: MapRepr) -> Self {
         Repr::Map(m)
+    }
+}
+
+impl Display for Repr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", generate(self))
+    }
+}
+
+impl Debug for Repr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", generate(self))
+    }
+}
+
+impl TryFrom<&str> for Repr {
+    type Error = ParseError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        parse(value)
+    }
+}
+
+impl FromStr for Repr {
+    type Err = ParseError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse(s)
+    }
+}
+
+impl Into<String> for &Repr {
+    fn into(self) -> String {
+        generate(self)
     }
 }
