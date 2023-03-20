@@ -63,9 +63,11 @@ use {
         },
         error::{
             context,
+            convert_error,
             ContextError,
             FromExternalError,
             ParseError,
+            VerboseError,
         },
         multi::{
             fold_many0,
@@ -82,6 +84,7 @@ use {
             tuple,
         },
         AsChar,
+        Finish,
         IResult,
         Parser,
     },
@@ -91,7 +94,18 @@ use {
     },
 };
 
-pub(crate) fn parse<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+pub fn parse(src: &str) -> Result<Repr, crate::syntax::ParseError> {
+    let ret = top::<VerboseError<&str>>(src).finish();
+    match ret {
+        Ok(r) => Ok(r.1),
+        Err(e) => {
+            let msg = convert_error(src, e);
+            Err(crate::syntax::ParseError { msg })
+        }
+    }
+}
+
+fn top<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {

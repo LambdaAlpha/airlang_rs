@@ -1,15 +1,5 @@
 use {
-    crate::{
-        repr::Repr,
-        syntax::generator::generate_pretty,
-    },
-    nom::{
-        error::{
-            convert_error,
-            VerboseError,
-        },
-        Finish,
-    },
+    crate::repr::Repr,
     std::fmt::Debug,
     thiserror::Error,
 };
@@ -40,16 +30,9 @@ pub struct ParseError {
 }
 
 pub fn parse(src: &str) -> Result<Repr, ParseError> {
-    let ret = parser::parse::<VerboseError<&str>>(src).finish();
-    match ret {
-        Ok(r) => Ok(r.1),
-        Err(e) => {
-            let msg = convert_error(src, e);
-            Err(ParseError { msg })
-        }
-    }
+    parser::parse(src)
 }
 
 pub fn generate(src: &Repr) -> String {
-    generate_pretty(src)
+    generator::generate_pretty(src)
 }
