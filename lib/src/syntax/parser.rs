@@ -245,12 +245,19 @@ fn infix<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(postfix, |tokens| {
+    let f = map_opt(postfix, |tokens| {
         let len = tokens.len();
         let mut iter = tokens.into_iter();
+        if len == 2 {
+            return Some(Repr::Call(Box::new(CallRepr::new(
+                iter.next().unwrap(),
+                iter.next().unwrap(),
+            ))));
+        } else if len % 2 == 0 {
+            return None;
+        }
         let first = iter.next().unwrap();
-        let last = if len % 2 == 0 { iter.next_back() } else { None };
-        let first = iter
+        let infix_repr = iter
             .array_chunks::<2>()
             .fold(first, |left, [middle, right]| {
                 Repr::Call(Box::new(CallRepr::new(
@@ -258,11 +265,7 @@ where
                     Repr::Pair(Box::new(PairRepr::new(left, right))),
                 )))
             });
-        if let Some(second) = last {
-            Repr::Call(Box::new(CallRepr::new(first, second)))
-        } else {
-            first
-        }
+        Some(infix_repr)
     });
     context("infix", f)(src)
 }

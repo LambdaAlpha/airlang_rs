@@ -261,11 +261,15 @@ fn generate_call(call: &CallRepr, s: &mut String, format: &GenerateFormat, inden
             generate(&call.input, s, format, indent)
         }
         _ => {
-            wrap_if_le(Association::Combine, &call.func, s, format, indent);
+            wrap(matches!(&call.func, Call(_)), &call.func, s, format, indent);
             s.push(' ');
-            let wrap_input = association_of(&call.input) <= Association::Combine
-                || matches!(&call.input, Call(_));
-            wrap(wrap_input, &call.input, s, format, indent);
+            wrap(
+                matches!(&call.input, Call(_)),
+                &call.input,
+                s,
+                format,
+                indent,
+            );
         }
     }
 }
