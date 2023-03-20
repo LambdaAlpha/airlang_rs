@@ -1,13 +1,13 @@
 use crate::{
     repr::Repr,
     syntax::test::{
-        apply,
+        call,
         infix,
-        inverse,
         letter,
         list,
         ltree,
         pair,
+        reverse,
     },
 };
 
@@ -16,9 +16,9 @@ pub(crate) fn expected() -> Vec<Repr> {
         infix(letter("a"), letter("b"), letter("c")),
         infix(list(vec![]), letter("b"), letter("c")),
         infix(pair(letter("a"), letter("b")), letter("c"), letter("d")),
-        infix(apply(letter("a"), letter("b")), letter("c"), letter("d")),
+        infix(call(letter("a"), letter("b")), letter("c"), letter("d")),
         infix(ltree(letter("a"), vec![]), letter("b"), letter("c")),
-        infix(inverse(letter("a"), letter("b")), letter("c"), letter("d")),
+        infix(reverse(letter("a"), letter("b")), letter("c"), letter("d")),
         infix(
             infix(letter("a"), letter("b"), letter("c")),
             letter("d"),
@@ -26,9 +26,9 @@ pub(crate) fn expected() -> Vec<Repr> {
         ),
         infix(letter("a"), list(vec![]), letter("b")),
         infix(letter("a"), pair(letter("b"), letter("c")), letter("d")),
-        infix(letter("a"), apply(letter("b"), letter("c")), letter("d")),
+        infix(letter("a"), call(letter("b"), letter("c")), letter("d")),
         infix(letter("a"), ltree(letter("b"), vec![]), letter("c")),
-        infix(letter("a"), inverse(letter("b"), letter("c")), letter("d")),
+        infix(letter("a"), reverse(letter("b"), letter("c")), letter("d")),
         infix(
             letter("a"),
             infix(letter("b"), letter("c"), letter("d")),
@@ -36,9 +36,9 @@ pub(crate) fn expected() -> Vec<Repr> {
         ),
         infix(letter("a"), letter("b"), list(vec![])),
         infix(letter("a"), letter("b"), pair(letter("c"), letter("d"))),
-        infix(letter("a"), letter("b"), apply(letter("c"), letter("d"))),
+        infix(letter("a"), letter("b"), call(letter("c"), letter("d"))),
         infix(letter("a"), letter("b"), ltree(letter("c"), vec![])),
-        infix(letter("a"), letter("b"), inverse(letter("c"), letter("d"))),
+        infix(letter("a"), letter("b"), reverse(letter("c"), letter("d"))),
         infix(
             letter("a"),
             letter("b"),

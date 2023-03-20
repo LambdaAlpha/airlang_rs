@@ -25,7 +25,7 @@ const PRESERVE_PREFIX: char = '\'';
 
 const SEPARATOR: char = ',';
 const PAIR_SEPARATOR: char = ':';
-const INVERSE_SEPARATOR: char = '?';
+const REVERSE_SEPARATOR: char = '?';
 const LIST_LEFT: char = '(';
 const LIST_RIGHT: char = ')';
 const MAP_LEFT: char = '{';

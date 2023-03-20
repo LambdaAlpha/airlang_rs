@@ -1,27 +1,27 @@
 use crate::{
     repr::{
-        ApplyRepr,
-        InverseRepr,
+        CallRepr,
         ListRepr,
         MapRepr,
         PairRepr,
         Repr,
+        ReverseRepr,
     },
     semantics::ReprError,
     types::{
-        Apply,
         Bool,
         BoxRef,
         Bytes,
+        Call,
         Float,
         ImRef,
         Int,
-        Inverse,
         Letter,
         List,
         Map,
         MutRef,
         Pair,
+        Reverse,
         Str,
         Symbol,
         Unit,
@@ -39,8 +39,8 @@ pub(crate) enum Val {
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairVal>),
-    Apply(Box<ApplyVal>),
-    Inverse(Box<InverseVal>),
+    Call(Box<CallVal>),
+    Reverse(Box<ReverseVal>),
     List(ListVal),
     Map(MapVal),
 
@@ -53,8 +53,8 @@ pub(crate) enum Val {
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
-pub(crate) type ApplyVal = Apply<Val, Val>;
-pub(crate) type InverseVal = Inverse<Val, Val>;
+pub(crate) type CallVal = Call<Val, Val>;
+pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Repr, Val>;
 pub(crate) type BoxRefVal = BoxRef<Val>;
@@ -126,15 +126,15 @@ impl Val {
             None
         }
     }
-    pub fn apply(&self) -> Option<&Box<ApplyVal>> {
-        if let Val::Apply(v) = self {
+    pub fn call(&self) -> Option<&Box<CallVal>> {
+        if let Val::Call(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn inverse(&self) -> Option<&Box<InverseVal>> {
-        if let Val::Inverse(v) = self {
+    pub fn reverse(&self) -> Option<&Box<ReverseVal>> {
+        if let Val::Reverse(v) = self {
             Some(v)
         } else {
             None
@@ -244,15 +244,15 @@ impl From<Box<PairVal>> for Val {
     }
 }
 
-impl From<Box<ApplyVal>> for Val {
-    fn from(value: Box<ApplyVal>) -> Self {
-        Val::Apply(value)
+impl From<Box<CallVal>> for Val {
+    fn from(value: Box<CallVal>) -> Self {
+        Val::Call(value)
     }
 }
 
-impl From<Box<InverseVal>> for Val {
-    fn from(value: Box<InverseVal>) -> Self {
-        Val::Inverse(value)
+impl From<Box<ReverseVal>> for Val {
+    fn from(value: Box<ReverseVal>) -> Self {
+        Val::Reverse(value)
     }
 }
 
@@ -304,8 +304,8 @@ impl From<&Repr> for Val {
             Repr::Symbol(s) => Val::Symbol(s.clone()),
             Repr::String(s) => Val::String(s.clone()),
             Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(&**p))),
-            Repr::Apply(c) => Val::Apply(Box::new(ApplyVal::from(&**c))),
-            Repr::Inverse(i) => Val::Inverse(Box::new(InverseVal::from(&**i))),
+            Repr::Call(c) => Val::Call(Box::new(CallVal::from(&**c))),
+            Repr::Reverse(i) => Val::Reverse(Box::new(ReverseVal::from(&**i))),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
         }
@@ -324,8 +324,8 @@ impl From<Repr> for Val {
             Repr::Symbol(s) => Val::Symbol(s),
             Repr::String(s) => Val::String(s),
             Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(*p))),
-            Repr::Apply(c) => Val::Apply(Box::new(ApplyVal::from(*c))),
-            Repr::Inverse(i) => Val::Inverse(Box::new(InverseVal::from(*i))),
+            Repr::Call(c) => Val::Call(Box::new(CallVal::from(*c))),
+            Repr::Reverse(i) => Val::Reverse(Box::new(ReverseVal::from(*i))),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
         }
@@ -347,11 +347,11 @@ impl TryInto<Repr> for &Val {
             Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
                 &**p,
             )?))),
-            Val::Apply(c) => Ok(Repr::Apply(Box::new(<_ as TryInto<ApplyRepr>>::try_into(
+            Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
                 &**c,
             )?))),
-            Val::Inverse(i) => Ok(Repr::Inverse(Box::new(
-                <_ as TryInto<InverseRepr>>::try_into(&**i)?,
+            Val::Reverse(i) => Ok(Repr::Reverse(Box::new(
+                <_ as TryInto<ReverseRepr>>::try_into(&**i)?,
             ))),
             Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
             Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
@@ -375,11 +375,11 @@ impl TryInto<Repr> for Val {
             Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
                 *p,
             )?))),
-            Val::Apply(c) => Ok(Repr::Apply(Box::new(<_ as TryInto<ApplyRepr>>::try_into(
+            Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
                 *c,
             )?))),
-            Val::Inverse(i) => Ok(Repr::Inverse(Box::new(
-                <_ as TryInto<InverseRepr>>::try_into(*i)?,
+            Val::Reverse(i) => Ok(Repr::Reverse(Box::new(
+                <_ as TryInto<ReverseRepr>>::try_into(*i)?,
             ))),
             Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
             Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
@@ -420,64 +420,61 @@ impl TryInto<PairRepr> for PairVal {
     }
 }
 
-impl From<&ApplyRepr> for ApplyVal {
-    fn from(value: &ApplyRepr) -> Self {
-        ApplyVal::new(Val::from(&value.func), Val::from(&value.input))
+impl From<&CallRepr> for CallVal {
+    fn from(value: &CallRepr) -> Self {
+        CallVal::new(Val::from(&value.func), Val::from(&value.input))
     }
 }
 
-impl From<ApplyRepr> for ApplyVal {
-    fn from(value: ApplyRepr) -> Self {
-        ApplyVal::new(Val::from(value.func), Val::from(value.input))
+impl From<CallRepr> for CallVal {
+    fn from(value: CallRepr) -> Self {
+        CallVal::new(Val::from(value.func), Val::from(value.input))
     }
 }
 
-impl TryInto<ApplyRepr> for &ApplyVal {
+impl TryInto<CallRepr> for &CallVal {
     type Error = ReprError;
-    fn try_into(self) -> Result<ApplyRepr, Self::Error> {
-        Ok(ApplyRepr::new(
+    fn try_into(self) -> Result<CallRepr, Self::Error> {
+        Ok(CallRepr::new(
             (&self.func).try_into()?,
             (&self.input).try_into()?,
         ))
     }
 }
 
-impl TryInto<ApplyRepr> for ApplyVal {
+impl TryInto<CallRepr> for CallVal {
     type Error = ReprError;
-    fn try_into(self) -> Result<ApplyRepr, Self::Error> {
-        Ok(ApplyRepr::new(
-            self.func.try_into()?,
-            self.input.try_into()?,
-        ))
+    fn try_into(self) -> Result<CallRepr, Self::Error> {
+        Ok(CallRepr::new(self.func.try_into()?, self.input.try_into()?))
     }
 }
 
-impl From<&InverseRepr> for InverseVal {
-    fn from(value: &InverseRepr) -> Self {
-        InverseVal::new(Val::from(&value.func), Val::from(&value.output))
+impl From<&ReverseRepr> for ReverseVal {
+    fn from(value: &ReverseRepr) -> Self {
+        ReverseVal::new(Val::from(&value.func), Val::from(&value.output))
     }
 }
 
-impl From<InverseRepr> for InverseVal {
-    fn from(value: InverseRepr) -> Self {
-        InverseVal::new(Val::from(value.func), Val::from(value.output))
+impl From<ReverseRepr> for ReverseVal {
+    fn from(value: ReverseRepr) -> Self {
+        ReverseVal::new(Val::from(value.func), Val::from(value.output))
     }
 }
 
-impl TryInto<InverseRepr> for &InverseVal {
+impl TryInto<ReverseRepr> for &ReverseVal {
     type Error = ReprError;
-    fn try_into(self) -> Result<InverseRepr, Self::Error> {
-        Ok(InverseRepr::new(
+    fn try_into(self) -> Result<ReverseRepr, Self::Error> {
+        Ok(ReverseRepr::new(
             (&self.func).try_into()?,
             (&self.output).try_into()?,
         ))
     }
 }
 
-impl TryInto<InverseRepr> for InverseVal {
+impl TryInto<ReverseRepr> for ReverseVal {
     type Error = ReprError;
-    fn try_into(self) -> Result<InverseRepr, Self::Error> {
-        Ok(InverseRepr::new(
+    fn try_into(self) -> Result<ReverseRepr, Self::Error> {
+        Ok(ReverseRepr::new(
             self.func.try_into()?,
             self.output.try_into()?,
         ))

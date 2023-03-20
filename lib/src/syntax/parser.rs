@@ -1,20 +1,20 @@
 use {
     crate::{
         repr::{
-            ApplyRepr,
-            InverseRepr,
+            CallRepr,
             PairRepr,
             Repr,
+            ReverseRepr,
         },
         syntax::{
             COMMENT_PREFIX,
-            INVERSE_SEPARATOR,
             LIST_LEFT,
             LIST_RIGHT,
             MAP_LEFT,
             MAP_RIGHT,
             PAIR_SEPARATOR,
             PRESERVE_PREFIX,
+            REVERSE_SEPARATOR,
             SEPARATOR,
             WRAP_LEFT,
             WRAP_RIGHT,
@@ -157,13 +157,13 @@ where
     context("pair", f)(src)
 }
 
-fn inverse_output<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn reverse_output<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let tagged_repr = preceded(char(INVERSE_SEPARATOR), normed(token));
+    let tagged_repr = preceded(char(REVERSE_SEPARATOR), normed(token));
     let f = map_opt(tagged_repr, unwrap_token);
-    context("inverse", f)(src)
+    context("reverse", f)(src)
 }
 
 fn unwrap_token(token: TaggedRepr) -> Option<Repr> {
@@ -197,7 +197,7 @@ where
         MAP_LEFT => repr_map,
         WRAP_LEFT => wrap,
         PAIR_SEPARATOR => pair_second,
-        INVERSE_SEPARATOR => inverse_output,
+        REVERSE_SEPARATOR => reverse_output,
         LIST_RIGHT | MAP_RIGHT | WRAP_RIGHT | SEPARATOR | COMMENT_PREFIX => fail,
         s if s.is_ascii_punctuation() => symbol,
         _ => fail,
@@ -205,7 +205,7 @@ where
     let tag = match first {
         WRAP_LEFT => TokenTag::Wrap,
         PAIR_SEPARATOR => TokenTag::Pair,
-        INVERSE_SEPARATOR => TokenTag::Inverse,
+        REVERSE_SEPARATOR => TokenTag::Reverse,
         _ => TokenTag::Default,
     };
     let f = tag_repr(tag, parser);
@@ -225,7 +225,7 @@ enum TokenTag {
     Default,
     Wrap,
     Pair,
-    Inverse,
+    Reverse,
 }
 
 struct TaggedRepr {
@@ -253,13 +253,13 @@ where
         let first = iter
             .array_chunks::<2>()
             .fold(first, |left, [middle, right]| {
-                Repr::Apply(Box::new(ApplyRepr::new(
+                Repr::Call(Box::new(CallRepr::new(
                     middle,
                     Repr::Pair(Box::new(PairRepr::new(left, right))),
                 )))
             });
         if let Some(second) = last {
-            Repr::Apply(Box::new(ApplyRepr::new(first, second)))
+            Repr::Call(Box::new(CallRepr::new(first, second)))
         } else {
             first
         }
@@ -287,11 +287,11 @@ where
                         match item.repr {
                             Repr::List(list) => {
                                 let last = tokens.pop().unwrap();
-                                Repr::Apply(Box::new(ApplyRepr::new(last, Repr::List(list))))
+                                Repr::Call(Box::new(CallRepr::new(last, Repr::List(list))))
                             }
                             Repr::Map(map) => {
                                 let last = tokens.pop().unwrap();
-                                Repr::Apply(Box::new(ApplyRepr::new(last, Repr::Map(map))))
+                                Repr::Call(Box::new(CallRepr::new(last, Repr::Map(map))))
                             }
                             other => other,
                         }
@@ -306,12 +306,12 @@ where
                         Repr::Pair(Box::new(PairRepr::new(last, item.repr)))
                     }
                 }
-                TokenTag::Inverse => {
+                TokenTag::Reverse => {
                     if tokens.is_empty() {
                         return None;
                     } else {
                         let last = tokens.pop().unwrap();
-                        Repr::Inverse(Box::new(InverseRepr::new(last, item.repr)))
+                        Repr::Reverse(Box::new(ReverseRepr::new(last, item.repr)))
                     }
                 }
             };
@@ -407,7 +407,7 @@ where
 fn is_symbol(c: char) -> bool {
     match c {
         LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
-        | PAIR_SEPARATOR | INVERSE_SEPARATOR => false,
+        | PAIR_SEPARATOR | REVERSE_SEPARATOR => false,
         c => c.is_ascii_punctuation(),
     }
 }

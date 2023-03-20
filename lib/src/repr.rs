@@ -6,16 +6,16 @@ use {
             ParseError,
         },
         types::{
-            Apply,
             Bool,
             Bytes,
+            Call,
             Float,
             Int,
-            Inverse,
             Letter,
             List,
             Map,
             Pair,
+            Reverse,
             Str,
             Symbol,
             Unit,
@@ -41,15 +41,15 @@ pub enum Repr {
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairRepr>),
-    Apply(Box<ApplyRepr>),
-    Inverse(Box<InverseRepr>),
+    Call(Box<CallRepr>),
+    Reverse(Box<ReverseRepr>),
     List(ListRepr),
     Map(MapRepr),
 }
 
 pub type PairRepr = Pair<Repr, Repr>;
-pub type ApplyRepr = Apply<Repr, Repr>;
-pub type InverseRepr = Inverse<Repr, Repr>;
+pub type CallRepr = Call<Repr, Repr>;
+pub type ReverseRepr = Reverse<Repr, Repr>;
 pub type ListRepr = List<Repr>;
 pub type MapRepr = Map<Repr, Repr>;
 
@@ -117,15 +117,15 @@ impl Repr {
             None
         }
     }
-    pub fn apply(&self) -> Option<&Box<ApplyRepr>> {
-        if let Repr::Apply(v) = self {
+    pub fn call(&self) -> Option<&Box<CallRepr>> {
+        if let Repr::Call(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn inverse(&self) -> Option<&Box<InverseRepr>> {
-        if let Repr::Inverse(v) = self {
+    pub fn reverse(&self) -> Option<&Box<ReverseRepr>> {
+        if let Repr::Reverse(v) = self {
             Some(v)
         } else {
             None
@@ -201,15 +201,15 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
-impl From<Box<ApplyRepr>> for Repr {
-    fn from(a: Box<ApplyRepr>) -> Self {
-        Repr::Apply(a)
+impl From<Box<CallRepr>> for Repr {
+    fn from(a: Box<CallRepr>) -> Self {
+        Repr::Call(a)
     }
 }
 
-impl From<Box<InverseRepr>> for Repr {
-    fn from(i: Box<InverseRepr>) -> Self {
-        Repr::Inverse(i)
+impl From<Box<ReverseRepr>> for Repr {
+    fn from(i: Box<ReverseRepr>) -> Self {
+        Repr::Reverse(i)
     }
 }
 
