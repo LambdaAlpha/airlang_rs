@@ -29,7 +29,9 @@
     const_type_id,
     arc_unwrap_or_clone,
     iter_array_chunks,
-    slice_concat_trait
+    slice_concat_trait,
+    try_trait_v2,
+    try_blocks
 )]
 
 pub mod repr;

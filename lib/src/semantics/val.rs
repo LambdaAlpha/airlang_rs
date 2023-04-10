@@ -1,30 +1,37 @@
-use crate::{
-    repr::{
-        CallRepr,
-        ListRepr,
-        MapRepr,
-        PairRepr,
-        Repr,
-        ReverseRepr,
+use {
+    crate::{
+        repr::{
+            CallRepr,
+            ListRepr,
+            MapRepr,
+            PairRepr,
+            Repr,
+            ReverseRepr,
+        },
+        semantics::ReprError,
+        types::{
+            Bool,
+            BoxRef,
+            Bytes,
+            Call,
+            Float,
+            ImRef,
+            Int,
+            Letter,
+            List,
+            Map,
+            MutRef,
+            Pair,
+            Reverse,
+            Str,
+            Symbol,
+            Unit,
+        },
     },
-    semantics::ReprError,
-    types::{
-        Bool,
-        BoxRef,
-        Bytes,
-        Call,
-        Float,
-        ImRef,
-        Int,
-        Letter,
-        List,
-        Map,
-        MutRef,
-        Pair,
-        Reverse,
-        Str,
-        Symbol,
-        Unit,
+    std::ops::{
+        ControlFlow,
+        FromResidual,
+        Try,
     },
 };
 
@@ -63,6 +70,10 @@ pub(crate) type MutRefVal = MutRef<Val>;
 
 #[allow(dead_code)]
 impl Val {
+    pub fn is_unit(&self) -> bool {
+        matches!(self, Val::Unit(_))
+    }
+
     pub fn unit(&self) -> Option<&Unit> {
         if let Val::Unit(v) = self {
             Some(v)
@@ -555,6 +566,28 @@ impl TryInto<MapRepr> for MapVal {
                 Ok((k, <_ as TryInto<Repr>>::try_into(v)?))
             })
             .collect::<Result<MapRepr, Self::Error>>()
+    }
+}
+
+impl FromResidual for Val {
+    fn from_residual(residual: <Self as Try>::Residual) -> Self {
+        residual
+    }
+}
+
+impl Try for Val {
+    type Output = Val;
+    type Residual = Val;
+
+    fn from_output(output: Self::Output) -> Self {
+        output
+    }
+
+    fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
+        match self {
+            Val::Unit(_) => ControlFlow::Break(self),
+            _ => ControlFlow::Continue(self),
+        }
     }
 }
 

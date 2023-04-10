@@ -26,6 +26,11 @@ use {
             Debug,
             Display,
         },
+        ops::{
+            ControlFlow,
+            FromResidual,
+            Try,
+        },
         str::FromStr,
     },
 };
@@ -54,6 +59,10 @@ pub type ListRepr = List<Repr>;
 pub type MapRepr = Map<Repr, Repr>;
 
 impl Repr {
+    pub fn is_unit(&self) -> bool {
+        matches!(self, Repr::Unit(_))
+    }
+
     pub fn unit(&self) -> Option<&Unit> {
         if let Repr::Unit(v) = self {
             Some(v)
@@ -254,5 +263,27 @@ impl FromStr for Repr {
 impl Into<String> for &Repr {
     fn into(self) -> String {
         generate(self)
+    }
+}
+
+impl FromResidual for Repr {
+    fn from_residual(residual: <Self as Try>::Residual) -> Self {
+        residual
+    }
+}
+
+impl Try for Repr {
+    type Output = Repr;
+    type Residual = Repr;
+
+    fn from_output(output: Self::Output) -> Self {
+        output
+    }
+
+    fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
+        match self {
+            Repr::Unit(_) => ControlFlow::Break(self),
+            _ => ControlFlow::Continue(self),
+        }
     }
 }
