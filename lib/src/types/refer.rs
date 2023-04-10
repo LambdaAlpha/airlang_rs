@@ -1,21 +1,24 @@
-use std::{
-    alloc,
-    cell::{
-        Cell,
-        UnsafeCell,
-    },
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    marker::PhantomData,
-    ops::{
-        Deref,
-        DerefMut,
-    },
-    ptr::{
-        self,
-        NonNull,
+use {
+    crate::traits::TryClone,
+    std::{
+        alloc,
+        cell::{
+            Cell,
+            UnsafeCell,
+        },
+        fmt::{
+            Debug,
+            Formatter,
+        },
+        marker::PhantomData,
+        ops::{
+            Deref,
+            DerefMut,
+        },
+        ptr::{
+            self,
+            NonNull,
+        },
     },
 };
 
@@ -46,6 +49,15 @@ impl<D> BoxRef<D> {
 
     pub(crate) fn state(&self) -> CellState {
         self.raw.state()
+    }
+}
+
+impl<D> TryClone for BoxRef<D> {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        self.ref_box().ok()
     }
 }
 
@@ -91,6 +103,15 @@ impl<D> ImRef<D> {
 
     pub(crate) fn state(&self) -> CellState {
         self.raw.state()
+    }
+}
+
+impl<D> TryClone for ImRef<D> {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        self.ref_im().ok()
     }
 }
 
@@ -145,6 +166,15 @@ impl<D> MutRef<D> {
     pub(crate) fn delete(self) {
         // SAFETY: we have exclusive ref and we consume self when delete, so we won't delete twice
         unsafe { self.raw.drop_data() }
+    }
+}
+
+impl<D> TryClone for MutRef<D> {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        None
     }
 }
 

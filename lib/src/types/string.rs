@@ -1,4 +1,5 @@
 use {
+    crate::traits::TryClone,
     smartstring::{
         LazyCompact,
         SmartString,
@@ -37,5 +38,14 @@ impl ToString for Str {
 impl Into<String> for Str {
     fn into(self) -> String {
         self.0.into()
+    }
+}
+
+impl TryClone for Str {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(self.clone())
     }
 }

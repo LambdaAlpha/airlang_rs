@@ -1,4 +1,5 @@
 use {
+    crate::traits::TryClone,
     smartstring::alias::CompactString,
     std::ops::Deref,
 };
@@ -28,5 +29,14 @@ impl ToString for Letter {
 impl Into<String> for Letter {
     fn into(self) -> String {
         self.0.into()
+    }
+}
+
+impl TryClone for Letter {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(self.clone())
     }
 }

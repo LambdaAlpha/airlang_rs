@@ -9,11 +9,13 @@ use {
             ReverseRepr,
         },
         semantics::ReprError,
+        traits::TryClone,
         types::{
             Bool,
             BoxRef,
             Bytes,
             Call,
+            Extend,
             Float,
             ImRef,
             Int,
@@ -55,8 +57,7 @@ pub(crate) enum Val {
     ImRef(ImRefVal),
     MutRef(MutRefVal),
 
-    // todo more val
-    Extend(ExtendVal),
+    Extend(Extend),
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
@@ -186,7 +187,7 @@ impl Val {
             None
         }
     }
-    pub fn extended(&self) -> Option<&ExtendVal> {
+    pub fn extended(&self) -> Option<&Extend> {
         if let Val::Extend(v) = self {
             Some(v)
         } else {
@@ -297,8 +298,8 @@ impl From<MutRefVal> for Val {
     }
 }
 
-impl From<ExtendVal> for Val {
-    fn from(value: ExtendVal) -> Self {
+impl From<Extend> for Val {
+    fn from(value: Extend) -> Self {
         Val::Extend(value)
     }
 }
@@ -591,5 +592,29 @@ impl Try for Val {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct ExtendVal;
+impl TryClone for Val {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        match self {
+            Val::Unit(u) => Some(Val::Unit(u.try_clone()?)),
+            Val::Bool(b) => Some(Val::Bool(b.try_clone()?)),
+            Val::Int(i) => Some(Val::Int(i.try_clone()?)),
+            Val::Float(f) => Some(Val::Float(f.try_clone()?)),
+            Val::Bytes(b) => Some(Val::Bytes(b.try_clone()?)),
+            Val::Letter(l) => Some(Val::Letter(l.try_clone()?)),
+            Val::Symbol(s) => Some(Val::Symbol(s.try_clone()?)),
+            Val::String(s) => Some(Val::String(s.try_clone()?)),
+            Val::Pair(p) => Some(Val::Pair(p.try_clone()?)),
+            Val::Call(c) => Some(Val::Call(c.try_clone()?)),
+            Val::Reverse(r) => Some(Val::Reverse(r.try_clone()?)),
+            Val::List(l) => Some(Val::List(l.try_clone()?)),
+            Val::Map(m) => Some(Val::Map(m.try_clone()?)),
+            Val::BoxRef(b) => Some(Val::BoxRef(b.try_clone()?)),
+            Val::ImRef(i) => Some(Val::ImRef(i.try_clone()?)),
+            Val::MutRef(m) => Some(Val::MutRef(m.try_clone()?)),
+            Val::Extend(e) => Some(Val::Extend(e.try_clone()?)),
+        }
+    }
+}

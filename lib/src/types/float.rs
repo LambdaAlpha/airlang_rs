@@ -1,4 +1,5 @@
 use {
+    crate::traits::TryClone,
     rug::Float as RugFloat,
     std::{
         fmt::{
@@ -68,5 +69,14 @@ impl Display for Float {
         let exp = exp.map_or("".to_owned(), |i| format!("e{i}"));
         let s = format!("{sign}0.{num}{exp}");
         write!(f, "{s}")
+    }
+}
+
+impl TryClone for Float {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(self.clone())
     }
 }

@@ -1,29 +1,7 @@
+use crate::traits::TryClone;
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Bool(bool);
-
-impl From<&bool> for Bool {
-    fn from(value: &bool) -> Self {
-        Bool(*value)
-    }
-}
-
-impl From<bool> for Bool {
-    fn from(value: bool) -> Self {
-        Bool(value)
-    }
-}
-
-impl Into<bool> for Bool {
-    fn into(self) -> bool {
-        self.0
-    }
-}
-
-impl Into<bool> for &Bool {
-    fn into(self) -> bool {
-        self.0
-    }
-}
 
 impl Bool {
     pub fn new(b: bool) -> Self {
@@ -52,5 +30,38 @@ impl Bool {
 
     pub fn not(&self) -> Bool {
         Bool(!self.0)
+    }
+}
+
+impl From<&bool> for Bool {
+    fn from(value: &bool) -> Self {
+        Bool(*value)
+    }
+}
+
+impl From<bool> for Bool {
+    fn from(value: bool) -> Self {
+        Bool(value)
+    }
+}
+
+impl Into<bool> for Bool {
+    fn into(self) -> bool {
+        self.0
+    }
+}
+
+impl Into<bool> for &Bool {
+    fn into(self) -> bool {
+        self.0
+    }
+}
+
+impl TryClone for Bool {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(self.clone())
     }
 }

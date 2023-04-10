@@ -9,6 +9,7 @@ pub(crate) use self::{
     bool::Bool,
     bytes::Bytes,
     call::Call,
+    extend::Extend,
     float::Float,
     int::Int,
     letter::Letter,
@@ -24,6 +25,7 @@ pub(crate) use self::{
 mod bool;
 mod bytes;
 mod call;
+mod extend;
 mod float;
 mod int;
 mod letter;

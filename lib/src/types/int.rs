@@ -1,4 +1,5 @@
 use {
+    crate::traits::TryClone,
     rug::Integer,
     std::fmt::{
         Debug,
@@ -22,5 +23,14 @@ impl Int {
 impl Display for Int {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Display>::fmt(&self.0, f)
+    }
+}
+
+impl TryClone for Int {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(self.clone())
     }
 }

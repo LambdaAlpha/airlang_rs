@@ -5,6 +5,7 @@ use {
             parse,
             ParseError,
         },
+        traits::TryClone,
         types::{
             Bool,
             Bytes,
@@ -285,5 +286,14 @@ impl Try for Repr {
             Repr::Unit(_) => ControlFlow::Break(self),
             _ => ControlFlow::Continue(self),
         }
+    }
+}
+
+impl TryClone for Repr {
+    fn try_clone(&self) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(self.clone())
     }
 }

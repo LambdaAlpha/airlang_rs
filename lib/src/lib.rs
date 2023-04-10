@@ -42,5 +42,7 @@ pub mod semantics;
 
 pub(crate) mod types;
 
+pub(crate) mod traits;
+
 #[allow(dead_code)]
 pub(crate) mod utils;
