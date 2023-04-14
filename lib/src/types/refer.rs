@@ -10,8 +10,12 @@ use {
             Debug,
             Formatter,
         },
-        marker::PhantomData,
+        marker::{
+            PhantomData,
+            Unsize,
+        },
         ops::{
+            CoerceUnsized,
             Deref,
             DerefMut,
         },
@@ -23,7 +27,7 @@ use {
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) struct BoxRef<D> {
+pub(crate) struct BoxRef<D: ?Sized> {
     raw: RawRef<D>,
 }
 
@@ -34,7 +38,10 @@ impl<D> BoxRef<D> {
             raw: RawRef::new(d, RefType::Box),
         }
     }
+}
 
+#[allow(unused)]
+impl<D: ?Sized> BoxRef<D> {
     pub(crate) fn ref_box(&self) -> Result<Self, CellState> {
         Self::try_from(&self.raw)
     }
@@ -52,7 +59,9 @@ impl<D> BoxRef<D> {
     }
 }
 
-impl<D> TryClone for BoxRef<D> {
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<BoxRef<U>> for BoxRef<D> {}
+
+impl<D: ?Sized> TryClone for BoxRef<D> {
     fn try_clone(&self) -> Option<Self>
     where
         Self: Sized,
@@ -61,7 +70,7 @@ impl<D> TryClone for BoxRef<D> {
     }
 }
 
-impl<D> TryFrom<&RawRef<D>> for BoxRef<D> {
+impl<D: ?Sized> TryFrom<&RawRef<D>> for BoxRef<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(BoxRef {
@@ -70,14 +79,14 @@ impl<D> TryFrom<&RawRef<D>> for BoxRef<D> {
     }
 }
 
-impl<D> Drop for BoxRef<D> {
+impl<D: ?Sized> Drop for BoxRef<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Box)
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) struct ImRef<D> {
+pub(crate) struct ImRef<D: ?Sized> {
     raw: RawRef<D>,
 }
 
@@ -88,7 +97,10 @@ impl<D> ImRef<D> {
             raw: RawRef::new(d, RefType::Im),
         }
     }
+}
 
+#[allow(unused)]
+impl<D: ?Sized> ImRef<D> {
     pub(crate) fn from_box(box_cell: &BoxRef<D>) -> Result<Self, CellState> {
         Self::try_from(&box_cell.raw)
     }
@@ -106,7 +118,9 @@ impl<D> ImRef<D> {
     }
 }
 
-impl<D> TryClone for ImRef<D> {
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<ImRef<U>> for ImRef<D> {}
+
+impl<D: ?Sized> TryClone for ImRef<D> {
     fn try_clone(&self) -> Option<Self>
     where
         Self: Sized,
@@ -115,7 +129,7 @@ impl<D> TryClone for ImRef<D> {
     }
 }
 
-impl<D> Deref for ImRef<D> {
+impl<D: ?Sized> Deref for ImRef<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
         // SAFETY: when self is alive there is no mutable ref and data hasn't been dropped
@@ -123,7 +137,7 @@ impl<D> Deref for ImRef<D> {
     }
 }
 
-impl<D> TryFrom<&RawRef<D>> for ImRef<D> {
+impl<D: ?Sized> TryFrom<&RawRef<D>> for ImRef<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(ImRef {
@@ -132,14 +146,14 @@ impl<D> TryFrom<&RawRef<D>> for ImRef<D> {
     }
 }
 
-impl<D> Drop for ImRef<D> {
+impl<D: ?Sized> Drop for ImRef<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Im)
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) struct MutRef<D> {
+pub(crate) struct MutRef<D: ?Sized> {
     raw: RawRef<D>,
 }
 
@@ -150,7 +164,10 @@ impl<D> MutRef<D> {
             raw: RawRef::new(d, RefType::Mut),
         }
     }
+}
 
+#[allow(unused)]
+impl<D: ?Sized> MutRef<D> {
     pub(crate) fn from_box(box_cell: &BoxRef<D>) -> Result<Self, CellState> {
         Self::try_from(&box_cell.raw)
     }
@@ -169,7 +186,9 @@ impl<D> MutRef<D> {
     }
 }
 
-impl<D> TryClone for MutRef<D> {
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<MutRef<U>> for MutRef<D> {}
+
+impl<D: ?Sized> TryClone for MutRef<D> {
     fn try_clone(&self) -> Option<Self>
     where
         Self: Sized,
@@ -178,7 +197,7 @@ impl<D> TryClone for MutRef<D> {
     }
 }
 
-impl<D> Deref for MutRef<D> {
+impl<D: ?Sized> Deref for MutRef<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
         // SAFETY: we have exclusive ref and data hasn't been dropped
@@ -186,14 +205,14 @@ impl<D> Deref for MutRef<D> {
     }
 }
 
-impl<D> DerefMut for MutRef<D> {
+impl<D: ?Sized> DerefMut for MutRef<D> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY: we have exclusive ref and data hasn't been dropped
         unsafe { self.raw.deref_mut() }
     }
 }
 
-impl<D> TryFrom<&RawRef<D>> for MutRef<D> {
+impl<D: ?Sized> TryFrom<&RawRef<D>> for MutRef<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(MutRef {
@@ -202,14 +221,14 @@ impl<D> TryFrom<&RawRef<D>> for MutRef<D> {
     }
 }
 
-impl<D> Drop for MutRef<D> {
+impl<D: ?Sized> Drop for MutRef<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Mut)
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
-struct RawRef<D> {
+struct RawRef<D: ?Sized> {
     ptr: NonNull<SharedCell<D>>,
     phantom: PhantomData<SharedCell<D>>,
 }
@@ -221,7 +240,9 @@ impl<D> RawRef<D> {
             phantom: PhantomData,
         }
     }
+}
 
+impl<D: ?Sized> RawRef<D> {
     fn clone_from(&self, ref_type: RefType) -> Result<RawRef<D>, CellState> {
         self.shared().clone_from(ref_type)?;
         Ok(RawRef {
@@ -270,7 +291,9 @@ impl<D> RawRef<D> {
     }
 }
 
-struct SharedCell<D> {
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<RawRef<U>> for RawRef<D> {}
+
+struct SharedCell<D: ?Sized> {
     state: SharedState,
     data: SharedData<D>,
 }
@@ -282,7 +305,9 @@ impl<D> SharedCell<D> {
             data: SharedData::new(d),
         }
     }
+}
 
+impl<D: ?Sized> SharedCell<D> {
     fn state(&self) -> CellState {
         self.state.state()
     }
@@ -320,7 +345,7 @@ impl<D> SharedCell<D> {
     }
 }
 
-pub(crate) struct SharedData<D> {
+pub(crate) struct SharedData<D: ?Sized> {
     value: UnsafeCell<D>,
 }
 
@@ -330,7 +355,9 @@ impl<D> SharedData<D> {
             value: UnsafeCell::new(d),
         }
     }
+}
 
+impl<D: ?Sized> SharedData<D> {
     // SAFETY: make sure data not dropped and there is no mut ref
     unsafe fn deref<'a>(&self) -> &'a D {
         self.value.get().as_ref().unwrap()

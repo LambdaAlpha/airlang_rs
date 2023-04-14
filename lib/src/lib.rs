@@ -31,7 +31,9 @@
     iter_array_chunks,
     slice_concat_trait,
     try_trait_v2,
-    try_blocks
+    try_blocks,
+    unsize,
+    coerce_unsized
 )]
 
 pub mod repr;

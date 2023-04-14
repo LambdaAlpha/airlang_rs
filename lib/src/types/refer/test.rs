@@ -146,6 +146,18 @@ fn assert_cell_state(
 }
 
 #[test]
+fn test_dst() -> Result<(), CellState> {
+    let a: ImRef<dyn ToString> = ImRef::new(1i8);
+    let b: ImRef<dyn ToString> = ImRef::new(true);
+    let _ = (a.to_string(), b.to_string());
+
+    let a: ImRef<[i8]> = ImRef::new([1]);
+    let b: ImRef<[i8]> = ImRef::new([1, 2]);
+    let _ = (&a[..], &b[..]);
+    Ok(())
+}
+
+#[test]
 fn test_deref() -> Result<(), CellState> {
     let i1 = ImRef::new("".to_owned());
     let i2 = i1.ref_im()?;
