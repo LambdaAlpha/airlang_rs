@@ -164,6 +164,15 @@ impl<D> MutRef<D> {
             raw: RawRef::new(d, RefType::Mut),
         }
     }
+
+    pub(crate) fn take(self) -> D {
+        // SAFETY:
+        // we have exclusive ref
+        // we consume self when taking
+        // we change the state to dropped
+        // so we won't access the data anymore
+        unsafe { self.raw.take_data() }
+    }
 }
 
 #[allow(unused)]
@@ -181,7 +190,11 @@ impl<D: ?Sized> MutRef<D> {
     }
 
     pub(crate) fn delete(self) {
-        // SAFETY: we have exclusive ref and we consume self when delete, so we won't delete twice
+        // SAFETY:
+        // we have exclusive ref
+        // we consume self when deleting
+        // we change the state to dropped
+        // so we won't access the data anymore
         unsafe { self.raw.drop_data() }
     }
 }
@@ -239,6 +252,11 @@ impl<D> RawRef<D> {
             ptr: Box::leak(Box::new(SharedCell::new(d, ref_type))).into(),
             phantom: PhantomData,
         }
+    }
+
+    // SAFETY: call only once and there is no ref
+    unsafe fn take_data(&self) -> D {
+        self.shared().take_data()
     }
 }
 
@@ -305,6 +323,12 @@ impl<D> SharedCell<D> {
             data: SharedData::new(d),
         }
     }
+
+    // SAFETY: call only once and there is no ref
+    unsafe fn take_data(&self) -> D {
+        self.state.drop();
+        self.data.take()
+    }
 }
 
 impl<D: ?Sized> SharedCell<D> {
@@ -354,6 +378,11 @@ impl<D> SharedData<D> {
         SharedData {
             value: UnsafeCell::new(d),
         }
+    }
+
+    // SAFETY: make sure data not dropped and there is no ref
+    unsafe fn take(&self) -> D {
+        ptr::read(self.value.get())
     }
 }
 

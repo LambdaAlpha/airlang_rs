@@ -177,3 +177,14 @@ fn test_deref_mut() -> Result<(), CellState> {
     assert_eq!(m.deref(), "1");
     Ok(())
 }
+
+#[test]
+fn test_take() -> Result<(), CellState> {
+    let m = MutRef::new("123".to_owned());
+    let b = m.ref_box()?;
+    let s = m.take();
+    assert_eq!(s, "123".to_owned());
+    b.ref_im().unwrap_err();
+    b.ref_mut().unwrap_err();
+    Ok(())
+}
