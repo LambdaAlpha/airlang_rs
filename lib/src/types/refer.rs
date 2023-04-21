@@ -85,6 +85,12 @@ impl<D: ?Sized> Drop for BoxRef<D> {
     }
 }
 
+impl<D: Default> Default for BoxRef<D> {
+    fn default() -> Self {
+        BoxRef::new(D::default())
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct ImRef<D: ?Sized> {
     raw: RawRef<D>,
@@ -149,6 +155,12 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for ImRef<D> {
 impl<D: ?Sized> Drop for ImRef<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Im)
+    }
+}
+
+impl<D: Default> Default for ImRef<D> {
+    fn default() -> Self {
+        ImRef::new(D::default())
     }
 }
 
@@ -237,6 +249,12 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for MutRef<D> {
 impl<D: ?Sized> Drop for MutRef<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Mut)
+    }
+}
+
+impl<D: Default> Default for MutRef<D> {
+    fn default() -> Self {
+        MutRef::new(D::default())
     }
 }
 
