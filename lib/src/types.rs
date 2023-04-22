@@ -1,10 +1,4 @@
 #[allow(unused)]
-pub(crate) use self::refer::{
-    BoxRef,
-    CellState,
-    ImRef,
-    MutRef,
-};
 pub(crate) use self::{
     bool::Bool,
     bytes::Bytes,
@@ -14,8 +8,17 @@ pub(crate) use self::{
     int::Int,
     letter::Letter,
     list::List,
-    map::Map,
+    map::{
+        Map,
+        Set,
+    },
     pair::Pair,
+    refer::{
+        BoxRef,
+        CellState,
+        ImRef,
+        MutRef,
+    },
     reverse::Reverse,
     string::Str,
     symbol::Symbol,

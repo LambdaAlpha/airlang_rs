@@ -8,7 +8,13 @@ use {
             Repr,
             ReverseRepr,
         },
-        semantics::ReprError,
+        semantics::{
+            eval::{
+                Ctx,
+                Func,
+            },
+            ReprError,
+        },
         traits::TryClone,
         types::{
             Bool,
@@ -57,6 +63,9 @@ pub(crate) enum Val {
     ImRef(ImRefVal),
     MutRef(MutRefVal),
 
+    Func(Func),
+    Ctx(Ctx),
+
     Extend(Extend),
 }
 
@@ -71,117 +80,131 @@ pub(crate) type MutRefVal = MutRef<Val>;
 
 #[allow(dead_code)]
 impl Val {
-    pub fn is_unit(&self) -> bool {
+    pub(crate) fn is_unit(&self) -> bool {
         matches!(self, Val::Unit(_))
     }
 
-    pub fn unit(&self) -> Option<&Unit> {
+    pub(crate) fn unit(&self) -> Option<&Unit> {
         if let Val::Unit(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn bool(&self) -> Option<&Bool> {
+    pub(crate) fn bool(&self) -> Option<&Bool> {
         if let Val::Bool(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn int(&self) -> Option<&Int> {
+    pub(crate) fn int(&self) -> Option<&Int> {
         if let Val::Int(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn float(&self) -> Option<&Float> {
+    pub(crate) fn float(&self) -> Option<&Float> {
         if let Val::Float(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn bytes(&self) -> Option<&Bytes> {
+    pub(crate) fn bytes(&self) -> Option<&Bytes> {
         if let Val::Bytes(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn string(&self) -> Option<&Str> {
+    pub(crate) fn string(&self) -> Option<&Str> {
         if let Val::String(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn letter(&self) -> Option<&Letter> {
+    pub(crate) fn letter(&self) -> Option<&Letter> {
         if let Val::Letter(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn symbol(&self) -> Option<&Symbol> {
+    pub(crate) fn symbol(&self) -> Option<&Symbol> {
         if let Val::Symbol(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn pair(&self) -> Option<&Box<PairVal>> {
+    pub(crate) fn pair(&self) -> Option<&Box<PairVal>> {
         if let Val::Pair(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn call(&self) -> Option<&Box<CallVal>> {
+    pub(crate) fn call(&self) -> Option<&Box<CallVal>> {
         if let Val::Call(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn reverse(&self) -> Option<&Box<ReverseVal>> {
+    pub(crate) fn reverse(&self) -> Option<&Box<ReverseVal>> {
         if let Val::Reverse(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn list(&self) -> Option<&ListVal> {
+    pub(crate) fn list(&self) -> Option<&ListVal> {
         if let Val::List(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn map(&self) -> Option<&MapVal> {
+    pub(crate) fn map(&self) -> Option<&MapVal> {
         if let Val::Map(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn box_ref(&self) -> Option<&BoxRefVal> {
+    pub(crate) fn box_ref(&self) -> Option<&BoxRefVal> {
         if let Val::BoxRef(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn im_ref(&self) -> Option<&ImRefVal> {
+    pub(crate) fn im_ref(&self) -> Option<&ImRefVal> {
         if let Val::ImRef(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub fn mut_ref(&self) -> Option<&MutRefVal> {
+    pub(crate) fn mut_ref(&self) -> Option<&MutRefVal> {
         if let Val::MutRef(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+    pub(crate) fn func(&self) -> Option<&Func> {
+        if let Val::Func(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+    pub(crate) fn ctx(&self) -> Option<&Ctx> {
+        if let Val::Ctx(v) = self {
             Some(v)
         } else {
             None
@@ -295,6 +318,18 @@ impl From<ImRefVal> for Val {
 impl From<MutRefVal> for Val {
     fn from(value: MutRefVal) -> Self {
         Val::MutRef(value)
+    }
+}
+
+impl From<Func> for Val {
+    fn from(value: Func) -> Self {
+        Val::Func(value)
+    }
+}
+
+impl From<Ctx> for Val {
+    fn from(value: Ctx) -> Self {
+        Val::Ctx(value)
     }
 }
 
@@ -614,6 +649,8 @@ impl TryClone for Val {
             Val::BoxRef(b) => Some(Val::BoxRef(b.try_clone()?)),
             Val::ImRef(i) => Some(Val::ImRef(i.try_clone()?)),
             Val::MutRef(m) => Some(Val::MutRef(m.try_clone()?)),
+            Val::Func(f) => Some(Val::Func(f.try_clone()?)),
+            Val::Ctx(c) => Some(Val::Ctx(c.try_clone()?)),
             Val::Extend(e) => Some(Val::Extend(e.try_clone()?)),
         }
     }

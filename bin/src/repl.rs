@@ -1,7 +1,7 @@
 use {
     airlang::{
         self,
-        semantics::interpret,
+        semantics::Interpreter,
         syntax::parse,
     },
     std::{
@@ -14,7 +14,8 @@ use {
 };
 
 pub fn repl() {
-    print_version();
+    let mut interpreter = Interpreter::new();
+    print_version(&mut interpreter);
 
     loop {
         print!("> ");
@@ -24,11 +25,13 @@ pub fn repl() {
         io::stdin().read_line(&mut src).unwrap();
         let src = src.trim();
 
-        if matches!(src, "quit" | "exit") {
-            break;
+        match src {
+            "# quit" | "# exit" => break,
+            "# reset" => interpreter.reset(),
+            _ => {}
         }
 
-        let result = interpret_str(&src);
+        let result = interpret_str(&mut interpreter, &src);
         match result {
             Ok(s) => {
                 println!("{s}")
@@ -38,20 +41,19 @@ pub fn repl() {
     }
 }
 
-fn print_version() {
-    // todo get air version
+fn print_version(interpreter: &mut Interpreter) {
     let version = include_str!("./air/version.air");
-    let version = interpret_str(version);
+    let version = interpret_str(interpreter, version);
     match version {
         Ok(s) => {
-            println!("🜁 air {s}")
+            println!("🜁 Air {s}")
         }
         Err(_) => {}
     }
 }
 
-fn interpret_str(src: &str) -> Result<String, Box<dyn Error>> {
+fn interpret_str(interpreter: &mut Interpreter, src: &str) -> Result<String, Box<dyn Error>> {
     let src_repr = parse(src)?;
-    let ret_repr = interpret(&src_repr)?;
+    let ret_repr = interpreter.interpret(&src_repr)?;
     Ok((&ret_repr).into())
 }
