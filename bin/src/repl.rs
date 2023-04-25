@@ -36,7 +36,9 @@ pub fn repl() {
             Ok(s) => {
                 println!("{s}")
             }
-            Err(_) => {}
+            Err(e) => {
+                println!("# {e}")
+            }
         }
     }
 }
