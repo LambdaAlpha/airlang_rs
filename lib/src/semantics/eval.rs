@@ -2,8 +2,6 @@ use {
     crate::{
         semantics::val::{
             CallVal,
-            ImRefVal,
-            MutRefVal,
             ReverseVal,
             Val,
         },
@@ -132,8 +130,6 @@ impl Composed {
 impl Ctx {
     pub(crate) fn eval(&mut self, input: &Val) -> Val {
         match input {
-            Val::ImRef(i) => self.eval_im_ref(i),
-            Val::MutRef(m) => self.eval_mut_ref(m),
             Val::Letter(l) => self.eval_letter(l),
             Val::Symbol(s) => self.eval_symbol(s),
             Val::Call(c) => self.eval_call(c),
@@ -144,14 +140,6 @@ impl Ctx {
 
     fn eval_default(&mut self, input: &Val) -> Val {
         input.try_clone().unwrap_or_default()
-    }
-
-    fn eval_im_ref(&mut self, i: &ImRefVal) -> Val {
-        self.eval(i)
-    }
-
-    fn eval_mut_ref(&mut self, m: &MutRefVal) -> Val {
-        self.eval(m)
     }
 
     fn eval_letter(&mut self, l: &Letter) -> Val {

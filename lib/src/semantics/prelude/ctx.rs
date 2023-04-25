@@ -40,3 +40,25 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
     }
     Val::default()
 }
+
+pub(crate) fn remove() -> Val {
+    Val::Func(Func {
+        func_trait: FuncTrait {
+            input_eval_mode: EvalMode::Val,
+        },
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::MOVE),
+            eval: ImRef::new(fn_move),
+        }),
+    })
+}
+
+fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
+    let name: &str = match &input {
+        Val::Letter(l) => l,
+        Val::Symbol(s) => s,
+        Val::String(s) => s,
+        _ => return Val::default(),
+    };
+    return ctx.remove(name);
+}
