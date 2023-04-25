@@ -22,6 +22,7 @@ use {
             Formatter,
         },
         marker::PhantomData,
+        mem::swap,
     },
 };
 
@@ -105,12 +106,9 @@ impl Composed {
             variables.insert(input_name.clone(), input);
         }
         if let Some(caller_name) = &self.caller_name {
-            let ctx_clone = if let Some(ctx) = ctx.try_clone() {
-                Val::Ctx(ctx)
-            } else {
-                return Val::default();
-            };
-            variables.insert(caller_name.clone(), ctx_clone);
+            let mut ctx_swap = Ctx::default();
+            swap(ctx, &mut ctx_swap);
+            variables.insert(caller_name.clone(), Val::Ctx(ctx_swap));
         }
         let call_interpreter = PhantomData;
         let reverse_interpreter = ctx.reverse_interpreter.as_ref().and_then(|i| i.try_clone());
@@ -123,7 +121,7 @@ impl Composed {
         };
         let output = new_ctx.eval(&self.eval);
         if let Some(caller_name) = &self.caller_name {
-            if let Val::Ctx(caller) = new_ctx.get(caller_name) {
+            if let Val::Ctx(caller) = new_ctx.remove(caller_name) {
                 *ctx = caller;
             }
         }
@@ -198,7 +196,6 @@ impl Ctx {
             .unwrap_or_default()
     }
 
-    #[allow(unused)]
     pub(crate) fn remove(&mut self, name: &str) -> Val {
         self.constants
             .get(name)
