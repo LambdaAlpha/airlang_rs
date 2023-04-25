@@ -24,6 +24,31 @@ fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_prelude() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/prelude.air"))
+fn test_core() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/core.air"))
+}
+
+#[test]
+fn test_ctx() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/ctx.air"))
+}
+
+#[test]
+fn test_ctrl() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/ctrl.air"))
+}
+
+#[test]
+fn test_bool() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/bool.air"))
+}
+
+#[test]
+fn test_eval() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/eval.air"))
+}
+
+#[test]
+fn test_refer() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/refer.air"))
 }

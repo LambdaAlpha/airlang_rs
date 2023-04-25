@@ -1,0 +1,76 @@
+parse "(1, 2)"
+# ---
+(1, 2)
+# ===
+;(a = 1, parse "a")
+# ---
+a
+# ===
+parse [stringify (1, 2)]
+# ---
+(1, 2)
+# ===
+stringify "1"
+# ---
+"\"1\""
+# ===
+val a
+# ---
+a
+# ===
+;(a = 1, eval [val a])
+# ---
+1
+# ===
+;(
+    f = func{
+        eval: [n a],
+        input_name: a,
+        constants: {n: not}
+    },
+    f 't
+)
+# ---
+'f
+# ===
+;(
+    f = func{
+        eval: [n a],
+        input_name: a,
+        constants: {n: not}
+    },
+    f [not 't]
+)
+# ---
+'t
+# ===
+;(
+    a = 'f,
+    f = func{
+        eval: [a == b],
+        input_name: b,
+        constants: {
+            ==: ==,
+            a: a
+        }
+    },
+    f 't
+)
+# ---
+'f
+# ===
+;(
+    f = func{
+        eval: [;(a = 1, eval code)],
+        input_eval_mode: val,
+        input_name: code,
+        constants: {
+            ;: ;,
+            =: =,
+            eval: eval,
+        }
+    },
+    f a
+)
+# ---
+1
