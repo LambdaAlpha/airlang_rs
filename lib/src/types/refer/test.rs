@@ -179,6 +179,18 @@ fn test_deref_mut() -> Result<(), CellState> {
 }
 
 #[test]
+fn test_borrow_mut() -> Result<(), CellState> {
+    let m = MutRef::new("".to_owned());
+    assert_eq!(m.deref(), "");
+    {
+        let s = m.borrow_mut();
+        s.push('1');
+    }
+    assert_eq!(m.deref(), "1");
+    Ok(())
+}
+
+#[test]
 fn test_take() -> Result<(), CellState> {
     let m = MutRef::new("123".to_owned());
     let b = m.ref_box()?;

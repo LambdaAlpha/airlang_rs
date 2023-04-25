@@ -201,6 +201,11 @@ impl<D: ?Sized> MutRef<D> {
         self.raw.state()
     }
 
+    pub(crate) fn borrow_mut(&self) -> &mut D {
+        // SAFETY: we have exclusive ref and data hasn't been dropped
+        unsafe { self.raw.deref_mut() }
+    }
+
     pub(crate) fn delete(self) {
         // SAFETY:
         // we have exclusive ref
