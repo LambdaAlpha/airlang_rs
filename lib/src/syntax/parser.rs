@@ -390,9 +390,9 @@ fn key_value_pair<'a, E>(src: &'a str) -> IResult<&'a str, (Repr, Repr), E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map_opt(normed(repr), |repr| match repr {
-        Repr::Pair(p) => Some((p.first, p.second)),
-        _ => None,
+    let f = map(normed(repr), |repr| match repr {
+        Repr::Pair(p) => (p.first, p.second),
+        repr => (repr.clone(), repr),
     });
     context("pair", f)(src)
 }
