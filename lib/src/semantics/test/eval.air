@@ -24,9 +24,10 @@ a
 # ===
 ;(
     f = func{
-        eval: [n a],
+        eval: [n [eval_in_ctx c:a]],
         input_name: a,
-        constants: {n: not}
+        caller_name: c,
+        constants: {n: not, eval_in_ctx: eval_in_ctx}
     },
     f 't
 )
@@ -35,9 +36,10 @@ a
 # ===
 ;(
     f = func{
-        eval: [n a],
+        eval: [n [eval_in_ctx c:a]],
         input_name: a,
-        constants: {n: not}
+        caller_name: c,
+        constants: {n: not, eval_in_ctx: eval_in_ctx}
     },
     f [not 't]
 )
@@ -62,7 +64,6 @@ a
 ;(
     f = func{
         eval: [;(a = 1, eval code)],
-        input_eval_mode: val,
         input_name: code,
         constants: {
             ;: ;,

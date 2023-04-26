@@ -2,7 +2,6 @@ use crate::{
     semantics::{
         eval::{
             Ctx,
-            EvalMode,
             Func,
             FuncImpl,
             FuncTrait,
@@ -17,9 +16,7 @@ use crate::{
 
 pub(crate) fn assign() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::ASSIGN),
             eval: ImRef::new(fn_assign),
@@ -43,9 +40,7 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn remove() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::MOVE),
             eval: ImRef::new(fn_move),

@@ -4,7 +4,6 @@ use crate::{
         eval::{
             Composed,
             Ctx,
-            EvalMode,
             Func,
             FuncImpl,
             FuncTrait,
@@ -28,9 +27,7 @@ use crate::{
 
 pub(crate) fn eval() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::EVAL),
             eval: ImRef::new(fn_eval),
@@ -39,14 +36,33 @@ pub(crate) fn eval() -> Val {
 }
 
 fn fn_eval(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.eval(&input)
+    let val = ctx.eval(&input);
+    ctx.eval(&val)
+}
+
+pub(crate) fn eval_in_ctx() -> Val {
+    Val::Func(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::EVAL_IN_CTX),
+            eval: ImRef::new(fn_eval_in_ctx),
+        }),
+    })
+}
+
+fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::Pair(pair) = input {
+        if let Val::Ctx(mut target_ctx) = ctx.eval(&pair.first) {
+            let val = ctx.eval(&pair.second);
+            return target_ctx.eval(&val);
+        }
+    }
+    Val::default()
 }
 
 pub(crate) fn val() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::VAL),
             eval: ImRef::new(fn_val),
@@ -60,9 +76,7 @@ fn fn_val(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn parse() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::PARSE),
             eval: ImRef::new(fn_parse),
@@ -70,8 +84,8 @@ pub(crate) fn parse() -> Val {
     })
 }
 
-fn fn_parse(_: &mut Ctx, input: Val) -> Val {
-    if let Val::String(input) = input {
+fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::String(input) = ctx.eval(&input) {
         if let Ok(repr) = crate::syntax::parse(&input) {
             return Val::from(repr);
         }
@@ -81,9 +95,7 @@ fn fn_parse(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn stringify() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::STRINGIFY),
             eval: ImRef::new(fn_stringify),
@@ -91,8 +103,8 @@ pub(crate) fn stringify() -> Val {
     })
 }
 
-fn fn_stringify(_: &mut Ctx, input: Val) -> Val {
-    if let Ok(repr) = input.try_into() {
+fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
+    if let Ok(repr) = ctx.eval(&input).try_into() {
         return Val::String(Str::from(crate::syntax::generate(&repr)));
     }
     Val::default()
@@ -100,9 +112,7 @@ fn fn_stringify(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn func() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::FUNC),
             eval: ImRef::new(fn_func),
@@ -112,15 +122,6 @@ pub(crate) fn func() -> Val {
 
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Map(map) = input {
-        let input_eval_mode = match map_get(&map, "input_eval_mode") {
-            Val::Letter(l) => match &*l {
-                "val" => EvalMode::Val,
-                "eval" => EvalMode::Eval,
-                _ => return Val::default(),
-            },
-            Val::Unit(_) => EvalMode::Eval,
-            _ => return Val::default(),
-        };
         let eval = map_get(&map, "eval");
         let constants = match map_get(&map, "constants") {
             Val::Map(m) => {
@@ -146,7 +147,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             _ => return Val::default(),
         };
         return Val::Func(Func {
-            func_trait: FuncTrait { input_eval_mode },
+            func_trait: FuncTrait {},
             func_impl: FuncImpl::Composed(Composed {
                 eval: ImRef::new(eval),
                 constants: ImRef::new(constants),

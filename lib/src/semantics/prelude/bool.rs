@@ -2,7 +2,6 @@ use crate::{
     semantics::{
         eval::{
             Ctx,
-            EvalMode,
             Func,
             FuncImpl,
             FuncTrait,
@@ -20,9 +19,7 @@ use crate::{
 
 pub(crate) fn not() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NOT),
             eval: ImRef::new(fn_not),
@@ -30,8 +27,8 @@ pub(crate) fn not() -> Val {
     })
 }
 
-fn fn_not(_: &mut Ctx, input: Val) -> Val {
-    if let Val::Bool(b) = input {
+fn fn_not(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::Bool(b) = ctx.eval(&input) {
         return Val::Bool(b.not());
     }
     Val::default()
@@ -39,9 +36,7 @@ fn fn_not(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn and() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::AND),
             eval: ImRef::new(fn_and),
@@ -66,9 +61,7 @@ fn fn_and(ctx: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn or() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::OR),
             eval: ImRef::new(fn_or),
@@ -93,9 +86,7 @@ fn fn_or(ctx: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn equal() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::EQUAL),
             eval: ImRef::new(fn_equal),
@@ -112,9 +103,7 @@ fn fn_equal(ctx: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn not_equal() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NOT_EQUAL),
             eval: ImRef::new(fn_not_equal),

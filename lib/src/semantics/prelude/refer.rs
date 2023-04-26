@@ -3,7 +3,6 @@ use {
         semantics::{
             eval::{
                 Ctx,
-                EvalMode,
                 Func,
                 FuncImpl,
                 FuncTrait,
@@ -28,9 +27,7 @@ use {
 
 pub(crate) fn new_box() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NEW_BOX),
             eval: ImRef::new(fn_new_box),
@@ -38,15 +35,13 @@ pub(crate) fn new_box() -> Val {
     })
 }
 
-fn fn_new_box(_: &mut Ctx, input: Val) -> Val {
-    Val::BoxRef(BoxRef::new(input))
+fn fn_new_box(ctx: &mut Ctx, input: Val) -> Val {
+    Val::BoxRef(BoxRef::new(ctx.eval(&input)))
 }
 
 pub(crate) fn new_im() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NEW_IM),
             eval: ImRef::new(fn_new_im),
@@ -54,15 +49,13 @@ pub(crate) fn new_im() -> Val {
     })
 }
 
-fn fn_new_im(_: &mut Ctx, input: Val) -> Val {
-    Val::ImRef(ImRef::new(input))
+fn fn_new_im(ctx: &mut Ctx, input: Val) -> Val {
+    Val::ImRef(ImRef::new(ctx.eval(&input)))
 }
 
 pub(crate) fn new_mut() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NEW_MUT),
             eval: ImRef::new(fn_new_mut),
@@ -70,15 +63,13 @@ pub(crate) fn new_mut() -> Val {
     })
 }
 
-fn fn_new_mut(_: &mut Ctx, input: Val) -> Val {
-    Val::MutRef(MutRef::new(input))
+fn fn_new_mut(ctx: &mut Ctx, input: Val) -> Val {
+    Val::MutRef(MutRef::new(ctx.eval(&input)))
 }
 
 pub(crate) fn ref_box() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::REF_BOX),
             eval: ImRef::new(fn_ref_box),
@@ -86,8 +77,8 @@ pub(crate) fn ref_box() -> Val {
     })
 }
 
-fn fn_ref_box(_: &mut Ctx, input: Val) -> Val {
-    match input {
+fn fn_ref_box(ctx: &mut Ctx, input: Val) -> Val {
+    match ctx.eval(&input) {
         Val::BoxRef(b) => b.ref_box().map(|b| Val::BoxRef(b)).unwrap_or_default(),
         Val::ImRef(i) => i.ref_box().map(|b| Val::BoxRef(b)).unwrap_or_default(),
         Val::MutRef(m) => m.ref_box().map(|b| Val::BoxRef(b)).unwrap_or_default(),
@@ -97,9 +88,7 @@ fn fn_ref_box(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn ref_im() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::REF_IM),
             eval: ImRef::new(fn_ref_im),
@@ -107,8 +96,8 @@ pub(crate) fn ref_im() -> Val {
     })
 }
 
-fn fn_ref_im(_: &mut Ctx, input: Val) -> Val {
-    match input {
+fn fn_ref_im(ctx: &mut Ctx, input: Val) -> Val {
+    match ctx.eval(&input) {
         Val::BoxRef(b) => b.ref_im().map(|i| Val::ImRef(i)).unwrap_or_default(),
         Val::ImRef(i) => i.ref_im().map(|i| Val::ImRef(i)).unwrap_or_default(),
         _ => Val::default(),
@@ -117,9 +106,7 @@ fn fn_ref_im(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn ref_mut() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::REF_MUT),
             eval: ImRef::new(fn_ref_mut),
@@ -127,8 +114,8 @@ pub(crate) fn ref_mut() -> Val {
     })
 }
 
-fn fn_ref_mut(_: &mut Ctx, input: Val) -> Val {
-    match input {
+fn fn_ref_mut(ctx: &mut Ctx, input: Val) -> Val {
+    match ctx.eval(&input) {
         Val::BoxRef(b) => b.ref_mut().map(|m| Val::MutRef(m)).unwrap_or_default(),
         _ => Val::default(),
     }
@@ -136,9 +123,7 @@ fn fn_ref_mut(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn deref_im() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Eval,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::DEREF_IM),
             eval: ImRef::new(fn_deref_im),
@@ -146,8 +131,8 @@ pub(crate) fn deref_im() -> Val {
     })
 }
 
-fn fn_deref_im(_: &mut Ctx, input: Val) -> Val {
-    match input {
+fn fn_deref_im(ctx: &mut Ctx, input: Val) -> Val {
+    match ctx.eval(&input) {
         Val::ImRef(i) => i.deref().try_clone().unwrap_or_default(),
         Val::MutRef(m) => m.deref().try_clone().unwrap_or_default(),
         _ => Val::default(),
@@ -156,9 +141,7 @@ fn fn_deref_im(_: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn deref_mut() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::DEREF_MUT),
             eval: ImRef::new(fn_deref_mut),

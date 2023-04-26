@@ -2,7 +2,6 @@ use crate::{
     semantics::{
         eval::{
             Ctx,
-            EvalMode,
             Func,
             FuncImpl,
             FuncTrait,
@@ -17,9 +16,7 @@ use crate::{
 
 pub(crate) fn sequence() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::SEQUENCE),
             eval: ImRef::new(fn_sequence),
@@ -40,9 +37,7 @@ fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn condition() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::IF),
             eval: ImRef::new(fn_if),
@@ -71,9 +66,7 @@ fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
 
 pub(crate) fn while_loop() -> Val {
     Val::Func(Func {
-        func_trait: FuncTrait {
-            input_eval_mode: EvalMode::Val,
-        },
+        func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::WHILE),
             eval: ImRef::new(fn_while),

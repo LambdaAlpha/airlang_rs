@@ -31,9 +31,7 @@ pub(crate) struct Func {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub(crate) struct FuncTrait {
-    pub(crate) input_eval_mode: EvalMode,
-}
+pub(crate) struct FuncTrait {}
 
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) enum FuncImpl {
@@ -55,12 +53,6 @@ pub(crate) struct Composed {
     pub(crate) caller_name: Option<Name>,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub(crate) enum EvalMode {
-    Val,
-    Eval,
-}
-
 pub(crate) type Name = CompactString;
 
 pub(crate) type NameMap = Map<Name, Val>;
@@ -75,10 +67,7 @@ pub(crate) struct Ctx {
 
 impl Func {
     pub(crate) fn eval(&self, ctx: &mut Ctx, input: &Val) -> Val {
-        let val = match self.func_trait.input_eval_mode {
-            EvalMode::Val => ctx.eval_default(input),
-            EvalMode::Eval => ctx.eval(input),
-        };
+        let val = ctx.eval_default(input);
         self.func_impl.eval(ctx, val)
     }
 }
