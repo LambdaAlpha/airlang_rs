@@ -27,7 +27,7 @@ a
         eval: [n [eval_in_ctx c:a]],
         input_name: a,
         caller_name: c,
-        constants: {n: not, eval_in_ctx: eval_in_ctx}
+        constants: {n: not, eval_in_ctx}
     },
     f 't
 )
@@ -39,7 +39,7 @@ a
         eval: [n [eval_in_ctx c:a]],
         input_name: a,
         caller_name: c,
-        constants: {n: not, eval_in_ctx: eval_in_ctx}
+        constants: {n: not, eval_in_ctx}
     },
     f [not 't]
 )
@@ -52,8 +52,8 @@ a
         eval: [a == b],
         input_name: b,
         constants: {
-            ==: ==,
-            a: a
+            ==,
+            a
         }
     },
     f 't
@@ -66,9 +66,9 @@ a
         eval: [;(a = 1, eval code)],
         input_name: code,
         constants: {
-            ;: ;,
-            =: =,
-            eval: eval,
+            ;,
+            =,
+            eval,
         }
     },
     f a
