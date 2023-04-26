@@ -39,40 +39,27 @@ if('t, if('f, 1, 2), 3)
 'u
 # ===
 ;(
-    a = 't,
-    while(a, ;(
-        a = 'f,
-        b = 1
+    a = 0,
+    b = 0,
+    while(a < 100, ;(
+        a = [a + 17],
+        b = [b + 1]
     )),
     b
 )
 # ---
-1
+6
 # ===
 ;(
-    a = 'f,
-    b = 'f,
-    while(not [a and b],
-        if(a, b = 't, a = 't)
+    a = 42,
+    b = 24,
+    while(a != b,
+        if(a > b,
+            a = [a - b],
+            b = [b - a]
+        )
     ),
-    a and b
+    a
 )
 # ---
-'t
-# ===
-;(
-    a = 'f,
-    b = 'f,
-    while(not [a and b],
-        if(a, ;(
-            d = c,
-            b = 't
-        ), ;(
-            c = 1,
-            a = 't
-        ))
-    ),
-    d
-)
-# ---
-1
+6
