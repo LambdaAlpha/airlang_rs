@@ -27,7 +27,10 @@ pub fn repl() {
 
         match src {
             "# quit" | "# exit" => break,
-            "# reset" => interpreter.reset(),
+            "# reset" => {
+                interpreter.reset();
+                continue;
+            }
             _ => {}
         }
 
