@@ -44,6 +44,17 @@ pub(crate) fn prelude() -> ImRef<NameMap> {
     put(&mut c, names::DEREF_IM, refer::deref_im());
     put(&mut c, names::DEREF_MUT, refer::deref_mut());
 
+    put(&mut c, names::INT_ADD, int::add());
+    put(&mut c, names::INT_SUBTRACT, int::subtract());
+    put(&mut c, names::INT_MULTIPLY, int::multiply());
+    put(&mut c, names::INT_DIVIDE, int::divide());
+    put(&mut c, names::INT_REMAINDER, int::remainder());
+    put(&mut c, names::INT_DIVIDE_REMAINDER, int::divide_remainder());
+    put(&mut c, names::INT_LESS_THAN, int::less_than());
+    put(&mut c, names::INT_LESS_EQUAL, int::less_equal());
+    put(&mut c, names::INT_GREATER_THAN, int::greater_than());
+    put(&mut c, names::INT_GREATER_EQUAL, int::greater_equal());
+
     ImRef::new(c)
 }
 
@@ -83,6 +94,17 @@ pub(crate) mod names {
     pub(crate) const REF_MUT: &str = "&mut";
     pub(crate) const DEREF_IM: &str = "@";
     pub(crate) const DEREF_MUT: &str = "=mut";
+
+    pub(crate) const INT_ADD: &str = "+";
+    pub(crate) const INT_SUBTRACT: &str = "-";
+    pub(crate) const INT_MULTIPLY: &str = "*";
+    pub(crate) const INT_DIVIDE: &str = "/";
+    pub(crate) const INT_REMAINDER: &str = "%";
+    pub(crate) const INT_DIVIDE_REMAINDER: &str = "/%";
+    pub(crate) const INT_LESS_THAN: &str = "<";
+    pub(crate) const INT_LESS_EQUAL: &str = "<=";
+    pub(crate) const INT_GREATER_THAN: &str = ">";
+    pub(crate) const INT_GREATER_EQUAL: &str = ">=";
 }
 
 mod meta;
@@ -96,3 +118,5 @@ mod ctrl;
 mod bool;
 
 mod refer;
+
+mod int;

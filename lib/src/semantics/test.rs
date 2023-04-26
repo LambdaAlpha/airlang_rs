@@ -52,3 +52,8 @@ fn test_eval() -> Result<(), Box<dyn Error>> {
 fn test_refer() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/refer.air"))
 }
+
+#[test]
+fn test_int() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/int.air"))
+}
