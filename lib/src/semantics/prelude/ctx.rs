@@ -27,7 +27,6 @@ pub(crate) fn assign() -> Val {
 fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
         let name: &str = match &pair.first {
-            Val::Letter(l) => l,
             Val::Symbol(s) => s,
             Val::String(s) => s,
             _ => return Val::default(),
@@ -50,7 +49,6 @@ pub(crate) fn remove() -> Val {
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
     let name: &str = match &input {
-        Val::Letter(l) => l,
         Val::Symbol(s) => s,
         Val::String(s) => s,
         _ => return Val::default(),

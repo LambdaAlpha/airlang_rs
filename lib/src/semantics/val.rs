@@ -25,7 +25,6 @@ use {
             Float,
             ImRef,
             Int,
-            Letter,
             List,
             Map,
             MutRef,
@@ -50,7 +49,6 @@ pub(crate) enum Val {
     Int(Int),
     Float(Float),
     Bytes(Bytes),
-    Letter(Letter),
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairVal>),
@@ -121,13 +119,6 @@ impl Val {
     }
     pub(crate) fn string(&self) -> Option<&Str> {
         if let Val::String(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn letter(&self) -> Option<&Letter> {
-        if let Val::Letter(v) = self {
             Some(v)
         } else {
             None
@@ -261,12 +252,6 @@ impl From<Str> for Val {
     }
 }
 
-impl From<Letter> for Val {
-    fn from(value: Letter) -> Self {
-        Val::Letter(value)
-    }
-}
-
 impl From<Symbol> for Val {
     fn from(value: Symbol) -> Self {
         Val::Symbol(value)
@@ -347,7 +332,6 @@ impl From<&Repr> for Val {
             Repr::Int(i) => Val::Int(i.clone()),
             Repr::Float(f) => Val::Float(f.clone()),
             Repr::Bytes(b) => Val::Bytes(b.clone()),
-            Repr::Letter(l) => Val::Letter(l.clone()),
             Repr::Symbol(s) => Val::Symbol(s.clone()),
             Repr::String(s) => Val::String(s.clone()),
             Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(&**p))),
@@ -367,7 +351,6 @@ impl From<Repr> for Val {
             Repr::Int(i) => Val::Int(i),
             Repr::Float(f) => Val::Float(f),
             Repr::Bytes(b) => Val::Bytes(b),
-            Repr::Letter(l) => Val::Letter(l),
             Repr::Symbol(s) => Val::Symbol(s),
             Repr::String(s) => Val::String(s),
             Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(*p))),
@@ -388,7 +371,6 @@ impl TryInto<Repr> for &Val {
             Val::Int(i) => Ok(Repr::Int((*i).clone())),
             Val::Float(f) => Ok(Repr::Float((*f).clone())),
             Val::Bytes(b) => Ok(Repr::Bytes((*b).clone())),
-            Val::Letter(l) => Ok(Repr::Letter((*l).clone())),
             Val::Symbol(s) => Ok(Repr::Symbol((*s).clone())),
             Val::String(s) => Ok(Repr::String((*s).clone())),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
@@ -416,7 +398,6 @@ impl TryInto<Repr> for Val {
             Val::Int(i) => Ok(Repr::Int(i)),
             Val::Float(f) => Ok(Repr::Float(f)),
             Val::Bytes(b) => Ok(Repr::Bytes(b)),
-            Val::Letter(l) => Ok(Repr::Letter(l)),
             Val::Symbol(s) => Ok(Repr::Symbol(s)),
             Val::String(s) => Ok(Repr::String(s)),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
@@ -638,7 +619,6 @@ impl TryClone for Val {
             Val::Int(i) => Some(Val::Int(i.try_clone()?)),
             Val::Float(f) => Some(Val::Float(f.try_clone()?)),
             Val::Bytes(b) => Some(Val::Bytes(b.try_clone()?)),
-            Val::Letter(l) => Some(Val::Letter(l.try_clone()?)),
             Val::Symbol(s) => Some(Val::Symbol(s.try_clone()?)),
             Val::String(s) => Some(Val::String(s.try_clone()?)),
             Val::Pair(p) => Some(Val::Pair(p.try_clone()?)),

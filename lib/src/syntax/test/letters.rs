@@ -1,13 +1,13 @@
 use crate::{
     repr::Repr,
-    syntax::test::letter,
+    syntax::test::symbol,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
-        letter("a"),
-        letter("Abc"),
-        letter("A_BB__CCC_"),
-        letter("A1B2C3"),
+        symbol("a"),
+        symbol("Abc"),
+        symbol("A_BB__CCC_"),
+        symbol("A1B2C3"),
     ]
 }

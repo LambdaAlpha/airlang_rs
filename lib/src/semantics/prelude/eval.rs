@@ -20,8 +20,8 @@ use crate::{
     traits::TryClone,
     types::{
         ImRef,
-        Letter,
         Str,
+        Symbol,
     },
 };
 
@@ -135,13 +135,11 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             _ => return Val::default(),
         };
         let input_name = match map_get(&map, "input_name") {
-            Val::Letter(l) => Some(Name::from(&*l)),
             Val::Symbol(s) => Some(Name::from(&*s)),
             Val::Unit(_) => None,
             _ => return Val::default(),
         };
         let caller_name = match map_get(&map, "caller_name") {
-            Val::Letter(l) => Some(Name::from(&*l)),
             Val::Symbol(s) => Some(Name::from(&*s)),
             Val::Unit(_) => None,
             _ => return Val::default(),
@@ -160,7 +158,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 fn map_get(map: &MapVal, name: &str) -> Val {
-    let name = Repr::Letter(Letter::from_str(name));
+    let name = Repr::Symbol(Symbol::from_str(name));
     map.get(&name)
         .and_then(|v| v.try_clone())
         .unwrap_or_default()
@@ -170,7 +168,6 @@ fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {
     let mut name_map = NameMap::default();
     for (k, v) in map.into_iter() {
         let name = match k {
-            Repr::Letter(l) => Name::from(&*l),
             Repr::Symbol(s) => Name::from(&*s),
             _ => return None,
         };

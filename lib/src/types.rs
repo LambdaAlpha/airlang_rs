@@ -6,7 +6,6 @@ pub(crate) use self::{
     extend::Extend,
     float::Float,
     int::Int,
-    letter::Letter,
     list::List,
     map::{
         Map,
@@ -31,7 +30,6 @@ mod call;
 mod extend;
 mod float;
 mod int;
-mod letter;
 mod list;
 mod map;
 mod pair;

@@ -8,7 +8,6 @@ use {
         traits::TryClone,
         types::{
             ImRef,
-            Letter,
             Map,
             Symbol,
         },
@@ -119,7 +118,6 @@ impl Composed {
 impl Ctx {
     pub(crate) fn eval(&mut self, input: &Val) -> Val {
         match input {
-            Val::Letter(l) => self.eval_letter(l),
             Val::Symbol(s) => self.eval_symbol(s),
             Val::Call(c) => self.eval_call(c),
             Val::Reverse(r) => self.eval_reverse(r),
@@ -129,10 +127,6 @@ impl Ctx {
 
     fn eval_default(&mut self, input: &Val) -> Val {
         input.try_clone().unwrap_or_default()
-    }
-
-    fn eval_letter(&mut self, l: &Letter) -> Val {
-        self.get(l)
     }
 
     fn eval_symbol(&mut self, s: &Symbol) -> Val {

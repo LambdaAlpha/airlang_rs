@@ -24,7 +24,6 @@ use {
             Bytes,
             Float,
             Int,
-            Letter,
             Map,
             Str,
             Symbol,
@@ -117,21 +116,19 @@ fn delimiter<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = value(
-        (),
-        take_while1(|c: char| matches!(c, ' ' | '\t' | '\r' | '\n')),
-    );
+    let f = value((), take_while1(is_delimiter));
     context("delimiter", f)(src)
+}
+
+fn is_delimiter(c: char) -> bool {
+    matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
 fn comment<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = value(
-        (),
-        tuple((char(COMMENT_PREFIX), cut(delimiter), cut(token))),
-    );
+    let f = value((), tuple((char(COMMENT_PREFIX), delimiter, cut(token))));
     context("comment", f)(src)
 }
 
@@ -196,24 +193,29 @@ where
     let (src, (first, second)) = peek(pair(anychar, opt(anychar)))(src)?;
 
     let parser = match first {
-        'a'..='z' | 'A'..='Z' => letter,
         '0'..='9' => number,
         '+' | '-' => match second {
             Some('0'..='9') => number,
             _ => symbol,
         },
         '"' => string,
-        PRESERVE_PREFIX => match second {
-            Some('a'..='z' | 'A'..='Z' | '0'..='9' | '_') => preserved,
-            _ => symbol,
-        },
+        PRESERVE_PREFIX => preserved,
         LIST_LEFT => repr_list,
         MAP_LEFT => repr_map,
         WRAP_LEFT => wrap,
         PAIR_SEPARATOR => pair_second,
         REVERSE_SEPARATOR => reverse_output,
-        LIST_RIGHT | MAP_RIGHT | WRAP_RIGHT | SEPARATOR | COMMENT_PREFIX => fail,
-        s if s.is_ascii_punctuation() => symbol,
+        COMMENT_PREFIX => match second {
+            Some(second) => {
+                if is_delimiter(second) {
+                    fail
+                } else {
+                    symbol
+                }
+            }
+            None => fail,
+        },
+        s if is_symbol(s) => symbol,
         _ => fail,
     };
     let tag = match first {
@@ -401,7 +403,7 @@ fn preserved<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let name = take_while1(|c: char| c.is_alphanumeric() || c == '_');
+    let name = take_while(is_symbol);
     let preserved_word = preceded(char('\''), name);
     let f = map_opt(preserved_word, |s: &str| match s {
         "u" => Some(Repr::Unit(Unit)),
@@ -412,17 +414,9 @@ where
     context("preserved", f)(src)
 }
 
-fn letter<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let letters = take_while1(|c: char| c.is_alphanumeric() || c == '_');
-    let f = map(letters, |s: &'a str| Repr::Letter(Letter::from_str(s)));
-    context("letter", f)(src)
-}
-
 fn is_symbol(c: char) -> bool {
     match c {
+        'a'..='z' | 'A'..='Z' | '0'..='9' => true,
         LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
         | PAIR_SEPARATOR | REVERSE_SEPARATOR => false,
         c => c.is_ascii_punctuation(),
@@ -433,7 +427,7 @@ fn symbol<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let symbol_letter_digit = take_while(|c| is_symbol(c) || c.is_alphanumeric());
+    let symbol_letter_digit = take_while(is_symbol);
     let f = map(symbol_letter_digit, |s: &'a str| {
         Repr::Symbol(Symbol::from_str(s))
     });

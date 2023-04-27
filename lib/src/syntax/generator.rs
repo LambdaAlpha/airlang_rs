@@ -107,7 +107,6 @@ pub(crate) fn generate(repr: &Repr, s: &mut String, format: &GenerateFormat, ind
         Repr::Float(f) => generate_float(f, s),
         Repr::Bytes(bytes) => generate_bytes(bytes, s),
         Repr::String(str) => generate_string(str, s),
-        Repr::Letter(str) => generate_letter(str, s),
         Repr::Symbol(str) => generate_symbol(str, s),
         Pair(p) => generate_pair(&p.first, &p.second, s, format, indent),
         Call(c) => generate_call(c, s, format, indent),
@@ -154,10 +153,6 @@ fn generate_string(str: &str, s: &mut String) {
         s.push_str(&escaped);
     }
     s.push('"');
-}
-
-fn generate_letter(str: &str, s: &mut String) {
-    s.push_str(str)
 }
 
 fn generate_symbol(str: &str, s: &mut String) {

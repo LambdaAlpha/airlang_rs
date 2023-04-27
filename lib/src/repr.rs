@@ -12,7 +12,6 @@ use {
             Call,
             Float,
             Int,
-            Letter,
             List,
             Map,
             Pair,
@@ -43,7 +42,6 @@ pub enum Repr {
     Int(Int),
     Float(Float),
     Bytes(Bytes),
-    Letter(Letter),
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairRepr>),
@@ -94,13 +92,6 @@ impl Repr {
     }
     pub fn bytes(&self) -> Option<&Bytes> {
         if let Repr::Bytes(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn letter(&self) -> Option<&Letter> {
-        if let Repr::Letter(v) = self {
             Some(v)
         } else {
             None
@@ -184,12 +175,6 @@ impl From<Float> for Repr {
 impl From<Bytes> for Repr {
     fn from(b: Bytes) -> Self {
         Repr::Bytes(b)
-    }
-}
-
-impl From<Letter> for Repr {
-    fn from(l: Letter) -> Self {
-        Repr::Letter(l)
     }
 }
 

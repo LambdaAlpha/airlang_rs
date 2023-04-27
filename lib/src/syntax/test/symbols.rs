@@ -25,7 +25,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("\\"),
         symbol("|"),
         symbol(";"),
-        symbol("'"),
         symbol("."),
         symbol("<"),
         symbol(">"),
@@ -38,7 +37,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("@\""),
         symbol("@'"),
         symbol("@#"),
-        symbol("'@"),
         list(vec![symbol("@"), ltree(symbol("$"), vec![])]),
     ]
 }

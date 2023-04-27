@@ -2,11 +2,11 @@ use crate::{
     repr::Repr,
     syntax::test::{
         infix,
-        letter,
         list,
         ltree,
         map,
         positive_decimal_int as int,
+        symbol,
     },
 };
 
@@ -27,14 +27,14 @@ pub(crate) fn expected() -> Vec<Repr> {
         int("13"),
         int("14"),
         list(vec![]),
-        ltree(letter("b"), vec![]),
+        ltree(symbol("b"), vec![]),
         list(vec![]),
         list(vec![int("2"), int("5")]),
         map(vec![]),
         map(vec![(int("2"), int("5"))]),
         int("2"),
-        ltree(letter("b"), vec![]),
-        infix(letter("b"), letter("d"), letter("f")),
+        ltree(symbol("b"), vec![]),
+        infix(symbol("b"), symbol("d"), symbol("f")),
         list(vec![]),
     ]
 }

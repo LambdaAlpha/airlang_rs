@@ -13,7 +13,6 @@ use {
             Bool,
             Float,
             Int,
-            Letter,
             Map,
             Str,
             Symbol,
@@ -64,10 +63,6 @@ fn float(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digit
 
 fn bytes(b: Vec<u8>) -> Repr {
     Repr::Bytes(b.into())
-}
-
-fn letter(s: &str) -> Repr {
-    Repr::Letter(Letter::from_str(s))
 }
 
 fn symbol(s: &str) -> Repr {
