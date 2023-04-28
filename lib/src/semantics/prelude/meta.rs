@@ -6,14 +6,21 @@ use crate::{
     },
 };
 
-pub(crate) fn version_code() -> Val {
-    const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
-    const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
-    const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
-    let version_code = format!("{:0>3}{:0>3}{:0>3}", MAJOR, MINOR, PATCH);
-    Val::Int(Int::from_sign_string_radix(true, &version_code, 10))
+pub(crate) fn version() -> Val {
+    Val::String(Str::from(env!("CARGO_PKG_VERSION")))
 }
 
-pub(crate) fn version_name() -> Val {
-    Val::String(Str::from(env!("CARGO_PKG_VERSION")))
+pub(crate) fn version_major() -> Val {
+    const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
+    Val::Int(Int::from_sign_string_radix(true, &MAJOR, 10))
+}
+
+pub(crate) fn version_minor() -> Val {
+    const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
+    Val::Int(Int::from_sign_string_radix(true, &MINOR, 10))
+}
+
+pub(crate) fn version_patch() -> Val {
+    const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
+    Val::Int(Int::from_sign_string_radix(true, &PATCH, 10))
 }

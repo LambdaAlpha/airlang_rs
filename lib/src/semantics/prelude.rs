@@ -12,8 +12,10 @@ use crate::{
 pub(crate) fn prelude() -> ImRef<NameMap> {
     let mut c = NameMap::default();
 
-    put(&mut c, names::AIR_VERSION_CODE, meta::version_code());
-    put(&mut c, names::AIR_VERSION_NAME, meta::version_name());
+    put(&mut c, names::AIR_VERSION, meta::version());
+    put(&mut c, names::AIR_VERSION_MAJOR, meta::version_major());
+    put(&mut c, names::AIR_VERSION_MINOR, meta::version_minor());
+    put(&mut c, names::AIR_VERSION_PATCH, meta::version_patch());
 
     put(&mut c, names::ASSIGN, ctx::assign());
     put(&mut c, names::MOVE, ctx::remove());
@@ -63,8 +65,10 @@ fn put(constants: &mut NameMap, key: &str, val: Val) {
 }
 
 pub(crate) mod names {
-    pub(crate) const AIR_VERSION_CODE: &str = "air_version_code";
-    pub(crate) const AIR_VERSION_NAME: &str = "air_version_name";
+    pub(crate) const AIR_VERSION: &str = "air_version";
+    pub(crate) const AIR_VERSION_MAJOR: &str = "air_version_major";
+    pub(crate) const AIR_VERSION_MINOR: &str = "air_version_minor";
+    pub(crate) const AIR_VERSION_PATCH: &str = "air_version_patch";
 
     pub(crate) const ASSIGN: &str = "=";
     pub(crate) const MOVE: &str = "move";
