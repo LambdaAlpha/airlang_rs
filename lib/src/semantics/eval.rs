@@ -46,7 +46,7 @@ pub(crate) struct Primitive {
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) struct Composed {
     // is boxed to avoid infinite size of Val
-    pub(crate) eval: ImRef<Val>,
+    pub(crate) body: ImRef<Val>,
     pub(crate) constants: ImRef<NameMap>,
     pub(crate) input_name: Option<Name>,
     pub(crate) caller_name: Option<Name>,
@@ -105,7 +105,7 @@ impl Composed {
             call_interpreter,
             reverse_interpreter,
         };
-        let output = new_ctx.eval(&self.eval);
+        let output = new_ctx.eval(&self.body);
         if let Some(caller_name) = &self.caller_name {
             if let Val::Ctx(caller) = new_ctx.remove(caller_name) {
                 *ctx = caller;
@@ -226,7 +226,7 @@ impl TryClone for Composed {
         Self: Sized,
     {
         Some(Composed {
-            eval: self.eval.try_clone()?,
+            body: self.body.try_clone()?,
             constants: self.constants.try_clone()?,
             input_name: self.input_name.clone(),
             caller_name: self.caller_name.clone(),

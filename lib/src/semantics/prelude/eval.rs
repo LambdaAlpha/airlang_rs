@@ -111,8 +111,8 @@ pub(crate) fn func() -> Val {
 
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Map(map) = input {
-        let eval = map_get(&map, "eval");
-        let constants = match map_get(&map, "constants") {
+        let body = map_get(&map, "body");
+        let constants = match map_get(&map, "const") {
             Val::Map(m) => {
                 if let Some(constants) = eval_name_map(ctx, m) {
                     constants
@@ -123,20 +123,32 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             Val::Unit(_) => NameMap::default(),
             _ => return Val::default(),
         };
-        let input_name = match map_get(&map, "input_name") {
-            Val::Symbol(s) => Some(Name::from(&*s)),
-            Val::Unit(_) => None,
+        let input_name = match map_get(&map, "input") {
+            Val::Symbol(s) => {
+                if &*s == "_" {
+                    None
+                } else {
+                    Some(Name::from(&*s))
+                }
+            }
+            Val::Unit(_) => Some(Name::from("input")),
             _ => return Val::default(),
         };
-        let caller_name = match map_get(&map, "caller_name") {
-            Val::Symbol(s) => Some(Name::from(&*s)),
-            Val::Unit(_) => None,
+        let caller_name = match map_get(&map, "caller") {
+            Val::Symbol(s) => {
+                if &*s == "_" {
+                    None
+                } else {
+                    Some(Name::from(&*s))
+                }
+            }
+            Val::Unit(_) => Some(Name::from("caller")),
             _ => return Val::default(),
         };
         return Val::Func(Func {
             func_trait: FuncTrait {},
             func_impl: FuncImpl::Composed(Composed {
-                eval: ImRef::new(eval),
+                body: ImRef::new(body),
                 constants: ImRef::new(constants),
                 input_name,
                 caller_name,
