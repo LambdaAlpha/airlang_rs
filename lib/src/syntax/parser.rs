@@ -427,10 +427,8 @@ fn symbol<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let symbol_letter_digit = take_while(is_symbol);
-    let f = map(symbol_letter_digit, |s: &'a str| {
-        Repr::Symbol(Symbol::from_str(s))
-    });
+    let symbols = take_while(is_symbol);
+    let f = map(symbols, |s: &'a str| Repr::Symbol(Symbol::from_str(s)));
     context("symbol", f)(src)
 }
 

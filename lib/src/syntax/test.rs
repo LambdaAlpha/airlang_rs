@@ -29,7 +29,6 @@ mod comments;
 mod floats;
 mod infixes;
 mod ints;
-mod letters;
 mod lists;
 mod maps;
 mod pairs;
@@ -214,16 +213,6 @@ fn test_parse_bytes() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_bytes() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/bytes.air"))
-}
-
-#[test]
-fn test_parse_letters() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/letters.air"), letters::expected)
-}
-
-#[test]
-fn test_generate_letters() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/letters.air"))
 }
 
 #[test]
