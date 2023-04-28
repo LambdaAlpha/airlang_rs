@@ -118,7 +118,6 @@ pub(crate) fn generate(repr: &Repr, s: &mut String, format: &GenerateFormat, ind
 
 fn generate_unit(s: &mut String) {
     s.push(PRESERVE_PREFIX);
-    s.push_str("u")
 }
 
 fn generate_bool(b: bool, s: &mut String) {

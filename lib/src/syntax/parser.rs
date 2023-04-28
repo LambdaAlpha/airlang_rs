@@ -406,7 +406,7 @@ where
     let name = take_while(is_symbol);
     let preserved_word = preceded(char('\''), name);
     let f = map_opt(preserved_word, |s: &str| match s {
-        "u" => Some(Repr::Unit(Unit)),
+        "" => Some(Repr::Unit(Unit)),
         "t" => Some(Repr::Bool(Bool::t())),
         "f" => Some(Repr::Bool(Bool::f())),
         _ => None,
