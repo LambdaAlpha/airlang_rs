@@ -24,10 +24,10 @@ a
 # ===
 ;(
     f = [func{
-        eval: [n [eval_in_ctx [c:a]]],
+        eval: [n [c eval a]],
         input_name: a,
         caller_name: c,
-        constants: {n: not, eval_in_ctx}
+        constants: {n: not, eval}
     }],
     f 't
 )
@@ -36,10 +36,10 @@ a
 # ===
 ;(
     f = [func{
-        eval: [n [eval_in_ctx [c:a]]],
+        eval: [n [c eval a]],
         input_name: a,
         caller_name: c,
-        constants: {n: not, eval_in_ctx}
+        constants: {n: not, eval}
     }],
     f [not 't]
 )

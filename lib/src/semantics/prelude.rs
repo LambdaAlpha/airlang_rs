@@ -31,7 +31,6 @@ pub(crate) fn prelude() -> ImRef<NameMap> {
     put(&mut c, names::NOT_EQUAL, bool::not_equal());
 
     put(&mut c, names::EVAL, eval::eval());
-    put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
     put(&mut c, names::VAL, eval::val());
     put(&mut c, names::PARSE, eval::parse());
     put(&mut c, names::STRINGIFY, eval::stringify());
@@ -84,7 +83,6 @@ pub(crate) mod names {
     pub(crate) const NOT_EQUAL: &str = "!=";
 
     pub(crate) const EVAL: &str = "eval";
-    pub(crate) const EVAL_IN_CTX: &str = "eval_in_ctx";
     pub(crate) const VAL: &str = "val";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";

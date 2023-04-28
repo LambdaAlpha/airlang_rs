@@ -36,28 +36,17 @@ pub(crate) fn eval() -> Val {
 }
 
 fn fn_eval(ctx: &mut Ctx, input: Val) -> Val {
-    let val = ctx.eval(&input);
-    ctx.eval(&val)
-}
-
-pub(crate) fn eval_in_ctx() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_IN_CTX),
-            eval: ImRef::new(fn_eval_in_ctx),
-        }),
-    })
-}
-
-fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
         if let Val::Ctx(mut target_ctx) = ctx.eval(&pair.first) {
             let val = ctx.eval(&pair.second);
-            return target_ctx.eval(&val);
+            target_ctx.eval(&val)
+        } else {
+            Val::default()
         }
+    } else {
+        let val = ctx.eval(&input);
+        ctx.eval(&val)
     }
-    Val::default()
 }
 
 pub(crate) fn val() -> Val {
