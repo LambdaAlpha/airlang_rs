@@ -158,37 +158,18 @@ fn generate_symbol(str: &str, s: &mut String) {
     s.push_str(str)
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-enum Association {
-    // a b
-    Combine,
-    // a b c
-    Infix,
-    // a(), a{}, a:b, a?b
-    Postfix,
-    // a, (), {}, [a]
-    Delimited,
+fn is_left_open(repr: &Repr) -> bool {
+    matches!(repr, Repr::Call(_) | Repr::Reverse(_) | Repr::Pair(_))
 }
 
-fn association_of(repr: &Repr) -> Association {
+fn is_normal_call(repr: &Repr) -> bool {
     match repr {
-        Pair(_) => Association::Postfix,
-        Call(a) => match &a.input {
-            Pair(_) => Association::Infix,
-            List(_) | Map(_) => Association::Postfix,
-            _ => Association::Combine,
+        Call(call) => match &call.input {
+            Pair(_) => false,
+            _ => true,
         },
-        Reverse(_) => Association::Postfix,
-        _ => Association::Delimited,
+        _ => false,
     }
-}
-
-fn is_prefix(_: &Repr) -> bool {
-    false
-}
-
-fn is_postfix(repr: &Repr) -> bool {
-    matches!(repr, List(_) | Map(_))
 }
 
 fn wrap(wrap: bool, repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
@@ -199,24 +180,8 @@ fn wrap(wrap: bool, repr: &Repr, s: &mut String, format: &GenerateFormat, indent
     }
 }
 
-fn wrap_if_le(
-    threshold: Association,
-    repr: &Repr,
-    s: &mut String,
-    format: &GenerateFormat,
-    indent: usize,
-) {
-    wrap(association_of(repr) <= threshold, repr, s, format, indent)
-}
-
-fn wrap_if_lt(
-    threshold: Association,
-    repr: &Repr,
-    s: &mut String,
-    format: &GenerateFormat,
-    indent: usize,
-) {
-    wrap(association_of(repr) < threshold, repr, s, format, indent)
+fn wrap_if_left_open(repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
+    wrap(is_left_open(repr), repr, s, format, indent)
 }
 
 fn generate_pair(
@@ -226,52 +191,36 @@ fn generate_pair(
     format: &GenerateFormat,
     indent: usize,
 ) {
-    wrap_if_lt(Association::Postfix, first, s, format, indent);
+    generate(first, s, format, indent);
     s.push_str(&format.pair_separator);
-    wrap_if_le(Association::Postfix, second, s, format, indent);
+    wrap_if_left_open(second, s, format, indent);
 }
 
 fn generate_call(call: &CallRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
     match &call.input {
         Pair(p) => {
-            let wrap_left = is_prefix(&p.first) || association_of(&p.first) < Association::Infix;
-            wrap(wrap_left, &p.first, s, format, indent);
+            wrap(is_normal_call(&p.first), &p.first, s, format, indent);
 
             s.push(' ');
 
-            let wrap_middle = is_prefix(&call.func)
-                || is_postfix(&call.func)
-                || association_of(&call.func) <= Association::Infix;
-            wrap(wrap_middle, &call.func, s, format, indent);
+            wrap_if_left_open(&call.func, s, format, indent);
 
             s.push(' ');
 
-            let wrap_right =
-                is_postfix(&p.second) || association_of(&p.second) <= Association::Infix;
-            wrap(wrap_right, &p.second, s, format, indent)
-        }
-        List(_) | Map(_) => {
-            wrap_if_lt(Association::Postfix, &call.func, s, format, indent);
-            generate(&call.input, s, format, indent)
+            wrap_if_left_open(&p.second, s, format, indent)
         }
         _ => {
             wrap(matches!(&call.func, Call(_)), &call.func, s, format, indent);
             s.push(' ');
-            wrap(
-                matches!(&call.input, Call(_)),
-                &call.input,
-                s,
-                format,
-                indent,
-            );
+            wrap_if_left_open(&call.input, s, format, indent);
         }
     }
 }
 
 fn generate_reverse(reverse: &ReverseRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
-    wrap_if_lt(Association::Postfix, &reverse.func, s, format, indent);
+    generate(&reverse.func, s, format, indent);
     s.push(REVERSE_SEPARATOR);
-    wrap_if_le(Association::Postfix, &reverse.output, s, format, indent);
+    wrap_if_left_open(&reverse.output, s, format, indent);
 }
 
 fn generate_wrapped(repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {

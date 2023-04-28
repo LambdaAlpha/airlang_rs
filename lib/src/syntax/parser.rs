@@ -254,39 +254,33 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     // postfix has higher priority than infix
-    context("repr", infix)(src)
+    context("repr", associate)(src)
 }
 
-fn infix<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let f = map_opt(postfix, |tokens| {
-        let len = tokens.len();
-        let mut iter = tokens.into_iter();
-        if len == 2 {
-            return Some(Repr::Call(Box::new(CallRepr::new(
-                iter.next().unwrap(),
-                iter.next().unwrap(),
-            ))));
-        } else if len % 2 == 0 {
-            return None;
-        }
-        let first = iter.next().unwrap();
-        let infix_repr = iter
-            .array_chunks::<2>()
-            .fold(first, |left, [middle, right]| {
-                Repr::Call(Box::new(CallRepr::new(
-                    middle,
-                    Repr::Pair(Box::new(PairRepr::new(left, right))),
-                )))
-            });
-        Some(infix_repr)
-    });
-    context("infix", f)(src)
+fn call(tokens: Vec<Repr>) -> Option<Repr> {
+    let len = tokens.len();
+    let mut iter = tokens.into_iter();
+    if len == 2 {
+        return Some(Repr::Call(Box::new(CallRepr::new(
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+        ))));
+    } else if len % 2 == 0 {
+        return None;
+    }
+    let first = iter.next().unwrap();
+    let infix_repr = iter
+        .array_chunks::<2>()
+        .fold(first, |left, [middle, right]| {
+            Repr::Call(Box::new(CallRepr::new(
+                middle,
+                Repr::Pair(Box::new(PairRepr::new(left, right))),
+            )))
+        });
+    Some(infix_repr)
 }
 
-fn postfix<'a, E>(src: &'a str) -> IResult<&'a str, Vec<Repr>, E>
+fn associate<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
@@ -299,38 +293,22 @@ where
             }
             let mut tokens = tokens.unwrap();
             let repr = match item.tag {
-                TokenTag::Default => {
-                    if tokens.is_empty() {
-                        item.repr
-                    } else {
-                        match item.repr {
-                            Repr::List(list) => {
-                                let last = tokens.pop().unwrap();
-                                Repr::Call(Box::new(CallRepr::new(last, Repr::List(list))))
-                            }
-                            Repr::Map(map) => {
-                                let last = tokens.pop().unwrap();
-                                Repr::Call(Box::new(CallRepr::new(last, Repr::Map(map))))
-                            }
-                            other => other,
-                        }
-                    }
-                }
+                TokenTag::Default => item.repr,
                 TokenTag::Wrap => item.repr,
                 TokenTag::Pair => {
-                    if tokens.is_empty() {
-                        return None;
+                    if let Some(repr) = call(tokens) {
+                        tokens = Vec::new();
+                        Repr::Pair(Box::new(PairRepr::new(repr, item.repr)))
                     } else {
-                        let last = tokens.pop().unwrap();
-                        Repr::Pair(Box::new(PairRepr::new(last, item.repr)))
+                        return None;
                     }
                 }
                 TokenTag::Reverse => {
-                    if tokens.is_empty() {
-                        return None;
+                    if let Some(repr) = call(tokens) {
+                        tokens = Vec::new();
+                        Repr::Reverse(Box::new(ReverseRepr::new(repr, item.repr)))
                     } else {
-                        let last = tokens.pop().unwrap();
-                        Repr::Reverse(Box::new(ReverseRepr::new(last, item.repr)))
+                        return None;
                     }
                 }
             };
@@ -338,8 +316,8 @@ where
             Some(tokens)
         },
     );
-    let f = map_opt(fold, |a| a);
-    context("postfix", f)(src)
+    let f = map_opt(fold, |tokens| tokens.and_then(call));
+    context("associate", f)(src)
 }
 
 fn items<'a, O1, O2, E, S, F, G>(
