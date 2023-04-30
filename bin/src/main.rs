@@ -21,8 +21,10 @@
     )
 )]
 
+use crate::repl::ui::StdUi;
+
 mod repl;
 
 fn main() {
-    repl::repl();
+    repl::repl(&mut StdUi);
 }
