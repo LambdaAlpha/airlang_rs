@@ -15,31 +15,31 @@ use {
 #[test]
 fn test_box_ref() -> Result<(), CellState> {
     let b1 = BoxRef::new("".to_owned());
-    assert_cell_state(b1.state(), false, 1, 0, false);
-    let b2 = b1.ref_box()?;
-    assert_cell_state(b1.state(), false, 2, 0, false);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, false);
+    let b2 = BoxRef::ref_box(&b1)?;
+    assert_cell_state(BoxRef::state(&b1), false, 2, 0, false);
     {
-        let b3 = b1.ref_box()?;
-        assert_cell_state(b1.state(), false, 3, 0, false);
+        let b3 = BoxRef::ref_box(&b1)?;
+        assert_cell_state(BoxRef::state(&b1), false, 3, 0, false);
         {
-            b1.ref_box()?;
-            assert_cell_state(b1.state(), false, 3, 0, false);
+            BoxRef::ref_box(&b1)?;
+            assert_cell_state(BoxRef::state(&b1), false, 3, 0, false);
         }
-        assert_cell_state(b1.state(), false, 3, 0, false);
+        assert_cell_state(BoxRef::state(&b1), false, 3, 0, false);
         drop(b3);
-        assert_cell_state(b1.state(), false, 2, 0, false);
+        assert_cell_state(BoxRef::state(&b1), false, 2, 0, false);
     }
-    assert_cell_state(b1.state(), false, 2, 0, false);
-    let b4 = b1.ref_box()?;
-    assert_cell_state(b1.state(), false, 3, 0, false);
-    let b5 = b1.ref_box()?;
-    assert_cell_state(b1.state(), false, 4, 0, false);
+    assert_cell_state(BoxRef::state(&b1), false, 2, 0, false);
+    let b4 = BoxRef::ref_box(&b1)?;
+    assert_cell_state(BoxRef::state(&b1), false, 3, 0, false);
+    let b5 = BoxRef::ref_box(&b1)?;
+    assert_cell_state(BoxRef::state(&b1), false, 4, 0, false);
     drop(b4);
-    assert_cell_state(b1.state(), false, 3, 0, false);
+    assert_cell_state(BoxRef::state(&b1), false, 3, 0, false);
     drop(b2);
-    assert_cell_state(b1.state(), false, 2, 0, false);
+    assert_cell_state(BoxRef::state(&b1), false, 2, 0, false);
     drop(b5);
-    assert_cell_state(b1.state(), false, 1, 0, false);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, false);
     drop(b1);
     Ok(())
 }
@@ -48,31 +48,31 @@ fn test_box_ref() -> Result<(), CellState> {
 #[test]
 fn test_im_ref() -> Result<(), CellState> {
     let i1 = ImRef::new("".to_owned());
-    assert_cell_state(i1.state(), false, 0, 1, false);
-    let i2 = i1.ref_im()?;
-    assert_cell_state(i1.state(), false, 0, 2, false);
+    assert_cell_state(ImRef::state(&i1), false, 0, 1, false);
+    let i2 = ImRef::ref_im(&i1)?;
+    assert_cell_state(ImRef::state(&i1), false, 0, 2, false);
     {
-        let i3 = i1.ref_im()?;
-        assert_cell_state(i1.state(), false, 0, 3, false);
+        let i3 = ImRef::ref_im(&i1)?;
+        assert_cell_state(ImRef::state(&i1), false, 0, 3, false);
         {
-            i1.ref_im()?;
-            assert_cell_state(i1.state(), false, 0, 3, false);
+            ImRef::ref_im(&i1)?;
+            assert_cell_state(ImRef::state(&i1), false, 0, 3, false);
         }
-        assert_cell_state(i1.state(), false, 0, 3, false);
+        assert_cell_state(ImRef::state(&i1), false, 0, 3, false);
         drop(i3);
-        assert_cell_state(i1.state(), false, 0, 2, false);
+        assert_cell_state(ImRef::state(&i1), false, 0, 2, false);
     }
-    assert_cell_state(i1.state(), false, 0, 2, false);
-    let i4 = i1.ref_im()?;
-    assert_cell_state(i1.state(), false, 0, 3, false);
-    let i5 = i1.ref_im()?;
-    assert_cell_state(i1.state(), false, 0, 4, false);
+    assert_cell_state(ImRef::state(&i1), false, 0, 2, false);
+    let i4 = ImRef::ref_im(&i1)?;
+    assert_cell_state(ImRef::state(&i1), false, 0, 3, false);
+    let i5 = ImRef::ref_im(&i1)?;
+    assert_cell_state(ImRef::state(&i1), false, 0, 4, false);
     drop(i4);
-    assert_cell_state(i1.state(), false, 0, 3, false);
+    assert_cell_state(ImRef::state(&i1), false, 0, 3, false);
     drop(i2);
-    assert_cell_state(i1.state(), false, 0, 2, false);
+    assert_cell_state(ImRef::state(&i1), false, 0, 2, false);
     drop(i5);
-    assert_cell_state(i1.state(), false, 0, 1, false);
+    assert_cell_state(ImRef::state(&i1), false, 0, 1, false);
     drop(i1);
     Ok(())
 }
@@ -80,7 +80,7 @@ fn test_im_ref() -> Result<(), CellState> {
 #[test]
 fn test_mut_ref() -> Result<(), CellState> {
     let m = MutRef::new("".to_owned());
-    assert!(m.state().is_mut());
+    assert!(MutRef::state(&m).is_mut());
     drop(m);
     Ok(())
 }
@@ -89,45 +89,45 @@ fn test_mut_ref() -> Result<(), CellState> {
 #[test]
 fn test_mix_ref() -> Result<(), CellState> {
     let b1 = BoxRef::new("".to_owned());
-    assert_cell_state(b1.state(), false, 1, 0, false);
-    let i1 = b1.ref_im()?; // im when box
-    assert_cell_state(b1.state(), false, 1, 1, false);
-    let i2 = i1.ref_im()?; // im when box and im
-    assert_cell_state(b1.state(), false, 1, 2, false);
-    b1.ref_box()?; // box when im and box
-    assert_cell_state(b1.state(), false, 1, 2, false);
-    b1.ref_mut().unwrap_err(); // mut when im and box
-    assert_cell_state(b1.state(), false, 1, 2, false);
-    i1.ref_box()?; // box when im and box
-    assert_cell_state(b1.state(), false, 1, 2, false);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, false);
+    let i1 = BoxRef::ref_im(&b1)?; // im when box
+    assert_cell_state(BoxRef::state(&b1), false, 1, 1, false);
+    let i2 = ImRef::ref_im(&i1)?; // im when box and im
+    assert_cell_state(BoxRef::state(&b1), false, 1, 2, false);
+    BoxRef::ref_box(&b1)?; // box when im and box
+    assert_cell_state(BoxRef::state(&b1), false, 1, 2, false);
+    BoxRef::ref_mut(&b1).unwrap_err(); // mut when im and box
+    assert_cell_state(BoxRef::state(&b1), false, 1, 2, false);
+    ImRef::ref_box(&i1)?; // box when im and box
+    assert_cell_state(BoxRef::state(&b1), false, 1, 2, false);
     drop(i1);
-    assert_cell_state(b1.state(), false, 1, 1, false);
-    b1.ref_mut().unwrap_err(); // mut when box and im
-    assert_cell_state(b1.state(), false, 1, 1, false);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 1, false);
+    BoxRef::ref_mut(&b1).unwrap_err(); // mut when box and im
+    assert_cell_state(BoxRef::state(&b1), false, 1, 1, false);
     drop(i2);
-    assert_cell_state(b1.state(), false, 1, 0, false);
-    let m1 = b1.ref_mut()?; // mut when box
-    assert_cell_state(b1.state(), false, 1, 0, true);
-    b1.ref_mut().unwrap_err(); // mut when box and mut
-    assert_cell_state(b1.state(), false, 1, 0, true);
-    b1.ref_im().unwrap_err(); // im when box and mut
-    assert_cell_state(b1.state(), false, 1, 0, true);
-    b1.ref_box()?; // box when box and mut
-    assert_cell_state(b1.state(), false, 1, 0, true);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, false);
+    let m1 = BoxRef::ref_mut(&b1)?; // mut when box
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, true);
+    BoxRef::ref_mut(&b1).unwrap_err(); // mut when box and mut
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, true);
+    BoxRef::ref_im(&b1).unwrap_err(); // im when box and mut
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, true);
+    BoxRef::ref_box(&b1)?; // box when box and mut
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, true);
     drop(m1);
-    assert_cell_state(b1.state(), false, 1, 0, false);
-    let i3 = b1.ref_im()?; // im when box
-    assert_cell_state(b1.state(), false, 1, 1, false);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, false);
+    let i3 = BoxRef::ref_im(&b1)?; // im when box
+    assert_cell_state(BoxRef::state(&b1), false, 1, 1, false);
     drop(i3);
-    assert_cell_state(b1.state(), false, 1, 0, false);
-    let m2 = b1.ref_mut()?;
-    assert_cell_state(b1.state(), false, 1, 0, true);
-    m2.delete();
-    assert_cell_state(b1.state(), true, 1, 0, false);
-    b1.ref_im().unwrap_err();
-    assert_cell_state(b1.state(), true, 1, 0, false);
-    b1.ref_box()?;
-    assert_cell_state(b1.state(), true, 1, 0, false);
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, false);
+    let m2 = BoxRef::ref_mut(&b1)?;
+    assert_cell_state(BoxRef::state(&b1), false, 1, 0, true);
+    MutRef::drop_data(m2);
+    assert_cell_state(BoxRef::state(&b1), true, 1, 0, false);
+    BoxRef::ref_im(&b1).unwrap_err();
+    assert_cell_state(BoxRef::state(&b1), true, 1, 0, false);
+    BoxRef::ref_box(&b1)?;
+    assert_cell_state(BoxRef::state(&b1), true, 1, 0, false);
     drop(b1);
     Ok(())
 }
@@ -160,7 +160,7 @@ fn test_dst() -> Result<(), CellState> {
 #[test]
 fn test_deref() -> Result<(), CellState> {
     let i1 = ImRef::new("".to_owned());
-    let i2 = i1.ref_im()?;
+    let i2 = ImRef::ref_im(&i1)?;
     assert_eq!(i1.deref(), "");
     assert_eq!(i2.deref(), "");
     Ok(())
@@ -183,7 +183,7 @@ fn test_borrow_mut() -> Result<(), CellState> {
     let m = MutRef::new("".to_owned());
     assert_eq!(m.deref(), "");
     {
-        let s = m.borrow_mut();
+        let s = MutRef::borrow_mut(&m);
         s.push('1');
     }
     assert_eq!(m.deref(), "1");
@@ -193,10 +193,10 @@ fn test_borrow_mut() -> Result<(), CellState> {
 #[test]
 fn test_take() -> Result<(), CellState> {
     let m = MutRef::new("123".to_owned());
-    let b = m.ref_box()?;
-    let s = m.take();
+    let b = MutRef::ref_box(&m)?;
+    let s = MutRef::move_data(m);
     assert_eq!(s, "123".to_owned());
-    b.ref_im().unwrap_err();
-    b.ref_mut().unwrap_err();
+    BoxRef::ref_im(&b).unwrap_err();
+    BoxRef::ref_mut(&b).unwrap_err();
     Ok(())
 }

@@ -79,9 +79,15 @@ pub(crate) fn ref_box() -> Val {
 
 fn fn_ref_box(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::BoxRef(b) => b.ref_box().map(|b| Val::BoxRef(b)).unwrap_or_default(),
-        Val::ImRef(i) => i.ref_box().map(|b| Val::BoxRef(b)).unwrap_or_default(),
-        Val::MutRef(m) => m.ref_box().map(|b| Val::BoxRef(b)).unwrap_or_default(),
+        Val::BoxRef(b) => BoxRef::ref_box(&b)
+            .map(|b| Val::BoxRef(b))
+            .unwrap_or_default(),
+        Val::ImRef(i) => ImRef::ref_box(&i)
+            .map(|b| Val::BoxRef(b))
+            .unwrap_or_default(),
+        Val::MutRef(m) => MutRef::ref_box(&m)
+            .map(|b| Val::BoxRef(b))
+            .unwrap_or_default(),
         _ => Val::default(),
     }
 }
@@ -98,8 +104,10 @@ pub(crate) fn ref_im() -> Val {
 
 fn fn_ref_im(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::BoxRef(b) => b.ref_im().map(|i| Val::ImRef(i)).unwrap_or_default(),
-        Val::ImRef(i) => i.ref_im().map(|i| Val::ImRef(i)).unwrap_or_default(),
+        Val::BoxRef(b) => BoxRef::ref_im(&b)
+            .map(|i| Val::ImRef(i))
+            .unwrap_or_default(),
+        Val::ImRef(i) => ImRef::ref_im(&i).map(|i| Val::ImRef(i)).unwrap_or_default(),
         _ => Val::default(),
     }
 }
@@ -116,7 +124,9 @@ pub(crate) fn ref_mut() -> Val {
 
 fn fn_ref_mut(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::BoxRef(b) => b.ref_mut().map(|m| Val::MutRef(m)).unwrap_or_default(),
+        Val::BoxRef(b) => BoxRef::ref_mut(&b)
+            .map(|m| Val::MutRef(m))
+            .unwrap_or_default(),
         _ => Val::default(),
     }
 }
@@ -153,7 +163,7 @@ fn fn_deref_mut(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
         if let Val::MutRef(m) = ctx.eval(&pair.first) {
             let mut val = ctx.eval(&pair.second);
-            swap(m.borrow_mut(), &mut val);
+            swap(MutRef::borrow_mut(&m), &mut val);
             return val;
         }
     }

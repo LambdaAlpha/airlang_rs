@@ -32,30 +32,30 @@ pub(crate) struct BoxRef<D: ?Sized> {
 }
 
 #[allow(unused)]
-impl<D> BoxRef<D> {
-    pub(crate) fn new(d: D) -> Self {
+impl<D: ?Sized> BoxRef<D> {
+    pub(crate) fn new(d: D) -> Self
+    where
+        D: Sized,
+    {
         BoxRef {
             raw: RawRef::new(d, RefType::Box),
         }
     }
-}
 
-#[allow(unused)]
-impl<D: ?Sized> BoxRef<D> {
-    pub(crate) fn ref_box(&self) -> Result<Self, CellState> {
-        Self::try_from(&self.raw)
+    pub(crate) fn ref_box(b: &BoxRef<D>) -> Result<Self, CellState> {
+        Self::try_from(&b.raw)
     }
 
-    pub(crate) fn ref_im(&self) -> Result<ImRef<D>, CellState> {
-        ImRef::try_from(&self.raw)
+    pub(crate) fn ref_im(b: &BoxRef<D>) -> Result<ImRef<D>, CellState> {
+        ImRef::try_from(&b.raw)
     }
 
-    pub(crate) fn ref_mut(&self) -> Result<MutRef<D>, CellState> {
-        MutRef::try_from(&self.raw)
+    pub(crate) fn ref_mut(b: &BoxRef<D>) -> Result<MutRef<D>, CellState> {
+        MutRef::try_from(&b.raw)
     }
 
-    pub(crate) fn state(&self) -> CellState {
-        self.raw.state()
+    pub(crate) fn state(b: &BoxRef<D>) -> CellState {
+        b.raw.shared().state()
     }
 }
 
@@ -66,7 +66,7 @@ impl<D: ?Sized> TryClone for BoxRef<D> {
     where
         Self: Sized,
     {
-        self.ref_box().ok()
+        Self::ref_box(self).ok()
     }
 }
 
@@ -74,7 +74,7 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for BoxRef<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(BoxRef {
-            raw: RawRef::clone_from(value, RefType::Box)?,
+            raw: RawRef::clone_to(value, RefType::Box)?,
         })
     }
 }
@@ -97,30 +97,30 @@ pub(crate) struct ImRef<D: ?Sized> {
 }
 
 #[allow(unused)]
-impl<D> ImRef<D> {
-    pub(crate) fn new(d: D) -> Self {
+impl<D: ?Sized> ImRef<D> {
+    pub(crate) fn new(d: D) -> Self
+    where
+        D: Sized,
+    {
         ImRef {
             raw: RawRef::new(d, RefType::Im),
         }
     }
-}
 
-#[allow(unused)]
-impl<D: ?Sized> ImRef<D> {
     pub(crate) fn from_box(box_cell: &BoxRef<D>) -> Result<Self, CellState> {
         Self::try_from(&box_cell.raw)
     }
 
-    pub(crate) fn ref_im(&self) -> Result<Self, CellState> {
-        Self::try_from(&self.raw)
+    pub(crate) fn ref_im(i: &ImRef<D>) -> Result<Self, CellState> {
+        Self::try_from(&i.raw)
     }
 
-    pub(crate) fn ref_box(&self) -> Result<BoxRef<D>, CellState> {
-        BoxRef::try_from(&self.raw)
+    pub(crate) fn ref_box(i: &ImRef<D>) -> Result<BoxRef<D>, CellState> {
+        BoxRef::try_from(&i.raw)
     }
 
-    pub(crate) fn state(&self) -> CellState {
-        self.raw.state()
+    pub(crate) fn state(i: &ImRef<D>) -> CellState {
+        i.raw.shared().state()
     }
 }
 
@@ -131,7 +131,7 @@ impl<D: ?Sized> TryClone for ImRef<D> {
     where
         Self: Sized,
     {
-        self.ref_im().ok()
+        Self::ref_im(self).ok()
     }
 }
 
@@ -139,7 +139,7 @@ impl<D: ?Sized> Deref for ImRef<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
         // SAFETY: when self is alive there is no mutable ref and data hasn't been dropped
-        unsafe { self.raw.deref() }
+        unsafe { self.raw.shared().deref() }
     }
 }
 
@@ -147,7 +147,7 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for ImRef<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(ImRef {
-            raw: RawRef::clone_from(value, RefType::Im)?,
+            raw: RawRef::clone_to(value, RefType::Im)?,
         })
     }
 }
@@ -170,49 +170,52 @@ pub(crate) struct MutRef<D: ?Sized> {
 }
 
 #[allow(unused)]
-impl<D> MutRef<D> {
-    pub(crate) fn new(d: D) -> Self {
+impl<D: ?Sized> MutRef<D> {
+    pub(crate) fn new(d: D) -> Self
+    where
+        D: Sized,
+    {
         MutRef {
             raw: RawRef::new(d, RefType::Mut),
         }
     }
 
-    pub(crate) fn take(self) -> D {
-        // SAFETY:
-        // we have exclusive ref
-        // we consume self when taking
-        // we change the state to dropped
-        // so we won't access the data anymore
-        unsafe { self.raw.take_data() }
-    }
-}
-
-#[allow(unused)]
-impl<D: ?Sized> MutRef<D> {
     pub(crate) fn from_box(box_cell: &BoxRef<D>) -> Result<Self, CellState> {
         Self::try_from(&box_cell.raw)
     }
 
-    pub(crate) fn ref_box(&self) -> Result<BoxRef<D>, CellState> {
-        BoxRef::try_from(&self.raw)
+    pub(crate) fn ref_box(m: &MutRef<D>) -> Result<BoxRef<D>, CellState> {
+        BoxRef::try_from(&m.raw)
     }
 
-    pub(crate) fn state(&self) -> CellState {
-        self.raw.state()
+    pub(crate) fn state(m: &MutRef<D>) -> CellState {
+        m.raw.shared().state()
     }
 
-    pub(crate) fn borrow_mut(&self) -> &mut D {
+    pub(crate) fn borrow_mut(m: &MutRef<D>) -> &mut D {
         // SAFETY: we have exclusive ref and data hasn't been dropped
-        unsafe { self.raw.deref_mut() }
+        unsafe { m.raw.shared().deref_mut() }
     }
 
-    pub(crate) fn delete(self) {
+    pub(crate) fn move_data(m: MutRef<D>) -> D
+    where
+        D: Sized,
+    {
         // SAFETY:
         // we have exclusive ref
-        // we consume self when deleting
+        // we consume the MutRef when taking
         // we change the state to dropped
         // so we won't access the data anymore
-        unsafe { self.raw.drop_data() }
+        unsafe { m.raw.shared().move_data() }
+    }
+
+    pub(crate) fn drop_data(m: MutRef<D>) {
+        // SAFETY:
+        // we have exclusive ref
+        // we consume the MutRef when deleting
+        // we change the state to dropped
+        // so we won't access the data anymore
+        unsafe { m.raw.shared().drop_data() }
     }
 }
 
@@ -231,14 +234,14 @@ impl<D: ?Sized> Deref for MutRef<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
         // SAFETY: we have exclusive ref and data hasn't been dropped
-        unsafe { self.raw.deref() }
+        unsafe { self.raw.shared().deref() }
     }
 }
 
 impl<D: ?Sized> DerefMut for MutRef<D> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY: we have exclusive ref and data hasn't been dropped
-        unsafe { self.raw.deref_mut() }
+        unsafe { self.raw.shared().deref_mut() }
     }
 }
 
@@ -246,7 +249,7 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for MutRef<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(MutRef {
-            raw: RawRef::clone_from(value, RefType::Mut)?,
+            raw: RawRef::clone_to(value, RefType::Mut)?,
         })
     }
 }
@@ -269,23 +272,19 @@ struct RawRef<D: ?Sized> {
     phantom: PhantomData<SharedCell<D>>,
 }
 
-impl<D> RawRef<D> {
-    fn new(d: D, ref_type: RefType) -> Self {
+impl<D: ?Sized> RawRef<D> {
+    fn new(d: D, ref_type: RefType) -> Self
+    where
+        D: Sized,
+    {
         RawRef {
             ptr: Box::leak(Box::new(SharedCell::new(d, ref_type))).into(),
             phantom: PhantomData,
         }
     }
 
-    // SAFETY: call only once and there is no ref
-    unsafe fn take_data(&self) -> D {
-        self.shared().take_data()
-    }
-}
-
-impl<D: ?Sized> RawRef<D> {
-    fn clone_from(&self, ref_type: RefType) -> Result<RawRef<D>, CellState> {
-        self.shared().clone_from(ref_type)?;
+    fn clone_to(&self, ref_type: RefType) -> Result<RawRef<D>, CellState> {
+        self.shared().clone_to(ref_type)?;
         Ok(RawRef {
             ptr: self.ptr,
             phantom: PhantomData,
@@ -311,118 +310,70 @@ impl<D: ?Sized> RawRef<D> {
         // SAFETY: when self is alive, ptr is always valid and we never call ptr.as_mut()
         unsafe { self.ptr.as_ref() }
     }
-
-    fn state(&self) -> CellState {
-        self.shared().state()
-    }
-
-    // SAFETY: make sure data not dropped and there is no mut ref
-    unsafe fn deref<'a>(&self) -> &'a D {
-        self.shared().deref()
-    }
-
-    // SAFETY: make sure data not dropped and there is no ref
-    unsafe fn deref_mut<'a>(&self) -> &'a mut D {
-        self.shared().deref_mut()
-    }
-
-    // SAFETY: call only once and there is no ref
-    unsafe fn drop_data(&self) {
-        self.shared().drop_data()
-    }
 }
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<RawRef<U>> for RawRef<D> {}
 
 struct SharedCell<D: ?Sized> {
-    state: SharedState,
-    data: SharedData<D>,
-}
-
-impl<D> SharedCell<D> {
-    fn new(d: D, ref_type: RefType) -> Self {
-        SharedCell {
-            state: SharedState::new(ref_type),
-            data: SharedData::new(d),
-        }
-    }
-
-    // SAFETY: call only once and there is no ref
-    unsafe fn take_data(&self) -> D {
-        self.state.drop();
-        self.data.take()
-    }
+    state: Cell<CellState>,
+    data: UnsafeCell<D>,
 }
 
 impl<D: ?Sized> SharedCell<D> {
-    fn state(&self) -> CellState {
-        self.state.state()
+    fn new(d: D, ref_type: RefType) -> Self
+    where
+        D: Sized,
+    {
+        SharedCell {
+            state: Cell::new(CellState::new(ref_type)),
+            data: UnsafeCell::new(d),
+        }
     }
 
-    fn clone_from(&self, ref_type: RefType) -> Result<(), CellState> {
-        self.state.clone_from(ref_type)
+    fn state(&self) -> CellState {
+        self.state.get()
+    }
+
+    fn clone_to(&self, ref_type: RefType) -> Result<(), CellState> {
+        self.state.set(self.state.get().clone_to(ref_type)?);
+        Ok(())
     }
 
     fn drop_from(&self, ref_type: RefType) {
-        self.state.drop_from(ref_type);
-        if self.state.should_drop() {
+        self.state.set(self.state.get().drop_from(ref_type));
+        if self.state.get().should_drop() {
             // SAFETY: state promises that we can and should drop
             unsafe { self.drop_data() }
         }
     }
 
     // SAFETY: call only once and there is no ref
+    unsafe fn move_data(&self) -> D
+    where
+        D: Sized,
+    {
+        self.state.set(self.state.get().drop());
+        ptr::read(self.data.get())
+    }
+
+    // SAFETY: call only once and there is no ref
     unsafe fn drop_data(&self) {
-        self.data.drop();
-        self.state.drop();
+        self.state.set(self.state.get().drop());
+        ptr::drop_in_place(self.data.get())
     }
 
     fn should_dealloc(&self) -> bool {
-        self.state.should_dealloc()
+        self.state.get().should_dealloc()
     }
 
     // SAFETY: make sure data not dropped and there is no mut ref
     unsafe fn deref<'a>(&self) -> &'a D {
-        self.data.deref()
+        self.data.get().as_ref().unwrap()
     }
 
     // SAFETY: make sure data not dropped and there is no ref
     unsafe fn deref_mut<'a>(&self) -> &'a mut D {
-        self.data.deref_mut()
-    }
-}
-
-pub(crate) struct SharedData<D: ?Sized> {
-    value: UnsafeCell<D>,
-}
-
-impl<D> SharedData<D> {
-    fn new(d: D) -> Self {
-        SharedData {
-            value: UnsafeCell::new(d),
-        }
-    }
-
-    // SAFETY: make sure data not dropped and there is no ref
-    unsafe fn take(&self) -> D {
-        ptr::read(self.value.get())
-    }
-}
-
-impl<D: ?Sized> SharedData<D> {
-    // SAFETY: make sure data not dropped and there is no mut ref
-    unsafe fn deref<'a>(&self) -> &'a D {
-        self.value.get().as_ref().unwrap()
-    }
-
-    // SAFETY: make sure data not dropped and there is no ref
-    unsafe fn deref_mut<'a>(&self) -> &'a mut D {
-        self.value.get().as_mut().unwrap()
-    }
-
-    // SAFETY: make sure data not dropped and there is no ref
-    unsafe fn drop(&self) {
-        ptr::drop_in_place(self.value.get())
+        self.data.get().as_mut().unwrap()
     }
 }
 
@@ -433,7 +384,7 @@ enum RefType {
     Mut,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub(crate) struct CellState {
     // the sign bit indicates whether data has been dropped (negative)
     // other bits indicates box ref cnt
@@ -466,34 +417,6 @@ impl CellState {
     pub(crate) fn is_referred(&self) -> bool {
         self.ref_cnt != 0
     }
-
-    fn clone_box(box_cnt: i32) -> i32 {
-        box_cnt + 1
-    }
-    fn drop_box(box_cnt: i32) -> i32 {
-        box_cnt - 1
-    }
-    fn clone_im(ref_cnt: i32) -> i32 {
-        ref_cnt + 1
-    }
-    fn drop_im(ref_cnt: i32) -> i32 {
-        ref_cnt - 1
-    }
-    fn clone_mut(_: i32) -> i32 {
-        i32::MIN
-    }
-    fn drop_mut(_: i32) -> i32 {
-        0
-    }
-    fn should_drop(&self) -> bool {
-        self.box_cnt == 0 && self.ref_cnt == 0
-    }
-    fn drop(ref_cnt: i32) -> i32 {
-        ref_cnt | i32::MIN
-    }
-    fn should_dealloc(&self) -> bool {
-        self.box_cnt == i32::MIN && self.ref_cnt == 0
-    }
 }
 
 impl Debug for CellState {
@@ -507,85 +430,66 @@ impl Debug for CellState {
     }
 }
 
-struct SharedState {
-    // the sign bit indicates whether data has been dropped (negative)
-    // other bits indicates box ref cnt
-    box_cnt: Cell<i32>,
-    // the sign bit indicates whether data has been mutable borrowed (negative)
-    // other bits indicates immutable borrow cnt
-    ref_cnt: Cell<i32>,
-}
-
-impl SharedState {
+impl CellState {
     fn new(ref_type: RefType) -> Self {
         let (box_cnt, ref_cnt) = match ref_type {
             RefType::Box => (1, 0),
             RefType::Im => (0, 1),
             RefType::Mut => (0, i32::MIN),
         };
-        SharedState {
-            box_cnt: Cell::new(box_cnt),
-            ref_cnt: Cell::new(ref_cnt),
-        }
+        CellState { box_cnt, ref_cnt }
     }
 
-    fn state(&self) -> CellState {
-        CellState {
-            box_cnt: self.box_cnt.get(),
-            ref_cnt: self.ref_cnt.get(),
-        }
-    }
-
-    fn clone_from(&self, ref_type: RefType) -> Result<(), CellState> {
-        let state = self.state();
+    fn clone_to(mut self, ref_type: RefType) -> Result<CellState, CellState> {
         match ref_type {
             RefType::Box => {
-                if state.is_box_full() {
-                    Err(state)
+                if self.is_box_full() {
+                    Err(self)
                 } else {
-                    self.box_cnt.set(CellState::clone_box(state.box_cnt));
-                    Ok(())
+                    self.box_cnt += 1;
+                    Ok(self)
                 }
             }
             RefType::Im => {
-                if state.is_dropped() || state.is_mut() || state.is_im_full() {
-                    Err(state)
+                if self.is_dropped() || self.is_mut() || self.is_im_full() {
+                    Err(self)
                 } else {
-                    self.ref_cnt.set(CellState::clone_im(state.ref_cnt));
-                    Ok(())
+                    self.ref_cnt += 1;
+                    Ok(self)
                 }
             }
             RefType::Mut => {
-                if state.is_dropped() || state.is_referred() {
-                    Err(state)
+                if self.is_dropped() || self.is_referred() {
+                    Err(self)
                 } else {
-                    self.ref_cnt.set(CellState::clone_mut(state.ref_cnt));
-                    Ok(())
+                    self.ref_cnt = i32::MIN;
+                    Ok(self)
                 }
             }
         }
     }
 
-    fn drop_from(&self, ref_type: RefType) {
-        let state = self.state();
+    fn drop_from(mut self, ref_type: RefType) -> CellState {
         match ref_type {
-            RefType::Box => self.box_cnt.set(CellState::drop_box(state.box_cnt)),
-            RefType::Im => self.ref_cnt.set(CellState::drop_im(state.ref_cnt)),
-            RefType::Mut => self.ref_cnt.set(CellState::drop_mut(state.ref_cnt)),
+            RefType::Box => self.box_cnt -= 1,
+            RefType::Im => self.ref_cnt -= 1,
+            RefType::Mut => self.ref_cnt = 0,
         }
+        self
     }
 
-    fn drop(&self) {
-        self.box_cnt.set(CellState::drop(self.box_cnt.get()))
+    fn drop(mut self) -> CellState {
+        self.box_cnt |= i32::MIN;
+        self
     }
 
     // if already dropped, return false
     fn should_drop(&self) -> bool {
-        self.state().should_drop()
+        self.box_cnt == 0 && self.ref_cnt == 0
     }
 
     fn should_dealloc(&self) -> bool {
-        self.state().should_dealloc()
+        self.box_cnt == i32::MIN && self.ref_cnt == 0
     }
 }
 
