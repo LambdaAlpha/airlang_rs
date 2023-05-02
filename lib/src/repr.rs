@@ -282,3 +282,9 @@ impl TryClone for Repr {
         Some(self.clone())
     }
 }
+
+impl Default for Repr {
+    fn default() -> Self {
+        Repr::Unit(Unit)
+    }
+}
