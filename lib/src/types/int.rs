@@ -83,6 +83,10 @@ impl Int {
     pub(crate) fn greater_equal(&self, other: &Int) -> Bool {
         Bool::new(self.0.ge(&other.0))
     }
+
+    pub(crate) fn less_greater(&self, other: &Int) -> Bool {
+        Bool::new(self.0.ne(&other.0))
+    }
 }
 
 impl Display for Int {

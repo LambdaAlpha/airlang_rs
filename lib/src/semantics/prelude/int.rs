@@ -232,3 +232,24 @@ fn fn_greater_equal(ctx: &mut Ctx, input: Val) -> Val {
     }
     Val::default()
 }
+
+pub(crate) fn less_greater() -> Val {
+    Val::Func(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::INT_LESS_GREATER),
+            eval: Reader::new(fn_less_greater),
+        }),
+    })
+}
+
+fn fn_less_greater(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::Pair(pair) = input {
+        if let Val::Int(i1) = ctx.eval(&pair.first) {
+            if let Val::Int(i2) = ctx.eval(&pair.second) {
+                return Val::Bool(i1.less_greater(&i2));
+            }
+        }
+    }
+    Val::default()
+}

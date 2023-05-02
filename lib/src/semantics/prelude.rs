@@ -56,6 +56,7 @@ pub(crate) fn prelude() -> Reader<NameMap> {
     put(&mut c, names::INT_LESS_EQUAL, int::less_equal());
     put(&mut c, names::INT_GREATER_THAN, int::greater_than());
     put(&mut c, names::INT_GREATER_EQUAL, int::greater_equal());
+    put(&mut c, names::INT_LESS_GREATER, int::less_greater());
 
     Reader::new(c)
 }
@@ -109,6 +110,7 @@ pub(crate) mod names {
     pub(crate) const INT_LESS_EQUAL: &str = "<=";
     pub(crate) const INT_GREATER_THAN: &str = ">";
     pub(crate) const INT_GREATER_EQUAL: &str = ">=";
+    pub(crate) const INT_LESS_GREATER: &str = "<>";
 }
 
 mod meta;
