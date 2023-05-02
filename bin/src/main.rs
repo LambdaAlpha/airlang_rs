@@ -20,11 +20,13 @@
         unused_parens,
     )
 )]
+#![feature(trait_alias)]
 
 use crate::repl::ui::StdUi;
 
 mod repl;
 
 fn main() {
-    repl::repl(&mut StdUi);
+    let mut std_ui = StdUi::new();
+    repl::repl(&mut std_ui);
 }
