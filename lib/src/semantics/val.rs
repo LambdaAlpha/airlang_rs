@@ -18,17 +18,17 @@ use {
         traits::TryClone,
         types::{
             Bool,
-            BoxRef,
             Bytes,
             Call,
             Extend,
             Float,
-            ImRef,
             Int,
+            Keeper,
             List,
             Map,
-            MutRef,
+            Owner,
             Pair,
+            Reader,
             Reverse,
             Str,
             Symbol,
@@ -57,9 +57,9 @@ pub(crate) enum Val {
     List(ListVal),
     Map(MapVal),
 
-    BoxRef(BoxRefVal),
-    ImRef(ImRefVal),
-    MutRef(MutRefVal),
+    Keeper(KeeperVal),
+    Reader(ReaderVal),
+    Owner(OwnerVal),
 
     Func(Func),
     Ctx(Ctx),
@@ -72,9 +72,9 @@ pub(crate) type CallVal = Call<Val, Val>;
 pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Repr, Val>;
-pub(crate) type BoxRefVal = BoxRef<Val>;
-pub(crate) type ImRefVal = ImRef<Val>;
-pub(crate) type MutRefVal = MutRef<Val>;
+pub(crate) type KeeperVal = Keeper<Val>;
+pub(crate) type ReaderVal = Reader<Val>;
+pub(crate) type OwnerVal = Owner<Val>;
 
 #[allow(dead_code)]
 impl Val {
@@ -166,22 +166,22 @@ impl Val {
             None
         }
     }
-    pub(crate) fn box_ref(&self) -> Option<&BoxRefVal> {
-        if let Val::BoxRef(v) = self {
+    pub(crate) fn keeper(&self) -> Option<&KeeperVal> {
+        if let Val::Keeper(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub(crate) fn im_ref(&self) -> Option<&ImRefVal> {
-        if let Val::ImRef(v) = self {
+    pub(crate) fn reader(&self) -> Option<&ReaderVal> {
+        if let Val::Reader(v) = self {
             Some(v)
         } else {
             None
         }
     }
-    pub(crate) fn mut_ref(&self) -> Option<&MutRefVal> {
-        if let Val::MutRef(v) = self {
+    pub(crate) fn owner(&self) -> Option<&OwnerVal> {
+        if let Val::Owner(v) = self {
             Some(v)
         } else {
             None
@@ -288,21 +288,21 @@ impl From<MapVal> for Val {
     }
 }
 
-impl From<BoxRefVal> for Val {
-    fn from(value: BoxRefVal) -> Self {
-        Val::BoxRef(value)
+impl From<KeeperVal> for Val {
+    fn from(value: KeeperVal) -> Self {
+        Val::Keeper(value)
     }
 }
 
-impl From<ImRefVal> for Val {
-    fn from(value: ImRefVal) -> Self {
-        Val::ImRef(value)
+impl From<ReaderVal> for Val {
+    fn from(value: ReaderVal) -> Self {
+        Val::Reader(value)
     }
 }
 
-impl From<MutRefVal> for Val {
-    fn from(value: MutRefVal) -> Self {
-        Val::MutRef(value)
+impl From<OwnerVal> for Val {
+    fn from(value: OwnerVal) -> Self {
+        Val::Owner(value)
     }
 }
 
@@ -626,9 +626,9 @@ impl TryClone for Val {
             Val::Reverse(r) => Some(Val::Reverse(r.try_clone()?)),
             Val::List(l) => Some(Val::List(l.try_clone()?)),
             Val::Map(m) => Some(Val::Map(m.try_clone()?)),
-            Val::BoxRef(b) => Some(Val::BoxRef(b.try_clone()?)),
-            Val::ImRef(i) => Some(Val::ImRef(i.try_clone()?)),
-            Val::MutRef(m) => Some(Val::MutRef(m.try_clone()?)),
+            Val::Keeper(b) => Some(Val::Keeper(b.try_clone()?)),
+            Val::Reader(i) => Some(Val::Reader(i.try_clone()?)),
+            Val::Owner(m) => Some(Val::Owner(m.try_clone()?)),
             Val::Func(f) => Some(Val::Func(f.try_clone()?)),
             Val::Ctx(c) => Some(Val::Ctx(c.try_clone()?)),
             Val::Extend(e) => Some(Val::Extend(e.try_clone()?)),

@@ -11,7 +11,7 @@ use crate::{
         prelude::names,
         val::Val,
     },
-    types::ImRef,
+    types::Reader,
 };
 
 pub(crate) fn sequence() -> Val {
@@ -19,7 +19,7 @@ pub(crate) fn sequence() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::SEQUENCE),
-            eval: ImRef::new(fn_sequence),
+            eval: Reader::new(fn_sequence),
         }),
     })
 }
@@ -40,7 +40,7 @@ pub(crate) fn condition() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::IF),
-            eval: ImRef::new(fn_if),
+            eval: Reader::new(fn_if),
         }),
     })
 }
@@ -69,7 +69,7 @@ pub(crate) fn while_loop() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::WHILE),
-            eval: ImRef::new(fn_while),
+            eval: Reader::new(fn_while),
         }),
     })
 }

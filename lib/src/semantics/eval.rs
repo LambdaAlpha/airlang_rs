@@ -7,8 +7,8 @@ use {
         },
         traits::TryClone,
         types::{
-            ImRef,
             Map,
+            Reader,
             Symbol,
         },
     },
@@ -40,14 +40,14 @@ pub(crate) enum FuncImpl {
 
 pub(crate) struct Primitive {
     pub(crate) id: Name,
-    pub(crate) eval: ImRef<dyn Fn(&mut Ctx, Val) -> Val>,
+    pub(crate) eval: Reader<dyn Fn(&mut Ctx, Val) -> Val>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) struct Composed {
     // is boxed to avoid infinite size of Val
-    pub(crate) body: ImRef<Val>,
-    pub(crate) constants: ImRef<NameMap>,
+    pub(crate) body: Reader<Val>,
+    pub(crate) constants: Reader<NameMap>,
     pub(crate) input_name: Option<Name>,
     pub(crate) caller_name: Option<Name>,
 }
@@ -58,10 +58,10 @@ pub(crate) type NameMap = Map<Name, Val>;
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub(crate) struct Ctx {
-    pub(crate) constants: ImRef<NameMap>,
+    pub(crate) constants: Reader<NameMap>,
     pub(crate) variables: NameMap,
     pub(crate) call_interpreter: PhantomData<fn(&Composed, &Val) -> Val>,
-    pub(crate) reverse_interpreter: Option<ImRef<Func>>,
+    pub(crate) reverse_interpreter: Option<Reader<Func>>,
 }
 
 impl Func {

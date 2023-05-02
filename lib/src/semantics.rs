@@ -10,7 +10,7 @@ use {
             val::Val,
         },
         traits::TryClone,
-        types::ImRef,
+        types::Reader,
     },
     thiserror::Error,
 };
@@ -29,7 +29,7 @@ mod test;
 pub struct ReprError {}
 
 pub struct Interpreter {
-    prelude: ImRef<NameMap>,
+    prelude: Reader<NameMap>,
     ctx: Ctx,
 }
 
@@ -50,7 +50,7 @@ impl Interpreter {
         self.ctx = Self::default_ctx(&self.prelude);
     }
 
-    fn default_ctx(prelude: &ImRef<NameMap>) -> Ctx {
+    fn default_ctx(prelude: &Reader<NameMap>) -> Ctx {
         let constants = prelude.try_clone().unwrap_or_default();
         Ctx {
             constants,

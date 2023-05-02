@@ -27,115 +27,115 @@ use {
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) struct BoxRef<D: ?Sized> {
+pub(crate) struct Keeper<D: ?Sized> {
     raw: RawRef<D>,
 }
 
 #[allow(unused)]
-impl<D: ?Sized> BoxRef<D> {
+impl<D: ?Sized> Keeper<D> {
     pub(crate) fn new(d: D) -> Self
     where
         D: Sized,
     {
-        BoxRef {
+        Keeper {
             raw: RawRef::new(d, RefType::Box),
         }
     }
 
-    pub(crate) fn ref_box(b: &BoxRef<D>) -> Result<Self, CellState> {
+    pub(crate) fn keeper(b: &Keeper<D>) -> Result<Self, CellState> {
         Self::try_from(&b.raw)
     }
 
-    pub(crate) fn ref_im(b: &BoxRef<D>) -> Result<ImRef<D>, CellState> {
-        ImRef::try_from(&b.raw)
+    pub(crate) fn saver(b: &Keeper<D>) -> Result<Reader<D>, CellState> {
+        Reader::try_from(&b.raw)
     }
 
-    pub(crate) fn ref_mut(b: &BoxRef<D>) -> Result<MutRef<D>, CellState> {
-        MutRef::try_from(&b.raw)
+    pub(crate) fn owner(b: &Keeper<D>) -> Result<Owner<D>, CellState> {
+        Owner::try_from(&b.raw)
     }
 
-    pub(crate) fn state(b: &BoxRef<D>) -> CellState {
+    pub(crate) fn state(b: &Keeper<D>) -> CellState {
         b.raw.shared().state()
     }
 }
 
-impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<BoxRef<U>> for BoxRef<D> {}
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Keeper<U>> for Keeper<D> {}
 
-impl<D: ?Sized> TryClone for BoxRef<D> {
+impl<D: ?Sized> TryClone for Keeper<D> {
     fn try_clone(&self) -> Option<Self>
     where
         Self: Sized,
     {
-        Self::ref_box(self).ok()
+        Self::keeper(self).ok()
     }
 }
 
-impl<D: ?Sized> TryFrom<&RawRef<D>> for BoxRef<D> {
+impl<D: ?Sized> TryFrom<&RawRef<D>> for Keeper<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
-        Ok(BoxRef {
+        Ok(Keeper {
             raw: RawRef::clone_to(value, RefType::Box)?,
         })
     }
 }
 
-impl<D: ?Sized> Drop for BoxRef<D> {
+impl<D: ?Sized> Drop for Keeper<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Box)
     }
 }
 
-impl<D: Default> Default for BoxRef<D> {
+impl<D: Default> Default for Keeper<D> {
     fn default() -> Self {
-        BoxRef::new(D::default())
+        Keeper::new(D::default())
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) struct ImRef<D: ?Sized> {
+pub(crate) struct Reader<D: ?Sized> {
     raw: RawRef<D>,
 }
 
 #[allow(unused)]
-impl<D: ?Sized> ImRef<D> {
+impl<D: ?Sized> Reader<D> {
     pub(crate) fn new(d: D) -> Self
     where
         D: Sized,
     {
-        ImRef {
+        Reader {
             raw: RawRef::new(d, RefType::Im),
         }
     }
 
-    pub(crate) fn from_box(box_cell: &BoxRef<D>) -> Result<Self, CellState> {
+    pub(crate) fn from_keeper(box_cell: &Keeper<D>) -> Result<Self, CellState> {
         Self::try_from(&box_cell.raw)
     }
 
-    pub(crate) fn ref_im(i: &ImRef<D>) -> Result<Self, CellState> {
+    pub(crate) fn reader(i: &Reader<D>) -> Result<Self, CellState> {
         Self::try_from(&i.raw)
     }
 
-    pub(crate) fn ref_box(i: &ImRef<D>) -> Result<BoxRef<D>, CellState> {
-        BoxRef::try_from(&i.raw)
+    pub(crate) fn keeper(i: &Reader<D>) -> Result<Keeper<D>, CellState> {
+        Keeper::try_from(&i.raw)
     }
 
-    pub(crate) fn state(i: &ImRef<D>) -> CellState {
+    pub(crate) fn state(i: &Reader<D>) -> CellState {
         i.raw.shared().state()
     }
 }
 
-impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<ImRef<U>> for ImRef<D> {}
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Reader<U>> for Reader<D> {}
 
-impl<D: ?Sized> TryClone for ImRef<D> {
+impl<D: ?Sized> TryClone for Reader<D> {
     fn try_clone(&self) -> Option<Self>
     where
         Self: Sized,
     {
-        Self::ref_im(self).ok()
+        Self::reader(self).ok()
     }
 }
 
-impl<D: ?Sized> Deref for ImRef<D> {
+impl<D: ?Sized> Deref for Reader<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
         // SAFETY: when self is alive there is no mutable ref and data hasn't been dropped
@@ -143,85 +143,85 @@ impl<D: ?Sized> Deref for ImRef<D> {
     }
 }
 
-impl<D: ?Sized> TryFrom<&RawRef<D>> for ImRef<D> {
+impl<D: ?Sized> TryFrom<&RawRef<D>> for Reader<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
-        Ok(ImRef {
+        Ok(Reader {
             raw: RawRef::clone_to(value, RefType::Im)?,
         })
     }
 }
 
-impl<D: ?Sized> Drop for ImRef<D> {
+impl<D: ?Sized> Drop for Reader<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Im)
     }
 }
 
-impl<D: Default> Default for ImRef<D> {
+impl<D: Default> Default for Reader<D> {
     fn default() -> Self {
-        ImRef::new(D::default())
+        Reader::new(D::default())
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) struct MutRef<D: ?Sized> {
+pub(crate) struct Owner<D: ?Sized> {
     raw: RawRef<D>,
 }
 
 #[allow(unused)]
-impl<D: ?Sized> MutRef<D> {
+impl<D: ?Sized> Owner<D> {
     pub(crate) fn new(d: D) -> Self
     where
         D: Sized,
     {
-        MutRef {
+        Owner {
             raw: RawRef::new(d, RefType::Mut),
         }
     }
 
-    pub(crate) fn from_box(box_cell: &BoxRef<D>) -> Result<Self, CellState> {
+    pub(crate) fn from_keeper(box_cell: &Keeper<D>) -> Result<Self, CellState> {
         Self::try_from(&box_cell.raw)
     }
 
-    pub(crate) fn ref_box(m: &MutRef<D>) -> Result<BoxRef<D>, CellState> {
-        BoxRef::try_from(&m.raw)
+    pub(crate) fn keeper(m: &Owner<D>) -> Result<Keeper<D>, CellState> {
+        Keeper::try_from(&m.raw)
     }
 
-    pub(crate) fn state(m: &MutRef<D>) -> CellState {
+    pub(crate) fn state(m: &Owner<D>) -> CellState {
         m.raw.shared().state()
     }
 
-    pub(crate) fn borrow_mut(m: &MutRef<D>) -> &mut D {
+    pub(crate) fn borrow_mut(m: &Owner<D>) -> &mut D {
         // SAFETY: we have exclusive ref and data hasn't been dropped
         unsafe { m.raw.shared().deref_mut() }
     }
 
-    pub(crate) fn move_data(m: MutRef<D>) -> D
+    pub(crate) fn move_data(m: Owner<D>) -> D
     where
         D: Sized,
     {
         // SAFETY:
         // we have exclusive ref
-        // we consume the MutRef when taking
+        // we consume the Owner when taking
         // we change the state to dropped
         // so we won't access the data anymore
         unsafe { m.raw.shared().move_data() }
     }
 
-    pub(crate) fn drop_data(m: MutRef<D>) {
+    pub(crate) fn drop_data(m: Owner<D>) {
         // SAFETY:
         // we have exclusive ref
-        // we consume the MutRef when deleting
+        // we consume the Owner when deleting
         // we change the state to dropped
         // so we won't access the data anymore
         unsafe { m.raw.shared().drop_data() }
     }
 }
 
-impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<MutRef<U>> for MutRef<D> {}
+impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Owner<U>> for Owner<D> {}
 
-impl<D: ?Sized> TryClone for MutRef<D> {
+impl<D: ?Sized> TryClone for Owner<D> {
     fn try_clone(&self) -> Option<Self>
     where
         Self: Sized,
@@ -230,7 +230,7 @@ impl<D: ?Sized> TryClone for MutRef<D> {
     }
 }
 
-impl<D: ?Sized> Deref for MutRef<D> {
+impl<D: ?Sized> Deref for Owner<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
         // SAFETY: we have exclusive ref and data hasn't been dropped
@@ -238,31 +238,31 @@ impl<D: ?Sized> Deref for MutRef<D> {
     }
 }
 
-impl<D: ?Sized> DerefMut for MutRef<D> {
+impl<D: ?Sized> DerefMut for Owner<D> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY: we have exclusive ref and data hasn't been dropped
         unsafe { self.raw.shared().deref_mut() }
     }
 }
 
-impl<D: ?Sized> TryFrom<&RawRef<D>> for MutRef<D> {
+impl<D: ?Sized> TryFrom<&RawRef<D>> for Owner<D> {
     type Error = CellState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
-        Ok(MutRef {
+        Ok(Owner {
             raw: RawRef::clone_to(value, RefType::Mut)?,
         })
     }
 }
 
-impl<D: ?Sized> Drop for MutRef<D> {
+impl<D: ?Sized> Drop for Owner<D> {
     fn drop(&mut self) {
         self.raw.drop_from(RefType::Mut)
     }
 }
 
-impl<D: Default> Default for MutRef<D> {
+impl<D: Default> Default for Owner<D> {
     fn default() -> Self {
-        MutRef::new(D::default())
+        Owner::new(D::default())
     }
 }
 

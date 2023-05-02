@@ -11,7 +11,7 @@ use crate::{
         prelude::names,
         val::Val,
     },
-    types::ImRef,
+    types::Reader,
 };
 
 pub(crate) fn assign() -> Val {
@@ -19,7 +19,7 @@ pub(crate) fn assign() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::ASSIGN),
-            eval: ImRef::new(fn_assign),
+            eval: Reader::new(fn_assign),
         }),
     })
 }
@@ -42,7 +42,7 @@ pub(crate) fn remove() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::MOVE),
-            eval: ImRef::new(fn_move),
+            eval: Reader::new(fn_move),
         }),
     })
 }

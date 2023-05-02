@@ -12,8 +12,8 @@ use crate::{
         val::Val,
     },
     types::{
-        ImRef,
         Pair,
+        Reader,
     },
 };
 
@@ -22,7 +22,7 @@ pub(crate) fn add() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_ADD),
-            eval: ImRef::new(fn_add),
+            eval: Reader::new(fn_add),
         }),
     })
 }
@@ -43,7 +43,7 @@ pub(crate) fn subtract() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_SUBTRACT),
-            eval: ImRef::new(fn_subtract),
+            eval: Reader::new(fn_subtract),
         }),
     })
 }
@@ -64,7 +64,7 @@ pub(crate) fn multiply() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_MULTIPLY),
-            eval: ImRef::new(fn_multiply),
+            eval: Reader::new(fn_multiply),
         }),
     })
 }
@@ -85,7 +85,7 @@ pub(crate) fn divide() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_DIVIDE),
-            eval: ImRef::new(fn_divide),
+            eval: Reader::new(fn_divide),
         }),
     })
 }
@@ -108,7 +108,7 @@ pub(crate) fn remainder() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_REMAINDER),
-            eval: ImRef::new(fn_remainder),
+            eval: Reader::new(fn_remainder),
         }),
     })
 }
@@ -131,7 +131,7 @@ pub(crate) fn divide_remainder() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_DIVIDE_REMAINDER),
-            eval: ImRef::new(fn_divide_remainder),
+            eval: Reader::new(fn_divide_remainder),
         }),
     })
 }
@@ -154,7 +154,7 @@ pub(crate) fn less_than() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_LESS_THAN),
-            eval: ImRef::new(fn_less_than),
+            eval: Reader::new(fn_less_than),
         }),
     })
 }
@@ -175,7 +175,7 @@ pub(crate) fn less_equal() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_LESS_EQUAL),
-            eval: ImRef::new(fn_less_equal),
+            eval: Reader::new(fn_less_equal),
         }),
     })
 }
@@ -196,7 +196,7 @@ pub(crate) fn greater_than() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_GREATER_THAN),
-            eval: ImRef::new(fn_greater_than),
+            eval: Reader::new(fn_greater_than),
         }),
     })
 }
@@ -217,7 +217,7 @@ pub(crate) fn greater_equal() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_GREATER_EQUAL),
-            eval: ImRef::new(fn_greater_equal),
+            eval: Reader::new(fn_greater_equal),
         }),
     })
 }

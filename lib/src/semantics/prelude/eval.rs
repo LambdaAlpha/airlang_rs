@@ -19,7 +19,7 @@ use crate::{
     },
     traits::TryClone,
     types::{
-        ImRef,
+        Reader,
         Str,
         Symbol,
     },
@@ -30,7 +30,7 @@ pub(crate) fn eval() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::EVAL),
-            eval: ImRef::new(fn_eval),
+            eval: Reader::new(fn_eval),
         }),
     })
 }
@@ -54,7 +54,7 @@ pub(crate) fn val() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::VAL),
-            eval: ImRef::new(fn_val),
+            eval: Reader::new(fn_val),
         }),
     })
 }
@@ -68,7 +68,7 @@ pub(crate) fn parse() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::PARSE),
-            eval: ImRef::new(fn_parse),
+            eval: Reader::new(fn_parse),
         }),
     })
 }
@@ -87,7 +87,7 @@ pub(crate) fn stringify() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::STRINGIFY),
-            eval: ImRef::new(fn_stringify),
+            eval: Reader::new(fn_stringify),
         }),
     })
 }
@@ -104,7 +104,7 @@ pub(crate) fn func() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::FUNC),
-            eval: ImRef::new(fn_func),
+            eval: Reader::new(fn_func),
         }),
     })
 }
@@ -148,8 +148,8 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
         return Val::Func(Func {
             func_trait: FuncTrait {},
             func_impl: FuncImpl::Composed(Composed {
-                body: ImRef::new(body),
-                constants: ImRef::new(constants),
+                body: Reader::new(body),
+                constants: Reader::new(constants),
                 input_name,
                 caller_name,
             }),

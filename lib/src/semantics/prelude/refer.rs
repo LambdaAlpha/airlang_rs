@@ -14,9 +14,9 @@ use {
         },
         traits::TryClone,
         types::{
-            BoxRef,
-            ImRef,
-            MutRef,
+            Keeper,
+            Owner,
+            Reader,
         },
     },
     std::{
@@ -25,145 +25,162 @@ use {
     },
 };
 
-pub(crate) fn new_box() -> Val {
+pub(crate) fn into_keeper() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::NEW_BOX),
-            eval: ImRef::new(fn_new_box),
+            id: Name::from(names::INTO_KEEPER),
+            eval: Reader::new(fn_into_keeper),
         }),
     })
 }
 
-fn fn_new_box(ctx: &mut Ctx, input: Val) -> Val {
-    Val::BoxRef(BoxRef::new(ctx.eval(&input)))
+fn fn_into_keeper(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Keeper(Keeper::new(ctx.eval(&input)))
 }
 
-pub(crate) fn new_im() -> Val {
+pub(crate) fn into_reader() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::NEW_IM),
-            eval: ImRef::new(fn_new_im),
+            id: Name::from(names::INTO_READER),
+            eval: Reader::new(fn_into_reader),
         }),
     })
 }
 
-fn fn_new_im(ctx: &mut Ctx, input: Val) -> Val {
-    Val::ImRef(ImRef::new(ctx.eval(&input)))
+fn fn_into_reader(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Reader(Reader::new(ctx.eval(&input)))
 }
 
-pub(crate) fn new_mut() -> Val {
+pub(crate) fn into_owner() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::NEW_MUT),
-            eval: ImRef::new(fn_new_mut),
+            id: Name::from(names::INTO_OWNER),
+            eval: Reader::new(fn_into_owner),
         }),
     })
 }
 
-fn fn_new_mut(ctx: &mut Ctx, input: Val) -> Val {
-    Val::MutRef(MutRef::new(ctx.eval(&input)))
+fn fn_into_owner(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Owner(Owner::new(ctx.eval(&input)))
 }
 
-pub(crate) fn ref_box() -> Val {
+pub(crate) fn share_keeper() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::REF_BOX),
-            eval: ImRef::new(fn_ref_box),
+            id: Name::from(names::SHARE_KEEPER),
+            eval: Reader::new(fn_share_keeper),
         }),
     })
 }
 
-fn fn_ref_box(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_share_keeper(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::BoxRef(b) => BoxRef::ref_box(&b)
-            .map(|b| Val::BoxRef(b))
+        Val::Keeper(b) => Keeper::keeper(&b)
+            .map(|b| Val::Keeper(b))
             .unwrap_or_default(),
-        Val::ImRef(i) => ImRef::ref_box(&i)
-            .map(|b| Val::BoxRef(b))
+        Val::Reader(i) => Reader::keeper(&i)
+            .map(|b| Val::Keeper(b))
             .unwrap_or_default(),
-        Val::MutRef(m) => MutRef::ref_box(&m)
-            .map(|b| Val::BoxRef(b))
+        Val::Owner(m) => Owner::keeper(&m)
+            .map(|b| Val::Keeper(b))
             .unwrap_or_default(),
         _ => Val::default(),
     }
 }
 
-pub(crate) fn ref_im() -> Val {
+pub(crate) fn share_reader() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::REF_IM),
-            eval: ImRef::new(fn_ref_im),
+            id: Name::from(names::SHARE_READER),
+            eval: Reader::new(fn_share_reader),
         }),
     })
 }
 
-fn fn_ref_im(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_share_reader(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::BoxRef(b) => BoxRef::ref_im(&b)
-            .map(|i| Val::ImRef(i))
+        Val::Keeper(b) => Keeper::saver(&b)
+            .map(|i| Val::Reader(i))
             .unwrap_or_default(),
-        Val::ImRef(i) => ImRef::ref_im(&i).map(|i| Val::ImRef(i)).unwrap_or_default(),
-        _ => Val::default(),
-    }
-}
-
-pub(crate) fn ref_mut() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::REF_MUT),
-            eval: ImRef::new(fn_ref_mut),
-        }),
-    })
-}
-
-fn fn_ref_mut(ctx: &mut Ctx, input: Val) -> Val {
-    match ctx.eval(&input) {
-        Val::BoxRef(b) => BoxRef::ref_mut(&b)
-            .map(|m| Val::MutRef(m))
+        Val::Reader(i) => Reader::reader(&i)
+            .map(|i| Val::Reader(i))
             .unwrap_or_default(),
         _ => Val::default(),
     }
 }
 
-pub(crate) fn deref_im() -> Val {
+pub(crate) fn share_owner() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::DEREF_IM),
-            eval: ImRef::new(fn_deref_im),
+            id: Name::from(names::SHARE_OWNER),
+            eval: Reader::new(fn_share_owner),
         }),
     })
 }
 
-fn fn_deref_im(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_share_owner(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::ImRef(i) => i.deref().try_clone().unwrap_or_default(),
-        Val::MutRef(m) => m.deref().try_clone().unwrap_or_default(),
+        Val::Keeper(b) => Keeper::owner(&b).map(|m| Val::Owner(m)).unwrap_or_default(),
         _ => Val::default(),
     }
 }
 
-pub(crate) fn deref_mut() -> Val {
+pub(crate) fn from_reader() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::DEREF_MUT),
-            eval: ImRef::new(fn_deref_mut),
+            id: Name::from(names::FROM_READER),
+            eval: Reader::new(fn_from_reader),
         }),
     })
 }
 
-fn fn_deref_mut(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_from_reader(ctx: &mut Ctx, input: Val) -> Val {
+    match ctx.eval(&input) {
+        Val::Reader(i) => i.deref().try_clone().unwrap_or_default(),
+        Val::Owner(m) => m.deref().try_clone().unwrap_or_default(),
+        _ => Val::default(),
+    }
+}
+
+pub(crate) fn from_owner() -> Val {
+    Val::Func(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::FROM_OWNER),
+            eval: Reader::new(fn_from_owner),
+        }),
+    })
+}
+
+fn fn_from_owner(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::Owner(m) = ctx.eval(&input) {
+        return Owner::move_data(m);
+    }
+    Val::default()
+}
+
+pub(crate) fn assign_owner() -> Val {
+    Val::Func(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::ASSIGN_OWNER),
+            eval: Reader::new(fn_assign_owner),
+        }),
+    })
+}
+
+fn fn_assign_owner(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::MutRef(m) = ctx.eval(&pair.first) {
+        if let Val::Owner(m) = ctx.eval(&pair.first) {
             let mut val = ctx.eval(&pair.second);
-            swap(MutRef::borrow_mut(&m), &mut val);
+            swap(Owner::borrow_mut(&m), &mut val);
             return val;
         }
     }

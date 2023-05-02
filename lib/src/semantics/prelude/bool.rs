@@ -13,7 +13,7 @@ use crate::{
     },
     types::{
         Bool,
-        ImRef,
+        Reader,
     },
 };
 
@@ -22,7 +22,7 @@ pub(crate) fn not() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NOT),
-            eval: ImRef::new(fn_not),
+            eval: Reader::new(fn_not),
         }),
     })
 }
@@ -39,7 +39,7 @@ pub(crate) fn and() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::AND),
-            eval: ImRef::new(fn_and),
+            eval: Reader::new(fn_and),
         }),
     })
 }
@@ -64,7 +64,7 @@ pub(crate) fn or() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::OR),
-            eval: ImRef::new(fn_or),
+            eval: Reader::new(fn_or),
         }),
     })
 }
@@ -89,7 +89,7 @@ pub(crate) fn equal() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::EQUAL),
-            eval: ImRef::new(fn_equal),
+            eval: Reader::new(fn_equal),
         }),
     })
 }
@@ -106,7 +106,7 @@ pub(crate) fn not_equal() -> Val {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::NOT_EQUAL),
-            eval: ImRef::new(fn_not_equal),
+            eval: Reader::new(fn_not_equal),
         }),
     })
 }

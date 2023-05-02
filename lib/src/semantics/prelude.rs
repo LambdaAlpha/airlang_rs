@@ -6,10 +6,10 @@ use crate::{
         },
         val::Val,
     },
-    types::ImRef,
+    types::Reader,
 };
 
-pub(crate) fn prelude() -> ImRef<NameMap> {
+pub(crate) fn prelude() -> Reader<NameMap> {
     let mut c = NameMap::default();
 
     put(&mut c, names::AIR_VERSION, meta::version());
@@ -36,14 +36,15 @@ pub(crate) fn prelude() -> ImRef<NameMap> {
     put(&mut c, names::STRINGIFY, eval::stringify());
     put(&mut c, names::FUNC, eval::func());
 
-    put(&mut c, names::NEW_BOX, refer::new_box());
-    put(&mut c, names::NEW_IM, refer::new_im());
-    put(&mut c, names::NEW_MUT, refer::new_mut());
-    put(&mut c, names::REF_BOX, refer::ref_box());
-    put(&mut c, names::REF_IM, refer::ref_im());
-    put(&mut c, names::REF_MUT, refer::ref_mut());
-    put(&mut c, names::DEREF_IM, refer::deref_im());
-    put(&mut c, names::DEREF_MUT, refer::deref_mut());
+    put(&mut c, names::INTO_KEEPER, refer::into_keeper());
+    put(&mut c, names::INTO_READER, refer::into_reader());
+    put(&mut c, names::INTO_OWNER, refer::into_owner());
+    put(&mut c, names::SHARE_KEEPER, refer::share_keeper());
+    put(&mut c, names::SHARE_READER, refer::share_reader());
+    put(&mut c, names::SHARE_OWNER, refer::share_owner());
+    put(&mut c, names::FROM_READER, refer::from_reader());
+    put(&mut c, names::ASSIGN_OWNER, refer::assign_owner());
+    put(&mut c, names::FROM_OWNER, refer::from_owner());
 
     put(&mut c, names::INT_ADD, int::add());
     put(&mut c, names::INT_SUBTRACT, int::subtract());
@@ -56,7 +57,7 @@ pub(crate) fn prelude() -> ImRef<NameMap> {
     put(&mut c, names::INT_GREATER_THAN, int::greater_than());
     put(&mut c, names::INT_GREATER_EQUAL, int::greater_equal());
 
-    ImRef::new(c)
+    Reader::new(c)
 }
 
 fn put(constants: &mut NameMap, key: &str, val: Val) {
@@ -88,14 +89,15 @@ pub(crate) mod names {
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "func";
 
-    pub(crate) const NEW_BOX: &str = "box";
-    pub(crate) const NEW_IM: &str = "im";
-    pub(crate) const NEW_MUT: &str = "mut";
-    pub(crate) const REF_BOX: &str = "&box";
-    pub(crate) const REF_IM: &str = "&im";
-    pub(crate) const REF_MUT: &str = "&mut";
-    pub(crate) const DEREF_IM: &str = "@";
-    pub(crate) const DEREF_MUT: &str = "=mut";
+    pub(crate) const INTO_KEEPER: &str = ">.";
+    pub(crate) const INTO_READER: &str = ">|";
+    pub(crate) const INTO_OWNER: &str = ">!";
+    pub(crate) const SHARE_KEEPER: &str = ".";
+    pub(crate) const SHARE_READER: &str = "|";
+    pub(crate) const SHARE_OWNER: &str = "!";
+    pub(crate) const FROM_READER: &str = "<|";
+    pub(crate) const FROM_OWNER: &str = "<!";
+    pub(crate) const ASSIGN_OWNER: &str = "=!";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";
