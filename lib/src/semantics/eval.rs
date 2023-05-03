@@ -137,7 +137,7 @@ impl Ctx {
         self.eval_func_then_call(&c.func, &c.input)
     }
 
-    fn eval_func_then_call(&mut self, func: &Val, input: &Val) -> Val {
+    pub(crate) fn eval_func_then_call(&mut self, func: &Val, input: &Val) -> Val {
         let func = if let Val::Func(f) = self.eval(func) {
             f
         } else {

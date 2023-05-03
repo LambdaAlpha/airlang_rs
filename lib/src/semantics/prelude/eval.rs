@@ -177,3 +177,20 @@ fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {
     }
     Some(name_map)
 }
+
+pub(crate) fn chain() -> Val {
+    Val::Func(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::CHAIN),
+            eval: Reader::new(fn_chain),
+        }),
+    })
+}
+
+fn fn_chain(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::Pair(pair) = input {
+        return ctx.eval_func_then_call(&pair.second, &pair.first);
+    }
+    Val::default()
+}
