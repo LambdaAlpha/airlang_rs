@@ -1,6 +1,6 @@
 use {
     airlang::{
-        semantics::interpret,
+        semantics::Interpreter,
         syntax::parse,
     },
     criterion::{
@@ -14,9 +14,10 @@ pub fn bench_semantics(c: &mut Criterion) {
 }
 
 fn bench_interpret(c: &mut Criterion) {
+    let mut interpreter = Interpreter::new();
     c.bench_function("interpret", |b| {
         let s = include_str!("interpret.air");
         let src_repr = parse(s).unwrap();
-        b.iter(|| interpret(black_box(&src_repr)))
+        b.iter(|| interpreter.interpret(black_box(&src_repr)))
     });
 }

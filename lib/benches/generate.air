@@ -1,6 +1,13 @@
 # "bench generate"
-seq(
-  x = [1 + 1],
-  y = {x: [read(x)]},
-  print("y is {}", y),
+;(
+  x = 42,
+  y = 24,
+  while(
+    x <> y,
+    if(x > y,
+        x = [x - y],
+        y = [y - x]
+    )
+  ),
+  x
 )
