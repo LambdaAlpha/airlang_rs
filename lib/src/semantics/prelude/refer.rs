@@ -104,7 +104,7 @@ pub(crate) fn share_reader() -> Val {
 
 fn fn_share_reader(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::Keeper(b) => Keeper::saver(&b)
+        Val::Keeper(b) => Keeper::reader(&b)
             .map(|i| Val::Reader(i))
             .unwrap_or_default(),
         Val::Reader(i) => Reader::reader(&i)

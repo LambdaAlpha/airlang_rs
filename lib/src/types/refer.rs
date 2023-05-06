@@ -10,6 +10,10 @@ use {
             Debug,
             Formatter,
         },
+        hash::{
+            Hash,
+            Hasher,
+        },
         marker::{
             PhantomData,
             Unsize,
@@ -26,7 +30,7 @@ use {
     },
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub(crate) struct Keeper<D: ?Sized> {
     raw: RawRef<D>,
 }
@@ -38,24 +42,24 @@ impl<D: ?Sized> Keeper<D> {
         D: Sized,
     {
         Keeper {
-            raw: RawRef::new(d, RefType::Box),
+            raw: RawRef::new(d, RefType::Keeper),
         }
     }
 
-    pub(crate) fn keeper(b: &Keeper<D>) -> Result<Self, CellState> {
-        Self::try_from(&b.raw)
+    pub(crate) fn keeper(k: &Keeper<D>) -> Result<Self, RefState> {
+        Self::try_from(&k.raw)
     }
 
-    pub(crate) fn saver(b: &Keeper<D>) -> Result<Reader<D>, CellState> {
-        Reader::try_from(&b.raw)
+    pub(crate) fn reader(k: &Keeper<D>) -> Result<Reader<D>, RefState> {
+        Reader::try_from(&k.raw)
     }
 
-    pub(crate) fn owner(b: &Keeper<D>) -> Result<Owner<D>, CellState> {
-        Owner::try_from(&b.raw)
+    pub(crate) fn owner(k: &Keeper<D>) -> Result<Owner<D>, RefState> {
+        Owner::try_from(&k.raw)
     }
 
-    pub(crate) fn state(b: &Keeper<D>) -> CellState {
-        b.raw.shared().state()
+    pub(crate) fn state(k: &Keeper<D>) -> RefState {
+        k.raw.shared().state()
     }
 }
 
@@ -71,17 +75,17 @@ impl<D: ?Sized> TryClone for Keeper<D> {
 }
 
 impl<D: ?Sized> TryFrom<&RawRef<D>> for Keeper<D> {
-    type Error = CellState;
+    type Error = RefState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(Keeper {
-            raw: RawRef::clone_to(value, RefType::Box)?,
+            raw: RawRef::clone_to(value, RefType::Keeper)?,
         })
     }
 }
 
 impl<D: ?Sized> Drop for Keeper<D> {
     fn drop(&mut self) {
-        self.raw.drop_from(RefType::Box)
+        self.raw.drop_from(RefType::Keeper)
     }
 }
 
@@ -91,7 +95,21 @@ impl<D: Default> Default for Keeper<D> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+impl<D: ?Sized> PartialEq for Keeper<D> {
+    fn eq(&self, other: &Self) -> bool {
+        self.raw == other.raw
+    }
+}
+
+impl<D: ?Sized> Eq for Keeper<D> {}
+
+impl<D: ?Sized> Hash for Keeper<D> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.raw.hash(state)
+    }
+}
+
+#[derive(Debug)]
 pub(crate) struct Reader<D: ?Sized> {
     raw: RawRef<D>,
 }
@@ -103,24 +121,24 @@ impl<D: ?Sized> Reader<D> {
         D: Sized,
     {
         Reader {
-            raw: RawRef::new(d, RefType::Im),
+            raw: RawRef::new(d, RefType::Reader),
         }
     }
 
-    pub(crate) fn from_keeper(box_cell: &Keeper<D>) -> Result<Self, CellState> {
-        Self::try_from(&box_cell.raw)
+    pub(crate) fn from_keeper(keeper: &Keeper<D>) -> Result<Self, RefState> {
+        Self::try_from(&keeper.raw)
     }
 
-    pub(crate) fn reader(i: &Reader<D>) -> Result<Self, CellState> {
-        Self::try_from(&i.raw)
+    pub(crate) fn reader(r: &Reader<D>) -> Result<Self, RefState> {
+        Self::try_from(&r.raw)
     }
 
-    pub(crate) fn keeper(i: &Reader<D>) -> Result<Keeper<D>, CellState> {
-        Keeper::try_from(&i.raw)
+    pub(crate) fn keeper(r: &Reader<D>) -> Result<Keeper<D>, RefState> {
+        Keeper::try_from(&r.raw)
     }
 
-    pub(crate) fn state(i: &Reader<D>) -> CellState {
-        i.raw.shared().state()
+    pub(crate) fn state(r: &Reader<D>) -> RefState {
+        r.raw.shared().state()
     }
 }
 
@@ -138,23 +156,23 @@ impl<D: ?Sized> TryClone for Reader<D> {
 impl<D: ?Sized> Deref for Reader<D> {
     type Target = D;
     fn deref(&self) -> &Self::Target {
-        // SAFETY: when self is alive there is no mutable ref and data hasn't been dropped
+        // SAFETY: when self is alive there is no owner and data hasn't been dropped
         unsafe { self.raw.shared().deref() }
     }
 }
 
 impl<D: ?Sized> TryFrom<&RawRef<D>> for Reader<D> {
-    type Error = CellState;
+    type Error = RefState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(Reader {
-            raw: RawRef::clone_to(value, RefType::Im)?,
+            raw: RawRef::clone_to(value, RefType::Reader)?,
         })
     }
 }
 
 impl<D: ?Sized> Drop for Reader<D> {
     fn drop(&mut self) {
-        self.raw.drop_from(RefType::Im)
+        self.raw.drop_from(RefType::Reader)
     }
 }
 
@@ -164,7 +182,21 @@ impl<D: Default> Default for Reader<D> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+impl<D: ?Sized> PartialEq for Reader<D> {
+    fn eq(&self, other: &Self) -> bool {
+        self.raw == other.raw
+    }
+}
+
+impl<D: ?Sized> Eq for Reader<D> {}
+
+impl<D: ?Sized> Hash for Reader<D> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.raw.hash(state)
+    }
+}
+
+#[derive(Debug)]
 pub(crate) struct Owner<D: ?Sized> {
     raw: RawRef<D>,
 }
@@ -176,28 +208,28 @@ impl<D: ?Sized> Owner<D> {
         D: Sized,
     {
         Owner {
-            raw: RawRef::new(d, RefType::Mut),
+            raw: RawRef::new(d, RefType::Owner),
         }
     }
 
-    pub(crate) fn from_keeper(box_cell: &Keeper<D>) -> Result<Self, CellState> {
-        Self::try_from(&box_cell.raw)
+    pub(crate) fn from_keeper(keeper: &Keeper<D>) -> Result<Self, RefState> {
+        Self::try_from(&keeper.raw)
     }
 
-    pub(crate) fn keeper(m: &Owner<D>) -> Result<Keeper<D>, CellState> {
-        Keeper::try_from(&m.raw)
+    pub(crate) fn keeper(o: &Owner<D>) -> Result<Keeper<D>, RefState> {
+        Keeper::try_from(&o.raw)
     }
 
-    pub(crate) fn state(m: &Owner<D>) -> CellState {
-        m.raw.shared().state()
+    pub(crate) fn state(o: &Owner<D>) -> RefState {
+        o.raw.shared().state()
     }
 
-    pub(crate) fn borrow_mut(m: &Owner<D>) -> &mut D {
+    pub(crate) fn borrow_mut(o: &Owner<D>) -> &mut D {
         // SAFETY: we have exclusive ref and data hasn't been dropped
-        unsafe { m.raw.shared().deref_mut() }
+        unsafe { o.raw.shared().deref_mut() }
     }
 
-    pub(crate) fn move_data(m: Owner<D>) -> D
+    pub(crate) fn move_data(o: Owner<D>) -> D
     where
         D: Sized,
     {
@@ -206,16 +238,16 @@ impl<D: ?Sized> Owner<D> {
         // we consume the Owner when taking
         // we change the state to dropped
         // so we won't access the data anymore
-        unsafe { m.raw.shared().move_data() }
+        unsafe { o.raw.shared().move_data() }
     }
 
-    pub(crate) fn drop_data(m: Owner<D>) {
+    pub(crate) fn drop_data(o: Owner<D>) {
         // SAFETY:
         // we have exclusive ref
         // we consume the Owner when deleting
         // we change the state to dropped
         // so we won't access the data anymore
-        unsafe { m.raw.shared().drop_data() }
+        unsafe { o.raw.shared().drop_data() }
     }
 }
 
@@ -246,17 +278,17 @@ impl<D: ?Sized> DerefMut for Owner<D> {
 }
 
 impl<D: ?Sized> TryFrom<&RawRef<D>> for Owner<D> {
-    type Error = CellState;
+    type Error = RefState;
     fn try_from(value: &RawRef<D>) -> Result<Self, Self::Error> {
         Ok(Owner {
-            raw: RawRef::clone_to(value, RefType::Mut)?,
+            raw: RawRef::clone_to(value, RefType::Owner)?,
         })
     }
 }
 
 impl<D: ?Sized> Drop for Owner<D> {
     fn drop(&mut self) {
-        self.raw.drop_from(RefType::Mut)
+        self.raw.drop_from(RefType::Owner)
     }
 }
 
@@ -266,7 +298,21 @@ impl<D: Default> Default for Owner<D> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+impl<D: ?Sized> PartialEq for Owner<D> {
+    fn eq(&self, other: &Self) -> bool {
+        self.raw == other.raw
+    }
+}
+
+impl<D: ?Sized> Eq for Owner<D> {}
+
+impl<D: ?Sized> Hash for Owner<D> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.raw.hash(state)
+    }
+}
+
+#[derive(Debug)]
 struct RawRef<D: ?Sized> {
     ptr: NonNull<SharedCell<D>>,
     phantom: PhantomData<SharedCell<D>>,
@@ -283,7 +329,7 @@ impl<D: ?Sized> RawRef<D> {
         }
     }
 
-    fn clone_to(&self, ref_type: RefType) -> Result<RawRef<D>, CellState> {
+    fn clone_to(&self, ref_type: RefType) -> Result<RawRef<D>, RefState> {
         self.shared().clone_to(ref_type)?;
         Ok(RawRef {
             ptr: self.ptr,
@@ -314,8 +360,22 @@ impl<D: ?Sized> RawRef<D> {
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<RawRef<U>> for RawRef<D> {}
 
+impl<D: ?Sized> PartialEq for RawRef<D> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ptr == other.ptr
+    }
+}
+
+impl<D: ?Sized> Eq for RawRef<D> {}
+
+impl<D: ?Sized> Hash for RawRef<D> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ptr.hash(state)
+    }
+}
+
 struct SharedCell<D: ?Sized> {
-    state: Cell<CellState>,
+    state: Cell<RefState>,
     data: UnsafeCell<D>,
 }
 
@@ -325,16 +385,16 @@ impl<D: ?Sized> SharedCell<D> {
         D: Sized,
     {
         SharedCell {
-            state: Cell::new(CellState::new(ref_type)),
+            state: Cell::new(RefState::new(ref_type)),
             data: UnsafeCell::new(d),
         }
     }
 
-    fn state(&self) -> CellState {
+    fn state(&self) -> RefState {
         self.state.get()
     }
 
-    fn clone_to(&self, ref_type: RefType) -> Result<(), CellState> {
+    fn clone_to(&self, ref_type: RefType) -> Result<(), RefState> {
         self.state.set(self.state.get().clone_to(ref_type)?);
         Ok(())
     }
@@ -366,7 +426,7 @@ impl<D: ?Sized> SharedCell<D> {
         self.state.get().should_dealloc()
     }
 
-    // SAFETY: make sure data not dropped and there is no mut ref
+    // SAFETY: make sure data not dropped and there is no owner
     unsafe fn deref<'a>(&self) -> &'a D {
         self.data.get().as_ref().unwrap()
     }
@@ -379,117 +439,120 @@ impl<D: ?Sized> SharedCell<D> {
 
 #[derive(Debug, Copy, Clone)]
 enum RefType {
-    Box,
-    Im,
-    Mut,
+    Keeper,
+    Reader,
+    Owner,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone)]
-pub(crate) struct CellState {
+pub(crate) struct RefState {
     // the sign bit indicates whether data has been dropped (negative)
-    // other bits indicates box ref cnt
-    box_cnt: i32,
-    // the sign bit indicates whether data has been mutable borrowed (negative)
-    // other bits indicates immutable borrow cnt
-    ref_cnt: i32,
+    // other bits indicates keeper cnt
+    keeper_cnt: i32,
+    // the sign bit indicates whether data has been owned (negative)
+    // other bits indicates reader cnt
+    reader_cnt: i32,
 }
 
 #[allow(unused)]
-impl CellState {
+impl RefState {
     pub(crate) fn is_dropped(&self) -> bool {
-        self.box_cnt < 0
+        self.keeper_cnt < 0
     }
-    pub(crate) fn is_mut(&self) -> bool {
-        self.ref_cnt < 0
+    pub(crate) fn is_owned(&self) -> bool {
+        self.reader_cnt < 0
     }
-    pub(crate) fn box_cnt(&self) -> u32 {
-        (self.box_cnt & i32::MAX) as u32
+    pub(crate) fn keeper_cnt(&self) -> u32 {
+        (self.keeper_cnt & i32::MAX) as u32
     }
-    pub(crate) fn is_box_full(&self) -> bool {
-        self.box_cnt & i32::MAX == i32::MAX
+    pub(crate) fn is_keeper_full(&self) -> bool {
+        self.keeper_cnt & i32::MAX == i32::MAX
     }
-    pub(crate) fn im_cnt(&self) -> u32 {
-        (self.ref_cnt & i32::MAX) as u32
+    pub(crate) fn reader_cnt(&self) -> u32 {
+        (self.reader_cnt & i32::MAX) as u32
     }
-    pub(crate) fn is_im_full(&self) -> bool {
-        self.ref_cnt == i32::MAX
+    pub(crate) fn is_reader_full(&self) -> bool {
+        self.reader_cnt == i32::MAX
     }
-    pub(crate) fn is_referred(&self) -> bool {
-        self.ref_cnt != 0
+    pub(crate) fn is_reading(&self) -> bool {
+        self.reader_cnt != 0
     }
 }
 
-impl Debug for CellState {
+impl Debug for RefState {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CellState")
+        f.debug_struct("RefState")
             .field("drop", &self.is_dropped())
-            .field("box", &self.box_cnt())
-            .field("im", &self.im_cnt())
-            .field("mut", &self.is_mut())
+            .field("keep", &self.keeper_cnt())
+            .field("read", &self.reader_cnt())
+            .field("own", &self.is_owned())
             .finish()
     }
 }
 
-impl CellState {
+impl RefState {
     fn new(ref_type: RefType) -> Self {
-        let (box_cnt, ref_cnt) = match ref_type {
-            RefType::Box => (1, 0),
-            RefType::Im => (0, 1),
-            RefType::Mut => (0, i32::MIN),
+        let (keep_cnt, read_cnt) = match ref_type {
+            RefType::Keeper => (1, 0),
+            RefType::Reader => (0, 1),
+            RefType::Owner => (0, i32::MIN),
         };
-        CellState { box_cnt, ref_cnt }
+        RefState {
+            keeper_cnt: keep_cnt,
+            reader_cnt: read_cnt,
+        }
     }
 
-    fn clone_to(mut self, ref_type: RefType) -> Result<CellState, CellState> {
+    fn clone_to(mut self, ref_type: RefType) -> Result<RefState, RefState> {
         match ref_type {
-            RefType::Box => {
-                if self.is_box_full() {
+            RefType::Keeper => {
+                if self.is_keeper_full() {
                     Err(self)
                 } else {
-                    self.box_cnt += 1;
+                    self.keeper_cnt += 1;
                     Ok(self)
                 }
             }
-            RefType::Im => {
-                if self.is_dropped() || self.is_mut() || self.is_im_full() {
+            RefType::Reader => {
+                if self.is_dropped() || self.is_owned() || self.is_reader_full() {
                     Err(self)
                 } else {
-                    self.ref_cnt += 1;
+                    self.reader_cnt += 1;
                     Ok(self)
                 }
             }
-            RefType::Mut => {
-                if self.is_dropped() || self.is_referred() {
+            RefType::Owner => {
+                if self.is_dropped() || self.is_reading() {
                     Err(self)
                 } else {
-                    self.ref_cnt = i32::MIN;
+                    self.reader_cnt = i32::MIN;
                     Ok(self)
                 }
             }
         }
     }
 
-    fn drop_from(mut self, ref_type: RefType) -> CellState {
+    fn drop_from(mut self, ref_type: RefType) -> RefState {
         match ref_type {
-            RefType::Box => self.box_cnt -= 1,
-            RefType::Im => self.ref_cnt -= 1,
-            RefType::Mut => self.ref_cnt = 0,
+            RefType::Keeper => self.keeper_cnt -= 1,
+            RefType::Reader => self.reader_cnt -= 1,
+            RefType::Owner => self.reader_cnt = 0,
         }
         self
     }
 
-    fn drop(mut self) -> CellState {
-        self.box_cnt |= i32::MIN;
+    fn drop(mut self) -> RefState {
+        self.keeper_cnt |= i32::MIN;
         self
     }
 
     // if already dropped, return false
     fn should_drop(&self) -> bool {
-        self.box_cnt == 0 && self.ref_cnt == 0
+        self.keeper_cnt == 0 && self.reader_cnt == 0
     }
 
     fn should_dealloc(&self) -> bool {
-        self.box_cnt == i32::MIN && self.ref_cnt == 0
+        self.keeper_cnt == i32::MIN && self.reader_cnt == 0
     }
 }
 

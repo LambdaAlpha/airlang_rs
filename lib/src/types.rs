@@ -13,10 +13,10 @@ pub(crate) use self::{
     },
     pair::Pair,
     refer::{
-        CellState,
         Keeper,
         Owner,
         Reader,
+        RefState,
     },
     reverse::Reverse,
     string::Str,
