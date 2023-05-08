@@ -51,6 +51,7 @@ use {
         combinator::{
             all_consuming,
             cut,
+            eof,
             fail,
             map,
             map_opt,
@@ -498,7 +499,9 @@ fn number<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = alt((hex_int, bin_int, hex_bytes, bin_bytes, decimal));
+    let numbers = alt((hex_int, bin_int, hex_bytes, bin_bytes, decimal));
+    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_symbol(c)))));
+    let f = terminated(numbers, next);
     context("number", f)(src)
 }
 
