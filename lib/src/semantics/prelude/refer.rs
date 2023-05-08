@@ -25,31 +25,31 @@ use {
     },
 };
 
-pub(crate) fn new_box() -> Val {
+pub(crate) fn box_new() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::BOX),
-            eval: Reader::new(fn_box),
+            id: Name::from(names::BOX_NEW),
+            eval: Reader::new(fn_box_new),
         }),
     })
 }
 
-fn fn_box(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_box_new(ctx: &mut Ctx, input: Val) -> Val {
     Val::Keeper(Keeper::new(ctx.eval(&input)))
 }
 
-pub(crate) fn box_copy() -> Val {
+pub(crate) fn box_read() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::BOX_COPY),
-            eval: Reader::new(fn_box_copy),
+            id: Name::from(names::BOX_READ),
+            eval: Reader::new(fn_box_read),
         }),
     })
 }
 
-fn fn_box_copy(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_box_read(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
         Val::Keeper(k) => Keeper::reader(&k)
             .ok()
@@ -59,17 +59,17 @@ fn fn_box_copy(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn box_move_out() -> Val {
+pub(crate) fn box_move() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::BOX_MOVE_OUT),
-            eval: Reader::new(fn_box_move_out),
+            id: Name::from(names::BOX_MOVE),
+            eval: Reader::new(fn_box_move),
         }),
     })
 }
 
-fn fn_box_move_out(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_box_move(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Keeper(k) = ctx.eval(&input) {
         return Keeper::owner(&k).map(Owner::move_data).unwrap_or_default();
     }

@@ -37,9 +37,9 @@ pub(crate) fn prelude() -> Reader<NameMap> {
     put(&mut c, names::FUNC, eval::func());
     put(&mut c, names::CHAIN, eval::chain());
 
-    put(&mut c, names::BOX, refer::new_box());
-    put(&mut c, names::BOX_COPY, refer::box_copy());
-    put(&mut c, names::BOX_MOVE_OUT, refer::box_move_out());
+    put(&mut c, names::BOX_NEW, refer::box_new());
+    put(&mut c, names::BOX_READ, refer::box_read());
+    put(&mut c, names::BOX_MOVE, refer::box_move());
     put(&mut c, names::BOX_ASSIGN, refer::box_assign());
 
     put(&mut c, names::INT_ADD, int::add());
@@ -87,10 +87,10 @@ pub(crate) mod names {
     pub(crate) const FUNC: &str = "func";
     pub(crate) const CHAIN: &str = ".";
 
-    pub(crate) const BOX: &str = "box";
-    pub(crate) const BOX_COPY: &str = "<.";
-    pub(crate) const BOX_MOVE_OUT: &str = "<!";
-    pub(crate) const BOX_ASSIGN: &str = "<-";
+    pub(crate) const BOX_NEW: &str = "@new";
+    pub(crate) const BOX_READ: &str = "@";
+    pub(crate) const BOX_MOVE: &str = "@move";
+    pub(crate) const BOX_ASSIGN: &str = "@=";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";
