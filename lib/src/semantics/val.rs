@@ -26,9 +26,7 @@ use {
             Keeper,
             List,
             Map,
-            Owner,
             Pair,
-            Reader,
             Reverse,
             Str,
             Symbol,
@@ -58,8 +56,6 @@ pub(crate) enum Val {
     Map(MapVal),
 
     Keeper(KeeperVal),
-    Reader(ReaderVal),
-    Owner(OwnerVal),
 
     Func(Func),
     Ctx(Ctx),
@@ -73,8 +69,6 @@ pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Repr, Val>;
 pub(crate) type KeeperVal = Keeper<Val>;
-pub(crate) type ReaderVal = Reader<Val>;
-pub(crate) type OwnerVal = Owner<Val>;
 
 #[allow(dead_code)]
 impl Val {
@@ -168,20 +162,6 @@ impl Val {
     }
     pub(crate) fn keeper(&self) -> Option<&KeeperVal> {
         if let Val::Keeper(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn reader(&self) -> Option<&ReaderVal> {
-        if let Val::Reader(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn owner(&self) -> Option<&OwnerVal> {
-        if let Val::Owner(v) = self {
             Some(v)
         } else {
             None
@@ -291,18 +271,6 @@ impl From<MapVal> for Val {
 impl From<KeeperVal> for Val {
     fn from(value: KeeperVal) -> Self {
         Val::Keeper(value)
-    }
-}
-
-impl From<ReaderVal> for Val {
-    fn from(value: ReaderVal) -> Self {
-        Val::Reader(value)
-    }
-}
-
-impl From<OwnerVal> for Val {
-    fn from(value: OwnerVal) -> Self {
-        Val::Owner(value)
     }
 }
 
@@ -627,8 +595,6 @@ impl TryClone for Val {
             Val::List(l) => Some(Val::List(l.try_clone()?)),
             Val::Map(m) => Some(Val::Map(m.try_clone()?)),
             Val::Keeper(b) => Some(Val::Keeper(b.try_clone()?)),
-            Val::Reader(i) => Some(Val::Reader(i.try_clone()?)),
-            Val::Owner(m) => Some(Val::Owner(m.try_clone()?)),
             Val::Func(f) => Some(Val::Func(f.try_clone()?)),
             Val::Ctx(c) => Some(Val::Ctx(c.try_clone()?)),
             Val::Extend(e) => Some(Val::Extend(e.try_clone()?)),

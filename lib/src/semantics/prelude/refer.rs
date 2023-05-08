@@ -25,163 +25,75 @@ use {
     },
 };
 
-pub(crate) fn into_keeper() -> Val {
+pub(crate) fn new_box() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::INTO_KEEPER),
-            eval: Reader::new(fn_into_keeper),
+            id: Name::from(names::BOX),
+            eval: Reader::new(fn_box),
         }),
     })
 }
 
-fn fn_into_keeper(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_box(ctx: &mut Ctx, input: Val) -> Val {
     Val::Keeper(Keeper::new(ctx.eval(&input)))
 }
 
-pub(crate) fn into_reader() -> Val {
+pub(crate) fn box_copy() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::INTO_READER),
-            eval: Reader::new(fn_into_reader),
+            id: Name::from(names::BOX_COPY),
+            eval: Reader::new(fn_box_copy),
         }),
     })
 }
 
-fn fn_into_reader(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Reader(Reader::new(ctx.eval(&input)))
-}
-
-pub(crate) fn into_owner() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::INTO_OWNER),
-            eval: Reader::new(fn_into_owner),
-        }),
-    })
-}
-
-fn fn_into_owner(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Owner(Owner::new(ctx.eval(&input)))
-}
-
-pub(crate) fn share_keeper() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::SHARE_KEEPER),
-            eval: Reader::new(fn_share_keeper),
-        }),
-    })
-}
-
-fn fn_share_keeper(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_box_copy(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
-        Val::Keeper(b) => Keeper::keeper(&b)
-            .map(|b| Val::Keeper(b))
-            .unwrap_or_default(),
-        Val::Reader(i) => Reader::keeper(&i)
-            .map(|b| Val::Keeper(b))
-            .unwrap_or_default(),
-        Val::Owner(m) => Owner::keeper(&m)
-            .map(|b| Val::Keeper(b))
+        Val::Keeper(k) => Keeper::reader(&k)
+            .ok()
+            .and_then(|i| i.deref().try_clone())
             .unwrap_or_default(),
         _ => Val::default(),
     }
 }
 
-pub(crate) fn share_reader() -> Val {
+pub(crate) fn box_move_out() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::SHARE_READER),
-            eval: Reader::new(fn_share_reader),
+            id: Name::from(names::BOX_MOVE_OUT),
+            eval: Reader::new(fn_box_move_out),
         }),
     })
 }
 
-fn fn_share_reader(ctx: &mut Ctx, input: Val) -> Val {
-    match ctx.eval(&input) {
-        Val::Keeper(b) => Keeper::reader(&b)
-            .map(|i| Val::Reader(i))
-            .unwrap_or_default(),
-        Val::Reader(i) => Reader::reader(&i)
-            .map(|i| Val::Reader(i))
-            .unwrap_or_default(),
-        _ => Val::default(),
-    }
-}
-
-pub(crate) fn share_owner() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::SHARE_OWNER),
-            eval: Reader::new(fn_share_owner),
-        }),
-    })
-}
-
-fn fn_share_owner(ctx: &mut Ctx, input: Val) -> Val {
-    match ctx.eval(&input) {
-        Val::Keeper(b) => Keeper::owner(&b).map(|m| Val::Owner(m)).unwrap_or_default(),
-        _ => Val::default(),
-    }
-}
-
-pub(crate) fn from_reader() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::FROM_READER),
-            eval: Reader::new(fn_from_reader),
-        }),
-    })
-}
-
-fn fn_from_reader(ctx: &mut Ctx, input: Val) -> Val {
-    match ctx.eval(&input) {
-        Val::Reader(i) => i.deref().try_clone().unwrap_or_default(),
-        Val::Owner(m) => m.deref().try_clone().unwrap_or_default(),
-        _ => Val::default(),
-    }
-}
-
-pub(crate) fn from_owner() -> Val {
-    Val::Func(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::FROM_OWNER),
-            eval: Reader::new(fn_from_owner),
-        }),
-    })
-}
-
-fn fn_from_owner(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Owner(m) = ctx.eval(&input) {
-        return Owner::move_data(m);
+fn fn_box_move_out(ctx: &mut Ctx, input: Val) -> Val {
+    if let Val::Keeper(k) = ctx.eval(&input) {
+        return Keeper::owner(&k).map(Owner::move_data).unwrap_or_default();
     }
     Val::default()
 }
 
-pub(crate) fn assign_owner() -> Val {
+pub(crate) fn box_assign() -> Val {
     Val::Func(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::ASSIGN_OWNER),
-            eval: Reader::new(fn_assign_owner),
+            id: Name::from(names::BOX_ASSIGN),
+            eval: Reader::new(fn_box_assign),
         }),
     })
 }
 
-fn fn_assign_owner(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_box_assign(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Owner(m) = ctx.eval(&pair.first) {
+        if let Val::Keeper(k) = ctx.eval(&pair.first) {
             let mut val = ctx.eval(&pair.second);
-            swap(Owner::borrow_mut(&m), &mut val);
-            return val;
+            if let Ok(owner) = Keeper::owner(&k) {
+                swap(Owner::borrow_mut(&owner), &mut val);
+                return val;
+            }
         }
     }
     Val::default()

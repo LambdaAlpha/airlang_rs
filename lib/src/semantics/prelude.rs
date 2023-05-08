@@ -37,15 +37,10 @@ pub(crate) fn prelude() -> Reader<NameMap> {
     put(&mut c, names::FUNC, eval::func());
     put(&mut c, names::CHAIN, eval::chain());
 
-    put(&mut c, names::INTO_KEEPER, refer::into_keeper());
-    put(&mut c, names::INTO_READER, refer::into_reader());
-    put(&mut c, names::INTO_OWNER, refer::into_owner());
-    put(&mut c, names::SHARE_KEEPER, refer::share_keeper());
-    put(&mut c, names::SHARE_READER, refer::share_reader());
-    put(&mut c, names::SHARE_OWNER, refer::share_owner());
-    put(&mut c, names::FROM_READER, refer::from_reader());
-    put(&mut c, names::ASSIGN_OWNER, refer::assign_owner());
-    put(&mut c, names::FROM_OWNER, refer::from_owner());
+    put(&mut c, names::BOX, refer::new_box());
+    put(&mut c, names::BOX_COPY, refer::box_copy());
+    put(&mut c, names::BOX_MOVE_OUT, refer::box_move_out());
+    put(&mut c, names::BOX_ASSIGN, refer::box_assign());
 
     put(&mut c, names::INT_ADD, int::add());
     put(&mut c, names::INT_SUBTRACT, int::subtract());
@@ -92,15 +87,10 @@ pub(crate) mod names {
     pub(crate) const FUNC: &str = "func";
     pub(crate) const CHAIN: &str = ".";
 
-    pub(crate) const INTO_KEEPER: &str = ">k";
-    pub(crate) const INTO_READER: &str = ">r";
-    pub(crate) const INTO_OWNER: &str = ">o";
-    pub(crate) const SHARE_KEEPER: &str = "^k";
-    pub(crate) const SHARE_READER: &str = "^r";
-    pub(crate) const SHARE_OWNER: &str = "^o";
-    pub(crate) const FROM_READER: &str = "<r";
-    pub(crate) const FROM_OWNER: &str = "<o";
-    pub(crate) const ASSIGN_OWNER: &str = "=o";
+    pub(crate) const BOX: &str = "box";
+    pub(crate) const BOX_COPY: &str = "<.";
+    pub(crate) const BOX_MOVE_OUT: &str = "<!";
+    pub(crate) const BOX_ASSIGN: &str = "<-";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";
