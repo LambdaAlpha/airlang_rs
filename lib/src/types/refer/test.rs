@@ -128,6 +128,8 @@ fn test_mix_ref() -> Result<(), RefState> {
     assert_ref_state(Keeper::state(&k1), true, 1, 0, false);
     Keeper::keeper(&k1)?;
     assert_ref_state(Keeper::state(&k1), true, 1, 0, false);
+    Keeper::reinit(&k1, "reinit".to_owned())?;
+    assert_ref_state(Keeper::state(&k1), false, 1, 0, false);
     drop(k1);
     Ok(())
 }
@@ -198,5 +200,16 @@ fn test_take() -> Result<(), RefState> {
     assert_eq!(s, "123".to_owned());
     Keeper::reader(&k).unwrap_err();
     Keeper::owner(&k).unwrap_err();
+    Ok(())
+}
+
+#[test]
+fn test_reinit() -> Result<(), RefState> {
+    let o = Owner::new("123".to_owned());
+    let k = Owner::keeper(&o)?;
+    Owner::drop_data(o);
+    Keeper::reinit(&k, "321".to_owned())?;
+    let r = Keeper::reader(&k)?;
+    assert_eq!(r.deref(), "321");
     Ok(())
 }

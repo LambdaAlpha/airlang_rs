@@ -93,6 +93,8 @@ fn fn_box_assign(ctx: &mut Ctx, input: Val) -> Val {
             if let Ok(owner) = Keeper::owner(&k) {
                 swap(Owner::borrow_mut(&owner), &mut val);
                 return val;
+            } else {
+                let _ = Keeper::reinit(&k, val);
             }
         }
     }

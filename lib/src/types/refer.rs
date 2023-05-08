@@ -61,6 +61,22 @@ impl<D: ?Sized> Keeper<D> {
     pub(crate) fn state(k: &Keeper<D>) -> RefState {
         k.raw.shared().state()
     }
+
+    pub(crate) fn reinit(k: &Keeper<D>, d: D) -> Result<(), RefState>
+    where
+        D: Sized,
+    {
+        let state = k.raw.shared().state();
+        if state.is_dropped() {
+            // SAFETY: data is dropped
+            unsafe {
+                k.raw.shared().reinit_data(d);
+            }
+            Ok(())
+        } else {
+            Err(state)
+        }
+    }
 }
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Keeper<U>> for Keeper<D> {}
@@ -422,6 +438,15 @@ impl<D: ?Sized> SharedCell<D> {
         ptr::drop_in_place(self.data.get())
     }
 
+    // SAFETY: data is dropped
+    unsafe fn reinit_data(&self, d: D)
+    where
+        D: Sized,
+    {
+        self.state.set(self.state.get().reinit());
+        ptr::write(self.data.get(), d)
+    }
+
     fn should_dealloc(&self) -> bool {
         self.state.get().should_dealloc()
     }
@@ -543,6 +568,11 @@ impl RefState {
 
     fn drop(mut self) -> RefState {
         self.keeper_cnt |= i32::MIN;
+        self
+    }
+
+    fn reinit(mut self) -> RefState {
+        self.keeper_cnt &= i32::MAX;
         self
     }
 
