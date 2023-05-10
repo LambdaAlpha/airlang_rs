@@ -15,13 +15,14 @@ use crate::{
 };
 
 pub(crate) fn assign() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::ASSIGN),
             eval: Reader::new(fn_assign),
         }),
     })
+    .into()
 }
 
 fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
@@ -38,13 +39,14 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::MOVE),
             eval: Reader::new(fn_move),
         }),
     })
+    .into()
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {

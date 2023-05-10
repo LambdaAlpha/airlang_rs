@@ -25,13 +25,14 @@ use {
 };
 
 pub(crate) fn box_new() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::BOX_NEW),
             eval: Reader::new(fn_box_new),
         }),
     })
+    .into()
 }
 
 fn fn_box_new(ctx: &mut Ctx, input: Val) -> Val {
@@ -39,13 +40,14 @@ fn fn_box_new(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn box_read() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::BOX_READ),
             eval: Reader::new(fn_box_read),
         }),
     })
+    .into()
 }
 
 fn fn_box_read(ctx: &mut Ctx, input: Val) -> Val {
@@ -58,13 +60,14 @@ fn fn_box_read(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn box_move() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::BOX_MOVE),
             eval: Reader::new(fn_box_move),
         }),
     })
+    .into()
 }
 
 fn fn_box_move(ctx: &mut Ctx, input: Val) -> Val {
@@ -75,13 +78,14 @@ fn fn_box_move(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn box_assign() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::BOX_ASSIGN),
             eval: Reader::new(fn_box_assign),
         }),
     })
+    .into()
 }
 
 fn fn_box_assign(ctx: &mut Ctx, input: Val) -> Val {

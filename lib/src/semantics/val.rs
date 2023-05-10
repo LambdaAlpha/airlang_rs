@@ -55,8 +55,8 @@ pub(crate) enum Val {
 
     Keeper(KeeperVal),
 
-    Func(Func),
-    Ctx(Ctx),
+    Func(Box<Func>),
+    Ctx(Box<Ctx>),
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
@@ -157,14 +157,14 @@ impl From<KeeperVal> for Val {
     }
 }
 
-impl From<Func> for Val {
-    fn from(value: Func) -> Self {
+impl From<Box<Func>> for Val {
+    fn from(value: Box<Func>) -> Self {
         Val::Func(value)
     }
 }
 
-impl From<Ctx> for Val {
-    fn from(value: Ctx) -> Self {
+impl From<Box<Ctx>> for Val {
+    fn from(value: Box<Ctx>) -> Self {
         Val::Ctx(value)
     }
 }

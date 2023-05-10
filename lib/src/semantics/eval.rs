@@ -44,8 +44,7 @@ pub(crate) struct Primitive {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Composed {
-    // is boxed to avoid infinite size of Val
-    pub(crate) body: Reader<Val>,
+    pub(crate) body: Val,
     pub(crate) constants: Reader<NameMap>,
     pub(crate) input_name: Option<Name>,
     pub(crate) caller_name: Option<Name>,
@@ -88,7 +87,7 @@ impl Composed {
         if let Some(caller_name) = &self.caller_name {
             let mut ctx_swap = Ctx::default();
             swap(ctx, &mut ctx_swap);
-            variables.insert(caller_name.clone(), Val::Ctx(ctx_swap));
+            variables.insert(caller_name.clone(), Val::Ctx(Box::new(ctx_swap)));
         }
         let reverse_interpreter = ctx.reverse_interpreter.clone();
 
@@ -100,7 +99,7 @@ impl Composed {
         let output = new_ctx.eval(&self.body);
         if let Some(caller_name) = &self.caller_name {
             if let Val::Ctx(caller) = new_ctx.remove(caller_name) {
-                *ctx = caller;
+                *ctx = *caller;
             }
         }
         output

@@ -25,13 +25,14 @@ use crate::{
 };
 
 pub(crate) fn eval() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::EVAL),
             eval: Reader::new(fn_eval),
         }),
     })
+    .into()
 }
 
 fn fn_eval(ctx: &mut Ctx, input: Val) -> Val {
@@ -49,13 +50,14 @@ fn fn_eval(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn val() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::VAL),
             eval: Reader::new(fn_val),
         }),
     })
+    .into()
 }
 
 fn fn_val(_: &mut Ctx, input: Val) -> Val {
@@ -63,13 +65,14 @@ fn fn_val(_: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn parse() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::PARSE),
             eval: Reader::new(fn_parse),
         }),
     })
+    .into()
 }
 
 fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
@@ -82,13 +85,14 @@ fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn stringify() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::STRINGIFY),
             eval: Reader::new(fn_stringify),
         }),
     })
+    .into()
 }
 
 fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
@@ -99,13 +103,14 @@ fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn func() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::FUNC),
             eval: Reader::new(fn_func),
         }),
     })
+    .into()
 }
 
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
@@ -144,15 +149,16 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             Val::Unit(_) => Some(Name::from("caller")),
             _ => return Val::default(),
         };
-        return Val::Func(Func {
+        return Box::new(Func {
             func_trait: FuncTrait {},
             func_impl: FuncImpl::Composed(Composed {
-                body: Reader::new(body),
+                body,
                 constants: Reader::new(constants),
                 input_name,
                 caller_name,
             }),
-        });
+        })
+        .into();
     }
     Val::default()
 }
@@ -176,13 +182,14 @@ fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {
 }
 
 pub(crate) fn chain() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::CHAIN),
             eval: Reader::new(fn_chain),
         }),
     })
+    .into()
 }
 
 fn fn_chain(ctx: &mut Ctx, input: Val) -> Val {

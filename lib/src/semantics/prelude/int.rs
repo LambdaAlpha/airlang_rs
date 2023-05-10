@@ -18,13 +18,14 @@ use crate::{
 };
 
 pub(crate) fn add() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_ADD),
             eval: Reader::new(fn_add),
         }),
     })
+    .into()
 }
 
 fn fn_add(ctx: &mut Ctx, input: Val) -> Val {
@@ -39,13 +40,14 @@ fn fn_add(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn subtract() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_SUBTRACT),
             eval: Reader::new(fn_subtract),
         }),
     })
+    .into()
 }
 
 fn fn_subtract(ctx: &mut Ctx, input: Val) -> Val {
@@ -60,13 +62,14 @@ fn fn_subtract(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn multiply() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_MULTIPLY),
             eval: Reader::new(fn_multiply),
         }),
     })
+    .into()
 }
 
 fn fn_multiply(ctx: &mut Ctx, input: Val) -> Val {
@@ -81,13 +84,14 @@ fn fn_multiply(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn divide() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_DIVIDE),
             eval: Reader::new(fn_divide),
         }),
     })
+    .into()
 }
 
 fn fn_divide(ctx: &mut Ctx, input: Val) -> Val {
@@ -104,13 +108,14 @@ fn fn_divide(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remainder() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_REMAINDER),
             eval: Reader::new(fn_remainder),
         }),
     })
+    .into()
 }
 
 fn fn_remainder(ctx: &mut Ctx, input: Val) -> Val {
@@ -127,13 +132,14 @@ fn fn_remainder(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn divide_remainder() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_DIVIDE_REMAINDER),
             eval: Reader::new(fn_divide_remainder),
         }),
     })
+    .into()
 }
 
 fn fn_divide_remainder(ctx: &mut Ctx, input: Val) -> Val {
@@ -150,13 +156,14 @@ fn fn_divide_remainder(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn less_than() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_LESS_THAN),
             eval: Reader::new(fn_less_than),
         }),
     })
+    .into()
 }
 
 fn fn_less_than(ctx: &mut Ctx, input: Val) -> Val {
@@ -171,13 +178,14 @@ fn fn_less_than(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn less_equal() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_LESS_EQUAL),
             eval: Reader::new(fn_less_equal),
         }),
     })
+    .into()
 }
 
 fn fn_less_equal(ctx: &mut Ctx, input: Val) -> Val {
@@ -192,13 +200,14 @@ fn fn_less_equal(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn greater_than() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_GREATER_THAN),
             eval: Reader::new(fn_greater_than),
         }),
     })
+    .into()
 }
 
 fn fn_greater_than(ctx: &mut Ctx, input: Val) -> Val {
@@ -213,13 +222,14 @@ fn fn_greater_than(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn greater_equal() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_GREATER_EQUAL),
             eval: Reader::new(fn_greater_equal),
         }),
     })
+    .into()
 }
 
 fn fn_greater_equal(ctx: &mut Ctx, input: Val) -> Val {
@@ -234,13 +244,14 @@ fn fn_greater_equal(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn less_greater() -> Val {
-    Val::Func(Func {
+    Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
             id: Name::from(names::INT_LESS_GREATER),
             eval: Reader::new(fn_less_greater),
         }),
     })
+    .into()
 }
 
 fn fn_less_greater(ctx: &mut Ctx, input: Val) -> Val {

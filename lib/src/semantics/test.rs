@@ -1,9 +1,14 @@
 use {
-    crate::syntax::parse,
-    std::error::Error,
+    crate::{
+        semantics::val::Val,
+        syntax::parse,
+    },
+    std::{
+        error::Error,
+        mem::size_of,
+    },
 };
 
-#[allow(dead_code)]
 fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
     let mut interpreter = crate::semantics::Interpreter::new();
     let tests = input.split("# ===");
@@ -21,6 +26,12 @@ fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
         interpreter.reset();
     }
     Ok(())
+}
+
+#[test]
+fn test_val_size() {
+    let size = size_of::<Val>();
+    assert!(size <= 40)
 }
 
 #[test]
