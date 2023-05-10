@@ -17,7 +17,6 @@ use crate::{
             Val,
         },
     },
-    traits::TryClone,
     types::{
         Reader,
         Str,
@@ -160,9 +159,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
 
 fn map_get(map: &MapVal, name: &str) -> Val {
     let name = Repr::Symbol(Symbol::from_str(name));
-    map.get(&name)
-        .and_then(|v| v.try_clone())
-        .unwrap_or_default()
+    map.get(&name).map(Clone::clone).unwrap_or_default()
 }
 
 fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {

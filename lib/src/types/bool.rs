@@ -1,5 +1,3 @@
-use crate::traits::TryClone;
-
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Bool(bool);
 
@@ -54,14 +52,5 @@ impl Into<bool> for Bool {
 impl Into<bool> for &Bool {
     fn into(self) -> bool {
         self.0
-    }
-}
-
-impl TryClone for Bool {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(self.clone())
     }
 }

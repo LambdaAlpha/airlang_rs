@@ -15,12 +15,10 @@ use {
             },
             ReprError,
         },
-        traits::TryClone,
         types::{
             Bool,
             Bytes,
             Call,
-            Extend,
             Float,
             Int,
             Keeper,
@@ -40,7 +38,7 @@ use {
     },
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum Val {
     Unit(Unit),
     Bool(Bool),
@@ -59,8 +57,6 @@ pub(crate) enum Val {
 
     Func(Func),
     Ctx(Ctx),
-
-    Extend(Extend),
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
@@ -74,119 +70,6 @@ pub(crate) type KeeperVal = Keeper<Val>;
 impl Val {
     pub(crate) fn is_unit(&self) -> bool {
         matches!(self, Val::Unit(_))
-    }
-
-    pub(crate) fn unit(&self) -> Option<&Unit> {
-        if let Val::Unit(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn bool(&self) -> Option<&Bool> {
-        if let Val::Bool(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn int(&self) -> Option<&Int> {
-        if let Val::Int(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn float(&self) -> Option<&Float> {
-        if let Val::Float(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn bytes(&self) -> Option<&Bytes> {
-        if let Val::Bytes(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn string(&self) -> Option<&Str> {
-        if let Val::String(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn symbol(&self) -> Option<&Symbol> {
-        if let Val::Symbol(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn pair(&self) -> Option<&Box<PairVal>> {
-        if let Val::Pair(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn call(&self) -> Option<&Box<CallVal>> {
-        if let Val::Call(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn reverse(&self) -> Option<&Box<ReverseVal>> {
-        if let Val::Reverse(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn list(&self) -> Option<&ListVal> {
-        if let Val::List(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn map(&self) -> Option<&MapVal> {
-        if let Val::Map(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn keeper(&self) -> Option<&KeeperVal> {
-        if let Val::Keeper(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn func(&self) -> Option<&Func> {
-        if let Val::Func(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub(crate) fn ctx(&self) -> Option<&Ctx> {
-        if let Val::Ctx(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn extended(&self) -> Option<&Extend> {
-        if let Val::Extend(v) = self {
-            Some(v)
-        } else {
-            None
-        }
     }
 }
 
@@ -283,12 +166,6 @@ impl From<Func> for Val {
 impl From<Ctx> for Val {
     fn from(value: Ctx) -> Self {
         Val::Ctx(value)
-    }
-}
-
-impl From<Extend> for Val {
-    fn from(value: Extend) -> Self {
-        Val::Extend(value)
     }
 }
 
@@ -572,32 +449,6 @@ impl Try for Val {
         match self {
             Val::Unit(_) => ControlFlow::Break(self),
             _ => ControlFlow::Continue(self),
-        }
-    }
-}
-
-impl TryClone for Val {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        match self {
-            Val::Unit(u) => Some(Val::Unit(u.try_clone()?)),
-            Val::Bool(b) => Some(Val::Bool(b.try_clone()?)),
-            Val::Int(i) => Some(Val::Int(i.try_clone()?)),
-            Val::Float(f) => Some(Val::Float(f.try_clone()?)),
-            Val::Bytes(b) => Some(Val::Bytes(b.try_clone()?)),
-            Val::Symbol(s) => Some(Val::Symbol(s.try_clone()?)),
-            Val::String(s) => Some(Val::String(s.try_clone()?)),
-            Val::Pair(p) => Some(Val::Pair(p.try_clone()?)),
-            Val::Call(c) => Some(Val::Call(c.try_clone()?)),
-            Val::Reverse(r) => Some(Val::Reverse(r.try_clone()?)),
-            Val::List(l) => Some(Val::List(l.try_clone()?)),
-            Val::Map(m) => Some(Val::Map(m.try_clone()?)),
-            Val::Keeper(b) => Some(Val::Keeper(b.try_clone()?)),
-            Val::Func(f) => Some(Val::Func(f.try_clone()?)),
-            Val::Ctx(c) => Some(Val::Ctx(c.try_clone()?)),
-            Val::Extend(e) => Some(Val::Extend(e.try_clone()?)),
         }
     }
 }

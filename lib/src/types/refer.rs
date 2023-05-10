@@ -1,32 +1,29 @@
-use {
-    crate::traits::TryClone,
-    std::{
-        alloc,
-        cell::{
-            Cell,
-            UnsafeCell,
-        },
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        hash::{
-            Hash,
-            Hasher,
-        },
-        marker::{
-            PhantomData,
-            Unsize,
-        },
-        ops::{
-            CoerceUnsized,
-            Deref,
-            DerefMut,
-        },
-        ptr::{
-            self,
-            NonNull,
-        },
+use std::{
+    alloc,
+    cell::{
+        Cell,
+        UnsafeCell,
+    },
+    fmt::{
+        Debug,
+        Formatter,
+    },
+    hash::{
+        Hash,
+        Hasher,
+    },
+    marker::{
+        PhantomData,
+        Unsize,
+    },
+    ops::{
+        CoerceUnsized,
+        Deref,
+        DerefMut,
+    },
+    ptr::{
+        self,
+        NonNull,
     },
 };
 
@@ -81,12 +78,9 @@ impl<D: ?Sized> Keeper<D> {
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Keeper<U>> for Keeper<D> {}
 
-impl<D: ?Sized> TryClone for Keeper<D> {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Self::keeper(self).ok()
+impl<D: ?Sized> Clone for Keeper<D> {
+    fn clone(&self) -> Self {
+        Self::keeper(self).expect("too many Keepers!")
     }
 }
 
@@ -160,12 +154,9 @@ impl<D: ?Sized> Reader<D> {
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Reader<U>> for Reader<D> {}
 
-impl<D: ?Sized> TryClone for Reader<D> {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Self::reader(self).ok()
+impl<D: ?Sized> Clone for Reader<D> {
+    fn clone(&self) -> Self {
+        Self::reader(self).expect("too many readers!")
     }
 }
 
@@ -268,15 +259,6 @@ impl<D: ?Sized> Owner<D> {
 }
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Owner<U>> for Owner<D> {}
-
-impl<D: ?Sized> TryClone for Owner<D> {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        None
-    }
-}
 
 impl<D: ?Sized> Deref for Owner<D> {
     type Target = D;

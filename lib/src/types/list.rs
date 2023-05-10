@@ -1,16 +1,13 @@
-use {
-    crate::traits::TryClone,
-    std::{
-        ops::{
-            Deref,
-            DerefMut,
-        },
-        slice::{
-            Iter,
-            IterMut,
-        },
-        vec::IntoIter,
+use std::{
+    ops::{
+        Deref,
+        DerefMut,
     },
+    slice::{
+        Iter,
+        IterMut,
+    },
+    vec::IntoIter,
 };
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
@@ -68,14 +65,5 @@ impl<T> From<Vec<T>> for List<T> {
 impl<T> Into<Vec<T>> for List<T> {
     fn into(self) -> Vec<T> {
         self.0
-    }
-}
-
-impl<T: TryClone> TryClone for List<T> {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        self.iter().map(|v| v.try_clone()).collect()
     }
 }

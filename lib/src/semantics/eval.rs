@@ -5,7 +5,6 @@ use {
             ReverseVal,
             Val,
         },
-        traits::TryClone,
         types::{
             Map,
             Reader,
@@ -18,12 +17,11 @@ use {
             Debug,
             Formatter,
         },
-        marker::PhantomData,
         mem::swap,
     },
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Func {
     pub(crate) func_trait: FuncTrait,
     pub(crate) func_impl: FuncImpl,
@@ -32,18 +30,19 @@ pub(crate) struct Func {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FuncTrait {}
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) enum FuncImpl {
     Primitive(Primitive),
     Composed(Composed),
 }
 
+#[derive(Clone)]
 pub(crate) struct Primitive {
     pub(crate) id: Name,
     pub(crate) eval: Reader<dyn Fn(&mut Ctx, Val) -> Val>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Composed {
     // is boxed to avoid infinite size of Val
     pub(crate) body: Reader<Val>,
@@ -56,11 +55,10 @@ pub(crate) type Name = CompactString;
 
 pub(crate) type NameMap = Map<Name, Val>;
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
 pub(crate) struct Ctx {
     pub(crate) constants: Reader<NameMap>,
     pub(crate) variables: NameMap,
-    pub(crate) call_interpreter: PhantomData<fn(&Composed, &Val) -> Val>,
     pub(crate) reverse_interpreter: Option<Reader<Func>>,
 }
 
@@ -82,11 +80,7 @@ impl FuncImpl {
 
 impl Composed {
     pub(crate) fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        let constants = if let Some(constants) = self.constants.try_clone() {
-            constants
-        } else {
-            return Val::default();
-        };
+        let constants = self.constants.clone();
         let mut variables = NameMap::default();
         if let Some(input_name) = &self.input_name {
             variables.insert(input_name.clone(), input);
@@ -96,13 +90,11 @@ impl Composed {
             swap(ctx, &mut ctx_swap);
             variables.insert(caller_name.clone(), Val::Ctx(ctx_swap));
         }
-        let call_interpreter = PhantomData;
-        let reverse_interpreter = ctx.reverse_interpreter.as_ref().and_then(|i| i.try_clone());
+        let reverse_interpreter = ctx.reverse_interpreter.clone();
 
         let mut new_ctx = Ctx {
             constants,
             variables,
-            call_interpreter,
             reverse_interpreter,
         };
         let output = new_ctx.eval(&self.body);
@@ -126,7 +118,7 @@ impl Ctx {
     }
 
     fn eval_default(&mut self, input: &Val) -> Val {
-        input.try_clone().unwrap_or_default()
+        input.clone()
     }
 
     fn eval_symbol(&mut self, s: &Symbol) -> Val {
@@ -147,10 +139,7 @@ impl Ctx {
     }
 
     fn eval_reverse(&mut self, r: &ReverseVal) -> Val {
-        let reverse_interpreter = self
-            .reverse_interpreter
-            .as_ref()
-            .and_then(|i| i.try_clone());
+        let reverse_interpreter = self.reverse_interpreter.clone();
         if let Some(reverse_interpreter) = reverse_interpreter {
             let reverse_func = reverse_interpreter.eval(self, &r.func);
             self.eval_func_then_call(&reverse_func, &r.output)
@@ -163,7 +152,7 @@ impl Ctx {
         self.constants
             .get(name)
             .or_else(|| self.variables.get(name))
-            .and_then(|v| v.try_clone())
+            .map(Clone::clone)
             .unwrap_or_default()
     }
 
@@ -181,82 +170,6 @@ impl Ctx {
             .map(|_| Val::default())
             .or_else(|| self.variables.insert(name, val))
             .unwrap_or_default()
-    }
-}
-
-impl TryClone for Func {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(Func {
-            func_trait: self.func_trait.clone(),
-            func_impl: self.func_impl.try_clone()?,
-        })
-    }
-}
-
-impl TryClone for FuncImpl {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(match self {
-            FuncImpl::Primitive(p) => FuncImpl::Primitive(p.try_clone()?),
-            FuncImpl::Composed(c) => FuncImpl::Composed(c.try_clone()?),
-        })
-    }
-}
-
-impl TryClone for Primitive {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(Primitive {
-            id: self.id.clone(),
-            eval: self.eval.try_clone()?,
-        })
-    }
-}
-
-impl TryClone for Composed {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(Composed {
-            body: self.body.try_clone()?,
-            constants: self.constants.try_clone()?,
-            input_name: self.input_name.clone(),
-            caller_name: self.caller_name.clone(),
-        })
-    }
-}
-
-impl TryClone for Ctx {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(Ctx {
-            constants: self.constants.try_clone()?,
-            variables: self.variables.try_clone()?,
-            call_interpreter: self.call_interpreter.clone(),
-            reverse_interpreter: self
-                .reverse_interpreter
-                .as_ref()
-                .and_then(|i| i.try_clone()),
-        })
-    }
-}
-
-impl TryClone for Name {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(self.clone())
     }
 }
 

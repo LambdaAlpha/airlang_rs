@@ -1,5 +1,4 @@
 use {
-    crate::traits::TryClone,
     rustc_hash::FxHashMap,
     std::{
         collections::hash_map::{
@@ -80,16 +79,5 @@ impl<K: Eq + Hash, V: Hash> Hash for Map<K, V> {
                 })
                 .fold(0, u64::wrapping_add),
         )
-    }
-}
-
-impl<K: Eq + Hash + TryClone, V: TryClone> TryClone for Map<K, V> {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        self.iter()
-            .map(|(k, v)| Some((k.try_clone()?, v.try_clone()?)))
-            .collect()
     }
 }

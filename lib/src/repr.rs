@@ -5,7 +5,6 @@ use {
             parse,
             ParseError,
         },
-        traits::TryClone,
         types::{
             Bool,
             Bytes,
@@ -60,91 +59,6 @@ pub type MapRepr = Map<Repr, Repr>;
 impl Repr {
     pub fn is_unit(&self) -> bool {
         matches!(self, Repr::Unit(_))
-    }
-
-    pub fn unit(&self) -> Option<&Unit> {
-        if let Repr::Unit(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn bool(&self) -> Option<&Bool> {
-        if let Repr::Bool(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn int(&self) -> Option<&Int> {
-        if let Repr::Int(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn float(&self) -> Option<&Float> {
-        if let Repr::Float(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn bytes(&self) -> Option<&Bytes> {
-        if let Repr::Bytes(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn symbol(&self) -> Option<&Symbol> {
-        if let Repr::Symbol(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn string(&self) -> Option<&Str> {
-        if let Repr::String(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn pair(&self) -> Option<&Box<PairRepr>> {
-        if let Repr::Pair(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn call(&self) -> Option<&Box<CallRepr>> {
-        if let Repr::Call(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn reverse(&self) -> Option<&Box<ReverseRepr>> {
-        if let Repr::Reverse(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn list(&self) -> Option<&ListRepr> {
-        if let Repr::List(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-    pub fn map(&self) -> Option<&MapRepr> {
-        if let Repr::Map(v) = self {
-            Some(v)
-        } else {
-            None
-        }
     }
 }
 
@@ -271,15 +185,6 @@ impl Try for Repr {
             Repr::Unit(_) => ControlFlow::Break(self),
             _ => ControlFlow::Continue(self),
         }
-    }
-}
-
-impl TryClone for Repr {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(self.clone())
     }
 }
 

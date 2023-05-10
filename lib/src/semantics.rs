@@ -9,7 +9,6 @@ use {
             prelude::prelude,
             val::Val,
         },
-        traits::TryClone,
         types::Reader,
     },
     thiserror::Error,
@@ -51,11 +50,10 @@ impl Interpreter {
     }
 
     fn default_ctx(prelude: &Reader<NameMap>) -> Ctx {
-        let constants = prelude.try_clone().unwrap_or_default();
+        let constants = prelude.clone();
         Ctx {
             constants,
             variables: Default::default(),
-            call_interpreter: Default::default(),
             reverse_interpreter: None,
         }
     }

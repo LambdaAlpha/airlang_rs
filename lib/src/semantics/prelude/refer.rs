@@ -12,7 +12,6 @@ use {
             prelude::names,
             val::Val,
         },
-        traits::TryClone,
         types::{
             Keeper,
             Owner,
@@ -52,8 +51,7 @@ pub(crate) fn box_read() -> Val {
 fn fn_box_read(ctx: &mut Ctx, input: Val) -> Val {
     match ctx.eval(&input) {
         Val::Keeper(k) => Keeper::reader(&k)
-            .ok()
-            .and_then(|i| i.deref().try_clone())
+            .map(|i| i.deref().clone())
             .unwrap_or_default(),
         _ => Val::default(),
     }

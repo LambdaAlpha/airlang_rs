@@ -1,5 +1,3 @@
-use crate::traits::TryClone;
-
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Bytes(Vec<u8>);
 
@@ -30,14 +28,5 @@ impl Into<Vec<u8>> for &Bytes {
 impl AsRef<[u8]> for Bytes {
     fn as_ref(&self) -> &[u8] {
         &self.0
-    }
-}
-
-impl TryClone for Bytes {
-    fn try_clone(&self) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        Some(self.clone())
     }
 }
