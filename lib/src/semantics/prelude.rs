@@ -1,15 +1,12 @@
-use crate::{
-    semantics::{
-        eval::{
-            Name,
-            NameMap,
-        },
-        val::Val,
+use crate::semantics::{
+    eval::{
+        Name,
+        NameMap,
     },
-    types::Reader,
+    val::Val,
 };
 
-pub(crate) fn prelude() -> Reader<NameMap> {
+pub(crate) fn prelude() -> NameMap {
     let mut c = NameMap::default();
 
     put(&mut c, names::AIR_VERSION, meta::version());
@@ -54,7 +51,7 @@ pub(crate) fn prelude() -> Reader<NameMap> {
     put(&mut c, names::INT_GREATER_EQUAL, int::greater_equal());
     put(&mut c, names::INT_LESS_GREATER, int::less_greater());
 
-    Reader::new(c)
+    c
 }
 
 fn put(constants: &mut NameMap, key: &str, val: Val) {

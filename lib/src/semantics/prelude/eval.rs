@@ -37,15 +37,15 @@ pub(crate) fn eval() -> Val {
 
 fn fn_eval(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Ctx(mut target_ctx) = ctx.eval(&pair.first) {
-            let val = ctx.eval(&pair.second);
-            target_ctx.eval(&val)
+        if let Val::Ctx(mut target_ctx) = ctx.eval(pair.first) {
+            let val = ctx.eval(pair.second);
+            target_ctx.eval(val)
         } else {
             Val::default()
         }
     } else {
-        let val = ctx.eval(&input);
-        ctx.eval(&val)
+        let val = ctx.eval(input);
+        ctx.eval(val)
     }
 }
 
@@ -76,7 +76,7 @@ pub(crate) fn parse() -> Val {
 }
 
 fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::String(input) = ctx.eval(&input) {
+    if let Val::String(input) = ctx.eval(input) {
         if let Ok(repr) = crate::syntax::parse(&input) {
             return Val::from(repr);
         }
@@ -96,7 +96,7 @@ pub(crate) fn stringify() -> Val {
 }
 
 fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
-    if let Ok(repr) = ctx.eval(&input).try_into() {
+    if let Ok(repr) = ctx.eval(input).try_into() {
         return Val::String(Str::from(crate::syntax::generate(&repr)));
     }
     Val::default()
@@ -175,7 +175,7 @@ fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {
             Repr::Symbol(s) => Name::from(&*s),
             _ => return None,
         };
-        let val = ctx.eval(&v);
+        let val = ctx.eval(v);
         name_map.insert(name, val);
     }
     Some(name_map)
@@ -194,7 +194,9 @@ pub(crate) fn chain() -> Val {
 
 fn fn_chain(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        return ctx.eval_func_then_call(&pair.second, &pair.first);
+        if let Val::Func(func) = ctx.eval(pair.second) {
+            return func.eval(ctx, pair.first);
+        }
     }
     Val::default()
 }

@@ -30,8 +30,8 @@ pub(crate) fn add() -> Val {
 
 fn fn_add(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Int(i1.add(i2));
             }
         }
@@ -52,8 +52,8 @@ pub(crate) fn subtract() -> Val {
 
 fn fn_subtract(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Int(i1.subtract(i2));
             }
         }
@@ -74,8 +74,8 @@ pub(crate) fn multiply() -> Val {
 
 fn fn_multiply(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Int(i1.multiply(i2));
             }
         }
@@ -96,8 +96,8 @@ pub(crate) fn divide() -> Val {
 
 fn fn_divide(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 if let Some(i) = i1.divide(i2) {
                     return Val::Int(i);
                 }
@@ -120,8 +120,8 @@ pub(crate) fn remainder() -> Val {
 
 fn fn_remainder(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 if let Some(i) = i1.remainder(i2) {
                     return Val::Int(i);
                 }
@@ -144,8 +144,8 @@ pub(crate) fn divide_remainder() -> Val {
 
 fn fn_divide_remainder(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 if let Some((quotient, rem)) = i1.divide_remainder(i2) {
                     return Val::Pair(Box::new(Pair::new(Val::Int(quotient), Val::Int(rem))));
                 }
@@ -168,8 +168,8 @@ pub(crate) fn less_than() -> Val {
 
 fn fn_less_than(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Bool(i1.less_than(&i2));
             }
         }
@@ -190,8 +190,8 @@ pub(crate) fn less_equal() -> Val {
 
 fn fn_less_equal(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Bool(i1.less_equal(&i2));
             }
         }
@@ -212,8 +212,8 @@ pub(crate) fn greater_than() -> Val {
 
 fn fn_greater_than(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Bool(i1.greater_than(&i2));
             }
         }
@@ -234,8 +234,8 @@ pub(crate) fn greater_equal() -> Val {
 
 fn fn_greater_equal(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Bool(i1.greater_equal(&i2));
             }
         }
@@ -256,8 +256,8 @@ pub(crate) fn less_greater() -> Val {
 
 fn fn_less_greater(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Int(i1) = ctx.eval(&pair.first) {
-            if let Val::Int(i2) = ctx.eval(&pair.second) {
+        if let Val::Int(i1) = ctx.eval(pair.first) {
+            if let Val::Int(i2) = ctx.eval(pair.second) {
                 return Val::Bool(i1.less_greater(&i2));
             }
         }

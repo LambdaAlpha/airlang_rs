@@ -32,7 +32,7 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
             Val::String(s) => s,
             _ => return Val::default(),
         };
-        let val = ctx.eval(&pair.second);
+        let val = ctx.eval(pair.second);
         return ctx.put(Name::from(name), val);
     }
     Val::default()

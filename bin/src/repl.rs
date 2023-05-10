@@ -53,13 +53,13 @@ pub(crate) fn dyn_ctx() -> DynCtx {
 
 fn eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: &str) -> Output {
     match parse(input) {
-        Ok(input) => const_ctx.eval(dyn_ctx, &input),
+        Ok(input) => const_ctx.eval(dyn_ctx, input),
         Err(err) => Output::Err(Box::new(err)),
     }
 }
 
 fn print_title(ui: &mut impl Ui, const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx) {
-    match title(const_ctx, dyn_ctx, &Repr::default()) {
+    match title(const_ctx, dyn_ctx, Repr::default()) {
         Output::Ok(output) => {
             ui.println(&output);
         }

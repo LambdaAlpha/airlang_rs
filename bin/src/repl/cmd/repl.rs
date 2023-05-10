@@ -12,9 +12,9 @@ use {
 
 const TITLE_PREFIX: &str = "🜁 Air ";
 
-pub(crate) fn title(_: &ConstCtx, dyn_ctx: &mut DynCtx, _: &Repr) -> Output {
+pub(crate) fn title(_: &ConstCtx, dyn_ctx: &mut DynCtx, _: Repr) -> Output {
     match parse(include_str!("../../air/version.air")) {
-        Ok(repr) => match dyn_ctx.interpreter.interpret(&repr) {
+        Ok(repr) => match dyn_ctx.interpreter.interpret(repr) {
             Ok(repr) => match repr {
                 Repr::String(s) => Output::Ok(Box::new(format!("{}{}", TITLE_PREFIX, &*s))),
                 repr => Output::Ok(Box::new(format!("{}{}", TITLE_PREFIX, repr))),
@@ -25,10 +25,10 @@ pub(crate) fn title(_: &ConstCtx, dyn_ctx: &mut DynCtx, _: &Repr) -> Output {
     }
 }
 
-pub(crate) fn quit(_: &ConstCtx, _: &mut DynCtx, _: &Repr) -> Output {
+pub(crate) fn quit(_: &ConstCtx, _: &mut DynCtx, _: Repr) -> Output {
     Output::Break
 }
 
-pub(crate) fn exit(_: &ConstCtx, _: &mut DynCtx, _: &Repr) -> Output {
+pub(crate) fn exit(_: &ConstCtx, _: &mut DynCtx, _: Repr) -> Output {
     Output::Break
 }

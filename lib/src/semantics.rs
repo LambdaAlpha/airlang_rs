@@ -28,7 +28,7 @@ mod test;
 pub struct ReprError {}
 
 pub struct Interpreter {
-    prelude: Reader<NameMap>,
+    prelude: NameMap,
     ctx: Ctx,
 }
 
@@ -39,9 +39,9 @@ impl Interpreter {
         Interpreter { prelude, ctx }
     }
 
-    pub fn interpret(&mut self, src: &Repr) -> Result<Repr, ReprError> {
+    pub fn interpret(&mut self, src: Repr) -> Result<Repr, ReprError> {
         let input = Val::from(src);
-        let output = self.ctx.eval(&input);
+        let output = self.ctx.eval(input);
         output.try_into()
     }
 
@@ -49,10 +49,10 @@ impl Interpreter {
         self.ctx = Self::default_ctx(&self.prelude);
     }
 
-    fn default_ctx(prelude: &Reader<NameMap>) -> Ctx {
+    fn default_ctx(prelude: &NameMap) -> Ctx {
         let constants = prelude.clone();
         Ctx {
-            constants,
+            constants: Reader::new(constants),
             variables: Default::default(),
             reverse_interpreter: None,
         }

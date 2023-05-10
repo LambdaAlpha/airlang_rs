@@ -36,7 +36,7 @@ pub(crate) fn box_new() -> Val {
 }
 
 fn fn_box_new(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Keeper(Keeper::new(ctx.eval(&input)))
+    Val::Keeper(Keeper::new(ctx.eval(input)))
 }
 
 pub(crate) fn box_read() -> Val {
@@ -51,7 +51,7 @@ pub(crate) fn box_read() -> Val {
 }
 
 fn fn_box_read(ctx: &mut Ctx, input: Val) -> Val {
-    match ctx.eval(&input) {
+    match ctx.eval(input) {
         Val::Keeper(k) => Keeper::reader(&k)
             .map(|i| i.deref().clone())
             .unwrap_or_default(),
@@ -71,7 +71,7 @@ pub(crate) fn box_move() -> Val {
 }
 
 fn fn_box_move(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Keeper(k) = ctx.eval(&input) {
+    if let Val::Keeper(k) = ctx.eval(input) {
         return Keeper::owner(&k).map(Owner::move_data).unwrap_or_default();
     }
     Val::default()
@@ -90,8 +90,8 @@ pub(crate) fn box_assign() -> Val {
 
 fn fn_box_assign(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
-        if let Val::Keeper(k) = ctx.eval(&pair.first) {
-            let mut val = ctx.eval(&pair.second);
+        if let Val::Keeper(k) = ctx.eval(pair.first) {
+            let mut val = ctx.eval(pair.second);
             if let Ok(owner) = Keeper::owner(&k) {
                 swap(Owner::borrow_mut(&owner), &mut val);
                 return val;

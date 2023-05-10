@@ -1,14 +1,9 @@
 use {
     crate::{
-        semantics::val::{
-            CallVal,
-            ReverseVal,
-            Val,
-        },
+        semantics::val::Val,
         types::{
             Map,
             Reader,
-            Symbol,
         },
     },
     smartstring::alias::CompactString,
@@ -18,6 +13,7 @@ use {
             Formatter,
         },
         mem::swap,
+        ops::Deref,
     },
 };
 
@@ -62,14 +58,13 @@ pub(crate) struct Ctx {
 }
 
 impl Func {
-    pub(crate) fn eval(&self, ctx: &mut Ctx, input: &Val) -> Val {
-        let val = ctx.eval_default(input);
-        self.func_impl.eval(ctx, val)
+    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
+        self.func_impl.eval(ctx, input)
     }
 }
 
 impl FuncImpl {
-    pub(crate) fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
             FuncImpl::Primitive(p) => (p.eval)(ctx, input),
             FuncImpl::Composed(c) => c.eval(ctx, input),
@@ -78,11 +73,11 @@ impl FuncImpl {
 }
 
 impl Composed {
-    pub(crate) fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        let constants = self.constants.clone();
+    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
+        let constants = self.constants;
         let mut variables = NameMap::default();
-        if let Some(input_name) = &self.input_name {
-            variables.insert(input_name.clone(), input);
+        if let Some(input_name) = self.input_name {
+            variables.insert(input_name, input);
         }
         if let Some(caller_name) = &self.caller_name {
             let mut ctx_swap = Ctx::default();
@@ -96,7 +91,7 @@ impl Composed {
             variables,
             reverse_interpreter,
         };
-        let output = new_ctx.eval(&self.body);
+        let output = new_ctx.eval(self.body);
         if let Some(caller_name) = &self.caller_name {
             if let Val::Ctx(caller) = new_ctx.remove(caller_name) {
                 *ctx = *caller;
@@ -107,41 +102,28 @@ impl Composed {
 }
 
 impl Ctx {
-    pub(crate) fn eval(&mut self, input: &Val) -> Val {
+    pub(crate) fn eval(&mut self, input: Val) -> Val {
         match input {
-            Val::Symbol(s) => self.eval_symbol(s),
-            Val::Call(c) => self.eval_call(c),
-            Val::Reverse(r) => self.eval_reverse(r),
-            v => self.eval_default(v),
+            Val::Symbol(s) => self.get(&s),
+            Val::Call(c) => self.eval_call(c.func, c.input),
+            Val::Reverse(r) => self.eval_reverse(r.func, r.output),
+            v => v,
         }
     }
 
-    fn eval_default(&mut self, input: &Val) -> Val {
-        input.clone()
-    }
-
-    fn eval_symbol(&mut self, s: &Symbol) -> Val {
-        self.get(s)
-    }
-
-    fn eval_call(&mut self, c: &CallVal) -> Val {
-        self.eval_func_then_call(&c.func, &c.input)
-    }
-
-    pub(crate) fn eval_func_then_call(&mut self, func: &Val, input: &Val) -> Val {
-        let func = if let Val::Func(f) = self.eval(func) {
-            f
+    pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {
+        if let Val::Func(func) = self.eval(func) {
+            func.eval(self, input)
         } else {
-            return Val::default();
-        };
-        func.eval(self, input)
+            Val::default()
+        }
     }
 
-    fn eval_reverse(&mut self, r: &ReverseVal) -> Val {
+    fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
         let reverse_interpreter = self.reverse_interpreter.clone();
         if let Some(reverse_interpreter) = reverse_interpreter {
-            let reverse_func = reverse_interpreter.eval(self, &r.func);
-            self.eval_func_then_call(&reverse_func, &r.output)
+            let reverse_func = reverse_interpreter.deref().clone().eval(self, func);
+            self.eval_call(reverse_func, output)
         } else {
             Val::default()
         }
