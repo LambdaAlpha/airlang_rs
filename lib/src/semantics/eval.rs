@@ -16,33 +16,34 @@ use {
             Debug,
             Formatter,
         },
+        hash::Hash,
         mem::swap,
         ops::Deref,
     },
 };
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Func {
     pub(crate) func_trait: FuncTrait,
     pub(crate) func_impl: FuncImpl,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub(crate) struct FuncTrait {}
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum FuncImpl {
     Primitive(Primitive),
     Composed(Composed),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Hash)]
 pub(crate) struct Primitive {
     pub(crate) id: Name,
     pub(crate) eval: Reader<dyn Fn(&mut Ctx, Val) -> Val>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed {
     pub(crate) body: Val,
     pub(crate) constants: Reader<NameMap>,
@@ -54,7 +55,7 @@ pub(crate) type Name = CompactString;
 
 pub(crate) type NameMap = Map<Name, Val>;
 
-#[derive(Debug, Clone, Default, Eq, PartialEq)]
+#[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub(crate) struct Ctx {
     pub(crate) constants: Reader<NameMap>,
     pub(crate) variables: NameMap,

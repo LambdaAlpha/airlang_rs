@@ -31,14 +31,17 @@ use {
             Unit,
         },
     },
-    std::ops::{
-        ControlFlow,
-        FromResidual,
-        Try,
+    std::{
+        hash::Hash,
+        ops::{
+            ControlFlow,
+            FromResidual,
+            Try,
+        },
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum Val {
     Unit(Unit),
     Bool(Bool),
@@ -63,7 +66,7 @@ pub(crate) type PairVal = Pair<Val, Val>;
 pub(crate) type CallVal = Call<Val, Val>;
 pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
-pub(crate) type MapVal = Map<Repr, Val>;
+pub(crate) type MapVal = Map<Val, Val>;
 pub(crate) type KeeperVal = Keeper<Val>;
 
 #[allow(dead_code)]
@@ -395,7 +398,7 @@ impl From<&MapRepr> for MapVal {
     fn from(value: &MapRepr) -> Self {
         value
             .into_iter()
-            .map(|(k, v)| (k.clone(), <_ as Into<Val>>::into(v)))
+            .map(|(k, v)| (<_ as Into<Val>>::into(k), <_ as Into<Val>>::into(v)))
             .collect()
     }
 }
@@ -404,7 +407,7 @@ impl From<MapRepr> for MapVal {
     fn from(value: MapRepr) -> Self {
         value
             .into_iter()
-            .map(|(k, v)| (k, <_ as Into<Val>>::into(v)))
+            .map(|(k, v)| (<_ as Into<Val>>::into(k), <_ as Into<Val>>::into(v)))
             .collect()
     }
 }
@@ -414,7 +417,10 @@ impl TryInto<MapRepr> for &MapVal {
     fn try_into(self) -> Result<MapRepr, Self::Error> {
         self.into_iter()
             .map::<Result<(Repr, Repr), Self::Error>, _>(|(k, v)| {
-                Ok((k.clone(), <_ as TryInto<Repr>>::try_into(v)?))
+                Ok((
+                    <_ as TryInto<Repr>>::try_into(k)?,
+                    <_ as TryInto<Repr>>::try_into(v)?,
+                ))
             })
             .collect::<Result<MapRepr, Self::Error>>()
     }
@@ -425,7 +431,10 @@ impl TryInto<MapRepr> for MapVal {
     fn try_into(self) -> Result<MapRepr, Self::Error> {
         self.into_iter()
             .map::<Result<(Repr, Repr), Self::Error>, _>(|(k, v)| {
-                Ok((k, <_ as TryInto<Repr>>::try_into(v)?))
+                Ok((
+                    <_ as TryInto<Repr>>::try_into(k)?,
+                    <_ as TryInto<Repr>>::try_into(v)?,
+                ))
             })
             .collect::<Result<MapRepr, Self::Error>>()
     }

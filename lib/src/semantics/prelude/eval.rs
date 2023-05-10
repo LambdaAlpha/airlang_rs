@@ -1,5 +1,4 @@
 use crate::{
-    repr::Repr,
     semantics::{
         eval::{
             Composed,
@@ -164,7 +163,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 fn map_get(map: &MapVal, name: &str) -> Val {
-    let name = Repr::Symbol(Symbol::from_str(name));
+    let name = Val::Symbol(Symbol::from_str(name));
     map.get(&name).map(Clone::clone).unwrap_or_default()
 }
 
@@ -172,7 +171,7 @@ fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {
     let mut name_map = NameMap::default();
     for (k, v) in map.into_iter() {
         let name = match k {
-            Repr::Symbol(s) => Name::from(&*s),
+            Val::Symbol(s) => Name::from(&*s),
             _ => return None,
         };
         let val = ctx.eval(v);
