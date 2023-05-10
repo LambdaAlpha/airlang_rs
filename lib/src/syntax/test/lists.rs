@@ -1,6 +1,6 @@
-use crate::{
+use crate::syntax::{
     repr::Repr,
-    syntax::test::{
+    test::{
         list,
         positive_decimal_int as int,
     },

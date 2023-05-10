@@ -8,10 +8,10 @@ use {
         },
         ui::Ui,
     },
-    airlang::{
-        repr::Repr,
-        semantics::Interpreter,
-        syntax::parse,
+    airlang::semantics::{
+        parse,
+        Interpreter,
+        Val,
     },
 };
 
@@ -59,7 +59,7 @@ fn eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: &str) -> Output {
 }
 
 fn print_title(ui: &mut impl Ui, const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx) {
-    match title(const_ctx, dyn_ctx, Repr::default()) {
+    match title(const_ctx, dyn_ctx, Val::default()) {
         Output::Ok(output) => {
             ui.println(&output);
         }

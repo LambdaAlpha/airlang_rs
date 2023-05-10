@@ -76,8 +76,8 @@ pub(crate) fn parse() -> Val {
 
 fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::String(input) = ctx.eval(input) {
-        if let Ok(repr) = crate::syntax::parse(&input) {
-            return Val::from(repr);
+        if let Ok(val) = crate::semantics::parse(&input) {
+            return val;
         }
     }
     Val::default()

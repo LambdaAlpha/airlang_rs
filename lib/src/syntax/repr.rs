@@ -3,6 +3,7 @@ use {
         syntax::{
             generate,
             parse,
+            parser::ParseRepr,
             ParseError,
         },
         types::{
@@ -50,11 +51,11 @@ pub enum Repr {
     Map(MapRepr),
 }
 
-pub type PairRepr = Pair<Repr, Repr>;
-pub type CallRepr = Call<Repr, Repr>;
-pub type ReverseRepr = Reverse<Repr, Repr>;
-pub type ListRepr = List<Repr>;
-pub type MapRepr = Map<Repr, Repr>;
+pub(crate) type PairRepr = Pair<Repr, Repr>;
+pub(crate) type CallRepr = Call<Repr, Repr>;
+pub(crate) type ReverseRepr = Reverse<Repr, Repr>;
+pub(crate) type ListRepr = List<Repr>;
+pub(crate) type MapRepr = Map<Repr, Repr>;
 
 impl Repr {
     pub fn is_unit(&self) -> bool {
@@ -191,5 +192,14 @@ impl Try for Repr {
 impl Default for Repr {
     fn default() -> Self {
         Repr::Unit(Unit)
+    }
+}
+
+impl ParseRepr for Repr {
+    fn try_into_pair(self) -> Result<(Self, Self), Self> {
+        match self {
+            Repr::Pair(pair) => Ok((pair.first, pair.second)),
+            other => Err(other),
+        }
     }
 }

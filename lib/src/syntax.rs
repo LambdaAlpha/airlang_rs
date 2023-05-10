@@ -1,11 +1,15 @@
+pub use repr::Repr;
 use {
-    crate::repr::Repr,
     std::fmt::Debug,
     thiserror::Error,
 };
 
-mod generator;
-mod parser;
+pub(crate) mod repr;
+
+pub(crate) mod parser;
+
+pub(crate) mod generator;
+
 #[cfg(test)]
 mod test;
 

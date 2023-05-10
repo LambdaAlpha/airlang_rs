@@ -1,19 +1,22 @@
 use {
     crate::{
-        repr::{
-            CallRepr,
-            ListRepr,
-            MapRepr,
-            PairRepr,
-            Repr,
-            ReverseRepr,
-        },
         semantics::{
             eval::{
                 Ctx,
                 Func,
             },
             ReprError,
+        },
+        syntax::{
+            parser::ParseRepr,
+            repr::{
+                CallRepr,
+                ListRepr,
+                MapRepr,
+                PairRepr,
+                Repr,
+                ReverseRepr,
+            },
         },
         types::{
             Bool,
@@ -42,7 +45,7 @@ use {
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub(crate) enum Val {
+pub enum Val {
     Unit(Unit),
     Bool(Bool),
     Int(Int),
@@ -458,6 +461,15 @@ impl Try for Val {
         match self {
             Val::Unit(_) => ControlFlow::Break(self),
             _ => ControlFlow::Continue(self),
+        }
+    }
+}
+
+impl ParseRepr for Val {
+    fn try_into_pair(self) -> Result<(Self, Self), Self> {
+        match self {
+            Val::Pair(pair) => Ok((pair.first, pair.second)),
+            other => Err(other),
         }
     }
 }

@@ -4,14 +4,14 @@ use {
         DynCtx,
         Output,
     },
-    airlang::{
-        repr::Repr,
-        syntax::parse,
+    airlang::semantics::{
+        parse,
+        Val,
     },
 };
 
-pub(crate) fn import(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, repr: Repr) -> Output {
-    if let Repr::String(path) = repr {
+pub(crate) fn import(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, val: Val) -> Output {
+    if let Val::String(path) = val {
         match std::fs::read_to_string(&*path) {
             Ok(input) => match parse(&input) {
                 Ok(input) => const_ctx.eval(dyn_ctx, input),

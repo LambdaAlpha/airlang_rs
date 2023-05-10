@@ -1,11 +1,5 @@
 use {
     crate::{
-        repr::{
-            CallRepr,
-            PairRepr,
-            Repr,
-            ReverseRepr,
-        },
         syntax::{
             COMMENT_PREFIX,
             LIST_LEFT,
@@ -22,9 +16,13 @@ use {
         types::{
             Bool,
             Bytes,
+            Call,
             Float,
             Int,
+            List,
             Map,
+            Pair,
+            Reverse,
             Str,
             Symbol,
             Unit,
@@ -89,13 +87,34 @@ use {
         Parser,
     },
     std::{
+        hash::Hash,
         num::ParseIntError,
         primitive::char as StdChar,
     },
 };
 
-pub fn parse(src: &str) -> Result<Repr, crate::syntax::ParseError> {
-    let ret = top::<VerboseError<&str>>(src).finish();
+pub(crate) trait ParseRepr:
+    From<Unit>
+    + From<Bool>
+    + From<Int>
+    + From<Float>
+    + From<Bytes>
+    + From<Symbol>
+    + From<Str>
+    + From<Box<Pair<Self, Self>>>
+    + From<Box<Call<Self, Self>>>
+    + From<Box<Reverse<Self, Self>>>
+    + From<List<Self>>
+    + Eq
+    + Hash
+    + From<Map<Self, Self>>
+    + Clone
+{
+    fn try_into_pair(self) -> Result<(Self, Self), Self>;
+}
+
+pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseError> {
+    let ret = top::<T, VerboseError<&str>>(src).finish();
     match ret {
         Ok(r) => Ok(r.1),
         Err(e) => {
@@ -105,11 +124,12 @@ pub fn parse(src: &str) -> Result<Repr, crate::syntax::ParseError> {
     }
 }
 
-fn top<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn top<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(delimited(informal, repr, informal));
+    let f = all_consuming(delimited(informal::<T, _>, repr, informal::<T, _>));
     context("top", f)(src)
 }
 
@@ -125,60 +145,69 @@ fn is_delimiter(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
-fn comment<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
+fn comment<'a, T, E>(src: &'a str) -> IResult<&'a str, (), E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = value((), tuple((char(COMMENT_PREFIX), delimiter, cut(token))));
+    let f = value(
+        (),
+        tuple((char(COMMENT_PREFIX), delimiter, cut(token::<T, _>))),
+    );
     context("comment", f)(src)
 }
 
-fn informal<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
+fn informal<'a, T, E>(src: &'a str) -> IResult<&'a str, (), E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    value((), many0(alt((delimiter, comment))))(src)
+    value((), many0(alt((delimiter, comment::<T, _>))))(src)
 }
 
-fn normed<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+fn normed<'a, T, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
     F: Parser<&'a str, O, E>,
 {
-    preceded(informal, f)
+    preceded(informal::<T, _>, f)
 }
 
-fn wrap<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn wrap<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let f = delimited(
         char(WRAP_LEFT),
-        cut(normed(repr)),
-        cut(normed(char(WRAP_RIGHT))),
+        cut(normed::<T, _, _, _>(repr)),
+        cut(normed::<T, _, _, _>(char(WRAP_RIGHT))),
     );
     context("wrap", f)(src)
 }
 
-fn pair_second<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn pair_second<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let tagged_repr = preceded(char(PAIR_SEPARATOR), normed(token));
+    let tagged_repr = preceded(char(PAIR_SEPARATOR), normed::<T, _, _, _>(token));
     let f = map_opt(tagged_repr, unwrap_token);
     context("pair", f)(src)
 }
 
-fn reverse_output<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn reverse_output<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let tagged_repr = preceded(char(REVERSE_SEPARATOR), normed(token));
+    let tagged_repr = preceded(char(REVERSE_SEPARATOR), normed::<T, _, _, _>(token));
     let f = map_opt(tagged_repr, unwrap_token);
     context("reverse", f)(src)
 }
 
-fn unwrap_token(token: TaggedRepr) -> Option<Repr> {
+fn unwrap_token<T: ParseRepr>(token: TaggedRepr<T>) -> Option<T> {
     match token.tag {
         TokenTag::Default => Some(token.repr),
         TokenTag::Wrap => Some(token.repr),
@@ -186,7 +215,7 @@ fn unwrap_token(token: TaggedRepr) -> Option<Repr> {
     }
 }
 
-fn token<'a, E>(src: &'a str) -> IResult<&'a str, TaggedRepr, E>
+fn token<'a, T: ParseRepr, E>(src: &'a str) -> IResult<&'a str, TaggedRepr<T>, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
@@ -229,10 +258,14 @@ where
     context("token", f)(src)
 }
 
-fn tag_repr<'a, E, F>(tag: TokenTag, f: F) -> impl FnMut(&'a str) -> IResult<&'a str, TaggedRepr, E>
+fn tag_repr<'a, T, E, F>(
+    tag: TokenTag,
+    f: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, TaggedRepr<T>, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-    F: Parser<&'a str, Repr, E>,
+    F: Parser<&'a str, T, E>,
 {
     map(f, move |repr| TaggedRepr { tag, repr })
 }
@@ -245,27 +278,25 @@ enum TokenTag {
     Reverse,
 }
 
-struct TaggedRepr {
+struct TaggedRepr<T: ParseRepr> {
     tag: TokenTag,
-    repr: Repr,
+    repr: T,
 }
 
-fn repr<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn repr<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    // postfix has higher priority than infix
     context("repr", associate)(src)
 }
 
-fn call(tokens: Vec<Repr>) -> Option<Repr> {
+fn call<T: ParseRepr>(tokens: Vec<T>) -> Option<T> {
     let len = tokens.len();
     let mut iter = tokens.into_iter();
     if len == 2 {
-        return Some(Repr::Call(Box::new(CallRepr::new(
-            iter.next().unwrap(),
-            iter.next().unwrap(),
-        ))));
+        let call = Box::new(Call::new(iter.next().unwrap(), iter.next().unwrap()));
+        return Some(<T as From<Box<Call<T, T>>>>::from(call));
     } else if len % 2 == 0 {
         return None;
     }
@@ -273,20 +304,21 @@ fn call(tokens: Vec<Repr>) -> Option<Repr> {
     let infix_repr = iter
         .array_chunks::<2>()
         .fold(first, |left, [middle, right]| {
-            Repr::Call(Box::new(CallRepr::new(
-                middle,
-                Repr::Pair(Box::new(PairRepr::new(left, right))),
-            )))
+            let pair = Box::new(Pair::new(left, right));
+            let pair = <T as From<Box<Pair<T, T>>>>::from(pair);
+            let infix = Box::new(Call::new(middle, pair));
+            <T as From<Box<Call<T, T>>>>::from(infix)
         });
     Some(infix_repr)
 }
 
-fn associate<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn associate<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let fold = fold_many1(
-        normed(token),
+        normed::<T, _, _, _>(token),
         || Some(Vec::new()),
         |tokens: Option<Vec<_>>, item| {
             if tokens.is_none() {
@@ -299,7 +331,8 @@ where
                 TokenTag::Pair => {
                     if let Some(repr) = call(tokens) {
                         tokens = Vec::new();
-                        Repr::Pair(Box::new(PairRepr::new(repr, item.repr)))
+                        let pair = Box::new(Pair::new(repr, item.repr));
+                        <T as From<Box<Pair<T, T>>>>::from(pair)
                     } else {
                         return None;
                     }
@@ -307,7 +340,8 @@ where
                 TokenTag::Reverse => {
                     if let Some(repr) = call(tokens) {
                         tokens = Vec::new();
-                        Repr::Reverse(Box::new(ReverseRepr::new(repr, item.repr)))
+                        let reverse = Box::new(Reverse::new(repr, item.repr));
+                        <T as From<Box<Reverse<T, T>>>>::from(reverse)
                     } else {
                         return None;
                     }
@@ -347,47 +381,74 @@ where
     })
 }
 
-fn repr_list<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn repr_list<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(normed(repr), normed(char(SEPARATOR)), normed(repr));
-    let delimited_items = delimited(char(LIST_LEFT), cut(items), cut(normed(char(LIST_RIGHT))));
-    let f = map(delimited_items, |list| Repr::List(list.into()));
+    let items = items(
+        normed::<T, _, _, _>(repr::<T, _>),
+        normed::<T, _, _, _>(char(SEPARATOR)),
+        normed::<T, _, _, _>(repr),
+    );
+    let delimited_items = delimited(
+        char(LIST_LEFT),
+        cut(items),
+        cut(normed::<T, _, _, _>(char(LIST_RIGHT))),
+    );
+    let f = map(delimited_items, |list| {
+        <T as From<List<T>>>::from(list.into())
+    });
     context("list", f)(src)
 }
 
-fn repr_map<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn repr_map<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(key_value_pair, normed(char(SEPARATOR)), key_value_pair);
-    let delimited_items = delimited(char(MAP_LEFT), cut(items), cut(normed(char(MAP_RIGHT))));
-    let f = map(delimited_items, |pairs| Repr::Map(Map::from_iter(pairs)));
+    let items = items(
+        key_value_pair::<T, E>,
+        normed::<T, _, _, _>(char(SEPARATOR)),
+        key_value_pair::<T, E>,
+    );
+    let delimited_items = delimited(
+        char(MAP_LEFT),
+        cut(items),
+        cut(normed::<T, _, _, _>(char(MAP_RIGHT))),
+    );
+    let f = map(delimited_items, |pairs| {
+        <T as From<Map<T, T>>>::from(Map::from_iter(pairs))
+    });
     context("map", f)(src)
 }
 
-fn key_value_pair<'a, E>(src: &'a str) -> IResult<&'a str, (Repr, Repr), E>
+fn key_value_pair<'a, T, E>(src: &'a str) -> IResult<&'a str, (T, T), E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(normed(repr), |repr| match repr {
-        Repr::Pair(p) => (p.first, p.second),
-        repr => (repr.clone(), repr),
-    });
+    let f = map(
+        normed::<T, _, _, _>(associate::<T, _>),
+        |repr: T| match repr.try_into_pair() {
+            Ok(pair) => pair,
+            Err(repr) => (repr.clone(), repr),
+        },
+    );
     context("pair", f)(src)
 }
 
-fn preserved<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn preserved<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let name = take_while(is_symbol);
     let preserved_word = preceded(char('\''), name);
     let f = map_opt(preserved_word, |s: &str| match s {
-        "" => Some(Repr::Unit(Unit)),
-        "t" => Some(Repr::Bool(Bool::t())),
-        "f" => Some(Repr::Bool(Bool::f())),
+        "" => Some(<T as From<Unit>>::from(Unit)),
+        "t" => Some(<T as From<Bool>>::from(Bool::t())),
+        "f" => Some(<T as From<Bool>>::from(Bool::f())),
         _ => None,
     });
     context("preserved", f)(src)
@@ -402,17 +463,21 @@ fn is_symbol(c: char) -> bool {
     }
 }
 
-fn symbol<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let symbols = take_while(is_symbol);
-    let f = map(symbols, |s: &'a str| Repr::Symbol(Symbol::from_str(s)));
+    let f = map(symbols, |s: &'a str| {
+        <T as From<Symbol>>::from(Symbol::from_str(s))
+    });
     context("symbol", f)(src)
 }
 
-fn string<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn string<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let fragment = alt((
@@ -429,7 +494,7 @@ where
         string
     });
     let delimited_string = delimited(char('"'), cut(collect_fragments), cut(char('"')));
-    let f = map(delimited_string, |s| Repr::String(Str::from(s)));
+    let f = map(delimited_string, |s| <T as From<Str>>::from(Str::from(s)));
     context("string", f)(src)
 }
 
@@ -495,8 +560,9 @@ where
     context("string_literal", f)(src)
 }
 
-fn number<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let numbers = alt((hex_int, bin_int, hex_bytes, bin_bytes, decimal));
@@ -521,8 +587,9 @@ where
     map(separated_list1(char('_'), f), |s| s.join(""))
 }
 
-fn hex_int<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn hex_int<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = tuple((
@@ -531,13 +598,14 @@ where
     ));
     let f = map_res(digits, |(sign, digits): (Option<StdChar>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 16);
-        Ok(Repr::Int(i))
+        Ok(<T as From<Int>>::from(i))
     });
     context("hex_int", f)(src)
 }
 
-fn bin_int<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn bin_int<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = tuple((
@@ -549,27 +617,29 @@ where
     ));
     let f = map_res(digits, |(sign, digits): (Option<StdChar>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 2);
-        Ok(Repr::Int(i))
+        Ok(<T as From<Int>>::from(i))
     });
     context("bin_int", f)(src)
 }
 
-fn hex_bytes<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn hex_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
     let tagged_digits = preceded(tag_no_case("1x"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
-        Ok(Repr::Bytes(Bytes::from(
+        Ok(<T as From<Bytes>>::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
         )))
     });
     context("hex_bytes", f)(src)
 }
 
-fn bin_bytes<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn bin_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
@@ -577,15 +647,16 @@ where
     });
     let tagged_digits = preceded(tag_no_case("1b"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
-        Ok(Repr::Bytes(Bytes::from(
+        Ok(<T as From<Bytes>>::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
         )))
     });
     context("bin_bytes", f)(src)
 }
 
-fn decimal<'a, E>(src: &'a str) -> IResult<&'a str, Repr, E>
+fn decimal<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let sign = opt(one_of("+-"));
@@ -606,7 +677,7 @@ where
         )| {
             if fractional.is_none() && exponential.is_none() {
                 let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &integral, 10);
-                Ok(Repr::Int(i))
+                Ok(<T as From<Int>>::from(i))
             } else {
                 let f = Float::from_parts(
                     !matches!(sign, Some('-')),
@@ -615,7 +686,7 @@ where
                     !matches!(exponential, Some((Some('-'), _))),
                     exponential.as_ref().map_or("", |(_, exp)| exp),
                 );
-                Ok(Repr::Float(f))
+                Ok(<T as From<Float>>::from(f))
             }
         },
     );

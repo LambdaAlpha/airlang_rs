@@ -1,17 +1,20 @@
 use {
     crate::{
-        repr::Repr,
         semantics::{
-            eval::{
-                Ctx,
-                NameMap,
-            },
+            eval::NameMap,
             prelude::prelude,
-            val::Val,
         },
+        syntax::ParseError,
         types::Reader,
     },
     thiserror::Error,
+};
+pub use {
+    eval::{
+        Ctx,
+        Func,
+    },
+    val::Val,
 };
 
 pub(crate) mod val;
@@ -39,10 +42,8 @@ impl Interpreter {
         Interpreter { prelude, ctx }
     }
 
-    pub fn interpret(&mut self, src: Repr) -> Result<Repr, ReprError> {
-        let input = Val::from(src);
-        let output = self.ctx.eval(input);
-        output.try_into()
+    pub fn interpret(&mut self, src: Val) -> Val {
+        self.ctx.eval(src)
     }
 
     pub fn reset(&mut self) {
@@ -57,4 +58,8 @@ impl Interpreter {
             reverse_interpreter: None,
         }
     }
+}
+
+pub fn parse(src: &str) -> Result<Val, ParseError> {
+    crate::syntax::parser::parse(src)
 }

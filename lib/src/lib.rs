@@ -36,8 +36,6 @@
     coerce_unsized
 )]
 
-pub mod repr;
-
 pub mod syntax;
 
 pub mod semantics;

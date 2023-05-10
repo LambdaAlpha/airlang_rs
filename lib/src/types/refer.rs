@@ -28,7 +28,7 @@ use std::{
 };
 
 #[derive(Debug)]
-pub(crate) struct Keeper<D: ?Sized> {
+pub struct Keeper<D: ?Sized> {
     raw: RawRef<D>,
 }
 

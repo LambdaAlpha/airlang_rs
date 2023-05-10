@@ -10,18 +10,21 @@ use {
         WRAP_RIGHT,
     },
     crate::{
-        repr::{
-            CallRepr,
-            ListRepr,
-            MapRepr,
-            Repr::{
-                self,
-                Pair,
-                Reverse,
-            },
-            ReverseRepr,
-        },
         syntax::{
+            repr::{
+                CallRepr,
+                ListRepr,
+                MapRepr,
+                Repr::{
+                    self,
+                    Call,
+                    List,
+                    Map,
+                    Pair,
+                    Reverse,
+                },
+                ReverseRepr,
+            },
             PRESERVE_PREFIX,
             REVERSE_SEPARATOR,
         },
@@ -31,11 +34,6 @@ use {
             Int,
         },
         utils,
-    },
-    Repr::{
-        Call,
-        List,
-        Map,
     },
 };
 

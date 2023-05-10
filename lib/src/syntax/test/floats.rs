@@ -1,6 +1,6 @@
-use crate::{
+use crate::syntax::{
     repr::Repr,
-    syntax::test::float,
+    test::float,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {

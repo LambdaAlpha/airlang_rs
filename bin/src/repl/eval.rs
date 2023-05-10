@@ -1,7 +1,11 @@
 use {
     airlang::{
-        repr::Repr,
-        semantics::Interpreter,
+        semantics::{
+            Interpreter,
+            ReprError,
+            Val,
+        },
+        syntax::Repr,
     },
     std::{
         collections::HashMap,
@@ -19,7 +23,7 @@ pub(crate) struct DynCtx {
     pub(crate) meta_interpreter: Interpreter,
 }
 
-pub(crate) trait Cmd = Fn(&ConstCtx, &mut DynCtx, Repr) -> Output;
+pub(crate) trait Cmd = Fn(&ConstCtx, &mut DynCtx, Val) -> Output;
 
 pub(crate) enum Output {
     Break,
@@ -28,58 +32,60 @@ pub(crate) enum Output {
 }
 
 impl ConstCtx {
-    pub(crate) fn eval(&self, dyn_ctx: &mut DynCtx, input: Repr) -> Output {
-        if let Repr::Call(call) = input {
-            if let Repr::Symbol(func) = &call.func {
+    pub(crate) fn eval(&self, dyn_ctx: &mut DynCtx, input: Val) -> Output {
+        if let Val::Call(call) = input {
+            if let Val::Symbol(func) = &call.func {
                 match &**func {
                     CMD => self.eval_cmd(dyn_ctx, call.input),
                     AIR => self.eval_air(dyn_ctx, call.input),
-                    _ => self.eval_air(dyn_ctx, Repr::Call(call)),
+                    _ => self.eval_air(dyn_ctx, Val::Call(call)),
                 }
             } else {
-                self.eval_air(dyn_ctx, Repr::Call(call))
+                self.eval_air(dyn_ctx, Val::Call(call))
             }
         } else {
             self.eval_air(dyn_ctx, input)
         }
     }
 
-    pub(crate) fn eval_cmd(&self, dyn_ctx: &mut DynCtx, input: Repr) -> Output {
+    pub(crate) fn eval_cmd(&self, dyn_ctx: &mut DynCtx, input: Val) -> Output {
         match input {
-            Repr::Symbol(ref s) => {
+            Val::Symbol(ref s) => {
                 if let Some(f) = self.cmd_map.get(&**s) {
-                    f(self, dyn_ctx, Repr::default())
+                    f(self, dyn_ctx, Val::default())
                 } else {
                     self.eval_meta(dyn_ctx, input)
                 }
             }
-            Repr::Call(call) => {
-                if let Repr::Symbol(func) = &call.func {
+            Val::Call(call) => {
+                if let Val::Symbol(func) = &call.func {
                     if &**func == AIR {
                         self.eval_meta(dyn_ctx, call.input)
                     } else if let Some(f) = self.cmd_map.get(&**func) {
                         f(self, dyn_ctx, call.input)
                     } else {
-                        self.eval_meta(dyn_ctx, Repr::Call(call))
+                        self.eval_meta(dyn_ctx, Val::Call(call))
                     }
                 } else {
-                    self.eval_meta(dyn_ctx, Repr::Call(call))
+                    self.eval_meta(dyn_ctx, Val::Call(call))
                 }
             }
             input => self.eval_meta(dyn_ctx, input),
         }
     }
 
-    pub(crate) fn eval_air(&self, dyn_ctx: &mut DynCtx, repr: Repr) -> Output {
-        Self::eval_interpret(&mut dyn_ctx.interpreter, repr)
+    pub(crate) fn eval_air(&self, dyn_ctx: &mut DynCtx, val: Val) -> Output {
+        Self::eval_interpret(&mut dyn_ctx.interpreter, val)
     }
 
-    pub(crate) fn eval_meta(&self, dyn_ctx: &mut DynCtx, repr: Repr) -> Output {
-        Self::eval_interpret(&mut dyn_ctx.meta_interpreter, repr)
+    pub(crate) fn eval_meta(&self, dyn_ctx: &mut DynCtx, val: Val) -> Output {
+        Self::eval_interpret(&mut dyn_ctx.meta_interpreter, val)
     }
 
-    fn eval_interpret(interpreter: &mut Interpreter, repr: Repr) -> Output {
-        match interpreter.interpret(repr) {
+    fn eval_interpret(interpreter: &mut Interpreter, val: Val) -> Output {
+        let output = interpreter.interpret(val);
+        let result: Result<Repr, ReprError> = output.try_into();
+        match result {
             Ok(output) => Output::Ok(Box::new(output)),
             Err(err) => Output::Err(Box::new(err)),
         }

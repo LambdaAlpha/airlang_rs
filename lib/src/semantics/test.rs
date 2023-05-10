@@ -1,7 +1,7 @@
 use {
-    crate::{
-        semantics::val::Val,
-        syntax::parse,
+    crate::semantics::{
+        parse,
+        val::Val,
     },
     std::{
         error::Error,
@@ -16,11 +16,11 @@ fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
     for test in tests {
         let (i, o) = test.split_once("# ---").unwrap();
         let src = parse(i)?;
-        let ret = interpreter.interpret(src)?;
+        let ret = interpreter.interpret(src);
         let ret_expected = parse(o)?;
         assert_eq!(
             ret, ret_expected,
-            "input: {}, real output: {} != expected output: {}",
+            "input: {:?}, real output: {:?} != expected output: {:?}",
             i, ret, o
         );
         interpreter.reset();

@@ -1,14 +1,16 @@
 use {
     crate::{
-        repr::{
-            CallRepr,
-            ListRepr,
-            MapRepr,
-            PairRepr,
-            Repr,
-            ReverseRepr,
+        syntax::{
+            parse,
+            repr::{
+                CallRepr,
+                ListRepr,
+                MapRepr,
+                PairRepr,
+                Repr,
+                ReverseRepr,
+            },
         },
-        syntax::parse,
         types::{
             Bool,
             Float,

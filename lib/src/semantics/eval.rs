@@ -23,7 +23,7 @@ use {
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct Func {
+pub struct Func {
     pub(crate) func_trait: FuncTrait,
     pub(crate) func_impl: FuncImpl,
 }
@@ -56,7 +56,7 @@ pub(crate) type Name = CompactString;
 pub(crate) type NameMap = Map<Name, Val>;
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
-pub(crate) struct Ctx {
+pub struct Ctx {
     pub(crate) constants: Reader<NameMap>,
     pub(crate) variables: NameMap,
     pub(crate) reverse_interpreter: Option<Reader<Func>>,
