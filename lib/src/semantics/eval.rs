@@ -1,7 +1,11 @@
 use {
     crate::{
-        semantics::val::Val,
+        semantics::val::{
+            KeeperVal,
+            Val,
+        },
         types::{
+            Keeper,
             Map,
             Reader,
         },
@@ -107,13 +111,40 @@ impl Ctx {
             Val::Symbol(s) => self.get(&s),
             Val::Call(c) => self.eval_call(c.func, c.input),
             Val::Reverse(r) => self.eval_reverse(r.func, r.output),
+            Val::Keeper(k) => self.eval_keeper(&k),
             v => v,
+        }
+    }
+
+    fn eval_ref(&mut self, input: &Val) -> Val {
+        match &*input {
+            Val::Symbol(s) => self.get(s),
+            Val::Call(c) => self.eval_ref_call(&c.func, &c.input),
+            Val::Reverse(r) => self.eval_ref_reverse(&r.func, &r.output),
+            Val::Keeper(k) => self.eval_keeper(k),
+            v => v.clone(),
+        }
+    }
+
+    fn eval_keeper(&mut self, keeper: &KeeperVal) -> Val {
+        if let Ok(input) = Keeper::reader(&keeper) {
+            self.eval_ref(&input)
+        } else {
+            Val::default()
         }
     }
 
     pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {
         if let Val::Func(func) = self.eval(func) {
             func.eval(self, input)
+        } else {
+            Val::default()
+        }
+    }
+
+    fn eval_ref_call(&mut self, func: &Val, input: &Val) -> Val {
+        if let Val::Func(func) = self.eval_ref(func) {
+            func.eval(self, input.clone())
         } else {
             Val::default()
         }
@@ -127,6 +158,10 @@ impl Ctx {
         } else {
             Val::default()
         }
+    }
+
+    fn eval_ref_reverse(&mut self, func: &Val, output: &Val) -> Val {
+        self.eval_reverse(func.clone(), output.clone())
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
