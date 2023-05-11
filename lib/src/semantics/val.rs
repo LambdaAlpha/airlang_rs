@@ -8,6 +8,7 @@ use {
             ReprError,
         },
         syntax::{
+            generator::GenerateRepr,
             parser::ParseRepr,
             repr::{
                 CallRepr,
@@ -471,5 +472,28 @@ impl ParseRepr for Val {
             Val::Pair(pair) => Ok((pair.first, pair.second)),
             other => Err(other),
         }
+    }
+}
+
+impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
+    type Error = ReprError;
+
+    fn try_into(self) -> Result<GenerateRepr<'a, Val>, Self::Error> {
+        let r = match self {
+            Val::Unit(u) => GenerateRepr::Unit(u),
+            Val::Bool(b) => GenerateRepr::Bool(b),
+            Val::Int(i) => GenerateRepr::Int(i),
+            Val::Float(f) => GenerateRepr::Float(f),
+            Val::Bytes(b) => GenerateRepr::Bytes(b),
+            Val::Symbol(s) => GenerateRepr::Symbol(s),
+            Val::String(s) => GenerateRepr::String(s),
+            Val::Pair(p) => GenerateRepr::Pair(p),
+            Val::Call(c) => GenerateRepr::Call(c),
+            Val::Reverse(r) => GenerateRepr::Reverse(r),
+            Val::List(l) => GenerateRepr::List(l),
+            Val::Map(m) => GenerateRepr::Map(m),
+            _ => return Err(ReprError {}),
+        };
+        Ok(r)
     }
 }

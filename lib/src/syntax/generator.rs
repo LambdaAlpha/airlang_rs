@@ -11,36 +11,38 @@ use {
     },
     crate::{
         syntax::{
-            repr::{
-                CallRepr,
-                ListRepr,
-                MapRepr,
-                Repr::{
-                    self,
-                    Call,
-                    List,
-                    Map,
-                    Pair,
-                    Reverse,
-                },
-                ReverseRepr,
-            },
             PRESERVE_PREFIX,
             REVERSE_SEPARATOR,
         },
         types::{
+            Bool,
             Bytes,
+            Call,
             Float,
             Int,
+            List,
+            Map,
+            Pair,
+            Reverse,
+            Str,
+            Symbol,
+            Unit,
         },
         utils,
     },
+    std::hash::Hash,
 };
 
 pub(crate) const INDENT: &str = "  ";
 
 #[allow(dead_code)]
-pub(crate) fn generate_compat(repr: &Repr) -> String {
+pub(crate) fn generate_compat<'a, T>(
+    repr: &'a T,
+) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: Into<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     let mut str = String::new();
     let config = GenerateFormat {
         indent: "".to_owned(),
@@ -51,12 +53,18 @@ pub(crate) fn generate_compat(repr: &Repr) -> String {
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
-    generate(repr, &mut str, &config, 0);
-    str
+    generate(repr, &mut str, &config, 0)?;
+    Ok(str)
 }
 
 #[allow(dead_code)]
-pub(crate) fn generate_comfort(repr: &Repr) -> String {
+pub(crate) fn generate_comfort<'a, T>(
+    repr: &'a T,
+) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: Into<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     let mut str = String::new();
     let config = GenerateFormat {
         indent: "".to_owned(),
@@ -67,12 +75,18 @@ pub(crate) fn generate_comfort(repr: &Repr) -> String {
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
-    generate(repr, &mut str, &config, 0);
-    str
+    generate(repr, &mut str, &config, 0)?;
+    Ok(str)
 }
 
 #[allow(dead_code)]
-pub(crate) fn generate_pretty(repr: &Repr) -> String {
+pub(crate) fn generate_pretty<'a, T>(
+    repr: &'a T,
+) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     let mut str = String::new();
     let config = GenerateFormat {
         indent: INDENT.to_owned(),
@@ -83,8 +97,8 @@ pub(crate) fn generate_pretty(repr: &Repr) -> String {
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
-    generate(repr, &mut str, &config, 0);
-    str
+    generate(repr, &mut str, &config, 0)?;
+    Ok(str)
 }
 
 pub(crate) struct GenerateFormat {
@@ -97,21 +111,50 @@ pub(crate) struct GenerateFormat {
     pub(crate) right_padding: String,
 }
 
-pub(crate) fn generate(repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
-    match repr {
-        Repr::Unit(_) => generate_unit(s),
-        Repr::Bool(b) => generate_bool(b.bool(), s),
-        Repr::Int(i) => generate_int(i, s),
-        Repr::Float(f) => generate_float(f, s),
-        Repr::Bytes(bytes) => generate_bytes(bytes, s),
-        Repr::String(str) => generate_string(str, s),
-        Repr::Symbol(str) => generate_symbol(str, s),
-        Pair(p) => generate_pair(&p.first, &p.second, s, format, indent),
-        Call(c) => generate_call(c, s, format, indent),
-        Reverse(i) => generate_reverse(i, s, format, indent),
-        List(list) => generate_list(list, s, format, indent),
-        Map(map) => generate_map(map, s, format, indent),
+pub(crate) enum GenerateRepr<'a, T>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    Unit(&'a Unit),
+    Bool(&'a Bool),
+    Int(&'a Int),
+    Float(&'a Float),
+    Bytes(&'a Bytes),
+    String(&'a Str),
+    Symbol(&'a Symbol),
+    Pair(&'a Pair<T, T>),
+    Call(&'a Call<T, T>),
+    Reverse(&'a Reverse<T, T>),
+    List(&'a List<T>),
+    Map(&'a Map<T, T>),
+}
+
+pub(crate) fn generate<'a, T>(
+    repr: &'a T,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    match repr.try_into()? {
+        GenerateRepr::Unit(_) => generate_unit(s),
+        GenerateRepr::Bool(b) => generate_bool(b.bool(), s),
+        GenerateRepr::Int(i) => generate_int(i, s),
+        GenerateRepr::Float(f) => generate_float(f, s),
+        GenerateRepr::Bytes(bytes) => generate_bytes(bytes, s),
+        GenerateRepr::String(str) => generate_string(str, s),
+        GenerateRepr::Symbol(str) => generate_symbol(str, s),
+        GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
+        GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
+        GenerateRepr::Reverse(i) => generate_reverse(i, s, format, indent)?,
+        GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
+        GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
     }
+    Ok(())
 }
 
 fn generate_unit(s: &mut String) {
@@ -156,98 +199,179 @@ fn generate_symbol(str: &str, s: &mut String) {
     s.push_str(str)
 }
 
-fn is_left_open(repr: &Repr) -> bool {
-    matches!(repr, Repr::Call(_) | Repr::Reverse(_) | Repr::Pair(_))
+fn is_left_open<'a, T>(repr: &'a T) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    let b = matches!(
+        repr.try_into()?,
+        GenerateRepr::Call(_) | GenerateRepr::Reverse(_) | GenerateRepr::Pair(_)
+    );
+    Ok(b)
 }
 
-fn is_normal_call(repr: &Repr) -> bool {
-    match repr {
-        Call(call) => match &call.input {
-            Pair(_) => false,
+fn is_normal_call<'a, T>(
+    repr: &'a T,
+) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    let b = match repr.try_into()? {
+        GenerateRepr::Call(call) => match (&call.input).try_into()? {
+            GenerateRepr::Pair(_) => false,
             _ => true,
         },
         _ => false,
-    }
+    };
+    Ok(b)
 }
 
-fn wrap(wrap: bool, repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
+fn wrap<'a, T>(
+    wrap: bool,
+    repr: &'a T,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     if wrap {
-        generate_wrapped(repr, s, format, indent);
+        generate_wrapped(repr, s, format, indent)
     } else {
         generate(repr, s, format, indent)
     }
 }
 
-fn wrap_if_left_open(repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
-    wrap(is_left_open(repr), repr, s, format, indent)
-}
-
-fn generate_pair(
-    first: &Repr,
-    second: &Repr,
+fn wrap_if_left_open<'a, T>(
+    repr: &'a T,
     s: &mut String,
     format: &GenerateFormat,
     indent: usize,
-) {
-    generate(first, s, format, indent);
-    s.push_str(&format.pair_separator);
-    wrap_if_left_open(second, s, format, indent);
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    wrap(is_left_open(repr)?, repr, s, format, indent)
 }
 
-fn generate_call(call: &CallRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
-    match &call.input {
-        Pair(p) => {
-            wrap(is_normal_call(&p.first), &p.first, s, format, indent);
+fn generate_pair<'a, T>(
+    first: &'a T,
+    second: &'a T,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    generate(first, s, format, indent)?;
+    s.push_str(&format.pair_separator);
+    wrap_if_left_open(second, s, format, indent)
+}
+
+fn generate_call<'a, T>(
+    call: &'a Call<T, T>,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    match (&call.input).try_into()? {
+        GenerateRepr::Pair(p) => {
+            wrap(is_normal_call(&p.first)?, &p.first, s, format, indent)?;
 
             s.push(' ');
 
-            wrap_if_left_open(&call.func, s, format, indent);
+            wrap_if_left_open(&call.func, s, format, indent)?;
 
             s.push(' ');
 
             wrap_if_left_open(&p.second, s, format, indent)
         }
         _ => {
-            wrap(matches!(&call.func, Call(_)), &call.func, s, format, indent);
+            wrap(
+                matches!((&call.func).try_into()?, GenerateRepr::Call(_)),
+                &call.func,
+                s,
+                format,
+                indent,
+            )?;
             s.push(' ');
-            wrap_if_left_open(&call.input, s, format, indent);
+            wrap_if_left_open(&call.input, s, format, indent)
         }
     }
 }
 
-fn generate_reverse(reverse: &ReverseRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
-    generate(&reverse.func, s, format, indent);
+fn generate_reverse<'a, T>(
+    reverse: &'a Reverse<T, T>,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    generate(&reverse.func, s, format, indent)?;
     s.push(REVERSE_SEPARATOR);
-    wrap_if_left_open(&reverse.output, s, format, indent);
+    wrap_if_left_open(&reverse.output, s, format, indent)
 }
 
-fn generate_wrapped(repr: &Repr, s: &mut String, format: &GenerateFormat, indent: usize) {
+fn generate_wrapped<'a, T>(
+    repr: &'a T,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     s.push(WRAP_LEFT);
     s.push_str(&format.left_padding);
-    generate(repr, s, format, indent);
+    generate(repr, s, format, indent)?;
     s.push_str(&format.right_padding);
     s.push(WRAP_RIGHT);
+    Ok(())
 }
 
-fn generate_list(list: &ListRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
+fn generate_list<'a, T>(
+    list: &'a List<T>,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     s.push(LIST_LEFT);
     if list.is_empty() {
         s.push(LIST_RIGHT);
-        return;
+        return Ok(());
     }
 
     if list.len() == 1 {
         s.push_str(&format.left_padding);
-        generate(list.first().unwrap(), s, format, indent);
+        generate(list.first().unwrap(), s, format, indent)?;
         s.push_str(&format.right_padding);
         s.push(LIST_RIGHT);
-        return;
+        return Ok(());
     }
 
     s.push_str(&format.before_first);
     for repr in list.iter() {
         s.push_str(&format.indent.repeat(indent + 1));
-        generate(repr, s, format, indent + 1);
+        generate(repr, s, format, indent + 1)?;
         s.push_str(&format.separator);
     }
     s.truncate(s.len() - format.separator.len());
@@ -255,28 +379,38 @@ fn generate_list(list: &ListRepr, s: &mut String, format: &GenerateFormat, inden
 
     s.push_str(&format.indent.repeat(indent));
     s.push(LIST_RIGHT);
+    Ok(())
 }
 
-fn generate_map(map: &MapRepr, s: &mut String, format: &GenerateFormat, indent: usize) {
+fn generate_map<'a, T>(
+    map: &'a Map<T, T>,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
     s.push(MAP_LEFT);
     if map.is_empty() {
         s.push(MAP_RIGHT);
-        return;
+        return Ok(());
     }
 
     if map.len() == 1 {
         let pair = map.iter().next().unwrap();
         s.push_str(&format.left_padding);
-        generate_pair(pair.0, pair.1, s, format, indent);
+        generate_pair(pair.0, pair.1, s, format, indent)?;
         s.push_str(&format.right_padding);
         s.push(MAP_RIGHT);
-        return;
+        return Ok(());
     }
 
     s.push_str(&format.before_first);
     for pair in map.iter() {
         s.push_str(&format.indent.repeat(indent + 1));
-        generate_pair(pair.0, pair.1, s, format, indent + 1);
+        generate_pair(pair.0, pair.1, s, format, indent + 1)?;
         s.push_str(&format.separator);
     }
     s.truncate(s.len() - format.separator.len());
@@ -284,4 +418,5 @@ fn generate_map(map: &MapRepr, s: &mut String, format: &GenerateFormat, indent: 
 
     s.push_str(&format.indent.repeat(indent));
     s.push(MAP_RIGHT);
+    Ok(())
 }

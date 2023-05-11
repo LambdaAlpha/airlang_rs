@@ -2,6 +2,7 @@ use {
     crate::{
         syntax::{
             generate,
+            generator::GenerateRepr,
             parse,
             parser::ParseRepr,
             ParseError,
@@ -22,6 +23,7 @@ use {
         },
     },
     std::{
+        convert::Infallible,
         fmt::{
             Debug,
             Display,
@@ -201,5 +203,27 @@ impl ParseRepr for Repr {
             Repr::Pair(pair) => Ok((pair.first, pair.second)),
             other => Err(other),
         }
+    }
+}
+
+impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
+    type Error = Infallible;
+
+    fn try_into(self) -> Result<GenerateRepr<'a, Repr>, Self::Error> {
+        let r = match self {
+            Repr::Unit(u) => GenerateRepr::Unit(u),
+            Repr::Bool(b) => GenerateRepr::Bool(b),
+            Repr::Int(i) => GenerateRepr::Int(i),
+            Repr::Float(f) => GenerateRepr::Float(f),
+            Repr::Bytes(b) => GenerateRepr::Bytes(b),
+            Repr::Symbol(s) => GenerateRepr::Symbol(s),
+            Repr::String(s) => GenerateRepr::String(s),
+            Repr::Pair(p) => GenerateRepr::Pair(p),
+            Repr::Call(c) => GenerateRepr::Call(c),
+            Repr::Reverse(r) => GenerateRepr::Reverse(r),
+            Repr::List(l) => GenerateRepr::List(l),
+            Repr::Map(m) => GenerateRepr::Map(m),
+        };
+        Ok(r)
     }
 }

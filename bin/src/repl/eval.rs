@@ -1,11 +1,8 @@
 use {
-    airlang::{
-        semantics::{
-            Interpreter,
-            ReprError,
-            Val,
-        },
-        syntax::Repr,
+    airlang::semantics::{
+        generate,
+        Interpreter,
+        Val,
     },
     std::{
         collections::HashMap,
@@ -84,8 +81,7 @@ impl ConstCtx {
 
     fn eval_interpret(interpreter: &mut Interpreter, val: Val) -> Output {
         let output = interpreter.interpret(val);
-        let result: Result<Repr, ReprError> = output.try_into();
-        match result {
+        match generate(&output) {
             Ok(output) => Output::Ok(Box::new(output)),
             Err(err) => Output::Err(Box::new(err)),
         }

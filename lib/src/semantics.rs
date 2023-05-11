@@ -63,3 +63,7 @@ impl Interpreter {
 pub fn parse(src: &str) -> Result<Val, ParseError> {
     crate::syntax::parser::parse(src)
 }
+
+pub fn generate(src: &Val) -> Result<String, ReprError> {
+    crate::syntax::generator::generate_pretty(src)
+}

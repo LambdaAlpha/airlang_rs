@@ -38,5 +38,5 @@ pub fn parse(src: &str) -> Result<Repr, ParseError> {
 }
 
 pub fn generate(src: &Repr) -> String {
-    generator::generate_pretty(src)
+    generator::generate_pretty(src).unwrap()
 }

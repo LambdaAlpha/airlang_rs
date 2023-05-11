@@ -95,8 +95,9 @@ pub(crate) fn stringify() -> Val {
 }
 
 fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
-    if let Ok(repr) = ctx.eval(input).try_into() {
-        return Val::String(Str::from(crate::syntax::generate(&repr)));
+    let val = ctx.eval(input);
+    if let Ok(str) = crate::semantics::generate(&val) {
+        return Val::String(Str::from(str));
     }
     Val::default()
 }
