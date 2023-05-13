@@ -8,7 +8,10 @@ use crate::{
             Name,
             Primitive,
         },
-        prelude::names,
+        prelude::{
+            eval::fn_eval_escape,
+            names,
+        },
         val::Val,
     },
     types::Reader,
@@ -26,6 +29,7 @@ pub(crate) fn assign() -> Val {
 }
 
 fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
+    let input = fn_eval_escape(ctx, input);
     if let Val::Pair(pair) = input {
         let name: &str = match &pair.first {
             Val::Symbol(s) => s,
@@ -50,6 +54,7 @@ pub(crate) fn remove() -> Val {
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
+    let input = fn_eval_escape(ctx, input);
     let name: &str = match &input {
         Val::Symbol(s) => s,
         Val::String(s) => s,

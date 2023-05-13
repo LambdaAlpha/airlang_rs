@@ -27,8 +27,12 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::EQUAL, bool::equal());
     put(&mut c, names::NOT_EQUAL, bool::not_equal());
 
-    put(&mut c, names::EVAL, eval::eval());
     put(&mut c, names::VAL, eval::val());
+    put(&mut c, names::EVAL, eval::eval());
+    put(&mut c, names::EVAL_TWICE, eval::eval_twice());
+    put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
+    put(&mut c, names::EVAL_MAP, eval::eval_map());
+    put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
     put(&mut c, names::PARSE, eval::parse());
     put(&mut c, names::STRINGIFY, eval::stringify());
     put(&mut c, names::FUNC, eval::func());
@@ -77,8 +81,12 @@ pub(crate) mod names {
     pub(crate) const EQUAL: &str = "==";
     pub(crate) const NOT_EQUAL: &str = "!=";
 
-    pub(crate) const EVAL: &str = "eval";
-    pub(crate) const VAL: &str = "val";
+    pub(crate) const VAL: &str = "$0";
+    pub(crate) const EVAL: &str = "$";
+    pub(crate) const EVAL_TWICE: &str = "$$";
+    pub(crate) const EVAL_ESCAPE: &str = "$\\";
+    pub(crate) const EVAL_MAP: &str = "$map";
+    pub(crate) const EVAL_IN_CTX: &str = "$@";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "func";

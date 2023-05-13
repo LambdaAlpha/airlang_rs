@@ -2,11 +2,14 @@ use {
     crate::{
         semantics::val::{
             KeeperVal,
+            ListVal,
+            MapVal,
             Val,
         },
         types::{
             Keeper,
             Map,
+            Pair,
             Reader,
         },
     },
@@ -110,6 +113,9 @@ impl Ctx {
     pub(crate) fn eval(&mut self, input: Val) -> Val {
         match input {
             Val::Symbol(s) => self.get(&s),
+            Val::Pair(p) => self.eval_pair(p.first, p.second),
+            Val::List(l) => self.eval_list(l),
+            Val::Map(m) => self.eval_map(m),
             Val::Call(c) => self.eval_call(c.func, c.input),
             Val::Reverse(r) => self.eval_reverse(r.func, r.output),
             Val::Keeper(k) => self.eval_keeper(&k),
@@ -120,6 +126,9 @@ impl Ctx {
     fn eval_ref(&mut self, input: &Val) -> Val {
         match &*input {
             Val::Symbol(s) => self.get(s),
+            Val::Pair(p) => self.eval_ref_pair(&p.first, &p.second),
+            Val::List(l) => self.eval_ref_list(l),
+            Val::Map(m) => self.eval_ref_map(m),
             Val::Call(c) => self.eval_ref_call(&c.func, &c.input),
             Val::Reverse(r) => self.eval_ref_reverse(&r.func, &r.output),
             Val::Keeper(k) => self.eval_keeper(k),
@@ -133,6 +142,42 @@ impl Ctx {
         } else {
             Val::default()
         }
+    }
+
+    fn eval_pair(&mut self, first: Val, second: Val) -> Val {
+        let pair = Pair::new(self.eval(first), self.eval(second));
+        Val::Pair(Box::new(pair))
+    }
+
+    fn eval_ref_pair(&mut self, first: &Val, second: &Val) -> Val {
+        let pair = Pair::new(self.eval_ref(first), self.eval_ref(second));
+        Val::Pair(Box::new(pair))
+    }
+
+    fn eval_list(&mut self, list: ListVal) -> Val {
+        let list = list.into_iter().map(|v| self.eval(v)).collect();
+        Val::List(list)
+    }
+
+    fn eval_ref_list(&mut self, list: &ListVal) -> Val {
+        let list = list.into_iter().map(|v| self.eval_ref(v)).collect();
+        Val::List(list)
+    }
+
+    fn eval_map(&mut self, map: MapVal) -> Val {
+        let map = map
+            .into_iter()
+            .map(|(k, v)| (self.eval(k), self.eval(v)))
+            .collect();
+        Val::Map(map)
+    }
+
+    fn eval_ref_map(&mut self, map: &MapVal) -> Val {
+        let map = map
+            .into_iter()
+            .map(|(k, v)| (self.eval_ref(k), self.eval_ref(v)))
+            .collect();
+        Val::Map(map)
     }
 
     pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {

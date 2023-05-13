@@ -14,20 +14,44 @@ stringify "1"
 # ---
 "\"1\""
 # ===
-val a
+$0 a
 # ---
 a
 # ===
-;(a = 1, eval [val a])
+$ [not 'f]
+# ---
+'t
+# ===
+$\ (a, f a, a: b, f? a, {a: b})
+# ---
+(a, f a, a: b, f? a, {a: b})
+# ===
+$\ {a: b, c: [\ [not 'f]]}
+# ---
+{a: b, c: 't}
+# ===
+$\ (a, b: (\ [not 't]))
+# ---
+(a, b: ('f))
+# ===
+$map {a, \ [not 't]: c, not 'f}
+# ---
+{a: ', 'f: ', not 'f: 't}
+# ===
+;(a = 1, $$ [$0 a])
 # ---
 1
 # ===
+[$0 a] $$ [$0 b]
+# ---
+': '
+# ===
 ;(
     f = [func{
-        body: [n [c eval a]],
+        body: [n [c $@ a]],
         input: a,
         caller: c,
-        const: {n: not, eval}
+        const: {n: not, $@}
     }],
     f 't
 )
@@ -36,10 +60,10 @@ a
 # ===
 ;(
     f = [func{
-        body: [n [c eval a]],
+        body: [n [c $@ a]],
         input: a,
         caller: c,
-        const: {n: not, eval}
+        const: {n: not, $@}
     }],
     f [not 't]
 )
@@ -48,8 +72,8 @@ a
 # ===
 ;(
     f = [func{
-        body: [not [caller eval input]],
-        const: {not, eval}
+        body: [not [caller $@ input]],
+        const: {not, $@}
     }],
     f [not 't]
 )
@@ -84,11 +108,11 @@ a
 # ===
 ;(
     f = [func{
-        body: [;(a = 1, eval input)],
+        body: [;(a = 1, $$ input)],
         const: {
             ;,
             =,
-            eval,
+            $$,
         }
     }],
     f a
