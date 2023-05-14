@@ -31,7 +31,11 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::EVAL, eval::eval());
     put(&mut c, names::EVAL_TWICE, eval::eval_twice());
     put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
-    put(&mut c, names::EVAL_MAP, eval::eval_map());
+    put(
+        &mut c,
+        names::EVAL_POSITIONAL_ESCAPE,
+        eval::eval_positional_escape(),
+    );
     put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
     put(&mut c, names::PARSE, eval::parse());
     put(&mut c, names::STRINGIFY, eval::stringify());
@@ -85,7 +89,7 @@ pub(crate) mod names {
     pub(crate) const EVAL: &str = "$";
     pub(crate) const EVAL_TWICE: &str = "$$";
     pub(crate) const EVAL_ESCAPE: &str = "$\\";
-    pub(crate) const EVAL_MAP: &str = "$map";
+    pub(crate) const EVAL_POSITIONAL_ESCAPE: &str = "$/";
     pub(crate) const EVAL_IN_CTX: &str = "$@";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";

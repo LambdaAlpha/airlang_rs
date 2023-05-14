@@ -134,26 +134,44 @@ pub(crate) fn fn_eval_escape(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn eval_map() -> Val {
+pub(crate) fn eval_positional_escape() -> Val {
     Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_MAP),
-            eval: Reader::new(fn_eval_map),
+            id: Name::from(names::EVAL_POSITIONAL_ESCAPE),
+            eval: Reader::new(fn_eval_positional_escape),
         }),
     })
     .into()
 }
 
-fn fn_eval_map(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Map(m) = input {
-        let map = m
-            .into_iter()
-            .map(|(k, v)| (fn_eval_escape(ctx, k), ctx.eval(v)))
-            .collect();
-        Val::Map(map)
-    } else {
-        Val::default()
+fn fn_eval_positional_escape(ctx: &mut Ctx, input: Val) -> Val {
+    match input {
+        Val::Map(m) => {
+            let map = m
+                .into_iter()
+                .map(|(k, v)| {
+                    let key = fn_eval_escape(ctx, k);
+                    let value = fn_eval_positional_escape(ctx, v);
+                    (key, value)
+                })
+                .collect();
+            Val::Map(map)
+        }
+        Val::Pair(p) => {
+            let first = fn_eval_positional_escape(ctx, p.first);
+            let second = fn_eval_positional_escape(ctx, p.second);
+            let pair = Box::new(Pair::new(first, second));
+            Val::Pair(pair)
+        }
+        Val::List(l) => {
+            let list = l
+                .into_iter()
+                .map(|v| fn_eval_positional_escape(ctx, v))
+                .collect();
+            Val::List(list)
+        }
+        i => ctx.eval(i),
     }
 }
 
