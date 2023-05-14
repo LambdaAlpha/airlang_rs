@@ -102,6 +102,15 @@ $/ {a: [$ {b: c}]}
 # ===
 ;(
     f = [func{
+        body: [[\ not] [caller [\ $@] input]]
+    }],
+    f [not 't]
+)
+# ---
+'t
+# ===
+;(
+    f = [func{
         body: _,
         input: _,
         caller: _,

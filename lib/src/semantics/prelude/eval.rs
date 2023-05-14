@@ -250,10 +250,10 @@ pub(crate) fn func() -> Val {
 
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Map(map) = input {
-        let body = map_get(&map, "body");
-        let constants = match map_get(&map, "const") {
+        let body = fn_eval_escape(ctx, map_get(&map, "body"));
+        let constants = match fn_eval_positional_escape(ctx, map_get(&map, "const")) {
             Val::Map(m) => {
-                if let Some(constants) = eval_name_map(ctx, m) {
+                if let Some(constants) = into_name_map(m) {
                     constants
                 } else {
                     return Val::default();
@@ -262,7 +262,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             Val::Unit(_) => NameMap::default(),
             _ => return Val::default(),
         };
-        let input_name = match map_get(&map, "input") {
+        let input_name = match fn_eval_escape(ctx, map_get(&map, "input")) {
             Val::Symbol(s) => {
                 if &*s == "_" {
                     None
@@ -273,7 +273,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             Val::Unit(_) => Some(Name::from("input")),
             _ => return Val::default(),
         };
-        let caller_name = match map_get(&map, "caller") {
+        let caller_name = match fn_eval_escape(ctx, map_get(&map, "caller")) {
             Val::Symbol(s) => {
                 if &*s == "_" {
                     None
@@ -303,17 +303,13 @@ fn map_get(map: &MapVal, name: &str) -> Val {
     map.get(&name).map(Clone::clone).unwrap_or_default()
 }
 
-fn eval_name_map(ctx: &mut Ctx, map: MapVal) -> Option<NameMap> {
-    let mut name_map = NameMap::default();
-    for (k, v) in map.into_iter() {
-        let name = match k {
-            Val::Symbol(s) => Name::from(&*s),
-            _ => return None,
-        };
-        let val = ctx.eval(v);
-        name_map.insert(name, val);
-    }
-    Some(name_map)
+fn into_name_map(map: MapVal) -> Option<NameMap> {
+    map.into_iter()
+        .map(|(k, v)| match k {
+            Val::Symbol(s) => Some((Name::from(&*s), v)),
+            _ => None,
+        })
+        .collect()
 }
 
 pub(crate) fn chain() -> Val {
