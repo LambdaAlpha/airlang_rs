@@ -29,9 +29,9 @@ pub(crate) fn assign() -> Val {
 }
 
 fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
-    let input = fn_eval_escape(ctx, input);
     if let Val::Pair(pair) = input {
-        let name: &str = match &pair.first {
+        let first = fn_eval_escape(ctx, pair.first);
+        let name: &str = match &first {
             Val::Symbol(s) => s,
             Val::String(s) => s,
             _ => return Val::default(),
