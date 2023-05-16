@@ -342,7 +342,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
                 if &*s == "_" {
                     None
                 } else {
-                    Some(Name::from(&*s))
+                    Some(Name::from(<_ as Into<String>>::into(s)))
                 }
             }
             Val::Unit(_) => Some(Name::from("input")),
@@ -353,7 +353,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
                 if &*s == "_" {
                     None
                 } else {
-                    Some(Name::from(&*s))
+                    Some(Name::from(<_ as Into<String>>::into(s)))
                 }
             }
             Val::Unit(_) => Some(Name::from("caller")),
@@ -381,7 +381,7 @@ fn map_get(map: &MapVal, name: &str) -> Val {
 fn into_name_map(map: MapVal) -> Option<NameMap> {
     map.into_iter()
         .map(|(k, v)| match k {
-            Val::Symbol(s) => Some((Name::from(&*s), v)),
+            Val::Symbol(s) => Some((Name::from(<_ as Into<String>>::into(s)), v)),
             _ => None,
         })
         .collect()
