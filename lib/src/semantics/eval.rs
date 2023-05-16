@@ -113,69 +113,38 @@ impl Ctx {
     pub(crate) fn eval(&mut self, input: Val) -> Val {
         match input {
             Val::Symbol(s) => self.get(&s),
+            Val::Keeper(k) => self.eval_keeper(&k),
             Val::Pair(p) => self.eval_pair(p.first, p.second),
             Val::List(l) => self.eval_list(l),
             Val::Map(m) => self.eval_map(m),
             Val::Call(c) => self.eval_call(c.func, c.input),
             Val::Reverse(r) => self.eval_reverse(r.func, r.output),
-            Val::Keeper(k) => self.eval_keeper(&k),
             v => v,
         }
     }
 
-    fn eval_ref(&mut self, input: &Val) -> Val {
-        match &*input {
-            Val::Symbol(s) => self.get(s),
-            Val::Pair(p) => self.eval_ref_pair(&p.first, &p.second),
-            Val::List(l) => self.eval_ref_list(l),
-            Val::Map(m) => self.eval_ref_map(m),
-            Val::Call(c) => self.eval_ref_call(&c.func, &c.input),
-            Val::Reverse(r) => self.eval_ref_reverse(&r.func, &r.output),
-            Val::Keeper(k) => self.eval_keeper(k),
-            v => v.clone(),
-        }
-    }
-
-    fn eval_keeper(&mut self, keeper: &KeeperVal) -> Val {
+    pub(crate) fn eval_keeper(&self, keeper: &KeeperVal) -> Val {
         if let Ok(input) = Keeper::reader(&keeper) {
-            self.eval_ref(&input)
+            input.deref().clone()
         } else {
             Val::default()
         }
     }
 
-    fn eval_pair(&mut self, first: Val, second: Val) -> Val {
+    pub(crate) fn eval_pair(&mut self, first: Val, second: Val) -> Val {
         let pair = Pair::new(self.eval(first), self.eval(second));
         Val::Pair(Box::new(pair))
     }
 
-    fn eval_ref_pair(&mut self, first: &Val, second: &Val) -> Val {
-        let pair = Pair::new(self.eval_ref(first), self.eval_ref(second));
-        Val::Pair(Box::new(pair))
-    }
-
-    fn eval_list(&mut self, list: ListVal) -> Val {
+    pub(crate) fn eval_list(&mut self, list: ListVal) -> Val {
         let list = list.into_iter().map(|v| self.eval(v)).collect();
         Val::List(list)
     }
 
-    fn eval_ref_list(&mut self, list: &ListVal) -> Val {
-        let list = list.into_iter().map(|v| self.eval_ref(v)).collect();
-        Val::List(list)
-    }
-
-    fn eval_map(&mut self, map: MapVal) -> Val {
+    pub(crate) fn eval_map(&mut self, map: MapVal) -> Val {
         let map = map
             .into_iter()
             .map(|(k, v)| (self.eval(k), self.eval(v)))
-            .collect();
-        Val::Map(map)
-    }
-
-    fn eval_ref_map(&mut self, map: &MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| (self.eval_ref(k), self.eval_ref(v)))
             .collect();
         Val::Map(map)
     }
@@ -188,15 +157,7 @@ impl Ctx {
         }
     }
 
-    fn eval_ref_call(&mut self, func: &Val, input: &Val) -> Val {
-        if let Val::Func(func) = self.eval_ref(func) {
-            func.eval(self, input.clone())
-        } else {
-            Val::default()
-        }
-    }
-
-    fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
+    pub(crate) fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
         let reverse_interpreter = self.reverse_interpreter.clone();
         if let Some(reverse_interpreter) = reverse_interpreter {
             let reverse_func = reverse_interpreter.deref().clone().eval(self, func);
@@ -204,10 +165,6 @@ impl Ctx {
         } else {
             Val::default()
         }
-    }
-
-    fn eval_ref_reverse(&mut self, func: &Val, output: &Val) -> Val {
-        self.eval_reverse(func.clone(), output.clone())
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {

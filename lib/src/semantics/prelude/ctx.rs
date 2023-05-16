@@ -1,20 +1,30 @@
-use crate::{
-    semantics::{
-        eval::{
-            Ctx,
-            Func,
-            FuncImpl,
-            FuncTrait,
-            Name,
-            Primitive,
+use {
+    crate::{
+        semantics::{
+            eval::{
+                Ctx,
+                Func,
+                FuncImpl,
+                FuncTrait,
+                Name,
+                Primitive,
+            },
+            prelude::{
+                eval::fn_eval_escape,
+                names,
+            },
+            val::Val,
         },
-        prelude::{
-            eval::fn_eval_escape,
-            names,
+        types::{
+            Keeper,
+            Owner,
+            Reader,
         },
-        val::Val,
     },
-    types::Reader,
+    std::{
+        mem::swap,
+        ops::DerefMut,
+    },
 };
 
 pub(crate) fn assign() -> Val {
@@ -31,15 +41,30 @@ pub(crate) fn assign() -> Val {
 fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(pair) = input {
         let first = fn_eval_escape(ctx, pair.first);
-        let name: &str = match &first {
-            Val::Symbol(s) => s,
-            Val::String(s) => s,
-            _ => return Val::default(),
-        };
-        let val = ctx.eval(pair.second);
-        return ctx.put(Name::from(name), val);
+        match &first {
+            Val::Symbol(s) => {
+                let val = ctx.eval(pair.second);
+                ctx.put(Name::from(&**s), val)
+            }
+            Val::String(s) => {
+                let val = ctx.eval(pair.second);
+                ctx.put(Name::from(&**s), val)
+            }
+            Val::Keeper(k) => {
+                let mut val = ctx.eval(pair.second);
+                if let Ok(mut o) = Keeper::owner(k) {
+                    swap(o.deref_mut(), &mut val);
+                    val
+                } else {
+                    let _ = Keeper::reinit(k, val);
+                    Val::default()
+                }
+            }
+            _ => Val::default(),
+        }
+    } else {
+        Val::default()
     }
-    Val::default()
 }
 
 pub(crate) fn remove() -> Val {
@@ -55,10 +80,25 @@ pub(crate) fn remove() -> Val {
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
     let input = fn_eval_escape(ctx, input);
-    let name: &str = match &input {
-        Val::Symbol(s) => s,
-        Val::String(s) => s,
-        _ => return Val::default(),
-    };
-    return ctx.remove(name);
+    match &input {
+        Val::Symbol(s) => ctx.remove(&**s),
+        Val::String(s) => ctx.remove(&**s),
+        Val::Keeper(k) => Keeper::owner(k).map(Owner::move_data).unwrap_or_default(),
+        _ => Val::default(),
+    }
+}
+
+pub(crate) fn box_new() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::BOX_NEW),
+            eval: Reader::new(fn_box_new),
+        }),
+    })
+    .into()
+}
+
+fn fn_box_new(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Keeper(Keeper::new(ctx.eval(input)))
 }

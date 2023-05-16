@@ -1,29 +1,34 @@
-use crate::{
-    semantics::{
-        eval::{
-            Composed,
-            Ctx,
-            Func,
-            FuncImpl,
-            FuncTrait,
-            Name,
-            NameMap,
-            Primitive,
+use {
+    crate::{
+        semantics::{
+            eval::{
+                Composed,
+                Ctx,
+                Func,
+                FuncImpl,
+                FuncTrait,
+                Name,
+                NameMap,
+                Primitive,
+            },
+            prelude::names,
+            val::{
+                ListVal,
+                MapVal,
+                Val,
+            },
         },
-        prelude::names,
-        val::{
-            MapVal,
-            Val,
+        types::{
+            Call,
+            Keeper,
+            Pair,
+            Reader,
+            Reverse,
+            Str,
+            Symbol,
         },
     },
-    types::{
-        Call,
-        Pair,
-        Reader,
-        Reverse,
-        Str,
-        Symbol,
-    },
+    std::ops::Deref,
 };
 
 pub(crate) fn val() -> Val {
@@ -68,8 +73,78 @@ pub(crate) fn eval_twice() -> Val {
 }
 
 fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
+    match input {
+        Val::Keeper(k) => {
+            if let Ok(input) = Keeper::reader(&k) {
+                eval_ref(ctx, input.deref())
+            } else {
+                Val::default()
+            }
+        }
+        i => {
+            let val = ctx.eval(i);
+            ctx.eval(val)
+        }
+    }
+}
+
+fn eval_ref(ctx: &mut Ctx, input: &Val) -> Val {
+    match &*input {
+        Val::Symbol(s) => ctx.get(s),
+        Val::Keeper(k) => ctx.eval_keeper(k),
+        Val::Pair(p) => eval_ref_pair(ctx, &p.first, &p.second),
+        Val::List(l) => eval_ref_list(ctx, l),
+        Val::Map(m) => eval_ref_map(ctx, m),
+        Val::Call(c) => eval_ref_call(ctx, &c.func, &c.input),
+        Val::Reverse(r) => eval_ref_reverse(ctx, &r.func, &r.output),
+        v => v.clone(),
+    }
+}
+
+fn eval_ref_pair(ctx: &mut Ctx, first: &Val, second: &Val) -> Val {
+    let pair = Pair::new(eval_ref(ctx, first), eval_ref(ctx, second));
+    Val::Pair(Box::new(pair))
+}
+
+fn eval_ref_list(ctx: &mut Ctx, list: &ListVal) -> Val {
+    let list = list.into_iter().map(|v| eval_ref(ctx, v)).collect();
+    Val::List(list)
+}
+
+fn eval_ref_map(ctx: &mut Ctx, map: &MapVal) -> Val {
+    let map = map
+        .into_iter()
+        .map(|(k, v)| (eval_ref(ctx, k), eval_ref(ctx, v)))
+        .collect();
+    Val::Map(map)
+}
+
+fn eval_ref_call(ctx: &mut Ctx, func: &Val, input: &Val) -> Val {
+    if let Val::Func(func) = eval_ref(ctx, func) {
+        func.eval(ctx, input.clone())
+    } else {
+        Val::default()
+    }
+}
+
+fn eval_ref_reverse(ctx: &mut Ctx, func: &Val, output: &Val) -> Val {
+    ctx.eval_reverse(func.clone(), output.clone())
+}
+
+pub(crate) fn eval_thrice() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::EVAL_THRICE),
+            eval: Reader::new(fn_eval_thrice),
+        }),
+    })
+    .into()
+}
+
+fn fn_eval_thrice(ctx: &mut Ctx, input: Val) -> Val {
     let val = ctx.eval(input);
-    ctx.eval(val)
+    fn_eval_twice(ctx, val)
 }
 
 pub(crate) fn eval_escape() -> Val {

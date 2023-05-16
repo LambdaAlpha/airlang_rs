@@ -16,6 +16,7 @@ pub(crate) fn prelude() -> NameMap {
 
     put(&mut c, names::ASSIGN, ctx::assign());
     put(&mut c, names::MOVE, ctx::remove());
+    put(&mut c, names::BOX_NEW, ctx::box_new());
 
     put(&mut c, names::SEQUENCE, ctrl::sequence());
     put(&mut c, names::IF, ctrl::condition());
@@ -30,6 +31,7 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::VAL, eval::val());
     put(&mut c, names::EVAL, eval::eval());
     put(&mut c, names::EVAL_TWICE, eval::eval_twice());
+    put(&mut c, names::EVAL_THRICE, eval::eval_thrice());
     put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
     put(
         &mut c,
@@ -41,11 +43,6 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::STRINGIFY, eval::stringify());
     put(&mut c, names::FUNC, eval::func());
     put(&mut c, names::CHAIN, eval::chain());
-
-    put(&mut c, names::BOX_NEW, refer::box_new());
-    put(&mut c, names::BOX_READ, refer::box_read());
-    put(&mut c, names::BOX_MOVE, refer::box_move());
-    put(&mut c, names::BOX_ASSIGN, refer::box_assign());
 
     put(&mut c, names::INT_ADD, int::add());
     put(&mut c, names::INT_SUBTRACT, int::subtract());
@@ -74,6 +71,7 @@ pub(crate) mod names {
 
     pub(crate) const ASSIGN: &str = "=";
     pub(crate) const MOVE: &str = "move";
+    pub(crate) const BOX_NEW: &str = "box";
 
     pub(crate) const SEQUENCE: &str = ";";
     pub(crate) const IF: &str = "if";
@@ -88,6 +86,7 @@ pub(crate) mod names {
     pub(crate) const VAL: &str = "$0";
     pub(crate) const EVAL: &str = "$";
     pub(crate) const EVAL_TWICE: &str = "$$";
+    pub(crate) const EVAL_THRICE: &str = "$$$";
     pub(crate) const EVAL_ESCAPE: &str = "$\\";
     pub(crate) const EVAL_POSITIONAL_ESCAPE: &str = "$/";
     pub(crate) const EVAL_IN_CTX: &str = "$@";
@@ -95,11 +94,6 @@ pub(crate) mod names {
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "func";
     pub(crate) const CHAIN: &str = ".";
-
-    pub(crate) const BOX_NEW: &str = "@new";
-    pub(crate) const BOX_READ: &str = "@";
-    pub(crate) const BOX_MOVE: &str = "@move";
-    pub(crate) const BOX_ASSIGN: &str = "@=";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";
@@ -123,7 +117,5 @@ mod ctx;
 mod ctrl;
 
 mod bool;
-
-mod refer;
 
 mod int;
