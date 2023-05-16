@@ -56,6 +56,11 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::INT_GREATER_EQUAL, int::greater_equal());
     put(&mut c, names::INT_LESS_GREATER, int::less_greater());
 
+    put(&mut c, names::PAIR_FIRST, pair::first());
+    put(&mut c, names::PAIR_FIRST_ASSIGN, pair::first_assign());
+    put(&mut c, names::PAIR_SECOND, pair::second());
+    put(&mut c, names::PAIR_SECOND_ASSIGN, pair::second_assign());
+
     c
 }
 
@@ -106,6 +111,11 @@ pub(crate) mod names {
     pub(crate) const INT_GREATER_THAN: &str = ">";
     pub(crate) const INT_GREATER_EQUAL: &str = ">=";
     pub(crate) const INT_LESS_GREATER: &str = "<>";
+
+    pub(crate) const PAIR_FIRST: &str = ".1";
+    pub(crate) const PAIR_FIRST_ASSIGN: &str = ".1=";
+    pub(crate) const PAIR_SECOND: &str = ".2";
+    pub(crate) const PAIR_SECOND_ASSIGN: &str = ".2=";
 }
 
 mod meta;
@@ -119,3 +129,5 @@ mod ctrl;
 mod bool;
 
 mod int;
+
+mod pair;

@@ -63,3 +63,8 @@ fn test_eval() -> Result<(), Box<dyn Error>> {
 fn test_int() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/int.air"))
 }
+
+#[test]
+fn test_pair() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/pair.air"))
+}

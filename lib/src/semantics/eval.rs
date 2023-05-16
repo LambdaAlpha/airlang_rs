@@ -168,11 +168,21 @@ impl Ctx {
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
+        self.get_ref(name).map(Clone::clone).unwrap_or_default()
+    }
+
+    pub(crate) fn get_ref(&self, name: &str) -> Option<&Val> {
         self.constants
             .get(name)
             .or_else(|| self.variables.get(name))
-            .map(Clone::clone)
-            .unwrap_or_default()
+    }
+
+    pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Val> {
+        if self.constants.get(name).is_some() {
+            None
+        } else {
+            self.variables.get_mut(name)
+        }
     }
 
     pub(crate) fn remove(&mut self, name: &str) -> Val {
