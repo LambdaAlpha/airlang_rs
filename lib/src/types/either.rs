@@ -1,4 +1,3 @@
-#[allow(unused)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) enum Either<L, R> {
     Left(L),

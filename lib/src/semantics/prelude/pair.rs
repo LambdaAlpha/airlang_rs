@@ -16,14 +16,11 @@ use {
             val::Val,
         },
         types::{
-            Keeper,
+            Either,
             Reader,
         },
     },
-    std::{
-        mem::swap,
-        ops::DerefMut,
-    },
+    std::mem::swap,
 };
 
 pub(crate) fn first() -> Val {
@@ -38,38 +35,20 @@ pub(crate) fn first() -> Val {
 }
 
 fn fn_first(ctx: &mut Ctx, input: Val) -> Val {
-    match fn_eval_escape(ctx, input) {
-        Val::Symbol(s) => {
-            if let Some(val) = ctx.get_ref(&s) {
-                fn_first_ref(val)
-            } else {
-                Val::default()
-            }
+    let name_or_pair = fn_eval_escape(ctx, input);
+    ctx.eval_ref(name_or_pair, |is_ref| {
+        if is_ref {
+            Either::Left(|val: &Val| match val {
+                Val::Pair(pair) => pair.first.clone(),
+                _ => Val::default(),
+            })
+        } else {
+            Either::Right(|val| match val {
+                Val::Pair(pair) => pair.first,
+                _ => Val::default(),
+            })
         }
-        Val::String(s) => {
-            if let Some(val) = ctx.get_ref(&s) {
-                fn_first_ref(val)
-            } else {
-                Val::default()
-            }
-        }
-        Val::Keeper(k) => {
-            if let Ok(i) = Keeper::reader(&k) {
-                fn_first_ref(&i)
-            } else {
-                Val::default()
-            }
-        }
-        Val::Pair(pair) => pair.first,
-        _ => Val::default(),
-    }
-}
-
-fn fn_first_ref(input: &Val) -> Val {
-    match input {
-        Val::Pair(p) => p.first.clone(),
-        _ => Val::default(),
-    }
+    })
 }
 
 pub(crate) fn first_assign() -> Val {
@@ -86,36 +65,24 @@ pub(crate) fn first_assign() -> Val {
 fn fn_first_assign(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(name_val) = input {
         let name = fn_eval_escape(ctx, name_val.first);
-        match name {
-            Val::Symbol(s) => {
-                let mut val = ctx.eval(name_val.second);
-                let pair = ctx.get_mut(&s);
-                if let Some(Val::Pair(pair)) = pair {
-                    swap(&mut pair.first, &mut val);
-                    return val;
-                }
-            }
-            Val::String(s) => {
-                let mut val = ctx.eval(name_val.second);
-                let pair = ctx.get_mut(&s);
-                if let Some(Val::Pair(pair)) = pair {
-                    swap(&mut pair.first, &mut val);
-                    return val;
-                }
-            }
-            Val::Keeper(k) => {
-                let mut val = ctx.eval(name_val.second);
-                if let Ok(mut o) = Keeper::owner(&k) {
-                    if let Val::Pair(pair) = o.deref_mut() {
+        let mut val = ctx.eval(name_val.second);
+        ctx.eval_mut(name, |is_ref| {
+            if is_ref {
+                Either::Left(|pair: &mut Val| {
+                    if let Val::Pair(pair) = pair {
                         swap(&mut pair.first, &mut val);
-                        return val;
+                        val
+                    } else {
+                        Val::default()
                     }
-                }
+                })
+            } else {
+                Either::Right(|_| Val::default())
             }
-            _ => {}
-        }
+        })
+    } else {
+        Val::default()
     }
-    Val::default()
 }
 
 pub(crate) fn second() -> Val {
@@ -130,38 +97,20 @@ pub(crate) fn second() -> Val {
 }
 
 fn fn_second(ctx: &mut Ctx, input: Val) -> Val {
-    match fn_eval_escape(ctx, input) {
-        Val::Symbol(s) => {
-            if let Some(val) = ctx.get_ref(&s) {
-                fn_second_ref(val)
-            } else {
-                Val::default()
-            }
+    let name_or_pair = fn_eval_escape(ctx, input);
+    ctx.eval_ref(name_or_pair, |is_ref| {
+        if is_ref {
+            Either::Left(|val: &Val| match val {
+                Val::Pair(pair) => pair.second.clone(),
+                _ => Val::default(),
+            })
+        } else {
+            Either::Right(|val| match val {
+                Val::Pair(pair) => pair.second,
+                _ => Val::default(),
+            })
         }
-        Val::String(s) => {
-            if let Some(val) = ctx.get_ref(&s) {
-                fn_second_ref(val)
-            } else {
-                Val::default()
-            }
-        }
-        Val::Keeper(k) => {
-            if let Ok(i) = Keeper::reader(&k) {
-                fn_second_ref(&i)
-            } else {
-                Val::default()
-            }
-        }
-        Val::Pair(pair) => pair.second,
-        _ => Val::default(),
-    }
-}
-
-fn fn_second_ref(input: &Val) -> Val {
-    match input {
-        Val::Pair(p) => p.second.clone(),
-        _ => Val::default(),
-    }
+    })
 }
 
 pub(crate) fn second_assign() -> Val {
@@ -178,34 +127,22 @@ pub(crate) fn second_assign() -> Val {
 fn fn_second_assign(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Pair(name_val) = input {
         let name = fn_eval_escape(ctx, name_val.first);
-        match name {
-            Val::Symbol(s) => {
-                let mut val = ctx.eval(name_val.second);
-                let pair = ctx.get_mut(&s);
-                if let Some(Val::Pair(pair)) = pair {
-                    swap(&mut pair.second, &mut val);
-                    return val;
-                }
-            }
-            Val::String(s) => {
-                let mut val = ctx.eval(name_val.second);
-                let pair = ctx.get_mut(&s);
-                if let Some(Val::Pair(pair)) = pair {
-                    swap(&mut pair.second, &mut val);
-                    return val;
-                }
-            }
-            Val::Keeper(k) => {
-                let mut val = ctx.eval(name_val.second);
-                if let Ok(mut o) = Keeper::owner(&k) {
-                    if let Val::Pair(pair) = o.deref_mut() {
+        let mut val = ctx.eval(name_val.second);
+        ctx.eval_mut(name, |is_ref| {
+            if is_ref {
+                Either::Left(|pair: &mut Val| {
+                    if let Val::Pair(pair) = pair {
                         swap(&mut pair.second, &mut val);
-                        return val;
+                        val
+                    } else {
+                        Val::default()
                     }
-                }
+                })
+            } else {
+                Either::Right(|_| Val::default())
             }
-            _ => {}
-        }
+        })
+    } else {
+        Val::default()
     }
-    Val::default()
 }

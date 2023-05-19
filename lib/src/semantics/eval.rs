@@ -7,6 +7,7 @@ use {
             Val,
         },
         types::{
+            Either,
             Keeper,
             Map,
             Pair,
@@ -199,6 +200,80 @@ impl Ctx {
             .map(|_| Val::default())
             .or_else(|| self.variables.insert(name, val))
             .unwrap_or_default()
+    }
+
+    pub(crate) fn eval_ref<M, F, G>(&self, name: Val, map: M) -> Val
+    where
+        F: FnOnce(&Val) -> Val,
+        G: FnOnce(Val) -> Val,
+        M: FnOnce(bool) -> Either<F, G>,
+    {
+        match name {
+            Val::Symbol(s) => {
+                if let Some(val) = self.get_ref(&s) {
+                    if let Either::Left(f) = map(true) {
+                        return f(val);
+                    }
+                }
+            }
+            Val::String(s) => {
+                if let Some(val) = self.get_ref(&s) {
+                    if let Either::Left(f) = map(true) {
+                        return f(val);
+                    }
+                }
+            }
+            Val::Keeper(k) => {
+                if let Ok(r) = Keeper::reader(&k) {
+                    if let Either::Left(f) = map(true) {
+                        return f(&r);
+                    }
+                }
+            }
+            val => {
+                if let Either::Right(g) = map(false) {
+                    return g(val);
+                }
+            }
+        }
+        Val::default()
+    }
+
+    pub(crate) fn eval_mut<M, F, G>(&mut self, name: Val, map: M) -> Val
+    where
+        F: FnOnce(&mut Val) -> Val,
+        G: FnOnce(Val) -> Val,
+        M: FnOnce(bool) -> Either<F, G>,
+    {
+        match name {
+            Val::Symbol(s) => {
+                if let Some(val) = self.get_mut(&s) {
+                    if let Either::Left(f) = map(true) {
+                        return f(val);
+                    }
+                }
+            }
+            Val::String(s) => {
+                if let Some(val) = self.get_mut(&s) {
+                    if let Either::Left(f) = map(true) {
+                        return f(val);
+                    }
+                }
+            }
+            Val::Keeper(k) => {
+                if let Ok(mut o) = Keeper::owner(&k) {
+                    if let Either::Left(f) = map(true) {
+                        return f(&mut o);
+                    }
+                }
+            }
+            val => {
+                if let Either::Right(g) = map(false) {
+                    return g(val);
+                }
+            }
+        }
+        Val::default()
     }
 }
 
