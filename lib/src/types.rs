@@ -1,9 +1,3 @@
-#[allow(unused)]
-pub(crate) use self::refer::{
-    Owner,
-    Reader,
-    RefState,
-};
 pub use self::{
     bool::Bool,
     bytes::Bytes,
@@ -22,17 +16,40 @@ pub use self::{
     symbol::Symbol,
     unit::Unit,
 };
+#[allow(unused)]
+pub(crate) use self::{
+    either::Either,
+    refer::{
+        Owner,
+        Reader,
+        RefState,
+    },
+};
+
+mod unit;
 
 mod bool;
-mod bytes;
-mod call;
-mod float;
+
 mod int;
-mod list;
-mod map;
-mod pair;
-mod refer;
-mod reverse;
-mod string;
+
+mod float;
+
+mod bytes;
+
 mod symbol;
-mod unit;
+
+mod string;
+
+mod pair;
+
+mod either;
+
+mod list;
+
+mod map;
+
+mod call;
+
+mod reverse;
+
+mod refer;
