@@ -33,11 +33,6 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::EVAL_TWICE, eval::eval_twice());
     put(&mut c, names::EVAL_THRICE, eval::eval_thrice());
     put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
-    put(
-        &mut c,
-        names::EVAL_POSITIONAL_ESCAPE,
-        eval::eval_positional_escape(),
-    );
     put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
     put(&mut c, names::PARSE, eval::parse());
     put(&mut c, names::STRINGIFY, eval::stringify());
@@ -60,6 +55,32 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::PAIR_FIRST_ASSIGN, pair::first_assign());
     put(&mut c, names::PAIR_SECOND, pair::second());
     put(&mut c, names::PAIR_SECOND_ASSIGN, pair::second_assign());
+
+    put(&mut c, names::LIST_LENGTH, list::length());
+    put(&mut c, names::LIST_SET, list::set());
+    put(&mut c, names::LIST_SET_MANY, list::set_many());
+    put(&mut c, names::LIST_GET, list::get());
+    put(&mut c, names::LIST_INSERT, list::insert());
+    put(&mut c, names::LIST_INSERT_MANY, list::insert_many());
+    put(&mut c, names::LIST_REMOVE, list::remove());
+    put(&mut c, names::LIST_PUSH, list::push());
+    put(&mut c, names::LIST_PUSH_MANY, list::push_many());
+    put(&mut c, names::LIST_POP, list::pop());
+    put(&mut c, names::LIST_CLEAR, list::clear());
+
+    put(&mut c, names::MAP_NEW, map::map_new());
+    put(&mut c, names::MAP_LENGTH, map::length());
+    put(&mut c, names::MAP_KEYS, map::keys());
+    put(&mut c, names::MAP_VALUES, map::values());
+    put(&mut c, names::MAP_CONTAINS, map::contains());
+    put(&mut c, names::MAP_CONTAINS_MANY, map::contains_many());
+    put(&mut c, names::MAP_SET, map::set());
+    put(&mut c, names::MAP_SET_MANY, map::set_many());
+    put(&mut c, names::MAP_GET, map::get());
+    put(&mut c, names::MAP_GET_MANY, map::get_many());
+    put(&mut c, names::MAP_REMOVE, map::remove());
+    put(&mut c, names::MAP_REMOVE_MANY, map::remove_many());
+    put(&mut c, names::MAP_CLEAR, map::clear());
 
     c
 }
@@ -93,11 +114,10 @@ pub(crate) mod names {
     pub(crate) const EVAL_TWICE: &str = "$$";
     pub(crate) const EVAL_THRICE: &str = "$$$";
     pub(crate) const EVAL_ESCAPE: &str = "$\\";
-    pub(crate) const EVAL_POSITIONAL_ESCAPE: &str = "$/";
-    pub(crate) const EVAL_IN_CTX: &str = "$@";
+    pub(crate) const EVAL_IN_CTX: &str = "$in";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
-    pub(crate) const FUNC: &str = "func";
+    pub(crate) const FUNC: &str = "function";
     pub(crate) const CHAIN: &str = ".";
 
     pub(crate) const INT_ADD: &str = "+";
@@ -112,10 +132,36 @@ pub(crate) mod names {
     pub(crate) const INT_GREATER_EQUAL: &str = ">=";
     pub(crate) const INT_LESS_GREATER: &str = "<>";
 
-    pub(crate) const PAIR_FIRST: &str = ".1";
-    pub(crate) const PAIR_FIRST_ASSIGN: &str = ".1=";
-    pub(crate) const PAIR_SECOND: &str = ".2";
-    pub(crate) const PAIR_SECOND_ASSIGN: &str = ".2=";
+    pub(crate) const PAIR_FIRST: &str = "get1";
+    pub(crate) const PAIR_FIRST_ASSIGN: &str = "set1";
+    pub(crate) const PAIR_SECOND: &str = "get2";
+    pub(crate) const PAIR_SECOND_ASSIGN: &str = "set2";
+
+    pub(crate) const LIST_LENGTH: &str = "list_length";
+    pub(crate) const LIST_SET: &str = "list_set";
+    pub(crate) const LIST_SET_MANY: &str = "list_set_many";
+    pub(crate) const LIST_GET: &str = "list_get";
+    pub(crate) const LIST_INSERT: &str = "list_insert";
+    pub(crate) const LIST_INSERT_MANY: &str = "list_insert_many";
+    pub(crate) const LIST_REMOVE: &str = "list_remove";
+    pub(crate) const LIST_PUSH: &str = "list_push";
+    pub(crate) const LIST_PUSH_MANY: &str = "list_push_many";
+    pub(crate) const LIST_POP: &str = "list_pop";
+    pub(crate) const LIST_CLEAR: &str = "list_clear";
+
+    pub(crate) const MAP_NEW: &str = "map";
+    pub(crate) const MAP_LENGTH: &str = "map_length";
+    pub(crate) const MAP_KEYS: &str = "map_keys";
+    pub(crate) const MAP_VALUES: &str = "map_values";
+    pub(crate) const MAP_CONTAINS: &str = "map_contains";
+    pub(crate) const MAP_CONTAINS_MANY: &str = "map_contains_many";
+    pub(crate) const MAP_SET: &str = "map_set";
+    pub(crate) const MAP_SET_MANY: &str = "map_set_many";
+    pub(crate) const MAP_GET: &str = "map_get";
+    pub(crate) const MAP_GET_MANY: &str = "map_get_many";
+    pub(crate) const MAP_REMOVE: &str = "map_remove";
+    pub(crate) const MAP_REMOVE_MANY: &str = "map_remove_many";
+    pub(crate) const MAP_CLEAR: &str = "map_clear";
 }
 
 mod meta;
@@ -131,3 +177,7 @@ mod bool;
 mod int;
 
 mod pair;
+
+mod list;
+
+mod map;

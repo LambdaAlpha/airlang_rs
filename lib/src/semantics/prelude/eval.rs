@@ -11,7 +11,10 @@ use {
                 NameMap,
                 Primitive,
             },
-            prelude::names,
+            prelude::{
+                map::fn_map_new,
+                names,
+            },
             val::{
                 ListVal,
                 MapVal,
@@ -209,47 +212,6 @@ pub(crate) fn fn_eval_escape(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn eval_positional_escape() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_POSITIONAL_ESCAPE),
-            eval: Reader::new(fn_eval_positional_escape),
-        }),
-    })
-    .into()
-}
-
-fn fn_eval_positional_escape(ctx: &mut Ctx, input: Val) -> Val {
-    match input {
-        Val::Map(m) => {
-            let map = m
-                .into_iter()
-                .map(|(k, v)| {
-                    let key = fn_eval_escape(ctx, k);
-                    let value = fn_eval_positional_escape(ctx, v);
-                    (key, value)
-                })
-                .collect();
-            Val::Map(map)
-        }
-        Val::Pair(p) => {
-            let first = fn_eval_positional_escape(ctx, p.first);
-            let second = fn_eval_positional_escape(ctx, p.second);
-            let pair = Box::new(Pair::new(first, second));
-            Val::Pair(pair)
-        }
-        Val::List(l) => {
-            let list = l
-                .into_iter()
-                .map(|v| fn_eval_positional_escape(ctx, v))
-                .collect();
-            Val::List(list)
-        }
-        i => ctx.eval(i),
-    }
-}
-
 pub(crate) fn eval_in_ctx() -> Val {
     Box::new(Func {
         func_trait: FuncTrait {},
@@ -326,7 +288,7 @@ pub(crate) fn func() -> Val {
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
     if let Val::Map(map) = input {
         let body = fn_eval_escape(ctx, map_get(&map, "body"));
-        let constants = match fn_eval_positional_escape(ctx, map_get(&map, "const")) {
+        let constants = match fn_map_new(ctx, map_get(&map, "const")) {
             Val::Map(m) => {
                 if let Some(constants) = into_name_map(m) {
                     constants

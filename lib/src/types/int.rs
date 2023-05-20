@@ -20,12 +20,61 @@ use {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Int(Integer);
 
+#[allow(unused)]
 impl Int {
     pub fn from_sign_string_radix(positive_sign: bool, digits: &str, radix: u8) -> Self {
         let sign = if positive_sign { "+" } else { "-" };
         let s = format!("{sign}{digits}");
         let i = Integer::from_str_radix(&s, radix as i32).unwrap();
         Int(i)
+    }
+
+    pub(crate) fn to_i8(&self) -> Option<i8> {
+        self.0.to_i8()
+    }
+
+    pub(crate) fn to_i16(&self) -> Option<i16> {
+        self.0.to_i16()
+    }
+
+    pub(crate) fn to_i32(&self) -> Option<i32> {
+        self.0.to_i32()
+    }
+
+    pub(crate) fn to_i64(&self) -> Option<i64> {
+        self.0.to_i64()
+    }
+
+    pub(crate) fn to_i128(&self) -> Option<i128> {
+        self.0.to_i128()
+    }
+
+    pub(crate) fn to_isize(&self) -> Option<isize> {
+        self.0.to_isize()
+    }
+
+    pub(crate) fn to_u8(&self) -> Option<u8> {
+        self.0.to_u8()
+    }
+
+    pub(crate) fn to_u16(&self) -> Option<u16> {
+        self.0.to_u16()
+    }
+
+    pub(crate) fn to_u32(&self) -> Option<u32> {
+        self.0.to_u32()
+    }
+
+    pub(crate) fn to_u64(&self) -> Option<u64> {
+        self.0.to_u64()
+    }
+
+    pub(crate) fn to_u128(&self) -> Option<u128> {
+        self.0.to_u128()
+    }
+
+    pub(crate) fn to_usize(&self) -> Option<usize> {
+        self.0.to_usize()
     }
 
     pub(crate) fn add(self, other: Int) -> Int {
@@ -89,5 +138,77 @@ impl Int {
 impl Display for Int {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Display>::fmt(&self.0, f)
+    }
+}
+
+impl From<i8> for Int {
+    fn from(value: i8) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<i16> for Int {
+    fn from(value: i16) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<i32> for Int {
+    fn from(value: i32) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<i64> for Int {
+    fn from(value: i64) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<i128> for Int {
+    fn from(value: i128) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<isize> for Int {
+    fn from(value: isize) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<u8> for Int {
+    fn from(value: u8) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<u16> for Int {
+    fn from(value: u16) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<u32> for Int {
+    fn from(value: u32) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<u64> for Int {
+    fn from(value: u64) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<u128> for Int {
+    fn from(value: u128) -> Self {
+        Int(value.into())
+    }
+}
+
+impl From<usize> for Int {
+    fn from(value: usize) -> Self {
+        Int(value.into())
     }
 }

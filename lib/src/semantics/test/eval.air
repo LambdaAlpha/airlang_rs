@@ -34,30 +34,6 @@ $\ (a, b: (\ [not 't]))
 # ---
 (a, b: ('f))
 # ===
-$/ {a, \ [not 't]: c, not 'f}
-# ---
-{a: ', 'f: ', not 'f: 't}
-# ===
-$/ {{a: b}: {c: d}}
-# ---
-{{a: b}: {c: '}}
-# ===
-$/ {\ [not 'f]: a}
-# ---
-{'t: '}
-# ===
-$/ (1, {a: b})
-# ---
-(1, {a: '})
-# ===
-$/ {a: [$0 {b: c}]}
-# ---
-{a: {b: c}}
-# ===
-$/ {a: [$ {b: c}]}
-# ---
-{a: {': '}}
-# ===
 ;(a = 1, $$ [$0 a])
 # ---
 1
@@ -71,11 +47,11 @@ $/ {a: [$ {b: c}]}
 1
 # ===
 ;(
-    f = [func{
-        body: [n [c $@ a]],
+    f = [function{
+        body: [n [c $in a]],
         input: a,
         caller: c,
-        const: {n: not, $@}
+        const: {n: not, $in}
     }],
     f 't
 )
@@ -83,11 +59,11 @@ $/ {a: [$ {b: c}]}
 'f
 # ===
 ;(
-    f = [func{
-        body: [n [c $@ a]],
+    f = [function{
+        body: [n [c $in a]],
         input: a,
         caller: c,
-        const: {n: not, $@}
+        const: {n: not, $in}
     }],
     f [not 't]
 )
@@ -95,9 +71,9 @@ $/ {a: [$ {b: c}]}
 't
 # ===
 ;(
-    f = [func{
-        body: [not [caller $@ input]],
-        const: {not, $@}
+    f = [function{
+        body: [not [caller $in input]],
+        const: {not, $in}
     }],
     f [not 't]
 )
@@ -105,8 +81,8 @@ $/ {a: [$ {b: c}]}
 't
 # ===
 ;(
-    f = [func{
-        body: [[\ not] [caller [\ $@] input]]
+    f = [function{
+        body: [[\ not] [caller [\ $in] input]]
     }],
     f [not 't]
 )
@@ -114,7 +90,7 @@ $/ {a: [$ {b: c}]}
 't
 # ===
 ;(
-    f = [func{
+    f = [function{
         body: _,
         input: _,
         caller: _,
@@ -127,7 +103,7 @@ $/ {a: [$ {b: c}]}
 # ===
 ;(
     a = 'f,
-    f = [func{
+    f = [function{
         body: [a == input],
         const: {
             ==,
@@ -140,7 +116,7 @@ $/ {a: [$ {b: c}]}
 'f
 # ===
 ;(
-    f = [func{
+    f = [function{
         body: [;(a = 1, $$ input)],
         const: {
             ;,

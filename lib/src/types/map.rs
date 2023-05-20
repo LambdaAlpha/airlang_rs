@@ -4,6 +4,8 @@ use {
         collections::hash_map::{
             DefaultHasher,
             IntoIter,
+            IntoKeys,
+            IntoValues,
             Iter,
             IterMut,
         },
@@ -23,6 +25,16 @@ pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);
 
 #[allow(dead_code)]
 pub type Set<K> = Map<K, ()>;
+
+impl<K: Eq + Hash, V> Map<K, V> {
+    pub(crate) fn into_keys(self) -> IntoKeys<K, V> {
+        self.0.into_keys()
+    }
+
+    pub(crate) fn into_values(self) -> IntoValues<K, V> {
+        self.0.into_values()
+    }
+}
 
 impl<K: Eq + Hash, V> FromIterator<(K, V)> for Map<K, V> {
     fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
