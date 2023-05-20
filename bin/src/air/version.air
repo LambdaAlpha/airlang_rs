@@ -1,1 +1,6 @@
-air_version
+;(
+    major = [stringify air_version_major],
+    minor = [stringify air_version_minor],
+    patch = [stringify air_version_patch],
+    str_concat (major, ".", minor, ".", patch)
+)

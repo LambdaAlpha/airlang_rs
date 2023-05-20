@@ -9,7 +9,6 @@ use crate::semantics::{
 pub(crate) fn prelude() -> NameMap {
     let mut c = NameMap::default();
 
-    put(&mut c, names::AIR_VERSION, meta::version());
     put(&mut c, names::AIR_VERSION_MAJOR, meta::version_major());
     put(&mut c, names::AIR_VERSION_MINOR, meta::version_minor());
     put(&mut c, names::AIR_VERSION_PATCH, meta::version_patch());
@@ -93,7 +92,6 @@ fn put(constants: &mut NameMap, key: &str, val: Val) {
 }
 
 pub(crate) mod names {
-    pub(crate) const AIR_VERSION: &str = "air_version";
     pub(crate) const AIR_VERSION_MAJOR: &str = "air_version_major";
     pub(crate) const AIR_VERSION_MINOR: &str = "air_version_minor";
     pub(crate) const AIR_VERSION_PATCH: &str = "air_version_patch";

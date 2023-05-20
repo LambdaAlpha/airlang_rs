@@ -1,14 +1,7 @@
 use crate::{
     semantics::val::Val,
-    types::{
-        Int,
-        Str,
-    },
+    types::Int,
 };
-
-pub(crate) fn version() -> Val {
-    Val::String(Str::from(env!("CARGO_PKG_VERSION")))
-}
 
 pub(crate) fn version_major() -> Val {
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
