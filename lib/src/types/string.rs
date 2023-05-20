@@ -3,16 +3,25 @@ use {
         LazyCompact,
         SmartString,
     },
-    std::ops::Deref,
+    std::ops::{
+        Deref,
+        DerefMut,
+    },
 };
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Str(SmartString<LazyCompact>);
+pub struct Str(pub(crate) SmartString<LazyCompact>);
 
 impl Deref for Str {
     type Target = str;
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Str {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
