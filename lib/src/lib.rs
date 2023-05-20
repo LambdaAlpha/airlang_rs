@@ -21,20 +21,7 @@
     )
 )]
 #![allow(incomplete_features)]
-#![feature(
-    trait_upcasting,
-    trait_alias,
-    never_type,
-    allocator_api,
-    const_type_id,
-    arc_unwrap_or_clone,
-    iter_array_chunks,
-    slice_concat_trait,
-    try_trait_v2,
-    try_blocks,
-    unsize,
-    coerce_unsized
-)]
+#![feature(iter_array_chunks, try_trait_v2, unsize, coerce_unsized)]
 
 pub mod syntax;
 
