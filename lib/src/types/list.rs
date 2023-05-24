@@ -10,7 +10,7 @@ use std::{
     vec::IntoIter,
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct List<T>(Vec<T>);
 
 impl<T> IntoIterator for List<T> {
@@ -65,5 +65,11 @@ impl<T> From<Vec<T>> for List<T> {
 impl<T> Into<Vec<T>> for List<T> {
     fn into(self) -> Vec<T> {
         self.0
+    }
+}
+
+impl<T> Default for List<T> {
+    fn default() -> Self {
+        List(Default::default())
     }
 }

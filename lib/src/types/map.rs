@@ -20,7 +20,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);
 
 #[allow(dead_code)]
@@ -91,5 +91,11 @@ impl<K: Eq + Hash, V: Hash> Hash for Map<K, V> {
                 })
                 .fold(0, u64::wrapping_add),
         )
+    }
+}
+
+impl<K: Eq + Hash, V> Default for Map<K, V> {
+    fn default() -> Self {
+        Map(Default::default())
     }
 }
