@@ -286,9 +286,9 @@ pub(crate) fn func() -> Val {
 }
 
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Map(map) = input {
-        let body = fn_eval_escape(ctx, map_get(&map, "body"));
-        let constants = match fn_map_new(ctx, map_get(&map, "const")) {
+    if let Val::Map(mut map) = input {
+        let body = fn_eval_escape(ctx, map_remove(&mut map, "body"));
+        let constants = match fn_map_new(ctx, map_remove(&mut map, "const")) {
             Val::Map(m) => {
                 if let Some(constants) = into_name_map(m) {
                     constants
@@ -299,7 +299,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             Val::Unit(_) => NameMap::default(),
             _ => return Val::default(),
         };
-        let input_name = match fn_eval_escape(ctx, map_get(&map, "input")) {
+        let input_name = match fn_eval_escape(ctx, map_remove(&mut map, "input")) {
             Val::Symbol(s) => {
                 if &*s == "_" {
                     None
@@ -310,7 +310,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             Val::Unit(_) => Some(Name::from("input")),
             _ => return Val::default(),
         };
-        let caller_name = match fn_eval_escape(ctx, map_get(&map, "caller")) {
+        let caller_name = match fn_eval_escape(ctx, map_remove(&mut map, "caller")) {
             Val::Symbol(s) => {
                 if &*s == "_" {
                     None
@@ -335,9 +335,9 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
     Val::default()
 }
 
-fn map_get(map: &MapVal, name: &str) -> Val {
+fn map_remove(map: &mut MapVal, name: &str) -> Val {
     let name = Val::Symbol(Symbol::from_str(name));
-    map.get(&name).map(Clone::clone).unwrap_or_default()
+    map.remove(&name).unwrap_or_default()
 }
 
 fn into_name_map(map: MapVal) -> Option<NameMap> {

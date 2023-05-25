@@ -1,27 +1,24 @@
-use {
-    crate::{
-        semantics::{
-            eval::{
-                Ctx,
-                Func,
-                FuncImpl,
-                FuncTrait,
-                Name,
-                Primitive,
-            },
-            prelude::{
-                eval::fn_eval_escape,
-                names,
-            },
-            val::Val,
+use crate::{
+    semantics::{
+        eval::{
+            Ctx,
+            Func,
+            FuncImpl,
+            FuncTrait,
+            Name,
+            Primitive,
         },
-        types::{
-            Keeper,
-            Reader,
-            Str,
+        prelude::{
+            eval::fn_eval_escape,
+            names,
         },
+        val::Val,
     },
-    std::ops::DerefMut,
+    types::{
+        Keeper,
+        Reader,
+        Str,
+    },
 };
 
 pub(crate) fn length() -> Val {
@@ -44,8 +41,8 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
             }
         }
         Val::Keeper(k) => {
-            if let Ok(mut o) = Keeper::owner(&k) {
-                if let Val::String(s) = o.deref_mut() {
+            if let Ok(r) = Keeper::reader(&k) {
+                if let Val::String(s) = &*r {
                     return Val::Int(s.len().into());
                 }
             }
