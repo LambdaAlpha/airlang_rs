@@ -10,7 +10,6 @@ pub use self::{
         Set,
     },
     pair::Pair,
-    refer::Keeper,
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
@@ -20,6 +19,7 @@ pub use self::{
 pub(crate) use self::{
     either::Either,
     refer::{
+        Keeper,
         Owner,
         Reader,
         RefState,

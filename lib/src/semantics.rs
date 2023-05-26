@@ -5,7 +5,6 @@ use {
             prelude::prelude,
         },
         syntax::ParseError,
-        types::Reader,
     },
     thiserror::Error,
 };
@@ -51,10 +50,9 @@ impl Interpreter {
     }
 
     fn default_ctx(prelude: &NameMap) -> Ctx {
-        let constants = prelude.clone();
+        let name_map = prelude.clone();
         Ctx {
-            constants: Reader::new(constants),
-            variables: Default::default(),
+            name_map,
             reverse_interpreter: None,
         }
     }

@@ -1,37 +1,35 @@
-use {
-    crate::{
-        semantics::{
-            eval::{
-                Composed,
-                Ctx,
-                Func,
-                FuncImpl,
-                FuncTrait,
-                Name,
-                NameMap,
-                Primitive,
-            },
-            prelude::{
-                map::fn_map_new,
-                names,
-            },
-            val::{
-                ListVal,
-                MapVal,
-                Val,
-            },
+use crate::{
+    semantics::{
+        eval::{
+            Composed,
+            Ctx,
+            Func,
+            FuncImpl,
+            FuncTrait,
+            Name,
+            NameMap,
+            Primitive,
+            TaggedVal,
         },
-        types::{
-            Call,
-            Keeper,
-            Pair,
-            Reader,
-            Reverse,
-            Str,
-            Symbol,
+        prelude::{
+            map::fn_map_new,
+            names,
+        },
+        val::{
+            ListVal,
+            MapVal,
+            Val,
         },
     },
-    std::ops::Deref,
+    types::{
+        Call,
+        Keeper,
+        Pair,
+        Reader,
+        Reverse,
+        Str,
+        Symbol,
+    },
 };
 
 pub(crate) fn val() -> Val {
@@ -77,9 +75,9 @@ pub(crate) fn eval_twice() -> Val {
 
 fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
     match input {
-        Val::Keeper(k) => {
-            if let Ok(input) = Keeper::reader(&k) {
-                eval_ref(ctx, input.deref())
+        Val::Box(k) => {
+            if let Ok(input) = Keeper::reader(&k.0) {
+                eval_ref(ctx, &input.val)
             } else {
                 Val::default()
             }
@@ -94,7 +92,7 @@ fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
 fn eval_ref(ctx: &mut Ctx, input: &Val) -> Val {
     match &*input {
         Val::Symbol(s) => ctx.get(s),
-        Val::Keeper(k) => ctx.eval_keeper(k),
+        Val::Box(k) => ctx.eval_box(&k.0),
         Val::Pair(p) => eval_ref_pair(ctx, &p.first, &p.second),
         Val::List(l) => eval_ref_list(ctx, l),
         Val::Map(m) => eval_ref_map(ctx, m),
@@ -325,7 +323,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
             func_trait: FuncTrait {},
             func_impl: FuncImpl::Composed(Composed {
                 body,
-                constants: Reader::new(constants),
+                constants,
                 input_name,
                 caller_name,
             }),
@@ -343,7 +341,10 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 fn into_name_map(map: MapVal) -> Option<NameMap> {
     map.into_iter()
         .map(|(k, v)| match k {
-            Val::Symbol(s) => Some((Name::from(<_ as Into<String>>::into(s)), v)),
+            Val::Symbol(s) => Some((
+                Name::from(<_ as Into<String>>::into(s)),
+                TaggedVal::new_const(v),
+            )),
             _ => None,
         })
         .collect()

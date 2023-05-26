@@ -40,9 +40,9 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
                 return Val::Int(s.len().into());
             }
         }
-        Val::Keeper(k) => {
-            if let Ok(r) = Keeper::reader(&k) {
-                if let Val::String(s) = &*r {
+        Val::Box(k) => {
+            if let Ok(r) = Keeper::reader(&k.0) {
+                if let Val::String(s) = &r.val {
                     return Val::Int(s.len().into());
                 }
             }

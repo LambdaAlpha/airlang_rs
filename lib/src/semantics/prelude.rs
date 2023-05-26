@@ -2,6 +2,7 @@ use crate::semantics::{
     eval::{
         Name,
         NameMap,
+        TaggedVal,
     },
     val::Val,
 };
@@ -13,9 +14,16 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::AIR_VERSION_MINOR, meta::version_minor());
     put(&mut c, names::AIR_VERSION_PATCH, meta::version_patch());
 
-    put(&mut c, names::ASSIGN, ctx::assign());
+    put(&mut c, names::READ, ctx::read());
     put(&mut c, names::MOVE, ctx::remove());
+    put(&mut c, names::ASSIGN, ctx::assign());
+    put(&mut c, names::ASSIGN_FINAL, ctx::assign_final());
+    put(&mut c, names::ASSIGN_CONST, ctx::assign_const());
+    put(&mut c, names::FINAL, ctx::set_final());
+    put(&mut c, names::CONST, ctx::set_const());
     put(&mut c, names::BOX_NEW, ctx::box_new());
+    put(&mut c, names::FINAL_BOX_NEW, ctx::final_box_new());
+    put(&mut c, names::CONST_BOX_NEW, ctx::const_box_new());
 
     put(&mut c, names::SEQUENCE, ctrl::sequence());
     put(&mut c, names::IF, ctrl::condition());
@@ -88,7 +96,7 @@ pub(crate) fn prelude() -> NameMap {
 }
 
 fn put(constants: &mut NameMap, key: &str, val: Val) {
-    constants.insert(Name::from(key), val);
+    constants.insert(Name::from(key), TaggedVal::new_const(val));
 }
 
 pub(crate) mod names {
@@ -96,9 +104,16 @@ pub(crate) mod names {
     pub(crate) const AIR_VERSION_MINOR: &str = "air_version_minor";
     pub(crate) const AIR_VERSION_PATCH: &str = "air_version_patch";
 
-    pub(crate) const ASSIGN: &str = "=";
+    pub(crate) const READ: &str = "read";
     pub(crate) const MOVE: &str = "move";
+    pub(crate) const ASSIGN: &str = "=";
+    pub(crate) const ASSIGN_FINAL: &str = "=final";
+    pub(crate) const ASSIGN_CONST: &str = "=const";
+    pub(crate) const FINAL: &str = "final";
+    pub(crate) const CONST: &str = "const";
     pub(crate) const BOX_NEW: &str = "box";
+    pub(crate) const FINAL_BOX_NEW: &str = "final_box";
+    pub(crate) const CONST_BOX_NEW: &str = "const_box";
 
     pub(crate) const SEQUENCE: &str = ";";
     pub(crate) const IF: &str = "if";

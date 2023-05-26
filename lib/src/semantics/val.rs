@@ -4,6 +4,7 @@ use {
             eval::{
                 Ctx,
                 Func,
+                TaggedVal,
             },
             ReprError,
         },
@@ -60,7 +61,7 @@ pub enum Val {
     List(ListVal),
     Map(MapVal),
 
-    Keeper(KeeperVal),
+    Box(BoxVal),
 
     Func(Box<Func>),
     Ctx(Box<Ctx>),
@@ -71,7 +72,9 @@ pub(crate) type CallVal = Call<Val, Val>;
 pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Val, Val>;
-pub(crate) type KeeperVal = Keeper<Val>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BoxVal(pub(crate) Keeper<TaggedVal>);
 
 #[allow(dead_code)]
 impl Val {
@@ -158,9 +161,9 @@ impl From<MapVal> for Val {
     }
 }
 
-impl From<KeeperVal> for Val {
-    fn from(value: KeeperVal) -> Self {
-        Val::Keeper(value)
+impl From<BoxVal> for Val {
+    fn from(value: BoxVal) -> Self {
+        Val::Box(value)
     }
 }
 
@@ -495,5 +498,11 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             _ => return Err(ReprError {}),
         };
         Ok(r)
+    }
+}
+
+impl From<Keeper<TaggedVal>> for BoxVal {
+    fn from(value: Keeper<TaggedVal>) -> Self {
+        BoxVal(value)
     }
 }

@@ -1,7 +1,6 @@
 use {
     crate::{
         semantics::val::{
-            KeeperVal,
             ListVal,
             MapVal,
             Val,
@@ -50,19 +49,33 @@ pub(crate) struct Primitive {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed {
     pub(crate) body: Val,
-    pub(crate) constants: Reader<NameMap>,
+    pub(crate) constants: NameMap,
     pub(crate) input_name: Option<Name>,
     pub(crate) caller_name: Option<Name>,
 }
 
 pub(crate) type Name = CompactString;
 
-pub(crate) type NameMap = Map<Name, Val>;
+pub(crate) type NameMap = Map<Name, TaggedVal>;
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub(crate) enum InvariantTag {
+    None,
+    // can't be assigned
+    Final,
+    // can't be modified
+    Const,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub(crate) struct TaggedVal {
+    pub(crate) tag: InvariantTag,
+    pub(crate) val: Val,
+}
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Ctx {
-    pub(crate) constants: Reader<NameMap>,
-    pub(crate) variables: NameMap,
+    pub(crate) name_map: NameMap,
     pub(crate) reverse_interpreter: Option<Reader<Func>>,
 }
 
@@ -83,26 +96,27 @@ impl FuncImpl {
 
 impl Composed {
     pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
-        let constants = self.constants;
-        let mut variables = NameMap::default();
+        let mut name_map = self.constants;
         if let Some(input_name) = self.input_name {
-            variables.insert(input_name, input);
+            name_map.insert(input_name, TaggedVal::new(input));
         }
         if let Some(caller_name) = &self.caller_name {
             let mut ctx_swap = Ctx::default();
             swap(ctx, &mut ctx_swap);
-            variables.insert(caller_name.clone(), Val::Ctx(Box::new(ctx_swap)));
+            name_map.insert(
+                caller_name.clone(),
+                TaggedVal::new_final(Val::Ctx(Box::new(ctx_swap))),
+            );
         }
         let reverse_interpreter = ctx.reverse_interpreter.clone();
 
         let mut new_ctx = Ctx {
-            constants,
-            variables,
+            name_map,
             reverse_interpreter,
         };
         let output = new_ctx.eval(self.body);
         if let Some(caller_name) = &self.caller_name {
-            if let Val::Ctx(caller) = new_ctx.remove(caller_name) {
+            if let Val::Ctx(caller) = new_ctx.into_val(caller_name) {
                 *ctx = *caller;
             }
         }
@@ -114,7 +128,7 @@ impl Ctx {
     pub(crate) fn eval(&mut self, input: Val) -> Val {
         match input {
             Val::Symbol(s) => self.get(&s),
-            Val::Keeper(k) => self.eval_keeper(&k),
+            Val::Box(k) => self.eval_box(&k.0),
             Val::Pair(p) => self.eval_pair(p.first, p.second),
             Val::List(l) => self.eval_list(l),
             Val::Map(m) => self.eval_map(m),
@@ -124,9 +138,9 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn eval_keeper(&self, keeper: &KeeperVal) -> Val {
+    pub(crate) fn eval_box(&self, keeper: &Keeper<TaggedVal>) -> Val {
         if let Ok(input) = Keeper::reader(&keeper) {
-            input.deref().clone()
+            input.deref().val.clone()
         } else {
             Val::default()
         }
@@ -169,37 +183,75 @@ impl Ctx {
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
-        self.get_ref(name).map(Clone::clone).unwrap_or_default()
+        self.name_map
+            .get(name)
+            .map(|tagged_val| tagged_val.val.clone())
+            .unwrap_or_default()
     }
 
     pub(crate) fn get_ref(&self, name: &str) -> Option<&Val> {
-        self.constants
-            .get(name)
-            .or_else(|| self.variables.get(name))
+        self.name_map.get(name).map(|tagged_val| &tagged_val.val)
     }
 
     pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Val> {
-        if self.constants.get(name).is_some() {
-            None
-        } else {
-            self.variables.get_mut(name)
-        }
+        self.name_map
+            .get_mut(name)
+            .and_then(|tagged_val| match tagged_val.tag {
+                InvariantTag::Const => None,
+                _ => Some(&mut tagged_val.val),
+            })
     }
 
     pub(crate) fn remove(&mut self, name: &str) -> Val {
-        self.constants
-            .get(name)
-            .map(|_| Val::default())
-            .or_else(|| self.variables.remove(name))
+        if let Some(tagged_val) = self.name_map.get(name) {
+            if matches!(&tagged_val.tag, InvariantTag::None) {
+                return self
+                    .name_map
+                    .remove(name)
+                    .map(|tagged_val| tagged_val.val)
+                    .unwrap_or_default();
+            }
+        }
+        Val::default()
+    }
+
+    fn into_val(mut self, name: &str) -> Val {
+        self.name_map
+            .remove(name)
+            .map(|tagged_val| tagged_val.val)
             .unwrap_or_default()
     }
 
-    pub(crate) fn put(&mut self, name: Name, val: Val) -> Val {
-        self.constants
-            .get(&name)
-            .map(|_| Val::default())
-            .or_else(|| self.variables.insert(name, val))
-            .unwrap_or_default()
+    pub(crate) fn put_val(&mut self, name: Name, val: TaggedVal) -> Val {
+        if let Some(tagged_val) = self.name_map.get(&name) {
+            if matches!(&tagged_val.tag, InvariantTag::None) {
+                self.name_map
+                    .insert(name, val)
+                    .map(|tagged_val| tagged_val.val)
+                    .unwrap_or_default()
+            } else {
+                Val::default()
+            }
+        } else {
+            self.name_map
+                .insert(name, val)
+                .map(|ctx_val| ctx_val.val)
+                .unwrap_or_default()
+        }
+    }
+
+    pub(crate) fn set_final(&mut self, name: &str) {
+        if let Some(tagged_val) = self.name_map.get_mut(name) {
+            if matches!(&tagged_val.tag, InvariantTag::None) {
+                tagged_val.tag = InvariantTag::Final;
+            }
+        }
+    }
+
+    pub(crate) fn set_const(&mut self, name: &str) {
+        if let Some(tagged_val) = self.name_map.get_mut(name) {
+            tagged_val.tag = InvariantTag::Const;
+        }
     }
 
     pub(crate) fn eval_ref<M, F, G>(&self, name: Val, map: M) -> Val
@@ -223,10 +275,10 @@ impl Ctx {
                     }
                 }
             }
-            Val::Keeper(k) => {
-                if let Ok(r) = Keeper::reader(&k) {
+            Val::Box(k) => {
+                if let Ok(r) = Keeper::reader(&k.0) {
                     if let Either::Left(f) = map(true) {
-                        return f(&r);
+                        return f(&r.val);
                     }
                 }
             }
@@ -260,10 +312,12 @@ impl Ctx {
                     }
                 }
             }
-            Val::Keeper(k) => {
-                if let Ok(mut o) = Keeper::owner(&k) {
-                    if let Either::Left(f) = map(true) {
-                        return f(&mut o);
+            Val::Box(k) => {
+                if let Ok(mut o) = Keeper::owner(&k.0) {
+                    if matches!(o.tag, InvariantTag::None | InvariantTag::Final) {
+                        if let Either::Left(f) = map(true) {
+                            return f(&mut o.val);
+                        }
                     }
                 }
             }
@@ -294,3 +348,24 @@ impl PartialEq for Primitive {
 }
 
 impl Eq for Primitive {}
+
+impl TaggedVal {
+    pub(crate) fn new(val: Val) -> TaggedVal {
+        TaggedVal {
+            tag: InvariantTag::None,
+            val,
+        }
+    }
+    pub(crate) fn new_final(val: Val) -> TaggedVal {
+        TaggedVal {
+            tag: InvariantTag::Final,
+            val,
+        }
+    }
+    pub(crate) fn new_const(val: Val) -> TaggedVal {
+        TaggedVal {
+            tag: InvariantTag::Const,
+            val,
+        }
+    }
+}
