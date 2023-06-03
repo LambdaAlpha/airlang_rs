@@ -21,7 +21,7 @@ default-features = false
 features = ["integer", "float"]
 
 [dev-dependencies]
-criterion = "0.4"
+criterion = "0.5"
 
 [[bench]]
 name = "bench_main"
