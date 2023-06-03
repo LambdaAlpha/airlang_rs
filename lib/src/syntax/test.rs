@@ -150,7 +150,7 @@ fn test_generate(src: &str) -> Result<(), Box<dyn Error>> {
 fn test_parse_illegal(src: &str) -> Result<(), Box<dyn Error>> {
     let sources = src.split("# ===");
     for s in sources {
-        assert!(matches!(parse(s), Err(_)), "src: {} shouldn't parse", s);
+        assert!(parse(s).is_err(), "src: {} shouldn't parse", s);
     }
     Ok(())
 }

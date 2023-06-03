@@ -18,7 +18,7 @@ pub(crate) fn title(_: &ConstCtx, dyn_ctx: &mut DynCtx, _: Val) -> Output {
         Ok(repr) => match dyn_ctx.interpreter.interpret(repr) {
             Val::String(s) => Output::Ok(Box::new(format!("{}{}", TITLE_PREFIX, &*s))),
             repr => match generate(&repr) {
-                Ok(s) => Output::Ok(Box::new(format!("{}{}", TITLE_PREFIX, s))),
+                Ok(s) => Output::Ok(Box::new(format!("{TITLE_PREFIX}{s}"))),
                 Err(err) => Output::Err(Box::new(err)),
             },
         },

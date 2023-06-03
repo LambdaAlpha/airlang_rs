@@ -36,23 +36,23 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
     let name_or_str = fn_eval_escape(ctx, input);
     match name_or_str {
         Val::Symbol(name) => {
-            if let Some(Val::String(s)) = ctx.get_ref(&name) {
-                return Val::Int(s.len().into());
-            }
+            let Some(Val::String(s)) = ctx.get_ref(&name) else {
+                return Val::default();
+            };
+            Val::Int(s.len().into())
         }
         Val::Box(k) => {
-            if let Ok(r) = Keeper::reader(&k.0) {
-                if let Val::String(s) = &r.val {
-                    return Val::Int(s.len().into());
-                }
-            }
+            let Ok(r) = Keeper::reader(&k.0) else {
+                return Val::default();
+            };
+            let Val::String(s) = &r.val else {
+                return Val::default();
+            };
+            Val::Int(s.len().into())
         }
-        Val::String(s) => {
-            return Val::Int(s.len().into());
-        }
-        _ => {}
+        Val::String(s) => Val::Int(s.len().into()),
+        _ => Val::default(),
     }
-    Val::default()
 }
 
 pub(crate) fn concat() -> Val {
@@ -67,16 +67,15 @@ pub(crate) fn concat() -> Val {
 }
 
 fn fn_concat(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::List(strings) = ctx.eval(input) {
-        let mut ret = String::new();
-        for str in strings {
-            if let Val::String(str) = str {
-                ret.push_str(&str)
-            } else {
-                return Val::default();
-            }
-        }
-        return Val::String(Str::from(ret));
+    let Val::List(strings) = ctx.eval(input) else {
+        return Val::default();
+    };
+    let mut ret = String::new();
+    for str in strings {
+        let Val::String(str) = str else {
+            return Val::default();
+        };
+        ret.push_str(&str);
     }
-    Val::default()
+    Val::String(Str::from(ret))
 }

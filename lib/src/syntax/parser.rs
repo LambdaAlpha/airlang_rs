@@ -321,30 +321,26 @@ where
         normed::<T, _, _, _>(token),
         || Some(Vec::new()),
         |tokens: Option<Vec<_>>, item| {
-            if tokens.is_none() {
-                return None;
-            }
+            tokens.as_ref()?;
             let mut tokens = tokens.unwrap();
             let repr = match item.tag {
                 TokenTag::Default => item.repr,
                 TokenTag::Wrap => item.repr,
                 TokenTag::Pair => {
-                    if let Some(repr) = call(tokens) {
-                        tokens = Vec::new();
-                        let pair = Box::new(Pair::new(repr, item.repr));
-                        <T as From<Box<Pair<T, T>>>>::from(pair)
-                    } else {
+                    let Some(repr) = call(tokens) else {
                         return None;
-                    }
+                    };
+                    tokens = Vec::new();
+                    let pair = Box::new(Pair::new(repr, item.repr));
+                    <T as From<Box<Pair<T, T>>>>::from(pair)
                 }
                 TokenTag::Reverse => {
-                    if let Some(repr) = call(tokens) {
-                        tokens = Vec::new();
-                        let reverse = Box::new(Reverse::new(repr, item.repr));
-                        <T as From<Box<Reverse<T, T>>>>::from(reverse)
-                    } else {
+                    let Some(repr) = call(tokens) else {
                         return None;
-                    }
+                    };
+                    tokens = Vec::new();
+                    let reverse = Box::new(Reverse::new(repr, item.repr));
+                    <T as From<Box<Reverse<T, T>>>>::from(reverse)
                 }
             };
             tokens.push(repr);
@@ -374,8 +370,8 @@ where
         opt(last),
     ));
     map(items_last, |(mut items, last)| {
-        if last.is_some() {
-            items.push(last.unwrap());
+        if let Some(last) = last {
+            items.push(last);
         }
         items
     })
@@ -667,6 +663,7 @@ where
         cut(tuple((opt(one_of("+-")), normed_num1(digit1)))),
     ));
     let fragments = tuple((sign, integral, fractional, exponential));
+    #[allow(clippy::type_complexity)]
     let f = map_res(
         fragments,
         |(sign, integral, fractional, exponential): (

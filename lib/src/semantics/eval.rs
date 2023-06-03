@@ -19,7 +19,10 @@ use {
             Debug,
             Formatter,
         },
-        hash::Hash,
+        hash::{
+            Hash,
+            Hasher,
+        },
         mem::swap,
         ops::Deref,
     },
@@ -40,9 +43,10 @@ pub(crate) enum FuncImpl {
     Composed(Composed),
 }
 
-#[derive(Clone, Hash)]
+#[derive(Clone)]
 pub(crate) struct Primitive {
     pub(crate) id: Name,
+    #[allow(clippy::type_complexity)]
     pub(crate) eval: Reader<dyn Fn(&mut Ctx, Val) -> Val>,
 }
 
@@ -139,11 +143,10 @@ impl Ctx {
     }
 
     pub(crate) fn eval_box(&self, keeper: &Keeper<TaggedVal>) -> Val {
-        if let Ok(input) = Keeper::reader(&keeper) {
-            input.deref().val.clone()
-        } else {
-            Val::default()
-        }
+        let Ok(input) = Keeper::reader(keeper) else {
+            return Val::default();
+        };
+        input.deref().val.clone()
     }
 
     pub(crate) fn eval_pair(&mut self, first: Val, second: Val) -> Val {
@@ -165,21 +168,19 @@ impl Ctx {
     }
 
     pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {
-        if let Val::Func(func) = self.eval(func) {
-            func.eval(self, input)
-        } else {
-            Val::default()
-        }
+        let Val::Func(func) = self.eval(func) else {
+            return Val::default();
+        };
+        func.eval(self, input)
     }
 
     pub(crate) fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
         let reverse_interpreter = self.reverse_interpreter.clone();
-        if let Some(reverse_interpreter) = reverse_interpreter {
-            let reverse_func = reverse_interpreter.deref().clone().eval(self, func);
-            self.eval_call(reverse_func, output)
-        } else {
-            Val::default()
-        }
+        let Some(reverse_interpreter) = reverse_interpreter else {
+            return Val::default();
+        };
+        let reverse_func = reverse_interpreter.deref().clone().eval(self, func);
+        self.eval_call(reverse_func, output)
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
@@ -203,16 +204,16 @@ impl Ctx {
     }
 
     pub(crate) fn remove(&mut self, name: &str) -> Val {
-        if let Some(tagged_val) = self.name_map.get(name) {
-            if matches!(&tagged_val.tag, InvariantTag::None) {
-                return self
-                    .name_map
-                    .remove(name)
-                    .map(|tagged_val| tagged_val.val)
-                    .unwrap_or_default();
-            }
+        let Some(tagged_val) = self.name_map.get(name) else {
+            return Val::default();
+        };
+        if !matches!(&tagged_val.tag, InvariantTag::None) {
+            return Val::default();
         }
-        Val::default()
+        self.name_map
+            .remove(name)
+            .map(|tagged_val| tagged_val.val)
+            .unwrap_or_default()
     }
 
     fn into_val(mut self, name: &str) -> Val {
@@ -223,35 +224,37 @@ impl Ctx {
     }
 
     pub(crate) fn put_val(&mut self, name: Name, val: TaggedVal) -> Val {
-        if let Some(tagged_val) = self.name_map.get(&name) {
-            if matches!(&tagged_val.tag, InvariantTag::None) {
-                self.name_map
-                    .insert(name, val)
-                    .map(|tagged_val| tagged_val.val)
-                    .unwrap_or_default()
-            } else {
-                Val::default()
-            }
-        } else {
-            self.name_map
+        let Some(tagged_val) = self.name_map.get(&name) else {
+            return self.name_map
                 .insert(name, val)
                 .map(|ctx_val| ctx_val.val)
+                .unwrap_or_default();
+        };
+        if matches!(&tagged_val.tag, InvariantTag::None) {
+            self.name_map
+                .insert(name, val)
+                .map(|tagged_val| tagged_val.val)
                 .unwrap_or_default()
+        } else {
+            Val::default()
         }
     }
 
     pub(crate) fn set_final(&mut self, name: &str) {
-        if let Some(tagged_val) = self.name_map.get_mut(name) {
-            if matches!(&tagged_val.tag, InvariantTag::None) {
-                tagged_val.tag = InvariantTag::Final;
-            }
+        let Some(tagged_val) = self.name_map.get_mut(name) else {
+            return;
+        };
+        if !(matches!(&tagged_val.tag, InvariantTag::None)) {
+            return;
         }
+        tagged_val.tag = InvariantTag::Final;
     }
 
     pub(crate) fn set_const(&mut self, name: &str) {
-        if let Some(tagged_val) = self.name_map.get_mut(name) {
-            tagged_val.tag = InvariantTag::Const;
-        }
+        let Some(tagged_val) = self.name_map.get_mut(name) else {
+            return;
+        };
+        tagged_val.tag = InvariantTag::Const;
     }
 
     pub(crate) fn eval_ref<M, F, G>(&self, name: Val, map: M) -> Val
@@ -262,33 +265,39 @@ impl Ctx {
     {
         match name {
             Val::Symbol(s) => {
-                if let Some(val) = self.get_ref(&s) {
-                    if let Either::Left(f) = map(true) {
-                        return f(val);
-                    }
-                }
+                let Some(val) = self.get_ref(&s) else {
+                    return Val::default();
+                };
+                let Either::Left(f) = map(true) else {
+                    return Val::default();
+                };
+                f(val)
             }
             Val::String(s) => {
-                if let Some(val) = self.get_ref(&s) {
-                    if let Either::Left(f) = map(true) {
-                        return f(val);
-                    }
-                }
+                let Some(val) = self.get_ref(&s) else {
+                    return Val::default();
+                };
+                let Either::Left(f) = map(true) else {
+                    return Val::default();
+                };
+                f(val)
             }
             Val::Box(k) => {
-                if let Ok(r) = Keeper::reader(&k.0) {
-                    if let Either::Left(f) = map(true) {
-                        return f(&r.val);
-                    }
-                }
+                let Ok(r) = Keeper::reader(&k.0) else {
+                    return Val::default();
+                };
+                let Either::Left(f) = map(true) else {
+                    return Val::default();
+                };
+                f(&r.val)
             }
             val => {
-                if let Either::Right(g) = map(false) {
-                    return g(val);
-                }
+                let Either::Right(g) = map(false) else {
+                    return Val::default();
+                };
+                g(val)
             }
         }
-        Val::default()
     }
 
     pub(crate) fn eval_mut<M, F, G>(&mut self, name: Val, map: M) -> Val
@@ -299,35 +308,42 @@ impl Ctx {
     {
         match name {
             Val::Symbol(s) => {
-                if let Some(val) = self.get_mut(&s) {
-                    if let Either::Left(f) = map(true) {
-                        return f(val);
-                    }
-                }
+                let Some(val) = self.get_mut(&s) else {
+                    return Val::default();
+                };
+                let Either::Left(f) = map(true) else {
+                    return Val::default();
+                };
+                f(val)
             }
             Val::String(s) => {
-                if let Some(val) = self.get_mut(&s) {
-                    if let Either::Left(f) = map(true) {
-                        return f(val);
-                    }
-                }
+                let Some(val) = self.get_mut(&s) else {
+                    return Val::default();
+                };
+                let Either::Left(f) = map(true) else {
+                    return Val::default();
+                };
+                f(val)
             }
             Val::Box(k) => {
-                if let Ok(mut o) = Keeper::owner(&k.0) {
-                    if matches!(o.tag, InvariantTag::None | InvariantTag::Final) {
-                        if let Either::Left(f) = map(true) {
-                            return f(&mut o.val);
-                        }
-                    }
+                let Ok(mut o) = Keeper::owner(&k.0) else {
+                    return Val::default();
+                };
+                if !matches!(o.tag, InvariantTag::None | InvariantTag::Final) {
+                    return Val::default();
                 }
+                let Either::Left(f) = map(true) else {
+                    return Val::default();
+                };
+                f(&mut o.val)
             }
             val => {
-                if let Either::Right(g) = map(false) {
-                    return g(val);
-                }
+                let Either::Right(g) = map(false) else {
+                    return Val::default();
+                };
+                g(val)
             }
         }
-        Val::default()
     }
 }
 
@@ -348,6 +364,12 @@ impl PartialEq for Primitive {
 }
 
 impl Eq for Primitive {}
+
+impl Hash for Primitive {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
 
 impl TaggedVal {
     pub(crate) fn new(val: Val) -> TaggedVal {

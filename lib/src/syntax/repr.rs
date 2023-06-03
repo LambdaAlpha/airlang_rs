@@ -163,9 +163,9 @@ impl FromStr for Repr {
     }
 }
 
-impl Into<String> for &Repr {
-    fn into(self) -> String {
-        generate(self)
+impl From<&Repr> for String {
+    fn from(value: &Repr) -> Self {
+        generate(value)
     }
 }
 

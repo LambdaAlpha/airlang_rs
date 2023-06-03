@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Unit;
 
 impl From<&()> for Unit {
@@ -13,14 +13,10 @@ impl From<()> for Unit {
     }
 }
 
-impl Into<()> for &Unit {
-    fn into(self) -> () {
-        ()
-    }
+impl From<Unit> for () {
+    fn from(_: Unit) -> Self {}
 }
 
-impl Into<()> for Unit {
-    fn into(self) -> () {
-        ()
-    }
+impl From<&Unit> for () {
+    fn from(_: &Unit) -> Self {}
 }

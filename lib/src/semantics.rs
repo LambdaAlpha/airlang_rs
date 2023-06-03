@@ -58,6 +58,12 @@ impl Interpreter {
     }
 }
 
+impl Default for Interpreter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub fn parse(src: &str) -> Result<Val, ParseError> {
     crate::syntax::parser::parse(src)
 }

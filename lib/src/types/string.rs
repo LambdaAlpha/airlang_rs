@@ -43,8 +43,8 @@ impl ToString for Str {
     }
 }
 
-impl Into<String> for Str {
-    fn into(self) -> String {
-        self.0.into()
+impl From<Str> for String {
+    fn from(value: Str) -> Self {
+        value.0.into()
     }
 }

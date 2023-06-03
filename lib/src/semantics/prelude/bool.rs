@@ -29,10 +29,10 @@ pub(crate) fn not() -> Val {
 }
 
 fn fn_not(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Bool(b) = ctx.eval(input) {
-        return Val::Bool(b.not());
-    }
-    Val::default()
+    let Val::Bool(b) = ctx.eval(input) else {
+        return Val::default();
+    };
+    Val::Bool(b.not())
 }
 
 pub(crate) fn and() -> Val {
@@ -47,18 +47,20 @@ pub(crate) fn and() -> Val {
 }
 
 fn fn_and(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(pair) = input {
-        if let Val::Bool(left) = ctx.eval(pair.first) {
-            if left.bool() {
-                if let Val::Bool(right) = ctx.eval(pair.second) {
-                    return Val::Bool(right);
-                }
-            } else {
-                return Val::Bool(Bool::f());
-            }
-        }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Bool(left) = ctx.eval(pair.first) else {
+        return Val::default();
+    };
+    if left.bool() {
+        let Val::Bool(right) = ctx.eval(pair.second) else {
+            return Val::default();
+        };
+        Val::Bool(right)
+    } else {
+        Val::Bool(Bool::f())
     }
-    Val::default()
 }
 
 pub(crate) fn or() -> Val {
@@ -73,18 +75,20 @@ pub(crate) fn or() -> Val {
 }
 
 fn fn_or(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(pair) = input {
-        if let Val::Bool(left) = ctx.eval(pair.first) {
-            if left.bool() {
-                return Val::Bool(Bool::t());
-            } else {
-                if let Val::Bool(right) = ctx.eval(pair.second) {
-                    return Val::Bool(right);
-                }
-            }
-        }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Bool(left) = ctx.eval(pair.first) else {
+        return Val::default();
+    };
+    if left.bool() {
+        Val::Bool(Bool::t())
+    } else {
+        let Val::Bool(right) = ctx.eval(pair.second) else {
+            return Val::default();
+        };
+        Val::Bool(right)
     }
-    Val::default()
 }
 
 pub(crate) fn equal() -> Val {
@@ -99,10 +103,10 @@ pub(crate) fn equal() -> Val {
 }
 
 fn fn_equal(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(pair) = input {
-        return Val::Bool(Bool::new(ctx.eval(pair.first) == ctx.eval(pair.second)));
-    }
-    Val::default()
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(ctx.eval(pair.first) == ctx.eval(pair.second)))
 }
 
 pub(crate) fn not_equal() -> Val {
@@ -117,8 +121,8 @@ pub(crate) fn not_equal() -> Val {
 }
 
 fn fn_not_equal(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(pair) = input {
-        return Val::Bool(Bool::new(ctx.eval(pair.first) != ctx.eval(pair.second)));
-    }
-    Val::default()
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(ctx.eval(pair.first) != ctx.eval(pair.second)))
 }

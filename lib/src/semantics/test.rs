@@ -31,7 +31,7 @@ fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_val_size() {
     let size = size_of::<Val>();
-    assert!(size <= 40)
+    assert!(size <= 40);
 }
 
 #[test]

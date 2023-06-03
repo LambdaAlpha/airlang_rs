@@ -18,7 +18,7 @@ pub(crate) fn u8_array_to_bin_string(bytes: &[u8]) -> String {
 
 pub(crate) fn u8_array_to_bin_string_mut(bytes: &[u8], s: &mut String) {
     for &b in bytes {
-        write!(s, "{:08b}", b).unwrap();
+        write!(s, "{b:08b}").unwrap();
     }
 }
 
@@ -37,6 +37,6 @@ pub(crate) fn u8_array_to_hex_string(bytes: &[u8]) -> String {
 
 pub(crate) fn u8_array_to_hex_string_mut(bytes: &[u8], s: &mut String) {
     for &b in bytes {
-        write!(s, "{:02x}", b).unwrap();
+        write!(s, "{b:02x}").unwrap();
     }
 }

@@ -182,8 +182,8 @@ impl From<Box<Ctx>> for Val {
 impl From<&Repr> for Val {
     fn from(value: &Repr) -> Self {
         match value {
-            Repr::Unit(u) => Val::Unit(u.clone()),
-            Repr::Bool(b) => Val::Bool(b.clone()),
+            Repr::Unit(u) => Val::Unit(*u),
+            Repr::Bool(b) => Val::Bool(*b),
             Repr::Int(i) => Val::Int(i.clone()),
             Repr::Float(f) => Val::Float(f.clone()),
             Repr::Bytes(b) => Val::Bytes(b.clone()),
@@ -221,8 +221,8 @@ impl TryInto<Repr> for &Val {
     type Error = ReprError;
     fn try_into(self) -> Result<Repr, Self::Error> {
         match self {
-            Val::Unit(u) => Ok(Repr::Unit(u.clone())),
-            Val::Bool(b) => Ok(Repr::Bool(b.clone())),
+            Val::Unit(u) => Ok(Repr::Unit(*u)),
+            Val::Bool(b) => Ok(Repr::Bool(*b)),
             Val::Int(i) => Ok(Repr::Int((*i).clone())),
             Val::Float(f) => Ok(Repr::Float((*f).clone())),
             Val::Bytes(b) => Ok(Repr::Bytes((*b).clone())),

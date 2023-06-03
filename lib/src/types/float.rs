@@ -33,9 +33,9 @@ impl Float {
         };
         let s = format!("{sign}{integral}.{fractional}{exp}");
         let f = RugFloat::parse(s).unwrap();
-        let sig_int = integral.trim_start_matches("0");
+        let sig_int = integral.trim_start_matches('0');
         let sig_frac = if sig_int.is_empty() {
-            fractional.trim_start_matches("0")
+            fractional.trim_start_matches('0')
         } else {
             fractional
         };
@@ -55,7 +55,7 @@ impl Eq for Float {
 
 impl Hash for Float {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.as_ord().hash(state)
+        self.0.as_ord().hash(state);
     }
 }
 

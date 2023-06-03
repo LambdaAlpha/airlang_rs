@@ -70,8 +70,8 @@ where
         indent: "".to_owned(),
         before_first: "".to_owned(),
         after_last: "".to_owned(),
-        separator: format!("{} ", SEPARATOR),
-        pair_separator: format!("{} ", PAIR_SEPARATOR),
+        separator: format!("{SEPARATOR} "),
+        pair_separator: format!("{PAIR_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -91,9 +91,9 @@ where
     let config = GenerateFormat {
         indent: INDENT.to_owned(),
         before_first: "\n".to_owned(),
-        after_last: format!("{}\n", SEPARATOR),
-        separator: format!("{}\n", SEPARATOR),
-        pair_separator: format!("{} ", PAIR_SEPARATOR),
+        after_last: format!("{SEPARATOR}\n"),
+        separator: format!("{SEPARATOR}\n"),
+        pair_separator: format!("{PAIR_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -163,15 +163,15 @@ fn generate_unit(s: &mut String) {
 
 fn generate_bool(b: bool, s: &mut String) {
     s.push(PRESERVE_PREFIX);
-    s.push_str(if b { "t" } else { "f" })
+    s.push_str(if b { "t" } else { "f" });
 }
 
 fn generate_int(i: &Int, s: &mut String) {
-    s.push_str(&i.to_string())
+    s.push_str(&i.to_string());
 }
 
 fn generate_float(f: &Float, s: &mut String) {
-    s.push_str(&f.to_string())
+    s.push_str(&f.to_string());
 }
 
 fn generate_bytes(bytes: &Bytes, s: &mut String) {
@@ -196,7 +196,7 @@ fn generate_string(str: &str, s: &mut String) {
 }
 
 fn generate_symbol(str: &str, s: &mut String) {
-    s.push_str(str)
+    s.push_str(str);
 }
 
 fn is_left_open<'a, T>(repr: &'a T) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
@@ -219,10 +219,7 @@ where
     T: Eq + Hash,
 {
     let b = match repr.try_into()? {
-        GenerateRepr::Call(call) => match (&call.input).try_into()? {
-            GenerateRepr::Pair(_) => false,
-            _ => true,
-        },
+        GenerateRepr::Call(call) => !matches!((&call.input).try_into()?, GenerateRepr::Pair(_)),
         _ => false,
     };
     Ok(b)

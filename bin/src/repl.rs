@@ -28,7 +28,7 @@ pub(crate) fn repl(ui: &mut impl Ui) {
         ui.read_line(&mut input);
         let input = input.trim();
 
-        if input == "" {
+        if input.is_empty() {
             continue;
         }
 

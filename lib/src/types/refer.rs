@@ -43,6 +43,7 @@ impl<D: ?Sized> Keeper<D> {
         }
     }
 
+    #[allow(clippy::self_named_constructors)]
     pub(crate) fn keeper(k: &Keeper<D>) -> Result<Self, RefState> {
         Self::try_from(&k.raw)
     }
@@ -95,7 +96,7 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for Keeper<D> {
 
 impl<D: ?Sized> Drop for Keeper<D> {
     fn drop(&mut self) {
-        self.raw.drop_from(RefType::Keeper)
+        self.raw.drop_from(RefType::Keeper);
     }
 }
 
@@ -115,7 +116,7 @@ impl<D: ?Sized> Eq for Keeper<D> {}
 
 impl<D: ?Sized> Hash for Keeper<D> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.raw.hash(state)
+        self.raw.hash(state);
     }
 }
 
@@ -139,6 +140,7 @@ impl<D: ?Sized> Reader<D> {
         Self::try_from(&keeper.raw)
     }
 
+    #[allow(clippy::self_named_constructors)]
     pub(crate) fn reader(r: &Reader<D>) -> Result<Self, RefState> {
         Self::try_from(&r.raw)
     }
@@ -179,7 +181,7 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for Reader<D> {
 
 impl<D: ?Sized> Drop for Reader<D> {
     fn drop(&mut self) {
-        self.raw.drop_from(RefType::Reader)
+        self.raw.drop_from(RefType::Reader);
     }
 }
 
@@ -199,7 +201,7 @@ impl<D: ?Sized> Eq for Reader<D> {}
 
 impl<D: ?Sized> Hash for Reader<D> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.raw.hash(state)
+        self.raw.hash(state);
     }
 }
 
@@ -231,6 +233,7 @@ impl<D: ?Sized> Owner<D> {
         o.raw.shared().state()
     }
 
+    #[allow(clippy::mut_from_ref)]
     pub(crate) fn borrow_mut(o: &Owner<D>) -> &mut D {
         // SAFETY: we have exclusive ref and data hasn't been dropped
         unsafe { o.raw.shared().deref_mut() }
@@ -286,7 +289,7 @@ impl<D: ?Sized> TryFrom<&RawRef<D>> for Owner<D> {
 
 impl<D: ?Sized> Drop for Owner<D> {
     fn drop(&mut self) {
-        self.raw.drop_from(RefType::Owner)
+        self.raw.drop_from(RefType::Owner);
     }
 }
 
@@ -306,7 +309,7 @@ impl<D: ?Sized> Eq for Owner<D> {}
 
 impl<D: ?Sized> Hash for Owner<D> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.raw.hash(state)
+        self.raw.hash(state);
     }
 }
 
@@ -368,7 +371,7 @@ impl<D: ?Sized> Eq for RawRef<D> {}
 
 impl<D: ?Sized> Hash for RawRef<D> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.ptr.hash(state)
+        self.ptr.hash(state);
     }
 }
 
@@ -417,7 +420,7 @@ impl<D: ?Sized> SharedCell<D> {
     // SAFETY: call only once and there is no ref
     unsafe fn drop_data(&self) {
         self.state.set(self.state.get().drop());
-        ptr::drop_in_place(self.data.get())
+        ptr::drop_in_place(self.data.get());
     }
 
     // SAFETY: data is dropped
@@ -426,7 +429,7 @@ impl<D: ?Sized> SharedCell<D> {
         D: Sized,
     {
         self.state.set(self.state.get().reinit());
-        ptr::write(self.data.get(), d)
+        ptr::write(self.data.get(), d);
     }
 
     fn should_dealloc(&self) -> bool {

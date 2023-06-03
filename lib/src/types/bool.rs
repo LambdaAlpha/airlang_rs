@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Bool(bool);
 
 impl Bool {
@@ -43,14 +43,14 @@ impl From<bool> for Bool {
     }
 }
 
-impl Into<bool> for Bool {
-    fn into(self) -> bool {
-        self.0
+impl From<Bool> for bool {
+    fn from(value: Bool) -> Self {
+        value.0
     }
 }
 
-impl Into<bool> for &Bool {
-    fn into(self) -> bool {
-        self.0
+impl From<&Bool> for bool {
+    fn from(value: &Bool) -> Self {
+        value.0
     }
 }

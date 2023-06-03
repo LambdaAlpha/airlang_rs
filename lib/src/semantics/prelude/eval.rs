@@ -76,11 +76,10 @@ pub(crate) fn eval_twice() -> Val {
 fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
     match input {
         Val::Box(k) => {
-            if let Ok(input) = Keeper::reader(&k.0) {
-                eval_ref(ctx, &input.val)
-            } else {
-                Val::default()
-            }
+            let Ok(input) = Keeper::reader(&k.0) else {
+                return Val::default();
+            };
+            eval_ref(ctx, &input.val)
         }
         i => {
             let val = ctx.eval(i);
@@ -90,7 +89,7 @@ fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 fn eval_ref(ctx: &mut Ctx, input: &Val) -> Val {
-    match &*input {
+    match input {
         Val::Symbol(s) => ctx.get(s),
         Val::Box(k) => ctx.eval_box(&k.0),
         Val::Pair(p) => eval_ref_pair(ctx, &p.first, &p.second),
@@ -121,11 +120,10 @@ fn eval_ref_map(ctx: &mut Ctx, map: &MapVal) -> Val {
 }
 
 fn eval_ref_call(ctx: &mut Ctx, func: &Val, input: &Val) -> Val {
-    if let Val::Func(func) = eval_ref(ctx, func) {
-        func.eval(ctx, input.clone())
-    } else {
-        Val::default()
-    }
+    let Val::Func(func) = eval_ref(ctx, func) else {
+        return Val::default();
+    };
+    func.eval(ctx, input.clone())
 }
 
 fn eval_ref_reverse(ctx: &mut Ctx, func: &Val, output: &Val) -> Val {
@@ -222,16 +220,14 @@ pub(crate) fn eval_in_ctx() -> Val {
 }
 
 fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(pair) = input {
-        if let Val::Ctx(mut target_ctx) = ctx.eval(pair.first) {
-            let val = ctx.eval(pair.second);
-            target_ctx.eval(val)
-        } else {
-            Val::default()
-        }
-    } else {
-        Val::default()
-    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Ctx(mut target_ctx) = ctx.eval(pair.first) else {
+        return Val::default();
+    };
+    let val = ctx.eval(pair.second);
+    target_ctx.eval(val)
 }
 pub(crate) fn parse() -> Val {
     Box::new(Func {
@@ -245,12 +241,10 @@ pub(crate) fn parse() -> Val {
 }
 
 fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::String(input) = ctx.eval(input) {
-        if let Ok(val) = crate::semantics::parse(&input) {
-            return val;
-        }
-    }
-    Val::default()
+    let Val::String(input) = ctx.eval(input)else {
+        return Val::default();
+    };
+    crate::semantics::parse(&input).unwrap_or_default()
 }
 
 pub(crate) fn stringify() -> Val {
@@ -266,10 +260,10 @@ pub(crate) fn stringify() -> Val {
 
 fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
     let val = ctx.eval(input);
-    if let Ok(str) = crate::semantics::generate(&val) {
-        return Val::String(Str::from(str));
-    }
-    Val::default()
+    let Ok(str) = crate::semantics::generate(&val) else {
+        return Val::default();
+    };
+    Val::String(Str::from(str))
 }
 
 pub(crate) fn func() -> Val {
@@ -284,53 +278,52 @@ pub(crate) fn func() -> Val {
 }
 
 fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Map(mut map) = input {
-        let body = fn_eval_escape(ctx, map_remove(&mut map, "body"));
-        let constants = match fn_map_new(ctx, map_remove(&mut map, "const")) {
-            Val::Map(m) => {
-                if let Some(constants) = into_name_map(m) {
-                    constants
-                } else {
-                    return Val::default();
-                }
+    let Val::Map(mut map) = input else {
+        return Val::default();
+    };
+    let body = fn_eval_escape(ctx, map_remove(&mut map, "body"));
+    let constants = match fn_map_new(ctx, map_remove(&mut map, "const")) {
+        Val::Map(m) => {
+            let Some(constants) = into_name_map(m) else {
+                return Val::default();
+            };
+            constants
+        }
+        Val::Unit(_) => NameMap::default(),
+        _ => return Val::default(),
+    };
+    let input_name = match fn_eval_escape(ctx, map_remove(&mut map, "input")) {
+        Val::Symbol(s) => {
+            if &*s == "_" {
+                None
+            } else {
+                Some(Name::from(<_ as Into<String>>::into(s)))
             }
-            Val::Unit(_) => NameMap::default(),
-            _ => return Val::default(),
-        };
-        let input_name = match fn_eval_escape(ctx, map_remove(&mut map, "input")) {
-            Val::Symbol(s) => {
-                if &*s == "_" {
-                    None
-                } else {
-                    Some(Name::from(<_ as Into<String>>::into(s)))
-                }
+        }
+        Val::Unit(_) => Some(Name::from("input")),
+        _ => return Val::default(),
+    };
+    let caller_name = match fn_eval_escape(ctx, map_remove(&mut map, "caller")) {
+        Val::Symbol(s) => {
+            if &*s == "_" {
+                None
+            } else {
+                Some(Name::from(<_ as Into<String>>::into(s)))
             }
-            Val::Unit(_) => Some(Name::from("input")),
-            _ => return Val::default(),
-        };
-        let caller_name = match fn_eval_escape(ctx, map_remove(&mut map, "caller")) {
-            Val::Symbol(s) => {
-                if &*s == "_" {
-                    None
-                } else {
-                    Some(Name::from(<_ as Into<String>>::into(s)))
-                }
-            }
-            Val::Unit(_) => Some(Name::from("caller")),
-            _ => return Val::default(),
-        };
-        return Box::new(Func {
-            func_trait: FuncTrait {},
-            func_impl: FuncImpl::Composed(Composed {
-                body,
-                constants,
-                input_name,
-                caller_name,
-            }),
-        })
-        .into();
-    }
-    Val::default()
+        }
+        Val::Unit(_) => Some(Name::from("caller")),
+        _ => return Val::default(),
+    };
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Composed(Composed {
+            body,
+            constants,
+            input_name,
+            caller_name,
+        }),
+    })
+    .into()
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
@@ -362,10 +355,11 @@ pub(crate) fn chain() -> Val {
 }
 
 fn fn_chain(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(pair) = input {
-        if let Val::Func(func) = ctx.eval(pair.second) {
-            return func.eval(ctx, pair.first);
-        }
-    }
-    Val::default()
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Func(func) = ctx.eval(pair.second) else {
+        return Val::default();
+    };
+    func.eval(ctx, pair.first)
 }

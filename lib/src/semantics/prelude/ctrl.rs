@@ -26,14 +26,14 @@ pub(crate) fn sequence() -> Val {
 }
 
 fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::List(list) = input {
-        let mut output = Val::default();
-        for val in list {
-            output = ctx.eval(val);
-        }
-        return output;
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let mut output = Val::default();
+    for val in list {
+        output = ctx.eval(val);
     }
-    Val::default()
+    output
 }
 
 pub(crate) fn condition() -> Val {
@@ -48,24 +48,28 @@ pub(crate) fn condition() -> Val {
 }
 
 fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::List(list) = input {
-        let mut iter = list.into_iter();
-        if let Some(condition) = iter.next() {
-            if let Val::Bool(b) = ctx.eval(condition) {
-                if b.bool() {
-                    if let Some(branch) = iter.next() {
-                        return ctx.eval(branch);
-                    }
-                } else {
-                    let _ = iter.next();
-                    if let Some(branch) = iter.next() {
-                        return ctx.eval(branch);
-                    }
-                }
-            }
-        }
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let mut iter = list.into_iter();
+    let Some(condition) = iter.next() else {
+        return Val::default();
+    };
+    let Val::Bool(b) = ctx.eval(condition) else {
+        return Val::default();
+    };
+    if b.bool() {
+        let Some(branch) = iter.next() else {
+            return Val::default();
+        };
+        ctx.eval(branch)
+    } else {
+        let _ = iter.next();
+        let Some(branch) = iter.next() else {
+            return Val::default();
+        };
+        ctx.eval(branch)
     }
-    Val::default()
 }
 
 pub(crate) fn while_loop() -> Val {
@@ -80,21 +84,23 @@ pub(crate) fn while_loop() -> Val {
 }
 
 fn fn_while(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::List(list) = input {
-        if let Some(condition) = list.get(0) {
-            if let Some(body) = list.get(1) {
-                loop {
-                    if let Val::Bool(b) = ctx.eval(condition.clone()) {
-                        if b.bool() {
-                            ctx.eval(body.clone());
-                        } else {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            }
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let Some(condition) = list.get(0) else {
+        return Val::default();
+    };
+    let Some(body) = list.get(1) else {
+        return Val::default();
+    };
+    loop {
+        let Val::Bool(b) = ctx.eval(condition.clone()) else {
+            return Val::default();
+        };
+        if b.bool() {
+            ctx.eval(body.clone());
+        } else {
+            break;
         }
     }
     Val::default()

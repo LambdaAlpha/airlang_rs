@@ -18,6 +18,8 @@
         unused_allocation,
         unused_comparisons,
         unused_parens,
+        clippy::needless_return,
+        clippy::semicolon_if_nothing_returned,
     )
 )]
 #![feature(trait_alias)]

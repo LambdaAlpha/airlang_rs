@@ -63,26 +63,24 @@ pub(crate) fn first_assign() -> Val {
 }
 
 fn fn_first_assign(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(name_val) = input {
-        let name = fn_eval_escape(ctx, name_val.first);
-        let mut val = ctx.eval(name_val.second);
-        ctx.eval_mut(name, |is_ref| {
-            if is_ref {
-                Either::Left(|pair: &mut Val| {
-                    if let Val::Pair(pair) = pair {
-                        swap(&mut pair.first, &mut val);
-                        val
-                    } else {
-                        Val::default()
-                    }
-                })
-            } else {
-                Either::Right(|_| Val::default())
-            }
-        })
-    } else {
-        Val::default()
-    }
+    let Val::Pair(name_val) = input else {
+        return Val::default();
+    };
+    let name = fn_eval_escape(ctx, name_val.first);
+    let mut val = ctx.eval(name_val.second);
+    ctx.eval_mut(name, |is_ref| {
+        if is_ref {
+            Either::Left(|pair: &mut Val| {
+                let Val::Pair(pair) = pair else {
+                    return Val::default();
+                };
+                swap(&mut pair.first, &mut val);
+                val
+            })
+        } else {
+            Either::Right(|_| Val::default())
+        }
+    })
 }
 
 pub(crate) fn second() -> Val {
@@ -125,24 +123,22 @@ pub(crate) fn second_assign() -> Val {
 }
 
 fn fn_second_assign(ctx: &mut Ctx, input: Val) -> Val {
-    if let Val::Pair(name_val) = input {
-        let name = fn_eval_escape(ctx, name_val.first);
-        let mut val = ctx.eval(name_val.second);
-        ctx.eval_mut(name, |is_ref| {
-            if is_ref {
-                Either::Left(|pair: &mut Val| {
-                    if let Val::Pair(pair) = pair {
-                        swap(&mut pair.second, &mut val);
-                        val
-                    } else {
-                        Val::default()
-                    }
-                })
-            } else {
-                Either::Right(|_| Val::default())
-            }
-        })
-    } else {
-        Val::default()
-    }
+    let Val::Pair(name_val) = input else {
+        return Val::default();
+    };
+    let name = fn_eval_escape(ctx, name_val.first);
+    let mut val = ctx.eval(name_val.second);
+    ctx.eval_mut(name, |is_ref| {
+        if is_ref {
+            Either::Left(|pair: &mut Val| {
+                let Val::Pair(pair) = pair else {
+                    return Val::default();
+                };
+                swap(&mut pair.second, &mut val);
+                val
+            })
+        } else {
+            Either::Right(|_| Val::default())
+        }
+    })
 }

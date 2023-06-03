@@ -30,42 +30,38 @@ pub(crate) enum Output {
 
 impl ConstCtx {
     pub(crate) fn eval(&self, dyn_ctx: &mut DynCtx, input: Val) -> Output {
-        if let Val::Call(call) = input {
-            if let Val::Symbol(func) = &call.func {
-                match &**func {
-                    CMD => self.eval_cmd(dyn_ctx, call.input),
-                    AIR => self.eval_air(dyn_ctx, call.input),
-                    _ => self.eval_air(dyn_ctx, Val::Call(call)),
-                }
-            } else {
-                self.eval_air(dyn_ctx, Val::Call(call))
-            }
-        } else {
-            self.eval_air(dyn_ctx, input)
+        let Val::Call(call) = input else {
+            return self.eval_air(dyn_ctx, input);
+        };
+        let Val::Symbol(func) = &call.func else {
+            return self.eval_air(dyn_ctx, Val::Call(call));
+        };
+        match &**func {
+            CMD => self.eval_cmd(dyn_ctx, call.input),
+            AIR => self.eval_air(dyn_ctx, call.input),
+            _ => self.eval_air(dyn_ctx, Val::Call(call)),
         }
     }
 
     pub(crate) fn eval_cmd(&self, dyn_ctx: &mut DynCtx, input: Val) -> Output {
         match input {
             Val::Symbol(ref s) => {
-                if let Some(f) = self.cmd_map.get(&**s) {
-                    f(self, dyn_ctx, Val::default())
-                } else {
-                    self.eval_meta(dyn_ctx, input)
-                }
+                let Some(f) = self.cmd_map.get(&**s) else {
+                    return self.eval_meta(dyn_ctx, input);
+                };
+                f(self, dyn_ctx, Val::default())
             }
             Val::Call(call) => {
-                if let Val::Symbol(func) = &call.func {
-                    if &**func == AIR {
-                        self.eval_meta(dyn_ctx, call.input)
-                    } else if let Some(f) = self.cmd_map.get(&**func) {
-                        f(self, dyn_ctx, call.input)
-                    } else {
-                        self.eval_meta(dyn_ctx, Val::Call(call))
-                    }
-                } else {
-                    self.eval_meta(dyn_ctx, Val::Call(call))
+                let Val::Symbol(func) = &call.func else {
+                    return self.eval_meta(dyn_ctx, Val::Call(call));
+                };
+                if &**func == AIR {
+                    return self.eval_meta(dyn_ctx, call.input);
                 }
+                let Some(f) = self.cmd_map.get(&**func) else {
+                    return self.eval_meta(dyn_ctx, Val::Call(call));
+                };
+                f(self, dyn_ctx, call.input)
             }
             input => self.eval_meta(dyn_ctx, input),
         }

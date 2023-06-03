@@ -25,8 +25,8 @@ impl ToString for Symbol {
     }
 }
 
-impl Into<String> for Symbol {
-    fn into(self) -> String {
-        self.0.into()
+impl From<Symbol> for String {
+    fn from(value: Symbol) -> Self {
+        value.0.into()
     }
 }
