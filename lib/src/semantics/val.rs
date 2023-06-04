@@ -61,7 +61,7 @@ pub enum Val {
     List(ListVal),
     Map(MapVal),
 
-    Box(BoxVal),
+    Ref(RefVal),
 
     Func(Box<Func>),
     Ctx(Box<Ctx>),
@@ -74,7 +74,7 @@ pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Val, Val>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BoxVal(pub(crate) Keeper<TaggedVal>);
+pub struct RefVal(pub(crate) Keeper<TaggedVal>);
 
 #[allow(dead_code)]
 impl Val {
@@ -161,9 +161,9 @@ impl From<MapVal> for Val {
     }
 }
 
-impl From<BoxVal> for Val {
-    fn from(value: BoxVal) -> Self {
-        Val::Box(value)
+impl From<RefVal> for Val {
+    fn from(value: RefVal) -> Self {
+        Val::Ref(value)
     }
 }
 
@@ -501,8 +501,8 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
     }
 }
 
-impl From<Keeper<TaggedVal>> for BoxVal {
+impl From<Keeper<TaggedVal>> for RefVal {
     fn from(value: Keeper<TaggedVal>) -> Self {
-        BoxVal(value)
+        RefVal(value)
     }
 }

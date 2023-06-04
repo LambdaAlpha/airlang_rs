@@ -75,7 +75,7 @@ pub(crate) fn eval_twice() -> Val {
 
 fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
     match input {
-        Val::Box(k) => {
+        Val::Ref(k) => {
             let Ok(input) = Keeper::reader(&k.0) else {
                 return Val::default();
             };
@@ -91,7 +91,7 @@ fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
 fn eval_ref(ctx: &mut Ctx, input: &Val) -> Val {
     match input {
         Val::Symbol(s) => ctx.get(s),
-        Val::Box(k) => ctx.eval_box(&k.0),
+        Val::Ref(k) => ctx.eval_ref_val(k),
         Val::Pair(p) => eval_ref_pair(ctx, &p.first, &p.second),
         Val::List(l) => eval_ref_list(ctx, l),
         Val::Map(m) => eval_ref_map(ctx, m),

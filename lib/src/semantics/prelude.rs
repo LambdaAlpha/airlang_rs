@@ -15,15 +15,17 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::AIR_VERSION_PATCH, meta::version_patch());
 
     put(&mut c, names::READ, ctx::read());
+    put(&mut c, names::IS_NULL, ctx::is_null());
     put(&mut c, names::MOVE, ctx::remove());
     put(&mut c, names::ASSIGN, ctx::assign());
     put(&mut c, names::ASSIGN_FINAL, ctx::assign_final());
     put(&mut c, names::ASSIGN_CONST, ctx::assign_const());
     put(&mut c, names::FINAL, ctx::set_final());
     put(&mut c, names::CONST, ctx::set_const());
-    put(&mut c, names::BOX_NEW, ctx::box_new());
-    put(&mut c, names::FINAL_BOX_NEW, ctx::final_box_new());
-    put(&mut c, names::CONST_BOX_NEW, ctx::const_box_new());
+    put(&mut c, names::REF, ctx::new_ref());
+    put(&mut c, names::NULL_REF, ctx::null_ref());
+    put(&mut c, names::FINAL_REF, ctx::final_ref());
+    put(&mut c, names::CONST_REF, ctx::const_ref());
 
     put(&mut c, names::SEQUENCE, ctrl::sequence());
     put(&mut c, names::IF, ctrl::condition());
@@ -105,15 +107,17 @@ pub(crate) mod names {
     pub(crate) const AIR_VERSION_PATCH: &str = "air_version_patch";
 
     pub(crate) const READ: &str = "read";
+    pub(crate) const IS_NULL: &str = "is_null";
     pub(crate) const MOVE: &str = "move";
     pub(crate) const ASSIGN: &str = "=";
     pub(crate) const ASSIGN_FINAL: &str = "=final";
     pub(crate) const ASSIGN_CONST: &str = "=const";
     pub(crate) const FINAL: &str = "final";
     pub(crate) const CONST: &str = "const";
-    pub(crate) const BOX_NEW: &str = "box";
-    pub(crate) const FINAL_BOX_NEW: &str = "final_box";
-    pub(crate) const CONST_BOX_NEW: &str = "const_box";
+    pub(crate) const REF: &str = "ref";
+    pub(crate) const NULL_REF: &str = "null_ref";
+    pub(crate) const FINAL_REF: &str = "final_ref";
+    pub(crate) const CONST_REF: &str = "const_ref";
 
     pub(crate) const SEQUENCE: &str = ";";
     pub(crate) const IF: &str = "if";

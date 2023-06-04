@@ -18,16 +18,14 @@ use {
             val::Val,
         },
         types::{
+            Bool,
             Either,
             Keeper,
             Owner,
             Reader,
         },
     },
-    std::{
-        convert::identity,
-        mem::swap,
-    },
+    std::mem::swap,
 };
 
 pub(crate) fn read() -> Val {
@@ -47,9 +45,29 @@ fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
         if is_ref {
             Either::Left(Clone::clone)
         } else {
-            Either::Right(identity)
+            Either::Right(|_| Val::default())
         }
     })
+}
+
+pub(crate) fn is_null() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::IS_NULL),
+            eval: Reader::new(fn_is_null),
+        }),
+    })
+    .into()
+}
+
+fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
+    let name = fn_eval_escape(ctx, input);
+    match name {
+        Val::Symbol(s) => Val::Bool(Bool::new(ctx.get_ref(&s).is_none())),
+        Val::Ref(k) => Val::Bool(Bool::new(Keeper::reader(&k.0).is_err())),
+        _ => Val::default(),
+    }
 }
 
 pub(crate) fn assign() -> Val {
@@ -110,14 +128,7 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
                 TaggedVal { tag, val },
             )
         }
-        Val::String(s) => {
-            let val = ctx.eval(pair.second);
-            ctx.put_val(
-                Name::from(<_ as Into<String>>::into(s)),
-                TaggedVal { tag, val },
-            )
-        }
-        Val::Box(k) => {
+        Val::Ref(k) => {
             let mut val = ctx.eval(pair.second);
             if let Ok(mut o) = Keeper::owner(&k.0) {
                 if !matches!(o.tag, InvariantTag::None) {
@@ -150,8 +161,7 @@ fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
     let input = fn_eval_escape(ctx, input);
     match input {
         Val::Symbol(s) => ctx.set_final(&s),
-        Val::String(s) => ctx.set_final(&s),
-        Val::Box(k) => {
+        Val::Ref(k) => {
             let Ok(mut o) = Keeper::owner(&k.0) else {
                 return Val::default();
             };
@@ -180,8 +190,7 @@ fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
     let input = fn_eval_escape(ctx, input);
     match input {
         Val::Symbol(s) => ctx.set_const(&s),
-        Val::String(s) => ctx.set_const(&s),
-        Val::Box(k) => {
+        Val::Ref(k) => {
             let Ok(mut o) = Keeper::owner(&k.0) else {
                 return Val::default();
             };
@@ -206,8 +215,7 @@ fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
     let input = fn_eval_escape(ctx, input);
     match input {
         Val::Symbol(s) => ctx.remove(&s),
-        Val::String(s) => ctx.remove(&s),
-        Val::Box(k) => {
+        Val::Ref(k) => {
             let Ok(o) = Keeper::owner(&k.0) else {
                 return Val::default();
             };
@@ -220,47 +228,67 @@ fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn box_new() -> Val {
+pub(crate) fn new_ref() -> Val {
     Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::BOX_NEW),
-            eval: Reader::new(fn_box_new),
+            id: Name::from(names::REF),
+            eval: Reader::new(fn_new_ref),
         }),
     })
     .into()
 }
 
-fn fn_box_new(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Box(Keeper::new(TaggedVal::new(ctx.eval(input))).into())
+fn fn_new_ref(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Ref(Keeper::new(TaggedVal::new(ctx.eval(input))).into())
 }
 
-pub(crate) fn final_box_new() -> Val {
+pub(crate) fn null_ref() -> Val {
     Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::FINAL_BOX_NEW),
-            eval: Reader::new(fn_final_box_new),
+            id: Name::from(names::NULL_REF),
+            eval: Reader::new(fn_null_ref),
         }),
     })
     .into()
 }
 
-fn fn_final_box_new(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Box(Keeper::new(TaggedVal::new_final(ctx.eval(input))).into())
+fn fn_null_ref(_: &mut Ctx, _: Val) -> Val {
+    let k = Keeper::new(TaggedVal::new(Val::default()));
+    let Ok(o) = Keeper::owner(&k) else {
+        return Val::default();
+    };
+    Owner::drop_data(o);
+    Val::Ref(k.into())
 }
 
-pub(crate) fn const_box_new() -> Val {
+pub(crate) fn final_ref() -> Val {
     Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::CONST_BOX_NEW),
-            eval: Reader::new(fn_const_box_new),
+            id: Name::from(names::FINAL_REF),
+            eval: Reader::new(fn_final_ref),
         }),
     })
     .into()
 }
 
-fn fn_const_box_new(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Box(Keeper::new(TaggedVal::new_const(ctx.eval(input))).into())
+fn fn_final_ref(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Ref(Keeper::new(TaggedVal::new_final(ctx.eval(input))).into())
+}
+
+pub(crate) fn const_ref() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::CONST_REF),
+            eval: Reader::new(fn_const_ref),
+        }),
+    })
+    .into()
+}
+
+fn fn_const_ref(ctx: &mut Ctx, input: Val) -> Val {
+    Val::Ref(Keeper::new(TaggedVal::new_const(ctx.eval(input))).into())
 }

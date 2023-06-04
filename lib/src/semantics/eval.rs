@@ -3,6 +3,7 @@ use {
         semantics::val::{
             ListVal,
             MapVal,
+            RefVal,
             Val,
         },
         types::{
@@ -132,7 +133,7 @@ impl Ctx {
     pub(crate) fn eval(&mut self, input: Val) -> Val {
         match input {
             Val::Symbol(s) => self.get(&s),
-            Val::Box(k) => self.eval_box(&k.0),
+            Val::Ref(k) => self.eval_ref_val(&k),
             Val::Pair(p) => self.eval_pair(p.first, p.second),
             Val::List(l) => self.eval_list(l),
             Val::Map(m) => self.eval_map(m),
@@ -142,8 +143,8 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn eval_box(&self, keeper: &Keeper<TaggedVal>) -> Val {
-        let Ok(input) = Keeper::reader(keeper) else {
+    pub(crate) fn eval_ref_val(&self, ref_val: &RefVal) -> Val {
+        let Ok(input) = Keeper::reader(&ref_val.0) else {
             return Val::default();
         };
         input.deref().val.clone()
@@ -273,16 +274,7 @@ impl Ctx {
                 };
                 f(val)
             }
-            Val::String(s) => {
-                let Some(val) = self.get_ref(&s) else {
-                    return Val::default();
-                };
-                let Either::Left(f) = map(true) else {
-                    return Val::default();
-                };
-                f(val)
-            }
-            Val::Box(k) => {
+            Val::Ref(k) => {
                 let Ok(r) = Keeper::reader(&k.0) else {
                     return Val::default();
                 };
@@ -316,16 +308,7 @@ impl Ctx {
                 };
                 f(val)
             }
-            Val::String(s) => {
-                let Some(val) = self.get_mut(&s) else {
-                    return Val::default();
-                };
-                let Either::Left(f) = map(true) else {
-                    return Val::default();
-                };
-                f(val)
-            }
-            Val::Box(k) => {
+            Val::Ref(k) => {
                 let Ok(mut o) = Keeper::owner(&k.0) else {
                     return Val::default();
                 };

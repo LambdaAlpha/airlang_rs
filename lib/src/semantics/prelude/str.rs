@@ -15,7 +15,7 @@ use crate::{
         val::Val,
     },
     types::{
-        Keeper,
+        Either,
         Reader,
         Str,
     },
@@ -34,25 +34,19 @@ pub(crate) fn length() -> Val {
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
     let name_or_str = fn_eval_escape(ctx, input);
-    match name_or_str {
-        Val::Symbol(name) => {
-            let Some(Val::String(s)) = ctx.get_ref(&name) else {
+    ctx.eval_ref(name_or_str, |is_ref| {
+        let f = |val: &Val| {
+            let Val::String(s) = val else {
                 return Val::default();
             };
             Val::Int(s.len().into())
+        };
+        if is_ref {
+            Either::Left(f)
+        } else {
+            Either::Right(move |val| f(&val))
         }
-        Val::Box(k) => {
-            let Ok(r) = Keeper::reader(&k.0) else {
-                return Val::default();
-            };
-            let Val::String(s) = &r.val else {
-                return Val::default();
-            };
-            Val::Int(s.len().into())
-        }
-        Val::String(s) => Val::Int(s.len().into()),
-        _ => Val::default(),
-    }
+    })
 }
 
 pub(crate) fn concat() -> Val {
