@@ -22,11 +22,9 @@ use crate::{
         },
     },
     types::{
-        Call,
         Keeper,
         Pair,
         Reader,
-        Reverse,
         Str,
         Symbol,
     },
@@ -157,55 +155,8 @@ pub(crate) fn eval_escape() -> Val {
     .into()
 }
 
-pub(crate) fn fn_eval_escape(ctx: &mut Ctx, input: Val) -> Val {
-    match input {
-        Val::Call(c) => match &c.func {
-            Val::Symbol(s) => {
-                if &**s == "\\" {
-                    ctx.eval(c.input)
-                } else {
-                    let func = fn_eval_escape(ctx, c.func);
-                    let input = fn_eval_escape(ctx, c.input);
-                    let call = Box::new(Call::new(func, input));
-                    Val::Call(call)
-                }
-            }
-            _ => {
-                let func = fn_eval_escape(ctx, c.func);
-                let input = fn_eval_escape(ctx, c.input);
-                let call = Box::new(Call::new(func, input));
-                Val::Call(call)
-            }
-        },
-        Val::Pair(p) => {
-            let first = fn_eval_escape(ctx, p.first);
-            let second = fn_eval_escape(ctx, p.second);
-            let pair = Box::new(Pair::new(first, second));
-            Val::Pair(pair)
-        }
-        Val::Reverse(r) => {
-            let func = fn_eval_escape(ctx, r.func);
-            let output = fn_eval_escape(ctx, r.output);
-            let reverse = Box::new(Reverse::new(func, output));
-            Val::Reverse(reverse)
-        }
-        Val::List(l) => {
-            let list = l.into_iter().map(|v| fn_eval_escape(ctx, v)).collect();
-            Val::List(list)
-        }
-        Val::Map(m) => {
-            let map = m
-                .into_iter()
-                .map(|(k, v)| {
-                    let key = fn_eval_escape(ctx, k);
-                    let value = fn_eval_escape(ctx, v);
-                    (key, value)
-                })
-                .collect();
-            Val::Map(map)
-        }
-        i => i,
-    }
+fn fn_eval_escape(ctx: &mut Ctx, input: Val) -> Val {
+    ctx.eval_escape(input)
 }
 
 pub(crate) fn eval_in_ctx() -> Val {
@@ -281,7 +232,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let body = fn_eval_escape(ctx, map_remove(&mut map, "body"));
+    let body = ctx.eval_escape(map_remove(&mut map, "body"));
     let constants = match fn_map_new(ctx, map_remove(&mut map, "const")) {
         Val::Map(m) => {
             let Some(constants) = into_name_map(m) else {
@@ -292,7 +243,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
         Val::Unit(_) => NameMap::default(),
         _ => return Val::default(),
     };
-    let input_name = match fn_eval_escape(ctx, map_remove(&mut map, "input")) {
+    let input_name = match ctx.eval_escape(map_remove(&mut map, "input")) {
         Val::Symbol(s) => {
             if &*s == "_" {
                 None
@@ -303,7 +254,7 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
         Val::Unit(_) => Some(Name::from("input")),
         _ => return Val::default(),
     };
-    let caller_name = match fn_eval_escape(ctx, map_remove(&mut map, "caller")) {
+    let caller_name = match ctx.eval_escape(map_remove(&mut map, "caller")) {
         Val::Symbol(s) => {
             if &*s == "_" {
                 None

@@ -11,10 +11,7 @@ use {
                 Primitive,
                 TaggedVal,
             },
-            prelude::{
-                eval::fn_eval_escape,
-                names,
-            },
+            prelude::names,
             val::Val,
         },
         types::{
@@ -40,7 +37,7 @@ pub(crate) fn read() -> Val {
 }
 
 fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
-    let name = fn_eval_escape(ctx, input);
+    let name = ctx.eval_escape(input);
     ctx.eval_ref(name, |is_ref| {
         if is_ref {
             Either::Left(Clone::clone)
@@ -62,7 +59,7 @@ pub(crate) fn is_null() -> Val {
 }
 
 fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
-    let name = fn_eval_escape(ctx, input);
+    let name = ctx.eval_escape(input);
     match name {
         Val::Symbol(s) => Val::Bool(Bool::new(ctx.get_ref(&s).is_none())),
         Val::Ref(k) => Val::Bool(Bool::new(Keeper::reader(&k.0).is_err())),
@@ -119,7 +116,7 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let first = fn_eval_escape(ctx, pair.first);
+    let first = ctx.eval_escape(pair.first);
     match first {
         Val::Symbol(s) => {
             let val = ctx.eval(pair.second);
@@ -158,7 +155,7 @@ pub(crate) fn set_final() -> Val {
 }
 
 fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
-    let input = fn_eval_escape(ctx, input);
+    let input = ctx.eval_escape(input);
     match input {
         Val::Symbol(s) => ctx.set_final(&s),
         Val::Ref(k) => {
@@ -187,7 +184,7 @@ pub(crate) fn set_const() -> Val {
 }
 
 fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
-    let input = fn_eval_escape(ctx, input);
+    let input = ctx.eval_escape(input);
     match input {
         Val::Symbol(s) => ctx.set_const(&s),
         Val::Ref(k) => {
@@ -212,7 +209,7 @@ pub(crate) fn remove() -> Val {
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
-    let input = fn_eval_escape(ctx, input);
+    let input = ctx.eval_escape(input);
     match input {
         Val::Symbol(s) => ctx.remove(&s),
         Val::Ref(k) => {

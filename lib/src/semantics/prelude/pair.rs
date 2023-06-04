@@ -9,10 +9,7 @@ use {
                 Name,
                 Primitive,
             },
-            prelude::{
-                eval::fn_eval_escape,
-                names,
-            },
+            prelude::names,
             val::Val,
         },
         types::{
@@ -35,7 +32,7 @@ pub(crate) fn first() -> Val {
 }
 
 fn fn_first(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_pair = fn_eval_escape(ctx, input);
+    let name_or_pair = ctx.eval_escape(input);
     ctx.eval_ref(name_or_pair, |is_ref| {
         if is_ref {
             Either::Left(|val: &Val| match val {
@@ -66,7 +63,7 @@ fn fn_first_assign(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_val.first);
+    let name = ctx.eval_escape(name_val.first);
     let mut val = ctx.eval(name_val.second);
     ctx.eval_mut(name, |is_ref| {
         if is_ref {
@@ -95,7 +92,7 @@ pub(crate) fn second() -> Val {
 }
 
 fn fn_second(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_pair = fn_eval_escape(ctx, input);
+    let name_or_pair = ctx.eval_escape(input);
     ctx.eval_ref(name_or_pair, |is_ref| {
         if is_ref {
             Either::Left(|val: &Val| match val {
@@ -126,7 +123,7 @@ fn fn_second_assign(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_val.first);
+    let name = ctx.eval_escape(name_val.first);
     let mut val = ctx.eval(name_val.second);
     ctx.eval_mut(name, |is_ref| {
         if is_ref {

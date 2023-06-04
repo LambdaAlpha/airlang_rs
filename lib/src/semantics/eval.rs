@@ -7,11 +7,13 @@ use {
             Val,
         },
         types::{
+            Call,
             Either,
             Keeper,
             Map,
             Pair,
             Reader,
+            Reverse,
         },
     },
     smartstring::alias::CompactString,
@@ -326,6 +328,57 @@ impl Ctx {
                 };
                 g(val)
             }
+        }
+    }
+
+    pub(crate) fn eval_escape(&mut self, input: Val) -> Val {
+        match input {
+            Val::Call(c) => match &c.func {
+                Val::Symbol(s) => {
+                    if &**s == "\\" {
+                        self.eval(c.input)
+                    } else {
+                        let func = self.eval_escape(c.func);
+                        let input = self.eval_escape(c.input);
+                        let call = Box::new(Call::new(func, input));
+                        Val::Call(call)
+                    }
+                }
+                _ => {
+                    let func = self.eval_escape(c.func);
+                    let input = self.eval_escape(c.input);
+                    let call = Box::new(Call::new(func, input));
+                    Val::Call(call)
+                }
+            },
+            Val::Pair(p) => {
+                let first = self.eval_escape(p.first);
+                let second = self.eval_escape(p.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::Reverse(r) => {
+                let func = self.eval_escape(r.func);
+                let output = self.eval_escape(r.output);
+                let reverse = Box::new(Reverse::new(func, output));
+                Val::Reverse(reverse)
+            }
+            Val::List(l) => {
+                let list = l.into_iter().map(|v| self.eval_escape(v)).collect();
+                Val::List(list)
+            }
+            Val::Map(m) => {
+                let map = m
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let key = self.eval_escape(k);
+                        let value = self.eval_escape(v);
+                        (key, value)
+                    })
+                    .collect();
+                Val::Map(map)
+            }
+            i => i,
         }
     }
 }

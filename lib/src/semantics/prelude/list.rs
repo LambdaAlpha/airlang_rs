@@ -9,10 +9,7 @@ use {
                 Name,
                 Primitive,
             },
-            prelude::{
-                eval::fn_eval_escape,
-                names,
-            },
+            prelude::names,
             val::{
                 PairVal,
                 Val,
@@ -39,7 +36,7 @@ pub(crate) fn length() -> Val {
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_list = fn_eval_escape(ctx, input);
+    let name_or_list = ctx.eval_escape(input);
     ctx.eval_ref(name_or_list, |is_ref| {
         let f = |list: &Val| {
             let Val::List(list) = list else {
@@ -73,7 +70,7 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = list_pair.second else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, list_pair.first);
+    let name = ctx.eval_escape(list_pair.first);
     let index = ctx.eval(index_value.first);
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -124,7 +121,7 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = list_pair.second else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, list_pair.first);
+    let name = ctx.eval_escape(list_pair.first);
     let index = ctx.eval(index_value.first);
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -176,7 +173,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
-    let name_or_list = fn_eval_escape(ctx, name_index.first);
+    let name_or_list = ctx.eval_escape(name_index.first);
     if let Val::Pair(range) = name_index.second {
         let Some((from, to)) = to_range(ctx, *range) else {
             return Val::default();
@@ -257,7 +254,7 @@ fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = name_pair.second else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_pair.first);
+    let name = ctx.eval_escape(name_pair.first);
     let index = ctx.eval(index_value.first);
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -308,7 +305,7 @@ fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = name_pair.second else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_pair.first);
+    let name = ctx.eval_escape(name_pair.first);
     let index = ctx.eval(index_value.first);
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -358,7 +355,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
-    let name_or_list = fn_eval_escape(ctx, name_index.first);
+    let name_or_list = ctx.eval_escape(name_index.first);
     if let Val::Pair(range) = name_index.second {
         let Some((from, to)) = to_range(ctx, *range) else {
             return Val::default();
@@ -438,7 +435,7 @@ fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_value.first);
+    let name = ctx.eval_escape(name_value.first);
     let value = ctx.eval(name_value.second);
     ctx.eval_mut(name, |is_ref| {
         if is_ref {
@@ -476,7 +473,7 @@ fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_values.first);
+    let name = ctx.eval_escape(name_values.first);
     let values = ctx.eval(name_values.second);
     let Val::List(mut values) = values else {
         return Val::default();
@@ -517,7 +514,7 @@ fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
-    let name = fn_eval_escape(ctx, name_count.first);
+    let name = ctx.eval_escape(name_count.first);
     let count = ctx.eval(name_count.second);
     match count {
         Val::Unit(_) => ctx.eval_mut(name, |is_ref| {
@@ -588,7 +585,7 @@ pub(crate) fn clear() -> Val {
 }
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
-    let name = fn_eval_escape(ctx, input);
+    let name = ctx.eval_escape(input);
     ctx.eval_mut(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
