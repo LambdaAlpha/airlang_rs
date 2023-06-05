@@ -37,7 +37,7 @@ pub(crate) fn length() -> Val {
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
     let name_or_list = ctx.eval_escape(input);
-    ctx.eval_ref(name_or_list, |is_ref| {
+    ctx.get_ref_or_val(name_or_list, |is_ref| {
         let f = |list: &Val| {
             let Val::List(list) = list else {
                 return Val::default();
@@ -76,7 +76,7 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let mut value = ctx.eval(index_value.second);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val else {
@@ -129,7 +129,7 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(values) = ctx.eval(index_value.second) else {
         return Val::default();
     };
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val else {
@@ -178,7 +178,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
         let Some((from, to)) = to_range(ctx, *range) else {
             return Val::default();
         };
-        ctx.eval_ref(name_or_list, |is_ref| {
+        ctx.get_ref_or_val(name_or_list, |is_ref| {
             if is_ref {
                 Either::Left(|list: &Val| {
                     let Val::List(list) = list else {
@@ -210,7 +210,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
         let Some(i) = to_index(ctx.eval(name_index.second)) else {
             return Val::default();
         };
-        ctx.eval_ref(name_or_list, |is_ref| {
+        ctx.get_ref_or_val(name_or_list, |is_ref| {
             if is_ref {
                 Either::Left(|list: &Val| {
                     let Val::List(list) = list else {
@@ -260,7 +260,7 @@ fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let value = ctx.eval(index_value.second);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val else {
@@ -313,7 +313,7 @@ fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(values) = ctx.eval(index_value.second) else {
         return Val::default();
     };
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val  else {
@@ -360,7 +360,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
         let Some((from, to)) = to_range(ctx, *range) else {
             return Val::default();
         };
-        ctx.eval_mut(name_or_list, |is_ref| {
+        ctx.get_mut_or_val(name_or_list, |is_ref| {
             if is_ref {
                 Either::Left(|list: &mut Val| {
                     let Val::List(list) = list  else {
@@ -393,7 +393,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
         let Some(i) = to_index(ctx.eval(name_index.second))else {
             return Val::default();
         };
-        ctx.eval_mut(name_or_list, |is_ref| {
+        ctx.get_mut_or_val(name_or_list, |is_ref| {
             if is_ref {
                 Either::Left(|list: &mut Val| {
                     let Val::List(list) = list else {
@@ -437,7 +437,7 @@ fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
     };
     let name = ctx.eval_escape(name_value.first);
     let value = ctx.eval(name_value.second);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val else {
@@ -478,7 +478,7 @@ fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(mut values) = values else {
         return Val::default();
     };
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val else {
@@ -517,7 +517,7 @@ fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
     let name = ctx.eval_escape(name_count.first);
     let count = ctx.eval(name_count.second);
     match count {
-        Val::Unit(_) => ctx.eval_mut(name, |is_ref| {
+        Val::Unit(_) => ctx.get_mut_or_val(name, |is_ref| {
             if is_ref {
                 Either::Left(|val: &mut Val| {
                     let Val::List(list) = val else {
@@ -541,7 +541,7 @@ fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
             let Some(i) = i.to_usize() else {
                 return Val::default();
             };
-            ctx.eval_mut(name, |is_ref| {
+            ctx.get_mut_or_val(name, |is_ref| {
                 if is_ref {
                     Either::Left(|val: &mut Val| {
                         let Val::List(list) = val else {
@@ -586,7 +586,7 @@ pub(crate) fn clear() -> Val {
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
     let name = ctx.eval_escape(input);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::List(list) = val else {

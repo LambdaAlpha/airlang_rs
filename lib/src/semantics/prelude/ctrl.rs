@@ -94,11 +94,11 @@ fn fn_while(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = ctx.eval(condition.clone()) else {
+        let Val::Bool(b) = ctx.eval_by_ref(condition) else {
             return Val::default();
         };
         if b.bool() {
-            ctx.eval(body.clone());
+            ctx.eval_by_ref(body);
         } else {
             break;
         }

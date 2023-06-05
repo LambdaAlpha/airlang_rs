@@ -38,7 +38,7 @@ pub(crate) fn read() -> Val {
 
 fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
     let name = ctx.eval_escape(input);
-    ctx.eval_ref(name, |is_ref| {
+    ctx.get_ref_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(Clone::clone)
         } else {

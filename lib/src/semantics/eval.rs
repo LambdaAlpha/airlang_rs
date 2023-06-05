@@ -135,7 +135,7 @@ impl Ctx {
     pub(crate) fn eval(&mut self, input: Val) -> Val {
         match input {
             Val::Symbol(s) => self.get(&s),
-            Val::Ref(k) => self.eval_ref_val(&k),
+            Val::Ref(k) => self.eval_ref(&k),
             Val::Pair(p) => self.eval_pair(p.first, p.second),
             Val::List(l) => self.eval_list(l),
             Val::Map(m) => self.eval_map(m),
@@ -145,7 +145,7 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn eval_ref_val(&self, ref_val: &RefVal) -> Val {
+    pub(crate) fn eval_ref(&self, ref_val: &RefVal) -> Val {
         let Ok(input) = Keeper::reader(&ref_val.0) else {
             return Val::default();
         };
@@ -184,6 +184,48 @@ impl Ctx {
         };
         let reverse_func = reverse_interpreter.deref().clone().eval(self, func);
         self.eval_call(reverse_func, output)
+    }
+
+    pub(crate) fn eval_by_ref(&mut self, input: &Val) -> Val {
+        match input {
+            Val::Symbol(s) => self.get(s),
+            Val::Ref(k) => self.eval_ref(k),
+            Val::Pair(p) => self.eval_pair_by_ref(&p.first, &p.second),
+            Val::List(l) => self.eval_list_by_ref(l),
+            Val::Map(m) => self.eval_map_by_ref(m),
+            Val::Call(c) => self.eval_call_by_ref(&c.func, &c.input),
+            Val::Reverse(r) => self.eval_reverse_by_ref(&r.func, &r.output),
+            v => v.clone(),
+        }
+    }
+
+    pub(crate) fn eval_pair_by_ref(&mut self, first: &Val, second: &Val) -> Val {
+        let pair = Pair::new(self.eval_by_ref(first), self.eval_by_ref(second));
+        Val::Pair(Box::new(pair))
+    }
+
+    pub(crate) fn eval_list_by_ref(&mut self, list: &ListVal) -> Val {
+        let list = list.into_iter().map(|v| self.eval_by_ref(v)).collect();
+        Val::List(list)
+    }
+
+    pub(crate) fn eval_map_by_ref(&mut self, map: &MapVal) -> Val {
+        let map = map
+            .into_iter()
+            .map(|(k, v)| (self.eval_by_ref(k), self.eval_by_ref(v)))
+            .collect();
+        Val::Map(map)
+    }
+
+    pub(crate) fn eval_call_by_ref(&mut self, func: &Val, input: &Val) -> Val {
+        let Val::Func(func) = self.eval_by_ref( func) else {
+            return Val::default();
+        };
+        func.eval(self, input.clone())
+    }
+
+    pub(crate) fn eval_reverse_by_ref(&mut self, func: &Val, output: &Val) -> Val {
+        self.eval_reverse(func.clone(), output.clone())
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
@@ -260,7 +302,7 @@ impl Ctx {
         tagged_val.tag = InvariantTag::Const;
     }
 
-    pub(crate) fn eval_ref<M, F, G>(&self, name: Val, map: M) -> Val
+    pub(crate) fn get_ref_or_val<M, F, G>(&self, name: Val, map: M) -> Val
     where
         F: FnOnce(&Val) -> Val,
         G: FnOnce(Val) -> Val,
@@ -294,7 +336,7 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn eval_mut<M, F, G>(&mut self, name: Val, map: M) -> Val
+    pub(crate) fn get_mut_or_val<M, F, G>(&mut self, name: Val, map: M) -> Val
     where
         F: FnOnce(&mut Val) -> Val,
         G: FnOnce(Val) -> Val,

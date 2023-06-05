@@ -70,7 +70,7 @@ pub(crate) fn length() -> Val {
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
     let name_or_map = ctx.eval_escape(input);
-    ctx.eval_ref(name_or_map, |is_ref| {
+    ctx.get_ref_or_val(name_or_map, |is_ref| {
         let f = |map: &Val| {
             let Val::Map(map) = map else {
                 return Val::default();
@@ -98,7 +98,7 @@ pub(crate) fn keys() -> Val {
 
 fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
     let name_or_map = ctx.eval_escape(input);
-    ctx.eval_ref(name_or_map, |is_ref| {
+    ctx.get_ref_or_val(name_or_map, |is_ref| {
         if is_ref {
             Either::Left(|val: &Val| {
                 let Val::Map(map) = val else {
@@ -130,7 +130,7 @@ pub(crate) fn values() -> Val {
 
 fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
     let name_or_map = ctx.eval_escape(input);
-    ctx.eval_ref(name_or_map, |is_ref| {
+    ctx.get_ref_or_val(name_or_map, |is_ref| {
         if is_ref {
             Either::Left(|val: &Val| {
                 let Val::Map(map) = val else {
@@ -166,7 +166,7 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
     };
     let name = ctx.eval_escape(name_key.first);
     let key = ctx.eval(name_key.second);
-    ctx.eval_ref(name, |is_ref| {
+    ctx.get_ref_or_val(name, |is_ref| {
         let f = |val: &Val| {
             let Val::Map(map) = val  else {
                 return Val::default();
@@ -201,7 +201,7 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(keys) = keys  else {
         return Val::default();
     };
-    ctx.eval_ref(name, |is_ref| {
+    ctx.get_ref_or_val(name, |is_ref| {
         let f = |val: &Val| {
             let Val::Map(map) = val else {
                 return Val::default();
@@ -238,7 +238,7 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     };
     let key = ctx.eval(key_value.first);
     let value = ctx.eval(key_value.second);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::Map(map) = val else {
@@ -277,7 +277,7 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Map(update) = name_pair.second else {
         return Val::default();
     };
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::Map(map) = val else {
@@ -318,7 +318,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
     };
     let name = ctx.eval_escape(name_key.first);
     let key = ctx.eval(name_key.second);
-    ctx.eval_ref(name, |is_ref| {
+    ctx.get_ref_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &Val| {
                 let Val::Map(map) = val else {
@@ -357,7 +357,7 @@ fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(keys) = keys else {
         return Val::default();
     };
-    ctx.eval_ref(name, |is_ref| {
+    ctx.get_ref_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &Val| {
                 let Val::Map(map) = val else {
@@ -401,7 +401,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
     };
     let name = ctx.eval_escape(name_key.first);
     let key = ctx.eval(name_key.second);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::Map(map) = val else {
@@ -441,7 +441,7 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(keys) = keys else {
         return Val::default();
     };
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::Map(map) = val else {
@@ -480,7 +480,7 @@ pub(crate) fn clear() -> Val {
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
     let name = ctx.eval_escape(input);
-    ctx.eval_mut(name, |is_ref| {
+    ctx.get_mut_or_val(name, |is_ref| {
         if is_ref {
             Either::Left(|val: &mut Val| {
                 let Val::Map(map) = val else {
