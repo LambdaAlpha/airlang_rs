@@ -217,3 +217,51 @@ is_null a
 ;(a = [const_ref 1], [\ a] = 2, $$ a)
 # ---
 1
+# ===
+;(a = [context {var: {b: 1}}], a $in [$0 b])
+# ---
+1
+# ===
+;(a = [context {var: {b: 1, ;, =}}], a $in [$0 [;(b = 2, b)]])
+# ---
+2
+# ===
+;(a = [context {final: {b: 1, ;, =}}], a $in [$0 [;(b = 2, b)]])
+# ---
+1
+# ===
+;(a = [context {const: {b: [1: 2], ;, set1}}], a $in [$0 [;(b set1 3, b)]])
+# ---
+1: 2
+# ===
+;(a = [context {var: {b: 1}}], set_super a, b)
+# ---
+1
+# ===
+;(a = [context {var: {b: 1}}], b = 2, set_super a, b)
+# ---
+2
+# ===
+;(a = [context {}], set_super a, b = 1, b: [a $in [$0 b]])
+# ---
+1: 1
+# ===
+;(a = [context {}], b = 1, set_super a, b = 2, b: [a $in [$0 b]])
+# ---
+2: '
+# ===
+;(a = [context {var: {b: [1: 2]}}], set_super a, b set1 3, a $in [$0 b])
+# ---
+3: 2
+# ===
+;(a = [context {var: {b: 1}}], set_super a, move b: [a $in [$0 b]])
+# ---
+1: '
+# ===
+;(a = [context {var: {b: 1}}], b = 2, set_super a, move b: [a $in [$0 b]])
+# ---
+2: 1
+# ===
+;(a = [context {}], set_super a, b =local 2, b: [a $in [$0 b]])
+# ---
+2: '

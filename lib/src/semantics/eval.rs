@@ -56,9 +56,9 @@ pub(crate) struct Primitive {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed {
     pub(crate) body: Val,
-    pub(crate) constants: NameMap,
-    pub(crate) input_name: Option<Name>,
-    pub(crate) caller_name: Option<Name>,
+    pub(crate) ctx: Ctx,
+    pub(crate) input_name: Name,
+    pub(crate) caller_name: Name,
 }
 
 pub(crate) type Name = CompactString;
@@ -83,6 +83,7 @@ pub(crate) struct TaggedVal {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Ctx {
     pub(crate) name_map: NameMap,
+    pub(crate) super_ctx_name: Option<Name>,
     pub(crate) reverse_interpreter: Option<Reader<Func>>,
 }
 
@@ -102,31 +103,26 @@ impl FuncImpl {
 }
 
 impl Composed {
-    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
-        let mut name_map = self.constants;
-        if let Some(input_name) = self.input_name {
-            name_map.insert(input_name, TaggedVal::new(input));
-        }
-        if let Some(caller_name) = &self.caller_name {
-            let mut ctx_swap = Ctx::default();
-            swap(ctx, &mut ctx_swap);
-            name_map.insert(
-                caller_name.clone(),
-                TaggedVal::new_final(Val::Ctx(Box::new(ctx_swap))),
-            );
-        }
-        let reverse_interpreter = ctx.reverse_interpreter.clone();
+    pub(crate) fn eval(mut self, ctx: &mut Ctx, input: Val) -> Val {
+        self.ctx
+            .name_map
+            .insert(self.input_name, TaggedVal::new(input));
 
-        let mut new_ctx = Ctx {
-            name_map,
-            reverse_interpreter,
-        };
-        let output = new_ctx.eval(self.body);
-        if let Some(caller_name) = &self.caller_name {
-            if let Val::Ctx(caller) = new_ctx.into_val(caller_name) {
-                *ctx = *caller;
-            }
+        self.ctx.reverse_interpreter = ctx.reverse_interpreter.clone();
+
+        let mut caller_ctx = Ctx::default();
+        swap(ctx, &mut caller_ctx);
+        self.ctx.name_map.insert(
+            self.caller_name.clone(),
+            TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx))),
+        );
+
+        let output = self.ctx.eval(self.body);
+
+        if let Val::Ctx(caller) = self.ctx.into_val(&self.caller_name) {
+            *ctx = *caller;
         }
+
         output
     }
 }
@@ -232,25 +228,33 @@ impl Ctx {
         self.name_map
             .get(name)
             .map(|tagged_val| tagged_val.val.clone())
+            .or_else(|| self.get_ref_super_ctx().map(|ctx| ctx.get(name)))
             .unwrap_or_default()
     }
 
     pub(crate) fn get_ref(&self, name: &str) -> Option<&Val> {
-        self.name_map.get(name).map(|tagged_val| &tagged_val.val)
+        self.name_map
+            .get(name)
+            .map(|tagged_val| &tagged_val.val)
+            .or_else(|| self.get_ref_super_ctx().and_then(|ctx| ctx.get_ref(name)))
     }
 
     pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Val> {
-        self.name_map
-            .get_mut(name)
-            .and_then(|tagged_val| match tagged_val.tag {
-                InvariantTag::Const => None,
-                _ => Some(&mut tagged_val.val),
-            })
+        if self.name_map.get(name).is_none() {
+            return self.get_mut_super_ctx().and_then(|ctx| ctx.get_mut(name));
+        }
+        let Some(tagged_val) = self.name_map.get_mut(name) else {
+            return None;
+        };
+        match tagged_val.tag {
+            InvariantTag::Const => None,
+            _ => Some(&mut tagged_val.val),
+        }
     }
 
     pub(crate) fn remove(&mut self, name: &str) -> Val {
         let Some(tagged_val) = self.name_map.get(name) else {
-            return Val::default();
+            return self.get_mut_super_ctx().map(|ctx| ctx.remove(name)).unwrap_or_default();
         };
         if !matches!(&tagged_val.tag, InvariantTag::None) {
             return Val::default();
@@ -269,24 +273,42 @@ impl Ctx {
     }
 
     pub(crate) fn put_val(&mut self, name: Name, val: TaggedVal) -> Val {
-        let Some(tagged_val) = self.name_map.get(&name) else {
-            return self.name_map
-                .insert(name, val)
-                .map(|ctx_val| ctx_val.val)
-                .unwrap_or_default();
-        };
-        if matches!(&tagged_val.tag, InvariantTag::None) {
-            self.name_map
-                .insert(name, val)
-                .map(|tagged_val| tagged_val.val)
-                .unwrap_or_default()
-        } else {
-            Val::default()
+        match self.name_map.get(&name) {
+            None => {
+                if let Some(super_ctx) = self.get_mut_super_ctx() {
+                    super_ctx.put_val(name, val)
+                } else {
+                    self.put_unchecked(name, val)
+                }
+            }
+            Some(tagged_val) => {
+                if !matches!(&tagged_val.tag, InvariantTag::None) {
+                    return Val::default();
+                }
+                self.put_unchecked(name, val)
+            }
         }
+    }
+
+    pub(crate) fn put_val_local(&mut self, name: Name, val: TaggedVal) -> Val {
+        let (None | Some(TaggedVal { tag: InvariantTag::None, .. })) = self.name_map.get(&name) else {
+            return Val::default();
+        };
+        self.put_unchecked(name, val)
+    }
+
+    fn put_unchecked(&mut self, name: Name, val: TaggedVal) -> Val {
+        self.name_map
+            .insert(name, val)
+            .map(|tagged_val| tagged_val.val)
+            .unwrap_or_default()
     }
 
     pub(crate) fn set_final(&mut self, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
+            if let Some(ctx) = self.get_mut_super_ctx() {
+                ctx.set_final(name);
+            }
             return;
         };
         if !(matches!(&tagged_val.tag, InvariantTag::None)) {
@@ -297,9 +319,35 @@ impl Ctx {
 
     pub(crate) fn set_const(&mut self, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
+            if let Some(ctx) = self.get_mut_super_ctx() {
+                ctx.set_const(name);
+            }
             return;
         };
         tagged_val.tag = InvariantTag::Const;
+    }
+
+    fn get_ref_super_ctx(&self) -> Option<&Ctx> {
+        let Some(name) = &self.super_ctx_name else {
+            return None;
+        };
+        let Some(TaggedVal { val: Val::Ctx(super_ctx), .. }) = self.name_map.get(name) else {
+            return None;
+        };
+        Some(super_ctx)
+    }
+
+    fn get_mut_super_ctx(&mut self) -> Option<&mut Ctx> {
+        let Some(name) = &self.super_ctx_name else {
+            return None;
+        };
+        let Some(TaggedVal { val: Val::Ctx(super_ctx), tag }) = self.name_map.get_mut(name) else {
+            return None;
+        };
+        if matches!(tag, InvariantTag::Const) {
+            return None;
+        }
+        Some(super_ctx)
     }
 
     pub(crate) fn get_ref_or_val<M, F, G>(&self, name: Val, map: M) -> Val

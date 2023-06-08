@@ -7,14 +7,9 @@ use crate::{
             FuncImpl,
             FuncTrait,
             Name,
-            NameMap,
             Primitive,
-            TaggedVal,
         },
-        prelude::{
-            map::fn_map_new,
-            names,
-        },
+        prelude::names,
         val::{
             MapVal,
             Val,
@@ -189,43 +184,26 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let body = ctx.eval_escape(map_remove(&mut map, "body"));
-    let constants = match fn_map_new(ctx, map_remove(&mut map, "const")) {
-        Val::Map(m) => {
-            let Some(constants) = into_name_map(m) else {
-                return Val::default();
-            };
-            constants
-        }
-        Val::Unit(_) => NameMap::default(),
+    let func_ctx = match ctx.eval(map_remove(&mut map, "context")) {
+        Val::Ctx(func_ctx) => *func_ctx,
+        Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
     let input_name = match ctx.eval_escape(map_remove(&mut map, "input")) {
-        Val::Symbol(s) => {
-            if &*s == "_" {
-                None
-            } else {
-                Some(Name::from(<_ as Into<String>>::into(s)))
-            }
-        }
-        Val::Unit(_) => Some(Name::from("input")),
+        Val::Symbol(Symbol(name)) => name,
+        Val::Unit(_) => Name::from("input"),
         _ => return Val::default(),
     };
     let caller_name = match ctx.eval_escape(map_remove(&mut map, "caller")) {
-        Val::Symbol(s) => {
-            if &*s == "_" {
-                None
-            } else {
-                Some(Name::from(<_ as Into<String>>::into(s)))
-            }
-        }
-        Val::Unit(_) => Some(Name::from("caller")),
+        Val::Symbol(Symbol(name)) => name,
+        Val::Unit(_) => Name::from("caller"),
         _ => return Val::default(),
     };
     Box::new(Func {
         func_trait: FuncTrait {},
         func_impl: FuncImpl::Composed(Composed {
             body,
-            constants,
+            ctx: func_ctx,
             input_name,
             caller_name,
         }),
@@ -236,18 +214,6 @@ fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
     let name = Val::Symbol(Symbol::from_str(name));
     map.remove(&name).unwrap_or_default()
-}
-
-fn into_name_map(map: MapVal) -> Option<NameMap> {
-    map.into_iter()
-        .map(|(k, v)| match k {
-            Val::Symbol(s) => Some((
-                Name::from(<_ as Into<String>>::into(s)),
-                TaggedVal::new_const(v),
-            )),
-            _ => None,
-        })
-        .collect()
 }
 
 pub(crate) fn chain() -> Val {

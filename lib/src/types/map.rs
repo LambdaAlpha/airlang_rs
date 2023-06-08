@@ -27,6 +27,10 @@ pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);
 pub type Set<K> = Map<K, ()>;
 
 impl<K: Eq + Hash, V> Map<K, V> {
+    pub(crate) fn with_capacity(len: usize) -> Self {
+        Map(FxHashMap::with_capacity_and_hasher(len, Default::default()))
+    }
+
     pub(crate) fn into_keys(self) -> IntoKeys<K, V> {
         self.0.into_keys()
     }

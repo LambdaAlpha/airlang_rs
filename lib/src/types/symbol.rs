@@ -4,7 +4,7 @@ use {
 };
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Symbol(CompactString);
+pub struct Symbol(pub(crate) CompactString);
 
 impl Symbol {
     pub(crate) fn from_str(s: &str) -> Self {

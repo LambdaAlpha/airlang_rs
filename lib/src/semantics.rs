@@ -53,6 +53,7 @@ impl Interpreter {
         let name_map = prelude.clone();
         Ctx {
             name_map,
+            super_ctx_name: None,
             reverse_interpreter: None,
         }
     }

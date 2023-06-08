@@ -8,11 +8,18 @@ use {
                 FuncTrait,
                 InvariantTag,
                 Name,
+                NameMap,
                 Primitive,
                 TaggedVal,
             },
-            prelude::names,
-            val::Val,
+            prelude::{
+                map::fn_map_new,
+                names,
+            },
+            val::{
+                MapVal,
+                Val,
+            },
         },
         types::{
             Bool,
@@ -20,6 +27,7 @@ use {
             Keeper,
             Owner,
             Reader,
+            Symbol,
         },
     },
     std::mem::swap,
@@ -65,6 +73,28 @@ fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
         Val::Ref(k) => Val::Bool(Bool::new(Keeper::reader(&k.0).is_err())),
         _ => Val::default(),
     }
+}
+
+pub(crate) fn assign_local() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::ASSIGN_LOCAL),
+            eval: Reader::new(fn_assign_local),
+        }),
+    })
+    .into()
+}
+
+fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Symbol(Symbol(name)) = ctx.eval_escape(pair.first) else {
+        return Val::default();
+    };
+    let val = ctx.eval(pair.second);
+    ctx.put_val_local(name, TaggedVal::new(val))
 }
 
 pub(crate) fn assign() -> Val {
@@ -288,4 +318,87 @@ pub(crate) fn const_ref() -> Val {
 
 fn fn_const_ref(ctx: &mut Ctx, input: Val) -> Val {
     Val::Ref(Keeper::new(TaggedVal::new_const(ctx.eval(input))).into())
+}
+
+pub(crate) fn ctx_new() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::CTX_NEW),
+            eval: Reader::new(fn_ctx_new),
+        }),
+    })
+    .into()
+}
+
+fn fn_ctx_new(ctx: &mut Ctx, input: Val) -> Val {
+    let Val::Map(mut map) = fn_map_new(ctx, input) else {
+        return Val::default();
+    };
+
+    let Val::Map(constants) = map_remove(&mut map, "const") else {
+        return Val::default();
+    };
+    let Val::Map(finals) = map_remove(&mut map, "final") else {
+        return Val::default();
+    };
+    let Val::Map(variables) = map_remove(&mut map, "var") else {
+        return Val::default();
+    };
+
+    let mut name_map = NameMap::with_capacity(constants.len() + finals.len() + variables.len());
+
+    for (key, val) in constants {
+        let Val::Symbol(Symbol(name)) = key else {
+            return Val::default();
+        };
+        name_map.insert(name, TaggedVal::new_const(val));
+    }
+    for (key, val) in finals {
+        let Val::Symbol(Symbol(name)) = key else {
+            return Val::default();
+        };
+        name_map.insert(name, TaggedVal::new_final(val));
+    }
+    for (key, val) in variables {
+        let Val::Symbol(Symbol(name)) = key else {
+            return Val::default();
+        };
+        name_map.insert(name, TaggedVal::new(val));
+    }
+
+    Val::Ctx(Box::new(Ctx {
+        name_map,
+        super_ctx_name: None,
+        reverse_interpreter: None,
+    }))
+}
+
+fn map_remove(map: &mut MapVal, name: &str) -> Val {
+    let name = Val::Symbol(Symbol::from_str(name));
+    map.remove(&name).unwrap_or(Val::Map(MapVal::default()))
+}
+
+pub(crate) fn ctx_set_super() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::CTX_SET_SUPER),
+            eval: Reader::new(fn_ctx_set_super),
+        }),
+    })
+    .into()
+}
+
+fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
+    match ctx.eval_escape(input) {
+        Val::Symbol(Symbol(name)) => {
+            ctx.super_ctx_name = Some(name);
+        }
+        Val::Unit(_) => {
+            ctx.super_ctx_name = None;
+        }
+        _ => {}
+    }
+    Val::default()
 }

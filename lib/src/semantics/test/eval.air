@@ -51,7 +51,7 @@ $\ (a, b: (\ [not 't]))
         body: [n [c $in a]],
         input: a,
         caller: c,
-        const: {n: not, $in}
+        context: [context {const: {n: not, $in}}]
     }],
     f 't
 )
@@ -63,7 +63,7 @@ $\ (a, b: (\ [not 't]))
         body: [n [c $in a]],
         input: a,
         caller: c,
-        const: {n: not, $in}
+        context: [context {const: {n: not, $in}}]
     }],
     f [not 't]
 )
@@ -73,7 +73,7 @@ $\ (a, b: (\ [not 't]))
 ;(
     f = [function{
         body: [not [caller $in input]],
-        const: {not, $in}
+        context: [context {const: {not, $in}}]
     }],
     f [not 't]
 )
@@ -90,25 +90,13 @@ $\ (a, b: (\ [not 't]))
 't
 # ===
 ;(
-    f = [function{
-        body: _,
-        input: _,
-        caller: _,
-        const: {}
-    }],
-    f [not 't]
-)
-# ---
-'
-# ===
-;(
     a = 'f,
     f = [function{
         body: [a == input],
-        const: {
+        context: [context {const: {
             ==,
             a
-        }
+        }}]
     }],
     f 't
 )
@@ -117,13 +105,14 @@ $\ (a, b: (\ [not 't]))
 # ===
 ;(
     f = [function{
-        body: [;(a = 1, $$ input)],
-        const: {
+        body: [;(set_super caller, $$ input)],
+        context: [context {const: {
             ;,
-            =,
             $$,
-        }
+            set_super,
+        }}]
     }],
+    a = 1,
     f a
 )
 # ---
