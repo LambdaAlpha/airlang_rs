@@ -23,6 +23,8 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::ASSIGN_CONST, ctx::assign_const());
     put(&mut c, names::FINAL, ctx::set_final());
     put(&mut c, names::CONST, ctx::set_const());
+    put(&mut c, names::IS_FINAL, ctx::is_final());
+    put(&mut c, names::IS_CONST, ctx::is_const());
     put(&mut c, names::REF, ctx::new_ref());
     put(&mut c, names::NULL_REF, ctx::null_ref());
     put(&mut c, names::FINAL_REF, ctx::final_ref());
@@ -118,6 +120,8 @@ pub(crate) mod names {
     pub(crate) const ASSIGN_CONST: &str = "=const";
     pub(crate) const FINAL: &str = "final";
     pub(crate) const CONST: &str = "const";
+    pub(crate) const IS_FINAL: &str = "is_final";
+    pub(crate) const IS_CONST: &str = "is_const";
     pub(crate) const REF: &str = "ref";
     pub(crate) const NULL_REF: &str = "null_ref";
     pub(crate) const FINAL_REF: &str = "final_ref";

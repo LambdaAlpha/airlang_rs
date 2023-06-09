@@ -327,6 +327,22 @@ impl Ctx {
         tagged_val.tag = InvariantTag::Const;
     }
 
+    pub(crate) fn is_final(&self, name: &str) -> bool {
+        self.name_map
+            .get(name)
+            .map(|tagged_val| matches!(&tagged_val.tag, InvariantTag::Final | InvariantTag::Const))
+            .or_else(|| self.get_ref_super_ctx().map(|ctx| ctx.is_final(name)))
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn is_const(&self, name: &str) -> bool {
+        self.name_map
+            .get(name)
+            .map(|tagged_val| matches!(&tagged_val.tag, InvariantTag::Const))
+            .or_else(|| self.get_ref_super_ctx().map(|ctx| ctx.is_const(name)))
+            .unwrap_or_default()
+    }
+
     fn get_ref_super_ctx(&self) -> Option<&Ctx> {
         let Some(name) = &self.super_ctx_name else {
             return None;

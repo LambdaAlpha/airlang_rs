@@ -158,6 +158,70 @@ is_null a
 # ---
 1
 # ===
+is_final a
+# ---
+'f
+# ===
+;(a = 1, is_final a)
+# ---
+'f
+# ===
+;(a =final 1, is_final a)
+# ---
+'t
+# ===
+;(a =const 1, is_final a)
+# ---
+'t
+# ===
+;(a = [null_ref '], is_final a)
+# ---
+'f
+# ===
+;(a = [ref 1], is_final [\ a])
+# ---
+'f
+# ===
+;(a = [final_ref 1], is_final [\ a])
+# ---
+'t
+# ===
+;(a = [const_ref 1], is_final [\ a])
+# ---
+'t
+# ===
+is_const a
+# ---
+'f
+# ===
+;(a = 1, is_const a)
+# ---
+'f
+# ===
+;(a =final 1, is_const a)
+# ---
+'f
+# ===
+;(a =const 1, is_const a)
+# ---
+'t
+# ===
+;(a = [null_ref '], is_const a)
+# ---
+'f
+# ===
+;(a = [ref 1], is_const [\ a])
+# ---
+'f
+# ===
+;(a = [final_ref 1], is_const [\ a])
+# ---
+'f
+# ===
+;(a = [const_ref 1], is_const [\ a])
+# ---
+'t
+# ===
 ;(a = [final_ref [1: 2]], const [\ a], [\ a] set1 3, eval2 a)
 # ---
 1: 2

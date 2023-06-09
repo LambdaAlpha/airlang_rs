@@ -227,6 +227,65 @@ fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
     }
     Val::default()
 }
+
+pub(crate) fn is_final() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::IS_FINAL),
+            eval: Reader::new(fn_is_final),
+        }),
+    })
+    .into()
+}
+
+fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
+    let input = ctx.eval_escape(input);
+    let is_const = match input {
+        Val::Symbol(s) => ctx.is_final(&s),
+        Val::Ref(k) => {
+            if let Ok(r) = Keeper::reader(&k.0) {
+                matches!(&r.tag, InvariantTag::Final | InvariantTag::Const)
+            } else {
+                false
+            }
+        }
+        _ => {
+            return Val::default();
+        }
+    };
+    Val::Bool(Bool::new(is_const))
+}
+
+pub(crate) fn is_const() -> Val {
+    Box::new(Func {
+        func_trait: FuncTrait {},
+        func_impl: FuncImpl::Primitive(Primitive {
+            id: Name::from(names::IS_CONST),
+            eval: Reader::new(fn_is_const),
+        }),
+    })
+    .into()
+}
+
+fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
+    let input = ctx.eval_escape(input);
+    let is_const = match input {
+        Val::Symbol(s) => ctx.is_const(&s),
+        Val::Ref(k) => {
+            if let Ok(r) = Keeper::reader(&k.0) {
+                matches!(&r.tag, InvariantTag::Const)
+            } else {
+                false
+            }
+        }
+        _ => {
+            return Val::default();
+        }
+    };
+    Val::Bool(Bool::new(is_const))
+}
+
 pub(crate) fn remove() -> Val {
     Box::new(Func {
         func_trait: FuncTrait {},
