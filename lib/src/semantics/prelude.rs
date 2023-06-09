@@ -135,12 +135,12 @@ pub(crate) mod names {
     pub(crate) const EQUAL: &str = "==";
     pub(crate) const NOT_EQUAL: &str = "!=";
 
-    pub(crate) const VAL: &str = "$0";
-    pub(crate) const EVAL: &str = "$";
-    pub(crate) const EVAL_TWICE: &str = "$$";
-    pub(crate) const EVAL_THRICE: &str = "$$$";
-    pub(crate) const EVAL_ESCAPE: &str = "$\\";
-    pub(crate) const EVAL_IN_CTX: &str = "$in";
+    pub(crate) const VAL: &str = "val";
+    pub(crate) const EVAL: &str = "eval";
+    pub(crate) const EVAL_TWICE: &str = "eval2";
+    pub(crate) const EVAL_THRICE: &str = "eval3";
+    pub(crate) const EVAL_ESCAPE: &str = "eval\\";
+    pub(crate) const EVAL_IN_CTX: &str = "eval@";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "function";

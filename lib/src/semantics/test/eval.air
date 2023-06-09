@@ -14,44 +14,44 @@ stringify "1"
 # ---
 "\"1\""
 # ===
-$0 a
+val a
 # ---
 a
 # ===
-$ [not 'f]
+eval [not 'f]
 # ---
 't
 # ===
-$\ (a, f a, a: b, f? a, {a: b})
+eval\ (a, f a, a: b, f? a, {a: b})
 # ---
 (a, f a, a: b, f? a, {a: b})
 # ===
-$\ {a: b, c: [\ [not 'f]]}
+eval\ {a: b, c: [\ [not 'f]]}
 # ---
 {a: b, c: 't}
 # ===
-$\ (a, b: (\ [not 't]))
+eval\ (a, b: (\ [not 't]))
 # ---
 (a, b: ('f))
 # ===
-;(a = 1, $$ [$0 a])
+;(a = 1, eval2 [val a])
 # ---
 1
 # ===
-[$0 a] $$ [$0 b]
+[val a] eval2 [val b]
 # ---
 ': '
 # ===
-;(a = 1, $$$ [ref [$0 a]])
+;(a = 1, eval3 [ref [val a]])
 # ---
 1
 # ===
 ;(
     f = [function{
-        body: [n [c $in a]],
+        body: [n [c eval@ a]],
         input: a,
         caller: c,
-        context: [context {const: {n: not, $in}}]
+        context: [context {const: {n: not, eval@}}]
     }],
     f 't
 )
@@ -60,10 +60,10 @@ $\ (a, b: (\ [not 't]))
 # ===
 ;(
     f = [function{
-        body: [n [c $in a]],
+        body: [n [c eval@ a]],
         input: a,
         caller: c,
-        context: [context {const: {n: not, $in}}]
+        context: [context {const: {n: not, eval@}}]
     }],
     f [not 't]
 )
@@ -72,8 +72,8 @@ $\ (a, b: (\ [not 't]))
 # ===
 ;(
     f = [function{
-        body: [not [caller $in input]],
-        context: [context {const: {not, $in}}]
+        body: [not [caller eval@ input]],
+        context: [context {const: {not, eval@}}]
     }],
     f [not 't]
 )
@@ -82,7 +82,7 @@ $\ (a, b: (\ [not 't]))
 # ===
 ;(
     f = [function{
-        body: [[\ not] [caller [\ $in] input]]
+        body: [[\ not] [caller [\ eval@] input]]
     }],
     f [not 't]
 )
@@ -105,10 +105,10 @@ $\ (a, b: (\ [not 't]))
 # ===
 ;(
     f = [function{
-        body: [;(set_super caller, $$ input)],
+        body: [;(set_super caller, eval2 input)],
         context: [context {const: {
             ;,
-            $$,
+            eval2,
             set_super,
         }}]
     }],
