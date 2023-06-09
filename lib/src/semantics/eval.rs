@@ -366,55 +366,37 @@ impl Ctx {
         Some(super_ctx)
     }
 
-    pub(crate) fn get_ref_or_val<M, F, G>(&self, name: Val, map: M) -> Val
+    pub(crate) fn get_ref_or_val<F>(&self, name: Val, f: F) -> Val
     where
-        F: FnOnce(&Val) -> Val,
-        G: FnOnce(Val) -> Val,
-        M: FnOnce(bool) -> Either<F, G>,
+        F: FnOnce(Either<&Val, Val>) -> Val,
     {
         match name {
             Val::Symbol(s) => {
                 let Some(val) = self.get_ref(&s) else {
                     return Val::default();
                 };
-                let Either::Left(f) = map(true) else {
-                    return Val::default();
-                };
-                f(val)
+                f(Either::Left(val))
             }
             Val::Ref(k) => {
                 let Ok(r) = Keeper::reader(&k.0) else {
                     return Val::default();
                 };
-                let Either::Left(f) = map(true) else {
-                    return Val::default();
-                };
-                f(&r.val)
+                f(Either::Left(&r.val))
             }
-            val => {
-                let Either::Right(g) = map(false) else {
-                    return Val::default();
-                };
-                g(val)
-            }
+            val => f(Either::Right(val)),
         }
     }
 
-    pub(crate) fn get_mut_or_val<M, F, G>(&mut self, name: Val, map: M) -> Val
+    pub(crate) fn get_mut_or_val<F>(&mut self, name: Val, f: F) -> Val
     where
-        F: FnOnce(&mut Val) -> Val,
-        G: FnOnce(Val) -> Val,
-        M: FnOnce(bool) -> Either<F, G>,
+        F: FnOnce(Either<&mut Val, Val>) -> Val,
     {
         match name {
             Val::Symbol(s) => {
                 let Some(val) = self.get_mut(&s) else {
                     return Val::default();
                 };
-                let Either::Left(f) = map(true) else {
-                    return Val::default();
-                };
-                f(val)
+                f(Either::Left(val))
             }
             Val::Ref(k) => {
                 let Ok(mut o) = Keeper::owner(&k.0) else {
@@ -423,17 +405,9 @@ impl Ctx {
                 if !matches!(o.tag, InvariantTag::None | InvariantTag::Final) {
                     return Val::default();
                 }
-                let Either::Left(f) = map(true) else {
-                    return Val::default();
-                };
-                f(&mut o.val)
+                f(Either::Left(&mut o.val))
             }
-            val => {
-                let Either::Right(g) = map(false) else {
-                    return Val::default();
-                };
-                g(val)
-            }
+            val => f(Either::Right(val)),
         }
     }
 
