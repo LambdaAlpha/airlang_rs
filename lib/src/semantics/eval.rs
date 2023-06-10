@@ -105,14 +105,13 @@ impl FuncImpl {
 impl Composed {
     pub(crate) fn eval(mut self, ctx: &mut Ctx, input: Val) -> Val {
         self.ctx
-            .name_map
-            .insert(self.input_name, TaggedVal::new(input));
+            .put_val_local(self.input_name, TaggedVal::new(input));
 
         self.ctx.reverse_interpreter = ctx.reverse_interpreter.clone();
 
         let mut caller_ctx = Ctx::default();
         swap(ctx, &mut caller_ctx);
-        self.ctx.name_map.insert(
+        self.ctx.put_val_local(
             self.caller_name.clone(),
             TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx))),
         );
