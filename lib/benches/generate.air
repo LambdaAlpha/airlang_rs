@@ -1,13 +1,13 @@
 # "bench generate"
-;(
+;[
   x = 42,
   y = 24,
-  while(
+  while[
     x <> y,
-    if(x > y,
-        x = [x - y],
-        y = [y - x]
-    )
-  ),
+    if[x > y,
+        x = (x - y),
+        y = (y - x)
+    ]
+  ],
   x
-)
+]

@@ -1,14 +1,14 @@
-parse "(1, 2)"
+parse "[1, 2]"
 # ---
-(1, 2)
+[1, 2]
 # ===
-;(a = 1, parse "a")
+;[a = 1, parse "a"]
 # ---
 a
 # ===
-parse [stringify (1, 2)]
+parse (stringify [1, 2])
 # ---
-(1, 2)
+[1, 2]
 # ===
 stringify "1"
 # ---
@@ -18,103 +18,103 @@ val a
 # ---
 a
 # ===
-eval [not 'f]
+eval (not 'f)
 # ---
 't
 # ===
-eval\ (a, f a, a: b, f? a, {a: b})
+eval\ [a, f a, a: b, f? a, {a: b}]
 # ---
-(a, f a, a: b, f? a, {a: b})
+[a, f a, a: b, f? a, {a: b}]
 # ===
-eval\ {a: b, c: [\ [not 'f]]}
+eval\ {a: b, c: (\ (not 'f))}
 # ---
 {a: b, c: 't}
 # ===
-eval\ (a, b: (\ [not 't]))
+eval\ [a, b: [\ (not 't)]]
 # ---
-(a, b: ('f))
+[a, b: ['f]]
 # ===
-;(a = 1, eval2 [val a])
+;[a = 1, eval2 (val a)]
 # ---
 1
 # ===
-[val a] eval2 [val b]
+(val a) eval2 (val b)
 # ---
 ': '
 # ===
-;(a = 1, eval3 [ref [val a]])
+;[a = 1, eval3 (ref (val a))]
 # ---
 1
 # ===
-;(
-    f = [function{
-        body: [n [c eval@ a]],
+;[
+    f = (function{
+        body: (n (c eval@ a)),
         input: a,
         caller: c,
-        context: [context {const: {n: not, eval@}}]
-    }],
+        context: (context {const: {n: not, eval@}})
+    }),
     f 't
-)
+]
 # ---
 'f
 # ===
-;(
-    f = [function{
-        body: [n [c eval@ a]],
+;[
+    f = (function{
+        body: (n (c eval@ a)),
         input: a,
         caller: c,
-        context: [context {const: {n: not, eval@}}]
-    }],
-    f [not 't]
-)
+        context: (context {const: {n: not, eval@}})
+    }),
+    f (not 't)
+]
 # ---
 't
 # ===
-;(
-    f = [function{
-        body: [not [caller eval@ input]],
-        context: [context {const: {not, eval@}}]
-    }],
-    f [not 't]
-)
+;[
+    f = (function{
+        body: (not (caller eval@ input)),
+        context: (context {const: {not, eval@}})
+    }),
+    f (not 't)
+]
 # ---
 't
 # ===
-;(
-    f = [function{
-        body: [[\ not] [caller [\ eval@] input]]
-    }],
-    f [not 't]
-)
+;[
+    f = (function{
+        body: ((\ not) (caller (\ eval@) input))
+    }),
+    f (not 't)
+]
 # ---
 't
 # ===
-;(
+;[
     a = 'f,
-    f = [function{
-        body: [a == input],
-        context: [context {const: {
+    f = (function{
+        body: (a == input),
+        context: (context {const: {
             ==,
             a
-        }}]
-    }],
+        }})
+    }),
     f 't
-)
+]
 # ---
 'f
 # ===
-;(
-    f = [function{
-        body: [;(set_super caller, eval2 input)],
-        context: [context {const: {
+;[
+    f = (function{
+        body: (;[set_super caller, eval2 input]),
+        context: (context {const: {
             ;,
             eval2,
             set_super,
-        }}]
-    }],
+        }})
+    }),
     a = 1,
     f a
-)
+]
 # ---
 1
 # ===
