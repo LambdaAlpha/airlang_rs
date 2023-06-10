@@ -46,6 +46,10 @@ eval\ [a, b: [\ (not 't)]]
 # ---
 1
 # ===
+;[a = (context {const: {=}}), a eval@ (val (b = 1)), a eval@ (val b)]
+# ---
+1
+# ===
 ;[
     f = (function{
         body: (n (c eval@ a)),
@@ -105,7 +109,7 @@ eval\ [a, b: [\ (not 't)]]
 # ===
 ;[
     f = (function{
-        body: (;[set_super caller, eval2 input]),
+        body: (;[self set_super caller, eval2 input]),
         context: (context {const: {
             ;,
             eval2,

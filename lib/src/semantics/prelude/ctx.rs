@@ -447,14 +447,35 @@ pub(crate) fn ctx_set_super() -> Val {
 }
 
 fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
-    match ctx.eval_escape(input) {
-        Val::Symbol(Symbol(name)) => {
-            ctx.super_ctx_name = Some(name);
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let ctx_name_or_val = ctx.eval_escape(pair.first);
+    let super_ctx_name = ctx.eval_escape(pair.second);
+    let f = |ctx: &mut Ctx| {
+        match super_ctx_name {
+            Val::Symbol(Symbol(name)) => {
+                ctx.super_ctx_name = Some(name);
+            }
+            Val::Unit(_) => {
+                ctx.super_ctx_name = None;
+            }
+            _ => {}
         }
-        Val::Unit(_) => {
-            ctx.super_ctx_name = None;
+        Val::default()
+    };
+    if let Val::Symbol(Symbol(name)) = &ctx_name_or_val {
+        if name == "self" {
+            return f(ctx);
         }
-        _ => {}
     }
-    Val::default()
+    ctx.get_mut_or_val(ctx_name_or_val, |ref_or_val| match ref_or_val {
+        Either::Left(r) => {
+            let Val::Ctx(ctx) = r else {
+                return Val::default();
+            };
+            f(ctx)
+        }
+        Either::Right(_) => Val::default(),
+    })
 }

@@ -16,6 +16,7 @@ use crate::{
         },
     },
     types::{
+        Either,
         Keeper,
         Reader,
         Str,
@@ -125,11 +126,20 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Ctx(mut target_ctx) = ctx.eval(pair.first) else {
-        return Val::default();
-    };
+    let name_or_val = ctx.eval_escape(pair.first);
     let val = ctx.eval(pair.second);
-    target_ctx.eval(val)
+    ctx.get_mut_or_val(name_or_val, |ref_or_val| {
+        let f = |target: &mut Val| {
+            let Val::Ctx(target_ctx) = target else {
+                return Val::default();
+            };
+            target_ctx.eval(val)
+        };
+        match ref_or_val {
+            Either::Left(r) => f(r),
+            Either::Right(mut val) => f(&mut val),
+        }
+    })
 }
 pub(crate) fn parse() -> Val {
     Box::new(Func {
