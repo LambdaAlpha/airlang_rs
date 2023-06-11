@@ -22,15 +22,15 @@ eval (not 'f)
 # ---
 't
 # ===
-eval\ [a, f a, a: b, f? a, {a: b}]
+eval' [a, f a, a: b, f? a, {a: b}]
 # ---
 [a, f a, a: b, f? a, {a: b}]
 # ===
-eval\ {a: b, c: (\ (not 'f))}
+eval' {a: b, c: (' (not 'f))}
 # ---
 {a: b, c: 't}
 # ===
-eval\ [a, b: [\ (not 't)]]
+eval' [a, b: [' (not 't)]]
 # ---
 [a, b: ['f]]
 # ===
@@ -86,7 +86,7 @@ eval\ [a, b: [\ (not 't)]]
 # ===
 ;[
     f = (function{
-        body: ((\ not) (caller (\ eval@) input))
+        body: ((' not) (caller (' eval@) input))
     }),
     f (not 't)
 ]
@@ -109,7 +109,7 @@ eval\ [a, b: [\ (not 't)]]
 # ===
 ;[
     f = (function{
-        body: (;[self set_super caller, eval2 input]),
+        body: (;[' set_super caller, eval2 input]),
         context: (context {const: {
             ;,
             eval2,

@@ -464,10 +464,8 @@ fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
         }
         Val::default()
     };
-    if let Val::Symbol(Symbol(name)) = &ctx_name_or_val {
-        if name == "self" {
-            return f(ctx);
-        }
+    if let Val::Unit(_) = &ctx_name_or_val {
+        return f(ctx);
     }
     ctx.get_mut_or_val(ctx_name_or_val, |ref_or_val| match ref_or_val {
         Either::Left(r) => {

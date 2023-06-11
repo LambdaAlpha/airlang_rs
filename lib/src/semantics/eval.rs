@@ -413,16 +413,7 @@ impl Ctx {
     pub(crate) fn eval_escape(&mut self, input: Val) -> Val {
         match input {
             Val::Call(c) => match &c.func {
-                Val::Symbol(s) => {
-                    if &**s == "\\" {
-                        self.eval(c.input)
-                    } else {
-                        let func = self.eval_escape(c.func);
-                        let input = self.eval_escape(c.input);
-                        let call = Box::new(Call::new(func, input));
-                        Val::Call(call)
-                    }
-                }
+                Val::Unit(_) => self.eval(c.input),
                 _ => {
                     let func = self.eval_escape(c.func);
                     let input = self.eval_escape(c.input);

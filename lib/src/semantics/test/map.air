@@ -1,4 +1,4 @@
-map {a, \ (not 't): c, not 'f}
+map {a, ' (not 't): c, not 'f}
 # ---
 {a: ', 'f: ', not 'f: 't}
 # ===
@@ -6,7 +6,7 @@ map {{a: b}: {c: d}}
 # ---
 {{a: b}: {c: '}}
 # ===
-map {\ (not 'f): a}
+map {' (not 'f): a}
 # ---
 {'t: '}
 # ===
@@ -30,7 +30,7 @@ map {a: (eval {b: c})}
 # ---
 2
 # ===
-;[a = (ref {1: 2, 3}), (\ a) . map_length]
+;[a = (ref {1: 2, 3}), (' a) . map_length]
 # ---
 2
 # ===

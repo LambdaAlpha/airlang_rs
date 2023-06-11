@@ -143,7 +143,7 @@ pub(crate) mod names {
     pub(crate) const EVAL: &str = "eval";
     pub(crate) const EVAL_TWICE: &str = "eval2";
     pub(crate) const EVAL_THRICE: &str = "eval3";
-    pub(crate) const EVAL_ESCAPE: &str = "eval\\";
+    pub(crate) const EVAL_ESCAPE: &str = "eval'";
     pub(crate) const EVAL_IN_CTX: &str = "eval@";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
