@@ -3,9 +3,6 @@ use crate::{
         eval::{
             Ctx,
             Func,
-            FuncImpl,
-            FuncTrait,
-            Name,
             Primitive,
         },
         prelude::names,
@@ -14,57 +11,14 @@ use crate::{
     types::{
         Bool,
         Either,
-        Pair,
-        Reader,
     },
 };
 
-pub(crate) fn map_new() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_NEW),
-            eval: Reader::new(fn_map_new),
-        }),
-    })
-    .into()
-}
-
-pub(crate) fn fn_map_new(ctx: &mut Ctx, input: Val) -> Val {
-    match input {
-        Val::Map(m) => {
-            let map = m
-                .into_iter()
-                .map(|(k, v)| {
-                    let key = ctx.eval_escape(k);
-                    let value = fn_map_new(ctx, v);
-                    (key, value)
-                })
-                .collect();
-            Val::Map(map)
-        }
-        Val::Pair(p) => {
-            let first = fn_map_new(ctx, p.first);
-            let second = fn_map_new(ctx, p.second);
-            let pair = Box::new(Pair::new(first, second));
-            Val::Pair(pair)
-        }
-        Val::List(l) => {
-            let list = l.into_iter().map(|v| fn_map_new(ctx, v)).collect();
-            Val::List(list)
-        }
-        i => ctx.eval(i),
-    }
-}
-
 pub(crate) fn length() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_LENGTH),
-            eval: Reader::new(fn_length),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_LENGTH,
+        fn_length,
+    )))
     .into()
 }
 
@@ -85,13 +39,10 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn keys() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_KEYS),
-            eval: Reader::new(fn_keys),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_KEYS,
+        fn_keys,
+    )))
     .into()
 }
 
@@ -114,13 +65,10 @@ fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn values() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_VALUES),
-            eval: Reader::new(fn_values),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_VALUES,
+        fn_values,
+    )))
     .into()
 }
 
@@ -143,13 +91,10 @@ fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn contains() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_CONTAINS),
-            eval: Reader::new(fn_contains),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_CONTAINS,
+        fn_contains,
+    )))
     .into()
 }
 
@@ -158,7 +103,7 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_key.first);
-    let key = ctx.eval(name_key.second);
+    let key = ctx.eval_escape(name_key.second);
     ctx.get_ref_or_val(name, |ref_or_val| {
         let f = |val: &Val| {
             let Val::Map(map) = val  else {
@@ -174,13 +119,10 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn contains_many() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_CONTAINS_MANY),
-            eval: Reader::new(fn_contains_many),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_CONTAINS_MANY,
+        fn_contains_many,
+    )))
     .into()
 }
 
@@ -189,7 +131,7 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_keys.first);
-    let keys = ctx.eval(name_keys.second);
+    let keys = ctx.eval_escape(name_keys.second);
     let Val::List(keys) = keys  else {
         return Val::default();
     };
@@ -209,13 +151,10 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_SET),
-            eval: Reader::new(fn_set),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_SET,
+        fn_set,
+    )))
     .into()
 }
 
@@ -227,7 +166,7 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(key_value) = name_pair.second else {
         return Val::default();
     };
-    let key = ctx.eval(key_value.first);
+    let key = ctx.eval_escape(key_value.first);
     let value = ctx.eval(key_value.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
@@ -247,13 +186,10 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set_many() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_SET_MANY),
-            eval: Reader::new(fn_set_many),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_SET_MANY,
+        fn_set_many,
+    )))
     .into()
 }
 
@@ -262,7 +198,7 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_pair.first);
-    let Val::Map(update) = name_pair.second else {
+    let Val::Map(update) = ctx.eval_bind(name_pair.second) else {
         return Val::default();
     };
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
@@ -287,13 +223,10 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_GET),
-            eval: Reader::new(fn_get),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_GET,
+        fn_get,
+    )))
     .into()
 }
 
@@ -302,7 +235,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_key.first);
-    let key = ctx.eval(name_key.second);
+    let key = ctx.eval_escape(name_key.second);
     ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -320,13 +253,10 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get_many() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_GET_MANY),
-            eval: Reader::new(fn_get_many),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_GET_MANY,
+        fn_get_many,
+    )))
     .into()
 }
 
@@ -335,7 +265,7 @@ fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_keys.first);
-    let keys = ctx.eval(name_keys.second);
+    let keys = ctx.eval_escape(name_keys.second);
     let Val::List(keys) = keys else {
         return Val::default();
     };
@@ -364,13 +294,10 @@ fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_REMOVE),
-            eval: Reader::new(fn_remove),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_REMOVE,
+        fn_remove,
+    )))
     .into()
 }
 
@@ -379,7 +306,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_key.first);
-    let key = ctx.eval(name_key.second);
+    let key = ctx.eval_escape(name_key.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -398,13 +325,10 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove_many() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_REMOVE_MANY),
-            eval: Reader::new(fn_remove_many),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_REMOVE_MANY,
+        fn_remove_many,
+    )))
     .into()
 }
 
@@ -413,7 +337,7 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = ctx.eval_escape(name_keys.first);
-    let keys = ctx.eval(name_keys.second);
+    let keys = ctx.eval_escape(name_keys.second);
     let Val::List(keys) = keys else {
         return Val::default();
     };
@@ -441,13 +365,10 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn clear() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MAP_CLEAR),
-            eval: Reader::new(fn_clear),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MAP_CLEAR,
+        fn_clear,
+    )))
     .into()
 }
 

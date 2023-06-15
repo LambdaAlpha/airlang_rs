@@ -2,10 +2,8 @@ use crate::{
     semantics::{
         eval::{
             Ctx,
+            EvalMode,
             Func,
-            FuncImpl,
-            FuncTrait,
-            Name,
             Primitive,
         },
         prelude::names,
@@ -13,19 +11,15 @@ use crate::{
     },
     types::{
         Either,
-        Reader,
         Str,
     },
 };
 
 pub(crate) fn length() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::STR_LENGTH),
-            eval: Reader::new(fn_length),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::STR_LENGTH,
+        fn_length,
+    )))
     .into()
 }
 
@@ -46,18 +40,16 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn concat() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::STR_CONCAT),
-            eval: Reader::new(fn_concat),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::STR_CONCAT,
+        EvalMode::Eval,
+        fn_concat,
+    )))
     .into()
 }
 
-fn fn_concat(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::List(strings) = ctx.eval(input) else {
+fn fn_concat(input: Val) -> Val {
+    let Val::List(strings) = input else {
         return Val::default();
     };
     let mut ret = String::new();

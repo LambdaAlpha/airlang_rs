@@ -46,19 +46,47 @@ pub(crate) enum FuncImpl {
     Composed(Composed),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub(crate) struct Primitive {
     pub(crate) id: Name,
-    #[allow(clippy::type_complexity)]
-    pub(crate) eval: Reader<dyn Fn(&mut Ctx, Val) -> Val>,
+    pub(crate) eval: PrimitiveEval,
 }
+
+#[derive(Clone)]
+pub(crate) enum PrimitiveEval {
+    CtxFree {
+        eval_mode: EvalMode,
+        evaluator: CtxFreeFn,
+    },
+    CtxAware {
+        evaluator: CtxAwareFn,
+    },
+}
+
+type CtxFreeFn = Reader<dyn Fn(Val) -> Val>;
+
+type CtxAwareFn = Reader<dyn Fn(&mut Ctx, Val) -> Val>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed {
     pub(crate) body: Val,
     pub(crate) ctx: Ctx,
     pub(crate) input_name: Name,
-    pub(crate) caller_name: Name,
+    pub(crate) eval: ComposedEval,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub(crate) enum ComposedEval {
+    CtxFree { eval_mode: EvalMode },
+    CtxAware { caller_name: Name },
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub(crate) enum EvalMode {
+    Val,
+    Eval,
+    Escape,
+    Bind,
 }
 
 pub(crate) type Name = CompactString;
@@ -96,33 +124,68 @@ impl Func {
 impl FuncImpl {
     pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            FuncImpl::Primitive(p) => (p.eval)(ctx, input),
+            FuncImpl::Primitive(p) => p.eval(ctx, input),
             FuncImpl::Composed(c) => c.eval(ctx, input),
         }
     }
 }
 
-impl Composed {
-    pub(crate) fn eval(mut self, ctx: &mut Ctx, input: Val) -> Val {
-        self.ctx
-            .put_val_local(self.input_name, TaggedVal::new(input));
-
-        self.ctx.reverse_interpreter = ctx.reverse_interpreter.clone();
-
-        let mut caller_ctx = Ctx::default();
-        swap(ctx, &mut caller_ctx);
-        self.ctx.put_val_local(
-            self.caller_name.clone(),
-            TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx))),
-        );
-
-        let output = self.ctx.eval(self.body);
-
-        if let Val::Ctx(caller) = self.ctx.into_val(&self.caller_name) {
-            *ctx = *caller;
+impl Primitive {
+    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
+        match self.eval {
+            PrimitiveEval::CtxFree {
+                eval_mode,
+                evaluator,
+            } => {
+                let val = eval_mode.eval(ctx, input);
+                evaluator(val)
+            }
+            PrimitiveEval::CtxAware { evaluator } => evaluator(ctx, input),
         }
+    }
+}
 
-        output
+impl Composed {
+    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
+        let mut new_ctx = self.ctx;
+        new_ctx.reverse_interpreter = ctx.reverse_interpreter.clone();
+
+        match self.eval {
+            ComposedEval::CtxFree { eval_mode } => {
+                let val = eval_mode.eval(ctx, input);
+                new_ctx.put_val_local(self.input_name, TaggedVal::new(val));
+                new_ctx.eval(self.body)
+            }
+            ComposedEval::CtxAware { caller_name } => {
+                new_ctx.put_val_local(self.input_name, TaggedVal::new(input));
+
+                let mut caller_ctx = Ctx::default();
+                swap(ctx, &mut caller_ctx);
+                new_ctx.put_val_local(
+                    caller_name.clone(),
+                    TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx))),
+                );
+
+                let output = new_ctx.eval(self.body);
+
+                if let Val::Ctx(caller) = new_ctx.into_val(&caller_name) {
+                    *ctx = *caller;
+                }
+
+                output
+            }
+        }
+    }
+}
+
+impl EvalMode {
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match self {
+            EvalMode::Val => input,
+            EvalMode::Eval => ctx.eval(input),
+            EvalMode::Escape => ctx.eval_escape(input),
+            EvalMode::Bind => ctx.eval_bind(input),
+        }
     }
 }
 
@@ -451,15 +514,55 @@ impl Ctx {
             i => i,
         }
     }
+
+    pub(crate) fn eval_bind(&mut self, input: Val) -> Val {
+        match input {
+            Val::Map(m) => {
+                let map = m
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let key = self.eval_escape(k);
+                        let value = self.eval_bind(v);
+                        (key, value)
+                    })
+                    .collect();
+                Val::Map(map)
+            }
+            Val::Pair(p) => {
+                let first = self.eval_bind(p.first);
+                let second = self.eval_bind(p.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::List(l) => {
+                let list = l.into_iter().map(|v| self.eval_bind(v)).collect();
+                Val::List(list)
+            }
+            i => self.eval(i),
+        }
+    }
 }
 
-impl Debug for Primitive {
+impl Debug for PrimitiveEval {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let ptr: *const dyn Fn(&mut Ctx, Val) -> Val = &*self.eval;
-        f.debug_struct("Primitive")
-            .field("id", &self.id)
-            .field("eval", &format!("{ptr:p}"))
-            .finish()
+        match self {
+            PrimitiveEval::CtxFree {
+                eval_mode,
+                evaluator: eval,
+            } => {
+                let ptr: *const dyn Fn(Val) -> Val = &**eval;
+                f.debug_struct("PrimitiveEval::CtxFree")
+                    .field("eval_mode", eval_mode)
+                    .field("eval", &format!("{ptr:p}"))
+                    .finish()
+            }
+            PrimitiveEval::CtxAware { evaluator: eval } => {
+                let ptr: *const dyn Fn(&mut Ctx, Val) -> Val = &**eval;
+                f.debug_struct("PrimitiveEval::CtxAware")
+                    .field("eval", &format!("{ptr:p}"))
+                    .finish()
+            }
+        }
     }
 }
 
@@ -494,6 +597,50 @@ impl TaggedVal {
         TaggedVal {
             tag: InvariantTag::Const,
             val,
+        }
+    }
+}
+
+impl Func {
+    pub(crate) fn new_primitive(primitive: Primitive) -> Func {
+        Func {
+            func_trait: FuncTrait {},
+            func_impl: FuncImpl::Primitive(primitive),
+        }
+    }
+
+    pub(crate) fn new_composed(composed: Composed) -> Func {
+        Func {
+            func_trait: FuncTrait {},
+            func_impl: FuncImpl::Composed(composed),
+        }
+    }
+}
+
+impl Primitive {
+    pub(crate) fn new_ctx_free(
+        id: &str,
+        eval_mode: EvalMode,
+        evaluator: impl Fn(Val) -> Val + 'static,
+    ) -> Primitive {
+        Primitive {
+            id: Name::from(id),
+            eval: PrimitiveEval::CtxFree {
+                eval_mode,
+                evaluator: Reader::new(evaluator),
+            },
+        }
+    }
+
+    pub(crate) fn new_ctx_aware(
+        id: &str,
+        evaluator: impl Fn(&mut Ctx, Val) -> Val + 'static,
+    ) -> Primitive {
+        Primitive {
+            id: Name::from(id),
+            eval: PrimitiveEval::CtxAware {
+                evaluator: Reader::new(evaluator),
+            },
         }
     }
 }

@@ -3,19 +3,15 @@ use {
         semantics::{
             eval::{
                 Ctx,
+                EvalMode,
                 Func,
-                FuncImpl,
-                FuncTrait,
                 InvariantTag,
                 Name,
                 NameMap,
                 Primitive,
                 TaggedVal,
             },
-            prelude::{
-                map::fn_map_new,
-                names,
-            },
+            prelude::names,
             val::{
                 MapVal,
                 Val,
@@ -26,7 +22,6 @@ use {
             Either,
             Keeper,
             Owner,
-            Reader,
             Symbol,
         },
     },
@@ -34,13 +29,10 @@ use {
 };
 
 pub(crate) fn read() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::READ),
-            eval: Reader::new(fn_read),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::READ,
+        fn_read,
+    )))
     .into()
 }
 
@@ -53,13 +45,10 @@ fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_null() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::IS_NULL),
-            eval: Reader::new(fn_is_null),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::IS_NULL,
+        fn_is_null,
+    )))
     .into()
 }
 
@@ -73,13 +62,10 @@ fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign_local() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::ASSIGN_LOCAL),
-            eval: Reader::new(fn_assign_local),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::ASSIGN_LOCAL,
+        fn_assign_local,
+    )))
     .into()
 }
 
@@ -95,13 +81,10 @@ fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::ASSIGN),
-            eval: Reader::new(fn_assign),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::ASSIGN,
+        fn_assign,
+    )))
     .into()
 }
 
@@ -110,13 +93,10 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign_final() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::ASSIGN_FINAL),
-            eval: Reader::new(fn_assign_final),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::ASSIGN_FINAL,
+        fn_assign_final,
+    )))
     .into()
 }
 
@@ -125,13 +105,10 @@ fn fn_assign_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign_const() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::ASSIGN_CONST),
-            eval: Reader::new(fn_assign_const),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::ASSIGN_CONST,
+        fn_assign_const,
+    )))
     .into()
 }
 
@@ -171,13 +148,10 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
 }
 
 pub(crate) fn set_final() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::FINAL),
-            eval: Reader::new(fn_set_final),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::FINAL,
+        fn_set_final,
+    )))
     .into()
 }
 
@@ -200,13 +174,10 @@ fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set_const() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::CONST),
-            eval: Reader::new(fn_set_const),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::CONST,
+        fn_set_const,
+    )))
     .into()
 }
 
@@ -226,13 +197,10 @@ fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_final() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::IS_FINAL),
-            eval: Reader::new(fn_is_final),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::IS_FINAL,
+        fn_is_final,
+    )))
     .into()
 }
 
@@ -255,13 +223,10 @@ fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_const() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::IS_CONST),
-            eval: Reader::new(fn_is_const),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::IS_CONST,
+        fn_is_const,
+    )))
     .into()
 }
 
@@ -284,13 +249,10 @@ fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::MOVE),
-            eval: Reader::new(fn_move),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::MOVE,
+        fn_move,
+    )))
     .into()
 }
 
@@ -312,32 +274,28 @@ fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn new_ref() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::REF),
-            eval: Reader::new(fn_new_ref),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::REF,
+        EvalMode::Eval,
+        fn_new_ref,
+    )))
     .into()
 }
 
-fn fn_new_ref(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Ref(Keeper::new(TaggedVal::new(ctx.eval(input))).into())
+fn fn_new_ref(input: Val) -> Val {
+    Val::Ref(Keeper::new(TaggedVal::new(input)).into())
 }
 
 pub(crate) fn null_ref() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::NULL_REF),
-            eval: Reader::new(fn_null_ref),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::NULL_REF,
+        EvalMode::Val,
+        fn_null_ref,
+    )))
     .into()
 }
 
-fn fn_null_ref(_: &mut Ctx, _: Val) -> Val {
+fn fn_null_ref(_: Val) -> Val {
     let k = Keeper::new(TaggedVal::new(Val::default()));
     let Ok(o) = Keeper::owner(&k) else {
         return Val::default();
@@ -347,48 +305,42 @@ fn fn_null_ref(_: &mut Ctx, _: Val) -> Val {
 }
 
 pub(crate) fn final_ref() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::FINAL_REF),
-            eval: Reader::new(fn_final_ref),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::FINAL_REF,
+        EvalMode::Eval,
+        fn_final_ref,
+    )))
     .into()
 }
 
-fn fn_final_ref(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Ref(Keeper::new(TaggedVal::new_final(ctx.eval(input))).into())
+fn fn_final_ref(input: Val) -> Val {
+    Val::Ref(Keeper::new(TaggedVal::new_final(input)).into())
 }
 
 pub(crate) fn const_ref() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::CONST_REF),
-            eval: Reader::new(fn_const_ref),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::CONST_REF,
+        EvalMode::Eval,
+        fn_const_ref,
+    )))
     .into()
 }
 
-fn fn_const_ref(ctx: &mut Ctx, input: Val) -> Val {
-    Val::Ref(Keeper::new(TaggedVal::new_const(ctx.eval(input))).into())
+fn fn_const_ref(input: Val) -> Val {
+    Val::Ref(Keeper::new(TaggedVal::new_const(input)).into())
 }
 
 pub(crate) fn ctx_new() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::CTX_NEW),
-            eval: Reader::new(fn_ctx_new),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::CTX_NEW,
+        EvalMode::Bind,
+        fn_ctx_new,
+    )))
     .into()
 }
 
-fn fn_ctx_new(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Map(mut map) = fn_map_new(ctx, input) else {
+fn fn_ctx_new(input: Val) -> Val {
+    let Val::Map(mut map) = input else {
         return Val::default();
     };
 
@@ -436,13 +388,10 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 }
 
 pub(crate) fn ctx_set_super() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::CTX_SET_SUPER),
-            eval: Reader::new(fn_ctx_set_super),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::CTX_SET_SUPER,
+        fn_ctx_set_super,
+    )))
     .into()
 }
 

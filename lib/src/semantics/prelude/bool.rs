@@ -1,60 +1,50 @@
 use crate::{
     semantics::{
         eval::{
-            Ctx,
+            EvalMode,
             Func,
-            FuncImpl,
-            FuncTrait,
-            Name,
             Primitive,
         },
         prelude::names,
         val::Val,
     },
-    types::{
-        Bool,
-        Reader,
-    },
+    types::Bool,
 };
 
 pub(crate) fn not() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::NOT),
-            eval: Reader::new(fn_not),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::NOT,
+        EvalMode::Eval,
+        fn_not,
+    )))
     .into()
 }
 
-fn fn_not(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Bool(b) = ctx.eval(input) else {
+fn fn_not(input: Val) -> Val {
+    let Val::Bool(b) = input else {
         return Val::default();
     };
     Val::Bool(b.not())
 }
 
 pub(crate) fn and() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::AND),
-            eval: Reader::new(fn_and),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::AND,
+        EvalMode::Eval,
+        fn_and,
+    )))
     .into()
 }
 
-fn fn_and(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_and(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Bool(left) = ctx.eval(pair.first) else {
+    let Val::Bool(left) = pair.first else {
         return Val::default();
     };
     if left.bool() {
-        let Val::Bool(right) = ctx.eval(pair.second) else {
+        let Val::Bool(right) = pair.second else {
             return Val::default();
         };
         Val::Bool(right)
@@ -64,27 +54,25 @@ fn fn_and(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn or() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::OR),
-            eval: Reader::new(fn_or),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::OR,
+        EvalMode::Eval,
+        fn_or,
+    )))
     .into()
 }
 
-fn fn_or(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_or(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Bool(left) = ctx.eval(pair.first) else {
+    let Val::Bool(left) = pair.first else {
         return Val::default();
     };
     if left.bool() {
         Val::Bool(Bool::t())
     } else {
-        let Val::Bool(right) = ctx.eval(pair.second) else {
+        let Val::Bool(right) = pair.second else {
             return Val::default();
         };
         Val::Bool(right)
@@ -92,37 +80,33 @@ fn fn_or(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn equal() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EQUAL),
-            eval: Reader::new(fn_equal),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::EQUAL,
+        EvalMode::Eval,
+        fn_equal,
+    )))
     .into()
 }
 
-fn fn_equal(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    Val::Bool(Bool::new(ctx.eval(pair.first) == ctx.eval(pair.second)))
+    Val::Bool(Bool::new(pair.first == pair.second))
 }
 
 pub(crate) fn not_equal() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::NOT_EQUAL),
-            eval: Reader::new(fn_not_equal),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::NOT_EQUAL,
+        EvalMode::Eval,
+        fn_not_equal,
+    )))
     .into()
 }
 
-fn fn_not_equal(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_not_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    Val::Bool(Bool::new(ctx.eval(pair.first) != ctx.eval(pair.second)))
+    Val::Bool(Bool::new(pair.first != pair.second))
 }

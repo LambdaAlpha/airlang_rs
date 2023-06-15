@@ -4,30 +4,21 @@ use {
             eval::{
                 Ctx,
                 Func,
-                FuncImpl,
-                FuncTrait,
-                Name,
                 Primitive,
             },
             prelude::names,
             val::Val,
         },
-        types::{
-            Either,
-            Reader,
-        },
+        types::Either,
     },
     std::mem::swap,
 };
 
 pub(crate) fn first() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::PAIR_FIRST),
-            eval: Reader::new(fn_first),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::PAIR_FIRST,
+        fn_first,
+    )))
     .into()
 }
 
@@ -46,13 +37,10 @@ fn fn_first(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn first_assign() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::PAIR_FIRST_ASSIGN),
-            eval: Reader::new(fn_first_assign),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::PAIR_FIRST_ASSIGN,
+        fn_first_assign,
+    )))
     .into()
 }
 
@@ -75,13 +63,10 @@ fn fn_first_assign(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn second() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::PAIR_SECOND),
-            eval: Reader::new(fn_second),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::PAIR_SECOND,
+        fn_second,
+    )))
     .into()
 }
 
@@ -100,13 +85,10 @@ fn fn_second(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn second_assign() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::PAIR_SECOND_ASSIGN),
-            eval: Reader::new(fn_second_assign),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::PAIR_SECOND_ASSIGN,
+        fn_second_assign,
+    )))
     .into()
 }
 

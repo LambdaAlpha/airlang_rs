@@ -2,10 +2,10 @@ use crate::{
     semantics::{
         eval::{
             Composed,
+            ComposedEval,
             Ctx,
+            EvalMode,
             Func,
-            FuncImpl,
-            FuncTrait,
             Name,
             Primitive,
         },
@@ -18,50 +18,68 @@ use crate::{
     types::{
         Either,
         Keeper,
-        Reader,
         Str,
         Symbol,
     },
 };
 
 pub(crate) fn val() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::VAL),
-            eval: Reader::new(fn_val),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::VAL,
+        EvalMode::Val,
+        fn_val,
+    )))
     .into()
 }
 
-fn fn_val(_: &mut Ctx, input: Val) -> Val {
+fn fn_val(input: Val) -> Val {
     input
 }
 
 pub(crate) fn eval() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL),
-            eval: Reader::new(fn_eval),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::EVAL,
+        EvalMode::Eval,
+        fn_eval,
+    )))
     .into()
 }
 
-fn fn_eval(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.eval(input)
+fn fn_eval(input: Val) -> Val {
+    input
+}
+
+pub(crate) fn eval_escape() -> Val {
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::EVAL_ESCAPE,
+        EvalMode::Escape,
+        fn_eval_escape,
+    )))
+    .into()
+}
+
+fn fn_eval_escape(input: Val) -> Val {
+    input
+}
+
+pub(crate) fn eval_bind() -> Val {
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::EVAL_BIND,
+        EvalMode::Bind,
+        fn_eval_bind,
+    )))
+    .into()
+}
+
+fn fn_eval_bind(input: Val) -> Val {
+    input
 }
 
 pub(crate) fn eval_twice() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_TWICE),
-            eval: Reader::new(fn_eval_twice),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::EVAL_TWICE,
+        fn_eval_twice,
+    )))
     .into()
 }
 
@@ -81,13 +99,10 @@ fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn eval_thrice() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_THRICE),
-            eval: Reader::new(fn_eval_thrice),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::EVAL_THRICE,
+        fn_eval_thrice,
+    )))
     .into()
 }
 
@@ -96,29 +111,11 @@ fn fn_eval_thrice(ctx: &mut Ctx, input: Val) -> Val {
     fn_eval_twice(ctx, val)
 }
 
-pub(crate) fn eval_escape() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_ESCAPE),
-            eval: Reader::new(fn_eval_escape),
-        }),
-    })
-    .into()
-}
-
-fn fn_eval_escape(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.eval_escape(input)
-}
-
 pub(crate) fn eval_in_ctx() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::EVAL_IN_CTX),
-            eval: Reader::new(fn_eval_in_ctx),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::EVAL_IN_CTX,
+        fn_eval_in_ctx,
+    )))
     .into()
 }
 
@@ -127,7 +124,7 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name_or_val = ctx.eval_escape(pair.first);
-    let val = ctx.eval(pair.second);
+    let val = ctx.eval_escape(pair.second);
     ctx.get_mut_or_val(name_or_val, |ref_or_val| {
         let f = |target: &mut Val| {
             let Val::Ctx(target_ctx) = target else {
@@ -142,82 +139,94 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
     })
 }
 pub(crate) fn parse() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::PARSE),
-            eval: Reader::new(fn_parse),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::PARSE,
+        EvalMode::Eval,
+        fn_parse,
+    )))
     .into()
 }
 
-fn fn_parse(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::String(input) = ctx.eval(input)else {
+fn fn_parse(input: Val) -> Val {
+    let Val::String(input) = input else {
         return Val::default();
     };
     crate::semantics::parse(&input).unwrap_or_default()
 }
 
 pub(crate) fn stringify() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::STRINGIFY),
-            eval: Reader::new(fn_stringify),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::STRINGIFY,
+        EvalMode::Eval,
+        fn_stringify,
+    )))
     .into()
 }
 
-fn fn_stringify(ctx: &mut Ctx, input: Val) -> Val {
-    let val = ctx.eval(input);
-    let Ok(str) = crate::semantics::generate(&val) else {
+fn fn_stringify(input: Val) -> Val {
+    let Ok(str) = crate::semantics::generate(&input) else {
         return Val::default();
     };
     Val::String(Str::from(str))
 }
 
 pub(crate) fn func() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::FUNC),
-            eval: Reader::new(fn_func),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+        names::FUNC,
+        EvalMode::Escape,
+        fn_func,
+    )))
     .into()
 }
 
-fn fn_func(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_func(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let body = ctx.eval_escape(map_remove(&mut map, "body"));
-    let func_ctx = match ctx.eval(map_remove(&mut map, "context")) {
+    let body = map_remove(&mut map, "body");
+    let func_ctx = match map_remove(&mut map, "context") {
         Val::Ctx(func_ctx) => *func_ctx,
         Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
-    let input_name = match ctx.eval_escape(map_remove(&mut map, "input")) {
+    let input_name = match map_remove(&mut map, "input") {
         Val::Symbol(Symbol(name)) => name,
         Val::Unit(_) => Name::from("input"),
         _ => return Val::default(),
     };
-    let caller_name = match ctx.eval_escape(map_remove(&mut map, "caller")) {
-        Val::Symbol(Symbol(name)) => name,
-        Val::Unit(_) => Name::from("caller"),
+    let ctx_aware = match map_remove(&mut map, "context_aware") {
+        Val::Bool(b) => b.bool(),
+        Val::Unit(_) => false,
         _ => return Val::default(),
     };
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Composed(Composed {
-            body,
-            ctx: func_ctx,
-            input_name,
-            caller_name,
-        }),
-    })
+    let eval = if ctx_aware {
+        let caller_name = match map_remove(&mut map, "caller") {
+            Val::Symbol(Symbol(name)) => name,
+            Val::Unit(_) => Name::from("caller"),
+            _ => return Val::default(),
+        };
+        ComposedEval::CtxAware { caller_name }
+    } else {
+        let eval_mode = match map_remove(&mut map, "eval_mode") {
+            Val::Symbol(Symbol(name)) => match &*name {
+                "val" => EvalMode::Val,
+                "eval" => EvalMode::Eval,
+                "esc" => EvalMode::Escape,
+                "bind" => EvalMode::Bind,
+                _ => return Val::default(),
+            },
+            Val::Unit(_) => EvalMode::Eval,
+            _ => return Val::default(),
+        };
+        ComposedEval::CtxFree { eval_mode }
+    };
+
+    Box::new(Func::new_composed(Composed {
+        body,
+        ctx: func_ctx,
+        input_name,
+        eval,
+    }))
     .into()
 }
 
@@ -227,13 +236,10 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 }
 
 pub(crate) fn chain() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::CHAIN),
-            eval: Reader::new(fn_chain),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::CHAIN,
+        fn_chain,
+    )))
     .into()
 }
 

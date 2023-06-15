@@ -1,27 +1,18 @@
-use crate::{
-    semantics::{
-        eval::{
-            Ctx,
-            Func,
-            FuncImpl,
-            FuncTrait,
-            Name,
-            Primitive,
-        },
-        prelude::names,
-        val::Val,
+use crate::semantics::{
+    eval::{
+        Ctx,
+        Func,
+        Primitive,
     },
-    types::Reader,
+    prelude::names,
+    val::Val,
 };
 
 pub(crate) fn sequence() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::SEQUENCE),
-            eval: Reader::new(fn_sequence),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::SEQUENCE,
+        fn_sequence,
+    )))
     .into()
 }
 
@@ -37,13 +28,10 @@ fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn condition() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::IF),
-            eval: Reader::new(fn_if),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::IF,
+        fn_if,
+    )))
     .into()
 }
 
@@ -73,13 +61,10 @@ fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn while_loop() -> Val {
-    Box::new(Func {
-        func_trait: FuncTrait {},
-        func_impl: FuncImpl::Primitive(Primitive {
-            id: Name::from(names::WHILE),
-            eval: Reader::new(fn_while),
-        }),
-    })
+    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+        names::WHILE,
+        fn_while,
+    )))
     .into()
 }
 

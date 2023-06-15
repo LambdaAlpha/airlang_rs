@@ -44,9 +44,10 @@ pub(crate) fn prelude() -> NameMap {
 
     put(&mut c, names::VAL, eval::val());
     put(&mut c, names::EVAL, eval::eval());
+    put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
+    put(&mut c, names::EVAL_BIND, eval::eval_bind());
     put(&mut c, names::EVAL_TWICE, eval::eval_twice());
     put(&mut c, names::EVAL_THRICE, eval::eval_thrice());
-    put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
     put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
     put(&mut c, names::PARSE, eval::parse());
     put(&mut c, names::STRINGIFY, eval::stringify());
@@ -85,7 +86,6 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::LIST_POP, list::pop());
     put(&mut c, names::LIST_CLEAR, list::clear());
 
-    put(&mut c, names::MAP_NEW, map::map_new());
     put(&mut c, names::MAP_LENGTH, map::length());
     put(&mut c, names::MAP_KEYS, map::keys());
     put(&mut c, names::MAP_VALUES, map::values());
@@ -133,22 +133,23 @@ pub(crate) mod names {
     pub(crate) const IF: &str = "if";
     pub(crate) const WHILE: &str = "while";
 
-    pub(crate) const NOT: &str = "not";
-    pub(crate) const AND: &str = "and";
-    pub(crate) const OR: &str = "or";
-    pub(crate) const EQUAL: &str = "==";
-    pub(crate) const NOT_EQUAL: &str = "!=";
-
     pub(crate) const VAL: &str = "val";
     pub(crate) const EVAL: &str = "eval";
+    pub(crate) const EVAL_ESCAPE: &str = "esc";
+    pub(crate) const EVAL_BIND: &str = "bind";
     pub(crate) const EVAL_TWICE: &str = "eval2";
     pub(crate) const EVAL_THRICE: &str = "eval3";
-    pub(crate) const EVAL_ESCAPE: &str = "eval'";
     pub(crate) const EVAL_IN_CTX: &str = "eval@";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "function";
     pub(crate) const CHAIN: &str = ".";
+
+    pub(crate) const NOT: &str = "not";
+    pub(crate) const AND: &str = "and";
+    pub(crate) const OR: &str = "or";
+    pub(crate) const EQUAL: &str = "==";
+    pub(crate) const NOT_EQUAL: &str = "!=";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";
@@ -182,7 +183,6 @@ pub(crate) mod names {
     pub(crate) const LIST_POP: &str = "list_pop";
     pub(crate) const LIST_CLEAR: &str = "list_clear";
 
-    pub(crate) const MAP_NEW: &str = "map";
     pub(crate) const MAP_LENGTH: &str = "map_length";
     pub(crate) const MAP_KEYS: &str = "map_keys";
     pub(crate) const MAP_VALUES: &str = "map_values";
@@ -199,11 +199,11 @@ pub(crate) mod names {
 
 mod meta;
 
-mod eval;
-
 mod ctx;
 
 mod ctrl;
+
+mod eval;
 
 mod bool;
 
