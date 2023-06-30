@@ -16,9 +16,9 @@ not 'f: "1"
 # ===
 {a: a}
 # ---
-{': '}
+{a: '}
 # ===
-eval2 (ref (val a))
+eval2 (ref (value a))
 # ---
 a
 # ===

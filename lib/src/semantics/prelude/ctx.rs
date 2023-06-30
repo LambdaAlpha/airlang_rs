@@ -37,7 +37,7 @@ pub(crate) fn read() -> Val {
 }
 
 fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
-    let name = ctx.eval_escape(input);
+    let name = ctx.eval_inline(input);
     ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(r) => r.clone(),
         Either::Right(_) => Val::default(),
@@ -53,7 +53,7 @@ pub(crate) fn is_null() -> Val {
 }
 
 fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
-    let name = ctx.eval_escape(input);
+    let name = ctx.eval_inline(input);
     match name {
         Val::Symbol(s) => Val::Bool(Bool::new(ctx.get_ref(&s).is_none())),
         Val::Ref(k) => Val::Bool(Bool::new(Keeper::reader(&k.0).is_err())),
@@ -73,7 +73,7 @@ fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(Symbol(name)) = ctx.eval_escape(pair.first) else {
+    let Val::Symbol(Symbol(name)) = ctx.eval_inline(pair.first) else {
         return Val::default();
     };
     let val = ctx.eval(pair.second);
@@ -120,7 +120,7 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let first = ctx.eval_escape(pair.first);
+    let first = ctx.eval_inline(pair.first);
     match first {
         Val::Symbol(s) => {
             let val = ctx.eval(pair.second);
@@ -156,7 +156,7 @@ pub(crate) fn set_final() -> Val {
 }
 
 fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_escape(input);
+    let input = ctx.eval_inline(input);
     match input {
         Val::Symbol(s) => ctx.set_final(&s),
         Val::Ref(k) => {
@@ -182,7 +182,7 @@ pub(crate) fn set_const() -> Val {
 }
 
 fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_escape(input);
+    let input = ctx.eval_inline(input);
     match input {
         Val::Symbol(s) => ctx.set_const(&s),
         Val::Ref(k) => {
@@ -205,7 +205,7 @@ pub(crate) fn is_final() -> Val {
 }
 
 fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_escape(input);
+    let input = ctx.eval_inline(input);
     let is_const = match input {
         Val::Symbol(s) => ctx.is_final(&s),
         Val::Ref(k) => {
@@ -231,7 +231,7 @@ pub(crate) fn is_const() -> Val {
 }
 
 fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_escape(input);
+    let input = ctx.eval_inline(input);
     let is_const = match input {
         Val::Symbol(s) => ctx.is_const(&s),
         Val::Ref(k) => {
@@ -257,7 +257,7 @@ pub(crate) fn remove() -> Val {
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_escape(input);
+    let input = ctx.eval_inline(input);
     match input {
         Val::Symbol(s) => ctx.remove(&s),
         Val::Ref(k) => {
@@ -289,7 +289,7 @@ fn fn_new_ref(input: Val) -> Val {
 pub(crate) fn null_ref() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
         names::NULL_REF,
-        EvalMode::Val,
+        EvalMode::Value,
         fn_null_ref,
     )))
     .into()
@@ -333,7 +333,7 @@ fn fn_const_ref(input: Val) -> Val {
 pub(crate) fn ctx_new() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
         names::CTX_NEW,
-        EvalMode::Bind,
+        EvalMode::Eval,
         fn_ctx_new,
     )))
     .into()
@@ -399,8 +399,8 @@ fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let ctx_name_or_val = ctx.eval_escape(pair.first);
-    let super_ctx_name = ctx.eval_escape(pair.second);
+    let ctx_name_or_val = ctx.eval_inline(pair.first);
+    let super_ctx_name = ctx.eval_inline(pair.second);
     let f = |ctx: &mut Ctx| {
         match super_ctx_name {
             Val::Symbol(Symbol(name)) => {

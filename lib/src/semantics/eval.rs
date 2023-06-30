@@ -83,10 +83,10 @@ pub(crate) enum ComposedEval {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum EvalMode {
-    Val,
+    Value,
     Eval,
-    Escape,
-    Bind,
+    Interpolate,
+    Inline,
 }
 
 pub(crate) type Name = CompactString;
@@ -181,10 +181,10 @@ impl Composed {
 impl EvalMode {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            EvalMode::Val => input,
+            EvalMode::Value => input,
             EvalMode::Eval => ctx.eval(input),
-            EvalMode::Escape => ctx.eval_escape(input),
-            EvalMode::Bind => ctx.eval_bind(input),
+            EvalMode::Interpolate => ctx.eval_interpolate(input),
+            EvalMode::Inline => ctx.eval_inline(input),
         }
     }
 }
@@ -223,7 +223,7 @@ impl Ctx {
     pub(crate) fn eval_map(&mut self, map: MapVal) -> Val {
         let map = map
             .into_iter()
-            .map(|(k, v)| (self.eval(k), self.eval(v)))
+            .map(|(k, v)| (self.eval_inline(k), self.eval(v)))
             .collect();
         Val::Map(map)
     }
@@ -473,39 +473,39 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn eval_escape(&mut self, input: Val) -> Val {
+    pub(crate) fn eval_interpolate(&mut self, input: Val) -> Val {
         match input {
             Val::Call(c) => match &c.func {
                 Val::Unit(_) => self.eval(c.input),
                 _ => {
-                    let func = self.eval_escape(c.func);
-                    let input = self.eval_escape(c.input);
+                    let func = self.eval_interpolate(c.func);
+                    let input = self.eval_interpolate(c.input);
                     let call = Box::new(Call::new(func, input));
                     Val::Call(call)
                 }
             },
             Val::Pair(p) => {
-                let first = self.eval_escape(p.first);
-                let second = self.eval_escape(p.second);
+                let first = self.eval_interpolate(p.first);
+                let second = self.eval_interpolate(p.second);
                 let pair = Box::new(Pair::new(first, second));
                 Val::Pair(pair)
             }
             Val::Reverse(r) => {
-                let func = self.eval_escape(r.func);
-                let output = self.eval_escape(r.output);
+                let func = self.eval_interpolate(r.func);
+                let output = self.eval_interpolate(r.output);
                 let reverse = Box::new(Reverse::new(func, output));
                 Val::Reverse(reverse)
             }
             Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_escape(v)).collect();
+                let list = l.into_iter().map(|v| self.eval_interpolate(v)).collect();
                 Val::List(list)
             }
             Val::Map(m) => {
                 let map = m
                     .into_iter()
                     .map(|(k, v)| {
-                        let key = self.eval_escape(k);
-                        let value = self.eval_escape(v);
+                        let key = self.eval_interpolate(k);
+                        let value = self.eval_interpolate(v);
                         (key, value)
                     })
                     .collect();
@@ -515,30 +515,32 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn eval_bind(&mut self, input: Val) -> Val {
+    pub(crate) fn eval_inline(&mut self, input: Val) -> Val {
         match input {
+            Val::Call(call) => self.eval_call(call.func, call.input),
+            Val::Reverse(reverse) => self.eval_reverse(reverse.func, reverse.output),
+            Val::Pair(pair) => {
+                let first = self.eval_inline(pair.first);
+                let second = self.eval_inline(pair.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::List(l) => {
+                let list = l.into_iter().map(|v| self.eval_inline(v)).collect();
+                Val::List(list)
+            }
             Val::Map(m) => {
                 let map = m
                     .into_iter()
                     .map(|(k, v)| {
-                        let key = self.eval_escape(k);
-                        let value = self.eval_bind(v);
+                        let key = self.eval_inline(k);
+                        let value = self.eval_inline(v);
                         (key, value)
                     })
                     .collect();
                 Val::Map(map)
             }
-            Val::Pair(p) => {
-                let first = self.eval_bind(p.first);
-                let second = self.eval_bind(p.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_bind(v)).collect();
-                Val::List(list)
-            }
-            i => self.eval(i),
+            v => v,
         }
     }
 }

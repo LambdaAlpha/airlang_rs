@@ -6,7 +6,7 @@
 # ---
 2
 # ===
-;[a = (ref {1: 2, 3}), (' a) . map_length]
+;[a = (ref {1: 2, 3}), (eval a) . map_length]
 # ---
 2
 # ===
@@ -38,7 +38,7 @@
 # ---
 't
 # ===
-;[b = (val a), {a: 1} map_contains (' b)]
+;[b = (value a), {a: 1} map_contains (eval b)]
 # ---
 't
 # ===

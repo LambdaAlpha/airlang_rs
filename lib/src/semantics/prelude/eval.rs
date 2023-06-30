@@ -23,16 +23,16 @@ use crate::{
     },
 };
 
-pub(crate) fn val() -> Val {
+pub(crate) fn value() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
-        names::VAL,
-        EvalMode::Val,
-        fn_val,
+        names::VALUE,
+        EvalMode::Value,
+        fn_value,
     )))
     .into()
 }
 
-fn fn_val(input: Val) -> Val {
+fn fn_value(input: Val) -> Val {
     input
 }
 
@@ -49,29 +49,29 @@ fn fn_eval(input: Val) -> Val {
     input
 }
 
-pub(crate) fn eval_escape() -> Val {
+pub(crate) fn eval_interpolate() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
-        names::EVAL_ESCAPE,
-        EvalMode::Escape,
-        fn_eval_escape,
+        names::EVAL_INTERPOLATE,
+        EvalMode::Interpolate,
+        fn_eval_interpolate,
     )))
     .into()
 }
 
-fn fn_eval_escape(input: Val) -> Val {
+fn fn_eval_interpolate(input: Val) -> Val {
     input
 }
 
-pub(crate) fn eval_bind() -> Val {
+pub(crate) fn eval_inline() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
-        names::EVAL_BIND,
-        EvalMode::Bind,
-        fn_eval_bind,
+        names::EVAL_INLINE,
+        EvalMode::Inline,
+        fn_eval_inline,
     )))
     .into()
 }
 
-fn fn_eval_bind(input: Val) -> Val {
+fn fn_eval_inline(input: Val) -> Val {
     input
 }
 
@@ -123,8 +123,8 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let name_or_val = ctx.eval_escape(pair.first);
-    let val = ctx.eval_escape(pair.second);
+    let name_or_val = ctx.eval_inline(pair.first);
+    let val = ctx.eval_interpolate(pair.second);
     ctx.get_mut_or_val(name_or_val, |ref_or_val| {
         let f = |target: &mut Val| {
             let Val::Ctx(target_ctx) = target else {
@@ -138,6 +138,7 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
         }
     })
 }
+
 pub(crate) fn parse() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
         names::PARSE,
@@ -173,7 +174,7 @@ fn fn_stringify(input: Val) -> Val {
 pub(crate) fn func() -> Val {
     Box::new(Func::new_primitive(Primitive::new_ctx_free(
         names::FUNC,
-        EvalMode::Escape,
+        EvalMode::Interpolate,
         fn_func,
     )))
     .into()
@@ -209,10 +210,10 @@ fn fn_func(input: Val) -> Val {
     } else {
         let eval_mode = match map_remove(&mut map, "eval_mode") {
             Val::Symbol(Symbol(name)) => match &*name {
-                "val" => EvalMode::Val,
-                "eval" => EvalMode::Eval,
-                "esc" => EvalMode::Escape,
-                "bind" => EvalMode::Bind,
+                names::VALUE => EvalMode::Value,
+                names::EVAL => EvalMode::Eval,
+                names::EVAL_INTERPOLATE => EvalMode::Interpolate,
+                names::EVAL_INLINE => EvalMode::Inline,
                 _ => return Val::default(),
             },
             Val::Unit(_) => EvalMode::Eval,

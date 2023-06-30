@@ -24,7 +24,7 @@ pub(crate) fn length() -> Val {
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_str = ctx.eval_escape(input);
+    let name_or_str = ctx.eval_inline(input);
     ctx.get_ref_or_val(name_or_str, |ref_or_val| {
         let f = |val: &Val| {
             let Val::String(s) = val else {

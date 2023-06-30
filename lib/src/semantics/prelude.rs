@@ -42,10 +42,10 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::EQUAL, bool::equal());
     put(&mut c, names::NOT_EQUAL, bool::not_equal());
 
-    put(&mut c, names::VAL, eval::val());
+    put(&mut c, names::VALUE, eval::value());
     put(&mut c, names::EVAL, eval::eval());
-    put(&mut c, names::EVAL_ESCAPE, eval::eval_escape());
-    put(&mut c, names::EVAL_BIND, eval::eval_bind());
+    put(&mut c, names::EVAL_INTERPOLATE, eval::eval_interpolate());
+    put(&mut c, names::EVAL_INLINE, eval::eval_inline());
     put(&mut c, names::EVAL_TWICE, eval::eval_twice());
     put(&mut c, names::EVAL_THRICE, eval::eval_thrice());
     put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
@@ -133,10 +133,10 @@ pub(crate) mod names {
     pub(crate) const IF: &str = "if";
     pub(crate) const WHILE: &str = "while";
 
-    pub(crate) const VAL: &str = "val";
+    pub(crate) const VALUE: &str = "value";
     pub(crate) const EVAL: &str = "eval";
-    pub(crate) const EVAL_ESCAPE: &str = "esc";
-    pub(crate) const EVAL_BIND: &str = "bind";
+    pub(crate) const EVAL_INTERPOLATE: &str = "interpolate";
+    pub(crate) const EVAL_INLINE: &str = "inline";
     pub(crate) const EVAL_TWICE: &str = "eval2";
     pub(crate) const EVAL_THRICE: &str = "eval3";
     pub(crate) const EVAL_IN_CTX: &str = "eval@";

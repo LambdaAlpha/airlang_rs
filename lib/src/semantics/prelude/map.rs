@@ -23,7 +23,7 @@ pub(crate) fn length() -> Val {
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_map = ctx.eval_escape(input);
+    let name_or_map = ctx.eval_inline(input);
     ctx.get_ref_or_val(name_or_map, |ref_or_val| {
         let f = |map: &Val| {
             let Val::Map(map) = map else {
@@ -47,7 +47,7 @@ pub(crate) fn keys() -> Val {
 }
 
 fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_map = ctx.eval_escape(input);
+    let name_or_map = ctx.eval_inline(input);
     ctx.get_ref_or_val(name_or_map, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -73,7 +73,7 @@ pub(crate) fn values() -> Val {
 }
 
 fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_map = ctx.eval_escape(input);
+    let name_or_map = ctx.eval_inline(input);
     ctx.get_ref_or_val(name_or_map, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -102,8 +102,8 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_key.first);
-    let key = ctx.eval_escape(name_key.second);
+    let name = ctx.eval_inline(name_key.first);
+    let key = ctx.eval_inline(name_key.second);
     ctx.get_ref_or_val(name, |ref_or_val| {
         let f = |val: &Val| {
             let Val::Map(map) = val  else {
@@ -130,8 +130,8 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_keys.first);
-    let keys = ctx.eval_escape(name_keys.second);
+    let name = ctx.eval_inline(name_keys.first);
+    let keys = ctx.eval_inline(name_keys.second);
     let Val::List(keys) = keys  else {
         return Val::default();
     };
@@ -162,11 +162,11 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_pair.first);
+    let name = ctx.eval_inline(name_pair.first);
     let Val::Pair(key_value) = name_pair.second else {
         return Val::default();
     };
-    let key = ctx.eval_escape(key_value.first);
+    let key = ctx.eval_inline(key_value.first);
     let value = ctx.eval(key_value.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
@@ -197,8 +197,8 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_pair.first);
-    let Val::Map(update) = ctx.eval_bind(name_pair.second) else {
+    let name = ctx.eval_inline(name_pair.first);
+    let Val::Map(update) = ctx.eval(name_pair.second) else {
         return Val::default();
     };
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
@@ -234,8 +234,8 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_key.first);
-    let key = ctx.eval_escape(name_key.second);
+    let name = ctx.eval_inline(name_key.first);
+    let key = ctx.eval_inline(name_key.second);
     ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -264,8 +264,8 @@ fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_keys.first);
-    let keys = ctx.eval_escape(name_keys.second);
+    let name = ctx.eval_inline(name_keys.first);
+    let keys = ctx.eval_inline(name_keys.second);
     let Val::List(keys) = keys else {
         return Val::default();
     };
@@ -305,8 +305,8 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_key.first);
-    let key = ctx.eval_escape(name_key.second);
+    let name = ctx.eval_inline(name_key.first);
+    let key = ctx.eval_inline(name_key.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -336,8 +336,8 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_keys.first);
-    let keys = ctx.eval_escape(name_keys.second);
+    let name = ctx.eval_inline(name_keys.first);
+    let keys = ctx.eval_inline(name_keys.second);
     let Val::List(keys) = keys else {
         return Val::default();
     };
@@ -373,7 +373,7 @@ pub(crate) fn clear() -> Val {
 }
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
-    let name = ctx.eval_escape(input);
+    let name = ctx.eval_inline(input);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {

@@ -23,7 +23,7 @@ pub(crate) fn first() -> Val {
 }
 
 fn fn_first(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_pair = ctx.eval_escape(input);
+    let name_or_pair = ctx.eval_inline(input);
     ctx.get_ref_or_val(name_or_pair, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val {
             Val::Pair(pair) => pair.first.clone(),
@@ -48,7 +48,7 @@ fn fn_first_assign(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_val.first);
+    let name = ctx.eval_inline(name_val.first);
     let mut val = ctx.eval(name_val.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(pair) => {
@@ -71,7 +71,7 @@ pub(crate) fn second() -> Val {
 }
 
 fn fn_second(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_pair = ctx.eval_escape(input);
+    let name_or_pair = ctx.eval_inline(input);
     ctx.get_ref_or_val(name_or_pair, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val {
             Val::Pair(pair) => pair.second.clone(),
@@ -96,7 +96,7 @@ fn fn_second_assign(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
-    let name = ctx.eval_escape(name_val.first);
+    let name = ctx.eval_inline(name_val.first);
     let mut val = ctx.eval(name_val.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(pair) => {

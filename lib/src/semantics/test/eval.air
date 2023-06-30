@@ -14,7 +14,7 @@ stringify "1"
 # ---
 "\"1\""
 # ===
-val a
+value a
 # ---
 a
 # ===
@@ -22,51 +22,71 @@ eval (not 'f)
 # ---
 't
 # ===
-esc [a, f a, a: b, f? a, {a: b}]
+interpolate [a, f a, a: b, f? a, {a: b}]
 # ---
 [a, f a, a: b, f? a, {a: b}]
 # ===
-esc {a: b, c: (' (not 'f))}
+interpolate {a: b, c: (' (not 'f))}
 # ---
 {a: b, c: 't}
 # ===
-esc [a, b: [' (not 't)]]
+interpolate [a, b: [' (not 't)]]
 # ---
 [a, b: ['f]]
 # ===
-bind {a, ' (not 't): c, not 'f}
+inline a
 # ---
-{a: ', 'f: ', not 'f: 't}
+a
 # ===
-bind {{a: b}: {c: d}}
+inline (eval a)
 # ---
-{{a: b}: {c: '}}
+'
 # ===
-bind {' (not 'f): a}
-# ---
-{'t: '}
-# ===
-bind [1, {a: b}]
-# ---
-[1, {a: '}]
-# ===
-bind {a: (val {b: c})}
-# ---
-{a: {b: c}}
-# ===
-bind {a: (eval {b: c})}
-# ---
-{a: {': '}}
-# ===
-;[a = 1, eval2 (val a)]
+inline 1
 # ---
 1
 # ===
-(val a) eval2 (val b)
+inline (not 'f)
+# ---
+'t
+# ===
+inline [1, a, not 'f]
+# ---
+[1, a, 't]
+# ===
+eval {a, not 't: c, value (not 'f): (not 'f)}
+# ---
+{a: ', 'f: ', not 'f: 't}
+# ===
+eval {{a: b}: {c: d}}
+# ---
+{{a: b}: {c: '}}
+# ===
+eval {not 'f: a}
+# ---
+{'t: '}
+# ===
+eval [1, {a: b}]
+# ---
+[1, {a: '}]
+# ===
+eval {a: (value {b: c})}
+# ---
+{a: {b: c}}
+# ===
+eval {a: (eval {b: c})}
+# ---
+{a: {b: '}}
+# ===
+;[a = 1, eval2 (value a)]
+# ---
+1
+# ===
+(value a) eval2 (value b)
 # ---
 ': '
 # ===
-;[a = 1, eval3 (ref (val a))]
+;[a = 1, eval3 (ref (value a))]
 # ---
 1
 # ===
@@ -116,7 +136,7 @@ bind {a: (eval {b: c})}
 ;[
     f = (function{
         body: input,
-        eval_mode: val,
+        eval_mode: value,
     }),
     f (not 't)
 ]
@@ -136,7 +156,7 @@ not 't
 ;[
     f = (function{
         body: input,
-        eval_mode: esc,
+        eval_mode: interpolate,
     }),
     f (not 't)
 ]
@@ -146,7 +166,7 @@ not 't
 ;[
     f = (function{
         body: input,
-        eval_mode: esc,
+        eval_mode: interpolate,
     }),
     f (' (not 't))
 ]
@@ -156,7 +176,7 @@ not 't
 ;[
     f = (function{
         body: input,
-        eval_mode: bind,
+        eval_mode: eval,
     }),
     f {a: b}
 ]

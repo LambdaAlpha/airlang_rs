@@ -6,7 +6,7 @@
 # ---
 '
 # ===
-;[a = 1, b = (val a), read (' b)]
+;[a = 1, b = (value a), read (eval b)]
 # ---
 1
 # ===
@@ -18,15 +18,15 @@ is_null a
 # ---
 'f
 # ===
-;[a = (null_ref '), (' a) . is_null]
+;[a = (null_ref '), (eval a) . is_null]
 # ---
 't
 # ===
-;[a = (ref 1), (' a) . is_null]
+;[a = (ref 1), (eval a) . is_null]
 # ---
 'f
 # ===
-;[a = (null_ref '), (' a) = 1, eval2 a]
+;[a = (null_ref '), (eval a) = 1, eval2 a]
 # ---
 1
 # ===
@@ -50,15 +50,15 @@ is_null a
 # ---
 1
 # ===
-;[a = (val b), (' a) = 1, b]
+;[a = (value b), (eval a) = 1, b]
 # ---
 1
 # ===
-;[a = (ref 1), (' a) = 2, eval2 a]
+;[a = (ref 1), (eval a) = 2, eval2 a]
 # ---
 2
 # ===
-;[a = (1 . ref . ref), (' (eval2 a)) = 2, eval3 a]
+;[a = (1 . ref . ref), (eval2 a) = 2, eval3 a]
 # ---
 2
 # ===
@@ -82,11 +82,11 @@ is_null a
 # ---
 3: 2
 # ===
-;[a = (ref 1), (' a) =final 2, (' a) = 3, eval2 a]
+;[a = (ref 1), (eval a) =final 2, (eval a) = 3, eval2 a]
 # ---
 2
 # ===
-;[a = (ref 1), (' a) =final (1: 2), (' a) set1 3, eval2 a]
+;[a = (ref 1), (eval a) =final (1: 2), (eval a) set1 3, eval2 a]
 # ---
 3: 2
 # ===
@@ -106,11 +106,11 @@ is_null a
 # ---
 1
 # ===
-;[a = (ref 1), (' a) =const 2, (' a) = 3, eval2 a]
+;[a = (ref 1), (eval a) =const 2, (eval a) = 3, eval2 a]
 # ---
 2
 # ===
-;[a = (ref 1), (' a) =const (1: 2), (' a) set1 3, eval2 a]
+;[a = (ref 1), (eval a) =const (1: 2), (eval a) set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -126,15 +126,15 @@ is_null a
 # ---
 1: 2
 # ===
-;[a = (ref 1), final (' a), (' a) = 2, eval2 a]
+;[a = (ref 1), final (eval a), (eval a) = 2, eval2 a]
 # ---
 1
 # ===
-;[a = (ref (1: 2)), final (' a), (' a) set1 3, eval2 a]
+;[a = (ref (1: 2)), final (eval a), (eval a) set1 3, eval2 a]
 # ---
 3: 2
 # ===
-;[a = (const_ref (1: 2)), final (' a), (' a) set1 3, eval2 a]
+;[a = (const_ref (1: 2)), final (eval a), (eval a) set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -150,11 +150,11 @@ is_null a
 # ---
 1: 2
 # ===
-;[a = (ref (1: 2)), const (' a), (' a) set1 3, eval2 a]
+;[a = (ref (1: 2)), const (eval a), (eval a) set1 3, eval2 a]
 # ---
 1: 2
 # ===
-;[a = (ref 1), const (' a), (' a) = 2, eval2 a]
+;[a = (ref 1), const (eval a), (eval a) = 2, eval2 a]
 # ---
 1
 # ===
@@ -178,15 +178,15 @@ is_final a
 # ---
 'f
 # ===
-;[a = (ref 1), is_final (' a)]
+;[a = (ref 1), is_final (eval a)]
 # ---
 'f
 # ===
-;[a = (final_ref 1), is_final (' a)]
+;[a = (final_ref 1), is_final (eval a)]
 # ---
 't
 # ===
-;[a = (const_ref 1), is_final (' a)]
+;[a = (const_ref 1), is_final (eval a)]
 # ---
 't
 # ===
@@ -210,19 +210,19 @@ is_const a
 # ---
 'f
 # ===
-;[a = (ref 1), is_const (' a)]
+;[a = (ref 1), is_const (eval a)]
 # ---
 'f
 # ===
-;[a = (final_ref 1), is_const (' a)]
+;[a = (final_ref 1), is_const (eval a)]
 # ---
 'f
 # ===
-;[a = (const_ref 1), is_const (' a)]
+;[a = (const_ref 1), is_const (eval a)]
 # ---
 't
 # ===
-;[a = (final_ref (1: 2)), const (' a), (' a) set1 3, eval2 a]
+;[a = (final_ref (1: 2)), const (eval a), (eval a) set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -242,43 +242,43 @@ is_const a
 # ---
 '
 # ===
-;[a = (val b), b = 1, move (' a)]
+;[a = (value b), b = 1, move (eval a)]
 # ---
 1
 # ===
-;[a = (ref 1), move (' a)]
+;[a = (ref 1), move (eval a)]
 # ---
 1
 # ===
-;[a = (ref 1), move (' a), eval2 a]
+;[a = (ref 1), move (eval a), eval2 a]
 # ---
 '
 # ===
-;[a = (ref 1), move (' a), (' a) = 2, eval2 a]
+;[a = (ref 1), move (eval a), (eval a) = 2, eval2 a]
 # ---
 2
 # ===
-;[a = (final_ref 1), move (' a)]
+;[a = (final_ref 1), move (eval a)]
 # ---
 '
 # ===
-;[a = (const_ref 1), move (' a)]
+;[a = (const_ref 1), move (eval a)]
 # ---
 '
 # ===
-;[a = (final_ref 1), (' a) = 2, eval2 a]
+;[a = (final_ref 1), (eval a) = 2, eval2 a]
 # ---
 1
 # ===
-;[a = (final_ref (1: 2)), (' a) set1 3, eval2 a]
+;[a = (final_ref (1: 2)), (eval a) set1 3, eval2 a]
 # ---
 3: 2
 # ===
-;[a = (const_ref (1: 2)), (' a) set1 3, eval2 a]
+;[a = (const_ref (1: 2)), (eval a) set1 3, eval2 a]
 # ---
 1: 2
 # ===
-;[a = (const_ref 1), (' a) = 2, eval2 a]
+;[a = (const_ref 1), (eval a) = 2, eval2 a]
 # ---
 1
 # ===
