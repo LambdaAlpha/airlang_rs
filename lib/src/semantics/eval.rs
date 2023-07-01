@@ -119,6 +119,10 @@ impl Func {
     pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
         self.func_impl.eval(ctx, input)
     }
+
+    pub(crate) fn eval_by_ref(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.func_impl.eval_by_ref(ctx, input)
+    }
 }
 
 impl FuncImpl {
@@ -128,11 +132,18 @@ impl FuncImpl {
             FuncImpl::Composed(c) => c.eval(ctx, input),
         }
     }
+
+    pub(crate) fn eval_by_ref(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match self {
+            FuncImpl::Primitive(p) => p.eval(ctx, input),
+            FuncImpl::Composed(c) => c.eval_by_ref(ctx, input),
+        }
+    }
 }
 
 impl Primitive {
-    pub(crate) fn eval(self, ctx: &mut Ctx, input: Val) -> Val {
-        match self.eval {
+    pub(crate) fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match &self.eval {
             PrimitiveEval::CtxFree {
                 eval_mode,
                 evaluator,
@@ -169,6 +180,37 @@ impl Composed {
                 let output = new_ctx.eval(self.body);
 
                 if let Val::Ctx(caller) = new_ctx.into_val(&caller_name) {
+                    *ctx = *caller;
+                }
+
+                output
+            }
+        }
+    }
+
+    pub(crate) fn eval_by_ref(&self, ctx: &mut Ctx, input: Val) -> Val {
+        let mut new_ctx = self.ctx.clone();
+        new_ctx.reverse_interpreter = ctx.reverse_interpreter.clone();
+
+        match &self.eval {
+            ComposedEval::CtxFree { eval_mode } => {
+                let val = eval_mode.eval(ctx, input);
+                new_ctx.put_val_local(self.input_name.clone(), TaggedVal::new(val));
+                new_ctx.eval_by_ref(&self.body)
+            }
+            ComposedEval::CtxAware { caller_name } => {
+                new_ctx.put_val_local(self.input_name.clone(), TaggedVal::new(input));
+
+                let mut caller_ctx = Ctx::default();
+                swap(ctx, &mut caller_ctx);
+                new_ctx.put_val_local(
+                    caller_name.clone(),
+                    TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx))),
+                );
+
+                let output = new_ctx.eval_by_ref(&self.body);
+
+                if let Val::Ctx(caller) = new_ctx.into_val(caller_name) {
                     *ctx = *caller;
                 }
 
@@ -229,10 +271,24 @@ impl Ctx {
     }
 
     pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {
-        let Val::Func(func) = self.eval(func) else {
-            return Val::default();
-        };
-        func.eval(self, input)
+        let func = self.eval(func);
+        self.func_call(func, input)
+    }
+
+    fn func_call(&mut self, func: Val, input: Val) -> Val {
+        match func {
+            Val::Func(func) => func.eval(self, input),
+            Val::Ref(r) => {
+                let Ok(r) = Keeper::reader(&r.0) else {
+                    return Val::default();
+                };
+                let Val::Func(func) = &r.val else {
+                    return Val::default();
+                };
+                func.eval_by_ref(self, input)
+            }
+            _ => Val::default(),
+        }
     }
 
     pub(crate) fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
@@ -276,10 +332,8 @@ impl Ctx {
     }
 
     pub(crate) fn eval_call_by_ref(&mut self, func: &Val, input: &Val) -> Val {
-        let Val::Func(func) = self.eval_by_ref( func) else {
-            return Val::default();
-        };
-        func.eval(self, input.clone())
+        let func = self.eval_by_ref(func);
+        self.func_call(func, input.clone())
     }
 
     pub(crate) fn eval_reverse_by_ref(&mut self, func: &Val, output: &Val) -> Val {

@@ -1,11 +1,17 @@
-use crate::semantics::{
-    eval::{
-        Name,
-        NameMap,
-        TaggedVal,
+use crate::{
+    semantics::{
+        eval::{
+            Name,
+            NameMap,
+            TaggedVal,
+        },
+        val::{
+            RefVal,
+            Val,
+        },
+        Func,
     },
-    val::Val,
-    Func,
+    types::Keeper,
 };
 
 pub(crate) fn prelude() -> NameMap {
@@ -108,7 +114,9 @@ fn put(constants: &mut NameMap, key: &str, val: Val) {
 }
 
 fn prelude_func(func: Func) -> Val {
-    Val::Func(Box::new(func))
+    Val::Ref(RefVal::from(Keeper::new(TaggedVal::new_const(Val::Func(
+        Box::new(func),
+    )))))
 }
 
 pub(crate) mod names {

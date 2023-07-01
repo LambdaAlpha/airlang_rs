@@ -239,8 +239,5 @@ fn fn_chain(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Func(func) = ctx.eval(pair.second) else {
-        return Val::default();
-    };
-    func.eval(ctx, pair.first)
+    ctx.eval_call(pair.second, pair.first)
 }
