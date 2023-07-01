@@ -11,7 +11,10 @@ use {
                 Primitive,
                 TaggedVal,
             },
-            prelude::names,
+            prelude::{
+                names,
+                prelude_func,
+            },
             val::{
                 MapVal,
                 Val,
@@ -29,11 +32,10 @@ use {
 };
 
 pub(crate) fn read() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::READ,
         fn_read,
     )))
-    .into()
 }
 
 fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
@@ -45,11 +47,10 @@ fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_null() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::IS_NULL,
         fn_is_null,
     )))
-    .into()
 }
 
 fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
@@ -62,11 +63,10 @@ fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign_local() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_LOCAL,
         fn_assign_local,
     )))
-    .into()
 }
 
 fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
@@ -81,11 +81,10 @@ fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN,
         fn_assign,
     )))
-    .into()
 }
 
 fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
@@ -93,11 +92,10 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign_final() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_FINAL,
         fn_assign_final,
     )))
-    .into()
 }
 
 fn fn_assign_final(ctx: &mut Ctx, input: Val) -> Val {
@@ -105,11 +103,10 @@ fn fn_assign_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn assign_const() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_CONST,
         fn_assign_const,
     )))
-    .into()
 }
 
 fn fn_assign_const(ctx: &mut Ctx, input: Val) -> Val {
@@ -148,11 +145,10 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
 }
 
 pub(crate) fn set_final() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::FINAL,
         fn_set_final,
     )))
-    .into()
 }
 
 fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
@@ -174,11 +170,10 @@ fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set_const() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CONST,
         fn_set_const,
     )))
-    .into()
 }
 
 fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
@@ -197,11 +192,10 @@ fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_final() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::IS_FINAL,
         fn_is_final,
     )))
-    .into()
 }
 
 fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
@@ -223,11 +217,10 @@ fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_const() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::IS_CONST,
         fn_is_const,
     )))
-    .into()
 }
 
 fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
@@ -249,11 +242,10 @@ fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MOVE,
         fn_move,
     )))
-    .into()
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
@@ -274,12 +266,11 @@ fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn new_ref() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::REF,
         EvalMode::Eval,
         fn_new_ref,
     )))
-    .into()
 }
 
 fn fn_new_ref(input: Val) -> Val {
@@ -287,12 +278,11 @@ fn fn_new_ref(input: Val) -> Val {
 }
 
 pub(crate) fn null_ref() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::NULL_REF,
         EvalMode::Value,
         fn_null_ref,
     )))
-    .into()
 }
 
 fn fn_null_ref(_: Val) -> Val {
@@ -305,12 +295,11 @@ fn fn_null_ref(_: Val) -> Val {
 }
 
 pub(crate) fn final_ref() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::FINAL_REF,
         EvalMode::Eval,
         fn_final_ref,
     )))
-    .into()
 }
 
 fn fn_final_ref(input: Val) -> Val {
@@ -318,12 +307,11 @@ fn fn_final_ref(input: Val) -> Val {
 }
 
 pub(crate) fn const_ref() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::CONST_REF,
         EvalMode::Eval,
         fn_const_ref,
     )))
-    .into()
 }
 
 fn fn_const_ref(input: Val) -> Val {
@@ -331,12 +319,11 @@ fn fn_const_ref(input: Val) -> Val {
 }
 
 pub(crate) fn ctx_new() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::CTX_NEW,
         EvalMode::Eval,
         fn_ctx_new,
     )))
-    .into()
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -388,11 +375,10 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 }
 
 pub(crate) fn ctx_set_super() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CTX_SET_SUPER,
         fn_ctx_set_super,
     )))
-    .into()
 }
 
 fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {

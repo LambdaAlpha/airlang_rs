@@ -9,7 +9,10 @@ use crate::{
             Name,
             Primitive,
         },
-        prelude::names,
+        prelude::{
+            names,
+            prelude_func,
+        },
         val::{
             MapVal,
             Val,
@@ -24,12 +27,11 @@ use crate::{
 };
 
 pub(crate) fn value() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::VALUE,
         EvalMode::Value,
         fn_value,
     )))
-    .into()
 }
 
 fn fn_value(input: Val) -> Val {
@@ -37,12 +39,11 @@ fn fn_value(input: Val) -> Val {
 }
 
 pub(crate) fn eval() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::EVAL,
         EvalMode::Eval,
         fn_eval,
     )))
-    .into()
 }
 
 fn fn_eval(input: Val) -> Val {
@@ -50,12 +51,11 @@ fn fn_eval(input: Val) -> Val {
 }
 
 pub(crate) fn eval_interpolate() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::EVAL_INTERPOLATE,
         EvalMode::Interpolate,
         fn_eval_interpolate,
     )))
-    .into()
 }
 
 fn fn_eval_interpolate(input: Val) -> Val {
@@ -63,12 +63,11 @@ fn fn_eval_interpolate(input: Val) -> Val {
 }
 
 pub(crate) fn eval_inline() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::EVAL_INLINE,
         EvalMode::Inline,
         fn_eval_inline,
     )))
-    .into()
 }
 
 fn fn_eval_inline(input: Val) -> Val {
@@ -76,11 +75,10 @@ fn fn_eval_inline(input: Val) -> Val {
 }
 
 pub(crate) fn eval_twice() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::EVAL_TWICE,
         fn_eval_twice,
     )))
-    .into()
 }
 
 fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
@@ -99,11 +97,10 @@ fn fn_eval_twice(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn eval_thrice() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::EVAL_THRICE,
         fn_eval_thrice,
     )))
-    .into()
 }
 
 fn fn_eval_thrice(ctx: &mut Ctx, input: Val) -> Val {
@@ -112,11 +109,10 @@ fn fn_eval_thrice(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn eval_in_ctx() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::EVAL_IN_CTX,
         fn_eval_in_ctx,
     )))
-    .into()
 }
 
 fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
@@ -140,12 +136,11 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn parse() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::PARSE,
         EvalMode::Eval,
         fn_parse,
     )))
-    .into()
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -156,12 +151,11 @@ fn fn_parse(input: Val) -> Val {
 }
 
 pub(crate) fn stringify() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::STRINGIFY,
         EvalMode::Eval,
         fn_stringify,
     )))
-    .into()
 }
 
 fn fn_stringify(input: Val) -> Val {
@@ -172,12 +166,11 @@ fn fn_stringify(input: Val) -> Val {
 }
 
 pub(crate) fn func() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::FUNC,
         EvalMode::Interpolate,
         fn_func,
     )))
-    .into()
 }
 
 fn fn_func(input: Val) -> Val {
@@ -222,13 +215,12 @@ fn fn_func(input: Val) -> Val {
         ComposedEval::CtxFree { eval_mode }
     };
 
-    Box::new(Func::new_composed(Composed {
+    Val::Func(Box::new(Func::new_composed(Composed {
         body,
         ctx: func_ctx,
         input_name,
         eval,
-    }))
-    .into()
+    })))
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
@@ -237,11 +229,10 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 }
 
 pub(crate) fn chain() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CHAIN,
         fn_chain,
     )))
-    .into()
 }
 
 fn fn_chain(ctx: &mut Ctx, input: Val) -> Val {

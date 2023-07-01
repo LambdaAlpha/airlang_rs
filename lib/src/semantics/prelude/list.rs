@@ -6,7 +6,10 @@ use {
                 Func,
                 Primitive,
             },
-            prelude::names,
+            prelude::{
+                names,
+                prelude_func,
+            },
             val::{
                 PairVal,
                 Val,
@@ -21,11 +24,10 @@ use {
 };
 
 pub(crate) fn length() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_LENGTH,
         fn_length,
     )))
-    .into()
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
@@ -45,11 +47,10 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_SET,
         fn_set,
     )))
-    .into()
 }
 
 fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
@@ -90,11 +91,10 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_SET_MANY,
         fn_set_many,
     )))
-    .into()
 }
 
 fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -139,11 +139,10 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_GET,
         fn_get,
     )))
-    .into()
 }
 
 fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
@@ -208,11 +207,10 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn insert() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_INSERT,
         fn_insert,
     )))
-    .into()
 }
 
 fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
@@ -253,11 +251,10 @@ fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn insert_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_INSERT_MANY,
         fn_insert_many,
     )))
-    .into()
 }
 
 fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -300,11 +297,10 @@ fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_REMOVE,
         fn_remove,
     )))
-    .into()
 }
 
 fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
@@ -371,11 +367,10 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn push() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_PUSH,
         fn_push,
     )))
-    .into()
 }
 
 fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
@@ -403,11 +398,10 @@ fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn push_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_PUSH_MANY,
         fn_push_many,
     )))
-    .into()
 }
 
 fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -438,11 +432,10 @@ fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn pop() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_POP,
         fn_pop,
     )))
-    .into()
 }
 
 fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
@@ -503,11 +496,10 @@ fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn clear() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_CLEAR,
         fn_clear,
     )))
-    .into()
 }
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {

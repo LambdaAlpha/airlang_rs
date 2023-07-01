@@ -5,6 +5,7 @@ use crate::semantics::{
         TaggedVal,
     },
     val::Val,
+    Func,
 };
 
 pub(crate) fn prelude() -> NameMap {
@@ -104,6 +105,10 @@ pub(crate) fn prelude() -> NameMap {
 
 fn put(constants: &mut NameMap, key: &str, val: Val) {
     constants.insert(Name::from(key), TaggedVal::new_const(val));
+}
+
+fn prelude_func(func: Func) -> Val {
+    Val::Func(Box::new(func))
 }
 
 pub(crate) mod names {

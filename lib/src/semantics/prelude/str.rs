@@ -6,7 +6,10 @@ use crate::{
             Func,
             Primitive,
         },
-        prelude::names,
+        prelude::{
+            names,
+            prelude_func,
+        },
         val::Val,
     },
     types::{
@@ -16,11 +19,10 @@ use crate::{
 };
 
 pub(crate) fn length() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::STR_LENGTH,
         fn_length,
     )))
-    .into()
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
@@ -40,12 +42,11 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn concat() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_free(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::STR_CONCAT,
         EvalMode::Eval,
         fn_concat,
     )))
-    .into()
 }
 
 fn fn_concat(input: Val) -> Val {

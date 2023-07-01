@@ -4,16 +4,18 @@ use crate::semantics::{
         Func,
         Primitive,
     },
-    prelude::names,
+    prelude::{
+        names,
+        prelude_func,
+    },
     val::Val,
 };
 
 pub(crate) fn sequence() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::SEQUENCE,
         fn_sequence,
     )))
-    .into()
 }
 
 fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
@@ -28,11 +30,10 @@ fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn condition() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::IF,
         fn_if,
     )))
-    .into()
 }
 
 fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
@@ -61,11 +62,10 @@ fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn while_loop() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::WHILE,
         fn_while,
     )))
-    .into()
 }
 
 fn fn_while(ctx: &mut Ctx, input: Val) -> Val {

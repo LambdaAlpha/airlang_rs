@@ -5,7 +5,10 @@ use crate::{
             Func,
             Primitive,
         },
-        prelude::names,
+        prelude::{
+            names,
+            prelude_func,
+        },
         val::Val,
     },
     types::{
@@ -15,11 +18,10 @@ use crate::{
 };
 
 pub(crate) fn length() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_LENGTH,
         fn_length,
     )))
-    .into()
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
@@ -39,11 +41,10 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn keys() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_KEYS,
         fn_keys,
     )))
-    .into()
 }
 
 fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
@@ -65,11 +66,10 @@ fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn values() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_VALUES,
         fn_values,
     )))
-    .into()
 }
 
 fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
@@ -91,11 +91,10 @@ fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn contains() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_CONTAINS,
         fn_contains,
     )))
-    .into()
 }
 
 fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
@@ -119,11 +118,10 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn contains_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_CONTAINS_MANY,
         fn_contains_many,
     )))
-    .into()
 }
 
 fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -151,11 +149,10 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_SET,
         fn_set,
     )))
-    .into()
 }
 
 fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
@@ -186,11 +183,10 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_SET_MANY,
         fn_set_many,
     )))
-    .into()
 }
 
 fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -223,11 +219,10 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_GET,
         fn_get,
     )))
-    .into()
 }
 
 fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
@@ -253,11 +248,10 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_GET_MANY,
         fn_get_many,
     )))
-    .into()
 }
 
 fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -294,11 +288,10 @@ fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_REMOVE,
         fn_remove,
     )))
-    .into()
 }
 
 fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
@@ -325,11 +318,10 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove_many() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_REMOVE_MANY,
         fn_remove_many,
     )))
-    .into()
 }
 
 fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
@@ -365,11 +357,10 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn clear() -> Val {
-    Box::new(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_CLEAR,
         fn_clear,
     )))
-    .into()
 }
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
