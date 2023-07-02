@@ -21,6 +21,7 @@ use crate::{
     types::{
         Either,
         Keeper,
+        Reader,
         Str,
         Symbol,
     },
@@ -126,7 +127,7 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, input: Val) -> Val {
             let Val::Ctx(target_ctx) = target else {
                 return Val::default();
             };
-            target_ctx.eval(val)
+            target_ctx.0.eval(val)
         };
         match ref_or_val {
             Either::Left(r) => f(r),
@@ -179,7 +180,7 @@ fn fn_func(input: Val) -> Val {
     };
     let body = map_remove(&mut map, "body");
     let func_ctx = match map_remove(&mut map, "context") {
-        Val::Ctx(func_ctx) => *func_ctx,
+        Val::Ctx(func_ctx) => *func_ctx.0,
         Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
@@ -215,12 +216,15 @@ fn fn_func(input: Val) -> Val {
         ComposedEval::CtxFree { eval_mode }
     };
 
-    Val::Func(Box::new(Func::new_composed(Composed {
-        body,
-        ctx: func_ctx,
-        input_name,
-        eval,
-    })))
+    Val::Func(
+        Reader::new(Func::new_composed(Composed {
+            body,
+            ctx: func_ctx,
+            input_name,
+            eval,
+        }))
+        .into(),
+    )
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {

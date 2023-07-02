@@ -30,6 +30,7 @@ use {
             List,
             Map,
             Pair,
+            Reader,
             Reverse,
             Str,
             Symbol,
@@ -37,9 +38,13 @@ use {
         },
     },
     std::{
-        hash::Hash,
+        hash::{
+            Hash,
+            Hasher,
+        },
         ops::{
             ControlFlow,
+            Deref,
             FromResidual,
             Try,
         },
@@ -63,8 +68,8 @@ pub enum Val {
 
     Ref(RefVal),
 
-    Func(Box<Func>),
-    Ctx(Box<Ctx>),
+    Func(FuncVal),
+    Ctx(CtxVal),
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
@@ -75,6 +80,12 @@ pub(crate) type MapVal = Map<Val, Val>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RefVal(pub(crate) Keeper<TaggedVal>);
+
+#[derive(Debug, Clone, Eq)]
+pub struct FuncVal(pub(crate) Reader<Func>);
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct CtxVal(pub(crate) Box<Ctx>);
 
 #[allow(dead_code)]
 impl Val {
@@ -167,14 +178,14 @@ impl From<RefVal> for Val {
     }
 }
 
-impl From<Box<Func>> for Val {
-    fn from(value: Box<Func>) -> Self {
+impl From<FuncVal> for Val {
+    fn from(value: FuncVal) -> Self {
         Val::Func(value)
     }
 }
 
-impl From<Box<Ctx>> for Val {
-    fn from(value: Box<Ctx>) -> Self {
+impl From<CtxVal> for Val {
+    fn from(value: CtxVal) -> Self {
         Val::Ctx(value)
     }
 }
@@ -504,5 +515,29 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
 impl From<Keeper<TaggedVal>> for RefVal {
     fn from(value: Keeper<TaggedVal>) -> Self {
         RefVal(value)
+    }
+}
+
+impl From<Reader<Func>> for FuncVal {
+    fn from(value: Reader<Func>) -> Self {
+        FuncVal(value)
+    }
+}
+
+impl PartialEq for FuncVal {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.deref().eq(&other.0)
+    }
+}
+
+impl Hash for FuncVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.deref().hash(state);
+    }
+}
+
+impl From<Box<Ctx>> for CtxVal {
+    fn from(value: Box<Ctx>) -> Self {
+        CtxVal(value)
     }
 }

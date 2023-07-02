@@ -5,13 +5,10 @@ use crate::{
             NameMap,
             TaggedVal,
         },
-        val::{
-            RefVal,
-            Val,
-        },
+        val::Val,
         Func,
     },
-    types::Keeper,
+    types::Reader,
 };
 
 pub(crate) fn prelude() -> NameMap {
@@ -114,9 +111,7 @@ fn put(constants: &mut NameMap, key: &str, val: Val) {
 }
 
 fn prelude_func(func: Func) -> Val {
-    Val::Ref(RefVal::from(Keeper::new(TaggedVal::new_const(Val::Func(
-        Box::new(func),
-    )))))
+    Val::Func(Reader::new(func).into())
 }
 
 pub(crate) mod names {

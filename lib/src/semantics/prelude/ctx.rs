@@ -362,11 +362,14 @@ fn fn_ctx_new(input: Val) -> Val {
         name_map.insert(name, TaggedVal::new(val));
     }
 
-    Val::Ctx(Box::new(Ctx {
-        name_map,
-        super_ctx_name: None,
-        reverse_interpreter: None,
-    }))
+    Val::Ctx(
+        Box::new(Ctx {
+            name_map,
+            super_ctx_name: None,
+            reverse_interpreter: None,
+        })
+        .into(),
+    )
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
@@ -407,7 +410,7 @@ fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
             let Val::Ctx(ctx) = r else {
                 return Val::default();
             };
-            f(ctx)
+            f(&mut ctx.0)
         }
         Either::Right(_) => Val::default(),
     })
