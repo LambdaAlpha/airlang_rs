@@ -326,7 +326,7 @@ impl Ctx {
     pub(crate) fn eval_map_by_ref(&mut self, map: &MapVal) -> Val {
         let map = map
             .into_iter()
-            .map(|(k, v)| (self.eval_by_ref(k), self.eval_by_ref(v)))
+            .map(|(k, v)| (self.eval_inline_by_ref(k), self.eval_by_ref(v)))
             .collect();
         Val::Map(map)
     }
@@ -338,6 +338,152 @@ impl Ctx {
 
     pub(crate) fn eval_reverse_by_ref(&mut self, func: &Val, output: &Val) -> Val {
         self.eval_reverse(func.clone(), output.clone())
+    }
+
+    pub(crate) fn eval_interpolate(&mut self, input: Val) -> Val {
+        match input {
+            Val::Call(c) => match &c.func {
+                Val::Unit(_) => self.eval(c.input),
+                _ => {
+                    let func = self.eval_interpolate(c.func);
+                    let input = self.eval_interpolate(c.input);
+                    let call = Box::new(Call::new(func, input));
+                    Val::Call(call)
+                }
+            },
+            Val::Pair(p) => {
+                let first = self.eval_interpolate(p.first);
+                let second = self.eval_interpolate(p.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::Reverse(r) => {
+                let func = self.eval_interpolate(r.func);
+                let output = self.eval_interpolate(r.output);
+                let reverse = Box::new(Reverse::new(func, output));
+                Val::Reverse(reverse)
+            }
+            Val::List(l) => {
+                let list = l.into_iter().map(|v| self.eval_interpolate(v)).collect();
+                Val::List(list)
+            }
+            Val::Map(m) => {
+                let map = m
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let key = self.eval_interpolate(k);
+                        let value = self.eval_interpolate(v);
+                        (key, value)
+                    })
+                    .collect();
+                Val::Map(map)
+            }
+            i => i,
+        }
+    }
+
+    #[allow(unused)]
+    pub(crate) fn eval_interpolate_by_ref(&mut self, input: &Val) -> Val {
+        match input {
+            Val::Call(c) => match &c.func {
+                Val::Unit(_) => self.eval_by_ref(&c.input),
+                _ => {
+                    let func = self.eval_interpolate_by_ref(&c.func);
+                    let input = self.eval_interpolate_by_ref(&c.input);
+                    let call = Box::new(Call::new(func, input));
+                    Val::Call(call)
+                }
+            },
+            Val::Pair(p) => {
+                let first = self.eval_interpolate_by_ref(&p.first);
+                let second = self.eval_interpolate_by_ref(&p.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::Reverse(r) => {
+                let func = self.eval_interpolate_by_ref(&r.func);
+                let output = self.eval_interpolate_by_ref(&r.output);
+                let reverse = Box::new(Reverse::new(func, output));
+                Val::Reverse(reverse)
+            }
+            Val::List(l) => {
+                let list = l
+                    .into_iter()
+                    .map(|v| self.eval_interpolate_by_ref(v))
+                    .collect();
+                Val::List(list)
+            }
+            Val::Map(m) => {
+                let map = m
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let key = self.eval_interpolate_by_ref(k);
+                        let value = self.eval_interpolate_by_ref(v);
+                        (key, value)
+                    })
+                    .collect();
+                Val::Map(map)
+            }
+            i => i.clone(),
+        }
+    }
+
+    pub(crate) fn eval_inline(&mut self, input: Val) -> Val {
+        match input {
+            Val::Call(call) => self.eval_call(call.func, call.input),
+            Val::Reverse(reverse) => self.eval_reverse(reverse.func, reverse.output),
+            Val::Pair(pair) => {
+                let first = self.eval_inline(pair.first);
+                let second = self.eval_inline(pair.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::List(l) => {
+                let list = l.into_iter().map(|v| self.eval_inline(v)).collect();
+                Val::List(list)
+            }
+            Val::Map(m) => {
+                let map = m
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let key = self.eval_inline(k);
+                        let value = self.eval_inline(v);
+                        (key, value)
+                    })
+                    .collect();
+                Val::Map(map)
+            }
+            v => v,
+        }
+    }
+
+    pub(crate) fn eval_inline_by_ref(&mut self, input: &Val) -> Val {
+        match input {
+            Val::Call(call) => self.eval_call_by_ref(&call.func, &call.input),
+            Val::Reverse(reverse) => self.eval_reverse_by_ref(&reverse.func, &reverse.output),
+            Val::Pair(pair) => {
+                let first = self.eval_inline_by_ref(&pair.first);
+                let second = self.eval_inline_by_ref(&pair.second);
+                let pair = Box::new(Pair::new(first, second));
+                Val::Pair(pair)
+            }
+            Val::List(l) => {
+                let list = l.into_iter().map(|v| self.eval_inline_by_ref(v)).collect();
+                Val::List(list)
+            }
+            Val::Map(m) => {
+                let map = m
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let key = self.eval_inline_by_ref(k);
+                        let value = self.eval_inline_by_ref(v);
+                        (key, value)
+                    })
+                    .collect();
+                Val::Map(map)
+            }
+            v => v.clone(),
+        }
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
@@ -524,77 +670,6 @@ impl Ctx {
                 f(Either::Left(&mut o.val))
             }
             val => f(Either::Right(val)),
-        }
-    }
-
-    pub(crate) fn eval_interpolate(&mut self, input: Val) -> Val {
-        match input {
-            Val::Call(c) => match &c.func {
-                Val::Unit(_) => self.eval(c.input),
-                _ => {
-                    let func = self.eval_interpolate(c.func);
-                    let input = self.eval_interpolate(c.input);
-                    let call = Box::new(Call::new(func, input));
-                    Val::Call(call)
-                }
-            },
-            Val::Pair(p) => {
-                let first = self.eval_interpolate(p.first);
-                let second = self.eval_interpolate(p.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::Reverse(r) => {
-                let func = self.eval_interpolate(r.func);
-                let output = self.eval_interpolate(r.output);
-                let reverse = Box::new(Reverse::new(func, output));
-                Val::Reverse(reverse)
-            }
-            Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_interpolate(v)).collect();
-                Val::List(list)
-            }
-            Val::Map(m) => {
-                let map = m
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let key = self.eval_interpolate(k);
-                        let value = self.eval_interpolate(v);
-                        (key, value)
-                    })
-                    .collect();
-                Val::Map(map)
-            }
-            i => i,
-        }
-    }
-
-    pub(crate) fn eval_inline(&mut self, input: Val) -> Val {
-        match input {
-            Val::Call(call) => self.eval_call(call.func, call.input),
-            Val::Reverse(reverse) => self.eval_reverse(reverse.func, reverse.output),
-            Val::Pair(pair) => {
-                let first = self.eval_inline(pair.first);
-                let second = self.eval_inline(pair.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_inline(v)).collect();
-                Val::List(list)
-            }
-            Val::Map(m) => {
-                let map = m
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let key = self.eval_inline(k);
-                        let value = self.eval_inline(v);
-                        (key, value)
-                    })
-                    .collect();
-                Val::Map(map)
-            }
-            v => v,
         }
     }
 }
