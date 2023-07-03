@@ -282,19 +282,19 @@ is_const a
 # ---
 1
 # ===
-;[a = (context {var: {b: 1}}), a eval@ b]
+;[a = (context {var: {b: 1}}), a .. b]
 # ---
 1
 # ===
-;[a = (context {var: {b: 1, ;, =}}), a eval@ (;[b = 2, b])]
+;[a = (context {var: {b: 1, ;, =}}), a .. (;[b = 2, b])]
 # ---
 2
 # ===
-;[a = (context {final: {b: 1, ;, =}}), a eval@ (;[b = 2, b])]
+;[a = (context {final: {b: 1, ;, =}}), a .. (;[b = 2, b])]
 # ---
 1
 # ===
-;[a = (context {const: {b: (1: 2), ;, set1}}), a eval@ (;[b set1 3, b])]
+;[a = (context {const: {b: (1: 2), ;, set1}}), a .. (;[b set1 3, b])]
 # ---
 1: 2
 # ===
@@ -306,34 +306,34 @@ is_const a
 # ---
 2
 # ===
-;[a = (context {}), ' set_super a, b = 1, b: (a eval@ b)]
+;[a = (context {}), ' set_super a, b = 1, b: (a .. b)]
 # ---
 1: 1
 # ===
-;[a = (context {}), b = 1, ' set_super a, b = 2, b: (a eval@ b)]
+;[a = (context {}), b = 1, ' set_super a, b = 2, b: (a .. b)]
 # ---
 2: '
 # ===
-;[a = (context {var: {b: (1: 2)}}), ' set_super a, b set1 3, a eval@ b]
+;[a = (context {var: {b: (1: 2)}}), ' set_super a, b set1 3, a .. b]
 # ---
 3: 2
 # ===
-;[a = (context {var: {b: 1}}), ' set_super a, move b: (a eval@ b)]
+;[a = (context {var: {b: 1}}), ' set_super a, move b: (a .. b)]
 # ---
 1: '
 # ===
-;[a = (context {var: {b: 1}}), b = 2, ' set_super a, move b: (a eval@ b)]
+;[a = (context {var: {b: 1}}), b = 2, ' set_super a, move b: (a .. b)]
 # ---
 2: 1
 # ===
-;[a = (context {}), ' set_super a, b =local 2, b: (a eval@ b)]
+;[a = (context {}), ' set_super a, b =local 2, b: (a .. b)]
 # ---
 2: '
 # ===
 ;[
     a = (context {const: {b: (context {const: {c: 1}})}}),
     a set_super b,
-    a eval@ c
+    a .. c
 ]
 # ---
 1

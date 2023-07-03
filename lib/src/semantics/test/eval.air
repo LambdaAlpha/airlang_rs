@@ -90,7 +90,11 @@ eval {a: (eval {b: c})}
 # ---
 1
 # ===
-;[a = (context {const: {=}}), a eval@ (b = 1), a eval@ b]
+;[a = (context {const: {=}}), a .. (b = 1), a .. b]
+# ---
+1
+# ===
+;[a = (context {const: {b: (ref (context {const: {c: 1}}))}}), a .. b .. c]
 # ---
 1
 # ===
@@ -202,11 +206,11 @@ not 't
 # ===
 ;[
     f = (function{
-        body: (caller eval@ (((' ') input) = 2)),
+        body: (caller .. (((' ') input) = 2)),
         context_aware: 't,
         context: (' (context {const: {
             ;,
-            eval@,
+            ..,
         }}))
     }),
     a = 1,
