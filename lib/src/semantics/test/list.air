@@ -14,7 +14,7 @@
 # ---
 2
 # ===
-;[a = (ref [1, 2]), (eval a) . list_length]
+;[a = (ref [1, 2]), a . list_length]
 # ---
 2
 # ===

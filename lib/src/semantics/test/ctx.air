@@ -86,7 +86,7 @@ is_null a
 # ---
 2
 # ===
-;[a = (ref 1), (eval a) =final (1: 2), (eval a) set1 3, eval2 a]
+;[a = (ref 1), (eval a) =final (1: 2), a set1 3, eval2 a]
 # ---
 3: 2
 # ===
@@ -110,7 +110,7 @@ is_null a
 # ---
 2
 # ===
-;[a = (ref 1), (eval a) =const (1: 2), (eval a) set1 3, eval2 a]
+;[a = (ref 1), (eval a) =const (1: 2), a set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -130,11 +130,11 @@ is_null a
 # ---
 1
 # ===
-;[a = (ref (1: 2)), final (eval a), (eval a) set1 3, eval2 a]
+;[a = (ref (1: 2)), final (eval a), a set1 3, eval2 a]
 # ---
 3: 2
 # ===
-;[a = (const_ref (1: 2)), final (eval a), (eval a) set1 3, eval2 a]
+;[a = (const_ref (1: 2)), final (eval a), a set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -150,7 +150,7 @@ is_null a
 # ---
 1: 2
 # ===
-;[a = (ref (1: 2)), const (eval a), (eval a) set1 3, eval2 a]
+;[a = (ref (1: 2)), const (eval a), a set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -222,7 +222,7 @@ is_const a
 # ---
 't
 # ===
-;[a = (final_ref (1: 2)), const (eval a), (eval a) set1 3, eval2 a]
+;[a = (final_ref (1: 2)), const (eval a), a set1 3, eval2 a]
 # ---
 1: 2
 # ===
@@ -270,11 +270,11 @@ is_const a
 # ---
 1
 # ===
-;[a = (final_ref (1: 2)), (eval a) set1 3, eval2 a]
+;[a = (final_ref (1: 2)), a set1 3, eval2 a]
 # ---
 3: 2
 # ===
-;[a = (const_ref (1: 2)), (eval a) set1 3, eval2 a]
+;[a = (const_ref (1: 2)), a set1 3, eval2 a]
 # ---
 1: 2
 # ===

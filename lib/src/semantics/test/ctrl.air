@@ -53,7 +53,7 @@ if['t, if['f, 1, 2], 3]
 ;[
     a = 42,
     b = 24,
-    while[a != b,
+    while[a <> b,
         if[a > b,
             a = (a - b),
             b = (b - a)

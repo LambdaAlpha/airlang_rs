@@ -40,10 +40,11 @@ pub(crate) fn read() -> Val {
 
 fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
     let name = ctx.eval_inline(input);
-    ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
-        Either::Left(r) => r.clone(),
-        Either::Right(_) => Val::default(),
-    })
+    match name {
+        Val::Symbol(s) => ctx.get(&s),
+        Val::Ref(r) => ctx.eval_ref(&r),
+        _ => Val::default(),
+    }
 }
 
 pub(crate) fn is_null() -> Val {
@@ -56,7 +57,7 @@ pub(crate) fn is_null() -> Val {
 fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
     let name = ctx.eval_inline(input);
     match name {
-        Val::Symbol(s) => Val::Bool(Bool::new(ctx.get_ref(&s).is_none())),
+        Val::Symbol(s) => Val::Bool(Bool::new(ctx.get_ref(&s, |op| op.is_none()))),
         Val::Ref(k) => Val::Bool(Bool::new(Keeper::reader(&k.0).is_err())),
         _ => Val::default(),
     }
@@ -365,7 +366,7 @@ fn fn_ctx_new(input: Val) -> Val {
     Val::Ctx(
         Box::new(Ctx {
             name_map,
-            super_ctx_name: None,
+            super_ctx: None,
             reverse_interpreter: None,
         })
         .into(),
@@ -389,14 +390,17 @@ fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let ctx_name_or_val = ctx.eval_inline(pair.first);
-    let super_ctx_name = ctx.eval_inline(pair.second);
+    let super_ctx = ctx.eval_inline(pair.second);
     let f = |ctx: &mut Ctx| {
-        match super_ctx_name {
+        match super_ctx {
             Val::Symbol(Symbol(name)) => {
-                ctx.super_ctx_name = Some(name);
+                ctx.super_ctx = Some(Either::Left(name));
+            }
+            Val::Ref(r) => {
+                ctx.super_ctx = Some(Either::Right(r));
             }
             Val::Unit(_) => {
-                ctx.super_ctx_name = None;
+                ctx.super_ctx = None;
             }
             _ => {}
         }

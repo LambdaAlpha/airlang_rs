@@ -185,12 +185,13 @@ not 't
 # ===
 ;[
     f = (function{
-        body: (;[' set_super caller, eval2 input]),
+        body: (;[' set_super (read caller), eval2 input]),
         context_aware: 't,
         context: (' (context {const: {
             ;,
             eval2,
             set_super,
+            read,
         }}))
     }),
     a = 1,

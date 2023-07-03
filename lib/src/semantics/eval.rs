@@ -1,6 +1,8 @@
 use {
     crate::{
         semantics::val::{
+            CtxVal,
+            FuncVal,
             ListVal,
             MapVal,
             RefVal,
@@ -11,6 +13,7 @@ use {
             Either,
             Keeper,
             Map,
+            Owner,
             Pair,
             Reader,
             Reverse,
@@ -111,7 +114,7 @@ pub(crate) struct TaggedVal {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Ctx {
     pub(crate) name_map: NameMap,
-    pub(crate) super_ctx_name: Option<Name>,
+    pub(crate) super_ctx: Option<Either<Name, RefVal>>,
     pub(crate) reverse_interpreter: Option<Reader<Func>>,
 }
 
@@ -161,15 +164,17 @@ impl Composed {
 
                 let mut caller_ctx = Ctx::default();
                 swap(ctx, &mut caller_ctx);
-                new_ctx.put_val_local(
-                    caller_name.clone(),
-                    TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx).into())),
-                );
+                let keeper =
+                    Keeper::new(TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx).into())));
+                let caller_ctx_ref = Val::Ref(RefVal(keeper.clone()));
+                new_ctx.put_val_local(caller_name.clone(), TaggedVal::new(caller_ctx_ref));
 
                 let output = new_ctx.eval_by_ref(&self.body);
 
-                if let Val::Ctx(caller) = new_ctx.into_val(caller_name) {
-                    *ctx = *caller.0;
+                if let Ok(o) = Keeper::owner(&keeper) {
+                    if let Val::Ctx(CtxVal(caller)) = Owner::move_data(o).val {
+                        *ctx = *caller;
+                    }
                 }
 
                 output
@@ -229,10 +234,10 @@ impl Ctx {
     }
 
     pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {
-        let Val::Func(func) = self.eval(func) else {
+        let Val::Func(FuncVal(func)) = self.eval(func) else {
             return Val::default();
         };
-        func.0.eval(self, input)
+        func.eval(self, input)
     }
 
     pub(crate) fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
@@ -276,10 +281,10 @@ impl Ctx {
     }
 
     pub(crate) fn eval_call_by_ref(&mut self, func: &Val, input: &Val) -> Val {
-        let Val::Func(func) = self.eval_by_ref(func) else {
+        let Val::Func(FuncVal(func)) = self.eval_by_ref(func) else {
             return Val::default();
         };
-        func.0.eval(self, input.clone())
+        func.eval(self, input.clone())
     }
 
     pub(crate) fn eval_reverse_by_ref(&mut self, func: &Val, output: &Val) -> Val {
@@ -433,36 +438,65 @@ impl Ctx {
     }
 
     pub(crate) fn get(&self, name: &str) -> Val {
-        self.name_map
-            .get(name)
-            .map(|tagged_val| tagged_val.val.clone())
-            .or_else(|| self.get_ref_super_ctx().map(|ctx| ctx.get(name)))
-            .unwrap_or_default()
+        let Some(tagged_val) = self.name_map.get(name) else {
+            return self.get_ref_super_ctx(|op_ctx| {
+                let Some(ctx) = op_ctx else {
+                    return Val::default();
+                };
+                ctx.get(name)
+            });
+        };
+        tagged_val.val.clone()
     }
 
-    pub(crate) fn get_ref(&self, name: &str) -> Option<&Val> {
-        self.name_map
-            .get(name)
-            .map(|tagged_val| &tagged_val.val)
-            .or_else(|| self.get_ref_super_ctx().and_then(|ctx| ctx.get_ref(name)))
+    pub(crate) fn get_ref<T, F>(&self, name: &str, f: F) -> T
+    where
+        F: FnOnce(Option<&Val>) -> T,
+    {
+        let Some(tagged_val) = self.name_map.get(name) else {
+            return self.get_ref_super_ctx(|op_ctx| {
+                let Some(ctx) = op_ctx else {
+                    return f(None);
+                };
+                ctx.get_ref(name, f)
+            });
+        };
+        f(Some(&tagged_val.val))
     }
 
-    pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Val> {
+    pub(crate) fn get_mut<T, F>(&mut self, name: &str, f: F) -> T
+    where
+        F: FnOnce(Option<&mut Val>) -> T,
+    {
         if self.name_map.get(name).is_none() {
-            return self.get_mut_super_ctx().and_then(|ctx| ctx.get_mut(name));
+            return self.get_mut_super_ctx(|ctx, is_super| {
+                if is_super {
+                    ctx.get_mut(name, f)
+                } else {
+                    f(None)
+                }
+            });
         }
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            return None;
+            return f(None);
         };
-        match tagged_val.tag {
-            InvariantTag::Const => None,
-            _ => Some(&mut tagged_val.val),
+
+        if matches!(tagged_val.tag, InvariantTag::Const) {
+            return f(None);
         }
+
+        f(Some(&mut tagged_val.val))
     }
 
     pub(crate) fn remove(&mut self, name: &str) -> Val {
         let Some(tagged_val) = self.name_map.get(name) else {
-            return self.get_mut_super_ctx().map(|ctx| ctx.remove(name)).unwrap_or_default();
+            return self.get_mut_super_ctx(|ctx, is_super| {
+                if is_super {
+                    ctx.remove(name)
+                } else {
+                    Val::default()
+                }
+            });
         };
         if !matches!(&tagged_val.tag, InvariantTag::None) {
             return Val::default();
@@ -473,29 +507,21 @@ impl Ctx {
             .unwrap_or_default()
     }
 
-    fn into_val(mut self, name: &str) -> Val {
-        self.name_map
-            .remove(name)
-            .map(|tagged_val| tagged_val.val)
-            .unwrap_or_default()
-    }
-
     pub(crate) fn put_val(&mut self, name: Name, val: TaggedVal) -> Val {
-        match self.name_map.get(&name) {
-            None => {
-                if let Some(super_ctx) = self.get_mut_super_ctx() {
-                    super_ctx.put_val(name, val)
+        let Some(tagged_val) = self.name_map.get(&name) else {
+            return self.get_mut_super_ctx(|ctx, is_super| {
+                if is_super {
+                    ctx.put_val(name, val)
                 } else {
-                    self.put_unchecked(name, val)
+                    ctx.put_unchecked(name, val)
                 }
-            }
-            Some(tagged_val) => {
-                if !matches!(&tagged_val.tag, InvariantTag::None) {
-                    return Val::default();
-                }
-                self.put_unchecked(name, val)
-            }
+            });
+        };
+
+        if !matches!(&tagged_val.tag, InvariantTag::None) {
+            return Val::default();
         }
+        self.put_unchecked(name, val)
     }
 
     pub(crate) fn put_val_local(&mut self, name: Name, val: TaggedVal) -> Val {
@@ -514,9 +540,11 @@ impl Ctx {
 
     pub(crate) fn set_final(&mut self, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            if let Some(ctx) = self.get_mut_super_ctx() {
-                ctx.set_final(name);
-            }
+            self.get_mut_super_ctx(|ctx, is_super| {
+                if is_super {
+                    ctx.set_final(name);
+                }
+            });
             return;
         };
         if !(matches!(&tagged_val.tag, InvariantTag::None)) {
@@ -527,51 +555,96 @@ impl Ctx {
 
     pub(crate) fn set_const(&mut self, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            if let Some(ctx) = self.get_mut_super_ctx() {
-                ctx.set_const(name);
-            }
+            self.get_mut_super_ctx(|ctx, is_super| {
+                if is_super {
+                    ctx.set_const(name);
+                }
+            });
             return;
         };
         tagged_val.tag = InvariantTag::Const;
     }
 
     pub(crate) fn is_final(&self, name: &str) -> bool {
-        self.name_map
-            .get(name)
-            .map(|tagged_val| matches!(&tagged_val.tag, InvariantTag::Final | InvariantTag::Const))
-            .or_else(|| self.get_ref_super_ctx().map(|ctx| ctx.is_final(name)))
-            .unwrap_or_default()
+        let Some(tagged_val) = self.name_map.get(name) else {
+            return self.get_ref_super_ctx(|op_ctx| {
+                let Some(ctx) = op_ctx else {
+                    return false;
+                };
+                ctx.is_final(name)
+            });
+        };
+        matches!(&tagged_val.tag, InvariantTag::Final | InvariantTag::Const)
     }
 
     pub(crate) fn is_const(&self, name: &str) -> bool {
-        self.name_map
-            .get(name)
-            .map(|tagged_val| matches!(&tagged_val.tag, InvariantTag::Const))
-            .or_else(|| self.get_ref_super_ctx().map(|ctx| ctx.is_const(name)))
-            .unwrap_or_default()
+        let Some(tagged_val) = self.name_map.get(name) else {
+            return self.get_ref_super_ctx(|op_ctx| {
+                let Some(ctx) = op_ctx else {
+                    return false;
+                };
+                ctx.is_const(name)
+            });
+        };
+        matches!(&tagged_val.tag, InvariantTag::Const)
     }
 
-    fn get_ref_super_ctx(&self) -> Option<&Ctx> {
-        let Some(name) = &self.super_ctx_name else {
-            return None;
+    fn get_ref_super_ctx<T, F>(&self, f: F) -> T
+    where
+        F: FnOnce(Option<&Ctx>) -> T,
+    {
+        let Some(name_or_ref) = &self.super_ctx else {
+            return f(None);
         };
-        let Some(TaggedVal { val: Val::Ctx(super_ctx), .. }) = self.name_map.get(name) else {
-            return None;
-        };
-        Some(&super_ctx.0)
-    }
-
-    fn get_mut_super_ctx(&mut self) -> Option<&mut Ctx> {
-        let Some(name) = &self.super_ctx_name else {
-            return None;
-        };
-        let Some(TaggedVal { val: Val::Ctx(super_ctx), tag }) = self.name_map.get_mut(name) else {
-            return None;
-        };
-        if matches!(tag, InvariantTag::Const) {
-            return None;
+        match name_or_ref {
+            Either::Left(name) => {
+                let Some(TaggedVal { val: Val::Ctx(CtxVal(super_ctx)), .. }) = self.name_map.get(name) else {
+                    return f(None);
+                };
+                f(Some(super_ctx))
+            }
+            Either::Right(RefVal(r)) => {
+                let Ok(r) = Keeper::reader(r) else {
+                    return f(None);
+                };
+                let TaggedVal { val: Val::Ctx(CtxVal(super_ctx)), .. } = &*r else {
+                    return f(None);
+                };
+                f(Some(super_ctx))
+            }
         }
-        Some(&mut super_ctx.0)
+    }
+
+    fn get_mut_super_ctx<T, F>(&mut self, f: F) -> T
+    where
+        F: FnOnce(&mut Ctx, bool) -> T,
+    {
+        let Some(name_or_ref) = &self.super_ctx else {
+            return f(self, false);
+        };
+        match name_or_ref {
+            Either::Left(name) => {
+                let Some(TaggedVal { val: Val::Ctx(CtxVal(super_ctx)), tag }) = self.name_map.get_mut(name) else {
+                    return f(self, false);
+                };
+                if matches!(tag, InvariantTag::Const) {
+                    return f(self, false);
+                }
+                f(super_ctx, true)
+            }
+            Either::Right(RefVal(r)) => {
+                let Ok(mut o) = Keeper::owner(r) else {
+                    return f(self, false);
+                };
+                let TaggedVal { val: Val::Ctx(CtxVal(super_ctx)), tag } = &mut *o else {
+                    return f(self, false);
+                };
+                if matches!(tag, InvariantTag::Const) {
+                    return f(self, false);
+                }
+                f(super_ctx, true)
+            }
+        }
     }
 
     pub(crate) fn get_ref_or_val<F>(&self, name: Val, f: F) -> Val
@@ -579,14 +652,21 @@ impl Ctx {
         F: FnOnce(Either<&Val, Val>) -> Val,
     {
         match name {
-            Val::Symbol(s) => {
-                let Some(val) = self.get_ref(&s) else {
+            Val::Symbol(s) => self.get_ref(&s, |op_val| {
+                let Some(val) = op_val else {
                     return Val::default();
                 };
-                f(Either::Left(val))
-            }
-            Val::Ref(k) => {
-                let Ok(r) = Keeper::reader(&k.0) else {
+                if let Val::Ref(RefVal(r)) = val {
+                    let Ok(r) = Keeper::reader(r) else {
+                        return Val::default();
+                    };
+                    f(Either::Left(&r.val))
+                } else {
+                    f(Either::Left(val))
+                }
+            }),
+            Val::Ref(RefVal(r)) => {
+                let Ok(r) = Keeper::reader(&r) else {
                     return Val::default();
                 };
                 f(Either::Left(&r.val))
@@ -600,17 +680,27 @@ impl Ctx {
         F: FnOnce(Either<&mut Val, Val>) -> Val,
     {
         match name {
-            Val::Symbol(s) => {
-                let Some(val) = self.get_mut(&s) else {
+            Val::Symbol(s) => self.get_mut(&s, |op_val| {
+                let Some(val) = op_val else {
                     return Val::default();
                 };
-                f(Either::Left(val))
-            }
-            Val::Ref(k) => {
-                let Ok(mut o) = Keeper::owner(&k.0) else {
+                if let Val::Ref(RefVal(r)) = val {
+                    let Ok(mut o) = Keeper::owner(r) else {
+                        return Val::default();
+                    };
+                    if matches!(o.tag, InvariantTag::Const) {
+                        return Val::default();
+                    }
+                    f(Either::Left(&mut o.val))
+                } else {
+                    f(Either::Left(val))
+                }
+            }),
+            Val::Ref(RefVal(r)) => {
+                let Ok(mut o) = Keeper::owner(&r) else {
                     return Val::default();
                 };
-                if !matches!(o.tag, InvariantTag::None | InvariantTag::Final) {
+                if matches!(o.tag, InvariantTag::Const) {
                     return Val::default();
                 }
                 f(Either::Left(&mut o.val))

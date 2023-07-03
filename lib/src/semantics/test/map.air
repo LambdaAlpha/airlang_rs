@@ -6,7 +6,7 @@
 # ---
 2
 # ===
-;[a = (ref {1: 2, 3}), (eval a) . map_length]
+;[a = (ref {1: 2, 3}), a . map_length]
 # ---
 2
 # ===
