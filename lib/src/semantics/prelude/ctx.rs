@@ -2,6 +2,14 @@ use {
     crate::{
         semantics::{
             eval::{
+                strategy::{
+                    eval::{
+                        DefaultStrategy,
+                        Eval,
+                    },
+                    inline::InlineStrategy,
+                    EvalStrategy,
+                },
                 Ctx,
                 EvalMode,
                 Func,
@@ -32,31 +40,31 @@ use {
 };
 
 pub(crate) fn read() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::READ,
+        EvalMode::Inline,
         fn_read,
     )))
 }
 
-fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
-    let name = ctx.eval_inline(input);
-    match name {
-        Val::Symbol(s) => ctx.get(&s),
-        Val::Ref(r) => ctx.eval_ref(&r),
+fn fn_read(ctx: &Ctx, input: Val) -> Val {
+    match input {
+        Val::Symbol(s) => Eval::eval_symbol(ctx, &s),
+        Val::Ref(r) => Eval::eval_ref(&r),
         _ => Val::default(),
     }
 }
 
 pub(crate) fn is_null() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::IS_NULL,
+        EvalMode::Inline,
         fn_is_null,
     )))
 }
 
-fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
-    let name = ctx.eval_inline(input);
-    match name {
+fn fn_is_null(ctx: &Ctx, input: Val) -> Val {
+    match input {
         Val::Symbol(s) => Val::Bool(Bool::new(ctx.get_ref(&s, |op| op.is_none()))),
         Val::Ref(k) => Val::Bool(Bool::new(Keeper::reader(&k.0).is_err())),
         _ => Val::default(),
@@ -66,6 +74,7 @@ fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn assign_local() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_LOCAL,
+        EvalMode::Value,
         fn_assign_local,
     )))
 }
@@ -74,16 +83,17 @@ fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(Symbol(name)) = ctx.eval_inline(pair.first) else {
+    let Val::Symbol(Symbol(name)) = InlineStrategy::eval(ctx, pair.first) else {
         return Val::default();
     };
-    let val = ctx.eval(pair.second);
+    let val = DefaultStrategy::eval(ctx, pair.second);
     ctx.put_val_local(name, TaggedVal::new(val))
 }
 
 pub(crate) fn assign() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN,
+        EvalMode::Value,
         fn_assign,
     )))
 }
@@ -95,6 +105,7 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn assign_final() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_FINAL,
+        EvalMode::Value,
         fn_assign_final,
     )))
 }
@@ -106,6 +117,7 @@ fn fn_assign_final(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn assign_const() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_CONST,
+        EvalMode::Value,
         fn_assign_const,
     )))
 }
@@ -118,17 +130,17 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let first = ctx.eval_inline(pair.first);
+    let first = InlineStrategy::eval(ctx, pair.first);
     match first {
         Val::Symbol(s) => {
-            let val = ctx.eval(pair.second);
+            let val = DefaultStrategy::eval(ctx, pair.second);
             ctx.put_val(
                 Name::from(<_ as Into<String>>::into(s)),
                 TaggedVal { tag, val },
             )
         }
         Val::Ref(k) => {
-            let mut val = ctx.eval(pair.second);
+            let mut val = DefaultStrategy::eval(ctx, pair.second);
             if let Ok(mut o) = Keeper::owner(&k.0) {
                 if !matches!(o.tag, InvariantTag::None) {
                     return Val::default();
@@ -148,12 +160,12 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
 pub(crate) fn set_final() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::FINAL,
+        EvalMode::Inline,
         fn_set_final,
     )))
 }
 
 fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_inline(input);
     match input {
         Val::Symbol(s) => ctx.set_final(&s),
         Val::Ref(k) => {
@@ -173,12 +185,12 @@ fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn set_const() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CONST,
+        EvalMode::Inline,
         fn_set_const,
     )))
 }
 
 fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_inline(input);
     match input {
         Val::Symbol(s) => ctx.set_const(&s),
         Val::Ref(k) => {
@@ -193,14 +205,14 @@ fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_final() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::IS_FINAL,
+        EvalMode::Inline,
         fn_is_final,
     )))
 }
 
-fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_inline(input);
+fn fn_is_final(ctx: &Ctx, input: Val) -> Val {
     let is_const = match input {
         Val::Symbol(s) => ctx.is_final(&s),
         Val::Ref(k) => {
@@ -218,14 +230,14 @@ fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn is_const() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::IS_CONST,
+        EvalMode::Inline,
         fn_is_const,
     )))
 }
 
-fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_inline(input);
+fn fn_is_const(ctx: &Ctx, input: Val) -> Val {
     let is_const = match input {
         Val::Symbol(s) => ctx.is_const(&s),
         Val::Ref(k) => {
@@ -245,12 +257,12 @@ fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn remove() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MOVE,
+        EvalMode::Inline,
         fn_move,
     )))
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
-    let input = ctx.eval_inline(input);
     match input {
         Val::Symbol(s) => ctx.remove(&s),
         Val::Ref(k) => {
@@ -381,6 +393,7 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 pub(crate) fn ctx_set_super() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CTX_SET_SUPER,
+        EvalMode::Inline,
         fn_ctx_set_super,
     )))
 }
@@ -389,8 +402,8 @@ fn fn_ctx_set_super(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let ctx_name_or_val = ctx.eval_inline(pair.first);
-    let super_ctx = ctx.eval_inline(pair.second);
+    let ctx_name_or_val = pair.first;
+    let super_ctx = pair.second;
     let f = |ctx: &mut Ctx| {
         match super_ctx {
             Val::Symbol(Symbol(name)) => {

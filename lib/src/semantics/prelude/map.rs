@@ -1,7 +1,13 @@
 use crate::{
     semantics::{
         eval::{
+            strategy::{
+                eval::DefaultStrategy,
+                inline::InlineStrategy,
+                EvalStrategy,
+            },
             Ctx,
+            EvalMode,
             Func,
             Primitive,
         },
@@ -18,15 +24,15 @@ use crate::{
 };
 
 pub(crate) fn length() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_LENGTH,
+        EvalMode::Inline,
         fn_length,
     )))
 }
 
-fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_map = ctx.eval_inline(input);
-    ctx.get_ref_or_val(name_or_map, |ref_or_val| {
+fn fn_length(ctx: &Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val(input, |ref_or_val| {
         let f = |map: &Val| {
             let Val::Map(map) = map else {
                 return Val::default();
@@ -41,15 +47,15 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn keys() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_KEYS,
+        EvalMode::Inline,
         fn_keys,
     )))
 }
 
-fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_map = ctx.eval_inline(input);
-    ctx.get_ref_or_val(name_or_map, |ref_or_val| match ref_or_val {
+fn fn_keys(ctx: &Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val(input, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
                 return Val::default();
@@ -66,15 +72,15 @@ fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn values() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_VALUES,
+        EvalMode::Inline,
         fn_values,
     )))
 }
 
-fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_map = ctx.eval_inline(input);
-    ctx.get_ref_or_val(name_or_map, |ref_or_val| match ref_or_val {
+fn fn_values(ctx: &Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val(input, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
                 return Val::default();
@@ -91,24 +97,25 @@ fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn contains() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_CONTAINS,
+        EvalMode::Inline,
         fn_contains,
     )))
 }
 
-fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_contains(ctx: &Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_key.first);
-    let key = ctx.eval_inline(name_key.second);
+    let name = name_key.first;
+    let key = &name_key.second;
     ctx.get_ref_or_val(name, |ref_or_val| {
         let f = |val: &Val| {
             let Val::Map(map) = val  else {
                 return Val::default();
             };
-            Val::Bool(Bool::new(map.contains_key(&key)))
+            Val::Bool(Bool::new(map.contains_key(key)))
         };
         match ref_or_val {
             Either::Left(val) => f(val),
@@ -118,19 +125,19 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn contains_many() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_CONTAINS_MANY,
+        EvalMode::Inline,
         fn_contains_many,
     )))
 }
 
-fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_contains_many(ctx: &Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_keys.first);
-    let keys = ctx.eval_inline(name_keys.second);
-    let Val::List(keys) = keys  else {
+    let name = name_keys.first;
+    let Val::List(keys) = name_keys.second  else {
         return Val::default();
     };
     ctx.get_ref_or_val(name, |ref_or_val| {
@@ -151,6 +158,7 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn set() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_SET,
+        EvalMode::Value,
         fn_set,
     )))
 }
@@ -159,12 +167,12 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_pair.first);
+    let name = InlineStrategy::eval(ctx, name_pair.first);
     let Val::Pair(key_value) = name_pair.second else {
         return Val::default();
     };
-    let key = ctx.eval_inline(key_value.first);
-    let value = ctx.eval(key_value.second);
+    let key = InlineStrategy::eval(ctx, key_value.first);
+    let value = DefaultStrategy::eval(ctx, key_value.second);
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -185,6 +193,7 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn set_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_SET_MANY,
+        EvalMode::Value,
         fn_set_many,
     )))
 }
@@ -193,8 +202,8 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_pair.first);
-    let Val::Map(update) = ctx.eval(name_pair.second) else {
+    let name = InlineStrategy::eval(ctx, name_pair.first);
+    let Val::Map(update) = DefaultStrategy::eval(ctx, name_pair.second) else {
         return Val::default();
     };
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
@@ -219,48 +228,49 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_GET,
+        EvalMode::Inline,
         fn_get,
     )))
 }
 
-fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_get(ctx: &Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_key.first);
-    let key = ctx.eval_inline(name_key.second);
+    let name = name_key.first;
+    let key = &name_key.second;
     ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
                 return Val::default();
             };
-            map.get(&key).map(Clone::clone).unwrap_or_default()
+            map.get(key).map(Clone::clone).unwrap_or_default()
         }
         Either::Right(val) => {
             let Val::Map(mut map) = val else {
                 return Val::default();
             };
-            map.remove(&key).unwrap_or_default()
+            map.remove(key).unwrap_or_default()
         }
     })
 }
 
 pub(crate) fn get_many() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_GET_MANY,
+        EvalMode::Inline,
         fn_get_many,
     )))
 }
 
-fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_get_many(ctx: &Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_keys.first);
-    let keys = ctx.eval_inline(name_keys.second);
-    let Val::List(keys) = keys else {
+    let name = name_keys.first;
+    let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
     ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
@@ -290,6 +300,7 @@ fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn remove() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_REMOVE,
+        EvalMode::Inline,
         fn_remove,
     )))
 }
@@ -298,8 +309,8 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_key.first);
-    let key = ctx.eval_inline(name_key.second);
+    let name = name_key.first;
+    let key = name_key.second;
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -320,6 +331,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn remove_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_REMOVE_MANY,
+        EvalMode::Inline,
         fn_remove_many,
     )))
 }
@@ -328,8 +340,8 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
-    let name = ctx.eval_inline(name_keys.first);
-    let keys = ctx.eval_inline(name_keys.second);
+    let name = name_keys.first;
+    let keys = name_keys.second;
     let Val::List(keys) = keys else {
         return Val::default();
     };
@@ -359,13 +371,13 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn clear() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_CLEAR,
+        EvalMode::Inline,
         fn_clear,
     )))
 }
 
 fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
-    let name = ctx.eval_inline(input);
-    ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
+    ctx.get_mut_or_val(input, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
                 return Val::default();

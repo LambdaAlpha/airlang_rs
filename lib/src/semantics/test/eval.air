@@ -190,7 +190,8 @@ not 't
 ;[
     f = (function{
         body: (;[' set_super (read caller), eval2 input]),
-        context_aware: 't,
+        eval_mode: value,
+        caller_context: aware,
         context: (' (context {const: {
             ;,
             eval2,
@@ -207,7 +208,8 @@ not 't
 ;[
     f = (function{
         body: (caller .. (((' ') input) = 2)),
-        context_aware: 't,
+        eval_mode: value,
+        caller_context: aware,
         context: (' (context {const: {
             ;,
             ..,
@@ -219,6 +221,23 @@ not 't
 ]
 # ---
 2
+# ===
+;[
+    f = (function{
+        body: (caller .. (((' ') input) = 2)),
+        eval_mode: value,
+        caller_context: const,
+        context: (' (context {const: {
+            ;,
+            ..,
+        }}))
+    }),
+    a = 1,
+    f a,
+    a
+]
+# ---
+1
 # ===
 't . not
 # ---

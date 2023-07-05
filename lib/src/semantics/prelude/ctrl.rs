@@ -1,6 +1,15 @@
 use crate::semantics::{
     eval::{
+        strategy::{
+            eval::{
+                DefaultByRefStrategy,
+                DefaultStrategy,
+            },
+            ByRefStrategy,
+            EvalStrategy,
+        },
         Ctx,
+        EvalMode,
         Func,
         Primitive,
     },
@@ -14,6 +23,7 @@ use crate::semantics::{
 pub(crate) fn sequence() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::SEQUENCE,
+        EvalMode::Value,
         fn_sequence,
     )))
 }
@@ -24,7 +34,7 @@ fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
     };
     let mut output = Val::default();
     for val in list {
-        output = ctx.eval(val);
+        output = DefaultStrategy::eval(ctx, val);
     }
     output
 }
@@ -32,6 +42,7 @@ fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn condition() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::IF,
+        EvalMode::Value,
         fn_if,
     )))
 }
@@ -44,26 +55,27 @@ fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
     let Some(condition) = iter.next() else {
         return Val::default();
     };
-    let Val::Bool(b) = ctx.eval(condition) else {
+    let Val::Bool(b) = DefaultStrategy::eval(ctx, condition) else {
         return Val::default();
     };
     if b.bool() {
         let Some(branch) = iter.next() else {
             return Val::default();
         };
-        ctx.eval(branch)
+        DefaultStrategy::eval(ctx, branch)
     } else {
         let _ = iter.next();
         let Some(branch) = iter.next() else {
             return Val::default();
         };
-        ctx.eval(branch)
+        DefaultStrategy::eval(ctx, branch)
     }
 }
 
 pub(crate) fn while_loop() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::WHILE,
+        EvalMode::Value,
         fn_while,
     )))
 }
@@ -79,11 +91,11 @@ fn fn_while(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = ctx.eval_by_ref(condition) else {
+        let Val::Bool(b) = DefaultByRefStrategy::eval(ctx, condition) else {
             return Val::default();
         };
         if b.bool() {
-            ctx.eval_by_ref(body);
+            DefaultByRefStrategy::eval(ctx, body);
         } else {
             break;
         }

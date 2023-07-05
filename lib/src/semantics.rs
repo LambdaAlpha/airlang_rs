@@ -1,7 +1,13 @@
 use {
     crate::{
         semantics::{
-            eval::NameMap,
+            eval::{
+                strategy::{
+                    eval::DefaultStrategy,
+                    EvalStrategy,
+                },
+                NameMap,
+            },
             prelude::prelude,
         },
         syntax::ParseError,
@@ -42,7 +48,7 @@ impl Interpreter {
     }
 
     pub fn interpret(&mut self, src: Val) -> Val {
-        self.ctx.eval(src)
+        DefaultStrategy::eval(&mut self.ctx, src)
     }
 
     pub fn reset(&mut self) {

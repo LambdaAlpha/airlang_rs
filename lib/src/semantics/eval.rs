@@ -1,22 +1,29 @@
 use {
     crate::{
-        semantics::val::{
-            CtxVal,
-            FuncVal,
-            ListVal,
-            MapVal,
-            RefVal,
-            Val,
+        semantics::{
+            eval::strategy::{
+                eval::{
+                    DefaultByRefStrategy,
+                    DefaultStrategy,
+                },
+                inline::InlineStrategy,
+                interpolate::InterpolateStrategy,
+                val::ValStrategy,
+                ByRefStrategy,
+                EvalStrategy,
+            },
+            val::{
+                CtxVal,
+                RefVal,
+                Val,
+            },
         },
         types::{
-            Call,
             Either,
             Keeper,
             Map,
             Owner,
-            Pair,
             Reader,
-            Reverse,
         },
     },
     smartstring::alias::CompactString,
@@ -30,7 +37,6 @@ use {
             Hasher,
         },
         mem::swap,
-        ops::Deref,
     },
 };
 
@@ -52,21 +58,20 @@ pub(crate) enum FuncImpl {
 #[derive(Debug, Clone)]
 pub(crate) struct Primitive {
     pub(crate) id: Name,
-    pub(crate) eval: PrimitiveEval,
+    pub(crate) eval_mode: EvalMode,
+    pub(crate) ctx_fn: PrimitiveCtxFn,
 }
 
 #[derive(Clone)]
-pub(crate) enum PrimitiveEval {
-    CtxFree {
-        eval_mode: EvalMode,
-        evaluator: CtxFreeFn,
-    },
-    CtxAware {
-        evaluator: CtxAwareFn,
-    },
+pub(crate) enum PrimitiveCtxFn {
+    Free(CtxFreeFn),
+    Const(CtxConstFn),
+    Aware(CtxAwareFn),
 }
 
 type CtxFreeFn = Reader<dyn Fn(Val) -> Val>;
+
+type CtxConstFn = Reader<dyn Fn(&Ctx, Val) -> Val>;
 
 type CtxAwareFn = Reader<dyn Fn(&mut Ctx, Val) -> Val>;
 
@@ -75,13 +80,15 @@ pub(crate) struct Composed {
     pub(crate) body: Val,
     pub(crate) ctx: Ctx,
     pub(crate) input_name: Name,
-    pub(crate) eval: ComposedEval,
+    pub(crate) eval_mode: EvalMode,
+    pub(crate) ctx_fn: ComposedCtxFn,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum ComposedEval {
-    CtxFree { eval_mode: EvalMode },
-    CtxAware { caller_name: Name },
+pub(crate) enum ComposedCtxFn {
+    Free,
+    Const { caller_name: Name },
+    Aware { caller_name: Name },
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -135,308 +142,77 @@ impl FuncImpl {
 
 impl Primitive {
     pub(crate) fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        match &self.eval {
-            PrimitiveEval::CtxFree {
-                eval_mode,
-                evaluator,
-            } => {
-                let val = eval_mode.eval(ctx, input);
-                evaluator(val)
-            }
-            PrimitiveEval::CtxAware { evaluator } => evaluator(ctx, input),
+        let val = self.eval_mode.eval(ctx, input);
+        match &self.ctx_fn {
+            PrimitiveCtxFn::Free(evaluator) => evaluator(val),
+            PrimitiveCtxFn::Const(evaluator) => evaluator(ctx, val),
+            PrimitiveCtxFn::Aware(evaluator) => evaluator(ctx, val),
         }
     }
 }
 
 impl Composed {
     pub(crate) fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        let mut new_ctx = self.ctx.clone();
-        new_ctx.reverse_interpreter = ctx.reverse_interpreter.clone();
-
-        match &self.eval {
-            ComposedEval::CtxFree { eval_mode } => {
-                let val = eval_mode.eval(ctx, input);
-                new_ctx.put_val_local(self.input_name.clone(), TaggedVal::new(val));
-                new_ctx.eval_by_ref(&self.body)
+        match &self.ctx_fn {
+            ComposedCtxFn::Free => self.eval_common(ctx, None, input),
+            ComposedCtxFn::Const { caller_name } => {
+                self.eval_common(ctx, Some((caller_name, InvariantTag::Const)), input)
             }
-            ComposedEval::CtxAware { caller_name } => {
-                new_ctx.put_val_local(self.input_name.clone(), TaggedVal::new(input));
-
-                let mut caller_ctx = Ctx::default();
-                swap(ctx, &mut caller_ctx);
-                let keeper =
-                    Keeper::new(TaggedVal::new_final(Val::Ctx(Box::new(caller_ctx).into())));
-                let caller_ctx_ref = Val::Ref(RefVal(keeper.clone()));
-                new_ctx.put_val_local(caller_name.clone(), TaggedVal::new(caller_ctx_ref));
-
-                let output = new_ctx.eval_by_ref(&self.body);
-
-                if let Ok(o) = Keeper::owner(&keeper) {
-                    if let Val::Ctx(CtxVal(caller)) = Owner::move_data(o).val {
-                        *ctx = *caller;
-                    }
-                }
-
-                output
+            ComposedCtxFn::Aware { caller_name } => {
+                self.eval_common(ctx, Some((caller_name, InvariantTag::Final)), input)
             }
         }
+    }
+
+    fn eval_common(
+        &self,
+        caller_ctx: &mut Ctx,
+        caller_name_tag: Option<(&Name, InvariantTag)>,
+        input: Val,
+    ) -> Val {
+        let mut new_ctx = self.ctx.clone();
+        new_ctx.reverse_interpreter = caller_ctx.reverse_interpreter.clone();
+
+        let input = self.eval_mode.eval(caller_ctx, input);
+        new_ctx.put_val_local(self.input_name.clone(), TaggedVal::new(input));
+
+        let Some((name, tag)) = caller_name_tag else {
+            return DefaultByRefStrategy::eval(&mut new_ctx, &self.body);
+        };
+
+        let mut caller_ctx_owned = Ctx::default();
+        swap(caller_ctx, &mut caller_ctx_owned);
+        let keeper = Keeper::new(TaggedVal {
+            val: Val::Ctx(Box::new(caller_ctx_owned).into()),
+            tag,
+        });
+        let caller_ctx_ref = Val::Ref(RefVal(keeper.clone()));
+        new_ctx.put_val_local(name.clone(), TaggedVal::new(caller_ctx_ref));
+
+        let output = DefaultByRefStrategy::eval(&mut new_ctx, &self.body);
+
+        if let Ok(o) = Keeper::owner(&keeper) {
+            if let Val::Ctx(CtxVal(caller)) = Owner::move_data(o).val {
+                *caller_ctx = *caller;
+            }
+        }
+
+        output
     }
 }
 
 impl EvalMode {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            EvalMode::Value => input,
-            EvalMode::Eval => ctx.eval(input),
-            EvalMode::Interpolate => ctx.eval_interpolate(input),
-            EvalMode::Inline => ctx.eval_inline(input),
+            EvalMode::Value => ValStrategy::eval(ctx, input),
+            EvalMode::Eval => DefaultStrategy::eval(ctx, input),
+            EvalMode::Interpolate => InterpolateStrategy::eval(ctx, input),
+            EvalMode::Inline => InlineStrategy::eval(ctx, input),
         }
     }
 }
 
 impl Ctx {
-    pub(crate) fn eval(&mut self, input: Val) -> Val {
-        match input {
-            Val::Symbol(s) => self.get(&s),
-            Val::Ref(k) => self.eval_ref(&k),
-            Val::Pair(p) => self.eval_pair(p.first, p.second),
-            Val::List(l) => self.eval_list(l),
-            Val::Map(m) => self.eval_map(m),
-            Val::Call(c) => self.eval_call(c.func, c.input),
-            Val::Reverse(r) => self.eval_reverse(r.func, r.output),
-            v => v,
-        }
-    }
-
-    pub(crate) fn eval_ref(&self, ref_val: &RefVal) -> Val {
-        let Ok(input) = Keeper::reader(&ref_val.0) else {
-            return Val::default();
-        };
-        input.deref().val.clone()
-    }
-
-    pub(crate) fn eval_pair(&mut self, first: Val, second: Val) -> Val {
-        let pair = Pair::new(self.eval(first), self.eval(second));
-        Val::Pair(Box::new(pair))
-    }
-
-    pub(crate) fn eval_list(&mut self, list: ListVal) -> Val {
-        let list = list.into_iter().map(|v| self.eval(v)).collect();
-        Val::List(list)
-    }
-
-    pub(crate) fn eval_map(&mut self, map: MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| (self.eval_inline(k), self.eval(v)))
-            .collect();
-        Val::Map(map)
-    }
-
-    pub(crate) fn eval_call(&mut self, func: Val, input: Val) -> Val {
-        let Val::Func(FuncVal(func)) = self.eval(func) else {
-            return Val::default();
-        };
-        func.eval(self, input)
-    }
-
-    pub(crate) fn eval_reverse(&mut self, func: Val, output: Val) -> Val {
-        let reverse_interpreter = self.reverse_interpreter.clone();
-        let Some(reverse_interpreter) = reverse_interpreter else {
-            return Val::default();
-        };
-        let reverse_func = reverse_interpreter.deref().clone().eval(self, func);
-        self.eval_call(reverse_func, output)
-    }
-
-    pub(crate) fn eval_by_ref(&mut self, input: &Val) -> Val {
-        match input {
-            Val::Symbol(s) => self.get(s),
-            Val::Ref(k) => self.eval_ref(k),
-            Val::Pair(p) => self.eval_pair_by_ref(&p.first, &p.second),
-            Val::List(l) => self.eval_list_by_ref(l),
-            Val::Map(m) => self.eval_map_by_ref(m),
-            Val::Call(c) => self.eval_call_by_ref(&c.func, &c.input),
-            Val::Reverse(r) => self.eval_reverse_by_ref(&r.func, &r.output),
-            v => v.clone(),
-        }
-    }
-
-    pub(crate) fn eval_pair_by_ref(&mut self, first: &Val, second: &Val) -> Val {
-        let pair = Pair::new(self.eval_by_ref(first), self.eval_by_ref(second));
-        Val::Pair(Box::new(pair))
-    }
-
-    pub(crate) fn eval_list_by_ref(&mut self, list: &ListVal) -> Val {
-        let list = list.into_iter().map(|v| self.eval_by_ref(v)).collect();
-        Val::List(list)
-    }
-
-    pub(crate) fn eval_map_by_ref(&mut self, map: &MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| (self.eval_inline_by_ref(k), self.eval_by_ref(v)))
-            .collect();
-        Val::Map(map)
-    }
-
-    pub(crate) fn eval_call_by_ref(&mut self, func: &Val, input: &Val) -> Val {
-        let Val::Func(FuncVal(func)) = self.eval_by_ref(func) else {
-            return Val::default();
-        };
-        func.eval(self, input.clone())
-    }
-
-    pub(crate) fn eval_reverse_by_ref(&mut self, func: &Val, output: &Val) -> Val {
-        self.eval_reverse(func.clone(), output.clone())
-    }
-
-    pub(crate) fn eval_interpolate(&mut self, input: Val) -> Val {
-        match input {
-            Val::Call(c) => match &c.func {
-                Val::Unit(_) => self.eval(c.input),
-                _ => {
-                    let func = self.eval_interpolate(c.func);
-                    let input = self.eval_interpolate(c.input);
-                    let call = Box::new(Call::new(func, input));
-                    Val::Call(call)
-                }
-            },
-            Val::Pair(p) => {
-                let first = self.eval_interpolate(p.first);
-                let second = self.eval_interpolate(p.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::Reverse(r) => {
-                let func = self.eval_interpolate(r.func);
-                let output = self.eval_interpolate(r.output);
-                let reverse = Box::new(Reverse::new(func, output));
-                Val::Reverse(reverse)
-            }
-            Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_interpolate(v)).collect();
-                Val::List(list)
-            }
-            Val::Map(m) => {
-                let map = m
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let key = self.eval_interpolate(k);
-                        let value = self.eval_interpolate(v);
-                        (key, value)
-                    })
-                    .collect();
-                Val::Map(map)
-            }
-            i => i,
-        }
-    }
-
-    #[allow(unused)]
-    pub(crate) fn eval_interpolate_by_ref(&mut self, input: &Val) -> Val {
-        match input {
-            Val::Call(c) => match &c.func {
-                Val::Unit(_) => self.eval_by_ref(&c.input),
-                _ => {
-                    let func = self.eval_interpolate_by_ref(&c.func);
-                    let input = self.eval_interpolate_by_ref(&c.input);
-                    let call = Box::new(Call::new(func, input));
-                    Val::Call(call)
-                }
-            },
-            Val::Pair(p) => {
-                let first = self.eval_interpolate_by_ref(&p.first);
-                let second = self.eval_interpolate_by_ref(&p.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::Reverse(r) => {
-                let func = self.eval_interpolate_by_ref(&r.func);
-                let output = self.eval_interpolate_by_ref(&r.output);
-                let reverse = Box::new(Reverse::new(func, output));
-                Val::Reverse(reverse)
-            }
-            Val::List(l) => {
-                let list = l
-                    .into_iter()
-                    .map(|v| self.eval_interpolate_by_ref(v))
-                    .collect();
-                Val::List(list)
-            }
-            Val::Map(m) => {
-                let map = m
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let key = self.eval_interpolate_by_ref(k);
-                        let value = self.eval_interpolate_by_ref(v);
-                        (key, value)
-                    })
-                    .collect();
-                Val::Map(map)
-            }
-            i => i.clone(),
-        }
-    }
-
-    pub(crate) fn eval_inline(&mut self, input: Val) -> Val {
-        match input {
-            Val::Call(call) => self.eval_call(call.func, call.input),
-            Val::Reverse(reverse) => self.eval_reverse(reverse.func, reverse.output),
-            Val::Pair(pair) => {
-                let first = self.eval_inline(pair.first);
-                let second = self.eval_inline(pair.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_inline(v)).collect();
-                Val::List(list)
-            }
-            Val::Map(m) => {
-                let map = m
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let key = self.eval_inline(k);
-                        let value = self.eval_inline(v);
-                        (key, value)
-                    })
-                    .collect();
-                Val::Map(map)
-            }
-            v => v,
-        }
-    }
-
-    pub(crate) fn eval_inline_by_ref(&mut self, input: &Val) -> Val {
-        match input {
-            Val::Call(call) => self.eval_call_by_ref(&call.func, &call.input),
-            Val::Reverse(reverse) => self.eval_reverse_by_ref(&reverse.func, &reverse.output),
-            Val::Pair(pair) => {
-                let first = self.eval_inline_by_ref(&pair.first);
-                let second = self.eval_inline_by_ref(&pair.second);
-                let pair = Box::new(Pair::new(first, second));
-                Val::Pair(pair)
-            }
-            Val::List(l) => {
-                let list = l.into_iter().map(|v| self.eval_inline_by_ref(v)).collect();
-                Val::List(list)
-            }
-            Val::Map(m) => {
-                let map = m
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let key = self.eval_inline_by_ref(k);
-                        let value = self.eval_inline_by_ref(v);
-                        (key, value)
-                    })
-                    .collect();
-                Val::Map(map)
-            }
-            v => v.clone(),
-        }
-    }
-
     pub(crate) fn get(&self, name: &str) -> Val {
         let Some(tagged_val) = self.name_map.get(name) else {
             return self.get_ref_super_ctx(|op_ctx| {
@@ -710,23 +486,25 @@ impl Ctx {
     }
 }
 
-impl Debug for PrimitiveEval {
+impl Debug for PrimitiveCtxFn {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            PrimitiveEval::CtxFree {
-                eval_mode,
-                evaluator: eval,
-            } => {
-                let ptr: *const dyn Fn(Val) -> Val = &**eval;
-                f.debug_struct("PrimitiveEval::CtxFree")
-                    .field("eval_mode", eval_mode)
-                    .field("eval", &format!("{ptr:p}"))
+            PrimitiveCtxFn::Free(evaluator) => {
+                let ptr: *const dyn Fn(Val) -> Val = &**evaluator;
+                f.debug_tuple("PrimitiveCtxFn::Free")
+                    .field(&format!("{ptr:p}"))
                     .finish()
             }
-            PrimitiveEval::CtxAware { evaluator: eval } => {
-                let ptr: *const dyn Fn(&mut Ctx, Val) -> Val = &**eval;
-                f.debug_struct("PrimitiveEval::CtxAware")
-                    .field("eval", &format!("{ptr:p}"))
+            PrimitiveCtxFn::Const(evaluator) => {
+                let ptr: *const dyn Fn(&Ctx, Val) -> Val = &**evaluator;
+                f.debug_tuple("PrimitiveCtxFn::Const")
+                    .field(&format!("{ptr:p}"))
+                    .finish()
+            }
+            PrimitiveCtxFn::Aware(evaluator) => {
+                let ptr: *const dyn Fn(&mut Ctx, Val) -> Val = &**evaluator;
+                f.debug_tuple("PrimitiveCtxFn::Aware")
+                    .field(&format!("{ptr:p}"))
                     .finish()
             }
         }
@@ -792,22 +570,34 @@ impl Primitive {
     ) -> Primitive {
         Primitive {
             id: Name::from(id),
-            eval: PrimitiveEval::CtxFree {
-                eval_mode,
-                evaluator: Reader::new(evaluator),
-            },
+            ctx_fn: PrimitiveCtxFn::Free(Reader::new(evaluator)),
+            eval_mode,
+        }
+    }
+
+    pub(crate) fn new_ctx_const(
+        id: &str,
+        eval_mode: EvalMode,
+        evaluator: impl Fn(&Ctx, Val) -> Val + 'static,
+    ) -> Primitive {
+        Primitive {
+            id: Name::from(id),
+            ctx_fn: PrimitiveCtxFn::Const(Reader::new(evaluator)),
+            eval_mode,
         }
     }
 
     pub(crate) fn new_ctx_aware(
         id: &str,
+        eval_mode: EvalMode,
         evaluator: impl Fn(&mut Ctx, Val) -> Val + 'static,
     ) -> Primitive {
         Primitive {
             id: Name::from(id),
-            eval: PrimitiveEval::CtxAware {
-                evaluator: Reader::new(evaluator),
-            },
+            ctx_fn: PrimitiveCtxFn::Aware(Reader::new(evaluator)),
+            eval_mode,
         }
     }
 }
+
+pub(crate) mod strategy;

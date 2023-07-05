@@ -19,15 +19,15 @@ use crate::{
 };
 
 pub(crate) fn length() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::STR_LENGTH,
+        EvalMode::Inline,
         fn_length,
     )))
 }
 
-fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
-    let name_or_str = ctx.eval_inline(input);
-    ctx.get_ref_or_val(name_or_str, |ref_or_val| {
+fn fn_length(ctx: &Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val(input, |ref_or_val| {
         let f = |val: &Val| {
             let Val::String(s) = val else {
                 return Val::default();
