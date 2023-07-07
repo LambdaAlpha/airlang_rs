@@ -1,6 +1,6 @@
 [package]
 name = "airlang_bin"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "The Air Programming Language"
@@ -10,4 +10,4 @@ keywords = ["air", "language", "specification", "formal", "logic"]
 categories = ["compilers"]
 
 [dependencies]
-airlang = { path = "../lib", version = "0.0.4" }
+airlang = { path = "../lib", version = "0.0.5" }
