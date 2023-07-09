@@ -213,3 +213,20 @@ fn test_reinit() -> Result<(), RefState> {
     assert_eq!(r.deref(), "321");
     Ok(())
 }
+
+#[test]
+fn test_circular() -> Result<(), RefState> {
+    struct Circular {
+        _ref: Option<Box<Keeper<Circular>>>,
+    }
+    let mut o: Owner<Circular> = Owner::new(Circular { _ref: None });
+    let k = Owner::keeper(&o)?;
+
+    *o = Circular {
+        _ref: Some(Box::new(k)),
+    };
+
+    drop(o);
+
+    Ok(())
+}
