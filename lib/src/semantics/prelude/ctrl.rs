@@ -8,6 +8,7 @@ use crate::semantics::{
             ByRefStrategy,
             EvalStrategy,
         },
+        BasicEvalMode,
         Ctx,
         EvalMode,
         Func,
@@ -23,7 +24,7 @@ use crate::semantics::{
 pub(crate) fn sequence() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::SEQUENCE,
-        EvalMode::Value,
+        EvalMode::Basic(BasicEvalMode::Value),
         fn_sequence,
     )))
 }
@@ -42,7 +43,7 @@ fn fn_sequence(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn condition() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::IF,
-        EvalMode::Value,
+        EvalMode::Basic(BasicEvalMode::Value),
         fn_if,
     )))
 }
@@ -75,7 +76,7 @@ fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn while_loop() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::WHILE,
-        EvalMode::Value,
+        EvalMode::Basic(BasicEvalMode::Value),
         fn_while,
     )))
 }

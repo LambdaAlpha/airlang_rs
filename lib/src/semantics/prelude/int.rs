@@ -1,6 +1,7 @@
 use crate::{
     semantics::{
         eval::{
+            BasicEvalMode,
             EvalMode,
             Func,
             Primitive,
@@ -17,7 +18,7 @@ use crate::{
 pub(crate) fn add() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_ADD,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_add,
     )))
 }
@@ -38,7 +39,7 @@ fn fn_add(input: Val) -> Val {
 pub(crate) fn subtract() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_SUBTRACT,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_subtract,
     )))
 }
@@ -59,7 +60,7 @@ fn fn_subtract(input: Val) -> Val {
 pub(crate) fn multiply() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_MULTIPLY,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_multiply,
     )))
 }
@@ -80,7 +81,7 @@ fn fn_multiply(input: Val) -> Val {
 pub(crate) fn divide() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_DIVIDE,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_divide,
     )))
 }
@@ -104,7 +105,7 @@ fn fn_divide(input: Val) -> Val {
 pub(crate) fn remainder() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_REMAINDER,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_remainder,
     )))
 }
@@ -128,7 +129,7 @@ fn fn_remainder(input: Val) -> Val {
 pub(crate) fn divide_remainder() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_DIVIDE_REMAINDER,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_divide_remainder,
     )))
 }
@@ -152,7 +153,7 @@ fn fn_divide_remainder(input: Val) -> Val {
 pub(crate) fn less_than() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_LESS_THAN,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_less_than,
     )))
 }
@@ -173,7 +174,7 @@ fn fn_less_than(input: Val) -> Val {
 pub(crate) fn less_equal() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_LESS_EQUAL,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_less_equal,
     )))
 }
@@ -194,7 +195,7 @@ fn fn_less_equal(input: Val) -> Val {
 pub(crate) fn greater_than() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_GREATER_THAN,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_greater_than,
     )))
 }
@@ -215,7 +216,7 @@ fn fn_greater_than(input: Val) -> Val {
 pub(crate) fn greater_equal() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_GREATER_EQUAL,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_greater_equal,
     )))
 }
@@ -236,7 +237,7 @@ fn fn_greater_equal(input: Val) -> Val {
 pub(crate) fn less_greater() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::INT_LESS_GREATER,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_less_greater,
     )))
 }

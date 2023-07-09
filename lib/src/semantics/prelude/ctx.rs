@@ -2,14 +2,8 @@ use {
     crate::{
         semantics::{
             eval::{
-                strategy::{
-                    eval::{
-                        DefaultStrategy,
-                        Eval,
-                    },
-                    inline::InlineStrategy,
-                    EvalStrategy,
-                },
+                strategy::eval::Eval,
+                BasicEvalMode,
                 Ctx,
                 EvalMode,
                 Func,
@@ -42,7 +36,7 @@ use {
 pub(crate) fn read() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::READ,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_read,
     )))
 }
@@ -58,7 +52,7 @@ fn fn_read(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn is_null() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::IS_NULL,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_is_null,
     )))
 }
@@ -74,7 +68,11 @@ fn fn_is_null(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn assign_local() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_LOCAL,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_assign_local,
     )))
 }
@@ -83,17 +81,21 @@ fn fn_assign_local(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(Symbol(name)) = InlineStrategy::eval(ctx, pair.first) else {
+    let Val::Symbol(Symbol(name)) = pair.first else {
         return Val::default();
     };
-    let val = DefaultStrategy::eval(ctx, pair.second);
+    let val = pair.second;
     ctx.put_val_local(name, TaggedVal::new(val))
 }
 
 pub(crate) fn assign() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_assign,
     )))
 }
@@ -105,7 +107,11 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn assign_final() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_FINAL,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_assign_final,
     )))
 }
@@ -117,7 +123,11 @@ fn fn_assign_final(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn assign_const() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::ASSIGN_CONST,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_assign_const,
     )))
 }
@@ -130,17 +140,17 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let first = InlineStrategy::eval(ctx, pair.first);
-    match first {
+    let name = pair.first;
+    match name {
         Val::Symbol(s) => {
-            let val = DefaultStrategy::eval(ctx, pair.second);
+            let val = pair.second;
             ctx.put_val(
                 Name::from(<_ as Into<String>>::into(s)),
                 TaggedVal { tag, val },
             )
         }
         Val::Ref(k) => {
-            let mut val = DefaultStrategy::eval(ctx, pair.second);
+            let mut val = pair.second;
             if let Ok(mut o) = Keeper::owner(&k.0) {
                 if !matches!(o.tag, InvariantTag::None) {
                     return Val::default();
@@ -160,7 +170,7 @@ fn fn_assign_val(ctx: &mut Ctx, input: Val, tag: InvariantTag) -> Val {
 pub(crate) fn set_final() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::FINAL,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_set_final,
     )))
 }
@@ -185,7 +195,7 @@ fn fn_set_final(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn set_const() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CONST,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_set_const,
     )))
 }
@@ -207,7 +217,7 @@ fn fn_set_const(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn is_final() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::IS_FINAL,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_is_final,
     )))
 }
@@ -232,7 +242,7 @@ fn fn_is_final(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn is_const() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::IS_CONST,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_is_const,
     )))
 }
@@ -257,7 +267,7 @@ fn fn_is_const(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn remove() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MOVE,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_move,
     )))
 }
@@ -281,7 +291,7 @@ fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn new_ref() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::REF,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_new_ref,
     )))
 }
@@ -293,7 +303,7 @@ fn fn_new_ref(input: Val) -> Val {
 pub(crate) fn null_ref() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::NULL_REF,
-        EvalMode::Value,
+        EvalMode::Basic(BasicEvalMode::Value),
         fn_null_ref,
     )))
 }
@@ -310,7 +320,7 @@ fn fn_null_ref(_: Val) -> Val {
 pub(crate) fn final_ref() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::FINAL_REF,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_final_ref,
     )))
 }
@@ -322,7 +332,7 @@ fn fn_final_ref(input: Val) -> Val {
 pub(crate) fn const_ref() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::CONST_REF,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_const_ref,
     )))
 }
@@ -334,7 +344,7 @@ fn fn_const_ref(input: Val) -> Val {
 pub(crate) fn ctx_new() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::CTX_NEW,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_ctx_new,
     )))
 }
@@ -393,7 +403,11 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
 pub(crate) fn ctx_set_super() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::CTX_SET_SUPER,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_ctx_set_super,
     )))
 }

@@ -23,6 +23,7 @@ use {
             Keeper,
             Map,
             Owner,
+            Pair,
             Reader,
         },
     },
@@ -92,11 +93,21 @@ pub(crate) enum ComposedCtxFn {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum EvalMode {
+pub(crate) enum BasicEvalMode {
     Value,
     Eval,
     Interpolate,
     Inline,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub(crate) enum EvalMode {
+    Basic(BasicEvalMode),
+    Pair {
+        first: BasicEvalMode,
+        second: BasicEvalMode,
+        non_pair: BasicEvalMode,
+    },
 }
 
 pub(crate) type Name = CompactString;
@@ -201,13 +212,34 @@ impl Composed {
     }
 }
 
+impl BasicEvalMode {
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match self {
+            BasicEvalMode::Value => ValStrategy::eval(ctx, input),
+            BasicEvalMode::Eval => DefaultStrategy::eval(ctx, input),
+            BasicEvalMode::Interpolate => InterpolateStrategy::eval(ctx, input),
+            BasicEvalMode::Inline => InlineStrategy::eval(ctx, input),
+        }
+    }
+}
+
 impl EvalMode {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            EvalMode::Value => ValStrategy::eval(ctx, input),
-            EvalMode::Eval => DefaultStrategy::eval(ctx, input),
-            EvalMode::Interpolate => InterpolateStrategy::eval(ctx, input),
-            EvalMode::Inline => InlineStrategy::eval(ctx, input),
+            EvalMode::Basic(eval_mode) => eval_mode.eval(ctx, input),
+            EvalMode::Pair {
+                first,
+                second,
+                non_pair,
+            } => match input {
+                Val::Pair(pair) => {
+                    let first = first.eval(ctx, pair.first);
+                    let second = second.eval(ctx, pair.second);
+                    let pair = Pair::new(first, second);
+                    Val::Pair(Box::new(pair))
+                }
+                input => non_pair.eval(ctx, input),
+            },
         }
     }
 }

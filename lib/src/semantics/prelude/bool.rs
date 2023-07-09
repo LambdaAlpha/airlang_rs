@@ -1,6 +1,7 @@
 use crate::{
     semantics::{
         eval::{
+            BasicEvalMode,
             EvalMode,
             Func,
             Primitive,
@@ -17,7 +18,7 @@ use crate::{
 pub(crate) fn not() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::NOT,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_not,
     )))
 }
@@ -32,7 +33,7 @@ fn fn_not(input: Val) -> Val {
 pub(crate) fn and() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::AND,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_and,
     )))
 }
@@ -57,7 +58,7 @@ fn fn_and(input: Val) -> Val {
 pub(crate) fn or() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::OR,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_or,
     )))
 }
@@ -82,7 +83,7 @@ fn fn_or(input: Val) -> Val {
 pub(crate) fn equal() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::EQUAL,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_equal,
     )))
 }
@@ -97,7 +98,7 @@ fn fn_equal(input: Val) -> Val {
 pub(crate) fn not_equal() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::NOT_EQUAL,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_not_equal,
     )))
 }

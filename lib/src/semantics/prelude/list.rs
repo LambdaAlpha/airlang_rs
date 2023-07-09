@@ -2,11 +2,7 @@ use {
     crate::{
         semantics::{
             eval::{
-                strategy::{
-                    eval::DefaultStrategy,
-                    inline::InlineStrategy,
-                    EvalStrategy,
-                },
+                BasicEvalMode,
                 Ctx,
                 EvalMode,
                 Func,
@@ -32,7 +28,7 @@ use {
 pub(crate) fn length() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::LIST_LENGTH,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_length,
     )))
 }
@@ -55,7 +51,11 @@ fn fn_length(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn set() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_SET,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_set,
     )))
 }
@@ -67,12 +67,12 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = list_pair.second else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, list_pair.first);
-    let index = DefaultStrategy::eval(ctx, index_value.first);
+    let name = list_pair.first;
+    let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
     };
-    let mut value = DefaultStrategy::eval(ctx, index_value.second);
+    let mut value = index_value.second;
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::List(list) = val else {
@@ -100,7 +100,11 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn set_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_SET_MANY,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_set_many,
     )))
 }
@@ -112,12 +116,12 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = list_pair.second else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, list_pair.first);
-    let index = DefaultStrategy::eval(ctx, index_value.first);
+    let name = list_pair.first;
+    let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
     };
-    let Val::List(values) = DefaultStrategy::eval(ctx, index_value.second) else {
+    let Val::List(values) = index_value.second else {
         return Val::default();
     };
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
@@ -147,20 +151,24 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::LIST_GET,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_get,
     )))
 }
 
-fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_get(ctx: &Ctx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
-    let name_or_list = InlineStrategy::eval(ctx, name_index.first);
+    let name_or_list = name_index.first;
     if let Val::Pair(range) = name_index.second {
-        let Some((from, to)) = to_range(ctx, *range) else {
+        let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
         ctx.get_ref_or_val(name_or_list, |ref_or_val| match ref_or_val {
@@ -189,7 +197,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
             }
         })
     } else {
-        let Some(i) = to_index(DefaultStrategy::eval(ctx, name_index.second)) else {
+        let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
         ctx.get_ref_or_val(name_or_list, |ref_or_val| match ref_or_val {
@@ -218,7 +226,11 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn insert() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_INSERT,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_insert,
     )))
 }
@@ -230,12 +242,12 @@ fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = name_pair.second else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_pair.first);
-    let index = DefaultStrategy::eval(ctx, index_value.first);
+    let name = name_pair.first;
+    let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
     };
-    let value = DefaultStrategy::eval(ctx, index_value.second);
+    let value = index_value.second;
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::List(list) = val else {
@@ -263,7 +275,11 @@ fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn insert_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_INSERT_MANY,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_insert_many,
     )))
 }
@@ -275,12 +291,12 @@ fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(index_value) = name_pair.second else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_pair.first);
-    let index = DefaultStrategy::eval(ctx, index_value.first);
+    let name = name_pair.first;
+    let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
     };
-    let Val::List(values) = DefaultStrategy::eval(ctx, index_value.second) else {
+    let Val::List(values) = index_value.second else {
         return Val::default();
     };
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
@@ -310,7 +326,11 @@ fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn remove() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_REMOVE,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_remove,
     )))
 }
@@ -319,9 +339,9 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
-    let name_or_list = InlineStrategy::eval(ctx, name_index.first);
+    let name_or_list = name_index.first;
     if let Val::Pair(range) = name_index.second {
-        let Some((from, to)) = to_range(ctx, *range) else {
+        let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
         ctx.get_mut_or_val(name_or_list, |ref_or_val| match ref_or_val {
@@ -351,7 +371,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
             }
         })
     } else {
-        let Some(i) = to_index(DefaultStrategy::eval(ctx, name_index.second))else {
+        let Some(i) = to_index(name_index.second)else {
             return Val::default();
         };
         ctx.get_mut_or_val(name_or_list, |ref_or_val| match ref_or_val {
@@ -381,7 +401,11 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn push() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_PUSH,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_push,
     )))
 }
@@ -390,8 +414,8 @@ fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_value.first);
-    let value = DefaultStrategy::eval(ctx, name_value.second);
+    let name = name_value.first;
+    let value = name_value.second;
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::List(list) = val else {
@@ -413,7 +437,11 @@ fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn push_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_PUSH_MANY,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_push_many,
     )))
 }
@@ -422,8 +450,8 @@ fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_values.first);
-    let values = DefaultStrategy::eval(ctx, name_values.second);
+    let name = name_values.first;
+    let values = name_values.second;
     let Val::List(mut values) = values else {
         return Val::default();
     };
@@ -448,7 +476,11 @@ fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn pop() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_POP,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_pop,
     )))
 }
@@ -457,8 +489,8 @@ fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_count.first);
-    let count = DefaultStrategy::eval(ctx, name_count.second);
+    let name = name_count.first;
+    let count = name_count.second;
     match count {
         Val::Unit(_) => ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
             Either::Left(val) => {
@@ -513,7 +545,7 @@ fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn clear() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::LIST_CLEAR,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_clear,
     )))
 }
@@ -544,13 +576,13 @@ fn to_index(val: Val) -> Option<usize> {
     i.to_usize()
 }
 
-fn to_range(ctx: &mut Ctx, pair: PairVal) -> Option<(Option<usize>, Option<usize>)> {
-    let from = match DefaultStrategy::eval(ctx, pair.first) {
+fn to_range(pair: PairVal) -> Option<(Option<usize>, Option<usize>)> {
+    let from = match pair.first {
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,
         _ => return None,
     };
-    let to = match DefaultStrategy::eval(ctx, pair.second) {
+    let to = match pair.second {
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,
         _ => return None,

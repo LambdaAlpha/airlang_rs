@@ -189,6 +189,27 @@ not 't
 # ===
 ;[
     f = (function{
+        body: input,
+        pair_eval_mode: (inline: eval),
+    }),
+    a f b
+]
+# ---
+a: '
+# ===
+;[
+    f = (function{
+        body: input,
+        pair_eval_mode: (inline: eval),
+        eval_mode: value
+    }),
+    f (not 'f)
+]
+# ---
+not 'f
+# ===
+;[
+    f = (function{
         body: (;[' set_super (read caller), eval2 input]),
         eval_mode: value,
         caller_context: aware,

@@ -1,11 +1,7 @@
 use crate::{
     semantics::{
         eval::{
-            strategy::{
-                eval::DefaultStrategy,
-                inline::InlineStrategy,
-                EvalStrategy,
-            },
+            BasicEvalMode,
             Ctx,
             EvalMode,
             Func,
@@ -26,7 +22,7 @@ use crate::{
 pub(crate) fn length() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_LENGTH,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_length,
     )))
 }
@@ -49,7 +45,7 @@ fn fn_length(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn keys() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_KEYS,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_keys,
     )))
 }
@@ -74,7 +70,7 @@ fn fn_keys(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn values() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_VALUES,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_values,
     )))
 }
@@ -99,7 +95,11 @@ fn fn_values(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn contains() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_CONTAINS,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_contains,
     )))
 }
@@ -127,7 +127,11 @@ fn fn_contains(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn contains_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_CONTAINS_MANY,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_contains_many,
     )))
 }
@@ -158,7 +162,11 @@ fn fn_contains_many(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn set() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_SET,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_set,
     )))
 }
@@ -167,12 +175,12 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_pair.first);
+    let name = name_pair.first;
     let Val::Pair(key_value) = name_pair.second else {
         return Val::default();
     };
-    let key = InlineStrategy::eval(ctx, key_value.first);
-    let value = DefaultStrategy::eval(ctx, key_value.second);
+    let key = key_value.first;
+    let value = key_value.second;
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
             let Val::Map(map) = val else {
@@ -193,7 +201,11 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn set_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_SET_MANY,
-        EvalMode::Value,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Eval,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_set_many,
     )))
 }
@@ -202,8 +214,8 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
-    let name = InlineStrategy::eval(ctx, name_pair.first);
-    let Val::Map(update) = DefaultStrategy::eval(ctx, name_pair.second) else {
+    let name = name_pair.first;
+    let Val::Map(update) = name_pair.second else {
         return Val::default();
     };
     ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
@@ -230,7 +242,11 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn get() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_GET,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_get,
     )))
 }
@@ -260,7 +276,11 @@ fn fn_get(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn get_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::MAP_GET_MANY,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_get_many,
     )))
 }
@@ -300,7 +320,11 @@ fn fn_get_many(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn remove() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_REMOVE,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_remove,
     )))
 }
@@ -331,7 +355,11 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn remove_many() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_REMOVE_MANY,
-        EvalMode::Inline,
+        EvalMode::Pair {
+            first: BasicEvalMode::Inline,
+            second: BasicEvalMode::Inline,
+            non_pair: BasicEvalMode::Value,
+        },
         fn_remove_many,
     )))
 }
@@ -371,7 +399,7 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
 pub(crate) fn clear() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
         names::MAP_CLEAR,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_clear,
     )))
 }

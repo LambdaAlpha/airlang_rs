@@ -1,6 +1,7 @@
 use crate::{
     semantics::{
         eval::{
+            BasicEvalMode,
             Ctx,
             EvalMode,
             Func,
@@ -21,7 +22,7 @@ use crate::{
 pub(crate) fn length() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_const(
         names::STR_LENGTH,
-        EvalMode::Inline,
+        EvalMode::Basic(BasicEvalMode::Inline),
         fn_length,
     )))
 }
@@ -44,7 +45,7 @@ fn fn_length(ctx: &Ctx, input: Val) -> Val {
 pub(crate) fn concat() -> Val {
     prelude_func(Func::new_primitive(Primitive::new_ctx_free(
         names::STR_CONCAT,
-        EvalMode::Eval,
+        EvalMode::Basic(BasicEvalMode::Eval),
         fn_concat,
     )))
 }
