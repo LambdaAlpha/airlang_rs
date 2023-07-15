@@ -2,9 +2,11 @@ use {
     crate::{
         semantics::{
             eval::{
-                Ctx,
+                ctx::{
+                    Ctx,
+                    TaggedVal,
+                },
                 Func,
-                TaggedVal,
             },
             ReprError,
         },

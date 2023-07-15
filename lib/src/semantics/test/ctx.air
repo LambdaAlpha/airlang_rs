@@ -82,6 +82,10 @@ is_null a
 # ---
 3: 2
 # ===
+;[a =final (ref 1), (eval a) = 2, eval2 a]
+# ---
+2
+# ===
 ;[a = (ref 1), (eval a) =final 2, (eval a) = 3, eval2 a]
 # ---
 2
@@ -89,6 +93,10 @@ is_null a
 ;[a = (ref 1), (eval a) =final (1: 2), a set1 3, eval2 a]
 # ---
 3: 2
+# ===
+;[a = (final_ref 1), a = 2, a]
+# ---
+2
 # ===
 ;[a =const (1: 2), a set1 3, a]
 # ---
@@ -106,6 +114,10 @@ is_null a
 # ---
 1
 # ===
+;[a =const (ref 1), (eval a) = 2, eval2 a]
+# ---
+2
+# ===
 ;[a = (ref 1), (eval a) =const 2, (eval a) = 3, eval2 a]
 # ---
 2
@@ -113,6 +125,10 @@ is_null a
 ;[a = (ref 1), (eval a) =const (1: 2), a set1 3, eval2 a]
 # ---
 1: 2
+# ===
+;[a =const (1 ref 2), (eval a) set1 3, eval2 a]
+# ---
+3: 2
 # ===
 ;[a = 1, final a, a = 2, a]
 # ---

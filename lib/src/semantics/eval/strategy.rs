@@ -14,6 +14,100 @@ use crate::{
     },
 };
 
+pub(crate) trait FreeStrategy {
+    fn eval(input: Val) -> Val {
+        match input {
+            Val::Symbol(s) => Self::eval_symbol(s),
+            Val::Pair(p) => Self::eval_pair(p.first, p.second),
+            Val::List(l) => Self::eval_list(l),
+            Val::Map(m) => Self::eval_map(m),
+            Val::Call(c) => Self::eval_call(c.func, c.input),
+            Val::Reverse(r) => Self::eval_reverse(r.func, r.output),
+            Val::Ref(k) => Self::eval_ref(k),
+            v => Self::eval_atoms(v),
+        }
+    }
+
+    fn eval_atoms(input: Val) -> Val {
+        input
+    }
+
+    fn eval_symbol(s: Symbol) -> Val;
+
+    fn eval_ref(ref_val: RefVal) -> Val;
+
+    fn eval_pair(first: Val, second: Val) -> Val {
+        let first = Self::eval(first);
+        let second = Self::eval(second);
+        let pair = Pair::new(first, second);
+        Val::Pair(Box::new(pair))
+    }
+
+    fn eval_list(list: ListVal) -> Val {
+        let list = list.into_iter().map(|v| Self::eval(v)).collect();
+        Val::List(list)
+    }
+
+    fn eval_map(map: MapVal) -> Val {
+        let map = map
+            .into_iter()
+            .map(|(k, v)| (Self::eval(k), Self::eval(v)))
+            .collect();
+        Val::Map(map)
+    }
+
+    fn eval_call(func: Val, input: Val) -> Val;
+
+    fn eval_reverse(func: Val, output: Val) -> Val;
+}
+
+pub(crate) trait FreeByRefStrategy {
+    fn eval(input: &Val) -> Val {
+        match input {
+            Val::Symbol(s) => Self::eval_symbol(s),
+            Val::Pair(p) => Self::eval_pair(&p.first, &p.second),
+            Val::List(l) => Self::eval_list(l),
+            Val::Map(m) => Self::eval_map(m),
+            Val::Call(c) => Self::eval_call(&c.func, &c.input),
+            Val::Reverse(r) => Self::eval_reverse(&r.func, &r.output),
+            Val::Ref(k) => Self::eval_ref(k),
+            v => Self::eval_atoms(v),
+        }
+    }
+
+    fn eval_atoms(input: &Val) -> Val {
+        input.clone()
+    }
+
+    fn eval_symbol(s: &Symbol) -> Val;
+
+    fn eval_ref(ref_val: &RefVal) -> Val;
+
+    fn eval_pair(first: &Val, second: &Val) -> Val {
+        let first = Self::eval(first);
+        let second = Self::eval(second);
+        let pair = Pair::new(first, second);
+        Val::Pair(Box::new(pair))
+    }
+
+    fn eval_list(list: &ListVal) -> Val {
+        let list = list.into_iter().map(|v| Self::eval(v)).collect();
+        Val::List(list)
+    }
+
+    fn eval_map(map: &MapVal) -> Val {
+        let map = map
+            .into_iter()
+            .map(|(k, v)| (Self::eval(k), Self::eval(v)))
+            .collect();
+        Val::Map(map)
+    }
+
+    fn eval_call(func: &Val, input: &Val) -> Val;
+
+    fn eval_reverse(func: &Val, output: &Val) -> Val;
+}
+
 pub(crate) trait EvalStrategy {
     fn eval(ctx: &mut Ctx, input: Val) -> Val {
         match input {

@@ -1,8 +1,8 @@
 use crate::{
     semantics::{
         eval::{
+            ctx::Ctx,
             BasicEvalMode,
-            Ctx,
             EvalMode,
             Func,
             Primitive,
@@ -27,8 +27,8 @@ pub(crate) fn length() -> Val {
     )))
 }
 
-fn fn_length(ctx: &Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val(input, |ref_or_val| {
+fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| {
         let f = |val: &Val| {
             let Val::String(s) = val else {
                 return Val::default();
@@ -36,7 +36,7 @@ fn fn_length(ctx: &Ctx, input: Val) -> Val {
             Val::Int(s.len().into())
         };
         match ref_or_val {
-            Either::Left(val) => f(val),
+            Either::Left(val) => f(val.as_const()),
             Either::Right(val) => f(&val),
         }
     })

@@ -90,13 +90,49 @@ eval {a: (eval {b: c})}
 # ---
 1
 # ===
+eval_free (1 (' +) 1)
+# ---
+2
+# ===
+;[a = 1, eval_free a]
+# ---
+'
+# ===
+eval_free ((' ;) [a (' =) 1, a])
+# ---
+1
+# ===
 ;[a = (context {const: {=}}), a .. (b = 1), a .. b]
+# ---
+1
+# ===
+;[a =const (context {var: {b: 1}}), a .. b]
+# ---
+1
+# ===
+;[a =const (context {var: {b: 1, =}}), a .. (b = 2), a .. b]
+# ---
+1
+# ===
+;[a =const (ref (context {var: {b: 1, =}})), a .. (b = 2), a .. b]
+# ---
+2
+# ===
+;[a = (const_ref (context {var: {b: 1, =}})), a .. (b = 2), a .. b]
 # ---
 1
 # ===
 ;[a = (context {const: {b: (ref (context {const: {c: 1}}))}}), a .. b .. c]
 # ---
 1
+# ===
+;[a = (context {const: {=, b: 1}}), a ..const b]
+# ---
+1
+# ===
+;[a = (context {const: {=}}), a ..const (b = 1), a ..const b]
+# ---
+'
 # ===
 ;[
     f = (function{
@@ -212,7 +248,7 @@ not 'f
     f = (function{
         body: (;[' set_super (read caller), eval2 input]),
         eval_mode: value,
-        caller_context: aware,
+        caller_context: mutable,
         context: (' (context {const: {
             ;,
             eval2,
@@ -230,9 +266,8 @@ not 'f
     f = (function{
         body: (caller .. (((' ') input) = 2)),
         eval_mode: value,
-        caller_context: aware,
+        caller_context: mutable,
         context: (' (context {const: {
-            ;,
             ..,
         }}))
     }),
@@ -247,9 +282,24 @@ not 'f
     f = (function{
         body: (caller .. (((' ') input) = 2)),
         eval_mode: value,
+        caller_context: mutable,
+        context: (' (context {const: {
+            ..,
+        }}))
+    }),
+    a =final 1,
+    f a,
+    a
+]
+# ---
+1
+# ===
+;[
+    f = (function{
+        body: (caller .. (((' ') input) = 2)),
+        eval_mode: value,
         caller_context: const,
         context: (' (context {const: {
-            ;,
             ..,
         }}))
     }),

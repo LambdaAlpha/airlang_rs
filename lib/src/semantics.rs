@@ -2,11 +2,14 @@ use {
     crate::{
         semantics::{
             eval::{
+                ctx::{
+                    Ctx,
+                    NameMap,
+                },
                 strategy::{
                     eval::DefaultStrategy,
                     EvalStrategy,
                 },
-                NameMap,
             },
             prelude::prelude,
         },
@@ -15,10 +18,7 @@ use {
     thiserror::Error,
 };
 pub use {
-    eval::{
-        Ctx,
-        Func,
-    },
+    eval::Func,
     val::Val,
 };
 
@@ -60,7 +60,6 @@ impl Interpreter {
         Ctx {
             name_map,
             super_ctx: None,
-            reverse_interpreter: None,
         }
     }
 }

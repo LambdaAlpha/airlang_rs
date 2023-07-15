@@ -1,10 +1,11 @@
 use crate::{
     semantics::{
         eval::{
+            ctx::Ctx,
             BasicEvalMode,
-            Ctx,
             EvalMode,
             Func,
+            IsConst,
             Primitive,
         },
         prelude::{
@@ -27,8 +28,8 @@ pub(crate) fn length() -> Val {
     )))
 }
 
-fn fn_length(ctx: &Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val(input, |ref_or_val| {
+fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| {
         let f = |map: &Val| {
             let Val::Map(map) = map else {
                 return Val::default();
@@ -36,7 +37,7 @@ fn fn_length(ctx: &Ctx, input: Val) -> Val {
             Val::Int(map.len().into())
         };
         match ref_or_val {
-            Either::Left(map) => f(map),
+            Either::Left(map) => f(map.as_const()),
             Either::Right(map) => f(&map),
         }
     })
@@ -50,10 +51,10 @@ pub(crate) fn keys() -> Val {
     )))
 }
 
-fn fn_keys(ctx: &Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val(input, |ref_or_val| match ref_or_val {
+fn fn_keys(ctx: &mut Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
-            let Val::Map(map) = val else {
+            let Val::Map(map) = val.as_const() else {
                 return Val::default();
             };
             Val::List(map.keys().cloned().collect())
@@ -75,10 +76,10 @@ pub(crate) fn values() -> Val {
     )))
 }
 
-fn fn_values(ctx: &Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val(input, |ref_or_val| match ref_or_val {
+fn fn_values(ctx: &mut Ctx, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
-            let Val::Map(map) = val else {
+            let Val::Map(map) = val.as_const() else {
                 return Val::default();
             };
             Val::List(map.values().cloned().collect())
@@ -104,13 +105,13 @@ pub(crate) fn contains() -> Val {
     )))
 }
 
-fn fn_contains(ctx: &Ctx, input: Val) -> Val {
+fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
     let name = name_key.first;
     let key = &name_key.second;
-    ctx.get_ref_or_val(name, |ref_or_val| {
+    ctx.get_ref_or_val_or_default(true, name, |ref_or_val| {
         let f = |val: &Val| {
             let Val::Map(map) = val  else {
                 return Val::default();
@@ -118,7 +119,7 @@ fn fn_contains(ctx: &Ctx, input: Val) -> Val {
             Val::Bool(Bool::new(map.contains_key(key)))
         };
         match ref_or_val {
-            Either::Left(val) => f(val),
+            Either::Left(val) => f(val.as_const()),
             Either::Right(val) => f(&val),
         }
     })
@@ -136,7 +137,7 @@ pub(crate) fn contains_many() -> Val {
     )))
 }
 
-fn fn_contains_many(ctx: &Ctx, input: Val) -> Val {
+fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -144,7 +145,7 @@ fn fn_contains_many(ctx: &Ctx, input: Val) -> Val {
     let Val::List(keys) = name_keys.second  else {
         return Val::default();
     };
-    ctx.get_ref_or_val(name, |ref_or_val| {
+    ctx.get_ref_or_val_or_default(true, name, |ref_or_val| {
         let f = |val: &Val| {
             let Val::Map(map) = val else {
                 return Val::default();
@@ -153,14 +154,14 @@ fn fn_contains_many(ctx: &Ctx, input: Val) -> Val {
             Val::Bool(Bool::new(b))
         };
         match ref_or_val {
-            Either::Left(val) => f(val),
+            Either::Left(val) => f(val.as_const()),
             Either::Right(val) => f(&val),
         }
     })
 }
 
 pub(crate) fn set() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
         names::MAP_SET,
         EvalMode::Pair {
             first: BasicEvalMode::Inline,
@@ -171,7 +172,7 @@ pub(crate) fn set() -> Val {
     )))
 }
 
-fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_set(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -181,9 +182,9 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     };
     let key = key_value.first;
     let value = key_value.second;
-    ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
-        Either::Left(val) => {
-            let Val::Map(map) = val else {
+    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+        Either::Left(mut val) => {
+            let Some(Val::Map(map)) = val.as_mut() else {
                 return Val::default();
             };
             map.insert(key, value).unwrap_or_default()
@@ -199,7 +200,7 @@ fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn set_many() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
         names::MAP_SET_MANY,
         EvalMode::Pair {
             first: BasicEvalMode::Inline,
@@ -210,7 +211,7 @@ pub(crate) fn set_many() -> Val {
     )))
 }
 
-fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_set_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -218,9 +219,9 @@ fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Map(update) = name_pair.second else {
         return Val::default();
     };
-    ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
-        Either::Left(val) => {
-            let Val::Map(map) = val else {
+    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+        Either::Left(mut val) => {
+            let Some(Val::Map(map)) = val.as_mut() else {
                 return Val::default();
             };
             let ret = update
@@ -251,15 +252,15 @@ pub(crate) fn get() -> Val {
     )))
 }
 
-fn fn_get(ctx: &Ctx, input: Val) -> Val {
+fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
     let name = name_key.first;
     let key = &name_key.second;
-    ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(true, name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
-            let Val::Map(map) = val else {
+            let Val::Map(map) = val.as_const() else {
                 return Val::default();
             };
             map.get(key).map(Clone::clone).unwrap_or_default()
@@ -285,7 +286,7 @@ pub(crate) fn get_many() -> Val {
     )))
 }
 
-fn fn_get_many(ctx: &Ctx, input: Val) -> Val {
+fn fn_get_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -293,9 +294,9 @@ fn fn_get_many(ctx: &Ctx, input: Val) -> Val {
     let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
-    ctx.get_ref_or_val(name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(true, name, |ref_or_val| match ref_or_val {
         Either::Left(val) => {
-            let Val::Map(map) = val else {
+            let Val::Map(map) = val.as_const() else {
                 return Val::default();
             };
             let ret = keys
@@ -318,7 +319,7 @@ fn fn_get_many(ctx: &Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
         names::MAP_REMOVE,
         EvalMode::Pair {
             first: BasicEvalMode::Inline,
@@ -329,15 +330,15 @@ pub(crate) fn remove() -> Val {
     )))
 }
 
-fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_remove(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
     let name = name_key.first;
     let key = name_key.second;
-    ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
-        Either::Left(val) => {
-            let Val::Map(map) = val else {
+    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+        Either::Left(mut val) => {
+            let Some(Val::Map(map)) = val.as_mut() else {
                 return Val::default();
             };
             map.remove(&key).unwrap_or_default()
@@ -353,7 +354,7 @@ fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn remove_many() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
         names::MAP_REMOVE_MANY,
         EvalMode::Pair {
             first: BasicEvalMode::Inline,
@@ -364,7 +365,7 @@ pub(crate) fn remove_many() -> Val {
     )))
 }
 
-fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_remove_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -373,9 +374,9 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(keys) = keys else {
         return Val::default();
     };
-    ctx.get_mut_or_val(name, |ref_or_val| match ref_or_val {
-        Either::Left(val) => {
-            let Val::Map(map) = val else {
+    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+        Either::Left(mut val) => {
+            let Some(Val::Map(map)) = val.as_mut() else {
                 return Val::default();
             };
             let ret = keys
@@ -397,17 +398,17 @@ fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn clear() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_aware(
+    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
         names::MAP_CLEAR,
         EvalMode::Basic(BasicEvalMode::Inline),
         fn_clear,
     )))
 }
 
-fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.get_mut_or_val(input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => {
-            let Val::Map(map) = val else {
+fn fn_clear(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(is_const, input, |ref_or_val| match ref_or_val {
+        Either::Left(mut val) => {
+            let Some(Val::Map(map)) = val.as_mut() else {
                 return Val::default();
             };
             map.clear();

@@ -1,9 +1,11 @@
 use crate::{
     semantics::{
         eval::{
+            ctx::{
+                NameMap,
+                TaggedVal,
+            },
             Name,
-            NameMap,
-            TaggedVal,
         },
         val::Val,
         Func,
@@ -52,7 +54,9 @@ pub(crate) fn prelude() -> NameMap {
     put(&mut c, names::EVAL_INLINE, eval::eval_inline());
     put(&mut c, names::EVAL_TWICE, eval::eval_twice());
     put(&mut c, names::EVAL_THRICE, eval::eval_thrice());
+    put(&mut c, names::EVAL_FREE, eval::eval_free());
     put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
+    put(&mut c, names::EVAL_IN_CTX_CONST, eval::eval_in_ctx_const());
     put(&mut c, names::PARSE, eval::parse());
     put(&mut c, names::STRINGIFY, eval::stringify());
     put(&mut c, names::FUNC, eval::func());
@@ -147,7 +151,9 @@ pub(crate) mod names {
     pub(crate) const EVAL_INLINE: &str = "inline";
     pub(crate) const EVAL_TWICE: &str = "eval2";
     pub(crate) const EVAL_THRICE: &str = "eval3";
+    pub(crate) const EVAL_FREE: &str = "eval_free";
     pub(crate) const EVAL_IN_CTX: &str = "..";
+    pub(crate) const EVAL_IN_CTX_CONST: &str = "..const";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "function";
