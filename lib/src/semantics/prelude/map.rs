@@ -113,7 +113,7 @@ fn fn_contains(ctx: &mut Ctx, input: Val) -> Val {
     let key = &name_key.second;
     ctx.get_ref_or_val_or_default(true, name, |ref_or_val| {
         let f = |val: &Val| {
-            let Val::Map(map) = val  else {
+            let Val::Map(map) = val else {
                 return Val::default();
             };
             Val::Bool(Bool::new(map.contains_key(key)))
@@ -142,7 +142,7 @@ fn fn_contains_many(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     let name = name_keys.first;
-    let Val::List(keys) = name_keys.second  else {
+    let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
     ctx.get_ref_or_val_or_default(true, name, |ref_or_val| {

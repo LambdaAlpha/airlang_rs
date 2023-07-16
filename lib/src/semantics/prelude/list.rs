@@ -302,7 +302,7 @@ fn fn_insert_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     };
     ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut()  else {
+            let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
             };
             if i > list.len() {
@@ -347,7 +347,7 @@ fn fn_remove(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
         };
         ctx.get_ref_or_val_or_default(is_const, name_or_list, |ref_or_val| match ref_or_val {
             Either::Left(mut list) => {
-                let Some(Val::List(list)) = list.as_mut()  else {
+                let Some(Val::List(list)) = list.as_mut() else {
                     return Val::default();
                 };
                 let from = from.unwrap_or_default();
@@ -372,7 +372,7 @@ fn fn_remove(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
             }
         })
     } else {
-        let Some(i) = to_index(name_index.second)else {
+        let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
         ctx.get_ref_or_val_or_default(is_const, name_or_list, |ref_or_val| match ref_or_val {

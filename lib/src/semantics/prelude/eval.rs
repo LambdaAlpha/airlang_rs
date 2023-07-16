@@ -163,7 +163,11 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let val = pair.second;
     ctx.get_ref_or_val_or_default(is_const, name_or_val, |target_ctx| {
         let f = |target| {
-            let TaggedRef{ val_ref: Val::Ctx(CtxVal(target_ctx)), is_const:target_ctx_const} = target else {
+            let TaggedRef {
+                val_ref: Val::Ctx(CtxVal(target_ctx)),
+                is_const: target_ctx_const,
+            } = target
+            else {
                 return Val::default();
             };
             if target_ctx_const {

@@ -52,7 +52,7 @@ impl FreeStrategy for DefaultFreeStrategy {
     }
 
     fn eval_call(func: Val, input: Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval( func) else {
+        let Val::Func(FuncVal(func)) = Self::eval(func) else {
             return Val::default();
         };
         func.eval_free(input)
@@ -87,7 +87,7 @@ impl FreeByRefStrategy for DefaultFreeByRefStrategy {
     }
 
     fn eval_call(func: &Val, input: &Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval( func) else {
+        let Val::Func(FuncVal(func)) = Self::eval(func) else {
             return Val::default();
         };
         func.eval_free(input.clone())

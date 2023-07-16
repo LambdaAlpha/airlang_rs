@@ -69,7 +69,11 @@ impl Ctx {
     pub(crate) fn remove(&mut self, is_const: bool, name: &str) -> Val {
         let Some(tagged_val) = self.name_map.get(name) else {
             return self.get_super_ctx(is_const, |ctx, _| {
-                let Some(TaggedRef { val_ref: ctx, is_const: super_const }) = ctx else {
+                let Some(TaggedRef {
+                    val_ref: ctx,
+                    is_const: super_const,
+                }) = ctx
+                else {
                     return Val::default();
                 };
                 ctx.remove(super_const, name)
@@ -89,21 +93,22 @@ impl Ctx {
 
     pub(crate) fn put_val(&mut self, is_const: bool, name: Name, val: TaggedVal) -> Val {
         let Some(tagged_val) = self.name_map.get(&name) else {
-            return self.get_super_ctx(is_const, |ctx, self_ctx| {
-                match ctx {
-                    None => {
-                        if is_const {
-                            return Val::default();
-                        }
-                        let Some(self_ctx) = self_ctx else {
-                            return Val::default();
-                        };
-                        self_ctx.put_unchecked(name, val)
+            return self.get_super_ctx(is_const, |ctx, self_ctx| match ctx {
+                None => {
+                    if is_const {
+                        return Val::default();
                     }
-                    Some(ctx) => {
-                        let TaggedRef { val_ref: ctx, is_const: super_const } = ctx;
-                        ctx.put_val(super_const, name, val)
-                    }
+                    let Some(self_ctx) = self_ctx else {
+                        return Val::default();
+                    };
+                    self_ctx.put_unchecked(name, val)
+                }
+                Some(ctx) => {
+                    let TaggedRef {
+                        val_ref: ctx,
+                        is_const: super_const,
+                    } = ctx;
+                    ctx.put_val(super_const, name, val)
                 }
             });
         };
@@ -117,7 +122,12 @@ impl Ctx {
     }
 
     pub(crate) fn put_val_local(&mut self, name: Name, val: TaggedVal) -> Val {
-        let (None | Some(TaggedVal { tag: InvariantTag::None, .. })) = self.name_map.get(&name) else {
+        let (None
+        | Some(TaggedVal {
+            tag: InvariantTag::None,
+            ..
+        })) = self.name_map.get(&name)
+        else {
             return Val::default();
         };
         self.put_unchecked(name, val)
@@ -133,7 +143,11 @@ impl Ctx {
     pub(crate) fn set_final(&mut self, is_const: bool, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
             self.get_super_ctx(is_const, |ctx, _| {
-                let Some(TaggedRef { val_ref: ctx, is_const: super_const }) = ctx else {
+                let Some(TaggedRef {
+                    val_ref: ctx,
+                    is_const: super_const,
+                }) = ctx
+                else {
                     return;
                 };
                 ctx.set_final(super_const, name);
@@ -152,7 +166,11 @@ impl Ctx {
     pub(crate) fn set_const(&mut self, is_const: bool, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
             self.get_super_ctx(is_const, |ctx, _| {
-                let Some(TaggedRef { val_ref: ctx, is_const: super_const }) = ctx else {
+                let Some(TaggedRef {
+                    val_ref: ctx,
+                    is_const: super_const,
+                }) = ctx
+                else {
                     return;
                 };
                 ctx.set_const(super_const, name);
@@ -197,7 +215,11 @@ impl Ctx {
     {
         if self.name_map.get(name).is_none() {
             return self.get_super_ctx(is_const, |ctx, self_ctx| {
-                let Some(TaggedRef { val_ref: ctx, is_const: super_const }) = ctx else {
+                let Some(TaggedRef {
+                    val_ref: ctx,
+                    is_const: super_const,
+                }) = ctx
+                else {
                     return f(None, self_ctx);
                 };
                 ctx.get_ref(super_const, name, f)
@@ -233,7 +255,11 @@ impl Ctx {
         };
         match name_or_ref {
             Either::Left(name) => {
-                let Some(TaggedVal { val: Val::Ctx(CtxVal(super_ctx)), tag }) = self.name_map.get_mut(name) else {
+                let Some(TaggedVal {
+                    val: Val::Ctx(CtxVal(super_ctx)),
+                    tag,
+                }) = self.name_map.get_mut(name)
+                else {
                     return f(None, Some(self));
                 };
                 let is_const = matches!(tag, InvariantTag::Const) || is_const;
@@ -243,7 +269,11 @@ impl Ctx {
                 let Ok(mut o) = Keeper::owner(r) else {
                     return f(None, Some(self));
                 };
-                let TaggedVal { val: Val::Ctx(CtxVal(super_ctx)), tag } = &mut *o else {
+                let TaggedVal {
+                    val: Val::Ctx(CtxVal(super_ctx)),
+                    tag,
+                } = &mut *o
+                else {
                     return f(None, Some(self));
                 };
                 let is_const = matches!(tag, InvariantTag::Const);
@@ -258,7 +288,11 @@ impl Ctx {
     {
         match name {
             Val::Symbol(s) => self.get_ref(is_const, &s, |ref_or_val, self_ctx| {
-                let Some(TaggedRef { val_ref: val, is_const: val_const }) = ref_or_val else {
+                let Some(TaggedRef {
+                    val_ref: val,
+                    is_const: val_const,
+                }) = ref_or_val
+                else {
                     return f(Either::Right(None), self_ctx);
                 };
                 let Val::Ref(RefVal(r)) = val else {

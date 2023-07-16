@@ -422,7 +422,11 @@ fn fn_ctx_set_super(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
         return Val::default();
     }
     ctx.get_ref_or_val_or_default(is_const, ctx_name_or_val, |ctx| {
-        let Either::Left(TaggedRef { val_ref: Val::Ctx(CtxVal(ctx)), is_const: false }) = ctx else {
+        let Either::Left(TaggedRef {
+            val_ref: Val::Ctx(CtxVal(ctx)),
+            is_const: false,
+        }) = ctx
+        else {
             return Val::default();
         };
         ctx.super_ctx = super_ctx;
