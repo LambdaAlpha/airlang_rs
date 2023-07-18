@@ -125,7 +125,7 @@ impl EvalStrategy for DefaultStrategy {
         let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
             return Val::default();
         };
-        func.eval(ctx, input)
+        func.eval_mutable(ctx, input)
     }
 
     fn eval_reverse(_: &mut Ctx, _: Val, _: Val) -> Val {
@@ -160,7 +160,7 @@ impl ByRefStrategy for DefaultByRefStrategy {
         let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
             return Val::default();
         };
-        func.eval(ctx, input.clone())
+        func.eval_mutable(ctx, input.clone())
     }
 
     fn eval_reverse(_: &mut Ctx, _: &Val, _: &Val) -> Val {
@@ -230,7 +230,7 @@ impl ByRefStrategy for DefaultConstByRefStrategy {
         let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
             return Val::default();
         };
-        func.eval(ctx, input.clone())
+        func.eval_mutable(ctx, input.clone())
     }
 
     fn eval_reverse(_: &mut Ctx, _: &Val, _: &Val) -> Val {

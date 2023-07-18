@@ -3,13 +3,14 @@ use crate::{
         eval::{
             ctx::Ctx,
             BasicEvalMode,
+            CtxConstFn,
+            CtxFreeFn,
             EvalMode,
-            Func,
             Primitive,
         },
         prelude::{
             names,
-            prelude_func,
+            PrimitiveFunc,
         },
         val::Val,
     },
@@ -19,12 +20,10 @@ use crate::{
     },
 };
 
-pub(crate) fn length() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
-        names::STR_LENGTH,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_length,
-    )))
+pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::STR_LENGTH, fn_length);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
@@ -42,12 +41,10 @@ fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
     })
 }
 
-pub(crate) fn concat() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::STR_CONCAT,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_concat,
-    )))
+pub(crate) fn concat() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::STR_CONCAT, fn_concat);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_concat(input: Val) -> Val {

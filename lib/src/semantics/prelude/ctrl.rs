@@ -12,24 +12,25 @@ use crate::semantics::{
             EvalStrategy,
         },
         BasicEvalMode,
+        CtxMutableFn,
         EvalMode,
-        Func,
         Primitive,
     },
     prelude::{
         names,
-        prelude_func,
+        PrimitiveFunc,
     },
     val::Val,
 };
 
-pub(crate) fn sequence() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable_dispatch(
+pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let primitive = Primitive::new_dispatch(
         names::SEQUENCE,
-        EvalMode::Basic(BasicEvalMode::Value),
         fn_sequence::<DefaultConstStrategy>,
         fn_sequence::<DefaultStrategy>,
-    )))
+    );
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_sequence<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
@@ -43,13 +44,14 @@ fn fn_sequence<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
     output
 }
 
-pub(crate) fn condition() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable_dispatch(
+pub(crate) fn condition() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let primitive = Primitive::new_dispatch(
         names::IF,
-        EvalMode::Basic(BasicEvalMode::Value),
         fn_if::<DefaultConstStrategy>,
         fn_if::<DefaultStrategy>,
-    )))
+    );
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_if<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
@@ -77,13 +79,14 @@ fn fn_if<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn while_loop() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable_dispatch(
+pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let primitive = Primitive::new_dispatch(
         names::WHILE,
-        EvalMode::Basic(BasicEvalMode::Value),
         fn_while::<DefaultConstByRefStrategy>,
         fn_while::<DefaultByRefStrategy>,
-    )))
+    );
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_while<Eval: ByRefStrategy>(ctx: &mut Ctx, input: Val) -> Val {

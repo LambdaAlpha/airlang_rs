@@ -248,7 +248,7 @@ not 'f
     f = (function{
         body: (;[' set_super (read caller), eval2 input]),
         eval_mode: value,
-        caller_context: mutable,
+        caller_access: mutable,
         context: (' (context {const: {
             ;,
             eval2,
@@ -266,7 +266,7 @@ not 'f
     f = (function{
         body: (caller .. (((' ') input) = 2)),
         eval_mode: value,
-        caller_context: mutable,
+        caller_access: mutable,
         context: (' (context {const: {
             ..,
         }}))
@@ -282,7 +282,7 @@ not 'f
     f = (function{
         body: (caller .. (((' ') input) = 2)),
         eval_mode: value,
-        caller_context: mutable,
+        caller_access: mutable,
         context: (' (context {const: {
             ..,
         }}))
@@ -298,7 +298,7 @@ not 'f
     f = (function{
         body: (caller .. (((' ') input) = 2)),
         eval_mode: value,
-        caller_context: const,
+        caller_access: const,
         context: (' (context {const: {
             ..,
         }}))

@@ -11,14 +11,16 @@ use {
                 },
                 ctx_free::CtxFree,
                 BasicEvalMode,
+                CtxConstFn,
+                CtxFreeFn,
+                CtxMutableFn,
                 EvalMode,
-                Func,
                 IsConst,
                 Primitive,
             },
             prelude::{
                 names,
-                prelude_func,
+                PrimitiveFunc,
             },
             val::{
                 CtxVal,
@@ -37,12 +39,10 @@ use {
     std::mem::swap,
 };
 
-pub(crate) fn read() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
-        names::READ,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_read,
-    )))
+pub(crate) fn read() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::READ, fn_read);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
@@ -53,12 +53,10 @@ fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn is_null() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
-        names::IS_NULL,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_is_null,
-    )))
+pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::IS_NULL, fn_is_null);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
@@ -69,16 +67,14 @@ fn fn_is_null(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn assign_local() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::ASSIGN_LOCAL,
-        EvalMode::Pair {
-            first: BasicEvalMode::Inline,
-            second: BasicEvalMode::Eval,
-            non_pair: BasicEvalMode::Value,
-        },
-        fn_assign_local,
-    )))
+pub(crate) fn assign_local() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Pair {
+        first: BasicEvalMode::Inline,
+        second: BasicEvalMode::Eval,
+        non_pair: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_LOCAL, fn_assign_local);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_assign_local(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
@@ -95,48 +91,42 @@ fn fn_assign_local(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     ctx.put_val_local(name, TaggedVal::new(val))
 }
 
-pub(crate) fn assign() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::ASSIGN,
-        EvalMode::Pair {
-            first: BasicEvalMode::Inline,
-            second: BasicEvalMode::Eval,
-            non_pair: BasicEvalMode::Value,
-        },
-        fn_assign,
-    )))
+pub(crate) fn assign() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Pair {
+        first: BasicEvalMode::Inline,
+        second: BasicEvalMode::Eval,
+        non_pair: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN, fn_assign);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_assign(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     fn_assign_val(ctx, is_const, input, InvariantTag::None)
 }
 
-pub(crate) fn assign_final() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::ASSIGN_FINAL,
-        EvalMode::Pair {
-            first: BasicEvalMode::Inline,
-            second: BasicEvalMode::Eval,
-            non_pair: BasicEvalMode::Value,
-        },
-        fn_assign_final,
-    )))
+pub(crate) fn assign_final() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Pair {
+        first: BasicEvalMode::Inline,
+        second: BasicEvalMode::Eval,
+        non_pair: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_FINAL, fn_assign_final);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_assign_final(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     fn_assign_val(ctx, is_const, input, InvariantTag::Final)
 }
 
-pub(crate) fn assign_const() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::ASSIGN_CONST,
-        EvalMode::Pair {
-            first: BasicEvalMode::Inline,
-            second: BasicEvalMode::Eval,
-            non_pair: BasicEvalMode::Value,
-        },
-        fn_assign_const,
-    )))
+pub(crate) fn assign_const() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Pair {
+        first: BasicEvalMode::Inline,
+        second: BasicEvalMode::Eval,
+        non_pair: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_CONST, fn_assign_const);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_assign_const(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
@@ -171,12 +161,10 @@ fn fn_assign_val(ctx: &mut Ctx, is_const: IsConst, input: Val, tag: InvariantTag
     }
 }
 
-pub(crate) fn set_final() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::FINAL,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_set_final,
-    )))
+pub(crate) fn set_final() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxMutableFn>::new(names::FINAL, fn_set_final);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_set_final(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
@@ -196,12 +184,10 @@ fn fn_set_final(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     Val::default()
 }
 
-pub(crate) fn set_const() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::CONST,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_set_const,
-    )))
+pub(crate) fn set_const() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxMutableFn>::new(names::CONST, fn_set_const);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_set_const(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
@@ -218,12 +204,10 @@ fn fn_set_const(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     Val::default()
 }
 
-pub(crate) fn is_final() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
-        names::IS_FINAL,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_is_final,
-    )))
+pub(crate) fn is_final() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::IS_FINAL, fn_is_final);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
@@ -237,12 +221,10 @@ fn fn_is_final(ctx: &mut Ctx, input: Val) -> Val {
     Val::Bool(Bool::new(is_const))
 }
 
-pub(crate) fn is_const() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_const(
-        names::IS_CONST,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_is_const,
-    )))
+pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::IS_CONST, fn_is_const);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
@@ -256,12 +238,10 @@ fn fn_is_const(ctx: &mut Ctx, input: Val) -> Val {
     Val::Bool(Bool::new(is_const))
 }
 
-pub(crate) fn remove() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::MOVE,
-        EvalMode::Basic(BasicEvalMode::Inline),
-        fn_move,
-    )))
+pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxMutableFn>::new(names::MOVE, fn_move);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_move(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
@@ -280,24 +260,20 @@ fn fn_move(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     }
 }
 
-pub(crate) fn new_ref() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::REF,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_new_ref,
-    )))
+pub(crate) fn new_ref() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::REF, fn_new_ref);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_new_ref(input: Val) -> Val {
     Val::Ref(Keeper::new(TaggedVal::new(input)).into())
 }
 
-pub(crate) fn null_ref() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::NULL_REF,
-        EvalMode::Basic(BasicEvalMode::Value),
-        fn_null_ref,
-    )))
+pub(crate) fn null_ref() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxFreeFn>::new(names::NULL_REF, fn_null_ref);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_null_ref(_: Val) -> Val {
@@ -309,36 +285,30 @@ fn fn_null_ref(_: Val) -> Val {
     Val::Ref(k.into())
 }
 
-pub(crate) fn final_ref() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::FINAL_REF,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_final_ref,
-    )))
+pub(crate) fn final_ref() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::FINAL_REF, fn_final_ref);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_final_ref(input: Val) -> Val {
     Val::Ref(Keeper::new(TaggedVal::new_final(input)).into())
 }
 
-pub(crate) fn const_ref() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::CONST_REF,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_const_ref,
-    )))
+pub(crate) fn const_ref() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::CONST_REF, fn_const_ref);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_const_ref(input: Val) -> Val {
     Val::Ref(Keeper::new(TaggedVal::new_const(input)).into())
 }
 
-pub(crate) fn ctx_new() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::CTX_NEW,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_ctx_new,
-    )))
+pub(crate) fn ctx_new() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::CTX_NEW, fn_ctx_new);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -391,16 +361,14 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
     map.remove(&name).unwrap_or(Val::Map(MapVal::default()))
 }
 
-pub(crate) fn ctx_set_super() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_mutable(
-        names::CTX_SET_SUPER,
-        EvalMode::Pair {
-            first: BasicEvalMode::Inline,
-            second: BasicEvalMode::Inline,
-            non_pair: BasicEvalMode::Value,
-        },
-        fn_ctx_set_super,
-    )))
+pub(crate) fn ctx_set_super() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Pair {
+        first: BasicEvalMode::Inline,
+        second: BasicEvalMode::Inline,
+        non_pair: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::CTX_SET_SUPER, fn_ctx_set_super);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_ctx_set_super(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {

@@ -5,7 +5,14 @@ use crate::{
                 NameMap,
                 TaggedVal,
             },
+            CtxConstFn,
+            CtxFreeFn,
+            CtxMutableFn,
+            EvalMode,
+            FuncEval,
+            FuncImpl,
             Name,
+            Primitive,
         },
         val::Val,
         Func,
@@ -16,106 +23,182 @@ use crate::{
 pub(crate) fn prelude() -> NameMap {
     let mut c = NameMap::default();
 
-    put(&mut c, names::AIR_VERSION_MAJOR, meta::version_major());
-    put(&mut c, names::AIR_VERSION_MINOR, meta::version_minor());
-    put(&mut c, names::AIR_VERSION_PATCH, meta::version_patch());
-
-    put(&mut c, names::READ, ctx::read());
-    put(&mut c, names::IS_NULL, ctx::is_null());
-    put(&mut c, names::MOVE, ctx::remove());
-    put(&mut c, names::ASSIGN_LOCAL, ctx::assign_local());
-    put(&mut c, names::ASSIGN, ctx::assign());
-    put(&mut c, names::ASSIGN_FINAL, ctx::assign_final());
-    put(&mut c, names::ASSIGN_CONST, ctx::assign_const());
-    put(&mut c, names::FINAL, ctx::set_final());
-    put(&mut c, names::CONST, ctx::set_const());
-    put(&mut c, names::IS_FINAL, ctx::is_final());
-    put(&mut c, names::IS_CONST, ctx::is_const());
-    put(&mut c, names::REF, ctx::new_ref());
-    put(&mut c, names::NULL_REF, ctx::null_ref());
-    put(&mut c, names::FINAL_REF, ctx::final_ref());
-    put(&mut c, names::CONST_REF, ctx::const_ref());
-    put(&mut c, names::CTX_NEW, ctx::ctx_new());
-    put(&mut c, names::CTX_SET_SUPER, ctx::ctx_set_super());
-
-    put(&mut c, names::SEQUENCE, ctrl::sequence());
-    put(&mut c, names::IF, ctrl::condition());
-    put(&mut c, names::WHILE, ctrl::while_loop());
-
-    put(&mut c, names::NOT, bool::not());
-    put(&mut c, names::AND, bool::and());
-    put(&mut c, names::OR, bool::or());
-    put(&mut c, names::EQUAL, bool::equal());
-    put(&mut c, names::NOT_EQUAL, bool::not_equal());
-
-    put(&mut c, names::VALUE, eval::value());
-    put(&mut c, names::EVAL, eval::eval());
-    put(&mut c, names::EVAL_INTERPOLATE, eval::eval_interpolate());
-    put(&mut c, names::EVAL_INLINE, eval::eval_inline());
-    put(&mut c, names::EVAL_TWICE, eval::eval_twice());
-    put(&mut c, names::EVAL_THRICE, eval::eval_thrice());
-    put(&mut c, names::EVAL_FREE, eval::eval_free());
-    put(&mut c, names::EVAL_IN_CTX, eval::eval_in_ctx());
-    put(&mut c, names::EVAL_IN_CTX_CONST, eval::eval_in_ctx_const());
-    put(&mut c, names::PARSE, eval::parse());
-    put(&mut c, names::STRINGIFY, eval::stringify());
-    put(&mut c, names::FUNC, eval::func());
-    put(&mut c, names::CHAIN, eval::chain());
-
-    put(&mut c, names::INT_ADD, int::add());
-    put(&mut c, names::INT_SUBTRACT, int::subtract());
-    put(&mut c, names::INT_MULTIPLY, int::multiply());
-    put(&mut c, names::INT_DIVIDE, int::divide());
-    put(&mut c, names::INT_REMAINDER, int::remainder());
-    put(&mut c, names::INT_DIVIDE_REMAINDER, int::divide_remainder());
-    put(&mut c, names::INT_LESS_THAN, int::less_than());
-    put(&mut c, names::INT_LESS_EQUAL, int::less_equal());
-    put(&mut c, names::INT_GREATER_THAN, int::greater_than());
-    put(&mut c, names::INT_GREATER_EQUAL, int::greater_equal());
-    put(&mut c, names::INT_LESS_GREATER, int::less_greater());
-
-    put(&mut c, names::STR_LENGTH, str::length());
-    put(&mut c, names::STR_CONCAT, str::concat());
-
-    put(&mut c, names::PAIR_FIRST, pair::first());
-    put(&mut c, names::PAIR_FIRST_ASSIGN, pair::first_assign());
-    put(&mut c, names::PAIR_SECOND, pair::second());
-    put(&mut c, names::PAIR_SECOND_ASSIGN, pair::second_assign());
-
-    put(&mut c, names::LIST_LENGTH, list::length());
-    put(&mut c, names::LIST_SET, list::set());
-    put(&mut c, names::LIST_SET_MANY, list::set_many());
-    put(&mut c, names::LIST_GET, list::get());
-    put(&mut c, names::LIST_INSERT, list::insert());
-    put(&mut c, names::LIST_INSERT_MANY, list::insert_many());
-    put(&mut c, names::LIST_REMOVE, list::remove());
-    put(&mut c, names::LIST_PUSH, list::push());
-    put(&mut c, names::LIST_PUSH_MANY, list::push_many());
-    put(&mut c, names::LIST_POP, list::pop());
-    put(&mut c, names::LIST_CLEAR, list::clear());
-
-    put(&mut c, names::MAP_LENGTH, map::length());
-    put(&mut c, names::MAP_KEYS, map::keys());
-    put(&mut c, names::MAP_VALUES, map::values());
-    put(&mut c, names::MAP_CONTAINS, map::contains());
-    put(&mut c, names::MAP_CONTAINS_MANY, map::contains_many());
-    put(&mut c, names::MAP_SET, map::set());
-    put(&mut c, names::MAP_SET_MANY, map::set_many());
-    put(&mut c, names::MAP_GET, map::get());
-    put(&mut c, names::MAP_GET_MANY, map::get_many());
-    put(&mut c, names::MAP_REMOVE, map::remove());
-    put(&mut c, names::MAP_REMOVE_MANY, map::remove_many());
-    put(&mut c, names::MAP_CLEAR, map::clear());
+    prelude_meta(&mut c);
+    prelude_ctx(&mut c);
+    prelude_ctrl(&mut c);
+    prelude_eval(&mut c);
+    prelude_bool(&mut c);
+    prelude_int(&mut c);
+    prelude_str(&mut c);
+    prelude_pair(&mut c);
+    prelude_list(&mut c);
+    prelude_map(&mut c);
 
     c
 }
 
-fn put(constants: &mut NameMap, key: &str, val: Val) {
-    constants.insert(Name::from(key), TaggedVal::new_const(val));
+fn prelude_meta(c: &mut NameMap) {
+    put(c, names::AIR_VERSION_MAJOR, meta::version_major());
+    put(c, names::AIR_VERSION_MINOR, meta::version_minor());
+    put(c, names::AIR_VERSION_PATCH, meta::version_patch());
 }
 
-fn prelude_func(func: Func) -> Val {
-    Val::Func(Reader::new(func).into())
+fn prelude_ctx(c: &mut NameMap) {
+    put_primitive_func(c, ctx::read());
+    put_primitive_func(c, ctx::is_null());
+    put_primitive_func(c, ctx::remove());
+    put_primitive_func(c, ctx::assign_local());
+    put_primitive_func(c, ctx::assign());
+    put_primitive_func(c, ctx::assign_final());
+    put_primitive_func(c, ctx::assign_const());
+    put_primitive_func(c, ctx::set_final());
+    put_primitive_func(c, ctx::set_const());
+    put_primitive_func(c, ctx::is_final());
+    put_primitive_func(c, ctx::is_const());
+    put_primitive_func(c, ctx::new_ref());
+    put_primitive_func(c, ctx::null_ref());
+    put_primitive_func(c, ctx::final_ref());
+    put_primitive_func(c, ctx::const_ref());
+    put_primitive_func(c, ctx::ctx_new());
+    put_primitive_func(c, ctx::ctx_set_super());
+}
+
+fn prelude_ctrl(c: &mut NameMap) {
+    put_primitive_func(c, ctrl::sequence());
+    put_primitive_func(c, ctrl::condition());
+    put_primitive_func(c, ctrl::while_loop());
+}
+
+fn prelude_eval(c: &mut NameMap) {
+    put_primitive_func(c, eval::value());
+    put_primitive_func(c, eval::eval());
+    put_primitive_func(c, eval::eval_interpolate());
+    put_primitive_func(c, eval::eval_inline());
+    put_primitive_func(c, eval::eval_twice());
+    put_primitive_func(c, eval::eval_thrice());
+    put_primitive_func(c, eval::eval_free());
+    put_primitive_func(c, eval::eval_in_ctx());
+    put_primitive_func(c, eval::eval_in_ctx_const());
+    put_primitive_func(c, eval::parse());
+    put_primitive_func(c, eval::stringify());
+    put_primitive_func(c, eval::func());
+    put_primitive_func(c, eval::chain());
+}
+
+fn prelude_bool(c: &mut NameMap) {
+    put_primitive_func(c, bool::not());
+    put_primitive_func(c, bool::and());
+    put_primitive_func(c, bool::or());
+    put_primitive_func(c, bool::equal());
+    put_primitive_func(c, bool::not_equal());
+}
+
+fn prelude_int(c: &mut NameMap) {
+    put_primitive_func(c, int::add());
+    put_primitive_func(c, int::subtract());
+    put_primitive_func(c, int::multiply());
+    put_primitive_func(c, int::divide());
+    put_primitive_func(c, int::remainder());
+    put_primitive_func(c, int::divide_remainder());
+    put_primitive_func(c, int::less_than());
+    put_primitive_func(c, int::less_equal());
+    put_primitive_func(c, int::greater_than());
+    put_primitive_func(c, int::greater_equal());
+    put_primitive_func(c, int::less_greater());
+}
+
+fn prelude_str(c: &mut NameMap) {
+    put_primitive_func(c, str::length());
+    put_primitive_func(c, str::concat());
+}
+
+fn prelude_pair(c: &mut NameMap) {
+    put_primitive_func(c, pair::first());
+    put_primitive_func(c, pair::first_assign());
+    put_primitive_func(c, pair::second());
+    put_primitive_func(c, pair::second_assign());
+}
+
+fn prelude_list(c: &mut NameMap) {
+    put_primitive_func(c, list::length());
+    put_primitive_func(c, list::set());
+    put_primitive_func(c, list::set_many());
+    put_primitive_func(c, list::get());
+    put_primitive_func(c, list::insert());
+    put_primitive_func(c, list::insert_many());
+    put_primitive_func(c, list::remove());
+    put_primitive_func(c, list::push());
+    put_primitive_func(c, list::push_many());
+    put_primitive_func(c, list::pop());
+    put_primitive_func(c, list::clear());
+}
+
+fn prelude_map(c: &mut NameMap) {
+    put_primitive_func(c, map::length());
+    put_primitive_func(c, map::keys());
+    put_primitive_func(c, map::values());
+    put_primitive_func(c, map::contains());
+    put_primitive_func(c, map::contains_many());
+    put_primitive_func(c, map::set());
+    put_primitive_func(c, map::set_many());
+    put_primitive_func(c, map::get());
+    put_primitive_func(c, map::get_many());
+    put_primitive_func(c, map::remove());
+    put_primitive_func(c, map::remove_many());
+    put_primitive_func(c, map::clear());
+}
+
+fn put(c: &mut NameMap, key: &str, val: Val) {
+    c.insert(Name::from(key), TaggedVal::new_const(val));
+}
+
+fn put_primitive_func<F>(c: &mut NameMap, primitive: PrimitiveFunc<F>)
+where
+    PrimitiveFunc<F>: IntoFunc,
+{
+    let id = primitive.evaluator.get_id().clone();
+    let func = primitive.into_func();
+    let val = Val::Func(Reader::new(func).into());
+    c.insert(id, TaggedVal::new_const(val));
+}
+
+pub(crate) struct PrimitiveFunc<F> {
+    input_eval_mode: EvalMode,
+    evaluator: Primitive<F>,
+}
+
+trait IntoFunc {
+    fn into_func(self) -> Func;
+}
+
+impl IntoFunc for PrimitiveFunc<CtxFreeFn> {
+    fn into_func(self) -> Func {
+        let evaluator = FuncEval::Free(FuncImpl::Primitive(self.evaluator));
+        Func::new(self.input_eval_mode, evaluator)
+    }
+}
+
+impl IntoFunc for PrimitiveFunc<CtxConstFn> {
+    fn into_func(self) -> Func {
+        let evaluator = FuncEval::Const(FuncImpl::Primitive(self.evaluator));
+        Func::new(self.input_eval_mode, evaluator)
+    }
+}
+
+impl IntoFunc for PrimitiveFunc<CtxMutableFn> {
+    fn into_func(self) -> Func {
+        let evaluator = FuncEval::Mutable(FuncImpl::Primitive(self.evaluator));
+        Func::new(self.input_eval_mode, evaluator)
+    }
+}
+
+impl<F> PrimitiveFunc<F> {
+    fn new(eval_mode: EvalMode, primitive: Primitive<F>) -> Self {
+        PrimitiveFunc {
+            input_eval_mode: eval_mode,
+            evaluator: primitive,
+        }
+    }
 }
 
 pub(crate) mod names {

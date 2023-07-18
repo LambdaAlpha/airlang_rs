@@ -2,25 +2,23 @@ use crate::{
     semantics::{
         eval::{
             BasicEvalMode,
+            CtxFreeFn,
             EvalMode,
-            Func,
             Primitive,
         },
         prelude::{
             names,
-            prelude_func,
+            PrimitiveFunc,
         },
         val::Val,
     },
     types::Pair,
 };
 
-pub(crate) fn add() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_ADD,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_add,
-    )))
+pub(crate) fn add() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_ADD, fn_add);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_add(input: Val) -> Val {
@@ -36,12 +34,10 @@ fn fn_add(input: Val) -> Val {
     Val::Int(i1.add(i2))
 }
 
-pub(crate) fn subtract() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_SUBTRACT,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_subtract,
-    )))
+pub(crate) fn subtract() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_SUBTRACT, fn_subtract);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -57,12 +53,10 @@ fn fn_subtract(input: Val) -> Val {
     Val::Int(i1.subtract(i2))
 }
 
-pub(crate) fn multiply() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_MULTIPLY,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_multiply,
-    )))
+pub(crate) fn multiply() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_MULTIPLY, fn_multiply);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -78,12 +72,10 @@ fn fn_multiply(input: Val) -> Val {
     Val::Int(i1.multiply(i2))
 }
 
-pub(crate) fn divide() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_DIVIDE,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_divide,
-    )))
+pub(crate) fn divide() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_DIVIDE, fn_divide);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -102,12 +94,10 @@ fn fn_divide(input: Val) -> Val {
     Val::Int(i)
 }
 
-pub(crate) fn remainder() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_REMAINDER,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_remainder,
-    )))
+pub(crate) fn remainder() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_REMAINDER, fn_remainder);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -126,12 +116,10 @@ fn fn_remainder(input: Val) -> Val {
     Val::Int(i)
 }
 
-pub(crate) fn divide_remainder() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_DIVIDE_REMAINDER,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_divide_remainder,
-    )))
+pub(crate) fn divide_remainder() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_DIVIDE_REMAINDER, fn_divide_remainder);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -150,12 +138,10 @@ fn fn_divide_remainder(input: Val) -> Val {
     Val::Pair(Box::new(Pair::new(Val::Int(quotient), Val::Int(rem))))
 }
 
-pub(crate) fn less_than() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_LESS_THAN,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_less_than,
-    )))
+pub(crate) fn less_than() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_LESS_THAN, fn_less_than);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -171,12 +157,10 @@ fn fn_less_than(input: Val) -> Val {
     Val::Bool(i1.less_than(&i2))
 }
 
-pub(crate) fn less_equal() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_LESS_EQUAL,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_less_equal,
-    )))
+pub(crate) fn less_equal() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_LESS_EQUAL, fn_less_equal);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -192,12 +176,10 @@ fn fn_less_equal(input: Val) -> Val {
     Val::Bool(i1.less_equal(&i2))
 }
 
-pub(crate) fn greater_than() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_GREATER_THAN,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_greater_than,
-    )))
+pub(crate) fn greater_than() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_GREATER_THAN, fn_greater_than);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -213,12 +195,10 @@ fn fn_greater_than(input: Val) -> Val {
     Val::Bool(i1.greater_than(&i2))
 }
 
-pub(crate) fn greater_equal() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_GREATER_EQUAL,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_greater_equal,
-    )))
+pub(crate) fn greater_equal() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_GREATER_EQUAL, fn_greater_equal);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -234,12 +214,10 @@ fn fn_greater_equal(input: Val) -> Val {
     Val::Bool(i1.greater_equal(&i2))
 }
 
-pub(crate) fn less_greater() -> Val {
-    prelude_func(Func::new_primitive(Primitive::new_ctx_free(
-        names::INT_LESS_GREATER,
-        EvalMode::Basic(BasicEvalMode::Eval),
-        fn_less_greater,
-    )))
+pub(crate) fn less_greater() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::INT_LESS_GREATER, fn_less_greater);
+    PrimitiveFunc::new(eval_mode, primitive)
 }
 
 fn fn_less_greater(input: Val) -> Val {
