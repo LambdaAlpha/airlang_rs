@@ -27,7 +27,6 @@ use std::{
     },
 };
 
-#[derive(Debug)]
 pub(crate) struct Keeper<D: ?Sized> {
     raw: RawRef<D>,
 }
@@ -100,6 +99,12 @@ impl<D: ?Sized> Drop for Keeper<D> {
     }
 }
 
+impl<D: ?Sized> Debug for Keeper<D> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Keeper").field(&self.raw).finish()
+    }
+}
+
 impl<D: Default> Default for Keeper<D> {
     fn default() -> Self {
         Keeper::new(D::default())
@@ -120,7 +125,6 @@ impl<D: ?Sized> Hash for Keeper<D> {
     }
 }
 
-#[derive(Debug)]
 pub(crate) struct Reader<D: ?Sized> {
     raw: RawRef<D>,
 }
@@ -185,6 +189,12 @@ impl<D: ?Sized> Drop for Reader<D> {
     }
 }
 
+impl<D: ?Sized> Debug for Reader<D> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Reader").field(&self.raw).finish()
+    }
+}
+
 impl<D: Default> Default for Reader<D> {
     fn default() -> Self {
         Reader::new(D::default())
@@ -205,7 +215,6 @@ impl<D: ?Sized> Hash for Reader<D> {
     }
 }
 
-#[derive(Debug)]
 pub(crate) struct Owner<D: ?Sized> {
     raw: RawRef<D>,
 }
@@ -293,6 +302,12 @@ impl<D: ?Sized> Drop for Owner<D> {
     }
 }
 
+impl<D: ?Sized> Debug for Owner<D> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Owner").field(&self.raw).finish()
+    }
+}
+
 impl<D: Default> Default for Owner<D> {
     fn default() -> Self {
         Owner::new(D::default())
@@ -313,7 +328,6 @@ impl<D: ?Sized> Hash for Owner<D> {
     }
 }
 
-#[derive(Debug)]
 struct RawRef<D: ?Sized> {
     ptr: NonNull<SharedCell<D>>,
     phantom: PhantomData<SharedCell<D>>,
@@ -360,6 +374,12 @@ impl<D: ?Sized> RawRef<D> {
 }
 
 impl<D: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<RawRef<U>> for RawRef<D> {}
+
+impl<D: ?Sized> Debug for RawRef<D> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.ptr.fmt(f)
+    }
+}
 
 impl<D: ?Sized> PartialEq for RawRef<D> {
     fn eq(&self, other: &Self) -> bool {
