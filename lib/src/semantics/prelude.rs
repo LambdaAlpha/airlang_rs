@@ -154,10 +154,10 @@ fn put(c: &mut NameMap, key: &str, val: Val) {
 
 fn put_primitive_func<F>(c: &mut NameMap, primitive: PrimitiveFunc<F>)
 where
-    PrimitiveFunc<F>: IntoFunc,
+    PrimitiveFunc<F>: Into<Func>,
 {
     let id = primitive.evaluator.get_id().clone();
-    let func = primitive.into_func();
+    let func = primitive.into();
     let val = Val::Func(Reader::new(func).into());
     c.insert(id, TaggedVal::new_const(val));
 }
@@ -167,26 +167,25 @@ pub(crate) struct PrimitiveFunc<F> {
     evaluator: Primitive<F>,
 }
 
-trait IntoFunc {
-    fn into_func(self) -> Func;
-}
-
-impl IntoFunc for PrimitiveFunc<CtxFreeFn> {
-    fn into_func(self) -> Func {
+#[allow(clippy::from_over_into)]
+impl Into<Func> for PrimitiveFunc<CtxFreeFn> {
+    fn into(self) -> Func {
         let evaluator = FuncEval::Free(FuncImpl::Primitive(self.evaluator));
         Func::new(self.input_eval_mode, evaluator)
     }
 }
 
-impl IntoFunc for PrimitiveFunc<CtxConstFn> {
-    fn into_func(self) -> Func {
+#[allow(clippy::from_over_into)]
+impl Into<Func> for PrimitiveFunc<CtxConstFn> {
+    fn into(self) -> Func {
         let evaluator = FuncEval::Const(FuncImpl::Primitive(self.evaluator));
         Func::new(self.input_eval_mode, evaluator)
     }
 }
 
-impl IntoFunc for PrimitiveFunc<CtxMutableFn> {
-    fn into_func(self) -> Func {
+#[allow(clippy::from_over_into)]
+impl Into<Func> for PrimitiveFunc<CtxMutableFn> {
+    fn into(self) -> Func {
         let evaluator = FuncEval::Mutable(FuncImpl::Primitive(self.evaluator));
         Func::new(self.input_eval_mode, evaluator)
     }
