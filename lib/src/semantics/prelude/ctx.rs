@@ -25,6 +25,7 @@ use {
             val::{
                 CtxVal,
                 MapVal,
+                RefVal,
                 Val,
             },
         },
@@ -49,8 +50,78 @@ fn fn_read(ctx: &mut Ctx, input: Val) -> Val {
     match input {
         Val::Symbol(s) => ctx.get(&s),
         Val::Ref(r) => CtxFree::get(&r),
+        Val::Pair(pair) => {
+            let Val::Symbol(first) = pair.first else {
+                return Val::default();
+            };
+            let Val::Symbol(second) = pair.second else {
+                return Val::default();
+            };
+            read_pair(ctx, &first, &second)
+        }
+        Val::List(mut list) => {
+            let Some(Val::Symbol(val_name)) = list.pop() else {
+                return Val::default();
+            };
+            read_nested(ctx, &list[..], &val_name)
+        }
         _ => Val::default(),
     }
+}
+
+fn read_pair(ctx: &mut Ctx, first: &str, second: &str) -> Val {
+    ctx.get_ref(true, first, |val, _| {
+        let Some(TaggedRef { val_ref, .. }) = val else {
+            return Val::default();
+        };
+        match val_ref {
+            Val::Ctx(CtxVal(ctx)) => ctx.get(second),
+            Val::Ref(RefVal(k)) => {
+                let Ok(mut o) = Keeper::owner(k) else {
+                    return Val::default();
+                };
+                let TaggedVal {
+                    val: Val::Ctx(CtxVal(ctx)),
+                    ..
+                } = &mut *o
+                else {
+                    return Val::default();
+                };
+                ctx.get(second)
+            }
+            _ => Val::default(),
+        }
+    })
+}
+
+fn read_nested(ctx: &mut Ctx, names: &[Val], val_name: &str) -> Val {
+    let Some(Val::Symbol(name)) = names.get(0) else {
+        return ctx.get(val_name);
+    };
+    let rest = &names[1..];
+
+    ctx.get_ref(true, name, |val, _| {
+        let Some(TaggedRef { val_ref, .. }) = val else {
+            return Val::default();
+        };
+        match val_ref {
+            Val::Ctx(CtxVal(ctx)) => read_nested(ctx, rest, val_name),
+            Val::Ref(RefVal(k)) => {
+                let Ok(mut o) = Keeper::owner(k) else {
+                    return Val::default();
+                };
+                let TaggedVal {
+                    val: Val::Ctx(CtxVal(ctx)),
+                    ..
+                } = &mut *o
+                else {
+                    return Val::default();
+                };
+                read_nested(ctx, rest, val_name)
+            }
+            _ => Val::default(),
+        }
+    })
 }
 
 pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {

@@ -37,6 +37,7 @@ pub(crate) struct TaggedVal {
     pub(crate) val: Val,
 }
 
+#[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) struct TaggedRef<'a, T> {
     pub(crate) val_ref: &'a mut T,
     pub(crate) is_const: bool,

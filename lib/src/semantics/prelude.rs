@@ -77,8 +77,8 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::eval_twice());
     put_primitive_func(c, eval::eval_thrice());
     put_primitive_func(c, eval::eval_free());
-    put_primitive_func(c, eval::eval_in_ctx());
-    put_primitive_func(c, eval::eval_in_ctx_const());
+    put_primitive_func(c, eval::eval_mutable());
+    put_primitive_func(c, eval::eval_const());
     put_primitive_func(c, eval::parse());
     put_primitive_func(c, eval::stringify());
     put_primitive_func(c, eval::func());
@@ -205,7 +205,7 @@ pub(crate) mod names {
     pub(crate) const AIR_VERSION_MINOR: &str = "air_version_minor";
     pub(crate) const AIR_VERSION_PATCH: &str = "air_version_patch";
 
-    pub(crate) const READ: &str = "read";
+    pub(crate) const READ: &str = "..";
     pub(crate) const IS_NULL: &str = "is_null";
     pub(crate) const MOVE: &str = "move";
     pub(crate) const ASSIGN_LOCAL: &str = "=local";
@@ -234,8 +234,8 @@ pub(crate) mod names {
     pub(crate) const EVAL_TWICE: &str = "eval2";
     pub(crate) const EVAL_THRICE: &str = "eval3";
     pub(crate) const EVAL_FREE: &str = "eval_free";
-    pub(crate) const EVAL_IN_CTX: &str = "..";
-    pub(crate) const EVAL_IN_CTX_CONST: &str = "..const";
+    pub(crate) const EVAL_CONST: &str = "eval_const";
+    pub(crate) const EVAL_MUTABLE: &str = "eval_mutable";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "function";

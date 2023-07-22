@@ -142,13 +142,27 @@ fn fn_eval_free(input: Val) -> Val {
     DefaultFreeStrategy::eval(input)
 }
 
-pub(crate) fn eval_in_ctx() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn eval_const() -> PrimitiveFunc<CtxConstFn> {
     let eval_mode = EvalMode::Pair {
         first: BasicEvalMode::Inline,
         second: BasicEvalMode::Interpolate,
         non_pair: BasicEvalMode::Value,
     };
-    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_IN_CTX, fn_eval_in_ctx);
+    let primitive = Primitive::<CtxConstFn>::new(names::EVAL_CONST, fn_eval_const);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_eval_const(ctx: &mut Ctx, input: Val) -> Val {
+    fn_eval_in_ctx(ctx, true, input)
+}
+
+pub(crate) fn eval_mutable() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::Pair {
+        first: BasicEvalMode::Inline,
+        second: BasicEvalMode::Interpolate,
+        non_pair: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_MUTABLE, fn_eval_in_ctx);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
@@ -178,20 +192,6 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
             Either::Right(mut val) => f(TaggedRef::new(&mut val, false)),
         }
     })
-}
-
-pub(crate) fn eval_in_ctx_const() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Interpolate,
-        non_pair: BasicEvalMode::Value,
-    };
-    let primitive = Primitive::<CtxConstFn>::new(names::EVAL_IN_CTX_CONST, fn_eval_in_ctx_const);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_eval_in_ctx_const(ctx: &mut Ctx, input: Val) -> Val {
-    fn_eval_in_ctx(ctx, true, input)
 }
 
 pub(crate) fn parse() -> PrimitiveFunc<CtxFreeFn> {
