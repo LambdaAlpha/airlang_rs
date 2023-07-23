@@ -1,16 +1,13 @@
 use {
     smartstring::alias::CompactString,
-    std::ops::Deref,
+    std::{
+        borrow::Borrow,
+        ops::Deref,
+    },
 };
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Symbol(pub(crate) CompactString);
-
-impl Symbol {
-    pub(crate) fn from_str(s: &str) -> Self {
-        Symbol(CompactString::from(s))
-    }
-}
 
 impl Deref for Symbol {
     type Target = str;
@@ -28,5 +25,17 @@ impl ToString for Symbol {
 impl From<Symbol> for String {
     fn from(value: Symbol) -> Self {
         value.0.into()
+    }
+}
+
+impl From<&str> for Symbol {
+    fn from(value: &str) -> Self {
+        Self(CompactString::from(value))
+    }
+}
+
+impl Borrow<str> for Symbol {
+    fn borrow(&self) -> &str {
+        self
     }
 }

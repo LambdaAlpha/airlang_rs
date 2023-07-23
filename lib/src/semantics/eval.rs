@@ -44,9 +44,9 @@ use {
             Owner,
             Pair,
             Reader,
+            Symbol,
         },
     },
-    smartstring::alias::CompactString,
     std::{
         fmt::Debug,
         hash::{
@@ -56,8 +56,6 @@ use {
         mem::swap,
     },
 };
-
-pub(crate) type Name = CompactString;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Func {
@@ -86,7 +84,7 @@ pub(crate) enum FuncImpl<P, C> {
 
 #[derive(Debug, Clone)]
 pub(crate) struct Primitive<F> {
-    id: Name,
+    id: Symbol,
     eval_fn: F,
 }
 
@@ -108,7 +106,7 @@ pub(crate) type CtxMutableFn = Reader<dyn Fn(&mut Ctx, IsConst, Val) -> Val>;
 pub(crate) struct Composed<C> {
     pub(crate) body: Val,
     pub(crate) ctx: Ctx,
-    pub(crate) input_name: Name,
+    pub(crate) input_name: Symbol,
     pub(crate) caller: C,
 }
 
@@ -117,12 +115,12 @@ pub(crate) struct CtxFreeInfo {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxConstInfo {
-    pub(crate) name: Name,
+    pub(crate) name: Symbol,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMutableInfo {
-    pub(crate) name: Name,
+    pub(crate) name: Symbol,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -348,7 +346,7 @@ impl FuncEvalTrait for Composed<CtxMutableInfo> {
     }
 }
 
-fn eval_free_in_free(mut new_ctx: Ctx, input: Val, input_name: Name, body: &Val) -> Val {
+fn eval_free_in_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
     new_ctx.put_val_local(input_name, TaggedVal::new(input));
     DefaultByRefStrategy::eval(&mut new_ctx, body)
 }
@@ -356,10 +354,10 @@ fn eval_free_in_free(mut new_ctx: Ctx, input: Val, input_name: Name, body: &Val)
 fn eval_free_in_aware(
     mut new_ctx: Ctx,
     caller: Ctx,
-    caller_name: Name,
+    caller_name: Symbol,
     caller_tag: InvariantTag,
     input: Val,
-    input_name: Name,
+    input_name: Symbol,
     body: &Val,
 ) -> Val {
     new_ctx.put_val_local(input_name, TaggedVal::new(input));
@@ -370,10 +368,10 @@ fn eval_free_in_aware(
 fn eval_aware_in_aware(
     mut new_ctx: Ctx,
     caller: &mut Ctx,
-    caller_name: Name,
+    caller_name: Symbol,
     caller_tag: InvariantTag,
     input: Val,
-    input_name: Name,
+    input_name: Symbol,
     body: &Val,
 ) -> Val {
     new_ctx.put_val_local(input_name, TaggedVal::new(input));
@@ -383,7 +381,7 @@ fn eval_aware_in_aware(
 fn keep_eval_restore(
     mut new_ctx: Ctx,
     ctx: &mut Ctx,
-    caller_name: Name,
+    caller_name: Symbol,
     caller_tag: InvariantTag,
     body: &Val,
 ) -> Val {
@@ -401,7 +399,7 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
     owned
 }
 
-fn put_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Name, tag: InvariantTag) {
+fn put_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) {
     let keeper = Keeper::new(TaggedVal {
         val: Val::Ctx(Box::new(ctx).into()),
         tag,
@@ -410,7 +408,7 @@ fn put_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Name, tag: InvariantTag) {
     new_ctx.put_val_local(name, TaggedVal::new(caller_ref));
 }
 
-fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Name, tag: InvariantTag) -> Keeper<TaggedVal> {
+fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) -> Keeper<TaggedVal> {
     let keeper = Keeper::new(TaggedVal {
         val: Val::Ctx(Box::new(ctx).into()),
         tag,
@@ -564,7 +562,7 @@ impl Func {
 }
 
 impl<C> Primitive<C> {
-    pub(crate) fn get_id(&self) -> &Name {
+    pub(crate) fn get_id(&self) -> &Symbol {
         &self.id
     }
 }
@@ -572,7 +570,7 @@ impl<C> Primitive<C> {
 impl Primitive<CtxFreeFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(Val) -> Val + 'static) -> Self {
         Primitive {
-            id: Name::from(id),
+            id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -581,7 +579,7 @@ impl Primitive<CtxFreeFn> {
 impl Primitive<CtxConstFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(&mut Ctx, Val) -> Val + 'static) -> Self {
         Primitive {
-            id: Name::from(id),
+            id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -593,7 +591,7 @@ impl Primitive<CtxMutableFn> {
         evaluator: impl Fn(&mut Ctx, IsConst, Val) -> Val + 'static,
     ) -> Self {
         Primitive {
-            id: Name::from(id),
+            id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -605,7 +603,7 @@ impl Primitive<CtxMutableFn> {
     ) -> Self {
         let evaluator = Self::dispatch(evaluator_const, evaluator_mutable);
         Primitive {
-            id: Name::from(id),
+            id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
         }
     }

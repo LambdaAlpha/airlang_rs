@@ -155,7 +155,7 @@ fn fn_assign_local(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(Symbol(name)) = pair.first else {
+    let Val::Symbol(name) = pair.first else {
         return Val::default();
     };
     let val = pair.second;
@@ -212,7 +212,7 @@ fn fn_assign_val(ctx: &mut Ctx, is_const: IsConst, input: Val, tag: InvariantTag
     match name {
         Val::Symbol(s) => {
             let val = pair.second;
-            ctx.put_val(is_const, s.0, TaggedVal { tag, val })
+            ctx.put_val(is_const, s, TaggedVal { tag, val })
         }
         Val::Ref(k) => {
             let mut val = pair.second;
@@ -400,19 +400,19 @@ fn fn_ctx_new(input: Val) -> Val {
     let mut name_map = NameMap::with_capacity(constants.len() + finals.len() + variables.len());
 
     for (key, val) in constants {
-        let Val::Symbol(Symbol(name)) = key else {
+        let Val::Symbol(name) = key else {
             return Val::default();
         };
         name_map.insert(name, TaggedVal::new_const(val));
     }
     for (key, val) in finals {
-        let Val::Symbol(Symbol(name)) = key else {
+        let Val::Symbol(name) = key else {
             return Val::default();
         };
         name_map.insert(name, TaggedVal::new_final(val));
     }
     for (key, val) in variables {
-        let Val::Symbol(Symbol(name)) = key else {
+        let Val::Symbol(name) = key else {
             return Val::default();
         };
         name_map.insert(name, TaggedVal::new(val));
@@ -428,7 +428,7 @@ fn fn_ctx_new(input: Val) -> Val {
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
-    let name = Val::Symbol(Symbol::from_str(name));
+    let name = Val::Symbol(Symbol::from(name));
     map.remove(&name).unwrap_or(Val::Map(MapVal::default()))
 }
 
@@ -449,7 +449,7 @@ fn fn_ctx_set_super(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let ctx_name_or_val = pair.first;
     let super_ctx = pair.second;
     let super_ctx = match super_ctx {
-        Val::Symbol(Symbol(name)) => Some(Either::Left(name)),
+        Val::Symbol(name) => Some(Either::Left(name)),
         Val::Ref(r) => Some(Either::Right(r)),
         Val::Unit(_) => None,
         _ => {

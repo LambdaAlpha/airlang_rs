@@ -466,7 +466,7 @@ where
 {
     let symbols = take_while(is_symbol);
     let f = map(symbols, |s: &'a str| {
-        <T as From<Symbol>>::from(Symbol::from_str(s))
+        <T as From<Symbol>>::from(Symbol::from(s))
     });
     context("symbol", f)(src)
 }

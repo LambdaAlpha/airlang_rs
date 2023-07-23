@@ -1,17 +1,15 @@
 use {
     crate::{
-        semantics::{
-            eval::Name,
-            val::{
-                CtxVal,
-                RefVal,
-                Val,
-            },
+        semantics::val::{
+            CtxVal,
+            RefVal,
+            Val,
         },
         types::{
             Either,
             Keeper,
             Map,
+            Symbol,
         },
     },
     std::{
@@ -20,7 +18,7 @@ use {
     },
 };
 
-pub(crate) type NameMap = Map<Name, TaggedVal>;
+pub(crate) type NameMap = Map<Symbol, TaggedVal>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum InvariantTag {
@@ -46,7 +44,7 @@ pub(crate) struct TaggedRef<'a, T> {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Ctx {
     pub(crate) name_map: NameMap,
-    pub(crate) super_ctx: Option<Either<Name, RefVal>>,
+    pub(crate) super_ctx: Option<Either<Symbol, RefVal>>,
 }
 
 impl Ctx {
@@ -92,7 +90,7 @@ impl Ctx {
             .unwrap_or_default()
     }
 
-    pub(crate) fn put_val(&mut self, is_const: bool, name: Name, val: TaggedVal) -> Val {
+    pub(crate) fn put_val(&mut self, is_const: bool, name: Symbol, val: TaggedVal) -> Val {
         let Some(tagged_val) = self.name_map.get(&name) else {
             return self.get_super_ctx(is_const, |ctx, self_ctx| match ctx {
                 None => {
@@ -122,7 +120,7 @@ impl Ctx {
         self.put_unchecked(name, val)
     }
 
-    pub(crate) fn put_val_local(&mut self, name: Name, val: TaggedVal) -> Val {
+    pub(crate) fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val {
         let (None
         | Some(TaggedVal {
             tag: InvariantTag::None,
@@ -134,7 +132,7 @@ impl Ctx {
         self.put_unchecked(name, val)
     }
 
-    pub(crate) fn put_unchecked(&mut self, name: Name, val: TaggedVal) -> Val {
+    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: TaggedVal) -> Val {
         self.name_map
             .insert(name, val)
             .map(|tagged_val| tagged_val.val)

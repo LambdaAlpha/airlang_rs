@@ -11,13 +11,15 @@ use crate::{
             EvalMode,
             FuncEval,
             FuncImpl,
-            Name,
             Primitive,
         },
         val::Val,
         Func,
     },
-    types::Reader,
+    types::{
+        Reader,
+        Symbol,
+    },
 };
 
 pub(crate) fn prelude() -> NameMap {
@@ -149,7 +151,7 @@ fn prelude_map(c: &mut NameMap) {
 }
 
 fn put(c: &mut NameMap, key: &str, val: Val) {
-    c.insert(Name::from(key), TaggedVal::new_const(val));
+    c.insert(Symbol::from(key), TaggedVal::new_const(val));
 }
 
 fn put_primitive_func<F>(c: &mut NameMap, primitive: PrimitiveFunc<F>)

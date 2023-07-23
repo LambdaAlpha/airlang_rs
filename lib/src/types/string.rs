@@ -3,9 +3,12 @@ use {
         LazyCompact,
         SmartString,
     },
-    std::ops::{
-        Deref,
-        DerefMut,
+    std::{
+        borrow::Borrow,
+        ops::{
+            Deref,
+            DerefMut,
+        },
     },
 };
 
@@ -46,5 +49,11 @@ impl ToString for Str {
 impl From<Str> for String {
     fn from(value: Str) -> Self {
         value.0.into()
+    }
+}
+
+impl Borrow<str> for Str {
+    fn borrow(&self) -> &str {
+        self
     }
 }
