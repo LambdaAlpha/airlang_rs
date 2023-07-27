@@ -1,22 +1,19 @@
 use crate::{
     semantics::{
         eval::{
-            ctx::Ctx,
-            ctx_free::CtxFree,
+            ctx::{
+                free::FreeCtx,
+                CtxTrait,
+            },
             strategy::{
                 inline::{
                     InlineByRefStrategy,
-                    InlineConstByRefStrategy,
-                    InlineConstStrategy,
-                    InlineFreeByRefStrategy,
-                    InlineFreeStrategy,
                     InlineStrategy,
                 },
-                ByRefStrategy,
-                EvalStrategy,
-                FreeByRefStrategy,
-                FreeStrategy,
+                ByRef,
+                ByVal,
             },
+            Evaluator,
         },
         val::{
             FuncVal,
@@ -28,212 +25,96 @@ use crate::{
     types::Symbol,
 };
 
-pub(crate) struct DefaultFreeStrategy;
-
-impl FreeStrategy for DefaultFreeStrategy {
-    fn eval_symbol(_: Symbol) -> Val {
-        Val::default()
-    }
-
-    fn eval_ref(ref_val: RefVal) -> Val {
-        CtxFree::get(&ref_val)
-    }
-
-    fn eval_map(map: MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| {
-                let key = InlineFreeStrategy::eval(k);
-                let value = Self::eval(v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map)
-    }
-
-    fn eval_call(func: Val, input: Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval(func) else {
-            return Val::default();
-        };
-        func.eval_free(input)
-    }
-
-    fn eval_reverse(_: Val, _: Val) -> Val {
-        Val::default()
-    }
-}
-
-pub(crate) struct DefaultFreeByRefStrategy;
-
-impl FreeByRefStrategy for DefaultFreeByRefStrategy {
-    fn eval_symbol(_: &Symbol) -> Val {
-        Val::default()
-    }
-
-    fn eval_ref(ref_val: &RefVal) -> Val {
-        CtxFree::get(ref_val)
-    }
-
-    fn eval_map(map: &MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| {
-                let key = InlineFreeByRefStrategy::eval(k);
-                let value = Self::eval(v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map)
-    }
-
-    fn eval_call(func: &Val, input: &Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval(func) else {
-            return Val::default();
-        };
-        func.eval_free(input.clone())
-    }
-
-    fn eval_reverse(_: &Val, _: &Val) -> Val {
-        Val::default()
-    }
-}
-
 pub(crate) struct DefaultStrategy;
 
-impl EvalStrategy for DefaultStrategy {
-    fn eval_symbol(ctx: &mut Ctx, s: Symbol) -> Val {
+impl<Ctx> Evaluator<Ctx, Val, Val> for DefaultStrategy
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.eval_val(ctx, input)
+    }
+}
+
+impl<Ctx> ByVal<Ctx> for DefaultStrategy
+where
+    Ctx: CtxTrait,
+{
+    fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
         ctx.get(&s)
     }
 
-    fn eval_ref(_: &mut Ctx, ref_val: RefVal) -> Val {
-        CtxFree::get(&ref_val)
+    fn eval_ref(&self, _: &mut Ctx, ref_val: RefVal) -> Val {
+        FreeCtx::get_val_ref(&ref_val)
     }
 
-    fn eval_map(ctx: &mut Ctx, map: MapVal) -> Val {
+    fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
         let map = map
             .into_iter()
             .map(|(k, v)| {
-                let key = InlineStrategy::eval(ctx, k);
-                let value = Self::eval(ctx, v);
+                let key = InlineStrategy.eval_val(ctx, k);
+                let value = self.eval_val(ctx, v);
                 (key, value)
             })
             .collect();
         Val::Map(map)
     }
 
-    fn eval_call(ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
+    fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
+        let Val::Func(FuncVal(func)) = self.eval_val(ctx, func) else {
             return Val::default();
         };
-        func.eval_mutable(ctx, input)
+        func.eval(ctx, input)
     }
 
-    fn eval_reverse(_: &mut Ctx, _: Val, _: Val) -> Val {
+    fn eval_reverse(&self, _: &mut Ctx, _: Val, _: Val) -> Val {
         Val::default()
     }
 }
 
 pub(crate) struct DefaultByRefStrategy;
 
-impl ByRefStrategy for DefaultByRefStrategy {
-    fn eval_symbol(ctx: &mut Ctx, s: &Symbol) -> Val {
-        ctx.get(s)
-    }
-
-    fn eval_ref(_: &mut Ctx, ref_val: &RefVal) -> Val {
-        CtxFree::get(ref_val)
-    }
-
-    fn eval_map(ctx: &mut Ctx, map: &MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| {
-                let key = InlineByRefStrategy::eval(ctx, k);
-                let value = Self::eval(ctx, v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map)
-    }
-
-    fn eval_call(ctx: &mut Ctx, func: &Val, input: &Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
-            return Val::default();
-        };
-        func.eval_mutable(ctx, input.clone())
-    }
-
-    fn eval_reverse(_: &mut Ctx, _: &Val, _: &Val) -> Val {
-        Val::default()
+impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for DefaultByRefStrategy
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
+        self.eval_val(ctx, input)
     }
 }
 
-pub(crate) struct DefaultConstStrategy;
-
-impl EvalStrategy for DefaultConstStrategy {
-    fn eval_symbol(ctx: &mut Ctx, s: Symbol) -> Val {
-        ctx.get(&s)
-    }
-
-    fn eval_ref(_: &mut Ctx, ref_val: RefVal) -> Val {
-        CtxFree::get(&ref_val)
-    }
-
-    fn eval_map(ctx: &mut Ctx, map: MapVal) -> Val {
-        let map = map
-            .into_iter()
-            .map(|(k, v)| {
-                let key = InlineConstStrategy::eval(ctx, k);
-                let value = Self::eval(ctx, v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map)
-    }
-
-    fn eval_call(ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
-            return Val::default();
-        };
-        func.eval_const(ctx, input)
-    }
-
-    fn eval_reverse(_: &mut Ctx, _: Val, _: Val) -> Val {
-        Val::default()
-    }
-}
-
-pub(crate) struct DefaultConstByRefStrategy;
-
-impl ByRefStrategy for DefaultConstByRefStrategy {
-    fn eval_symbol(ctx: &mut Ctx, s: &Symbol) -> Val {
+impl<'a, Ctx> ByRef<'a, Ctx> for DefaultByRefStrategy
+where
+    Ctx: CtxTrait,
+{
+    fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
         ctx.get(s)
     }
 
-    fn eval_ref(_: &mut Ctx, ref_val: &RefVal) -> Val {
-        CtxFree::get(ref_val)
+    fn eval_ref(&self, _: &mut Ctx, ref_val: &'a RefVal) -> Val {
+        FreeCtx::get_val_ref(ref_val)
     }
 
-    fn eval_map(ctx: &mut Ctx, map: &MapVal) -> Val {
+    fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
         let map = map
             .into_iter()
             .map(|(k, v)| {
-                let key = InlineConstByRefStrategy::eval(ctx, k);
-                let value = Self::eval(ctx, v);
+                let key = InlineByRefStrategy.eval_val(ctx, k);
+                let value = self.eval_val(ctx, v);
                 (key, value)
             })
             .collect();
         Val::Map(map)
     }
 
-    fn eval_call(ctx: &mut Ctx, func: &Val, input: &Val) -> Val {
-        let Val::Func(FuncVal(func)) = Self::eval(ctx, func) else {
+    fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
+        let Val::Func(FuncVal(func)) = self.eval_val(ctx, func) else {
             return Val::default();
         };
-        func.eval_mutable(ctx, input.clone())
+        func.eval(ctx, input.clone())
     }
 
-    fn eval_reverse(_: &mut Ctx, _: &Val, _: &Val) -> Val {
+    fn eval_reverse(&self, _: &mut Ctx, _: &'a Val, _: &'a Val) -> Val {
         Val::default()
     }
 }

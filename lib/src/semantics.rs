@@ -3,13 +3,12 @@ use {
         semantics::{
             eval::{
                 ctx::{
+                    mutable::MutableCtx,
                     Ctx,
                     NameMap,
                 },
-                strategy::{
-                    eval::DefaultStrategy,
-                    EvalStrategy,
-                },
+                strategy::eval::DefaultStrategy,
+                Evaluator,
             },
             prelude::prelude,
         },
@@ -48,7 +47,7 @@ impl Interpreter {
     }
 
     pub fn interpret(&mut self, src: Val) -> Val {
-        DefaultStrategy::eval(&mut self.ctx, src)
+        DefaultStrategy.eval(&mut MutableCtx(&mut self.ctx), src)
     }
 
     pub fn reset(&mut self) {

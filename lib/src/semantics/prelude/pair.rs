@@ -2,12 +2,15 @@ use {
     crate::{
         semantics::{
             eval::{
-                ctx::Ctx,
+                ctx::{
+                    constant::CtxForConstFn,
+                    mutable::CtxForMutableFn,
+                    CtxTrait,
+                },
                 BasicEvalMode,
                 CtxConstFn,
                 CtxMutableFn,
                 EvalMode,
-                IsConst,
                 Primitive,
             },
             prelude::{
@@ -27,8 +30,8 @@ pub(crate) fn first() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_first(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| match ref_or_val {
+fn fn_first(mut ctx: CtxForConstFn, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
             _ => Val::default(),
@@ -50,13 +53,13 @@ pub(crate) fn first_assign() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_first_assign(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_first_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
     let name = name_val.first;
     let mut val = name_val.second;
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut pair) => {
             let Some(Val::Pair(pair)) = pair.as_mut() else {
                 return Val::default();
@@ -74,8 +77,8 @@ pub(crate) fn second() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_second(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| match ref_or_val {
+fn fn_second(mut ctx: CtxForConstFn, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
             _ => Val::default(),
@@ -97,13 +100,13 @@ pub(crate) fn second_assign() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_second_assign(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_second_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
     let name = name_val.first;
     let mut val = name_val.second;
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut pair) => {
             let Some(Val::Pair(pair)) = pair.as_mut() else {
                 return Val::default();

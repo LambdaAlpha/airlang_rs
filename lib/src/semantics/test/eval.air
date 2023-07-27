@@ -100,6 +100,10 @@ eval_free (1 (' +) 1)
 # ===
 eval_free ((' ;) [a (' =) 1, a])
 # ---
+'
+# ===
+eval_free ((' get1) (1: 2))
+# ---
 1
 # ===
 ;[a = (context {const: {=}}), a eval_mutable (b = 1), a .. b]
@@ -258,6 +262,62 @@ not 'f
     }),
     a = 1,
     f a
+]
+# ---
+1
+# ===
+;[
+    a = 1,
+    f = (function{
+        body: (caller eval_const a),
+        caller_access: free,
+        context: (' (context {const: {
+            eval_const,
+        }}))
+    }),
+    f '
+]
+# ---
+'
+# ===
+;[
+    a = 1,
+    f = (function{
+        body: (caller eval_const a),
+        caller_access: const,
+        context: (' (context {const: {
+            eval_const,
+        }}))
+    }),
+    f '
+]
+# ---
+1
+# ===
+;[
+    a = 1,
+    f = (function{
+        body: (caller eval_const a),
+        caller_access: mutable,
+        context: (' (context {const: {
+            eval_const,
+        }}))
+    }),
+    f '
+]
+# ---
+1
+# ===
+;[
+    a = 1,
+    f = (function{
+        body: (caller eval_mutable a),
+        caller_access: const,
+        context: (' (context {const: {
+            eval_mutable,
+        }}))
+    }),
+    f '
 ]
 # ---
 1

@@ -2,20 +2,25 @@ use crate::{
     semantics::{
         eval::{
             ctx::{
+                constant::{
+                    ConstCtx,
+                    CtxForConstFn,
+                },
+                free::FreeCtx,
+                mutable::{
+                    CtxForMutableFn,
+                    MutableCtx,
+                },
                 Ctx,
+                CtxTrait,
                 TaggedRef,
             },
             strategy::{
                 eval::{
                     DefaultByRefStrategy,
-                    DefaultConstByRefStrategy,
-                    DefaultConstStrategy,
-                    DefaultFreeStrategy,
                     DefaultStrategy,
                 },
-                ByRefStrategy,
-                EvalStrategy,
-                FreeStrategy,
+                ByVal,
             },
             BasicEvalMode,
             Composed,
@@ -26,10 +31,10 @@ use crate::{
             CtxMutableFn,
             CtxMutableInfo,
             EvalMode,
+            Evaluator,
             Func,
             FuncEval,
             FuncImpl,
-            IsConst,
             Primitive,
         },
         prelude::{
@@ -93,42 +98,44 @@ fn fn_eval_inline(input: Val) -> Val {
 
 pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
-    let primitive = Primitive::new_dispatch(
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::EVAL_TWICE,
-        fn_eval_twice::<DefaultConstStrategy, DefaultConstByRefStrategy>,
-        fn_eval_twice::<DefaultStrategy, DefaultByRefStrategy>,
+        fn_eval_twice::<FreeCtx>,
+        |ctx, val| fn_eval_twice(ctx, val),
+        |ctx, val| fn_eval_twice(ctx, val),
     );
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_twice<Eval: EvalStrategy, EvalByRef: ByRefStrategy>(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_eval_twice<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     match input {
         Val::Ref(k) => {
             let Ok(input) = Keeper::reader(&k.0) else {
                 return Val::default();
             };
-            EvalByRef::eval(ctx, &input.val)
+            DefaultByRefStrategy.eval(&mut ctx, &input.val)
         }
         i => {
-            let val = Eval::eval(ctx, i);
-            Eval::eval(ctx, val)
+            let val = DefaultStrategy.eval(&mut ctx, i);
+            DefaultStrategy.eval(&mut ctx, val)
         }
     }
 }
 
 pub(crate) fn eval_thrice() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
-    let primitive = Primitive::new_dispatch(
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::EVAL_THRICE,
-        fn_eval_thrice::<DefaultConstStrategy, DefaultConstByRefStrategy>,
-        fn_eval_thrice::<DefaultStrategy, DefaultByRefStrategy>,
+        fn_eval_thrice::<FreeCtx>,
+        |ctx, val| fn_eval_thrice(ctx, val),
+        |ctx, val| fn_eval_thrice(ctx, val),
     );
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_thrice<Eval: EvalStrategy, EvalByRef: ByRefStrategy>(ctx: &mut Ctx, input: Val) -> Val {
-    let val = Eval::eval(ctx, input);
-    fn_eval_twice::<Eval, EvalByRef>(ctx, val)
+fn fn_eval_thrice<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
+    let val = DefaultStrategy.eval(&mut ctx, input);
+    fn_eval_twice::<Ctx>(ctx, val)
 }
 
 pub(crate) fn eval_free() -> PrimitiveFunc<CtxFreeFn> {
@@ -138,7 +145,7 @@ pub(crate) fn eval_free() -> PrimitiveFunc<CtxFreeFn> {
 }
 
 fn fn_eval_free(input: Val) -> Val {
-    DefaultFreeStrategy::eval(input)
+    DefaultStrategy.eval(&mut FreeCtx, input)
 }
 
 pub(crate) fn eval_const() -> PrimitiveFunc<CtxConstFn> {
@@ -151,8 +158,8 @@ pub(crate) fn eval_const() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_const(ctx: &mut Ctx, input: Val) -> Val {
-    fn_eval_in_ctx(ctx, true, input)
+fn fn_eval_const(ctx: CtxForConstFn, input: Val) -> Val {
+    fn_eval_in_ctx(ctx, input)
 }
 
 pub(crate) fn eval_mutable() -> PrimitiveFunc<CtxMutableFn> {
@@ -161,17 +168,18 @@ pub(crate) fn eval_mutable() -> PrimitiveFunc<CtxMutableFn> {
         second: BasicEvalMode::Interpolate,
         non_pair: BasicEvalMode::Value,
     };
-    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_MUTABLE, fn_eval_in_ctx);
+    let primitive =
+        Primitive::<CtxMutableFn>::new(names::EVAL_MUTABLE, |ctx, val| fn_eval_in_ctx(ctx, val));
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_in_ctx(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_eval_in_ctx<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let name_or_val = pair.first;
     let val = pair.second;
-    ctx.get_ref_or_val_or_default(is_const, name_or_val, |target_ctx| {
+    ctx.get_ref_or_val_or_default(name_or_val, |target_ctx| {
         let f = |target| {
             let TaggedRef {
                 val_ref: Val::Ctx(CtxVal(target_ctx)),
@@ -181,9 +189,9 @@ fn fn_eval_in_ctx(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
                 return Val::default();
             };
             if target_ctx_const {
-                DefaultConstStrategy::eval(target_ctx, val)
+                DefaultStrategy.eval(&mut ConstCtx(target_ctx), val)
             } else {
-                DefaultStrategy::eval(target_ctx, val)
+                DefaultStrategy.eval(&mut MutableCtx(target_ctx), val)
             }
         };
         match target_ctx {
@@ -332,13 +340,9 @@ pub(crate) fn chain() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_chain(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    if is_const {
-        DefaultConstStrategy::eval_call(ctx, pair.second, pair.first)
-    } else {
-        DefaultStrategy::eval_call(ctx, pair.second, pair.first)
-    }
+    DefaultStrategy.eval_call(&mut ctx, pair.second, pair.first)
 }

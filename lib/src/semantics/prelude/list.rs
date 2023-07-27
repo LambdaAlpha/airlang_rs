@@ -2,12 +2,15 @@ use {
     crate::{
         semantics::{
             eval::{
-                ctx::Ctx,
+                ctx::{
+                    constant::CtxForConstFn,
+                    mutable::CtxForMutableFn,
+                    CtxTrait,
+                },
                 BasicEvalMode,
                 CtxConstFn,
                 CtxMutableFn,
                 EvalMode,
-                IsConst,
                 Primitive,
             },
             prelude::{
@@ -33,8 +36,8 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_length(ctx: &mut Ctx, input: Val) -> Val {
-    ctx.get_ref_or_val_or_default(true, input, |ref_or_val| {
+fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(input, |ref_or_val| {
         let f = |list: &Val| {
             let Val::List(list) = list else {
                 return Val::default();
@@ -58,7 +61,7 @@ pub(crate) fn set() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_set(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -71,7 +74,7 @@ fn fn_set(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
         return Val::default();
     };
     let mut value = index_value.second;
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
@@ -105,7 +108,7 @@ pub(crate) fn set_many() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_set_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -120,7 +123,7 @@ fn fn_set_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
@@ -156,7 +159,7 @@ pub(crate) fn get() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -165,7 +168,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        ctx.get_ref_or_val_or_default(true, name_or_list, |ref_or_val| match ref_or_val {
+        ctx.get_ref_or_val_or_default(name_or_list, |ref_or_val| match ref_or_val {
             Either::Left(list) => {
                 let Val::List(list) = list.as_const() else {
                     return Val::default();
@@ -194,7 +197,7 @@ fn fn_get(ctx: &mut Ctx, input: Val) -> Val {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        ctx.get_ref_or_val_or_default(true, name_or_list, |ref_or_val| match ref_or_val {
+        ctx.get_ref_or_val_or_default(name_or_list, |ref_or_val| match ref_or_val {
             Either::Left(list) => {
                 let Val::List(list) = list.as_const() else {
                     return Val::default();
@@ -227,7 +230,7 @@ pub(crate) fn insert() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_insert(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -240,7 +243,7 @@ fn fn_insert(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
         return Val::default();
     };
     let value = index_value.second;
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
@@ -274,7 +277,7 @@ pub(crate) fn insert_many() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_insert_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -289,7 +292,7 @@ fn fn_insert_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
@@ -323,7 +326,7 @@ pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_remove(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -332,7 +335,7 @@ fn fn_remove(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        ctx.get_ref_or_val_or_default(is_const, name_or_list, |ref_or_val| match ref_or_val {
+        ctx.get_ref_or_val_or_default(name_or_list, |ref_or_val| match ref_or_val {
             Either::Left(mut list) => {
                 let Some(Val::List(list)) = list.as_mut() else {
                     return Val::default();
@@ -362,7 +365,7 @@ fn fn_remove(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        ctx.get_ref_or_val_or_default(is_const, name_or_list, |ref_or_val| match ref_or_val {
+        ctx.get_ref_or_val_or_default(name_or_list, |ref_or_val| match ref_or_val {
             Either::Left(mut list) => {
                 let Some(Val::List(list)) = list.as_mut() else {
                     return Val::default();
@@ -396,13 +399,13 @@ pub(crate) fn push() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_push(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
     let name = name_value.first;
     let value = name_value.second;
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
@@ -430,7 +433,7 @@ pub(crate) fn push_many() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_push_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
@@ -439,7 +442,7 @@ fn fn_push_many(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
     let Val::List(mut values) = values else {
         return Val::default();
     };
-    ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+    ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();
@@ -467,37 +470,35 @@ pub(crate) fn pop() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_pop(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
+fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
     let name = name_count.first;
     let count = name_count.second;
     match count {
-        Val::Unit(_) => {
-            ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
-                Either::Left(mut val) => {
-                    let Some(Val::List(list)) = val.as_mut() else {
-                        return Val::default();
-                    };
-                    list.pop().unwrap_or_default()
+        Val::Unit(_) => ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
+            Either::Left(mut val) => {
+                let Some(Val::List(list)) = val.as_mut() else {
+                    return Val::default();
+                };
+                list.pop().unwrap_or_default()
+            }
+            Either::Right(val) => {
+                let Val::List(mut list) = val else {
+                    return Val::default();
+                };
+                if list.pop().is_none() {
+                    return Val::default();
                 }
-                Either::Right(val) => {
-                    let Val::List(mut list) = val else {
-                        return Val::default();
-                    };
-                    if list.pop().is_none() {
-                        return Val::default();
-                    }
-                    Val::List(list)
-                }
-            })
-        }
+                Val::List(list)
+            }
+        }),
         Val::Int(i) => {
             let Some(i) = i.to_usize() else {
                 return Val::default();
             };
-            ctx.get_ref_or_val_or_default(is_const, name, |ref_or_val| match ref_or_val {
+            ctx.get_ref_or_val_or_default(name, |ref_or_val| match ref_or_val {
                 Either::Left(mut val) => {
                     let Some(Val::List(list)) = val.as_mut() else {
                         return Val::default();
@@ -532,8 +533,8 @@ pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_clear(ctx: &mut Ctx, is_const: IsConst, input: Val) -> Val {
-    ctx.get_ref_or_val_or_default(is_const, input, |ref_or_val| match ref_or_val {
+fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    ctx.get_ref_or_val_or_default(input, |ref_or_val| match ref_or_val {
         Either::Left(mut val) => {
             let Some(Val::List(list)) = val.as_mut() else {
                 return Val::default();

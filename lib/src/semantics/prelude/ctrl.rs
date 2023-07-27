@@ -1,19 +1,17 @@
 use crate::semantics::{
     eval::{
-        ctx::Ctx,
-        strategy::{
-            eval::{
-                DefaultByRefStrategy,
-                DefaultConstByRefStrategy,
-                DefaultConstStrategy,
-                DefaultStrategy,
-            },
-            ByRefStrategy,
-            EvalStrategy,
+        ctx::{
+            free::FreeCtx,
+            CtxTrait,
+        },
+        strategy::eval::{
+            DefaultByRefStrategy,
+            DefaultStrategy,
         },
         BasicEvalMode,
         CtxMutableFn,
         EvalMode,
+        Evaluator,
         Primitive,
     },
     prelude::{
@@ -25,36 +23,38 @@ use crate::semantics::{
 
 pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
-    let primitive = Primitive::new_dispatch(
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::SEQUENCE,
-        fn_sequence::<DefaultConstStrategy>,
-        fn_sequence::<DefaultStrategy>,
+        fn_sequence::<FreeCtx>,
+        |ctx, val| fn_sequence(ctx, val),
+        |ctx, val| fn_sequence(ctx, val),
     );
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_sequence<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_sequence<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
     let mut output = Val::default();
     for val in list {
-        output = Eval::eval(ctx, val);
+        output = DefaultStrategy.eval(&mut ctx, val);
     }
     output
 }
 
 pub(crate) fn condition() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
-    let primitive = Primitive::new_dispatch(
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::IF,
-        fn_if::<DefaultConstStrategy>,
-        fn_if::<DefaultStrategy>,
+        fn_if::<FreeCtx>,
+        |ctx, val| fn_if(ctx, val),
+        |ctx, val| fn_if(ctx, val),
     );
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_if<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_if<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
@@ -62,34 +62,35 @@ fn fn_if<Eval: EvalStrategy>(ctx: &mut Ctx, input: Val) -> Val {
     let Some(condition) = iter.next() else {
         return Val::default();
     };
-    let Val::Bool(b) = Eval::eval(ctx, condition) else {
+    let Val::Bool(b) = DefaultStrategy.eval(&mut ctx, condition) else {
         return Val::default();
     };
     if b.bool() {
         let Some(branch) = iter.next() else {
             return Val::default();
         };
-        Eval::eval(ctx, branch)
+        DefaultStrategy.eval(&mut ctx, branch)
     } else {
         let _ = iter.next();
         let Some(branch) = iter.next() else {
             return Val::default();
         };
-        Eval::eval(ctx, branch)
+        DefaultStrategy.eval(&mut ctx, branch)
     }
 }
 
 pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
-    let primitive = Primitive::new_dispatch(
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::WHILE,
-        fn_while::<DefaultConstByRefStrategy>,
-        fn_while::<DefaultByRefStrategy>,
+        fn_while::<FreeCtx>,
+        |ctx, val| fn_while(ctx, val),
+        |ctx, val| fn_while(ctx, val),
     );
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_while<Eval: ByRefStrategy>(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_while<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
@@ -100,11 +101,11 @@ fn fn_while<Eval: ByRefStrategy>(ctx: &mut Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = Eval::eval(ctx, condition) else {
+        let Val::Bool(b) = DefaultByRefStrategy.eval(&mut ctx, condition) else {
             return Val::default();
         };
         if b.bool() {
-            Eval::eval(ctx, body);
+            DefaultByRefStrategy.eval(&mut ctx, body);
         } else {
             break;
         }

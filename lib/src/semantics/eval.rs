@@ -3,34 +3,28 @@ use {
         semantics::{
             eval::{
                 ctx::{
+                    constant::{
+                        ConstCtx,
+                        CtxForConstFn,
+                    },
+                    free::FreeCtx,
+                    mutable::{
+                        CtxForMutableFn,
+                        MutableCtx,
+                    },
                     Ctx,
+                    CtxTrait,
                     InvariantTag,
                     TaggedVal,
                 },
                 strategy::{
                     eval::{
                         DefaultByRefStrategy,
-                        DefaultConstStrategy,
-                        DefaultFreeStrategy,
                         DefaultStrategy,
                     },
-                    inline::{
-                        InlineConstStrategy,
-                        InlineFreeStrategy,
-                        InlineStrategy,
-                    },
-                    interpolate::{
-                        InterpolateConstStrategy,
-                        InterpolateFreeStrategy,
-                        InterpolateStrategy,
-                    },
-                    val::{
-                        ValFreeStrategy,
-                        ValStrategy,
-                    },
-                    ByRefStrategy,
-                    EvalStrategy,
-                    FreeStrategy,
+                    inline::InlineStrategy,
+                    interpolate::InterpolateStrategy,
+                    val::ValStrategy,
                 },
             },
             val::{
@@ -88,19 +82,11 @@ pub(crate) struct Primitive<F> {
     eval_fn: F,
 }
 
-pub(crate) type IsConst = bool;
-
 pub(crate) type CtxFreeFn = Reader<dyn Fn(Val) -> Val>;
 
-/*
-Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when
-evaluating a ctx-aware function. But a `&mut Ctx` is more compact and convenient, and we can
-change `&mut Ctx` back to `Ctx` at anytime we need by swapping its memory with a default ctx.
-The `const` is just a flag and a runtime invariant.
-*/
-pub(crate) type CtxConstFn = Reader<dyn Fn(&mut Ctx, Val) -> Val>;
+pub(crate) type CtxConstFn = Reader<dyn Fn(CtxForConstFn, Val) -> Val>;
 
-pub(crate) type CtxMutableFn = Reader<dyn Fn(&mut Ctx, IsConst, Val) -> Val>;
+pub(crate) type CtxMutableFn = Reader<dyn Fn(CtxForMutableFn, Val) -> Val>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed<C> {
@@ -141,231 +127,141 @@ pub(crate) enum EvalMode {
     },
 }
 
-impl Func {
-    pub(crate) fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
+pub(crate) trait Evaluator<Ctx, Input, Output> {
+    fn eval(&self, ctx: &mut Ctx, input: Input) -> Output;
+}
+
+impl<Ctx> Evaluator<Ctx, Val, Val> for Func
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         let input = self.input_eval_mode.eval(ctx, input);
-        self.evaluator.eval_mutable(ctx, input)
-    }
-
-    pub(crate) fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        let input = self.input_eval_mode.eval_const(ctx, input);
-        self.evaluator.eval_const(ctx, input)
-    }
-
-    pub(crate) fn eval_free(&self, input: Val) -> Val {
-        let mut ctx = Ctx::default();
-        let input = self.input_eval_mode.eval(&mut ctx, input);
-        self.evaluator.eval_free(ctx, input)
+        self.evaluator.eval(ctx, input)
     }
 }
 
-pub(crate) trait FuncEvalTrait {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val;
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val;
-    fn eval_free(&self, ctx: Ctx, input: Val) -> Val;
-}
-
-impl FuncEvalTrait for FuncEval {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl<Ctx> Evaluator<Ctx, Val, Val> for FuncEval
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            FuncEval::Free(func) => func.eval_mutable(ctx, input),
-            FuncEval::Const(func) => func.eval_mutable(ctx, input),
-            FuncEval::Mutable(func) => func.eval_mutable(ctx, input),
-        }
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        match self {
-            FuncEval::Free(func) => func.eval_const(ctx, input),
-            FuncEval::Const(func) => func.eval_const(ctx, input),
-            FuncEval::Mutable(func) => func.eval_const(ctx, input),
-        }
-    }
-
-    fn eval_free(&self, ctx: Ctx, input: Val) -> Val {
-        match self {
-            FuncEval::Free(func) => func.eval_free(ctx, input),
-            FuncEval::Const(func) => func.eval_free(ctx, input),
-            FuncEval::Mutable(func) => func.eval_free(ctx, input),
+            FuncEval::Free(func) => func.eval(ctx, input),
+            FuncEval::Const(func) => func.eval(ctx, input),
+            FuncEval::Mutable(func) => func.eval(ctx, input),
         }
     }
 }
 
-impl<P: FuncEvalTrait, C: FuncEvalTrait> FuncEvalTrait for FuncImpl<P, C> {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl<Ctx, P: Evaluator<Ctx, Val, Val>, C: Evaluator<Ctx, Val, Val>> Evaluator<Ctx, Val, Val>
+    for FuncImpl<P, C>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            FuncImpl::Primitive(p) => p.eval_mutable(ctx, input),
-            FuncImpl::Composed(c) => c.eval_mutable(ctx, input),
-        }
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        match self {
-            FuncImpl::Primitive(p) => p.eval_const(ctx, input),
-            FuncImpl::Composed(c) => c.eval_const(ctx, input),
-        }
-    }
-
-    fn eval_free(&self, ctx: Ctx, input: Val) -> Val {
-        match self {
-            FuncImpl::Primitive(p) => p.eval_free(ctx, input),
-            FuncImpl::Composed(c) => c.eval_free(ctx, input),
+            FuncImpl::Primitive(p) => p.eval(ctx, input),
+            FuncImpl::Composed(c) => c.eval(ctx, input),
         }
     }
 }
 
-impl FuncEvalTrait for Primitive<CtxFreeFn> {
-    fn eval_mutable(&self, _: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(input)
-    }
-
-    fn eval_const(&self, _: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(input)
-    }
-
-    fn eval_free(&self, _: Ctx, input: Val) -> Val {
+impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxFreeFn>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, _: &mut Ctx, input: Val) -> Val {
         (self.eval_fn)(input)
     }
 }
 
-impl FuncEvalTrait for Composed<CtxFreeInfo> {
-    fn eval_mutable(&self, _: &mut Ctx, input: Val) -> Val {
-        eval_free_in_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
-    }
-
-    fn eval_const(&self, _: &mut Ctx, input: Val) -> Val {
-        eval_free_in_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
-    }
-
-    fn eval_free(&self, _: Ctx, input: Val) -> Val {
-        eval_free_in_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
+impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxFreeInfo>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, _: &mut Ctx, input: Val) -> Val {
+        eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
     }
 }
 
-impl FuncEvalTrait for Primitive<CtxConstFn> {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(ctx, input)
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(ctx, input)
-    }
-
-    fn eval_free(&self, mut ctx: Ctx, input: Val) -> Val {
-        (self.eval_fn)(&mut ctx, input)
+impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxConstFn>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        (self.eval_fn)(ctx.for_const_fn(), input)
     }
 }
 
-impl FuncEvalTrait for Composed<CtxConstInfo> {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
-        eval_aware_in_aware(
-            self.ctx.clone(),
-            ctx,
-            self.caller.name.clone(),
-            InvariantTag::Const,
-            input,
-            self.input_name.clone(),
-            &self.body,
-        )
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        eval_aware_in_aware(
-            self.ctx.clone(),
-            ctx,
-            self.caller.name.clone(),
-            InvariantTag::Const,
-            input,
-            self.input_name.clone(),
-            &self.body,
-        )
-    }
-
-    fn eval_free(&self, ctx: Ctx, input: Val) -> Val {
-        eval_free_in_aware(
-            self.ctx.clone(),
-            ctx,
-            self.caller.name.clone(),
-            InvariantTag::Const,
-            input,
-            self.input_name.clone(),
-            &self.body,
-        )
+impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxConstInfo>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match ctx.for_const_fn() {
+            CtxForConstFn::Free => {
+                eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
+            }
+            CtxForConstFn::Const(ctx) => eval_aware(
+                self.ctx.clone(),
+                ctx,
+                self.caller.name.clone(),
+                InvariantTag::Const,
+                input,
+                self.input_name.clone(),
+                &self.body,
+            ),
+        }
     }
 }
 
-impl FuncEvalTrait for Primitive<CtxMutableFn> {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(ctx, false, input)
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(ctx, true, input)
-    }
-
-    fn eval_free(&self, mut ctx: Ctx, input: Val) -> Val {
-        (self.eval_fn)(&mut ctx, false, input)
+impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxMutableFn>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        (self.eval_fn)(ctx.for_mutable_fn(), input)
     }
 }
 
-impl FuncEvalTrait for Composed<CtxMutableInfo> {
-    fn eval_mutable(&self, ctx: &mut Ctx, input: Val) -> Val {
-        eval_aware_in_aware(
-            self.ctx.clone(),
-            ctx,
-            self.caller.name.clone(),
-            InvariantTag::Final,
-            input,
-            self.input_name.clone(),
-            &self.body,
-        )
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        eval_aware_in_aware(
-            self.ctx.clone(),
-            ctx,
-            self.caller.name.clone(),
-            InvariantTag::Const,
-            input,
-            self.input_name.clone(),
-            &self.body,
-        )
-    }
-
-    fn eval_free(&self, ctx: Ctx, input: Val) -> Val {
-        eval_free_in_aware(
-            self.ctx.clone(),
-            ctx,
-            self.caller.name.clone(),
-            InvariantTag::Final,
-            input,
-            self.input_name.clone(),
-            &self.body,
-        )
+impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxMutableInfo>
+where
+    Ctx: CtxTrait,
+{
+    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match ctx.for_mutable_fn() {
+            CtxForMutableFn::Free => {
+                eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
+            }
+            CtxForMutableFn::Const(ctx) => eval_aware(
+                self.ctx.clone(),
+                ctx,
+                self.caller.name.clone(),
+                InvariantTag::Const,
+                input,
+                self.input_name.clone(),
+                &self.body,
+            ),
+            CtxForMutableFn::Mutable(ctx) => eval_aware(
+                self.ctx.clone(),
+                ctx,
+                self.caller.name.clone(),
+                InvariantTag::Final,
+                input,
+                self.input_name.clone(),
+                &self.body,
+            ),
+        }
     }
 }
 
-fn eval_free_in_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
+fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
     new_ctx.put_val_local(input_name, TaggedVal::new(input));
-    DefaultByRefStrategy::eval(&mut new_ctx, body)
+    DefaultByRefStrategy.eval(&mut MutableCtx(&mut new_ctx), body)
 }
 
-fn eval_free_in_aware(
-    mut new_ctx: Ctx,
-    caller: Ctx,
-    caller_name: Symbol,
-    caller_tag: InvariantTag,
-    input: Val,
-    input_name: Symbol,
-    body: &Val,
-) -> Val {
-    new_ctx.put_val_local(input_name, TaggedVal::new(input));
-    put_ctx(&mut new_ctx, caller, caller_name, caller_tag);
-    DefaultByRefStrategy::eval(&mut new_ctx, body)
-}
-
-fn eval_aware_in_aware(
+fn eval_aware(
     mut new_ctx: Ctx,
     caller: &mut Ctx,
     caller_name: Symbol,
@@ -387,7 +283,7 @@ fn keep_eval_restore(
 ) -> Val {
     let caller = own_ctx(ctx);
     let keeper = keep_ctx(&mut new_ctx, caller, caller_name, caller_tag);
-    let output = DefaultByRefStrategy::eval(&mut new_ctx, body);
+    let output = DefaultByRefStrategy.eval(&mut MutableCtx(&mut new_ctx), body);
     restore_ctx(ctx, &keeper);
     output
 }
@@ -397,15 +293,6 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
     let mut owned = Ctx::default();
     swap(ctx, &mut owned);
     owned
-}
-
-fn put_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) {
-    let keeper = Keeper::new(TaggedVal {
-        val: Val::Ctx(Box::new(ctx).into()),
-        tag,
-    });
-    let caller_ref = Val::Ref(RefVal(keeper));
-    new_ctx.put_val_local(name, TaggedVal::new(caller_ref));
 }
 
 fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) -> Keeper<TaggedVal> {
@@ -426,75 +313,24 @@ fn restore_ctx(ctx: &mut Ctx, keeper: &Keeper<TaggedVal>) {
     }
 }
 
-impl BasicEvalMode {
-    fn eval_free(&self, input: Val) -> Val {
-        match self {
-            BasicEvalMode::Value => ValFreeStrategy::eval(input),
-            BasicEvalMode::Eval => DefaultFreeStrategy::eval(input),
-            BasicEvalMode::Interpolate => InterpolateFreeStrategy::eval(input),
-            BasicEvalMode::Inline => InlineFreeStrategy::eval(input),
-        }
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        match self {
-            BasicEvalMode::Value => ValStrategy::eval(ctx, input),
-            BasicEvalMode::Eval => DefaultConstStrategy::eval(ctx, input),
-            BasicEvalMode::Interpolate => InterpolateConstStrategy::eval(ctx, input),
-            BasicEvalMode::Inline => InlineConstStrategy::eval(ctx, input),
-        }
-    }
-
+impl<Ctx> Evaluator<Ctx, Val, Val> for BasicEvalMode
+where
+    Ctx: CtxTrait,
+{
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            BasicEvalMode::Value => ValStrategy::eval(ctx, input),
-            BasicEvalMode::Eval => DefaultStrategy::eval(ctx, input),
-            BasicEvalMode::Interpolate => InterpolateStrategy::eval(ctx, input),
-            BasicEvalMode::Inline => InlineStrategy::eval(ctx, input),
+            BasicEvalMode::Value => ValStrategy.eval(ctx, input),
+            BasicEvalMode::Eval => DefaultStrategy.eval(ctx, input),
+            BasicEvalMode::Interpolate => InterpolateStrategy.eval(ctx, input),
+            BasicEvalMode::Inline => InlineStrategy.eval(ctx, input),
         }
     }
 }
 
-impl EvalMode {
-    #[allow(unused)]
-    fn eval_free(&self, input: Val) -> Val {
-        match self {
-            EvalMode::Basic(eval_mode) => eval_mode.eval_free(input),
-            EvalMode::Pair {
-                first,
-                second,
-                non_pair,
-            } => match input {
-                Val::Pair(pair) => {
-                    let first = first.eval_free(pair.first);
-                    let second = second.eval_free(pair.second);
-                    let pair = Pair::new(first, second);
-                    Val::Pair(Box::new(pair))
-                }
-                input => non_pair.eval_free(input),
-            },
-        }
-    }
-
-    fn eval_const(&self, ctx: &mut Ctx, input: Val) -> Val {
-        match self {
-            EvalMode::Basic(eval_mode) => eval_mode.eval_const(ctx, input),
-            EvalMode::Pair {
-                first,
-                second,
-                non_pair,
-            } => match input {
-                Val::Pair(pair) => {
-                    let first = first.eval_const(ctx, pair.first);
-                    let second = second.eval_const(ctx, pair.second);
-                    let pair = Pair::new(first, second);
-                    Val::Pair(Box::new(pair))
-                }
-                input => non_pair.eval_const(ctx, input),
-            },
-        }
-    }
-
+impl<Ctx> Evaluator<Ctx, Val, Val> for EvalMode
+where
+    Ctx: CtxTrait,
+{
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
             EvalMode::Basic(eval_mode) => eval_mode.eval(ctx, input),
@@ -577,19 +413,40 @@ impl Primitive<CtxFreeFn> {
 }
 
 impl Primitive<CtxConstFn> {
-    pub(crate) fn new(id: &str, evaluator: impl Fn(&mut Ctx, Val) -> Val + 'static) -> Self {
+    pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForConstFn, Val) -> Val + 'static) -> Self {
         Primitive {
             id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
         }
     }
+
+    #[allow(unused)]
+    pub(crate) fn new_dispatch(
+        id: &str,
+        free_evaluator: impl Fn(FreeCtx, Val) -> Val + 'static,
+        const_evaluator: impl Fn(ConstCtx, Val) -> Val + 'static,
+    ) -> Self {
+        let evaluator = Self::dispatch(free_evaluator, const_evaluator);
+        Primitive {
+            id: Symbol::from(id),
+            eval_fn: Reader::new(evaluator),
+        }
+    }
+
+    fn dispatch<Free, Const>(f: Free, c: Const) -> impl Fn(CtxForConstFn, Val) -> Val + 'static
+    where
+        Free: Fn(FreeCtx, Val) -> Val + 'static,
+        Const: Fn(ConstCtx, Val) -> Val + 'static,
+    {
+        move |ctx, val| match ctx {
+            CtxForConstFn::Free => f(FreeCtx, val),
+            CtxForConstFn::Const(ctx) => c(ConstCtx(ctx), val),
+        }
+    }
 }
 
 impl Primitive<CtxMutableFn> {
-    pub(crate) fn new(
-        id: &str,
-        evaluator: impl Fn(&mut Ctx, IsConst, Val) -> Val + 'static,
-    ) -> Self {
+    pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForMutableFn, Val) -> Val + 'static) -> Self {
         Primitive {
             id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
@@ -598,30 +455,31 @@ impl Primitive<CtxMutableFn> {
 
     pub(crate) fn new_dispatch(
         id: &str,
-        evaluator_const: impl Fn(&mut Ctx, Val) -> Val + 'static,
-        evaluator_mutable: impl Fn(&mut Ctx, Val) -> Val + 'static,
+        free_evaluator: impl Fn(FreeCtx, Val) -> Val + 'static,
+        const_evaluator: impl Fn(ConstCtx, Val) -> Val + 'static,
+        mutable_evaluator: impl Fn(MutableCtx, Val) -> Val + 'static,
     ) -> Self {
-        let evaluator = Self::dispatch(evaluator_const, evaluator_mutable);
+        let evaluator = Self::dispatch(free_evaluator, const_evaluator, mutable_evaluator);
         Primitive {
             id: Symbol::from(id),
             eval_fn: Reader::new(evaluator),
         }
     }
 
-    fn dispatch<Const, Mutable>(
+    fn dispatch<Free, Const, Mutable>(
+        f: Free,
         c: Const,
         m: Mutable,
-    ) -> impl Fn(&mut Ctx, IsConst, Val) -> Val + 'static
+    ) -> impl Fn(CtxForMutableFn, Val) -> Val + 'static
     where
-        Const: Fn(&mut Ctx, Val) -> Val + 'static,
-        Mutable: Fn(&mut Ctx, Val) -> Val + 'static,
+        Free: Fn(FreeCtx, Val) -> Val + 'static,
+        Const: Fn(ConstCtx, Val) -> Val + 'static,
+        Mutable: Fn(MutableCtx, Val) -> Val + 'static,
     {
-        move |ctx, is_const, input| {
-            if is_const {
-                c(ctx, input)
-            } else {
-                m(ctx, input)
-            }
+        move |ctx, val| match ctx {
+            CtxForMutableFn::Free => f(FreeCtx, val),
+            CtxForMutableFn::Const(ctx) => c(ConstCtx(ctx), val),
+            CtxForMutableFn::Mutable(ctx) => m(MutableCtx(ctx), val),
         }
     }
 }
@@ -629,5 +487,3 @@ impl Primitive<CtxMutableFn> {
 pub(crate) mod strategy;
 
 pub(crate) mod ctx;
-
-pub(crate) mod ctx_free;
