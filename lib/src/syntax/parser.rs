@@ -10,6 +10,7 @@ use {
             PRESERVE_PREFIX,
             REVERSE_SEPARATOR,
             SEPARATOR,
+            STRING_QUOTE,
             WRAP_LEFT,
             WRAP_RIGHT,
         },
@@ -192,7 +193,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let tagged_repr = preceded(char(PAIR_SEPARATOR), normed::<T, _, _, _>(token));
+    let tagged_repr = preceded(
+        tuple((char(PAIR_SEPARATOR), delimiter)),
+        normed::<T, _, _, _>(token),
+    );
     let f = map_opt(tagged_repr, unwrap_token);
     context("pair", f)(src)
 }
@@ -202,7 +206,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let tagged_repr = preceded(char(REVERSE_SEPARATOR), normed::<T, _, _, _>(token));
+    let tagged_repr = preceded(
+        tuple((char(REVERSE_SEPARATOR), delimiter)),
+        normed::<T, _, _, _>(token),
+    );
     let f = map_opt(tagged_repr, unwrap_token);
     context("reverse", f)(src)
 }
@@ -222,19 +229,43 @@ where
     // a parsing rule is decided by first 2 chars
     let (src, (first, second)) = peek(pair(anychar, opt(anychar)))(src)?;
 
+    let mut tag = TokenTag::Default;
     let parser = match first {
         '0'..='9' => number,
         '+' | '-' => match second {
             Some('0'..='9') => number,
             _ => symbol,
         },
-        '"' => string,
+        STRING_QUOTE => string,
         PRESERVE_PREFIX => preserved,
         LIST_LEFT => repr_list,
         MAP_LEFT => repr_map,
-        WRAP_LEFT => wrap,
-        PAIR_SEPARATOR => pair_second,
-        REVERSE_SEPARATOR => reverse_output,
+        WRAP_LEFT => {
+            tag = TokenTag::Wrap;
+            wrap
+        }
+        PAIR_SEPARATOR => match second {
+            Some(second) => {
+                if is_delimiter(second) {
+                    tag = TokenTag::Pair;
+                    pair_second
+                } else {
+                    symbol
+                }
+            }
+            None => fail,
+        },
+        REVERSE_SEPARATOR => match second {
+            Some(second) => {
+                if is_delimiter(second) {
+                    tag = TokenTag::Reverse;
+                    reverse_output
+                } else {
+                    symbol
+                }
+            }
+            None => fail,
+        },
         COMMENT_PREFIX => match second {
             Some(second) => {
                 if is_delimiter(second) {
@@ -247,12 +278,6 @@ where
         },
         s if is_symbol(s) => symbol,
         _ => fail,
-    };
-    let tag = match first {
-        WRAP_LEFT => TokenTag::Wrap,
-        PAIR_SEPARATOR => TokenTag::Pair,
-        REVERSE_SEPARATOR => TokenTag::Reverse,
-        _ => TokenTag::Default,
     };
     let f = tag_repr(tag, parser);
     context("token", f)(src)
@@ -445,7 +470,17 @@ where
         "" => Some(<T as From<Unit>>::from(Unit)),
         "t" => Some(<T as From<Bool>>::from(Bool::t())),
         "f" => Some(<T as From<Bool>>::from(Bool::f())),
-        _ => None,
+        symbol => {
+            let first = symbol.chars().next().unwrap();
+            if matches!(first, PRESERVE_PREFIX | STRING_QUOTE)
+                || matches!(first, PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX)
+                    && symbol.len() == 1
+            {
+                Some(<T as From<Symbol>>::from(Symbol::from_str(symbol)))
+            } else {
+                None
+            }
+        }
     });
     context("preserved", f)(src)
 }
@@ -453,8 +488,7 @@ where
 fn is_symbol(c: char) -> bool {
     match c {
         'a'..='z' | 'A'..='Z' | '0'..='9' => true,
-        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
-        | PAIR_SEPARATOR | REVERSE_SEPARATOR => false,
+        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR => false,
         c => c.is_ascii_punctuation(),
     }
 }
@@ -466,7 +500,7 @@ where
 {
     let symbols = take_while(is_symbol);
     let f = map(symbols, |s: &'a str| {
-        <T as From<Symbol>>::from(Symbol::from(s))
+        <T as From<Symbol>>::from(Symbol::from_str(s))
     });
     context("symbol", f)(src)
 }
@@ -489,7 +523,11 @@ where
         }
         string
     });
-    let delimited_string = delimited(char('"'), cut(collect_fragments), cut(char('"')));
+    let delimited_string = delimited(
+        char(STRING_QUOTE),
+        cut(collect_fragments),
+        cut(char(STRING_QUOTE)),
+    );
     let f = map(delimited_string, |s| <T as From<Str>>::from(Str::from(s)));
     context("string", f)(src)
 }
@@ -513,7 +551,7 @@ where
             value('\r', char('r')),
             value('\t', char('t')),
             value('\\', char('\\')),
-            value('"', char('"')),
+            value(STRING_QUOTE, char(STRING_QUOTE)),
             value(' ', char(' ')),
             value(' ', char('s')),
         )),

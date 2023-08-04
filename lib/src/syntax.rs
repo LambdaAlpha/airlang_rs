@@ -13,6 +13,8 @@ pub(crate) mod generator;
 #[cfg(test)]
 mod test;
 
+const STRING_QUOTE: char = '"';
+
 const COMMENT_PREFIX: char = '#';
 
 const PRESERVE_PREFIX: char = '\'';

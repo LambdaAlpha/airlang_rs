@@ -1,18 +1,18 @@
 use {
-    super::{
-        LIST_LEFT,
-        LIST_RIGHT,
-        MAP_LEFT,
-        MAP_RIGHT,
-        PAIR_SEPARATOR,
-        SEPARATOR,
-        WRAP_LEFT,
-        WRAP_RIGHT,
-    },
     crate::{
         syntax::{
+            COMMENT_PREFIX,
+            LIST_LEFT,
+            LIST_RIGHT,
+            MAP_LEFT,
+            MAP_RIGHT,
+            PAIR_SEPARATOR,
             PRESERVE_PREFIX,
             REVERSE_SEPARATOR,
+            SEPARATOR,
+            STRING_QUOTE,
+            WRAP_LEFT,
+            WRAP_RIGHT,
         },
         types::{
             Bool,
@@ -49,7 +49,8 @@ where
         before_first: "".to_owned(),
         after_last: "".to_owned(),
         separator: SEPARATOR.to_string(),
-        pair_separator: PAIR_SEPARATOR.to_string(),
+        pair_separator: format!(" {PAIR_SEPARATOR} "),
+        reverse_separator: format!(" {REVERSE_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -71,7 +72,8 @@ where
         before_first: "".to_owned(),
         after_last: "".to_owned(),
         separator: format!("{SEPARATOR} "),
-        pair_separator: format!("{PAIR_SEPARATOR} "),
+        pair_separator: format!(" {PAIR_SEPARATOR} "),
+        reverse_separator: format!(" {REVERSE_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -93,7 +95,8 @@ where
         before_first: "\n".to_owned(),
         after_last: format!("{SEPARATOR}\n"),
         separator: format!("{SEPARATOR}\n"),
-        pair_separator: format!("{PAIR_SEPARATOR} "),
+        pair_separator: format!(" {PAIR_SEPARATOR} "),
+        reverse_separator: format!(" {REVERSE_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -107,6 +110,7 @@ pub(crate) struct GenerateFormat {
     pub(crate) after_last: String,
     pub(crate) separator: String,
     pub(crate) pair_separator: String,
+    pub(crate) reverse_separator: String,
     pub(crate) left_padding: String,
     pub(crate) right_padding: String,
 }
@@ -180,22 +184,28 @@ fn generate_bytes(bytes: &Bytes, s: &mut String) {
 }
 
 fn generate_string(str: &str, s: &mut String) {
-    s.push('"');
+    s.push(STRING_QUOTE);
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\".to_owned(),
             '\n' => "\\n".to_owned(),
             '\r' => "\\r".to_owned(),
             '\t' => "\\t".to_owned(),
-            '"' => "\\\"".to_owned(),
+            STRING_QUOTE => format!("\\{}", STRING_QUOTE),
             _ => c.to_string(),
         };
         s.push_str(&escaped);
     }
-    s.push('"');
+    s.push(STRING_QUOTE);
 }
 
 fn generate_symbol(str: &str, s: &mut String) {
+    let first = str.chars().next().unwrap();
+    if matches!(first, PRESERVE_PREFIX | STRING_QUOTE)
+        || matches!(first, PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX) && str.len() == 1
+    {
+        s.push(PRESERVE_PREFIX);
+    }
     s.push_str(str);
 }
 
@@ -319,7 +329,7 @@ where
     T: Eq + Hash,
 {
     generate(&reverse.func, s, format, indent)?;
-    s.push(REVERSE_SEPARATOR);
+    s.push_str(&format.reverse_separator);
     wrap_if_left_open(&reverse.output, s, format, indent)
 }
 

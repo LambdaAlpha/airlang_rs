@@ -406,7 +406,7 @@ impl<C> Primitive<C> {
 impl Primitive<CtxFreeFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(Val) -> Val + 'static) -> Self {
         Primitive {
-            id: Symbol::from(id),
+            id: Symbol::from_str(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -415,7 +415,7 @@ impl Primitive<CtxFreeFn> {
 impl Primitive<CtxConstFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForConstFn, Val) -> Val + 'static) -> Self {
         Primitive {
-            id: Symbol::from(id),
+            id: Symbol::from_str(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -428,7 +428,7 @@ impl Primitive<CtxConstFn> {
     ) -> Self {
         let evaluator = Self::dispatch(free_evaluator, const_evaluator);
         Primitive {
-            id: Symbol::from(id),
+            id: Symbol::from_str(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -448,7 +448,7 @@ impl Primitive<CtxConstFn> {
 impl Primitive<CtxMutableFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForMutableFn, Val) -> Val + 'static) -> Self {
         Primitive {
-            id: Symbol::from(id),
+            id: Symbol::from_str(id),
             eval_fn: Reader::new(evaluator),
         }
     }
@@ -461,7 +461,7 @@ impl Primitive<CtxMutableFn> {
     ) -> Self {
         let evaluator = Self::dispatch(free_evaluator, const_evaluator, mutable_evaluator);
         Primitive {
-            id: Symbol::from(id),
+            id: Symbol::from_str(id),
             eval_fn: Reader::new(evaluator),
         }
     }

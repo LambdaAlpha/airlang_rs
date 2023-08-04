@@ -10,19 +10,19 @@
 # ---
 1
 # ===
-;[a = (context {const: {b: 1}}), a .. b]
+;[a = (context {const : {b : 1}}), a .. b]
 # ---
 1
 # ===
-;[a = (context {const: {b: 1}}), .. [a, b]]
+;[a = (context {const : {b : 1}}), .. [a, b]]
 # ---
 1
 # ===
-;[a = (ref (context {const: {b: 1}})), .. [a, b]]
+;[a = (ref (context {const : {b : 1}})), .. [a, b]]
 # ---
 1
 # ===
-;[a = (ref (context {const: {b: (ref (context {const: {c: 1}}))}})), .. [a, b, c]]
+;[a = (ref (context {const : {b : (ref (context {const : {c : 1}}))}})), .. [a, b, c]]
 # ---
 1
 # ===
@@ -94,9 +94,9 @@ is_null a
 # ---
 1
 # ===
-;[a =final (1: 2), a set1 3, a]
+;[a =final (1 : 2), a set1 3, a]
 # ---
-3: 2
+3 : 2
 # ===
 ;[a =final (ref 1), (eval a) = 2, eval2 a]
 # ---
@@ -106,17 +106,17 @@ is_null a
 # ---
 2
 # ===
-;[a = (ref 1), (eval a) =final (1: 2), a set1 3, eval2 a]
+;[a = (ref 1), (eval a) =final (1 : 2), a set1 3, eval2 a]
 # ---
-3: 2
+3 : 2
 # ===
 ;[a = (final_ref 1), a = 2, a]
 # ---
 2
 # ===
-;[a =const (1: 2), a set1 3, a]
+;[a =const (1 : 2), a set1 3, a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a =const 1, a = 2, a]
 # ---
@@ -138,53 +138,53 @@ is_null a
 # ---
 2
 # ===
-;[a = (ref 1), (eval a) =const (1: 2), a set1 3, eval2 a]
+;[a = (ref 1), (eval a) =const (1 : 2), a set1 3, eval2 a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a =const (1 ref 2), (eval a) set1 3, eval2 a]
 # ---
-3: 2
+3 : 2
 # ===
 ;[a = 1, final a, a = 2, a]
 # ---
 1
 # ===
-;[a = (1: 2), final a, a set1 3, a]
+;[a = (1 : 2), final a, a set1 3, a]
 # ---
-3: 2
+3 : 2
 # ===
-;[a =const (1: 2), final a, a set1 3, a]
+;[a =const (1 : 2), final a, a set1 3, a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a = (ref 1), final (eval a), (eval a) = 2, eval2 a]
 # ---
 1
 # ===
-;[a = (ref (1: 2)), final (eval a), a set1 3, eval2 a]
+;[a = (ref (1 : 2)), final (eval a), a set1 3, eval2 a]
 # ---
-3: 2
+3 : 2
 # ===
-;[a = (const_ref (1: 2)), final (eval a), a set1 3, eval2 a]
+;[a = (const_ref (1 : 2)), final (eval a), a set1 3, eval2 a]
 # ---
-1: 2
+1 : 2
 # ===
-;[a = (1: 2), const a, a set1 3, a]
+;[a = (1 : 2), const a, a set1 3, a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a = 1, const a, a = 2, a]
 # ---
 1
 # ===
-;[a =final (1: 2), const a, a set1 3, a]
+;[a =final (1 : 2), const a, a set1 3, a]
 # ---
-1: 2
+1 : 2
 # ===
-;[a = (ref (1: 2)), const (eval a), a set1 3, eval2 a]
+;[a = (ref (1 : 2)), const (eval a), a set1 3, eval2 a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a = (ref 1), const (eval a), (eval a) = 2, eval2 a]
 # ---
@@ -254,9 +254,9 @@ is_const a
 # ---
 't
 # ===
-;[a = (final_ref (1: 2)), const (eval a), a set1 3, eval2 a]
+;[a = (final_ref (1 : 2)), const (eval a), a set1 3, eval2 a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a = 1, move a]
 # ---
@@ -302,68 +302,68 @@ is_const a
 # ---
 1
 # ===
-;[a = (final_ref (1: 2)), a set1 3, eval2 a]
+;[a = (final_ref (1 : 2)), a set1 3, eval2 a]
 # ---
-3: 2
+3 : 2
 # ===
-;[a = (const_ref (1: 2)), a set1 3, eval2 a]
+;[a = (const_ref (1 : 2)), a set1 3, eval2 a]
 # ---
-1: 2
+1 : 2
 # ===
 ;[a = (const_ref 1), (eval a) = 2, eval2 a]
 # ---
 1
 # ===
-;[a = (context {var: {b: 1}}), a .. b]
+;[a = (context {var : {b : 1}}), a .. b]
 # ---
 1
 # ===
-;[a = (context {var: {b: 1, ;, =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {var : {b : 1, ;, =}}), a eval_mutable (;[b = 2, b])]
 # ---
 2
 # ===
-;[a = (context {final: {b: 1, ;, =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {final : {b : 1, ;, =}}), a eval_mutable (;[b = 2, b])]
 # ---
 1
 # ===
-;[a = (context {const: {b: (1: 2), ;, set1}}), a eval_mutable (;[b set1 3, b])]
+;[a = (context {const : {b : (1 : 2), ;, set1}}), a eval_mutable (;[b set1 3, b])]
 # ---
-1: 2
+1 : 2
 # ===
-;[a = (context {var: {b: 1}}), ' set_super a, b]
+;[a = (context {var : {b : 1}}), ' set_super a, b]
 # ---
 1
 # ===
-;[a = (context {var: {b: 1}}), b = 2, ' set_super a, b]
+;[a = (context {var : {b : 1}}), b = 2, ' set_super a, b]
 # ---
 2
 # ===
-;[a = (context {}), ' set_super a, b = 1, b: (a .. b)]
+;[a = (context {}), ' set_super a, b = 1, b : (a .. b)]
 # ---
-1: 1
+1 : 1
 # ===
-;[a = (context {}), b = 1, ' set_super a, b = 2, b: (a .. b)]
+;[a = (context {}), b = 1, ' set_super a, b = 2, b : (a .. b)]
 # ---
-2: '
+2 : '
 # ===
-;[a = (context {var: {b: (1: 2)}}), ' set_super a, b set1 3, a .. b]
+;[a = (context {var : {b : (1 : 2)}}), ' set_super a, b set1 3, a .. b]
 # ---
-3: 2
+3 : 2
 # ===
-;[a = (context {var: {b: 1}}), ' set_super a, move b: (a .. b)]
+;[a = (context {var : {b : 1}}), ' set_super a, move b : (a .. b)]
 # ---
-1: '
+1 : '
 # ===
-;[a = (context {var: {b: 1}}), b = 2, ' set_super a, move b: (a .. b)]
+;[a = (context {var : {b : 1}}), b = 2, ' set_super a, move b : (a .. b)]
 # ---
-2: 1
+2 : 1
 # ===
-;[a = (context {}), ' set_super a, b =local 2, b: (a .. b)]
+;[a = (context {}), ' set_super a, b =local 2, b : (a .. b)]
 # ---
-2: '
+2 : '
 # ===
 ;[
-    a = (context {const: {b: (context {const: {c: 1}})}}),
+    a = (context {const : {b : (context {const : {c : 1}})}}),
     a set_super b,
     a .. c
 ]

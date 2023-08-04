@@ -67,7 +67,7 @@ fn bytes(b: Vec<u8>) -> Repr {
 }
 
 fn symbol(s: &str) -> Repr {
-    Repr::Symbol(Symbol::from(s))
+    Repr::Symbol(Symbol::from_str(s))
 }
 
 fn string(s: &str) -> Repr {

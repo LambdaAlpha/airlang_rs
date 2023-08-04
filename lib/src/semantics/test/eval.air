@@ -22,17 +22,17 @@ eval (not 'f)
 # ---
 't
 # ===
-interpolate [a, f a, a: b, f? a, {a: b}]
+interpolate [a, f a, a : b, f ? a, {a : b}]
 # ---
-[a, f a, a: b, f? a, {a: b}]
+[a, f a, a : b, f ? a, {a : b}]
 # ===
-interpolate {a: b, c: (' (not 'f))}
+interpolate {a : b, c : (' (not 'f))}
 # ---
-{a: b, c: 't}
+{a : b, c : 't}
 # ===
-interpolate [a, b: [' (not 't)]]
+interpolate [a, b : [' (not 't)]]
 # ---
-[a, b: ['f]]
+[a, b : ['f]]
 # ===
 inline a
 # ---
@@ -54,29 +54,29 @@ inline [1, a, not 'f]
 # ---
 [1, a, 't]
 # ===
-eval {a, not 't: c, value (not 'f): (not 'f)}
+eval {a, not 't : c, value (not 'f) : (not 'f)}
 # ---
-{a: ', 'f: ', not 'f: 't}
+{a : ', 'f : ', not 'f : 't}
 # ===
-eval {{a: b}: {c: d}}
+eval {{a : b} : {c : d}}
 # ---
-{{a: b}: {c: '}}
+{{a : b} : {c : '}}
 # ===
-eval {not 'f: a}
+eval {not 'f : a}
 # ---
-{'t: '}
+{'t : '}
 # ===
-eval [1, {a: b}]
+eval [1, {a : b}]
 # ---
-[1, {a: '}]
+[1, {a : '}]
 # ===
-eval {a: (value {b: c})}
+eval {a : (value {b : c})}
 # ---
-{a: {b: c}}
+{a : {b : c}}
 # ===
-eval {a: (eval {b: c})}
+eval {a : (eval {b : c})}
 # ---
-{a: {b: '}}
+{a : {b : '}}
 # ===
 ;[a = 1, eval2 (value a)]
 # ---
@@ -84,7 +84,7 @@ eval {a: (eval {b: c})}
 # ===
 (value a) eval2 (value b)
 # ---
-': '
+' : '
 # ===
 ;[a = 1, eval3 (ref (value a))]
 # ---
@@ -102,45 +102,45 @@ eval_free ((' ;) [a (' =) 1, a])
 # ---
 '
 # ===
-eval_free ((' get1) (1: 2))
+eval_free ((' get1) (1 : 2))
 # ---
 1
 # ===
-;[a = (context {const: {=}}), a eval_mutable (b = 1), a .. b]
+;[a = (context {const : {=}}), a eval_mutable (b = 1), a .. b]
 # ---
 1
 # ===
-;[a =const (context {var: {b: 1}}), a eval_mutable b]
+;[a =const (context {var : {b : 1}}), a eval_mutable b]
 # ---
 1
 # ===
-;[a =const (context {var: {b: 1, =}}), a eval_mutable (b = 2), a .. b]
+;[a =const (context {var : {b : 1, =}}), a eval_mutable (b = 2), a .. b]
 # ---
 1
 # ===
-;[a =const (ref (context {var: {b: 1, =}})), a eval_mutable (b = 2), a .. b]
+;[a =const (ref (context {var : {b : 1, =}})), a eval_mutable (b = 2), a .. b]
 # ---
 2
 # ===
-;[a = (const_ref (context {var: {b: 1, =}})), a eval_mutable (b = 2), a .. b]
+;[a = (const_ref (context {var : {b : 1, =}})), a eval_mutable (b = 2), a .. b]
 # ---
 1
 # ===
-;[a = (context {const: {b: (ref (context {const: {c: 1}}))}}), .. [a, b, c]]
+;[a = (context {const : {b : (ref (context {const : {c : 1}}))}}), .. [a, b, c]]
 # ---
 1
 # ===
-;[a = (context {const: {=, b: 1}}), a eval_const b]
+;[a = (context {const : {=, b : 1}}), a eval_const b]
 # ---
 1
 # ===
-;[a = (context {const: {=}}), a eval_const (b = 1), a .. b]
+;[a = (context {const : {=}}), a eval_const (b = 1), a .. b]
 # ---
 '
 # ===
 ;[
     f = (function{
-        body: input,
+        body : input,
     }),
     f (not 't)
 ]
@@ -149,7 +149,7 @@ eval_free ((' get1) (1: 2))
 # ===
 ;[
     f = (function{
-        body: ((' not) input)
+        body : ((' not) input)
     }),
     f (not 't)
 ]
@@ -158,8 +158,8 @@ eval_free ((' get1) (1: 2))
 # ===
 ;[
     f = (function{
-        body: (not input),
-        context: (' (context {const: {not}}))
+        body : (not input),
+        context : (' (context {const : {not}}))
     }),
     f (not 't)
 ]
@@ -168,9 +168,9 @@ eval_free ((' get1) (1: 2))
 # ===
 ;[
     f = (function{
-        body: (n a),
-        input: a,
-        context: (' (context {const: {n: not}}))
+        body : (n a),
+        input : a,
+        context : (' (context {const : {n : not}}))
     }),
     f (not 't)
 ]
@@ -179,8 +179,8 @@ eval_free ((' get1) (1: 2))
 # ===
 ;[
     f = (function{
-        body: input,
-        eval_mode: value,
+        body : input,
+        eval_mode : value,
     }),
     f (not 't)
 ]
@@ -189,8 +189,8 @@ not 't
 # ===
 ;[
     f = (function{
-        body: ((' not) input),
-        eval_mode: eval,
+        body : ((' not) input),
+        eval_mode : eval,
     }),
     f (not 't)
 ]
@@ -199,8 +199,8 @@ not 't
 # ===
 ;[
     f = (function{
-        body: input,
-        eval_mode: interpolate,
+        body : input,
+        eval_mode : interpolate,
     }),
     f (not 't)
 ]
@@ -209,8 +209,8 @@ not 't
 # ===
 ;[
     f = (function{
-        body: input,
-        eval_mode: interpolate,
+        body : input,
+        eval_mode : interpolate,
     }),
     f (' (not 't))
 ]
@@ -219,29 +219,29 @@ not 't
 # ===
 ;[
     f = (function{
-        body: input,
-        eval_mode: eval,
+        body : input,
+        eval_mode : eval,
     }),
-    f {a: b}
+    f {a : b}
 ]
 # ---
-{a: '}
+{a : '}
 # ===
 ;[
     f = (function{
-        body: input,
-        pair_eval_mode: (inline: eval),
+        body : input,
+        pair_eval_mode : (inline : eval),
     }),
     a f b
 ]
 # ---
-a: '
+a : '
 # ===
 ;[
     f = (function{
-        body: input,
-        pair_eval_mode: (inline: eval),
-        eval_mode: value
+        body : input,
+        pair_eval_mode : (inline : eval),
+        eval_mode : value
     }),
     f (not 'f)
 ]
@@ -250,10 +250,10 @@ not 'f
 # ===
 ;[
     f = (function{
-        body: (;[' set_super (.. caller), eval2 input]),
-        eval_mode: value,
-        caller_access: mutable,
-        context: (' (context {const: {
+        body : (;[' set_super (.. caller), eval2 input]),
+        eval_mode : value,
+        caller_access : mutable,
+        context : (' (context {const : {
             ;,
             eval2,
             set_super,
@@ -269,9 +269,9 @@ not 'f
 ;[
     a = 1,
     f = (function{
-        body: (caller eval_const a),
-        caller_access: free,
-        context: (' (context {const: {
+        body : (caller eval_const a),
+        caller_access : free,
+        context : (' (context {const : {
             eval_const,
         }}))
     }),
@@ -283,9 +283,9 @@ not 'f
 ;[
     a = 1,
     f = (function{
-        body: (caller eval_const a),
-        caller_access: const,
-        context: (' (context {const: {
+        body : (caller eval_const a),
+        caller_access : const,
+        context : (' (context {const : {
             eval_const,
         }}))
     }),
@@ -297,9 +297,9 @@ not 'f
 ;[
     a = 1,
     f = (function{
-        body: (caller eval_const a),
-        caller_access: mutable,
-        context: (' (context {const: {
+        body : (caller eval_const a),
+        caller_access : mutable,
+        context : (' (context {const : {
             eval_const,
         }}))
     }),
@@ -311,9 +311,9 @@ not 'f
 ;[
     a = 1,
     f = (function{
-        body: (caller eval_mutable a),
-        caller_access: const,
-        context: (' (context {const: {
+        body : (caller eval_mutable a),
+        caller_access : const,
+        context : (' (context {const : {
             eval_mutable,
         }}))
     }),
@@ -324,10 +324,10 @@ not 'f
 # ===
 ;[
     f = (function{
-        body: (caller eval_mutable (((' ') input) = 2)),
-        eval_mode: value,
-        caller_access: mutable,
-        context: (' (context {const: {
+        body : (caller eval_mutable (((' ') input) = 2)),
+        eval_mode : value,
+        caller_access : mutable,
+        context : (' (context {const : {
             eval_mutable,
         }}))
     }),
@@ -340,10 +340,10 @@ not 'f
 # ===
 ;[
     f = (function{
-        body: (caller eval_mutable (((' ') input) = 2)),
-        eval_mode: value,
-        caller_access: mutable,
-        context: (' (context {const: {
+        body : (caller eval_mutable (((' ') input) = 2)),
+        eval_mode : value,
+        caller_access : mutable,
+        context : (' (context {const : {
             eval_mutable,
         }}))
     }),
@@ -356,10 +356,10 @@ not 'f
 # ===
 ;[
     f = (function{
-        body: (caller eval_mutable (((' ') input) = 2)),
-        eval_mode: value,
-        caller_access: const,
-        context: (' (context {const: {
+        body : (caller eval_mutable (((' ') input) = 2)),
+        eval_mode : value,
+        caller_access : const,
+        context : (' (context {const : {
             eval_mutable,
         }}))
     }),

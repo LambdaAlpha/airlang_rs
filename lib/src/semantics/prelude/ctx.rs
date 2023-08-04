@@ -409,7 +409,7 @@ fn fn_ctx_new(input: Val) -> Val {
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
-    let name = Val::Symbol(Symbol::from(name));
+    let name = Val::Symbol(Symbol::from_str(name));
     map.remove(&name).unwrap_or(Val::Map(MapVal::default()))
 }
 

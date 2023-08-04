@@ -245,7 +245,7 @@ fn fn_func(input: Val) -> Val {
     };
     let input_name = match map_remove(&mut map, "input") {
         Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from("input"),
+        Val::Unit(_) => Symbol::from_str("input"),
         _ => return Val::default(),
     };
 
@@ -278,7 +278,7 @@ fn fn_func(input: Val) -> Val {
 
     let caller_name = match map_remove(&mut map, "caller_name") {
         Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from("caller"),
+        Val::Unit(_) => Symbol::from_str("caller"),
         _ => return Val::default(),
     };
     let evaluator = match map_remove(&mut map, "caller_access") {
@@ -316,7 +316,7 @@ fn fn_func(input: Val) -> Val {
 }
 
 fn map_remove(map: &mut MapVal, name: &str) -> Val {
-    let name = Val::Symbol(Symbol::from(name));
+    let name = Val::Symbol(Symbol::from_str(name));
     map.remove(&name).unwrap_or_default()
 }
 
