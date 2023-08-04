@@ -201,7 +201,7 @@ fn generate_string(str: &str, s: &mut String) {
 
 fn generate_symbol(str: &str, s: &mut String) {
     let first = str.chars().next().unwrap();
-    if matches!(first, PRESERVE_PREFIX | STRING_QUOTE)
+    if matches!(first, PRESERVE_PREFIX | STRING_QUOTE | '0'..='9')
         || matches!(first, PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX) && str.len() == 1
     {
         s.push(PRESERVE_PREFIX);

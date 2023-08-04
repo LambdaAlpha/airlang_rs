@@ -472,7 +472,7 @@ where
         "f" => Some(<T as From<Bool>>::from(Bool::f())),
         symbol => {
             let first = symbol.chars().next().unwrap();
-            if matches!(first, PRESERVE_PREFIX | STRING_QUOTE)
+            if matches!(first, PRESERVE_PREFIX | STRING_QUOTE | '0'..='9')
                 || matches!(first, PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX)
                     && symbol.len() == 1
             {
