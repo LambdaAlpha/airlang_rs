@@ -17,7 +17,7 @@ const STRING_QUOTE: char = '"';
 
 const COMMENT_PREFIX: char = '#';
 
-const PRESERVE_PREFIX: char = '\'';
+const ESCAPED_PREFIX: char = '\'';
 
 const SEPARATOR: char = ',';
 const PAIR_SEPARATOR: char = ':';

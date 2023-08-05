@@ -2,12 +2,12 @@ use {
     crate::{
         syntax::{
             COMMENT_PREFIX,
+            ESCAPED_PREFIX,
             LIST_LEFT,
             LIST_RIGHT,
             MAP_LEFT,
             MAP_RIGHT,
             PAIR_SEPARATOR,
-            PRESERVE_PREFIX,
             REVERSE_SEPARATOR,
             SEPARATOR,
             STRING_QUOTE,
@@ -237,7 +237,7 @@ where
             _ => symbol,
         },
         STRING_QUOTE => string,
-        PRESERVE_PREFIX => preserved,
+        ESCAPED_PREFIX => escaped,
         LIST_LEFT => repr_list,
         MAP_LEFT => repr_map,
         WRAP_LEFT => {
@@ -459,30 +459,33 @@ where
     context("pair", f)(src)
 }
 
-fn preserved<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn escaped<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let name = take_while(is_symbol);
-    let preserved_word = preceded(char('\''), name);
-    let f = map_opt(preserved_word, |s: &str| match s {
+    let symbol = take_while(is_symbol);
+    let escaped = preceded(char('\''), symbol);
+    let f = map_opt(escaped, |s: &str| {
+        if let None | Some('a'..='z' | 'A'..='Z') = s.chars().next() {
+            preserved(s)
+        } else {
+            Some(<T as From<Symbol>>::from(Symbol::from_str(s)))
+        }
+    });
+    context("escaped", f)(src)
+}
+
+fn preserved<T>(src: &str) -> Option<T>
+where
+    T: ParseRepr,
+{
+    match src {
         "" => Some(<T as From<Unit>>::from(Unit)),
         "t" => Some(<T as From<Bool>>::from(Bool::t())),
         "f" => Some(<T as From<Bool>>::from(Bool::f())),
-        symbol => {
-            let first = symbol.chars().next().unwrap();
-            if matches!(first, PRESERVE_PREFIX | STRING_QUOTE | '0'..='9')
-                || matches!(first, PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX)
-                    && symbol.len() == 1
-            {
-                Some(<T as From<Symbol>>::from(Symbol::from_str(symbol)))
-            } else {
-                None
-            }
-        }
-    });
-    context("preserved", f)(src)
+        _ => None,
+    }
 }
 
 fn is_symbol(c: char) -> bool {

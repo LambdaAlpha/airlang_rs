@@ -2,12 +2,12 @@ use {
     crate::{
         syntax::{
             COMMENT_PREFIX,
+            ESCAPED_PREFIX,
             LIST_LEFT,
             LIST_RIGHT,
             MAP_LEFT,
             MAP_RIGHT,
             PAIR_SEPARATOR,
-            PRESERVE_PREFIX,
             REVERSE_SEPARATOR,
             SEPARATOR,
             STRING_QUOTE,
@@ -162,11 +162,11 @@ where
 }
 
 fn generate_unit(s: &mut String) {
-    s.push(PRESERVE_PREFIX);
+    s.push(ESCAPED_PREFIX);
 }
 
 fn generate_bool(b: bool, s: &mut String) {
-    s.push(PRESERVE_PREFIX);
+    s.push(ESCAPED_PREFIX);
     s.push_str(if b { "t" } else { "f" });
 }
 
@@ -200,11 +200,16 @@ fn generate_string(str: &str, s: &mut String) {
 }
 
 fn generate_symbol(str: &str, s: &mut String) {
-    let first = str.chars().next().unwrap();
-    if matches!(first, PRESERVE_PREFIX | STRING_QUOTE | '0'..='9')
-        || matches!(first, PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX) && str.len() == 1
-    {
-        s.push(PRESERVE_PREFIX);
+    let mut chars = str.chars();
+    let first = chars.next().unwrap();
+    let escape = match first {
+        ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
+        PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_PREFIX => str.len() == 1,
+        '+' | '-' => matches!(chars.next(), Some('0'..='9')),
+        _ => false,
+    };
+    if escape {
+        s.push(ESCAPED_PREFIX);
     }
     s.push_str(str);
 }
