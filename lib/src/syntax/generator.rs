@@ -49,8 +49,6 @@ where
         before_first: "".to_owned(),
         after_last: "".to_owned(),
         separator: SEPARATOR.to_string(),
-        pair_separator: format!(" {PAIR_SEPARATOR} "),
-        reverse_separator: format!(" {REVERSE_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -72,8 +70,6 @@ where
         before_first: "".to_owned(),
         after_last: "".to_owned(),
         separator: format!("{SEPARATOR} "),
-        pair_separator: format!(" {PAIR_SEPARATOR} "),
-        reverse_separator: format!(" {REVERSE_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -95,8 +91,6 @@ where
         before_first: "\n".to_owned(),
         after_last: format!("{SEPARATOR}\n"),
         separator: format!("{SEPARATOR}\n"),
-        pair_separator: format!(" {PAIR_SEPARATOR} "),
-        reverse_separator: format!(" {REVERSE_SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };
@@ -109,8 +103,6 @@ pub(crate) struct GenerateFormat {
     pub(crate) before_first: String,
     pub(crate) after_last: String,
     pub(crate) separator: String,
-    pub(crate) pair_separator: String,
-    pub(crate) reverse_separator: String,
     pub(crate) left_padding: String,
     pub(crate) right_padding: String,
 }
@@ -226,6 +218,18 @@ where
     Ok(b)
 }
 
+fn is_right_open<'a, T>(repr: &'a T) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    let b = matches!(
+        repr.try_into()?,
+        GenerateRepr::Call(_) | GenerateRepr::Reverse(_) | GenerateRepr::Pair(_)
+    );
+    Ok(b)
+}
+
 fn is_normal_call<'a, T>(
     repr: &'a T,
 ) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
@@ -271,6 +275,19 @@ where
     wrap(is_left_open(repr)?, repr, s, format, indent)
 }
 
+fn wrap_if_right_open<'a, T>(
+    repr: &'a T,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    wrap(is_right_open(repr)?, repr, s, format, indent)
+}
+
 fn generate_pair<'a, T>(
     first: &'a T,
     second: &'a T,
@@ -282,9 +299,17 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    generate(first, s, format, indent)?;
-    s.push_str(&format.pair_separator);
-    wrap_if_left_open(second, s, format, indent)
+    generate_infix(
+        first,
+        |s, _format, _indent| {
+            s.push(PAIR_SEPARATOR);
+            Ok(())
+        },
+        second,
+        s,
+        format,
+        indent,
+    )
 }
 
 fn generate_call<'a, T>(
@@ -298,25 +323,16 @@ where
     T: Eq + Hash,
 {
     match (&call.input).try_into()? {
-        GenerateRepr::Pair(p) => {
-            wrap(is_normal_call(&p.first)?, &p.first, s, format, indent)?;
-
-            s.push(' ');
-
-            wrap_if_left_open(&call.func, s, format, indent)?;
-
-            s.push(' ');
-
-            wrap_if_left_open(&p.second, s, format, indent)
-        }
+        GenerateRepr::Pair(p) => generate_infix(
+            &p.first,
+            |s, format, indent| wrap_if_left_open(&call.func, s, format, indent),
+            &p.second,
+            s,
+            format,
+            indent,
+        ),
         _ => {
-            wrap(
-                matches!((&call.func).try_into()?, GenerateRepr::Call(_)),
-                &call.func,
-                s,
-                format,
-                indent,
-            )?;
+            wrap_if_right_open(&call.func, s, format, indent)?;
             s.push(' ');
             wrap_if_left_open(&call.input, s, format, indent)
         }
@@ -333,9 +349,44 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    generate(&reverse.func, s, format, indent)?;
-    s.push_str(&format.reverse_separator);
-    wrap_if_left_open(&reverse.output, s, format, indent)
+    generate_infix(
+        &reverse.func,
+        |s, _format, _indent| {
+            s.push(REVERSE_SEPARATOR);
+            Ok(())
+        },
+        &reverse.output,
+        s,
+        format,
+        indent,
+    )
+}
+
+fn generate_infix<'a, T>(
+    left: &'a T,
+    generate_middle: impl FnOnce(
+        &mut String,
+        &GenerateFormat,
+        usize,
+    ) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>,
+    right: &'a T,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    wrap(is_normal_call(left)?, left, s, format, indent)?;
+
+    s.push(' ');
+
+    generate_middle(s, format, indent)?;
+
+    s.push(' ');
+
+    wrap_if_left_open(right, s, format, indent)
 }
 
 fn generate_wrapped<'a, T>(

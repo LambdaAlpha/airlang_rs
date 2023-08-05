@@ -54,15 +54,15 @@ inline [1, a, not 'f]
 # ---
 [1, a, 't]
 # ===
-eval {a, not 't : c, value (not 'f) : (not 'f)}
+eval {a, (not 't) : c, (value (not 'f)) : (not 'f)}
 # ---
-{a : ', 'f : ', not 'f : 't}
+{a : ', 'f : ', (not 'f) : 't}
 # ===
 eval {{a : b} : {c : d}}
 # ---
 {{a : b} : {c : '}}
 # ===
-eval {not 'f : a}
+eval {(not 'f) : a}
 # ---
 {'t : '}
 # ===

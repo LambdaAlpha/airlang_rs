@@ -151,10 +151,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = value(
-        (),
-        tuple((char(COMMENT_PREFIX), delimiter, cut(token::<T, _>))),
-    );
+    let comment = cut(verify(token::<T, _>, |token| {
+        matches!(token, Token::Default(_))
+    }));
+    let f = value((), tuple((char(COMMENT_PREFIX), delimiter, comment)));
     context("comment", f)(src)
 }
 
@@ -188,124 +188,46 @@ where
     context("wrap", f)(src)
 }
 
-fn pair_second<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let tagged_repr = preceded(
-        tuple((char(PAIR_SEPARATOR), delimiter)),
-        normed::<T, _, _, _>(token),
-    );
-    let f = map_opt(tagged_repr, unwrap_token);
-    context("pair", f)(src)
-}
-
-fn reverse_output<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let tagged_repr = preceded(
-        tuple((char(REVERSE_SEPARATOR), delimiter)),
-        normed::<T, _, _, _>(token),
-    );
-    let f = map_opt(tagged_repr, unwrap_token);
-    context("reverse", f)(src)
-}
-
-fn unwrap_token<T: ParseRepr>(token: TaggedRepr<T>) -> Option<T> {
-    match token.tag {
-        TokenTag::Default => Some(token.repr),
-        TokenTag::Wrap => Some(token.repr),
-        _ => None,
-    }
-}
-
-fn token<'a, T: ParseRepr, E>(src: &'a str) -> IResult<&'a str, TaggedRepr<T>, E>
+fn token<'a, T: ParseRepr, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     // a parsing rule is decided by first 2 chars
     let (src, (first, second)) = peek(pair(anychar, opt(anychar)))(src)?;
 
-    let mut tag = TokenTag::Default;
     let parser = match first {
-        '0'..='9' => number,
+        '0'..='9' => |s| map(number, Token::Default)(s),
         '+' | '-' => match second {
-            Some('0'..='9') => number,
-            _ => symbol,
+            Some('0'..='9') => |s| map(number, Token::Default)(s),
+            _ => |s| map(symbol, Token::Default)(s),
         },
-        STRING_QUOTE => string,
-        ESCAPED_PREFIX => escaped,
-        LIST_LEFT => repr_list,
-        MAP_LEFT => repr_map,
-        WRAP_LEFT => {
-            tag = TokenTag::Wrap;
-            wrap
-        }
+        STRING_QUOTE => |s| map(string, Token::Default)(s),
+        ESCAPED_PREFIX => |s| map(escaped, Token::Default)(s),
+        LIST_LEFT => |s| map(repr_list, Token::Default)(s),
+        MAP_LEFT => |s| map(repr_map, Token::Default)(s),
+        WRAP_LEFT => |s| map(wrap, Token::Default)(s),
         PAIR_SEPARATOR => match second {
-            Some(second) => {
-                if is_delimiter(second) {
-                    tag = TokenTag::Pair;
-                    pair_second
-                } else {
-                    symbol
-                }
-            }
-            None => fail,
+            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            _ => |s| map(char(PAIR_SEPARATOR), |_| Token::Pair)(s),
         },
         REVERSE_SEPARATOR => match second {
-            Some(second) => {
-                if is_delimiter(second) {
-                    tag = TokenTag::Reverse;
-                    reverse_output
-                } else {
-                    symbol
-                }
-            }
-            None => fail,
+            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            _ => |s| map(char(REVERSE_SEPARATOR), |_| Token::Reverse)(s),
         },
         COMMENT_PREFIX => match second {
-            Some(second) => {
-                if is_delimiter(second) {
-                    fail
-                } else {
-                    symbol
-                }
-            }
-            None => fail,
+            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            _ => fail,
         },
-        s if is_symbol(s) => symbol,
+        s if is_symbol(s) => |s| map(symbol, Token::Default)(s),
         _ => fail,
     };
-    let f = tag_repr(tag, parser);
-    context("token", f)(src)
+    context("token", parser)(src)
 }
 
-fn tag_repr<'a, T, E, F>(
-    tag: TokenTag,
-    f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, TaggedRepr<T>, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-    F: Parser<&'a str, T, E>,
-{
-    map(f, move |repr| TaggedRepr { tag, repr })
-}
-
-#[derive(Copy, Clone)]
-enum TokenTag {
-    Default,
-    Wrap,
+enum Token<T> {
     Pair,
     Reverse,
-}
-
-struct TaggedRepr<T: ParseRepr> {
-    tag: TokenTag,
-    repr: T,
+    Default(T),
 }
 
 fn repr<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -316,25 +238,47 @@ where
     context("repr", associate)(src)
 }
 
-fn call<T: ParseRepr>(tokens: Vec<T>) -> Option<T> {
+fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     let len = tokens.len();
     let mut iter = tokens.into_iter();
     if len == 2 {
-        let call = Box::new(Call::new(iter.next().unwrap(), iter.next().unwrap()));
+        let Token::Default(func) = iter.next().unwrap() else {
+            return None;
+        };
+        let Token::Default(input) = iter.next().unwrap() else {
+            return None;
+        };
+        let call = Box::new(Call::new(func, input));
         return Some(<T as From<Box<Call<T, T>>>>::from(call));
     } else if len % 2 == 0 {
         return None;
     }
-    let first = iter.next().unwrap();
-    let infix_repr = iter
-        .array_chunks::<2>()
-        .fold(first, |left, [middle, right]| {
-            let pair = Box::new(Pair::new(left, right));
-            let pair = <T as From<Box<Pair<T, T>>>>::from(pair);
-            let infix = Box::new(Call::new(middle, pair));
-            <T as From<Box<Call<T, T>>>>::from(infix)
-        });
-    Some(infix_repr)
+    let Token::Default(first) = iter.next().unwrap() else {
+        return None;
+    };
+    iter.array_chunks::<2>()
+        .try_fold(first, |left, [middle, right]| {
+            let Token::Default(right) = right else {
+                return None;
+            };
+            let repr = match middle {
+                Token::Pair => {
+                    let pair = Box::new(Pair::new(left, right));
+                    <T as From<Box<Pair<T, T>>>>::from(pair)
+                }
+                Token::Reverse => {
+                    let reverse = Box::new(Reverse::new(left, right));
+                    <T as From<Box<Reverse<T, T>>>>::from(reverse)
+                }
+                Token::Default(middle) => {
+                    let pair = Box::new(Pair::new(left, right));
+                    let pair = <T as From<Box<Pair<T, T>>>>::from(pair);
+                    let infix = Box::new(Call::new(middle, pair));
+                    <T as From<Box<Call<T, T>>>>::from(infix)
+                }
+            };
+            Some(repr)
+        })
 }
 
 fn associate<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -342,37 +286,15 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let fold = fold_many1(
+    let collect = fold_many1(
         normed::<T, _, _, _>(token),
-        || Some(Vec::new()),
-        |tokens: Option<Vec<_>>, item| {
-            tokens.as_ref()?;
-            let mut tokens = tokens.unwrap();
-            let repr = match item.tag {
-                TokenTag::Default => item.repr,
-                TokenTag::Wrap => item.repr,
-                TokenTag::Pair => {
-                    let Some(repr) = call(tokens) else {
-                        return None;
-                    };
-                    tokens = Vec::new();
-                    let pair = Box::new(Pair::new(repr, item.repr));
-                    <T as From<Box<Pair<T, T>>>>::from(pair)
-                }
-                TokenTag::Reverse => {
-                    let Some(repr) = call(tokens) else {
-                        return None;
-                    };
-                    tokens = Vec::new();
-                    let reverse = Box::new(Reverse::new(repr, item.repr));
-                    <T as From<Box<Reverse<T, T>>>>::from(reverse)
-                }
-            };
-            tokens.push(repr);
-            Some(tokens)
+        Vec::new,
+        |mut tokens: Vec<_>, item| {
+            tokens.push(item);
+            tokens
         },
     );
-    let f = map_opt(fold, |tokens| tokens.and_then(call));
+    let f = map_opt(collect, fold_tokens);
     context("associate", f)(src)
 }
 

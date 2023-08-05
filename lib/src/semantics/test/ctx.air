@@ -350,11 +350,11 @@ is_const a
 # ---
 3 : 2
 # ===
-;[a = (context {var : {b : 1}}), ' set_super a, move b : (a .. b)]
+;[a = (context {var : {b : 1}}), ' set_super a, (move b) : (a .. b)]
 # ---
 1 : '
 # ===
-;[a = (context {var : {b : 1}}), b = 2, ' set_super a, move b : (a .. b)]
+;[a = (context {var : {b : 1}}), b = 2, ' set_super a, (move b) : (a .. b)]
 # ---
 2 : 1
 # ===

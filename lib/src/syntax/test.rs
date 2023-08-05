@@ -137,7 +137,10 @@ fn test_generate(src: &str) -> Result<(), Box<dyn Error>> {
     for s in sources {
         let repr = parse(s)?;
         let string = repr.to_string();
-        let new_repr = parse(&string)?;
+        let new_repr = parse(&string).map_err(|e| {
+            eprintln!("{e}");
+            e
+        })?;
         assert_eq!(
             repr, new_repr,
             "src: {}, repr: {} != new_repr: {}",
