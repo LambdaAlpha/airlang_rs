@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "airlang"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "criterion",
  "nom",
@@ -25,7 +25,7 @@ dependencies = [
 
 [[package]]
 name = "airlang_bin"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "airlang",
 ]
