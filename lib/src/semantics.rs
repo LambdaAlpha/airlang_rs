@@ -1,15 +1,13 @@
 use {
     crate::{
         semantics::{
-            eval::{
-                ctx::{
-                    mutable::MutableCtx,
-                    Ctx,
-                    NameMap,
-                },
-                strategy::eval::DefaultStrategy,
-                Evaluator,
+            ctx::{
+                mutable::MutableCtx,
+                Ctx,
+                NameMap,
             },
+            eval::Evaluator,
+            eval_mode::eval::Eval,
             prelude::prelude,
         },
         syntax::ParseError,
@@ -17,18 +15,9 @@ use {
     thiserror::Error,
 };
 pub use {
-    eval::Func,
+    func::Func,
     val::Val,
 };
-
-pub(crate) mod val;
-
-pub(crate) mod eval;
-
-pub(crate) mod prelude;
-
-#[cfg(test)]
-mod test;
 
 #[derive(Error, Debug)]
 #[error("ReprError")]
@@ -47,7 +36,7 @@ impl Interpreter {
     }
 
     pub fn interpret(&mut self, src: Val) -> Val {
-        DefaultStrategy.eval(&mut MutableCtx(&mut self.ctx), src)
+        Eval.eval(&mut MutableCtx(&mut self.ctx), src)
     }
 
     pub fn reset(&mut self) {
@@ -76,3 +65,18 @@ pub fn parse(src: &str) -> Result<Val, ParseError> {
 pub fn generate(src: &Val) -> Result<String, ReprError> {
     crate::syntax::generator::generate_pretty(src)
 }
+
+pub(crate) mod val;
+
+pub(crate) mod eval;
+
+pub(crate) mod ctx;
+
+pub(crate) mod func;
+
+pub(crate) mod eval_mode;
+
+pub(crate) mod prelude;
+
+#[cfg(test)]
+mod test;

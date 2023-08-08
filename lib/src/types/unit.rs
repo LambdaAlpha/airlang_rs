@@ -2,21 +2,21 @@
 pub struct Unit;
 
 impl From<&()> for Unit {
-    fn from(_: &()) -> Self {
+    fn from(_unit: &()) -> Self {
         Unit
     }
 }
 
 impl From<()> for Unit {
-    fn from(_: ()) -> Self {
+    fn from(_unit: ()) -> Self {
         Unit
     }
 }
 
 impl From<Unit> for () {
-    fn from(_: Unit) -> Self {}
+    fn from(_unit: Unit) -> Self {}
 }
 
 impl From<&Unit> for () {
-    fn from(_: &Unit) -> Self {}
+    fn from(_unit: &Unit) -> Self {}
 }

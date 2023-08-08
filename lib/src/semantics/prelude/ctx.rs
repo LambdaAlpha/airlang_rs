@@ -1,26 +1,28 @@
 use {
     crate::{
         semantics::{
-            eval::{
-                ctx::{
-                    constant::{
-                        ConstCtx,
-                        CtxForConstFn,
-                    },
-                    free::FreeCtx,
-                    mutable::CtxForMutableFn,
-                    Ctx,
-                    CtxTrait,
-                    InvariantTag,
-                    NameMap,
-                    TaggedRef,
-                    TaggedVal,
+            ctx::{
+                constant::{
+                    ConstCtx,
+                    CtxForConstFn,
                 },
+                free::FreeCtx,
+                mutable::CtxForMutableFn,
+                Ctx,
+                CtxTrait,
+                InvariantTag,
+                NameMap,
+                TaggedRef,
+                TaggedVal,
+            },
+            eval_mode::{
                 BasicEvalMode,
+                EvalMode,
+            },
+            func::{
                 CtxConstFn,
                 CtxFreeFn,
                 CtxMutableFn,
-                EvalMode,
                 Primitive,
             },
             prelude::{
@@ -328,7 +330,7 @@ pub(crate) fn null_ref() -> PrimitiveFunc<CtxFreeFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_null_ref(_: Val) -> Val {
+fn fn_null_ref(_input: Val) -> Val {
     let k = Keeper::new(TaggedVal::new(Val::default()));
     let Ok(o) = Keeper::owner(&k) else {
         return Val::default();

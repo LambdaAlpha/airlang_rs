@@ -1,14 +1,16 @@
 use crate::{
     semantics::{
-        eval::{
-            ctx::{
-                constant::CtxForConstFn,
-                CtxTrait,
-            },
+        ctx::{
+            constant::CtxForConstFn,
+            CtxTrait,
+        },
+        eval_mode::{
             BasicEvalMode,
+            EvalMode,
+        },
+        func::{
             CtxConstFn,
             CtxFreeFn,
-            EvalMode,
             Primitive,
         },
         prelude::{

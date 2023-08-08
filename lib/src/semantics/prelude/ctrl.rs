@@ -1,17 +1,19 @@
 use crate::semantics::{
-    eval::{
-        ctx::{
-            free::FreeCtx,
-            CtxTrait,
-        },
-        strategy::eval::{
-            DefaultByRefStrategy,
-            DefaultStrategy,
+    ctx::{
+        free::FreeCtx,
+        CtxTrait,
+    },
+    eval::Evaluator,
+    eval_mode::{
+        eval::{
+            Eval,
+            EvalByRef,
         },
         BasicEvalMode,
-        CtxMutableFn,
         EvalMode,
-        Evaluator,
+    },
+    func::{
+        CtxMutableFn,
         Primitive,
     },
     prelude::{
@@ -38,7 +40,7 @@ fn fn_sequence<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     };
     let mut output = Val::default();
     for val in list {
-        output = DefaultStrategy.eval(&mut ctx, val);
+        output = Eval.eval(&mut ctx, val);
     }
     output
 }
@@ -62,20 +64,20 @@ fn fn_if<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     let Some(condition) = iter.next() else {
         return Val::default();
     };
-    let Val::Bool(b) = DefaultStrategy.eval(&mut ctx, condition) else {
+    let Val::Bool(b) = Eval.eval(&mut ctx, condition) else {
         return Val::default();
     };
     if b.bool() {
         let Some(branch) = iter.next() else {
             return Val::default();
         };
-        DefaultStrategy.eval(&mut ctx, branch)
+        Eval.eval(&mut ctx, branch)
     } else {
         let _ = iter.next();
         let Some(branch) = iter.next() else {
             return Val::default();
         };
-        DefaultStrategy.eval(&mut ctx, branch)
+        Eval.eval(&mut ctx, branch)
     }
 }
 
@@ -101,11 +103,11 @@ fn fn_while<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = DefaultByRefStrategy.eval(&mut ctx, condition) else {
+        let Val::Bool(b) = EvalByRef.eval(&mut ctx, condition) else {
             return Val::default();
         };
         if b.bool() {
-            DefaultByRefStrategy.eval(&mut ctx, body);
+            EvalByRef.eval(&mut ctx, body);
         } else {
             break;
         }

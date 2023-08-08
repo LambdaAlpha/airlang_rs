@@ -1,9 +1,9 @@
 use {
     crate::{
         semantics::{
-            eval::{
-                CtxForConstFn,
-                CtxForMutableFn,
+            ctx::{
+                constant::CtxForConstFn,
+                mutable::CtxForMutableFn,
             },
             val::{
                 CtxVal,

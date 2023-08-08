@@ -1,6 +1,6 @@
 use crate::{
     semantics::{
-        eval::ctx::{
+        ctx::{
             free::FreeCtx,
             mutable::CtxForMutableFn,
             Ctx,

@@ -1,14 +1,14 @@
 use crate::{
     semantics::{
-        eval::{
-            ctx::{
-                NameMap,
-                TaggedVal,
-            },
+        ctx::{
+            NameMap,
+            TaggedVal,
+        },
+        eval_mode::EvalMode,
+        func::{
             CtxConstFn,
             CtxFreeFn,
             CtxMutableFn,
-            EvalMode,
             FuncEval,
             FuncImpl,
             Primitive,

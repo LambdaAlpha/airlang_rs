@@ -1,9 +1,11 @@
 use crate::{
     semantics::{
-        eval::{
+        eval_mode::{
             BasicEvalMode,
-            CtxFreeFn,
             EvalMode,
+        },
+        func::{
+            CtxFreeFn,
             Primitive,
         },
         prelude::{
