@@ -2,18 +2,21 @@ use {
     crate::{
         semantics::{
             ctx::{
+                Ctx,
+                CtxTrait,
+                DefaultCtx,
+                InvariantTag,
+                NameMap,
+                TaggedRef,
+                TaggedVal,
+            },
+            ctx_access::{
                 constant::{
                     ConstCtx,
                     CtxForConstFn,
                 },
                 free::FreeCtx,
                 mutable::CtxForMutableFn,
-                Ctx,
-                CtxTrait,
-                InvariantTag,
-                NameMap,
-                TaggedRef,
-                TaggedVal,
             },
             eval_mode::{
                 BasicEvalMode,
@@ -443,7 +446,7 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
         ctx.set_super(super_ctx);
         return Val::default();
     }
-    ctx.get_ref_or_val_or_default(ctx_name_or_val, |ctx| {
+    DefaultCtx.get_ref_val_or_default(&mut ctx, ctx_name_or_val, |ctx| {
         let Either::Left(TaggedRef {
             val_ref: Val::Ctx(CtxVal(ctx)),
             is_const: false,

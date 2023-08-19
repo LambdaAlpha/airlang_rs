@@ -1,7 +1,7 @@
 use crate::semantics::{
-    ctx::{
+    ctx_access::{
         free::FreeCtx,
-        CtxTrait,
+        CtxAccessor,
     },
     eval::Evaluator,
     eval_mode::{
@@ -34,7 +34,7 @@ pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_sequence<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
@@ -56,7 +56,7 @@ pub(crate) fn condition() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_if<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
@@ -92,7 +92,7 @@ pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_while<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };

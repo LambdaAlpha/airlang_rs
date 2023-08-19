@@ -1,6 +1,12 @@
 use crate::{
     semantics::{
         ctx::{
+            Ctx,
+            CtxTrait,
+            DefaultCtx,
+            TaggedRef,
+        },
+        ctx_access::{
             constant::{
                 ConstCtx,
                 CtxForConstFn,
@@ -10,9 +16,7 @@ use crate::{
                 CtxForMutableFn,
                 MutableCtx,
             },
-            Ctx,
-            CtxTrait,
-            TaggedRef,
+            CtxAccessor,
         },
         eval::{
             input::ByVal,
@@ -109,7 +113,7 @@ pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_twice<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_eval_twice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     match input {
         Val::Ref(k) => {
             let Ok(input) = Keeper::reader(&k.0) else {
@@ -135,7 +139,7 @@ pub(crate) fn eval_thrice() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_thrice<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_eval_thrice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let val = Eval.eval(&mut ctx, input);
     fn_eval_twice::<Ctx>(ctx, val)
 }
@@ -181,7 +185,7 @@ fn fn_eval_in_ctx<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     };
     let name_or_val = pair.first;
     let val = pair.second;
-    ctx.get_ref_or_val_or_default(name_or_val, |target_ctx| {
+    DefaultCtx.get_ref_val_or_default(&mut ctx, name_or_val, |target_ctx| {
         let f = |target| {
             let TaggedRef {
                 val_ref: Val::Ctx(CtxVal(target_ctx)),

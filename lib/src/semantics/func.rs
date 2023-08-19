@@ -2,6 +2,11 @@ use {
     crate::{
         semantics::{
             ctx::{
+                Ctx,
+                InvariantTag,
+                TaggedVal,
+            },
+            ctx_access::{
                 constant::{
                     ConstCtx,
                     CtxForConstFn,
@@ -11,10 +16,7 @@ use {
                     CtxForMutableFn,
                     MutableCtx,
                 },
-                Ctx,
-                CtxTrait,
-                InvariantTag,
-                TaggedVal,
+                CtxAccessor,
             },
             eval::Evaluator,
             eval_mode::{
@@ -104,7 +106,7 @@ pub(crate) struct CtxMutableInfo {
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Func
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         let input = self.input_eval_mode.eval(ctx, input);
@@ -114,7 +116,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for FuncEval
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
@@ -128,7 +130,7 @@ where
 impl<Ctx, P: Evaluator<Ctx, Val, Val>, C: Evaluator<Ctx, Val, Val>> Evaluator<Ctx, Val, Val>
     for FuncImpl<P, C>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
@@ -140,7 +142,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxFreeFn>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, _ctx: &mut Ctx, input: Val) -> Val {
         (self.eval_fn)(input)
@@ -149,7 +151,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxFreeInfo>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, _ctx: &mut Ctx, input: Val) -> Val {
         eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
@@ -158,7 +160,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxConstFn>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         (self.eval_fn)(ctx.for_const_fn(), input)
@@ -167,7 +169,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxConstInfo>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_const_fn() {
@@ -189,7 +191,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxMutableFn>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         (self.eval_fn)(ctx.for_mutable_fn(), input)
@@ -198,7 +200,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxMutableInfo>
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_mutable_fn() {

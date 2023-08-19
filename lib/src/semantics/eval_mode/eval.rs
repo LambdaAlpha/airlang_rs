@@ -1,8 +1,8 @@
 use crate::{
     semantics::{
-        ctx::{
+        ctx_access::{
             free::FreeCtx,
-            CtxTrait,
+            CtxAccessor,
         },
         eval::{
             input::{
@@ -39,7 +39,7 @@ pub(crate) struct Eval;
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Eval
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         DefaultByVal::eval_val(self, ctx, input)
@@ -48,7 +48,7 @@ where
 
 impl<Ctx> ByVal<Ctx, Val> for Eval
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval_atoms(&self, ctx: &mut Ctx, input: Val) -> Val {
         Value.eval_atoms(ctx, input)
@@ -96,7 +96,7 @@ pub(crate) struct EvalByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EvalByRef
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         DefaultByRef::eval_val(self, ctx, input)
@@ -105,7 +105,7 @@ where
 
 impl<'a, Ctx> ByRef<'a, Ctx, Val> for EvalByRef
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         ValueByRef.eval_atoms(ctx, input)

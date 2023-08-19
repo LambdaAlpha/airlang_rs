@@ -1,6 +1,6 @@
 use crate::{
     semantics::{
-        ctx::CtxTrait,
+        ctx_access::CtxAccessor,
         eval::{
             Evaluator,
             ValBuilder,
@@ -48,7 +48,7 @@ pub(crate) enum EvalMode {
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for BasicEvalMode
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
@@ -61,7 +61,7 @@ where
 }
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for BasicEvalMode
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         match self {
@@ -75,7 +75,7 @@ where
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for EvalMode
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
@@ -99,7 +99,7 @@ where
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EvalMode
 where
-    Ctx: CtxTrait,
+    Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         match self {

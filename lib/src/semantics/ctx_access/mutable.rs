@@ -1,15 +1,19 @@
 use crate::{
     semantics::{
         ctx::{
+            Ctx,
+            CtxTrait,
+            DefaultCtx,
+            TaggedRef,
+            TaggedVal,
+        },
+        ctx_access::{
             constant::{
                 ConstCtx,
                 CtxForConstFn,
             },
             free::FreeCtx,
-            Ctx,
-            CtxTrait,
-            TaggedRef,
-            TaggedVal,
+            CtxAccessor,
         },
         val::RefVal,
         Val,
@@ -30,16 +34,12 @@ pub(crate) enum CtxForMutableFn<'a> {
 }
 
 impl<'a> CtxTrait for MutableCtx<'a> {
-    fn for_const_fn(&mut self) -> CtxForConstFn {
-        CtxForConstFn::Const(self.0)
-    }
-
-    fn for_mutable_fn(&mut self) -> CtxForMutableFn {
-        CtxForMutableFn::Mutable(self.0)
-    }
-
     fn get(&mut self, name: &str) -> Val {
         self.0.get(name)
+    }
+
+    fn is_null(&mut self, name: &str) -> Val {
+        DefaultCtx.is_null(self, name)
     }
 
     fn remove(&mut self, name: &str) -> Val {
@@ -82,28 +82,19 @@ impl<'a> CtxTrait for MutableCtx<'a> {
     {
         self.0.get_ref(false, name, |val, _| f(val))
     }
+}
 
-    fn get_super_ctx<T, F>(&mut self, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Ctx>>) -> T,
-    {
-        self.0.get_super_ctx(false, |val, _| f(val))
+impl<'a> CtxAccessor for MutableCtx<'a> {
+    fn for_const_fn(&mut self) -> CtxForConstFn {
+        CtxForConstFn::Const(self.0)
+    }
+
+    fn for_mutable_fn(&mut self) -> CtxForMutableFn {
+        CtxForMutableFn::Mutable(self.0)
     }
 }
 
 impl<'a> CtxTrait for CtxForMutableFn<'a> {
-    fn for_const_fn(&mut self) -> CtxForConstFn {
-        match self {
-            CtxForMutableFn::Free => CtxForConstFn::Free,
-            CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx),
-            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ctx),
-        }
-    }
-
-    fn for_mutable_fn(&mut self) -> CtxForMutableFn {
-        self.reborrow()
-    }
-
     fn get(&mut self, name: &str) -> Val {
         match self {
             CtxForMutableFn::Free => FreeCtx.get(name),
@@ -194,53 +185,19 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
             CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get_ref(name, f),
         }
     }
+}
 
-    fn get_ref_or_default<T, F>(&mut self, name: &str, f: F) -> T
-    where
-        T: Default,
-        F: FnOnce(TaggedRef<Val>) -> T,
-    {
+impl<'a> CtxAccessor for CtxForMutableFn<'a> {
+    fn for_const_fn(&mut self) -> CtxForConstFn {
         match self {
-            CtxForMutableFn::Free => FreeCtx.get_ref_or_default(name, f),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).get_ref_or_default(name, f),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get_ref_or_default(name, f),
+            CtxForMutableFn::Free => CtxForConstFn::Free,
+            CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx),
+            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ctx),
         }
     }
 
-    fn get_super_ctx<T, F>(&mut self, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Ctx>>) -> T,
-    {
-        match self {
-            CtxForMutableFn::Free => FreeCtx.get_super_ctx(f),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).get_super_ctx(f),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get_super_ctx(f),
-        }
-    }
-
-    fn get_ref_or_val<T, F>(&mut self, name: Val, f: F) -> T
-    where
-        F: FnOnce(Either<TaggedRef<Val>, Option<Val>>) -> T,
-        Self: Sized,
-    {
-        match self {
-            CtxForMutableFn::Free => FreeCtx.get_ref_or_val(name, f),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).get_ref_or_val(name, f),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get_ref_or_val(name, f),
-        }
-    }
-
-    fn get_ref_or_val_or_default<T, F>(&mut self, name: Val, f: F) -> T
-    where
-        T: Default,
-        F: FnOnce(Either<TaggedRef<Val>, Val>) -> T,
-        Self: Sized,
-    {
-        match self {
-            CtxForMutableFn::Free => FreeCtx.get_ref_or_val_or_default(name, f),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).get_ref_or_val_or_default(name, f),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get_ref_or_val_or_default(name, f),
-        }
+    fn for_mutable_fn(&mut self) -> CtxForMutableFn {
+        self.reborrow()
     }
 }
 

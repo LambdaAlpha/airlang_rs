@@ -2,10 +2,10 @@ use {
     crate::{
         semantics::{
             ctx::{
-                mutable::MutableCtx,
                 Ctx,
                 NameMap,
             },
+            ctx_access::mutable::MutableCtx,
             eval::Evaluator,
             eval_mode::eval::Eval,
             prelude::prelude,
@@ -71,6 +71,8 @@ pub(crate) mod val;
 pub(crate) mod eval;
 
 pub(crate) mod ctx;
+
+pub(crate) mod ctx_access;
 
 pub(crate) mod func;
 

@@ -1,13 +1,15 @@
 use crate::{
     semantics::{
         ctx::{
-            constant::CtxForConstFn,
-            mutable::CtxForMutableFn,
-            Ctx,
             CtxTrait,
             InvariantTag,
             TaggedRef,
             TaggedVal,
+        },
+        ctx_access::{
+            constant::CtxForConstFn,
+            mutable::CtxForMutableFn,
+            CtxAccessor,
         },
         val::{
             RefVal,
@@ -81,14 +83,6 @@ impl FreeCtx {
 }
 
 impl CtxTrait for FreeCtx {
-    fn for_const_fn(&mut self) -> CtxForConstFn {
-        CtxForConstFn::Free
-    }
-
-    fn for_mutable_fn(&mut self) -> CtxForMutableFn {
-        CtxForMutableFn::Free
-    }
-
     fn get(&mut self, _name: &str) -> Val {
         Val::default()
     }
@@ -129,11 +123,14 @@ impl CtxTrait for FreeCtx {
     {
         f(None)
     }
+}
 
-    fn get_super_ctx<T, F>(&mut self, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Ctx>>) -> T,
-    {
-        f(None)
+impl CtxAccessor for FreeCtx {
+    fn for_const_fn(&mut self) -> CtxForConstFn {
+        CtxForConstFn::Free
+    }
+
+    fn for_mutable_fn(&mut self) -> CtxForMutableFn {
+        CtxForMutableFn::Free
     }
 }

@@ -1,9 +1,7 @@
 use crate::{
     semantics::{
-        ctx::{
-            constant::CtxForConstFn,
-            CtxTrait,
-        },
+        ctx::DefaultCtx,
+        ctx_access::constant::CtxForConstFn,
         eval_mode::{
             BasicEvalMode,
             EvalMode,
@@ -32,7 +30,7 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
-    ctx.get_ref_or_val_or_default(input, |ref_or_val| {
+    DefaultCtx.get_ref_val_or_default(&mut ctx, input, |ref_or_val| {
         let f = |val: &Val| {
             let Val::String(s) = val else {
                 return Val::default();
