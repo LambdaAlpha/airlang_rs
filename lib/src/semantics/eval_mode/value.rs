@@ -24,6 +24,7 @@ use crate::{
     },
 };
 
+#[derive(Default)]
 pub(crate) struct Value;
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Value {
@@ -66,6 +67,7 @@ impl<Ctx> ByVal<Ctx, Val> for Value {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct ValueByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for ValueByRef {

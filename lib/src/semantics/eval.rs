@@ -48,6 +48,7 @@ impl DefaultByVal {
         ctx: &mut Ctx,
         first: Val,
         second: Val,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByVal<Ctx, Output>,
@@ -55,26 +56,28 @@ impl DefaultByVal {
     {
         let first = eval.eval(ctx, first);
         let second = eval.eval(ctx, second);
-        Builder::from_pair(first, second)
+        builder.from_pair(first, second)
     }
 
     pub(crate) fn eval_list<Ctx, Output, Eval, Builder>(
         eval: &Eval,
         ctx: &mut Ctx,
         list: ListVal,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByVal<Ctx, Output>,
         Builder: OutputBuilder<Output>,
     {
         let list = list.into_iter().map(|v| eval.eval(ctx, v));
-        Builder::from_list(list)
+        builder.from_list(list)
     }
 
     pub(crate) fn eval_map<Ctx, Output, Eval, Builder>(
         eval: &Eval,
         ctx: &mut Ctx,
         map: MapVal,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByVal<Ctx, Output>,
@@ -85,7 +88,7 @@ impl DefaultByVal {
             let value = eval.eval(ctx, v);
             (key, value)
         });
-        Builder::from_map(map)
+        builder.from_map(map)
     }
 
     pub(crate) fn eval_call<Ctx, Output, Eval, Builder>(
@@ -93,6 +96,7 @@ impl DefaultByVal {
         ctx: &mut Ctx,
         func: Val,
         input: Val,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByVal<Ctx, Output>,
@@ -100,7 +104,7 @@ impl DefaultByVal {
     {
         let func = eval.eval(ctx, func);
         let input = eval.eval(ctx, input);
-        Builder::from_call(func, input)
+        builder.from_call(func, input)
     }
 
     #[allow(unused)]
@@ -109,6 +113,7 @@ impl DefaultByVal {
         ctx: &mut Ctx,
         func: Val,
         output: Val,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByVal<Ctx, Output>,
@@ -116,7 +121,7 @@ impl DefaultByVal {
     {
         let func = eval.eval(ctx, func);
         let output = eval.eval(ctx, output);
-        Builder::from_reverse(func, output)
+        builder.from_reverse(func, output)
     }
 }
 
@@ -148,6 +153,7 @@ impl DefaultByRef {
         ctx: &mut Ctx,
         first: &'a Val,
         second: &'a Val,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByRef<'a, Ctx, Output>,
@@ -155,26 +161,28 @@ impl DefaultByRef {
     {
         let first = eval.eval(ctx, first);
         let second = eval.eval(ctx, second);
-        Builder::from_pair(first, second)
+        builder.from_pair(first, second)
     }
 
     pub(crate) fn eval_list<'a, Ctx, Output, Eval, Builder>(
         eval: &Eval,
         ctx: &mut Ctx,
         list: &'a ListVal,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByRef<'a, Ctx, Output>,
         Builder: OutputBuilder<Output>,
     {
         let list = list.into_iter().map(|v| eval.eval(ctx, v));
-        Builder::from_list(list)
+        builder.from_list(list)
     }
 
     pub(crate) fn eval_map<'a, Ctx, Output, Eval, Builder>(
         eval: &Eval,
         ctx: &mut Ctx,
         map: &'a MapVal,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByRef<'a, Ctx, Output>,
@@ -185,7 +193,7 @@ impl DefaultByRef {
             let value = eval.eval(ctx, v);
             (key, value)
         });
-        Builder::from_map(map)
+        builder.from_map(map)
     }
 
     pub(crate) fn eval_call<'a, Ctx, Output, Eval, Builder>(
@@ -193,6 +201,7 @@ impl DefaultByRef {
         ctx: &mut Ctx,
         func: &'a Val,
         input: &'a Val,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByRef<'a, Ctx, Output>,
@@ -200,7 +209,7 @@ impl DefaultByRef {
     {
         let func = eval.eval(ctx, func);
         let input = eval.eval(ctx, input);
-        Builder::from_call(func, input)
+        builder.from_call(func, input)
     }
 
     #[allow(unused)]
@@ -209,6 +218,7 @@ impl DefaultByRef {
         ctx: &mut Ctx,
         func: &'a Val,
         output: &'a Val,
+        builder: &Builder,
     ) -> Output
     where
         Eval: ByRef<'a, Ctx, Output>,
@@ -216,36 +226,37 @@ impl DefaultByRef {
     {
         let func = eval.eval(ctx, func);
         let output = eval.eval(ctx, output);
-        Builder::from_reverse(func, output)
+        builder.from_reverse(func, output)
     }
 }
 
+#[derive(Default)]
 pub(crate) struct ValBuilder;
 
 impl OutputBuilder<Val> for ValBuilder {
-    fn from_pair(first: Val, second: Val) -> Val {
+    fn from_pair(&self, first: Val, second: Val) -> Val {
         Val::Pair(Box::new(Pair::new(first, second)))
     }
 
-    fn from_list<Iter>(iter: Iter) -> Val
+    fn from_list<Iter>(&self, iter: Iter) -> Val
     where
         Iter: Iterator<Item = Val>,
     {
         Val::List(iter.collect())
     }
 
-    fn from_map<Iter>(kv_iter: Iter) -> Val
+    fn from_map<Iter>(&self, kv_iter: Iter) -> Val
     where
         Iter: Iterator<Item = (Val, Val)>,
     {
         Val::Map(kv_iter.collect())
     }
 
-    fn from_call(func: Val, input: Val) -> Val {
+    fn from_call(&self, func: Val, input: Val) -> Val {
         Val::Call(Box::new(Call::new(func, input)))
     }
 
-    fn from_reverse(func: Val, output: Val) -> Val {
+    fn from_reverse(&self, func: Val, output: Val) -> Val {
         Val::Reverse(Box::new(Reverse::new(func, output)))
     }
 }

@@ -15,14 +15,12 @@ use crate::{
             ValBuilder,
         },
         eval_mode::{
-            inline::{
-                Inline,
-                InlineByRef,
-            },
             value::{
                 Value,
                 ValueByRef,
             },
+            INLINE,
+            INLINE_BY_REF,
         },
         val::{
             FuncVal,
@@ -36,6 +34,7 @@ use crate::{
     types::Symbol,
 };
 
+#[derive(Default)]
 pub(crate) struct Eval;
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Eval
@@ -64,20 +63,20 @@ where
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
-        DefaultByVal::eval_pair::<_, _, _, ValBuilder>(self, ctx, first, second)
+        DefaultByVal::eval_pair(self, ctx, first, second, &ValBuilder)
     }
 
     fn eval_list(&self, ctx: &mut Ctx, list: ListVal) -> Val {
-        DefaultByVal::eval_list::<_, _, _, ValBuilder>(self, ctx, list)
+        DefaultByVal::eval_list(self, ctx, list, &ValBuilder)
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
         let map = map.into_iter().map(|(k, v)| {
-            let key = Inline.eval(ctx, k);
+            let key = INLINE.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
-        ValBuilder::from_map(map)
+        ValBuilder.from_map(map)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
@@ -92,6 +91,7 @@ where
     }
 }
 
+#[derive(Default)]
 pub(crate) struct EvalByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EvalByRef
@@ -120,20 +120,20 @@ where
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
-        DefaultByRef::eval_pair::<_, _, _, ValBuilder>(self, ctx, first, second)
+        DefaultByRef::eval_pair(self, ctx, first, second, &ValBuilder)
     }
 
     fn eval_list(&self, ctx: &mut Ctx, list: &'a ListVal) -> Val {
-        DefaultByRef::eval_list::<_, _, _, ValBuilder>(self, ctx, list)
+        DefaultByRef::eval_list(self, ctx, list, &ValBuilder)
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
         let map = map.into_iter().map(|(k, v)| {
-            let key = InlineByRef.eval(ctx, k);
+            let key = INLINE_BY_REF.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
-        ValBuilder::from_map(map)
+        ValBuilder.from_map(map)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
