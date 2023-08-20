@@ -81,6 +81,8 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::eval_free());
     put_primitive_func(c, eval::eval_mutable());
     put_primitive_func(c, eval::eval_const());
+    put_primitive_func(c, eval::is_ctx_free());
+    put_primitive_func(c, eval::is_ctx_const());
     put_primitive_func(c, eval::parse());
     put_primitive_func(c, eval::stringify());
     put_primitive_func(c, eval::func());
@@ -238,6 +240,8 @@ pub(crate) mod names {
     pub(crate) const EVAL_FREE: &str = "eval_free";
     pub(crate) const EVAL_CONST: &str = "eval_const";
     pub(crate) const EVAL_MUTABLE: &str = "eval_mutable";
+    pub(crate) const IS_CTX_FREE: &str = "is_context_free";
+    pub(crate) const IS_CTX_CONST: &str = "is_context_const";
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "function";

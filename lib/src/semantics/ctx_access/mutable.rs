@@ -85,6 +85,14 @@ impl<'a> CtxTrait for MutableCtx<'a> {
 }
 
 impl<'a> CtxAccessor for MutableCtx<'a> {
+    fn is_ctx_free(&self) -> bool {
+        false
+    }
+
+    fn is_ctx_const(&self) -> bool {
+        false
+    }
+
     fn for_const_fn(&mut self) -> CtxForConstFn {
         CtxForConstFn::Const(self.0)
     }
@@ -188,6 +196,14 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
 }
 
 impl<'a> CtxAccessor for CtxForMutableFn<'a> {
+    fn is_ctx_free(&self) -> bool {
+        matches!(self, CtxForMutableFn::Free)
+    }
+
+    fn is_ctx_const(&self) -> bool {
+        matches!(self, CtxForMutableFn::Free | CtxForMutableFn::Const(_))
+    }
+
     fn for_const_fn(&mut self) -> CtxForConstFn {
         match self {
             CtxForMutableFn::Free => CtxForConstFn::Free,

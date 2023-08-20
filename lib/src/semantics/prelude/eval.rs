@@ -54,6 +54,7 @@ use crate::{
         },
     },
     types::{
+        Bool,
         Either,
         Keeper,
         Reader,
@@ -185,8 +186,8 @@ fn fn_eval_in_ctx<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     };
     let name_or_val = pair.first;
     let val = pair.second;
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name_or_val, |target_ctx| {
-        let f = |target| {
+    DefaultCtx.get_ref_val_or_default(&mut ctx, name_or_val, |target_ctx| match target_ctx {
+        Either::Left(target) => {
             let TaggedRef {
                 val_ref: Val::Ctx(CtxVal(target_ctx)),
                 is_const: target_ctx_const,
@@ -199,10 +200,71 @@ fn fn_eval_in_ctx<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
             } else {
                 Eval.eval(&mut MutableCtx(target_ctx), val)
             }
-        };
-        match target_ctx {
-            Either::Left(r) => f(r),
-            Either::Right(mut val) => f(TaggedRef::new(&mut val, false)),
+        }
+        Either::Right(target) => {
+            let Val::Ctx(CtxVal(mut target_ctx)) = target else {
+                return Val::default();
+            };
+            Eval.eval(&mut MutableCtx(&mut target_ctx), val)
+        }
+    })
+}
+
+pub(crate) fn is_ctx_free() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Interpolate);
+    let primitive = Primitive::<CtxFreeFn>::new(names::IS_CTX_FREE, fn_is_ctx_free);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_is_ctx_free(input: Val) -> Val {
+    let Val::Map(mut map) = input else {
+        return Val::default();
+    };
+    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+        return Val::default();
+    };
+    let value = map_remove(&mut map, "value");
+    let is_ctx_free = eval_mode.is_free(&mut FreeCtx, value);
+    Val::Bool(Bool::new(is_ctx_free))
+}
+
+pub(crate) fn is_ctx_const() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::Basic(BasicEvalMode::Interpolate);
+    let primitive = Primitive::<CtxConstFn>::new(names::IS_CTX_CONST, fn_is_ctx_const);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
+    let Val::Map(mut map) = input else {
+        return Val::default();
+    };
+    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+        return Val::default();
+    };
+    let value = map_remove(&mut map, "value");
+    let target_ctx = map_remove(&mut map, "context");
+    if target_ctx.is_unit() {
+        let is_ctx_const = eval_mode.is_const(&mut ctx, value);
+        return Val::Bool(Bool::new(is_ctx_const));
+    }
+    DefaultCtx.get_ref_val_or_default(&mut ctx, target_ctx, |target_ctx| match target_ctx {
+        Either::Left(target) => {
+            let TaggedRef {
+                val_ref: Val::Ctx(CtxVal(target_ctx)),
+                ..
+            } = target
+            else {
+                return Val::default();
+            };
+            let is_ctx_const = eval_mode.is_const(&mut ConstCtx(target_ctx), value);
+            Val::Bool(Bool::new(is_ctx_const))
+        }
+        Either::Right(target) => {
+            let Val::Ctx(CtxVal(mut target_ctx)) = target else {
+                return Val::default();
+            };
+            let is_ctx_const = eval_mode.is_const(&mut ConstCtx(&mut target_ctx), value);
+            Val::Bool(Bool::new(is_ctx_const))
         }
     })
 }
@@ -254,34 +316,9 @@ fn fn_func(input: Val) -> Val {
         Val::Unit(_) => Symbol::from_str("input"),
         _ => return Val::default(),
     };
-
-    let eval_mode = map_remove(&mut map, "eval_mode");
-    let default_eval_mode = if let Val::Unit(_) = eval_mode {
-        BasicEvalMode::Eval
-    } else if let Some(eval_mode) = parse_eval_mode(eval_mode) {
-        eval_mode
-    } else {
+    let Some(eval_mode) = parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let pair_eval_mode = map_remove(&mut map, "pair_eval_mode");
-    let eval_mode = match pair_eval_mode {
-        Val::Pair(pair) => {
-            let Some(first) = parse_eval_mode(pair.first) else {
-                return Val::default();
-            };
-            let Some(second) = parse_eval_mode(pair.second) else {
-                return Val::default();
-            };
-            EvalMode::Pair {
-                first,
-                second,
-                non_pair: default_eval_mode,
-            }
-        }
-        Val::Unit(_) => EvalMode::Basic(default_eval_mode),
-        _ => return Val::default(),
-    };
-
     let caller_name = match map_remove(&mut map, "caller_name") {
         Val::Symbol(name) => name,
         Val::Unit(_) => Symbol::from_str("caller"),
@@ -326,7 +363,32 @@ fn map_remove(map: &mut MapVal, name: &str) -> Val {
     map.remove(&name).unwrap_or_default()
 }
 
-fn parse_eval_mode(val: Val) -> Option<BasicEvalMode> {
+fn parse_eval_mode(map: &mut MapVal) -> Option<EvalMode> {
+    let eval_mode = map_remove(map, "eval_mode");
+    let default_eval_mode = if let Val::Unit(_) = eval_mode {
+        BasicEvalMode::Eval
+    } else if let Some(eval_mode) = parse_basic_eval_mode(eval_mode) {
+        eval_mode
+    } else {
+        return None;
+    };
+    let pair_eval_mode = map_remove(map, "pair_eval_mode");
+    match pair_eval_mode {
+        Val::Pair(pair) => {
+            let first = parse_basic_eval_mode(pair.first)?;
+            let second = parse_basic_eval_mode(pair.second)?;
+            Some(EvalMode::Pair {
+                first,
+                second,
+                non_pair: default_eval_mode,
+            })
+        }
+        Val::Unit(_) => Some(EvalMode::Basic(default_eval_mode)),
+        _ => None,
+    }
+}
+
+fn parse_basic_eval_mode(val: Val) -> Option<BasicEvalMode> {
     let Val::Symbol(Symbol(name)) = val else {
         return None;
     };

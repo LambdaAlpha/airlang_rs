@@ -23,7 +23,13 @@
     )
 )]
 #![allow(incomplete_features)]
-#![feature(iter_array_chunks, try_trait_v2, unsize, coerce_unsized)]
+#![feature(
+    iter_array_chunks,
+    try_trait_v2,
+    iterator_try_collect,
+    unsize,
+    coerce_unsized
+)]
 
 pub mod syntax;
 

@@ -48,8 +48,8 @@ use {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Func {
-    input_eval_mode: EvalMode,
-    evaluator: FuncEval,
+    pub(crate) input_eval_mode: EvalMode,
+    pub(crate) evaluator: FuncEval,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -102,6 +102,16 @@ pub(crate) struct CtxConstInfo {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMutableInfo {
     pub(crate) name: Symbol,
+}
+
+impl Func {
+    pub(crate) fn is_ctx_free(&self) -> bool {
+        matches!(&self.evaluator, FuncEval::Free(_))
+    }
+
+    pub(crate) fn is_ctx_const(&self) -> bool {
+        matches!(&self.evaluator, FuncEval::Free(_) | FuncEval::Const(_))
+    }
 }
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Func

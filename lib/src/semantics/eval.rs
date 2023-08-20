@@ -51,7 +51,7 @@ impl DefaultByVal {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByVal<Ctx, Output>,
+        Eval: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let first = eval.eval(ctx, first);
@@ -66,7 +66,7 @@ impl DefaultByVal {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByVal<Ctx, Output>,
+        Eval: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let list = list.into_iter().map(|v| eval.eval(ctx, v));
@@ -80,7 +80,7 @@ impl DefaultByVal {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByVal<Ctx, Output>,
+        Eval: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let map = map.into_iter().map(|(k, v)| {
@@ -99,7 +99,7 @@ impl DefaultByVal {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByVal<Ctx, Output>,
+        Eval: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let func = eval.eval(ctx, func);
@@ -116,7 +116,7 @@ impl DefaultByVal {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByVal<Ctx, Output>,
+        Eval: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let func = eval.eval(ctx, func);
@@ -156,7 +156,7 @@ impl DefaultByRef {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByRef<'a, Ctx, Output>,
+        Eval: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let first = eval.eval(ctx, first);
@@ -171,7 +171,7 @@ impl DefaultByRef {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByRef<'a, Ctx, Output>,
+        Eval: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let list = list.into_iter().map(|v| eval.eval(ctx, v));
@@ -185,7 +185,7 @@ impl DefaultByRef {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByRef<'a, Ctx, Output>,
+        Eval: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let map = map.into_iter().map(|(k, v)| {
@@ -204,7 +204,7 @@ impl DefaultByRef {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByRef<'a, Ctx, Output>,
+        Eval: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let func = eval.eval(ctx, func);
@@ -221,7 +221,7 @@ impl DefaultByRef {
         builder: &Builder,
     ) -> Output
     where
-        Eval: ByRef<'a, Ctx, Output>,
+        Eval: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let func = eval.eval(ctx, func);
@@ -230,7 +230,6 @@ impl DefaultByRef {
     }
 }
 
-#[derive(Default)]
 pub(crate) struct ValBuilder;
 
 impl OutputBuilder<Val> for ValBuilder {
@@ -258,6 +257,69 @@ impl OutputBuilder<Val> for ValBuilder {
 
     fn from_reverse(&self, func: Val, output: Val) -> Val {
         Val::Reverse(Box::new(Reverse::new(func, output)))
+    }
+}
+
+pub(crate) struct BoolAndBuilder;
+
+impl OutputBuilder<bool> for BoolAndBuilder {
+    fn from_pair(&self, first: bool, second: bool) -> bool {
+        first && second
+    }
+
+    fn from_list<Iter>(&self, mut iter: Iter) -> bool
+    where
+        Iter: Iterator<Item = bool>,
+    {
+        iter.all(|b| b)
+    }
+
+    fn from_map<Iter>(&self, mut kv_iter: Iter) -> bool
+    where
+        Iter: Iterator<Item = (bool, bool)>,
+    {
+        kv_iter.all(|(k, v)| k && v)
+    }
+
+    fn from_call(&self, func: bool, input: bool) -> bool {
+        func && input
+    }
+
+    fn from_reverse(&self, func: bool, output: bool) -> bool {
+        func && output
+    }
+}
+
+pub(crate) struct OpValBuilder;
+
+impl OutputBuilder<Option<Val>> for OpValBuilder {
+    fn from_pair(&self, first: Option<Val>, second: Option<Val>) -> Option<Val> {
+        Some(ValBuilder.from_pair(first?, second?))
+    }
+
+    fn from_list<Iter>(&self, mut iter: Iter) -> Option<Val>
+    where
+        Iter: Iterator<Item = Option<Val>>,
+    {
+        iter.try_collect().map(Val::List)
+    }
+
+    fn from_map<Iter>(&self, kv_iter: Iter) -> Option<Val>
+    where
+        Iter: Iterator<Item = (Option<Val>, Option<Val>)>,
+    {
+        kv_iter
+            .map(|(k, v)| Some((k?, v?)))
+            .try_collect()
+            .map(Val::Map)
+    }
+
+    fn from_call(&self, func: Option<Val>, input: Option<Val>) -> Option<Val> {
+        Some(ValBuilder.from_call(func?, input?))
+    }
+
+    fn from_reverse(&self, func: Option<Val>, output: Option<Val>) -> Option<Val> {
+        Some(ValBuilder.from_reverse(func?, output?))
     }
 }
 

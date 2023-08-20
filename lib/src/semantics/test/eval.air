@@ -138,6 +138,174 @@ eval_free ((' get1) (1 : 2))
 # ---
 '
 # ===
+is_context_free {value : 1}
+# ---
+'t
+# ===
+is_context_free {value : a}
+# ---
+'f
+# ===
+is_context_free {value : a, eval_mode : eval}
+# ---
+'f
+# ===
+is_context_free {value : (1 : a)}
+# ---
+'f
+# ===
+is_context_free {value : (1 : "a")}
+# ---
+'t
+# ===
+is_context_free {value : (1 : a), pair_eval_mode : (eval : value)}
+# ---
+'t
+# ===
+is_context_free {value : [1, a]}
+# ---
+'f
+# ===
+is_context_free {value : [1, "a"]}
+# ---
+'t
+# ===
+is_context_free {value : {a : 1, 1 : a}}
+# ---
+'f
+# ===
+is_context_free {value : {a : 1, 1 : "a"}}
+# ---
+'t
+# ===
+is_context_free {value : {(eval a) : 1, 1 : "a"}}
+# ---
+'f
+# ===
+is_context_free {value : (f 1)}
+# ---
+'f
+# ===
+is_context_free {value : ((' not) 't)}
+# ---
+'t
+# ===
+is_context_free {value : ((' not) a)}
+# ---
+'f
+# ===
+is_context_free {value : ((' get1) 1)}
+# ---
+'f
+# ===
+is_context_free {value : a, eval_mode : value}
+# ---
+'t
+# ===
+is_context_free {value : [a, (' not) 't], eval_mode : inline}
+# ---
+'t
+# ===
+is_context_free {value : [eval a], eval_mode : inline}
+# ---
+'f
+# ===
+is_context_free {value : ((' ') a), eval_mode : interpolate}
+# ---
+'f
+# ===
+is_context_free {value : [a, ((' ') 1)], eval_mode : interpolate}
+# ---
+'t
+# ===
+is_context_const {value : a}
+# ---
+'t
+# ===
+is_context_const {value : (a : b)}
+# ---
+'t
+# ===
+is_context_const {value : (a : (move a))}
+# ---
+'f
+# ===
+is_context_const {value : (a : (move a)), pair_eval_mode : (eval : value)}
+# ---
+'t
+# ===
+is_context_const {value : [1, a]}
+# ---
+'t
+# ===
+is_context_const {value : [1, move a]}
+# ---
+'f
+# ===
+is_context_const {value : {a : 1, (move a) : a}}
+# ---
+'f
+# ===
+is_context_const {value : {a : 1, a : (move a)}}
+# ---
+'f
+# ===
+is_context_const {value : {a : 1, a : a}}
+# ---
+'t
+# ===
+is_context_const {value : (get1 a)}
+# ---
+'t
+# ===
+is_context_const {value : (move a)}
+# ---
+'f
+# ===
+is_context_const {value : (move a), eval_mode : eval}
+# ---
+'f
+# ===
+is_context_const {value : (not (move a))}
+# ---
+'f
+# ===
+is_context_const {value : (; [])}
+# ---
+'f
+# ===
+is_context_const {value : (f (move a))}
+# ---
+'t
+# ===
+is_context_const {value : (move a), eval_mode : value}
+# ---
+'t
+# ===
+is_context_const {value : ((' move) a), eval_mode : inline}
+# ---
+'f
+# ===
+is_context_const {value : ((' value) a), eval_mode : inline}
+# ---
+'t
+# ===
+is_context_const {value : ((' ') (move a)), eval_mode : interpolate}
+# ---
+'f
+# ===
+is_context_const {value : [move a, (' ') a], eval_mode : interpolate}
+# ---
+'t
+# ===
+;[c = (context {const : {move : not}}), is_context_const {value : (move a), context : c}]
+# ---
+'t
+# ===
+;[c = (ref (context {const : {move : not}})), is_context_const {value : (move a), context : c}]
+# ---
+'t
+# ===
 ;[
     f = (function{
         body : input,

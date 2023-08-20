@@ -126,6 +126,14 @@ impl CtxTrait for FreeCtx {
 }
 
 impl CtxAccessor for FreeCtx {
+    fn is_ctx_free(&self) -> bool {
+        true
+    }
+
+    fn is_ctx_const(&self) -> bool {
+        true
+    }
+
     fn for_const_fn(&mut self) -> CtxForConstFn {
         CtxForConstFn::Free
     }

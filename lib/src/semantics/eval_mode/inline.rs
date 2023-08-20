@@ -21,7 +21,6 @@ use crate::{
     types::Symbol,
 };
 
-#[derive(Default)]
 pub(crate) struct Inline<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
@@ -80,7 +79,6 @@ where
     }
 }
 
-#[derive(Default)]
 pub(crate) struct InlineByRef<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,

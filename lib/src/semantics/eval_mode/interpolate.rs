@@ -21,7 +21,6 @@ use crate::{
     types::Symbol,
 };
 
-#[derive(Default)]
 pub(crate) struct Interpolate<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
@@ -84,7 +83,6 @@ where
     }
 }
 
-#[derive(Default)]
 pub(crate) struct InterpolateByRef<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
