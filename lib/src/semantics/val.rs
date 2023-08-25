@@ -6,6 +6,10 @@ use {
                 TaggedVal,
             },
             func::Func,
+            logic::{
+                Prop,
+                Theorem,
+            },
             ReprError,
         },
         syntax::{
@@ -70,6 +74,9 @@ pub enum Val {
 
     Func(FuncVal),
     Ctx(CtxVal),
+
+    Prop(PropVal),
+    Theorem(TheoremVal),
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
@@ -86,6 +93,12 @@ pub struct FuncVal(pub(crate) Reader<Func>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CtxVal(pub(crate) Box<Ctx>);
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PropVal(pub(crate) Reader<Prop>);
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct TheoremVal(pub(crate) Reader<Theorem>);
 
 #[allow(dead_code)]
 impl Val {
@@ -187,6 +200,18 @@ impl From<FuncVal> for Val {
 impl From<CtxVal> for Val {
     fn from(value: CtxVal) -> Self {
         Val::Ctx(value)
+    }
+}
+
+impl From<PropVal> for Val {
+    fn from(value: PropVal) -> Self {
+        Val::Prop(value)
+    }
+}
+
+impl From<TheoremVal> for Val {
+    fn from(value: TheoremVal) -> Self {
+        Val::Theorem(value)
     }
 }
 
@@ -539,5 +564,17 @@ impl Hash for FuncVal {
 impl From<Box<Ctx>> for CtxVal {
     fn from(value: Box<Ctx>) -> Self {
         CtxVal(value)
+    }
+}
+
+impl From<Reader<Prop>> for PropVal {
+    fn from(value: Reader<Prop>) -> Self {
+        PropVal(value)
+    }
+}
+
+impl From<Reader<Theorem>> for TheoremVal {
+    fn from(value: Reader<Theorem>) -> Self {
+        TheoremVal(value)
     }
 }

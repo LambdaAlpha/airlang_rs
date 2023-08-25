@@ -29,6 +29,7 @@ pub(crate) fn prelude() -> NameMap {
     prelude_ctx(&mut c);
     prelude_ctrl(&mut c);
     prelude_eval(&mut c);
+    prelude_logic(&mut c);
     prelude_bool(&mut c);
     prelude_int(&mut c);
     prelude_str(&mut c);
@@ -87,6 +88,21 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::stringify());
     put_primitive_func(c, eval::func());
     put_primitive_func(c, eval::chain());
+}
+
+fn prelude_logic(c: &mut NameMap) {
+    put_primitive_func(c, logic::new_prop());
+    put_primitive_func(c, logic::new_theorem());
+    put_primitive_func(c, logic::prove());
+    put_primitive_func(c, logic::relax());
+    put_primitive_func(c, logic::is_true());
+    put_primitive_func(c, logic::get_access());
+    put_primitive_func(c, logic::get_eval_mode());
+    put_primitive_func(c, logic::get_pair_eval_mode());
+    put_primitive_func(c, logic::get_input());
+    put_primitive_func(c, logic::get_output());
+    put_primitive_func(c, logic::get_before());
+    put_primitive_func(c, logic::get_after());
 }
 
 fn prelude_bool(c: &mut NameMap) {
@@ -247,6 +263,19 @@ pub(crate) mod names {
     pub(crate) const FUNC: &str = "function";
     pub(crate) const CHAIN: &str = ".";
 
+    pub(crate) const LOGIC_NEW_PROP: &str = "proposition";
+    pub(crate) const LOGIC_NEW_THEOREM: &str = "theorem";
+    pub(crate) const LOGIC_PROVE: &str = "prove";
+    pub(crate) const LOGIC_RELAX: &str = "relax";
+    pub(crate) const LOGIC_IS_TRUE: &str = "is_true";
+    pub(crate) const LOGIC_ACCESS: &str = "!access";
+    pub(crate) const LOGIC_EVAL_MODE: &str = "!eval_mode";
+    pub(crate) const LOGIC_PAIR_EVAL_MODE: &str = "!pair_eval_mode";
+    pub(crate) const LOGIC_INPUT: &str = "!input";
+    pub(crate) const LOGIC_OUTPUT: &str = "!output";
+    pub(crate) const LOGIC_CTX_BEFORE: &str = "!before";
+    pub(crate) const LOGIC_CTX_AFTER: &str = "!after";
+
     pub(crate) const NOT: &str = "not";
     pub(crate) const AND: &str = "and";
     pub(crate) const OR: &str = "or";
@@ -307,6 +336,8 @@ mod ctrl;
 
 mod eval;
 
+mod logic;
+
 mod bool;
 
 mod int;
@@ -318,3 +349,5 @@ mod pair;
 mod list;
 
 mod map;
+
+mod utils;

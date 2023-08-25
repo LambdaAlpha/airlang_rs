@@ -1,0 +1,536 @@
+proposition {
+    input : 1,
+    output : 1,
+    access : (value free),
+}
+# ---
+'
+# ===
+proposition {
+    input : (ref 1),
+    output : (ref 1),
+    access : (value free),
+}
+# ---
+'
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 2),
+        access : (value free),
+    }),
+    .. (!input p)
+]
+# ---
+1
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 2),
+        access : (value free),
+    }),
+    .. (!output p)
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {var : {a : 2}})),
+    }),
+    ctx = (!before p),
+    ctx eval_const a
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {var : {a : 2}})),
+    }),
+    ctx = (!after p),
+    ctx eval_const a
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value mutable),
+        before : (const_ref (context {var : {a : 2}})),
+        after : (const_ref (context {var : {a : 2}})),
+    }),
+    ctx = (!before p),
+    ctx eval_const a
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value mutable),
+        before : (const_ref (context {var : {a : 2}})),
+        after : (const_ref (context {var : {a : 2}})),
+    }),
+    ctx = (!after p),
+    ctx eval_const a
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    !eval_mode p
+]
+# ---
+eval
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    !pair_eval_mode p
+]
+# ---
+eval : eval
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        pair_eval_mode : (value (eval : value)),
+        access : (value free),
+    }),
+    !pair_eval_mode p
+]
+# ---
+eval : value
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    !access p
+]
+# ---
+free
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    .. (!input t)
+]
+# ---
+1
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    .. (!output t)
+]
+# ---
+1
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    !access t
+]
+# ---
+free
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    !eval_mode t
+]
+# ---
+eval
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    !pair_eval_mode t
+]
+# ---
+eval : eval
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    is_true t
+]
+# ---
+'t
+# ===
+;[
+    t = (theorem {
+        input : (const_ref (interpolate ((' not) 't))),
+        access : (value free),
+    }),
+    .. (!output t)
+]
+# ---
+'f
+# ===
+theorem {
+    input : (const_ref (interpolate ((' move) 1))),
+    access : (value free),
+}
+# ---
+'
+# ===
+;[
+    t = (theorem {
+        input : (const_ref (value (not 't))),
+        access : (value const),
+        context : (const_ref (context {
+            var : {
+                not,
+            }
+        }))
+    }),
+    .. (!output t)
+]
+# ---
+'f
+# ===
+;[
+    t = (theorem {
+        input : (const_ref (value (;[a = 1, a]))),
+        context : (const_ref (context {
+            const : {
+                ;,
+                =,
+            }
+        }))
+    }),
+    .. (!output t)
+]
+# ---
+1
+# ===
+;[
+    t = (theorem {
+        input : (const_ref (value (;[a = 1, a]))),
+        context : (const_ref (context {
+            const : {
+                ;,
+                =,
+            }
+        }))
+    }),
+    (!before t) eval_const ((' is_null) a)
+]
+# ---
+'t
+# ===
+;[
+    t = (theorem {
+        input : (const_ref (value (;[a = 1, a]))),
+        context : (const_ref (context {
+            const : {
+                ;,
+                =,
+            }
+        }))
+    }),
+    (!after t) eval_const ((' is_null) a)
+]
+# ---
+'f
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    t = (prove p),
+    is_true t
+]
+# ---
+'t
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 2),
+        access : (value free),
+    }),
+    t = (prove p),
+    is_true t
+]
+# ---
+'f
+# ===
+;[
+    p = (proposition {
+        input : 1,
+        output : 1,
+        access : (value free),
+    }),
+    prove p
+]
+# ---
+'
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    p1 = (p relax {
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    !access p1
+]
+# ---
+const
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    p1 = (p relax {
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    (!before p1) eval_const a
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    p1 = (p relax {
+        access : (value mutable),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    (!before p1) eval_const a
+]
+# ---
+2
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    p1 = (p relax {
+        access : (value mutable),
+    }),
+    !access p1
+]
+# ---
+mutable
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    p relax {
+        access : (value mutable),
+        context : (const_ref (context {}))
+    }
+]
+# ---
+'
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    p relax {
+        access : (value const),
+    }
+]
+# ---
+'
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 1),
+        access : (value free),
+    }),
+    p relax {
+        access : (value const),
+        context : (ref (context {
+            var : {a : 2}
+        }))
+    }
+]
+# ---
+'
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    t1 = (t relax {
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    (!before t1) eval_const a
+]
+# ---
+2
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    t1 = (t relax {
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    is_true t1
+]
+# ---
+'t
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    t1 = (t relax {
+        access : (value mutable),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    is_true t1
+]
+# ---
+'t
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    t1 = (t relax {
+        access : (value mutable),
+    }),
+    is_true t1
+]
+# ---
+'t
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }),
+    t relax {
+        access : (value const),
+    }
+]
+# ---
+'
+# ===
+;[
+    p = (proposition {
+        input : (const_ref 1),
+        output : (const_ref 2),
+        access : (value free),
+    }),
+    t = (prove p),
+    t relax {
+        access : (value const),
+        context : (const_ref (context {
+            var : {a : 2}
+        }))
+    }
+]
+# ---
+'
+# ===
+;[
+    t = (theorem {
+        input : (const_ref 1),
+        access : (value free),
+    }),
+    t relax {
+        access : (value mutable),
+        context : (ref (context {
+            var : {a : 2}
+        }))
+    }
+]
+# ---
+'

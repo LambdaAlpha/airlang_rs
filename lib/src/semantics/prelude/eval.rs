@@ -45,11 +45,11 @@ use crate::{
         },
         prelude::{
             names,
+            utils,
             PrimitiveFunc,
         },
         val::{
             CtxVal,
-            MapVal,
             Val,
         },
     },
@@ -220,10 +220,10 @@ fn fn_is_ctx_free(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+    let Some(eval_mode) = utils::parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let value = map_remove(&mut map, "value");
+    let value = utils::map_remove(&mut map, "value");
     let is_ctx_free = eval_mode.is_free(&mut FreeCtx, value);
     Val::Bool(Bool::new(is_ctx_free))
 }
@@ -238,11 +238,11 @@ fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+    let Some(eval_mode) = utils::parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let value = map_remove(&mut map, "value");
-    let target_ctx = map_remove(&mut map, "context");
+    let value = utils::map_remove(&mut map, "value");
+    let target_ctx = utils::map_remove(&mut map, "context");
     if target_ctx.is_unit() {
         let is_ctx_const = eval_mode.is_const(&mut ctx, value);
         return Val::Bool(Bool::new(is_ctx_const));
@@ -305,101 +305,54 @@ fn fn_func(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let body = map_remove(&mut map, "body");
-    let func_ctx = match map_remove(&mut map, "context") {
+    let body = utils::map_remove(&mut map, "body");
+    let func_ctx = match utils::map_remove(&mut map, "context") {
         Val::Ctx(func_ctx) => *func_ctx.0,
         Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
-    let input_name = match map_remove(&mut map, "input") {
+    let input_name = match utils::map_remove(&mut map, "input") {
         Val::Symbol(name) => name,
         Val::Unit(_) => Symbol::from_str("input"),
         _ => return Val::default(),
     };
-    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+    let Some(eval_mode) = utils::parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let caller_name = match map_remove(&mut map, "caller_name") {
+    let caller_name = match utils::map_remove(&mut map, "caller_name") {
         Val::Symbol(name) => name,
         Val::Unit(_) => Symbol::from_str("caller"),
         _ => return Val::default(),
     };
-    let evaluator = match map_remove(&mut map, "caller_access") {
-        Val::Symbol(s) => match &*s {
-            "free" => FuncEval::Free(FuncImpl::Composed(Composed {
-                body,
-                ctx: func_ctx,
-                input_name,
-                caller: CtxFreeInfo {},
-            })),
-            "const" => FuncEval::Const(FuncImpl::Composed(Composed {
-                body,
-                ctx: func_ctx,
-                input_name,
-                caller: CtxConstInfo { name: caller_name },
-            })),
-            "mutable" => FuncEval::Mutable(FuncImpl::Composed(Composed {
-                body,
-                ctx: func_ctx,
-                input_name,
-                caller: CtxMutableInfo { name: caller_name },
-            })),
-            _ => return Val::default(),
-        },
-        Val::Unit(_) => FuncEval::Free(FuncImpl::Composed(Composed {
+    let caller_access = utils::map_remove(&mut map, "caller_access");
+    let caller_access = match &caller_access {
+        Val::Symbol(s) => &**s,
+        Val::Unit(_) => "free",
+        _ => return Val::default(),
+    };
+    let evaluator = match caller_access {
+        "free" => FuncEval::Free(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxFreeInfo {},
         })),
+        "const" => FuncEval::Const(FuncImpl::Composed(Composed {
+            body,
+            ctx: func_ctx,
+            input_name,
+            caller: CtxConstInfo { name: caller_name },
+        })),
+        "mutable" => FuncEval::Mutable(FuncImpl::Composed(Composed {
+            body,
+            ctx: func_ctx,
+            input_name,
+            caller: CtxMutableInfo { name: caller_name },
+        })),
         _ => return Val::default(),
     };
     let func = Func::new(eval_mode, evaluator);
     Val::Func(Reader::new(func).into())
-}
-
-fn map_remove(map: &mut MapVal, name: &str) -> Val {
-    let name = Val::Symbol(Symbol::from_str(name));
-    map.remove(&name).unwrap_or_default()
-}
-
-fn parse_eval_mode(map: &mut MapVal) -> Option<EvalMode> {
-    let eval_mode = map_remove(map, "eval_mode");
-    let default_eval_mode = if let Val::Unit(_) = eval_mode {
-        BasicEvalMode::Eval
-    } else if let Some(eval_mode) = parse_basic_eval_mode(eval_mode) {
-        eval_mode
-    } else {
-        return None;
-    };
-    let pair_eval_mode = map_remove(map, "pair_eval_mode");
-    match pair_eval_mode {
-        Val::Pair(pair) => {
-            let first = parse_basic_eval_mode(pair.first)?;
-            let second = parse_basic_eval_mode(pair.second)?;
-            Some(EvalMode::Pair {
-                first,
-                second,
-                non_pair: default_eval_mode,
-            })
-        }
-        Val::Unit(_) => Some(EvalMode::Basic(default_eval_mode)),
-        _ => None,
-    }
-}
-
-fn parse_basic_eval_mode(val: Val) -> Option<BasicEvalMode> {
-    let Val::Symbol(Symbol(name)) = val else {
-        return None;
-    };
-    let eval_mode = match &*name {
-        names::VALUE => BasicEvalMode::Value,
-        names::EVAL => BasicEvalMode::Eval,
-        names::EVAL_INTERPOLATE => BasicEvalMode::Interpolate,
-        names::EVAL_INLINE => BasicEvalMode::Inline,
-        _ => return None,
-    };
-    Some(eval_mode)
 }
 
 pub(crate) fn chain() -> PrimitiveFunc<CtxMutableFn> {

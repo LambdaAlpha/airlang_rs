@@ -78,6 +78,8 @@ pub(crate) mod func;
 
 pub(crate) mod eval_mode;
 
+pub(crate) mod logic;
+
 pub(crate) mod prelude;
 
 #[cfg(test)]

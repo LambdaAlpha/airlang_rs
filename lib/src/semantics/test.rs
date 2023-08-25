@@ -56,13 +56,18 @@ fn test_ctrl() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_bool() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/bool.air"))
+fn test_eval() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/eval.air"))
 }
 
 #[test]
-fn test_eval() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/eval.air"))
+fn test_logic() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/logic.air"))
+}
+
+#[test]
+fn test_bool() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/bool.air"))
 }
 
 #[test]
