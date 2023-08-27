@@ -22,15 +22,15 @@ eval (not 'f)
 # ---
 't
 # ===
-interpolate [a, f a, a : b, f ? a, {a : b}]
+quote [a, f a, a : b, f ? a, {a : b}]
 # ---
 [a, f a, a : b, f ? a, {a : b}]
 # ===
-interpolate {a : b, c : (' (not 'f))}
+quote {a : b, c : (' (not 'f))}
 # ---
 {a : b, c : 't}
 # ===
-interpolate [a, b : [' (not 't)]]
+quote [a, b : [' (not 't)]]
 # ---
 [a, b : ['f]]
 # ===
@@ -210,11 +210,11 @@ is_context_free {value : [eval a], eval_mode : inline}
 # ---
 'f
 # ===
-is_context_free {value : ((' ') a), eval_mode : interpolate}
+is_context_free {value : ((' ') a), eval_mode : quote}
 # ---
 'f
 # ===
-is_context_free {value : [a, ((' ') 1)], eval_mode : interpolate}
+is_context_free {value : [a, ((' ') 1)], eval_mode : quote}
 # ---
 't
 # ===
@@ -290,11 +290,11 @@ is_context_const {value : ((' value) a), eval_mode : inline}
 # ---
 't
 # ===
-is_context_const {value : ((' ') (move a)), eval_mode : interpolate}
+is_context_const {value : ((' ') (move a)), eval_mode : quote}
 # ---
 'f
 # ===
-is_context_const {value : [move a, (' ') a], eval_mode : interpolate}
+is_context_const {value : [move a, (' ') a], eval_mode : quote}
 # ---
 't
 # ===
@@ -368,7 +368,7 @@ not 't
 ;[
     f = (function{
         body : input,
-        eval_mode : interpolate,
+        eval_mode : quote,
     }),
     f (not 't)
 ]
@@ -378,7 +378,7 @@ not 't
 ;[
     f = (function{
         body : input,
-        eval_mode : interpolate,
+        eval_mode : quote,
     }),
     f (' (not 't))
 ]

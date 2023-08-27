@@ -197,7 +197,7 @@ eval : eval
 # ===
 ;[
     t = (theorem {
-        input : (const_ref (interpolate ((' not) 't))),
+        input : (const_ref (quote ((' not) 't))),
         access : (value free),
     }),
     .. (!output t)
@@ -206,7 +206,7 @@ eval : eval
 'f
 # ===
 theorem {
-    input : (const_ref (interpolate ((' move) 1))),
+    input : (const_ref (quote ((' move) 1))),
     access : (value free),
 }
 # ---

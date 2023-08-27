@@ -75,7 +75,7 @@ fn prelude_ctrl(c: &mut NameMap) {
 fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::value());
     put_primitive_func(c, eval::eval());
-    put_primitive_func(c, eval::eval_interpolate());
+    put_primitive_func(c, eval::eval_quote());
     put_primitive_func(c, eval::eval_inline());
     put_primitive_func(c, eval::eval_twice());
     put_primitive_func(c, eval::eval_thrice());
@@ -249,7 +249,7 @@ pub(crate) mod names {
 
     pub(crate) const VALUE: &str = "value";
     pub(crate) const EVAL: &str = "eval";
-    pub(crate) const EVAL_INTERPOLATE: &str = "interpolate";
+    pub(crate) const EVAL_QUOTE: &str = "quote";
     pub(crate) const EVAL_INLINE: &str = "inline";
     pub(crate) const EVAL_TWICE: &str = "eval2";
     pub(crate) const EVAL_THRICE: &str = "eval3";

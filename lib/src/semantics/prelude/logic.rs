@@ -37,7 +37,7 @@ use crate::{
 };
 
 pub(crate) fn new_prop() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_NEW_PROP, fn_new_prop);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -95,7 +95,7 @@ fn fn_new_prop(input: Val) -> Val {
 }
 
 pub(crate) fn new_theorem() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_NEW_THEOREM, fn_new_theorem);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -146,7 +146,7 @@ fn fn_new_theorem(input: Val) -> Val {
 }
 
 pub(crate) fn prove() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_PROVE, fn_prove);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -162,10 +162,9 @@ fn fn_prove(input: Val) -> Val {
 }
 
 pub(crate) fn relax() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Eval,
-        second: BasicEvalMode::Eval,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Eval, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_RELAX, fn_relax);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -235,7 +234,7 @@ fn fn_relax(input: Val) -> Val {
 }
 
 pub(crate) fn is_true() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_IS_TRUE, fn_is_true);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -248,7 +247,7 @@ fn fn_is_true(input: Val) -> Val {
 }
 
 pub(crate) fn get_access() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_ACCESS, fn_get_access);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -268,7 +267,7 @@ fn fn_get_access(input: Val) -> Val {
 }
 
 pub(crate) fn get_eval_mode() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_EVAL_MODE, fn_get_eval_mode);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -280,15 +279,12 @@ fn fn_get_eval_mode(input: Val) -> Val {
         _ => return Val::default(),
     };
     let eval_mode = prop.eval_mode();
-    let s = match eval_mode {
-        EvalMode::Basic(eval_mode) => basic_eval_mode_to_symbol(eval_mode),
-        EvalMode::Pair { non_pair, .. } => basic_eval_mode_to_symbol(non_pair),
-    };
+    let s = basic_eval_mode_to_symbol(eval_mode.default);
     Val::Symbol(s)
 }
 
 pub(crate) fn get_pair_eval_mode() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_PAIR_EVAL_MODE, fn_get_pair_eval_mode);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -300,12 +296,12 @@ fn fn_get_pair_eval_mode(input: Val) -> Val {
         _ => return Val::default(),
     };
     let eval_mode = prop.eval_mode();
-    let (first, second) = match eval_mode {
-        EvalMode::Basic(eval_mode) => {
-            let s = basic_eval_mode_to_symbol(eval_mode);
+    let (first, second) = match eval_mode.pair {
+        None => {
+            let s = basic_eval_mode_to_symbol(eval_mode.default);
             (s.clone(), s)
         }
-        EvalMode::Pair { first, second, .. } => {
+        Some((first, second)) => {
             let first = basic_eval_mode_to_symbol(first);
             let second = basic_eval_mode_to_symbol(second);
             (first, second)
@@ -315,7 +311,7 @@ fn fn_get_pair_eval_mode(input: Val) -> Val {
 }
 
 pub(crate) fn get_input() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_INPUT, fn_get_input);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -330,7 +326,7 @@ fn fn_get_input(input: Val) -> Val {
 }
 
 pub(crate) fn get_output() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_OUTPUT, fn_get_output);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -345,7 +341,7 @@ fn fn_get_output(input: Val) -> Val {
 }
 
 pub(crate) fn get_before() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_CTX_BEFORE, fn_get_before);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -365,7 +361,7 @@ fn fn_get_before(input: Val) -> Val {
 }
 
 pub(crate) fn get_after() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_CTX_AFTER, fn_get_after);
     PrimitiveFunc::new(eval_mode, primitive)
 }

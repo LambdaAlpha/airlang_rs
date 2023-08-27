@@ -24,9 +24,9 @@ use crate::semantics::{
             Inline,
             InlineByRef,
         },
-        interpolate::{
-            Interpolate,
-            InterpolateByRef,
+        quote::{
+            Quote,
+            QuoteByRef,
         },
         value::{
             Value,
@@ -43,21 +43,26 @@ use crate::semantics::{
 pub(crate) enum BasicEvalMode {
     Value,
     Eval,
-    Interpolate,
+    Quote,
     Inline,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum EvalMode {
-    Basic(BasicEvalMode),
-    Pair {
-        first: BasicEvalMode,
-        second: BasicEvalMode,
-        non_pair: BasicEvalMode,
-    },
+pub(crate) struct EvalMode {
+    pub(crate) default: BasicEvalMode,
+    pub(crate) pair: Option<(BasicEvalMode, BasicEvalMode)>,
 }
 
-const INTERPOLATE: Interpolate<Eval, Value, ValBuilder> = Interpolate {
+impl EvalMode {
+    pub(crate) fn basic(eval_mode: BasicEvalMode) -> Self {
+        Self {
+            default: eval_mode,
+            pair: None,
+        }
+    }
+}
+
+const QUOTE: Quote<Eval, Value, ValBuilder> = Quote {
     eval: Eval,
     value: Value,
     builder: ValBuilder,
@@ -74,7 +79,7 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_generic(ctx, input, &Eval, &Value, &INLINE, &INTERPOLATE)
+        self.eval_generic(ctx, input, &Eval, &Value, &INLINE, &QUOTE)
     }
 }
 
@@ -83,19 +88,11 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_generic(
-            ctx,
-            input,
-            &Eval,
-            &Value,
-            &INLINE,
-            &INTERPOLATE,
-            &ValBuilder,
-        )
+        self.eval_generic(ctx, input, &Eval, &Value, &INLINE, &QUOTE, &ValBuilder)
     }
 }
 
-const INTERPOLATE_BY_REF: InterpolateByRef<EvalByRef, ValueByRef, ValBuilder> = InterpolateByRef {
+const QUOTE_BY_REF: QuoteByRef<EvalByRef, ValueByRef, ValBuilder> = QuoteByRef {
     eval: EvalByRef,
     value: ValueByRef,
     builder: ValBuilder,
@@ -118,7 +115,7 @@ where
             &EvalByRef,
             &ValueByRef,
             &INLINE_BY_REF,
-            &INTERPOLATE_BY_REF,
+            &QUOTE_BY_REF,
         )
     }
 }
@@ -134,13 +131,13 @@ where
             &EvalByRef,
             &ValueByRef,
             &INLINE_BY_REF,
-            &INTERPOLATE_BY_REF,
+            &QUOTE_BY_REF,
             &ValBuilder,
         )
     }
 }
 
-const INTERPOLATE_FREE: Interpolate<EvalFree, ValueFreeConst, OpValBuilder> = Interpolate {
+const QUOTE_FREE: Quote<EvalFree, ValueFreeConst, OpValBuilder> = Quote {
     eval: EvalFree,
     value: ValueFreeConst,
     builder: OpValBuilder,
@@ -164,7 +161,7 @@ impl BasicEvalMode {
             &EvalFree,
             &ValueFreeConst,
             &INLINE_FREE,
-            &INTERPOLATE_FREE,
+            &QUOTE_FREE,
         )
     }
 }
@@ -180,14 +177,14 @@ impl EvalMode {
             &EvalFree,
             &ValueFreeConst,
             &INLINE_FREE,
-            &INTERPOLATE_FREE,
+            &QUOTE_FREE,
             &OpValBuilder,
         )
     }
 }
 
-const INTERPOLATE_FREE_BY_REF: InterpolateByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
-    InterpolateByRef {
+const QUOTE_FREE_BY_REF: QuoteByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
+    QuoteByRef {
         eval: EvalFreeByRef,
         value: ValueFreeConstByRef,
         builder: OpValBuilder,
@@ -212,7 +209,7 @@ impl BasicEvalMode {
             &EvalFreeByRef,
             &ValueFreeConstByRef,
             &INLINE_FREE_BY_REF,
-            &INTERPOLATE_FREE_BY_REF,
+            &QUOTE_FREE_BY_REF,
         )
     }
 }
@@ -228,13 +225,13 @@ impl EvalMode {
             &EvalFreeByRef,
             &ValueFreeConstByRef,
             &INLINE_FREE_BY_REF,
-            &INTERPOLATE_FREE_BY_REF,
+            &QUOTE_FREE_BY_REF,
             &OpValBuilder,
         )
     }
 }
 
-const INTERPOLATE_CONST: Interpolate<EvalConst, ValueFreeConst, OpValBuilder> = Interpolate {
+const QUOTE_CONST: Quote<EvalConst, ValueFreeConst, OpValBuilder> = Quote {
     eval: EvalConst,
     value: ValueFreeConst,
     builder: OpValBuilder,
@@ -258,7 +255,7 @@ impl BasicEvalMode {
             &EvalConst,
             &ValueFreeConst,
             &INLINE_CONST,
-            &INTERPOLATE_CONST,
+            &QUOTE_CONST,
         )
     }
 }
@@ -274,21 +271,18 @@ impl EvalMode {
             &EvalConst,
             &ValueFreeConst,
             &INLINE_CONST,
-            &INTERPOLATE_CONST,
+            &QUOTE_CONST,
             &OpValBuilder,
         )
     }
 }
 
-const INTERPOLATE_CONST_BY_REF: InterpolateByRef<
-    EvalConstByRef,
-    ValueFreeConstByRef,
-    OpValBuilder,
-> = InterpolateByRef {
-    eval: EvalConstByRef,
-    value: ValueFreeConstByRef,
-    builder: OpValBuilder,
-};
+const QUOTE_CONST_BY_REF: QuoteByRef<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
+    QuoteByRef {
+        eval: EvalConstByRef,
+        value: ValueFreeConstByRef,
+        builder: OpValBuilder,
+    };
 
 const INLINE_CONST_BY_REF: InlineByRef<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
     InlineByRef {
@@ -309,7 +303,7 @@ impl BasicEvalMode {
             &EvalConstByRef,
             &ValueFreeConstByRef,
             &INLINE_CONST_BY_REF,
-            &INTERPOLATE_CONST_BY_REF,
+            &QUOTE_CONST_BY_REF,
         )
     }
 }
@@ -325,17 +319,13 @@ impl EvalMode {
             &EvalConstByRef,
             &ValueFreeConstByRef,
             &INLINE_CONST_BY_REF,
-            &INTERPOLATE_CONST_BY_REF,
+            &QUOTE_CONST_BY_REF,
             &OpValBuilder,
         )
     }
 }
 
-const INTERPOLATE_FREE_CHECKER: Interpolate<
-    EvalFreeChecker,
-    ValueFreeConstChecker,
-    BoolAndBuilder,
-> = Interpolate {
+const QUOTE_FREE_CHECKER: Quote<EvalFreeChecker, ValueFreeConstChecker, BoolAndBuilder> = Quote {
     eval: EvalFreeChecker,
     value: ValueFreeConstChecker,
     builder: BoolAndBuilder,
@@ -360,7 +350,7 @@ impl BasicEvalMode {
             &EvalFreeChecker,
             &ValueFreeConstChecker,
             &INLINE_FREE_CHECKER,
-            &INTERPOLATE_FREE_CHECKER,
+            &QUOTE_FREE_CHECKER,
         )
     }
 }
@@ -376,17 +366,17 @@ impl EvalMode {
             &EvalFreeChecker,
             &ValueFreeConstChecker,
             &INLINE_FREE_CHECKER,
-            &INTERPOLATE_FREE_CHECKER,
+            &QUOTE_FREE_CHECKER,
             &BoolAndBuilder,
         )
     }
 }
 
-const INTERPOLATE_FREE_CHECKER_BY_REF: InterpolateByRef<
+const QUOTE_FREE_CHECKER_BY_REF: QuoteByRef<
     EvalFreeCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
-> = InterpolateByRef {
+> = QuoteByRef {
     eval: EvalFreeCheckerByRef,
     value: ValueFreeConstChecker,
     builder: BoolAndBuilder,
@@ -414,7 +404,7 @@ impl BasicEvalMode {
             &EvalFreeCheckerByRef,
             &ValueFreeConstChecker,
             &INLINE_FREE_CHECKER_BY_REF,
-            &INTERPOLATE_FREE_CHECKER_BY_REF,
+            &QUOTE_FREE_CHECKER_BY_REF,
         )
     }
 }
@@ -430,17 +420,13 @@ impl EvalMode {
             &EvalFreeCheckerByRef,
             &ValueFreeConstChecker,
             &INLINE_FREE_CHECKER_BY_REF,
-            &INTERPOLATE_FREE_CHECKER_BY_REF,
+            &QUOTE_FREE_CHECKER_BY_REF,
             &BoolAndBuilder,
         )
     }
 }
 
-const INTERPOLATE_CONST_CHECKER: Interpolate<
-    EvalConstChecker,
-    ValueFreeConstChecker,
-    BoolAndBuilder,
-> = Interpolate {
+const QUOTE_CONST_CHECKER: Quote<EvalConstChecker, ValueFreeConstChecker, BoolAndBuilder> = Quote {
     eval: EvalConstChecker,
     value: ValueFreeConstChecker,
     builder: BoolAndBuilder,
@@ -465,7 +451,7 @@ impl BasicEvalMode {
             &EvalConstChecker,
             &ValueFreeConstChecker,
             &INLINE_CONST_CHECKER,
-            &INTERPOLATE_CONST_CHECKER,
+            &QUOTE_CONST_CHECKER,
         )
     }
 }
@@ -481,17 +467,17 @@ impl EvalMode {
             &EvalConstChecker,
             &ValueFreeConstChecker,
             &INLINE_CONST_CHECKER,
-            &INTERPOLATE_CONST_CHECKER,
+            &QUOTE_CONST_CHECKER,
             &BoolAndBuilder,
         )
     }
 }
 
-const INTERPOLATE_CONST_CHECKER_BY_REF: InterpolateByRef<
+const QUOTE_CONST_CHECKER_BY_REF: QuoteByRef<
     EvalConstCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
-> = InterpolateByRef {
+> = QuoteByRef {
     eval: EvalConstCheckerByRef,
     value: ValueFreeConstChecker,
     builder: BoolAndBuilder,
@@ -519,7 +505,7 @@ impl BasicEvalMode {
             &EvalConstCheckerByRef,
             &ValueFreeConstChecker,
             &INLINE_CONST_CHECKER_BY_REF,
-            &INTERPOLATE_CONST_CHECKER_BY_REF,
+            &QUOTE_CONST_CHECKER_BY_REF,
         )
     }
 }
@@ -535,33 +521,33 @@ impl EvalMode {
             &EvalConstCheckerByRef,
             &ValueFreeConstChecker,
             &INLINE_CONST_CHECKER_BY_REF,
-            &INTERPOLATE_CONST_CHECKER_BY_REF,
+            &QUOTE_CONST_CHECKER_BY_REF,
             &BoolAndBuilder,
         )
     }
 }
 
 impl BasicEvalMode {
-    fn eval_generic<Ctx, Input, Output, Eval, Value, Inline, Interpolate>(
+    fn eval_generic<Ctx, Input, Output, Eval, Value, Inline, Quote>(
         &self,
         ctx: &mut Ctx,
         input: Input,
         eval: &Eval,
         value: &Value,
         inline: &Inline,
-        interpolate: &Interpolate,
+        quote: &Quote,
     ) -> Output
     where
         Ctx: CtxAccessor,
         Eval: Evaluator<Ctx, Input, Output>,
         Value: Evaluator<Ctx, Input, Output>,
         Inline: Evaluator<Ctx, Input, Output>,
-        Interpolate: Evaluator<Ctx, Input, Output>,
+        Quote: Evaluator<Ctx, Input, Output>,
     {
         match self {
             BasicEvalMode::Value => value.eval(ctx, input),
             BasicEvalMode::Eval => eval.eval(ctx, input),
-            BasicEvalMode::Interpolate => interpolate.eval(ctx, input),
+            BasicEvalMode::Quote => quote.eval(ctx, input),
             BasicEvalMode::Inline => inline.eval(ctx, input),
         }
     }
@@ -569,14 +555,14 @@ impl BasicEvalMode {
 
 impl EvalMode {
     #[allow(clippy::too_many_arguments)]
-    fn eval_generic<Ctx, Output, Eval, Value, Inline, Interpolate, Builder>(
+    fn eval_generic<Ctx, Output, Eval, Value, Inline, Quote, Builder>(
         &self,
         ctx: &mut Ctx,
         input: Val,
         eval: &Eval,
         value: &Value,
         inline: &Inline,
-        interpolate: &Interpolate,
+        quote: &Quote,
         builder: &Builder,
     ) -> Output
     where
@@ -584,39 +570,34 @@ impl EvalMode {
         Eval: Evaluator<Ctx, Val, Output>,
         Value: Evaluator<Ctx, Val, Output>,
         Inline: Evaluator<Ctx, Val, Output>,
-        Interpolate: Evaluator<Ctx, Val, Output>,
+        Quote: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        match self {
-            EvalMode::Basic(eval_mode) => {
-                eval_mode.eval_generic(ctx, input, eval, value, inline, interpolate)
+        match input {
+            Val::Pair(pair) => {
+                let (first, second) = match &self.pair {
+                    None => (self.default, self.default),
+                    Some((first, second)) => (*first, *second),
+                };
+                let first = first.eval_generic(ctx, pair.first, eval, value, inline, quote);
+                let second = second.eval_generic(ctx, pair.second, eval, value, inline, quote);
+                builder.from_pair(first, second)
             }
-            EvalMode::Pair {
-                first,
-                second,
-                non_pair,
-            } => match input {
-                Val::Pair(pair) => {
-                    let first =
-                        first.eval_generic(ctx, pair.first, eval, value, inline, interpolate);
-                    let second =
-                        second.eval_generic(ctx, pair.second, eval, value, inline, interpolate);
-                    builder.from_pair(first, second)
-                }
-                input => non_pair.eval_generic(ctx, input, eval, value, inline, interpolate),
-            },
+            input => self
+                .default
+                .eval_generic(ctx, input, eval, value, inline, quote),
         }
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn eval_by_ref_generic<'a, Ctx, Output, Eval, Value, Inline, Interpolate, Builder>(
+    fn eval_by_ref_generic<'a, Ctx, Output, Eval, Value, Inline, Quote, Builder>(
         &self,
         ctx: &mut Ctx,
         input: &'a Val,
         eval: &Eval,
         value: &Value,
         inline: &Inline,
-        interpolate: &Interpolate,
+        quote: &Quote,
         builder: &Builder,
     ) -> Output
     where
@@ -624,34 +605,29 @@ impl EvalMode {
         Eval: Evaluator<Ctx, &'a Val, Output>,
         Value: Evaluator<Ctx, &'a Val, Output>,
         Inline: Evaluator<Ctx, &'a Val, Output>,
-        Interpolate: Evaluator<Ctx, &'a Val, Output>,
+        Quote: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        match self {
-            EvalMode::Basic(eval_mode) => {
-                eval_mode.eval_generic(ctx, input, eval, value, inline, interpolate)
+        match input {
+            Val::Pair(pair) => {
+                let (first, second) = match &self.pair {
+                    None => (self.default, self.default),
+                    Some((first, second)) => (*first, *second),
+                };
+                let first = first.eval_generic(ctx, &pair.first, eval, value, inline, quote);
+                let second = second.eval_generic(ctx, &pair.second, eval, value, inline, quote);
+                builder.from_pair(first, second)
             }
-            EvalMode::Pair {
-                first,
-                second,
-                non_pair,
-            } => match input {
-                Val::Pair(pair) => {
-                    let first =
-                        first.eval_generic(ctx, &pair.first, eval, value, inline, interpolate);
-                    let second =
-                        second.eval_generic(ctx, &pair.second, eval, value, inline, interpolate);
-                    builder.from_pair(first, second)
-                }
-                input => non_pair.eval_generic(ctx, input, eval, value, inline, interpolate),
-            },
+            input => self
+                .default
+                .eval_generic(ctx, input, eval, value, inline, quote),
         }
     }
 }
 
 pub(crate) mod value;
 
-pub(crate) mod interpolate;
+pub(crate) mod quote;
 
 pub(crate) mod inline;
 

@@ -27,7 +27,7 @@ use crate::{
 };
 
 pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_LENGTH, fn_length);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -48,7 +48,7 @@ fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn keys() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_KEYS, fn_keys);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -71,7 +71,7 @@ fn fn_keys(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn values() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_VALUES, fn_values);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -94,10 +94,9 @@ fn fn_values(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn contains() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Inline,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_CONTAINS, fn_contains);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -124,10 +123,9 @@ fn fn_contains(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn contains_many() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Inline,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_CONTAINS_MANY, fn_contains_many);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -157,10 +155,9 @@ fn fn_contains_many(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn set() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Eval,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxMutableFn>::new(names::MAP_SET, fn_set);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -194,10 +191,9 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn set_many() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Eval,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxMutableFn>::new(names::MAP_SET_MANY, fn_set_many);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -233,10 +229,9 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Inline,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_GET, fn_get);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -265,10 +260,9 @@ fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn get_many() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Inline,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxConstFn>::new(names::MAP_GET_MANY, fn_get_many);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -307,10 +301,9 @@ fn fn_get_many(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Inline,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxMutableFn>::new(names::MAP_REMOVE, fn_remove);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -340,10 +333,9 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn remove_many() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair {
-        first: BasicEvalMode::Inline,
-        second: BasicEvalMode::Inline,
-        non_pair: BasicEvalMode::Value,
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxMutableFn>::new(names::MAP_REMOVE_MANY, fn_remove_many);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -382,7 +374,7 @@ fn fn_remove_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
     let primitive = Primitive::<CtxMutableFn>::new(names::MAP_CLEAR, fn_clear);
     PrimitiveFunc::new(eval_mode, primitive)
 }

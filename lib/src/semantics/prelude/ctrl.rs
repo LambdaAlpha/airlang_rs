@@ -24,7 +24,7 @@ use crate::semantics::{
 };
 
 pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::SEQUENCE,
         fn_sequence::<FreeCtx>,
@@ -46,7 +46,7 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn condition() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::IF,
         fn_if::<FreeCtx>,
@@ -82,7 +82,7 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Value);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::WHILE,
         fn_while::<FreeCtx>,

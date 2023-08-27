@@ -18,7 +18,7 @@ use crate::{
 };
 
 pub(crate) fn not() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::NOT, fn_not);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -31,7 +31,7 @@ fn fn_not(input: Val) -> Val {
 }
 
 pub(crate) fn and() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::AND, fn_and);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -54,7 +54,7 @@ fn fn_and(input: Val) -> Val {
 }
 
 pub(crate) fn or() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::OR, fn_or);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -77,7 +77,7 @@ fn fn_or(input: Val) -> Val {
 }
 
 pub(crate) fn equal() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::EQUAL, fn_equal);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -90,7 +90,7 @@ fn fn_equal(input: Val) -> Val {
 }
 
 pub(crate) fn not_equal() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::NOT_EQUAL, fn_not_equal);
     PrimitiveFunc::new(eval_mode, primitive)
 }
