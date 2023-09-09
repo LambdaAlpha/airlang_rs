@@ -1,7 +1,7 @@
 use {
     crate::{
         syntax::{
-            COMMENT_PREFIX,
+            COMMENT_SEPARATOR,
             ESCAPED_PREFIX,
             LIST_LEFT,
             LIST_RIGHT,
@@ -71,7 +71,6 @@ use {
         multi::{
             fold_many0,
             fold_many1,
-            many0,
             separated_list0,
             separated_list1,
         },
@@ -130,7 +129,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(delimited(informal::<T, _>, repr, informal::<T, _>));
+    let f = all_consuming(delimited(delimiter, repr, delimiter));
     context("top", f)(src)
 }
 
@@ -138,32 +137,12 @@ fn delimiter<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = value((), take_while1(is_delimiter));
+    let f = value((), take_while(is_delimiter));
     context("delimiter", f)(src)
 }
 
 fn is_delimiter(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
-}
-
-fn comment<'a, T, E>(src: &'a str) -> IResult<&'a str, (), E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let comment = cut(verify(token::<T, _>, |token| {
-        matches!(token, Token::Default(_))
-    }));
-    let f = value((), tuple((char(COMMENT_PREFIX), delimiter, comment)));
-    context("comment", f)(src)
-}
-
-fn informal<'a, T, E>(src: &'a str) -> IResult<&'a str, (), E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    value((), many0(alt((delimiter, comment::<T, _>))))(src)
 }
 
 fn normed<'a, T, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
@@ -172,7 +151,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
     F: Parser<&'a str, O, E>,
 {
-    preceded(informal::<T, _>, f)
+    preceded(delimiter, f)
 }
 
 fn wrap<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -214,9 +193,9 @@ where
             Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
             _ => |s| map(char(REVERSE_SEPARATOR), |_| Token::Reverse)(s),
         },
-        COMMENT_PREFIX => match second {
+        COMMENT_SEPARATOR => match second {
             Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
-            _ => fail,
+            _ => |s| map(char(COMMENT_SEPARATOR), |_| Token::Comment)(s),
         },
         s if is_symbol(s) => |s| map(symbol, Token::Default)(s),
         _ => fail,
@@ -227,6 +206,7 @@ where
 enum Token<T> {
     Pair,
     Reverse,
+    Comment,
     Default(T),
 }
 
@@ -270,6 +250,7 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                     let reverse = Box::new(Reverse::new(left, right));
                     <T as From<Box<Reverse<T, T>>>>::from(reverse)
                 }
+                Token::Comment => right,
                 Token::Default(middle) => {
                     let pair = Box::new(Pair::new(left, right));
                     let pair = <T as From<Box<Pair<T, T>>>>::from(pair);

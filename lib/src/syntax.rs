@@ -21,9 +21,9 @@ const MAP_RIGHT: char = '}';
 const WRAP_LEFT: char = '(';
 const WRAP_RIGHT: char = ')';
 
-const COMMENT_PREFIX: char = '#';
 const STRING_QUOTE: char = '"';
 const ESCAPED_PREFIX: char = '\'';
+const COMMENT_SEPARATOR: char = '#';
 const PAIR_SEPARATOR: char = ':';
 const REVERSE_SEPARATOR: char = '?';
 
