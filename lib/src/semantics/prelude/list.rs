@@ -182,15 +182,14 @@ fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let value = index_value.second;
-    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, name, |val| {
         let Val::List(list) = val else {
-            return Val::default();
+            return;
         };
         if i > list.len() {
-            return Val::default();
+            return;
         }
         list.insert(i, value);
-        Val::default()
     })
 }
 
@@ -218,15 +217,14 @@ fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, name, |val| {
         let Val::List(list) = val else {
-            return Val::default();
+            return;
         };
         if i > list.len() {
-            return Val::default();
+            return;
         }
         list.splice(i..i, values);
-        Val::default()
     })
 }
 
@@ -291,12 +289,11 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
     let name = name_value.first;
     let value = name_value.second;
-    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, name, |val| {
         let Val::List(list) = val else {
-            return Val::default();
+            return;
         };
         list.push(value);
-        Val::default()
     })
 }
 
@@ -318,12 +315,11 @@ fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(mut values) = values else {
         return Val::default();
     };
-    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, name, |val| {
         let Val::List(list) = val else {
-            return Val::default();
+            return;
         };
         list.append(&mut values);
-        Val::default()
     })
 }
 
@@ -376,12 +372,11 @@ pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    DefaultCtx.get_mut_ref(&mut ctx, input, |val| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, input, |val| {
         let Val::List(list) = val else {
-            return Val::default();
+            return;
         };
         list.clear();
-        Val::default()
     })
 }
 

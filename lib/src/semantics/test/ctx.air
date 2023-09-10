@@ -388,8 +388,8 @@ is_const a
 # ===
 ;[
     a = (context {const : {b : (context {const : {c : 1}})}}),
-    (d : _) = ((move a) set_super b),
-    d .. c
+    a = ((move a) set_super b),
+    a .. c
 ]
 # ---
 1

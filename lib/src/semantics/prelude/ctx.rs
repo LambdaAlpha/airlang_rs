@@ -450,11 +450,10 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
         ctx.set_super(super_ctx);
         return Val::default();
     }
-    DefaultCtx.get_mut_ref(&mut ctx, ctx_name_or_val, |ctx| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, ctx_name_or_val, |ctx| {
         let Val::Ctx(CtxVal(ctx)) = ctx else {
-            return Val::default();
+            return;
         };
         ctx.super_ctx = super_ctx;
-        Val::default()
     })
 }

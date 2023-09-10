@@ -325,11 +325,10 @@ pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    DefaultCtx.get_mut_ref(&mut ctx, input, |val| {
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, input, |val| {
         let Val::Map(map) = val else {
-            return Val::default();
+            return;
         };
         map.clear();
-        Val::default()
     })
 }

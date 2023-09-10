@@ -443,6 +443,27 @@ impl DefaultCtx {
             _ => Val::default(),
         })
     }
+
+    pub(crate) fn get_mut_ref_no_ret<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
+    where
+        F: FnOnce(&mut Val),
+        Self: Sized,
+    {
+        self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
+            Either::Left(tagged_ref) => {
+                if tagged_ref.is_const {
+                    return Val::default();
+                }
+                f(tagged_ref.val_ref);
+                Val::default()
+            }
+            Either::Right(Some(mut val)) => {
+                f(&mut val);
+                val
+            }
+            _ => Val::default(),
+        })
+    }
 }
 
 impl<'a, T> TaggedRef<'a, T> {
