@@ -234,10 +234,10 @@ impl Theorem {
         if !matches!(ctx_owner.tag, InvariantTag::Const) {
             return None;
         }
-        let Val::Ctx(CtxVal(input_ctx)) = &ctx_owner.val else {
+        let Val::Ctx(CtxVal(ctx_before)) = &ctx_owner.val else {
             return None;
         };
-        let mut after = Ctx::clone(input_ctx);
+        let mut after = Ctx::clone(ctx_before);
         let output = eval_mode.eval(&mut MutableCtx(&mut after), &input_owner.val);
         let output = RefVal::from(Keeper::new(TaggedVal::new_const(output)));
         let after = Val::Ctx(CtxVal::from(Box::new(after)));

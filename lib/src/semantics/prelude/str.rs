@@ -17,10 +17,7 @@ use crate::{
         },
         val::Val,
     },
-    types::{
-        Either,
-        Str,
-    },
+    types::Str,
 };
 
 pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
@@ -30,17 +27,11 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_ref_val_or_default(&mut ctx, input, |ref_or_val| {
-        let f = |val: &Val| {
-            let Val::String(s) = val else {
-                return Val::default();
-            };
-            Val::Int(s.len().into())
+    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+        let Val::String(s) = val else {
+            return Val::default();
         };
-        match ref_or_val {
-            Either::Left(val) => f(val.as_const()),
-            Either::Right(val) => f(&val),
-        }
+        Val::Int(s.len().into())
     })
 }
 

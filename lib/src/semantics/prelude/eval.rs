@@ -55,7 +55,6 @@ use crate::{
     },
     types::{
         Bool,
-        Either,
         Keeper,
         Reader,
         Str,
@@ -184,26 +183,18 @@ fn fn_eval_in_ctx<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
     };
     let name_or_val = pair.first;
     let val = pair.second;
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name_or_val, |target_ctx| match target_ctx {
-        Either::Left(target) => {
-            let TaggedRef {
-                val_ref: Val::Ctx(CtxVal(target_ctx)),
-                is_const: target_ctx_const,
-            } = target
-            else {
-                return Val::default();
-            };
-            if target_ctx_const {
-                Eval.eval(&mut ConstCtx(target_ctx), val)
-            } else {
-                Eval.eval(&mut MutableCtx(target_ctx), val)
-            }
-        }
-        Either::Right(target) => {
-            let Val::Ctx(CtxVal(mut target_ctx)) = target else {
-                return Val::default();
-            };
-            Eval.eval(&mut MutableCtx(&mut target_ctx), val)
+    DefaultCtx.get_tagged_ref(&mut ctx, name_or_val, |target_ctx| {
+        let TaggedRef {
+            val_ref: Val::Ctx(CtxVal(target_ctx)),
+            is_const: target_ctx_const,
+        } = target_ctx
+        else {
+            return Val::default();
+        };
+        if target_ctx_const {
+            Eval.eval(&mut ConstCtx(target_ctx), val)
+        } else {
+            Eval.eval(&mut MutableCtx(target_ctx), val)
         }
     })
 }
@@ -245,25 +236,16 @@ fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
         let is_ctx_const = eval_mode.is_const(&mut ctx, value);
         return Val::Bool(Bool::new(is_ctx_const));
     }
-    DefaultCtx.get_ref_val_or_default(&mut ctx, target_ctx, |target_ctx| match target_ctx {
-        Either::Left(target) => {
-            let TaggedRef {
-                val_ref: Val::Ctx(CtxVal(target_ctx)),
-                ..
-            } = target
-            else {
-                return Val::default();
-            };
-            let is_ctx_const = eval_mode.is_const(&mut ConstCtx(target_ctx), value);
-            Val::Bool(Bool::new(is_ctx_const))
-        }
-        Either::Right(target) => {
-            let Val::Ctx(CtxVal(mut target_ctx)) = target else {
-                return Val::default();
-            };
-            let is_ctx_const = eval_mode.is_const(&mut ConstCtx(&mut target_ctx), value);
-            Val::Bool(Bool::new(is_ctx_const))
-        }
+    DefaultCtx.get_tagged_ref(&mut ctx, target_ctx, |target_ctx| {
+        let TaggedRef {
+            val_ref: Val::Ctx(CtxVal(target_ctx)),
+            ..
+        } = target_ctx
+        else {
+            return Val::default();
+        };
+        let is_ctx_const = eval_mode.is_const(&mut ConstCtx(target_ctx), value);
+        Val::Bool(Bool::new(is_ctx_const))
     })
 }
 

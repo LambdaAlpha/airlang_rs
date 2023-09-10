@@ -44,6 +44,7 @@ use {
             Either,
             Keeper,
             Owner,
+            Pair,
             Symbol,
         },
     },
@@ -212,13 +213,13 @@ fn fn_assign_val(mut ctx: CtxForMutableFn, input: Val, tag: InvariantTag) -> Val
         return Val::default();
     };
     let name = pair.first;
+    assign_recursive(&mut ctx, name, pair.second, tag)
+}
+
+fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, mut val: Val, tag: InvariantTag) -> Val {
     match name {
-        Val::Symbol(s) => {
-            let val = pair.second;
-            ctx.put_val(s, TaggedVal { tag, val })
-        }
+        Val::Symbol(s) => ctx.put_val(s, TaggedVal { tag, val }),
         Val::Ref(k) => {
-            let mut val = pair.second;
             if let Ok(mut o) = Keeper::owner(&k.0) {
                 if !matches!(o.tag, InvariantTag::None) {
                     return Val::default();
@@ -230,6 +231,14 @@ fn fn_assign_val(mut ctx: CtxForMutableFn, input: Val, tag: InvariantTag) -> Val
                 let _ = Keeper::reinit(&k.0, TaggedVal::new(val));
                 Val::default()
             }
+        }
+        Val::Pair(name_pair) => {
+            let Val::Pair(val_pair) = val else {
+                return Val::default();
+            };
+            let last_first = assign_recursive(ctx, name_pair.first, val_pair.first, tag);
+            let last_second = assign_recursive(ctx, name_pair.second, val_pair.second, tag);
+            Val::Pair(Box::new(Pair::new(last_first, last_second)))
         }
         _ => Val::default(),
     }
@@ -441,12 +450,8 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
         ctx.set_super(super_ctx);
         return Val::default();
     }
-    DefaultCtx.get_ref_val_or_default(&mut ctx, ctx_name_or_val, |ctx| {
-        let Either::Left(TaggedRef {
-            val_ref: Val::Ctx(CtxVal(ctx)),
-            is_const: false,
-        }) = ctx
-        else {
+    DefaultCtx.get_mut_ref(&mut ctx, ctx_name_or_val, |ctx| {
+        let Val::Ctx(CtxVal(ctx)) = ctx else {
             return Val::default();
         };
         ctx.super_ctx = super_ctx;

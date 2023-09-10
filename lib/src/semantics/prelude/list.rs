@@ -24,10 +24,7 @@ use {
                 Val,
             },
         },
-        types::{
-            Either,
-            List,
-        },
+        types::List,
     },
     std::mem::swap,
 };
@@ -39,17 +36,11 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_ref_val_or_default(&mut ctx, input, |ref_or_val| {
-        let f = |list: &Val| {
-            let Val::List(list) = list else {
-                return Val::default();
-            };
-            Val::Int(list.len().into())
+    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
         };
-        match ref_or_val {
-            Either::Left(list) => f(list.as_const()),
-            Either::Right(list) => f(&list),
-        }
+        Val::Int(list.len().into())
     })
 }
 
@@ -75,27 +66,15 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let mut value = index_value.second;
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            let Some(current) = list.get_mut(i) else {
-                return Val::default();
-            };
-            swap(current, &mut value);
-            value
-        }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            let Some(current) = list.get_mut(i) else {
-                return Val::default();
-            };
-            *current = value;
-            Val::List(list)
-        }
+    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        let Some(current) = list.get_mut(i) else {
+            return Val::default();
+        };
+        swap(current, &mut value);
+        value
     })
 }
 
@@ -123,29 +102,16 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            let end = i + values.len();
-            if end > list.len() {
-                return Val::default();
-            }
-            let ret = list.splice(i..end, values).collect();
-            Val::List(ret)
+    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        let end = i + values.len();
+        if end > list.len() {
+            return Val::default();
         }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            let end = i + values.len();
-            if end > list.len() {
-                return Val::default();
-            };
-            list.splice(i..end, values);
-            Val::List(list)
-        }
+        let ret = list.splice(i..end, values).collect();
+        Val::List(ret)
     })
 }
 
@@ -167,54 +133,29 @@ fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(list) => {
-                let Val::List(list) = list.as_const() else {
-                    return Val::default();
-                };
-                let from = from.unwrap_or_default();
-                let to = to.unwrap_or(list.len());
-                let Some(slice) = list.get(from..to) else {
-                    return Val::default();
-                };
-                Val::List(List::from(slice.to_owned()))
-            }
-            Either::Right(list) => {
-                let Val::List(list) = list else {
-                    return Val::default();
-                };
-                let from = from.unwrap_or_default();
-                let to = to.unwrap_or(list.len());
-                if from > to || to > list.len() {
-                    return Val::default();
-                }
-                let slice = list.into_iter().skip(from).take(to - from).collect();
-                Val::List(slice)
-            }
+        DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+            let Val::List(list) = val else {
+                return Val::default();
+            };
+            let from = from.unwrap_or_default();
+            let to = to.unwrap_or(list.len());
+            let Some(slice) = list.get(from..to) else {
+                return Val::default();
+            };
+            Val::List(List::from(slice.to_owned()))
         })
     } else {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(list) => {
-                let Val::List(list) = list.as_const() else {
-                    return Val::default();
-                };
-                let Some(val) = list.get(i) else {
-                    return Val::default();
-                };
-                val.clone()
-            }
-            Either::Right(list) => {
-                let Val::List(mut list) = list else {
-                    return Val::default();
-                };
-                if i >= list.len() {
-                    return Val::default();
-                }
-                list.swap_remove(i)
-            }
+        DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+            let Val::List(list) = val else {
+                return Val::default();
+            };
+            let Some(val) = list.get(i) else {
+                return Val::default();
+            };
+            val.clone()
         })
     }
 }
@@ -241,27 +182,15 @@ fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let value = index_value.second;
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            if i > list.len() {
-                return Val::default();
-            }
-            list.insert(i, value);
-            Val::default()
+    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        if i > list.len() {
+            return Val::default();
         }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            if i > list.len() {
-                return Val::default();
-            }
-            list.insert(i, value);
-            Val::List(list)
-        }
+        list.insert(i, value);
+        Val::default()
     })
 }
 
@@ -289,27 +218,15 @@ fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            if i > list.len() {
-                return Val::default();
-            }
-            list.splice(i..i, values);
-            Val::default()
+    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        if i > list.len() {
+            return Val::default();
         }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            if i > list.len() {
-                return Val::default();
-            }
-            list.splice(i..i, values);
-            Val::List(list)
-        }
+        list.splice(i..i, values);
+        Val::default()
     })
 }
 
@@ -331,56 +248,30 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(mut list) => {
-                let Some(Val::List(list)) = list.as_mut() else {
-                    return Val::default();
-                };
-                let from = from.unwrap_or_default();
-                let to = to.unwrap_or(list.len());
-                if from > to || to > list.len() {
-                    return Val::default();
-                }
-                let ret = list.splice(from..to, Vec::new()).collect();
-                Val::List(ret)
+        DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+            let Val::List(list) = val else {
+                return Val::default();
+            };
+            let from = from.unwrap_or_default();
+            let to = to.unwrap_or(list.len());
+            if from > to || to > list.len() {
+                return Val::default();
             }
-            Either::Right(list) => {
-                let Val::List(mut list) = list else {
-                    return Val::default();
-                };
-                let from = from.unwrap_or_default();
-                let to = to.unwrap_or(list.len());
-                if from > to || to > list.len() {
-                    return Val::default();
-                }
-                list.splice(from..to, Vec::new());
-                Val::List(list)
-            }
+            let ret = list.splice(from..to, Vec::new()).collect();
+            Val::List(ret)
         })
     } else {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(mut list) => {
-                let Some(Val::List(list)) = list.as_mut() else {
-                    return Val::default();
-                };
-                if i >= list.len() {
-                    return Val::default();
-                }
-                list.remove(i)
+        DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+            let Val::List(list) = val else {
+                return Val::default();
+            };
+            if i >= list.len() {
+                return Val::default();
             }
-            Either::Right(list) => {
-                let Val::List(mut list) = list else {
-                    return Val::default();
-                };
-                if i >= list.len() {
-                    return Val::default();
-                }
-                list.remove(i);
-                Val::List(list)
-            }
+            list.remove(i)
         })
     }
 }
@@ -400,21 +291,12 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
     let name = name_value.first;
     let value = name_value.second;
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            list.push(value);
-            Val::default()
-        }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            list.push(value);
-            Val::List(list)
-        }
+    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        list.push(value);
+        Val::default()
     })
 }
 
@@ -436,21 +318,12 @@ fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(mut values) = values else {
         return Val::default();
     };
-    DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            list.append(&mut values);
-            Val::default()
-        }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            list.append(&mut values);
-            Val::List(list)
-        }
+    DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        list.append(&mut values);
+        Val::default()
     })
 }
 
@@ -470,52 +343,26 @@ fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let name = name_count.first;
     let count = name_count.second;
     match count {
-        Val::Unit(_) => {
-            DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-                Either::Left(mut val) => {
-                    let Some(Val::List(list)) = val.as_mut() else {
-                        return Val::default();
-                    };
-                    list.pop().unwrap_or_default()
-                }
-                Either::Right(val) => {
-                    let Val::List(mut list) = val else {
-                        return Val::default();
-                    };
-                    if list.pop().is_none() {
-                        return Val::default();
-                    }
-                    Val::List(list)
-                }
-            })
-        }
+        Val::Unit(_) => DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+            let Val::List(list) = val else {
+                return Val::default();
+            };
+            list.pop().unwrap_or_default()
+        }),
         Val::Int(i) => {
             let Some(i) = i.to_usize() else {
                 return Val::default();
             };
-            DefaultCtx.get_ref_val_or_default(&mut ctx, name, |ref_or_val| match ref_or_val {
-                Either::Left(mut val) => {
-                    let Some(Val::List(list)) = val.as_mut() else {
-                        return Val::default();
-                    };
-                    if i > list.len() {
-                        return Val::default();
-                    }
-                    let start = list.len() - i;
-                    let ret = list.split_off(start);
-                    Val::List(ret.into())
+            DefaultCtx.get_mut_ref(&mut ctx, name, |val| {
+                let Val::List(list) = val else {
+                    return Val::default();
+                };
+                if i > list.len() {
+                    return Val::default();
                 }
-                Either::Right(val) => {
-                    let Val::List(mut list) = val else {
-                        return Val::default();
-                    };
-                    if i > list.len() {
-                        return Val::default();
-                    }
-                    let length = list.len() - i;
-                    list.truncate(length);
-                    Val::List(list)
-                }
+                let start = list.len() - i;
+                let ret = list.split_off(start);
+                Val::List(ret.into())
             })
         }
         _ => Val::default(),
@@ -529,21 +376,12 @@ pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    DefaultCtx.get_ref_val_or_default(&mut ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(mut val) => {
-            let Some(Val::List(list)) = val.as_mut() else {
-                return Val::default();
-            };
-            list.clear();
-            Val::default()
-        }
-        Either::Right(val) => {
-            let Val::List(mut list) = val else {
-                return Val::default();
-            };
-            list.clear();
-            Val::List(list)
-        }
+    DefaultCtx.get_mut_ref(&mut ctx, input, |val| {
+        let Val::List(list) = val else {
+            return Val::default();
+        };
+        list.clear();
+        Val::default()
     })
 }
 

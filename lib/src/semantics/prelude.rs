@@ -156,7 +156,9 @@ fn prelude_list(c: &mut NameMap) {
 fn prelude_map(c: &mut NameMap) {
     put_primitive_func(c, map::length());
     put_primitive_func(c, map::keys());
+    put_primitive_func(c, map::into_keys());
     put_primitive_func(c, map::values());
+    put_primitive_func(c, map::into_values());
     put_primitive_func(c, map::contains());
     put_primitive_func(c, map::contains_many());
     put_primitive_func(c, map::set());
@@ -316,7 +318,9 @@ pub(crate) mod names {
 
     pub(crate) const MAP_LENGTH: &str = "map_length";
     pub(crate) const MAP_KEYS: &str = "map_keys";
+    pub(crate) const MAP_INTO_KEYS: &str = "map_into_keys";
     pub(crate) const MAP_VALUES: &str = "map_values";
+    pub(crate) const MAP_INTO_VALUES: &str = "map_into_values";
     pub(crate) const MAP_CONTAINS: &str = "map_contains";
     pub(crate) const MAP_CONTAINS_MANY: &str = "map_contains_many";
     pub(crate) const MAP_SET: &str = "map_set";

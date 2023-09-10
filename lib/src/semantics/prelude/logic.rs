@@ -17,6 +17,7 @@ use crate::{
             names,
             utils::{
                 basic_eval_mode_to_symbol,
+                const_ref_val,
                 map_remove,
                 parse_eval_mode,
             },
@@ -49,12 +50,8 @@ fn fn_new_prop(input: Val) -> Val {
     let Some(eval_mode) = parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let Val::Ref(input) = map_remove(&mut map, "input") else {
-        return Val::default();
-    };
-    let Val::Ref(output) = map_remove(&mut map, "output") else {
-        return Val::default();
-    };
+    let input = const_ref_val(map_remove(&mut map, "input"));
+    let output = const_ref_val(map_remove(&mut map, "output"));
     let access = map_remove(&mut map, "access");
     let access = match &access {
         Val::Symbol(s) => &**s,
@@ -69,23 +66,16 @@ fn fn_new_prop(input: Val) -> Val {
             Val::Prop(PropVal(Reader::new(prop)))
         }
         "const" => {
-            let Val::Ref(ctx) = map_remove(&mut map, "context") else {
-                return Val::default();
-            };
+            let ctx = const_ref_val(map_remove(&mut map, "context"));
             let Some(prop) = Prop::new_const(eval_mode, ctx, input, output) else {
                 return Val::default();
             };
             Val::Prop(PropVal(Reader::new(prop)))
         }
         "mutable" => {
-            let Val::Ref(input_ctx) = map_remove(&mut map, "before") else {
-                return Val::default();
-            };
-            let Val::Ref(output_ctx) = map_remove(&mut map, "after") else {
-                return Val::default();
-            };
-            let Some(prop) = Prop::new_mutable(eval_mode, input_ctx, input, output_ctx, output)
-            else {
+            let before = const_ref_val(map_remove(&mut map, "before"));
+            let after = const_ref_val(map_remove(&mut map, "after"));
+            let Some(prop) = Prop::new_mutable(eval_mode, before, input, after, output) else {
                 return Val::default();
             };
             Val::Prop(PropVal(Reader::new(prop)))
@@ -107,9 +97,7 @@ fn fn_new_theorem(input: Val) -> Val {
     let Some(eval_mode) = parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let Val::Ref(input) = map_remove(&mut map, "input") else {
-        return Val::default();
-    };
+    let input = const_ref_val(map_remove(&mut map, "input"));
     let access = map_remove(&mut map, "access");
     let access = match &access {
         Val::Symbol(s) => &**s,
@@ -124,18 +112,14 @@ fn fn_new_theorem(input: Val) -> Val {
             Val::Theorem(TheoremVal(Reader::new(theorem)))
         }
         "const" => {
-            let Val::Ref(ctx) = map_remove(&mut map, "context") else {
-                return Val::default();
-            };
+            let ctx = const_ref_val(map_remove(&mut map, "context"));
             let Some(theorem) = Theorem::new_const(eval_mode, ctx, input) else {
                 return Val::default();
             };
             Val::Theorem(TheoremVal(Reader::new(theorem)))
         }
         "mutable" => {
-            let Val::Ref(ctx) = map_remove(&mut map, "context") else {
-                return Val::default();
-            };
+            let ctx = const_ref_val(map_remove(&mut map, "context"));
             let Some(theorem) = Theorem::new_mutable(eval_mode, ctx, input) else {
                 return Val::default();
             };
@@ -189,18 +173,16 @@ fn fn_relax(input: Val) -> Val {
     match pair.first {
         Val::Prop(PropVal(prop)) => {
             if is_const {
-                let Val::Ref(ctx) = ctx else {
-                    return Val::default();
-                };
+                let ctx = const_ref_val(ctx);
                 let Some(new_prop) = prop.relax_to_const(ctx) else {
                     return Val::default();
                 };
                 Val::Prop(PropVal(Reader::new(new_prop)))
             } else {
-                let ctx = match ctx {
-                    Val::Ref(ctx) => Some(ctx),
-                    Val::Unit(_) => None,
-                    _ => return Val::default(),
+                let ctx = if ctx.is_unit() {
+                    None
+                } else {
+                    Some(const_ref_val(ctx))
                 };
                 let Some(new_prop) = prop.relax_to_mutable(ctx) else {
                     return Val::default();
@@ -210,18 +192,16 @@ fn fn_relax(input: Val) -> Val {
         }
         Val::Theorem(TheoremVal(theorem)) => {
             if is_const {
-                let Val::Ref(ctx) = ctx else {
-                    return Val::default();
-                };
+                let ctx = const_ref_val(ctx);
                 let Some(new_theorem) = theorem.relax_to_const(ctx) else {
                     return Val::default();
                 };
                 Val::Theorem(TheoremVal(Reader::new(new_theorem)))
             } else {
-                let ctx = match ctx {
-                    Val::Ref(ctx) => Some(ctx),
-                    Val::Unit(_) => None,
-                    _ => return Val::default(),
+                let ctx = if ctx.is_unit() {
+                    None
+                } else {
+                    Some(const_ref_val(ctx))
                 };
                 let Some(new_theorem) = theorem.relax_to_mutable(ctx) else {
                     return Val::default();

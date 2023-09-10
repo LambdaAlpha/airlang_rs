@@ -10,6 +10,7 @@ use {
             Either,
             Keeper,
             Map,
+            Pair,
             Symbol,
         },
     },
@@ -389,6 +390,57 @@ impl DefaultCtx {
             Either::Left(tagged_ref) => f(Either::Left(tagged_ref)),
             Either::Right(Some(val)) => f(Either::Right(val)),
             _ => T::default(),
+        })
+    }
+
+    pub(crate) fn get_tagged_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
+    where
+        F: FnOnce(TaggedRef<Val>) -> Val,
+        Self: Sized,
+    {
+        self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
+            Either::Left(tagged_ref) => f(tagged_ref),
+            Either::Right(Some(mut val)) => {
+                let tagged_ref = TaggedRef::new(&mut val, false);
+                let result = f(tagged_ref);
+                Val::Pair(Box::new(Pair::new(val, result)))
+            }
+            _ => Val::default(),
+        })
+    }
+
+    pub(crate) fn get_const_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
+    where
+        F: FnOnce(&Val) -> Val,
+        Self: Sized,
+    {
+        self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
+            Either::Left(tagged_ref) => f(tagged_ref.val_ref),
+            Either::Right(Some(val)) => {
+                let result = f(&val);
+                Val::Pair(Box::new(Pair::new(val, result)))
+            }
+            _ => Val::default(),
+        })
+    }
+
+    pub(crate) fn get_mut_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
+    where
+        F: FnOnce(&mut Val) -> Val,
+        Self: Sized,
+    {
+        self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
+            Either::Left(tagged_ref) => {
+                if tagged_ref.is_const {
+                    return Val::default();
+                }
+                f(tagged_ref.val_ref)
+            }
+            Either::Right(Some(mut val)) => {
+                let result = f(&mut val);
+                Val::Pair(Box::new(Pair::new(val, result)))
+            }
+            _ => Val::default(),
         })
     }
 }

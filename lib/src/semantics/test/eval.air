@@ -106,6 +106,10 @@ eval_free ((' get1) (1 : 2))
 # ---
 1
 # ===
+;[(_ : a) = ((context {var : {a : 1, =}}) eval_mutable (a = 2)), a]
+# ---
+1
+# ===
 ;[a = (context {const : {=}}), a eval_mutable (b = 1), a .. b]
 # ---
 1
@@ -127,6 +131,10 @@ eval_free ((' get1) (1 : 2))
 1
 # ===
 ;[a = (context {const : {b : (ref (context {const : {c : 1}}))}}), .. [a, b, c]]
+# ---
+1
+# ===
+;[(_ : a) = ((context {const : {=, b : 1}}) eval_const b), a]
 # ---
 1
 # ===

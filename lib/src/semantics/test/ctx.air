@@ -78,6 +78,22 @@ is_null a
 # ---
 2
 # ===
+;[(a : b) = (1 : 2), a]
+# ---
+1
+# ===
+;[(a : b) = (1 : 2), b]
+# ---
+2
+# ===
+;[(a : b : c) = (1 : 2 : 3), [a, b, c]]
+# ---
+[1, 2, 3]
+# ===
+;[a = 1, b = 2, (a : b) = (3 : 4)]
+# ---
+1 : 2
+# ===
 ;[a =final 1, a = 2]
 # ---
 '
@@ -366,6 +382,14 @@ is_const a
     a = (context {const : {b : (context {const : {c : 1}})}}),
     a set_super b,
     a .. c
+]
+# ---
+1
+# ===
+;[
+    a = (context {const : {b : (context {const : {c : 1}})}}),
+    (d : _) = ((move a) set_super b),
+    d .. c
 ]
 # ---
 1
