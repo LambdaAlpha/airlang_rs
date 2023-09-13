@@ -95,8 +95,8 @@ where
         func.eval(ctx, input)
     }
 
-    fn eval_reverse(&self, _ctx: &mut Ctx, _func: Val, _output: Val) -> Val {
-        Val::default()
+    fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
+        DefaultByVal::eval_reverse(self, ctx, func, output, &ValBuilder)
     }
 }
 
@@ -151,8 +151,8 @@ where
         func.eval(ctx, input.clone())
     }
 
-    fn eval_reverse(&self, _ctx: &mut Ctx, _func: &'a Val, _output: &'a Val) -> Val {
-        Val::default()
+    fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
+        DefaultByRef::eval_reverse(self, ctx, func, output, &ValBuilder)
     }
 }
 
@@ -212,7 +212,7 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Option<Val> {
-        Some(Eval.eval_reverse(ctx, func, output))
+        DefaultByVal::eval_reverse(self, ctx, func, output, &OpValBuilder)
     }
 }
 
@@ -272,7 +272,7 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Option<Val> {
-        Some(EvalByRef.eval_reverse(ctx, func, output))
+        DefaultByRef::eval_reverse(self, ctx, func, output, &OpValBuilder)
     }
 }
 
@@ -332,7 +332,7 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Option<Val> {
-        Some(Eval.eval_reverse(ctx, func, output))
+        DefaultByVal::eval_reverse(self, ctx, func, output, &OpValBuilder)
     }
 }
 
@@ -392,7 +392,7 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Option<Val> {
-        Some(EvalByRef.eval_reverse(ctx, func, output))
+        DefaultByRef::eval_reverse(self, ctx, func, output, &OpValBuilder)
     }
 }
 
@@ -453,8 +453,8 @@ where
         func.input_eval_mode.is_free(ctx, input)
     }
 
-    fn eval_reverse(&self, _ctx: &mut Ctx, _func: Val, _output: Val) -> bool {
-        true
+    fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> bool {
+        DefaultByVal::eval_reverse(self, ctx, func, output, &BoolAndBuilder)
     }
 }
 
@@ -515,8 +515,8 @@ where
         func.input_eval_mode.is_free_by_ref(ctx, input)
     }
 
-    fn eval_reverse(&self, _ctx: &mut Ctx, _func: &'a Val, _output: &'a Val) -> bool {
-        true
+    fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> bool {
+        DefaultByRef::eval_reverse(self, ctx, func, output, &BoolAndBuilder)
     }
 }
 
@@ -577,8 +577,8 @@ where
         func.input_eval_mode.is_const(ctx, input)
     }
 
-    fn eval_reverse(&self, _ctx: &mut Ctx, _func: Val, _output: Val) -> bool {
-        true
+    fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> bool {
+        DefaultByVal::eval_reverse(self, ctx, func, output, &BoolAndBuilder)
     }
 }
 
@@ -639,7 +639,7 @@ where
         func.input_eval_mode.is_const_by_ref(ctx, input)
     }
 
-    fn eval_reverse(&self, _ctx: &mut Ctx, _func: &'a Val, _output: &'a Val) -> bool {
-        true
+    fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> bool {
+        DefaultByRef::eval_reverse(self, ctx, func, output, &BoolAndBuilder)
     }
 }

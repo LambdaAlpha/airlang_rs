@@ -75,7 +75,7 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Output {
-        self.eval.eval_reverse(ctx, func, output)
+        DefaultByVal::eval_reverse(self, ctx, func, output, &self.builder)
     }
 }
 
@@ -135,6 +135,6 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Output {
-        self.eval.eval_reverse(ctx, func, output)
+        DefaultByRef::eval_reverse(self, ctx, func, output, &self.builder)
     }
 }
