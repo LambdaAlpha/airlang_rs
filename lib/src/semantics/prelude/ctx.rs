@@ -265,15 +265,14 @@ fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, mut val: Val, tag: Inv
             };
             let mut last_list = List::default();
             let mut name_iter = name_list.into_iter();
-            let mut val_iter: Box<dyn ExactSizeIterator<Item = Val>> =
-                Box::new(val_list.into_iter());
+            let mut val_iter = val_list.into_iter();
             while let (Some(name), Some(val)) = (name_iter.next(), val_iter.next()) {
                 if let Val::Symbol(s) = &name {
                     if &**s == "..." {
                         let name_len = name_iter.len();
                         let val_len = val_iter.len();
                         if val_len > name_len {
-                            val_iter = Box::new(val_iter.skip(val_len - name_len));
+                            val_iter.advance_by(val_len - name_len).unwrap();
                         }
                         last_list.push(Val::default());
                         continue;
