@@ -41,10 +41,13 @@ use {
         },
         types::{
             Bool,
+            Call,
             Either,
             Keeper,
+            List,
             Owner,
             Pair,
+            Reverse,
             Symbol,
         },
     },
@@ -239,6 +242,60 @@ fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, mut val: Val, tag: Inv
             let last_first = assign_recursive(ctx, name_pair.first, val_pair.first, tag);
             let last_second = assign_recursive(ctx, name_pair.second, val_pair.second, tag);
             Val::Pair(Box::new(Pair::new(last_first, last_second)))
+        }
+        Val::Call(name_call) => {
+            let Val::Call(val_call) = val else {
+                return Val::default();
+            };
+            let last_func = assign_recursive(ctx, name_call.func, val_call.func, tag);
+            let last_input = assign_recursive(ctx, name_call.input, val_call.input, tag);
+            Val::Call(Box::new(Call::new(last_func, last_input)))
+        }
+        Val::Reverse(name_reverse) => {
+            let Val::Reverse(val_reverse) = val else {
+                return Val::default();
+            };
+            let last_func = assign_recursive(ctx, name_reverse.func, val_reverse.func, tag);
+            let last_output = assign_recursive(ctx, name_reverse.output, val_reverse.output, tag);
+            Val::Reverse(Box::new(Reverse::new(last_func, last_output)))
+        }
+        Val::List(name_list) => {
+            let Val::List(val_list) = val else {
+                return Val::default();
+            };
+            let mut last_list = List::default();
+            let mut name_iter = name_list.into_iter();
+            let mut val_iter: Box<dyn ExactSizeIterator<Item = Val>> =
+                Box::new(val_list.into_iter());
+            while let (Some(name), Some(val)) = (name_iter.next(), val_iter.next()) {
+                if let Val::Symbol(s) = &name {
+                    if &**s == "..." {
+                        let name_len = name_iter.len();
+                        let val_len = val_iter.len();
+                        if val_len > name_len {
+                            val_iter = Box::new(val_iter.skip(val_len - name_len));
+                        }
+                        last_list.push(Val::default());
+                        continue;
+                    }
+                }
+                last_list.push(assign_recursive(ctx, name, val, tag));
+            }
+            Val::List(last_list)
+        }
+        Val::Map(mut name_map) => {
+            let Val::Map(val_map) = val else {
+                return Val::default();
+            };
+            let last_map = val_map
+                .into_iter()
+                .filter_map(|(k, v)| {
+                    let name = name_map.remove(&k)?;
+                    let last_val = assign_recursive(ctx, name, v, tag);
+                    Some((k, last_val))
+                })
+                .collect();
+            Val::Map(last_map)
         }
         _ => Val::default(),
     }
