@@ -1,57 +1,48 @@
-use {
-    crate::{
-        semantics::{
-            ctx::{
-                Ctx,
-                CtxTrait,
-                DefaultCtx,
-                InvariantTag,
-                NameMap,
-                TaggedRef,
-                TaggedVal,
-            },
-            ctx_access::{
-                constant::{
-                    ConstCtx,
-                    CtxForConstFn,
-                },
-                free::FreeCtx,
-                mutable::CtxForMutableFn,
-            },
-            eval_mode::{
-                BasicEvalMode,
-                EvalMode,
-            },
-            func::{
-                CtxConstFn,
-                CtxFreeFn,
-                CtxMutableFn,
-                Primitive,
-            },
-            prelude::{
-                names,
-                PrimitiveFunc,
-            },
-            val::{
-                CtxVal,
-                MapVal,
-                RefVal,
-                Val,
-            },
+use crate::{
+    semantics::{
+        ctx::{
+            Ctx,
+            CtxTrait,
+            DefaultCtx,
+            InvariantTag,
+            NameMap,
+            TaggedRef,
+            TaggedVal,
         },
-        types::{
-            Bool,
-            Call,
-            Either,
-            Keeper,
-            List,
-            Owner,
-            Pair,
-            Reverse,
-            Symbol,
+        ctx_access::{
+            constant::{
+                ConstCtx,
+                CtxForConstFn,
+            },
+            mutable::CtxForMutableFn,
+        },
+        eval_mode::{
+            BasicEvalMode,
+            EvalMode,
+        },
+        func::{
+            CtxConstFn,
+            CtxFreeFn,
+            CtxMutableFn,
+            Primitive,
+        },
+        prelude::{
+            names,
+            PrimitiveFunc,
+        },
+        val::{
+            CtxVal,
+            MapVal,
+            Val,
         },
     },
-    std::mem::swap,
+    types::{
+        Call,
+        List,
+        Pair,
+        Reverse,
+        Symbol,
+    },
 };
 
 pub(crate) fn read() -> PrimitiveFunc<CtxConstFn> {
@@ -63,7 +54,6 @@ pub(crate) fn read() -> PrimitiveFunc<CtxConstFn> {
 fn fn_read(mut ctx: CtxForConstFn, input: Val) -> Val {
     match input {
         Val::Symbol(s) => ctx.get(&s),
-        Val::Ref(r) => FreeCtx::get_val_ref(&r),
         Val::Pair(pair) => {
             let Val::Symbol(first) = pair.first else {
                 return Val::default();
@@ -88,23 +78,10 @@ fn read_pair(ctx: &mut CtxForConstFn, first: &str, second: &str) -> Val {
         let Some(TaggedRef { val_ref, .. }) = val else {
             return Val::default();
         };
-        match val_ref {
-            Val::Ctx(CtxVal(ctx)) => ctx.get(second),
-            Val::Ref(RefVal(k)) => {
-                let Ok(mut o) = Keeper::owner(k) else {
-                    return Val::default();
-                };
-                let TaggedVal {
-                    val: Val::Ctx(CtxVal(ctx)),
-                    ..
-                } = &mut *o
-                else {
-                    return Val::default();
-                };
-                ctx.get(second)
-            }
-            _ => Val::default(),
-        }
+        let Val::Ctx(CtxVal(ctx)) = val_ref else {
+            return Val::default();
+        };
+        ctx.get(second)
     })
 }
 
@@ -118,23 +95,10 @@ fn read_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Va
         let Some(TaggedRef { val_ref, .. }) = val else {
             return Val::default();
         };
-        match val_ref {
-            Val::Ctx(CtxVal(ctx)) => read_nested(ConstCtx(ctx), rest, val_name),
-            Val::Ref(RefVal(k)) => {
-                let Ok(mut o) = Keeper::owner(k) else {
-                    return Val::default();
-                };
-                let TaggedVal {
-                    val: Val::Ctx(CtxVal(ctx)),
-                    ..
-                } = &mut *o
-                else {
-                    return Val::default();
-                };
-                read_nested(ConstCtx(ctx), rest, val_name)
-            }
-            _ => Val::default(),
-        }
+        let Val::Ctx(CtxVal(ctx)) = val_ref else {
+            return Val::default();
+        };
+        read_nested(ConstCtx(ctx), rest, val_name)
     })
 }
 
@@ -145,11 +109,10 @@ pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_is_null(mut ctx: CtxForConstFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.is_null(&s),
-        Val::Ref(k) => Val::Bool(Bool::new(FreeCtx::is_null_ref(&k))),
-        _ => Val::default(),
-    }
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_null(&s)
 }
 
 pub(crate) fn assign_local() -> PrimitiveFunc<CtxMutableFn> {
@@ -219,22 +182,9 @@ fn fn_assign_val(mut ctx: CtxForMutableFn, input: Val, tag: InvariantTag) -> Val
     assign_recursive(&mut ctx, name, pair.second, tag)
 }
 
-fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, mut val: Val, tag: InvariantTag) -> Val {
+fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, val: Val, tag: InvariantTag) -> Val {
     match name {
         Val::Symbol(s) => ctx.put_val(s, TaggedVal { tag, val }),
-        Val::Ref(k) => {
-            if let Ok(mut o) = Keeper::owner(&k.0) {
-                if !matches!(o.tag, InvariantTag::None) {
-                    return Val::default();
-                }
-                swap(&mut o.val, &mut val);
-                o.tag = tag;
-                val
-            } else {
-                let _ = Keeper::reinit(&k.0, TaggedVal::new(val));
-                Val::default()
-            }
-        }
         Val::Pair(name_pair) => {
             let Val::Pair(val_pair) = val else {
                 return Val::default();
@@ -307,11 +257,10 @@ pub(crate) fn set_final() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.set_final(&s),
-        Val::Ref(k) => FreeCtx::set_final_ref(&k),
-        _ => {}
-    }
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.set_final(&s);
     Val::default()
 }
 
@@ -322,11 +271,10 @@ pub(crate) fn set_const() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.set_const(&s),
-        Val::Ref(k) => FreeCtx::set_const_ref(&k),
-        _ => {}
-    }
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.set_const(&s);
     Val::default()
 }
 
@@ -337,14 +285,10 @@ pub(crate) fn is_final() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_is_final(mut ctx: CtxForConstFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.is_final(&s),
-        Val::Ref(r) => {
-            let is_final = FreeCtx::is_final_ref(&r);
-            Val::Bool(Bool::new(is_final))
-        }
-        _ => Val::default(),
-    }
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_final(&s)
 }
 
 pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
@@ -354,14 +298,10 @@ pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_is_const(mut ctx: CtxForConstFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.is_const(&s),
-        Val::Ref(r) => {
-            let is_const = FreeCtx::is_const_ref(&r);
-            Val::Bool(Bool::new(is_const))
-        }
-        _ => Val::default(),
-    }
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_const(&s)
 }
 
 pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
@@ -371,56 +311,10 @@ pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.remove(&s),
-        Val::Ref(k) => FreeCtx::remove_ref(&k),
-        _ => Val::default(),
-    }
-}
-
-pub(crate) fn new_ref() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::REF, fn_new_ref);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_new_ref(input: Val) -> Val {
-    Val::Ref(Keeper::new(TaggedVal::new(input)).into())
-}
-
-pub(crate) fn null_ref() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
-    let primitive = Primitive::<CtxFreeFn>::new(names::NULL_REF, fn_null_ref);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_null_ref(_input: Val) -> Val {
-    let k = Keeper::new(TaggedVal::new(Val::default()));
-    let Ok(o) = Keeper::owner(&k) else {
+    let Val::Symbol(s) = input else {
         return Val::default();
     };
-    Owner::drop_data(o);
-    Val::Ref(k.into())
-}
-
-pub(crate) fn final_ref() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::FINAL_REF, fn_final_ref);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_final_ref(input: Val) -> Val {
-    Val::Ref(Keeper::new(TaggedVal::new_final(input)).into())
-}
-
-pub(crate) fn const_ref() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::CONST_REF, fn_const_ref);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_const_ref(input: Val) -> Val {
-    Val::Ref(Keeper::new(TaggedVal::new_const(input)).into())
+    ctx.remove(&s)
 }
 
 pub(crate) fn ctx_new() -> PrimitiveFunc<CtxFreeFn> {
@@ -495,8 +389,7 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let ctx_name_or_val = pair.first;
     let super_ctx = pair.second;
     let super_ctx = match super_ctx {
-        Val::Symbol(name) => Some(Either::Left(name)),
-        Val::Ref(r) => Some(Either::Right(r)),
+        Val::Symbol(name) => Some(name),
         Val::Unit(_) => None,
         _ => {
             return Val::default();

@@ -23,10 +23,7 @@ use crate::{
             Evaluator,
         },
         eval_mode::{
-            eval::{
-                Eval,
-                EvalByRef,
-            },
+            eval::Eval,
             BasicEvalMode,
             EvalMode,
         },
@@ -55,7 +52,6 @@ use crate::{
     },
     types::{
         Bool,
-        Keeper,
         Reader,
         Str,
         Symbol,
@@ -114,18 +110,8 @@ pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_eval_twice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    match input {
-        Val::Ref(k) => {
-            let Ok(input) = Keeper::reader(&k.0) else {
-                return Val::default();
-            };
-            EvalByRef.eval(&mut ctx, &input.val)
-        }
-        i => {
-            let val = Eval.eval(&mut ctx, i);
-            Eval.eval(&mut ctx, val)
-        }
-    }
+    let val = Eval.eval(&mut ctx, input);
+    Eval.eval(&mut ctx, val)
 }
 
 pub(crate) fn eval_thrice() -> PrimitiveFunc<CtxMutableFn> {
@@ -140,8 +126,9 @@ pub(crate) fn eval_thrice() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_eval_thrice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let val = Eval.eval(&mut ctx, input);
-    fn_eval_twice::<Ctx>(ctx, val)
+    let val1 = Eval.eval(&mut ctx, input);
+    let val2 = Eval.eval(&mut ctx, val1);
+    Eval.eval(&mut ctx, val2)
 }
 
 pub(crate) fn eval_free() -> PrimitiveFunc<CtxFreeFn> {

@@ -4,7 +4,6 @@ use crate::{
         val::{
             ListVal,
             MapVal,
-            RefVal,
         },
         Val,
     },
@@ -15,8 +14,6 @@ pub(crate) trait ByVal<Ctx, Output>: Evaluator<Ctx, Val, Output> {
     fn eval_atoms(&self, ctx: &mut Ctx, input: Val) -> Output;
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Output;
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: RefVal) -> Output;
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Output;
 
@@ -33,8 +30,6 @@ pub(crate) trait ByRef<'a, Ctx, Output>: Evaluator<Ctx, &'a Val, Output> {
     fn eval_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Output;
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Output;
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: &'a RefVal) -> Output;
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Output;
 

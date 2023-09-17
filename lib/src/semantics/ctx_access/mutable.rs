@@ -15,12 +15,10 @@ use crate::{
             free::FreeCtx,
             CtxAccessor,
         },
-        val::RefVal,
         Val,
     },
     types::{
         Bool,
-        Either,
         Symbol,
     },
 };
@@ -72,7 +70,7 @@ impl<'a> CtxTrait for MutableCtx<'a> {
         Val::Bool(Bool::new(is_const))
     }
 
-    fn set_super(&mut self, super_ctx: Option<Either<Symbol, RefVal>>) {
+    fn set_super(&mut self, super_ctx: Option<Symbol>) {
         self.0.super_ctx = super_ctx;
     }
 
@@ -175,7 +173,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn set_super(&mut self, super_ctx: Option<Either<Symbol, RefVal>>) {
+    fn set_super(&mut self, super_ctx: Option<Symbol>) {
         match self {
             CtxForMutableFn::Free => FreeCtx.set_super(super_ctx),
             CtxForMutableFn::Const(ctx) => ConstCtx(ctx).set_super(super_ctx),

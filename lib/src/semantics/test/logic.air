@@ -1,21 +1,10 @@
 ;[
     p = (proposition {
-        input : (const_ref 1),
-        output : (const_ref 2),
+        input : 1,
+        output : 2,
         access : (value free),
     }),
-    .. (!input p)
-]
-# ---
-1
-# ===
-;[
-    p = (proposition {
-        input : (ref 1),
-        output : (ref 2),
-        access : (value free),
-    }),
-    .. (!input p)
+    !input p
 ]
 # ---
 1
@@ -26,18 +15,7 @@
         output : 2,
         access : (value free),
     }),
-    .. (!input p)
-]
-# ---
-1
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 2,
-        access : (value free),
-    }),
-    .. (!output p)
+    !output p
 ]
 # ---
 2
@@ -146,7 +124,7 @@ free
         input : 1,
         access : (value free),
     }),
-    .. (!input t)
+    !input t
 ]
 # ---
 1
@@ -156,7 +134,7 @@ free
         input : 1,
         access : (value free),
     }),
-    .. (!output t)
+    !output t
 ]
 # ---
 1
@@ -206,7 +184,7 @@ eval : eval
         input : (quote ((' not) 't)),
         access : (value free),
     }),
-    .. (!output t)
+    !output t
 ]
 # ---
 'f
@@ -228,7 +206,7 @@ theorem {
             }
         })
     }),
-    .. (!output t)
+    !output t
 ]
 # ---
 'f
@@ -243,7 +221,7 @@ theorem {
             }
         })
     }),
-    .. (!output t)
+    !output t
 ]
 # ---
 1
@@ -258,7 +236,8 @@ theorem {
             }
         })
     }),
-    (!before t) eval_const ((' is_null) a)
+    ctx = (!before t),
+    ctx eval_const ((' is_null) a)
 ]
 # ---
 't
@@ -273,7 +252,8 @@ theorem {
             }
         })
     }),
-    (!after t) eval_const ((' is_null) a)
+    ctx = (!after t),
+    ctx eval_const ((' is_null) a)
 ]
 # ---
 'f
@@ -331,7 +311,8 @@ const
             var : {a : 2}
         })
     }),
-    (!before p1) eval_const a
+    ctx = (!before p1),
+    ctx eval_const a
 ]
 # ---
 2
@@ -348,7 +329,8 @@ const
             var : {a : 2}
         })
     }),
-    (!before p1) eval_const a
+    ctx = (!before p1),
+    ctx eval_const a
 ]
 # ---
 2
@@ -414,7 +396,8 @@ mutable
             var : {a : 2}
         })
     }),
-    (!before t1) eval_const a
+    ctx = (!before t1),
+    ctx eval_const a
 ]
 # ---
 2

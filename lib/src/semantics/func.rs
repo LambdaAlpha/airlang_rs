@@ -25,13 +25,10 @@ use {
             },
             val::{
                 CtxVal,
-                RefVal,
                 Val,
             },
         },
         types::{
-            Keeper,
-            Owner,
             Reader,
             Symbol,
         },
@@ -265,9 +262,9 @@ fn keep_eval_restore(
     body: &Val,
 ) -> Val {
     let caller = own_ctx(ctx);
-    let keeper = keep_ctx(&mut new_ctx, caller, caller_name, caller_tag);
+    keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_tag);
     let output = EvalByRef.eval(&mut MutableCtx(&mut new_ctx), body);
-    restore_ctx(ctx, &keeper);
+    restore_ctx(ctx, new_ctx, &caller_name);
     output
 }
 
@@ -278,22 +275,16 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
     owned
 }
 
-fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) -> Keeper<TaggedVal> {
-    let keeper = Keeper::new(TaggedVal {
-        val: Val::Ctx(Box::new(ctx).into()),
-        tag,
-    });
-    let caller_ref = Val::Ref(RefVal(keeper.clone()));
-    new_ctx.put_val_local(name, TaggedVal::new(caller_ref));
-    keeper
+fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) {
+    let val = Val::Ctx(CtxVal(Box::new(ctx)));
+    new_ctx.put_val_local(name, TaggedVal { val, tag });
 }
 
-fn restore_ctx(ctx: &mut Ctx, keeper: &Keeper<TaggedVal>) {
-    if let Ok(o) = Keeper::owner(keeper) {
-        if let Val::Ctx(CtxVal(c)) = Owner::move_data(o).val {
-            *ctx = *c;
-        }
-    }
+fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &str) {
+    let Val::Ctx(CtxVal(caller)) = new_ctx.into_val(name) else {
+        return;
+    };
+    *ctx = *caller;
 }
 
 impl<F> PartialEq for Primitive<F> {

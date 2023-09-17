@@ -38,7 +38,6 @@ impl DefaultByVal {
             Val::Map(m) => eval.eval_map(ctx, m),
             Val::Call(c) => eval.eval_call(ctx, c.func, c.input),
             Val::Reverse(r) => eval.eval_reverse(ctx, r.func, r.output),
-            Val::Ref(k) => eval.eval_ref(ctx, k),
             v => eval.eval_atoms(ctx, v),
         }
     }
@@ -143,7 +142,6 @@ impl DefaultByRef {
             Val::Map(m) => eval.eval_map(ctx, m),
             Val::Call(c) => eval.eval_call(ctx, &c.func, &c.input),
             Val::Reverse(r) => eval.eval_reverse(ctx, &r.func, &r.output),
-            Val::Ref(k) => eval.eval_ref(ctx, k),
             v => eval.eval_atoms(ctx, v),
         }
     }

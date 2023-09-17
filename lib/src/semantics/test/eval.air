@@ -86,7 +86,7 @@ eval {a : (eval {b : c})}
 # ---
 ' : '
 # ===
-;[a = 1, eval3 (ref (value a))]
+;[a = (value b), b = (value c), c = 1, eval3 a]
 # ---
 1
 # ===
@@ -119,18 +119,6 @@ eval_free ((' get1) (1 : 2))
 1
 # ===
 ;[a =const (context {var : {b : 1, =}}), a eval_mutable (b = 2), a .. b]
-# ---
-1
-# ===
-;[a =const (ref (context {var : {b : 1, =}})), a eval_mutable (b = 2), a .. b]
-# ---
-2
-# ===
-;[a = (const_ref (context {var : {b : 1, =}})), a eval_mutable (b = 2), a .. b]
-# ---
-1
-# ===
-;[a = (context {const : {b : (ref (context {const : {c : 1}}))}}), .. [a, b, c]]
 # ---
 1
 # ===
@@ -310,10 +298,6 @@ is_context_const {value : [move a, (' ') a], eval_mode : quote}
 # ---
 't
 # ===
-;[c = (ref (context {const : {move : not}})), is_context_const {value : (move a), context : c}]
-# ---
-'t
-# ===
 ;[
     f = (function{
         body : input,
@@ -426,7 +410,7 @@ not 'f
 # ===
 ;[
     f = (function{
-        body : (;[' set_super (.. caller), eval2 input]),
+        body : (;[' set_super caller, eval2 input]),
         eval_mode : value,
         caller_access : mutable,
         context : (' (context {const : {

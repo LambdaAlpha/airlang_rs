@@ -13,7 +13,6 @@ use crate::{
         val::{
             ListVal,
             MapVal,
-            RefVal,
             Val,
         },
         Evaluator,
@@ -52,10 +51,6 @@ where
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Output {
         self.value.eval_symbol(ctx, s)
-    }
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: RefVal) -> Output {
-        self.value.eval_ref(ctx, ref_val)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Output {
@@ -112,10 +107,6 @@ where
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Output {
         self.value.eval_symbol(ctx, s)
-    }
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: &'a RefVal) -> Output {
-        self.value.eval_ref(ctx, ref_val)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Output {

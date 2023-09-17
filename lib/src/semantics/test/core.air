@@ -18,10 +18,6 @@ a
 # ---
 {a : '}
 # ===
-eval2 (ref (value a))
-# ---
-a
-# ===
 not (not 't)
 # ---
 't

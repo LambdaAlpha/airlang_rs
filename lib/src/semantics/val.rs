@@ -1,10 +1,7 @@
 use {
     crate::{
         semantics::{
-            ctx::{
-                Ctx,
-                TaggedVal,
-            },
+            ctx::Ctx,
             func::Func,
             logic::{
                 Prop,
@@ -30,7 +27,6 @@ use {
             Call,
             Float,
             Int,
-            Keeper,
             List,
             Map,
             Pair,
@@ -70,8 +66,6 @@ pub enum Val {
     List(ListVal),
     Map(MapVal),
 
-    Ref(RefVal),
-
     Func(FuncVal),
     Ctx(CtxVal),
 
@@ -84,9 +78,6 @@ pub(crate) type CallVal = Call<Val, Val>;
 pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Val, Val>;
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct RefVal(pub(crate) Keeper<TaggedVal>);
 
 #[derive(Debug, Clone, Eq)]
 pub struct FuncVal(pub(crate) Reader<Func>);
@@ -182,12 +173,6 @@ impl From<ListVal> for Val {
 impl From<MapVal> for Val {
     fn from(value: MapVal) -> Self {
         Val::Map(value)
-    }
-}
-
-impl From<RefVal> for Val {
-    fn from(value: RefVal) -> Self {
-        Val::Ref(value)
     }
 }
 
@@ -534,12 +519,6 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             _ => return Err(ReprError {}),
         };
         Ok(r)
-    }
-}
-
-impl From<Keeper<TaggedVal>> for RefVal {
-    fn from(value: Keeper<TaggedVal>) -> Self {
-        RefVal(value)
     }
 }
 

@@ -58,10 +58,6 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::set_const());
     put_primitive_func(c, ctx::is_final());
     put_primitive_func(c, ctx::is_const());
-    put_primitive_func(c, ctx::new_ref());
-    put_primitive_func(c, ctx::null_ref());
-    put_primitive_func(c, ctx::final_ref());
-    put_primitive_func(c, ctx::const_ref());
     put_primitive_func(c, ctx::ctx_new());
     put_primitive_func(c, ctx::ctx_set_super());
 }
@@ -238,10 +234,6 @@ pub(crate) mod names {
     pub(crate) const CONST: &str = "const";
     pub(crate) const IS_FINAL: &str = "is_final";
     pub(crate) const IS_CONST: &str = "is_const";
-    pub(crate) const REF: &str = "ref";
-    pub(crate) const NULL_REF: &str = "null_ref";
-    pub(crate) const FINAL_REF: &str = "final_ref";
-    pub(crate) const CONST_REF: &str = "const_ref";
     pub(crate) const CTX_NEW: &str = "context";
     pub(crate) const CTX_SET_SUPER: &str = "set_super";
 

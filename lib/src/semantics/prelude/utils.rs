@@ -1,22 +1,14 @@
 use crate::{
     semantics::{
-        ctx::TaggedVal,
-        ctx_access::free::FreeCtx,
         eval_mode::{
             BasicEvalMode,
             EvalMode,
         },
         prelude::names,
-        val::{
-            MapVal,
-            RefVal,
-        },
+        val::MapVal,
         Val,
     },
-    types::{
-        Keeper,
-        Symbol,
-    },
+    types::Symbol,
 };
 
 pub(crate) fn map_remove(map: &mut MapVal, name: &str) -> Val {
@@ -68,32 +60,4 @@ pub(crate) fn basic_eval_mode_to_symbol(eval_mode: BasicEvalMode) -> Symbol {
         BasicEvalMode::Inline => "inline",
     };
     Symbol::from_str(str)
-}
-
-#[allow(unused)]
-pub(crate) fn ref_val(val: Val) -> RefVal {
-    if let Val::Ref(ref_val) = val {
-        ref_val
-    } else {
-        RefVal(Keeper::new(TaggedVal::new(val)))
-    }
-}
-
-#[allow(unused)]
-pub(crate) fn final_ref_val(val: Val) -> RefVal {
-    if let Val::Ref(ref_val) = val {
-        FreeCtx::set_final_ref(&ref_val);
-        ref_val
-    } else {
-        RefVal(Keeper::new(TaggedVal::new_final(val)))
-    }
-}
-
-pub(crate) fn const_ref_val(val: Val) -> RefVal {
-    if let Val::Ref(ref_val) = val {
-        FreeCtx::set_const_ref(&ref_val);
-        ref_val
-    } else {
-        RefVal(Keeper::new(TaggedVal::new_const(val)))
-    }
 }

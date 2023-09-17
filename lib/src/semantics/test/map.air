@@ -6,10 +6,6 @@
 # ---
 2
 # ===
-;[a = (ref {1 : 2, 3}), a . map_length]
-# ---
-2
-# ===
 ;[(m : k) = (map_keys {1 : 2, 3}), (k list_get 0) + (k list_get 1)]
 # ---
 4

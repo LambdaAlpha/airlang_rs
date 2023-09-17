@@ -1,9 +1,6 @@
 use crate::{
     semantics::{
-        ctx_access::{
-            free::FreeCtx,
-            CtxAccessor,
-        },
+        ctx_access::CtxAccessor,
         eval::{
             input::{
                 ByRef,
@@ -36,7 +33,6 @@ use crate::{
             FuncVal,
             ListVal,
             MapVal,
-            RefVal,
             Val,
         },
         Evaluator,
@@ -65,10 +61,6 @@ where
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
         ctx.get(&s)
-    }
-
-    fn eval_ref(&self, _ctx: &mut Ctx, ref_val: RefVal) -> Val {
-        FreeCtx::get_val_ref(&ref_val)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
@@ -123,10 +115,6 @@ where
         ctx.get(s)
     }
 
-    fn eval_ref(&self, _ctx: &mut Ctx, ref_val: &'a RefVal) -> Val {
-        FreeCtx::get_val_ref(ref_val)
-    }
-
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
         DefaultByRef::eval_pair(self, ctx, first, second, &ValBuilder)
     }
@@ -177,10 +165,6 @@ where
 
     fn eval_symbol(&self, _ctx: &mut Ctx, _s: Symbol) -> Option<Val> {
         None
-    }
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: RefVal) -> Option<Val> {
-        Some(Eval.eval_ref(ctx, ref_val))
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Option<Val> {
@@ -239,10 +223,6 @@ where
         None
     }
 
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: &'a RefVal) -> Option<Val> {
-        Some(EvalByRef.eval_ref(ctx, ref_val))
-    }
-
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Option<Val> {
         DefaultByRef::eval_pair(self, ctx, first, second, &OpValBuilder)
     }
@@ -297,10 +277,6 @@ where
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Option<Val> {
         Some(Eval.eval_symbol(ctx, s))
-    }
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: RefVal) -> Option<Val> {
-        Some(Eval.eval_ref(ctx, ref_val))
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Option<Val> {
@@ -359,10 +335,6 @@ where
         Some(EvalByRef.eval_symbol(ctx, s))
     }
 
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: &'a RefVal) -> Option<Val> {
-        Some(EvalByRef.eval_ref(ctx, ref_val))
-    }
-
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Option<Val> {
         DefaultByRef::eval_pair(self, ctx, first, second, &OpValBuilder)
     }
@@ -417,10 +389,6 @@ where
 
     fn eval_symbol(&self, _ctx: &mut Ctx, _s: Symbol) -> bool {
         false
-    }
-
-    fn eval_ref(&self, _ctx: &mut Ctx, _ref_val: RefVal) -> bool {
-        true
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> bool {
@@ -481,10 +449,6 @@ where
         false
     }
 
-    fn eval_ref(&self, _ctx: &mut Ctx, _ref_val: &'a RefVal) -> bool {
-        true
-    }
-
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> bool {
         DefaultByRef::eval_pair(self, ctx, first, second, &BoolAndBuilder)
     }
@@ -543,10 +507,6 @@ where
         true
     }
 
-    fn eval_ref(&self, _ctx: &mut Ctx, _ref_val: RefVal) -> bool {
-        true
-    }
-
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> bool {
         DefaultByVal::eval_pair(self, ctx, first, second, &BoolAndBuilder)
     }
@@ -602,10 +562,6 @@ where
     }
 
     fn eval_symbol(&self, _ctx: &mut Ctx, _s: &'a Symbol) -> bool {
-        true
-    }
-
-    fn eval_ref(&self, _ctx: &mut Ctx, _ref_val: &'a RefVal) -> bool {
         true
     }
 

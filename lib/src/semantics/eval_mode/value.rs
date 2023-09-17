@@ -12,7 +12,6 @@ use crate::{
         val::{
             ListVal,
             MapVal,
-            RefVal,
             Val,
         },
     },
@@ -39,10 +38,6 @@ impl<Ctx> ByVal<Ctx, Val> for Value {
 
     fn eval_symbol(&self, _ctx: &mut Ctx, s: Symbol) -> Val {
         Val::Symbol(s)
-    }
-
-    fn eval_ref(&self, _ctx: &mut Ctx, ref_val: RefVal) -> Val {
-        Val::Ref(ref_val)
     }
 
     fn eval_pair(&self, _ctx: &mut Ctx, first: Val, second: Val) -> Val {
@@ -83,10 +78,6 @@ impl<'a, Ctx> ByRef<'a, Ctx, Val> for ValueByRef {
         Val::Symbol(s.clone())
     }
 
-    fn eval_ref(&self, _ctx: &mut Ctx, ref_val: &'a RefVal) -> Val {
-        Val::Ref(ref_val.clone())
-    }
-
     fn eval_pair(&self, _ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
         Val::Pair(Box::new(Pair::new(first.clone(), second.clone())))
     }
@@ -123,10 +114,6 @@ impl<Ctx> ByVal<Ctx, Option<Val>> for ValueFreeConst {
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Option<Val> {
         Some(Value.eval_symbol(ctx, s))
-    }
-
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: RefVal) -> Option<Val> {
-        Some(Value.eval_ref(ctx, ref_val))
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Option<Val> {
@@ -167,10 +154,6 @@ impl<'a, Ctx> ByRef<'a, Ctx, Option<Val>> for ValueFreeConstByRef {
         Some(ValueByRef.eval_symbol(ctx, s))
     }
 
-    fn eval_ref(&self, ctx: &mut Ctx, ref_val: &'a RefVal) -> Option<Val> {
-        Some(ValueByRef.eval_ref(ctx, ref_val))
-    }
-
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Option<Val> {
         Some(ValueByRef.eval_pair(ctx, first, second))
     }
@@ -209,10 +192,6 @@ impl<Ctx> ByVal<Ctx, bool> for ValueFreeConstChecker {
         true
     }
 
-    fn eval_ref(&self, _ctx: &mut Ctx, _ref_val: RefVal) -> bool {
-        true
-    }
-
     fn eval_pair(&self, _ctx: &mut Ctx, _first: Val, _second: Val) -> bool {
         true
     }
@@ -246,10 +225,6 @@ impl<'a, Ctx> ByRef<'a, Ctx, bool> for ValueFreeConstChecker {
     }
 
     fn eval_symbol(&self, _ctx: &mut Ctx, _s: &'a Symbol) -> bool {
-        true
-    }
-
-    fn eval_ref(&self, _ctx: &mut Ctx, _ref_val: &'a RefVal) -> bool {
         true
     }
 

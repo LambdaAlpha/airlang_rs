@@ -1,31 +1,20 @@
-use crate::{
-    semantics::{
-        ctx::{
-            InvariantTag,
-            TaggedVal,
-        },
-        ctx_access::{
-            constant::ConstCtx,
-            free::FreeCtx,
-            mutable::MutableCtx,
-        },
-        eval::Evaluator,
-        eval_mode::EvalMode,
-        val::{
-            CtxVal,
-            RefVal,
-        },
-        Ctx,
-        Val,
+use crate::semantics::{
+    ctx_access::{
+        constant::ConstCtx,
+        free::FreeCtx,
+        mutable::MutableCtx,
     },
-    types::Keeper,
+    eval::Evaluator,
+    eval_mode::EvalMode,
+    Ctx,
+    Val,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Prop {
     eval_mode: EvalMode,
-    input: RefVal,
-    output: RefVal,
+    input: Val,
+    output: Val,
     ctx: PropCtx,
 }
 
@@ -38,69 +27,48 @@ pub(crate) struct Theorem {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum PropCtx {
     Free,
-    Const(RefVal),
-    Mutable(RefVal, RefVal),
+    Const(Ctx),
+    Mutable(Ctx, Ctx),
 }
 
 impl Prop {
-    pub(crate) fn new_free(eval_mode: EvalMode, input: RefVal, output: RefVal) -> Option<Self> {
-        if !Self::verify_val(&input) || !Self::verify_val(&output) {
-            return None;
-        }
-        Some(Self {
+    pub(crate) fn new_free(eval_mode: EvalMode, input: Val, output: Val) -> Self {
+        Self {
             eval_mode,
             input,
             output,
             ctx: PropCtx::Free,
-        })
+        }
     }
 
-    pub(crate) fn new_const(
-        eval_mode: EvalMode,
-        ctx: RefVal,
-        input: RefVal,
-        output: RefVal,
-    ) -> Option<Self> {
-        if !Self::verify_val(&input) || !Self::verify_val(&output) || !Self::verify_ctx(&ctx) {
-            return None;
-        }
-        Some(Self {
+    pub(crate) fn new_const(eval_mode: EvalMode, ctx: Ctx, input: Val, output: Val) -> Self {
+        Self {
             eval_mode,
             input,
             output,
             ctx: PropCtx::Const(ctx),
-        })
+        }
     }
 
     pub(crate) fn new_mutable(
         eval_mode: EvalMode,
-        before: RefVal,
-        input: RefVal,
-        after: RefVal,
-        output: RefVal,
-    ) -> Option<Self> {
-        if !Self::verify_val(&input)
-            || !Self::verify_val(&output)
-            || !Self::verify_ctx(&before)
-            || !Self::verify_ctx(&after)
-        {
-            return None;
-        }
-        Some(Self {
+        before: Ctx,
+        input: Val,
+        after: Ctx,
+        output: Val,
+    ) -> Self {
+        Self {
             eval_mode,
             input,
             output,
             ctx: PropCtx::Mutable(before, after),
-        })
+        }
     }
 
-    pub(crate) fn relax_to_const(&self, ctx: RefVal) -> Option<Self> {
+    pub(crate) fn relax_to_const(&self, ctx: Ctx) -> Option<Self> {
         let PropCtx::Free = &self.ctx else {
             return None;
         };
-        if !Self::verify_ctx(&ctx) {
-            return None;
-        }
         let ctx = PropCtx::Const(ctx);
         Some(Self {
             eval_mode: self.eval_mode,
@@ -110,13 +78,10 @@ impl Prop {
         })
     }
 
-    pub(crate) fn relax_to_mutable(&self, ctx: Option<RefVal>) -> Option<Self> {
+    pub(crate) fn relax_to_mutable(&self, ctx: Option<Ctx>) -> Option<Self> {
         let ctx = match &self.ctx {
             PropCtx::Free => {
                 let ctx = ctx?;
-                if !Self::verify_ctx(&ctx) {
-                    return None;
-                }
                 PropCtx::Mutable(ctx.clone(), ctx)
             }
             PropCtx::Const(current) => {
@@ -135,38 +100,15 @@ impl Prop {
         })
     }
 
-    fn verify_val(val: &RefVal) -> bool {
-        let Ok(owner) = Keeper::owner(&val.0) else {
-            return false;
-        };
-        if !matches!(owner.tag, InvariantTag::Const) {
-            return false;
-        }
-        true
-    }
-
-    fn verify_ctx(ctx: &RefVal) -> bool {
-        let Ok(mut ctx_owner) = Keeper::owner(&ctx.0) else {
-            return false;
-        };
-        if !matches!(ctx_owner.tag, InvariantTag::Const) {
-            return false;
-        }
-        let Val::Ctx(_) = &mut ctx_owner.val else {
-            return false;
-        };
-        true
-    }
-
     pub(crate) fn eval_mode(&self) -> EvalMode {
         self.eval_mode
     }
 
-    pub(crate) fn input(&self) -> &RefVal {
+    pub(crate) fn input(&self) -> &Val {
         &self.input
     }
 
-    pub(crate) fn output(&self) -> &RefVal {
+    pub(crate) fn output(&self) -> &Val {
         &self.output
     }
 
@@ -176,15 +118,8 @@ impl Prop {
 }
 
 impl Theorem {
-    pub(crate) fn new_free(eval_mode: EvalMode, input: RefVal) -> Option<Self> {
-        let Ok(owner) = Keeper::owner(&input.0) else {
-            return None;
-        };
-        if !matches!(owner.tag, InvariantTag::Const) {
-            return None;
-        }
-        let output = eval_mode.eval_free_by_ref(&mut FreeCtx, &owner.val)?;
-        let output = RefVal::from(Keeper::new(TaggedVal::new_const(output)));
+    pub(crate) fn new_free(eval_mode: EvalMode, input: Val) -> Option<Self> {
+        let output = eval_mode.eval_free_by_ref(&mut FreeCtx, &input)?;
         let prop = Prop {
             eval_mode,
             input,
@@ -194,54 +129,20 @@ impl Theorem {
         Some(Self { prop, truth: true })
     }
 
-    pub(crate) fn new_const(eval_mode: EvalMode, ctx_ref: RefVal, input: RefVal) -> Option<Self> {
-        let Ok(input_owner) = Keeper::owner(&input.0) else {
-            return None;
-        };
-        if !matches!(input_owner.tag, InvariantTag::Const) {
-            return None;
-        }
-        let Ok(mut ctx_owner) = Keeper::owner(&ctx_ref.0) else {
-            return None;
-        };
-        if !matches!(ctx_owner.tag, InvariantTag::Const) {
-            return None;
-        }
-        let Val::Ctx(CtxVal(ctx)) = &mut ctx_owner.val else {
-            return None;
-        };
-        let output = eval_mode.eval_const_by_ref(&mut ConstCtx(ctx), &input_owner.val)?;
-        let output = RefVal::from(Keeper::new(TaggedVal::new_const(output)));
+    pub(crate) fn new_const(eval_mode: EvalMode, mut ctx: Ctx, input: Val) -> Option<Self> {
+        let output = eval_mode.eval_const_by_ref(&mut ConstCtx(&mut ctx), &input)?;
         let prop = Prop {
             eval_mode,
             input,
             output,
-            ctx: PropCtx::Const(ctx_ref),
+            ctx: PropCtx::Const(ctx),
         };
         Some(Self { prop, truth: true })
     }
 
-    pub(crate) fn new_mutable(eval_mode: EvalMode, before: RefVal, input: RefVal) -> Option<Self> {
-        let Ok(input_owner) = Keeper::owner(&input.0) else {
-            return None;
-        };
-        if !matches!(input_owner.tag, InvariantTag::Const) {
-            return None;
-        }
-        let Ok(ctx_owner) = Keeper::owner(&before.0) else {
-            return None;
-        };
-        if !matches!(ctx_owner.tag, InvariantTag::Const) {
-            return None;
-        }
-        let Val::Ctx(CtxVal(ctx_before)) = &ctx_owner.val else {
-            return None;
-        };
-        let mut after = Ctx::clone(ctx_before);
-        let output = eval_mode.eval(&mut MutableCtx(&mut after), &input_owner.val);
-        let output = RefVal::from(Keeper::new(TaggedVal::new_const(output)));
-        let after = Val::Ctx(CtxVal::from(Box::new(after)));
-        let after = RefVal::from(Keeper::new(TaggedVal::new_const(after)));
+    pub(crate) fn new_mutable(eval_mode: EvalMode, before: Ctx, input: Val) -> Option<Self> {
+        let mut after = Ctx::clone(&before);
+        let output = eval_mode.eval(&mut MutableCtx(&mut after), &input);
         let prop = Prop {
             eval_mode,
             input,
@@ -251,64 +152,38 @@ impl Theorem {
         Some(Self { prop, truth: true })
     }
 
-    pub(crate) fn prove(prop: Prop) -> Option<Self> {
-        let Ok(input_owner) = Keeper::owner(&prop.input.0) else {
-            return None;
-        };
-        let Ok(output_owner) = Keeper::owner(&prop.output.0) else {
-            return None;
-        };
-        match &prop.ctx {
+    pub(crate) fn prove(mut prop: Prop) -> Option<Self> {
+        match &mut prop.ctx {
             PropCtx::Free => {
-                let Some(real_output) = prop
-                    .eval_mode
-                    .eval_free_by_ref(&mut FreeCtx, &input_owner.val)
+                let Some(real_output) = prop.eval_mode.eval_free_by_ref(&mut FreeCtx, &prop.input)
                 else {
                     return None;
                 };
-                let truth = output_owner.val == real_output;
+                let truth = prop.output == real_output;
                 Some(Self { prop, truth })
             }
-            PropCtx::Const(ctx) => {
-                let Ok(mut ctx_owner) = Keeper::owner(&ctx.0) else {
-                    return None;
-                };
-                let Val::Ctx(CtxVal(before)) = &mut ctx_owner.val else {
-                    return None;
-                };
+            PropCtx::Const(before) => {
                 let Some(real_output) = prop
                     .eval_mode
-                    .eval_const_by_ref(&mut ConstCtx(before), &input_owner.val)
+                    .eval_const_by_ref(&mut ConstCtx(before), &prop.input)
                 else {
                     return None;
                 };
-                let truth = output_owner.val == real_output;
+                let truth = prop.output == real_output;
                 Some(Self { prop, truth })
             }
             PropCtx::Mutable(before, after) => {
-                let Ok(before_owner) = Keeper::owner(&before.0) else {
-                    return None;
-                };
-                let Val::Ctx(CtxVal(before)) = &before_owner.val else {
-                    return None;
-                };
-                let Ok(mut after) = Keeper::owner(&after.0) else {
-                    return None;
-                };
-                let Val::Ctx(CtxVal(after)) = &mut after.val else {
-                    return None;
-                };
                 let mut real_after = Ctx::clone(before);
                 let real_output = prop
                     .eval_mode
-                    .eval(&mut MutableCtx(&mut real_after), &input_owner.val);
-                let truth = output_owner.val == real_output && **after == real_after;
+                    .eval(&mut MutableCtx(&mut real_after), &prop.input);
+                let truth = prop.output == real_output && *after == real_after;
                 Some(Self { prop, truth })
             }
         }
     }
 
-    pub(crate) fn relax_to_const(&self, ctx: RefVal) -> Option<Self> {
+    pub(crate) fn relax_to_const(&self, ctx: Ctx) -> Option<Self> {
         if !self.truth {
             return None;
         }
@@ -316,7 +191,7 @@ impl Theorem {
         Some(Self { prop, truth: true })
     }
 
-    pub(crate) fn relax_to_mutable(&self, ctx: Option<RefVal>) -> Option<Self> {
+    pub(crate) fn relax_to_mutable(&self, ctx: Option<Ctx>) -> Option<Self> {
         if !self.truth {
             return None;
         }
