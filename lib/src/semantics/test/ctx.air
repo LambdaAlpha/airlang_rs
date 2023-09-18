@@ -222,6 +222,22 @@ is_const a
 # ---
 1
 # ===
+;[a = (context {var : {b : 1}}), a move b]
+# ---
+1
+# ===
+;[a = (context {var : {b : 1}}), a move b, a .. b]
+# ---
+'
+# ===
+;[a = (context {var : {b : 1}}), move [a, b]]
+# ---
+1
+# ===
+;[a = (context {var : {b : 1}}), move [a, b], a .. b]
+# ---
+'
+# ===
 ;[a = (context {var : {b : 1}}), a .. b]
 # ---
 1
