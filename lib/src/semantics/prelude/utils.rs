@@ -39,7 +39,7 @@ pub(crate) fn parse_eval_mode(map: &mut MapVal) -> Option<EvalMode> {
 }
 
 fn parse_basic_eval_mode(val: Val) -> Option<BasicEvalMode> {
-    let Val::Symbol(Symbol(name)) = val else {
+    let Val::Symbol(name) = val else {
         return None;
     };
     let eval_mode = match &*name {

@@ -13,7 +13,7 @@ use {
 };
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Str(pub(crate) SmartString<LazyCompact>);
+pub struct Str(SmartString<LazyCompact>);
 
 impl Deref for Str {
     type Target = str;
