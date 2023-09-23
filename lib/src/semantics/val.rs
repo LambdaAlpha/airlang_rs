@@ -85,10 +85,10 @@ pub struct FuncVal(pub(crate) Reader<Func>);
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CtxVal(pub(crate) Box<Ctx>);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Eq)]
 pub struct PropVal(pub(crate) Reader<Prop>);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Eq)]
 pub struct TheoremVal(pub(crate) Reader<Theorem>);
 
 #[allow(dead_code)]
@@ -530,7 +530,10 @@ impl From<Reader<Func>> for FuncVal {
 
 impl PartialEq for FuncVal {
     fn eq(&self, other: &Self) -> bool {
-        self.0.deref().eq(&other.0)
+        if self.0 == other.0 {
+            return true;
+        }
+        *self.0 == *other.0
     }
 }
 
@@ -552,8 +555,38 @@ impl From<Reader<Prop>> for PropVal {
     }
 }
 
+impl PartialEq for PropVal {
+    fn eq(&self, other: &Self) -> bool {
+        if self.0 == other.0 {
+            return true;
+        }
+        *self.0 == *other.0
+    }
+}
+
+impl Hash for PropVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.deref().hash(state);
+    }
+}
+
 impl From<Reader<Theorem>> for TheoremVal {
     fn from(value: Reader<Theorem>) -> Self {
         TheoremVal(value)
+    }
+}
+
+impl PartialEq for TheoremVal {
+    fn eq(&self, other: &Self) -> bool {
+        if self.0 == other.0 {
+            return true;
+        }
+        *self.0 == *other.0
+    }
+}
+
+impl Hash for TheoremVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.deref().hash(state);
     }
 }

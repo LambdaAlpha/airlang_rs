@@ -46,7 +46,47 @@ not 'f
 # ---
 't
 # ===
+(value a) == (value a)
+# ---
+'t
+# ===
+"" == ""
+# ---
+'t
+# ===
+(1 : 2) == (1 : 2)
+# ---
+'t
+# ===
 [1, 2] == [1, 2]
+# ---
+'t
+# ===
+{} == {}
+# ---
+'t
+# ===
+(value (f a)) == (value (f a))
+# ---
+'t
+# ===
+(1 ? 2) == (1 ? 2)
+# ---
+'t
+# ===
+(function {body : input}) == (function {body : input})
+# ---
+'t
+# ===
+(context {}) == (context {})
+# ---
+'t
+# ===
+(proposition {input : 1, output : 1, access : (value free)}) == (proposition {input : 1, output : 1, access : (value free)})
+# ---
+'t
+# ===
+(theorem {input : 1, access : (value free)}) == (theorem {input : 1, access : (value free)})
 # ---
 't
 # ===
