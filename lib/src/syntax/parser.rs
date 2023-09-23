@@ -222,14 +222,25 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     let len = tokens.len();
     let mut iter = tokens.into_iter();
     if len == 2 {
-        let Token::Default(func) = iter.next().unwrap() else {
-            return None;
-        };
+        let func = iter.next().unwrap();
         let Token::Default(input) = iter.next().unwrap() else {
             return None;
         };
-        let call = Box::new(Call::new(func, input));
-        return Some(<T as From<Box<Call<T, T>>>>::from(call));
+        return match func {
+            Token::Pair => {
+                let pair = Box::new(Pair::new(input.clone(), input));
+                Some(<T as From<Box<Pair<T, T>>>>::from(pair))
+            }
+            Token::Reverse => {
+                let reverse = Box::new(Reverse::new(input.clone(), input));
+                Some(<T as From<Box<Reverse<T, T>>>>::from(reverse))
+            }
+            Token::Comment => Some(input),
+            Token::Default(func) => {
+                let call = Box::new(Call::new(func, input));
+                Some(<T as From<Box<Call<T, T>>>>::from(call))
+            }
+        };
     } else if len % 2 == 0 {
         return None;
     }
@@ -356,7 +367,7 @@ where
         normed::<T, _, _, _>(associate::<T, _>),
         |repr: T| match repr.try_into_pair() {
             Ok(pair) => pair,
-            Err(repr) => (repr.clone(), repr),
+            Err(repr) => (repr, <T as From<Unit>>::from(Unit)),
         },
     );
     context("pair", f)(src)

@@ -30,5 +30,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         list(vec![pair(symbol("a"), symbol("b"))]),
         map(vec![(symbol("a"), symbol("b"))]),
         map(vec![(pair(symbol("a"), symbol("b")), symbol("c"))]),
+        pair(symbol("a"), symbol("a")),
     ]
 }

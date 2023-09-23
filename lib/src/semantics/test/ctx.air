@@ -98,7 +98,7 @@ is_null a
 # ---
 [1, ', 2, 3]
 # ===
-;[{a, b} = {a : 1, b : 2, c : 3}, [a, b]]
+;[{: a, : b} = {a : 1, b : 2, c : 3}, [a, b]]
 # ---
 [1, 2]
 # ===
@@ -242,15 +242,15 @@ is_const a
 # ---
 1
 # ===
-;[a = (context {var : {b : 1, ;, =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {var : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
 # ---
 2
 # ===
-;[a = (context {final : {b : 1, ;, =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {final : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
 # ---
 1
 # ===
-;[a = (context {const : {b : (1 : 2), ;, set1}}), a eval_mutable (;[b set1 3, b])]
+;[a = (context {const : {b : (1 : 2), : ;, : set1}}), a eval_mutable (;[b set1 3, b])]
 # ---
 1 : 2
 # ===

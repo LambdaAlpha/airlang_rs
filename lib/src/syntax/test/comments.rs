@@ -30,5 +30,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         map(vec![(int("2"), int("4"))]),
         int("2"),
         infix(symbol("d"), symbol("e"), symbol("f")),
+        symbol("a"),
     ]
 }

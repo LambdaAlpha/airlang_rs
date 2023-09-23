@@ -26,5 +26,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         reverse(ltree(symbol("a"), vec![]), symbol("b")),
         reverse(reverse(symbol("a"), symbol("b")), symbol("c")),
         reverse(infix(symbol("a"), symbol("b"), symbol("c")), symbol("d")),
+        reverse(symbol("a"), symbol("a")),
     ]
 }

@@ -1,4 +1,4 @@
-"bench parse" #
+"bench parse" ~
 (;[
   x = 42,
   y = 24,

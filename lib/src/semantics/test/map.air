@@ -1,24 +1,24 @@
-{1 : 2, 3} . map_length
+{1 : 2, : 3} . map_length
 # ---
-{1 : 2, 3} : 2
+{1 : 2, : 3} : 2
 # ===
-;[a = {1 : 2, 3}, a . map_length]
+;[a = {1 : 2, : 3}, a . map_length]
 # ---
 2
 # ===
-;[(m : k) = (map_keys {1 : 2, 3}), (k list_get 0) + (k list_get 1)]
+;[(m : k) = (map_keys {1 : 2, : 3}), (k list_get 0) + (k list_get 1)]
 # ---
 4
 # ===
-;[a = {1 : 2, 3}, b = (map_keys a), (b list_get 0) + (b list_get 1)]
+;[a = {1 : 2, : 3}, b = (map_keys a), (b list_get 0) + (b list_get 1)]
 # ---
 4
 # ===
-;[(m : k) = (map_into_keys {1 : 2, 3}), (k list_get 0) + (k list_get 1)]
+;[(m : k) = (map_into_keys {1 : 2, : 3}), (k list_get 0) + (k list_get 1)]
 # ---
 4
 # ===
-;[a = {1 : 2, 3}, k = (map_into_keys a), (k list_get 0) + (k list_get 1)]
+;[a = {1 : 2, : 3}, k = (map_into_keys a), (k list_get 0) + (k list_get 1)]
 # ---
 4
 # ===
