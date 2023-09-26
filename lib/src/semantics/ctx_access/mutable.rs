@@ -32,20 +32,20 @@ pub(crate) enum CtxForMutableFn<'a> {
 }
 
 impl<'a> CtxTrait for MutableCtx<'a> {
-    fn get(&mut self, name: &str) -> Val {
+    fn get(&self, name: &str) -> Val {
         self.0.get(name)
     }
 
-    fn is_null(&mut self, name: &str) -> Val {
+    fn is_null(&self, name: &str) -> Val {
         DefaultCtx.is_null(self, name)
     }
 
     fn remove(&mut self, name: &str) -> Val {
-        self.0.remove(false, name)
+        self.0.remove(name)
     }
 
     fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val {
-        self.0.put_val(false, name, val)
+        self.0.put_val(name, val)
     }
 
     fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val {
@@ -53,19 +53,19 @@ impl<'a> CtxTrait for MutableCtx<'a> {
     }
 
     fn set_final(&mut self, name: &str) {
-        self.0.set_final(false, name);
+        self.0.set_final(name);
     }
 
     fn set_const(&mut self, name: &str) {
-        self.0.set_const(false, name);
+        self.0.set_const(name);
     }
 
-    fn is_final(&mut self, name: &str) -> Val {
+    fn is_final(&self, name: &str) -> Val {
         let is_final = self.0.is_final(name);
         Val::Bool(Bool::new(is_final))
     }
 
-    fn is_const(&mut self, name: &str) -> Val {
+    fn is_const(&self, name: &str) -> Val {
         let is_const = self.0.is_const(name);
         Val::Bool(Bool::new(is_const))
     }
@@ -74,11 +74,8 @@ impl<'a> CtxTrait for MutableCtx<'a> {
         self.0.super_ctx = super_ctx;
     }
 
-    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Val>>) -> T,
-    {
-        self.0.get_tagged_ref(false, name, |val, _| f(val))
+    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
+        self.0.get_tagged_ref(false, name)
     }
 
     fn get_const_ref(&self, name: &str) -> Option<&Val> {
@@ -86,7 +83,7 @@ impl<'a> CtxTrait for MutableCtx<'a> {
     }
 
     fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
-        self.0.get_many_ref(names)
+        self.0.get_many_const_ref(names)
     }
 }
 
@@ -109,7 +106,7 @@ impl<'a> CtxAccessor for MutableCtx<'a> {
 }
 
 impl<'a> CtxTrait for CtxForMutableFn<'a> {
-    fn get(&mut self, name: &str) -> Val {
+    fn get(&self, name: &str) -> Val {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.get(name),
             CtxForMutableFn::Const(ctx) => ctx.get(name),
@@ -117,7 +114,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_null(&mut self, name: &str) -> Val {
+    fn is_null(&self, name: &str) -> Val {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_null(name),
             CtxForMutableFn::Const(ctx) => ctx.is_null(name),
@@ -165,7 +162,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_final(&mut self, name: &str) -> Val {
+    fn is_final(&self, name: &str) -> Val {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_final(name),
             CtxForMutableFn::Const(ctx) => ctx.is_final(name),
@@ -173,7 +170,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_const(&mut self, name: &str) -> Val {
+    fn is_const(&self, name: &str) -> Val {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_const(name),
             CtxForMutableFn::Const(ctx) => ctx.is_const(name),
@@ -189,14 +186,11 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Val>>) -> T,
-    {
+    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
         match self {
-            CtxForMutableFn::Free(ctx) => ctx.get_tagged_ref(name, f),
-            CtxForMutableFn::Const(ctx) => ctx.get_tagged_ref(name, f),
-            CtxForMutableFn::Mutable(ctx) => ctx.get_tagged_ref(name, f),
+            CtxForMutableFn::Free(ctx) => ctx.get_tagged_ref(name),
+            CtxForMutableFn::Const(ctx) => ctx.get_tagged_ref(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_tagged_ref(name),
         }
     }
 
@@ -240,7 +234,6 @@ impl<'a> CtxAccessor for CtxForMutableFn<'a> {
 }
 
 impl<'a> MutableCtx<'a> {
-    #[allow(unused)]
     pub(crate) fn reborrow(&mut self) -> MutableCtx {
         MutableCtx(self.0)
     }

@@ -34,51 +34,44 @@ pub(crate) enum CtxForConstFn<'a> {
 }
 
 impl<'a> CtxTrait for ConstCtx<'a> {
-    fn get(&mut self, name: &str) -> Val {
+    fn get(&self, name: &str) -> Val {
         self.0.get(name)
     }
 
-    fn is_null(&mut self, name: &str) -> Val {
+    fn is_null(&self, name: &str) -> Val {
         DefaultCtx.is_null(self, name)
     }
 
-    fn remove(&mut self, name: &str) -> Val {
-        self.0.remove(true, name)
+    fn remove(&mut self, _name: &str) -> Val {
+        Val::default()
     }
 
-    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val {
-        self.0.put_val(true, name, val)
+    fn put_val(&mut self, _name: Symbol, _val: TaggedVal) -> Val {
+        Val::default()
     }
 
     fn put_val_local(&mut self, _name: Symbol, _val: TaggedVal) -> Val {
         Val::default()
     }
 
-    fn set_final(&mut self, name: &str) {
-        self.0.set_final(true, name);
-    }
+    fn set_final(&mut self, _name: &str) {}
 
-    fn set_const(&mut self, name: &str) {
-        self.0.set_const(true, name);
-    }
+    fn set_const(&mut self, _name: &str) {}
 
-    fn is_final(&mut self, name: &str) -> Val {
+    fn is_final(&self, name: &str) -> Val {
         let is_final = self.0.is_final(name);
         Val::Bool(Bool::new(is_final))
     }
 
-    fn is_const(&mut self, name: &str) -> Val {
+    fn is_const(&self, name: &str) -> Val {
         let is_const = self.0.is_const(name);
         Val::Bool(Bool::new(is_const))
     }
 
     fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
 
-    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Val>>) -> T,
-    {
-        self.0.get_tagged_ref(true, name, |val, _| f(val))
+    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
+        self.0.get_tagged_ref(true, name)
     }
 
     fn get_const_ref(&self, name: &str) -> Option<&Val> {
@@ -86,7 +79,7 @@ impl<'a> CtxTrait for ConstCtx<'a> {
     }
 
     fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
-        self.0.get_many_ref(names)
+        self.0.get_many_const_ref(names)
     }
 }
 
@@ -109,14 +102,14 @@ impl<'a> CtxAccessor for ConstCtx<'a> {
 }
 
 impl<'a> CtxTrait for CtxForConstFn<'a> {
-    fn get(&mut self, name: &str) -> Val {
+    fn get(&self, name: &str) -> Val {
         match self {
             CtxForConstFn::Free(ctx) => ctx.get(name),
             CtxForConstFn::Const(ctx) => ctx.get(name),
         }
     }
 
-    fn is_null(&mut self, name: &str) -> Val {
+    fn is_null(&self, name: &str) -> Val {
         match self {
             CtxForConstFn::Free(ctx) => ctx.is_null(name),
             CtxForConstFn::Const(ctx) => ctx.is_null(name),
@@ -158,14 +151,14 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn is_final(&mut self, name: &str) -> Val {
+    fn is_final(&self, name: &str) -> Val {
         match self {
             CtxForConstFn::Free(ctx) => ctx.is_final(name),
             CtxForConstFn::Const(ctx) => ctx.is_final(name),
         }
     }
 
-    fn is_const(&mut self, name: &str) -> Val {
+    fn is_const(&self, name: &str) -> Val {
         match self {
             CtxForConstFn::Free(ctx) => ctx.is_const(name),
             CtxForConstFn::Const(ctx) => ctx.is_const(name),
@@ -179,13 +172,10 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Val>>) -> T,
-    {
+    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_tagged_ref(name, f),
-            CtxForConstFn::Const(ctx) => ctx.get_tagged_ref(name, f),
+            CtxForConstFn::Free(ctx) => ctx.get_tagged_ref(name),
+            CtxForConstFn::Const(ctx) => ctx.get_tagged_ref(name),
         }
     }
 
@@ -226,7 +216,6 @@ impl<'a> CtxAccessor for CtxForConstFn<'a> {
 }
 
 impl<'a> ConstCtx<'a> {
-    #[allow(unused)]
     pub(crate) fn reborrow(&mut self) -> ConstCtx {
         ConstCtx(self.0)
     }

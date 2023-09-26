@@ -35,8 +35,8 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -50,8 +50,8 @@ pub(crate) fn keys() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_keys(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -82,8 +82,8 @@ pub(crate) fn values() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_values(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -117,13 +117,13 @@ pub(crate) fn contains() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_contains(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
     let name = name_key.first;
     let key = &name_key.second;
-    DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_const_ref(&ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -140,7 +140,7 @@ pub(crate) fn contains_many() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_contains_many(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -148,7 +148,7 @@ fn fn_contains_many(mut ctx: CtxForConstFn, input: Val) -> Val {
     let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
-    DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_const_ref(&ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -222,13 +222,13 @@ pub(crate) fn get() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
     let name = name_key.first;
     let key = &name_key.second;
-    DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_const_ref(&ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -245,7 +245,7 @@ pub(crate) fn get_many() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_get_many(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -253,7 +253,7 @@ fn fn_get_many(mut ctx: CtxForConstFn, input: Val) -> Val {
     let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
-    DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+    DefaultCtx.get_const_ref(&ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };

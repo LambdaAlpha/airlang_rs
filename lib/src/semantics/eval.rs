@@ -106,7 +106,6 @@ impl DefaultByVal {
         builder.from_call(func, input)
     }
 
-    #[allow(unused)]
     pub(crate) fn eval_reverse<Ctx, Output, Eval, Builder>(
         eval: &Eval,
         ctx: &mut Ctx,
@@ -210,7 +209,6 @@ impl DefaultByRef {
         builder.from_call(func, input)
     }
 
-    #[allow(unused)]
     pub(crate) fn eval_reverse<'a, Ctx, Output, Eval, Builder>(
         eval: &Eval,
         ctx: &mut Ctx,

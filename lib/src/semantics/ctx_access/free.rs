@@ -18,11 +18,11 @@ use crate::{
 pub(crate) struct FreeCtx;
 
 impl CtxTrait for FreeCtx {
-    fn get(&mut self, _name: &str) -> Val {
+    fn get(&self, _name: &str) -> Val {
         Val::default()
     }
 
-    fn is_null(&mut self, _name: &str) -> Val {
+    fn is_null(&self, _name: &str) -> Val {
         Val::default()
     }
 
@@ -42,21 +42,18 @@ impl CtxTrait for FreeCtx {
 
     fn set_const(&mut self, _name: &str) {}
 
-    fn is_final(&mut self, _name: &str) -> Val {
+    fn is_final(&self, _name: &str) -> Val {
         Val::default()
     }
 
-    fn is_const(&mut self, _name: &str) -> Val {
+    fn is_const(&self, _name: &str) -> Val {
         Val::default()
     }
 
     fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
 
-    fn get_tagged_ref<T, F>(&mut self, _name: &str, f: F) -> T
-    where
-        F: FnOnce(Option<TaggedRef<Val>>) -> T,
-    {
-        f(None)
+    fn get_tagged_ref(&mut self, _name: &str) -> Option<TaggedRef<Val>> {
+        None
     }
 
     fn get_const_ref(&self, _name: &str) -> Option<&Val> {

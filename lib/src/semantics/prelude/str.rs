@@ -26,8 +26,8 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::String(s) = val else {
             return Val::default();
         };

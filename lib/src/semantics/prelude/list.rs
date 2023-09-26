@@ -35,8 +35,8 @@ pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_length(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&mut ctx, input, |val| {
+fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::List(list) = val else {
             return Val::default();
         };
@@ -124,7 +124,7 @@ pub(crate) fn get() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -133,7 +133,7 @@ fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+        DefaultCtx.get_const_ref(&ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -148,7 +148,7 @@ fn fn_get(mut ctx: CtxForConstFn, input: Val) -> Val {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        DefaultCtx.get_const_ref(&mut ctx, name, |val| {
+        DefaultCtx.get_const_ref(&ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };

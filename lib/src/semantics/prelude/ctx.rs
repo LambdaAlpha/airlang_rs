@@ -77,15 +77,10 @@ fn fn_read(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn read_pair(ctx: &mut CtxForConstFn, first: &str, second: &str) -> Val {
-    ctx.get_tagged_ref(first, |val| {
-        let Some(TaggedRef { val_ref, .. }) = val else {
-            return Val::default();
-        };
-        let Val::Ctx(CtxVal(ctx)) = val_ref else {
-            return Val::default();
-        };
-        ctx.get(second)
-    })
+    let Some(Val::Ctx(CtxVal(ctx))) = ctx.get_const_ref(first) else {
+        return Val::default();
+    };
+    ctx.get(second)
 }
 
 fn read_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Val {
@@ -94,15 +89,13 @@ fn read_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Va
     };
     let rest = &names[1..];
 
-    ctx.get_tagged_ref(name, |val| {
-        let Some(TaggedRef { val_ref, .. }) = val else {
-            return Val::default();
-        };
-        let Val::Ctx(CtxVal(ctx)) = val_ref else {
-            return Val::default();
-        };
-        read_nested(ConstCtx(ctx), rest, val_name)
-    })
+    let Some(TaggedRef { val_ref, .. }) = ctx.get_tagged_ref(name) else {
+        return Val::default();
+    };
+    let Val::Ctx(CtxVal(ctx)) = val_ref else {
+        return Val::default();
+    };
+    read_nested(ConstCtx(ctx), rest, val_name)
 }
 
 pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
@@ -111,7 +104,7 @@ pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_is_null(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -287,7 +280,7 @@ pub(crate) fn is_final() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_is_final(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -300,7 +293,7 @@ pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_is_const(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -336,15 +329,16 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn remove_pair(ctx: &mut CtxForMutableFn, first: &str, second: &str) -> Val {
-    ctx.get_tagged_ref(first, |val| {
-        let Some(TaggedRef { val_ref, is_const }) = val else {
-            return Val::default();
-        };
-        let Val::Ctx(CtxVal(ctx)) = val_ref else {
-            return Val::default();
-        };
-        ctx.remove(is_const, second)
-    })
+    let Some(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(first) else {
+        return Val::default();
+    };
+    let Val::Ctx(CtxVal(ctx)) = val_ref else {
+        return Val::default();
+    };
+    if is_const {
+        return Val::default();
+    }
+    ctx.remove(second)
 }
 
 fn remove_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Val {
@@ -353,19 +347,17 @@ fn remove_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> 
     };
     let rest = &names[1..];
 
-    ctx.get_tagged_ref(name, |val| {
-        let Some(TaggedRef { val_ref, is_const }) = val else {
-            return Val::default();
-        };
-        let Val::Ctx(CtxVal(ctx)) = val_ref else {
-            return Val::default();
-        };
-        if is_const {
-            remove_nested(ConstCtx(ctx), rest, val_name)
-        } else {
-            remove_nested(MutableCtx(ctx), rest, val_name)
-        }
-    })
+    let Some(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
+        return Val::default();
+    };
+    let Val::Ctx(CtxVal(ctx)) = val_ref else {
+        return Val::default();
+    };
+    if is_const {
+        remove_nested(ConstCtx(ctx), rest, val_name)
+    } else {
+        remove_nested(MutableCtx(ctx), rest, val_name)
+    }
 }
 
 pub(crate) fn ctx_new() -> PrimitiveFunc<CtxFreeFn> {
