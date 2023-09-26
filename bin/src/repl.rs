@@ -18,17 +18,36 @@ use {
 pub(crate) fn repl(ui: &mut impl Ui) {
     let const_ctx = cmd::const_ctx();
     let mut dyn_ctx = dyn_ctx();
+    let mut input_buffer = String::new();
 
     print_title(ui, &const_ctx, &mut dyn_ctx);
 
     loop {
         ui.print(PROMPT_PREFIX);
 
-        let mut input = String::new();
-        ui.read_line(&mut input);
-        let input = input.trim();
+        if !input_buffer.is_empty() {
+            input_buffer.push('\n');
+        }
 
+        let len = input_buffer.len();
+        ui.read_line(&mut input_buffer);
+        input_buffer.truncate(input_buffer.trim_end().len());
+
+        let input = input_buffer.trim();
         if input.is_empty() {
+            input_buffer.clear();
+            continue;
+        }
+
+        if input == "((" {
+            dyn_ctx.multiline_mode = true;
+        } else {
+            let newline = input_buffer[len..].trim();
+            if newline == "))" {
+                dyn_ctx.multiline_mode = false;
+            }
+        }
+        if dyn_ctx.multiline_mode {
             continue;
         }
 
@@ -41,6 +60,7 @@ pub(crate) fn repl(ui: &mut impl Ui) {
             }
             Output::Break => break,
         }
+        input_buffer.clear();
     }
 }
 
@@ -48,6 +68,7 @@ pub(crate) fn dyn_ctx() -> DynCtx {
     DynCtx {
         interpreter: Interpreter::new(),
         meta_interpreter: Interpreter::new(),
+        multiline_mode: false,
     }
 }
 

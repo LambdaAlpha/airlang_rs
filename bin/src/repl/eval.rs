@@ -18,6 +18,8 @@ pub(crate) struct ConstCtx {
 pub(crate) struct DynCtx {
     pub(crate) interpreter: Interpreter,
     pub(crate) meta_interpreter: Interpreter,
+
+    pub(crate) multiline_mode: bool,
 }
 
 pub(crate) trait Cmd = Fn(&ConstCtx, &mut DynCtx, Val) -> Output;
@@ -84,5 +86,5 @@ impl ConstCtx {
     }
 }
 
-const CMD: &str = "#cmd";
-const AIR: &str = "#air";
+const CMD: &str = ":cmd";
+const AIR: &str = ":air";
