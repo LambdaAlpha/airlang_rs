@@ -30,7 +30,8 @@
     try_trait_v2,
     iterator_try_collect,
     unsize,
-    coerce_unsized
+    coerce_unsized,
+    array_methods
 )]
 
 pub mod syntax;

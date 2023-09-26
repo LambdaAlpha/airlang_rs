@@ -180,12 +180,12 @@ where
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_const_fn() {
-            CtxForConstFn::Free => {
+            CtxForConstFn::Free(_ctx) => {
                 eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
             }
             CtxForConstFn::Const(ctx) => eval_aware(
                 self.ctx.clone(),
-                ctx,
+                ctx.0,
                 self.caller.name.clone(),
                 InvariantTag::Const,
                 input,
@@ -211,12 +211,12 @@ where
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_mutable_fn() {
-            CtxForMutableFn::Free => {
+            CtxForMutableFn::Free(_ctx) => {
                 eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
             }
             CtxForMutableFn::Const(ctx) => eval_aware(
                 self.ctx.clone(),
-                ctx,
+                ctx.0,
                 self.caller.name.clone(),
                 InvariantTag::Const,
                 input,
@@ -225,7 +225,7 @@ where
             ),
             CtxForMutableFn::Mutable(ctx) => eval_aware(
                 self.ctx.clone(),
-                ctx,
+                ctx.0,
                 self.caller.name.clone(),
                 InvariantTag::Final,
                 input,
@@ -375,8 +375,8 @@ impl Primitive<CtxConstFn> {
         Const: Fn(ConstCtx, Val) -> Val + 'static,
     {
         move |ctx, val| match ctx {
-            CtxForConstFn::Free => f(FreeCtx, val),
-            CtxForConstFn::Const(ctx) => c(ConstCtx(ctx), val),
+            CtxForConstFn::Free(ctx) => f(ctx, val),
+            CtxForConstFn::Const(ctx) => c(ctx, val),
         }
     }
 }
@@ -413,9 +413,9 @@ impl Primitive<CtxMutableFn> {
         Mutable: Fn(MutableCtx, Val) -> Val + 'static,
     {
         move |ctx, val| match ctx {
-            CtxForMutableFn::Free => f(FreeCtx, val),
-            CtxForMutableFn::Const(ctx) => c(ConstCtx(ctx), val),
-            CtxForMutableFn::Mutable(ctx) => m(MutableCtx(ctx), val),
+            CtxForMutableFn::Free(ctx) => f(ctx, val),
+            CtxForMutableFn::Const(ctx) => c(ctx, val),
+            CtxForMutableFn::Mutable(ctx) => m(ctx, val),
         }
     }
 }

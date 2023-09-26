@@ -40,9 +40,13 @@ pub(crate) trait CtxTrait {
 
     fn set_super(&mut self, super_ctx: Option<Symbol>);
 
-    fn get_ref<T, F>(&mut self, name: &str, f: F) -> T
+    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
     where
         F: FnOnce(Option<TaggedRef<Val>>) -> T;
+
+    fn get_const_ref(&self, name: &str) -> Option<&Val>;
+
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N];
 }
 
 pub(crate) type NameMap = Map<Symbol, TaggedVal>;
@@ -78,7 +82,7 @@ pub struct Ctx {
 impl Ctx {
     pub(crate) fn get(&mut self, name: &str) -> Val {
         let Some(tagged_val) = self.name_map.get(name) else {
-            return self.get_super_ctx(true, |super_ctx, _| {
+            return self.get_tagged_super_ctx(true, |super_ctx, _| {
                 let Some(TaggedRef { val_ref: ctx, .. }) = super_ctx else {
                     return Val::default();
                 };
@@ -90,7 +94,7 @@ impl Ctx {
 
     pub(crate) fn remove(&mut self, is_const: bool, name: &str) -> Val {
         let Some(tagged_val) = self.name_map.get(name) else {
-            return self.get_super_ctx(is_const, |ctx, _| {
+            return self.get_tagged_super_ctx(is_const, |ctx, _| {
                 let Some(TaggedRef {
                     val_ref: ctx,
                     is_const: super_const,
@@ -115,7 +119,7 @@ impl Ctx {
 
     pub(crate) fn put_val(&mut self, is_const: bool, name: Symbol, val: TaggedVal) -> Val {
         let Some(tagged_val) = self.name_map.get(&name) else {
-            return self.get_super_ctx(is_const, |ctx, self_ctx| match ctx {
+            return self.get_tagged_super_ctx(is_const, |ctx, self_ctx| match ctx {
                 None => {
                     if is_const {
                         return Val::default();
@@ -164,7 +168,7 @@ impl Ctx {
 
     pub(crate) fn set_final(&mut self, is_const: bool, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            self.get_super_ctx(is_const, |ctx, _| {
+            self.get_tagged_super_ctx(is_const, |ctx, _| {
                 let Some(TaggedRef {
                     val_ref: ctx,
                     is_const: super_const,
@@ -187,7 +191,7 @@ impl Ctx {
 
     pub(crate) fn set_const(&mut self, is_const: bool, name: &str) {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            self.get_super_ctx(is_const, |ctx, _| {
+            self.get_tagged_super_ctx(is_const, |ctx, _| {
                 let Some(TaggedRef {
                     val_ref: ctx,
                     is_const: super_const,
@@ -208,7 +212,7 @@ impl Ctx {
     #[allow(clippy::wrong_self_convention)]
     pub(crate) fn is_final(&mut self, name: &str) -> bool {
         let Some(tagged_val) = self.name_map.get(name) else {
-            return self.get_super_ctx(true, |ctx, _| {
+            return self.get_tagged_super_ctx(true, |ctx, _| {
                 let Some(TaggedRef { val_ref: ctx, .. }) = ctx else {
                     return false;
                 };
@@ -221,7 +225,7 @@ impl Ctx {
     #[allow(clippy::wrong_self_convention)]
     pub(crate) fn is_const(&mut self, name: &str) -> bool {
         let Some(tagged_val) = self.name_map.get(name) else {
-            return self.get_super_ctx(true, |ctx, _| {
+            return self.get_tagged_super_ctx(true, |ctx, _| {
                 let Some(TaggedRef { val_ref: ctx, .. }) = ctx else {
                     return false;
                 };
@@ -231,12 +235,12 @@ impl Ctx {
         matches!(&tagged_val.tag, InvariantTag::Const)
     }
 
-    pub(crate) fn get_ref<T, F>(&mut self, is_const: bool, name: &str, f: F) -> T
+    pub(crate) fn get_tagged_ref<T, F>(&mut self, is_const: bool, name: &str, f: F) -> T
     where
         F: FnOnce(Option<TaggedRef<Val>>, Option<&mut Ctx>) -> T,
     {
         if self.name_map.get(name).is_none() {
-            return self.get_super_ctx(is_const, |ctx, self_ctx| {
+            return self.get_tagged_super_ctx(is_const, |ctx, self_ctx| {
                 let Some(TaggedRef {
                     val_ref: ctx,
                     is_const: super_const,
@@ -244,7 +248,7 @@ impl Ctx {
                 else {
                     return f(None, self_ctx);
                 };
-                ctx.get_ref(super_const, name, f)
+                ctx.get_tagged_ref(super_const, name, f)
             });
         }
         let Some(tagged_val) = self.name_map.get_mut(name) else {
@@ -254,21 +258,31 @@ impl Ctx {
         f(Some(TaggedRef::new(&mut tagged_val.val, is_const)), None)
     }
 
-    #[allow(unused)]
-    pub(crate) fn get_ref_or_default<T, F>(&mut self, is_const: bool, name: &str, f: F) -> T
-    where
-        T: Default,
-        F: FnOnce(TaggedRef<Val>) -> T,
-    {
-        self.get_ref(is_const, name, |val, _| {
-            let Some(val) = val else {
-                return T::default();
-            };
-            f(val)
-        })
+    pub(crate) fn get_const_ref(&self, name: &str) -> Option<&Val> {
+        if self.name_map.get(name).is_none() {
+            let super_ctx = self.get_const_super_ctx()?;
+            return super_ctx.get_const_ref(name);
+        }
+        let tagged_val = self.name_map.get(name)?;
+        Some(&tagged_val.val)
     }
 
-    fn get_super_ctx<T, F>(&mut self, is_const: bool, f: F) -> T
+    pub(crate) fn get_many_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
+        match self.get_const_super_ctx() {
+            None => names.map(|name| {
+                let tagged_val = self.name_map.get(name)?;
+                Some(&tagged_val.val)
+            }),
+            Some(super_ctx) => names.map(|name| {
+                self.name_map
+                    .get(name)
+                    .map(|tagged_val| &tagged_val.val)
+                    .or_else(|| super_ctx.get_const_ref(name))
+            }),
+        }
+    }
+
+    fn get_tagged_super_ctx<T, F>(&mut self, is_const: bool, f: F) -> T
     where
         F: FnOnce(Option<TaggedRef<Ctx>>, Option<&mut Ctx>) -> T,
     {
@@ -286,6 +300,18 @@ impl Ctx {
         f(Some(TaggedRef::new(super_ctx, is_const)), None)
     }
 
+    fn get_const_super_ctx(&self) -> Option<&Ctx> {
+        let name = self.super_ctx.as_ref()?;
+        let TaggedVal {
+            val: Val::Ctx(CtxVal(super_ctx)),
+            tag: _tag,
+        } = self.name_map.get(name)?
+        else {
+            return None;
+        };
+        Some(super_ctx)
+    }
+
     pub(crate) fn into_val(mut self, name: &str) -> Val {
         self.name_map
             .remove(name)
@@ -299,13 +325,13 @@ pub(crate) struct DefaultCtx;
 impl DefaultCtx {
     #[allow(unused)]
     pub(crate) fn get<Ctx: CtxTrait>(&self, ctx: &mut Ctx, name: &str) -> Val {
-        ctx.get_ref(name, |val| {
+        ctx.get_tagged_ref(name, |val| {
             val.map(|val| val.val_ref.clone()).unwrap_or_default()
         })
     }
 
     pub(crate) fn is_null<Ctx: CtxTrait>(&self, ctx: &mut Ctx, name: &str) -> Val {
-        let is_null = ctx.get_ref(name, |val| val.is_none());
+        let is_null = ctx.get_tagged_ref(name, |val| val.is_none());
         Val::Bool(Bool::new(is_null))
     }
 
@@ -320,7 +346,7 @@ impl DefaultCtx {
         T: Default,
         F: FnOnce(TaggedRef<Val>) -> T,
     {
-        ctx.get_ref(name, |val| {
+        ctx.get_tagged_ref(name, |val| {
             let Some(val) = val else {
                 return T::default();
             };
@@ -334,7 +360,7 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => ctx.get_ref(&s, |ref_or_val| {
+            Val::Symbol(s) => ctx.get_tagged_ref(&s, |ref_or_val| {
                 let Some(TaggedRef {
                     val_ref: val,
                     is_const: val_const,
@@ -395,6 +421,23 @@ impl DefaultCtx {
             }
             _ => Val::default(),
         })
+    }
+
+    pub(crate) fn get_many_const_ref<Ctx: CtxTrait, F, const N: usize>(
+        &self,
+        ctx: &Ctx,
+        names: [Val; N],
+        f: F,
+    ) -> Val
+    where
+        F: FnOnce([Option<&Val>; N]) -> Val,
+        Self: Sized,
+    {
+        let vals = names.each_ref().map(|name| match name {
+            Val::Symbol(s) => ctx.get_const_ref(s),
+            val => Some(val),
+        });
+        f(vals)
     }
 
     pub(crate) fn get_mut_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val

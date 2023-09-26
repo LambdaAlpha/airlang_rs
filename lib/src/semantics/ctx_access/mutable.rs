@@ -26,9 +26,9 @@ use crate::{
 pub(crate) struct MutableCtx<'a>(pub(crate) &'a mut Ctx);
 
 pub(crate) enum CtxForMutableFn<'a> {
-    Free,
-    Const(&'a mut Ctx),
-    Mutable(&'a mut Ctx),
+    Free(FreeCtx),
+    Const(ConstCtx<'a>),
+    Mutable(MutableCtx<'a>),
 }
 
 impl<'a> CtxTrait for MutableCtx<'a> {
@@ -74,11 +74,19 @@ impl<'a> CtxTrait for MutableCtx<'a> {
         self.0.super_ctx = super_ctx;
     }
 
-    fn get_ref<T, F>(&mut self, name: &str, f: F) -> T
+    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
     where
         F: FnOnce(Option<TaggedRef<Val>>) -> T,
     {
-        self.0.get_ref(false, name, |val, _| f(val))
+        self.0.get_tagged_ref(false, name, |val, _| f(val))
+    }
+
+    fn get_const_ref(&self, name: &str) -> Option<&Val> {
+        self.0.get_const_ref(name)
+    }
+
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
+        self.0.get_many_ref(names)
     }
 }
 
@@ -92,121 +100,137 @@ impl<'a> CtxAccessor for MutableCtx<'a> {
     }
 
     fn for_const_fn(&mut self) -> CtxForConstFn {
-        CtxForConstFn::Const(self.0)
+        CtxForConstFn::Const(ConstCtx(self.0))
     }
 
     fn for_mutable_fn(&mut self) -> CtxForMutableFn {
-        CtxForMutableFn::Mutable(self.0)
+        CtxForMutableFn::Mutable(self.reborrow())
     }
 }
 
 impl<'a> CtxTrait for CtxForMutableFn<'a> {
     fn get(&mut self, name: &str) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.get(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).get(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get(name),
+            CtxForMutableFn::Free(ctx) => ctx.get(name),
+            CtxForMutableFn::Const(ctx) => ctx.get(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.get(name),
         }
     }
 
     fn is_null(&mut self, name: &str) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.is_null(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).is_null(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).is_null(name),
+            CtxForMutableFn::Free(ctx) => ctx.is_null(name),
+            CtxForMutableFn::Const(ctx) => ctx.is_null(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.is_null(name),
         }
     }
 
     fn remove(&mut self, name: &str) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.remove(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).remove(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).remove(name),
+            CtxForMutableFn::Free(ctx) => ctx.remove(name),
+            CtxForMutableFn::Const(ctx) => ctx.remove(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.remove(name),
         }
     }
 
     fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.put_val(name, val),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).put_val(name, val),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).put_val(name, val),
+            CtxForMutableFn::Free(ctx) => ctx.put_val(name, val),
+            CtxForMutableFn::Const(ctx) => ctx.put_val(name, val),
+            CtxForMutableFn::Mutable(ctx) => ctx.put_val(name, val),
         }
     }
 
     fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.put_val_local(name, val),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).put_val_local(name, val),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).put_val_local(name, val),
+            CtxForMutableFn::Free(ctx) => ctx.put_val_local(name, val),
+            CtxForMutableFn::Const(ctx) => ctx.put_val_local(name, val),
+            CtxForMutableFn::Mutable(ctx) => ctx.put_val_local(name, val),
         }
     }
 
     fn set_final(&mut self, name: &str) {
         match self {
-            CtxForMutableFn::Free => FreeCtx.set_final(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).set_final(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).set_final(name),
+            CtxForMutableFn::Free(ctx) => ctx.set_final(name),
+            CtxForMutableFn::Const(ctx) => ctx.set_final(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.set_final(name),
         }
     }
 
     fn set_const(&mut self, name: &str) {
         match self {
-            CtxForMutableFn::Free => FreeCtx.set_const(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).set_const(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).set_const(name),
+            CtxForMutableFn::Free(ctx) => ctx.set_const(name),
+            CtxForMutableFn::Const(ctx) => ctx.set_const(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.set_const(name),
         }
     }
 
     fn is_final(&mut self, name: &str) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.is_final(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).is_final(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).is_final(name),
+            CtxForMutableFn::Free(ctx) => ctx.is_final(name),
+            CtxForMutableFn::Const(ctx) => ctx.is_final(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.is_final(name),
         }
     }
 
     fn is_const(&mut self, name: &str) -> Val {
         match self {
-            CtxForMutableFn::Free => FreeCtx.is_const(name),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).is_const(name),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).is_const(name),
+            CtxForMutableFn::Free(ctx) => ctx.is_const(name),
+            CtxForMutableFn::Const(ctx) => ctx.is_const(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.is_const(name),
         }
     }
 
     fn set_super(&mut self, super_ctx: Option<Symbol>) {
         match self {
-            CtxForMutableFn::Free => FreeCtx.set_super(super_ctx),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).set_super(super_ctx),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).set_super(super_ctx),
+            CtxForMutableFn::Free(ctx) => ctx.set_super(super_ctx),
+            CtxForMutableFn::Const(ctx) => ctx.set_super(super_ctx),
+            CtxForMutableFn::Mutable(ctx) => ctx.set_super(super_ctx),
         }
     }
 
-    fn get_ref<T, F>(&mut self, name: &str, f: F) -> T
+    fn get_tagged_ref<T, F>(&mut self, name: &str, f: F) -> T
     where
         F: FnOnce(Option<TaggedRef<Val>>) -> T,
     {
         match self {
-            CtxForMutableFn::Free => FreeCtx.get_ref(name, f),
-            CtxForMutableFn::Const(ctx) => ConstCtx(ctx).get_ref(name, f),
-            CtxForMutableFn::Mutable(ctx) => MutableCtx(ctx).get_ref(name, f),
+            CtxForMutableFn::Free(ctx) => ctx.get_tagged_ref(name, f),
+            CtxForMutableFn::Const(ctx) => ctx.get_tagged_ref(name, f),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_tagged_ref(name, f),
+        }
+    }
+
+    fn get_const_ref(&self, name: &str) -> Option<&Val> {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.get_const_ref(name),
+            CtxForMutableFn::Const(ctx) => ctx.get_const_ref(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_const_ref(name),
+        }
+    }
+
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.get_many_const_ref(names),
+            CtxForMutableFn::Const(ctx) => ctx.get_many_const_ref(names),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_many_const_ref(names),
         }
     }
 }
 
 impl<'a> CtxAccessor for CtxForMutableFn<'a> {
     fn is_ctx_free(&self) -> bool {
-        matches!(self, CtxForMutableFn::Free)
+        matches!(self, CtxForMutableFn::Free(_))
     }
 
     fn is_ctx_const(&self) -> bool {
-        matches!(self, CtxForMutableFn::Free | CtxForMutableFn::Const(_))
+        matches!(self, CtxForMutableFn::Free(_) | CtxForMutableFn::Const(_))
     }
 
     fn for_const_fn(&mut self) -> CtxForConstFn {
         match self {
-            CtxForMutableFn::Free => CtxForConstFn::Free,
-            CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx),
-            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ctx),
+            CtxForMutableFn::Free(_ctx) => CtxForConstFn::Free(FreeCtx),
+            CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx.reborrow()),
+            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx(ctx.0)),
         }
     }
 
@@ -225,9 +249,9 @@ impl<'a> MutableCtx<'a> {
 impl<'a> CtxForMutableFn<'a> {
     pub(crate) fn reborrow(&mut self) -> CtxForMutableFn {
         match self {
-            CtxForMutableFn::Free => CtxForMutableFn::Free,
-            CtxForMutableFn::Const(ctx) => CtxForMutableFn::Const(ctx),
-            CtxForMutableFn::Mutable(ctx) => CtxForMutableFn::Mutable(ctx),
+            CtxForMutableFn::Free(_ctx) => CtxForMutableFn::Free(FreeCtx),
+            CtxForMutableFn::Const(ctx) => CtxForMutableFn::Const(ctx.reborrow()),
+            CtxForMutableFn::Mutable(ctx) => CtxForMutableFn::Mutable(ctx.reborrow()),
         }
     }
 }

@@ -52,11 +52,19 @@ impl CtxTrait for FreeCtx {
 
     fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
 
-    fn get_ref<T, F>(&mut self, _name: &str, f: F) -> T
+    fn get_tagged_ref<T, F>(&mut self, _name: &str, f: F) -> T
     where
         F: FnOnce(Option<TaggedRef<Val>>) -> T,
     {
         f(None)
+    }
+
+    fn get_const_ref(&self, _name: &str) -> Option<&Val> {
+        None
+    }
+
+    fn get_many_const_ref<const N: usize>(&self, _names: [&str; N]) -> [Option<&Val>; N] {
+        [None; N]
     }
 }
 
@@ -70,10 +78,10 @@ impl CtxAccessor for FreeCtx {
     }
 
     fn for_const_fn(&mut self) -> CtxForConstFn {
-        CtxForConstFn::Free
+        CtxForConstFn::Free(FreeCtx)
     }
 
     fn for_mutable_fn(&mut self) -> CtxForMutableFn {
-        CtxForMutableFn::Free
+        CtxForMutableFn::Free(FreeCtx)
     }
 }

@@ -77,7 +77,7 @@ fn fn_read(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn read_pair(ctx: &mut CtxForConstFn, first: &str, second: &str) -> Val {
-    ctx.get_ref(first, |val| {
+    ctx.get_tagged_ref(first, |val| {
         let Some(TaggedRef { val_ref, .. }) = val else {
             return Val::default();
         };
@@ -94,7 +94,7 @@ fn read_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Va
     };
     let rest = &names[1..];
 
-    ctx.get_ref(name, |val| {
+    ctx.get_tagged_ref(name, |val| {
         let Some(TaggedRef { val_ref, .. }) = val else {
             return Val::default();
         };
@@ -336,7 +336,7 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn remove_pair(ctx: &mut CtxForMutableFn, first: &str, second: &str) -> Val {
-    ctx.get_ref(first, |val| {
+    ctx.get_tagged_ref(first, |val| {
         let Some(TaggedRef { val_ref, is_const }) = val else {
             return Val::default();
         };
@@ -353,7 +353,7 @@ fn remove_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> 
     };
     let rest = &names[1..];
 
-    ctx.get_ref(name, |val| {
+    ctx.get_tagged_ref(name, |val| {
         let Some(TaggedRef { val_ref, is_const }) = val else {
             return Val::default();
         };
