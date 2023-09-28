@@ -1,4 +1,4 @@
-"bench interpret" ~
+"bench interpret" @
 (;[
   x = 42,
   y = 24,
