@@ -41,7 +41,7 @@ pub(crate) fn repl(ui: &mut impl Ui) {
 
         if input == "((" {
             dyn_ctx.multiline_mode = true;
-        } else {
+        } else if len <= input_buffer.len() {
             let newline = input_buffer[len..].trim();
             if newline == "))" {
                 dyn_ctx.multiline_mode = false;
