@@ -1,13 +1,30 @@
 "bench interpret" @
-(;[
+(; [
+  ctx = (context {const : {
+    : ;,
+    : while,
+    : <>,
+    : if,
+    : >,
+    : =,
+    : -,
+  }}),
+  f = (function {
+    body : (; [
+      (x : y) = input,
+      while [
+        x <> y,
+        if [
+          x > y,
+          x = (x - y),
+          y = (y - x)
+        ]
+      ],
+      x
+    ]),
+    context : (' (move ctx)),
+  }),
   x = 42,
   y = 24,
-  while[
-    x <> y,
-    if[x > y,
-        x = (x - y),
-        y = (y - x)
-    ]
-  ],
-  x
+  x f y
 ])
