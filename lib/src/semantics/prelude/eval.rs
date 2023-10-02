@@ -55,7 +55,6 @@ use crate::{
     types::{
         Bool,
         Reader,
-        Str,
         Symbol,
     },
 };
@@ -236,32 +235,6 @@ fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
         let is_ctx_const = eval_mode.is_const(&mut ConstCtx(target_ctx), value);
         Val::Bool(Bool::new(is_ctx_const))
     })
-}
-
-pub(crate) fn parse() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::PARSE, fn_parse);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_parse(input: Val) -> Val {
-    let Val::String(input) = input else {
-        return Val::default();
-    };
-    crate::semantics::parse(&input).unwrap_or_default()
-}
-
-pub(crate) fn stringify() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::STRINGIFY, fn_stringify);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_stringify(input: Val) -> Val {
-    let Ok(str) = crate::semantics::generate(&input) else {
-        return Val::default();
-    };
-    Val::String(Str::from(str))
 }
 
 pub(crate) fn func() -> PrimitiveFunc<CtxFreeFn> {

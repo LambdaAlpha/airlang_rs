@@ -46,6 +46,11 @@ fn test_core() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_syntax() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/syntax.air"))
+}
+
+#[test]
 fn test_ctx() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/ctx.air"))
 }

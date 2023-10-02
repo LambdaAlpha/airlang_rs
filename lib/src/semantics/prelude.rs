@@ -26,6 +26,7 @@ pub(crate) fn prelude() -> NameMap {
     let mut c = NameMap::default();
 
     prelude_meta(&mut c);
+    prelude_syntax(&mut c);
     prelude_ctx(&mut c);
     prelude_ctrl(&mut c);
     prelude_eval(&mut c);
@@ -44,6 +45,11 @@ fn prelude_meta(c: &mut NameMap) {
     put(c, names::AIR_VERSION_MAJOR, meta::version_major());
     put(c, names::AIR_VERSION_MINOR, meta::version_minor());
     put(c, names::AIR_VERSION_PATCH, meta::version_patch());
+}
+
+fn prelude_syntax(c: &mut NameMap) {
+    put_primitive_func(c, syntax::parse());
+    put_primitive_func(c, syntax::stringify());
 }
 
 fn prelude_ctx(c: &mut NameMap) {
@@ -80,8 +86,6 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::eval_const());
     put_primitive_func(c, eval::is_ctx_free());
     put_primitive_func(c, eval::is_ctx_const());
-    put_primitive_func(c, eval::parse());
-    put_primitive_func(c, eval::stringify());
     put_primitive_func(c, eval::func());
     put_primitive_func(c, eval::chain());
 }
@@ -220,6 +224,9 @@ pub(crate) mod names {
     pub(crate) const AIR_VERSION_MINOR: &str = "air_version_minor";
     pub(crate) const AIR_VERSION_PATCH: &str = "air_version_patch";
 
+    pub(crate) const PARSE: &str = "parse";
+    pub(crate) const STRINGIFY: &str = "stringify";
+
     pub(crate) const READ: &str = "..";
     pub(crate) const IS_NULL: &str = "is_null";
     pub(crate) const MOVE: &str = "move";
@@ -249,8 +256,6 @@ pub(crate) mod names {
     pub(crate) const EVAL_MUTABLE: &str = "eval_mutable";
     pub(crate) const IS_CTX_FREE: &str = "is_context_free";
     pub(crate) const IS_CTX_CONST: &str = "is_context_const";
-    pub(crate) const PARSE: &str = "parse";
-    pub(crate) const STRINGIFY: &str = "stringify";
     pub(crate) const FUNC: &str = "function";
     pub(crate) const CHAIN: &str = ".";
 
@@ -319,6 +324,8 @@ pub(crate) mod names {
 }
 
 mod meta;
+
+mod syntax;
 
 mod ctx;
 
