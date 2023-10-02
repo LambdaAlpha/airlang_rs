@@ -26,6 +26,8 @@ use crate::{
             eval::Eval,
             BasicEvalMode,
             EvalMode,
+            INLINE,
+            QUOTE,
         },
         func::{
             Composed,
@@ -68,34 +70,34 @@ fn fn_value(input: Val) -> Val {
     input
 }
 
-pub(crate) fn eval() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::EVAL, fn_eval);
+pub(crate) fn eval() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL, fn_eval);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval(input: Val) -> Val {
-    input
+fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    Eval.eval(&mut ctx, input)
 }
 
-pub(crate) fn eval_quote() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
-    let primitive = Primitive::<CtxFreeFn>::new(names::EVAL_QUOTE, fn_eval_quote);
+pub(crate) fn eval_quote() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_QUOTE, fn_eval_quote);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_quote(input: Val) -> Val {
-    input
+fn fn_eval_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    QUOTE.eval(&mut ctx, input)
 }
 
-pub(crate) fn eval_inline() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
-    let primitive = Primitive::<CtxFreeFn>::new(names::EVAL_INLINE, fn_eval_inline);
+pub(crate) fn eval_inline() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_INLINE, fn_eval_inline);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_inline(input: Val) -> Val {
-    input
+fn fn_eval_inline(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    INLINE.eval(&mut ctx, input)
 }
 
 pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {

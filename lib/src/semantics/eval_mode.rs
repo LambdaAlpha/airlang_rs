@@ -62,13 +62,13 @@ impl EvalMode {
     }
 }
 
-const QUOTE: Quote<Eval, Value, ValBuilder> = Quote {
+pub(crate) const QUOTE: Quote<Eval, Value, ValBuilder> = Quote {
     eval: Eval,
     value: Value,
     builder: ValBuilder,
 };
 
-const INLINE: Inline<Eval, Value, ValBuilder> = Inline {
+pub(crate) const INLINE: Inline<Eval, Value, ValBuilder> = Inline {
     eval: Eval,
     value: Value,
     builder: ValBuilder,
@@ -92,13 +92,13 @@ where
     }
 }
 
-const QUOTE_BY_REF: QuoteByRef<EvalByRef, ValueByRef, ValBuilder> = QuoteByRef {
+pub(crate) const QUOTE_BY_REF: QuoteByRef<EvalByRef, ValueByRef, ValBuilder> = QuoteByRef {
     eval: EvalByRef,
     value: ValueByRef,
     builder: ValBuilder,
 };
 
-const INLINE_BY_REF: InlineByRef<EvalByRef, ValueByRef, ValBuilder> = InlineByRef {
+pub(crate) const INLINE_BY_REF: InlineByRef<EvalByRef, ValueByRef, ValBuilder> = InlineByRef {
     eval: EvalByRef,
     value: ValueByRef,
     builder: ValBuilder,
@@ -137,13 +137,13 @@ where
     }
 }
 
-const QUOTE_FREE: Quote<EvalFree, ValueFreeConst, OpValBuilder> = Quote {
+pub(crate) const QUOTE_FREE: Quote<EvalFree, ValueFreeConst, OpValBuilder> = Quote {
     eval: EvalFree,
     value: ValueFreeConst,
     builder: OpValBuilder,
 };
 
-const INLINE_FREE: Inline<EvalFree, ValueFreeConst, OpValBuilder> = Inline {
+pub(crate) const INLINE_FREE: Inline<EvalFree, ValueFreeConst, OpValBuilder> = Inline {
     eval: EvalFree,
     value: ValueFreeConst,
     builder: OpValBuilder,
@@ -183,14 +183,14 @@ impl EvalMode {
     }
 }
 
-const QUOTE_FREE_BY_REF: QuoteByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
+pub(crate) const QUOTE_FREE_BY_REF: QuoteByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
     QuoteByRef {
         eval: EvalFreeByRef,
         value: ValueFreeConstByRef,
         builder: OpValBuilder,
     };
 
-const INLINE_FREE_BY_REF: InlineByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
+pub(crate) const INLINE_FREE_BY_REF: InlineByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
     InlineByRef {
         eval: EvalFreeByRef,
         value: ValueFreeConstByRef,
@@ -231,13 +231,13 @@ impl EvalMode {
     }
 }
 
-const QUOTE_CONST: Quote<EvalConst, ValueFreeConst, OpValBuilder> = Quote {
+pub(crate) const QUOTE_CONST: Quote<EvalConst, ValueFreeConst, OpValBuilder> = Quote {
     eval: EvalConst,
     value: ValueFreeConst,
     builder: OpValBuilder,
 };
 
-const INLINE_CONST: Inline<EvalConst, ValueFreeConst, OpValBuilder> = Inline {
+pub(crate) const INLINE_CONST: Inline<EvalConst, ValueFreeConst, OpValBuilder> = Inline {
     eval: EvalConst,
     value: ValueFreeConst,
     builder: OpValBuilder,
@@ -277,19 +277,22 @@ impl EvalMode {
     }
 }
 
-const QUOTE_CONST_BY_REF: QuoteByRef<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
+pub(crate) const QUOTE_CONST_BY_REF: QuoteByRef<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
     QuoteByRef {
         eval: EvalConstByRef,
         value: ValueFreeConstByRef,
         builder: OpValBuilder,
     };
 
-const INLINE_CONST_BY_REF: InlineByRef<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
-    InlineByRef {
-        eval: EvalConstByRef,
-        value: ValueFreeConstByRef,
-        builder: OpValBuilder,
-    };
+pub(crate) const INLINE_CONST_BY_REF: InlineByRef<
+    EvalConstByRef,
+    ValueFreeConstByRef,
+    OpValBuilder,
+> = InlineByRef {
+    eval: EvalConstByRef,
+    value: ValueFreeConstByRef,
+    builder: OpValBuilder,
+};
 
 impl BasicEvalMode {
     #[allow(unused)]
@@ -325,18 +328,22 @@ impl EvalMode {
     }
 }
 
-const QUOTE_FREE_CHECKER: Quote<EvalFreeChecker, ValueFreeConstChecker, BoolAndBuilder> = Quote {
-    eval: EvalFreeChecker,
-    value: ValueFreeConstChecker,
-    builder: BoolAndBuilder,
-};
-
-const INLINE_FREE_CHECKER: Inline<EvalFreeChecker, ValueFreeConstChecker, BoolAndBuilder> =
-    Inline {
+pub(crate) const QUOTE_FREE_CHECKER: Quote<EvalFreeChecker, ValueFreeConstChecker, BoolAndBuilder> =
+    Quote {
         eval: EvalFreeChecker,
         value: ValueFreeConstChecker,
         builder: BoolAndBuilder,
     };
+
+pub(crate) const INLINE_FREE_CHECKER: Inline<
+    EvalFreeChecker,
+    ValueFreeConstChecker,
+    BoolAndBuilder,
+> = Inline {
+    eval: EvalFreeChecker,
+    value: ValueFreeConstChecker,
+    builder: BoolAndBuilder,
+};
 
 impl BasicEvalMode {
     #[allow(unused)]
@@ -372,7 +379,7 @@ impl EvalMode {
     }
 }
 
-const QUOTE_FREE_CHECKER_BY_REF: QuoteByRef<
+pub(crate) const QUOTE_FREE_CHECKER_BY_REF: QuoteByRef<
     EvalFreeCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
@@ -382,7 +389,7 @@ const QUOTE_FREE_CHECKER_BY_REF: QuoteByRef<
     builder: BoolAndBuilder,
 };
 
-const INLINE_FREE_CHECKER_BY_REF: InlineByRef<
+pub(crate) const INLINE_FREE_CHECKER_BY_REF: InlineByRef<
     EvalFreeCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
@@ -426,18 +433,25 @@ impl EvalMode {
     }
 }
 
-const QUOTE_CONST_CHECKER: Quote<EvalConstChecker, ValueFreeConstChecker, BoolAndBuilder> = Quote {
+pub(crate) const QUOTE_CONST_CHECKER: Quote<
+    EvalConstChecker,
+    ValueFreeConstChecker,
+    BoolAndBuilder,
+> = Quote {
     eval: EvalConstChecker,
     value: ValueFreeConstChecker,
     builder: BoolAndBuilder,
 };
 
-const INLINE_CONST_CHECKER: Inline<EvalConstChecker, ValueFreeConstChecker, BoolAndBuilder> =
-    Inline {
-        eval: EvalConstChecker,
-        value: ValueFreeConstChecker,
-        builder: BoolAndBuilder,
-    };
+pub(crate) const INLINE_CONST_CHECKER: Inline<
+    EvalConstChecker,
+    ValueFreeConstChecker,
+    BoolAndBuilder,
+> = Inline {
+    eval: EvalConstChecker,
+    value: ValueFreeConstChecker,
+    builder: BoolAndBuilder,
+};
 
 impl BasicEvalMode {
     #[allow(unused)]
@@ -473,7 +487,7 @@ impl EvalMode {
     }
 }
 
-const QUOTE_CONST_CHECKER_BY_REF: QuoteByRef<
+pub(crate) const QUOTE_CONST_CHECKER_BY_REF: QuoteByRef<
     EvalConstCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
@@ -483,7 +497,7 @@ const QUOTE_CONST_CHECKER_BY_REF: QuoteByRef<
     builder: BoolAndBuilder,
 };
 
-const INLINE_CONST_CHECKER_BY_REF: InlineByRef<
+pub(crate) const INLINE_CONST_CHECKER_BY_REF: InlineByRef<
     EvalConstCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,

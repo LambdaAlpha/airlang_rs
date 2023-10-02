@@ -1,8 +1,8 @@
 ;[
     p = (proposition {
+        function : not,
         input : 1,
         output : 2,
-        access : (value free),
     }),
     !input p
 ]
@@ -11,9 +11,9 @@
 # ===
 ;[
     p = (proposition {
+        function : not,
         input : 1,
         output : 2,
-        access : (value free),
     }),
     !output p
 ]
@@ -22,9 +22,9 @@
 # ===
 ;[
     p = (proposition {
+        function : ==,
         input : 1,
         output : 1,
-        access : (value const),
         context : (context {var : {a : 2}}),
     }),
     ctx = (!before p),
@@ -35,9 +35,9 @@
 # ===
 ;[
     p = (proposition {
+        function : ==,
         input : 1,
         output : 1,
-        access : (value const),
         context : (context {var : {a : 2}}),
     }),
     ctx = (!after p),
@@ -48,11 +48,11 @@
 # ===
 ;[
     p = (proposition {
+        function : =,
         input : 1,
         output : 1,
-        access : (value mutable),
         before : (context {var : {a : 2}}),
-        after : (context {var : {a : 2}}),
+        after : (context {var : {a : 3}}),
     }),
     ctx = (!before p),
     ctx eval_const a
@@ -62,117 +62,63 @@
 # ===
 ;[
     p = (proposition {
+        function : =,
         input : 1,
         output : 1,
-        access : (value mutable),
         before : (context {var : {a : 2}}),
-        after : (context {var : {a : 2}}),
+        after : (context {var : {a : 3}}),
     }),
     ctx = (!after p),
     ctx eval_const a
 ]
 # ---
-2
+3
 # ===
 ;[
     p = (proposition {
+        function : not,
         input : 1,
-        output : 1,
-        access : (value free),
+        output : 2,
     }),
-    !eval_mode p
+    (!function p) == not
 ]
 # ---
-eval
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value free),
-    }),
-    !pair_eval_mode p
-]
-# ---
-eval : eval
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        pair_eval_mode : (value (eval : value)),
-        access : (value free),
-    }),
-    !pair_eval_mode p
-]
-# ---
-eval : value
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value free),
-    }),
-    !access p
-]
-# ---
-free
+'t
 # ===
 ;[
     t = (theorem {
-        input : 1,
-        access : (value free),
+        function : not,
+        input : 't,
     }),
     !input t
 ]
 # ---
-1
+'t
 # ===
 ;[
     t = (theorem {
-        input : 1,
-        access : (value free),
+        function : not,
+        input : 't,
     }),
     !output t
 ]
 # ---
-1
+'f
 # ===
 ;[
     t = (theorem {
-        input : 1,
-        access : (value free),
+        function : not,
+        input : 't,
     }),
-    !access t
+    (!function t) == not
 ]
 # ---
-free
+'t
 # ===
 ;[
     t = (theorem {
-        input : 1,
-        access : (value free),
-    }),
-    !eval_mode t
-]
-# ---
-eval
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value free),
-    }),
-    !pair_eval_mode t
-]
-# ---
-eval : eval
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value free),
+        function : not,
+        input : 't,
     }),
     is_true t
 ]
@@ -181,28 +127,23 @@ eval : eval
 # ===
 ;[
     t = (theorem {
+        function : eval,
         input : (quote ((' not) 't)),
-        access : (value free),
+        context : (context {}),
     }),
     !output t
 ]
 # ---
 'f
 # ===
-theorem {
-    input : (quote ((' move) 1)),
-    access : (value free),
-}
-# ---
-'
-# ===
 ;[
     t = (theorem {
-        input : (value (not 't)),
-        access : (value const),
+        function : ==,
+        input : (value (a : b)),
         context : (context {
             var : {
-                : not,
+                a : 1,
+                b : 2,
             }
         })
     }),
@@ -213,28 +154,9 @@ theorem {
 # ===
 ;[
     t = (theorem {
-        input : (value (;[a = 1, a])),
-        context : (context {
-            const : {
-                : ;,
-                : =,
-            }
-        })
-    }),
-    !output t
-]
-# ---
-1
-# ===
-;[
-    t = (theorem {
-        input : (value (;[a = 1, a])),
-        context : (context {
-            const : {
-                : ;,
-                : =,
-            }
-        })
+        function : =,
+        input : (value (a : 1)),
+        context : (context {})
     }),
     ctx = (!before t),
     ctx eval_const ((' is_null) a)
@@ -244,13 +166,9 @@ theorem {
 # ===
 ;[
     t = (theorem {
-        input : (value (;[a = 1, a])),
-        context : (context {
-            const : {
-                : ;,
-                : =,
-            }
-        })
+        function : =,
+        input : (value (a : 1)),
+        context : (context {})
     }),
     ctx = (!after t),
     ctx eval_const ((' is_null) a)
@@ -260,9 +178,9 @@ theorem {
 # ===
 ;[
     p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value free),
+        function : not,
+        input : 't,
+        output : 'f,
     }),
     t = (prove p),
     is_true t
@@ -272,212 +190,12 @@ theorem {
 # ===
 ;[
     p = (proposition {
-        input : 1,
-        output : 2,
-        access : (value free),
+        function : not,
+        input : 't,
+        output : 't,
     }),
     t = (prove p),
     is_true t
 ]
 # ---
 'f
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value free),
-    }),
-    p1 = (p relax {
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    !access p1
-]
-# ---
-const
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value free),
-    }),
-    p1 = (p relax {
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    ctx = (!before p1),
-    ctx eval_const a
-]
-# ---
-2
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value free),
-    }),
-    p1 = (p relax {
-        access : (value mutable),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    ctx = (!before p1),
-    ctx eval_const a
-]
-# ---
-2
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    p1 = (p relax {
-        access : (value mutable),
-    }),
-    !access p1
-]
-# ---
-mutable
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    p relax {
-        access : (value mutable),
-        context : (context {})
-    }
-]
-# ---
-'
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 1,
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    p relax {
-        access : (value const),
-    }
-]
-# ---
-'
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value free),
-    }),
-    t1 = (t relax {
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    ctx = (!before t1),
-    ctx eval_const a
-]
-# ---
-2
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value free),
-    }),
-    t1 = (t relax {
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    is_true t1
-]
-# ---
-'t
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value free),
-    }),
-    t1 = (t relax {
-        access : (value mutable),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    is_true t1
-]
-# ---
-'t
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    t1 = (t relax {
-        access : (value mutable),
-    }),
-    is_true t1
-]
-# ---
-'t
-# ===
-;[
-    t = (theorem {
-        input : 1,
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }),
-    t relax {
-        access : (value const),
-    }
-]
-# ---
-'
-# ===
-;[
-    p = (proposition {
-        input : 1,
-        output : 2,
-        access : (value free),
-    }),
-    t = (prove p),
-    t relax {
-        access : (value const),
-        context : (context {
-            var : {a : 2}
-        })
-    }
-]
-# ---
-'

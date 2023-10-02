@@ -52,6 +52,7 @@ fn parse_basic_eval_mode(val: Val) -> Option<BasicEvalMode> {
     Some(eval_mode)
 }
 
+#[allow(unused)]
 pub(crate) fn basic_eval_mode_to_symbol(eval_mode: BasicEvalMode) -> Symbol {
     let str = match eval_mode {
         BasicEvalMode::Value => "value",

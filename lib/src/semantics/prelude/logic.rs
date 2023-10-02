@@ -6,6 +6,7 @@ use crate::{
         },
         func::{
             CtxFreeFn,
+            FuncEval,
             Primitive,
         },
         logic::{
@@ -15,11 +16,7 @@ use crate::{
         },
         prelude::{
             names,
-            utils::{
-                basic_eval_mode_to_symbol,
-                map_remove,
-                parse_eval_mode,
-            },
+            utils::map_remove,
             PrimitiveFunc,
         },
         val::{
@@ -31,9 +28,7 @@ use crate::{
     },
     types::{
         Bool,
-        Pair,
         Reader,
-        Symbol,
     },
 };
 
@@ -47,40 +42,33 @@ fn fn_new_prop(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+    let Val::Func(func) = map_remove(&mut map, "function") else {
         return Val::default();
     };
     let input = map_remove(&mut map, "input");
     let output = map_remove(&mut map, "output");
-    let access = map_remove(&mut map, "access");
-    let access = match &access {
-        Val::Symbol(s) => &**s,
-        Val::Unit(_) => "mutable",
-        _ => return Val::default(),
-    };
-    match access {
-        "free" => {
-            let prop = Prop::new_free(eval_mode, input, output);
+    match &func.0.evaluator {
+        FuncEval::Free(_) => {
+            let prop = Prop::new_free(func, input, output);
             Val::Prop(PropVal(Reader::new(prop)))
         }
-        "const" => {
+        FuncEval::Const(_) => {
             let Val::Ctx(CtxVal(ctx)) = map_remove(&mut map, "context") else {
                 return Val::default();
             };
-            let prop = Prop::new_const(eval_mode, *ctx, input, output);
+            let prop = Prop::new_const(func, *ctx, input, output);
             Val::Prop(PropVal(Reader::new(prop)))
         }
-        "mutable" => {
+        FuncEval::Mutable(_) => {
             let Val::Ctx(CtxVal(before)) = map_remove(&mut map, "before") else {
                 return Val::default();
             };
             let Val::Ctx(CtxVal(after)) = map_remove(&mut map, "after") else {
                 return Val::default();
             };
-            let prop = Prop::new_mutable(eval_mode, *before, input, *after, output);
+            let prop = Prop::new_mutable(func, *before, input, *after, output);
             Val::Prop(PropVal(Reader::new(prop)))
         }
-        _ => Val::default(),
     }
 }
 
@@ -94,42 +82,29 @@ fn fn_new_theorem(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let Some(eval_mode) = parse_eval_mode(&mut map) else {
+    let Val::Func(func) = map_remove(&mut map, "function") else {
         return Val::default();
     };
     let input = map_remove(&mut map, "input");
-    let access = map_remove(&mut map, "access");
-    let access = match &access {
-        Val::Symbol(s) => &**s,
-        Val::Unit(_) => "mutable",
-        _ => return Val::default(),
-    };
-    match access {
-        "free" => {
-            let Some(theorem) = Theorem::new_free(eval_mode, input) else {
-                return Val::default();
-            };
+    match &func.0.evaluator {
+        FuncEval::Free(_) => {
+            let theorem = Theorem::new_free(func, input);
             Val::Theorem(TheoremVal(Reader::new(theorem)))
         }
-        "const" => {
+        FuncEval::Const(_) => {
             let Val::Ctx(CtxVal(ctx)) = map_remove(&mut map, "context") else {
                 return Val::default();
             };
-            let Some(theorem) = Theorem::new_const(eval_mode, *ctx, input) else {
-                return Val::default();
-            };
+            let theorem = Theorem::new_const(func, *ctx, input);
             Val::Theorem(TheoremVal(Reader::new(theorem)))
         }
-        "mutable" => {
+        FuncEval::Mutable(_) => {
             let Val::Ctx(CtxVal(before)) = map_remove(&mut map, "context") else {
                 return Val::default();
             };
-            let Some(theorem) = Theorem::new_mutable(eval_mode, *before, input) else {
-                return Val::default();
-            };
+            let theorem = Theorem::new_mutable(func, *before, input);
             Val::Theorem(TheoremVal(Reader::new(theorem)))
         }
-        _ => Val::default(),
     }
 }
 
@@ -143,82 +118,8 @@ fn fn_prove(input: Val) -> Val {
     let Val::Prop(PropVal(prop)) = input else {
         return Val::default();
     };
-    let Some(theorem) = Theorem::prove(Prop::clone(&*prop)) else {
-        return Val::default();
-    };
+    let theorem = Theorem::prove(Prop::clone(&*prop));
     Val::Theorem(TheoremVal(Reader::new(theorem)))
-}
-
-pub(crate) fn relax() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Eval, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_RELAX, fn_relax);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_relax(input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let Val::Map(mut map) = pair.second else {
-        return Val::default();
-    };
-    let Val::Symbol(access) = map_remove(&mut map, "access") else {
-        return Val::default();
-    };
-    let is_const = match &*access {
-        "const" => true,
-        "mutable" => false,
-        _ => return Val::default(),
-    };
-    let ctx = map_remove(&mut map, "context");
-    match pair.first {
-        Val::Prop(PropVal(prop)) => {
-            if is_const {
-                let Val::Ctx(CtxVal(ctx)) = ctx else {
-                    return Val::default();
-                };
-                let Some(new_prop) = prop.relax_to_const(*ctx) else {
-                    return Val::default();
-                };
-                Val::Prop(PropVal(Reader::new(new_prop)))
-            } else {
-                let ctx = match ctx {
-                    Val::Ctx(CtxVal(ctx)) => Some(*ctx),
-                    Val::Unit(_) => None,
-                    _ => return Val::default(),
-                };
-                let Some(new_prop) = prop.relax_to_mutable(ctx) else {
-                    return Val::default();
-                };
-                Val::Prop(PropVal(Reader::new(new_prop)))
-            }
-        }
-        Val::Theorem(TheoremVal(theorem)) => {
-            if is_const {
-                let Val::Ctx(CtxVal(ctx)) = ctx else {
-                    return Val::default();
-                };
-                let Some(new_theorem) = theorem.relax_to_const(*ctx) else {
-                    return Val::default();
-                };
-                Val::Theorem(TheoremVal(Reader::new(new_theorem)))
-            } else {
-                let ctx = match ctx {
-                    Val::Ctx(CtxVal(ctx)) => Some(*ctx),
-                    Val::Unit(_) => None,
-                    _ => return Val::default(),
-                };
-                let Some(new_theorem) = theorem.relax_to_mutable(ctx) else {
-                    return Val::default();
-                };
-                Val::Theorem(TheoremVal(Reader::new(new_theorem)))
-            }
-        }
-        _ => Val::default(),
-    }
 }
 
 pub(crate) fn is_true() -> PrimitiveFunc<CtxFreeFn> {
@@ -234,68 +135,19 @@ fn fn_is_true(input: Val) -> Val {
     Val::Bool(Bool::new(theorem.is_true()))
 }
 
-pub(crate) fn get_access() -> PrimitiveFunc<CtxFreeFn> {
+pub(crate) fn get_function() -> PrimitiveFunc<CtxFreeFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_ACCESS, fn_get_access);
+    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_FUNCTION, fn_get_function);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_get_access(input: Val) -> Val {
+fn fn_get_function(input: Val) -> Val {
     let prop = match &input {
         Val::Theorem(TheoremVal(theorem)) => theorem.prop(),
         Val::Prop(PropVal(prop)) => prop,
         _ => return Val::default(),
     };
-    let access = match prop.ctx() {
-        PropCtx::Free => "free",
-        PropCtx::Const(_) => "const",
-        PropCtx::Mutable(_, _) => "mutable",
-    };
-    Val::Symbol(Symbol::from_str(access))
-}
-
-pub(crate) fn get_eval_mode() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_EVAL_MODE, fn_get_eval_mode);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_get_eval_mode(input: Val) -> Val {
-    let prop = match &input {
-        Val::Theorem(TheoremVal(theorem)) => theorem.prop(),
-        Val::Prop(PropVal(prop)) => prop,
-        _ => return Val::default(),
-    };
-    let eval_mode = prop.eval_mode();
-    let s = basic_eval_mode_to_symbol(eval_mode.default);
-    Val::Symbol(s)
-}
-
-pub(crate) fn get_pair_eval_mode() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_PAIR_EVAL_MODE, fn_get_pair_eval_mode);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_get_pair_eval_mode(input: Val) -> Val {
-    let prop = match &input {
-        Val::Theorem(TheoremVal(theorem)) => theorem.prop(),
-        Val::Prop(PropVal(prop)) => prop,
-        _ => return Val::default(),
-    };
-    let eval_mode = prop.eval_mode();
-    let (first, second) = match eval_mode.pair {
-        None => {
-            let s = basic_eval_mode_to_symbol(eval_mode.default);
-            (s.clone(), s)
-        }
-        Some((first, second)) => {
-            let first = basic_eval_mode_to_symbol(first);
-            let second = basic_eval_mode_to_symbol(second);
-            (first, second)
-        }
-    };
-    Val::Pair(Box::new(Pair::new(Val::Symbol(first), Val::Symbol(second))))
+    Val::Func(prop.func().clone())
 }
 
 pub(crate) fn get_input() -> PrimitiveFunc<CtxFreeFn> {
