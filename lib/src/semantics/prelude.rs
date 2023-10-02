@@ -87,6 +87,15 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::is_ctx_free());
     put_primitive_func(c, eval::is_ctx_const());
     put_primitive_func(c, eval::func());
+    put_primitive_func(c, eval::func_eval_mode());
+    put_primitive_func(c, eval::func_pair_eval_mode());
+    put_primitive_func(c, eval::func_access());
+    put_primitive_func(c, eval::func_is_primitive());
+    put_primitive_func(c, eval::func_id());
+    put_primitive_func(c, eval::func_body());
+    put_primitive_func(c, eval::func_context());
+    put_primitive_func(c, eval::func_input_name());
+    put_primitive_func(c, eval::func_caller_name());
     put_primitive_func(c, eval::chain());
 }
 
@@ -257,6 +266,15 @@ pub(crate) mod names {
     pub(crate) const IS_CTX_FREE: &str = "is_context_free";
     pub(crate) const IS_CTX_CONST: &str = "is_context_const";
     pub(crate) const FUNC: &str = "function";
+    pub(crate) const FUNC_ACCESS: &str = "function_access";
+    pub(crate) const FUNC_EVAL_MODE: &str = "function_eval_mode";
+    pub(crate) const FUNC_PAIR_EVAL_MODE: &str = "function_pair_eval_mode";
+    pub(crate) const FUNC_IS_PRIMITIVE: &str = "function_is_primitive";
+    pub(crate) const FUNC_ID: &str = "function_id";
+    pub(crate) const FUNC_BODY: &str = "function_body";
+    pub(crate) const FUNC_CTX: &str = "function_context";
+    pub(crate) const FUNC_INPUT_NAME: &str = "function_input_name";
+    pub(crate) const FUNC_CALLER_NAME: &str = "function_caller_name";
     pub(crate) const CHAIN: &str = ".";
 
     pub(crate) const LOGIC_NEW_PROP: &str = "proposition";

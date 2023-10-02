@@ -514,6 +514,106 @@ not 'f
 # ---
 1
 # ===
+function_access function
+# ---
+free
+# ===
+function_access function_access
+# ---
+const
+# ===
+function_access eval
+# ---
+mutable
+# ===
+;[f = (function {body : input}), function_access f]
+# ---
+free
+# ===
+function_eval_mode not
+# ---
+eval
+# ===
+function_eval_mode eval
+# ---
+value
+# ===
+function_eval_mode function_eval_mode
+# ---
+inline
+# ===
+;[f = (function {body : input}), function_eval_mode f]
+# ---
+eval
+# ===
+function_pair_eval_mode and
+# ---
+eval : eval
+# ===
+function_pair_eval_mode not
+# ---
+eval : eval
+# ===
+function_is_primitive not
+# ---
+'t
+# ===
+;[f = (function {body : input}), function_is_primitive f]
+# ---
+'f
+# ===
+function_id not
+# ---
+not
+# ===
+;[neg = not, function_id neg]
+# ---
+not
+# ===
+;[f = (function {body : input}), function_id f]
+# ---
+'
+# ===
+;[f = (function {body : input}), function_body f]
+# ---
+input
+# ===
+function_body not
+# ---
+'
+# ===
+;[
+    ctx = (context {var : {a : 1}}),
+    f = (function {body : input, context : (' ctx)}),
+    (function_context f) == ctx
+]
+# ---
+'t
+# ===
+function_context not
+# ---
+'
+# ===
+;[f = (function {body : input}), function_input_name f]
+# ---
+input
+# ===
+function_input_name not
+# ---
+'
+# ===
+;[f = (function {body : input, caller_access : const}), function_caller_name f]
+# ---
+caller
+# ===
+;[f = (function {body : input}), function_caller_name f]
+# ---
+'
+# ===
+function_caller_name not
+# ---
+'
+# ===
 't . not
 # ---
 'f

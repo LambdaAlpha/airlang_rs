@@ -109,6 +109,124 @@ impl Func {
     pub(crate) fn is_ctx_const(&self) -> bool {
         matches!(&self.evaluator, FuncEval::Free(_) | FuncEval::Const(_))
     }
+
+    pub(crate) fn is_primitive(&self) -> bool {
+        match &self.evaluator {
+            FuncEval::Free(eval) => matches!(eval, FuncImpl::Primitive(_)),
+            FuncEval::Const(eval) => matches!(eval, FuncImpl::Primitive(_)),
+            FuncEval::Mutable(eval) => matches!(eval, FuncImpl::Primitive(_)),
+        }
+    }
+
+    pub(crate) fn primitive_id(&self) -> Option<Symbol> {
+        match &self.evaluator {
+            FuncEval::Free(eval) => {
+                let FuncImpl::Primitive(eval) = eval else {
+                    return None;
+                };
+                Some(eval.id.clone())
+            }
+            FuncEval::Const(eval) => {
+                let FuncImpl::Primitive(eval) = eval else {
+                    return None;
+                };
+                Some(eval.id.clone())
+            }
+            FuncEval::Mutable(eval) => {
+                let FuncImpl::Primitive(eval) = eval else {
+                    return None;
+                };
+                Some(eval.id.clone())
+            }
+        }
+    }
+
+    pub(crate) fn composed_body(&self) -> Option<Val> {
+        match &self.evaluator {
+            FuncEval::Free(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.body.clone())
+            }
+            FuncEval::Const(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.body.clone())
+            }
+            FuncEval::Mutable(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.body.clone())
+            }
+        }
+    }
+
+    pub(crate) fn composed_context(&self) -> Option<Ctx> {
+        match &self.evaluator {
+            FuncEval::Free(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.ctx.clone())
+            }
+            FuncEval::Const(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.ctx.clone())
+            }
+            FuncEval::Mutable(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.ctx.clone())
+            }
+        }
+    }
+
+    pub(crate) fn composed_input_name(&self) -> Option<Symbol> {
+        match &self.evaluator {
+            FuncEval::Free(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.input_name.clone())
+            }
+            FuncEval::Const(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.input_name.clone())
+            }
+            FuncEval::Mutable(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.input_name.clone())
+            }
+        }
+    }
+
+    pub(crate) fn composed_caller_name(&self) -> Option<Symbol> {
+        match &self.evaluator {
+            FuncEval::Free(_) => None,
+            FuncEval::Const(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.caller.name.clone())
+            }
+            FuncEval::Mutable(eval) => {
+                let FuncImpl::Composed(eval) = eval else {
+                    return None;
+                };
+                Some(eval.caller.name.clone())
+            }
+        }
+    }
 }
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Func
