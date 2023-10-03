@@ -27,6 +27,7 @@ pub(crate) fn prelude() -> NameMap {
 
     prelude_meta(&mut c);
     prelude_syntax(&mut c);
+    prelude_types(&mut c);
     prelude_ctx(&mut c);
     prelude_ctrl(&mut c);
     prelude_eval(&mut c);
@@ -50,6 +51,10 @@ fn prelude_meta(c: &mut NameMap) {
 fn prelude_syntax(c: &mut NameMap) {
     put_primitive_func(c, syntax::parse());
     put_primitive_func(c, syntax::stringify());
+}
+
+fn prelude_types(c: &mut NameMap) {
+    put_primitive_func(c, types::type_of());
 }
 
 fn prelude_ctx(c: &mut NameMap) {
@@ -241,6 +246,8 @@ pub(crate) mod names {
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
 
+    pub(crate) const TYPE_OF: &str = "type_of";
+
     pub(crate) const LOAD: &str = "load";
     pub(crate) const MOVE: &str = "move";
     pub(crate) const SAVE: &str = "save";
@@ -354,6 +361,8 @@ pub(crate) mod names {
 mod meta;
 
 mod syntax;
+
+mod types;
 
 mod ctx;
 

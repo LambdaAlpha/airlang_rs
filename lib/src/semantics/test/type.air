@@ -1,0 +1,67 @@
+;[a = ', type_of a]
+# ---
+unit
+# ===
+;[a = 't, type_of a]
+# ---
+bool
+# ===
+type_of (not 't)
+# ---
+'f : bool
+# ===
+;[a = 1, type_of a]
+# ---
+int
+# ===
+;[a = 1.0, type_of a]
+# ---
+float
+# ===
+;[a = 1xff, type_of a]
+# ---
+bytes
+# ===
+;[a = (value a), type_of a]
+# ---
+symbol
+# ===
+;[a = "", type_of a]
+# ---
+string
+# ===
+;[a = (1 : 2), type_of a]
+# ---
+pair
+# ===
+;[a = (value (f a)), type_of a]
+# ---
+call
+# ===
+;[a = (value (f ? a)), type_of a]
+# ---
+reverse
+# ===
+;[a = [], type_of a]
+# ---
+list
+# ===
+;[a = {}, type_of a]
+# ---
+map
+# ===
+;[a = (function {body : input}), type_of a]
+# ---
+function
+# ===
+;[a = (context {}), type_of a]
+# ---
+context
+# ===
+;[a = (proposition {function : not, input : 't, output : 'f}), type_of a]
+# ---
+proposition
+# ===
+;[a = (theorem {function : not, input : 't}), type_of a]
+# ---
+theorem
