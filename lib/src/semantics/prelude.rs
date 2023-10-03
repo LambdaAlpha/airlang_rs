@@ -81,6 +81,7 @@ fn prelude_ctx(c: &mut NameMap) {
 fn prelude_ctrl(c: &mut NameMap) {
     put_primitive_func(c, ctrl::sequence());
     put_primitive_func(c, ctrl::condition());
+    put_primitive_func(c, ctrl::matching());
     put_primitive_func(c, ctrl::while_loop());
 }
 
@@ -269,6 +270,7 @@ pub(crate) mod names {
 
     pub(crate) const SEQUENCE: &str = ";";
     pub(crate) const IF: &str = "if";
+    pub(crate) const MATCH: &str = "match";
     pub(crate) const WHILE: &str = "while";
 
     pub(crate) const VALUE: &str = "value";

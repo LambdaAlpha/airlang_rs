@@ -351,6 +351,22 @@ impl DefaultCtx {
         }
     }
 
+    pub(crate) fn get_const_ref_no_ret<Ctx: CtxTrait, F>(&self, ctx: &Ctx, name: Val, f: F) -> Val
+    where
+        F: FnOnce(&Val) -> Val,
+        Self: Sized,
+    {
+        match name {
+            Val::Symbol(s) => {
+                let Some(val) = ctx.get_const_ref(&s) else {
+                    return Val::default();
+                };
+                f(val)
+            }
+            val => f(&val),
+        }
+    }
+
     pub(crate) fn get_many_const_ref<Ctx: CtxTrait, F, const N: usize>(
         &self,
         ctx: &Ctx,

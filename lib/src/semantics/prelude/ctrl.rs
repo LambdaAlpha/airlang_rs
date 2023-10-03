@@ -81,6 +81,48 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     }
 }
 
+pub(crate) fn matching() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
+        names::MATCH,
+        fn_match::<FreeCtx>,
+        |ctx, val| fn_match(ctx, val),
+        |ctx, val| fn_match(ctx, val),
+    );
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let mut iter = list.into_iter();
+    let Some(val) = iter.next() else {
+        return Val::default();
+    };
+    let to_match = Eval.eval(&mut ctx, val);
+    let Some(Val::Map(map)) = iter.next() else {
+        return Val::default();
+    };
+    let eval = map
+        .into_iter()
+        .find_map(|(k, v)| {
+            let k = Eval.eval(&mut ctx, k);
+            if k == to_match {
+                Some(v)
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| {
+            let Some(default) = iter.next() else {
+                return Val::default();
+            };
+            default
+        });
+    Eval.eval(&mut ctx, eval)
+}
+
 pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
