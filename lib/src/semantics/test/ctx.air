@@ -214,6 +214,10 @@
 # ---
 1 : 2
 # ===
+;[a = (context {var : {b : 1}}), final [a, b], is_final [a, b]]
+# ---
+'t
+# ===
 ;[a = (1 : 2), const a, a set1 3, a]
 # ---
 1 : 2
@@ -221,6 +225,10 @@
 ;[a = 1, const a, a = 2, a]
 # ---
 1
+# ===
+;[a = (context {var : {b : 1}}), const [a, b], is_const [a, b]]
+# ---
+'t
 # ===
 ;[a =final (1 : 2), const a, a set1 3, a]
 # ---
