@@ -1,30 +1,86 @@
-;[a = 1, .. a]
+;[a = 1, load a]
 # ---
 1
 # ===
-;[a = 1, .. "a"]
+;[a = 1, load "a"]
 # ---
 '
 # ===
-;[a = 1, b = (value a), .. (eval b)]
+;[a = 1, b = (value a), load (eval b)]
 # ---
 1
 # ===
-;[a = (context {const : {b : 1}}), a .. b]
+;[a = (context {const : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
-;[a = (context {const : {b : 1}}), .. [a, b]]
+;[a = (context {const : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
-is_null a
+;[a = 1, move a]
+# ---
+1
+# ===
+;[a = 1, move a, a]
+# ---
+'
+# ===
+;[a =final 1, move a]
+# ---
+'
+# ===
+;[a =const 1, move a]
+# ---
+'
+# ===
+;[a = (value b), b = 1, move (eval a)]
+# ---
+1
+# ===
+;[a = (context {var : {b : 1}}), move [a, b]]
+# ---
+1
+# ===
+;[a = (context {var : {b : 1}}), move [a, b], load [a, b]]
+# ---
+'
+# ===
+;[a = (context {var : {b : 1}}), move [a, b]]
+# ---
+1
+# ===
+;[a = (context {var : {b : 1}}), move [a, b], load [a, b]]
+# ---
+'
+# ===
+;[a = (context {var : {b : 1}}), load [a, b]]
+# ---
+1
+# ===
+;[a = (context {}), b = 1, [a, b] save b, load [a, b]]
+# ---
+1
+# ===
+;[a = 1, b save a, b]
+# ---
+1
+# ===
+;[a = (context {var : {b : (context {})}}), c = 1, [a, b, d] save c, load [a, b, d]]
+# ---
+1
+# ===
+;[a = (context {}), b = 1, [a, b] save_final b, is_final [a, b]]
 # ---
 't
 # ===
-;[a = 1, is_null a]
+;[a = (context {}), b = 1, [a, b] save_const b, is_const [a, b]]
 # ---
-'f
+'t
+# ===
+;[a = (context {}), b = a, [a, b] save (move b), a set_super b, [a, c] save_local 1, is_local [a, c]]
+# ---
+'t
 # ===
 ;[a = 1, a]
 # ---
@@ -186,6 +242,10 @@ is_final a
 # ---
 't
 # ===
+;[a = (context {final : {b : 1}}), is_final [a, b]]
+# ---
+'t
+# ===
 is_const a
 # ---
 'f
@@ -202,45 +262,45 @@ is_const a
 # ---
 't
 # ===
-;[a = 1, move a]
+;[a = (context {const : {b : 1}}), is_const [a, b]]
 # ---
-1
+'t
 # ===
-;[a = 1, move a, a]
+is_null a
 # ---
-'
+'t
 # ===
-;[a =final 1, move a]
+;[a = 1, is_null a]
 # ---
-'
+'f
 # ===
-;[a =const 1, move a]
+;[a = (context {}), is_null [a, b]]
 # ---
-'
+'t
 # ===
-;[a = (value b), b = 1, move (eval a)]
+;[a = (context {var : {b : 1}}), is_null [a, b]]
 # ---
-1
+'f
 # ===
-;[a = (context {var : {b : 1}}), a move b]
+is_local a
 # ---
-1
+'f
 # ===
-;[a = (context {var : {b : 1}}), a move b, a .. b]
+;[a = 1, is_local a]
 # ---
-'
+'t
 # ===
-;[a = (context {var : {b : 1}}), move [a, b]]
+;[a = (context {}), ' set_super a, b = 1, is_local b]
 # ---
-1
+'f
 # ===
-;[a = (context {var : {b : 1}}), move [a, b], a .. b]
+;[a = (context {}), b = a, [a, b] save (move b), [a, c] save 1, a set_super b, is_local [a, c]]
 # ---
-'
+'t
 # ===
-;[a = (context {var : {b : 1}}), a .. b]
+;[a = (context {}), b = a, [a, b] save (move b), a set_super b, [a, c] save 1, is_local [a, c]]
 # ---
-1
+'f
 # ===
 ;[a = (context {var : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
 # ---
@@ -262,34 +322,38 @@ is_const a
 # ---
 2
 # ===
-;[a = (context {}), ' set_super a, b = 1, b : (a .. b)]
+;[a = (context {}), ' set_super a, b = 1, b : (load [a, b])]
 # ---
 1 : 1
 # ===
-;[a = (context {}), b = 1, ' set_super a, b = 2, b : (a .. b)]
+;[a = (context {}), b = 1, ' set_super a, b = 2, b : (load [a, b])]
 # ---
 2 : '
 # ===
-;[a = (context {var : {b : (1 : 2)}}), ' set_super a, b set1 3, a .. b]
+;[a = (context {var : {b : (1 : 2)}}), ' set_super a, b set1 3, load [a, b]]
 # ---
 3 : 2
 # ===
-;[a = (context {var : {b : 1}}), ' set_super a, (move b) : (a .. b)]
+;[a = (context {var : {b : 1}}), ' set_super a, (move b) : (load [a, b])]
 # ---
 1 : '
 # ===
-;[a = (context {var : {b : 1}}), b = 2, ' set_super a, (move b) : (a .. b)]
+;[a = (context {var : {b : 1}}), b = 2, ' set_super a, (move b) : (load [a, b])]
 # ---
 2 : 1
 # ===
-;[a = (context {}), ' set_super a, b =local 2, b : (a .. b)]
+;[a = (context {}), ' set_super a, b =local 2, b : (load [a, b])]
 # ---
 2 : '
+# ===
+;[a = (context {}), ' set_super a, (b : c) =local (1 : 2), b]
+# ---
+1
 # ===
 ;[
     a = (context {const : {b : (context {const : {c : 1}})}}),
     a set_super b,
-    a .. c
+    load [a, c]
 ]
 # ---
 1
@@ -297,7 +361,7 @@ is_const a
 ;[
     a = (context {const : {b : (context {const : {c : 1}})}}),
     a = ((move a) set_super b),
-    a .. c
+    load [a, c]
 ]
 # ---
 1

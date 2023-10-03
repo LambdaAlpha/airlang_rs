@@ -22,10 +22,6 @@ impl CtxTrait for FreeCtx {
         Val::default()
     }
 
-    fn is_null(&self, _name: &str) -> Val {
-        Val::default()
-    }
-
     fn remove(&mut self, _name: &str) -> Val {
         Val::default()
     }
@@ -47,6 +43,14 @@ impl CtxTrait for FreeCtx {
     }
 
     fn is_const(&self, _name: &str) -> Val {
+        Val::default()
+    }
+
+    fn is_null(&self, _name: &str) -> Val {
+        Val::default()
+    }
+
+    fn is_local(&self, _name: &str) -> Val {
         Val::default()
     }
 

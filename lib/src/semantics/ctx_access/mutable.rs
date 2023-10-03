@@ -36,10 +36,6 @@ impl<'a> CtxTrait for MutableCtx<'a> {
         self.0.get(name)
     }
 
-    fn is_null(&self, name: &str) -> Val {
-        DefaultCtx.is_null(self, name)
-    }
-
     fn remove(&mut self, name: &str) -> Val {
         self.0.remove(name)
     }
@@ -68,6 +64,15 @@ impl<'a> CtxTrait for MutableCtx<'a> {
     fn is_const(&self, name: &str) -> Val {
         let is_const = self.0.is_const(name);
         Val::Bool(Bool::new(is_const))
+    }
+
+    fn is_null(&self, name: &str) -> Val {
+        DefaultCtx.is_null(self, name)
+    }
+
+    fn is_local(&self, name: &str) -> Val {
+        let is_local = self.0.is_local(name);
+        Val::Bool(Bool::new(is_local))
     }
 
     fn set_super(&mut self, super_ctx: Option<Symbol>) {
@@ -111,14 +116,6 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
             CtxForMutableFn::Free(ctx) => ctx.get(name),
             CtxForMutableFn::Const(ctx) => ctx.get(name),
             CtxForMutableFn::Mutable(ctx) => ctx.get(name),
-        }
-    }
-
-    fn is_null(&self, name: &str) -> Val {
-        match self {
-            CtxForMutableFn::Free(ctx) => ctx.is_null(name),
-            CtxForMutableFn::Const(ctx) => ctx.is_null(name),
-            CtxForMutableFn::Mutable(ctx) => ctx.is_null(name),
         }
     }
 
@@ -175,6 +172,22 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
             CtxForMutableFn::Free(ctx) => ctx.is_const(name),
             CtxForMutableFn::Const(ctx) => ctx.is_const(name),
             CtxForMutableFn::Mutable(ctx) => ctx.is_const(name),
+        }
+    }
+
+    fn is_null(&self, name: &str) -> Val {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.is_null(name),
+            CtxForMutableFn::Const(ctx) => ctx.is_null(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.is_null(name),
+        }
+    }
+
+    fn is_local(&self, name: &str) -> Val {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.is_local(name),
+            CtxForMutableFn::Const(ctx) => ctx.is_local(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.is_local(name),
         }
     }
 

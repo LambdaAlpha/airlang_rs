@@ -21,8 +21,6 @@ use {
 pub(crate) trait CtxTrait {
     fn get(&self, name: &str) -> Val;
 
-    fn is_null(&self, name: &str) -> Val;
-
     fn remove(&mut self, name: &str) -> Val;
 
     fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val;
@@ -37,13 +35,19 @@ pub(crate) trait CtxTrait {
 
     fn is_const(&self, name: &str) -> Val;
 
+    fn is_null(&self, name: &str) -> Val;
+
+    fn is_local(&self, name: &str) -> Val;
+
     fn set_super(&mut self, super_ctx: Option<Symbol>);
 
     fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>>;
 
     fn get_const_ref(&self, name: &str) -> Option<&Val>;
 
-    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N];
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N]
+    where
+        Self: Sized;
 }
 
 pub(crate) type NameMap = Map<Symbol, TaggedVal>;
@@ -199,6 +203,10 @@ impl Ctx {
             return super_ctx.is_const(name);
         };
         matches!(&tagged_val.tag, InvariantTag::Const)
+    }
+
+    pub(crate) fn is_local(&self, name: &str) -> bool {
+        self.name_map.get(name).is_some()
     }
 
     pub(crate) fn get_tagged_ref(&mut self, is_const: bool, name: &str) -> Option<TaggedRef<Val>> {

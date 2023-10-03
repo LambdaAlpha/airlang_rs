@@ -38,10 +38,6 @@ impl<'a> CtxTrait for ConstCtx<'a> {
         self.0.get(name)
     }
 
-    fn is_null(&self, name: &str) -> Val {
-        DefaultCtx.is_null(self, name)
-    }
-
     fn remove(&mut self, _name: &str) -> Val {
         Val::default()
     }
@@ -66,6 +62,15 @@ impl<'a> CtxTrait for ConstCtx<'a> {
     fn is_const(&self, name: &str) -> Val {
         let is_const = self.0.is_const(name);
         Val::Bool(Bool::new(is_const))
+    }
+
+    fn is_null(&self, name: &str) -> Val {
+        DefaultCtx.is_null(self, name)
+    }
+
+    fn is_local(&self, name: &str) -> Val {
+        let is_local = self.0.is_local(name);
+        Val::Bool(Bool::new(is_local))
     }
 
     fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
@@ -106,13 +111,6 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.get(name),
             CtxForConstFn::Const(ctx) => ctx.get(name),
-        }
-    }
-
-    fn is_null(&self, name: &str) -> Val {
-        match self {
-            CtxForConstFn::Free(ctx) => ctx.is_null(name),
-            CtxForConstFn::Const(ctx) => ctx.is_null(name),
         }
     }
 
@@ -162,6 +160,20 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.is_const(name),
             CtxForConstFn::Const(ctx) => ctx.is_const(name),
+        }
+    }
+
+    fn is_null(&self, name: &str) -> Val {
+        match self {
+            CtxForConstFn::Free(ctx) => ctx.is_null(name),
+            CtxForConstFn::Const(ctx) => ctx.is_null(name),
+        }
+    }
+
+    fn is_local(&self, name: &str) -> Val {
+        match self {
+            CtxForConstFn::Free(ctx) => ctx.is_local(name),
+            CtxForConstFn::Const(ctx) => ctx.is_local(name),
         }
     }
 

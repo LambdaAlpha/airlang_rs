@@ -48,87 +48,91 @@ use crate::{
     },
 };
 
-pub(crate) fn read() -> PrimitiveFunc<CtxConstFn> {
+pub(crate) fn load() -> PrimitiveFunc<CtxConstFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
-    let primitive = Primitive::<CtxConstFn>::new(names::READ, fn_read);
+    let primitive = Primitive::<CtxConstFn>::new(names::LOAD, fn_load);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_read(mut ctx: CtxForConstFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.get(&s),
-        Val::Pair(pair) => {
-            let Val::Symbol(first) = pair.first else {
-                return Val::default();
-            };
-            let Val::Symbol(second) = pair.second else {
-                return Val::default();
-            };
-            read_pair(&mut ctx, &first, &second)
-        }
-        Val::List(mut list) => {
-            let Some(Val::Symbol(val_name)) = list.pop() else {
-                return Val::default();
-            };
-            read_nested(ctx, &list[..], &val_name)
-        }
-        _ => Val::default(),
-    }
+fn fn_load(ctx: CtxForConstFn, input: Val) -> Val {
+    fn_nested(ctx, input, |ctx, name| ctx.get(&name))
 }
 
-fn read_pair(ctx: &mut CtxForConstFn, first: &str, second: &str) -> Val {
-    let Some(Val::Ctx(CtxVal(ctx))) = ctx.get_const_ref(first) else {
-        return Val::default();
-    };
-    ctx.get(second)
-}
-
-fn read_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Val {
-    let Some(Val::Symbol(name)) = names.get(0) else {
-        return ctx.get(val_name);
-    };
-    let rest = &names[1..];
-
-    let Some(TaggedRef { val_ref, .. }) = ctx.get_tagged_ref(name) else {
-        return Val::default();
-    };
-    let Val::Ctx(CtxVal(ctx)) = val_ref else {
-        return Val::default();
-    };
-    read_nested(ConstCtx(ctx), rest, val_name)
-}
-
-pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
+pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
-    let primitive = Primitive::<CtxConstFn>::new(names::IS_NULL, fn_is_null);
+    let primitive = Primitive::<CtxMutableFn>::new(names::MOVE, fn_move);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    ctx.is_null(&s)
+fn fn_move(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_nested(ctx, input, |mut ctx, name| ctx.remove(&name))
 }
 
-pub(crate) fn assign_local() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn save() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode {
         pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
         default: BasicEvalMode::Value,
     };
-    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_LOCAL, fn_assign_local);
+    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE, fn_save);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_assign_local(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_save(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_save_val::<false>(ctx, input, InvariantTag::None)
+}
+
+pub(crate) fn save_final() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE_FINAL, fn_save_final);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_save_final(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_save_val::<false>(ctx, input, InvariantTag::Final)
+}
+
+pub(crate) fn save_const() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE_CONST, fn_save_const);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_save_const(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_save_val::<false>(ctx, input, InvariantTag::Const)
+}
+
+pub(crate) fn save_local() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE_LOCAL, fn_save_local);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_save_local(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_save_val::<true>(ctx, input, InvariantTag::None)
+}
+
+fn fn_save_val<const LOCAL: bool>(ctx: CtxForMutableFn, input: Val, tag: InvariantTag) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(name) = pair.first else {
-        return Val::default();
-    };
     let val = pair.second;
-    ctx.put_val_local(name, TaggedVal::new(val))
+    let tagged_val = TaggedVal { val, tag };
+    fn_nested(ctx, pair.first, |mut ctx, name| {
+        if LOCAL {
+            ctx.put_val_local(name, tagged_val)
+        } else {
+            ctx.put_val(name, tagged_val)
+        }
+    })
 }
 
 pub(crate) fn assign() -> PrimitiveFunc<CtxMutableFn> {
@@ -141,7 +145,7 @@ pub(crate) fn assign() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_assign(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val(ctx, input, InvariantTag::None)
+    fn_assign_val::<false>(ctx, input, InvariantTag::None)
 }
 
 pub(crate) fn assign_final() -> PrimitiveFunc<CtxMutableFn> {
@@ -154,7 +158,7 @@ pub(crate) fn assign_final() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_assign_final(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val(ctx, input, InvariantTag::Final)
+    fn_assign_val::<false>(ctx, input, InvariantTag::Final)
 }
 
 pub(crate) fn assign_const() -> PrimitiveFunc<CtxMutableFn> {
@@ -167,42 +171,71 @@ pub(crate) fn assign_const() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_assign_const(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val(ctx, input, InvariantTag::Const)
+    fn_assign_val::<false>(ctx, input, InvariantTag::Const)
 }
 
-fn fn_assign_val(mut ctx: CtxForMutableFn, input: Val, tag: InvariantTag) -> Val {
+pub(crate) fn assign_local() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode {
+        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        default: BasicEvalMode::Value,
+    };
+    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_LOCAL, fn_assign_local);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_assign_local(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_assign_val::<true>(ctx, input, InvariantTag::None)
+}
+
+fn fn_assign_val<const LOCAL: bool>(
+    mut ctx: CtxForMutableFn,
+    input: Val,
+    tag: InvariantTag,
+) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let name = pair.first;
-    assign_recursive(&mut ctx, name, pair.second, tag)
+    assign_destruct::<LOCAL>(&mut ctx, name, pair.second, tag)
 }
 
-fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, val: Val, tag: InvariantTag) -> Val {
+fn assign_destruct<const LOCAL: bool>(
+    ctx: &mut CtxForMutableFn,
+    name: Val,
+    val: Val,
+    tag: InvariantTag,
+) -> Val {
     match name {
-        Val::Symbol(s) => ctx.put_val(s, TaggedVal { tag, val }),
+        Val::Symbol(s) => {
+            if LOCAL {
+                ctx.put_val_local(s, TaggedVal { tag, val })
+            } else {
+                ctx.put_val(s, TaggedVal { tag, val })
+            }
+        }
         Val::Pair(name_pair) => {
             let Val::Pair(val_pair) = val else {
                 return Val::default();
             };
-            let last_first = assign_recursive(ctx, name_pair.first, val_pair.first, tag);
-            let last_second = assign_recursive(ctx, name_pair.second, val_pair.second, tag);
+            let last_first = assign_destruct::<LOCAL>(ctx, name_pair.first, val_pair.first, tag);
+            let last_second = assign_destruct::<LOCAL>(ctx, name_pair.second, val_pair.second, tag);
             Val::Pair(Box::new(Pair::new(last_first, last_second)))
         }
         Val::Call(name_call) => {
             let Val::Call(val_call) = val else {
                 return Val::default();
             };
-            let last_func = assign_recursive(ctx, name_call.func, val_call.func, tag);
-            let last_input = assign_recursive(ctx, name_call.input, val_call.input, tag);
+            let last_func = assign_destruct::<LOCAL>(ctx, name_call.func, val_call.func, tag);
+            let last_input = assign_destruct::<LOCAL>(ctx, name_call.input, val_call.input, tag);
             Val::Call(Box::new(Call::new(last_func, last_input)))
         }
         Val::Reverse(name_reverse) => {
             let Val::Reverse(val_reverse) = val else {
                 return Val::default();
             };
-            let last_func = assign_recursive(ctx, name_reverse.func, val_reverse.func, tag);
-            let last_output = assign_recursive(ctx, name_reverse.output, val_reverse.output, tag);
+            let last_func = assign_destruct::<LOCAL>(ctx, name_reverse.func, val_reverse.func, tag);
+            let last_output =
+                assign_destruct::<LOCAL>(ctx, name_reverse.output, val_reverse.output, tag);
             Val::Reverse(Box::new(Reverse::new(last_func, last_output)))
         }
         Val::List(name_list) => {
@@ -224,7 +257,7 @@ fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, val: Val, tag: Invaria
                         continue;
                     }
                 }
-                last_list.push(assign_recursive(ctx, name, val, tag));
+                last_list.push(assign_destruct::<LOCAL>(ctx, name, val, tag));
             }
             Val::List(last_list)
         }
@@ -236,7 +269,7 @@ fn assign_recursive(ctx: &mut CtxForMutableFn, name: Val, val: Val, tag: Invaria
                 .into_iter()
                 .filter_map(|(k, v)| {
                     let name = name_map.remove(&k)?;
-                    let last_val = assign_recursive(ctx, name, v, tag);
+                    let last_val = assign_destruct::<LOCAL>(ctx, name, v, tag);
                     Some((k, last_val))
                 })
                 .collect();
@@ -252,12 +285,11 @@ pub(crate) fn set_final() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    ctx.set_final(&s);
-    Val::default()
+fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_nested(ctx, input, |mut ctx, name| {
+        ctx.set_final(&name);
+        Val::default()
+    })
 }
 
 pub(crate) fn set_const() -> PrimitiveFunc<CtxMutableFn> {
@@ -266,12 +298,11 @@ pub(crate) fn set_const() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    ctx.set_const(&s);
-    Val::default()
+fn fn_set_const(ctx: CtxForMutableFn, input: Val) -> Val {
+    fn_nested(ctx, input, |mut ctx, name| {
+        ctx.set_const(&name);
+        Val::default()
+    })
 }
 
 pub(crate) fn is_final() -> PrimitiveFunc<CtxConstFn> {
@@ -281,10 +312,7 @@ pub(crate) fn is_final() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    ctx.is_final(&s)
+    fn_nested(ctx, input, |ctx, name| ctx.is_final(&name))
 }
 
 pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
@@ -294,56 +322,53 @@ pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    ctx.is_const(&s)
+    fn_nested(ctx, input, |ctx, name| ctx.is_const(&name))
 }
 
-pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
-    let primitive = Primitive::<CtxMutableFn>::new(names::MOVE, fn_move);
+    let primitive = Primitive::<CtxConstFn>::new(names::IS_NULL, fn_is_null);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(s) => ctx.remove(&s),
-        Val::Pair(pair) => {
-            let Val::Symbol(first) = pair.first else {
-                return Val::default();
-            };
-            let Val::Symbol(second) = pair.second else {
-                return Val::default();
-            };
-            remove_pair(&mut ctx, &first, &second)
-        }
+fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
+    fn_nested(ctx, input, |ctx, name| ctx.is_null(&name))
+}
+
+pub(crate) fn is_local() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::IS_LOCAL, fn_is_local);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
+    fn_nested(ctx, input, |ctx, name| ctx.is_local(&name))
+}
+
+fn fn_nested<Ctx, F>(ctx: Ctx, names: Val, f: F) -> Val
+where
+    Ctx: CtxTrait,
+    F: for<'a> FnOnce(Box<dyn CtxTrait + 'a>, Symbol) -> Val,
+{
+    match names {
+        Val::Symbol(s) => f(Box::new(ctx), s),
         Val::List(mut list) => {
             let Some(Val::Symbol(val_name)) = list.pop() else {
                 return Val::default();
             };
-            remove_nested(ctx, &list[..], &val_name)
+            nested(ctx, &list[..], val_name, f)
         }
         _ => Val::default(),
     }
 }
 
-fn remove_pair(ctx: &mut CtxForMutableFn, first: &str, second: &str) -> Val {
-    let Some(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(first) else {
-        return Val::default();
-    };
-    let Val::Ctx(CtxVal(ctx)) = val_ref else {
-        return Val::default();
-    };
-    if is_const {
-        return Val::default();
-    }
-    ctx.remove(second)
-}
-
-fn remove_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> Val {
+fn nested<Ctx, F>(mut ctx: Ctx, names: &[Val], val_name: Symbol, f: F) -> Val
+where
+    Ctx: CtxTrait,
+    F: for<'a> FnOnce(Box<dyn CtxTrait + 'a>, Symbol) -> Val,
+{
     let Some(Val::Symbol(name)) = names.get(0) else {
-        return ctx.remove(val_name);
+        return f(Box::new(ctx), val_name);
     };
     let rest = &names[1..];
 
@@ -354,9 +379,9 @@ fn remove_nested<Ctx: CtxTrait>(mut ctx: Ctx, names: &[Val], val_name: &str) -> 
         return Val::default();
     };
     if is_const {
-        remove_nested(ConstCtx(ctx), rest, val_name)
+        nested(ConstCtx(ctx), rest, val_name, f)
     } else {
-        remove_nested(MutableCtx(ctx), rest, val_name)
+        nested(MutableCtx(ctx), rest, val_name, f)
     }
 }
 

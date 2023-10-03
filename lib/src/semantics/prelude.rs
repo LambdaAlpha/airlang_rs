@@ -53,17 +53,22 @@ fn prelude_syntax(c: &mut NameMap) {
 }
 
 fn prelude_ctx(c: &mut NameMap) {
-    put_primitive_func(c, ctx::read());
-    put_primitive_func(c, ctx::is_null());
+    put_primitive_func(c, ctx::load());
     put_primitive_func(c, ctx::remove());
-    put_primitive_func(c, ctx::assign_local());
+    put_primitive_func(c, ctx::save());
+    put_primitive_func(c, ctx::save_final());
+    put_primitive_func(c, ctx::save_const());
+    put_primitive_func(c, ctx::save_local());
     put_primitive_func(c, ctx::assign());
     put_primitive_func(c, ctx::assign_final());
     put_primitive_func(c, ctx::assign_const());
+    put_primitive_func(c, ctx::assign_local());
     put_primitive_func(c, ctx::set_final());
     put_primitive_func(c, ctx::set_const());
     put_primitive_func(c, ctx::is_final());
     put_primitive_func(c, ctx::is_const());
+    put_primitive_func(c, ctx::is_null());
+    put_primitive_func(c, ctx::is_local());
     put_primitive_func(c, ctx::ctx_new());
     put_primitive_func(c, ctx::ctx_set_super());
 }
@@ -236,17 +241,22 @@ pub(crate) mod names {
     pub(crate) const PARSE: &str = "parse";
     pub(crate) const STRINGIFY: &str = "stringify";
 
-    pub(crate) const READ: &str = "..";
-    pub(crate) const IS_NULL: &str = "is_null";
+    pub(crate) const LOAD: &str = "load";
     pub(crate) const MOVE: &str = "move";
-    pub(crate) const ASSIGN_LOCAL: &str = "=local";
+    pub(crate) const SAVE: &str = "save";
+    pub(crate) const SAVE_FINAL: &str = "save_final";
+    pub(crate) const SAVE_CONST: &str = "save_const";
+    pub(crate) const SAVE_LOCAL: &str = "save_local";
     pub(crate) const ASSIGN: &str = "=";
     pub(crate) const ASSIGN_FINAL: &str = "=final";
     pub(crate) const ASSIGN_CONST: &str = "=const";
+    pub(crate) const ASSIGN_LOCAL: &str = "=local";
     pub(crate) const FINAL: &str = "final";
     pub(crate) const CONST: &str = "const";
     pub(crate) const IS_FINAL: &str = "is_final";
     pub(crate) const IS_CONST: &str = "is_const";
+    pub(crate) const IS_NULL: &str = "is_null";
+    pub(crate) const IS_LOCAL: &str = "is_local";
     pub(crate) const CTX_NEW: &str = "context";
     pub(crate) const CTX_SET_SUPER: &str = "set_super";
 
