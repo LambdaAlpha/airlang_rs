@@ -1,6 +1,6 @@
 "bench interpret" @
 (; [
-  ctx = (context {const : {
+  ctx = (context {constant : {
     : ;,
     : while,
     : <>,

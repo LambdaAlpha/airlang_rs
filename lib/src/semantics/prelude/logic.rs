@@ -32,13 +32,13 @@ use crate::{
     },
 };
 
-pub(crate) fn new_prop() -> PrimitiveFunc<CtxFreeFn> {
+pub(crate) fn prop_new() -> PrimitiveFunc<CtxFreeFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_NEW_PROP, fn_new_prop);
+    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_PROP_NEW, fn_prop_new);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_new_prop(input: Val) -> Val {
+fn fn_prop_new(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
@@ -72,13 +72,13 @@ fn fn_new_prop(input: Val) -> Val {
     }
 }
 
-pub(crate) fn new_theorem() -> PrimitiveFunc<CtxFreeFn> {
+pub(crate) fn theorem_new() -> PrimitiveFunc<CtxFreeFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_NEW_THEOREM, fn_new_theorem);
+    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_THEOREM_NEW, fn_theorem_new);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_new_theorem(input: Val) -> Val {
+fn fn_theorem_new(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };

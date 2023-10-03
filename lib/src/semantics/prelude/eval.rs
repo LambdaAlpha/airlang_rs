@@ -86,7 +86,7 @@ fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 pub(crate) fn eval_quote() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_QUOTE, fn_eval_quote);
+    let primitive = Primitive::<CtxMutableFn>::new(names::QUOTE, fn_eval_quote);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
@@ -96,7 +96,7 @@ fn fn_eval_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 pub(crate) fn eval_inline() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL_INLINE, fn_eval_inline);
+    let primitive = Primitive::<CtxMutableFn>::new(names::INLINE, fn_eval_inline);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
@@ -242,13 +242,13 @@ fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func() -> PrimitiveFunc<CtxFreeFn> {
+pub(crate) fn func_new() -> PrimitiveFunc<CtxFreeFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
-    let primitive = Primitive::<CtxFreeFn>::new(names::FUNC, fn_func);
+    let primitive = Primitive::<CtxFreeFn>::new(names::FUNC_NEW, fn_func_new);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_func(input: Val) -> Val {
+fn fn_func_new(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
@@ -258,7 +258,7 @@ fn fn_func(input: Val) -> Val {
         Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
-    let input_name = match utils::map_remove(&mut map, "input") {
+    let input_name = match utils::map_remove(&mut map, "input_name") {
         Val::Symbol(name) => name,
         Val::Unit(_) => Symbol::from_str("input"),
         _ => return Val::default(),
@@ -284,7 +284,7 @@ fn fn_func(input: Val) -> Val {
             input_name,
             caller: CtxFreeInfo {},
         })),
-        "const" => FuncEval::Const(FuncImpl::Composed(Composed {
+        "constant" => FuncEval::Const(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
@@ -315,7 +315,7 @@ fn fn_func_access(ctx: CtxForConstFn, input: Val) -> Val {
         };
         let access = match &func.evaluator {
             FuncEval::Free(_) => "free",
-            FuncEval::Const(_) => "const",
+            FuncEval::Const(_) => "constant",
             FuncEval::Mutable(_) => "mutable",
         };
         Val::Symbol(Symbol::from_str(access))

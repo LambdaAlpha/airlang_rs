@@ -4,7 +4,7 @@
         input : 1,
         output : 2,
     }),
-    !input p
+    proposition_input p
 ]
 # ---
 1
@@ -15,7 +15,7 @@
         input : 1,
         output : 2,
     }),
-    !output p
+    proposition_output p
 ]
 # ---
 2
@@ -25,10 +25,10 @@
         function : ==,
         input : 1,
         output : 1,
-        context : (context {var : {a : 2}}),
+        context : (context {variable : {a : 2}}),
     }),
-    ctx = (!before p),
-    ctx eval_const a
+    ctx = (proposition_before p),
+    ctx eval_constant a
 ]
 # ---
 2
@@ -38,10 +38,10 @@
         function : ==,
         input : 1,
         output : 1,
-        context : (context {var : {a : 2}}),
+        context : (context {variable : {a : 2}}),
     }),
-    ctx = (!after p),
-    ctx eval_const a
+    ctx = (proposition_after p),
+    ctx eval_constant a
 ]
 # ---
 2
@@ -51,11 +51,11 @@
         function : =,
         input : 1,
         output : 1,
-        before : (context {var : {a : 2}}),
-        after : (context {var : {a : 3}}),
+        before : (context {variable : {a : 2}}),
+        after : (context {variable : {a : 3}}),
     }),
-    ctx = (!before p),
-    ctx eval_const a
+    ctx = (proposition_before p),
+    ctx eval_constant a
 ]
 # ---
 2
@@ -65,11 +65,11 @@
         function : =,
         input : 1,
         output : 1,
-        before : (context {var : {a : 2}}),
-        after : (context {var : {a : 3}}),
+        before : (context {variable : {a : 2}}),
+        after : (context {variable : {a : 3}}),
     }),
-    ctx = (!after p),
-    ctx eval_const a
+    ctx = (proposition_after p),
+    ctx eval_constant a
 ]
 # ---
 3
@@ -80,7 +80,7 @@
         input : 1,
         output : 2,
     }),
-    (!function p) == not
+    (proposition_function p) == not
 ]
 # ---
 't
@@ -90,7 +90,7 @@
         function : not,
         input : 't,
     }),
-    !input t
+    proposition_input t
 ]
 # ---
 't
@@ -100,7 +100,7 @@
         function : not,
         input : 't,
     }),
-    !output t
+    proposition_output t
 ]
 # ---
 'f
@@ -110,7 +110,7 @@
         function : not,
         input : 't,
     }),
-    (!function t) == not
+    (proposition_function t) == not
 ]
 # ---
 't
@@ -131,7 +131,7 @@
         input : (quote ((' not) 't)),
         context : (context {}),
     }),
-    !output t
+    proposition_output t
 ]
 # ---
 'f
@@ -141,13 +141,13 @@
         function : ==,
         input : (value (a : b)),
         context : (context {
-            var : {
+            variable : {
                 a : 1,
                 b : 2,
             }
         })
     }),
-    !output t
+    proposition_output t
 ]
 # ---
 'f
@@ -158,8 +158,8 @@
         input : (value (a : 1)),
         context : (context {})
     }),
-    ctx = (!before t),
-    ctx eval_const ((' is_null) a)
+    ctx = (proposition_before t),
+    ctx eval_constant ((' is_null) a)
 ]
 # ---
 't
@@ -170,8 +170,8 @@
         input : (value (a : 1)),
         context : (context {})
     }),
-    ctx = (!after t),
-    ctx eval_const ((' is_null) a)
+    ctx = (proposition_after t),
+    ctx eval_constant ((' is_null) a)
 ]
 # ---
 'f

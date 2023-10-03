@@ -281,7 +281,7 @@ fn assign_destruct<const LOCAL: bool>(
 
 pub(crate) fn set_final() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
-    let primitive = Primitive::<CtxMutableFn>::new(names::FINAL, fn_set_final);
+    let primitive = Primitive::<CtxMutableFn>::new(names::SET_FINAL, fn_set_final);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
@@ -294,7 +294,7 @@ fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
 
 pub(crate) fn set_const() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
-    let primitive = Primitive::<CtxMutableFn>::new(names::CONST, fn_set_const);
+    let primitive = Primitive::<CtxMutableFn>::new(names::SET_CONST, fn_set_const);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
@@ -396,13 +396,13 @@ fn fn_ctx_new(input: Val) -> Val {
         return Val::default();
     };
 
-    let Val::Map(constants) = map_remove(&mut map, "const") else {
+    let Val::Map(constants) = map_remove(&mut map, "constant") else {
         return Val::default();
     };
     let Val::Map(finals) = map_remove(&mut map, "final") else {
         return Val::default();
     };
-    let Val::Map(variables) = map_remove(&mut map, "var") else {
+    let Val::Map(variables) = map_remove(&mut map, "variable") else {
         return Val::default();
     };
 

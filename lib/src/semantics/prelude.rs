@@ -97,7 +97,7 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::eval_const());
     put_primitive_func(c, eval::is_ctx_free());
     put_primitive_func(c, eval::is_ctx_const());
-    put_primitive_func(c, eval::func());
+    put_primitive_func(c, eval::func_new());
     put_primitive_func(c, eval::func_eval_mode());
     put_primitive_func(c, eval::func_pair_eval_mode());
     put_primitive_func(c, eval::func_access());
@@ -111,8 +111,8 @@ fn prelude_eval(c: &mut NameMap) {
 }
 
 fn prelude_logic(c: &mut NameMap) {
-    put_primitive_func(c, logic::new_prop());
-    put_primitive_func(c, logic::new_theorem());
+    put_primitive_func(c, logic::prop_new());
+    put_primitive_func(c, logic::theorem_new());
     put_primitive_func(c, logic::prove());
     put_primitive_func(c, logic::is_true());
     put_primitive_func(c, logic::get_function());
@@ -253,16 +253,16 @@ pub(crate) mod names {
     pub(crate) const MOVE: &str = "move";
     pub(crate) const SAVE: &str = "save";
     pub(crate) const SAVE_FINAL: &str = "save_final";
-    pub(crate) const SAVE_CONST: &str = "save_const";
+    pub(crate) const SAVE_CONST: &str = "save_constant";
     pub(crate) const SAVE_LOCAL: &str = "save_local";
     pub(crate) const ASSIGN: &str = "=";
     pub(crate) const ASSIGN_FINAL: &str = "=final";
-    pub(crate) const ASSIGN_CONST: &str = "=const";
+    pub(crate) const ASSIGN_CONST: &str = "=constant";
     pub(crate) const ASSIGN_LOCAL: &str = "=local";
-    pub(crate) const FINAL: &str = "final";
-    pub(crate) const CONST: &str = "const";
+    pub(crate) const SET_FINAL: &str = "set_final";
+    pub(crate) const SET_CONST: &str = "set_constant";
     pub(crate) const IS_FINAL: &str = "is_final";
-    pub(crate) const IS_CONST: &str = "is_const";
+    pub(crate) const IS_CONST: &str = "is_constant";
     pub(crate) const IS_NULL: &str = "is_null";
     pub(crate) const IS_LOCAL: &str = "is_local";
     pub(crate) const CTX_NEW: &str = "context";
@@ -275,17 +275,17 @@ pub(crate) mod names {
 
     pub(crate) const VALUE: &str = "value";
     pub(crate) const EVAL: &str = "eval";
-    pub(crate) const EVAL_QUOTE: &str = "quote";
-    pub(crate) const EVAL_INLINE: &str = "inline";
-    pub(crate) const EVAL_TWICE: &str = "eval2";
-    pub(crate) const EVAL_THRICE: &str = "eval3";
+    pub(crate) const QUOTE: &str = "quote";
+    pub(crate) const INLINE: &str = "inline";
+    pub(crate) const EVAL_TWICE: &str = "eval_2";
+    pub(crate) const EVAL_THRICE: &str = "eval_3";
     pub(crate) const EVAL_FREE: &str = "eval_free";
-    pub(crate) const EVAL_CONST: &str = "eval_const";
+    pub(crate) const EVAL_CONST: &str = "eval_constant";
     pub(crate) const EVAL_MUTABLE: &str = "eval_mutable";
     pub(crate) const IS_CTX_FREE: &str = "is_context_free";
-    pub(crate) const IS_CTX_CONST: &str = "is_context_const";
-    pub(crate) const FUNC: &str = "function";
-    pub(crate) const FUNC_ACCESS: &str = "function_access";
+    pub(crate) const IS_CTX_CONST: &str = "is_context_constant";
+    pub(crate) const FUNC_NEW: &str = "function";
+    pub(crate) const FUNC_ACCESS: &str = "function_caller_access";
     pub(crate) const FUNC_EVAL_MODE: &str = "function_eval_mode";
     pub(crate) const FUNC_PAIR_EVAL_MODE: &str = "function_pair_eval_mode";
     pub(crate) const FUNC_IS_PRIMITIVE: &str = "function_is_primitive";
@@ -296,21 +296,21 @@ pub(crate) mod names {
     pub(crate) const FUNC_CALLER_NAME: &str = "function_caller_name";
     pub(crate) const CHAIN: &str = ".";
 
-    pub(crate) const LOGIC_NEW_PROP: &str = "proposition";
-    pub(crate) const LOGIC_NEW_THEOREM: &str = "theorem";
+    pub(crate) const LOGIC_PROP_NEW: &str = "proposition";
+    pub(crate) const LOGIC_THEOREM_NEW: &str = "theorem";
     pub(crate) const LOGIC_PROVE: &str = "prove";
     pub(crate) const LOGIC_IS_TRUE: &str = "is_true";
-    pub(crate) const LOGIC_FUNCTION: &str = "!function";
-    pub(crate) const LOGIC_INPUT: &str = "!input";
-    pub(crate) const LOGIC_OUTPUT: &str = "!output";
-    pub(crate) const LOGIC_CTX_BEFORE: &str = "!before";
-    pub(crate) const LOGIC_CTX_AFTER: &str = "!after";
+    pub(crate) const LOGIC_FUNCTION: &str = "proposition_function";
+    pub(crate) const LOGIC_INPUT: &str = "proposition_input";
+    pub(crate) const LOGIC_OUTPUT: &str = "proposition_output";
+    pub(crate) const LOGIC_CTX_BEFORE: &str = "proposition_before";
+    pub(crate) const LOGIC_CTX_AFTER: &str = "proposition_after";
 
     pub(crate) const NOT: &str = "not";
     pub(crate) const AND: &str = "and";
     pub(crate) const OR: &str = "or";
     pub(crate) const EQUAL: &str = "==";
-    pub(crate) const NOT_EQUAL: &str = "!=";
+    pub(crate) const NOT_EQUAL: &str = "=/=";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";
@@ -324,13 +324,13 @@ pub(crate) mod names {
     pub(crate) const INT_GREATER_EQUAL: &str = ">=";
     pub(crate) const INT_LESS_GREATER: &str = "<>";
 
-    pub(crate) const STR_LENGTH: &str = "str_length";
-    pub(crate) const STR_CONCAT: &str = "str_concat";
+    pub(crate) const STR_LENGTH: &str = "string_length";
+    pub(crate) const STR_CONCAT: &str = "string_concat";
 
-    pub(crate) const PAIR_FIRST: &str = "get1";
-    pub(crate) const PAIR_FIRST_ASSIGN: &str = "set1";
-    pub(crate) const PAIR_SECOND: &str = "get2";
-    pub(crate) const PAIR_SECOND_ASSIGN: &str = "set2";
+    pub(crate) const PAIR_FIRST: &str = "get_1";
+    pub(crate) const PAIR_FIRST_ASSIGN: &str = "set_1";
+    pub(crate) const PAIR_SECOND: &str = "get_2";
+    pub(crate) const PAIR_SECOND_ASSIGN: &str = "set_2";
 
     pub(crate) const LIST_LENGTH: &str = "list_length";
     pub(crate) const LIST_SET: &str = "list_set";

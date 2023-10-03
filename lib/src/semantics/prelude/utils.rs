@@ -45,8 +45,8 @@ fn parse_basic_eval_mode(val: Val) -> Option<BasicEvalMode> {
     let eval_mode = match &*name {
         names::VALUE => BasicEvalMode::Value,
         names::EVAL => BasicEvalMode::Eval,
-        names::EVAL_QUOTE => BasicEvalMode::Quote,
-        names::EVAL_INLINE => BasicEvalMode::Inline,
+        names::QUOTE => BasicEvalMode::Quote,
+        names::INLINE => BasicEvalMode::Inline,
         _ => return None,
     };
     Some(eval_mode)

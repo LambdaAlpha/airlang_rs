@@ -10,11 +10,11 @@
 # ---
 1
 # ===
-;[a = (context {const : {b : 1}}), load [a, b]]
+;[a = (context {constant : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
-;[a = (context {const : {b : 1}}), load [a, b]]
+;[a = (context {constant : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
@@ -30,7 +30,7 @@
 # ---
 '
 # ===
-;[a =const 1, move a]
+;[a =constant 1, move a]
 # ---
 '
 # ===
@@ -38,23 +38,23 @@
 # ---
 1
 # ===
-;[a = (context {var : {b : 1}}), move [a, b]]
+;[a = (context {variable : {b : 1}}), move [a, b]]
 # ---
 1
 # ===
-;[a = (context {var : {b : 1}}), move [a, b], load [a, b]]
+;[a = (context {variable : {b : 1}}), move [a, b], load [a, b]]
 # ---
 '
 # ===
-;[a = (context {var : {b : 1}}), move [a, b]]
+;[a = (context {variable : {b : 1}}), move [a, b]]
 # ---
 1
 # ===
-;[a = (context {var : {b : 1}}), move [a, b], load [a, b]]
+;[a = (context {variable : {b : 1}}), move [a, b], load [a, b]]
 # ---
 '
 # ===
-;[a = (context {var : {b : 1}}), load [a, b]]
+;[a = (context {variable : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
@@ -66,7 +66,7 @@
 # ---
 1
 # ===
-;[a = (context {var : {b : (context {})}}), c = 1, [a, b, d] save c, load [a, b, d]]
+;[a = (context {variable : {b : (context {})}}), c = 1, [a, b, d] save c, load [a, b, d]]
 # ---
 1
 # ===
@@ -74,7 +74,7 @@
 # ---
 't
 # ===
-;[a = (context {}), b = 1, [a, b] save_const b, is_const [a, b]]
+;[a = (context {}), b = 1, [a, b] save_constant b, is_constant [a, b]]
 # ---
 't
 # ===
@@ -178,59 +178,59 @@
 # ---
 1
 # ===
-;[a =final 1, a =const 2, a]
+;[a =final 1, a =constant 2, a]
 # ---
 1
 # ===
-;[a =final (1 : 2), a set1 3, a]
+;[a =final (1 : 2), a set_1 3, a]
 # ---
 3 : 2
 # ===
-;[a =const (1 : 2), a set1 3, a]
+;[a =constant (1 : 2), a set_1 3, a]
 # ---
 1 : 2
 # ===
-;[a =const 1, a = 2, a]
+;[a =constant 1, a = 2, a]
 # ---
 1
 # ===
-;[a =const 1, a =final 2, a]
+;[a =constant 1, a =final 2, a]
 # ---
 1
 # ===
-;[a =const 1, a =const 2, a]
+;[a =constant 1, a =constant 2, a]
 # ---
 1
 # ===
-;[a = 1, final a, a = 2, a]
+;[a = 1, set_final a, a = 2, a]
 # ---
 1
 # ===
-;[a = (1 : 2), final a, a set1 3, a]
+;[a = (1 : 2), set_final a, a set_1 3, a]
 # ---
 3 : 2
 # ===
-;[a =const (1 : 2), final a, a set1 3, a]
+;[a =constant (1 : 2), set_final a, a set_1 3, a]
 # ---
 1 : 2
 # ===
-;[a = (context {var : {b : 1}}), final [a, b], is_final [a, b]]
+;[a = (context {variable : {b : 1}}), set_final [a, b], is_final [a, b]]
 # ---
 't
 # ===
-;[a = (1 : 2), const a, a set1 3, a]
+;[a = (1 : 2), set_constant a, a set_1 3, a]
 # ---
 1 : 2
 # ===
-;[a = 1, const a, a = 2, a]
+;[a = 1, set_constant a, a = 2, a]
 # ---
 1
 # ===
-;[a = (context {var : {b : 1}}), const [a, b], is_const [a, b]]
+;[a = (context {variable : {b : 1}}), set_constant [a, b], is_constant [a, b]]
 # ---
 't
 # ===
-;[a =final (1 : 2), const a, a set1 3, a]
+;[a =final (1 : 2), set_constant a, a set_1 3, a]
 # ---
 1 : 2
 # ===
@@ -246,7 +246,7 @@ is_final a
 # ---
 't
 # ===
-;[a =const 1, is_final a]
+;[a =constant 1, is_final a]
 # ---
 't
 # ===
@@ -254,23 +254,23 @@ is_final a
 # ---
 't
 # ===
-is_const a
+is_constant a
 # ---
 'f
 # ===
-;[a = 1, is_const a]
+;[a = 1, is_constant a]
 # ---
 'f
 # ===
-;[a =final 1, is_const a]
+;[a =final 1, is_constant a]
 # ---
 'f
 # ===
-;[a =const 1, is_const a]
+;[a =constant 1, is_constant a]
 # ---
 't
 # ===
-;[a = (context {const : {b : 1}}), is_const [a, b]]
+;[a = (context {constant : {b : 1}}), is_constant [a, b]]
 # ---
 't
 # ===
@@ -286,7 +286,7 @@ is_null a
 # ---
 't
 # ===
-;[a = (context {var : {b : 1}}), is_null [a, b]]
+;[a = (context {variable : {b : 1}}), is_null [a, b]]
 # ---
 'f
 # ===
@@ -310,7 +310,7 @@ is_local a
 # ---
 'f
 # ===
-;[a = (context {var : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {variable : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
 # ---
 2
 # ===
@@ -318,15 +318,15 @@ is_local a
 # ---
 1
 # ===
-;[a = (context {const : {b : (1 : 2), : ;, : set1}}), a eval_mutable (;[b set1 3, b])]
+;[a = (context {constant : {b : (1 : 2), : ;, : set_1}}), a eval_mutable (;[b set_1 3, b])]
 # ---
 1 : 2
 # ===
-;[a = (context {var : {b : 1}}), ' set_super a, b]
+;[a = (context {variable : {b : 1}}), ' set_super a, b]
 # ---
 1
 # ===
-;[a = (context {var : {b : 1}}), b = 2, ' set_super a, b]
+;[a = (context {variable : {b : 1}}), b = 2, ' set_super a, b]
 # ---
 2
 # ===
@@ -338,15 +338,15 @@ is_local a
 # ---
 2 : '
 # ===
-;[a = (context {var : {b : (1 : 2)}}), ' set_super a, b set1 3, load [a, b]]
+;[a = (context {variable : {b : (1 : 2)}}), ' set_super a, b set_1 3, load [a, b]]
 # ---
 3 : 2
 # ===
-;[a = (context {var : {b : 1}}), ' set_super a, (move b) : (load [a, b])]
+;[a = (context {variable : {b : 1}}), ' set_super a, (move b) : (load [a, b])]
 # ---
 1 : '
 # ===
-;[a = (context {var : {b : 1}}), b = 2, ' set_super a, (move b) : (load [a, b])]
+;[a = (context {variable : {b : 1}}), b = 2, ' set_super a, (move b) : (load [a, b])]
 # ---
 2 : 1
 # ===
@@ -359,7 +359,7 @@ is_local a
 1
 # ===
 ;[
-    a = (context {const : {b : (context {const : {c : 1}})}}),
+    a = (context {constant : {b : (context {constant : {c : 1}})}}),
     a set_super b,
     load [a, c]
 ]
@@ -367,7 +367,7 @@ is_local a
 1
 # ===
 ;[
-    a = (context {const : {b : (context {const : {c : 1}})}}),
+    a = (context {constant : {b : (context {constant : {c : 1}})}}),
     a = ((move a) set_super b),
     load [a, c]
 ]
