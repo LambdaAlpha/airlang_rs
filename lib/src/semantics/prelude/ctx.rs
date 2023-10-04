@@ -3,7 +3,6 @@ use crate::{
         ctx::{
             Ctx,
             CtxTrait,
-            DefaultCtx,
             InvariantTag,
             NameMap,
             TaggedRef,
@@ -31,6 +30,7 @@ use crate::{
         },
         prelude::{
             names,
+            utils::map_remove,
             PrimitiveFunc,
         },
         val::{
@@ -396,49 +396,45 @@ fn fn_ctx_new(input: Val) -> Val {
         return Val::default();
     };
 
-    let Val::Map(constants) = map_remove(&mut map, "constant") else {
-        return Val::default();
-    };
-    let Val::Map(finals) = map_remove(&mut map, "final") else {
-        return Val::default();
-    };
-    let Val::Map(variables) = map_remove(&mut map, "variable") else {
-        return Val::default();
+    let name_map_repr = match map_remove(&mut map, "map") {
+        Val::Map(name_map) => name_map,
+        Val::Unit(_) => MapVal::default(),
+        _ => return Val::default(),
     };
 
-    let mut name_map = NameMap::with_capacity(constants.len() + finals.len() + variables.len());
+    let mut name_map = NameMap::with_capacity(name_map_repr.len());
 
-    for (key, val) in constants {
+    for (key, val) in name_map_repr {
         let Val::Symbol(name) = key else {
             return Val::default();
         };
-        name_map.insert(name, TaggedVal::new_const(val));
-    }
-    for (key, val) in finals {
-        let Val::Symbol(name) = key else {
-            return Val::default();
+        let tagged_val = if let Val::Pair(pair) = val {
+            let Val::Symbol(tag) = pair.second else {
+                return Val::default();
+            };
+            let val = pair.first;
+            let tag = match &*tag {
+                "variable" => InvariantTag::None,
+                "final" => InvariantTag::Final,
+                "constant" => InvariantTag::Const,
+                _ => return Val::default(),
+            };
+            TaggedVal { val, tag }
+        } else {
+            TaggedVal::new(val)
         };
-        name_map.insert(name, TaggedVal::new_final(val));
-    }
-    for (key, val) in variables {
-        let Val::Symbol(name) = key else {
-            return Val::default();
-        };
-        name_map.insert(name, TaggedVal::new(val));
+        name_map.insert(name, tagged_val);
     }
 
-    Val::Ctx(
-        Box::new(Ctx {
-            name_map,
-            super_ctx: None,
-        })
-        .into(),
-    )
-}
+    let super_ctx = match map_remove(&mut map, "super") {
+        Val::Symbol(s) => Some(s),
+        _ => None,
+    };
 
-fn map_remove(map: &mut MapVal, name: &str) -> Val {
-    let name = Val::Symbol(Symbol::from_str(name));
-    map.remove(&name).unwrap_or(Val::Map(MapVal::default()))
+    Val::Ctx(CtxVal(Box::new(Ctx {
+        name_map,
+        super_ctx,
+    })))
 }
 
 pub(crate) fn ctx_set_super() -> PrimitiveFunc<CtxMutableFn> {
@@ -454,7 +450,7 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let ctx_name_or_val = pair.first;
+    let mut path = pair.first;
     let super_ctx = pair.second;
     let super_ctx = match super_ctx {
         Val::Symbol(name) => Some(name),
@@ -463,14 +459,90 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
             return Val::default();
         }
     };
-    if let Val::Unit(_) = &ctx_name_or_val {
-        ctx.set_super(super_ctx);
-        return Val::default();
+    match path {
+        Val::Symbol(name) => {
+            let Some(TaggedRef {
+                val_ref: Val::Ctx(CtxVal(ctx)),
+                is_const: false,
+            }) = ctx.get_tagged_ref(&name)
+            else {
+                return Val::default();
+            };
+            ctx.super_ctx = super_ctx;
+            Val::default()
+        }
+        Val::List(mut list) => {
+            if list.is_empty() {
+                ctx.set_super(super_ctx);
+                return Val::default();
+            }
+            let Val::Symbol(val_name) = list.pop().unwrap() else {
+                return Val::default();
+            };
+            nested(ctx, &list[..], val_name, |mut ctx, name| {
+                let Some(TaggedRef {
+                    val_ref: Val::Ctx(CtxVal(ctx)),
+                    is_const: false,
+                }) = ctx.get_tagged_ref(&name)
+                else {
+                    return Val::default();
+                };
+                ctx.super_ctx = super_ctx;
+                Val::default()
+            })
+        }
+        Val::Ctx(CtxVal(ref mut ctx)) => {
+            ctx.super_ctx = super_ctx;
+            path
+        }
+        _ => Val::default(),
     }
-    DefaultCtx.get_mut_ref_no_ret(&mut ctx, ctx_name_or_val, |ctx| {
-        let Val::Ctx(CtxVal(ctx)) = ctx else {
-            return;
-        };
-        ctx.super_ctx = super_ctx;
-    })
+}
+
+pub(crate) fn ctx_get_super() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let primitive = Primitive::<CtxConstFn>::new(names::CTX_GET_SUPER, fn_ctx_get_super);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_ctx_get_super(ctx: CtxForConstFn, input: Val) -> Val {
+    match input {
+        Val::Symbol(name) => {
+            let Some(Val::Ctx(CtxVal(ctx))) = ctx.get_const_ref(&name) else {
+                return Val::default();
+            };
+            let Some(super_name) = &ctx.super_ctx else {
+                return Val::default();
+            };
+            Val::Symbol(super_name.clone())
+        }
+        Val::List(mut list) => {
+            if list.is_empty() {
+                let Some(super_name) = ctx.get_super() else {
+                    return Val::default();
+                };
+                return Val::Symbol(super_name);
+            }
+            let Val::Symbol(val_name) = list.pop().unwrap() else {
+                return Val::default();
+            };
+            nested(ctx, &list[..], val_name, |ctx, name| {
+                let Some(Val::Ctx(CtxVal(ctx))) = ctx.get_const_ref(&name) else {
+                    return Val::default();
+                };
+                let Some(super_name) = &ctx.super_ctx else {
+                    return Val::default();
+                };
+                Val::Symbol(super_name.clone())
+            })
+        }
+        Val::Ctx(CtxVal(ref ctx)) => {
+            let super_ctx = match &ctx.super_ctx {
+                Some(name) => Val::Symbol(name.clone()),
+                None => Val::default(),
+            };
+            Val::Pair(Box::new(Pair::new(input, super_ctx)))
+        }
+        _ => Val::default(),
+    }
 }

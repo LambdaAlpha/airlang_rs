@@ -1,6 +1,6 @@
 "bench interpret" @
 (; [
-  ctx = (context {constant : {
+  ctx = (context {map : {
     : ;,
     : while,
     : <>,

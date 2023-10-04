@@ -243,7 +243,7 @@ fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_new() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::FUNC_NEW, fn_func_new);
     PrimitiveFunc::new(eval_mode, primitive)
 }

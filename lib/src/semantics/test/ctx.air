@@ -10,11 +10,11 @@
 # ---
 1
 # ===
-;[a = (context {constant : {b : 1}}), load [a, b]]
+;[a = (context {map : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
-;[a = (context {constant : {b : 1}}), load [a, b]]
+;[a = (context {map : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
@@ -38,23 +38,23 @@
 # ---
 1
 # ===
-;[a = (context {variable : {b : 1}}), move [a, b]]
+;[a = (context {map : {b : 1}}), move [a, b]]
 # ---
 1
 # ===
-;[a = (context {variable : {b : 1}}), move [a, b], load [a, b]]
+;[a = (context {map : {b : 1}}), move [a, b], load [a, b]]
 # ---
 '
 # ===
-;[a = (context {variable : {b : 1}}), move [a, b]]
+;[a = (context {map : {b : 1}}), move [a, b]]
 # ---
 1
 # ===
-;[a = (context {variable : {b : 1}}), move [a, b], load [a, b]]
+;[a = (context {map : {b : 1}}), move [a, b], load [a, b]]
 # ---
 '
 # ===
-;[a = (context {variable : {b : 1}}), load [a, b]]
+;[a = (context {map : {b : 1}}), load [a, b]]
 # ---
 1
 # ===
@@ -66,7 +66,7 @@
 # ---
 1
 # ===
-;[a = (context {variable : {b : (context {})}}), c = 1, [a, b, d] save c, load [a, b, d]]
+;[a = (context {map : {b : (context {})}}), c = 1, [a, b, d] save c, load [a, b, d]]
 # ---
 1
 # ===
@@ -214,7 +214,7 @@
 # ---
 1 : 2
 # ===
-;[a = (context {variable : {b : 1}}), set_final [a, b], is_final [a, b]]
+;[a = (context {map : {b : 1}}), set_final [a, b], is_final [a, b]]
 # ---
 't
 # ===
@@ -226,7 +226,7 @@
 # ---
 1
 # ===
-;[a = (context {variable : {b : 1}}), set_constant [a, b], is_constant [a, b]]
+;[a = (context {map : {b : 1}}), set_constant [a, b], is_constant [a, b]]
 # ---
 't
 # ===
@@ -250,7 +250,7 @@ is_final a
 # ---
 't
 # ===
-;[a = (context {final : {b : 1}}), is_final [a, b]]
+;[final = (value final), a = (context {map : {b : (1 : final)}}), is_final [a, b]]
 # ---
 't
 # ===
@@ -270,7 +270,7 @@ is_constant a
 # ---
 't
 # ===
-;[a = (context {constant : {b : 1}}), is_constant [a, b]]
+;[constant = (value constant), a = (context {map : {b : (1 : constant)}}), is_constant [a, b]]
 # ---
 't
 # ===
@@ -286,7 +286,7 @@ is_null a
 # ---
 't
 # ===
-;[a = (context {variable : {b : 1}}), is_null [a, b]]
+;[a = (context {map : {b : 1}}), is_null [a, b]]
 # ---
 'f
 # ===
@@ -298,7 +298,7 @@ is_local a
 # ---
 't
 # ===
-;[a = (context {}), ' set_super a, b = 1, is_local b]
+;[a = (context {}), [] set_super a, b = 1, is_local b]
 # ---
 'f
 # ===
@@ -310,56 +310,60 @@ is_local a
 # ---
 'f
 # ===
-;[a = (context {variable : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {map : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
 # ---
 2
 # ===
-;[a = (context {final : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
+;[final = (value final), a = (context {map : {b : (1 : final), : ;, : =}}), a eval_mutable (;[b = 2, b])]
 # ---
 1
 # ===
-;[a = (context {constant : {b : (1 : 2), : ;, : set_1}}), a eval_mutable (;[b set_1 3, b])]
+;[constant = (value constant), a = (context {map : {b : (1 : 2 : constant), : ;, : set_1}}), a eval_mutable (;[b set_1 3, b])]
 # ---
 1 : 2
 # ===
-;[a = (context {variable : {b : 1}}), ' set_super a, b]
+;[a = (context {map : {b : 1}}), [] set_super a, b]
 # ---
 1
 # ===
-;[a = (context {variable : {b : 1}}), b = 2, ' set_super a, b]
+;[a = (context {map : {b : 1}}), b = 2, [] set_super a, b]
 # ---
 2
 # ===
-;[a = (context {}), ' set_super a, b = 1, b : (load [a, b])]
+;[a = (context {}), [] set_super a, b = 1, b : (load [a, b])]
 # ---
 1 : 1
 # ===
-;[a = (context {}), b = 1, ' set_super a, b = 2, b : (load [a, b])]
+;[a = (context {}), b = 1, [] set_super a, b = 2, b : (load [a, b])]
 # ---
 2 : '
 # ===
-;[a = (context {variable : {b : (1 : 2)}}), ' set_super a, b set_1 3, load [a, b]]
+;[variable = (value variable), a = (context {map : {b : (1 : 2 : variable)}}), [] set_super a, b set_1 3, load [a, b]]
 # ---
 3 : 2
 # ===
-;[a = (context {variable : {b : 1}}), ' set_super a, (move b) : (load [a, b])]
+;[a = (context {map : {b : 1}}), [] set_super a, (move b) : (load [a, b])]
 # ---
 1 : '
 # ===
-;[a = (context {variable : {b : 1}}), b = 2, ' set_super a, (move b) : (load [a, b])]
+;[a = (context {map : {b : 1}}), b = 2, [] set_super a, (move b) : (load [a, b])]
 # ---
 2 : 1
 # ===
-;[a = (context {}), ' set_super a, b =local 2, b : (load [a, b])]
+;[a = (context {}), [] set_super a, b =local 2, b : (load [a, b])]
 # ---
 2 : '
 # ===
-;[a = (context {}), ' set_super a, (b : c) =local (1 : 2), b]
+;[a = (context {}), [] set_super a, (b : c) =local (1 : 2), b]
+# ---
+1
+# ===
+;[a = (context {map : {b : (context {map : {c : 1}})}, super : (value b)}), load [a, c]]
 # ---
 1
 # ===
 ;[
-    a = (context {constant : {b : (context {constant : {c : 1}})}}),
+    a = (context {map : {b : (context {map : {c : 1}})}}),
     a set_super b,
     load [a, c]
 ]
@@ -367,9 +371,37 @@ is_local a
 1
 # ===
 ;[
-    a = (context {constant : {b : (context {constant : {c : 1}})}}),
+    a = (context {map : {b : (context {map : {c : 1}})}}),
     a = ((move a) set_super b),
     load [a, c]
 ]
 # ---
 1
+# ===
+;[
+    a = (context {map : {b : (context {map : {c : (context {map : {d : 1}})}})}}),
+    [a, b] set_super c,
+    load [a, b, d]
+]
+# ---
+1
+# ===
+;[a = (context {map : {b : (context {map : {c : 1}})}, super : (value b)}), get_super a]
+# ---
+b
+# ===
+;[(_ : super) = (get_super (context {map : {b : (context {map : {c : 1}})}, super : (value b)})), super]
+# ---
+b
+# ===
+;[a = (context {}), [] set_super a, get_super []]
+# ---
+a
+# ===
+;[
+    a = (context {map : {b : (context {map : {c : (context {})}})}}),
+    [a, b] set_super c,
+    get_super [a, b]
+]
+# ---
+c

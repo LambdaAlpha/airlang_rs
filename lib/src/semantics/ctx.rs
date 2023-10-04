@@ -41,6 +41,8 @@ pub(crate) trait CtxTrait {
 
     fn set_super(&mut self, super_ctx: Option<Symbol>);
 
+    fn get_super(&self) -> Option<Symbol>;
+
     fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>>;
 
     fn get_const_ref(&self, name: &str) -> Option<&Val>;

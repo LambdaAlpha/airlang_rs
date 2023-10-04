@@ -419,6 +419,7 @@ impl<F> Hash for Primitive<F> {
     }
 }
 
+#[allow(unused)]
 impl TaggedVal {
     pub(crate) fn new(val: Val) -> TaggedVal {
         TaggedVal {

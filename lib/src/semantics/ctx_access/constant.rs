@@ -75,6 +75,10 @@ impl<'a> CtxTrait for ConstCtx<'a> {
 
     fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
 
+    fn get_super(&self) -> Option<Symbol> {
+        self.0.super_ctx.clone()
+    }
+
     fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
         self.0.get_tagged_ref(true, name)
     }
@@ -181,6 +185,13 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.set_super(super_ctx),
             CtxForConstFn::Const(ctx) => ctx.set_super(super_ctx),
+        }
+    }
+
+    fn get_super(&self) -> Option<Symbol> {
+        match self {
+            CtxForConstFn::Free(ctx) => ctx.get_super(),
+            CtxForConstFn::Const(ctx) => ctx.get_super(),
         }
     }
 

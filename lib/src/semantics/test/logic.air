@@ -25,7 +25,7 @@
         function : ==,
         input : 1,
         output : 1,
-        context : (context {variable : {a : 2}}),
+        context : (context {map : {a : 2}}),
     }),
     ctx = (proposition_before p),
     ctx eval_constant a
@@ -38,7 +38,7 @@
         function : ==,
         input : 1,
         output : 1,
-        context : (context {variable : {a : 2}}),
+        context : (context {map : {a : 2}}),
     }),
     ctx = (proposition_after p),
     ctx eval_constant a
@@ -51,8 +51,8 @@
         function : =,
         input : 1,
         output : 1,
-        before : (context {variable : {a : 2}}),
-        after : (context {variable : {a : 3}}),
+        before : (context {map : {a : 2}}),
+        after : (context {map : {a : 3}}),
     }),
     ctx = (proposition_before p),
     ctx eval_constant a
@@ -65,8 +65,8 @@
         function : =,
         input : 1,
         output : 1,
-        before : (context {variable : {a : 2}}),
-        after : (context {variable : {a : 3}}),
+        before : (context {map : {a : 2}}),
+        after : (context {map : {a : 3}}),
     }),
     ctx = (proposition_after p),
     ctx eval_constant a
@@ -141,7 +141,7 @@
         function : ==,
         input : (value (a : b)),
         context : (context {
-            variable : {
+            map : {
                 a : 1,
                 b : 2,
             }

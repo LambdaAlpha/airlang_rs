@@ -76,6 +76,7 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::is_local());
     put_primitive_func(c, ctx::ctx_new());
     put_primitive_func(c, ctx::ctx_set_super());
+    put_primitive_func(c, ctx::ctx_get_super());
 }
 
 fn prelude_ctrl(c: &mut NameMap) {
@@ -267,6 +268,7 @@ pub(crate) mod names {
     pub(crate) const IS_LOCAL: &str = "is_local";
     pub(crate) const CTX_NEW: &str = "context";
     pub(crate) const CTX_SET_SUPER: &str = "set_super";
+    pub(crate) const CTX_GET_SUPER: &str = "get_super";
 
     pub(crate) const SEQUENCE: &str = ";";
     pub(crate) const IF: &str = "if";
