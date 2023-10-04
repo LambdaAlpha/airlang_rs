@@ -11,6 +11,7 @@ use crate::semantics::{
         },
         BasicEvalMode,
         EvalMode,
+        INLINE,
     },
     func::{
         CtxMutableFn,
@@ -107,7 +108,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
-            let k = Eval.eval(&mut ctx, k);
+            let k = INLINE.eval(&mut ctx, k);
             if k == to_match {
                 Some(v)
             } else {
