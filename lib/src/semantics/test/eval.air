@@ -514,6 +514,40 @@ not 'f
 # ---
 1
 # ===
+function_represent (function (inline {body : input}))
+# ---
+{body : input}
+# ===
+function_represent not
+# ---
+{id : not}
+# ===
+function_represent (function (value {body : input, caller_access : constant}))
+# ---
+{body : input, caller_access : constant}
+# ===
+function_represent ==
+# ---
+{id : ==, caller_access : constant, eval_mode : value, pair_eval_mode : (inline : inline)}
+# ===
+function_represent (function (value {
+    body : i,
+    input_name : i,
+    caller_name : c,
+    eval_mode : value,
+    pair_eval_mode : (inline : quote),
+    caller_access : mutable,
+}))
+# ---
+{
+    body : i,
+    input_name : i,
+    caller_name : c,
+    eval_mode : value,
+    pair_eval_mode : (inline : quote),
+    caller_access : mutable,
+}
+# ===
 function_caller_access function
 # ---
 free

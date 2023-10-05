@@ -56,11 +56,11 @@ pub(crate) enum FuncEval {
     Mutable(CtxMutableEval),
 }
 
-type CtxFreeEval = FuncImpl<Primitive<CtxFreeFn>, Composed<CtxFreeInfo>>;
+pub(crate) type CtxFreeEval = FuncImpl<Primitive<CtxFreeFn>, Composed<CtxFreeInfo>>;
 
-type CtxConstEval = FuncImpl<Primitive<CtxConstFn>, Composed<CtxConstInfo>>;
+pub(crate) type CtxConstEval = FuncImpl<Primitive<CtxConstFn>, Composed<CtxConstInfo>>;
 
-type CtxMutableEval = FuncImpl<Primitive<CtxMutableFn>, Composed<CtxMutableInfo>>;
+pub(crate) type CtxMutableEval = FuncImpl<Primitive<CtxMutableFn>, Composed<CtxMutableInfo>>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum FuncImpl<P, C> {

@@ -75,6 +75,7 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::is_null());
     put_primitive_func(c, ctx::is_local());
     put_primitive_func(c, ctx::ctx_new());
+    put_primitive_func(c, ctx::ctx_repr());
     put_primitive_func(c, ctx::ctx_set_super());
     put_primitive_func(c, ctx::ctx_get_super());
 }
@@ -99,6 +100,7 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::is_ctx_free());
     put_primitive_func(c, eval::is_ctx_const());
     put_primitive_func(c, eval::func_new());
+    put_primitive_func(c, eval::func_repr());
     put_primitive_func(c, eval::func_eval_mode());
     put_primitive_func(c, eval::func_pair_eval_mode());
     put_primitive_func(c, eval::func_access());
@@ -113,7 +115,9 @@ fn prelude_eval(c: &mut NameMap) {
 
 fn prelude_logic(c: &mut NameMap) {
     put_primitive_func(c, logic::prop_new());
+    put_primitive_func(c, logic::prop_repr());
     put_primitive_func(c, logic::theorem_new());
+    put_primitive_func(c, logic::theorem_repr());
     put_primitive_func(c, logic::prove());
     put_primitive_func(c, logic::is_true());
     put_primitive_func(c, logic::get_function());
@@ -267,6 +271,7 @@ pub(crate) mod names {
     pub(crate) const IS_NULL: &str = "is_null";
     pub(crate) const IS_LOCAL: &str = "is_local";
     pub(crate) const CTX_NEW: &str = "context";
+    pub(crate) const CTX_REPR: &str = "context_represent";
     pub(crate) const CTX_SET_SUPER: &str = "set_super";
     pub(crate) const CTX_GET_SUPER: &str = "get_super";
 
@@ -287,6 +292,7 @@ pub(crate) mod names {
     pub(crate) const IS_CTX_FREE: &str = "is_context_free";
     pub(crate) const IS_CTX_CONST: &str = "is_context_constant";
     pub(crate) const FUNC_NEW: &str = "function";
+    pub(crate) const FUNC_REPR: &str = "function_represent";
     pub(crate) const FUNC_ACCESS: &str = "function_caller_access";
     pub(crate) const FUNC_EVAL_MODE: &str = "function_eval_mode";
     pub(crate) const FUNC_PAIR_EVAL_MODE: &str = "function_pair_eval_mode";
@@ -299,7 +305,9 @@ pub(crate) mod names {
     pub(crate) const CHAIN: &str = ".";
 
     pub(crate) const LOGIC_PROP_NEW: &str = "proposition";
+    pub(crate) const LOGIC_PROP_REPR: &str = "proposition_represent";
     pub(crate) const LOGIC_THEOREM_NEW: &str = "theorem";
+    pub(crate) const LOGIC_THEOREM_REPR: &str = "theorem_represent";
     pub(crate) const LOGIC_PROVE: &str = "prove";
     pub(crate) const LOGIC_IS_TRUE: &str = "is_true";
     pub(crate) const LOGIC_FUNCTION: &str = "proposition_function";

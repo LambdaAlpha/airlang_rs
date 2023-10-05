@@ -86,6 +86,42 @@
 't
 # ===
 ;[
+    map = {
+        function : not,
+        input : 't,
+        output : 'f,
+    },
+    map == (proposition_represent (proposition map))
+]
+# ---
+'t
+# ===
+;[
+    map = {
+        function : ==,
+        input : 't,
+        output : 'f,
+        context : (context {}),
+    },
+    map == (proposition_represent (proposition map))
+]
+# ---
+'t
+# ===
+;[
+    map = {
+        function : =,
+        input : 't,
+        output : 'f,
+        before : (context {}),
+        after : (context {}),
+    },
+    map == (proposition_represent (proposition map))
+]
+# ---
+'t
+# ===
+;[
     t = (theorem {
         function : not,
         input : 't,
@@ -129,7 +165,7 @@
     t = (theorem {
         function : eval,
         input : (quote ((' not) 't)),
-        context : (context {}),
+        before : (context {}),
     }),
     proposition_output t
 ]
@@ -156,7 +192,7 @@
     t = (theorem {
         function : =,
         input : (value (a : 1)),
-        context : (context {})
+        before : (context {})
     }),
     ctx = (proposition_before t),
     ctx eval_constant ((' is_null) a)
@@ -168,13 +204,66 @@
     t = (theorem {
         function : =,
         input : (value (a : 1)),
-        context : (context {})
+        before : (context {})
     }),
     ctx = (proposition_after t),
     ctx eval_constant ((' is_null) a)
 ]
 # ---
 'f
+# ===
+;[
+    map = (theorem_represent (theorem {
+        function : not,
+        input : 't,
+    })),
+    expected = {
+        function : not,
+        input : 't,
+        output : 'f,
+        truth : 't,
+    },
+    map == expected
+]
+# ---
+'t
+# ===
+;[
+    map = (theorem_represent (theorem {
+        function : ==,
+        input : (1 : 2),
+        context : (context {}),
+    })),
+    expected = {
+        function : ==,
+        input : (1 : 2),
+        output : 'f,
+        context : (context {}),
+        truth : 't,
+    },
+    map == expected
+]
+# ---
+'t
+# ===
+;[
+    map = (theorem_represent (theorem {
+        function : =,
+        input : ((value a) : 1),
+        before : (context {}),
+    })),
+    expected = {
+        function : =,
+        input : ((value a) : 1),
+        output : ',
+        before : (context {}),
+        after : (context {map : {a : 1}}),
+        truth : 't,
+    },
+    map == expected
+]
+# ---
+'t
 # ===
 ;[
     p = (proposition {

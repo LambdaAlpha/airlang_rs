@@ -31,10 +31,13 @@ use crate::{
         },
         func::{
             Composed,
+            CtxConstEval,
             CtxConstFn,
             CtxConstInfo,
+            CtxFreeEval,
             CtxFreeFn,
             CtxFreeInfo,
+            CtxMutableEval,
             CtxMutableFn,
             CtxMutableInfo,
             Func,
@@ -47,12 +50,15 @@ use crate::{
             utils::{
                 self,
                 basic_eval_mode_to_symbol,
+                generate_eval_mode,
+                symbol,
             },
             PrimitiveFunc,
         },
         val::{
             CtxVal,
             FuncVal,
+            MapVal,
             Val,
         },
     },
@@ -242,6 +248,19 @@ fn fn_is_ctx_const(mut ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
+const BODY: &str = "body";
+const CTX: &str = "context";
+const INPUT_NAME: &str = "input_name";
+const CALLER_NAME: &str = "caller_name";
+const CALLER_ACCESS: &str = "caller_access";
+const ID: &str = "id";
+
+const DEFAULT_INPUT_NAME: &str = "input";
+const DEFAULT_CALLER_NAME: &str = "caller";
+const FREE: &str = "free";
+const CONST: &str = "constant";
+const MUTABLE: &str = "mutable";
+
 pub(crate) fn func_new() -> PrimitiveFunc<CtxFreeFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::FUNC_NEW, fn_func_new);
@@ -252,45 +271,45 @@ fn fn_func_new(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let body = utils::map_remove(&mut map, "body");
-    let func_ctx = match utils::map_remove(&mut map, "context") {
+    let body = utils::map_remove(&mut map, BODY);
+    let func_ctx = match utils::map_remove(&mut map, CTX) {
         Val::Ctx(func_ctx) => *func_ctx.0,
         Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
-    let input_name = match utils::map_remove(&mut map, "input_name") {
+    let input_name = match utils::map_remove(&mut map, INPUT_NAME) {
         Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from_str("input"),
+        Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
         _ => return Val::default(),
     };
     let Some(eval_mode) = utils::parse_eval_mode(&mut map) else {
         return Val::default();
     };
-    let caller_name = match utils::map_remove(&mut map, "caller_name") {
+    let caller_name = match utils::map_remove(&mut map, CALLER_NAME) {
         Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from_str("caller"),
+        Val::Unit(_) => Symbol::from_str(DEFAULT_CALLER_NAME),
         _ => return Val::default(),
     };
-    let caller_access = utils::map_remove(&mut map, "caller_access");
+    let caller_access = utils::map_remove(&mut map, CALLER_ACCESS);
     let caller_access = match &caller_access {
         Val::Symbol(s) => &**s,
-        Val::Unit(_) => "free",
+        Val::Unit(_) => FREE,
         _ => return Val::default(),
     };
     let evaluator = match caller_access {
-        "free" => FuncEval::Free(FuncImpl::Composed(Composed {
+        FREE => FuncEval::Free(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxFreeInfo {},
         })),
-        "constant" => FuncEval::Const(FuncImpl::Composed(Composed {
+        CONST => FuncEval::Const(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxConstInfo { name: caller_name },
         })),
-        "mutable" => FuncEval::Mutable(FuncImpl::Composed(Composed {
+        MUTABLE => FuncEval::Mutable(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
@@ -300,6 +319,79 @@ fn fn_func_new(input: Val) -> Val {
     };
     let func = Func::new(eval_mode, evaluator);
     Val::Func(Reader::new(func).into())
+}
+
+pub(crate) fn func_repr() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::FUNC_REPR, fn_func_repr);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_func_repr(input: Val) -> Val {
+    let Val::Func(FuncVal(func)) = input else {
+        return Val::default();
+    };
+    let mut repr = MapVal::default();
+
+    generate_eval_mode(&mut repr, func.input_eval_mode);
+
+    match &func.evaluator {
+        FuncEval::Free(eval) => match eval {
+            CtxFreeEval::Primitive(p) => {
+                repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+            }
+            CtxFreeEval::Composed(c) => {
+                repr.insert(symbol(BODY), c.body.clone());
+                if c.ctx != Ctx::default() {
+                    repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
+                }
+                if &*c.input_name != DEFAULT_INPUT_NAME {
+                    repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
+                }
+            }
+        },
+        FuncEval::Const(eval) => {
+            repr.insert(symbol(CALLER_ACCESS), symbol(CONST));
+            match eval {
+                CtxConstEval::Primitive(p) => {
+                    repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                }
+                CtxConstEval::Composed(c) => {
+                    repr.insert(symbol(BODY), c.body.clone());
+                    if c.ctx != Ctx::default() {
+                        repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
+                    }
+                    if &*c.input_name != DEFAULT_INPUT_NAME {
+                        repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
+                    }
+                    if &*c.caller.name != DEFAULT_CALLER_NAME {
+                        repr.insert(symbol(CALLER_NAME), Val::Symbol(c.caller.name.clone()));
+                    }
+                }
+            }
+        }
+        FuncEval::Mutable(eval) => {
+            repr.insert(symbol(CALLER_ACCESS), symbol(MUTABLE));
+            match eval {
+                CtxMutableEval::Primitive(p) => {
+                    repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                }
+                CtxMutableEval::Composed(c) => {
+                    repr.insert(symbol(BODY), c.body.clone());
+                    if c.ctx != Ctx::default() {
+                        repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
+                    }
+                    if &*c.input_name != DEFAULT_INPUT_NAME {
+                        repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
+                    }
+                    if &*c.caller.name != DEFAULT_CALLER_NAME {
+                        repr.insert(symbol(CALLER_NAME), Val::Symbol(c.caller.name.clone()));
+                    }
+                }
+            }
+        }
+    }
+    Val::Map(repr)
 }
 
 pub(crate) fn func_access() -> PrimitiveFunc<CtxConstFn> {
@@ -314,9 +406,9 @@ fn fn_func_access(ctx: CtxForConstFn, input: Val) -> Val {
             return Val::default();
         };
         let access = match &func.evaluator {
-            FuncEval::Free(_) => "free",
-            FuncEval::Const(_) => "constant",
-            FuncEval::Mutable(_) => "mutable",
+            FuncEval::Free(_) => FREE,
+            FuncEval::Const(_) => CONST,
+            FuncEval::Mutable(_) => MUTABLE,
         };
         Val::Symbol(Symbol::from_str(access))
     })

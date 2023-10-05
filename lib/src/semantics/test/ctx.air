@@ -362,6 +362,18 @@ is_local a
 # ---
 1
 # ===
+context_represent (context {})
+# ---
+{}
+# ===
+context_represent (context {map : {a : 1}, super : (value b)})
+# ---
+{map : {a : 1}, super : b}
+# ===
+;[a = (context_represent (context {map : {b : (context {})}})), map = (a map_remove map), b = (map map_remove b), type_of b]
+# ---
+context
+# ===
 ;[
     a = (context {map : {b : (context {map : {c : 1}})}}),
     a set_super b,

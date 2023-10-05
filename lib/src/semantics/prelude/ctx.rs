@@ -30,7 +30,10 @@ use crate::{
         },
         prelude::{
             names,
-            utils::map_remove,
+            utils::{
+                map_remove,
+                symbol,
+            },
             PrimitiveFunc,
         },
         val::{
@@ -385,6 +388,13 @@ where
     }
 }
 
+const MAP: &str = "map";
+const SUPER: &str = "super";
+
+const VARIABLE: &str = "variable";
+const FINAL: &str = "final";
+const CONST: &str = "constant";
+
 pub(crate) fn ctx_new() -> PrimitiveFunc<CtxFreeFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::CTX_NEW, fn_ctx_new);
@@ -396,7 +406,7 @@ fn fn_ctx_new(input: Val) -> Val {
         return Val::default();
     };
 
-    let name_map_repr = match map_remove(&mut map, "map") {
+    let name_map_repr = match map_remove(&mut map, MAP) {
         Val::Map(name_map) => name_map,
         Val::Unit(_) => MapVal::default(),
         _ => return Val::default(),
@@ -414,9 +424,9 @@ fn fn_ctx_new(input: Val) -> Val {
             };
             let val = pair.first;
             let tag = match &*tag {
-                "variable" => InvariantTag::None,
-                "final" => InvariantTag::Final,
-                "constant" => InvariantTag::Const,
+                VARIABLE => InvariantTag::None,
+                FINAL => InvariantTag::Final,
+                CONST => InvariantTag::Const,
                 _ => return Val::default(),
             };
             TaggedVal { val, tag }
@@ -426,7 +436,7 @@ fn fn_ctx_new(input: Val) -> Val {
         name_map.insert(name, tagged_val);
     }
 
-    let super_ctx = match map_remove(&mut map, "super") {
+    let super_ctx = match map_remove(&mut map, SUPER) {
         Val::Symbol(s) => Some(s),
         _ => None,
     };
@@ -435,6 +445,51 @@ fn fn_ctx_new(input: Val) -> Val {
         name_map,
         super_ctx,
     })))
+}
+
+pub(crate) fn ctx_repr() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
+    let primitive = Primitive::<CtxFreeFn>::new(names::CTX_REPR, fn_ctx_repr);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_ctx_repr(input: Val) -> Val {
+    let Val::Ctx(CtxVal(ctx)) = input else {
+        return Val::default();
+    };
+    let mut repr = MapVal::default();
+
+    if let Some(name) = ctx.super_ctx {
+        repr.insert(symbol(SUPER), Val::Symbol(name));
+    }
+
+    if !ctx.name_map.is_empty() {
+        let map = ctx
+            .name_map
+            .into_iter()
+            .map(|(k, v)| {
+                let k = Val::Symbol(k);
+                let v = if let Val::Pair(_) = v.val {
+                    let tag = match v.tag {
+                        InvariantTag::None => VARIABLE,
+                        InvariantTag::Final => FINAL,
+                        InvariantTag::Const => CONST,
+                    };
+                    Val::Pair(Box::new(Pair::new(v.val, symbol(tag))))
+                } else {
+                    match v.tag {
+                        InvariantTag::None => v.val,
+                        InvariantTag::Final => Val::Pair(Box::new(Pair::new(v.val, symbol(FINAL)))),
+                        InvariantTag::Const => Val::Pair(Box::new(Pair::new(v.val, symbol(CONST)))),
+                    }
+                };
+                (k, v)
+            })
+            .collect();
+        repr.insert(symbol(MAP), Val::Map(map));
+    }
+
+    Val::Map(repr)
 }
 
 pub(crate) fn ctx_set_super() -> PrimitiveFunc<CtxMutableFn> {
