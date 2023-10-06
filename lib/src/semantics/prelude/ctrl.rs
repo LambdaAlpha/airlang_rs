@@ -1,27 +1,30 @@
-use crate::semantics::{
-    ctx_access::{
-        free::FreeCtx,
-        CtxAccessor,
-    },
-    eval::Evaluator,
-    eval_mode::{
-        eval::{
-            Eval,
-            EvalByRef,
+use crate::{
+    semantics::{
+        ctx_access::{
+            free::FreeCtx,
+            CtxAccessor,
         },
-        BasicEvalMode,
-        EvalMode,
-        INLINE,
+        eval::Evaluator,
+        eval_mode::{
+            eval::{
+                Eval,
+                EvalByRef,
+            },
+            BasicEvalMode,
+            EvalMode,
+            INLINE,
+        },
+        func::{
+            CtxMutableFn,
+            Primitive,
+        },
+        prelude::{
+            names,
+            PrimitiveFunc,
+        },
+        val::Val,
     },
-    func::{
-        CtxMutableFn,
-        Primitive,
-    },
-    prelude::{
-        names,
-        PrimitiveFunc,
-    },
-    val::Val,
+    types::Symbol,
 };
 
 pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
@@ -42,6 +45,41 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let mut output = Val::default();
     for val in list {
         output = Eval.eval(&mut ctx, val);
+    }
+    output
+}
+
+pub(crate) fn breakable_sequence() -> PrimitiveFunc<CtxMutableFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
+        names::BREAKABLE_SEQUENCE,
+        fn_breakable_sequence::<FreeCtx>,
+        |ctx, val| fn_breakable_sequence(ctx, val),
+        |ctx, val| fn_breakable_sequence(ctx, val),
+    );
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+    let (name, list) = if let Val::Pair(pair) = input {
+        let Val::Symbol(name) = INLINE.eval(&mut ctx, pair.first) else {
+            return Val::default();
+        };
+        (name, pair.second)
+    } else {
+        (Symbol::from_str("return"), input)
+    };
+    let Val::List(list) = list else {
+        return Val::default();
+    };
+
+    let mut output = Val::default();
+    ctx.remove(&name);
+    for val in list {
+        output = Eval.eval(&mut ctx, val);
+        if let Some(val) = ctx.get_const_ref(&name) {
+            return val.clone();
+        }
     }
     output
 }

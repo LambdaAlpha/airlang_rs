@@ -10,6 +10,76 @@
 # ---
 2
 # ===
+;return [1, 2, if ['t, return = 3], 4]
+# ---
+3
+# ===
+;return [1, if ['t, ;return [2, if ['t, return = 3], return = 4]], return = 5, return]
+# ---
+3
+# ===
+;return [1, if ['t, ; [2, if ['t, return = 3], return = 4]], return = 5, return]
+# ---
+4
+# ===
+;[a = 1, a ;return [a = 2, a = 3]]
+# ---
+2
+# ===
+;[a = 1, a ;return [b = 1, a = 2, a = 3]]
+# ---
+2
+# ===
+a ;return [a = 1]
+# ---
+1
+# ===
+;[a = 1, a ;return [], is_null a]
+# ---
+'t
+# ===
+(value a) ;return [a = 1, 2]
+# ---
+1
+# ===
+;[
+    a = 0,
+    b = 0,
+    while [
+        b < 5,
+        continue ;return [
+            b = (b + 1),
+            if [
+                b == 2,
+                continue = ',
+            ],
+            a = (a + b),
+        ]
+    ],
+    a
+]
+# ---
+13
+# ===
+;return [
+    a = 0,
+    b = 0,
+    while [
+        (is_null return) and (b < 5),
+        ;return [
+            if [
+                a > 5,
+                return = a,
+            ],
+            b = (b + 1),
+            a = (a + b),
+        ]
+    ],
+    a
+]
+# ---
+6
+# ===
 if['t, 1, 2]
 # ---
 1
