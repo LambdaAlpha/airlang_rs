@@ -31,6 +31,8 @@ pub(crate) fn prelude() -> NameMap {
     prelude_ctx(&mut c);
     prelude_ctrl(&mut c);
     prelude_eval(&mut c);
+    prelude_func(&mut c);
+    prelude_call(&mut c);
     prelude_logic(&mut c);
     prelude_bool(&mut c);
     prelude_int(&mut c);
@@ -100,18 +102,24 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::eval_const());
     put_primitive_func(c, eval::is_ctx_free());
     put_primitive_func(c, eval::is_ctx_const());
-    put_primitive_func(c, eval::func_new());
-    put_primitive_func(c, eval::func_repr());
-    put_primitive_func(c, eval::func_eval_mode());
-    put_primitive_func(c, eval::func_pair_eval_mode());
-    put_primitive_func(c, eval::func_access());
-    put_primitive_func(c, eval::func_is_primitive());
-    put_primitive_func(c, eval::func_id());
-    put_primitive_func(c, eval::func_body());
-    put_primitive_func(c, eval::func_context());
-    put_primitive_func(c, eval::func_input_name());
-    put_primitive_func(c, eval::func_caller_name());
-    put_primitive_func(c, eval::chain());
+}
+
+fn prelude_func(c: &mut NameMap) {
+    put_primitive_func(c, func::func_new());
+    put_primitive_func(c, func::func_repr());
+    put_primitive_func(c, func::func_eval_mode());
+    put_primitive_func(c, func::func_pair_eval_mode());
+    put_primitive_func(c, func::func_access());
+    put_primitive_func(c, func::func_is_primitive());
+    put_primitive_func(c, func::func_id());
+    put_primitive_func(c, func::func_body());
+    put_primitive_func(c, func::func_context());
+    put_primitive_func(c, func::func_input_name());
+    put_primitive_func(c, func::func_caller_name());
+}
+
+fn prelude_call(c: &mut NameMap) {
+    put_primitive_func(c, call::chain());
 }
 
 fn prelude_logic(c: &mut NameMap) {
@@ -293,6 +301,7 @@ pub(crate) mod names {
     pub(crate) const EVAL_MUTABLE: &str = "eval_mutable";
     pub(crate) const IS_CTX_FREE: &str = "is_context_free";
     pub(crate) const IS_CTX_CONST: &str = "is_context_constant";
+
     pub(crate) const FUNC_NEW: &str = "function";
     pub(crate) const FUNC_REPR: &str = "function_represent";
     pub(crate) const FUNC_ACCESS: &str = "function_caller_access";
@@ -304,6 +313,7 @@ pub(crate) mod names {
     pub(crate) const FUNC_CTX: &str = "function_context";
     pub(crate) const FUNC_INPUT_NAME: &str = "function_input_name";
     pub(crate) const FUNC_CALLER_NAME: &str = "function_caller_name";
+
     pub(crate) const CHAIN: &str = ".";
 
     pub(crate) const LOGIC_PROP_NEW: &str = "proposition";
@@ -383,6 +393,10 @@ mod ctx;
 mod ctrl;
 
 mod eval;
+
+mod func;
+
+mod call;
 
 mod logic;
 
