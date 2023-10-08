@@ -6,7 +6,7 @@
 # ---
 '
 # ===
-;[a = 1, b = (value a), load (eval b)]
+;[a = 1, b = (value a), load ('t b)]
 # ---
 1
 # ===
@@ -34,7 +34,7 @@
 # ---
 '
 # ===
-;[a = (value b), b = 1, move (eval a)]
+;[a = (value b), b = 1, move ('t a)]
 # ---
 1
 # ===
@@ -98,7 +98,7 @@
 # ---
 1
 # ===
-;[a = (value b), (eval a) = 1, b]
+;[a = (value b), ('t a) = 1, b]
 # ---
 1
 # ===
@@ -114,11 +114,11 @@
 # ---
 [1, 2, 3]
 # ===
-;[(value (f a)) = (value (1 2)), [f, a]]
+;[(f a) = (value (1 2)), [f, a]]
 # ---
 [1, 2]
 # ===
-;[(value (a b c)) = (value (1 2 3)), [a, b, c]]
+;[(a b c) = (value (1 2 3)), [a, b, c]]
 # ---
 [1, 2, 3]
 # ===
@@ -384,7 +384,7 @@ context
 # ===
 ;[
     a = (context {map : {b : (context {map : {c : 1}})}}),
-    a = ((move a) set_super b),
+    a = (('t (move a)) set_super b),
     load [a, c]
 ]
 # ---
@@ -402,7 +402,7 @@ context
 # ---
 b
 # ===
-;[(_ : super) = (get_super (context {map : {b : (context {map : {c : 1}})}, super : (value b)})), super]
+;[(_ : super) = (get_super ('t (context {map : {b : (context {map : {c : 1}})}, super : (value b)}))), super]
 # ---
 b
 # ===

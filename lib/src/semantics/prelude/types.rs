@@ -20,7 +20,7 @@ use crate::{
 };
 
 pub(crate) fn type_of() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::TYPE_OF, fn_type_of);
     PrimitiveFunc::new(eval_mode, primitive)
 }

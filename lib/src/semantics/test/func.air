@@ -1,5 +1,5 @@
 ;[
-    f = (function (inline {
+    f = (function (value {
         body : input,
     })),
     f (not 't)
@@ -90,7 +90,7 @@ not 't
 ;[
     f = (function (value {
         body : input,
-        pair_eval_mode : (inline : eval),
+        pair_eval_mode : (quote : eval),
     })),
     a f b
 ]
@@ -100,7 +100,7 @@ a : '
 ;[
     f = (function (value {
         body : input,
-        pair_eval_mode : (inline : eval),
+        pair_eval_mode : (quote : eval),
         eval_mode : value
     })),
     f (not 'f)
@@ -230,7 +230,7 @@ not 'f
 # ---
 1
 # ===
-function_represent (function (inline {body : input}))
+function_represent (function (quote {body : input}))
 # ---
 {body : input}
 # ===
@@ -244,14 +244,14 @@ function_represent (function (value {body : input, caller_access : constant}))
 # ===
 function_represent ==
 # ---
-{id : ==, caller_access : constant, eval_mode : value, pair_eval_mode : (inline : inline)}
+{id : ==, caller_access : constant, eval_mode : value, pair_eval_mode : (quote : quote)}
 # ===
 function_represent (function (value {
     body : i,
     input_name : i,
     caller_name : c,
     eval_mode : value,
-    pair_eval_mode : (inline : quote),
+    pair_eval_mode : (quote : quote),
     caller_access : mutable,
 }))
 # ---
@@ -260,7 +260,7 @@ function_represent (function (value {
     input_name : i,
     caller_name : c,
     eval_mode : value,
-    pair_eval_mode : (inline : quote),
+    pair_eval_mode : (quote : quote),
     caller_access : mutable,
 }
 # ===
@@ -290,7 +290,7 @@ value
 # ===
 function_eval_mode function_eval_mode
 # ---
-inline
+quote
 # ===
 ;[f = (function (value {body : input})), function_eval_mode f]
 # ---
@@ -335,7 +335,7 @@ function_body not
 ;[
     ctx = (context {map : {a : 1}}),
     f = (function {body : (value input), context : ctx}),
-    (function_context f) == ctx
+    ('t (function_context f)) == ctx
 ]
 # ---
 't

@@ -22,7 +22,6 @@ use crate::{
             eval::Eval,
             BasicEvalMode,
             EvalMode,
-            INLINE,
             QUOTE,
         },
         func::{
@@ -77,16 +76,6 @@ fn fn_eval_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
     QUOTE.eval(&mut ctx, input)
 }
 
-pub(crate) fn eval_inline() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::INLINE, fn_eval_inline);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_eval_inline(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    INLINE.eval(&mut ctx, input)
-}
-
 pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::basic(BasicEvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
@@ -132,7 +121,7 @@ fn fn_eval_free(input: Val) -> Val {
 
 pub(crate) fn eval_const() -> PrimitiveFunc<CtxConstFn> {
     let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Quote)),
+        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Quote)),
         default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxConstFn>::new(names::EVAL_CONST, fn_eval_const);
@@ -145,7 +134,7 @@ fn fn_eval_const(ctx: CtxForConstFn, input: Val) -> Val {
 
 pub(crate) fn eval_mutable() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Quote)),
+        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Quote)),
         default: BasicEvalMode::Value,
     };
     let primitive =

@@ -30,27 +30,7 @@ quote ('f ('f a))
 # ---
 'f a
 # ===
-inline a
-# ---
-a
-# ===
-inline (eval a)
-# ---
-'
-# ===
-inline 1
-# ---
-1
-# ===
-inline (not 'f)
-# ---
-'t
-# ===
-inline [1, a, not 'f]
-# ---
-[1, a, 't]
-# ===
-eval {: a, (not 't) : c, (value (not 'f)) : (not 'f)}
+eval {: a, ('t (not 't)) : c, : (not 'f)}
 # ---
 {a, 'f, (not 'f) : 't}
 # ===
@@ -58,7 +38,7 @@ eval {{a : b} : {c : d}}
 # ---
 {{a : b} : {c}}
 # ===
-eval {(not 'f) : a}
+eval {('t (not 'f)) : a}
 # ---
 {'t}
 # ===
@@ -102,7 +82,7 @@ eval_free (('t get_1) (1 : 2))
 # ---
 1
 # ===
-;[(_ : a) = ((context {map : {a : 1, : =}}) eval_mutable (a = 2)), a]
+;[(_ : a) = (('t (context {map : {a : 1, : =}})) eval_mutable (a = 2)), a]
 # ---
 1
 # ===
@@ -118,7 +98,7 @@ eval_free (('t get_1) (1 : 2))
 # ---
 1
 # ===
-;[constant = (value constant), (_ : a) = ((context {map : {: =, b : (1 : constant)}}) eval_constant b), a]
+;[constant = (value constant), (_ : a) = (('t (context {map : {: =, b : (1 : constant)}})) eval_constant b), a]
 # ---
 1
 # ===
@@ -170,7 +150,7 @@ is_context_free {value : {a : 1, 1 : "a"}}
 # ---
 't
 # ===
-is_context_free {value : {(eval a) : 1, 1 : "a"}}
+is_context_free {value : {('f ('t a)) : 1, 1 : "a"}}
 # ---
 'f
 # ===
@@ -193,14 +173,6 @@ is_context_free {value : (('t get_1) 1)}
 is_context_free {value : a, eval_mode : value}
 # ---
 't
-# ===
-is_context_free {value : [a, ('t not) 't], eval_mode : inline}
-# ---
-'t
-# ===
-is_context_free {value : [eval a], eval_mode : inline}
-# ---
-'f
 # ===
 is_context_free {value : ('f ('t a)), eval_mode : quote}
 # ---
@@ -234,7 +206,7 @@ is_context_constant {value : [1, move a]}
 # ---
 'f
 # ===
-is_context_constant {value : {a : 1, (move a) : a}}
+is_context_constant {value : {a : 1, ('f ('t (move a))) : a}}
 # ---
 'f
 # ===
@@ -271,14 +243,6 @@ is_context_constant {value : (f (move a))}
 'f
 # ===
 is_context_constant {value : (move a), eval_mode : value}
-# ---
-'t
-# ===
-is_context_constant {value : (('t move) a), eval_mode : inline}
-# ---
-'f
-# ===
-is_context_constant {value : (('t value) a), eval_mode : inline}
 # ---
 't
 # ===

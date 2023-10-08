@@ -12,7 +12,7 @@ use crate::{
             },
             BasicEvalMode,
             EvalMode,
-            INLINE,
+            QUOTE,
         },
         func::{
             CtxMutableFn,
@@ -62,7 +62,7 @@ pub(crate) fn breakable_sequence() -> PrimitiveFunc<CtxMutableFn> {
 
 fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let (name, list) = if let Val::Pair(pair) = input {
-        let Val::Symbol(name) = INLINE.eval(&mut ctx, pair.first) else {
+        let Val::Symbol(name) = QUOTE.eval(&mut ctx, pair.first) else {
             return Val::default();
         };
         (name, pair.second)
@@ -146,7 +146,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
-            let k = INLINE.eval(&mut ctx, k);
+            let k = QUOTE.eval(&mut ctx, k);
             if k == to_match {
                 Some(v)
             } else {

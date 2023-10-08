@@ -52,7 +52,6 @@ fn parse_basic_eval_mode(val: Val) -> Option<BasicEvalMode> {
         names::VALUE => BasicEvalMode::Value,
         names::EVAL => BasicEvalMode::Eval,
         names::QUOTE => BasicEvalMode::Quote,
-        names::INLINE => BasicEvalMode::Inline,
         _ => return None,
     };
     Some(eval_mode)
@@ -63,7 +62,6 @@ pub(crate) fn basic_eval_mode_to_symbol(eval_mode: BasicEvalMode) -> Symbol {
         BasicEvalMode::Value => names::VALUE,
         BasicEvalMode::Eval => names::EVAL,
         BasicEvalMode::Quote => names::QUOTE,
-        BasicEvalMode::Inline => names::INLINE,
     };
     Symbol::from_str(str)
 }

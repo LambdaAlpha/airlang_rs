@@ -50,7 +50,7 @@
 # ---
 {a : 1} : 't
 # ===
-;[b = (value a), {a : 1} map_contains (eval b)]
+;[b = (value a), {a : 1} map_contains ('t b)]
 # ---
 {a : 1} : 't
 # ===

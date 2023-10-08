@@ -18,16 +18,16 @@ use crate::{
                 Value,
                 ValueByRef,
             },
-            INLINE,
-            INLINE_BY_REF,
-            INLINE_CONST,
-            INLINE_CONST_BY_REF,
-            INLINE_CONST_CHECKER,
-            INLINE_CONST_CHECKER_BY_REF,
-            INLINE_FREE,
-            INLINE_FREE_BY_REF,
-            INLINE_FREE_CHECKER,
-            INLINE_FREE_CHECKER_BY_REF,
+            QUOTE,
+            QUOTE_BY_REF,
+            QUOTE_CONST,
+            QUOTE_CONST_BY_REF,
+            QUOTE_CONST_CHECKER,
+            QUOTE_CONST_CHECKER_BY_REF,
+            QUOTE_FREE,
+            QUOTE_FREE_BY_REF,
+            QUOTE_FREE_CHECKER,
+            QUOTE_FREE_CHECKER_BY_REF,
         },
         val::{
             FuncVal,
@@ -73,7 +73,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE.eval(ctx, k);
+            let key = QUOTE.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -129,7 +129,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_BY_REF.eval(ctx, k);
+            let key = QUOTE_BY_REF.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -185,7 +185,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Option<Val> {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_FREE.eval(ctx, k);
+            let key = QUOTE_FREE.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -244,7 +244,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Option<Val> {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_FREE_BY_REF.eval(ctx, k);
+            let key = QUOTE_FREE_BY_REF.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -303,7 +303,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Option<Val> {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_CONST.eval(ctx, k);
+            let key = QUOTE_CONST.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -362,7 +362,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Option<Val> {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_CONST_BY_REF.eval(ctx, k);
+            let key = QUOTE_CONST_BY_REF.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -421,7 +421,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> bool {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_FREE_CHECKER.eval(ctx, k);
+            let key = QUOTE_FREE_CHECKER.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -480,7 +480,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> bool {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_FREE_CHECKER_BY_REF.eval(ctx, k);
+            let key = QUOTE_FREE_CHECKER_BY_REF.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -539,7 +539,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> bool {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_CONST_CHECKER.eval(ctx, k);
+            let key = QUOTE_CONST_CHECKER.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });
@@ -598,7 +598,7 @@ where
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> bool {
         let map = map.into_iter().map(|(k, v)| {
-            let key = INLINE_CONST_CHECKER_BY_REF.eval(ctx, k);
+            let key = QUOTE_CONST_CHECKER_BY_REF.eval(ctx, k);
             let value = self.eval(ctx, v);
             (key, value)
         });

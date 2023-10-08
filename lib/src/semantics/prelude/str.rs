@@ -21,7 +21,7 @@ use crate::{
 };
 
 pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::STR_LENGTH, fn_length);
     PrimitiveFunc::new(eval_mode, primitive)
 }

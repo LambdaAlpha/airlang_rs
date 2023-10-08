@@ -88,7 +88,7 @@ fn fn_or(input: Val) -> Val {
 pub(crate) fn equal() -> PrimitiveFunc<CtxConstFn> {
     let eval_mode = EvalMode {
         default: BasicEvalMode::Value,
-        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Quote)),
     };
     let primitive = Primitive::<CtxConstFn>::new(names::EQUAL, fn_equal);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -106,7 +106,7 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
 pub(crate) fn not_equal() -> PrimitiveFunc<CtxConstFn> {
     let eval_mode = EvalMode {
         default: BasicEvalMode::Value,
-        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Inline)),
+        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Quote)),
     };
     let primitive = Primitive::<CtxConstFn>::new(names::NOT_EQUAL, fn_not_equal);
     PrimitiveFunc::new(eval_mode, primitive)

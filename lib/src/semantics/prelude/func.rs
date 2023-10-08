@@ -197,7 +197,7 @@ fn fn_func_repr(input: Val) -> Val {
 }
 
 pub(crate) fn func_access() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_ACCESS, fn_func_access);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -217,7 +217,7 @@ fn fn_func_access(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_eval_mode() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_EVAL_MODE, fn_func_eval_mode);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -233,7 +233,7 @@ fn fn_func_eval_mode(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_pair_eval_mode() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive =
         Primitive::<CtxConstFn>::new(names::FUNC_PAIR_EVAL_MODE, fn_func_pair_eval_mode);
     PrimitiveFunc::new(eval_mode, primitive)
@@ -260,7 +260,7 @@ fn fn_func_pair_eval_mode(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_is_primitive() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_IS_PRIMITIVE, fn_func_is_primitive);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -276,7 +276,7 @@ fn fn_func_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_id() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_ID, fn_func_id);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -294,7 +294,7 @@ fn fn_func_id(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_body() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_BODY, fn_func_body);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -312,7 +312,7 @@ fn fn_func_body(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_context() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_CTX, fn_func_context);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -330,7 +330,7 @@ fn fn_func_context(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_input_name() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_INPUT_NAME, fn_func_input_name);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -348,7 +348,7 @@ fn fn_func_input_name(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn func_caller_name() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::FUNC_CALLER_NAME, fn_func_caller_name);
     PrimitiveFunc::new(eval_mode, primitive)
 }

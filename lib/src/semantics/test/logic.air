@@ -80,7 +80,7 @@
         input : 1,
         output : 2,
     }),
-    (proposition_function p) == not
+    ('t (proposition_function p)) == not
 ]
 # ---
 't
@@ -91,7 +91,7 @@
         input : 't,
         output : 'f,
     },
-    map == (proposition_represent (proposition map))
+    map == ('t (proposition_represent (proposition map)))
 ]
 # ---
 't
@@ -103,7 +103,7 @@
         output : 'f,
         context : (context {}),
     },
-    map == (proposition_represent (proposition map))
+    map == ('t (proposition_represent (proposition map)))
 ]
 # ---
 't
@@ -116,7 +116,7 @@
         before : (context {}),
         after : (context {}),
     },
-    map == (proposition_represent (proposition map))
+    map == ('t (proposition_represent (proposition map)))
 ]
 # ---
 't
@@ -146,7 +146,7 @@
         function : not,
         input : 't,
     }),
-    (proposition_function t) == not
+    ('t (proposition_function t)) == not
 ]
 # ---
 't

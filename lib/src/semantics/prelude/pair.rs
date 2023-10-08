@@ -27,7 +27,7 @@ use {
 };
 
 pub(crate) fn first() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::PAIR_FIRST, fn_first);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -47,7 +47,7 @@ fn fn_first(mut ctx: CtxForConstFn, input: Val) -> Val {
 
 pub(crate) fn first_assign() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
         default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxMutableFn>::new(names::PAIR_FIRST_ASSIGN, fn_first_assign);
@@ -73,7 +73,7 @@ fn fn_first_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn second() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Inline);
+    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
     let primitive = Primitive::<CtxConstFn>::new(names::PAIR_SECOND, fn_second);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -93,7 +93,7 @@ fn fn_second(mut ctx: CtxForConstFn, input: Val) -> Val {
 
 pub(crate) fn second_assign() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Inline, BasicEvalMode::Eval)),
+        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
         default: BasicEvalMode::Value,
     };
     let primitive = Primitive::<CtxMutableFn>::new(names::PAIR_SECOND_ASSIGN, fn_second_assign);
