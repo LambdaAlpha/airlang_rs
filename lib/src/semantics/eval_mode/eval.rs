@@ -81,10 +81,14 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        let Val::Func(FuncVal(func)) = self.eval(ctx, func) else {
-            return Val::default();
-        };
-        func.eval(ctx, input)
+        let func = self.eval(ctx, func);
+        if let Val::Func(FuncVal(func)) = func {
+            let input = func.input_eval_mode.eval(ctx, input);
+            func.eval(ctx, input)
+        } else {
+            let input = self.eval(ctx, input);
+            ValBuilder.from_call(func, input)
+        }
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
@@ -133,10 +137,14 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
-        let Val::Func(FuncVal(func)) = self.eval(ctx, func) else {
-            return Val::default();
-        };
-        func.eval(ctx, input.clone())
+        let func = self.eval(ctx, func);
+        if let Val::Func(FuncVal(func)) = func {
+            let input = func.input_eval_mode.eval(ctx, input);
+            func.eval(ctx, input)
+        } else {
+            let input = self.eval(ctx, input);
+            ValBuilder.from_call(func, input)
+        }
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
@@ -185,14 +193,17 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Option<Val> {
-        let Val::Func(FuncVal(func)) = self.eval(ctx, func)? else {
-            return Some(Val::default());
-        };
-        if !func.is_ctx_free() {
-            return None;
+        let func = self.eval(ctx, func)?;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_free() {
+                return None;
+            }
+            let input = func.input_eval_mode.eval_free(ctx, input)?;
+            Some(func.eval(ctx, input))
+        } else {
+            let input = self.eval(ctx, input)?;
+            Some(ValBuilder.from_call(func, input))
         }
-        let input = func.input_eval_mode.eval_free(ctx, input)?;
-        Some(func.eval(ctx, input))
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Option<Val> {
@@ -241,14 +252,17 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Option<Val> {
-        let Val::Func(FuncVal(func)) = self.eval(ctx, func)? else {
-            return Some(Val::default());
-        };
-        if !func.is_ctx_free() {
-            return None;
+        let func = self.eval(ctx, func)?;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_free() {
+                return None;
+            }
+            let input = func.input_eval_mode.eval_free_by_ref(ctx, input)?;
+            Some(func.eval(ctx, input))
+        } else {
+            let input = self.eval(ctx, input)?;
+            Some(ValBuilder.from_call(func, input))
         }
-        let input = func.input_eval_mode.eval_free_by_ref(ctx, input)?;
-        Some(func.eval(ctx, input))
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Option<Val> {
@@ -297,14 +311,17 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Option<Val> {
-        let Val::Func(FuncVal(func)) = self.eval(ctx, func)? else {
-            return Some(Val::default());
-        };
-        if !func.is_ctx_const() {
-            return None;
+        let func = self.eval(ctx, func)?;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_const() {
+                return None;
+            }
+            let input = func.input_eval_mode.eval_const(ctx, input)?;
+            Some(func.eval(ctx, input))
+        } else {
+            let input = self.eval(ctx, input)?;
+            Some(ValBuilder.from_call(func, input))
         }
-        let input = func.input_eval_mode.eval_const(ctx, input)?;
-        Some(func.eval(ctx, input))
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Option<Val> {
@@ -353,14 +370,17 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Option<Val> {
-        let Val::Func(FuncVal(func)) = self.eval(ctx, func)? else {
-            return Some(Val::default());
-        };
-        if !func.is_ctx_const() {
-            return None;
+        let func = self.eval(ctx, func)?;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_const() {
+                return None;
+            }
+            let input = func.input_eval_mode.eval_const_by_ref(ctx, input)?;
+            Some(func.eval(ctx, input))
+        } else {
+            let input = self.eval(ctx, input)?;
+            Some(ValBuilder.from_call(func, input))
         }
-        let input = func.input_eval_mode.eval_const_by_ref(ctx, input)?;
-        Some(func.eval(ctx, input))
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Option<Val> {
@@ -412,13 +432,14 @@ where
         let Some(func) = EvalFree.eval(ctx, func) else {
             return false;
         };
-        let Val::Func(FuncVal(func)) = func else {
-            return true;
-        };
-        if !func.is_ctx_free() {
-            return false;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_free() {
+                return false;
+            }
+            func.input_eval_mode.is_free(ctx, input)
+        } else {
+            self.eval(ctx, input)
         }
-        func.input_eval_mode.is_free(ctx, input)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> bool {
@@ -470,13 +491,14 @@ where
         let Some(func) = EvalFreeByRef.eval(ctx, func) else {
             return false;
         };
-        let Val::Func(FuncVal(func)) = func else {
-            return true;
-        };
-        if !func.is_ctx_free() {
-            return false;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_free() {
+                return false;
+            }
+            func.input_eval_mode.is_free_by_ref(ctx, input)
+        } else {
+            self.eval(ctx, input)
         }
-        func.input_eval_mode.is_free_by_ref(ctx, input)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> bool {
@@ -528,13 +550,14 @@ where
         let Some(func) = EvalConst.eval(ctx, func) else {
             return false;
         };
-        let Val::Func(FuncVal(func)) = func else {
-            return true;
-        };
-        if !func.is_ctx_const() {
-            return false;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_const() {
+                return false;
+            }
+            func.input_eval_mode.is_const(ctx, input)
+        } else {
+            self.eval(ctx, input)
         }
-        func.input_eval_mode.is_const(ctx, input)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> bool {
@@ -586,13 +609,14 @@ where
         let Some(func) = EvalConstByRef.eval(ctx, func) else {
             return false;
         };
-        let Val::Func(FuncVal(func)) = func else {
-            return true;
-        };
-        if !func.is_ctx_const() {
-            return false;
+        if let Val::Func(FuncVal(func)) = func {
+            if !func.is_ctx_const() {
+                return false;
+            }
+            func.input_eval_mode.is_const_by_ref(ctx, input)
+        } else {
+            self.eval(ctx, input)
         }
-        func.input_eval_mode.is_const_by_ref(ctx, input)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> bool {

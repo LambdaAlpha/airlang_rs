@@ -234,7 +234,6 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        let input = self.input_eval_mode.eval(ctx, input);
         self.evaluator.eval(ctx, input)
     }
 }
