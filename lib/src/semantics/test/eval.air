@@ -10,13 +10,25 @@ quote [a, f a, a : b, f ? a, {a : b}]
 # ---
 [a, f a, a : b, f ? a, {a : b}]
 # ===
-quote {a : b, c : (' (not 'f))}
+quote {a : b, c : ('t (not 'f))}
 # ---
 {a : b, c : 't}
 # ===
-quote [a, b : [' (not 't)]]
+quote [a, b : ['t (not 't)]]
 # ---
 [a, b : ['f]]
+# ===
+quote ('f a)
+# ---
+a
+# ===
+quote ('f ('t (not 't)))
+# ---
+'t (not 't)
+# ===
+quote ('f ('f a))
+# ---
+'f a
 # ===
 inline a
 # ---
@@ -74,7 +86,7 @@ eval {a : (eval {b : c})}
 # ---
 1
 # ===
-eval_free (1 (' +) 1)
+eval_free (1 ('t +) 1)
 # ---
 2
 # ===
@@ -82,11 +94,11 @@ eval_free (1 (' +) 1)
 # ---
 '
 # ===
-eval_free ((' ;) [a (' =) 1, a])
+eval_free (('t ;) [a ('t =) 1, a])
 # ---
 '
 # ===
-eval_free ((' get_1) (1 : 2))
+eval_free (('t get_1) (1 : 2))
 # ---
 1
 # ===
@@ -166,15 +178,15 @@ is_context_free {value : (f 1)}
 # ---
 'f
 # ===
-is_context_free {value : ((' not) 't)}
+is_context_free {value : (('t not) 't)}
 # ---
 't
 # ===
-is_context_free {value : ((' not) a)}
+is_context_free {value : (('t not) a)}
 # ---
 'f
 # ===
-is_context_free {value : ((' get_1) 1)}
+is_context_free {value : (('t get_1) 1)}
 # ---
 'f
 # ===
@@ -182,7 +194,7 @@ is_context_free {value : a, eval_mode : value}
 # ---
 't
 # ===
-is_context_free {value : [a, (' not) 't], eval_mode : inline}
+is_context_free {value : [a, ('t not) 't], eval_mode : inline}
 # ---
 't
 # ===
@@ -190,11 +202,11 @@ is_context_free {value : [eval a], eval_mode : inline}
 # ---
 'f
 # ===
-is_context_free {value : ((' ') a), eval_mode : quote}
+is_context_free {value : ('f ('t a)), eval_mode : quote}
 # ---
 'f
 # ===
-is_context_free {value : [a, ((' ') 1)], eval_mode : quote}
+is_context_free {value : [a, ('f ('t 1))], eval_mode : quote}
 # ---
 't
 # ===
@@ -262,19 +274,19 @@ is_context_constant {value : (move a), eval_mode : value}
 # ---
 't
 # ===
-is_context_constant {value : ((' move) a), eval_mode : inline}
+is_context_constant {value : (('t move) a), eval_mode : inline}
 # ---
 'f
 # ===
-is_context_constant {value : ((' value) a), eval_mode : inline}
+is_context_constant {value : (('t value) a), eval_mode : inline}
 # ---
 't
 # ===
-is_context_constant {value : ((' ') (move a)), eval_mode : quote}
+is_context_constant {value : ('f ('t (move a))), eval_mode : quote}
 # ---
 'f
 # ===
-is_context_constant {value : [move a, (' ') a], eval_mode : quote}
+is_context_constant {value : [move a, 'f ('t a)], eval_mode : quote}
 # ---
 't
 # ===

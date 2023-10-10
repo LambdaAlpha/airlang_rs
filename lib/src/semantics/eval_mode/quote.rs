@@ -66,10 +66,14 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Output {
-        if let Val::Unit(_) = &func {
-            return self.eval.eval(ctx, input);
+        let Val::Bool(b) = &func else {
+            return DefaultByVal::eval_call(self, ctx, func, input, &self.builder);
+        };
+        if b.bool() {
+            self.eval.eval(ctx, input)
+        } else {
+            self.value.eval(ctx, input)
         }
-        DefaultByVal::eval_call(self, ctx, func, input, &self.builder)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Output {
@@ -125,10 +129,14 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Output {
-        if let Val::Unit(_) = &func {
-            return self.eval.eval(ctx, input);
+        let Val::Bool(b) = &func else {
+            return DefaultByRef::eval_call(self, ctx, func, input, &self.builder);
+        };
+        if b.bool() {
+            self.eval.eval(ctx, input)
+        } else {
+            self.value.eval(ctx, input)
         }
-        DefaultByRef::eval_call(self, ctx, func, input, &self.builder)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Output {

@@ -9,7 +9,7 @@
 # ===
 ;[
     f = (function (quote {
-        body : ((' not) input)
+        body : (('t not) input)
     })),
     f (not 't)
 ]
@@ -49,7 +49,7 @@ not 't
 # ===
 ;[
     f = (function (quote {
-        body : ((' not) input),
+        body : (('t not) input),
         eval_mode : eval,
     })),
     f (not 't)
@@ -72,7 +72,7 @@ not 't
         body : input,
         eval_mode : quote,
     })),
-    f (' (not 't))
+    f ('t (not 't))
 ]
 # ---
 'f
@@ -113,7 +113,7 @@ not 'f
         body : (;[[] set_super caller, eval_2 input]),
         eval_mode : value,
         caller_access : mutable,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : ;,
             : eval_2,
             : set_super,
@@ -131,7 +131,7 @@ not 'f
     f = (function (quote {
         body : (caller eval_constant a),
         caller_access : free,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_constant,
         }}))
     })),
@@ -145,7 +145,7 @@ not 'f
     f = (function (quote {
         body : (caller eval_constant a),
         caller_access : constant,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_constant,
         }}))
     })),
@@ -159,7 +159,7 @@ not 'f
     f = (function (quote {
         body : (caller eval_constant a),
         caller_access : mutable,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_constant,
         }}))
     })),
@@ -173,7 +173,7 @@ not 'f
     f = (function (quote {
         body : (caller eval_mutable a),
         caller_access : constant,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_mutable,
         }}))
     })),
@@ -184,10 +184,10 @@ not 'f
 # ===
 ;[
     f = (function (quote {
-        body : (caller eval_mutable (((' ')input) = 2)),
+        body : (caller eval_mutable (('f ('t input)) = 2)),
         eval_mode : value,
         caller_access : mutable,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_mutable,
         }}))
     })),
@@ -200,10 +200,10 @@ not 'f
 # ===
 ;[
     f = (function (quote {
-        body : (caller eval_mutable (((' ') input) = 2)),
+        body : (caller eval_mutable (('f ('t input)) = 2)),
         eval_mode : value,
         caller_access : mutable,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_mutable,
         }}))
     })),
@@ -216,10 +216,10 @@ not 'f
 # ===
 ;[
     f = (function (quote {
-        body : (caller eval_mutable (((' ') input) = 2)),
+        body : (caller eval_mutable (('f ('t input)) = 2)),
         eval_mode : value,
         caller_access : constant,
-        context : (' (context {map : {
+        context : ('t (context {map : {
             : eval_mutable,
         }}))
     })),

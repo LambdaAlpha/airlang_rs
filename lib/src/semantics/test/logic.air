@@ -164,7 +164,7 @@
 ;[
     t = (theorem {
         function : eval,
-        input : (quote ((' not) 't)),
+        input : (quote (('t not) 't)),
         before : (context {}),
     }),
     proposition_output t
@@ -195,7 +195,7 @@
         before : (context {})
     }),
     ctx = (proposition_before t),
-    ctx eval_constant ((' is_null) a)
+    ctx eval_constant (('t is_null) a)
 ]
 # ---
 't
@@ -207,7 +207,7 @@
         before : (context {})
     }),
     ctx = (proposition_after t),
-    ctx eval_constant ((' is_null) a)
+    ctx eval_constant (('t is_null) a)
 ]
 # ---
 'f
