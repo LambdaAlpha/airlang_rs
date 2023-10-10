@@ -46,7 +46,7 @@ not 'f
 # ---
 't
 # ===
-(value a) == (value a)
+('' a) == ('' a)
 # ---
 't
 # ===
@@ -66,7 +66,7 @@ not 'f
 # ---
 't
 # ===
-(value (f a)) == (value (f a))
+('' (f a)) == ('' (f a))
 # ---
 't
 # ===
@@ -82,11 +82,11 @@ not 'f
 # ---
 't
 # ===
-(proposition {input : 1, output : 1, access : (value free)}) == (proposition {input : 1, output : 1, access : (value free)})
+(proposition {input : 1, output : 1, access : ('' free)}) == (proposition {input : 1, output : 1, access : ('' free)})
 # ---
 't
 # ===
-(theorem {input : 1, access : (value free)}) == (theorem {input : 1, access : (value free)})
+(theorem {input : 1, access : ('' free)}) == (theorem {input : 1, access : ('' free)})
 # ---
 't
 # ===

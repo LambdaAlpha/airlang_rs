@@ -6,7 +6,7 @@
 # ---
 '
 # ===
-;[a = 1, b = (value a), load ('t b)]
+;[a = 1, b = ('' a), load ('t b)]
 # ---
 1
 # ===
@@ -34,7 +34,7 @@
 # ---
 '
 # ===
-;[a = (value b), b = 1, move ('t a)]
+;[a = ('' b), b = 1, move ('t a)]
 # ---
 1
 # ===
@@ -98,7 +98,7 @@
 # ---
 1
 # ===
-;[a = (value b), ('t a) = 1, b]
+;[a = ('' b), ('t a) = 1, b]
 # ---
 1
 # ===
@@ -114,11 +114,11 @@
 # ---
 [1, 2, 3]
 # ===
-;[(f a) = (value (1 2)), [f, a]]
+;[(f a) = ('' (1 2)), [f, a]]
 # ---
 [1, 2]
 # ===
-;[(a b c) = (value (1 2 3)), [a, b, c]]
+;[(a b c) = ('' (1 2 3)), [a, b, c]]
 # ---
 [1, 2, 3]
 # ===
@@ -250,7 +250,7 @@ is_final a
 # ---
 't
 # ===
-;[final = (value final), a = (context {map : {b : (1 : final)}}), is_final [a, b]]
+;[final = ('' final), a = (context {map : {b : (1 : final)}}), is_final [a, b]]
 # ---
 't
 # ===
@@ -270,7 +270,7 @@ is_constant a
 # ---
 't
 # ===
-;[constant = (value constant), a = (context {map : {b : (1 : constant)}}), is_constant [a, b]]
+;[constant = ('' constant), a = (context {map : {b : (1 : constant)}}), is_constant [a, b]]
 # ---
 't
 # ===
@@ -310,15 +310,15 @@ is_local a
 # ---
 'f
 # ===
-;[a = (context {map : {b : 1, : ;, : =}}), a eval_mutable (;[b = 2, b])]
+;[a = (context {map : {b : 1, : ;, : =}}), a $mutable (;[b = 2, b])]
 # ---
 2
 # ===
-;[final = (value final), a = (context {map : {b : (1 : final), : ;, : =}}), a eval_mutable (;[b = 2, b])]
+;[final = ('' final), a = (context {map : {b : (1 : final), : ;, : =}}), a $mutable (;[b = 2, b])]
 # ---
 1
 # ===
-;[constant = (value constant), a = (context {map : {b : (1 : 2 : constant), : ;, : set_1}}), a eval_mutable (;[b set_1 3, b])]
+;[constant = ('' constant), a = (context {map : {b : (1 : 2 : constant), : ;, : set_1}}), a $mutable (;[b set_1 3, b])]
 # ---
 1 : 2
 # ===
@@ -338,7 +338,7 @@ is_local a
 # ---
 2 : '
 # ===
-;[variable = (value variable), a = (context {map : {b : (1 : 2 : variable)}}), [] set_super a, b set_1 3, load [a, b]]
+;[variable = ('' variable), a = (context {map : {b : (1 : 2 : variable)}}), [] set_super a, b set_1 3, load [a, b]]
 # ---
 3 : 2
 # ===
@@ -358,7 +358,7 @@ is_local a
 # ---
 1
 # ===
-;[a = (context {map : {b : (context {map : {c : 1}})}, super : (value b)}), load [a, c]]
+;[a = (context {map : {b : (context {map : {c : 1}})}, super : ('' b)}), load [a, c]]
 # ---
 1
 # ===
@@ -366,7 +366,7 @@ context_represent (context {})
 # ---
 {}
 # ===
-context_represent (context {map : {a : 1}, super : (value b)})
+context_represent (context {map : {a : 1}, super : ('' b)})
 # ---
 {map : {a : 1}, super : b}
 # ===
@@ -398,11 +398,11 @@ context
 # ---
 1
 # ===
-;[a = (context {map : {b : (context {map : {c : 1}})}, super : (value b)}), get_super a]
+;[a = (context {map : {b : (context {map : {c : 1}})}, super : ('' b)}), get_super a]
 # ---
 b
 # ===
-;[(_ : super) = (get_super ('t (context {map : {b : (context {map : {c : 1}})}, super : (value b)}))), super]
+;[(_ : super) = (get_super ('t (context {map : {b : (context {map : {c : 1}})}, super : ('' b)}))), super]
 # ---
 b
 # ===

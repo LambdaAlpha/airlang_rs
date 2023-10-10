@@ -1,259 +1,259 @@
-value a
+'' a
 # ---
 a
 # ===
-eval (not 'f)
+$ (not 'f)
 # ---
 't
 # ===
-quote [a, f a, a : b, f ? a, {a : b}]
+` [a, f a, a : b, f ? a, {a : b}]
 # ---
 [a, f a, a : b, f ? a, {a : b}]
 # ===
-quote {a : b, c : ('t (not 'f))}
+` {a : b, c : ('t (not 'f))}
 # ---
 {a : b, c : 't}
 # ===
-quote [a, b : ['t (not 't)]]
+` [a, b : ['t (not 't)]]
 # ---
 [a, b : ['f]]
 # ===
-quote ('f a)
+` ('f a)
 # ---
 a
 # ===
-quote ('f ('t (not 't)))
+` ('f ('t (not 't)))
 # ---
 't (not 't)
 # ===
-quote ('f ('f a))
+` ('f ('f a))
 # ---
 'f a
 # ===
-eval {: a, ('t (not 't)) : c, : (not 'f)}
+$ {: a, ('t (not 't)) : c, : (not 'f)}
 # ---
 {a, 'f, (not 'f) : 't}
 # ===
-eval {{a : b} : {c : d}}
+$ {{a : b} : {c : d}}
 # ---
 {{a : b} : {c}}
 # ===
-eval {('t (not 'f)) : a}
+$ {('t (not 'f)) : a}
 # ---
 {'t}
 # ===
-eval [1, {a : b}]
+$ [1, {a : b}]
 # ---
 [1, {a}]
 # ===
-eval {a : (value {b : c})}
+$ {a : ('' {b : c})}
 # ---
 {a : {b : c}}
 # ===
-eval {a : (eval {b : c})}
+$ {a : ($ {b : c})}
 # ---
 {a : {b}}
 # ===
-;[a = 1, eval_2 (value a)]
+;[a = 1, $2 ('' a)]
 # ---
 1
 # ===
-(value a) eval_2 (value b)
+('' a) $2 ('' b)
 # ---
 : '
 # ===
-;[a = (value b), b = (value c), c = 1, eval_3 a]
+;[a = ('' b), b = ('' c), c = 1, $3 a]
 # ---
 1
 # ===
-eval_free (1 ('t +) 1)
+$free (1 ('t +) 1)
 # ---
 2
 # ===
-;[a = 1, eval_free a]
+;[a = 1, $free a]
 # ---
 '
 # ===
-eval_free (('t ;) [a ('t =) 1, a])
+$free (('t ;) [a ('t =) 1, a])
 # ---
 '
 # ===
-eval_free (('t get_1) (1 : 2))
+$free (('t get_1) (1 : 2))
 # ---
 1
 # ===
-;[(_ : a) = (('t (context {map : {a : 1, : =}})) eval_mutable (a = 2)), a]
+;[(_ : a) = (('t (context {map : {a : 1, : =}})) $mutable (a = 2)), a]
 # ---
 1
 # ===
-;[a = (context {map : {: =}}), a eval_mutable (b = 1), load [a, b]]
+;[a = (context {map : {: =}}), a $mutable (b = 1), load [a, b]]
 # ---
 1
 # ===
-;[a =constant (context {map : {b : 1}}), a eval_mutable b]
+;[a =constant (context {map : {b : 1}}), a $mutable b]
 # ---
 1
 # ===
-;[a =constant (context {map : {b : 1, : =}}), a eval_mutable (b = 2), load [a, b]]
+;[a =constant (context {map : {b : 1, : =}}), a $mutable (b = 2), load [a, b]]
 # ---
 1
 # ===
-;[constant = (value constant), (_ : a) = (('t (context {map : {: =, b : (1 : constant)}})) eval_constant b), a]
+;[constant = ('' constant), (_ : a) = (('t (context {map : {: =, b : (1 : constant)}})) $constant b), a]
 # ---
 1
 # ===
-;[constant = (value constant), a = (context {map : {: =, b : (1 : constant)}}), a eval_constant b]
+;[constant = ('' constant), a = (context {map : {: =, b : (1 : constant)}}), a $constant b]
 # ---
 1
 # ===
-;[a = (context {map : {: =}}), a eval_constant (b = 1), load [a, b]]
+;[a = (context {map : {: =}}), a $constant (b = 1), load [a, b]]
 # ---
 '
 # ===
-is_context_free {value : 1}
+$is_free {value : 1}
 # ---
 't
 # ===
-is_context_free {value : a}
+$is_free {value : a}
 # ---
 'f
 # ===
-is_context_free {value : a, eval_mode : eval}
+$is_free {value : a, eval_mode : $}
 # ---
 'f
 # ===
-is_context_free {value : (1 : a)}
+$is_free {value : (1 : a)}
 # ---
 'f
 # ===
-is_context_free {value : (1 : "a")}
+$is_free {value : (1 : "a")}
 # ---
 't
 # ===
-is_context_free {value : (1 : a), pair_eval_mode : (eval : value)}
+$is_free {value : (1 : a), pair_eval_mode : ($ : '')}
 # ---
 't
 # ===
-is_context_free {value : [1, a]}
+$is_free {value : [1, a]}
 # ---
 'f
 # ===
-is_context_free {value : [1, "a"]}
+$is_free {value : [1, "a"]}
 # ---
 't
 # ===
-is_context_free {value : {a : 1, 1 : a}}
+$is_free {value : {a : 1, 1 : a}}
 # ---
 'f
 # ===
-is_context_free {value : {a : 1, 1 : "a"}}
+$is_free {value : {a : 1, 1 : "a"}}
 # ---
 't
 # ===
-is_context_free {value : {('f ('t a)) : 1, 1 : "a"}}
+$is_free {value : {('f ('t a)) : 1, 1 : "a"}}
 # ---
 'f
 # ===
-is_context_free {value : (f 1)}
+$is_free {value : (f 1)}
 # ---
 'f
 # ===
-is_context_free {value : (('t not) 't)}
+$is_free {value : (('t not) 't)}
 # ---
 't
 # ===
-is_context_free {value : (('t not) a)}
+$is_free {value : (('t not) a)}
 # ---
 'f
 # ===
-is_context_free {value : (('t get_1) 1)}
+$is_free {value : (('t get_1) 1)}
 # ---
 'f
 # ===
-is_context_free {value : a, eval_mode : value}
+$is_free {value : a, eval_mode : ''}
 # ---
 't
 # ===
-is_context_free {value : ('f ('t a)), eval_mode : quote}
+$is_free {value : ('f ('t a)), eval_mode : `}
 # ---
 'f
 # ===
-is_context_free {value : [a, ('f ('t 1))], eval_mode : quote}
+$is_free {value : [a, ('f ('t 1))], eval_mode : `}
 # ---
 't
 # ===
-is_context_constant {value : a}
+$is_constant {value : a}
 # ---
 't
 # ===
-is_context_constant {value : (a : b)}
+$is_constant {value : (a : b)}
 # ---
 't
 # ===
-is_context_constant {value : (a : (move a))}
+$is_constant {value : (a : (move a))}
 # ---
 'f
 # ===
-is_context_constant {value : (a : (move a)), pair_eval_mode : (eval : value)}
+$is_constant {value : (a : (move a)), pair_eval_mode : ($ : '')}
 # ---
 't
 # ===
-is_context_constant {value : [1, a]}
+$is_constant {value : [1, a]}
 # ---
 't
 # ===
-is_context_constant {value : [1, move a]}
+$is_constant {value : [1, move a]}
 # ---
 'f
 # ===
-is_context_constant {value : {a : 1, ('f ('t (move a))) : a}}
+$is_constant {value : {a : 1, ('f ('t (move a))) : a}}
 # ---
 'f
 # ===
-is_context_constant {value : {a : 1, a : (move a)}}
+$is_constant {value : {a : 1, a : (move a)}}
 # ---
 'f
 # ===
-is_context_constant {value : {a : 1, a : a}}
+$is_constant {value : {a : 1, a : a}}
 # ---
 't
 # ===
-is_context_constant {value : (get_1 a)}
+$is_constant {value : (get_1 a)}
 # ---
 't
 # ===
-is_context_constant {value : (move a)}
+$is_constant {value : (move a)}
 # ---
 'f
 # ===
-is_context_constant {value : (move a), eval_mode : eval}
+$is_constant {value : (move a), eval_mode : $}
 # ---
 'f
 # ===
-is_context_constant {value : (not (move a))}
+$is_constant {value : (not (move a))}
 # ---
 'f
 # ===
-is_context_constant {value : (; [])}
+$is_constant {value : (; [])}
 # ---
 'f
 # ===
-is_context_constant {value : (f (move a))}
+$is_constant {value : (f (move a))}
 # ---
 'f
 # ===
-is_context_constant {value : (move a), eval_mode : value}
+$is_constant {value : (move a), eval_mode : ''}
 # ---
 't
 # ===
-is_context_constant {value : ('f ('t (move a))), eval_mode : quote}
+$is_constant {value : ('f ('t (move a))), eval_mode : `}
 # ---
 'f
 # ===
-is_context_constant {value : [move a, 'f ('t a)], eval_mode : quote}
+$is_constant {value : [move a, 'f ('t a)], eval_mode : `}
 # ---
 't
 # ===
-;[c = (context {map : {move : not}}), is_context_constant {value : (move a), context : c}]
+;[c = (context {map : {move : not}}), $is_constant {value : (move a), context : c}]
 # ---
 't

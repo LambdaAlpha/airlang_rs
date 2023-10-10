@@ -28,7 +28,7 @@
         context : (context {map : {a : 2}}),
     }),
     ctx = (proposition_before p),
-    ctx eval_constant a
+    ctx $constant a
 ]
 # ---
 2
@@ -41,7 +41,7 @@
         context : (context {map : {a : 2}}),
     }),
     ctx = (proposition_after p),
-    ctx eval_constant a
+    ctx $constant a
 ]
 # ---
 2
@@ -55,7 +55,7 @@
         after : (context {map : {a : 3}}),
     }),
     ctx = (proposition_before p),
-    ctx eval_constant a
+    ctx $constant a
 ]
 # ---
 2
@@ -69,7 +69,7 @@
         after : (context {map : {a : 3}}),
     }),
     ctx = (proposition_after p),
-    ctx eval_constant a
+    ctx $constant a
 ]
 # ---
 3
@@ -163,8 +163,8 @@
 # ===
 ;[
     t = (theorem {
-        function : eval,
-        input : (quote (('t not) 't)),
+        function : $,
+        input : (` (('t not) 't)),
         before : (context {}),
     }),
     proposition_output t
@@ -175,7 +175,7 @@
 ;[
     t = (theorem {
         function : ==,
-        input : (value (a : b)),
+        input : ('' (a : b)),
         context : (context {
             map : {
                 a : 1,
@@ -191,11 +191,11 @@
 ;[
     t = (theorem {
         function : =,
-        input : (value (a : 1)),
+        input : ('' (a : 1)),
         before : (context {})
     }),
     ctx = (proposition_before t),
-    ctx eval_constant (('t is_null) a)
+    ctx $constant (('t is_null) a)
 ]
 # ---
 't
@@ -203,11 +203,11 @@
 ;[
     t = (theorem {
         function : =,
-        input : (value (a : 1)),
+        input : ('' (a : 1)),
         before : (context {})
     }),
     ctx = (proposition_after t),
-    ctx eval_constant (('t is_null) a)
+    ctx $constant (('t is_null) a)
 ]
 # ---
 'f
@@ -249,12 +249,12 @@
 ;[
     map = (theorem_represent (theorem {
         function : =,
-        input : ((value a) : 1),
+        input : (('' a) : 1),
         before : (context {}),
     })),
     expected = {
         function : =,
-        input : ((value a) : 1),
+        input : (('' a) : 1),
         output : ',
         before : (context {}),
         after : (context {map : {a : 1}}),

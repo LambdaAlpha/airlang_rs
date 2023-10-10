@@ -1,5 +1,5 @@
 ;[
-    f = (function (value {
+    f = (function ('' {
         body : input,
     })),
     f (not 't)
@@ -8,7 +8,7 @@
 'f
 # ===
 ;[
-    f = (function (quote {
+    f = (function (` {
         body : (('t not) input)
     })),
     f (not 't)
@@ -18,7 +18,7 @@
 # ===
 ;[
     f = (function {
-        body : (value (not input)),
+        body : ('' (not input)),
         context : (context {map : {: not}})
     }),
     f (not 't)
@@ -28,8 +28,8 @@
 # ===
 ;[
     f = (function {
-        body : (value (n a)),
-        input_name : (value a),
+        body : ('' (n a)),
+        input_name : ('' a),
         context : (context {map : {n : not}})
     }),
     f (not 't)
@@ -38,9 +38,9 @@
 't
 # ===
 ;[
-    f = (function (value {
+    f = (function ('' {
         body : input,
-        eval_mode : value,
+        eval_mode : '',
     })),
     f (not 't)
 ]
@@ -48,9 +48,9 @@
 not 't
 # ===
 ;[
-    f = (function (quote {
+    f = (function (` {
         body : (('t not) input),
-        eval_mode : eval,
+        eval_mode : $,
     })),
     f (not 't)
 ]
@@ -58,9 +58,9 @@ not 't
 't
 # ===
 ;[
-    f = (function (value {
+    f = (function (` {
         body : input,
-        eval_mode : quote,
+        eval_mode : `,
     })),
     f (not 't)
 ]
@@ -68,9 +68,9 @@ not 't
 not 't
 # ===
 ;[
-    f = (function (value {
+    f = (function ('' {
         body : input,
-        eval_mode : quote,
+        eval_mode : `,
     })),
     f ('t (not 't))
 ]
@@ -78,9 +78,9 @@ not 't
 'f
 # ===
 ;[
-    f = (function (value {
+    f = (function ('' {
         body : input,
-        eval_mode : eval,
+        eval_mode : $,
     })),
     f {a : b}
 ]
@@ -88,9 +88,9 @@ not 't
 {a : '}
 # ===
 ;[
-    f = (function (value {
+    f = (function ('' {
         body : input,
-        pair_eval_mode : (quote : eval),
+        pair_eval_mode : (` : $),
     })),
     a f b
 ]
@@ -98,10 +98,10 @@ not 't
 a : '
 # ===
 ;[
-    f = (function (value {
+    f = (function ('' {
         body : input,
-        pair_eval_mode : (quote : eval),
-        eval_mode : value
+        pair_eval_mode : (` : $),
+        eval_mode : ''
     })),
     f (not 'f)
 ]
@@ -109,13 +109,13 @@ a : '
 not 'f
 # ===
 ;[
-    f = (function (quote {
-        body : (;[[] set_super caller, eval_2 input]),
-        eval_mode : value,
+    f = (function (` {
+        body : (;[[] set_super caller, $2 input]),
+        eval_mode : '',
         caller_access : mutable,
         context : ('t (context {map : {
             : ;,
-            : eval_2,
+            : $2,
             : set_super,
             : load,
         }}))
@@ -128,11 +128,11 @@ not 'f
 # ===
 ;[
     a = 1,
-    f = (function (quote {
-        body : (caller eval_constant a),
+    f = (function (` {
+        body : (caller $constant a),
         caller_access : free,
         context : ('t (context {map : {
-            : eval_constant,
+            : $constant,
         }}))
     })),
     f '
@@ -142,11 +142,11 @@ not 'f
 # ===
 ;[
     a = 1,
-    f = (function (quote {
-        body : (caller eval_constant a),
+    f = (function (` {
+        body : (caller $constant a),
         caller_access : constant,
         context : ('t (context {map : {
-            : eval_constant,
+            : $constant,
         }}))
     })),
     f '
@@ -156,11 +156,11 @@ not 'f
 # ===
 ;[
     a = 1,
-    f = (function (quote {
-        body : (caller eval_constant a),
+    f = (function (` {
+        body : (caller $constant a),
         caller_access : mutable,
         context : ('t (context {map : {
-            : eval_constant,
+            : $constant,
         }}))
     })),
     f '
@@ -170,11 +170,11 @@ not 'f
 # ===
 ;[
     a = 1,
-    f = (function (quote {
-        body : (caller eval_mutable a),
+    f = (function (` {
+        body : (caller $mutable a),
         caller_access : constant,
         context : ('t (context {map : {
-            : eval_mutable,
+            : $mutable,
         }}))
     })),
     f '
@@ -183,12 +183,12 @@ not 'f
 1
 # ===
 ;[
-    f = (function (quote {
-        body : (caller eval_mutable (('f ('t input)) = 2)),
-        eval_mode : value,
+    f = (function (` {
+        body : (caller $mutable (('f ('t input)) = 2)),
+        eval_mode : '',
         caller_access : mutable,
         context : ('t (context {map : {
-            : eval_mutable,
+            : $mutable,
         }}))
     })),
     a = 1,
@@ -199,12 +199,12 @@ not 'f
 2
 # ===
 ;[
-    f = (function (quote {
-        body : (caller eval_mutable (('f ('t input)) = 2)),
-        eval_mode : value,
+    f = (function (` {
+        body : (caller $mutable (('f ('t input)) = 2)),
+        eval_mode : '',
         caller_access : mutable,
         context : ('t (context {map : {
-            : eval_mutable,
+            : $mutable,
         }}))
     })),
     a =final 1,
@@ -215,12 +215,12 @@ not 'f
 1
 # ===
 ;[
-    f = (function (quote {
-        body : (caller eval_mutable (('f ('t input)) = 2)),
-        eval_mode : value,
+    f = (function (` {
+        body : (caller $mutable (('f ('t input)) = 2)),
+        eval_mode : '',
         caller_access : constant,
         context : ('t (context {map : {
-            : eval_mutable,
+            : $mutable,
         }}))
     })),
     a = 1,
@@ -230,7 +230,7 @@ not 'f
 # ---
 1
 # ===
-function_represent (function (quote {body : input}))
+function_represent (function (` {body : input}))
 # ---
 {body : input}
 # ===
@@ -238,20 +238,20 @@ function_represent not
 # ---
 {id : not}
 # ===
-function_represent (function (value {body : input, caller_access : constant}))
+function_represent (function ('' {body : input, caller_access : constant}))
 # ---
 {body : input, caller_access : constant}
 # ===
 function_represent ==
 # ---
-{id : ==, caller_access : constant, eval_mode : value, pair_eval_mode : (quote : quote)}
+{id : ==, caller_access : constant, eval_mode : '', pair_eval_mode : (` : `)}
 # ===
-function_represent (function (value {
+function_represent (function ('' {
     body : i,
     input_name : i,
     caller_name : c,
-    eval_mode : value,
-    pair_eval_mode : (quote : quote),
+    eval_mode : '',
+    pair_eval_mode : (` : `),
     caller_access : mutable,
 }))
 # ---
@@ -259,8 +259,8 @@ function_represent (function (value {
     body : i,
     input_name : i,
     caller_name : c,
-    eval_mode : value,
-    pair_eval_mode : (quote : quote),
+    eval_mode : '',
+    pair_eval_mode : (` : `),
     caller_access : mutable,
 }
 # ===
@@ -272,43 +272,43 @@ function_caller_access function_caller_access
 # ---
 constant
 # ===
-function_caller_access eval
+function_caller_access $
 # ---
 mutable
 # ===
-;[f = (function (value {body : input})), function_caller_access f]
+;[f = (function ('' {body : input})), function_caller_access f]
 # ---
 free
 # ===
 function_eval_mode not
 # ---
-eval
+$
 # ===
-function_eval_mode eval
+function_eval_mode $
 # ---
-value
+''
 # ===
 function_eval_mode function_eval_mode
 # ---
-quote
+`
 # ===
-;[f = (function (value {body : input})), function_eval_mode f]
+;[f = (function ('' {body : input})), function_eval_mode f]
 # ---
-eval
+$
 # ===
 function_pair_eval_mode and
 # ---
-eval : eval
+$ : $
 # ===
 function_pair_eval_mode not
 # ---
-eval : eval
+$ : $
 # ===
 function_is_primitive not
 # ---
 't
 # ===
-;[f = (function (value {body : input})), function_is_primitive f]
+;[f = (function ('' {body : input})), function_is_primitive f]
 # ---
 'f
 # ===
@@ -320,11 +320,11 @@ not
 # ---
 not
 # ===
-;[f = (function (value {body : input})), function_id f]
+;[f = (function ('' {body : input})), function_id f]
 # ---
 '
 # ===
-;[f = (function (value {body : input})), function_body f]
+;[f = (function ('' {body : input})), function_body f]
 # ---
 input
 # ===
@@ -334,7 +334,7 @@ function_body not
 # ===
 ;[
     ctx = (context {map : {a : 1}}),
-    f = (function {body : (value input), context : ctx}),
+    f = (function {body : ('' input), context : ctx}),
     ('t (function_context f)) == ctx
 ]
 # ---
@@ -344,7 +344,7 @@ function_context not
 # ---
 '
 # ===
-;[f = (function (value {body : input})), function_input_name f]
+;[f = (function ('' {body : input})), function_input_name f]
 # ---
 input
 # ===
@@ -352,11 +352,11 @@ function_input_name not
 # ---
 '
 # ===
-;[f = (function (value {body : input, caller_access : constant})), function_caller_name f]
+;[f = (function ('' {body : input, caller_access : constant})), function_caller_name f]
 # ---
 caller
 # ===
-;[f = (function (value {body : input})), function_caller_name f]
+;[f = (function ('' {body : input})), function_caller_name f]
 # ---
 '
 # ===

@@ -289,16 +289,16 @@ pub(crate) mod names {
     pub(crate) const MATCH: &str = "match";
     pub(crate) const WHILE: &str = "while";
 
-    pub(crate) const VALUE: &str = "value";
-    pub(crate) const EVAL: &str = "eval";
-    pub(crate) const QUOTE: &str = "quote";
-    pub(crate) const EVAL_TWICE: &str = "eval_2";
-    pub(crate) const EVAL_THRICE: &str = "eval_3";
-    pub(crate) const EVAL_FREE: &str = "eval_free";
-    pub(crate) const EVAL_CONST: &str = "eval_constant";
-    pub(crate) const EVAL_MUTABLE: &str = "eval_mutable";
-    pub(crate) const IS_CTX_FREE: &str = "is_context_free";
-    pub(crate) const IS_CTX_CONST: &str = "is_context_constant";
+    pub(crate) const VALUE: &str = "'";
+    pub(crate) const EVAL: &str = "$";
+    pub(crate) const QUOTE: &str = "`";
+    pub(crate) const EVAL_TWICE: &str = "$2";
+    pub(crate) const EVAL_THRICE: &str = "$3";
+    pub(crate) const EVAL_FREE: &str = "$free";
+    pub(crate) const EVAL_CONST: &str = "$constant";
+    pub(crate) const EVAL_MUTABLE: &str = "$mutable";
+    pub(crate) const IS_CTX_FREE: &str = "$is_free";
+    pub(crate) const IS_CTX_CONST: &str = "$is_constant";
 
     pub(crate) const FUNC_NEW: &str = "function";
     pub(crate) const FUNC_REPR: &str = "function_represent";

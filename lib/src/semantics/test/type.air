@@ -22,7 +22,7 @@ float
 # ---
 bytes
 # ===
-;[a = (value a), type_of a]
+;[a = ('' a), type_of a]
 # ---
 symbol
 # ===
@@ -34,11 +34,11 @@ string
 # ---
 pair
 # ===
-;[a = (value (f a)), type_of a]
+;[a = ('' (f a)), type_of a]
 # ---
 call
 # ===
-;[a = (value (f ? a)), type_of a]
+;[a = ('' (f ? a)), type_of a]
 # ---
 reverse
 # ===
