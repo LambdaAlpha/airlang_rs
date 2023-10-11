@@ -417,3 +417,19 @@ a
 ]
 # ---
 c
+# ===
+;[a = (prelude '), a $constant (not 't)]
+# ---
+'f
+# ===
+;[a = (prelude '), is_null [a, prelude]]
+# ---
+'f
+# ===
+;[a = 1, b = (prelude '), is_null [b, a]]
+# ---
+'t
+# ===
+;[a = (prelude '), is_constant [a, prelude]]
+# ---
+'t

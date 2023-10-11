@@ -113,12 +113,7 @@ not 'f
         body : (;[[] set_super caller, $2 input]),
         eval_mode : '',
         caller_access : mutable,
-        context : ('t (context {map : {
-            : ;,
-            : $2,
-            : set_super,
-            : load,
-        }}))
+        context : ('t (prelude '))
     })),
     a = 1,
     f a

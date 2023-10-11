@@ -80,6 +80,7 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::ctx_repr());
     put_primitive_func(c, ctx::ctx_set_super());
     put_primitive_func(c, ctx::ctx_get_super());
+    put_primitive_func(c, ctx::ctx_prelude());
 }
 
 fn prelude_ctrl(c: &mut NameMap) {
@@ -282,6 +283,7 @@ pub(crate) mod names {
     pub(crate) const CTX_REPR: &str = "context_represent";
     pub(crate) const CTX_SET_SUPER: &str = "set_super";
     pub(crate) const CTX_GET_SUPER: &str = "get_super";
+    pub(crate) const CTX_PRELUDE: &str = "prelude";
 
     pub(crate) const SEQUENCE: &str = ";";
     pub(crate) const BREAKABLE_SEQUENCE: &str = ";return";

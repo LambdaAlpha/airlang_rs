@@ -30,6 +30,7 @@ use crate::{
         },
         prelude::{
             names,
+            prelude,
             utils::{
                 map_remove,
                 symbol,
@@ -600,4 +601,18 @@ fn fn_ctx_get_super(ctx: CtxForConstFn, input: Val) -> Val {
         }
         _ => Val::default(),
     }
+}
+
+pub(crate) fn ctx_prelude() -> PrimitiveFunc<CtxFreeFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxFreeFn>::new(names::CTX_PRELUDE, fn_ctx_prelude);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_ctx_prelude(_input: Val) -> Val {
+    let name_map = prelude();
+    Val::Ctx(CtxVal(Box::new(Ctx {
+        name_map,
+        super_ctx: None,
+    })))
 }
