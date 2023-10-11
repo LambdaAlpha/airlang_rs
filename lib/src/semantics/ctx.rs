@@ -353,6 +353,7 @@ impl DefaultCtx {
         }
     }
 
+    #[allow(unused)]
     pub(crate) fn get_const_ref_no_ret<Ctx: CtxTrait, F>(&self, ctx: &Ctx, name: Val, f: F) -> Val
     where
         F: FnOnce(&Val) -> Val,
