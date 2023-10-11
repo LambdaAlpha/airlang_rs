@@ -433,3 +433,15 @@ c
 ;[a = (prelude '), is_constant [a, prelude]]
 # ---
 't
+# ===
+;[a = 1, b = (this '), load [b, a]]
+# ---
+1
+# ===
+;[a = (this '), b = 1, is_null [a, b]]
+# ---
+'t
+# ===
+$free (('t this) ')
+# ---
+'

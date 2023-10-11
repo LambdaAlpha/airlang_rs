@@ -616,3 +616,16 @@ fn fn_ctx_prelude(_input: Val) -> Val {
         super_ctx: None,
     })))
 }
+
+pub(crate) fn ctx_current() -> PrimitiveFunc<CtxConstFn> {
+    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let primitive = Primitive::<CtxConstFn>::new(names::CTX_CURRENT, fn_ctx_current);
+    PrimitiveFunc::new(eval_mode, primitive)
+}
+
+fn fn_ctx_current(ctx: CtxForConstFn, _input: Val) -> Val {
+    let CtxForConstFn::Const(ctx) = ctx else {
+        return Val::default();
+    };
+    Val::Ctx(CtxVal(Box::new(ctx.0.clone())))
+}
