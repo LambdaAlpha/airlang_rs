@@ -46,7 +46,7 @@ not 'f
 # ---
 't
 # ===
-('' a) == ('' a)
+;[a = ('' c), b = ('' c), a == b]
 # ---
 't
 # ===
@@ -66,7 +66,7 @@ not 'f
 # ---
 't
 # ===
-('' (f a)) == ('' (f a))
+;[a = (1 2), b = (1 2), a == b]
 # ---
 't
 # ===
@@ -74,19 +74,27 @@ not 'f
 # ---
 't
 # ===
-(function {body : input}) == (function {body : input})
+;[a = (function {body : input}), b = (function {body : input}), a == b]
 # ---
 't
 # ===
-(context {}) == (context {})
+;[a = (context {}), b = (context {}), a == b]
 # ---
 't
 # ===
-(proposition {input : 1, output : 1, access : ('' free)}) == (proposition {input : 1, output : 1, access : ('' free)})
+;[
+    a = (proposition {input : 1, output : 1, access : ('' free)}),
+    b = (proposition {input : 1, output : 1, access : ('' free)}),
+    a == b
+]
 # ---
 't
 # ===
-(theorem {input : 1, access : ('' free)}) == (theorem {input : 1, access : ('' free)})
+;[
+    a = (theorem {input : 1, access : ('' free)}),
+    b = (theorem {input : 1, access : ('' free)}),
+    a == b
+]
 # ---
 't
 # ===
