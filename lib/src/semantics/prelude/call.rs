@@ -1,24 +1,30 @@
-use crate::semantics::{
-    ctx_access::mutable::CtxForMutableFn,
-    eval::input::ByVal,
-    eval_mode::{
-        eval::Eval,
-        BasicEvalMode,
-        EvalMode,
+use crate::{
+    semantics::{
+        ctx_access::mutable::CtxForMutableFn,
+        eval::input::ByVal,
+        eval_mode::{
+            eval::Eval,
+            BasicEvalMode,
+            EvalMode,
+        },
+        func::{
+            CtxMutableFn,
+            Primitive,
+        },
+        prelude::{
+            names,
+            PrimitiveFunc,
+        },
+        Val,
     },
-    func::{
-        CtxMutableFn,
-        Primitive,
-    },
-    prelude::{
-        names,
-        PrimitiveFunc,
-    },
-    Val,
+    types::Pair,
 };
 
 pub(crate) fn chain() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Value);
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Any(BasicEvalMode::Value),
+        EvalMode::Any(BasicEvalMode::Value),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::CHAIN, fn_chain);
     PrimitiveFunc::new(eval_mode, primitive)
 }

@@ -24,13 +24,16 @@ use {
                 Val,
             },
         },
-        types::List,
+        types::{
+            List,
+            Pair,
+        },
     },
     std::mem::swap,
 };
 
 pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
+    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::LIST_LENGTH, fn_length);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -45,10 +48,13 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn set() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Pair(Box::new(Pair::new(
+            EvalMode::Any(BasicEvalMode::Eval),
+            EvalMode::Any(BasicEvalMode::Eval),
+        ))),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_SET, fn_set);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -79,10 +85,13 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn set_many() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Pair(Box::new(Pair::new(
+            EvalMode::Any(BasicEvalMode::Eval),
+            EvalMode::List(BasicEvalMode::Eval),
+        ))),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_SET_MANY, fn_set_many);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -116,10 +125,10 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn get() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Any(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxConstFn>::new(names::LIST_GET, fn_get);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -161,10 +170,13 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn insert() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Pair(Box::new(Pair::new(
+            EvalMode::Any(BasicEvalMode::Eval),
+            EvalMode::Any(BasicEvalMode::Eval),
+        ))),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_INSERT, fn_insert);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -194,10 +206,13 @@ fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn insert_many() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Pair(Box::new(Pair::new(
+            EvalMode::Any(BasicEvalMode::Eval),
+            EvalMode::List(BasicEvalMode::Eval),
+        ))),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_INSERT_MANY, fn_insert_many);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -229,10 +244,10 @@ fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Any(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_REMOVE, fn_remove);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -275,10 +290,10 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn push() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Any(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_PUSH, fn_push);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -298,10 +313,10 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn push_many() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::List(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_PUSH_MANY, fn_push_many);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -324,10 +339,10 @@ fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn pop() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode {
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Eval)),
-        default: BasicEvalMode::Value,
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Any(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_POP, fn_pop);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -366,7 +381,7 @@ fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
+    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new(names::LIST_CLEAR, fn_clear);
     PrimitiveFunc::new(eval_mode, primitive)
 }

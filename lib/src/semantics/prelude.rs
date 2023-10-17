@@ -109,7 +109,6 @@ fn prelude_func(c: &mut NameMap) {
     put_primitive_func(c, func::func_new());
     put_primitive_func(c, func::func_repr());
     put_primitive_func(c, func::func_eval_mode());
-    put_primitive_func(c, func::func_pair_eval_mode());
     put_primitive_func(c, func::func_access());
     put_primitive_func(c, func::func_is_primitive());
     put_primitive_func(c, func::func_id());
@@ -308,7 +307,6 @@ pub(crate) mod names {
     pub(crate) const FUNC_REPR: &str = "function_represent";
     pub(crate) const FUNC_ACCESS: &str = "function_caller_access";
     pub(crate) const FUNC_EVAL_MODE: &str = "function_eval_mode";
-    pub(crate) const FUNC_PAIR_EVAL_MODE: &str = "function_pair_eval_mode";
     pub(crate) const FUNC_IS_PRIMITIVE: &str = "function_is_primitive";
     pub(crate) const FUNC_ID: &str = "function_id";
     pub(crate) const FUNC_BODY: &str = "function_body";

@@ -17,11 +17,14 @@ use crate::{
         },
         val::Val,
     },
-    types::Bool,
+    types::{
+        Bool,
+        Pair,
+    },
 };
 
 pub(crate) fn not() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::Any(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::NOT, fn_not);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -34,10 +37,10 @@ fn fn_not(input: Val) -> Val {
 }
 
 pub(crate) fn and() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode {
-        default: BasicEvalMode::Value,
-        pair: Some((BasicEvalMode::Eval, BasicEvalMode::Eval)),
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Any(BasicEvalMode::Eval),
+        EvalMode::Any(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxFreeFn>::new(names::AND, fn_and);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -60,10 +63,10 @@ fn fn_and(input: Val) -> Val {
 }
 
 pub(crate) fn or() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode {
-        default: BasicEvalMode::Value,
-        pair: Some((BasicEvalMode::Eval, BasicEvalMode::Eval)),
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Any(BasicEvalMode::Eval),
+        EvalMode::Any(BasicEvalMode::Eval),
+    )));
     let primitive = Primitive::<CtxFreeFn>::new(names::OR, fn_or);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -86,10 +89,10 @@ fn fn_or(input: Val) -> Val {
 }
 
 pub(crate) fn equal() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode {
-        default: BasicEvalMode::Value,
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Quote)),
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Symbol(BasicEvalMode::Value),
+    )));
     let primitive = Primitive::<CtxConstFn>::new(names::EQUAL, fn_equal);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -104,10 +107,10 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn not_equal() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode {
-        default: BasicEvalMode::Value,
-        pair: Some((BasicEvalMode::Quote, BasicEvalMode::Quote)),
-    };
+    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
+        EvalMode::Symbol(BasicEvalMode::Value),
+        EvalMode::Symbol(BasicEvalMode::Value),
+    )));
     let primitive = Primitive::<CtxConstFn>::new(names::NOT_EQUAL, fn_not_equal);
     PrimitiveFunc::new(eval_mode, primitive)
 }

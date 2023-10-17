@@ -30,29 +30,29 @@ a
 # ---
 'f a
 # ===
-$ {: a, ('t (not 't)) : c, : (not 'f)}
+$ {: a, (not 't) : c, : (not 'f)}
 # ---
-{a, 'f, (not 'f) : 't}
+{', 'f : ', : 't}
 # ===
 $ {{a : b} : {c : d}}
 # ---
-{{a : b} : {c}}
+{{' : '} : {' : '}}
 # ===
-$ {('t (not 'f)) : a}
+$ {('' (not 'f)) : a}
 # ---
-{'t}
+{(not 'f) : '}
 # ===
 $ [1, {a : b}]
 # ---
-[1, {a}]
+[1, {' : '}]
 # ===
-$ {a : ('' {b : c})}
+$ {('' a) : ('' {b : c})}
 # ---
 {a : {b : c}}
 # ===
-$ {a : ($ {b : c})}
+$ {('' a) : ($ {b : c})}
 # ---
-{a : {b}}
+{a : {' : '}}
 # ===
 ;[a = 1, $2 ('' a)]
 # ---
@@ -60,7 +60,7 @@ $ {a : ($ {b : c})}
 # ===
 ('' a) $2 ('' b)
 # ---
-: '
+' : '
 # ===
 ;[a = ('' b), b = ('' c), c = 1, $3 a]
 # ---
@@ -82,7 +82,7 @@ $free (('t get_1) (1 : 2))
 # ---
 1
 # ===
-;[(_ : a) = (('t (context {map : {a : 1, : =}})) $mutable (a = 2)), a]
+;[(_ : a) = ((context {map : {a : 1, : =}}) $mutable (a = 2)), a]
 # ---
 1
 # ===
@@ -98,11 +98,11 @@ $free (('t get_1) (1 : 2))
 # ---
 1
 # ===
-;[constant = ('' constant), (_ : a) = (('t (context {map : {: =, b : (1 : constant)}})) $constant b), a]
+;[(_ : a) = ((context {map : {: =, b : (1 : constant)}}) $constant b), a]
 # ---
 1
 # ===
-;[constant = ('' constant), a = (context {map : {: =, b : (1 : constant)}}), a $constant b]
+;[a = (context {map : {: =, b : (1 : constant)}}), a $constant b]
 # ---
 1
 # ===
@@ -130,7 +130,7 @@ $is_free {value : (1 : "a")}
 # ---
 't
 # ===
-$is_free {value : (1 : a), pair_eval_mode : ($ : '')}
+$is_free {value : (1 : a), eval_mode : ($ : '')}
 # ---
 't
 # ===
@@ -147,10 +147,6 @@ $is_free {value : {a : 1, 1 : a}}
 'f
 # ===
 $is_free {value : {a : 1, 1 : "a"}}
-# ---
-'t
-# ===
-$is_free {value : {('f ('t a)) : 1, 1 : "a"}}
 # ---
 'f
 # ===
@@ -194,7 +190,7 @@ $is_constant {value : (a : (move a))}
 # ---
 'f
 # ===
-$is_constant {value : (a : (move a)), pair_eval_mode : ($ : '')}
+$is_constant {value : (a : (move a)), eval_mode : ($ : '')}
 # ---
 't
 # ===

@@ -6,7 +6,7 @@ unit
 # ---
 bool
 # ===
-type_of ('t (not 't))
+type_of (not 't)
 # ---
 'f : bool
 # ===

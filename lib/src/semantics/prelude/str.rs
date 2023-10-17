@@ -21,7 +21,7 @@ use crate::{
 };
 
 pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Quote);
+    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::STR_LENGTH, fn_length);
     PrimitiveFunc::new(eval_mode, primitive)
 }
@@ -36,7 +36,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn concat() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::basic(BasicEvalMode::Eval);
+    let eval_mode = EvalMode::List(BasicEvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::STR_CONCAT, fn_concat);
     PrimitiveFunc::new(eval_mode, primitive)
 }

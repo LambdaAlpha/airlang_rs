@@ -80,43 +80,55 @@
         input : 1,
         output : 2,
     }),
-    ('t (proposition_function p)) == not
+    (proposition_function p) == not
 ]
 # ---
 't
 # ===
 ;[
-    map = {
+    $map = (function {
+        body : input,
+        eval_mode : ('' map_items $),
+    }),
+    map = ($map {
         function : not,
         input : 't,
         output : 'f,
-    },
-    map == ('t (proposition_represent (proposition map)))
+    }),
+    map == (proposition_represent (proposition map))
 ]
 # ---
 't
 # ===
 ;[
-    map = {
+    $map = (function {
+        body : input,
+        eval_mode : ('' map_items $),
+    }),
+    map = ($map {
         function : ==,
         input : 't,
         output : 'f,
         context : (context {}),
-    },
-    map == ('t (proposition_represent (proposition map)))
+    }),
+    map == (proposition_represent (proposition map))
 ]
 # ---
 't
 # ===
 ;[
-    map = {
+    $map = (function {
+        body : input,
+        eval_mode : ('' map_items $),
+    }),
+    map = ($map {
         function : =,
         input : 't,
         output : 'f,
         before : (context {}),
         after : (context {}),
-    },
-    map == ('t (proposition_represent (proposition map)))
+    }),
+    map == (proposition_represent (proposition map))
 ]
 # ---
 't
@@ -146,7 +158,7 @@
         function : not,
         input : 't,
     }),
-    ('t (proposition_function t)) == not
+    (proposition_function t) == not
 ]
 # ---
 't
@@ -195,7 +207,7 @@
         before : (context {})
     }),
     ctx = (proposition_before t),
-    ctx $constant (('t is_null) a)
+    ctx $constant (('t is_null) [a])
 ]
 # ---
 't
@@ -207,7 +219,7 @@
         before : (context {})
     }),
     ctx = (proposition_after t),
-    ctx $constant (('t is_null) a)
+    ctx $constant (('t is_null) [a])
 ]
 # ---
 'f
@@ -217,12 +229,16 @@
         function : not,
         input : 't,
     })),
-    expected = {
+    $map = (function {
+        body : input,
+        eval_mode : ('' map_items $),
+    }),
+    expected = ($map {
         function : not,
         input : 't,
         output : 'f,
         truth : 't,
-    },
+    }),
     map == expected
 ]
 # ---
@@ -234,13 +250,17 @@
         input : (1 : 2),
         context : (context {}),
     })),
-    expected = {
+    $map = (function {
+        body : input,
+        eval_mode : ('' map_items $),
+    }),
+    expected = ($map {
         function : ==,
         input : (1 : 2),
         output : 'f,
         context : (context {}),
         truth : 't,
-    },
+    }),
     map == expected
 ]
 # ---
@@ -252,14 +272,18 @@
         input : (('' a) : 1),
         before : (context {}),
     })),
-    expected = {
+    $map = (function {
+        body : input,
+        eval_mode : ('' map_items $),
+    }),
+    expected = ($map {
         function : =,
         input : (('' a) : 1),
         output : ',
         before : (context {}),
         after : (context {map : {a : 1}}),
         truth : 't,
-    },
+    }),
     map == expected
 ]
 # ---

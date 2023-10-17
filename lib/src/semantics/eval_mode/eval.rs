@@ -13,21 +13,9 @@ use crate::{
             OpValBuilder,
             ValBuilder,
         },
-        eval_mode::{
-            value::{
-                Value,
-                ValueByRef,
-            },
-            QUOTE,
-            QUOTE_BY_REF,
-            QUOTE_CONST,
-            QUOTE_CONST_BY_REF,
-            QUOTE_CONST_CHECKER,
-            QUOTE_CONST_CHECKER_BY_REF,
-            QUOTE_FREE,
-            QUOTE_FREE_BY_REF,
-            QUOTE_FREE_CHECKER,
-            QUOTE_FREE_CHECKER_BY_REF,
+        eval_mode::value::{
+            Value,
+            ValueByRef,
         },
         val::{
             FuncVal,
@@ -72,12 +60,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        ValBuilder.from_map(map)
+        DefaultByVal::eval_map(self, ctx, map, &ValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
@@ -128,12 +111,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_BY_REF.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        ValBuilder.from_map(map)
+        DefaultByRef::eval_map(self, ctx, map, &ValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
@@ -184,12 +162,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Option<Val> {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_FREE.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        OpValBuilder.from_map(map)
+        DefaultByVal::eval_map(self, ctx, map, &OpValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Option<Val> {
@@ -243,12 +216,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Option<Val> {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_FREE_BY_REF.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        OpValBuilder.from_map(map)
+        DefaultByRef::eval_map(self, ctx, map, &OpValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Option<Val> {
@@ -302,12 +270,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Option<Val> {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_CONST.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        OpValBuilder.from_map(map)
+        DefaultByVal::eval_map(self, ctx, map, &OpValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Option<Val> {
@@ -361,12 +324,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Option<Val> {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_CONST_BY_REF.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        OpValBuilder.from_map(map)
+        DefaultByRef::eval_map(self, ctx, map, &OpValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Option<Val> {
@@ -420,12 +378,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> bool {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_FREE_CHECKER.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        BoolAndBuilder.from_map(map)
+        DefaultByVal::eval_map(self, ctx, map, &BoolAndBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> bool {
@@ -479,12 +432,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> bool {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_FREE_CHECKER_BY_REF.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        BoolAndBuilder.from_map(map)
+        DefaultByRef::eval_map(self, ctx, map, &BoolAndBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> bool {
@@ -538,12 +486,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> bool {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_CONST_CHECKER.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        BoolAndBuilder.from_map(map)
+        DefaultByVal::eval_map(self, ctx, map, &BoolAndBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> bool {
@@ -597,12 +540,7 @@ where
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> bool {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = QUOTE_CONST_CHECKER_BY_REF.eval(ctx, k);
-            let value = self.eval(ctx, v);
-            (key, value)
-        });
-        BoolAndBuilder.from_map(map)
+        DefaultByRef::eval_map(self, ctx, map, &BoolAndBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> bool {
