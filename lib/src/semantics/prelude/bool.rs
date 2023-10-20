@@ -1,13 +1,10 @@
 use crate::{
     semantics::{
-        ctx::DefaultCtx,
-        ctx_access::constant::CtxForConstFn,
         eval_mode::{
             BasicEvalMode,
             EvalMode,
         },
         func::{
-            CtxConstFn,
             CtxFreeFn,
             Primitive,
         },
@@ -86,40 +83,4 @@ fn fn_or(input: Val) -> Val {
         };
         Val::Bool(right)
     }
-}
-
-pub(crate) fn equal() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Symbol(BasicEvalMode::Value),
-    )));
-    let primitive = Primitive::<CtxConstFn>::new(names::EQUAL, fn_equal);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    DefaultCtx.get_many_const_ref(&ctx, [pair.first, pair.second], |[v1, v2]| {
-        Val::Bool(Bool::new(v1 == v2))
-    })
-}
-
-pub(crate) fn not_equal() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Symbol(BasicEvalMode::Value),
-    )));
-    let primitive = Primitive::<CtxConstFn>::new(names::NOT_EQUAL, fn_not_equal);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    DefaultCtx.get_many_const_ref(&ctx, [pair.first, pair.second], |[v1, v2]| {
-        Val::Bool(Bool::new(v1 != v2))
-    })
 }

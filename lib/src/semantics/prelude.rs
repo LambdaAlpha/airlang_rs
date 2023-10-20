@@ -27,7 +27,7 @@ pub(crate) fn prelude() -> NameMap {
 
     prelude_meta(&mut c);
     prelude_syntax(&mut c);
-    prelude_types(&mut c);
+    prelude_value(&mut c);
     prelude_ctx(&mut c);
     prelude_ctrl(&mut c);
     prelude_eval(&mut c);
@@ -56,8 +56,10 @@ fn prelude_syntax(c: &mut NameMap) {
     put_primitive_func(c, syntax::stringify());
 }
 
-fn prelude_types(c: &mut NameMap) {
-    put_primitive_func(c, types::type_of());
+fn prelude_value(c: &mut NameMap) {
+    put_primitive_func(c, value::type_of());
+    put_primitive_func(c, value::equal());
+    put_primitive_func(c, value::not_equal());
 }
 
 fn prelude_ctx(c: &mut NameMap) {
@@ -143,8 +145,6 @@ fn prelude_bool(c: &mut NameMap) {
     put_primitive_func(c, bool::not());
     put_primitive_func(c, bool::and());
     put_primitive_func(c, bool::or());
-    put_primitive_func(c, bool::equal());
-    put_primitive_func(c, bool::not_equal());
 }
 
 fn prelude_int(c: &mut NameMap) {
@@ -389,7 +389,7 @@ mod meta;
 
 mod syntax;
 
-mod types;
+mod value;
 
 mod ctx;
 

@@ -51,8 +51,8 @@ fn test_syntax() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_types() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/type.air"))
+fn test_value() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/value.air"))
 }
 
 #[test]
