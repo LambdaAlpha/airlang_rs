@@ -71,6 +71,11 @@ fn test_eval() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_logic() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/logic.air"))
+}
+
+#[test]
 fn test_func() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/func.air"))
 }
@@ -81,8 +86,8 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_logic() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/logic.air"))
+fn test_prop() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/prop.air"))
 }
 
 #[test]

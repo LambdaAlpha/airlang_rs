@@ -64,4 +64,4 @@ proposition
 # ===
 ;[a = (theorem {function : not, input : 't}), type_of a]
 # ---
-theorem
+proposition

@@ -43,7 +43,6 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
             Val::Func(_) => "function",
             Val::Ctx(_) => "context",
             Val::Prop(_) => "proposition",
-            Val::Theorem(_) => "theorem",
         };
         Val::Symbol(Symbol::from_str(s))
     })

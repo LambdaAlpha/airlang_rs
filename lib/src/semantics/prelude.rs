@@ -31,9 +31,10 @@ pub(crate) fn prelude() -> NameMap {
     prelude_ctx(&mut c);
     prelude_ctrl(&mut c);
     prelude_eval(&mut c);
+    prelude_logic(&mut c);
     prelude_func(&mut c);
     prelude_call(&mut c);
-    prelude_logic(&mut c);
+    prelude_prop(&mut c);
     prelude_bool(&mut c);
     prelude_int(&mut c);
     prelude_str(&mut c);
@@ -105,6 +106,11 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::is_ctx_const());
 }
 
+fn prelude_logic(c: &mut NameMap) {
+    put_primitive_func(c, logic::theorem_new());
+    put_primitive_func(c, logic::prove());
+}
+
 fn prelude_func(c: &mut NameMap) {
     put_primitive_func(c, func::func_new());
     put_primitive_func(c, func::func_repr());
@@ -122,18 +128,15 @@ fn prelude_call(c: &mut NameMap) {
     put_primitive_func(c, call::chain());
 }
 
-fn prelude_logic(c: &mut NameMap) {
-    put_primitive_func(c, logic::prop_new());
-    put_primitive_func(c, logic::prop_repr());
-    put_primitive_func(c, logic::theorem_new());
-    put_primitive_func(c, logic::theorem_repr());
-    put_primitive_func(c, logic::prove());
-    put_primitive_func(c, logic::is_true());
-    put_primitive_func(c, logic::get_function());
-    put_primitive_func(c, logic::get_input());
-    put_primitive_func(c, logic::get_output());
-    put_primitive_func(c, logic::get_before());
-    put_primitive_func(c, logic::get_after());
+fn prelude_prop(c: &mut NameMap) {
+    put_primitive_func(c, prop::prop_new());
+    put_primitive_func(c, prop::prop_repr());
+    put_primitive_func(c, prop::get_truth());
+    put_primitive_func(c, prop::get_function());
+    put_primitive_func(c, prop::get_input());
+    put_primitive_func(c, prop::get_output());
+    put_primitive_func(c, prop::get_before());
+    put_primitive_func(c, prop::get_after());
 }
 
 fn prelude_bool(c: &mut NameMap) {
@@ -303,6 +306,9 @@ pub(crate) mod names {
     pub(crate) const IS_CTX_FREE: &str = "$is_free";
     pub(crate) const IS_CTX_CONST: &str = "$is_constant";
 
+    pub(crate) const LOGIC_THEOREM_NEW: &str = "theorem";
+    pub(crate) const LOGIC_PROVE: &str = "prove";
+
     pub(crate) const FUNC_NEW: &str = "function";
     pub(crate) const FUNC_REPR: &str = "function_represent";
     pub(crate) const FUNC_ACCESS: &str = "function_caller_access";
@@ -316,17 +322,14 @@ pub(crate) mod names {
 
     pub(crate) const CHAIN: &str = ".";
 
-    pub(crate) const LOGIC_PROP_NEW: &str = "proposition";
-    pub(crate) const LOGIC_PROP_REPR: &str = "proposition_represent";
-    pub(crate) const LOGIC_THEOREM_NEW: &str = "theorem";
-    pub(crate) const LOGIC_THEOREM_REPR: &str = "theorem_represent";
-    pub(crate) const LOGIC_PROVE: &str = "prove";
-    pub(crate) const LOGIC_IS_TRUE: &str = "is_true";
-    pub(crate) const LOGIC_FUNCTION: &str = "proposition_function";
-    pub(crate) const LOGIC_INPUT: &str = "proposition_input";
-    pub(crate) const LOGIC_OUTPUT: &str = "proposition_output";
-    pub(crate) const LOGIC_CTX_BEFORE: &str = "proposition_before";
-    pub(crate) const LOGIC_CTX_AFTER: &str = "proposition_after";
+    pub(crate) const PROP_NEW: &str = "proposition";
+    pub(crate) const PROP_REPR: &str = "proposition_represent";
+    pub(crate) const PROP_TRUTH: &str = "proposition_truth";
+    pub(crate) const PROP_FUNCTION: &str = "proposition_function";
+    pub(crate) const PROP_INPUT: &str = "proposition_input";
+    pub(crate) const PROP_OUTPUT: &str = "proposition_output";
+    pub(crate) const PROP_CTX_BEFORE: &str = "proposition_before";
+    pub(crate) const PROP_CTX_AFTER: &str = "proposition_after";
 
     pub(crate) const NOT: &str = "not";
     pub(crate) const AND: &str = "and";
@@ -394,11 +397,13 @@ mod ctrl;
 
 mod eval;
 
+mod logic;
+
 mod func;
 
 mod call;
 
-mod logic;
+mod prop;
 
 mod bool;
 

@@ -1,139 +1,4 @@
 ;[
-    p = (proposition {
-        function : not,
-        input : 1,
-        output : 2,
-    }),
-    proposition_input p
-]
-# ---
-1
-# ===
-;[
-    p = (proposition {
-        function : not,
-        input : 1,
-        output : 2,
-    }),
-    proposition_output p
-]
-# ---
-2
-# ===
-;[
-    p = (proposition {
-        function : ==,
-        input : 1,
-        output : 1,
-        context : (context {map : {a : 2}}),
-    }),
-    ctx = (proposition_before p),
-    ctx $constant a
-]
-# ---
-2
-# ===
-;[
-    p = (proposition {
-        function : ==,
-        input : 1,
-        output : 1,
-        context : (context {map : {a : 2}}),
-    }),
-    ctx = (proposition_after p),
-    ctx $constant a
-]
-# ---
-2
-# ===
-;[
-    p = (proposition {
-        function : =,
-        input : 1,
-        output : 1,
-        before : (context {map : {a : 2}}),
-        after : (context {map : {a : 3}}),
-    }),
-    ctx = (proposition_before p),
-    ctx $constant a
-]
-# ---
-2
-# ===
-;[
-    p = (proposition {
-        function : =,
-        input : 1,
-        output : 1,
-        before : (context {map : {a : 2}}),
-        after : (context {map : {a : 3}}),
-    }),
-    ctx = (proposition_after p),
-    ctx $constant a
-]
-# ---
-3
-# ===
-;[
-    p = (proposition {
-        function : not,
-        input : 1,
-        output : 2,
-    }),
-    (proposition_function p) == not
-]
-# ---
-'t
-# ===
-;[
-    $map = (function {
-        body : input,
-        eval_mode : ('' map_items $),
-    }),
-    map = ($map {
-        function : not,
-        input : 't,
-        output : 'f,
-    }),
-    map == (proposition_represent (proposition map))
-]
-# ---
-'t
-# ===
-;[
-    $map = (function {
-        body : input,
-        eval_mode : ('' map_items $),
-    }),
-    map = ($map {
-        function : ==,
-        input : 't,
-        output : 'f,
-        context : (context {}),
-    }),
-    map == (proposition_represent (proposition map))
-]
-# ---
-'t
-# ===
-;[
-    $map = (function {
-        body : input,
-        eval_mode : ('' map_items $),
-    }),
-    map = ($map {
-        function : =,
-        input : 't,
-        output : 'f,
-        before : (context {}),
-        after : (context {}),
-    }),
-    map == (proposition_represent (proposition map))
-]
-# ---
-'t
-# ===
-;[
     t = (theorem {
         function : not,
         input : 't,
@@ -168,7 +33,7 @@
         function : not,
         input : 't,
     }),
-    is_true t
+    proposition_truth t
 ]
 # ---
 't
@@ -225,78 +90,13 @@
 'f
 # ===
 ;[
-    map = (theorem_represent (theorem {
-        function : not,
-        input : 't,
-    })),
-    $map = (function {
-        body : input,
-        eval_mode : ('' map_items $),
-    }),
-    expected = ($map {
-        function : not,
-        input : 't,
-        output : 'f,
-        truth : 't,
-    }),
-    map == expected
-]
-# ---
-'t
-# ===
-;[
-    map = (theorem_represent (theorem {
-        function : ==,
-        input : (1 : 2),
-        context : (context {}),
-    })),
-    $map = (function {
-        body : input,
-        eval_mode : ('' map_items $),
-    }),
-    expected = ($map {
-        function : ==,
-        input : (1 : 2),
-        output : 'f,
-        context : (context {}),
-        truth : 't,
-    }),
-    map == expected
-]
-# ---
-'t
-# ===
-;[
-    map = (theorem_represent (theorem {
-        function : =,
-        input : (('' a) : 1),
-        before : (context {}),
-    })),
-    $map = (function {
-        body : input,
-        eval_mode : ('' map_items $),
-    }),
-    expected = ($map {
-        function : =,
-        input : (('' a) : 1),
-        output : ',
-        before : (context {}),
-        after : (context {map : {a : 1}}),
-        truth : 't,
-    }),
-    map == expected
-]
-# ---
-'t
-# ===
-;[
     p = (proposition {
         function : not,
         input : 't,
         output : 'f,
     }),
     t = (prove p),
-    is_true t
+    proposition_truth t
 ]
 # ---
 't
@@ -308,7 +108,7 @@
         output : 't,
     }),
     t = (prove p),
-    is_true t
+    proposition_truth t
 ]
 # ---
 'f

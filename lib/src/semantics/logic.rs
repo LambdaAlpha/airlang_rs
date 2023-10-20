@@ -20,12 +20,7 @@ pub struct Prop {
     input: Val,
     output: Val,
     ctx: PropCtx,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct Theorem {
-    prop: Prop,
-    truth: bool,
+    truth: Truth,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -33,6 +28,13 @@ pub(crate) enum PropCtx {
     Free,
     Const(Ctx),
     Mutable(Ctx, Ctx),
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum Truth {
+    None,
+    True,
+    False,
 }
 
 impl Prop {
@@ -43,6 +45,7 @@ impl Prop {
             input,
             output,
             ctx: PropCtx::Free,
+            truth: Truth::None,
         }
     }
 
@@ -53,6 +56,7 @@ impl Prop {
             input,
             output,
             ctx: PropCtx::Const(ctx),
+            truth: Truth::None,
         }
     }
 
@@ -69,6 +73,7 @@ impl Prop {
             input,
             output,
             ctx: PropCtx::Mutable(before, after),
+            truth: Truth::None,
         }
     }
 
@@ -87,58 +92,60 @@ impl Prop {
     pub(crate) fn ctx(&self) -> &PropCtx {
         &self.ctx
     }
-}
 
-impl Theorem {
-    pub(crate) fn new_free(func: FuncVal, input: Val) -> Self {
+    pub(crate) fn new_free_theorem(func: FuncVal, input: Val) -> Self {
         assert_matches!(func.0.evaluator, FuncEval::Free(_));
         let output = func.0.evaluator.eval(&mut FreeCtx, input.clone());
-        let prop = Prop {
+        Self {
             func,
             input,
             output,
             ctx: PropCtx::Free,
-        };
-        Self { prop, truth: true }
+            truth: Truth::True,
+        }
     }
 
-    pub(crate) fn new_const(func: FuncVal, mut ctx: Ctx, input: Val) -> Self {
+    pub(crate) fn new_const_theorem(func: FuncVal, mut ctx: Ctx, input: Val) -> Self {
         assert_matches!(func.0.evaluator, FuncEval::Const(_));
         let output = func
             .0
             .evaluator
             .eval(&mut ConstCtx(&mut ctx), input.clone());
-        let prop = Prop {
+        Self {
             func,
             input,
             output,
             ctx: PropCtx::Const(ctx),
-        };
-        Self { prop, truth: true }
+            truth: Truth::True,
+        }
     }
 
-    pub(crate) fn new_mutable(func: FuncVal, before: Ctx, input: Val) -> Self {
+    pub(crate) fn new_mutable_theorem(func: FuncVal, before: Ctx, input: Val) -> Self {
         assert_matches!(func.0.evaluator, FuncEval::Mutable(_));
         let mut after = Ctx::clone(&before);
         let output = func
             .0
             .evaluator
             .eval(&mut MutableCtx(&mut after), input.clone());
-        let prop = Prop {
+        Self {
             func,
             input,
             output,
             ctx: PropCtx::Mutable(before, after),
-        };
-        Self { prop, truth: true }
+            truth: Truth::True,
+        }
     }
 
     pub(crate) fn prove(mut prop: Prop) -> Self {
         match &mut prop.ctx {
             PropCtx::Free => {
                 let real_output = prop.func.0.evaluator.eval(&mut FreeCtx, prop.input.clone());
-                let truth = prop.output == real_output;
-                Self { prop, truth }
+                prop.truth = if prop.output == real_output {
+                    Truth::True
+                } else {
+                    Truth::False
+                };
+                prop
             }
             PropCtx::Const(before) => {
                 let real_output = prop
@@ -146,8 +153,12 @@ impl Theorem {
                     .0
                     .evaluator
                     .eval(&mut ConstCtx(before), prop.input.clone());
-                let truth = prop.output == real_output;
-                Self { prop, truth }
+                prop.truth = if prop.output == real_output {
+                    Truth::True
+                } else {
+                    Truth::False
+                };
+                prop
             }
             PropCtx::Mutable(before, after) => {
                 let mut real_after = Ctx::clone(before);
@@ -156,17 +167,17 @@ impl Theorem {
                     .0
                     .evaluator
                     .eval(&mut MutableCtx(&mut real_after), prop.input.clone());
-                let truth = prop.output == real_output && *after == real_after;
-                Self { prop, truth }
+                prop.truth = if prop.output == real_output && *after == real_after {
+                    Truth::True
+                } else {
+                    Truth::False
+                };
+                prop
             }
         }
     }
 
-    pub(crate) fn is_true(&self) -> bool {
+    pub(crate) fn truth(&self) -> Truth {
         self.truth
-    }
-
-    pub(crate) fn prop(&self) -> &Prop {
-        &self.prop
     }
 }

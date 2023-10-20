@@ -3,10 +3,7 @@ use {
         semantics::{
             ctx::Ctx,
             func::Func,
-            logic::{
-                Prop,
-                Theorem,
-            },
+            logic::Prop,
             ReprError,
         },
         syntax::{
@@ -70,7 +67,6 @@ pub enum Val {
     Ctx(CtxVal),
 
     Prop(PropVal),
-    Theorem(TheoremVal),
 }
 
 pub(crate) type PairVal = Pair<Val, Val>;
@@ -87,9 +83,6 @@ pub struct CtxVal(pub(crate) Box<Ctx>);
 
 #[derive(Debug, Clone, Eq)]
 pub struct PropVal(pub(crate) Reader<Prop>);
-
-#[derive(Debug, Clone, Eq)]
-pub struct TheoremVal(pub(crate) Reader<Theorem>);
 
 #[allow(dead_code)]
 impl Val {
@@ -191,12 +184,6 @@ impl From<CtxVal> for Val {
 impl From<PropVal> for Val {
     fn from(value: PropVal) -> Self {
         Val::Prop(value)
-    }
-}
-
-impl From<TheoremVal> for Val {
-    fn from(value: TheoremVal) -> Self {
-        Val::Theorem(value)
     }
 }
 
@@ -565,27 +552,6 @@ impl PartialEq for PropVal {
 }
 
 impl Hash for PropVal {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.deref().hash(state);
-    }
-}
-
-impl From<Reader<Theorem>> for TheoremVal {
-    fn from(value: Reader<Theorem>) -> Self {
-        TheoremVal(value)
-    }
-}
-
-impl PartialEq for TheoremVal {
-    fn eq(&self, other: &Self) -> bool {
-        if self.0 == other.0 {
-            return true;
-        }
-        *self.0 == *other.0
-    }
-}
-
-impl Hash for TheoremVal {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.deref().hash(state);
     }
