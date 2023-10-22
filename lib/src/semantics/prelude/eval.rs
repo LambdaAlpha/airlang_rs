@@ -71,13 +71,13 @@ fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
     Eval.eval(&mut ctx, input)
 }
 
-pub(crate) fn eval_quote() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn quote() -> PrimitiveFunc<CtxMutableFn> {
     let eval_mode = EvalMode::Any(BasicEvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::QUOTE, fn_eval_quote);
+    let primitive = Primitive::<CtxMutableFn>::new(names::QUOTE, fn_quote);
     PrimitiveFunc::new(eval_mode, primitive)
 }
 
-fn fn_eval_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
     QUOTE.eval(&mut ctx, input)
 }
 

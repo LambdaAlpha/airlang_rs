@@ -98,7 +98,7 @@ fn prelude_ctrl(c: &mut NameMap) {
 fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::value());
     put_primitive_func(c, eval::eval());
-    put_primitive_func(c, eval::eval_quote());
+    put_primitive_func(c, eval::quote());
     put_primitive_func(c, eval::eval_twice());
     put_primitive_func(c, eval::eval_thrice());
     put_primitive_func(c, eval::eval_free());
