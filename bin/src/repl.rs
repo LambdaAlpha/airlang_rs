@@ -25,13 +25,8 @@ pub(crate) fn repl(ui: &mut impl Ui) {
     loop {
         ui.print(PROMPT_PREFIX);
 
-        if !input_buffer.is_empty() {
-            input_buffer.push('\n');
-        }
-
         let len = input_buffer.len();
         ui.read_line(&mut input_buffer);
-        input_buffer.truncate(input_buffer.trim_end().len());
 
         let input = input_buffer.trim();
         if input.is_empty() {
@@ -41,7 +36,7 @@ pub(crate) fn repl(ui: &mut impl Ui) {
 
         if input == "((" {
             dyn_ctx.multiline_mode = true;
-        } else if len <= input_buffer.len() {
+        } else {
             let newline = input_buffer[len..].trim();
             if newline == "))" {
                 dyn_ctx.multiline_mode = false;
