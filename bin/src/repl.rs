@@ -15,18 +15,18 @@ use {
     },
 };
 
-pub(crate) fn repl(ui: &mut impl Ui) {
+pub(crate) fn repl(ui: &mut impl Ui) -> std::io::Result<()> {
     let const_ctx = cmd::const_ctx();
     let mut dyn_ctx = dyn_ctx();
     let mut input_buffer = String::new();
 
-    print_title(ui, &const_ctx, &mut dyn_ctx);
+    print_title(ui, &const_ctx, &mut dyn_ctx)?;
 
     loop {
-        ui.print(PROMPT_PREFIX);
+        ui.print(PROMPT_PREFIX)?;
 
         let len = input_buffer.len();
-        ui.read_line(&mut input_buffer);
+        ui.read_line(&mut input_buffer)?;
 
         let input = input_buffer.trim();
         if input.is_empty() {
@@ -48,15 +48,16 @@ pub(crate) fn repl(ui: &mut impl Ui) {
 
         match eval(&const_ctx, &mut dyn_ctx, input) {
             Output::Ok(output) => {
-                ui.println(&output);
+                ui.println(&output)?;
             }
             Output::Err(error) => {
-                ui.eprintln(&*error);
+                ui.eprintln(&*error)?;
             }
             Output::Break => break,
         }
         input_buffer.clear();
     }
+    Ok(())
 }
 
 pub(crate) fn dyn_ctx() -> DynCtx {
@@ -74,16 +75,21 @@ fn eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: &str) -> Output {
     }
 }
 
-fn print_title(ui: &mut impl Ui, const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx) {
+fn print_title(
+    ui: &mut impl Ui,
+    const_ctx: &ConstCtx,
+    dyn_ctx: &mut DynCtx,
+) -> std::io::Result<()> {
     match title(const_ctx, dyn_ctx, Val::default()) {
         Output::Ok(output) => {
-            ui.println(&output);
+            ui.println(&output)?;
         }
         Output::Err(error) => {
-            ui.eprintln(&*error);
+            ui.eprintln(&*error)?;
         }
         _ => {}
     }
+    Ok(())
 }
 
 const PROMPT_PREFIX: &str = "> ";

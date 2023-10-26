@@ -29,7 +29,7 @@ use crate::repl::ui::StdUi;
 
 mod repl;
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let mut std_ui = StdUi::new();
-    repl::repl(&mut std_ui);
+    repl::repl(&mut std_ui)
 }
