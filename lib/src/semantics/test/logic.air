@@ -72,7 +72,7 @@
         before : (context {})
     }),
     ctx = (proposition_before t),
-    ctx $constant (('t is_null) [a])
+    ctx .. (is_null [a])
 ]
 # ---
 't
@@ -84,7 +84,7 @@
         before : (context {})
     }),
     ctx = (proposition_after t),
-    ctx $constant (('t is_null) [a])
+    ctx .. (is_null [a])
 ]
 # ---
 'f

@@ -5,3 +5,43 @@
 't . not . not and 't
 # ---
 't
+# ===
+' .. (1 + 1)
+# ---
+2
+# ===
+;[a = 1, ' .. (load [a])]
+# ---
+'
+# ===
+' .. (; (` [a ('t =) 1, a]))
+# ---
+'
+# ===
+' .. (get_1 (1 : 2))
+# ---
+1
+# ===
+;[(_ : a) = ((context {map : {a : 1}}) .. (a = 2)), a]
+# ---
+1
+# ===
+;[a = (context {}), a .. (b = 1), load [a, b]]
+# ---
+1
+# ===
+;[a =constant (context {map : {b : 1}}), a .. ($ b)]
+# ---
+1
+# ===
+;[a =constant (context {map : {b : 1}}), a .. (b = 2), load [a, b]]
+# ---
+1
+# ===
+;[(_ : a) = ((context {map : {b : (1 : constant)}}) .. ($ b)), a]
+# ---
+1
+# ===
+;[a = (context {map : {b : (1 : constant)}}), a .. ($ b)]
+# ---
+1

@@ -1,7 +1,6 @@
 use crate::{
     semantics::{
         ctx::{
-            CtxTrait,
             DefaultCtx,
             TaggedRef,
         },
@@ -11,10 +10,7 @@ use crate::{
                 CtxForConstFn,
             },
             free::FreeCtx,
-            mutable::{
-                CtxForMutableFn,
-                MutableCtx,
-            },
+            mutable::CtxForMutableFn,
             CtxAccessor,
         },
         eval::Evaluator,
@@ -47,7 +43,6 @@ use crate::{
     types::{
         Bool,
         Map,
-        Pair,
     },
 };
 
@@ -112,61 +107,6 @@ fn fn_eval_thrice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let val1 = Eval.eval(&mut ctx, input);
     let val2 = Eval.eval(&mut ctx, val1);
     Eval.eval(&mut ctx, val2)
-}
-
-pub(crate) fn eval_free() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Any(BasicEvalMode::Quote);
-    let primitive = Primitive::<CtxFreeFn>::new(names::EVAL_FREE, fn_eval_free);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_eval_free(input: Val) -> Val {
-    Eval.eval(&mut FreeCtx, input)
-}
-
-pub(crate) fn eval_const() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Any(BasicEvalMode::Quote),
-    )));
-    let primitive = Primitive::<CtxConstFn>::new(names::EVAL_CONST, fn_eval_const);
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_eval_const(ctx: CtxForConstFn, input: Val) -> Val {
-    fn_eval_in_ctx(ctx, input)
-}
-
-pub(crate) fn eval_mutable() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Any(BasicEvalMode::Quote),
-    )));
-    let primitive =
-        Primitive::<CtxMutableFn>::new(names::EVAL_MUTABLE, |ctx, val| fn_eval_in_ctx(ctx, val));
-    PrimitiveFunc::new(eval_mode, primitive)
-}
-
-fn fn_eval_in_ctx<Ctx: CtxTrait>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let name_or_val = pair.first;
-    let val = pair.second;
-    DefaultCtx.get_tagged_ref(&mut ctx, name_or_val, |target_ctx| {
-        let TaggedRef {
-            val_ref: Val::Ctx(CtxVal(target_ctx)),
-            is_const: target_ctx_const,
-        } = target_ctx
-        else {
-            return Val::default();
-        };
-        if target_ctx_const {
-            Eval.eval(&mut ConstCtx(target_ctx), val)
-        } else {
-            Eval.eval(&mut MutableCtx(target_ctx), val)
-        }
-    })
 }
 
 const VALUE: &str = "value";

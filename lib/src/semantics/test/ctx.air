@@ -318,15 +318,15 @@ is_local [a]
 # ---
 'f
 # ===
-;[a = (context {map : {b : 1, : ;, : =}}), a $mutable (;[b = 2, b])]
+;[a = (context {map : {b : 1, : ;, : =}}), a .. (; [b = 2, b])]
 # ---
 2
 # ===
-;[a = (context {map : {b : (1 : final), : ;, : =}}), a $mutable (;[b = 2, b])]
+;[a = (context {map : {b : (1 : final), : ;, : =}}), a .. (; [b = 2, b])]
 # ---
 1
 # ===
-;[a = (context {map : {b : (1 : 2 : constant), : ;, : set_1}}), a $mutable (;[b set_1 3, b])]
+;[a = (context {map : {b : (1 : 2 : constant), : ;, : set_1}}), a .. (; [b set_1 3, b])]
 # ---
 1 : 2
 # ===
@@ -426,7 +426,7 @@ a
 # ---
 c
 # ===
-;[a = (prelude '), a $constant (not 't)]
+;[a = (prelude '), a .. (not 't)]
 # ---
 'f
 # ===
@@ -450,6 +450,6 @@ c
 # ---
 't
 # ===
-$free (('t this) ')
+' .. (this ')
 # ---
 '

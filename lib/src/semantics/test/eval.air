@@ -66,50 +66,6 @@ $ {('' a) : ($ {b : c})}
 # ---
 1
 # ===
-$free (1 ('t +) 1)
-# ---
-2
-# ===
-;[a = 1, $free a]
-# ---
-'
-# ===
-$free (('t ;) [a ('t =) 1, a])
-# ---
-'
-# ===
-$free (('t get_1) (1 : 2))
-# ---
-1
-# ===
-;[(_ : a) = ((context {map : {a : 1, : =}}) $mutable (a = 2)), a]
-# ---
-1
-# ===
-;[a = (context {map : {: =}}), a $mutable (b = 1), load [a, b]]
-# ---
-1
-# ===
-;[a =constant (context {map : {b : 1}}), a $mutable b]
-# ---
-1
-# ===
-;[a =constant (context {map : {b : 1, : =}}), a $mutable (b = 2), load [a, b]]
-# ---
-1
-# ===
-;[(_ : a) = ((context {map : {: =, b : (1 : constant)}}) $constant b), a]
-# ---
-1
-# ===
-;[a = (context {map : {: =, b : (1 : constant)}}), a $constant b]
-# ---
-1
-# ===
-;[a = (context {map : {: =}}), a $constant (b = 1), load [a, b]]
-# ---
-'
-# ===
 $is_free {value : 1}
 # ---
 't

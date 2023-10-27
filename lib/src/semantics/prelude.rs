@@ -101,9 +101,6 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::quote());
     put_primitive_func(c, eval::eval_twice());
     put_primitive_func(c, eval::eval_thrice());
-    put_primitive_func(c, eval::eval_free());
-    put_primitive_func(c, eval::eval_mutable());
-    put_primitive_func(c, eval::eval_const());
     put_primitive_func(c, eval::is_ctx_free());
     put_primitive_func(c, eval::is_ctx_const());
 }
@@ -128,6 +125,7 @@ fn prelude_func(c: &mut NameMap) {
 
 fn prelude_call(c: &mut NameMap) {
     put_primitive_func(c, call::chain());
+    put_primitive_func(c, call::call_with_ctx());
 }
 
 fn prelude_prop(c: &mut NameMap) {
@@ -300,9 +298,6 @@ pub(crate) mod names {
     pub(crate) const QUOTE: &str = "`";
     pub(crate) const EVAL_TWICE: &str = "$2";
     pub(crate) const EVAL_THRICE: &str = "$3";
-    pub(crate) const EVAL_FREE: &str = "$free";
-    pub(crate) const EVAL_CONST: &str = "$constant";
-    pub(crate) const EVAL_MUTABLE: &str = "$mutable";
     pub(crate) const IS_CTX_FREE: &str = "$is_free";
     pub(crate) const IS_CTX_CONST: &str = "$is_constant";
 
@@ -321,6 +316,7 @@ pub(crate) mod names {
     pub(crate) const FUNC_CALLER_NAME: &str = "function_caller_name";
 
     pub(crate) const CHAIN: &str = ".";
+    pub(crate) const CALL_WITH_CTX: &str = "..";
 
     pub(crate) const PROP_NEW: &str = "proposition";
     pub(crate) const PROP_REPR: &str = "proposition_represent";

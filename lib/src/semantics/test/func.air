@@ -259,10 +259,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : (caller $constant a),
+        body : (caller .. ($ a)),
         caller_access : free,
         context : (context {map : {
-            : $constant,
+            : ..,
+            : $,
         }})
     }),
     f '
@@ -273,10 +274,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : (caller $constant a),
+        body : (caller .. ($ a)),
         caller_access : constant,
         context : (context {map : {
-            : $constant,
+            : ..,
+            : $,
         }})
     }),
     f '
@@ -287,10 +289,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : (caller $constant a),
+        body : (caller .. ($ a)),
         caller_access : mutable,
         context : (context {map : {
-            : $constant,
+            : ..,
+            : $,
         }})
     }),
     f '
@@ -301,10 +304,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : (caller $mutable a),
+        body : (caller .. ($ a)),
         caller_access : constant,
         context : (context {map : {
-            : $mutable,
+            : ..,
+            : $,
         }})
     }),
     f '
@@ -314,11 +318,12 @@ a
 # ===
 ;[
     f = (function {
-        body : (caller $mutable (('f ('t input)) = 2)),
+        body : (caller .. (('f ('t input)) = 2)),
         eval_mode : '',
         caller_access : mutable,
         context : (context {map : {
-            : $mutable,
+            : ..,
+            : =,
         }})
     }),
     a = 1,
@@ -330,11 +335,12 @@ a
 # ===
 ;[
     f = (function {
-        body : (caller $mutable (('f ('t input)) = 2)),
+        body : (caller .. (('f ('t input)) = 2)),
         eval_mode : '',
         caller_access : mutable,
         context : (context {map : {
-            : $mutable,
+            : ..,
+            : =,
         }})
     }),
     a =final 1,
@@ -346,11 +352,12 @@ a
 # ===
 ;[
     f = (function {
-        body : (caller $mutable (('f ('t input)) = 2)),
+        body : (caller .. (('f ('t input)) = 2)),
         eval_mode : '',
         caller_access : constant,
         context : (context {map : {
-            : $mutable,
+            : ..,
+            : =,
         }})
     }),
     a = 1,

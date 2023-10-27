@@ -28,7 +28,7 @@
         context : (context {map : {a : 2}}),
     }),
     ctx = (proposition_before p),
-    ctx $constant a
+    ctx .. ($ a)
 ]
 # ---
 2
@@ -41,7 +41,7 @@
         context : (context {map : {a : 2}}),
     }),
     ctx = (proposition_after p),
-    ctx $constant a
+    ctx .. ($ a)
 ]
 # ---
 2
@@ -55,7 +55,7 @@
         after : (context {map : {a : 3}}),
     }),
     ctx = (proposition_before p),
-    ctx $constant a
+    ctx .. ($ a)
 ]
 # ---
 2
@@ -69,7 +69,7 @@
         after : (context {map : {a : 3}}),
     }),
     ctx = (proposition_after p),
-    ctx $constant a
+    ctx .. ($ a)
 ]
 # ---
 3
