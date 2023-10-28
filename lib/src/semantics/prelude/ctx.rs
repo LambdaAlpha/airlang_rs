@@ -36,6 +36,7 @@ use crate::{
             PrimitiveFunc,
         },
         val::{
+            CallVal,
             CtxVal,
             MapVal,
             Val,
@@ -81,56 +82,23 @@ pub(crate) fn save() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_save(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_save_val::<false>(ctx, input, InvariantTag::None)
-}
-
-pub(crate) fn save_final() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE_FINAL, fn_save_final);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_save_final(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_save_val::<false>(ctx, input, InvariantTag::Final)
-}
-
-pub(crate) fn save_const() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE_CONST, fn_save_const);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_save_const(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_save_val::<false>(ctx, input, InvariantTag::Const)
-}
-
-pub(crate) fn save_local() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE_LOCAL, fn_save_local);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_save_local(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_save_val::<true>(ctx, input, InvariantTag::None)
-}
-
-fn fn_save_val<const LOCAL: bool>(ctx: CtxForMutableFn, input: Val, tag: InvariantTag) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let val = pair.second;
-    let tagged_val = TaggedVal { val, tag };
-    fn_nested(ctx, pair.first, |mut ctx, name| {
-        if LOCAL {
+    let path = pair.first;
+    let (local, tagged_val) = if let Val::Call(call) = pair.second {
+        match parse_ctx_val_pair(call, true) {
+            ParseCtxValPairResult::Parsed { val, local, tag } => (local, TaggedVal { val, tag }),
+            ParseCtxValPairResult::Fallback(call) => (false, TaggedVal::new(Val::Call(call))),
+            ParseCtxValPairResult::None => {
+                return Val::default();
+            }
+        }
+    } else {
+        (false, TaggedVal::new(pair.second))
+    };
+    fn_nested(ctx, path, |mut ctx, name| {
+        if local {
             ctx.put_val_local(name, tagged_val)
         } else {
             ctx.put_val(name, tagged_val)
@@ -147,98 +115,64 @@ pub(crate) fn assign() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(input_mode, primitive)
 }
 
-fn fn_assign(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val::<false>(ctx, input, InvariantTag::None)
-}
-
-pub(crate) fn assign_final() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Quote),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_FINAL, fn_assign_final);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_assign_final(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val::<false>(ctx, input, InvariantTag::Final)
-}
-
-pub(crate) fn assign_const() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Quote),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_CONST, fn_assign_const);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_assign_const(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val::<false>(ctx, input, InvariantTag::Const)
-}
-
-pub(crate) fn assign_local() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Quote),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::ASSIGN_LOCAL, fn_assign_local);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_assign_local(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_assign_val::<true>(ctx, input, InvariantTag::None)
-}
-
-fn fn_assign_val<const LOCAL: bool>(
-    mut ctx: CtxForMutableFn,
-    input: Val,
-    tag: InvariantTag,
-) -> Val {
+fn fn_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let name = pair.first;
-    assign_destruct::<LOCAL>(&mut ctx, name, pair.second, tag)
+    assign_destruct(&mut ctx, name, pair.second, false, InvariantTag::None)
 }
 
-fn assign_destruct<const LOCAL: bool>(
+const LOCAL: &str = "local";
+const TAG: &str = "tag";
+
+fn assign_destruct(
     ctx: &mut CtxForMutableFn,
     name: Val,
     val: Val,
+    local: bool,
     tag: InvariantTag,
 ) -> Val {
     match name {
         Val::Symbol(s) => {
-            if LOCAL {
-                ctx.put_val_local(s, TaggedVal { tag, val })
+            let tagged_val = TaggedVal { val, tag };
+            if local {
+                ctx.put_val_local(s, tagged_val)
             } else {
-                ctx.put_val(s, TaggedVal { tag, val })
+                ctx.put_val(s, tagged_val)
             }
         }
         Val::Pair(name_pair) => {
             let Val::Pair(val_pair) = val else {
                 return Val::default();
             };
-            let last_first = assign_destruct::<LOCAL>(ctx, name_pair.first, val_pair.first, tag);
-            let last_second = assign_destruct::<LOCAL>(ctx, name_pair.second, val_pair.second, tag);
+            let last_first = assign_destruct(ctx, name_pair.first, val_pair.first, local, tag);
+            let last_second = assign_destruct(ctx, name_pair.second, val_pair.second, local, tag);
             Val::Pair(Box::new(Pair::new(last_first, last_second)))
         }
-        Val::Call(name_call) => {
-            let Val::Call(val_call) = val else {
-                return Val::default();
-            };
-            let last_func = assign_destruct::<LOCAL>(ctx, name_call.func, val_call.func, tag);
-            let last_input = assign_destruct::<LOCAL>(ctx, name_call.input, val_call.input, tag);
-            Val::Call(Box::new(Call::new(last_func, last_input)))
-        }
+        Val::Call(name_call) => match parse_ctx_val_pair(name_call, true) {
+            ParseCtxValPairResult::Parsed {
+                val: name,
+                local,
+                tag,
+            } => assign_destruct(ctx, name, val, local, tag),
+            ParseCtxValPairResult::Fallback(name_call) => {
+                let Val::Call(val_call) = val else {
+                    return Val::default();
+                };
+                let last_func = assign_destruct(ctx, name_call.func, val_call.func, local, tag);
+                let last_input = assign_destruct(ctx, name_call.input, val_call.input, local, tag);
+                Val::Call(Box::new(Call::new(last_func, last_input)))
+            }
+            ParseCtxValPairResult::None => Val::default(),
+        },
         Val::Reverse(name_reverse) => {
             let Val::Reverse(val_reverse) = val else {
                 return Val::default();
             };
-            let last_func = assign_destruct::<LOCAL>(ctx, name_reverse.func, val_reverse.func, tag);
+            let last_func = assign_destruct(ctx, name_reverse.func, val_reverse.func, local, tag);
             let last_output =
-                assign_destruct::<LOCAL>(ctx, name_reverse.output, val_reverse.output, tag);
+                assign_destruct(ctx, name_reverse.output, val_reverse.output, local, tag);
             Val::Reverse(Box::new(Reverse::new(last_func, last_output)))
         }
         Val::List(name_list) => {
@@ -260,7 +194,7 @@ fn assign_destruct<const LOCAL: bool>(
                         continue;
                     }
                 }
-                last_list.push(assign_destruct::<LOCAL>(ctx, name, val, tag));
+                last_list.push(assign_destruct(ctx, name, val, local, tag));
             }
             Val::List(last_list)
         }
@@ -272,7 +206,7 @@ fn assign_destruct<const LOCAL: bool>(
                 .into_iter()
                 .filter_map(|(k, v)| {
                     let name = name_map.remove(&k)?;
-                    let last_val = assign_destruct::<LOCAL>(ctx, name, v, tag);
+                    let last_val = assign_destruct(ctx, name, v, local, tag);
                     Some((k, last_val))
                 })
                 .collect();
@@ -280,6 +214,76 @@ fn assign_destruct<const LOCAL: bool>(
         }
         _ => Val::default(),
     }
+}
+
+enum ParseCtxValPairResult {
+    Parsed {
+        val: Val,
+        local: bool,
+        tag: InvariantTag,
+    },
+    Fallback(Box<CallVal>),
+    None,
+}
+
+fn parse_ctx_val_pair(call: Box<CallVal>, accept_local: bool) -> ParseCtxValPairResult {
+    let Val::Symbol(tag) = &call.func else {
+        return ParseCtxValPairResult::Fallback(call);
+    };
+    if &**tag != CTX_VALUE_PAIR {
+        return ParseCtxValPairResult::Fallback(call);
+    }
+    let Val::Pair(pair) = call.input else {
+        return ParseCtxValPairResult::None;
+    };
+    let val = pair.first;
+    let (local, tag) = match pair.second {
+        Val::Symbol(s) => {
+            if let Some(tag) = parse_invariant_tag(&s) {
+                (false, tag)
+            } else if accept_local && &*s == LOCAL {
+                (true, InvariantTag::None)
+            } else {
+                return ParseCtxValPairResult::None;
+            }
+        }
+        Val::Map(mut map) => {
+            let tag = match map_remove(&mut map, TAG) {
+                Val::Symbol(tag) => {
+                    if let Some(tag) = parse_invariant_tag(&tag) {
+                        tag
+                    } else {
+                        return ParseCtxValPairResult::None;
+                    }
+                }
+                Val::Unit(_) => InvariantTag::None,
+                _ => return ParseCtxValPairResult::None,
+            };
+            let local = map.contains_key(&symbol(LOCAL));
+            (local, tag)
+        }
+        _ => return ParseCtxValPairResult::None,
+    };
+    ParseCtxValPairResult::Parsed { val, local, tag }
+}
+
+fn parse_invariant_tag(tag: &str) -> Option<InvariantTag> {
+    let tag = match tag {
+        VARIABLE => InvariantTag::None,
+        FINAL => InvariantTag::Final,
+        CONST => InvariantTag::Const,
+        _ => return None,
+    };
+    Some(tag)
+}
+
+fn generate_invariant_tag(tag: InvariantTag) -> Symbol {
+    let tag = match tag {
+        InvariantTag::None => VARIABLE,
+        InvariantTag::Final => FINAL,
+        InvariantTag::Const => CONST,
+    };
+    Symbol::from_str(tag)
 }
 
 pub(crate) fn set_final() -> PrimitiveFunc<CtxMutableFn> {
@@ -391,6 +395,7 @@ where
 const MAP: &str = "map";
 const SUPER: &str = "super";
 
+const CTX_VALUE_PAIR: &str = ":";
 const VARIABLE: &str = "variable";
 const FINAL: &str = "final";
 const CONST: &str = "constant";
@@ -401,10 +406,7 @@ pub(crate) fn ctx_new() -> PrimitiveFunc<CtxFreeFn> {
         symbol(MAP),
         InputMode::MapForAll(Box::new(Pair::new(
             InputMode::Any(EvalMode::Quote),
-            InputMode::Pair(Box::new(Pair::new(
-                InputMode::Any(EvalMode::Eval),
-                InputMode::Symbol(EvalMode::Value),
-            ))),
+            InputMode::Any(EvalMode::Eval),
         ))),
     );
     map.insert(symbol(SUPER), InputMode::Symbol(EvalMode::Value));
@@ -430,20 +432,18 @@ fn fn_ctx_new(input: Val) -> Val {
         let Val::Symbol(name) = key else {
             return Val::default();
         };
-        let tagged_val = if let Val::Pair(pair) = val {
-            let Val::Symbol(tag) = pair.second else {
-                return Val::default();
-            };
-            let val = pair.first;
-            let tag = match &*tag {
-                VARIABLE => InvariantTag::None,
-                FINAL => InvariantTag::Final,
-                CONST => InvariantTag::Const,
-                _ => return Val::default(),
-            };
-            TaggedVal { val, tag }
-        } else {
-            TaggedVal::new(val)
+        let tagged_val = {
+            if let Val::Call(call) = val {
+                match parse_ctx_val_pair(call, false) {
+                    ParseCtxValPairResult::Parsed { val, tag, .. } => TaggedVal { val, tag },
+                    ParseCtxValPairResult::Fallback(call) => TaggedVal::new(Val::Call(call)),
+                    ParseCtxValPairResult::None => {
+                        return Val::default();
+                    }
+                }
+            } else {
+                TaggedVal::new(val)
+            }
         };
         name_map.insert(name, tagged_val);
     }
@@ -481,19 +481,20 @@ fn fn_ctx_repr(input: Val) -> Val {
             .into_iter()
             .map(|(k, v)| {
                 let k = Val::Symbol(k);
-                let v = if let Val::Pair(_) = v.val {
-                    let tag = match v.tag {
-                        InvariantTag::None => VARIABLE,
-                        InvariantTag::Final => FINAL,
-                        InvariantTag::Const => CONST,
-                    };
-                    Val::Pair(Box::new(Pair::new(v.val, symbol(tag))))
+                let use_normal_form = if let Val::Call(call) = &v.val
+                    && let Val::Symbol(func) = &call.func
+                    && &**func == CTX_VALUE_PAIR {
+                    true
                 } else {
-                    match v.tag {
-                        InvariantTag::None => v.val,
-                        InvariantTag::Final => Val::Pair(Box::new(Pair::new(v.val, symbol(FINAL)))),
-                        InvariantTag::Const => Val::Pair(Box::new(Pair::new(v.val, symbol(CONST)))),
-                    }
+                    matches!(v.tag, InvariantTag::Final | InvariantTag::Const)
+                };
+                let v = if use_normal_form {
+                    let func = symbol(CTX_VALUE_PAIR);
+                    let tag = generate_invariant_tag(v.tag);
+                    let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(tag))));
+                    Val::Call(Box::new(Call::new(func, pair)))
+                } else {
+                    v.val
                 };
                 (k, v)
             })

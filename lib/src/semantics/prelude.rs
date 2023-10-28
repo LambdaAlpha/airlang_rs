@@ -66,13 +66,7 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::load());
     put_primitive_func(c, ctx::remove());
     put_primitive_func(c, ctx::save());
-    put_primitive_func(c, ctx::save_final());
-    put_primitive_func(c, ctx::save_const());
-    put_primitive_func(c, ctx::save_local());
     put_primitive_func(c, ctx::assign());
-    put_primitive_func(c, ctx::assign_final());
-    put_primitive_func(c, ctx::assign_const());
-    put_primitive_func(c, ctx::assign_local());
     put_primitive_func(c, ctx::set_final());
     put_primitive_func(c, ctx::set_const());
     put_primitive_func(c, ctx::is_final());
@@ -267,13 +261,7 @@ pub(crate) mod names {
     pub(crate) const LOAD: &str = "load";
     pub(crate) const MOVE: &str = "move";
     pub(crate) const SAVE: &str = "save";
-    pub(crate) const SAVE_FINAL: &str = "save_final";
-    pub(crate) const SAVE_CONST: &str = "save_constant";
-    pub(crate) const SAVE_LOCAL: &str = "save_local";
     pub(crate) const ASSIGN: &str = "=";
-    pub(crate) const ASSIGN_FINAL: &str = "=final";
-    pub(crate) const ASSIGN_CONST: &str = "=constant";
-    pub(crate) const ASSIGN_LOCAL: &str = "=local";
     pub(crate) const SET_FINAL: &str = "set_final";
     pub(crate) const SET_CONST: &str = "set_constant";
     pub(crate) const IS_FINAL: &str = "is_final";

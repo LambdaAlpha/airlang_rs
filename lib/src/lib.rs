@@ -32,7 +32,8 @@
     unsize,
     coerce_unsized,
     array_methods,
-    assert_matches
+    assert_matches,
+    let_chains
 )]
 
 pub mod syntax;

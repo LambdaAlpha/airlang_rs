@@ -26,11 +26,11 @@
 # ---
 '
 # ===
-;[a =final 1, move [a]]
+;[(a ': final) = 1, move [a]]
 # ---
 '
 # ===
-;[a =constant 1, move [a]]
+;[(a ': constant) = 1, move [a]]
 # ---
 '
 # ===
@@ -70,15 +70,33 @@
 # ---
 1
 # ===
-;[a = (context {}), b = 1, [a, b] save_final b, is_final [a, b]]
+;[a = (context {}), b = 1, [a, b] save (` (('t b) ': final)), is_final [a, b]]
 # ---
 't
 # ===
-;[a = (context {}), b = 1, [a, b] save_constant b, is_constant [a, b]]
+;[a = (context {}), b = 1, [a, b] save (` (('t b) ': constant)), is_constant [a, b]]
 # ---
 't
 # ===
-;[a = (context {}), b = a, [a, b] save (move [b]), [a] set_super b, [a, c] save_local 1, is_local [a, c]]
+;[
+    a = (context {}),
+    b = a,
+    [a, b] save (move [b]),
+    [a] set_super b,
+    [a, c] save ('' (1 ': local)),
+    is_local [a, c]
+]
+# ---
+'t
+# ===
+;[
+    a = (context {}),
+    b = a,
+    [a, b] save (move [b]),
+    [a] set_super b,
+    [a, c] save ('' (1 ': {local, tag : final})),
+    (is_local [a, c]) and (is_final [a, c])
+]
 # ---
 't
 # ===
@@ -102,6 +120,14 @@
 # ---
 1
 # ===
+;[(a ': final) = 1, is_final [a]]
+# ---
+'t
+# ===
+;[(a ': {tag : final, local}) = 1, (is_final [a]) and (is_local [a])]
+# ---
+'t
+# ===
 ;[(a : b) = (1 : 2), a]
 # ---
 1
@@ -113,6 +139,14 @@
 ;[(a : b : c) = (1 : 2 : 3), [a, b, c]]
 # ---
 [1, 2, 3]
+# ===
+;[(a : b ': final) = (1 : 2), (is_final [a]) and (is_final [b])]
+# ---
+'t
+# ===
+;[((a ': final) : (b ': constant)) = (1 : 2), (is_final [a]) and (is_constant [b])]
+# ---
+'t
 # ===
 ;[(f a) = ('' (1 2)), [f, a]]
 # ---
@@ -166,47 +200,47 @@
 # ---
 1 : 2
 # ===
-;[a =final 1, a = 2]
+;[(a ': final) = 1, a = 2]
 # ---
 '
 # ===
-;[a =final 1, a = 2, a]
+;[(a ': final) = 1, a = 2, a]
 # ---
 1
 # ===
-;[a =final 1, a =final 2, a]
+;[(a ': final) = 1, (a ': final) = 2, a]
 # ---
 1
 # ===
-;[a =final 1, a =constant 2, a]
+;[(a ': final) = 1, (a ': constant) = 2, a]
 # ---
 1
 # ===
-;[a =final (1 : 2), a set_1 3, a]
+;[(a ': final) = (1 : 2), a set_1 3, a]
 # ---
 3 : 2
 # ===
-;[(a : b) =final (1 : 2), (is_final [a]) and (is_final [b])]
+;[(a : b ': final) = (1 : 2), (is_final [a]) and (is_final [b])]
 # ---
 't
 # ===
-;[a =constant (1 : 2), a set_1 3, a]
+;[(a ': constant) = (1 : 2), a set_1 3, a]
 # ---
 1 : 2
 # ===
-;[a =constant 1, a = 2, a]
+;[(a ': constant) = 1, a = 2, a]
 # ---
 1
 # ===
-;[a =constant 1, a =final 2, a]
+;[(a ': constant) = 1, (a ': final) = 2, a]
 # ---
 1
 # ===
-;[a =constant 1, a =constant 2, a]
+;[(a ': constant) = 1, (a ': constant) = 2, a]
 # ---
 1
 # ===
-;[(a : b) =constant (1 : 2), (is_constant [a]) and (is_constant [b])]
+;[(a : b ': constant) = (1 : 2), (is_constant [a]) and (is_constant [b])]
 # ---
 't
 # ===
@@ -218,7 +252,7 @@
 # ---
 3 : 2
 # ===
-;[a =constant (1 : 2), set_final [a], a set_1 3, a]
+;[(a ': constant) = (1 : 2), set_final [a], a set_1 3, a]
 # ---
 1 : 2
 # ===
@@ -238,7 +272,7 @@
 # ---
 't
 # ===
-;[a =final (1 : 2), set_constant [a], a set_1 3, a]
+;[(a ': final) = (1 : 2), set_constant [a], a set_1 3, a]
 # ---
 1 : 2
 # ===
@@ -250,15 +284,27 @@ is_final [a]
 # ---
 'f
 # ===
-;[a =final 1, is_final [a]]
+;[(a ': final) = 1, is_final [a]]
 # ---
 't
 # ===
-;[a =constant 1, is_final [a]]
+;[(a ': constant) = 1, is_final [a]]
 # ---
 't
 # ===
-;[a = (context {map : {b : (1 : final)}}), is_final [a, b]]
+;[': = ('' ':), final = ('' final), a = (context {map : {b : (1 ': final)}}), is_final [a, b]]
+# ---
+'t
+# ===
+;[
+    ': = (function {
+        body : (('' ':) (move [input])),
+        input_mode : ($ : ''),
+        context : (context {map : {: '', : move}}),
+    }),
+    a = (context {map : {b : (1 ': final)}}),
+    is_final [a, b]
+]
 # ---
 't
 # ===
@@ -270,15 +316,15 @@ is_constant [a]
 # ---
 'f
 # ===
-;[a =final 1, is_constant [a]]
+;[(a ': final) = 1, is_constant [a]]
 # ---
 'f
 # ===
-;[a =constant 1, is_constant [a]]
+;[(a ': constant) = 1, is_constant [a]]
 # ---
 't
 # ===
-;[a = (context {map : {b : (1 : constant)}}), is_constant [a, b]]
+;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), is_constant [a, b]]
 # ---
 't
 # ===
@@ -322,11 +368,11 @@ is_local [a]
 # ---
 2
 # ===
-;[a = (context {map : {b : (1 : final), : ;, : =}}), a .. (; [b = 2, b])]
+;[': = ('' ':), final = ('' final), a = (context {map : {b : (1 ': final), : ;, : =}}), a .. (; [b = 2, b])]
 # ---
 1
 # ===
-;[a = (context {map : {b : (1 : 2 : constant), : ;, : set_1}}), a .. (; [b set_1 3, b])]
+;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 : 2 ': constant), : ;, : set_1}}), a .. (; [b set_1 3, b])]
 # ---
 1 : 2
 # ===
@@ -346,7 +392,7 @@ is_local [a]
 # ---
 2 : '
 # ===
-;[a = (context {map : {b : (1 : 2 : variable)}}), [] set_super a, b set_1 3, load [a, b]]
+;[a = (context {map : {b : (1 : 2)}}), [] set_super a, b set_1 3, load [a, b]]
 # ---
 3 : 2
 # ===
@@ -358,11 +404,11 @@ is_local [a]
 # ---
 2 : 1
 # ===
-;[a = (context {}), [] set_super a, b =local 2, b : (load [a, b])]
+;[a = (context {}), [] set_super a, (b ': local) = 2, b : (load [a, b])]
 # ---
 2 : '
 # ===
-;[a = (context {}), [] set_super a, (b : c) =local (1 : 2), b]
+;[a = (context {}), [] set_super a, (b : c ': local) = (1 : 2), b]
 # ---
 1
 # ===
@@ -377,6 +423,10 @@ context_represent (context {})
 context_represent (context {map : {a : 1}, super : b})
 # ---
 {map : {a : 1}, super : b}
+# ===
+;[': = ('' ':), final = ('' final), context_represent (context {map : {a : (1 ': final)}})]
+# ---
+{map : {a : (1 ': final)}}
 # ===
 ;[a = (context_represent (context {map : {b : (context {})}})), map = (a map_remove ('' map)), b = (map map_remove ('' b)), type_of b]
 # ---
