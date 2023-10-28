@@ -40,7 +40,7 @@
 ;[
     f = (function {
         body : input,
-        eval_mode : '',
+        input_mode : '',
     }),
     f (not 't)
 ]
@@ -50,7 +50,7 @@ not 't
 ;[
     f = (function {
         body : (('t not) input),
-        eval_mode : $,
+        input_mode : $,
     }),
     f (not 't)
 ]
@@ -60,7 +60,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        eval_mode : `,
+        input_mode : `,
     }),
     f (not 't)
 ]
@@ -70,7 +70,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        eval_mode : `,
+        input_mode : `,
     }),
     f ('t (not 't))
 ]
@@ -80,7 +80,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        eval_mode : $,
+        input_mode : $,
     }),
     f {a : b}
 ]
@@ -90,7 +90,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        eval_mode : (` : $),
+        input_mode : (` : $),
     }),
     a f b
 ]
@@ -100,7 +100,7 @@ a : '
 ;[
     f = (function {
         body : input,
-        eval_mode : '',
+        input_mode : '',
     }),
     f (not 'f)
 ]
@@ -110,7 +110,7 @@ not 'f
 ;[
     f = (function {
         body : input,
-        eval_mode : (symbol ''),
+        input_mode : (symbol ''),
     }),
     f (not 'f)
 ]
@@ -120,7 +120,7 @@ not 'f
 ;[
     f = (function {
         body : input,
-        eval_mode : (symbol ''),
+        input_mode : (symbol ''),
     }),
     f a
 ]
@@ -131,7 +131,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        eval_mode : (symbol ''),
+        input_mode : (symbol ''),
     }),
     f [a]
 ]
@@ -142,7 +142,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        eval_mode : [$, `, ... '', $],
+        input_mode : [$, `, ... '', $],
     }),
     f [a, a, a, a, a, a]
 ]
@@ -152,7 +152,7 @@ a
 ;[
     f = (function {
         body : input,
-        eval_mode : (list ''),
+        input_mode : (list ''),
     }),
     f [a, b]
 ]
@@ -162,7 +162,7 @@ a
 ;[
     f = (function {
         body : input,
-        eval_mode : (list ''),
+        input_mode : (list ''),
     }),
     f (not 'f)
 ]
@@ -172,7 +172,7 @@ a
 ;[
     f = (function {
         body : input,
-        eval_mode : (list_items (symbol '')),
+        input_mode : (list_items (symbol '')),
     }),
     f [not 't, b]
 ]
@@ -183,7 +183,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        eval_mode : {a : $, b : ''},
+        input_mode : {a : $, b : ''},
     }),
     f {a : a, b : a}
 ]
@@ -193,7 +193,7 @@ a
 ;[
     f = (function {
         body : input,
-        eval_mode : (map ''),
+        input_mode : (map ''),
     }),
     f {a : b}
 ]
@@ -203,7 +203,7 @@ a
 ;[
     f = (function {
         body : input,
-        eval_mode : (map ''),
+        input_mode : (map ''),
     }),
     f (not 't)
 ]
@@ -214,7 +214,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        eval_mode : (` map_items $),
+        input_mode : (` map_items $),
     }),
     f {: a}
 ]
@@ -225,7 +225,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        eval_mode : (call ($ '')),
+        input_mode : (call ($ '')),
     }),
     f (a a)
 ]
@@ -236,7 +236,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        eval_mode : ($ ? ''),
+        input_mode : ($ ? ''),
     }),
     f (a ? a)
 ]
@@ -246,7 +246,7 @@ a
 ;[
     f = (function {
         body : (;[[] set_super caller, $2 input]),
-        eval_mode : '',
+        input_mode : '',
         caller_access : mutable,
         context : (prelude ')
     }),
@@ -319,7 +319,7 @@ a
 ;[
     f = (function {
         body : (caller .. (('f ('t input)) = 2)),
-        eval_mode : '',
+        input_mode : '',
         caller_access : mutable,
         context : (context {map : {
             : ..,
@@ -336,7 +336,7 @@ a
 ;[
     f = (function {
         body : (caller .. (('f ('t input)) = 2)),
-        eval_mode : '',
+        input_mode : '',
         caller_access : mutable,
         context : (context {map : {
             : ..,
@@ -353,7 +353,7 @@ a
 ;[
     f = (function {
         body : (caller .. (('f ('t input)) = 2)),
-        eval_mode : '',
+        input_mode : '',
         caller_access : constant,
         context : (context {map : {
             : ..,
@@ -381,13 +381,13 @@ function_represent (function {body : input, caller_access : constant})
 # ===
 function_represent ==
 # ---
-{id : ==, caller_access : constant, eval_mode : ((symbol '') : (symbol ''))}
+{id : ==, caller_access : constant, input_mode : ((symbol '') : (symbol ''))}
 # ===
 function_represent (function {
     body : i,
     input_name : i,
     caller_name : c,
-    eval_mode : (` : `),
+    input_mode : (` : `),
     caller_access : mutable,
 })
 # ---
@@ -395,7 +395,7 @@ function_represent (function {
     body : i,
     input_name : i,
     caller_name : c,
-    eval_mode : (` : `),
+    input_mode : (` : `),
     caller_access : mutable,
 }
 # ===
@@ -415,28 +415,28 @@ mutable
 # ---
 free
 # ===
-function_eval_mode not
+function_input_mode not
 # ---
 $
 # ===
-function_eval_mode $
+function_input_mode $
 # ---
 ''
 # ===
-function_eval_mode function_eval_mode
+function_input_mode function_input_mode
 # ---
 symbol ''
 # ===
-;[f = (function {body : input}), function_eval_mode f]
+;[f = (function {body : input}), function_input_mode f]
 # ---
 $
 # ===
 ;[
     f = (function {
         body : input,
-        eval_mode : ($ : `),
+        input_mode : ($ : `),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 $ : `
@@ -444,9 +444,9 @@ $ : `
 ;[
     f = (function {
         body : input,
-        eval_mode : (symbol ''),
+        input_mode : (symbol ''),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 symbol ''
@@ -454,9 +454,9 @@ symbol ''
 ;[
     f = (function {
         body : input,
-        eval_mode : (call ($ '')),
+        input_mode : (call ($ '')),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 call ($ '')
@@ -464,9 +464,9 @@ call ($ '')
 ;[
     f = (function {
         body : input,
-        eval_mode : [$, `, '', ... $, ''],
+        input_mode : [$, `, '', ... $, ''],
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 [$, `, '', ... $, '']
@@ -474,9 +474,9 @@ call ($ '')
 ;[
     f = (function {
         body : input,
-        eval_mode : (list ''),
+        input_mode : (list ''),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 list ''
@@ -484,9 +484,9 @@ list ''
 ;[
     f = (function {
         body : input,
-        eval_mode : (list_items (symbol '')),
+        input_mode : (list_items (symbol '')),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 list_items (symbol '')
@@ -494,9 +494,9 @@ list_items (symbol '')
 ;[
     f = (function {
         body : input,
-        eval_mode : {a : $, b : ''},
+        input_mode : {a : $, b : ''},
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 {a : $, b : ''}
@@ -504,9 +504,9 @@ list_items (symbol '')
 ;[
     f = (function {
         body : input,
-        eval_mode : (map ''),
+        input_mode : (map ''),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 map ''
@@ -514,9 +514,9 @@ map ''
 ;[
     f = (function {
         body : input,
-        eval_mode : ($ map_items ''),
+        input_mode : ($ map_items ''),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 $ map_items ''
@@ -524,9 +524,9 @@ $ map_items ''
 ;[
     f = (function {
         body : input,
-        eval_mode : ([symbol '', list ''] map_items (list_items (map ''))),
+        input_mode : ([symbol '', list ''] map_items (list_items (map ''))),
     }),
-    function_eval_mode f
+    function_input_mode f
 ]
 # ---
 [symbol '', list ''] map_items (list_items (map ''))

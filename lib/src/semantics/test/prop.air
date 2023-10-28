@@ -88,7 +88,7 @@
 ;[
     $map = (function {
         body : input,
-        eval_mode : ('' map_items $),
+        input_mode : ('' map_items $),
     }),
     map = ($map {
         function : not,
@@ -103,7 +103,7 @@
 ;[
     $map = (function {
         body : input,
-        eval_mode : ('' map_items $),
+        input_mode : ('' map_items $),
     }),
     map = ($map {
         function : ==,
@@ -119,7 +119,7 @@
 ;[
     $map = (function {
         body : input,
-        eval_mode : ('' map_items $),
+        input_mode : ('' map_items $),
     }),
     map = ($map {
         function : =,
@@ -140,7 +140,7 @@
     })),
     $map = (function {
         body : input,
-        eval_mode : ('' map_items $),
+        input_mode : ('' map_items $),
     }),
     expected = ($map {
         function : not,
@@ -161,7 +161,7 @@
     })),
     $map = (function {
         body : input,
-        eval_mode : ('' map_items $),
+        input_mode : ('' map_items $),
     }),
     expected = ($map {
         function : ==,
@@ -183,7 +183,7 @@
     })),
     $map = (function {
         body : input,
-        eval_mode : ('' map_items $),
+        input_mode : ('' map_items $),
     }),
     expected = ($map {
         function : =,

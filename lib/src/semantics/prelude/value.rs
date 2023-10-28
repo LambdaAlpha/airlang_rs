@@ -2,14 +2,12 @@ use crate::{
     semantics::{
         ctx::DefaultCtx,
         ctx_access::constant::CtxForConstFn,
-        eval_mode::{
-            BasicEvalMode,
-            EvalMode,
-        },
+        eval_mode::EvalMode,
         func::{
             CtxConstFn,
             Primitive,
         },
+        input_mode::InputMode,
         prelude::{
             names,
             PrimitiveFunc,
@@ -24,9 +22,9 @@ use crate::{
 };
 
 pub(crate) fn type_of() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::TYPE_OF, fn_type_of);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
@@ -53,12 +51,12 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn equal() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Symbol(BasicEvalMode::Value),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Symbol(EvalMode::Value),
+        InputMode::Symbol(EvalMode::Value),
     )));
     let primitive = Primitive::<CtxConstFn>::new(names::EQUAL, fn_equal);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
@@ -71,12 +69,12 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn not_equal() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Symbol(BasicEvalMode::Value),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Symbol(EvalMode::Value),
+        InputMode::Symbol(EvalMode::Value),
     )));
     let primitive = Primitive::<CtxConstFn>::new(names::NOT_EQUAL, fn_not_equal);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {

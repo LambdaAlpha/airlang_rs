@@ -4,7 +4,6 @@ use crate::{
             NameMap,
             TaggedVal,
         },
-        eval_mode::EvalMode,
         func::{
             CtxConstFn,
             CtxFreeFn,
@@ -13,6 +12,7 @@ use crate::{
             FuncImpl,
             Primitive,
         },
+        input_mode::InputMode,
         val::Val,
         Func,
     },
@@ -113,7 +113,7 @@ fn prelude_logic(c: &mut NameMap) {
 fn prelude_func(c: &mut NameMap) {
     put_primitive_func(c, func::func_new());
     put_primitive_func(c, func::func_repr());
-    put_primitive_func(c, func::func_eval_mode());
+    put_primitive_func(c, func::func_input_mode());
     put_primitive_func(c, func::func_access());
     put_primitive_func(c, func::func_is_primitive());
     put_primitive_func(c, func::func_id());
@@ -217,7 +217,7 @@ where
 }
 
 pub(crate) struct PrimitiveFunc<F> {
-    input_eval_mode: EvalMode,
+    input_mode: InputMode,
     evaluator: Primitive<F>,
 }
 
@@ -225,7 +225,7 @@ pub(crate) struct PrimitiveFunc<F> {
 impl Into<Func> for PrimitiveFunc<CtxFreeFn> {
     fn into(self) -> Func {
         let evaluator = FuncEval::Free(FuncImpl::Primitive(self.evaluator));
-        Func::new(self.input_eval_mode, evaluator)
+        Func::new(self.input_mode, evaluator)
     }
 }
 
@@ -233,7 +233,7 @@ impl Into<Func> for PrimitiveFunc<CtxFreeFn> {
 impl Into<Func> for PrimitiveFunc<CtxConstFn> {
     fn into(self) -> Func {
         let evaluator = FuncEval::Const(FuncImpl::Primitive(self.evaluator));
-        Func::new(self.input_eval_mode, evaluator)
+        Func::new(self.input_mode, evaluator)
     }
 }
 
@@ -241,14 +241,14 @@ impl Into<Func> for PrimitiveFunc<CtxConstFn> {
 impl Into<Func> for PrimitiveFunc<CtxMutableFn> {
     fn into(self) -> Func {
         let evaluator = FuncEval::Mutable(FuncImpl::Primitive(self.evaluator));
-        Func::new(self.input_eval_mode, evaluator)
+        Func::new(self.input_mode, evaluator)
     }
 }
 
 impl<F> PrimitiveFunc<F> {
-    fn new(eval_mode: EvalMode, primitive: Primitive<F>) -> Self {
+    fn new(input_mode: InputMode, primitive: Primitive<F>) -> Self {
         PrimitiveFunc {
-            input_eval_mode: eval_mode,
+            input_mode,
             evaluator: primitive,
         }
     }
@@ -307,7 +307,7 @@ pub(crate) mod names {
     pub(crate) const FUNC_NEW: &str = "function";
     pub(crate) const FUNC_REPR: &str = "function_represent";
     pub(crate) const FUNC_ACCESS: &str = "function_caller_access";
-    pub(crate) const FUNC_EVAL_MODE: &str = "function_eval_mode";
+    pub(crate) const FUNC_INPUT_MODE: &str = "function_input_mode";
     pub(crate) const FUNC_IS_PRIMITIVE: &str = "function_is_primitive";
     pub(crate) const FUNC_ID: &str = "function_id";
     pub(crate) const FUNC_BODY: &str = "function_body";

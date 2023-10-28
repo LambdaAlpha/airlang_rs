@@ -2,16 +2,14 @@ use crate::{
     semantics::{
         ctx::DefaultCtx,
         ctx_access::constant::CtxForConstFn,
-        eval_mode::{
-            BasicEvalMode,
-            EvalMode,
-        },
+        eval_mode::EvalMode,
         func::{
             CtxConstFn,
             CtxFreeFn,
             FuncEval,
             Primitive,
         },
+        input_mode::InputMode,
         logic::{
             Prop,
             PropCtx,
@@ -50,15 +48,15 @@ const TRUTH: &str = "truth";
 
 pub(crate) fn prop_new() -> PrimitiveFunc<CtxFreeFn> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(INPUT), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(OUTPUT), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(CTX), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(BEFORE), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(AFTER), EvalMode::Any(BasicEvalMode::Eval));
-    let eval_mode = EvalMode::MapForSome(map);
+    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(INPUT), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(OUTPUT), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(AFTER), InputMode::Any(EvalMode::Eval));
+    let input_mode = InputMode::MapForSome(map);
     let primitive = Primitive::<CtxFreeFn>::new(names::PROP_NEW, fn_prop_new);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_prop_new(input: Val) -> Val {
@@ -96,9 +94,9 @@ fn fn_prop_new(input: Val) -> Val {
 }
 
 pub(crate) fn prop_repr() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Any(BasicEvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::PROP_REPR, fn_prop_repr);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_prop_repr(input: Val) -> Val {
@@ -136,9 +134,9 @@ fn generate_prop(repr: &mut MapVal, prop: &Prop) {
 }
 
 pub(crate) fn get_truth() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::PROP_TRUTH, fn_get_truth);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_get_truth(ctx: CtxForConstFn, input: Val) -> Val {
@@ -155,9 +153,9 @@ fn fn_get_truth(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn get_function() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::PROP_FUNCTION, fn_get_function);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_get_function(ctx: CtxForConstFn, input: Val) -> Val {
@@ -170,9 +168,9 @@ fn fn_get_function(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn get_input() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::PROP_INPUT, fn_get_input);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_get_input(ctx: CtxForConstFn, input: Val) -> Val {
@@ -185,9 +183,9 @@ fn fn_get_input(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn get_output() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::PROP_OUTPUT, fn_get_output);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_get_output(ctx: CtxForConstFn, input: Val) -> Val {
@@ -200,9 +198,9 @@ fn fn_get_output(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn get_before() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::PROP_CTX_BEFORE, fn_get_before);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_get_before(ctx: CtxForConstFn, input: Val) -> Val {
@@ -220,9 +218,9 @@ fn fn_get_before(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 pub(crate) fn get_after() -> PrimitiveFunc<CtxConstFn> {
-    let eval_mode = EvalMode::Symbol(BasicEvalMode::Value);
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::PROP_CTX_AFTER, fn_get_after);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_get_after(ctx: CtxForConstFn, input: Val) -> Val {

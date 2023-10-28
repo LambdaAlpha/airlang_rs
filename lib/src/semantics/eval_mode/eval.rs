@@ -66,7 +66,7 @@ where
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
         let func = self.eval(ctx, func);
         if let Val::Func(FuncVal(func)) = func {
-            let input = func.input_eval_mode.eval(ctx, input);
+            let input = func.input_mode.eval(ctx, input);
             func.eval(ctx, input)
         } else {
             let input = self.eval(ctx, input);
@@ -117,7 +117,7 @@ where
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
         let func = self.eval(ctx, func);
         if let Val::Func(FuncVal(func)) = func {
-            let input = func.input_eval_mode.eval(ctx, input);
+            let input = func.input_mode.eval(ctx, input);
             func.eval(ctx, input)
         } else {
             let input = self.eval(ctx, input);
@@ -171,7 +171,7 @@ where
             if !func.is_ctx_free() {
                 return None;
             }
-            let input = func.input_eval_mode.eval_free(ctx, input)?;
+            let input = func.input_mode.eval_free(ctx, input)?;
             Some(func.eval(ctx, input))
         } else {
             let input = self.eval(ctx, input)?;
@@ -225,7 +225,7 @@ where
             if !func.is_ctx_free() {
                 return None;
             }
-            let input = func.input_eval_mode.eval_free_by_ref(ctx, input)?;
+            let input = func.input_mode.eval_free_by_ref(ctx, input)?;
             Some(func.eval(ctx, input))
         } else {
             let input = self.eval(ctx, input)?;
@@ -279,7 +279,7 @@ where
             if !func.is_ctx_const() {
                 return None;
             }
-            let input = func.input_eval_mode.eval_const(ctx, input)?;
+            let input = func.input_mode.eval_const(ctx, input)?;
             Some(func.eval(ctx, input))
         } else {
             let input = self.eval(ctx, input)?;
@@ -333,7 +333,7 @@ where
             if !func.is_ctx_const() {
                 return None;
             }
-            let input = func.input_eval_mode.eval_const_by_ref(ctx, input)?;
+            let input = func.input_mode.eval_const_by_ref(ctx, input)?;
             Some(func.eval(ctx, input))
         } else {
             let input = self.eval(ctx, input)?;
@@ -389,7 +389,7 @@ where
             if !func.is_ctx_free() {
                 return false;
             }
-            func.input_eval_mode.is_free(ctx, input)
+            func.input_mode.is_free(ctx, input)
         } else {
             self.eval(ctx, input)
         }
@@ -443,7 +443,7 @@ where
             if !func.is_ctx_free() {
                 return false;
             }
-            func.input_eval_mode.is_free_by_ref(ctx, input)
+            func.input_mode.is_free_by_ref(ctx, input)
         } else {
             self.eval(ctx, input)
         }
@@ -497,7 +497,7 @@ where
             if !func.is_ctx_const() {
                 return false;
             }
-            func.input_eval_mode.is_const(ctx, input)
+            func.input_mode.is_const(ctx, input)
         } else {
             self.eval(ctx, input)
         }
@@ -551,7 +551,7 @@ where
             if !func.is_ctx_const() {
                 return false;
             }
-            func.input_eval_mode.is_const_by_ref(ctx, input)
+            func.input_mode.is_const_by_ref(ctx, input)
         } else {
             self.eval(ctx, input)
         }

@@ -1,13 +1,11 @@
 use crate::{
     semantics::{
-        eval_mode::{
-            BasicEvalMode,
-            EvalMode,
-        },
+        eval_mode::EvalMode,
         func::{
             CtxFreeFn,
             Primitive,
         },
+        input_mode::InputMode,
         prelude::{
             names,
             PrimitiveFunc,
@@ -18,9 +16,9 @@ use crate::{
 };
 
 pub(crate) fn parse() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Any(BasicEvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::PARSE, fn_parse);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -31,9 +29,9 @@ fn fn_parse(input: Val) -> Val {
 }
 
 pub(crate) fn stringify() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Any(BasicEvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::STRINGIFY, fn_stringify);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_stringify(input: Val) -> Val {

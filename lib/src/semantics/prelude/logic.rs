@@ -1,14 +1,12 @@
 use crate::{
     semantics::{
-        eval_mode::{
-            BasicEvalMode,
-            EvalMode,
-        },
+        eval_mode::EvalMode,
         func::{
             CtxFreeFn,
             FuncEval,
             Primitive,
         },
+        input_mode::InputMode,
         logic::Prop,
         prelude::{
             names,
@@ -37,13 +35,13 @@ const BEFORE: &str = "before";
 
 pub(crate) fn theorem_new() -> PrimitiveFunc<CtxFreeFn> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(INPUT), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(CTX), EvalMode::Any(BasicEvalMode::Eval));
-    map.insert(symbol(BEFORE), EvalMode::Any(BasicEvalMode::Eval));
-    let eval_mode = EvalMode::MapForSome(map);
+    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(INPUT), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::Eval));
+    let input_mode = InputMode::MapForSome(map);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_THEOREM_NEW, fn_theorem_new);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_theorem_new(input: Val) -> Val {
@@ -77,9 +75,9 @@ fn fn_theorem_new(input: Val) -> Val {
 }
 
 pub(crate) fn prove() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Any(BasicEvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_PROVE, fn_prove);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_prove(input: Val) -> Val {

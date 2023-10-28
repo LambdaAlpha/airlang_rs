@@ -10,13 +10,15 @@ use crate::{
                 Eval,
                 EvalByRef,
             },
-            BasicEvalMode,
             EvalMode,
-            ListItemEvalMode,
         },
         func::{
             CtxMutableFn,
             Primitive,
+        },
+        input_mode::{
+            InputMode,
+            ListItemInputMode,
         },
         prelude::{
             names,
@@ -32,14 +34,14 @@ use crate::{
 };
 
 pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::List(BasicEvalMode::Value);
+    let input_mode = InputMode::List(EvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::SEQUENCE,
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -54,9 +56,9 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 pub(crate) fn breakable_sequence() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::List(BasicEvalMode::Value),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Symbol(EvalMode::Value),
+        InputMode::List(EvalMode::Value),
     )));
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::BREAKABLE_SEQUENCE,
@@ -64,7 +66,7 @@ pub(crate) fn breakable_sequence() -> PrimitiveFunc<CtxMutableFn> {
         |ctx, val| fn_breakable_sequence(ctx, val),
         |ctx, val| fn_breakable_sequence(ctx, val),
     );
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -93,31 +95,31 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 pub(crate) fn condition() -> PrimitiveFunc<CtxMutableFn> {
     let list = List::from(vec![
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Eval),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Eval),
             ellipsis: false,
         },
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Value),
             ellipsis: false,
         },
     ]);
-    let eval_mode = EvalMode::ListForSome(list);
+    let input_mode = InputMode::ListForSome(list);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::IF,
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -153,27 +155,27 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 pub(crate) fn matching() -> PrimitiveFunc<CtxMutableFn> {
     let list = List::from(vec![
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Eval),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Eval),
             ellipsis: false,
         },
-        ListItemEvalMode {
-            eval_mode: EvalMode::Map(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Map(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Value),
             ellipsis: false,
         },
     ]);
-    let eval_mode = EvalMode::ListForSome(list);
+    let input_mode = InputMode::ListForSome(list);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::MATCH,
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -208,23 +210,23 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
     let list = List::from(vec![
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemEvalMode {
-            eval_mode: EvalMode::Any(BasicEvalMode::Value),
+        ListItemInputMode {
+            input_mode: InputMode::Any(EvalMode::Value),
             ellipsis: false,
         },
     ]);
-    let eval_mode = EvalMode::ListForSome(list);
+    let input_mode = InputMode::ListForSome(list);
     let primitive = Primitive::<CtxMutableFn>::new_dispatch(
         names::WHILE,
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
     );
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {

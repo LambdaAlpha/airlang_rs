@@ -74,7 +74,7 @@ $is_free {value : a}
 # ---
 'f
 # ===
-$is_free {value : a, eval_mode : $}
+$is_free {value : a, input_mode : $}
 # ---
 'f
 # ===
@@ -86,7 +86,7 @@ $is_free {value : (1 : "a")}
 # ---
 't
 # ===
-$is_free {value : (1 : a), eval_mode : ($ : '')}
+$is_free {value : (1 : a), input_mode : ($ : '')}
 # ---
 't
 # ===
@@ -122,15 +122,15 @@ $is_free {value : (('t get_1) 1)}
 # ---
 'f
 # ===
-$is_free {value : a, eval_mode : ''}
+$is_free {value : a, input_mode : ''}
 # ---
 't
 # ===
-$is_free {value : ('f ('t a)), eval_mode : `}
+$is_free {value : ('f ('t a)), input_mode : `}
 # ---
 'f
 # ===
-$is_free {value : [a, ('f ('t 1))], eval_mode : `}
+$is_free {value : [a, ('f ('t 1))], input_mode : `}
 # ---
 't
 # ===
@@ -146,7 +146,7 @@ $is_constant {value : (a : (move a))}
 # ---
 'f
 # ===
-$is_constant {value : (a : (move a)), eval_mode : ($ : '')}
+$is_constant {value : (a : (move a)), input_mode : ($ : '')}
 # ---
 't
 # ===
@@ -178,7 +178,7 @@ $is_constant {value : (move a)}
 # ---
 'f
 # ===
-$is_constant {value : (move a), eval_mode : $}
+$is_constant {value : (move a), input_mode : $}
 # ---
 'f
 # ===
@@ -194,15 +194,15 @@ $is_constant {value : (f (move a))}
 # ---
 'f
 # ===
-$is_constant {value : (move a), eval_mode : ''}
+$is_constant {value : (move a), input_mode : ''}
 # ---
 't
 # ===
-$is_constant {value : ('f ('t (move a))), eval_mode : `}
+$is_constant {value : ('f ('t (move a))), input_mode : `}
 # ---
 'f
 # ===
-$is_constant {value : [move a, 'f ('t a)], eval_mode : `}
+$is_constant {value : [move a, 'f ('t a)], input_mode : `}
 # ---
 't
 # ===

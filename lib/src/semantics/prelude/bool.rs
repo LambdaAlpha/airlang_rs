@@ -1,13 +1,11 @@
 use crate::{
     semantics::{
-        eval_mode::{
-            BasicEvalMode,
-            EvalMode,
-        },
+        eval_mode::EvalMode,
         func::{
             CtxFreeFn,
             Primitive,
         },
+        input_mode::InputMode,
         prelude::{
             names,
             PrimitiveFunc,
@@ -21,9 +19,9 @@ use crate::{
 };
 
 pub(crate) fn not() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Any(BasicEvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::Eval);
     let primitive = Primitive::<CtxFreeFn>::new(names::NOT, fn_not);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -34,12 +32,12 @@ fn fn_not(input: Val) -> Val {
 }
 
 pub(crate) fn and() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Any(BasicEvalMode::Eval),
-        EvalMode::Any(BasicEvalMode::Eval),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Eval),
     )));
     let primitive = Primitive::<CtxFreeFn>::new(names::AND, fn_and);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -60,12 +58,12 @@ fn fn_and(input: Val) -> Val {
 }
 
 pub(crate) fn or() -> PrimitiveFunc<CtxFreeFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Any(BasicEvalMode::Eval),
-        EvalMode::Any(BasicEvalMode::Eval),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Eval),
     )));
     let primitive = Primitive::<CtxFreeFn>::new(names::OR, fn_or);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_or(input: Val) -> Val {

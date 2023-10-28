@@ -18,13 +18,13 @@ use crate::{
         },
         eval_mode::{
             eval::Eval,
-            BasicEvalMode,
             EvalMode,
         },
         func::{
             CtxMutableFn,
             Primitive,
         },
+        input_mode::InputMode,
         prelude::{
             names,
             PrimitiveFunc,
@@ -42,12 +42,12 @@ use crate::{
 };
 
 pub(crate) fn chain() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Any(BasicEvalMode::Value),
-        EvalMode::Any(BasicEvalMode::Value),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Value),
+        InputMode::Any(EvalMode::Value),
     )));
     let primitive = Primitive::<CtxMutableFn>::new(names::CHAIN, fn_chain);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -58,15 +58,15 @@ fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 pub(crate) fn call_with_ctx() -> PrimitiveFunc<CtxMutableFn> {
-    let eval_mode = EvalMode::Pair(Box::new(Pair::new(
-        EvalMode::Symbol(BasicEvalMode::Value),
-        EvalMode::Call(Box::new(Call::new(
-            EvalMode::Any(BasicEvalMode::Eval),
-            EvalMode::Any(BasicEvalMode::Value),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Symbol(EvalMode::Value),
+        InputMode::Call(Box::new(Call::new(
+            InputMode::Any(EvalMode::Eval),
+            InputMode::Any(EvalMode::Value),
         ))),
     )));
     let primitive = Primitive::<CtxMutableFn>::new(names::CALL_WITH_CTX, fn_call_with_ctx);
-    PrimitiveFunc::new(eval_mode, primitive)
+    PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -80,7 +80,7 @@ fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let target_ctx = pair.first;
-    let input = func.input_eval_mode.eval(&mut ctx, call.input);
+    let input = func.input_mode.eval(&mut ctx, call.input);
     if let Val::Unit(_) = target_ctx {
         return func.eval(&mut FreeCtx, input);
     }

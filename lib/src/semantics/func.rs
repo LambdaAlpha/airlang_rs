@@ -19,10 +19,8 @@ use {
                 CtxAccessor,
             },
             eval::Evaluator,
-            eval_mode::{
-                eval::EvalByRef,
-                EvalMode,
-            },
+            eval_mode::eval::EvalByRef,
+            input_mode::InputMode,
             val::{
                 CtxVal,
                 Val,
@@ -45,7 +43,7 @@ use {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Func {
-    pub(crate) input_eval_mode: EvalMode,
+    pub(crate) input_mode: InputMode,
     pub(crate) evaluator: FuncEval,
 }
 
@@ -443,9 +441,9 @@ impl TaggedVal {
 }
 
 impl Func {
-    pub(crate) fn new(input_eval_mode: EvalMode, evaluator: FuncEval) -> Self {
+    pub(crate) fn new(input_mode: InputMode, evaluator: FuncEval) -> Self {
         Func {
-            input_eval_mode,
+            input_mode,
             evaluator,
         }
     }
