@@ -9,12 +9,15 @@ use {
     },
 };
 
+const MAIN_DELIMITER: &str = "=====";
+const SUB_DELIMITER: &str = "-----";
+
 fn test_interpret(input: &str) -> Result<(), Box<dyn Error>> {
     let mut interpreter = crate::semantics::Interpreter::new();
-    let tests = input.split("# ===");
+    let tests = input.split(MAIN_DELIMITER);
 
     for test in tests {
-        let (i, o) = test.split_once("# ---").unwrap();
+        let (i, o) = test.split_once(SUB_DELIMITER).unwrap();
         let src = parse(i).map_err(|e| {
             eprintln!("{e}");
             e

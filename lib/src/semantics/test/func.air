@@ -4,18 +4,18 @@
     }),
     f (not 't)
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     f = (function {
         body : (('t not) input)
     }),
     f (not 't)
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     f = (function {
         body : (not input),
@@ -23,9 +23,9 @@
     }),
     f (not 't)
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     f = (function {
         body : (n a),
@@ -34,9 +34,9 @@
     }),
     f (not 't)
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -44,9 +44,9 @@
     }),
     f (not 't)
 ]
-# ---
+-----
 not 't
-# ===
+=====
 ;[
     f = (function {
         body : (('t not) input),
@@ -54,9 +54,9 @@ not 't
     }),
     f (not 't)
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -64,9 +64,9 @@ not 't
     }),
     f (not 't)
 ]
-# ---
+-----
 not 't
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -74,9 +74,9 @@ not 't
     }),
     f ('t (not 't))
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -84,9 +84,9 @@ not 't
     }),
     f {a : b}
 ]
-# ---
+-----
 {' : '}
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -94,9 +94,9 @@ not 't
     }),
     a f b
 ]
-# ---
+-----
 a : '
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -104,9 +104,9 @@ a : '
     }),
     f (not 'f)
 ]
-# ---
+-----
 not 'f
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -114,9 +114,9 @@ not 'f
     }),
     f (not 'f)
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -124,9 +124,9 @@ not 'f
     }),
     f a
 ]
-# ---
+-----
 a
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -135,9 +135,9 @@ a
     }),
     f [a]
 ]
-# ---
+-----
 [1]
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -146,9 +146,9 @@ a
     }),
     f [a, a, a, a, a, a]
 ]
-# ---
+-----
 [1, a, a, a, a, 1]
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -156,9 +156,9 @@ a
     }),
     f [a, b]
 ]
-# ---
+-----
 [a, b]
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -166,9 +166,9 @@ a
     }),
     f (not 'f)
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -176,9 +176,9 @@ a
     }),
     f [not 't, b]
 ]
-# ---
+-----
 ['f, b]
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -187,9 +187,9 @@ a
     }),
     f {a : a, b : a}
 ]
-# ---
+-----
 {a : 1, b : a}
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -197,9 +197,9 @@ a
     }),
     f {a : b}
 ]
-# ---
+-----
 {a : b}
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -207,9 +207,9 @@ a
     }),
     f (not 't)
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -218,9 +218,9 @@ a
     }),
     f {: a}
 ]
-# ---
+-----
 {a : 1}
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -229,9 +229,9 @@ a
     }),
     f (a a)
 ]
-# ---
+-----
 1 a
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -240,9 +240,9 @@ a
     }),
     f (a ? a)
 ]
-# ---
+-----
 1 ? a
-# ===
+=====
 ;[
     f = (function {
         body : (;[[] set_super caller, $2 input]),
@@ -253,9 +253,9 @@ a
     a = 1,
     f a
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -268,9 +268,9 @@ a
     }),
     f '
 ]
-# ---
+-----
 '
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -283,9 +283,9 @@ a
     }),
     f '
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -298,9 +298,9 @@ a
     }),
     f '
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     a = 1,
     f = (function {
@@ -313,9 +313,9 @@ a
     }),
     f '
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     f = (function {
         body : (caller .. (('f ('t input)) = 2)),
@@ -330,9 +330,9 @@ a
     f a,
     a
 ]
-# ---
+-----
 2
-# ===
+=====
 ;[
     f = (function {
         body : (caller .. (('f ('t input)) = 2)),
@@ -347,9 +347,9 @@ a
     f a,
     a
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     f = (function {
         body : (caller .. (('f ('t input)) = 2)),
@@ -364,25 +364,25 @@ a
     f a,
     a
 ]
-# ---
+-----
 1
-# ===
+=====
 function_represent (function {body : input})
-# ---
+-----
 {body : input}
-# ===
+=====
 function_represent not
-# ---
+-----
 {id : not}
-# ===
+=====
 function_represent (function {body : input, caller_access : constant})
-# ---
+-----
 {body : input, caller_access : constant}
-# ===
+=====
 function_represent ==
-# ---
+-----
 {id : ==, caller_access : constant, input_mode : ((symbol '') : (symbol ''))}
-# ===
+=====
 function_represent (function {
     body : i,
     input_name : i,
@@ -390,7 +390,7 @@ function_represent (function {
     input_mode : (` : `),
     caller_access : mutable,
 })
-# ---
+-----
 {
     body : i,
     input_name : i,
@@ -398,39 +398,39 @@ function_represent (function {
     input_mode : (` : `),
     caller_access : mutable,
 }
-# ===
+=====
 function_caller_access function
-# ---
+-----
 free
-# ===
+=====
 function_caller_access function_caller_access
-# ---
+-----
 constant
-# ===
+=====
 function_caller_access $
-# ---
+-----
 mutable
-# ===
+=====
 ;[f = (function {body : input}), function_caller_access f]
-# ---
+-----
 free
-# ===
+=====
 function_input_mode not
-# ---
+-----
 $
-# ===
+=====
 function_input_mode $
-# ---
+-----
 ''
-# ===
+=====
 function_input_mode function_input_mode
-# ---
+-----
 symbol ''
-# ===
+=====
 ;[f = (function {body : input}), function_input_mode f]
-# ---
+-----
 $
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -438,9 +438,9 @@ $
     }),
     function_input_mode f
 ]
-# ---
+-----
 $ : `
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -448,9 +448,9 @@ $ : `
     }),
     function_input_mode f
 ]
-# ---
+-----
 symbol ''
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -458,9 +458,9 @@ symbol ''
     }),
     function_input_mode f
 ]
-# ---
+-----
 call ($ '')
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -468,9 +468,9 @@ call ($ '')
     }),
     function_input_mode f
 ]
-# ---
+-----
 [$, `, '', ... $, '']
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -478,9 +478,9 @@ call ($ '')
     }),
     function_input_mode f
 ]
-# ---
+-----
 list ''
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -488,9 +488,9 @@ list ''
     }),
     function_input_mode f
 ]
-# ---
+-----
 list_items (symbol '')
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -498,9 +498,9 @@ list_items (symbol '')
     }),
     function_input_mode f
 ]
-# ---
+-----
 {a : $, b : ''}
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -508,9 +508,9 @@ list_items (symbol '')
     }),
     function_input_mode f
 ]
-# ---
+-----
 map ''
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -518,9 +518,9 @@ map ''
     }),
     function_input_mode f
 ]
-# ---
+-----
 $ map_items ''
-# ===
+=====
 ;[
     f = (function {
         body : input,
@@ -528,65 +528,65 @@ $ map_items ''
     }),
     function_input_mode f
 ]
-# ---
+-----
 [symbol '', list ''] map_items (list_items (map ''))
-# ===
+=====
 function_is_primitive not
-# ---
+-----
 't
-# ===
+=====
 ;[f = (function {body : input}), function_is_primitive f]
-# ---
+-----
 'f
-# ===
+=====
 function_id not
-# ---
+-----
 not
-# ===
+=====
 ;[neg = not, function_id neg]
-# ---
+-----
 not
-# ===
+=====
 ;[f = (function {body : input}), function_id f]
-# ---
+-----
 '
-# ===
+=====
 ;[f = (function {body : input}), function_body f]
-# ---
+-----
 input
-# ===
+=====
 function_body not
-# ---
+-----
 '
-# ===
+=====
 ;[
     ctx = (context {map : {a : 1}}),
     f = (function {body : input, context : ctx}),
     (function_context f) == ctx
 ]
-# ---
+-----
 't
-# ===
+=====
 function_context not
-# ---
+-----
 '
-# ===
+=====
 ;[f = (function {body : input}), function_input_name f]
-# ---
+-----
 input
-# ===
+=====
 function_input_name not
-# ---
+-----
 '
-# ===
+=====
 ;[f = (function {body : input, caller_access : constant}), function_caller_name f]
-# ---
+-----
 caller
-# ===
+=====
 ;[f = (function {body : input}), function_caller_name f]
-# ---
+-----
 '
-# ===
+=====
 function_caller_name not
-# ---
+-----
 '

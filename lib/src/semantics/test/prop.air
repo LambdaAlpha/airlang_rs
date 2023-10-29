@@ -6,9 +6,9 @@
     }),
     proposition_input p
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     p = (proposition {
         function : not,
@@ -17,9 +17,9 @@
     }),
     proposition_output p
 ]
-# ---
+-----
 2
-# ===
+=====
 ;[
     p = (proposition {
         function : ==,
@@ -30,9 +30,9 @@
     ctx = (proposition_before p),
     ctx .. ($ a)
 ]
-# ---
+-----
 2
-# ===
+=====
 ;[
     p = (proposition {
         function : ==,
@@ -43,9 +43,9 @@
     ctx = (proposition_after p),
     ctx .. ($ a)
 ]
-# ---
+-----
 2
-# ===
+=====
 ;[
     p = (proposition {
         function : =,
@@ -57,9 +57,9 @@
     ctx = (proposition_before p),
     ctx .. ($ a)
 ]
-# ---
+-----
 2
-# ===
+=====
 ;[
     p = (proposition {
         function : =,
@@ -71,9 +71,9 @@
     ctx = (proposition_after p),
     ctx .. ($ a)
 ]
-# ---
+-----
 3
-# ===
+=====
 ;[
     p = (proposition {
         function : not,
@@ -82,9 +82,9 @@
     }),
     (proposition_function p) == not
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     $map = (function {
         body : input,
@@ -97,9 +97,9 @@
     }),
     map == (proposition_represent (proposition map))
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     $map = (function {
         body : input,
@@ -113,9 +113,9 @@
     }),
     map == (proposition_represent (proposition map))
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     $map = (function {
         body : input,
@@ -130,9 +130,9 @@
     }),
     map == (proposition_represent (proposition map))
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     map = (proposition_represent (theorem {
         function : not,
@@ -150,9 +150,9 @@
     }),
     map == expected
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     map = (proposition_represent (theorem {
         function : ==,
@@ -172,9 +172,9 @@
     }),
     map == expected
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     map = (proposition_represent (theorem {
         function : =,
@@ -195,9 +195,9 @@
     }),
     map == expected
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     p = (proposition {
         function : not,
@@ -206,5 +206,5 @@
     }),
     ((type_of p) == ('' proposition)) and ((proposition_truth p) == ')
 ]
-# ---
+-----
 't

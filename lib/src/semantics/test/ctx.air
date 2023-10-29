@@ -1,83 +1,83 @@
 ;[a = 1, load ('' a)]
-# ---
+-----
 1
-# ===
+=====
 ;[a = 1, load "a"]
-# ---
+-----
 '
-# ===
+=====
 ;[a = 1, b = ('' a), load b]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), load [a, b]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), load [a, b]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = 1, move [a]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = 1, move [a], a]
-# ---
+-----
 '
-# ===
+=====
 ;[(a ': final) = 1, move [a]]
-# ---
+-----
 '
-# ===
+=====
 ;[(a ': constant) = 1, move [a]]
-# ---
+-----
 '
-# ===
+=====
 ;[a = ('' b), b = 1, move a]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), move [a, b]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), move [a, b], load [a, b]]
-# ---
+-----
 '
-# ===
+=====
 ;[a = (context {map : {b : 1}}), move [a, b]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), move [a, b], load [a, b]]
-# ---
+-----
 '
-# ===
+=====
 ;[a = (context {map : {b : 1}}), load [a, b]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {}), b = 1, [a, b] save b, load [a, b]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = 1, [b] save a, b]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : (context {})}}), c = 1, [a, b, d] save c, load [a, b, d]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {}), b = 1, [a, b] save (` (('t b) ': final)), is_final [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = (context {}), b = 1, [a, b] save (` (('t b) ': constant)), is_constant [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ;[
     a = (context {}),
     b = a,
@@ -86,9 +86,9 @@
     [a, c] save ('' (1 ': local)),
     is_local [a, c]
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     a = (context {}),
     b = a,
@@ -97,205 +97,205 @@
     [a, c] save ('' (1 ': {local, tag : final})),
     (is_local [a, c]) and (is_final [a, c])
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[a = 1, a]
-# ---
+-----
 1
-# ===
+=====
 ;[a = 1, a = 2]
-# ---
+-----
 1
-# ===
+=====
 ;[a = 1, a = 2, a]
-# ---
+-----
 2
-# ===
+=====
 ;[a = 1, b = a, b]
-# ---
+-----
 1
-# ===
+=====
 ;[a = ('' b), ('t a) = 1, b]
-# ---
+-----
 1
-# ===
+=====
 ;[(a ': final) = 1, is_final [a]]
-# ---
+-----
 't
-# ===
+=====
 ;[(a ': {tag : final, local}) = 1, (is_final [a]) and (is_local [a])]
-# ---
+-----
 't
-# ===
+=====
 ;[(a : b) = (1 : 2), a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a : b) = (1 : 2), b]
-# ---
+-----
 2
-# ===
+=====
 ;[(a : b : c) = (1 : 2 : 3), [a, b, c]]
-# ---
+-----
 [1, 2, 3]
-# ===
+=====
 ;[(a : b ': final) = (1 : 2), (is_final [a]) and (is_final [b])]
-# ---
+-----
 't
-# ===
+=====
 ;[((a ': final) : (b ': constant)) = (1 : 2), (is_final [a]) and (is_constant [b])]
-# ---
+-----
 't
-# ===
+=====
 ;[(f a) = ('' (1 2)), [f, a]]
-# ---
+-----
 [1, 2]
-# ===
+=====
 ;[(a b c) = ('' (1 2 3)), [a, b, c]]
-# ---
+-----
 [1, 2, 3]
-# ===
+=====
 ;[(f ? b) = (1 ? 2), [f, b]]
-# ---
+-----
 [1, 2]
-# ===
+=====
 ;[[a, b, c] = [1, 2, 3], [a, b, c]]
-# ---
+-----
 [1, 2, 3]
-# ===
+=====
 ;[[a, b] = [1, 2, 3], [a, b]]
-# ---
+-----
 [1, 2]
-# ===
+=====
 ;[[a, ..., c] = [1, 2, 3], [a, c]]
-# ---
+-----
 [1, 3]
-# ===
+=====
 ;[[a, ..., c, d] = [1, 2, 3, 4, 5], [a, c, d]]
-# ---
+-----
 [1, 4, 5]
-# ===
+=====
 ;[[a, ..., b, ..., c] = [1, 2, 3, 4, 5, 6], [a, b, c]]
-# ---
+-----
 [1, 4, 6]
-# ===
+=====
 ;[[a, ..., b, c] = [1, 2], [a, b, c]]
-# ---
+-----
 [1, ', ']
-# ===
+=====
 ;[a = 1, b = 2, c = 3, [a, ..., b, c] = [4, 5, 6, 7, 8]]
-# ---
+-----
 [1, ', 2, 3]
-# ===
+=====
 ;[{: a, : b} = {('' a) : 1, ('' b) : 2, ('' c) : 3}, [a, b]]
-# ---
+-----
 [1, 2]
-# ===
+=====
 ;[{1 : a, 3 : b} = {1 : 2, 3 : 4}, [a, b]]
-# ---
+-----
 [2, 4]
-# ===
+=====
 ;[a = 1, b = 2, (a : b) = (3 : 4)]
-# ---
+-----
 1 : 2
-# ===
+=====
 ;[(a ': final) = 1, a = 2]
-# ---
+-----
 '
-# ===
+=====
 ;[(a ': final) = 1, a = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a ': final) = 1, (a ': final) = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a ': final) = 1, (a ': constant) = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a ': final) = (1 : 2), a set_1 3, a]
-# ---
+-----
 3 : 2
-# ===
+=====
 ;[(a : b ': final) = (1 : 2), (is_final [a]) and (is_final [b])]
-# ---
+-----
 't
-# ===
+=====
 ;[(a ': constant) = (1 : 2), a set_1 3, a]
-# ---
+-----
 1 : 2
-# ===
+=====
 ;[(a ': constant) = 1, a = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a ': constant) = 1, (a ': final) = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a ': constant) = 1, (a ': constant) = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[(a : b ': constant) = (1 : 2), (is_constant [a]) and (is_constant [b])]
-# ---
+-----
 't
-# ===
+=====
 ;[a = 1, set_final [a], a = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (1 : 2), set_final [a], a set_1 3, a]
-# ---
+-----
 3 : 2
-# ===
+=====
 ;[(a ': constant) = (1 : 2), set_final [a], a set_1 3, a]
-# ---
+-----
 1 : 2
-# ===
+=====
 ;[a = (context {map : {b : 1}}), set_final [a, b], is_final [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = (1 : 2), set_constant [a], a set_1 3, a]
-# ---
+-----
 1 : 2
-# ===
+=====
 ;[a = 1, set_constant [a], a = 2, a]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), set_constant [a, b], is_constant [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ;[(a ': final) = (1 : 2), set_constant [a], a set_1 3, a]
-# ---
+-----
 1 : 2
-# ===
+=====
 is_final [a]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = 1, is_final [a]]
-# ---
+-----
 'f
-# ===
+=====
 ;[(a ': final) = 1, is_final [a]]
-# ---
+-----
 't
-# ===
+=====
 ;[(a ': constant) = 1, is_final [a]]
-# ---
+-----
 't
-# ===
+=====
 ;[': = ('' ':), final = ('' final), a = (context {map : {b : (1 ': final)}}), is_final [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ;[
     ': = (function {
         body : (('' ':) (move [input])),
@@ -305,201 +305,201 @@ is_final [a]
     a = (context {map : {b : (1 ': final)}}),
     is_final [a, b]
 ]
-# ---
+-----
 't
-# ===
+=====
 is_constant [a]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = 1, is_constant [a]]
-# ---
+-----
 'f
-# ===
+=====
 ;[(a ': final) = 1, is_constant [a]]
-# ---
+-----
 'f
-# ===
+=====
 ;[(a ': constant) = 1, is_constant [a]]
-# ---
+-----
 't
-# ===
+=====
 ;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), is_constant [a, b]]
-# ---
+-----
 't
-# ===
+=====
 is_null [a]
-# ---
+-----
 't
-# ===
+=====
 ;[a = 1, is_null [a]]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = (context {}), is_null [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = (context {map : {b : 1}}), is_null [a, b]]
-# ---
+-----
 'f
-# ===
+=====
 is_local [a]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = 1, is_local [a]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = (context {}), [] set_super a, b = 1, is_local [b]]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = (context {}), b = a, [a, b] save (move [b]), [a, c] save 1, [a] set_super b, is_local [a, c]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = (context {}), b = a, [a, b] save (move [b]), [a] set_super b, [a, c] save 1, is_local [a, c]]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = (context {map : {b : 1, : ;, : =}}), a .. (; [b = 2, b])]
-# ---
+-----
 2
-# ===
+=====
 ;[': = ('' ':), final = ('' final), a = (context {map : {b : (1 ': final), : ;, : =}}), a .. (; [b = 2, b])]
-# ---
+-----
 1
-# ===
+=====
 ;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 : 2 ': constant), : ;, : set_1}}), a .. (; [b set_1 3, b])]
-# ---
+-----
 1 : 2
-# ===
+=====
 ;[a = (context {map : {b : 1}}), [] set_super a, b]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : 1}}), b = 2, [] set_super a, b]
-# ---
+-----
 2
-# ===
+=====
 ;[a = (context {}), [] set_super a, b = 1, b : (load [a, b])]
-# ---
+-----
 1 : 1
-# ===
+=====
 ;[a = (context {}), b = 1, [] set_super a, b = 2, b : (load [a, b])]
-# ---
+-----
 2 : '
-# ===
+=====
 ;[a = (context {map : {b : (1 : 2)}}), [] set_super a, b set_1 3, load [a, b]]
-# ---
+-----
 3 : 2
-# ===
+=====
 ;[a = (context {map : {b : 1}}), [] set_super a, (move [b]) : (load [a, b])]
-# ---
+-----
 1 : '
-# ===
+=====
 ;[a = (context {map : {b : 1}}), b = 2, [] set_super a, (move [b]) : (load [a, b])]
-# ---
+-----
 2 : 1
-# ===
+=====
 ;[a = (context {}), [] set_super a, (b ': local) = 2, b : (load [a, b])]
-# ---
+-----
 2 : '
-# ===
+=====
 ;[a = (context {}), [] set_super a, (b : c ': local) = (1 : 2), b]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : (context {map : {c : 1}})}, super : b}), load [a, c]]
-# ---
+-----
 1
-# ===
+=====
 context_represent (context {})
-# ---
+-----
 {}
-# ===
+=====
 context_represent (context {map : {a : 1}, super : b})
-# ---
+-----
 {map : {a : 1}, super : b}
-# ===
+=====
 ;[': = ('' ':), final = ('' final), context_represent (context {map : {a : (1 ': final)}})]
-# ---
+-----
 {map : {a : (1 ': final)}}
-# ===
+=====
 ;[a = (context_represent (context {map : {b : (context {})}})), map = (a map_remove ('' map)), b = (map map_remove ('' b)), type_of b]
-# ---
+-----
 context
-# ===
+=====
 ;[
     a = (context {map : {b : (context {map : {c : 1}})}}),
     [a] set_super b,
     load [a, c]
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     a = (context {map : {b : (context {map : {c : 1}})}}),
     a = ((move [a]) set_super b),
     load [a, c]
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[
     a = (context {map : {b : (context {map : {c : (context {map : {d : 1}})}})}}),
     [a, b] set_super c,
     load [a, b, d]
 ]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (context {map : {b : (context {map : {c : 1}})}, super : b}), get_super [a]]
-# ---
+-----
 b
-# ===
+=====
 ;[(_ : super) = (get_super (context {map : {b : (context {map : {c : 1}})}, super : b})), super]
-# ---
+-----
 b
-# ===
+=====
 ;[a = (context {}), [] set_super a, get_super []]
-# ---
+-----
 a
-# ===
+=====
 ;[
     a = (context {map : {b : (context {map : {c : (context {})}})}}),
     [a, b] set_super c,
     get_super [a, b]
 ]
-# ---
+-----
 c
-# ===
+=====
 ;[a = (prelude '), a .. (not 't)]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = (prelude '), is_null [a, prelude]]
-# ---
+-----
 'f
-# ===
+=====
 ;[a = 1, b = (prelude '), is_null [b, a]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = (prelude '), is_constant [a, prelude]]
-# ---
+-----
 't
-# ===
+=====
 ;[a = 1, b = (this '), load [b, a]]
-# ---
+-----
 1
-# ===
+=====
 ;[a = (this '), b = 1, is_null [a, b]]
-# ---
+-----
 't
-# ===
+=====
 ' .. (this ')
-# ---
+-----
 '

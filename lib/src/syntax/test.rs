@@ -115,8 +115,11 @@ fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
     )))
 }
 
+const MAIN_DELIMITER: &str = "=====";
+const SUB_DELIMITER: &str = "-----";
+
 fn test_parse(src: &str, expected: impl FnOnce() -> Vec<Repr>) -> Result<(), Box<dyn Error>> {
-    let sources = src.split("# ===");
+    let sources = src.split(MAIN_DELIMITER);
 
     for (s, expected_repr) in sources.zip(expected()) {
         let real_repr = parse(s).map_err(|e| {
@@ -133,7 +136,7 @@ fn test_parse(src: &str, expected: impl FnOnce() -> Vec<Repr>) -> Result<(), Box
 }
 
 fn test_generate(src: &str) -> Result<(), Box<dyn Error>> {
-    let sources = src.split("# ===");
+    let sources = src.split(MAIN_DELIMITER);
     for s in sources {
         let repr = parse(s)?;
         let string = repr.to_string();
@@ -151,7 +154,7 @@ fn test_generate(src: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn test_parse_illegal(src: &str) -> Result<(), Box<dyn Error>> {
-    let sources = src.split("# ===");
+    let sources = src.split(MAIN_DELIMITER);
     for s in sources {
         assert!(parse(s).is_err(), "src: {} shouldn't parse", s);
     }
@@ -159,10 +162,10 @@ fn test_parse_illegal(src: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn test_parse_bad(src: &str) -> Result<(), Box<dyn Error>> {
-    let tests = src.split("# ===");
+    let tests = src.split(MAIN_DELIMITER);
 
     for test in tests {
-        let (i1, i2) = test.split_once("# ---").unwrap();
+        let (i1, i2) = test.split_once(SUB_DELIMITER).unwrap();
         let i1 = parse(i1)?;
         let i2 = parse(i2)?;
         assert_eq!(i1, i2, "src1: {} != scr2: {}", i1, i2);

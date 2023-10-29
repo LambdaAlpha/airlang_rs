@@ -5,9 +5,9 @@
     }),
     proposition_input t
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     t = (theorem {
         function : not,
@@ -15,9 +15,9 @@
     }),
     proposition_output t
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     t = (theorem {
         function : not,
@@ -25,9 +25,9 @@
     }),
     (proposition_function t) == not
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     t = (theorem {
         function : not,
@@ -35,9 +35,9 @@
     }),
     proposition_truth t
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     t = (theorem {
         function : $,
@@ -46,9 +46,9 @@
     }),
     proposition_output t
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     t = (theorem {
         function : ==,
@@ -62,9 +62,9 @@
     }),
     proposition_output t
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     t = (theorem {
         function : =,
@@ -74,9 +74,9 @@
     ctx = (proposition_before t),
     ctx .. (is_null [a])
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     t = (theorem {
         function : =,
@@ -86,9 +86,9 @@
     ctx = (proposition_after t),
     ctx .. (is_null [a])
 ]
-# ---
+-----
 'f
-# ===
+=====
 ;[
     p = (proposition {
         function : not,
@@ -98,9 +98,9 @@
     t = (prove p),
     proposition_truth t
 ]
-# ---
+-----
 't
-# ===
+=====
 ;[
     p = (proposition {
         function : not,
@@ -110,5 +110,5 @@
     t = (prove p),
     proposition_truth t
 ]
-# ---
+-----
 'f
