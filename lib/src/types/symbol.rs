@@ -2,11 +2,15 @@ use {
     smartstring::alias::CompactString,
     std::{
         borrow::Borrow,
+        fmt::{
+            Debug,
+            Formatter,
+        },
         ops::Deref,
     },
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Symbol(CompactString);
 
 impl Symbol {
@@ -42,5 +46,11 @@ impl From<Symbol> for String {
 impl Borrow<str> for Symbol {
     fn borrow(&self) -> &str {
         self
+    }
+}
+
+impl Debug for Symbol {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "'{}", &self.0)
     }
 }

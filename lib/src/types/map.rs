@@ -9,6 +9,10 @@ use {
             Iter,
             IterMut,
         },
+        fmt::{
+            Debug,
+            Formatter,
+        },
         hash::{
             Hash,
             Hasher,
@@ -20,7 +24,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);
 
 #[allow(dead_code)]
@@ -103,5 +107,11 @@ impl<K: Eq + Hash, V: Hash> Hash for Map<K, V> {
 impl<K: Eq + Hash, V> Default for Map<K, V> {
     fn default() -> Self {
         Map(Default::default())
+    }
+}
+
+impl<K: Eq + Hash + Debug, V: Debug> Debug for Map<K, V> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(&self.0, f)
     }
 }

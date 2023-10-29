@@ -17,7 +17,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Int(Integer);
 
 #[allow(unused)]
@@ -138,6 +138,12 @@ impl Int {
 impl Display for Int {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Display>::fmt(&self.0, f)
+    }
+}
+
+impl Debug for Int {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(&self.0, f)
     }
 }
 

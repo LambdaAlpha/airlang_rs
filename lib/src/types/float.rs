@@ -2,6 +2,7 @@ use {
     rug::Float as RugFloat,
     std::{
         fmt::{
+            Debug,
             Display,
             Formatter,
         },
@@ -12,7 +13,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Float(RugFloat);
 
 impl Float {
@@ -68,5 +69,11 @@ impl Display for Float {
         let exp = exp.map_or("".to_owned(), |i| format!("e{i}"));
         let s = format!("{sign}0.{num}{exp}");
         write!(f, "{s}")
+    }
+}
+
+impl Debug for Float {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Display>::fmt(self, f)
     }
 }

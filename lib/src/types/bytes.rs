@@ -1,4 +1,9 @@
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+use std::fmt::{
+    Debug,
+    Formatter,
+};
+
+#[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Bytes(Vec<u8>);
 
 impl From<&[u8]> for Bytes {
@@ -28,5 +33,11 @@ impl From<&Bytes> for Vec<u8> {
 impl AsRef<[u8]> for Bytes {
     fn as_ref(&self) -> &[u8] {
         &self.0
+    }
+}
+
+impl Debug for Bytes {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Bytes({:x?})", self.0)
     }
 }

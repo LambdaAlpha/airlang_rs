@@ -1,4 +1,9 @@
-#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
+use std::fmt::{
+    Debug,
+    Formatter,
+};
+
+#[derive(Copy, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Bool(bool);
 
 impl Bool {
@@ -52,5 +57,11 @@ impl From<Bool> for bool {
 impl From<&Bool> for bool {
     fn from(value: &Bool) -> Self {
         value.0
+    }
+}
+
+impl Debug for Bool {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(&self.0, f)
     }
 }

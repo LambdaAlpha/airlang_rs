@@ -5,6 +5,10 @@ use {
     },
     std::{
         borrow::Borrow,
+        fmt::{
+            Debug,
+            Formatter,
+        },
         ops::{
             Deref,
             DerefMut,
@@ -12,7 +16,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Str(SmartString<LazyCompact>);
 
 impl Deref for Str {
@@ -55,5 +59,11 @@ impl From<Str> for String {
 impl Borrow<str> for Str {
     fn borrow(&self) -> &str {
         self
+    }
+}
+
+impl Debug for Str {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(&self.0, f)
     }
 }

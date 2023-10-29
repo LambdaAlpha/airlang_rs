@@ -1,4 +1,8 @@
 use std::{
+    fmt::{
+        Debug,
+        Formatter,
+    },
     ops::{
         Deref,
         DerefMut,
@@ -10,7 +14,7 @@ use std::{
     vec::IntoIter,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct List<T>(Vec<T>);
 
 impl<T> IntoIterator for List<T> {
@@ -73,5 +77,11 @@ impl<T> From<List<T>> for Vec<T> {
 impl<T> Default for List<T> {
     fn default() -> Self {
         List(Default::default())
+    }
+}
+
+impl<T: Debug> Debug for List<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(&self.0, f)
     }
 }

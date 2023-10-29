@@ -35,6 +35,10 @@ use {
         },
     },
     std::{
+        fmt::{
+            Debug,
+            Formatter,
+        },
         hash::{
             Hash,
             Hasher,
@@ -48,7 +52,7 @@ use {
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Val {
     Unit(Unit),
     Bool(Bool),
@@ -75,13 +79,13 @@ pub(crate) type ReverseVal = Reverse<Val, Val>;
 pub(crate) type ListVal = List<Val>;
 pub(crate) type MapVal = Map<Val, Val>;
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Clone, Eq)]
 pub struct FuncVal(pub(crate) Reader<Func>);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CtxVal(pub(crate) Box<Ctx>);
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Clone, Eq)]
 pub struct PropVal(pub(crate) Reader<Prop>);
 
 #[allow(dead_code)]
@@ -554,5 +558,45 @@ impl PartialEq for PropVal {
 impl Hash for PropVal {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.deref().hash(state);
+    }
+}
+
+impl Debug for Val {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Val::Unit(u) => <_ as Debug>::fmt(u, f),
+            Val::Bool(b) => <_ as Debug>::fmt(b, f),
+            Val::Int(i) => <_ as Debug>::fmt(i, f),
+            Val::Float(float) => <_ as Debug>::fmt(float, f),
+            Val::Bytes(b) => <_ as Debug>::fmt(b, f),
+            Val::Symbol(s) => <_ as Debug>::fmt(s, f),
+            Val::String(s) => <_ as Debug>::fmt(s, f),
+            Val::Pair(p) => <_ as Debug>::fmt(p, f),
+            Val::Call(c) => <_ as Debug>::fmt(c, f),
+            Val::Reverse(r) => <_ as Debug>::fmt(r, f),
+            Val::List(l) => <_ as Debug>::fmt(l, f),
+            Val::Map(m) => <_ as Debug>::fmt(m, f),
+            Val::Func(func) => <_ as Debug>::fmt(func, f),
+            Val::Ctx(c) => <_ as Debug>::fmt(c, f),
+            Val::Prop(p) => <_ as Debug>::fmt(p, f),
+        }
+    }
+}
+
+impl Debug for FuncVal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(self.0.deref(), f)
+    }
+}
+
+impl Debug for CtxVal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(self.0.deref(), f)
+    }
+}
+
+impl Debug for PropVal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Debug>::fmt(self.0.deref(), f)
     }
 }
