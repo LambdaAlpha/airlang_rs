@@ -28,6 +28,7 @@ use crate::{
     types::Symbol,
 };
 
+#[derive(Copy, Clone)]
 pub(crate) struct Eval;
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Eval
@@ -79,6 +80,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EvalByRef
@@ -130,6 +132,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalFree;
 
 impl<Ctx> Evaluator<Ctx, Val, Option<Val>> for EvalFree
@@ -184,6 +187,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalFreeByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Option<Val>> for EvalFreeByRef
@@ -238,6 +242,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalConst;
 
 impl<Ctx> Evaluator<Ctx, Val, Option<Val>> for EvalConst
@@ -292,6 +297,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalConstByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Option<Val>> for EvalConstByRef
@@ -346,6 +352,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalFreeChecker;
 
 impl<Ctx> Evaluator<Ctx, Val, bool> for EvalFreeChecker
@@ -400,6 +407,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalFreeCheckerByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, bool> for EvalFreeCheckerByRef
@@ -454,6 +462,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalConstChecker;
 
 impl<Ctx> Evaluator<Ctx, Val, bool> for EvalConstChecker
@@ -508,6 +517,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct EvalConstCheckerByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, bool> for EvalConstCheckerByRef

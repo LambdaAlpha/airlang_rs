@@ -41,10 +41,14 @@ pub(crate) enum EvalMode {
     Quote,
 }
 
-pub(crate) const QUOTE: Quote<Eval, Value, ValBuilder> = Quote {
+pub(crate) const BY_VAL: ByValEvaluators<Eval, Value, ValBuilder> = Evaluators {
     eval: Eval,
     value: Value,
-    builder: ValBuilder,
+    quote: Quote {
+        eval: Eval,
+        value: Value,
+        builder: ValBuilder,
+    },
 };
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for EvalMode
@@ -52,14 +56,18 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_generic(ctx, input, &Eval, &Value, &QUOTE)
+        self.eval_generic(ctx, input, BY_VAL)
     }
 }
 
-pub(crate) const QUOTE_BY_REF: QuoteByRef<EvalByRef, ValueByRef, ValBuilder> = QuoteByRef {
+pub(crate) const BY_REF: ByRefEvaluators<EvalByRef, ValueByRef, ValBuilder> = Evaluators {
     eval: EvalByRef,
     value: ValueByRef,
-    builder: ValBuilder,
+    quote: QuoteByRef {
+        eval: EvalByRef,
+        value: ValueByRef,
+        builder: ValBuilder,
+    },
 };
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EvalMode
@@ -67,14 +75,18 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        self.eval_generic(ctx, input, &EvalByRef, &ValueByRef, &QUOTE_BY_REF)
+        self.eval_generic(ctx, input, BY_REF)
     }
 }
 
-pub(crate) const QUOTE_FREE: Quote<EvalFree, ValueFreeConst, OpValBuilder> = Quote {
+pub(crate) const FREE: ByValEvaluators<EvalFree, ValueFreeConst, OpValBuilder> = Evaluators {
     eval: EvalFree,
     value: ValueFreeConst,
-    builder: OpValBuilder,
+    quote: Quote {
+        eval: EvalFree,
+        value: ValueFreeConst,
+        builder: OpValBuilder,
+    },
 };
 
 impl EvalMode {
@@ -83,15 +95,19 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(ctx, input, &EvalFree, &ValueFreeConst, &QUOTE_FREE)
+        self.eval_generic(ctx, input, FREE)
     }
 }
 
-pub(crate) const QUOTE_FREE_BY_REF: QuoteByRef<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
-    QuoteByRef {
+pub(crate) const FREE_BY_REF: ByRefEvaluators<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
+    Evaluators {
         eval: EvalFreeByRef,
         value: ValueFreeConstByRef,
-        builder: OpValBuilder,
+        quote: QuoteByRef {
+            eval: EvalFreeByRef,
+            value: ValueFreeConstByRef,
+            builder: OpValBuilder,
+        },
     };
 
 impl EvalMode {
@@ -100,20 +116,18 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalFreeByRef,
-            &ValueFreeConstByRef,
-            &QUOTE_FREE_BY_REF,
-        )
+        self.eval_generic(ctx, input, FREE_BY_REF)
     }
 }
 
-pub(crate) const QUOTE_CONST: Quote<EvalConst, ValueFreeConst, OpValBuilder> = Quote {
+pub(crate) const CONST: ByValEvaluators<EvalConst, ValueFreeConst, OpValBuilder> = Evaluators {
     eval: EvalConst,
     value: ValueFreeConst,
-    builder: OpValBuilder,
+    quote: Quote {
+        eval: EvalConst,
+        value: ValueFreeConst,
+        builder: OpValBuilder,
+    },
 };
 
 impl EvalMode {
@@ -122,15 +136,19 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(ctx, input, &EvalConst, &ValueFreeConst, &QUOTE_CONST)
+        self.eval_generic(ctx, input, CONST)
     }
 }
 
-pub(crate) const QUOTE_CONST_BY_REF: QuoteByRef<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
-    QuoteByRef {
+pub(crate) const CONST_BY_REF: ByRefEvaluators<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
+    Evaluators {
         eval: EvalConstByRef,
         value: ValueFreeConstByRef,
-        builder: OpValBuilder,
+        quote: QuoteByRef {
+            eval: EvalConstByRef,
+            value: ValueFreeConstByRef,
+            builder: OpValBuilder,
+        },
     };
 
 impl EvalMode {
@@ -139,22 +157,23 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalConstByRef,
-            &ValueFreeConstByRef,
-            &QUOTE_CONST_BY_REF,
-        )
+        self.eval_generic(ctx, input, CONST_BY_REF)
     }
 }
 
-pub(crate) const QUOTE_FREE_CHECKER: Quote<EvalFreeChecker, ValueFreeConstChecker, BoolAndBuilder> =
-    Quote {
+pub(crate) const FREE_CHECKER: ByValEvaluators<
+    EvalFreeChecker,
+    ValueFreeConstChecker,
+    BoolAndBuilder,
+> = Evaluators {
+    eval: EvalFreeChecker,
+    value: ValueFreeConstChecker,
+    quote: Quote {
         eval: EvalFreeChecker,
         value: ValueFreeConstChecker,
         builder: BoolAndBuilder,
-    };
+    },
+};
 
 impl EvalMode {
     #[allow(unused)]
@@ -162,24 +181,22 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalFreeChecker,
-            &ValueFreeConstChecker,
-            &QUOTE_FREE_CHECKER,
-        )
+        self.eval_generic(ctx, input, FREE_CHECKER)
     }
 }
 
-pub(crate) const QUOTE_FREE_CHECKER_BY_REF: QuoteByRef<
+pub(crate) const FREE_CHECKER_BY_REF: ByRefEvaluators<
     EvalFreeCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
-> = QuoteByRef {
+> = Evaluators {
     eval: EvalFreeCheckerByRef,
     value: ValueFreeConstChecker,
-    builder: BoolAndBuilder,
+    quote: QuoteByRef {
+        eval: EvalFreeCheckerByRef,
+        value: ValueFreeConstChecker,
+        builder: BoolAndBuilder,
+    },
 };
 
 impl EvalMode {
@@ -188,24 +205,22 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalFreeCheckerByRef,
-            &ValueFreeConstChecker,
-            &QUOTE_FREE_CHECKER_BY_REF,
-        )
+        self.eval_generic(ctx, input, FREE_CHECKER_BY_REF)
     }
 }
 
-pub(crate) const QUOTE_CONST_CHECKER: Quote<
+pub(crate) const CONST_CHECKER: ByValEvaluators<
     EvalConstChecker,
     ValueFreeConstChecker,
     BoolAndBuilder,
-> = Quote {
+> = Evaluators {
     eval: EvalConstChecker,
     value: ValueFreeConstChecker,
-    builder: BoolAndBuilder,
+    quote: Quote {
+        eval: EvalConstChecker,
+        value: ValueFreeConstChecker,
+        builder: BoolAndBuilder,
+    },
 };
 
 impl EvalMode {
@@ -214,24 +229,22 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalConstChecker,
-            &ValueFreeConstChecker,
-            &QUOTE_CONST_CHECKER,
-        )
+        self.eval_generic(ctx, input, CONST_CHECKER)
     }
 }
 
-pub(crate) const QUOTE_CONST_CHECKER_BY_REF: QuoteByRef<
+pub(crate) const CONST_CHECKER_BY_REF: ByRefEvaluators<
     EvalConstCheckerByRef,
     ValueFreeConstChecker,
     BoolAndBuilder,
-> = QuoteByRef {
+> = Evaluators {
     eval: EvalConstCheckerByRef,
     value: ValueFreeConstChecker,
-    builder: BoolAndBuilder,
+    quote: QuoteByRef {
+        eval: EvalConstCheckerByRef,
+        value: ValueFreeConstChecker,
+        builder: BoolAndBuilder,
+    },
 };
 
 impl EvalMode {
@@ -240,24 +253,28 @@ impl EvalMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalConstCheckerByRef,
-            &ValueFreeConstChecker,
-            &QUOTE_CONST_CHECKER_BY_REF,
-        )
+        self.eval_generic(ctx, input, CONST_CHECKER_BY_REF)
     }
 }
+
+#[derive(Copy, Clone)]
+pub(crate) struct Evaluators<Eval, Value, Quote> {
+    pub(crate) eval: Eval,
+    pub(crate) value: Value,
+    pub(crate) quote: Quote,
+}
+
+pub(crate) type ByValEvaluators<Eval, Value, Builder> =
+    Evaluators<Eval, Value, Quote<Eval, Value, Builder>>;
+pub(crate) type ByRefEvaluators<Eval, Value, Builder> =
+    Evaluators<Eval, Value, QuoteByRef<Eval, Value, Builder>>;
 
 impl EvalMode {
     pub(crate) fn eval_generic<Ctx, Input, Output, Eval, Value, Quote>(
         &self,
         ctx: &mut Ctx,
         input: Input,
-        eval: &Eval,
-        value: &Value,
-        quote: &Quote,
+        evaluators: Evaluators<Eval, Value, Quote>,
     ) -> Output
     where
         Ctx: CtxAccessor,
@@ -266,9 +283,9 @@ impl EvalMode {
         Quote: Evaluator<Ctx, Input, Output>,
     {
         match self {
-            EvalMode::Value => value.eval(ctx, input),
-            EvalMode::Eval => eval.eval(ctx, input),
-            EvalMode::Quote => quote.eval(ctx, input),
+            EvalMode::Value => evaluators.value.eval(ctx, input),
+            EvalMode::Eval => evaluators.eval.eval(ctx, input),
+            EvalMode::Quote => evaluators.quote.eval(ctx, input),
         }
     }
 }

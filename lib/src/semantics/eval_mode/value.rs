@@ -23,6 +23,7 @@ use crate::{
     },
 };
 
+#[derive(Copy, Clone)]
 pub(crate) struct Value;
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for Value {
@@ -61,6 +62,7 @@ impl<Ctx> ByVal<Ctx, Val> for Value {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct ValueByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for ValueByRef {
@@ -99,6 +101,7 @@ impl<'a, Ctx> ByRef<'a, Ctx, Val> for ValueByRef {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct ValueFreeConst;
 
 impl<Ctx> Evaluator<Ctx, Val, Option<Val>> for ValueFreeConst {
@@ -137,6 +140,7 @@ impl<Ctx> ByVal<Ctx, Option<Val>> for ValueFreeConst {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct ValueFreeConstByRef;
 
 impl<'a, Ctx> Evaluator<Ctx, &'a Val, Option<Val>> for ValueFreeConstByRef {
@@ -175,6 +179,7 @@ impl<'a, Ctx> ByRef<'a, Ctx, Option<Val>> for ValueFreeConstByRef {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct ValueFreeConstChecker;
 
 impl<Ctx> Evaluator<Ctx, Val, bool> for ValueFreeConstChecker {

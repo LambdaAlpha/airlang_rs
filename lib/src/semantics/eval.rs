@@ -226,6 +226,7 @@ impl DefaultByRef {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct ValBuilder;
 
 impl OutputBuilder<Val> for ValBuilder {
@@ -256,6 +257,7 @@ impl OutputBuilder<Val> for ValBuilder {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct BoolAndBuilder;
 
 impl OutputBuilder<bool> for BoolAndBuilder {
@@ -286,6 +288,7 @@ impl OutputBuilder<bool> for BoolAndBuilder {
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct OpValBuilder;
 
 impl OutputBuilder<Option<Val>> for OpValBuilder {

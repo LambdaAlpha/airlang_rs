@@ -257,6 +257,8 @@ pub(crate) mod names {
     pub(crate) const STRINGIFY: &str = "stringify";
 
     pub(crate) const TYPE_OF: &str = "type_of";
+    pub(crate) const EQUAL: &str = "==";
+    pub(crate) const NOT_EQUAL: &str = "=/=";
 
     pub(crate) const LOAD: &str = "load";
     pub(crate) const MOVE: &str = "move";
@@ -318,8 +320,6 @@ pub(crate) mod names {
     pub(crate) const NOT: &str = "not";
     pub(crate) const AND: &str = "and";
     pub(crate) const OR: &str = "or";
-    pub(crate) const EQUAL: &str = "==";
-    pub(crate) const NOT_EQUAL: &str = "=/=";
 
     pub(crate) const INT_ADD: &str = "+";
     pub(crate) const INT_SUBTRACT: &str = "-";

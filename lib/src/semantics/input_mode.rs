@@ -3,42 +3,26 @@ use crate::{
         ctx_access::CtxAccessor,
         eval::{
             output::OutputBuilder,
-            BoolAndBuilder,
             Evaluator,
-            OpValBuilder,
-            ValBuilder,
         },
         eval_mode::{
-            eval::{
-                Eval,
-                EvalByRef,
-                EvalConst,
-                EvalConstByRef,
-                EvalConstChecker,
-                EvalConstCheckerByRef,
-                EvalFree,
-                EvalFreeByRef,
-                EvalFreeChecker,
-                EvalFreeCheckerByRef,
+            quote::{
+                Quote,
+                QuoteByRef,
             },
-            value::{
-                Value,
-                ValueByRef,
-                ValueFreeConst,
-                ValueFreeConstByRef,
-                ValueFreeConstChecker,
-            },
+            ByRefEvaluators,
+            ByValEvaluators,
             EvalMode,
-            QUOTE,
-            QUOTE_BY_REF,
-            QUOTE_CONST,
-            QUOTE_CONST_BY_REF,
-            QUOTE_CONST_CHECKER,
-            QUOTE_CONST_CHECKER_BY_REF,
-            QUOTE_FREE,
-            QUOTE_FREE_BY_REF,
-            QUOTE_FREE_CHECKER,
-            QUOTE_FREE_CHECKER_BY_REF,
+            BY_REF,
+            BY_VAL,
+            CONST,
+            CONST_BY_REF,
+            CONST_CHECKER,
+            CONST_CHECKER_BY_REF,
+            FREE,
+            FREE_BY_REF,
+            FREE_CHECKER,
+            FREE_CHECKER_BY_REF,
         },
         Val,
     },
@@ -77,7 +61,7 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_generic(ctx, input, &Eval, &Value, &QUOTE, &ValBuilder)
+        self.eval_generic(ctx, input, BY_VAL)
     }
 }
 
@@ -86,14 +70,7 @@ where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        self.eval_by_ref_generic(
-            ctx,
-            input,
-            &EvalByRef,
-            &ValueByRef,
-            &QUOTE_BY_REF,
-            &ValBuilder,
-        )
+        self.eval_by_ref_generic(ctx, input, BY_REF)
     }
 }
 
@@ -102,14 +79,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalFree,
-            &ValueFreeConst,
-            &QUOTE_FREE,
-            &OpValBuilder,
-        )
+        self.eval_generic(ctx, input, FREE)
     }
 }
 
@@ -118,14 +88,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_by_ref_generic(
-            ctx,
-            input,
-            &EvalFreeByRef,
-            &ValueFreeConstByRef,
-            &QUOTE_FREE_BY_REF,
-            &OpValBuilder,
-        )
+        self.eval_by_ref_generic(ctx, input, FREE_BY_REF)
     }
 }
 
@@ -134,14 +97,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalConst,
-            &ValueFreeConst,
-            &QUOTE_CONST,
-            &OpValBuilder,
-        )
+        self.eval_generic(ctx, input, CONST)
     }
 }
 
@@ -150,14 +106,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_by_ref_generic(
-            ctx,
-            input,
-            &EvalConstByRef,
-            &ValueFreeConstByRef,
-            &QUOTE_CONST_BY_REF,
-            &OpValBuilder,
-        )
+        self.eval_by_ref_generic(ctx, input, CONST_BY_REF)
     }
 }
 
@@ -166,14 +115,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalFreeChecker,
-            &ValueFreeConstChecker,
-            &QUOTE_FREE_CHECKER,
-            &BoolAndBuilder,
-        )
+        self.eval_generic(ctx, input, FREE_CHECKER)
     }
 }
 
@@ -182,14 +124,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_by_ref_generic(
-            ctx,
-            input,
-            &EvalFreeCheckerByRef,
-            &ValueFreeConstChecker,
-            &QUOTE_FREE_CHECKER_BY_REF,
-            &BoolAndBuilder,
-        )
+        self.eval_by_ref_generic(ctx, input, FREE_CHECKER_BY_REF)
     }
 }
 
@@ -198,14 +133,7 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_generic(
-            ctx,
-            input,
-            &EvalConstChecker,
-            &ValueFreeConstChecker,
-            &QUOTE_CONST_CHECKER,
-            &BoolAndBuilder,
-        )
+        self.eval_generic(ctx, input, CONST_CHECKER)
     }
 }
 
@@ -214,93 +142,63 @@ impl InputMode {
     where
         Ctx: CtxAccessor,
     {
-        self.eval_by_ref_generic(
-            ctx,
-            input,
-            &EvalConstCheckerByRef,
-            &ValueFreeConstChecker,
-            &QUOTE_CONST_CHECKER_BY_REF,
-            &BoolAndBuilder,
-        )
+        self.eval_by_ref_generic(ctx, input, CONST_CHECKER_BY_REF)
     }
 }
 
 impl InputMode {
-    #[allow(clippy::too_many_arguments)]
-    fn eval_generic<Ctx, Output, Eval, Value, Quote, Builder>(
+    fn eval_generic<Ctx, Output, Eval, Value, Builder>(
         &self,
         ctx: &mut Ctx,
         input: Val,
-        eval: &Eval,
-        value: &Value,
-        quote: &Quote,
-        builder: &Builder,
+        evaluators: ByValEvaluators<Eval, Value, Builder>,
     ) -> Output
     where
         Ctx: CtxAccessor,
         Eval: Evaluator<Ctx, Val, Output>,
         Value: Evaluator<Ctx, Val, Output>,
-        Quote: Evaluator<Ctx, Val, Output>,
+        Quote<Eval, Value, Builder>: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
+        ByValEvaluators<Eval, Value, Builder>: Copy,
     {
         match (self, input) {
-            (InputMode::Any(mode), input) => mode.eval_generic(ctx, input, eval, value, quote),
+            (InputMode::Any(mode), input) => mode.eval_generic(ctx, input, evaluators),
             (InputMode::Symbol(mode), Val::Symbol(s)) => {
-                mode.eval_generic(ctx, Val::Symbol(s), eval, value, quote)
+                mode.eval_generic(ctx, Val::Symbol(s), evaluators)
             }
             (InputMode::Pair(mode_pair), Val::Pair(val_pair)) => {
-                let first =
-                    mode_pair
-                        .first
-                        .eval_generic(ctx, val_pair.first, eval, value, quote, builder);
-                let second = mode_pair.second.eval_generic(
-                    ctx,
-                    val_pair.second,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                builder.from_pair(first, second)
+                let first = mode_pair
+                    .first
+                    .eval_generic(ctx, val_pair.first, evaluators);
+                let second = mode_pair
+                    .second
+                    .eval_generic(ctx, val_pair.second, evaluators);
+                evaluators.quote.builder.from_pair(first, second)
             }
             (InputMode::Call(mode_call), Val::Call(val_call)) => {
-                let func =
-                    mode_call
-                        .func
-                        .eval_generic(ctx, val_call.func, eval, value, quote, builder);
-                let input =
-                    mode_call
-                        .input
-                        .eval_generic(ctx, val_call.input, eval, value, quote, builder);
-                builder.from_call(func, input)
+                let func = mode_call.func.eval_generic(ctx, val_call.func, evaluators);
+                let input = mode_call
+                    .input
+                    .eval_generic(ctx, val_call.input, evaluators);
+                evaluators.quote.builder.from_call(func, input)
             }
             (InputMode::Reverse(mode_reverse), Val::Reverse(val_reverse)) => {
-                let func = mode_reverse.func.eval_generic(
-                    ctx,
-                    val_reverse.func,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                let output = mode_reverse.output.eval_generic(
-                    ctx,
-                    val_reverse.output,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                builder.from_reverse(func, output)
+                let func = mode_reverse
+                    .func
+                    .eval_generic(ctx, val_reverse.func, evaluators);
+                let output = mode_reverse
+                    .output
+                    .eval_generic(ctx, val_reverse.output, evaluators);
+                evaluators.quote.builder.from_reverse(func, output)
             }
             (InputMode::List(mode), Val::List(val_list)) => {
-                mode.eval_generic(ctx, Val::List(val_list), eval, value, quote)
+                mode.eval_generic(ctx, Val::List(val_list), evaluators)
             }
             (InputMode::ListForAll(mode), Val::List(val_list)) => {
                 let list = val_list
                     .into_iter()
-                    .map(|v| mode.eval_generic(ctx, v, eval, value, quote, builder));
-                builder.from_list(list)
+                    .map(|v| mode.eval_generic(ctx, v, evaluators));
+                evaluators.quote.builder.from_list(list)
             }
             (InputMode::ListForSome(mode_list), Val::List(val_list)) => {
                 let mut list = Vec::with_capacity(val_list.len());
@@ -313,142 +211,102 @@ impl InputMode {
                         if val_len > name_len {
                             for _ in 0..(val_len - name_len) {
                                 let val = val_iter.next().unwrap();
-                                let val = mode
-                                    .input_mode
-                                    .eval_generic(ctx, val, eval, value, quote, builder);
+                                let val = mode.input_mode.eval_generic(ctx, val, evaluators);
                                 list.push(val);
                             }
                         }
                     } else if let Some(val) = val_iter.next() {
-                        let val = mode
-                            .input_mode
-                            .eval_generic(ctx, val, eval, value, quote, builder);
+                        let val = mode.input_mode.eval_generic(ctx, val, evaluators);
                         list.push(val);
                     } else {
                         break;
                     }
                 }
                 for val in val_iter {
-                    list.push(eval.eval(ctx, val));
+                    list.push(evaluators.eval.eval(ctx, val));
                 }
-                builder.from_list(list.into_iter())
+                evaluators.quote.builder.from_list(list.into_iter())
             }
             (InputMode::Map(mode), Val::Map(val_map)) => {
-                mode.eval_generic(ctx, Val::Map(val_map), eval, value, quote)
+                mode.eval_generic(ctx, Val::Map(val_map), evaluators)
             }
             (InputMode::MapForAll(mode), Val::Map(val_map)) => {
                 let map = val_map.into_iter().map(|(k, v)| {
-                    let k = mode.first.eval_generic(ctx, k, eval, value, quote, builder);
-                    let v = mode
-                        .second
-                        .eval_generic(ctx, v, eval, value, quote, builder);
+                    let k = mode.first.eval_generic(ctx, k, evaluators);
+                    let v = mode.second.eval_generic(ctx, v, evaluators);
                     (k, v)
                 });
-                builder.from_map(map)
+                evaluators.quote.builder.from_map(map)
             }
             (InputMode::MapForSome(mode_map), Val::Map(val_map)) => {
                 let map = val_map.into_iter().map(|(k, v)| {
                     let v = if let Some(mode) = mode_map.get(&k) {
-                        mode.eval_generic(ctx, v, eval, value, quote, builder)
+                        mode.eval_generic(ctx, v, evaluators)
                     } else {
-                        eval.eval(ctx, v)
+                        evaluators.eval.eval(ctx, v)
                     };
-                    let k = value.eval(ctx, k);
+                    let k = evaluators.value.eval(ctx, k);
                     (k, v)
                 });
-                builder.from_map(map)
+                evaluators.quote.builder.from_map(map)
             }
-            (_, input) => eval.eval(ctx, input),
+            (_, input) => evaluators.eval.eval(ctx, input),
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
-    fn eval_by_ref_generic<'a, Ctx, Output, Eval, Value, Quote, Builder>(
+    fn eval_by_ref_generic<'a, Ctx, Output, Eval, Value, Builder>(
         &self,
         ctx: &mut Ctx,
         input: &'a Val,
-        eval: &Eval,
-        value: &Value,
-        quote: &Quote,
-        builder: &Builder,
+        evaluators: ByRefEvaluators<Eval, Value, Builder>,
     ) -> Output
     where
         Ctx: CtxAccessor,
         Eval: Evaluator<Ctx, &'a Val, Output>,
         Value: Evaluator<Ctx, &'a Val, Output>,
-        Quote: Evaluator<Ctx, &'a Val, Output>,
+        QuoteByRef<Eval, Value, Builder>: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
+        ByRefEvaluators<Eval, Value, Builder>: Copy,
     {
         match (self, input) {
-            (InputMode::Any(mode), input) => mode.eval_generic(ctx, input, eval, value, quote),
-            (InputMode::Symbol(mode), Val::Symbol(_)) => {
-                mode.eval_generic(ctx, input, eval, value, quote)
-            }
+            (InputMode::Any(mode), input) => mode.eval_generic(ctx, input, evaluators),
+            (InputMode::Symbol(mode), Val::Symbol(_)) => mode.eval_generic(ctx, input, evaluators),
             (InputMode::Pair(mode_pair), Val::Pair(val_pair)) => {
-                let first = mode_pair.first.eval_by_ref_generic(
-                    ctx,
-                    &val_pair.first,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                let second = mode_pair.second.eval_by_ref_generic(
-                    ctx,
-                    &val_pair.second,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                builder.from_pair(first, second)
+                let first = mode_pair
+                    .first
+                    .eval_by_ref_generic(ctx, &val_pair.first, evaluators);
+                let second =
+                    mode_pair
+                        .second
+                        .eval_by_ref_generic(ctx, &val_pair.second, evaluators);
+                evaluators.quote.builder.from_pair(first, second)
             }
             (InputMode::Call(mode_call), Val::Call(val_call)) => {
-                let func = mode_call.func.eval_by_ref_generic(
-                    ctx,
-                    &val_call.func,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                let input = mode_call.input.eval_by_ref_generic(
-                    ctx,
-                    &val_call.input,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                builder.from_call(func, input)
+                let func = mode_call
+                    .func
+                    .eval_by_ref_generic(ctx, &val_call.func, evaluators);
+                let input = mode_call
+                    .input
+                    .eval_by_ref_generic(ctx, &val_call.input, evaluators);
+                evaluators.quote.builder.from_call(func, input)
             }
             (InputMode::Reverse(mode_reverse), Val::Reverse(val_reverse)) => {
-                let func = mode_reverse.func.eval_by_ref_generic(
-                    ctx,
-                    &val_reverse.func,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                let output = mode_reverse.output.eval_by_ref_generic(
-                    ctx,
-                    &val_reverse.output,
-                    eval,
-                    value,
-                    quote,
-                    builder,
-                );
-                builder.from_reverse(func, output)
+                let func =
+                    mode_reverse
+                        .func
+                        .eval_by_ref_generic(ctx, &val_reverse.func, evaluators);
+                let output =
+                    mode_reverse
+                        .output
+                        .eval_by_ref_generic(ctx, &val_reverse.output, evaluators);
+                evaluators.quote.builder.from_reverse(func, output)
             }
-            (InputMode::List(mode), Val::List(_)) => {
-                mode.eval_generic(ctx, input, eval, value, quote)
-            }
+            (InputMode::List(mode), Val::List(_)) => mode.eval_generic(ctx, input, evaluators),
             (InputMode::ListForAll(mode), Val::List(val_list)) => {
                 let list = val_list
                     .into_iter()
-                    .map(|v| mode.eval_by_ref_generic(ctx, v, eval, value, quote, builder));
-                builder.from_list(list)
+                    .map(|v| mode.eval_by_ref_generic(ctx, v, evaluators));
+                evaluators.quote.builder.from_list(list)
             }
             (InputMode::ListForSome(mode_list), Val::List(val_list)) => {
                 let mut list = Vec::with_capacity(val_list.len());
@@ -456,9 +314,7 @@ impl InputMode {
                 let mut val_iter = val_list.into_iter();
                 while let Some(val) = val_iter.next() {
                     if let Some(mode) = mode_iter.next() {
-                        let val = mode
-                            .input_mode
-                            .eval_by_ref_generic(ctx, val, eval, value, quote, builder);
+                        let val = mode.input_mode.eval_by_ref_generic(ctx, val, evaluators);
                         list.push(val);
                         if mode.ellipsis {
                             let name_len = mode_iter.len();
@@ -466,47 +322,40 @@ impl InputMode {
                             if val_len > name_len {
                                 for _ in 0..(val_len - name_len) {
                                     let val = val_iter.next().unwrap();
-                                    let val = mode
-                                        .input_mode
-                                        .eval_by_ref_generic(ctx, val, eval, value, quote, builder);
+                                    let val =
+                                        mode.input_mode.eval_by_ref_generic(ctx, val, evaluators);
                                     list.push(val);
                                 }
                             }
                         }
                     } else {
-                        list.push(eval.eval(ctx, val));
+                        list.push(evaluators.eval.eval(ctx, val));
                     }
                 }
-                builder.from_list(list.into_iter())
+                evaluators.quote.builder.from_list(list.into_iter())
             }
-            (InputMode::Map(mode), Val::Map(_)) => {
-                mode.eval_generic(ctx, input, eval, value, quote)
-            }
+            (InputMode::Map(mode), Val::Map(_)) => mode.eval_generic(ctx, input, evaluators),
             (InputMode::MapForAll(mode), Val::Map(val_map)) => {
                 let map = val_map.into_iter().map(|(k, v)| {
-                    let k = mode
-                        .first
-                        .eval_by_ref_generic(ctx, k, eval, value, quote, builder);
-                    let v = mode
-                        .second
-                        .eval_by_ref_generic(ctx, v, eval, value, quote, builder);
+                    let k = mode.first.eval_by_ref_generic(ctx, k, evaluators);
+                    let v = mode.second.eval_by_ref_generic(ctx, v, evaluators);
                     (k, v)
                 });
-                builder.from_map(map)
+                evaluators.quote.builder.from_map(map)
             }
             (InputMode::MapForSome(mode_map), Val::Map(val_map)) => {
                 let map = val_map.into_iter().map(|(k, v)| {
                     let v = if let Some(mode) = mode_map.get(k) {
-                        mode.eval_by_ref_generic(ctx, v, eval, value, quote, builder)
+                        mode.eval_by_ref_generic(ctx, v, evaluators)
                     } else {
-                        eval.eval(ctx, v)
+                        evaluators.eval.eval(ctx, v)
                     };
-                    let k = value.eval(ctx, k);
+                    let k = evaluators.value.eval(ctx, k);
                     (k, v)
                 });
-                builder.from_map(map)
+                evaluators.quote.builder.from_map(map)
             }
-            (_, input) => eval.eval(ctx, input),
+            (_, input) => evaluators.eval.eval(ctx, input),
         }
     }
 }

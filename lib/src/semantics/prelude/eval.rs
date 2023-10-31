@@ -17,7 +17,7 @@ use crate::{
         eval_mode::{
             eval::Eval,
             EvalMode,
-            QUOTE,
+            BY_VAL,
         },
         func::{
             CtxConstFn,
@@ -73,7 +73,7 @@ pub(crate) fn quote() -> PrimitiveFunc<CtxMutableFn> {
 }
 
 fn fn_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    QUOTE.eval(&mut ctx, input)
+    BY_VAL.quote.eval(&mut ctx, input)
 }
 
 pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {

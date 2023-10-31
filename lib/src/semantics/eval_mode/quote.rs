@@ -20,6 +20,7 @@ use crate::{
     types::Symbol,
 };
 
+#[derive(Copy, Clone)]
 pub(crate) struct Quote<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
@@ -81,6 +82,7 @@ where
     }
 }
 
+#[derive(Copy, Clone)]
 pub(crate) struct QuoteByRef<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
