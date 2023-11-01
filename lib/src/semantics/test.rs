@@ -13,6 +13,9 @@ const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";
 
 fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
+    if input.is_empty() {
+        return Ok(());
+    }
     let mut interpreter = crate::semantics::Interpreter::new();
     let tests = input.split(MAIN_DELIMITER);
 
@@ -89,8 +92,23 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_reverse() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/reverse.air"), "test/reverse.air")
+}
+
+#[test]
 fn test_prop() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/prop.air"), "test/prop.air")
+}
+
+#[test]
+fn test_symbol() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/symbol.air"), "test/symbol.air")
+}
+
+#[test]
+fn test_unit() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/unit.air"), "test/unit.air")
 }
 
 #[test]
@@ -101,6 +119,16 @@ fn test_bool() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_int() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/int.air"), "test/int.air")
+}
+
+#[test]
+fn test_float() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/float.air"), "test/float.air")
+}
+
+#[test]
+fn test_bytes() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/bytes.air"), "test/bytes.air")
 }
 
 #[test]

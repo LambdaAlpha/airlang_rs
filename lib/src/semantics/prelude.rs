@@ -387,11 +387,21 @@ mod func;
 
 mod call;
 
+mod reverse;
+
 mod prop;
+
+mod symbol;
+
+mod unit;
 
 mod bool;
 
 mod int;
+
+mod float;
+
+mod bytes;
 
 mod str;
 
