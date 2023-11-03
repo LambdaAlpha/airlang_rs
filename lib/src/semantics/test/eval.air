@@ -2,210 +2,210 @@
 -----
 a
 =====
-$ (not 'f)
+` (not 'f)
 -----
 't
 =====
-` [a, f a, a : b, f ? a, {a : b}]
+'" [a, f a, a : b, f ? a, {a : b}]
 -----
 [a, f a, a : b, f ? a, {a : b}]
 =====
-` {a : b, c : ('t (not 'f))}
+'" {a : b, c : ('t (not 'f))}
 -----
 {a : b, c : 't}
 =====
-` [a, b : ['t (not 't)]]
+'" [a, b : ['t (not 't)]]
 -----
 [a, b : ['f]]
 =====
-` ('f a)
+'" ('f a)
 -----
 a
 =====
-` ('f ('t (not 't)))
+'" ('f ('t (not 't)))
 -----
 't (not 't)
 =====
-` ('f ('f a))
+'" ('f ('f a))
 -----
 'f a
 =====
-$ {: a, (not 't) : c, : (not 'f)}
+` {: a, (not 't) : c, : (not 'f)}
 -----
 {', 'f : ', : 't}
 =====
-$ {{a : b} : {c : d}}
+` {{a : b} : {c : d}}
 -----
 {{' : '} : {' : '}}
 =====
-$ {('' (not 'f)) : a}
+` {('' (not 'f)) : a}
 -----
 {(not 'f) : '}
 =====
-$ [1, {a : b}]
+` [1, {a : b}]
 -----
 [1, {' : '}]
 =====
-$ {('' a) : ('' {b : c})}
+` {('' a) : ('' {b : c})}
 -----
 {a : {b : c}}
 =====
-$ {('' a) : ($ {b : c})}
+` {('' a) : (` {b : c})}
 -----
 {a : {' : '}}
 =====
-;[a = 1, $2 ('' a)]
+;[a = 1, `2 ('' a)]
 -----
 1
 =====
-('' a) $2 ('' b)
+('' a) `2 ('' b)
 -----
 ' : '
 =====
-;[a = ('' b), b = ('' c), c = 1, $3 a]
+;[a = ('' b), b = ('' c), c = 1, `3 a]
 -----
 1
 =====
-$is_free {value : 1}
+`is_free {value : 1}
 -----
 't
 =====
-$is_free {value : a}
+`is_free {value : a}
 -----
 'f
 =====
-$is_free {value : a, input_mode : $}
+`is_free {value : a, input_mode : `}
 -----
 'f
 =====
-$is_free {value : (1 : a)}
+`is_free {value : (1 : a)}
 -----
 'f
 =====
-$is_free {value : (1 : "a")}
+`is_free {value : (1 : "a")}
 -----
 't
 =====
-$is_free {value : (1 : a), input_mode : ($ : '')}
+`is_free {value : (1 : a), input_mode : (` : '')}
 -----
 't
 =====
-$is_free {value : [1, a]}
+`is_free {value : [1, a]}
 -----
 'f
 =====
-$is_free {value : [1, "a"]}
+`is_free {value : [1, "a"]}
 -----
 't
 =====
-$is_free {value : {a : 1, 1 : a}}
+`is_free {value : {a : 1, 1 : a}}
 -----
 'f
 =====
-$is_free {value : {a : 1, 1 : "a"}}
+`is_free {value : {a : 1, 1 : "a"}}
 -----
 'f
 =====
-$is_free {value : (f 1)}
+`is_free {value : (f 1)}
 -----
 'f
 =====
-$is_free {value : (('t not) 't)}
+`is_free {value : (('t not) 't)}
 -----
 't
 =====
-$is_free {value : (('t not) a)}
+`is_free {value : (('t not) a)}
 -----
 'f
 =====
-$is_free {value : (('t get_1) 1)}
+`is_free {value : (('t get_1) 1)}
 -----
 'f
 =====
-$is_free {value : a, input_mode : ''}
+`is_free {value : a, input_mode : ''}
 -----
 't
 =====
-$is_free {value : ('f ('t a)), input_mode : `}
+`is_free {value : ('f ('t a)), input_mode : '"}
 -----
 'f
 =====
-$is_free {value : [a, ('f ('t 1))], input_mode : `}
+`is_free {value : [a, ('f ('t 1))], input_mode : '"}
 -----
 't
 =====
-$is_constant {value : a}
+`is_constant {value : a}
 -----
 't
 =====
-$is_constant {value : (a : b)}
+`is_constant {value : (a : b)}
 -----
 't
 =====
-$is_constant {value : (a : (move a))}
+`is_constant {value : (a : (move a))}
 -----
 'f
 =====
-$is_constant {value : (a : (move a)), input_mode : ($ : '')}
+`is_constant {value : (a : (move a)), input_mode : (` : '')}
 -----
 't
 =====
-$is_constant {value : [1, a]}
+`is_constant {value : [1, a]}
 -----
 't
 =====
-$is_constant {value : [1, move a]}
+`is_constant {value : [1, move a]}
 -----
 'f
 =====
-$is_constant {value : {a : 1, ('f ('t (move a))) : a}}
+`is_constant {value : {a : 1, ('f ('t (move a))) : a}}
 -----
 'f
 =====
-$is_constant {value : {a : 1, a : (move a)}}
+`is_constant {value : {a : 1, a : (move a)}}
 -----
 'f
 =====
-$is_constant {value : {a : 1, a : a}}
+`is_constant {value : {a : 1, a : a}}
 -----
 't
 =====
-$is_constant {value : (get_1 a)}
+`is_constant {value : (get_1 a)}
 -----
 't
 =====
-$is_constant {value : (move a)}
+`is_constant {value : (move a)}
 -----
 'f
 =====
-$is_constant {value : (move a), input_mode : $}
+`is_constant {value : (move a), input_mode : `}
 -----
 'f
 =====
-$is_constant {value : (not (move a))}
+`is_constant {value : (not (move a))}
 -----
 'f
 =====
-$is_constant {value : (; [])}
+`is_constant {value : (; [])}
 -----
 'f
 =====
-$is_constant {value : (f (move a))}
+`is_constant {value : (f (move a))}
 -----
 'f
 =====
-$is_constant {value : (move a), input_mode : ''}
+`is_constant {value : (move a), input_mode : ''}
 -----
 't
 =====
-$is_constant {value : ('f ('t (move a))), input_mode : `}
+`is_constant {value : ('f ('t (move a))), input_mode : '"}
 -----
 'f
 =====
-$is_constant {value : [move a, 'f ('t a)], input_mode : `}
+`is_constant {value : [move a, 'f ('t a)], input_mode : '"}
 -----
 't
 =====
-;[c = (context {map : {move : not}}), $is_constant {value : (move a), context : c}]
+;[c = (context {map : {move : not}}), `is_constant {value : (move a), context : c}]
 -----
 't

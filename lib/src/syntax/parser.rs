@@ -1,6 +1,7 @@
 use {
     crate::{
         syntax::{
+            CALL_SEPARATOR,
             COMMENT_SEPARATOR,
             ESCAPED_PREFIX,
             LIST_LEFT,
@@ -188,6 +189,10 @@ where
             Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
             _ => |s| map(exact_char(PAIR_SEPARATOR), |_| Token::Pair)(s),
         },
+        CALL_SEPARATOR => match second {
+            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            _ => |s| map(exact_char(CALL_SEPARATOR), |_| Token::Call)(s),
+        },
         REVERSE_SEPARATOR => match second {
             Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
             _ => |s| map(exact_char(REVERSE_SEPARATOR), |_| Token::Reverse)(s),
@@ -204,6 +209,7 @@ where
 
 enum Token<T> {
     Pair,
+    Call,
     Reverse,
     Comment,
     Default(T),
@@ -230,6 +236,10 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                 let pair = Box::new(Pair::new(input.clone(), input));
                 Some(<T as From<Box<Pair<T, T>>>>::from(pair))
             }
+            Token::Call => {
+                let call = Box::new(Call::new(input.clone(), input));
+                Some(<T as From<Box<Call<T, T>>>>::from(call))
+            }
             Token::Reverse => {
                 let reverse = Box::new(Reverse::new(input.clone(), input));
                 Some(<T as From<Box<Reverse<T, T>>>>::from(reverse))
@@ -255,6 +265,10 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                 Token::Pair => {
                     let pair = Box::new(Pair::new(left, right));
                     <T as From<Box<Pair<T, T>>>>::from(pair)
+                }
+                Token::Call => {
+                    let call = Box::new(Call::new(left, right));
+                    <T as From<Box<Call<T, T>>>>::from(call)
                 }
                 Token::Reverse => {
                     let reverse = Box::new(Reverse::new(left, right));

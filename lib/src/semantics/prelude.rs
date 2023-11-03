@@ -284,12 +284,12 @@ pub(crate) mod names {
     pub(crate) const WHILE: &str = "while";
 
     pub(crate) const VALUE: &str = "'";
-    pub(crate) const EVAL: &str = "$";
-    pub(crate) const QUOTE: &str = "`";
-    pub(crate) const EVAL_TWICE: &str = "$2";
-    pub(crate) const EVAL_THRICE: &str = "$3";
-    pub(crate) const IS_CTX_FREE: &str = "$is_free";
-    pub(crate) const IS_CTX_CONST: &str = "$is_constant";
+    pub(crate) const EVAL: &str = "`";
+    pub(crate) const QUOTE: &str = "\"";
+    pub(crate) const EVAL_TWICE: &str = "`2";
+    pub(crate) const EVAL_THRICE: &str = "`3";
+    pub(crate) const IS_CTX_FREE: &str = "`is_free";
+    pub(crate) const IS_CTX_CONST: &str = "`is_constant";
 
     pub(crate) const LOGIC_THEOREM_NEW: &str = "theorem";
     pub(crate) const LOGIC_PROVE: &str = "prove";

@@ -70,11 +70,11 @@
 -----
 1
 =====
-;[a = (context {}), b = 1, [a, b] save (` (('t b) ': final)), is_final [a, b]]
+;[a = (context {}), b = 1, [a, b] save ('" (('t b) ': final)), is_final [a, b]]
 -----
 't
 =====
-;[a = (context {}), b = 1, [a, b] save (` (('t b) ': constant)), is_constant [a, b]]
+;[a = (context {}), b = 1, [a, b] save ('" (('t b) ': constant)), is_constant [a, b]]
 -----
 't
 =====
@@ -299,7 +299,7 @@ is_final [a]
 ;[
     ': = (function {
         body : (('' ':) (move [input])),
-        input_mode : ($ : ''),
+        input_mode : (` : ''),
         context : (context {map : {: '', : move}}),
     }),
     a = (context {map : {b : (1 ': final)}}),

@@ -1,6 +1,7 @@
 use {
     crate::{
         syntax::{
+            CALL_SEPARATOR,
             COMMENT_SEPARATOR,
             ESCAPED_PREFIX,
             LIST_LEFT,
@@ -196,7 +197,7 @@ fn generate_symbol(str: &str, s: &mut String) {
     let first = chars.next().unwrap();
     let escape = match first {
         ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
-        PAIR_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => str.len() == 1,
+        PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => str.len() == 1,
         '+' | '-' => matches!(chars.next(), Some('0'..='9')),
         _ => false,
     };

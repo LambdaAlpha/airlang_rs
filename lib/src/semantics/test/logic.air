@@ -40,8 +40,8 @@
 =====
 ;[
     t = (theorem {
-        function : $,
-        input : (` (('t not) 't)),
+        function : `,
+        input : ('" (('t not) 't)),
         before : (context {}),
     }),
     proposition_output t

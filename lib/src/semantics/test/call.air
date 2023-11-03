@@ -14,7 +14,7 @@
 -----
 '
 =====
-' .. (; (` [a ('t =) 1, a]))
+' .. (; ('" [a ('t =) 1, a]))
 -----
 '
 =====
@@ -30,7 +30,7 @@
 -----
 1
 =====
-;[(a ': constant) = (context {map : {b : 1}}), a .. ($ b)]
+;[(a ': constant) = (context {map : {b : 1}}), a .. (` b)]
 -----
 1
 =====
@@ -38,10 +38,10 @@
 -----
 1
 =====
-;[': = ('' ':), constant = ('' constant), (_ : a) = ((context {map : {b : (1 ': constant)}}) .. ($ b)), a]
+;[': = ('' ':), constant = ('' constant), (_ : a) = ((context {map : {b : (1 ': constant)}}) .. (` b)), a]
 -----
 1
 =====
-;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), a .. ($ b)]
+;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), a .. (` b)]
 -----
 1
