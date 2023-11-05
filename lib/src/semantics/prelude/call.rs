@@ -1,7 +1,7 @@
 use crate::{
     semantics::{
         ctx::{
-            DefaultCtx,
+            CtxTrait,
             TaggedRef,
         },
         ctx_access::{
@@ -59,7 +59,7 @@ fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 pub(crate) fn call_with_ctx() -> PrimitiveFunc<CtxMutableFn> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
+        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
         InputMode::Call(Box::new(Call::new(
             InputMode::Any(EvalMode::Eval),
             InputMode::Any(EvalMode::Value),
@@ -84,18 +84,30 @@ fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
     if let Val::Unit(_) = target_ctx {
         return func.eval(&mut FreeCtx, input);
     }
-    DefaultCtx.get_tagged_ref(&mut ctx, target_ctx, |target_ctx| {
-        let TaggedRef {
-            val_ref: Val::Ctx(CtxVal(target_ctx)),
-            is_const: target_ctx_const,
-        } = target_ctx
-        else {
-            return Val::default();
-        };
-        if target_ctx_const {
-            func.eval(&mut ConstCtx(target_ctx), input)
-        } else {
-            func.eval(&mut MutableCtx(target_ctx), input)
-        }
-    })
+    let Val::List(names) = target_ctx else {
+        return Val::default();
+    };
+    get_ctx_nested(ctx, &names[..], |mut ctx| func.eval(&mut ctx, input))
+}
+
+fn get_ctx_nested<F>(mut ctx: CtxForMutableFn, names: &[Val], f: F) -> Val
+where
+    F: for<'a> FnOnce(CtxForMutableFn<'a>) -> Val,
+{
+    let Some(Val::Symbol(name)) = names.first() else {
+        return f(ctx);
+    };
+    let rest = &names[1..];
+
+    let Some(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
+        return Val::default();
+    };
+    let Val::Ctx(CtxVal(ctx)) = val_ref else {
+        return Val::default();
+    };
+    if is_const {
+        get_ctx_nested(CtxForMutableFn::Const(ConstCtx(ctx)), rest, f)
+    } else {
+        get_ctx_nested(CtxForMutableFn::Mutable(MutableCtx(ctx)), rest, f)
+    }
 }

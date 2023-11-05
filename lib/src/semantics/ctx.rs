@@ -39,9 +39,9 @@ pub(crate) trait CtxTrait {
 
     fn is_local(&self, name: &str) -> Val;
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>);
+    fn get_super(&self) -> Option<&Symbol>;
 
-    fn get_super(&self) -> Option<Symbol>;
+    fn set_super(&mut self, super_ctx: Option<Symbol>);
 
     fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>>;
 
@@ -350,23 +350,6 @@ impl DefaultCtx {
                 let result = f(&val);
                 Val::Pair(Box::new(Pair::new(val, result)))
             }
-        }
-    }
-
-    #[allow(unused)]
-    pub(crate) fn get_const_ref_no_ret<Ctx: CtxTrait, F>(&self, ctx: &Ctx, name: Val, f: F) -> Val
-    where
-        F: FnOnce(&Val) -> Val,
-        Self: Sized,
-    {
-        match name {
-            Val::Symbol(s) => {
-                let Some(val) = ctx.get_const_ref(&s) else {
-                    return Val::default();
-                };
-                f(val)
-            }
-            val => f(&val),
         }
     }
 

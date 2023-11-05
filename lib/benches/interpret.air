@@ -22,7 +22,7 @@
       ],
       x
     ]),
-    context : (move [ctx]),
+    context : (move ctx),
   }),
   x = 42,
   y = 24,

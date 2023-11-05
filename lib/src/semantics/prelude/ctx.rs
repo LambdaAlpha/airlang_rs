@@ -5,18 +5,11 @@ use crate::{
             CtxTrait,
             InvariantTag,
             NameMap,
-            TaggedRef,
             TaggedVal,
         },
         ctx_access::{
-            constant::{
-                ConstCtx,
-                CtxForConstFn,
-            },
-            mutable::{
-                CtxForMutableFn,
-                MutableCtx,
-            },
+            constant::CtxForConstFn,
+            mutable::CtxForMutableFn,
         },
         eval_mode::EvalMode,
         func::{
@@ -52,58 +45,30 @@ use crate::{
     },
 };
 
-pub(crate) fn load() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
-    let primitive = Primitive::<CtxConstFn>::new(names::LOAD, fn_load);
+pub(crate) fn read() -> PrimitiveFunc<CtxConstFn> {
+    let input_mode = InputMode::Symbol(EvalMode::Value);
+    let primitive = Primitive::<CtxConstFn>::new(names::READ, fn_read);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
-fn fn_load(ctx: CtxForConstFn, input: Val) -> Val {
-    fn_nested(ctx, input, |ctx, name| ctx.get(&name))
+fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.get(&s)
 }
 
 pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new(names::MOVE, fn_move);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
-fn fn_move(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_nested(ctx, input, |mut ctx, name| ctx.remove(&name))
-}
-
-pub(crate) fn save() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
-        InputMode::Any(EvalMode::Eval),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::SAVE, fn_save);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_save(ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
         return Val::default();
     };
-    let path = pair.first;
-    let (local, tagged_val) = if let Val::Call(call) = pair.second {
-        match parse_ctx_val_pair(call, true) {
-            ParseCtxValPairResult::Parsed { val, local, tag } => (local, TaggedVal { val, tag }),
-            ParseCtxValPairResult::Fallback(call) => (false, TaggedVal::new(Val::Call(call))),
-            ParseCtxValPairResult::None => {
-                return Val::default();
-            }
-        }
-    } else {
-        (false, TaggedVal::new(pair.second))
-    };
-    fn_nested(ctx, path, |mut ctx, name| {
-        if local {
-            ctx.put_val_local(name, tagged_val)
-        } else {
-            ctx.put_val(name, tagged_val)
-        }
-    })
+    ctx.remove(&s)
 }
 
 pub(crate) fn assign() -> PrimitiveFunc<CtxMutableFn> {
@@ -287,109 +252,114 @@ fn generate_invariant_tag(tag: InvariantTag) -> Symbol {
 }
 
 pub(crate) fn set_final() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new(names::SET_FINAL, fn_set_final);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
-fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_nested(ctx, input, |mut ctx, name| {
-        ctx.set_final(&name);
-        Val::default()
-    })
+fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.set_final(&s);
+    Val::default()
 }
 
 pub(crate) fn set_const() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new(names::SET_CONST, fn_set_const);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
-fn fn_set_const(ctx: CtxForMutableFn, input: Val) -> Val {
-    fn_nested(ctx, input, |mut ctx, name| {
-        ctx.set_const(&name);
-        Val::default()
-    })
+fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.set_const(&s);
+    Val::default()
 }
 
 pub(crate) fn is_final() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::IS_FINAL, fn_is_final);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
-    fn_nested(ctx, input, |ctx, name| ctx.is_final(&name))
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_final(&s)
 }
 
 pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::IS_CONST, fn_is_const);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
-    fn_nested(ctx, input, |ctx, name| ctx.is_const(&name))
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_const(&s)
 }
 
 pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::IS_NULL, fn_is_null);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
-    fn_nested(ctx, input, |ctx, name| ctx.is_null(&name))
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_null(&s)
 }
 
 pub(crate) fn is_local() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
+    let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxConstFn>::new(names::IS_LOCAL, fn_is_local);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
-    fn_nested(ctx, input, |ctx, name| ctx.is_local(&name))
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    ctx.is_local(&s)
 }
 
-fn fn_nested<Ctx, F>(ctx: Ctx, names: Val, f: F) -> Val
-where
-    Ctx: CtxTrait,
-    F: for<'a> FnOnce(Box<dyn CtxTrait + 'a>, Symbol) -> Val,
-{
-    match names {
-        Val::Symbol(s) => f(Box::new(ctx), s),
-        Val::List(mut list) => {
-            let Some(Val::Symbol(val_name)) = list.pop() else {
-                return Val::default();
-            };
-            nested(ctx, &list[..], val_name, f)
+pub(crate) fn ctx_get_super() -> PrimitiveFunc<CtxConstFn> {
+    let input_mode = InputMode::Symbol(EvalMode::Value);
+    let primitive = Primitive::<CtxConstFn>::new(names::CTX_GET_SUPER, fn_ctx_get_super);
+    PrimitiveFunc::new(input_mode, primitive)
+}
+
+fn fn_ctx_get_super(ctx: CtxForConstFn, _input: Val) -> Val {
+    let Some(super_ctx) = ctx.get_super() else {
+        return Val::default();
+    };
+    Val::Symbol(super_ctx.clone())
+}
+
+pub(crate) fn ctx_set_super() -> PrimitiveFunc<CtxMutableFn> {
+    let input_mode = InputMode::Symbol(EvalMode::Value);
+    let primitive = Primitive::<CtxMutableFn>::new(names::CTX_SET_SUPER, fn_ctx_set_super);
+    PrimitiveFunc::new(input_mode, primitive)
+}
+
+fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let super_ctx = match input {
+        Val::Symbol(name) => Some(name),
+        Val::Unit(_) => None,
+        _ => {
+            return Val::default();
         }
-        _ => Val::default(),
-    }
-}
-
-fn nested<Ctx, F>(mut ctx: Ctx, names: &[Val], val_name: Symbol, f: F) -> Val
-where
-    Ctx: CtxTrait,
-    F: for<'a> FnOnce(Box<dyn CtxTrait + 'a>, Symbol) -> Val,
-{
-    let Some(Val::Symbol(name)) = names.first() else {
-        return f(Box::new(ctx), val_name);
     };
-    let rest = &names[1..];
-
-    let Some(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
-        return Val::default();
-    };
-    let Val::Ctx(CtxVal(ctx)) = val_ref else {
-        return Val::default();
-    };
-    if is_const {
-        nested(ConstCtx(ctx), rest, val_name, f)
-    } else {
-        nested(MutableCtx(ctx), rest, val_name, f)
-    }
+    ctx.set_super(super_ctx);
+    Val::default()
 }
 
 const MAP: &str = "map";
@@ -504,116 +474,6 @@ fn fn_ctx_repr(input: Val) -> Val {
     }
 
     Val::Map(repr)
-}
-
-pub(crate) fn ctx_set_super() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
-        InputMode::Symbol(EvalMode::Value),
-    )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::CTX_SET_SUPER, fn_ctx_set_super);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let mut path = pair.first;
-    let super_ctx = pair.second;
-    let super_ctx = match super_ctx {
-        Val::Symbol(name) => Some(name),
-        Val::Unit(_) => None,
-        _ => {
-            return Val::default();
-        }
-    };
-    match path {
-        Val::Symbol(name) => {
-            let Some(TaggedRef {
-                val_ref: Val::Ctx(CtxVal(ctx)),
-                is_const: false,
-            }) = ctx.get_tagged_ref(&name)
-            else {
-                return Val::default();
-            };
-            ctx.super_ctx = super_ctx;
-            Val::default()
-        }
-        Val::List(mut list) => {
-            if list.is_empty() {
-                ctx.set_super(super_ctx);
-                return Val::default();
-            }
-            let Val::Symbol(val_name) = list.pop().unwrap() else {
-                return Val::default();
-            };
-            nested(ctx, &list[..], val_name, |mut ctx, name| {
-                let Some(TaggedRef {
-                    val_ref: Val::Ctx(CtxVal(ctx)),
-                    is_const: false,
-                }) = ctx.get_tagged_ref(&name)
-                else {
-                    return Val::default();
-                };
-                ctx.super_ctx = super_ctx;
-                Val::default()
-            })
-        }
-        Val::Ctx(CtxVal(ref mut ctx)) => {
-            ctx.super_ctx = super_ctx;
-            path
-        }
-        _ => Val::default(),
-    }
-}
-
-pub(crate) fn ctx_get_super() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value)));
-    let primitive = Primitive::<CtxConstFn>::new(names::CTX_GET_SUPER, fn_ctx_get_super);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_ctx_get_super(ctx: CtxForConstFn, input: Val) -> Val {
-    match input {
-        Val::Symbol(name) => {
-            let Some(Val::Ctx(CtxVal(ctx))) = ctx.get_const_ref(&name) else {
-                return Val::default();
-            };
-            let Some(super_name) = &ctx.super_ctx else {
-                return Val::default();
-            };
-            Val::Symbol(super_name.clone())
-        }
-        Val::List(mut list) => {
-            if list.is_empty() {
-                let Some(super_name) = ctx.get_super() else {
-                    return Val::default();
-                };
-                return Val::Symbol(super_name);
-            }
-            let Val::Symbol(val_name) = list.pop().unwrap() else {
-                return Val::default();
-            };
-            nested(ctx, &list[..], val_name, |ctx, name| {
-                let Some(Val::Ctx(CtxVal(ctx))) = ctx.get_const_ref(&name) else {
-                    return Val::default();
-                };
-                let Some(super_name) = &ctx.super_ctx else {
-                    return Val::default();
-                };
-                Val::Symbol(super_name.clone())
-            })
-        }
-        Val::Ctx(CtxVal(ref ctx)) => {
-            let super_ctx = match &ctx.super_ctx {
-                Some(name) => Val::Symbol(name.clone()),
-                None => Val::default(),
-            };
-            Val::Pair(Box::new(Pair::new(input, super_ctx)))
-        }
-        _ => Val::default(),
-    }
 }
 
 pub(crate) fn ctx_prelude() -> PrimitiveFunc<CtxFreeFn> {

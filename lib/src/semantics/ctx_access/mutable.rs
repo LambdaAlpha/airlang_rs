@@ -75,12 +75,12 @@ impl<'a> CtxTrait for MutableCtx<'a> {
         Val::Bool(Bool::new(is_local))
     }
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) {
-        self.0.super_ctx = super_ctx;
+    fn get_super(&self) -> Option<&Symbol> {
+        self.0.super_ctx.as_ref()
     }
 
-    fn get_super(&self) -> Option<Symbol> {
-        self.0.super_ctx.clone()
+    fn set_super(&mut self, super_ctx: Option<Symbol>) {
+        self.0.super_ctx = super_ctx;
     }
 
     fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
@@ -195,19 +195,19 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
+    fn get_super(&self) -> Option<&Symbol> {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.get_super(),
+            CtxForMutableFn::Const(ctx) => ctx.get_super(),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_super(),
+        }
+    }
+
     fn set_super(&mut self, super_ctx: Option<Symbol>) {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.set_super(super_ctx),
             CtxForMutableFn::Const(ctx) => ctx.set_super(super_ctx),
             CtxForMutableFn::Mutable(ctx) => ctx.set_super(super_ctx),
-        }
-    }
-
-    fn get_super(&self) -> Option<Symbol> {
-        match self {
-            CtxForMutableFn::Free(ctx) => ctx.get_super(),
-            CtxForMutableFn::Const(ctx) => ctx.get_super(),
-            CtxForMutableFn::Mutable(ctx) => ctx.get_super(),
         }
     }
 

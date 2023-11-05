@@ -22,26 +22,26 @@
 -----
 1
 =====
-;[(_ : a) = ((context {map : {a : 1}}) .. (a = 2)), a]
+;[[] .. (a = 1), a]
 -----
 1
 =====
-;[a = (context {}), a .. (b = 1), load [a, b]]
+;[c = (context {map : {a : 1}}), a = ([c] .. (a = 2)), a]
 -----
 1
 =====
-;[(a ': constant) = (context {map : {b : 1}}), a .. (` b)]
+;[a = (context {}), [a] .. (b = 1), [a] .. (read b)]
 -----
 1
 =====
-;[(a ': constant) = (context {map : {b : 1}}), a .. (b = 2), load [a, b]]
+;[(a ': constant) = (context {map : {b : 1}}), [a] .. (` b)]
 -----
 1
 =====
-;[': = ('' ':), constant = ('' constant), (_ : a) = ((context {map : {b : (1 ': constant)}}) .. (` b)), a]
+;[(a ': constant) = (context {map : {b : 1}}), [a] .. (b = 2), [a] .. (read b)]
 -----
 1
 =====
-;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), a .. (` b)]
+;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), [a] .. (` b)]
 -----
 1

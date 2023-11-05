@@ -77,9 +77,8 @@ fn prelude_value(c: &mut NameMap) {
 }
 
 fn prelude_ctx(c: &mut NameMap) {
-    put_primitive_func(c, ctx::load());
+    put_primitive_func(c, ctx::read());
     put_primitive_func(c, ctx::remove());
-    put_primitive_func(c, ctx::save());
     put_primitive_func(c, ctx::assign());
     put_primitive_func(c, ctx::set_final());
     put_primitive_func(c, ctx::set_const());
@@ -87,10 +86,10 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::is_const());
     put_primitive_func(c, ctx::is_null());
     put_primitive_func(c, ctx::is_local());
+    put_primitive_func(c, ctx::ctx_get_super());
+    put_primitive_func(c, ctx::ctx_set_super());
     put_primitive_func(c, ctx::ctx_new());
     put_primitive_func(c, ctx::ctx_repr());
-    put_primitive_func(c, ctx::ctx_set_super());
-    put_primitive_func(c, ctx::ctx_get_super());
     put_primitive_func(c, ctx::ctx_prelude());
     put_primitive_func(c, ctx::ctx_current());
 }
@@ -274,9 +273,8 @@ pub(crate) mod names {
     pub(crate) const EQUAL: &str = "==";
     pub(crate) const NOT_EQUAL: &str = "=/=";
 
-    pub(crate) const LOAD: &str = "load";
+    pub(crate) const READ: &str = "read";
     pub(crate) const MOVE: &str = "move";
-    pub(crate) const SAVE: &str = "save";
     pub(crate) const ASSIGN: &str = "=";
     pub(crate) const SET_FINAL: &str = "set_final";
     pub(crate) const SET_CONST: &str = "set_constant";
@@ -284,10 +282,10 @@ pub(crate) mod names {
     pub(crate) const IS_CONST: &str = "is_constant";
     pub(crate) const IS_NULL: &str = "is_null";
     pub(crate) const IS_LOCAL: &str = "is_local";
+    pub(crate) const CTX_GET_SUPER: &str = "get_super";
+    pub(crate) const CTX_SET_SUPER: &str = "set_super";
     pub(crate) const CTX_NEW: &str = "context";
     pub(crate) const CTX_REPR: &str = "context_represent";
-    pub(crate) const CTX_SET_SUPER: &str = "set_super";
-    pub(crate) const CTX_GET_SUPER: &str = "get_super";
     pub(crate) const CTX_PRELUDE: &str = "prelude";
     pub(crate) const CTX_CURRENT: &str = "this";
 

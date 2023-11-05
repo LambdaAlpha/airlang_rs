@@ -65,7 +65,7 @@ Demonstration of the gcd algorithm\n
             ],
             x
         ]),
-        context : (move [ctx]),
+        context : (move ctx),
     }),
     42 gcd 24
 ])

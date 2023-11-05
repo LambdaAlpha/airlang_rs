@@ -54,11 +54,11 @@ impl CtxTrait for FreeCtx {
         Val::default()
     }
 
-    fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
-
-    fn get_super(&self) -> Option<Symbol> {
+    fn get_super(&self) -> Option<&Symbol> {
         None
     }
+
+    fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
 
     fn get_tagged_ref(&mut self, _name: &str) -> Option<TaggedRef<Val>> {
         None
