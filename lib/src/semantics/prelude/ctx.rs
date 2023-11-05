@@ -374,7 +374,7 @@ where
     Ctx: CtxTrait,
     F: for<'a> FnOnce(Box<dyn CtxTrait + 'a>, Symbol) -> Val,
 {
-    let Some(Val::Symbol(name)) = names.get(0) else {
+    let Some(Val::Symbol(name)) = names.first() else {
         return f(Box::new(ctx), val_name);
     };
     let rest = &names[1..];
@@ -483,7 +483,8 @@ fn fn_ctx_repr(input: Val) -> Val {
                 let k = Val::Symbol(k);
                 let use_normal_form = if let Val::Call(call) = &v.val
                     && let Val::Symbol(func) = &call.func
-                    && &**func == CTX_VALUE_PAIR {
+                    && &**func == CTX_VALUE_PAIR
+                {
                     true
                 } else {
                     matches!(v.tag, InvariantTag::Final | InvariantTag::Const)

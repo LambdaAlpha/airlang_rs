@@ -5,10 +5,7 @@ pub use self::{
     float::Float,
     int::Int,
     list::List,
-    map::{
-        Map,
-        Set,
-    },
+    map::Map,
     pair::Pair,
     reverse::Reverse,
     string::Str,

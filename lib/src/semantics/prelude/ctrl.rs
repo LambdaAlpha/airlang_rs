@@ -229,6 +229,7 @@ pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
     PrimitiveFunc::new(input_mode, primitive)
 }
 
+#[allow(clippy::get_first)]
 fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
