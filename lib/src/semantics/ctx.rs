@@ -319,6 +319,7 @@ impl DefaultCtx {
         }
     }
 
+    #[allow(unused)]
     pub(crate) fn get_tagged_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
     where
         F: FnOnce(TaggedRef<Val>) -> Val,

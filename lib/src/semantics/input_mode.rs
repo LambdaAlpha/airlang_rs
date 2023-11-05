@@ -15,14 +15,6 @@ use crate::{
             EvalMode,
             BY_REF,
             BY_VAL,
-            CONST,
-            CONST_BY_REF,
-            CONST_CHECKER,
-            CONST_CHECKER_BY_REF,
-            FREE,
-            FREE_BY_REF,
-            FREE_CHECKER,
-            FREE_CHECKER_BY_REF,
         },
         Val,
     },
@@ -71,78 +63,6 @@ where
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         self.eval_by_ref_generic(ctx, input, BY_REF)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn eval_free<Ctx>(&self, ctx: &mut Ctx, input: Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, FREE)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn eval_free_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_by_ref_generic(ctx, input, FREE_BY_REF)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn eval_const<Ctx>(&self, ctx: &mut Ctx, input: Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, CONST)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn eval_const_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_by_ref_generic(ctx, input, CONST_BY_REF)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn is_free<Ctx>(&self, ctx: &mut Ctx, input: Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, FREE_CHECKER)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn is_free_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_by_ref_generic(ctx, input, FREE_CHECKER_BY_REF)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn is_const<Ctx>(&self, ctx: &mut Ctx, input: Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, CONST_CHECKER)
-    }
-}
-
-impl InputMode {
-    pub(crate) fn is_const_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_by_ref_generic(ctx, input, CONST_CHECKER_BY_REF)
     }
 }
 

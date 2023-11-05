@@ -1,23 +1,13 @@
 use crate::semantics::{
     ctx_access::CtxAccessor,
     eval::{
-        BoolAndBuilder,
         Evaluator,
-        OpValBuilder,
         ValBuilder,
     },
     eval_mode::{
         eval::{
             Eval,
             EvalByRef,
-            EvalConst,
-            EvalConstByRef,
-            EvalConstChecker,
-            EvalConstCheckerByRef,
-            EvalFree,
-            EvalFreeByRef,
-            EvalFreeChecker,
-            EvalFreeCheckerByRef,
         },
         quote::{
             Quote,
@@ -26,9 +16,6 @@ use crate::semantics::{
         value::{
             Value,
             ValueByRef,
-            ValueFreeConst,
-            ValueFreeConstByRef,
-            ValueFreeConstChecker,
         },
     },
     Val,
@@ -76,184 +63,6 @@ where
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         self.eval_generic(ctx, input, BY_REF)
-    }
-}
-
-pub(crate) const FREE: ByValEvaluators<EvalFree, ValueFreeConst, OpValBuilder> = Evaluators {
-    eval: EvalFree,
-    value: ValueFreeConst,
-    quote: Quote {
-        eval: EvalFree,
-        value: ValueFreeConst,
-        builder: OpValBuilder,
-    },
-};
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn eval_free<Ctx>(&self, ctx: &mut Ctx, input: Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, FREE)
-    }
-}
-
-pub(crate) const FREE_BY_REF: ByRefEvaluators<EvalFreeByRef, ValueFreeConstByRef, OpValBuilder> =
-    Evaluators {
-        eval: EvalFreeByRef,
-        value: ValueFreeConstByRef,
-        quote: QuoteByRef {
-            eval: EvalFreeByRef,
-            value: ValueFreeConstByRef,
-            builder: OpValBuilder,
-        },
-    };
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn eval_free_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, FREE_BY_REF)
-    }
-}
-
-pub(crate) const CONST: ByValEvaluators<EvalConst, ValueFreeConst, OpValBuilder> = Evaluators {
-    eval: EvalConst,
-    value: ValueFreeConst,
-    quote: Quote {
-        eval: EvalConst,
-        value: ValueFreeConst,
-        builder: OpValBuilder,
-    },
-};
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn eval_const<Ctx>(&self, ctx: &mut Ctx, input: Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, CONST)
-    }
-}
-
-pub(crate) const CONST_BY_REF: ByRefEvaluators<EvalConstByRef, ValueFreeConstByRef, OpValBuilder> =
-    Evaluators {
-        eval: EvalConstByRef,
-        value: ValueFreeConstByRef,
-        quote: QuoteByRef {
-            eval: EvalConstByRef,
-            value: ValueFreeConstByRef,
-            builder: OpValBuilder,
-        },
-    };
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn eval_const_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> Option<Val>
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, CONST_BY_REF)
-    }
-}
-
-pub(crate) const FREE_CHECKER: ByValEvaluators<
-    EvalFreeChecker,
-    ValueFreeConstChecker,
-    BoolAndBuilder,
-> = Evaluators {
-    eval: EvalFreeChecker,
-    value: ValueFreeConstChecker,
-    quote: Quote {
-        eval: EvalFreeChecker,
-        value: ValueFreeConstChecker,
-        builder: BoolAndBuilder,
-    },
-};
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn is_free<Ctx>(&self, ctx: &mut Ctx, input: Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, FREE_CHECKER)
-    }
-}
-
-pub(crate) const FREE_CHECKER_BY_REF: ByRefEvaluators<
-    EvalFreeCheckerByRef,
-    ValueFreeConstChecker,
-    BoolAndBuilder,
-> = Evaluators {
-    eval: EvalFreeCheckerByRef,
-    value: ValueFreeConstChecker,
-    quote: QuoteByRef {
-        eval: EvalFreeCheckerByRef,
-        value: ValueFreeConstChecker,
-        builder: BoolAndBuilder,
-    },
-};
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn is_free_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, FREE_CHECKER_BY_REF)
-    }
-}
-
-pub(crate) const CONST_CHECKER: ByValEvaluators<
-    EvalConstChecker,
-    ValueFreeConstChecker,
-    BoolAndBuilder,
-> = Evaluators {
-    eval: EvalConstChecker,
-    value: ValueFreeConstChecker,
-    quote: Quote {
-        eval: EvalConstChecker,
-        value: ValueFreeConstChecker,
-        builder: BoolAndBuilder,
-    },
-};
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn is_const<Ctx>(&self, ctx: &mut Ctx, input: Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, CONST_CHECKER)
-    }
-}
-
-pub(crate) const CONST_CHECKER_BY_REF: ByRefEvaluators<
-    EvalConstCheckerByRef,
-    ValueFreeConstChecker,
-    BoolAndBuilder,
-> = Evaluators {
-    eval: EvalConstCheckerByRef,
-    value: ValueFreeConstChecker,
-    quote: QuoteByRef {
-        eval: EvalConstCheckerByRef,
-        value: ValueFreeConstChecker,
-        builder: BoolAndBuilder,
-    },
-};
-
-impl EvalMode {
-    #[allow(unused)]
-    pub(crate) fn is_const_by_ref<Ctx>(&self, ctx: &mut Ctx, input: &Val) -> bool
-    where
-        Ctx: CtxAccessor,
-    {
-        self.eval_generic(ctx, input, CONST_CHECKER_BY_REF)
     }
 }
 

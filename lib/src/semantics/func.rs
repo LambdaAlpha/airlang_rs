@@ -100,10 +100,12 @@ pub(crate) struct CtxMutableInfo {
 }
 
 impl Func {
+    #[allow(unused)]
     pub(crate) fn is_ctx_free(&self) -> bool {
         matches!(&self.evaluator, FuncEval::Free(_))
     }
 
+    #[allow(unused)]
     pub(crate) fn is_ctx_const(&self) -> bool {
         matches!(&self.evaluator, FuncEval::Free(_) | FuncEval::Const(_))
     }

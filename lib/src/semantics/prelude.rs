@@ -108,8 +108,6 @@ fn prelude_eval(c: &mut NameMap) {
     put_primitive_func(c, eval::quote());
     put_primitive_func(c, eval::eval_twice());
     put_primitive_func(c, eval::eval_thrice());
-    put_primitive_func(c, eval::is_ctx_free());
-    put_primitive_func(c, eval::is_ctx_const());
 }
 
 fn prelude_logic(c: &mut NameMap) {
@@ -300,8 +298,6 @@ pub(crate) mod names {
     pub(crate) const QUOTE: &str = "\"";
     pub(crate) const EVAL_TWICE: &str = "`2";
     pub(crate) const EVAL_THRICE: &str = "`3";
-    pub(crate) const IS_CTX_FREE: &str = "`is_free";
-    pub(crate) const IS_CTX_CONST: &str = "`is_constant";
 
     pub(crate) const LOGIC_THEOREM_NEW: &str = "theorem";
     pub(crate) const LOGIC_PROVE: &str = "prove";
