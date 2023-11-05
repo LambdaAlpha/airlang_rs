@@ -27,8 +27,8 @@ use crate::{
         },
         input_mode::InputMode,
         prelude::{
+            initial_ctx,
             names,
-            prelude,
             utils::{
                 map_remove,
                 symbol,
@@ -623,11 +623,7 @@ pub(crate) fn ctx_prelude() -> PrimitiveFunc<CtxFreeFn> {
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {
-    let name_map = prelude();
-    Val::Ctx(CtxVal(Box::new(Ctx {
-        name_map,
-        super_ctx: None,
-    })))
+    Val::Ctx(CtxVal(Box::new(initial_ctx())))
 }
 
 pub(crate) fn ctx_current() -> PrimitiveFunc<CtxConstFn> {

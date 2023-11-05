@@ -1,14 +1,11 @@
 use {
     crate::{
         semantics::{
-            ctx::{
-                Ctx,
-                NameMap,
-            },
+            ctx::Ctx,
             ctx_access::mutable::MutableCtx,
             eval::Evaluator,
             eval_mode::eval::Eval,
-            prelude::prelude,
+            prelude::initial_ctx,
         },
         syntax::ParseError,
     },
@@ -24,15 +21,12 @@ pub use {
 pub struct ReprError {}
 
 pub struct Interpreter {
-    prelude: NameMap,
     ctx: Ctx,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
-        let prelude = prelude();
-        let ctx = Self::default_ctx(&prelude);
-        Interpreter { prelude, ctx }
+        Interpreter { ctx: initial_ctx() }
     }
 
     pub fn interpret(&mut self, src: Val) -> Val {
@@ -40,15 +34,7 @@ impl Interpreter {
     }
 
     pub fn reset(&mut self) {
-        self.ctx = Self::default_ctx(&self.prelude);
-    }
-
-    fn default_ctx(prelude: &NameMap) -> Ctx {
-        let name_map = prelude.clone();
-        Ctx {
-            name_map,
-            super_ctx: None,
-        }
+        self.ctx = initial_ctx();
     }
 }
 

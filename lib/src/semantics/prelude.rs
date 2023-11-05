@@ -1,6 +1,7 @@
 use crate::{
     semantics::{
         ctx::{
+            Ctx,
             NameMap,
             TaggedVal,
         },
@@ -22,7 +23,20 @@ use crate::{
     },
 };
 
+thread_local! (static PRELUDE: NameMap = init_prelude());
+
 pub(crate) fn prelude() -> NameMap {
+    PRELUDE.with(Clone::clone)
+}
+
+pub(crate) fn initial_ctx() -> Ctx {
+    Ctx {
+        name_map: prelude(),
+        super_ctx: None,
+    }
+}
+
+fn init_prelude() -> NameMap {
     let mut c = NameMap::default();
 
     prelude_meta(&mut c);
