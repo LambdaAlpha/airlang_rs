@@ -99,7 +99,7 @@ where
     };
     let rest = &names[1..];
 
-    let Some(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
+    let Ok(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
         return Val::default();
     };
     let Val::Ctx(CtxVal(ctx)) = val_ref else {

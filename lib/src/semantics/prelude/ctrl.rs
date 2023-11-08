@@ -83,10 +83,10 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     };
 
     let mut output = Val::default();
-    ctx.remove(&name);
+    let _ = ctx.remove(&name);
     for val in list {
         output = Eval.eval(&mut ctx, val);
-        if let Some(val) = ctx.get_const_ref(&name) {
+        if let Ok(val) = ctx.get_const_ref(&name) {
             return val.clone();
         }
     }

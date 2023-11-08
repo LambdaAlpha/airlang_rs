@@ -47,7 +47,7 @@ where
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
-        ctx.get(&s)
+        ctx.get(&s).unwrap_or_default()
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
@@ -99,7 +99,7 @@ where
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
-        ctx.get(s)
+        ctx.get(s).unwrap_or_default()
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {

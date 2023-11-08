@@ -1,6 +1,7 @@
 use crate::{
     semantics::{
         ctx::{
+            CtxError,
             CtxTrait,
             TaggedRef,
             TaggedVal,
@@ -18,58 +19,67 @@ use crate::{
 pub(crate) struct FreeCtx;
 
 impl CtxTrait for FreeCtx {
-    fn get(&self, _name: &str) -> Val {
-        Val::default()
+    fn get(&self, _name: &str) -> Result<Val, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn remove(&mut self, _name: &str) -> Val {
-        Val::default()
+    fn remove(&mut self, _name: &str) -> Result<Val, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn put_val(&mut self, _name: Symbol, _val: TaggedVal) -> Val {
-        Val::default()
+    fn put_val(&mut self, _name: Symbol, _val: TaggedVal) -> Result<Option<Val>, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn put_val_local(&mut self, _name: Symbol, _val: TaggedVal) -> Val {
-        Val::default()
+    fn put_val_local(&mut self, _name: Symbol, _val: TaggedVal) -> Result<Option<Val>, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn set_final(&mut self, _name: &str) {}
-
-    fn set_const(&mut self, _name: &str) {}
-
-    fn is_final(&self, _name: &str) -> Val {
-        Val::default()
+    fn set_final(&mut self, _name: &str) -> Result<(), CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn is_const(&self, _name: &str) -> Val {
-        Val::default()
+    fn set_const(&mut self, _name: &str) -> Result<(), CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn is_null(&self, _name: &str) -> Val {
-        Val::default()
+    fn is_final(&self, _name: &str) -> Result<bool, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn is_local(&self, _name: &str) -> Val {
-        Val::default()
+    fn is_const(&self, _name: &str) -> Result<bool, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn get_super(&self) -> Option<&Symbol> {
-        None
+    fn is_null(&self, _name: &str) -> Result<bool, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn set_super(&mut self, _super_ctx: Option<Symbol>) {}
-
-    fn get_tagged_ref(&mut self, _name: &str) -> Option<TaggedRef<Val>> {
-        None
+    fn is_local(&self, _name: &str) -> Result<bool, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn get_const_ref(&self, _name: &str) -> Option<&Val> {
-        None
+    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn get_many_const_ref<const N: usize>(&self, _names: [&str; N]) -> [Option<&Val>; N] {
-        [None; N]
+    fn set_super(&mut self, _super_ctx: Option<Symbol>) -> Result<(), CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_tagged_ref(&mut self, _name: &str) -> Result<TaggedRef<Val>, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_const_ref(&self, _name: &str) -> Result<&Val, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_many_const_ref<const N: usize>(&self, _names: [&str; N]) -> [Result<&Val, CtxError>; N]
+    where
+        Self: Sized,
+    {
+        [Err(CtxError::AccessDenied); N]
     }
 }
 

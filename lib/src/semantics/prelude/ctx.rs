@@ -2,6 +2,7 @@ use crate::{
     semantics::{
         ctx::{
             Ctx,
+            CtxError,
             CtxTrait,
             InvariantTag,
             NameMap,
@@ -36,6 +37,7 @@ use crate::{
         },
     },
     types::{
+        Bool,
         Call,
         List,
         Map,
@@ -55,7 +57,7 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.get(&s)
+    ctx.get(&s).unwrap_or_default()
 }
 
 pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
@@ -68,7 +70,7 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.remove(&s)
+    ctx.remove(&s).unwrap_or_default()
 }
 
 pub(crate) fn assign() -> PrimitiveFunc<CtxMutableFn> {
@@ -102,9 +104,15 @@ fn assign_destruct(
         Val::Symbol(s) => {
             let tagged_val = TaggedVal { val, tag };
             if local {
-                ctx.put_val_local(s, tagged_val)
+                let Ok(Some(last)) = ctx.put_val_local(s, tagged_val) else {
+                    return Val::default();
+                };
+                last
             } else {
-                ctx.put_val(s, tagged_val)
+                let Ok(Some(last)) = ctx.put_val(s, tagged_val) else {
+                    return Val::default();
+                };
+                last
             }
         }
         Val::Pair(name_pair) => {
@@ -261,7 +269,7 @@ fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.set_final(&s);
+    let _ = ctx.set_final(&s);
     Val::default()
 }
 
@@ -275,7 +283,7 @@ fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.set_const(&s);
+    let _ = ctx.set_const(&s);
     Val::default()
 }
 
@@ -289,7 +297,11 @@ fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.is_final(&s)
+    match ctx.is_final(&s) {
+        Ok(b) => Val::Bool(Bool::new(b)),
+        Err(CtxError::NotFound) => Val::Bool(Bool::f()),
+        _ => Val::default(),
+    }
 }
 
 pub(crate) fn is_const() -> PrimitiveFunc<CtxConstFn> {
@@ -302,7 +314,11 @@ fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.is_const(&s)
+    match ctx.is_const(&s) {
+        Ok(b) => Val::Bool(Bool::new(b)),
+        Err(CtxError::NotFound) => Val::Bool(Bool::f()),
+        _ => Val::default(),
+    }
 }
 
 pub(crate) fn is_null() -> PrimitiveFunc<CtxConstFn> {
@@ -315,7 +331,10 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.is_null(&s)
+    match ctx.is_null(&s) {
+        Ok(b) => Val::Bool(Bool::new(b)),
+        Err(_) => Val::default(),
+    }
 }
 
 pub(crate) fn is_local() -> PrimitiveFunc<CtxConstFn> {
@@ -328,7 +347,10 @@ fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.is_local(&s)
+    match ctx.is_local(&s) {
+        Ok(b) => Val::Bool(Bool::new(b)),
+        Err(_) => Val::default(),
+    }
 }
 
 pub(crate) fn ctx_get_super() -> PrimitiveFunc<CtxConstFn> {
@@ -338,7 +360,7 @@ pub(crate) fn ctx_get_super() -> PrimitiveFunc<CtxConstFn> {
 }
 
 fn fn_ctx_get_super(ctx: CtxForConstFn, _input: Val) -> Val {
-    let Some(super_ctx) = ctx.get_super() else {
+    let Ok(Some(super_ctx)) = ctx.get_super() else {
         return Val::default();
     };
     Val::Symbol(super_ctx.clone())
@@ -358,7 +380,7 @@ fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
             return Val::default();
         }
     };
-    ctx.set_super(super_ctx);
+    let _ = ctx.set_super(super_ctx);
     Val::default()
 }
 

@@ -2,6 +2,7 @@ use crate::{
     semantics::{
         ctx::{
             Ctx,
+            CtxError,
             CtxTrait,
             DefaultCtx,
             TaggedRef,
@@ -17,10 +18,7 @@ use crate::{
         },
         Val,
     },
-    types::{
-        Bool,
-        Symbol,
-    },
+    types::Symbol,
 };
 
 pub(crate) struct MutableCtx<'a>(pub(crate) &'a mut Ctx);
@@ -32,66 +30,65 @@ pub(crate) enum CtxForMutableFn<'a> {
 }
 
 impl<'a> CtxTrait for MutableCtx<'a> {
-    fn get(&self, name: &str) -> Val {
+    fn get(&self, name: &str) -> Result<Val, CtxError> {
         self.0.get(name)
     }
 
-    fn remove(&mut self, name: &str) -> Val {
+    fn remove(&mut self, name: &str) -> Result<Val, CtxError> {
         self.0.remove(name)
     }
 
-    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError> {
         self.0.put_val(name, val)
     }
 
-    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError> {
         self.0.put_val_local(name, val)
     }
 
-    fn set_final(&mut self, name: &str) {
-        self.0.set_final(name);
+    fn set_final(&mut self, name: &str) -> Result<(), CtxError> {
+        self.0.set_final(name)
     }
 
-    fn set_const(&mut self, name: &str) {
-        self.0.set_const(name);
+    fn set_const(&mut self, name: &str) -> Result<(), CtxError> {
+        self.0.set_const(name)
     }
 
-    fn is_final(&self, name: &str) -> Val {
-        let is_final = self.0.is_final(name);
-        Val::Bool(Bool::new(is_final))
+    fn is_final(&self, name: &str) -> Result<bool, CtxError> {
+        self.0.is_final(name)
     }
 
-    fn is_const(&self, name: &str) -> Val {
-        let is_const = self.0.is_const(name);
-        Val::Bool(Bool::new(is_const))
+    fn is_const(&self, name: &str) -> Result<bool, CtxError> {
+        self.0.is_const(name)
     }
 
-    fn is_null(&self, name: &str) -> Val {
+    fn is_null(&self, name: &str) -> Result<bool, CtxError> {
         DefaultCtx.is_null(self, name)
     }
 
-    fn is_local(&self, name: &str) -> Val {
+    fn is_local(&self, name: &str) -> Result<bool, CtxError> {
         let is_local = self.0.is_local(name);
-        Val::Bool(Bool::new(is_local))
+        Ok(is_local)
     }
 
-    fn get_super(&self) -> Option<&Symbol> {
-        self.0.super_ctx.as_ref()
+    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
+        Ok(self.0.super_ctx.as_ref())
     }
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) {
+    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError> {
         self.0.super_ctx = super_ctx;
+        Ok(())
     }
 
-    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
+    fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError> {
         self.0.get_tagged_ref(false, name)
     }
 
-    fn get_const_ref(&self, name: &str) -> Option<&Val> {
+    fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError> {
         self.0.get_const_ref(name)
     }
 
-    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Result<&Val, CtxError>; N] {
         self.0.get_many_const_ref(names)
     }
 }
@@ -115,7 +112,7 @@ impl<'a> CtxAccessor for MutableCtx<'a> {
 }
 
 impl<'a> CtxTrait for CtxForMutableFn<'a> {
-    fn get(&self, name: &str) -> Val {
+    fn get(&self, name: &str) -> Result<Val, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.get(name),
             CtxForMutableFn::Const(ctx) => ctx.get(name),
@@ -123,7 +120,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn remove(&mut self, name: &str) -> Val {
+    fn remove(&mut self, name: &str) -> Result<Val, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.remove(name),
             CtxForMutableFn::Const(ctx) => ctx.remove(name),
@@ -131,7 +128,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.put_val(name, val),
             CtxForMutableFn::Const(ctx) => ctx.put_val(name, val),
@@ -139,7 +136,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.put_val_local(name, val),
             CtxForMutableFn::Const(ctx) => ctx.put_val_local(name, val),
@@ -147,7 +144,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn set_final(&mut self, name: &str) {
+    fn set_final(&mut self, name: &str) -> Result<(), CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.set_final(name),
             CtxForMutableFn::Const(ctx) => ctx.set_final(name),
@@ -155,7 +152,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn set_const(&mut self, name: &str) {
+    fn set_const(&mut self, name: &str) -> Result<(), CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.set_const(name),
             CtxForMutableFn::Const(ctx) => ctx.set_const(name),
@@ -163,7 +160,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_final(&self, name: &str) -> Val {
+    fn is_final(&self, name: &str) -> Result<bool, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_final(name),
             CtxForMutableFn::Const(ctx) => ctx.is_final(name),
@@ -171,7 +168,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_const(&self, name: &str) -> Val {
+    fn is_const(&self, name: &str) -> Result<bool, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_const(name),
             CtxForMutableFn::Const(ctx) => ctx.is_const(name),
@@ -179,7 +176,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_null(&self, name: &str) -> Val {
+    fn is_null(&self, name: &str) -> Result<bool, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_null(name),
             CtxForMutableFn::Const(ctx) => ctx.is_null(name),
@@ -187,7 +184,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn is_local(&self, name: &str) -> Val {
+    fn is_local(&self, name: &str) -> Result<bool, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.is_local(name),
             CtxForMutableFn::Const(ctx) => ctx.is_local(name),
@@ -195,7 +192,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn get_super(&self) -> Option<&Symbol> {
+    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.get_super(),
             CtxForMutableFn::Const(ctx) => ctx.get_super(),
@@ -203,7 +200,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) {
+    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.set_super(super_ctx),
             CtxForMutableFn::Const(ctx) => ctx.set_super(super_ctx),
@@ -211,7 +208,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>> {
+    fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.get_tagged_ref(name),
             CtxForMutableFn::Const(ctx) => ctx.get_tagged_ref(name),
@@ -219,7 +216,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn get_const_ref(&self, name: &str) -> Option<&Val> {
+    fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.get_const_ref(name),
             CtxForMutableFn::Const(ctx) => ctx.get_const_ref(name),
@@ -227,7 +224,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Result<&Val, CtxError>; N] {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.get_many_const_ref(names),
             CtxForMutableFn::Const(ctx) => ctx.get_many_const_ref(names),

@@ -5,7 +5,6 @@ use {
             Val,
         },
         types::{
-            Bool,
             Either,
             Map,
             Pair,
@@ -18,36 +17,43 @@ use {
     },
 };
 
+#[derive(Copy, Clone)]
+pub(crate) enum CtxError {
+    NotFound,
+    AccessDenied,
+    NotExpected,
+}
+
 pub(crate) trait CtxTrait {
-    fn get(&self, name: &str) -> Val;
+    fn get(&self, name: &str) -> Result<Val, CtxError>;
 
-    fn remove(&mut self, name: &str) -> Val;
+    fn remove(&mut self, name: &str) -> Result<Val, CtxError>;
 
-    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val;
+    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError>;
 
-    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val;
+    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError>;
 
-    fn set_final(&mut self, name: &str);
+    fn set_final(&mut self, name: &str) -> Result<(), CtxError>;
 
-    fn set_const(&mut self, name: &str);
+    fn set_const(&mut self, name: &str) -> Result<(), CtxError>;
 
-    fn is_final(&self, name: &str) -> Val;
+    fn is_final(&self, name: &str) -> Result<bool, CtxError>;
 
-    fn is_const(&self, name: &str) -> Val;
+    fn is_const(&self, name: &str) -> Result<bool, CtxError>;
 
-    fn is_null(&self, name: &str) -> Val;
+    fn is_null(&self, name: &str) -> Result<bool, CtxError>;
 
-    fn is_local(&self, name: &str) -> Val;
+    fn is_local(&self, name: &str) -> Result<bool, CtxError>;
 
-    fn get_super(&self) -> Option<&Symbol>;
+    fn get_super(&self) -> Result<Option<&Symbol>, CtxError>;
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>);
+    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError>;
 
-    fn get_tagged_ref(&mut self, name: &str) -> Option<TaggedRef<Val>>;
+    fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError>;
 
-    fn get_const_ref(&self, name: &str) -> Option<&Val>;
+    fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError>;
 
-    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N]
+    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Result<&Val, CtxError>; N]
     where
         Self: Sized;
 }
@@ -83,201 +89,185 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub(crate) fn get(&self, name: &str) -> Val {
+    pub(crate) fn get(&self, name: &str) -> Result<Val, CtxError> {
         let Some(tagged_val) = self.name_map.get(name) else {
-            let Some(super_ctx) = self.get_const_super_ctx() else {
-                return Val::default();
-            };
-            return super_ctx.get(name);
+            return self.get_const_super_ctx()?.get(name);
         };
-        tagged_val.val.clone()
+        Ok(tagged_val.val.clone())
     }
 
-    pub(crate) fn remove(&mut self, name: &str) -> Val {
+    pub(crate) fn remove(&mut self, name: &str) -> Result<Val, CtxError> {
         let Some(tagged_val) = self.name_map.get(name) else {
-            let Either::Left(Some(TaggedRef {
-                val_ref: ctx,
-                is_const: false,
-            })) = self.get_tagged_super_ctx()
-            else {
-                return Val::default();
-            };
-            return ctx.remove(name);
+            return self.get_mut_super_ctx()?.remove(name);
         };
         if !matches!(&tagged_val.tag, InvariantTag::None) {
-            return Val::default();
+            return Err(CtxError::AccessDenied);
         }
-        self.name_map
-            .remove(name)
-            .map(|tagged_val| tagged_val.val)
-            .unwrap_or_default()
+        Ok(self.name_map.remove(name).unwrap().val)
     }
 
-    pub(crate) fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    pub(crate) fn put_val(
+        &mut self,
+        name: Symbol,
+        val: TaggedVal,
+    ) -> Result<Option<Val>, CtxError> {
         let Some(tagged_val) = self.name_map.get(&name) else {
-            return match self.get_tagged_super_ctx() {
-                Either::Right(self_ctx) => self_ctx.put_unchecked(name, val),
-                Either::Left(Some(TaggedRef {
-                    val_ref: ctx,
-                    is_const,
-                })) => {
-                    if is_const {
-                        return Val::default();
-                    };
-                    ctx.put_val(name, val)
-                }
-                _ => Val::default(),
+            return match self.get_mut_super_ctx() {
+                Ok(super_ctx) => super_ctx.put_val(name, val),
+                Err(CtxError::NotFound) => Ok(self.put_unchecked(name, val)),
+                Err(err) => Err(err),
             };
         };
         if !matches!(&tagged_val.tag, InvariantTag::None) {
-            return Val::default();
+            return Err(CtxError::AccessDenied);
         }
-        self.put_unchecked(name, val)
+        Ok(self.put_unchecked(name, val))
     }
 
-    pub(crate) fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    pub(crate) fn put_val_local(
+        &mut self,
+        name: Symbol,
+        val: TaggedVal,
+    ) -> Result<Option<Val>, CtxError> {
         let (None
         | Some(TaggedVal {
             tag: InvariantTag::None,
             ..
         })) = self.name_map.get(&name)
         else {
-            return Val::default();
+            return Err(CtxError::AccessDenied);
         };
-        self.put_unchecked(name, val)
+        Ok(self.put_unchecked(name, val))
     }
 
-    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: TaggedVal) -> Val {
+    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: TaggedVal) -> Option<Val> {
         self.name_map
             .insert(name, val)
             .map(|tagged_val| tagged_val.val)
-            .unwrap_or_default()
     }
 
-    pub(crate) fn set_final(&mut self, name: &str) {
+    pub(crate) fn set_final(&mut self, name: &str) -> Result<(), CtxError> {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            let Either::Left(Some(TaggedRef {
-                val_ref: ctx,
-                is_const: false,
-            })) = self.get_tagged_super_ctx()
-            else {
-                return;
-            };
-            ctx.set_final(name);
-            return;
+            return self.get_mut_super_ctx()?.set_final(name);
         };
         if !(matches!(&tagged_val.tag, InvariantTag::None)) {
-            return;
+            return Err(CtxError::AccessDenied);
         }
         tagged_val.tag = InvariantTag::Final;
+        Ok(())
     }
 
-    pub(crate) fn set_const(&mut self, name: &str) {
+    pub(crate) fn set_const(&mut self, name: &str) -> Result<(), CtxError> {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
-            let Either::Left(Some(TaggedRef {
-                val_ref: ctx,
-                is_const: false,
-            })) = self.get_tagged_super_ctx()
-            else {
-                return;
-            };
-            ctx.set_const(name);
-            return;
+            return self.get_mut_super_ctx()?.set_const(name);
         };
         tagged_val.tag = InvariantTag::Const;
+        Ok(())
     }
 
-    pub(crate) fn is_final(&self, name: &str) -> bool {
+    pub(crate) fn is_final(&self, name: &str) -> Result<bool, CtxError> {
         let Some(tagged_val) = self.name_map.get(name) else {
-            let Some(super_ctx) = self.get_const_super_ctx() else {
-                return false;
-            };
-            return super_ctx.is_final(name);
+            return self.get_const_super_ctx()?.is_final(name);
         };
-        matches!(&tagged_val.tag, InvariantTag::Final | InvariantTag::Const)
+        let is_final = matches!(&tagged_val.tag, InvariantTag::Final | InvariantTag::Const);
+        Ok(is_final)
     }
 
-    pub(crate) fn is_const(&self, name: &str) -> bool {
+    pub(crate) fn is_const(&self, name: &str) -> Result<bool, CtxError> {
         let Some(tagged_val) = self.name_map.get(name) else {
-            let Some(super_ctx) = self.get_const_super_ctx() else {
-                return false;
-            };
-            return super_ctx.is_const(name);
+            return self.get_const_super_ctx()?.is_const(name);
         };
-        matches!(&tagged_val.tag, InvariantTag::Const)
+        let is_const = matches!(&tagged_val.tag, InvariantTag::Const);
+        Ok(is_const)
     }
 
     pub(crate) fn is_local(&self, name: &str) -> bool {
         self.name_map.get(name).is_some()
     }
 
-    pub(crate) fn get_tagged_ref(&mut self, is_const: bool, name: &str) -> Option<TaggedRef<Val>> {
+    pub(crate) fn get_tagged_ref(
+        &mut self,
+        is_const: bool,
+        name: &str,
+    ) -> Result<TaggedRef<Val>, CtxError> {
         if self.name_map.get(name).is_none() {
-            return match self.get_tagged_super_ctx() {
-                Either::Left(Some(TaggedRef {
-                    val_ref: ctx,
-                    is_const: super_const,
-                })) => ctx.get_tagged_ref(is_const || super_const, name),
-                _ => None,
-            };
+            let super_ctx = self.get_tagged_super_ctx()?;
+            let is_const = is_const || super_ctx.is_const;
+            return super_ctx.val_ref.get_tagged_ref(is_const, name);
         }
         let tagged_val = self.name_map.get_mut(name).unwrap();
-        let is_const = matches!(tagged_val.tag, InvariantTag::Const) || is_const;
-        Some(TaggedRef::new(&mut tagged_val.val, is_const))
+        let is_const = is_const || matches!(tagged_val.tag, InvariantTag::Const);
+        Ok(TaggedRef::new(&mut tagged_val.val, is_const))
     }
 
-    pub(crate) fn get_const_ref(&self, name: &str) -> Option<&Val> {
-        if self.name_map.get(name).is_none() {
-            let super_ctx = self.get_const_super_ctx()?;
-            return super_ctx.get_const_ref(name);
-        }
-        let tagged_val = self.name_map.get(name)?;
-        Some(&tagged_val.val)
+    pub(crate) fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError> {
+        let Some(tagged_val) = self.name_map.get(name) else {
+            return self.get_const_super_ctx()?.get_const_ref(name);
+        };
+        Ok(&tagged_val.val)
     }
 
-    pub(crate) fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Option<&Val>; N] {
+    pub(crate) fn get_many_const_ref<const N: usize>(
+        &self,
+        names: [&str; N],
+    ) -> [Result<&Val, CtxError>; N] {
         match self.get_const_super_ctx() {
-            None => names.map(|name| {
-                let tagged_val = self.name_map.get(name)?;
-                Some(&tagged_val.val)
+            Ok(super_ctx) => names.map(|name| {
+                let Some(tagged_val) = self.name_map.get(name) else {
+                    return super_ctx.get_const_ref(name);
+                };
+                Ok(&tagged_val.val)
             }),
-            Some(super_ctx) => names.map(|name| {
-                self.name_map
-                    .get(name)
-                    .map(|tagged_val| &tagged_val.val)
-                    .or_else(|| super_ctx.get_const_ref(name))
+            Err(err) => names.map(|name| {
+                let Some(tagged_val) = self.name_map.get(name) else {
+                    return Err(err);
+                };
+                Ok(&tagged_val.val)
             }),
         }
     }
 
-    fn get_tagged_super_ctx(&mut self) -> Either<Option<TaggedRef<Ctx>>, &mut Ctx> {
+    fn get_tagged_super_ctx(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
         let Some(name) = &self.super_ctx else {
-            return Either::Right(self);
+            return Err(CtxError::NotFound);
         };
-        if self.name_map.get(name).is_none() {
-            return Either::Right(self);
-        }
-        let Some(TaggedVal {
-            val: Val::Ctx(CtxVal(super_ctx)),
-            tag,
-        }) = self.name_map.get_mut(name)
-        else {
-            return Either::Left(None);
+        let Some(tagged_val) = self.name_map.get_mut(name) else {
+            return Err(CtxError::NotExpected);
         };
-        let is_const = matches!(tag, InvariantTag::Const);
-        Either::Left(Some(TaggedRef::new(super_ctx, is_const)))
+        let Val::Ctx(CtxVal(super_ctx)) = &mut tagged_val.val else {
+            return Err(CtxError::NotExpected);
+        };
+        let is_const = matches!(tagged_val.tag, InvariantTag::Const);
+        Ok(TaggedRef::new(super_ctx, is_const))
     }
 
-    fn get_const_super_ctx(&self) -> Option<&Ctx> {
-        let name = self.super_ctx.as_ref()?;
-        let TaggedVal {
-            val: Val::Ctx(CtxVal(super_ctx)),
-            tag: _tag,
-        } = self.name_map.get(name)?
-        else {
-            return None;
+    fn get_mut_super_ctx(&mut self) -> Result<&mut Ctx, CtxError> {
+        let Some(name) = &self.super_ctx else {
+            return Err(CtxError::NotFound);
         };
-        Some(super_ctx)
+        let Some(tagged_val) = self.name_map.get_mut(name) else {
+            return Err(CtxError::NotExpected);
+        };
+        let Val::Ctx(CtxVal(super_ctx)) = &mut tagged_val.val else {
+            return Err(CtxError::NotExpected);
+        };
+        if matches!(tagged_val.tag, InvariantTag::Const) {
+            return Err(CtxError::AccessDenied);
+        }
+        Ok(super_ctx)
+    }
+
+    fn get_const_super_ctx(&self) -> Result<&Ctx, CtxError> {
+        let Some(name) = &self.super_ctx else {
+            return Err(CtxError::NotFound);
+        };
+        let Some(super_ctx) = self.name_map.get(name) else {
+            return Err(CtxError::NotExpected);
+        };
+        let Val::Ctx(CtxVal(super_ctx)) = &super_ctx.val else {
+            return Err(CtxError::NotExpected);
+        };
+        Ok(super_ctx)
     }
 
     pub(crate) fn into_val(mut self, name: &str) -> Val {
@@ -292,14 +282,21 @@ pub(crate) struct DefaultCtx;
 
 impl DefaultCtx {
     #[allow(unused)]
-    pub(crate) fn get<Ctx: CtxTrait>(&self, ctx: &Ctx, name: &str) -> Val {
-        let val = ctx.get_const_ref(name);
-        val.cloned().unwrap_or_default()
+    pub(crate) fn get<Ctx: CtxTrait>(&self, ctx: &Ctx, name: &str) -> Result<Val, CtxError> {
+        ctx.get_const_ref(name).cloned()
     }
 
-    pub(crate) fn is_null<Ctx: CtxTrait>(&self, ctx: &Ctx, name: &str) -> Val {
-        let is_null = ctx.get_const_ref(name).is_none();
-        Val::Bool(Bool::new(is_null))
+    pub(crate) fn is_null<Ctx: CtxTrait>(&self, ctx: &Ctx, name: &str) -> Result<bool, CtxError> {
+        match ctx.get_const_ref(name) {
+            Ok(_) => Ok(false),
+            Err(err) => {
+                if let CtxError::NotFound = err {
+                    Ok(true)
+                } else {
+                    Err(err)
+                }
+            }
+        }
     }
 
     pub(crate) fn get_ref_or_val<Ctx: CtxTrait, T, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> T
@@ -310,7 +307,7 @@ impl DefaultCtx {
     {
         match name {
             Val::Symbol(s) => {
-                let Some(tagged_ref) = ctx.get_tagged_ref(&s) else {
+                let Ok(tagged_ref) = ctx.get_tagged_ref(&s) else {
                     return T::default();
                 };
                 f(Either::Left(tagged_ref))
@@ -342,7 +339,7 @@ impl DefaultCtx {
     {
         match name {
             Val::Symbol(s) => {
-                let Some(val) = ctx.get_const_ref(&s) else {
+                let Ok(val) = ctx.get_const_ref(&s) else {
                     return Val::default();
                 };
                 f(val)
@@ -361,12 +358,12 @@ impl DefaultCtx {
         f: F,
     ) -> Val
     where
-        F: FnOnce([Option<&Val>; N]) -> Val,
+        F: FnOnce([Result<&Val, CtxError>; N]) -> Val,
         Self: Sized,
     {
         let vals = names.each_ref().map(|name| match name {
             Val::Symbol(s) => ctx.get_const_ref(s),
-            val => Some(val),
+            val => Ok(val),
         });
         f(vals)
     }

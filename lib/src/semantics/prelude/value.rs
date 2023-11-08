@@ -64,7 +64,14 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     DefaultCtx.get_many_const_ref(&ctx, [pair.first, pair.second], |[v1, v2]| {
-        Val::Bool(Bool::new(v1 == v2))
+        let eq = if let Ok(v1) = v1
+            && let Ok(v2) = v2
+        {
+            v1 == v2
+        } else {
+            true
+        };
+        Val::Bool(Bool::new(eq))
     })
 }
 
@@ -82,6 +89,13 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     DefaultCtx.get_many_const_ref(&ctx, [pair.first, pair.second], |[v1, v2]| {
-        Val::Bool(Bool::new(v1 != v2))
+        let ne = if let Ok(v1) = v1
+            && let Ok(v2) = v2
+        {
+            v1 != v2
+        } else {
+            false
+        };
+        Val::Bool(Bool::new(ne))
     })
 }
