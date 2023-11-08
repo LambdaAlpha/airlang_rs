@@ -78,7 +78,7 @@ fn prelude_value(c: &mut NameMap) {
 
 fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::read());
-    put_primitive_func(c, ctx::remove());
+    put_primitive_func(c, ctx::move1());
     put_primitive_func(c, ctx::assign());
     put_primitive_func(c, ctx::set_final());
     put_primitive_func(c, ctx::set_const());
@@ -97,9 +97,9 @@ fn prelude_ctx(c: &mut NameMap) {
 fn prelude_ctrl(c: &mut NameMap) {
     put_primitive_func(c, ctrl::sequence());
     put_primitive_func(c, ctrl::breakable_sequence());
-    put_primitive_func(c, ctrl::condition());
-    put_primitive_func(c, ctrl::matching());
-    put_primitive_func(c, ctrl::while_loop());
+    put_primitive_func(c, ctrl::if1());
+    put_primitive_func(c, ctrl::match1());
+    put_primitive_func(c, ctrl::while1());
 }
 
 fn prelude_eval(c: &mut NameMap) {

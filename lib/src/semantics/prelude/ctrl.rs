@@ -93,7 +93,7 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     output
 }
 
-pub(crate) fn condition() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn if1() -> PrimitiveFunc<CtxMutableFn> {
     let list = List::from(vec![
         ListItemInputMode {
             input_mode: InputMode::Any(EvalMode::Eval),
@@ -153,7 +153,7 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn matching() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn match1() -> PrimitiveFunc<CtxMutableFn> {
     let list = List::from(vec![
         ListItemInputMode {
             input_mode: InputMode::Any(EvalMode::Eval),
@@ -208,7 +208,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     Eval.eval(&mut ctx, eval)
 }
 
-pub(crate) fn while_loop() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn while1() -> PrimitiveFunc<CtxMutableFn> {
     let list = List::from(vec![
         ListItemInputMode {
             input_mode: InputMode::Any(EvalMode::Value),

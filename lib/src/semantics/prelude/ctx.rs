@@ -60,7 +60,7 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
     ctx.get(&s).unwrap_or_default()
 }
 
-pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
+pub(crate) fn move1() -> PrimitiveFunc<CtxMutableFn> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
     let primitive = Primitive::<CtxMutableFn>::new(names::MOVE, fn_move);
     PrimitiveFunc::new(input_mode, primitive)
