@@ -39,19 +39,19 @@ Demonstration of the gcd algorithm\n
 - There are very few keywords\n
 \  - `@` and `:` are soft keywords, representing comments and pairs respectively.\s
      The symbols themselves can be represented by `'@` and `':` respectively.\n
-\  - `context`, `function`, `while`, `move`, `map`, `body` are all ordinary symbols.\n
+\  - `context`, `function`, `while`, `move`, `body` are all ordinary symbols.\n
 - There are no operators, `;`, `=`, `<>`, `%` are all ordinary symbols.\n
 - The symbols `;`, `=`, `context`, `function`, `while`, `<>`, `%`, `move` and `gcd` all refer to ordinary functions.\n
 "
 @
 (; [
-    ctx = (context {map : {
+    ctx = (' context {
         : ;,
         : =,
         : while,
         : <>,
         : %,
-    }}),
+    }),
     gcd = (function {
         body : (; [
             (x : y) = input,

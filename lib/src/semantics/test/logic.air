@@ -42,7 +42,7 @@
     t = (theorem {
         function : `,
         input : ('" (('t not) 't)),
-        before : (context {}),
+        before : (' context {}),
     }),
     proposition_output t
 ]
@@ -53,11 +53,9 @@
     t = (theorem {
         function : ==,
         input : ('' (a : b)),
-        context : (context {
-            map : {
-                a : 1,
-                b : 2,
-            }
+        context : (' context {
+            a : 1,
+            b : 2,
         })
     }),
     proposition_output t
@@ -69,7 +67,7 @@
     t = (theorem {
         function : =,
         input : ('' (a : 1)),
-        before : (context {})
+        before : (' context {})
     }),
     ctx = (proposition_before t),
     [ctx] .. (is_null a)
@@ -81,7 +79,7 @@
     t = (theorem {
         function : =,
         input : ('' (a : 1)),
-        before : (context {})
+        before : (' context {})
     }),
     ctx = (proposition_after t),
     [ctx] .. (is_null a)

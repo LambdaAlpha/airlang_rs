@@ -23,7 +23,14 @@ use crate::{
     },
 };
 
+thread_local! (static META_PRELUDE: NameMap = init_meta_prelude());
+
 thread_local! (static PRELUDE: NameMap = init_prelude());
+
+#[allow(unused)]
+pub(crate) fn meta_prelude() -> NameMap {
+    META_PRELUDE.with(Clone::clone)
+}
 
 pub(crate) fn prelude() -> NameMap {
     PRELUDE.with(Clone::clone)
@@ -32,8 +39,12 @@ pub(crate) fn prelude() -> NameMap {
 pub(crate) fn initial_ctx() -> Ctx {
     Ctx {
         name_map: prelude(),
-        super_ctx: None,
+        meta: None,
     }
+}
+
+fn init_meta_prelude() -> NameMap {
+    NameMap::default()
 }
 
 fn init_prelude() -> NameMap {
@@ -86,8 +97,7 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::is_const());
     put_primitive_func(c, ctx::is_null());
     put_primitive_func(c, ctx::is_local());
-    put_primitive_func(c, ctx::ctx_get_super());
-    put_primitive_func(c, ctx::ctx_set_super());
+    put_primitive_func(c, ctx::set_meta());
     put_primitive_func(c, ctx::ctx_new());
     put_primitive_func(c, ctx::ctx_repr());
     put_primitive_func(c, ctx::ctx_prelude());

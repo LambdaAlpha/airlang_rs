@@ -45,9 +45,11 @@ pub(crate) trait CtxTrait {
 
     fn is_local(&self, name: &str) -> Result<bool, CtxError>;
 
-    fn get_super(&self) -> Result<Option<&Symbol>, CtxError>;
+    fn get_meta(&self) -> Result<&Ctx, CtxError>;
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError>;
+    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError>;
+
+    fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError>;
 
     fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError>;
 
@@ -85,7 +87,7 @@ pub(crate) struct TaggedRef<'a, T> {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Ctx {
     pub(crate) name_map: NameMap,
-    pub(crate) super_ctx: Option<Symbol>,
+    pub(crate) meta: Option<Box<Ctx>>,
 }
 
 impl Ctx {
@@ -228,10 +230,13 @@ impl Ctx {
     }
 
     fn get_tagged_super_ctx(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
-        let Some(name) = &self.super_ctx else {
+        let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
-        let Some(tagged_val) = self.name_map.get_mut(name) else {
+        let Val::Symbol(name) = meta.get(names::SUPER)? else {
+            return Err(CtxError::NotExpected);
+        };
+        let Some(tagged_val) = self.name_map.get_mut(&name) else {
             return Err(CtxError::NotExpected);
         };
         let Val::Ctx(CtxVal(super_ctx)) = &mut tagged_val.val else {
@@ -242,10 +247,13 @@ impl Ctx {
     }
 
     fn get_mut_super_ctx(&mut self) -> Result<&mut Ctx, CtxError> {
-        let Some(name) = &self.super_ctx else {
+        let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
-        let Some(tagged_val) = self.name_map.get_mut(name) else {
+        let Val::Symbol(name) = meta.get(names::SUPER)? else {
+            return Err(CtxError::NotExpected);
+        };
+        let Some(tagged_val) = self.name_map.get_mut(&name) else {
             return Err(CtxError::NotExpected);
         };
         let Val::Ctx(CtxVal(super_ctx)) = &mut tagged_val.val else {
@@ -258,10 +266,13 @@ impl Ctx {
     }
 
     fn get_const_super_ctx(&self) -> Result<&Ctx, CtxError> {
-        let Some(name) = &self.super_ctx else {
+        let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
-        let Some(super_ctx) = self.name_map.get(name) else {
+        let Val::Symbol(name) = meta.get(names::SUPER)? else {
+            return Err(CtxError::NotExpected);
+        };
+        let Some(super_ctx) = self.name_map.get(&name) else {
             return Err(CtxError::NotExpected);
         };
         let Val::Ctx(CtxVal(super_ctx)) = &super_ctx.val else {
@@ -425,3 +436,5 @@ impl<'a, T> TaggedRef<'a, T> {
         }
     }
 }
+
+pub(crate) mod names;

@@ -71,12 +71,22 @@ impl<'a> CtxTrait for MutableCtx<'a> {
         Ok(is_local)
     }
 
-    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
-        Ok(self.0.super_ctx.as_ref())
+    fn get_meta(&self) -> Result<&Ctx, CtxError> {
+        match &self.0.meta {
+            Some(ctx) => Ok(ctx),
+            None => Err(CtxError::NotFound),
+        }
     }
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError> {
-        self.0.super_ctx = super_ctx;
+    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
+        match &mut self.0.meta {
+            Some(ctx) => Ok(TaggedRef::new(ctx, false)),
+            None => Err(CtxError::NotFound),
+        }
+    }
+
+    fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError> {
+        self.0.meta = meta.map(Box::new);
         Ok(())
     }
 
@@ -192,19 +202,27 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         }
     }
 
-    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
+    fn get_meta(&self) -> Result<&Ctx, CtxError> {
         match self {
-            CtxForMutableFn::Free(ctx) => ctx.get_super(),
-            CtxForMutableFn::Const(ctx) => ctx.get_super(),
-            CtxForMutableFn::Mutable(ctx) => ctx.get_super(),
+            CtxForMutableFn::Free(ctx) => ctx.get_meta(),
+            CtxForMutableFn::Const(ctx) => ctx.get_meta(),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_meta(),
         }
     }
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError> {
+    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
         match self {
-            CtxForMutableFn::Free(ctx) => ctx.set_super(super_ctx),
-            CtxForMutableFn::Const(ctx) => ctx.set_super(super_ctx),
-            CtxForMutableFn::Mutable(ctx) => ctx.set_super(super_ctx),
+            CtxForMutableFn::Free(ctx) => ctx.get_tagged_meta(),
+            CtxForMutableFn::Const(ctx) => ctx.get_tagged_meta(),
+            CtxForMutableFn::Mutable(ctx) => ctx.get_tagged_meta(),
+        }
+    }
+
+    fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError> {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.set_meta(meta),
+            CtxForMutableFn::Const(ctx) => ctx.set_meta(meta),
+            CtxForMutableFn::Mutable(ctx) => ctx.set_meta(meta),
         }
     }
 

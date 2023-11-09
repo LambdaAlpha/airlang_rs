@@ -10,11 +10,11 @@
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), [a] .. (read b)]
+;[a = (' context {b : 1}), [a] .. (read b)]
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), [a] .. (read b)]
+;[a = (' context {b : 1}), [a] .. (read b)]
 -----
 1
 =====
@@ -38,27 +38,27 @@
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), [a] .. (move b)]
+;[a = (' context {b : 1}), [a] .. (move b)]
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), [a] .. (move b), [a] .. (read b)]
+;[a = (' context {b : 1}), [a] .. (move b), [a] .. (read b)]
 -----
 '
 =====
-;[a = (context {map : {b : 1}}), [a] .. (move b)]
+;[a = (' context {b : 1}), [a] .. (move b)]
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), [a] .. (move b), [a] .. (read b)]
+;[a = (' context {b : 1}), [a] .. (move b), [a] .. (read b)]
 -----
 '
 =====
-;[a = (context {map : {b : 1}}), [a] .. (read b)]
+;[a = (' context {b : 1}), [a] .. (read b)]
 -----
 1
 =====
-;[a = (context {}), b = 1, [a] .. (b = b), [a] .. (read b)]
+;[a = (' context {}), b = 1, [a] .. (b = b), [a] .. (read b)]
 -----
 1
 =====
@@ -66,37 +66,15 @@
 -----
 1
 =====
-;[a = (context {map : {b : (context {})}}), c = 1, [a, b] .. (d = c), [a, b] .. (read d)]
+;[a = (' context {b : (' context {})}), c = 1, [a, b] .. (d = c), [a, b] .. (read d)]
 -----
 1
 =====
-;[a = (context {}), b = 1, [a] .. ((b ': final) = b), [a] .. (is_final b)]
+;[a = (' context {}), b = 1, [a] .. ((b ': final) = b), [a] .. (is_final b)]
 -----
 't
 =====
-;[a = (context {}), b = 1, [a] .. ((b ': constant) = b), [a] .. (is_constant b)]
------
-'t
-=====
-;[
-    a = (context {}),
-    b = a,
-    [a] .. (b = (move b)),
-    [a] .. (set_super b),
-    [a] .. ((c ': local) = 1),
-    [a] .. (is_local c)
-]
------
-'t
-=====
-;[
-    a = (context {}),
-    b = a,
-    [a] .. (b = (move b)),
-    [a] .. (set_super b),
-    [a] .. ((c ': {local, tag : final}) = 1),
-    ([a] .. (is_local c)) and ([a] .. (is_final c))
-]
+;[a = (' context {}), b = 1, [a] .. ((b ': constant) = b), [a] .. (is_constant b)]
 -----
 't
 =====
@@ -256,7 +234,7 @@
 -----
 1 : 2
 =====
-;[a = (context {map : {b : 1}}), [a] .. (set_final b), [a] .. (is_final b)]
+;[a = (' context {b : 1}), [a] .. (set_final b), [a] .. (is_final b)]
 -----
 't
 =====
@@ -268,7 +246,7 @@
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), [a] .. (set_constant b), [a] .. (is_constant b)]
+;[a = (' context {b : 1}), [a] .. (set_constant b), [a] .. (is_constant b)]
 -----
 't
 =====
@@ -292,7 +270,7 @@ is_final a
 -----
 't
 =====
-;[': = ('' ':), final = ('' final), a = (context {map : {b : (1 ': final)}}), [a] .. (is_final b)]
+;[': = ('' ':), final = ('' final), a = (' context {b : (1 ': final)}), [a] .. (is_final b)]
 -----
 't
 =====
@@ -300,9 +278,9 @@ is_final a
     ': = (function {
         body : (('' ':) (move input)),
         input_mode : (` : ''),
-        context : (context {map : {: '', : move}}),
+        context : (' context {: '', : move}),
     }),
-    a = (context {map : {b : (1 ': final)}}),
+    a = (' context {b : (1 ': final)}),
     [a] .. (is_final b)
 ]
 -----
@@ -324,7 +302,7 @@ is_constant a
 -----
 't
 =====
-;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 ': constant)}}), [a] .. (is_constant b)]
+;[': = ('' ':), constant = ('' constant), a = (' context {b : (1 ': constant)}), [a] .. (is_constant b)]
 -----
 't
 =====
@@ -336,11 +314,11 @@ is_null a
 -----
 'f
 =====
-;[a = (context {}), [a] .. (is_null b)]
+;[a = (' context {}), [a] .. (is_null b)]
 -----
 't
 =====
-;[a = (context {map : {b : 1}}), [a] .. (is_null b)]
+;[a = (' context {b : 1}), [a] .. (is_null b)]
 -----
 'f
 =====
@@ -352,114 +330,139 @@ is_local a
 -----
 't
 =====
-;[a = (context {}), set_super a, b = 1, is_local b]
+;[a = (' context {}), set_meta (' context {super : a}), b = 1, is_local b]
 -----
 'f
 =====
-;[a = (context {}), b = a, [a] .. (b = (move b)), [a] .. (c = 1), [a] .. (set_super b), [a] .. (is_local c)]
+;[
+    a = (' context {b : (' context {})}),
+    [a] .. (c = 1),
+    [a] .. (set_meta {super : b}),
+    [a] .. (is_local c)
+]
 -----
 't
 =====
-;[a = (context {}), b = a, [a] .. (b = (move b)), [a] .. (set_super b), [a] .. (c = 1), [a] .. (is_local c)]
+;[a = (' context {super : b} context {b : (' context {})}), [a] .. (c = 1), [a] .. (is_local c)]
 -----
 'f
 =====
-;[a = (context {map : {b : 1, : ;, : =}}), [a] .. (; [b = 2, b])]
+;[a = (' context {b : 1, : ;, : =}), [a] .. (; [b = 2, b])]
 -----
 2
 =====
-;[': = ('' ':), final = ('' final), a = (context {map : {b : (1 ': final), : ;, : =}}), [a] .. (; [b = 2, b])]
+;[': = ('' ':), final = ('' final), a = (' context {b : (1 ': final), : ;, : =}), [a] .. (; [b = 2, b])]
 -----
 1
 =====
-;[': = ('' ':), constant = ('' constant), a = (context {map : {b : (1 : 2 ': constant), : ;, : set_1}}), [a] .. (; [b set_1 3, b])]
+;[
+    ': = ('' ':),
+    constant = ('' constant),
+    a = (' context {b : (1 : 2 ': constant), : ;, : set_1}),
+    [a] .. (; [b set_1 3, b])
+]
 -----
 1 : 2
 =====
-;[a = (context {map : {b : 1}}), set_super a, b]
+;[
+    mm = (' context {super : ('' s)}),
+    s = (' context {super : ('' c)}),
+    m = ((move mm) context {s : (move s)}),
+    c = (' context {d : 1}),
+    ctx = ((move m) context {c : (move c)}),
+    [ctx] .. (read d)
+]
 -----
 1
 =====
-;[a = (context {map : {b : 1}}), b = 2, set_super a, b]
+;[a = (' context {b : 1}), set_meta (' context {super : ('' a)}), b]
+-----
+1
+=====
+;[a = (' context {b : 1}), b = 2, set_meta (' context {super : ('' a)}), b]
 -----
 2
 =====
-;[a = (context {}), set_super a, b = 1, b : ([a] .. (read b))]
+;[a = (' context {}), set_meta (' context {super : ('' a)}), b = 1, b : ([a] .. (read b))]
 -----
 1 : 1
 =====
-;[a = (context {}), b = 1, set_super a, b = 2, b : ([a] .. (read b))]
+;[a = (' context {}), b = 1, set_meta (' context {super : ('' a)}), b = 2, b : ([a] .. (read b))]
 -----
 2 : '
 =====
-;[a = (context {map : {b : (1 : 2)}}), set_super a, b set_1 3, [a] .. (read b)]
+;[a = (' context {b : (1 : 2)}), set_meta (' context {super : ('' a)}), b set_1 3, [a] .. (read b)]
 -----
 3 : 2
 =====
-;[a = (context {map : {b : 1}}), set_super a, (move b) : ([a] .. (read b))]
+;[a = (' context {b : 1}), set_meta (' context {super : ('' a)}), (move b) : ([a] .. (read b))]
 -----
 1 : '
 =====
-;[a = (context {map : {b : 1}}), b = 2, set_super a, (move b) : ([a] .. (read b))]
+;[a = (' context {b : 1}), b = 2, set_meta (' context {super : ('' a)}), (move b) : ([a] .. (read b))]
 -----
 2 : 1
 =====
-;[a = (context {}), set_super a, (b ': local) = 2, b : ([a] .. (read b))]
+;[a = (' context {}), set_meta (' context {super : ('' a)}), (b ': local) = 2, b : ([a] .. (read b))]
 -----
 2 : '
 =====
-;[a = (context {}), set_super a, (b : c ': local) = (1 : 2), b]
+;[a = (' context {}), set_meta (' context {super : ('' a)}), (b : c ': local) = (1 : 2), b]
 -----
 1
 =====
-;[a = (context {map : {b : (context {map : {c : 1}})}, super : b}), [a] .. (read c)]
+;[a = ((' context {super : ('' b)}) context {b : (' context {c : 1})}), [a] .. (read c)]
 -----
 1
 =====
-context_represent (context {})
+context_represent (' context {})
 -----
-{}
+' : {}
 =====
-context_represent (context {map : {a : 1}, super : b})
+;[
+    (meta : map) = (context_represent (' context {super : ('' b)} context {a : 1})),
+    meta = (context_represent (move meta)),
+    meta : map
+]
 -----
-{map : {a : 1}, super : b}
+' : {super : b} : {a : 1}
 =====
-;[': = ('' ':), final = ('' final), context_represent (context {map : {a : (1 ': final)}})]
+;[': = ('' ':), final = ('' final), context_represent (' context {a : (1 ': final)})]
 -----
-{map : {a : (1 ': final)}}
+' : {a : (1 ': final)}
 =====
-;[a = (context_represent (context {map : {b : (context {})}})), map = (a map_remove ('' map)), b = (map map_remove ('' b)), type_of b]
+;[(_ : map) = (context_represent (' context {b : (' context {})})), b = (map map_remove ('' b)), type_of b]
 -----
 context
 =====
 ;[
-    a = (context {map : {b : (context {map : {c : 1}})}}),
-    [a] .. (set_super b),
+    a = (' context {b : (' context {c : 1})}),
+    [a] .. (set_meta (' context {super : ('' b)})),
     [a] .. (read c)
 ]
 -----
 1
 =====
 ;[
-    a = (context {map : {b : (context {map : {c : (context {map : {d : 1}})}})}}),
-    [a, b] .. (set_super c),
+    a = (' context {b : (' context {c : (' context {d : 1})})}),
+    [a, b] .. (set_meta (' context {super : ('' c)})),
     [a, b] .. (read d)
 ]
 -----
 1
 =====
-;[a = (context {map : {b : (context {map : {c : 1}})}, super : b}), [a] .. (get_super ')]
+;[a = (' context {super : ('' b)} context {b : (' context {c : 1})}), [a] .. (('' meta) .. (read super))]
 -----
 b
 =====
-;[a = (context {}), set_super a, get_super ']
+;[a = (' context {}), set_meta (' context {super : ('' a)}), ('' meta) .. (read super)]
 -----
 a
 =====
 ;[
-    a = (context {map : {b : (context {map : {c : (context {})}})}}),
-    [a, b] .. (set_super c),
-    [a, b] .. (get_super ')
+    a = (' context {b : (' context {c : (' context {})})}),
+    [a, b] .. (set_meta (' context {super : ('' c)})),
+    [a, b] .. (('' meta) .. (read super))
 ]
 -----
 c

@@ -25,7 +25,7 @@
         function : ==,
         input : 1,
         output : 1,
-        context : (context {map : {a : 2}}),
+        context : (' context {a : 2}),
     }),
     ctx = (proposition_before p),
     [ctx] .. (` a)
@@ -38,7 +38,7 @@
         function : ==,
         input : 1,
         output : 1,
-        context : (context {map : {a : 2}}),
+        context : (' context {a : 2}),
     }),
     ctx = (proposition_after p),
     [ctx] .. (` a)
@@ -51,8 +51,8 @@
         function : =,
         input : 1,
         output : 1,
-        before : (context {map : {a : 2}}),
-        after : (context {map : {a : 3}}),
+        before : (' context {a : 2}),
+        after : (' context {a : 3}),
     }),
     ctx = (proposition_before p),
     [ctx] .. (` a)
@@ -65,8 +65,8 @@
         function : =,
         input : 1,
         output : 1,
-        before : (context {map : {a : 2}}),
-        after : (context {map : {a : 3}}),
+        before : (' context {a : 2}),
+        after : (' context {a : 3}),
     }),
     ctx = (proposition_after p),
     [ctx] .. (` a)
@@ -109,7 +109,7 @@
         function : ==,
         input : 't,
         output : 'f,
-        context : (context {}),
+        context : (' context {}),
     }),
     map == (proposition_represent (proposition map))
 ]
@@ -125,8 +125,8 @@
         function : =,
         input : 't,
         output : 'f,
-        before : (context {}),
-        after : (context {}),
+        before : (' context {}),
+        after : (' context {}),
     }),
     map == (proposition_represent (proposition map))
 ]
@@ -157,7 +157,7 @@
     map = (proposition_represent (theorem {
         function : ==,
         input : (1 : 2),
-        context : (context {}),
+        context : (' context {}),
     })),
     $map = (function {
         body : input,
@@ -167,7 +167,7 @@
         function : ==,
         input : (1 : 2),
         output : 'f,
-        context : (context {}),
+        context : (' context {}),
         truth : 't,
     }),
     map == expected
@@ -179,7 +179,7 @@
     map = (proposition_represent (theorem {
         function : =,
         input : (('' a) : 1),
-        before : (context {}),
+        before : (' context {}),
     })),
     $map = (function {
         body : input,
@@ -189,8 +189,8 @@
         function : =,
         input : (('' a) : 1),
         output : ',
-        before : (context {}),
-        after : (context {map : {a : 1}}),
+        before : (' context {}),
+        after : (' context {a : 1}),
         truth : 't,
     }),
     map == expected

@@ -1,6 +1,7 @@
 use crate::{
     semantics::{
         ctx::{
+            Ctx,
             CtxError,
             CtxTrait,
             TaggedRef,
@@ -59,11 +60,15 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
+    fn get_meta(&self) -> Result<&Ctx, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_super(&mut self, _super_ctx: Option<Symbol>) -> Result<(), CtxError> {
+    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn set_meta(&mut self, _meta: Option<Ctx>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 

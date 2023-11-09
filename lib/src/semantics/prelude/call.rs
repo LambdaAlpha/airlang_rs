@@ -81,13 +81,22 @@ fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
     let target_ctx = pair.first;
     let input = func.input_mode.eval(&mut ctx, call.input);
-    if let Val::Unit(_) = target_ctx {
-        return func.eval(&mut FreeCtx, input);
+
+    match target_ctx {
+        Val::Unit(_) => func.eval(&mut FreeCtx, input),
+        Val::Symbol(name) if &*name == "meta" => {
+            let Ok(meta) = ctx.get_tagged_meta() else {
+                return Val::default();
+            };
+            if meta.is_const {
+                func.eval(&mut ConstCtx(meta.val_ref), input)
+            } else {
+                func.eval(&mut MutableCtx(meta.val_ref), input)
+            }
+        }
+        Val::List(names) => get_ctx_nested(ctx, &names[..], |mut ctx| func.eval(&mut ctx, input)),
+        _ => Val::default(),
     }
-    let Val::List(names) = target_ctx else {
-        return Val::default();
-    };
-    get_ctx_nested(ctx, &names[..], |mut ctx| func.eval(&mut ctx, input))
 }
 
 fn get_ctx_nested<F>(mut ctx: CtxForMutableFn, names: &[Val], f: F) -> Val

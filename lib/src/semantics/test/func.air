@@ -19,7 +19,7 @@
 ;[
     f = (function {
         body : (not input),
-        context : (context {map : {: not}})
+        context : (' context {: not})
     }),
     f (not 't)
 ]
@@ -30,7 +30,7 @@
     f = (function {
         body : (n a),
         input_name : a,
-        context : (context {map : {n : not}})
+        context : (' context {n : not})
     }),
     f (not 't)
 ]
@@ -245,7 +245,7 @@ a
 =====
 ;[
     f = (function {
-        body : (;[set_super caller, `2 input]),
+        body : (;[set_meta (' context {super : ('' caller)}), `2 input]),
         input_mode : '',
         caller_access : mutable,
         context : (prelude ')
@@ -261,10 +261,10 @@ a
     f = (function {
         body : ([caller] .. (` a)),
         caller_access : free,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : `,
-        }})
+        })
     }),
     f '
 ]
@@ -276,10 +276,10 @@ a
     f = (function {
         body : ([caller] .. (` a)),
         caller_access : constant,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : `,
-        }})
+        })
     }),
     f '
 ]
@@ -291,10 +291,10 @@ a
     f = (function {
         body : ([caller] .. (` a)),
         caller_access : mutable,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : `,
-        }})
+        })
     }),
     f '
 ]
@@ -306,10 +306,10 @@ a
     f = (function {
         body : ([caller] .. (` a)),
         caller_access : constant,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : `,
-        }})
+        })
     }),
     f '
 ]
@@ -321,10 +321,10 @@ a
         body : ([caller] .. (('f ('t input)) = 2)),
         input_mode : '',
         caller_access : mutable,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : =,
-        }})
+        })
     }),
     a = 1,
     f a,
@@ -338,10 +338,10 @@ a
         body : ([caller] .. (('f ('t input)) = 2)),
         input_mode : '',
         caller_access : mutable,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : =,
-        }})
+        })
     }),
     (a ': final) = 1,
     f a,
@@ -355,10 +355,10 @@ a
         body : ([caller] .. (('f ('t input)) = 2)),
         input_mode : '',
         caller_access : constant,
-        context : (context {map : {
+        context : (' context {
             : ..,
             : =,
-        }})
+        })
     }),
     a = 1,
     f a,
@@ -560,7 +560,7 @@ function_body not
 '
 =====
 ;[
-    ctx = (context {map : {a : 1}}),
+    ctx = (' context {a : 1}),
     f = (function {body : input, context : ctx}),
     (function_context f) == ctx
 ]

@@ -1,6 +1,6 @@
 "bench interpret" @
 (; [
-  ctx = (context {map : {
+  ctx = (' context {
     : ;,
     : while,
     : <>,
@@ -8,7 +8,7 @@
     : >,
     : =,
     : -,
-  }}),
+  }),
   f = (function {
     body : (; [
       (x : y) = input,

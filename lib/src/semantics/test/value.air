@@ -54,7 +54,7 @@ map
 -----
 function
 =====
-;[a = (context {}), type_of a]
+;[a = (' context {}), type_of a]
 -----
 context
 =====
@@ -114,7 +114,7 @@ proposition
 -----
 't
 =====
-;[a = (context {}), b = (context {}), a == b]
+;[a = (' context {}), b = (' context {}), a == b]
 -----
 't
 =====

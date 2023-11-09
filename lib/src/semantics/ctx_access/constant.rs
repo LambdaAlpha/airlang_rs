@@ -73,11 +73,21 @@ impl<'a> CtxTrait for ConstCtx<'a> {
         Ok(is_local)
     }
 
-    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
-        Ok(self.0.super_ctx.as_ref())
+    fn get_meta(&self) -> Result<&Ctx, CtxError> {
+        match &self.0.meta {
+            Some(ctx) => Ok(ctx),
+            None => Err(CtxError::NotFound),
+        }
     }
 
-    fn set_super(&mut self, _super_ctx: Option<Symbol>) -> Result<(), CtxError> {
+    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
+        match &mut self.0.meta {
+            Some(ctx) => Ok(TaggedRef::new(ctx, true)),
+            None => Err(CtxError::NotFound),
+        }
+    }
+
+    fn set_meta(&mut self, _meta: Option<Ctx>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -183,17 +193,24 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn get_super(&self) -> Result<Option<&Symbol>, CtxError> {
+    fn get_meta(&self) -> Result<&Ctx, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_super(),
-            CtxForConstFn::Const(ctx) => ctx.get_super(),
+            CtxForConstFn::Free(ctx) => ctx.get_meta(),
+            CtxForConstFn::Const(ctx) => ctx.get_meta(),
         }
     }
 
-    fn set_super(&mut self, super_ctx: Option<Symbol>) -> Result<(), CtxError> {
+    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.set_super(super_ctx),
-            CtxForConstFn::Const(ctx) => ctx.set_super(super_ctx),
+            CtxForConstFn::Free(ctx) => ctx.get_tagged_meta(),
+            CtxForConstFn::Const(ctx) => ctx.get_tagged_meta(),
+        }
+    }
+
+    fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError> {
+        match self {
+            CtxForConstFn::Free(ctx) => ctx.set_meta(meta),
+            CtxForConstFn::Const(ctx) => ctx.set_meta(meta),
         }
     }
 

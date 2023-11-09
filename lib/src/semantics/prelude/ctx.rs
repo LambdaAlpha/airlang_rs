@@ -40,10 +40,10 @@ use crate::{
         Bool,
         Call,
         List,
-        Map,
         Pair,
         Reverse,
         Symbol,
+        Unit,
     },
 };
 
@@ -353,39 +353,24 @@ fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
     }
 }
 
-pub(crate) fn ctx_get_super() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::CTX_GET_SUPER, fn_ctx_get_super);
+pub(crate) fn set_meta() -> PrimitiveFunc<CtxMutableFn> {
+    let input_mode = InputMode::Any(EvalMode::Eval);
+    let primitive = Primitive::<CtxMutableFn>::new(names::SET_META, fn_set_meta);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
-fn fn_ctx_get_super(ctx: CtxForConstFn, _input: Val) -> Val {
-    let Ok(Some(super_ctx)) = ctx.get_super() else {
-        return Val::default();
-    };
-    Val::Symbol(super_ctx.clone())
-}
-
-pub(crate) fn ctx_set_super() -> PrimitiveFunc<CtxMutableFn> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::CTX_SET_SUPER, fn_ctx_set_super);
-    PrimitiveFunc::new(input_mode, primitive)
-}
-
-fn fn_ctx_set_super(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    let super_ctx = match input {
-        Val::Symbol(name) => Some(name),
-        Val::Unit(_) => None,
-        _ => {
-            return Val::default();
+fn fn_set_meta(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    match input {
+        Val::Unit(_) => {
+            let _ = ctx.set_meta(None);
         }
-    };
-    let _ = ctx.set_super(super_ctx);
+        Val::Ctx(meta) => {
+            let _ = ctx.set_meta(Some(*meta.0));
+        }
+        _ => {}
+    }
     Val::default()
 }
-
-const MAP: &str = "map";
-const SUPER: &str = "super";
 
 const CTX_VALUE_PAIR: &str = ":";
 const VARIABLE: &str = "variable";
@@ -393,26 +378,29 @@ const FINAL: &str = "final";
 const CONST: &str = "constant";
 
 pub(crate) fn ctx_new() -> PrimitiveFunc<CtxFreeFn> {
-    let mut map = Map::default();
-    map.insert(
-        symbol(MAP),
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
         InputMode::MapForAll(Box::new(Pair::new(
             InputMode::Any(EvalMode::Quote),
             InputMode::Any(EvalMode::Eval),
         ))),
-    );
-    map.insert(symbol(SUPER), InputMode::Symbol(EvalMode::Value));
-    let input_mode = InputMode::MapForSome(map);
+    )));
     let primitive = Primitive::<CtxFreeFn>::new(names::CTX_NEW, fn_ctx_new);
     PrimitiveFunc::new(input_mode, primitive)
 }
 
 fn fn_ctx_new(input: Val) -> Val {
-    let Val::Map(mut map) = input else {
+    let Val::Pair(meta_map) = input else {
         return Val::default();
     };
 
-    let name_map_repr = match map_remove(&mut map, MAP) {
+    let meta = match meta_map.first {
+        Val::Unit(_) => None,
+        Val::Ctx(meta) => Some(meta.0),
+        _ => return Val::default(),
+    };
+
+    let name_map_repr = match meta_map.second {
         Val::Map(name_map) => name_map,
         Val::Unit(_) => MapVal::default(),
         _ => return Val::default(),
@@ -440,15 +428,7 @@ fn fn_ctx_new(input: Val) -> Val {
         name_map.insert(name, tagged_val);
     }
 
-    let super_ctx = match map_remove(&mut map, SUPER) {
-        Val::Symbol(s) => Some(s),
-        _ => None,
-    };
-
-    Val::Ctx(CtxVal(Box::new(Ctx {
-        name_map,
-        super_ctx,
-    })))
+    Val::Ctx(CtxVal(Box::new(Ctx { name_map, meta })))
 }
 
 pub(crate) fn ctx_repr() -> PrimitiveFunc<CtxFreeFn> {
@@ -461,41 +441,38 @@ fn fn_ctx_repr(input: Val) -> Val {
     let Val::Ctx(CtxVal(ctx)) = input else {
         return Val::default();
     };
-    let mut repr = MapVal::default();
 
-    if let Some(name) = ctx.super_ctx {
-        repr.insert(symbol(SUPER), Val::Symbol(name));
-    }
+    let meta = match ctx.meta {
+        Some(meta) => Val::Ctx(CtxVal(meta)),
+        None => Val::Unit(Unit),
+    };
 
-    if !ctx.name_map.is_empty() {
-        let map = ctx
-            .name_map
-            .into_iter()
-            .map(|(k, v)| {
-                let k = Val::Symbol(k);
-                let use_normal_form = if let Val::Call(call) = &v.val
-                    && let Val::Symbol(func) = &call.func
-                    && &**func == CTX_VALUE_PAIR
-                {
-                    true
-                } else {
-                    matches!(v.tag, InvariantTag::Final | InvariantTag::Const)
-                };
-                let v = if use_normal_form {
-                    let func = symbol(CTX_VALUE_PAIR);
-                    let tag = generate_invariant_tag(v.tag);
-                    let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(tag))));
-                    Val::Call(Box::new(Call::new(func, pair)))
-                } else {
-                    v.val
-                };
-                (k, v)
-            })
-            .collect();
-        repr.insert(symbol(MAP), Val::Map(map));
-    }
-
-    Val::Map(repr)
+    let map = ctx
+        .name_map
+        .into_iter()
+        .map(|(k, v)| {
+            let k = Val::Symbol(k);
+            let use_normal_form = if let Val::Call(call) = &v.val
+                && let Val::Symbol(func) = &call.func
+                && &**func == CTX_VALUE_PAIR
+            {
+                true
+            } else {
+                matches!(v.tag, InvariantTag::Final | InvariantTag::Const)
+            };
+            let v = if use_normal_form {
+                let func = symbol(CTX_VALUE_PAIR);
+                let tag = generate_invariant_tag(v.tag);
+                let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(tag))));
+                Val::Call(Box::new(Call::new(func, pair)))
+            } else {
+                v.val
+            };
+            (k, v)
+        })
+        .collect();
+    let map = Val::Map(map);
+    Val::Pair(Box::new(Pair::new(meta, map)))
 }
 
 pub(crate) fn ctx_prelude() -> PrimitiveFunc<CtxFreeFn> {
