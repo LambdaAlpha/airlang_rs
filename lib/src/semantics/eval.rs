@@ -47,7 +47,7 @@ impl DefaultByVal {
         ctx: &mut Ctx,
         first: Val,
         second: Val,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, Val, Output>,
@@ -62,7 +62,7 @@ impl DefaultByVal {
         eval: &Eval,
         ctx: &mut Ctx,
         list: ListVal,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, Val, Output>,
@@ -76,7 +76,7 @@ impl DefaultByVal {
         eval: &Eval,
         ctx: &mut Ctx,
         map: MapVal,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, Val, Output>,
@@ -95,7 +95,7 @@ impl DefaultByVal {
         ctx: &mut Ctx,
         func: Val,
         input: Val,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, Val, Output>,
@@ -111,7 +111,7 @@ impl DefaultByVal {
         ctx: &mut Ctx,
         func: Val,
         output: Val,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, Val, Output>,
@@ -150,7 +150,7 @@ impl DefaultByRef {
         ctx: &mut Ctx,
         first: &'a Val,
         second: &'a Val,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, &'a Val, Output>,
@@ -165,7 +165,7 @@ impl DefaultByRef {
         eval: &Eval,
         ctx: &mut Ctx,
         list: &'a ListVal,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, &'a Val, Output>,
@@ -179,7 +179,7 @@ impl DefaultByRef {
         eval: &Eval,
         ctx: &mut Ctx,
         map: &'a MapVal,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, &'a Val, Output>,
@@ -198,7 +198,7 @@ impl DefaultByRef {
         ctx: &mut Ctx,
         func: &'a Val,
         input: &'a Val,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, &'a Val, Output>,
@@ -214,7 +214,7 @@ impl DefaultByRef {
         ctx: &mut Ctx,
         func: &'a Val,
         output: &'a Val,
-        builder: &Builder,
+        builder: Builder,
     ) -> Output
     where
         Eval: Evaluator<Ctx, &'a Val, Output>,

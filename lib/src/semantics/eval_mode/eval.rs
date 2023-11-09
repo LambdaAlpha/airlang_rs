@@ -51,15 +51,15 @@ where
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
-        DefaultByVal::eval_pair(self, ctx, first, second, &ValBuilder)
+        DefaultByVal::eval_pair(self, ctx, first, second, ValBuilder)
     }
 
     fn eval_list(&self, ctx: &mut Ctx, list: ListVal) -> Val {
-        DefaultByVal::eval_list(self, ctx, list, &ValBuilder)
+        DefaultByVal::eval_list(self, ctx, list, ValBuilder)
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
-        DefaultByVal::eval_map(self, ctx, map, &ValBuilder)
+        DefaultByVal::eval_map(self, ctx, map, ValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
@@ -74,7 +74,7 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        DefaultByVal::eval_reverse(self, ctx, func, output, &ValBuilder)
+        DefaultByVal::eval_reverse(self, ctx, func, output, ValBuilder)
     }
 }
 
@@ -103,15 +103,15 @@ where
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
-        DefaultByRef::eval_pair(self, ctx, first, second, &ValBuilder)
+        DefaultByRef::eval_pair(self, ctx, first, second, ValBuilder)
     }
 
     fn eval_list(&self, ctx: &mut Ctx, list: &'a ListVal) -> Val {
-        DefaultByRef::eval_list(self, ctx, list, &ValBuilder)
+        DefaultByRef::eval_list(self, ctx, list, ValBuilder)
     }
 
     fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
-        DefaultByRef::eval_map(self, ctx, map, &ValBuilder)
+        DefaultByRef::eval_map(self, ctx, map, ValBuilder)
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
@@ -126,6 +126,6 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        DefaultByRef::eval_reverse(self, ctx, func, output, &ValBuilder)
+        DefaultByRef::eval_reverse(self, ctx, func, output, ValBuilder)
     }
 }
