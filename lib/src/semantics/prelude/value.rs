@@ -1,17 +1,18 @@
 use crate::{
     semantics::{
-        ctx::DefaultCtx,
+        ctx::{
+            DefaultCtx,
+            NameMap,
+        },
         ctx_access::constant::CtxForConstFn,
         eval_mode::EvalMode,
-        func::{
-            CtxConstFn,
-            Primitive,
-        },
         input_mode::InputMode,
         prelude::{
-            names,
-            PrimitiveFunc,
+            named_const_fn,
+            Named,
+            Prelude,
         },
+        val::FuncVal,
         Val,
     },
     types::{
@@ -21,10 +22,34 @@ use crate::{
     },
 };
 
-pub(crate) fn type_of() -> PrimitiveFunc<CtxConstFn> {
+#[derive(Clone)]
+pub(crate) struct ValuePrelude {
+    type_of: Named<FuncVal>,
+    equal: Named<FuncVal>,
+    not_equal: Named<FuncVal>,
+}
+
+impl Default for ValuePrelude {
+    fn default() -> Self {
+        ValuePrelude {
+            type_of: type_of(),
+            equal: equal(),
+            not_equal: not_equal(),
+        }
+    }
+}
+
+impl Prelude for ValuePrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.type_of.put(m);
+        self.equal.put(m);
+        self.not_equal.put(m);
+    }
+}
+
+fn type_of() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::TYPE_OF, fn_type_of);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("type_of", input_mode, fn_type_of)
 }
 
 fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
@@ -50,13 +75,12 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn equal() -> PrimitiveFunc<CtxConstFn> {
+fn equal() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Symbol(EvalMode::Value),
     )));
-    let primitive = Primitive::<CtxConstFn>::new(names::EQUAL, fn_equal);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("==", input_mode, fn_equal)
 }
 
 fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
@@ -75,13 +99,12 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn not_equal() -> PrimitiveFunc<CtxConstFn> {
+fn not_equal() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Symbol(EvalMode::Value),
     )));
-    let primitive = Primitive::<CtxConstFn>::new(names::NOT_EQUAL, fn_not_equal);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("=/=", input_mode, fn_not_equal)
 }
 
 fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {

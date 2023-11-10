@@ -1,19 +1,50 @@
 use crate::{
-    semantics::val::Val,
+    semantics::{
+        ctx::NameMap,
+        prelude::{
+            Named,
+            Prelude,
+        },
+    },
     types::Int,
 };
 
-pub(crate) fn version_major() -> Val {
+#[derive(Clone)]
+pub(crate) struct MetaPrelude {
+    version_major: Named<Int>,
+    version_minor: Named<Int>,
+    version_patch: Named<Int>,
+}
+
+impl Default for MetaPrelude {
+    fn default() -> Self {
+        MetaPrelude {
+            version_major: Named::new("air_version_major", version_major()),
+            version_minor: Named::new("air_version_minor", version_minor()),
+            version_patch: Named::new("air_version_patch", version_patch()),
+        }
+    }
+}
+
+impl Prelude for MetaPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.version_major.put(m);
+        self.version_minor.put(m);
+        self.version_patch.put(m);
+    }
+}
+
+fn version_major() -> Int {
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
-    Val::Int(Int::from_sign_string_radix(true, MAJOR, 10))
+    Int::from_sign_string_radix(true, MAJOR, 10)
 }
 
-pub(crate) fn version_minor() -> Val {
+fn version_minor() -> Int {
     const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
-    Val::Int(Int::from_sign_string_radix(true, MINOR, 10))
+    Int::from_sign_string_radix(true, MINOR, 10)
 }
 
-pub(crate) fn version_patch() -> Val {
+fn version_patch() -> Int {
     const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
-    Val::Int(Int::from_sign_string_radix(true, PATCH, 10))
+    Int::from_sign_string_radix(true, PATCH, 10)
 }

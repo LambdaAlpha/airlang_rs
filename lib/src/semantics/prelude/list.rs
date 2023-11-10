@@ -1,23 +1,24 @@
 use {
     crate::{
         semantics::{
-            ctx::DefaultCtx,
+            ctx::{
+                DefaultCtx,
+                NameMap,
+            },
             ctx_access::{
                 constant::CtxForConstFn,
                 mutable::CtxForMutableFn,
             },
             eval_mode::EvalMode,
-            func::{
-                CtxConstFn,
-                CtxMutableFn,
-                Primitive,
-            },
             input_mode::InputMode,
             prelude::{
-                names,
-                PrimitiveFunc,
+                named_const_fn,
+                named_mutable_fn,
+                Named,
+                Prelude,
             },
             val::{
+                FuncVal,
                 PairVal,
                 Val,
             },
@@ -30,10 +31,58 @@ use {
     std::mem::swap,
 };
 
-pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
+#[derive(Clone)]
+pub(crate) struct ListPrelude {
+    length: Named<FuncVal>,
+    set: Named<FuncVal>,
+    set_many: Named<FuncVal>,
+    get: Named<FuncVal>,
+    insert: Named<FuncVal>,
+    insert_many: Named<FuncVal>,
+    remove: Named<FuncVal>,
+    push: Named<FuncVal>,
+    push_many: Named<FuncVal>,
+    pop: Named<FuncVal>,
+    clear: Named<FuncVal>,
+}
+
+impl Default for ListPrelude {
+    fn default() -> Self {
+        ListPrelude {
+            length: length(),
+            set: set(),
+            set_many: set_many(),
+            get: get(),
+            insert: insert(),
+            insert_many: insert_many(),
+            remove: remove(),
+            push: push(),
+            push_many: push_many(),
+            pop: pop(),
+            clear: clear(),
+        }
+    }
+}
+
+impl Prelude for ListPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.length.put(m);
+        self.set.put(m);
+        self.set_many.put(m);
+        self.get.put(m);
+        self.insert.put(m);
+        self.insert_many.put(m);
+        self.remove.put(m);
+        self.push.put(m);
+        self.push_many.put(m);
+        self.pop.put(m);
+        self.clear.put(m);
+    }
+}
+
+fn length() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::LIST_LENGTH, fn_length);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("list_length", input_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
@@ -45,7 +94,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn set() -> PrimitiveFunc<CtxMutableFn> {
+fn set() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
@@ -53,8 +102,7 @@ pub(crate) fn set() -> PrimitiveFunc<CtxMutableFn> {
             InputMode::Any(EvalMode::Eval),
         ))),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_SET, fn_set);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_set", input_mode, fn_set)
 }
 
 fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -82,7 +130,7 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn set_many() -> PrimitiveFunc<CtxMutableFn> {
+fn set_many() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
@@ -90,8 +138,7 @@ pub(crate) fn set_many() -> PrimitiveFunc<CtxMutableFn> {
             InputMode::List(EvalMode::Eval),
         ))),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_SET_MANY, fn_set_many);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_set_many", input_mode, fn_set_many)
 }
 
 fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -122,13 +169,12 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn get() -> PrimitiveFunc<CtxConstFn> {
+fn get() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxConstFn>::new(names::LIST_GET, fn_get);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("list_get", input_mode, fn_get)
 }
 
 fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
@@ -167,7 +213,7 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
     }
 }
 
-pub(crate) fn insert() -> PrimitiveFunc<CtxMutableFn> {
+fn insert() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
@@ -175,8 +221,7 @@ pub(crate) fn insert() -> PrimitiveFunc<CtxMutableFn> {
             InputMode::Any(EvalMode::Eval),
         ))),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_INSERT, fn_insert);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_insert", input_mode, fn_insert)
 }
 
 fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -203,7 +248,7 @@ fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn insert_many() -> PrimitiveFunc<CtxMutableFn> {
+fn insert_many() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
@@ -211,8 +256,7 @@ pub(crate) fn insert_many() -> PrimitiveFunc<CtxMutableFn> {
             InputMode::List(EvalMode::Eval),
         ))),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_INSERT_MANY, fn_insert_many);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_insert_many", input_mode, fn_insert_many)
 }
 
 fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -241,13 +285,12 @@ fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn remove() -> PrimitiveFunc<CtxMutableFn> {
+fn remove() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_REMOVE, fn_remove);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_remove", input_mode, fn_remove)
 }
 
 fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -287,13 +330,12 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
     }
 }
 
-pub(crate) fn push() -> PrimitiveFunc<CtxMutableFn> {
+fn push() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_PUSH, fn_push);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_push", input_mode, fn_push)
 }
 
 fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -310,13 +352,12 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn push_many() -> PrimitiveFunc<CtxMutableFn> {
+fn push_many() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::List(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_PUSH_MANY, fn_push_many);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_push_many", input_mode, fn_push_many)
 }
 
 fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -336,13 +377,12 @@ fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn pop() -> PrimitiveFunc<CtxMutableFn> {
+fn pop() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_POP, fn_pop);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_pop", input_mode, fn_pop)
 }
 
 fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -378,10 +418,9 @@ fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
     }
 }
 
-pub(crate) fn clear() -> PrimitiveFunc<CtxMutableFn> {
+fn clear() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::LIST_CLEAR, fn_clear);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("list_clear", input_mode, fn_clear)
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {

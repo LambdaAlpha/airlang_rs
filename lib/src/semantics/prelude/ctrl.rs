@@ -1,5 +1,6 @@
 use crate::{
     semantics::{
+        ctx::NameMap,
         ctx_access::{
             free::FreeCtx,
             CtxAccessor,
@@ -21,10 +22,14 @@ use crate::{
             ListItemInputMode,
         },
         prelude::{
-            names,
-            PrimitiveFunc,
+            named_mutable_fn,
+            Named,
+            Prelude,
         },
-        val::Val,
+        val::{
+            FuncVal,
+            Val,
+        },
     },
     types::{
         List,
@@ -33,15 +38,45 @@ use crate::{
     },
 };
 
-pub(crate) fn sequence() -> PrimitiveFunc<CtxMutableFn> {
+#[derive(Clone)]
+pub(crate) struct CtrlPrelude {
+    sequence: Named<FuncVal>,
+    breakable_sequence: Named<FuncVal>,
+    if1: Named<FuncVal>,
+    match1: Named<FuncVal>,
+    while1: Named<FuncVal>,
+}
+
+impl Default for CtrlPrelude {
+    fn default() -> Self {
+        CtrlPrelude {
+            sequence: sequence(),
+            breakable_sequence: breakable_sequence(),
+            if1: if1(),
+            match1: match1(),
+            while1: while1(),
+        }
+    }
+}
+
+impl Prelude for CtrlPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.sequence.put(m);
+        self.breakable_sequence.put(m);
+        self.if1.put(m);
+        self.match1.put(m);
+        self.while1.put(m);
+    }
+}
+
+fn sequence() -> Named<FuncVal> {
     let input_mode = InputMode::List(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::SEQUENCE,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn(";", input_mode, func)
 }
 
 fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -55,18 +90,17 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     output
 }
 
-pub(crate) fn breakable_sequence() -> PrimitiveFunc<CtxMutableFn> {
+fn breakable_sequence() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::List(EvalMode::Value),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::BREAKABLE_SEQUENCE,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_breakable_sequence::<FreeCtx>,
         |ctx, val| fn_breakable_sequence(ctx, val),
         |ctx, val| fn_breakable_sequence(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn(";return", input_mode, func)
 }
 
 fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -93,7 +127,7 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     output
 }
 
-pub(crate) fn if1() -> PrimitiveFunc<CtxMutableFn> {
+fn if1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemInputMode {
             input_mode: InputMode::Any(EvalMode::Eval),
@@ -113,13 +147,12 @@ pub(crate) fn if1() -> PrimitiveFunc<CtxMutableFn> {
         },
     ]);
     let input_mode = InputMode::ListForSome(list);
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::IF,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("if", input_mode, func)
 }
 
 fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -153,7 +186,7 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     }
 }
 
-pub(crate) fn match1() -> PrimitiveFunc<CtxMutableFn> {
+fn match1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemInputMode {
             input_mode: InputMode::Any(EvalMode::Eval),
@@ -169,13 +202,12 @@ pub(crate) fn match1() -> PrimitiveFunc<CtxMutableFn> {
         },
     ]);
     let input_mode = InputMode::ListForSome(list);
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::MATCH,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("match", input_mode, func)
 }
 
 fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -208,7 +240,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     Eval.eval(&mut ctx, eval)
 }
 
-pub(crate) fn while1() -> PrimitiveFunc<CtxMutableFn> {
+fn while1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemInputMode {
             input_mode: InputMode::Any(EvalMode::Value),
@@ -220,13 +252,12 @@ pub(crate) fn while1() -> PrimitiveFunc<CtxMutableFn> {
         },
     ]);
     let input_mode = InputMode::ListForSome(list);
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::WHILE,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("while", input_mode, func)
 }
 
 #[allow(clippy::get_first)]

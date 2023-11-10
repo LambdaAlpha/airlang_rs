@@ -1,27 +1,51 @@
 use crate::{
     semantics::{
-        ctx::DefaultCtx,
+        ctx::{
+            DefaultCtx,
+            NameMap,
+        },
         ctx_access::constant::CtxForConstFn,
         eval_mode::EvalMode,
-        func::{
-            CtxConstFn,
-            CtxFreeFn,
-            Primitive,
-        },
         input_mode::InputMode,
         prelude::{
-            names,
-            PrimitiveFunc,
+            named_const_fn,
+            named_free_fn,
+            Named,
+            Prelude,
         },
-        val::Val,
+        val::{
+            FuncVal,
+            Val,
+        },
     },
     types::Str,
 };
 
-pub(crate) fn length() -> PrimitiveFunc<CtxConstFn> {
+#[derive(Clone)]
+pub(crate) struct StrPrelude {
+    length: Named<FuncVal>,
+    concat: Named<FuncVal>,
+}
+
+impl Default for StrPrelude {
+    fn default() -> Self {
+        StrPrelude {
+            length: length(),
+            concat: concat(),
+        }
+    }
+}
+
+impl Prelude for StrPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.length.put(m);
+        self.concat.put(m);
+    }
+}
+
+fn length() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::STR_LENGTH, fn_length);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("string_length", input_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
@@ -33,10 +57,9 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn concat() -> PrimitiveFunc<CtxFreeFn> {
+fn concat() -> Named<FuncVal> {
     let input_mode = InputMode::List(EvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::STR_CONCAT, fn_concat);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("string_concat", input_mode, fn_concat)
 }
 
 fn fn_concat(input: Val) -> Val {

@@ -5,7 +5,7 @@ use crate::{
             InputMode,
             ListItemInputMode,
         },
-        prelude::names,
+        prelude::eval,
         val::{
             ListVal,
             MapVal,
@@ -176,9 +176,9 @@ fn parse_input_mode_map_for_some(input_mode: MapVal) -> Option<InputMode> {
 
 fn symbol_to_eval_mode(name: &Symbol) -> Option<EvalMode> {
     let eval_mode = match &**name {
-        names::VALUE => EvalMode::Value,
-        names::EVAL => EvalMode::Eval,
-        names::QUOTE => EvalMode::Quote,
+        eval::VALUE => EvalMode::Value,
+        eval::EVAL => EvalMode::Eval,
+        eval::QUOTE => EvalMode::Quote,
         _ => return None,
     };
     Some(eval_mode)
@@ -186,9 +186,9 @@ fn symbol_to_eval_mode(name: &Symbol) -> Option<EvalMode> {
 
 pub(crate) fn eval_mode_to_symbol(eval_mode: EvalMode) -> Symbol {
     let str = match eval_mode {
-        EvalMode::Value => names::VALUE,
-        EvalMode::Eval => names::EVAL,
-        EvalMode::Quote => names::QUOTE,
+        EvalMode::Value => eval::VALUE,
+        EvalMode::Eval => eval::EVAL,
+        EvalMode::Quote => eval::QUOTE,
     };
     Symbol::from_str(str)
 }

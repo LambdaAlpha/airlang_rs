@@ -1,4 +1,5 @@
 use crate::semantics::{
+    ctx::NameMap,
     ctx_access::{
         free::FreeCtx,
         mutable::CtxForMutableFn,
@@ -11,57 +12,92 @@ use crate::semantics::{
         BY_VAL,
     },
     func::{
-        CtxFreeFn,
         CtxMutableFn,
         Primitive,
     },
     input_mode::InputMode,
     prelude::{
-        names,
-        PrimitiveFunc,
+        named_free_fn,
+        named_mutable_fn,
+        Named,
+        Prelude,
     },
-    val::Val,
+    val::{
+        FuncVal,
+        Val,
+    },
 };
 
-pub(crate) fn value() -> PrimitiveFunc<CtxFreeFn> {
+#[derive(Clone)]
+pub(crate) struct EvalPrelude {
+    value: Named<FuncVal>,
+    eval: Named<FuncVal>,
+    quote: Named<FuncVal>,
+    eval_twice: Named<FuncVal>,
+    eval_thrice: Named<FuncVal>,
+}
+
+impl Default for EvalPrelude {
+    fn default() -> Self {
+        EvalPrelude {
+            value: value(),
+            eval: eval(),
+            quote: quote(),
+            eval_twice: eval_twice(),
+            eval_thrice: eval_thrice(),
+        }
+    }
+}
+
+impl Prelude for EvalPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.value.put(m);
+        self.eval.put(m);
+        self.quote.put(m);
+        self.eval_twice.put(m);
+        self.eval_thrice.put(m);
+    }
+}
+
+pub(crate) const VALUE: &str = "'";
+pub(crate) const EVAL: &str = "`";
+pub(crate) const QUOTE: &str = "\"";
+
+fn value() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    let primitive = Primitive::<CtxFreeFn>::new(names::VALUE, fn_value);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn(VALUE, input_mode, fn_value)
 }
 
 fn fn_value(input: Val) -> Val {
     input
 }
 
-pub(crate) fn eval() -> PrimitiveFunc<CtxMutableFn> {
+fn eval() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::EVAL, fn_eval);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn(EVAL, input_mode, fn_eval)
 }
 
 fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
     Eval.eval(&mut ctx, input)
 }
 
-pub(crate) fn quote() -> PrimitiveFunc<CtxMutableFn> {
+fn quote() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new(names::QUOTE, fn_quote);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn(QUOTE, input_mode, fn_quote)
 }
 
 fn fn_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
     BY_VAL.quote.eval(&mut ctx, input)
 }
 
-pub(crate) fn eval_twice() -> PrimitiveFunc<CtxMutableFn> {
+fn eval_twice() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::EVAL_TWICE,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_eval_twice::<FreeCtx>,
         |ctx, val| fn_eval_twice(ctx, val),
         |ctx, val| fn_eval_twice(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("`2", input_mode, func)
 }
 
 fn fn_eval_twice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -69,15 +105,14 @@ fn fn_eval_twice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     Eval.eval(&mut ctx, val)
 }
 
-pub(crate) fn eval_thrice() -> PrimitiveFunc<CtxMutableFn> {
+fn eval_thrice() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    let primitive = Primitive::<CtxMutableFn>::new_dispatch(
-        names::EVAL_THRICE,
+    let func = Primitive::<CtxMutableFn>::dispatch(
         fn_eval_thrice::<FreeCtx>,
         |ctx, val| fn_eval_thrice(ctx, val),
         |ctx, val| fn_eval_thrice(ctx, val),
     );
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("`3", input_mode, func)
 }
 
 fn fn_eval_thrice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {

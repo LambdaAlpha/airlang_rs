@@ -2,6 +2,7 @@ use crate::{
     semantics::{
         ctx::{
             CtxTrait,
+            NameMap,
             TaggedRef,
         },
         ctx_access::{
@@ -20,14 +21,11 @@ use crate::{
             eval::Eval,
             EvalMode,
         },
-        func::{
-            CtxMutableFn,
-            Primitive,
-        },
         input_mode::InputMode,
         prelude::{
-            names,
-            PrimitiveFunc,
+            named_mutable_fn,
+            Named,
+            Prelude,
         },
         val::{
             CtxVal,
@@ -41,13 +39,34 @@ use crate::{
     },
 };
 
-pub(crate) fn chain() -> PrimitiveFunc<CtxMutableFn> {
+#[derive(Clone)]
+pub(crate) struct CallPrelude {
+    chain: Named<FuncVal>,
+    call_with_ctx: Named<FuncVal>,
+}
+
+impl Default for CallPrelude {
+    fn default() -> Self {
+        CallPrelude {
+            chain: chain(),
+            call_with_ctx: call_with_ctx(),
+        }
+    }
+}
+
+impl Prelude for CallPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.chain.put(m);
+        self.call_with_ctx.put(m);
+    }
+}
+
+fn chain() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Any(EvalMode::Value),
         InputMode::Any(EvalMode::Value),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::CHAIN, fn_chain);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn(".", input_mode, fn_chain)
 }
 
 fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -57,7 +76,7 @@ fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
     Eval.eval_call(&mut ctx, pair.second, pair.first)
 }
 
-pub(crate) fn call_with_ctx() -> PrimitiveFunc<CtxMutableFn> {
+fn call_with_ctx() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
         InputMode::Call(Box::new(Call::new(
@@ -65,8 +84,7 @@ pub(crate) fn call_with_ctx() -> PrimitiveFunc<CtxMutableFn> {
             InputMode::Any(EvalMode::Value),
         ))),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::CALL_WITH_CTX, fn_call_with_ctx);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("..", input_mode, fn_call_with_ctx)
 }
 
 fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {

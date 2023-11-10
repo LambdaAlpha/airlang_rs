@@ -3,34 +3,34 @@ use crate::{
         ctx::{
             Ctx,
             DefaultCtx,
+            NameMap,
         },
         ctx_access::constant::CtxForConstFn,
         eval_mode::EvalMode,
         func::{
             Composed,
             CtxConstEval,
-            CtxConstFn,
             CtxConstInfo,
             CtxFreeEval,
-            CtxFreeFn,
             CtxFreeInfo,
             CtxMutableEval,
             CtxMutableInfo,
             Func,
             FuncEval,
             FuncImpl,
-            Primitive,
         },
         input_mode::InputMode,
         prelude::{
-            names,
+            named_const_fn,
+            named_free_fn,
             utils::{
                 generate_input_mode,
                 map_remove,
                 parse_input_mode,
                 symbol,
             },
-            PrimitiveFunc,
+            Named,
+            Prelude,
         },
         val::{
             CtxVal,
@@ -47,6 +47,52 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
+pub(crate) struct FuncPrelude {
+    new: Named<FuncVal>,
+    repr: Named<FuncVal>,
+    caller_access: Named<FuncVal>,
+    input_mode: Named<FuncVal>,
+    is_primitive: Named<FuncVal>,
+    id: Named<FuncVal>,
+    body: Named<FuncVal>,
+    ctx: Named<FuncVal>,
+    input_name: Named<FuncVal>,
+    caller_name: Named<FuncVal>,
+}
+
+impl Default for FuncPrelude {
+    fn default() -> Self {
+        FuncPrelude {
+            new: new(),
+            repr: repr(),
+            caller_access: caller_access(),
+            input_mode: input_mode(),
+            is_primitive: is_primitive(),
+            id: id(),
+            body: body(),
+            ctx: ctx(),
+            input_name: input_name(),
+            caller_name: caller_name(),
+        }
+    }
+}
+
+impl Prelude for FuncPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.new.put(m);
+        self.repr.put(m);
+        self.caller_access.put(m);
+        self.input_mode.put(m);
+        self.is_primitive.put(m);
+        self.id.put(m);
+        self.body.put(m);
+        self.ctx.put(m);
+        self.input_name.put(m);
+        self.caller_name.put(m);
+    }
+}
+
 const BODY: &str = "body";
 const CTX: &str = "context";
 const INPUT_NAME: &str = "input_name";
@@ -61,7 +107,7 @@ const FREE: &str = "free";
 const CONST: &str = "constant";
 const MUTABLE: &str = "mutable";
 
-pub(crate) fn func_new() -> PrimitiveFunc<CtxFreeFn> {
+fn new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(BODY), InputMode::Any(EvalMode::Quote));
     map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
@@ -70,11 +116,10 @@ pub(crate) fn func_new() -> PrimitiveFunc<CtxFreeFn> {
     map.insert(symbol(CALLER_ACCESS), InputMode::Symbol(EvalMode::Value));
     map.insert(symbol(INPUT_MODE), InputMode::Any(EvalMode::Quote));
     let input_mode = InputMode::MapForSome(map);
-    let primitive = Primitive::<CtxFreeFn>::new(names::FUNC_NEW, fn_func_new);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("function", input_mode, fn_new)
 }
 
-fn fn_func_new(input: Val) -> Val {
+fn fn_new(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
@@ -128,13 +173,12 @@ fn fn_func_new(input: Val) -> Val {
     Val::Func(Reader::new(func).into())
 }
 
-pub(crate) fn func_repr() -> PrimitiveFunc<CtxFreeFn> {
+fn repr() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::FUNC_REPR, fn_func_repr);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("function_represent", input_mode, fn_repr)
 }
 
-fn fn_func_repr(input: Val) -> Val {
+fn fn_repr(input: Val) -> Val {
     let Val::Func(FuncVal(func)) = input else {
         return Val::default();
     };
@@ -204,13 +248,12 @@ fn fn_func_repr(input: Val) -> Val {
     Val::Map(repr)
 }
 
-pub(crate) fn func_access() -> PrimitiveFunc<CtxConstFn> {
+fn caller_access() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_ACCESS, fn_func_access);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_caller_access", input_mode, fn_caller_access)
 }
 
-fn fn_func_access(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -224,13 +267,12 @@ fn fn_func_access(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_input_mode() -> PrimitiveFunc<CtxConstFn> {
+fn input_mode() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_INPUT_MODE, fn_func_input_mode);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_input_mode", input_mode, fn_input_mode)
 }
 
-fn fn_func_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -239,13 +281,12 @@ fn fn_func_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_is_primitive() -> PrimitiveFunc<CtxConstFn> {
+fn is_primitive() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_IS_PRIMITIVE, fn_func_is_primitive);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_is_primitive", input_mode, fn_is_primitive)
 }
 
-fn fn_func_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -255,13 +296,12 @@ fn fn_func_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_id() -> PrimitiveFunc<CtxConstFn> {
+fn id() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_ID, fn_func_id);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_id", input_mode, fn_id)
 }
 
-fn fn_func_id(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -273,13 +313,12 @@ fn fn_func_id(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_body() -> PrimitiveFunc<CtxConstFn> {
+fn body() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_BODY, fn_func_body);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_body", input_mode, fn_body)
 }
 
-fn fn_func_body(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -291,13 +330,12 @@ fn fn_func_body(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_context() -> PrimitiveFunc<CtxConstFn> {
+fn ctx() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_CTX, fn_func_context);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_context", input_mode, fn_ctx)
 }
 
-fn fn_func_context(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -309,13 +347,12 @@ fn fn_func_context(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_input_name() -> PrimitiveFunc<CtxConstFn> {
+fn input_name() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_INPUT_NAME, fn_func_input_name);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_input_name", input_mode, fn_input_name)
 }
 
-fn fn_func_input_name(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
@@ -327,13 +364,12 @@ fn fn_func_input_name(ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn func_caller_name() -> PrimitiveFunc<CtxConstFn> {
+fn caller_name() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::FUNC_CALLER_NAME, fn_func_caller_name);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("function_caller_name", input_mode, fn_caller_name)
 }
 
-fn fn_func_caller_name(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_caller_name(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();

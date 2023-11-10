@@ -1,23 +1,26 @@
 use {
     crate::{
         semantics::{
-            ctx::DefaultCtx,
+            ctx::{
+                DefaultCtx,
+                NameMap,
+            },
             ctx_access::{
                 constant::CtxForConstFn,
                 mutable::CtxForMutableFn,
             },
             eval_mode::EvalMode,
-            func::{
-                CtxConstFn,
-                CtxMutableFn,
-                Primitive,
-            },
             input_mode::InputMode,
             prelude::{
-                names,
-                PrimitiveFunc,
+                named_const_fn,
+                named_mutable_fn,
+                Named,
+                Prelude,
             },
-            val::Val,
+            val::{
+                FuncVal,
+                Val,
+            },
         },
         types::{
             Either,
@@ -27,13 +30,40 @@ use {
     std::mem::swap,
 };
 
-pub(crate) fn first() -> PrimitiveFunc<CtxConstFn> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::PAIR_FIRST, fn_first);
-    PrimitiveFunc::new(input_mode, primitive)
+#[derive(Clone)]
+pub(crate) struct PairPrelude {
+    get_first: Named<FuncVal>,
+    set_first: Named<FuncVal>,
+    get_second: Named<FuncVal>,
+    set_second: Named<FuncVal>,
 }
 
-fn fn_first(mut ctx: CtxForConstFn, input: Val) -> Val {
+impl Default for PairPrelude {
+    fn default() -> Self {
+        PairPrelude {
+            get_first: get_first(),
+            set_first: set_first(),
+            get_second: get_second(),
+            set_second: set_second(),
+        }
+    }
+}
+
+impl Prelude for PairPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.get_first.put(m);
+        self.set_first.put(m);
+        self.get_second.put(m);
+        self.set_second.put(m);
+    }
+}
+
+fn get_first() -> Named<FuncVal> {
+    let input_mode = InputMode::Symbol(EvalMode::Value);
+    named_const_fn("get_1", input_mode, fn_get_first)
+}
+
+fn fn_get_first(mut ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_ref_or_val(&mut ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
@@ -46,16 +76,15 @@ fn fn_first(mut ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn first_assign() -> PrimitiveFunc<CtxMutableFn> {
+fn set_first() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::PAIR_FIRST_ASSIGN, fn_first_assign);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("set_1", input_mode, fn_set_first)
 }
 
-fn fn_first_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_first(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -73,13 +102,12 @@ fn fn_first_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn second() -> PrimitiveFunc<CtxConstFn> {
+fn get_second() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    let primitive = Primitive::<CtxConstFn>::new(names::PAIR_SECOND, fn_second);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_const_fn("get_2", input_mode, fn_get_second)
 }
 
-fn fn_second(mut ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_second(mut ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_ref_or_val(&mut ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
@@ -92,16 +120,15 @@ fn fn_second(mut ctx: CtxForConstFn, input: Val) -> Val {
     })
 }
 
-pub(crate) fn second_assign() -> PrimitiveFunc<CtxMutableFn> {
+fn set_second() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxMutableFn>::new(names::PAIR_SECOND_ASSIGN, fn_second_assign);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_mutable_fn("set_2", input_mode, fn_set_second)
 }
 
-fn fn_second_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_second(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };

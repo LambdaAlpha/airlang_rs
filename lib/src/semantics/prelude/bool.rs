@@ -1,16 +1,17 @@
 use crate::{
     semantics::{
+        ctx::NameMap,
         eval_mode::EvalMode,
-        func::{
-            CtxFreeFn,
-            Primitive,
-        },
         input_mode::InputMode,
         prelude::{
-            names,
-            PrimitiveFunc,
+            named_free_fn,
+            Named,
+            Prelude,
         },
-        val::Val,
+        val::{
+            FuncVal,
+            Val,
+        },
     },
     types::{
         Bool,
@@ -18,10 +19,34 @@ use crate::{
     },
 };
 
-pub(crate) fn not() -> PrimitiveFunc<CtxFreeFn> {
+#[derive(Clone)]
+pub(crate) struct BoolPrelude {
+    not: Named<FuncVal>,
+    and: Named<FuncVal>,
+    or: Named<FuncVal>,
+}
+
+impl Default for BoolPrelude {
+    fn default() -> Self {
+        BoolPrelude {
+            not: not(),
+            and: and(),
+            or: or(),
+        }
+    }
+}
+
+impl Prelude for BoolPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.not.put(m);
+        self.and.put(m);
+        self.or.put(m);
+    }
+}
+
+fn not() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::NOT, fn_not);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("not", input_mode, fn_not)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -31,13 +56,12 @@ fn fn_not(input: Val) -> Val {
     Val::Bool(b.not())
 }
 
-pub(crate) fn and() -> PrimitiveFunc<CtxFreeFn> {
+fn and() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Any(EvalMode::Eval),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxFreeFn>::new(names::AND, fn_and);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("and", input_mode, fn_and)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -57,13 +81,12 @@ fn fn_and(input: Val) -> Val {
     }
 }
 
-pub(crate) fn or() -> PrimitiveFunc<CtxFreeFn> {
+fn or() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Any(EvalMode::Eval),
         InputMode::Any(EvalMode::Eval),
     )));
-    let primitive = Primitive::<CtxFreeFn>::new(names::OR, fn_or);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("or", input_mode, fn_or)
 }
 
 fn fn_or(input: Val) -> Val {

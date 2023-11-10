@@ -475,19 +475,10 @@ impl Primitive<CtxConstFn> {
     }
 
     #[allow(unused)]
-    pub(crate) fn new_dispatch(
-        id: &str,
-        free_evaluator: impl Fn(FreeCtx, Val) -> Val + 'static,
-        const_evaluator: impl Fn(ConstCtx, Val) -> Val + 'static,
-    ) -> Self {
-        let evaluator = Self::dispatch(free_evaluator, const_evaluator);
-        Primitive {
-            id: Symbol::from_str(id),
-            eval_fn: Reader::new(evaluator),
-        }
-    }
-
-    fn dispatch<Free, Const>(f: Free, c: Const) -> impl Fn(CtxForConstFn, Val) -> Val + 'static
+    pub(crate) fn dispatch<Free, Const>(
+        f: Free,
+        c: Const,
+    ) -> impl Fn(CtxForConstFn, Val) -> Val + 'static
     where
         Free: Fn(FreeCtx, Val) -> Val + 'static,
         Const: Fn(ConstCtx, Val) -> Val + 'static,
@@ -507,20 +498,7 @@ impl Primitive<CtxMutableFn> {
         }
     }
 
-    pub(crate) fn new_dispatch(
-        id: &str,
-        free_evaluator: impl Fn(FreeCtx, Val) -> Val + 'static,
-        const_evaluator: impl Fn(ConstCtx, Val) -> Val + 'static,
-        mutable_evaluator: impl Fn(MutableCtx, Val) -> Val + 'static,
-    ) -> Self {
-        let evaluator = Self::dispatch(free_evaluator, const_evaluator, mutable_evaluator);
-        Primitive {
-            id: Symbol::from_str(id),
-            eval_fn: Reader::new(evaluator),
-        }
-    }
-
-    fn dispatch<Free, Const, Mutable>(
+    pub(crate) fn dispatch<Free, Const, Mutable>(
         f: Free,
         c: Const,
         m: Mutable,

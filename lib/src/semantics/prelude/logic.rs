@@ -1,23 +1,22 @@
 use crate::{
     semantics::{
+        ctx::NameMap,
         eval_mode::EvalMode,
-        func::{
-            CtxFreeFn,
-            FuncEval,
-            Primitive,
-        },
+        func::FuncEval,
         input_mode::InputMode,
         logic::Prop,
         prelude::{
-            names,
+            named_free_fn,
             utils::{
                 map_remove,
                 symbol,
             },
-            PrimitiveFunc,
+            Named,
+            Prelude,
         },
         val::{
             CtxVal,
+            FuncVal,
             PropVal,
         },
         Val,
@@ -28,20 +27,41 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
+pub(crate) struct LogicPrelude {
+    theorem_new: Named<FuncVal>,
+    prove: Named<FuncVal>,
+}
+
+impl Default for LogicPrelude {
+    fn default() -> Self {
+        LogicPrelude {
+            theorem_new: theorem_new(),
+            prove: prove(),
+        }
+    }
+}
+
+impl Prelude for LogicPrelude {
+    fn put(&self, m: &mut NameMap) {
+        self.theorem_new.put(m);
+        self.prove.put(m);
+    }
+}
+
 const FUNCTION: &str = "function";
 const INPUT: &str = "input";
 const CTX: &str = "context";
 const BEFORE: &str = "before";
 
-pub(crate) fn theorem_new() -> PrimitiveFunc<CtxFreeFn> {
+fn theorem_new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::Eval));
     map.insert(symbol(INPUT), InputMode::Any(EvalMode::Eval));
     map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
     map.insert(symbol(BEFORE), InputMode::Any(EvalMode::Eval));
     let input_mode = InputMode::MapForSome(map);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_THEOREM_NEW, fn_theorem_new);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("theorem", input_mode, fn_theorem_new)
 }
 
 fn fn_theorem_new(input: Val) -> Val {
@@ -74,10 +94,9 @@ fn fn_theorem_new(input: Val) -> Val {
     }
 }
 
-pub(crate) fn prove() -> PrimitiveFunc<CtxFreeFn> {
+fn prove() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Eval);
-    let primitive = Primitive::<CtxFreeFn>::new(names::LOGIC_PROVE, fn_prove);
-    PrimitiveFunc::new(input_mode, primitive)
+    named_free_fn("prove", input_mode, fn_prove)
 }
 
 fn fn_prove(input: Val) -> Val {
