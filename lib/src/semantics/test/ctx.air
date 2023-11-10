@@ -435,6 +435,14 @@ context_represent (' context {})
 -----
 context
 =====
+;[a = (' context {}), [a] .. (has_meta ')]
+-----
+'f
+=====
+;[a = (' context {} context {}), [a] .. (has_meta ')]
+-----
+'t
+=====
 ;[
     a = (' context {b : (' context {c : 1})}),
     [a] .. (set_meta (' context {super : ('' b)})),
@@ -466,6 +474,10 @@ a
 ]
 -----
 c
+=====
+;[a = (' context {} context {}), [a] .. (set_meta '), [a] .. (has_meta ')]
+-----
+'f
 =====
 ;[a = (prelude '), [a] .. (not 't)]
 -----

@@ -18,6 +18,7 @@ pub(crate) const IS_FINAL: &str = "is_final";
 pub(crate) const IS_CONST: &str = "is_constant";
 pub(crate) const IS_NULL: &str = "is_null";
 pub(crate) const IS_LOCAL: &str = "is_local";
+pub(crate) const HAS_META: &str = "has_meta";
 pub(crate) const SET_META: &str = "set_meta";
 pub(crate) const CTX_NEW: &str = "context";
 pub(crate) const CTX_REPR: &str = "context_represent";

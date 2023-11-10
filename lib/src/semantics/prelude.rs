@@ -97,6 +97,7 @@ fn prelude_ctx(c: &mut NameMap) {
     put_primitive_func(c, ctx::is_const());
     put_primitive_func(c, ctx::is_null());
     put_primitive_func(c, ctx::is_local());
+    put_primitive_func(c, ctx::has_meta());
     put_primitive_func(c, ctx::set_meta());
     put_primitive_func(c, ctx::ctx_new());
     put_primitive_func(c, ctx::ctx_repr());

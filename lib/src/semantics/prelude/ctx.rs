@@ -353,6 +353,20 @@ fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
     }
 }
 
+pub(crate) fn has_meta() -> PrimitiveFunc<CtxConstFn> {
+    let input_mode = InputMode::Any(EvalMode::Value);
+    let primitive = Primitive::<CtxConstFn>::new(names::HAS_META, fn_has_meta);
+    PrimitiveFunc::new(input_mode, primitive)
+}
+
+fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
+    match ctx.get_meta() {
+        Ok(_) => Val::Bool(Bool::t()),
+        Err(CtxError::NotFound) => Val::Bool(Bool::f()),
+        _ => Val::default(),
+    }
+}
+
 pub(crate) fn set_meta() -> PrimitiveFunc<CtxMutableFn> {
     let input_mode = InputMode::Any(EvalMode::Eval);
     let primitive = Primitive::<CtxMutableFn>::new(names::SET_META, fn_set_meta);
