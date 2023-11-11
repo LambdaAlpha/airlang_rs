@@ -1,5 +1,6 @@
 use crate::{
     semantics::{
+        ctx::names::SOLVER,
         ctx_access::CtxAccessor,
         eval::{
             input::{
@@ -74,7 +75,17 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        DefaultByVal::eval_reverse(self, ctx, func, output, ValBuilder)
+        let reverse = DefaultByVal::eval_reverse(self, ctx, func, output, ValBuilder);
+        let Ok(meta) = ctx.get_meta() else {
+            return reverse;
+        };
+        let Ok(solver) = meta.get(SOLVER) else {
+            return reverse;
+        };
+        let Val::Func(FuncVal(solver)) = solver else {
+            return Val::default();
+        };
+        solver.eval(ctx, reverse)
     }
 }
 
@@ -126,6 +137,16 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        DefaultByRef::eval_reverse(self, ctx, func, output, ValBuilder)
+        let reverse = DefaultByRef::eval_reverse(self, ctx, func, output, ValBuilder);
+        let Ok(meta) = ctx.get_meta() else {
+            return reverse;
+        };
+        let Ok(solver) = meta.get(SOLVER) else {
+            return reverse;
+        };
+        let Val::Func(FuncVal(solver)) = solver else {
+            return Val::default();
+        };
+        solver.eval(ctx, reverse)
     }
 }
