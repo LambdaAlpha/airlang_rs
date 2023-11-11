@@ -28,7 +28,7 @@
         context : (' context {a : 2}),
     }),
     ctx = (proposition_before p),
-    [ctx] .. (` a)
+    [ctx] .. (`1 a)
 ]
 -----
 2
@@ -41,7 +41,7 @@
         context : (' context {a : 2}),
     }),
     ctx = (proposition_after p),
-    [ctx] .. (` a)
+    [ctx] .. (`1 a)
 ]
 -----
 2
@@ -55,7 +55,7 @@
         after : (' context {a : 3}),
     }),
     ctx = (proposition_before p),
-    [ctx] .. (` a)
+    [ctx] .. (`1 a)
 ]
 -----
 2
@@ -69,7 +69,7 @@
         after : (' context {a : 3}),
     }),
     ctx = (proposition_after p),
-    [ctx] .. (` a)
+    [ctx] .. (`1 a)
 ]
 -----
 3
@@ -88,7 +88,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : ('' map_items `),
+        input_mode : (`0 map_items `1),
     }),
     map = ($map {
         function : not,
@@ -103,7 +103,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : ('' map_items `),
+        input_mode : (`0 map_items `1),
     }),
     map = ($map {
         function : ==,
@@ -119,7 +119,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : ('' map_items `),
+        input_mode : (`0 map_items `1),
     }),
     map = ($map {
         function : =,
@@ -140,7 +140,7 @@
     })),
     $map = (function {
         body : input,
-        input_mode : ('' map_items `),
+        input_mode : (`0 map_items `1),
     }),
     expected = ($map {
         function : not,
@@ -161,7 +161,7 @@
     })),
     $map = (function {
         body : input,
-        input_mode : ('' map_items `),
+        input_mode : (`0 map_items `1),
     }),
     expected = ($map {
         function : ==,
@@ -178,16 +178,16 @@
 ;[
     map = (proposition_represent (theorem {
         function : =,
-        input : (('' a) : 1),
+        input : ((`0 a) : 1),
         before : (' context {}),
     })),
     $map = (function {
         body : input,
-        input_mode : ('' map_items `),
+        input_mode : (`0 map_items `1),
     }),
     expected = ($map {
         function : =,
-        input : (('' a) : 1),
+        input : ((`0 a) : 1),
         output : ',
         before : (' context {}),
         after : (' context {a : 1}),
@@ -204,7 +204,7 @@
         input : 1,
         output : 2,
     }),
-    ((type_of p) == ('' proposition)) and ((proposition_truth p) == ')
+    ((type_of p) == (`0 proposition)) and ((proposition_truth p) == ')
 ]
 -----
 't

@@ -40,7 +40,7 @@
 ;[
     f = (function {
         body : input,
-        input_mode : '',
+        input_mode : `0,
     }),
     f (not 't)
 ]
@@ -50,7 +50,7 @@ not 't
 ;[
     f = (function {
         body : (('t not) input),
-        input_mode : `,
+        input_mode : `1,
     }),
     f (not 't)
 ]
@@ -60,7 +60,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        input_mode : '",
+        input_mode : ``,
     }),
     f (not 't)
 ]
@@ -70,7 +70,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        input_mode : '",
+        input_mode : ``,
     }),
     f ('t (not 't))
 ]
@@ -80,7 +80,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        input_mode : `,
+        input_mode : `1,
     }),
     f {a : b}
 ]
@@ -90,7 +90,7 @@ not 't
 ;[
     f = (function {
         body : input,
-        input_mode : ('" : `),
+        input_mode : (`` : `1),
     }),
     a f b
 ]
@@ -100,7 +100,7 @@ a : '
 ;[
     f = (function {
         body : input,
-        input_mode : '',
+        input_mode : `0,
     }),
     f (not 'f)
 ]
@@ -110,7 +110,7 @@ not 'f
 ;[
     f = (function {
         body : input,
-        input_mode : (symbol ''),
+        input_mode : (symbol `0),
     }),
     f (not 'f)
 ]
@@ -120,7 +120,7 @@ not 'f
 ;[
     f = (function {
         body : input,
-        input_mode : (symbol ''),
+        input_mode : (symbol `0),
     }),
     f a
 ]
@@ -131,7 +131,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : (symbol ''),
+        input_mode : (symbol `0),
     }),
     f [a]
 ]
@@ -142,7 +142,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : [`, '", ... '', `],
+        input_mode : [`1, ``, ... `0, `1],
     }),
     f [a, a, a, a, a, a]
 ]
@@ -152,7 +152,7 @@ a
 ;[
     f = (function {
         body : input,
-        input_mode : (list ''),
+        input_mode : (list `0),
     }),
     f [a, b]
 ]
@@ -162,7 +162,7 @@ a
 ;[
     f = (function {
         body : input,
-        input_mode : (list ''),
+        input_mode : (list `0),
     }),
     f (not 'f)
 ]
@@ -172,7 +172,7 @@ a
 ;[
     f = (function {
         body : input,
-        input_mode : (list_items (symbol '')),
+        input_mode : (list_items (symbol `0)),
     }),
     f [not 't, b]
 ]
@@ -183,7 +183,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : {a : `, b : ''},
+        input_mode : {a : `1, b : `0},
     }),
     f {a : a, b : a}
 ]
@@ -193,7 +193,7 @@ a
 ;[
     f = (function {
         body : input,
-        input_mode : (map ''),
+        input_mode : (map `0),
     }),
     f {a : b}
 ]
@@ -203,7 +203,7 @@ a
 ;[
     f = (function {
         body : input,
-        input_mode : (map ''),
+        input_mode : (map `0),
     }),
     f (not 't)
 ]
@@ -214,7 +214,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : ('" map_items `),
+        input_mode : (`` map_items `1),
     }),
     f {: a}
 ]
@@ -225,7 +225,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : (call (` '')),
+        input_mode : (call (`1 `0)),
     }),
     f (a a)
 ]
@@ -236,7 +236,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : (` ? ''),
+        input_mode : (`1 ? `0),
     }),
     f (a ? a)
 ]
@@ -245,8 +245,8 @@ a
 =====
 ;[
     f = (function {
-        body : (;[set_meta (' context {super : ('' caller)}), `2 input]),
-        input_mode : '',
+        body : (;[set_meta (' context {super : (`0 caller)}), `2 input]),
+        input_mode : `0,
         caller_access : mutable,
         context : (prelude ')
     }),
@@ -259,11 +259,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (` a)),
+        body : ([caller] .. (`1 a)),
         caller_access : free,
         context : (' context {
             : ..,
-            : `,
+            : `1,
         })
     }),
     f '
@@ -274,11 +274,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (` a)),
+        body : ([caller] .. (`1 a)),
         caller_access : constant,
         context : (' context {
             : ..,
-            : `,
+            : `1,
         })
     }),
     f '
@@ -289,11 +289,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (` a)),
+        body : ([caller] .. (`1 a)),
         caller_access : mutable,
         context : (' context {
             : ..,
-            : `,
+            : `1,
         })
     }),
     f '
@@ -304,11 +304,11 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (` a)),
+        body : ([caller] .. (`1 a)),
         caller_access : constant,
         context : (' context {
             : ..,
-            : `,
+            : `1,
         })
     }),
     f '
@@ -319,7 +319,7 @@ a
 ;[
     f = (function {
         body : ([caller] .. (('f ('t input)) = 2)),
-        input_mode : '',
+        input_mode : `0,
         caller_access : mutable,
         context : (' context {
             : ..,
@@ -336,7 +336,7 @@ a
 ;[
     f = (function {
         body : ([caller] .. (('f ('t input)) = 2)),
-        input_mode : '',
+        input_mode : `0,
         caller_access : mutable,
         context : (' context {
             : ..,
@@ -353,7 +353,7 @@ a
 ;[
     f = (function {
         body : ([caller] .. (('f ('t input)) = 2)),
-        input_mode : '',
+        input_mode : `0,
         caller_access : constant,
         context : (' context {
             : ..,
@@ -381,13 +381,13 @@ function_represent (function {body : input, caller_access : constant})
 =====
 function_represent ==
 -----
-{id : ==, caller_access : constant, input_mode : ((symbol '') : (symbol ''))}
+{id : ==, caller_access : constant, input_mode : ((symbol `0) : (symbol `0))}
 =====
 function_represent (function {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : (` : `),
+    input_mode : (`1 : `1),
     caller_access : mutable,
 })
 -----
@@ -395,7 +395,7 @@ function_represent (function {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : (` : `),
+    input_mode : (`1 : `1),
     caller_access : mutable,
 }
 =====
@@ -407,7 +407,7 @@ function_caller_access function_caller_access
 -----
 constant
 =====
-function_caller_access `
+function_caller_access `1
 -----
 mutable
 =====
@@ -417,119 +417,119 @@ free
 =====
 function_input_mode not
 -----
-`
+`1
 =====
-function_input_mode `
+function_input_mode `1
 -----
-''
+`0
 =====
 function_input_mode function_input_mode
 -----
-symbol ''
+symbol `0
 =====
 ;[f = (function {body : input}), function_input_mode f]
 -----
-`
+`1
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (` : '"),
+        input_mode : (`1 : ``),
     }),
     function_input_mode f
 ]
 -----
-` : '"
+`1 : ``
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (symbol ''),
+        input_mode : (symbol `0),
     }),
     function_input_mode f
 ]
 -----
-symbol ''
+symbol `0
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (call (` '')),
+        input_mode : (call (`1 `0)),
     }),
     function_input_mode f
 ]
 -----
-call (` '')
+call (`1 `0)
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : [`, '", '', ... `, ''],
+        input_mode : [`1, ``, `0, ... `1, `0],
     }),
     function_input_mode f
 ]
 -----
-[`, '", '', ... `, '']
+[`1, ``, `0, ... `1, `0]
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (list ''),
+        input_mode : (list `0),
     }),
     function_input_mode f
 ]
 -----
-list ''
+list `0
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (list_items (symbol '')),
+        input_mode : (list_items (symbol `0)),
     }),
     function_input_mode f
 ]
 -----
-list_items (symbol '')
+list_items (symbol `0)
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : {a : `, b : ''},
+        input_mode : {a : `1, b : `0},
     }),
     function_input_mode f
 ]
 -----
-{a : `, b : ''}
+{a : `1, b : `0}
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (map ''),
+        input_mode : (map `0),
     }),
     function_input_mode f
 ]
 -----
-map ''
+map `0
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : (` map_items ''),
+        input_mode : (`1 map_items `0),
     }),
     function_input_mode f
 ]
 -----
-` map_items ''
+`1 map_items `0
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : ([symbol '', list ''] map_items (list_items (map ''))),
+        input_mode : ([symbol `0, list `0] map_items (list_items (map `0))),
     }),
     function_input_mode f
 ]
 -----
-[symbol '', list ''] map_items (list_items (map ''))
+[symbol `0, list `0] map_items (list_items (map `0))
 =====
 function_is_primitive not
 -----

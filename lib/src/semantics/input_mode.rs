@@ -6,9 +6,9 @@ use crate::{
             Evaluator,
         },
         eval_mode::{
-            quote::{
-                Quote,
-                QuoteByRef,
+            mix::{
+                Mix,
+                MixByRef,
             },
             ByRefEvaluators,
             ByValEvaluators,
@@ -77,7 +77,7 @@ impl InputMode {
         Ctx: CtxAccessor,
         Eval: Evaluator<Ctx, Val, Output>,
         Value: Evaluator<Ctx, Val, Output>,
-        Quote<Eval, Value, Builder>: Evaluator<Ctx, Val, Output>,
+        Mix<Eval, Value, Builder>: Evaluator<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
         ByValEvaluators<Eval, Value, Builder>: Copy,
     {
@@ -93,14 +93,14 @@ impl InputMode {
                 let second = mode_pair
                     .second
                     .eval_generic(ctx, val_pair.second, evaluators);
-                evaluators.quote.builder.from_pair(first, second)
+                evaluators.mix.builder.from_pair(first, second)
             }
             (InputMode::Call(mode_call), Val::Call(val_call)) => {
                 let func = mode_call.func.eval_generic(ctx, val_call.func, evaluators);
                 let input = mode_call
                     .input
                     .eval_generic(ctx, val_call.input, evaluators);
-                evaluators.quote.builder.from_call(func, input)
+                evaluators.mix.builder.from_call(func, input)
             }
             (InputMode::Reverse(mode_reverse), Val::Reverse(val_reverse)) => {
                 let func = mode_reverse
@@ -109,7 +109,7 @@ impl InputMode {
                 let output = mode_reverse
                     .output
                     .eval_generic(ctx, val_reverse.output, evaluators);
-                evaluators.quote.builder.from_reverse(func, output)
+                evaluators.mix.builder.from_reverse(func, output)
             }
             (InputMode::List(mode), Val::List(val_list)) => {
                 mode.eval_generic(ctx, Val::List(val_list), evaluators)
@@ -118,7 +118,7 @@ impl InputMode {
                 let list = val_list
                     .into_iter()
                     .map(|v| mode.eval_generic(ctx, v, evaluators));
-                evaluators.quote.builder.from_list(list)
+                evaluators.mix.builder.from_list(list)
             }
             (InputMode::ListForSome(mode_list), Val::List(val_list)) => {
                 let mut list = Vec::with_capacity(val_list.len());
@@ -145,7 +145,7 @@ impl InputMode {
                 for val in val_iter {
                     list.push(evaluators.eval.eval(ctx, val));
                 }
-                evaluators.quote.builder.from_list(list.into_iter())
+                evaluators.mix.builder.from_list(list.into_iter())
             }
             (InputMode::Map(mode), Val::Map(val_map)) => {
                 mode.eval_generic(ctx, Val::Map(val_map), evaluators)
@@ -156,7 +156,7 @@ impl InputMode {
                     let v = mode.second.eval_generic(ctx, v, evaluators);
                     (k, v)
                 });
-                evaluators.quote.builder.from_map(map)
+                evaluators.mix.builder.from_map(map)
             }
             (InputMode::MapForSome(mode_map), Val::Map(val_map)) => {
                 let map = val_map.into_iter().map(|(k, v)| {
@@ -168,7 +168,7 @@ impl InputMode {
                     let k = evaluators.value.eval(ctx, k);
                     (k, v)
                 });
-                evaluators.quote.builder.from_map(map)
+                evaluators.mix.builder.from_map(map)
             }
             (_, input) => evaluators.eval.eval(ctx, input),
         }
@@ -184,7 +184,7 @@ impl InputMode {
         Ctx: CtxAccessor,
         Eval: Evaluator<Ctx, &'a Val, Output>,
         Value: Evaluator<Ctx, &'a Val, Output>,
-        QuoteByRef<Eval, Value, Builder>: Evaluator<Ctx, &'a Val, Output>,
+        MixByRef<Eval, Value, Builder>: Evaluator<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
         ByRefEvaluators<Eval, Value, Builder>: Copy,
     {
@@ -199,7 +199,7 @@ impl InputMode {
                     mode_pair
                         .second
                         .eval_by_ref_generic(ctx, &val_pair.second, evaluators);
-                evaluators.quote.builder.from_pair(first, second)
+                evaluators.mix.builder.from_pair(first, second)
             }
             (InputMode::Call(mode_call), Val::Call(val_call)) => {
                 let func = mode_call
@@ -208,7 +208,7 @@ impl InputMode {
                 let input = mode_call
                     .input
                     .eval_by_ref_generic(ctx, &val_call.input, evaluators);
-                evaluators.quote.builder.from_call(func, input)
+                evaluators.mix.builder.from_call(func, input)
             }
             (InputMode::Reverse(mode_reverse), Val::Reverse(val_reverse)) => {
                 let func =
@@ -219,14 +219,14 @@ impl InputMode {
                     mode_reverse
                         .output
                         .eval_by_ref_generic(ctx, &val_reverse.output, evaluators);
-                evaluators.quote.builder.from_reverse(func, output)
+                evaluators.mix.builder.from_reverse(func, output)
             }
             (InputMode::List(mode), Val::List(_)) => mode.eval_generic(ctx, input, evaluators),
             (InputMode::ListForAll(mode), Val::List(val_list)) => {
                 let list = val_list
                     .into_iter()
                     .map(|v| mode.eval_by_ref_generic(ctx, v, evaluators));
-                evaluators.quote.builder.from_list(list)
+                evaluators.mix.builder.from_list(list)
             }
             (InputMode::ListForSome(mode_list), Val::List(val_list)) => {
                 let mut list = Vec::with_capacity(val_list.len());
@@ -252,7 +252,7 @@ impl InputMode {
                         list.push(evaluators.eval.eval(ctx, val));
                     }
                 }
-                evaluators.quote.builder.from_list(list.into_iter())
+                evaluators.mix.builder.from_list(list.into_iter())
             }
             (InputMode::Map(mode), Val::Map(_)) => mode.eval_generic(ctx, input, evaluators),
             (InputMode::MapForAll(mode), Val::Map(val_map)) => {
@@ -261,7 +261,7 @@ impl InputMode {
                     let v = mode.second.eval_by_ref_generic(ctx, v, evaluators);
                     (k, v)
                 });
-                evaluators.quote.builder.from_map(map)
+                evaluators.mix.builder.from_map(map)
             }
             (InputMode::MapForSome(mode_map), Val::Map(val_map)) => {
                 let map = val_map.into_iter().map(|(k, v)| {
@@ -273,7 +273,7 @@ impl InputMode {
                     let k = evaluators.value.eval(ctx, k);
                     (k, v)
                 });
-                evaluators.quote.builder.from_map(map)
+                evaluators.mix.builder.from_map(map)
             }
             (_, input) => evaluators.eval.eval(ctx, input),
         }

@@ -32,7 +32,7 @@ use crate::semantics::{
 pub(crate) struct EvalPrelude {
     value: Named<FuncVal>,
     eval: Named<FuncVal>,
-    quote: Named<FuncVal>,
+    mix: Named<FuncVal>,
     eval_twice: Named<FuncVal>,
     eval_thrice: Named<FuncVal>,
 }
@@ -42,7 +42,7 @@ impl Default for EvalPrelude {
         EvalPrelude {
             value: value(),
             eval: eval(),
-            quote: quote(),
+            mix: mix(),
             eval_twice: eval_twice(),
             eval_thrice: eval_thrice(),
         }
@@ -53,15 +53,15 @@ impl Prelude for EvalPrelude {
     fn put(&self, m: &mut NameMap) {
         self.value.put(m);
         self.eval.put(m);
-        self.quote.put(m);
+        self.mix.put(m);
         self.eval_twice.put(m);
         self.eval_thrice.put(m);
     }
 }
 
-pub(crate) const VALUE: &str = "'";
-pub(crate) const EVAL: &str = "`";
-pub(crate) const QUOTE: &str = "\"";
+pub(crate) const VALUE: &str = "`0";
+pub(crate) const EVAL: &str = "`1";
+pub(crate) const MIX: &str = "``";
 
 fn value() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
@@ -81,13 +81,13 @@ fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
     Eval.eval(&mut ctx, input)
 }
 
-fn quote() -> Named<FuncVal> {
+fn mix() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    named_mutable_fn(QUOTE, input_mode, fn_quote)
+    named_mutable_fn(MIX, input_mode, fn_mix)
 }
 
-fn fn_quote(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    BY_VAL.quote.eval(&mut ctx, input)
+fn fn_mix(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    BY_VAL.mix.eval(&mut ctx, input)
 }
 
 fn eval_twice() -> Named<FuncVal> {

@@ -21,13 +21,13 @@ use crate::{
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct Quote<Eval, Value, Builder> {
+pub(crate) struct Mix<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
     pub(crate) builder: Builder,
 }
 
-impl<Ctx, Output, Eval, Value, Builder> Evaluator<Ctx, Val, Output> for Quote<Eval, Value, Builder>
+impl<Ctx, Output, Eval, Value, Builder> Evaluator<Ctx, Val, Output> for Mix<Eval, Value, Builder>
 where
     Ctx: CtxTrait,
     Eval: ByVal<Ctx, Output>,
@@ -39,7 +39,7 @@ where
     }
 }
 
-impl<Ctx, Output, Eval, Value, Builder> ByVal<Ctx, Output> for Quote<Eval, Value, Builder>
+impl<Ctx, Output, Eval, Value, Builder> ByVal<Ctx, Output> for Mix<Eval, Value, Builder>
 where
     Ctx: CtxTrait,
     Eval: ByVal<Ctx, Output>,
@@ -83,14 +83,14 @@ where
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct QuoteByRef<Eval, Value, Builder> {
+pub(crate) struct MixByRef<Eval, Value, Builder> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
     pub(crate) builder: Builder,
 }
 
 impl<'a, Ctx, Output, Eval, Value, Builder> Evaluator<Ctx, &'a Val, Output>
-    for QuoteByRef<Eval, Value, Builder>
+    for MixByRef<Eval, Value, Builder>
 where
     Ctx: CtxTrait,
     Eval: ByRef<'a, Ctx, Output>,
@@ -103,7 +103,7 @@ where
 }
 
 impl<'a, Ctx, Output, Eval, Value, Builder> ByRef<'a, Ctx, Output>
-    for QuoteByRef<Eval, Value, Builder>
+    for MixByRef<Eval, Value, Builder>
 where
     Ctx: CtxTrait,
     Eval: ByRef<'a, Ctx, Output>,

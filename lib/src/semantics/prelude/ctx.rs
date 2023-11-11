@@ -132,7 +132,7 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn assign() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Quote),
+        InputMode::Any(EvalMode::Mix),
         InputMode::Any(EvalMode::Eval),
     )));
     named_mutable_fn("=", input_mode, fn_assign)
@@ -443,7 +443,7 @@ fn ctx_new() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Any(EvalMode::Eval),
         InputMode::MapForAll(Box::new(Pair::new(
-            InputMode::Any(EvalMode::Quote),
+            InputMode::Any(EvalMode::Mix),
             InputMode::Any(EvalMode::Eval),
         ))),
     )));

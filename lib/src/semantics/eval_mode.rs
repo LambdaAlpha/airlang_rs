@@ -9,9 +9,9 @@ use crate::semantics::{
             Eval,
             EvalByRef,
         },
-        quote::{
-            Quote,
-            QuoteByRef,
+        mix::{
+            Mix,
+            MixByRef,
         },
         value::{
             Value,
@@ -25,13 +25,13 @@ use crate::semantics::{
 pub(crate) enum EvalMode {
     Value,
     Eval,
-    Quote,
+    Mix,
 }
 
 pub(crate) const BY_VAL: ByValEvaluators<Eval, Value, ValBuilder> = Evaluators {
     eval: Eval,
     value: Value,
-    quote: Quote {
+    mix: Mix {
         eval: Eval,
         value: Value,
         builder: ValBuilder,
@@ -50,7 +50,7 @@ where
 pub(crate) const BY_REF: ByRefEvaluators<EvalByRef, ValueByRef, ValBuilder> = Evaluators {
     eval: EvalByRef,
     value: ValueByRef,
-    quote: QuoteByRef {
+    mix: MixByRef {
         eval: EvalByRef,
         value: ValueByRef,
         builder: ValBuilder,
@@ -67,40 +67,40 @@ where
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct Evaluators<Eval, Value, Quote> {
+pub(crate) struct Evaluators<Eval, Value, Mix> {
     pub(crate) eval: Eval,
     pub(crate) value: Value,
-    pub(crate) quote: Quote,
+    pub(crate) mix: Mix,
 }
 
 pub(crate) type ByValEvaluators<Eval, Value, Builder> =
-    Evaluators<Eval, Value, Quote<Eval, Value, Builder>>;
+    Evaluators<Eval, Value, Mix<Eval, Value, Builder>>;
 pub(crate) type ByRefEvaluators<Eval, Value, Builder> =
-    Evaluators<Eval, Value, QuoteByRef<Eval, Value, Builder>>;
+    Evaluators<Eval, Value, MixByRef<Eval, Value, Builder>>;
 
 impl EvalMode {
-    pub(crate) fn eval_generic<Ctx, Input, Output, Eval, Value, Quote>(
+    pub(crate) fn eval_generic<Ctx, Input, Output, Eval, Value, Mix>(
         &self,
         ctx: &mut Ctx,
         input: Input,
-        evaluators: Evaluators<Eval, Value, Quote>,
+        evaluators: Evaluators<Eval, Value, Mix>,
     ) -> Output
     where
         Ctx: CtxAccessor,
         Eval: Evaluator<Ctx, Input, Output>,
         Value: Evaluator<Ctx, Input, Output>,
-        Quote: Evaluator<Ctx, Input, Output>,
+        Mix: Evaluator<Ctx, Input, Output>,
     {
         match self {
             EvalMode::Value => evaluators.value.eval(ctx, input),
             EvalMode::Eval => evaluators.eval.eval(ctx, input),
-            EvalMode::Quote => evaluators.quote.eval(ctx, input),
+            EvalMode::Mix => evaluators.mix.eval(ctx, input),
         }
     }
 }
 
 pub(crate) mod value;
 
-pub(crate) mod quote;
+pub(crate) mod mix;
 
 pub(crate) mod eval;

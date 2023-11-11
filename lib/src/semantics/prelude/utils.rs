@@ -178,7 +178,7 @@ fn symbol_to_eval_mode(name: &Symbol) -> Option<EvalMode> {
     let eval_mode = match &**name {
         eval::VALUE => EvalMode::Value,
         eval::EVAL => EvalMode::Eval,
-        eval::QUOTE => EvalMode::Quote,
+        eval::MIX => EvalMode::Mix,
         _ => return None,
     };
     Some(eval_mode)
@@ -188,7 +188,7 @@ pub(crate) fn eval_mode_to_symbol(eval_mode: EvalMode) -> Symbol {
     let str = match eval_mode {
         EvalMode::Value => eval::VALUE,
         EvalMode::Eval => eval::EVAL,
-        EvalMode::Quote => eval::QUOTE,
+        EvalMode::Mix => eval::MIX,
     };
     Symbol::from_str(str)
 }

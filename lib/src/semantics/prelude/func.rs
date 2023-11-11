@@ -109,12 +109,12 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), InputMode::Any(EvalMode::Quote));
+    map.insert(symbol(BODY), InputMode::Any(EvalMode::Mix));
     map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
     map.insert(symbol(INPUT_NAME), InputMode::Symbol(EvalMode::Value));
     map.insert(symbol(CALLER_NAME), InputMode::Symbol(EvalMode::Value));
     map.insert(symbol(CALLER_ACCESS), InputMode::Symbol(EvalMode::Value));
-    map.insert(symbol(INPUT_MODE), InputMode::Any(EvalMode::Quote));
+    map.insert(symbol(INPUT_MODE), InputMode::Any(EvalMode::Mix));
     let input_mode = InputMode::MapForSome(map);
     named_free_fn("function", input_mode, fn_new)
 }
