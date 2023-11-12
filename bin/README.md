@@ -32,17 +32,7 @@ The Air language seeks to solve programming problems once and for all.
 ## Demo
 
 ```Air
-"
-Demonstration of the gcd algorithm\n
-\n
-- The syntax for comments `a @ b` is not special. It takes a pair of values and returns the second value.\n
-- There are very few keywords\n
-\  - `@` and `:` are soft keywords, representing comments and pairs respectively.\s
-     The symbols themselves can be represented by `'@` and `':` respectively.\n
-\  - `context`, `function`, `while`, `move`, `body` are all ordinary symbols.\n
-- There are no operators, `;`, `=`, `<>`, `%` are all ordinary symbols.\n
-- The symbols `;`, `=`, `context`, `function`, `while`, `<>`, `%`, `move` and `gcd` all refer to ordinary functions.\n
-"
+"Demonstration of the gcd algorithm"
 @
 (; [
     ctx = (' context {
