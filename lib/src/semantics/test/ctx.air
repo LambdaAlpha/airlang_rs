@@ -420,9 +420,9 @@ context_represent (' context {})
 ' : {}
 =====
 ;[
-    (meta : map) = (context_represent (' context {super : (`0 b)} context {a : 1})),
+    (meta : m) = (context_represent (' context {super : (`0 b)} context {a : 1})),
     meta = (context_represent (move meta)),
-    meta : map
+    meta : m
 ]
 -----
 ' : {super : b} : {a : 1}
@@ -431,7 +431,7 @@ context_represent (' context {})
 -----
 ' : {a : (1 ': final)}
 =====
-;[(_ : map) = (context_represent (' context {b : (' context {})})), b = (map map_remove (`0 b)), type_of b]
+;[(_ : m) = (context_represent (' context {b : (' context {})})), b = (m map_remove (`0 b)), type_of b]
 -----
 context
 =====

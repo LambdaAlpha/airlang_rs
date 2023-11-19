@@ -90,12 +90,12 @@
         body : input,
         input_mode : (`0 map_items `1),
     }),
-    map = ($map {
+    m = ($map {
         function : not,
         input : 't,
         output : 'f,
     }),
-    map == (proposition_represent (proposition map))
+    m == (proposition_represent (proposition m))
 ]
 -----
 't
@@ -105,13 +105,13 @@
         body : input,
         input_mode : (`0 map_items `1),
     }),
-    map = ($map {
+    m = ($map {
         function : ==,
         input : 't,
         output : 'f,
         context : (' context {}),
     }),
-    map == (proposition_represent (proposition map))
+    m == (proposition_represent (proposition m))
 ]
 -----
 't
@@ -121,20 +121,20 @@
         body : input,
         input_mode : (`0 map_items `1),
     }),
-    map = ($map {
+    m = ($map {
         function : =,
         input : 't,
         output : 'f,
         before : (' context {}),
         after : (' context {}),
     }),
-    map == (proposition_represent (proposition map))
+    m == (proposition_represent (proposition m))
 ]
 -----
 't
 =====
 ;[
-    map = (proposition_represent (theorem {
+    m = (proposition_represent (theorem {
         function : not,
         input : 't,
     })),
@@ -148,13 +148,13 @@
         output : 'f,
         truth : 't,
     }),
-    map == expected
+    m == expected
 ]
 -----
 't
 =====
 ;[
-    map = (proposition_represent (theorem {
+    m = (proposition_represent (theorem {
         function : ==,
         input : (1 : 2),
         context : (' context {}),
@@ -170,13 +170,13 @@
         context : (' context {}),
         truth : 't,
     }),
-    map == expected
+    m == expected
 ]
 -----
 't
 =====
 ;[
-    map = (proposition_represent (theorem {
+    m = (proposition_represent (theorem {
         function : =,
         input : ((`0 a) : 1),
         before : (' context {}),
@@ -193,7 +193,7 @@
         after : (' context {a : 1}),
         truth : 't,
     }),
-    map == expected
+    m == expected
 ]
 -----
 't

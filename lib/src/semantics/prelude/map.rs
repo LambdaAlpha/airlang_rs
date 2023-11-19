@@ -13,6 +13,7 @@ use {
             input_mode::InputMode,
             prelude::{
                 named_const_fn,
+                named_free_fn,
                 named_mutable_fn,
                 Named,
                 Prelude,
@@ -25,6 +26,7 @@ use {
         },
         types::{
             Bool,
+            Int,
             Pair,
         },
     },
@@ -34,6 +36,8 @@ use {
 #[derive(Clone)]
 pub(crate) struct MapPrelude {
     length: Named<FuncVal>,
+    items: Named<FuncVal>,
+    into_items: Named<FuncVal>,
     keys: Named<FuncVal>,
     into_keys: Named<FuncVal>,
     values: Named<FuncVal>,
@@ -47,12 +51,17 @@ pub(crate) struct MapPrelude {
     remove: Named<FuncVal>,
     remove_many: Named<FuncVal>,
     clear: Named<FuncVal>,
+    new_map: Named<FuncVal>,
+    new_set: Named<FuncVal>,
+    new_multiset: Named<FuncVal>,
 }
 
 impl Default for MapPrelude {
     fn default() -> Self {
         MapPrelude {
             length: length(),
+            items: items(),
+            into_items: into_items(),
             keys: keys(),
             into_keys: into_keys(),
             values: values(),
@@ -66,6 +75,9 @@ impl Default for MapPrelude {
             remove: remove(),
             remove_many: remove_many(),
             clear: clear(),
+            new_map: new_map(),
+            new_set: new_set(),
+            new_multiset: new_multiset(),
         }
     }
 }
@@ -73,6 +85,8 @@ impl Default for MapPrelude {
 impl Prelude for MapPrelude {
     fn put(&self, m: &mut NameMap) {
         self.length.put(m);
+        self.items.put(m);
+        self.into_items.put(m);
         self.keys.put(m);
         self.into_keys.put(m);
         self.values.put(m);
@@ -86,6 +100,9 @@ impl Prelude for MapPrelude {
         self.remove.put(m);
         self.remove_many.put(m);
         self.clear.put(m);
+        self.new_map.put(m);
+        self.new_set.put(m);
+        self.new_multiset.put(m);
     }
 }
 
@@ -100,6 +117,44 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
             return Val::default();
         };
         Val::Int(map.len().into())
+    })
+}
+
+fn items() -> Named<FuncVal> {
+    let input_mode = InputMode::Symbol(EvalMode::Value);
+    named_const_fn("map_items", input_mode, fn_items)
+}
+
+fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
+        let Val::Map(map) = val else {
+            return Val::default();
+        };
+        let items = map
+            .iter()
+            .map(|(k, v)| Val::Pair(Box::new(Pair::new(k.clone(), v.clone()))))
+            .collect();
+        Val::List(items)
+    })
+}
+
+fn into_items() -> Named<FuncVal> {
+    let input_mode = InputMode::Symbol(EvalMode::Value);
+    named_mutable_fn("map_into_items", input_mode, fn_into_items)
+}
+
+fn fn_into_items(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    DefaultCtx.get_mut_ref(&mut ctx, input, |val| {
+        let Val::Map(map) = val else {
+            return Val::default();
+        };
+        let mut origin = MapVal::default();
+        swap(map, &mut origin);
+        let items = origin
+            .into_iter()
+            .map(|(k, v)| Val::Pair(Box::new(Pair::new(k, v))))
+            .collect();
+        Val::List(items)
     })
 }
 
@@ -127,9 +182,9 @@ fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let mut map1 = MapVal::default();
-        swap(map, &mut map1);
-        Val::List(map1.into_keys().collect())
+        let mut origin = MapVal::default();
+        swap(map, &mut origin);
+        Val::List(origin.into_keys().collect())
     })
 }
 
@@ -157,9 +212,9 @@ fn fn_into_values(mut ctx: CtxForMutableFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let mut map1 = MapVal::default();
-        swap(map, &mut map1);
-        Val::List(map1.into_values().collect())
+        let mut origin = MapVal::default();
+        swap(map, &mut origin);
+        Val::List(origin.into_values().collect())
     })
 }
 
@@ -380,4 +435,64 @@ fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
         };
         map.clear();
     })
+}
+
+fn new_map() -> Named<FuncVal> {
+    let input_mode = InputMode::ListForAll(Box::new(InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Eval),
+    )))));
+    named_free_fn("map", input_mode, fn_new_map)
+}
+
+fn fn_new_map(input: Val) -> Val {
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let map = list
+        .into_iter()
+        .map(|item| {
+            let Val::Pair(pair) = item else {
+                return None;
+            };
+            Some((pair.first, pair.second))
+        })
+        .try_collect();
+    match map {
+        Some(map) => Val::Map(map),
+        None => Val::default(),
+    }
+}
+
+fn new_set() -> Named<FuncVal> {
+    let input_mode = InputMode::List(EvalMode::Eval);
+    named_free_fn("set", input_mode, fn_new_set)
+}
+
+fn fn_new_set(input: Val) -> Val {
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let map = list.into_iter().map(|k| (k, Val::default())).collect();
+    Val::Map(map)
+}
+
+fn new_multiset() -> Named<FuncVal> {
+    let input_mode = InputMode::List(EvalMode::Eval);
+    named_free_fn("multiset", input_mode, fn_new_multiset)
+}
+
+fn fn_new_multiset(input: Val) -> Val {
+    let Val::List(list) = input else {
+        return Val::default();
+    };
+    let mut multiset = MapVal::with_capacity(list.len());
+    for item in list {
+        let count = multiset.entry(item).or_insert(Val::Int(Int::from(0)));
+        let Val::Int(count) = count else {
+            unreachable!()
+        };
+        count.increase();
+    }
+    Val::Map(multiset)
 }

@@ -114,6 +114,14 @@ impl Int {
         }
     }
 
+    pub(crate) fn increase(&mut self) {
+        self.0 += 1;
+    }
+
+    pub(crate) fn decrease(&mut self) {
+        self.0 -= 1;
+    }
+
     pub(crate) fn less_than(&self, other: &Int) -> Bool {
         Bool::new(self.0.lt(&other.0))
     }

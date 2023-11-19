@@ -6,37 +6,53 @@
 -----
 2
 =====
-;[(m : k) = (map_keys {1 : 2, : 3}), (k list_get 0) + (k list_get 1)]
+;[(m : i) = (map_items {1 : 2, : 3}), map i]
 -----
-4
+{1 : 2, : 3}
 =====
-;[a = {1 : 2, : 3}, b = (map_keys a), (b list_get 0) + (b list_get 1)]
+;[a = {1 : 2, : 3}, b = (map_items a), map b]
 -----
-4
+{1 : 2, : 3}
 =====
-;[(m : k) = (map_into_keys {1 : 2, : 3}), (k list_get 0) + (k list_get 1)]
+;[(m : i) = (map_into_items {1 : 2, : 3}), map i]
 -----
-4
+{1 : 2, : 3}
 =====
-;[a = {1 : 2, : 3}, k = (map_into_keys a), (k list_get 0) + (k list_get 1)]
+;[a = {1 : 2, : 3}, b = (map_into_items a), map b]
 -----
-4
+{1 : 2, : 3}
 =====
-;[(m : v) = (map_values {1 : 2, 3 : 2}), (v list_get 0) + (v list_get 1)]
+;[(m : k) = (map_keys {1 : 2, : 3}), set k]
 -----
-4
+{1, 3}
 =====
-;[a = {1 : 2, 3 : 2}, b = (map_values a), (b list_get 0) + (b list_get 1)]
+;[a = {1 : 2, : 3}, b = (map_keys a), set b]
 -----
-4
+{1, 3}
 =====
-;[(m : k) = (map_into_values {1 : 2, 3 : 2}), (k list_get 0) + (k list_get 1)]
+;[(m : k) = (map_into_keys {1 : 2, : 3}), set k]
 -----
-4
+{1, 3}
 =====
-;[a = {1 : 2, 3 : 2}, v = (map_into_values a), (v list_get 0) + (v list_get 1)]
+;[a = {1 : 2, : 3}, k = (map_into_keys a), set k]
 -----
-4
+{1, 3}
+=====
+;[(m : v) = (map_values {1 : 2, 3 : 2}), multiset v]
+-----
+{2 : 2}
+=====
+;[a = {1 : 2, 3 : 2}, b = (map_values a), multiset b]
+-----
+{2 : 2}
+=====
+;[(m : k) = (map_into_values {1 : 2, 3 : 2}), multiset k]
+-----
+{2 : 2}
+=====
+;[a = {1 : 2, 3 : 2}, v = (map_into_values a), multiset v]
+-----
+{2 : 2}
 =====
 {1 : 2} map_contains 1
 -----
@@ -221,3 +237,27 @@
 ;[a = {1 : 2, 2 : 3}, a . map_clear, a]
 -----
 {}
+=====
+map [1 : 2, 3 : 4]
+-----
+{1 : 2, 3 : 4}
+=====
+map [1 : 2, 3]
+-----
+'
+=====
+map [1 : 2, 1 : 3]
+-----
+{1 : 3}
+=====
+set [1, 2, 2, 3]
+-----
+{1, 2, 3}
+=====
+set [1, 2, 1]
+-----
+{1, 2}
+=====
+multiset ["a", "b", "c", "c", "c", "b"]
+-----
+{"a" : 1, "b" : 2, "c" : 3}
