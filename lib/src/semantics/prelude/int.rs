@@ -18,17 +18,17 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct IntPrelude {
-    add: Named<FuncVal>,
-    subtract: Named<FuncVal>,
-    multiply: Named<FuncVal>,
-    divide: Named<FuncVal>,
-    remainder: Named<FuncVal>,
-    divide_remainder: Named<FuncVal>,
-    less_than: Named<FuncVal>,
-    less_equal: Named<FuncVal>,
-    greater_than: Named<FuncVal>,
-    greater_equal: Named<FuncVal>,
-    less_greater: Named<FuncVal>,
+    pub(crate) add: Named<FuncVal>,
+    pub(crate) subtract: Named<FuncVal>,
+    pub(crate) multiply: Named<FuncVal>,
+    pub(crate) divide: Named<FuncVal>,
+    pub(crate) remainder: Named<FuncVal>,
+    pub(crate) divide_remainder: Named<FuncVal>,
+    pub(crate) less_than: Named<FuncVal>,
+    pub(crate) less_equal: Named<FuncVal>,
+    pub(crate) greater_than: Named<FuncVal>,
+    pub(crate) greater_equal: Named<FuncVal>,
+    pub(crate) less_greater: Named<FuncVal>,
 }
 
 impl Default for IntPrelude {

@@ -49,16 +49,16 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct FuncPrelude {
-    new: Named<FuncVal>,
-    repr: Named<FuncVal>,
-    caller_access: Named<FuncVal>,
-    input_mode: Named<FuncVal>,
-    is_primitive: Named<FuncVal>,
-    id: Named<FuncVal>,
-    body: Named<FuncVal>,
-    ctx: Named<FuncVal>,
-    input_name: Named<FuncVal>,
-    caller_name: Named<FuncVal>,
+    pub(crate) new: Named<FuncVal>,
+    pub(crate) repr: Named<FuncVal>,
+    pub(crate) caller_access: Named<FuncVal>,
+    pub(crate) input_mode: Named<FuncVal>,
+    pub(crate) is_primitive: Named<FuncVal>,
+    pub(crate) id: Named<FuncVal>,
+    pub(crate) body: Named<FuncVal>,
+    pub(crate) ctx: Named<FuncVal>,
+    pub(crate) input_name: Named<FuncVal>,
+    pub(crate) caller_name: Named<FuncVal>,
 }
 
 impl Default for FuncPrelude {

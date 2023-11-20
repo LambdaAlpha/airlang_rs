@@ -33,17 +33,17 @@ use {
 
 #[derive(Clone)]
 pub(crate) struct ListPrelude {
-    length: Named<FuncVal>,
-    set: Named<FuncVal>,
-    set_many: Named<FuncVal>,
-    get: Named<FuncVal>,
-    insert: Named<FuncVal>,
-    insert_many: Named<FuncVal>,
-    remove: Named<FuncVal>,
-    push: Named<FuncVal>,
-    push_many: Named<FuncVal>,
-    pop: Named<FuncVal>,
-    clear: Named<FuncVal>,
+    pub(crate) length: Named<FuncVal>,
+    pub(crate) set: Named<FuncVal>,
+    pub(crate) set_many: Named<FuncVal>,
+    pub(crate) get: Named<FuncVal>,
+    pub(crate) insert: Named<FuncVal>,
+    pub(crate) insert_many: Named<FuncVal>,
+    pub(crate) remove: Named<FuncVal>,
+    pub(crate) push: Named<FuncVal>,
+    pub(crate) push_many: Named<FuncVal>,
+    pub(crate) pop: Named<FuncVal>,
+    pub(crate) clear: Named<FuncVal>,
 }
 
 impl Default for ListPrelude {

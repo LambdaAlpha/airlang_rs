@@ -56,26 +56,26 @@ thread_local! (pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default, Clone)]
 pub(crate) struct AllPrelude {
-    meta: MetaPrelude,
-    syntax: SyntaxPrelude,
-    value: ValuePrelude,
-    ctx: CtxPrelude,
-    ctrl: CtrlPrelude,
-    eval: EvalPrelude,
-    logic: LogicPrelude,
-    func: FuncPrelude,
-    call: CallPrelude,
-    prop: PropPrelude,
-    symbol: SymbolPrelude,
-    unit: UnitPrelude,
-    bool: BoolPrelude,
-    int: IntPrelude,
-    float: FloatPrelude,
-    bytes: BytesPrelude,
-    str: StrPrelude,
-    pair: PairPrelude,
-    list: ListPrelude,
-    map: MapPrelude,
+    pub(crate) meta: MetaPrelude,
+    pub(crate) syntax: SyntaxPrelude,
+    pub(crate) value: ValuePrelude,
+    pub(crate) ctx: CtxPrelude,
+    pub(crate) ctrl: CtrlPrelude,
+    pub(crate) eval: EvalPrelude,
+    pub(crate) logic: LogicPrelude,
+    pub(crate) func: FuncPrelude,
+    pub(crate) call: CallPrelude,
+    pub(crate) prop: PropPrelude,
+    pub(crate) symbol: SymbolPrelude,
+    pub(crate) unit: UnitPrelude,
+    pub(crate) bool: BoolPrelude,
+    pub(crate) int: IntPrelude,
+    pub(crate) float: FloatPrelude,
+    pub(crate) bytes: BytesPrelude,
+    pub(crate) str: StrPrelude,
+    pub(crate) pair: PairPrelude,
+    pub(crate) list: ListPrelude,
+    pub(crate) map: MapPrelude,
 }
 
 impl Prelude for AllPrelude {
@@ -115,7 +115,7 @@ pub(crate) fn initial_ctx() -> Ctx {
     }
 }
 
-trait Prelude {
+pub(crate) trait Prelude {
     fn put(&self, m: &mut NameMap);
 }
 

@@ -47,21 +47,21 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct CtxPrelude {
-    read: Named<FuncVal>,
-    move1: Named<FuncVal>,
-    assign: Named<FuncVal>,
-    set_final: Named<FuncVal>,
-    set_const: Named<FuncVal>,
-    is_final: Named<FuncVal>,
-    is_const: Named<FuncVal>,
-    is_null: Named<FuncVal>,
-    is_local: Named<FuncVal>,
-    has_meta: Named<FuncVal>,
-    set_meta: Named<FuncVal>,
-    ctx_new: Named<FuncVal>,
-    ctx_repr: Named<FuncVal>,
-    ctx_prelude: Named<FuncVal>,
-    ctx_this: Named<FuncVal>,
+    pub(crate) read: Named<FuncVal>,
+    pub(crate) move1: Named<FuncVal>,
+    pub(crate) assign: Named<FuncVal>,
+    pub(crate) set_final: Named<FuncVal>,
+    pub(crate) set_const: Named<FuncVal>,
+    pub(crate) is_final: Named<FuncVal>,
+    pub(crate) is_const: Named<FuncVal>,
+    pub(crate) is_null: Named<FuncVal>,
+    pub(crate) is_local: Named<FuncVal>,
+    pub(crate) has_meta: Named<FuncVal>,
+    pub(crate) set_meta: Named<FuncVal>,
+    pub(crate) ctx_new: Named<FuncVal>,
+    pub(crate) ctx_repr: Named<FuncVal>,
+    pub(crate) ctx_prelude: Named<FuncVal>,
+    pub(crate) ctx_this: Named<FuncVal>,
 }
 
 impl Default for CtxPrelude {

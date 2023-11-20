@@ -29,8 +29,8 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct LogicPrelude {
-    theorem_new: Named<FuncVal>,
-    prove: Named<FuncVal>,
+    pub(crate) theorem_new: Named<FuncVal>,
+    pub(crate) prove: Named<FuncVal>,
 }
 
 impl Default for LogicPrelude {

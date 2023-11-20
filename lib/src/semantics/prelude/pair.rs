@@ -32,10 +32,10 @@ use {
 
 #[derive(Clone)]
 pub(crate) struct PairPrelude {
-    get_first: Named<FuncVal>,
-    set_first: Named<FuncVal>,
-    get_second: Named<FuncVal>,
-    set_second: Named<FuncVal>,
+    pub(crate) get_first: Named<FuncVal>,
+    pub(crate) set_first: Named<FuncVal>,
+    pub(crate) get_second: Named<FuncVal>,
+    pub(crate) set_second: Named<FuncVal>,
 }
 
 impl Default for PairPrelude {

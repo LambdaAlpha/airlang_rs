@@ -40,11 +40,11 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct CtrlPrelude {
-    sequence: Named<FuncVal>,
-    breakable_sequence: Named<FuncVal>,
-    if1: Named<FuncVal>,
-    match1: Named<FuncVal>,
-    while1: Named<FuncVal>,
+    pub(crate) sequence: Named<FuncVal>,
+    pub(crate) breakable_sequence: Named<FuncVal>,
+    pub(crate) if1: Named<FuncVal>,
+    pub(crate) match1: Named<FuncVal>,
+    pub(crate) while1: Named<FuncVal>,
 }
 
 impl Default for CtrlPrelude {

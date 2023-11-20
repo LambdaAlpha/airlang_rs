@@ -41,14 +41,14 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct PropPrelude {
-    new: Named<FuncVal>,
-    repr: Named<FuncVal>,
-    truth: Named<FuncVal>,
-    func: Named<FuncVal>,
-    input: Named<FuncVal>,
-    output: Named<FuncVal>,
-    before: Named<FuncVal>,
-    after: Named<FuncVal>,
+    pub(crate) new: Named<FuncVal>,
+    pub(crate) repr: Named<FuncVal>,
+    pub(crate) truth: Named<FuncVal>,
+    pub(crate) func: Named<FuncVal>,
+    pub(crate) input: Named<FuncVal>,
+    pub(crate) output: Named<FuncVal>,
+    pub(crate) before: Named<FuncVal>,
+    pub(crate) after: Named<FuncVal>,
 }
 
 impl Default for PropPrelude {

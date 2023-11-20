@@ -11,9 +11,9 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct MetaPrelude {
-    version_major: Named<Int>,
-    version_minor: Named<Int>,
-    version_patch: Named<Int>,
+    pub(crate) version_major: Named<Int>,
+    pub(crate) version_minor: Named<Int>,
+    pub(crate) version_patch: Named<Int>,
 }
 
 impl Default for MetaPrelude {

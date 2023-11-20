@@ -23,8 +23,8 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct StrPrelude {
-    length: Named<FuncVal>,
-    concat: Named<FuncVal>,
+    pub(crate) length: Named<FuncVal>,
+    pub(crate) concat: Named<FuncVal>,
 }
 
 impl Default for StrPrelude {

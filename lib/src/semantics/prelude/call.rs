@@ -41,8 +41,8 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct CallPrelude {
-    chain: Named<FuncVal>,
-    call_with_ctx: Named<FuncVal>,
+    pub(crate) chain: Named<FuncVal>,
+    pub(crate) call_with_ctx: Named<FuncVal>,
 }
 
 impl Default for CallPrelude {

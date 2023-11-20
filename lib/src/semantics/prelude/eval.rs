@@ -30,11 +30,11 @@ use crate::semantics::{
 
 #[derive(Clone)]
 pub(crate) struct EvalPrelude {
-    value: Named<FuncVal>,
-    eval: Named<FuncVal>,
-    mix: Named<FuncVal>,
-    eval_twice: Named<FuncVal>,
-    eval_thrice: Named<FuncVal>,
+    pub(crate) value: Named<FuncVal>,
+    pub(crate) eval: Named<FuncVal>,
+    pub(crate) mix: Named<FuncVal>,
+    pub(crate) eval_twice: Named<FuncVal>,
+    pub(crate) eval_thrice: Named<FuncVal>,
 }
 
 impl Default for EvalPrelude {

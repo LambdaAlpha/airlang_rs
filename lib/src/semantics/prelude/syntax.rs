@@ -18,8 +18,8 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct SyntaxPrelude {
-    parse: Named<FuncVal>,
-    stringify: Named<FuncVal>,
+    pub(crate) parse: Named<FuncVal>,
+    pub(crate) stringify: Named<FuncVal>,
 }
 
 impl Default for SyntaxPrelude {

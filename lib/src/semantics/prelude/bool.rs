@@ -21,9 +21,9 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct BoolPrelude {
-    not: Named<FuncVal>,
-    and: Named<FuncVal>,
-    or: Named<FuncVal>,
+    pub(crate) not: Named<FuncVal>,
+    pub(crate) and: Named<FuncVal>,
+    pub(crate) or: Named<FuncVal>,
 }
 
 impl Default for BoolPrelude {

@@ -16,7 +16,7 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct UnitPrelude {
-    unit: Named<FuncVal>,
+    pub(crate) unit: Named<FuncVal>,
 }
 
 impl Default for UnitPrelude {

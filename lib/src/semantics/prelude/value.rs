@@ -24,9 +24,9 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct ValuePrelude {
-    type_of: Named<FuncVal>,
-    equal: Named<FuncVal>,
-    not_equal: Named<FuncVal>,
+    pub(crate) type_of: Named<FuncVal>,
+    pub(crate) equal: Named<FuncVal>,
+    pub(crate) not_equal: Named<FuncVal>,
 }
 
 impl Default for ValuePrelude {
