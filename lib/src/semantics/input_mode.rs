@@ -38,8 +38,8 @@ pub(crate) enum InputMode {
     ListForAll(Box<InputMode>),
     ListForSome(List<ListItemInputMode>),
     Map(EvalMode),
-    MapForSome(Map<Val, InputMode>),
     MapForAll(Box<Pair<InputMode, InputMode>>),
+    MapForSome(Map<Val, InputMode>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]

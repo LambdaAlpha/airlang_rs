@@ -33,7 +33,7 @@ impl Prelude for UnitPrelude {
 
 fn unit() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Value);
-    named_free_fn("'", input_mode, fn_unit)
+    named_free_fn("unit", input_mode, fn_unit)
 }
 
 fn fn_unit(_input: Val) -> Val {

@@ -77,3 +77,15 @@ impl Debug for Float {
         <_ as Display>::fmt(self, f)
     }
 }
+
+impl From<f32> for Float {
+    fn from(value: f32) -> Self {
+        Float(RugFloat::with_val(24, value))
+    }
+}
+
+impl From<f64> for Float {
+    fn from(value: f64) -> Self {
+        Float(RugFloat::with_val(53, value))
+    }
+}

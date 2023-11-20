@@ -14,6 +14,7 @@ rustc-hash = "1"
 thiserror = "1"
 nom = "7"
 smartstring = "1"
+rand = {version = "0.8", features = ["small_rng", "alloc"]}
 
 [dependencies.rug]
 version = "1"

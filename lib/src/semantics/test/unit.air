@@ -1,11 +1,11 @@
-'' '
+unit '
 -----
 '
 =====
-'' 1
+unit 1
 -----
 '
 =====
-type_of ''
+type_of unit
 -----
 function

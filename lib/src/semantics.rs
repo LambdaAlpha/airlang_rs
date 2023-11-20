@@ -68,6 +68,8 @@ pub(crate) mod input_mode;
 
 pub(crate) mod logic;
 
+pub(crate) mod nondeterministic;
+
 pub(crate) mod prelude;
 
 #[cfg(test)]
