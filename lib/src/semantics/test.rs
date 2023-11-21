@@ -41,6 +41,11 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_doc() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/doc.air"), "test/doc.air")
+}
+
+#[test]
 fn test_val_size() {
     let size = size_of::<Val>();
     assert!(size <= 40);

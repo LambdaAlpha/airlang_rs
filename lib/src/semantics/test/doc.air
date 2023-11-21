@@ -1,0 +1,29 @@
+"Demonstration of the gcd algorithm"
+@
+(; [
+    ctx = (' context {
+        : ;,
+        : =,
+        : while,
+        : <>,
+        : %,
+    }),
+    gcd = (function {
+        body : (; [
+            (x : y) = input,
+            while [
+                y <> 0,
+                ; [
+                    z = y,
+                    y = (x % y),
+                    x = z,
+                ],
+            ],
+            x
+        ]),
+        context : (move ctx),
+    }),
+    42 gcd 24
+])
+-----
+6
