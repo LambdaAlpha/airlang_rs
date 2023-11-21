@@ -41,7 +41,7 @@ pub mod syntax;
 
 pub mod semantics;
 
-pub(crate) mod types;
+pub mod types;
 
 pub(crate) mod traits;
 

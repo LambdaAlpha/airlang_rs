@@ -11,9 +11,17 @@ use {
     },
     thiserror::Error,
 };
-pub use {
-    func::Func,
-    val::Val,
+
+pub use self::val::{
+    CallVal,
+    CtxVal,
+    FuncVal,
+    ListVal,
+    MapVal,
+    PairVal,
+    PropVal,
+    ReverseVal,
+    Val,
 };
 
 #[derive(Error, Debug)]

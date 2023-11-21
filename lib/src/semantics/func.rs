@@ -42,7 +42,7 @@ use {
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Func {
+pub(crate) struct Func {
     pub(crate) input_mode: InputMode,
     pub(crate) evaluator: FuncEval,
 }

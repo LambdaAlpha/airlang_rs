@@ -1,26 +1,26 @@
 pub use self::{
     bool::Bool,
     bytes::Bytes,
-    call::Call,
     float::Float,
     int::Int,
-    list::List,
-    map::Map,
-    pair::Pair,
-    reverse::Reverse,
     string::Str,
     symbol::Symbol,
     unit::Unit,
 };
 #[allow(unused)]
 pub(crate) use self::{
+    call::Call,
     either::Either,
+    list::List,
+    map::Map,
+    pair::Pair,
     refer::{
         Keeper,
         Owner,
         Reader,
         RefState,
     },
+    reverse::Reverse,
 };
 
 mod unit;

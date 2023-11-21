@@ -73,11 +73,11 @@ pub enum Val {
     Prop(PropVal),
 }
 
-pub(crate) type PairVal = Pair<Val, Val>;
-pub(crate) type CallVal = Call<Val, Val>;
-pub(crate) type ReverseVal = Reverse<Val, Val>;
-pub(crate) type ListVal = List<Val>;
-pub(crate) type MapVal = Map<Val, Val>;
+pub type PairVal = Pair<Val, Val>;
+pub type CallVal = Call<Val, Val>;
+pub type ReverseVal = Reverse<Val, Val>;
+pub type ListVal = List<Val>;
+pub type MapVal = Map<Val, Val>;
 
 #[derive(Clone, Eq)]
 pub struct FuncVal(pub(crate) Reader<Func>);

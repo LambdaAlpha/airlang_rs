@@ -1,7 +1,15 @@
-pub use repr::Repr;
 use {
     std::fmt::Debug,
     thiserror::Error,
+};
+
+pub use self::repr::{
+    CallRepr,
+    ListRepr,
+    MapRepr,
+    PairRepr,
+    Repr,
+    ReverseRepr,
 };
 
 pub(crate) mod repr;

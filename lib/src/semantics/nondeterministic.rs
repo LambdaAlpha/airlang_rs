@@ -13,6 +13,7 @@ use {
                 CtxConstInfo,
                 CtxFreeInfo,
                 CtxMutableInfo,
+                Func,
                 FuncEval,
                 FuncImpl,
             },
@@ -35,7 +36,6 @@ use {
                 PropVal,
                 ReverseVal,
             },
-            Func,
             Val,
         },
         types::{

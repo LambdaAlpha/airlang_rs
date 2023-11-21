@@ -13,6 +13,7 @@ use crate::{
             CtxConstFn,
             CtxFreeFn,
             CtxMutableFn,
+            Func,
             FuncEval,
             FuncImpl,
             Primitive,
@@ -44,7 +45,6 @@ use crate::{
             FuncVal,
             Val,
         },
-        Func,
     },
     types::{
         Reader,

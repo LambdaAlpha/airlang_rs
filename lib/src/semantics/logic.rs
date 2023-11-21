@@ -15,7 +15,7 @@ use {
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Prop {
+pub(crate) struct Prop {
     func: FuncVal,
     input: Val,
     output: Val,
