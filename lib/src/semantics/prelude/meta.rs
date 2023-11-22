@@ -19,9 +19,9 @@ pub(crate) struct MetaPrelude {
 impl Default for MetaPrelude {
     fn default() -> Self {
         MetaPrelude {
-            version_major: Named::new("air_version_major", version_major()),
-            version_minor: Named::new("air_version_minor", version_minor()),
-            version_patch: Named::new("air_version_patch", version_patch()),
+            version_major: Named::new("air.version_major", version_major()),
+            version_minor: Named::new("air.version_minor", version_minor()),
+            version_patch: Named::new("air.version_patch", version_patch()),
         }
     }
 }

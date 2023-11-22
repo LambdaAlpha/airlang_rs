@@ -1,6 +1,6 @@
 ;[
-    major = (stringify air_version_major),
-    minor = (stringify air_version_minor),
-    patch = (stringify air_version_patch),
-    string_concat [major, ".", minor, ".", patch]
+    major = (stringify air.version_major),
+    minor = (stringify air.version_minor),
+    patch = (stringify air.version_patch),
+    string.concat [major, ".", minor, ".", patch]
 ]

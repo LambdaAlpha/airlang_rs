@@ -82,7 +82,7 @@ impl Prelude for ListPrelude {
 
 fn length() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("list_length", input_mode, fn_length)
+    named_const_fn("list.length", input_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
@@ -102,7 +102,7 @@ fn set() -> Named<FuncVal> {
             InputMode::Any(EvalMode::Eval),
         ))),
     )));
-    named_mutable_fn("list_set", input_mode, fn_set)
+    named_mutable_fn("list.set", input_mode, fn_set)
 }
 
 fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -138,7 +138,7 @@ fn set_many() -> Named<FuncVal> {
             InputMode::List(EvalMode::Eval),
         ))),
     )));
-    named_mutable_fn("list_set_many", input_mode, fn_set_many)
+    named_mutable_fn("list.set_many", input_mode, fn_set_many)
 }
 
 fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -174,7 +174,7 @@ fn get() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_const_fn("list_get", input_mode, fn_get)
+    named_const_fn("list.get", input_mode, fn_get)
 }
 
 fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
@@ -221,7 +221,7 @@ fn insert() -> Named<FuncVal> {
             InputMode::Any(EvalMode::Eval),
         ))),
     )));
-    named_mutable_fn("list_insert", input_mode, fn_insert)
+    named_mutable_fn("list.insert", input_mode, fn_insert)
 }
 
 fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -256,7 +256,7 @@ fn insert_many() -> Named<FuncVal> {
             InputMode::List(EvalMode::Eval),
         ))),
     )));
-    named_mutable_fn("list_insert_many", input_mode, fn_insert_many)
+    named_mutable_fn("list.insert_many", input_mode, fn_insert_many)
 }
 
 fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -290,7 +290,7 @@ fn remove() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_mutable_fn("list_remove", input_mode, fn_remove)
+    named_mutable_fn("list.remove", input_mode, fn_remove)
 }
 
 fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -335,7 +335,7 @@ fn push() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_mutable_fn("list_push", input_mode, fn_push)
+    named_mutable_fn("list.push", input_mode, fn_push)
 }
 
 fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -357,7 +357,7 @@ fn push_many() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::List(EvalMode::Eval),
     )));
-    named_mutable_fn("list_push_many", input_mode, fn_push_many)
+    named_mutable_fn("list.push_many", input_mode, fn_push_many)
 }
 
 fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -382,7 +382,7 @@ fn pop() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_mutable_fn("list_pop", input_mode, fn_pop)
+    named_mutable_fn("list.pop", input_mode, fn_pop)
 }
 
 fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -420,7 +420,7 @@ fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn clear() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("list_clear", input_mode, fn_clear)
+    named_mutable_fn("list.clear", input_mode, fn_clear)
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {

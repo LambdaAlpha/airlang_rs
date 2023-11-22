@@ -1,27 +1,27 @@
-"" . string_length
+"" . string.length
 -----
 "" : 0
 =====
-"1" . string_length
+"1" . string.length
 -----
 "1" : 1
 =====
-;[a = "12", a . string_length]
+;[a = "12", a . string.length]
 -----
 2
 =====
-["1", "2"] . string_concat
+["1", "2"] . string.concat
 -----
 "12"
 =====
-;[a = "1", b = "2", c = "3", string_concat [a, b, c]]
+;[a = "1", b = "2", c = "3", string.concat [a, b, c]]
 -----
 "123"
 =====
-string_concat []
+string.concat []
 -----
 ""
 =====
-string_concat (`1 ["1", "2"])
+string.concat (`1 ["1", "2"])
 -----
 "12"

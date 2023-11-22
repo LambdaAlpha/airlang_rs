@@ -494,7 +494,7 @@ fn fn_ctx_new(input: Val) -> Val {
 
 fn ctx_repr() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Eval);
-    named_free_fn("context_represent", input_mode, fn_ctx_repr)
+    named_free_fn("context.represent", input_mode, fn_ctx_repr)
 }
 
 fn fn_ctx_repr(input: Val) -> Val {

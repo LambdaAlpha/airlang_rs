@@ -108,7 +108,7 @@ impl Prelude for MapPrelude {
 
 fn length() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map_length", input_mode, fn_length)
+    named_const_fn("map.length", input_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
@@ -122,7 +122,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn items() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map_items", input_mode, fn_items)
+    named_const_fn("map.items", input_mode, fn_items)
 }
 
 fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
@@ -140,7 +140,7 @@ fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_items() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map_into_items", input_mode, fn_into_items)
+    named_mutable_fn("map.into_items", input_mode, fn_into_items)
 }
 
 fn fn_into_items(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -160,7 +160,7 @@ fn fn_into_items(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn keys() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map_keys", input_mode, fn_keys)
+    named_const_fn("map.keys", input_mode, fn_keys)
 }
 
 fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
@@ -174,7 +174,7 @@ fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_keys() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map_into_keys", input_mode, fn_into_keys)
+    named_mutable_fn("map.into_keys", input_mode, fn_into_keys)
 }
 
 fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -190,7 +190,7 @@ fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn values() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map_values", input_mode, fn_values)
+    named_const_fn("map.values", input_mode, fn_values)
 }
 
 fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
@@ -204,7 +204,7 @@ fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_values() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map_into_values", input_mode, fn_into_values)
+    named_mutable_fn("map.into_values", input_mode, fn_into_values)
 }
 
 fn fn_into_values(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -223,7 +223,7 @@ fn contains() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_const_fn("map_contains", input_mode, fn_contains)
+    named_const_fn("map.contains", input_mode, fn_contains)
 }
 
 fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
@@ -245,7 +245,7 @@ fn contains_many() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::List(EvalMode::Eval),
     )));
-    named_const_fn("map_contains_many", input_mode, fn_contains_many)
+    named_const_fn("map.contains_many", input_mode, fn_contains_many)
 }
 
 fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
@@ -273,7 +273,7 @@ fn set() -> Named<FuncVal> {
             InputMode::Any(EvalMode::Eval),
         ))),
     )));
-    named_mutable_fn("map_set", input_mode, fn_set)
+    named_mutable_fn("map.set", input_mode, fn_set)
 }
 
 fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -299,7 +299,7 @@ fn set_many() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Map(EvalMode::Eval),
     )));
-    named_mutable_fn("map_set_many", input_mode, fn_set_many)
+    named_mutable_fn("map.set_many", input_mode, fn_set_many)
 }
 
 fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -327,7 +327,7 @@ fn get() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_const_fn("map_get", input_mode, fn_get)
+    named_const_fn("map.get", input_mode, fn_get)
 }
 
 fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
@@ -349,7 +349,7 @@ fn get_many() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::List(EvalMode::Eval),
     )));
-    named_const_fn("map_get_many", input_mode, fn_get_many)
+    named_const_fn("map.get_many", input_mode, fn_get_many)
 }
 
 fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
@@ -377,7 +377,7 @@ fn remove() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Any(EvalMode::Eval),
     )));
-    named_mutable_fn("map_remove", input_mode, fn_remove)
+    named_mutable_fn("map.remove", input_mode, fn_remove)
 }
 
 fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -399,7 +399,7 @@ fn remove_many() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::List(EvalMode::Eval),
     )));
-    named_mutable_fn("map_remove_many", input_mode, fn_remove_many)
+    named_mutable_fn("map.remove_many", input_mode, fn_remove_many)
 }
 
 fn fn_remove_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -425,7 +425,7 @@ fn fn_remove_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn clear() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map_clear", input_mode, fn_clear)
+    named_mutable_fn("map.clear", input_mode, fn_clear)
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {

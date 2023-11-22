@@ -415,23 +415,23 @@ is_local a
 -----
 1
 =====
-context_represent (' context {})
+context.represent (' context {})
 -----
 ' : {}
 =====
 ;[
-    (meta : m) = (context_represent (' context {super : (`0 b)} context {a : 1})),
-    meta = (context_represent (move meta)),
+    (meta : m) = (context.represent (' context {super : (`0 b)} context {a : 1})),
+    meta = (context.represent (move meta)),
     meta : m
 ]
 -----
 ' : {super : b} : {a : 1}
 =====
-;[': = (`0 ':), final = (`0 final), context_represent (' context {a : (1 ': final)})]
+;[': = (`0 ':), final = (`0 final), context.represent (' context {a : (1 ': final)})]
 -----
 ' : {a : (1 ': final)}
 =====
-;[(_ : m) = (context_represent (' context {b : (' context {})})), b = (m map_remove (`0 b)), type_of b]
+;[(_ : m) = (context.represent (' context {b : (' context {})})), b = (m map.remove (`0 b)), type_of b]
 -----
 context
 =====

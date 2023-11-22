@@ -367,23 +367,23 @@ a
 -----
 1
 =====
-function_represent (function {body : input})
+function.represent (function {body : input})
 -----
 {body : input}
 =====
-function_represent not
+function.represent not
 -----
 {id : not}
 =====
-function_represent (function {body : input, caller_access : constant})
+function.represent (function {body : input, caller_access : constant})
 -----
 {body : input, caller_access : constant}
 =====
-function_represent ==
+function.represent ==
 -----
 {id : ==, caller_access : constant, input_mode : ((symbol `0) : (symbol `0))}
 =====
-function_represent (function {
+function.represent (function {
     body : i,
     input_name : i,
     caller_name : c,
@@ -399,35 +399,35 @@ function_represent (function {
     caller_access : mutable,
 }
 =====
-function_caller_access function
+function.caller_access function
 -----
 free
 =====
-function_caller_access function_caller_access
+function.caller_access function.caller_access
 -----
 constant
 =====
-function_caller_access `1
+function.caller_access `1
 -----
 mutable
 =====
-;[f = (function {body : input}), function_caller_access f]
+;[f = (function {body : input}), function.caller_access f]
 -----
 free
 =====
-function_input_mode not
+function.input_mode not
 -----
 `1
 =====
-function_input_mode `1
+function.input_mode `1
 -----
 `0
 =====
-function_input_mode function_input_mode
+function.input_mode function.input_mode
 -----
 symbol `0
 =====
-;[f = (function {body : input}), function_input_mode f]
+;[f = (function {body : input}), function.input_mode f]
 -----
 `1
 =====
@@ -436,7 +436,7 @@ symbol `0
         body : input,
         input_mode : (`1 : ``),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 `1 : ``
@@ -446,7 +446,7 @@ symbol `0
         body : input,
         input_mode : (symbol `0),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 symbol `0
@@ -456,7 +456,7 @@ symbol `0
         body : input,
         input_mode : (call (`1 `0)),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 call (`1 `0)
@@ -466,7 +466,7 @@ call (`1 `0)
         body : input,
         input_mode : [`1, ``, `0, ... `1, `0],
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 [`1, ``, `0, ... `1, `0]
@@ -476,7 +476,7 @@ call (`1 `0)
         body : input,
         input_mode : (list `0),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 list `0
@@ -486,7 +486,7 @@ list `0
         body : input,
         input_mode : (list_items (symbol `0)),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 list_items (symbol `0)
@@ -496,7 +496,7 @@ list_items (symbol `0)
         body : input,
         input_mode : {a : `1, b : `0},
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 {a : `1, b : `0}
@@ -506,7 +506,7 @@ list_items (symbol `0)
         body : input,
         input_mode : (map `0),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 map `0
@@ -516,7 +516,7 @@ map `0
         body : input,
         input_mode : (`1 map_items `0),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 `1 map_items `0
@@ -526,67 +526,67 @@ map `0
         body : input,
         input_mode : ([symbol `0, list `0] map_items (list_items (map `0))),
     }),
-    function_input_mode f
+    function.input_mode f
 ]
 -----
 [symbol `0, list `0] map_items (list_items (map `0))
 =====
-function_is_primitive not
+function.is_primitive not
 -----
 't
 =====
-;[f = (function {body : input}), function_is_primitive f]
+;[f = (function {body : input}), function.is_primitive f]
 -----
 'f
 =====
-function_id not
+function.id not
 -----
 not
 =====
-;[neg = not, function_id neg]
+;[neg = not, function.id neg]
 -----
 not
 =====
-;[f = (function {body : input}), function_id f]
+;[f = (function {body : input}), function.id f]
 -----
 '
 =====
-;[f = (function {body : input}), function_body f]
+;[f = (function {body : input}), function.body f]
 -----
 input
 =====
-function_body not
+function.body not
 -----
 '
 =====
 ;[
     ctx = (' context {a : 1}),
     f = (function {body : input, context : ctx}),
-    (function_context f) == ctx
+    (function.context f) == ctx
 ]
 -----
 't
 =====
-function_context not
+function.context not
 -----
 '
 =====
-;[f = (function {body : input}), function_input_name f]
+;[f = (function {body : input}), function.input_name f]
 -----
 input
 =====
-function_input_name not
+function.input_name not
 -----
 '
 =====
-;[f = (function {body : input, caller_access : constant}), function_caller_name f]
+;[f = (function {body : input, caller_access : constant}), function.caller_name f]
 -----
 caller
 =====
-;[f = (function {body : input}), function_caller_name f]
+;[f = (function {body : input}), function.caller_name f]
 -----
 '
 =====
-function_caller_name not
+function.caller_name not
 -----
 '

@@ -175,7 +175,7 @@ fn fn_new(input: Val) -> Val {
 
 fn repr() -> Named<FuncVal> {
     let input_mode = InputMode::Any(EvalMode::Eval);
-    named_free_fn("function_represent", input_mode, fn_repr)
+    named_free_fn("function.represent", input_mode, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -250,7 +250,7 @@ fn fn_repr(input: Val) -> Val {
 
 fn caller_access() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_caller_access", input_mode, fn_caller_access)
+    named_const_fn("function.caller_access", input_mode, fn_caller_access)
 }
 
 fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
@@ -269,7 +269,7 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn input_mode() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_input_mode", input_mode, fn_input_mode)
+    named_const_fn("function.input_mode", input_mode, fn_input_mode)
 }
 
 fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
@@ -283,7 +283,7 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn is_primitive() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_is_primitive", input_mode, fn_is_primitive)
+    named_const_fn("function.is_primitive", input_mode, fn_is_primitive)
 }
 
 fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
@@ -298,7 +298,7 @@ fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn id() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_id", input_mode, fn_id)
+    named_const_fn("function.id", input_mode, fn_id)
 }
 
 fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
@@ -315,7 +315,7 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn body() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_body", input_mode, fn_body)
+    named_const_fn("function.body", input_mode, fn_body)
 }
 
 fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
@@ -332,7 +332,7 @@ fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn ctx() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_context", input_mode, fn_ctx)
+    named_const_fn("function.context", input_mode, fn_ctx)
 }
 
 fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
@@ -349,7 +349,7 @@ fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn input_name() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_input_name", input_mode, fn_input_name)
+    named_const_fn("function.input_name", input_mode, fn_input_name)
 }
 
 fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
@@ -366,7 +366,7 @@ fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn caller_name() -> Named<FuncVal> {
     let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function_caller_name", input_mode, fn_caller_name)
+    named_const_fn("function.caller_name", input_mode, fn_caller_name)
 }
 
 fn fn_caller_name(ctx: CtxForConstFn, input: Val) -> Val {

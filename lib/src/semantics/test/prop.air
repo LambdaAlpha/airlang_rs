@@ -4,7 +4,7 @@
         input : 1,
         output : 2,
     }),
-    proposition_input p
+    proposition.input p
 ]
 -----
 1
@@ -15,7 +15,7 @@
         input : 1,
         output : 2,
     }),
-    proposition_output p
+    proposition.output p
 ]
 -----
 2
@@ -27,7 +27,7 @@
         output : 1,
         context : (' context {a : 2}),
     }),
-    ctx = (proposition_before p),
+    ctx = (proposition.before p),
     [ctx] .. (`1 a)
 ]
 -----
@@ -40,7 +40,7 @@
         output : 1,
         context : (' context {a : 2}),
     }),
-    ctx = (proposition_after p),
+    ctx = (proposition.after p),
     [ctx] .. (`1 a)
 ]
 -----
@@ -54,7 +54,7 @@
         before : (' context {a : 2}),
         after : (' context {a : 3}),
     }),
-    ctx = (proposition_before p),
+    ctx = (proposition.before p),
     [ctx] .. (`1 a)
 ]
 -----
@@ -68,7 +68,7 @@
         before : (' context {a : 2}),
         after : (' context {a : 3}),
     }),
-    ctx = (proposition_after p),
+    ctx = (proposition.after p),
     [ctx] .. (`1 a)
 ]
 -----
@@ -80,7 +80,7 @@
         input : 1,
         output : 2,
     }),
-    (proposition_function p) == not
+    (proposition.function p) == not
 ]
 -----
 't
@@ -95,7 +95,7 @@
         input : 't,
         output : 'f,
     }),
-    m == (proposition_represent (proposition m))
+    m == (proposition.represent (proposition m))
 ]
 -----
 't
@@ -111,7 +111,7 @@
         output : 'f,
         context : (' context {}),
     }),
-    m == (proposition_represent (proposition m))
+    m == (proposition.represent (proposition m))
 ]
 -----
 't
@@ -128,13 +128,13 @@
         before : (' context {}),
         after : (' context {}),
     }),
-    m == (proposition_represent (proposition m))
+    m == (proposition.represent (proposition m))
 ]
 -----
 't
 =====
 ;[
-    m = (proposition_represent (theorem {
+    m = (proposition.represent (theorem {
         function : not,
         input : 't,
     })),
@@ -154,7 +154,7 @@
 't
 =====
 ;[
-    m = (proposition_represent (theorem {
+    m = (proposition.represent (theorem {
         function : ==,
         input : (1 : 2),
         context : (' context {}),
@@ -176,7 +176,7 @@
 't
 =====
 ;[
-    m = (proposition_represent (theorem {
+    m = (proposition.represent (theorem {
         function : =,
         input : ((`0 a) : 1),
         before : (' context {}),
@@ -204,7 +204,7 @@
         input : 1,
         output : 2,
     }),
-    ((type_of p) == (`0 proposition)) and ((proposition_truth p) == ')
+    ((type_of p) == (`0 proposition)) and ((proposition.truth p) == ')
 ]
 -----
 't
