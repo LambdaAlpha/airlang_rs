@@ -14,7 +14,10 @@ rustc-hash = "1"
 thiserror = "1"
 nom = "7"
 smartstring = "1"
-rand = {version = "0.8", features = ["small_rng", "alloc"]}
+
+[dependencies.rand]
+version = "0.8"
+features = ["small_rng", "alloc"]
 
 [dependencies.rug]
 version = "1"
@@ -25,5 +28,8 @@ features = ["integer", "float"]
 criterion = "0.5"
 
 [[bench]]
-name = "bench_main"
+name = "main"
 harness = false
+
+[[test]]
+name = "main"

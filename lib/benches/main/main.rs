@@ -10,8 +10,8 @@ use {
     },
 };
 
-pub mod semantics;
-pub mod syntax;
+mod semantics;
+mod syntax;
 
 criterion_group!(benches, bench_all);
 criterion_main!(benches);
