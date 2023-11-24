@@ -22,7 +22,7 @@
 =====
 ;[
     p = (proposition {
-        function : ==,
+        function : ===,
         input : 1,
         output : 1,
         context : (' context {a : 2}),
@@ -35,7 +35,7 @@
 =====
 ;[
     p = (proposition {
-        function : ==,
+        function : ===,
         input : 1,
         output : 1,
         context : (' context {a : 2}),
@@ -80,7 +80,7 @@
         input : 1,
         output : 2,
     }),
-    (proposition.function p) == not
+    (proposition.function p) -== not
 ]
 -----
 't
@@ -95,7 +95,7 @@
         input : 't,
         output : 'f,
     }),
-    m == (proposition.represent (proposition m))
+    m ==- (proposition.represent (proposition m))
 ]
 -----
 't
@@ -106,12 +106,12 @@
         input_mode : (`0 map_items `1),
     }),
     m = ($map {
-        function : ==,
+        function : ===,
         input : 't,
         output : 'f,
         context : (' context {}),
     }),
-    m == (proposition.represent (proposition m))
+    m ==- (proposition.represent (proposition m))
 ]
 -----
 't
@@ -128,7 +128,7 @@
         before : (' context {}),
         after : (' context {}),
     }),
-    m == (proposition.represent (proposition m))
+    m ==- (proposition.represent (proposition m))
 ]
 -----
 't
@@ -148,29 +148,29 @@
         output : 'f,
         truth : 't,
     }),
-    m == expected
+    m === expected
 ]
 -----
 't
 =====
 ;[
     m = (proposition.represent (theorem {
-        function : ==,
-        input : (1 : 2),
-        context : (' context {}),
+        function : ===,
+        input : (`0 (a : b)),
+        context : (' context {a : 1, b : 2}),
     })),
     $map = (function {
         body : input,
         input_mode : (`0 map_items `1),
     }),
     expected = ($map {
-        function : ==,
-        input : (1 : 2),
+        function : ===,
+        input : (`0 (a : b)),
         output : 'f,
-        context : (' context {}),
+        context : (' context {a : 1, b : 2}),
         truth : 't,
     }),
-    m == expected
+    m === expected
 ]
 -----
 't
@@ -193,7 +193,7 @@
         after : (' context {a : 1}),
         truth : 't,
     }),
-    m == expected
+    m === expected
 ]
 -----
 't
@@ -204,7 +204,7 @@
         input : 1,
         output : 2,
     }),
-    ((type_of p) == (`0 proposition)) and ((proposition.truth p) == ')
+    ((type_of p) -=- (`0 proposition)) and ((proposition.truth p) -=- ')
 ]
 -----
 't

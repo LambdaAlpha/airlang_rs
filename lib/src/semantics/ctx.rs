@@ -362,6 +362,7 @@ impl DefaultCtx {
         }
     }
 
+    #[allow(unused)]
     pub(crate) fn get_many_const_ref<Ctx: CtxTrait, F, const N: usize>(
         &self,
         ctx: &Ctx,

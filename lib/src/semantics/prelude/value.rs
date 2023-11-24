@@ -2,6 +2,7 @@ use {
     crate::{
         semantics::{
             ctx::{
+                CtxTrait,
                 DefaultCtx,
                 NameMap,
             },
@@ -68,7 +69,13 @@ pub(crate) struct ValuePrelude {
     pub(crate) any: Named<FuncVal>,
     pub(crate) type_of: Named<FuncVal>,
     pub(crate) equal: Named<FuncVal>,
+    pub(crate) equal_val: Named<FuncVal>,
+    pub(crate) equal_ref_val: Named<FuncVal>,
+    pub(crate) equal_val_ref: Named<FuncVal>,
     pub(crate) not_equal: Named<FuncVal>,
+    pub(crate) not_equal_val: Named<FuncVal>,
+    pub(crate) not_equal_ref_val: Named<FuncVal>,
+    pub(crate) not_equal_val_ref: Named<FuncVal>,
 }
 
 impl Default for ValuePrelude {
@@ -77,7 +84,13 @@ impl Default for ValuePrelude {
             any: any(),
             type_of: type_of(),
             equal: equal(),
+            equal_val: equal_val(),
+            equal_ref_val: equal_ref_val(),
+            equal_val_ref: equal_val_ref(),
             not_equal: not_equal(),
+            not_equal_val: not_equal_val(),
+            not_equal_ref_val: not_equal_ref_val(),
+            not_equal_val_ref: not_equal_val_ref(),
         }
     }
 }
@@ -87,7 +100,13 @@ impl Prelude for ValuePrelude {
         self.any.put(m);
         self.type_of.put(m);
         self.equal.put(m);
+        self.equal_val.put(m);
+        self.equal_ref_val.put(m);
+        self.equal_val_ref.put(m);
         self.not_equal.put(m);
+        self.not_equal_val.put(m);
+        self.not_equal_ref_val.put(m);
+        self.not_equal_val_ref.put(m);
     }
 }
 
@@ -157,23 +176,84 @@ fn equal() -> Named<FuncVal> {
         InputMode::Symbol(EvalMode::Value),
         InputMode::Symbol(EvalMode::Value),
     )));
-    named_const_fn("==", input_mode, fn_equal)
+    named_const_fn("===", input_mode, fn_equal)
 }
 
 fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    DefaultCtx.get_many_const_ref(&ctx, [pair.first, pair.second], |[v1, v2]| {
-        let eq = if let Ok(v1) = v1
-            && let Ok(v2) = v2
-        {
-            v1 == v2
-        } else {
-            true
-        };
-        Val::Bool(Bool::new(eq))
-    })
+    let Val::Symbol(v1) = pair.first else {
+        return Val::default();
+    };
+    let Val::Symbol(v2) = pair.second else {
+        return Val::default();
+    };
+    let [v1, v2] = ctx.get_many_const_ref([&v1, &v2]);
+    if let Ok(v1) = v1
+        && let Ok(v2) = v2
+    {
+        Val::Bool(Bool::new(*v1 == *v2))
+    } else {
+        Val::default()
+    }
+}
+
+fn equal_val() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Eval),
+    )));
+    named_free_fn("-=-", input_mode, fn_equal_val)
+}
+
+fn fn_equal_val(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(pair.first == pair.second))
+}
+
+fn equal_ref_val() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Symbol(EvalMode::Value),
+        InputMode::Any(EvalMode::Eval),
+    )));
+    named_const_fn("==-", input_mode, fn_equal_ref_val)
+}
+
+fn fn_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Symbol(v1) = pair.first else {
+        return Val::default();
+    };
+    let Ok(v1) = ctx.get_const_ref(&v1) else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(*v1 == pair.second))
+}
+
+fn equal_val_ref() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Symbol(EvalMode::Value),
+    )));
+    named_const_fn("-==", input_mode, fn_equal_val_ref)
+}
+
+fn fn_equal_val_ref(ctx: CtxForConstFn, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Symbol(v2) = pair.second else {
+        return Val::default();
+    };
+    let Ok(v2) = ctx.get_const_ref(&v2) else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(pair.first == *v2))
 }
 
 fn not_equal() -> Named<FuncVal> {
@@ -188,14 +268,75 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    DefaultCtx.get_many_const_ref(&ctx, [pair.first, pair.second], |[v1, v2]| {
-        let ne = if let Ok(v1) = v1
-            && let Ok(v2) = v2
-        {
-            v1 != v2
-        } else {
-            false
-        };
-        Val::Bool(Bool::new(ne))
-    })
+    let Val::Symbol(v1) = pair.first else {
+        return Val::default();
+    };
+    let Val::Symbol(v2) = pair.second else {
+        return Val::default();
+    };
+    let [v1, v2] = ctx.get_many_const_ref([&v1, &v2]);
+    if let Ok(v1) = v1
+        && let Ok(v2) = v2
+    {
+        Val::Bool(Bool::new(*v1 != *v2))
+    } else {
+        Val::default()
+    }
+}
+
+fn not_equal_val() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Eval),
+    )));
+    named_free_fn("-/-", input_mode, fn_not_equal_val)
+}
+
+fn fn_not_equal_val(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(pair.first != pair.second))
+}
+
+fn not_equal_ref_val() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Symbol(EvalMode::Value),
+        InputMode::Any(EvalMode::Eval),
+    )));
+    named_const_fn("=/-", input_mode, fn_not_equal_ref_val)
+}
+
+fn fn_not_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Symbol(v1) = pair.first else {
+        return Val::default();
+    };
+    let Ok(v1) = ctx.get_const_ref(&v1) else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(*v1 != pair.second))
+}
+
+fn not_equal_val_ref() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Symbol(EvalMode::Value),
+    )));
+    named_const_fn("-/=", input_mode, fn_not_equal_val_ref)
+}
+
+fn fn_not_equal_val_ref(ctx: CtxForConstFn, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Symbol(v2) = pair.second else {
+        return Val::default();
+    };
+    let Ok(v2) = ctx.get_const_ref(&v2) else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(pair.first != *v2))
 }

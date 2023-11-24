@@ -379,9 +379,9 @@ function.represent (function {body : input, caller_access : constant})
 -----
 {body : input, caller_access : constant}
 =====
-function.represent ==
+function.represent ===
 -----
-{id : ==, caller_access : constant, input_mode : ((symbol `0) : (symbol `0))}
+{id : ===, caller_access : constant, input_mode : ((symbol `0) : (symbol `0))}
 =====
 function.represent (function {
     body : i,
@@ -562,7 +562,7 @@ function.body not
 ;[
     ctx = (' context {a : 1}),
     f = (function {body : input, context : ctx}),
-    (function.context f) == ctx
+    (function.context f) -== ctx
 ]
 -----
 't

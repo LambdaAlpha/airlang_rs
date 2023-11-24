@@ -23,7 +23,7 @@
         function : not,
         input : 't,
     }),
-    (proposition.function t) == not
+    (proposition.function t) -== not
 ]
 -----
 't
@@ -51,7 +51,7 @@
 =====
 ;[
     t = (theorem {
-        function : ==,
+        function : ===,
         input : (`0 (a : b)),
         context : (' context {
             a : 1,
