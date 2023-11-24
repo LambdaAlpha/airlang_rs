@@ -41,6 +41,11 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_debug() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/debug.air"), "test/debug.air")
+}
+
+#[test]
 fn test_doc() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/doc.air"), "test/doc.air")
 }
