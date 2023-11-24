@@ -12,6 +12,7 @@ use crate::{
                 CtxForMutableFn,
                 MutableCtx,
             },
+            CtxAccessor,
         },
         eval::{
             input::ByVal,
@@ -20,6 +21,10 @@ use crate::{
         eval_mode::{
             eval::Eval,
             EvalMode,
+        },
+        func::{
+            CtxMutableFn,
+            Primitive,
         },
         input_mode::InputMode,
         prelude::{
@@ -41,6 +46,7 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct CallPrelude {
+    pub(crate) call: Named<FuncVal>,
     pub(crate) chain: Named<FuncVal>,
     pub(crate) call_with_ctx: Named<FuncVal>,
 }
@@ -48,6 +54,7 @@ pub(crate) struct CallPrelude {
 impl Default for CallPrelude {
     fn default() -> Self {
         CallPrelude {
+            call: call(),
             chain: chain(),
             call_with_ctx: call_with_ctx(),
         }
@@ -56,9 +63,34 @@ impl Default for CallPrelude {
 
 impl Prelude for CallPrelude {
     fn put(&self, m: &mut NameMap) {
+        self.call.put(m);
         self.chain.put(m);
         self.call_with_ctx.put(m);
     }
+}
+
+fn call() -> Named<FuncVal> {
+    let input_mode = InputMode::Pair(Box::new(Pair::new(
+        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Eval),
+    )));
+    let func = Primitive::<CtxMutableFn>::dispatch(
+        fn_call::<FreeCtx>,
+        |ctx, val| fn_call(ctx, val),
+        |ctx, val| fn_call(ctx, val),
+    );
+    named_mutable_fn("$", input_mode, func)
+}
+
+fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Func(FuncVal(func)) = &pair.first else {
+        return Val::default();
+    };
+    let input = func.input_mode.eval(&mut ctx, pair.second);
+    func.eval(&mut ctx, input)
 }
 
 fn chain() -> Named<FuncVal> {

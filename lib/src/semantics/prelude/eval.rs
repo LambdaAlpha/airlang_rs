@@ -1,19 +1,11 @@
 use crate::semantics::{
     ctx::NameMap,
-    ctx_access::{
-        free::FreeCtx,
-        mutable::CtxForMutableFn,
-        CtxAccessor,
-    },
+    ctx_access::mutable::CtxForMutableFn,
     eval::Evaluator,
     eval_mode::{
         eval::Eval,
         EvalMode,
         BY_VAL,
-    },
-    func::{
-        CtxMutableFn,
-        Primitive,
     },
     input_mode::InputMode,
     prelude::{
@@ -33,8 +25,6 @@ pub(crate) struct EvalPrelude {
     pub(crate) value: Named<FuncVal>,
     pub(crate) eval: Named<FuncVal>,
     pub(crate) mix: Named<FuncVal>,
-    pub(crate) eval_twice: Named<FuncVal>,
-    pub(crate) eval_thrice: Named<FuncVal>,
 }
 
 impl Default for EvalPrelude {
@@ -43,8 +33,6 @@ impl Default for EvalPrelude {
             value: value(),
             eval: eval(),
             mix: mix(),
-            eval_twice: eval_twice(),
-            eval_thrice: eval_thrice(),
         }
     }
 }
@@ -54,8 +42,6 @@ impl Prelude for EvalPrelude {
         self.value.put(m);
         self.eval.put(m);
         self.mix.put(m);
-        self.eval_twice.put(m);
-        self.eval_thrice.put(m);
     }
 }
 
@@ -88,35 +74,4 @@ fn mix() -> Named<FuncVal> {
 
 fn fn_mix(mut ctx: CtxForMutableFn, input: Val) -> Val {
     BY_VAL.mix.eval(&mut ctx, input)
-}
-
-fn eval_twice() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Value);
-    let func = Primitive::<CtxMutableFn>::dispatch(
-        fn_eval_twice::<FreeCtx>,
-        |ctx, val| fn_eval_twice(ctx, val),
-        |ctx, val| fn_eval_twice(ctx, val),
-    );
-    named_mutable_fn("`2", input_mode, func)
-}
-
-fn fn_eval_twice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let val = Eval.eval(&mut ctx, input);
-    Eval.eval(&mut ctx, val)
-}
-
-fn eval_thrice() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Value);
-    let func = Primitive::<CtxMutableFn>::dispatch(
-        fn_eval_thrice::<FreeCtx>,
-        |ctx, val| fn_eval_thrice(ctx, val),
-        |ctx, val| fn_eval_thrice(ctx, val),
-    );
-    named_mutable_fn("`3", input_mode, func)
-}
-
-fn fn_eval_thrice<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let val1 = Eval.eval(&mut ctx, input);
-    let val2 = Eval.eval(&mut ctx, val1);
-    Eval.eval(&mut ctx, val2)
 }
