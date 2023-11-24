@@ -38,6 +38,6 @@ impl AsRef<[u8]> for Bytes {
 
 impl Debug for Bytes {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Bytes({:x?})", self.0)
+        write!(f, "Bytes({:02x?})", self.0)
     }
 }
