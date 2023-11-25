@@ -116,7 +116,7 @@ fn call_with_ctx() -> Named<FuncVal> {
             InputMode::Any(EvalMode::Value),
         ))),
     )));
-    named_mutable_fn("..", input_mode, fn_call_with_ctx)
+    named_mutable_fn("do", input_mode, fn_call_with_ctx)
 }
 
 fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {

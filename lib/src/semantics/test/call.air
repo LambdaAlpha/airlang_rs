@@ -6,46 +6,46 @@
 -----
 't
 =====
-' .. (1 + 1)
+' do (1 + 1)
 -----
 2
 =====
-;[a = 1, ' .. (load [a])]
+;[a = 1, ' do (load [a])]
 -----
 '
 =====
-' .. (; (`` [a ('t =) 1, a]))
+' do (; (`` [a ('t =) 1, a]))
 -----
 '
 =====
-' .. (get_1 (1 : 2))
+' do (get_1 (1 : 2))
 -----
 1
 =====
-;[[] .. (a = 1), a]
+;[[] do (a = 1), a]
 -----
 1
 =====
-;[c = (' context {a : 1}), a = ([c] .. (a = 2)), a]
+;[c = (' context {a : 1}), a = ([c] do (a = 2)), a]
 -----
 1
 =====
-;[a = (' context {}), [a] .. (b = 1), [a] .. (read b)]
+;[a = (' context {}), [a] do (b = 1), [a] do (read b)]
 -----
 1
 =====
-;[(a ': constant) = (' context {b : 1}), [a] .. (`1 b)]
+;[(a ': constant) = (' context {b : 1}), [a] do (`1 b)]
 -----
 1
 =====
-;[(a ': constant) = (' context {b : 1}), [a] .. (b = 2), [a] .. (read b)]
+;[(a ': constant) = (' context {b : 1}), [a] do (b = 2), [a] do (read b)]
 -----
 1
 =====
-;[': = (`0 ':), constant = (`0 constant), a = (' context {b : (1 ': constant)}), [a] .. (`1 b)]
+;[': = (`0 ':), constant = (`0 constant), a = (' context {b : (1 ': constant)}), [a] do (`1 b)]
 -----
 1
 =====
-;[set_meta (' context {a : 1}), (`0 meta) .. (read a)]
+;[set_meta (' context {a : 1}), (`0 meta) do (read a)]
 -----
 1

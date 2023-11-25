@@ -259,10 +259,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (`1 a)),
+        body : ([caller] do (`1 a)),
         caller_access : free,
         context : (' context {
-            : ..,
+            : do,
             : `1,
         })
     }),
@@ -274,10 +274,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (`1 a)),
+        body : ([caller] do (`1 a)),
         caller_access : constant,
         context : (' context {
-            : ..,
+            : do,
             : `1,
         })
     }),
@@ -289,10 +289,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (`1 a)),
+        body : ([caller] do (`1 a)),
         caller_access : mutable,
         context : (' context {
-            : ..,
+            : do,
             : `1,
         })
     }),
@@ -304,10 +304,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] .. (`1 a)),
+        body : ([caller] do (`1 a)),
         caller_access : constant,
         context : (' context {
-            : ..,
+            : do,
             : `1,
         })
     }),
@@ -318,11 +318,11 @@ a
 =====
 ;[
     f = (function {
-        body : ([caller] .. (('f ('t input)) = 2)),
+        body : ([caller] do (('f ('t input)) = 2)),
         input_mode : `0,
         caller_access : mutable,
         context : (' context {
-            : ..,
+            : do,
             : =,
         })
     }),
@@ -335,11 +335,11 @@ a
 =====
 ;[
     f = (function {
-        body : ([caller] .. (('f ('t input)) = 2)),
+        body : ([caller] do (('f ('t input)) = 2)),
         input_mode : `0,
         caller_access : mutable,
         context : (' context {
-            : ..,
+            : do,
             : =,
         })
     }),
@@ -352,11 +352,11 @@ a
 =====
 ;[
     f = (function {
-        body : ([caller] .. (('f ('t input)) = 2)),
+        body : ([caller] do (('f ('t input)) = 2)),
         input_mode : `0,
         caller_access : constant,
         context : (' context {
-            : ..,
+            : do,
             : =,
         })
     }),
