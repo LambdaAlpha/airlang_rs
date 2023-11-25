@@ -56,6 +56,7 @@ pub(crate) struct CtxPrelude {
     pub(crate) is_const: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
     pub(crate) is_local: Named<FuncVal>,
+    pub(crate) get_access: Named<FuncVal>,
     pub(crate) has_meta: Named<FuncVal>,
     pub(crate) set_meta: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
@@ -76,6 +77,7 @@ impl Default for CtxPrelude {
             is_const: is_const(),
             is_null: is_null(),
             is_local: is_local(),
+            get_access: get_access(),
             has_meta: has_meta(),
             set_meta: set_meta(),
             ctx_new: ctx_new(),
@@ -97,6 +99,7 @@ impl Prelude for CtxPrelude {
         self.is_const.put(m);
         self.is_null.put(m);
         self.is_local.put(m);
+        self.get_access.put(m);
         self.has_meta.put(m);
         self.set_meta.put(m);
         self.ctx_new.put(m);
@@ -401,6 +404,24 @@ fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(_) => Val::default(),
     }
+}
+
+fn get_access() -> Named<FuncVal> {
+    let input_mode = InputMode::Any(EvalMode::Value);
+    named_mutable_fn("access", input_mode, fn_get_access)
+}
+
+const ACCESS_FREE: &str = "free";
+const ACCESS_CONSTANT: &str = "constant";
+const ACCESS_MUTABLE: &str = "mutable";
+
+fn fn_get_access(ctx: CtxForMutableFn, _input: Val) -> Val {
+    let access = match ctx {
+        CtxForMutableFn::Free(_) => ACCESS_FREE,
+        CtxForMutableFn::Const(_) => ACCESS_CONSTANT,
+        CtxForMutableFn::Mutable(_) => ACCESS_MUTABLE,
+    };
+    symbol(access)
 }
 
 fn has_meta() -> Named<FuncVal> {

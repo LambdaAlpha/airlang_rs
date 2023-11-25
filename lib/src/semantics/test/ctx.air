@@ -375,6 +375,22 @@ is_local a
 -----
 1
 =====
+access '
+-----
+mutable
+=====
+' .. (access ')
+-----
+free
+=====
+;[a ': constant = (' context {}), [a] .. (access ')]
+-----
+constant
+=====
+;[a = (' context {}), [a] .. (access ')]
+-----
+mutable
+=====
 ;[a = (' context {b : 1}), set_meta (' context {super : (`0 a)}), b]
 -----
 1
