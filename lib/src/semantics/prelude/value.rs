@@ -111,7 +111,7 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Mix);
+    let input_mode = InputMode::Any(EvalMode::Less);
     named_free_fn("any", input_mode, fn_any)
 }
 
@@ -201,8 +201,8 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn equal_val() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("-=-", input_mode, fn_equal_val)
 }
@@ -217,7 +217,7 @@ fn fn_equal_val(input: Val) -> Val {
 fn equal_ref_val() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_const_fn("==-", input_mode, fn_equal_ref_val)
 }
@@ -237,7 +237,7 @@ fn fn_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn equal_val_ref() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
         InputMode::Symbol(EvalMode::Value),
     )));
     named_const_fn("-==", input_mode, fn_equal_val_ref)
@@ -286,8 +286,8 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn not_equal_val() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("-/-", input_mode, fn_not_equal_val)
 }
@@ -302,7 +302,7 @@ fn fn_not_equal_val(input: Val) -> Val {
 fn not_equal_ref_val() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_const_fn("=/-", input_mode, fn_not_equal_ref_val)
 }
@@ -322,7 +322,7 @@ fn fn_not_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn not_equal_val_ref() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
         InputMode::Symbol(EvalMode::Value),
     )));
     named_const_fn("-/=", input_mode, fn_not_equal_val_ref)

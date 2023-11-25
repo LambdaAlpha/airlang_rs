@@ -74,7 +74,7 @@ float
 -----
 bytes
 =====
-;[a = (`0 a), type_of a]
+;[a = (' a), type_of a]
 -----
 symbol
 =====
@@ -86,11 +86,11 @@ string
 -----
 pair
 =====
-;[a = (`0 (f a)), type_of a]
+;[a = (' (f a)), type_of a]
 -----
 call
 =====
-;[a = (`0 (f ? a)), type_of a]
+;[a = (' (f ? a)), type_of a]
 -----
 reverse
 =====
@@ -134,7 +134,7 @@ proposition
 -----
 't
 =====
-(`0 a) -=- (`0 a)
+(' a) -=- (' a)
 -----
 't
 =====
@@ -171,16 +171,16 @@ proposition
 't
 =====
 ;[
-    a = (proposition {input : 1, output : 1, access : (`0 free)}),
-    b = (proposition {input : 1, output : 1, access : (`0 free)}),
+    a = (proposition {input : 1, output : 1, access : (' free)}),
+    b = (proposition {input : 1, output : 1, access : (' free)}),
     a === b
 ]
 -----
 't
 =====
 ;[
-    a = (theorem {input : 1, access : (`0 free)}),
-    b = (theorem {input : 1, access : (`0 free)}),
+    a = (theorem {input : 1, access : (' free)}),
+    b = (theorem {input : 1, access : (' free)}),
     a === b
 ]
 -----

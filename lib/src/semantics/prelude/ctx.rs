@@ -135,8 +135,8 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn assign() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Mix),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::Less),
+        InputMode::Any(EvalMode::More),
     )));
     named_mutable_fn("=", input_mode, fn_assign)
 }
@@ -438,7 +438,7 @@ fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
 }
 
 fn set_meta() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_mutable_fn("set_meta", input_mode, fn_set_meta)
 }
 
@@ -462,10 +462,10 @@ const CONST: &str = "constant";
 
 fn ctx_new() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
         InputMode::MapForAll(Box::new(Pair::new(
-            InputMode::Any(EvalMode::Mix),
-            InputMode::Any(EvalMode::Eval),
+            InputMode::Any(EvalMode::Less),
+            InputMode::Any(EvalMode::More),
         ))),
     )));
     named_free_fn("context", input_mode, fn_ctx_new)
@@ -514,7 +514,7 @@ fn fn_ctx_new(input: Val) -> Val {
 }
 
 fn ctx_repr() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("context.represent", input_mode, fn_ctx_repr)
 }
 

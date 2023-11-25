@@ -1,23 +1,26 @@
 use crate::{
     semantics::{
-        ctx::names::SOLVER,
         ctx_access::CtxAccessor,
         eval::{
             input::{
                 ByRef,
                 ByVal,
             },
-            output::OutputBuilder,
             DefaultByRef,
             DefaultByVal,
             ValBuilder,
         },
-        eval_mode::value::{
-            Value,
-            ValueByRef,
+        eval_mode::{
+            more::{
+                More,
+                MoreByRef,
+            },
+            value::{
+                Value,
+                ValueByRef,
+            },
         },
         val::{
-            FuncVal,
             ListVal,
             MapVal,
             Val,
@@ -28,9 +31,9 @@ use crate::{
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct Eval;
+pub(crate) struct Less;
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Eval
+impl<Ctx> Evaluator<Ctx, Val, Val> for Less
 where
     Ctx: CtxAccessor,
 {
@@ -39,7 +42,7 @@ where
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for Eval
+impl<Ctx> ByVal<Ctx, Val> for Less
 where
     Ctx: CtxAccessor,
 {
@@ -48,7 +51,7 @@ where
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
-        ctx.get(&s).unwrap_or_default()
+        Value.eval_symbol(ctx, s)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
@@ -64,35 +67,28 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        let func = self.eval(ctx, func);
-        if let Val::Func(FuncVal(func)) = func {
-            let input = func.input_mode.eval(ctx, input);
-            func.eval(ctx, input)
-        } else {
-            let input = self.eval(ctx, input);
-            ValBuilder.from_call(func, input)
+        match &func {
+            Val::Unit(_) => input,
+            Val::Bool(b) => {
+                if b.bool() {
+                    More.eval(ctx, input)
+                } else {
+                    self.eval(ctx, input)
+                }
+            }
+            _ => DefaultByVal::eval_call(self, ctx, func, input, ValBuilder),
         }
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        let reverse = DefaultByVal::eval_reverse(self, ctx, func, output, ValBuilder);
-        let Ok(meta) = ctx.get_meta() else {
-            return reverse;
-        };
-        let Ok(solver) = meta.get(SOLVER) else {
-            return reverse;
-        };
-        let Val::Func(FuncVal(solver)) = solver else {
-            return Val::default();
-        };
-        solver.eval(ctx, reverse)
+        DefaultByVal::eval_reverse(self, ctx, func, output, ValBuilder)
     }
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct EvalByRef;
+pub(crate) struct LessByRef;
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EvalByRef
+impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for LessByRef
 where
     Ctx: CtxAccessor,
 {
@@ -101,7 +97,7 @@ where
     }
 }
 
-impl<'a, Ctx> ByRef<'a, Ctx, Val> for EvalByRef
+impl<'a, Ctx> ByRef<'a, Ctx, Val> for LessByRef
 where
     Ctx: CtxAccessor,
 {
@@ -110,7 +106,7 @@ where
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
-        ctx.get(s).unwrap_or_default()
+        ValueByRef.eval_symbol(ctx, s)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
@@ -126,27 +122,20 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
-        let func = self.eval(ctx, func);
-        if let Val::Func(FuncVal(func)) = func {
-            let input = func.input_mode.eval(ctx, input);
-            func.eval(ctx, input)
-        } else {
-            let input = self.eval(ctx, input);
-            ValBuilder.from_call(func, input)
+        match &func {
+            Val::Unit(_) => ValueByRef.eval(ctx, input),
+            Val::Bool(b) => {
+                if b.bool() {
+                    MoreByRef.eval(ctx, input)
+                } else {
+                    self.eval(ctx, input)
+                }
+            }
+            _ => DefaultByRef::eval_call(self, ctx, func, input, ValBuilder),
         }
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        let reverse = DefaultByRef::eval_reverse(self, ctx, func, output, ValBuilder);
-        let Ok(meta) = ctx.get_meta() else {
-            return reverse;
-        };
-        let Ok(solver) = meta.get(SOLVER) else {
-            return reverse;
-        };
-        let Val::Func(FuncVal(solver)) = solver else {
-            return Val::default();
-        };
-        solver.eval(ctx, reverse)
+        DefaultByRef::eval_reverse(self, ctx, func, output, ValBuilder)
     }
 }

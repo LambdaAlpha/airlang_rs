@@ -45,7 +45,7 @@ impl Prelude for BoolPrelude {
 }
 
 fn not() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("not", input_mode, fn_not)
 }
 
@@ -58,8 +58,8 @@ fn fn_not(input: Val) -> Val {
 
 fn and() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("and", input_mode, fn_and)
 }
@@ -83,8 +83,8 @@ fn fn_and(input: Val) -> Val {
 
 fn or() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("or", input_mode, fn_or)
 }

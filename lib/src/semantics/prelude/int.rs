@@ -67,8 +67,8 @@ impl Prelude for IntPrelude {
 
 fn add() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("+", input_mode, fn_add)
 }
@@ -88,8 +88,8 @@ fn fn_add(input: Val) -> Val {
 
 fn subtract() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("-", input_mode, fn_subtract)
 }
@@ -109,8 +109,8 @@ fn fn_subtract(input: Val) -> Val {
 
 fn multiply() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("*", input_mode, fn_multiply)
 }
@@ -130,8 +130,8 @@ fn fn_multiply(input: Val) -> Val {
 
 fn divide() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("/", input_mode, fn_divide)
 }
@@ -154,8 +154,8 @@ fn fn_divide(input: Val) -> Val {
 
 fn remainder() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("%", input_mode, fn_remainder)
 }
@@ -178,8 +178,8 @@ fn fn_remainder(input: Val) -> Val {
 
 fn divide_remainder() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("/%", input_mode, fn_divide_remainder)
 }
@@ -202,8 +202,8 @@ fn fn_divide_remainder(input: Val) -> Val {
 
 fn less_than() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("<", input_mode, fn_less_than)
 }
@@ -223,8 +223,8 @@ fn fn_less_than(input: Val) -> Val {
 
 fn less_equal() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("<=", input_mode, fn_less_equal)
 }
@@ -244,8 +244,8 @@ fn fn_less_equal(input: Val) -> Val {
 
 fn greater_than() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn(">", input_mode, fn_greater_than)
 }
@@ -265,8 +265,8 @@ fn fn_greater_than(input: Val) -> Val {
 
 fn greater_equal() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn(">=", input_mode, fn_greater_equal)
 }
@@ -286,8 +286,8 @@ fn fn_greater_equal(input: Val) -> Val {
 
 fn less_greater() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     named_free_fn("<>", input_mode, fn_less_greater)
 }

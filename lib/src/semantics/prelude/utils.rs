@@ -5,7 +5,6 @@ use crate::{
             InputMode,
             ListItemInputMode,
         },
-        prelude::eval,
         val::{
             ListVal,
             MapVal,
@@ -15,10 +14,12 @@ use crate::{
         Val,
     },
     types::{
+        Bool,
         Call,
         Pair,
         Reverse,
         Symbol,
+        Unit,
     },
 };
 
@@ -37,7 +38,12 @@ const ELLIPSIS: &str = "...";
 
 pub(crate) fn parse_input_mode(input_mode: Val) -> Option<InputMode> {
     match input_mode {
-        Val::Symbol(s) => parse_input_mode_any(s),
+        Val::Unit(_) => Some(InputMode::Any(EvalMode::Value)),
+        Val::Bool(b) => Some(InputMode::Any(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        })),
         Val::Pair(pair) => parse_input_mode_pair(*pair),
         Val::Call(call) => {
             let Val::Symbol(tag) = call.func else {
@@ -48,16 +54,20 @@ pub(crate) fn parse_input_mode(input_mode: Val) -> Option<InputMode> {
         Val::Reverse(reverse) => parse_input_mode_reverse(*reverse),
         Val::List(list) => parse_input_mode_list_for_some(list),
         Val::Map(map) => parse_input_mode_map_for_some(map),
-        Val::Unit(_) => Some(InputMode::Any(EvalMode::Eval)),
         _ => None,
     }
 }
 
 fn parse_eval_mode(eval_mode: Val) -> Option<EvalMode> {
-    let Val::Symbol(s) = eval_mode else {
-        return None;
-    };
-    symbol_to_eval_mode(&s)
+    match eval_mode {
+        Val::Unit(_) => Some(EvalMode::Value),
+        Val::Bool(b) => Some(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        }),
+        _ => None,
+    }
 }
 
 fn parse_input_mode_tag(tag: &str, input_mode: Val) -> Option<InputMode> {
@@ -70,10 +80,6 @@ fn parse_input_mode_tag(tag: &str, input_mode: Val) -> Option<InputMode> {
         MAP_FOR_ALL => parse_input_mode_map_for_all(input_mode),
         _ => None,
     }
-}
-
-fn parse_input_mode_any(eval_mode: Symbol) -> Option<InputMode> {
-    Some(InputMode::Any(symbol_to_eval_mode(&eval_mode)?))
 }
 
 fn parse_input_mode_symbol(eval_mode: Val) -> Option<InputMode> {
@@ -174,34 +180,20 @@ fn parse_input_mode_map_for_some(input_mode: MapVal) -> Option<InputMode> {
     Some(map)
 }
 
-fn symbol_to_eval_mode(name: &Symbol) -> Option<EvalMode> {
-    let eval_mode = match &**name {
-        eval::VALUE => EvalMode::Value,
-        eval::EVAL => EvalMode::Eval,
-        eval::MIX => EvalMode::Mix,
-        _ => return None,
-    };
-    Some(eval_mode)
-}
-
-pub(crate) fn eval_mode_to_symbol(eval_mode: EvalMode) -> Symbol {
-    let str = match eval_mode {
-        EvalMode::Value => eval::VALUE,
-        EvalMode::Eval => eval::EVAL,
-        EvalMode::Mix => eval::MIX,
-    };
-    Symbol::from_str(str)
+pub(crate) fn eval_mode_to_val(eval_mode: EvalMode) -> Val {
+    match eval_mode {
+        EvalMode::Value => Val::Unit(Unit),
+        EvalMode::More => Val::Bool(Bool::t()),
+        EvalMode::Less => Val::Bool(Bool::f()),
+    }
 }
 
 pub(crate) fn generate_input_mode(input_mode: &InputMode) -> Val {
     match input_mode {
-        InputMode::Any(mode) => {
-            let s = eval_mode_to_symbol(*mode);
-            Val::Symbol(s)
-        }
+        InputMode::Any(mode) => eval_mode_to_val(*mode),
         InputMode::Symbol(mode) => {
             let tag = symbol(SYMBOL);
-            let mode = Val::Symbol(eval_mode_to_symbol(*mode));
+            let mode = eval_mode_to_val(*mode);
             Val::Call(Box::new(Call::new(tag, mode)))
         }
         InputMode::Pair(pair) => {
@@ -223,8 +215,8 @@ pub(crate) fn generate_input_mode(input_mode: &InputMode) -> Val {
         }
         InputMode::List(mode) => {
             let tag = symbol(LIST);
-            let mode = eval_mode_to_symbol(*mode);
-            Val::Call(Box::new(Call::new(tag, Val::Symbol(mode))))
+            let mode = eval_mode_to_val(*mode);
+            Val::Call(Box::new(Call::new(tag, mode)))
         }
         InputMode::ListForAll(mode) => {
             let tag = symbol(LIST_FOR_ALL);
@@ -248,8 +240,8 @@ pub(crate) fn generate_input_mode(input_mode: &InputMode) -> Val {
         }
         InputMode::Map(mode) => {
             let tag = symbol(MAP);
-            let mode = eval_mode_to_symbol(*mode);
-            Val::Call(Box::new(Call::new(tag, Val::Symbol(mode))))
+            let mode = eval_mode_to_val(*mode);
+            Val::Call(Box::new(Call::new(tag, mode)))
         }
         InputMode::MapForAll(mode) => {
             let tag = symbol(MAP_FOR_ALL);

@@ -40,8 +40,8 @@
 =====
 ;[
     t = (theorem {
-        function : `1,
-        input : (`` (('t not) 't)),
+        function : ''t,
+        input : ('f (('t not) 't)),
         before : (' context {}),
     }),
     proposition.output t
@@ -52,7 +52,7 @@
 ;[
     t = (theorem {
         function : ===,
-        input : (`0 (a : b)),
+        input : (' (a : b)),
         context : (' context {
             a : 1,
             b : 2,
@@ -66,7 +66,7 @@
 ;[
     t = (theorem {
         function : =,
-        input : (`0 (a : 1)),
+        input : (' (a : 1)),
         before : (' context {})
     }),
     ctx = (proposition.before t),
@@ -78,7 +78,7 @@
 ;[
     t = (theorem {
         function : =,
-        input : (`0 (a : 1)),
+        input : (' (a : 1)),
         before : (' context {})
     }),
     ctx = (proposition.after t),

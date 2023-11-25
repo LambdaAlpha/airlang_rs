@@ -4,7 +4,7 @@ use {
             ctx::Ctx,
             ctx_access::mutable::MutableCtx,
             eval::Evaluator,
-            eval_mode::eval::Eval,
+            eval_mode::more::More,
             prelude::initial_ctx,
         },
         syntax::ParseError,
@@ -38,7 +38,7 @@ impl Interpreter {
     }
 
     pub fn interpret(&mut self, src: Val) -> Val {
-        Eval.eval(&mut MutableCtx(&mut self.ctx), src)
+        More.eval(&mut MutableCtx(&mut self.ctx), src)
     }
 
     pub fn reset(&mut self) {

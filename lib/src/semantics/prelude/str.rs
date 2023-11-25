@@ -58,7 +58,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = InputMode::List(EvalMode::Eval);
+    let input_mode = InputMode::List(EvalMode::More);
     named_free_fn("string.concat", input_mode, fn_concat)
 }
 

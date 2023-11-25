@@ -98,8 +98,8 @@ fn set() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
-            InputMode::Any(EvalMode::Eval),
-            InputMode::Any(EvalMode::Eval),
+            InputMode::Any(EvalMode::More),
+            InputMode::Any(EvalMode::More),
         ))),
     )));
     named_mutable_fn("list.set", input_mode, fn_set)
@@ -134,8 +134,8 @@ fn set_many() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
-            InputMode::Any(EvalMode::Eval),
-            InputMode::List(EvalMode::Eval),
+            InputMode::Any(EvalMode::More),
+            InputMode::List(EvalMode::More),
         ))),
     )));
     named_mutable_fn("list.set_many", input_mode, fn_set_many)
@@ -172,7 +172,7 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn get() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_const_fn("list.get", input_mode, fn_get)
 }
@@ -217,8 +217,8 @@ fn insert() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
-            InputMode::Any(EvalMode::Eval),
-            InputMode::Any(EvalMode::Eval),
+            InputMode::Any(EvalMode::More),
+            InputMode::Any(EvalMode::More),
         ))),
     )));
     named_mutable_fn("list.insert", input_mode, fn_insert)
@@ -252,8 +252,8 @@ fn insert_many() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
         InputMode::Pair(Box::new(Pair::new(
-            InputMode::Any(EvalMode::Eval),
-            InputMode::List(EvalMode::Eval),
+            InputMode::Any(EvalMode::More),
+            InputMode::List(EvalMode::More),
         ))),
     )));
     named_mutable_fn("list.insert_many", input_mode, fn_insert_many)
@@ -288,7 +288,7 @@ fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn remove() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_mutable_fn("list.remove", input_mode, fn_remove)
 }
@@ -333,7 +333,7 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_mutable_fn("list.push", input_mode, fn_push)
 }
@@ -355,7 +355,7 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn push_many() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::List(EvalMode::Eval),
+        InputMode::List(EvalMode::More),
     )));
     named_mutable_fn("list.push_many", input_mode, fn_push_many)
 }
@@ -380,7 +380,7 @@ fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn pop() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_mutable_fn("list.pop", input_mode, fn_pop)
 }

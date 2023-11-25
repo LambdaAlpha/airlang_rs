@@ -89,12 +89,12 @@ const TRUTH: &str = "truth";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(INPUT), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(OUTPUT), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(AFTER), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::More));
+    map.insert(symbol(INPUT), InputMode::Any(EvalMode::More));
+    map.insert(symbol(OUTPUT), InputMode::Any(EvalMode::More));
+    map.insert(symbol(CTX), InputMode::Any(EvalMode::More));
+    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::More));
+    map.insert(symbol(AFTER), InputMode::Any(EvalMode::More));
     let input_mode = InputMode::MapForSome(map);
     named_free_fn("proposition", input_mode, fn_new)
 }
@@ -134,7 +134,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("proposition.represent", input_mode, fn_repr)
 }
 

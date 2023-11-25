@@ -109,12 +109,12 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), InputMode::Any(EvalMode::Mix));
-    map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(BODY), InputMode::Any(EvalMode::Less));
+    map.insert(symbol(CTX), InputMode::Any(EvalMode::More));
     map.insert(symbol(INPUT_NAME), InputMode::Symbol(EvalMode::Value));
     map.insert(symbol(CALLER_NAME), InputMode::Symbol(EvalMode::Value));
     map.insert(symbol(CALLER_ACCESS), InputMode::Symbol(EvalMode::Value));
-    map.insert(symbol(INPUT_MODE), InputMode::Any(EvalMode::Mix));
+    map.insert(symbol(INPUT_MODE), InputMode::Any(EvalMode::Less));
     let input_mode = InputMode::MapForSome(map);
     named_free_fn("function", input_mode, fn_new)
 }
@@ -134,7 +134,10 @@ fn fn_new(input: Val) -> Val {
         Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
         _ => return Val::default(),
     };
-    let Some(input_mode) = parse_input_mode(map_remove(&mut map, INPUT_MODE)) else {
+    let input_mode = map
+        .remove(&symbol(INPUT_MODE))
+        .unwrap_or(Val::Bool(Bool::t()));
+    let Some(input_mode) = parse_input_mode(input_mode) else {
         return Val::default();
     };
     let caller_name = match map_remove(&mut map, CALLER_NAME) {
@@ -174,7 +177,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("function.represent", input_mode, fn_repr)
 }
 
@@ -184,7 +187,7 @@ fn fn_repr(input: Val) -> Val {
     };
     let mut repr = MapVal::default();
 
-    if func.input_mode != InputMode::Any(EvalMode::Eval) {
+    if func.input_mode != InputMode::Any(EvalMode::More) {
         let input_mode = generate_input_mode(&func.input_mode);
         repr.insert(symbol(INPUT_MODE), input_mode);
     }

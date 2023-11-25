@@ -19,7 +19,7 @@ use {
                 CtxAccessor,
             },
             eval::Evaluator,
-            eval_mode::eval::EvalByRef,
+            eval_mode::more::MoreByRef,
             input_mode::InputMode,
             val::{
                 CtxVal,
@@ -355,7 +355,7 @@ where
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
     let _ = new_ctx.put_val_local(input_name, TaggedVal::new(input));
-    EvalByRef.eval(&mut MutableCtx(&mut new_ctx), body)
+    MoreByRef.eval(&mut MutableCtx(&mut new_ctx), body)
 }
 
 fn eval_aware(
@@ -380,7 +380,7 @@ fn keep_eval_restore(
 ) -> Val {
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_tag);
-    let output = EvalByRef.eval(&mut MutableCtx(&mut new_ctx), body);
+    let output = MoreByRef.eval(&mut MutableCtx(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, &caller_name);
     output
 }

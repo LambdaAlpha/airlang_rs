@@ -7,9 +7,9 @@ use crate::{
         },
         eval::Evaluator,
         eval_mode::{
-            eval::{
-                Eval,
-                EvalByRef,
+            more::{
+                More,
+                MoreByRef,
             },
             EvalMode,
         },
@@ -85,7 +85,7 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     };
     let mut output = Val::default();
     for val in list {
-        output = Eval.eval(&mut ctx, val);
+        output = More.eval(&mut ctx, val);
     }
     output
 }
@@ -119,7 +119,7 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let mut output = Val::default();
     let _ = ctx.remove(&name);
     for val in list {
-        output = Eval.eval(&mut ctx, val);
+        output = More.eval(&mut ctx, val);
         if let Ok(val) = ctx.get_const_ref(&name) {
             return val.clone();
         }
@@ -130,7 +130,7 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 fn if1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemInputMode {
-            input_mode: InputMode::Any(EvalMode::Eval),
+            input_mode: InputMode::Any(EvalMode::More),
             ellipsis: false,
         },
         ListItemInputMode {
@@ -168,13 +168,13 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
             let Some(branch) = iter.next() else {
                 return Val::default();
             };
-            Eval.eval(&mut ctx, branch)
+            More.eval(&mut ctx, branch)
         } else {
             let _ = iter.next();
             let Some(branch) = iter.next() else {
                 return Val::default();
             };
-            Eval.eval(&mut ctx, branch)
+            More.eval(&mut ctx, branch)
         }
     } else {
         let _ = iter.next();
@@ -182,14 +182,14 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         let Some(default) = iter.next() else {
             return Val::default();
         };
-        Eval.eval(&mut ctx, default)
+        More.eval(&mut ctx, default)
     }
 }
 
 fn match1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemInputMode {
-            input_mode: InputMode::Any(EvalMode::Eval),
+            input_mode: InputMode::Any(EvalMode::More),
             ellipsis: false,
         },
         ListItemInputMode {
@@ -224,7 +224,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
-            let k = Eval.eval(&mut ctx, k);
+            let k = More.eval(&mut ctx, k);
             if k == val {
                 Some(v)
             } else {
@@ -237,7 +237,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
             };
             default
         });
-    Eval.eval(&mut ctx, eval)
+    More.eval(&mut ctx, eval)
 }
 
 fn while1() -> Named<FuncVal> {
@@ -272,11 +272,11 @@ fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = EvalByRef.eval(&mut ctx, condition) else {
+        let Val::Bool(b) = MoreByRef.eval(&mut ctx, condition) else {
             return Val::default();
         };
         if b.bool() {
-            EvalByRef.eval(&mut ctx, body);
+            MoreByRef.eval(&mut ctx, body);
         } else {
             break;
         }

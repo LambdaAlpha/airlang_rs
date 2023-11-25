@@ -14,7 +14,7 @@
 -----
 '
 =====
-' do (; (`` [a ('t =) 1, a]))
+' do (; ('f [a ('t =) 1, a]))
 -----
 '
 =====
@@ -34,7 +34,7 @@
 -----
 1
 =====
-;[(a ': constant) = (' context {b : 1}), [a] do (`1 b)]
+;[(a ': constant) = (' context {b : 1}), [a] do (read b)]
 -----
 1
 =====
@@ -42,10 +42,10 @@
 -----
 1
 =====
-;[': = (`0 ':), constant = (`0 constant), a = (' context {b : (1 ': constant)}), [a] do (`1 b)]
+;[': = (' ':), constant = (' constant), a = (' context {b : (1 ': constant)}), [a] do (read b)]
 -----
 1
 =====
-;[set_meta (' context {a : 1}), (`0 meta) do (read a)]
+;[set_meta (' context {a : 1}), (' meta) do (read a)]
 -----
 1

@@ -19,7 +19,7 @@ use crate::{
             Evaluator,
         },
         eval_mode::{
-            eval::Eval,
+            more::More,
             EvalMode,
         },
         func::{
@@ -71,8 +71,8 @@ impl Prelude for CallPrelude {
 
 fn call() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Eval),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
+        InputMode::Any(EvalMode::More),
     )));
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_call::<FreeCtx>,
@@ -105,14 +105,14 @@ fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    Eval.eval_call(&mut ctx, pair.second, pair.first)
+    More.eval_call(&mut ctx, pair.second, pair.first)
 }
 
 fn call_with_ctx() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
         InputMode::Call(Box::new(Call::new(
-            InputMode::Any(EvalMode::Eval),
+            InputMode::Any(EvalMode::More),
             InputMode::Any(EvalMode::Value),
         ))),
     )));

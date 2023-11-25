@@ -232,7 +232,7 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> CtxVal {
 }
 
 pub(crate) fn any_eval_mode(rng: &mut SmallRng) -> EvalMode {
-    const EVAL_MODES: [EvalMode; 3] = [EvalMode::Value, EvalMode::Eval, EvalMode::Mix];
+    const EVAL_MODES: [EvalMode; 3] = [EvalMode::Value, EvalMode::More, EvalMode::Less];
     *(EVAL_MODES.choose(rng).unwrap())
 }
 

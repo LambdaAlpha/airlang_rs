@@ -22,9 +22,17 @@ not (not 't)
 -----
 't
 =====
-(`1 not) 't
+' a
 -----
-'f
+a
+=====
+'f [a, 't (not 't), 'f (not 't), ' a]
+-----
+[a, 'f, not 't, a]
+=====
+'t [not 't, 't (not 't), 'f (not 't), ' (not 't)]
+-----
+['f, 'f, not 't, not 't]
 =====
 "a" "b"
 -----

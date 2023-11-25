@@ -56,10 +56,10 @@ const BEFORE: &str = "before";
 
 fn theorem_new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(INPUT), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(CTX), InputMode::Any(EvalMode::Eval));
-    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::Eval));
+    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::More));
+    map.insert(symbol(INPUT), InputMode::Any(EvalMode::More));
+    map.insert(symbol(CTX), InputMode::Any(EvalMode::More));
+    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::More));
     let input_mode = InputMode::MapForSome(map);
     named_free_fn("theorem", input_mode, fn_theorem_new)
 }
@@ -95,7 +95,7 @@ fn fn_theorem_new(input: Val) -> Val {
 }
 
 fn prove() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("prove", input_mode, fn_prove)
 }
 

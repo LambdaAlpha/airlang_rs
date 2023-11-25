@@ -39,7 +39,7 @@ impl Prelude for SyntaxPrelude {
 }
 
 fn parse() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("parse", input_mode, fn_parse)
 }
 
@@ -51,7 +51,7 @@ fn fn_parse(input: Val) -> Val {
 }
 
 fn stringify() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Eval);
+    let input_mode = InputMode::Any(EvalMode::More);
     named_free_fn("stringify", input_mode, fn_stringify)
 }
 

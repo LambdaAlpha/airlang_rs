@@ -79,7 +79,7 @@ fn fn_get_first(mut ctx: CtxForConstFn, input: Val) -> Val {
 fn set_first() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_mutable_fn("set_1", input_mode, fn_set_first)
 }
@@ -123,7 +123,7 @@ fn fn_get_second(mut ctx: CtxForConstFn, input: Val) -> Val {
 fn set_second() -> Named<FuncVal> {
     let input_mode = InputMode::Pair(Box::new(Pair::new(
         InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::Eval),
+        InputMode::Any(EvalMode::More),
     )));
     named_mutable_fn("set_2", input_mode, fn_set_second)
 }
