@@ -214,7 +214,7 @@ fn assign_destruct(
             let mut last_list = List::default();
             let mut name_iter = name_list.into_iter();
             let mut val_iter = val_list.into_iter();
-            while let (Some(name), Some(val)) = (name_iter.next(), val_iter.next()) {
+            while let (Some(name), val) = (name_iter.next(), val_iter.next()) {
                 if let Val::Symbol(s) = &name {
                     if &**s == "..." {
                         let name_len = name_iter.len();
@@ -226,20 +226,21 @@ fn assign_destruct(
                         continue;
                     }
                 }
+                let val = val.unwrap_or_default();
                 last_list.push(assign_destruct(ctx, name, val, local, tag));
             }
             Val::List(last_list)
         }
-        Val::Map(mut name_map) => {
-            let Val::Map(val_map) = val else {
+        Val::Map(name_map) => {
+            let Val::Map(mut val_map) = val else {
                 return Val::default();
             };
-            let last_map = val_map
+            let last_map = name_map
                 .into_iter()
-                .filter_map(|(k, v)| {
-                    let name = name_map.remove(&k)?;
-                    let last_val = assign_destruct(ctx, name, v, local, tag);
-                    Some((k, last_val))
+                .map(|(k, name)| {
+                    let val = val_map.remove(&k).unwrap_or_default();
+                    let last_val = assign_destruct(ctx, name, val, local, tag);
+                    (k, last_val)
                 })
                 .collect();
             Val::Map(last_map)
