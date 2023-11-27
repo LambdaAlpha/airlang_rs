@@ -12,7 +12,10 @@ use {
         },
     },
     std::{
-        fmt::Debug,
+        fmt::{
+            Debug,
+            Formatter,
+        },
         hash::Hash,
     },
 };
@@ -72,7 +75,7 @@ pub(crate) enum InvariantTag {
     Const,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct TaggedVal {
     pub(crate) tag: InvariantTag,
     pub(crate) val: Val,
@@ -417,6 +420,12 @@ impl DefaultCtx {
                 val
             }
         })
+    }
+}
+
+impl Debug for TaggedVal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("").field(&self.tag).field(&self.val).finish()
     }
 }
 

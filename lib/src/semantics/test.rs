@@ -33,7 +33,8 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
         })?;
         assert_eq!(
             ret, ret_expected,
-            "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:?}",
+            "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:#?}, \
+            current context: {interpreter:#?}",
         );
         interpreter.reset();
     }

@@ -32,7 +32,10 @@ use {
         },
     },
     std::{
-        fmt::Debug,
+        fmt::{
+            Debug,
+            Formatter,
+        },
         hash::{
             Hash,
             Hasher,
@@ -41,7 +44,7 @@ use {
     },
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Func {
     pub(crate) input_mode: InputMode,
     pub(crate) evaluator: FuncEval,
@@ -439,6 +442,53 @@ impl TaggedVal {
             tag: InvariantTag::Const,
             val,
         }
+    }
+}
+
+impl Debug for Func {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut s = f.debug_struct("Func");
+        match &self.evaluator {
+            FuncEval::Free(eval) => match eval {
+                CtxFreeEval::Primitive(p) => {
+                    s.field("id", &p.id);
+                }
+                CtxFreeEval::Composed(c) => {
+                    s.field("input_mode", &self.input_mode);
+                    s.field("caller_access", &"free");
+                    s.field("body", &c.body);
+                    s.field("context", &c.ctx);
+                    s.field("input_name", &c.input_name);
+                }
+            },
+            FuncEval::Const(eval) => match eval {
+                CtxConstEval::Primitive(p) => {
+                    s.field("id", &p.id);
+                }
+                CtxConstEval::Composed(c) => {
+                    s.field("input_mode", &self.input_mode);
+                    s.field("caller_access", &"constant");
+                    s.field("body", &c.body);
+                    s.field("context", &c.ctx);
+                    s.field("caller_name", &c.caller.name);
+                    s.field("input_name", &c.input_name);
+                }
+            },
+            FuncEval::Mutable(eval) => match eval {
+                CtxMutableEval::Primitive(p) => {
+                    s.field("id", &p.id);
+                }
+                CtxMutableEval::Composed(c) => {
+                    s.field("input_mode", &self.input_mode);
+                    s.field("caller_access", &"mutable");
+                    s.field("body", &c.body);
+                    s.field("context", &c.ctx);
+                    s.field("caller_name", &c.caller.name);
+                    s.field("input_name", &c.input_name);
+                }
+            },
+        }
+        s.finish()
     }
 }
 

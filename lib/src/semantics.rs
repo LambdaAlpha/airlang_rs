@@ -28,6 +28,7 @@ pub use self::val::{
 #[error("ReprError")]
 pub struct ReprError {}
 
+#[derive(Debug)]
 pub struct Interpreter {
     ctx: Ctx,
 }
