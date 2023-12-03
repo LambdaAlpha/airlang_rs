@@ -25,11 +25,19 @@
 )]
 #![feature(trait_alias)]
 
-use crate::repl::ui::StdUi;
-
-mod repl;
+use crate::ui::StdUi;
 
 fn main() -> std::io::Result<()> {
     let mut std_ui = StdUi::new();
     repl::repl(&mut std_ui)
 }
+
+mod ctx;
+
+mod eval;
+
+mod repl;
+
+mod prelude;
+
+mod ui;

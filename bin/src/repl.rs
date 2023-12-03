@@ -1,11 +1,14 @@
 use {
-    crate::repl::{
-        cmd::repl::title,
-        eval::{
+    crate::{
+        ctx::{
             ConstCtx,
             DynCtx,
+        },
+        eval::{
+            eval,
             Output,
         },
+        prelude::initial_const_ctx,
         ui::Ui,
     },
     airlang::semantics::{
@@ -13,14 +16,15 @@ use {
         Interpreter,
         Val,
     },
+    std::error::Error,
 };
 
 pub(crate) fn repl(ui: &mut impl Ui) -> std::io::Result<()> {
-    let const_ctx = cmd::const_ctx();
+    let const_ctx = initial_const_ctx();
     let mut dyn_ctx = dyn_ctx();
     let mut input_buffer = String::new();
 
-    print_title(ui, &const_ctx, &mut dyn_ctx)?;
+    print_title(ui, &mut dyn_ctx.interpreter)?;
 
     loop {
         ui.print(PROMPT_PREFIX)?;
@@ -46,11 +50,11 @@ pub(crate) fn repl(ui: &mut impl Ui) -> std::io::Result<()> {
             continue;
         }
 
-        match eval(&const_ctx, &mut dyn_ctx, input) {
-            Output::Ok(output) => {
+        match repl_eval(&const_ctx, &mut dyn_ctx, input) {
+            Output::Print(output) => {
                 ui.println(&output)?;
             }
-            Output::Err(error) => {
+            Output::Eprint(error) => {
                 ui.eprintln(&*error)?;
             }
             Output::Break => break,
@@ -68,34 +72,26 @@ pub(crate) fn dyn_ctx() -> DynCtx {
     }
 }
 
-fn eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: &str) -> Output {
+fn repl_eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: &str) -> Output {
     match parse(input) {
-        Ok(input) => const_ctx.eval(dyn_ctx, input),
-        Err(err) => Output::Err(Box::new(err)),
+        Ok(input) => eval(const_ctx, dyn_ctx, input),
+        Err(err) => Output::Eprint(Box::new(err)),
     }
 }
 
-fn print_title(
-    ui: &mut impl Ui,
-    const_ctx: &ConstCtx,
-    dyn_ctx: &mut DynCtx,
-) -> std::io::Result<()> {
-    match title(const_ctx, dyn_ctx, Val::default()) {
-        Output::Ok(output) => {
-            ui.println(&output)?;
-        }
-        Output::Err(error) => {
-            ui.eprintln(&*error)?;
-        }
-        _ => {}
+const TITLE_PREFIX: &str = "🜁 Air ";
+
+fn print_title(ui: &mut impl Ui, interpreter: &mut Interpreter) -> std::io::Result<()> {
+    match parse(include_str!("air/version.air")) {
+        Ok(repr) => match interpreter.interpret(repr) {
+            Val::String(s) => ui.println(format!("{}{}", TITLE_PREFIX, &*s)),
+            _ => {
+                let msg = format!("{} unknown version", TITLE_PREFIX);
+                ui.eprintln(&*Box::<dyn Error>::from(msg))
+            }
+        },
+        Err(err) => ui.eprintln(err),
     }
-    Ok(())
 }
 
 const PROMPT_PREFIX: &str = "> ";
-
-pub(crate) mod cmd;
-
-pub(crate) mod eval;
-
-pub(crate) mod ui;
