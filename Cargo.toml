@@ -3,7 +3,8 @@ resolver = "2"
 
 members = [
     "lib",
-    "bin"
+    "bin",
+    "air"
 ]
 
 [profile.release]

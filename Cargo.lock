@@ -12,6 +12,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "air_main"
+version = "0.0.1"
+dependencies = [
+ "airlang",
+]
+
+[[package]]
 name = "airlang"
 version = "0.0.9"
 dependencies = [
