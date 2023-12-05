@@ -1,0 +1,3 @@
+[submodule "air/main"]
+	path = air/main
+	url = git@github.com:LambdaAlpha/air-main.git
