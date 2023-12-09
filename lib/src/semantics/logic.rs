@@ -11,7 +11,7 @@ use {
         Ctx,
         Val,
     },
-    std::assert_matches::assert_matches,
+    std::assert_matches::debug_assert_matches,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -39,7 +39,7 @@ pub(crate) enum Truth {
 
 impl Prop {
     pub(crate) fn new_free(func: FuncVal, input: Val, output: Val) -> Self {
-        assert_matches!(func.0.evaluator, FuncEval::Free(_));
+        debug_assert_matches!(func.0.evaluator, FuncEval::Free(_));
         Self {
             func,
             input,
@@ -50,7 +50,7 @@ impl Prop {
     }
 
     pub(crate) fn new_const(func: FuncVal, ctx: Ctx, input: Val, output: Val) -> Self {
-        assert_matches!(func.0.evaluator, FuncEval::Const(_));
+        debug_assert_matches!(func.0.evaluator, FuncEval::Const(_));
         Self {
             func,
             input,
@@ -67,7 +67,7 @@ impl Prop {
         after: Ctx,
         output: Val,
     ) -> Self {
-        assert_matches!(func.0.evaluator, FuncEval::Mutable(_));
+        debug_assert_matches!(func.0.evaluator, FuncEval::Mutable(_));
         Self {
             func,
             input,
@@ -94,7 +94,7 @@ impl Prop {
     }
 
     pub(crate) fn new_free_theorem(func: FuncVal, input: Val) -> Self {
-        assert_matches!(func.0.evaluator, FuncEval::Free(_));
+        debug_assert_matches!(func.0.evaluator, FuncEval::Free(_));
         let output = func.0.evaluator.eval(&mut FreeCtx, input.clone());
         Self {
             func,
@@ -106,7 +106,7 @@ impl Prop {
     }
 
     pub(crate) fn new_const_theorem(func: FuncVal, mut ctx: Ctx, input: Val) -> Self {
-        assert_matches!(func.0.evaluator, FuncEval::Const(_));
+        debug_assert_matches!(func.0.evaluator, FuncEval::Const(_));
         let output = func
             .0
             .evaluator
@@ -121,7 +121,7 @@ impl Prop {
     }
 
     pub(crate) fn new_mutable_theorem(func: FuncVal, before: Ctx, input: Val) -> Self {
-        assert_matches!(func.0.evaluator, FuncEval::Mutable(_));
+        debug_assert_matches!(func.0.evaluator, FuncEval::Mutable(_));
         let mut after = Ctx::clone(&before);
         let output = func
             .0
