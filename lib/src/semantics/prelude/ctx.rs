@@ -6,11 +6,24 @@ use crate::{
             CtxTrait,
             InvariantTag,
             NameMap,
+            TaggedRef,
             TaggedVal,
         },
         ctx_access::{
-            constant::CtxForConstFn,
-            mutable::CtxForMutableFn,
+            constant::{
+                ConstCtx,
+                CtxForConstFn,
+            },
+            free::FreeCtx,
+            mutable::{
+                CtxForMutableFn,
+                MutableCtx,
+            },
+        },
+        eval::{
+            output::OutputBuilder,
+            Evaluator,
+            ValBuilder,
         },
         eval_mode::EvalMode,
         io_mode::IoMode,
@@ -26,6 +39,7 @@ use crate::{
             Named,
             Prelude,
         },
+        problem::solve,
         val::{
             CallVal,
             CtxVal,
@@ -59,6 +73,7 @@ pub(crate) struct CtxPrelude {
     pub(crate) get_access: Named<FuncVal>,
     pub(crate) has_meta: Named<FuncVal>,
     pub(crate) set_meta: Named<FuncVal>,
+    pub(crate) with_ctx: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
     pub(crate) ctx_repr: Named<FuncVal>,
     pub(crate) ctx_prelude: Named<FuncVal>,
@@ -80,6 +95,7 @@ impl Default for CtxPrelude {
             get_access: get_access(),
             has_meta: has_meta(),
             set_meta: set_meta(),
+            with_ctx: with_ctx(),
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
             ctx_prelude: ctx_prelude(),
@@ -102,6 +118,7 @@ impl Prelude for CtxPrelude {
         self.get_access.put(m);
         self.has_meta.put(m);
         self.set_meta.put(m);
+        self.with_ctx.put(m);
         self.ctx_new.put(m);
         self.ctx_repr.put(m);
         self.ctx_prelude.put(m);
@@ -466,6 +483,99 @@ fn fn_set_meta(mut ctx: CtxForMutableFn, input: Val) -> Val {
         _ => {}
     }
     Val::default()
+}
+
+fn with_ctx() -> Named<FuncVal> {
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::ListForAll(Box::new(IoMode::Symbol(EvalMode::Value))),
+        IoMode::Call(Box::new(Call::new(
+            IoMode::Any(EvalMode::More),
+            IoMode::Any(EvalMode::Value),
+        ))),
+    )));
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn("do", input_mode, output_mode, fn_with_ctx)
+}
+
+fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    match pair.second {
+        Val::Call(call) => {
+            let Val::Func(FuncVal(func)) = call.func else {
+                return Val::default();
+            };
+            let target_ctx = pair.first;
+            let input = func.input_mode.eval(&mut ctx, call.input);
+
+            match target_ctx {
+                Val::Unit(_) => func.eval(&mut FreeCtx, input),
+                Val::Symbol(name) if &*name == "meta" => {
+                    let Ok(meta) = ctx.get_tagged_meta() else {
+                        return Val::default();
+                    };
+                    if meta.is_const {
+                        func.eval(&mut ConstCtx(meta.val_ref), input)
+                    } else {
+                        func.eval(&mut MutableCtx(meta.val_ref), input)
+                    }
+                }
+                Val::List(names) => {
+                    get_ctx_nested(ctx, &names[..], |mut ctx| func.eval(&mut ctx, input))
+                }
+                _ => Val::default(),
+            }
+        }
+        Val::Reverse(reverse) => {
+            let Val::Func(FuncVal(func)) = &reverse.func else {
+                return Val::default();
+            };
+            let target_ctx = pair.first;
+            let output = func.output_mode.eval(&mut ctx, reverse.output);
+            let reverse = ValBuilder.from_reverse(reverse.func, output);
+            match target_ctx {
+                Val::Unit(_) => solve(&mut FreeCtx, reverse),
+                Val::Symbol(name) if &*name == "meta" => {
+                    let Ok(meta) = ctx.get_tagged_meta() else {
+                        return Val::default();
+                    };
+                    if meta.is_const {
+                        solve(&mut ConstCtx(meta.val_ref), reverse)
+                    } else {
+                        solve(&mut MutableCtx(meta.val_ref), reverse)
+                    }
+                }
+                Val::List(names) => {
+                    get_ctx_nested(ctx, &names[..], |mut ctx| solve(&mut ctx, reverse))
+                }
+                _ => Val::default(),
+            }
+        }
+        _ => Val::default(),
+    }
+}
+
+fn get_ctx_nested<F>(mut ctx: CtxForMutableFn, names: &[Val], f: F) -> Val
+where
+    F: for<'a> FnOnce(CtxForMutableFn<'a>) -> Val,
+{
+    let Some(Val::Symbol(name)) = names.first() else {
+        return f(ctx);
+    };
+    let rest = &names[1..];
+
+    let Ok(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
+        return Val::default();
+    };
+    let Val::Ctx(CtxVal(ctx)) = val_ref else {
+        return Val::default();
+    };
+    if is_const {
+        get_ctx_nested(CtxForMutableFn::Const(ConstCtx(ctx)), rest, f)
+    } else {
+        get_ctx_nested(CtxForMutableFn::Mutable(MutableCtx(ctx)), rest, f)
+    }
 }
 
 const CTX_VALUE_PAIR: &str = ":";

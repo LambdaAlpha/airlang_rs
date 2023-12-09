@@ -245,7 +245,7 @@ a
 =====
 ;[
     f = (function {
-        body : (;[set_meta (' context {super : (' (' caller))}), read '$ input]),
+        body : (;[set_meta (' context {super : (' (' caller))}), read $$ input]),
         input_mode : ',
         caller_access : mutable,
         context : (prelude ')

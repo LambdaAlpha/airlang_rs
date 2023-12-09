@@ -1,16 +1,16 @@
-"" . string.length
+"" $> string.length
 -----
 "" : 0
 =====
-"1" . string.length
+"1" $> string.length
 -----
 "1" : 1
 =====
-;[a = "12", a . string.length]
+;[a = "12", a $> string.length]
 -----
 2
 =====
-["1", "2"] . string.concat
+["1", "2"] $> string.concat
 -----
 "12"
 =====

@@ -1,16 +1,16 @@
-[] . list.length
+[] $> list.length
 -----
 [] : 0
 =====
-[1, 2] . list.length
+[1, 2] $> list.length
 -----
 [1, 2] : 2
 =====
-;[a = [], a . list.length]
+;[a = [], a $> list.length]
 -----
 0
 =====
-;[a = [1, 2], a . list.length]
+;[a = [1, 2], a $> list.length]
 -----
 2
 =====
@@ -278,14 +278,14 @@
 -----
 [1, 2]
 =====
-[1, 2] . list.clear
+[1, 2] $> list.clear
 -----
 []
 =====
-;[a = [1, 2], a . list.clear]
+;[a = [1, 2], a $> list.clear]
 -----
 '
 =====
-;[a = [1, 2], a . list.clear, a]
+;[a = [1, 2], a $> list.clear, a]
 -----
 []

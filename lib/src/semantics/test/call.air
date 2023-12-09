@@ -1,51 +1,15 @@
-'t . not
+'t $> not
 -----
 'f
 =====
-'t . not . not and 't
+'t $> not $> not and 't
 -----
 't
 =====
-' do (1 + 1)
------
-2
-=====
-;[a = 1, ' do (load [a])]
------
-'
-=====
-' do (; ('f [a ('t =) 1, a]))
------
-'
-=====
-' do (get_1 (1 : 2))
+;[a = 1, b = (' a), read $$ b]
 -----
 1
 =====
-;[[] do (a = 1), a]
+'' $$ (not 'f)
 -----
-1
-=====
-;[c = (' context {a : 1}), a = ([c] do (a = 2)), a]
------
-1
-=====
-;[a = (' context {}), [a] do (b = 1), [a] do (read b)]
------
-1
-=====
-;[(a ': constant) = (' context {b : 1}), [a] do (read b)]
------
-1
-=====
-;[(a ': constant) = (' context {b : 1}), [a] do (b = 2), [a] do (read b)]
------
-1
-=====
-;[': = (' ':), constant = (' constant), a = (' context {b : (1 ': constant)}), [a] do (read b)]
------
-1
-=====
-;[set_meta (' context {a : 1}), (' meta) do (read a)]
------
-1
+'t
