@@ -17,7 +17,7 @@ use crate::{
     types::Symbol,
 };
 
-pub(crate) struct FreeCtx;
+pub struct FreeCtx;
 
 impl CtxTrait for FreeCtx {
     fn get(&self, _name: &str) -> Result<Val, CtxError> {

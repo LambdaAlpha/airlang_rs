@@ -26,6 +26,7 @@ use crate::{
             ctrl::CtrlPrelude,
             ctx::CtxPrelude,
             eval::EvalPrelude,
+            extension::ExtPrelude,
             float::FloatPrelude,
             func::FuncPrelude,
             int::IntPrelude,
@@ -76,6 +77,7 @@ pub(crate) struct AllPrelude {
     pub(crate) pair: PairPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
+    pub(crate) extension: ExtPrelude,
 }
 
 impl Prelude for AllPrelude {
@@ -100,6 +102,7 @@ impl Prelude for AllPrelude {
         self.pair.put(m);
         self.list.put(m);
         self.map.put(m);
+        self.extension.put(m);
     }
 }
 
@@ -228,5 +231,7 @@ mod pair;
 mod list;
 
 mod map;
+
+mod extension;
 
 mod utils;

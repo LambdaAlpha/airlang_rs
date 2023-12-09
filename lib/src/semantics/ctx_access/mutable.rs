@@ -21,9 +21,9 @@ use crate::{
     types::Symbol,
 };
 
-pub(crate) struct MutableCtx<'a>(pub(crate) &'a mut Ctx);
+pub struct MutableCtx<'a>(pub(crate) &'a mut Ctx);
 
-pub(crate) enum CtxForMutableFn<'a> {
+pub enum CtxForMutableFn<'a> {
     Free(FreeCtx),
     Const(ConstCtx<'a>),
     Mutable(MutableCtx<'a>),

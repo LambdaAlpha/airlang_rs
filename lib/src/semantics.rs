@@ -5,6 +5,12 @@ use {
             ctx_access::mutable::MutableCtx,
             eval::Evaluator,
             eval_mode::more::More,
+            extension::{
+                CallExtension,
+                ReverseExtension,
+                CALL_EXTENSION,
+                REVERSE_EXTENSION,
+            },
             prelude::initial_ctx,
         },
         syntax::ParseError,
@@ -61,6 +67,14 @@ pub fn generate(src: &Val) -> Result<String, ReprError> {
     crate::syntax::generator::generate_pretty(src)
 }
 
+pub fn set_call_extension(f: CallExtension) {
+    CALL_EXTENSION.set(f);
+}
+
+pub fn set_reverse_extension(f: ReverseExtension) {
+    REVERSE_EXTENSION.set(f);
+}
+
 pub(crate) mod val;
 
 pub(crate) mod eval;
@@ -80,6 +94,8 @@ pub(crate) mod logic;
 pub(crate) mod nondeterministic;
 
 pub(crate) mod problem;
+
+pub(crate) mod extension;
 
 pub(crate) mod prelude;
 

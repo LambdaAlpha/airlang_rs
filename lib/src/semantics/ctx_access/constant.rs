@@ -18,7 +18,7 @@ use crate::{
     types::Symbol,
 };
 
-pub(crate) struct ConstCtx<'a>(pub(crate) &'a mut Ctx);
+pub struct ConstCtx<'a>(pub(crate) &'a mut Ctx);
 
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when

@@ -1,6 +1,12 @@
 use {
     crate::semantics::{
+        eval::{
+            output::OutputBuilder,
+            ValBuilder,
+        },
         parse,
+        set_call_extension,
+        set_reverse_extension,
         val::Val,
     },
     std::{
@@ -160,4 +166,15 @@ fn test_list() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_map() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/map.air"), "test/map.air")
+}
+
+#[test]
+fn test_extension() -> Result<(), Box<dyn Error>> {
+    set_call_extension(Box::new(|_ctx, func, input| {
+        ValBuilder.from_call(func, input)
+    }));
+    set_reverse_extension(Box::new(|_ctx, func, output| {
+        ValBuilder.from_reverse(func, output)
+    }));
+    test_interpret(include_str!("test/extension.air"), "test/extension.air")
 }
