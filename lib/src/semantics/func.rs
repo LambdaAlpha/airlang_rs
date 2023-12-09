@@ -20,7 +20,7 @@ use {
             },
             eval::Evaluator,
             eval_mode::more::MoreByRef,
-            input_mode::InputMode,
+            io_mode::IoMode,
             val::{
                 CtxVal,
                 Val,
@@ -46,7 +46,8 @@ use {
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Func {
-    pub(crate) input_mode: InputMode,
+    pub(crate) input_mode: IoMode,
+    pub(crate) output_mode: IoMode,
     pub(crate) evaluator: FuncEval,
 }
 
@@ -493,9 +494,10 @@ impl Debug for Func {
 }
 
 impl Func {
-    pub(crate) fn new(input_mode: InputMode, evaluator: FuncEval) -> Self {
+    pub(crate) fn new(input_mode: IoMode, output_mode: IoMode, evaluator: FuncEval) -> Self {
         Func {
             input_mode,
+            output_mode,
             evaluator,
         }
     }

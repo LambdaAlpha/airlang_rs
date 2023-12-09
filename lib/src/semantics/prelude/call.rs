@@ -26,7 +26,7 @@ use crate::{
             CtxMutableFn,
             Primitive,
         },
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             named_mutable_fn,
             Named,
@@ -70,16 +70,17 @@ impl Prelude for CallPrelude {
 }
 
 fn call() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
+    let output_mode = IoMode::Any(EvalMode::More);
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_call::<FreeCtx>,
         |ctx, val| fn_call(ctx, val),
         |ctx, val| fn_call(ctx, val),
     );
-    named_mutable_fn("$", input_mode, func)
+    named_mutable_fn("$", input_mode, output_mode, func)
 }
 
 fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
@@ -94,11 +95,12 @@ fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 fn chain() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::Value),
-        InputMode::Any(EvalMode::Value),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::Value),
+        IoMode::Any(EvalMode::Value),
     )));
-    named_mutable_fn(".", input_mode, fn_chain)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn(".", input_mode, output_mode, fn_chain)
 }
 
 fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -109,14 +111,15 @@ fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn call_with_ctx() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::ListForAll(Box::new(InputMode::Symbol(EvalMode::Value))),
-        InputMode::Call(Box::new(Call::new(
-            InputMode::Any(EvalMode::More),
-            InputMode::Any(EvalMode::Value),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::ListForAll(Box::new(IoMode::Symbol(EvalMode::Value))),
+        IoMode::Call(Box::new(Call::new(
+            IoMode::Any(EvalMode::More),
+            IoMode::Any(EvalMode::Value),
         ))),
     )));
-    named_mutable_fn("do", input_mode, fn_call_with_ctx)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn("do", input_mode, output_mode, fn_call_with_ctx)
 }
 
 fn fn_call_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {

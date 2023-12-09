@@ -73,7 +73,7 @@ pub(crate) mod func;
 
 pub(crate) mod eval_mode;
 
-pub(crate) mod input_mode;
+pub(crate) mod io_mode;
 
 pub(crate) mod logic;
 

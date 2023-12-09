@@ -92,7 +92,13 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        let reverse = DefaultByVal::eval_reverse(self, ctx, func, output, ValBuilder);
+        let func = self.eval(ctx, func);
+        let output = if let Val::Func(FuncVal(f)) = &func {
+            f.output_mode.eval(ctx, output)
+        } else {
+            self.eval(ctx, output)
+        };
+        let reverse = ValBuilder.from_reverse(func, output);
         let Ok(meta) = ctx.get_meta() else {
             return reverse;
         };
@@ -165,7 +171,13 @@ where
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        let reverse = DefaultByRef::eval_reverse(self, ctx, func, output, ValBuilder);
+        let func = self.eval(ctx, func);
+        let output = if let Val::Func(FuncVal(f)) = &func {
+            f.output_mode.eval(ctx, output)
+        } else {
+            self.eval(ctx, output)
+        };
+        let reverse = ValBuilder.from_reverse(func, output);
         let Ok(meta) = ctx.get_meta() else {
             return reverse;
         };

@@ -2,7 +2,7 @@ use crate::{
     semantics::{
         ctx::NameMap,
         eval_mode::EvalMode,
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             named_free_fn,
             Named,
@@ -45,8 +45,9 @@ impl Prelude for BoolPrelude {
 }
 
 fn not() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::More);
-    named_free_fn("not", input_mode, fn_not)
+    let input_mode = IoMode::Any(EvalMode::More);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("not", input_mode, output_mode, fn_not)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -57,11 +58,12 @@ fn fn_not(input: Val) -> Val {
 }
 
 fn and() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("and", input_mode, fn_and)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("and", input_mode, output_mode, fn_and)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -82,11 +84,12 @@ fn fn_and(input: Val) -> Val {
 }
 
 fn or() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("or", input_mode, fn_or)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("or", input_mode, output_mode, fn_or)
 }
 
 fn fn_or(input: Val) -> Val {

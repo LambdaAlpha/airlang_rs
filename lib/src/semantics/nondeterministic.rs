@@ -17,9 +17,9 @@ use {
                 FuncEval,
                 FuncImpl,
             },
-            input_mode::{
-                InputMode,
-                ListItemInputMode,
+            io_mode::{
+                IoMode,
+                ListItemIoMode,
             },
             logic::Prop,
             prelude::{
@@ -236,7 +236,7 @@ pub(crate) fn any_eval_mode(rng: &mut SmallRng) -> EvalMode {
     *(EVAL_MODES.choose(rng).unwrap())
 }
 
-pub(crate) fn any_input_mode(rng: &mut SmallRng, depth: usize) -> InputMode {
+pub(crate) fn any_io_mode(rng: &mut SmallRng, depth: usize) -> IoMode {
     let weight: usize = 1 << min(depth, 32);
     let weights = [
         weight, // any
@@ -256,58 +256,58 @@ pub(crate) fn any_input_mode(rng: &mut SmallRng, depth: usize) -> InputMode {
     let new_depth = depth + 1;
 
     match i {
-        0 => InputMode::Any(any_eval_mode(rng)),
-        1 => InputMode::Symbol(any_eval_mode(rng)),
-        2 => InputMode::Pair(Box::new(Pair::new(
-            any_input_mode(rng, new_depth),
-            any_input_mode(rng, new_depth),
+        0 => IoMode::Any(any_eval_mode(rng)),
+        1 => IoMode::Symbol(any_eval_mode(rng)),
+        2 => IoMode::Pair(Box::new(Pair::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
         ))),
-        3 => InputMode::Call(Box::new(Call::new(
-            any_input_mode(rng, new_depth),
-            any_input_mode(rng, new_depth),
+        3 => IoMode::Call(Box::new(Call::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
         ))),
-        4 => InputMode::Reverse(Box::new(Reverse::new(
-            any_input_mode(rng, new_depth),
-            any_input_mode(rng, new_depth),
+        4 => IoMode::Reverse(Box::new(Reverse::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
         ))),
-        5 => InputMode::List(any_eval_mode(rng)),
-        6 => InputMode::ListForAll(Box::new(any_input_mode(rng, new_depth))),
+        5 => IoMode::List(any_eval_mode(rng)),
+        6 => IoMode::ListForAll(Box::new(any_io_mode(rng, new_depth))),
         7 => {
             let left = any_len_weighted(rng, depth) >> 1;
             let right = any_len_weighted(rng, depth) >> 1;
             let mut list = Vec::with_capacity(left + 1 + right);
             for _ in 0..left {
-                list.push(ListItemInputMode {
+                list.push(ListItemIoMode {
                     ellipsis: false,
-                    input_mode: any_input_mode(rng, new_depth),
+                    io_mode: any_io_mode(rng, new_depth),
                 });
             }
             if rng.gen() {
-                list.push(ListItemInputMode {
+                list.push(ListItemIoMode {
                     ellipsis: true,
-                    input_mode: any_input_mode(rng, new_depth),
+                    io_mode: any_io_mode(rng, new_depth),
                 });
             }
             for _ in 0..right {
-                list.push(ListItemInputMode {
+                list.push(ListItemIoMode {
                     ellipsis: false,
-                    input_mode: any_input_mode(rng, new_depth),
+                    io_mode: any_io_mode(rng, new_depth),
                 });
             }
-            InputMode::ListForSome(List::from(list))
+            IoMode::ListForSome(List::from(list))
         }
-        8 => InputMode::Map(any_eval_mode(rng)),
-        9 => InputMode::MapForAll(Box::new(Pair::new(
-            any_input_mode(rng, new_depth),
-            any_input_mode(rng, new_depth),
+        8 => IoMode::Map(any_eval_mode(rng)),
+        9 => IoMode::MapForAll(Box::new(Pair::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
         ))),
         10 => {
             let len = any_len_weighted(rng, new_depth);
             let mut map = Map::with_capacity(len);
             for _ in 0..len {
-                map.insert(any_val(rng, new_depth), any_input_mode(rng, new_depth));
+                map.insert(any_val(rng, new_depth), any_io_mode(rng, new_depth));
             }
-            InputMode::MapForSome(map)
+            IoMode::MapForSome(map)
         }
         _ => unreachable!(),
     }
@@ -330,7 +330,8 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         };
         func
     } else {
-        let input_mode = any_input_mode(rng, depth);
+        let input_mode = any_io_mode(rng, depth);
+        let output_mode = any_io_mode(rng, depth);
         let evaluator = match rng.gen_range(0..variant_count::<FuncEval>()) {
             0 => FuncEval::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
@@ -358,6 +359,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         };
         let func = Func {
             input_mode,
+            output_mode,
             evaluator,
         };
         FuncVal(Reader::new(func))

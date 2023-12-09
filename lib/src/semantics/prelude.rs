@@ -18,7 +18,7 @@ use crate::{
             FuncImpl,
             Primitive,
         },
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             bool::BoolPrelude,
             bytes::BytesPrelude,
@@ -141,34 +141,46 @@ impl<T: Into<Val> + Clone> Named<T> {
 
 fn named_free_fn(
     name: &'static str,
-    input_mode: InputMode,
+    input_mode: IoMode,
+    output_mode: IoMode,
     func: impl Fn(Val) -> Val + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<CtxFreeFn>::new(name, func);
-    let func = Func::new(input_mode, FuncEval::Free(FuncImpl::Primitive(primitive)));
+    let func = Func::new(
+        input_mode,
+        output_mode,
+        FuncEval::Free(FuncImpl::Primitive(primitive)),
+    );
     let func_val = FuncVal(Reader::new(func));
     Named::new(name, func_val)
 }
 
 fn named_const_fn(
     name: &'static str,
-    input_mode: InputMode,
+    input_mode: IoMode,
+    output_mode: IoMode,
     func: impl Fn(CtxForConstFn, Val) -> Val + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<CtxConstFn>::new(name, func);
-    let func = Func::new(input_mode, FuncEval::Const(FuncImpl::Primitive(primitive)));
+    let func = Func::new(
+        input_mode,
+        output_mode,
+        FuncEval::Const(FuncImpl::Primitive(primitive)),
+    );
     let func_val = FuncVal(Reader::new(func));
     Named::new(name, func_val)
 }
 
 fn named_mutable_fn(
     name: &'static str,
-    input_mode: InputMode,
+    input_mode: IoMode,
+    output_mode: IoMode,
     func: impl Fn(CtxForMutableFn, Val) -> Val + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<CtxMutableFn>::new(name, func);
     let func = Func::new(
         input_mode,
+        output_mode,
         FuncEval::Mutable(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Reader::new(func));

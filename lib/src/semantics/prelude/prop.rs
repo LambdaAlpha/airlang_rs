@@ -7,7 +7,7 @@ use crate::{
         ctx_access::constant::CtxForConstFn,
         eval_mode::EvalMode,
         func::FuncEval,
-        input_mode::InputMode,
+        io_mode::IoMode,
         logic::{
             Prop,
             PropCtx,
@@ -89,14 +89,15 @@ const TRUTH: &str = "truth";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), InputMode::Any(EvalMode::More));
-    map.insert(symbol(INPUT), InputMode::Any(EvalMode::More));
-    map.insert(symbol(OUTPUT), InputMode::Any(EvalMode::More));
-    map.insert(symbol(CTX), InputMode::Any(EvalMode::More));
-    map.insert(symbol(BEFORE), InputMode::Any(EvalMode::More));
-    map.insert(symbol(AFTER), InputMode::Any(EvalMode::More));
-    let input_mode = InputMode::MapForSome(map);
-    named_free_fn("proposition", input_mode, fn_new)
+    map.insert(symbol(FUNCTION), IoMode::Any(EvalMode::More));
+    map.insert(symbol(INPUT), IoMode::Any(EvalMode::More));
+    map.insert(symbol(OUTPUT), IoMode::Any(EvalMode::More));
+    map.insert(symbol(CTX), IoMode::Any(EvalMode::More));
+    map.insert(symbol(BEFORE), IoMode::Any(EvalMode::More));
+    map.insert(symbol(AFTER), IoMode::Any(EvalMode::More));
+    let input_mode = IoMode::MapForSome(map);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("proposition", input_mode, output_mode, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -134,8 +135,17 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::More);
-    named_free_fn("proposition.represent", input_mode, fn_repr)
+    let input_mode = IoMode::Any(EvalMode::More);
+    let mut map = Map::default();
+    map.insert(symbol(FUNCTION), IoMode::Any(EvalMode::More));
+    map.insert(symbol(INPUT), IoMode::Any(EvalMode::More));
+    map.insert(symbol(OUTPUT), IoMode::Any(EvalMode::More));
+    map.insert(symbol(CTX), IoMode::Any(EvalMode::More));
+    map.insert(symbol(BEFORE), IoMode::Any(EvalMode::More));
+    map.insert(symbol(AFTER), IoMode::Any(EvalMode::More));
+    map.insert(symbol(TRUTH), IoMode::Any(EvalMode::More));
+    let output_mode = IoMode::MapForSome(map);
+    named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -173,8 +183,9 @@ fn generate_prop(repr: &mut MapVal, prop: &Prop) {
 }
 
 fn truth() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("proposition.truth", input_mode, fn_truth)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("proposition.truth", input_mode, output_mode, fn_truth)
 }
 
 fn fn_truth(ctx: CtxForConstFn, input: Val) -> Val {
@@ -191,8 +202,9 @@ fn fn_truth(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn func() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("proposition.function", input_mode, fn_func)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("proposition.function", input_mode, output_mode, fn_func)
 }
 
 fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
@@ -205,8 +217,9 @@ fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("proposition.input", input_mode, fn_input)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("proposition.input", input_mode, output_mode, fn_input)
 }
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
@@ -219,8 +232,9 @@ fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn output() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("proposition.output", input_mode, fn_output)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("proposition.output", input_mode, output_mode, fn_output)
 }
 
 fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
@@ -233,8 +247,9 @@ fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn before() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("proposition.before", input_mode, fn_before)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("proposition.before", input_mode, output_mode, fn_before)
 }
 
 fn fn_before(ctx: CtxForConstFn, input: Val) -> Val {
@@ -252,8 +267,9 @@ fn fn_before(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn after() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("proposition.after", input_mode, fn_after)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("proposition.after", input_mode, output_mode, fn_after)
 }
 
 fn fn_after(ctx: CtxForConstFn, input: Val) -> Val {

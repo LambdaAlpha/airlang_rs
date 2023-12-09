@@ -10,7 +10,7 @@ use {
                 mutable::CtxForMutableFn,
             },
             eval_mode::EvalMode,
-            input_mode::InputMode,
+            io_mode::IoMode,
             prelude::{
                 named_const_fn,
                 named_free_fn,
@@ -107,8 +107,9 @@ impl Prelude for MapPrelude {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map.length", input_mode, fn_length)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("map.length", input_mode, output_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
@@ -121,8 +122,12 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn items() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map.items", input_mode, fn_items)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::ListForAll(Box::new(IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
+    )))));
+    named_const_fn("map.items", input_mode, output_mode, fn_items)
 }
 
 fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
@@ -139,8 +144,12 @@ fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn into_items() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map.into_items", input_mode, fn_into_items)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::ListForAll(Box::new(IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
+    )))));
+    named_mutable_fn("map.into_items", input_mode, output_mode, fn_into_items)
 }
 
 fn fn_into_items(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -159,8 +168,9 @@ fn fn_into_items(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn keys() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map.keys", input_mode, fn_keys)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::List(EvalMode::More);
+    named_const_fn("map.keys", input_mode, output_mode, fn_keys)
 }
 
 fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
@@ -173,8 +183,9 @@ fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn into_keys() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map.into_keys", input_mode, fn_into_keys)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::List(EvalMode::More);
+    named_mutable_fn("map.into_keys", input_mode, output_mode, fn_into_keys)
 }
 
 fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -189,8 +200,9 @@ fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn values() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("map.values", input_mode, fn_values)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::List(EvalMode::More);
+    named_const_fn("map.values", input_mode, output_mode, fn_values)
 }
 
 fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
@@ -203,8 +215,9 @@ fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn into_values() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map.into_values", input_mode, fn_into_values)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::List(EvalMode::More);
+    named_mutable_fn("map.into_values", input_mode, output_mode, fn_into_values)
 }
 
 fn fn_into_values(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -219,11 +232,12 @@ fn fn_into_values(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn contains() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::Any(EvalMode::More),
     )));
-    named_const_fn("map.contains", input_mode, fn_contains)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("map.contains", input_mode, output_mode, fn_contains)
 }
 
 fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
@@ -241,11 +255,17 @@ fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn contains_many() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::List(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::List(EvalMode::More),
     )));
-    named_const_fn("map.contains_many", input_mode, fn_contains_many)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn(
+        "map.contains_many",
+        input_mode,
+        output_mode,
+        fn_contains_many,
+    )
 }
 
 fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
@@ -266,14 +286,15 @@ fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn set() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::Pair(Box::new(Pair::new(
-            InputMode::Any(EvalMode::More),
-            InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::Pair(Box::new(Pair::new(
+            IoMode::Any(EvalMode::More),
+            IoMode::Any(EvalMode::More),
         ))),
     )));
-    named_mutable_fn("map.set", input_mode, fn_set)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn("map.set", input_mode, output_mode, fn_set)
 }
 
 fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -295,11 +316,12 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn set_many() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::Map(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::Map(EvalMode::More),
     )));
-    named_mutable_fn("map.set_many", input_mode, fn_set_many)
+    let output_mode = IoMode::Map(EvalMode::More);
+    named_mutable_fn("map.set_many", input_mode, output_mode, fn_set_many)
 }
 
 fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -323,11 +345,12 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn get() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::Any(EvalMode::More),
     )));
-    named_const_fn("map.get", input_mode, fn_get)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("map.get", input_mode, output_mode, fn_get)
 }
 
 fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
@@ -345,11 +368,12 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn get_many() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::List(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::List(EvalMode::More),
     )));
-    named_const_fn("map.get_many", input_mode, fn_get_many)
+    let output_mode = IoMode::Map(EvalMode::More);
+    named_const_fn("map.get_many", input_mode, output_mode, fn_get_many)
 }
 
 fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
@@ -373,11 +397,12 @@ fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn remove() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::Any(EvalMode::More),
     )));
-    named_mutable_fn("map.remove", input_mode, fn_remove)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn("map.remove", input_mode, output_mode, fn_remove)
 }
 
 fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -395,11 +420,12 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn remove_many() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Symbol(EvalMode::Value),
-        InputMode::List(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::List(EvalMode::More),
     )));
-    named_mutable_fn("map.remove_many", input_mode, fn_remove_many)
+    let output_mode = IoMode::Map(EvalMode::More);
+    named_mutable_fn("map.remove_many", input_mode, output_mode, fn_remove_many)
 }
 
 fn fn_remove_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -424,8 +450,9 @@ fn fn_remove_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn clear() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_mutable_fn("map.clear", input_mode, fn_clear)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn("map.clear", input_mode, output_mode, fn_clear)
 }
 
 fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -438,11 +465,12 @@ fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn new_map() -> Named<FuncVal> {
-    let input_mode = InputMode::ListForAll(Box::new(InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::ListForAll(Box::new(IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )))));
-    named_free_fn("map", input_mode, fn_new_map)
+    let output_mode = IoMode::Map(EvalMode::More);
+    named_free_fn("map", input_mode, output_mode, fn_new_map)
 }
 
 fn fn_new_map(input: Val) -> Val {
@@ -465,8 +493,9 @@ fn fn_new_map(input: Val) -> Val {
 }
 
 fn new_set() -> Named<FuncVal> {
-    let input_mode = InputMode::List(EvalMode::More);
-    named_free_fn("set", input_mode, fn_new_set)
+    let input_mode = IoMode::List(EvalMode::More);
+    let output_mode = IoMode::Map(EvalMode::More);
+    named_free_fn("set", input_mode, output_mode, fn_new_set)
 }
 
 fn fn_new_set(input: Val) -> Val {
@@ -478,8 +507,9 @@ fn fn_new_set(input: Val) -> Val {
 }
 
 fn new_multiset() -> Named<FuncVal> {
-    let input_mode = InputMode::List(EvalMode::More);
-    named_free_fn("multiset", input_mode, fn_new_multiset)
+    let input_mode = IoMode::List(EvalMode::More);
+    let output_mode = IoMode::Map(EvalMode::More);
+    named_free_fn("multiset", input_mode, output_mode, fn_new_multiset)
 }
 
 fn fn_new_multiset(input: Val) -> Val {

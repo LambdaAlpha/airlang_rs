@@ -388,6 +388,7 @@ function.represent (function {
     input_name : i,
     caller_name : c,
     input_mode : ('t : 't),
+    output_mode : ('f : 'f),
     caller_access : mutable,
 })
 -----
@@ -396,6 +397,7 @@ function.represent (function {
     input_name : i,
     caller_name : c,
     input_mode : ('t : 't),
+    output_mode : ('f : 'f),
     caller_access : mutable,
 }
 =====
@@ -530,6 +532,16 @@ map '
 ]
 -----
 [symbol ', list '] map_items (list_items (map '))
+=====
+;[
+    f = (function {
+        body : input,
+        output_mode : ('t map_items '),
+    }),
+    function.output_mode f
+]
+-----
+'t map_items '
 =====
 function.is_primitive not
 -----

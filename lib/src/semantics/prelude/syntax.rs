@@ -2,7 +2,7 @@ use crate::{
     semantics::{
         ctx::NameMap,
         eval_mode::EvalMode,
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             named_free_fn,
             Named,
@@ -39,8 +39,9 @@ impl Prelude for SyntaxPrelude {
 }
 
 fn parse() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::More);
-    named_free_fn("parse", input_mode, fn_parse)
+    let input_mode = IoMode::Any(EvalMode::More);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("parse", input_mode, output_mode, fn_parse)
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -51,8 +52,9 @@ fn fn_parse(input: Val) -> Val {
 }
 
 fn stringify() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::More);
-    named_free_fn("stringify", input_mode, fn_stringify)
+    let input_mode = IoMode::Any(EvalMode::More);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("stringify", input_mode, output_mode, fn_stringify)
 }
 
 fn fn_stringify(input: Val) -> Val {

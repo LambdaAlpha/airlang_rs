@@ -11,7 +11,7 @@ use crate::semantics::{
         value::Value,
         EvalMode,
     },
-    input_mode::InputMode,
+    io_mode::IoMode,
     prelude::{
         named_free_fn,
         named_mutable_fn,
@@ -54,8 +54,9 @@ pub(crate) const LESS: &str = "'f";
 pub(crate) const MORE: &str = "'t";
 
 fn value() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Value);
-    named_free_fn(VALUE, input_mode, fn_value)
+    let input_mode = IoMode::Any(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn(VALUE, input_mode, output_mode, fn_value)
 }
 
 fn fn_value(input: Val) -> Val {
@@ -63,8 +64,9 @@ fn fn_value(input: Val) -> Val {
 }
 
 fn less() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Value);
-    named_mutable_fn(LESS, input_mode, fn_less)
+    let input_mode = IoMode::Any(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn(LESS, input_mode, output_mode, fn_less)
 }
 
 fn fn_less(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -72,8 +74,9 @@ fn fn_less(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn more() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::Value);
-    named_mutable_fn(MORE, input_mode, fn_more)
+    let input_mode = IoMode::Any(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn(MORE, input_mode, output_mode, fn_more)
 }
 
 fn fn_more(mut ctx: CtxForMutableFn, input: Val) -> Val {

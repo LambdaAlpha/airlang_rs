@@ -2,7 +2,7 @@ use crate::{
     semantics::{
         ctx::NameMap,
         eval_mode::EvalMode,
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             named_free_fn,
             Named,
@@ -66,11 +66,12 @@ impl Prelude for IntPrelude {
 }
 
 fn add() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("+", input_mode, fn_add)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("+", input_mode, output_mode, fn_add)
 }
 
 fn fn_add(input: Val) -> Val {
@@ -87,11 +88,12 @@ fn fn_add(input: Val) -> Val {
 }
 
 fn subtract() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("-", input_mode, fn_subtract)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("-", input_mode, output_mode, fn_subtract)
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -108,11 +110,12 @@ fn fn_subtract(input: Val) -> Val {
 }
 
 fn multiply() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("*", input_mode, fn_multiply)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("*", input_mode, output_mode, fn_multiply)
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -129,11 +132,12 @@ fn fn_multiply(input: Val) -> Val {
 }
 
 fn divide() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("/", input_mode, fn_divide)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("/", input_mode, output_mode, fn_divide)
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -153,11 +157,12 @@ fn fn_divide(input: Val) -> Val {
 }
 
 fn remainder() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("%", input_mode, fn_remainder)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("%", input_mode, output_mode, fn_remainder)
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -177,11 +182,15 @@ fn fn_remainder(input: Val) -> Val {
 }
 
 fn divide_remainder() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("/%", input_mode, fn_divide_remainder)
+    let output_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
+    )));
+    named_free_fn("/%", input_mode, output_mode, fn_divide_remainder)
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -201,11 +210,12 @@ fn fn_divide_remainder(input: Val) -> Val {
 }
 
 fn less_than() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("<", input_mode, fn_less_than)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("<", input_mode, output_mode, fn_less_than)
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -222,11 +232,12 @@ fn fn_less_than(input: Val) -> Val {
 }
 
 fn less_equal() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("<=", input_mode, fn_less_equal)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("<=", input_mode, output_mode, fn_less_equal)
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -243,11 +254,12 @@ fn fn_less_equal(input: Val) -> Val {
 }
 
 fn greater_than() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn(">", input_mode, fn_greater_than)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn(">", input_mode, output_mode, fn_greater_than)
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -264,11 +276,12 @@ fn fn_greater_than(input: Val) -> Val {
 }
 
 fn greater_equal() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn(">=", input_mode, fn_greater_equal)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn(">=", input_mode, output_mode, fn_greater_equal)
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -285,11 +298,12 @@ fn fn_greater_equal(input: Val) -> Val {
 }
 
 fn less_greater() -> Named<FuncVal> {
-    let input_mode = InputMode::Pair(Box::new(Pair::new(
-        InputMode::Any(EvalMode::More),
-        InputMode::Any(EvalMode::More),
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::More),
     )));
-    named_free_fn("<>", input_mode, fn_less_greater)
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("<>", input_mode, output_mode, fn_less_greater)
 }
 
 fn fn_less_greater(input: Val) -> Val {

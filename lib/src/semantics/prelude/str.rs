@@ -6,7 +6,7 @@ use crate::{
         },
         ctx_access::constant::CtxForConstFn,
         eval_mode::EvalMode,
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             named_const_fn,
             named_free_fn,
@@ -44,8 +44,9 @@ impl Prelude for StrPrelude {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("string.length", input_mode, fn_length)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("string.length", input_mode, output_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
@@ -58,8 +59,9 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = InputMode::List(EvalMode::More);
-    named_free_fn("string.concat", input_mode, fn_concat)
+    let input_mode = IoMode::List(EvalMode::More);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("string.concat", input_mode, output_mode, fn_concat)
 }
 
 fn fn_concat(input: Val) -> Val {

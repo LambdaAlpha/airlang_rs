@@ -19,14 +19,14 @@ use crate::{
             FuncEval,
             FuncImpl,
         },
-        input_mode::InputMode,
+        io_mode::IoMode,
         prelude::{
             named_const_fn,
             named_free_fn,
             utils::{
-                generate_input_mode,
+                generate_io_mode,
                 map_remove,
-                parse_input_mode,
+                parse_io_mode,
                 symbol,
             },
             Named,
@@ -53,6 +53,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) repr: Named<FuncVal>,
     pub(crate) caller_access: Named<FuncVal>,
     pub(crate) input_mode: Named<FuncVal>,
+    pub(crate) output_mode: Named<FuncVal>,
     pub(crate) is_primitive: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
     pub(crate) body: Named<FuncVal>,
@@ -68,6 +69,7 @@ impl Default for FuncPrelude {
             repr: repr(),
             caller_access: caller_access(),
             input_mode: input_mode(),
+            output_mode: output_mode(),
             is_primitive: is_primitive(),
             id: id(),
             body: body(),
@@ -84,6 +86,7 @@ impl Prelude for FuncPrelude {
         self.repr.put(m);
         self.caller_access.put(m);
         self.input_mode.put(m);
+        self.output_mode.put(m);
         self.is_primitive.put(m);
         self.id.put(m);
         self.body.put(m);
@@ -99,6 +102,7 @@ const INPUT_NAME: &str = "input_name";
 const CALLER_NAME: &str = "caller_name";
 const ID: &str = "id";
 const INPUT_MODE: &str = "input_mode";
+const OUTPUT_MODE: &str = "output_mode";
 const CALLER_ACCESS: &str = "caller_access";
 
 const DEFAULT_INPUT_NAME: &str = "input";
@@ -109,14 +113,16 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), InputMode::Any(EvalMode::Less));
-    map.insert(symbol(CTX), InputMode::Any(EvalMode::More));
-    map.insert(symbol(INPUT_NAME), InputMode::Symbol(EvalMode::Value));
-    map.insert(symbol(CALLER_NAME), InputMode::Symbol(EvalMode::Value));
-    map.insert(symbol(CALLER_ACCESS), InputMode::Symbol(EvalMode::Value));
-    map.insert(symbol(INPUT_MODE), InputMode::Any(EvalMode::Less));
-    let input_mode = InputMode::MapForSome(map);
-    named_free_fn("function", input_mode, fn_new)
+    map.insert(symbol(BODY), IoMode::Any(EvalMode::Less));
+    map.insert(symbol(CTX), IoMode::Any(EvalMode::More));
+    map.insert(symbol(INPUT_NAME), IoMode::Symbol(EvalMode::Value));
+    map.insert(symbol(CALLER_NAME), IoMode::Symbol(EvalMode::Value));
+    map.insert(symbol(CALLER_ACCESS), IoMode::Symbol(EvalMode::Value));
+    map.insert(symbol(INPUT_MODE), IoMode::Any(EvalMode::Less));
+    map.insert(symbol(OUTPUT_MODE), IoMode::Any(EvalMode::Less));
+    let input_mode = IoMode::MapForSome(map);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("function", input_mode, output_mode, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -137,7 +143,13 @@ fn fn_new(input: Val) -> Val {
     let input_mode = map
         .remove(&symbol(INPUT_MODE))
         .unwrap_or(Val::Bool(Bool::t()));
-    let Some(input_mode) = parse_input_mode(input_mode) else {
+    let Some(input_mode) = parse_io_mode(input_mode) else {
+        return Val::default();
+    };
+    let output_mode = map
+        .remove(&symbol(OUTPUT_MODE))
+        .unwrap_or(Val::Bool(Bool::t()));
+    let Some(output_mode) = parse_io_mode(output_mode) else {
         return Val::default();
     };
     let caller_name = match map_remove(&mut map, CALLER_NAME) {
@@ -172,13 +184,23 @@ fn fn_new(input: Val) -> Val {
         })),
         _ => return Val::default(),
     };
-    let func = Func::new(input_mode, evaluator);
+    let func = Func::new(input_mode, output_mode, evaluator);
     Val::Func(Reader::new(func).into())
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = InputMode::Any(EvalMode::More);
-    named_free_fn("function.represent", input_mode, fn_repr)
+    let input_mode = IoMode::Any(EvalMode::More);
+    let mut map = Map::default();
+    map.insert(symbol(BODY), IoMode::Any(EvalMode::Less));
+    map.insert(symbol(CTX), IoMode::Any(EvalMode::More));
+    map.insert(symbol(INPUT_NAME), IoMode::Symbol(EvalMode::Value));
+    map.insert(symbol(CALLER_NAME), IoMode::Symbol(EvalMode::Value));
+    map.insert(symbol(CALLER_ACCESS), IoMode::Symbol(EvalMode::Value));
+    map.insert(symbol(INPUT_MODE), IoMode::Any(EvalMode::Less));
+    map.insert(symbol(OUTPUT_MODE), IoMode::Any(EvalMode::Less));
+    map.insert(symbol(ID), IoMode::Any(EvalMode::Less));
+    let output_mode = IoMode::MapForSome(map);
+    named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -187,9 +209,13 @@ fn fn_repr(input: Val) -> Val {
     };
     let mut repr = MapVal::default();
 
-    if func.input_mode != InputMode::Any(EvalMode::More) {
-        let input_mode = generate_input_mode(&func.input_mode);
+    if func.input_mode != IoMode::Any(EvalMode::More) {
+        let input_mode = generate_io_mode(&func.input_mode);
         repr.insert(symbol(INPUT_MODE), input_mode);
+    }
+    if func.output_mode != IoMode::Any(EvalMode::More) {
+        let output_mode = generate_io_mode(&func.output_mode);
+        repr.insert(symbol(OUTPUT_MODE), output_mode);
     }
 
     match &func.evaluator {
@@ -252,8 +278,14 @@ fn fn_repr(input: Val) -> Val {
 }
 
 fn caller_access() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.caller_access", input_mode, fn_caller_access)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Symbol(EvalMode::Value);
+    named_const_fn(
+        "function.caller_access",
+        input_mode,
+        output_mode,
+        fn_caller_access,
+    )
 }
 
 fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
@@ -271,8 +303,14 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input_mode() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.input_mode", input_mode, fn_input_mode)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::Less);
+    named_const_fn(
+        "function.input_mode",
+        input_mode,
+        output_mode,
+        fn_input_mode,
+    )
 }
 
 fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
@@ -280,13 +318,39 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
-        generate_input_mode(&func.input_mode)
+        generate_io_mode(&func.input_mode)
+    })
+}
+
+fn output_mode() -> Named<FuncVal> {
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::Less);
+    named_const_fn(
+        "function.output_mode",
+        input_mode,
+        output_mode,
+        fn_output_mode,
+    )
+}
+
+fn fn_output_mode(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
+        let Val::Func(FuncVal(func)) = val else {
+            return Val::default();
+        };
+        generate_io_mode(&func.output_mode)
     })
 }
 
 fn is_primitive() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.is_primitive", input_mode, fn_is_primitive)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn(
+        "function.is_primitive",
+        input_mode,
+        output_mode,
+        fn_is_primitive,
+    )
 }
 
 fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
@@ -300,8 +364,9 @@ fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn id() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.id", input_mode, fn_id)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Symbol(EvalMode::Value);
+    named_const_fn("function.id", input_mode, output_mode, fn_id)
 }
 
 fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
@@ -317,8 +382,9 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn body() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.body", input_mode, fn_body)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::Less);
+    named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 
 fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
@@ -334,8 +400,9 @@ fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn ctx() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.context", input_mode, fn_ctx)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_const_fn("function.context", input_mode, output_mode, fn_ctx)
 }
 
 fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
@@ -351,8 +418,14 @@ fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input_name() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.input_name", input_mode, fn_input_name)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Symbol(EvalMode::Value);
+    named_const_fn(
+        "function.input_name",
+        input_mode,
+        output_mode,
+        fn_input_name,
+    )
 }
 
 fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
@@ -368,8 +441,14 @@ fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn caller_name() -> Named<FuncVal> {
-    let input_mode = InputMode::Symbol(EvalMode::Value);
-    named_const_fn("function.caller_name", input_mode, fn_caller_name)
+    let input_mode = IoMode::Symbol(EvalMode::Value);
+    let output_mode = IoMode::Symbol(EvalMode::Value);
+    named_const_fn(
+        "function.caller_name",
+        input_mode,
+        output_mode,
+        fn_caller_name,
+    )
 }
 
 fn fn_caller_name(ctx: CtxForConstFn, input: Val) -> Val {
