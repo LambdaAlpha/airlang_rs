@@ -1,6 +1,5 @@
 use crate::{
     semantics::{
-        ctx::names::SOLVER,
         ctx_access::CtxAccessor,
         eval::{
             input::{
@@ -22,6 +21,7 @@ use crate::{
                 ValueByRef,
             },
         },
+        problem::solve,
         val::{
             FuncVal,
             ListVal,
@@ -99,16 +99,7 @@ where
             self.eval(ctx, output)
         };
         let reverse = ValBuilder.from_reverse(func, output);
-        let Ok(meta) = ctx.get_meta() else {
-            return reverse;
-        };
-        let Ok(solver) = meta.get(SOLVER) else {
-            return reverse;
-        };
-        let Val::Func(FuncVal(solver)) = solver else {
-            return Val::default();
-        };
-        solver.eval(ctx, reverse)
+        solve(ctx, reverse)
     }
 }
 
@@ -178,15 +169,6 @@ where
             self.eval(ctx, output)
         };
         let reverse = ValBuilder.from_reverse(func, output);
-        let Ok(meta) = ctx.get_meta() else {
-            return reverse;
-        };
-        let Ok(solver) = meta.get(SOLVER) else {
-            return reverse;
-        };
-        let Val::Func(FuncVal(solver)) = solver else {
-            return Val::default();
-        };
-        solver.eval(ctx, reverse)
+        solve(ctx, reverse)
     }
 }

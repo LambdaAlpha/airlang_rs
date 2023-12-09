@@ -79,6 +79,8 @@ pub(crate) mod logic;
 
 pub(crate) mod nondeterministic;
 
+pub(crate) mod problem;
+
 pub(crate) mod prelude;
 
 #[cfg(test)]
