@@ -1,9 +1,9 @@
 [package]
-name = "airlang_bin"
-version = "0.0.9"
+name = "airlang_ext"
+version = "0.0.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "The Air Programming Language"
+description = "The Extension of the Air Programming Language"
 homepage = "https://github.com/LambdaAlpha/airlang"
 repository = "https://github.com/LambdaAlpha/airlang_rs"
 keywords = ["air", "language", "specification", "formal", "logic"]
@@ -12,7 +12,3 @@ categories = ["compilers"]
 [dependencies.airlang]
 path = "../lib"
 version = "0.0.9"
-
-[dependencies.airlang_ext]
-path = "../ext"
-version = "0.0.1"

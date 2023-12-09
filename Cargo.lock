@@ -16,6 +16,7 @@ name = "air_main"
 version = "0.0.1"
 dependencies = [
  "airlang",
+ "airlang_ext",
 ]
 
 [[package]]
@@ -34,6 +35,14 @@ dependencies = [
 [[package]]
 name = "airlang_bin"
 version = "0.0.9"
+dependencies = [
+ "airlang",
+ "airlang_ext",
+]
+
+[[package]]
+name = "airlang_ext"
+version = "0.0.1"
 dependencies = [
  "airlang",
 ]

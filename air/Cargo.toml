@@ -12,3 +12,7 @@ categories = ["compilers"]
 [dependencies.airlang]
 path = "../lib"
 version = "0.0.9"
+
+[dependencies.airlang_ext]
+path = "../ext"
+version = "0.0.1"
