@@ -7,8 +7,8 @@ use crate::{
         output::OutputBuilder,
     },
     val::{
-        ListVal,
-        MapVal,
+        list::ListVal,
+        map::MapVal,
     },
     Call,
     Pair,

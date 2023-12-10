@@ -21,8 +21,8 @@ use {
             Prelude,
         },
         val::{
-            FuncVal,
-            MapVal,
+            func::FuncVal,
+            map::MapVal,
             Val,
         },
     },

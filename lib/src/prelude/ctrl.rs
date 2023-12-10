@@ -29,7 +29,7 @@ use crate::{
     },
     symbol::Symbol,
     val::{
-        FuncVal,
+        func::FuncVal,
         Val,
     },
 };

@@ -16,9 +16,9 @@ use crate::{
     },
     types::refer::Reader,
     val::{
-        CtxVal,
-        FuncVal,
-        PropVal,
+        ctx::CtxVal,
+        func::FuncVal,
+        prop::PropVal,
     },
     Val,
 };

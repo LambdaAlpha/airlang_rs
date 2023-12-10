@@ -5,7 +5,7 @@ use {
         symbol::Symbol,
         types::either::Either,
         val::{
-            CtxVal,
+            ctx::CtxVal,
             Val,
         },
     },

@@ -27,7 +27,7 @@ use crate::{
         Prelude,
     },
     problem::solve,
-    val::FuncVal,
+    val::func::FuncVal,
     Val,
 };
 

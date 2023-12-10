@@ -23,9 +23,9 @@ use crate::{
     problem::solve,
     symbol::Symbol,
     val::{
-        FuncVal,
-        ListVal,
-        MapVal,
+        func::FuncVal,
+        list::ListVal,
+        map::MapVal,
         Val,
     },
     Evaluator,

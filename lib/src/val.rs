@@ -2,16 +2,8 @@ use {
     crate::{
         bool::Bool,
         bytes::Bytes,
-        call::Call,
-        ctx::Ctx,
         float::Float,
-        func::Func,
         int::Int,
-        list::List,
-        logic::Prop,
-        map::Map,
-        pair::Pair,
-        reverse::Reverse,
         string::Str,
         symbol::Symbol,
         syntax::{
@@ -26,8 +18,17 @@ use {
                 ReverseRepr,
             },
         },
-        types::refer::Reader,
         unit::Unit,
+        val::{
+            call::CallVal,
+            ctx::CtxVal,
+            func::FuncVal,
+            list::ListVal,
+            map::MapVal,
+            pair::PairVal,
+            prop::PropVal,
+            reverse::ReverseVal,
+        },
         ReprError,
     },
     std::{
@@ -35,13 +36,9 @@ use {
             Debug,
             Formatter,
         },
-        hash::{
-            Hash,
-            Hasher,
-        },
+        hash::Hash,
         ops::{
             ControlFlow,
-            Deref,
             FromResidual,
             Try,
         },
@@ -68,21 +65,6 @@ pub enum Val {
 
     Prop(PropVal),
 }
-
-pub type PairVal = Pair<Val, Val>;
-pub type CallVal = Call<Val, Val>;
-pub type ReverseVal = Reverse<Val, Val>;
-pub type ListVal = List<Val>;
-pub type MapVal = Map<Val, Val>;
-
-#[derive(Clone, Eq)]
-pub struct FuncVal(pub(crate) Reader<Func>);
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CtxVal(pub(crate) Box<Ctx>);
-
-#[derive(Clone, Eq)]
-pub struct PropVal(pub(crate) Reader<Prop>);
 
 #[allow(dead_code)]
 impl Val {
@@ -279,182 +261,6 @@ impl TryInto<Repr> for Val {
     }
 }
 
-impl From<&PairRepr> for PairVal {
-    fn from(value: &PairRepr) -> Self {
-        PairVal::new(Val::from(&value.first), Val::from(&value.second))
-    }
-}
-
-impl From<PairRepr> for PairVal {
-    fn from(value: PairRepr) -> Self {
-        PairVal::new(Val::from(value.first), Val::from(value.second))
-    }
-}
-
-impl TryInto<PairRepr> for &PairVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<PairRepr, Self::Error> {
-        Ok(PairRepr::new(
-            (&self.first).try_into()?,
-            (&self.second).try_into()?,
-        ))
-    }
-}
-
-impl TryInto<PairRepr> for PairVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<PairRepr, Self::Error> {
-        Ok(PairRepr::new(
-            self.first.try_into()?,
-            self.second.try_into()?,
-        ))
-    }
-}
-
-impl From<&CallRepr> for CallVal {
-    fn from(value: &CallRepr) -> Self {
-        CallVal::new(Val::from(&value.func), Val::from(&value.input))
-    }
-}
-
-impl From<CallRepr> for CallVal {
-    fn from(value: CallRepr) -> Self {
-        CallVal::new(Val::from(value.func), Val::from(value.input))
-    }
-}
-
-impl TryInto<CallRepr> for &CallVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<CallRepr, Self::Error> {
-        Ok(CallRepr::new(
-            (&self.func).try_into()?,
-            (&self.input).try_into()?,
-        ))
-    }
-}
-
-impl TryInto<CallRepr> for CallVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<CallRepr, Self::Error> {
-        Ok(CallRepr::new(self.func.try_into()?, self.input.try_into()?))
-    }
-}
-
-impl From<&ReverseRepr> for ReverseVal {
-    fn from(value: &ReverseRepr) -> Self {
-        ReverseVal::new(Val::from(&value.func), Val::from(&value.output))
-    }
-}
-
-impl From<ReverseRepr> for ReverseVal {
-    fn from(value: ReverseRepr) -> Self {
-        ReverseVal::new(Val::from(value.func), Val::from(value.output))
-    }
-}
-
-impl TryInto<ReverseRepr> for &ReverseVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<ReverseRepr, Self::Error> {
-        Ok(ReverseRepr::new(
-            (&self.func).try_into()?,
-            (&self.output).try_into()?,
-        ))
-    }
-}
-
-impl TryInto<ReverseRepr> for ReverseVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<ReverseRepr, Self::Error> {
-        Ok(ReverseRepr::new(
-            self.func.try_into()?,
-            self.output.try_into()?,
-        ))
-    }
-}
-
-impl From<&ListRepr> for ListVal {
-    fn from(value: &ListRepr) -> Self {
-        value.iter().map(|v| v.into()).collect::<Vec<Val>>().into()
-    }
-}
-
-impl From<ListRepr> for ListVal {
-    fn from(value: ListRepr) -> Self {
-        <_ as Into<Vec<Repr>>>::into(value)
-            .into_iter()
-            .map(|v| v.into())
-            .collect::<Vec<Val>>()
-            .into()
-    }
-}
-
-impl TryInto<ListRepr> for ListVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<ListRepr, Self::Error> {
-        <_ as Into<Vec<Val>>>::into(self)
-            .into_iter()
-            .map(|v| v.try_into())
-            .collect::<Result<Vec<Repr>, Self::Error>>()
-            .map(|v| v.into())
-    }
-}
-
-impl TryInto<ListRepr> for &ListVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<ListRepr, Self::Error> {
-        self.iter()
-            .map(|v| v.try_into())
-            .collect::<Result<Vec<Repr>, Self::Error>>()
-            .map(|v| v.into())
-    }
-}
-
-impl From<&MapRepr> for MapVal {
-    fn from(value: &MapRepr) -> Self {
-        value
-            .into_iter()
-            .map(|(k, v)| (<_ as Into<Val>>::into(k), <_ as Into<Val>>::into(v)))
-            .collect()
-    }
-}
-
-impl From<MapRepr> for MapVal {
-    fn from(value: MapRepr) -> Self {
-        value
-            .into_iter()
-            .map(|(k, v)| (<_ as Into<Val>>::into(k), <_ as Into<Val>>::into(v)))
-            .collect()
-    }
-}
-
-impl TryInto<MapRepr> for &MapVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<MapRepr, Self::Error> {
-        self.into_iter()
-            .map::<Result<(Repr, Repr), Self::Error>, _>(|(k, v)| {
-                Ok((
-                    <_ as TryInto<Repr>>::try_into(k)?,
-                    <_ as TryInto<Repr>>::try_into(v)?,
-                ))
-            })
-            .collect::<Result<MapRepr, Self::Error>>()
-    }
-}
-
-impl TryInto<MapRepr> for MapVal {
-    type Error = ReprError;
-    fn try_into(self) -> Result<MapRepr, Self::Error> {
-        self.into_iter()
-            .map::<Result<(Repr, Repr), Self::Error>, _>(|(k, v)| {
-                Ok((
-                    <_ as TryInto<Repr>>::try_into(k)?,
-                    <_ as TryInto<Repr>>::try_into(v)?,
-                ))
-            })
-            .collect::<Result<MapRepr, Self::Error>>()
-    }
-}
-
 impl FromResidual for Val {
     fn from_residual(residual: <Self as Try>::Residual) -> Self {
         residual
@@ -509,54 +315,6 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
     }
 }
 
-impl From<Reader<Func>> for FuncVal {
-    fn from(value: Reader<Func>) -> Self {
-        FuncVal(value)
-    }
-}
-
-impl PartialEq for FuncVal {
-    fn eq(&self, other: &Self) -> bool {
-        if self.0 == other.0 {
-            return true;
-        }
-        *self.0 == *other.0
-    }
-}
-
-impl Hash for FuncVal {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.deref().hash(state);
-    }
-}
-
-impl From<Box<Ctx>> for CtxVal {
-    fn from(value: Box<Ctx>) -> Self {
-        CtxVal(value)
-    }
-}
-
-impl From<Reader<Prop>> for PropVal {
-    fn from(value: Reader<Prop>) -> Self {
-        PropVal(value)
-    }
-}
-
-impl PartialEq for PropVal {
-    fn eq(&self, other: &Self) -> bool {
-        if self.0 == other.0 {
-            return true;
-        }
-        *self.0 == *other.0
-    }
-}
-
-impl Hash for PropVal {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.deref().hash(state);
-    }
-}
-
 impl Debug for Val {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -579,20 +337,18 @@ impl Debug for Val {
     }
 }
 
-impl Debug for FuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Debug>::fmt(self.0.deref(), f)
-    }
-}
+pub(crate) mod pair;
 
-impl Debug for CtxVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Debug>::fmt(self.0.deref(), f)
-    }
-}
+pub(crate) mod call;
 
-impl Debug for PropVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Debug>::fmt(self.0.deref(), f)
-    }
-}
+pub(crate) mod reverse;
+
+pub(crate) mod list;
+
+pub(crate) mod map;
+
+pub(crate) mod func;
+
+pub(crate) mod ctx;
+
+pub(crate) mod prop;

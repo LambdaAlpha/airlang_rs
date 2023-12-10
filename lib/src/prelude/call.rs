@@ -24,7 +24,7 @@ use crate::{
         Named,
         Prelude,
     },
-    val::FuncVal,
+    val::func::FuncVal,
     Val,
 };
 

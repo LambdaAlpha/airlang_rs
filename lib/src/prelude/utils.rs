@@ -11,10 +11,10 @@ use crate::{
     symbol::Symbol,
     unit::Unit,
     val::{
-        ListVal,
-        MapVal,
-        PairVal,
-        ReverseVal,
+        list::ListVal,
+        map::MapVal,
+        pair::PairVal,
+        reverse::ReverseVal,
     },
     Val,
 };

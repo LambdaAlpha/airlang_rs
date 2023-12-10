@@ -44,7 +44,7 @@ use crate::{
     symbol::Symbol,
     types::refer::Reader,
     val::{
-        FuncVal,
+        func::FuncVal,
         Val,
     },
 };

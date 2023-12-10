@@ -47,10 +47,10 @@ use crate::{
     symbol::Symbol,
     unit::Unit,
     val::{
-        CallVal,
-        CtxVal,
-        FuncVal,
-        MapVal,
+        call::CallVal,
+        ctx::CtxVal,
+        func::FuncVal,
+        map::MapVal,
         Val,
     },
 };

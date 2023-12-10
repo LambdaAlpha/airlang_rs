@@ -8,7 +8,7 @@ use {
         },
         eval::Evaluator,
         func::FuncEval,
-        val::FuncVal,
+        val::func::FuncVal,
         Val,
     },
     std::assert_matches::debug_assert_matches,

@@ -35,7 +35,7 @@ use {
             Prelude,
         },
         symbol::Symbol,
-        val::FuncVal,
+        val::func::FuncVal,
         Val,
     },
     rand::{

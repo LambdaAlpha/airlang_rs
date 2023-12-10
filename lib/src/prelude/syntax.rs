@@ -9,7 +9,7 @@ use crate::{
     },
     string::Str,
     val::{
-        FuncVal,
+        func::FuncVal,
         Val,
     },
 };

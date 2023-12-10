@@ -10,7 +10,7 @@ use crate::{
         Prelude,
     },
     val::{
-        FuncVal,
+        func::FuncVal,
         Val,
     },
 };

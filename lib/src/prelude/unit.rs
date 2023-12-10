@@ -8,7 +8,7 @@ use crate::{
         Prelude,
     },
     unit::Unit,
-    val::FuncVal,
+    val::func::FuncVal,
     Val,
 };
 

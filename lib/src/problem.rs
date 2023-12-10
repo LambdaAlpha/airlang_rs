@@ -3,7 +3,7 @@ use {
         ctx::names::SOLVER,
         ctx_access::CtxAccessor,
         eval::Evaluator,
-        val::FuncVal,
+        val::func::FuncVal,
         Val,
     },
     std::assert_matches::debug_assert_matches,

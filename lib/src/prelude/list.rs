@@ -19,8 +19,8 @@ use {
             Prelude,
         },
         val::{
-            FuncVal,
-            PairVal,
+            func::FuncVal,
+            pair::PairVal,
             Val,
         },
     },

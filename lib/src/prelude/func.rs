@@ -36,9 +36,9 @@ use crate::{
     symbol::Symbol,
     types::refer::Reader,
     val::{
-        CtxVal,
-        FuncVal,
-        MapVal,
+        ctx::CtxVal,
+        func::FuncVal,
+        map::MapVal,
         Val,
     },
 };

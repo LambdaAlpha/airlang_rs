@@ -21,8 +21,8 @@ use crate::{
     },
     symbol::Symbol,
     val::{
-        ListVal,
-        MapVal,
+        list::ListVal,
+        map::MapVal,
         Val,
     },
     Evaluator,

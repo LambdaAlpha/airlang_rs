@@ -19,7 +19,7 @@ use {
         },
         types::either::Either,
         val::{
-            FuncVal,
+            func::FuncVal,
             Val,
         },
     },

@@ -27,10 +27,10 @@ use crate::{
     types::refer::Reader,
     unit::Unit,
     val::{
-        CtxVal,
-        FuncVal,
-        MapVal,
-        PropVal,
+        ctx::CtxVal,
+        func::FuncVal,
+        map::MapVal,
+        prop::PropVal,
     },
     Val,
 };
