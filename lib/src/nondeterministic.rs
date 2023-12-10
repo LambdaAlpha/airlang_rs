@@ -1,5 +1,8 @@
 use {
     crate::{
+        bool::Bool,
+        bytes::Bytes,
+        call::Call,
         ctx::{
             Ctx,
             InvariantTag,
@@ -7,6 +10,7 @@ use {
             TaggedVal,
         },
         eval_mode::EvalMode,
+        float::Float,
         func::{
             Composed,
             CtxConstInfo,
@@ -16,30 +20,24 @@ use {
             FuncEval,
             FuncImpl,
         },
+        int::Int,
         io_mode::{
             IoMode,
             ListItemIoMode,
         },
+        list::List,
         logic::Prop,
+        map::Map,
+        pair::Pair,
         prelude::{
             Prelude,
             PRELUDE,
         },
-        types::{
-            Bool,
-            Bytes,
-            Call,
-            Float,
-            Int,
-            List,
-            Map,
-            Pair,
-            Reader,
-            Reverse,
-            Str,
-            Symbol,
-            Unit,
-        },
+        reverse::Reverse,
+        string::Str,
+        symbol::Symbol,
+        types::refer::Reader,
+        unit::Unit,
         val::{
             CallVal,
             CtxVal,

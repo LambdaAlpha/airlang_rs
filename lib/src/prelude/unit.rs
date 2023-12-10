@@ -7,7 +7,7 @@ use crate::{
         Named,
         Prelude,
     },
-    types::Unit,
+    unit::Unit,
     val::FuncVal,
     Val,
 };

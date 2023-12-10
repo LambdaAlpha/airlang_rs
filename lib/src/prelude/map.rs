@@ -1,5 +1,6 @@
 use {
     crate::{
+        bool::Bool,
         ctx::{
             DefaultCtx,
             NameMap,
@@ -9,18 +10,15 @@ use {
             mutable::CtxForMutableFn,
         },
         eval_mode::EvalMode,
+        int::Int,
         io_mode::IoMode,
+        pair::Pair,
         prelude::{
             named_const_fn,
             named_free_fn,
             named_mutable_fn,
             Named,
             Prelude,
-        },
-        types::{
-            Bool,
-            Int,
-            Pair,
         },
         val::{
             FuncVal,

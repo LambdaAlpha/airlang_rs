@@ -2,12 +2,12 @@ use crate::{
     ctx::NameMap,
     eval_mode::EvalMode,
     io_mode::IoMode,
+    pair::Pair,
     prelude::{
         named_free_fn,
         Named,
         Prelude,
     },
-    types::Pair,
     val::{
         FuncVal,
         Val,

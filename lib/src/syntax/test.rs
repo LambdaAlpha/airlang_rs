@@ -1,5 +1,11 @@
 use {
     crate::{
+        bool::Bool,
+        float::Float,
+        int::Int,
+        map::Map,
+        string::Str,
+        symbol::Symbol,
         syntax::{
             parse,
             repr::{
@@ -11,15 +17,7 @@ use {
                 ReverseRepr,
             },
         },
-        types::{
-            Bool,
-            Float,
-            Int,
-            Map,
-            Str,
-            Symbol,
-            Unit,
-        },
+        unit::Unit,
     },
     std::error::Error,
 };

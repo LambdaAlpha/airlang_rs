@@ -1,4 +1,5 @@
 use crate::{
+    bool::Bool,
     ctx::{
         Ctx,
         DefaultCtx,
@@ -19,6 +20,7 @@ use crate::{
         FuncImpl,
     },
     io_mode::IoMode,
+    map::Map,
     prelude::{
         named_const_fn,
         named_free_fn,
@@ -31,12 +33,8 @@ use crate::{
         Named,
         Prelude,
     },
-    types::{
-        Bool,
-        Map,
-        Reader,
-        Symbol,
-    },
+    symbol::Symbol,
+    types::refer::Reader,
     val::{
         CtxVal,
         FuncVal,

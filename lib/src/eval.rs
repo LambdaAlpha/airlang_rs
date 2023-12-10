@@ -6,15 +6,13 @@ use crate::{
         },
         output::OutputBuilder,
     },
-    types::{
-        Call,
-        Pair,
-        Reverse,
-    },
     val::{
         ListVal,
         MapVal,
     },
+    Call,
+    Pair,
+    Reverse,
     Val,
 };
 

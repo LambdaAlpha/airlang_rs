@@ -1,5 +1,5 @@
 use {
-    crate::types::Bool,
+    crate::bool::Bool,
     rug::Integer,
     std::{
         fmt::{

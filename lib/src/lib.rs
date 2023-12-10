@@ -53,16 +53,25 @@ use {
     thiserror::Error,
 };
 
-pub use self::val::{
-    CallVal as Call,
-    CtxVal as Ctx,
-    FuncVal as Func,
-    ListVal as List,
-    MapVal as Map,
-    PairVal as Pair,
-    PropVal as Prop,
-    ReverseVal as Reverse,
-    Val,
+pub use self::{
+    bool::Bool,
+    bytes::Bytes,
+    float::Float,
+    int::Int,
+    string::Str,
+    symbol::Symbol,
+    unit::Unit,
+    val::{
+        CallVal as Call,
+        CtxVal as Ctx,
+        FuncVal as Func,
+        ListVal as List,
+        MapVal as Map,
+        PairVal as Pair,
+        PropVal as Prop,
+        ReverseVal as Reverse,
+        Val,
+    },
 };
 
 pub fn parse(src: &str) -> Result<Val, ParseError> {
@@ -120,7 +129,31 @@ pub(crate) mod prelude;
 
 pub mod syntax;
 
-pub mod types;
+pub(crate) mod unit;
+
+pub(crate) mod bool;
+
+pub(crate) mod int;
+
+pub(crate) mod float;
+
+pub(crate) mod bytes;
+
+pub(crate) mod symbol;
+
+pub(crate) mod string;
+
+pub(crate) mod pair;
+
+pub(crate) mod list;
+
+pub(crate) mod map;
+
+pub(crate) mod call;
+
+pub(crate) mod reverse;
+
+pub(crate) mod types;
 
 pub(crate) mod traits;
 

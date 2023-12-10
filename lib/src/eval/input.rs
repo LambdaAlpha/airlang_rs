@@ -1,6 +1,6 @@
 use crate::{
     eval::Evaluator,
-    types::Symbol,
+    symbol::Symbol,
     val::{
         ListVal,
         MapVal,

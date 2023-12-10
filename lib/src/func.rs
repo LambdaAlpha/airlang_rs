@@ -20,10 +20,8 @@ use {
         eval::Evaluator,
         eval_mode::more::MoreByRef,
         io_mode::IoMode,
-        types::{
-            Reader,
-            Symbol,
-        },
+        symbol::Symbol,
+        types::refer::Reader,
         val::{
             CtxVal,
             Val,

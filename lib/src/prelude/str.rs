@@ -12,7 +12,7 @@ use crate::{
         Named,
         Prelude,
     },
-    types::Str,
+    string::Str,
     val::{
         FuncVal,
         Val,

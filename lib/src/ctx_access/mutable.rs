@@ -15,7 +15,7 @@ use crate::{
         free::FreeCtx,
         CtxAccessor,
     },
-    types::Symbol,
+    symbol::Symbol,
     Val,
 };
 

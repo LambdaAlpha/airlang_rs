@@ -20,13 +20,13 @@ use crate::{
         Primitive,
     },
     io_mode::IoMode,
+    pair::Pair,
     prelude::{
         named_mutable_fn,
         Named,
         Prelude,
     },
     problem::solve,
-    types::Pair,
     val::FuncVal,
     Val,
 };

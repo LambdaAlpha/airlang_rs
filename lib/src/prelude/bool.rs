@@ -1,15 +1,13 @@
 use crate::{
+    bool::Bool,
     ctx::NameMap,
     eval_mode::EvalMode,
     io_mode::IoMode,
+    pair::Pair,
     prelude::{
         named_free_fn,
         Named,
         Prelude,
-    },
-    types::{
-        Bool,
-        Pair,
     },
     val::{
         FuncVal,

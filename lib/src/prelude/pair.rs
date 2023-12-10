@@ -10,16 +10,14 @@ use {
         },
         eval_mode::EvalMode,
         io_mode::IoMode,
+        pair::Pair,
         prelude::{
             named_const_fn,
             named_mutable_fn,
             Named,
             Prelude,
         },
-        types::{
-            Either,
-            Pair,
-        },
+        types::either::Either,
         val::{
             FuncVal,
             Val,

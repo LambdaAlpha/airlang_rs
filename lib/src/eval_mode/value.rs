@@ -1,4 +1,5 @@
 use crate::{
+    call::Call,
     eval::{
         input::{
             ByRef,
@@ -8,12 +9,9 @@ use crate::{
         DefaultByVal,
         Evaluator,
     },
-    types::{
-        Call,
-        Pair,
-        Reverse,
-        Symbol,
-    },
+    pair::Pair,
+    reverse::Reverse,
+    symbol::Symbol,
     val::{
         ListVal,
         MapVal,

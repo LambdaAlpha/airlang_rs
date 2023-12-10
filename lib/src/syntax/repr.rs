@@ -1,5 +1,16 @@
 use {
     crate::{
+        bool::Bool,
+        bytes::Bytes,
+        call::Call,
+        float::Float,
+        int::Int,
+        list::List,
+        map::Map,
+        pair::Pair,
+        reverse::Reverse,
+        string::Str,
+        symbol::Symbol,
         syntax::{
             generate,
             generator::GenerateRepr,
@@ -7,20 +18,7 @@ use {
             parser::ParseRepr,
             ParseError,
         },
-        types::{
-            Bool,
-            Bytes,
-            Call,
-            Float,
-            Int,
-            List,
-            Map,
-            Pair,
-            Reverse,
-            Str,
-            Symbol,
-            Unit,
-        },
+        unit::Unit,
     },
     std::{
         convert::Infallible,

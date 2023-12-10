@@ -1,5 +1,6 @@
 use {
     crate::{
+        bool::Bool,
         ctx::{
             CtxTrait,
             DefaultCtx,
@@ -26,17 +27,14 @@ use {
             any_unit,
             any_val,
         },
+        pair::Pair,
         prelude::{
             named_const_fn,
             named_free_fn,
             Named,
             Prelude,
         },
-        types::{
-            Bool,
-            Pair,
-            Symbol,
-        },
+        symbol::Symbol,
         val::FuncVal,
         Val,
     },

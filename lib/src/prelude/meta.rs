@@ -1,10 +1,10 @@
 use crate::{
     ctx::NameMap,
+    int::Int,
     prelude::{
         Named,
         Prelude,
     },
-    types::Int,
 };
 
 #[derive(Clone)]

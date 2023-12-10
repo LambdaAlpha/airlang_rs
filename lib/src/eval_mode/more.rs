@@ -21,7 +21,7 @@ use crate::{
         },
     },
     problem::solve,
-    types::Symbol,
+    symbol::Symbol,
     val::{
         FuncVal,
         ListVal,

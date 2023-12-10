@@ -1,4 +1,5 @@
 use crate::{
+    bool::Bool,
     ctx::{
         DefaultCtx,
         NameMap,
@@ -12,6 +13,7 @@ use crate::{
         PropCtx,
         Truth,
     },
+    map::Map,
     prelude::{
         named_const_fn,
         named_free_fn,
@@ -22,12 +24,8 @@ use crate::{
         Named,
         Prelude,
     },
-    types::{
-        Bool,
-        Map,
-        Reader,
-        Unit,
-    },
+    types::refer::Reader,
+    unit::Unit,
     val::{
         CtxVal,
         FuncVal,

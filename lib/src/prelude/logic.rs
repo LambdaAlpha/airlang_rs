@@ -4,6 +4,7 @@ use crate::{
     func::FuncEval,
     io_mode::IoMode,
     logic::Prop,
+    map::Map,
     prelude::{
         named_free_fn,
         utils::{
@@ -13,10 +14,7 @@ use crate::{
         Named,
         Prelude,
     },
-    types::{
-        Map,
-        Reader,
-    },
+    types::refer::Reader,
     val::{
         CtxVal,
         FuncVal,

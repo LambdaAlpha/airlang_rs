@@ -1,4 +1,5 @@
 use crate::{
+    call::Call,
     ctx_access::CtxAccessor,
     eval::{
         output::OutputBuilder,
@@ -16,13 +17,10 @@ use crate::{
         },
         EvalMode,
     },
-    types::{
-        Call,
-        List,
-        Map,
-        Pair,
-        Reverse,
-    },
+    list::List,
+    map::Map,
+    pair::Pair,
+    reverse::Reverse,
     Val,
 };
 

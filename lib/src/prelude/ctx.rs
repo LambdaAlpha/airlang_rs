@@ -1,4 +1,6 @@
 use crate::{
+    bool::Bool,
+    call::Call,
     ctx::{
         Ctx,
         CtxError,
@@ -26,6 +28,8 @@ use crate::{
     },
     eval_mode::EvalMode,
     io_mode::IoMode,
+    list::List,
+    pair::Pair,
     prelude::{
         initial_ctx,
         named_const_fn,
@@ -39,15 +43,9 @@ use crate::{
         Prelude,
     },
     problem::solve,
-    types::{
-        Bool,
-        Call,
-        List,
-        Pair,
-        Reverse,
-        Symbol,
-        Unit,
-    },
+    reverse::Reverse,
+    symbol::Symbol,
+    unit::Unit,
     val::{
         CallVal,
         CtxVal,

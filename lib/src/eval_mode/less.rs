@@ -19,7 +19,7 @@ use crate::{
             ValueByRef,
         },
     },
-    types::Symbol,
+    symbol::Symbol,
     val::{
         ListVal,
         MapVal,

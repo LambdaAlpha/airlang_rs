@@ -1,17 +1,15 @@
 use crate::{
+    bool::Bool,
+    call::Call,
     eval_mode::EvalMode,
     io_mode::{
         IoMode,
         ListItemIoMode,
     },
-    types::{
-        Bool,
-        Call,
-        Pair,
-        Reverse,
-        Symbol,
-        Unit,
-    },
+    pair::Pair,
+    reverse::Reverse,
+    symbol::Symbol,
+    unit::Unit,
     val::{
         ListVal,
         MapVal,

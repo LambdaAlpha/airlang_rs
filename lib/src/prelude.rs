@@ -41,10 +41,8 @@ use crate::{
         unit::UnitPrelude,
         value::ValuePrelude,
     },
-    types::{
-        Reader,
-        Symbol,
-    },
+    symbol::Symbol,
+    types::refer::Reader,
     val::{
         FuncVal,
         Val,

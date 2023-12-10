@@ -10,15 +10,13 @@ use {
         },
         eval_mode::EvalMode,
         io_mode::IoMode,
+        list::List,
+        pair::Pair,
         prelude::{
             named_const_fn,
             named_mutable_fn,
             Named,
             Prelude,
-        },
-        types::{
-            List,
-            Pair,
         },
         val::{
             FuncVal,

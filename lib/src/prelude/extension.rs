@@ -7,12 +7,12 @@ use crate::{
         REVERSE_EXTENSION,
     },
     io_mode::IoMode,
+    pair::Pair,
     prelude::{
         named_mutable_fn,
         Named,
         Prelude,
     },
-    types::Pair,
     val::FuncVal,
     Val,
 };

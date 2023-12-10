@@ -4,7 +4,7 @@ use {
         initial_ctx,
         interpret,
         parse,
-        types::Int,
+        Int,
         Val,
     },
     std::error::Error,

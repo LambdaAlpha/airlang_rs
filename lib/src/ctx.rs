@@ -1,11 +1,9 @@
 use {
     crate::{
-        types::{
-            Either,
-            Map,
-            Pair,
-            Symbol,
-        },
+        map::Map,
+        pair::Pair,
+        symbol::Symbol,
+        types::either::Either,
         val::{
             CtxVal,
             Val,

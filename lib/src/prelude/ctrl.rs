@@ -20,16 +20,14 @@ use crate::{
         IoMode,
         ListItemIoMode,
     },
+    list::List,
+    pair::Pair,
     prelude::{
         named_mutable_fn,
         Named,
         Prelude,
     },
-    types::{
-        List,
-        Pair,
-        Symbol,
-    },
+    symbol::Symbol,
     val::{
         FuncVal,
         Val,

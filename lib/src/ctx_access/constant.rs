@@ -12,7 +12,7 @@ use crate::{
         mutable::CtxForMutableFn,
         CtxAccessor,
     },
-    types::Symbol,
+    symbol::Symbol,
     Val,
 };
 
