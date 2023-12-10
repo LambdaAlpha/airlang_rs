@@ -1,6 +1,6 @@
 use crate::{
     pair::Pair,
-    syntax::PairRepr,
+    syntax::repr::pair::PairRepr,
     ReprError,
     Val,
 };

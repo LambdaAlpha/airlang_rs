@@ -2,13 +2,8 @@ use {
     crate::{
         bool::Bool,
         bytes::Bytes,
-        call::Call,
         float::Float,
         int::Int,
-        list::List,
-        map::Map,
-        pair::Pair,
-        reverse::Reverse,
         string::Str,
         symbol::Symbol,
         syntax::{
@@ -16,6 +11,13 @@ use {
             generator::GenerateRepr,
             parse,
             parser::ParseRepr,
+            repr::{
+                call::CallRepr,
+                list::ListRepr,
+                map::MapRepr,
+                pair::PairRepr,
+                reverse::ReverseRepr,
+            },
             ParseError,
         },
         unit::Unit,
@@ -50,12 +52,6 @@ pub enum Repr {
     List(ListRepr),
     Map(MapRepr),
 }
-
-pub type PairRepr = Pair<Repr, Repr>;
-pub type CallRepr = Call<Repr, Repr>;
-pub type ReverseRepr = Reverse<Repr, Repr>;
-pub type ListRepr = List<Repr>;
-pub type MapRepr = Map<Repr, Repr>;
 
 impl Repr {
     pub fn is_unit(&self) -> bool {
@@ -225,3 +221,13 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
         Ok(r)
     }
 }
+
+pub(crate) mod pair;
+
+pub(crate) mod call;
+
+pub(crate) mod reverse;
+
+pub(crate) mod list;
+
+pub(crate) mod map;

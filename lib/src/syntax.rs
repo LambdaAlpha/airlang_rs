@@ -4,12 +4,12 @@ use {
 };
 
 pub use self::repr::{
-    CallRepr,
-    ListRepr,
-    MapRepr,
-    PairRepr,
+    call::CallRepr as Call,
+    list::ListRepr as List,
+    map::MapRepr as Map,
+    pair::PairRepr as Pair,
+    reverse::ReverseRepr as Reverse,
     Repr,
-    ReverseRepr,
 };
 
 pub(crate) mod repr;

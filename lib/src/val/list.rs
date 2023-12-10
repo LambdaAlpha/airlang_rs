@@ -1,6 +1,6 @@
 use crate::{
     list::List,
-    syntax::ListRepr,
+    syntax::repr::list::ListRepr,
     ReprError,
     Val,
 };

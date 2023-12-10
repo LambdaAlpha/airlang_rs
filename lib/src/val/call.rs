@@ -1,6 +1,6 @@
 use crate::{
     call::Call,
-    syntax::CallRepr,
+    syntax::repr::call::CallRepr,
     ReprError,
     Val,
 };

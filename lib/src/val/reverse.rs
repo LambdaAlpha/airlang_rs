@@ -1,6 +1,6 @@
 use crate::{
     reverse::Reverse,
-    syntax::ReverseRepr,
+    syntax::repr::reverse::ReverseRepr,
     ReprError,
     Val,
 };

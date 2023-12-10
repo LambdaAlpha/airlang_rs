@@ -1,6 +1,6 @@
 use crate::{
     map::Map,
-    syntax::MapRepr,
+    syntax::repr::map::MapRepr,
     ReprError,
     Val,
 };

@@ -9,12 +9,12 @@ use {
         syntax::{
             parse,
             repr::{
-                CallRepr,
-                ListRepr,
-                MapRepr,
-                PairRepr,
+                call::CallRepr,
+                list::ListRepr,
+                map::MapRepr,
+                pair::PairRepr,
+                reverse::ReverseRepr,
                 Repr,
-                ReverseRepr,
             },
         },
         unit::Unit,
