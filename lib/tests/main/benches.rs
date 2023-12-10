@@ -1,9 +1,10 @@
 use {
     airlang::{
         generate,
+        initial_ctx,
+        interpret,
         parse,
         types::Int,
-        Interpreter,
         Val,
     },
     std::error::Error,
@@ -11,10 +12,10 @@ use {
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
-    let mut interpreter = Interpreter::new();
+    let mut ctx = initial_ctx();
     let s = include_str!("../../benches/main/interpret.air");
     let src_val = parse(s)?;
-    let output = interpreter.interpret(src_val);
+    let output = interpret(&mut ctx, src_val);
     let expected = Val::Int(Int::from(6));
     assert_eq!(output, expected);
     Ok(())

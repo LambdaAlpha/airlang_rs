@@ -1,5 +1,6 @@
 use {
     crate::{
+        ctx::Ctx,
         ctx_access::{
             constant::ConstCtx,
             free::FreeCtx,
@@ -8,7 +9,6 @@ use {
         eval::Evaluator,
         func::FuncEval,
         val::FuncVal,
-        Ctx,
         Val,
     },
     std::assert_matches::debug_assert_matches,

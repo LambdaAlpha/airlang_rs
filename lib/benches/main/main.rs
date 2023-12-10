@@ -2,8 +2,9 @@ use {
     crate::syntax::bench_syntax,
     airlang::{
         generate,
+        initial_ctx,
+        interpret,
         parse,
-        Interpreter,
     },
     criterion::{
         black_box,
@@ -27,12 +28,12 @@ pub fn bench_all(c: &mut Criterion) {
 
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
-        let mut interpreter = Interpreter::new();
+        let mut ctx = initial_ctx();
         let s = include_str!("interpret.air");
         let src_val = parse(s).expect("parse failed");
         b.iter_batched(
             || src_val.clone(),
-            |val| interpreter.interpret(black_box(val)),
+            |val| interpret(&mut ctx, black_box(val)),
             BatchSize::SmallInput,
         )
     });

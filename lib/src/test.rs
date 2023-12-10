@@ -4,6 +4,8 @@ use {
             output::OutputBuilder,
             ValBuilder,
         },
+        initial_ctx,
+        interpret,
         parse,
         set_call_extension,
         set_reverse_extension,
@@ -22,7 +24,7 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     if input.is_empty() {
         return Ok(());
     }
-    let mut interpreter = crate::Interpreter::new();
+    let mut ctx = initial_ctx();
     let tests = input.split(MAIN_DELIMITER);
 
     for test in tests {
@@ -32,7 +34,7 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
             e
         })?;
-        let ret = interpreter.interpret(src);
+        let ret = interpret(&mut ctx, src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
             e
@@ -40,9 +42,9 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
         assert_eq!(
             ret, ret_expected,
             "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:#?}, \
-            current context: {interpreter:#?}",
+            current context: {ctx:#?}",
         );
-        interpreter.reset();
+        ctx = initial_ctx();
     }
     Ok(())
 }

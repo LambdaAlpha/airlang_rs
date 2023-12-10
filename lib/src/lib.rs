@@ -39,7 +39,6 @@
 
 use {
     crate::{
-        ctx::Ctx,
         ctx_access::mutable::MutableCtx,
         eval::Evaluator,
         eval_mode::more::More,
@@ -49,59 +48,42 @@ use {
             CALL_EXTENSION,
             REVERSE_EXTENSION,
         },
-        prelude::initial_ctx,
         syntax::ParseError,
     },
     thiserror::Error,
 };
 
 pub use self::val::{
-    CallVal,
-    CtxVal,
-    FuncVal,
-    ListVal,
-    MapVal,
-    PairVal,
-    PropVal,
-    ReverseVal,
+    CallVal as Call,
+    CtxVal as Ctx,
+    FuncVal as Func,
+    ListVal as List,
+    MapVal as Map,
+    PairVal as Pair,
+    PropVal as Prop,
+    ReverseVal as Reverse,
     Val,
 };
-
-#[derive(Error, Debug)]
-#[error("ReprError")]
-pub struct ReprError {}
-
-#[derive(Debug)]
-pub struct Interpreter {
-    ctx: Ctx,
-}
-
-impl Interpreter {
-    pub fn new() -> Self {
-        Interpreter { ctx: initial_ctx() }
-    }
-
-    pub fn interpret(&mut self, src: Val) -> Val {
-        More.eval(&mut MutableCtx(&mut self.ctx), src)
-    }
-
-    pub fn reset(&mut self) {
-        self.ctx = initial_ctx();
-    }
-}
-
-impl Default for Interpreter {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 pub fn parse(src: &str) -> Result<Val, ParseError> {
     syntax::parser::parse(src)
 }
 
+#[derive(Error, Debug)]
+#[error("ReprError")]
+pub struct ReprError {}
+
 pub fn generate(src: &Val) -> Result<String, ReprError> {
     syntax::generator::generate_pretty(src)
+}
+
+pub fn initial_ctx() -> Ctx {
+    let ctx = prelude::initial_ctx();
+    Ctx(Box::new(ctx))
+}
+
+pub fn interpret(ctx: &mut Ctx, input: Val) -> Val {
+    More.eval(&mut MutableCtx(&mut ctx.0), input)
 }
 
 pub fn set_call_extension(f: CallExtension) {

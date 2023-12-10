@@ -27,7 +27,7 @@ use crate::{
     },
     problem::solve,
     types::Pair,
-    FuncVal,
+    val::FuncVal,
     Val,
 };
 

@@ -12,8 +12,10 @@ use {
         ui::Ui,
     },
     airlang::{
+        initial_ctx,
+        interpret,
         parse,
-        Interpreter,
+        Ctx,
         Val,
     },
     std::error::Error,
@@ -24,7 +26,7 @@ pub(crate) fn repl(ui: &mut impl Ui) -> std::io::Result<()> {
     let mut dyn_ctx = dyn_ctx();
     let mut input_buffer = String::new();
 
-    print_title(ui, &mut dyn_ctx.interpreter)?;
+    print_title(ui, &mut dyn_ctx.ctx)?;
 
     loop {
         ui.print(PROMPT_PREFIX)?;
@@ -66,8 +68,8 @@ pub(crate) fn repl(ui: &mut impl Ui) -> std::io::Result<()> {
 
 pub(crate) fn dyn_ctx() -> DynCtx {
     DynCtx {
-        interpreter: Interpreter::new(),
-        meta_interpreter: Interpreter::new(),
+        ctx: initial_ctx(),
+        meta_ctx: initial_ctx(),
         multiline_mode: false,
     }
 }
@@ -81,9 +83,9 @@ fn repl_eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: &str) -> Output 
 
 const TITLE_PREFIX: &str = "🜁 Air ";
 
-fn print_title(ui: &mut impl Ui, interpreter: &mut Interpreter) -> std::io::Result<()> {
+fn print_title(ui: &mut impl Ui, ctx: &mut Ctx) -> std::io::Result<()> {
     match parse(include_str!("air/version.air")) {
-        Ok(repr) => match interpreter.interpret(repr) {
+        Ok(repr) => match interpret(ctx, repr) {
             Val::String(s) => ui.println(format!("{}{}", TITLE_PREFIX, &*s)),
             _ => {
                 let msg = format!("{} unknown version", TITLE_PREFIX);

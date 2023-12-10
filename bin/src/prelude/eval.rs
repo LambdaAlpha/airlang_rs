@@ -15,7 +15,10 @@ use {
             Prelude,
         },
     },
-    airlang::Val,
+    airlang::{
+        initial_ctx,
+        Val,
+    },
     std::{
         collections::HashMap,
         rc::Rc,
@@ -48,14 +51,14 @@ impl Prelude for EvalPrelude {
 }
 
 fn eval(_const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: Val) -> Output {
-    eval_interpret(&mut dyn_ctx.interpreter, input)
+    eval_interpret(&mut dyn_ctx.ctx, input)
 }
 
 fn repl_eval(_const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: Val) -> Output {
-    eval_interpret(&mut dyn_ctx.meta_interpreter, input)
+    eval_interpret(&mut dyn_ctx.meta_ctx, input)
 }
 
 pub(crate) fn reset(_const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, _input: Val) -> Output {
-    dyn_ctx.interpreter.reset();
+    dyn_ctx.ctx = initial_ctx();
     Output::Print(Box::new("context reset"))
 }

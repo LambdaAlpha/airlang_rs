@@ -13,7 +13,7 @@ use crate::{
         Prelude,
     },
     types::Pair,
-    FuncVal,
+    val::FuncVal,
     Val,
 };
 

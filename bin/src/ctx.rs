@@ -1,6 +1,6 @@
 use {
     crate::eval::Cmd,
-    airlang::Interpreter,
+    airlang::Ctx,
     std::{
         collections::HashMap,
         rc::Rc,
@@ -12,8 +12,8 @@ pub(crate) struct ConstCtx {
 }
 
 pub(crate) struct DynCtx {
-    pub(crate) interpreter: Interpreter,
-    pub(crate) meta_interpreter: Interpreter,
+    pub(crate) ctx: Ctx,
+    pub(crate) meta_ctx: Ctx,
 
     pub(crate) multiline_mode: bool,
 }
