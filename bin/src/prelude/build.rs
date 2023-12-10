@@ -15,7 +15,7 @@ use {
             Prelude,
         },
     },
-    airlang::semantics::{
+    airlang::{
         parse,
         Val,
     },

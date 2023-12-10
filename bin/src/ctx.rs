@@ -1,6 +1,6 @@
 use {
     crate::eval::Cmd,
-    airlang::semantics::Interpreter,
+    airlang::Interpreter,
     std::{
         collections::HashMap,
         rc::Rc,

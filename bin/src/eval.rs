@@ -3,7 +3,7 @@ use {
         ConstCtx,
         DynCtx,
     },
-    airlang::semantics::{
+    airlang::{
         generate,
         Interpreter,
         Val,

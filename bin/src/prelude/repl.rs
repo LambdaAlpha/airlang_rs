@@ -14,7 +14,7 @@ use {
             Prelude,
         },
     },
-    airlang::semantics::Val,
+    airlang::Val,
     std::{
         collections::HashMap,
         rc::Rc,

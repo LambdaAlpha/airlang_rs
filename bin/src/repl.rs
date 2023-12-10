@@ -11,7 +11,7 @@ use {
         prelude::initial_const_ctx,
         ui::Ui,
     },
-    airlang::semantics::{
+    airlang::{
         parse,
         Interpreter,
         Val,
