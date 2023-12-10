@@ -43,7 +43,7 @@ impl Prelude for ExtPrelude {
 
 fn call() -> Named<FuncVal> {
     let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::Less),
         IoMode::Any(EvalMode::More),
     )));
     let output_mode = IoMode::Any(EvalMode::More);
@@ -59,7 +59,7 @@ fn fn_call(ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn reverse() -> Named<FuncVal> {
     let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::Less),
         IoMode::Any(EvalMode::More),
     )));
     let output_mode = IoMode::Any(EvalMode::More);
