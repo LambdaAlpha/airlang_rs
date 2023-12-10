@@ -6,21 +6,23 @@ use {
     std::cell::RefCell,
 };
 
-pub(crate) type CallExtension = Box<dyn Fn(CtxForMutableFn, Val, Val) -> Val>;
-pub(crate) type ReverseExtension = Box<dyn Fn(CtxForMutableFn, Val, Val) -> Val>;
-
-thread_local! (
-    pub(crate) static CALL_EXTENSION: RefCell<CallExtension> = RefCell::new(Box::new(fn_default_call))
-);
-
-thread_local! (
-    pub(crate) static REVERSE_EXTENSION: RefCell<ReverseExtension> = RefCell::new(Box::new(fn_default_reverse))
-);
-
-fn fn_default_call(_ctx: CtxForMutableFn, _func: Val, _input: Val) -> Val {
-    Val::default()
+pub trait Extension {
+    fn call(&self, ctx: CtxForMutableFn, func: Val, input: Val) -> Val;
+    fn reverse(&self, ctx: CtxForMutableFn, func: Val, output: Val) -> Val;
 }
 
-fn fn_default_reverse(_ctx: CtxForMutableFn, _func: Val, _output: Val) -> Val {
-    Val::default()
+thread_local! (
+    pub(crate) static EXTENSION: RefCell<Box<dyn Extension>> = RefCell::new(Box::new(DefaultExtension))
+);
+
+struct DefaultExtension;
+
+impl Extension for DefaultExtension {
+    fn call(&self, _ctx: CtxForMutableFn, _func: Val, _input: Val) -> Val {
+        Val::default()
+    }
+
+    fn reverse(&self, _ctx: CtxForMutableFn, _func: Val, _output: Val) -> Val {
+        Val::default()
+    }
 }

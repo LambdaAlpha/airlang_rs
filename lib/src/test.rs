@@ -1,14 +1,15 @@
 use {
     crate::{
+        ctx_access::mutable::CtxForMutableFn,
         eval::{
             output::OutputBuilder,
             ValBuilder,
         },
+        extension::Extension,
         initial_ctx,
         interpret,
         parse,
-        set_call_extension,
-        set_reverse_extension,
+        set_extension,
         val::Val,
     },
     std::{
@@ -172,11 +173,15 @@ fn test_map() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
-    set_call_extension(Box::new(|_ctx, func, input| {
-        ValBuilder.from_call(func, input)
-    }));
-    set_reverse_extension(Box::new(|_ctx, func, output| {
-        ValBuilder.from_reverse(func, output)
-    }));
+    struct Ext;
+    impl Extension for Ext {
+        fn call(&self, _ctx: CtxForMutableFn, func: Val, input: Val) -> Val {
+            ValBuilder.from_call(func, input)
+        }
+        fn reverse(&self, _ctx: CtxForMutableFn, func: Val, output: Val) -> Val {
+            ValBuilder.from_reverse(func, output)
+        }
+    }
+    set_extension(Box::new(Ext));
     test_interpret(include_str!("test/extension.air"), "test/extension.air")
 }

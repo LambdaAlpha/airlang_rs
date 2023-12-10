@@ -2,10 +2,7 @@ use crate::{
     ctx::NameMap,
     ctx_access::mutable::CtxForMutableFn,
     eval_mode::EvalMode,
-    extension::{
-        CALL_EXTENSION,
-        REVERSE_EXTENSION,
-    },
+    extension::EXTENSION,
     io_mode::IoMode,
     pair::Pair,
     prelude::{
@@ -52,7 +49,7 @@ fn fn_call(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    CALL_EXTENSION.with(|f| (f.borrow())(ctx, pair.first, pair.second))
+    EXTENSION.with(|f| f.borrow().call(ctx, pair.first, pair.second))
 }
 
 fn reverse() -> Named<FuncVal> {
@@ -68,5 +65,5 @@ fn fn_reverse(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    REVERSE_EXTENSION.with(|f| (f.borrow())(ctx, pair.first, pair.second))
+    EXTENSION.with(|f| f.borrow().reverse(ctx, pair.first, pair.second))
 }

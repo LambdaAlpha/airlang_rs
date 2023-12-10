@@ -42,12 +42,7 @@ use {
         ctx_access::mutable::MutableCtx,
         eval::Evaluator,
         eval_mode::more::More,
-        extension::{
-            CallExtension,
-            ReverseExtension,
-            CALL_EXTENSION,
-            REVERSE_EXTENSION,
-        },
+        extension::EXTENSION,
         syntax::ParseError,
     },
     thiserror::Error,
@@ -56,6 +51,7 @@ use {
 pub use self::{
     bool::Bool,
     bytes::Bytes,
+    extension::Extension,
     float::Float,
     int::Int,
     string::Str,
@@ -95,12 +91,8 @@ pub fn interpret(ctx: &mut Ctx, input: Val) -> Val {
     More.eval(&mut MutableCtx(&mut ctx.0), input)
 }
 
-pub fn set_call_extension(f: CallExtension) {
-    CALL_EXTENSION.set(f);
-}
-
-pub fn set_reverse_extension(f: ReverseExtension) {
-    REVERSE_EXTENSION.set(f);
+pub fn set_extension(extension: Box<dyn Extension>) {
+    EXTENSION.set(extension);
 }
 
 pub(crate) mod val;
