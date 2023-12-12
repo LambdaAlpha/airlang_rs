@@ -234,7 +234,7 @@ impl Ctx {
         let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
-        let Val::Symbol(name) = meta.get(names::SUPER)? else {
+        let Val::Symbol(name) = meta.get(SUPER)? else {
             return Err(CtxError::NotExpected);
         };
         let Some(tagged_val) = self.name_map.get_mut(&name) else {
@@ -251,7 +251,7 @@ impl Ctx {
         let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
-        let Val::Symbol(name) = meta.get(names::SUPER)? else {
+        let Val::Symbol(name) = meta.get(SUPER)? else {
             return Err(CtxError::NotExpected);
         };
         let Some(tagged_val) = self.name_map.get_mut(&name) else {
@@ -270,7 +270,7 @@ impl Ctx {
         let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
-        let Val::Symbol(name) = meta.get(names::SUPER)? else {
+        let Val::Symbol(name) = meta.get(SUPER)? else {
             return Err(CtxError::NotExpected);
         };
         let Some(super_ctx) = self.name_map.get(&name) else {
@@ -445,4 +445,4 @@ impl<'a, T> TaggedRef<'a, T> {
     }
 }
 
-pub(crate) mod names;
+pub(crate) const SUPER: &str = "super";

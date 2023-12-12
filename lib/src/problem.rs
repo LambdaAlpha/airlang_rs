@@ -1,6 +1,5 @@
 use {
     crate::{
-        ctx::names::SOLVER,
         ctx_access::CtxAccessor,
         eval::Evaluator,
         val::func::FuncVal,
@@ -22,3 +21,5 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, reverse: Val) -> Val {
     };
     solver.eval(ctx, reverse)
 }
+
+pub(crate) const SOLVER: &str = "solver";
