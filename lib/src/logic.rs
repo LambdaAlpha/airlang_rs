@@ -110,7 +110,7 @@ impl Prop {
         let output = func
             .0
             .evaluator
-            .eval(&mut ConstCtx(&mut ctx), input.clone());
+            .eval(&mut ConstCtx::new_inner(&mut ctx), input.clone());
         Self {
             func,
             input,
@@ -126,7 +126,7 @@ impl Prop {
         let output = func
             .0
             .evaluator
-            .eval(&mut MutableCtx(&mut after), input.clone());
+            .eval(&mut MutableCtx::new_inner(&mut after), input.clone());
         Self {
             func,
             input,
@@ -152,7 +152,7 @@ impl Prop {
                     .func
                     .0
                     .evaluator
-                    .eval(&mut ConstCtx(before), prop.input.clone());
+                    .eval(&mut ConstCtx::new_inner(before), prop.input.clone());
                 prop.truth = if prop.output == real_output {
                     Truth::True
                 } else {
@@ -162,11 +162,10 @@ impl Prop {
             }
             PropCtx::Mutable(before, after) => {
                 let mut real_after = Ctx::clone(before);
-                let real_output = prop
-                    .func
-                    .0
-                    .evaluator
-                    .eval(&mut MutableCtx(&mut real_after), prop.input.clone());
+                let real_output = prop.func.0.evaluator.eval(
+                    &mut MutableCtx::new_inner(&mut real_after),
+                    prop.input.clone(),
+                );
                 prop.truth = if prop.output == real_output && *after == real_after {
                     Truth::True
                 } else {

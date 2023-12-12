@@ -16,14 +16,14 @@ use crate::{
     Val,
 };
 
-pub struct ConstCtx<'a>(pub(crate) &'a mut Ctx);
-
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when
 evaluating a ctx-aware function. But a `&mut Ctx` is more compact and convenient, and we can
 change `&mut Ctx` back to `Ctx` at anytime we need by swapping its memory with a default ctx.
 The `const` is just a flag and a runtime invariant.
 */
+pub struct ConstCtx<'a>(&'a mut Ctx);
+
 pub(crate) enum CtxForConstFn<'a> {
     Free(FreeCtx),
     Const(ConstCtx<'a>),
@@ -256,8 +256,29 @@ impl<'a> CtxAccessor for CtxForConstFn<'a> {
 }
 
 impl<'a> ConstCtx<'a> {
+    pub fn new(ctx: &'a mut crate::Ctx) -> Self {
+        ConstCtx(&mut ctx.0)
+    }
+
+    pub(crate) fn new_inner(ctx: &'a mut Ctx) -> Self {
+        ConstCtx(ctx)
+    }
+
     pub(crate) fn reborrow(&mut self) -> ConstCtx {
         ConstCtx(self.0)
+    }
+
+    pub(crate) fn get_ref(&self) -> &Ctx {
+        self.0
+    }
+
+    // SAFETY: The function f can take the ctx out during its execution,
+    // but when f returns, ctx must be equal to its original value.
+    pub(crate) unsafe fn temp_take<'b, T, F>(&'b mut self, f: F) -> T
+    where
+        F: FnOnce(&'b mut Ctx) -> T,
+    {
+        f(self.0)
     }
 }
 

@@ -5,8 +5,9 @@ use {
     },
     airlang::{
         generate,
-        interpret,
+        interpret_mutable,
         Ctx,
+        MutableCtx,
         Val,
     },
     std::{
@@ -37,7 +38,8 @@ pub(crate) fn eval(const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: Val) -> Ou
 }
 
 pub(crate) fn eval_interpret(ctx: &mut Ctx, val: Val) -> Output {
-    let output = interpret(ctx, val);
+    let mutable_ctx = MutableCtx::new(ctx);
+    let output = interpret_mutable(mutable_ctx, val);
     match generate(&output) {
         Ok(output) => Output::Print(Box::new(output)),
         Err(err) => Output::Eprint(Box::new(err)),

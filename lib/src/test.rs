@@ -1,16 +1,17 @@
 use {
     crate::{
-        ctx_access::mutable::CtxForMutableFn,
         eval::{
             output::OutputBuilder,
             ValBuilder,
         },
         extension::Extension,
         initial_ctx,
-        interpret,
+        interpret_mutable,
         parse,
         set_extension,
         val::Val,
+        CtxForMutableFn,
+        MutableCtx,
     },
     std::{
         error::Error,
@@ -26,6 +27,7 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
     let mut ctx = initial_ctx();
+    let mut mutable_ctx = MutableCtx::new(&mut ctx);
     let tests = input.split(MAIN_DELIMITER);
 
     for test in tests {
@@ -35,7 +37,7 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
             e
         })?;
-        let ret = interpret(&mut ctx, src);
+        let ret = interpret_mutable(mutable_ctx.reborrow(), src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
             e
@@ -46,6 +48,7 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             current context: {ctx:#?}",
         );
         ctx = initial_ctx();
+        mutable_ctx = MutableCtx::new(&mut ctx);
     }
     Ok(())
 }

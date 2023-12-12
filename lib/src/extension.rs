@@ -1,6 +1,6 @@
 use {
     crate::{
-        ctx_access::mutable::CtxForMutableFn,
+        CtxForMutableFn,
         Val,
     },
     std::cell::RefCell,

@@ -300,15 +300,21 @@ where
             CtxForConstFn::Free(_ctx) => {
                 eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
             }
-            CtxForConstFn::Const(ctx) => eval_aware(
-                self.ctx.clone(),
-                ctx.0,
-                self.caller.name.clone(),
-                InvariantTag::Const,
-                input,
-                self.input_name.clone(),
-                &self.body,
-            ),
+            CtxForConstFn::Const(mut ctx) => {
+                let f = |ctx| {
+                    eval_aware(
+                        self.ctx.clone(),
+                        ctx,
+                        self.caller.name.clone(),
+                        InvariantTag::Const,
+                        input,
+                        self.input_name.clone(),
+                        &self.body,
+                    )
+                };
+                // SAFETY: We use the const tag to indicate not to modify this context.
+                unsafe { ctx.temp_take(f) }
+            }
         }
     }
 }
@@ -331,31 +337,43 @@ where
             CtxForMutableFn::Free(_ctx) => {
                 eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
             }
-            CtxForMutableFn::Const(ctx) => eval_aware(
-                self.ctx.clone(),
-                ctx.0,
-                self.caller.name.clone(),
-                InvariantTag::Const,
-                input,
-                self.input_name.clone(),
-                &self.body,
-            ),
-            CtxForMutableFn::Mutable(ctx) => eval_aware(
-                self.ctx.clone(),
-                ctx.0,
-                self.caller.name.clone(),
-                InvariantTag::Final,
-                input,
-                self.input_name.clone(),
-                &self.body,
-            ),
+            CtxForMutableFn::Const(mut ctx) => {
+                let f = |ctx| {
+                    eval_aware(
+                        self.ctx.clone(),
+                        ctx,
+                        self.caller.name.clone(),
+                        InvariantTag::Const,
+                        input,
+                        self.input_name.clone(),
+                        &self.body,
+                    )
+                };
+                // SAFETY: We use the const tag to indicate not to modify this context.
+                unsafe { ctx.temp_take(f) }
+            }
+            CtxForMutableFn::Mutable(mut ctx) => {
+                let f = |ctx| {
+                    eval_aware(
+                        self.ctx.clone(),
+                        ctx,
+                        self.caller.name.clone(),
+                        InvariantTag::Final,
+                        input,
+                        self.input_name.clone(),
+                        &self.body,
+                    )
+                };
+                // SAFETY: We use the final tag to indicate not to move this context.
+                unsafe { ctx.temp_take(f) }
+            }
         }
     }
 }
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
     let _ = new_ctx.put_val_local(input_name, TaggedVal::new(input));
-    MoreByRef.eval(&mut MutableCtx(&mut new_ctx), body)
+    MoreByRef.eval(&mut MutableCtx::new_inner(&mut new_ctx), body)
 }
 
 fn eval_aware(
@@ -380,7 +398,7 @@ fn keep_eval_restore(
 ) -> Val {
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_tag);
-    let output = MoreByRef.eval(&mut MutableCtx(&mut new_ctx), body);
+    let output = MoreByRef.eval(&mut MutableCtx::new_inner(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, &caller_name);
     output
 }

@@ -13,9 +13,10 @@ use {
     },
     airlang::{
         initial_ctx,
-        interpret,
+        interpret_mutable,
         parse,
         Ctx,
+        MutableCtx,
         Val,
     },
     std::error::Error,
@@ -85,13 +86,16 @@ const TITLE_PREFIX: &str = "🜁 Air ";
 
 fn print_title(ui: &mut impl Ui, ctx: &mut Ctx) -> std::io::Result<()> {
     match parse(include_str!("air/version.air")) {
-        Ok(repr) => match interpret(ctx, repr) {
-            Val::String(s) => ui.println(format!("{}{}", TITLE_PREFIX, &*s)),
-            _ => {
-                let msg = format!("{} unknown version", TITLE_PREFIX);
-                ui.eprintln(&*Box::<dyn Error>::from(msg))
+        Ok(repr) => {
+            let mutable_ctx = MutableCtx::new(ctx);
+            match interpret_mutable(mutable_ctx, repr) {
+                Val::String(s) => ui.println(format!("{}{}", TITLE_PREFIX, &*s)),
+                _ => {
+                    let msg = format!("{} unknown version", TITLE_PREFIX);
+                    ui.eprintln(&*Box::<dyn Error>::from(msg))
+                }
             }
-        },
+        }
         Err(err) => ui.eprintln(err),
     }
 }

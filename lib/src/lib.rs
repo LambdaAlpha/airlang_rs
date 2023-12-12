@@ -39,7 +39,6 @@
 
 use {
     crate::{
-        ctx_access::mutable::MutableCtx,
         eval::Evaluator,
         eval_mode::more::More,
         extension::EXTENSION,
@@ -51,6 +50,14 @@ use {
 pub use self::{
     bool::Bool,
     bytes::Bytes,
+    ctx_access::{
+        constant::ConstCtx,
+        free::FreeCtx,
+        mutable::{
+            CtxForMutableFn,
+            MutableCtx,
+        },
+    },
     extension::Extension,
     float::Float,
     int::Int,
@@ -87,8 +94,16 @@ pub fn initial_ctx() -> Ctx {
     Ctx(Box::new(ctx))
 }
 
-pub fn interpret(ctx: &mut Ctx, input: Val) -> Val {
-    More.eval(&mut MutableCtx(&mut ctx.0), input)
+pub fn interpret_mutable(mut ctx: MutableCtx, input: Val) -> Val {
+    More.eval(&mut ctx, input)
+}
+
+pub fn interpret_const(mut ctx: ConstCtx, input: Val) -> Val {
+    More.eval(&mut ctx, input)
+}
+
+pub fn interpret_free(mut ctx: FreeCtx, input: Val) -> Val {
+    More.eval(&mut ctx, input)
 }
 
 pub fn set_extension(extension: Box<dyn Extension>) {

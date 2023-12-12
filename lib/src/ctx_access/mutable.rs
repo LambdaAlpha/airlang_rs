@@ -19,7 +19,7 @@ use crate::{
     Val,
 };
 
-pub struct MutableCtx<'a>(pub(crate) &'a mut Ctx);
+pub struct MutableCtx<'a>(&'a mut Ctx);
 
 pub enum CtxForMutableFn<'a> {
     Free(FreeCtx),
@@ -111,7 +111,7 @@ impl<'a> CtxAccessor for MutableCtx<'a> {
     }
 
     fn for_const_fn(&mut self) -> CtxForConstFn {
-        CtxForConstFn::Const(ConstCtx(self.0))
+        CtxForConstFn::Const(ConstCtx::new_inner(self.0))
     }
 
     fn for_mutable_fn(&mut self) -> CtxForMutableFn {
@@ -262,7 +262,7 @@ impl<'a> CtxAccessor for CtxForMutableFn<'a> {
         match self {
             CtxForMutableFn::Free(_ctx) => CtxForConstFn::Free(FreeCtx),
             CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx.reborrow()),
-            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx(ctx.0)),
+            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx::new_inner(ctx.0)),
         }
     }
 
@@ -272,8 +272,25 @@ impl<'a> CtxAccessor for CtxForMutableFn<'a> {
 }
 
 impl<'a> MutableCtx<'a> {
-    pub(crate) fn reborrow(&mut self) -> MutableCtx {
+    pub fn new(ctx: &'a mut crate::Ctx) -> Self {
+        Self(&mut ctx.0)
+    }
+
+    pub(crate) fn new_inner(ctx: &'a mut Ctx) -> Self {
+        Self(ctx)
+    }
+
+    pub fn reborrow(&mut self) -> MutableCtx {
         MutableCtx(self.0)
+    }
+
+    // SAFETY: The function f can take the ctx out during its execution,
+    // but when f returns, ctx must be equal to its original value.
+    pub(crate) unsafe fn temp_take<'b, T, F>(&'b mut self, f: F) -> T
+    where
+        F: FnOnce(&'b mut Ctx) -> T,
+    {
+        f(self.0)
     }
 }
 
