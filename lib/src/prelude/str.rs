@@ -6,9 +6,11 @@ use crate::{
     ctx_access::constant::CtxForConstFn,
     eval_mode::EvalMode,
     io_mode::IoMode,
+    pair::Pair,
     prelude::{
         named_const_fn,
         named_free_fn,
+        named_mutable_fn,
         Named,
         Prelude,
     },
@@ -17,11 +19,13 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    CtxForMutableFn,
 };
 
 #[derive(Clone)]
 pub(crate) struct StrPrelude {
     pub(crate) length: Named<FuncVal>,
+    pub(crate) push: Named<FuncVal>,
     pub(crate) concat: Named<FuncVal>,
 }
 
@@ -29,6 +33,7 @@ impl Default for StrPrelude {
     fn default() -> Self {
         StrPrelude {
             length: length(),
+            push: push(),
             concat: concat(),
         }
     }
@@ -37,6 +42,7 @@ impl Default for StrPrelude {
 impl Prelude for StrPrelude {
     fn put(&self, m: &mut NameMap) {
         self.length.put(m);
+        self.push.put(m);
         self.concat.put(m);
     }
 }
@@ -53,6 +59,30 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
             return Val::default();
         };
         Val::Int(s.len().into())
+    })
+}
+
+fn push() -> Named<FuncVal> {
+    let input_mode = IoMode::Pair(Box::new(Pair::new(
+        IoMode::Symbol(EvalMode::Value),
+        IoMode::Any(EvalMode::More),
+    )));
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_mutable_fn("string.push", input_mode, output_mode, fn_push)
+}
+
+fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::String(s) = pair.second else {
+        return Val::default();
+    };
+    DefaultCtx.get_mut_ref_no_ret(&mut ctx, pair.first, |val| {
+        let Val::String(str) = val else {
+            return;
+        };
+        str.push_str(&s);
     })
 }
 

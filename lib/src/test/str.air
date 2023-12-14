@@ -10,6 +10,10 @@
 -----
 2
 =====
+;[a = "hello", b = "world", a string.push " ", a string.push b, a]
+-----
+"hello world"
+=====
 ["1", "2"] $> string.concat
 -----
 "12"

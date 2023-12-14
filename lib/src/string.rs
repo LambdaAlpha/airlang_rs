@@ -19,6 +19,12 @@ use {
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Str(SmartString<LazyCompact>);
 
+impl Str {
+    pub fn push_str(&mut self, s: &str) {
+        self.0.push_str(s);
+    }
+}
+
 impl Deref for Str {
     type Target = str;
     fn deref(&self) -> &Self::Target {
