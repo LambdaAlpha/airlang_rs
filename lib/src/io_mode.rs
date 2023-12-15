@@ -21,11 +21,12 @@ use crate::{
     map::Map,
     pair::Pair,
     reverse::Reverse,
+    CtxForMutableFn,
     Val,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum IoMode {
+pub enum IoMode {
     Any(EvalMode),
     Symbol(EvalMode),
     Pair(Box<Pair<IoMode, IoMode>>),
@@ -40,9 +41,9 @@ pub(crate) enum IoMode {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct ListItemIoMode {
-    pub(crate) io_mode: IoMode,
-    pub(crate) ellipsis: bool,
+pub struct ListItemIoMode {
+    pub io_mode: IoMode,
+    pub ellipsis: bool,
 }
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for IoMode
@@ -202,5 +203,11 @@ where
             }
             (_, input) => MoreByRef.eval(ctx, input),
         }
+    }
+}
+
+impl IoMode {
+    pub fn apply(&self, mut ctx: CtxForMutableFn, input: Val) -> Val {
+        self.eval(&mut ctx, input)
     }
 }

@@ -50,17 +50,26 @@ use {
 pub use self::{
     bool::Bool,
     bytes::Bytes,
+    ctx::CtxError,
     ctx_access::{
-        constant::ConstCtx,
+        constant::{
+            ConstCtx,
+            CtxForConstFn,
+        },
         free::FreeCtx,
         mutable::{
             CtxForMutableFn,
             MutableCtx,
         },
     },
+    eval_mode::EvalMode,
     extension::Extension,
     float::Float,
     int::Int,
+    io_mode::{
+        IoMode,
+        ListItemIoMode,
+    },
     string::Str,
     symbol::Symbol,
     unit::Unit,

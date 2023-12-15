@@ -178,10 +178,10 @@ fn test_map() -> Result<(), Box<dyn Error>> {
 fn test_extension() -> Result<(), Box<dyn Error>> {
     struct Ext;
     impl Extension for Ext {
-        fn call(&self, _ctx: CtxForMutableFn, func: Val, input: Val) -> Val {
+        fn call(&mut self, _ctx: CtxForMutableFn, func: Val, input: Val) -> Val {
             ValBuilder.from_call(func, input)
         }
-        fn reverse(&self, _ctx: CtxForMutableFn, func: Val, output: Val) -> Val {
+        fn reverse(&mut self, _ctx: CtxForMutableFn, func: Val, output: Val) -> Val {
             ValBuilder.from_reverse(func, output)
         }
     }

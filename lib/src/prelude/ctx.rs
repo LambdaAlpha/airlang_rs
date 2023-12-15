@@ -707,5 +707,5 @@ fn fn_ctx_this(ctx: CtxForConstFn, _input: Val) -> Val {
     let CtxForConstFn::Const(ctx) = ctx else {
         return Val::default();
     };
-    Val::Ctx(CtxVal(Box::new(ctx.get_ref().clone())))
+    Val::Ctx(CtxVal(Box::new(ctx.get_ctx_ref().clone())))
 }

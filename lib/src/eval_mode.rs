@@ -19,7 +19,7 @@ use crate::{
 };
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum EvalMode {
+pub enum EvalMode {
     Value,
     Less,
     More,

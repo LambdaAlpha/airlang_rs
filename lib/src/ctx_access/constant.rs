@@ -24,7 +24,7 @@ The `const` is just a flag and a runtime invariant.
 */
 pub struct ConstCtx<'a>(&'a mut Ctx);
 
-pub(crate) enum CtxForConstFn<'a> {
+pub enum CtxForConstFn<'a> {
     Free(FreeCtx),
     Const(ConstCtx<'a>),
 }
@@ -264,12 +264,16 @@ impl<'a> ConstCtx<'a> {
         ConstCtx(ctx)
     }
 
-    pub(crate) fn reborrow(&mut self) -> ConstCtx {
+    pub fn reborrow(&mut self) -> ConstCtx {
         ConstCtx(self.0)
     }
 
-    pub(crate) fn get_ref(&self) -> &Ctx {
+    pub(crate) fn get_ctx_ref(&self) -> &Ctx {
         self.0
+    }
+
+    pub fn get_ref(&self, name: &Symbol) -> Result<&Val, CtxError> {
+        self.get_const_ref(name)
     }
 
     // SAFETY: The function f can take the ctx out during its execution,
@@ -283,10 +287,14 @@ impl<'a> ConstCtx<'a> {
 }
 
 impl<'a> CtxForConstFn<'a> {
-    pub(crate) fn reborrow(&mut self) -> CtxForConstFn {
+    pub fn reborrow(&mut self) -> CtxForConstFn {
         match self {
             CtxForConstFn::Free(_ctx) => CtxForConstFn::Free(FreeCtx),
             CtxForConstFn::Const(ctx) => CtxForConstFn::Const(ctx.reborrow()),
         }
+    }
+
+    pub fn get_ref(&self, name: &Symbol) -> Result<&Val, CtxError> {
+        self.get_const_ref(name)
     }
 }

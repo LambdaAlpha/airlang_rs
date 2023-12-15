@@ -19,10 +19,10 @@ use {
 };
 
 #[derive(Copy, Clone)]
-pub(crate) enum CtxError {
+pub enum CtxError {
     NotFound,
     AccessDenied,
-    NotExpected,
+    Unexpected,
 }
 
 pub(crate) trait CtxTrait {
@@ -235,13 +235,13 @@ impl Ctx {
             return Err(CtxError::NotFound);
         };
         let Val::Symbol(name) = meta.get(SUPER)? else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let Some(tagged_val) = self.name_map.get_mut(&name) else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let Val::Ctx(CtxVal(super_ctx)) = &mut tagged_val.val else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let is_const = matches!(tagged_val.tag, InvariantTag::Const);
         Ok(TaggedRef::new(super_ctx, is_const))
@@ -252,13 +252,13 @@ impl Ctx {
             return Err(CtxError::NotFound);
         };
         let Val::Symbol(name) = meta.get(SUPER)? else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let Some(tagged_val) = self.name_map.get_mut(&name) else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let Val::Ctx(CtxVal(super_ctx)) = &mut tagged_val.val else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         if matches!(tagged_val.tag, InvariantTag::Const) {
             return Err(CtxError::AccessDenied);
@@ -271,13 +271,13 @@ impl Ctx {
             return Err(CtxError::NotFound);
         };
         let Val::Symbol(name) = meta.get(SUPER)? else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let Some(super_ctx) = self.name_map.get(&name) else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         let Val::Ctx(CtxVal(super_ctx)) = &super_ctx.val else {
-            return Err(CtxError::NotExpected);
+            return Err(CtxError::Unexpected);
         };
         Ok(super_ctx)
     }

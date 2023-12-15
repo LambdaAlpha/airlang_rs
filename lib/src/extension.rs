@@ -7,8 +7,8 @@ use {
 };
 
 pub trait Extension {
-    fn call(&self, ctx: CtxForMutableFn, func: Val, input: Val) -> Val;
-    fn reverse(&self, ctx: CtxForMutableFn, func: Val, output: Val) -> Val;
+    fn call(&mut self, ctx: CtxForMutableFn, func: Val, input: Val) -> Val;
+    fn reverse(&mut self, ctx: CtxForMutableFn, func: Val, output: Val) -> Val;
 }
 
 thread_local! (
@@ -18,11 +18,11 @@ thread_local! (
 struct DefaultExtension;
 
 impl Extension for DefaultExtension {
-    fn call(&self, _ctx: CtxForMutableFn, _func: Val, _input: Val) -> Val {
+    fn call(&mut self, _ctx: CtxForMutableFn, _func: Val, _input: Val) -> Val {
         Val::default()
     }
 
-    fn reverse(&self, _ctx: CtxForMutableFn, _func: Val, _output: Val) -> Val {
+    fn reverse(&mut self, _ctx: CtxForMutableFn, _func: Val, _output: Val) -> Val {
         Val::default()
     }
 }

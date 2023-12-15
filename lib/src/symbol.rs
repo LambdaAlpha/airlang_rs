@@ -14,6 +14,13 @@ use {
 pub struct Symbol(CompactString);
 
 impl Symbol {
+    /// # Safety
+    ///
+    /// the input must be a valid symbol
+    pub unsafe fn from_str_unchecked(s: &str) -> Self {
+        Symbol(CompactString::from(s))
+    }
+
     pub(crate) fn from_str(s: &str) -> Self {
         Symbol(CompactString::from(s))
     }

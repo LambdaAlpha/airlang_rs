@@ -39,7 +39,7 @@ impl Prelude for ExtPrelude {
 fn call() -> Named<FuncVal> {
     let input_mode = IoMode::Pair(Box::new(Pair::new(
         IoMode::Any(EvalMode::Less),
-        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::Value),
     )));
     let output_mode = IoMode::Any(EvalMode::More);
     named_mutable_fn("$", input_mode, output_mode, fn_call)
@@ -49,13 +49,13 @@ fn fn_call(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    EXTENSION.with(|f| f.borrow().call(ctx, pair.first, pair.second))
+    EXTENSION.with_borrow_mut(|f| f.call(ctx, pair.first, pair.second))
 }
 
 fn reverse() -> Named<FuncVal> {
     let input_mode = IoMode::Pair(Box::new(Pair::new(
         IoMode::Any(EvalMode::Less),
-        IoMode::Any(EvalMode::More),
+        IoMode::Any(EvalMode::Value),
     )));
     let output_mode = IoMode::Any(EvalMode::More);
     named_mutable_fn("?", input_mode, output_mode, fn_reverse)
@@ -65,5 +65,5 @@ fn fn_reverse(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    EXTENSION.with(|f| f.borrow().reverse(ctx, pair.first, pair.second))
+    EXTENSION.with_borrow_mut(|f| f.reverse(ctx, pair.first, pair.second))
 }

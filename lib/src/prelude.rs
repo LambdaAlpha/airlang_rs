@@ -49,7 +49,7 @@ use crate::{
     },
 };
 
-thread_local! (pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
+thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default, Clone)]
 pub(crate) struct AllPrelude {

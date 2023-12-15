@@ -292,14 +292,46 @@ impl<'a> MutableCtx<'a> {
     {
         f(self.0)
     }
+
+    pub fn get_ref(&self, name: &Symbol) -> Result<&Val, CtxError> {
+        self.get_const_ref(name)
+    }
+
+    pub fn get_mut(&mut self, name: &Symbol) -> Result<&mut Val, CtxError> {
+        let tagged_ref = self.get_tagged_ref(name)?;
+        if tagged_ref.is_const {
+            return Err(CtxError::AccessDenied);
+        }
+        Ok(tagged_ref.val_ref)
+    }
 }
 
 impl<'a> CtxForMutableFn<'a> {
-    pub(crate) fn reborrow(&mut self) -> CtxForMutableFn {
+    pub fn reborrow(&mut self) -> CtxForMutableFn {
         match self {
             CtxForMutableFn::Free(_ctx) => CtxForMutableFn::Free(FreeCtx),
             CtxForMutableFn::Const(ctx) => CtxForMutableFn::Const(ctx.reborrow()),
             CtxForMutableFn::Mutable(ctx) => CtxForMutableFn::Mutable(ctx.reborrow()),
         }
+    }
+
+    pub fn to_const(self) -> CtxForConstFn<'a> {
+        match self {
+            CtxForMutableFn::Free(_ctx) => CtxForConstFn::Free(FreeCtx),
+            CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx),
+            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx::new_inner(ctx.0)),
+        }
+    }
+
+    pub fn get_ref(&self, name: &Symbol) -> Result<&Val, CtxError> {
+        self.get_const_ref(name)
+    }
+
+    pub fn get_mut(&mut self, name: &Symbol) -> Result<&mut Val, CtxError> {
+        let tagged_ref = self.get_tagged_ref(name)?;
+        if tagged_ref.is_const {
+            return Err(CtxError::AccessDenied);
+        }
+        Ok(tagged_ref.val_ref)
     }
 }
