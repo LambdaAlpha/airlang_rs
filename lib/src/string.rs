@@ -1,23 +1,18 @@
-use {
-    smartstring::{
-        LazyCompact,
-        SmartString,
+use std::{
+    borrow::Borrow,
+    fmt::{
+        Debug,
+        Display,
+        Formatter,
     },
-    std::{
-        borrow::Borrow,
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        ops::{
-            Deref,
-            DerefMut,
-        },
+    ops::{
+        Deref,
+        DerefMut,
     },
 };
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
-pub struct Str(SmartString<LazyCompact>);
+pub struct Str(String);
 
 impl Str {
     pub fn push_str(&mut self, s: &str) {
@@ -26,7 +21,7 @@ impl Str {
 }
 
 impl Deref for Str {
-    type Target = str;
+    type Target = String;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -40,25 +35,19 @@ impl DerefMut for Str {
 
 impl From<&str> for Str {
     fn from(value: &str) -> Self {
-        Str(SmartString::from(value))
+        Str(String::from(value))
     }
 }
 
 impl From<String> for Str {
     fn from(value: String) -> Self {
-        Str(SmartString::from(value))
-    }
-}
-
-impl ToString for Str {
-    fn to_string(&self) -> String {
-        self.0.to_string()
+        Str(value)
     }
 }
 
 impl From<Str> for String {
     fn from(value: Str) -> Self {
-        value.0.into()
+        value.0
     }
 }
 
@@ -71,5 +60,11 @@ impl Borrow<str> for Str {
 impl Debug for Str {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Debug>::fmt(&self.0, f)
+    }
+}
+
+impl Display for Str {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Display>::fmt(&self.0, f)
     }
 }
