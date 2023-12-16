@@ -1,5 +1,8 @@
 use {
-    crate::func::ExtFunc,
+    crate::{
+        prelude::io::IoPrelude,
+        ExtFunc,
+    },
     airlang::Symbol,
     std::collections::HashMap,
 };
@@ -7,10 +10,14 @@ use {
 thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default)]
-pub(crate) struct AllPrelude {}
+pub(crate) struct AllPrelude {
+    pub(crate) io: IoPrelude,
+}
 
 impl Prelude for AllPrelude {
-    fn put(&self, _m: &mut HashMap<Symbol, ExtFunc>) {}
+    fn put(&self, m: &mut HashMap<Symbol, ExtFunc>) {
+        self.io.put(m);
+    }
 }
 
 pub(crate) trait Prelude {
@@ -34,3 +41,5 @@ impl NamedExtFunc {
         m.insert(name, self.func.clone());
     }
 }
+
+pub(crate) mod io;

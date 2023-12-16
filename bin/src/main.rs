@@ -25,9 +25,15 @@
 )]
 #![feature(trait_alias)]
 
-use crate::ui::StdUi;
+use {
+    crate::ui::StdUi,
+    airlang::set_extension,
+    airlang_ext::AirExt,
+};
 
 fn main() -> std::io::Result<()> {
+    let air_ext = AirExt::default();
+    set_extension(Box::new(air_ext));
     let mut std_ui = StdUi::new();
     repl::repl(&mut std_ui)
 }
