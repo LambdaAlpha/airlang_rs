@@ -25,7 +25,6 @@ use {
     },
 };
 
-#[derive(Clone)]
 pub(crate) struct IoPrelude {
     pub(crate) read_line: NamedExtFunc,
     pub(crate) print: NamedExtFunc,
@@ -51,7 +50,7 @@ impl Default for IoPrelude {
 }
 
 impl Prelude for IoPrelude {
-    fn put(&self, m: &mut HashMap<Symbol, ExtFunc>) {
+    fn put(self, m: &mut HashMap<Symbol, ExtFunc>) {
         self.read_line.put(m);
         self.print.put(m);
         self.print_line.put(m);

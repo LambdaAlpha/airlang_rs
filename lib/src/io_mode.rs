@@ -207,7 +207,7 @@ where
 }
 
 impl IoMode {
-    pub fn apply(&self, mut ctx: CtxForMutableFn, input: Val) -> Val {
-        self.eval(&mut ctx, input)
+    pub fn apply(&self, mut ctx: CtxForMutableFn, val: Val) -> Val {
+        self.eval(&mut ctx, val)
     }
 }

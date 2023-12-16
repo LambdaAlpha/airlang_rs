@@ -3,8 +3,8 @@
 use {
     crate::{
         prelude::{
+            AllPrelude,
             Prelude,
-            PRELUDE,
         },
         problem::DefaultSolver,
     },
@@ -37,11 +37,11 @@ impl Extension for AirExt {
         let Val::Symbol(func) = func else {
             return Val::default();
         };
-        let Some(func) = self.func_map.get(&func) else {
+        let Some(func) = self.func_map.get_mut(&func) else {
             return Val::default();
         };
         let input = func.input_mode.apply(ctx.reborrow(), input);
-        func.ext_fn.apply(ctx, input)
+        func.ext_fn.call(ctx, input)
     }
 
     fn reverse(&mut self, mut ctx: CtxForMutableFn, func: Val, output: Val) -> Val {
@@ -58,14 +58,13 @@ impl Extension for AirExt {
 
 impl Default for AirExt {
     fn default() -> Self {
-        PRELUDE.with(|prelude| {
-            let mut call_map = HashMap::with_capacity(200);
-            prelude.put(&mut call_map);
-            Self {
-                func_map: call_map,
-                solver: Box::new(DefaultSolver),
-            }
-        })
+        let all_prelude = AllPrelude::default();
+        let mut call_map = HashMap::with_capacity(200);
+        all_prelude.put(&mut call_map);
+        Self {
+            func_map: call_map,
+            solver: Box::new(DefaultSolver),
+        }
     }
 }
 

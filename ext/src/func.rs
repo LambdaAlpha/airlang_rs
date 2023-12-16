@@ -1,52 +1,53 @@
-use {
-    airlang::{
-        CtxForConstFn,
-        CtxForMutableFn,
-        IoMode,
-        Val,
-    },
-    std::rc::Rc,
+use airlang::{
+    CtxForConstFn,
+    CtxForMutableFn,
+    IoMode,
+    Val,
 };
 
-pub trait ExtCtxFreeFn = Fn(Val) -> Val;
+pub trait ExtCtxFreeFn {
+    fn call(&mut self, input: Val) -> Val;
+}
 
-pub trait ExtCtxConstFn = Fn(CtxForConstFn, Val) -> Val;
+pub trait ExtCtxConstFn {
+    fn call(&mut self, ctx: CtxForConstFn, input: Val) -> Val;
+}
 
-pub trait ExtCtxMutableFn = Fn(CtxForMutableFn, Val) -> Val;
+pub trait ExtCtxMutableFn {
+    fn call(&mut self, ctx: CtxForMutableFn, input: Val) -> Val;
+}
 
-#[derive(Clone)]
 pub struct ExtFunc {
     pub(crate) input_mode: IoMode,
     pub(crate) output_mode: IoMode,
     pub(crate) ext_fn: ExtFn,
 }
 
-#[derive(Clone)]
 pub enum ExtFn {
-    Free(Rc<dyn ExtCtxFreeFn>),
-    Const(Rc<dyn ExtCtxConstFn>),
-    Mutable(Rc<dyn ExtCtxMutableFn>),
+    Free(Box<dyn ExtCtxFreeFn>),
+    Const(Box<dyn ExtCtxConstFn>),
+    Mutable(Box<dyn ExtCtxMutableFn>),
 }
 
 impl ExtFn {
-    pub fn apply(&self, ctx: CtxForMutableFn, input: Val) -> Val {
+    pub fn call(&mut self, ctx: CtxForMutableFn, input: Val) -> Val {
         match self {
-            ExtFn::Free(f) => f(input),
-            ExtFn::Const(f) => f(ctx.to_const(), input),
-            ExtFn::Mutable(f) => f(ctx, input),
+            ExtFn::Free(f) => f.call(input),
+            ExtFn::Const(f) => f.call(ctx.to_const(), input),
+            ExtFn::Mutable(f) => f.call(ctx, input),
         }
     }
 
     pub fn new_free(f: impl ExtCtxFreeFn + 'static) -> Self {
-        ExtFn::Free(Rc::new(f))
+        ExtFn::Free(Box::new(f))
     }
 
     pub fn new_const(f: impl ExtCtxConstFn + 'static) -> Self {
-        ExtFn::Const(Rc::new(f))
+        ExtFn::Const(Box::new(f))
     }
 
     pub fn new_mutable(f: impl ExtCtxMutableFn + 'static) -> Self {
-        ExtFn::Mutable(Rc::new(f))
+        ExtFn::Mutable(Box::new(f))
     }
 }
 
@@ -69,5 +70,32 @@ impl ExtFunc {
 
     pub fn ext_fn(&self) -> &ExtFn {
         &self.ext_fn
+    }
+}
+
+impl<T> ExtCtxFreeFn for T
+where
+    T: Fn(Val) -> Val,
+{
+    fn call(&mut self, input: Val) -> Val {
+        self(input)
+    }
+}
+
+impl<T> ExtCtxConstFn for T
+where
+    T: Fn(CtxForConstFn, Val) -> Val,
+{
+    fn call(&mut self, ctx: CtxForConstFn, input: Val) -> Val {
+        self(ctx, input)
+    }
+}
+
+impl<T> ExtCtxMutableFn for T
+where
+    T: Fn(CtxForMutableFn, Val) -> Val,
+{
+    fn call(&mut self, ctx: CtxForMutableFn, input: Val) -> Val {
+        self(ctx, input)
     }
 }

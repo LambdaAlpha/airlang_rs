@@ -153,7 +153,7 @@ impl Ctx {
         let Some(tagged_val) = self.name_map.get_mut(name) else {
             return self.get_mut_super_ctx()?.set_final(name);
         };
-        if !(matches!(&tagged_val.tag, InvariantTag::None)) {
+        if !matches!(&tagged_val.tag, InvariantTag::None) {
             return Err(CtxError::AccessDenied);
         }
         tagged_val.tag = InvariantTag::Final;
