@@ -1,6 +1,9 @@
 use {
     crate::{
-        prelude::io::IoPrelude,
+        prelude::{
+            file::FilePrelude,
+            io::IoPrelude,
+        },
         ExtFunc,
     },
     airlang::Symbol,
@@ -10,11 +13,13 @@ use {
 #[derive(Default)]
 pub(crate) struct AllPrelude {
     pub(crate) io: IoPrelude,
+    pub(crate) file: FilePrelude,
 }
 
 impl Prelude for AllPrelude {
     fn put(self, m: &mut HashMap<Symbol, ExtFunc>) {
         self.io.put(m);
+        self.file.put(m);
     }
 }
 
@@ -39,3 +44,5 @@ impl NamedExtFunc {
 }
 
 pub(crate) mod io;
+
+pub(crate) mod file;
