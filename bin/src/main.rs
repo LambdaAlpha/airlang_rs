@@ -26,24 +26,37 @@
 #![feature(trait_alias)]
 
 use {
-    crate::ui::StdUi,
-    airlang::set_extension,
-    airlang_ext::AirExt,
+    crate::prelude::{
+        AllPrelude,
+        Prelude,
+        PreludeMap,
+    },
+    airlang::{
+        set_extension,
+        Symbol,
+    },
+    airlang_ext::{
+        AirExt,
+        ExtFunc,
+    },
 };
 
 fn main() -> std::io::Result<()> {
-    let air_ext = AirExt::default();
-    set_extension(Box::new(air_ext));
-    let mut std_ui = StdUi::new();
-    repl::repl(&mut std_ui)
+    let all_prelude = AllPrelude::default();
+    let mut map = ReplPreludeMap(AirExt::default());
+    all_prelude.put(&mut map);
+    set_extension(Box::new(map.0));
+    repl::repl()
 }
 
-mod ctx;
+struct ReplPreludeMap(AirExt);
 
-mod eval;
+impl PreludeMap for ReplPreludeMap {
+    fn put(&mut self, name: Symbol, func: ExtFunc) {
+        self.0.add_func(name, func);
+    }
+}
 
 mod repl;
 
 mod prelude;
-
-mod ui;

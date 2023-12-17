@@ -1,71 +1,49 @@
 use {
-    crate::{
-        ctx::ConstCtx,
-        eval::Cmd,
-        prelude::{
-            build::BuildPrelude,
-            eval::EvalPrelude,
-            repl::ReplPrelude,
-        },
+    crate::prelude::{
+        eval::EvalPrelude,
+        repl::ReplPrelude,
     },
-    std::{
-        collections::HashMap,
-        rc::Rc,
-    },
+    airlang::Symbol,
+    airlang_ext::ExtFunc,
 };
 
-thread_local! (pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
-
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub(crate) struct AllPrelude {
     pub(crate) repl: ReplPrelude,
     pub(crate) eval: EvalPrelude,
-    pub(crate) build: BuildPrelude,
+}
+
+pub(crate) trait PreludeMap {
+    fn put(&mut self, name: Symbol, func: ExtFunc);
 }
 
 pub(crate) trait Prelude {
-    fn put(&self, m: &mut HashMap<String, Rc<dyn Cmd>>);
+    fn put(self, map: &mut impl PreludeMap);
 }
 
 impl Prelude for AllPrelude {
-    fn put(&self, m: &mut HashMap<String, Rc<dyn Cmd>>) {
+    fn put(self, m: &mut impl PreludeMap) {
         self.repl.put(m);
         self.eval.put(m);
-        self.build.put(m);
     }
 }
 
-pub(crate) fn initial_const_ctx() -> ConstCtx {
-    let cmd_map = PRELUDE.with(|prelude| {
-        let mut m = HashMap::default();
-        prelude.put(&mut m);
-        m
-    });
-    ConstCtx { cmd_map }
-}
-
-#[derive(Clone)]
-pub(crate) struct Named<T> {
+pub(crate) struct NamedExtFunc {
     pub(crate) name: &'static str,
-    pub(crate) value: T,
+    pub(crate) func: ExtFunc,
 }
 
-impl Prelude for Named<Rc<dyn Cmd>> {
-    fn put(&self, m: &mut HashMap<String, Rc<dyn Cmd>>) {
-        let name = String::from(self.name);
-        m.insert(name, self.value.clone());
+impl NamedExtFunc {
+    pub(crate) fn new(name: &'static str, func: ExtFunc) -> Self {
+        Self { name, func }
     }
-}
 
-fn named_fn(name: &'static str, cmd: impl Cmd + 'static) -> Named<Rc<dyn Cmd>> {
-    Named {
-        name,
-        value: Rc::new(cmd),
+    pub(crate) fn put(self, map: &mut impl PreludeMap) {
+        let name = unsafe { Symbol::from_str_unchecked(self.name) };
+        map.put(name, self.func);
     }
 }
 
 mod repl;
 
 mod eval;
-
-mod build;

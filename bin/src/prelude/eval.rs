@@ -1,64 +1,52 @@
 use {
-    crate::{
-        ctx::{
-            ConstCtx,
-            DynCtx,
-        },
-        eval::{
-            eval_interpret,
-            Cmd,
-            Output,
-        },
-        prelude::{
-            named_fn,
-            Named,
-            Prelude,
-        },
+    crate::prelude::{
+        NamedExtFunc,
+        Prelude,
+        PreludeMap,
     },
     airlang::{
         initial_ctx,
+        CtxForMutableFn,
+        EvalMode,
+        IoMode,
         Val,
     },
-    std::{
-        collections::HashMap,
-        rc::Rc,
+    airlang_ext::{
+        ExtFn,
+        ExtFunc,
     },
 };
 
-#[derive(Clone)]
 pub(crate) struct EvalPrelude {
-    pub(crate) eval: Named<Rc<dyn Cmd>>,
-    pub(crate) meta_eval: Named<Rc<dyn Cmd>>,
-    pub(crate) reset: Named<Rc<dyn Cmd>>,
+    pub(crate) reset: NamedExtFunc,
 }
 
 impl Default for EvalPrelude {
     fn default() -> Self {
-        Self {
-            eval: named_fn("repl.eval", eval),
-            meta_eval: named_fn("repl.meta", repl_eval),
-            reset: named_fn("repl.reset", reset),
-        }
+        Self { reset: reset() }
     }
 }
 
 impl Prelude for EvalPrelude {
-    fn put(&self, m: &mut HashMap<String, Rc<dyn Cmd>>) {
-        self.eval.put(m);
-        self.meta_eval.put(m);
+    fn put(self, m: &mut impl PreludeMap) {
         self.reset.put(m);
     }
 }
 
-fn eval(_const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: Val) -> Output {
-    eval_interpret(&mut dyn_ctx.ctx, input)
+fn reset() -> NamedExtFunc {
+    let ext_fn = ExtFn::new_mutable(fn_reset);
+    let input_mode = IoMode::Any(EvalMode::Value);
+    let output_mode = IoMode::Any(EvalMode::Value);
+    let func = ExtFunc::new(input_mode, output_mode, ext_fn);
+    NamedExtFunc::new("repl.reset", func)
 }
 
-fn repl_eval(_const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, input: Val) -> Output {
-    eval_interpret(&mut dyn_ctx.meta_ctx, input)
-}
-
-pub(crate) fn reset(_const_ctx: &ConstCtx, dyn_ctx: &mut DynCtx, _input: Val) -> Output {
-    dyn_ctx.ctx = initial_ctx();
-    Output::Print(Box::new("context reset"))
+fn fn_reset(ctx: CtxForMutableFn, _input: Val) -> Val {
+    let CtxForMutableFn::Mutable(mut ctx) = ctx else {
+        eprintln!("Unable to reset context, context is immutable.");
+        return Val::default();
+    };
+    let initial_ctx = initial_ctx();
+    ctx.set(initial_ctx);
+    Val::default()
 }

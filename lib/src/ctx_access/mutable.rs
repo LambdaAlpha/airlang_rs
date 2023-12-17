@@ -1,22 +1,25 @@
-use crate::{
-    ctx::{
-        Ctx,
-        CtxError,
-        CtxTrait,
-        DefaultCtx,
-        TaggedRef,
-        TaggedVal,
-    },
-    ctx_access::{
-        constant::{
-            ConstCtx,
-            CtxForConstFn,
+use {
+    crate::{
+        ctx::{
+            Ctx,
+            CtxError,
+            CtxTrait,
+            DefaultCtx,
+            TaggedRef,
+            TaggedVal,
         },
-        free::FreeCtx,
-        CtxAccessor,
+        ctx_access::{
+            constant::{
+                ConstCtx,
+                CtxForConstFn,
+            },
+            free::FreeCtx,
+            CtxAccessor,
+        },
+        symbol::Symbol,
+        Val,
     },
-    symbol::Symbol,
-    Val,
+    std::mem::swap,
 };
 
 pub struct MutableCtx<'a>(&'a mut Ctx);
@@ -282,6 +285,14 @@ impl<'a> MutableCtx<'a> {
 
     pub fn reborrow(&mut self) -> MutableCtx {
         MutableCtx(self.0)
+    }
+
+    pub fn swap(&mut self, other: &mut Self) {
+        swap(self.0, other.0);
+    }
+
+    pub fn set(&mut self, ctx: crate::Ctx) {
+        *self.0 = *ctx.0;
     }
 
     // SAFETY: The function f can take the ctx out during its execution,
