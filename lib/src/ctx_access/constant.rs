@@ -256,16 +256,16 @@ impl<'a> CtxAccessor for CtxForConstFn<'a> {
 }
 
 impl<'a> ConstCtx<'a> {
-    pub fn new(ctx: &'a mut crate::Ctx) -> Self {
-        ConstCtx(&mut ctx.0)
-    }
-
-    pub(crate) fn new_inner(ctx: &'a mut Ctx) -> Self {
+    pub fn new(ctx: &'a mut Ctx) -> Self {
         ConstCtx(ctx)
     }
 
     pub fn reborrow(&mut self) -> ConstCtx {
         ConstCtx(self.0)
+    }
+
+    pub fn meta(&mut self) -> Option<ConstCtx> {
+        self.0.meta.as_mut().map(|meta| ConstCtx(&mut *meta))
     }
 
     pub(crate) fn get_ctx_ref(&self) -> &Ctx {

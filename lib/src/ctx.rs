@@ -86,7 +86,7 @@ pub(crate) struct TaggedRef<'a, T> {
 }
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
-pub(crate) struct Ctx {
+pub struct Ctx {
     pub(crate) name_map: NameMap,
     pub(crate) meta: Option<Box<Ctx>>,
 }

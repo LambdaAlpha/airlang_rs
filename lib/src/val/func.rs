@@ -45,3 +45,11 @@ impl Debug for FuncVal {
         <_ as Debug>::fmt(self.0.deref(), f)
     }
 }
+
+impl Deref for FuncVal {
+    type Target = Func;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}

@@ -41,7 +41,7 @@ use {
 };
 
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub(crate) struct Func {
+pub struct Func {
     pub(crate) input_mode: IoMode,
     pub(crate) output_mode: IoMode,
     pub(crate) evaluator: FuncEval,
@@ -100,6 +100,14 @@ pub(crate) struct CtxMutableInfo {
 }
 
 impl Func {
+    pub fn input_mode(&self) -> &IoMode {
+        &self.input_mode
+    }
+
+    pub fn output_mode(&self) -> &IoMode {
+        &self.output_mode
+    }
+
     #[allow(unused)]
     pub(crate) fn is_ctx_free(&self) -> bool {
         matches!(&self.evaluator, FuncEval::Free(_))
@@ -373,7 +381,7 @@ where
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
     let _ = new_ctx.put_val_local(input_name, TaggedVal::new(input));
-    MoreByRef.eval(&mut MutableCtx::new_inner(&mut new_ctx), body)
+    MoreByRef.eval(&mut MutableCtx::new(&mut new_ctx), body)
 }
 
 fn eval_aware(
@@ -398,7 +406,7 @@ fn keep_eval_restore(
 ) -> Val {
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_tag);
-    let output = MoreByRef.eval(&mut MutableCtx::new_inner(&mut new_ctx), body);
+    let output = MoreByRef.eval(&mut MutableCtx::new(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, &caller_name);
     output
 }

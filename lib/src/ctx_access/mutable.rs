@@ -114,7 +114,7 @@ impl<'a> CtxAccessor for MutableCtx<'a> {
     }
 
     fn for_const_fn(&mut self) -> CtxForConstFn {
-        CtxForConstFn::Const(ConstCtx::new_inner(self.0))
+        CtxForConstFn::Const(ConstCtx::new(self.0))
     }
 
     fn for_mutable_fn(&mut self) -> CtxForMutableFn {
@@ -265,7 +265,7 @@ impl<'a> CtxAccessor for CtxForMutableFn<'a> {
         match self {
             CtxForMutableFn::Free(_ctx) => CtxForConstFn::Free(FreeCtx),
             CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx.reborrow()),
-            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx::new_inner(ctx.0)),
+            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx::new(ctx.0)),
         }
     }
 
@@ -275,11 +275,7 @@ impl<'a> CtxAccessor for CtxForMutableFn<'a> {
 }
 
 impl<'a> MutableCtx<'a> {
-    pub fn new(ctx: &'a mut crate::Ctx) -> Self {
-        Self(&mut ctx.0)
-    }
-
-    pub(crate) fn new_inner(ctx: &'a mut Ctx) -> Self {
+    pub fn new(ctx: &'a mut Ctx) -> Self {
         Self(ctx)
     }
 
@@ -287,12 +283,16 @@ impl<'a> MutableCtx<'a> {
         MutableCtx(self.0)
     }
 
+    pub fn meta(&mut self) -> Option<MutableCtx> {
+        self.0.meta.as_mut().map(|meta| MutableCtx(&mut *meta))
+    }
+
     pub fn swap(&mut self, other: &mut Self) {
         swap(self.0, other.0);
     }
 
-    pub fn set(&mut self, ctx: crate::Ctx) {
-        *self.0 = *ctx.0;
+    pub fn set(&mut self, ctx: Ctx) {
+        *self.0 = ctx;
     }
 
     // SAFETY: The function f can take the ctx out during its execution,
@@ -330,7 +330,7 @@ impl<'a> CtxForMutableFn<'a> {
         match self {
             CtxForMutableFn::Free(_ctx) => CtxForConstFn::Free(FreeCtx),
             CtxForMutableFn::Const(ctx) => CtxForConstFn::Const(ctx),
-            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx::new_inner(ctx.0)),
+            CtxForMutableFn::Mutable(ctx) => CtxForConstFn::Const(ConstCtx::new(ctx.0)),
         }
     }
 

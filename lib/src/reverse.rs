@@ -7,7 +7,7 @@ pub struct Reverse<A, B> {
 }
 
 impl<A, B> Reverse<A, B> {
-    pub(crate) fn new(func: A, output: B) -> Self {
+    pub fn new(func: A, output: B) -> Self {
         Self { func, output }
     }
 }

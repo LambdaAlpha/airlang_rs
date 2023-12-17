@@ -7,7 +7,7 @@ pub struct Call<A, B> {
 }
 
 impl<A, B> Call<A, B> {
-    pub(crate) fn new(func: A, input: B) -> Self {
+    pub fn new(func: A, input: B) -> Self {
         Self { func, input }
     }
 }

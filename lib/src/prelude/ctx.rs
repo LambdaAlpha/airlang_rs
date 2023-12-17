@@ -512,9 +512,9 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
                         return Val::default();
                     };
                     if meta.is_const {
-                        func.eval(&mut ConstCtx::new_inner(meta.val_ref), input)
+                        func.eval(&mut ConstCtx::new(meta.val_ref), input)
                     } else {
-                        func.eval(&mut MutableCtx::new_inner(meta.val_ref), input)
+                        func.eval(&mut MutableCtx::new(meta.val_ref), input)
                     }
                 }
                 Val::List(names) => {
@@ -537,9 +537,9 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
                         return Val::default();
                     };
                     if meta.is_const {
-                        solve(&mut ConstCtx::new_inner(meta.val_ref), reverse)
+                        solve(&mut ConstCtx::new(meta.val_ref), reverse)
                     } else {
-                        solve(&mut MutableCtx::new_inner(meta.val_ref), reverse)
+                        solve(&mut MutableCtx::new(meta.val_ref), reverse)
                     }
                 }
                 Val::List(names) => {
@@ -568,13 +568,9 @@ where
         return Val::default();
     };
     if is_const {
-        get_ctx_nested(CtxForMutableFn::Const(ConstCtx::new_inner(ctx)), rest, f)
+        get_ctx_nested(CtxForMutableFn::Const(ConstCtx::new(ctx)), rest, f)
     } else {
-        get_ctx_nested(
-            CtxForMutableFn::Mutable(MutableCtx::new_inner(ctx)),
-            rest,
-            f,
-        )
+        get_ctx_nested(CtxForMutableFn::Mutable(MutableCtx::new(ctx)), rest, f)
     }
 }
 

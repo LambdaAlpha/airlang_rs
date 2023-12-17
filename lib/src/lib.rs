@@ -50,7 +50,11 @@ use {
 pub use self::{
     bool::Bool,
     bytes::Bytes,
-    ctx::CtxError,
+    call::Call,
+    ctx::{
+        Ctx,
+        CtxError,
+    },
     ctx_access::{
         constant::{
             ConstCtx,
@@ -65,23 +69,29 @@ pub use self::{
     eval_mode::EvalMode,
     extension::Extension,
     float::Float,
+    func::Func,
     int::Int,
     io_mode::{
         IoMode,
         ListItemIoMode,
     },
+    list::List,
+    logic::Prop,
+    map::Map,
+    pair::Pair,
+    reverse::Reverse,
     string::Str,
     symbol::Symbol,
     unit::Unit,
     val::{
-        call::CallVal as Call,
-        ctx::CtxVal as Ctx,
-        func::FuncVal as Func,
-        list::ListVal as List,
-        map::MapVal as Map,
-        pair::PairVal as Pair,
-        prop::PropVal as Prop,
-        reverse::ReverseVal as Reverse,
+        call::CallVal,
+        ctx::CtxVal,
+        func::FuncVal,
+        list::ListVal,
+        map::MapVal,
+        pair::PairVal,
+        prop::PropVal,
+        reverse::ReverseVal,
         Val,
     },
 };
@@ -99,8 +109,7 @@ pub fn generate(src: &Val) -> Result<String, ReprError> {
 }
 
 pub fn initial_ctx() -> Ctx {
-    let ctx = prelude::initial_ctx();
-    Ctx(Box::new(ctx))
+    prelude::initial_ctx()
 }
 
 pub fn interpret_mutable(mut ctx: MutableCtx, input: Val) -> Val {

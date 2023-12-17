@@ -7,7 +7,7 @@ pub struct Pair<A, B> {
 }
 
 impl<A, B> Pair<A, B> {
-    pub(crate) fn new(first: A, second: B) -> Self {
+    pub fn new(first: A, second: B) -> Self {
         Self { first, second }
     }
 }

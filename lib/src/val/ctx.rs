@@ -5,7 +5,10 @@ use {
             Debug,
             Formatter,
         },
-        ops::Deref,
+        ops::{
+            Deref,
+            DerefMut,
+        },
     },
 };
 
@@ -21,5 +24,18 @@ impl From<Box<Ctx>> for CtxVal {
 impl Debug for CtxVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Debug>::fmt(self.0.deref(), f)
+    }
+}
+
+impl Deref for CtxVal {
+    type Target = Ctx;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for CtxVal {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

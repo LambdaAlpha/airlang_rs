@@ -4,11 +4,11 @@ use {
 };
 
 pub use self::repr::{
-    call::CallRepr as Call,
-    list::ListRepr as List,
-    map::MapRepr as Map,
-    pair::PairRepr as Pair,
-    reverse::ReverseRepr as Reverse,
+    call::CallRepr,
+    list::ListRepr,
+    map::MapRepr,
+    pair::PairRepr,
+    reverse::ReverseRepr,
     Repr,
 };
 

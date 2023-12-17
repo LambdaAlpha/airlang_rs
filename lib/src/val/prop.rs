@@ -45,3 +45,11 @@ impl Debug for PropVal {
         <_ as Debug>::fmt(self.0.deref(), f)
     }
 }
+
+impl Deref for PropVal {
+    type Target = Prop;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
