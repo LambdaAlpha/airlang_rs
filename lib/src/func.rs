@@ -21,7 +21,6 @@ use {
         eval_mode::more::MoreByRef,
         io_mode::IoMode,
         symbol::Symbol,
-        types::refer::Reader,
         val::{
             ctx::CtxVal,
             Val,
@@ -40,14 +39,14 @@ use {
     },
 };
 
-#[derive(Clone, Eq, PartialEq, Hash)]
+#[derive(Eq, PartialEq, Hash)]
 pub struct Func {
     pub(crate) input_mode: IoMode,
     pub(crate) output_mode: IoMode,
     pub(crate) evaluator: FuncEval,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum FuncEval {
     Free(CtxFreeEval),
     Const(CtxConstEval),
@@ -60,23 +59,23 @@ pub(crate) type CtxConstEval = FuncImpl<Primitive<CtxConstFn>, Composed<CtxConst
 
 pub(crate) type CtxMutableEval = FuncImpl<Primitive<CtxMutableFn>, Composed<CtxMutableInfo>>;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum FuncImpl<P, C> {
     Primitive(P),
     Composed(C),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub(crate) struct Primitive<F> {
     id: Symbol,
     eval_fn: F,
 }
 
-pub(crate) type CtxFreeFn = Reader<dyn Fn(Val) -> Val>;
+pub(crate) type CtxFreeFn = Box<dyn Fn(Val) -> Val>;
 
-pub(crate) type CtxConstFn = Reader<dyn Fn(CtxForConstFn, Val) -> Val>;
+pub(crate) type CtxConstFn = Box<dyn Fn(CtxForConstFn, Val) -> Val>;
 
-pub(crate) type CtxMutableFn = Reader<dyn Fn(CtxForMutableFn, Val) -> Val>;
+pub(crate) type CtxMutableFn = Box<dyn Fn(CtxForMutableFn, Val) -> Val>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed<C> {
@@ -468,6 +467,12 @@ impl TaggedVal {
     }
 }
 
+impl<T> Debug for Primitive<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Primitive").field(&self.id).finish()
+    }
+}
+
 impl Debug for Func {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut s = f.debug_struct("Func");
@@ -535,7 +540,7 @@ impl Primitive<CtxFreeFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(Val) -> Val + 'static) -> Self {
         Primitive {
             id: Symbol::from_str(id),
-            eval_fn: Reader::new(evaluator),
+            eval_fn: Box::new(evaluator),
         }
     }
 }
@@ -544,7 +549,7 @@ impl Primitive<CtxConstFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForConstFn, Val) -> Val + 'static) -> Self {
         Primitive {
             id: Symbol::from_str(id),
-            eval_fn: Reader::new(evaluator),
+            eval_fn: Box::new(evaluator),
         }
     }
 
@@ -568,7 +573,7 @@ impl Primitive<CtxMutableFn> {
     pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForMutableFn, Val) -> Val + 'static) -> Self {
         Primitive {
             id: Symbol::from_str(id),
-            eval_fn: Reader::new(evaluator),
+            eval_fn: Box::new(evaluator),
         }
     }
 
