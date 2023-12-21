@@ -1,7 +1,6 @@
 use {
     airlang::{
         generate,
-        initial_ctx,
         interpret_mutable,
         parse,
         MutableCtx,
@@ -15,13 +14,11 @@ use {
     },
 };
 
-pub(crate) fn repl() -> Result<()> {
-    let mut ctx = initial_ctx();
-    let mut mutable_ctx = MutableCtx::new(&mut ctx);
+pub(crate) fn repl(mut ctx: MutableCtx) -> Result<()> {
     let mut multiline_mode = false;
     let mut input_buffer = String::new();
 
-    print_title(mutable_ctx.reborrow());
+    print_title(ctx.reborrow());
 
     loop {
         print!("{}", PROMPT_PREFIX);
@@ -48,7 +45,7 @@ pub(crate) fn repl() -> Result<()> {
             continue;
         }
 
-        eval_print(mutable_ctx.reborrow(), input);
+        eval_print(ctx.reborrow(), input);
 
         input_buffer.clear();
     }

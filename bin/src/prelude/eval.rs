@@ -1,24 +1,29 @@
 use {
-    crate::prelude::{
-        NamedExtFunc,
-        Prelude,
-        PreludeMap,
+    crate::{
+        init_ctx,
+        prelude::{
+            put_func,
+            Prelude,
+        },
     },
     airlang::{
         initial_ctx,
         CtxForMutableFn,
         EvalMode,
         IoMode,
+        MutableCtx,
+        Symbol,
         Val,
     },
     airlang_ext::{
         ExtFn,
         ExtFunc,
     },
+    std::rc::Rc,
 };
 
 pub(crate) struct EvalPrelude {
-    pub(crate) reset: NamedExtFunc,
+    pub(crate) reset: Rc<ExtFunc>,
 }
 
 impl Default for EvalPrelude {
@@ -28,17 +33,17 @@ impl Default for EvalPrelude {
 }
 
 impl Prelude for EvalPrelude {
-    fn put(self, m: &mut impl PreludeMap) {
-        self.reset.put(m);
+    fn put(&self, mut ctx: MutableCtx) {
+        put_func(&self.reset, ctx.reborrow());
     }
 }
 
-fn reset() -> NamedExtFunc {
+fn reset() -> Rc<ExtFunc> {
+    let id = unsafe { Symbol::from_str_unchecked("repl.reset") };
     let ext_fn = ExtFn::new_mutable(fn_reset);
     let input_mode = IoMode::Any(EvalMode::Value);
     let output_mode = IoMode::Any(EvalMode::Value);
-    let func = ExtFunc::new(input_mode, output_mode, ext_fn);
-    NamedExtFunc::new("repl.reset", func)
+    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
 
 fn fn_reset(ctx: CtxForMutableFn, _input: Val) -> Val {
@@ -46,7 +51,8 @@ fn fn_reset(ctx: CtxForMutableFn, _input: Val) -> Val {
         eprintln!("Unable to reset context, context is immutable.");
         return Val::default();
     };
-    let initial_ctx = initial_ctx();
+    let mut initial_ctx = initial_ctx();
+    init_ctx(MutableCtx::new(&mut initial_ctx));
     ctx.set(initial_ctx);
     Val::default()
 }

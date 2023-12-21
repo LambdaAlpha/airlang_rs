@@ -16,12 +16,16 @@ use {
         },
         hash::Hash,
     },
+    thiserror::Error,
 };
 
-#[derive(Copy, Clone)]
+#[derive(Error, Copy, Clone, Debug)]
 pub enum CtxError {
+    #[error("not found")]
     NotFound,
+    #[error("access denied")]
     AccessDenied,
+    #[error("unexpected")]
     Unexpected,
 }
 
@@ -64,7 +68,7 @@ pub(crate) trait CtxTrait {
 pub(crate) type NameMap = Map<Symbol, TaggedVal>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum InvariantTag {
+pub enum InvariantTag {
     // no limit
     None,
     // can't be assigned

@@ -41,7 +41,6 @@ use {
     crate::{
         eval::Evaluator,
         eval_mode::more::More,
-        extension::EXTENSION,
         syntax::ParseError,
     },
     thiserror::Error,
@@ -54,6 +53,7 @@ pub use self::{
     ctx::{
         Ctx,
         CtxError,
+        InvariantTag,
     },
     ctx_access::{
         constant::{
@@ -67,7 +67,11 @@ pub use self::{
         },
     },
     eval_mode::EvalMode,
-    extension::Extension,
+    extension::{
+        AsFuncExt,
+        FuncExt,
+        ValExt,
+    },
     float::Float,
     func::Func,
     int::Int,
@@ -122,10 +126,6 @@ pub fn interpret_const(mut ctx: ConstCtx, input: Val) -> Val {
 
 pub fn interpret_free(mut ctx: FreeCtx, input: Val) -> Val {
     More.eval(&mut ctx, input)
-}
-
-pub fn set_extension(extension: Box<dyn Extension>) {
-    EXTENSION.set(extension);
 }
 
 pub(crate) mod val;

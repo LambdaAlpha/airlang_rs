@@ -2,6 +2,7 @@ use {
     crate::{
         bool::Bool,
         bytes::Bytes,
+        extension::ValExt,
         float::Float,
         int::Int,
         string::Str,
@@ -64,6 +65,8 @@ pub enum Val {
     Ctx(CtxVal),
 
     Prop(PropVal),
+
+    Ext(Box<dyn ValExt>),
 }
 
 #[allow(dead_code)]
@@ -333,6 +336,7 @@ impl Debug for Val {
             Val::Func(func) => <_ as Debug>::fmt(func, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
             Val::Prop(p) => <_ as Debug>::fmt(p, f),
+            Val::Ext(e) => <_ as Debug>::fmt(e, f),
         }
     }
 }

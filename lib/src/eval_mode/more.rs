@@ -80,21 +80,39 @@ where
             _ => {}
         }
         let func = self.eval(ctx, func);
-        if let Val::Func(FuncVal(func)) = func {
-            let input = func.input_mode.eval(ctx, input);
-            func.eval(ctx, input)
-        } else {
-            let input = self.eval(ctx, input);
-            ValBuilder.from_call(func, input)
+        match &func {
+            Val::Func(FuncVal(func)) => {
+                let input = func.input_mode.eval(ctx, input);
+                func.eval(ctx, input)
+            }
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    let input = func.input_mode().eval(ctx, input);
+                    func.call(ctx.for_mutable_fn(), input)
+                } else {
+                    let input = self.eval(ctx, input);
+                    ValBuilder.from_call(func, input)
+                }
+            }
+            _ => {
+                let input = self.eval(ctx, input);
+                ValBuilder.from_call(func, input)
+            }
         }
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
         let func = self.eval(ctx, func);
-        let output = if let Val::Func(FuncVal(f)) = &func {
-            f.output_mode.eval(ctx, output)
-        } else {
-            self.eval(ctx, output)
+        let output = match &func {
+            Val::Func(FuncVal(f)) => f.output_mode.eval(ctx, output),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.output_mode().eval(ctx, output)
+                } else {
+                    self.eval(ctx, output)
+                }
+            }
+            _ => self.eval(ctx, output),
         };
         let reverse = ValBuilder.from_reverse(func, output);
         solve(ctx, reverse)
@@ -150,21 +168,39 @@ where
             _ => {}
         }
         let func = self.eval(ctx, func);
-        if let Val::Func(FuncVal(func)) = func {
-            let input = func.input_mode.eval(ctx, input);
-            func.eval(ctx, input)
-        } else {
-            let input = self.eval(ctx, input);
-            ValBuilder.from_call(func, input)
+        match &func {
+            Val::Func(FuncVal(func)) => {
+                let input = func.input_mode.eval(ctx, input);
+                func.eval(ctx, input)
+            }
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    let input = func.input_mode().eval(ctx, input);
+                    func.call(ctx.for_mutable_fn(), input)
+                } else {
+                    let input = self.eval(ctx, input);
+                    ValBuilder.from_call(func, input)
+                }
+            }
+            _ => {
+                let input = self.eval(ctx, input);
+                ValBuilder.from_call(func, input)
+            }
         }
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
         let func = self.eval(ctx, func);
-        let output = if let Val::Func(FuncVal(f)) = &func {
-            f.output_mode.eval(ctx, output)
-        } else {
-            self.eval(ctx, output)
+        let output = match &func {
+            Val::Func(FuncVal(f)) => f.output_mode.eval(ctx, output),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.output_mode().eval(ctx, output)
+                } else {
+                    self.eval(ctx, output)
+                }
+            }
+            _ => self.eval(ctx, output),
         };
         let reverse = ValBuilder.from_reverse(func, output);
         solve(ctx, reverse)

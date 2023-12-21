@@ -1,17 +1,20 @@
 use {
     crate::{
-        eval::{
-            output::OutputBuilder,
-            ValBuilder,
+        ctx::InvariantTag,
+        extension::{
+            AsFuncExt,
+            FuncExt,
         },
-        extension::Extension,
         initial_ctx,
         interpret_mutable,
         parse,
-        set_extension,
         val::Val,
+        Ctx,
         CtxForMutableFn,
+        EvalMode,
+        IoMode,
         MutableCtx,
+        Symbol,
     },
     std::{
         error::Error,
@@ -23,13 +26,22 @@ const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";
 
 fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
+    let ctx = initial_ctx();
+    test_interpret_with_ctx(ctx, input, file_name)
+}
+
+fn test_interpret_with_ctx(
+    mut ctx: Ctx,
+    input: &str,
+    file_name: &str,
+) -> Result<(), Box<dyn Error>> {
     if input.is_empty() {
         return Ok(());
     }
-    let mut ctx = initial_ctx();
+    let backup = ctx.clone();
+
     let mut mutable_ctx = MutableCtx::new(&mut ctx);
     let tests = input.split(MAIN_DELIMITER);
-
     for test in tests {
         let split_err = format!("file {file_name}, case ({test}): invalid test case format");
         let (i, o) = test.split_once(SUB_DELIMITER).expect(&split_err);
@@ -47,7 +59,7 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:#?}, \
             current context: {ctx:#?}",
         );
-        ctx = initial_ctx();
+        ctx = backup.clone();
         mutable_ctx = MutableCtx::new(&mut ctx);
     }
     Ok(())
@@ -176,15 +188,39 @@ fn test_map() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
-    struct Ext;
-    impl Extension for Ext {
-        fn call(&mut self, _ctx: CtxForMutableFn, func: Val, input: Val) -> Val {
-            ValBuilder.from_call(func, input)
-        }
-        fn reverse(&mut self, _ctx: CtxForMutableFn, func: Val, output: Val) -> Val {
-            ValBuilder.from_reverse(func, output)
-        }
+    let mut ctx = initial_ctx();
+    let mut mutable_ctx = MutableCtx::new(&mut ctx);
+    mutable_ctx.put(
+        Symbol::from_str("ext"),
+        InvariantTag::Const,
+        Val::Ext(Box::new(Ext)),
+    )?;
+    test_interpret_with_ctx(
+        ctx,
+        include_str!("test/extension.air"),
+        "test/extension.air",
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Ext;
+
+impl AsFuncExt for Ext {
+    fn as_func(&self) -> Option<&dyn FuncExt> {
+        Some(self)
     }
-    set_extension(Box::new(Ext));
-    test_interpret(include_str!("test/extension.air"), "test/extension.air")
+}
+
+impl FuncExt for Ext {
+    fn input_mode(&self) -> &IoMode {
+        &IoMode::Any(EvalMode::More)
+    }
+
+    fn output_mode(&self) -> &IoMode {
+        &IoMode::Any(EvalMode::More)
+    }
+
+    fn call(&self, _ctx: CtxForMutableFn, input: Val) -> Val {
+        input
+    }
 }

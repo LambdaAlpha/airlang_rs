@@ -5,6 +5,7 @@ use {
             CtxError,
             CtxTrait,
             DefaultCtx,
+            InvariantTag,
             TaggedRef,
             TaggedVal,
         },
@@ -314,6 +315,15 @@ impl<'a> MutableCtx<'a> {
             return Err(CtxError::AccessDenied);
         }
         Ok(tagged_ref.val_ref)
+    }
+
+    pub fn put(
+        &mut self,
+        name: Symbol,
+        tag: InvariantTag,
+        val: Val,
+    ) -> Result<Option<Val>, CtxError> {
+        self.put_val(name, TaggedVal { tag, val })
     }
 }
 

@@ -4,11 +4,19 @@ use {
             file::FilePrelude,
             io::IoPrelude,
         },
+        val::ExtVal,
         ExtFunc,
     },
-    airlang::Symbol,
-    std::collections::HashMap,
+    airlang::{
+        InvariantTag,
+        MutableCtx,
+        Symbol,
+        Val,
+    },
+    std::rc::Rc,
 };
+
+thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default)]
 pub(crate) struct AllPrelude {
@@ -17,30 +25,42 @@ pub(crate) struct AllPrelude {
 }
 
 impl Prelude for AllPrelude {
-    fn put(self, m: &mut HashMap<Symbol, ExtFunc>) {
-        self.io.put(m);
-        self.file.put(m);
+    fn put(&self, mut ctx: MutableCtx) {
+        self.io.put(ctx.reborrow());
+        self.file.put(ctx.reborrow());
     }
 }
 
 pub(crate) trait Prelude {
-    fn put(self, m: &mut HashMap<Symbol, ExtFunc>);
+    fn put(&self, ctx: MutableCtx);
 }
 
-pub(crate) struct NamedExtFunc {
+#[derive(Clone)]
+pub(crate) struct Named<T> {
     pub(crate) name: &'static str,
-    pub(crate) func: ExtFunc,
+    pub(crate) value: T,
 }
 
-impl NamedExtFunc {
-    pub(crate) fn new(name: &'static str, func: ExtFunc) -> Self {
-        Self { name, func }
+#[allow(unused)]
+impl<T> Named<T> {
+    pub(crate) fn new(name: &'static str, value: T) -> Self {
+        Self { name, value }
     }
+}
 
-    pub(crate) fn put(self, m: &mut HashMap<Symbol, ExtFunc>) {
+#[allow(unused)]
+impl<T: Into<ExtVal>> Named<T> {
+    pub(crate) fn put(self, mut ctx: MutableCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
-        m.insert(name, self.func);
+        let val = Val::Ext(Box::new(self.value.into()));
+        let _ = ctx.put(name, InvariantTag::Const, val);
     }
+}
+
+pub(crate) fn put_func(func: &Rc<ExtFunc>, mut ctx: MutableCtx) {
+    let id = func.id.clone();
+    let val = Val::Ext(Box::new(ExtVal::Func(func.clone())));
+    let _ = ctx.put(id, InvariantTag::Const, val);
 }
 
 pub(crate) mod io;

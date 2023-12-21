@@ -8,6 +8,7 @@ use {
         },
         ctx_access::constant::CtxForConstFn,
         eval_mode::EvalMode,
+        extension::UnitExt,
         io_mode::IoMode,
         nondeterministic::{
             any_bool,
@@ -59,6 +60,7 @@ const MAP: &str = "map";
 const CTX: &str = "context";
 const FUNC: &str = "function";
 const PROP: &str = "proposition";
+const EXT: &str = "extension";
 
 #[derive(Clone)]
 pub(crate) struct ValuePrelude {
@@ -134,6 +136,7 @@ fn fn_any(input: Val) -> Val {
             CTX => Val::Ctx(any_ctx(rng, DEPTH)),
             FUNC => Val::Func(any_func(rng, DEPTH)),
             PROP => Val::Prop(any_prop(rng, DEPTH)),
+            EXT => Val::Ext(Box::new(UnitExt)),
             _ => Val::default(),
         },
         _ => Val::default(),
@@ -164,6 +167,7 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
             Val::Func(_) => FUNC,
             Val::Ctx(_) => CTX,
             Val::Prop(_) => PROP,
+            Val::Ext(_) => EXT,
         };
         Val::Symbol(Symbol::from_str(s))
     })

@@ -1,25 +1,26 @@
 use {
     crate::{
         prelude::{
-            NamedExtFunc,
+            put_func,
+            ExtFunc,
             Prelude,
         },
         ExtFn,
-        ExtFunc,
     },
     airlang::{
         CtxForConstFn,
         EvalMode,
         IoMode,
+        MutableCtx,
         Str,
         Symbol,
         Val,
     },
-    std::collections::HashMap,
+    std::rc::Rc,
 };
 
 pub(crate) struct FilePrelude {
-    pub(crate) read_to_string: NamedExtFunc,
+    pub(crate) read_to_string: Rc<ExtFunc>,
 }
 
 impl Default for FilePrelude {
@@ -31,17 +32,17 @@ impl Default for FilePrelude {
 }
 
 impl Prelude for FilePrelude {
-    fn put(self, m: &mut HashMap<Symbol, ExtFunc>) {
-        self.read_to_string.put(m);
+    fn put(&self, mut ctx: MutableCtx) {
+        put_func(&self.read_to_string, ctx.reborrow());
     }
 }
 
-fn read_to_string() -> NamedExtFunc {
-    let ext_fn = ExtFn::new_const(fn_read_to_string);
+fn read_to_string() -> Rc<ExtFunc> {
+    let id = unsafe { Symbol::from_str_unchecked("file.read_to_string") };
     let input_mode = IoMode::Symbol(EvalMode::Value);
     let output_mode = IoMode::Any(EvalMode::More);
-    let func = ExtFunc::new(input_mode, output_mode, ext_fn);
-    NamedExtFunc::new("file.read_to_string", func)
+    let ext_fn = ExtFn::new_const(fn_read_to_string);
+    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
 
 fn fn_read_to_string(ctx: CtxForConstFn, input: Val) -> Val {

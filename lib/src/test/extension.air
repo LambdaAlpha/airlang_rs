@@ -1,15 +1,19 @@
-1 '$ 2
+ext 1
 -----
-1 $ 2
+1
 =====
-f '$ (not 't)
+ext 2
 -----
-f $ (not 't)
+2
 =====
-1 '? 2
+ext === ext
 -----
-1 ? 2
+'t
 =====
-f '? (not 't)
+type_of ext
 -----
-f ? (not 't)
+extension
+=====
+;[a = ext, b = ext, a === b]
+-----
+'t

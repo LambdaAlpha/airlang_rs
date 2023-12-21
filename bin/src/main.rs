@@ -27,34 +27,26 @@
 
 use {
     crate::prelude::{
-        AllPrelude,
         Prelude,
-        PreludeMap,
+        PRELUDE,
     },
     airlang::{
-        set_extension,
-        Symbol,
-    },
-    airlang_ext::{
-        AirExt,
-        ExtFunc,
+        initial_ctx,
+        MutableCtx,
     },
 };
 
 fn main() -> std::io::Result<()> {
-    let all_prelude = AllPrelude::default();
-    let mut map = ReplPreludeMap(AirExt::default());
-    all_prelude.put(&mut map);
-    set_extension(Box::new(map.0));
-    repl::repl()
+    let mut ctx = initial_ctx();
+    let mut mutable_ctx = MutableCtx::new(&mut ctx);
+    init_ctx(mutable_ctx.reborrow());
+
+    repl::repl(mutable_ctx)
 }
 
-struct ReplPreludeMap(AirExt);
-
-impl PreludeMap for ReplPreludeMap {
-    fn put(&mut self, name: Symbol, func: ExtFunc) {
-        self.0.add_func(name, func);
-    }
+pub(crate) fn init_ctx(mut ctx: MutableCtx) {
+    airlang_ext::init_ctx(ctx.reborrow());
+    PRELUDE.with(|prelude| prelude.put(ctx));
 }
 
 mod repl;

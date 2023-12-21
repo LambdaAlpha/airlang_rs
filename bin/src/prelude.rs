@@ -3,9 +3,20 @@ use {
         eval::EvalPrelude,
         repl::ReplPrelude,
     },
-    airlang::Symbol,
-    airlang_ext::ExtFunc,
+    airlang::{
+        InvariantTag,
+        MutableCtx,
+        Symbol,
+        Val,
+    },
+    airlang_ext::{
+        ExtFunc,
+        ExtVal,
+    },
+    std::rc::Rc,
 };
+
+thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default)]
 pub(crate) struct AllPrelude {
@@ -13,35 +24,43 @@ pub(crate) struct AllPrelude {
     pub(crate) eval: EvalPrelude,
 }
 
-pub(crate) trait PreludeMap {
-    fn put(&mut self, name: Symbol, func: ExtFunc);
-}
-
 pub(crate) trait Prelude {
-    fn put(self, map: &mut impl PreludeMap);
+    fn put(&self, ctx: MutableCtx);
 }
 
 impl Prelude for AllPrelude {
-    fn put(self, m: &mut impl PreludeMap) {
-        self.repl.put(m);
-        self.eval.put(m);
+    fn put(&self, mut ctx: MutableCtx) {
+        self.repl.put(ctx.reborrow());
+        self.eval.put(ctx.reborrow());
     }
 }
 
-pub(crate) struct NamedExtFunc {
+#[derive(Clone)]
+pub(crate) struct Named<T> {
     pub(crate) name: &'static str,
-    pub(crate) func: ExtFunc,
+    pub(crate) value: T,
 }
 
-impl NamedExtFunc {
-    pub(crate) fn new(name: &'static str, func: ExtFunc) -> Self {
-        Self { name, func }
+#[allow(unused)]
+impl<T> Named<T> {
+    pub(crate) fn new(name: &'static str, value: T) -> Self {
+        Self { name, value }
     }
+}
 
-    pub(crate) fn put(self, map: &mut impl PreludeMap) {
+#[allow(unused)]
+impl<T: Into<ExtVal>> Named<T> {
+    pub(crate) fn put(self, mut ctx: MutableCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
-        map.put(name, self.func);
+        let val = Val::Ext(Box::new(self.value.into()));
+        let _ = ctx.put(name, InvariantTag::Const, val);
     }
+}
+
+pub(crate) fn put_func(func: &Rc<ExtFunc>, mut ctx: MutableCtx) {
+    let id = func.id().clone();
+    let val = Val::Ext(Box::new(ExtVal::Func(func.clone())));
+    let _ = ctx.put(id, InvariantTag::Const, val);
 }
 
 mod repl;

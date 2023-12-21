@@ -1,22 +1,24 @@
 use {
     crate::prelude::{
-        NamedExtFunc,
+        put_func,
         Prelude,
-        PreludeMap,
     },
     airlang::{
         EvalMode,
         IoMode,
+        MutableCtx,
+        Symbol,
         Val,
     },
     airlang_ext::{
         ExtFn,
         ExtFunc,
     },
+    std::rc::Rc,
 };
 
 pub(crate) struct ReplPrelude {
-    pub(crate) exit: NamedExtFunc,
+    pub(crate) exit: Rc<ExtFunc>,
 }
 
 impl Default for ReplPrelude {
@@ -26,17 +28,17 @@ impl Default for ReplPrelude {
 }
 
 impl Prelude for ReplPrelude {
-    fn put(self, m: &mut impl PreludeMap) {
-        self.exit.put(m);
+    fn put(&self, mut ctx: MutableCtx) {
+        put_func(&self.exit, ctx.reborrow());
     }
 }
 
-fn exit() -> NamedExtFunc {
-    let ext_fn = ExtFn::new_free(fn_exit);
+fn exit() -> Rc<ExtFunc> {
+    let id = unsafe { Symbol::from_str_unchecked("repl.exit") };
     let input_mode = IoMode::Any(EvalMode::Value);
     let output_mode = IoMode::Any(EvalMode::Value);
-    let func = ExtFunc::new(input_mode, output_mode, ext_fn);
-    NamedExtFunc::new("repl.exit", func)
+    let ext_fn = ExtFn::new_free(fn_exit);
+    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
 
 fn fn_exit(_input: Val) -> Val {
