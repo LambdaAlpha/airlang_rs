@@ -23,7 +23,7 @@
         clippy::semicolon_if_nothing_returned,
     )
 )]
-#![feature(trait_alias)]
+#![feature(iterator_try_collect)]
 
 use {
     crate::prelude::{

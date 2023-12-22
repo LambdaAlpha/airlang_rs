@@ -1,6 +1,7 @@
 use {
     crate::prelude::{
         eval::EvalPrelude,
+        process::ProcessPrelude,
         repl::ReplPrelude,
     },
     airlang::{
@@ -22,6 +23,7 @@ thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 pub(crate) struct AllPrelude {
     pub(crate) repl: ReplPrelude,
     pub(crate) eval: EvalPrelude,
+    pub(crate) process: ProcessPrelude,
 }
 
 pub(crate) trait Prelude {
@@ -32,6 +34,7 @@ impl Prelude for AllPrelude {
     fn put(&self, mut ctx: MutableCtx) {
         self.repl.put(ctx.reborrow());
         self.eval.put(ctx.reborrow());
+        self.process.put(ctx.reborrow());
     }
 }
 
@@ -66,3 +69,5 @@ pub(crate) fn put_func(func: &Rc<ExtFunc>, mut ctx: MutableCtx) {
 mod repl;
 
 mod eval;
+
+mod process;
