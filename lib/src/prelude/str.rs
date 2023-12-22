@@ -19,11 +19,14 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Bytes,
     CtxForMutableFn,
 };
 
 #[derive(Clone)]
 pub(crate) struct StrPrelude {
+    pub(crate) from_utf8: Named<FuncVal>,
+    pub(crate) to_bytes: Named<FuncVal>,
     pub(crate) length: Named<FuncVal>,
     pub(crate) push: Named<FuncVal>,
     pub(crate) concat: Named<FuncVal>,
@@ -32,6 +35,8 @@ pub(crate) struct StrPrelude {
 impl Default for StrPrelude {
     fn default() -> Self {
         StrPrelude {
+            from_utf8: from_utf8(),
+            to_bytes: to_bytes(),
             length: length(),
             push: push(),
             concat: concat(),
@@ -41,10 +46,42 @@ impl Default for StrPrelude {
 
 impl Prelude for StrPrelude {
     fn put(&self, m: &mut NameMap) {
+        self.from_utf8.put(m);
+        self.to_bytes.put(m);
         self.length.put(m);
         self.push.put(m);
         self.concat.put(m);
     }
+}
+
+fn from_utf8() -> Named<FuncVal> {
+    let input_mode = IoMode::Any(EvalMode::More);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("string.from_utf8", input_mode, output_mode, fn_from_utf8)
+}
+
+fn fn_from_utf8(input: Val) -> Val {
+    let Val::Bytes(bytes) = input else {
+        return Val::default();
+    };
+    if let Ok(str) = String::from_utf8(bytes.into()) {
+        Val::String(Str::from(str))
+    } else {
+        Val::default()
+    }
+}
+
+fn to_bytes() -> Named<FuncVal> {
+    let input_mode = IoMode::Any(EvalMode::More);
+    let output_mode = IoMode::Any(EvalMode::More);
+    named_free_fn("string.to_bytes", input_mode, output_mode, fn_to_bytes)
+}
+
+fn fn_to_bytes(input: Val) -> Val {
+    let Val::String(str) = input else {
+        return Val::default();
+    };
+    Val::Bytes(Bytes::from(String::from(str).into_bytes()))
 }
 
 fn length() -> Named<FuncVal> {
