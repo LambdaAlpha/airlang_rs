@@ -32,8 +32,8 @@ string.concat ('t ["1", "2"])
 =====
 string.to_bytes "abc"
 -----
-1x616263
+0x'616263
 =====
-string.from_utf8 1x616263
+string.from_utf8 0x'616263
 -----
 "abc"

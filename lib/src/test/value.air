@@ -70,7 +70,7 @@ int
 -----
 float
 =====
-;[a = 1xff, type_of a]
+;[a = 0x'ff, type_of a]
 -----
 bytes
 =====

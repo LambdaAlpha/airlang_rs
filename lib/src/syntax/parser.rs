@@ -530,7 +530,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let numbers = alt((hex_int, bin_int, hex_bytes, bin_bytes, decimal));
+    let numbers = alt((hex_bytes, hex_int, bin_bytes, bin_int, decimal));
     let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_symbol(c)))));
     let f = terminated(numbers, next);
     context("number", f)(src)
@@ -593,7 +593,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
-    let tagged_digits = preceded(tag_no_case("1x"), cut(normed_num0(digits)));
+    let tagged_digits = preceded(tag_no_case("0x'"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(<T as From<Bytes>>::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
@@ -610,7 +610,7 @@ where
     let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
         s.len() % 8 == 0
     });
-    let tagged_digits = preceded(tag_no_case("1b"), cut(normed_num0(digits)));
+    let tagged_digits = preceded(tag_no_case("0b'"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(<T as From<Bytes>>::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
