@@ -1,4 +1,4 @@
-#![feature(trait_alias)]
+#![feature(iterator_try_collect)]
 
 use {
     crate::prelude::{

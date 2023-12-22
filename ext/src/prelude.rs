@@ -3,6 +3,7 @@ use {
         prelude::{
             file::FilePrelude,
             io::IoPrelude,
+            process::ProcessPrelude,
         },
         val::ExtVal,
         ExtFunc,
@@ -22,12 +23,14 @@ thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 pub(crate) struct AllPrelude {
     pub(crate) io: IoPrelude,
     pub(crate) file: FilePrelude,
+    pub(crate) process: ProcessPrelude,
 }
 
 impl Prelude for AllPrelude {
     fn put(&self, mut ctx: MutableCtx) {
         self.io.put(ctx.reborrow());
         self.file.put(ctx.reborrow());
+        self.process.put(ctx.reborrow());
     }
 }
 
@@ -66,3 +69,5 @@ pub(crate) fn put_func(func: &Rc<ExtFunc>, mut ctx: MutableCtx) {
 pub(crate) mod io;
 
 pub(crate) mod file;
+
+pub(crate) mod process;
