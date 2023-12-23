@@ -1,25 +1,24 @@
-use {
-    crate::{
-        bool::Bool,
-        float::Float,
-        int::Int,
-        map::Map,
-        string::Str,
-        symbol::Symbol,
-        syntax::{
-            parse,
-            repr::{
-                call::CallRepr,
-                list::ListRepr,
-                map::MapRepr,
-                pair::PairRepr,
-                reverse::ReverseRepr,
-                Repr,
-            },
+use std::error::Error;
+
+use crate::{
+    bool::Bool,
+    float::Float,
+    int::Int,
+    map::Map,
+    string::Str,
+    symbol::Symbol,
+    syntax::{
+        parse,
+        repr::{
+            call::CallRepr,
+            list::ListRepr,
+            map::MapRepr,
+            pair::PairRepr,
+            reverse::ReverseRepr,
+            Repr,
         },
-        unit::Unit,
     },
-    std::error::Error,
+    unit::Unit,
 };
 
 mod booleans;

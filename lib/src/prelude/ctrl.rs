@@ -225,11 +225,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         .into_iter()
         .find_map(|(k, v)| {
             let k = More.eval(&mut ctx, k);
-            if k == val {
-                Some(v)
-            } else {
-                None
-            }
+            if k == val { Some(v) } else { None }
         })
         .unwrap_or_else(|| {
             let Some(default) = iter.next() else {

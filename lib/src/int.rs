@@ -1,21 +1,21 @@
-use {
-    crate::bool::Bool,
-    rug::Integer,
-    std::{
-        fmt::{
-            Debug,
-            Display,
-            Formatter,
-        },
-        ops::{
-            Add,
-            Div,
-            Mul,
-            Rem,
-            Sub,
-        },
+use std::{
+    fmt::{
+        Debug,
+        Display,
+        Formatter,
+    },
+    ops::{
+        Add,
+        Div,
+        Mul,
+        Rem,
+        Sub,
     },
 };
+
+use rug::Integer;
+
+use crate::bool::Bool;
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Int(Integer);

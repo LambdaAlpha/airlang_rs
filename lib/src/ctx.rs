@@ -1,22 +1,22 @@
-use {
-    crate::{
-        map::Map,
-        pair::Pair,
-        symbol::Symbol,
-        types::either::Either,
-        val::{
-            ctx::CtxVal,
-            Val,
-        },
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
     },
-    std::{
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        hash::Hash,
+    hash::Hash,
+};
+
+use thiserror::Error;
+
+use crate::{
+    map::Map,
+    pair::Pair,
+    symbol::Symbol,
+    types::either::Either,
+    val::{
+        ctx::CtxVal,
+        Val,
     },
-    thiserror::Error,
 };
 
 #[derive(Error, Copy, Clone, Debug)]

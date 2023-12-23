@@ -1,14 +1,13 @@
-use {
-    smartstring::alias::CompactString,
-    std::{
-        borrow::Borrow,
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        ops::Deref,
+use std::{
+    borrow::Borrow,
+    fmt::{
+        Debug,
+        Formatter,
     },
+    ops::Deref,
 };
+
+use smartstring::alias::CompactString;
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Symbol(CompactString);

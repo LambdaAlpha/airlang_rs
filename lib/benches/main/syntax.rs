@@ -1,12 +1,10 @@
-use {
-    airlang::syntax::{
-        generate,
-        parse,
-    },
-    criterion::{
-        black_box,
-        Criterion,
-    },
+use airlang::syntax::{
+    generate,
+    parse,
+};
+use criterion::{
+    black_box,
+    Criterion,
 };
 
 pub fn bench_syntax(c: &mut Criterion) {

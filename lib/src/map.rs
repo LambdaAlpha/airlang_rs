@@ -1,28 +1,27 @@
-use {
-    rustc_hash::FxHashMap,
-    std::{
-        collections::hash_map::{
-            DefaultHasher,
-            IntoIter,
-            IntoKeys,
-            IntoValues,
-            Iter,
-            IterMut,
-        },
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        hash::{
-            Hash,
-            Hasher,
-        },
-        ops::{
-            Deref,
-            DerefMut,
-        },
+use std::{
+    collections::hash_map::{
+        DefaultHasher,
+        IntoIter,
+        IntoKeys,
+        IntoValues,
+        Iter,
+        IterMut,
+    },
+    fmt::{
+        Debug,
+        Formatter,
+    },
+    hash::{
+        Hash,
+        Hasher,
+    },
+    ops::{
+        Deref,
+        DerefMut,
     },
 };
+
+use rustc_hash::FxHashMap;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);

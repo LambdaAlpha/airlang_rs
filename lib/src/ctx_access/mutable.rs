@@ -1,26 +1,25 @@
-use {
-    crate::{
-        ctx::{
-            Ctx,
-            CtxError,
-            CtxTrait,
-            DefaultCtx,
-            InvariantTag,
-            TaggedRef,
-            TaggedVal,
-        },
-        ctx_access::{
-            constant::{
-                ConstCtx,
-                CtxForConstFn,
-            },
-            free::FreeCtx,
-            CtxAccessor,
-        },
-        symbol::Symbol,
-        Val,
+use std::mem::swap;
+
+use crate::{
+    ctx::{
+        Ctx,
+        CtxError,
+        CtxTrait,
+        DefaultCtx,
+        InvariantTag,
+        TaggedRef,
+        TaggedVal,
     },
-    std::mem::swap,
+    ctx_access::{
+        constant::{
+            ConstCtx,
+            CtxForConstFn,
+        },
+        free::FreeCtx,
+        CtxAccessor,
+    },
+    symbol::Symbol,
+    Val,
 };
 
 pub struct MutableCtx<'a>(&'a mut Ctx);

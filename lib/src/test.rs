@@ -1,25 +1,24 @@
-use {
-    crate::{
-        ctx::InvariantTag,
-        extension::{
-            AsFuncExt,
-            FuncExt,
-        },
-        initial_ctx,
-        interpret_mutable,
-        parse,
-        val::Val,
-        Ctx,
-        CtxForMutableFn,
-        EvalMode,
-        IoMode,
-        MutableCtx,
-        Symbol,
+use std::{
+    error::Error,
+    mem::size_of,
+};
+
+use crate::{
+    ctx::InvariantTag,
+    extension::{
+        AsFuncExt,
+        FuncExt,
     },
-    std::{
-        error::Error,
-        mem::size_of,
-    },
+    initial_ctx,
+    interpret_mutable,
+    parse,
+    val::Val,
+    Ctx,
+    CtxForMutableFn,
+    EvalMode,
+    IoMode,
+    MutableCtx,
+    Symbol,
 };
 
 const MAIN_DELIMITER: &str = "=====";

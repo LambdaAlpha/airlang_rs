@@ -1,16 +1,15 @@
-use {
-    crate::ctx::Ctx,
-    std::{
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        ops::{
-            Deref,
-            DerefMut,
-        },
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
+    },
+    ops::{
+        Deref,
+        DerefMut,
     },
 };
+
+use crate::ctx::Ctx;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CtxVal(pub(crate) Box<Ctx>);

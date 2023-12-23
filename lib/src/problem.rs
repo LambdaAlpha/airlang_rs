@@ -1,11 +1,10 @@
-use {
-    crate::{
-        ctx_access::CtxAccessor,
-        eval::Evaluator,
-        val::func::FuncVal,
-        Val,
-    },
-    std::assert_matches::debug_assert_matches,
+use std::assert_matches::debug_assert_matches;
+
+use crate::{
+    ctx_access::CtxAccessor,
+    eval::Evaluator,
+    val::func::FuncVal,
+    Val,
 };
 
 pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, reverse: Val) -> Val {

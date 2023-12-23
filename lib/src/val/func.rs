@@ -1,19 +1,18 @@
-use {
-    crate::{
-        func::Func,
-        types::refer::Reader,
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
     },
-    std::{
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        hash::{
-            Hash,
-            Hasher,
-        },
-        ops::Deref,
+    hash::{
+        Hash,
+        Hasher,
     },
+    ops::Deref,
+};
+
+use crate::{
+    func::Func,
+    types::refer::Reader,
 };
 
 #[derive(Clone, Eq)]

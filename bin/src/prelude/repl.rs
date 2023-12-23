@@ -1,20 +1,20 @@
-use {
-    crate::prelude::{
-        put_func,
-        Prelude,
-    },
-    airlang::{
-        EvalMode,
-        IoMode,
-        MutableCtx,
-        Symbol,
-        Val,
-    },
-    airlang_ext::{
-        ExtFn,
-        ExtFunc,
-    },
-    std::rc::Rc,
+use std::rc::Rc;
+
+use airlang::{
+    EvalMode,
+    IoMode,
+    MutableCtx,
+    Symbol,
+    Val,
+};
+use airlang_ext::{
+    ExtFn,
+    ExtFunc,
+};
+
+use crate::prelude::{
+    put_func,
+    Prelude,
 };
 
 pub(crate) struct ReplPrelude {

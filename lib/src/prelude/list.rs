@@ -1,30 +1,29 @@
-use {
-    crate::{
-        ctx::{
-            DefaultCtx,
-            NameMap,
-        },
-        ctx_access::{
-            constant::CtxForConstFn,
-            mutable::CtxForMutableFn,
-        },
-        eval_mode::EvalMode,
-        io_mode::IoMode,
-        list::List,
-        pair::Pair,
-        prelude::{
-            named_const_fn,
-            named_mutable_fn,
-            Named,
-            Prelude,
-        },
-        val::{
-            func::FuncVal,
-            pair::PairVal,
-            Val,
-        },
+use std::mem::swap;
+
+use crate::{
+    ctx::{
+        DefaultCtx,
+        NameMap,
     },
-    std::mem::swap,
+    ctx_access::{
+        constant::CtxForConstFn,
+        mutable::CtxForMutableFn,
+    },
+    eval_mode::EvalMode,
+    io_mode::IoMode,
+    list::List,
+    pair::Pair,
+    prelude::{
+        named_const_fn,
+        named_mutable_fn,
+        Named,
+        Prelude,
+    },
+    val::{
+        func::FuncVal,
+        pair::PairVal,
+        Val,
+    },
 };
 
 #[derive(Clone)]

@@ -53,14 +53,14 @@ pub(crate) fn expected() -> Vec<Repr> {
         ltree(ltree(symbol("a"), vec![]), vec![]),
         ltree(list(vec![]), vec![]),
         ltree(list(vec![]), vec![]),
-        mtree(
-            symbol("a"),
-            vec![(mtree(symbol("b"), vec![]), mtree(symbol("c"), vec![]))],
-        ),
-        mtree(
-            symbol("a"),
-            vec![(mtree(symbol("b"), vec![]), mtree(symbol("c"), vec![]))],
-        ),
+        mtree(symbol("a"), vec![(
+            mtree(symbol("b"), vec![]),
+            mtree(symbol("c"), vec![]),
+        )]),
+        mtree(symbol("a"), vec![(
+            mtree(symbol("b"), vec![]),
+            mtree(symbol("c"), vec![]),
+        )]),
         mtree(mtree(symbol("a"), vec![]), vec![]),
         mtree(mtree(symbol("a"), vec![]), vec![]),
         mtree(map(vec![]), vec![]),

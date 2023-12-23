@@ -1,9 +1,8 @@
-use {
-    airlang::syntax::{
-        generate,
-        parse,
-    },
-    std::error::Error,
+use std::error::Error;
+
+use airlang::syntax::{
+    generate,
+    parse,
 };
 
 #[test]

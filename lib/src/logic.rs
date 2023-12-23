@@ -1,17 +1,16 @@
-use {
-    crate::{
-        ctx::Ctx,
-        ctx_access::{
-            constant::ConstCtx,
-            free::FreeCtx,
-            mutable::MutableCtx,
-        },
-        eval::Evaluator,
-        func::FuncEval,
-        val::func::FuncVal,
-        Val,
+use std::assert_matches::debug_assert_matches;
+
+use crate::{
+    ctx::Ctx,
+    ctx_access::{
+        constant::ConstCtx,
+        free::FreeCtx,
+        mutable::MutableCtx,
     },
-    std::assert_matches::debug_assert_matches,
+    eval::Evaluator,
+    func::FuncEval,
+    val::func::FuncVal,
+    Val,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

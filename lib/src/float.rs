@@ -1,17 +1,16 @@
-use {
-    rug::Float as RugFloat,
-    std::{
-        fmt::{
-            Debug,
-            Display,
-            Formatter,
-        },
-        hash::{
-            Hash,
-            Hasher,
-        },
+use std::{
+    fmt::{
+        Debug,
+        Display,
+        Formatter,
+    },
+    hash::{
+        Hash,
+        Hasher,
     },
 };
+
+use rug::Float as RugFloat;
 
 #[derive(Clone, PartialEq)]
 pub struct Float(RugFloat);

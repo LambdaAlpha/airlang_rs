@@ -1,41 +1,40 @@
-use {
-    crate::{
-        ctx::{
-            Ctx,
-            InvariantTag,
-            TaggedVal,
-        },
-        ctx_access::{
-            constant::{
-                ConstCtx,
-                CtxForConstFn,
-            },
-            free::FreeCtx,
-            mutable::{
-                CtxForMutableFn,
-                MutableCtx,
-            },
-            CtxAccessor,
-        },
-        eval::Evaluator,
-        eval_mode::more::MoreByRef,
-        io_mode::IoMode,
-        symbol::Symbol,
-        val::{
-            ctx::CtxVal,
-            Val,
-        },
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
     },
-    std::{
-        fmt::{
-            Debug,
-            Formatter,
+    hash::{
+        Hash,
+        Hasher,
+    },
+    mem::swap,
+};
+
+use crate::{
+    ctx::{
+        Ctx,
+        InvariantTag,
+        TaggedVal,
+    },
+    ctx_access::{
+        constant::{
+            ConstCtx,
+            CtxForConstFn,
         },
-        hash::{
-            Hash,
-            Hasher,
+        free::FreeCtx,
+        mutable::{
+            CtxForMutableFn,
+            MutableCtx,
         },
-        mem::swap,
+        CtxAccessor,
+    },
+    eval::Evaluator,
+    eval_mode::more::MoreByRef,
+    io_mode::IoMode,
+    symbol::Symbol,
+    val::{
+        ctx::CtxVal,
+        Val,
     },
 };
 

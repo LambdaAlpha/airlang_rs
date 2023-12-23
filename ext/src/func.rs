@@ -1,25 +1,24 @@
-use {
-    airlang::{
-        AsFuncExt,
-        CtxForConstFn,
-        CtxForMutableFn,
-        FuncExt,
-        IoMode,
-        Symbol,
-        Val,
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
     },
-    std::{
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        hash::{
-            Hash,
-            Hasher,
-        },
-        ops::Deref,
-        rc::Rc,
+    hash::{
+        Hash,
+        Hasher,
     },
+    ops::Deref,
+    rc::Rc,
+};
+
+use airlang::{
+    AsFuncExt,
+    CtxForConstFn,
+    CtxForMutableFn,
+    FuncExt,
+    IoMode,
+    Symbol,
+    Val,
 };
 
 pub trait ExtCtxFreeFn {

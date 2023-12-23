@@ -1,14 +1,13 @@
-use {
-    airlang::{
-        generate,
-        initial_ctx,
-        interpret_mutable,
-        parse,
-        Int,
-        MutableCtx,
-        Val,
-    },
-    std::error::Error,
+use std::error::Error;
+
+use airlang::{
+    generate,
+    initial_ctx,
+    interpret_mutable,
+    parse,
+    Int,
+    MutableCtx,
+    Val,
 };
 
 #[test]

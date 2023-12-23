@@ -1,21 +1,21 @@
-use {
-    crate::prelude::{
-        eval::EvalPrelude,
-        process::ProcessPrelude,
-        repl::ReplPrelude,
-    },
-    airlang::{
-        InvariantTag,
-        MutableCtx,
-        Symbol,
-        Val,
-        ValExt,
-    },
-    airlang_ext::{
-        ExtFunc,
-        ExtFuncVal,
-    },
-    std::rc::Rc,
+use std::rc::Rc;
+
+use airlang::{
+    InvariantTag,
+    MutableCtx,
+    Symbol,
+    Val,
+    ValExt,
+};
+use airlang_ext::{
+    ExtFunc,
+    ExtFuncVal,
+};
+
+use crate::prelude::{
+    eval::EvalPrelude,
+    process::ProcessPrelude,
+    repl::ReplPrelude,
 };
 
 thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());

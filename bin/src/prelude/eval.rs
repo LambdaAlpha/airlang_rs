@@ -1,25 +1,25 @@
-use {
-    crate::{
-        init_ctx,
-        prelude::{
-            put_func,
-            Prelude,
-        },
+use std::rc::Rc;
+
+use airlang::{
+    initial_ctx,
+    CtxForMutableFn,
+    EvalMode,
+    IoMode,
+    MutableCtx,
+    Symbol,
+    Val,
+};
+use airlang_ext::{
+    ExtFn,
+    ExtFunc,
+};
+
+use crate::{
+    init_ctx,
+    prelude::{
+        put_func,
+        Prelude,
     },
-    airlang::{
-        initial_ctx,
-        CtxForMutableFn,
-        EvalMode,
-        IoMode,
-        MutableCtx,
-        Symbol,
-        Val,
-    },
-    airlang_ext::{
-        ExtFn,
-        ExtFunc,
-    },
-    std::rc::Rc,
 };
 
 pub(crate) struct EvalPrelude {

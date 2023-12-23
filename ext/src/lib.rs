@@ -1,5 +1,6 @@
 #![feature(iterator_try_collect)]
 
+use airlang::MutableCtx;
 pub use func::{
     ExtCtxConstFn,
     ExtCtxFreeFn,
@@ -8,12 +9,10 @@ pub use func::{
     ExtFunc,
     ExtFuncVal,
 };
-use {
-    crate::prelude::{
-        Prelude,
-        PRELUDE,
-    },
-    airlang::MutableCtx,
+
+use crate::prelude::{
+    Prelude,
+    PRELUDE,
 };
 
 pub fn init_ctx(ctx: MutableCtx) {

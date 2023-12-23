@@ -37,14 +37,7 @@
     variant_count
 )]
 
-use {
-    crate::{
-        eval::Evaluator,
-        eval_mode::more::More,
-        syntax::ParseError,
-    },
-    thiserror::Error,
-};
+use thiserror::Error;
 
 pub use self::{
     bool::Bool,
@@ -98,6 +91,11 @@ pub use self::{
         reverse::ReverseVal,
         Val,
     },
+};
+use crate::{
+    eval::Evaluator,
+    eval_mode::more::More,
+    syntax::ParseError,
 };
 
 pub fn parse(src: &str) -> Result<Val, ParseError> {

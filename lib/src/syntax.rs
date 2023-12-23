@@ -1,7 +1,6 @@
-use {
-    std::fmt::Debug,
-    thiserror::Error,
-};
+use std::fmt::Debug;
+
+use thiserror::Error;
 
 pub use self::repr::{
     call::CallRepr,

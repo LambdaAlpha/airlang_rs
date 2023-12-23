@@ -1,14 +1,13 @@
-use {
-    crate::types::refer::{
-        Keeper,
-        Owner,
-        Reader,
-        RefState,
-    },
-    std::ops::{
-        Deref,
-        DerefMut,
-    },
+use std::ops::{
+    Deref,
+    DerefMut,
+};
+
+use crate::types::refer::{
+    Keeper,
+    Owner,
+    Reader,
+    RefState,
 };
 
 // explicitly drop all variables to make their lifetime clear

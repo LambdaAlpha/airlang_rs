@@ -1,20 +1,19 @@
-use {
-    crate::syntax::bench_syntax,
-    airlang::{
-        generate,
-        initial_ctx,
-        interpret_mutable,
-        parse,
-        MutableCtx,
-    },
-    criterion::{
-        black_box,
-        criterion_group,
-        criterion_main,
-        BatchSize,
-        Criterion,
-    },
+use airlang::{
+    generate,
+    initial_ctx,
+    interpret_mutable,
+    parse,
+    MutableCtx,
 };
+use criterion::{
+    black_box,
+    criterion_group,
+    criterion_main,
+    BatchSize,
+    Criterion,
+};
+
+use crate::syntax::bench_syntax;
 
 criterion_group!(benches, bench_all);
 criterion_main!(benches);

@@ -1,49 +1,48 @@
-use {
-    crate::{
-        bool::Bool,
-        bytes::Bytes,
-        extension::ValExt,
-        float::Float,
-        int::Int,
-        string::Str,
-        symbol::Symbol,
-        syntax::{
-            generator::GenerateRepr,
-            parser::ParseRepr,
-            repr::{
-                call::CallRepr,
-                list::ListRepr,
-                map::MapRepr,
-                pair::PairRepr,
-                reverse::ReverseRepr,
-                Repr,
-            },
-        },
-        unit::Unit,
-        val::{
-            call::CallVal,
-            ctx::CtxVal,
-            func::FuncVal,
-            list::ListVal,
-            map::MapVal,
-            pair::PairVal,
-            prop::PropVal,
-            reverse::ReverseVal,
-        },
-        ReprError,
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
     },
-    std::{
-        fmt::{
-            Debug,
-            Formatter,
-        },
-        hash::Hash,
-        ops::{
-            ControlFlow,
-            FromResidual,
-            Try,
+    hash::Hash,
+    ops::{
+        ControlFlow,
+        FromResidual,
+        Try,
+    },
+};
+
+use crate::{
+    bool::Bool,
+    bytes::Bytes,
+    extension::ValExt,
+    float::Float,
+    int::Int,
+    string::Str,
+    symbol::Symbol,
+    syntax::{
+        generator::GenerateRepr,
+        parser::ParseRepr,
+        repr::{
+            call::CallRepr,
+            list::ListRepr,
+            map::MapRepr,
+            pair::PairRepr,
+            reverse::ReverseRepr,
+            Repr,
         },
     },
+    unit::Unit,
+    val::{
+        call::CallVal,
+        ctx::CtxVal,
+        func::FuncVal,
+        list::ListVal,
+        map::MapVal,
+        pair::PairVal,
+        prop::PropVal,
+        reverse::ReverseVal,
+    },
+    ReprError,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]

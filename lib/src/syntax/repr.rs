@@ -1,40 +1,39 @@
-use {
-    crate::{
-        bool::Bool,
-        bytes::Bytes,
-        float::Float,
-        int::Int,
-        string::Str,
-        symbol::Symbol,
-        syntax::{
-            generate,
-            generator::GenerateRepr,
-            parse,
-            parser::ParseRepr,
-            repr::{
-                call::CallRepr,
-                list::ListRepr,
-                map::MapRepr,
-                pair::PairRepr,
-                reverse::ReverseRepr,
-            },
-            ParseError,
-        },
-        unit::Unit,
+use std::{
+    convert::Infallible,
+    fmt::{
+        Debug,
+        Display,
     },
-    std::{
-        convert::Infallible,
-        fmt::{
-            Debug,
-            Display,
-        },
-        ops::{
-            ControlFlow,
-            FromResidual,
-            Try,
-        },
-        str::FromStr,
+    ops::{
+        ControlFlow,
+        FromResidual,
+        Try,
     },
+    str::FromStr,
+};
+
+use crate::{
+    bool::Bool,
+    bytes::Bytes,
+    float::Float,
+    int::Int,
+    string::Str,
+    symbol::Symbol,
+    syntax::{
+        generate,
+        generator::GenerateRepr,
+        parse,
+        parser::ParseRepr,
+        repr::{
+            call::CallRepr,
+            list::ListRepr,
+            map::MapRepr,
+            pair::PairRepr,
+            reverse::ReverseRepr,
+        },
+        ParseError,
+    },
+    unit::Unit,
 };
 
 #[derive(PartialEq, Eq, Clone, Hash)]

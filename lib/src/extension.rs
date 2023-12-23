@@ -1,17 +1,16 @@
-use {
-    crate::{
-        CtxForMutableFn,
-        IoMode,
-        Val,
+use std::{
+    any::Any,
+    fmt::Debug,
+    hash::{
+        Hash,
+        Hasher,
     },
-    std::{
-        any::Any,
-        fmt::Debug,
-        hash::{
-            Hash,
-            Hasher,
-        },
-    },
+};
+
+use crate::{
+    CtxForMutableFn,
+    IoMode,
+    Val,
 };
 
 pub trait ValExt: Debug + AsFuncExt {

@@ -75,7 +75,7 @@ where
                     self.eval(ctx, input)
                 } else {
                     Less.eval(ctx, input)
-                }
+                };
             }
             _ => {}
         }
@@ -163,7 +163,7 @@ where
                     self.eval(ctx, input)
                 } else {
                     LessByRef.eval(ctx, input)
-                }
+                };
             }
             _ => {}
         }

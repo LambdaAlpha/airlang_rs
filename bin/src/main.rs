@@ -25,15 +25,14 @@
 )]
 #![feature(iterator_try_collect)]
 
-use {
-    crate::prelude::{
-        Prelude,
-        PRELUDE,
-    },
-    airlang::{
-        initial_ctx,
-        MutableCtx,
-    },
+use airlang::{
+    initial_ctx,
+    MutableCtx,
+};
+
+use crate::prelude::{
+    Prelude,
+    PRELUDE,
 };
 
 fn main() -> std::io::Result<()> {

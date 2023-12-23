@@ -1,17 +1,16 @@
-use {
-    airlang::{
-        generate,
-        interpret_mutable,
-        parse,
-        MutableCtx,
-        Val,
-    },
-    std::io::{
-        stdin,
-        stdout,
-        Result,
-        Write,
-    },
+use std::io::{
+    stdin,
+    stdout,
+    Result,
+    Write,
+};
+
+use airlang::{
+    generate,
+    interpret_mutable,
+    parse,
+    MutableCtx,
+    Val,
 };
 
 pub(crate) fn repl(mut ctx: MutableCtx) -> Result<()> {

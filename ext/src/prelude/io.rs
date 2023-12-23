@@ -1,29 +1,29 @@
-use {
-    crate::{
-        prelude::{
-            put_func,
-            ExtFunc,
-            Prelude,
-        },
-        ExtFn,
+use std::{
+    io::{
+        stderr,
+        stdin,
+        stdout,
+        Write,
     },
-    airlang::{
-        CtxForMutableFn,
-        EvalMode,
-        IoMode,
-        MutableCtx,
-        Symbol,
-        Val,
+    rc::Rc,
+};
+
+use airlang::{
+    CtxForMutableFn,
+    EvalMode,
+    IoMode,
+    MutableCtx,
+    Symbol,
+    Val,
+};
+
+use crate::{
+    prelude::{
+        put_func,
+        ExtFunc,
+        Prelude,
     },
-    std::{
-        io::{
-            stderr,
-            stdin,
-            stdout,
-            Write,
-        },
-        rc::Rc,
-    },
+    ExtFn,
 };
 
 pub(crate) struct IoPrelude {
