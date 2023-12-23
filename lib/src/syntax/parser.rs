@@ -374,13 +374,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(
-        normed::<T, _, _, _>(associate::<T, _>),
-        |repr: T| match repr.try_into_pair() {
-            Ok(pair) => pair,
-            Err(repr) => (repr, <T as From<Unit>>::from(Unit)),
-        },
-    );
+    let f = map(normed::<T, _, _, _>(associate::<T, _>), |repr: T| {
+        repr.try_into_pair()
+            .unwrap_or_else(|repr| (repr, <T as From<Unit>>::from(Unit)))
+    });
     context("pair", f)(src)
 }
 
