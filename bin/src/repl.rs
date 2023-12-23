@@ -25,7 +25,10 @@ pub(crate) fn repl(mut ctx: MutableCtx) -> Result<()> {
         stdout().flush()?;
 
         let len = input_buffer.len();
-        stdin().read_line(&mut input_buffer)?;
+        let read_size = stdin().read_line(&mut input_buffer)?;
+        if read_size == 0 {
+            return Ok(());
+        }
 
         let input = input_buffer.trim();
         if input.is_empty() {
