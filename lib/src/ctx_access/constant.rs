@@ -297,4 +297,14 @@ impl<'a> CtxForConstFn<'a> {
     pub fn get_ref(&self, name: &Symbol) -> Result<&Val, CtxError> {
         self.get_const_ref(name)
     }
+
+    pub fn meta(&mut self) -> Result<ConstCtx, CtxError> {
+        match self {
+            CtxForConstFn::Free(_ctx) => Err(CtxError::AccessDenied),
+            CtxForConstFn::Const(ctx) => match ctx.meta() {
+                Some(meta) => Ok(meta),
+                None => Err(CtxError::NotFound),
+            },
+        }
+    }
 }

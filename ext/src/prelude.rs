@@ -11,6 +11,7 @@ use airlang::{
 use crate::{
     func::ExtFuncVal,
     prelude::{
+        build::BuildPrelude,
         file::FilePrelude,
         io::IoPrelude,
         process::ProcessPrelude,
@@ -25,6 +26,7 @@ pub(crate) struct AllPrelude {
     pub(crate) io: IoPrelude,
     pub(crate) file: FilePrelude,
     pub(crate) process: ProcessPrelude,
+    pub(crate) build: BuildPrelude,
 }
 
 impl Prelude for AllPrelude {
@@ -32,6 +34,7 @@ impl Prelude for AllPrelude {
         self.io.put(ctx.reborrow());
         self.file.put(ctx.reborrow());
         self.process.put(ctx.reborrow());
+        self.build.put(ctx.reborrow());
     }
 }
 
@@ -72,3 +75,5 @@ pub(crate) mod io;
 pub(crate) mod file;
 
 pub(crate) mod process;
+
+pub(crate) mod build;

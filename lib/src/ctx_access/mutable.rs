@@ -223,7 +223,7 @@ impl<'a> CtxTrait for CtxForMutableFn<'a> {
         match self {
             CtxForMutableFn::Free(ctx) => ctx.set_meta(meta),
             CtxForMutableFn::Const(ctx) => ctx.set_meta(meta),
-            CtxForMutableFn::Mutable(ctx) => ctx.set_meta(meta),
+            CtxForMutableFn::Mutable(ctx) => <_ as CtxTrait>::set_meta(ctx, meta),
         }
     }
 
@@ -285,6 +285,10 @@ impl<'a> MutableCtx<'a> {
 
     pub fn meta(&mut self) -> Option<MutableCtx> {
         self.0.meta.as_mut().map(|meta| MutableCtx(&mut *meta))
+    }
+
+    pub fn set_meta(&mut self, meta: Option<Ctx>) {
+        self.0.meta = meta.map(Box::new);
     }
 
     pub fn swap(&mut self, other: &mut Self) {
@@ -353,5 +357,30 @@ impl<'a> CtxForMutableFn<'a> {
             return Err(CtxError::AccessDenied);
         }
         Ok(tagged_ref.val_ref)
+    }
+
+    pub fn meta(&mut self) -> Result<ConstCtx, CtxError> {
+        match self {
+            CtxForMutableFn::Free(_ctx) => Err(CtxError::AccessDenied),
+            CtxForMutableFn::Const(ctx) => match ctx.meta() {
+                Some(meta) => Ok(meta),
+                None => Err(CtxError::NotFound),
+            },
+            CtxForMutableFn::Mutable(ctx) => match ctx.meta() {
+                Some(meta) => Ok(ConstCtx::new(meta.0)),
+                None => Err(CtxError::NotFound),
+            },
+        }
+    }
+
+    pub fn meta_mut(&mut self) -> Result<MutableCtx, CtxError> {
+        match self {
+            CtxForMutableFn::Free(_ctx) => Err(CtxError::AccessDenied),
+            CtxForMutableFn::Const(_ctx) => Err(CtxError::AccessDenied),
+            CtxForMutableFn::Mutable(ctx) => match ctx.meta() {
+                Some(meta) => Ok(meta),
+                None => Err(CtxError::NotFound),
+            },
+        }
     }
 }
