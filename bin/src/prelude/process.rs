@@ -14,11 +14,6 @@ use {
     },
     airlang_ext::ExtFn,
     std::{
-        io::{
-            stderr,
-            stdout,
-            Write,
-        },
         process::Command,
         rc::Rc,
     },
@@ -83,16 +78,19 @@ fn fn_call(input: Val) -> Val {
         return Val::default();
     };
 
-    let output = Command::new(&*program).args(arguments).output();
-    let Ok(output) = output else {
+    let child = Command::new(&*program).args(arguments).spawn();
+    let Ok(mut child) = child else {
+        eprintln!("failed to execute program");
+        return Val::default();
+    };
+    let Ok(status) = child.wait() else {
         return Val::default();
     };
 
-    let _ = stdout().write_all(&output.stdout);
-    let _ = stderr().write_all(&output.stderr);
-
-    if let Some(status) = output.status.code() {
-        println!("program exit with code: {status}");
+    if let Some(status) = status.code() {
+        if status != 0 {
+            println!("program exit with code: {status}");
+        }
     }
     Val::default()
 }
