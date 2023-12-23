@@ -1,5 +1,6 @@
 use {
     airlang::{
+        AsFuncExt,
         CtxForConstFn,
         CtxForMutableFn,
         FuncExt,
@@ -16,6 +17,8 @@ use {
             Hash,
             Hasher,
         },
+        ops::Deref,
+        rc::Rc,
     },
 };
 
@@ -43,6 +46,9 @@ pub enum ExtFn {
     Const(Box<dyn ExtCtxConstFn>),
     Mutable(Box<dyn ExtCtxMutableFn>),
 }
+
+#[derive(Debug, Clone)]
+pub struct ExtFuncVal(Rc<ExtFunc>);
 
 impl ExtFn {
     pub fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val {
@@ -131,6 +137,32 @@ impl FuncExt for ExtFunc {
 
     fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val {
         self.ext_fn.call(ctx, input)
+    }
+}
+
+impl AsFuncExt for ExtFuncVal {
+    fn as_func(&self) -> Option<&dyn FuncExt> {
+        Some(&*self.0)
+    }
+}
+
+impl From<Rc<ExtFunc>> for ExtFuncVal {
+    fn from(value: Rc<ExtFunc>) -> Self {
+        Self(value)
+    }
+}
+
+impl PartialEq for ExtFuncVal {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.id == other.0.id
+    }
+}
+
+impl Eq for ExtFuncVal {}
+
+impl Hash for ExtFuncVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.deref().hash(state)
     }
 }
 

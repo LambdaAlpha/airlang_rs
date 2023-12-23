@@ -1,11 +1,11 @@
 use {
     crate::{
+        func::ExtFuncVal,
         prelude::{
             file::FilePrelude,
             io::IoPrelude,
             process::ProcessPrelude,
         },
-        val::ExtVal,
         ExtFunc,
     },
     airlang::{
@@ -13,6 +13,7 @@ use {
         MutableCtx,
         Symbol,
         Val,
+        ValExt,
     },
     std::rc::Rc,
 };
@@ -52,17 +53,17 @@ impl<T> Named<T> {
 }
 
 #[allow(unused)]
-impl<T: Into<ExtVal>> Named<T> {
+impl<T: ValExt + 'static> Named<T> {
     pub(crate) fn put(self, mut ctx: MutableCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
-        let val = Val::Ext(Box::new(self.value.into()));
+        let val = Val::Ext(Box::new(self.value));
         let _ = ctx.put(name, InvariantTag::Const, val);
     }
 }
 
 pub(crate) fn put_func(func: &Rc<ExtFunc>, mut ctx: MutableCtx) {
     let id = func.id.clone();
-    let val = Val::Ext(Box::new(ExtVal::Func(func.clone())));
+    let val = Val::Ext(Box::new(ExtFuncVal::from(func.clone())));
     let _ = ctx.put(id, InvariantTag::Const, val);
 }
 

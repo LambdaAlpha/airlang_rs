@@ -1,5 +1,13 @@
 #![feature(iterator_try_collect)]
 
+pub use func::{
+    ExtCtxConstFn,
+    ExtCtxFreeFn,
+    ExtCtxMutableFn,
+    ExtFn,
+    ExtFunc,
+    ExtFuncVal,
+};
 use {
     crate::prelude::{
         Prelude,
@@ -7,22 +15,10 @@ use {
     },
     airlang::MutableCtx,
 };
-pub use {
-    func::{
-        ExtCtxConstFn,
-        ExtCtxFreeFn,
-        ExtCtxMutableFn,
-        ExtFn,
-        ExtFunc,
-    },
-    val::ExtVal,
-};
 
 pub fn init_ctx(ctx: MutableCtx) {
     PRELUDE.with(|prelude| prelude.put(ctx));
 }
-
-pub(crate) mod val;
 
 pub(crate) mod func;
 
