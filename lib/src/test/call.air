@@ -1,8 +1,8 @@
-'t $> not
+'t | not
 -----
 'f
 =====
-'t $> not $> not and 't
+'t | not | not and 't
 -----
 't
 =====

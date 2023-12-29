@@ -34,7 +34,7 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct ReversePrelude {
     pub(crate) reverse: Named<FuncVal>,
-    pub(crate) chain: Named<FuncVal>,
+    pub(crate) pipe: Named<FuncVal>,
 }
 
 #[allow(clippy::derivable_impls)]
@@ -42,7 +42,7 @@ impl Default for ReversePrelude {
     fn default() -> Self {
         ReversePrelude {
             reverse: reverse(),
-            chain: chain(),
+            pipe: pipe(),
         }
     }
 }
@@ -50,7 +50,7 @@ impl Default for ReversePrelude {
 impl Prelude for ReversePrelude {
     fn put(&self, m: &mut NameMap) {
         self.reverse.put(m);
-        self.chain.put(m);
+        self.pipe.put(m);
     }
 }
 
@@ -80,16 +80,16 @@ fn fn_reverse<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     solve(&mut ctx, reverse)
 }
 
-fn chain() -> Named<FuncVal> {
+fn pipe() -> Named<FuncVal> {
     let input_mode = IoMode::Pair(Box::new(Pair::new(
         IoMode::Any(EvalMode::Value),
         IoMode::Any(EvalMode::Value),
     )));
     let output_mode = IoMode::Any(EvalMode::More);
-    named_mutable_fn("?>", input_mode, output_mode, fn_chain)
+    named_mutable_fn("\\", input_mode, output_mode, fn_pipe)
 }
 
-fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_pipe(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

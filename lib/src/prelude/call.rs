@@ -31,14 +31,14 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct CallPrelude {
     pub(crate) call: Named<FuncVal>,
-    pub(crate) chain: Named<FuncVal>,
+    pub(crate) pipe: Named<FuncVal>,
 }
 
 impl Default for CallPrelude {
     fn default() -> Self {
         CallPrelude {
             call: call(),
-            chain: chain(),
+            pipe: pipe(),
         }
     }
 }
@@ -46,7 +46,7 @@ impl Default for CallPrelude {
 impl Prelude for CallPrelude {
     fn put(&self, m: &mut NameMap) {
         self.call.put(m);
-        self.chain.put(m);
+        self.pipe.put(m);
     }
 }
 
@@ -75,16 +75,16 @@ fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     func.eval(&mut ctx, input)
 }
 
-fn chain() -> Named<FuncVal> {
+fn pipe() -> Named<FuncVal> {
     let input_mode = IoMode::Pair(Box::new(Pair::new(
         IoMode::Any(EvalMode::Value),
         IoMode::Any(EvalMode::Value),
     )));
     let output_mode = IoMode::Any(EvalMode::More);
-    named_mutable_fn("$>", input_mode, output_mode, fn_chain)
+    named_mutable_fn("|", input_mode, output_mode, fn_pipe)
 }
 
-fn fn_chain(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_pipe(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
