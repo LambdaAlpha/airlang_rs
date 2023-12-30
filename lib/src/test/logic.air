@@ -40,9 +40,9 @@
 =====
 ;[
     t = (theorem {
-        function : ''t,
+        function : `t,
         input : ('f (('t not) 't)),
-        before : (' context {}),
+        before : ('u context {}),
     }),
     proposition.output t
 ]
@@ -52,8 +52,8 @@
 ;[
     t = (theorem {
         function : ===,
-        input : (' (a : b)),
-        context : (' context {
+        input : ('u (a : b)),
+        context : ('u context {
             a : 1,
             b : 2,
         })
@@ -66,8 +66,8 @@
 ;[
     t = (theorem {
         function : =,
-        input : (' (a : 1)),
-        before : (' context {})
+        input : ('u (a : 1)),
+        before : ('u context {})
     }),
     ctx = (proposition.before t),
     [ctx] do (is_null a)
@@ -78,8 +78,8 @@
 ;[
     t = (theorem {
         function : =,
-        input : (' (a : 1)),
-        before : (' context {})
+        input : ('u (a : 1)),
+        before : ('u context {})
     }),
     ctx = (proposition.after t),
     [ctx] do (is_null a)

@@ -1,6 +1,6 @@
 ;[]
 -----
-'
+'u
 =====
 ;[1]
 -----
@@ -14,15 +14,15 @@
 -----
 3
 =====
-' ;return [1, 2, if ['t, return = 3], 4]
+'u ;return [1, 2, if ['t, return = 3], 4]
 -----
 3
 =====
-' ;return [1, if ['t, ' ;return [2, if ['t, return = 3], return = 4]], return = 5, return]
+'u ;return [1, if ['t, 'u ;return [2, if ['t, return = 3], return = 4]], return = 5, return]
 -----
 3
 =====
-' ;return [1, if ['t, ; [2, if ['t, return = 3], return = 4]], return = 5, return]
+'u ;return [1, if ['t, ; [2, if ['t, return = 3], return = 4]], return = 5, return]
 -----
 4
 =====
@@ -42,7 +42,7 @@ a ;return [a = 1]
 -----
 't
 =====
-(' a) ;return [a = 1, 2]
+('u a) ;return [a = 1, 2]
 -----
 1
 =====
@@ -55,7 +55,7 @@ a ;return [a = 1]
             b = (b + 1),
             if [
                 b ==- 2,
-                continue = ',
+                continue = 'u,
             ],
             a = (a + b),
         ]
@@ -65,12 +65,12 @@ a ;return [a = 1]
 -----
 13
 =====
-' ;return [
+'u ;return [
     a = 0,
     b = 0,
     while [
         (is_null return) and (b < 5),
-        ' ;return [
+        'u ;return [
             if [
                 a > 5,
                 return = a,
@@ -98,17 +98,17 @@ if ['t, 1]
 =====
 if ['f, 1]
 -----
-'
+'u
 =====
 ;[if ['t, 1, a = 2], a]
 -----
-'
+'u
 =====
 if ['t, if ['f, 1, 2], 3]
 -----
 2
 =====
-if [', 1, 2, 3]
+if ['u, 1, 2, 3]
 -----
 3
 =====
@@ -126,23 +126,23 @@ match [3, {1 : 2, 2 : 3}, 4]
 =====
 ;[match [1, {1 : (a = 1), 2 : (b = 2)}, c = 3], [a, b, c]]
 -----
-[1, ', ']
+[1, 'u, 'u]
 =====
 ;[match [3, {1 : (a = 1), 2 : (b = 2)}, c = 3], [a, b, c]]
 -----
-[', ', 3]
+['u, 'u, 3]
 =====
 match [1, {(2 - 1) : 2, (2 + 1) : 4}]
 -----
 2
 =====
-match [' a, {(' a) : 1, (' b) : 2}]
+match ['u a, {('u a) : 1, ('u b) : 2}]
 -----
 1
 =====
 ;[while ['f, a = 1], a]
 -----
-'
+'u
 =====
 ;[
     a = 0,

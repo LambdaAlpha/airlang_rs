@@ -153,6 +153,8 @@ where
 
 fn generate_unit(s: &mut String) {
     s.push(ESCAPED_PREFIX);
+    #[allow(clippy::single_char_add_str)]
+    s.push_str("u");
 }
 
 fn generate_bool(b: bool, s: &mut String) {
@@ -191,12 +193,16 @@ fn generate_string(str: &str, s: &mut String) {
 
 fn generate_symbol(str: &str, s: &mut String) {
     let mut chars = str.chars();
-    let first = chars.next().unwrap();
-    let escape = match first {
-        ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
-        PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => str.len() == 1,
-        '+' | '-' => matches!(chars.next(), Some('0'..='9')),
-        _ => false,
+    let escape = match chars.next() {
+        Some(first) => match first {
+            ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
+            PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => {
+                str.len() == 1
+            }
+            '+' | '-' => matches!(chars.next(), Some('0'..='9')),
+            _ => false,
+        },
+        None => true,
     };
     if escape {
         s.push(ESCAPED_PREFIX);

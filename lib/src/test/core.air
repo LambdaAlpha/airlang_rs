@@ -4,7 +4,7 @@
 =====
 a
 -----
-'
+'u
 =====
 (not 'f) : "1"
 -----
@@ -22,15 +22,15 @@ not (not 't)
 -----
 't
 =====
-' a
+'u a
 -----
 a
 =====
-'f [a, 't (not 't), 'f (not 't), ' a]
+'f [a, 't (not 't), 'f (not 't), 'u a]
 -----
 [a, 'f, not 't, a]
 =====
-'t [not 't, 't (not 't), 'f (not 't), ' (not 't)]
+'t [not 't, 't (not 't), 'f (not 't), 'u (not 't)]
 -----
 ['f, 'f, not 't, not 't]
 =====

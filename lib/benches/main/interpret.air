@@ -1,6 +1,6 @@
 "bench interpret" @
 (; [
-  ctx = (' context {
+  ctx = ('u context {
     : ;,
     : while,
     : <>,

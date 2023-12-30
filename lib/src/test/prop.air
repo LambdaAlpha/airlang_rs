@@ -25,7 +25,7 @@
         function : ===,
         input : 1,
         output : 1,
-        context : (' context {a : 2}),
+        context : ('u context {a : 2}),
     }),
     ctx = (proposition.before p),
     [ctx] do (read a)
@@ -38,7 +38,7 @@
         function : ===,
         input : 1,
         output : 1,
-        context : (' context {a : 2}),
+        context : ('u context {a : 2}),
     }),
     ctx = (proposition.after p),
     [ctx] do (read a)
@@ -51,8 +51,8 @@
         function : =,
         input : 1,
         output : 1,
-        before : (' context {a : 2}),
-        after : (' context {a : 3}),
+        before : ('u context {a : 2}),
+        after : ('u context {a : 3}),
     }),
     ctx = (proposition.before p),
     [ctx] do (read a)
@@ -65,8 +65,8 @@
         function : =,
         input : 1,
         output : 1,
-        before : (' context {a : 2}),
-        after : (' context {a : 3}),
+        before : ('u context {a : 2}),
+        after : ('u context {a : 3}),
     }),
     ctx = (proposition.after p),
     [ctx] do (read a)
@@ -88,7 +88,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : (' map_items 't),
+        input_mode : ('u map_items 't),
     }),
     m = ($map {
         function : not,
@@ -103,13 +103,13 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : (' map_items 't),
+        input_mode : ('u map_items 't),
     }),
     m = ($map {
         function : ===,
         input : 't,
         output : 'f,
-        context : (' context {}),
+        context : ('u context {}),
     }),
     m ==- (proposition.represent (proposition m))
 ]
@@ -119,14 +119,14 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : (' map_items 't),
+        input_mode : ('u map_items 't),
     }),
     m = ($map {
         function : =,
         input : 't,
         output : 'f,
-        before : (' context {}),
-        after : (' context {}),
+        before : ('u context {}),
+        after : ('u context {}),
     }),
     m ==- (proposition.represent (proposition m))
 ]
@@ -140,7 +140,7 @@
     })),
     $map = (function {
         body : input,
-        input_mode : (' map_items 't),
+        input_mode : ('u map_items 't),
     }),
     expected = ($map {
         function : not,
@@ -156,18 +156,18 @@
 ;[
     m = (proposition.represent (theorem {
         function : ===,
-        input : (' (a : b)),
-        context : (' context {a : 1, b : 2}),
+        input : ('u (a : b)),
+        context : ('u context {a : 1, b : 2}),
     })),
     $map = (function {
         body : input,
-        input_mode : (' map_items 't),
+        input_mode : ('u map_items 't),
     }),
     expected = ($map {
         function : ===,
-        input : (' (a : b)),
+        input : ('u (a : b)),
         output : 'f,
-        context : (' context {a : 1, b : 2}),
+        context : ('u context {a : 1, b : 2}),
         truth : 't,
     }),
     m === expected
@@ -178,19 +178,19 @@
 ;[
     m = (proposition.represent (theorem {
         function : =,
-        input : ((' a) : 1),
-        before : (' context {}),
+        input : (('u a) : 1),
+        before : ('u context {}),
     })),
     $map = (function {
         body : input,
-        input_mode : (' map_items 't),
+        input_mode : ('u map_items 't),
     }),
     expected = ($map {
         function : =,
-        input : ((' a) : 1),
-        output : ',
-        before : (' context {}),
-        after : (' context {a : 1}),
+        input : (('u a) : 1),
+        output : 'u,
+        before : ('u context {}),
+        after : ('u context {a : 1}),
         truth : 't,
     }),
     m === expected
@@ -204,7 +204,7 @@
         input : 1,
         output : 2,
     }),
-    ((type_of p) -=- (' proposition)) and ((proposition.truth p) -=- ')
+    ((type_of p) -=- ('u proposition)) and ((proposition.truth p) -=- 'u)
 ]
 -----
 't

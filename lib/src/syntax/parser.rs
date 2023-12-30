@@ -389,7 +389,7 @@ where
     let symbol = take_while(is_symbol);
     let escaped = preceded(exact_char('\''), symbol);
     let f = map_opt(escaped, |s: &str| {
-        if let None | Some('a'..='z' | 'A'..='Z') = s.chars().next() {
+        if let Some('a'..='z' | 'A'..='Z') = s.chars().next() {
             preserved(s)
         } else {
             Some(<T as From<Symbol>>::from(Symbol::from_str(s)))
@@ -403,7 +403,7 @@ where
     T: ParseRepr,
 {
     match src {
-        "" => Some(<T as From<Unit>>::from(Unit)),
+        "u" => Some(<T as From<Unit>>::from(Unit)),
         "t" => Some(<T as From<Bool>>::from(Bool::t())),
         "f" => Some(<T as From<Bool>>::from(Bool::f())),
         _ => None,

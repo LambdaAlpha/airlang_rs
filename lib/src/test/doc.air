@@ -1,7 +1,7 @@
 "Demonstration of the gcd algorithm"
 @
 (; [
-    ctx = (' context {
+    ctx = ('u context {
         : ;,
         : =,
         : while,

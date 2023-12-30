@@ -49,9 +49,9 @@ impl Prelude for EvalPrelude {
     }
 }
 
-pub(crate) const VALUE: &str = "'";
-pub(crate) const LESS: &str = "'f";
-pub(crate) const MORE: &str = "'t";
+pub(crate) const VALUE: &str = "`u";
+pub(crate) const LESS: &str = "`f";
+pub(crate) const MORE: &str = "`t";
 
 fn value() -> Named<FuncVal> {
     let input_mode = IoMode::Any(EvalMode::Value);

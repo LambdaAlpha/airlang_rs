@@ -162,7 +162,7 @@ impl DistString for DistSymbol {
 }
 
 pub(crate) fn any_symbol(rng: &mut SmallRng) -> Symbol {
-    let len = any_len(rng) + 1;
+    let len = any_len(rng);
     let s = DistSymbol.sample_string(rng, len);
     Symbol::from_string(s)
 }

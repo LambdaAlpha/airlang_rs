@@ -1,10 +1,10 @@
-unit '
+unit 'u
 -----
-'
+'u
 =====
 unit 1
 -----
-'
+'u
 =====
 type_of unit
 -----

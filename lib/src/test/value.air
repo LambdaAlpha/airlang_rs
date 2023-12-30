@@ -50,7 +50,7 @@ function
 -----
 proposition
 =====
-;[a = ', type_of a]
+;[a = 'u, type_of a]
 -----
 unit
 =====
@@ -74,7 +74,7 @@ float
 -----
 bytes
 =====
-;[a = (' a), type_of a]
+;[a = ('u a), type_of a]
 -----
 symbol
 =====
@@ -86,11 +86,11 @@ string
 -----
 pair
 =====
-;[a = (' (f a)), type_of a]
+;[a = ('u (f a)), type_of a]
 -----
 call
 =====
-;[a = (' (f ? a)), type_of a]
+;[a = ('u (f ? a)), type_of a]
 -----
 reverse
 =====
@@ -106,7 +106,7 @@ map
 -----
 function
 =====
-;[a = (' context {}), type_of a]
+;[a = ('u context {}), type_of a]
 -----
 context
 =====
@@ -134,7 +134,7 @@ proposition
 -----
 't
 =====
-(' a) -=- (' a)
+('u a) -=- ('u a)
 -----
 't
 =====
@@ -166,21 +166,21 @@ proposition
 -----
 't
 =====
-;[a = (' context {}), b = (' context {}), a === b]
+;[a = ('u context {}), b = ('u context {}), a === b]
 -----
 't
 =====
 ;[
-    a = (proposition {input : 1, output : 1, access : (' free)}),
-    b = (proposition {input : 1, output : 1, access : (' free)}),
+    a = (proposition {input : 1, output : 1, access : ('u free)}),
+    b = (proposition {input : 1, output : 1, access : ('u free)}),
     a === b
 ]
 -----
 't
 =====
 ;[
-    a = (theorem {input : 1, access : (' free)}),
-    b = (theorem {input : 1, access : (' free)}),
+    a = (theorem {input : 1, access : ('u free)}),
+    b = (theorem {input : 1, access : ('u free)}),
     a === b
 ]
 -----
@@ -236,8 +236,8 @@ proposition
 =====
 a === b
 -----
-'
+'u
 =====
 a =/= b
 -----
-'
+'u

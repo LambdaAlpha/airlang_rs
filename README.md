@@ -35,7 +35,7 @@ The Air language seeks to solve programming problems once and for all.
 "Demonstration of the gcd algorithm"
 @
 (; [
-    ctx = (' context {
+    ctx = ('u context {
         : ;,
         : =,
         : while,
