@@ -5,12 +5,15 @@ use crate::{
     },
     ctx_access::constant::CtxForConstFn,
     eval_mode::EvalMode,
-    io_mode::IoMode,
-    pair::Pair,
+    io_mode::ListMode,
     prelude::{
+        default_mode,
+        list_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
+        pair_mode,
+        symbol_value_mode,
         Named,
         Prelude,
     },
@@ -55,8 +58,8 @@ impl Prelude for StrPrelude {
 }
 
 fn from_utf8() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = default_mode();
+    let output_mode = default_mode();
     named_free_fn("string.from_utf8", input_mode, output_mode, fn_from_utf8)
 }
 
@@ -72,8 +75,8 @@ fn fn_from_utf8(input: Val) -> Val {
 }
 
 fn to_bytes() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = default_mode();
+    let output_mode = default_mode();
     named_free_fn("string.to_bytes", input_mode, output_mode, fn_to_bytes)
 }
 
@@ -85,8 +88,8 @@ fn fn_to_bytes(input: Val) -> Val {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("string.length", input_mode, output_mode, fn_length)
 }
 
@@ -100,11 +103,8 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn push() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), default_mode());
+    let output_mode = default_mode();
     named_mutable_fn("string.push", input_mode, output_mode, fn_push)
 }
 
@@ -124,8 +124,8 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = IoMode::List(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = list_mode(ListMode::Eval(EvalMode::More));
+    let output_mode = default_mode();
     named_free_fn("string.concat", input_mode, output_mode, fn_concat)
 }
 

@@ -9,12 +9,12 @@ use crate::{
         constant::CtxForConstFn,
         mutable::CtxForMutableFn,
     },
-    eval_mode::EvalMode,
-    io_mode::IoMode,
-    pair::Pair,
     prelude::{
+        default_mode,
         named_const_fn,
         named_mutable_fn,
+        pair_mode,
+        symbol_value_mode,
         Named,
         Prelude,
     },
@@ -54,8 +54,8 @@ impl Prelude for PairPrelude {
 }
 
 fn get_first() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("get_1", input_mode, output_mode, fn_get_first)
 }
 
@@ -73,11 +73,8 @@ fn fn_get_first(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn set_first() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), default_mode());
+    let output_mode = default_mode();
     named_mutable_fn("set_1", input_mode, output_mode, fn_set_first)
 }
 
@@ -100,8 +97,8 @@ fn fn_set_first(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn get_second() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("get_2", input_mode, output_mode, fn_get_second)
 }
 
@@ -119,11 +116,8 @@ fn fn_get_second(mut ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn set_second() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), default_mode());
+    let output_mode = default_mode();
     named_mutable_fn("set_2", input_mode, output_mode, fn_set_second)
 }
 

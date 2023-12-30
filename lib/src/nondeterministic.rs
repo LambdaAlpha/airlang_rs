@@ -42,7 +42,7 @@ use crate::{
     int::Int,
     io_mode::{
         IoMode,
-        ListItemIoMode,
+        ListItemMode,
     },
     list::List,
     logic::Prop,
@@ -67,6 +67,12 @@ use crate::{
         prop::PropVal,
         reverse::ReverseVal,
     },
+    CallMode,
+    ListMode,
+    MapMode,
+    MatchMode,
+    PairMode,
+    ReverseMode,
     Val,
 };
 
@@ -232,17 +238,117 @@ pub(crate) fn any_eval_mode(rng: &mut SmallRng) -> EvalMode {
     *(EVAL_MODES.choose(rng).unwrap())
 }
 
-pub(crate) fn any_io_mode(rng: &mut SmallRng, depth: usize) -> IoMode {
+pub(crate) fn any_match_mode(rng: &mut SmallRng, depth: usize) -> MatchMode {
+    let new_depth = depth + 1;
+    let symbol = any_eval_mode(rng);
+    let pair = Box::new(any_pair_mode(rng, new_depth));
+    let call = Box::new(any_call_mode(rng, new_depth));
+    let reverse = Box::new(any_reverse_mode(rng, new_depth));
+    let list = Box::new(any_list_mode(rng, new_depth));
+    let map = Box::new(any_map_mode(rng, new_depth));
+    MatchMode {
+        symbol,
+        pair,
+        call,
+        reverse,
+        list,
+        map,
+    }
+}
+
+pub(crate) fn any_pair_mode(rng: &mut SmallRng, depth: usize) -> PairMode {
+    let new_depth = depth + 1;
+    let weight: usize = 1 << min(depth, 32);
+    let weights = [weight, 1];
+    let dist = WeightedIndex::new(weights).unwrap();
+    let i = dist.sample(rng);
+    if i == 0 {
+        PairMode::Eval(any_eval_mode(rng))
+    } else {
+        PairMode::Pair(Pair::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
+        ))
+    }
+}
+
+pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
+    let new_depth = depth + 1;
+    let weight: usize = 1 << min(depth, 32);
+    let weights = [weight, 1];
+    let dist = WeightedIndex::new(weights).unwrap();
+    let i = dist.sample(rng);
+    if i == 0 {
+        CallMode::Eval(any_eval_mode(rng))
+    } else {
+        CallMode::Call(Call::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
+        ))
+    }
+}
+
+pub(crate) fn any_reverse_mode(rng: &mut SmallRng, depth: usize) -> ReverseMode {
+    let new_depth = depth + 1;
+    let weight: usize = 1 << min(depth, 32);
+    let weights = [weight, 1];
+    let dist = WeightedIndex::new(weights).unwrap();
+    let i = dist.sample(rng);
+    if i == 0 {
+        ReverseMode::Eval(any_eval_mode(rng))
+    } else {
+        ReverseMode::Reverse(Reverse::new(
+            any_io_mode(rng, new_depth),
+            any_io_mode(rng, new_depth),
+        ))
+    }
+}
+
+pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
     let weight: usize = 1 << min(depth, 32);
     let weights = [
-        weight, // any
-        weight, // symbol
-        1,      // pair
-        1,      // call
-        1,      // reverse
         weight, // list
         1,      // list for all
         1,      // list for some
+    ];
+    let dist = WeightedIndex::new(weights).unwrap();
+    let i = dist.sample(rng);
+    let new_depth = depth + 1;
+
+    match i {
+        0 => ListMode::Eval(any_eval_mode(rng)),
+        1 => ListMode::ForAll(any_io_mode(rng, new_depth)),
+        2 => {
+            let left = any_len_weighted(rng, depth) >> 1;
+            let right = any_len_weighted(rng, depth) >> 1;
+            let mut list = Vec::with_capacity(left + 1 + right);
+            for _ in 0..left {
+                list.push(ListItemMode {
+                    ellipsis: false,
+                    io_mode: any_io_mode(rng, new_depth),
+                });
+            }
+            if rng.gen() {
+                list.push(ListItemMode {
+                    ellipsis: true,
+                    io_mode: any_io_mode(rng, new_depth),
+                });
+            }
+            for _ in 0..right {
+                list.push(ListItemMode {
+                    ellipsis: false,
+                    io_mode: any_io_mode(rng, new_depth),
+                });
+            }
+            ListMode::ForSome(List::from(list))
+        }
+        _ => unreachable!(),
+    }
+}
+
+pub(crate) fn any_map_mode(rng: &mut SmallRng, depth: usize) -> MapMode {
+    let weight: usize = 1 << min(depth, 32);
+    let weights = [
         weight, // map
         1,      // map for all
         1,      // map for some
@@ -252,60 +358,32 @@ pub(crate) fn any_io_mode(rng: &mut SmallRng, depth: usize) -> IoMode {
     let new_depth = depth + 1;
 
     match i {
-        0 => IoMode::Any(any_eval_mode(rng)),
-        1 => IoMode::Symbol(any_eval_mode(rng)),
-        2 => IoMode::Pair(Box::new(Pair::new(
+        0 => MapMode::Eval(any_eval_mode(rng)),
+        1 => MapMode::ForAll(Pair::new(
             any_io_mode(rng, new_depth),
             any_io_mode(rng, new_depth),
-        ))),
-        3 => IoMode::Call(Box::new(Call::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
-        ))),
-        4 => IoMode::Reverse(Box::new(Reverse::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
-        ))),
-        5 => IoMode::List(any_eval_mode(rng)),
-        6 => IoMode::ListForAll(Box::new(any_io_mode(rng, new_depth))),
-        7 => {
-            let left = any_len_weighted(rng, depth) >> 1;
-            let right = any_len_weighted(rng, depth) >> 1;
-            let mut list = Vec::with_capacity(left + 1 + right);
-            for _ in 0..left {
-                list.push(ListItemIoMode {
-                    ellipsis: false,
-                    io_mode: any_io_mode(rng, new_depth),
-                });
-            }
-            if rng.gen() {
-                list.push(ListItemIoMode {
-                    ellipsis: true,
-                    io_mode: any_io_mode(rng, new_depth),
-                });
-            }
-            for _ in 0..right {
-                list.push(ListItemIoMode {
-                    ellipsis: false,
-                    io_mode: any_io_mode(rng, new_depth),
-                });
-            }
-            IoMode::ListForSome(List::from(list))
-        }
-        8 => IoMode::Map(any_eval_mode(rng)),
-        9 => IoMode::MapForAll(Box::new(Pair::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
-        ))),
-        10 => {
+        )),
+        2 => {
             let len = any_len_weighted(rng, new_depth);
             let mut map = Map::with_capacity(len);
             for _ in 0..len {
                 map.insert(any_val(rng, new_depth), any_io_mode(rng, new_depth));
             }
-            IoMode::MapForSome(map)
+            MapMode::ForSome(map)
         }
         _ => unreachable!(),
+    }
+}
+
+pub(crate) fn any_io_mode(rng: &mut SmallRng, depth: usize) -> IoMode {
+    let weight: usize = 1 << min(depth, 32);
+    let weights = [weight, 1];
+    let dist = WeightedIndex::new(weights).unwrap();
+    let i = dist.sample(rng);
+    if i == 0 {
+        IoMode::Eval(any_eval_mode(rng))
+    } else {
+        IoMode::Match(any_match_mode(rng, depth))
     }
 }
 

@@ -32,10 +32,12 @@ use crate::{
         any_unit,
         any_val,
     },
-    pair::Pair,
     prelude::{
+        default_mode,
         named_const_fn,
         named_free_fn,
+        pair_mode,
+        symbol_value_mode,
         Named,
         Prelude,
     },
@@ -108,8 +110,8 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::Less);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = IoMode::Eval(EvalMode::Less);
+    let output_mode = default_mode();
     named_free_fn("any", input_mode, output_mode, fn_any)
 }
 
@@ -143,8 +145,8 @@ fn fn_any(input: Val) -> Val {
 }
 
 fn type_of() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Symbol(EvalMode::Value);
+    let input_mode = symbol_value_mode();
+    let output_mode = symbol_value_mode();
     named_const_fn("type_of", input_mode, output_mode, fn_type_of)
 }
 
@@ -173,11 +175,8 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn equal() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Symbol(EvalMode::Value),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), symbol_value_mode());
+    let output_mode = default_mode();
     named_const_fn("===", input_mode, output_mode, fn_equal)
 }
 
@@ -202,11 +201,8 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn equal_val() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
     named_free_fn("-=-", input_mode, output_mode, fn_equal_val)
 }
 
@@ -218,11 +214,8 @@ fn fn_equal_val(input: Val) -> Val {
 }
 
 fn equal_ref_val() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), default_mode());
+    let output_mode = default_mode();
     named_const_fn("==-", input_mode, output_mode, fn_equal_ref_val)
 }
 
@@ -240,11 +233,8 @@ fn fn_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn equal_val_ref() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Symbol(EvalMode::Value),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), symbol_value_mode());
+    let output_mode = default_mode();
     named_const_fn("-==", input_mode, output_mode, fn_equal_val_ref)
 }
 
@@ -262,11 +252,8 @@ fn fn_equal_val_ref(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn not_equal() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Symbol(EvalMode::Value),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), symbol_value_mode());
+    let output_mode = default_mode();
     named_const_fn("=/=", input_mode, output_mode, fn_not_equal)
 }
 
@@ -291,11 +278,8 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn not_equal_val() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
     named_free_fn("-/-", input_mode, output_mode, fn_not_equal_val)
 }
 
@@ -307,11 +291,8 @@ fn fn_not_equal_val(input: Val) -> Val {
 }
 
 fn not_equal_ref_val() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(symbol_value_mode(), default_mode());
+    let output_mode = default_mode();
     named_const_fn("=/-", input_mode, output_mode, fn_not_equal_ref_val)
 }
 
@@ -329,11 +310,8 @@ fn fn_not_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn not_equal_val_ref() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Symbol(EvalMode::Value),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), symbol_value_mode());
+    let output_mode = default_mode();
     named_const_fn("-/=", input_mode, output_mode, fn_not_equal_val_ref)
 }
 

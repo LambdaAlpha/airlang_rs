@@ -31,10 +31,16 @@ use crate::{
     list::List,
     pair::Pair,
     prelude::{
+        call_mode,
+        default_mode,
         initial_ctx,
+        list_mode_for_all,
+        map_mode_for_all,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
+        pair_mode,
+        symbol_value_mode,
         utils::{
             map_remove,
             symbol,
@@ -123,8 +129,8 @@ impl Prelude for CtxPrelude {
 }
 
 fn read() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("read", input_mode, output_mode, fn_read)
 }
 
@@ -136,8 +142,8 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn move1() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_mutable_fn("move", input_mode, output_mode, fn_move)
 }
 
@@ -149,11 +155,8 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn assign() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::Less),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(IoMode::Eval(EvalMode::Less), default_mode());
+    let output_mode = default_mode();
     named_mutable_fn("=", input_mode, output_mode, fn_assign)
 }
 
@@ -336,8 +339,8 @@ fn generate_invariant_tag(tag: InvariantTag) -> Symbol {
 }
 
 fn set_final() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = symbol_value_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     named_mutable_fn("set_final", input_mode, output_mode, fn_set_final)
 }
 
@@ -350,8 +353,8 @@ fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn set_const() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = symbol_value_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     named_mutable_fn("set_constant", input_mode, output_mode, fn_set_const)
 }
 
@@ -364,8 +367,8 @@ fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn is_final() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("is_final", input_mode, output_mode, fn_is_final)
 }
 
@@ -381,8 +384,8 @@ fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_const() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("is_constant", input_mode, output_mode, fn_is_const)
 }
 
@@ -398,8 +401,8 @@ fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_null() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("is_null", input_mode, output_mode, fn_is_null)
 }
 
@@ -414,8 +417,8 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_local() -> Named<FuncVal> {
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     named_const_fn("is_local", input_mode, output_mode, fn_is_local)
 }
 
@@ -430,8 +433,8 @@ fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn get_access() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Symbol(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = symbol_value_mode();
     named_mutable_fn("access", input_mode, output_mode, fn_get_access)
 }
 
@@ -449,8 +452,8 @@ fn fn_get_access(ctx: CtxForMutableFn, _input: Val) -> Val {
 }
 
 fn has_meta() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = default_mode();
     named_const_fn("has_meta", input_mode, output_mode, fn_has_meta)
 }
 
@@ -463,8 +466,8 @@ fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
 }
 
 fn set_meta() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = default_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     named_mutable_fn("set_meta", input_mode, output_mode, fn_set_meta)
 }
 
@@ -482,14 +485,11 @@ fn fn_set_meta(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn with_ctx() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::ListForAll(Box::new(IoMode::Symbol(EvalMode::Value))),
-        IoMode::Call(Box::new(Call::new(
-            IoMode::Any(EvalMode::More),
-            IoMode::Any(EvalMode::Value),
-        ))),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(
+        list_mode_for_all(symbol_value_mode()),
+        call_mode(default_mode(), IoMode::Eval(EvalMode::Value)),
+    );
+    let output_mode = default_mode();
     named_mutable_fn("do", input_mode, output_mode, fn_with_ctx)
 }
 
@@ -580,14 +580,11 @@ const FINAL: &str = "final";
 const CONST: &str = "constant";
 
 fn ctx_new() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::MapForAll(Box::new(Pair::new(
-            IoMode::Any(EvalMode::Less),
-            IoMode::Any(EvalMode::More),
-        ))),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(
+        default_mode(),
+        map_mode_for_all(IoMode::Eval(EvalMode::Less), default_mode()),
+    );
+    let output_mode = default_mode();
     named_free_fn("context", input_mode, output_mode, fn_ctx_new)
 }
 
@@ -634,14 +631,11 @@ fn fn_ctx_new(input: Val) -> Val {
 }
 
 fn ctx_repr() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::MapForAll(Box::new(Pair::new(
-            IoMode::Any(EvalMode::Less),
-            IoMode::Any(EvalMode::More),
-        ))),
-    )));
+    let input_mode = default_mode();
+    let output_mode = pair_mode(
+        default_mode(),
+        map_mode_for_all(IoMode::Eval(EvalMode::Less), default_mode()),
+    );
     named_free_fn("context.represent", input_mode, output_mode, fn_ctx_repr)
 }
 
@@ -684,8 +678,8 @@ fn fn_ctx_repr(input: Val) -> Val {
 }
 
 fn ctx_prelude() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = default_mode();
     named_free_fn("prelude", input_mode, output_mode, fn_ctx_prelude)
 }
 
@@ -694,8 +688,8 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 }
 
 fn ctx_this() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = default_mode();
     named_const_fn("this", input_mode, output_mode, fn_ctx_this)
 }
 

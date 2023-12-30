@@ -293,7 +293,7 @@ is_final a
 ;[
     ': = (function {
         body : (': (move input)),
-        input_mode : ('t : 'u),
+        input_mode : {pair : ('t : 'u)},
         context : ('u context {': : ('u ':), : move}),
     }),
     a = ('u context {b : (1 ': final)}),

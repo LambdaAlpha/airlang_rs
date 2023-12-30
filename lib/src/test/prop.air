@@ -88,7 +88,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : ('u map_items 't),
+        input_mode : {map : ('u : 't)},
     }),
     m = ($map {
         function : not,
@@ -103,7 +103,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : ('u map_items 't),
+        input_mode : {map : ('u : 't)},
     }),
     m = ($map {
         function : ===,
@@ -119,7 +119,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : ('u map_items 't),
+        input_mode : {map : ('u : 't)},
     }),
     m = ($map {
         function : =,
@@ -140,7 +140,7 @@
     })),
     $map = (function {
         body : input,
-        input_mode : ('u map_items 't),
+        input_mode : {map : ('u : 't)},
     }),
     expected = ($map {
         function : not,
@@ -161,7 +161,7 @@
     })),
     $map = (function {
         body : input,
-        input_mode : ('u map_items 't),
+        input_mode : {map : ('u : 't)},
     }),
     expected = ($map {
         function : ===,
@@ -183,7 +183,7 @@
     })),
     $map = (function {
         body : input,
-        input_mode : ('u map_items 't),
+        input_mode : {map : ('u : 't)},
     }),
     expected = ($map {
         function : =,

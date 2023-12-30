@@ -2,8 +2,6 @@ use std::rc::Rc;
 
 use airlang::{
     CtxForConstFn,
-    EvalMode,
-    IoMode,
     MutableCtx,
     Str,
     Symbol,
@@ -12,7 +10,9 @@ use airlang::{
 
 use crate::{
     prelude::{
+        default_mode,
         put_func,
+        symbol_value_mode,
         ExtFunc,
         Prelude,
     },
@@ -39,8 +39,8 @@ impl Prelude for FilePrelude {
 
 fn read_to_string() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("file.read_to_string") };
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     let ext_fn = ExtFn::new_const(fn_read_to_string);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }

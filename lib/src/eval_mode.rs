@@ -18,10 +18,11 @@ use crate::{
     Val,
 };
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum EvalMode {
     Value,
     Less,
+    #[default]
     More,
 }
 

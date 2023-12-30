@@ -4,7 +4,10 @@ use crate::{
     eval_mode::EvalMode,
     io_mode::{
         IoMode,
-        ListItemIoMode,
+        ListItemMode,
+        ListMode,
+        MapMode,
+        MatchMode,
     },
     pair::Pair,
     reverse::Reverse,
@@ -13,9 +16,11 @@ use crate::{
     val::{
         list::ListVal,
         map::MapVal,
-        pair::PairVal,
-        reverse::ReverseVal,
     },
+    CallMode,
+    Map,
+    PairMode,
+    ReverseMode,
     Val,
 };
 
@@ -25,33 +30,48 @@ pub(crate) fn map_remove(map: &mut MapVal, name: &str) -> Val {
 }
 
 const SYMBOL: &str = "symbol";
+const PAIR: &str = "pair";
 const CALL: &str = "call";
+const REVERSE: &str = "reverse";
 const LIST: &str = "list";
-const LIST_FOR_ALL: &str = "list_items";
 const MAP: &str = "map";
-const MAP_FOR_ALL: &str = "map_items";
+
 const ELLIPSIS: &str = "...";
 
 pub(crate) fn parse_io_mode(io_mode: Val) -> Option<IoMode> {
     match io_mode {
-        Val::Unit(_) => Some(IoMode::Any(EvalMode::Value)),
-        Val::Bool(b) => Some(IoMode::Any(if b.bool() {
+        Val::Unit(_) => Some(IoMode::Eval(EvalMode::Value)),
+        Val::Bool(b) => Some(IoMode::Eval(if b.bool() {
             EvalMode::More
         } else {
             EvalMode::Less
         })),
-        Val::Pair(pair) => parse_io_mode_pair(*pair),
-        Val::Call(call) => {
-            let Val::Symbol(tag) = call.func else {
-                return None;
-            };
-            parse_io_mode_tag(&tag, call.input)
-        }
-        Val::Reverse(reverse) => parse_io_mode_reverse(*reverse),
-        Val::List(list) => parse_io_mode_list_for_some(list),
-        Val::Map(map) => parse_io_mode_map_for_some(map),
+        Val::Map(map) => Some(IoMode::Match(parse_match_mode(map)?)),
         _ => None,
     }
+}
+
+fn parse_match_mode(mut map: MapVal) -> Option<MatchMode> {
+    let mut mode = MatchMode::default();
+    if let Some(symbol_mode) = map.remove(&symbol(SYMBOL)) {
+        mode.symbol = parse_eval_mode(symbol_mode)?;
+    }
+    if let Some(pair_mode) = map.remove(&symbol(PAIR)) {
+        mode.pair = Box::new(parse_pair_mode(pair_mode)?);
+    }
+    if let Some(call_mode) = map.remove(&symbol(CALL)) {
+        mode.call = Box::new(parse_call_mode(call_mode)?);
+    }
+    if let Some(reverse_mode) = map.remove(&symbol(REVERSE)) {
+        mode.reverse = Box::new(parse_reverse_mode(reverse_mode)?);
+    }
+    if let Some(list_mode) = map.remove(&symbol(LIST)) {
+        mode.list = Box::new(parse_list_mode(list_mode)?);
+    }
+    if let Some(map_mode) = map.remove(&symbol(MAP)) {
+        mode.map = Box::new(parse_map_mode(map_mode)?);
+    }
+    Some(mode)
 }
 
 fn parse_eval_mode(eval_mode: Val) -> Option<EvalMode> {
@@ -66,68 +86,87 @@ fn parse_eval_mode(eval_mode: Val) -> Option<EvalMode> {
     }
 }
 
-fn parse_io_mode_tag(tag: &str, io_mode: Val) -> Option<IoMode> {
-    match tag {
-        SYMBOL => parse_io_mode_symbol(io_mode),
-        CALL => parse_io_mode_call(io_mode),
-        LIST => parse_io_mode_list(io_mode),
-        LIST_FOR_ALL => parse_io_mode_list_for_all(io_mode),
-        MAP => parse_io_mode_map(io_mode),
-        MAP_FOR_ALL => parse_io_mode_map_for_all(io_mode),
+fn parse_pair_mode(io_mode: Val) -> Option<PairMode> {
+    match io_mode {
+        Val::Unit(_) => Some(PairMode::Eval(EvalMode::Value)),
+        Val::Bool(b) => Some(PairMode::Eval(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        })),
+        Val::Pair(pair) => {
+            let first = parse_io_mode(pair.first)?;
+            let second = parse_io_mode(pair.second)?;
+            let pair = Pair::new(first, second);
+            Some(PairMode::Pair(pair))
+        }
         _ => None,
     }
 }
 
-fn parse_io_mode_symbol(eval_mode: Val) -> Option<IoMode> {
-    Some(IoMode::Symbol(parse_eval_mode(eval_mode)?))
+fn parse_call_mode(io_mode: Val) -> Option<CallMode> {
+    match io_mode {
+        Val::Unit(_) => Some(CallMode::Eval(EvalMode::Value)),
+        Val::Bool(b) => Some(CallMode::Eval(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        })),
+        Val::Call(call) => {
+            let func = parse_io_mode(call.func)?;
+            let input = parse_io_mode(call.input)?;
+            let call = Call::new(func, input);
+            Some(CallMode::Call(call))
+        }
+        _ => None,
+    }
 }
 
-fn parse_io_mode_pair(io_mode: PairVal) -> Option<IoMode> {
-    let first = parse_io_mode(io_mode.first)?;
-    let second = parse_io_mode(io_mode.second)?;
-    let pair = IoMode::Pair(Box::new(Pair::new(first, second)));
-    Some(pair)
+fn parse_reverse_mode(io_mode: Val) -> Option<ReverseMode> {
+    match io_mode {
+        Val::Unit(_) => Some(ReverseMode::Eval(EvalMode::Value)),
+        Val::Bool(b) => Some(ReverseMode::Eval(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        })),
+        Val::Reverse(reverse) => {
+            let func = parse_io_mode(reverse.func)?;
+            let output = parse_io_mode(reverse.output)?;
+            let reverse = Reverse::new(func, output);
+            Some(ReverseMode::Reverse(reverse))
+        }
+        _ => None,
+    }
 }
 
-fn parse_io_mode_call(io_mode: Val) -> Option<IoMode> {
-    let Val::Call(call) = io_mode else {
-        return None;
-    };
-    let func = parse_io_mode(call.func)?;
-    let input = parse_io_mode(call.input)?;
-    let call = IoMode::Call(Box::new(Call::new(func, input)));
-    Some(call)
+fn parse_list_mode(io_mode: Val) -> Option<ListMode> {
+    match io_mode {
+        Val::Unit(_) => Some(ListMode::Eval(EvalMode::Value)),
+        Val::Bool(b) => Some(ListMode::Eval(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        })),
+        Val::List(list) => Some(parse_list_mode_for_some(list)?),
+        Val::Pair(pair) => Some(ListMode::ForAll(parse_io_mode(pair.second)?)),
+        _ => None,
+    }
 }
 
-fn parse_io_mode_reverse(io_mode: ReverseVal) -> Option<IoMode> {
-    let func = parse_io_mode(io_mode.func)?;
-    let output = parse_io_mode(io_mode.output)?;
-    let reverse = IoMode::Reverse(Box::new(Reverse::new(func, output)));
-    Some(reverse)
-}
-
-fn parse_io_mode_list(eval_mode: Val) -> Option<IoMode> {
-    Some(IoMode::List(parse_eval_mode(eval_mode)?))
-}
-
-fn parse_io_mode_list_for_all(io_mode: Val) -> Option<IoMode> {
-    let io_mode = parse_io_mode(io_mode)?;
-    Some(IoMode::ListForAll(Box::new(io_mode)))
-}
-
-fn parse_io_mode_list_for_some(io_mode: ListVal) -> Option<IoMode> {
+fn parse_list_mode_for_some(io_mode: ListVal) -> Option<ListMode> {
     let list = io_mode
         .into_iter()
-        .map(parse_list_item_io_mode)
+        .map(parse_list_item_mode)
         .try_collect()?;
-    let list = IoMode::ListForSome(list);
+    let list = ListMode::ForSome(list);
     Some(list)
 }
 
-fn parse_list_item_io_mode(io_mode: Val) -> Option<ListItemIoMode> {
+fn parse_list_item_mode(io_mode: Val) -> Option<ListItemMode> {
     let Val::Call(call) = io_mode else {
         let io_mode = parse_io_mode(io_mode)?;
-        return Some(ListItemIoMode {
+        return Some(ListItemMode {
             io_mode,
             ellipsis: false,
         });
@@ -135,36 +174,36 @@ fn parse_list_item_io_mode(io_mode: Val) -> Option<ListItemIoMode> {
     let Val::Symbol(tag) = call.func else {
         return None;
     };
-    let io_mode = if &*tag == ELLIPSIS {
-        let io_mode = parse_io_mode(call.input)?;
-        ListItemIoMode {
-            io_mode,
-            ellipsis: true,
-        }
-    } else {
-        let io_mode = parse_io_mode_tag(&tag, call.input)?;
-        ListItemIoMode {
-            io_mode,
-            ellipsis: false,
-        }
+    if &*tag != ELLIPSIS {
+        return None;
+    }
+    let io_mode = parse_io_mode(call.input)?;
+    let io_mode = ListItemMode {
+        io_mode,
+        ellipsis: true,
     };
     Some(io_mode)
 }
 
-fn parse_io_mode_map(eval_mode: Val) -> Option<IoMode> {
-    Some(IoMode::Map(parse_eval_mode(eval_mode)?))
+fn parse_map_mode(io_mode: Val) -> Option<MapMode> {
+    match io_mode {
+        Val::Unit(_) => Some(MapMode::Eval(EvalMode::Value)),
+        Val::Bool(b) => Some(MapMode::Eval(if b.bool() {
+            EvalMode::More
+        } else {
+            EvalMode::Less
+        })),
+        Val::Map(map) => Some(parse_map_mode_for_some(map)?),
+        Val::Pair(pair) => {
+            let first = parse_io_mode(pair.first)?;
+            let second = parse_io_mode(pair.second)?;
+            Some(MapMode::ForAll(Pair::new(first, second)))
+        }
+        _ => None,
+    }
 }
 
-fn parse_io_mode_map_for_all(io_mode: Val) -> Option<IoMode> {
-    let Val::Pair(pair) = io_mode else {
-        return None;
-    };
-    let key = parse_io_mode(pair.first)?;
-    let value = parse_io_mode(pair.second)?;
-    Some(IoMode::MapForAll(Box::new(Pair::new(key, value))))
-}
-
-fn parse_io_mode_map_for_some(io_mode: MapVal) -> Option<IoMode> {
+fn parse_map_mode_for_some(io_mode: MapVal) -> Option<MapMode> {
     let map = io_mode
         .into_iter()
         .map(|(k, v)| {
@@ -172,11 +211,11 @@ fn parse_io_mode_map_for_some(io_mode: MapVal) -> Option<IoMode> {
             Some((k, io_mode))
         })
         .try_collect()?;
-    let map = IoMode::MapForSome(map);
+    let map = MapMode::ForSome(map);
     Some(map)
 }
 
-pub(crate) fn eval_mode_to_val(eval_mode: EvalMode) -> Val {
+pub(crate) fn generate_eval_mode(eval_mode: EvalMode) -> Val {
     match eval_mode {
         EvalMode::Value => Val::Unit(Unit),
         EvalMode::More => Val::Bool(Bool::t()),
@@ -186,41 +225,81 @@ pub(crate) fn eval_mode_to_val(eval_mode: EvalMode) -> Val {
 
 pub(crate) fn generate_io_mode(io_mode: &IoMode) -> Val {
     match io_mode {
-        IoMode::Any(mode) => eval_mode_to_val(*mode),
-        IoMode::Symbol(mode) => {
-            let tag = symbol(SYMBOL);
-            let mode = eval_mode_to_val(*mode);
-            Val::Call(Box::new(Call::new(tag, mode)))
-        }
-        IoMode::Pair(pair) => {
+        IoMode::Eval(mode) => generate_eval_mode(*mode),
+        IoMode::Match(mode) => generate_match_mode(mode),
+    }
+}
+
+pub(crate) fn generate_match_mode(mode: &MatchMode) -> Val {
+    let mut map = Map::default();
+    if mode.symbol != EvalMode::More {
+        map.insert(symbol(SYMBOL), generate_eval_mode(mode.symbol));
+    }
+    if *mode.pair != PairMode::Eval(EvalMode::More) {
+        let val = generate_pair_mode(&mode.pair);
+        map.insert(symbol(PAIR), val);
+    }
+    if *mode.call != CallMode::Eval(EvalMode::More) {
+        let val = generate_call_mode(&mode.call);
+        map.insert(symbol(CALL), val);
+    }
+    if *mode.reverse != ReverseMode::Eval(EvalMode::More) {
+        let val = generate_reverse_mode(&mode.reverse);
+        map.insert(symbol(REVERSE), val);
+    }
+    if *mode.list != ListMode::Eval(EvalMode::More) {
+        let val = generate_list_mode(&mode.list);
+        map.insert(symbol(LIST), val);
+    }
+    if *mode.map != MapMode::Eval(EvalMode::More) {
+        let val = generate_map_mode(&mode.map);
+        map.insert(symbol(MAP), val);
+    }
+    Val::Map(map)
+}
+
+pub(crate) fn generate_pair_mode(pair: &PairMode) -> Val {
+    match pair {
+        PairMode::Eval(mode) => generate_eval_mode(*mode),
+        PairMode::Pair(pair) => {
             let first = generate_io_mode(&pair.first);
             let second = generate_io_mode(&pair.second);
             Val::Pair(Box::new(Pair::new(first, second)))
         }
-        IoMode::Call(call) => {
-            let tag = symbol(CALL);
+    }
+}
+
+pub(crate) fn generate_call_mode(call: &CallMode) -> Val {
+    match call {
+        CallMode::Eval(mode) => generate_eval_mode(*mode),
+        CallMode::Call(call) => {
             let func = generate_io_mode(&call.func);
             let input = generate_io_mode(&call.input);
-            let call = Val::Call(Box::new(Call::new(func, input)));
-            Val::Call(Box::new(Call::new(tag, call)))
+            Val::Call(Box::new(Call::new(func, input)))
         }
-        IoMode::Reverse(reverse) => {
+    }
+}
+
+pub(crate) fn generate_reverse_mode(reverse: &ReverseMode) -> Val {
+    match reverse {
+        ReverseMode::Eval(mode) => generate_eval_mode(*mode),
+        ReverseMode::Reverse(reverse) => {
             let func = generate_io_mode(&reverse.func);
             let output = generate_io_mode(&reverse.output);
             Val::Reverse(Box::new(Reverse::new(func, output)))
         }
-        IoMode::List(mode) => {
-            let tag = symbol(LIST);
-            let mode = eval_mode_to_val(*mode);
-            Val::Call(Box::new(Call::new(tag, mode)))
+    }
+}
+
+pub(crate) fn generate_list_mode(list: &ListMode) -> Val {
+    match list {
+        ListMode::Eval(mode) => generate_eval_mode(*mode),
+        ListMode::ForAll(mode) => {
+            let second = generate_io_mode(mode);
+            Val::Pair(Box::new(Pair::new(Val::default(), second)))
         }
-        IoMode::ListForAll(mode) => {
-            let tag = symbol(LIST_FOR_ALL);
-            let mode = generate_io_mode(mode);
-            Val::Call(Box::new(Call::new(tag, mode)))
-        }
-        IoMode::ListForSome(list) => {
-            let list = list
+        ListMode::ForSome(mode_list) => {
+            let list = mode_list
                 .iter()
                 .map(|mode| {
                     if mode.ellipsis {
@@ -234,20 +313,19 @@ pub(crate) fn generate_io_mode(io_mode: &IoMode) -> Val {
                 .collect();
             Val::List(list)
         }
-        IoMode::Map(mode) => {
-            let tag = symbol(MAP);
-            let mode = eval_mode_to_val(*mode);
-            Val::Call(Box::new(Call::new(tag, mode)))
+    }
+}
+
+pub(crate) fn generate_map_mode(map: &MapMode) -> Val {
+    match map {
+        MapMode::Eval(mode) => generate_eval_mode(*mode),
+        MapMode::ForAll(mode) => {
+            let first = generate_io_mode(&mode.first);
+            let second = generate_io_mode(&mode.second);
+            Val::Pair(Box::new(Pair::new(first, second)))
         }
-        IoMode::MapForAll(mode) => {
-            let tag = symbol(MAP_FOR_ALL);
-            let key = generate_io_mode(&mode.first);
-            let value = generate_io_mode(&mode.second);
-            let pair = Val::Pair(Box::new(Pair::new(key, value)));
-            Val::Call(Box::new(Call::new(tag, pair)))
-        }
-        IoMode::MapForSome(map) => {
-            let map = map
+        MapMode::ForSome(mode_map) => {
+            let map = mode_map
                 .iter()
                 .map(|(k, v)| {
                     let mode = generate_io_mode(v);

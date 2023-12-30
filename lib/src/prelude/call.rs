@@ -18,9 +18,10 @@ use crate::{
         Primitive,
     },
     io_mode::IoMode,
-    pair::Pair,
     prelude::{
+        default_mode,
         named_mutable_fn,
+        pair_mode,
         Named,
         Prelude,
     },
@@ -51,11 +52,8 @@ impl Prelude for CallPrelude {
 }
 
 fn call() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_call::<FreeCtx>,
         |ctx, val| fn_call(ctx, val),
@@ -76,11 +74,8 @@ fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 fn pipe() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::Value),
-        IoMode::Any(EvalMode::Value),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(IoMode::Eval(EvalMode::Value), IoMode::Eval(EvalMode::Value));
+    let output_mode = default_mode();
     named_mutable_fn("|", input_mode, output_mode, fn_pipe)
 }
 

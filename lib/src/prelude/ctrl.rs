@@ -18,12 +18,19 @@ use crate::{
     },
     io_mode::{
         IoMode,
-        ListItemIoMode,
+        ListItemMode,
+        ListMode,
+        MapMode,
     },
     list::List,
-    pair::Pair,
     prelude::{
+        default_mode,
+        list_mode,
+        list_mode_for_some,
+        map_mode,
         named_mutable_fn,
+        pair_mode,
+        symbol_value_mode,
         Named,
         Prelude,
     },
@@ -66,8 +73,8 @@ impl Prelude for CtrlPrelude {
 }
 
 fn sequence() -> Named<FuncVal> {
-    let input_mode = IoMode::List(EvalMode::Value);
-    let output_mode = IoMode::List(EvalMode::More);
+    let input_mode = list_mode(ListMode::Eval(EvalMode::Value));
+    let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
@@ -88,11 +95,11 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 fn breakable_sequence() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Symbol(EvalMode::Value),
-        IoMode::List(EvalMode::Value),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(
+        symbol_value_mode(),
+        list_mode(ListMode::Eval(EvalMode::Value)),
+    );
+    let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_breakable_sequence::<FreeCtx>,
         |ctx, val| fn_breakable_sequence(ctx, val),
@@ -127,25 +134,25 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 fn if1() -> Named<FuncVal> {
     let list = List::from(vec![
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::More),
+        ListItemMode {
+            io_mode: default_mode(),
             ellipsis: false,
         },
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::Value),
+        ListItemMode {
+            io_mode: IoMode::Eval(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::Value),
+        ListItemMode {
+            io_mode: IoMode::Eval(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::Value),
+        ListItemMode {
+            io_mode: IoMode::Eval(EvalMode::Value),
             ellipsis: false,
         },
     ]);
-    let input_mode = IoMode::ListForSome(list);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = list_mode_for_some(list);
+    let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
@@ -187,21 +194,21 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 fn match1() -> Named<FuncVal> {
     let list = List::from(vec![
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::More),
+        ListItemMode {
+            io_mode: default_mode(),
             ellipsis: false,
         },
-        ListItemIoMode {
-            io_mode: IoMode::Map(EvalMode::Value),
+        ListItemMode {
+            io_mode: map_mode(MapMode::Eval(EvalMode::Value)),
             ellipsis: false,
         },
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::Value),
+        ListItemMode {
+            io_mode: IoMode::Eval(EvalMode::Value),
             ellipsis: false,
         },
     ]);
-    let input_mode = IoMode::ListForSome(list);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = list_mode_for_some(list);
+    let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
@@ -238,17 +245,17 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 fn while1() -> Named<FuncVal> {
     let list = List::from(vec![
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::Value),
+        ListItemMode {
+            io_mode: IoMode::Eval(EvalMode::Value),
             ellipsis: false,
         },
-        ListItemIoMode {
-            io_mode: IoMode::Any(EvalMode::Value),
+        ListItemMode {
+            io_mode: IoMode::Eval(EvalMode::Value),
             ellipsis: false,
         },
     ]);
-    let input_mode = IoMode::ListForSome(list);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = list_mode_for_some(list);
+    let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),

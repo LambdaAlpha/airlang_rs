@@ -7,7 +7,7 @@ use airlang::{
     Bytes,
     EvalMode,
     Int,
-    IoMode,
+    ListMode,
     Map,
     MapVal,
     MutableCtx,
@@ -17,6 +17,9 @@ use airlang::{
 
 use crate::{
     prelude::{
+        default_mode,
+        list_mode,
+        map_mode_for_some,
         put_func,
         ExtFunc,
         Prelude,
@@ -48,12 +51,12 @@ fn call() -> Rc<ExtFunc> {
 
     let mut map = Map::default();
     let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
-    map.insert(program_key, IoMode::Any(EvalMode::More));
+    map.insert(program_key, default_mode());
     let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
-    map.insert(arguments_key, IoMode::List(EvalMode::More));
+    map.insert(arguments_key, list_mode(ListMode::Eval(EvalMode::More)));
 
-    let input_mode = IoMode::MapForSome(map);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = map_mode_for_some(map);
+    let output_mode = default_mode();
     let ext_fn = ExtFn::new_free(fn_call);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }

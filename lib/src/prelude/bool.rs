@@ -1,11 +1,10 @@
 use crate::{
     bool::Bool,
     ctx::NameMap,
-    eval_mode::EvalMode,
-    io_mode::IoMode,
-    pair::Pair,
     prelude::{
+        default_mode,
         named_free_fn,
+        pair_mode,
         Named,
         Prelude,
     },
@@ -41,8 +40,8 @@ impl Prelude for BoolPrelude {
 }
 
 fn not() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = default_mode();
+    let output_mode = default_mode();
     named_free_fn("not", input_mode, output_mode, fn_not)
 }
 
@@ -54,11 +53,8 @@ fn fn_not(input: Val) -> Val {
 }
 
 fn and() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
     named_free_fn("and", input_mode, output_mode, fn_and)
 }
 
@@ -80,11 +76,8 @@ fn fn_and(input: Val) -> Val {
 }
 
 fn or() -> Named<FuncVal> {
-    let input_mode = IoMode::Pair(Box::new(Pair::new(
-        IoMode::Any(EvalMode::More),
-        IoMode::Any(EvalMode::More),
-    )));
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
     named_free_fn("or", input_mode, output_mode, fn_or)
 }
 

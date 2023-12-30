@@ -1,11 +1,11 @@
 use crate::{
     ctx::NameMap,
-    eval_mode::EvalMode,
     func::FuncEval,
-    io_mode::IoMode,
     logic::Prop,
     map::Map,
     prelude::{
+        default_mode,
+        map_mode_for_some,
         named_free_fn,
         utils::{
             map_remove,
@@ -52,12 +52,12 @@ const BEFORE: &str = "before";
 
 fn theorem_new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), IoMode::Any(EvalMode::More));
-    map.insert(symbol(INPUT), IoMode::Any(EvalMode::More));
-    map.insert(symbol(CTX), IoMode::Any(EvalMode::More));
-    map.insert(symbol(BEFORE), IoMode::Any(EvalMode::More));
-    let input_mode = IoMode::MapForSome(map);
-    let output_mode = IoMode::Any(EvalMode::More);
+    map.insert(symbol(FUNCTION), default_mode());
+    map.insert(symbol(INPUT), default_mode());
+    map.insert(symbol(CTX), default_mode());
+    map.insert(symbol(BEFORE), default_mode());
+    let input_mode = map_mode_for_some(map);
+    let output_mode = default_mode();
     named_free_fn("theorem", input_mode, output_mode, fn_theorem_new)
 }
 
@@ -92,8 +92,8 @@ fn fn_theorem_new(input: Val) -> Val {
 }
 
 fn prove() -> Named<FuncVal> {
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = default_mode();
+    let output_mode = default_mode();
     named_free_fn("prove", input_mode, output_mode, fn_prove)
 }
 

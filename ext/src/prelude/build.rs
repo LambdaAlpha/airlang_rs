@@ -12,9 +12,7 @@ use airlang::{
     parse,
     Ctx,
     CtxForMutableFn,
-    EvalMode,
     InvariantTag,
-    IoMode,
     MutableCtx,
     Str,
     Symbol,
@@ -23,6 +21,7 @@ use airlang::{
 
 use crate::{
     prelude::{
+        default_mode,
         put_func,
         Prelude,
     },
@@ -48,8 +47,8 @@ impl Prelude for BuildPrelude {
 
 fn import() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("build.import") };
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = default_mode();
+    let output_mode = default_mode();
     let ext_fn = ExtFn::new_mutable(fn_import);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }

@@ -19,7 +19,9 @@ use airlang::{
 
 use crate::{
     prelude::{
+        default_mode,
         put_func,
+        symbol_value_mode,
         ExtFunc,
         Prelude,
     },
@@ -64,8 +66,8 @@ impl Prelude for IoPrelude {
 
 fn read_line() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.read_line") };
-    let input_mode = IoMode::Symbol(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::More);
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
     let ext_fn = ExtFn::new_mutable(fn_read_line);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
@@ -86,8 +88,8 @@ fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn print() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.print") };
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = default_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     let ext_fn = ExtFn::new_free(fn_print);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
@@ -102,8 +104,8 @@ fn fn_print(input: Val) -> Val {
 
 fn print_line() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.print_line") };
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = default_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     let ext_fn = ExtFn::new_free(fn_print_line);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
@@ -118,8 +120,8 @@ fn fn_print_line(input: Val) -> Val {
 
 fn flush() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.flush") };
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Value);
     let ext_fn = ExtFn::new_free(fn_flush);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
@@ -131,8 +133,8 @@ fn fn_flush(_input: Val) -> Val {
 
 fn error_print() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.error_print") };
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = default_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     let ext_fn = ExtFn::new_free(fn_error_print);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
@@ -147,8 +149,8 @@ fn fn_error_print(input: Val) -> Val {
 
 fn error_print_line() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.error_print_line") };
-    let input_mode = IoMode::Any(EvalMode::More);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = default_mode();
+    let output_mode = IoMode::Eval(EvalMode::Value);
     let ext_fn = ExtFn::new_free(fn_error_print_line);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
@@ -164,8 +166,8 @@ fn fn_error_print_line(input: Val) -> Val {
 fn error_flush() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("io.error_flush") };
     let ext_fn = ExtFn::new_free(fn_error_flush);
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Value);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
 

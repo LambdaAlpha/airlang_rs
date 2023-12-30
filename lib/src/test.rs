@@ -212,11 +212,11 @@ impl AsFuncExt for Ext {
 
 impl FuncExt for Ext {
     fn input_mode(&self) -> &IoMode {
-        &IoMode::Any(EvalMode::More)
+        &IoMode::Eval(EvalMode::More)
     }
 
     fn output_mode(&self) -> &IoMode {
-        &IoMode::Any(EvalMode::More)
+        &IoMode::Eval(EvalMode::More)
     }
 
     fn call(&self, _ctx: CtxForMutableFn, input: Val) -> Val {

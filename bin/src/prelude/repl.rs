@@ -35,8 +35,8 @@ impl Prelude for ReplPrelude {
 
 fn exit() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("repl.exit") };
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Value);
     let ext_fn = ExtFn::new_free(fn_exit);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }

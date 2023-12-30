@@ -41,8 +41,8 @@ impl Prelude for EvalPrelude {
 fn reset() -> Rc<ExtFunc> {
     let id = unsafe { Symbol::from_str_unchecked("repl.reset") };
     let ext_fn = ExtFn::new_mutable(fn_reset);
-    let input_mode = IoMode::Any(EvalMode::Value);
-    let output_mode = IoMode::Any(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Value);
     Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
 }
 
