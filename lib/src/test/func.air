@@ -255,7 +255,7 @@ a
 =====
 ;[
     f = (function {
-        body : (;[set_meta ('u context {super : ('u ('u caller))}), read $$ input]),
+        body : (;[set_meta ('u context {super : ('u ('u caller))}), $$ (read input)]),
         input_mode : 'u,
         caller_access : mutable,
         context : (prelude 'u)
@@ -269,10 +269,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] do (read a)),
+        body : (caller .. (read a)),
         caller_access : free,
         context : ('u context {
-            : do,
+            : ..,
             : read,
         })
     }),
@@ -284,10 +284,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] do (read a)),
+        body : (caller .. (read a)),
         caller_access : constant,
         context : ('u context {
-            : do,
+            : ..,
             : read,
         })
     }),
@@ -299,10 +299,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] do (read a)),
+        body : (caller .. (read a)),
         caller_access : mutable,
         context : ('u context {
-            : do,
+            : ..,
             : read,
         })
     }),
@@ -314,10 +314,10 @@ a
 ;[
     a = 1,
     f = (function {
-        body : ([caller] do (read a)),
+        body : (caller .. (read a)),
         caller_access : constant,
         context : ('u context {
-            : do,
+            : ..,
             : read,
         })
     }),
@@ -328,12 +328,13 @@ a
 =====
 ;[
     f = (function {
-        body : ([caller] do (('u ('t input)) = 2)),
+        body : (caller .. ($$ (input = 2))),
         input_mode : 'u,
         caller_access : mutable,
         context : ('u context {
-            : do,
+            : ..,
             : =,
+            : $$,
         })
     }),
     a = 1,
@@ -345,12 +346,13 @@ a
 =====
 ;[
     f = (function {
-        body : ([caller] do (('u ('t input)) = 2)),
+        body : (caller .. ($$ (input = 2))),
         input_mode : 'u,
         caller_access : mutable,
         context : ('u context {
-            : do,
+            : ..,
             : =,
+            : $$,
         })
     }),
     (a ': final) = 1,
@@ -362,12 +364,13 @@ a
 =====
 ;[
     f = (function {
-        body : ([caller] do (('u ('t input)) = 2)),
+        body : (caller .. ($$ (input = 2))),
         input_mode : 'u,
         caller_access : constant,
         context : ('u context {
-            : do,
+            : ..,
             : =,
+            : $$,
         })
     }),
     a = 1,

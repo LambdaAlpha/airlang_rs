@@ -5,12 +5,6 @@ use crate::{
         mutable::CtxForMutableFn,
         CtxAccessor,
     },
-    eval::{
-        input::ByVal,
-        output::OutputBuilder,
-        Evaluator,
-        ValBuilder,
-    },
     eval_mode::{
         more::More,
         EvalMode,
@@ -24,10 +18,10 @@ use crate::{
         default_mode,
         named_mutable_fn,
         pair_mode,
+        reverse_mode,
         Named,
         Prelude,
     },
-    problem::solve,
     val::func::FuncVal,
     Val,
 };
@@ -56,7 +50,7 @@ impl Prelude for ReversePrelude {
 }
 
 fn reverse() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
+    let input_mode = reverse_mode(default_mode(), default_mode());
     let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_reverse::<FreeCtx>,
@@ -67,19 +61,14 @@ fn reverse() -> Named<FuncVal> {
 }
 
 fn fn_reverse<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+    let Val::Reverse(reverse) = input else {
         return Val::default();
     };
-    let Val::Func(FuncVal(func)) = &pair.first else {
-        return Val::default();
-    };
-    let output = func.output_mode.eval(&mut ctx, pair.second);
-    let reverse = ValBuilder.from_reverse(pair.first, output);
-    solve(&mut ctx, reverse)
+    More.eval_output_then_solve(&mut ctx, reverse.func, reverse.output)
 }
 
 fn pipe() -> Named<FuncVal> {
-    let input_mode = pair_mode(IoMode::Eval(EvalMode::Value), IoMode::Eval(EvalMode::Value));
+    let input_mode = pair_mode(IoMode::Eval(EvalMode::Value), default_mode());
     let output_mode = default_mode();
     named_mutable_fn("\\", input_mode, output_mode, fn_pipe)
 }
@@ -88,5 +77,5 @@ fn fn_pipe(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    More.eval_reverse(&mut ctx, pair.second, pair.first)
+    More.eval_output_then_solve(&mut ctx, pair.second, pair.first)
 }

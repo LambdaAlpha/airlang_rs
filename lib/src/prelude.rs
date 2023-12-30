@@ -229,7 +229,6 @@ fn call_mode(func: IoMode, input: IoMode) -> IoMode {
     IoMode::Match(mode)
 }
 
-#[allow(unused)]
 fn reverse_mode(func: IoMode, output: IoMode) -> IoMode {
     let mode = MatchMode {
         reverse: Box::new(ReverseMode::Reverse(Reverse::new(func, output))),

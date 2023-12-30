@@ -70,7 +70,7 @@
         before : ('u context {})
     }),
     ctx = (proposition.before t),
-    [ctx] do (is_null a)
+    ctx .. (is_null a)
 ]
 -----
 't
@@ -82,7 +82,7 @@
         before : ('u context {})
     }),
     ctx = (proposition.after t),
-    [ctx] do (is_null a)
+    ctx .. (is_null a)
 ]
 -----
 'f

@@ -28,7 +28,7 @@
         context : ('u context {a : 2}),
     }),
     ctx = (proposition.before p),
-    [ctx] do (read a)
+    ctx .. (read a)
 ]
 -----
 2
@@ -41,7 +41,7 @@
         context : ('u context {a : 2}),
     }),
     ctx = (proposition.after p),
-    [ctx] do (read a)
+    ctx .. (read a)
 ]
 -----
 2
@@ -55,7 +55,7 @@
         after : ('u context {a : 3}),
     }),
     ctx = (proposition.before p),
-    [ctx] do (read a)
+    ctx .. (read a)
 ]
 -----
 2
@@ -69,7 +69,7 @@
         after : ('u context {a : 3}),
     }),
     ctx = (proposition.after p),
-    [ctx] do (read a)
+    ctx .. (read a)
 ]
 -----
 3

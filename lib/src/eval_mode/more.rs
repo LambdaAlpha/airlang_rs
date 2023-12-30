@@ -80,6 +80,20 @@ where
             _ => {}
         }
         let func = self.eval(ctx, func);
+        self.eval_input_then_call(ctx, func, input)
+    }
+
+    fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
+        let func = self.eval(ctx, func);
+        self.eval_output_then_solve(ctx, func, output)
+    }
+}
+
+impl More {
+    pub(crate) fn eval_input_then_call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
         match &func {
             Val::Func(FuncVal(func)) => {
                 let input = func.input_mode.eval(ctx, input);
@@ -101,8 +115,44 @@ where
         }
     }
 
-    fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        let func = self.eval(ctx, func);
+    pub(crate) fn eval_input<Ctx>(&self, ctx: &mut Ctx, func: &Val, input: Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
+        match func {
+            Val::Func(FuncVal(func)) => func.input_mode.eval(ctx, input),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.input_mode().eval(ctx, input)
+                } else {
+                    self.eval(ctx, input)
+                }
+            }
+            _ => self.eval(ctx, input),
+        }
+    }
+
+    pub(crate) fn call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
+        match &func {
+            Val::Func(FuncVal(func)) => func.eval(ctx, input),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.call(ctx.for_mutable_fn(), input)
+                } else {
+                    ValBuilder.from_call(func, input)
+                }
+            }
+            _ => ValBuilder.from_call(func, input),
+        }
+    }
+
+    pub(crate) fn eval_output_then_solve<Ctx>(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
         let output = match &func {
             Val::Func(FuncVal(f)) => f.output_mode.eval(ctx, output),
             Val::Ext(ext) => {
@@ -114,6 +164,31 @@ where
             }
             _ => self.eval(ctx, output),
         };
+        let reverse = ValBuilder.from_reverse(func, output);
+        solve(ctx, reverse)
+    }
+
+    pub(crate) fn eval_output<Ctx>(&self, ctx: &mut Ctx, func: &Val, output: Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
+        match func {
+            Val::Func(FuncVal(f)) => f.output_mode.eval(ctx, output),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.output_mode().eval(ctx, output)
+                } else {
+                    self.eval(ctx, output)
+                }
+            }
+            _ => self.eval(ctx, output),
+        }
+    }
+
+    pub(crate) fn solve<Ctx>(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
         let reverse = ValBuilder.from_reverse(func, output);
         solve(ctx, reverse)
     }
@@ -168,6 +243,20 @@ where
             _ => {}
         }
         let func = self.eval(ctx, func);
+        self.eval_input_then_call(ctx, func, input)
+    }
+
+    fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
+        let func = self.eval(ctx, func);
+        self.eval_func_reverse(ctx, func, output)
+    }
+}
+
+impl MoreByRef {
+    pub(crate) fn eval_input_then_call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: &Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
         match &func {
             Val::Func(FuncVal(func)) => {
                 let input = func.input_mode.eval(ctx, input);
@@ -189,8 +278,30 @@ where
         }
     }
 
-    fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        let func = self.eval(ctx, func);
+    #[allow(unused)]
+    pub(crate) fn eval_input<Ctx>(&self, ctx: &mut Ctx, func: &Val, input: &Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
+        match func {
+            Val::Func(FuncVal(func)) => func.input_mode.eval(ctx, input),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.input_mode().eval(ctx, input)
+                } else {
+                    self.eval(ctx, input)
+                }
+            }
+            _ => self.eval(ctx, input),
+        }
+    }
+
+    pub(crate) fn eval_func_reverse<Ctx: CtxAccessor>(
+        &self,
+        ctx: &mut Ctx,
+        func: Val,
+        output: &Val,
+    ) -> Val {
         let output = match &func {
             Val::Func(FuncVal(f)) => f.output_mode.eval(ctx, output),
             Val::Ext(ext) => {
@@ -204,5 +315,23 @@ where
         };
         let reverse = ValBuilder.from_reverse(func, output);
         solve(ctx, reverse)
+    }
+
+    #[allow(unused)]
+    pub(crate) fn eval_output<Ctx>(&self, ctx: &mut Ctx, func: &Val, output: &Val) -> Val
+    where
+        Ctx: CtxAccessor,
+    {
+        match func {
+            Val::Func(FuncVal(f)) => f.output_mode.eval(ctx, output),
+            Val::Ext(ext) => {
+                if let Some(func) = ext.as_func() {
+                    func.output_mode().eval(ctx, output)
+                } else {
+                    self.eval(ctx, output)
+                }
+            }
+            _ => self.eval(ctx, output),
+        }
     }
 }

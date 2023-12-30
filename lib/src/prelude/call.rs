@@ -5,10 +5,6 @@ use crate::{
         mutable::CtxForMutableFn,
         CtxAccessor,
     },
-    eval::{
-        input::ByVal,
-        Evaluator,
-    },
     eval_mode::{
         more::More,
         EvalMode,
@@ -19,6 +15,7 @@ use crate::{
     },
     io_mode::IoMode,
     prelude::{
+        call_mode,
         default_mode,
         named_mutable_fn,
         pair_mode,
@@ -52,7 +49,7 @@ impl Prelude for CallPrelude {
 }
 
 fn call() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
+    let input_mode = call_mode(default_mode(), default_mode());
     let output_mode = default_mode();
     let func = Primitive::<CtxMutableFn>::dispatch(
         fn_call::<FreeCtx>,
@@ -63,18 +60,14 @@ fn call() -> Named<FuncVal> {
 }
 
 fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+    let Val::Call(call) = input else {
         return Val::default();
     };
-    let Val::Func(FuncVal(func)) = &pair.first else {
-        return Val::default();
-    };
-    let input = func.input_mode.eval(&mut ctx, pair.second);
-    func.eval(&mut ctx, input)
+    More.eval_input_then_call(&mut ctx, call.func, call.input)
 }
 
 fn pipe() -> Named<FuncVal> {
-    let input_mode = pair_mode(IoMode::Eval(EvalMode::Value), IoMode::Eval(EvalMode::Value));
+    let input_mode = pair_mode(IoMode::Eval(EvalMode::Value), default_mode());
     let output_mode = default_mode();
     named_mutable_fn("|", input_mode, output_mode, fn_pipe)
 }
@@ -83,5 +76,5 @@ fn fn_pipe(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    More.eval_call(&mut ctx, pair.second, pair.first)
+    More.eval_input_then_call(&mut ctx, pair.second, pair.first)
 }
