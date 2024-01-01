@@ -590,7 +590,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
-    let tagged_digits = preceded(tag_no_case("0x'"), cut(normed_num0(digits)));
+    let tagged_digits = preceded(tag_no_case("8x"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(<T as From<Bytes>>::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
@@ -607,7 +607,7 @@ where
     let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
         s.len() % 8 == 0
     });
-    let tagged_digits = preceded(tag_no_case("0b'"), cut(normed_num0(digits)));
+    let tagged_digits = preceded(tag_no_case("8b"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(<T as From<Bytes>>::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,

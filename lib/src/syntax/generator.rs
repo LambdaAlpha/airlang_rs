@@ -171,7 +171,7 @@ fn generate_float(f: &Float, s: &mut String) {
 }
 
 fn generate_bytes(bytes: &Bytes, s: &mut String) {
-    s.push_str("0x'");
+    s.push_str("8x");
     utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
 }
 
