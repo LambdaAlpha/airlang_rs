@@ -6,8 +6,7 @@ use std::{
 };
 
 use airlang::{
-    interpret_const,
-    interpret_free,
+    initial_ctx,
     interpret_mutable,
     parse,
     Ctx,
@@ -20,6 +19,7 @@ use airlang::{
 };
 
 use crate::{
+    init_ctx,
     prelude::{
         default_mode,
         put_func,
@@ -77,18 +77,11 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
 
-    match ctx {
-        CtxForMutableFn::Free(ctx) => interpret_free(ctx, val),
-        CtxForMutableFn::Const(ctx) => interpret_const(ctx, val),
-        CtxForMutableFn::Mutable(mut mutable_ctx) => {
-            set_cur_url(mutable_ctx.reborrow(), cur_url_key.clone(), new_url);
-            let output = interpret_mutable(mutable_ctx.reborrow(), val);
-            if let Some(cur_url) = cur_url {
-                set_cur_url(mutable_ctx, cur_url_key, cur_url);
-            }
-            output
-        }
-    }
+    let mut ctx_for_mod = initial_ctx();
+    let mut mut_ctx_for_mod = MutableCtx::new(&mut ctx_for_mod);
+    init_ctx(mut_ctx_for_mod.reborrow());
+    set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key.clone(), new_url);
+    interpret_mutable(mut_ctx_for_mod, val)
 }
 
 fn get_cur_url(mut ctx: CtxForMutableFn, key: &Symbol) -> Option<String> {

@@ -1,0 +1,4 @@
+; [
+    b = (build.import "b/b.air"),
+    b + 1
+]
