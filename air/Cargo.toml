@@ -16,3 +16,6 @@ version = "0.0.10"
 [dependencies.airlang_ext]
 path = "../ext"
 version = "0.0.10"
+
+[[test]]
+name = "main"
