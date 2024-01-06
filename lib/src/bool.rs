@@ -19,7 +19,7 @@ impl Bool {
         Bool(true)
     }
 
-    pub fn bool(&self) -> bool {
+    pub fn bool(self) -> bool {
         self.0
     }
 
@@ -45,12 +45,6 @@ impl Bool {
     }
 }
 
-impl From<&bool> for Bool {
-    fn from(value: &bool) -> Self {
-        Bool(*value)
-    }
-}
-
 impl From<bool> for Bool {
     fn from(value: bool) -> Self {
         Bool(value)
@@ -59,12 +53,6 @@ impl From<bool> for Bool {
 
 impl From<Bool> for bool {
     fn from(value: Bool) -> Self {
-        value.0
-    }
-}
-
-impl From<&Bool> for bool {
-    fn from(value: &Bool) -> Self {
         value.0
     }
 }
