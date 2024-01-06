@@ -110,6 +110,7 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
+    #[allow(unused)]
     Unit(&'a Unit),
     Bool(&'a Bool),
     Int(&'a Int),
