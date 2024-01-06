@@ -491,7 +491,7 @@ context
 -----
 1
 =====
-;[a = ('u context {super : ('u b)} context {b : ('u context {c : 1})}), a .. ('t .. (read super))]
+;[a = ('u context {super : ('u b)} context {b : ('u context {c : 1})}), [a, 't] .. (read super)]
 -----
 b
 =====
@@ -502,7 +502,7 @@ a
 ;[
     a = ('u context {b : ('u context {c : ('u context {})})}),
     [a, b] .. (set_meta ('u context {super : ('u c)})),
-    [a, b] .. ('t .. (read super))
+    [a, b, 't] .. (read super)
 ]
 -----
 c

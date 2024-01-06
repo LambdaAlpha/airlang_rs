@@ -696,12 +696,22 @@ fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
     }
 }
 
-fn with_target_ctx<F>(mut ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
+fn with_target_ctx<F>(ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
 where
     F: FnOnce(CtxForMutableFn) -> Val,
 {
     match target_ctx {
-        Val::Unit(_) => Some(callback(CtxForMutableFn::Free(FreeCtx))),
+        Val::List(names) => get_ctx_nested(ctx, &names[..], callback),
+        _ => with_target_ctx_basic(ctx, target_ctx, |ctx| Some(callback(ctx))),
+    }
+}
+
+fn with_target_ctx_basic<F>(mut ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
+where
+    F: FnOnce(CtxForMutableFn) -> Option<Val>,
+{
+    match target_ctx {
+        Val::Unit(_) => callback(CtxForMutableFn::Free(FreeCtx)),
         Val::Bool(is_meta) => {
             if is_meta.bool() {
                 let Ok(TaggedRef {
@@ -712,14 +722,12 @@ where
                     return None;
                 };
                 if is_const {
-                    Some(callback(CtxForMutableFn::Const(ConstCtx::new(meta_ctx))))
+                    callback(CtxForMutableFn::Const(ConstCtx::new(meta_ctx)))
                 } else {
-                    Some(callback(CtxForMutableFn::Mutable(MutableCtx::new(
-                        meta_ctx,
-                    ))))
+                    callback(CtxForMutableFn::Mutable(MutableCtx::new(meta_ctx)))
                 }
             } else {
-                Some(callback(ctx))
+                callback(ctx)
             }
         }
         Val::Symbol(name) => {
@@ -730,38 +738,25 @@ where
                 return None;
             };
             if is_const {
-                Some(callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx))))
+                callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx)))
             } else {
-                Some(callback(CtxForMutableFn::Mutable(MutableCtx::new(
-                    target_ctx,
-                ))))
+                callback(CtxForMutableFn::Mutable(MutableCtx::new(target_ctx)))
             }
         }
-        Val::List(names) => get_ctx_nested(ctx, &names[..], callback),
         _ => None,
     }
 }
 
-fn get_ctx_nested<F>(mut ctx: CtxForMutableFn, names: &[Val], f: F) -> Option<Val>
+fn get_ctx_nested<F>(ctx: CtxForMutableFn, names: &[Val], f: F) -> Option<Val>
 where
     F: for<'a> FnOnce(CtxForMutableFn<'a>) -> Val,
 {
-    let Some(Val::Symbol(name)) = names.first() else {
+    let Some(target_ctx) = names.first() else {
         return Some(f(ctx));
     };
     let rest = &names[1..];
 
-    let Ok(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
-        return None;
-    };
-    let Val::Ctx(CtxVal(ctx)) = val_ref else {
-        return None;
-    };
-    if is_const {
-        get_ctx_nested(CtxForMutableFn::Const(ConstCtx::new(ctx)), rest, f)
-    } else {
-        get_ctx_nested(CtxForMutableFn::Mutable(MutableCtx::new(ctx)), rest, f)
-    }
+    with_target_ctx_basic(ctx, target_ctx, |ctx| get_ctx_nested(ctx, rest, f))
 }
 
 const CTX_VALUE_PAIR: &str = ":";
