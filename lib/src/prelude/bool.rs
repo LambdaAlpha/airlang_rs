@@ -1,5 +1,4 @@
 use crate::{
-    bool::Bool,
     ctx::NameMap,
     prelude::{
         default_mode,
@@ -19,6 +18,8 @@ pub(crate) struct BoolPrelude {
     pub(crate) not: Named<FuncVal>,
     pub(crate) and: Named<FuncVal>,
     pub(crate) or: Named<FuncVal>,
+    pub(crate) xor: Named<FuncVal>,
+    pub(crate) imply: Named<FuncVal>,
 }
 
 impl Default for BoolPrelude {
@@ -27,6 +28,8 @@ impl Default for BoolPrelude {
             not: not(),
             and: and(),
             or: or(),
+            xor: xor(),
+            imply: imply(),
         }
     }
 }
@@ -36,6 +39,8 @@ impl Prelude for BoolPrelude {
         self.not.put(m);
         self.and.put(m);
         self.or.put(m);
+        self.xor.put(m);
+        self.imply.put(m);
     }
 }
 
@@ -65,14 +70,10 @@ fn fn_and(input: Val) -> Val {
     let Val::Bool(left) = pair.first else {
         return Val::default();
     };
-    if left.bool() {
-        let Val::Bool(right) = pair.second else {
-            return Val::default();
-        };
-        Val::Bool(right)
-    } else {
-        Val::Bool(Bool::f())
-    }
+    let Val::Bool(right) = pair.second else {
+        return Val::default();
+    };
+    Val::Bool(left.and(right))
 }
 
 fn or() -> Named<FuncVal> {
@@ -88,12 +89,46 @@ fn fn_or(input: Val) -> Val {
     let Val::Bool(left) = pair.first else {
         return Val::default();
     };
-    if left.bool() {
-        Val::Bool(Bool::t())
-    } else {
-        let Val::Bool(right) = pair.second else {
-            return Val::default();
-        };
-        Val::Bool(right)
-    }
+    let Val::Bool(right) = pair.second else {
+        return Val::default();
+    };
+    Val::Bool(left.or(right))
+}
+
+fn xor() -> Named<FuncVal> {
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
+    named_free_fn("xor", input_mode, output_mode, fn_xor)
+}
+
+fn fn_xor(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Bool(left) = pair.first else {
+        return Val::default();
+    };
+    let Val::Bool(right) = pair.second else {
+        return Val::default();
+    };
+    Val::Bool(left.xor(right))
+}
+
+fn imply() -> Named<FuncVal> {
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
+    named_free_fn("imply", input_mode, output_mode, fn_imply)
+}
+
+fn fn_imply(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let Val::Bool(left) = pair.first else {
+        return Val::default();
+    };
+    let Val::Bool(right) = pair.second else {
+        return Val::default();
+    };
+    Val::Bool(left.imply(right))
 }

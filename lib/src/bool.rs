@@ -23,15 +23,24 @@ impl Bool {
         self.0
     }
 
-    pub fn and(&self, b: &Bool) -> Bool {
+    pub fn and(self, b: Bool) -> Bool {
         Bool(self.0 && b.0)
     }
 
-    pub fn or(&self, b: &Bool) -> Bool {
+    pub fn or(self, b: Bool) -> Bool {
         Bool(self.0 || b.0)
     }
 
-    pub fn not(&self) -> Bool {
+    pub fn xor(self, b: Bool) -> Bool {
+        Bool(self.0 != b.0)
+    }
+
+    pub fn imply(self, b: Bool) -> Bool {
+        Bool(!self.0 || b.0)
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn not(self) -> Bool {
         Bool(!self.0)
     }
 }
