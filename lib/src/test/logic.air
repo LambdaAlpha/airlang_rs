@@ -1,112 +1,39 @@
 ;[
-    t = (theorem {
+    p = (proposition.prove {
         function : not,
         input : 't,
     }),
-    proposition.input t
+    proposition.input p
 ]
 -----
 't
 =====
 ;[
-    t = (theorem {
+    p = (proposition.prove {
         function : not,
         input : 't,
     }),
-    proposition.output t
+    proposition.output p
 ]
 -----
 'f
 =====
 ;[
-    t = (theorem {
+    p = (proposition.prove {
         function : not,
         input : 't,
     }),
-    (proposition.function t) -== not
+    (proposition.function p) -== not
 ]
 -----
 't
 =====
 ;[
-    t = (theorem {
+    p = (proposition.prove {
         function : not,
         input : 't,
     }),
-    proposition.truth t
+    proposition.proved p
 ]
 -----
 't
-=====
-;[
-    t = (theorem {
-        function : `t,
-        input : ('f (('t not) 't)),
-        before : ('u context {}),
-    }),
-    proposition.output t
-]
------
-'f
-=====
-;[
-    t = (theorem {
-        function : ===,
-        input : ('u (a : b)),
-        context : ('u context {
-            a : 1,
-            b : 2,
-        })
-    }),
-    proposition.output t
-]
------
-'f
-=====
-;[
-    t = (theorem {
-        function : =,
-        input : ('u (a : 1)),
-        before : ('u context {})
-    }),
-    ctx = (proposition.before t),
-    ctx .. (is_null a)
-]
------
-'t
-=====
-;[
-    t = (theorem {
-        function : =,
-        input : ('u (a : 1)),
-        before : ('u context {})
-    }),
-    ctx = (proposition.after t),
-    ctx .. (is_null a)
-]
------
-'f
-=====
-;[
-    p = (proposition {
-        function : not,
-        input : 't,
-        output : 'f,
-    }),
-    t = (prove p),
-    proposition.truth t
-]
------
-'t
-=====
-;[
-    p = (proposition {
-        function : not,
-        input : 't,
-        output : 't,
-    }),
-    t = (prove p),
-    proposition.truth t
-]
------
-'f

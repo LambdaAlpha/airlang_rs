@@ -6,11 +6,7 @@ use crate::{
     },
     ctx_access::constant::CtxForConstFn,
     func::FuncEval,
-    logic::{
-        Prop,
-        PropCtx,
-        Truth,
-    },
+    logic::Prop,
     map::Map,
     prelude::{
         default_mode,
@@ -26,9 +22,7 @@ use crate::{
         Prelude,
     },
     types::refer::Reader,
-    unit::Unit,
     val::{
-        ctx::CtxVal,
         func::FuncVal,
         map::MapVal,
         prop::PropVal,
@@ -40,12 +34,10 @@ use crate::{
 pub(crate) struct PropPrelude {
     pub(crate) new: Named<FuncVal>,
     pub(crate) repr: Named<FuncVal>,
-    pub(crate) truth: Named<FuncVal>,
+    pub(crate) proved: Named<FuncVal>,
     pub(crate) func: Named<FuncVal>,
     pub(crate) input: Named<FuncVal>,
     pub(crate) output: Named<FuncVal>,
-    pub(crate) before: Named<FuncVal>,
-    pub(crate) after: Named<FuncVal>,
 }
 
 impl Default for PropPrelude {
@@ -53,12 +45,10 @@ impl Default for PropPrelude {
         PropPrelude {
             new: new(),
             repr: repr(),
-            truth: truth(),
+            proved: proved(),
             func: func(),
             input: input(),
             output: output(),
-            before: before(),
-            after: after(),
         }
     }
 }
@@ -67,31 +57,23 @@ impl Prelude for PropPrelude {
     fn put(&self, m: &mut NameMap) {
         self.new.put(m);
         self.repr.put(m);
-        self.truth.put(m);
+        self.proved.put(m);
         self.func.put(m);
         self.input.put(m);
         self.output.put(m);
-        self.before.put(m);
-        self.after.put(m);
     }
 }
 
 const FUNCTION: &str = "function";
 const INPUT: &str = "input";
 const OUTPUT: &str = "output";
-const CTX: &str = "context";
-const BEFORE: &str = "before";
-const AFTER: &str = "after";
-const TRUTH: &str = "truth";
+const PROVED: &str = "proved";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
     map.insert(symbol(INPUT), default_mode());
     map.insert(symbol(OUTPUT), default_mode());
-    map.insert(symbol(CTX), default_mode());
-    map.insert(symbol(BEFORE), default_mode());
-    map.insert(symbol(AFTER), default_mode());
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();
     named_free_fn("proposition", input_mode, output_mode, fn_new)
@@ -106,29 +88,11 @@ fn fn_new(input: Val) -> Val {
     };
     let input = map_remove(&mut map, INPUT);
     let output = map_remove(&mut map, OUTPUT);
-    match &func.0.evaluator {
-        FuncEval::Free(_) => {
-            let prop = Prop::new_free(func, input, output);
-            Val::Prop(PropVal(Reader::new(prop)))
-        }
-        FuncEval::Const(_) => {
-            let Val::Ctx(CtxVal(ctx)) = map_remove(&mut map, CTX) else {
-                return Val::default();
-            };
-            let prop = Prop::new_const(func, *ctx, input, output);
-            Val::Prop(PropVal(Reader::new(prop)))
-        }
-        FuncEval::Mutable(_) => {
-            let Val::Ctx(CtxVal(before)) = map_remove(&mut map, BEFORE) else {
-                return Val::default();
-            };
-            let Val::Ctx(CtxVal(after)) = map_remove(&mut map, AFTER) else {
-                return Val::default();
-            };
-            let prop = Prop::new_mutable(func, *before, input, *after, output);
-            Val::Prop(PropVal(Reader::new(prop)))
-        }
-    }
+    let FuncEval::Free(_) = &func.0.evaluator else {
+        return Val::default();
+    };
+    let prop = Prop::new(func, input, output);
+    Val::Prop(PropVal(Reader::new(prop)))
 }
 
 fn repr() -> Named<FuncVal> {
@@ -137,10 +101,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), default_mode());
     map.insert(symbol(INPUT), default_mode());
     map.insert(symbol(OUTPUT), default_mode());
-    map.insert(symbol(CTX), default_mode());
-    map.insert(symbol(BEFORE), default_mode());
-    map.insert(symbol(AFTER), default_mode());
-    map.insert(symbol(TRUTH), default_mode());
+    map.insert(symbol(PROVED), default_mode());
     let output_mode = map_mode_for_some(map);
     named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)
 }
@@ -158,43 +119,23 @@ fn generate_prop(repr: &mut MapVal, prop: &Prop) {
     repr.insert(symbol(FUNCTION), Val::Func(prop.func().clone()));
     repr.insert(symbol(INPUT), prop.input().clone());
     repr.insert(symbol(OUTPUT), prop.output().clone());
-    match prop.ctx() {
-        PropCtx::Free => {}
-        PropCtx::Const(ctx) => {
-            repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(ctx.clone()))));
-        }
-        PropCtx::Mutable(before, after) => {
-            repr.insert(symbol(BEFORE), Val::Ctx(CtxVal(Box::new(before.clone()))));
-            repr.insert(symbol(AFTER), Val::Ctx(CtxVal(Box::new(after.clone()))));
-        }
+    if prop.proved() {
+        repr.insert(symbol(PROVED), Val::Bool(Bool::t()));
     }
-    match prop.truth() {
-        Truth::True => {
-            repr.insert(symbol(TRUTH), Val::Bool(Bool::t()));
-        }
-        Truth::False => {
-            repr.insert(symbol(TRUTH), Val::Bool(Bool::f()));
-        }
-        _ => {}
-    };
 }
 
-fn truth() -> Named<FuncVal> {
+fn proved() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
     let output_mode = default_mode();
-    named_const_fn("proposition.truth", input_mode, output_mode, fn_truth)
+    named_const_fn("proposition.proved", input_mode, output_mode, fn_proved)
 }
 
-fn fn_truth(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_proved(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.get_const_ref(&ctx, input, |val| {
         let Val::Prop(PropVal(prop)) = val else {
             return Val::default();
         };
-        match prop.truth() {
-            Truth::None => Val::Unit(Unit),
-            Truth::True => Val::Bool(Bool::t()),
-            Truth::False => Val::Bool(Bool::f()),
-        }
+        Val::Bool(Bool::new(prop.proved()))
     })
 }
 
@@ -240,45 +181,5 @@ fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
             return Val::default();
         };
         prop.output().clone()
-    })
-}
-
-fn before() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = default_mode();
-    named_const_fn("proposition.before", input_mode, output_mode, fn_before)
-}
-
-fn fn_before(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
-        let Val::Prop(PropVal(prop)) = val else {
-            return Val::default();
-        };
-        let ctx = prop.ctx();
-        match ctx {
-            PropCtx::Free => Val::default(),
-            PropCtx::Const(ctx) => Val::Ctx(CtxVal(Box::new(ctx.clone()))),
-            PropCtx::Mutable(before, _) => Val::Ctx(CtxVal(Box::new(before.clone()))),
-        }
-    })
-}
-
-fn after() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = default_mode();
-    named_const_fn("proposition.after", input_mode, output_mode, fn_after)
-}
-
-fn fn_after(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
-        let Val::Prop(PropVal(prop)) = val else {
-            return Val::default();
-        };
-        let ctx = prop.ctx();
-        match ctx {
-            PropCtx::Free => Val::default(),
-            PropCtx::Const(ctx) => Val::Ctx(CtxVal(Box::new(ctx.clone()))),
-            PropCtx::Mutable(_, after) => Val::Ctx(CtxVal(Box::new(after.clone()))),
-        }
     })
 }

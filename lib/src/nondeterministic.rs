@@ -440,39 +440,56 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     }
 }
 
+pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
+    if rng.gen() {
+        let prelude = PRELUDE.with(|prelude| {
+            let mut m = NameMap::default();
+            prelude.put(&mut m);
+            m
+        });
+        let func = prelude
+            .into_values()
+            .filter(|v| {
+                let Val::Func(func) = &v.val else {
+                    return false;
+                };
+                let FuncEval::Free(_) = &func.evaluator else {
+                    return false;
+                };
+                true
+            })
+            .choose(rng)
+            .unwrap();
+        let Val::Func(func) = func.val else {
+            unreachable!()
+        };
+        func
+    } else {
+        let input_mode = any_io_mode(rng, depth);
+        let output_mode = any_io_mode(rng, depth);
+        let evaluator = FuncEval::Free(FuncImpl::Composed(Composed {
+            body: any_val(rng, depth),
+            ctx: *any_ctx(rng, depth).0,
+            input_name: any_symbol(rng),
+            caller: CtxFreeInfo {},
+        }));
+        let func = Func {
+            input_mode,
+            output_mode,
+            evaluator,
+        };
+        FuncVal(Reader::new(func))
+    }
+}
+
 pub(crate) fn any_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
-    let func = any_func(rng, depth);
+    let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
     let prop = if rng.gen() {
-        match &func.0.evaluator {
-            FuncEval::Free(_) => Prop::new_free_theorem(func, input),
-            FuncEval::Const(_) => {
-                let ctx = *any_ctx(rng, depth).0;
-                Prop::new_const_theorem(func, ctx, input)
-            }
-            FuncEval::Mutable(_) => {
-                let ctx = *any_ctx(rng, depth).0;
-                Prop::new_mutable_theorem(func, ctx, input)
-            }
-        }
+        Prop::new_theorem(func, input)
     } else {
-        match &func.0.evaluator {
-            FuncEval::Free(_) => {
-                let output = any_val(rng, depth);
-                Prop::new_free(func, input, output)
-            }
-            FuncEval::Const(_) => {
-                let ctx = *any_ctx(rng, depth).0;
-                let output = any_val(rng, depth);
-                Prop::new_const(func, ctx, input, output)
-            }
-            FuncEval::Mutable(_) => {
-                let before = *any_ctx(rng, depth).0;
-                let after = *any_ctx(rng, depth).0;
-                let output = any_val(rng, depth);
-                Prop::new_mutable(func, before, input, after, output)
-            }
-        }
+        let output = any_val(rng, depth);
+        Prop::new(func, input, output)
     };
     PropVal(Reader::new(prop))
 }
