@@ -114,7 +114,7 @@ context
 -----
 proposition
 =====
-;[a = (proposition.prove {function : not, input : 't}), type_of a]
+;[a = (proposition.prove (not 't)), type_of a]
 -----
 proposition
 =====

@@ -47,10 +47,7 @@
 't
 =====
 ;[
-    m = (proposition.represent (proposition.prove {
-        function : not,
-        input : 't,
-    })),
+    m = (proposition.represent (proposition.prove (not 't))),
     $map = (function {
         body : input,
         input_mode : {map : ('u : 't)},

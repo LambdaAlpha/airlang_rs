@@ -5,6 +5,7 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
+    eval::Evaluator,
     func::FuncEval,
     logic::Prop,
     map::Map,
@@ -13,6 +14,7 @@ use crate::{
         map_mode_for_some,
         named_const_fn,
         named_free_fn,
+        named_mutable_fn,
         symbol_value_mode,
         utils::{
             map_remove,
@@ -27,6 +29,9 @@ use crate::{
         map::MapVal,
         prop::PropVal,
     },
+    CtxForMutableFn,
+    EvalMode,
+    IoMode,
     Val,
 };
 
@@ -72,25 +77,27 @@ const PROVED: &str = "proved";
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), default_mode());
-    map.insert(symbol(OUTPUT), default_mode());
+    map.insert(symbol(INPUT), IoMode::Eval(EvalMode::Value));
+    map.insert(symbol(OUTPUT), IoMode::Eval(EvalMode::Value));
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();
-    named_free_fn("proposition", input_mode, output_mode, fn_new)
+    named_mutable_fn("proposition", input_mode, output_mode, fn_new)
 }
 
-fn fn_new(input: Val) -> Val {
+fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
     let Val::Func(func) = map_remove(&mut map, FUNCTION) else {
         return Val::default();
     };
-    let input = map_remove(&mut map, INPUT);
-    let output = map_remove(&mut map, OUTPUT);
     let FuncEval::Free(_) = &func.0.evaluator else {
         return Val::default();
     };
+    let input = map_remove(&mut map, INPUT);
+    let input = func.input_mode.eval(&mut ctx, input);
+    let output = map_remove(&mut map, OUTPUT);
+    let output = func.output_mode.eval(&mut ctx, output);
     let prop = Prop::new(func, input, output);
     Val::Prop(PropVal(Reader::new(prop)))
 }
@@ -99,8 +106,8 @@ fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), default_mode());
-    map.insert(symbol(OUTPUT), default_mode());
+    map.insert(symbol(INPUT), IoMode::Eval(EvalMode::Value));
+    map.insert(symbol(OUTPUT), IoMode::Eval(EvalMode::Value));
     map.insert(symbol(PROVED), default_mode());
     let output_mode = map_mode_for_some(map);
     named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)

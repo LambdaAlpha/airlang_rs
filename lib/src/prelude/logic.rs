@@ -1,16 +1,12 @@
 use crate::{
     ctx::NameMap,
+    eval::Evaluator,
     func::FuncEval,
     logic::Prop,
-    map::Map,
     prelude::{
+        call_mode,
         default_mode,
-        map_mode_for_some,
-        named_free_fn,
-        utils::{
-            map_remove,
-            symbol,
-        },
+        named_mutable_fn,
         Named,
         Prelude,
     },
@@ -19,6 +15,9 @@ use crate::{
         func::FuncVal,
         prop::PropVal,
     },
+    CtxForMutableFn,
+    EvalMode,
+    IoMode,
     Val,
 };
 
@@ -39,29 +38,23 @@ impl Prelude for LogicPrelude {
     }
 }
 
-const FUNCTION: &str = "function";
-const INPUT: &str = "input";
-
 fn prove() -> Named<FuncVal> {
-    let mut map = Map::default();
-    map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), default_mode());
-    let input_mode = map_mode_for_some(map);
+    let input_mode = call_mode(default_mode(), IoMode::Eval(EvalMode::Value));
     let output_mode = default_mode();
-    named_free_fn("proposition.prove", input_mode, output_mode, fn_prove)
+    named_mutable_fn("proposition.prove", input_mode, output_mode, fn_prove)
 }
 
-fn fn_prove(input: Val) -> Val {
-    let Val::Map(mut map) = input else {
+fn fn_prove(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Call(call) = input else {
         return Val::default();
     };
-    let Val::Func(func) = map_remove(&mut map, FUNCTION) else {
+    let Val::Func(func) = call.func else {
         return Val::default();
     };
-    let input = map_remove(&mut map, INPUT);
     let FuncEval::Free(_) = &func.0.evaluator else {
         return Val::default();
     };
+    let input = func.input_mode.eval(&mut ctx, call.input);
     let theorem = Prop::new_theorem(func, input);
     Val::Prop(PropVal(Reader::new(theorem)))
 }
