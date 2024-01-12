@@ -1,11 +1,9 @@
-use std::{
-    process::Command,
-    rc::Rc,
-};
+use std::process::Command;
 
 use airlang::{
     Bytes,
     EvalMode,
+    FuncVal,
     Int,
     ListMode,
     Map,
@@ -15,20 +13,17 @@ use airlang::{
     Val,
 };
 
-use crate::{
-    prelude::{
-        default_mode,
-        list_mode,
-        map_mode_for_some,
-        put_func,
-        ExtFunc,
-        Prelude,
-    },
-    ExtFn,
+use crate::prelude::{
+    default_mode,
+    list_mode,
+    map_mode_for_some,
+    named_free_fn,
+    Named,
+    Prelude,
 };
 
 pub(crate) struct ProcessPrelude {
-    pub(crate) call: Rc<ExtFunc>,
+    pub(crate) call: Named<FuncVal>,
 }
 
 impl Default for ProcessPrelude {
@@ -39,16 +34,14 @@ impl Default for ProcessPrelude {
 
 impl Prelude for ProcessPrelude {
     fn put(&self, mut ctx: MutableCtx) {
-        put_func(&self.call, ctx.reborrow());
+        self.call.put(ctx.reborrow());
     }
 }
 
 const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
-fn call() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("process.call") };
-
+fn call() -> Named<FuncVal> {
     let mut map = Map::default();
     let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
     map.insert(program_key, default_mode());
@@ -57,8 +50,7 @@ fn call() -> Rc<ExtFunc> {
 
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();
-    let ext_fn = ExtFn::new_free(fn_call);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn("process.call", input_mode, output_mode, fn_call)
 }
 
 fn fn_call(input: Val) -> Val {

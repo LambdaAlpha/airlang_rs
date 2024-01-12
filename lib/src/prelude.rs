@@ -4,10 +4,6 @@ use crate::{
         NameMap,
         TaggedVal,
     },
-    ctx_access::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
-    },
     func::{
         CtxConstFn,
         CtxFreeFn,
@@ -157,9 +153,9 @@ fn named_free_fn(
     name: &'static str,
     input_mode: IoMode,
     output_mode: IoMode,
-    func: impl Fn(Val) -> Val + 'static,
+    func: impl CtxFreeFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<CtxFreeFn>::new(name, func);
+    let primitive = Primitive::<Box<dyn CtxFreeFn>>::new(name, func);
     let func = Func::new(
         input_mode,
         output_mode,
@@ -173,9 +169,9 @@ fn named_const_fn(
     name: &'static str,
     input_mode: IoMode,
     output_mode: IoMode,
-    func: impl Fn(CtxForConstFn, Val) -> Val + 'static,
+    func: impl CtxConstFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<CtxConstFn>::new(name, func);
+    let primitive = Primitive::<Box<dyn CtxConstFn>>::new(name, func);
     let func = Func::new(
         input_mode,
         output_mode,
@@ -189,9 +185,9 @@ fn named_mutable_fn(
     name: &'static str,
     input_mode: IoMode,
     output_mode: IoMode,
-    func: impl Fn(CtxForMutableFn, Val) -> Val + 'static,
+    func: impl CtxMutableFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<CtxMutableFn>::new(name, func);
+    let primitive = Primitive::<Box<dyn CtxMutableFn>>::new(name, func);
     let func = Func::new(
         input_mode,
         output_mode,

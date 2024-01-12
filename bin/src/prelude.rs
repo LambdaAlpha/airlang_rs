@@ -1,9 +1,12 @@
-use std::rc::Rc;
-
 use airlang::{
     Call,
     CallMode,
+    CtxConstFn,
+    CtxFreeFn,
+    CtxMutableFn,
     EvalMode,
+    Func,
+    FuncVal,
     InvariantTag,
     IoMode,
     List,
@@ -19,11 +22,6 @@ use airlang::{
     ReverseMode,
     Symbol,
     Val,
-    ValExt,
-};
-use airlang_ext::{
-    ExtFunc,
-    ExtFuncVal,
 };
 
 use crate::prelude::{
@@ -66,19 +64,49 @@ impl<T> Named<T> {
     }
 }
 
-#[allow(unused)]
-impl<T: ValExt + 'static> Named<T> {
-    pub(crate) fn put(self, mut ctx: MutableCtx) {
+impl<T: Into<Val> + Clone> Named<T> {
+    pub(crate) fn put(&self, mut ctx: MutableCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
-        let val = Val::Ext(Box::new(self.value));
+        let val = self.value.clone().into();
         let _ = ctx.put(name, InvariantTag::Const, val);
     }
 }
 
-pub(crate) fn put_func(func: &Rc<ExtFunc>, mut ctx: MutableCtx) {
-    let id = func.id().clone();
-    let val = Val::Ext(Box::new(ExtFuncVal::from(func.clone())));
-    let _ = ctx.put(id, InvariantTag::Const, val);
+fn named_free_fn(
+    name: &'static str,
+    input_mode: IoMode,
+    output_mode: IoMode,
+    func: impl CtxFreeFn + 'static,
+) -> Named<FuncVal> {
+    let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
+    let func = Func::new_free(input_mode, output_mode, name_symbol, Box::new(func));
+    let func_val = FuncVal::from(func);
+    Named::new(name, func_val)
+}
+
+#[allow(unused)]
+fn named_const_fn(
+    name: &'static str,
+    input_mode: IoMode,
+    output_mode: IoMode,
+    func: impl CtxConstFn + 'static,
+) -> Named<FuncVal> {
+    let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
+    let func = Func::new_const(input_mode, output_mode, name_symbol, Box::new(func));
+    let func_val = FuncVal::from(func);
+    Named::new(name, func_val)
+}
+
+fn named_mutable_fn(
+    name: &'static str,
+    input_mode: IoMode,
+    output_mode: IoMode,
+    func: impl CtxMutableFn + 'static,
+) -> Named<FuncVal> {
+    let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
+    let func = Func::new_mutable(input_mode, output_mode, name_symbol, Box::new(func));
+    let func_val = FuncVal::from(func);
+    Named::new(name, func_val)
 }
 
 fn default_mode() -> IoMode {

@@ -5,17 +5,16 @@ use std::{
 
 use crate::{
     ctx::InvariantTag,
-    extension::{
-        AsFuncExt,
-        FuncExt,
-    },
+    extension::UnitExt,
     initial_ctx,
     interpret_mutable,
     parse,
     val::Val,
     Ctx,
-    CtxForMutableFn,
+    CtxFreeFn,
     EvalMode,
+    Func,
+    FuncVal,
     IoMode,
     MutableCtx,
     Symbol,
@@ -190,9 +189,20 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
     let mut ctx = initial_ctx();
     let mut mutable_ctx = MutableCtx::new(&mut ctx);
     mutable_ctx.put(
-        Symbol::from_str("ext"),
+        Symbol::from_str("unit_ext"),
         InvariantTag::Const,
-        Val::Ext(Box::new(Ext)),
+        Val::Ext(Box::new(UnitExt)),
+    )?;
+    let func_ext_name = Symbol::from_str("func_ext");
+    mutable_ctx.put(
+        func_ext_name.clone(),
+        InvariantTag::Const,
+        Val::Func(FuncVal::from(Func::new_free(
+            IoMode::Eval(EvalMode::More),
+            IoMode::Eval(EvalMode::More),
+            func_ext_name,
+            Box::new(FuncExt),
+        ))),
     )?;
     test_interpret_with_ctx(
         ctx,
@@ -202,24 +212,10 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Ext;
+struct FuncExt;
 
-impl AsFuncExt for Ext {
-    fn as_func(&self) -> Option<&dyn FuncExt> {
-        Some(self)
-    }
-}
-
-impl FuncExt for Ext {
-    fn input_mode(&self) -> &IoMode {
-        &IoMode::Eval(EvalMode::More)
-    }
-
-    fn output_mode(&self) -> &IoMode {
-        &IoMode::Eval(EvalMode::More)
-    }
-
-    fn call(&self, _ctx: CtxForMutableFn, input: Val) -> Val {
+impl CtxFreeFn for FuncExt {
+    fn call(&self, input: Val) -> Val {
         input
     }
 }

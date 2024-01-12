@@ -60,13 +60,14 @@ pub use self::{
         },
     },
     eval_mode::EvalMode,
-    extension::{
-        AsFuncExt,
-        FuncExt,
-        ValExt,
-    },
+    extension::ValExt,
     float::Float,
-    func::Func,
+    func::{
+        CtxConstFn,
+        CtxFreeFn,
+        CtxMutableFn,
+        Func,
+    },
     int::Int,
     io_mode::{
         CallMode,

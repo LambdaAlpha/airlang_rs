@@ -54,6 +54,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) input_mode: Named<FuncVal>,
     pub(crate) output_mode: Named<FuncVal>,
     pub(crate) is_primitive: Named<FuncVal>,
+    pub(crate) is_extension: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
     pub(crate) body: Named<FuncVal>,
     pub(crate) ctx: Named<FuncVal>,
@@ -70,6 +71,7 @@ impl Default for FuncPrelude {
             input_mode: input_mode(),
             output_mode: output_mode(),
             is_primitive: is_primitive(),
+            is_extension: is_extension(),
             id: id(),
             body: body(),
             ctx: ctx(),
@@ -87,6 +89,7 @@ impl Prelude for FuncPrelude {
         self.input_mode.put(m);
         self.output_mode.put(m);
         self.is_primitive.put(m);
+        self.is_extension.put(m);
         self.id.put(m);
         self.body.put(m);
         self.ctx.put(m);
@@ -359,6 +362,29 @@ fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
         };
         let is_primitive = func.is_primitive();
         Val::Bool(Bool::new(is_primitive))
+    })
+}
+
+fn is_extension() -> Named<FuncVal> {
+    let input_mode = symbol_value_mode();
+    let output_mode = default_mode();
+    named_const_fn(
+        "function.is_extension",
+        input_mode,
+        output_mode,
+        fn_is_extension,
+    )
+}
+
+fn fn_is_extension(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.get_const_ref(&ctx, input, |val| {
+        let Val::Func(FuncVal(func)) = val else {
+            return Val::default();
+        };
+        let Some(is_extension) = func.primitive_is_extension() else {
+            return Val::default();
+        };
+        Val::Bool(Bool::new(is_extension))
     })
 }
 

@@ -1,41 +1,36 @@
-use std::{
-    io::{
-        stderr,
-        stdin,
-        stdout,
-        Write,
-    },
-    rc::Rc,
+use std::io::{
+    stderr,
+    stdin,
+    stdout,
+    Write,
 };
 
 use airlang::{
     CtxForMutableFn,
     EvalMode,
+    FuncVal,
     IoMode,
     MutableCtx,
-    Symbol,
     Val,
 };
 
-use crate::{
-    prelude::{
-        default_mode,
-        put_func,
-        symbol_value_mode,
-        ExtFunc,
-        Prelude,
-    },
-    ExtFn,
+use crate::prelude::{
+    default_mode,
+    named_free_fn,
+    named_mutable_fn,
+    symbol_value_mode,
+    Named,
+    Prelude,
 };
 
 pub(crate) struct IoPrelude {
-    pub(crate) read_line: Rc<ExtFunc>,
-    pub(crate) print: Rc<ExtFunc>,
-    pub(crate) print_line: Rc<ExtFunc>,
-    pub(crate) flush: Rc<ExtFunc>,
-    pub(crate) error_print: Rc<ExtFunc>,
-    pub(crate) error_print_line: Rc<ExtFunc>,
-    pub(crate) error_flush: Rc<ExtFunc>,
+    pub(crate) read_line: Named<FuncVal>,
+    pub(crate) print: Named<FuncVal>,
+    pub(crate) print_line: Named<FuncVal>,
+    pub(crate) flush: Named<FuncVal>,
+    pub(crate) error_print: Named<FuncVal>,
+    pub(crate) error_print_line: Named<FuncVal>,
+    pub(crate) error_flush: Named<FuncVal>,
 }
 
 impl Default for IoPrelude {
@@ -54,22 +49,20 @@ impl Default for IoPrelude {
 
 impl Prelude for IoPrelude {
     fn put(&self, mut ctx: MutableCtx) {
-        put_func(&self.read_line, ctx.reborrow());
-        put_func(&self.print, ctx.reborrow());
-        put_func(&self.print_line, ctx.reborrow());
-        put_func(&self.flush, ctx.reborrow());
-        put_func(&self.error_print, ctx.reborrow());
-        put_func(&self.error_print_line, ctx.reborrow());
-        put_func(&self.error_flush, ctx.reborrow());
+        self.read_line.put(ctx.reborrow());
+        self.print.put(ctx.reborrow());
+        self.print_line.put(ctx.reborrow());
+        self.flush.put(ctx.reborrow());
+        self.error_print.put(ctx.reborrow());
+        self.error_print_line.put(ctx.reborrow());
+        self.error_flush.put(ctx.reborrow());
     }
 }
 
-fn read_line() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.read_line") };
+fn read_line() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
     let output_mode = default_mode();
-    let ext_fn = ExtFn::new_mutable(fn_read_line);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_mutable_fn("io.read_line", input_mode, output_mode, fn_read_line)
 }
 
 fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -86,12 +79,10 @@ fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
     Val::default()
 }
 
-fn print() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.print") };
+fn print() -> Named<FuncVal> {
     let input_mode = default_mode();
     let output_mode = IoMode::Eval(EvalMode::Value);
-    let ext_fn = ExtFn::new_free(fn_print);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn("io.print", input_mode, output_mode, fn_print)
 }
 
 fn fn_print(input: Val) -> Val {
@@ -102,12 +93,10 @@ fn fn_print(input: Val) -> Val {
     Val::default()
 }
 
-fn print_line() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.print_line") };
+fn print_line() -> Named<FuncVal> {
     let input_mode = default_mode();
     let output_mode = IoMode::Eval(EvalMode::Value);
-    let ext_fn = ExtFn::new_free(fn_print_line);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn("io.print_line", input_mode, output_mode, fn_print_line)
 }
 
 fn fn_print_line(input: Val) -> Val {
@@ -118,12 +107,10 @@ fn fn_print_line(input: Val) -> Val {
     Val::default()
 }
 
-fn flush() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.flush") };
+fn flush() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = IoMode::Eval(EvalMode::Value);
-    let ext_fn = ExtFn::new_free(fn_flush);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn("io.flush", input_mode, output_mode, fn_flush)
 }
 
 fn fn_flush(_input: Val) -> Val {
@@ -131,12 +118,10 @@ fn fn_flush(_input: Val) -> Val {
     Val::default()
 }
 
-fn error_print() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.error_print") };
+fn error_print() -> Named<FuncVal> {
     let input_mode = default_mode();
     let output_mode = IoMode::Eval(EvalMode::Value);
-    let ext_fn = ExtFn::new_free(fn_error_print);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn("io.error_print", input_mode, output_mode, fn_error_print)
 }
 
 fn fn_error_print(input: Val) -> Val {
@@ -147,12 +132,15 @@ fn fn_error_print(input: Val) -> Val {
     Val::default()
 }
 
-fn error_print_line() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.error_print_line") };
+fn error_print_line() -> Named<FuncVal> {
     let input_mode = default_mode();
     let output_mode = IoMode::Eval(EvalMode::Value);
-    let ext_fn = ExtFn::new_free(fn_error_print_line);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn(
+        "io.error_print_line",
+        input_mode,
+        output_mode,
+        fn_error_print_line,
+    )
 }
 
 fn fn_error_print_line(input: Val) -> Val {
@@ -163,12 +151,10 @@ fn fn_error_print_line(input: Val) -> Val {
     Val::default()
 }
 
-fn error_flush() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("io.error_flush") };
-    let ext_fn = ExtFn::new_free(fn_error_flush);
+fn error_flush() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = IoMode::Eval(EvalMode::Value);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_free_fn("io.error_flush", input_mode, output_mode, fn_error_flush)
 }
 
 fn fn_error_flush(_input: Val) -> Val {

@@ -2,7 +2,6 @@ use std::{
     env::current_dir,
     fs::read_to_string,
     path::Path,
-    rc::Rc,
 };
 
 use airlang::{
@@ -11,6 +10,7 @@ use airlang::{
     parse,
     Ctx,
     CtxForMutableFn,
+    FuncVal,
     InvariantTag,
     MutableCtx,
     Str,
@@ -22,15 +22,14 @@ use crate::{
     init_ctx,
     prelude::{
         default_mode,
-        put_func,
+        named_mutable_fn,
+        Named,
         Prelude,
     },
-    ExtFn,
-    ExtFunc,
 };
 
 pub(crate) struct BuildPrelude {
-    pub(crate) import: Rc<ExtFunc>,
+    pub(crate) import: Named<FuncVal>,
 }
 
 impl Default for BuildPrelude {
@@ -41,16 +40,14 @@ impl Default for BuildPrelude {
 
 impl Prelude for BuildPrelude {
     fn put(&self, mut ctx: MutableCtx) {
-        put_func(&self.import, ctx.reborrow());
+        self.import.put(ctx.reborrow());
     }
 }
 
-fn import() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("build.import") };
+fn import() -> Named<FuncVal> {
     let input_mode = default_mode();
     let output_mode = default_mode();
-    let ext_fn = ExtFn::new_mutable(fn_import);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_mutable_fn("build.import", input_mode, output_mode, fn_import)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

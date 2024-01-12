@@ -24,6 +24,12 @@ impl From<Reader<Func>> for FuncVal {
     }
 }
 
+impl From<Func> for FuncVal {
+    fn from(value: Func) -> Self {
+        FuncVal(Reader::new(value))
+    }
+}
+
 impl PartialEq for FuncVal {
     fn eq(&self, other: &Self) -> bool {
         if self.0 == other.0 {

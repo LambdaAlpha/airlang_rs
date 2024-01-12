@@ -564,6 +564,10 @@ function.is_primitive not
 -----
 'f
 =====
+function.is_extension not
+-----
+'f
+=====
 function.id not
 -----
 not

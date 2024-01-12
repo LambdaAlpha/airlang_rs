@@ -1,26 +1,21 @@
-use std::rc::Rc;
-
 use airlang::{
     CtxForConstFn,
+    FuncVal,
     MutableCtx,
     Str,
-    Symbol,
     Val,
 };
 
-use crate::{
-    prelude::{
-        default_mode,
-        put_func,
-        symbol_value_mode,
-        ExtFunc,
-        Prelude,
-    },
-    ExtFn,
+use crate::prelude::{
+    default_mode,
+    named_const_fn,
+    symbol_value_mode,
+    Named,
+    Prelude,
 };
 
 pub(crate) struct FilePrelude {
-    pub(crate) read_to_string: Rc<ExtFunc>,
+    pub(crate) read_to_string: Named<FuncVal>,
 }
 
 impl Default for FilePrelude {
@@ -33,16 +28,19 @@ impl Default for FilePrelude {
 
 impl Prelude for FilePrelude {
     fn put(&self, mut ctx: MutableCtx) {
-        put_func(&self.read_to_string, ctx.reborrow());
+        self.read_to_string.put(ctx.reborrow());
     }
 }
 
-fn read_to_string() -> Rc<ExtFunc> {
-    let id = unsafe { Symbol::from_str_unchecked("file.read_to_string") };
+fn read_to_string() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
     let output_mode = default_mode();
-    let ext_fn = ExtFn::new_const(fn_read_to_string);
-    Rc::new(ExtFunc::new(id, input_mode, output_mode, ext_fn))
+    named_const_fn(
+        "file.read_to_string",
+        input_mode,
+        output_mode,
+        fn_read_to_string,
+    )
 }
 
 fn fn_read_to_string(ctx: CtxForConstFn, input: Val) -> Val {

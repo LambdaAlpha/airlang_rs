@@ -1,31 +1,43 @@
-ext 1
------
-1
-=====
-ext 2
------
-2
-=====
-ext === ext
+;[a = unit_ext, b = unit_ext, a === b]
 -----
 't
 =====
-type_of ext
+type_of unit_ext
 -----
 extension
 =====
-;[a = ext, b = ext, a === b]
+func_ext 1
+-----
+1
+=====
+func_ext 2
+-----
+2
+=====
+type_of func_ext
+-----
+function
+=====
+function.is_extension func_ext
 -----
 't
 =====
-1 | ext
+;[a = func_ext, b = func_ext, a === b]
+-----
+'t
+=====
+1 | func_ext
 -----
 1
 =====
-'u .. (ext 1)
+'u .. (func_ext 1)
 -----
 1
 =====
-$$ (ext 1)
+$$ (func_ext 1)
 -----
 1
+=====
+;[p = (proposition.prove (func_ext 't)), proposition.proved p]
+-----
+'t

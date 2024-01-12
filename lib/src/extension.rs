@@ -7,13 +7,7 @@ use std::{
     },
 };
 
-use crate::{
-    CtxForMutableFn,
-    IoMode,
-    Val,
-};
-
-pub trait ValExt: Debug + AsFuncExt {
+pub trait ValExt: Debug {
     fn as_any(&self) -> &dyn Any;
 
     fn dyn_eq(&self, other: &dyn ValExt) -> bool;
@@ -21,17 +15,7 @@ pub trait ValExt: Debug + AsFuncExt {
     fn dyn_hash(&self, hasher: &mut dyn Hasher);
 }
 
-pub trait AsFuncExt {
-    fn as_func(&self) -> Option<&dyn FuncExt>;
-}
-
-pub trait FuncExt {
-    fn input_mode(&self) -> &IoMode;
-    fn output_mode(&self) -> &IoMode;
-    fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val;
-}
-
-impl<T: Any + Eq + Clone + Hash + Debug + AsFuncExt> ValExt for T {
+impl<T: Any + Eq + Clone + Hash + Debug> ValExt for T {
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -82,9 +66,3 @@ impl Hash for dyn ValExt {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct UnitExt;
-
-impl AsFuncExt for UnitExt {
-    fn as_func(&self) -> Option<&dyn FuncExt> {
-        None
-    }
-}

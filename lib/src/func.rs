@@ -45,6 +45,18 @@ pub struct Func {
     pub(crate) evaluator: FuncEval,
 }
 
+pub trait CtxFreeFn {
+    fn call(&self, input: Val) -> Val;
+}
+
+pub trait CtxConstFn {
+    fn call(&self, ctx: CtxForConstFn, input: Val) -> Val;
+}
+
+pub trait CtxMutableFn {
+    fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val;
+}
+
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum FuncEval {
     Free(CtxFreeEval),
@@ -52,11 +64,12 @@ pub(crate) enum FuncEval {
     Mutable(CtxMutableEval),
 }
 
-pub(crate) type CtxFreeEval = FuncImpl<Primitive<CtxFreeFn>, Composed<CtxFreeInfo>>;
+pub(crate) type CtxFreeEval = FuncImpl<Primitive<Box<dyn CtxFreeFn>>, Composed<CtxFreeInfo>>;
 
-pub(crate) type CtxConstEval = FuncImpl<Primitive<CtxConstFn>, Composed<CtxConstInfo>>;
+pub(crate) type CtxConstEval = FuncImpl<Primitive<Box<dyn CtxConstFn>>, Composed<CtxConstInfo>>;
 
-pub(crate) type CtxMutableEval = FuncImpl<Primitive<CtxMutableFn>, Composed<CtxMutableInfo>>;
+pub(crate) type CtxMutableEval =
+    FuncImpl<Primitive<Box<dyn CtxMutableFn>>, Composed<CtxMutableInfo>>;
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum FuncImpl<P, C> {
@@ -66,15 +79,10 @@ pub(crate) enum FuncImpl<P, C> {
 
 #[derive(Clone)]
 pub(crate) struct Primitive<F> {
+    is_extension: bool,
     id: Symbol,
     eval_fn: F,
 }
-
-pub(crate) type CtxFreeFn = Box<dyn Fn(Val) -> Val>;
-
-pub(crate) type CtxConstFn = Box<dyn Fn(CtxForConstFn, Val) -> Val>;
-
-pub(crate) type CtxMutableFn = Box<dyn Fn(CtxForMutableFn, Val) -> Val>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed<C> {
@@ -143,6 +151,29 @@ impl Func {
                     return None;
                 };
                 Some(eval.id.clone())
+            }
+        }
+    }
+
+    pub(crate) fn primitive_is_extension(&self) -> Option<bool> {
+        match &self.evaluator {
+            FuncEval::Free(eval) => {
+                let FuncImpl::Primitive(eval) = eval else {
+                    return None;
+                };
+                Some(eval.is_extension)
+            }
+            FuncEval::Const(eval) => {
+                let FuncImpl::Primitive(eval) = eval else {
+                    return None;
+                };
+                Some(eval.is_extension)
+            }
+            FuncEval::Mutable(eval) => {
+                let FuncImpl::Primitive(eval) = eval else {
+                    return None;
+                };
+                Some(eval.is_extension)
             }
         }
     }
@@ -270,12 +301,12 @@ where
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxFreeFn>
+impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<Box<dyn CtxFreeFn>>
 where
     Ctx: CtxAccessor,
 {
     fn eval(&self, _ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(input)
+        self.eval_fn.call(input)
     }
 }
 
@@ -288,12 +319,12 @@ where
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxConstFn>
+impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<Box<dyn CtxConstFn>>
 where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(ctx.for_const_fn(), input)
+        self.eval_fn.call(ctx.for_const_fn(), input)
     }
 }
 
@@ -325,12 +356,12 @@ where
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<CtxMutableFn>
+impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<Box<dyn CtxMutableFn>>
 where
     Ctx: CtxAccessor,
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        (self.eval_fn)(ctx.for_mutable_fn(), input)
+        self.eval_fn.call(ctx.for_mutable_fn(), input)
     }
 }
 
@@ -430,7 +461,7 @@ fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &str) {
 
 impl<F> PartialEq for Primitive<F> {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
+        self.id == other.id && self.is_extension == other.is_extension
     }
 }
 
@@ -439,6 +470,7 @@ impl<F> Eq for Primitive<F> {}
 impl<F> Hash for Primitive<F> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
+        self.is_extension.hash(state);
     }
 }
 
@@ -479,6 +511,7 @@ impl Debug for Func {
             FuncEval::Free(eval) => match eval {
                 CtxFreeEval::Primitive(p) => {
                     s.field("id", &p.id);
+                    s.field("is_extension", &p.is_extension);
                 }
                 CtxFreeEval::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
@@ -491,6 +524,7 @@ impl Debug for Func {
             FuncEval::Const(eval) => match eval {
                 CtxConstEval::Primitive(p) => {
                     s.field("id", &p.id);
+                    s.field("is_extension", &p.is_extension);
                 }
                 CtxConstEval::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
@@ -504,6 +538,7 @@ impl Debug for Func {
             FuncEval::Mutable(eval) => match eval {
                 CtxMutableEval::Primitive(p) => {
                     s.field("id", &p.id);
+                    s.field("is_extension", &p.is_extension);
                 }
                 CtxMutableEval::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
@@ -527,6 +562,60 @@ impl Func {
             evaluator,
         }
     }
+
+    pub fn new_free(
+        input_mode: IoMode,
+        output_mode: IoMode,
+        id: Symbol,
+        f: Box<dyn CtxFreeFn>,
+    ) -> Self {
+        let evaluator = FuncEval::Free(CtxFreeEval::Primitive(Primitive {
+            is_extension: true,
+            id,
+            eval_fn: f,
+        }));
+        Func {
+            input_mode,
+            output_mode,
+            evaluator,
+        }
+    }
+
+    pub fn new_const(
+        input_mode: IoMode,
+        output_mode: IoMode,
+        id: Symbol,
+        f: Box<dyn CtxConstFn>,
+    ) -> Self {
+        let evaluator = FuncEval::Const(CtxConstEval::Primitive(Primitive {
+            is_extension: true,
+            id,
+            eval_fn: f,
+        }));
+        Func {
+            input_mode,
+            output_mode,
+            evaluator,
+        }
+    }
+
+    pub fn new_mutable(
+        input_mode: IoMode,
+        output_mode: IoMode,
+        id: Symbol,
+        f: Box<dyn CtxMutableFn>,
+    ) -> Self {
+        let evaluator = FuncEval::Mutable(CtxMutableEval::Primitive(Primitive {
+            is_extension: true,
+            id,
+            eval_fn: f,
+        }));
+        Func {
+            input_mode,
+            output_mode,
+            evaluator,
+        }
+    }
 }
 
 impl<C> Primitive<C> {
@@ -535,61 +624,124 @@ impl<C> Primitive<C> {
     }
 }
 
-impl Primitive<CtxFreeFn> {
-    pub(crate) fn new(id: &str, evaluator: impl Fn(Val) -> Val + 'static) -> Self {
+impl Primitive<Box<dyn CtxFreeFn>> {
+    pub(crate) fn new(id: &str, evaluator: impl CtxFreeFn + 'static) -> Self {
         Primitive {
+            is_extension: false,
             id: Symbol::from_str(id),
             eval_fn: Box::new(evaluator),
         }
     }
 }
 
-impl Primitive<CtxConstFn> {
-    pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForConstFn, Val) -> Val + 'static) -> Self {
+impl Primitive<Box<dyn CtxConstFn>> {
+    pub(crate) fn new(id: &str, evaluator: impl CtxConstFn + 'static) -> Self {
         Primitive {
+            is_extension: false,
             id: Symbol::from_str(id),
             eval_fn: Box::new(evaluator),
         }
     }
+}
 
+pub(crate) struct ConstDispatcher<Free, Const> {
+    free_fn: Free,
+    const_fn: Const,
+}
+
+impl<Free, Const> ConstDispatcher<Free, Const>
+where
+    Free: Fn(FreeCtx, Val) -> Val + 'static,
+    Const: Fn(ConstCtx, Val) -> Val + 'static,
+{
     #[allow(unused)]
-    pub(crate) fn dispatch<Free, Const>(
-        f: Free,
-        c: Const,
-    ) -> impl Fn(CtxForConstFn, Val) -> Val + 'static
-    where
-        Free: Fn(FreeCtx, Val) -> Val + 'static,
-        Const: Fn(ConstCtx, Val) -> Val + 'static,
-    {
-        move |ctx, val| match ctx {
-            CtxForConstFn::Free(ctx) => f(ctx, val),
-            CtxForConstFn::Const(ctx) => c(ctx, val),
+    pub(crate) fn new(free_fn: Free, const_fn: Const) -> Self {
+        Self { free_fn, const_fn }
+    }
+}
+
+impl<Free, Const> CtxConstFn for ConstDispatcher<Free, Const>
+where
+    Free: Fn(FreeCtx, Val) -> Val + 'static,
+    Const: Fn(ConstCtx, Val) -> Val + 'static,
+{
+    fn call(&self, ctx: CtxForConstFn, input: Val) -> Val {
+        match ctx {
+            CtxForConstFn::Free(ctx) => (self.free_fn)(ctx, input),
+            CtxForConstFn::Const(ctx) => (self.const_fn)(ctx, input),
         }
     }
 }
 
-impl Primitive<CtxMutableFn> {
-    pub(crate) fn new(id: &str, evaluator: impl Fn(CtxForMutableFn, Val) -> Val + 'static) -> Self {
+impl Primitive<Box<dyn CtxMutableFn>> {
+    pub(crate) fn new(id: &str, evaluator: impl CtxMutableFn + 'static) -> Self {
         Primitive {
+            is_extension: false,
             id: Symbol::from_str(id),
             eval_fn: Box::new(evaluator),
         }
     }
+}
 
-    pub(crate) fn dispatch<Free, Const, Mutable>(
-        f: Free,
-        c: Const,
-        m: Mutable,
-    ) -> impl Fn(CtxForMutableFn, Val) -> Val + 'static
-    where
-        Free: Fn(FreeCtx, Val) -> Val + 'static,
-        Const: Fn(ConstCtx, Val) -> Val + 'static,
-        Mutable: Fn(MutableCtx, Val) -> Val + 'static,
-    {
-        move |ctx, val| match ctx {
-            CtxForMutableFn::Free(ctx) => f(ctx, val),
-            CtxForMutableFn::Const(ctx) => c(ctx, val),
-            CtxForMutableFn::Mutable(ctx) => m(ctx, val),
+pub(crate) struct MutableDispatcher<Free, Const, Mutable> {
+    free_fn: Free,
+    const_fn: Const,
+    mutable_fn: Mutable,
+}
+
+impl<Free, Const, Mutable> MutableDispatcher<Free, Const, Mutable>
+where
+    Free: Fn(FreeCtx, Val) -> Val + 'static,
+    Const: Fn(ConstCtx, Val) -> Val + 'static,
+    Mutable: Fn(MutableCtx, Val) -> Val + 'static,
+{
+    pub(crate) fn new(free_fn: Free, const_fn: Const, mutable_fn: Mutable) -> Self {
+        Self {
+            free_fn,
+            const_fn,
+            mutable_fn,
         }
+    }
+}
+
+impl<Free, Const, Mutable> CtxMutableFn for MutableDispatcher<Free, Const, Mutable>
+where
+    Free: Fn(FreeCtx, Val) -> Val + 'static,
+    Const: Fn(ConstCtx, Val) -> Val + 'static,
+    Mutable: Fn(MutableCtx, Val) -> Val + 'static,
+{
+    fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val {
+        match ctx {
+            CtxForMutableFn::Free(ctx) => (self.free_fn)(ctx, input),
+            CtxForMutableFn::Const(ctx) => (self.const_fn)(ctx, input),
+            CtxForMutableFn::Mutable(ctx) => (self.mutable_fn)(ctx, input),
+        }
+    }
+}
+
+impl<T> CtxFreeFn for T
+where
+    T: Fn(Val) -> Val,
+{
+    fn call(&self, input: Val) -> Val {
+        self(input)
+    }
+}
+
+impl<T> CtxConstFn for T
+where
+    T: Fn(CtxForConstFn, Val) -> Val,
+{
+    fn call(&self, ctx: CtxForConstFn, input: Val) -> Val {
+        self(ctx, input)
+    }
+}
+
+impl<T> CtxMutableFn for T
+where
+    T: Fn(CtxForMutableFn, Val) -> Val,
+{
+    fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val {
+        self(ctx, input)
     }
 }

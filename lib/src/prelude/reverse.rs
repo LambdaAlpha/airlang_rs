@@ -9,10 +9,7 @@ use crate::{
         more::More,
         EvalMode,
     },
-    func::{
-        CtxMutableFn,
-        Primitive,
-    },
+    func::MutableDispatcher,
     io_mode::IoMode,
     prelude::{
         default_mode,
@@ -52,7 +49,7 @@ impl Prelude for ReversePrelude {
 fn reverse() -> Named<FuncVal> {
     let input_mode = reverse_mode(default_mode(), default_mode());
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_reverse::<FreeCtx>,
         |ctx, val| fn_reverse(ctx, val),
         |ctx, val| fn_reverse(ctx, val),

@@ -9,10 +9,7 @@ use crate::{
         more::More,
         EvalMode,
     },
-    func::{
-        CtxMutableFn,
-        Primitive,
-    },
+    func::MutableDispatcher,
     io_mode::IoMode,
     prelude::{
         call_mode,
@@ -51,7 +48,7 @@ impl Prelude for CallPrelude {
 fn call() -> Named<FuncVal> {
     let input_mode = call_mode(default_mode(), default_mode());
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_call::<FreeCtx>,
         |ctx, val| fn_call(ctx, val),
         |ctx, val| fn_call(ctx, val),

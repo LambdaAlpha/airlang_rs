@@ -12,10 +12,7 @@ use crate::{
         },
         EvalMode,
     },
-    func::{
-        CtxMutableFn,
-        Primitive,
-    },
+    func::MutableDispatcher,
     io_mode::{
         IoMode,
         ListItemMode,
@@ -75,7 +72,7 @@ impl Prelude for CtrlPrelude {
 fn sequence() -> Named<FuncVal> {
     let input_mode = list_mode(ListMode::Eval(EvalMode::Value));
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
@@ -100,7 +97,7 @@ fn breakable_sequence() -> Named<FuncVal> {
         list_mode(ListMode::Eval(EvalMode::Value)),
     );
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_breakable_sequence::<FreeCtx>,
         |ctx, val| fn_breakable_sequence(ctx, val),
         |ctx, val| fn_breakable_sequence(ctx, val),
@@ -153,7 +150,7 @@ fn if1() -> Named<FuncVal> {
     ]);
     let input_mode = list_mode_for_some(list);
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
@@ -209,7 +206,7 @@ fn match1() -> Named<FuncVal> {
     ]);
     let input_mode = list_mode_for_some(list);
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
@@ -256,7 +253,7 @@ fn while1() -> Named<FuncVal> {
     ]);
     let input_mode = list_mode_for_some(list);
     let output_mode = default_mode();
-    let func = Primitive::<CtxMutableFn>::dispatch(
+    let func = MutableDispatcher::new(
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
