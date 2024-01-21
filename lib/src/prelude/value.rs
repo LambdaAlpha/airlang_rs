@@ -61,6 +61,7 @@ const MAP: &str = "map";
 const CTX: &str = "context";
 const FUNC: &str = "function";
 const PROP: &str = "proposition";
+const ANSWER: &str = "answer";
 const EXT: &str = "extension";
 
 #[derive(Clone)]
@@ -168,6 +169,7 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
             Val::Func(_) => FUNC,
             Val::Ctx(_) => CTX,
             Val::Prop(_) => PROP,
+            Val::Answer(_) => ANSWER,
             Val::Ext(_) => EXT,
         };
         Val::Symbol(Symbol::from_str(s))

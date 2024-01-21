@@ -20,6 +20,7 @@ use crate::{
         MatchMode,
     },
     prelude::{
+        answer::AnswerPrelude,
         bool::BoolPrelude,
         bytes::BytesPrelude,
         call::CallPrelude,
@@ -74,6 +75,7 @@ pub(crate) struct AllPrelude {
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
     pub(crate) prop: PropPrelude,
+    pub(crate) answer: AnswerPrelude,
     pub(crate) symbol: SymbolPrelude,
     pub(crate) unit: UnitPrelude,
     pub(crate) bool: BoolPrelude,
@@ -99,6 +101,7 @@ impl Prelude for AllPrelude {
         self.func.put(m);
         self.call.put(m);
         self.prop.put(m);
+        self.answer.put(m);
         self.symbol.put(m);
         self.unit.put(m);
         self.bool.put(m);
@@ -302,6 +305,8 @@ mod call;
 mod reverse;
 
 mod prop;
+
+mod answer;
 
 mod symbol;
 

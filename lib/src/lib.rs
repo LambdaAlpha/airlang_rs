@@ -83,11 +83,13 @@ pub use self::{
     logic::Prop,
     map::Map,
     pair::Pair,
+    problem::Answer,
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
     unit::Unit,
     val::{
+        answer::AnswerVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,

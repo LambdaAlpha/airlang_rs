@@ -114,7 +114,7 @@ impl More {
         }
     }
 
-    pub(crate) fn call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val
+    pub(crate) fn call<Ctx>(ctx: &mut Ctx, func: Val, input: Val) -> Val
     where
         Ctx: CtxAccessor,
     {
@@ -129,13 +129,13 @@ impl More {
     where
         Ctx: CtxAccessor,
     {
-        let output = if let Val::Func(FuncVal(f)) = &func {
-            f.output_mode.eval(ctx, output)
+        if let Val::Func(func) = func {
+            let output = func.output_mode.eval(ctx, output);
+            solve(ctx, func, output)
         } else {
-            self.eval(ctx, output)
-        };
-        let reverse = ValBuilder.from_reverse(func, output);
-        solve(ctx, reverse)
+            let output = self.eval(ctx, output);
+            ValBuilder.from_reverse(func, output)
+        }
     }
 
     pub(crate) fn eval_output<Ctx>(&self, ctx: &mut Ctx, func: &Val, output: Val) -> Val
@@ -149,12 +149,15 @@ impl More {
         }
     }
 
-    pub(crate) fn solve<Ctx>(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val
+    pub(crate) fn solve<Ctx>(ctx: &mut Ctx, func: Val, output: Val) -> Val
     where
         Ctx: CtxAccessor,
     {
-        let reverse = ValBuilder.from_reverse(func, output);
-        solve(ctx, reverse)
+        if let Val::Func(func) = func {
+            solve(ctx, func, output)
+        } else {
+            ValBuilder.from_reverse(func, output)
+        }
     }
 }
 
@@ -212,7 +215,7 @@ where
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
         let func = self.eval(ctx, func);
-        self.eval_func_reverse(ctx, func, output)
+        self.eval_output_then_solve(ctx, func, output)
     }
 }
 
@@ -242,19 +245,19 @@ impl MoreByRef {
         }
     }
 
-    pub(crate) fn eval_func_reverse<Ctx: CtxAccessor>(
+    pub(crate) fn eval_output_then_solve<Ctx: CtxAccessor>(
         &self,
         ctx: &mut Ctx,
         func: Val,
         output: &Val,
     ) -> Val {
-        let output = if let Val::Func(FuncVal(f)) = &func {
-            f.output_mode.eval(ctx, output)
+        if let Val::Func(func) = func {
+            let output = func.output_mode.eval(ctx, output);
+            solve(ctx, func, output)
         } else {
-            self.eval(ctx, output)
-        };
-        let reverse = ValBuilder.from_reverse(func, output);
-        solve(ctx, reverse)
+            let output = self.eval(ctx, output);
+            ValBuilder.from_reverse(func, output)
+        }
     }
 
     #[allow(unused)]

@@ -528,7 +528,7 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let func = call.func;
             let input = More.eval_input(&mut ctx, &func, call.input);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.call(&mut target_ctx, func, input)
+                More::call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
@@ -536,7 +536,7 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let func = reverse.func;
             let output = More.eval_output(&mut ctx, &func, reverse.output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.solve(&mut target_ctx, func, output)
+                More::solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -582,7 +582,7 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             };
             let input = More.eval_input(&mut ctx, &func, input);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.call(&mut target_ctx, func, input)
+                More::call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
@@ -596,7 +596,7 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             };
             let output = More.eval_output(&mut ctx, &func, output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.solve(&mut target_ctx, func, output)
+                More::solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }

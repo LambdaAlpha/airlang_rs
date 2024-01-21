@@ -33,6 +33,7 @@ use crate::{
     },
     unit::Unit,
     val::{
+        answer::AnswerVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
@@ -64,6 +65,8 @@ pub enum Val {
     Ctx(CtxVal),
 
     Prop(PropVal),
+
+    Answer(AnswerVal),
 
     Ext(Box<dyn ValExt>),
 }
@@ -168,6 +171,12 @@ impl From<CtxVal> for Val {
 impl From<PropVal> for Val {
     fn from(value: PropVal) -> Self {
         Val::Prop(value)
+    }
+}
+
+impl From<AnswerVal> for Val {
+    fn from(value: AnswerVal) -> Self {
+        Val::Answer(value)
     }
 }
 
@@ -335,6 +344,7 @@ impl Debug for Val {
             Val::Func(func) => <_ as Debug>::fmt(func, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
             Val::Prop(p) => <_ as Debug>::fmt(p, f),
+            Val::Answer(a) => <_ as Debug>::fmt(a, f),
             Val::Ext(e) => <_ as Debug>::fmt(e, f),
         }
     }
@@ -355,3 +365,5 @@ pub(crate) mod func;
 pub(crate) mod ctx;
 
 pub(crate) mod prop;
+
+pub(crate) mod answer;
