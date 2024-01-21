@@ -349,7 +349,7 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        map.get(key).map(Clone::clone).unwrap_or_default()
+        map.get(key).cloned().unwrap_or_default()
     })
 }
 
