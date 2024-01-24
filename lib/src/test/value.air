@@ -162,26 +162,26 @@ proposition
 -----
 't
 =====
-;[a = (function {body : input}), b = (function {body : input}), a === b]
+;[a = (function {body : input}), b = (function {body : input}), a === b and (a =/- 'u)]
 -----
 't
 =====
-;[a = ('u context {}), b = ('u context {}), a === b]
+;[a = ('u context {}), b = ('u context {}), a === b and (a =/- 'u)]
 -----
 't
 =====
 ;[
-    a = (proposition {input : 1, output : 1, access : ('u free)}),
-    b = (proposition {input : 1, output : 1, access : ('u free)}),
-    a === b
+    a = (proposition {function : not, input : 't, output : 'f}),
+    b = (proposition {function : not, input : 't, output : 'f}),
+    a === b and (a =/- 'u)
 ]
 -----
 't
 =====
 ;[
-    a = (theorem {input : 1, access : ('u free)}),
-    b = (theorem {input : 1, access : ('u free)}),
-    a === b
+    a = (answer.unverified 1),
+    b = (answer.unverified 1),
+    a === b and (a =/- 'u)
 ]
 -----
 't
