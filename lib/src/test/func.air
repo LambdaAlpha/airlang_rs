@@ -182,7 +182,7 @@ a
 ;[
     f = (function {
         body : input,
-        input_mode : {list : ('u : {symbol : 'u})},
+        input_mode : {list : (all {symbol : 'u})},
     }),
     f [not 't, b]
 ]
@@ -224,7 +224,7 @@ a
     a = 1,
     f = (function {
         body : input,
-        input_mode : {map : ('f : 't)},
+        input_mode : {map : ('f all 't)},
     }),
     f {: a}
 ]
@@ -499,12 +499,12 @@ function.input_mode function.input_mode
 ;[
     f = (function {
         body : input,
-        input_mode : {list : ('u : {symbol : 'u})},
+        input_mode : {list : (all {symbol : 'u})},
     }),
     function.input_mode f
 ]
 -----
-{list : ('u : {symbol : 'u})}
+{list : (all {symbol : 'u})}
 =====
 ;[
     f = (function {
@@ -529,32 +529,32 @@ function.input_mode function.input_mode
 ;[
     f = (function {
         body : input,
-        input_mode : {map : ('t : 'u)},
+        input_mode : {map : ('t all 'u)},
     }),
     function.input_mode f
 ]
 -----
-{map : ('t : 'u)}
+{map : ('t all 'u)}
 =====
 ;[
     f = (function {
         body : input,
-        input_mode : {map : ({list : [{symbol : 'u}, {list : 'u}]} : {list : ('u : {map : 'u})})},
+        input_mode : {map : ({list : [{symbol : 'u}, {list : 'u}]} all {list : (all {map : 'u})})},
     }),
     function.input_mode f
 ]
 -----
-{map : ({list : [{symbol : 'u}, {list : 'u}]} : {list : ('u : {map : 'u})})}
+{map : ({list : [{symbol : 'u}, {list : 'u}]} all {list : (all {map : 'u})})}
 =====
 ;[
     f = (function {
         body : input,
-        output_mode : {map : ('t : 'u)},
+        output_mode : {map : ('t all 'u)},
     }),
     function.output_mode f
 ]
 -----
-{map : ('t : 'u)}
+{map : ('t all 'u)}
 =====
 function.is_primitive not
 -----

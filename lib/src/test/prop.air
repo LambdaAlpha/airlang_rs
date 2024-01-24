@@ -34,7 +34,7 @@
 ;[
     $map = (function {
         body : input,
-        input_mode : {map : ('u : 't)},
+        input_mode : {map : ('u all 't)},
     }),
     m = ($map {
         function : not,
@@ -50,7 +50,7 @@
     m = (proposition.represent (proposition.prove (not 't))),
     $map = (function {
         body : input,
-        input_mode : {map : ('u : 't)},
+        input_mode : {map : ('u all 't)},
     }),
     expected = ($map {
         function : not,

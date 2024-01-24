@@ -37,6 +37,7 @@ const LIST: &str = "list";
 const MAP: &str = "map";
 
 const ELLIPSIS: &str = "...";
+const FOR_ALL: &str = "all";
 
 pub(crate) fn parse_io_mode(io_mode: Val) -> Option<IoMode> {
     match io_mode {
@@ -149,7 +150,15 @@ fn parse_list_mode(io_mode: Val) -> Option<ListMode> {
             EvalMode::Less
         })),
         Val::List(list) => Some(parse_list_mode_for_some(list)?),
-        Val::Pair(pair) => Some(ListMode::ForAll(parse_io_mode(pair.second)?)),
+        Val::Call(call) => {
+            let Val::Symbol(tag) = call.func else {
+                return None;
+            };
+            if *tag != *FOR_ALL {
+                return None;
+            }
+            Some(ListMode::ForAll(parse_io_mode(call.input)?))
+        }
         _ => None,
     }
 }
@@ -194,7 +203,16 @@ fn parse_map_mode(io_mode: Val) -> Option<MapMode> {
             EvalMode::Less
         })),
         Val::Map(map) => Some(parse_map_mode_for_some(map)?),
-        Val::Pair(pair) => {
+        Val::Call(call) => {
+            let Val::Symbol(tag) = call.func else {
+                return None;
+            };
+            if *tag != *FOR_ALL {
+                return None;
+            }
+            let Val::Pair(pair) = call.input else {
+                return None;
+            };
             let first = parse_io_mode(pair.first)?;
             let second = parse_io_mode(pair.second)?;
             Some(MapMode::ForAll(Pair::new(first, second)))
@@ -295,8 +313,8 @@ pub(crate) fn generate_list_mode(list: &ListMode) -> Val {
     match list {
         ListMode::Eval(mode) => generate_eval_mode(*mode),
         ListMode::ForAll(mode) => {
-            let second = generate_io_mode(mode);
-            Val::Pair(Box::new(Pair::new(Val::default(), second)))
+            let mode = generate_io_mode(mode);
+            Val::Call(Box::new(Call::new(symbol(FOR_ALL), mode)))
         }
         ListMode::ForSome(mode_list) => {
             let list = mode_list
@@ -322,7 +340,8 @@ pub(crate) fn generate_map_mode(map: &MapMode) -> Val {
         MapMode::ForAll(mode) => {
             let first = generate_io_mode(&mode.first);
             let second = generate_io_mode(&mode.second);
-            Val::Pair(Box::new(Pair::new(first, second)))
+            let pair = Val::Pair(Box::new(Pair::new(first, second)));
+            Val::Call(Box::new(Call::new(symbol(FOR_ALL), pair)))
         }
         MapMode::ForSome(mode_map) => {
             let map = mode_map
