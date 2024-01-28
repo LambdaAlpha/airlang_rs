@@ -491,14 +491,14 @@ where
     let digit = take_while_m_n(1, 6, |c: char| c.is_hex_digit());
     let delimited_digit = preceded(
         exact_char('u'),
-        delimited(exact_char('{'), cut(digit), cut(exact_char('}'))),
+        delimited(exact_char('('), cut(digit), cut(exact_char(')'))),
     );
     let parse_u32 = map_res(delimited_digit, move |hex| u32::from_str_radix(hex, 16));
     let f = map_opt(parse_u32, std::char::from_u32);
     context("unicode", f)(src)
 }
 
-// ignore space around \t, \r and \n
+// ignore \t, \r, \n and the spaces around them
 fn whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,

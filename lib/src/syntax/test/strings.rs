@@ -11,7 +11,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         string("`~!@#$%^&*()-_=+[]{};:'\",.<>?\\|/"),
         string("🜁🜂🜃🜄"),
         string("   \n\r\t\u{1F701}"),
-        string(" \\ \\s\\n\\r\\t\\u{1F701}"),
+        string(" \\ \\s\\n\\r\\t\\u(1F701)"),
         string(" \\ \\ \\\n\\\r\\\t\\\u{1F701}"),
         string("multiple lines"),
         string("a\nb\n  c"),
