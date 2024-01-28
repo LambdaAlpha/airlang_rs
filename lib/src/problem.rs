@@ -20,6 +20,9 @@ pub enum Answer {
 }
 
 pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val) -> Val {
+    if !func.is_ctx_free() {
+        return Val::default();
+    }
     let Ok(meta) = ctx.get_meta() else {
         return Val::default();
     };
