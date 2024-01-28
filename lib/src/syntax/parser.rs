@@ -30,6 +30,7 @@ use nom::{
         map_res,
         opt,
         peek,
+        success,
         value,
         verify,
     },
@@ -73,6 +74,7 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
+        BYTES_PREFIX,
         CALL_SEPARATOR,
         COMMENT_SEPARATOR,
         ESCAPED_PREFIX,
@@ -178,6 +180,7 @@ where
             Some('0'..='9') => |s| map(number, Token::Default)(s),
             _ => |s| map(symbol, Token::Default)(s),
         },
+        BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
         STRING_QUOTE => |s| map(string, Token::Default)(s),
         ESCAPED_PREFIX => |s| map(escaped, Token::Default)(s),
         LIST_LEFT => |s| map(repr_list, Token::Default)(s),
@@ -527,7 +530,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let numbers = alt((hex_bytes, hex_int, bin_bytes, bin_int, decimal));
+    let numbers = alt((hex_int, bin_int, decimal));
     let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_symbol(c)))));
     let f = terminated(numbers, next);
     context("number", f)(src)
@@ -584,38 +587,6 @@ where
     context("bin_int", f)(src)
 }
 
-fn hex_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
-    let tagged_digits = preceded(tag_no_case("8x"), cut(normed_num0(digits)));
-    let f = map_res(tagged_digits, |s: String| {
-        Ok(<T as From<Bytes>>::from(Bytes::from(
-            utils::conversion::hex_str_to_vec_u8(&s)?,
-        )))
-    });
-    context("hex_bytes", f)(src)
-}
-
-fn bin_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
-        s.len() % 8 == 0
-    });
-    let tagged_digits = preceded(tag_no_case("8b"), cut(normed_num0(digits)));
-    let f = map_res(tagged_digits, |s: String| {
-        Ok(<T as From<Bytes>>::from(Bytes::from(
-            utils::conversion::bin_str_to_vec_u8(&s)?,
-        )))
-    });
-    context("bin_bytes", f)(src)
-}
-
 fn decimal<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
@@ -654,4 +625,59 @@ where
         },
     );
     context("decimal", f)(src)
+}
+
+fn bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let bytes = preceded(
+        exact_char(BYTES_PREFIX),
+        alt((hex_bytes, bin_bytes, empty_bytes)),
+    );
+    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_symbol(c)))));
+    let f = terminated(bytes, next);
+    context("bytes", f)(src)
+}
+
+fn hex_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
+    let tagged_digits = preceded(tag_no_case("x"), cut(normed_num0(digits)));
+    let f = map_res(tagged_digits, |s: String| {
+        Ok(<T as From<Bytes>>::from(Bytes::from(
+            utils::conversion::hex_str_to_vec_u8(&s)?,
+        )))
+    });
+    context("hex_bytes", f)(src)
+}
+
+fn bin_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
+        s.len() % 8 == 0
+    });
+    let tagged_digits = preceded(tag_no_case("b"), cut(normed_num0(digits)));
+    let f = map_res(tagged_digits, |s: String| {
+        Ok(<T as From<Bytes>>::from(Bytes::from(
+            utils::conversion::bin_str_to_vec_u8(&s)?,
+        )))
+    });
+    context("bin_bytes", f)(src)
+}
+
+fn empty_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let f = success(<T as From<Bytes>>::from(Bytes::default()));
+    context("empty_bytes", f)(src)
 }

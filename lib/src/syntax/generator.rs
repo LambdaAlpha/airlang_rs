@@ -13,6 +13,7 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
+        BYTES_PREFIX,
         CALL_SEPARATOR,
         COMMENT_SEPARATOR,
         ESCAPED_PREFIX,
@@ -172,7 +173,11 @@ fn generate_float(f: &Float, s: &mut String) {
 }
 
 fn generate_bytes(bytes: &Bytes, s: &mut String) {
-    s.push_str("8x");
+    s.push(BYTES_PREFIX);
+    if bytes.as_ref().is_empty() {
+        return;
+    }
+    s.push('x');
     utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
 }
 
@@ -196,7 +201,7 @@ fn generate_symbol(str: &str, s: &mut String) {
     let mut chars = str.chars();
     let escape = match chars.next() {
         Some(first) => match first {
-            ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
+            BYTES_PREFIX | ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
             PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => {
                 str.len() == 1
             }

@@ -30,6 +30,7 @@ const WRAP_RIGHT: char = ')';
 
 const STRING_QUOTE: char = '"';
 const ESCAPED_PREFIX: char = '\'';
+const BYTES_PREFIX: char = '#';
 const COMMENT_SEPARATOR: char = '@';
 const PAIR_SEPARATOR: char = ':';
 const CALL_SEPARATOR: char = '$';
