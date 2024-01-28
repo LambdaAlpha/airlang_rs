@@ -61,7 +61,7 @@ fn print_title(ctx: MutableCtx) {
             Val::String(s) => println!("{}{}", TITLE_PREFIX, &*s),
             _ => {
                 let msg = format!("{} unknown version", TITLE_PREFIX);
-                eprintln!("{}", msg)
+                eprintln!("{}", msg);
             }
         },
         Err(err) => eprintln!("{}", err),
