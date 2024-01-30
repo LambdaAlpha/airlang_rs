@@ -22,7 +22,7 @@ features = ["small_rng", "alloc"]
 [dependencies.rug]
 version = "1"
 default-features = false
-features = ["integer", "float"]
+features = ["std", "integer", "float"]
 
 [dev-dependencies]
 criterion = "0.5"

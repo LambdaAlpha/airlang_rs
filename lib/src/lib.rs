@@ -31,7 +31,6 @@
     iterator_try_collect,
     unsize,
     coerce_unsized,
-    array_methods,
     assert_matches,
     let_chains,
     variant_count
