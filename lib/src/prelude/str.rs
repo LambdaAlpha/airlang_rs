@@ -124,7 +124,7 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Eval(EvalMode::More));
+    let input_mode = list_mode(ListMode::Eval(EvalMode::Eager));
     let output_mode = default_mode();
     named_free_fn("string.concat", input_mode, output_mode, fn_concat)
 }

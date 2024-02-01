@@ -6,8 +6,8 @@ use crate::{
     },
     eval::Evaluator,
     eval_mode::{
-        less::Less,
-        more::More,
+        eager::Eager,
+        lazy::Lazy,
         value::Value,
         EvalMode,
     },
@@ -28,16 +28,16 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct EvalPrelude {
     pub(crate) value: Named<FuncVal>,
-    pub(crate) less: Named<FuncVal>,
-    pub(crate) more: Named<FuncVal>,
+    pub(crate) lazy: Named<FuncVal>,
+    pub(crate) eager: Named<FuncVal>,
 }
 
 impl Default for EvalPrelude {
     fn default() -> Self {
         EvalPrelude {
             value: value(),
-            less: less(),
-            more: more(),
+            lazy: lazy(),
+            eager: eager(),
         }
     }
 }
@@ -45,14 +45,14 @@ impl Default for EvalPrelude {
 impl Prelude for EvalPrelude {
     fn put(&self, m: &mut NameMap) {
         self.value.put(m);
-        self.less.put(m);
-        self.more.put(m);
+        self.lazy.put(m);
+        self.eager.put(m);
     }
 }
 
 pub(crate) const VALUE: &str = "`u";
-pub(crate) const LESS: &str = "`f";
-pub(crate) const MORE: &str = "`t";
+pub(crate) const LAZY: &str = "`f";
+pub(crate) const EAGER: &str = "`t";
 
 fn value() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
@@ -64,22 +64,22 @@ fn fn_value(input: Val) -> Val {
     Value.eval(&mut FreeCtx, input)
 }
 
-fn less() -> Named<FuncVal> {
+fn lazy() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = default_mode();
-    named_mutable_fn(LESS, input_mode, output_mode, fn_less)
+    named_mutable_fn(LAZY, input_mode, output_mode, fn_lazy)
 }
 
-fn fn_less(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    Less.eval(&mut ctx, input)
+fn fn_lazy(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    Lazy.eval(&mut ctx, input)
 }
 
-fn more() -> Named<FuncVal> {
+fn eager() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = default_mode();
-    named_mutable_fn(MORE, input_mode, output_mode, fn_more)
+    named_mutable_fn(EAGER, input_mode, output_mode, fn_eager)
 }
 
-fn fn_more(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    More.eval(&mut ctx, input)
+fn fn_eager(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    Eager.eval(&mut ctx, input)
 }

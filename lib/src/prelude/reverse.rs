@@ -6,7 +6,7 @@ use crate::{
         CtxAccessor,
     },
     eval_mode::{
-        more::More,
+        eager::Eager,
         EvalMode,
     },
     func::MutableDispatcher,
@@ -61,7 +61,7 @@ fn fn_reverse<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::Reverse(reverse) = input else {
         return Val::default();
     };
-    More.eval_output_then_solve(&mut ctx, reverse.func, reverse.output)
+    Eager.eval_output_then_solve(&mut ctx, reverse.func, reverse.output)
 }
 
 fn pipe() -> Named<FuncVal> {
@@ -74,5 +74,5 @@ fn fn_pipe(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    More.eval_output_then_solve(&mut ctx, pair.second, pair.first)
+    Eager.eval_output_then_solve(&mut ctx, pair.second, pair.first)
 }

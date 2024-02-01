@@ -46,7 +46,10 @@ fn call() -> Named<FuncVal> {
     let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
     map.insert(program_key, default_mode());
     let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
-    map.insert(arguments_key, list_mode(ListMode::Eval(EvalMode::More)));
+    map.insert(
+        arguments_key,
+        list_mode(ListMode::Eval(EvalMode::default())),
+    );
 
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();

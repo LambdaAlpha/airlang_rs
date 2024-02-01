@@ -43,9 +43,9 @@ pub(crate) fn parse_io_mode(io_mode: Val) -> Option<IoMode> {
     match io_mode {
         Val::Unit(_) => Some(IoMode::Eval(EvalMode::Value)),
         Val::Bool(b) => Some(IoMode::Eval(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         })),
         Val::Map(map) => Some(IoMode::Match(parse_match_mode(map)?)),
         _ => None,
@@ -79,9 +79,9 @@ fn parse_eval_mode(eval_mode: Val) -> Option<EvalMode> {
     match eval_mode {
         Val::Unit(_) => Some(EvalMode::Value),
         Val::Bool(b) => Some(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         }),
         _ => None,
     }
@@ -91,9 +91,9 @@ fn parse_pair_mode(io_mode: Val) -> Option<PairMode> {
     match io_mode {
         Val::Unit(_) => Some(PairMode::Eval(EvalMode::Value)),
         Val::Bool(b) => Some(PairMode::Eval(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         })),
         Val::Pair(pair) => {
             let first = parse_io_mode(pair.first)?;
@@ -109,9 +109,9 @@ fn parse_call_mode(io_mode: Val) -> Option<CallMode> {
     match io_mode {
         Val::Unit(_) => Some(CallMode::Eval(EvalMode::Value)),
         Val::Bool(b) => Some(CallMode::Eval(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         })),
         Val::Call(call) => {
             let func = parse_io_mode(call.func)?;
@@ -127,9 +127,9 @@ fn parse_reverse_mode(io_mode: Val) -> Option<ReverseMode> {
     match io_mode {
         Val::Unit(_) => Some(ReverseMode::Eval(EvalMode::Value)),
         Val::Bool(b) => Some(ReverseMode::Eval(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         })),
         Val::Reverse(reverse) => {
             let func = parse_io_mode(reverse.func)?;
@@ -145,9 +145,9 @@ fn parse_list_mode(io_mode: Val) -> Option<ListMode> {
     match io_mode {
         Val::Unit(_) => Some(ListMode::Eval(EvalMode::Value)),
         Val::Bool(b) => Some(ListMode::Eval(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         })),
         Val::List(list) => Some(parse_list_mode_for_some(list)?),
         Val::Call(call) => {
@@ -198,9 +198,9 @@ fn parse_map_mode(io_mode: Val) -> Option<MapMode> {
     match io_mode {
         Val::Unit(_) => Some(MapMode::Eval(EvalMode::Value)),
         Val::Bool(b) => Some(MapMode::Eval(if b.bool() {
-            EvalMode::More
+            EvalMode::Eager
         } else {
-            EvalMode::Less
+            EvalMode::Lazy
         })),
         Val::Map(map) => Some(parse_map_mode_for_some(map)?),
         Val::Call(call) => {
@@ -236,8 +236,8 @@ fn parse_map_mode_for_some(io_mode: MapVal) -> Option<MapMode> {
 pub(crate) fn generate_eval_mode(eval_mode: EvalMode) -> Val {
     match eval_mode {
         EvalMode::Value => Val::Unit(Unit),
-        EvalMode::More => Val::Bool(Bool::t()),
-        EvalMode::Less => Val::Bool(Bool::f()),
+        EvalMode::Eager => Val::Bool(Bool::t()),
+        EvalMode::Lazy => Val::Bool(Bool::f()),
     }
 }
 
@@ -250,26 +250,26 @@ pub(crate) fn generate_io_mode(io_mode: &IoMode) -> Val {
 
 pub(crate) fn generate_match_mode(mode: &MatchMode) -> Val {
     let mut map = Map::default();
-    if mode.symbol != EvalMode::More {
+    if mode.symbol != EvalMode::Eager {
         map.insert(symbol(SYMBOL), generate_eval_mode(mode.symbol));
     }
-    if *mode.pair != PairMode::Eval(EvalMode::More) {
+    if *mode.pair != PairMode::Eval(EvalMode::Eager) {
         let val = generate_pair_mode(&mode.pair);
         map.insert(symbol(PAIR), val);
     }
-    if *mode.call != CallMode::Eval(EvalMode::More) {
+    if *mode.call != CallMode::Eval(EvalMode::Eager) {
         let val = generate_call_mode(&mode.call);
         map.insert(symbol(CALL), val);
     }
-    if *mode.reverse != ReverseMode::Eval(EvalMode::More) {
+    if *mode.reverse != ReverseMode::Eval(EvalMode::Eager) {
         let val = generate_reverse_mode(&mode.reverse);
         map.insert(symbol(REVERSE), val);
     }
-    if *mode.list != ListMode::Eval(EvalMode::More) {
+    if *mode.list != ListMode::Eval(EvalMode::Eager) {
         let val = generate_list_mode(&mode.list);
         map.insert(symbol(LIST), val);
     }
-    if *mode.map != MapMode::Eval(EvalMode::More) {
+    if *mode.map != MapMode::Eval(EvalMode::Eager) {
         let val = generate_map_mode(&mode.map);
         map.insert(symbol(MAP), val);
     }

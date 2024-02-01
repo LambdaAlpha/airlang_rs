@@ -102,7 +102,7 @@ pub use self::{
 };
 use crate::{
     eval::Evaluator,
-    eval_mode::more::More,
+    eval_mode::eager::Eager,
     syntax::ParseError,
 };
 
@@ -123,15 +123,15 @@ pub fn initial_ctx() -> Ctx {
 }
 
 pub fn interpret_mutable(mut ctx: MutableCtx, input: Val) -> Val {
-    More.eval(&mut ctx, input)
+    Eager.eval(&mut ctx, input)
 }
 
 pub fn interpret_const(mut ctx: ConstCtx, input: Val) -> Val {
-    More.eval(&mut ctx, input)
+    Eager.eval(&mut ctx, input)
 }
 
 pub fn interpret_free(mut ctx: FreeCtx, input: Val) -> Val {
-    More.eval(&mut ctx, input)
+    Eager.eval(&mut ctx, input)
 }
 
 pub(crate) mod val;

@@ -11,9 +11,9 @@ use crate::{
         ValBuilder,
     },
     eval_mode::{
-        less::{
-            Less,
-            LessByRef,
+        lazy::{
+            Lazy,
+            LazyByRef,
         },
         value::{
             Value,
@@ -32,9 +32,9 @@ use crate::{
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct More;
+pub(crate) struct Eager;
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for More
+impl<Ctx> Evaluator<Ctx, Val, Val> for Eager
 where
     Ctx: CtxAccessor,
 {
@@ -43,7 +43,7 @@ where
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for More
+impl<Ctx> ByVal<Ctx, Val> for Eager
 where
     Ctx: CtxAccessor,
 {
@@ -74,7 +74,7 @@ where
                 return if b.bool() {
                     self.eval(ctx, input)
                 } else {
-                    Less.eval(ctx, input)
+                    Lazy.eval(ctx, input)
                 };
             }
             _ => {}
@@ -89,7 +89,7 @@ where
     }
 }
 
-impl More {
+impl Eager {
     pub(crate) fn eval_input_then_call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val
     where
         Ctx: CtxAccessor,
@@ -162,9 +162,9 @@ impl More {
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct MoreByRef;
+pub(crate) struct EagerByRef;
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for MoreByRef
+impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EagerByRef
 where
     Ctx: CtxAccessor,
 {
@@ -173,7 +173,7 @@ where
     }
 }
 
-impl<'a, Ctx> ByRef<'a, Ctx, Val> for MoreByRef
+impl<'a, Ctx> ByRef<'a, Ctx, Val> for EagerByRef
 where
     Ctx: CtxAccessor,
 {
@@ -204,7 +204,7 @@ where
                 return if b.bool() {
                     self.eval(ctx, input)
                 } else {
-                    LessByRef.eval(ctx, input)
+                    LazyByRef.eval(ctx, input)
                 };
             }
             _ => {}
@@ -219,7 +219,7 @@ where
     }
 }
 
-impl MoreByRef {
+impl EagerByRef {
     pub(crate) fn eval_input_then_call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: &Val) -> Val
     where
         Ctx: CtxAccessor,

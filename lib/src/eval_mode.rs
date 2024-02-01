@@ -2,13 +2,13 @@ use crate::{
     ctx_access::CtxAccessor,
     eval::Evaluator,
     eval_mode::{
-        less::{
-            Less,
-            LessByRef,
+        eager::{
+            Eager,
+            EagerByRef,
         },
-        more::{
-            More,
-            MoreByRef,
+        lazy::{
+            Lazy,
+            LazyByRef,
         },
         value::{
             Value,
@@ -21,9 +21,9 @@ use crate::{
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum EvalMode {
     Value,
-    Less,
+    Lazy,
     #[default]
-    More,
+    Eager,
 }
 
 impl<Ctx> Evaluator<Ctx, Val, Val> for EvalMode
@@ -33,8 +33,8 @@ where
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
             EvalMode::Value => Value.eval(ctx, input),
-            EvalMode::Less => Less.eval(ctx, input),
-            EvalMode::More => More.eval(ctx, input),
+            EvalMode::Lazy => Lazy.eval(ctx, input),
+            EvalMode::Eager => Eager.eval(ctx, input),
         }
     }
 }
@@ -46,14 +46,14 @@ where
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         match self {
             EvalMode::Value => ValueByRef.eval(ctx, input),
-            EvalMode::Less => LessByRef.eval(ctx, input),
-            EvalMode::More => MoreByRef.eval(ctx, input),
+            EvalMode::Lazy => LazyByRef.eval(ctx, input),
+            EvalMode::Eager => EagerByRef.eval(ctx, input),
         }
     }
 }
 
 pub(crate) mod value;
 
-pub(crate) mod less;
+pub(crate) mod lazy;
 
-pub(crate) mod more;
+pub(crate) mod eager;

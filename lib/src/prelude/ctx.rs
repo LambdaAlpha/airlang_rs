@@ -26,7 +26,7 @@ use crate::{
         Evaluator,
     },
     eval_mode::{
-        more::More,
+        eager::Eager,
         EvalMode,
     },
     io_mode::IoMode,
@@ -505,11 +505,11 @@ fn with_ctx() -> Named<FuncVal> {
         }),
         IoMode::Match(MatchMode {
             call: Box::new(CallMode::Call(Call::new(
-                IoMode::Eval(EvalMode::More),
+                IoMode::Eval(EvalMode::Eager),
                 IoMode::Eval(EvalMode::Value),
             ))),
             reverse: Box::new(ReverseMode::Reverse(Reverse::new(
-                IoMode::Eval(EvalMode::More),
+                IoMode::Eval(EvalMode::Eager),
                 IoMode::Eval(EvalMode::Value),
             ))),
             ..Default::default()
@@ -526,17 +526,17 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
     match pair.second {
         Val::Call(call) => {
             let func = call.func;
-            let input = More.eval_input(&mut ctx, &func, call.input);
+            let input = Eager.eval_input(&mut ctx, &func, call.input);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More::call(&mut target_ctx, func, input)
+                Eager::call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
         Val::Reverse(reverse) => {
             let func = reverse.func;
-            let output = More.eval_output(&mut ctx, &func, reverse.output);
+            let output = Eager.eval_output(&mut ctx, &func, reverse.output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More::solve(&mut target_ctx, func, output)
+                Eager::solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -576,13 +576,13 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let func = call.func;
             let input = call.input;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
-                More.eval(&mut target_ctx, func)
+                Eager.eval(&mut target_ctx, func)
             }) else {
                 return Val::default();
             };
-            let input = More.eval_input(&mut ctx, &func, input);
+            let input = Eager.eval_input(&mut ctx, &func, input);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More::call(&mut target_ctx, func, input)
+                Eager::call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
@@ -590,13 +590,13 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let func = reverse.func;
             let output = reverse.output;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
-                More.eval(&mut target_ctx, func)
+                Eager.eval(&mut target_ctx, func)
             }) else {
                 return Val::default();
             };
-            let output = More.eval_output(&mut ctx, &func, output);
+            let output = Eager.eval_output(&mut ctx, &func, output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More::solve(&mut target_ctx, func, output)
+                Eager::solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -613,11 +613,11 @@ fn with_ctx_input() -> Named<FuncVal> {
         }),
         IoMode::Match(MatchMode {
             call: Box::new(CallMode::Call(Call::new(
-                IoMode::Eval(EvalMode::More),
+                IoMode::Eval(EvalMode::Eager),
                 IoMode::Eval(EvalMode::Value),
             ))),
             reverse: Box::new(ReverseMode::Reverse(Reverse::new(
-                IoMode::Eval(EvalMode::More),
+                IoMode::Eval(EvalMode::Eager),
                 IoMode::Eval(EvalMode::Value),
             ))),
             ..Default::default()
@@ -636,7 +636,7 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
             let func = call.func;
             let input = call.input;
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.eval_input_then_call(&mut target_ctx, func, input)
+                Eager.eval_input_then_call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
@@ -644,7 +644,7 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
             let func = reverse.func;
             let output = reverse.output;
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.eval_output_then_solve(&mut target_ctx, func, output)
+                Eager.eval_output_then_solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -682,13 +682,13 @@ fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
     match pair.second {
         Val::Call(call) => {
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.eval_call(&mut target_ctx, call.func, call.input)
+                Eager.eval_call(&mut target_ctx, call.func, call.input)
             });
             result.unwrap_or_default()
         }
         Val::Reverse(reverse) => {
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                More.eval_reverse(&mut target_ctx, reverse.func, reverse.output)
+                Eager.eval_reverse(&mut target_ctx, reverse.func, reverse.output)
             });
             result.unwrap_or_default()
         }

@@ -10,9 +10,9 @@ use crate::{
         ValBuilder,
     },
     eval_mode::{
-        more::{
-            More,
-            MoreByRef,
+        eager::{
+            Eager,
+            EagerByRef,
         },
         value::{
             Value,
@@ -29,9 +29,9 @@ use crate::{
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct Less;
+pub(crate) struct Lazy;
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Less
+impl<Ctx> Evaluator<Ctx, Val, Val> for Lazy
 where
     Ctx: CtxAccessor,
 {
@@ -40,7 +40,7 @@ where
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for Less
+impl<Ctx> ByVal<Ctx, Val> for Lazy
 where
     Ctx: CtxAccessor,
 {
@@ -69,7 +69,7 @@ where
             Val::Unit(_) => input,
             Val::Bool(b) => {
                 if b.bool() {
-                    More.eval(ctx, input)
+                    Eager.eval(ctx, input)
                 } else {
                     self.eval(ctx, input)
                 }
@@ -84,9 +84,9 @@ where
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct LessByRef;
+pub(crate) struct LazyByRef;
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for LessByRef
+impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for LazyByRef
 where
     Ctx: CtxAccessor,
 {
@@ -95,7 +95,7 @@ where
     }
 }
 
-impl<'a, Ctx> ByRef<'a, Ctx, Val> for LessByRef
+impl<'a, Ctx> ByRef<'a, Ctx, Val> for LazyByRef
 where
     Ctx: CtxAccessor,
 {
@@ -124,7 +124,7 @@ where
             Val::Unit(_) => ValueByRef.eval(ctx, input),
             Val::Bool(b) => {
                 if b.bool() {
-                    MoreByRef.eval(ctx, input)
+                    EagerByRef.eval(ctx, input)
                 } else {
                     self.eval(ctx, input)
                 }

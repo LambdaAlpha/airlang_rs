@@ -6,7 +6,7 @@ use crate::{
         CtxAccessor,
     },
     eval_mode::{
-        more::More,
+        eager::Eager,
         EvalMode,
     },
     func::MutableDispatcher,
@@ -60,7 +60,7 @@ fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
-    More.eval_input_then_call(&mut ctx, call.func, call.input)
+    Eager.eval_input_then_call(&mut ctx, call.func, call.input)
 }
 
 fn pipe() -> Named<FuncVal> {
@@ -73,5 +73,5 @@ fn fn_pipe(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    More.eval_input_then_call(&mut ctx, pair.second, pair.first)
+    Eager.eval_input_then_call(&mut ctx, pair.second, pair.first)
 }

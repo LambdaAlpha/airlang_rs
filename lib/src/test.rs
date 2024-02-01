@@ -198,8 +198,8 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         func_ext_name.clone(),
         InvariantTag::Const,
         Val::Func(FuncVal::from(Func::new_free(
-            IoMode::Eval(EvalMode::More),
-            IoMode::Eval(EvalMode::More),
+            IoMode::Eval(EvalMode::Eager),
+            IoMode::Eval(EvalMode::Eager),
             func_ext_name,
             Box::new(FuncExt),
         ))),

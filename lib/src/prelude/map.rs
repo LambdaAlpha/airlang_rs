@@ -167,7 +167,7 @@ fn fn_into_items(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn keys() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = list_mode(ListMode::Eval(EvalMode::More));
+    let output_mode = list_mode(ListMode::Eval(EvalMode::Eager));
     named_const_fn("map.keys", input_mode, output_mode, fn_keys)
 }
 
@@ -182,7 +182,7 @@ fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_keys() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = list_mode(ListMode::Eval(EvalMode::More));
+    let output_mode = list_mode(ListMode::Eval(EvalMode::Eager));
     named_mutable_fn("map.into_keys", input_mode, output_mode, fn_into_keys)
 }
 
@@ -199,7 +199,7 @@ fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn values() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = list_mode(ListMode::Eval(EvalMode::More));
+    let output_mode = list_mode(ListMode::Eval(EvalMode::Eager));
     named_const_fn("map.values", input_mode, output_mode, fn_values)
 }
 
@@ -214,7 +214,7 @@ fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_values() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = list_mode(ListMode::Eval(EvalMode::More));
+    let output_mode = list_mode(ListMode::Eval(EvalMode::Eager));
     named_mutable_fn("map.into_values", input_mode, output_mode, fn_into_values)
 }
 
@@ -252,7 +252,7 @@ fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
 fn contains_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_value_mode(),
-        list_mode(ListMode::Eval(EvalMode::More)),
+        list_mode(ListMode::Eval(EvalMode::Eager)),
     );
     let output_mode = default_mode();
     named_const_fn(
@@ -308,8 +308,11 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn set_many() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), map_mode(MapMode::Eval(EvalMode::More)));
-    let output_mode = map_mode(MapMode::Eval(EvalMode::More));
+    let input_mode = pair_mode(
+        symbol_value_mode(),
+        map_mode(MapMode::Eval(EvalMode::Eager)),
+    );
+    let output_mode = map_mode(MapMode::Eval(EvalMode::Eager));
     named_mutable_fn("map.set_many", input_mode, output_mode, fn_set_many)
 }
 
@@ -356,9 +359,9 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
 fn get_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_value_mode(),
-        list_mode(ListMode::Eval(EvalMode::More)),
+        list_mode(ListMode::Eval(EvalMode::Eager)),
     );
-    let output_mode = map_mode(MapMode::Eval(EvalMode::More));
+    let output_mode = map_mode(MapMode::Eval(EvalMode::Eager));
     named_const_fn("map.get_many", input_mode, output_mode, fn_get_many)
 }
 
@@ -405,9 +408,9 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn remove_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_value_mode(),
-        list_mode(ListMode::Eval(EvalMode::More)),
+        list_mode(ListMode::Eval(EvalMode::Eager)),
     );
-    let output_mode = map_mode(MapMode::Eval(EvalMode::More));
+    let output_mode = map_mode(MapMode::Eval(EvalMode::Eager));
     named_mutable_fn("map.remove_many", input_mode, output_mode, fn_remove_many)
 }
 
@@ -449,7 +452,7 @@ fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn new_map() -> Named<FuncVal> {
     let input_mode = list_mode_for_all(pair_mode(default_mode(), default_mode()));
-    let output_mode = map_mode(MapMode::Eval(EvalMode::More));
+    let output_mode = map_mode(MapMode::Eval(EvalMode::Eager));
     named_free_fn("map", input_mode, output_mode, fn_new_map)
 }
 
@@ -473,8 +476,8 @@ fn fn_new_map(input: Val) -> Val {
 }
 
 fn new_set() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Eval(EvalMode::More));
-    let output_mode = map_mode(MapMode::Eval(EvalMode::More));
+    let input_mode = list_mode(ListMode::Eval(EvalMode::Eager));
+    let output_mode = map_mode(MapMode::Eval(EvalMode::Eager));
     named_free_fn("set", input_mode, output_mode, fn_new_set)
 }
 
@@ -487,8 +490,8 @@ fn fn_new_set(input: Val) -> Val {
 }
 
 fn new_multiset() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Eval(EvalMode::More));
-    let output_mode = map_mode(MapMode::Eval(EvalMode::More));
+    let input_mode = list_mode(ListMode::Eval(EvalMode::Eager));
+    let output_mode = map_mode(MapMode::Eval(EvalMode::Eager));
     named_free_fn("multiset", input_mode, output_mode, fn_new_multiset)
 }
 

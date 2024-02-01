@@ -6,9 +6,9 @@ use crate::{
     },
     eval::Evaluator,
     eval_mode::{
-        more::{
-            More,
-            MoreByRef,
+        eager::{
+            Eager,
+            EagerByRef,
         },
         EvalMode,
     },
@@ -86,7 +86,7 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     };
     let mut output = Val::default();
     for val in list {
-        output = More.eval(&mut ctx, val);
+        output = Eager.eval(&mut ctx, val);
     }
     output
 }
@@ -121,7 +121,7 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let mut output = Val::default();
     let _ = ctx.remove(&name);
     for val in list {
-        output = More.eval(&mut ctx, val);
+        output = Eager.eval(&mut ctx, val);
         if let Ok(val) = ctx.get_const_ref(&name) {
             return val.clone();
         }
@@ -171,13 +171,13 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
             let Some(branch) = iter.next() else {
                 return Val::default();
             };
-            More.eval(&mut ctx, branch)
+            Eager.eval(&mut ctx, branch)
         } else {
             let _ = iter.next();
             let Some(branch) = iter.next() else {
                 return Val::default();
             };
-            More.eval(&mut ctx, branch)
+            Eager.eval(&mut ctx, branch)
         }
     } else {
         let _ = iter.next();
@@ -185,7 +185,7 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         let Some(default) = iter.next() else {
             return Val::default();
         };
-        More.eval(&mut ctx, default)
+        Eager.eval(&mut ctx, default)
     }
 }
 
@@ -228,7 +228,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
-            let k = More.eval(&mut ctx, k);
+            let k = Eager.eval(&mut ctx, k);
             if k == val { Some(v) } else { None }
         })
         .unwrap_or_else(|| {
@@ -237,7 +237,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
             };
             default
         });
-    More.eval(&mut ctx, eval)
+    Eager.eval(&mut ctx, eval)
 }
 
 fn while1() -> Named<FuncVal> {
@@ -273,11 +273,11 @@ fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = MoreByRef.eval(&mut ctx, condition) else {
+        let Val::Bool(b) = EagerByRef.eval(&mut ctx, condition) else {
             return Val::default();
         };
         if b.bool() {
-            MoreByRef.eval(&mut ctx, body);
+            EagerByRef.eval(&mut ctx, body);
         } else {
             break;
         }

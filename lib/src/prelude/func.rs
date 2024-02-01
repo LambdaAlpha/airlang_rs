@@ -115,13 +115,13 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), IoMode::Eval(EvalMode::Less));
+    map.insert(symbol(BODY), IoMode::Eval(EvalMode::Lazy));
     map.insert(symbol(CTX), default_mode());
     map.insert(symbol(INPUT_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
-    map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Less));
-    map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Less));
+    map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Lazy));
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();
     named_free_fn("function", input_mode, output_mode, fn_new)
@@ -193,14 +193,14 @@ fn fn_new(input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
-    map.insert(symbol(BODY), IoMode::Eval(EvalMode::Less));
+    map.insert(symbol(BODY), IoMode::Eval(EvalMode::Lazy));
     map.insert(symbol(CTX), default_mode());
     map.insert(symbol(INPUT_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
-    map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Less));
-    map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Less));
-    map.insert(symbol(ID), IoMode::Eval(EvalMode::Less));
+    map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(ID), IoMode::Eval(EvalMode::Lazy));
     let output_mode = map_mode_for_some(map);
     named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
@@ -306,7 +306,7 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn input_mode() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Less);
+    let output_mode = IoMode::Eval(EvalMode::Lazy);
     named_const_fn(
         "function.input_mode",
         input_mode,
@@ -326,7 +326,7 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn output_mode() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Less);
+    let output_mode = IoMode::Eval(EvalMode::Lazy);
     named_const_fn(
         "function.output_mode",
         input_mode,
@@ -408,7 +408,7 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn body() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Less);
+    let output_mode = IoMode::Eval(EvalMode::Lazy);
     named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 

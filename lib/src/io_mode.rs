@@ -7,9 +7,9 @@ use crate::{
         ValBuilder,
     },
     eval_mode::{
-        more::{
-            More,
-            MoreByRef,
+        eager::{
+            Eager,
+            EagerByRef,
         },
         value::{
             Value,
@@ -81,37 +81,37 @@ pub enum MapMode {
 
 impl Default for IoMode {
     fn default() -> Self {
-        IoMode::Eval(EvalMode::More)
+        IoMode::Eval(EvalMode::Eager)
     }
 }
 
 impl Default for PairMode {
     fn default() -> Self {
-        PairMode::Eval(EvalMode::More)
+        PairMode::Eval(EvalMode::Eager)
     }
 }
 
 impl Default for CallMode {
     fn default() -> Self {
-        CallMode::Eval(EvalMode::More)
+        CallMode::Eval(EvalMode::Eager)
     }
 }
 
 impl Default for ReverseMode {
     fn default() -> Self {
-        ReverseMode::Eval(EvalMode::More)
+        ReverseMode::Eval(EvalMode::Eager)
     }
 }
 
 impl Default for ListMode {
     fn default() -> Self {
-        ListMode::Eval(EvalMode::More)
+        ListMode::Eval(EvalMode::Eager)
     }
 }
 
 impl Default for MapMode {
     fn default() -> Self {
-        MapMode::Eval(EvalMode::More)
+        MapMode::Eval(EvalMode::Eager)
     }
 }
 
@@ -252,7 +252,7 @@ impl ListMode {
                     }
                 }
                 for val in val_iter {
-                    list.push(More.eval(ctx, val));
+                    list.push(Eager.eval(ctx, val));
                 }
                 ValBuilder.from_list(list.into_iter())
             }
@@ -297,7 +297,7 @@ impl ListMode {
                     }
                 }
                 for val in val_iter {
-                    list.push(MoreByRef.eval(ctx, val));
+                    list.push(EagerByRef.eval(ctx, val));
                 }
                 ValBuilder.from_list(list.into_iter())
             }
@@ -328,7 +328,7 @@ impl MapMode {
                     let v = if let Some(mode) = mode_map.get(&k) {
                         mode.eval(ctx, v)
                     } else {
-                        More.eval(ctx, v)
+                        Eager.eval(ctx, v)
                     };
                     let k = Value.eval(ctx, k);
                     (k, v)
@@ -362,7 +362,7 @@ impl MapMode {
                     let v = if let Some(mode) = mode_map.get(k) {
                         mode.eval(ctx, v)
                     } else {
-                        MoreByRef.eval(ctx, v)
+                        EagerByRef.eval(ctx, v)
                     };
                     let k = ValueByRef.eval(ctx, k);
                     (k, v)
