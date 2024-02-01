@@ -28,6 +28,14 @@ impl Symbol {
     pub(crate) fn from_string(s: String) -> Self {
         Symbol(CompactString::from(s))
     }
+
+    pub(crate) fn is_symbol(c: char) -> bool {
+        match c {
+            'a'..='z' | 'A'..='Z' | '0'..='9' => true,
+            '(' | ')' | '[' | ']' | '{' | '}' | ',' => false,
+            c => c.is_ascii_punctuation(),
+        }
+    }
 }
 
 impl Deref for Symbol {
