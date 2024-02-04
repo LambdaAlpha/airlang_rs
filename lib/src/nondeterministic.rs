@@ -67,6 +67,8 @@ use crate::{
         prop::PropVal,
         reverse::ReverseVal,
     },
+    Answer,
+    AnswerVal,
     CallMode,
     ListMode,
     MapMode,
@@ -94,6 +96,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // ctx
         1,      // func
         1,      // prop
+        1,      // answer
     ];
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
@@ -115,6 +118,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         12 => Val::Ctx(any_ctx(rng, new_depth)),
         13 => Val::Func(any_func(rng, new_depth)),
         14 => Val::Prop(any_prop(rng, new_depth)),
+        15 => Val::Answer(any_answer(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -492,6 +496,28 @@ pub(crate) fn any_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
         Prop::new(func, input, output)
     };
     PropVal(Reader::new(prop))
+}
+
+pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
+    let weight: usize = 1 << min(depth, 32);
+    let weights = [
+        weight, // unsolved
+        weight, // unsolvable
+        1,      // unverified
+        1,      // verified
+    ];
+    let dist = WeightedIndex::new(weights).unwrap();
+    let i = dist.sample(rng);
+    let new_depth = depth + 1;
+
+    let answer = match i {
+        0 => Answer::Unsolved,
+        1 => Answer::Unsolvable,
+        2 => Answer::Unverified(any_val(rng, new_depth)),
+        3 => Answer::Verified(any_prop(rng, new_depth)),
+        _ => unreachable!(),
+    };
+    AnswerVal::from(Box::new(answer))
 }
 
 fn any_len_weighted(rng: &mut SmallRng, depth: usize) -> usize {

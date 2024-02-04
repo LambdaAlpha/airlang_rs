@@ -15,6 +15,7 @@ use crate::{
     extension::UnitExt,
     io_mode::IoMode,
     nondeterministic::{
+        any_answer,
         any_bool,
         any_bytes,
         any_call,
@@ -138,6 +139,7 @@ fn fn_any(input: Val) -> Val {
             CTX => Val::Ctx(any_ctx(rng, DEPTH)),
             FUNC => Val::Func(any_func(rng, DEPTH)),
             PROP => Val::Prop(any_prop(rng, DEPTH)),
+            ANSWER => Val::Answer(any_answer(rng, DEPTH)),
             EXT => Val::Ext(Box::new(UnitExt)),
             _ => Val::default(),
         },

@@ -50,6 +50,10 @@ function
 -----
 proposition
 =====
+;[a = (any answer), type_of a]
+-----
+answer
+=====
 ;[a = 'u, type_of a]
 -----
 unit
