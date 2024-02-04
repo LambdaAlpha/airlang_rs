@@ -29,6 +29,7 @@ use crate::{
         TaggedVal,
     },
     eval_mode::EvalMode,
+    extension::UnitExt,
     float::Float,
     func::{
         Composed,
@@ -76,6 +77,7 @@ use crate::{
     PairMode,
     ReverseMode,
     Val,
+    ValExt,
 };
 
 pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
@@ -97,6 +99,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // func
         1,      // prop
         1,      // answer
+        1,      // extension
     ];
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
@@ -119,6 +122,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         13 => Val::Func(any_func(rng, new_depth)),
         14 => Val::Prop(any_prop(rng, new_depth)),
         15 => Val::Answer(any_answer(rng, new_depth)),
+        16 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -518,6 +522,10 @@ pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
         _ => unreachable!(),
     };
     AnswerVal::from(Box::new(answer))
+}
+
+pub(crate) fn any_extension(_rng: &mut SmallRng, _depth: usize) -> Box<dyn ValExt> {
+    Box::new(UnitExt)
 }
 
 fn any_len_weighted(rng: &mut SmallRng, depth: usize) -> usize {

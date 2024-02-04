@@ -180,6 +180,12 @@ impl From<AnswerVal> for Val {
     }
 }
 
+impl From<Box<dyn ValExt>> for Val {
+    fn from(value: Box<dyn ValExt>) -> Self {
+        Val::Ext(value)
+    }
+}
+
 impl From<&Repr> for Val {
     fn from(value: &Repr) -> Self {
         match value {

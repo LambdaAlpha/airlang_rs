@@ -1,8 +1,8 @@
-;[a = unit_ext, b = unit_ext, a === b]
+;[a = extension.unit, b = extension.unit, a === b]
 -----
 't
 =====
-type_of unit_ext
+type_of extension.unit
 -----
 extension
 =====

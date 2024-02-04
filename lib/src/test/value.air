@@ -54,6 +54,10 @@ proposition
 -----
 answer
 =====
+;[e = (any extension), type_of e]
+-----
+extension
+=====
 ;[a = 'u, type_of a]
 -----
 unit
