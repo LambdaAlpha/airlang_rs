@@ -102,7 +102,7 @@
 -----
 't
 =====
-;[(a ': {tag : final, local}) = 1, (is_final a) and (is_local a)]
+;[(a ': {invariant : final, local}) = 1, (is_final a) and (is_local a)]
 -----
 't
 =====
@@ -131,6 +131,10 @@
 [1, 2]
 =====
 ;[(a b c) = ('u (1 2 3)), [a, b, c]]
+-----
+[1, 2, 3]
+=====
+;[a ': b ': none = (1 2 3), [a, ':, b]]
 -----
 [1, 2, 3]
 =====
@@ -285,6 +289,10 @@ is_final a
 ;[': = ('u ':), final = ('u final), a = ('u context {b : (1 ': final)}), a .. (is_final b)]
 -----
 't
+=====
+;[': = ('u ':), final = ('u final), a = ('u context {b : (1 ': 2 ': final)}), a .. (read b)]
+-----
+1 ': 2
 =====
 ;[
     ': = (function {

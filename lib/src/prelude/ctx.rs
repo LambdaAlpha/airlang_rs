@@ -60,8 +60,11 @@ use crate::{
     },
     CallMode,
     ListMode,
+    ListVal,
     MatchMode,
+    PairVal,
     ReverseMode,
+    ReverseVal,
 };
 
 #[derive(Clone)]
@@ -177,106 +180,160 @@ fn fn_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let name = pair.first;
-    assign_destruct(&mut ctx, name, pair.second, false, InvariantTag::None)
+    let val = pair.second;
+    let options = AssignOptions::default();
+    assign_allow_options(&mut ctx, name, val, options)
 }
 
 const LOCAL: &str = "local";
-const TAG: &str = "tag";
+const INVARIANT: &str = "invariant";
 
 fn assign_destruct(
     ctx: &mut CtxForMutableFn,
     name: Val,
     val: Val,
-    local: bool,
-    tag: InvariantTag,
+    options: AssignOptions,
+    allow_options: bool,
 ) -> Val {
     match name {
-        Val::Symbol(s) => {
-            let tagged_val = TaggedVal { val, tag };
-            if local {
-                let Ok(Some(last)) = ctx.put_val_local(s, tagged_val) else {
-                    return Val::default();
-                };
-                last
-            } else {
-                let Ok(Some(last)) = ctx.put_val(s, tagged_val) else {
-                    return Val::default();
-                };
-                last
-            }
-        }
-        Val::Pair(name_pair) => {
-            let Val::Pair(val_pair) = val else {
-                return Val::default();
-            };
-            let last_first = assign_destruct(ctx, name_pair.first, val_pair.first, local, tag);
-            let last_second = assign_destruct(ctx, name_pair.second, val_pair.second, local, tag);
-            Val::Pair(Box::new(Pair::new(last_first, last_second)))
-        }
-        Val::Call(name_call) => match parse_ctx_val_pair(name_call, true) {
-            ParseCtxValPairResult::Parsed {
-                val: name,
-                local,
-                tag,
-            } => assign_destruct(ctx, name, val, local, tag),
-            ParseCtxValPairResult::Fallback(name_call) => {
-                let Val::Call(val_call) = val else {
-                    return Val::default();
-                };
-                let last_func = assign_destruct(ctx, name_call.func, val_call.func, local, tag);
-                let last_input = assign_destruct(ctx, name_call.input, val_call.input, local, tag);
-                Val::Call(Box::new(Call::new(last_func, last_input)))
-            }
-            ParseCtxValPairResult::None => Val::default(),
-        },
-        Val::Reverse(name_reverse) => {
-            let Val::Reverse(val_reverse) = val else {
-                return Val::default();
-            };
-            let last_func = assign_destruct(ctx, name_reverse.func, val_reverse.func, local, tag);
-            let last_output =
-                assign_destruct(ctx, name_reverse.output, val_reverse.output, local, tag);
-            Val::Reverse(Box::new(Reverse::new(last_func, last_output)))
-        }
-        Val::List(name_list) => {
-            let Val::List(val_list) = val else {
-                return Val::default();
-            };
-            let mut last_list = List::default();
-            let mut name_iter = name_list.into_iter();
-            let mut val_iter = val_list.into_iter();
-            while let (Some(name), val) = (name_iter.next(), val_iter.next()) {
-                if let Val::Symbol(s) = &name {
-                    if &**s == "..." {
-                        let name_len = name_iter.len();
-                        let val_len = val_iter.len();
-                        if val_len > name_len {
-                            val_iter.advance_by(val_len - name_len).unwrap();
-                        }
-                        last_list.push(Val::default());
-                        continue;
+        Val::Symbol(s) => assign_symbol(ctx, s, val, options),
+        Val::Pair(name) => assign_pair(ctx, *name, val, options),
+        Val::Call(name) => {
+            if allow_options {
+                match parse_ctx_val_pair(name, true) {
+                    ParseCtxValPairResult::Parsed {
+                        val: name,
+                        local,
+                        tag,
+                    } => {
+                        let options = AssignOptions { local, tag };
+                        assign_destruct(ctx, name, val, options, false)
                     }
+                    ParseCtxValPairResult::Fallback(name) => assign_call(ctx, *name, val, options),
+                    ParseCtxValPairResult::None => Val::default(),
                 }
-                let val = val.unwrap_or_default();
-                last_list.push(assign_destruct(ctx, name, val, local, tag));
+            } else {
+                assign_call(ctx, *name, val, options)
             }
-            Val::List(last_list)
         }
-        Val::Map(name_map) => {
-            let Val::Map(mut val_map) = val else {
-                return Val::default();
-            };
-            let last_map = name_map
-                .into_iter()
-                .map(|(k, name)| {
-                    let val = val_map.remove(&k).unwrap_or_default();
-                    let last_val = assign_destruct(ctx, name, val, local, tag);
-                    (k, last_val)
-                })
-                .collect();
-            Val::Map(last_map)
-        }
+        Val::Reverse(name) => assign_reverse(ctx, *name, val, options),
+        Val::List(name) => assign_list(ctx, name, val, options),
+        Val::Map(name) => assign_map(ctx, name, val, options),
         _ => Val::default(),
+    }
+}
+
+fn assign_allow_options(
+    ctx: &mut CtxForMutableFn,
+    name: Val,
+    val: Val,
+    options: AssignOptions,
+) -> Val {
+    assign_destruct(ctx, name, val, options, true)
+}
+
+fn assign_symbol(ctx: &mut CtxForMutableFn, name: Symbol, val: Val, options: AssignOptions) -> Val {
+    let tagged_val = TaggedVal {
+        val,
+        tag: options.tag,
+    };
+    if options.local {
+        let Ok(last) = ctx.put_val_local(name, tagged_val) else {
+            return Val::default();
+        };
+        last.unwrap_or_default()
+    } else {
+        let Ok(last) = ctx.put_val(name, tagged_val) else {
+            return Val::default();
+        };
+        last.unwrap_or_default()
+    }
+}
+
+fn assign_pair(ctx: &mut CtxForMutableFn, name: PairVal, val: Val, options: AssignOptions) -> Val {
+    let Val::Pair(val) = val else {
+        return Val::default();
+    };
+    let first = assign_allow_options(ctx, name.first, val.first, options);
+    let second = assign_allow_options(ctx, name.second, val.second, options);
+    Val::Pair(Box::new(Pair::new(first, second)))
+}
+
+fn assign_call(ctx: &mut CtxForMutableFn, name: CallVal, val: Val, options: AssignOptions) -> Val {
+    let Val::Call(val) = val else {
+        return Val::default();
+    };
+    let func = assign_allow_options(ctx, name.func, val.func, options);
+    let input = assign_allow_options(ctx, name.input, val.input, options);
+    Val::Call(Box::new(Call::new(func, input)))
+}
+
+fn assign_reverse(
+    ctx: &mut CtxForMutableFn,
+    name: ReverseVal,
+    val: Val,
+    options: AssignOptions,
+) -> Val {
+    let Val::Reverse(val) = val else {
+        return Val::default();
+    };
+    let func = assign_allow_options(ctx, name.func, val.func, options);
+    let output = assign_allow_options(ctx, name.output, val.output, options);
+    Val::Reverse(Box::new(Reverse::new(func, output)))
+}
+
+fn assign_list(ctx: &mut CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
+    let Val::List(val) = val else {
+        return Val::default();
+    };
+    let mut list = List::default();
+    let mut name_iter = name.into_iter();
+    let mut val_iter = val.into_iter();
+    while let (Some(name), val) = (name_iter.next(), val_iter.next()) {
+        if let Val::Symbol(s) = &name {
+            if &**s == "..." {
+                let name_len = name_iter.len();
+                let val_len = val_iter.len();
+                if val_len > name_len {
+                    val_iter.advance_by(val_len - name_len).unwrap();
+                }
+                list.push(Val::default());
+                continue;
+            }
+        }
+        let val = val.unwrap_or_default();
+        list.push(assign_allow_options(ctx, name, val, options));
+    }
+    Val::List(list)
+}
+
+fn assign_map(ctx: &mut CtxForMutableFn, name: MapVal, val: Val, options: AssignOptions) -> Val {
+    let Val::Map(mut val) = val else {
+        return Val::default();
+    };
+    let map = name
+        .into_iter()
+        .map(|(k, name)| {
+            let val = val.remove(&k).unwrap_or_default();
+            let last_val = assign_allow_options(ctx, name, val, options);
+            (k, last_val)
+        })
+        .collect();
+    Val::Map(map)
+}
+
+#[derive(Copy, Clone)]
+struct AssignOptions {
+    local: bool,
+    tag: InvariantTag,
+}
+
+impl Default for AssignOptions {
+    fn default() -> Self {
+        AssignOptions {
+            local: false,
+            tag: InvariantTag::None,
+        }
     }
 }
 
@@ -312,7 +369,7 @@ fn parse_ctx_val_pair(call: Box<CallVal>, accept_local: bool) -> ParseCtxValPair
             }
         }
         Val::Map(mut map) => {
-            let tag = match map_remove(&mut map, TAG) {
+            let tag = match map_remove(&mut map, INVARIANT) {
                 Val::Symbol(tag) => {
                     if let Some(tag) = parse_invariant_tag(&tag) {
                         tag
@@ -333,7 +390,7 @@ fn parse_ctx_val_pair(call: Box<CallVal>, accept_local: bool) -> ParseCtxValPair
 
 fn parse_invariant_tag(tag: &str) -> Option<InvariantTag> {
     let tag = match tag {
-        VARIABLE => InvariantTag::None,
+        NONE => InvariantTag::None,
         FINAL => InvariantTag::Final,
         CONST => InvariantTag::Const,
         _ => return None,
@@ -343,7 +400,7 @@ fn parse_invariant_tag(tag: &str) -> Option<InvariantTag> {
 
 fn generate_invariant_tag(tag: InvariantTag) -> Symbol {
     let tag = match tag {
-        InvariantTag::None => VARIABLE,
+        InvariantTag::None => NONE,
         InvariantTag::Final => FINAL,
         InvariantTag::Const => CONST,
     };
@@ -760,7 +817,7 @@ where
 }
 
 const CTX_VALUE_PAIR: &str = ":";
-const VARIABLE: &str = "variable";
+const NONE: &str = "none";
 const FINAL: &str = "final";
 const CONST: &str = "constant";
 
