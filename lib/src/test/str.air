@@ -30,7 +30,7 @@ string.concat ('t ["1", "2"])
 -----
 "12"
 =====
-string.to_bytes "abc"
+string.into_utf8 "abc"
 -----
 #x616263
 =====

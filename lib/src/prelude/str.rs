@@ -29,7 +29,7 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct StrPrelude {
     pub(crate) from_utf8: Named<FuncVal>,
-    pub(crate) to_bytes: Named<FuncVal>,
+    pub(crate) into_utf8: Named<FuncVal>,
     pub(crate) length: Named<FuncVal>,
     pub(crate) push: Named<FuncVal>,
     pub(crate) concat: Named<FuncVal>,
@@ -39,7 +39,7 @@ impl Default for StrPrelude {
     fn default() -> Self {
         StrPrelude {
             from_utf8: from_utf8(),
-            to_bytes: to_bytes(),
+            into_utf8: into_utf8(),
             length: length(),
             push: push(),
             concat: concat(),
@@ -50,7 +50,7 @@ impl Default for StrPrelude {
 impl Prelude for StrPrelude {
     fn put(&self, m: &mut NameMap) {
         self.from_utf8.put(m);
-        self.to_bytes.put(m);
+        self.into_utf8.put(m);
         self.length.put(m);
         self.push.put(m);
         self.concat.put(m);
@@ -74,13 +74,13 @@ fn fn_from_utf8(input: Val) -> Val {
     }
 }
 
-fn to_bytes() -> Named<FuncVal> {
+fn into_utf8() -> Named<FuncVal> {
     let input_mode = default_mode();
     let output_mode = default_mode();
-    named_free_fn("string.to_bytes", input_mode, output_mode, fn_to_bytes)
+    named_free_fn("string.into_utf8", input_mode, output_mode, fn_into_utf8)
 }
 
-fn fn_to_bytes(input: Val) -> Val {
+fn fn_into_utf8(input: Val) -> Val {
     let Val::String(str) = input else {
         return Val::default();
     };
