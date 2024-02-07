@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::{
     ctx_access::CtxAccessor,
     eval::{
@@ -16,8 +18,11 @@ pub enum Answer {
     Unsolved,
     Unsolvable,
     Unverified(Val),
-    Verified(PropVal),
+    Verified(Verified),
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Verified(pub(crate) PropVal);
 
 pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val) -> Val {
     if !func.is_ctx_free() {
@@ -47,3 +52,21 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
 }
 
 pub(crate) const SOLVER: &str = "solver";
+
+impl Verified {
+    pub fn new(prop_val: PropVal) -> Option<Verified> {
+        if prop_val.proved() {
+            Some(Verified(prop_val))
+        } else {
+            None
+        }
+    }
+}
+
+impl Deref for Verified {
+    type Target = PropVal;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}

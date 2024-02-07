@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::{
     ctx::{
         DefaultCtx,
@@ -11,6 +13,7 @@ use crate::{
         Named,
         Prelude,
     },
+    problem::Verified,
     Answer,
     AnswerVal,
     Bool,
@@ -96,7 +99,10 @@ fn fn_verified(input: Val) -> Val {
     let Val::Prop(prop) = input else {
         return Val::default();
     };
-    Val::Answer(AnswerVal::from(Answer::Verified(prop)))
+    if !prop.proved() {
+        return Val::default();
+    }
+    Val::Answer(AnswerVal::from(Answer::Verified(Verified(prop))))
 }
 
 fn is_unsolved() -> Named<FuncVal> {
@@ -217,7 +223,7 @@ fn fn_evidence(ctx: CtxForConstFn, input: Val) -> Val {
         let Answer::Verified(prop) = &**answer else {
             return Val::default();
         };
-        Val::Prop(prop.clone())
+        Val::Prop(prop.deref().clone())
     })
 }
 
@@ -236,7 +242,7 @@ fn fn_into_evidence(input: Val) -> Val {
     let Val::Answer(answer) = input else {
         return Val::default();
     };
-    let Answer::Verified(prop) = *answer.0 else {
+    let Answer::Verified(Verified(prop)) = *answer.0 else {
         return Val::default();
     };
     Val::Prop(prop)

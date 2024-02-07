@@ -53,6 +53,7 @@ use crate::{
         Prelude,
         PRELUDE,
     },
+    problem::Verified,
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
@@ -494,11 +495,18 @@ pub(crate) fn any_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
     let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
     let prop = if rng.gen() {
-        Prop::new_theorem(func, input)
+        Prop::new_proved(func, input)
     } else {
         let output = any_val(rng, depth);
         Prop::new(func, input, output)
     };
+    PropVal(Reader::new(prop))
+}
+
+pub(crate) fn any_proved_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
+    let func = any_free_func(rng, depth);
+    let input = any_val(rng, depth);
+    let prop = Prop::new_proved(func, input);
     PropVal(Reader::new(prop))
 }
 
@@ -518,7 +526,7 @@ pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
         0 => Answer::Unsolved,
         1 => Answer::Unsolvable,
         2 => Answer::Unverified(any_val(rng, new_depth)),
-        3 => Answer::Verified(any_prop(rng, new_depth)),
+        3 => Answer::Verified(Verified(any_proved_prop(rng, new_depth))),
         _ => unreachable!(),
     };
     AnswerVal::from(Box::new(answer))

@@ -82,7 +82,10 @@ pub use self::{
     logic::Prop,
     map::Map,
     pair::Pair,
-    problem::Answer,
+    problem::{
+        Answer,
+        Verified,
+    },
     reverse::Reverse,
     string::Str,
     symbol::Symbol,

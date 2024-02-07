@@ -55,6 +55,6 @@ fn fn_prove(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let input = func.input_mode.eval(&mut ctx, call.input);
-    let theorem = Prop::new_theorem(func, input);
+    let theorem = Prop::new_proved(func, input);
     Val::Prop(PropVal(Reader::new(theorem)))
 }

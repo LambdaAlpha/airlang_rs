@@ -26,6 +26,10 @@ answer.is_verified answer.unsolvable
 -----
 't
 =====
+;[p = (proposition {function : not, input : 't, output : 'f}), a = (answer.verified p), (type_of p) -=- proposition and (a ==- 'u)]
+-----
+'t
+=====
 ;[a = (answer.verified (proposition.prove (not 't))), answer.input a]
 -----
 't

@@ -43,7 +43,7 @@ impl Prop {
         self.proved
     }
 
-    pub(crate) fn new_theorem(func: FuncVal, input: Val) -> Self {
+    pub(crate) fn new_proved(func: FuncVal, input: Val) -> Self {
         debug_assert_matches!(func.0.evaluator, FuncEval::Free(_));
         let output = func.0.evaluator.eval(&mut FreeCtx, input.clone());
         Self {
