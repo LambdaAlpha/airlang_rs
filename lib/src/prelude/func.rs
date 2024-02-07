@@ -103,6 +103,7 @@ const CTX: &str = "context";
 const INPUT_NAME: &str = "input_name";
 const CALLER_NAME: &str = "caller_name";
 const ID: &str = "id";
+const IS_EXTENSION: &str = "is_extension";
 const INPUT_MODE: &str = "input_mode";
 const OUTPUT_MODE: &str = "output_mode";
 const CALLER_ACCESS: &str = "caller_access";
@@ -200,7 +201,8 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
     map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Lazy));
     map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Lazy));
-    map.insert(symbol(ID), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(ID), symbol_value_mode());
+    map.insert(symbol(IS_EXTENSION), default_mode());
     let output_mode = map_mode_for_some(map);
     named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
@@ -224,6 +226,9 @@ fn fn_repr(input: Val) -> Val {
         FuncEval::Free(eval) => match eval {
             CtxFreeEval::Primitive(p) => {
                 repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                if p.is_extension() {
+                    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                }
             }
             CtxFreeEval::Composed(c) => {
                 repr.insert(symbol(BODY), c.body.clone());
@@ -240,6 +245,9 @@ fn fn_repr(input: Val) -> Val {
             match eval {
                 CtxConstEval::Primitive(p) => {
                     repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                    if p.is_extension() {
+                        repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    }
                 }
                 CtxConstEval::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
@@ -260,6 +268,9 @@ fn fn_repr(input: Val) -> Val {
             match eval {
                 CtxMutableEval::Primitive(p) => {
                     repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                    if p.is_extension() {
+                        repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    }
                 }
                 CtxMutableEval::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());

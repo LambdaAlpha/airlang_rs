@@ -622,6 +622,10 @@ impl<C> Primitive<C> {
     pub(crate) fn get_id(&self) -> &Symbol {
         &self.id
     }
+
+    pub(crate) fn is_extension(&self) -> bool {
+        self.is_extension
+    }
 }
 
 impl Primitive<Box<dyn CtxFreeFn>> {

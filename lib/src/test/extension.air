@@ -22,6 +22,10 @@ function.is_extension func_ext
 -----
 't
 =====
+function.represent func_ext
+-----
+{id : func_ext, is_extension : 't}
+=====
 ;[a = func_ext, b = func_ext, a === b]
 -----
 't
