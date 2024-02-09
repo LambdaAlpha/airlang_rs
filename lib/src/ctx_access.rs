@@ -7,8 +7,10 @@ use crate::{
 };
 
 pub(crate) trait CtxAccessor: CtxTrait {
+    #[allow(unused)]
     fn is_ctx_free(&self) -> bool;
 
+    #[allow(unused)]
     fn is_ctx_const(&self) -> bool;
 
     fn for_const_fn(&mut self) -> CtxForConstFn;
