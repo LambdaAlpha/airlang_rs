@@ -18,7 +18,7 @@ a
 -----
 {'f : 'f}
 =====
-not (not 't)
+not $ not $ 't
 -----
 't
 =====
@@ -26,11 +26,11 @@ not (not 't)
 -----
 a
 =====
-'f [a, 't (not 't), 'f (not 't), 'u a]
+'f [a, 't $ not $ 't, 'f $ not $ 't, 'u a]
 -----
 [a, 'f, not 't, a]
 =====
-'t [not 't, 't (not 't), 'f (not 't), 'u (not 't)]
+'t [not 't, 't $ not $ 't, 'f $ not $ 't, 'u $ not $ 't]
 -----
 ['f, 'f, not 't, not 't]
 =====
@@ -38,10 +38,10 @@ a
 -----
 "a" "b"
 =====
-"a" (not 't)
+"a" $ not $ 't
 -----
 "a" 'f
 =====
-(not 't) (not 't)
+(not 't) $ not $ 't
 -----
 'f 'f

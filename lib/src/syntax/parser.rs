@@ -254,12 +254,13 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     } else if len % 2 == 0 {
         return None;
     }
-    let Token::Default(first) = iter.next().unwrap() else {
+    let mut iter = iter.rev();
+    let Token::Default(last) = iter.next().unwrap() else {
         return None;
     };
     iter.array_chunks::<2>()
-        .try_fold(first, |left, [middle, right]| {
-            let Token::Default(right) = right else {
+        .try_fold(last, |right, [middle, left]| {
+            let Token::Default(left) = left else {
                 return None;
             };
             let repr = match middle {

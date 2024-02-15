@@ -216,6 +216,7 @@ fn generate_symbol(str: &str, s: &mut String) {
     s.push_str(str);
 }
 
+#[allow(unused)]
 fn is_left_open<'a, T>(repr: &'a T) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
 where
     &'a T: TryInto<GenerateRepr<'a, T>>,
@@ -272,6 +273,7 @@ where
     }
 }
 
+#[allow(unused)]
 fn wrap_if_left_open<'a, T>(
     repr: &'a T,
     s: &mut String,
@@ -335,17 +337,23 @@ where
     match (&call.input).try_into()? {
         GenerateRepr::Pair(p) => generate_infix(
             &p.first,
-            |s, format, indent| wrap_if_left_open(&call.func, s, format, indent),
+            |s, format, indent| wrap_if_right_open(&call.func, s, format, indent),
             &p.second,
             s,
             format,
             indent,
         ),
-        _ => {
-            wrap_if_right_open(&call.func, s, format, indent)?;
-            s.push(' ');
-            wrap_if_left_open(&call.input, s, format, indent)
-        }
+        _ => generate_infix(
+            &call.func,
+            |s, _format, _indent| {
+                s.push(CALL_SEPARATOR);
+                Ok(())
+            },
+            &call.input,
+            s,
+            format,
+            indent,
+        ),
     }
 }
 
@@ -388,7 +396,7 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    wrap(is_normal_call(left)?, left, s, format, indent)?;
+    wrap_if_right_open(left, s, format, indent)?;
 
     s.push(' ');
 
@@ -396,7 +404,7 @@ where
 
     s.push(' ');
 
-    wrap_if_left_open(right, s, format, indent)
+    wrap(is_normal_call(right)?, right, s, format, indent)
 }
 
 fn generate_wrapped<'a, T>(

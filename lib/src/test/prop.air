@@ -1,75 +1,75 @@
 ;[
-    p = (proposition {
+    p = proposition $ {
         function : not,
         input : 1,
         output : 2,
-    }),
+    },
     proposition.input p
 ]
 -----
 1
 =====
 ;[
-    p = (proposition {
+    p = proposition $ {
         function : not,
         input : 1,
         output : 2,
-    }),
+    },
     proposition.output p
 ]
 -----
 2
 =====
 ;[
-    p = (proposition {
+    p = proposition $ {
         function : not,
         input : 1,
         output : 2,
-    }),
+    },
     (proposition.function p) -== not
 ]
 -----
 't
 =====
 ;[
-    $map = (function {
+    $map = function $ {
         body : input,
-        input_mode : {map : ('u all 't)},
-    }),
-    m = ($map {
+        input_mode : {map : 'u all 't},
+    },
+    m = $map $ {
         function : not,
         input : 't,
         output : 'f,
-    }),
-    m ==- (proposition.represent (proposition m))
+    },
+    m ==- proposition.represent $ proposition $ m
 ]
 -----
 't
 =====
 ;[
-    m = (proposition.represent (proposition.prove (not 't))),
-    $map = (function {
+    m = proposition.represent $ proposition.prove $ not $ 't,
+    $map = function $ {
         body : input,
-        input_mode : {map : ('u all 't)},
-    }),
-    expected = ($map {
+        input_mode : {map : 'u all 't},
+    },
+    expected = $map $ {
         function : not,
         input : 't,
         output : 'f,
         proved : 't,
-    }),
+    },
     m === expected
 ]
 -----
 't
 =====
 ;[
-    p = (proposition {
+    p = proposition $ {
         function : not,
         input : 1,
         output : 2,
-    }),
-    ((type_of p) -=- ('u proposition)) and ((proposition.proved p) -=- 'f)
+    },
+    ((type_of p) -=- 'u $ proposition) and (proposition.proved p) -=- 'f
 ]
 -----
 't

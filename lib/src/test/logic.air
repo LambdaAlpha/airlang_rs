@@ -1,26 +1,26 @@
 ;[
-    p = (proposition.prove (not (not 'f))),
+    p = proposition.prove $ not $ (not 'f),
     proposition.input p
 ]
 -----
 't
 =====
 ;[
-    p = (proposition.prove (not 't)),
+    p = proposition.prove $ not $ 't,
     proposition.output p
 ]
 -----
 'f
 =====
 ;[
-    p = (proposition.prove (not 't)),
+    p = proposition.prove $ not $ 't,
     (proposition.function p) -== not
 ]
 -----
 't
 =====
 ;[
-    p = (proposition.prove (not 't)),
+    p = proposition.prove $ not $ 't,
     proposition.proved p
 ]
 -----

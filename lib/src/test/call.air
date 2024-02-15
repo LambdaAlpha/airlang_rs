@@ -2,14 +2,14 @@
 -----
 'f
 =====
-'t | not | not and 't
+(('t | not) | not) and 't
 -----
 't
 =====
-;[a = 1, b = ('u a), $$ (read b)]
+;[a = 1, b = 'u $ a, $$ $ read $ b]
 -----
 1
 =====
-$$ (`u (not 'f))
+$$ $ `u $ not $ 'f
 -----
 't

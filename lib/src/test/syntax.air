@@ -6,7 +6,7 @@ parse "[1, 2]"
 -----
 a
 =====
-parse (stringify [1, 2])
+parse $ stringify $ [1, 2]
 -----
 [1, 2]
 =====

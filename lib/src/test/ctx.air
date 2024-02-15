@@ -6,15 +6,15 @@
 -----
 'u
 =====
-;[a = 1, b = ('u a), read ('t b)]
+;[a = 1, b = 'u $ a, read $ 't $ b]
 -----
 1
 =====
-;[a = ('u context {b : 1}), a .. (read b)]
+;[a = 'u context {b : 1}, a .. read $ b]
 -----
 1
 =====
-;[a = ('u context {b : 1}), a .. (read b)]
+;[a = 'u context {b : 1}, a .. read $ b]
 -----
 1
 =====
@@ -34,47 +34,47 @@
 -----
 'u
 =====
-;[a = ('u b), b = 1, move ('t a)]
+;[a = 'u $ b, b = 1, move $ 't $ a]
 -----
 1
 =====
-;[a = ('u context {b : 1}), a .. (move b)]
+;[a = 'u context {b : 1}, a .. move $ b]
 -----
 1
 =====
-;[a = ('u context {b : 1}), a .. (move b), a .. (read b)]
+;[a = 'u context {b : 1}, a .. move $ b, a .. read $ b]
 -----
 'u
 =====
-;[a = ('u context {b : 1}), a .. (move b)]
+;[a = 'u context {b : 1}, a .. move $ b]
 -----
 1
 =====
-;[a = ('u context {b : 1}), a .. (move b), a .. (read b)]
+;[a = 'u context {b : 1}, a .. move $ b, a .. read $ b]
 -----
 'u
 =====
-;[a = ('u context {b : 1}), a .. (read b)]
+;[a = 'u context {b : 1}, a .. read $ b]
 -----
 1
 =====
-;[a = ('u context {}), b = 1, a .. (b = b), a .. (read b)]
+;[a = 'u context {}, b = 1, a .. b = b, a .. read $ b]
 -----
 1
 =====
-;[a = 1, [] .. (b = a), b]
+;[a = 1, [] .. b = a, b]
 -----
 1
 =====
-;[a = ('u context {b : ('u context {})}), c = 1, [a, b] .. (d = c), [a, b] .. (read d)]
+;[a = 'u context {b : 'u context {}}, c = 1, [a, b] .. d = c, [a, b] .. read $ d]
 -----
 1
 =====
-;[a = ('u context {}), b = 1, a .. ((b ': final) = b), a .. (is_final b)]
+;[a = 'u context {}, b = 1, a .. (b ': final) = b, a .. is_final $ b]
 -----
 't
 =====
-;[a = ('u context {}), b = 1, a .. ((b ': constant) = b), a .. (is_constant b)]
+;[a = 'u context {}, b = 1, a .. (b ': constant) = b, a .. is_constant $ b]
 -----
 't
 =====
@@ -94,7 +94,7 @@
 -----
 1
 =====
-;[a = ('u b), $$ (a = 1), b]
+;[a = 'u $ b, $$ $ a = 1, b]
 -----
 1
 =====
@@ -102,43 +102,43 @@
 -----
 't
 =====
-;[(a ': {invariant : final, local}) = 1, (is_final a) and (is_local a)]
+;[(a ': {invariant : final, local}) = 1, (is_final a) and is_local $ a]
 -----
 't
 =====
-;[(a : b) = (1 : 2), a]
+;[(a : b) = 1 : 2, a]
 -----
 1
 =====
-;[(a : b) = (1 : 2), b]
+;[(a : b) = 1 : 2, b]
 -----
 2
 =====
-;[(a : b : c) = (1 : 2 : 3), [a, b, c]]
+;[(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-;[(a : b ': final) = (1 : 2), (is_final a) and (is_final b)]
+;[((a : b) ': final) = 1 : 2, (is_final a) and is_final $ b]
 -----
 't
 =====
-;[((a ': final) : (b ': constant)) = (1 : 2), (is_final a) and (is_constant b)]
+;[((a ': final) : (b ': constant)) = 1 : 2, (is_final a) and is_constant $ b]
 -----
 't
 =====
-;[(f a) = ('u (1 2)), [f, a]]
+;[(f a) = 'u $ 1 $ 2, [f, a]]
 -----
 [1, 2]
 =====
-;[(a b c) = ('u (1 2 3)), [a, b, c]]
+;[(a b c) = 'u $ 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-;[a ': b ': none = (1 2 3), [a, ':, b]]
+;[((a ': b) ': none) = 1 2 3, [a, ':, b]]
 -----
 [1, 2, 3]
 =====
-;[(f ? b) = (1 ? 2), [f, b]]
+;[(f ? b) = 1 ? 2, [f, b]]
 -----
 [1, 2]
 =====
@@ -190,7 +190,7 @@
 -----
 {1 : 1, 2 : 2}
 =====
-;[a = 1, b = 2, (a : b) = (3 : 4)]
+;[a = 1, b = 2, (a : b) = 3 : 4]
 -----
 1 : 2
 =====
@@ -210,15 +210,15 @@
 -----
 1
 =====
-;[(a ': final) = (1 : 2), a set_1 3, a]
+;[(a ': final) = 1 : 2, a set_1 3, a]
 -----
 3 : 2
 =====
-;[(a : b ': final) = (1 : 2), (is_final a) and (is_final b)]
+;[((a : b) ': final) = 1 : 2, (is_final a) and is_final $ b]
 -----
 't
 =====
-;[(a ': constant) = (1 : 2), a set_1 3, a]
+;[(a ': constant) = 1 : 2, a set_1 3, a]
 -----
 1 : 2
 =====
@@ -234,7 +234,7 @@
 -----
 1
 =====
-;[(a : b ': constant) = (1 : 2), (is_constant a) and (is_constant b)]
+;[((a : b) ': constant) = 1 : 2, (is_constant a) and is_constant $ b]
 -----
 't
 =====
@@ -242,19 +242,19 @@
 -----
 1
 =====
-;[a = (1 : 2), set_final a, a set_1 3, a]
+;[a = 1 : 2, set_final a, a set_1 3, a]
 -----
 3 : 2
 =====
-;[(a ': constant) = (1 : 2), set_final a, a set_1 3, a]
+;[(a ': constant) = 1 : 2, set_final a, a set_1 3, a]
 -----
 1 : 2
 =====
-;[a = ('u context {b : 1}), a .. (set_final b), a .. (is_final b)]
+;[a = 'u context {b : 1}, a .. set_final $ b, a .. is_final $ b]
 -----
 't
 =====
-;[a = (1 : 2), set_constant a, a set_1 3, a]
+;[a = 1 : 2, set_constant a, a set_1 3, a]
 -----
 1 : 2
 =====
@@ -262,11 +262,11 @@
 -----
 1
 =====
-;[a = ('u context {b : 1}), a .. (set_constant b), a .. (is_constant b)]
+;[a = 'u context {b : 1}, a .. set_constant $ b, a .. is_constant $ b]
 -----
 't
 =====
-;[(a ': final) = (1 : 2), set_constant a, a set_1 3, a]
+;[(a ': final) = 1 : 2, set_constant a, a set_1 3, a]
 -----
 1 : 2
 =====
@@ -286,22 +286,22 @@ is_final a
 -----
 't
 =====
-;[': = ('u ':), final = ('u final), a = ('u context {b : (1 ': final)}), a .. (is_final b)]
+;[': = 'u $ ':, final = 'u $ final, a = 'u context {b : 1 ': final}, a .. is_final $ b]
 -----
 't
 =====
-;[': = ('u ':), final = ('u final), a = ('u context {b : (1 ': 2 ': final)}), a .. (read b)]
+;[': = 'u $ ':, final = 'u $ final, a = 'u context {b : (1 ': 2) ': final}, a .. read $ b]
 -----
 1 ': 2
 =====
 ;[
-    ': = (function {
+    ': = function $ {
         body : (': (move input)),
-        input_mode : {pair : ('t : 'u)},
-        context : ('u context {': : ('u ':), : move}),
-    }),
-    a = ('u context {b : (1 ': final)}),
-    a .. (is_final b)
+        input_mode : {pair : 't : 'u},
+        context : 'u context {': : 'u $ ':, : move},
+    },
+    a = 'u context {b : 1 ': final},
+    a .. is_final $ b
 ]
 -----
 't
@@ -322,7 +322,7 @@ is_constant a
 -----
 't
 =====
-;[': = ('u ':), constant = ('u constant), a = ('u context {b : (1 ': constant)}), a .. (is_constant b)]
+;[': = 'u $ ':, constant = 'u $ constant, a = 'u context {b : 1 ': constant}, a .. is_constant $ b]
 -----
 't
 =====
@@ -334,11 +334,11 @@ is_null a
 -----
 'f
 =====
-;[a = ('u context {}), a .. (is_null b)]
+;[a = 'u context {}, a .. is_null $ b]
 -----
 't
 =====
-;[a = ('u context {b : 1}), a .. (is_null b)]
+;[a = 'u context {b : 1}, a .. is_null $ b]
 -----
 'f
 =====
@@ -350,47 +350,47 @@ is_local a
 -----
 't
 =====
-;[a = ('u context {}), set_meta ('u context {super : a}), b = 1, is_local b]
+;[a = 'u context {}, set_meta $ 'u context {super : a}, b = 1, is_local b]
 -----
 'f
 =====
 ;[
-    a = ('u context {b : ('u context {})}),
-    a .. (c = 1),
-    a .. (set_meta ('u context {super : b})),
-    a .. (is_local c)
+    a = 'u context {b : 'u context {}},
+    a .. c = 1,
+    a .. set_meta $ 'u context {super : b},
+    a .. is_local $ c
 ]
 -----
 't
 =====
-;[a = ('u context {super : b} context {b : ('u context {})}), a .. (c = 1), a .. (is_local c)]
+;[a = ('u context {super : b}) context {b : 'u context {}}, a .. c = 1, a .. is_local $ c]
 -----
 'f
 =====
-;[a = ('u context {b : 1, : ;, : =}), a .. (; [b = 2, b])]
+;[a = 'u context {b : 1, : ;, : =}, a .. ; $ [b = 2, b]]
 -----
 2
 =====
-;[': = ('u ':), final = ('u final), a = ('u context {b : (1 ': final), : ;, : =}), a .. (; [b = 2, b])]
+;[': = 'u $ ':, final = 'u $ final, a = 'u context {b : 1 ': final, : ;, : =}, a .. ; $ [b = 2, b]]
 -----
 1
 =====
 ;[
-    ': = ('u ':),
-    constant = ('u constant),
-    a = ('u context {b : (1 : 2 ': constant), : ;, : set_1}),
+    ': = 'u $ ':,
+    constant = 'u $ constant,
+    a = 'u context {b : (1 : 2) ': constant, : ;, : set_1},
     a .. (; [b set_1 3, b])
 ]
 -----
 1 : 2
 =====
 ;[
-    mm = ('u context {super : ('u s)}),
-    s = ('u context {super : ('u c)}),
-    m = ((move mm) context {s : (move s)}),
-    c = ('u context {d : 1}),
-    ctx = ((move m) context {c : (move c)}),
-    ctx .. (read d)
+    mm = 'u context {super : 'u $ s},
+    s = 'u context {super : 'u $ c},
+    m = (move mm) context {s : move $ s},
+    c = 'u context {d : 1},
+    ctx = (move m) context {c : move $ c},
+    ctx .. read $ d
 ]
 -----
 1
@@ -399,217 +399,217 @@ access 'u
 -----
 mutable
 =====
-'u .. (access 'u)
+'u .. access $ 'u
 -----
 free
 =====
-;[a ': constant = ('u context {}), a .. (access 'u)]
+;[(a ': constant) = 'u context {}, a .. access $ 'u]
 -----
 constant
 =====
-;[a = ('u context {}), a .. (access 'u)]
+;[a = 'u context {}, a .. access $ 'u]
 -----
 mutable
 =====
-;[a = ('u context {b : 1}), set_meta ('u context {super : ('u a)}), b]
+;[a = 'u context {b : 1}, set_meta $ 'u context {super : 'u $ a}, b]
 -----
 1
 =====
-;[a = ('u context {b : 1}), b = 2, set_meta ('u context {super : ('u a)}), b]
+;[a = 'u context {b : 1}, b = 2, set_meta $ 'u context {super : 'u $ a}, b]
 -----
 2
 =====
-;[a = ('u context {}), set_meta ('u context {super : ('u a)}), b = 1, b : (a .. (read b))]
+;[a = 'u context {}, set_meta $ 'u context {super : 'u $ a}, b = 1, b : a .. read $ b]
 -----
 1 : 1
 =====
-;[a = ('u context {}), b = 1, set_meta ('u context {super : ('u a)}), b = 2, b : (a .. (read b))]
+;[a = 'u context {}, b = 1, set_meta $ 'u context {super : 'u $ a}, b = 2, b : a .. read $ b]
 -----
 2 : 'u
 =====
-;[a = ('u context {b : (1 : 2)}), set_meta ('u context {super : ('u a)}), b set_1 3, a .. (read b)]
+;[a = 'u context {b : 1 : 2}, set_meta $ 'u context {super : 'u $ a}, b set_1 3, a .. read $ b]
 -----
 3 : 2
 =====
-;[a = ('u context {b : 1}), set_meta ('u context {super : ('u a)}), (move b) : (a .. (read b))]
+;[a = 'u context {b : 1}, set_meta $ 'u context {super : 'u $ a}, (move b) : a .. read $ b]
 -----
 1 : 'u
 =====
-;[a = ('u context {b : 1}), b = 2, set_meta ('u context {super : ('u a)}), (move b) : (a .. (read b))]
+;[a = 'u context {b : 1}, b = 2, set_meta $ 'u context {super : 'u $ a}, (move b) : a .. read $ b]
 -----
 2 : 1
 =====
-;[a = ('u context {}), set_meta ('u context {super : ('u a)}), (b ': local) = 2, b : (a .. (read b))]
+;[a = 'u context {}, set_meta $ 'u context {super : 'u $ a}, (b ': local) = 2, b : a .. read $ b]
 -----
 2 : 'u
 =====
-;[a = ('u context {}), set_meta ('u context {super : ('u a)}), (b : c ': local) = (1 : 2), b]
+;[a = 'u context {}, set_meta $ 'u context {super : 'u $ a}, ((b : c) ': local) = 1 : 2, b]
 -----
 1
 =====
-;[a = (('u context {super : ('u b)}) context {b : ('u context {c : 1})}), a .. (read c)]
+;[a = ('u context {super : ('u b)}) context {b : 'u context {c : 1}}, a .. read $ c]
 -----
 1
 =====
-context.represent ('u context {})
+context.represent $ 'u context {}
 -----
 'u : {}
 =====
 ;[
-    (meta : m) = (context.represent ('u context {super : ('u b)} context {a : 1})),
-    meta = (context.represent (move meta)),
+    (meta : m) = context.represent $ ('u context {super : ('u b)}) context {a : 1},
+    meta = context.represent $ move $ meta,
     meta : m
 ]
 -----
-'u : {super : b} : {a : 1}
+('u : {super : b}) : {a : 1}
 =====
-;[': = ('u ':), final = ('u final), context.represent ('u context {a : (1 ': final)})]
+;[': = 'u $ ':, final = 'u $ final, context.represent $ 'u context {a : 1 ': final}]
 -----
-'u : {a : (1 ': final)}
+'u : {a : 1 ': final}
 =====
-;[(_ : m) = (context.represent ('u context {b : ('u context {})})), b = (m map.remove ('u b)), type_of b]
+;[(_ : m) = context.represent $ 'u context {b : 'u context {}}, b = m map.remove 'u $ b, type_of b]
 -----
 context
 =====
-;[a = ('u context {}), a .. (has_meta 'u)]
+;[a = 'u context {}, a .. has_meta $ 'u]
 -----
 'f
 =====
-;[a = ('u context {} context {}), a .. (has_meta 'u)]
+;[a = ('u context {}) context {}, a .. has_meta $ 'u]
 -----
 't
 =====
 ;[
-    a = ('u context {b : ('u context {c : 1})}),
-    a .. (set_meta ('u context {super : ('u b)})),
-    a .. (read c)
+    a = 'u context {b : 'u context {c : 1}},
+    a .. set_meta $ 'u context {super : 'u $ b},
+    a .. read $ c
 ]
 -----
 1
 =====
 ;[
-    a = ('u context {b : ('u context {c : ('u context {d : 1})})}),
-    [a, b] .. (set_meta ('u context {super : ('u c)})),
-    [a, b] .. (read d)
+    a = 'u context {b : 'u context {c : 'u context {d : 1}}},
+    [a, b] .. set_meta $ 'u context {super : 'u $ c},
+    [a, b] .. read $ d
 ]
 -----
 1
 =====
-;[a = ('u context {super : ('u b)} context {b : ('u context {c : 1})}), [a, 't] .. (read super)]
+;[a = ('u context {super : 'u $ b}) context {b : 'u context {c : 1}}, [a, 't] .. read $ super]
 -----
 b
 =====
-;[a = ('u context {}), set_meta ('u context {super : ('u a)}), 't .. (read super)]
+;[a = 'u context {}, set_meta $ 'u context {super : 'u $ a}, 't .. read $ super]
 -----
 a
 =====
 ;[
-    a = ('u context {b : ('u context {c : ('u context {})})}),
-    [a, b] .. (set_meta ('u context {super : ('u c)})),
-    [a, b, 't] .. (read super)
+    a = 'u context {b : 'u context {c : 'u context {}}},
+    [a, b] .. set_meta $ 'u context {super : 'u $ c},
+    [a, b, 't] .. read $ super
 ]
 -----
 c
 =====
-;[a = ('u context {} context {}), a .. (set_meta 'u), a .. (has_meta 'u)]
+;[a = ('u context {}) context {}, a .. set_meta $ 'u, a .. has_meta $ 'u]
 -----
 'f
 =====
-;[a = (prelude 'u), a .. (not 't)]
+;[a = prelude $ 'u, a .. not $ 't]
 -----
 'f
 =====
-;[a = (prelude 'u), a .. (is_null prelude)]
+;[a = prelude $ 'u, a .. is_null $ prelude]
 -----
 'f
 =====
-;[a = 1, b = (prelude 'u), b .. (is_null a)]
+;[a = 1, b = prelude $ 'u, b .. is_null $ a]
 -----
 't
 =====
-;[a = (prelude 'u), a .. (is_constant prelude)]
+;[a = prelude $ 'u, a .. is_constant $ prelude]
 -----
 't
 =====
-;[a = 1, b = (this 'u), b .. (read a)]
+;[a = 1, b = this $ 'u, b .. read $ a]
 -----
 1
 =====
-;[a = (this 'u), b = 1, a .. (is_null b)]
+;[a = this $ 'u, b = 1, a .. is_null $ b]
 -----
 't
 =====
-'u .. (this 'u)
+'u .. this $ 'u
 -----
 'u
 =====
-'u .. (1 + 1)
+'u .. 1 + 1
 -----
 2
 =====
-;[a = 1, 'u .. (move a)]
+;[a = 1, 'u .. move $ a]
 -----
 'u
 =====
-'u .. (; ('f [a ('t =) 1, a]))
+'u .. ; $ 'f $ [a ('t =) 1, a]
 -----
 'u
 =====
-'u .. (get_1 (1 : 2))
+'u .. get_1 $ 1 : 2
 -----
 1
 =====
-;[[] .. (a = 1), a]
+;[[] .. a = 1, a]
 -----
 1
 =====
-;[c = ('u context {a : 1}), a = (c .. (a = 2)), a]
+;[c = 'u context {a : 1}, a = c .. a = 2, a]
 -----
 1
 =====
-;[a = ('u context {}), a .. (b = 1), a .. (read b)]
+;[a = 'u context {}, a .. b = 1, a .. read $ b]
 -----
 1
 =====
-;[(a ': constant) = ('u context {b : 1}), a .. (read b)]
+;[(a ': constant) = 'u context {b : 1}, a .. read $ b]
 -----
 1
 =====
-;[(a ': constant) = ('u context {b : 1}), a .. (b = 2), a .. (read b)]
+;[(a ': constant) = 'u context {b : 1}, a .. b = 2, a .. read $ b]
 -----
 1
 =====
-;[': = ('u ':), constant = ('u constant), a = ('u context {b : (1 ': constant)}), a .. (read b)]
+;[': = 'u $ ':, constant = 'u $ constant, a = 'u context {b : 1 ': constant}, a .. read $ b]
 -----
 1
 =====
-;[set_meta ('u context {a : 1}), 't .. (read a)]
+;[set_meta $ 'u context {a : 1}, 't .. read $ a]
 -----
 1
 =====
 ;[
     set_first = set_1,
-    a = ('u context {set_first : (move set_first), p : (1 : 2)}),
+    a = 'u context {set_first : move $ set_first, p : 1 : 2},
     b = 3,
-    a :. (p set_first b),
-    a .. (read p),
+    a :. p set_first b,
+    a .. read $ p,
 ]
 -----
 3 : 2
 =====
 ;[
-    a = ('u context {p : (1 : 2), b : 3}),
-    a .: (p set_1 b),
-    a .. (read p),
+    a = 'u context {p : 1 : 2, b : 3},
+    a .: p set_1 b,
+    a .. read $ p,
 ]
 -----
 3 : 2
 =====
 ;[
     set_first = set_1,
-    a = ('u context {set_first : (move set_first), p : (1 : 2), b : 3}),
-    a :: (p set_first b),
-    a .. (read p),
+    a = 'u context {set_first : move $ set_first, p : 1 : 2, b : 3},
+    a :: p set_first b,
+    a .. read $ p,
 ]
 -----
 3 : 2

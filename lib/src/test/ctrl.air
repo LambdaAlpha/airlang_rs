@@ -52,12 +52,12 @@ a ;return [a = 1]
     while [
         b < 5,
         continue ;return [
-            b = (b + 1),
+            b = b + 1,
             if [
                 b ==- 2,
                 continue = 'u,
             ],
-            a = (a + b),
+            a = a + b,
         ]
     ],
     a
@@ -69,14 +69,14 @@ a ;return [a = 1]
     a = 0,
     b = 0,
     while [
-        (is_null return) and (b < 5),
+        (is_null return) and b < 5,
         'u ;return [
             if [
                 a > 5,
                 return = a,
             ],
-            b = (b + 1),
-            a = (a + b),
+            b = b + 1,
+            a = a + b,
         ]
     ],
     a
@@ -112,7 +112,7 @@ if ['u, 1, 2, 3]
 -----
 3
 =====
-;[a = 1, match [a, {1 : (1 + 2), 2 : (2 + 3)}]]
+;[a = 1, match [a, {1 : 1 + 2, 2 : 2 + 3}]]
 -----
 3
 =====
@@ -124,11 +124,11 @@ match [3, {1 : 2, 2 : 3}, 4]
 -----
 4
 =====
-;[match [1, {1 : (a = 1), 2 : (b = 2)}, c = 3], [a, b, c]]
+;[match [1, {1 : a = 1, 2 : b = 2}, c = 3], [a, b, c]]
 -----
 [1, 'u, 'u]
 =====
-;[match [3, {1 : (a = 1), 2 : (b = 2)}, c = 3], [a, b, c]]
+;[match [3, {1 : a = 1, 2 : b = 2}, c = 3], [a, b, c]]
 -----
 ['u, 'u, 3]
 =====
@@ -148,8 +148,8 @@ match ['u a, {('u a) : 1, ('u b) : 2}]
     a = 0,
     b = 0,
     while [a < 100, ;[
-        a = (a + 17),
-        b = (b + 1)
+        a = a + 17,
+        b = b + 1
     ]],
     b
 ]
@@ -161,8 +161,8 @@ match ['u a, {('u a) : 1, ('u b) : 2}]
     b = 24,
     while [a <> b,
         if[a > b,
-            a = (a - b),
-            b = (b - a)
+            a = a - b,
+            b = b - a
         ]
     ],
     a

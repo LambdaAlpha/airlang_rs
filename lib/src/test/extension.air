@@ -34,14 +34,14 @@ function.represent func_ext
 -----
 1
 =====
-'u .. (func_ext 1)
+'u .. func_ext $ 1
 -----
 1
 =====
-$$ (func_ext 1)
+$$ $ func_ext $ 1
 -----
 1
 =====
-;[p = (proposition.prove (func_ext 't)), proposition.proved p]
+;[p = proposition.prove $ func_ext $ 't, proposition.proved p]
 -----
 't

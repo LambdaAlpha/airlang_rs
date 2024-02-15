@@ -32,33 +32,31 @@ The Air language seeks to solve programming problems once and for all.
 ## Demo
 
 ```Air
-"Demonstration of the gcd algorithm"
-@
-(; [
-    ctx = ('u context {
+"Demonstration of the gcd algorithm" @ ; $ [
+    ctx = 'u context {
         : ;,
         : =,
         : while,
         : <>,
         : %,
-    }),
-    gcd = (function {
-        body : (; [
+    },
+    gcd = function $ {
+        body : ; $ [
             (x : y) = input,
             while [
                 y <> 0,
                 ; [
                     z = y,
-                    y = (x % y),
+                    y = x % y,
                     x = z,
                 ],
             ],
             x
-        ]),
-        context : (move ctx),
-    }),
+        ],
+        context : move $ ctx,
+    },
     42 gcd 24
-])
+]
 ```
 
 ## License

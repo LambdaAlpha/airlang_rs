@@ -1,6 +1,6 @@
 "bench interpret" @
 (; [
-  ctx = ('u context {
+  ctx = 'u context {
     : ;,
     : while,
     : <>,
@@ -8,7 +8,7 @@
     : >,
     : =,
     : -,
-  }),
+  },
   f = (function {
     body : (; [
       (x : y) = input,
@@ -16,8 +16,8 @@
         x <> y,
         if [
           x > y,
-          x = (x - y),
-          y = (y - x)
+          x = x - y,
+          y = y - x
         ]
       ],
       x

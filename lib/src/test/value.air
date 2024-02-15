@@ -1,60 +1,60 @@
-;[u = (any unit), type_of u]
+;[u = any $ unit, type_of u]
 -----
 unit
 =====
-;[b = (any bool), type_of b]
+;[b = any $ bool, type_of b]
 -----
 bool
 =====
-;[i = (any int), type_of i]
+;[i = any $ int, type_of i]
 -----
 int
 =====
-;[f = (any float), type_of f]
+;[f = any $ float, type_of f]
 -----
 float
 =====
-;[b = (any bytes), type_of b]
+;[b = any $ bytes, type_of b]
 -----
 bytes
 =====
-;[s = (any symbol), type_of s]
+;[s = any $ symbol, type_of s]
 -----
 symbol
 =====
-;[s = (any string), type_of s]
+;[s = any $ string, type_of s]
 -----
 string
 =====
-;[p = (any pair), type_of p]
+;[p = any $ pair, type_of p]
 -----
 pair
 =====
-;[c = (any call), type_of c]
+;[c = any $ call, type_of c]
 -----
 call
 =====
-;[r = (any reverse), type_of r]
+;[r = any $ reverse, type_of r]
 -----
 reverse
 =====
-;[c = (any context), type_of c]
+;[c = any $ context, type_of c]
 -----
 context
 =====
-;[f = (any function), type_of f]
+;[f = any $ function, type_of f]
 -----
 function
 =====
-;[p = (any proposition), type_of p]
+;[p = any $ proposition, type_of p]
 -----
 proposition
 =====
-;[a = (any answer), type_of a]
+;[a = any $ answer, type_of a]
 -----
 answer
 =====
-;[e = (any extension), type_of e]
+;[e = any $ extension, type_of e]
 -----
 extension
 =====
@@ -66,7 +66,7 @@ unit
 -----
 bool
 =====
-type_of (not 't)
+type_of $ not $ 't
 -----
 'f : bool
 =====
@@ -82,7 +82,7 @@ float
 -----
 bytes
 =====
-;[a = ('u a), type_of a]
+;[a = 'u $ a, type_of a]
 -----
 symbol
 =====
@@ -90,15 +90,15 @@ symbol
 -----
 string
 =====
-;[a = (1 : 2), type_of a]
+;[a = 1 : 2, type_of a]
 -----
 pair
 =====
-;[a = ('u (f a)), type_of a]
+;[a = 'u $ f $ a, type_of a]
 -----
 call
 =====
-;[a = ('u (f ? a)), type_of a]
+;[a = 'u $ f ? a, type_of a]
 -----
 reverse
 =====
@@ -110,19 +110,19 @@ list
 -----
 map
 =====
-;[a = (function {body : input}), type_of a]
+;[a = function $ {body : input}, type_of a]
 -----
 function
 =====
-;[a = ('u context {}), type_of a]
+;[a = 'u context {}, type_of a]
 -----
 context
 =====
-;[a = (proposition {function : not, input : 't, output : 'f}), type_of a]
+;[a = proposition $ {function : not, input : 't, output : 'f}, type_of a]
 -----
 proposition
 =====
-;[a = (proposition.prove (not 't)), type_of a]
+;[a = proposition.prove $ not $ 't, type_of a]
 -----
 proposition
 =====
@@ -170,26 +170,26 @@ proposition
 -----
 't
 =====
-;[a = (function {body : input}), b = (function {body : input}), a === b and (a =/- 'u)]
+;[a = function $ {body : input}, b = function $ {body : input}, (a === b) and a =/- 'u]
 -----
 't
 =====
-;[a = ('u context {}), b = ('u context {}), a === b and (a =/- 'u)]
+;[a = 'u context {}, b = 'u context {}, (a === b) and a =/- 'u]
 -----
 't
 =====
 ;[
-    a = (proposition {function : not, input : 't, output : 'f}),
-    b = (proposition {function : not, input : 't, output : 'f}),
-    a === b and (a =/- 'u)
+    a = proposition $ {function : not, input : 't, output : 'f},
+    b = proposition $ {function : not, input : 't, output : 'f},
+    (a === b) and a =/- 'u
 ]
 -----
 't
 =====
 ;[
-    a = (answer.unverified 1),
-    b = (answer.unverified 1),
-    a === b and (a =/- 'u)
+    a = answer.unverified $ 1,
+    b = answer.unverified $ 1,
+    (a === b) and a =/- 'u
 ]
 -----
 't
