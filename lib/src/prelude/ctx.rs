@@ -288,14 +288,14 @@ fn assign_list(ctx: &mut CtxForMutableFn, name: ListVal, val: Val, options: Assi
     };
     let mut list = List::default();
     let mut name_iter = name.into_iter();
-    let mut val_iter = val.into_iter();
+    let mut val_iter: Box<dyn ExactSizeIterator<Item = Val>> = Box::new(val.into_iter());
     while let (Some(name), val) = (name_iter.next(), val_iter.next()) {
         if let Val::Symbol(s) = &name {
             if &**s == "..." {
                 let name_len = name_iter.len();
                 let val_len = val_iter.len();
                 if val_len > name_len {
-                    val_iter.advance_by(val_len - name_len).unwrap();
+                    val_iter = Box::new(val_iter.skip(val_len - name_len));
                 }
                 list.push(Val::default());
                 continue;
@@ -896,12 +896,14 @@ fn fn_ctx_repr(input: Val) -> Val {
         .into_iter()
         .map(|(k, v)| {
             let k = Val::Symbol(k);
-            let use_normal_form = if let Val::Call(call) = &v.val
-                && let Val::Symbol(func) = &call.func
-                && &**func == CTX_VALUE_PAIR
-            {
-                true
-            } else {
+            let use_normal_form = 'a: {
+                if let Val::Call(call) = &v.val {
+                    if let Val::Symbol(func) = &call.func {
+                        if &**func == CTX_VALUE_PAIR {
+                            break 'a true;
+                        }
+                    }
+                }
                 matches!(v.tag, InvariantTag::Final | InvariantTag::Const)
             };
             let v = if use_normal_form {

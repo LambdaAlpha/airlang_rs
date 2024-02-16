@@ -1,6 +1,6 @@
 use std::{
     cmp::min,
-    mem::variant_count,
+    rc::Rc,
 };
 
 use rand::{
@@ -57,7 +57,6 @@ use crate::{
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
-    types::refer::Reader,
     unit::Unit,
     val::{
         call::CallVal,
@@ -415,7 +414,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         let input_mode = any_io_mode(rng, depth);
         let output_mode = any_io_mode(rng, depth);
-        let evaluator = match rng.gen_range(0..variant_count::<FuncEval>()) {
+        let evaluator = match rng.gen_range(0..3) {
             0 => FuncEval::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
@@ -445,7 +444,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
             output_mode,
             evaluator,
         };
-        FuncVal(Reader::new(func))
+        FuncVal(Rc::new(func))
     }
 }
 
@@ -487,7 +486,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
             output_mode,
             evaluator,
         };
-        FuncVal(Reader::new(func))
+        FuncVal(Rc::new(func))
     }
 }
 
@@ -500,14 +499,14 @@ pub(crate) fn any_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
         let output = any_val(rng, depth);
         Prop::new(func, input, output)
     };
-    PropVal(Reader::new(prop))
+    PropVal(Rc::new(prop))
 }
 
 pub(crate) fn any_proved_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
     let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
     let prop = Prop::new_proved(func, input);
-    PropVal(Reader::new(prop))
+    PropVal(Rc::new(prop))
 }
 
 pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {

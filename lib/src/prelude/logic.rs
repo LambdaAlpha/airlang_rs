@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     ctx::NameMap,
     eval::Evaluator,
@@ -10,7 +12,6 @@ use crate::{
         Named,
         Prelude,
     },
-    types::refer::Reader,
     val::{
         func::FuncVal,
         prop::PropVal,
@@ -56,5 +57,5 @@ fn fn_prove(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
     let input = func.input_mode.eval(&mut ctx, call.input);
     let theorem = Prop::new_proved(func, input);
-    Val::Prop(PropVal(Reader::new(theorem)))
+    Val::Prop(PropVal(Rc::new(theorem)))
 }

@@ -30,7 +30,7 @@ impl TryInto<MapRepr> for &MapVal {
     fn try_into(self) -> Result<MapRepr, Self::Error> {
         self.into_iter()
             .map(|(k, v)| Ok((k.try_into()?, v.try_into()?)))
-            .try_collect()
+            .collect::<Result<MapRepr, _>>()
     }
 }
 
@@ -39,6 +39,6 @@ impl TryInto<MapRepr> for MapVal {
     fn try_into(self) -> Result<MapRepr, Self::Error> {
         self.into_iter()
             .map(|(k, v)| Ok((k.try_into()?, v.try_into()?)))
-            .try_collect()
+            .collect::<Result<MapRepr, _>>()
     }
 }

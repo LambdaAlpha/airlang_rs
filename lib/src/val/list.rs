@@ -22,13 +22,17 @@ impl From<ListRepr> for ListVal {
 impl TryInto<ListRepr> for ListVal {
     type Error = ReprError;
     fn try_into(self) -> Result<ListRepr, Self::Error> {
-        self.into_iter().map(|v| v.try_into()).try_collect()
+        self.into_iter()
+            .map(|v| v.try_into())
+            .collect::<Result<ListRepr, _>>()
     }
 }
 
 impl TryInto<ListRepr> for &ListVal {
     type Error = ReprError;
     fn try_into(self) -> Result<ListRepr, Self::Error> {
-        self.iter().map(|v| v.try_into()).try_collect()
+        self.iter()
+            .map(|v| v.try_into())
+            .collect::<Result<ListRepr, _>>()
     }
 }

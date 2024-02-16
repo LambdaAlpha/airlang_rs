@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     bool::Bool,
     ctx::{
@@ -23,7 +25,6 @@ use crate::{
         Named,
         Prelude,
     },
-    types::refer::Reader,
     val::{
         func::FuncVal,
         map::MapVal,
@@ -99,7 +100,7 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let output = map_remove(&mut map, OUTPUT);
     let output = func.output_mode.eval(&mut ctx, output);
     let prop = Prop::new(func, input, output);
-    Val::Prop(PropVal(Reader::new(prop)))
+    Val::Prop(PropVal(Rc::new(prop)))
 }
 
 fn repr() -> Named<FuncVal> {

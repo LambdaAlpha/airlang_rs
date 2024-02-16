@@ -195,13 +195,13 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     let [v1, v2] = ctx.get_many_const_ref([&v1, &v2]);
-    if let Ok(v1) = v1
-        && let Ok(v2) = v2
-    {
-        Val::Bool(Bool::new(*v1 == *v2))
-    } else {
-        Val::default()
-    }
+    let Ok(v1) = v1 else {
+        return Val::default();
+    };
+    let Ok(v2) = v2 else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(*v1 == *v2))
 }
 
 fn equal_val() -> Named<FuncVal> {
@@ -272,13 +272,13 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     let [v1, v2] = ctx.get_many_const_ref([&v1, &v2]);
-    if let Ok(v1) = v1
-        && let Ok(v2) = v2
-    {
-        Val::Bool(Bool::new(*v1 != *v2))
-    } else {
-        Val::default()
-    }
+    let Ok(v1) = v1 else {
+        return Val::default();
+    };
+    let Ok(v2) = v2 else {
+        return Val::default();
+    };
+    Val::Bool(Bool::new(*v1 != *v2))
 }
 
 fn not_equal_val() -> Named<FuncVal> {

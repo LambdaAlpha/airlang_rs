@@ -4,11 +4,6 @@ use std::{
         Formatter,
     },
     hash::Hash,
-    ops::{
-        ControlFlow,
-        FromResidual,
-        Try,
-    },
 };
 
 use crate::{
@@ -274,28 +269,6 @@ impl TryInto<Repr> for Val {
             Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
             Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
             _ => Err(ReprError {}),
-        }
-    }
-}
-
-impl FromResidual for Val {
-    fn from_residual(residual: <Self as Try>::Residual) -> Self {
-        residual
-    }
-}
-
-impl Try for Val {
-    type Output = Val;
-    type Residual = Val;
-
-    fn from_output(output: Self::Output) -> Self {
-        output
-    }
-
-    fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
-        match self {
-            Val::Unit(_) => ControlFlow::Break(self),
-            _ => ControlFlow::Continue(self),
         }
     }
 }

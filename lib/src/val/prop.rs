@@ -8,18 +8,16 @@ use std::{
         Hasher,
     },
     ops::Deref,
+    rc::Rc,
 };
 
-use crate::{
-    logic::Prop,
-    types::refer::Reader,
-};
+use crate::logic::Prop;
 
 #[derive(Clone, Eq)]
-pub struct PropVal(pub(crate) Reader<Prop>);
+pub struct PropVal(pub(crate) Rc<Prop>);
 
-impl From<Reader<Prop>> for PropVal {
-    fn from(value: Reader<Prop>) -> Self {
+impl From<Rc<Prop>> for PropVal {
+    fn from(value: Rc<Prop>) -> Self {
         PropVal(value)
     }
 }

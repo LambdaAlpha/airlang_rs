@@ -24,17 +24,6 @@
     )
 )]
 #![allow(incomplete_features)]
-#![feature(
-    iter_array_chunks,
-    iter_advance_by,
-    try_trait_v2,
-    iterator_try_collect,
-    unsize,
-    coerce_unsized,
-    assert_matches,
-    let_chains,
-    variant_count
-)]
 
 use thiserror::Error;
 

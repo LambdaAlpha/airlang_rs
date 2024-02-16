@@ -18,6 +18,7 @@ use crate::{
         map::MapVal,
     },
     CallMode,
+    List,
     Map,
     PairMode,
     ReverseMode,
@@ -167,7 +168,7 @@ fn parse_list_mode_for_some(io_mode: ListVal) -> Option<ListMode> {
     let list = io_mode
         .into_iter()
         .map(parse_list_item_mode)
-        .try_collect()?;
+        .collect::<Option<List<_>>>()?;
     let list = ListMode::ForSome(list);
     Some(list)
 }
@@ -228,7 +229,7 @@ fn parse_map_mode_for_some(io_mode: MapVal) -> Option<MapMode> {
             let io_mode = parse_io_mode(v)?;
             Some((k, io_mode))
         })
-        .try_collect()?;
+        .collect::<Option<Map<_, _>>>()?;
     let map = MapMode::ForSome(map);
     Some(map)
 }

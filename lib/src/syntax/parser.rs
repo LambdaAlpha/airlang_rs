@@ -258,34 +258,39 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     let Token::Default(last) = iter.next().unwrap() else {
         return None;
     };
-    iter.array_chunks::<2>()
-        .try_fold(last, |right, [middle, left]| {
-            let Token::Default(left) = left else {
-                return None;
-            };
-            let repr = match middle {
-                Token::Pair => {
-                    let pair = Box::new(Pair::new(left, right));
-                    <T as From<Box<Pair<T, T>>>>::from(pair)
-                }
-                Token::Call => {
-                    let call = Box::new(Call::new(left, right));
-                    <T as From<Box<Call<T, T>>>>::from(call)
-                }
-                Token::Reverse => {
-                    let reverse = Box::new(Reverse::new(left, right));
-                    <T as From<Box<Reverse<T, T>>>>::from(reverse)
-                }
-                Token::Comment => right,
-                Token::Default(middle) => {
-                    let pair = Box::new(Pair::new(left, right));
-                    let pair = <T as From<Box<Pair<T, T>>>>::from(pair);
-                    let infix = Box::new(Call::new(middle, pair));
-                    <T as From<Box<Call<T, T>>>>::from(infix)
-                }
-            };
-            Some(repr)
-        })
+    let mut right = last;
+    loop {
+        let Some(middle) = iter.next() else {
+            break;
+        };
+        let left = iter.next()?;
+        let Token::Default(left) = left else {
+            return None;
+        };
+        let repr = match middle {
+            Token::Pair => {
+                let pair = Box::new(Pair::new(left, right));
+                <T as From<Box<Pair<T, T>>>>::from(pair)
+            }
+            Token::Call => {
+                let call = Box::new(Call::new(left, right));
+                <T as From<Box<Call<T, T>>>>::from(call)
+            }
+            Token::Reverse => {
+                let reverse = Box::new(Reverse::new(left, right));
+                <T as From<Box<Reverse<T, T>>>>::from(reverse)
+            }
+            Token::Comment => right,
+            Token::Default(middle) => {
+                let pair = Box::new(Pair::new(left, right));
+                let pair = <T as From<Box<Pair<T, T>>>>::from(pair);
+                let infix = Box::new(Call::new(middle, pair));
+                <T as From<Box<Call<T, T>>>>::from(infix)
+            }
+        };
+        right = repr;
+    }
+    Some(right)
 }
 
 fn associate<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>

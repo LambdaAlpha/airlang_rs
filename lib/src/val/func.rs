@@ -8,25 +8,23 @@ use std::{
         Hasher,
     },
     ops::Deref,
+    rc::Rc,
 };
 
-use crate::{
-    func::Func,
-    types::refer::Reader,
-};
+use crate::func::Func;
 
 #[derive(Clone, Eq)]
-pub struct FuncVal(pub(crate) Reader<Func>);
+pub struct FuncVal(pub(crate) Rc<Func>);
 
-impl From<Reader<Func>> for FuncVal {
-    fn from(value: Reader<Func>) -> Self {
+impl From<Rc<Func>> for FuncVal {
+    fn from(value: Rc<Func>) -> Self {
         FuncVal(value)
     }
 }
 
 impl From<Func> for FuncVal {
     fn from(value: Func) -> Self {
-        FuncVal(Reader::new(value))
+        FuncVal(Rc::new(value))
     }
 }
 

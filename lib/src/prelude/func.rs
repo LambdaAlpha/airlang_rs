@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     bool::Bool,
     ctx::{
@@ -37,7 +39,6 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
-    types::refer::Reader,
     val::{
         ctx::CtxVal,
         func::FuncVal,
@@ -188,7 +189,7 @@ fn fn_new(input: Val) -> Val {
         _ => return Val::default(),
     };
     let func = Func::new(input_mode, output_mode, evaluator);
-    Val::Func(Reader::new(func).into())
+    Val::Func(Rc::new(func).into())
 }
 
 fn repr() -> Named<FuncVal> {

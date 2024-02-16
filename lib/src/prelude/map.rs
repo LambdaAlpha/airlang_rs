@@ -468,7 +468,7 @@ fn fn_new_map(input: Val) -> Val {
             };
             Some((pair.first, pair.second))
         })
-        .try_collect();
+        .collect();
     match map {
         Some(map) => Val::Map(map),
         None => Val::default(),

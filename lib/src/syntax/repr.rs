@@ -4,11 +4,6 @@ use std::{
         Debug,
         Display,
     },
-    ops::{
-        ControlFlow,
-        FromResidual,
-        Try,
-    },
     str::FromStr,
 };
 
@@ -159,28 +154,6 @@ impl FromStr for Repr {
 impl From<&Repr> for String {
     fn from(value: &Repr) -> Self {
         generate(value)
-    }
-}
-
-impl FromResidual for Repr {
-    fn from_residual(residual: <Self as Try>::Residual) -> Self {
-        residual
-    }
-}
-
-impl Try for Repr {
-    type Output = Repr;
-    type Residual = Repr;
-
-    fn from_output(output: Self::Output) -> Self {
-        output
-    }
-
-    fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
-        match self {
-            Repr::Unit(_) => ControlFlow::Break(self),
-            _ => ControlFlow::Continue(self),
-        }
     }
 }
 

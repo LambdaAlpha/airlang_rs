@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     ctx::{
         Ctx,
@@ -44,7 +46,6 @@ use crate::{
         value::ValuePrelude,
     },
     symbol::Symbol,
-    types::refer::Reader,
     val::{
         func::FuncVal,
         Val,
@@ -164,7 +165,7 @@ fn named_free_fn(
         output_mode,
         FuncEval::Free(FuncImpl::Primitive(primitive)),
     );
-    let func_val = FuncVal(Reader::new(func));
+    let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
 }
 
@@ -180,7 +181,7 @@ fn named_const_fn(
         output_mode,
         FuncEval::Const(FuncImpl::Primitive(primitive)),
     );
-    let func_val = FuncVal(Reader::new(func));
+    let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
 }
 
@@ -196,7 +197,7 @@ fn named_mutable_fn(
         output_mode,
         FuncEval::Mutable(FuncImpl::Primitive(primitive)),
     );
-    let func_val = FuncVal(Reader::new(func));
+    let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
 }
 

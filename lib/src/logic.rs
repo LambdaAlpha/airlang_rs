@@ -1,5 +1,3 @@
-use std::assert_matches::debug_assert_matches;
-
 use crate::{
     ctx_access::free::FreeCtx,
     eval::Evaluator,
@@ -18,7 +16,7 @@ pub struct Prop {
 
 impl Prop {
     pub(crate) fn new(func: FuncVal, input: Val, output: Val) -> Self {
-        debug_assert_matches!(func.0.evaluator, FuncEval::Free(_));
+        debug_assert!(matches!(func.0.evaluator, FuncEval::Free(_)));
         Self {
             func,
             input,
@@ -44,7 +42,7 @@ impl Prop {
     }
 
     pub(crate) fn new_proved(func: FuncVal, input: Val) -> Self {
-        debug_assert_matches!(func.0.evaluator, FuncEval::Free(_));
+        debug_assert!(matches!(func.0.evaluator, FuncEval::Free(_)));
         let output = func.0.evaluator.eval(&mut FreeCtx, input.clone());
         Self {
             func,
