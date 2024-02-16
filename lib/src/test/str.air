@@ -1,12 +1,12 @@
-"" | string.length
+string.length ""
 -----
 "" : 0
 =====
-"1" | string.length
+string.length "1"
 -----
 "1" : 1
 =====
-;[a = "12", a | string.length]
+;[a = "12", string.length a]
 -----
 2
 =====
@@ -14,7 +14,7 @@
 -----
 "hello world"
 =====
-["1", "2"] | string.concat
+string.concat ["1", "2"]
 -----
 "12"
 =====
