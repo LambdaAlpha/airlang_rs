@@ -357,7 +357,7 @@ is_local a
 ;[
     a = ('u context {b : ('u context {})}),
     a .. (c = 1),
-    a .. (set_meta {super : b}),
+    a .. (set_meta ('u context {super : b})),
     a .. (is_local c)
 ]
 -----
