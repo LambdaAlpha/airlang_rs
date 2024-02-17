@@ -1,5 +1,4 @@
-"bench generate" @
-(;[
+"bench generate" @ ; $ [
   x = 42,
   y = 24,
   while[
@@ -10,4 +9,4 @@
     ]
   ],
   x
-])
+]

@@ -1,5 +1,4 @@
-"bench interpret" @
-(; [
+"bench interpret" @ ; $ [
   ctx = 'u context {
     : ;,
     : while,
@@ -9,8 +8,8 @@
     : =,
     : -,
   },
-  f = (function {
-    body : (; [
+  f = function $ {
+    body : ; $ [
       (x : y) = input,
       while [
         x <> y,
@@ -21,10 +20,10 @@
         ]
       ],
       x
-    ]),
-    context : (move ctx),
-  }),
+    ],
+    context : move $ ctx,
+  },
   x = 42,
   y = 24,
   x f y
-])
+]
