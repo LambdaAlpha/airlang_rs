@@ -409,7 +409,7 @@ where
 }
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
-    let _ = new_ctx.put_val_local(input_name, TaggedVal::new(input));
+    let _ = new_ctx.put_val(input_name, TaggedVal::new(input));
     EagerByRef.eval(&mut MutableCtx::new(&mut new_ctx), body)
 }
 
@@ -422,7 +422,7 @@ fn eval_aware(
     input_name: Symbol,
     body: &Val,
 ) -> Val {
-    let _ = new_ctx.put_val_local(input_name, TaggedVal::new(input));
+    let _ = new_ctx.put_val(input_name, TaggedVal::new(input));
     keep_eval_restore(new_ctx, caller, caller_name, caller_tag, body)
 }
 
@@ -449,7 +449,7 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
 
 fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) {
     let val = Val::Ctx(CtxVal(Box::new(ctx)));
-    let _ = new_ctx.put_val_local(name, TaggedVal { val, tag });
+    let _ = new_ctx.put_val(name, TaggedVal { val, tag });
 }
 
 fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &str) {

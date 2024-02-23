@@ -77,7 +77,6 @@ pub(crate) struct CtxPrelude {
     pub(crate) is_final: Named<FuncVal>,
     pub(crate) is_const: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
-    pub(crate) is_local: Named<FuncVal>,
     pub(crate) get_access: Named<FuncVal>,
     pub(crate) has_meta: Named<FuncVal>,
     pub(crate) set_meta: Named<FuncVal>,
@@ -102,7 +101,6 @@ impl Default for CtxPrelude {
             is_final: is_final(),
             is_const: is_const(),
             is_null: is_null(),
-            is_local: is_local(),
             get_access: get_access(),
             has_meta: has_meta(),
             set_meta: set_meta(),
@@ -128,7 +126,6 @@ impl Prelude for CtxPrelude {
         self.is_final.put(m);
         self.is_const.put(m);
         self.is_null.put(m);
-        self.is_local.put(m);
         self.get_access.put(m);
         self.has_meta.put(m);
         self.set_meta.put(m);
@@ -185,7 +182,6 @@ fn fn_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
     assign_allow_options(&mut ctx, name, val, options)
 }
 
-const LOCAL: &str = "local";
 const INVARIANT: &str = "invariant";
 
 fn assign_destruct(
@@ -200,13 +196,9 @@ fn assign_destruct(
         Val::Pair(name) => assign_pair(ctx, *name, val, options),
         Val::Call(name) => {
             if allow_options {
-                match parse_ctx_val_pair(name, true) {
-                    ParseCtxValPairResult::Parsed {
-                        val: name,
-                        local,
-                        tag,
-                    } => {
-                        let options = AssignOptions { local, tag };
+                match parse_ctx_val_pair(name) {
+                    ParseCtxValPairResult::Parsed { val: name, tag } => {
+                        let options = AssignOptions { tag };
                         assign_destruct(ctx, name, val, options, false)
                     }
                     ParseCtxValPairResult::Fallback(name) => assign_call(ctx, *name, val, options),
@@ -237,17 +229,10 @@ fn assign_symbol(ctx: &mut CtxForMutableFn, name: Symbol, val: Val, options: Ass
         val,
         tag: options.tag,
     };
-    if options.local {
-        let Ok(last) = ctx.put_val_local(name, tagged_val) else {
-            return Val::default();
-        };
-        last.unwrap_or_default()
-    } else {
-        let Ok(last) = ctx.put_val(name, tagged_val) else {
-            return Val::default();
-        };
-        last.unwrap_or_default()
-    }
+    let Ok(last) = ctx.put_val(name, tagged_val) else {
+        return Val::default();
+    };
+    last.unwrap_or_default()
 }
 
 fn assign_pair(ctx: &mut CtxForMutableFn, name: PairVal, val: Val, options: AssignOptions) -> Val {
@@ -324,30 +309,24 @@ fn assign_map(ctx: &mut CtxForMutableFn, name: MapVal, val: Val, options: Assign
 
 #[derive(Copy, Clone)]
 struct AssignOptions {
-    local: bool,
     tag: InvariantTag,
 }
 
 impl Default for AssignOptions {
     fn default() -> Self {
         AssignOptions {
-            local: false,
             tag: InvariantTag::None,
         }
     }
 }
 
 enum ParseCtxValPairResult {
-    Parsed {
-        val: Val,
-        local: bool,
-        tag: InvariantTag,
-    },
+    Parsed { val: Val, tag: InvariantTag },
     Fallback(Box<CallVal>),
     None,
 }
 
-fn parse_ctx_val_pair(call: Box<CallVal>, accept_local: bool) -> ParseCtxValPairResult {
+fn parse_ctx_val_pair(call: Box<CallVal>) -> ParseCtxValPairResult {
     let Val::Symbol(tag) = &call.func else {
         return ParseCtxValPairResult::Fallback(call);
     };
@@ -358,34 +337,28 @@ fn parse_ctx_val_pair(call: Box<CallVal>, accept_local: bool) -> ParseCtxValPair
         return ParseCtxValPairResult::None;
     };
     let val = pair.first;
-    let (local, tag) = match pair.second {
+    let tag = match pair.second {
         Val::Symbol(s) => {
             if let Some(tag) = parse_invariant_tag(&s) {
-                (false, tag)
-            } else if accept_local && &*s == LOCAL {
-                (true, InvariantTag::None)
+                tag
             } else {
                 return ParseCtxValPairResult::None;
             }
         }
-        Val::Map(mut map) => {
-            let tag = match map_remove(&mut map, INVARIANT) {
-                Val::Symbol(tag) => {
-                    if let Some(tag) = parse_invariant_tag(&tag) {
-                        tag
-                    } else {
-                        return ParseCtxValPairResult::None;
-                    }
+        Val::Map(mut map) => match map_remove(&mut map, INVARIANT) {
+            Val::Symbol(tag) => {
+                if let Some(tag) = parse_invariant_tag(&tag) {
+                    tag
+                } else {
+                    return ParseCtxValPairResult::None;
                 }
-                Val::Unit(_) => InvariantTag::None,
-                _ => return ParseCtxValPairResult::None,
-            };
-            let local = map.contains_key(&symbol(LOCAL));
-            (local, tag)
-        }
+            }
+            Val::Unit(_) => InvariantTag::None,
+            _ => return ParseCtxValPairResult::None,
+        },
         _ => return ParseCtxValPairResult::None,
     };
-    ParseCtxValPairResult::Parsed { val, local, tag }
+    ParseCtxValPairResult::Parsed { val, tag }
 }
 
 fn parse_invariant_tag(tag: &str) -> Option<InvariantTag> {
@@ -480,22 +453,6 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     match ctx.is_null(&s) {
-        Ok(b) => Val::Bool(Bool::new(b)),
-        Err(_) => Val::default(),
-    }
-}
-
-fn is_local() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = default_mode();
-    named_const_fn("is_local", input_mode, output_mode, fn_is_local)
-}
-
-fn fn_is_local(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    match ctx.is_local(&s) {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(_) => Val::default(),
     }
@@ -855,7 +812,7 @@ fn fn_ctx_new(input: Val) -> Val {
         };
         let tagged_val = {
             if let Val::Call(call) = val {
-                match parse_ctx_val_pair(call, false) {
+                match parse_ctx_val_pair(call) {
                     ParseCtxValPairResult::Parsed { val, tag, .. } => TaggedVal { val, tag },
                     ParseCtxValPairResult::Fallback(call) => TaggedVal::new(Val::Call(call)),
                     ParseCtxValPairResult::None => {

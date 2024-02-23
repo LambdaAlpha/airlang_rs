@@ -42,10 +42,6 @@ impl<'a> CtxTrait for ConstCtx<'a> {
         Err(CtxError::AccessDenied)
     }
 
-    fn put_val_local(&mut self, _name: Symbol, _val: TaggedVal) -> Result<Option<Val>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
     fn set_final(&mut self, _name: &str) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
@@ -64,11 +60,6 @@ impl<'a> CtxTrait for ConstCtx<'a> {
 
     fn is_null(&self, name: &str) -> Result<bool, CtxError> {
         DefaultCtx.is_null(self, name)
-    }
-
-    fn is_local(&self, name: &str) -> Result<bool, CtxError> {
-        let is_local = self.0.is_local(name);
-        Ok(is_local)
     }
 
     fn get_meta(&self) -> Result<&Ctx, CtxError> {
@@ -95,10 +86,6 @@ impl<'a> CtxTrait for ConstCtx<'a> {
 
     fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError> {
         self.0.get_const_ref(name)
-    }
-
-    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Result<&Val, CtxError>; N] {
-        self.0.get_many_const_ref(names)
     }
 }
 
@@ -142,13 +129,6 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn put_val_local(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError> {
-        match self {
-            CtxForConstFn::Free(ctx) => ctx.put_val_local(name, val),
-            CtxForConstFn::Const(ctx) => ctx.put_val_local(name, val),
-        }
-    }
-
     fn set_final(&mut self, name: &str) -> Result<(), CtxError> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.set_final(name),
@@ -184,13 +164,6 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn is_local(&self, name: &str) -> Result<bool, CtxError> {
-        match self {
-            CtxForConstFn::Free(ctx) => ctx.is_local(name),
-            CtxForConstFn::Const(ctx) => ctx.is_local(name),
-        }
-    }
-
     fn get_meta(&self) -> Result<&Ctx, CtxError> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.get_meta(),
@@ -223,13 +196,6 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.get_const_ref(name),
             CtxForConstFn::Const(ctx) => ctx.get_const_ref(name),
-        }
-    }
-
-    fn get_many_const_ref<const N: usize>(&self, names: [&str; N]) -> [Result<&Val, CtxError>; N] {
-        match self {
-            CtxForConstFn::Free(ctx) => ctx.get_many_const_ref(names),
-            CtxForConstFn::Const(ctx) => ctx.get_many_const_ref(names),
         }
     }
 }

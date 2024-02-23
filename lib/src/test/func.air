@@ -254,19 +254,6 @@ a
 1 ? a
 =====
 ;[
-    f = function $ {
-        body : ; $ [set_meta $ 'u context {super : 'u $ 'u $ caller}, $$ $ read $ input],
-        input_mode : 'u,
-        caller_access : mutable,
-        context : prelude $ 'u
-    },
-    a = 1,
-    f a
-]
------
-1
-=====
-;[
     a = 1,
     f = function $ {
         body : caller .. read $ a,

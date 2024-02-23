@@ -194,10 +194,11 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(v2) = pair.second else {
         return Val::default();
     };
-    let [v1, v2] = ctx.get_many_const_ref([&v1, &v2]);
+    let v1 = ctx.get_const_ref(&v1);
     let Ok(v1) = v1 else {
         return Val::default();
     };
+    let v2 = ctx.get_const_ref(&v2);
     let Ok(v2) = v2 else {
         return Val::default();
     };
@@ -271,10 +272,11 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(v2) = pair.second else {
         return Val::default();
     };
-    let [v1, v2] = ctx.get_many_const_ref([&v1, &v2]);
+    let v1 = ctx.get_const_ref(&v1);
     let Ok(v1) = v1 else {
         return Val::default();
     };
+    let v2 = ctx.get_const_ref(&v2);
     let Ok(v2) = v2 else {
         return Val::default();
     };

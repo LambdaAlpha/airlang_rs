@@ -30,10 +30,6 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn put_val_local(&mut self, _name: Symbol, _val: TaggedVal) -> Result<Option<Val>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
     fn set_final(&mut self, _name: &str) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
@@ -51,10 +47,6 @@ impl CtxTrait for FreeCtx {
     }
 
     fn is_null(&self, _name: &str) -> Result<bool, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn is_local(&self, _name: &str) -> Result<bool, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -76,13 +68,6 @@ impl CtxTrait for FreeCtx {
 
     fn get_const_ref(&self, _name: &str) -> Result<&Val, CtxError> {
         Err(CtxError::AccessDenied)
-    }
-
-    fn get_many_const_ref<const N: usize>(&self, _names: [&str; N]) -> [Result<&Val, CtxError>; N]
-    where
-        Self: Sized,
-    {
-        [Err(CtxError::AccessDenied); N]
     }
 }
 
