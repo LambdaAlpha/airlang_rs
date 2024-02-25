@@ -1,47 +1,47 @@
-'t
+.t
 -----
-'t
+.t
 =====
 a
 -----
-'u
+.
 =====
-(not 'f) : "1"
+(not .f) : "1"
 -----
-'t : "1"
+.t : "1"
 =====
-[not 't, 1, "2"]
+[not .t, 1, "2"]
 -----
-['f, 1, "2"]
+[.f, 1, "2"]
 =====
-{(not 't) : (not 't)}
+{(not .t) : (not .t)}
 -----
-{'f : 'f}
+{.f : .f}
 =====
-not $ not $ 't
+not $ not $ .t
 -----
-'t
+.t
 =====
-'u a
+. a
 -----
 a
 =====
-'f [a, 't $ not $ 't, 'f $ not $ 't, 'u a]
+.f [a, .t $ not $ .t, .f $ not $ .t, . a]
 -----
-[a, 'f, not 't, a]
+[a, .f, not .t, a]
 =====
-'t [not 't, 't $ not $ 't, 'f $ not $ 't, 'u $ not $ 't]
+.t [not .t, .t $ not $ .t, .f $ not $ .t, . $ not $ .t]
 -----
-['f, 'f, not 't, not 't]
+[.f, .f, not .t, not .t]
 =====
 "a" "b"
 -----
 "a" "b"
 =====
-"a" $ not $ 't
+"a" $ not $ .t
 -----
-"a" 'f
+"a" .f
 =====
-(not 't) $ not $ 't
+(not .t) $ not $ .t
 -----
-'f 'f
+.f .f

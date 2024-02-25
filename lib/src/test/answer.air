@@ -1,18 +1,18 @@
 answer.is_unsolved answer.unsolved
 -----
-'t
+.t
 =====
 answer.is_unsolvable answer.unsolvable
 -----
-'t
+.t
 =====
 answer.is_verified answer.unsolvable
 -----
-'u
+.
 =====
 ;[a = answer.unverified $ 1, answer.is_verified a]
 -----
-'f
+.f
 =====
 ;[a = answer.unverified $ 1, answer.input a]
 -----
@@ -22,26 +22,26 @@ answer.is_verified answer.unsolvable
 -----
 1
 =====
-;[a = answer.verified $ proposition.prove $ not $ 't, answer.is_verified a]
+;[a = answer.verified $ proposition.prove $ not $ .t, answer.is_verified a]
 -----
-'t
+.t
 =====
-;[p = proposition $ {function : not, input : 't, output : 'f}, a = answer.verified $ p, (type_of p) -=- proposition and a ==- 'u]
+;[p = proposition $ {function : not, input : .t, output : .f}, a = answer.verified $ p, (type_of p) -=- proposition and a ==- .]
 -----
-'t
+.t
 =====
-;[a = answer.verified $ proposition.prove $ not $ 't, answer.input a]
+;[a = answer.verified $ proposition.prove $ not $ .t, answer.input a]
 -----
-'t
+.t
 =====
-;[a = answer.verified $ proposition.prove $ not $ 't, answer.into_input $ move $ a]
+;[a = answer.verified $ proposition.prove $ not $ .t, answer.into_input $ move $ a]
 -----
-'t
+.t
 =====
-;[a = answer.verified $ proposition.prove $ not $ 't, p = answer.evidence $ a, type_of p]
+;[a = answer.verified $ proposition.prove $ not $ .t, p = answer.evidence $ a, type_of p]
 -----
 proposition
 =====
-;[a = answer.verified $ proposition.prove $ not $ 't, p = answer.into_evidence $ move $ a, type_of p]
+;[a = answer.verified $ proposition.prove $ not $ .t, p = answer.into_evidence $ move $ a, type_of p]
 -----
 proposition

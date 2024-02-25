@@ -50,14 +50,10 @@ impl Prelude for EvalPrelude {
     }
 }
 
-pub(crate) const VALUE: &str = "`u";
-pub(crate) const LAZY: &str = "`f";
-pub(crate) const EAGER: &str = "`t";
-
 fn value() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = default_mode();
-    named_free_fn(VALUE, input_mode, output_mode, fn_value)
+    named_free_fn("value", input_mode, output_mode, fn_value)
 }
 
 fn fn_value(input: Val) -> Val {
@@ -67,7 +63,7 @@ fn fn_value(input: Val) -> Val {
 fn lazy() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = default_mode();
-    named_mutable_fn(LAZY, input_mode, output_mode, fn_lazy)
+    named_mutable_fn("lazy", input_mode, output_mode, fn_lazy)
 }
 
 fn fn_lazy(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -77,7 +73,7 @@ fn fn_lazy(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn eager() -> Named<FuncVal> {
     let input_mode = IoMode::Eval(EvalMode::Value);
     let output_mode = default_mode();
-    named_mutable_fn(EAGER, input_mode, output_mode, fn_eager)
+    named_mutable_fn("eager", input_mode, output_mode, fn_eager)
 }
 
 fn fn_eager(mut ctx: CtxForMutableFn, input: Val) -> Val {

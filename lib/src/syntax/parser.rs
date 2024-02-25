@@ -77,15 +77,16 @@ use crate::{
         BYTES_PREFIX,
         CALL_SEPARATOR,
         COMMENT_SEPARATOR,
-        ESCAPED_PREFIX,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         PAIR_SEPARATOR,
+        PRESERVED_PREFIX,
         REVERSE_SEPARATOR,
         SEPARATOR,
         STRING_QUOTE,
+        SYMBOL_QUOTE,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
@@ -178,31 +179,36 @@ where
         '0'..='9' => |s| map(number, Token::Default)(s),
         '+' | '-' => match second {
             Some('0'..='9') => |s| map(number, Token::Default)(s),
-            _ => |s| map(symbol, Token::Default)(s),
+            _ => |s| map(trivial_symbol, Token::Default)(s),
         },
+        PRESERVED_PREFIX => |s| map(preserved, Token::Default)(s),
         BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
         STRING_QUOTE => |s| map(string, Token::Default)(s),
-        ESCAPED_PREFIX => |s| map(escaped, Token::Default)(s),
+        SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
         LIST_LEFT => |s| map(repr_list, Token::Default)(s),
+        LIST_RIGHT => fail,
         MAP_LEFT => |s| map(repr_map, Token::Default)(s),
+        MAP_RIGHT => fail,
         WRAP_LEFT => |s| map(wrap, Token::Default)(s),
+        WRAP_RIGHT => fail,
+        SEPARATOR => fail,
         PAIR_SEPARATOR => match second {
-            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
             _ => |s| map(exact_char(PAIR_SEPARATOR), |_| Token::Pair)(s),
         },
         CALL_SEPARATOR => match second {
-            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
             _ => |s| map(exact_char(CALL_SEPARATOR), |_| Token::Call)(s),
         },
         REVERSE_SEPARATOR => match second {
-            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
             _ => |s| map(exact_char(REVERSE_SEPARATOR), |_| Token::Reverse)(s),
         },
         COMMENT_SEPARATOR => match second {
-            Some(second) if !is_delimiter(second) => |s| map(symbol, Token::Default)(s),
+            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
             _ => |s| map(exact_char(COMMENT_SEPARATOR), |_| Token::Comment)(s),
         },
-        s if is_symbol(s) => |s| map(symbol, Token::Default)(s),
+        s if is_symbol(s) => |s| map(trivial_symbol, Token::Default)(s),
         _ => fail,
     };
     context("token", parser)(src)
@@ -390,53 +396,111 @@ where
     context("pair", f)(src)
 }
 
-fn escaped<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn preserved<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let symbol = take_while(is_symbol);
-    let escaped = preceded(exact_char('\''), symbol);
-    let f = map_opt(escaped, |s: &str| {
-        if let Some('a'..='z' | 'A'..='Z') = s.chars().next() {
-            preserved(s)
-        } else {
-            Some(<T as From<Symbol>>::from(Symbol::from_str(s)))
-        }
-    });
-    context("escaped", f)(src)
+    let symbol = take_while(is_trivial_symbol);
+    let prefixed = preceded(exact_char(PRESERVED_PREFIX), symbol);
+    let f = map_opt(prefixed, keywords);
+    context("preserved", f)(src)
 }
 
-fn preserved<T>(src: &str) -> Option<T>
+fn keywords<T>(src: &str) -> Option<T>
 where
     T: ParseRepr,
 {
     match src {
-        "u" => Some(<T as From<Unit>>::from(Unit)),
+        "" => Some(<T as From<Unit>>::from(Unit)),
         "t" => Some(<T as From<Bool>>::from(Bool::t())),
         "f" => Some(<T as From<Bool>>::from(Bool::f())),
         _ => None,
     }
 }
 
-fn is_symbol(c: char) -> bool {
+fn is_trivial_symbol(c: char) -> bool {
     match c {
-        'a'..='z' | 'A'..='Z' | '0'..='9' => true,
         LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR => false,
-        c => c.is_ascii_punctuation(),
+        c => Symbol::is_symbol(c),
     }
 }
 
-fn symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn is_symbol(c: char) -> bool {
+    Symbol::is_symbol(c)
+}
+
+fn trivial_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let symbols = take_while(is_symbol);
+    let symbols = take_while(is_trivial_symbol);
     let f = map(symbols, |s: &'a str| {
         <T as From<Symbol>>::from(Symbol::from_str(s))
     });
-    context("symbol", f)(src)
+    context("trivial_symbol", f)(src)
+}
+
+fn quoted_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let fragment = alt((
+        map(symbol_literal, StringFragment::Literal),
+        map(symbol_escaped_char, StringFragment::Escaped),
+        value(StringFragment::Space(""), symbol_whitespace),
+    ));
+    let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
+        match fragment {
+            StringFragment::Literal(s) => string.push_str(s),
+            StringFragment::Escaped(c) => string.push(c),
+            StringFragment::Space(_s) => {}
+        }
+        string
+    });
+    let delimited_string = delimited(
+        exact_char(SYMBOL_QUOTE),
+        cut(collect_fragments),
+        cut(exact_char(SYMBOL_QUOTE)),
+    );
+    let f = map(delimited_string, |s| {
+        <T as From<Symbol>>::from(Symbol::from_string(s))
+    });
+    context("quoted_symbol", f)(src)
+}
+
+fn symbol_escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let f = preceded(
+        exact_char('\\'),
+        alt((
+            value('\\', exact_char('\\')),
+            value(SYMBOL_QUOTE, exact_char(SYMBOL_QUOTE)),
+        )),
+    );
+    context("symbol_escaped_char", f)(src)
+}
+
+// ignore \t, \r, \n and spaces
+fn symbol_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let f = value((), multispace1);
+    context("symbol_whitespace", f)(src)
+}
+
+fn symbol_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let normal = take_while(|c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
+    let f = verify(normal, |s: &str| !s.is_empty());
+    context("symbol_literal", f)(src)
 }
 
 fn string<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -445,9 +509,9 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let fragment = alt((
-        map(literal, StringFragment::Literal),
-        map(escaped_char, StringFragment::Escaped),
-        map(whitespace, StringFragment::Space),
+        map(string_literal, StringFragment::Literal),
+        map(string_escaped_char, StringFragment::Escaped),
+        map(string_whitespace, StringFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         match fragment {
@@ -473,7 +537,7 @@ enum StringFragment<'a> {
     Space(&'a str),
 }
 
-fn escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
+fn string_escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
@@ -490,7 +554,7 @@ where
             value(' ', exact_char('s')),
         )),
     );
-    context("escaped_char", f)(src)
+    context("string_escaped_char", f)(src)
 }
 
 fn unicode<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
@@ -508,7 +572,7 @@ where
 }
 
 // ignore \t, \r, \n and the spaces around them
-fn whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn string_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
@@ -519,10 +583,10 @@ where
             &s[0..0]
         }
     });
-    context("whitespace", f)(src)
+    context("string_whitespace", f)(src)
 }
 
-fn literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn string_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
@@ -537,7 +601,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let numbers = alt((hex_int, bin_int, decimal));
-    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_symbol(c)))));
+    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_trivial_symbol(c)))));
     let f = terminated(numbers, next);
     context("number", f)(src)
 }
@@ -642,7 +706,7 @@ where
         exact_char(BYTES_PREFIX),
         alt((hex_bytes, bin_bytes, empty_bytes)),
     );
-    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_symbol(c)))));
+    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_trivial_symbol(c)))));
     let f = terminated(bytes, next);
     context("bytes", f)(src)
 }

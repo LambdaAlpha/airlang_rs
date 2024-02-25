@@ -16,15 +16,16 @@ use crate::{
         BYTES_PREFIX,
         CALL_SEPARATOR,
         COMMENT_SEPARATOR,
-        ESCAPED_PREFIX,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         PAIR_SEPARATOR,
+        PRESERVED_PREFIX,
         REVERSE_SEPARATOR,
         SEPARATOR,
         STRING_QUOTE,
+        SYMBOL_QUOTE,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
@@ -154,13 +155,11 @@ where
 }
 
 fn generate_unit(s: &mut String) {
-    s.push(ESCAPED_PREFIX);
-    #[allow(clippy::single_char_add_str)]
-    s.push_str("u");
+    s.push(PRESERVED_PREFIX);
 }
 
 fn generate_bool(b: bool, s: &mut String) {
-    s.push(ESCAPED_PREFIX);
+    s.push(PRESERVED_PREFIX);
     s.push_str(if b { "t" } else { "f" });
 }
 
@@ -198,22 +197,39 @@ fn generate_string(str: &str, s: &mut String) {
 }
 
 fn generate_symbol(str: &str, s: &mut String) {
-    let mut chars = str.chars();
-    let escape = match chars.next() {
-        Some(first) => match first {
-            BYTES_PREFIX | ESCAPED_PREFIX | STRING_QUOTE | '0'..='9' => true,
-            PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => {
-                str.len() == 1
-            }
-            '+' | '-' => matches!(chars.next(), Some('0'..='9')),
-            _ => false,
-        },
-        None => true,
-    };
-    if escape {
-        s.push(ESCAPED_PREFIX);
+    if !is_need_quote(str) {
+        return s.push_str(str);
     }
-    s.push_str(str);
+
+    s.push(SYMBOL_QUOTE);
+    for c in str.chars() {
+        let escaped = match c {
+            '\\' => "\\\\".to_owned(),
+            SYMBOL_QUOTE => format!("\\{}", SYMBOL_QUOTE),
+            _ => c.to_string(),
+        };
+        s.push_str(&escaped);
+    }
+    s.push(SYMBOL_QUOTE);
+}
+
+fn is_need_quote(str: &str) -> bool {
+    let mut chars = str.chars();
+    let Some(first) = chars.next() else {
+        return true;
+    };
+    match first {
+        BYTES_PREFIX | PRESERVED_PREFIX | SYMBOL_QUOTE | STRING_QUOTE | '0'..='9' => true,
+        PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => str.len() == 1,
+        '+' | '-' => matches!(chars.next(), Some('0'..='9')),
+        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR => true,
+        _ => chars.any(|c| {
+            matches!(
+                c,
+                LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
+            )
+        }),
+    }
 }
 
 #[allow(unused)]

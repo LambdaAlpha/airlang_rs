@@ -1,6 +1,6 @@
 ;[]
 -----
-'u
+.
 =====
 ;[1]
 -----
@@ -14,15 +14,15 @@
 -----
 3
 =====
-'u ;return [1, 2, if ['t, return = 3], 4]
+. ;return [1, 2, if [.t, return = 3], 4]
 -----
 3
 =====
-'u ;return [1, if ['t, 'u ;return [2, if ['t, return = 3], return = 4]], return = 5, return]
+. ;return [1, if [.t, . ;return [2, if [.t, return = 3], return = 4]], return = 5, return]
 -----
 3
 =====
-'u ;return [1, if ['t, ; [2, if ['t, return = 3], return = 4]], return = 5, return]
+. ;return [1, if [.t, ; [2, if [.t, return = 3], return = 4]], return = 5, return]
 -----
 4
 =====
@@ -40,9 +40,9 @@ a ;return [a = 1]
 =====
 ;[a = 1, a ;return [], is_null a]
 -----
-'t
+.t
 =====
-('u a) ;return [a = 1, 2]
+(. a) ;return [a = 1, 2]
 -----
 1
 =====
@@ -55,7 +55,7 @@ a ;return [a = 1]
             b = b + 1,
             if [
                 b ==- 2,
-                continue = 'u,
+                continue = .,
             ],
             a = a + b,
         ]
@@ -65,12 +65,12 @@ a ;return [a = 1]
 -----
 13
 =====
-'u ;return [
+. ;return [
     a = 0,
     b = 0,
     while [
         (is_null return) and b < 5,
-        'u ;return [
+        . ;return [
             if [
                 a > 5,
                 return = a,
@@ -84,31 +84,31 @@ a ;return [a = 1]
 -----
 6
 =====
-if ['t, 1, 2]
+if [.t, 1, 2]
 -----
 1
 =====
-if ['f, 1, 2]
+if [.f, 1, 2]
 -----
 2
 =====
-if ['t, 1]
+if [.t, 1]
 -----
 1
 =====
-if ['f, 1]
+if [.f, 1]
 -----
-'u
+.
 =====
-;[if ['t, 1, a = 2], a]
+;[if [.t, 1, a = 2], a]
 -----
-'u
+.
 =====
-if ['t, if ['f, 1, 2], 3]
+if [.t, if [.f, 1, 2], 3]
 -----
 2
 =====
-if ['u, 1, 2, 3]
+if [., 1, 2, 3]
 -----
 3
 =====
@@ -126,23 +126,23 @@ match [3, {1 : 2, 2 : 3}, 4]
 =====
 ;[match [1, {1 : a = 1, 2 : b = 2}, c = 3], [a, b, c]]
 -----
-[1, 'u, 'u]
+[1, ., .]
 =====
 ;[match [3, {1 : a = 1, 2 : b = 2}, c = 3], [a, b, c]]
 -----
-['u, 'u, 3]
+[., ., 3]
 =====
 match [1, {(2 - 1) : 2, (2 + 1) : 4}]
 -----
 2
 =====
-;[a = 'u $ a, match [a, {('u a) : 1, ('u b) : 2}]]
+;[a = . $ a, match [a, {(. a) : 1, (. b) : 2}]]
 -----
 1
 =====
-;[while ['f, a = 1], a]
+;[while [.f, a = 1], a]
 -----
-'u
+.
 =====
 ;[
     a = 0,

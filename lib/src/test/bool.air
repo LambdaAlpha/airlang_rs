@@ -1,59 +1,59 @@
-not 't
+not .t
 -----
-'f
+.f
 =====
-not 'f
+not .f
 -----
-'t
+.t
 =====
-'t and 'f
+.t and .f
 -----
-'f
+.f
 =====
-'t and 't
+.t and .t
 -----
-'t
+.t
 =====
-;['f and ; $ [a = 1, 't], a]
+;[.f and ; $ [a = 1, .t], a]
 -----
 1
 =====
-'t or 'f
+.t or .f
 -----
-'t
+.t
 =====
-'f or 'f
+.f or .f
 -----
-'f
+.f
 =====
-;['t or ; $ [a = 1, 'f], a]
+;[.t or ; $ [a = 1, .f], a]
 -----
 1
 =====
-'t xor 'f
+.t xor .f
 -----
-'t
+.t
 =====
-'t xor 't
+.t xor .t
 -----
-'f
+.f
 =====
-'f xor 'f
+.f xor .f
 -----
-'f
+.f
 =====
-'t imply 'f
+.t imply .f
 -----
-'f
+.f
 =====
-'t imply 't
+.t imply .t
 -----
-'t
+.t
 =====
-'f imply 't
+.f imply .t
 -----
-'t
+.t
 =====
-'f imply 'f
+.f imply .f
 -----
-'t
+.t

@@ -30,11 +30,7 @@ impl Symbol {
     }
 
     pub(crate) fn is_symbol(c: char) -> bool {
-        match c {
-            'a'..='z' | 'A'..='Z' | '0'..='9' => true,
-            '(' | ')' | '[' | ']' | '{' | '}' | ',' => false,
-            c => c.is_ascii_punctuation(),
-        }
+        c.is_ascii_graphic()
     }
 }
 
@@ -45,6 +41,7 @@ impl Deref for Symbol {
     }
 }
 
+#[allow(clippy::to_string_trait_impl)]
 impl ToString for Symbol {
     fn to_string(&self) -> String {
         self.0.to_string()
@@ -65,6 +62,6 @@ impl Borrow<str> for Symbol {
 
 impl Debug for Symbol {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "'{}", &self.0)
+        write!(f, "'{}'", &self.0)
     }
 }

@@ -1,5 +1,5 @@
 "bench interpret" @ ; $ [
-  ctx = 'u context {
+  ctx = . context {
     : ;,
     : while,
     : <>,

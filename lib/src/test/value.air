@@ -58,17 +58,17 @@ answer
 -----
 extension
 =====
-;[a = 'u, type_of a]
+;[a = ., type_of a]
 -----
 unit
 =====
-;[a = 't, type_of a]
+;[a = .t, type_of a]
 -----
 bool
 =====
-type_of $ not $ 't
+type_of $ not $ .t
 -----
-'f : bool
+.f : bool
 =====
 ;[a = 1, type_of a]
 -----
@@ -82,7 +82,7 @@ float
 -----
 bytes
 =====
-;[a = 'u $ a, type_of a]
+;[a = . $ a, type_of a]
 -----
 symbol
 =====
@@ -94,11 +94,11 @@ string
 -----
 pair
 =====
-;[a = 'u $ f $ a, type_of a]
+;[a = . $ f $ a, type_of a]
 -----
 call
 =====
-;[a = 'u $ f ? a, type_of a]
+;[a = . $ f ? a, type_of a]
 -----
 reverse
 =====
@@ -114,138 +114,138 @@ map
 -----
 function
 =====
-;[a = 'u context {}, type_of a]
+;[a = . context {}, type_of a]
 -----
 context
 =====
-;[a = proposition $ {function : not, input : 't, output : 'f}, type_of a]
+;[a = proposition $ {function : not, input : .t, output : .f}, type_of a]
 -----
 proposition
 =====
-;[a = proposition.prove $ not $ 't, type_of a]
+;[a = proposition.prove $ not $ .t, type_of a]
 -----
 proposition
 =====
-'t -=- 'f
+.t -=- .f
 -----
-'f
+.f
 =====
-'f -=- 'f
+.f -=- .f
 -----
-'t
+.t
 =====
 1 -=- 1
 -----
-'t
+.t
 =====
 1.0 -=- 1.0
 -----
-'t
+.t
 =====
-('u a) -=- ('u a)
+(. a) -=- (. a)
 -----
-'t
+.t
 =====
 "" -=- ""
 -----
-'t
+.t
 =====
 (1 : 2) -=- (1 : 2)
 -----
-'t
+.t
 =====
 [1, 2] -=- [1, 2]
 -----
-'t
+.t
 =====
 {} -=- {}
 -----
-'t
+.t
 =====
 (1 2) -=- (1 2)
 -----
-'t
+.t
 =====
 (1 ? 2) -=- (1 ? 2)
 -----
-'t
+.t
 =====
-;[a = function $ {body : input}, b = function $ {body : input}, (a === b) and a =/- 'u]
+;[a = function $ {body : input}, b = function $ {body : input}, (a === b) and a =/- .]
 -----
-'t
+.t
 =====
-;[a = 'u context {}, b = 'u context {}, (a === b) and a =/- 'u]
+;[a = . context {}, b = . context {}, (a === b) and a =/- .]
 -----
-'t
+.t
 =====
 ;[
-    a = proposition $ {function : not, input : 't, output : 'f},
-    b = proposition $ {function : not, input : 't, output : 'f},
-    (a === b) and a =/- 'u
+    a = proposition $ {function : not, input : .t, output : .f},
+    b = proposition $ {function : not, input : .t, output : .f},
+    (a === b) and a =/- .
 ]
 -----
-'t
+.t
 =====
 ;[
     a = answer.unverified $ 1,
     b = answer.unverified $ 1,
-    (a === b) and a =/- 'u
+    (a === b) and a =/- .
 ]
 -----
-'t
+.t
 =====
 (1 + 1) -=- (3 - 1)
 -----
-'t
+.t
 =====
 1 -=- "a"
 -----
-'f
+.f
 =====
 1 -/- "a"
 -----
-'t
+.t
 =====
 1 -/- 1
 -----
-'f
+.f
 =====
 ;[a = 1, a ==- 1]
 -----
-'t
+.t
 =====
 ;[a = 1, a =/- 1]
 -----
-'f
+.f
 =====
 ;[a = 1, 1 -== a]
 -----
-'t
+.t
 =====
 ;[a = 1, 1 -/= a]
 -----
-'f
+.f
 =====
 ;[a = 1, b = 1, a === b]
 -----
-'t
+.t
 =====
 ;[a = 1, b = 1, a =/= b]
 -----
-'f
+.f
 =====
 ;[a = 1, a === a]
 -----
-'t
+.t
 =====
 ;[a = 1, a =/= a]
 -----
-'f
+.f
 =====
 a === b
 -----
-'u
+.
 =====
 a =/= b
 -----
-'u
+.

@@ -2,135 +2,135 @@
     f = function $ {
         body : input,
     },
-    f $ not $ 't
+    f $ not $ .t
 ]
 -----
-'f
+.f
 =====
 ;[
     f = function $ {
-        body : ('t not) $ input
+        body : (.t not) $ input
     },
-    f $ not $ 't
+    f $ not $ .t
 ]
 -----
-'t
+.t
 =====
 ;[
     f = function $ {
         body : not $ input,
-        context : 'u context {: not}
+        context : . context {: not}
     },
-    f $ not $ 't
+    f $ not $ .t
 ]
 -----
-'t
+.t
 =====
 ;[
     f = function $ {
         body : n $ a,
         input_name : a,
-        context : 'u context {n : not}
+        context : . context {n : not}
     },
-    f $ not $ 't
+    f $ not $ .t
 ]
 -----
-'t
+.t
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : 'u,
+        input_mode : .,
     },
-    f $ not $ 't
+    f $ not $ .t
 ]
 -----
-not 't
+not .t
 =====
 ;[
     f = function $ {
-        body : ('t not) $ input,
-        input_mode : 't,
+        body : (.t not) $ input,
+        input_mode : .t,
     },
-    f $ not $ 't
+    f $ not $ .t
 ]
 -----
-'t
-=====
-;[
-    f = function $ {
-        body : input,
-        input_mode : 'f,
-    },
-    f $ not $ 't
-]
------
-not 't
+.t
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : 'f,
+        input_mode : .f,
     },
-    f $ 't $ not $ 't
+    f $ not $ .t
 ]
 -----
-'f
+not .t
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : 't,
+        input_mode : .f,
+    },
+    f $ .t $ not $ .t
+]
+-----
+.f
+=====
+;[
+    f = function $ {
+        body : input,
+        input_mode : .t,
     },
     f {a : b}
 ]
 -----
-{'u : 'u}
+{. : .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {pair : 'f : 't},
+        input_mode : {pair : .f : .t},
     },
     a f b
 ]
 -----
-a : 'u
+a : .
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {pair : 'f : 't, symbol : 'u},
+        input_mode : {pair : .f : .t, symbol : .},
     },
     [a f b, f a]
 ]
 -----
-[a : 'u, a]
+[a : ., a]
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : 'u,
+        input_mode : .,
     },
-    f $ not $ 'f
+    f $ not $ .f
 ]
 -----
-not 'f
+not .f
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {symbol : 'u},
+        input_mode : {symbol : .},
     },
-    f $ not $ 'f
+    f $ not $ .f
 ]
 -----
-'t
+.t
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {symbol : 'u},
+        input_mode : {symbol : .},
     },
     f a
 ]
@@ -141,7 +141,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {symbol : 'u},
+        input_mode : {symbol : .},
     },
     f [a]
 ]
@@ -152,7 +152,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {list : ['t, 'f, ... 'u, 't]},
+        input_mode : {list : [.t, .f, '...' ., .t]},
     },
     f [a, a, a, a, a, a]
 ]
@@ -162,7 +162,7 @@ a
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : 'u},
+        input_mode : {list : .},
     },
     f [a, b]
 ]
@@ -172,28 +172,28 @@ a
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : 'u},
+        input_mode : {list : .},
     },
-    f $ not $ 'f
+    f $ not $ .f
 ]
 -----
-'t
+.t
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : (all {symbol : 'u})},
+        input_mode : {list : (all {symbol : .})},
     },
-    f [not 't, b]
+    f [not .t, b]
 ]
 -----
-['f, b]
+[.f, b]
 =====
 ;[
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : {a : 't, b : 'u}},
+        input_mode : {map : {a : .t, b : .}},
     },
     f {a : a, b : a}
 ]
@@ -203,7 +203,7 @@ a
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : 'u},
+        input_mode : {map : .},
     },
     f {a : b}
 ]
@@ -213,18 +213,18 @@ a
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : 'u},
+        input_mode : {map : .},
     },
-    f (not 't)
+    f (not .t)
 ]
 -----
-'f
+.f
 =====
 ;[
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : 'f all 't},
+        input_mode : {map : .f all .t},
     },
     f {: a}
 ]
@@ -235,7 +235,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {call : 'u $ 't $ 'u},
+        input_mode : {call : . $ .t $ .},
     },
     f (a a)
 ]
@@ -246,7 +246,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {reverse : 't ? 'u},
+        input_mode : {reverse : .t ? .},
     },
     f $ a ? a
 ]
@@ -256,29 +256,29 @@ a
 ;[
     a = 1,
     f = function $ {
-        body : caller .. read $ a,
+        body : caller | read $ a,
         caller_access : free,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : read,
         }
     },
-    f 'u
+    f .
 ]
 -----
-'u
+.
 =====
 ;[
     a = 1,
     f = function $ {
-        body : caller .. read $ a,
+        body : caller | read $ a,
         caller_access : constant,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : read,
         }
     },
-    f 'u
+    f .
 ]
 -----
 1
@@ -286,14 +286,14 @@ a
 ;[
     a = 1,
     f = function $ {
-        body : caller .. read $ a,
+        body : caller | read $ a,
         caller_access : mutable,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : read,
         }
     },
-    f 'u
+    f .
 ]
 -----
 1
@@ -301,25 +301,25 @@ a
 ;[
     a = 1,
     f = function $ {
-        body : caller .. read $ a,
+        body : caller | read $ a,
         caller_access : constant,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : read,
         }
     },
-    f 'u
+    f .
 ]
 -----
 1
 =====
 ;[
     f = function $ {
-        body : caller .. $$ $ input = 2,
-        input_mode : 'u,
+        body : caller | $$ $ input = 2,
+        input_mode : .,
         caller_access : mutable,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : =,
             : $$,
         }
@@ -333,16 +333,16 @@ a
 =====
 ;[
     f = function $ {
-        body : caller .. $$ $ input = 2,
-        input_mode : 'u,
+        body : caller | $$ $ input = 2,
+        input_mode : .,
         caller_access : mutable,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : =,
             : $$,
         }
     },
-    (a ': final) = 1,
+    (a :: final) = 1,
     f a,
     a
 ]
@@ -351,11 +351,11 @@ a
 =====
 ;[
     f = function $ {
-        body : caller .. $$ $ input = 2,
-        input_mode : 'u,
+        body : caller | $$ $ input = 2,
+        input_mode : .,
         caller_access : constant,
-        context : 'u context {
-            : ..,
+        context : . context {
+            : |,
             : =,
             : $$,
         }
@@ -381,14 +381,14 @@ function.represent $ function $ {body : input, caller_access : constant}
 =====
 function.represent ===
 -----
-{id : ===, caller_access : constant, input_mode : {pair : {symbol : 'u} : {symbol : 'u}}}
+{id : ===, caller_access : constant, input_mode : {pair : {symbol : .} : {symbol : .}}}
 =====
 function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : 't : 't},
-    output_mode : {pair : 'f : 'f},
+    input_mode : {pair : .t : .t},
+    output_mode : {pair : .f : .f},
     caller_access : mutable,
 }
 -----
@@ -396,8 +396,8 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : 't : 't},
-    output_mode : {pair : 'f : 'f},
+    input_mode : {pair : .t : .t},
+    output_mode : {pair : .f : .f},
     caller_access : mutable,
 }
 =====
@@ -409,7 +409,7 @@ function.caller_access function.caller_access
 -----
 constant
 =====
-function.caller_access `t
+function.caller_access eager
 -----
 mutable
 =====
@@ -419,141 +419,141 @@ free
 =====
 function.input_mode not
 -----
-'t
+.t
 =====
-function.input_mode `t
+function.input_mode eager
 -----
-'u
+.
 =====
 function.input_mode function.input_mode
 -----
-{symbol : 'u}
+{symbol : .}
 =====
 ;[f = function $ {body : input}, function.input_mode f]
 -----
-'t
+.t
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {pair : 't : 'f},
+        input_mode : {pair : .t : .f},
     },
     function.input_mode f
 ]
 -----
-{pair : 't : 'f}
+{pair : .t : .f}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {symbol : 'u},
+        input_mode : {symbol : .},
     },
     function.input_mode f
 ]
 -----
-{symbol : 'u}
+{symbol : .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {call : 'u $ 't $ 'u},
+        input_mode : {call : . $ .t $ .},
     },
     function.input_mode f
 ]
 -----
-{call : 't $ 'u}
+{call : .t $ .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : ['t, 'f, 'u, ... 't, 'u]},
+        input_mode : {list : [.t, .f, ., '...' .t, .]},
     },
     function.input_mode f
 ]
 -----
-{list : ['t, 'f, 'u, ... 't, 'u]}
+{list : [.t, .f, ., '...' .t, .]}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : 'u},
+        input_mode : {list : .},
     },
     function.input_mode f
 ]
 -----
-{list : 'u}
+{list : .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : (all {symbol : 'u})},
+        input_mode : {list : (all {symbol : .})},
     },
     function.input_mode f
 ]
 -----
-{list : all $ {symbol : 'u}}
+{list : all $ {symbol : .}}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : {a : 't, b : 'u}},
+        input_mode : {map : {a : .t, b : .}},
     },
     function.input_mode f
 ]
 -----
-{map : {a : 't, b : 'u}}
+{map : {a : .t, b : .}}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : 'u},
+        input_mode : {map : .},
     },
     function.input_mode f
 ]
 -----
-{map : 'u}
+{map : .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : 't all 'u},
+        input_mode : {map : .t all .},
     },
     function.input_mode f
 ]
 -----
-{map : 't all 'u}
+{map : .t all .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : {list : [{symbol : 'u}, {list : 'u}]} all {list : all $ {map : 'u}}},
+        input_mode : {map : {list : [{symbol : .}, {list : .}]} all {list : all $ {map : .}}},
     },
     function.input_mode f
 ]
 -----
-{map : {list : [{symbol : 'u}, {list : 'u}]} all {list : all $ {map : 'u}}}
+{map : {list : [{symbol : .}, {list : .}]} all {list : all $ {map : .}}}
 =====
 ;[
     f = function $ {
         body : input,
-        output_mode : {map : 't all 'u},
+        output_mode : {map : .t all .},
     },
     function.output_mode f
 ]
 -----
-{map : 't all 'u}
+{map : .t all .}
 =====
 function.is_primitive not
 -----
-'t
+.t
 =====
 ;[f = function $ {body : input}, function.is_primitive f]
 -----
-'f
+.f
 =====
 function.is_extension not
 -----
-'f
+.f
 =====
 function.id not
 -----
@@ -565,7 +565,7 @@ not
 =====
 ;[f = function $ {body : input}, function.id f]
 -----
-'u
+.
 =====
 ;[f = function $ {body : input}, function.body f]
 -----
@@ -573,19 +573,19 @@ input
 =====
 function.body not
 -----
-'u
+.
 =====
 ;[
-    ctx = 'u context {a : 1},
+    ctx = . context {a : 1},
     f = function $ {body : input, context : ctx},
     (function.context f) -== ctx
 ]
 -----
-'t
+.t
 =====
 function.context not
 -----
-'u
+.
 =====
 ;[f = function $ {body : input}, function.input_name f]
 -----
@@ -593,7 +593,7 @@ input
 =====
 function.input_name not
 -----
-'u
+.
 =====
 ;[f = function $ {body : input, caller_access : constant}, function.caller_name f]
 -----
@@ -601,8 +601,8 @@ caller
 =====
 ;[f = function $ {body : input}, function.caller_name f]
 -----
-'u
+.
 =====
 function.caller_name not
 -----
-'u
+.

@@ -1,27 +1,27 @@
 ;[
-    p = proposition.prove $ not $ (not 'f),
+    p = proposition.prove $ not $ (not .f),
     proposition.input p
 ]
 -----
-'t
+.t
 =====
 ;[
-    p = proposition.prove $ not $ 't,
+    p = proposition.prove $ not $ .t,
     proposition.output p
 ]
 -----
-'f
+.f
 =====
 ;[
-    p = proposition.prove $ not $ 't,
+    p = proposition.prove $ not $ .t,
     (proposition.function p) -== not
 ]
 -----
-'t
+.t
 =====
 ;[
-    p = proposition.prove $ not $ 't,
+    p = proposition.prove $ not $ .t,
     proposition.proved p
 ]
 -----
-'t
+.t
