@@ -1,59 +1,59 @@
-not .t
+not .true
 -----
-.f
+.false
 =====
-not .f
+not .false
 -----
-.t
+.true
 =====
-.t and .f
+.true and .false
 -----
-.f
+.false
 =====
-.t and .t
+.true and .true
 -----
-.t
+.true
 =====
-;[.f and ; $ [a = 1, .t], a]
+;[.false and ; $ [a = 1, .true], a]
 -----
 1
 =====
-.t or .f
+.true or .false
 -----
-.t
+.true
 =====
-.f or .f
+.false or .false
 -----
-.f
+.false
 =====
-;[.t or ; $ [a = 1, .f], a]
+;[.true or ; $ [a = 1, .false], a]
 -----
 1
 =====
-.t xor .f
+.true xor .false
 -----
-.t
+.true
 =====
-.t xor .t
+.true xor .true
 -----
-.f
+.false
 =====
-.f xor .f
+.false xor .false
 -----
-.f
+.false
 =====
-.t imply .f
+.true imply .false
 -----
-.f
+.false
 =====
-.t imply .t
+.true imply .true
 -----
-.t
+.true
 =====
-.f imply .t
+.false imply .true
 -----
-.t
+.true
 =====
-.f imply .f
+.false imply .false
 -----
-.t
+.true

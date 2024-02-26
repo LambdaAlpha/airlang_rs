@@ -62,13 +62,13 @@ extension
 -----
 unit
 =====
-;[a = .t, type_of a]
+;[a = .true, type_of a]
 -----
 bool
 =====
-type_of $ not $ .t
+type_of $ not $ .true
 -----
-.f : bool
+.false : bool
 =====
 ;[a = 1, type_of a]
 -----
@@ -118,73 +118,73 @@ function
 -----
 context
 =====
-;[a = proposition $ {function : not, input : .t, output : .f}, type_of a]
+;[a = proposition $ {function : not, input : .true, output : .false}, type_of a]
 -----
 proposition
 =====
-;[a = proposition.prove $ not $ .t, type_of a]
+;[a = proposition.prove $ not $ .true, type_of a]
 -----
 proposition
 =====
-.t -=- .f
+.true -=- .false
 -----
-.f
+.false
 =====
-.f -=- .f
+.false -=- .false
 -----
-.t
+.true
 =====
 1 -=- 1
 -----
-.t
+.true
 =====
 1.0 -=- 1.0
 -----
-.t
+.true
 =====
 (. a) -=- (. a)
 -----
-.t
+.true
 =====
 "" -=- ""
 -----
-.t
+.true
 =====
 (1 : 2) -=- (1 : 2)
 -----
-.t
+.true
 =====
 [1, 2] -=- [1, 2]
 -----
-.t
+.true
 =====
 {} -=- {}
 -----
-.t
+.true
 =====
 (1 2) -=- (1 2)
 -----
-.t
+.true
 =====
 (1 ? 2) -=- (1 ? 2)
 -----
-.t
+.true
 =====
 ;[a = function $ {body : input}, b = function $ {body : input}, (a === b) and a =/- .]
 -----
-.t
+.true
 =====
 ;[a = . context {}, b = . context {}, (a === b) and a =/- .]
 -----
-.t
+.true
 =====
 ;[
-    a = proposition $ {function : not, input : .t, output : .f},
-    b = proposition $ {function : not, input : .t, output : .f},
+    a = proposition $ {function : not, input : .true, output : .false},
+    b = proposition $ {function : not, input : .true, output : .false},
     (a === b) and a =/- .
 ]
 -----
-.t
+.true
 =====
 ;[
     a = answer.unverified $ 1,
@@ -192,55 +192,55 @@ proposition
     (a === b) and a =/- .
 ]
 -----
-.t
+.true
 =====
 (1 + 1) -=- (3 - 1)
 -----
-.t
+.true
 =====
 1 -=- "a"
 -----
-.f
+.false
 =====
 1 -/- "a"
 -----
-.t
+.true
 =====
 1 -/- 1
 -----
-.f
+.false
 =====
 ;[a = 1, a ==- 1]
 -----
-.t
+.true
 =====
 ;[a = 1, a =/- 1]
 -----
-.f
+.false
 =====
 ;[a = 1, 1 -== a]
 -----
-.t
+.true
 =====
 ;[a = 1, 1 -/= a]
 -----
-.f
+.false
 =====
 ;[a = 1, b = 1, a === b]
 -----
-.t
+.true
 =====
 ;[a = 1, b = 1, a =/= b]
 -----
-.f
+.false
 =====
 ;[a = 1, a === a]
 -----
-.t
+.true
 =====
 ;[a = 1, a =/= a]
 -----
-.f
+.false
 =====
 a === b
 -----

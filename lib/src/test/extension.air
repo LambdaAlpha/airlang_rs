@@ -1,6 +1,6 @@
 ;[a = extension.unit, b = extension.unit, a === b]
 -----
-.t
+.true
 =====
 type_of extension.unit
 -----
@@ -20,15 +20,15 @@ function
 =====
 function.is_extension func_ext
 -----
-.t
+.true
 =====
 function.represent func_ext
 -----
-{id : func_ext, is_extension : .t}
+{id : func_ext, is_extension : .true}
 =====
 ;[a = func_ext, b = func_ext, a === b]
 -----
-.t
+.true
 =====
 . | func_ext $ 1
 -----
@@ -38,6 +38,6 @@ $$ $ func_ext $ 1
 -----
 1
 =====
-;[p = proposition.prove $ func_ext $ .t, proposition.proved p]
+;[p = proposition.prove $ func_ext $ .true, proposition.proved p]
 -----
-.t
+.true

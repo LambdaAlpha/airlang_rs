@@ -160,7 +160,7 @@ fn generate_unit(s: &mut String) {
 
 fn generate_bool(b: bool, s: &mut String) {
     s.push(PRESERVED_PREFIX);
-    s.push_str(if b { "t" } else { "f" });
+    s.push_str(if b { "true" } else { "false" });
 }
 
 fn generate_int(i: &Int, s: &mut String) {

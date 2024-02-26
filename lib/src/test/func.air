@@ -2,29 +2,29 @@
     f = function $ {
         body : input,
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-.f
+.false
 =====
 ;[
     f = function $ {
-        body : (.t not) $ input
+        body : (.true not) $ input
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
         body : not $ input,
         context : . context {: not}
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
@@ -32,55 +32,55 @@
         input_name : a,
         context : . context {n : not}
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
         body : input,
         input_mode : .,
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-not .t
+not .true
 =====
 ;[
     f = function $ {
-        body : (.t not) $ input,
-        input_mode : .t,
+        body : (.true not) $ input,
+        input_mode : .true,
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : .f,
+        input_mode : .false,
     },
-    f $ not $ .t
+    f $ not $ .true
 ]
 -----
-not .t
+not .true
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : .f,
+        input_mode : .false,
     },
-    f $ .t $ not $ .t
+    f $ .true $ not $ .true
 ]
 -----
-.f
+.false
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : .t,
+        input_mode : .true,
     },
     f {a : b}
 ]
@@ -90,7 +90,7 @@ not .t
 ;[
     f = function $ {
         body : input,
-        input_mode : {pair : .f : .t},
+        input_mode : {pair : .false : .true},
     },
     a f b
 ]
@@ -100,7 +100,7 @@ a : .
 ;[
     f = function $ {
         body : input,
-        input_mode : {pair : .f : .t, symbol : .},
+        input_mode : {pair : .false : .true, symbol : .},
     },
     [a f b, f a]
 ]
@@ -112,20 +112,20 @@ a : .
         body : input,
         input_mode : .,
     },
-    f $ not $ .f
+    f $ not $ .false
 ]
 -----
-not .f
+not .false
 =====
 ;[
     f = function $ {
         body : input,
         input_mode : {symbol : .},
     },
-    f $ not $ .f
+    f $ not $ .false
 ]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
@@ -152,7 +152,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {list : [.t, .f, '...' ., .t]},
+        input_mode : {list : [.true, .false, '...' ., .true]},
     },
     f [a, a, a, a, a, a]
 ]
@@ -174,26 +174,26 @@ a
         body : input,
         input_mode : {list : .},
     },
-    f $ not $ .f
+    f $ not $ .false
 ]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
         body : input,
         input_mode : {list : (all {symbol : .})},
     },
-    f [not .t, b]
+    f [not .true, b]
 ]
 -----
-[.f, b]
+[.false, b]
 =====
 ;[
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : {a : .t, b : .}},
+        input_mode : {map : {a : .true, b : .}},
     },
     f {a : a, b : a}
 ]
@@ -215,16 +215,16 @@ a
         body : input,
         input_mode : {map : .},
     },
-    f (not .t)
+    f (not .true)
 ]
 -----
-.f
+.false
 =====
 ;[
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : .f all .t},
+        input_mode : {map : .false all .true},
     },
     f {: a}
 ]
@@ -235,7 +235,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {call : . $ .t $ .},
+        input_mode : {call : . $ .true $ .},
     },
     f (a a)
 ]
@@ -246,7 +246,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {reverse : .t ? .},
+        input_mode : {reverse : .true ? .},
     },
     f $ a ? a
 ]
@@ -387,8 +387,8 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : .t : .t},
-    output_mode : {pair : .f : .f},
+    input_mode : {pair : .true : .true},
+    output_mode : {pair : .false : .false},
     caller_access : mutable,
 }
 -----
@@ -396,8 +396,8 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : .t : .t},
-    output_mode : {pair : .f : .f},
+    input_mode : {pair : .true : .true},
+    output_mode : {pair : .false : .false},
     caller_access : mutable,
 }
 =====
@@ -419,7 +419,7 @@ free
 =====
 function.input_mode not
 -----
-.t
+.true
 =====
 function.input_mode eager
 -----
@@ -431,17 +431,17 @@ function.input_mode function.input_mode
 =====
 ;[f = function $ {body : input}, function.input_mode f]
 -----
-.t
+.true
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {pair : .t : .f},
+        input_mode : {pair : .true : .false},
     },
     function.input_mode f
 ]
 -----
-{pair : .t : .f}
+{pair : .true : .false}
 =====
 ;[
     f = function $ {
@@ -456,22 +456,22 @@ function.input_mode function.input_mode
 ;[
     f = function $ {
         body : input,
-        input_mode : {call : . $ .t $ .},
+        input_mode : {call : . $ .true $ .},
     },
     function.input_mode f
 ]
 -----
-{call : .t $ .}
+{call : .true $ .}
 =====
 ;[
     f = function $ {
         body : input,
-        input_mode : {list : [.t, .f, ., '...' .t, .]},
+        input_mode : {list : [.true, .false, ., '...' .true, .]},
     },
     function.input_mode f
 ]
 -----
-{list : [.t, .f, ., '...' .t, .]}
+{list : [.true, .false, ., '...' .true, .]}
 =====
 ;[
     f = function $ {
@@ -496,12 +496,12 @@ function.input_mode function.input_mode
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : {a : .t, b : .}},
+        input_mode : {map : {a : .true, b : .}},
     },
     function.input_mode f
 ]
 -----
-{map : {a : .t, b : .}}
+{map : {a : .true, b : .}}
 =====
 ;[
     f = function $ {
@@ -516,12 +516,12 @@ function.input_mode function.input_mode
 ;[
     f = function $ {
         body : input,
-        input_mode : {map : .t all .},
+        input_mode : {map : .true all .},
     },
     function.input_mode f
 ]
 -----
-{map : .t all .}
+{map : .true all .}
 =====
 ;[
     f = function $ {
@@ -536,24 +536,24 @@ function.input_mode function.input_mode
 ;[
     f = function $ {
         body : input,
-        output_mode : {map : .t all .},
+        output_mode : {map : .true all .},
     },
     function.output_mode f
 ]
 -----
-{map : .t all .}
+{map : .true all .}
 =====
 function.is_primitive not
 -----
-.t
+.true
 =====
 ;[f = function $ {body : input}, function.is_primitive f]
 -----
-.f
+.false
 =====
 function.is_extension not
 -----
-.f
+.false
 =====
 function.id not
 -----
@@ -581,7 +581,7 @@ function.body not
     (function.context f) -== ctx
 ]
 -----
-.t
+.true
 =====
 function.context not
 -----

@@ -75,7 +75,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("+1.0e-10"),
         symbol("+1.a"),
         symbol("-1.0"),
-        symbol(".t"),
+        symbol(".true"),
         symbol("'$"),
         symbol("'?"),
         symbol("'a"),

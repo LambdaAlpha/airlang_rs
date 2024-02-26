@@ -413,8 +413,8 @@ where
 {
     match src {
         "" => Some(<T as From<Unit>>::from(Unit)),
-        "t" => Some(<T as From<Bool>>::from(Bool::t())),
-        "f" => Some(<T as From<Bool>>::from(Bool::f())),
+        "true" => Some(<T as From<Bool>>::from(Bool::t())),
+        "false" => Some(<T as From<Bool>>::from(Bool::f())),
         _ => None,
     }
 }

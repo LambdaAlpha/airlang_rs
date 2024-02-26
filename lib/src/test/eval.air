@@ -2,55 +2,55 @@
 -----
 a
 =====
-.t $ not $ .f
+.true $ not $ .false
 -----
-.t
+.true
 =====
-.f [a, f a, a : b, f ? a, {a : b}]
+.false [a, f a, a : b, f ? a, {a : b}]
 -----
 [a, f a, a : b, f ? a, {a : b}]
 =====
-.f {a : b, c : .t $ not $ .f}
+.false {a : b, c : .true $ not $ .false}
 -----
-{a : b, c : .t}
+{a : b, c : .true}
 =====
-.f [a, b : [.t $ not $ .t]]
+.false [a, b : [.true $ not $ .true]]
 -----
-[a, b : [.f]]
+[a, b : [.false]]
 =====
-.f $ .f $ a
+.false $ .false $ a
 -----
 a
 =====
-. $ .t $ not $ .t
+. $ .true $ not $ .true
 -----
-.t $ not $ .t
+.true $ not $ .true
 =====
-.f $ . $ .f $ a
+.false $ . $ .false $ a
 -----
-.f a
+.false a
 =====
-.t {: a, (not .t) : c, : (not .f)}
+.true {: a, (not .true) : c, : (not .false)}
 -----
-{., .f : ., : .t}
+{., .false : ., : .true}
 =====
-.t {{a : b} : {c : d}}
+.true {{a : b} : {c : d}}
 -----
 {{. : .} : {. : .}}
 =====
-.t {(. $ not $ .f) : a}
+.true {(. $ not $ .false) : a}
 -----
-{(not .f) : .}
+{(not .false) : .}
 =====
-.t [1, {a : b}]
+.true [1, {a : b}]
 -----
 [1, {. : .}]
 =====
-.t {(. a) : . $ {b : c}}
+.true {(. a) : . $ {b : c}}
 -----
 {a : {b : c}}
 =====
-.t {(. a) : .t $ {b : c}}
+.true {(. a) : .true $ {b : c}}
 -----
 {a : {. : .}}
 =====
@@ -58,9 +58,9 @@ value a
 -----
 a
 =====
-eager $ not $ .t
+eager $ not $ .true
 -----
-.f
+.false
 =====
 ;[a = . $ a, eager $ a]
 -----
@@ -70,10 +70,10 @@ eager $ . $ a
 -----
 a
 =====
-lazy $ not $ .t
+lazy $ not $ .true
 -----
-not .t
+not .true
 =====
-lazy $ .t $ not $ .t
+lazy $ .true $ not $ .true
 -----
-.f
+.false

@@ -2,6 +2,6 @@
 -----
 1
 =====
-$$ $ value $ not $ .f
+$$ $ value $ not $ .false
 -----
-.t
+.true

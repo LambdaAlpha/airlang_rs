@@ -14,15 +14,15 @@
 -----
 3
 =====
-. ;return [1, 2, if [.t, return = 3], 4]
+. ;return [1, 2, if [.true, return = 3], 4]
 -----
 3
 =====
-. ;return [1, if [.t, . ;return [2, if [.t, return = 3], return = 4]], return = 5, return]
+. ;return [1, if [.true, . ;return [2, if [.true, return = 3], return = 4]], return = 5, return]
 -----
 3
 =====
-. ;return [1, if [.t, ; [2, if [.t, return = 3], return = 4]], return = 5, return]
+. ;return [1, if [.true, ; [2, if [.true, return = 3], return = 4]], return = 5, return]
 -----
 4
 =====
@@ -40,7 +40,7 @@ a ;return [a = 1]
 =====
 ;[a = 1, a ;return [], is_null a]
 -----
-.t
+.true
 =====
 (. a) ;return [a = 1, 2]
 -----
@@ -84,27 +84,27 @@ a ;return [a = 1]
 -----
 6
 =====
-if [.t, 1, 2]
+if [.true, 1, 2]
 -----
 1
 =====
-if [.f, 1, 2]
+if [.false, 1, 2]
 -----
 2
 =====
-if [.t, 1]
+if [.true, 1]
 -----
 1
 =====
-if [.f, 1]
+if [.false, 1]
 -----
 .
 =====
-;[if [.t, 1, a = 2], a]
+;[if [.true, 1, a = 2], a]
 -----
 .
 =====
-if [.t, if [.f, 1, 2], 3]
+if [.true, if [.false, 1, 2], 3]
 -----
 2
 =====
@@ -140,7 +140,7 @@ match [1, {(2 - 1) : 2, (2 + 1) : 4}]
 -----
 1
 =====
-;[while [.f, a = 1], a]
+;[while [.false, a = 1], a]
 -----
 .
 =====

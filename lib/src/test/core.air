@@ -1,47 +1,47 @@
-.t
+.true
 -----
-.t
+.true
 =====
 a
 -----
 .
 =====
-(not .f) : "1"
+(not .false) : "1"
 -----
-.t : "1"
+.true : "1"
 =====
-[not .t, 1, "2"]
+[not .true, 1, "2"]
 -----
-[.f, 1, "2"]
+[.false, 1, "2"]
 =====
-{(not .t) : (not .t)}
+{(not .true) : (not .true)}
 -----
-{.f : .f}
+{.false : .false}
 =====
-not $ not $ .t
+not $ not $ .true
 -----
-.t
+.true
 =====
 . a
 -----
 a
 =====
-.f [a, .t $ not $ .t, .f $ not $ .t, . a]
+.false [a, .true $ not $ .true, .false $ not $ .true, . a]
 -----
-[a, .f, not .t, a]
+[a, .false, not .true, a]
 =====
-.t [not .t, .t $ not $ .t, .f $ not $ .t, . $ not $ .t]
+.true [not .true, .true $ not $ .true, .false $ not $ .true, . $ not $ .true]
 -----
-[.f, .f, not .t, not .t]
+[.false, .false, not .true, not .true]
 =====
 "a" "b"
 -----
 "a" "b"
 =====
-"a" $ not $ .t
+"a" $ not $ .true
 -----
-"a" .f
+"a" .false
 =====
-(not .t) $ not $ .t
+(not .true) $ not $ .true
 -----
-.f .f
+.false .false
