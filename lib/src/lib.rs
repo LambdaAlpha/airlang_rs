@@ -176,6 +176,8 @@ pub(crate) mod call;
 
 pub(crate) mod reverse;
 
+pub(crate) mod annotation;
+
 pub(crate) mod types;
 
 pub(crate) mod traits;

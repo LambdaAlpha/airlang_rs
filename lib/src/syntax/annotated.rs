@@ -8,28 +8,28 @@ use std::{
 };
 
 use crate::{
-    annotation::Annotated,
-    bool::Bool,
-    bytes::Bytes,
-    float::Float,
-    int::Int,
-    string::Str,
-    symbol::Symbol,
     syntax::{
-        generate,
-        generator::GenerateRepr,
-        parse,
-        parser::ParseRepr,
-        repr::{
+        annotated::{
+            annotation::AnnotatedRepr,
             call::CallRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
             reverse::ReverseRepr,
         },
+        generate_all,
+        generator::GenerateRepr,
+        parse_all,
+        parser::ParseRepr,
         ParseError,
     },
-    unit::Unit,
+    Bool,
+    Bytes,
+    Float,
+    Int,
+    Str,
+    Symbol,
+    Unit,
 };
 
 #[derive(PartialEq, Eq, Clone, Hash)]
@@ -46,6 +46,7 @@ pub enum Repr {
     Reverse(Box<ReverseRepr>),
     List(ListRepr),
     Map(MapRepr),
+    Annotated(Box<AnnotatedRepr>),
 }
 
 impl Repr {
@@ -126,41 +127,41 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<Box<Annotated<Repr, Repr>>> for Repr {
-    fn from(value: Box<Annotated<Repr, Repr>>) -> Self {
-        value.value
+impl From<Box<AnnotatedRepr>> for Repr {
+    fn from(a: Box<AnnotatedRepr>) -> Self {
+        Repr::Annotated(a)
     }
 }
 
 impl Display for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate(self))
+        write!(f, "{}", generate_all(self))
     }
 }
 
 impl Debug for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate(self))
+        write!(f, "{}", generate_all(self))
     }
 }
 
 impl TryFrom<&str> for Repr {
     type Error = ParseError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        parse(value)
+        parse_all(value)
     }
 }
 
 impl FromStr for Repr {
     type Err = ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse(s)
+        parse_all(s)
     }
 }
 
 impl From<&Repr> for String {
     fn from(value: &Repr) -> Self {
-        generate(value)
+        generate_all(value)
     }
 }
 
@@ -196,6 +197,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Reverse(r) => GenerateRepr::Reverse(r),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),
+            Repr::Annotated(a) => GenerateRepr::Annotated(a),
         };
         Ok(r)
     }
@@ -210,3 +212,5 @@ pub(crate) mod reverse;
 pub(crate) mod list;
 
 pub(crate) mod map;
+
+pub(crate) mod annotation;

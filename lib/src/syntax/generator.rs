@@ -1,6 +1,7 @@
 use std::hash::Hash;
 
 use crate::{
+    annotation::Annotated,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -13,9 +14,9 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
+        ANNOTATION_SEPARATOR,
         BYTES_PREFIX,
         CALL_SEPARATOR,
-        COMMENT_SEPARATOR,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
@@ -125,6 +126,7 @@ where
     Reverse(&'a Reverse<T, T>),
     List(&'a List<T>),
     Map(&'a Map<T, T>),
+    Annotated(&'a Annotated<T, T>),
 }
 
 pub(crate) fn generate<'a, T>(
@@ -150,6 +152,7 @@ where
         GenerateRepr::Reverse(i) => generate_reverse(i, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
+        GenerateRepr::Annotated(a) => generate_annotated(a, s, format, indent)?,
     }
     Ok(())
 }
@@ -220,7 +223,9 @@ fn is_need_quote(str: &str) -> bool {
     };
     match first {
         BYTES_PREFIX | PRESERVED_PREFIX | SYMBOL_QUOTE | STRING_QUOTE | '0'..='9' => true,
-        PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | COMMENT_SEPARATOR => str.len() == 1,
+        PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | ANNOTATION_SEPARATOR => {
+            str.len() == 1
+        }
         '+' | '-' => matches!(chars.next(), Some('0'..='9')),
         LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR => true,
         _ => chars.any(|c| {
@@ -516,4 +521,27 @@ where
     s.push_str(&format.indent.repeat(indent));
     s.push(MAP_RIGHT);
     Ok(())
+}
+
+fn generate_annotated<'a, T>(
+    annotated: &'a Annotated<T, T>,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    generate_infix(
+        &annotated.annotation,
+        |s, _format, _indent| {
+            s.push(ANNOTATION_SEPARATOR);
+            Ok(())
+        },
+        &annotated.value,
+        s,
+        format,
+        indent,
+    )
 }

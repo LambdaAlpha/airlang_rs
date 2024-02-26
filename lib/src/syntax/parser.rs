@@ -62,6 +62,7 @@ use nom::{
 };
 
 use crate::{
+    annotation::Annotated,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -74,9 +75,9 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
+        ANNOTATION_SEPARATOR,
         BYTES_PREFIX,
         CALL_SEPARATOR,
-        COMMENT_SEPARATOR,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
@@ -109,6 +110,7 @@ pub(crate) trait ParseRepr:
     + Eq
     + Hash
     + From<Map<Self, Self>>
+    + From<Box<Annotated<Self, Self>>>
     + Clone
 {
     fn try_into_pair(self) -> Result<(Self, Self), Self>;
@@ -204,9 +206,9 @@ where
             Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
             _ => |s| map(exact_char(REVERSE_SEPARATOR), |_| Token::Reverse)(s),
         },
-        COMMENT_SEPARATOR => match second {
+        ANNOTATION_SEPARATOR => match second {
             Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(COMMENT_SEPARATOR), |_| Token::Comment)(s),
+            _ => |s| map(exact_char(ANNOTATION_SEPARATOR), |_| Token::Annotation)(s),
         },
         s if is_symbol(s) => |s| map(trivial_symbol, Token::Default)(s),
         _ => fail,
@@ -218,7 +220,7 @@ enum Token<T> {
     Pair,
     Call,
     Reverse,
-    Comment,
+    Annotation,
     Default(T),
 }
 
@@ -251,7 +253,10 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                 let reverse = Box::new(Reverse::new(input.clone(), input));
                 Some(<T as From<Box<Reverse<T, T>>>>::from(reverse))
             }
-            Token::Comment => Some(input),
+            Token::Annotation => {
+                let annotated = Box::new(Annotated::new(input.clone(), input));
+                Some(<T as From<Box<Annotated<T, T>>>>::from(annotated))
+            }
             Token::Default(func) => {
                 let call = Box::new(Call::new(func, input));
                 Some(<T as From<Box<Call<T, T>>>>::from(call))
@@ -286,7 +291,10 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                 let reverse = Box::new(Reverse::new(left, right));
                 <T as From<Box<Reverse<T, T>>>>::from(reverse)
             }
-            Token::Comment => right,
+            Token::Annotation => {
+                let annotated = Box::new(Annotated::new(left, right));
+                <T as From<Box<Annotated<T, T>>>>::from(annotated)
+            }
             Token::Default(middle) => {
                 let pair = Box::new(Pair::new(left, right));
                 let pair = <T as From<Box<Pair<T, T>>>>::from(pair);

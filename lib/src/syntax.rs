@@ -13,6 +13,8 @@ pub use self::repr::{
 
 pub(crate) mod repr;
 
+pub mod annotated;
+
 pub(crate) mod parser;
 
 pub(crate) mod generator;
@@ -34,7 +36,7 @@ const SYMBOL_QUOTE: char = '\'';
 const BYTES_PREFIX: char = '#';
 const PRESERVED_PREFIX: char = '.';
 
-const COMMENT_SEPARATOR: char = '@';
+const ANNOTATION_SEPARATOR: char = '@';
 const PAIR_SEPARATOR: char = ':';
 const CALL_SEPARATOR: char = '$';
 const REVERSE_SEPARATOR: char = '?';
@@ -49,6 +51,14 @@ pub fn parse(src: &str) -> Result<Repr, ParseError> {
     parser::parse(src)
 }
 
+pub fn parse_all(src: &str) -> Result<annotated::Repr, ParseError> {
+    parser::parse(src)
+}
+
 pub fn generate(src: &Repr) -> String {
+    generator::generate_pretty(src).unwrap()
+}
+
+pub fn generate_all(src: &annotated::Repr) -> String {
     generator::generate_pretty(src).unwrap()
 }

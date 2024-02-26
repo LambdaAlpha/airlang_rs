@@ -24,7 +24,7 @@ use crate::{
 mod booleans;
 mod bytes;
 mod calls;
-mod comments;
+mod annotations;
 mod floats;
 mod infixes;
 mod ints;
@@ -372,17 +372,17 @@ fn test_generate_maps() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_comments() -> Result<(), Box<dyn Error>> {
+fn test_parse_annotations() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/comments.air"),
-        "test/comments.air",
-        comments::expected,
+        include_str!("test/annotations.air"),
+        "test/annotations.air",
+        annotations::expected,
     )
 }
 
 #[test]
-fn test_generate_comments() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/comments.air"), "test/comments.air")
+fn test_generate_annotations() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/annotations.air"), "test/annotations.air")
 }
 
 #[test]
