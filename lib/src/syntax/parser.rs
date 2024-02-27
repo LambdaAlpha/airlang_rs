@@ -62,7 +62,7 @@ use nom::{
 };
 
 use crate::{
-    annotation::Annotated,
+    annotation::Annotation,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -110,7 +110,7 @@ pub(crate) trait ParseRepr:
     + Eq
     + Hash
     + From<Map<Self, Self>>
-    + From<Box<Annotated<Self, Self>>>
+    + From<Box<Annotation<Self, Self>>>
     + Clone
 {
     fn try_into_pair(self) -> Result<(Self, Self), Self>;
@@ -254,8 +254,8 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                 Some(<T as From<Box<Reverse<T, T>>>>::from(reverse))
             }
             Token::Annotation => {
-                let annotated = Box::new(Annotated::new(input.clone(), input));
-                Some(<T as From<Box<Annotated<T, T>>>>::from(annotated))
+                let annotation = Box::new(Annotation::new(input.clone(), input));
+                Some(<T as From<Box<Annotation<T, T>>>>::from(annotation))
             }
             Token::Default(func) => {
                 let call = Box::new(Call::new(func, input));
@@ -292,8 +292,8 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
                 <T as From<Box<Reverse<T, T>>>>::from(reverse)
             }
             Token::Annotation => {
-                let annotated = Box::new(Annotated::new(left, right));
-                <T as From<Box<Annotated<T, T>>>>::from(annotated)
+                let annotation = Box::new(Annotation::new(left, right));
+                <T as From<Box<Annotation<T, T>>>>::from(annotation)
             }
             Token::Default(middle) => {
                 let pair = Box::new(Pair::new(left, right));

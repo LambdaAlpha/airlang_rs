@@ -1,6 +1,6 @@
 use crate::{
     pair::Pair,
-    syntax::annotated::Repr,
+    syntax::reserve::Repr,
 };
 
 pub type PairRepr = Pair<Repr, Repr>;

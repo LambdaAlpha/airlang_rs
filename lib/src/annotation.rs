@@ -1,13 +1,13 @@
 use std::hash::Hash;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Annotated<A, B> {
-    pub annotation: A,
+pub struct Annotation<A, B> {
+    pub note: A,
     pub value: B,
 }
 
-impl<A, B> Annotated<A, B> {
-    pub fn new(annotation: A, value: B) -> Self {
-        Self { annotation, value }
+impl<A, B> Annotation<A, B> {
+    pub fn new(note: A, value: B) -> Self {
+        Self { note, value }
     }
 }

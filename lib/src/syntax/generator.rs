@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use crate::{
-    annotation::Annotated,
+    annotation::Annotation,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -126,7 +126,7 @@ where
     Reverse(&'a Reverse<T, T>),
     List(&'a List<T>),
     Map(&'a Map<T, T>),
-    Annotated(&'a Annotated<T, T>),
+    Annotation(&'a Annotation<T, T>),
 }
 
 pub(crate) fn generate<'a, T>(
@@ -152,7 +152,7 @@ where
         GenerateRepr::Reverse(i) => generate_reverse(i, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
-        GenerateRepr::Annotated(a) => generate_annotated(a, s, format, indent)?,
+        GenerateRepr::Annotation(a) => generate_annotation(a, s, format, indent)?,
     }
     Ok(())
 }
@@ -523,8 +523,8 @@ where
     Ok(())
 }
 
-fn generate_annotated<'a, T>(
-    annotated: &'a Annotated<T, T>,
+fn generate_annotation<'a, T>(
+    annotation: &'a Annotation<T, T>,
     s: &mut String,
     format: &GenerateFormat,
     indent: usize,
@@ -534,12 +534,12 @@ where
     T: Eq + Hash,
 {
     generate_infix(
-        &annotated.annotation,
+        &annotation.note,
         |s, _format, _indent| {
             s.push(ANNOTATION_SEPARATOR);
             Ok(())
         },
-        &annotated.value,
+        &annotation.value,
         s,
         format,
         indent,

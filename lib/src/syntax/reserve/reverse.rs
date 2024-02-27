@@ -1,6 +1,6 @@
 use crate::{
     reverse::Reverse,
-    syntax::annotated::Repr,
+    syntax::reserve::Repr,
 };
 
 pub type ReverseRepr = Reverse<Repr, Repr>;

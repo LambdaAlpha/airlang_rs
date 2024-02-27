@@ -1,6 +1,6 @@
 use crate::{
     call::Call,
-    syntax::annotated::Repr,
+    syntax::reserve::Repr,
 };
 
 pub type CallRepr = Call<Repr, Repr>;

@@ -11,9 +11,9 @@ pub use self::repr::{
     Repr,
 };
 
-pub(crate) mod repr;
+pub mod reserve;
 
-pub mod annotated;
+pub(crate) mod repr;
 
 pub(crate) mod parser;
 
@@ -51,7 +51,7 @@ pub fn parse(src: &str) -> Result<Repr, ParseError> {
     parser::parse(src)
 }
 
-pub fn parse_all(src: &str) -> Result<annotated::Repr, ParseError> {
+pub fn parse_reserve(src: &str) -> Result<reserve::Repr, ParseError> {
     parser::parse(src)
 }
 
@@ -59,6 +59,6 @@ pub fn generate(src: &Repr) -> String {
     generator::generate_pretty(src).unwrap()
 }
 
-pub fn generate_all(src: &annotated::Repr) -> String {
+pub fn generate_reserve(src: &reserve::Repr) -> String {
     generator::generate_pretty(src).unwrap()
 }

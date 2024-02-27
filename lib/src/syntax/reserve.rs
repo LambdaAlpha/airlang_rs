@@ -9,18 +9,18 @@ use std::{
 
 use crate::{
     syntax::{
-        annotated::{
-            annotation::AnnotatedRepr,
+        generate_reserve,
+        generator::GenerateRepr,
+        parse_reserve,
+        parser::ParseRepr,
+        reserve::{
+            annotation::AnnotationRepr,
             call::CallRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
             reverse::ReverseRepr,
         },
-        generate_all,
-        generator::GenerateRepr,
-        parse_all,
-        parser::ParseRepr,
         ParseError,
     },
     Bool,
@@ -46,7 +46,7 @@ pub enum Repr {
     Reverse(Box<ReverseRepr>),
     List(ListRepr),
     Map(MapRepr),
-    Annotated(Box<AnnotatedRepr>),
+    Annotation(Box<AnnotationRepr>),
 }
 
 impl Repr {
@@ -127,41 +127,41 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<Box<AnnotatedRepr>> for Repr {
-    fn from(a: Box<AnnotatedRepr>) -> Self {
-        Repr::Annotated(a)
+impl From<Box<AnnotationRepr>> for Repr {
+    fn from(a: Box<AnnotationRepr>) -> Self {
+        Repr::Annotation(a)
     }
 }
 
 impl Display for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_all(self))
+        write!(f, "{}", generate_reserve(self))
     }
 }
 
 impl Debug for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_all(self))
+        write!(f, "{}", generate_reserve(self))
     }
 }
 
 impl TryFrom<&str> for Repr {
     type Error = ParseError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        parse_all(value)
+        parse_reserve(value)
     }
 }
 
 impl FromStr for Repr {
     type Err = ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_all(s)
+        parse_reserve(s)
     }
 }
 
 impl From<&Repr> for String {
     fn from(value: &Repr) -> Self {
-        generate_all(value)
+        generate_reserve(value)
     }
 }
 
@@ -197,7 +197,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Reverse(r) => GenerateRepr::Reverse(r),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),
-            Repr::Annotated(a) => GenerateRepr::Annotated(a),
+            Repr::Annotation(a) => GenerateRepr::Annotation(a),
         };
         Ok(r)
     }

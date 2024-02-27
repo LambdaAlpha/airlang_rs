@@ -1,6 +1,6 @@
 use crate::{
     list::List,
-    syntax::annotated::Repr,
+    syntax::reserve::Repr,
 };
 
 pub type ListRepr = List<Repr>;

@@ -8,7 +8,7 @@ use std::{
 };
 
 use crate::{
-    annotation::Annotated,
+    annotation::Annotation,
     bool::Bool,
     bytes::Bytes,
     float::Float,
@@ -126,8 +126,8 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<Box<Annotated<Repr, Repr>>> for Repr {
-    fn from(value: Box<Annotated<Repr, Repr>>) -> Self {
+impl From<Box<Annotation<Repr, Repr>>> for Repr {
+    fn from(value: Box<Annotation<Repr, Repr>>) -> Self {
         value.value
     }
 }
