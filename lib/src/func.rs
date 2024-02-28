@@ -453,7 +453,7 @@ fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) {
 }
 
 fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &str) {
-    let Val::Ctx(CtxVal(caller)) = new_ctx.into_val(name) else {
+    let Ok(Val::Ctx(CtxVal(caller))) = new_ctx.into_val(name) else {
         return;
     };
     *ctx = *caller;

@@ -101,6 +101,11 @@ struct DispatchTagged<'a> {
     ctx: TaggedRef<'a, Ctx>,
 }
 
+struct DispatchOwned {
+    foreword: bool,
+    ctx: Ctx,
+}
+
 impl Ctx {
     fn dispatch_const(&self, name: &str) -> Result<DispatchConst, CtxError> {
         let Some(meta) = &self.meta else {
@@ -212,6 +217,43 @@ impl Ctx {
                 };
                 let is_const = is_const || matches!(tagged_val.tag, InvariantTag::Const);
                 Ok(DispatchTagged::foreword(TaggedRef::new(ctx, is_const)))
+            }
+            _ => Err(CtxError::Unexpected),
+        }
+    }
+
+    fn dispatch_owned(mut self, name: &str) -> Result<DispatchOwned, CtxError> {
+        let Some(meta) = &self.meta else {
+            return Ok(DispatchOwned::this(self));
+        };
+        let Ok(dispatcher) = meta.get(DISPATCHER) else {
+            return Ok(DispatchOwned::this(self));
+        };
+        let Val::Func(dispatcher) = dispatcher else {
+            return Err(CtxError::Unexpected);
+        };
+        if !dispatcher.is_ctx_free() {
+            return Err(CtxError::Unexpected);
+        }
+        let target_name = Val::Symbol(Symbol::from_str(name));
+        let ctx_name = dispatcher.eval(&mut FreeCtx, target_name);
+        match ctx_name {
+            Val::Bool(b) => {
+                let dispatch = if b.bool() {
+                    DispatchOwned::foreword(*self.meta.unwrap())
+                } else {
+                    DispatchOwned::this(self)
+                };
+                Ok(dispatch)
+            }
+            Val::Symbol(s) => {
+                let Some(val) = self.name_map.remove(&s) else {
+                    return Err(CtxError::Unexpected);
+                };
+                let Val::Ctx(ctx) = val.val else {
+                    return Err(CtxError::Unexpected);
+                };
+                Ok(DispatchOwned::foreword(*ctx.0))
             }
             _ => Err(CtxError::Unexpected),
         }
@@ -348,11 +390,15 @@ impl Ctx {
         Ok(&tagged_val.val)
     }
 
-    pub(crate) fn into_val(mut self, name: &str) -> Val {
-        self.name_map
-            .remove(name)
-            .map(|tagged_val| tagged_val.val)
-            .unwrap_or_default()
+    pub(crate) fn into_val(self, name: &str) -> Result<Val, CtxError> {
+        let mut dispatch = self.dispatch_owned(name)?;
+        if dispatch.foreword {
+            return dispatch.ctx.into_val(name);
+        }
+        let Some(tagged_val) = dispatch.ctx.name_map.remove(name) else {
+            return Err(CtxError::NotFound);
+        };
+        Ok(tagged_val.val)
     }
 }
 
@@ -397,6 +443,22 @@ impl<'a> DispatchTagged<'a> {
     }
 
     fn foreword(ctx: TaggedRef<'a, Ctx>) -> Self {
+        Self {
+            foreword: true,
+            ctx,
+        }
+    }
+}
+
+impl DispatchOwned {
+    fn this(ctx: Ctx) -> Self {
+        Self {
+            foreword: false,
+            ctx,
+        }
+    }
+
+    fn foreword(ctx: Ctx) -> Self {
         Self {
             foreword: true,
             ctx,

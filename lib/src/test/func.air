@@ -367,6 +367,34 @@ a
 -----
 1
 =====
+;[
+    dispatcher = function $ {
+        body : . $ if $ [
+            input ==- . $ caller,
+            . c,
+            .false
+        ],
+        caller_access : free,
+        context : . context {
+            : if,
+            : ==-
+        },
+    },
+    f = function $ {
+        body : . $ caller | a = 1,
+        caller_access : mutable,
+        context : (. context {: dispatcher}) context {
+            : =,
+            : |,
+            c : . context {},
+        }
+    },
+    f .,
+    a
+]
+-----
+1
+=====
 function.represent $ function $ {body : input}
 -----
 {body : input}
