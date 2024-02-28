@@ -15,15 +15,13 @@ rustc-hash = "1"
 thiserror = "1"
 nom = "7"
 smartstring = "1"
+num-bigint = "0.4"
+num-traits = "0.2"
+num-integer = "0.1"
 
 [dependencies.rand]
 version = "0.8"
 features = ["small_rng", "alloc"]
-
-[dependencies.rug]
-version = "1"
-default-features = false
-features = ["std", "integer", "float"]
 
 [dev-dependencies]
 criterion = "0.5"

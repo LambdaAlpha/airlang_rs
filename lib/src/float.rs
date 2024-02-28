@@ -4,16 +4,27 @@ use std::{
         Display,
         Formatter,
     },
-    hash::{
-        Hash,
-        Hasher,
-    },
+    hash::Hash,
+    str::FromStr,
 };
 
-use rug::Float as RugFloat;
+use num_bigint::{
+    BigInt,
+    BigUint,
+    Sign,
+};
+use num_traits::Zero;
 
-#[derive(Clone, PartialEq)]
-pub struct Float(RugFloat);
+// temporary representation
+// int * 10^exp
+#[derive(Clone, PartialEq, Hash)]
+pub struct Float(Box<FloatInner>);
+
+#[derive(Clone, PartialEq, Hash)]
+struct FloatInner {
+    int: BigInt,
+    exp: BigInt,
+}
 
 impl Float {
     pub(crate) fn from_parts(
@@ -23,29 +34,20 @@ impl Float {
         exp_sign: bool,
         exp: &str,
     ) -> Self {
-        const LOG_2_10: f64 = 3.3219280948873626;
-        let sign = if sign { "+" } else { "-" };
+        let sign = if sign { Sign::Plus } else { Sign::Minus };
+        let mut int = String::from(integral);
+        int.push_str(fractional);
+        let int = BigUint::from_str(&int).unwrap();
+        let int = BigInt::from_biguint(sign, int);
+        let exp_sign = if exp_sign { Sign::Plus } else { Sign::Minus };
         let exp = if exp.is_empty() {
-            "".to_owned()
+            Zero::zero()
         } else {
-            let exp_sign = if exp_sign { "+" } else { "-" };
-            format!("e{exp_sign}{exp}")
+            BigUint::from_str(exp).unwrap()
         };
-        let s = format!("{sign}{integral}.{fractional}{exp}");
-        let f = RugFloat::parse(s).unwrap();
-        let sig_int = integral.trim_start_matches('0');
-        let sig_frac = if sig_int.is_empty() {
-            fractional.trim_start_matches('0')
-        } else {
-            fractional
-        };
-        let mut sig_len = sig_int.len() + sig_frac.len();
-        if sig_len == 0 {
-            sig_len = 1;
-        }
-        let precision = (sig_len as f64 * LOG_2_10).ceil() as u32;
-        let f = RugFloat::with_val(precision, f);
-        Float(f)
+        let exp = BigInt::from_biguint(exp_sign, exp);
+        let exp = exp - fractional.len();
+        Self(Box::new(FloatInner { int, exp }))
     }
 }
 
@@ -53,38 +55,26 @@ impl Eq for Float {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-impl Hash for Float {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.as_ord().hash(state);
+impl Display for FloatInner {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}e{}", self.int, self.exp)
     }
 }
 
 impl Display for Float {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        const LOG_10_2: f64 = 0.30102999566398114;
-        let sig_len = (self.0.prec() as f64 * LOG_10_2).floor() as usize;
-        let (sign, num, exp) = self.0.to_sign_string_exp(10, Some(sig_len));
-        let sign = if sign { "-" } else { "+" };
-        let exp = exp.map_or("".to_owned(), |i| format!("e{i}"));
-        let s = format!("{sign}0.{num}{exp}");
-        write!(f, "{s}")
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Debug for FloatInner {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        <_ as Display>::fmt(self, f)
     }
 }
 
 impl Debug for Float {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Display>::fmt(self, f)
-    }
-}
-
-impl From<f32> for Float {
-    fn from(value: f32) -> Self {
-        Float(RugFloat::with_val(24, value))
-    }
-}
-
-impl From<f64> for Float {
-    fn from(value: f64) -> Self {
-        Float(RugFloat::with_val(53, value))
     }
 }

@@ -13,19 +13,25 @@ use std::{
     },
 };
 
-use rug::Integer;
+use num_bigint::BigInt;
+use num_integer::Integer;
+use num_traits::{
+    Num,
+    ToPrimitive,
+    Zero,
+};
 
 use crate::bool::Bool;
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
-pub struct Int(Integer);
+pub struct Int(BigInt);
 
 #[allow(unused)]
 impl Int {
     pub fn from_sign_string_radix(positive_sign: bool, digits: &str, radix: u8) -> Self {
         let sign = if positive_sign { "+" } else { "-" };
         let s = format!("{sign}{digits}");
-        let i = Integer::from_str_radix(&s, radix as i32).unwrap();
+        let i = BigInt::from_str_radix(&s, radix as u32).unwrap();
         Int(i)
     }
 
@@ -90,7 +96,7 @@ impl Int {
     }
 
     pub(crate) fn divide(self, other: Int) -> Option<Int> {
-        if other.0 == Integer::ZERO {
+        if other.0 == Zero::zero() {
             None
         } else {
             Some(Int(self.0.div(other.0)))
@@ -98,7 +104,7 @@ impl Int {
     }
 
     pub(crate) fn remainder(self, other: Int) -> Option<Int> {
-        if other.0 == Integer::ZERO {
+        if other.0 == Zero::zero() {
             None
         } else {
             Some(Int(self.0.rem(other.0)))
@@ -106,10 +112,10 @@ impl Int {
     }
 
     pub(crate) fn divide_remainder(self, other: Int) -> Option<(Int, Int)> {
-        if other.0 == Integer::ZERO {
+        if other.0 == Zero::zero() {
             None
         } else {
-            let (quotient, rem) = self.0.div_rem(other.0);
+            let (quotient, rem) = self.0.div_rem(&other.0);
             Some((Int(quotient), Int(rem)))
         }
     }
