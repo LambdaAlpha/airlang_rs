@@ -45,6 +45,7 @@ use nom::{
     multi::{
         fold_many0,
         fold_many1,
+        many_till,
         separated_list0,
         separated_list1,
     },
@@ -75,19 +76,21 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
-        ANNOTATION_SEPARATOR,
+        is_special,
+        ANNOTATION_INFIX,
         BYTES_PREFIX,
-        CALL_SEPARATOR,
+        CALL_INFIX,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
-        PAIR_SEPARATOR,
+        PAIR_INFIX,
         PRESERVED_PREFIX,
-        REVERSE_SEPARATOR,
+        REVERSE_INFIX,
         SEPARATOR,
         STRING_QUOTE,
         SYMBOL_QUOTE,
+        TOKENS_QUOTE,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
@@ -187,6 +190,7 @@ where
         BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
         STRING_QUOTE => |s| map(string, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
+        TOKENS_QUOTE => |s| map(tokens, Token::Default)(s),
         LIST_LEFT => |s| map(repr_list, Token::Default)(s),
         LIST_RIGHT => fail,
         MAP_LEFT => |s| map(repr_map, Token::Default)(s),
@@ -194,21 +198,21 @@ where
         WRAP_LEFT => |s| map(wrap, Token::Default)(s),
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
-        PAIR_SEPARATOR => match second {
+        PAIR_INFIX => match second {
             Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(PAIR_SEPARATOR), |_| Token::Pair)(s),
+            _ => |s| map(exact_char(PAIR_INFIX), |_| Token::Pair)(s),
         },
-        CALL_SEPARATOR => match second {
+        CALL_INFIX => match second {
             Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(CALL_SEPARATOR), |_| Token::Call)(s),
+            _ => |s| map(exact_char(CALL_INFIX), |_| Token::Call)(s),
         },
-        REVERSE_SEPARATOR => match second {
+        REVERSE_INFIX => match second {
             Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(REVERSE_SEPARATOR), |_| Token::Reverse)(s),
+            _ => |s| map(exact_char(REVERSE_INFIX), |_| Token::Reverse)(s),
         },
-        ANNOTATION_SEPARATOR => match second {
+        ANNOTATION_INFIX => match second {
             Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(ANNOTATION_SEPARATOR), |_| Token::Annotation)(s),
+            _ => |s| map(exact_char(ANNOTATION_INFIX), |_| Token::Annotation)(s),
         },
         s if is_symbol(s) => |s| map(trivial_symbol, Token::Default)(s),
         _ => fail,
@@ -224,44 +228,79 @@ enum Token<T> {
     Default(T),
 }
 
+fn tokens<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let collect = preceded(
+        exact_char(TOKENS_QUOTE),
+        many_till(
+            normed::<T, _, _, _>(token),
+            normed::<T, _, _, _>(exact_char(TOKENS_QUOTE)),
+        ),
+    );
+    let f = map(collect, |(tokens, _)| {
+        let list = tokens.into_iter().map(token_to_repr).collect::<List<_>>();
+        From::from(list)
+    });
+    context("tokens", f)(src)
+}
+
+fn token_to_repr<T: ParseRepr>(token: Token<T>) -> T {
+    match token {
+        Token::Pair => {
+            let s = Symbol::from_string(PAIR_INFIX.to_string());
+            From::from(s)
+        }
+        Token::Call => {
+            let s = Symbol::from_string(CALL_INFIX.to_string());
+            From::from(s)
+        }
+        Token::Reverse => {
+            let s = Symbol::from_string(REVERSE_INFIX.to_string());
+            From::from(s)
+        }
+        Token::Annotation => {
+            let s = Symbol::from_string(ANNOTATION_INFIX.to_string());
+            From::from(s)
+        }
+        Token::Default(token) => token,
+    }
+}
+
 fn repr<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    context("repr", associate)(src)
+    context("repr", compose)(src)
 }
 
-fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
+fn compose<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let collect = fold_many1(
+        normed::<T, _, _, _>(token),
+        Vec::new,
+        |mut tokens: Vec<_>, item| {
+            tokens.push(item);
+            tokens
+        },
+    );
+    let f = map_opt(collect, compose_tokens);
+    context("compose", f)(src)
+}
+
+fn compose_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     let len = tokens.len();
     let mut iter = tokens.into_iter();
     if len == 2 {
         let func = iter.next().unwrap();
-        let Token::Default(input) = iter.next().unwrap() else {
-            return None;
-        };
-        return match func {
-            Token::Pair => {
-                let pair = Box::new(Pair::new(input.clone(), input));
-                Some(<T as From<Box<Pair<T, T>>>>::from(pair))
-            }
-            Token::Call => {
-                let call = Box::new(Call::new(input.clone(), input));
-                Some(<T as From<Box<Call<T, T>>>>::from(call))
-            }
-            Token::Reverse => {
-                let reverse = Box::new(Reverse::new(input.clone(), input));
-                Some(<T as From<Box<Reverse<T, T>>>>::from(reverse))
-            }
-            Token::Annotation => {
-                let annotation = Box::new(Annotation::new(input.clone(), input));
-                Some(<T as From<Box<Annotation<T, T>>>>::from(annotation))
-            }
-            Token::Default(func) => {
-                let call = Box::new(Call::new(func, input));
-                Some(<T as From<Box<Call<T, T>>>>::from(call))
-            }
-        };
+        let input = iter.next().unwrap();
+        return compose_two(func, input);
     } else if len % 2 == 0 {
         return None;
     }
@@ -278,50 +317,66 @@ fn fold_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
         let Token::Default(left) = left else {
             return None;
         };
-        let repr = match middle {
-            Token::Pair => {
-                let pair = Box::new(Pair::new(left, right));
-                <T as From<Box<Pair<T, T>>>>::from(pair)
-            }
-            Token::Call => {
-                let call = Box::new(Call::new(left, right));
-                <T as From<Box<Call<T, T>>>>::from(call)
-            }
-            Token::Reverse => {
-                let reverse = Box::new(Reverse::new(left, right));
-                <T as From<Box<Reverse<T, T>>>>::from(reverse)
-            }
-            Token::Annotation => {
-                let annotation = Box::new(Annotation::new(left, right));
-                <T as From<Box<Annotation<T, T>>>>::from(annotation)
-            }
-            Token::Default(middle) => {
-                let pair = Box::new(Pair::new(left, right));
-                let pair = <T as From<Box<Pair<T, T>>>>::from(pair);
-                let infix = Box::new(Call::new(middle, pair));
-                <T as From<Box<Call<T, T>>>>::from(infix)
-            }
-        };
+        let repr = compose_infix(left, middle, right);
         right = repr;
     }
     Some(right)
 }
 
-fn associate<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let collect = fold_many1(
-        normed::<T, _, _, _>(token),
-        Vec::new,
-        |mut tokens: Vec<_>, item| {
-            tokens.push(item);
-            tokens
-        },
-    );
-    let f = map_opt(collect, fold_tokens);
-    context("associate", f)(src)
+fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
+    let Token::Default(input) = input else {
+        return None;
+    };
+    let repr = match func {
+        Token::Pair => {
+            let pair = Box::new(Pair::new(input.clone(), input));
+            From::from(pair)
+        }
+        Token::Call => {
+            let call = Box::new(Call::new(input.clone(), input));
+            From::from(call)
+        }
+        Token::Reverse => {
+            let reverse = Box::new(Reverse::new(input.clone(), input));
+            From::from(reverse)
+        }
+        Token::Annotation => {
+            let annotation = Box::new(Annotation::new(input.clone(), input));
+            From::from(annotation)
+        }
+        Token::Default(func) => {
+            let call = Box::new(Call::new(func, input));
+            From::from(call)
+        }
+    };
+    Some(repr)
+}
+
+fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
+    match middle {
+        Token::Pair => {
+            let pair = Box::new(Pair::new(left, right));
+            From::from(pair)
+        }
+        Token::Call => {
+            let call = Box::new(Call::new(left, right));
+            From::from(call)
+        }
+        Token::Reverse => {
+            let reverse = Box::new(Reverse::new(left, right));
+            From::from(reverse)
+        }
+        Token::Annotation => {
+            let annotation = Box::new(Annotation::new(left, right));
+            From::from(annotation)
+        }
+        Token::Default(middle) => {
+            let pair = Box::new(Pair::new(left, right));
+            let pair = From::from(pair);
+            let infix = Box::new(Call::new(middle, pair));
+            From::from(infix)
+        }
+    }
 }
 
 fn items<'a, O1, O2, E, S, F, G>(
@@ -365,9 +420,7 @@ where
         cut(items),
         cut(normed::<T, _, _, _>(exact_char(LIST_RIGHT))),
     );
-    let f = map(delimited_items, |list| {
-        <T as From<List<T>>>::from(list.into())
-    });
+    let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
 }
 
@@ -386,9 +439,7 @@ where
         cut(items),
         cut(normed::<T, _, _, _>(exact_char(MAP_RIGHT))),
     );
-    let f = map(delimited_items, |pairs| {
-        <T as From<Map<T, T>>>::from(Map::from_iter(pairs))
-    });
+    let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
     context("map", f)(src)
 }
 
@@ -397,9 +448,9 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(normed::<T, _, _, _>(associate::<T, _>), |repr: T| {
+    let f = map(normed::<T, _, _, _>(compose::<T, _>), |repr: T| {
         repr.try_into_pair()
-            .unwrap_or_else(|repr| (repr, <T as From<Unit>>::from(Unit)))
+            .unwrap_or_else(|repr| (repr, From::from(Unit)))
     });
     context("pair", f)(src)
 }
@@ -420,18 +471,18 @@ where
     T: ParseRepr,
 {
     match src {
-        "" => Some(<T as From<Unit>>::from(Unit)),
-        "true" => Some(<T as From<Bool>>::from(Bool::t())),
-        "false" => Some(<T as From<Bool>>::from(Bool::f())),
+        "" => Some(From::from(Unit)),
+        "true" => Some(From::from(Bool::t())),
+        "false" => Some(From::from(Bool::f())),
         _ => None,
     }
 }
 
 fn is_trivial_symbol(c: char) -> bool {
-    match c {
-        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR => false,
-        c => Symbol::is_symbol(c),
+    if is_special(c) {
+        return false;
     }
+    Symbol::is_symbol(c)
 }
 
 fn is_symbol(c: char) -> bool {
@@ -444,9 +495,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let symbols = take_while(is_trivial_symbol);
-    let f = map(symbols, |s: &'a str| {
-        <T as From<Symbol>>::from(Symbol::from_str(s))
-    });
+    let f = map(symbols, |s: &'a str| From::from(Symbol::from_str(s)));
     context("trivial_symbol", f)(src)
 }
 
@@ -473,9 +522,7 @@ where
         cut(collect_fragments),
         cut(exact_char(SYMBOL_QUOTE)),
     );
-    let f = map(delimited_string, |s| {
-        <T as From<Symbol>>::from(Symbol::from_string(s))
-    });
+    let f = map(delimited_string, |s| From::from(Symbol::from_string(s)));
     context("quoted_symbol", f)(src)
 }
 
@@ -534,7 +581,7 @@ where
         cut(collect_fragments),
         cut(exact_char(STRING_QUOTE)),
     );
-    let f = map(delimited_string, |s| <T as From<Str>>::from(Str::from(s)));
+    let f = map(delimited_string, |s| From::from(Str::from(s)));
     context("string", f)(src)
 }
 
@@ -641,7 +688,7 @@ where
     ));
     let f = map_res(digits, |(sign, digits): (Option<char>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 16);
-        Ok(<T as From<Int>>::from(i))
+        Ok(From::from(i))
     });
     context("hex_int", f)(src)
 }
@@ -660,7 +707,7 @@ where
     ));
     let f = map_res(digits, |(sign, digits): (Option<char>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 2);
-        Ok(<T as From<Int>>::from(i))
+        Ok(From::from(i))
     });
     context("bin_int", f)(src)
 }
@@ -689,7 +736,7 @@ where
         )| {
             if fractional.is_none() && exponential.is_none() {
                 let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &integral, 10);
-                Ok(<T as From<Int>>::from(i))
+                Ok(From::from(i))
             } else {
                 let f = Float::from_parts(
                     !matches!(sign, Some('-')),
@@ -698,7 +745,7 @@ where
                     !matches!(exponential, Some((Some('-'), _))),
                     exponential.as_ref().map_or("", |(_, exp)| exp),
                 );
-                Ok(<T as From<Float>>::from(f))
+                Ok(From::from(f))
             }
         },
     );
@@ -727,7 +774,7 @@ where
     let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
     let tagged_digits = preceded(tag_no_case("x"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
-        Ok(<T as From<Bytes>>::from(Bytes::from(
+        Ok(From::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
         )))
     });
@@ -744,7 +791,7 @@ where
     });
     let tagged_digits = preceded(tag_no_case("b"), cut(normed_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
-        Ok(<T as From<Bytes>>::from(Bytes::from(
+        Ok(From::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
         )))
     });
@@ -756,6 +803,6 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = success(<T as From<Bytes>>::from(Bytes::default()));
+    let f = success(From::from(Bytes::default()));
     context("empty_bytes", f)(src)
 }

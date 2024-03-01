@@ -23,6 +23,7 @@ pub(crate) mod generator;
 mod test;
 
 const SEPARATOR: char = ',';
+const TOKENS_QUOTE: char = '`';
 const LIST_LEFT: char = '[';
 const LIST_RIGHT: char = ']';
 const MAP_LEFT: char = '{';
@@ -36,10 +37,10 @@ const SYMBOL_QUOTE: char = '\'';
 const BYTES_PREFIX: char = '#';
 const PRESERVED_PREFIX: char = '.';
 
-const ANNOTATION_SEPARATOR: char = '@';
-const PAIR_SEPARATOR: char = ':';
-const CALL_SEPARATOR: char = '$';
-const REVERSE_SEPARATOR: char = '?';
+const ANNOTATION_INFIX: char = '@';
+const PAIR_INFIX: char = ':';
+const CALL_INFIX: char = '$';
+const REVERSE_INFIX: char = '?';
 
 #[derive(Error, Debug)]
 #[error("ParseError:\n{msg}")]
@@ -61,4 +62,18 @@ pub fn generate(src: &Repr) -> String {
 
 pub fn generate_reserve(src: &reserve::Repr) -> String {
     generator::generate_pretty(src).unwrap()
+}
+
+pub(crate) fn is_special(c: char) -> bool {
+    matches!(
+        c,
+        LIST_LEFT
+            | LIST_RIGHT
+            | MAP_LEFT
+            | MAP_RIGHT
+            | WRAP_LEFT
+            | WRAP_RIGHT
+            | SEPARATOR
+            | TOKENS_QUOTE
+    )
 }

@@ -14,16 +14,17 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
-        ANNOTATION_SEPARATOR,
+        is_special,
+        ANNOTATION_INFIX,
         BYTES_PREFIX,
-        CALL_SEPARATOR,
+        CALL_INFIX,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
-        PAIR_SEPARATOR,
+        PAIR_INFIX,
         PRESERVED_PREFIX,
-        REVERSE_SEPARATOR,
+        REVERSE_INFIX,
         SEPARATOR,
         STRING_QUOTE,
         SYMBOL_QUOTE,
@@ -223,17 +224,10 @@ fn is_need_quote(str: &str) -> bool {
     };
     match first {
         BYTES_PREFIX | PRESERVED_PREFIX | SYMBOL_QUOTE | STRING_QUOTE | '0'..='9' => true,
-        PAIR_SEPARATOR | CALL_SEPARATOR | REVERSE_SEPARATOR | ANNOTATION_SEPARATOR => {
-            str.len() == 1
-        }
+        PAIR_INFIX | CALL_INFIX | REVERSE_INFIX | ANNOTATION_INFIX => str.len() == 1,
         '+' | '-' => matches!(chars.next(), Some('0'..='9')),
-        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR => true,
-        _ => chars.any(|c| {
-            matches!(
-                c,
-                LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
-            )
-        }),
+        c if is_special(c) => true,
+        _ => chars.any(is_special),
     }
 }
 
@@ -335,7 +329,7 @@ where
     generate_infix(
         first,
         |s, _format, _indent| {
-            s.push(PAIR_SEPARATOR);
+            s.push(PAIR_INFIX);
             Ok(())
         },
         second,
@@ -367,7 +361,7 @@ where
         _ => generate_infix(
             &call.func,
             |s, _format, _indent| {
-                s.push(CALL_SEPARATOR);
+                s.push(CALL_INFIX);
                 Ok(())
             },
             &call.input,
@@ -391,7 +385,7 @@ where
     generate_infix(
         &reverse.func,
         |s, _format, _indent| {
-            s.push(REVERSE_SEPARATOR);
+            s.push(REVERSE_INFIX);
             Ok(())
         },
         &reverse.output,
@@ -536,7 +530,7 @@ where
     generate_infix(
         &annotation.note,
         |s, _format, _indent| {
-            s.push(ANNOTATION_SEPARATOR);
+            s.push(ANNOTATION_INFIX);
             Ok(())
         },
         &annotation.value,
