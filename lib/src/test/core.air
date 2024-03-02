@@ -1,47 +1,47 @@
-.true
+true
 -----
-.true
+true
 =====
 a
 -----
 .
 =====
-(not .false) : "1"
+(not false) : "1"
 -----
-.true : "1"
+true : "1"
 =====
-[not .true, 1, "2"]
+[not true, 1, "2"]
 -----
-[.false, 1, "2"]
+[false, 1, "2"]
 =====
-{(not .true) : (not .true)}
+{(not true) : (not true)}
 -----
-{.false : .false}
+{false : false}
 =====
-not $ not $ .true
+not $ not $ true
 -----
-.true
+true
 =====
 . a
 -----
 a
 =====
-.false [a, .true $ not $ .true, .false $ not $ .true, . a]
+false [a, true $ not $ true, false $ not $ true, . a]
 -----
-[a, .false, not .true, a]
+[a, false, not true, a]
 =====
-.true [not .true, .true $ not $ .true, .false $ not $ .true, . $ not $ .true]
+true [not true, true $ not $ true, false $ not $ true, . $ not $ true]
 -----
-[.false, .false, not .true, not .true]
+[false, false, not true, not true]
 =====
 "a" "b"
 -----
 "a" "b"
 =====
-"a" $ not $ .true
+"a" $ not $ true
 -----
-"a" .false
+"a" false
 =====
-(not .true) $ not $ .true
+(not true) $ not $ true
 -----
-.false .false
+false false

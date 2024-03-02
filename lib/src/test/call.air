@@ -2,6 +2,6 @@
 -----
 1
 =====
-$$ $ value $ not $ .false
+$$ $ value $ not $ false
 -----
-.true
+true

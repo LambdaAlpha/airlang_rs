@@ -62,13 +62,13 @@ extension
 -----
 unit
 =====
-;[a = .true, type_of a]
+;[a = true, type_of a]
 -----
 bool
 =====
-type_of $ not $ .true
+type_of $ not $ true
 -----
-.false : bool
+false : bool
 =====
 ;[a = 1, type_of a]
 -----
@@ -118,73 +118,73 @@ function
 -----
 context
 =====
-;[a = proposition $ {function : not, input : .true, output : .false}, type_of a]
+;[a = proposition $ {function : not, input : true, output : false}, type_of a]
 -----
 proposition
 =====
-;[a = proposition.prove $ not $ .true, type_of a]
+;[a = proposition.prove $ not $ true, type_of a]
 -----
 proposition
 =====
-.true -=- .false
+true -=- false
 -----
-.false
+false
 =====
-.false -=- .false
+false -=- false
 -----
-.true
+true
 =====
 1 -=- 1
 -----
-.true
+true
 =====
 1.0 -=- 1.0
 -----
-.true
+true
 =====
 (. a) -=- (. a)
 -----
-.true
+true
 =====
 "" -=- ""
 -----
-.true
+true
 =====
 (1 : 2) -=- (1 : 2)
 -----
-.true
+true
 =====
 [1, 2] -=- [1, 2]
 -----
-.true
+true
 =====
 {} -=- {}
 -----
-.true
+true
 =====
 (1 2) -=- (1 2)
 -----
-.true
+true
 =====
 (1 ? 2) -=- (1 ? 2)
 -----
-.true
+true
 =====
 ;[a = function $ {body : input}, b = function $ {body : input}, (a === b) and a =/- .]
 -----
-.true
+true
 =====
 ;[a = . context {}, b = . context {}, (a === b) and a =/- .]
 -----
-.true
+true
 =====
 ;[
-    a = proposition $ {function : not, input : .true, output : .false},
-    b = proposition $ {function : not, input : .true, output : .false},
+    a = proposition $ {function : not, input : true, output : false},
+    b = proposition $ {function : not, input : true, output : false},
     (a === b) and a =/- .
 ]
 -----
-.true
+true
 =====
 ;[
     a = answer.unverified $ 1,
@@ -192,55 +192,55 @@ proposition
     (a === b) and a =/- .
 ]
 -----
-.true
+true
 =====
 (1 + 1) -=- (3 - 1)
 -----
-.true
+true
 =====
 1 -=- "a"
 -----
-.false
+false
 =====
 1 -/- "a"
 -----
-.true
+true
 =====
 1 -/- 1
 -----
-.false
+false
 =====
 ;[a = 1, a ==- 1]
 -----
-.true
+true
 =====
 ;[a = 1, a =/- 1]
 -----
-.false
+false
 =====
 ;[a = 1, 1 -== a]
 -----
-.true
+true
 =====
 ;[a = 1, 1 -/= a]
 -----
-.false
+false
 =====
 ;[a = 1, b = 1, a === b]
 -----
-.true
+true
 =====
 ;[a = 1, b = 1, a =/= b]
 -----
-.false
+false
 =====
 ;[a = 1, a === a]
 -----
-.true
+true
 =====
 ;[a = 1, a =/= a]
 -----
-.false
+false
 =====
 a === b
 -----

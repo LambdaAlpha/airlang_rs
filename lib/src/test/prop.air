@@ -29,39 +29,39 @@
     (proposition.function p) -== not
 ]
 -----
-.true
+true
 =====
 ;[
     $map = function $ {
         body : input,
-        input_mode : {map : . all .true},
+        input_mode : {map : . all true},
     },
     m = $map $ {
         function : not,
-        input : .true,
-        output : .false,
+        input : true,
+        output : false,
     },
     m ==- proposition.represent $ proposition $ m
 ]
 -----
-.true
+true
 =====
 ;[
-    m = proposition.represent $ proposition.prove $ not $ .true,
+    m = proposition.represent $ proposition.prove $ not $ true,
     $map = function $ {
         body : input,
-        input_mode : {map : . all .true},
+        input_mode : {map : . all true},
     },
     expected = $map $ {
         function : not,
-        input : .true,
-        output : .false,
-        proved : .true,
+        input : true,
+        output : false,
+        proved : true,
     },
     m === expected
 ]
 -----
-.true
+true
 =====
 ;[
     p = proposition $ {
@@ -69,7 +69,7 @@
         input : 1,
         output : 2,
     },
-    ((type_of p) -=- . $ proposition) and (proposition.proved p) -=- .false
+    ((type_of p) -=- . $ proposition) and (proposition.proved p) -=- false
 ]
 -----
-.true
+true

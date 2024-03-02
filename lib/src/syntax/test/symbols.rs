@@ -1,8 +1,8 @@
 use crate::syntax::{
     repr::Repr,
     test::{
+        call,
         list,
-        ltree,
         symbol,
     },
 };
@@ -52,7 +52,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("->"),
         symbol("==="),
         symbol("!=="),
-        list(vec![symbol("%"), ltree(symbol("$"), vec![])]),
+        list(vec![symbol("%"), call(list(vec![]), list(vec![]))]),
         symbol("a%"),
         symbol("%a"),
         symbol("%'"),
@@ -75,7 +75,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("+1.0e-10"),
         symbol("+1.a"),
         symbol("-1.0"),
-        symbol(".true"),
+        symbol("true"),
         symbol("'$"),
         symbol("'?"),
         symbol("'a"),

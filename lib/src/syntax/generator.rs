@@ -14,20 +14,23 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
+        is_keyword,
         is_special,
         ANNOTATION_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
+        FALSE,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         PAIR_INFIX,
-        PRESERVED_PREFIX,
         REVERSE_INFIX,
         SEPARATOR,
         STRING_QUOTE,
         SYMBOL_QUOTE,
+        TRUE,
+        UNIT,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
@@ -159,12 +162,11 @@ where
 }
 
 fn generate_unit(s: &mut String) {
-    s.push(PRESERVED_PREFIX);
+    s.push_str(UNIT);
 }
 
 fn generate_bool(b: bool, s: &mut String) {
-    s.push(PRESERVED_PREFIX);
-    s.push_str(if b { "true" } else { "false" });
+    s.push_str(if b { TRUE } else { FALSE });
 }
 
 fn generate_int(i: &Int, s: &mut String) {
@@ -218,17 +220,20 @@ fn generate_symbol(str: &str, s: &mut String) {
 }
 
 fn is_need_quote(str: &str) -> bool {
-    let mut chars = str.chars();
-    let Some(first) = chars.next() else {
+    if str.is_empty() {
         return true;
-    };
-    match first {
-        BYTES_PREFIX | PRESERVED_PREFIX | SYMBOL_QUOTE | STRING_QUOTE | '0'..='9' => true,
-        PAIR_INFIX | CALL_INFIX | REVERSE_INFIX | ANNOTATION_INFIX => str.len() == 1,
-        '+' | '-' => matches!(chars.next(), Some('0'..='9')),
-        c if is_special(c) => true,
-        _ => chars.any(is_special),
     }
+    if is_keyword(str) {
+        return true;
+    }
+    let mut chars = str.chars();
+    let first = chars.next().unwrap();
+    match first {
+        BYTES_PREFIX | SYMBOL_QUOTE | STRING_QUOTE | '0'..='9' => return true,
+        '+' | '-' if matches!(chars.next(), Some('0'..='9')) => return true,
+        _ => {}
+    }
+    str.chars().any(is_special)
 }
 
 #[allow(unused)]
@@ -329,7 +334,7 @@ where
     generate_infix(
         first,
         |s, _format, _indent| {
-            s.push(PAIR_INFIX);
+            s.push_str(PAIR_INFIX);
             Ok(())
         },
         second,
@@ -361,7 +366,7 @@ where
         _ => generate_infix(
             &call.func,
             |s, _format, _indent| {
-                s.push(CALL_INFIX);
+                s.push_str(CALL_INFIX);
                 Ok(())
             },
             &call.input,
@@ -385,7 +390,7 @@ where
     generate_infix(
         &reverse.func,
         |s, _format, _indent| {
-            s.push(REVERSE_INFIX);
+            s.push_str(REVERSE_INFIX);
             Ok(())
         },
         &reverse.output,
@@ -530,7 +535,7 @@ where
     generate_infix(
         &annotation.note,
         |s, _format, _indent| {
-            s.push(ANNOTATION_INFIX);
+            s.push_str(ANNOTATION_INFIX);
             Ok(())
         },
         &annotation.value,

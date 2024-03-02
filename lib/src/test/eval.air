@@ -2,55 +2,55 @@
 -----
 a
 =====
-.true $ not $ .false
+true $ not $ false
 -----
-.true
+true
 =====
-.false [a, f a, a : b, f ? a, {a : b}]
+false [a, f a, a : b, f ? a, {a : b}]
 -----
 [a, f a, a : b, f ? a, {a : b}]
 =====
-.false {a : b, c : .true $ not $ .false}
+false {a : b, c : true $ not $ false}
 -----
-{a : b, c : .true}
+{a : b, c : true}
 =====
-.false [a, b : [.true $ not $ .true]]
+false [a, b : [true $ not $ true]]
 -----
-[a, b : [.false]]
+[a, b : [false]]
 =====
-.false $ .false $ a
+false $ false $ a
 -----
 a
 =====
-. $ .true $ not $ .true
+. $ true $ not $ true
 -----
-.true $ not $ .true
+true $ not $ true
 =====
-.false $ . $ .false $ a
+false $ . $ false $ a
 -----
-.false a
+false a
 =====
-.true {: a, (not .true) : c, : (not .false)}
+true {: a, (not true) : c, : (not false)}
 -----
-{., .false : ., : .true}
+{., false : ., : true}
 =====
-.true {{a : b} : {c : d}}
+true {{a : b} : {c : d}}
 -----
 {{. : .} : {. : .}}
 =====
-.true {(. $ not $ .false) : a}
+true {(. $ not $ false) : a}
 -----
-{(not .false) : .}
+{(not false) : .}
 =====
-.true [1, {a : b}]
+true [1, {a : b}]
 -----
 [1, {. : .}]
 =====
-.true {(. a) : . $ {b : c}}
+true {(. a) : . $ {b : c}}
 -----
 {a : {b : c}}
 =====
-.true {(. a) : .true $ {b : c}}
+true {(. a) : true $ {b : c}}
 -----
 {a : {. : .}}
 =====
@@ -58,9 +58,9 @@ value a
 -----
 a
 =====
-eager $ not $ .true
+eager $ not $ true
 -----
-.false
+false
 =====
 ;[a = . $ a, eager $ a]
 -----
@@ -70,10 +70,10 @@ eager $ . $ a
 -----
 a
 =====
-lazy $ not $ .true
+lazy $ not $ true
 -----
-not .true
+not true
 =====
-lazy $ .true $ not $ .true
+lazy $ true $ not $ true
 -----
-.false
+false

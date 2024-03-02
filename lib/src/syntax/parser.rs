@@ -80,17 +80,19 @@ use crate::{
         ANNOTATION_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
+        FALSE,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         PAIR_INFIX,
-        PRESERVED_PREFIX,
         REVERSE_INFIX,
         SEPARATOR,
         STRING_QUOTE,
         SYMBOL_QUOTE,
         TOKENS_QUOTE,
+        TRUE,
+        UNIT,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
@@ -181,16 +183,6 @@ where
     let (src, (first, second)) = peek(pair(anychar, opt(anychar)))(src)?;
 
     let parser = match first {
-        '0'..='9' => |s| map(number, Token::Default)(s),
-        '+' | '-' => match second {
-            Some('0'..='9') => |s| map(number, Token::Default)(s),
-            _ => |s| map(trivial_symbol, Token::Default)(s),
-        },
-        PRESERVED_PREFIX => |s| map(preserved, Token::Default)(s),
-        BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
-        STRING_QUOTE => |s| map(string, Token::Default)(s),
-        SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
-        TOKENS_QUOTE => |s| map(tokens, Token::Default)(s),
         LIST_LEFT => |s| map(repr_list, Token::Default)(s),
         LIST_RIGHT => fail,
         MAP_LEFT => |s| map(repr_map, Token::Default)(s),
@@ -198,34 +190,30 @@ where
         WRAP_LEFT => |s| map(wrap, Token::Default)(s),
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
-        PAIR_INFIX => match second {
-            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(PAIR_INFIX), |_| Token::Pair)(s),
-        },
-        CALL_INFIX => match second {
-            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(CALL_INFIX), |_| Token::Call)(s),
-        },
-        REVERSE_INFIX => match second {
-            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(REVERSE_INFIX), |_| Token::Reverse)(s),
-        },
-        ANNOTATION_INFIX => match second {
-            Some(second) if !is_delimiter(second) => |s| map(trivial_symbol, Token::Default)(s),
-            _ => |s| map(exact_char(ANNOTATION_INFIX), |_| Token::Annotation)(s),
-        },
-        s if is_symbol(s) => |s| map(trivial_symbol, Token::Default)(s),
+        TOKENS_QUOTE => |s| map(tokens, Token::Default)(s),
+        STRING_QUOTE => |s| map(string, Token::Default)(s),
+        SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
+        BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
+        '0'..='9' => |s| map(number, Token::Default)(s),
+        '+' | '-' if matches!(second, Some('0'..='9')) => |s| map(number, Token::Default)(s),
+        s if is_symbol(s) => unquote_symbol,
         _ => fail,
     };
     context("token", parser)(src)
 }
 
 enum Token<T> {
-    Pair,
-    Call,
-    Reverse,
-    Annotation,
+    Unquote(Symbol),
     Default(T),
+}
+
+impl<T: ParseRepr> Token<T> {
+    fn into_repr(self) -> T {
+        match self {
+            Token::Unquote(s) => From::from(s),
+            Token::Default(r) => r,
+        }
+    }
 }
 
 fn tokens<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -241,32 +229,13 @@ where
         ),
     );
     let f = map(collect, |(tokens, _)| {
-        let list = tokens.into_iter().map(token_to_repr).collect::<List<_>>();
+        let list = tokens
+            .into_iter()
+            .map(Token::into_repr)
+            .collect::<List<_>>();
         From::from(list)
     });
     context("tokens", f)(src)
-}
-
-fn token_to_repr<T: ParseRepr>(token: Token<T>) -> T {
-    match token {
-        Token::Pair => {
-            let s = Symbol::from_string(PAIR_INFIX.to_string());
-            From::from(s)
-        }
-        Token::Call => {
-            let s = Symbol::from_string(CALL_INFIX.to_string());
-            From::from(s)
-        }
-        Token::Reverse => {
-            let s = Symbol::from_string(REVERSE_INFIX.to_string());
-            From::from(s)
-        }
-        Token::Annotation => {
-            let s = Symbol::from_string(ANNOTATION_INFIX.to_string());
-            From::from(s)
-        }
-        Token::Default(token) => token,
-    }
 }
 
 fn repr<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -305,18 +274,13 @@ fn compose_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
         return None;
     }
     let mut iter = iter.rev();
-    let Token::Default(last) = iter.next().unwrap() else {
-        return None;
-    };
+    let last = iter.next().unwrap().into_repr();
     let mut right = last;
     loop {
         let Some(middle) = iter.next() else {
             break;
         };
-        let left = iter.next()?;
-        let Token::Default(left) = left else {
-            return None;
-        };
+        let left = iter.next()?.into_repr();
         let repr = compose_infix(left, middle, right);
         right = repr;
     }
@@ -324,26 +288,31 @@ fn compose_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
 }
 
 fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
-    let Token::Default(input) = input else {
-        return None;
-    };
+    let input = input.into_repr();
     let repr = match func {
-        Token::Pair => {
-            let pair = Box::new(Pair::new(input.clone(), input));
-            From::from(pair)
-        }
-        Token::Call => {
-            let call = Box::new(Call::new(input.clone(), input));
-            From::from(call)
-        }
-        Token::Reverse => {
-            let reverse = Box::new(Reverse::new(input.clone(), input));
-            From::from(reverse)
-        }
-        Token::Annotation => {
-            let annotation = Box::new(Annotation::new(input.clone(), input));
-            From::from(annotation)
-        }
+        Token::Unquote(s) => match &*s {
+            PAIR_INFIX => {
+                let pair = Box::new(Pair::new(input.clone(), input));
+                From::from(pair)
+            }
+            CALL_INFIX => {
+                let call = Box::new(Call::new(input.clone(), input));
+                From::from(call)
+            }
+            REVERSE_INFIX => {
+                let reverse = Box::new(Reverse::new(input.clone(), input));
+                From::from(reverse)
+            }
+            ANNOTATION_INFIX => {
+                let annotation = Box::new(Annotation::new(input.clone(), input));
+                From::from(annotation)
+            }
+            _ => {
+                let func = From::from(s);
+                let call = Box::new(Call::new(func, input));
+                From::from(call)
+            }
+        },
         Token::Default(func) => {
             let call = Box::new(Call::new(func, input));
             From::from(call)
@@ -354,22 +323,31 @@ fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
 
 fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
     match middle {
-        Token::Pair => {
-            let pair = Box::new(Pair::new(left, right));
-            From::from(pair)
-        }
-        Token::Call => {
-            let call = Box::new(Call::new(left, right));
-            From::from(call)
-        }
-        Token::Reverse => {
-            let reverse = Box::new(Reverse::new(left, right));
-            From::from(reverse)
-        }
-        Token::Annotation => {
-            let annotation = Box::new(Annotation::new(left, right));
-            From::from(annotation)
-        }
+        Token::Unquote(s) => match &*s {
+            PAIR_INFIX => {
+                let pair = Box::new(Pair::new(left, right));
+                From::from(pair)
+            }
+            CALL_INFIX => {
+                let call = Box::new(Call::new(left, right));
+                From::from(call)
+            }
+            REVERSE_INFIX => {
+                let reverse = Box::new(Reverse::new(left, right));
+                From::from(reverse)
+            }
+            ANNOTATION_INFIX => {
+                let annotation = Box::new(Annotation::new(left, right));
+                From::from(annotation)
+            }
+            _ => {
+                let middle = From::from(s);
+                let pair = Box::new(Pair::new(left, right));
+                let pair = From::from(pair);
+                let infix = Box::new(Call::new(middle, pair));
+                From::from(infix)
+            }
+        },
         Token::Default(middle) => {
             let pair = Box::new(Pair::new(left, right));
             let pair = From::from(pair);
@@ -455,29 +433,6 @@ where
     context("pair", f)(src)
 }
 
-fn preserved<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let symbol = take_while(is_trivial_symbol);
-    let prefixed = preceded(exact_char(PRESERVED_PREFIX), symbol);
-    let f = map_opt(prefixed, keywords);
-    context("preserved", f)(src)
-}
-
-fn keywords<T>(src: &str) -> Option<T>
-where
-    T: ParseRepr,
-{
-    match src {
-        "" => Some(From::from(Unit)),
-        "true" => Some(From::from(Bool::t())),
-        "false" => Some(From::from(Bool::f())),
-        _ => None,
-    }
-}
-
 fn is_trivial_symbol(c: char) -> bool {
     if is_special(c) {
         return false;
@@ -489,14 +444,27 @@ fn is_symbol(c: char) -> bool {
     Symbol::is_symbol(c)
 }
 
-fn trivial_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn unquote_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let symbols = take_while(is_trivial_symbol);
-    let f = map(symbols, |s: &'a str| From::from(Symbol::from_str(s)));
-    context("trivial_symbol", f)(src)
+    let f = map(symbols, unquote_symbol_to_token);
+    context("unquote_symbol", f)(src)
+}
+
+fn unquote_symbol_to_token<T: ParseRepr>(s: &str) -> Token<T> {
+    let token = match s {
+        UNIT => From::from(Unit),
+        TRUE => From::from(Bool::t()),
+        FALSE => From::from(Bool::f()),
+        s => {
+            let s = Symbol::from_str(s);
+            return Token::Unquote(s);
+        }
+    };
+    Token::Default(token)
 }
 
 fn quoted_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>

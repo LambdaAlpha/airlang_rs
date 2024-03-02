@@ -35,12 +35,15 @@ const STRING_QUOTE: char = '"';
 const SYMBOL_QUOTE: char = '\'';
 
 const BYTES_PREFIX: char = '#';
-const PRESERVED_PREFIX: char = '.';
 
-const ANNOTATION_INFIX: char = '@';
-const PAIR_INFIX: char = ':';
-const CALL_INFIX: char = '$';
-const REVERSE_INFIX: char = '?';
+// keywords
+const UNIT: &str = ".";
+const TRUE: &str = "true";
+const FALSE: &str = "false";
+const ANNOTATION_INFIX: &str = "@";
+const PAIR_INFIX: &str = ":";
+const CALL_INFIX: &str = "$";
+const REVERSE_INFIX: &str = "?";
 
 #[derive(Error, Debug)]
 #[error("ParseError:\n{msg}")]
@@ -75,5 +78,12 @@ pub(crate) fn is_special(c: char) -> bool {
             | WRAP_RIGHT
             | SEPARATOR
             | TOKENS_QUOTE
+    )
+}
+
+pub(crate) fn is_keyword(s: &str) -> bool {
+    matches!(
+        s,
+        UNIT | TRUE | FALSE | ANNOTATION_INFIX | PAIR_INFIX | CALL_INFIX | REVERSE_INFIX
     )
 }

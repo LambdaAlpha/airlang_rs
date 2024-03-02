@@ -1,27 +1,27 @@
 ;[
-    p = proposition.prove $ not $ (not .false),
+    p = proposition.prove $ not $ (not false),
     proposition.input p
 ]
 -----
-.true
+true
 =====
 ;[
-    p = proposition.prove $ not $ .true,
+    p = proposition.prove $ not $ true,
     proposition.output p
 ]
 -----
-.false
+false
 =====
 ;[
-    p = proposition.prove $ not $ .true,
+    p = proposition.prove $ not $ true,
     (proposition.function p) -== not
 ]
 -----
-.true
+true
 =====
 ;[
-    p = proposition.prove $ not $ .true,
+    p = proposition.prove $ not $ true,
     proposition.proved p
 ]
 -----
-.true
+true

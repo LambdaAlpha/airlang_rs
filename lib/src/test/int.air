@@ -116,55 +116,55 @@
 =====
 0 < 1
 -----
-.true
+true
 =====
 1 < 1
 -----
-.false
+false
 =====
 2 < 1
 -----
-.false
+false
 =====
 2 > 1
 -----
-.true
+true
 =====
 1 > 1
 -----
-.false
+false
 =====
 0 > 1
 -----
-.false
+false
 =====
 0 <= 1
 -----
-.true
+true
 =====
 1 <= 1
 -----
-.true
+true
 =====
 2 <= 1
 -----
-.false
+false
 =====
 2 >= 1
 -----
-.true
+true
 =====
 1 >= 1
 -----
-.true
+true
 =====
 0 >= 1
 -----
-.false
+false
 =====
 1 -/- "1"
 -----
-.true
+true
 =====
 1 <> "1"
 -----
@@ -172,12 +172,12 @@
 =====
 1 <> 0
 -----
-.true
+true
 =====
 1 <> 1
 -----
-.false
+false
 =====
 1 <> 2
 -----
-.true
+true

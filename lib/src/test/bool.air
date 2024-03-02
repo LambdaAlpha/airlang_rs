@@ -1,59 +1,59 @@
-not .true
+not true
 -----
-.false
+false
 =====
-not .false
+not false
 -----
-.true
+true
 =====
-.true and .false
+true and false
 -----
-.false
+false
 =====
-.true and .true
+true and true
 -----
-.true
+true
 =====
-;[.false and ; $ [a = 1, .true], a]
+;[false and ; $ [a = 1, true], a]
 -----
 1
 =====
-.true or .false
+true or false
 -----
-.true
+true
 =====
-.false or .false
+false or false
 -----
-.false
+false
 =====
-;[.true or ; $ [a = 1, .false], a]
+;[true or ; $ [a = 1, false], a]
 -----
 1
 =====
-.true xor .false
+true xor false
 -----
-.true
+true
 =====
-.true xor .true
+true xor true
 -----
-.false
+false
 =====
-.false xor .false
+false xor false
 -----
-.false
+false
 =====
-.true imply .false
+true imply false
 -----
-.false
+false
 =====
-.true imply .true
+true imply true
 -----
-.true
+true
 =====
-.false imply .true
+false imply true
 -----
-.true
+true
 =====
-.false imply .false
+false imply false
 -----
-.true
+true
