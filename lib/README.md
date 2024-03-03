@@ -1,6 +1,6 @@
 # The Air Programming Language
 
-The [Air](https://github.com/LambdaAlpha/airlang) programming language is carefully designed to solve programming problems once and for all. It is a delightful surprise for programming language enthusiasts.
+The [Air](https://github.com/LambdaAlpha/airlang) programming language is carefully designed to solve programming problems once and for all.
 
 ## Goals
 
