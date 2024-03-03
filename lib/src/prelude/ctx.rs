@@ -578,7 +578,7 @@ fn with_ctx_func() -> Named<FuncVal> {
         }),
     );
     let output_mode = default_mode();
-    named_mutable_fn("+|", input_mode, output_mode, fn_with_ctx_func)
+    named_mutable_fn(".|", input_mode, output_mode, fn_with_ctx_func)
 }
 
 fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -638,7 +638,7 @@ fn with_ctx_input() -> Named<FuncVal> {
         }),
     );
     let output_mode = default_mode();
-    named_mutable_fn("|+", input_mode, output_mode, fn_with_ctx_input)
+    named_mutable_fn("|.", input_mode, output_mode, fn_with_ctx_input)
 }
 
 fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
@@ -686,7 +686,7 @@ fn with_ctx_func_input() -> Named<FuncVal> {
         }),
     );
     let output_mode = default_mode();
-    named_mutable_fn("+|+", input_mode, output_mode, fn_with_ctx_func_input)
+    named_mutable_fn(".|.", input_mode, output_mode, fn_with_ctx_func_input)
 }
 
 fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {

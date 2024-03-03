@@ -370,7 +370,7 @@ true
     set_first = set_1,
     a = . context {set_first : move $ set_first, p : 1 : 2},
     b = 3,
-    a +| p set_first b,
+    a .| p set_first b,
     a | read $ p,
 ]
 -----
@@ -378,7 +378,7 @@ true
 =====
 ;[
     a = . context {p : 1 : 2, b : 3},
-    a |+ p set_1 b,
+    a |. p set_1 b,
     a | read $ p,
 ]
 -----
@@ -387,7 +387,7 @@ true
 ;[
     set_first = set_1,
     a = . context {set_first : move $ set_first, p : 1 : 2, b : 3},
-    a +|+ p set_first b,
+    a .|. p set_first b,
     a | read $ p,
 ]
 -----
