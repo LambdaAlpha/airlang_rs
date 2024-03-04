@@ -1,6 +1,6 @@
 [package]
 name = "airlang"
-version = "0.0.12"
+version = "0.0.13"
 edition = "2021"
 rust-version = "1.60"
 license = "MIT OR Apache-2.0"
