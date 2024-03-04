@@ -23,7 +23,6 @@
         clippy::semicolon_if_nothing_returned,
     )
 )]
-#![feature(iterator_try_collect)]
 
 use airlang::{
     initial_ctx,

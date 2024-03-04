@@ -23,7 +23,6 @@
         clippy::semicolon_if_nothing_returned,
     )
 )]
-#![allow(incomplete_features)]
 
 use thiserror::Error;
 

@@ -73,7 +73,7 @@ fn fn_call(input: Val) -> Val {
             };
             Some(String::from(arg))
         })
-        .try_collect::<Vec<String>>();
+        .collect::<Option<Vec<String>>>();
     let Some(arguments) = arguments else {
         return Val::default();
     };

@@ -82,23 +82,22 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn get_cur_url(mut ctx: CtxForMutableFn, key: &Symbol) -> Option<String> {
-    if let Ok(meta) = ctx.meta()
-        && let Ok(val) = meta.get_ref(key)
-    {
-        if let Val::String(url) = val {
-            Some((**url).to_owned())
-        } else {
-            None
+    if let Ok(meta) = ctx.meta() {
+        if let Ok(val) = meta.get_ref(key) {
+            return if let Val::String(url) = val {
+                Some((**url).to_owned())
+            } else {
+                None
+            };
         }
-    } else {
-        let Ok(cur_dir) = current_dir() else {
-            return None;
-        };
-        let Ok(cur_dir) = cur_dir.into_os_string().into_string() else {
-            return None;
-        };
-        Some(cur_dir)
     }
+    let Ok(cur_dir) = current_dir() else {
+        return None;
+    };
+    let Ok(cur_dir) = cur_dir.into_os_string().into_string() else {
+        return None;
+    };
+    Some(cur_dir)
 }
 
 fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) {
@@ -113,12 +112,8 @@ fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) {
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {
-    if let Some(parent) = <_ as AsRef<Path>>::as_ref(cur_url).parent()
-        && let Ok(new_url) = parent.join(url).canonicalize()
-        && let Ok(new_url) = new_url.into_os_string().into_string()
-    {
-        Some(new_url)
-    } else {
-        None
-    }
+    let parent = <_ as AsRef<Path>>::as_ref(cur_url).parent()?;
+    let new_url = parent.join(url).canonicalize().ok()?;
+    let new_url = new_url.into_os_string().into_string().ok()?;
+    Some(new_url)
 }

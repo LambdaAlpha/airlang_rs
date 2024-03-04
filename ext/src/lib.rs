@@ -1,5 +1,3 @@
-#![feature(iterator_try_collect, let_chains)]
-
 use airlang::MutableCtx;
 
 use crate::prelude::{
