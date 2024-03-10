@@ -24,22 +24,21 @@
     )
 )]
 
-use airlang::{
-    initial_ctx,
-    MutableCtx,
-};
+use std::io::stdout;
 
-use crate::prelude::{
-    Prelude,
-    PRELUDE,
+use airlang::MutableCtx;
+
+use crate::{
+    prelude::{
+        Prelude,
+        PRELUDE,
+    },
+    repl::Repl,
 };
 
 fn main() -> std::io::Result<()> {
-    let mut ctx = initial_ctx();
-    let mut mutable_ctx = MutableCtx::new(&mut ctx);
-    init_ctx(mutable_ctx.reborrow());
-
-    repl::repl(mutable_ctx)
+    let mut repl = Repl::new(stdout());
+    repl.run()
 }
 
 pub(crate) fn init_ctx(mut ctx: MutableCtx) {

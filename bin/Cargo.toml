@@ -17,3 +17,6 @@ version = "0.0.13"
 [dependencies.airlang_ext]
 path = "../ext"
 version = "0.0.13"
+
+[dependencies]
+crossterm = "0.27"
