@@ -131,7 +131,7 @@ impl<W: Write + AsRawFd> Repl<W> {
     fn run_once(&mut self) -> Result<()> {
         let mut input = String::new();
         stdin().read_to_string(&mut input)?;
-        Self::eval(&mut self.terminal, MutableCtx::new(&mut self.ctx), &input)?;
+        self.eval(&input)?;
         self.terminal.new_line()?;
         self.terminal.flush()
     }
@@ -283,7 +283,7 @@ impl<W: Write + AsRawFd> Repl<W> {
         self.terminal.flush()?;
 
         disable_raw_mode()?;
-        Self::eval(&mut self.terminal, MutableCtx::new(&mut self.ctx), &input)?;
+        self.eval(&input)?;
         self.terminal.flush()?;
         enable_raw_mode()
     }
@@ -405,19 +405,19 @@ impl<W: Write + AsRawFd> Repl<W> {
         input
     }
 
-    fn eval(terminal: &mut Terminal<W>, ctx: MutableCtx, input: &str) -> Result<()> {
+    fn eval(&mut self, input: &str) -> Result<()> {
         if input.is_empty() {
             return Ok(());
         }
         match parse(input) {
             Ok(input) => {
-                let output = interpret_mutable(ctx, input);
+                let output = interpret_mutable(MutableCtx::new(&mut self.ctx), input);
                 match generate(&output) {
-                    Ok(o) => terminal.print(o),
-                    Err(e) => terminal.eprint(e.to_string()),
+                    Ok(o) => self.terminal.print(o),
+                    Err(e) => self.terminal.eprint(e.to_string()),
                 }
             }
-            Err(e) => terminal.eprint(e.to_string()),
+            Err(e) => self.terminal.eprint(e.to_string()),
         }
     }
 
