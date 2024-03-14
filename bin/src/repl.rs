@@ -269,13 +269,15 @@ impl<W: Write + AsRawFd> Repl<W> {
 
     fn commit(&mut self) -> Result<()> {
         let input = self.get_input_buffer();
+        let previous_lines = take(&mut self.previous_lines);
+        let mut last_line = take(&mut self.head_buffer);
         for c in take(&mut self.tail_buffer) {
-            self.head_buffer.push(c);
+            last_line.push(c);
         }
 
         self.histories.push(History {
-            previous_lines: take(&mut self.previous_lines),
-            last_line: take(&mut self.head_buffer),
+            previous_lines,
+            last_line,
         });
         self.history_index = 0;
 
