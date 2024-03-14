@@ -6,11 +6,11 @@ string.length "1"
 -----
 "1" : 1
 =====
-;[a = "12", string.length a]
+; [a = "12", string.length a]
 -----
 2
 =====
-;[a = "hello", b = "world", a string.push " ", a string.push b, a]
+; [a = "hello", b = "world", a string.push " ", a string.push b, a]
 -----
 "hello world"
 =====
@@ -18,7 +18,7 @@ string.concat ["1", "2"]
 -----
 "12"
 =====
-;[a = "1", b = "2", c = "3", string.concat [a, b, c]]
+; [a = "1", b = "2", c = "3", string.concat [a, b, c]]
 -----
 "123"
 =====

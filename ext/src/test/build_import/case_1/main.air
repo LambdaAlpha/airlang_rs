@@ -1,4 +1,4 @@
-;[
+; [
   a = (build.import "a/a.air"),
   b = (build.import "a/b/b.air"),
   a + b

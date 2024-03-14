@@ -14,7 +14,7 @@ true and true
 -----
 true
 =====
-;[false and ; $ [a = 1, true], a]
+; [false and ; $ [a = 1, true], a]
 -----
 1
 =====
@@ -26,7 +26,7 @@ false or false
 -----
 false
 =====
-;[true or ; $ [a = 1, false], a]
+; [true or ; $ [a = 1, false], a]
 -----
 1
 =====

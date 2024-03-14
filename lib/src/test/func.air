@@ -1,4 +1,4 @@
-;[
+; [
     f = function $ {
         body : input,
     },
@@ -7,7 +7,7 @@
 -----
 false
 =====
-;[
+; [
     f = function $ {
         body : (true not) $ input
     },
@@ -16,7 +16,7 @@ false
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : not $ input,
         context : . context {: not}
@@ -26,7 +26,7 @@ true
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : n $ a,
         input_name : a,
@@ -37,7 +37,7 @@ true
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : .,
@@ -47,7 +47,7 @@ true
 -----
 not true
 =====
-;[
+; [
     f = function $ {
         body : (true not) $ input,
         input_mode : true,
@@ -57,7 +57,7 @@ not true
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : false,
@@ -67,7 +67,7 @@ true
 -----
 not true
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : false,
@@ -77,7 +77,7 @@ not true
 -----
 false
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : true,
@@ -87,7 +87,7 @@ false
 -----
 {. : .}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {pair : false : true},
@@ -97,7 +97,7 @@ false
 -----
 a : .
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {pair : false : true, symbol : .},
@@ -107,7 +107,7 @@ a : .
 -----
 [a : ., a]
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : .,
@@ -117,7 +117,7 @@ a : .
 -----
 not false
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {symbol : .},
@@ -127,7 +127,7 @@ not false
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {symbol : .},
@@ -137,7 +137,7 @@ true
 -----
 a
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : input,
@@ -148,7 +148,7 @@ a
 -----
 [1]
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : input,
@@ -159,7 +159,7 @@ a
 -----
 [1, a, a, a, a, 1]
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {list : .},
@@ -169,7 +169,7 @@ a
 -----
 [a, b]
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {list : .},
@@ -179,7 +179,7 @@ a
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {list : (all {symbol : .})},
@@ -189,7 +189,7 @@ true
 -----
 [false, b]
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : input,
@@ -200,7 +200,7 @@ true
 -----
 {a : 1, b : a}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {map : .},
@@ -210,7 +210,7 @@ true
 -----
 {a : b}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {map : .},
@@ -220,7 +220,7 @@ true
 -----
 false
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : input,
@@ -231,7 +231,7 @@ false
 -----
 {a : 1}
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : input,
@@ -242,7 +242,7 @@ false
 -----
 1 a
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : input,
@@ -253,7 +253,7 @@ false
 -----
 1 ? a
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : caller | read $ a,
@@ -268,7 +268,7 @@ false
 -----
 .
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : caller | read $ a,
@@ -283,7 +283,7 @@ false
 -----
 1
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : caller | read $ a,
@@ -298,7 +298,7 @@ false
 -----
 1
 =====
-;[
+; [
     a = 1,
     f = function $ {
         body : caller | read $ a,
@@ -313,7 +313,7 @@ false
 -----
 1
 =====
-;[
+; [
     f = function $ {
         body : caller | $$ $ input = 2,
         input_mode : .,
@@ -331,7 +331,7 @@ false
 -----
 2
 =====
-;[
+; [
     f = function $ {
         body : caller | $$ $ input = 2,
         input_mode : .,
@@ -349,7 +349,7 @@ false
 -----
 1
 =====
-;[
+; [
     f = function $ {
         body : caller | $$ $ input = 2,
         input_mode : .,
@@ -367,7 +367,7 @@ false
 -----
 1
 =====
-;[
+; [
     dispatcher = function $ {
         body : . $ if $ [
             input ==- . $ caller,
@@ -441,7 +441,7 @@ function.caller_access eager
 -----
 mutable
 =====
-;[f = function $ {body : input}, function.caller_access f]
+; [f = function $ {body : input}, function.caller_access f]
 -----
 free
 =====
@@ -457,11 +457,11 @@ function.input_mode function.input_mode
 -----
 {symbol : .}
 =====
-;[f = function $ {body : input}, function.input_mode f]
+; [f = function $ {body : input}, function.input_mode f]
 -----
 true
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {pair : true : false},
@@ -471,7 +471,7 @@ true
 -----
 {pair : true : false}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {symbol : .},
@@ -481,7 +481,7 @@ true
 -----
 {symbol : .}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {call : . $ true $ .},
@@ -491,7 +491,7 @@ true
 -----
 {call : true $ .}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {list : [true, false, ., '...' true, .]},
@@ -501,7 +501,7 @@ true
 -----
 {list : [true, false, ., '...' true, .]}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {list : .},
@@ -511,7 +511,7 @@ true
 -----
 {list : .}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {list : (all {symbol : .})},
@@ -521,7 +521,7 @@ true
 -----
 {list : all $ {symbol : .}}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {map : {a : true, b : .}},
@@ -531,7 +531,7 @@ true
 -----
 {map : {a : true, b : .}}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {map : .},
@@ -541,7 +541,7 @@ true
 -----
 {map : .}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {map : true all .},
@@ -551,7 +551,7 @@ true
 -----
 {map : true all .}
 =====
-;[
+; [
     f = function $ {
         body : input,
         input_mode : {map : {list : [{symbol : .}, {list : .}]} all {list : all $ {map : .}}},
@@ -561,7 +561,7 @@ true
 -----
 {map : {list : [{symbol : .}, {list : .}]} all {list : all $ {map : .}}}
 =====
-;[
+; [
     f = function $ {
         body : input,
         output_mode : {map : true all .},
@@ -575,7 +575,7 @@ function.is_primitive not
 -----
 true
 =====
-;[f = function $ {body : input}, function.is_primitive f]
+; [f = function $ {body : input}, function.is_primitive f]
 -----
 false
 =====
@@ -587,15 +587,15 @@ function.id not
 -----
 not
 =====
-;[neg = not, function.id neg]
+; [neg = not, function.id neg]
 -----
 not
 =====
-;[f = function $ {body : input}, function.id f]
+; [f = function $ {body : input}, function.id f]
 -----
 .
 =====
-;[f = function $ {body : input}, function.body f]
+; [f = function $ {body : input}, function.body f]
 -----
 input
 =====
@@ -603,7 +603,7 @@ function.body not
 -----
 .
 =====
-;[
+; [
     ctx = . context {a : 1},
     f = function $ {body : input, context : ctx},
     (function.context f) -== ctx
@@ -615,7 +615,7 @@ function.context not
 -----
 .
 =====
-;[f = function $ {body : input}, function.input_name f]
+; [f = function $ {body : input}, function.input_name f]
 -----
 input
 =====
@@ -623,11 +623,11 @@ function.input_name not
 -----
 .
 =====
-;[f = function $ {body : input, caller_access : constant}, function.caller_name f]
+; [f = function $ {body : input, caller_access : constant}, function.caller_name f]
 -----
 caller
 =====
-;[f = function $ {body : input}, function.caller_name f]
+; [f = function $ {body : input}, function.caller_name f]
 -----
 .
 =====

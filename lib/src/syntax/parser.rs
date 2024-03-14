@@ -23,7 +23,6 @@ use nom::{
     combinator::{
         all_consuming,
         cut,
-        eof,
         fail,
         map,
         map_opt,
@@ -44,8 +43,6 @@ use nom::{
     },
     multi::{
         fold_many0,
-        fold_many1,
-        many_till,
         separated_list0,
         separated_list1,
     },
@@ -137,29 +134,24 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(delimited(delimiter, repr, delimiter));
+    let f = all_consuming(delimited(
+        take_while(is_delimiter),
+        compose,
+        take_while(is_delimiter),
+    ));
     context("top", f)(src)
-}
-
-fn delimiter<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let f = value((), take_while(is_delimiter));
-    context("delimiter", f)(src)
 }
 
 fn is_delimiter(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
-fn normed<'a, T, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+fn normed<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
-    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
     F: Parser<&'a str, O, E>,
 {
-    preceded(delimiter, f)
+    preceded(take_while(is_delimiter), f)
 }
 
 fn wrap<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -169,8 +161,8 @@ where
 {
     let f = delimited(
         exact_char(WRAP_LEFT),
-        cut(normed::<T, _, _, _>(repr)),
-        cut(normed::<T, _, _, _>(exact_char(WRAP_RIGHT))),
+        cut(normed(compose)),
+        cut(normed(exact_char(WRAP_RIGHT))),
     );
     context("wrap", f)(src)
 }
@@ -216,19 +208,29 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
+fn non_tokens<'a, T: ParseRepr, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let (src, first) = peek(anychar)(src)?;
+    let parser = match first {
+        TOKENS_QUOTE => fail,
+        _ => token,
+    };
+    context("non_tokens", parser)(src)
+}
+
 fn tokens<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = preceded(
+    let collect = delimited(
         exact_char(TOKENS_QUOTE),
-        many_till(
-            normed::<T, _, _, _>(token),
-            normed::<T, _, _, _>(exact_char(TOKENS_QUOTE)),
-        ),
+        cut(separated_list0(take_while1(is_delimiter), non_tokens)),
+        cut(normed(exact_char(TOKENS_QUOTE))),
     );
-    let f = map(collect, |(tokens, _)| {
+    let f = map(collect, |tokens| {
         let list = tokens
             .into_iter()
             .map(Token::into_repr)
@@ -238,28 +240,13 @@ where
     context("tokens", f)(src)
 }
 
-fn repr<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    context("repr", compose)(src)
-}
-
 fn compose<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = fold_many1(
-        normed::<T, _, _, _>(token),
-        Vec::new,
-        |mut tokens: Vec<_>, item| {
-            tokens.push(item);
-            tokens
-        },
-    );
-    let f = map_opt(collect, compose_tokens);
+    let delimited_tokens = separated_list1(take_while1(is_delimiter), token);
+    let f = map_opt(delimited_tokens, compose_tokens);
     context("compose", f)(src)
 }
 
@@ -389,14 +376,14 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let items = items(
-        normed::<T, _, _, _>(repr::<T, _>),
-        normed::<T, _, _, _>(exact_char(SEPARATOR)),
-        normed::<T, _, _, _>(repr),
+        normed(compose),
+        normed(exact_char(SEPARATOR)),
+        normed(compose),
     );
     let delimited_items = delimited(
         exact_char(LIST_LEFT),
         cut(items),
-        cut(normed::<T, _, _, _>(exact_char(LIST_RIGHT))),
+        cut(normed(exact_char(LIST_RIGHT))),
     );
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
@@ -408,14 +395,14 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let items = items(
-        key_value_pair::<T, E>,
-        normed::<T, _, _, _>(exact_char(SEPARATOR)),
-        key_value_pair::<T, E>,
+        key_value_pair,
+        normed(exact_char(SEPARATOR)),
+        key_value_pair,
     );
     let delimited_items = delimited(
         exact_char(MAP_LEFT),
         cut(items),
-        cut(normed::<T, _, _, _>(exact_char(MAP_RIGHT))),
+        cut(normed(exact_char(MAP_RIGHT))),
     );
     let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
     context("map", f)(src)
@@ -426,7 +413,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(normed::<T, _, _, _>(compose::<T, _>), |repr: T| {
+    let f = map(normed(compose), |repr: T| {
         repr.try_into_pair()
             .unwrap_or_else(|repr| (repr, From::from(Unit)))
     });
@@ -623,9 +610,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let numbers = alt((hex_int, bin_int, decimal));
-    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_trivial_symbol(c)))));
-    let f = terminated(numbers, next);
+    let f = alt((hex_int, bin_int, decimal));
     context("number", f)(src)
 }
 
@@ -725,12 +710,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let bytes = preceded(
+    let f = preceded(
         exact_char(BYTES_PREFIX),
         alt((hex_bytes, bin_bytes, empty_bytes)),
     );
-    let next = peek(alt((eof, take_while_m_n(1, 1, |c| !is_trivial_symbol(c)))));
-    let f = terminated(bytes, next);
     context("bytes", f)(src)
 }
 

@@ -62,7 +62,7 @@ eager $ not $ true
 -----
 false
 =====
-;[a = . $ a, eager $ a]
+; [a = . $ a, eager $ a]
 -----
 a
 =====

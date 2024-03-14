@@ -1,4 +1,4 @@
-;[
+; [
     p = proposition $ {
         function : not,
         input : 1,
@@ -9,7 +9,7 @@
 -----
 1
 =====
-;[
+; [
     p = proposition $ {
         function : not,
         input : 1,
@@ -20,7 +20,7 @@
 -----
 2
 =====
-;[
+; [
     p = proposition $ {
         function : not,
         input : 1,
@@ -31,7 +31,7 @@
 -----
 true
 =====
-;[
+; [
     $map = function $ {
         body : input,
         input_mode : {map : . all true},
@@ -46,7 +46,7 @@ true
 -----
 true
 =====
-;[
+; [
     m = proposition.represent $ proposition.prove $ not $ true,
     $map = function $ {
         body : input,
@@ -63,7 +63,7 @@ true
 -----
 true
 =====
-;[
+; [
     p = proposition $ {
         function : not,
         input : 1,
