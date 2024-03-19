@@ -342,8 +342,8 @@ impl<W: Write + AsRawFd> Repl<W> {
             self.tail_buffer.clear();
         } else {
             let history = &self.histories[len - self.history_index];
-            self.previous_lines = history.previous_lines.clone();
-            self.head_buffer = history.last_line.clone();
+            self.previous_lines.clone_from(&history.previous_lines);
+            self.head_buffer.clone_from(&history.last_line);
             self.tail_buffer.clear();
         }
 
