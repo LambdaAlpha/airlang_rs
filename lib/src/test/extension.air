@@ -1,4 +1,4 @@
-; [a = extension.unit, b = extension.unit, a === b]
+; [a = extension.unit, b = extension.unit, a == b]
 -----
 true
 =====
@@ -26,7 +26,7 @@ function.represent func_ext
 -----
 {id : func_ext, is_extension : true}
 =====
-; [a = func_ext, b = func_ext, a === b]
+; [a = func_ext, b = func_ext, a == b]
 -----
 true
 =====

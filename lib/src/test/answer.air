@@ -26,7 +26,7 @@ false
 -----
 true
 =====
-; [p = proposition $ {function : not, input : true, output : false}, a = answer.verified $ p, (type_of p) -=- proposition and a ==- .]
+; [p = proposition $ {function : not, input : true, output : false}, a = answer.verified $ p, (type_of p) == proposition and a == .]
 -----
 true
 =====

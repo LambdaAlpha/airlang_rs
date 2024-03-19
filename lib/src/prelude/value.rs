@@ -70,13 +70,7 @@ pub(crate) struct ValuePrelude {
     pub(crate) any: Named<FuncVal>,
     pub(crate) type_of: Named<FuncVal>,
     pub(crate) equal: Named<FuncVal>,
-    pub(crate) equal_val: Named<FuncVal>,
-    pub(crate) equal_ref_val: Named<FuncVal>,
-    pub(crate) equal_val_ref: Named<FuncVal>,
     pub(crate) not_equal: Named<FuncVal>,
-    pub(crate) not_equal_val: Named<FuncVal>,
-    pub(crate) not_equal_ref_val: Named<FuncVal>,
-    pub(crate) not_equal_val_ref: Named<FuncVal>,
 }
 
 impl Default for ValuePrelude {
@@ -85,13 +79,7 @@ impl Default for ValuePrelude {
             any: any(),
             type_of: type_of(),
             equal: equal(),
-            equal_val: equal_val(),
-            equal_ref_val: equal_ref_val(),
-            equal_val_ref: equal_val_ref(),
             not_equal: not_equal(),
-            not_equal_val: not_equal_val(),
-            not_equal_ref_val: not_equal_ref_val(),
-            not_equal_val_ref: not_equal_val_ref(),
         }
     }
 }
@@ -101,13 +89,7 @@ impl Prelude for ValuePrelude {
         self.any.put(m);
         self.type_of.put(m);
         self.equal.put(m);
-        self.equal_val.put(m);
-        self.equal_ref_val.put(m);
-        self.equal_val_ref.put(m);
         self.not_equal.put(m);
-        self.not_equal_val.put(m);
-        self.not_equal_ref_val.put(m);
-        self.not_equal_val_ref.put(m);
     }
 }
 
@@ -181,155 +163,57 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let input_mode = pair_mode(symbol_value_mode(), symbol_value_mode());
     let output_mode = default_mode();
-    named_const_fn("===", input_mode, output_mode, fn_equal)
+    named_const_fn("==", input_mode, output_mode, fn_equal)
 }
 
 fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(v1) = pair.first else {
+    let Some(v1) = get_by_ref(&ctx, &pair.first) else {
         return Val::default();
     };
-    let Val::Symbol(v2) = pair.second else {
-        return Val::default();
-    };
-    let v1 = ctx.get_const_ref(&v1);
-    let Ok(v1) = v1 else {
-        return Val::default();
-    };
-    let v2 = ctx.get_const_ref(&v2);
-    let Ok(v2) = v2 else {
+    let Some(v2) = get_by_ref(&ctx, &pair.second) else {
         return Val::default();
     };
     Val::Bool(Bool::new(*v1 == *v2))
 }
 
-fn equal_val() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
-    named_free_fn("-=-", input_mode, output_mode, fn_equal_val)
-}
-
-fn fn_equal_val(input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(pair.first == pair.second))
-}
-
-fn equal_ref_val() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), default_mode());
-    let output_mode = default_mode();
-    named_const_fn("==-", input_mode, output_mode, fn_equal_ref_val)
-}
-
-fn fn_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let Val::Symbol(v1) = pair.first else {
-        return Val::default();
-    };
-    let Ok(v1) = ctx.get_const_ref(&v1) else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(*v1 == pair.second))
-}
-
-fn equal_val_ref() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), symbol_value_mode());
-    let output_mode = default_mode();
-    named_const_fn("-==", input_mode, output_mode, fn_equal_val_ref)
-}
-
-fn fn_equal_val_ref(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let Val::Symbol(v2) = pair.second else {
-        return Val::default();
-    };
-    let Ok(v2) = ctx.get_const_ref(&v2) else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(pair.first == *v2))
-}
-
 fn not_equal() -> Named<FuncVal> {
     let input_mode = pair_mode(symbol_value_mode(), symbol_value_mode());
     let output_mode = default_mode();
-    named_const_fn("=/=", input_mode, output_mode, fn_not_equal)
+    named_const_fn("!=", input_mode, output_mode, fn_not_equal)
 }
 
 fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Symbol(v1) = pair.first else {
+    let Some(v1) = get_by_ref(&ctx, &pair.first) else {
         return Val::default();
     };
-    let Val::Symbol(v2) = pair.second else {
-        return Val::default();
-    };
-    let v1 = ctx.get_const_ref(&v1);
-    let Ok(v1) = v1 else {
-        return Val::default();
-    };
-    let v2 = ctx.get_const_ref(&v2);
-    let Ok(v2) = v2 else {
+    let Some(v2) = get_by_ref(&ctx, &pair.second) else {
         return Val::default();
     };
     Val::Bool(Bool::new(*v1 != *v2))
 }
 
-fn not_equal_val() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
-    named_free_fn("-/-", input_mode, output_mode, fn_not_equal_val)
-}
-
-fn fn_not_equal_val(input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(pair.first != pair.second))
-}
-
-fn not_equal_ref_val() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), default_mode());
-    let output_mode = default_mode();
-    named_const_fn("=/-", input_mode, output_mode, fn_not_equal_ref_val)
-}
-
-fn fn_not_equal_ref_val(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let Val::Symbol(v1) = pair.first else {
-        return Val::default();
-    };
-    let Ok(v1) = ctx.get_const_ref(&v1) else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(*v1 != pair.second))
-}
-
-fn not_equal_val_ref() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), symbol_value_mode());
-    let output_mode = default_mode();
-    named_const_fn("-/=", input_mode, output_mode, fn_not_equal_val_ref)
-}
-
-fn fn_not_equal_val_ref(ctx: CtxForConstFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let Val::Symbol(v2) = pair.second else {
-        return Val::default();
-    };
-    let Ok(v2) = ctx.get_const_ref(&v2) else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(pair.first != *v2))
+fn get_by_ref<'a>(ctx: &'a CtxForConstFn<'a>, v: &'a Val) -> Option<&'a Val> {
+    match v {
+        Val::Symbol(v) => {
+            if let Ok(v1) = ctx.get_const_ref(v) {
+                Some(v1)
+            } else {
+                None
+            }
+        }
+        Val::Call(c) => {
+            if c.func.is_unit() {
+                Some(&c.input)
+            } else {
+                Some(v)
+            }
+        }
+        v => Some(v),
+    }
 }

@@ -26,7 +26,7 @@
         input : 1,
         output : 2,
     },
-    (proposition.function p) -== not
+    (proposition.function p) == not
 ]
 -----
 true
@@ -41,7 +41,7 @@ true
         input : true,
         output : false,
     },
-    m ==- proposition.represent $ proposition $ m
+    m == proposition.represent $ proposition $ m
 ]
 -----
 true
@@ -58,7 +58,7 @@ true
         output : false,
         proved : true,
     },
-    m === expected
+    m == expected
 ]
 -----
 true
@@ -69,7 +69,7 @@ true
         input : 1,
         output : 2,
     },
-    ((type_of p) -=- id $ proposition) and (proposition.proved p) -=- false
+    ((type_of p) == id $ proposition) and (proposition.proved p) == false
 ]
 -----
 true

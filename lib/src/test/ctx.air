@@ -278,7 +278,7 @@ false
 -----
 true
 =====
-; [m1 = . context {}, set_meta m1, m2 = true | this $ ., m1 === m2]
+; [m1 = . context {}, set_meta m1, m2 = true | this $ ., m1 == m2]
 -----
 true
 =====
@@ -305,7 +305,7 @@ false
         },
     },
     set_meta $ . context {: dispatcher},
-    (a1 ==- 1) and b1 ==- 2
+    (a1 == 1) and b1 == 2
 ]
 -----
 true
@@ -448,7 +448,7 @@ true
     a = . context {b : 1},
     hm = a | has_meta $ .,
     b = a | read $ b,
-    (not hm) and b ==- 1
+    (not hm) and b == 1
 ]
 -----
 true

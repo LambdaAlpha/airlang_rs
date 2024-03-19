@@ -14,7 +14,7 @@ false
 =====
 ; [
     p = proposition.prove $ not $ true,
-    (proposition.function p) -== not
+    (proposition.function p) == not
 ]
 -----
 true

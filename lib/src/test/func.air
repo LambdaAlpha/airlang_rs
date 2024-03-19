@@ -370,14 +370,14 @@ false
 ; [
     dispatcher = function $ {
         body : if $ [
-            input ==- id $ caller,
+            input == (. .) $ id $ caller,
             id c,
             false
         ],
         caller_access : free,
         context : . context {
             : if,
-            : ==-,
+            : ==,
             : id,
         },
     },
@@ -408,9 +408,9 @@ function.represent $ function $ {body : input, caller_access : constant}
 -----
 {body : input, caller_access : constant}
 =====
-function.represent ===
+function.represent ==
 -----
-{id : ===, caller_access : constant, input_mode : {pair : {symbol : id} : {symbol : id}}}
+{id : ==, caller_access : constant, input_mode : {pair : {symbol : id} : {symbol : id}}}
 =====
 function.represent $ function $ {
     body : i,
@@ -607,7 +607,7 @@ function.body not
 ; [
     ctx = . context {a : 1},
     f = function $ {body : input, context : ctx},
-    (function.context f) -== ctx
+    (function.context f) == ctx
 ]
 -----
 true
