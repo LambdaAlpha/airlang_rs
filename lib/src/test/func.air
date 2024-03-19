@@ -152,7 +152,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {list : [true, false, '...' ., true]},
+        input_mode : {list : [true, false, ... ., true]},
     },
     f [a, a, a, a, a, a]
 ]
@@ -494,12 +494,12 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : [true, false, ., '...' true, .]},
+        input_mode : {list : [true, false, ., ... true, .]},
     },
     function.input_mode f
 ]
 -----
-{list : [true, false, ., '...' true, .]}
+{list : [true, false, ., ... true, .]}
 =====
 ; [
     f = function $ {
