@@ -70,7 +70,7 @@ impl Prelude for CtrlPrelude {
 }
 
 fn sequence() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Eval(EvalMode::Value));
+    let input_mode = list_mode(ListMode::Eval(EvalMode::Id));
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
@@ -92,10 +92,7 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 fn breakable_sequence() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        symbol_value_mode(),
-        list_mode(ListMode::Eval(EvalMode::Value)),
-    );
+    let input_mode = pair_mode(symbol_value_mode(), list_mode(ListMode::Eval(EvalMode::Id)));
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_breakable_sequence::<FreeCtx>,
@@ -136,15 +133,15 @@ fn if1() -> Named<FuncVal> {
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Value),
+            io_mode: IoMode::Eval(EvalMode::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Value),
+            io_mode: IoMode::Eval(EvalMode::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Value),
+            io_mode: IoMode::Eval(EvalMode::Id),
             ellipsis: false,
         },
     ]);
@@ -196,11 +193,11 @@ fn match1() -> Named<FuncVal> {
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: map_mode(MapMode::Eval(EvalMode::Value)),
+            io_mode: map_mode(MapMode::Eval(EvalMode::Id)),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Value),
+            io_mode: IoMode::Eval(EvalMode::Id),
             ellipsis: false,
         },
     ]);
@@ -243,11 +240,11 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 fn while1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Value),
+            io_mode: IoMode::Eval(EvalMode::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Value),
+            io_mode: IoMode::Eval(EvalMode::Id),
             ellipsis: false,
         },
     ]);

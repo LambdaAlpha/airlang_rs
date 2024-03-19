@@ -9,7 +9,7 @@ false
 =====
 ; [
     f = function $ {
-        body : (true not) $ input
+        body : (. not) $ input
     },
     f $ not $ true
 ]
@@ -40,7 +40,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : .,
+        input_mode : id,
     },
     f $ not $ true
 ]
@@ -49,8 +49,8 @@ not true
 =====
 ; [
     f = function $ {
-        body : (true not) $ input,
-        input_mode : true,
+        body : (. not) $ input,
+        input_mode : eager,
     },
     f $ not $ true
 ]
@@ -60,7 +60,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : false,
+        input_mode : lazy,
     },
     f $ not $ true
 ]
@@ -70,9 +70,9 @@ not true
 ; [
     f = function $ {
         body : input,
-        input_mode : false,
+        input_mode : lazy,
     },
-    f $ true $ not $ true
+    f $ . $ not $ true
 ]
 -----
 false
@@ -80,7 +80,7 @@ false
 ; [
     f = function $ {
         body : input,
-        input_mode : true,
+        input_mode : eager,
     },
     f {a : b}
 ]
@@ -90,7 +90,7 @@ false
 ; [
     f = function $ {
         body : input,
-        input_mode : {pair : false : true},
+        input_mode : {pair : lazy : eager},
     },
     a f b
 ]
@@ -100,7 +100,7 @@ a : .
 ; [
     f = function $ {
         body : input,
-        input_mode : {pair : false : true, symbol : .},
+        input_mode : {pair : lazy : eager, symbol : id},
     },
     [a f b, f a]
 ]
@@ -110,7 +110,7 @@ a : .
 ; [
     f = function $ {
         body : input,
-        input_mode : .,
+        input_mode : id,
     },
     f $ not $ false
 ]
@@ -120,7 +120,7 @@ not false
 ; [
     f = function $ {
         body : input,
-        input_mode : {symbol : .},
+        input_mode : {symbol : id},
     },
     f $ not $ false
 ]
@@ -130,7 +130,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {symbol : .},
+        input_mode : {symbol : id},
     },
     f a
 ]
@@ -141,7 +141,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {symbol : .},
+        input_mode : {symbol : id},
     },
     f [a]
 ]
@@ -152,7 +152,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {list : [true, false, ... ., true]},
+        input_mode : {list : [eager, lazy, ... id, eager]},
     },
     f [a, a, a, a, a, a]
 ]
@@ -162,7 +162,7 @@ a
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : .},
+        input_mode : {list : id},
     },
     f [a, b]
 ]
@@ -172,7 +172,7 @@ a
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : .},
+        input_mode : {list : id},
     },
     f $ not $ false
 ]
@@ -182,7 +182,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : (all {symbol : .})},
+        input_mode : {list : (all {symbol : id})},
     },
     f [not true, b]
 ]
@@ -193,7 +193,7 @@ true
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : {a : true, b : .}},
+        input_mode : {map : {a : eager, b : id}},
     },
     f {a : a, b : a}
 ]
@@ -203,7 +203,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : .},
+        input_mode : {map : id},
     },
     f {a : b}
 ]
@@ -213,7 +213,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : .},
+        input_mode : {map : id},
     },
     f (not true)
 ]
@@ -224,7 +224,7 @@ false
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : false all true},
+        input_mode : {map : lazy all eager},
     },
     f {: a}
 ]
@@ -235,7 +235,7 @@ false
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {call : . $ true $ .},
+        input_mode : {call : eager $ id},
     },
     f (a a)
 ]
@@ -246,7 +246,7 @@ false
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {reverse : true ? .},
+        input_mode : {reverse : eager ? id},
     },
     f $ a ? a
 ]
@@ -316,7 +316,7 @@ false
 ; [
     f = function $ {
         body : caller | $$ $ input = 2,
-        input_mode : .,
+        input_mode : id,
         caller_access : mutable,
         context : . context {
             : |,
@@ -334,7 +334,7 @@ false
 ; [
     f = function $ {
         body : caller | $$ $ input = 2,
-        input_mode : .,
+        input_mode : id,
         caller_access : mutable,
         context : . context {
             : |,
@@ -352,7 +352,7 @@ false
 ; [
     f = function $ {
         body : caller | $$ $ input = 2,
-        input_mode : .,
+        input_mode : id,
         caller_access : constant,
         context : . context {
             : |,
@@ -369,19 +369,20 @@ false
 =====
 ; [
     dispatcher = function $ {
-        body : . $ if $ [
-            input ==- . $ caller,
-            . c,
+        body : if $ [
+            input ==- id $ caller,
+            id c,
             false
         ],
         caller_access : free,
         context : . context {
             : if,
-            : ==-
+            : ==-,
+            : id,
         },
     },
     f = function $ {
-        body : . $ caller | a = 1,
+        body : caller | a = 1,
         caller_access : mutable,
         context : (. context {: dispatcher}) context {
             : =,
@@ -409,14 +410,14 @@ function.represent $ function $ {body : input, caller_access : constant}
 =====
 function.represent ===
 -----
-{id : ===, caller_access : constant, input_mode : {pair : {symbol : .} : {symbol : .}}}
+{id : ===, caller_access : constant, input_mode : {pair : {symbol : id} : {symbol : id}}}
 =====
 function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : true : true},
-    output_mode : {pair : false : false},
+    input_mode : {pair : eager : eager},
+    output_mode : {pair : lazy : lazy},
     caller_access : mutable,
 }
 -----
@@ -424,8 +425,8 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : true : true},
-    output_mode : {pair : false : false},
+    input_mode : {pair : eager : eager},
+    output_mode : {pair : lazy : lazy},
     caller_access : mutable,
 }
 =====
@@ -447,129 +448,129 @@ free
 =====
 function.input_mode not
 -----
-true
+eager
 =====
 function.input_mode eager
 -----
-.
+id
 =====
 function.input_mode function.input_mode
 -----
-{symbol : .}
+{symbol : id}
 =====
 ; [f = function $ {body : input}, function.input_mode f]
 -----
-true
+eager
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {pair : true : false},
+        input_mode : {pair : eager : lazy},
     },
     function.input_mode f
 ]
 -----
-{pair : true : false}
+{pair : eager : lazy}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {symbol : .},
+        input_mode : {symbol : id},
     },
     function.input_mode f
 ]
 -----
-{symbol : .}
+{symbol : id}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {call : . $ true $ .},
+        input_mode : {call : eager $ id},
     },
     function.input_mode f
 ]
 -----
-{call : true $ .}
+{call : eager $ id}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : [true, false, ., ... true, .]},
+        input_mode : {list : [eager, lazy, id, ... eager, id]},
     },
     function.input_mode f
 ]
 -----
-{list : [true, false, ., ... true, .]}
+{list : [eager, lazy, id, ... eager, id]}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : .},
+        input_mode : {list : id},
     },
     function.input_mode f
 ]
 -----
-{list : .}
+{list : id}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : (all {symbol : .})},
+        input_mode : {list : (all {symbol : id})},
     },
     function.input_mode f
 ]
 -----
-{list : all $ {symbol : .}}
+{list : all $ {symbol : id}}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : {a : true, b : .}},
+        input_mode : {map : {a : eager, b : id}},
     },
     function.input_mode f
 ]
 -----
-{map : {a : true, b : .}}
+{map : {a : eager, b : id}}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : .},
+        input_mode : {map : id},
     },
     function.input_mode f
 ]
 -----
-{map : .}
+{map : id}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : true all .},
+        input_mode : {map : eager all id},
     },
     function.input_mode f
 ]
 -----
-{map : true all .}
+{map : eager all id}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : {list : [{symbol : .}, {list : .}]} all {list : all $ {map : .}}},
+        input_mode : {map : {list : [{symbol : id}, {list : id}]} all {list : all $ {map : id}}},
     },
     function.input_mode f
 ]
 -----
-{map : {list : [{symbol : .}, {list : .}]} all {list : all $ {map : .}}}
+{map : {list : [{symbol : id}, {list : id}]} all {list : all $ {map : id}}}
 =====
 ; [
     f = function $ {
         body : input,
-        output_mode : {map : true all .},
+        output_mode : {map : eager all id},
     },
     function.output_mode f
 ]
 -----
-{map : true all .}
+{map : eager all id}
 =====
 function.is_primitive not
 -----

@@ -6,13 +6,13 @@ use crate::{
             Eager,
             EagerByRef,
         },
+        id::{
+            Id,
+            IdByRef,
+        },
         lazy::{
             Lazy,
             LazyByRef,
-        },
-        value::{
-            Value,
-            ValueByRef,
         },
     },
     Val,
@@ -20,7 +20,7 @@ use crate::{
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum EvalMode {
-    Value,
+    Id,
     Lazy,
     #[default]
     Eager,
@@ -32,7 +32,7 @@ where
 {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            EvalMode::Value => Value.eval(ctx, input),
+            EvalMode::Id => Id.eval(ctx, input),
             EvalMode::Lazy => Lazy.eval(ctx, input),
             EvalMode::Eager => Eager.eval(ctx, input),
         }
@@ -45,14 +45,14 @@ where
 {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         match self {
-            EvalMode::Value => ValueByRef.eval(ctx, input),
+            EvalMode::Id => IdByRef.eval(ctx, input),
             EvalMode::Lazy => LazyByRef.eval(ctx, input),
             EvalMode::Eager => EagerByRef.eval(ctx, input),
         }
     }
 }
 
-pub(crate) mod value;
+pub(crate) mod id;
 
 pub(crate) mod lazy;
 

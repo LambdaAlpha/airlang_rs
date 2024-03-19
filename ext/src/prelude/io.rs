@@ -18,7 +18,7 @@ use crate::prelude::{
     default_mode,
     named_free_fn,
     named_mutable_fn,
-    symbol_value_mode,
+    symbol_id_mode,
     Named,
     Prelude,
 };
@@ -60,7 +60,7 @@ impl Prelude for IoPrelude {
 }
 
 fn read_line() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_mutable_fn("io.read_line", input_mode, output_mode, fn_read_line)
 }
@@ -81,7 +81,7 @@ fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn print() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn("io.print", input_mode, output_mode, fn_print)
 }
 
@@ -95,7 +95,7 @@ fn fn_print(input: Val) -> Val {
 
 fn print_line() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn("io.print_line", input_mode, output_mode, fn_print_line)
 }
 
@@ -108,8 +108,8 @@ fn fn_print_line(input: Val) -> Val {
 }
 
 fn flush() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Value);
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn("io.flush", input_mode, output_mode, fn_flush)
 }
 
@@ -120,7 +120,7 @@ fn fn_flush(_input: Val) -> Val {
 
 fn error_print() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn("io.error_print", input_mode, output_mode, fn_error_print)
 }
 
@@ -134,7 +134,7 @@ fn fn_error_print(input: Val) -> Val {
 
 fn error_print_line() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn(
         "io.error_print_line",
         input_mode,
@@ -152,8 +152,8 @@ fn fn_error_print_line(input: Val) -> Val {
 }
 
 fn error_flush() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Value);
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn("io.error_flush", input_mode, output_mode, fn_error_flush)
 }
 

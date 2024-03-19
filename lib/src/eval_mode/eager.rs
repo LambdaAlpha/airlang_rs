@@ -10,15 +10,9 @@ use crate::{
         DefaultByVal,
         ValBuilder,
     },
-    eval_mode::{
-        lazy::{
-            Lazy,
-            LazyByRef,
-        },
-        value::{
-            Value,
-            ValueByRef,
-        },
+    eval_mode::id::{
+        Id,
+        IdByRef,
     },
     problem::solve,
     symbol::Symbol,
@@ -48,7 +42,7 @@ where
     Ctx: CtxAccessor,
 {
     fn eval_atoms(&self, ctx: &mut Ctx, input: Val) -> Val {
-        Value.eval_atoms(ctx, input)
+        Id.eval_atoms(ctx, input)
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
@@ -68,17 +62,6 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        match &func {
-            Val::Unit(_) => return Value.eval(ctx, input),
-            Val::Bool(b) => {
-                return if b.bool() {
-                    self.eval(ctx, input)
-                } else {
-                    Lazy.eval(ctx, input)
-                };
-            }
-            _ => {}
-        }
         let func = self.eval(ctx, func);
         self.eval_input_then_call(ctx, func, input)
     }
@@ -178,7 +161,7 @@ where
     Ctx: CtxAccessor,
 {
     fn eval_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        ValueByRef.eval_atoms(ctx, input)
+        IdByRef.eval_atoms(ctx, input)
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
@@ -198,17 +181,6 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
-        match &func {
-            Val::Unit(_) => return ValueByRef.eval(ctx, input),
-            Val::Bool(b) => {
-                return if b.bool() {
-                    self.eval(ctx, input)
-                } else {
-                    LazyByRef.eval(ctx, input)
-                };
-            }
-            _ => {}
-        }
         let func = self.eval(ctx, func);
         self.eval_input_then_call(ctx, func, input)
     }

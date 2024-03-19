@@ -11,9 +11,9 @@ use crate::{
             Eager,
             EagerByRef,
         },
-        value::{
-            Value,
-            ValueByRef,
+        id::{
+            Id,
+            IdByRef,
         },
         EvalMode,
     },
@@ -330,7 +330,7 @@ impl MapMode {
                     } else {
                         Eager.eval(ctx, v)
                     };
-                    let k = Value.eval(ctx, k);
+                    let k = Id.eval(ctx, k);
                     (k, v)
                 });
                 ValBuilder.from_map(map)
@@ -364,7 +364,7 @@ impl MapMode {
                     } else {
                         EagerByRef.eval(ctx, v)
                     };
-                    let k = ValueByRef.eval(ctx, k);
+                    let k = IdByRef.eval(ctx, k);
                     (k, v)
                 });
                 ValBuilder.from_map(map)

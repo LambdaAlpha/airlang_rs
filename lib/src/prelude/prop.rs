@@ -78,8 +78,8 @@ const PROVED: &str = "proved";
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), IoMode::Eval(EvalMode::Value));
-    map.insert(symbol(OUTPUT), IoMode::Eval(EvalMode::Value));
+    map.insert(symbol(INPUT), IoMode::Eval(EvalMode::Id));
+    map.insert(symbol(OUTPUT), IoMode::Eval(EvalMode::Id));
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();
     named_mutable_fn("proposition", input_mode, output_mode, fn_new)
@@ -107,8 +107,8 @@ fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), IoMode::Eval(EvalMode::Value));
-    map.insert(symbol(OUTPUT), IoMode::Eval(EvalMode::Value));
+    map.insert(symbol(INPUT), IoMode::Eval(EvalMode::Id));
+    map.insert(symbol(OUTPUT), IoMode::Eval(EvalMode::Id));
     map.insert(symbol(PROVED), default_mode());
     let output_mode = map_mode_for_some(map);
     named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)

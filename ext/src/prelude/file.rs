@@ -9,7 +9,7 @@ use airlang::{
 use crate::prelude::{
     default_mode,
     named_const_fn,
-    symbol_value_mode,
+    symbol_id_mode,
     Named,
     Prelude,
 };
@@ -33,7 +33,7 @@ impl Prelude for FilePrelude {
 }
 
 fn read_to_string() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn(
         "file.read_to_string",

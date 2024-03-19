@@ -20,6 +20,10 @@ pub(crate) trait Evaluator<Ctx, Input, Output> {
     fn eval(&self, ctx: &mut Ctx, input: Input) -> Output;
 }
 
+pub(crate) const ID: &str = "id";
+pub(crate) const LAZY: &str = "lazy";
+pub(crate) const EAGER: &str = "eager";
+
 pub(crate) struct DefaultByVal;
 
 impl DefaultByVal {

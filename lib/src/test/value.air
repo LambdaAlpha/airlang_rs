@@ -82,7 +82,7 @@ float
 -----
 bytes
 =====
-; [a = . $ a, type_of a]
+; [a = id $ a, type_of a]
 -----
 symbol
 =====
@@ -98,7 +98,7 @@ pair
 -----
 call
 =====
-; [a = . $ f ? a, type_of a]
+; [a = id $ f ? a, type_of a]
 -----
 reverse
 =====

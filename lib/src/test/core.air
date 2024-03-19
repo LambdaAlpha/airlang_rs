@@ -22,17 +22,17 @@ not $ not $ true
 -----
 true
 =====
-. a
+. 1
 -----
-a
+. 1
 =====
-false [a, true $ not $ true, false $ not $ true, . a]
+true 1
 -----
-[a, false, not true, a]
+true 1
 =====
-true [not true, true $ not $ true, false $ not $ true, . $ not $ true]
+false 1
 -----
-[false, false, not true, not true]
+false 1
 =====
 "a" "b"
 -----
@@ -41,7 +41,3 @@ true [not true, true $ not $ true, false $ not $ true, . $ not $ true]
 "a" $ not $ true
 -----
 "a" false
-=====
-(not true) $ not $ true
------
-false false

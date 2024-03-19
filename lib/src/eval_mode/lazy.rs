@@ -14,9 +14,9 @@ use crate::{
             Eager,
             EagerByRef,
         },
-        value::{
-            Value,
-            ValueByRef,
+        id::{
+            Id,
+            IdByRef,
         },
     },
     symbol::Symbol,
@@ -45,11 +45,11 @@ where
     Ctx: CtxAccessor,
 {
     fn eval_atoms(&self, ctx: &mut Ctx, input: Val) -> Val {
-        Value.eval_atoms(ctx, input)
+        Id.eval_atoms(ctx, input)
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
-        Value.eval_symbol(ctx, s)
+        Id.eval_symbol(ctx, s)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
@@ -65,17 +65,10 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        match &func {
-            Val::Unit(_) => input,
-            Val::Bool(b) => {
-                if b.bool() {
-                    Eager.eval(ctx, input)
-                } else {
-                    self.eval(ctx, input)
-                }
-            }
-            _ => DefaultByVal::eval_call(self, ctx, func, input, ValBuilder),
+        if func.is_unit() {
+            return Eager.eval(ctx, input);
         }
+        DefaultByVal::eval_call(self, ctx, func, input, ValBuilder)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
@@ -100,11 +93,11 @@ where
     Ctx: CtxAccessor,
 {
     fn eval_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        ValueByRef.eval_atoms(ctx, input)
+        IdByRef.eval_atoms(ctx, input)
     }
 
     fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
-        ValueByRef.eval_symbol(ctx, s)
+        IdByRef.eval_symbol(ctx, s)
     }
 
     fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
@@ -120,17 +113,10 @@ where
     }
 
     fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
-        match &func {
-            Val::Unit(_) => ValueByRef.eval(ctx, input),
-            Val::Bool(b) => {
-                if b.bool() {
-                    EagerByRef.eval(ctx, input)
-                } else {
-                    self.eval(ctx, input)
-                }
-            }
-            _ => DefaultByRef::eval_call(self, ctx, func, input, ValBuilder),
+        if func.is_unit() {
+            return EagerByRef.eval(ctx, input);
         }
+        DefaultByRef::eval_call(self, ctx, func, input, ValBuilder)
     }
 
     fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {

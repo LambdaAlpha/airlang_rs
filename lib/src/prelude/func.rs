@@ -8,6 +8,7 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
+    eval::EAGER,
     eval_mode::EvalMode,
     func::{
         Composed,
@@ -144,15 +145,11 @@ fn fn_new(input: Val) -> Val {
         Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
         _ => return Val::default(),
     };
-    let input_mode = map
-        .remove(&symbol(INPUT_MODE))
-        .unwrap_or(Val::Bool(Bool::t()));
+    let input_mode = map.remove(&symbol(INPUT_MODE)).unwrap_or(symbol(EAGER));
     let Some(input_mode) = parse_io_mode(input_mode) else {
         return Val::default();
     };
-    let output_mode = map
-        .remove(&symbol(OUTPUT_MODE))
-        .unwrap_or(Val::Bool(Bool::t()));
+    let output_mode = map.remove(&symbol(OUTPUT_MODE)).unwrap_or(symbol(EAGER));
     let Some(output_mode) = parse_io_mode(output_mode) else {
         return Val::default();
     };

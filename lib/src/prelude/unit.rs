@@ -30,8 +30,8 @@ impl Prelude for UnitPrelude {
 }
 
 fn unit() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Value);
-    let output_mode = IoMode::Eval(EvalMode::Value);
+    let input_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Eval(EvalMode::Id);
     named_free_fn("unit", input_mode, output_mode, fn_unit)
 }
 

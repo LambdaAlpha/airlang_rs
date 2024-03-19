@@ -6,7 +6,7 @@
 -----
 .
 =====
-; [a = 1, b = . $ a, read $ true $ b]
+; [a = 1, b = id $ a, read $ eager $ b]
 -----
 1
 =====
@@ -30,7 +30,7 @@
 -----
 .
 =====
-; [a = . $ b, b = 1, move $ true $ a]
+; [a = id $ b, b = 1, move $ eager $ a]
 -----
 1
 =====
@@ -50,7 +50,7 @@
 -----
 1
 =====
-; [a = . $ b, $$ $ a = 1, b]
+; [a = id $ b, $$ $ a = 1, b]
 -----
 1
 =====
@@ -106,11 +106,11 @@ true
 -----
 [1, 2, 3]
 =====
-; [(f a) = . $ 1 $ 2, [f, a]]
+; [(f a) = id $ 1 $ 2, [f, a]]
 -----
 [1, 2]
 =====
-; [(a b c) = . $ 1 2 3, [a, b, c]]
+; [(a b c) = id $ 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
@@ -154,7 +154,7 @@ true
 -----
 [1, ., 2, 3]
 =====
-; [{: a, : b} = {(. a) : 1, (. b) : 2, (. c) : 3}, [a, b]]
+; [{: a, : b} = {(id a) : 1, (id b) : 2, (id c) : 3}, [a, b]]
 -----
 [1, 2]
 =====
@@ -294,17 +294,18 @@ false
     a = . context {a1 : 1},
     b = . context {b1 : 2},
     dispatcher = function $ {
-        body : . $ match $ [
+        body : match $ [
             input,
             {
-                (. a1) : (. a),
-                (. b1) : (. b),
+                (id a1) : (id a),
+                (id b1) : (id b),
             },
             false,
         ],
         caller_access : free,
         context : . context {
             : match,
+            : id,
         },
     },
     set_meta $ . context {: dispatcher},
@@ -315,12 +316,18 @@ true
 =====
 ; [
     da = function $ {
-        body : . $ . $ b,
+        body : id $ b,
         caller_access : free,
+        context : . context {
+            : id,
+        },
     },
     db = function $ {
-        body : . $ . $ c,
+        body : id $ c,
         caller_access : free,
+        context : . context {
+            : id,
+        },
     },
     a = (. context {dispatcher : da}) context {
         b : (. context {dispatcher : db}) context {
@@ -455,18 +462,18 @@ context.represent $ . context {}
 . : {}
 =====
 ; [
-    (meta : m) = context.represent $ (. context {super : (. b)}) context {a : 1},
+    (meta : m) = context.represent $ (. context {super : id $ b}) context {a : 1},
     meta = context.represent $ move $ meta,
     meta : m
 ]
 -----
 (. : {super : b}) : {a : 1}
 =====
-; [:: = . $ ::, final = . $ final, context.represent $ . context {a : 1 :: final}]
+; [:: = id $ ::, final = id $ final, context.represent $ . context {a : 1 :: final}]
 -----
 . : {a : 1 :: final}
 =====
-; [(_ : m) = context.represent $ . context {b : . context {}}, b = m map.remove . $ b, type_of b]
+; [(_ : m) = context.represent $ . context {b : . context {}}, b = m map.remove id $ b, type_of b]
 -----
 context
 =====

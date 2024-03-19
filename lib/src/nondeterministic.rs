@@ -250,7 +250,7 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> CtxVal {
 }
 
 pub(crate) fn any_eval_mode(rng: &mut SmallRng) -> EvalMode {
-    const EVAL_MODES: [EvalMode; 3] = [EvalMode::Value, EvalMode::Eager, EvalMode::Lazy];
+    const EVAL_MODES: [EvalMode; 3] = [EvalMode::Id, EvalMode::Eager, EvalMode::Lazy];
     *(EVAL_MODES.choose(rng).unwrap())
 }
 

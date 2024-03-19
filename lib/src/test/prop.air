@@ -34,7 +34,7 @@ true
 ; [
     $map = function $ {
         body : input,
-        input_mode : {map : . all true},
+        input_mode : {map : id all eager},
     },
     m = $map $ {
         function : not,
@@ -50,7 +50,7 @@ true
     m = proposition.represent $ proposition.prove $ not $ true,
     $map = function $ {
         body : input,
-        input_mode : {map : . all true},
+        input_mode : {map : id all eager},
     },
     expected = $map $ {
         function : not,
@@ -69,7 +69,7 @@ true
         input : 1,
         output : 2,
     },
-    ((type_of p) -=- . $ proposition) and (proposition.proved p) -=- false
+    ((type_of p) -=- id $ proposition) and (proposition.proved p) -=- false
 ]
 -----
 true

@@ -40,7 +40,7 @@ impl Prelude for LogicPrelude {
 }
 
 fn prove() -> Named<FuncVal> {
-    let input_mode = call_mode(default_mode(), IoMode::Eval(EvalMode::Value));
+    let input_mode = call_mode(default_mode(), IoMode::Eval(EvalMode::Id));
     let output_mode = default_mode();
     named_mutable_fn("proposition.prove", input_mode, output_mode, fn_prove)
 }

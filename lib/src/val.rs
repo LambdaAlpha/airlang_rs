@@ -67,7 +67,6 @@ pub enum Val {
     Ext(Box<dyn ValExt>),
 }
 
-#[allow(dead_code)]
 impl Val {
     pub(crate) fn is_unit(&self) -> bool {
         matches!(self, Val::Unit(_))

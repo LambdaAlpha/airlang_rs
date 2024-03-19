@@ -115,9 +115,9 @@ fn default_mode() -> IoMode {
     IoMode::default()
 }
 
-fn symbol_value_mode() -> IoMode {
+fn symbol_id_mode() -> IoMode {
     let mode = MatchMode {
-        symbol: EvalMode::Value,
+        symbol: EvalMode::Id,
         ..Default::default()
     };
     IoMode::Match(mode)

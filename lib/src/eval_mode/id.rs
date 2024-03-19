@@ -20,15 +20,15 @@ use crate::{
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct Value;
+pub(crate) struct Id;
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Value {
+impl<Ctx> Evaluator<Ctx, Val, Val> for Id {
     fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
         DefaultByVal::eval_val(self, ctx, input)
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for Value {
+impl<Ctx> ByVal<Ctx, Val> for Id {
     fn eval_atoms(&self, _ctx: &mut Ctx, input: Val) -> Val {
         input
     }
@@ -59,15 +59,15 @@ impl<Ctx> ByVal<Ctx, Val> for Value {
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct ValueByRef;
+pub(crate) struct IdByRef;
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for ValueByRef {
+impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for IdByRef {
     fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         DefaultByRef::eval_val(self, ctx, input)
     }
 }
 
-impl<'a, Ctx> ByRef<'a, Ctx, Val> for ValueByRef {
+impl<'a, Ctx> ByRef<'a, Ctx, Val> for IdByRef {
     fn eval_atoms(&self, _ctx: &mut Ctx, input: &'a Val) -> Val {
         input.clone()
     }
