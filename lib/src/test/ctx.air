@@ -10,7 +10,7 @@
 -----
 1
 =====
-; [(a :: constant) = 1, read a]
+; [(a . constant) = 1, read a]
 -----
 1
 =====
@@ -22,11 +22,11 @@
 -----
 .
 =====
-; [(a :: final) = 1, move a]
+; [(a . final) = 1, move a]
 -----
 .
 =====
-; [(a :: constant) = 1, move a]
+; [(a . constant) = 1, move a]
 -----
 .
 =====
@@ -54,27 +54,27 @@
 -----
 1
 =====
-; [(a :: none) = 1, a]
+; [(a . none) = 1, a]
 -----
 1
 =====
-; [(a :: none) = 1, (is_final a) and not $ is_null $ a]
+; [(a . none) = 1, (is_final a) and not $ is_null $ a]
 -----
 false
 =====
-; [(a :: final) = 1, is_final a]
+; [(a . final) = 1, is_final a]
 -----
 true
 =====
-; [(a :: constant) = 1, is_constant a]
+; [(a . constant) = 1, is_constant a]
 -----
 true
 =====
-; [(a :: {invariant : final}) = 1, is_final a]
+; [(a . {invariant : final}) = 1, is_final a]
 -----
 true
 =====
-; [(a :: {}) = 1, (is_final a) and not $ is_null $ a]
+; [(a . {}) = 1, (is_final a) and not $ is_null $ a]
 -----
 false
 =====
@@ -90,21 +90,17 @@ false
 -----
 [1, 2, 3]
 =====
-; [((a : b) :: final) = 1 : 2, (is_final a) and is_final $ b]
+; [((a : b) . final) = 1 : 2, (is_final a) and is_final $ b]
 -----
 true
 =====
-; [((a :: final) : (b :: constant)) = 1 : 2, (is_final a) and is_constant $ b]
+; [((a . final) : (b . constant)) = 1 : 2, (is_final a) and is_constant $ b]
 -----
 true
 =====
-; [((a : (b :: final)) :: constant) = 1 : 2, (is_constant a) and (not $ is_constant $ b) and is_final $ b]
+; [((a : (b . final)) . constant) = 1 : 2, (is_constant a) and (not $ is_constant $ b) and is_final $ b]
 -----
 true
-=====
-; [((a :: b) :: none) = 1 2 3, [a, ::, b]]
------
-[1, 2, 3]
 =====
 ; [(f a) = id $ 1 $ 2, [f, a]]
 -----
@@ -166,39 +162,39 @@ true
 -----
 {1 : 1, 2 : 2}
 =====
-; [(a :: final) = 1, a = 2]
+; [(a . final) = 1, a = 2]
 -----
 .
 =====
-; [(a :: final) = 1, a = 2, a]
+; [(a . final) = 1, a = 2, a]
 -----
 1
 =====
-; [(a :: final) = 1, (a :: final) = 2, a]
+; [(a . final) = 1, (a . final) = 2, a]
 -----
 1
 =====
-; [(a :: final) = 1, (a :: constant) = 2, a]
+; [(a . final) = 1, (a . constant) = 2, a]
 -----
 1
 =====
-; [(a :: final) = 1 : 2, a set_1 3, a]
+; [(a . final) = 1 : 2, a set_1 3, a]
 -----
 3 : 2
 =====
-; [(a :: constant) = 1 : 2, a set_1 3, a]
+; [(a . constant) = 1 : 2, a set_1 3, a]
 -----
 1 : 2
 =====
-; [(a :: constant) = 1, a = 2, a]
+; [(a . constant) = 1, a = 2, a]
 -----
 1
 =====
-; [(a :: constant) = 1, (a :: final) = 2, a]
+; [(a . constant) = 1, (a . final) = 2, a]
 -----
 1
 =====
-; [(a :: constant) = 1, (a :: constant) = 2, a]
+; [(a . constant) = 1, (a . constant) = 2, a]
 -----
 1
 =====
@@ -206,7 +202,7 @@ true
 -----
 true
 =====
-; [(a :: constant) = 1, set_final a, is_constant a]
+; [(a . constant) = 1, set_final a, is_constant a]
 -----
 true
 =====
@@ -214,7 +210,7 @@ true
 -----
 true
 =====
-; [(a :: final) = 1, set_constant a, is_constant a]
+; [(a . final) = 1, set_constant a, is_constant a]
 -----
 true
 =====
@@ -226,11 +222,11 @@ false
 -----
 false
 =====
-; [(a :: final) = 1, is_final a]
+; [(a . final) = 1, is_final a]
 -----
 true
 =====
-; [(a :: constant) = 1, is_final a]
+; [(a . constant) = 1, is_final a]
 -----
 true
 =====
@@ -242,11 +238,11 @@ false
 -----
 false
 =====
-; [(a :: final) = 1, is_constant a]
+; [(a . final) = 1, is_constant a]
 -----
 false
 =====
-; [(a :: constant) = 1, is_constant a]
+; [(a . constant) = 1, is_constant a]
 -----
 true
 =====
@@ -266,7 +262,7 @@ mutable
 -----
 free
 =====
-; [(a :: constant) = . context {}, a | access $ .]
+; [(a . constant) = . context {}, a | access $ .]
 -----
 constant
 =====
@@ -469,9 +465,9 @@ context.represent $ . context {}
 -----
 (. : {super : b}) : {a : 1}
 =====
-; [:: = id $ ::, final = id $ final, context.represent $ . context {a : 1 :: final}]
+; [final = id $ final, context.represent $ . context {a : 1 . final}]
 -----
-. : {a : 1 :: final}
+. : {a : 1 . final}
 =====
 ; [(_ : m) = context.represent $ . context {b : . context {}}, b = m map.remove id $ b, type_of b]
 -----

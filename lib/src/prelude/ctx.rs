@@ -327,12 +327,9 @@ enum ParseCtxValPairResult {
 }
 
 fn parse_ctx_val_pair(call: Box<CallVal>) -> ParseCtxValPairResult {
-    let Val::Symbol(tag) = &call.func else {
+    let Val::Unit(_) = &call.func else {
         return ParseCtxValPairResult::Fallback(call);
     };
-    if &**tag != CTX_VALUE_PAIR {
-        return ParseCtxValPairResult::Fallback(call);
-    }
     let Val::Pair(pair) = call.input else {
         return ParseCtxValPairResult::None;
     };
@@ -773,7 +770,6 @@ where
     with_target_ctx_basic(ctx, target_ctx, |ctx| get_ctx_nested(ctx, rest, f))
 }
 
-const CTX_VALUE_PAIR: &str = "::";
 const NONE: &str = "none";
 const FINAL: &str = "final";
 const CONST: &str = "constant";
@@ -855,16 +851,14 @@ fn fn_ctx_repr(input: Val) -> Val {
             let k = Val::Symbol(k);
             let use_normal_form = 'a: {
                 if let Val::Call(call) = &v.val {
-                    if let Val::Symbol(func) = &call.func {
-                        if &**func == CTX_VALUE_PAIR {
-                            break 'a true;
-                        }
+                    if let Val::Unit(_) = &call.func {
+                        break 'a true;
                     }
                 }
                 matches!(v.tag, InvariantTag::Final | InvariantTag::Const)
             };
             let v = if use_normal_form {
-                let func = symbol(CTX_VALUE_PAIR);
+                let func = Val::Unit(Unit);
                 let tag = generate_invariant_tag(v.tag);
                 let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(tag))));
                 Val::Call(Box::new(Call::new(func, pair)))
