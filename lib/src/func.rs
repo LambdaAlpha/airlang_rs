@@ -28,10 +28,10 @@ use crate::{
         },
         CtxAccessor,
     },
-    eval::Evaluator,
-    eval_mode::eager::EagerByRef,
     io_mode::IoMode,
     symbol::Symbol,
+    transform::eval::EvalByRef,
+    transformer::Transformer,
     val::{
         ctx::CtxVal,
         Val,
@@ -42,7 +42,7 @@ use crate::{
 pub struct Func {
     pub(crate) input_mode: IoMode,
     pub(crate) output_mode: IoMode,
-    pub(crate) evaluator: FuncEval,
+    pub(crate) core: FuncCore,
 }
 
 pub trait CtxFreeFn {
@@ -58,18 +58,17 @@ pub trait CtxMutableFn {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) enum FuncEval {
-    Free(CtxFreeEval),
-    Const(CtxConstEval),
-    Mutable(CtxMutableEval),
+pub(crate) enum FuncCore {
+    Free(CtxFree),
+    Const(CtxConst),
+    Mutable(CtxMutable),
 }
 
-pub(crate) type CtxFreeEval = FuncImpl<Primitive<Box<dyn CtxFreeFn>>, Composed<CtxFreeInfo>>;
+pub(crate) type CtxFree = FuncImpl<Primitive<Box<dyn CtxFreeFn>>, Composed<CtxFreeInfo>>;
 
-pub(crate) type CtxConstEval = FuncImpl<Primitive<Box<dyn CtxConstFn>>, Composed<CtxConstInfo>>;
+pub(crate) type CtxConst = FuncImpl<Primitive<Box<dyn CtxConstFn>>, Composed<CtxConstInfo>>;
 
-pub(crate) type CtxMutableEval =
-    FuncImpl<Primitive<Box<dyn CtxMutableFn>>, Composed<CtxMutableInfo>>;
+pub(crate) type CtxMutable = FuncImpl<Primitive<Box<dyn CtxMutableFn>>, Composed<CtxMutableInfo>>;
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum FuncImpl<P, C> {
@@ -81,7 +80,7 @@ pub(crate) enum FuncImpl<P, C> {
 pub(crate) struct Primitive<F> {
     is_extension: bool,
     id: Symbol,
-    eval_fn: F,
+    f: F,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -116,223 +115,223 @@ impl Func {
 
     #[allow(unused)]
     pub(crate) fn is_ctx_free(&self) -> bool {
-        matches!(&self.evaluator, FuncEval::Free(_))
+        matches!(&self.core, FuncCore::Free(_))
     }
 
     #[allow(unused)]
     pub(crate) fn is_ctx_const(&self) -> bool {
-        matches!(&self.evaluator, FuncEval::Free(_) | FuncEval::Const(_))
+        matches!(&self.core, FuncCore::Free(_) | FuncCore::Const(_))
     }
 
     pub(crate) fn is_primitive(&self) -> bool {
-        match &self.evaluator {
-            FuncEval::Free(eval) => matches!(eval, FuncImpl::Primitive(_)),
-            FuncEval::Const(eval) => matches!(eval, FuncImpl::Primitive(_)),
-            FuncEval::Mutable(eval) => matches!(eval, FuncImpl::Primitive(_)),
+        match &self.core {
+            FuncCore::Free(f) => matches!(f, FuncImpl::Primitive(_)),
+            FuncCore::Const(f) => matches!(f, FuncImpl::Primitive(_)),
+            FuncCore::Mutable(f) => matches!(f, FuncImpl::Primitive(_)),
         }
     }
 
     pub(crate) fn primitive_id(&self) -> Option<Symbol> {
-        match &self.evaluator {
-            FuncEval::Free(eval) => {
-                let FuncImpl::Primitive(eval) = eval else {
+        match &self.core {
+            FuncCore::Free(f) => {
+                let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
-                Some(eval.id.clone())
+                Some(f.id.clone())
             }
-            FuncEval::Const(eval) => {
-                let FuncImpl::Primitive(eval) = eval else {
+            FuncCore::Const(f) => {
+                let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
-                Some(eval.id.clone())
+                Some(f.id.clone())
             }
-            FuncEval::Mutable(eval) => {
-                let FuncImpl::Primitive(eval) = eval else {
+            FuncCore::Mutable(f) => {
+                let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
-                Some(eval.id.clone())
+                Some(f.id.clone())
             }
         }
     }
 
     pub(crate) fn primitive_is_extension(&self) -> Option<bool> {
-        match &self.evaluator {
-            FuncEval::Free(eval) => {
-                let FuncImpl::Primitive(eval) = eval else {
+        match &self.core {
+            FuncCore::Free(f) => {
+                let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
-                Some(eval.is_extension)
+                Some(f.is_extension)
             }
-            FuncEval::Const(eval) => {
-                let FuncImpl::Primitive(eval) = eval else {
+            FuncCore::Const(f) => {
+                let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
-                Some(eval.is_extension)
+                Some(f.is_extension)
             }
-            FuncEval::Mutable(eval) => {
-                let FuncImpl::Primitive(eval) = eval else {
+            FuncCore::Mutable(f) => {
+                let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
-                Some(eval.is_extension)
+                Some(f.is_extension)
             }
         }
     }
 
     pub(crate) fn composed_body(&self) -> Option<Val> {
-        match &self.evaluator {
-            FuncEval::Free(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+        match &self.core {
+            FuncCore::Free(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.body.clone())
+                Some(f.body.clone())
             }
-            FuncEval::Const(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Const(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.body.clone())
+                Some(f.body.clone())
             }
-            FuncEval::Mutable(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Mutable(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.body.clone())
+                Some(f.body.clone())
             }
         }
     }
 
     pub(crate) fn composed_context(&self) -> Option<Ctx> {
-        match &self.evaluator {
-            FuncEval::Free(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+        match &self.core {
+            FuncCore::Free(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.ctx.clone())
+                Some(f.ctx.clone())
             }
-            FuncEval::Const(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Const(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.ctx.clone())
+                Some(f.ctx.clone())
             }
-            FuncEval::Mutable(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Mutable(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.ctx.clone())
+                Some(f.ctx.clone())
             }
         }
     }
 
     pub(crate) fn composed_input_name(&self) -> Option<Symbol> {
-        match &self.evaluator {
-            FuncEval::Free(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+        match &self.core {
+            FuncCore::Free(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.input_name.clone())
+                Some(f.input_name.clone())
             }
-            FuncEval::Const(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Const(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.input_name.clone())
+                Some(f.input_name.clone())
             }
-            FuncEval::Mutable(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Mutable(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.input_name.clone())
+                Some(f.input_name.clone())
             }
         }
     }
 
     pub(crate) fn composed_caller_name(&self) -> Option<Symbol> {
-        match &self.evaluator {
-            FuncEval::Free(_) => None,
-            FuncEval::Const(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+        match &self.core {
+            FuncCore::Free(_) => None,
+            FuncCore::Const(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.caller.name.clone())
+                Some(f.caller.name.clone())
             }
-            FuncEval::Mutable(eval) => {
-                let FuncImpl::Composed(eval) = eval else {
+            FuncCore::Mutable(f) => {
+                let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(eval.caller.name.clone())
+                Some(f.caller.name.clone())
             }
         }
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Func
+impl<Ctx> Transformer<Ctx, Val, Val> for Func
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.evaluator.eval(ctx, input)
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.core.transform(ctx, input)
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for FuncEval
+impl<Ctx> Transformer<Ctx, Val, Val> for FuncCore
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            FuncEval::Free(func) => func.eval(ctx, input),
-            FuncEval::Const(func) => func.eval(ctx, input),
-            FuncEval::Mutable(func) => func.eval(ctx, input),
+            FuncCore::Free(func) => func.transform(ctx, input),
+            FuncCore::Const(func) => func.transform(ctx, input),
+            FuncCore::Mutable(func) => func.transform(ctx, input),
         }
     }
 }
 
-impl<Ctx, P: Evaluator<Ctx, Val, Val>, C: Evaluator<Ctx, Val, Val>> Evaluator<Ctx, Val, Val>
+impl<Ctx, P: Transformer<Ctx, Val, Val>, C: Transformer<Ctx, Val, Val>> Transformer<Ctx, Val, Val>
     for FuncImpl<P, C>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            FuncImpl::Primitive(p) => p.eval(ctx, input),
-            FuncImpl::Composed(c) => c.eval(ctx, input),
+            FuncImpl::Primitive(p) => p.transform(ctx, input),
+            FuncImpl::Composed(c) => c.transform(ctx, input),
         }
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<Box<dyn CtxFreeFn>>
+impl<Ctx> Transformer<Ctx, Val, Val> for Primitive<Box<dyn CtxFreeFn>>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, _ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_fn.call(input)
+    fn transform(&self, _ctx: &mut Ctx, input: Val) -> Val {
+        self.f.call(input)
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxFreeInfo>
+impl<Ctx> Transformer<Ctx, Val, Val> for Composed<CtxFreeInfo>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, _ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, _ctx: &mut Ctx, input: Val) -> Val {
         eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<Box<dyn CtxConstFn>>
+impl<Ctx> Transformer<Ctx, Val, Val> for Primitive<Box<dyn CtxConstFn>>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_fn.call(ctx.for_const_fn(), input)
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.f.call(ctx.for_const_fn(), input)
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxConstInfo>
+impl<Ctx> Transformer<Ctx, Val, Val> for Composed<CtxConstInfo>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_const_fn() {
             CtxForConstFn::Free(_ctx) => {
                 eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
@@ -356,20 +355,20 @@ where
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Primitive<Box<dyn CtxMutableFn>>
+impl<Ctx> Transformer<Ctx, Val, Val> for Primitive<Box<dyn CtxMutableFn>>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.eval_fn.call(ctx.for_mutable_fn(), input)
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.f.call(ctx.for_mutable_fn(), input)
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Composed<CtxMutableInfo>
+impl<Ctx> Transformer<Ctx, Val, Val> for Composed<CtxMutableInfo>
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_mutable_fn() {
             CtxForMutableFn::Free(_ctx) => {
                 eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
@@ -410,7 +409,7 @@ where
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
     let _ = new_ctx.put_val(input_name, TaggedVal::new(input));
-    EagerByRef.eval(&mut MutableCtx::new(&mut new_ctx), body)
+    EvalByRef.transform(&mut MutableCtx::new(&mut new_ctx), body)
 }
 
 fn eval_aware(
@@ -435,7 +434,7 @@ fn keep_eval_restore(
 ) -> Val {
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_tag);
-    let output = EagerByRef.eval(&mut MutableCtx::new(&mut new_ctx), body);
+    let output = EvalByRef.transform(&mut MutableCtx::new(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, &caller_name);
     output
 }
@@ -507,13 +506,13 @@ impl<T> Debug for Primitive<T> {
 impl Debug for Func {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut s = f.debug_struct("Func");
-        match &self.evaluator {
-            FuncEval::Free(eval) => match eval {
-                CtxFreeEval::Primitive(p) => {
+        match &self.core {
+            FuncCore::Free(f) => match f {
+                CtxFree::Primitive(p) => {
                     s.field("id", &p.id);
                     s.field("is_extension", &p.is_extension);
                 }
-                CtxFreeEval::Composed(c) => {
+                CtxFree::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
                     s.field("caller_access", &"free");
                     s.field("body", &c.body);
@@ -521,12 +520,12 @@ impl Debug for Func {
                     s.field("input_name", &c.input_name);
                 }
             },
-            FuncEval::Const(eval) => match eval {
-                CtxConstEval::Primitive(p) => {
+            FuncCore::Const(f) => match f {
+                CtxConst::Primitive(p) => {
                     s.field("id", &p.id);
                     s.field("is_extension", &p.is_extension);
                 }
-                CtxConstEval::Composed(c) => {
+                CtxConst::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
                     s.field("caller_access", &"constant");
                     s.field("body", &c.body);
@@ -535,12 +534,12 @@ impl Debug for Func {
                     s.field("input_name", &c.input_name);
                 }
             },
-            FuncEval::Mutable(eval) => match eval {
-                CtxMutableEval::Primitive(p) => {
+            FuncCore::Mutable(f) => match f {
+                CtxMutable::Primitive(p) => {
                     s.field("id", &p.id);
                     s.field("is_extension", &p.is_extension);
                 }
-                CtxMutableEval::Composed(c) => {
+                CtxMutable::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
                     s.field("caller_access", &"mutable");
                     s.field("body", &c.body);
@@ -555,11 +554,11 @@ impl Debug for Func {
 }
 
 impl Func {
-    pub(crate) fn new(input_mode: IoMode, output_mode: IoMode, evaluator: FuncEval) -> Self {
+    pub(crate) fn new(input_mode: IoMode, output_mode: IoMode, core: FuncCore) -> Self {
         Func {
             input_mode,
             output_mode,
-            evaluator,
+            core,
         }
     }
 
@@ -569,15 +568,15 @@ impl Func {
         id: Symbol,
         f: Box<dyn CtxFreeFn>,
     ) -> Self {
-        let evaluator = FuncEval::Free(CtxFreeEval::Primitive(Primitive {
+        let core = FuncCore::Free(CtxFree::Primitive(Primitive {
             is_extension: true,
             id,
-            eval_fn: f,
+            f,
         }));
         Func {
             input_mode,
             output_mode,
-            evaluator,
+            core,
         }
     }
 
@@ -587,15 +586,15 @@ impl Func {
         id: Symbol,
         f: Box<dyn CtxConstFn>,
     ) -> Self {
-        let evaluator = FuncEval::Const(CtxConstEval::Primitive(Primitive {
+        let core = FuncCore::Const(CtxConst::Primitive(Primitive {
             is_extension: true,
             id,
-            eval_fn: f,
+            f,
         }));
         Func {
             input_mode,
             output_mode,
-            evaluator,
+            core,
         }
     }
 
@@ -605,15 +604,15 @@ impl Func {
         id: Symbol,
         f: Box<dyn CtxMutableFn>,
     ) -> Self {
-        let evaluator = FuncEval::Mutable(CtxMutableEval::Primitive(Primitive {
+        let core = FuncCore::Mutable(CtxMutable::Primitive(Primitive {
             is_extension: true,
             id,
-            eval_fn: f,
+            f,
         }));
         Func {
             input_mode,
             output_mode,
-            evaluator,
+            core,
         }
     }
 }
@@ -629,21 +628,21 @@ impl<C> Primitive<C> {
 }
 
 impl Primitive<Box<dyn CtxFreeFn>> {
-    pub(crate) fn new(id: &str, evaluator: impl CtxFreeFn + 'static) -> Self {
+    pub(crate) fn new(id: &str, f: impl CtxFreeFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            eval_fn: Box::new(evaluator),
+            f: Box::new(f),
         }
     }
 }
 
 impl Primitive<Box<dyn CtxConstFn>> {
-    pub(crate) fn new(id: &str, evaluator: impl CtxConstFn + 'static) -> Self {
+    pub(crate) fn new(id: &str, f: impl CtxConstFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            eval_fn: Box::new(evaluator),
+            f: Box::new(f),
         }
     }
 }
@@ -678,11 +677,11 @@ where
 }
 
 impl Primitive<Box<dyn CtxMutableFn>> {
-    pub(crate) fn new(id: &str, evaluator: impl CtxMutableFn + 'static) -> Self {
+    pub(crate) fn new(id: &str, f: impl CtxMutableFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            eval_fn: Box::new(evaluator),
+            f: Box::new(f),
         }
     }
 }

@@ -50,7 +50,7 @@ not true
 ; [
     f = function $ {
         body : (. not) $ input,
-        input_mode : eager,
+        input_mode : eval,
     },
     f $ not $ true
 ]
@@ -80,7 +80,7 @@ false
 ; [
     f = function $ {
         body : input,
-        input_mode : eager,
+        input_mode : eval,
     },
     f {a : b}
 ]
@@ -90,7 +90,7 @@ false
 ; [
     f = function $ {
         body : input,
-        input_mode : {pair : lazy : eager},
+        input_mode : {pair : lazy : eval},
     },
     a f b
 ]
@@ -100,7 +100,7 @@ a : .
 ; [
     f = function $ {
         body : input,
-        input_mode : {pair : lazy : eager, symbol : id},
+        input_mode : {pair : lazy : eval, symbol : id},
     },
     [a f b, f a]
 ]
@@ -152,7 +152,7 @@ a
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {list : [eager, lazy, ... id, eager]},
+        input_mode : {list : [eval, lazy, ... id, eval]},
     },
     f [a, a, a, a, a, a]
 ]
@@ -193,7 +193,7 @@ true
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : {a : eager, b : id}},
+        input_mode : {map : {a : eval, b : id}},
     },
     f {a : a, b : a}
 ]
@@ -224,7 +224,7 @@ false
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {map : lazy all eager},
+        input_mode : {map : lazy all eval},
     },
     f {: a}
 ]
@@ -235,7 +235,7 @@ false
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {call : eager $ id},
+        input_mode : {call : eval $ id},
     },
     f (a a)
 ]
@@ -246,7 +246,7 @@ false
     a = 1,
     f = function $ {
         body : input,
-        input_mode : {reverse : eager ? id},
+        input_mode : {reverse : eval ? id},
     },
     f $ a ? a
 ]
@@ -416,7 +416,7 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : eager : eager},
+    input_mode : {pair : eval : eval},
     output_mode : {pair : lazy : lazy},
     caller_access : mutable,
 }
@@ -425,7 +425,7 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : eager : eager},
+    input_mode : {pair : eval : eval},
     output_mode : {pair : lazy : lazy},
     caller_access : mutable,
 }
@@ -438,7 +438,7 @@ function.caller_access function.caller_access
 -----
 constant
 =====
-function.caller_access eager
+function.caller_access eval
 -----
 mutable
 =====
@@ -448,9 +448,9 @@ free
 =====
 function.input_mode not
 -----
-eager
+eval
 =====
-function.input_mode eager
+function.input_mode eval
 -----
 id
 =====
@@ -460,17 +460,17 @@ function.input_mode function.input_mode
 =====
 ; [f = function $ {body : input}, function.input_mode f]
 -----
-eager
+eval
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {pair : eager : lazy},
+        input_mode : {pair : eval : lazy},
     },
     function.input_mode f
 ]
 -----
-{pair : eager : lazy}
+{pair : eval : lazy}
 =====
 ; [
     f = function $ {
@@ -485,22 +485,22 @@ eager
 ; [
     f = function $ {
         body : input,
-        input_mode : {call : eager $ id},
+        input_mode : {call : eval $ id},
     },
     function.input_mode f
 ]
 -----
-{call : eager $ id}
+{call : eval $ id}
 =====
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : [eager, lazy, id, ... eager, id]},
+        input_mode : {list : [eval, lazy, id, ... eval, id]},
     },
     function.input_mode f
 ]
 -----
-{list : [eager, lazy, id, ... eager, id]}
+{list : [eval, lazy, id, ... eval, id]}
 =====
 ; [
     f = function $ {
@@ -525,12 +525,12 @@ eager
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : {a : eager, b : id}},
+        input_mode : {map : {a : eval, b : id}},
     },
     function.input_mode f
 ]
 -----
-{map : {a : eager, b : id}}
+{map : {a : eval, b : id}}
 =====
 ; [
     f = function $ {
@@ -545,12 +545,12 @@ eager
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : eager all id},
+        input_mode : {map : eval all id},
     },
     function.input_mode f
 ]
 -----
-{map : eager all id}
+{map : eval all id}
 =====
 ; [
     f = function $ {
@@ -565,12 +565,12 @@ eager
 ; [
     f = function $ {
         body : input,
-        output_mode : {map : eager all id},
+        output_mode : {map : eval all id},
     },
     function.output_mode f
 ]
 -----
-{map : eager all id}
+{map : eval all id}
 =====
 function.is_primitive not
 -----

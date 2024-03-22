@@ -4,14 +4,6 @@ use crate::{
         free::FreeCtx,
         CtxAccessor,
     },
-    eval::Evaluator,
-    eval_mode::{
-        eager::{
-            Eager,
-            EagerByRef,
-        },
-        EvalMode,
-    },
     func::MutableDispatcher,
     io_mode::{
         IoMode,
@@ -32,6 +24,14 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
+    transform::{
+        eval::{
+            Eval,
+            EvalByRef,
+        },
+        Transform,
+    },
+    transformer::Transformer,
     val::{
         func::FuncVal,
         Val,
@@ -70,7 +70,7 @@ impl Prelude for CtrlPrelude {
 }
 
 fn sequence() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Eval(EvalMode::Id));
+    let input_mode = list_mode(ListMode::Transform(Transform::Id));
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
@@ -86,13 +86,16 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     };
     let mut output = Val::default();
     for val in list {
-        output = Eager.eval(&mut ctx, val);
+        output = Eval.transform(&mut ctx, val);
     }
     output
 }
 
 fn breakable_sequence() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), list_mode(ListMode::Eval(EvalMode::Id)));
+    let input_mode = pair_mode(
+        symbol_value_mode(),
+        list_mode(ListMode::Transform(Transform::Id)),
+    );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_breakable_sequence::<FreeCtx>,
@@ -118,7 +121,7 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let mut output = Val::default();
     let _ = ctx.remove(&name);
     for val in list {
-        output = Eager.eval(&mut ctx, val);
+        output = Eval.transform(&mut ctx, val);
         if let Ok(val) = ctx.get_const_ref(&name) {
             return val.clone();
         }
@@ -133,15 +136,15 @@ fn if1() -> Named<FuncVal> {
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Id),
+            io_mode: IoMode::Transform(Transform::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Id),
+            io_mode: IoMode::Transform(Transform::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Id),
+            io_mode: IoMode::Transform(Transform::Id),
             ellipsis: false,
         },
     ]);
@@ -168,13 +171,13 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
             let Some(branch) = iter.next() else {
                 return Val::default();
             };
-            Eager.eval(&mut ctx, branch)
+            Eval.transform(&mut ctx, branch)
         } else {
             let _ = iter.next();
             let Some(branch) = iter.next() else {
                 return Val::default();
             };
-            Eager.eval(&mut ctx, branch)
+            Eval.transform(&mut ctx, branch)
         }
     } else {
         let _ = iter.next();
@@ -182,7 +185,7 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         let Some(default) = iter.next() else {
             return Val::default();
         };
-        Eager.eval(&mut ctx, default)
+        Eval.transform(&mut ctx, default)
     }
 }
 
@@ -193,11 +196,11 @@ fn match1() -> Named<FuncVal> {
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: map_mode(MapMode::Eval(EvalMode::Id)),
+            io_mode: map_mode(MapMode::Transform(Transform::Id)),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Id),
+            io_mode: IoMode::Transform(Transform::Id),
             ellipsis: false,
         },
     ]);
@@ -225,7 +228,7 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
-            let k = Eager.eval(&mut ctx, k);
+            let k = Eval.transform(&mut ctx, k);
             if k == val { Some(v) } else { None }
         })
         .unwrap_or_else(|| {
@@ -234,17 +237,17 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
             };
             default
         });
-    Eager.eval(&mut ctx, eval)
+    Eval.transform(&mut ctx, eval)
 }
 
 fn while1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Id),
+            io_mode: IoMode::Transform(Transform::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Eval(EvalMode::Id),
+            io_mode: IoMode::Transform(Transform::Id),
             ellipsis: false,
         },
     ]);
@@ -270,11 +273,11 @@ fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
         return Val::default();
     };
     loop {
-        let Val::Bool(b) = EagerByRef.eval(&mut ctx, condition) else {
+        let Val::Bool(b) = EvalByRef.transform(&mut ctx, condition) else {
             return Val::default();
         };
         if b.bool() {
-            EagerByRef.eval(&mut ctx, body);
+            EvalByRef.transform(&mut ctx, body);
         } else {
             break;
         }

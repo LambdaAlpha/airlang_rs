@@ -4,7 +4,6 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
-    eval_mode::EvalMode,
     io_mode::ListMode,
     prelude::{
         default_mode,
@@ -18,6 +17,7 @@ use crate::{
         Prelude,
     },
     string::Str,
+    transform::Transform,
     val::{
         func::FuncVal,
         Val,
@@ -124,7 +124,7 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Eval(EvalMode::Eager));
+    let input_mode = list_mode(ListMode::Transform(Transform::Eval));
     let output_mode = default_mode();
     named_free_fn("string.concat", input_mode, output_mode, fn_concat)
 }

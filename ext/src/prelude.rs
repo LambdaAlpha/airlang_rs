@@ -4,7 +4,6 @@ use airlang::{
     CtxConstFn,
     CtxFreeFn,
     CtxMutableFn,
-    EvalMode,
     Func,
     FuncVal,
     InvariantTag,
@@ -21,6 +20,7 @@ use airlang::{
     Reverse,
     ReverseMode,
     Symbol,
+    Transform,
     Val,
 };
 
@@ -117,7 +117,7 @@ fn default_mode() -> IoMode {
 
 fn symbol_id_mode() -> IoMode {
     let mode = MatchMode {
-        symbol: EvalMode::Id,
+        symbol: Transform::Id,
         ..Default::default()
     };
     IoMode::Match(mode)

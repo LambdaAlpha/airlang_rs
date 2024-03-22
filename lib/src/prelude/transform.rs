@@ -4,18 +4,6 @@ use crate::{
         free::FreeCtx,
         mutable::CtxForMutableFn,
     },
-    eval::{
-        Evaluator,
-        EAGER,
-        ID,
-        LAZY,
-    },
-    eval_mode::{
-        eager::Eager,
-        id::Id,
-        lazy::Lazy,
-        EvalMode,
-    },
     io_mode::IoMode,
     prelude::{
         default_mode,
@@ -24,6 +12,18 @@ use crate::{
         Named,
         Prelude,
     },
+    transform::{
+        eval::Eval,
+        id::Id,
+        lazy::Lazy,
+        Transform,
+    },
+    transformer::{
+        Transformer,
+        EVAL,
+        ID,
+        LAZY,
+    },
     val::{
         func::FuncVal,
         Val,
@@ -31,56 +31,56 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct EvalPrelude {
+pub(crate) struct TransformPrelude {
+    pub(crate) eval: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
     pub(crate) lazy: Named<FuncVal>,
-    pub(crate) eager: Named<FuncVal>,
 }
 
-impl Default for EvalPrelude {
+impl Default for TransformPrelude {
     fn default() -> Self {
-        EvalPrelude {
+        TransformPrelude {
+            eval: eval(),
             id: id(),
             lazy: lazy(),
-            eager: eager(),
         }
     }
 }
 
-impl Prelude for EvalPrelude {
+impl Prelude for TransformPrelude {
     fn put(&self, m: &mut NameMap) {
+        self.eval.put(m);
         self.id.put(m);
         self.lazy.put(m);
-        self.eager.put(m);
     }
 }
 
+fn eval() -> Named<FuncVal> {
+    let input_mode = IoMode::Transform(Transform::Id);
+    let output_mode = default_mode();
+    named_mutable_fn(EVAL, input_mode, output_mode, fn_eval)
+}
+
+fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    Eval.transform(&mut ctx, input)
+}
+
 fn id() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
     let output_mode = default_mode();
     named_free_fn(ID, input_mode, output_mode, fn_id)
 }
 
 fn fn_id(input: Val) -> Val {
-    Id.eval(&mut FreeCtx, input)
+    Id.transform(&mut FreeCtx, input)
 }
 
 fn lazy() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
     let output_mode = default_mode();
     named_mutable_fn(LAZY, input_mode, output_mode, fn_lazy)
 }
 
 fn fn_lazy(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    Lazy.eval(&mut ctx, input)
-}
-
-fn eager() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
-    let output_mode = default_mode();
-    named_mutable_fn(EAGER, input_mode, output_mode, fn_eager)
-}
-
-fn fn_eager(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    Eager.eval(&mut ctx, input)
+    Lazy.transform(&mut ctx, input)
 }

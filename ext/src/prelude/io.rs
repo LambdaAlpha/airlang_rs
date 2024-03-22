@@ -7,10 +7,10 @@ use std::io::{
 
 use airlang::{
     CtxForMutableFn,
-    EvalMode,
     FuncVal,
     IoMode,
     MutableCtx,
+    Transform,
     Val,
 };
 
@@ -81,7 +81,7 @@ fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn print() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn("io.print", input_mode, output_mode, fn_print)
 }
 
@@ -95,7 +95,7 @@ fn fn_print(input: Val) -> Val {
 
 fn print_line() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn("io.print_line", input_mode, output_mode, fn_print_line)
 }
 
@@ -108,8 +108,8 @@ fn fn_print_line(input: Val) -> Val {
 }
 
 fn flush() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn("io.flush", input_mode, output_mode, fn_flush)
 }
 
@@ -120,7 +120,7 @@ fn fn_flush(_input: Val) -> Val {
 
 fn error_print() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn("io.error_print", input_mode, output_mode, fn_error_print)
 }
 
@@ -134,7 +134,7 @@ fn fn_error_print(input: Val) -> Val {
 
 fn error_print_line() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn(
         "io.error_print_line",
         input_mode,
@@ -152,8 +152,8 @@ fn fn_error_print_line(input: Val) -> Val {
 }
 
 fn error_flush() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn("io.error_flush", input_mode, output_mode, fn_error_flush)
 }
 

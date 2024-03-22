@@ -1,6 +1,12 @@
 use crate::{
     ctx_access::CtxAccessor,
-    eval::{
+    problem::solve,
+    symbol::Symbol,
+    transform::id::{
+        Id,
+        IdByRef,
+    },
+    transformer::{
         input::{
             ByRef,
             ByVal,
@@ -10,78 +16,72 @@ use crate::{
         DefaultByVal,
         ValBuilder,
     },
-    eval_mode::id::{
-        Id,
-        IdByRef,
-    },
-    problem::solve,
-    symbol::Symbol,
     val::{
         func::FuncVal,
         list::ListVal,
         map::MapVal,
         Val,
     },
-    Evaluator,
+    Transformer,
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct Eager;
+pub(crate) struct Eval;
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for Eager
+impl<Ctx> Transformer<Ctx, Val, Val> for Eval
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
-        DefaultByVal::eval_val(self, ctx, input)
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+        DefaultByVal::transform_val(self, ctx, input)
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for Eager
+impl<Ctx> ByVal<Ctx, Val> for Eval
 where
     Ctx: CtxAccessor,
 {
-    fn eval_atoms(&self, ctx: &mut Ctx, input: Val) -> Val {
-        Id.eval_atoms(ctx, input)
+    fn transform_atoms(&self, ctx: &mut Ctx, input: Val) -> Val {
+        Id.transform_atoms(ctx, input)
     }
 
-    fn eval_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
+    fn transform_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
         ctx.get(&s).unwrap_or_default()
     }
 
-    fn eval_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
-        DefaultByVal::eval_pair(self, ctx, first, second, ValBuilder)
+    fn transform_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
+        DefaultByVal::transform_pair(self, ctx, first, second, ValBuilder)
     }
 
-    fn eval_list(&self, ctx: &mut Ctx, list: ListVal) -> Val {
-        DefaultByVal::eval_list(self, ctx, list, ValBuilder)
+    fn transform_list(&self, ctx: &mut Ctx, list: ListVal) -> Val {
+        DefaultByVal::transform_list(self, ctx, list, ValBuilder)
     }
 
-    fn eval_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
-        DefaultByVal::eval_map(self, ctx, map, ValBuilder)
+    fn transform_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
+        DefaultByVal::transform_map(self, ctx, map, ValBuilder)
     }
 
-    fn eval_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
-        let func = self.eval(ctx, func);
+    fn transform_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
+        let func = self.transform(ctx, func);
         self.eval_input_then_call(ctx, func, input)
     }
 
-    fn eval_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        let func = self.eval(ctx, func);
+    fn transform_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
+        let func = self.transform(ctx, func);
         self.eval_output_then_solve(ctx, func, output)
     }
 }
 
-impl Eager {
+impl Eval {
     pub(crate) fn eval_input_then_call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val
     where
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(func)) = &func {
-            let input = func.input_mode.eval(ctx, input);
-            func.eval(ctx, input)
+            let input = func.input_mode.transform(ctx, input);
+            func.transform(ctx, input)
         } else {
-            let input = self.eval(ctx, input);
+            let input = self.transform(ctx, input);
             ValBuilder.from_call(func, input)
         }
     }
@@ -91,9 +91,9 @@ impl Eager {
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(func)) = func {
-            func.input_mode.eval(ctx, input)
+            func.input_mode.transform(ctx, input)
         } else {
-            self.eval(ctx, input)
+            self.transform(ctx, input)
         }
     }
 
@@ -102,7 +102,7 @@ impl Eager {
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(func)) = &func {
-            func.eval(ctx, input)
+            func.transform(ctx, input)
         } else {
             ValBuilder.from_call(func, input)
         }
@@ -113,10 +113,10 @@ impl Eager {
         Ctx: CtxAccessor,
     {
         if let Val::Func(func) = func {
-            let output = func.output_mode.eval(ctx, output);
+            let output = func.output_mode.transform(ctx, output);
             solve(ctx, func, output)
         } else {
-            let output = self.eval(ctx, output);
+            let output = self.transform(ctx, output);
             ValBuilder.from_reverse(func, output)
         }
     }
@@ -126,9 +126,9 @@ impl Eager {
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(f)) = func {
-            f.output_mode.eval(ctx, output)
+            f.output_mode.transform(ctx, output)
         } else {
-            self.eval(ctx, output)
+            self.transform(ctx, output)
         }
     }
 
@@ -145,62 +145,62 @@ impl Eager {
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct EagerByRef;
+pub(crate) struct EvalByRef;
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for EagerByRef
+impl<'a, Ctx> Transformer<Ctx, &'a Val, Val> for EvalByRef
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        DefaultByRef::eval_val(self, ctx, input)
+    fn transform(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
+        DefaultByRef::transform_val(self, ctx, input)
     }
 }
 
-impl<'a, Ctx> ByRef<'a, Ctx, Val> for EagerByRef
+impl<'a, Ctx> ByRef<'a, Ctx, Val> for EvalByRef
 where
     Ctx: CtxAccessor,
 {
-    fn eval_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        IdByRef.eval_atoms(ctx, input)
+    fn transform_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
+        IdByRef.transform_atoms(ctx, input)
     }
 
-    fn eval_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
+    fn transform_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
         ctx.get(s).unwrap_or_default()
     }
 
-    fn eval_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
-        DefaultByRef::eval_pair(self, ctx, first, second, ValBuilder)
+    fn transform_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
+        DefaultByRef::transform_pair(self, ctx, first, second, ValBuilder)
     }
 
-    fn eval_list(&self, ctx: &mut Ctx, list: &'a ListVal) -> Val {
-        DefaultByRef::eval_list(self, ctx, list, ValBuilder)
+    fn transform_list(&self, ctx: &mut Ctx, list: &'a ListVal) -> Val {
+        DefaultByRef::transform_list(self, ctx, list, ValBuilder)
     }
 
-    fn eval_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
-        DefaultByRef::eval_map(self, ctx, map, ValBuilder)
+    fn transform_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
+        DefaultByRef::transform_map(self, ctx, map, ValBuilder)
     }
 
-    fn eval_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
-        let func = self.eval(ctx, func);
+    fn transform_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
+        let func = self.transform(ctx, func);
         self.eval_input_then_call(ctx, func, input)
     }
 
-    fn eval_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        let func = self.eval(ctx, func);
+    fn transform_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
+        let func = self.transform(ctx, func);
         self.eval_output_then_solve(ctx, func, output)
     }
 }
 
-impl EagerByRef {
+impl EvalByRef {
     pub(crate) fn eval_input_then_call<Ctx>(&self, ctx: &mut Ctx, func: Val, input: &Val) -> Val
     where
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(func)) = &func {
-            let input = func.input_mode.eval(ctx, input);
-            func.eval(ctx, input)
+            let input = func.input_mode.transform(ctx, input);
+            func.transform(ctx, input)
         } else {
-            let input = self.eval(ctx, input);
+            let input = self.transform(ctx, input);
             ValBuilder.from_call(func, input)
         }
     }
@@ -211,9 +211,9 @@ impl EagerByRef {
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(func)) = func {
-            func.input_mode.eval(ctx, input)
+            func.input_mode.transform(ctx, input)
         } else {
-            self.eval(ctx, input)
+            self.transform(ctx, input)
         }
     }
 
@@ -224,10 +224,10 @@ impl EagerByRef {
         output: &Val,
     ) -> Val {
         if let Val::Func(func) = func {
-            let output = func.output_mode.eval(ctx, output);
+            let output = func.output_mode.transform(ctx, output);
             solve(ctx, func, output)
         } else {
-            let output = self.eval(ctx, output);
+            let output = self.transform(ctx, output);
             ValBuilder.from_reverse(func, output)
         }
     }
@@ -238,9 +238,9 @@ impl EagerByRef {
         Ctx: CtxAccessor,
     {
         if let Val::Func(FuncVal(f)) = func {
-            f.output_mode.eval(ctx, output)
+            f.output_mode.transform(ctx, output)
         } else {
-            self.eval(ctx, output)
+            self.transform(ctx, output)
         }
     }
 }

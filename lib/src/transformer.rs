@@ -1,5 +1,5 @@
 use crate::{
-    eval::{
+    transformer::{
         input::{
             ByRef,
             ByVal,
@@ -16,109 +16,109 @@ use crate::{
     Val,
 };
 
-pub(crate) trait Evaluator<Ctx, Input, Output> {
-    fn eval(&self, ctx: &mut Ctx, input: Input) -> Output;
+pub(crate) trait Transformer<Ctx, Input, Output> {
+    fn transform(&self, ctx: &mut Ctx, input: Input) -> Output;
 }
 
+pub(crate) const EVAL: &str = "eval";
 pub(crate) const ID: &str = "id";
 pub(crate) const LAZY: &str = "lazy";
-pub(crate) const EAGER: &str = "eager";
 
 pub(crate) struct DefaultByVal;
 
 impl DefaultByVal {
-    pub(crate) fn eval_val<Ctx, Output, Eval>(eval: &Eval, ctx: &mut Ctx, input: Val) -> Output
+    pub(crate) fn transform_val<Ctx, Output, T>(t: &T, ctx: &mut Ctx, input: Val) -> Output
     where
-        Eval: ByVal<Ctx, Output>,
+        T: ByVal<Ctx, Output>,
     {
         match input {
-            Val::Symbol(s) => eval.eval_symbol(ctx, s),
-            Val::Pair(p) => eval.eval_pair(ctx, p.first, p.second),
-            Val::List(l) => eval.eval_list(ctx, l),
-            Val::Map(m) => eval.eval_map(ctx, m),
-            Val::Call(c) => eval.eval_call(ctx, c.func, c.input),
-            Val::Reverse(r) => eval.eval_reverse(ctx, r.func, r.output),
-            v => eval.eval_atoms(ctx, v),
+            Val::Symbol(s) => t.transform_symbol(ctx, s),
+            Val::Pair(p) => t.transform_pair(ctx, p.first, p.second),
+            Val::List(l) => t.transform_list(ctx, l),
+            Val::Map(m) => t.transform_map(ctx, m),
+            Val::Call(c) => t.transform_call(ctx, c.func, c.input),
+            Val::Reverse(r) => t.transform_reverse(ctx, r.func, r.output),
+            v => t.transform_atoms(ctx, v),
         }
     }
 
-    pub(crate) fn eval_pair<Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_pair<Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         first: Val,
         second: Val,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, Val, Output>,
+        T: Transformer<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let first = eval.eval(ctx, first);
-        let second = eval.eval(ctx, second);
+        let first = t.transform(ctx, first);
+        let second = t.transform(ctx, second);
         builder.from_pair(first, second)
     }
 
-    pub(crate) fn eval_list<Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_list<Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         list: ListVal,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, Val, Output>,
+        T: Transformer<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let list = list.into_iter().map(|v| eval.eval(ctx, v));
+        let list = list.into_iter().map(|v| t.transform(ctx, v));
         builder.from_list(list)
     }
 
-    pub(crate) fn eval_map<Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_map<Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         map: MapVal,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, Val, Output>,
+        T: Transformer<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let map = map.into_iter().map(|(k, v)| {
-            let key = eval.eval(ctx, k);
-            let value = eval.eval(ctx, v);
+            let key = t.transform(ctx, k);
+            let value = t.transform(ctx, v);
             (key, value)
         });
         builder.from_map(map)
     }
 
-    pub(crate) fn eval_call<Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_call<Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         func: Val,
         input: Val,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, Val, Output>,
+        T: Transformer<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let func = eval.eval(ctx, func);
-        let input = eval.eval(ctx, input);
+        let func = t.transform(ctx, func);
+        let input = t.transform(ctx, input);
         builder.from_call(func, input)
     }
 
-    pub(crate) fn eval_reverse<Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_reverse<Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         func: Val,
         output: Val,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, Val, Output>,
+        T: Transformer<Ctx, Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let func = eval.eval(ctx, func);
-        let output = eval.eval(ctx, output);
+        let func = t.transform(ctx, func);
+        let output = t.transform(ctx, output);
         builder.from_reverse(func, output)
     }
 }
@@ -126,102 +126,98 @@ impl DefaultByVal {
 pub(crate) struct DefaultByRef;
 
 impl DefaultByRef {
-    pub(crate) fn eval_val<'a, Ctx, Output, Eval>(
-        eval: &Eval,
-        ctx: &mut Ctx,
-        input: &'a Val,
-    ) -> Output
+    pub(crate) fn transform_val<'a, Ctx, Output, T>(t: &T, ctx: &mut Ctx, input: &'a Val) -> Output
     where
-        Eval: ByRef<'a, Ctx, Output>,
+        T: ByRef<'a, Ctx, Output>,
     {
         match input {
-            Val::Symbol(s) => eval.eval_symbol(ctx, s),
-            Val::Pair(p) => eval.eval_pair(ctx, &p.first, &p.second),
-            Val::List(l) => eval.eval_list(ctx, l),
-            Val::Map(m) => eval.eval_map(ctx, m),
-            Val::Call(c) => eval.eval_call(ctx, &c.func, &c.input),
-            Val::Reverse(r) => eval.eval_reverse(ctx, &r.func, &r.output),
-            v => eval.eval_atoms(ctx, v),
+            Val::Symbol(s) => t.transform_symbol(ctx, s),
+            Val::Pair(p) => t.transform_pair(ctx, &p.first, &p.second),
+            Val::List(l) => t.transform_list(ctx, l),
+            Val::Map(m) => t.transform_map(ctx, m),
+            Val::Call(c) => t.transform_call(ctx, &c.func, &c.input),
+            Val::Reverse(r) => t.transform_reverse(ctx, &r.func, &r.output),
+            v => t.transform_atoms(ctx, v),
         }
     }
 
-    pub(crate) fn eval_pair<'a, Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_pair<'a, Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         first: &'a Val,
         second: &'a Val,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, &'a Val, Output>,
+        T: Transformer<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let first = eval.eval(ctx, first);
-        let second = eval.eval(ctx, second);
+        let first = t.transform(ctx, first);
+        let second = t.transform(ctx, second);
         builder.from_pair(first, second)
     }
 
-    pub(crate) fn eval_list<'a, Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_list<'a, Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         list: &'a ListVal,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, &'a Val, Output>,
+        T: Transformer<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let list = list.into_iter().map(|v| eval.eval(ctx, v));
+        let list = list.into_iter().map(|v| t.transform(ctx, v));
         builder.from_list(list)
     }
 
-    pub(crate) fn eval_map<'a, Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_map<'a, Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         map: &'a MapVal,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, &'a Val, Output>,
+        T: Transformer<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let map = map.into_iter().map(|(k, v)| {
-            let key = eval.eval(ctx, k);
-            let value = eval.eval(ctx, v);
+            let key = t.transform(ctx, k);
+            let value = t.transform(ctx, v);
             (key, value)
         });
         builder.from_map(map)
     }
 
-    pub(crate) fn eval_call<'a, Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_call<'a, Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         func: &'a Val,
         input: &'a Val,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, &'a Val, Output>,
+        T: Transformer<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let func = eval.eval(ctx, func);
-        let input = eval.eval(ctx, input);
+        let func = t.transform(ctx, func);
+        let input = t.transform(ctx, input);
         builder.from_call(func, input)
     }
 
-    pub(crate) fn eval_reverse<'a, Ctx, Output, Eval, Builder>(
-        eval: &Eval,
+    pub(crate) fn transform_reverse<'a, Ctx, Output, T, Builder>(
+        t: &T,
         ctx: &mut Ctx,
         func: &'a Val,
         output: &'a Val,
         builder: Builder,
     ) -> Output
     where
-        Eval: Evaluator<Ctx, &'a Val, Output>,
+        T: Transformer<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let func = eval.eval(ctx, func);
-        let output = eval.eval(ctx, output);
+        let func = t.transform(ctx, func);
+        let output = t.transform(ctx, output);
         builder.from_reverse(func, output)
     }
 }

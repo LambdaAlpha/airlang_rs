@@ -6,7 +6,7 @@
 -----
 .
 =====
-; [a = 1, b = id $ a, read $ eager $ b]
+; [a = 1, b = id $ a, read $ eval $ b]
 -----
 1
 =====
@@ -30,7 +30,7 @@
 -----
 .
 =====
-; [a = id $ b, b = 1, move $ eager $ a]
+; [a = id $ b, b = 1, move $ eval $ a]
 -----
 1
 =====

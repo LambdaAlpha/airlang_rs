@@ -11,7 +11,6 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
-    eval_mode::EvalMode,
     io_mode::IoMode,
     nondeterministic::{
         any_answer,
@@ -43,6 +42,7 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
+    transform::Transform,
     val::func::FuncVal,
     Val,
 };
@@ -94,7 +94,7 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Lazy);
+    let input_mode = IoMode::Transform(Transform::Lazy);
     let output_mode = default_mode();
     named_free_fn("any", input_mode, output_mode, fn_any)
 }

@@ -1,12 +1,12 @@
 use crate::{
     ctx::NameMap,
-    eval_mode::EvalMode,
     io_mode::IoMode,
     prelude::{
         named_free_fn,
         Named,
         Prelude,
     },
+    transform::Transform,
     unit::Unit,
     val::func::FuncVal,
     Val,
@@ -30,8 +30,8 @@ impl Prelude for UnitPrelude {
 }
 
 fn unit() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_free_fn("unit", input_mode, output_mode, fn_unit)
 }
 

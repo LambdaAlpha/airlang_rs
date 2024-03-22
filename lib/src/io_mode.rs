@@ -1,39 +1,39 @@
 use crate::{
     call::Call,
     ctx_access::CtxAccessor,
-    eval::{
-        output::OutputBuilder,
-        Evaluator,
-        ValBuilder,
-    },
-    eval_mode::{
-        eager::{
-            Eager,
-            EagerByRef,
+    list::List,
+    map::Map,
+    pair::Pair,
+    reverse::Reverse,
+    transform::{
+        eval::{
+            Eval,
+            EvalByRef,
         },
         id::{
             Id,
             IdByRef,
         },
-        EvalMode,
+        Transform,
     },
-    list::List,
-    map::Map,
-    pair::Pair,
-    reverse::Reverse,
+    transformer::{
+        output::OutputBuilder,
+        Transformer,
+        ValBuilder,
+    },
     CtxForMutableFn,
     Val,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum IoMode {
-    Eval(EvalMode),
+    Transform(Transform),
     Match(MatchMode),
 }
 
 #[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
 pub struct MatchMode {
-    pub symbol: EvalMode,
+    pub symbol: Transform,
     pub pair: Box<PairMode>,
     pub call: Box<CallMode>,
     pub reverse: Box<ReverseMode>,
@@ -43,25 +43,25 @@ pub struct MatchMode {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum PairMode {
-    Eval(EvalMode),
+    Transform(Transform),
     Pair(Pair<IoMode, IoMode>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum CallMode {
-    Eval(EvalMode),
+    Transform(Transform),
     Call(Call<IoMode, IoMode>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ReverseMode {
-    Eval(EvalMode),
+    Transform(Transform),
     Reverse(Reverse<IoMode, IoMode>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ListMode {
-    Eval(EvalMode),
+    Transform(Transform),
     ForAll(IoMode),
     ForSome(List<ListItemMode>),
 }
@@ -74,156 +74,159 @@ pub struct ListItemMode {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum MapMode {
-    Eval(EvalMode),
+    Transform(Transform),
     ForAll(Pair<IoMode, IoMode>),
     ForSome(Map<Val, IoMode>),
 }
 
 impl Default for IoMode {
     fn default() -> Self {
-        IoMode::Eval(EvalMode::Eager)
+        IoMode::Transform(Transform::Eval)
     }
 }
 
 impl Default for PairMode {
     fn default() -> Self {
-        PairMode::Eval(EvalMode::Eager)
+        PairMode::Transform(Transform::Eval)
     }
 }
 
 impl Default for CallMode {
     fn default() -> Self {
-        CallMode::Eval(EvalMode::Eager)
+        CallMode::Transform(Transform::Eval)
     }
 }
 
 impl Default for ReverseMode {
     fn default() -> Self {
-        ReverseMode::Eval(EvalMode::Eager)
+        ReverseMode::Transform(Transform::Eval)
     }
 }
 
 impl Default for ListMode {
     fn default() -> Self {
-        ListMode::Eval(EvalMode::Eager)
+        ListMode::Transform(Transform::Eval)
     }
 }
 
 impl Default for MapMode {
     fn default() -> Self {
-        MapMode::Eval(EvalMode::Eager)
+        MapMode::Transform(Transform::Eval)
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for IoMode
+impl<Ctx> Transformer<Ctx, Val, Val> for IoMode
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            IoMode::Eval(mode) => mode.eval(ctx, input),
-            IoMode::Match(mode) => mode.eval(ctx, input),
+            IoMode::Transform(mode) => mode.transform(ctx, input),
+            IoMode::Match(mode) => mode.transform(ctx, input),
         }
     }
 }
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for IoMode
+impl<'a, Ctx> Transformer<Ctx, &'a Val, Val> for IoMode
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         match self {
-            IoMode::Eval(mode) => mode.eval(ctx, input),
-            IoMode::Match(mode) => mode.eval(ctx, input),
+            IoMode::Transform(mode) => mode.transform(ctx, input),
+            IoMode::Match(mode) => mode.transform(ctx, input),
         }
     }
 }
 
-impl<Ctx> Evaluator<Ctx, Val, Val> for MatchMode
+impl<Ctx> Transformer<Ctx, Val, Val> for MatchMode
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match input {
-            Val::Symbol(_) => self.symbol.eval(ctx, input),
+            Val::Symbol(_) => self.symbol.transform(ctx, input),
             Val::Pair(pair) => match &*self.pair {
-                PairMode::Eval(mode) => mode.eval(ctx, Val::Pair(pair)),
+                PairMode::Transform(mode) => mode.transform(ctx, Val::Pair(pair)),
                 PairMode::Pair(pair_mode) => {
-                    let first = pair_mode.first.eval(ctx, pair.first);
-                    let second = pair_mode.second.eval(ctx, pair.second);
+                    let first = pair_mode.first.transform(ctx, pair.first);
+                    let second = pair_mode.second.transform(ctx, pair.second);
                     ValBuilder.from_pair(first, second)
                 }
             },
             Val::Call(call) => match &*self.call {
-                CallMode::Eval(mode) => mode.eval(ctx, Val::Call(call)),
+                CallMode::Transform(mode) => mode.transform(ctx, Val::Call(call)),
                 CallMode::Call(call_mode) => {
-                    let func = call_mode.func.eval(ctx, call.func);
-                    let input = call_mode.input.eval(ctx, call.input);
+                    let func = call_mode.func.transform(ctx, call.func);
+                    let input = call_mode.input.transform(ctx, call.input);
                     ValBuilder.from_call(func, input)
                 }
             },
             Val::Reverse(reverse) => match &*self.reverse {
-                ReverseMode::Eval(mode) => mode.eval(ctx, Val::Reverse(reverse)),
+                ReverseMode::Transform(mode) => mode.transform(ctx, Val::Reverse(reverse)),
                 ReverseMode::Reverse(reverse_mode) => {
-                    let func = reverse_mode.func.eval(ctx, reverse.func);
-                    let output = reverse_mode.output.eval(ctx, reverse.output);
+                    let func = reverse_mode.func.transform(ctx, reverse.func);
+                    let output = reverse_mode.output.transform(ctx, reverse.output);
                     ValBuilder.from_reverse(func, output)
                 }
             },
-            Val::List(_) => self.list.eval(ctx, input),
-            Val::Map(_) => self.map.eval(ctx, input),
+            Val::List(_) => self.list.transform(ctx, input),
+            Val::Map(_) => self.map.transform(ctx, input),
             val => val,
         }
     }
 }
 
-impl<'a, Ctx> Evaluator<Ctx, &'a Val, Val> for MatchMode
+impl<'a, Ctx> Transformer<Ctx, &'a Val, Val> for MatchMode
 where
     Ctx: CtxAccessor,
 {
-    fn eval(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
         match input {
-            Val::Symbol(_) => self.symbol.eval(ctx, input),
+            Val::Symbol(_) => self.symbol.transform(ctx, input),
             Val::Pair(pair) => match &*self.pair {
-                PairMode::Eval(mode) => mode.eval(ctx, input),
+                PairMode::Transform(mode) => mode.transform(ctx, input),
                 PairMode::Pair(pair_mode) => {
-                    let first = pair_mode.first.eval(ctx, &pair.first);
-                    let second = pair_mode.second.eval(ctx, &pair.second);
+                    let first = pair_mode.first.transform(ctx, &pair.first);
+                    let second = pair_mode.second.transform(ctx, &pair.second);
                     ValBuilder.from_pair(first, second)
                 }
             },
             Val::Call(call) => match &*self.call {
-                CallMode::Eval(mode) => mode.eval(ctx, input),
+                CallMode::Transform(mode) => mode.transform(ctx, input),
                 CallMode::Call(call_mode) => {
-                    let func = call_mode.func.eval(ctx, &call.func);
-                    let input = call_mode.input.eval(ctx, &call.input);
+                    let func = call_mode.func.transform(ctx, &call.func);
+                    let input = call_mode.input.transform(ctx, &call.input);
                     ValBuilder.from_call(func, input)
                 }
             },
             Val::Reverse(reverse) => match &*self.reverse {
-                ReverseMode::Eval(mode) => mode.eval(ctx, input),
+                ReverseMode::Transform(mode) => mode.transform(ctx, input),
                 ReverseMode::Reverse(reverse_mode) => {
-                    let func = reverse_mode.func.eval(ctx, &reverse.func);
-                    let output = reverse_mode.output.eval(ctx, &reverse.output);
+                    let func = reverse_mode.func.transform(ctx, &reverse.func);
+                    let output = reverse_mode.output.transform(ctx, &reverse.output);
                     ValBuilder.from_reverse(func, output)
                 }
             },
-            Val::List(_) => self.list.eval_by_ref(ctx, input),
-            Val::Map(_) => self.map.eval_by_ref(ctx, input),
+            Val::List(_) => self.list.transform_by_ref(ctx, input),
+            Val::Map(_) => self.map.transform_by_ref(ctx, input),
             val => val.clone(),
         }
     }
 }
 
 impl ListMode {
-    fn eval<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, list: Val) -> Val {
+    fn transform<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, list: Val) -> Val {
         match self {
-            ListMode::Eval(mode) => mode.eval(ctx, list),
+            ListMode::Transform(mode) => mode.transform(ctx, list),
             ListMode::ForAll(mode) => {
                 let Val::List(list) = list else {
                     unreachable!()
                 };
-                let list = list.into_iter().map(|val| mode.eval(ctx, val)).collect();
+                let list = list
+                    .into_iter()
+                    .map(|val| mode.transform(ctx, val))
+                    .collect();
                 Val::List(list)
             }
             ListMode::ForSome(mode_list) => {
@@ -240,19 +243,19 @@ impl ListMode {
                         if val_len > name_len {
                             for _ in 0..(val_len - name_len) {
                                 let val = val_iter.next().unwrap();
-                                let val = mode.io_mode.eval(ctx, val);
+                                let val = mode.io_mode.transform(ctx, val);
                                 list.push(val);
                             }
                         }
                     } else if let Some(val) = val_iter.next() {
-                        let val = mode.io_mode.eval(ctx, val);
+                        let val = mode.io_mode.transform(ctx, val);
                         list.push(val);
                     } else {
                         break;
                     }
                 }
                 for val in val_iter {
-                    list.push(Eager.eval(ctx, val));
+                    list.push(Eval.transform(ctx, val));
                 }
                 ValBuilder.from_list(list.into_iter())
             }
@@ -261,14 +264,17 @@ impl ListMode {
 }
 
 impl ListMode {
-    fn eval_by_ref<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, list: &Val) -> Val {
+    fn transform_by_ref<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, list: &Val) -> Val {
         match self {
-            ListMode::Eval(mode) => mode.eval(ctx, list),
+            ListMode::Transform(mode) => mode.transform(ctx, list),
             ListMode::ForAll(mode) => {
                 let Val::List(list) = list else {
                     unreachable!()
                 };
-                let list = list.into_iter().map(|val| mode.eval(ctx, val)).collect();
+                let list = list
+                    .into_iter()
+                    .map(|val| mode.transform(ctx, val))
+                    .collect();
                 Val::List(list)
             }
             ListMode::ForSome(mode_list) => {
@@ -285,19 +291,19 @@ impl ListMode {
                         if val_len > name_len {
                             for _ in 0..(val_len - name_len) {
                                 let val = val_iter.next().unwrap();
-                                let val = mode.io_mode.eval(ctx, val);
+                                let val = mode.io_mode.transform(ctx, val);
                                 list.push(val);
                             }
                         }
                     } else if let Some(val) = val_iter.next() {
-                        let val = mode.io_mode.eval(ctx, val);
+                        let val = mode.io_mode.transform(ctx, val);
                         list.push(val);
                     } else {
                         break;
                     }
                 }
                 for val in val_iter {
-                    list.push(EagerByRef.eval(ctx, val));
+                    list.push(EvalByRef.transform(ctx, val));
                 }
                 ValBuilder.from_list(list.into_iter())
             }
@@ -306,16 +312,16 @@ impl ListMode {
 }
 
 impl MapMode {
-    fn eval<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, map: Val) -> Val {
+    fn transform<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, map: Val) -> Val {
         match self {
-            MapMode::Eval(mode) => mode.eval(ctx, map),
+            MapMode::Transform(mode) => mode.transform(ctx, map),
             MapMode::ForAll(mode) => {
                 let Val::Map(val_map) = map else {
                     unreachable!()
                 };
                 let map = val_map.into_iter().map(|(k, v)| {
-                    let k = mode.first.eval(ctx, k);
-                    let v = mode.second.eval(ctx, v);
+                    let k = mode.first.transform(ctx, k);
+                    let v = mode.second.transform(ctx, v);
                     (k, v)
                 });
                 ValBuilder.from_map(map)
@@ -326,11 +332,11 @@ impl MapMode {
                 };
                 let map = val_map.into_iter().map(|(k, v)| {
                     let v = if let Some(mode) = mode_map.get(&k) {
-                        mode.eval(ctx, v)
+                        mode.transform(ctx, v)
                     } else {
-                        Eager.eval(ctx, v)
+                        Eval.transform(ctx, v)
                     };
-                    let k = Id.eval(ctx, k);
+                    let k = Id.transform(ctx, k);
                     (k, v)
                 });
                 ValBuilder.from_map(map)
@@ -340,16 +346,16 @@ impl MapMode {
 }
 
 impl MapMode {
-    fn eval_by_ref<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, map: &Val) -> Val {
+    fn transform_by_ref<Ctx: CtxAccessor>(&self, ctx: &mut Ctx, map: &Val) -> Val {
         match self {
-            MapMode::Eval(mode) => mode.eval(ctx, map),
+            MapMode::Transform(mode) => mode.transform(ctx, map),
             MapMode::ForAll(mode) => {
                 let Val::Map(val_map) = map else {
                     unreachable!()
                 };
                 let map = val_map.into_iter().map(|(k, v)| {
-                    let k = mode.first.eval(ctx, k);
-                    let v = mode.second.eval(ctx, v);
+                    let k = mode.first.transform(ctx, k);
+                    let v = mode.second.transform(ctx, v);
                     (k, v)
                 });
                 ValBuilder.from_map(map)
@@ -360,11 +366,11 @@ impl MapMode {
                 };
                 let map = val_map.into_iter().map(|(k, v)| {
                     let v = if let Some(mode) = mode_map.get(k) {
-                        mode.eval(ctx, v)
+                        mode.transform(ctx, v)
                     } else {
-                        EagerByRef.eval(ctx, v)
+                        EvalByRef.transform(ctx, v)
                     };
-                    let k = IdByRef.eval(ctx, k);
+                    let k = IdByRef.transform(ctx, k);
                     (k, v)
                 });
                 ValBuilder.from_map(map)
@@ -375,6 +381,6 @@ impl MapMode {
 
 impl IoMode {
     pub fn apply(&self, mut ctx: CtxForMutableFn, val: Val) -> Val {
-        self.eval(&mut ctx, val)
+        self.transform(&mut ctx, val)
     }
 }

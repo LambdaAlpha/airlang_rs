@@ -46,7 +46,6 @@ pub use self::{
             MutableCtx,
         },
     },
-    eval_mode::EvalMode,
     extension::ValExt,
     float::Float,
     func::{
@@ -77,6 +76,7 @@ pub use self::{
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
+    transform::Transform,
     unit::Unit,
     val::{
         answer::AnswerVal,
@@ -92,9 +92,9 @@ pub use self::{
     },
 };
 use crate::{
-    eval::Evaluator,
-    eval_mode::eager::Eager,
     syntax::ParseError,
+    transform::eval::Eval,
+    transformer::Transformer,
 };
 
 pub fn parse(src: &str) -> Result<Val, ParseError> {
@@ -114,28 +114,28 @@ pub fn initial_ctx() -> Ctx {
 }
 
 pub fn interpret_mutable(mut ctx: MutableCtx, input: Val) -> Val {
-    Eager.eval(&mut ctx, input)
+    Eval.transform(&mut ctx, input)
 }
 
 pub fn interpret_const(mut ctx: ConstCtx, input: Val) -> Val {
-    Eager.eval(&mut ctx, input)
+    Eval.transform(&mut ctx, input)
 }
 
 pub fn interpret_free(mut ctx: FreeCtx, input: Val) -> Val {
-    Eager.eval(&mut ctx, input)
+    Eval.transform(&mut ctx, input)
 }
 
 pub(crate) mod val;
 
-pub(crate) mod eval;
+pub(crate) mod transformer;
+
+pub(crate) mod transform;
 
 pub(crate) mod ctx;
 
 pub(crate) mod ctx_access;
 
 pub(crate) mod func;
-
-pub(crate) mod eval_mode;
 
 pub(crate) mod io_mode;
 

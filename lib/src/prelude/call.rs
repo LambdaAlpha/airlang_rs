@@ -4,7 +4,6 @@ use crate::{
         free::FreeCtx,
         CtxAccessor,
     },
-    eval_mode::eager::Eager,
     func::MutableDispatcher,
     prelude::{
         call_mode,
@@ -13,6 +12,7 @@ use crate::{
         Named,
         Prelude,
     },
+    transform::eval::Eval,
     val::func::FuncVal,
     Val,
 };
@@ -49,5 +49,5 @@ fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
-    Eager.eval_input_then_call(&mut ctx, call.func, call.input)
+    Eval.eval_input_then_call(&mut ctx, call.func, call.input)
 }

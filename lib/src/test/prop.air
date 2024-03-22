@@ -34,7 +34,7 @@ true
 ; [
     $map = function $ {
         body : input,
-        input_mode : {map : id all eager},
+        input_mode : {map : id all eval},
     },
     m = $map $ {
         function : not,
@@ -50,7 +50,7 @@ true
     m = proposition.represent $ proposition.prove $ not $ true,
     $map = function $ {
         body : input,
-        input_mode : {map : id all eager},
+        input_mode : {map : id all eval},
     },
     expected = $map $ {
         function : not,

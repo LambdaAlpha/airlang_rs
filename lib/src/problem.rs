@@ -2,9 +2,9 @@ use std::ops::Deref;
 
 use crate::{
     ctx_access::CtxAccessor,
-    eval::{
+    transformer::{
         output::OutputBuilder,
-        Evaluator,
+        Transformer,
         ValBuilder,
     },
     val::func::FuncVal,
@@ -38,7 +38,7 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
         return Val::default();
     };
     let reverse = ValBuilder.from_reverse(Val::Func(func.clone()), output.clone());
-    let input = solver.eval(ctx, reverse);
+    let input = solver.transform(ctx, reverse);
     let Val::Answer(answer) = &input else {
         return Val::default();
     };

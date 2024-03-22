@@ -1,10 +1,10 @@
 use airlang::{
     initial_ctx,
     CtxForMutableFn,
-    EvalMode,
     FuncVal,
     IoMode,
     MutableCtx,
+    Transform,
     Val,
 };
 
@@ -34,8 +34,8 @@ impl Prelude for EvalPrelude {
 }
 
 fn reset() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_mutable_fn("repl.reset", input_mode, output_mode, fn_reset)
 }
 

@@ -1,11 +1,5 @@
 use crate::{
     call::Call,
-    eval::{
-        EAGER,
-        ID,
-        LAZY,
-    },
-    eval_mode::EvalMode,
     io_mode::{
         IoMode,
         ListItemMode,
@@ -16,6 +10,12 @@ use crate::{
     pair::Pair,
     reverse::Reverse,
     symbol::Symbol,
+    transform::Transform,
+    transformer::{
+        EVAL,
+        ID,
+        LAZY,
+    },
     val::{
         list::ListVal,
         map::MapVal,
@@ -45,8 +45,8 @@ const FOR_ALL: &str = "all";
 
 pub(crate) fn parse_io_mode(io_mode: Val) -> Option<IoMode> {
     match io_mode {
-        Val::Unit(_) => Some(IoMode::Eval(EvalMode::Id)),
-        Val::Symbol(s) => Some(IoMode::Eval(symbol_to_eval_mode(&s)?)),
+        Val::Unit(_) => Some(IoMode::Transform(Transform::Id)),
+        Val::Symbol(s) => Some(IoMode::Transform(symbol_to_transform(&s)?)),
         Val::Map(map) => Some(IoMode::Match(parse_match_mode(map)?)),
         _ => None,
     }
@@ -55,7 +55,7 @@ pub(crate) fn parse_io_mode(io_mode: Val) -> Option<IoMode> {
 fn parse_match_mode(mut map: MapVal) -> Option<MatchMode> {
     let mut mode = MatchMode::default();
     if let Some(symbol_mode) = map.remove(&symbol(SYMBOL)) {
-        mode.symbol = parse_eval_mode(symbol_mode)?;
+        mode.symbol = parse_transform(symbol_mode)?;
     }
     if let Some(pair_mode) = map.remove(&symbol(PAIR)) {
         mode.pair = Box::new(parse_pair_mode(pair_mode)?);
@@ -75,27 +75,27 @@ fn parse_match_mode(mut map: MapVal) -> Option<MatchMode> {
     Some(mode)
 }
 
-fn symbol_to_eval_mode(s: &str) -> Option<EvalMode> {
+fn symbol_to_transform(s: &str) -> Option<Transform> {
     match s {
-        ID => Some(EvalMode::Id),
-        LAZY => Some(EvalMode::Lazy),
-        EAGER => Some(EvalMode::Eager),
+        ID => Some(Transform::Id),
+        LAZY => Some(Transform::Lazy),
+        EVAL => Some(Transform::Eval),
         _ => None,
     }
 }
 
-fn parse_eval_mode(eval_mode: Val) -> Option<EvalMode> {
-    match eval_mode {
-        Val::Unit(_) => Some(EvalMode::Id),
-        Val::Symbol(s) => symbol_to_eval_mode(&s),
+fn parse_transform(val: Val) -> Option<Transform> {
+    match val {
+        Val::Unit(_) => Some(Transform::Id),
+        Val::Symbol(s) => symbol_to_transform(&s),
         _ => None,
     }
 }
 
 fn parse_pair_mode(io_mode: Val) -> Option<PairMode> {
     match io_mode {
-        Val::Unit(_) => Some(PairMode::Eval(EvalMode::Id)),
-        Val::Symbol(s) => Some(PairMode::Eval(symbol_to_eval_mode(&s)?)),
+        Val::Unit(_) => Some(PairMode::Transform(Transform::Id)),
+        Val::Symbol(s) => Some(PairMode::Transform(symbol_to_transform(&s)?)),
         Val::Pair(pair) => {
             let first = parse_io_mode(pair.first)?;
             let second = parse_io_mode(pair.second)?;
@@ -108,8 +108,8 @@ fn parse_pair_mode(io_mode: Val) -> Option<PairMode> {
 
 fn parse_call_mode(io_mode: Val) -> Option<CallMode> {
     match io_mode {
-        Val::Unit(_) => Some(CallMode::Eval(EvalMode::Id)),
-        Val::Symbol(s) => Some(CallMode::Eval(symbol_to_eval_mode(&s)?)),
+        Val::Unit(_) => Some(CallMode::Transform(Transform::Id)),
+        Val::Symbol(s) => Some(CallMode::Transform(symbol_to_transform(&s)?)),
         Val::Call(call) => {
             let func = parse_io_mode(call.func)?;
             let input = parse_io_mode(call.input)?;
@@ -122,8 +122,8 @@ fn parse_call_mode(io_mode: Val) -> Option<CallMode> {
 
 fn parse_reverse_mode(io_mode: Val) -> Option<ReverseMode> {
     match io_mode {
-        Val::Unit(_) => Some(ReverseMode::Eval(EvalMode::Id)),
-        Val::Symbol(s) => Some(ReverseMode::Eval(symbol_to_eval_mode(&s)?)),
+        Val::Unit(_) => Some(ReverseMode::Transform(Transform::Id)),
+        Val::Symbol(s) => Some(ReverseMode::Transform(symbol_to_transform(&s)?)),
         Val::Reverse(reverse) => {
             let func = parse_io_mode(reverse.func)?;
             let output = parse_io_mode(reverse.output)?;
@@ -136,8 +136,8 @@ fn parse_reverse_mode(io_mode: Val) -> Option<ReverseMode> {
 
 fn parse_list_mode(io_mode: Val) -> Option<ListMode> {
     match io_mode {
-        Val::Unit(_) => Some(ListMode::Eval(EvalMode::Id)),
-        Val::Symbol(s) => Some(ListMode::Eval(symbol_to_eval_mode(&s)?)),
+        Val::Unit(_) => Some(ListMode::Transform(Transform::Id)),
+        Val::Symbol(s) => Some(ListMode::Transform(symbol_to_transform(&s)?)),
         Val::List(list) => Some(parse_list_mode_for_some(list)?),
         Val::Call(call) => {
             let Val::Symbol(tag) = call.func else {
@@ -185,8 +185,8 @@ fn parse_list_item_mode(io_mode: Val) -> Option<ListItemMode> {
 
 fn parse_map_mode(io_mode: Val) -> Option<MapMode> {
     match io_mode {
-        Val::Unit(_) => Some(MapMode::Eval(EvalMode::Id)),
-        Val::Symbol(s) => Some(MapMode::Eval(symbol_to_eval_mode(&s)?)),
+        Val::Unit(_) => Some(MapMode::Transform(Transform::Id)),
+        Val::Symbol(s) => Some(MapMode::Transform(symbol_to_transform(&s)?)),
         Val::Map(map) => Some(parse_map_mode_for_some(map)?),
         Val::Call(call) => {
             let Val::Symbol(tag) = call.func else {
@@ -218,44 +218,44 @@ fn parse_map_mode_for_some(io_mode: MapVal) -> Option<MapMode> {
     Some(map)
 }
 
-pub(crate) fn generate_eval_mode(eval_mode: EvalMode) -> Val {
-    let s = match eval_mode {
-        EvalMode::Id => ID,
-        EvalMode::Eager => EAGER,
-        EvalMode::Lazy => LAZY,
+pub(crate) fn generate_transform(transform: Transform) -> Val {
+    let s = match transform {
+        Transform::Id => ID,
+        Transform::Eval => EVAL,
+        Transform::Lazy => LAZY,
     };
     symbol(s)
 }
 
 pub(crate) fn generate_io_mode(io_mode: &IoMode) -> Val {
     match io_mode {
-        IoMode::Eval(mode) => generate_eval_mode(*mode),
+        IoMode::Transform(mode) => generate_transform(*mode),
         IoMode::Match(mode) => generate_match_mode(mode),
     }
 }
 
 pub(crate) fn generate_match_mode(mode: &MatchMode) -> Val {
     let mut map = Map::default();
-    if mode.symbol != EvalMode::Eager {
-        map.insert(symbol(SYMBOL), generate_eval_mode(mode.symbol));
+    if mode.symbol != Transform::Eval {
+        map.insert(symbol(SYMBOL), generate_transform(mode.symbol));
     }
-    if *mode.pair != PairMode::Eval(EvalMode::Eager) {
+    if *mode.pair != PairMode::Transform(Transform::Eval) {
         let val = generate_pair_mode(&mode.pair);
         map.insert(symbol(PAIR), val);
     }
-    if *mode.call != CallMode::Eval(EvalMode::Eager) {
+    if *mode.call != CallMode::Transform(Transform::Eval) {
         let val = generate_call_mode(&mode.call);
         map.insert(symbol(CALL), val);
     }
-    if *mode.reverse != ReverseMode::Eval(EvalMode::Eager) {
+    if *mode.reverse != ReverseMode::Transform(Transform::Eval) {
         let val = generate_reverse_mode(&mode.reverse);
         map.insert(symbol(REVERSE), val);
     }
-    if *mode.list != ListMode::Eval(EvalMode::Eager) {
+    if *mode.list != ListMode::Transform(Transform::Eval) {
         let val = generate_list_mode(&mode.list);
         map.insert(symbol(LIST), val);
     }
-    if *mode.map != MapMode::Eval(EvalMode::Eager) {
+    if *mode.map != MapMode::Transform(Transform::Eval) {
         let val = generate_map_mode(&mode.map);
         map.insert(symbol(MAP), val);
     }
@@ -264,7 +264,7 @@ pub(crate) fn generate_match_mode(mode: &MatchMode) -> Val {
 
 pub(crate) fn generate_pair_mode(pair: &PairMode) -> Val {
     match pair {
-        PairMode::Eval(mode) => generate_eval_mode(*mode),
+        PairMode::Transform(mode) => generate_transform(*mode),
         PairMode::Pair(pair) => {
             let first = generate_io_mode(&pair.first);
             let second = generate_io_mode(&pair.second);
@@ -275,7 +275,7 @@ pub(crate) fn generate_pair_mode(pair: &PairMode) -> Val {
 
 pub(crate) fn generate_call_mode(call: &CallMode) -> Val {
     match call {
-        CallMode::Eval(mode) => generate_eval_mode(*mode),
+        CallMode::Transform(mode) => generate_transform(*mode),
         CallMode::Call(call) => {
             let func = generate_io_mode(&call.func);
             let input = generate_io_mode(&call.input);
@@ -286,7 +286,7 @@ pub(crate) fn generate_call_mode(call: &CallMode) -> Val {
 
 pub(crate) fn generate_reverse_mode(reverse: &ReverseMode) -> Val {
     match reverse {
-        ReverseMode::Eval(mode) => generate_eval_mode(*mode),
+        ReverseMode::Transform(mode) => generate_transform(*mode),
         ReverseMode::Reverse(reverse) => {
             let func = generate_io_mode(&reverse.func);
             let output = generate_io_mode(&reverse.output);
@@ -297,7 +297,7 @@ pub(crate) fn generate_reverse_mode(reverse: &ReverseMode) -> Val {
 
 pub(crate) fn generate_list_mode(list: &ListMode) -> Val {
     match list {
-        ListMode::Eval(mode) => generate_eval_mode(*mode),
+        ListMode::Transform(mode) => generate_transform(*mode),
         ListMode::ForAll(mode) => {
             let mode = generate_io_mode(mode);
             Val::Call(Box::new(Call::new(symbol(FOR_ALL), mode)))
@@ -322,7 +322,7 @@ pub(crate) fn generate_list_mode(list: &ListMode) -> Val {
 
 pub(crate) fn generate_map_mode(map: &MapMode) -> Val {
     match map {
-        MapMode::Eval(mode) => generate_eval_mode(*mode),
+        MapMode::Transform(mode) => generate_transform(*mode),
         MapMode::ForAll(mode) => {
             let first = generate_io_mode(&mode.first);
             let second = generate_io_mode(&mode.second);

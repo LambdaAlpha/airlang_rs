@@ -18,31 +18,31 @@ id [a, not false]
 -----
 [a, not false]
 =====
-eager $ not $ false
+eval $ not $ false
 -----
 true
 =====
-eager $ . $ not $ false
+eval $ . $ not $ false
 -----
 . true
 =====
-eager $ true $ not $ false
+eval $ true $ not $ false
 -----
 true true
 =====
-eager $ id $ not $ false
+eval $ id $ not $ false
 -----
 not false
 =====
-eager $ lazy $ a
+eval $ lazy $ a
 -----
 a
 =====
-eager $ eager $ id $ a
+eval $ eval $ id $ a
 -----
 a
 =====
-eager [(not true) : not $ true, not true, {: (not true)}]
+eval [(not true) : not $ true, not true, {: (not true)}]
 -----
 [: false, false, {: false}]
 =====
@@ -62,9 +62,9 @@ lazy $ id $ a
 -----
 id a
 =====
-lazy $ eager $ a
+lazy $ eval $ a
 -----
-eager a
+eval a
 =====
 lazy $ lazy $ a
 -----

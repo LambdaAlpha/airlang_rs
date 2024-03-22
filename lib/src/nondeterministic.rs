@@ -28,7 +28,6 @@ use crate::{
         NameMap,
         TaggedVal,
     },
-    eval_mode::EvalMode,
     extension::UnitExt,
     float::Float,
     func::{
@@ -37,7 +36,7 @@ use crate::{
         CtxFreeInfo,
         CtxMutableInfo,
         Func,
-        FuncEval,
+        FuncCore,
         FuncImpl,
     },
     int::Int,
@@ -57,6 +56,7 @@ use crate::{
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
+    transform::Transform,
     unit::Unit,
     val::{
         call::CallVal,
@@ -249,14 +249,14 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> CtxVal {
     CtxVal(Box::new(ctx))
 }
 
-pub(crate) fn any_eval_mode(rng: &mut SmallRng) -> EvalMode {
-    const EVAL_MODES: [EvalMode; 3] = [EvalMode::Id, EvalMode::Eager, EvalMode::Lazy];
-    *(EVAL_MODES.choose(rng).unwrap())
+pub(crate) fn any_transform(rng: &mut SmallRng) -> Transform {
+    const TRANSFORMS: [Transform; 3] = [Transform::Eval, Transform::Id, Transform::Lazy];
+    *(TRANSFORMS.choose(rng).unwrap())
 }
 
 pub(crate) fn any_match_mode(rng: &mut SmallRng, depth: usize) -> MatchMode {
     let new_depth = depth + 1;
-    let symbol = any_eval_mode(rng);
+    let symbol = any_transform(rng);
     let pair = Box::new(any_pair_mode(rng, new_depth));
     let call = Box::new(any_call_mode(rng, new_depth));
     let reverse = Box::new(any_reverse_mode(rng, new_depth));
@@ -279,7 +279,7 @@ pub(crate) fn any_pair_mode(rng: &mut SmallRng, depth: usize) -> PairMode {
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
     if i == 0 {
-        PairMode::Eval(any_eval_mode(rng))
+        PairMode::Transform(any_transform(rng))
     } else {
         PairMode::Pair(Pair::new(
             any_io_mode(rng, new_depth),
@@ -295,7 +295,7 @@ pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
     if i == 0 {
-        CallMode::Eval(any_eval_mode(rng))
+        CallMode::Transform(any_transform(rng))
     } else {
         CallMode::Call(Call::new(
             any_io_mode(rng, new_depth),
@@ -311,7 +311,7 @@ pub(crate) fn any_reverse_mode(rng: &mut SmallRng, depth: usize) -> ReverseMode 
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
     if i == 0 {
-        ReverseMode::Eval(any_eval_mode(rng))
+        ReverseMode::Transform(any_transform(rng))
     } else {
         ReverseMode::Reverse(Reverse::new(
             any_io_mode(rng, new_depth),
@@ -332,7 +332,7 @@ pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
     let new_depth = depth + 1;
 
     match i {
-        0 => ListMode::Eval(any_eval_mode(rng)),
+        0 => ListMode::Transform(any_transform(rng)),
         1 => ListMode::ForAll(any_io_mode(rng, new_depth)),
         2 => {
             let left = any_len_weighted(rng, depth) >> 1;
@@ -374,7 +374,7 @@ pub(crate) fn any_map_mode(rng: &mut SmallRng, depth: usize) -> MapMode {
     let new_depth = depth + 1;
 
     match i {
-        0 => MapMode::Eval(any_eval_mode(rng)),
+        0 => MapMode::Transform(any_transform(rng)),
         1 => MapMode::ForAll(Pair::new(
             any_io_mode(rng, new_depth),
             any_io_mode(rng, new_depth),
@@ -397,7 +397,7 @@ pub(crate) fn any_io_mode(rng: &mut SmallRng, depth: usize) -> IoMode {
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
     if i == 0 {
-        IoMode::Eval(any_eval_mode(rng))
+        IoMode::Transform(any_transform(rng))
     } else {
         IoMode::Match(any_match_mode(rng, depth))
     }
@@ -422,14 +422,14 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         let input_mode = any_io_mode(rng, depth);
         let output_mode = any_io_mode(rng, depth);
-        let evaluator = match rng.gen_range(0..3) {
-            0 => FuncEval::Free(FuncImpl::Composed(Composed {
+        let transformer = match rng.gen_range(0..3) {
+            0 => FuncCore::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
                 input_name: any_symbol(rng),
                 caller: CtxFreeInfo {},
             })),
-            1 => FuncEval::Const(FuncImpl::Composed(Composed {
+            1 => FuncCore::Const(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
                 input_name: any_symbol(rng),
@@ -437,7 +437,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
                     name: any_symbol(rng),
                 },
             })),
-            2 => FuncEval::Mutable(FuncImpl::Composed(Composed {
+            2 => FuncCore::Mutable(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
                 input_name: any_symbol(rng),
@@ -450,7 +450,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let func = Func {
             input_mode,
             output_mode,
-            evaluator,
+            core: transformer,
         };
         FuncVal(Rc::new(func))
     }
@@ -469,7 +469,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
                 let Val::Func(func) = &v.val else {
                     return false;
                 };
-                let FuncEval::Free(_) = &func.evaluator else {
+                let FuncCore::Free(_) = &func.core else {
                     return false;
                 };
                 true
@@ -483,7 +483,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         let input_mode = any_io_mode(rng, depth);
         let output_mode = any_io_mode(rng, depth);
-        let evaluator = FuncEval::Free(FuncImpl::Composed(Composed {
+        let transformer = FuncCore::Free(FuncImpl::Composed(Composed {
             body: any_val(rng, depth),
             ctx: *any_ctx(rng, depth).0,
             input_name: any_symbol(rng),
@@ -492,7 +492,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let func = Func {
             input_mode,
             output_mode,
-            evaluator,
+            core: transformer,
         };
         FuncVal(Rc::new(func))
     }

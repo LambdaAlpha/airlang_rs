@@ -11,7 +11,7 @@ use crate::{
         CtxFreeFn,
         CtxMutableFn,
         Func,
-        FuncEval,
+        FuncCore,
         FuncImpl,
         Primitive,
     },
@@ -28,7 +28,6 @@ use crate::{
         call::CallPrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
-        eval::EvalPrelude,
         extension::ExtPrelude,
         float::FloatPrelude,
         func::FuncPrelude,
@@ -42,6 +41,7 @@ use crate::{
         str::StrPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
+        transform::TransformPrelude,
         unit::UnitPrelude,
         value::ValuePrelude,
     },
@@ -52,7 +52,6 @@ use crate::{
     },
     Call,
     CallMode,
-    EvalMode,
     List,
     ListItemMode,
     Map,
@@ -60,6 +59,7 @@ use crate::{
     PairMode,
     Reverse,
     ReverseMode,
+    Transform,
 };
 
 thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
@@ -71,7 +71,7 @@ pub(crate) struct AllPrelude {
     pub(crate) value: ValuePrelude,
     pub(crate) ctx: CtxPrelude,
     pub(crate) ctrl: CtrlPrelude,
-    pub(crate) eval: EvalPrelude,
+    pub(crate) transform: TransformPrelude,
     pub(crate) logic: LogicPrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
@@ -97,7 +97,7 @@ impl Prelude for AllPrelude {
         self.value.put(m);
         self.ctx.put(m);
         self.ctrl.put(m);
-        self.eval.put(m);
+        self.transform.put(m);
         self.logic.put(m);
         self.func.put(m);
         self.call.put(m);
@@ -163,7 +163,7 @@ fn named_free_fn(
     let func = Func::new(
         input_mode,
         output_mode,
-        FuncEval::Free(FuncImpl::Primitive(primitive)),
+        FuncCore::Free(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
@@ -179,7 +179,7 @@ fn named_const_fn(
     let func = Func::new(
         input_mode,
         output_mode,
-        FuncEval::Const(FuncImpl::Primitive(primitive)),
+        FuncCore::Const(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
@@ -195,7 +195,7 @@ fn named_mutable_fn(
     let func = Func::new(
         input_mode,
         output_mode,
-        FuncEval::Mutable(FuncImpl::Primitive(primitive)),
+        FuncCore::Mutable(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
@@ -207,7 +207,7 @@ fn default_mode() -> IoMode {
 
 fn symbol_value_mode() -> IoMode {
     let mode = MatchMode {
-        symbol: EvalMode::Id,
+        symbol: Transform::Id,
         ..Default::default()
     };
     IoMode::Match(mode)
@@ -295,7 +295,7 @@ mod ctx;
 
 mod ctrl;
 
-mod eval;
+mod transform;
 
 mod logic;
 

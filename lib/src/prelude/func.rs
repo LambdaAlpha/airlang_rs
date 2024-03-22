@@ -8,18 +8,16 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
-    eval::EAGER,
-    eval_mode::EvalMode,
     func::{
         Composed,
-        CtxConstEval,
+        CtxConst,
         CtxConstInfo,
-        CtxFreeEval,
+        CtxFree,
         CtxFreeInfo,
-        CtxMutableEval,
+        CtxMutable,
         CtxMutableInfo,
         Func,
-        FuncEval,
+        FuncCore,
         FuncImpl,
     },
     io_mode::IoMode,
@@ -40,6 +38,8 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
+    transform::Transform,
+    transformer::EVAL,
     val::{
         ctx::CtxVal,
         func::FuncVal,
@@ -118,13 +118,13 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(BODY), IoMode::Transform(Transform::Lazy));
     map.insert(symbol(CTX), default_mode());
     map.insert(symbol(INPUT_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
-    map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Lazy));
-    map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(INPUT_MODE), IoMode::Transform(Transform::Lazy));
+    map.insert(symbol(OUTPUT_MODE), IoMode::Transform(Transform::Lazy));
     let input_mode = map_mode_for_some(map);
     let output_mode = default_mode();
     named_free_fn("function", input_mode, output_mode, fn_new)
@@ -145,11 +145,11 @@ fn fn_new(input: Val) -> Val {
         Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
         _ => return Val::default(),
     };
-    let input_mode = map.remove(&symbol(INPUT_MODE)).unwrap_or(symbol(EAGER));
+    let input_mode = map.remove(&symbol(INPUT_MODE)).unwrap_or(symbol(EVAL));
     let Some(input_mode) = parse_io_mode(input_mode) else {
         return Val::default();
     };
-    let output_mode = map.remove(&symbol(OUTPUT_MODE)).unwrap_or(symbol(EAGER));
+    let output_mode = map.remove(&symbol(OUTPUT_MODE)).unwrap_or(symbol(EVAL));
     let Some(output_mode) = parse_io_mode(output_mode) else {
         return Val::default();
     };
@@ -164,20 +164,20 @@ fn fn_new(input: Val) -> Val {
         Val::Unit(_) => FREE,
         _ => return Val::default(),
     };
-    let evaluator = match caller_access {
-        FREE => FuncEval::Free(FuncImpl::Composed(Composed {
+    let transformer = match caller_access {
+        FREE => FuncCore::Free(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxFreeInfo {},
         })),
-        CONST => FuncEval::Const(FuncImpl::Composed(Composed {
+        CONST => FuncCore::Const(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxConstInfo { name: caller_name },
         })),
-        MUTABLE => FuncEval::Mutable(FuncImpl::Composed(Composed {
+        MUTABLE => FuncCore::Mutable(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
@@ -185,20 +185,20 @@ fn fn_new(input: Val) -> Val {
         })),
         _ => return Val::default(),
     };
-    let func = Func::new(input_mode, output_mode, evaluator);
+    let func = Func::new(input_mode, output_mode, transformer);
     Val::Func(Rc::new(func).into())
 }
 
 fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
-    map.insert(symbol(BODY), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(BODY), IoMode::Transform(Transform::Lazy));
     map.insert(symbol(CTX), default_mode());
     map.insert(symbol(INPUT_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_NAME), symbol_value_mode());
     map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
-    map.insert(symbol(INPUT_MODE), IoMode::Eval(EvalMode::Lazy));
-    map.insert(symbol(OUTPUT_MODE), IoMode::Eval(EvalMode::Lazy));
+    map.insert(symbol(INPUT_MODE), IoMode::Transform(Transform::Lazy));
+    map.insert(symbol(OUTPUT_MODE), IoMode::Transform(Transform::Lazy));
     map.insert(symbol(ID), symbol_value_mode());
     map.insert(symbol(IS_EXTENSION), default_mode());
     let output_mode = map_mode_for_some(map);
@@ -220,15 +220,15 @@ fn fn_repr(input: Val) -> Val {
         repr.insert(symbol(OUTPUT_MODE), output_mode);
     }
 
-    match &func.evaluator {
-        FuncEval::Free(eval) => match eval {
-            CtxFreeEval::Primitive(p) => {
+    match &func.core {
+        FuncCore::Free(t) => match t {
+            CtxFree::Primitive(p) => {
                 repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                 if p.is_extension() {
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                 }
             }
-            CtxFreeEval::Composed(c) => {
+            CtxFree::Composed(c) => {
                 repr.insert(symbol(BODY), c.body.clone());
                 if c.ctx != Ctx::default() {
                     repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
@@ -238,16 +238,16 @@ fn fn_repr(input: Val) -> Val {
                 }
             }
         },
-        FuncEval::Const(eval) => {
+        FuncCore::Const(t) => {
             repr.insert(symbol(CALLER_ACCESS), symbol(CONST));
-            match eval {
-                CtxConstEval::Primitive(p) => {
+            match t {
+                CtxConst::Primitive(p) => {
                     repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                     if p.is_extension() {
                         repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                     }
                 }
-                CtxConstEval::Composed(c) => {
+                CtxConst::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
                     if c.ctx != Ctx::default() {
                         repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
@@ -261,16 +261,16 @@ fn fn_repr(input: Val) -> Val {
                 }
             }
         }
-        FuncEval::Mutable(eval) => {
+        FuncCore::Mutable(t) => {
             repr.insert(symbol(CALLER_ACCESS), symbol(MUTABLE));
-            match eval {
-                CtxMutableEval::Primitive(p) => {
+            match t {
+                CtxMutable::Primitive(p) => {
                     repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                     if p.is_extension() {
                         repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                     }
                 }
-                CtxMutableEval::Composed(c) => {
+                CtxMutable::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
                     if c.ctx != Ctx::default() {
                         repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
@@ -304,10 +304,10 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
-        let access = match &func.evaluator {
-            FuncEval::Free(_) => FREE,
-            FuncEval::Const(_) => CONST,
-            FuncEval::Mutable(_) => MUTABLE,
+        let access = match &func.core {
+            FuncCore::Free(_) => FREE,
+            FuncCore::Const(_) => CONST,
+            FuncCore::Mutable(_) => MUTABLE,
         };
         Val::Symbol(Symbol::from_str(access))
     })
@@ -315,7 +315,7 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn input_mode() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Lazy);
+    let output_mode = IoMode::Transform(Transform::Lazy);
     named_const_fn(
         "function.input_mode",
         input_mode,
@@ -335,7 +335,7 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn output_mode() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Lazy);
+    let output_mode = IoMode::Transform(Transform::Lazy);
     named_const_fn(
         "function.output_mode",
         input_mode,
@@ -417,7 +417,7 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn body() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Lazy);
+    let output_mode = IoMode::Transform(Transform::Lazy);
     named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 

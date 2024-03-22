@@ -2,7 +2,6 @@ use std::process::Command;
 
 use airlang::{
     Bytes,
-    EvalMode,
     FuncVal,
     Int,
     ListMode,
@@ -10,6 +9,7 @@ use airlang::{
     MapVal,
     MutableCtx,
     Symbol,
+    Transform,
     Val,
 };
 
@@ -48,7 +48,7 @@ fn call() -> Named<FuncVal> {
     let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
     map.insert(
         arguments_key,
-        list_mode(ListMode::Eval(EvalMode::default())),
+        list_mode(ListMode::Transform(Transform::default())),
     );
 
     let input_mode = map_mode_for_some(map);

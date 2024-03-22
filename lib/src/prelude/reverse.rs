@@ -4,7 +4,6 @@ use crate::{
         free::FreeCtx,
         CtxAccessor,
     },
-    eval_mode::eager::Eager,
     func::MutableDispatcher,
     prelude::{
         default_mode,
@@ -13,6 +12,7 @@ use crate::{
         Named,
         Prelude,
     },
+    transform::eval::Eval,
     val::func::FuncVal,
     Val,
 };
@@ -50,5 +50,5 @@ fn fn_reverse<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let Val::Reverse(reverse) = input else {
         return Val::default();
     };
-    Eager.eval_output_then_solve(&mut ctx, reverse.func, reverse.output)
+    Eval.eval_output_then_solve(&mut ctx, reverse.func, reverse.output)
 }

@@ -9,7 +9,6 @@ use crate::{
         constant::CtxForConstFn,
         mutable::CtxForMutableFn,
     },
-    eval_mode::EvalMode,
     io_mode::ListMode,
     list::List,
     prelude::{
@@ -22,6 +21,7 @@ use crate::{
         Named,
         Prelude,
     },
+    transform::Transform,
     val::{
         func::FuncVal,
         pair::PairVal,
@@ -130,9 +130,12 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn set_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_value_mode(),
-        pair_mode(default_mode(), list_mode(ListMode::Eval(EvalMode::Eager))),
+        pair_mode(
+            default_mode(),
+            list_mode(ListMode::Transform(Transform::Eval)),
+        ),
     );
-    let output_mode = list_mode(ListMode::Eval(EvalMode::Eager));
+    let output_mode = list_mode(ListMode::Transform(Transform::Eval));
     named_mutable_fn("list.set_many", input_mode, output_mode, fn_set_many)
 }
 
@@ -242,7 +245,10 @@ fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn insert_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_value_mode(),
-        pair_mode(default_mode(), list_mode(ListMode::Eval(EvalMode::Eager))),
+        pair_mode(
+            default_mode(),
+            list_mode(ListMode::Transform(Transform::Eval)),
+        ),
     );
     let output_mode = default_mode();
     named_mutable_fn("list.insert_many", input_mode, output_mode, fn_insert_many)
@@ -340,7 +346,7 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn push_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_value_mode(),
-        list_mode(ListMode::Eval(EvalMode::Eager)),
+        list_mode(ListMode::Transform(Transform::Eval)),
     );
     let output_mode = default_mode();
     named_mutable_fn("list.push_many", input_mode, output_mode, fn_push_many)

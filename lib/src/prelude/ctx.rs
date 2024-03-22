@@ -21,14 +21,6 @@ use crate::{
             MutableCtx,
         },
     },
-    eval::{
-        input::ByVal,
-        Evaluator,
-    },
-    eval_mode::{
-        eager::Eager,
-        EvalMode,
-    },
     io_mode::IoMode,
     list::List,
     pair::Pair,
@@ -50,6 +42,14 @@ use crate::{
     },
     reverse::Reverse,
     symbol::Symbol,
+    transform::{
+        eval::Eval,
+        Transform,
+    },
+    transformer::{
+        input::ByVal,
+        Transformer,
+    },
     unit::Unit,
     val::{
         call::CallVal,
@@ -167,7 +167,7 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn assign() -> Named<FuncVal> {
-    let input_mode = pair_mode(IoMode::Eval(EvalMode::Id), default_mode());
+    let input_mode = pair_mode(IoMode::Transform(Transform::Id), default_mode());
     let output_mode = default_mode();
     named_mutable_fn("=", input_mode, output_mode, fn_assign)
 }
@@ -379,7 +379,7 @@ fn generate_invariant_tag(tag: InvariantTag) -> Symbol {
 
 fn set_final() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_mutable_fn("set_final", input_mode, output_mode, fn_set_final)
 }
 
@@ -393,7 +393,7 @@ fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn set_const() -> Named<FuncVal> {
     let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_mutable_fn("set_constant", input_mode, output_mode, fn_set_const)
 }
 
@@ -456,7 +456,7 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn get_access() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
     let output_mode = symbol_value_mode();
     named_mutable_fn("access", input_mode, output_mode, fn_get_access)
 }
@@ -475,7 +475,7 @@ fn fn_get_access(ctx: CtxForMutableFn, _input: Val) -> Val {
 }
 
 fn has_meta() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
     let output_mode = default_mode();
     named_const_fn("has_meta", input_mode, output_mode, fn_has_meta)
 }
@@ -490,7 +490,7 @@ fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
 
 fn set_meta() -> Named<FuncVal> {
     let input_mode = default_mode();
-    let output_mode = IoMode::Eval(EvalMode::Id);
+    let output_mode = IoMode::Transform(Transform::Id);
     named_mutable_fn("set_meta", input_mode, output_mode, fn_set_meta)
 }
 
@@ -510,18 +510,18 @@ fn fn_set_meta(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let input_mode = pair_mode(
         IoMode::Match(MatchMode {
-            symbol: EvalMode::Id,
+            symbol: Transform::Id,
             list: Box::new(ListMode::ForAll(symbol_value_mode())),
             ..Default::default()
         }),
         IoMode::Match(MatchMode {
             call: Box::new(CallMode::Call(Call::new(
-                IoMode::Eval(EvalMode::Eager),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Eval),
+                IoMode::Transform(Transform::Id),
             ))),
             reverse: Box::new(ReverseMode::Reverse(Reverse::new(
-                IoMode::Eval(EvalMode::Eager),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Eval),
+                IoMode::Transform(Transform::Id),
             ))),
             ..Default::default()
         }),
@@ -537,17 +537,17 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
     match pair.second {
         Val::Call(call) => {
             let func = call.func;
-            let input = Eager.eval_input(&mut ctx, &func, call.input);
+            let input = Eval.eval_input(&mut ctx, &func, call.input);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager::call(&mut target_ctx, func, input)
+                Eval::call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
         Val::Reverse(reverse) => {
             let func = reverse.func;
-            let output = Eager.eval_output(&mut ctx, &func, reverse.output);
+            let output = Eval.eval_output(&mut ctx, &func, reverse.output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager::solve(&mut target_ctx, func, output)
+                Eval::solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -558,18 +558,18 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn with_ctx_func() -> Named<FuncVal> {
     let input_mode = pair_mode(
         IoMode::Match(MatchMode {
-            symbol: EvalMode::Id,
+            symbol: Transform::Id,
             list: Box::new(ListMode::ForAll(symbol_value_mode())),
             ..Default::default()
         }),
         IoMode::Match(MatchMode {
             call: Box::new(CallMode::Call(Call::new(
-                IoMode::Eval(EvalMode::Id),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Id),
+                IoMode::Transform(Transform::Id),
             ))),
             reverse: Box::new(ReverseMode::Reverse(Reverse::new(
-                IoMode::Eval(EvalMode::Id),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Id),
+                IoMode::Transform(Transform::Id),
             ))),
             ..Default::default()
         }),
@@ -587,13 +587,13 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let func = call.func;
             let input = call.input;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
-                Eager.eval(&mut target_ctx, func)
+                Eval.transform(&mut target_ctx, func)
             }) else {
                 return Val::default();
             };
-            let input = Eager.eval_input(&mut ctx, &func, input);
+            let input = Eval.eval_input(&mut ctx, &func, input);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager::call(&mut target_ctx, func, input)
+                Eval::call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
@@ -601,13 +601,13 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let func = reverse.func;
             let output = reverse.output;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
-                Eager.eval(&mut target_ctx, func)
+                Eval.transform(&mut target_ctx, func)
             }) else {
                 return Val::default();
             };
-            let output = Eager.eval_output(&mut ctx, &func, output);
+            let output = Eval.eval_output(&mut ctx, &func, output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager::solve(&mut target_ctx, func, output)
+                Eval::solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -618,18 +618,18 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn with_ctx_input() -> Named<FuncVal> {
     let input_mode = pair_mode(
         IoMode::Match(MatchMode {
-            symbol: EvalMode::Id,
+            symbol: Transform::Id,
             list: Box::new(ListMode::ForAll(symbol_value_mode())),
             ..Default::default()
         }),
         IoMode::Match(MatchMode {
             call: Box::new(CallMode::Call(Call::new(
-                IoMode::Eval(EvalMode::Eager),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Eval),
+                IoMode::Transform(Transform::Id),
             ))),
             reverse: Box::new(ReverseMode::Reverse(Reverse::new(
-                IoMode::Eval(EvalMode::Eager),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Eval),
+                IoMode::Transform(Transform::Id),
             ))),
             ..Default::default()
         }),
@@ -647,7 +647,7 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
             let func = call.func;
             let input = call.input;
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager.eval_input_then_call(&mut target_ctx, func, input)
+                Eval.eval_input_then_call(&mut target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
@@ -655,7 +655,7 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
             let func = reverse.func;
             let output = reverse.output;
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager.eval_output_then_solve(&mut target_ctx, func, output)
+                Eval.eval_output_then_solve(&mut target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -666,18 +666,18 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
 fn with_ctx_func_input() -> Named<FuncVal> {
     let input_mode = pair_mode(
         IoMode::Match(MatchMode {
-            symbol: EvalMode::Id,
+            symbol: Transform::Id,
             list: Box::new(ListMode::ForAll(symbol_value_mode())),
             ..Default::default()
         }),
         IoMode::Match(MatchMode {
             call: Box::new(CallMode::Call(Call::new(
-                IoMode::Eval(EvalMode::Id),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Id),
+                IoMode::Transform(Transform::Id),
             ))),
             reverse: Box::new(ReverseMode::Reverse(Reverse::new(
-                IoMode::Eval(EvalMode::Id),
-                IoMode::Eval(EvalMode::Id),
+                IoMode::Transform(Transform::Id),
+                IoMode::Transform(Transform::Id),
             ))),
             ..Default::default()
         }),
@@ -693,13 +693,13 @@ fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
     match pair.second {
         Val::Call(call) => {
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager.eval_call(&mut target_ctx, call.func, call.input)
+                Eval.transform_call(&mut target_ctx, call.func, call.input)
             });
             result.unwrap_or_default()
         }
         Val::Reverse(reverse) => {
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eager.eval_reverse(&mut target_ctx, reverse.func, reverse.output)
+                Eval.transform_reverse(&mut target_ctx, reverse.func, reverse.output)
             });
             result.unwrap_or_default()
         }
@@ -873,7 +873,7 @@ fn fn_ctx_repr(input: Val) -> Val {
 }
 
 fn ctx_prelude() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
     let output_mode = default_mode();
     named_free_fn("prelude", input_mode, output_mode, fn_ctx_prelude)
 }
@@ -883,7 +883,7 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 }
 
 fn ctx_this() -> Named<FuncVal> {
-    let input_mode = IoMode::Eval(EvalMode::Id);
+    let input_mode = IoMode::Transform(Transform::Id);
     let output_mode = default_mode();
     named_const_fn("this", input_mode, output_mode, fn_ctx_this)
 }

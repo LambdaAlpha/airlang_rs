@@ -9,10 +9,10 @@ use std::{
 use thiserror::Error;
 
 use crate::{
-    eval::Evaluator,
     map::Map,
     pair::Pair,
     symbol::Symbol,
+    transformer::Transformer,
     types::either::Either,
     val::Val,
     FreeCtx,
@@ -121,7 +121,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(Symbol::from_str(name));
-        let ctx_name = dispatcher.eval(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -158,7 +158,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(Symbol::from_str(name));
-        let ctx_name = dispatcher.eval(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -198,7 +198,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(Symbol::from_str(name));
-        let ctx_name = dispatcher.eval(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -236,7 +236,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(Symbol::from_str(name));
-        let ctx_name = dispatcher.eval(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {

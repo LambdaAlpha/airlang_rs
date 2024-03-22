@@ -11,12 +11,12 @@ use crate::{
     val::Val,
     Ctx,
     CtxFreeFn,
-    EvalMode,
     Func,
     FuncVal,
     IoMode,
     MutableCtx,
     Symbol,
+    Transform,
 };
 
 const MAIN_DELIMITER: &str = "=====";
@@ -104,8 +104,8 @@ fn test_ctrl() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_eval() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/eval.air"), "test/eval.air")
+fn test_transform() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/transform.air"), "test/transform.air")
 }
 
 #[test]
@@ -192,8 +192,8 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         func_ext_name.clone(),
         InvariantTag::Const,
         Val::Func(FuncVal::from(Func::new_free(
-            IoMode::Eval(EvalMode::Eager),
-            IoMode::Eval(EvalMode::Eager),
+            IoMode::Transform(Transform::Eval),
+            IoMode::Transform(Transform::Eval),
             func_ext_name,
             Box::new(FuncExt),
         ))),
