@@ -242,9 +242,9 @@ impl<'a> ConstCtx<'a> {
         self.get_const_ref(name)
     }
 
-    // SAFETY: The function f can take the ctx out during its execution,
+    // INVARIANT: The function f can take the ctx out during its execution,
     // but when f returns, ctx must be equal to its original value.
-    pub(crate) unsafe fn temp_take<'b, T, F>(&'b mut self, f: F) -> T
+    pub(crate) fn temp_take<'b, T, F>(&'b mut self, f: F) -> T
     where
         F: FnOnce(&'b mut Ctx) -> T,
     {

@@ -348,8 +348,8 @@ where
                         &self.body,
                     )
                 };
-                // SAFETY: We use the const tag to indicate not to modify this context.
-                unsafe { ctx.temp_take(f) }
+                // INVARIANT: We use the const tag to indicate not to modify this context.
+                ctx.temp_take(f)
             }
         }
     }
@@ -385,8 +385,8 @@ where
                         &self.body,
                     )
                 };
-                // SAFETY: We use the const tag to indicate not to modify this context.
-                unsafe { ctx.temp_take(f) }
+                // INVARIANT: We use the const tag to indicate not to modify this context.
+                ctx.temp_take(f)
             }
             CtxForMutableFn::Mutable(mut ctx) => {
                 let f = |ctx| {
@@ -400,8 +400,8 @@ where
                         &self.body,
                     )
                 };
-                // SAFETY: We use the final tag to indicate not to move this context.
-                unsafe { ctx.temp_take(f) }
+                // INVARIANT: We use the final tag to indicate not to move this context.
+                ctx.temp_take(f)
             }
         }
     }
