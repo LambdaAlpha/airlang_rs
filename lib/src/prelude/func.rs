@@ -20,32 +20,37 @@ use crate::{
         FuncCore,
         FuncImpl,
     },
-    io_mode::IoMode,
     map::Map,
+    mode::{
+        repr::{
+            generate,
+            parse,
+        },
+        TransformMode,
+    },
     prelude::{
         default_mode,
-        map_mode_for_some,
+        map_for_some_mode,
         named_const_fn,
         named_free_fn,
-        symbol_value_mode,
-        utils::{
-            generate_io_mode,
-            map_remove,
-            parse_io_mode,
-            symbol,
-        },
+        symbol_id_mode,
         Named,
         Prelude,
     },
     symbol::Symbol,
     transform::Transform,
     transformer::EVAL,
+    utils::val::{
+        map_remove,
+        symbol,
+    },
     val::{
         ctx::CtxVal,
         func::FuncVal,
         map::MapVal,
         Val,
     },
+    Mode,
 };
 
 #[derive(Clone)]
@@ -118,14 +123,14 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), IoMode::Transform(Transform::Lazy));
+    map.insert(symbol(BODY), Mode::Generic(Transform::Lazy));
     map.insert(symbol(CTX), default_mode());
-    map.insert(symbol(INPUT_NAME), symbol_value_mode());
-    map.insert(symbol(CALLER_NAME), symbol_value_mode());
-    map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
-    map.insert(symbol(INPUT_MODE), IoMode::Transform(Transform::Lazy));
-    map.insert(symbol(OUTPUT_MODE), IoMode::Transform(Transform::Lazy));
-    let input_mode = map_mode_for_some(map);
+    map.insert(symbol(INPUT_NAME), symbol_id_mode());
+    map.insert(symbol(CALLER_NAME), symbol_id_mode());
+    map.insert(symbol(CALLER_ACCESS), symbol_id_mode());
+    map.insert(symbol(INPUT_MODE), Mode::Generic(Transform::Lazy));
+    map.insert(symbol(OUTPUT_MODE), Mode::Generic(Transform::Lazy));
+    let input_mode = map_for_some_mode(map);
     let output_mode = default_mode();
     named_free_fn("function", input_mode, output_mode, fn_new)
 }
@@ -146,11 +151,11 @@ fn fn_new(input: Val) -> Val {
         _ => return Val::default(),
     };
     let input_mode = map.remove(&symbol(INPUT_MODE)).unwrap_or(symbol(EVAL));
-    let Some(input_mode) = parse_io_mode(input_mode) else {
+    let Some(input_mode) = parse(input_mode) else {
         return Val::default();
     };
     let output_mode = map.remove(&symbol(OUTPUT_MODE)).unwrap_or(symbol(EVAL));
-    let Some(output_mode) = parse_io_mode(output_mode) else {
+    let Some(output_mode) = parse(output_mode) else {
         return Val::default();
     };
     let caller_name = match map_remove(&mut map, CALLER_NAME) {
@@ -192,16 +197,16 @@ fn fn_new(input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
-    map.insert(symbol(BODY), IoMode::Transform(Transform::Lazy));
+    map.insert(symbol(BODY), Mode::Generic(Transform::Lazy));
     map.insert(symbol(CTX), default_mode());
-    map.insert(symbol(INPUT_NAME), symbol_value_mode());
-    map.insert(symbol(CALLER_NAME), symbol_value_mode());
-    map.insert(symbol(CALLER_ACCESS), symbol_value_mode());
-    map.insert(symbol(INPUT_MODE), IoMode::Transform(Transform::Lazy));
-    map.insert(symbol(OUTPUT_MODE), IoMode::Transform(Transform::Lazy));
-    map.insert(symbol(ID), symbol_value_mode());
+    map.insert(symbol(INPUT_NAME), symbol_id_mode());
+    map.insert(symbol(CALLER_NAME), symbol_id_mode());
+    map.insert(symbol(CALLER_ACCESS), symbol_id_mode());
+    map.insert(symbol(INPUT_MODE), Mode::Generic(Transform::Lazy));
+    map.insert(symbol(OUTPUT_MODE), Mode::Generic(Transform::Lazy));
+    map.insert(symbol(ID), symbol_id_mode());
     map.insert(symbol(IS_EXTENSION), default_mode());
-    let output_mode = map_mode_for_some(map);
+    let output_mode = map_for_some_mode(map);
     named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
 
@@ -211,12 +216,12 @@ fn fn_repr(input: Val) -> Val {
     };
     let mut repr = MapVal::default();
 
-    if func.input_mode != IoMode::default() {
-        let input_mode = generate_io_mode(&func.input_mode);
+    if func.input_mode != TransformMode::default() {
+        let input_mode = generate(&func.input_mode);
         repr.insert(symbol(INPUT_MODE), input_mode);
     }
-    if func.output_mode != IoMode::default() {
-        let output_mode = generate_io_mode(&func.output_mode);
+    if func.output_mode != TransformMode::default() {
+        let output_mode = generate(&func.output_mode);
         repr.insert(symbol(OUTPUT_MODE), output_mode);
     }
 
@@ -289,8 +294,8 @@ fn fn_repr(input: Val) -> Val {
 }
 
 fn caller_access() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
+    let output_mode = symbol_id_mode();
     named_const_fn(
         "function.caller_access",
         input_mode,
@@ -314,8 +319,8 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input_mode() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Transform(Transform::Lazy);
+    let input_mode = symbol_id_mode();
+    let output_mode = Mode::Generic(Transform::Lazy);
     named_const_fn(
         "function.input_mode",
         input_mode,
@@ -329,13 +334,13 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
-        generate_io_mode(&func.input_mode)
+        generate(&func.input_mode)
     })
 }
 
 fn output_mode() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Transform(Transform::Lazy);
+    let input_mode = symbol_id_mode();
+    let output_mode = Mode::Generic(Transform::Lazy);
     named_const_fn(
         "function.output_mode",
         input_mode,
@@ -349,12 +354,12 @@ fn fn_output_mode(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
-        generate_io_mode(&func.output_mode)
+        generate(&func.output_mode)
     })
 }
 
 fn is_primitive() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn(
         "function.is_primitive",
@@ -375,7 +380,7 @@ fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_extension() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn(
         "function.is_extension",
@@ -398,8 +403,8 @@ fn fn_is_extension(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn id() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
+    let output_mode = symbol_id_mode();
     named_const_fn("function.id", input_mode, output_mode, fn_id)
 }
 
@@ -416,8 +421,8 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn body() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = IoMode::Transform(Transform::Lazy);
+    let input_mode = symbol_id_mode();
+    let output_mode = Mode::Generic(Transform::Lazy);
     named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 
@@ -434,7 +439,7 @@ fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn ctx() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("function.context", input_mode, output_mode, fn_ctx)
 }
@@ -452,8 +457,8 @@ fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input_name() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
+    let output_mode = symbol_id_mode();
     named_const_fn(
         "function.input_name",
         input_mode,
@@ -475,8 +480,8 @@ fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn caller_name() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
+    let output_mode = symbol_id_mode();
     named_const_fn(
         "function.caller_name",
         input_mode,

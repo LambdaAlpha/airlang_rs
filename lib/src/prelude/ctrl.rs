@@ -5,21 +5,16 @@ use crate::{
         CtxAccessor,
     },
     func::MutableDispatcher,
-    io_mode::{
-        IoMode,
-        ListItemMode,
-        ListMode,
-        MapMode,
-    },
     list::List,
+    mode::ListItemMode,
     prelude::{
         default_mode,
-        list_mode,
-        list_mode_for_some,
-        map_mode,
+        list_for_all_mode,
+        list_for_some_mode,
+        map_for_all_mode,
         named_mutable_fn,
         pair_mode,
-        symbol_value_mode,
+        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -36,6 +31,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Mode,
 };
 
 #[derive(Clone)]
@@ -70,7 +66,7 @@ impl Prelude for CtrlPrelude {
 }
 
 fn sequence() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Transform(Transform::Id));
+    let input_mode = list_for_all_mode(Mode::Generic(Transform::Id));
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
@@ -93,8 +89,8 @@ fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 
 fn breakable_sequence() -> Named<FuncVal> {
     let input_mode = pair_mode(
-        symbol_value_mode(),
-        list_mode(ListMode::Transform(Transform::Id)),
+        symbol_id_mode(),
+        list_for_all_mode(Mode::Generic(Transform::Id)),
     );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
@@ -132,23 +128,23 @@ fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 fn if1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemMode {
-            io_mode: default_mode(),
+            mode: default_mode(),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Transform(Transform::Id),
+            mode: Mode::Generic(Transform::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Transform(Transform::Id),
+            mode: Mode::Generic(Transform::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Transform(Transform::Id),
+            mode: Mode::Generic(Transform::Id),
             ellipsis: false,
         },
     ]);
-    let input_mode = list_mode_for_some(list);
+    let input_mode = list_for_some_mode(list);
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_if::<FreeCtx>,
@@ -192,19 +188,19 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 fn match1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemMode {
-            io_mode: default_mode(),
+            mode: default_mode(),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: map_mode(MapMode::Transform(Transform::Id)),
+            mode: map_for_all_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Transform(Transform::Id),
+            mode: Mode::Generic(Transform::Id),
             ellipsis: false,
         },
     ]);
-    let input_mode = list_mode_for_some(list);
+    let input_mode = list_for_some_mode(list);
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_match::<FreeCtx>,
@@ -243,15 +239,15 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 fn while1() -> Named<FuncVal> {
     let list = List::from(vec![
         ListItemMode {
-            io_mode: IoMode::Transform(Transform::Id),
+            mode: Mode::Generic(Transform::Id),
             ellipsis: false,
         },
         ListItemMode {
-            io_mode: IoMode::Transform(Transform::Id),
+            mode: Mode::Generic(Transform::Id),
             ellipsis: false,
         },
     ]);
-    let input_mode = list_mode_for_some(list);
+    let input_mode = list_for_some_mode(list);
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_while::<FreeCtx>,

@@ -9,7 +9,7 @@ use crate::{
         default_mode,
         named_const_fn,
         named_free_fn,
-        symbol_value_mode,
+        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -106,7 +106,7 @@ fn fn_verified(input: Val) -> Val {
 }
 
 fn is_unsolved() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn(
         "answer.is_unsolved",
@@ -127,7 +127,7 @@ fn fn_is_unsolved(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_unsolvable() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn(
         "answer.is_unsolvable",
@@ -148,7 +148,7 @@ fn fn_is_unsolvable(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_verified() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn(
         "answer.is_verified",
@@ -172,7 +172,7 @@ fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("answer.input", input_mode, output_mode, fn_input)
 }
@@ -210,7 +210,7 @@ fn fn_into_input(input: Val) -> Val {
 }
 
 fn evidence() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("answer.evidence", input_mode, output_mode, fn_evidence)
 }

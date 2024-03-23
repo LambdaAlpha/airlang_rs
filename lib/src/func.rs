@@ -28,7 +28,7 @@ use crate::{
         },
         CtxAccessor,
     },
-    io_mode::IoMode,
+    mode::TransformMode,
     symbol::Symbol,
     transform::eval::EvalByRef,
     transformer::Transformer,
@@ -40,8 +40,8 @@ use crate::{
 
 #[derive(Eq, PartialEq, Hash)]
 pub struct Func {
-    pub(crate) input_mode: IoMode,
-    pub(crate) output_mode: IoMode,
+    pub(crate) input_mode: TransformMode,
+    pub(crate) output_mode: TransformMode,
     pub(crate) core: FuncCore,
 }
 
@@ -105,11 +105,11 @@ pub(crate) struct CtxMutableInfo {
 }
 
 impl Func {
-    pub fn input_mode(&self) -> &IoMode {
+    pub fn input_mode(&self) -> &TransformMode {
         &self.input_mode
     }
 
-    pub fn output_mode(&self) -> &IoMode {
+    pub fn output_mode(&self) -> &TransformMode {
         &self.output_mode
     }
 
@@ -554,7 +554,11 @@ impl Debug for Func {
 }
 
 impl Func {
-    pub(crate) fn new(input_mode: IoMode, output_mode: IoMode, core: FuncCore) -> Self {
+    pub(crate) fn new(
+        input_mode: TransformMode,
+        output_mode: TransformMode,
+        core: FuncCore,
+    ) -> Self {
         Func {
             input_mode,
             output_mode,
@@ -563,8 +567,8 @@ impl Func {
     }
 
     pub fn new_free(
-        input_mode: IoMode,
-        output_mode: IoMode,
+        input_mode: TransformMode,
+        output_mode: TransformMode,
         id: Symbol,
         f: Box<dyn CtxFreeFn>,
     ) -> Self {
@@ -581,8 +585,8 @@ impl Func {
     }
 
     pub fn new_const(
-        input_mode: IoMode,
-        output_mode: IoMode,
+        input_mode: TransformMode,
+        output_mode: TransformMode,
         id: Symbol,
         f: Box<dyn CtxConstFn>,
     ) -> Self {
@@ -599,8 +603,8 @@ impl Func {
     }
 
     pub fn new_mutable(
-        input_mode: IoMode,
-        output_mode: IoMode,
+        input_mode: TransformMode,
+        output_mode: TransformMode,
         id: Symbol,
         f: Box<dyn CtxMutableFn>,
     ) -> Self {

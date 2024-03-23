@@ -21,7 +21,6 @@ use rand::{
 use crate::{
     bool::Bool,
     bytes::Bytes,
-    call::Call,
     ctx::{
         Ctx,
         InvariantTag,
@@ -40,20 +39,20 @@ use crate::{
         FuncImpl,
     },
     int::Int,
-    io_mode::{
-        IoMode,
-        ListItemMode,
-    },
     list::List,
     logic::Prop,
     map::Map,
+    mode::{
+        ListItemMode,
+        Mode,
+        TransformMode,
+    },
     pair::Pair,
     prelude::{
         Prelude,
         PRELUDE,
     },
     problem::Verified,
-    reverse::Reverse,
     string::Str,
     symbol::Symbol,
     transform::Transform,
@@ -70,14 +69,15 @@ use crate::{
     },
     Answer,
     AnswerVal,
+    Call,
     CallMode,
     ListMode,
     MapMode,
-    MatchMode,
-    PairMode,
+    Reverse,
     ReverseMode,
     Val,
     ValExt,
+    ValMode,
 };
 
 pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
@@ -254,15 +254,16 @@ pub(crate) fn any_transform(rng: &mut SmallRng) -> Transform {
     *(TRANSFORMS.choose(rng).unwrap())
 }
 
-pub(crate) fn any_match_mode(rng: &mut SmallRng, depth: usize) -> MatchMode {
-    let new_depth = depth + 1;
+pub(crate) fn any_val_mode(rng: &mut SmallRng, depth: usize) -> ValMode {
     let symbol = any_transform(rng);
-    let pair = Box::new(any_pair_mode(rng, new_depth));
-    let call = Box::new(any_call_mode(rng, new_depth));
-    let reverse = Box::new(any_reverse_mode(rng, new_depth));
-    let list = Box::new(any_list_mode(rng, new_depth));
-    let map = Box::new(any_map_mode(rng, new_depth));
-    MatchMode {
+    let pair = Box::new(any_pair_mode(rng, depth));
+    let call = any_mode(rng, depth, |rng, depth| Box::new(any_call_mode(rng, depth)));
+    let reverse = any_mode(rng, depth, |rng, depth| {
+        Box::new(any_reverse_mode(rng, depth))
+    });
+    let list = Box::new(any_list_mode(rng, depth));
+    let map = Box::new(any_map_mode(rng, depth));
+    ValMode {
         symbol,
         pair,
         call,
@@ -272,88 +273,72 @@ pub(crate) fn any_match_mode(rng: &mut SmallRng, depth: usize) -> MatchMode {
     }
 }
 
-pub(crate) fn any_pair_mode(rng: &mut SmallRng, depth: usize) -> PairMode {
+pub(crate) fn any_mode<T>(
+    rng: &mut SmallRng,
+    depth: usize,
+    f: impl FnOnce(&mut SmallRng, usize) -> T,
+) -> Mode<Transform, T> {
     let new_depth = depth + 1;
     let weight: usize = 1 << min(depth, 32);
     let weights = [weight, 1];
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
     if i == 0 {
-        PairMode::Transform(any_transform(rng))
+        Mode::Generic(any_transform(rng))
     } else {
-        PairMode::Pair(Pair::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
-        ))
+        Mode::Specific(f(rng, new_depth))
     }
+}
+
+pub(crate) fn any_pair_mode(
+    rng: &mut SmallRng,
+    depth: usize,
+) -> Pair<TransformMode, TransformMode> {
+    Pair::new(
+        any_transform_mode(rng, depth),
+        any_transform_mode(rng, depth),
+    )
 }
 
 pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
-    let new_depth = depth + 1;
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [weight, 1];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
-    if i == 0 {
-        CallMode::Transform(any_transform(rng))
-    } else {
-        CallMode::Call(Call::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
-        ))
-    }
+    CallMode::Call(Call::new(
+        any_transform_mode(rng, depth),
+        any_transform_mode(rng, depth),
+    ))
 }
 
 pub(crate) fn any_reverse_mode(rng: &mut SmallRng, depth: usize) -> ReverseMode {
-    let new_depth = depth + 1;
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [weight, 1];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
-    if i == 0 {
-        ReverseMode::Transform(any_transform(rng))
-    } else {
-        ReverseMode::Reverse(Reverse::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
-        ))
-    }
+    ReverseMode::Reverse(Reverse::new(
+        any_transform_mode(rng, depth),
+        any_transform_mode(rng, depth),
+    ))
 }
 
 pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [
-        weight, // list
-        1,      // list for all
-        1,      // list for some
-    ];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
     let new_depth = depth + 1;
 
-    match i {
-        0 => ListMode::Transform(any_transform(rng)),
-        1 => ListMode::ForAll(any_io_mode(rng, new_depth)),
-        2 => {
+    match rng.gen_range(0..2) {
+        0 => ListMode::ForAll(any_transform_mode(rng, new_depth)),
+        1 => {
             let left = any_len_weighted(rng, depth) >> 1;
             let right = any_len_weighted(rng, depth) >> 1;
             let mut list = Vec::with_capacity(left + 1 + right);
             for _ in 0..left {
                 list.push(ListItemMode {
                     ellipsis: false,
-                    io_mode: any_io_mode(rng, new_depth),
+                    mode: any_transform_mode(rng, new_depth),
                 });
             }
             if rng.gen() {
                 list.push(ListItemMode {
                     ellipsis: true,
-                    io_mode: any_io_mode(rng, new_depth),
+                    mode: any_transform_mode(rng, new_depth),
                 });
             }
             for _ in 0..right {
                 list.push(ListItemMode {
                     ellipsis: false,
-                    io_mode: any_io_mode(rng, new_depth),
+                    mode: any_transform_mode(rng, new_depth),
                 });
             }
             ListMode::ForSome(List::from(list))
@@ -363,27 +348,18 @@ pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
 }
 
 pub(crate) fn any_map_mode(rng: &mut SmallRng, depth: usize) -> MapMode {
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [
-        weight, // map
-        1,      // map for all
-        1,      // map for some
-    ];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
     let new_depth = depth + 1;
 
-    match i {
-        0 => MapMode::Transform(any_transform(rng)),
-        1 => MapMode::ForAll(Pair::new(
-            any_io_mode(rng, new_depth),
-            any_io_mode(rng, new_depth),
+    match rng.gen_range(0..2) {
+        0 => MapMode::ForAll(Pair::new(
+            any_transform_mode(rng, new_depth),
+            any_transform_mode(rng, new_depth),
         )),
-        2 => {
+        1 => {
             let len = any_len_weighted(rng, new_depth);
             let mut map = Map::with_capacity(len);
             for _ in 0..len {
-                map.insert(any_val(rng, new_depth), any_io_mode(rng, new_depth));
+                map.insert(any_val(rng, new_depth), any_transform_mode(rng, new_depth));
             }
             MapMode::ForSome(map)
         }
@@ -391,16 +367,8 @@ pub(crate) fn any_map_mode(rng: &mut SmallRng, depth: usize) -> MapMode {
     }
 }
 
-pub(crate) fn any_io_mode(rng: &mut SmallRng, depth: usize) -> IoMode {
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [weight, 1];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
-    if i == 0 {
-        IoMode::Transform(any_transform(rng))
-    } else {
-        IoMode::Match(any_match_mode(rng, depth))
-    }
+pub(crate) fn any_transform_mode(rng: &mut SmallRng, depth: usize) -> TransformMode {
+    any_mode(rng, depth, any_val_mode)
 }
 
 pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
@@ -420,8 +388,8 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         };
         func
     } else {
-        let input_mode = any_io_mode(rng, depth);
-        let output_mode = any_io_mode(rng, depth);
+        let input_mode = any_transform_mode(rng, depth);
+        let output_mode = any_transform_mode(rng, depth);
         let transformer = match rng.gen_range(0..3) {
             0 => FuncCore::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
@@ -481,8 +449,8 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         };
         func
     } else {
-        let input_mode = any_io_mode(rng, depth);
-        let output_mode = any_io_mode(rng, depth);
+        let input_mode = any_transform_mode(rng, depth);
+        let output_mode = any_transform_mode(rng, depth);
         let transformer = FuncCore::Free(FuncImpl::Composed(Composed {
             body: any_val(rng, depth),
             ctx: *any_ctx(rng, depth).0,

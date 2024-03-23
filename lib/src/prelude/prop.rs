@@ -12,26 +12,26 @@ use crate::{
     map::Map,
     prelude::{
         default_mode,
-        map_mode_for_some,
+        map_for_some_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
-        symbol_value_mode,
-        utils::{
-            map_remove,
-            symbol,
-        },
+        symbol_id_mode,
         Named,
         Prelude,
     },
     transformer::Transformer,
+    utils::val::{
+        map_remove,
+        symbol,
+    },
     val::{
         func::FuncVal,
         map::MapVal,
         prop::PropVal,
     },
     CtxForMutableFn,
-    IoMode,
+    Mode,
     Transform,
     Val,
 };
@@ -78,9 +78,9 @@ const PROVED: &str = "proved";
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), IoMode::Transform(Transform::Id));
-    map.insert(symbol(OUTPUT), IoMode::Transform(Transform::Id));
-    let input_mode = map_mode_for_some(map);
+    map.insert(symbol(INPUT), Mode::Generic(Transform::Id));
+    map.insert(symbol(OUTPUT), Mode::Generic(Transform::Id));
+    let input_mode = map_for_some_mode(map);
     let output_mode = default_mode();
     named_mutable_fn("proposition", input_mode, output_mode, fn_new)
 }
@@ -107,10 +107,10 @@ fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), IoMode::Transform(Transform::Id));
-    map.insert(symbol(OUTPUT), IoMode::Transform(Transform::Id));
+    map.insert(symbol(INPUT), Mode::Generic(Transform::Id));
+    map.insert(symbol(OUTPUT), Mode::Generic(Transform::Id));
     map.insert(symbol(PROVED), default_mode());
-    let output_mode = map_mode_for_some(map);
+    let output_mode = map_for_some_mode(map);
     named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)
 }
 
@@ -133,7 +133,7 @@ fn generate_prop(repr: &mut MapVal, prop: &Prop) {
 }
 
 fn proved() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("proposition.proved", input_mode, output_mode, fn_proved)
 }
@@ -148,7 +148,7 @@ fn fn_proved(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn func() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("proposition.function", input_mode, output_mode, fn_func)
 }
@@ -163,7 +163,7 @@ fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("proposition.input", input_mode, output_mode, fn_input)
 }
@@ -178,7 +178,7 @@ fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn output() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("proposition.output", input_mode, output_mode, fn_output)
 }

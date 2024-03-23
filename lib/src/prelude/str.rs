@@ -4,20 +4,17 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
-    io_mode::ListMode,
     prelude::{
         default_mode,
-        list_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
         pair_mode,
-        symbol_value_mode,
+        symbol_id_mode,
         Named,
         Prelude,
     },
     string::Str,
-    transform::Transform,
     val::{
         func::FuncVal,
         Val,
@@ -88,7 +85,7 @@ fn fn_into_utf8(input: Val) -> Val {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
     let output_mode = default_mode();
     named_const_fn("string.length", input_mode, output_mode, fn_length)
 }
@@ -103,7 +100,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn push() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), default_mode());
+    let input_mode = pair_mode(symbol_id_mode(), default_mode());
     let output_mode = default_mode();
     named_mutable_fn("string.push", input_mode, output_mode, fn_push)
 }
@@ -124,7 +121,7 @@ fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = list_mode(ListMode::Transform(Transform::Eval));
+    let input_mode = default_mode();
     let output_mode = default_mode();
     named_free_fn("string.concat", input_mode, output_mode, fn_concat)
 }

@@ -11,7 +11,6 @@ use crate::{
         NameMap,
     },
     ctx_access::constant::CtxForConstFn,
-    io_mode::IoMode,
     nondeterministic::{
         any_answer,
         any_bool,
@@ -37,33 +36,35 @@ use crate::{
         named_const_fn,
         named_free_fn,
         pair_mode,
-        symbol_value_mode,
+        symbol_id_mode,
         Named,
         Prelude,
     },
     symbol::Symbol,
     transform::Transform,
-    val::func::FuncVal,
+    val::{
+        func::FuncVal,
+        ANSWER,
+        BOOL,
+        BYTES,
+        CALL,
+        CTX,
+        EXT,
+        FLOAT,
+        FUNC,
+        INT,
+        LIST,
+        MAP,
+        PAIR,
+        PROP,
+        REVERSE,
+        STRING,
+        SYMBOL,
+        UNIT,
+    },
+    Mode,
     Val,
 };
-
-const UNIT: &str = "unit";
-const BOOL: &str = "bool";
-const INT: &str = "int";
-const FLOAT: &str = "float";
-const BYTES: &str = "bytes";
-const SYMBOL: &str = "symbol";
-const STRING: &str = "string";
-const PAIR: &str = "pair";
-const CALL: &str = "call";
-const REVERSE: &str = "reverse";
-const LIST: &str = "list";
-const MAP: &str = "map";
-const CTX: &str = "context";
-const FUNC: &str = "function";
-const PROP: &str = "proposition";
-const ANSWER: &str = "answer";
-const EXT: &str = "extension";
 
 #[derive(Clone)]
 pub(crate) struct ValuePrelude {
@@ -94,7 +95,7 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
-    let input_mode = IoMode::Transform(Transform::Lazy);
+    let input_mode = Mode::Generic(Transform::Lazy);
     let output_mode = default_mode();
     named_free_fn("any", input_mode, output_mode, fn_any)
 }
@@ -130,8 +131,8 @@ fn fn_any(input: Val) -> Val {
 }
 
 fn type_of() -> Named<FuncVal> {
-    let input_mode = symbol_value_mode();
-    let output_mode = symbol_value_mode();
+    let input_mode = symbol_id_mode();
+    let output_mode = symbol_id_mode();
     named_const_fn("type_of", input_mode, output_mode, fn_type_of)
 }
 
@@ -161,7 +162,7 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn equal() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), symbol_value_mode());
+    let input_mode = pair_mode(symbol_id_mode(), symbol_id_mode());
     let output_mode = default_mode();
     named_const_fn("==", input_mode, output_mode, fn_equal)
 }
@@ -180,7 +181,7 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn not_equal() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_value_mode(), symbol_value_mode());
+    let input_mode = pair_mode(symbol_id_mode(), symbol_id_mode());
     let output_mode = default_mode();
     named_const_fn("!=", input_mode, output_mode, fn_not_equal)
 }

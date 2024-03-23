@@ -17,7 +17,7 @@ use crate::{
         prop::PropVal,
     },
     CtxForMutableFn,
-    IoMode,
+    Mode,
     Transform,
     Val,
 };
@@ -40,7 +40,7 @@ impl Prelude for LogicPrelude {
 }
 
 fn prove() -> Named<FuncVal> {
-    let input_mode = call_mode(default_mode(), IoMode::Transform(Transform::Id));
+    let input_mode = call_mode(default_mode(), Mode::Generic(Transform::Id));
     let output_mode = default_mode();
     named_mutable_fn("proposition.prove", input_mode, output_mode, fn_prove)
 }

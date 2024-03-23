@@ -67,6 +67,24 @@ pub enum Val {
     Ext(Box<dyn ValExt>),
 }
 
+pub(crate) const UNIT: &str = "unit";
+pub(crate) const BOOL: &str = "bool";
+pub(crate) const INT: &str = "int";
+pub(crate) const FLOAT: &str = "float";
+pub(crate) const BYTES: &str = "bytes";
+pub(crate) const SYMBOL: &str = "symbol";
+pub(crate) const STRING: &str = "string";
+pub(crate) const PAIR: &str = "pair";
+pub(crate) const CALL: &str = "call";
+pub(crate) const REVERSE: &str = "reverse";
+pub(crate) const LIST: &str = "list";
+pub(crate) const MAP: &str = "map";
+pub(crate) const CTX: &str = "context";
+pub(crate) const FUNC: &str = "function";
+pub(crate) const PROP: &str = "proposition";
+pub(crate) const ANSWER: &str = "answer";
+pub(crate) const EXT: &str = "extension";
+
 impl Val {
     pub(crate) fn is_unit(&self) -> bool {
         matches!(self, Val::Unit(_))

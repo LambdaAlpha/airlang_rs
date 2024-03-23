@@ -15,11 +15,12 @@ use crate::{
         FuncImpl,
         Primitive,
     },
-    io_mode::{
-        IoMode,
+    mode::{
         ListMode,
         MapMode,
-        MatchMode,
+        Mode,
+        TransformMode,
+        ValMode,
     },
     prelude::{
         answer::AnswerPrelude,
@@ -56,7 +57,6 @@ use crate::{
     ListItemMode,
     Map,
     Pair,
-    PairMode,
     Reverse,
     ReverseMode,
     Transform,
@@ -155,8 +155,8 @@ impl<T: Into<Val> + Clone> Named<T> {
 
 fn named_free_fn(
     name: &'static str,
-    input_mode: IoMode,
-    output_mode: IoMode,
+    input_mode: TransformMode,
+    output_mode: TransformMode,
     func: impl CtxFreeFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<Box<dyn CtxFreeFn>>::new(name, func);
@@ -171,8 +171,8 @@ fn named_free_fn(
 
 fn named_const_fn(
     name: &'static str,
-    input_mode: IoMode,
-    output_mode: IoMode,
+    input_mode: TransformMode,
+    output_mode: TransformMode,
     func: impl CtxConstFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<Box<dyn CtxConstFn>>::new(name, func);
@@ -187,8 +187,8 @@ fn named_const_fn(
 
 fn named_mutable_fn(
     name: &'static str,
-    input_mode: IoMode,
-    output_mode: IoMode,
+    input_mode: TransformMode,
+    output_mode: TransformMode,
     func: impl CtxMutableFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<Box<dyn CtxMutableFn>>::new(name, func);
@@ -201,88 +201,72 @@ fn named_mutable_fn(
     Named::new(name, func_val)
 }
 
-fn default_mode() -> IoMode {
-    IoMode::default()
+fn default_mode() -> TransformMode {
+    TransformMode::default()
 }
 
-fn symbol_value_mode() -> IoMode {
-    let mode = MatchMode {
+fn symbol_id_mode() -> TransformMode {
+    let mode = ValMode {
         symbol: Transform::Id,
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn pair_mode(first: IoMode, second: IoMode) -> IoMode {
-    let mode = MatchMode {
-        pair: Box::new(PairMode::Pair(Pair::new(first, second))),
+fn pair_mode(first: TransformMode, second: TransformMode) -> TransformMode {
+    let mode = ValMode {
+        pair: Box::new(Pair::new(first, second)),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn call_mode(func: IoMode, input: IoMode) -> IoMode {
-    let mode = MatchMode {
-        call: Box::new(CallMode::Call(Call::new(func, input))),
+fn call_mode(func: TransformMode, input: TransformMode) -> TransformMode {
+    let mode = ValMode {
+        call: Mode::new(CallMode::Call(Call::new(func, input))),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn reverse_mode(func: IoMode, output: IoMode) -> IoMode {
-    let mode = MatchMode {
-        reverse: Box::new(ReverseMode::Reverse(Reverse::new(func, output))),
+fn reverse_mode(func: TransformMode, output: TransformMode) -> TransformMode {
+    let mode = ValMode {
+        reverse: Mode::new(ReverseMode::Reverse(Reverse::new(func, output))),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn list_mode(list_mode: ListMode) -> IoMode {
-    let mode = MatchMode {
-        list: Box::new(list_mode),
-        ..Default::default()
-    };
-    IoMode::Match(mode)
-}
-
-fn list_mode_for_all(mode: IoMode) -> IoMode {
-    let mode = MatchMode {
+fn list_for_all_mode(mode: TransformMode) -> TransformMode {
+    let mode = ValMode {
         list: Box::new(ListMode::ForAll(mode)),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn list_mode_for_some(list_item: List<ListItemMode>) -> IoMode {
-    let mode = MatchMode {
+fn list_for_some_mode(list_item: List<ListItemMode>) -> TransformMode {
+    let mode = ValMode {
         list: Box::new(ListMode::ForSome(list_item)),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn map_mode(map_mode: MapMode) -> IoMode {
-    let mode = MatchMode {
-        map: Box::new(map_mode),
-        ..Default::default()
-    };
-    IoMode::Match(mode)
-}
-
-fn map_mode_for_all(key: IoMode, value: IoMode) -> IoMode {
-    let mode = MatchMode {
+fn map_for_all_mode(key: TransformMode, value: TransformMode) -> TransformMode {
+    let mode = ValMode {
         map: Box::new(MapMode::ForAll(Pair::new(key, value))),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
-fn map_mode_for_some(map_mode: Map<Val, IoMode>) -> IoMode {
-    let mode = MatchMode {
+fn map_for_some_mode(map_mode: Map<Val, TransformMode>) -> TransformMode {
+    let mode = ValMode {
         map: Box::new(MapMode::ForSome(map_mode)),
         ..Default::default()
     };
-    IoMode::Match(mode)
+    Mode::Specific(mode)
 }
 
 mod meta;
@@ -330,5 +314,3 @@ mod list;
 mod map;
 
 mod extension;
-
-mod utils;

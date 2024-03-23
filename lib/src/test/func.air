@@ -162,7 +162,7 @@ a
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : id},
+        input_mode : {list : all $ id},
     },
     f [a, b]
 ]
@@ -172,7 +172,7 @@ a
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : id},
+        input_mode : {list : all $ id},
     },
     f $ not $ false
 ]
@@ -182,7 +182,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : (all {symbol : id})},
+        input_mode : {list : all $ {symbol : id}},
     },
     f [not true, b]
 ]
@@ -203,7 +203,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : id},
+        input_mode : {map : id all id},
     },
     f {a : b}
 ]
@@ -213,7 +213,7 @@ true
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : id},
+        input_mode : {map : id all id},
     },
     f (not true)
 ]
@@ -416,7 +416,7 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : eval : eval},
+    input_mode : {pair : eval : id},
     output_mode : {pair : lazy : lazy},
     caller_access : mutable,
 }
@@ -425,7 +425,7 @@ function.represent $ function $ {
     body : i,
     input_name : i,
     caller_name : c,
-    input_mode : {pair : eval : eval},
+    input_mode : {pair : eval : id},
     output_mode : {pair : lazy : lazy},
     caller_access : mutable,
 }
@@ -505,12 +505,12 @@ eval
 ; [
     f = function $ {
         body : input,
-        input_mode : {list : id},
+        input_mode : {list : all $ id},
     },
     function.input_mode f
 ]
 -----
-{list : id}
+{list : all $ id}
 =====
 ; [
     f = function $ {
@@ -535,12 +535,12 @@ eval
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : id},
+        input_mode : {map : id all id},
     },
     function.input_mode f
 ]
 -----
-{map : id}
+{map : id all id}
 =====
 ; [
     f = function $ {
@@ -555,12 +555,12 @@ eval
 ; [
     f = function $ {
         body : input,
-        input_mode : {map : {list : [{symbol : id}, {list : id}]} all {list : all $ {map : id}}},
+        input_mode : {map : {list : [{symbol : id}, {list : all $ id}]} all {list : all $ {map : id all id}}},
     },
     function.input_mode f
 ]
 -----
-{map : {list : [{symbol : id}, {list : id}]} all {list : all $ {map : id}}}
+{map : {list : [{symbol : id}, {list : all $ id}]} all {list : all $ {map : id all id}}}
 =====
 ; [
     f = function $ {

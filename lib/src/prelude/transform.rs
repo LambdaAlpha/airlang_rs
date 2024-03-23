@@ -4,7 +4,6 @@ use crate::{
         free::FreeCtx,
         mutable::CtxForMutableFn,
     },
-    io_mode::IoMode,
     prelude::{
         default_mode,
         named_free_fn,
@@ -28,6 +27,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Mode,
 };
 
 #[derive(Clone)]
@@ -56,7 +56,7 @@ impl Prelude for TransformPrelude {
 }
 
 fn eval() -> Named<FuncVal> {
-    let input_mode = IoMode::Transform(Transform::Id);
+    let input_mode = Mode::Generic(Transform::Id);
     let output_mode = default_mode();
     named_mutable_fn(EVAL, input_mode, output_mode, fn_eval)
 }
@@ -66,7 +66,7 @@ fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn id() -> Named<FuncVal> {
-    let input_mode = IoMode::Transform(Transform::Id);
+    let input_mode = Mode::Generic(Transform::Id);
     let output_mode = default_mode();
     named_free_fn(ID, input_mode, output_mode, fn_id)
 }
@@ -76,7 +76,7 @@ fn fn_id(input: Val) -> Val {
 }
 
 fn lazy() -> Named<FuncVal> {
-    let input_mode = IoMode::Transform(Transform::Id);
+    let input_mode = Mode::Generic(Transform::Id);
     let output_mode = default_mode();
     named_mutable_fn(LAZY, input_mode, output_mode, fn_lazy)
 }

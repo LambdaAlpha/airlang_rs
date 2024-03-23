@@ -1,6 +1,5 @@
 use crate::{
     ctx::NameMap,
-    io_mode::IoMode,
     prelude::{
         named_free_fn,
         Named,
@@ -9,6 +8,7 @@ use crate::{
     transform::Transform,
     unit::Unit,
     val::func::FuncVal,
+    Mode,
     Val,
 };
 
@@ -30,8 +30,8 @@ impl Prelude for UnitPrelude {
 }
 
 fn unit() -> Named<FuncVal> {
-    let input_mode = IoMode::Transform(Transform::Id);
-    let output_mode = IoMode::Transform(Transform::Id);
+    let input_mode = Mode::Generic(Transform::Id);
+    let output_mode = Mode::Generic(Transform::Id);
     named_free_fn("unit", input_mode, output_mode, fn_unit)
 }
 

@@ -55,19 +55,19 @@ pub use self::{
         Func,
     },
     int::Int,
-    io_mode::{
-        CallMode,
-        IoMode,
-        ListItemMode,
-        ListMode,
-        MapMode,
-        MatchMode,
-        PairMode,
-        ReverseMode,
-    },
     list::List,
     logic::Prop,
     map::Map,
+    mode::{
+        CallMode,
+        ListItemMode,
+        ListMode,
+        MapMode,
+        Mode,
+        ReverseMode,
+        TransformMode,
+        ValMode,
+    },
     pair::Pair,
     problem::{
         Answer,
@@ -131,13 +131,13 @@ pub(crate) mod transformer;
 
 pub(crate) mod transform;
 
+pub(crate) mod mode;
+
 pub(crate) mod ctx;
 
 pub(crate) mod ctx_access;
 
 pub(crate) mod func;
-
-pub(crate) mod io_mode;
 
 pub(crate) mod logic;
 
