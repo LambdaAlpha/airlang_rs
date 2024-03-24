@@ -494,7 +494,8 @@ const MULTILINE_PROMPT: &str = "┃ ";
 
 impl<W: Write + AsRawFd> Terminal<W> {
     fn move_home(&mut self) -> Result<()> {
-        self.0.queue(MoveToColumn(DEFAULT_PROMPT.len() as u16))?;
+        let width = DEFAULT_PROMPT.chars().count() as u16;
+        self.0.queue(MoveToColumn(width))?;
         Ok(())
     }
 
