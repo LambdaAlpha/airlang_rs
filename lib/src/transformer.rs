@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::{
     transformer::{
         input::{
@@ -250,6 +252,15 @@ impl OutputBuilder<Val> for ValBuilder {
 
     fn from_reverse(&self, func: Val, output: Val) -> Val {
         Val::Reverse(Box::new(Reverse::new(func, output)))
+    }
+}
+
+impl<Ctx, I, O, T> Transformer<Ctx, I, O> for Box<T>
+where
+    T: Transformer<Ctx, I, O>,
+{
+    fn transform(&self, ctx: &mut Ctx, input: I) -> O {
+        self.deref().transform(ctx, input)
     }
 }
 

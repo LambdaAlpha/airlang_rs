@@ -135,7 +135,7 @@ fn pair_mode(first: TransformMode, second: TransformMode) -> TransformMode {
 #[allow(unused)]
 fn call_mode(func: TransformMode, input: TransformMode) -> TransformMode {
     let mode = ValMode {
-        call: Mode::new(CallMode::Call(Call::new(func, input))),
+        call: Mode::new(CallMode::ForAll(Call::new(func, input))),
         ..Default::default()
     };
     Mode::Specific(mode)
@@ -144,7 +144,7 @@ fn call_mode(func: TransformMode, input: TransformMode) -> TransformMode {
 #[allow(unused)]
 fn reverse_mode(func: TransformMode, output: TransformMode) -> TransformMode {
     let mode = ValMode {
-        reverse: Mode::new(ReverseMode::Reverse(Reverse::new(func, output))),
+        reverse: Mode::new(ReverseMode::ForAll(Reverse::new(func, output))),
         ..Default::default()
     };
     Mode::Specific(mode)

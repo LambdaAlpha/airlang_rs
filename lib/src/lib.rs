@@ -59,11 +59,13 @@ pub use self::{
     logic::Prop,
     map::Map,
     mode::{
+        CallForSomeMode,
         CallMode,
         ListItemMode,
         ListMode,
         MapMode,
         Mode,
+        ReverseForSomeMode,
         ReverseMode,
         TransformMode,
         ValMode,

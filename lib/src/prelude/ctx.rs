@@ -515,11 +515,11 @@ fn with_ctx() -> Named<FuncVal> {
             ..Default::default()
         }),
         Mode::Specific(ValMode {
-            call: Mode::new(CallMode::Call(Call::new(
+            call: Mode::new(CallMode::ForAll(Call::new(
                 Mode::Generic(Transform::Eval),
                 Mode::Generic(Transform::Id),
             ))),
-            reverse: Mode::new(ReverseMode::Reverse(Reverse::new(
+            reverse: Mode::new(ReverseMode::ForAll(Reverse::new(
                 Mode::Generic(Transform::Eval),
                 Mode::Generic(Transform::Id),
             ))),
@@ -563,11 +563,11 @@ fn with_ctx_func() -> Named<FuncVal> {
             ..Default::default()
         }),
         Mode::Specific(ValMode {
-            call: Mode::new(CallMode::Call(Call::new(
+            call: Mode::new(CallMode::ForAll(Call::new(
                 Mode::Generic(Transform::Id),
                 Mode::Generic(Transform::Id),
             ))),
-            reverse: Mode::new(ReverseMode::Reverse(Reverse::new(
+            reverse: Mode::new(ReverseMode::ForAll(Reverse::new(
                 Mode::Generic(Transform::Id),
                 Mode::Generic(Transform::Id),
             ))),
@@ -623,11 +623,11 @@ fn with_ctx_input() -> Named<FuncVal> {
             ..Default::default()
         }),
         Mode::Specific(ValMode {
-            call: Mode::new(CallMode::Call(Call::new(
+            call: Mode::new(CallMode::ForAll(Call::new(
                 Mode::Generic(Transform::Eval),
                 Mode::Generic(Transform::Id),
             ))),
-            reverse: Mode::new(ReverseMode::Reverse(Reverse::new(
+            reverse: Mode::new(ReverseMode::ForAll(Reverse::new(
                 Mode::Generic(Transform::Eval),
                 Mode::Generic(Transform::Id),
             ))),
@@ -671,11 +671,11 @@ fn with_ctx_func_input() -> Named<FuncVal> {
             ..Default::default()
         }),
         Mode::Specific(ValMode {
-            call: Mode::new(CallMode::Call(Call::new(
+            call: Mode::new(CallMode::ForAll(Call::new(
                 Mode::Generic(Transform::Id),
                 Mode::Generic(Transform::Id),
             ))),
-            reverse: Mode::new(ReverseMode::Reverse(Reverse::new(
+            reverse: Mode::new(ReverseMode::ForAll(Reverse::new(
                 Mode::Generic(Transform::Id),
                 Mode::Generic(Transform::Id),
             ))),

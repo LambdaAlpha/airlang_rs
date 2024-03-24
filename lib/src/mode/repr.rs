@@ -1,5 +1,9 @@
 use crate::{
-    mode::Mode,
+    mode::{
+        CallForSomeMode,
+        Mode,
+        ReverseForSomeMode,
+    },
     transformer::{
         EVAL,
         ID,
@@ -7,12 +11,18 @@ use crate::{
     },
     utils::val::symbol,
     val::{
+        BOOL,
+        BYTES,
         CALL,
+        FLOAT,
+        INT,
         LIST,
         MAP,
         PAIR,
         REVERSE,
+        STRING,
         SYMBOL,
+        UNIT,
     },
     Call,
     CallMode,
@@ -141,45 +151,159 @@ pub(crate) fn generate_pair(mode: &Pair<TransformMode, TransformMode>) -> Val {
 }
 
 fn parse_call(mode: Val) -> Option<Mode<Transform, Box<CallMode>>> {
-    parse_mode(mode, |mode| {
-        let Val::Call(call) = mode else {
-            return None;
-        };
-        let func = parse(call.func)?;
-        let input = parse(call.input)?;
-        Some(Box::new(CallMode::Call(Call::new(func, input))))
+    parse_mode(mode, |mode| match mode {
+        Val::Call(call) => {
+            let func = parse(call.func)?;
+            let input = parse(call.input)?;
+            Some(Box::new(CallMode::ForAll(Call::new(func, input))))
+        }
+        Val::Map(map) => {
+            let call_for_some = parse_call_for_some(map)?;
+            Some(Box::new(CallMode::ForSome(call_for_some)))
+        }
+        _ => None,
     })
+}
+
+fn parse_call_for_some(mut map: MapVal) -> Option<CallForSomeMode> {
+    let mut mode = CallForSomeMode::default();
+    if let Some(unit_mode) = map.remove(&symbol(UNIT)) {
+        mode.unit = parse(unit_mode)?;
+    }
+    if let Some(bool_mode) = map.remove(&symbol(BOOL)) {
+        mode.bool = parse(bool_mode)?;
+    }
+    if let Some(int_mode) = map.remove(&symbol(INT)) {
+        mode.int = parse(int_mode)?;
+    }
+    if let Some(float_mode) = map.remove(&symbol(FLOAT)) {
+        mode.float = parse(float_mode)?;
+    }
+    if let Some(bytes_mode) = map.remove(&symbol(BYTES)) {
+        mode.bytes = parse(bytes_mode)?;
+    }
+    if let Some(string_mode) = map.remove(&symbol(STRING)) {
+        mode.string = parse(string_mode)?;
+    }
+    if let Some(symbol_mode) = map.remove(&symbol(SYMBOL)) {
+        mode.symbol = parse(symbol_mode)?;
+    }
+    Some(mode)
 }
 
 pub(crate) fn generate_call(mode: &Mode<Transform, Box<CallMode>>) -> Val {
     generate_mode(mode, |call| match &**call {
-        CallMode::Call(call) => {
+        CallMode::ForAll(call) => {
             let func = generate(&call.func);
             let input = generate(&call.input);
             Val::Call(Box::new(Call::new(func, input)))
         }
+        CallMode::ForSome(call) => generate_call_for_some(call),
     })
 }
 
+fn generate_call_for_some(mode: &CallForSomeMode) -> Val {
+    let mut map = Map::default();
+    if mode.unit != Default::default() {
+        map.insert(symbol(UNIT), generate(&mode.unit));
+    }
+    if mode.bool != Default::default() {
+        map.insert(symbol(BOOL), generate(&mode.bool));
+    }
+    if mode.int != Default::default() {
+        map.insert(symbol(INT), generate(&mode.int));
+    }
+    if mode.float != Default::default() {
+        map.insert(symbol(FLOAT), generate(&mode.float));
+    }
+    if mode.bytes != Default::default() {
+        map.insert(symbol(BYTES), generate(&mode.bytes));
+    }
+    if mode.string != Default::default() {
+        map.insert(symbol(STRING), generate(&mode.string));
+    }
+    if mode.symbol != Default::default() {
+        map.insert(symbol(SYMBOL), generate(&mode.symbol));
+    }
+    Val::Map(map)
+}
+
 fn parse_reverse(mode: Val) -> Option<Mode<Transform, Box<ReverseMode>>> {
-    parse_mode(mode, |mode| {
-        let Val::Reverse(reverse) = mode else {
-            return None;
-        };
-        let func = parse(reverse.func)?;
-        let output = parse(reverse.output)?;
-        Some(Box::new(ReverseMode::Reverse(Reverse::new(func, output))))
+    parse_mode(mode, |mode| match mode {
+        Val::Reverse(reverse) => {
+            let func = parse(reverse.func)?;
+            let output = parse(reverse.output)?;
+            Some(Box::new(ReverseMode::ForAll(Reverse::new(func, output))))
+        }
+        Val::Map(map) => {
+            let reverse_for_some = parse_reverse_for_some(map)?;
+            Some(Box::new(ReverseMode::ForSome(reverse_for_some)))
+        }
+        _ => None,
     })
+}
+
+fn parse_reverse_for_some(mut map: MapVal) -> Option<ReverseForSomeMode> {
+    let mut mode = ReverseForSomeMode::default();
+    if let Some(unit_mode) = map.remove(&symbol(UNIT)) {
+        mode.unit = parse(unit_mode)?;
+    }
+    if let Some(bool_mode) = map.remove(&symbol(BOOL)) {
+        mode.bool = parse(bool_mode)?;
+    }
+    if let Some(int_mode) = map.remove(&symbol(INT)) {
+        mode.int = parse(int_mode)?;
+    }
+    if let Some(float_mode) = map.remove(&symbol(FLOAT)) {
+        mode.float = parse(float_mode)?;
+    }
+    if let Some(bytes_mode) = map.remove(&symbol(BYTES)) {
+        mode.bytes = parse(bytes_mode)?;
+    }
+    if let Some(string_mode) = map.remove(&symbol(STRING)) {
+        mode.string = parse(string_mode)?;
+    }
+    if let Some(symbol_mode) = map.remove(&symbol(SYMBOL)) {
+        mode.symbol = parse(symbol_mode)?;
+    }
+    Some(mode)
 }
 
 pub(crate) fn generate_reverse(mode: &Mode<Transform, Box<ReverseMode>>) -> Val {
     generate_mode(mode, |reverse| match &**reverse {
-        ReverseMode::Reverse(reverse) => {
+        ReverseMode::ForAll(reverse) => {
             let func = generate(&reverse.func);
             let output = generate(&reverse.output);
             Val::Reverse(Box::new(Reverse::new(func, output)))
         }
+        ReverseMode::ForSome(reverse) => generate_reverse_for_some(reverse),
     })
+}
+
+fn generate_reverse_for_some(mode: &ReverseForSomeMode) -> Val {
+    let mut map = Map::default();
+    if mode.unit != Default::default() {
+        map.insert(symbol(UNIT), generate(&mode.unit));
+    }
+    if mode.bool != Default::default() {
+        map.insert(symbol(BOOL), generate(&mode.bool));
+    }
+    if mode.int != Default::default() {
+        map.insert(symbol(INT), generate(&mode.int));
+    }
+    if mode.float != Default::default() {
+        map.insert(symbol(FLOAT), generate(&mode.float));
+    }
+    if mode.bytes != Default::default() {
+        map.insert(symbol(BYTES), generate(&mode.bytes));
+    }
+    if mode.string != Default::default() {
+        map.insert(symbol(STRING), generate(&mode.string));
+    }
+    if mode.symbol != Default::default() {
+        map.insert(symbol(SYMBOL), generate(&mode.symbol));
+    }
+    Val::Map(map)
 }
 
 fn parse_list(mode: Val) -> Option<ListMode> {

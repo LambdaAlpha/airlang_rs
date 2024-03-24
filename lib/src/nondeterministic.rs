@@ -301,14 +301,14 @@ pub(crate) fn any_pair_mode(
 }
 
 pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
-    CallMode::Call(Call::new(
+    CallMode::ForAll(Call::new(
         any_transform_mode(rng, depth),
         any_transform_mode(rng, depth),
     ))
 }
 
 pub(crate) fn any_reverse_mode(rng: &mut SmallRng, depth: usize) -> ReverseMode {
-    ReverseMode::Reverse(Reverse::new(
+    ReverseMode::ForAll(Reverse::new(
         any_transform_mode(rng, depth),
         any_transform_mode(rng, depth),
     ))

@@ -1,11 +1,10 @@
-use std::ops::Deref;
-
 use crate::{
     call::Call,
     ctx_access::CtxAccessor,
     list::List,
     map::Map,
     pair::Pair,
+    problem::solve,
     reverse::Reverse,
     transform::{
         eval::{
@@ -52,12 +51,38 @@ pub struct ValMode {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum CallMode {
-    Call(Call<TransformMode, TransformMode>),
+    ForAll(Call<TransformMode, TransformMode>),
+    ForSome(CallForSomeMode),
+}
+
+// decide transform mode of input by the type of function
+#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
+pub struct CallForSomeMode {
+    pub unit: TransformMode,
+    pub bool: TransformMode,
+    pub int: TransformMode,
+    pub float: TransformMode,
+    pub bytes: TransformMode,
+    pub string: TransformMode,
+    pub symbol: TransformMode,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ReverseMode {
-    Reverse(Reverse<TransformMode, TransformMode>),
+    ForAll(Reverse<TransformMode, TransformMode>),
+    ForSome(ReverseForSomeMode),
+}
+
+// decide transform mode of output by the type of function
+#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
+pub struct ReverseForSomeMode {
+    pub unit: TransformMode,
+    pub bool: TransformMode,
+    pub int: TransformMode,
+    pub float: TransformMode,
+    pub bytes: TransformMode,
+    pub string: TransformMode,
+    pub symbol: TransformMode,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -184,13 +209,10 @@ impl<Ctx> Transformer<Ctx, CallVal, Val> for CallMode
 where
     Ctx: CtxAccessor,
 {
-    fn transform(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+    fn transform(&self, ctx: &mut Ctx, call: CallVal) -> Val {
         match self {
-            CallMode::Call(call) => {
-                let func = call.func.transform(ctx, input.func);
-                let input = call.input.transform(ctx, input.input);
-                ValBuilder.from_call(func, input)
-            }
+            CallMode::ForAll(mode) => mode.transform(ctx, call),
+            CallMode::ForSome(mode) => mode.transform(ctx, call),
         }
     }
 }
@@ -199,14 +221,67 @@ impl<'a, Ctx> Transformer<Ctx, &'a CallVal, Val> for CallMode
 where
     Ctx: CtxAccessor,
 {
-    fn transform(&self, ctx: &mut Ctx, input: &'a CallVal) -> Val {
+    fn transform(&self, ctx: &mut Ctx, call: &'a CallVal) -> Val {
         match self {
-            CallMode::Call(call) => {
-                let func = call.func.transform(ctx, &input.func);
-                let input = call.input.transform(ctx, &input.input);
-                ValBuilder.from_call(func, input)
-            }
+            CallMode::ForAll(mode) => mode.transform(ctx, call),
+            CallMode::ForSome(mode) => mode.transform(ctx, call),
         }
+    }
+}
+
+impl<Ctx> Transformer<Ctx, CallVal, Val> for CallForSomeMode
+where
+    Ctx: CtxAccessor,
+{
+    fn transform(&self, ctx: &mut Ctx, call: CallVal) -> Val {
+        let func = Eval.transform(ctx, call.func);
+        let transformer = match func {
+            Val::Func(f) => {
+                let input = f.input_mode.transform(ctx, call.input);
+                return f.transform(ctx, input);
+            }
+            Val::Unit(_) => &self.unit,
+            Val::Bool(_) => &self.bool,
+            Val::Int(_) => &self.int,
+            Val::Float(_) => &self.float,
+            Val::Bytes(_) => &self.bytes,
+            Val::String(_) => &self.string,
+            Val::Symbol(_) => &self.symbol,
+            _ => {
+                let input = Eval.transform(ctx, call.input);
+                return ValBuilder.from_call(func, input);
+            }
+        };
+        let input = transformer.transform(ctx, call.input);
+        ValBuilder.from_call(func, input)
+    }
+}
+
+impl<'a, Ctx> Transformer<Ctx, &'a CallVal, Val> for CallForSomeMode
+where
+    Ctx: CtxAccessor,
+{
+    fn transform(&self, ctx: &mut Ctx, call: &'a CallVal) -> Val {
+        let func = EvalByRef.transform(ctx, &call.func);
+        let transformer = match func {
+            Val::Func(f) => {
+                let input = f.input_mode.transform(ctx, &call.input);
+                return f.transform(ctx, input);
+            }
+            Val::Unit(_) => &self.unit,
+            Val::Bool(_) => &self.bool,
+            Val::Int(_) => &self.int,
+            Val::Float(_) => &self.float,
+            Val::Bytes(_) => &self.bytes,
+            Val::String(_) => &self.string,
+            Val::Symbol(_) => &self.symbol,
+            _ => {
+                let input = EvalByRef.transform(ctx, &call.input);
+                return ValBuilder.from_call(func, input);
+            }
+        };
+        let input = transformer.transform(ctx, &call.input);
+        ValBuilder.from_call(func, input)
     }
 }
 
@@ -222,17 +297,40 @@ where
     }
 }
 
+impl<FT, IT, Ctx, FV, IV> Transformer<Ctx, Call<FV, IV>, Val> for Call<FT, IT>
+where
+    Ctx: CtxAccessor,
+    FT: Transformer<Ctx, FV, Val>,
+    IT: Transformer<Ctx, IV, Val>,
+{
+    fn transform(&self, ctx: &mut Ctx, call: Call<FV, IV>) -> Val {
+        let func = self.func.transform(ctx, call.func);
+        let input = self.input.transform(ctx, call.input);
+        ValBuilder.from_call(func, input)
+    }
+}
+
+impl<'a, FT, IT, Ctx, FV, IV> Transformer<Ctx, &'a Call<FV, IV>, Val> for Call<FT, IT>
+where
+    Ctx: CtxAccessor,
+    FT: Transformer<Ctx, &'a FV, Val>,
+    IT: Transformer<Ctx, &'a IV, Val>,
+{
+    fn transform(&self, ctx: &mut Ctx, call: &'a Call<FV, IV>) -> Val {
+        let func = self.func.transform(ctx, &call.func);
+        let input = self.input.transform(ctx, &call.input);
+        ValBuilder.from_call(func, input)
+    }
+}
+
 impl<Ctx> Transformer<Ctx, ReverseVal, Val> for ReverseMode
 where
     Ctx: CtxAccessor,
 {
     fn transform(&self, ctx: &mut Ctx, input: ReverseVal) -> Val {
         match self {
-            ReverseMode::Reverse(reverse) => {
-                let func = reverse.func.transform(ctx, input.func);
-                let output = reverse.output.transform(ctx, input.output);
-                ValBuilder.from_reverse(func, output)
-            }
+            ReverseMode::ForAll(reverse) => reverse.transform(ctx, input),
+            ReverseMode::ForSome(reverse) => reverse.transform(ctx, input),
         }
     }
 }
@@ -243,12 +341,65 @@ where
 {
     fn transform(&self, ctx: &mut Ctx, input: &'a ReverseVal) -> Val {
         match self {
-            ReverseMode::Reverse(reverse) => {
-                let func = reverse.func.transform(ctx, &input.func);
-                let output = reverse.output.transform(ctx, &input.output);
-                ValBuilder.from_reverse(func, output)
-            }
+            ReverseMode::ForAll(reverse) => reverse.transform(ctx, input),
+            ReverseMode::ForSome(reverse) => reverse.transform(ctx, input),
         }
+    }
+}
+
+impl<Ctx> Transformer<Ctx, ReverseVal, Val> for ReverseForSomeMode
+where
+    Ctx: CtxAccessor,
+{
+    fn transform(&self, ctx: &mut Ctx, reverse: ReverseVal) -> Val {
+        let func = Eval.transform(ctx, reverse.func);
+        let transformer = match func {
+            Val::Func(f) => {
+                let output = f.output_mode.transform(ctx, reverse.output);
+                return solve(ctx, f, output);
+            }
+            Val::Unit(_) => &self.unit,
+            Val::Bool(_) => &self.bool,
+            Val::Int(_) => &self.int,
+            Val::Float(_) => &self.float,
+            Val::Bytes(_) => &self.bytes,
+            Val::String(_) => &self.string,
+            Val::Symbol(_) => &self.symbol,
+            _ => {
+                let output = Eval.transform(ctx, reverse.output);
+                return ValBuilder.from_reverse(func, output);
+            }
+        };
+        let output = transformer.transform(ctx, reverse.output);
+        ValBuilder.from_reverse(func, output)
+    }
+}
+
+impl<'a, Ctx> Transformer<Ctx, &'a ReverseVal, Val> for ReverseForSomeMode
+where
+    Ctx: CtxAccessor,
+{
+    fn transform(&self, ctx: &mut Ctx, reverse: &'a ReverseVal) -> Val {
+        let func = EvalByRef.transform(ctx, &reverse.func);
+        let transformer = match func {
+            Val::Func(f) => {
+                let output = f.output_mode.transform(ctx, &reverse.output);
+                return f.transform(ctx, output);
+            }
+            Val::Unit(_) => &self.unit,
+            Val::Bool(_) => &self.bool,
+            Val::Int(_) => &self.int,
+            Val::Float(_) => &self.float,
+            Val::Bytes(_) => &self.bytes,
+            Val::String(_) => &self.string,
+            Val::Symbol(_) => &self.symbol,
+            _ => {
+                let output = EvalByRef.transform(ctx, &reverse.output);
+                return ValBuilder.from_reverse(func, output);
+            }
+        };
+        let output = transformer.transform(ctx, &reverse.output);
+        ValBuilder.from_reverse(func, output)
     }
 }
 
@@ -261,6 +412,32 @@ where
             Mode::Generic(mode) => mode.transform(ctx, Val::Reverse(input)),
             Mode::Specific(mode) => mode.transform(ctx, *input),
         }
+    }
+}
+
+impl<FT, IT, Ctx, FV, IV> Transformer<Ctx, Reverse<FV, IV>, Val> for Reverse<FT, IT>
+where
+    Ctx: CtxAccessor,
+    FT: Transformer<Ctx, FV, Val>,
+    IT: Transformer<Ctx, IV, Val>,
+{
+    fn transform(&self, ctx: &mut Ctx, reverse: Reverse<FV, IV>) -> Val {
+        let func = self.func.transform(ctx, reverse.func);
+        let output = self.output.transform(ctx, reverse.output);
+        ValBuilder.from_reverse(func, output)
+    }
+}
+
+impl<'a, FT, IT, Ctx, FV, IV> Transformer<Ctx, &'a Reverse<FV, IV>, Val> for Reverse<FT, IT>
+where
+    Ctx: CtxAccessor,
+    FT: Transformer<Ctx, &'a FV, Val>,
+    IT: Transformer<Ctx, &'a IV, Val>,
+{
+    fn transform(&self, ctx: &mut Ctx, reverse: &'a Reverse<FV, IV>) -> Val {
+        let func = self.func.transform(ctx, &reverse.func);
+        let output = self.output.transform(ctx, &reverse.output);
+        ValBuilder.from_reverse(func, output)
     }
 }
 
@@ -422,16 +599,6 @@ where
             Mode::Generic(mode) => mode.transform(ctx, input.1),
             Mode::Specific(mode) => mode.transform(ctx, input.0),
         }
-    }
-}
-
-impl<Ctx, I, O, T> Transformer<Ctx, I, O> for Box<T>
-where
-    Ctx: CtxAccessor,
-    T: Transformer<Ctx, I, O>,
-{
-    fn transform(&self, ctx: &mut Ctx, input: I) -> O {
-        self.deref().transform(ctx, input)
     }
 }
 

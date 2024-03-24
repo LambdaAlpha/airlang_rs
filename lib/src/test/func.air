@@ -246,12 +246,56 @@ false
     a = 1,
     f = function $ {
         body : input,
+        input_mode : {call : {unit : id}},
+    },
+    ((f $ . $ a) == id $ . $ a) and (f $ not $ false) == true
+]
+-----
+true
+=====
+; [
+    a = id $ b,
+    f = function $ {
+        body : input,
+        input_mode : {call : {symbol : id}},
+    },
+    ((f $ a $ a) == id $ b $ a) and (f $ not $ false) == true
+]
+-----
+true
+=====
+; [
+    a = 1,
+    f = function $ {
+        body : input,
         input_mode : {reverse : eval ? id},
     },
     f $ a ? a
 ]
 -----
 1 ? a
+=====
+; [
+    a = 1,
+    f = function $ {
+        body : input,
+        input_mode : {reverse : {unit : id}},
+    },
+    (f $ . ? a) == id $ . ? a
+]
+-----
+true
+=====
+; [
+    a = id $ b,
+    f = function $ {
+        body : input,
+        input_mode : {reverse : {symbol : id}},
+    },
+    ((f $ a ? a) == id $ b ? a) and (f $ . ? a) == id $ . ? b
+]
+-----
+true
 =====
 ; [
     a = 1,
