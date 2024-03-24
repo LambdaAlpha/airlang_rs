@@ -489,8 +489,8 @@ impl<W: Write + AsRawFd> Repl<W> {
     }
 }
 
-const DEFAULT_PROMPT: &str = "> ";
-const MULTILINE_PROMPT: &str = "| ";
+const DEFAULT_PROMPT: &str = "❯ ";
+const MULTILINE_PROMPT: &str = "┃ ";
 
 impl<W: Write + AsRawFd> Terminal<W> {
     fn move_home(&mut self) -> Result<()> {
