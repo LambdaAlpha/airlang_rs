@@ -381,15 +381,14 @@ impl<W: Write + AsRawFd> Repl<W> {
     fn handle_home(&mut self) -> Result<()> {
         self.tail_buffer.extend(self.head_buffer.chars().rev());
         self.head_buffer.clear();
-        self.terminal.move_home()?;
+        self.move_home()?;
         self.terminal.flush()
     }
 
     fn handle_end(&mut self) -> Result<()> {
         self.head_buffer.extend(self.tail_buffer.iter().rev());
         self.tail_buffer.clear();
-        self.terminal.move_home()?;
-        self.print_head()?;
+        self.move_home_print_head()?;
         self.print_tail_restore_position()?;
         self.terminal.flush()
     }
@@ -438,8 +437,14 @@ impl<W: Write + AsRawFd> Repl<W> {
         }
     }
 
+    fn move_home(&mut self) -> Result<()> {
+        self.terminal.queue(MoveToColumn(0))?;
+        self.terminal.print_prompt(self.get_prompt())?;
+        Ok(())
+    }
+
     fn move_home_print_head(&mut self) -> Result<()> {
-        self.terminal.move_home()?;
+        self.move_home()?;
         self.print_head()
     }
 
@@ -493,12 +498,6 @@ const DEFAULT_PROMPT: &str = "❯ ";
 const MULTILINE_PROMPT: &str = "┃ ";
 
 impl<W: Write + AsRawFd> Terminal<W> {
-    fn move_home(&mut self) -> Result<()> {
-        let width = DEFAULT_PROMPT.chars().count() as u16;
-        self.0.queue(MoveToColumn(width))?;
-        Ok(())
-    }
-
     fn update_prompt(&mut self, prompt: &str) -> Result<()> {
         self.0.queue(SavePosition)?;
         self.0.queue(MoveToColumn(0))?;
