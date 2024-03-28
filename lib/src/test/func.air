@@ -413,11 +413,7 @@ true
 =====
 ; [
     dispatcher = function $ {
-        body : if $ [
-            input == (. .) $ id $ caller,
-            id c,
-            false
-        ],
+        body : (input == (. .) $ id $ caller) if (id c) : false,
         caller_access : free,
         context : . context {
             : if,

@@ -5,20 +5,14 @@ use crate::{
         CtxAccessor,
     },
     func::MutableDispatcher,
-    list::List,
-    mode::ListItemMode,
     prelude::{
         default_mode,
-        list_for_all_mode,
-        list_for_some_mode,
         map_for_all_mode,
         named_mutable_fn,
         pair_mode,
-        symbol_id_mode,
         Named,
         Prelude,
     },
-    symbol::Symbol,
     transform::{
         eval::{
             Eval,
@@ -37,7 +31,6 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct CtrlPrelude {
     pub(crate) sequence: Named<FuncVal>,
-    pub(crate) breakable_sequence: Named<FuncVal>,
     pub(crate) if1: Named<FuncVal>,
     pub(crate) match1: Named<FuncVal>,
     pub(crate) while1: Named<FuncVal>,
@@ -47,7 +40,6 @@ impl Default for CtrlPrelude {
     fn default() -> Self {
         CtrlPrelude {
             sequence: sequence(),
-            breakable_sequence: breakable_sequence(),
             if1: if1(),
             match1: match1(),
             while1: while1(),
@@ -58,15 +50,25 @@ impl Default for CtrlPrelude {
 impl Prelude for CtrlPrelude {
     fn put(&self, m: &mut NameMap) {
         self.sequence.put(m);
-        self.breakable_sequence.put(m);
         self.if1.put(m);
         self.match1.put(m);
         self.while1.put(m);
     }
 }
 
+const BREAK: &str = "break";
+const CONTINUE: &str = "continue";
+
+#[derive(Copy, Clone)]
+enum CtrlFlowTag {
+    Error,
+    None,
+    Continue,
+    Break,
+}
+
 fn sequence() -> Named<FuncVal> {
-    let input_mode = list_for_all_mode(Mode::Generic(Transform::Id));
+    let input_mode = Mode::Generic(Transform::Id);
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
@@ -76,75 +78,15 @@ fn sequence() -> Named<FuncVal> {
     named_mutable_fn(";", input_mode, output_mode, func)
 }
 
-fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::List(list) = input else {
-        return Val::default();
-    };
-    let mut output = Val::default();
-    for val in list {
-        output = Eval.transform(&mut ctx, val);
-    }
-    output
-}
-
-fn breakable_sequence() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        symbol_id_mode(),
-        list_for_all_mode(Mode::Generic(Transform::Id)),
-    );
-    let output_mode = default_mode();
-    let func = MutableDispatcher::new(
-        fn_breakable_sequence::<FreeCtx>,
-        |ctx, val| fn_breakable_sequence(ctx, val),
-        |ctx, val| fn_breakable_sequence(ctx, val),
-    );
-    named_mutable_fn(";return", input_mode, output_mode, func)
-}
-
-fn fn_breakable_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let name = match pair.first {
-        Val::Symbol(s) => s,
-        Val::Unit(_) => Symbol::from_str("return"),
-        _ => return Val::default(),
-    };
-    let Val::List(list) = pair.second else {
-        return Val::default();
-    };
-
-    let mut output = Val::default();
-    let _ = ctx.remove(&name);
-    for val in list {
-        output = Eval.transform(&mut ctx, val);
-        if let Ok(val) = ctx.get_const_ref(&name) {
-            return val.clone();
-        }
-    }
-    output
+fn fn_sequence<Ctx: CtxAccessor>(ctx: Ctx, input: Val) -> Val {
+    block(ctx, input).0
 }
 
 fn if1() -> Named<FuncVal> {
-    let list = List::from(vec![
-        ListItemMode {
-            mode: default_mode(),
-            ellipsis: false,
-        },
-        ListItemMode {
-            mode: Mode::Generic(Transform::Id),
-            ellipsis: false,
-        },
-        ListItemMode {
-            mode: Mode::Generic(Transform::Id),
-            ellipsis: false,
-        },
-        ListItemMode {
-            mode: Mode::Generic(Transform::Id),
-            ellipsis: false,
-        },
-    ]);
-    let input_mode = list_for_some_mode(list);
+    let input_mode = pair_mode(
+        default_mode(),
+        pair_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
+    );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_if::<FreeCtx>,
@@ -154,53 +96,33 @@ fn if1() -> Named<FuncVal> {
     named_mutable_fn("if", input_mode, output_mode, func)
 }
 
-fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::List(list) = input else {
+fn fn_if<Ctx: CtxAccessor>(ctx: Ctx, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let mut iter = list.into_iter();
-    let Some(condition) = iter.next() else {
+    let condition = pair.first;
+    let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
-    if let Val::Bool(b) = condition {
-        if b.bool() {
-            let Some(branch) = iter.next() else {
-                return Val::default();
-            };
-            Eval.transform(&mut ctx, branch)
-        } else {
-            let _ = iter.next();
-            let Some(branch) = iter.next() else {
-                return Val::default();
-            };
-            Eval.transform(&mut ctx, branch)
-        }
+    let Val::Bool(b) = condition else {
+        return Val::default();
+    };
+    let branch = if b.bool() {
+        branches.first
     } else {
-        let _ = iter.next();
-        let _ = iter.next();
-        let Some(default) = iter.next() else {
-            return Val::default();
-        };
-        Eval.transform(&mut ctx, default)
-    }
+        branches.second
+    };
+    block(ctx, branch).0
 }
 
 fn match1() -> Named<FuncVal> {
-    let list = List::from(vec![
-        ListItemMode {
-            mode: default_mode(),
-            ellipsis: false,
-        },
-        ListItemMode {
-            mode: map_for_all_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
-            ellipsis: false,
-        },
-        ListItemMode {
-            mode: Mode::Generic(Transform::Id),
-            ellipsis: false,
-        },
-    ]);
-    let input_mode = list_for_some_mode(list);
+    let input_mode = pair_mode(
+        default_mode(),
+        pair_mode(
+            map_for_all_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
+            Mode::Generic(Transform::Id),
+        ),
+    );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_match::<FreeCtx>,
@@ -211,43 +133,29 @@ fn match1() -> Named<FuncVal> {
 }
 
 fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::List(list) = input else {
+    let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let mut iter = list.into_iter();
-    let Some(val) = iter.next() else {
+    let val = pair.first;
+    let Val::Pair(pair) = pair.second else {
         return Val::default();
     };
-    let Some(Val::Map(map)) = iter.next() else {
+    let Val::Map(map) = pair.first else {
         return Val::default();
     };
+    let default = pair.second;
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
             let k = Eval.transform(&mut ctx, k);
             if k == val { Some(v) } else { None }
         })
-        .unwrap_or_else(|| {
-            let Some(default) = iter.next() else {
-                return Val::default();
-            };
-            default
-        });
-    Eval.transform(&mut ctx, eval)
+        .unwrap_or(default);
+    block(ctx, eval).0
 }
 
 fn while1() -> Named<FuncVal> {
-    let list = List::from(vec![
-        ListItemMode {
-            mode: Mode::Generic(Transform::Id),
-            ellipsis: false,
-        },
-        ListItemMode {
-            mode: Mode::Generic(Transform::Id),
-            ellipsis: false,
-        },
-    ]);
-    let input_mode = list_for_some_mode(list);
+    let input_mode = pair_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id));
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_while::<FreeCtx>,
@@ -259,24 +167,97 @@ fn while1() -> Named<FuncVal> {
 
 #[allow(clippy::get_first)]
 fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::List(list) = input else {
+    let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Some(condition) = list.get(0) else {
-        return Val::default();
-    };
-    let Some(body) = list.get(1) else {
-        return Val::default();
-    };
+    let condition = pair.first;
+    let body = pair.second;
     loop {
-        let Val::Bool(b) = EvalByRef.transform(&mut ctx, condition) else {
+        let Val::Bool(b) = EvalByRef.transform(&mut ctx, &condition) else {
             return Val::default();
         };
-        if b.bool() {
-            EvalByRef.transform(&mut ctx, body);
-        } else {
+        if !b.bool() {
             break;
+        }
+        let (output, tag) = block_by_ref(&mut ctx, &body);
+        match tag {
+            CtrlFlowTag::Error => return output,
+            CtrlFlowTag::None => {}
+            CtrlFlowTag::Continue => {}
+            CtrlFlowTag::Break => return output,
         }
     }
     Val::default()
+}
+
+fn block<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> (Val, CtrlFlowTag) {
+    let Val::List(list) = input else {
+        return (Eval.transform(&mut ctx, input), CtrlFlowTag::None);
+    };
+    let mut output = Val::default();
+    for val in list {
+        let Val::Call(call) = val else {
+            output = Eval.transform(&mut ctx, val);
+            continue;
+        };
+        let Val::Symbol(s) = &call.func else {
+            output = Eval.transform(&mut ctx, Val::Call(call));
+            continue;
+        };
+        let tag = match &**s {
+            BREAK => CtrlFlowTag::Break,
+            CONTINUE => CtrlFlowTag::Continue,
+            _ => {
+                output = Eval.transform(&mut ctx, Val::Call(call));
+                continue;
+            }
+        };
+        let Val::Pair(pair) = call.input else {
+            return (Val::default(), CtrlFlowTag::Error);
+        };
+        let condition = Eval.transform(&mut ctx, pair.first);
+        let Val::Bool(condition) = condition else {
+            return (Val::default(), CtrlFlowTag::Error);
+        };
+        if condition.bool() {
+            return (Eval.transform(&mut ctx, pair.second), tag);
+        }
+    }
+    (output, CtrlFlowTag::None)
+}
+
+fn block_by_ref<Ctx: CtxAccessor>(ctx: &mut Ctx, input: &Val) -> (Val, CtrlFlowTag) {
+    let Val::List(list) = input else {
+        return (EvalByRef.transform(ctx, input), CtrlFlowTag::None);
+    };
+    let mut output = Val::default();
+    for val in list {
+        let Val::Call(call) = val else {
+            output = EvalByRef.transform(ctx, val);
+            continue;
+        };
+        let Val::Symbol(s) = &call.func else {
+            output = EvalByRef.transform(ctx, val);
+            continue;
+        };
+        let tag = match &**s {
+            BREAK => CtrlFlowTag::Break,
+            CONTINUE => CtrlFlowTag::Continue,
+            _ => {
+                output = EvalByRef.transform(ctx, val);
+                continue;
+            }
+        };
+        let Val::Pair(pair) = &call.input else {
+            return (Val::default(), CtrlFlowTag::Error);
+        };
+        let condition = EvalByRef.transform(ctx, &pair.first);
+        let Val::Bool(condition) = condition else {
+            return (Val::default(), CtrlFlowTag::Error);
+        };
+        if condition.bool() {
+            return (EvalByRef.transform(ctx, &pair.second), tag);
+        }
+    }
+    (output, CtrlFlowTag::None)
 }

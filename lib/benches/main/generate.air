@@ -1,12 +1,10 @@
 "bench generate" @ ; $ [
   x = 42,
   y = 24,
-  while [
-    x <> y,
-    if [x > y,
-        x = x - y,
-        y = y - x
-    ]
-  ],
+  (x <> y) while (x > y) if (
+    x = x - y
+  ) : (
+    y = y - x
+  ),
   x
 ]

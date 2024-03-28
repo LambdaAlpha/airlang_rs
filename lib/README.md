@@ -43,13 +43,10 @@ The Air language seeks to solve programming problems once and for all.
     gcd = function $ {
         body : ; $ [
             (x : y) = input,
-            while [
-                y <> 0,
-                ; [
-                    z = y,
-                    y = x % y,
-                    x = z,
-                ],
+            (y <> 0) while [
+                z = y,
+                y = x % y,
+                x = z,
             ],
             x
         ],

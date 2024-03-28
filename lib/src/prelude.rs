@@ -245,6 +245,7 @@ fn list_for_all_mode(mode: TransformMode) -> TransformMode {
     Mode::Specific(mode)
 }
 
+#[allow(unused)]
 fn list_for_some_mode(list_item: List<ListItemMode>) -> TransformMode {
     let mode = ValMode {
         list: Box::new(ListMode::ForSome(list_item)),
