@@ -12,11 +12,11 @@ categories = ["compilers"]
 
 [dependencies.airlang]
 path = "../lib"
-version = "0.0.13"
+version = "0.1.0"
 
 [dependencies.airlang_ext]
 path = "../ext"
-version = "0.0.13"
+version = "0.1.0"
 
 [[test]]
 name = "main"
