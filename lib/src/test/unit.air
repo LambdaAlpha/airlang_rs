@@ -9,3 +9,15 @@ unit 1
 type_of unit
 -----
 function
+=====
+is_unit .
+-----
+true
+=====
+is_unit true
+-----
+false
+=====
+is_unit false
+-----
+false
