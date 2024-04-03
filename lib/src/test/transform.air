@@ -2,15 +2,15 @@ id a
 -----
 a
 =====
-id $ lazy $ a
+id ! lazy ! a
 -----
 lazy a
 =====
-id $ . $ a
+id ! . ! a
 -----
 . a
 =====
-id $ true $ a
+id ! true ! a
 -----
 true a
 =====
@@ -18,31 +18,31 @@ id [a, not false]
 -----
 [a, not false]
 =====
-eval $ not $ false
+eval ! not ! false
 -----
 true
 =====
-eval $ . $ not $ false
+eval ! . ! not ! false
 -----
 . true
 =====
-eval $ true $ not $ false
+eval ! true ! not ! false
 -----
 true true
 =====
-eval $ id $ not $ false
+eval ! id ! not ! false
 -----
 not false
 =====
-eval $ lazy $ a
+eval ! lazy ! a
 -----
 a
 =====
-eval $ eval $ id $ a
+eval ! eval ! id ! a
 -----
 a
 =====
-eval [(not true) : not $ true, not true, {: (not true)}]
+eval [(not true) : not ! true, not true, {: (not true)}]
 -----
 [: false, false, {: false}]
 =====
@@ -50,27 +50,27 @@ lazy a
 -----
 a
 =====
-lazy $ . $ not $ false
+lazy ! . ! not ! false
 -----
 true
 =====
-lazy $ true $ not $ false
+lazy ! true ! not ! false
 -----
-true $ not $ false
+true ! not ! false
 =====
-lazy $ id $ a
+lazy ! id ! a
 -----
 id a
 =====
-lazy $ eval $ a
+lazy ! eval ! a
 -----
 eval a
 =====
-lazy $ lazy $ a
+lazy ! lazy ! a
 -----
-lazy $ a
+lazy ! a
 =====
-lazy $ . $ .
+lazy ! . ! .
 -----
 .
 =====

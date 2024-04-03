@@ -22,6 +22,6 @@ symbol.into_string ''
 -----
 ""
 =====
-symbol.into_string $ id $ hello_world!
+symbol.into_string ! id ! hello_world!
 -----
 "hello_world!"

@@ -18,7 +18,7 @@ true : "1"
 -----
 {false : false}
 =====
-not $ not $ true
+not ! not ! true
 -----
 true
 =====
@@ -38,6 +38,6 @@ false 1
 -----
 "a" "b"
 =====
-"a" $ not $ true
+"a" ! not ! true
 -----
 "a" false

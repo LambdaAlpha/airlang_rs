@@ -6,7 +6,7 @@
 -----
 .
 =====
-; [a = 1, b = id $ a, read $ eval $ b]
+; [a = 1, b = id ! a, read ! eval ! b]
 -----
 1
 =====
@@ -30,7 +30,7 @@
 -----
 .
 =====
-; [a = id $ b, b = 1, move $ eval $ a]
+; [a = id ! b, b = 1, move ! eval ! a]
 -----
 1
 =====
@@ -50,7 +50,7 @@
 -----
 1
 =====
-; [a = id $ b, $$ $ a = 1, b]
+; [a = id ! b, !! ! a = 1, b]
 -----
 1
 =====
@@ -58,7 +58,7 @@
 -----
 1
 =====
-; [(a . none) = 1, (is_final a) and not $ is_null $ a]
+; [(a . none) = 1, (is_final a) and not ! is_null ! a]
 -----
 false
 =====
@@ -74,7 +74,7 @@ true
 -----
 true
 =====
-; [(a . {}) = 1, (is_final a) and not $ is_null $ a]
+; [(a . {}) = 1, (is_final a) and not ! is_null ! a]
 -----
 false
 =====
@@ -90,23 +90,23 @@ false
 -----
 [1, 2, 3]
 =====
-; [((a : b) . final) = 1 : 2, (is_final a) and is_final $ b]
+; [((a : b) . final) = 1 : 2, (is_final a) and is_final ! b]
 -----
 true
 =====
-; [((a . final) : (b . constant)) = 1 : 2, (is_final a) and is_constant $ b]
+; [((a . final) : (b . constant)) = 1 : 2, (is_final a) and is_constant ! b]
 -----
 true
 =====
-; [((a : (b . final)) . constant) = 1 : 2, (is_constant a) and (not $ is_constant $ b) and is_final $ b]
+; [((a : (b . final)) . constant) = 1 : 2, (is_constant a) and (not ! is_constant ! b) and is_final ! b]
 -----
 true
 =====
-; [(f a) = id $ 1 $ 2, [f, a]]
+; [(f a) = id ! 1 ! 2, [f, a]]
 -----
 [1, 2]
 =====
-; [(a b c) = id $ 1 2 3, [a, b, c]]
+; [(a b c) = id ! 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
@@ -198,7 +198,7 @@ true
 -----
 1
 =====
-; [a = 1, set_final a, (is_final a) and not $ is_constant $ a]
+; [a = 1, set_final a, (is_final a) and not ! is_constant ! a]
 -----
 true
 =====
@@ -258,15 +258,15 @@ access .
 -----
 mutable
 =====
-. | access $ .
+. | access ! .
 -----
 free
 =====
-; [(a . constant) = . context {}, a | access $ .]
+; [(a . constant) = . context {}, a | access ! .]
 -----
 constant
 =====
-; [a = . context {}, a | access $ .]
+; [a = . context {}, a | access ! .]
 -----
 mutable
 =====
@@ -274,22 +274,22 @@ has_meta .
 -----
 false
 =====
-; [set_meta $ . context {}, has_meta .]
+; [set_meta ! . context {}, has_meta .]
 -----
 true
 =====
-; [m1 = . context {}, set_meta m1, m2 = true | this $ ., m1 == m2]
+; [m1 = . context {}, set_meta m1, m2 = true | this ! ., m1 == m2]
 -----
 true
 =====
-; [a = (. context {}) context {}, a | set_meta $ ., a | has_meta $ .]
+; [a = (. context {}) context {}, a | set_meta ! ., a | has_meta ! .]
 -----
 false
 =====
 ; [
     a = . context {a1 : 1},
     b = . context {b1 : 2},
-    dispatcher = function $ {
+    dispatcher = function ! {
         body : input match {
             (id a1) : (id a),
             (id b1) : (id b),
@@ -300,22 +300,22 @@ false
             : id,
         },
     },
-    set_meta $ . context {: dispatcher},
+    set_meta ! . context {: dispatcher},
     (a1 == 1) and b1 == 2
 ]
 -----
 true
 =====
 ; [
-    da = function $ {
-        body : id $ b,
+    da = function ! {
+        body : id ! b,
         caller_access : free,
         context : . context {
             : id,
         },
     },
-    db = function $ {
-        body : id $ c,
+    db = function ! {
+        body : id ! c,
         caller_access : free,
         context : . context {
             : id,
@@ -328,17 +328,17 @@ true
             }
         }
     },
-    a | read $ d
+    a | read ! d
 ]
 -----
 1
 =====
 ; [
-    dispatcher = function $ {
+    dispatcher = function ! {
         body : true,
         caller_access : free,
     },
-    set_meta $ . context {: dispatcher, a : 1},
+    set_meta ! . context {: dispatcher, a : 1},
     a
 ]
 -----
@@ -346,11 +346,11 @@ true
 =====
 ; [
     a = 1,
-    dispatcher = function $ {
+    dispatcher = function ! {
         body : false,
         caller_access : free,
     },
-    set_meta $ . context {: dispatcher},
+    set_meta ! . context {: dispatcher},
     a
 ]
 -----
@@ -360,17 +360,17 @@ true
     a = . context {p : 1 : 2},
     b = 3,
     a | p set_1 b,
-    a | read $ p,
+    a | read ! p,
 ]
 -----
 3 : 2
 =====
 ; [
     set_first = set_1,
-    a = . context {set_first : move $ set_first, p : 1 : 2},
+    a = . context {set_first : move ! set_first, p : 1 : 2},
     b = 3,
     a .| p set_first b,
-    a | read $ p,
+    a | read ! p,
 ]
 -----
 3 : 2
@@ -378,23 +378,23 @@ true
 ; [
     a = . context {p : 1 : 2, b : 3},
     a |. p set_1 b,
-    a | read $ p,
+    a | read ! p,
 ]
 -----
 3 : 2
 =====
 ; [
     set_first = set_1,
-    a = . context {set_first : move $ set_first, p : 1 : 2, b : 3},
+    a = . context {set_first : move ! set_first, p : 1 : 2, b : 3},
     a .|. p set_first b,
-    a | read $ p,
+    a | read ! p,
 ]
 -----
 3 : 2
 =====
 ; [
-    set_meta $ . context {a : 1},
-    true | read $ a
+    set_meta ! . context {a : 1},
+    true | read ! a
 ]
 -----
 1
@@ -406,25 +406,25 @@ true
 -----
 1
 =====
-; [a = 1, [] | read $ a]
+; [a = 1, [] | read ! a]
 -----
 1
 =====
 ; [
     a = (. context {b : 1}) context {c : 2},
-    [a, true] | read $ b
+    [a, true] | read ! b
 ]
 -----
 1
 =====
 ; [
     a = . context {b : . context {c : 1}},
-    [a, b] | read $ c
+    [a, b] | read ! c
 ]
 -----
 1
 =====
-. | this $ .
+. | this ! .
 -----
 .
 =====
@@ -432,63 +432,63 @@ true
 -----
 2
 =====
-; [a = 1, . | move $ a]
+; [a = 1, . | move ! a]
 -----
 .
 =====
-. | get_1 $ 1 : 2
+. | get_1 ! 1 : 2
 -----
 1
 =====
 ; [
     a = . context {b : 1},
-    hm = a | has_meta $ .,
-    b = a | read $ b,
+    hm = a | has_meta ! .,
+    b = a | read ! b,
     (not hm) and b == 1
 ]
 -----
 true
 =====
-context.represent $ . context {}
+context.represent ! . context {}
 -----
 . : {}
 =====
 ; [
-    (meta : m) = context.represent $ (. context {super : id $ b}) context {a : 1},
-    meta = context.represent $ move $ meta,
+    (meta : m) = context.represent ! (. context {super : id ! b}) context {a : 1},
+    meta = context.represent ! move ! meta,
     meta : m
 ]
 -----
 (. : {super : b}) : {a : 1}
 =====
-; [final = id $ final, context.represent $ . context {a : 1 . final}]
+; [final = id ! final, context.represent ! . context {a : 1 . final}]
 -----
 . : {a : 1 . final}
 =====
-; [(_ : m) = context.represent $ . context {b : . context {}}, b = m map.remove id $ b, type_of b]
+; [(_ : m) = context.represent ! . context {b : . context {}}, b = m map.remove id ! b, type_of b]
 -----
 context
 =====
-; [a = prelude $ ., a | not $ true]
+; [a = prelude ! ., a | not ! true]
 -----
 false
 =====
-; [a = prelude $ ., a | is_null $ prelude]
+; [a = prelude ! ., a | is_null ! prelude]
 -----
 false
 =====
-; [a = 1, b = prelude $ ., b | is_null $ a]
+; [a = 1, b = prelude ! ., b | is_null ! a]
 -----
 true
 =====
-; [a = prelude $ ., a | is_constant $ prelude]
+; [a = prelude ! ., a | is_constant ! prelude]
 -----
 true
 =====
-; [a = 1, b = this $ ., b | read $ a]
+; [a = 1, b = this ! ., b | read ! a]
 -----
 1
 =====
-; [a = this $ ., b = 1, a | is_null $ b]
+; [a = this ! ., b = 1, a | is_null ! b]
 -----
 true

@@ -1,4 +1,4 @@
-"Demonstration of the gcd algorithm" @ ; $ [
+"Demonstration of the gcd algorithm" @ ; ! [
     ctx = . context {
         : ;,
         : =,
@@ -6,8 +6,8 @@
         : <>,
         : %,
     },
-    gcd = function $ {
-        body : ; $ [
+    gcd = function ! {
+        body : ; ! [
             (x : y) = input,
             (y <> 0) while [
                 z = y,
@@ -16,7 +16,7 @@
             ],
             x
         ],
-        context : move $ ctx,
+        context : move ! ctx,
     },
     42 gcd 24
 ]

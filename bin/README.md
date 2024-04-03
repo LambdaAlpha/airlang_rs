@@ -32,7 +32,7 @@ The Air language seeks to solve programming problems once and for all.
 ## Demo
 
 ```Air
-"Demonstration of the gcd algorithm" @ ; $ [
+"Demonstration of the gcd algorithm" @ ; ! [
     ctx = . context {
         : ;,
         : =,
@@ -40,8 +40,8 @@ The Air language seeks to solve programming problems once and for all.
         : <>,
         : %,
     },
-    gcd = function $ {
-        body : ; $ [
+    gcd = function ! {
+        body : ; ! [
             (x : y) = input,
             (y <> 0) while [
                 z = y,
@@ -50,7 +50,7 @@ The Air language seeks to solve programming problems once and for all.
             ],
             x
         ],
-        context : move $ ctx,
+        context : move ! ctx,
     },
     42 gcd 24
 ]

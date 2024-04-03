@@ -1,5 +1,5 @@
 ; [
-    p = proposition $ {
+    p = proposition ! {
         function : not,
         input : 1,
         output : 2,
@@ -10,7 +10,7 @@
 1
 =====
 ; [
-    p = proposition $ {
+    p = proposition ! {
         function : not,
         input : 1,
         output : 2,
@@ -21,7 +21,7 @@
 2
 =====
 ; [
-    p = proposition $ {
+    p = proposition ! {
         function : not,
         input : 1,
         output : 2,
@@ -32,27 +32,27 @@
 true
 =====
 ; [
-    $map = function $ {
+    !map = function ! {
         body : input,
         input_mode : {map : id all eval},
     },
-    m = $map $ {
+    m = !map ! {
         function : not,
         input : true,
         output : false,
     },
-    m == proposition.represent $ proposition $ m
+    m == proposition.represent ! proposition ! m
 ]
 -----
 true
 =====
 ; [
-    m = proposition.represent $ proposition.prove $ not $ true,
-    $map = function $ {
+    m = proposition.represent ! proposition.prove ! not ! true,
+    !map = function ! {
         body : input,
         input_mode : {map : id all eval},
     },
-    expected = $map $ {
+    expected = !map ! {
         function : not,
         input : true,
         output : false,
@@ -64,12 +64,12 @@ true
 true
 =====
 ; [
-    p = proposition $ {
+    p = proposition ! {
         function : not,
         input : 1,
         output : 2,
     },
-    ((type_of p) == id $ proposition) and (proposition.proved p) == false
+    ((type_of p) == id ! proposition) and (proposition.proved p) == false
 ]
 -----
 true

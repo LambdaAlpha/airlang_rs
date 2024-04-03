@@ -42,7 +42,7 @@ fn call() -> Named<FuncVal> {
         |ctx, val| fn_call(ctx, val),
         |ctx, val| fn_call(ctx, val),
     );
-    named_mutable_fn("$$", input_mode, output_mode, func)
+    named_mutable_fn("!!", input_mode, output_mode, func)
 }
 
 fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {

@@ -42,7 +42,7 @@ const TRUE: &str = "true";
 const FALSE: &str = "false";
 const ANNOTATION_INFIX: &str = "@";
 const PAIR_INFIX: &str = ":";
-const CALL_INFIX: &str = "$";
+const CALL_INFIX: &str = "!";
 const REVERSE_INFIX: &str = "?";
 
 #[derive(Error, Debug)]

@@ -1,7 +1,7 @@
-; [a = 1, b = id $ a, $$ $ read $ b]
+; [a = 1, b = id ! a, !! ! read ! b]
 -----
 1
 =====
-$$ $ id $ not $ false
+!! ! id ! not ! false
 -----
 true

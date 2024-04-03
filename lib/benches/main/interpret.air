@@ -1,4 +1,4 @@
-"bench interpret" @ ; $ [
+"bench interpret" @ ; ! [
   ctx = . context {
     : ;,
     : while,
@@ -8,8 +8,8 @@
     : =,
     : -,
   },
-  f = function $ {
-    body : ; $ [
+  f = function ! {
+    body : ; ! [
       (x : y) = input,
       (x <> y) while (x > y) if (
         x = x - y
@@ -18,7 +18,7 @@
       ),
       x
     ],
-    context : move $ ctx,
+    context : move ! ctx,
   },
   x = 42,
   y = 24,
