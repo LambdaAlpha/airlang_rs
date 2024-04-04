@@ -23,7 +23,6 @@ pub(crate) mod generator;
 mod test;
 
 const SEPARATOR: char = ',';
-const TOKENS_QUOTE: char = '`';
 const LIST_LEFT: char = '[';
 const LIST_RIGHT: char = ']';
 const MAP_LEFT: char = '{';
@@ -40,6 +39,7 @@ const BYTES_PREFIX: char = '#';
 const UNIT: &str = ".";
 const TRUE: &str = "true";
 const FALSE: &str = "false";
+const TOKENS_PREFIX: &str = "`";
 const ANNOTATION_INFIX: &str = "@";
 const PAIR_INFIX: &str = ":";
 const CALL_INFIX: &str = "!";
@@ -70,18 +70,11 @@ pub fn generate_reserve(src: &reserve::Repr) -> String {
 pub(crate) fn is_special(c: char) -> bool {
     matches!(
         c,
-        LIST_LEFT
-            | LIST_RIGHT
-            | MAP_LEFT
-            | MAP_RIGHT
-            | WRAP_LEFT
-            | WRAP_RIGHT
-            | SEPARATOR
-            | TOKENS_QUOTE
+        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
     )
 }
 
-pub(crate) fn is_keyword(s: &str) -> bool {
+pub(crate) fn maybe_keyword(s: &str) -> bool {
     matches!(
         s,
         UNIT | TRUE | FALSE | ANNOTATION_INFIX | PAIR_INFIX | CALL_INFIX | REVERSE_INFIX

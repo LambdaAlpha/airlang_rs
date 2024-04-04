@@ -14,8 +14,8 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
-        is_keyword,
         is_special,
+        maybe_keyword,
         ANNOTATION_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
@@ -223,7 +223,7 @@ fn is_need_quote(str: &str) -> bool {
     if str.is_empty() {
         return true;
     }
-    if is_keyword(str) {
+    if maybe_keyword(str) {
         return true;
     }
     let mut chars = str.chars();

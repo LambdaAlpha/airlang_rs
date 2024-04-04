@@ -7,6 +7,7 @@ use nom::{
     branch::alt,
     bytes::complete::{
         is_not,
+        tag,
         tag_no_case,
         take_while,
         take_while1,
@@ -48,7 +49,6 @@ use nom::{
     },
     sequence::{
         delimited,
-        pair,
         preceded,
         terminated,
         tuple,
@@ -87,7 +87,7 @@ use crate::{
         SEPARATOR,
         STRING_QUOTE,
         SYMBOL_QUOTE,
-        TOKENS_QUOTE,
+        TOKENS_PREFIX,
         TRUE,
         UNIT,
         WRAP_LEFT,
@@ -189,8 +189,7 @@ fn token<'a, T: ParseRepr, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    // a parsing rule is decided by first 2 chars
-    let (src, (first, second)) = peek(pair(anychar, opt(anychar)))(src)?;
+    let (src, first) = peek(anychar)(src)?;
 
     let parser = match first {
         LIST_LEFT => |s| map(list1, Token::Default)(s),
@@ -200,12 +199,10 @@ where
         WRAP_LEFT => |s| map(wrap, Token::Default)(s),
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
-        TOKENS_QUOTE => |s| map(tokens, Token::Default)(s),
         STRING_QUOTE => |s| map(string, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
         BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
         '0'..='9' => |s| map(number, Token::Default)(s),
-        '+' | '-' if matches!(second, Some('0'..='9')) => |s| map(number, Token::Default)(s),
         s if is_symbol(s) => unquote_symbol,
         _ => fail,
     };
@@ -226,28 +223,12 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn non_tokens<'a, T: ParseRepr, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let (src, first) = peek(anychar)(src)?;
-    let parser = match first {
-        TOKENS_QUOTE => fail,
-        _ => token,
-    };
-    context("non_tokens", parser)(src)
-}
-
 fn tokens<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = brackets(
-        TOKENS_QUOTE,
-        TOKENS_QUOTE,
-        separated_list0(delimiter1, non_tokens),
-    );
+    let collect = brackets(LIST_LEFT, LIST_RIGHT, separated_list0(delimiter1, token));
     let f = map(collect, |tokens| {
         let list = tokens
             .into_iter()
@@ -440,10 +421,12 @@ fn is_symbol(c: char) -> bool {
 fn unquote_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let symbols = take_while(is_trivial_symbol);
-    let f = map(symbols, unquote_symbol_to_token);
+    let signed_number = map(signed_number, Token::Default);
+    let tokens = preceded(tag(TOKENS_PREFIX), map(tokens, Token::Default));
+    let symbols = map(take_while(is_trivial_symbol), unquote_symbol_to_token);
+    let f = alt((signed_number, tokens, symbols));
     context("unquote_symbol", f)(src)
 }
 
@@ -609,6 +592,19 @@ where
     let normal = is_not("\"\\ \t\r\n");
     let f = verify(normal, |s: &str| !s.is_empty());
     context("string_literal", f)(src)
+}
+
+fn signed_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let (src, second) = peek(preceded(one_of("+-"), opt(anychar)))(src)?;
+    let Some('0'..='9') = second else {
+        return fail(src);
+    };
+    let f = cut(number);
+    context("signed_number", f)(src)
 }
 
 fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
