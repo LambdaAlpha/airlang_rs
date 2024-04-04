@@ -14,7 +14,7 @@ use nom::{
     },
     character::complete::{
         anychar,
-        char as exact_char,
+        char as char1,
         digit1,
         hex_digit1,
         multispace1,
@@ -134,24 +134,46 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(delimited(
-        take_while(is_delimiter),
-        compose,
-        take_while(is_delimiter),
-    ));
+    let f = all_consuming(trim(compose));
     context("top", f)(src)
+}
+
+fn trim<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+where
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, O, E>,
+{
+    delimited(delimiter0, f, delimiter0)
+}
+
+fn delimiter0<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+where
+    E: ParseError<&'a str>,
+{
+    take_while(is_delimiter)(src)
+}
+
+fn delimiter1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+where
+    E: ParseError<&'a str>,
+{
+    take_while1(is_delimiter)(src)
 }
 
 fn is_delimiter(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
-fn normed<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+fn brackets<'a, T, E, F>(
+    left: char,
+    right: char,
+    f: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-    F: Parser<&'a str, O, E>,
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, T, E>,
 {
-    preceded(take_while(is_delimiter), f)
+    delimited(char1(left), cut(trim(f)), cut(char1(right)))
 }
 
 fn wrap<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -159,11 +181,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = delimited(
-        exact_char(WRAP_LEFT),
-        cut(normed(compose)),
-        cut(normed(exact_char(WRAP_RIGHT))),
-    );
+    let f = brackets(WRAP_LEFT, WRAP_RIGHT, compose);
     context("wrap", f)(src)
 }
 
@@ -175,9 +193,9 @@ where
     let (src, (first, second)) = peek(pair(anychar, opt(anychar)))(src)?;
 
     let parser = match first {
-        LIST_LEFT => |s| map(repr_list, Token::Default)(s),
+        LIST_LEFT => |s| map(list1, Token::Default)(s),
         LIST_RIGHT => fail,
-        MAP_LEFT => |s| map(repr_map, Token::Default)(s),
+        MAP_LEFT => |s| map(map1, Token::Default)(s),
         MAP_RIGHT => fail,
         WRAP_LEFT => |s| map(wrap, Token::Default)(s),
         WRAP_RIGHT => fail,
@@ -225,10 +243,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = delimited(
-        exact_char(TOKENS_QUOTE),
-        cut(separated_list0(take_while1(is_delimiter), non_tokens)),
-        cut(normed(exact_char(TOKENS_QUOTE))),
+    let collect = brackets(
+        TOKENS_QUOTE,
+        TOKENS_QUOTE,
+        separated_list0(delimiter1, non_tokens),
     );
     let f = map(collect, |tokens| {
         let list = tokens
@@ -245,7 +263,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let delimited_tokens = separated_list1(take_while1(is_delimiter), token);
+    let delimited_tokens = separated_list1(delimiter1, token);
     let f = map_opt(delimited_tokens, compose_tokens);
     context("compose", f)(src)
 }
@@ -350,16 +368,20 @@ fn items<'a, O1, O2, E, S, F, G>(
     last: G,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<O2>, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str>,
     S: Parser<&'a str, O1, E>,
     F: Parser<&'a str, O2, E>,
     G: Parser<&'a str, O2, E>,
 {
     let items_last = tuple((
-        fold_many0(terminated(item, separator), Vec::new, |mut items, item| {
-            items.push(item);
-            items
-        }),
+        fold_many0(
+            terminated(item, trim(separator)),
+            Vec::new,
+            |mut items, item| {
+                items.push(item);
+                items
+            },
+        ),
         opt(last),
     ));
     map(items_last, |(mut items, last)| {
@@ -370,40 +392,24 @@ where
     })
 }
 
-fn repr_list<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn list1<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(
-        normed(compose),
-        normed(exact_char(SEPARATOR)),
-        normed(compose),
-    );
-    let delimited_items = delimited(
-        exact_char(LIST_LEFT),
-        cut(items),
-        cut(normed(exact_char(LIST_RIGHT))),
-    );
+    let items = items(compose, char1(SEPARATOR), compose);
+    let delimited_items = brackets(LIST_LEFT, LIST_RIGHT, items);
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
 }
 
-fn repr_map<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn map1<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(
-        key_value_pair,
-        normed(exact_char(SEPARATOR)),
-        key_value_pair,
-    );
-    let delimited_items = delimited(
-        exact_char(MAP_LEFT),
-        cut(items),
-        cut(normed(exact_char(MAP_RIGHT))),
-    );
+    let items = items(key_value_pair, char1(SEPARATOR), key_value_pair);
+    let delimited_items = brackets(MAP_LEFT, MAP_RIGHT, items);
     let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
     context("map", f)(src)
 }
@@ -413,7 +419,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(normed(compose), |repr: T| {
+    let f = map(compose, |repr: T| {
         repr.try_into_pair()
             .unwrap_or_else(|repr| (repr, From::from(Unit)))
     });
@@ -473,9 +479,9 @@ where
         string
     });
     let delimited_string = delimited(
-        exact_char(SYMBOL_QUOTE),
+        char1(SYMBOL_QUOTE),
         cut(collect_fragments),
-        cut(exact_char(SYMBOL_QUOTE)),
+        cut(char1(SYMBOL_QUOTE)),
     );
     let f = map(delimited_string, |s| From::from(Symbol::from_string(s)));
     context("quoted_symbol", f)(src)
@@ -486,10 +492,10 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let f = preceded(
-        exact_char('\\'),
+        char1('\\'),
         alt((
-            value('\\', exact_char('\\')),
-            value(SYMBOL_QUOTE, exact_char(SYMBOL_QUOTE)),
+            value('\\', char1('\\')),
+            value(SYMBOL_QUOTE, char1(SYMBOL_QUOTE)),
         )),
     );
     context("symbol_escaped_char", f)(src)
@@ -532,9 +538,9 @@ where
         string
     });
     let delimited_string = delimited(
-        exact_char(STRING_QUOTE),
+        char1(STRING_QUOTE),
         cut(collect_fragments),
-        cut(exact_char(STRING_QUOTE)),
+        cut(char1(STRING_QUOTE)),
     );
     let f = map(delimited_string, |s| From::from(Str::from(s)));
     context("string", f)(src)
@@ -552,16 +558,16 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let f = preceded(
-        exact_char('\\'),
+        char1('\\'),
         alt((
             unicode,
-            value('\n', exact_char('n')),
-            value('\r', exact_char('r')),
-            value('\t', exact_char('t')),
-            value('\\', exact_char('\\')),
-            value(STRING_QUOTE, exact_char(STRING_QUOTE)),
-            value(' ', exact_char(' ')),
-            value(' ', exact_char('s')),
+            value('\n', char1('n')),
+            value('\r', char1('r')),
+            value('\t', char1('t')),
+            value('\\', char1('\\')),
+            value(STRING_QUOTE, char1(STRING_QUOTE)),
+            value(' ', char1(' ')),
+            value(' ', char1('s')),
         )),
     );
     context("string_escaped_char", f)(src)
@@ -573,8 +579,8 @@ where
 {
     let digit = take_while_m_n(1, 6, |c: char| c.is_hex_digit());
     let delimited_digit = preceded(
-        exact_char('u'),
-        delimited(exact_char('('), cut(digit), cut(exact_char(')'))),
+        char1('u'),
+        delimited(char1('('), cut(digit), cut(char1(')'))),
     );
     let parse_u32 = map_res(delimited_digit, move |hex| u32::from_str_radix(hex, 16));
     let f = map_opt(parse_u32, std::char::from_u32);
@@ -614,20 +620,20 @@ where
     context("number", f)(src)
 }
 
-fn normed_num0<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
+fn trim_num0<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
     F: Parser<&'a str, &'a str, E>,
 {
-    map(separated_list0(exact_char('_'), f), |s| s.join(""))
+    map(separated_list0(char1('_'), f), |s| s.join(""))
 }
 
-fn normed_num1<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
+fn trim_num1<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
     F: Parser<&'a str, &'a str, E>,
 {
-    map(separated_list1(exact_char('_'), f), |s| s.join(""))
+    map(separated_list1(char1('_'), f), |s| s.join(""))
 }
 
 fn hex_int<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -637,7 +643,7 @@ where
 {
     let digits = tuple((
         opt(one_of("+-")),
-        preceded(tag_no_case("0x"), cut(normed_num1(hex_digit1))),
+        preceded(tag_no_case("0x"), cut(trim_num1(hex_digit1))),
     ));
     let f = map_res(digits, |(sign, digits): (Option<char>, String)| {
         let i = Int::from_sign_string_radix(!matches!(sign, Some('-')), &digits, 16);
@@ -655,7 +661,7 @@ where
         opt(one_of("+-")),
         preceded(
             tag_no_case("0b"),
-            cut(normed_num1(take_while1(|c: char| c == '0' || c == '1'))),
+            cut(trim_num1(take_while1(|c: char| c == '0' || c == '1'))),
         ),
     ));
     let f = map_res(digits, |(sign, digits): (Option<char>, String)| {
@@ -671,11 +677,11 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let sign = opt(one_of("+-"));
-    let integral = normed_num1(digit1);
-    let fractional = opt(preceded(exact_char('.'), cut(normed_num0(digit1))));
+    let integral = trim_num1(digit1);
+    let fractional = opt(preceded(char1('.'), cut(trim_num0(digit1))));
     let exponential = opt(preceded(
         tag_no_case("e"),
-        cut(tuple((opt(one_of("+-")), normed_num1(digit1)))),
+        cut(tuple((opt(one_of("+-")), trim_num1(digit1)))),
     ));
     let fragments = tuple((sign, integral, fractional, exponential));
     #[allow(clippy::type_complexity)]
@@ -711,7 +717,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let f = preceded(
-        exact_char(BYTES_PREFIX),
+        char1(BYTES_PREFIX),
         alt((hex_bytes, bin_bytes, empty_bytes)),
     );
     context("bytes", f)(src)
@@ -723,7 +729,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
-    let tagged_digits = preceded(tag_no_case("x"), cut(normed_num0(digits)));
+    let tagged_digits = preceded(tag_no_case("x"), cut(trim_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(From::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
@@ -740,7 +746,7 @@ where
     let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
         s.len() % 8 == 0
     });
-    let tagged_digits = preceded(tag_no_case("b"), cut(normed_num0(digits)));
+    let tagged_digits = preceded(tag_no_case("b"), cut(trim_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(From::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
