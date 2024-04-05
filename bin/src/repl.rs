@@ -2,7 +2,6 @@ use std::{
     fmt::Display,
     io::{
         stdin,
-        stdout,
         Read,
         Result,
         Write,
@@ -68,6 +67,8 @@ use crate::init_ctx;
 pub(crate) struct Repl<W: Write + AsRawFd> {
     ctx: Ctx,
     terminal: Terminal<W>,
+    is_raw_mode_enabled: bool,
+
     multiline_mode: bool,
     previous_lines: Vec<String>,
     // last line, before cursor
@@ -86,6 +87,12 @@ struct History {
 
 struct Terminal<W: Write + AsRawFd>(W);
 
+enum CtrlFlow {
+    None,
+    Continue,
+    Break,
+}
+
 impl<W: Write + AsRawFd> Repl<W> {
     pub(crate) fn new(out: W) -> Self {
         let mut ctx = initial_ctx();
@@ -94,6 +101,7 @@ impl<W: Write + AsRawFd> Repl<W> {
         Self {
             ctx,
             terminal,
+            is_raw_mode_enabled: false,
             multiline_mode: false,
             previous_lines: Vec::new(),
             head_buffer: String::new(),
@@ -109,23 +117,37 @@ impl<W: Write + AsRawFd> Repl<W> {
             return self.run_once();
         }
 
-        // must be named
-        let _clean_up = CleanUp::init()?;
+        self.is_raw_mode_enabled = is_raw_mode_enabled()?;
+
         self.setup()?;
+
+        self.set_title()?;
+        self.terminal.flush()?;
 
         loop {
             self.terminal.newline_default_prompt()?;
             self.terminal.flush()?;
 
-            self.handle_event()?;
+            let should_break = self.handle_event()?;
+            if should_break {
+                break;
+            }
         }
+        Ok(())
     }
 
     fn setup(&mut self) -> Result<()> {
         enable_raw_mode()?;
-        self.terminal.queue(EnableBracketedPaste)?;
-        self.set_title()?;
-        self.terminal.flush()
+        self.terminal.execute(EnableBracketedPaste)
+    }
+
+    fn cleanup(&mut self) {
+        let _ = self.terminal.execute(DisableBracketedPaste);
+        if self.is_raw_mode_enabled {
+            let _ = enable_raw_mode();
+        } else {
+            let _ = disable_raw_mode();
+        }
     }
 
     fn run_once(&mut self) -> Result<()> {
@@ -136,15 +158,15 @@ impl<W: Write + AsRawFd> Repl<W> {
         self.terminal.flush()
     }
 
-    fn handle_event(&mut self) -> Result<()> {
+    fn handle_event(&mut self) -> Result<bool /* break */> {
         loop {
             let event = read()?;
             match event {
-                Event::Key(key) => {
-                    if self.handle_key(key)? {
-                        break Ok(());
-                    }
-                }
+                Event::Key(key) => match self.handle_key(key)? {
+                    CtrlFlow::None => {}
+                    CtrlFlow::Continue => break Ok(false),
+                    CtrlFlow::Break => break Ok(true),
+                },
                 Event::Mouse(_) => {}
                 Event::Paste(text) => {
                     self.handle_paste(text)?;
@@ -173,7 +195,7 @@ impl<W: Write + AsRawFd> Repl<W> {
         self.terminal.flush()
     }
 
-    fn handle_key(&mut self, key: KeyEvent) -> Result<bool /* break */> {
+    fn handle_key(&mut self, key: KeyEvent) -> Result<CtrlFlow> {
         match key.code {
             KeyCode::Enter => {
                 return self.handle_enter();
@@ -223,10 +245,10 @@ impl<W: Write + AsRawFd> Repl<W> {
             KeyCode::Media(_) => {}
             KeyCode::Modifier(_) => {}
         }
-        Ok(false)
+        Ok(CtrlFlow::None)
     }
 
-    fn handle_enter(&mut self) -> Result<bool /* break */> {
+    fn handle_enter(&mut self) -> Result<CtrlFlow> {
         if self.multiline_mode {
             let new_line = take(&mut self.head_buffer);
             self.previous_lines.push(new_line);
@@ -236,15 +258,15 @@ impl<W: Write + AsRawFd> Repl<W> {
             self.print_head()?;
             self.print_tail_restore_position()?;
             self.terminal.flush()?;
-            Ok(false)
+            Ok(CtrlFlow::None)
         } else {
             self.commit()?;
             self.terminal.flush()?;
-            Ok(true)
+            Ok(CtrlFlow::Continue)
         }
     }
 
-    fn handle_char(&mut self, c: char, modifiers: KeyModifiers) -> Result<bool /* break */> {
+    fn handle_char(&mut self, c: char, modifiers: KeyModifiers) -> Result<CtrlFlow> {
         if modifiers.is_empty() || modifiers == KeyModifiers::SHIFT {
             self.head_buffer.push(c);
 
@@ -253,12 +275,14 @@ impl<W: Write + AsRawFd> Repl<W> {
             }
             self.print_tail_restore_position()?;
             self.terminal.flush()?;
-            return Ok(false);
+            return Ok(CtrlFlow::None);
         }
         if modifiers == KeyModifiers::ALT && c == 'm' {
             self.handle_multiline_switch()?;
+        } else if modifiers == KeyModifiers::CONTROL && c == 'c' {
+            return Ok(CtrlFlow::Break);
         }
-        Ok(false)
+        Ok(CtrlFlow::None)
     }
 
     fn handle_multiline_switch(&mut self) -> Result<()> {
@@ -284,10 +308,10 @@ impl<W: Write + AsRawFd> Repl<W> {
         self.terminal.new_line()?;
         self.terminal.flush()?;
 
-        disable_raw_mode()?;
+        self.cleanup();
         self.eval(&input)?;
         self.terminal.flush()?;
-        enable_raw_mode()
+        self.setup()
     }
 
     fn handle_backspace(&mut self) -> Result<()> {
@@ -494,6 +518,12 @@ impl<W: Write + AsRawFd> Repl<W> {
     }
 }
 
+impl<W: Write + AsRawFd> Drop for Repl<W> {
+    fn drop(&mut self) {
+        self.cleanup();
+    }
+}
+
 const DEFAULT_PROMPT: &str = "❯ ";
 const MULTILINE_PROMPT: &str = "┃ ";
 
@@ -587,35 +617,16 @@ impl<W: Write + AsRawFd> Terminal<W> {
         Ok(())
     }
 
+    fn execute(&mut self, command: impl Command) -> Result<()> {
+        self.0.execute(command)?;
+        Ok(())
+    }
+
     fn flush(&mut self) -> Result<()> {
         self.0.flush()
     }
 
     fn is_tty(&self) -> bool {
         self.0.is_tty()
-    }
-}
-
-struct CleanUp {
-    is_raw_mode_enabled: bool,
-}
-
-impl CleanUp {
-    fn init() -> Result<Self> {
-        let is_raw_mode_enabled = is_raw_mode_enabled()?;
-        Ok(Self {
-            is_raw_mode_enabled,
-        })
-    }
-}
-
-impl Drop for CleanUp {
-    fn drop(&mut self) {
-        let _ = stdout().execute(DisableBracketedPaste);
-        if self.is_raw_mode_enabled {
-            let _ = enable_raw_mode();
-        } else {
-            let _ = disable_raw_mode();
-        }
     }
 }
