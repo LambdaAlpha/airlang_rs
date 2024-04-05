@@ -21,5 +21,6 @@ pub fn expected() -> Vec<Repr> {
             int("7"),
         ),
         ltree(infix(int("1"), int("2"), int("3")), vec![]),
+        infix(infix(int("1"), int("2"), int("3")), int("4"), int("5")),
     ]
 }

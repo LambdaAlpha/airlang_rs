@@ -85,9 +85,9 @@ use crate::{
         PAIR_INFIX,
         REVERSE_INFIX,
         SEPARATOR,
+        SHIFT_PREFIX,
         STRING_QUOTE,
         SYMBOL_QUOTE,
-        TOKENS_PREFIX,
         TRUE,
         UNIT,
         WRAP_LEFT,
@@ -118,6 +118,9 @@ pub(crate) trait ParseRepr:
     fn try_into_pair(self) -> Result<(Self, Self), Self>;
 }
 
+const RIGHT_ASSOCIATIVE: bool = true;
+const LEFT_ASSOCIATIVE: bool = false;
+
 pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseError> {
     let ret = top::<T, VerboseError<&str>>(src).finish();
     match ret {
@@ -134,7 +137,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(trim(compose));
+    let f = all_consuming(trim(compose_right_associative));
     context("top", f)(src)
 }
 
@@ -176,12 +179,28 @@ where
     delimited(char1(left), cut(trim(f)), cut(char1(right)))
 }
 
-fn wrap<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn wrap_left_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = brackets(WRAP_LEFT, WRAP_RIGHT, compose);
+    wrap::<LEFT_ASSOCIATIVE, _, _>(src)
+}
+
+fn wrap_right_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    wrap::<RIGHT_ASSOCIATIVE, _, _>(src)
+}
+
+fn wrap<'a, const ASSOCIATIVITY: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let f = brackets(WRAP_LEFT, WRAP_RIGHT, compose::<ASSOCIATIVITY, _, _>);
     context("wrap", f)(src)
 }
 
@@ -196,7 +215,7 @@ where
         LIST_RIGHT => fail,
         MAP_LEFT => |s| map(map1, Token::Default)(s),
         MAP_RIGHT => fail,
-        WRAP_LEFT => |s| map(wrap, Token::Default)(s),
+        WRAP_LEFT => |s| map(wrap_right_associative, Token::Default)(s),
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
         STRING_QUOTE => |s| map(string, Token::Default)(s),
@@ -239,17 +258,34 @@ where
     context("tokens", f)(src)
 }
 
-fn compose<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+#[allow(unused)]
+fn compose_left_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    compose::<LEFT_ASSOCIATIVE, _, _>(src)
+}
+
+fn compose_right_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    compose::<RIGHT_ASSOCIATIVE, _, _>(src)
+}
+
+fn compose<'a, const ASSOCIATIVITY: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let delimited_tokens = separated_list1(delimiter1, token);
-    let f = map_opt(delimited_tokens, compose_tokens);
+    let f = map_opt(delimited_tokens, compose_tokens::<ASSOCIATIVITY, _>);
     context("compose", f)(src)
 }
 
-fn compose_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
+fn compose_tokens<const ASSOCIATIVITY: bool, T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     let len = tokens.len();
     let mut iter = tokens.into_iter();
     if len == 2 {
@@ -259,18 +295,11 @@ fn compose_tokens<T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
     } else if len % 2 == 0 {
         return None;
     }
-    let mut iter = iter.rev();
-    let last = iter.next().unwrap().into_repr();
-    let mut right = last;
-    loop {
-        let Some(middle) = iter.next() else {
-            break;
-        };
-        let left = iter.next()?.into_repr();
-        let repr = compose_infix(left, middle, right);
-        right = repr;
+    if ASSOCIATIVITY == RIGHT_ASSOCIATIVE {
+        compose_many::<RIGHT_ASSOCIATIVE, _, _>(iter.rev())
+    } else {
+        compose_many::<LEFT_ASSOCIATIVE, _, _>(iter)
     }
-    Some(right)
 }
 
 fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
@@ -305,6 +334,27 @@ fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
         }
     };
     Some(repr)
+}
+
+fn compose_many<const ASSOCIATIVITY: bool, T, I>(mut iter: I) -> Option<T>
+where
+    T: ParseRepr,
+    I: Iterator<Item = Token<T>>,
+{
+    let mut first = iter.next().unwrap().into_repr();
+    loop {
+        let Some(middle) = iter.next() else {
+            break;
+        };
+        let last = iter.next()?.into_repr();
+        let repr = if ASSOCIATIVITY == RIGHT_ASSOCIATIVE {
+            compose_infix(last, middle, first)
+        } else {
+            compose_infix(first, middle, last)
+        };
+        first = repr;
+    }
+    Some(first)
 }
 
 fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
@@ -378,7 +428,11 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(compose, char1(SEPARATOR), compose);
+    let items = items(
+        compose_right_associative,
+        char1(SEPARATOR),
+        compose_right_associative,
+    );
     let delimited_items = brackets(LIST_LEFT, LIST_RIGHT, items);
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
@@ -400,7 +454,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(compose, |repr: T| {
+    let f = map(compose_right_associative, |repr: T| {
         repr.try_into_pair()
             .unwrap_or_else(|repr| (repr, From::from(Unit)))
     });
@@ -424,7 +478,13 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let signed_number = map(signed_number, Token::Default);
-    let tokens = preceded(tag(TOKENS_PREFIX), map(tokens, Token::Default));
+    let tokens = preceded(
+        tag(SHIFT_PREFIX),
+        alt((
+            map(wrap_left_associative, Token::Default),
+            map(tokens, Token::Default),
+        )),
+    );
     let symbols = map(take_while(is_trivial_symbol), unquote_symbol_to_token);
     let f = alt((signed_number, tokens, symbols));
     context("unquote_symbol", f)(src)
