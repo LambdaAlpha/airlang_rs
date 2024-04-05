@@ -153,6 +153,9 @@ impl<W: Write + AsRawFd> Repl<W> {
     fn run_once(&mut self) -> Result<()> {
         let mut input = String::new();
         stdin().read_to_string(&mut input)?;
+        if input.is_empty() {
+            return Ok(());
+        }
         self.eval(&input)?;
         self.terminal.new_line()?;
         self.terminal.flush()
@@ -299,14 +302,20 @@ impl<W: Write + AsRawFd> Repl<W> {
             last_line.push(c);
         }
 
-        self.histories.push(History {
-            previous_lines,
-            last_line,
-        });
+        if !(previous_lines.is_empty() && last_line.is_empty()) {
+            self.histories.push(History {
+                previous_lines,
+                last_line,
+            });
+        }
         self.history_index = 0;
 
         self.terminal.new_line()?;
         self.terminal.flush()?;
+
+        if input.is_empty() {
+            return Ok(());
+        }
 
         self.cleanup();
         self.eval(&input)?;
@@ -431,9 +440,6 @@ impl<W: Write + AsRawFd> Repl<W> {
     }
 
     fn eval(&mut self, input: &str) -> Result<()> {
-        if input.is_empty() {
-            return Ok(());
-        }
         match parse(input) {
             Ok(input) => {
                 let output = interpret_mutable(MutableCtx::new(&mut self.ctx), input);
