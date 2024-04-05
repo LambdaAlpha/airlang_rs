@@ -245,7 +245,7 @@ impl<W: Write + AsRawFd> Repl<W> {
     }
 
     fn handle_char(&mut self, c: char, modifiers: KeyModifiers) -> Result<bool /* break */> {
-        if modifiers.is_empty() {
+        if modifiers.is_empty() || modifiers == KeyModifiers::SHIFT {
             self.head_buffer.push(c);
 
             if c != '\r' {
