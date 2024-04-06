@@ -67,10 +67,18 @@ pub fn generate_reserve(src: &reserve::Repr) -> String {
     generator::generate_pretty(src).unwrap()
 }
 
-pub(crate) fn is_special(c: char) -> bool {
+pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(
         c,
-        LIST_LEFT | LIST_RIGHT | MAP_LEFT | MAP_RIGHT | WRAP_LEFT | WRAP_RIGHT | SEPARATOR
+        SEPARATOR
+            | LIST_LEFT
+            | LIST_RIGHT
+            | MAP_LEFT
+            | MAP_RIGHT
+            | WRAP_LEFT
+            | WRAP_RIGHT
+            | STRING_QUOTE
+            | SYMBOL_QUOTE
     )
 }
 

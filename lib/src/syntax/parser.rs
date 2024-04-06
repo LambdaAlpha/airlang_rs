@@ -71,7 +71,7 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
-        is_special,
+        is_delimiter,
         ANNOTATION_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
@@ -141,24 +141,24 @@ where
     E: ParseError<&'a str>,
     F: Parser<&'a str, O, E>,
 {
-    delimited(delimiter0, f, delimiter0)
+    delimited(empty0, f, empty0)
 }
 
-fn delimiter0<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn empty0<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str>,
 {
-    take_while(is_delimiter)(src)
+    take_while(is_empty)(src)
 }
 
-fn delimiter1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn empty1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str>,
 {
-    take_while1(is_delimiter)(src)
+    take_while1(is_empty)(src)
 }
 
-fn is_delimiter(c: char) -> bool {
+fn is_empty(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
@@ -227,7 +227,7 @@ where
 }
 
 fn is_trivial_symbol(c: char) -> bool {
-    if is_special(c) {
+    if is_delimiter(c) {
         return false;
     }
     Symbol::is_symbol(c)
@@ -309,7 +309,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = brackets(LIST_LEFT, LIST_RIGHT, separated_list0(delimiter1, token));
+    let collect = brackets(LIST_LEFT, LIST_RIGHT, separated_list0(empty1, token));
     let f = map(collect, |tokens| {
         let list = tokens
             .into_iter()
@@ -333,7 +333,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let delimited_tokens = separated_list1(delimiter1, token);
+    let delimited_tokens = separated_list1(empty1, token);
     let f = map_opt(delimited_tokens, compose_tokens::<ASSOCIATIVITY, _>);
     context("compose", f)(src)
 }

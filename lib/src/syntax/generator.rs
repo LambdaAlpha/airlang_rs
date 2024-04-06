@@ -14,7 +14,7 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
-        is_special,
+        is_delimiter,
         maybe_keyword,
         ANNOTATION_INFIX,
         BYTES_PREFIX,
@@ -233,7 +233,7 @@ fn is_need_quote(str: &str) -> bool {
         '+' | '-' if matches!(chars.next(), Some('0'..='9')) => return true,
         _ => {}
     }
-    str.chars().any(is_special)
+    str.chars().any(is_delimiter)
 }
 
 #[allow(unused)]
