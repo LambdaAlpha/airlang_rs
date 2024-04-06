@@ -22,28 +22,28 @@ pub(crate) mod generator;
 #[cfg(test)]
 mod test;
 
-const SEPARATOR: char = ',';
-const LIST_LEFT: char = '[';
-const LIST_RIGHT: char = ']';
-const MAP_LEFT: char = '{';
-const MAP_RIGHT: char = '}';
-const WRAP_LEFT: char = '(';
-const WRAP_RIGHT: char = ')';
+pub(crate) const SEPARATOR: char = ',';
+pub(crate) const LIST_LEFT: char = '[';
+pub(crate) const LIST_RIGHT: char = ']';
+pub(crate) const MAP_LEFT: char = '{';
+pub(crate) const MAP_RIGHT: char = '}';
+pub(crate) const WRAP_LEFT: char = '(';
+pub(crate) const WRAP_RIGHT: char = ')';
 
-const STRING_QUOTE: char = '"';
-const SYMBOL_QUOTE: char = '\'';
+pub(crate) const STRING_QUOTE: char = '"';
+pub(crate) const SYMBOL_QUOTE: char = '\'';
 
-const BYTES_PREFIX: char = '#';
+pub(crate) const BYTES_PREFIX: char = '#';
 
 // keywords
-const UNIT: &str = ".";
-const TRUE: &str = "true";
-const FALSE: &str = "false";
-const SHIFT_PREFIX: &str = "^";
-const ANNOTATION_INFIX: &str = "@";
-const PAIR_INFIX: &str = ":";
-const CALL_INFIX: &str = "!";
-const REVERSE_INFIX: &str = "?";
+pub(crate) const UNIT: &str = ".";
+pub(crate) const TRUE: &str = "true";
+pub(crate) const FALSE: &str = "false";
+pub(crate) const SHIFT_PREFIX: &str = "^";
+pub(crate) const ANNOTATION_INFIX: &str = "@";
+pub(crate) const PAIR_INFIX: &str = ":";
+pub(crate) const CALL_INFIX: &str = "!";
+pub(crate) const REVERSE_INFIX: &str = "?";
 
 #[derive(Error, Debug)]
 #[error("ParseError:\n{msg}")]

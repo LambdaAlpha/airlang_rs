@@ -12,12 +12,14 @@ use crate::{
     prelude::{
         default_mode,
         named_const_fn,
+        named_free_fn,
         named_mutable_fn,
         pair_mode,
         symbol_id_mode,
         Named,
         Prelude,
     },
+    syntax::PAIR_INFIX,
     types::either::Either,
     val::{
         func::FuncVal,
@@ -27,6 +29,7 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct PairPrelude {
+    pub(crate) new: Named<FuncVal>,
     pub(crate) get_first: Named<FuncVal>,
     pub(crate) set_first: Named<FuncVal>,
     pub(crate) get_second: Named<FuncVal>,
@@ -36,6 +39,7 @@ pub(crate) struct PairPrelude {
 impl Default for PairPrelude {
     fn default() -> Self {
         PairPrelude {
+            new: new(),
             get_first: get_first(),
             set_first: set_first(),
             get_second: get_second(),
@@ -46,11 +50,25 @@ impl Default for PairPrelude {
 
 impl Prelude for PairPrelude {
     fn put(&self, m: &mut NameMap) {
+        self.new.put(m);
         self.get_first.put(m);
         self.set_first.put(m);
         self.get_second.put(m);
         self.set_second.put(m);
     }
+}
+
+fn new() -> Named<FuncVal> {
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
+    named_free_fn(PAIR_INFIX, input_mode, output_mode, fn_new)
+}
+
+fn fn_new(input: Val) -> Val {
+    let Val::Pair(_) = input else {
+        return Val::default();
+    };
+    input
 }
 
 fn get_first() -> Named<FuncVal> {

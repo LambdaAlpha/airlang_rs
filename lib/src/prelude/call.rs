@@ -8,30 +8,52 @@ use crate::{
     prelude::{
         call_mode,
         default_mode,
+        named_free_fn,
         named_mutable_fn,
+        pair_mode,
         Named,
         Prelude,
     },
+    syntax::CALL_INFIX,
     transform::eval::Eval,
     val::func::FuncVal,
+    Call,
     Val,
 };
 
 #[derive(Clone)]
 pub(crate) struct CallPrelude {
+    pub(crate) new: Named<FuncVal>,
     pub(crate) call: Named<FuncVal>,
 }
 
 impl Default for CallPrelude {
     fn default() -> Self {
-        CallPrelude { call: call() }
+        CallPrelude {
+            new: new(),
+            call: call(),
+        }
     }
 }
 
 impl Prelude for CallPrelude {
     fn put(&self, m: &mut NameMap) {
+        self.new.put(m);
         self.call.put(m);
     }
+}
+
+fn new() -> Named<FuncVal> {
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
+    named_free_fn(CALL_INFIX, input_mode, output_mode, fn_new)
+}
+
+fn fn_new(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    Val::Call(Box::new(Call::new(pair.first, pair.second)))
 }
 
 fn call() -> Named<FuncVal> {

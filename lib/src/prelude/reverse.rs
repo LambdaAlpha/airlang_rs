@@ -7,32 +7,54 @@ use crate::{
     func::MutableDispatcher,
     prelude::{
         default_mode,
+        named_free_fn,
         named_mutable_fn,
+        pair_mode,
         reverse_mode,
         Named,
         Prelude,
     },
+    syntax::REVERSE_INFIX,
     transform::eval::Eval,
     val::func::FuncVal,
+    Reverse,
     Val,
 };
 
 #[derive(Clone)]
 pub(crate) struct ReversePrelude {
+    pub(crate) new: Named<FuncVal>,
     pub(crate) reverse: Named<FuncVal>,
 }
 
 #[allow(clippy::derivable_impls)]
 impl Default for ReversePrelude {
     fn default() -> Self {
-        ReversePrelude { reverse: reverse() }
+        ReversePrelude {
+            new: new(),
+            reverse: reverse(),
+        }
     }
 }
 
 impl Prelude for ReversePrelude {
     fn put(&self, m: &mut NameMap) {
+        self.new.put(m);
         self.reverse.put(m);
     }
+}
+
+fn new() -> Named<FuncVal> {
+    let input_mode = pair_mode(default_mode(), default_mode());
+    let output_mode = default_mode();
+    named_free_fn(REVERSE_INFIX, input_mode, output_mode, fn_new)
+}
+
+fn fn_new(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    Val::Reverse(Box::new(Reverse::new(pair.first, pair.second)))
 }
 
 fn reverse() -> Named<FuncVal> {

@@ -213,3 +213,8 @@ impl CtxFreeFn for FuncExt {
         input
     }
 }
+
+#[test]
+fn test_annotation() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/annotation.air"), "test/annotation.air")
+}

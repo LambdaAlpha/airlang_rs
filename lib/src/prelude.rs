@@ -23,6 +23,7 @@ use crate::{
         ValMode,
     },
     prelude::{
+        annotation::AnnotationPrelude,
         answer::AnswerPrelude,
         bool::BoolPrelude,
         bytes::BytesPrelude,
@@ -39,6 +40,7 @@ use crate::{
         meta::MetaPrelude,
         pair::PairPrelude,
         prop::PropPrelude,
+        reverse::ReversePrelude,
         str::StrPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
@@ -75,6 +77,7 @@ pub(crate) struct AllPrelude {
     pub(crate) logic: LogicPrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
+    pub(crate) reverse: ReversePrelude,
     pub(crate) prop: PropPrelude,
     pub(crate) answer: AnswerPrelude,
     pub(crate) symbol: SymbolPrelude,
@@ -88,6 +91,7 @@ pub(crate) struct AllPrelude {
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) extension: ExtPrelude,
+    pub(crate) annotation: AnnotationPrelude,
 }
 
 impl Prelude for AllPrelude {
@@ -101,6 +105,7 @@ impl Prelude for AllPrelude {
         self.logic.put(m);
         self.func.put(m);
         self.call.put(m);
+        self.reverse.put(m);
         self.prop.put(m);
         self.answer.put(m);
         self.symbol.put(m);
@@ -114,6 +119,7 @@ impl Prelude for AllPrelude {
         self.list.put(m);
         self.map.put(m);
         self.extension.put(m);
+        self.annotation.put(m);
     }
 }
 
@@ -315,3 +321,5 @@ mod list;
 mod map;
 
 mod extension;
+
+mod annotation;
