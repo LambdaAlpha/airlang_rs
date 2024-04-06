@@ -118,9 +118,6 @@ pub(crate) trait ParseRepr:
     fn try_into_pair(self) -> Result<(Self, Self), Self>;
 }
 
-const RIGHT_ASSOCIATIVE: bool = true;
-const LEFT_ASSOCIATIVE: bool = false;
-
 pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseError> {
     let ret = top::<T, VerboseError<&str>>(src).finish();
     match ret {
@@ -179,6 +176,9 @@ where
     delimited(char1(left), cut(trim(f)), cut(char1(right)))
 }
 
+const RIGHT_ASSOCIATIVE: bool = true;
+const LEFT_ASSOCIATIVE: bool = false;
+
 fn wrap_left_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
@@ -228,6 +228,7 @@ where
     context("token", parser)(src)
 }
 
+#[derive(Clone)]
 enum Token<T> {
     Unquote(Symbol),
     Default(T),
@@ -256,15 +257,6 @@ where
         From::from(list)
     });
     context("tokens", f)(src)
-}
-
-#[allow(unused)]
-fn compose_left_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    compose::<LEFT_ASSOCIATIVE, _, _>(src)
 }
 
 fn compose_right_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -477,30 +469,41 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let signed_number = map(signed_number, Token::Default);
-    let tokens = preceded(
-        tag(SHIFT_PREFIX),
-        alt((
-            map(wrap_left_associative, Token::Default),
-            map(tokens, Token::Default),
-        )),
-    );
-    let symbols = map(take_while(is_trivial_symbol), unquote_symbol_to_token);
-    let f = alt((signed_number, tokens, symbols));
+    let positive_number = keyword_preceded("+", number::<POSITIVE, _, _>);
+    let negative_number = keyword_preceded("-", number::<NEGATIVE, _, _>);
+    let left_associative = keyword_preceded(SHIFT_PREFIX, wrap_left_associative);
+    let tokens = keyword_preceded(SHIFT_PREFIX, tokens);
+
+    let keywords_or_symbols = map(take_while(is_trivial_symbol), |s| {
+        let token = match s {
+            UNIT => From::from(Unit),
+            TRUE => From::from(Bool::t()),
+            FALSE => From::from(Bool::f()),
+            s => return Token::Unquote(Symbol::from_str(s)),
+        };
+        Token::Default(token)
+    });
+
+    let f = alt((
+        positive_number,
+        negative_number,
+        left_associative,
+        tokens,
+        keywords_or_symbols,
+    ));
     context("unquote_symbol", f)(src)
 }
 
-fn unquote_symbol_to_token<T: ParseRepr>(s: &str) -> Token<T> {
-    let token = match s {
-        UNIT => From::from(Unit),
-        TRUE => From::from(Bool::t()),
-        FALSE => From::from(Bool::f()),
-        s => {
-            let s = Symbol::from_str(s);
-            return Token::Unquote(s);
-        }
-    };
-    Token::Default(token)
+fn keyword_preceded<'a, T, E, F>(
+    keyword: &'static str,
+    f: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, Token<T>, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, T, E>,
+{
+    map(preceded(tag(keyword), f), Token::Default)
 }
 
 fn quoted_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -656,18 +659,6 @@ where
 
 const POSITIVE: bool = true;
 const NEGATIVE: bool = false;
-
-fn signed_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let f = alt((
-        preceded(tag("+"), number::<POSITIVE, _, _>),
-        preceded(tag("-"), number::<NEGATIVE, _, _>),
-    ));
-    context("signed_number", f)(src)
-}
 
 fn unsigned_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
