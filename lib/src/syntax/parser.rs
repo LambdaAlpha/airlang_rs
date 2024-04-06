@@ -7,7 +7,6 @@ use nom::{
     branch::alt,
     bytes::complete::{
         is_not,
-        tag,
         tag_no_case,
         take_while,
         take_while1,
@@ -30,7 +29,6 @@ use nom::{
         map_res,
         opt,
         peek,
-        success,
         value,
         verify,
     },
@@ -218,14 +216,77 @@ where
         WRAP_LEFT => |s| map(wrap_right_associative, Token::Default)(s),
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
+
         STRING_QUOTE => |s| map(string, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
-        BYTES_PREFIX => |s| map(bytes, Token::Default)(s),
-        '0'..='9' => |s| map(unsigned_number, Token::Default)(s),
+
         s if is_symbol(s) => unquote_symbol,
         _ => fail,
     };
     context("token", parser)(src)
+}
+
+fn is_trivial_symbol(c: char) -> bool {
+    if is_special(c) {
+        return false;
+    }
+    Symbol::is_symbol(c)
+}
+
+fn is_symbol(c: char) -> bool {
+    Symbol::is_symbol(c)
+}
+
+fn unquote_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    let (rest, src) = take_while(is_trivial_symbol)(src)?;
+
+    let mut chars = src.chars();
+    let first = chars.next().unwrap();
+    let second = chars.next();
+
+    match first {
+        '0'..='9' => return token_all_consuming(src, rest, number::<POSITIVE, _, _>),
+        '+' if matches!(second, Some('0'..='9')) => {
+            return token_all_consuming(&src[1..], rest, number::<POSITIVE, _, _>);
+        }
+        '-' if matches!(second, Some('0'..='9')) => {
+            return token_all_consuming(&src[1..], rest, number::<NEGATIVE, _, _>);
+        }
+        BYTES_PREFIX => return token_all_consuming(src, rest, bytes),
+        _ => {}
+    }
+
+    let symbol = |s| Ok((s, Token::Unquote(Symbol::from_str(src))));
+
+    match src {
+        UNIT => Ok((rest, Token::Default(From::from(Unit)))),
+        TRUE => Ok((rest, Token::Default(From::from(Bool::t())))),
+        FALSE => Ok((rest, Token::Default(From::from(Bool::f())))),
+        SHIFT_PREFIX => alt((
+            map(wrap_left_associative, Token::Default),
+            map(tokens, Token::Default),
+            symbol,
+        ))(rest),
+        _ => symbol(rest),
+    }
+}
+
+fn token_all_consuming<'a, T, E, F>(
+    src: &'a str,
+    rest: &'a str,
+    f: F,
+) -> IResult<&'a str, Token<T>, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, T, E>,
+{
+    let (_, token) = all_consuming(f)(src)?;
+    Ok((rest, Token::Default(token)))
 }
 
 #[derive(Clone)]
@@ -453,59 +514,6 @@ where
     context("pair", f)(src)
 }
 
-fn is_trivial_symbol(c: char) -> bool {
-    if is_special(c) {
-        return false;
-    }
-    Symbol::is_symbol(c)
-}
-
-fn is_symbol(c: char) -> bool {
-    Symbol::is_symbol(c)
-}
-
-fn unquote_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, Token<T>, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let positive_number = keyword_preceded("+", number::<POSITIVE, _, _>);
-    let negative_number = keyword_preceded("-", number::<NEGATIVE, _, _>);
-    let left_associative = keyword_preceded(SHIFT_PREFIX, wrap_left_associative);
-    let tokens = keyword_preceded(SHIFT_PREFIX, tokens);
-
-    let keywords_or_symbols = map(take_while(is_trivial_symbol), |s| {
-        let token = match s {
-            UNIT => From::from(Unit),
-            TRUE => From::from(Bool::t()),
-            FALSE => From::from(Bool::f()),
-            s => return Token::Unquote(Symbol::from_str(s)),
-        };
-        Token::Default(token)
-    });
-
-    let f = alt((
-        positive_number,
-        negative_number,
-        left_associative,
-        tokens,
-        keywords_or_symbols,
-    ));
-    context("unquote_symbol", f)(src)
-}
-
-fn keyword_preceded<'a, T, E, F>(
-    keyword: &'static str,
-    f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, Token<T>, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, T, E>,
-{
-    map(preceded(tag(keyword), f), Token::Default)
-}
-
 fn quoted_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
@@ -660,14 +668,6 @@ where
 const POSITIVE: bool = true;
 const NEGATIVE: bool = false;
 
-fn unsigned_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    number::<POSITIVE, _, _>(src)
-}
-
 fn number<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
@@ -813,6 +813,6 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = success(From::from(Bytes::default()));
+    let f = |s| Ok((s, From::from(Bytes::default())));
     context("empty_bytes", f)(src)
 }
