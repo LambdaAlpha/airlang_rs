@@ -40,7 +40,7 @@ use crate::{
 
 pub(crate) const INDENT: &str = "  ";
 
-#[allow(dead_code)]
+#[allow(unused)]
 pub(crate) fn generate_compat<'a, T>(
     repr: &'a T,
 ) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
@@ -61,7 +61,7 @@ where
     Ok(str)
 }
 
-#[allow(dead_code)]
+#[allow(unused)]
 pub(crate) fn generate_comfort<'a, T>(
     repr: &'a T,
 ) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
@@ -82,7 +82,6 @@ where
     Ok(str)
 }
 
-#[allow(dead_code)]
 pub(crate) fn generate_pretty<'a, T>(
     repr: &'a T,
 ) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
@@ -236,7 +235,6 @@ fn is_need_quote(str: &str) -> bool {
     str.chars().any(is_delimiter)
 }
 
-#[allow(unused)]
 fn is_left_open<'a, T>(repr: &'a T) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
 where
     &'a T: TryInto<GenerateRepr<'a, T>>,

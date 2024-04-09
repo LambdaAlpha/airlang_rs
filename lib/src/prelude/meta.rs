@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     int::Int,
     prelude::{
         Named,
@@ -25,7 +25,7 @@ impl Default for MetaPrelude {
 }
 
 impl Prelude for MetaPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.version_major.put(m);
         self.version_minor.put(m);
         self.version_patch.put(m);

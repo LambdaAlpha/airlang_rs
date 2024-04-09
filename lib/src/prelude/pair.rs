@@ -2,8 +2,8 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::{
         constant::CtxForConstFn,
@@ -49,7 +49,7 @@ impl Default for PairPrelude {
 }
 
 impl Prelude for PairPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
         self.get_first.put(m);
         self.set_first.put(m);

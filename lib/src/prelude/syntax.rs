@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::{
         default_mode,
         named_free_fn,
@@ -29,7 +29,7 @@ impl Default for SyntaxPrelude {
 }
 
 impl Prelude for SyntaxPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.parse.put(m);
         self.stringify.put(m);
     }

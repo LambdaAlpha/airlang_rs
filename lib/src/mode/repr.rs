@@ -4,7 +4,7 @@ use crate::{
         Mode,
         ReverseForSomeMode,
     },
-    transformer::{
+    transform::{
         EVAL,
         ID,
         LAZY,

@@ -13,6 +13,9 @@ use smartstring::alias::CompactString;
 pub struct Symbol(CompactString);
 
 impl Symbol {
+    pub(crate) const MIN: char = '!';
+    pub(crate) const MAX: char = '~';
+
     /// # Safety
     ///
     /// the input must be a valid symbol
@@ -24,13 +27,12 @@ impl Symbol {
         Symbol(CompactString::from(s))
     }
 
-    #[allow(unused)]
     pub(crate) fn from_string(s: String) -> Self {
         Symbol(CompactString::from(s))
     }
 
     pub(crate) fn is_symbol(c: char) -> bool {
-        c.is_ascii_graphic()
+        Self::MIN <= c && c <= Self::MAX
     }
 }
 

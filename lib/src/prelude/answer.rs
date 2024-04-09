@@ -2,8 +2,8 @@ use std::ops::Deref;
 
 use crate::{
     ctx::{
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     prelude::{
         default_mode,
@@ -56,7 +56,7 @@ impl Default for AnswerPrelude {
 }
 
 impl Prelude for AnswerPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.unsolved.put(m);
         self.unsolvable.put(m);
         self.unverified.put(m);

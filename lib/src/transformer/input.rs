@@ -9,7 +9,7 @@ use crate::{
 };
 
 pub(crate) trait ByVal<Ctx, Output>: Transformer<Ctx, Val, Output> {
-    fn transform_atoms(&self, ctx: &mut Ctx, input: Val) -> Output;
+    fn transform_default(&self, ctx: &mut Ctx, input: Val) -> Output;
 
     fn transform_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Output;
 
@@ -25,7 +25,7 @@ pub(crate) trait ByVal<Ctx, Output>: Transformer<Ctx, Val, Output> {
 }
 
 pub(crate) trait ByRef<'a, Ctx, Output>: Transformer<Ctx, &'a Val, Output> {
-    fn transform_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Output;
+    fn transform_default(&self, ctx: &mut Ctx, input: &'a Val) -> Output;
 
     fn transform_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Output;
 

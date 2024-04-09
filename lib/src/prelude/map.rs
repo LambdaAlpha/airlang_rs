@@ -3,8 +3,8 @@ use std::mem::swap;
 use crate::{
     bool::Bool,
     ctx::{
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::{
         constant::CtxForConstFn,
@@ -82,7 +82,7 @@ impl Default for MapPrelude {
 }
 
 impl Prelude for MapPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.length.put(m);
         self.items.put(m);
         self.into_items.put(m);

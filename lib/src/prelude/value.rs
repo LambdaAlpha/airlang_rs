@@ -6,9 +6,9 @@ use rand::{
 use crate::{
     bool::Bool,
     ctx::{
+        CtxMap,
         CtxTrait,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::constant::CtxForConstFn,
     nondeterministic::{
@@ -86,7 +86,7 @@ impl Default for ValuePrelude {
 }
 
 impl Prelude for ValuePrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.any.put(m);
         self.type_of.put(m);
         self.equal.put(m);

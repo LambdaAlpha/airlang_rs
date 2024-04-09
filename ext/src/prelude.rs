@@ -6,7 +6,7 @@ use airlang::{
     CtxMutableFn,
     Func,
     FuncVal,
-    InvariantTag,
+    Invariant,
     List,
     ListItemMode,
     ListMode,
@@ -60,7 +60,6 @@ pub(crate) struct Named<T> {
     pub(crate) value: T,
 }
 
-#[allow(unused)]
 impl<T> Named<T> {
     pub(crate) fn new(name: &'static str, value: T) -> Self {
         Self { name, value }
@@ -71,7 +70,7 @@ impl<T: Into<Val> + Clone> Named<T> {
     pub(crate) fn put(&self, mut ctx: MutableCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
         let val = self.value.clone().into();
-        let _ = ctx.put(name, InvariantTag::Const, val);
+        let _ = ctx.put(name, Invariant::Const, val);
     }
 }
 

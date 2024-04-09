@@ -38,14 +38,14 @@ pub enum Repr {
     Bool(Bool),
     Int(Int),
     Float(Float),
-    Bytes(Bytes),
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairRepr>),
-    Call(Box<CallRepr>),
-    Reverse(Box<ReverseRepr>),
     List(ListRepr),
     Map(MapRepr),
+    Bytes(Bytes),
+    Call(Box<CallRepr>),
+    Reverse(Box<ReverseRepr>),
 }
 
 impl Repr {
@@ -78,12 +78,6 @@ impl From<Float> for Repr {
     }
 }
 
-impl From<Bytes> for Repr {
-    fn from(b: Bytes) -> Self {
-        Repr::Bytes(b)
-    }
-}
-
 impl From<Symbol> for Repr {
     fn from(s: Symbol) -> Self {
         Repr::Symbol(s)
@@ -102,18 +96,6 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
-impl From<Box<CallRepr>> for Repr {
-    fn from(a: Box<CallRepr>) -> Self {
-        Repr::Call(a)
-    }
-}
-
-impl From<Box<ReverseRepr>> for Repr {
-    fn from(i: Box<ReverseRepr>) -> Self {
-        Repr::Reverse(i)
-    }
-}
-
 impl From<ListRepr> for Repr {
     fn from(l: ListRepr) -> Self {
         Repr::List(l)
@@ -129,6 +111,24 @@ impl From<MapRepr> for Repr {
 impl From<Box<Annotation<Repr, Repr>>> for Repr {
     fn from(value: Box<Annotation<Repr, Repr>>) -> Self {
         value.value
+    }
+}
+
+impl From<Bytes> for Repr {
+    fn from(b: Bytes) -> Self {
+        Repr::Bytes(b)
+    }
+}
+
+impl From<Box<CallRepr>> for Repr {
+    fn from(a: Box<CallRepr>) -> Self {
+        Repr::Call(a)
+    }
+}
+
+impl From<Box<ReverseRepr>> for Repr {
+    fn from(i: Box<ReverseRepr>) -> Self {
+        Repr::Reverse(i)
     }
 }
 
@@ -203,10 +203,10 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
 
 pub(crate) mod pair;
 
-pub(crate) mod call;
-
-pub(crate) mod reverse;
-
 pub(crate) mod list;
 
 pub(crate) mod map;
+
+pub(crate) mod call;
+
+pub(crate) mod reverse;

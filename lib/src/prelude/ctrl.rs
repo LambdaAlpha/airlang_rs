@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     ctx_access::{
         free::FreeCtx,
         CtxAccessor,
@@ -52,7 +52,7 @@ impl Default for CtrlPrelude {
 }
 
 impl Prelude for CtrlPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.sequence.put(m);
         self.if1.put(m);
         self.if_not.put(m);

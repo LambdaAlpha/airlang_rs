@@ -3,11 +3,11 @@ use std::rc::Rc;
 use crate::{
     bool::Bool,
     ctx::{
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::constant::CtxForConstFn,
-    func::FuncCore,
+    func::FuncTransformer,
     logic::Prop,
     map::Map,
     prelude::{
@@ -60,7 +60,7 @@ impl Default for PropPrelude {
 }
 
 impl Prelude for PropPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
         self.repr.put(m);
         self.proved.put(m);
@@ -92,7 +92,7 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Func(func) = map_remove(&mut map, FUNCTION) else {
         return Val::default();
     };
-    let FuncCore::Free(_) = &func.0.core else {
+    let FuncTransformer::Free(_) = &func.0.transformer else {
         return Val::default();
     };
     let input = map_remove(&mut map, INPUT);

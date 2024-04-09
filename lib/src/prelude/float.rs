@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::Prelude,
 };
 #[derive(Clone)]
@@ -13,5 +13,5 @@ impl Default for FloatPrelude {
 }
 
 impl Prelude for FloatPrelude {
-    fn put(&self, _m: &mut NameMap) {}
+    fn put(&self, _m: &mut CtxMap) {}
 }

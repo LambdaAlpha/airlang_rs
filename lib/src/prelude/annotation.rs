@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::{
         default_mode,
         named_free_fn,
@@ -24,7 +24,7 @@ impl Default for AnnotationPrelude {
 }
 
 impl Prelude for AnnotationPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
     }
 }

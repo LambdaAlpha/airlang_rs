@@ -4,8 +4,8 @@ use crate::{
     bool::Bool,
     ctx::{
         Ctx,
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::constant::CtxForConstFn,
     func::{
@@ -17,8 +17,8 @@ use crate::{
         CtxMutable,
         CtxMutableInfo,
         Func,
-        FuncCore,
         FuncImpl,
+        FuncTransformer,
     },
     map::Map,
     mode::{
@@ -38,8 +38,10 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
-    transform::Transform,
-    transformer::EVAL,
+    transform::{
+        Transform,
+        EVAL,
+    },
     utils::val::{
         map_remove,
         symbol,
@@ -89,7 +91,7 @@ impl Default for FuncPrelude {
 }
 
 impl Prelude for FuncPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
         self.repr.put(m);
         self.caller_access.put(m);
@@ -170,19 +172,19 @@ fn fn_new(input: Val) -> Val {
         _ => return Val::default(),
     };
     let transformer = match caller_access {
-        FREE => FuncCore::Free(FuncImpl::Composed(Composed {
+        FREE => FuncTransformer::Free(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxFreeInfo {},
         })),
-        CONST => FuncCore::Const(FuncImpl::Composed(Composed {
+        CONST => FuncTransformer::Const(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
             caller: CtxConstInfo { name: caller_name },
         })),
-        MUTABLE => FuncCore::Mutable(FuncImpl::Composed(Composed {
+        MUTABLE => FuncTransformer::Mutable(FuncImpl::Composed(Composed {
             body,
             ctx: func_ctx,
             input_name,
@@ -225,8 +227,8 @@ fn fn_repr(input: Val) -> Val {
         repr.insert(symbol(OUTPUT_MODE), output_mode);
     }
 
-    match &func.core {
-        FuncCore::Free(t) => match t {
+    match &func.transformer {
+        FuncTransformer::Free(t) => match t {
             CtxFree::Primitive(p) => {
                 repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                 if p.is_extension() {
@@ -243,7 +245,7 @@ fn fn_repr(input: Val) -> Val {
                 }
             }
         },
-        FuncCore::Const(t) => {
+        FuncTransformer::Const(t) => {
             repr.insert(symbol(CALLER_ACCESS), symbol(CONST));
             match t {
                 CtxConst::Primitive(p) => {
@@ -266,7 +268,7 @@ fn fn_repr(input: Val) -> Val {
                 }
             }
         }
-        FuncCore::Mutable(t) => {
+        FuncTransformer::Mutable(t) => {
             repr.insert(symbol(CALLER_ACCESS), symbol(MUTABLE));
             match t {
                 CtxMutable::Primitive(p) => {
@@ -309,10 +311,10 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
-        let access = match &func.core {
-            FuncCore::Free(_) => FREE,
-            FuncCore::Const(_) => CONST,
-            FuncCore::Mutable(_) => MUTABLE,
+        let access = match &func.transformer {
+            FuncTransformer::Free(_) => FREE,
+            FuncTransformer::Const(_) => CONST,
+            FuncTransformer::Mutable(_) => MUTABLE,
         };
         Val::Symbol(Symbol::from_str(access))
     })

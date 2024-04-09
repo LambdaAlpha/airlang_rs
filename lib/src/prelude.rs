@@ -3,16 +3,16 @@ use std::rc::Rc;
 use crate::{
     ctx::{
         Ctx,
-        NameMap,
-        TaggedVal,
+        CtxMap,
+        CtxValue,
     },
     func::{
         CtxConstFn,
         CtxFreeFn,
         CtxMutableFn,
         Func,
-        FuncCore,
         FuncImpl,
+        FuncTransformer,
         Primitive,
     },
     mode::{
@@ -95,7 +95,7 @@ pub(crate) struct AllPrelude {
 }
 
 impl Prelude for AllPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.meta.put(m);
         self.syntax.put(m);
         self.value.put(m);
@@ -124,19 +124,19 @@ impl Prelude for AllPrelude {
 }
 
 pub(crate) fn initial_ctx() -> Ctx {
-    let name_map = PRELUDE.with(|prelude| {
-        let mut m = NameMap::default();
+    let ctx_map = PRELUDE.with(|prelude| {
+        let mut m = CtxMap::default();
         prelude.put(&mut m);
         m
     });
     Ctx {
-        name_map,
+        map: ctx_map,
         meta: None,
     }
 }
 
 pub(crate) trait Prelude {
-    fn put(&self, m: &mut NameMap);
+    fn put(&self, m: &mut CtxMap);
 }
 
 #[derive(Clone)]
@@ -152,9 +152,9 @@ impl<T> Named<T> {
 }
 
 impl<T: Into<Val> + Clone> Named<T> {
-    pub(crate) fn put(&self, m: &mut NameMap) {
+    pub(crate) fn put(&self, m: &mut CtxMap) {
         let name = Symbol::from_str(self.name);
-        let value = TaggedVal::new_const(self.value.clone().into());
+        let value = CtxValue::new_const(self.value.clone().into());
         m.insert(name, value);
     }
 }
@@ -169,7 +169,7 @@ fn named_free_fn(
     let func = Func::new(
         input_mode,
         output_mode,
-        FuncCore::Free(FuncImpl::Primitive(primitive)),
+        FuncTransformer::Free(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
@@ -185,7 +185,7 @@ fn named_const_fn(
     let func = Func::new(
         input_mode,
         output_mode,
-        FuncCore::Const(FuncImpl::Primitive(primitive)),
+        FuncTransformer::Const(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)
@@ -201,7 +201,7 @@ fn named_mutable_fn(
     let func = Func::new(
         input_mode,
         output_mode,
-        FuncCore::Mutable(FuncImpl::Primitive(primitive)),
+        FuncTransformer::Mutable(FuncImpl::Primitive(primitive)),
     );
     let func_val = FuncVal(Rc::new(func));
     Named::new(name, func_val)

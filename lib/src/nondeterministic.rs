@@ -23,9 +23,9 @@ use crate::{
     bytes::Bytes,
     ctx::{
         Ctx,
-        InvariantTag,
-        NameMap,
-        TaggedVal,
+        CtxMap,
+        CtxValue,
+        Invariant,
     },
     extension::UnitExt,
     float::Float,
@@ -35,8 +35,8 @@ use crate::{
         CtxFreeInfo,
         CtxMutableInfo,
         Func,
-        FuncCore,
         FuncImpl,
+        FuncTransformer,
     },
     int::Int,
     list::List,
@@ -162,15 +162,7 @@ struct DistSymbol;
 
 impl Distribution<u8> for DistSymbol {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u8 {
-        const CHARSET: &[u8] = b"\
-            ABCDEFGHIJKLMNOPQRSTUVWXYZ\
-            abcdefghijklmnopqrstuvwxyz\
-            0123456789\
-            `~!@#$%^&*-_=+\\|;:'\"<.>/?\
-        ";
-        const RANGE: u32 = CHARSET.len() as u32;
-        let i = rng.gen_range(0..RANGE);
-        CHARSET[i as usize]
+        rng.gen_range(Symbol::MIN..=Symbol::MAX) as u8
     }
 }
 
@@ -225,27 +217,27 @@ pub(crate) fn any_map(rng: &mut SmallRng, depth: usize) -> MapVal {
     map
 }
 
-pub(crate) fn any_invariant_tag(rng: &mut SmallRng) -> InvariantTag {
-    const TAGS: [InvariantTag; 3] = [InvariantTag::None, InvariantTag::Final, InvariantTag::Const];
-    *(TAGS.choose(rng).unwrap())
+pub(crate) fn any_invariant(rng: &mut SmallRng) -> Invariant {
+    const INVARIANTS: [Invariant; 3] = [Invariant::None, Invariant::Final, Invariant::Const];
+    *(INVARIANTS.choose(rng).unwrap())
 }
 
 pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> CtxVal {
     let len = any_len_weighted(rng, depth);
-    let mut name_map = Map::with_capacity(len);
+    let mut ctx_map = Map::with_capacity(len);
     for _ in 0..len {
-        let tagged_val = TaggedVal {
+        let ctx_value = CtxValue {
             val: any_val(rng, depth),
-            tag: any_invariant_tag(rng),
+            invariant: any_invariant(rng),
         };
-        name_map.insert(any_symbol(rng), tagged_val);
+        ctx_map.insert(any_symbol(rng), ctx_value);
     }
     let meta = if rng.gen_bool(0.1) {
         Some(any_ctx(rng, depth).0)
     } else {
         None
     };
-    let ctx = Ctx { name_map, meta };
+    let ctx = Ctx { map: ctx_map, meta };
     CtxVal(Box::new(ctx))
 }
 
@@ -374,7 +366,7 @@ pub(crate) fn any_transform_mode(rng: &mut SmallRng, depth: usize) -> TransformM
 pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     if rng.gen() {
         let prelude = PRELUDE.with(|prelude| {
-            let mut m = NameMap::default();
+            let mut m = CtxMap::default();
             prelude.put(&mut m);
             m
         });
@@ -391,13 +383,13 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let input_mode = any_transform_mode(rng, depth);
         let output_mode = any_transform_mode(rng, depth);
         let transformer = match rng.gen_range(0..3) {
-            0 => FuncCore::Free(FuncImpl::Composed(Composed {
+            0 => FuncTransformer::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
                 input_name: any_symbol(rng),
                 caller: CtxFreeInfo {},
             })),
-            1 => FuncCore::Const(FuncImpl::Composed(Composed {
+            1 => FuncTransformer::Const(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
                 input_name: any_symbol(rng),
@@ -405,7 +397,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
                     name: any_symbol(rng),
                 },
             })),
-            2 => FuncCore::Mutable(FuncImpl::Composed(Composed {
+            2 => FuncTransformer::Mutable(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
                 ctx: *any_ctx(rng, depth).0,
                 input_name: any_symbol(rng),
@@ -418,7 +410,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let func = Func {
             input_mode,
             output_mode,
-            core: transformer,
+            transformer,
         };
         FuncVal(Rc::new(func))
     }
@@ -427,7 +419,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     if rng.gen() {
         let prelude = PRELUDE.with(|prelude| {
-            let mut m = NameMap::default();
+            let mut m = CtxMap::default();
             prelude.put(&mut m);
             m
         });
@@ -437,7 +429,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
                 let Val::Func(func) = &v.val else {
                     return false;
                 };
-                let FuncCore::Free(_) = &func.core else {
+                let FuncTransformer::Free(_) = &func.transformer else {
                     return false;
                 };
                 true
@@ -451,7 +443,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         let input_mode = any_transform_mode(rng, depth);
         let output_mode = any_transform_mode(rng, depth);
-        let transformer = FuncCore::Free(FuncImpl::Composed(Composed {
+        let transformer = FuncTransformer::Free(FuncImpl::Composed(Composed {
             body: any_val(rng, depth),
             ctx: *any_ctx(rng, depth).0,
             input_name: any_symbol(rng),
@@ -460,7 +452,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let func = Func {
             input_mode,
             output_mode,
-            core: transformer,
+            transformer,
         };
         FuncVal(Rc::new(func))
     }

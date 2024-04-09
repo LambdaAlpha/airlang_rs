@@ -1,6 +1,6 @@
 use crate::{
     ctx_access::free::FreeCtx,
-    func::FuncCore,
+    func::FuncTransformer,
     transformer::Transformer,
     val::func::FuncVal,
     Val,
@@ -16,7 +16,7 @@ pub struct Prop {
 
 impl Prop {
     pub(crate) fn new(func: FuncVal, input: Val, output: Val) -> Self {
-        debug_assert!(matches!(func.0.core, FuncCore::Free(_)));
+        debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
         Self {
             func,
             input,
@@ -42,8 +42,8 @@ impl Prop {
     }
 
     pub(crate) fn new_proved(func: FuncVal, input: Val) -> Self {
-        debug_assert!(matches!(func.0.core, FuncCore::Free(_)));
-        let output = func.0.core.transform(&mut FreeCtx, input.clone());
+        debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
+        let output = func.transformer.transform(&mut FreeCtx, input.clone());
         Self {
             func,
             input,

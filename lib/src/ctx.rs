@@ -33,7 +33,7 @@ pub(crate) trait CtxTrait {
 
     fn remove(&mut self, name: &str) -> Result<Val, CtxError>;
 
-    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError>;
+    fn put_value(&mut self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
 
     fn set_final(&mut self, name: &str) -> Result<(), CtxError>;
 
@@ -47,19 +47,25 @@ pub(crate) trait CtxTrait {
 
     fn get_meta(&self) -> Result<&Ctx, CtxError>;
 
-    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError>;
+    fn get_dyn_meta(&mut self) -> Result<DynRef<Ctx>, CtxError>;
 
     fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError>;
 
-    fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError>;
+    fn get_dyn_ref(&mut self, name: &str) -> Result<DynRef<Val>, CtxError>;
 
     fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError>;
 }
 
-pub(crate) type NameMap = Map<Symbol, TaggedVal>;
+#[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
+pub struct Ctx {
+    pub(crate) map: CtxMap,
+    pub(crate) meta: Option<Box<Ctx>>,
+}
+
+pub(crate) type CtxMap = Map<Symbol, CtxValue>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum InvariantTag {
+pub enum Invariant {
     // no limit
     None,
     // can't be assigned
@@ -69,21 +75,15 @@ pub enum InvariantTag {
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub(crate) struct TaggedVal {
-    pub(crate) tag: InvariantTag,
+pub(crate) struct CtxValue {
+    pub(crate) invariant: Invariant,
     pub(crate) val: Val,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) struct TaggedRef<'a, T> {
-    pub(crate) val_ref: &'a mut T,
+pub(crate) struct DynRef<'a, T> {
+    pub(crate) ref1: &'a mut T,
     pub(crate) is_const: bool,
-}
-
-#[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
-pub struct Ctx {
-    pub(crate) name_map: NameMap,
-    pub(crate) meta: Option<Box<Ctx>>,
 }
 
 struct DispatchConst<'a> {
@@ -96,9 +96,9 @@ struct DispatchMut<'a> {
     ctx: &'a mut Ctx,
 }
 
-struct DispatchTagged<'a> {
+struct DispatchDyn<'a> {
     foreword: bool,
-    ctx: TaggedRef<'a, Ctx>,
+    ctx: DynRef<'a, Ctx>,
 }
 
 struct DispatchOwned {
@@ -111,7 +111,7 @@ impl Ctx {
         let Some(meta) = &self.meta else {
             return Ok(DispatchConst::this(self));
         };
-        let Ok(dispatcher) = meta.get(DISPATCHER) else {
+        let Ok(dispatcher) = meta.get_const_ref(DISPATCHER) else {
             return Ok(DispatchConst::this(self));
         };
         let Val::Func(dispatcher) = dispatcher else {
@@ -132,7 +132,7 @@ impl Ctx {
                 Ok(dispatch)
             }
             Val::Symbol(s) => {
-                let Some(val) = self.name_map.get(&s) else {
+                let Some(val) = self.map.get(&s) else {
                     return Err(CtxError::Unexpected);
                 };
                 let Val::Ctx(ctx) = &val.val else {
@@ -148,7 +148,7 @@ impl Ctx {
         let Some(meta) = &self.meta else {
             return Ok(DispatchMut::this(self));
         };
-        let Ok(dispatcher) = meta.get(DISPATCHER) else {
+        let Ok(dispatcher) = meta.get_const_ref(DISPATCHER) else {
             return Ok(DispatchMut::this(self));
         };
         let Val::Func(dispatcher) = dispatcher else {
@@ -169,13 +169,13 @@ impl Ctx {
                 Ok(dispatch)
             }
             Val::Symbol(s) => {
-                let Some(tagged_val) = self.name_map.get_mut(&s) else {
+                let Some(ctx_value) = self.map.get_mut(&s) else {
                     return Err(CtxError::Unexpected);
                 };
-                let Val::Ctx(ctx) = &mut tagged_val.val else {
+                let Val::Ctx(ctx) = &mut ctx_value.val else {
                     return Err(CtxError::Unexpected);
                 };
-                if matches!(tagged_val.tag, InvariantTag::Const) {
+                if matches!(ctx_value.invariant, Invariant::Const) {
                     return Err(CtxError::AccessDenied);
                 }
                 Ok(DispatchMut::foreword(ctx))
@@ -184,12 +184,12 @@ impl Ctx {
         }
     }
 
-    fn dispatch_tagged(&mut self, is_const: bool, name: &str) -> Result<DispatchTagged, CtxError> {
+    fn dispatch_dyn(&mut self, is_const: bool, name: &str) -> Result<DispatchDyn, CtxError> {
         let Some(meta) = &self.meta else {
-            return Ok(DispatchTagged::this(TaggedRef::new(self, is_const)));
+            return Ok(DispatchDyn::this(DynRef::new(self, is_const)));
         };
-        let Ok(dispatcher) = meta.get(DISPATCHER) else {
-            return Ok(DispatchTagged::this(TaggedRef::new(self, is_const)));
+        let Ok(dispatcher) = meta.get_const_ref(DISPATCHER) else {
+            return Ok(DispatchDyn::this(DynRef::new(self, is_const)));
         };
         let Val::Func(dispatcher) = &dispatcher else {
             return Err(CtxError::Unexpected);
@@ -202,21 +202,21 @@ impl Ctx {
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
-                    DispatchTagged::foreword(TaggedRef::new(self.meta.as_mut().unwrap(), is_const))
+                    DispatchDyn::foreword(DynRef::new(self.meta.as_mut().unwrap(), is_const))
                 } else {
-                    DispatchTagged::this(TaggedRef::new(self, is_const))
+                    DispatchDyn::this(DynRef::new(self, is_const))
                 };
                 Ok(dispatch)
             }
             Val::Symbol(s) => {
-                let Some(tagged_val) = self.name_map.get_mut(&s) else {
+                let Some(ctx_value) = self.map.get_mut(&s) else {
                     return Err(CtxError::Unexpected);
                 };
-                let Val::Ctx(ctx) = &mut tagged_val.val else {
+                let Val::Ctx(ctx) = &mut ctx_value.val else {
                     return Err(CtxError::Unexpected);
                 };
-                let is_const = is_const || matches!(tagged_val.tag, InvariantTag::Const);
-                Ok(DispatchTagged::foreword(TaggedRef::new(ctx, is_const)))
+                let is_const = is_const || matches!(ctx_value.invariant, Invariant::Const);
+                Ok(DispatchDyn::foreword(DynRef::new(ctx, is_const)))
             }
             _ => Err(CtxError::Unexpected),
         }
@@ -226,7 +226,7 @@ impl Ctx {
         let Some(meta) = &self.meta else {
             return Ok(DispatchOwned::this(self));
         };
-        let Ok(dispatcher) = meta.get(DISPATCHER) else {
+        let Ok(dispatcher) = meta.get_const_ref(DISPATCHER) else {
             return Ok(DispatchOwned::this(self));
         };
         let Val::Func(dispatcher) = dispatcher else {
@@ -247,7 +247,7 @@ impl Ctx {
                 Ok(dispatch)
             }
             Val::Symbol(s) => {
-                let Some(val) = self.name_map.remove(&s) else {
+                let Some(val) = self.map.remove(&s) else {
                     return Err(CtxError::Unexpected);
                 };
                 let Val::Ctx(ctx) = val.val else {
@@ -264,10 +264,10 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.get(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get(name) else {
             return Err(CtxError::NotFound);
         };
-        Ok(tagged_val.val.clone())
+        Ok(ctx_value.val.clone())
     }
 
     pub(crate) fn remove(&mut self, name: &str) -> Result<Val, CtxError> {
@@ -275,37 +275,31 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.remove(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get(name) else {
             return Err(CtxError::NotFound);
         };
-        if !matches!(&tagged_val.tag, InvariantTag::None) {
+        if !matches!(&ctx_value.invariant, Invariant::None) {
             return Err(CtxError::AccessDenied);
         }
-        Ok(dispatch.ctx.name_map.remove(name).unwrap().val)
+        Ok(dispatch.ctx.map.remove(name).unwrap().val)
     }
 
-    pub(crate) fn put_val(
-        &mut self,
-        name: Symbol,
-        val: TaggedVal,
-    ) -> Result<Option<Val>, CtxError> {
+    pub(crate) fn put_val(&mut self, name: Symbol, val: CtxValue) -> Result<Option<Val>, CtxError> {
         let dispatch = self.dispatch_mut(&name)?;
         if dispatch.foreword {
             return dispatch.ctx.put_val(name, val);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get(&name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get(&name) else {
             return Ok(dispatch.ctx.put_unchecked(name, val));
         };
-        if !matches!(&tagged_val.tag, InvariantTag::None) {
+        if !matches!(&ctx_value.invariant, Invariant::None) {
             return Err(CtxError::AccessDenied);
         }
         Ok(dispatch.ctx.put_unchecked(name, val))
     }
 
-    fn put_unchecked(&mut self, name: Symbol, val: TaggedVal) -> Option<Val> {
-        self.name_map
-            .insert(name, val)
-            .map(|tagged_val| tagged_val.val)
+    fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
+        self.map.insert(name, val).map(|ctx_value| ctx_value.val)
     }
 
     pub(crate) fn set_final(&mut self, name: &str) -> Result<(), CtxError> {
@@ -313,13 +307,13 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.set_final(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get_mut(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get_mut(name) else {
             return Err(CtxError::NotFound);
         };
-        if !matches!(&tagged_val.tag, InvariantTag::None) {
+        if !matches!(&ctx_value.invariant, Invariant::None) {
             return Err(CtxError::AccessDenied);
         }
-        tagged_val.tag = InvariantTag::Final;
+        ctx_value.invariant = Invariant::Final;
         Ok(())
     }
 
@@ -328,10 +322,10 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.set_const(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get_mut(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get_mut(name) else {
             return Err(CtxError::NotFound);
         };
-        tagged_val.tag = InvariantTag::Const;
+        ctx_value.invariant = Invariant::Const;
         Ok(())
     }
 
@@ -340,10 +334,10 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.is_final(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get(name) else {
             return Err(CtxError::NotFound);
         };
-        let is_final = matches!(&tagged_val.tag, InvariantTag::Final | InvariantTag::Const);
+        let is_final = matches!(&ctx_value.invariant, Invariant::Final | Invariant::Const);
         Ok(is_final)
     }
 
@@ -352,31 +346,28 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.is_const(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get(name) else {
             return Err(CtxError::NotFound);
         };
-        let is_const = matches!(&tagged_val.tag, InvariantTag::Const);
+        let is_const = matches!(&ctx_value.invariant, Invariant::Const);
         Ok(is_const)
     }
 
-    pub(crate) fn get_tagged_ref(
+    pub(crate) fn get_dyn_ref(
         &mut self,
         is_const: bool,
         name: &str,
-    ) -> Result<TaggedRef<Val>, CtxError> {
-        let dispatch = self.dispatch_tagged(is_const, name)?;
+    ) -> Result<DynRef<Val>, CtxError> {
+        let dispatch = self.dispatch_dyn(is_const, name)?;
         if dispatch.foreword {
-            return dispatch
-                .ctx
-                .val_ref
-                .get_tagged_ref(dispatch.ctx.is_const, name);
+            return dispatch.ctx.ref1.get_dyn_ref(dispatch.ctx.is_const, name);
         }
-        if dispatch.ctx.val_ref.name_map.get(name).is_none() {
+        if dispatch.ctx.ref1.map.get(name).is_none() {
             return Err(CtxError::NotFound);
         }
-        let tagged_val = dispatch.ctx.val_ref.name_map.get_mut(name).unwrap();
-        let is_const = is_const || matches!(tagged_val.tag, InvariantTag::Const);
-        Ok(TaggedRef::new(&mut tagged_val.val, is_const))
+        let ctx_value = dispatch.ctx.ref1.map.get_mut(name).unwrap();
+        let is_const = is_const || matches!(ctx_value.invariant, Invariant::Const);
+        Ok(DynRef::new(&mut ctx_value.val, is_const))
     }
 
     pub(crate) fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError> {
@@ -384,10 +375,10 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.get_const_ref(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.get(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.get(name) else {
             return Err(CtxError::NotFound);
         };
-        Ok(&tagged_val.val)
+        Ok(&ctx_value.val)
     }
 
     pub(crate) fn into_val(self, name: &str) -> Result<Val, CtxError> {
@@ -395,10 +386,10 @@ impl Ctx {
         if dispatch.foreword {
             return dispatch.ctx.into_val(name);
         }
-        let Some(tagged_val) = dispatch.ctx.name_map.remove(name) else {
+        let Some(ctx_value) = dispatch.ctx.map.remove(name) else {
             return Err(CtxError::NotFound);
         };
-        Ok(tagged_val.val)
+        Ok(ctx_value.val)
     }
 }
 
@@ -434,15 +425,15 @@ impl<'a> DispatchMut<'a> {
     }
 }
 
-impl<'a> DispatchTagged<'a> {
-    fn this(ctx: TaggedRef<'a, Ctx>) -> Self {
+impl<'a> DispatchDyn<'a> {
+    fn this(ctx: DynRef<'a, Ctx>) -> Self {
         Self {
             foreword: false,
             ctx,
         }
     }
 
-    fn foreword(ctx: TaggedRef<'a, Ctx>) -> Self {
+    fn foreword(ctx: DynRef<'a, Ctx>) -> Self {
         Self {
             foreword: true,
             ctx,
@@ -469,11 +460,6 @@ impl DispatchOwned {
 pub(crate) struct DefaultCtx;
 
 impl DefaultCtx {
-    #[allow(unused)]
-    pub(crate) fn get<Ctx: CtxTrait>(&self, ctx: &Ctx, name: &str) -> Result<Val, CtxError> {
-        ctx.get_const_ref(name).cloned()
-    }
-
     pub(crate) fn is_null<Ctx: CtxTrait>(&self, ctx: &Ctx, name: &str) -> Result<bool, CtxError> {
         match ctx.get_const_ref(name) {
             Ok(_) => Ok(false),
@@ -490,31 +476,31 @@ impl DefaultCtx {
     pub(crate) fn get_ref_or_val<Ctx: CtxTrait, T, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> T
     where
         T: Default,
-        F: FnOnce(Either<TaggedRef<Val>, Val>) -> T,
+        F: FnOnce(Either<DynRef<Val>, Val>) -> T,
         Self: Sized,
     {
         match name {
             Val::Symbol(s) => {
-                let Ok(tagged_ref) = ctx.get_tagged_ref(&s) else {
+                let Ok(dyn_ref) = ctx.get_dyn_ref(&s) else {
                     return T::default();
                 };
-                f(Either::Left(tagged_ref))
+                f(Either::Left(dyn_ref))
             }
             val => f(Either::Right(val)),
         }
     }
 
     #[allow(unused)]
-    pub(crate) fn get_tagged_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
+    pub(crate) fn get_dyn_ref<Ctx: CtxTrait, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> Val
     where
-        F: FnOnce(TaggedRef<Val>) -> Val,
+        F: FnOnce(DynRef<Val>) -> Val,
         Self: Sized,
     {
         self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(tagged_ref) => f(tagged_ref),
+            Either::Left(dyn_ref) => f(dyn_ref),
             Either::Right(mut val) => {
-                let tagged_ref = TaggedRef::new(&mut val, false);
-                let result = f(tagged_ref);
+                let dyn_ref = DynRef::new(&mut val, false);
+                let result = f(dyn_ref);
                 Val::Pair(Box::new(Pair::new(val, result)))
             }
         })
@@ -545,11 +531,11 @@ impl DefaultCtx {
         Self: Sized,
     {
         self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(tagged_ref) => {
-                if tagged_ref.is_const {
+            Either::Left(dyn_ref) => {
+                if dyn_ref.is_const {
                     return Val::default();
                 }
-                f(tagged_ref.val_ref)
+                f(dyn_ref.ref1)
             }
             Either::Right(mut val) => {
                 let result = f(&mut val);
@@ -564,11 +550,11 @@ impl DefaultCtx {
         Self: Sized,
     {
         self.get_ref_or_val(ctx, name, |ref_or_val| match ref_or_val {
-            Either::Left(tagged_ref) => {
-                if tagged_ref.is_const {
+            Either::Left(dyn_ref) => {
+                if dyn_ref.is_const {
                     return Val::default();
                 }
-                f(tagged_ref.val_ref);
+                f(dyn_ref.ref1);
                 Val::default()
             }
             Either::Right(mut val) => {
@@ -579,26 +565,53 @@ impl DefaultCtx {
     }
 }
 
-impl Debug for TaggedVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("").field(&self.tag).field(&self.val).finish()
+#[allow(unused)]
+impl CtxValue {
+    pub(crate) fn new(val: Val) -> CtxValue {
+        CtxValue {
+            invariant: Invariant::None,
+            val,
+        }
+    }
+
+    pub(crate) fn new_final(val: Val) -> CtxValue {
+        CtxValue {
+            invariant: Invariant::Final,
+            val,
+        }
+    }
+
+    pub(crate) fn new_const(val: Val) -> CtxValue {
+        CtxValue {
+            invariant: Invariant::Const,
+            val,
+        }
     }
 }
 
-impl<'a, T> TaggedRef<'a, T> {
-    pub(crate) fn new(val_ref: &'a mut T, is_const: bool) -> Self {
-        TaggedRef { val_ref, is_const }
+impl Debug for CtxValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("")
+            .field(&self.invariant)
+            .field(&self.val)
+            .finish()
+    }
+}
+
+impl<'a, T> DynRef<'a, T> {
+    pub(crate) fn new(ref1: &'a mut T, is_const: bool) -> Self {
+        DynRef { ref1, is_const }
     }
 
     pub(crate) fn as_const(&'a self) -> &'a T {
-        self.val_ref
+        self.ref1
     }
 
     pub(crate) fn as_mut(&'a mut self) -> Option<&'a mut T> {
         if self.is_const {
             None
         } else {
-            Some(&mut self.val_ref)
+            Some(&mut self.ref1)
         }
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::Prelude,
 };
 
@@ -14,5 +14,5 @@ impl Default for BytesPrelude {
 }
 
 impl Prelude for BytesPrelude {
-    fn put(&self, _m: &mut NameMap) {}
+    fn put(&self, _m: &mut CtxMap) {}
 }

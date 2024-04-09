@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::{
         default_mode,
         named_free_fn,
@@ -19,7 +19,6 @@ pub(crate) struct SymbolPrelude {
     pub(crate) into_str: Named<FuncVal>,
 }
 
-#[allow(clippy::derivable_impls)]
 impl Default for SymbolPrelude {
     fn default() -> Self {
         SymbolPrelude {
@@ -31,7 +30,7 @@ impl Default for SymbolPrelude {
 }
 
 impl Prelude for SymbolPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.empty.put(m);
         self.from_str.put(m);
         self.into_str.put(m);

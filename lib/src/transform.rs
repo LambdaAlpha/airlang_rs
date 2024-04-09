@@ -18,6 +18,10 @@ use crate::{
     Val,
 };
 
+pub(crate) const EVAL: &str = "eval";
+pub(crate) const ID: &str = "id";
+pub(crate) const LAZY: &str = "lazy";
+
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Transform {
     #[default]

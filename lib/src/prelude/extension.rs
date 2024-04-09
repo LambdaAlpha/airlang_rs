@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     extension::UnitExt,
     prelude::{
         Named,
@@ -13,7 +13,6 @@ pub(crate) struct ExtPrelude {
     pub(crate) unit: Named<Box<dyn ValExt>>,
 }
 
-#[allow(clippy::derivable_impls)]
 impl Default for ExtPrelude {
     fn default() -> Self {
         ExtPrelude { unit: unit() }
@@ -21,7 +20,7 @@ impl Default for ExtPrelude {
 }
 
 impl Prelude for ExtPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.unit.put(m);
     }
 }

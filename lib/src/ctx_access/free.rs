@@ -3,8 +3,8 @@ use crate::{
         Ctx,
         CtxError,
         CtxTrait,
-        TaggedRef,
-        TaggedVal,
+        CtxValue,
+        DynRef,
     },
     ctx_access::{
         constant::CtxForConstFn,
@@ -26,7 +26,7 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn put_val(&mut self, _name: Symbol, _val: TaggedVal) -> Result<Option<Val>, CtxError> {
+    fn put_value(&mut self, _name: Symbol, _value: CtxValue) -> Result<Option<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -54,7 +54,7 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
+    fn get_dyn_meta(&mut self) -> Result<DynRef<Ctx>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -62,7 +62,7 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_tagged_ref(&mut self, _name: &str) -> Result<TaggedRef<Val>, CtxError> {
+    fn get_dyn_ref(&mut self, _name: &str) -> Result<DynRef<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 

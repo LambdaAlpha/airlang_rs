@@ -1,7 +1,7 @@
 use crate::{
     ctx::{
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::constant::CtxForConstFn,
     prelude::{
@@ -45,7 +45,7 @@ impl Default for StrPrelude {
 }
 
 impl Prelude for StrPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.from_utf8.put(m);
         self.into_utf8.put(m);
         self.length.put(m);

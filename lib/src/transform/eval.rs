@@ -41,8 +41,8 @@ impl<Ctx> ByVal<Ctx, Val> for Eval
 where
     Ctx: CtxAccessor,
 {
-    fn transform_atoms(&self, ctx: &mut Ctx, input: Val) -> Val {
-        Id.transform_atoms(ctx, input)
+    fn transform_default(&self, ctx: &mut Ctx, input: Val) -> Val {
+        Id.transform_default(ctx, input)
     }
 
     fn transform_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
@@ -160,8 +160,8 @@ impl<'a, Ctx> ByRef<'a, Ctx, Val> for EvalByRef
 where
     Ctx: CtxAccessor,
 {
-    fn transform_atoms(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        IdByRef.transform_atoms(ctx, input)
+    fn transform_default(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
+        IdByRef.transform_default(ctx, input)
     }
 
     fn transform_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {

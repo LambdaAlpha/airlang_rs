@@ -48,17 +48,18 @@ pub enum Val {
     Bool(Bool),
     Int(Int),
     Float(Float),
-    Bytes(Bytes),
     Symbol(Symbol),
     String(Str),
     Pair(Box<PairVal>),
-    Call(Box<CallVal>),
-    Reverse(Box<ReverseVal>),
     List(ListVal),
     Map(MapVal),
 
-    Func(FuncVal),
+    Bytes(Bytes),
+    Call(Box<CallVal>),
+    Reverse(Box<ReverseVal>),
+
     Ctx(CtxVal),
+    Func(FuncVal),
 
     Prop(PropVal),
 
@@ -71,14 +72,14 @@ pub(crate) const UNIT: &str = "unit";
 pub(crate) const BOOL: &str = "bool";
 pub(crate) const INT: &str = "int";
 pub(crate) const FLOAT: &str = "float";
-pub(crate) const BYTES: &str = "bytes";
 pub(crate) const SYMBOL: &str = "symbol";
 pub(crate) const STRING: &str = "string";
 pub(crate) const PAIR: &str = "pair";
-pub(crate) const CALL: &str = "call";
-pub(crate) const REVERSE: &str = "reverse";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
+pub(crate) const BYTES: &str = "bytes";
+pub(crate) const CALL: &str = "call";
+pub(crate) const REVERSE: &str = "reverse";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 pub(crate) const PROP: &str = "proposition";
@@ -121,12 +122,6 @@ impl From<Float> for Val {
     }
 }
 
-impl From<Bytes> for Val {
-    fn from(value: Bytes) -> Self {
-        Val::Bytes(value)
-    }
-}
-
 impl From<Str> for Val {
     fn from(value: Str) -> Self {
         Val::String(value)
@@ -142,18 +137,6 @@ impl From<Symbol> for Val {
 impl From<Box<PairVal>> for Val {
     fn from(value: Box<PairVal>) -> Self {
         Val::Pair(value)
-    }
-}
-
-impl From<Box<CallVal>> for Val {
-    fn from(value: Box<CallVal>) -> Self {
-        Val::Call(value)
-    }
-}
-
-impl From<Box<ReverseVal>> for Val {
-    fn from(value: Box<ReverseVal>) -> Self {
-        Val::Reverse(value)
     }
 }
 
@@ -175,15 +158,33 @@ impl From<Box<Annotation<Val, Val>>> for Val {
     }
 }
 
-impl From<FuncVal> for Val {
-    fn from(value: FuncVal) -> Self {
-        Val::Func(value)
+impl From<Bytes> for Val {
+    fn from(value: Bytes) -> Self {
+        Val::Bytes(value)
+    }
+}
+
+impl From<Box<CallVal>> for Val {
+    fn from(value: Box<CallVal>) -> Self {
+        Val::Call(value)
+    }
+}
+
+impl From<Box<ReverseVal>> for Val {
+    fn from(value: Box<ReverseVal>) -> Self {
+        Val::Reverse(value)
     }
 }
 
 impl From<CtxVal> for Val {
     fn from(value: CtxVal) -> Self {
         Val::Ctx(value)
+    }
+}
+
+impl From<FuncVal> for Val {
+    fn from(value: FuncVal) -> Self {
+        Val::Func(value)
     }
 }
 
@@ -212,14 +213,14 @@ impl From<&Repr> for Val {
             Repr::Bool(b) => Val::Bool(*b),
             Repr::Int(i) => Val::Int(i.clone()),
             Repr::Float(f) => Val::Float(f.clone()),
-            Repr::Bytes(b) => Val::Bytes(b.clone()),
             Repr::Symbol(s) => Val::Symbol(s.clone()),
             Repr::String(s) => Val::String(s.clone()),
             Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(&**p))),
-            Repr::Call(c) => Val::Call(Box::new(CallVal::from(&**c))),
-            Repr::Reverse(i) => Val::Reverse(Box::new(ReverseVal::from(&**i))),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
+            Repr::Bytes(b) => Val::Bytes(b.clone()),
+            Repr::Call(c) => Val::Call(Box::new(CallVal::from(&**c))),
+            Repr::Reverse(i) => Val::Reverse(Box::new(ReverseVal::from(&**i))),
         }
     }
 }
@@ -231,14 +232,14 @@ impl From<Repr> for Val {
             Repr::Bool(b) => Val::Bool(b),
             Repr::Int(i) => Val::Int(i),
             Repr::Float(f) => Val::Float(f),
-            Repr::Bytes(b) => Val::Bytes(b),
             Repr::Symbol(s) => Val::Symbol(s),
             Repr::String(s) => Val::String(s),
             Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(*p))),
-            Repr::Call(c) => Val::Call(Box::new(CallVal::from(*c))),
-            Repr::Reverse(i) => Val::Reverse(Box::new(ReverseVal::from(*i))),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
+            Repr::Bytes(b) => Val::Bytes(b),
+            Repr::Call(c) => Val::Call(Box::new(CallVal::from(*c))),
+            Repr::Reverse(i) => Val::Reverse(Box::new(ReverseVal::from(*i))),
         }
     }
 }
@@ -251,20 +252,20 @@ impl TryInto<Repr> for &Val {
             Val::Bool(b) => Ok(Repr::Bool(*b)),
             Val::Int(i) => Ok(Repr::Int((*i).clone())),
             Val::Float(f) => Ok(Repr::Float((*f).clone())),
-            Val::Bytes(b) => Ok(Repr::Bytes((*b).clone())),
             Val::Symbol(s) => Ok(Repr::Symbol((*s).clone())),
             Val::String(s) => Ok(Repr::String((*s).clone())),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
                 &**p,
             )?))),
+            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
+            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
+            Val::Bytes(b) => Ok(Repr::Bytes((*b).clone())),
             Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
                 &**c,
             )?))),
             Val::Reverse(i) => Ok(Repr::Reverse(Box::new(
                 <_ as TryInto<ReverseRepr>>::try_into(&**i)?,
             ))),
-            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
-            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
             _ => Err(ReprError {}),
         }
     }
@@ -278,20 +279,20 @@ impl TryInto<Repr> for Val {
             Val::Bool(b) => Ok(Repr::Bool(b)),
             Val::Int(i) => Ok(Repr::Int(i)),
             Val::Float(f) => Ok(Repr::Float(f)),
-            Val::Bytes(b) => Ok(Repr::Bytes(b)),
             Val::Symbol(s) => Ok(Repr::Symbol(s)),
             Val::String(s) => Ok(Repr::String(s)),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
                 *p,
             )?))),
+            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
+            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
+            Val::Bytes(b) => Ok(Repr::Bytes(b)),
             Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
                 *c,
             )?))),
             Val::Reverse(i) => Ok(Repr::Reverse(Box::new(
                 <_ as TryInto<ReverseRepr>>::try_into(*i)?,
             ))),
-            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
-            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
             _ => Err(ReprError {}),
         }
     }
@@ -315,14 +316,14 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             Val::Bool(b) => GenerateRepr::Bool(b),
             Val::Int(i) => GenerateRepr::Int(i),
             Val::Float(f) => GenerateRepr::Float(f),
-            Val::Bytes(b) => GenerateRepr::Bytes(b),
             Val::Symbol(s) => GenerateRepr::Symbol(s),
             Val::String(s) => GenerateRepr::String(s),
             Val::Pair(p) => GenerateRepr::Pair(p),
-            Val::Call(c) => GenerateRepr::Call(c),
-            Val::Reverse(r) => GenerateRepr::Reverse(r),
             Val::List(l) => GenerateRepr::List(l),
             Val::Map(m) => GenerateRepr::Map(m),
+            Val::Bytes(b) => GenerateRepr::Bytes(b),
+            Val::Call(c) => GenerateRepr::Call(c),
+            Val::Reverse(r) => GenerateRepr::Reverse(r),
             _ => return Err(ReprError {}),
         };
         Ok(r)
@@ -336,16 +337,16 @@ impl Debug for Val {
             Val::Bool(b) => <_ as Debug>::fmt(b, f),
             Val::Int(i) => <_ as Debug>::fmt(i, f),
             Val::Float(float) => <_ as Debug>::fmt(float, f),
-            Val::Bytes(b) => <_ as Debug>::fmt(b, f),
             Val::Symbol(s) => <_ as Debug>::fmt(s, f),
             Val::String(s) => <_ as Debug>::fmt(s, f),
             Val::Pair(p) => <_ as Debug>::fmt(p, f),
-            Val::Call(c) => <_ as Debug>::fmt(c, f),
-            Val::Reverse(r) => <_ as Debug>::fmt(r, f),
             Val::List(l) => <_ as Debug>::fmt(l, f),
             Val::Map(m) => <_ as Debug>::fmt(m, f),
-            Val::Func(func) => <_ as Debug>::fmt(func, f),
+            Val::Bytes(b) => <_ as Debug>::fmt(b, f),
+            Val::Call(c) => <_ as Debug>::fmt(c, f),
+            Val::Reverse(r) => <_ as Debug>::fmt(r, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
+            Val::Func(func) => <_ as Debug>::fmt(func, f),
             Val::Prop(p) => <_ as Debug>::fmt(p, f),
             Val::Answer(a) => <_ as Debug>::fmt(a, f),
             Val::Ext(e) => <_ as Debug>::fmt(e, f),
@@ -355,17 +356,17 @@ impl Debug for Val {
 
 pub(crate) mod pair;
 
-pub(crate) mod call;
-
-pub(crate) mod reverse;
-
 pub(crate) mod list;
 
 pub(crate) mod map;
 
-pub(crate) mod func;
+pub(crate) mod call;
+
+pub(crate) mod reverse;
 
 pub(crate) mod ctx;
+
+pub(crate) mod func;
 
 pub(crate) mod prop;
 

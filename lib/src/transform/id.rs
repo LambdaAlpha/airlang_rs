@@ -29,7 +29,7 @@ impl<Ctx> Transformer<Ctx, Val, Val> for Id {
 }
 
 impl<Ctx> ByVal<Ctx, Val> for Id {
-    fn transform_atoms(&self, _ctx: &mut Ctx, input: Val) -> Val {
+    fn transform_default(&self, _ctx: &mut Ctx, input: Val) -> Val {
         input
     }
 
@@ -68,7 +68,7 @@ impl<'a, Ctx> Transformer<Ctx, &'a Val, Val> for IdByRef {
 }
 
 impl<'a, Ctx> ByRef<'a, Ctx, Val> for IdByRef {
-    fn transform_atoms(&self, _ctx: &mut Ctx, input: &'a Val) -> Val {
+    fn transform_default(&self, _ctx: &mut Ctx, input: &'a Val) -> Val {
         input.clone()
     }
 

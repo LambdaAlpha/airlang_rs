@@ -22,10 +22,6 @@ pub(crate) trait Transformer<Ctx, Input, Output> {
     fn transform(&self, ctx: &mut Ctx, input: Input) -> Output;
 }
 
-pub(crate) const EVAL: &str = "eval";
-pub(crate) const ID: &str = "id";
-pub(crate) const LAZY: &str = "lazy";
-
 pub(crate) struct DefaultByVal;
 
 impl DefaultByVal {
@@ -40,7 +36,7 @@ impl DefaultByVal {
             Val::Map(m) => t.transform_map(ctx, m),
             Val::Call(c) => t.transform_call(ctx, c.func, c.input),
             Val::Reverse(r) => t.transform_reverse(ctx, r.func, r.output),
-            v => t.transform_atoms(ctx, v),
+            v => t.transform_default(ctx, v),
         }
     }
 
@@ -139,7 +135,7 @@ impl DefaultByRef {
             Val::Map(m) => t.transform_map(ctx, m),
             Val::Call(c) => t.transform_call(ctx, &c.func, &c.input),
             Val::Reverse(r) => t.transform_reverse(ctx, &r.func, &r.output),
-            v => t.transform_atoms(ctx, v),
+            v => t.transform_default(ctx, v),
         }
     }
 

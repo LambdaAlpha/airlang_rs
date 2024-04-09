@@ -5,7 +5,7 @@ use airlang::{
     interpret_mutable,
     parse,
     Ctx,
-    InvariantTag,
+    Invariant,
     MutableCtx,
     Symbol,
 };
@@ -58,6 +58,6 @@ fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
     init_ctx(mut_ctx.reborrow());
     let main = interpret_mutable(mut_ctx.reborrow(), src);
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
-    mut_ctx.put(main_name, InvariantTag::Const, main)?;
+    mut_ctx.put(main_name, Invariant::Const, main)?;
     Ok(ctx)
 }

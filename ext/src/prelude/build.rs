@@ -11,7 +11,7 @@ use airlang::{
     Ctx,
     CtxForMutableFn,
     FuncVal,
-    InvariantTag,
+    Invariant,
     MutableCtx,
     Str,
     Symbol,
@@ -102,11 +102,11 @@ fn get_cur_url(mut ctx: CtxForMutableFn, key: &Symbol) -> Option<String> {
 
 fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) {
     if let Some(mut meta) = ctx.meta() {
-        let _ = meta.put(key, InvariantTag::None, Val::String(Str::from(new_url)));
+        let _ = meta.put(key, Invariant::None, Val::String(Str::from(new_url)));
     } else {
         let mut meta = Ctx::default();
         let mut meta_mut = MutableCtx::new(&mut meta);
-        let _ = meta_mut.put(key, InvariantTag::None, Val::String(Str::from(new_url)));
+        let _ = meta_mut.put(key, Invariant::None, Val::String(Str::from(new_url)));
         ctx.set_meta(Some(meta));
     }
 }

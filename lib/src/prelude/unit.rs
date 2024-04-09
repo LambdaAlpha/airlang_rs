@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::{
         default_mode,
         named_free_fn,
@@ -30,7 +30,7 @@ impl Default for UnitPrelude {
 }
 
 impl Prelude for UnitPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.unit.put(m);
         self.is_unit.put(m);
     }

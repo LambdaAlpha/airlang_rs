@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     ctx_access::{
         free::FreeCtx,
         mutable::CtxForMutableFn,
@@ -16,13 +16,11 @@ use crate::{
         id::Id,
         lazy::Lazy,
         Transform,
-    },
-    transformer::{
-        Transformer,
         EVAL,
         ID,
         LAZY,
     },
+    transformer::Transformer,
     val::{
         func::FuncVal,
         Val,
@@ -48,7 +46,7 @@ impl Default for TransformPrelude {
 }
 
 impl Prelude for TransformPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.eval.put(m);
         self.id.put(m);
         self.lazy.put(m);

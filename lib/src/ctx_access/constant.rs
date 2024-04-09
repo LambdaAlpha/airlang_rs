@@ -3,9 +3,9 @@ use crate::{
         Ctx,
         CtxError,
         CtxTrait,
+        CtxValue,
         DefaultCtx,
-        TaggedRef,
-        TaggedVal,
+        DynRef,
     },
     ctx_access::{
         free::FreeCtx,
@@ -38,7 +38,7 @@ impl<'a> CtxTrait for ConstCtx<'a> {
         Err(CtxError::AccessDenied)
     }
 
-    fn put_val(&mut self, _name: Symbol, _val: TaggedVal) -> Result<Option<Val>, CtxError> {
+    fn put_value(&mut self, _name: Symbol, _value: CtxValue) -> Result<Option<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -69,9 +69,9 @@ impl<'a> CtxTrait for ConstCtx<'a> {
         }
     }
 
-    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
+    fn get_dyn_meta(&mut self) -> Result<DynRef<Ctx>, CtxError> {
         match &mut self.0.meta {
-            Some(ctx) => Ok(TaggedRef::new(ctx, true)),
+            Some(ctx) => Ok(DynRef::new(ctx, true)),
             None => Err(CtxError::NotFound),
         }
     }
@@ -80,8 +80,8 @@ impl<'a> CtxTrait for ConstCtx<'a> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError> {
-        self.0.get_tagged_ref(true, name)
+    fn get_dyn_ref(&mut self, name: &str) -> Result<DynRef<Val>, CtxError> {
+        self.0.get_dyn_ref(true, name)
     }
 
     fn get_const_ref(&self, name: &str) -> Result<&Val, CtxError> {
@@ -122,10 +122,10 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn put_val(&mut self, name: Symbol, val: TaggedVal) -> Result<Option<Val>, CtxError> {
+    fn put_value(&mut self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.put_val(name, val),
-            CtxForConstFn::Const(ctx) => ctx.put_val(name, val),
+            CtxForConstFn::Free(ctx) => ctx.put_value(name, value),
+            CtxForConstFn::Const(ctx) => ctx.put_value(name, value),
         }
     }
 
@@ -171,10 +171,10 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn get_tagged_meta(&mut self) -> Result<TaggedRef<Ctx>, CtxError> {
+    fn get_dyn_meta(&mut self) -> Result<DynRef<Ctx>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_tagged_meta(),
-            CtxForConstFn::Const(ctx) => ctx.get_tagged_meta(),
+            CtxForConstFn::Free(ctx) => ctx.get_dyn_meta(),
+            CtxForConstFn::Const(ctx) => ctx.get_dyn_meta(),
         }
     }
 
@@ -185,10 +185,10 @@ impl<'a> CtxTrait for CtxForConstFn<'a> {
         }
     }
 
-    fn get_tagged_ref(&mut self, name: &str) -> Result<TaggedRef<Val>, CtxError> {
+    fn get_dyn_ref(&mut self, name: &str) -> Result<DynRef<Val>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_tagged_ref(name),
-            CtxForConstFn::Const(ctx) => ctx.get_tagged_ref(name),
+            CtxForConstFn::Free(ctx) => ctx.get_dyn_ref(name),
+            CtxForConstFn::Const(ctx) => ctx.get_dyn_ref(name),
         }
     }
 

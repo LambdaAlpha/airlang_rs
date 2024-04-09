@@ -4,11 +4,11 @@ use crate::{
     ctx::{
         Ctx,
         CtxError,
+        CtxMap,
         CtxTrait,
-        InvariantTag,
-        NameMap,
-        TaggedRef,
-        TaggedVal,
+        CtxValue,
+        DynRef,
+        Invariant,
     },
     ctx_access::{
         constant::{
@@ -117,7 +117,7 @@ impl Default for CtxPrelude {
 }
 
 impl Prelude for CtxPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.read.put(m);
         self.move1.put(m);
         self.assign.put(m);
@@ -197,8 +197,11 @@ fn assign_destruct(
         Val::Call(name) => {
             if allow_options {
                 match parse_ctx_val_pair(name) {
-                    ParseCtxValPairResult::Parsed { val: name, tag } => {
-                        let options = AssignOptions { tag };
+                    ParseCtxValPairResult::Parsed {
+                        val: name,
+                        invariant,
+                    } => {
+                        let options = AssignOptions { invariant };
                         assign_destruct(ctx, name, val, options, false)
                     }
                     ParseCtxValPairResult::Fallback(name) => assign_call(ctx, *name, val, options),
@@ -225,11 +228,11 @@ fn assign_allow_options(
 }
 
 fn assign_symbol(ctx: &mut CtxForMutableFn, name: Symbol, val: Val, options: AssignOptions) -> Val {
-    let tagged_val = TaggedVal {
+    let ctx_value = CtxValue {
         val,
-        tag: options.tag,
+        invariant: options.invariant,
     };
-    let Ok(last) = ctx.put_val(name, tagged_val) else {
+    let Ok(last) = ctx.put_value(name, ctx_value) else {
         return Val::default();
     };
     last.unwrap_or_default()
@@ -309,19 +312,19 @@ fn assign_map(ctx: &mut CtxForMutableFn, name: MapVal, val: Val, options: Assign
 
 #[derive(Copy, Clone)]
 struct AssignOptions {
-    tag: InvariantTag,
+    invariant: Invariant,
 }
 
 impl Default for AssignOptions {
     fn default() -> Self {
         AssignOptions {
-            tag: InvariantTag::None,
+            invariant: Invariant::None,
         }
     }
 }
 
 enum ParseCtxValPairResult {
-    Parsed { val: Val, tag: InvariantTag },
+    Parsed { val: Val, invariant: Invariant },
     Fallback(Box<CallVal>),
     None,
 }
@@ -334,47 +337,47 @@ fn parse_ctx_val_pair(call: Box<CallVal>) -> ParseCtxValPairResult {
         return ParseCtxValPairResult::None;
     };
     let val = pair.first;
-    let tag = match pair.second {
+    let invariant = match pair.second {
         Val::Symbol(s) => {
-            if let Some(tag) = parse_invariant_tag(&s) {
-                tag
+            if let Some(invariant) = parse_invariant(&s) {
+                invariant
             } else {
                 return ParseCtxValPairResult::None;
             }
         }
         Val::Map(mut map) => match map_remove(&mut map, INVARIANT) {
-            Val::Symbol(tag) => {
-                if let Some(tag) = parse_invariant_tag(&tag) {
-                    tag
+            Val::Symbol(invariant) => {
+                if let Some(invariant) = parse_invariant(&invariant) {
+                    invariant
                 } else {
                     return ParseCtxValPairResult::None;
                 }
             }
-            Val::Unit(_) => InvariantTag::None,
+            Val::Unit(_) => Invariant::None,
             _ => return ParseCtxValPairResult::None,
         },
         _ => return ParseCtxValPairResult::None,
     };
-    ParseCtxValPairResult::Parsed { val, tag }
+    ParseCtxValPairResult::Parsed { val, invariant }
 }
 
-fn parse_invariant_tag(tag: &str) -> Option<InvariantTag> {
-    let tag = match tag {
-        NONE => InvariantTag::None,
-        FINAL => InvariantTag::Final,
-        CONST => InvariantTag::Const,
+fn parse_invariant(invariant: &str) -> Option<Invariant> {
+    let invariant = match invariant {
+        NONE => Invariant::None,
+        FINAL => Invariant::Final,
+        CONST => Invariant::Const,
         _ => return None,
     };
-    Some(tag)
+    Some(invariant)
 }
 
-fn generate_invariant_tag(tag: InvariantTag) -> Symbol {
-    let tag = match tag {
-        InvariantTag::None => NONE,
-        InvariantTag::Final => FINAL,
-        InvariantTag::Const => CONST,
+fn generate_invariant(invariant: Invariant) -> Symbol {
+    let invariant = match invariant {
+        Invariant::None => NONE,
+        Invariant::Final => FINAL,
+        Invariant::Const => CONST,
     };
-    Symbol::from_str(tag)
+    Symbol::from_str(invariant)
 }
 
 fn set_final() -> Named<FuncVal> {
@@ -725,10 +728,10 @@ where
         Val::Unit(_) => callback(CtxForMutableFn::Free(FreeCtx)),
         Val::Bool(is_meta) => {
             if is_meta.bool() {
-                let Ok(TaggedRef {
+                let Ok(DynRef {
                     is_const,
-                    val_ref: meta_ctx,
-                }) = ctx.get_tagged_meta()
+                    ref1: meta_ctx,
+                }) = ctx.get_dyn_meta()
                 else {
                     return None;
                 };
@@ -742,10 +745,10 @@ where
             }
         }
         Val::Symbol(name) => {
-            let Ok(TaggedRef { val_ref, is_const }) = ctx.get_tagged_ref(name) else {
+            let Ok(DynRef { ref1, is_const }) = ctx.get_dyn_ref(name) else {
                 return None;
             };
-            let Val::Ctx(CtxVal(target_ctx)) = val_ref else {
+            let Val::Ctx(CtxVal(target_ctx)) = ref1 else {
                 return None;
             };
             if is_const {
@@ -794,35 +797,37 @@ fn fn_ctx_new(input: Val) -> Val {
         _ => return Val::default(),
     };
 
-    let name_map_repr = match meta_map.second {
-        Val::Map(name_map) => name_map,
+    let ctx_map_repr = match meta_map.second {
+        Val::Map(ctx_map) => ctx_map,
         Val::Unit(_) => MapVal::default(),
         _ => return Val::default(),
     };
 
-    let mut name_map = NameMap::with_capacity(name_map_repr.len());
+    let mut ctx_map = CtxMap::with_capacity(ctx_map_repr.len());
 
-    for (key, val) in name_map_repr {
+    for (key, val) in ctx_map_repr {
         let Val::Symbol(name) = key else {
             return Val::default();
         };
-        let tagged_val = {
+        let ctx_value = {
             if let Val::Call(call) = val {
                 match parse_ctx_val_pair(call) {
-                    ParseCtxValPairResult::Parsed { val, tag, .. } => TaggedVal { val, tag },
-                    ParseCtxValPairResult::Fallback(call) => TaggedVal::new(Val::Call(call)),
+                    ParseCtxValPairResult::Parsed { val, invariant, .. } => {
+                        CtxValue { val, invariant }
+                    }
+                    ParseCtxValPairResult::Fallback(call) => CtxValue::new(Val::Call(call)),
                     ParseCtxValPairResult::None => {
                         return Val::default();
                     }
                 }
             } else {
-                TaggedVal::new(val)
+                CtxValue::new(val)
             }
         };
-        name_map.insert(name, tagged_val);
+        ctx_map.insert(name, ctx_value);
     }
 
-    Val::Ctx(CtxVal(Box::new(Ctx { name_map, meta })))
+    Val::Ctx(CtxVal(Box::new(Ctx { map: ctx_map, meta })))
 }
 
 fn ctx_repr() -> Named<FuncVal> {
@@ -845,7 +850,7 @@ fn fn_ctx_repr(input: Val) -> Val {
     };
 
     let map = ctx
-        .name_map
+        .map
         .into_iter()
         .map(|(k, v)| {
             let k = Val::Symbol(k);
@@ -855,12 +860,12 @@ fn fn_ctx_repr(input: Val) -> Val {
                         break 'a true;
                     }
                 }
-                matches!(v.tag, InvariantTag::Final | InvariantTag::Const)
+                matches!(v.invariant, Invariant::Final | Invariant::Const)
             };
             let v = if use_normal_form {
                 let func = Val::Unit(Unit);
-                let tag = generate_invariant_tag(v.tag);
-                let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(tag))));
+                let invariant = generate_invariant(v.invariant);
+                let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(invariant))));
                 Val::Call(Box::new(Call::new(func, pair)))
             } else {
                 v.val

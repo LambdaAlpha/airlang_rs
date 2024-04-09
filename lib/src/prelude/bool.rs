@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     prelude::{
         default_mode,
         named_free_fn,
@@ -40,7 +40,7 @@ impl Default for BoolPrelude {
 }
 
 impl Prelude for BoolPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.is_true.put(m);
         self.is_false.put(m);
         self.not.put(m);

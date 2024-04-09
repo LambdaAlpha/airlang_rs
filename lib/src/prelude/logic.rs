@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
-    ctx::NameMap,
-    func::FuncCore,
+    ctx::CtxMap,
+    func::FuncTransformer,
     logic::Prop,
     prelude::{
         call_mode,
@@ -34,7 +34,7 @@ impl Default for LogicPrelude {
 }
 
 impl Prelude for LogicPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.prove.put(m);
     }
 }
@@ -52,7 +52,7 @@ fn fn_prove(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Func(func) = call.func else {
         return Val::default();
     };
-    let FuncCore::Free(_) = &func.0.core else {
+    let FuncTransformer::Free(_) = &func.0.transformer else {
         return Val::default();
     };
     let input = func.input_mode.transform(&mut ctx, call.input);

@@ -26,9 +26,6 @@ use rustc_hash::FxHashMap;
 #[derive(Clone, PartialEq, Eq)]
 pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);
 
-#[allow(dead_code)]
-pub type Set<K> = Map<K, ()>;
-
 impl<K: Eq + Hash, V> Map<K, V> {
     pub(crate) fn with_capacity(len: usize) -> Self {
         Map(FxHashMap::with_capacity_and_hasher(len, Default::default()))

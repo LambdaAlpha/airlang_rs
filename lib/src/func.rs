@@ -13,8 +13,8 @@ use std::{
 use crate::{
     ctx::{
         Ctx,
-        InvariantTag,
-        TaggedVal,
+        CtxValue,
+        Invariant,
     },
     ctx_access::{
         constant::{
@@ -42,7 +42,7 @@ use crate::{
 pub struct Func {
     pub(crate) input_mode: TransformMode,
     pub(crate) output_mode: TransformMode,
-    pub(crate) core: FuncCore,
+    pub(crate) transformer: FuncTransformer,
 }
 
 pub trait CtxFreeFn {
@@ -58,7 +58,7 @@ pub trait CtxMutableFn {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) enum FuncCore {
+pub(crate) enum FuncTransformer {
     Free(CtxFree),
     Const(CtxConst),
     Mutable(CtxMutable),
@@ -77,10 +77,10 @@ pub(crate) enum FuncImpl<P, C> {
 }
 
 #[derive(Clone)]
-pub(crate) struct Primitive<F> {
+pub(crate) struct Primitive<Fn> {
     is_extension: bool,
     id: Symbol,
-    f: F,
+    fn1: Fn,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -113,39 +113,41 @@ impl Func {
         &self.output_mode
     }
 
-    #[allow(unused)]
     pub(crate) fn is_ctx_free(&self) -> bool {
-        matches!(&self.core, FuncCore::Free(_))
+        matches!(&self.transformer, FuncTransformer::Free(_))
     }
 
     #[allow(unused)]
     pub(crate) fn is_ctx_const(&self) -> bool {
-        matches!(&self.core, FuncCore::Free(_) | FuncCore::Const(_))
+        matches!(
+            &self.transformer,
+            FuncTransformer::Free(_) | FuncTransformer::Const(_)
+        )
     }
 
     pub(crate) fn is_primitive(&self) -> bool {
-        match &self.core {
-            FuncCore::Free(f) => matches!(f, FuncImpl::Primitive(_)),
-            FuncCore::Const(f) => matches!(f, FuncImpl::Primitive(_)),
-            FuncCore::Mutable(f) => matches!(f, FuncImpl::Primitive(_)),
+        match &self.transformer {
+            FuncTransformer::Free(f) => matches!(f, FuncImpl::Primitive(_)),
+            FuncTransformer::Const(f) => matches!(f, FuncImpl::Primitive(_)),
+            FuncTransformer::Mutable(f) => matches!(f, FuncImpl::Primitive(_)),
         }
     }
 
     pub(crate) fn primitive_id(&self) -> Option<Symbol> {
-        match &self.core {
-            FuncCore::Free(f) => {
+        match &self.transformer {
+            FuncTransformer::Free(f) => {
                 let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
                 Some(f.id.clone())
             }
-            FuncCore::Const(f) => {
+            FuncTransformer::Const(f) => {
                 let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
                 Some(f.id.clone())
             }
-            FuncCore::Mutable(f) => {
+            FuncTransformer::Mutable(f) => {
                 let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
@@ -155,20 +157,20 @@ impl Func {
     }
 
     pub(crate) fn primitive_is_extension(&self) -> Option<bool> {
-        match &self.core {
-            FuncCore::Free(f) => {
+        match &self.transformer {
+            FuncTransformer::Free(f) => {
                 let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
                 Some(f.is_extension)
             }
-            FuncCore::Const(f) => {
+            FuncTransformer::Const(f) => {
                 let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
                 Some(f.is_extension)
             }
-            FuncCore::Mutable(f) => {
+            FuncTransformer::Mutable(f) => {
                 let FuncImpl::Primitive(f) = f else {
                     return None;
                 };
@@ -178,20 +180,20 @@ impl Func {
     }
 
     pub(crate) fn composed_body(&self) -> Option<Val> {
-        match &self.core {
-            FuncCore::Free(f) => {
+        match &self.transformer {
+            FuncTransformer::Free(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.body.clone())
             }
-            FuncCore::Const(f) => {
+            FuncTransformer::Const(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.body.clone())
             }
-            FuncCore::Mutable(f) => {
+            FuncTransformer::Mutable(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
@@ -201,20 +203,20 @@ impl Func {
     }
 
     pub(crate) fn composed_context(&self) -> Option<Ctx> {
-        match &self.core {
-            FuncCore::Free(f) => {
+        match &self.transformer {
+            FuncTransformer::Free(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.ctx.clone())
             }
-            FuncCore::Const(f) => {
+            FuncTransformer::Const(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.ctx.clone())
             }
-            FuncCore::Mutable(f) => {
+            FuncTransformer::Mutable(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
@@ -224,20 +226,20 @@ impl Func {
     }
 
     pub(crate) fn composed_input_name(&self) -> Option<Symbol> {
-        match &self.core {
-            FuncCore::Free(f) => {
+        match &self.transformer {
+            FuncTransformer::Free(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.input_name.clone())
             }
-            FuncCore::Const(f) => {
+            FuncTransformer::Const(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.input_name.clone())
             }
-            FuncCore::Mutable(f) => {
+            FuncTransformer::Mutable(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
@@ -247,15 +249,15 @@ impl Func {
     }
 
     pub(crate) fn composed_caller_name(&self) -> Option<Symbol> {
-        match &self.core {
-            FuncCore::Free(_) => None,
-            FuncCore::Const(f) => {
+        match &self.transformer {
+            FuncTransformer::Free(_) => None,
+            FuncTransformer::Const(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
                 Some(f.caller.name.clone())
             }
-            FuncCore::Mutable(f) => {
+            FuncTransformer::Mutable(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
@@ -270,19 +272,19 @@ where
     Ctx: CtxAccessor,
 {
     fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.core.transform(ctx, input)
+        self.transformer.transform(ctx, input)
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for FuncCore
+impl<Ctx> Transformer<Ctx, Val, Val> for FuncTransformer
 where
     Ctx: CtxAccessor,
 {
     fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            FuncCore::Free(func) => func.transform(ctx, input),
-            FuncCore::Const(func) => func.transform(ctx, input),
-            FuncCore::Mutable(func) => func.transform(ctx, input),
+            FuncTransformer::Free(func) => func.transform(ctx, input),
+            FuncTransformer::Const(func) => func.transform(ctx, input),
+            FuncTransformer::Mutable(func) => func.transform(ctx, input),
         }
     }
 }
@@ -305,7 +307,7 @@ where
     Ctx: CtxAccessor,
 {
     fn transform(&self, _ctx: &mut Ctx, input: Val) -> Val {
-        self.f.call(input)
+        self.fn1.call(input)
     }
 }
 
@@ -323,7 +325,7 @@ where
     Ctx: CtxAccessor,
 {
     fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.f.call(ctx.for_const_fn(), input)
+        self.fn1.call(ctx.for_const_fn(), input)
     }
 }
 
@@ -342,13 +344,13 @@ where
                         self.ctx.clone(),
                         ctx,
                         self.caller.name.clone(),
-                        InvariantTag::Const,
+                        Invariant::Const,
                         input,
                         self.input_name.clone(),
                         &self.body,
                     )
                 };
-                // INVARIANT: We use the const tag to indicate not to modify this context.
+                // INVARIANT: We use the const invariant to indicate not to modify this context.
                 ctx.temp_take(f)
             }
         }
@@ -360,7 +362,7 @@ where
     Ctx: CtxAccessor,
 {
     fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.f.call(ctx.for_mutable_fn(), input)
+        self.fn1.call(ctx.for_mutable_fn(), input)
     }
 }
 
@@ -379,13 +381,13 @@ where
                         self.ctx.clone(),
                         ctx,
                         self.caller.name.clone(),
-                        InvariantTag::Const,
+                        Invariant::Const,
                         input,
                         self.input_name.clone(),
                         &self.body,
                     )
                 };
-                // INVARIANT: We use the const tag to indicate not to modify this context.
+                // INVARIANT: We use the const invariant to indicate not to modify this context.
                 ctx.temp_take(f)
             }
             CtxForMutableFn::Mutable(mut ctx) => {
@@ -394,13 +396,13 @@ where
                         self.ctx.clone(),
                         ctx,
                         self.caller.name.clone(),
-                        InvariantTag::Final,
+                        Invariant::Final,
                         input,
                         self.input_name.clone(),
                         &self.body,
                     )
                 };
-                // INVARIANT: We use the final tag to indicate not to move this context.
+                // INVARIANT: We use the final invariant to indicate not to move this context.
                 ctx.temp_take(f)
             }
         }
@@ -408,7 +410,7 @@ where
 }
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
-    let _ = new_ctx.put_val(input_name, TaggedVal::new(input));
+    let _ = new_ctx.put_val(input_name, CtxValue::new(input));
     EvalByRef.transform(&mut MutableCtx::new(&mut new_ctx), body)
 }
 
@@ -416,24 +418,24 @@ fn eval_aware(
     mut new_ctx: Ctx,
     caller: &mut Ctx,
     caller_name: Symbol,
-    caller_tag: InvariantTag,
+    caller_invariant: Invariant,
     input: Val,
     input_name: Symbol,
     body: &Val,
 ) -> Val {
-    let _ = new_ctx.put_val(input_name, TaggedVal::new(input));
-    keep_eval_restore(new_ctx, caller, caller_name, caller_tag, body)
+    let _ = new_ctx.put_val(input_name, CtxValue::new(input));
+    keep_eval_restore(new_ctx, caller, caller_name, caller_invariant, body)
 }
 
 fn keep_eval_restore(
     mut new_ctx: Ctx,
     ctx: &mut Ctx,
     caller_name: Symbol,
-    caller_tag: InvariantTag,
+    caller_invariant: Invariant,
     body: &Val,
 ) -> Val {
     let caller = own_ctx(ctx);
-    keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_tag);
+    keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_invariant);
     let output = EvalByRef.transform(&mut MutableCtx::new(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, &caller_name);
     output
@@ -446,9 +448,9 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
     owned
 }
 
-fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, tag: InvariantTag) {
+fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
     let val = Val::Ctx(CtxVal(Box::new(ctx)));
-    let _ = new_ctx.put_val(name, TaggedVal { val, tag });
+    let _ = new_ctx.put_val(name, CtxValue { val, invariant });
 }
 
 fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &str) {
@@ -473,30 +475,6 @@ impl<F> Hash for Primitive<F> {
     }
 }
 
-#[allow(unused)]
-impl TaggedVal {
-    pub(crate) fn new(val: Val) -> TaggedVal {
-        TaggedVal {
-            tag: InvariantTag::None,
-            val,
-        }
-    }
-
-    pub(crate) fn new_final(val: Val) -> TaggedVal {
-        TaggedVal {
-            tag: InvariantTag::Final,
-            val,
-        }
-    }
-
-    pub(crate) fn new_const(val: Val) -> TaggedVal {
-        TaggedVal {
-            tag: InvariantTag::Const,
-            val,
-        }
-    }
-}
-
 impl<T> Debug for Primitive<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("Primitive").field(&self.id).finish()
@@ -506,8 +484,8 @@ impl<T> Debug for Primitive<T> {
 impl Debug for Func {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut s = f.debug_struct("Func");
-        match &self.core {
-            FuncCore::Free(f) => match f {
+        match &self.transformer {
+            FuncTransformer::Free(f) => match f {
                 CtxFree::Primitive(p) => {
                     s.field("id", &p.id);
                     s.field("is_extension", &p.is_extension);
@@ -520,7 +498,7 @@ impl Debug for Func {
                     s.field("input_name", &c.input_name);
                 }
             },
-            FuncCore::Const(f) => match f {
+            FuncTransformer::Const(f) => match f {
                 CtxConst::Primitive(p) => {
                     s.field("id", &p.id);
                     s.field("is_extension", &p.is_extension);
@@ -534,7 +512,7 @@ impl Debug for Func {
                     s.field("input_name", &c.input_name);
                 }
             },
-            FuncCore::Mutable(f) => match f {
+            FuncTransformer::Mutable(f) => match f {
                 CtxMutable::Primitive(p) => {
                     s.field("id", &p.id);
                     s.field("is_extension", &p.is_extension);
@@ -557,12 +535,12 @@ impl Func {
     pub(crate) fn new(
         input_mode: TransformMode,
         output_mode: TransformMode,
-        core: FuncCore,
+        transformer: FuncTransformer,
     ) -> Self {
         Func {
             input_mode,
             output_mode,
-            core,
+            transformer,
         }
     }
 
@@ -570,17 +548,17 @@ impl Func {
         input_mode: TransformMode,
         output_mode: TransformMode,
         id: Symbol,
-        f: Box<dyn CtxFreeFn>,
+        fn1: Box<dyn CtxFreeFn>,
     ) -> Self {
-        let core = FuncCore::Free(CtxFree::Primitive(Primitive {
+        let transformer = FuncTransformer::Free(CtxFree::Primitive(Primitive {
             is_extension: true,
             id,
-            f,
+            fn1,
         }));
         Func {
             input_mode,
             output_mode,
-            core,
+            transformer,
         }
     }
 
@@ -588,17 +566,17 @@ impl Func {
         input_mode: TransformMode,
         output_mode: TransformMode,
         id: Symbol,
-        f: Box<dyn CtxConstFn>,
+        fn1: Box<dyn CtxConstFn>,
     ) -> Self {
-        let core = FuncCore::Const(CtxConst::Primitive(Primitive {
+        let transformer = FuncTransformer::Const(CtxConst::Primitive(Primitive {
             is_extension: true,
             id,
-            f,
+            fn1,
         }));
         Func {
             input_mode,
             output_mode,
-            core,
+            transformer,
         }
     }
 
@@ -608,15 +586,15 @@ impl Func {
         id: Symbol,
         f: Box<dyn CtxMutableFn>,
     ) -> Self {
-        let core = FuncCore::Mutable(CtxMutable::Primitive(Primitive {
+        let transformer = FuncTransformer::Mutable(CtxMutable::Primitive(Primitive {
             is_extension: true,
             id,
-            f,
+            fn1: f,
         }));
         Func {
             input_mode,
             output_mode,
-            core,
+            transformer,
         }
     }
 }
@@ -636,7 +614,7 @@ impl Primitive<Box<dyn CtxFreeFn>> {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            f: Box::new(f),
+            fn1: Box::new(f),
         }
     }
 }
@@ -646,7 +624,7 @@ impl Primitive<Box<dyn CtxConstFn>> {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            f: Box::new(f),
+            fn1: Box::new(f),
         }
     }
 }
@@ -685,7 +663,7 @@ impl Primitive<Box<dyn CtxMutableFn>> {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            f: Box::new(f),
+            fn1: Box::new(f),
         }
     }
 }

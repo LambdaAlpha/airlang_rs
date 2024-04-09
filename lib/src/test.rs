@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    ctx::InvariantTag,
+    ctx::Invariant,
     initial_ctx,
     interpret_mutable,
     parse,
@@ -190,7 +190,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
     let func_ext_name = Symbol::from_str("func_ext");
     mutable_ctx.put(
         func_ext_name.clone(),
-        InvariantTag::Const,
+        Invariant::Const,
         Val::Func(FuncVal::from(Func::new_free(
             Mode::Generic(Transform::Eval),
             Mode::Generic(Transform::Eval),

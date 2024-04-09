@@ -11,18 +11,8 @@ pub use self::repr::{
     Repr,
 };
 
-pub mod reserve;
+// delimiters
 
-pub(crate) mod repr;
-
-pub(crate) mod parser;
-
-pub(crate) mod generator;
-
-#[cfg(test)]
-mod test;
-
-pub(crate) const SEPARATOR: char = ',';
 pub(crate) const LIST_LEFT: char = '[';
 pub(crate) const LIST_RIGHT: char = ']';
 pub(crate) const MAP_LEFT: char = '{';
@@ -30,12 +20,17 @@ pub(crate) const MAP_RIGHT: char = '}';
 pub(crate) const WRAP_LEFT: char = '(';
 pub(crate) const WRAP_RIGHT: char = ')';
 
+pub(crate) const SEPARATOR: char = ',';
+
 pub(crate) const STRING_QUOTE: char = '"';
 pub(crate) const SYMBOL_QUOTE: char = '\'';
+
+// prefixes
 
 pub(crate) const BYTES_PREFIX: char = '#';
 
 // keywords
+
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
@@ -88,3 +83,14 @@ pub(crate) fn maybe_keyword(s: &str) -> bool {
         UNIT | TRUE | FALSE | ANNOTATION_INFIX | PAIR_INFIX | CALL_INFIX | REVERSE_INFIX
     )
 }
+
+pub mod reserve;
+
+pub(crate) mod repr;
+
+pub(crate) mod parser;
+
+pub(crate) mod generator;
+
+#[cfg(test)]
+mod test;

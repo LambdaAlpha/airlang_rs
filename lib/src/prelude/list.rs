@@ -2,8 +2,8 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
+        CtxMap,
         DefaultCtx,
-        NameMap,
     },
     ctx_access::{
         constant::CtxForConstFn,
@@ -60,7 +60,7 @@ impl Default for ListPrelude {
 }
 
 impl Prelude for ListPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.length.put(m);
         self.set.put(m);
         self.set_many.put(m);

@@ -18,7 +18,6 @@ use nom::{
         digit1,
         hex_digit1,
         multispace1,
-        one_of,
     },
     combinator::{
         all_consuming,
@@ -29,6 +28,7 @@ use nom::{
         map_res,
         opt,
         peek,
+        success,
         value,
         verify,
     },
@@ -671,7 +671,7 @@ const NEGATIVE: bool = false;
 fn number<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = alt((
         hex_int::<SIGN, _, _>,
@@ -700,12 +700,12 @@ where
 fn hex_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let digits = preceded(tag_no_case("0x"), cut(trim_num1(hex_digit1)));
-    let f = map_res(digits, |digits: String| {
+    let f = map(digits, |digits: String| {
         let i = Int::from_sign_string_radix(SIGN, &digits, 16);
-        Ok(From::from(i))
+        From::from(i)
     });
     context("hex_int", f)(src)
 }
@@ -713,15 +713,15 @@ where
 fn bin_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let digits = preceded(
         tag_no_case("0b"),
         cut(trim_num1(take_while1(|c: char| c == '0' || c == '1'))),
     );
-    let f = map_res(digits, |digits: String| {
+    let f = map(digits, |digits: String| {
         let i = Int::from_sign_string_radix(SIGN, &digits, 2);
-        Ok(From::from(i))
+        From::from(i)
     });
     context("bin_int", f)(src)
 }
@@ -729,39 +729,45 @@ where
 fn decimal<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let integral = trim_num1(digit1);
     let fractional = opt(preceded(char1('.'), cut(trim_num0(digit1))));
+    let exp_sign = alt((
+        value(true, char1('+')),
+        value(false, char1('-')),
+        success(true),
+    ));
     let exponential = opt(preceded(
         tag_no_case("e"),
-        cut(tuple((opt(one_of("+-")), trim_num1(digit1)))),
+        cut(tuple((exp_sign, trim_num1(digit1)))),
     ));
     let fragments = tuple((integral, fractional, exponential));
-    #[allow(clippy::type_complexity)]
-    let f = map_res(
-        fragments,
-        |(integral, fractional, exponential): (
-            String,
-            Option<String>,
-            Option<(Option<char>, String)>,
-        )| {
-            if fractional.is_none() && exponential.is_none() {
-                let i = Int::from_sign_string_radix(SIGN, &integral, 10);
-                Ok(From::from(i))
-            } else {
-                let f = Float::from_parts(
-                    SIGN,
-                    &integral,
-                    fractional.as_ref().map_or("", |s| s),
-                    !matches!(exponential, Some((Some('-'), _))),
-                    exponential.as_ref().map_or("", |(_, exp)| exp),
-                );
-                Ok(From::from(f))
-            }
-        },
-    );
+    let f = map(fragments, |(integral, fractional, exponential)| {
+        build_decimal::<SIGN, _>(integral, fractional, exponential)
+    });
     context("decimal", f)(src)
+}
+
+fn build_decimal<const SIGN: bool, T>(
+    integral: String,
+    fractional: Option<String>,
+    exponential: Option<(bool, String)>,
+) -> T
+where
+    T: ParseRepr,
+{
+    if fractional.is_none() && exponential.is_none() {
+        let i = Int::from_sign_string_radix(SIGN, &integral, 10);
+        return From::from(i);
+    }
+    let fractional = fractional.as_deref().unwrap_or("");
+    let (exp_sign, exp) = match &exponential {
+        None => (true, ""),
+        Some((exp_sign, exp)) => (*exp_sign, &**exp),
+    };
+    let f = Float::from_parts(SIGN, &integral, fractional, exp_sign, exp);
+    From::from(f)
 }
 
 fn bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>

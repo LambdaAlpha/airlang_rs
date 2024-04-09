@@ -33,7 +33,7 @@ pub use self::{
     ctx::{
         Ctx,
         CtxError,
-        InvariantTag,
+        Invariant,
     },
     ctx_access::{
         constant::{
@@ -183,7 +183,7 @@ pub(crate) mod types;
 
 pub(crate) mod traits;
 
-#[allow(dead_code)]
+#[allow(unused)]
 pub(crate) mod utils;
 
 #[cfg(test)]

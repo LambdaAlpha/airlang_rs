@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     pair::Pair,
     prelude::{
         default_mode,
@@ -48,7 +48,7 @@ impl Default for IntPrelude {
 }
 
 impl Prelude for IntPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.add.put(m);
         self.subtract.put(m);
         self.multiply.put(m);

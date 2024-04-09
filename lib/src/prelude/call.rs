@@ -1,5 +1,5 @@
 use crate::{
-    ctx::NameMap,
+    ctx::CtxMap,
     ctx_access::{
         free::FreeCtx,
         CtxAccessor,
@@ -37,7 +37,7 @@ impl Default for CallPrelude {
 }
 
 impl Prelude for CallPrelude {
-    fn put(&self, m: &mut NameMap) {
+    fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
         self.call.put(m);
     }
