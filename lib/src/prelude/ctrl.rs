@@ -7,7 +7,7 @@ use crate::{
     func::MutableDispatcher,
     prelude::{
         default_mode,
-        map_for_all_mode,
+        map_all_mode,
         named_mutable_fn,
         pair_mode,
         Named,
@@ -76,7 +76,7 @@ enum CtrlFlowTag {
 }
 
 fn sequence() -> Named<FuncVal> {
-    let input_mode = Mode::Generic(Transform::Id);
+    let input_mode = Mode::Predefined(Transform::Id);
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
@@ -93,7 +93,10 @@ fn fn_sequence<Ctx: CtxAccessor>(ctx: Ctx, input: Val) -> Val {
 fn if1() -> Named<FuncVal> {
     let input_mode = pair_mode(
         default_mode(),
-        pair_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
+        pair_mode(
+            Mode::Predefined(Transform::Id),
+            Mode::Predefined(Transform::Id),
+        ),
     );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
@@ -126,7 +129,10 @@ fn fn_if<Ctx: CtxAccessor>(ctx: Ctx, input: Val) -> Val {
 fn if_not() -> Named<FuncVal> {
     let input_mode = pair_mode(
         default_mode(),
-        pair_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
+        pair_mode(
+            Mode::Predefined(Transform::Id),
+            Mode::Predefined(Transform::Id),
+        ),
     );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
@@ -160,8 +166,11 @@ fn match1() -> Named<FuncVal> {
     let input_mode = pair_mode(
         default_mode(),
         pair_mode(
-            map_for_all_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id)),
-            Mode::Generic(Transform::Id),
+            map_all_mode(
+                Mode::Predefined(Transform::Id),
+                Mode::Predefined(Transform::Id),
+            ),
+            Mode::Predefined(Transform::Id),
         ),
     );
     let output_mode = default_mode();
@@ -196,7 +205,10 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 fn while1() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id));
+    let input_mode = pair_mode(
+        Mode::Predefined(Transform::Id),
+        Mode::Predefined(Transform::Id),
+    );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_while::<FreeCtx>,
@@ -231,7 +243,10 @@ fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
 }
 
 fn while_not() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::Generic(Transform::Id), Mode::Generic(Transform::Id));
+    let input_mode = pair_mode(
+        Mode::Predefined(Transform::Id),
+        Mode::Predefined(Transform::Id),
+    );
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
         fn_while_not::<FreeCtx>,

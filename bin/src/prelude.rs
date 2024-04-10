@@ -18,8 +18,7 @@ use airlang::{
     Reverse,
     ReverseMode,
     Symbol,
-    Transform,
-    TransformMode,
+    SymbolMode,
     Val,
     ValMode,
 };
@@ -73,8 +72,8 @@ impl<T: Into<Val> + Clone> Named<T> {
 
 fn named_free_fn(
     name: &'static str,
-    input_mode: TransformMode,
-    output_mode: TransformMode,
+    input_mode: Mode,
+    output_mode: Mode,
     func: impl CtxFreeFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
@@ -86,8 +85,8 @@ fn named_free_fn(
 #[allow(unused)]
 fn named_const_fn(
     name: &'static str,
-    input_mode: TransformMode,
-    output_mode: TransformMode,
+    input_mode: Mode,
+    output_mode: Mode,
     func: impl CtxConstFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
@@ -98,8 +97,8 @@ fn named_const_fn(
 
 fn named_mutable_fn(
     name: &'static str,
-    input_mode: TransformMode,
-    output_mode: TransformMode,
+    input_mode: Mode,
+    output_mode: Mode,
     func: impl CtxMutableFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
@@ -108,79 +107,79 @@ fn named_mutable_fn(
     Named::new(name, func_val)
 }
 
-fn default_mode() -> TransformMode {
-    TransformMode::default()
+fn default_mode() -> Mode {
+    Mode::default()
 }
 
 #[allow(unused)]
-fn symbol_id_mode() -> TransformMode {
+fn symbol_id_mode() -> Mode {
     let mode = ValMode {
-        symbol: Transform::Id,
+        symbol: SymbolMode::Id,
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 #[allow(unused)]
-fn pair_mode(first: TransformMode, second: TransformMode) -> TransformMode {
+fn pair_mode(first: Mode, second: Mode) -> Mode {
     let mode = ValMode {
         pair: Box::new(Pair::new(first, second)),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 #[allow(unused)]
-fn call_mode(func: TransformMode, input: TransformMode) -> TransformMode {
+fn call_mode(func: Mode, input: Mode) -> Mode {
     let mode = ValMode {
-        call: Mode::new(CallMode::ForAll(Call::new(func, input))),
+        call: Box::new(CallMode::Struct(Call::new(func, input))),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 #[allow(unused)]
-fn reverse_mode(func: TransformMode, output: TransformMode) -> TransformMode {
+fn reverse_mode(func: Mode, output: Mode) -> Mode {
     let mode = ValMode {
-        reverse: Mode::new(ReverseMode::ForAll(Reverse::new(func, output))),
+        reverse: Box::new(ReverseMode::Struct(Reverse::new(func, output))),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 #[allow(unused)]
-fn list_for_all_mode(mode: TransformMode) -> TransformMode {
+fn list_all_mode(mode: Mode) -> Mode {
     let mode = ValMode {
-        list: Box::new(ListMode::ForAll(mode)),
+        list: Box::new(ListMode::All(mode)),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 #[allow(unused)]
-fn list_for_some_mode(list_item: List<ListItemMode>) -> TransformMode {
+fn list_some_mode(list_item: List<ListItemMode>) -> Mode {
     let mode = ValMode {
-        list: Box::new(ListMode::ForSome(list_item)),
+        list: Box::new(ListMode::Some(list_item)),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 #[allow(unused)]
-fn map_for_all_mode(key: TransformMode, value: TransformMode) -> TransformMode {
+fn map_all_mode(key: Mode, value: Mode) -> Mode {
     let mode = ValMode {
-        map: Box::new(MapMode::ForAll(Pair::new(key, value))),
+        map: Box::new(MapMode::All(Pair::new(key, value))),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
-fn map_for_some_mode(map_mode: Map<Val, TransformMode>) -> TransformMode {
+fn map_some_mode(map_mode: Map<Val, Mode>) -> Mode {
     let mode = ValMode {
-        map: Box::new(MapMode::ForSome(map_mode)),
+        map: Box::new(MapMode::Some(map_mode)),
         ..Default::default()
     };
-    Mode::Specific(mode)
+    Mode::Custom(Box::new(mode))
 }
 
 mod repl;

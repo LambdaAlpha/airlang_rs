@@ -95,7 +95,7 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
-    let input_mode = Mode::Generic(Transform::Lazy);
+    let input_mode = Mode::Predefined(Transform::Lazy);
     let output_mode = default_mode();
     named_free_fn("any", input_mode, output_mode, fn_any)
 }

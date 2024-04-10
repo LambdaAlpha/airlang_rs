@@ -26,11 +26,11 @@ use crate::{
             generate,
             parse,
         },
-        TransformMode,
+        Mode,
     },
     prelude::{
         default_mode,
-        map_for_some_mode,
+        map_some_mode,
         named_const_fn,
         named_free_fn,
         symbol_id_mode,
@@ -52,7 +52,6 @@ use crate::{
         map::MapVal,
         Val,
     },
-    Mode,
 };
 
 #[derive(Clone)]
@@ -125,14 +124,14 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), Mode::Generic(Transform::Lazy));
+    map.insert(symbol(BODY), Mode::Predefined(Transform::Lazy));
     map.insert(symbol(CTX), default_mode());
     map.insert(symbol(INPUT_NAME), symbol_id_mode());
     map.insert(symbol(CALLER_NAME), symbol_id_mode());
     map.insert(symbol(CALLER_ACCESS), symbol_id_mode());
-    map.insert(symbol(INPUT_MODE), Mode::Generic(Transform::Lazy));
-    map.insert(symbol(OUTPUT_MODE), Mode::Generic(Transform::Lazy));
-    let input_mode = map_for_some_mode(map);
+    map.insert(symbol(INPUT_MODE), Mode::Predefined(Transform::Lazy));
+    map.insert(symbol(OUTPUT_MODE), Mode::Predefined(Transform::Lazy));
+    let input_mode = map_some_mode(map);
     let output_mode = default_mode();
     named_free_fn("function", input_mode, output_mode, fn_new)
 }
@@ -199,16 +198,16 @@ fn fn_new(input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
-    map.insert(symbol(BODY), Mode::Generic(Transform::Lazy));
+    map.insert(symbol(BODY), Mode::Predefined(Transform::Lazy));
     map.insert(symbol(CTX), default_mode());
     map.insert(symbol(INPUT_NAME), symbol_id_mode());
     map.insert(symbol(CALLER_NAME), symbol_id_mode());
     map.insert(symbol(CALLER_ACCESS), symbol_id_mode());
-    map.insert(symbol(INPUT_MODE), Mode::Generic(Transform::Lazy));
-    map.insert(symbol(OUTPUT_MODE), Mode::Generic(Transform::Lazy));
+    map.insert(symbol(INPUT_MODE), Mode::Predefined(Transform::Lazy));
+    map.insert(symbol(OUTPUT_MODE), Mode::Predefined(Transform::Lazy));
     map.insert(symbol(ID), symbol_id_mode());
     map.insert(symbol(IS_EXTENSION), default_mode());
-    let output_mode = map_for_some_mode(map);
+    let output_mode = map_some_mode(map);
     named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
 
@@ -218,11 +217,11 @@ fn fn_repr(input: Val) -> Val {
     };
     let mut repr = MapVal::default();
 
-    if func.input_mode != TransformMode::default() {
+    if func.input_mode != Mode::default() {
         let input_mode = generate(&func.input_mode);
         repr.insert(symbol(INPUT_MODE), input_mode);
     }
-    if func.output_mode != TransformMode::default() {
+    if func.output_mode != Mode::default() {
         let output_mode = generate(&func.output_mode);
         repr.insert(symbol(OUTPUT_MODE), output_mode);
     }
@@ -322,7 +321,7 @@ fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn input_mode() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = Mode::Generic(Transform::Lazy);
+    let output_mode = Mode::Predefined(Transform::Lazy);
     named_const_fn(
         "function.input_mode",
         input_mode,
@@ -342,7 +341,7 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn output_mode() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = Mode::Generic(Transform::Lazy);
+    let output_mode = Mode::Predefined(Transform::Lazy);
     named_const_fn(
         "function.output_mode",
         input_mode,
@@ -424,7 +423,7 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn body() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = Mode::Generic(Transform::Lazy);
+    let output_mode = Mode::Predefined(Transform::Lazy);
     named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 

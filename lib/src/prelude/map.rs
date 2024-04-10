@@ -14,7 +14,7 @@ use crate::{
     pair::Pair,
     prelude::{
         default_mode,
-        list_for_all_mode,
+        list_all_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
@@ -122,7 +122,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn items() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = list_for_all_mode(pair_mode(default_mode(), default_mode()));
+    let output_mode = list_all_mode(pair_mode(default_mode(), default_mode()));
     named_const_fn("map.items", input_mode, output_mode, fn_items)
 }
 
@@ -141,7 +141,7 @@ fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_items() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = list_for_all_mode(pair_mode(default_mode(), default_mode()));
+    let output_mode = list_all_mode(pair_mode(default_mode(), default_mode()));
     named_mutable_fn("map.into_items", input_mode, output_mode, fn_into_items)
 }
 
@@ -194,7 +194,7 @@ fn fn_into_keys(mut ctx: CtxForMutableFn, input: Val) -> Val {
 
 fn values() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = list_for_all_mode(Mode::Generic(Transform::Eval));
+    let output_mode = list_all_mode(Mode::Predefined(Transform::Eval));
     named_const_fn("map.values", input_mode, output_mode, fn_values)
 }
 
@@ -209,7 +209,7 @@ fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
 
 fn into_values() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
-    let output_mode = list_for_all_mode(Mode::Generic(Transform::Eval));
+    let output_mode = list_all_mode(Mode::Predefined(Transform::Eval));
     named_mutable_fn("map.into_values", input_mode, output_mode, fn_into_values)
 }
 
@@ -247,7 +247,7 @@ fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
 fn contains_many() -> Named<FuncVal> {
     let input_mode = pair_mode(
         symbol_id_mode(),
-        list_for_all_mode(Mode::Generic(Transform::Eval)),
+        list_all_mode(Mode::Predefined(Transform::Eval)),
     );
     let output_mode = default_mode();
     named_const_fn(
@@ -434,7 +434,7 @@ fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn new_map() -> Named<FuncVal> {
-    let input_mode = list_for_all_mode(pair_mode(default_mode(), default_mode()));
+    let input_mode = list_all_mode(pair_mode(default_mode(), default_mode()));
     let output_mode = default_mode();
     named_free_fn("map", input_mode, output_mode, fn_new_map)
 }

@@ -192,8 +192,8 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         func_ext_name.clone(),
         Invariant::Const,
         Val::Func(FuncVal::from(Func::new_free(
-            Mode::Generic(Transform::Eval),
-            Mode::Generic(Transform::Eval),
+            Mode::Predefined(Transform::Eval),
+            Mode::Predefined(Transform::Eval),
             func_ext_name,
             Box::new(FuncExt),
         ))),

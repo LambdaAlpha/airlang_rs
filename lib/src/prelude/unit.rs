@@ -37,8 +37,8 @@ impl Prelude for UnitPrelude {
 }
 
 fn unit() -> Named<FuncVal> {
-    let input_mode = Mode::Generic(Transform::Id);
-    let output_mode = Mode::Generic(Transform::Id);
+    let input_mode = Mode::Predefined(Transform::Id);
+    let output_mode = Mode::Predefined(Transform::Id);
     named_free_fn("unit", input_mode, output_mode, fn_unit)
 }
 

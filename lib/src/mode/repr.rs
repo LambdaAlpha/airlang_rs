@@ -1,8 +1,8 @@
 use crate::{
     mode::{
-        CallForSomeMode,
+        CallDepMode,
         Mode,
-        ReverseForSomeMode,
+        ReverseDepMode,
     },
     transform::{
         EVAL,
@@ -36,8 +36,8 @@ use crate::{
     Pair,
     Reverse,
     ReverseMode,
+    SymbolMode,
     Transform,
-    TransformMode,
     Val,
     ValMode,
 };
@@ -45,32 +45,28 @@ use crate::{
 const ELLIPSIS: &str = "...";
 const FOR_ALL: &str = "all";
 
-pub(crate) fn parse(mode: Val) -> Option<TransformMode> {
-    parse_mode(mode, |mode| {
-        let Val::Map(map) = mode else {
-            return None;
-        };
-        parse_val(map)
-    })
+pub(crate) fn parse(mode: Val) -> Option<Mode> {
+    let mode = match mode {
+        Val::Unit(_) => Mode::Predefined(Default::default()),
+        Val::Symbol(s) => Mode::Predefined(parse_transform(&s)?),
+        Val::Map(map) => Mode::Custom(Box::new(parse_val(map)?)),
+        _ => return None,
+    };
+    Some(mode)
 }
 
-pub(crate) fn generate(mode: &TransformMode) -> Val {
-    generate_mode(mode, generate_val)
+pub(crate) fn generate(mode: &Mode) -> Val {
+    match mode {
+        Mode::Predefined(t) => generate_transform(*t),
+        Mode::Custom(m) => generate_val(m),
+    }
 }
 
-fn transform_from_symbol(s: &str) -> Option<Transform> {
+fn parse_transform(s: &str) -> Option<Transform> {
     match s {
         ID => Some(Transform::Id),
         LAZY => Some(Transform::Lazy),
         EVAL => Some(Transform::Eval),
-        _ => None,
-    }
-}
-
-fn parse_transform(val: Val) -> Option<Transform> {
-    match val {
-        Val::Unit(_) => Some(Transform::Id),
-        Val::Symbol(s) => transform_from_symbol(&s),
         _ => None,
     }
 }
@@ -87,16 +83,16 @@ pub(crate) fn generate_transform(transform: Transform) -> Val {
 fn parse_val(mut map: MapVal) -> Option<ValMode> {
     let mut mode = ValMode::default();
     if let Some(symbol_mode) = map.remove(&symbol(SYMBOL)) {
-        mode.symbol = parse_transform(symbol_mode)?;
+        mode.symbol = parse_symbol(symbol_mode)?;
     }
     if let Some(pair_mode) = map.remove(&symbol(PAIR)) {
         mode.pair = Box::new(parse_pair(pair_mode)?);
     }
     if let Some(call_mode) = map.remove(&symbol(CALL)) {
-        mode.call = parse_call(call_mode)?;
+        mode.call = Box::new(parse_call(call_mode)?);
     }
     if let Some(reverse_mode) = map.remove(&symbol(REVERSE)) {
-        mode.reverse = parse_reverse(reverse_mode)?;
+        mode.reverse = Box::new(parse_reverse(reverse_mode)?);
     }
     if let Some(list_mode) = map.remove(&symbol(LIST)) {
         mode.list = Box::new(parse_list(list_mode)?);
@@ -110,7 +106,7 @@ fn parse_val(mut map: MapVal) -> Option<ValMode> {
 pub(crate) fn generate_val(mode: &ValMode) -> Val {
     let mut map = Map::default();
     if mode.symbol != Default::default() {
-        map.insert(symbol(SYMBOL), generate_transform(mode.symbol));
+        map.insert(symbol(SYMBOL), generate_symbol(&mode.symbol));
     }
     if mode.pair != Default::default() {
         let val = generate_pair(&mode.pair);
@@ -135,7 +131,27 @@ pub(crate) fn generate_val(mode: &ValMode) -> Val {
     Val::Map(map)
 }
 
-fn parse_pair(mode: Val) -> Option<Pair<TransformMode, TransformMode>> {
+fn parse_symbol(mode: Val) -> Option<SymbolMode> {
+    match mode {
+        Val::Unit(_) => Some(SymbolMode::Eval),
+        Val::Symbol(s) => match &*s {
+            ID => Some(SymbolMode::Id),
+            EVAL => Some(SymbolMode::Eval),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn generate_symbol(mode: &SymbolMode) -> Val {
+    let s = match mode {
+        SymbolMode::Id => ID,
+        SymbolMode::Eval => EVAL,
+    };
+    symbol(s)
+}
+
+fn parse_pair(mode: Val) -> Option<Pair<Mode, Mode>> {
     let Val::Pair(pair) = mode else {
         return None;
     };
@@ -144,29 +160,37 @@ fn parse_pair(mode: Val) -> Option<Pair<TransformMode, TransformMode>> {
     Some(Pair::new(first, second))
 }
 
-pub(crate) fn generate_pair(mode: &Pair<TransformMode, TransformMode>) -> Val {
+fn generate_pair(mode: &Pair<Mode, Mode>) -> Val {
     let first = generate(&mode.first);
     let second = generate(&mode.second);
     Val::Pair(Box::new(Pair::new(first, second)))
 }
 
-fn parse_call(mode: Val) -> Option<Mode<Transform, Box<CallMode>>> {
-    parse_mode(mode, |mode| match mode {
+fn parse_call(mode: Val) -> Option<CallMode> {
+    let mode = match mode {
+        Val::Unit(_) => CallMode::Eval,
+        Val::Symbol(s) => {
+            if &*s != EVAL {
+                return None;
+            }
+            CallMode::Eval
+        }
         Val::Call(call) => {
             let func = parse(call.func)?;
             let input = parse(call.input)?;
-            Some(Box::new(CallMode::ForAll(Call::new(func, input))))
+            CallMode::Struct(Call::new(func, input))
         }
         Val::Map(map) => {
-            let call_for_some = parse_call_for_some(map)?;
-            Some(Box::new(CallMode::ForSome(call_for_some)))
+            let call_dep_mode = parse_call_dep(map)?;
+            CallMode::Dependent(call_dep_mode)
         }
-        _ => None,
-    })
+        _ => return None,
+    };
+    Some(mode)
 }
 
-fn parse_call_for_some(mut map: MapVal) -> Option<CallForSomeMode> {
-    let mut mode = CallForSomeMode::default();
+fn parse_call_dep(mut map: MapVal) -> Option<CallDepMode> {
+    let mut mode = CallDepMode::default();
     if let Some(unit_mode) = map.remove(&symbol(UNIT)) {
         mode.unit = parse(unit_mode)?;
     }
@@ -191,18 +215,19 @@ fn parse_call_for_some(mut map: MapVal) -> Option<CallForSomeMode> {
     Some(mode)
 }
 
-pub(crate) fn generate_call(mode: &Mode<Transform, Box<CallMode>>) -> Val {
-    generate_mode(mode, |call| match &**call {
-        CallMode::ForAll(call) => {
+pub(crate) fn generate_call(mode: &CallMode) -> Val {
+    match mode {
+        CallMode::Eval => symbol(EVAL),
+        CallMode::Struct(call) => {
             let func = generate(&call.func);
             let input = generate(&call.input);
             Val::Call(Box::new(Call::new(func, input)))
         }
-        CallMode::ForSome(call) => generate_call_for_some(call),
-    })
+        CallMode::Dependent(call) => generate_call_dep(call),
+    }
 }
 
-fn generate_call_for_some(mode: &CallForSomeMode) -> Val {
+fn generate_call_dep(mode: &CallDepMode) -> Val {
     let mut map = Map::default();
     if mode.unit != Default::default() {
         map.insert(symbol(UNIT), generate(&mode.unit));
@@ -228,23 +253,31 @@ fn generate_call_for_some(mode: &CallForSomeMode) -> Val {
     Val::Map(map)
 }
 
-fn parse_reverse(mode: Val) -> Option<Mode<Transform, Box<ReverseMode>>> {
-    parse_mode(mode, |mode| match mode {
+fn parse_reverse(mode: Val) -> Option<ReverseMode> {
+    let mode = match mode {
+        Val::Unit(_) => ReverseMode::Eval,
+        Val::Symbol(s) => {
+            if &*s != EVAL {
+                return None;
+            }
+            ReverseMode::Eval
+        }
         Val::Reverse(reverse) => {
             let func = parse(reverse.func)?;
             let output = parse(reverse.output)?;
-            Some(Box::new(ReverseMode::ForAll(Reverse::new(func, output))))
+            ReverseMode::Struct(Reverse::new(func, output))
         }
         Val::Map(map) => {
-            let reverse_for_some = parse_reverse_for_some(map)?;
-            Some(Box::new(ReverseMode::ForSome(reverse_for_some)))
+            let reverse_dep_mode = parse_reverse_dep(map)?;
+            ReverseMode::Dependent(reverse_dep_mode)
         }
-        _ => None,
-    })
+        _ => return None,
+    };
+    Some(mode)
 }
 
-fn parse_reverse_for_some(mut map: MapVal) -> Option<ReverseForSomeMode> {
-    let mut mode = ReverseForSomeMode::default();
+fn parse_reverse_dep(mut map: MapVal) -> Option<ReverseDepMode> {
+    let mut mode = ReverseDepMode::default();
     if let Some(unit_mode) = map.remove(&symbol(UNIT)) {
         mode.unit = parse(unit_mode)?;
     }
@@ -269,18 +302,19 @@ fn parse_reverse_for_some(mut map: MapVal) -> Option<ReverseForSomeMode> {
     Some(mode)
 }
 
-pub(crate) fn generate_reverse(mode: &Mode<Transform, Box<ReverseMode>>) -> Val {
-    generate_mode(mode, |reverse| match &**reverse {
-        ReverseMode::ForAll(reverse) => {
+pub(crate) fn generate_reverse(mode: &ReverseMode) -> Val {
+    match mode {
+        ReverseMode::Eval => symbol(EVAL),
+        ReverseMode::Struct(reverse) => {
             let func = generate(&reverse.func);
             let output = generate(&reverse.output);
             Val::Reverse(Box::new(Reverse::new(func, output)))
         }
-        ReverseMode::ForSome(reverse) => generate_reverse_for_some(reverse),
-    })
+        ReverseMode::Dependent(reverse) => generate_reverse_dep(reverse),
+    }
 }
 
-fn generate_reverse_for_some(mode: &ReverseForSomeMode) -> Val {
+fn generate_reverse_dep(mode: &ReverseDepMode) -> Val {
     let mut map = Map::default();
     if mode.unit != Default::default() {
         map.insert(symbol(UNIT), generate(&mode.unit));
@@ -308,7 +342,7 @@ fn generate_reverse_for_some(mode: &ReverseForSomeMode) -> Val {
 
 fn parse_list(mode: Val) -> Option<ListMode> {
     match mode {
-        Val::List(list) => Some(parse_list_for_some(list)?),
+        Val::List(list) => Some(parse_list_some(list)?),
         Val::Call(call) => {
             let Val::Symbol(tag) = call.func else {
                 return None;
@@ -316,18 +350,18 @@ fn parse_list(mode: Val) -> Option<ListMode> {
             if *tag != *FOR_ALL {
                 return None;
             }
-            Some(ListMode::ForAll(parse(call.input)?))
+            Some(ListMode::All(parse(call.input)?))
         }
         _ => None,
     }
 }
 
-fn parse_list_for_some(mode: ListVal) -> Option<ListMode> {
+fn parse_list_some(mode: ListVal) -> Option<ListMode> {
     let list = mode
         .into_iter()
         .map(parse_list_item)
         .collect::<Option<List<_>>>()?;
-    let list = ListMode::ForSome(list);
+    let list = ListMode::Some(list);
     Some(list)
 }
 
@@ -355,11 +389,11 @@ fn parse_list_item(mode: Val) -> Option<ListItemMode> {
 
 pub(crate) fn generate_list(mode: &ListMode) -> Val {
     match mode {
-        ListMode::ForAll(mode) => {
+        ListMode::All(mode) => {
             let mode = generate(mode);
             Val::Call(Box::new(Call::new(symbol(FOR_ALL), mode)))
         }
-        ListMode::ForSome(mode_list) => {
+        ListMode::Some(mode_list) => {
             let list = mode_list
                 .iter()
                 .map(|mode| {
@@ -379,7 +413,7 @@ pub(crate) fn generate_list(mode: &ListMode) -> Val {
 
 fn parse_map(mode: Val) -> Option<MapMode> {
     match mode {
-        Val::Map(map) => Some(parse_map_for_some(map)?),
+        Val::Map(map) => Some(parse_map_some(map)?),
         Val::Call(call) => {
             let Val::Symbol(tag) = call.func else {
                 return None;
@@ -392,13 +426,13 @@ fn parse_map(mode: Val) -> Option<MapMode> {
             };
             let first = parse(pair.first)?;
             let second = parse(pair.second)?;
-            Some(MapMode::ForAll(Pair::new(first, second)))
+            Some(MapMode::All(Pair::new(first, second)))
         }
         _ => None,
     }
 }
 
-fn parse_map_for_some(mode: MapVal) -> Option<MapMode> {
+fn parse_map_some(mode: MapVal) -> Option<MapMode> {
     let map = mode
         .into_iter()
         .map(|(k, v)| {
@@ -406,19 +440,19 @@ fn parse_map_for_some(mode: MapVal) -> Option<MapMode> {
             Some((k, mode))
         })
         .collect::<Option<Map<_, _>>>()?;
-    let map = MapMode::ForSome(map);
+    let map = MapMode::Some(map);
     Some(map)
 }
 
 pub(crate) fn generate_map(mode: &MapMode) -> Val {
     match mode {
-        MapMode::ForAll(mode) => {
+        MapMode::All(mode) => {
             let first = generate(&mode.first);
             let second = generate(&mode.second);
             let pair = Val::Pair(Box::new(Pair::new(first, second)));
             Val::Call(Box::new(Call::new(symbol(FOR_ALL), pair)))
         }
-        MapMode::ForSome(mode_map) => {
+        MapMode::Some(mode_map) => {
             let map = mode_map
                 .iter()
                 .map(|(k, v)| {
@@ -428,21 +462,5 @@ pub(crate) fn generate_map(mode: &MapMode) -> Val {
                 .collect();
             Val::Map(map)
         }
-    }
-}
-
-fn parse_mode<T>(mode: Val, f: impl FnOnce(Val) -> Option<T>) -> Option<Mode<Transform, T>> {
-    let transform_mode = match mode {
-        Val::Unit(_) => Mode::Generic(Transform::Id),
-        Val::Symbol(s) => Mode::Generic(transform_from_symbol(&s)?),
-        mode => Mode::Specific(f(mode)?),
-    };
-    Some(transform_mode)
-}
-
-fn generate_mode<T>(mode: &Mode<Transform, T>, f: impl FnOnce(&T) -> Val) -> Val {
-    match mode {
-        Mode::Generic(mode) => generate_transform(*mode),
-        Mode::Specific(mode) => f(mode),
     }
 }

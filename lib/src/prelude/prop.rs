@@ -12,7 +12,7 @@ use crate::{
     map::Map,
     prelude::{
         default_mode,
-        map_for_some_mode,
+        map_some_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
@@ -78,9 +78,9 @@ const PROVED: &str = "proved";
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), Mode::Generic(Transform::Id));
-    map.insert(symbol(OUTPUT), Mode::Generic(Transform::Id));
-    let input_mode = map_for_some_mode(map);
+    map.insert(symbol(INPUT), Mode::Predefined(Transform::Id));
+    map.insert(symbol(OUTPUT), Mode::Predefined(Transform::Id));
+    let input_mode = map_some_mode(map);
     let output_mode = default_mode();
     named_mutable_fn("proposition", input_mode, output_mode, fn_new)
 }
@@ -107,10 +107,10 @@ fn repr() -> Named<FuncVal> {
     let input_mode = default_mode();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), Mode::Generic(Transform::Id));
-    map.insert(symbol(OUTPUT), Mode::Generic(Transform::Id));
+    map.insert(symbol(INPUT), Mode::Predefined(Transform::Id));
+    map.insert(symbol(OUTPUT), Mode::Predefined(Transform::Id));
     map.insert(symbol(PROVED), default_mode());
-    let output_mode = map_for_some_mode(map);
+    let output_mode = map_some_mode(map);
     named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)
 }
 

@@ -10,7 +10,7 @@ use airlang::{
 
 use crate::prelude::{
     default_mode,
-    map_for_some_mode,
+    map_some_mode,
     named_free_fn,
     Named,
     Prelude,
@@ -42,7 +42,7 @@ fn call() -> Named<FuncVal> {
     let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
     map.insert(arguments_key, default_mode());
 
-    let input_mode = map_for_some_mode(map);
+    let input_mode = map_some_mode(map);
     let output_mode = default_mode();
     named_free_fn("repl.execute", input_mode, output_mode, fn_call)
 }
