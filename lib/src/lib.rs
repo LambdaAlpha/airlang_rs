@@ -24,8 +24,6 @@
     )
 )]
 
-use thiserror::Error;
-
 pub use self::{
     bool::Bool,
     bytes::Bytes,
@@ -79,6 +77,7 @@ pub use self::{
     reverse::Reverse,
     string::Str,
     symbol::Symbol,
+    syntax::generator::ReprError,
     transform::Transform,
     unit::Unit,
     val::{
@@ -103,10 +102,6 @@ use crate::{
 pub fn parse(src: &str) -> Result<Val, ParseError> {
     syntax::parser::parse(src)
 }
-
-#[derive(Error, Debug)]
-#[error("ReprError")]
-pub struct ReprError {}
 
 pub fn generate(src: &Val) -> Result<String, ReprError> {
     syntax::generator::generate_pretty(src)

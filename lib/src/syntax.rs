@@ -1,6 +1,11 @@
-use std::fmt::Debug;
-
-use thiserror::Error;
+use std::{
+    error::Error,
+    fmt::{
+        Debug,
+        Display,
+        Formatter,
+    },
+};
 
 pub use self::repr::{
     call::CallRepr,
@@ -40,8 +45,7 @@ pub(crate) const PAIR_INFIX: &str = ":";
 pub(crate) const CALL_INFIX: &str = "!";
 pub(crate) const REVERSE_INFIX: &str = "?";
 
-#[derive(Error, Debug)]
-#[error("ParseError:\n{msg}")]
+#[derive(Debug)]
 pub struct ParseError {
     pub(crate) msg: String,
 }
@@ -83,6 +87,14 @@ pub(crate) fn maybe_keyword(s: &str) -> bool {
         UNIT | TRUE | FALSE | ANNOTATION_INFIX | PAIR_INFIX | CALL_INFIX | REVERSE_INFIX
     )
 }
+
+impl Display for ParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ParseError\n{}", self.msg)
+    }
+}
+
+impl Error for ParseError {}
 
 pub mod reserve;
 

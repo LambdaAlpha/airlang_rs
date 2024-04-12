@@ -12,7 +12,6 @@ categories = ["compilers"]
 
 [dependencies]
 rustc-hash = "1"
-thiserror = "1"
 nom = "7"
 smartstring = "1"
 num-bigint = "0.4"

@@ -1,12 +1,12 @@
 use std::{
+    error::Error,
     fmt::{
         Debug,
+        Display,
         Formatter,
     },
     hash::Hash,
 };
-
-use thiserror::Error;
 
 use crate::{
     map::Map,
@@ -18,13 +18,10 @@ use crate::{
     FreeCtx,
 };
 
-#[derive(Error, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum CtxError {
-    #[error("not found")]
     NotFound,
-    #[error("access denied")]
     AccessDenied,
-    #[error("unexpected")]
     Unexpected,
 }
 
@@ -615,5 +612,23 @@ impl<'a, T> DynRef<'a, T> {
         }
     }
 }
+
+impl Display for CtxError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CtxError::NotFound => {
+                write!(f, "not found")
+            }
+            CtxError::AccessDenied => {
+                write!(f, "access denied")
+            }
+            CtxError::Unexpected => {
+                write!(f, "unexpected")
+            }
+        }
+    }
+}
+
+impl Error for CtxError {}
 
 pub(crate) const DISPATCHER: &str = "dispatcher";

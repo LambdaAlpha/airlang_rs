@@ -1,4 +1,11 @@
-use std::hash::Hash;
+use std::{
+    error::Error,
+    fmt::{
+        Display,
+        Formatter,
+    },
+    hash::Hash,
+};
 
 use crate::{
     annotation::Annotation,
@@ -37,6 +44,9 @@ use crate::{
     unit::Unit,
     utils,
 };
+
+#[derive(Debug)]
+pub struct ReprError {}
 
 pub(crate) const INDENT: &str = "  ";
 
@@ -542,3 +552,11 @@ where
         indent,
     )
 }
+
+impl Display for ReprError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ReprError")
+    }
+}
+
+impl Error for ReprError {}
