@@ -2,21 +2,11 @@ use crate::{
     ctx_access::CtxAccessor,
     symbol::Symbol,
     transform::{
-        eval::{
-            Eval,
-            EvalByRef,
-        },
-        id::{
-            Id,
-            IdByRef,
-        },
+        eval::Eval,
+        id::Id,
     },
     transformer::{
-        input::{
-            ByRef,
-            ByVal,
-        },
-        DefaultByRef,
+        input::ByVal,
         DefaultByVal,
         ValBuilder,
     },
@@ -73,53 +63,5 @@ where
 
     fn transform_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
         DefaultByVal::transform_reverse(self, ctx, func, output, ValBuilder)
-    }
-}
-
-#[derive(Copy, Clone)]
-pub(crate) struct LazyByRef;
-
-impl<'a, Ctx> Transformer<Ctx, &'a Val, Val> for LazyByRef
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        DefaultByRef::transform_val(self, ctx, input)
-    }
-}
-
-impl<'a, Ctx> ByRef<'a, Ctx, Val> for LazyByRef
-where
-    Ctx: CtxAccessor,
-{
-    fn transform_default(&self, ctx: &mut Ctx, input: &'a Val) -> Val {
-        IdByRef.transform_default(ctx, input)
-    }
-
-    fn transform_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Val {
-        IdByRef.transform_symbol(ctx, s)
-    }
-
-    fn transform_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Val {
-        DefaultByRef::transform_pair(self, ctx, first, second, ValBuilder)
-    }
-
-    fn transform_list(&self, ctx: &mut Ctx, list: &'a ListVal) -> Val {
-        DefaultByRef::transform_list(self, ctx, list, ValBuilder)
-    }
-
-    fn transform_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Val {
-        DefaultByRef::transform_map(self, ctx, map, ValBuilder)
-    }
-
-    fn transform_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Val {
-        if func.is_unit() {
-            return EvalByRef.transform(ctx, input);
-        }
-        DefaultByRef::transform_call(self, ctx, func, input, ValBuilder)
-    }
-
-    fn transform_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Val {
-        DefaultByRef::transform_reverse(self, ctx, func, output, ValBuilder)
     }
 }

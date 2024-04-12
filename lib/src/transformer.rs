@@ -2,10 +2,7 @@ use std::ops::Deref;
 
 use crate::{
     transformer::{
-        input::{
-            ByRef,
-            ByVal,
-        },
+        input::ByVal,
         output::OutputBuilder,
     },
     val::{
@@ -113,105 +110,6 @@ impl DefaultByVal {
     ) -> Output
     where
         T: Transformer<Ctx, Val, Output>,
-        Builder: OutputBuilder<Output>,
-    {
-        let func = t.transform(ctx, func);
-        let output = t.transform(ctx, output);
-        builder.from_reverse(func, output)
-    }
-}
-
-pub(crate) struct DefaultByRef;
-
-impl DefaultByRef {
-    pub(crate) fn transform_val<'a, Ctx, Output, T>(t: &T, ctx: &mut Ctx, input: &'a Val) -> Output
-    where
-        T: ByRef<'a, Ctx, Output>,
-    {
-        match input {
-            Val::Symbol(s) => t.transform_symbol(ctx, s),
-            Val::Pair(p) => t.transform_pair(ctx, &p.first, &p.second),
-            Val::List(l) => t.transform_list(ctx, l),
-            Val::Map(m) => t.transform_map(ctx, m),
-            Val::Call(c) => t.transform_call(ctx, &c.func, &c.input),
-            Val::Reverse(r) => t.transform_reverse(ctx, &r.func, &r.output),
-            v => t.transform_default(ctx, v),
-        }
-    }
-
-    pub(crate) fn transform_pair<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        ctx: &mut Ctx,
-        first: &'a Val,
-        second: &'a Val,
-        builder: Builder,
-    ) -> Output
-    where
-        T: Transformer<Ctx, &'a Val, Output>,
-        Builder: OutputBuilder<Output>,
-    {
-        let first = t.transform(ctx, first);
-        let second = t.transform(ctx, second);
-        builder.from_pair(first, second)
-    }
-
-    pub(crate) fn transform_list<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        ctx: &mut Ctx,
-        list: &'a ListVal,
-        builder: Builder,
-    ) -> Output
-    where
-        T: Transformer<Ctx, &'a Val, Output>,
-        Builder: OutputBuilder<Output>,
-    {
-        let list = list.into_iter().map(|v| t.transform(ctx, v));
-        builder.from_list(list)
-    }
-
-    pub(crate) fn transform_map<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        ctx: &mut Ctx,
-        map: &'a MapVal,
-        builder: Builder,
-    ) -> Output
-    where
-        T: Transformer<Ctx, &'a Val, Output>,
-        Builder: OutputBuilder<Output>,
-    {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = t.transform(ctx, k);
-            let value = t.transform(ctx, v);
-            (key, value)
-        });
-        builder.from_map(map)
-    }
-
-    pub(crate) fn transform_call<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        ctx: &mut Ctx,
-        func: &'a Val,
-        input: &'a Val,
-        builder: Builder,
-    ) -> Output
-    where
-        T: Transformer<Ctx, &'a Val, Output>,
-        Builder: OutputBuilder<Output>,
-    {
-        let func = t.transform(ctx, func);
-        let input = t.transform(ctx, input);
-        builder.from_call(func, input)
-    }
-
-    pub(crate) fn transform_reverse<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        ctx: &mut Ctx,
-        func: &'a Val,
-        output: &'a Val,
-        builder: Builder,
-    ) -> Output
-    where
-        T: Transformer<Ctx, &'a Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let func = t.transform(ctx, func);

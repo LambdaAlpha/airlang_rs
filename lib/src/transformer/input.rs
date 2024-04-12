@@ -23,19 +23,3 @@ pub(crate) trait ByVal<Ctx, Output>: Transformer<Ctx, Val, Output> {
 
     fn transform_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Output;
 }
-
-pub(crate) trait ByRef<'a, Ctx, Output>: Transformer<Ctx, &'a Val, Output> {
-    fn transform_default(&self, ctx: &mut Ctx, input: &'a Val) -> Output;
-
-    fn transform_symbol(&self, ctx: &mut Ctx, s: &'a Symbol) -> Output;
-
-    fn transform_pair(&self, ctx: &mut Ctx, first: &'a Val, second: &'a Val) -> Output;
-
-    fn transform_list(&self, ctx: &mut Ctx, list: &'a ListVal) -> Output;
-
-    fn transform_map(&self, ctx: &mut Ctx, map: &'a MapVal) -> Output;
-
-    fn transform_call(&self, ctx: &mut Ctx, func: &'a Val, input: &'a Val) -> Output;
-
-    fn transform_reverse(&self, ctx: &mut Ctx, func: &'a Val, output: &'a Val) -> Output;
-}

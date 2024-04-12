@@ -30,7 +30,7 @@ use crate::{
     },
     mode::Mode,
     symbol::Symbol,
-    transform::eval::EvalByRef,
+    transform::eval::Eval,
     transformer::Transformer,
     val::{
         ctx::CtxVal,
@@ -316,7 +316,12 @@ where
     Ctx: CtxAccessor,
 {
     fn transform(&self, _ctx: &mut Ctx, input: Val) -> Val {
-        eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
+        eval_free(
+            self.ctx.clone(),
+            input,
+            self.input_name.clone(),
+            self.body.clone(),
+        )
     }
 }
 
@@ -335,9 +340,12 @@ where
 {
     fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_const_fn() {
-            CtxForConstFn::Free(_ctx) => {
-                eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
-            }
+            CtxForConstFn::Free(_ctx) => eval_free(
+                self.ctx.clone(),
+                input,
+                self.input_name.clone(),
+                self.body.clone(),
+            ),
             CtxForConstFn::Const(mut ctx) => {
                 let f = |ctx| {
                     eval_aware(
@@ -347,7 +355,7 @@ where
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
-                        &self.body,
+                        self.body.clone(),
                     )
                 };
                 // INVARIANT: We use the const invariant to indicate not to modify this context.
@@ -372,9 +380,12 @@ where
 {
     fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
         match ctx.for_mutable_fn() {
-            CtxForMutableFn::Free(_ctx) => {
-                eval_free(self.ctx.clone(), input, self.input_name.clone(), &self.body)
-            }
+            CtxForMutableFn::Free(_ctx) => eval_free(
+                self.ctx.clone(),
+                input,
+                self.input_name.clone(),
+                self.body.clone(),
+            ),
             CtxForMutableFn::Const(mut ctx) => {
                 let f = |ctx| {
                     eval_aware(
@@ -384,7 +395,7 @@ where
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
-                        &self.body,
+                        self.body.clone(),
                     )
                 };
                 // INVARIANT: We use the const invariant to indicate not to modify this context.
@@ -399,7 +410,7 @@ where
                         Invariant::Final,
                         input,
                         self.input_name.clone(),
-                        &self.body,
+                        self.body.clone(),
                     )
                 };
                 // INVARIANT: We use the final invariant to indicate not to move this context.
@@ -409,9 +420,9 @@ where
     }
 }
 
-fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: &Val) -> Val {
+fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
     let _ = new_ctx.put_val(input_name, CtxValue::new(input));
-    EvalByRef.transform(&mut MutableCtx::new(&mut new_ctx), body)
+    Eval.transform(&mut MutableCtx::new(&mut new_ctx), body)
 }
 
 fn eval_aware(
@@ -421,7 +432,7 @@ fn eval_aware(
     caller_invariant: Invariant,
     input: Val,
     input_name: Symbol,
-    body: &Val,
+    body: Val,
 ) -> Val {
     let _ = new_ctx.put_val(input_name, CtxValue::new(input));
     keep_eval_restore(new_ctx, caller, caller_name, caller_invariant, body)
@@ -432,11 +443,11 @@ fn keep_eval_restore(
     ctx: &mut Ctx,
     caller_name: Symbol,
     caller_invariant: Invariant,
-    body: &Val,
+    body: Val,
 ) -> Val {
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_invariant);
-    let output = EvalByRef.transform(&mut MutableCtx::new(&mut new_ctx), body);
+    let output = Eval.transform(&mut MutableCtx::new(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, &caller_name);
     output
 }
