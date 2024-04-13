@@ -139,7 +139,7 @@ fn proved() -> Named<FuncVal> {
 }
 
 fn fn_proved(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Prop(PropVal(prop)) = val else {
             return Val::default();
         };
@@ -154,7 +154,7 @@ fn func() -> Named<FuncVal> {
 }
 
 fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Prop(PropVal(prop)) = val else {
             return Val::default();
         };
@@ -169,7 +169,7 @@ fn input() -> Named<FuncVal> {
 }
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Prop(PropVal(prop)) = val else {
             return Val::default();
         };
@@ -184,7 +184,7 @@ fn output() -> Named<FuncVal> {
 }
 
 fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Prop(PropVal(prop)) = val else {
             return Val::default();
         };

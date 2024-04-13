@@ -7,7 +7,6 @@ use crate::{
     bool::Bool,
     ctx::{
         CtxMap,
-        CtxTrait,
         DefaultCtx,
     },
     ctx_access::constant::CtxForConstFn,
@@ -137,7 +136,7 @@ fn type_of() -> Named<FuncVal> {
 }
 
 fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
             Val::Bool(_) => BOOL,
@@ -202,7 +201,7 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
 fn get_by_ref<'a>(ctx: &'a CtxForConstFn<'a>, v: &'a Val) -> Option<&'a Val> {
     match v {
         Val::Symbol(v) => {
-            if let Ok(v1) = ctx.get_const_ref(v) {
+            if let Ok(v1) = ctx.get_ref(v) {
                 Some(v1)
             } else {
                 None

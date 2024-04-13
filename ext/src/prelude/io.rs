@@ -69,7 +69,7 @@ fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    let Ok(str) = ctx.get_mut(&s) else {
+    let Ok(str) = ctx.get_ref_mut(&s) else {
         return Val::default();
     };
     let Val::String(str) = str else {

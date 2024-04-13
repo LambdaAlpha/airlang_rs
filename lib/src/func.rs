@@ -13,6 +13,7 @@ use std::{
 use crate::{
     ctx::{
         Ctx,
+        CtxTrait,
         CtxValue,
         Invariant,
     },
@@ -421,7 +422,7 @@ where
 }
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
-    let _ = new_ctx.put_val(input_name, CtxValue::new(input));
+    let _ = new_ctx.put_value(input_name, CtxValue::new(input));
     Eval.transform(&mut MutableCtx::new(&mut new_ctx), body)
 }
 
@@ -434,7 +435,7 @@ fn eval_aware(
     input_name: Symbol,
     body: Val,
 ) -> Val {
-    let _ = new_ctx.put_val(input_name, CtxValue::new(input));
+    let _ = new_ctx.put_value(input_name, CtxValue::new(input));
     keep_eval_restore(new_ctx, caller, caller_name, caller_invariant, body)
 }
 
@@ -461,7 +462,7 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
 
 fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
     let val = Val::Ctx(CtxVal(Box::new(ctx)));
-    let _ = new_ctx.put_val(name, CtxValue { val, invariant });
+    let _ = new_ctx.put_value(name, CtxValue { val, invariant });
 }
 
 fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &str) {

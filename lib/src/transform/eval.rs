@@ -1,4 +1,5 @@
 use crate::{
+    ctx::DefaultCtx,
     ctx_access::CtxAccessor,
     problem::solve,
     symbol::Symbol,
@@ -39,7 +40,7 @@ where
     }
 
     fn transform_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
-        ctx.get(&s).unwrap_or_default()
+        DefaultCtx.get_or_default(ctx, &s)
     }
 
     fn transform_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {

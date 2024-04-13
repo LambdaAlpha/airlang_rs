@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use crate::{
+    ctx::CtxTrait,
     ctx_access::CtxAccessor,
     transformer::{
         output::OutputBuilder,
@@ -31,10 +32,10 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
     let Ok(meta) = ctx.get_meta() else {
         return Val::default();
     };
-    let Ok(solver) = meta.get(SOLVER) else {
+    let Ok(solver) = meta.get_ref(SOLVER) else {
         return Val::default();
     };
-    let Val::Func(FuncVal(solver)) = solver else {
+    let Val::Func(FuncVal(solver)) = solver.clone() else {
         return Val::default();
     };
     let reverse = ValBuilder.from_reverse(Val::Func(func.clone()), output.clone());

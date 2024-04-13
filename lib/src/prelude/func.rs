@@ -306,7 +306,7 @@ fn caller_access() -> Named<FuncVal> {
 }
 
 fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -331,7 +331,7 @@ fn input_mode() -> Named<FuncVal> {
 }
 
 fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -351,7 +351,7 @@ fn output_mode() -> Named<FuncVal> {
 }
 
 fn fn_output_mode(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -371,7 +371,7 @@ fn is_primitive() -> Named<FuncVal> {
 }
 
 fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -392,7 +392,7 @@ fn is_extension() -> Named<FuncVal> {
 }
 
 fn fn_is_extension(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -410,7 +410,7 @@ fn id() -> Named<FuncVal> {
 }
 
 fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -428,7 +428,7 @@ fn body() -> Named<FuncVal> {
 }
 
 fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -446,7 +446,7 @@ fn ctx() -> Named<FuncVal> {
 }
 
 fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -469,7 +469,7 @@ fn input_name() -> Named<FuncVal> {
 }
 
 fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };
@@ -492,7 +492,7 @@ fn caller_name() -> Named<FuncVal> {
 }
 
 fn fn_caller_name(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Func(FuncVal(func)) = val else {
             return Val::default();
         };

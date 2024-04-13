@@ -117,7 +117,7 @@ fn is_unsolved() -> Named<FuncVal> {
 }
 
 fn fn_is_unsolved(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
@@ -138,7 +138,7 @@ fn is_unsolvable() -> Named<FuncVal> {
 }
 
 fn fn_is_unsolvable(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
@@ -159,7 +159,7 @@ fn is_verified() -> Named<FuncVal> {
 }
 
 fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
@@ -178,7 +178,7 @@ fn input() -> Named<FuncVal> {
 }
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
@@ -216,7 +216,7 @@ fn evidence() -> Named<FuncVal> {
 }
 
 fn fn_evidence(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_const_ref(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };

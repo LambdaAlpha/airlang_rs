@@ -78,7 +78,7 @@ fn get_first() -> Named<FuncVal> {
 }
 
 fn fn_get_first(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_ref_or_val(&mut ctx, input, |ref_or_val| match ref_or_val {
+    DefaultCtx.with_dyn(&mut ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
             _ => Val::default(),
@@ -102,7 +102,7 @@ fn fn_set_first(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx.get_ref_or_val(&mut ctx, name, |ref_or_val| match ref_or_val {
+    DefaultCtx.with_dyn(&mut ctx, name, |ref_or_val| match ref_or_val {
         Either::Left(mut pair) => {
             let Some(Val::Pair(pair)) = pair.as_mut() else {
                 return Val::default();
@@ -121,7 +121,7 @@ fn get_second() -> Named<FuncVal> {
 }
 
 fn fn_get_second(mut ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.get_ref_or_val(&mut ctx, input, |ref_or_val| match ref_or_val {
+    DefaultCtx.with_dyn(&mut ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
             _ => Val::default(),
@@ -145,7 +145,7 @@ fn fn_set_second(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx.get_ref_or_val(&mut ctx, name, |ref_or_val| match ref_or_val {
+    DefaultCtx.with_dyn(&mut ctx, name, |ref_or_val| match ref_or_val {
         Either::Left(mut pair) => {
             let Some(Val::Pair(pair)) = pair.as_mut() else {
                 return Val::default();

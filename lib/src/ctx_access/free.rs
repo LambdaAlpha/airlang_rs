@@ -18,7 +18,15 @@ use crate::{
 pub struct FreeCtx;
 
 impl CtxTrait for FreeCtx {
-    fn get(&self, _name: &str) -> Result<Val, CtxError> {
+    fn get_ref(&self, _name: &str) -> Result<&Val, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_ref_mut(&mut self, _name: &str) -> Result<&mut Val, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_ref_dyn(&mut self, _name: &str) -> Result<DynRef<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -34,11 +42,11 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_const(&mut self, _name: &str) -> Result<(), CtxError> {
+    fn is_final(&self, _name: &str) -> Result<bool, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn is_final(&self, _name: &str) -> Result<bool, CtxError> {
+    fn set_const(&mut self, _name: &str) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -46,27 +54,19 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn is_null(&self, _name: &str) -> Result<bool, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
     fn get_meta(&self) -> Result<&Ctx, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_dyn_meta(&mut self) -> Result<DynRef<Ctx>, CtxError> {
+    fn get_meta_mut(&mut self) -> Result<&mut Ctx, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_meta_dyn(&mut self) -> Result<DynRef<Ctx>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
     fn set_meta(&mut self, _meta: Option<Ctx>) -> Result<(), CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn get_dyn_ref(&mut self, _name: &str) -> Result<DynRef<Val>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn get_const_ref(&self, _name: &str) -> Result<&Val, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

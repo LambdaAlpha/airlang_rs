@@ -7,6 +7,7 @@ use crate::{
         CtxMap,
         CtxTrait,
         CtxValue,
+        DefaultCtx,
         DynRef,
         Invariant,
     },
@@ -151,7 +152,7 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.get(&s).unwrap_or_default()
+    DefaultCtx.get_or_default(&ctx, &s)
 }
 
 fn move1() -> Named<FuncVal> {
@@ -453,7 +454,7 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match ctx.is_null(&s) {
+    match DefaultCtx.is_null(&ctx, &s) {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(_) => Val::default(),
     }
@@ -732,7 +733,7 @@ where
                 let Ok(DynRef {
                     is_const,
                     ref1: meta_ctx,
-                }) = ctx.get_dyn_meta()
+                }) = ctx.get_meta_dyn()
                 else {
                     return None;
                 };
@@ -746,7 +747,7 @@ where
             }
         }
         Val::Symbol(name) => {
-            let Ok(DynRef { ref1, is_const }) = ctx.get_dyn_ref(name) else {
+            let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name) else {
                 return None;
             };
             let Val::Ctx(CtxVal(target_ctx)) = ref1 else {
