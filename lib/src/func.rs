@@ -504,6 +504,7 @@ impl Debug for Func {
                 }
                 CtxFree::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
+                    s.field("output_mode", &self.output_mode);
                     s.field("caller_access", &"free");
                     s.field("body", &c.body);
                     s.field("context", &c.ctx);
@@ -517,6 +518,7 @@ impl Debug for Func {
                 }
                 CtxConst::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
+                    s.field("output_mode", &self.output_mode);
                     s.field("caller_access", &"constant");
                     s.field("body", &c.body);
                     s.field("context", &c.ctx);
@@ -531,6 +533,7 @@ impl Debug for Func {
                 }
                 CtxMutable::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
+                    s.field("output_mode", &self.output_mode);
                     s.field("caller_access", &"mutable");
                     s.field("body", &c.body);
                     s.field("context", &c.ctx);
@@ -592,12 +595,12 @@ impl Func {
         input_mode: Mode,
         output_mode: Mode,
         id: Symbol,
-        f: Box<dyn CtxMutableFn>,
+        fn1: Box<dyn CtxMutableFn>,
     ) -> Self {
         let transformer = FuncTransformer::Mutable(CtxMutable::Primitive(Primitive {
             is_extension: true,
             id,
-            fn1: f,
+            fn1,
         }));
         Func {
             input_mode,
