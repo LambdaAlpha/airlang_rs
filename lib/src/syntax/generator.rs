@@ -9,6 +9,7 @@ use std::{
 
 use crate::{
     annotation::Annotation,
+    ask::Ask,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -17,13 +18,13 @@ use crate::{
     list::List,
     map::Map,
     pair::Pair,
-    reverse::Reverse,
     string::Str,
     symbol::Symbol,
     syntax::{
         is_delimiter,
         maybe_keyword,
         ANNOTATION_INFIX,
+        ASK_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
         FALSE,
@@ -32,7 +33,6 @@ use crate::{
         MAP_LEFT,
         MAP_RIGHT,
         PAIR_INFIX,
-        REVERSE_INFIX,
         SEPARATOR,
         STRING_QUOTE,
         SYMBOL_QUOTE,
@@ -136,7 +136,7 @@ where
     Symbol(&'a Symbol),
     Pair(&'a Pair<T, T>),
     Call(&'a Call<T, T>),
-    Reverse(&'a Reverse<T, T>),
+    Ask(&'a Ask<T, T>),
     List(&'a List<T>),
     Map(&'a Map<T, T>),
     Annotation(&'a Annotation<T, T>),
@@ -162,7 +162,7 @@ where
         GenerateRepr::Symbol(str) => generate_symbol(str, s),
         GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
         GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
-        GenerateRepr::Reverse(i) => generate_reverse(i, s, format, indent)?,
+        GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
         GenerateRepr::Annotation(a) => generate_annotation(a, s, format, indent)?,
@@ -252,7 +252,7 @@ where
 {
     let b = matches!(
         repr.try_into()?,
-        GenerateRepr::Call(_) | GenerateRepr::Reverse(_) | GenerateRepr::Pair(_)
+        GenerateRepr::Call(_) | GenerateRepr::Ask(_) | GenerateRepr::Pair(_)
     );
     Ok(b)
 }
@@ -264,7 +264,7 @@ where
 {
     let b = matches!(
         repr.try_into()?,
-        GenerateRepr::Call(_) | GenerateRepr::Reverse(_) | GenerateRepr::Pair(_)
+        GenerateRepr::Call(_) | GenerateRepr::Ask(_) | GenerateRepr::Pair(_)
     );
     Ok(b)
 }
@@ -385,8 +385,8 @@ where
     }
 }
 
-fn generate_reverse<'a, T>(
-    reverse: &'a Reverse<T, T>,
+fn generate_ask<'a, T>(
+    ask: &'a Ask<T, T>,
     s: &mut String,
     format: &GenerateFormat,
     indent: usize,
@@ -396,12 +396,12 @@ where
     T: Eq + Hash,
 {
     generate_infix(
-        &reverse.func,
+        &ask.func,
         |s, _format, _indent| {
-            s.push_str(REVERSE_INFIX);
+            s.push_str(ASK_INFIX);
             Ok(())
         },
-        &reverse.output,
+        &ask.output,
         s,
         format,
         indent,

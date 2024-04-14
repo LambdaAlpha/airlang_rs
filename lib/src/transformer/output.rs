@@ -12,5 +12,5 @@ pub(crate) trait OutputBuilder<Output> {
 
     fn from_call(&self, func: Output, input: Output) -> Output;
 
-    fn from_reverse(&self, func: Output, output: Output) -> Output;
+    fn from_ask(&self, func: Output, output: Output) -> Output;
 }

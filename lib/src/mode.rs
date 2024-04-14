@@ -1,11 +1,11 @@
 use crate::{
+    ask::Ask,
     call::Call,
     ctx_access::CtxAccessor,
     list::List,
     map::Map,
     pair::Pair,
     problem::solve,
-    reverse::Reverse,
     transform::{
         eval::Eval,
         id::Id,
@@ -17,12 +17,12 @@ use crate::{
         Transformer,
         ValBuilder,
     },
+    AskVal,
     CallVal,
     CtxForMutableFn,
     ListVal,
     MapVal,
     PairVal,
-    ReverseVal,
     Symbol,
     Val,
 };
@@ -40,7 +40,7 @@ pub struct ValMode {
     pub list: Box<ListMode>,
     pub map: Box<MapMode>,
     pub call: Box<CallMode>,
-    pub reverse: Box<ReverseMode>,
+    pub ask: Box<AskMode>,
 }
 
 #[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
@@ -91,16 +91,16 @@ pub struct CallDepMode {
 }
 
 #[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ReverseMode {
+pub enum AskMode {
     #[default]
     Eval,
-    Struct(Reverse<Mode, Mode>),
-    Dependent(ReverseDepMode),
+    Struct(Ask<Mode, Mode>),
+    Dependent(AskDepMode),
 }
 
 // decide transform mode of output by the type of function
 #[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ReverseDepMode {
+pub struct AskDepMode {
     pub unit: Mode,
     pub bool: Mode,
     pub int: Mode,
@@ -149,7 +149,7 @@ where
             Val::Symbol(s) => self.symbol.transform(ctx, s),
             Val::Pair(pair) => self.pair.transform(ctx, *pair),
             Val::Call(call) => self.call.transform(ctx, *call),
-            Val::Reverse(reverse) => self.reverse.transform(ctx, *reverse),
+            Val::Ask(ask) => self.ask.transform(ctx, *ask),
             Val::List(list) => self.list.transform(ctx, list),
             Val::Map(map) => self.map.transform(ctx, map),
             val => val,
@@ -306,28 +306,28 @@ where
     }
 }
 
-impl<Ctx> Transformer<Ctx, ReverseVal, Val> for ReverseMode
+impl<Ctx> Transformer<Ctx, AskVal, Val> for AskMode
 where
     Ctx: CtxAccessor,
 {
-    fn transform(&self, ctx: &mut Ctx, input: ReverseVal) -> Val {
+    fn transform(&self, ctx: &mut Ctx, input: AskVal) -> Val {
         match self {
-            ReverseMode::Eval => Eval.transform_reverse(ctx, input.func, input.output),
-            ReverseMode::Struct(reverse) => reverse.transform(ctx, input),
-            ReverseMode::Dependent(reverse) => reverse.transform(ctx, input),
+            AskMode::Eval => Eval.transform_ask(ctx, input.func, input.output),
+            AskMode::Struct(ask) => ask.transform(ctx, input),
+            AskMode::Dependent(ask) => ask.transform(ctx, input),
         }
     }
 }
 
-impl<Ctx> Transformer<Ctx, ReverseVal, Val> for ReverseDepMode
+impl<Ctx> Transformer<Ctx, AskVal, Val> for AskDepMode
 where
     Ctx: CtxAccessor,
 {
-    fn transform(&self, ctx: &mut Ctx, reverse: ReverseVal) -> Val {
-        let func = Eval.transform(ctx, reverse.func);
+    fn transform(&self, ctx: &mut Ctx, ask: AskVal) -> Val {
+        let func = Eval.transform(ctx, ask.func);
         let transformer = match func {
             Val::Func(f) => {
-                let output = f.output_mode.transform(ctx, reverse.output);
+                let output = f.output_mode.transform(ctx, ask.output);
                 return solve(ctx, f, output);
             }
             Val::Unit(_) => &self.unit,
@@ -338,23 +338,23 @@ where
             Val::String(_) => &self.string,
             Val::Symbol(_) => &self.symbol,
             _ => {
-                let output = Eval.transform(ctx, reverse.output);
-                return ValBuilder.from_reverse(func, output);
+                let output = Eval.transform(ctx, ask.output);
+                return ValBuilder.from_ask(func, output);
             }
         };
-        let output = transformer.transform(ctx, reverse.output);
-        ValBuilder.from_reverse(func, output)
+        let output = transformer.transform(ctx, ask.output);
+        ValBuilder.from_ask(func, output)
     }
 }
 
-impl<Ctx> Transformer<Ctx, ReverseVal, Val> for Reverse<Mode, Mode>
+impl<Ctx> Transformer<Ctx, AskVal, Val> for Ask<Mode, Mode>
 where
     Ctx: CtxAccessor,
 {
-    fn transform(&self, ctx: &mut Ctx, reverse: ReverseVal) -> Val {
-        let func = self.func.transform(ctx, reverse.func);
-        let output = self.output.transform(ctx, reverse.output);
-        ValBuilder.from_reverse(func, output)
+    fn transform(&self, ctx: &mut Ctx, ask: AskVal) -> Val {
+        let func = self.func.transform(ctx, ask.func);
+        let output = self.output.transform(ctx, ask.output);
+        ValBuilder.from_ask(func, output)
     }
 }
 

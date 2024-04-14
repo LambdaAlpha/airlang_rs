@@ -1,8 +1,8 @@
 use crate::{
     mode::{
+        AskDepMode,
         CallDepMode,
         Mode,
-        ReverseDepMode,
     },
     transform::{
         EVAL,
@@ -11,6 +11,7 @@ use crate::{
     },
     utils::val::symbol,
     val::{
+        ASK,
         BOOL,
         BYTES,
         CALL,
@@ -19,11 +20,12 @@ use crate::{
         LIST,
         MAP,
         PAIR,
-        REVERSE,
         STRING,
         SYMBOL,
         UNIT,
     },
+    Ask,
+    AskMode,
     Call,
     CallMode,
     List,
@@ -34,8 +36,6 @@ use crate::{
     MapMode,
     MapVal,
     Pair,
-    Reverse,
-    ReverseMode,
     SymbolMode,
     Transform,
     Val,
@@ -91,8 +91,8 @@ fn parse_val(mut map: MapVal) -> Option<ValMode> {
     if let Some(call_mode) = map.remove(&symbol(CALL)) {
         mode.call = Box::new(parse_call(call_mode)?);
     }
-    if let Some(reverse_mode) = map.remove(&symbol(REVERSE)) {
-        mode.reverse = Box::new(parse_reverse(reverse_mode)?);
+    if let Some(ask_mode) = map.remove(&symbol(ASK)) {
+        mode.ask = Box::new(parse_ask(ask_mode)?);
     }
     if let Some(list_mode) = map.remove(&symbol(LIST)) {
         mode.list = Box::new(parse_list(list_mode)?);
@@ -116,9 +116,9 @@ pub(crate) fn generate_val(mode: &ValMode) -> Val {
         let val = generate_call(&mode.call);
         map.insert(symbol(CALL), val);
     }
-    if mode.reverse != Default::default() {
-        let val = generate_reverse(&mode.reverse);
-        map.insert(symbol(REVERSE), val);
+    if mode.ask != Default::default() {
+        let val = generate_ask(&mode.ask);
+        map.insert(symbol(ASK), val);
     }
     if mode.list != Default::default() {
         let val = generate_list(&mode.list);
@@ -253,31 +253,31 @@ fn generate_call_dep(mode: &CallDepMode) -> Val {
     Val::Map(map)
 }
 
-fn parse_reverse(mode: Val) -> Option<ReverseMode> {
+fn parse_ask(mode: Val) -> Option<AskMode> {
     let mode = match mode {
-        Val::Unit(_) => ReverseMode::Eval,
+        Val::Unit(_) => AskMode::Eval,
         Val::Symbol(s) => {
             if &*s != EVAL {
                 return None;
             }
-            ReverseMode::Eval
+            AskMode::Eval
         }
-        Val::Reverse(reverse) => {
-            let func = parse(reverse.func)?;
-            let output = parse(reverse.output)?;
-            ReverseMode::Struct(Reverse::new(func, output))
+        Val::Ask(ask) => {
+            let func = parse(ask.func)?;
+            let output = parse(ask.output)?;
+            AskMode::Struct(Ask::new(func, output))
         }
         Val::Map(map) => {
-            let reverse_dep_mode = parse_reverse_dep(map)?;
-            ReverseMode::Dependent(reverse_dep_mode)
+            let ask_dep_mode = parse_ask_dep(map)?;
+            AskMode::Dependent(ask_dep_mode)
         }
         _ => return None,
     };
     Some(mode)
 }
 
-fn parse_reverse_dep(mut map: MapVal) -> Option<ReverseDepMode> {
-    let mut mode = ReverseDepMode::default();
+fn parse_ask_dep(mut map: MapVal) -> Option<AskDepMode> {
+    let mut mode = AskDepMode::default();
     if let Some(unit_mode) = map.remove(&symbol(UNIT)) {
         mode.unit = parse(unit_mode)?;
     }
@@ -302,19 +302,19 @@ fn parse_reverse_dep(mut map: MapVal) -> Option<ReverseDepMode> {
     Some(mode)
 }
 
-pub(crate) fn generate_reverse(mode: &ReverseMode) -> Val {
+pub(crate) fn generate_ask(mode: &AskMode) -> Val {
     match mode {
-        ReverseMode::Eval => symbol(EVAL),
-        ReverseMode::Struct(reverse) => {
-            let func = generate(&reverse.func);
-            let output = generate(&reverse.output);
-            Val::Reverse(Box::new(Reverse::new(func, output)))
+        AskMode::Eval => symbol(EVAL),
+        AskMode::Struct(ask) => {
+            let func = generate(&ask.func);
+            let output = generate(&ask.output);
+            Val::Ask(Box::new(Ask::new(func, output)))
         }
-        ReverseMode::Dependent(reverse) => generate_reverse_dep(reverse),
+        AskMode::Dependent(ask) => generate_ask_dep(ask),
     }
 }
 
-fn generate_reverse_dep(mode: &ReverseDepMode) -> Val {
+fn generate_ask_dep(mode: &AskDepMode) -> Val {
     let mut map = Map::default();
     if mode.unit != Default::default() {
         map.insert(symbol(UNIT), generate(&mode.unit));

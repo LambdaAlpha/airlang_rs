@@ -57,6 +57,7 @@ use crate::{
     transform::Transform,
     unit::Unit,
     val::{
+        ask::AskVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
@@ -64,19 +65,18 @@ use crate::{
         map::MapVal,
         pair::PairVal,
         prop::PropVal,
-        reverse::ReverseVal,
     },
     Answer,
     AnswerVal,
+    Ask,
+    AskDepMode,
+    AskMode,
     Call,
     CallDepMode,
     CallMode,
     ListMode,
     MapMode,
     PairMode,
-    Reverse,
-    ReverseDepMode,
-    ReverseMode,
     SymbolMode,
     Val,
     ValExt,
@@ -95,7 +95,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // string
         1,      // pair
         1,      // call
-        1,      // reverse
+        1,      // ask
         1,      // list
         1,      // map
         1,      // ctx
@@ -118,7 +118,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         6 => Val::String(any_string(rng)),
         7 => Val::Pair(Box::new(any_pair(rng, new_depth))),
         8 => Val::Call(Box::new(any_call(rng, new_depth))),
-        9 => Val::Reverse(Box::new(any_reverse(rng, new_depth))),
+        9 => Val::Ask(Box::new(any_ask(rng, new_depth))),
         10 => Val::List(any_list(rng, new_depth)),
         11 => Val::Map(any_map(rng, new_depth)),
         12 => Val::Ctx(any_ctx(rng, new_depth)),
@@ -198,8 +198,8 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> CallVal {
     CallVal::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_reverse(rng: &mut SmallRng, depth: usize) -> ReverseVal {
-    ReverseVal::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> AskVal {
+    AskVal::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> ListVal {
@@ -253,14 +253,14 @@ pub(crate) fn any_val_mode(rng: &mut SmallRng, depth: usize) -> ValMode {
     let symbol = any_symbol_mode(rng);
     let pair = Box::new(any_pair_mode(rng, depth));
     let call = Box::new(any_call_mode(rng, depth));
-    let reverse = Box::new(any_reverse_mode(rng, depth));
+    let ask = Box::new(any_ask_mode(rng, depth));
     let list = Box::new(any_list_mode(rng, depth));
     let map = Box::new(any_map_mode(rng, depth));
     ValMode {
         symbol,
         pair,
         call,
-        reverse,
+        ask,
         list,
         map,
     }
@@ -309,7 +309,7 @@ pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
     }
 }
 
-pub(crate) fn any_reverse_mode(rng: &mut SmallRng, depth: usize) -> ReverseMode {
+pub(crate) fn any_ask_mode(rng: &mut SmallRng, depth: usize) -> AskMode {
     let weight: usize = 1 << min(depth, 32);
     let weights = [
         weight,      // eval
@@ -321,12 +321,9 @@ pub(crate) fn any_reverse_mode(rng: &mut SmallRng, depth: usize) -> ReverseMode 
     let new_depth = depth + 1;
 
     match i {
-        0 => ReverseMode::Eval,
-        1 => ReverseMode::Struct(Reverse::new(
-            any_mode(rng, new_depth),
-            any_mode(rng, new_depth),
-        )),
-        2 => ReverseMode::Dependent(ReverseDepMode {
+        0 => AskMode::Eval,
+        1 => AskMode::Struct(Ask::new(any_mode(rng, new_depth), any_mode(rng, new_depth))),
+        2 => AskMode::Dependent(AskDepMode {
             unit: any_mode(rng, new_depth),
             bool: any_mode(rng, new_depth),
             int: any_mode(rng, new_depth),

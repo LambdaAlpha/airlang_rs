@@ -61,7 +61,7 @@ where
         DefaultByVal::transform_call(self, ctx, func, input, ValBuilder)
     }
 
-    fn transform_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        DefaultByVal::transform_reverse(self, ctx, func, output, ValBuilder)
+    fn transform_ask(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
+        DefaultByVal::transform_ask(self, ctx, func, output, ValBuilder)
     }
 }

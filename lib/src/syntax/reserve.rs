@@ -15,11 +15,11 @@ use crate::{
         parser::ParseRepr,
         reserve::{
             annotation::AnnotationRepr,
+            ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
-            reverse::ReverseRepr,
         },
         ParseError,
     },
@@ -43,7 +43,7 @@ pub enum Repr {
     String(Str),
     Pair(Box<PairRepr>),
     Call(Box<CallRepr>),
-    Reverse(Box<ReverseRepr>),
+    Ask(Box<AskRepr>),
     List(ListRepr),
     Map(MapRepr),
     Annotation(Box<AnnotationRepr>),
@@ -109,9 +109,9 @@ impl From<Box<CallRepr>> for Repr {
     }
 }
 
-impl From<Box<ReverseRepr>> for Repr {
-    fn from(i: Box<ReverseRepr>) -> Self {
-        Repr::Reverse(i)
+impl From<Box<AskRepr>> for Repr {
+    fn from(a: Box<AskRepr>) -> Self {
+        Repr::Ask(a)
     }
 }
 
@@ -194,7 +194,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::String(s) => GenerateRepr::String(s),
             Repr::Pair(p) => GenerateRepr::Pair(p),
             Repr::Call(c) => GenerateRepr::Call(c),
-            Repr::Reverse(r) => GenerateRepr::Reverse(r),
+            Repr::Ask(a) => GenerateRepr::Ask(a),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),
             Repr::Annotation(a) => GenerateRepr::Annotation(a),
@@ -207,7 +207,7 @@ pub(crate) mod pair;
 
 pub(crate) mod call;
 
-pub(crate) mod reverse;
+pub(crate) mod ask;
 
 pub(crate) mod list;
 

@@ -34,9 +34,9 @@ pair
 -----
 call
 =====
-; [r = any ! reverse, type_of r]
+; [r = any ! ask, type_of r]
 -----
-reverse
+ask
 =====
 ; [c = any ! context, type_of c]
 -----
@@ -100,7 +100,7 @@ call
 =====
 ; [a = id ! f ? a, type_of a]
 -----
-reverse
+ask
 =====
 ; [a = [], type_of a]
 -----

@@ -38,8 +38,8 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
     let Val::Func(FuncVal(solver)) = solver.clone() else {
         return Val::default();
     };
-    let reverse = ValBuilder.from_reverse(Val::Func(func.clone()), output.clone());
-    let input = solver.transform(ctx, reverse);
+    let ask = ValBuilder.from_ask(Val::Func(func.clone()), output.clone());
+    let input = solver.transform(ctx, ask);
     let Val::Answer(answer) = &input else {
         return Val::default();
     };

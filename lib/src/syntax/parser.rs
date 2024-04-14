@@ -59,6 +59,7 @@ use nom::{
 
 use crate::{
     annotation::Annotation,
+    ask::Ask,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -67,12 +68,12 @@ use crate::{
     list::List,
     map::Map,
     pair::Pair,
-    reverse::Reverse,
     string::Str,
     symbol::Symbol,
     syntax::{
         is_delimiter,
         ANNOTATION_INFIX,
+        ASK_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
         FALSE,
@@ -81,7 +82,6 @@ use crate::{
         MAP_LEFT,
         MAP_RIGHT,
         PAIR_INFIX,
-        REVERSE_INFIX,
         SEPARATOR,
         SHIFT_PREFIX,
         STRING_QUOTE,
@@ -105,7 +105,7 @@ pub(crate) trait ParseRepr:
     + From<Str>
     + From<Box<Pair<Self, Self>>>
     + From<Box<Call<Self, Self>>>
-    + From<Box<Reverse<Self, Self>>>
+    + From<Box<Ask<Self, Self>>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -367,9 +367,9 @@ fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
                 let call = Box::new(Call::new(input.clone(), input));
                 From::from(call)
             }
-            REVERSE_INFIX => {
-                let reverse = Box::new(Reverse::new(input.clone(), input));
-                From::from(reverse)
+            ASK_INFIX => {
+                let ask = Box::new(Ask::new(input.clone(), input));
+                From::from(ask)
             }
             ANNOTATION_INFIX => {
                 let annotation = Box::new(Annotation::new(input.clone(), input));
@@ -421,9 +421,9 @@ fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
                 let call = Box::new(Call::new(left, right));
                 From::from(call)
             }
-            REVERSE_INFIX => {
-                let reverse = Box::new(Reverse::new(left, right));
-                From::from(reverse)
+            ASK_INFIX => {
+                let ask = Box::new(Ask::new(left, right));
+                From::from(ask)
             }
             ANNOTATION_INFIX => {
                 let annotation = Box::new(Annotation::new(left, right));

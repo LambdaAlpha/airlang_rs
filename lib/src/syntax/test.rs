@@ -10,11 +10,11 @@ use crate::{
     syntax::{
         parse,
         repr::{
+            ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
-            reverse::ReverseRepr,
             Repr,
         },
     },
@@ -31,7 +31,7 @@ mod ints;
 mod lists;
 mod maps;
 mod pairs;
-mod reverses;
+mod asks;
 mod strings;
 mod symbols;
 mod units;
@@ -79,8 +79,8 @@ fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn reverse(func: Repr, output: Repr) -> Repr {
-    Repr::Reverse(Box::new(ReverseRepr::new(func, output)))
+fn ask(func: Repr, output: Repr) -> Repr {
+    Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -316,17 +316,17 @@ fn test_generate_calls() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_reverses() -> Result<(), Box<dyn Error>> {
+fn test_parse_asks() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/reverses.air"),
-        "test/reverses.air",
-        reverses::expected,
+        include_str!("test/asks.air"),
+        "test/asks.air",
+        asks::expected,
     )
 }
 
 #[test]
-fn test_generate_reverses() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/reverses.air"), "test/reverses.air")
+fn test_generate_asks() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/asks.air"), "test/asks.air")
 }
 
 #[test]

@@ -24,6 +24,7 @@ use crate::{
     prelude::{
         annotation::AnnotationPrelude,
         answer::AnswerPrelude,
+        ask::AskPrelude,
         bool::BoolPrelude,
         bytes::BytesPrelude,
         call::CallPrelude,
@@ -39,7 +40,6 @@ use crate::{
         meta::MetaPrelude,
         pair::PairPrelude,
         prop::PropPrelude,
-        reverse::ReversePrelude,
         str::StrPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
@@ -52,14 +52,14 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Ask,
+    AskMode,
     Call,
     CallMode,
     List,
     ListItemMode,
     Map,
     Pair,
-    Reverse,
-    ReverseMode,
     SymbolMode,
 };
 
@@ -76,7 +76,7 @@ pub(crate) struct AllPrelude {
     pub(crate) logic: LogicPrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
-    pub(crate) reverse: ReversePrelude,
+    pub(crate) ask: AskPrelude,
     pub(crate) prop: PropPrelude,
     pub(crate) answer: AnswerPrelude,
     pub(crate) symbol: SymbolPrelude,
@@ -104,7 +104,7 @@ impl Prelude for AllPrelude {
         self.logic.put(m);
         self.func.put(m);
         self.call.put(m);
-        self.reverse.put(m);
+        self.ask.put(m);
         self.prop.put(m);
         self.answer.put(m);
         self.symbol.put(m);
@@ -234,9 +234,9 @@ fn call_mode(func: Mode, input: Mode) -> Mode {
     Mode::Custom(Box::new(mode))
 }
 
-fn reverse_mode(func: Mode, output: Mode) -> Mode {
+fn ask_mode(func: Mode, output: Mode) -> Mode {
     let mode = ValMode {
-        reverse: Box::new(ReverseMode::Struct(Reverse::new(func, output))),
+        ask: Box::new(AskMode::Struct(Ask::new(func, output))),
         ..Default::default()
     };
     Mode::Custom(Box::new(mode))
@@ -293,7 +293,7 @@ mod func;
 
 mod call;
 
-mod reverse;
+mod ask;
 
 mod prop;
 

@@ -124,8 +124,8 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_reverse() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/reverse.air"), "test/reverse.air")
+fn test_ask() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/ask.air"), "test/ask.air")
 }
 
 #[test]

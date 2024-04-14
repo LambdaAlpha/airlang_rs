@@ -21,5 +21,5 @@ pub(crate) trait ByVal<Ctx, Output>: Transformer<Ctx, Val, Output> {
 
     fn transform_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Output;
 
-    fn transform_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Output;
+    fn transform_ask(&self, ctx: &mut Ctx, func: Val, output: Val) -> Output;
 }

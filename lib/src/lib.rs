@@ -25,6 +25,7 @@
 )]
 
 pub use self::{
+    ask::Ask,
     bool::Bool,
     bytes::Bytes,
     call::Call,
@@ -57,6 +58,8 @@ pub use self::{
     logic::Prop,
     map::Map,
     mode::{
+        AskDepMode,
+        AskMode,
         CallDepMode,
         CallMode,
         ListItemMode,
@@ -64,8 +67,6 @@ pub use self::{
         MapMode,
         Mode,
         PairMode,
-        ReverseDepMode,
-        ReverseMode,
         SymbolMode,
         ValMode,
     },
@@ -74,7 +75,6 @@ pub use self::{
         Answer,
         Verified,
     },
-    reverse::Reverse,
     string::Str,
     symbol::Symbol,
     syntax::generator::ReprError,
@@ -82,6 +82,7 @@ pub use self::{
     unit::Unit,
     val::{
         answer::AnswerVal,
+        ask::AskVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
@@ -89,7 +90,6 @@ pub use self::{
         map::MapVal,
         pair::PairVal,
         prop::PropVal,
-        reverse::ReverseVal,
         Val,
     },
 };
@@ -171,7 +171,7 @@ pub(crate) mod map;
 
 pub(crate) mod call;
 
-pub(crate) mod reverse;
+pub(crate) mod ask;
 
 pub(crate) mod annotation;
 

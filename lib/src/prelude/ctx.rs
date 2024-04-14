@@ -1,4 +1,5 @@
 use crate::{
+    ask::Ask,
     bool::Bool,
     call::Call,
     ctx::{
@@ -37,7 +38,6 @@ use crate::{
         Named,
         Prelude,
     },
-    reverse::Reverse,
     symbol::Symbol,
     transform::{
         eval::Eval,
@@ -59,12 +59,12 @@ use crate::{
         map::MapVal,
         Val,
     },
+    AskMode,
+    AskVal,
     CallMode,
     ListMode,
     ListVal,
     PairVal,
-    ReverseMode,
-    ReverseVal,
     SymbolMode,
     ValMode,
 };
@@ -213,7 +213,7 @@ fn assign_destruct(
                 assign_call(ctx, *name, val, options)
             }
         }
-        Val::Reverse(name) => assign_reverse(ctx, *name, val, options),
+        Val::Ask(name) => assign_ask(ctx, *name, val, options),
         Val::List(name) => assign_list(ctx, name, val, options),
         Val::Map(name) => assign_map(ctx, name, val, options),
         _ => Val::default(),
@@ -258,18 +258,13 @@ fn assign_call(ctx: &mut CtxForMutableFn, name: CallVal, val: Val, options: Assi
     Val::Call(Box::new(Call::new(func, input)))
 }
 
-fn assign_reverse(
-    ctx: &mut CtxForMutableFn,
-    name: ReverseVal,
-    val: Val,
-    options: AssignOptions,
-) -> Val {
-    let Val::Reverse(val) = val else {
+fn assign_ask(ctx: &mut CtxForMutableFn, name: AskVal, val: Val, options: AssignOptions) -> Val {
+    let Val::Ask(val) = val else {
         return Val::default();
     };
     let func = assign_allow_options(ctx, name.func, val.func, options);
     let output = assign_allow_options(ctx, name.output, val.output, options);
-    Val::Reverse(Box::new(Reverse::new(func, output)))
+    Val::Ask(Box::new(Ask::new(func, output)))
 }
 
 fn assign_list(ctx: &mut CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
@@ -524,7 +519,7 @@ fn with_ctx() -> Named<FuncVal> {
                 Mode::Predefined(Transform::Eval),
                 Mode::Predefined(Transform::Id),
             ))),
-            reverse: Box::new(ReverseMode::Struct(Reverse::new(
+            ask: Box::new(AskMode::Struct(Ask::new(
                 Mode::Predefined(Transform::Eval),
                 Mode::Predefined(Transform::Id),
             ))),
@@ -548,9 +543,9 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
             });
             result.unwrap_or_default()
         }
-        Val::Reverse(reverse) => {
-            let func = reverse.func;
-            let output = Eval.eval_output(&mut ctx, &func, reverse.output);
+        Val::Ask(ask) => {
+            let func = ask.func;
+            let output = Eval.eval_output(&mut ctx, &func, ask.output);
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
                 Eval::solve(&mut target_ctx, func, output)
             });
@@ -572,7 +567,7 @@ fn with_ctx_func() -> Named<FuncVal> {
                 Mode::Predefined(Transform::Id),
                 Mode::Predefined(Transform::Id),
             ))),
-            reverse: Box::new(ReverseMode::Struct(Reverse::new(
+            ask: Box::new(AskMode::Struct(Ask::new(
                 Mode::Predefined(Transform::Id),
                 Mode::Predefined(Transform::Id),
             ))),
@@ -602,9 +597,9 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             });
             result.unwrap_or_default()
         }
-        Val::Reverse(reverse) => {
-            let func = reverse.func;
-            let output = reverse.output;
+        Val::Ask(ask) => {
+            let func = ask.func;
+            let output = ask.output;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
                 Eval.transform(&mut target_ctx, func)
             }) else {
@@ -632,7 +627,7 @@ fn with_ctx_input() -> Named<FuncVal> {
                 Mode::Predefined(Transform::Eval),
                 Mode::Predefined(Transform::Id),
             ))),
-            reverse: Box::new(ReverseMode::Struct(Reverse::new(
+            ask: Box::new(AskMode::Struct(Ask::new(
                 Mode::Predefined(Transform::Eval),
                 Mode::Predefined(Transform::Id),
             ))),
@@ -656,9 +651,9 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
             });
             result.unwrap_or_default()
         }
-        Val::Reverse(reverse) => {
-            let func = reverse.func;
-            let output = reverse.output;
+        Val::Ask(ask) => {
+            let func = ask.func;
+            let output = ask.output;
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
                 Eval.eval_output_then_solve(&mut target_ctx, func, output)
             });
@@ -680,7 +675,7 @@ fn with_ctx_func_input() -> Named<FuncVal> {
                 Mode::Predefined(Transform::Id),
                 Mode::Predefined(Transform::Id),
             ))),
-            reverse: Box::new(ReverseMode::Struct(Reverse::new(
+            ask: Box::new(AskMode::Struct(Ask::new(
                 Mode::Predefined(Transform::Id),
                 Mode::Predefined(Transform::Id),
             ))),
@@ -702,9 +697,9 @@ fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
             });
             result.unwrap_or_default()
         }
-        Val::Reverse(reverse) => {
+        Val::Ask(ask) => {
             let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval.transform_reverse(&mut target_ctx, reverse.func, reverse.output)
+                Eval.transform_ask(&mut target_ctx, ask.func, ask.output)
             });
             result.unwrap_or_default()
         }

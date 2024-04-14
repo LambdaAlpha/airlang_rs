@@ -1,7 +1,7 @@
 use crate::{
+    ask::Ask,
     call::Call,
     pair::Pair,
-    reverse::Reverse,
     symbol::Symbol,
     transformer::{
         input::ByVal,
@@ -49,7 +49,7 @@ impl<Ctx> ByVal<Ctx, Val> for Id {
         Val::Call(Box::new(Call::new(func, input)))
     }
 
-    fn transform_reverse(&self, _ctx: &mut Ctx, func: Val, output: Val) -> Val {
-        Val::Reverse(Box::new(Reverse::new(func, output)))
+    fn transform_ask(&self, _ctx: &mut Ctx, func: Val, output: Val) -> Val {
+        Val::Ask(Box::new(Ask::new(func, output)))
     }
 }

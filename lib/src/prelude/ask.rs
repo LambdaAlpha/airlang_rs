@@ -6,70 +6,70 @@ use crate::{
     },
     func::MutableDispatcher,
     prelude::{
+        ask_mode,
         default_mode,
         named_free_fn,
         named_mutable_fn,
         pair_mode,
-        reverse_mode,
         Named,
         Prelude,
     },
-    syntax::REVERSE_INFIX,
+    syntax::ASK_INFIX,
     transform::eval::Eval,
     val::func::FuncVal,
-    Reverse,
+    Ask,
     Val,
 };
 
 #[derive(Clone)]
-pub(crate) struct ReversePrelude {
+pub(crate) struct AskPrelude {
     pub(crate) new: Named<FuncVal>,
-    pub(crate) reverse: Named<FuncVal>,
+    pub(crate) ask: Named<FuncVal>,
 }
 
-impl Default for ReversePrelude {
+impl Default for AskPrelude {
     fn default() -> Self {
-        ReversePrelude {
+        AskPrelude {
             new: new(),
-            reverse: reverse(),
+            ask: ask(),
         }
     }
 }
 
-impl Prelude for ReversePrelude {
+impl Prelude for AskPrelude {
     fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
-        self.reverse.put(m);
+        self.ask.put(m);
     }
 }
 
 fn new() -> Named<FuncVal> {
     let input_mode = pair_mode(default_mode(), default_mode());
     let output_mode = default_mode();
-    named_free_fn(REVERSE_INFIX, input_mode, output_mode, fn_new)
+    named_free_fn(ASK_INFIX, input_mode, output_mode, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    Val::Reverse(Box::new(Reverse::new(pair.first, pair.second)))
+    Val::Ask(Box::new(Ask::new(pair.first, pair.second)))
 }
 
-fn reverse() -> Named<FuncVal> {
-    let input_mode = reverse_mode(default_mode(), default_mode());
+fn ask() -> Named<FuncVal> {
+    let input_mode = ask_mode(default_mode(), default_mode());
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
-        fn_reverse::<FreeCtx>,
-        |ctx, val| fn_reverse(ctx, val),
-        |ctx, val| fn_reverse(ctx, val),
+        fn_ask::<FreeCtx>,
+        |ctx, val| fn_ask(ctx, val),
+        |ctx, val| fn_ask(ctx, val),
     );
     named_mutable_fn("??", input_mode, output_mode, func)
 }
 
-fn fn_reverse<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    let Val::Reverse(reverse) = input else {
+fn fn_ask<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+    let Val::Ask(ask) = input else {
         return Val::default();
     };
-    Eval.eval_output_then_solve(&mut ctx, reverse.func, reverse.output)
+    Eval.eval_output_then_solve(&mut ctx, ask.func, ask.output)
 }

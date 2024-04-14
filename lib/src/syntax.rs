@@ -8,11 +8,11 @@ use std::{
 };
 
 pub use self::repr::{
+    ask::AskRepr,
     call::CallRepr,
     list::ListRepr,
     map::MapRepr,
     pair::PairRepr,
-    reverse::ReverseRepr,
     Repr,
 };
 
@@ -43,7 +43,7 @@ pub(crate) const SHIFT_PREFIX: &str = "^";
 pub(crate) const ANNOTATION_INFIX: &str = "@";
 pub(crate) const PAIR_INFIX: &str = ":";
 pub(crate) const CALL_INFIX: &str = "!";
-pub(crate) const REVERSE_INFIX: &str = "?";
+pub(crate) const ASK_INFIX: &str = "?";
 
 #[derive(Debug)]
 pub struct ParseError {
@@ -84,7 +84,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 pub(crate) fn maybe_keyword(s: &str) -> bool {
     matches!(
         s,
-        UNIT | TRUE | FALSE | ANNOTATION_INFIX | PAIR_INFIX | CALL_INFIX | REVERSE_INFIX
+        UNIT | TRUE | FALSE | ANNOTATION_INFIX | PAIR_INFIX | CALL_INFIX | ASK_INFIX
     )
 }
 

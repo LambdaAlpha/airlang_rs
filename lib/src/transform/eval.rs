@@ -60,7 +60,7 @@ where
         self.eval_input_then_call(ctx, func, input)
     }
 
-    fn transform_reverse(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
+    fn transform_ask(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
         let func = self.transform(ctx, func);
         self.eval_output_then_solve(ctx, func, output)
     }
@@ -111,7 +111,7 @@ impl Eval {
             solve(ctx, func, output)
         } else {
             let output = self.transform(ctx, output);
-            ValBuilder.from_reverse(func, output)
+            ValBuilder.from_ask(func, output)
         }
     }
 
@@ -133,7 +133,7 @@ impl Eval {
         if let Val::Func(func) = func {
             solve(ctx, func, output)
         } else {
-            ValBuilder.from_reverse(func, output)
+            ValBuilder.from_ask(func, output)
         }
     }
 }

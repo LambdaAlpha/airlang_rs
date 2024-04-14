@@ -9,9 +9,9 @@ use crate::{
         list::ListVal,
         map::MapVal,
     },
+    Ask,
     Call,
     Pair,
-    Reverse,
     Val,
 };
 
@@ -32,7 +32,7 @@ impl DefaultByVal {
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
             Val::Call(c) => t.transform_call(ctx, c.func, c.input),
-            Val::Reverse(r) => t.transform_reverse(ctx, r.func, r.output),
+            Val::Ask(a) => t.transform_ask(ctx, a.func, a.output),
             v => t.transform_default(ctx, v),
         }
     }
@@ -101,7 +101,7 @@ impl DefaultByVal {
         builder.from_call(func, input)
     }
 
-    pub(crate) fn transform_reverse<Ctx, Output, T, Builder>(
+    pub(crate) fn transform_ask<Ctx, Output, T, Builder>(
         t: &T,
         ctx: &mut Ctx,
         func: Val,
@@ -114,7 +114,7 @@ impl DefaultByVal {
     {
         let func = t.transform(ctx, func);
         let output = t.transform(ctx, output);
-        builder.from_reverse(func, output)
+        builder.from_ask(func, output)
     }
 }
 
@@ -144,8 +144,8 @@ impl OutputBuilder<Val> for ValBuilder {
         Val::Call(Box::new(Call::new(func, input)))
     }
 
-    fn from_reverse(&self, func: Val, output: Val) -> Val {
-        Val::Reverse(Box::new(Reverse::new(func, output)))
+    fn from_ask(&self, func: Val, output: Val) -> Val {
+        Val::Ask(Box::new(Ask::new(func, output)))
     }
 }
 

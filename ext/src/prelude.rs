@@ -1,4 +1,6 @@
 use airlang::{
+    Ask,
+    AskMode,
     Call,
     CallMode,
     CtxConstFn,
@@ -15,8 +17,6 @@ use airlang::{
     Mode,
     MutableCtx,
     Pair,
-    Reverse,
-    ReverseMode,
     Symbol,
     SymbolMode,
     Val,
@@ -140,9 +140,9 @@ fn call_mode(func: Mode, input: Mode) -> Mode {
 }
 
 #[allow(unused)]
-fn reverse_mode(func: Mode, output: Mode) -> Mode {
+fn ask_mode(func: Mode, output: Mode) -> Mode {
     let mode = ValMode {
-        reverse: Box::new(ReverseMode::Struct(Reverse::new(func, output))),
+        ask: Box::new(AskMode::Struct(Ask::new(func, output))),
         ..Default::default()
     };
     Mode::Custom(Box::new(mode))
