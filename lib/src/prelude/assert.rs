@@ -8,7 +8,7 @@ use crate::{
     },
     ctx_access::constant::CtxForConstFn,
     func::FuncTransformer,
-    logic::Prop,
+    logic::Assert,
     map::Map,
     prelude::{
         default_mode,
@@ -26,9 +26,9 @@ use crate::{
         symbol,
     },
     val::{
+        assert::AssertVal,
         func::FuncVal,
         map::MapVal,
-        prop::PropVal,
     },
     CtxForMutableFn,
     Mode,
@@ -37,21 +37,21 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct PropPrelude {
+pub(crate) struct AssertPrelude {
     pub(crate) new: Named<FuncVal>,
     pub(crate) repr: Named<FuncVal>,
-    pub(crate) proved: Named<FuncVal>,
+    pub(crate) verified: Named<FuncVal>,
     pub(crate) func: Named<FuncVal>,
     pub(crate) input: Named<FuncVal>,
     pub(crate) output: Named<FuncVal>,
 }
 
-impl Default for PropPrelude {
+impl Default for AssertPrelude {
     fn default() -> Self {
-        PropPrelude {
+        AssertPrelude {
             new: new(),
             repr: repr(),
-            proved: proved(),
+            verified: is_verified(),
             func: func(),
             input: input(),
             output: output(),
@@ -59,11 +59,11 @@ impl Default for PropPrelude {
     }
 }
 
-impl Prelude for PropPrelude {
+impl Prelude for AssertPrelude {
     fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
         self.repr.put(m);
-        self.proved.put(m);
+        self.verified.put(m);
         self.func.put(m);
         self.input.put(m);
         self.output.put(m);
@@ -73,7 +73,7 @@ impl Prelude for PropPrelude {
 const FUNCTION: &str = "function";
 const INPUT: &str = "input";
 const OUTPUT: &str = "output";
-const PROVED: &str = "proved";
+const VERIFIED: &str = "verified";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
@@ -82,7 +82,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(OUTPUT), Mode::Predefined(Transform::Id));
     let input_mode = map_some_mode(map);
     let output_mode = default_mode();
-    named_mutable_fn("proposition", input_mode, output_mode, fn_new)
+    named_mutable_fn("assert", input_mode, output_mode, fn_new)
 }
 
 fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -99,8 +99,8 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let input = func.input_mode.transform(&mut ctx, input);
     let output = map_remove(&mut map, OUTPUT);
     let output = func.output_mode.transform(&mut ctx, output);
-    let prop = Prop::new(func, input, output);
-    Val::Prop(PropVal(Rc::new(prop)))
+    let assert = Assert::new(func, input, output);
+    Val::Assert(AssertVal(Rc::new(assert)))
 }
 
 fn repr() -> Named<FuncVal> {
@@ -109,85 +109,90 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), default_mode());
     map.insert(symbol(INPUT), Mode::Predefined(Transform::Id));
     map.insert(symbol(OUTPUT), Mode::Predefined(Transform::Id));
-    map.insert(symbol(PROVED), default_mode());
+    map.insert(symbol(VERIFIED), default_mode());
     let output_mode = map_some_mode(map);
-    named_free_fn("proposition.represent", input_mode, output_mode, fn_repr)
+    named_free_fn("assert.represent", input_mode, output_mode, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
-    let Val::Prop(PropVal(prop)) = input else {
+    let Val::Assert(AssertVal(assert)) = input else {
         return Val::default();
     };
     let mut repr = MapVal::default();
-    generate_prop(&mut repr, &prop);
+    generate_assert(&mut repr, &assert);
     Val::Map(repr)
 }
 
-fn generate_prop(repr: &mut MapVal, prop: &Prop) {
-    repr.insert(symbol(FUNCTION), Val::Func(prop.func().clone()));
-    repr.insert(symbol(INPUT), prop.input().clone());
-    repr.insert(symbol(OUTPUT), prop.output().clone());
-    if prop.proved() {
-        repr.insert(symbol(PROVED), Val::Bool(Bool::t()));
+fn generate_assert(repr: &mut MapVal, assert: &Assert) {
+    repr.insert(symbol(FUNCTION), Val::Func(assert.func().clone()));
+    repr.insert(symbol(INPUT), assert.input().clone());
+    repr.insert(symbol(OUTPUT), assert.output().clone());
+    if assert.is_verified() {
+        repr.insert(symbol(VERIFIED), Val::Bool(Bool::t()));
     }
 }
 
-fn proved() -> Named<FuncVal> {
+fn is_verified() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
     let output_mode = default_mode();
-    named_const_fn("proposition.proved", input_mode, output_mode, fn_proved)
+    named_const_fn(
+        "assert.is_verified",
+        input_mode,
+        output_mode,
+        fn_is_verified,
+    )
 }
 
-fn fn_proved(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(&ctx, input, |val| {
-        let Val::Prop(PropVal(prop)) = val else {
+        let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(prop.proved()))
+        Val::Bool(Bool::new(assert.is_verified()))
     })
 }
 
 fn func() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
     let output_mode = default_mode();
-    named_const_fn("proposition.function", input_mode, output_mode, fn_func)
+    named_const_fn("assert.function", input_mode, output_mode, fn_func)
 }
 
 fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(&ctx, input, |val| {
-        let Val::Prop(PropVal(prop)) = val else {
+        let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
-        Val::Func(prop.func().clone())
+        Val::Func(assert.func().clone())
     })
 }
 
 fn input() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
     let output_mode = default_mode();
-    named_const_fn("proposition.input", input_mode, output_mode, fn_input)
+    named_const_fn("assert.input", input_mode, output_mode, fn_input)
 }
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(&ctx, input, |val| {
-        let Val::Prop(PropVal(prop)) = val else {
+        let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
-        prop.input().clone()
+        assert.input().clone()
     })
 }
 
 fn output() -> Named<FuncVal> {
     let input_mode = symbol_id_mode();
     let output_mode = default_mode();
-    named_const_fn("proposition.output", input_mode, output_mode, fn_output)
+    named_const_fn("assert.output", input_mode, output_mode, fn_output)
 }
 
 fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(&ctx, input, |val| {
-        let Val::Prop(PropVal(prop)) = val else {
+        let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
-        prop.output().clone()
+        assert.output().clone()
     })
 }

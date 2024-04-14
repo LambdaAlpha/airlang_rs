@@ -40,7 +40,7 @@ use crate::{
     },
     int::Int,
     list::List,
-    logic::Prop,
+    logic::Assert,
     map::Map,
     mode::{
         ListItemMode,
@@ -58,13 +58,13 @@ use crate::{
     unit::Unit,
     val::{
         ask::AskVal,
+        assert::AssertVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
         list::ListVal,
         map::MapVal,
         pair::PairVal,
-        prop::PropVal,
     },
     Answer,
     AnswerVal,
@@ -100,7 +100,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // map
         1,      // ctx
         1,      // func
-        1,      // prop
+        1,      // assert
         1,      // answer
         1,      // extension
     ];
@@ -123,7 +123,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         11 => Val::Map(any_map(rng, new_depth)),
         12 => Val::Ctx(any_ctx(rng, new_depth)),
         13 => Val::Func(any_func(rng, new_depth)),
-        14 => Val::Prop(any_prop(rng, new_depth)),
+        14 => Val::Assert(any_assert(rng, new_depth)),
         15 => Val::Answer(any_answer(rng, new_depth)),
         16 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
@@ -501,23 +501,23 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     }
 }
 
-pub(crate) fn any_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
+pub(crate) fn any_assert(rng: &mut SmallRng, depth: usize) -> AssertVal {
     let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
-    let prop = if rng.gen() {
-        Prop::new_proved(func, input)
+    let assert = if rng.gen() {
+        Assert::new_verified(func, input)
     } else {
         let output = any_val(rng, depth);
-        Prop::new(func, input, output)
+        Assert::new(func, input, output)
     };
-    PropVal(Rc::new(prop))
+    AssertVal(Rc::new(assert))
 }
 
-pub(crate) fn any_proved_prop(rng: &mut SmallRng, depth: usize) -> PropVal {
+pub(crate) fn any_proved_assert(rng: &mut SmallRng, depth: usize) -> AssertVal {
     let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
-    let prop = Prop::new_proved(func, input);
-    PropVal(Rc::new(prop))
+    let assert = Assert::new_verified(func, input);
+    AssertVal(Rc::new(assert))
 }
 
 pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
@@ -536,7 +536,7 @@ pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
         0 => Answer::Unsolved,
         1 => Answer::Unsolvable,
         2 => Answer::Unverified(any_val(rng, new_depth)),
-        3 => Answer::Verified(Verified(any_proved_prop(rng, new_depth))),
+        3 => Answer::Verified(Verified(any_proved_assert(rng, new_depth))),
         _ => unreachable!(),
     };
     AnswerVal::from(Box::new(answer))

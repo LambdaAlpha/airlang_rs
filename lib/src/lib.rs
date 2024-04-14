@@ -55,7 +55,7 @@ pub use self::{
     },
     int::Int,
     list::List,
-    logic::Prop,
+    logic::Assert,
     map::Map,
     mode::{
         AskDepMode,
@@ -83,13 +83,13 @@ pub use self::{
     val::{
         answer::AnswerVal,
         ask::AskVal,
+        assert::AssertVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
         list::ListVal,
         map::MapVal,
         pair::PairVal,
-        prop::PropVal,
         Val,
     },
 };

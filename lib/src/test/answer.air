@@ -22,26 +22,26 @@ false
 -----
 1
 =====
-; [a = answer.verified ! proposition.prove ! not ! true, answer.is_verified a]
+; [a = answer.verified ! assert.verified ! not ! true, answer.is_verified a]
 -----
 true
 =====
-; [p = proposition ! {function : not, input : true, output : false}, a = answer.verified ! p, (type_of p) == proposition and a == .]
+; [p = assert ! {function : not, input : true, output : false}, a = answer.verified ! p, (type_of p) == assert and a == .]
 -----
 true
 =====
-; [a = answer.verified ! proposition.prove ! not ! true, answer.input a]
+; [a = answer.verified ! assert.verified ! not ! true, answer.input a]
 -----
 true
 =====
-; [a = answer.verified ! proposition.prove ! not ! true, answer.into_input ! move ! a]
+; [a = answer.verified ! assert.verified ! not ! true, answer.into_input ! move ! a]
 -----
 true
 =====
-; [a = answer.verified ! proposition.prove ! not ! true, p = answer.evidence ! a, type_of p]
+; [a = answer.verified ! assert.verified ! not ! true, p = answer.evidence ! a, type_of p]
 -----
-proposition
+assert
 =====
-; [a = answer.verified ! proposition.prove ! not ! true, p = answer.into_evidence ! move ! a, type_of p]
+; [a = answer.verified ! assert.verified ! not ! true, p = answer.into_evidence ! move ! a, type_of p]
 -----
-proposition
+assert

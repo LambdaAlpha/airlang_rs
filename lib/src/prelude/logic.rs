@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     ctx::CtxMap,
     func::FuncTransformer,
-    logic::Prop,
+    logic::Assert,
     prelude::{
         call_mode,
         default_mode,
@@ -13,8 +13,8 @@ use crate::{
     },
     transformer::Transformer,
     val::{
+        assert::AssertVal,
         func::FuncVal,
-        prop::PropVal,
     },
     CtxForMutableFn,
     Mode,
@@ -24,28 +24,30 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct LogicPrelude {
-    pub(crate) prove: Named<FuncVal>,
+    pub(crate) verified: Named<FuncVal>,
 }
 
 impl Default for LogicPrelude {
     fn default() -> Self {
-        LogicPrelude { prove: prove() }
+        LogicPrelude {
+            verified: verified(),
+        }
     }
 }
 
 impl Prelude for LogicPrelude {
     fn put(&self, m: &mut CtxMap) {
-        self.prove.put(m);
+        self.verified.put(m);
     }
 }
 
-fn prove() -> Named<FuncVal> {
+fn verified() -> Named<FuncVal> {
     let input_mode = call_mode(default_mode(), Mode::Predefined(Transform::Id));
     let output_mode = default_mode();
-    named_mutable_fn("proposition.prove", input_mode, output_mode, fn_prove)
+    named_mutable_fn("assert.verified", input_mode, output_mode, fn_verified)
 }
 
-fn fn_prove(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_verified(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
@@ -56,6 +58,6 @@ fn fn_prove(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let input = func.input_mode.transform(&mut ctx, call.input);
-    let theorem = Prop::new_proved(func, input);
-    Val::Prop(PropVal(Rc::new(theorem)))
+    let verified = Assert::new_verified(func, input);
+    Val::Assert(AssertVal(Rc::new(verified)))
 }

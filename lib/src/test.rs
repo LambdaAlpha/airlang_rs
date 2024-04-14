@@ -129,8 +129,8 @@ fn test_ask() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_prop() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/prop.air"), "test/prop.air")
+fn test_assert() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/assert.air"), "test/assert.air")
 }
 
 #[test]

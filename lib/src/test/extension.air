@@ -38,6 +38,6 @@ true
 -----
 1
 =====
-; [p = proposition.prove ! func_ext ! true, proposition.proved p]
+; [p = assert.verified ! func_ext ! true, assert.is_verified p]
 -----
 true

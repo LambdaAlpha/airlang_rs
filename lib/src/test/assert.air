@@ -1,32 +1,32 @@
 ; [
-    p = proposition ! {
+    p = assert ! {
         function : not,
         input : 1,
         output : 2,
     },
-    proposition.input p
+    assert.input p
 ]
 -----
 1
 =====
 ; [
-    p = proposition ! {
+    p = assert ! {
         function : not,
         input : 1,
         output : 2,
     },
-    proposition.output p
+    assert.output p
 ]
 -----
 2
 =====
 ; [
-    p = proposition ! {
+    p = assert ! {
         function : not,
         input : 1,
         output : 2,
     },
-    (proposition.function p) == not
+    (assert.function p) == not
 ]
 -----
 true
@@ -41,13 +41,13 @@ true
         input : true,
         output : false,
     },
-    m == proposition.represent ! proposition ! m
+    m == assert.represent ! assert ! m
 ]
 -----
 true
 =====
 ; [
-    m = proposition.represent ! proposition.prove ! not ! true,
+    m = assert.represent ! assert.verified ! not ! true,
     !map = function ! {
         body : input,
         input_mode : {map : id all eval},
@@ -56,7 +56,7 @@ true
         function : not,
         input : true,
         output : false,
-        proved : true,
+        verified : true,
     },
     m == expected
 ]
@@ -64,12 +64,12 @@ true
 true
 =====
 ; [
-    p = proposition ! {
+    p = assert ! {
         function : not,
         input : 1,
         output : 2,
     },
-    ((type_of p) == id ! proposition) and (proposition.proved p) == false
+    ((type_of p) == id ! assert) and (assert.is_verified p) == false
 ]
 -----
 true

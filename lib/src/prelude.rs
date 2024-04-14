@@ -25,6 +25,7 @@ use crate::{
         annotation::AnnotationPrelude,
         answer::AnswerPrelude,
         ask::AskPrelude,
+        assert::AssertPrelude,
         bool::BoolPrelude,
         bytes::BytesPrelude,
         call::CallPrelude,
@@ -39,7 +40,6 @@ use crate::{
         map::MapPrelude,
         meta::MetaPrelude,
         pair::PairPrelude,
-        prop::PropPrelude,
         str::StrPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
@@ -77,7 +77,7 @@ pub(crate) struct AllPrelude {
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
     pub(crate) ask: AskPrelude,
-    pub(crate) prop: PropPrelude,
+    pub(crate) assert: AssertPrelude,
     pub(crate) answer: AnswerPrelude,
     pub(crate) symbol: SymbolPrelude,
     pub(crate) unit: UnitPrelude,
@@ -105,7 +105,7 @@ impl Prelude for AllPrelude {
         self.func.put(m);
         self.call.put(m);
         self.ask.put(m);
-        self.prop.put(m);
+        self.assert.put(m);
         self.answer.put(m);
         self.symbol.put(m);
         self.unit.put(m);
@@ -295,7 +295,7 @@ mod call;
 
 mod ask;
 
-mod prop;
+mod assert;
 
 mod answer;
 

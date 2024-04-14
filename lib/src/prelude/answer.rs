@@ -96,13 +96,13 @@ fn verified() -> Named<FuncVal> {
 }
 
 fn fn_verified(input: Val) -> Val {
-    let Val::Prop(prop) = input else {
+    let Val::Assert(assert) = input else {
         return Val::default();
     };
-    if !prop.proved() {
+    if !assert.is_verified() {
         return Val::default();
     }
-    Val::Answer(AnswerVal::from(Answer::Verified(Verified(prop))))
+    Val::Answer(AnswerVal::from(Answer::Verified(Verified(assert))))
 }
 
 fn is_unsolved() -> Named<FuncVal> {
@@ -186,7 +186,7 @@ fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
             Answer::Unsolved => Val::default(),
             Answer::Unsolvable => Val::default(),
             Answer::Unverified(value) => value.clone(),
-            Answer::Verified(prop) => prop.input().clone(),
+            Answer::Verified(assert) => assert.input().clone(),
         }
     })
 }
@@ -205,7 +205,7 @@ fn fn_into_input(input: Val) -> Val {
         Answer::Unsolved => Val::default(),
         Answer::Unsolvable => Val::default(),
         Answer::Unverified(value) => value,
-        Answer::Verified(prop) => prop.input().clone(),
+        Answer::Verified(assert) => assert.input().clone(),
     }
 }
 
@@ -220,10 +220,10 @@ fn fn_evidence(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
-        let Answer::Verified(prop) = &**answer else {
+        let Answer::Verified(assert) = &**answer else {
             return Val::default();
         };
-        Val::Prop(prop.deref().clone())
+        Val::Assert(assert.deref().clone())
     })
 }
 
@@ -242,8 +242,8 @@ fn fn_into_evidence(input: Val) -> Val {
     let Val::Answer(answer) = input else {
         return Val::default();
     };
-    let Answer::Verified(Verified(prop)) = *answer.0 else {
+    let Answer::Verified(Verified(assert)) = *answer.0 else {
         return Val::default();
     };
-    Val::Prop(prop)
+    Val::Assert(assert)
 }

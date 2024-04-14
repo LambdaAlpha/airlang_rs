@@ -31,13 +31,13 @@ use crate::{
     val::{
         answer::AnswerVal,
         ask::AskVal,
+        assert::AssertVal,
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
         list::ListVal,
         map::MapVal,
         pair::PairVal,
-        prop::PropVal,
     },
     ReprError,
 };
@@ -61,7 +61,7 @@ pub enum Val {
     Ctx(CtxVal),
     Func(FuncVal),
 
-    Prop(PropVal),
+    Assert(AssertVal),
 
     Answer(AnswerVal),
 
@@ -82,7 +82,7 @@ pub(crate) const CALL: &str = "call";
 pub(crate) const ASK: &str = "ask";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
-pub(crate) const PROP: &str = "proposition";
+pub(crate) const ASSERT: &str = "assert";
 pub(crate) const ANSWER: &str = "answer";
 pub(crate) const EXT: &str = "extension";
 
@@ -188,9 +188,9 @@ impl From<FuncVal> for Val {
     }
 }
 
-impl From<PropVal> for Val {
-    fn from(value: PropVal) -> Self {
-        Val::Prop(value)
+impl From<AssertVal> for Val {
+    fn from(value: AssertVal) -> Self {
+        Val::Assert(value)
     }
 }
 
@@ -345,7 +345,7 @@ impl Debug for Val {
             Val::Ask(a) => <_ as Debug>::fmt(a, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
             Val::Func(func) => <_ as Debug>::fmt(func, f),
-            Val::Prop(p) => <_ as Debug>::fmt(p, f),
+            Val::Assert(a) => <_ as Debug>::fmt(a, f),
             Val::Answer(a) => <_ as Debug>::fmt(a, f),
             Val::Ext(e) => <_ as Debug>::fmt(e, f),
         }
@@ -366,6 +366,6 @@ pub(crate) mod ctx;
 
 pub(crate) mod func;
 
-pub(crate) mod prop;
+pub(crate) mod assert;
 
 pub(crate) mod answer;

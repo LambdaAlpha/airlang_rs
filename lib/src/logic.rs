@@ -7,21 +7,21 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Prop {
+pub struct Assert {
     func: FuncVal,
     input: Val,
     output: Val,
-    proved: bool,
+    verified: bool,
 }
 
-impl Prop {
+impl Assert {
     pub(crate) fn new(func: FuncVal, input: Val, output: Val) -> Self {
         debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
         Self {
             func,
             input,
             output,
-            proved: false,
+            verified: false,
         }
     }
 
@@ -37,18 +37,18 @@ impl Prop {
         &self.output
     }
 
-    pub fn proved(&self) -> bool {
-        self.proved
+    pub fn is_verified(&self) -> bool {
+        self.verified
     }
 
-    pub(crate) fn new_proved(func: FuncVal, input: Val) -> Self {
+    pub(crate) fn new_verified(func: FuncVal, input: Val) -> Self {
         debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
         let output = func.transformer.transform(&mut FreeCtx, input.clone());
         Self {
             func,
             input,
             output,
-            proved: true,
+            verified: true,
         }
     }
 }

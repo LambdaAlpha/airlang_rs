@@ -9,7 +9,7 @@ use crate::{
         ValBuilder,
     },
     val::func::FuncVal,
-    PropVal,
+    AssertVal,
     Val,
 };
 
@@ -23,7 +23,7 @@ pub enum Answer {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Verified(pub(crate) PropVal);
+pub struct Verified(pub(crate) AssertVal);
 
 pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val) -> Val {
     if !func.is_ctx_free() {
@@ -43,10 +43,10 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
     let Val::Answer(answer) = &input else {
         return Val::default();
     };
-    let Answer::Verified(prop) = &**answer else {
+    let Answer::Verified(assert) = &**answer else {
         return input;
     };
-    if *prop.func() != func || *prop.output() != output || !prop.proved() {
+    if *assert.func() != func || *assert.output() != output || !assert.is_verified() {
         return Val::default();
     }
     input
@@ -55,9 +55,9 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
 pub(crate) const SOLVER: &str = "solver";
 
 impl Verified {
-    pub fn new(prop_val: PropVal) -> Option<Verified> {
-        if prop_val.proved() {
-            Some(Verified(prop_val))
+    pub fn new(assert_val: AssertVal) -> Option<Verified> {
+        if assert_val.is_verified() {
+            Some(Verified(assert_val))
         } else {
             None
         }
@@ -65,7 +65,7 @@ impl Verified {
 }
 
 impl Deref for Verified {
-    type Target = PropVal;
+    type Target = AssertVal;
 
     fn deref(&self) -> &Self::Target {
         &self.0

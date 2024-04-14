@@ -11,18 +11,18 @@ use std::{
     rc::Rc,
 };
 
-use crate::logic::Prop;
+use crate::logic::Assert;
 
 #[derive(Clone, Eq)]
-pub struct PropVal(pub(crate) Rc<Prop>);
+pub struct AssertVal(pub(crate) Rc<Assert>);
 
-impl From<Rc<Prop>> for PropVal {
-    fn from(value: Rc<Prop>) -> Self {
-        PropVal(value)
+impl From<Rc<Assert>> for AssertVal {
+    fn from(value: Rc<Assert>) -> Self {
+        AssertVal(value)
     }
 }
 
-impl PartialEq for PropVal {
+impl PartialEq for AssertVal {
     fn eq(&self, other: &Self) -> bool {
         if self.0 == other.0 {
             return true;
@@ -31,20 +31,20 @@ impl PartialEq for PropVal {
     }
 }
 
-impl Hash for PropVal {
+impl Hash for AssertVal {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.deref().hash(state);
     }
 }
 
-impl Debug for PropVal {
+impl Debug for AssertVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Debug>::fmt(self.0.deref(), f)
     }
 }
 
-impl Deref for PropVal {
-    type Target = Prop;
+impl Deref for AssertVal {
+    type Target = Assert;
 
     fn deref(&self) -> &Self::Target {
         &self.0

@@ -46,9 +46,9 @@ context
 -----
 function
 =====
-; [p = any ! proposition, type_of p]
+; [p = any ! assert, type_of p]
 -----
-proposition
+assert
 =====
 ; [a = any ! answer, type_of a]
 -----
@@ -118,13 +118,13 @@ function
 -----
 context
 =====
-; [a = proposition ! {function : not, input : true, output : false}, type_of a]
+; [a = assert ! {function : not, input : true, output : false}, type_of a]
 -----
-proposition
+assert
 =====
-; [a = proposition.prove ! not ! true, type_of a]
+; [a = assert.verified ! not ! true, type_of a]
 -----
-proposition
+assert
 =====
 true == false
 -----
@@ -179,8 +179,8 @@ true
 true
 =====
 ; [
-    a = proposition ! {function : not, input : true, output : false},
-    b = proposition ! {function : not, input : true, output : false},
+    a = assert ! {function : not, input : true, output : false},
+    b = assert ! {function : not, input : true, output : false},
     (a == b) and a != .
 ]
 -----
