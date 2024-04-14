@@ -4,13 +4,7 @@ use rand::{
 };
 
 use crate::{
-    bool::Bool,
-    ctx::{
-        CtxMap,
-        DefaultCtx,
-    },
-    ctx_access::constant::CtxForConstFn,
-    nondeterministic::{
+    arbitrary::{
         any_answer,
         any_ask,
         any_assert,
@@ -30,6 +24,12 @@ use crate::{
         any_unit,
         any_val,
     },
+    bool::Bool,
+    ctx::{
+        CtxMap,
+        DefaultCtx,
+    },
+    ctx_access::constant::CtxForConstFn,
     prelude::{
         default_mode,
         named_const_fn,

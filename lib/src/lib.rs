@@ -139,7 +139,7 @@ pub(crate) mod func;
 
 pub(crate) mod logic;
 
-pub(crate) mod nondeterministic;
+pub(crate) mod arbitrary;
 
 pub(crate) mod problem;
 
