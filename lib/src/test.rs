@@ -27,26 +27,22 @@ fn test_interpret(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     test_interpret_with_ctx(ctx, input, file_name)
 }
 
-fn test_interpret_with_ctx(
-    mut ctx: Ctx,
-    input: &str,
-    file_name: &str,
-) -> Result<(), Box<dyn Error>> {
+fn test_interpret_with_ctx(ctx: Ctx, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     if input.is_empty() {
         return Ok(());
     }
-    let backup = ctx.clone();
+    let backup = ctx;
 
-    let mut mutable_ctx = MutableCtx::new(&mut ctx);
     let tests = input.split(MAIN_DELIMITER);
     for test in tests {
+        let mut ctx = backup.clone();
         let split_err = format!("file {file_name}, case ({test}): invalid test case format");
         let (i, o) = test.split_once(SUB_DELIMITER).expect(&split_err);
         let src = parse(i).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
             e
         })?;
-        let ret = interpret_mutable(mutable_ctx.reborrow(), src);
+        let ret = interpret_mutable(MutableCtx::new(&mut ctx), src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
             e
@@ -56,8 +52,6 @@ fn test_interpret_with_ctx(
             "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:#?}, \
             current context: {ctx:#?}",
         );
-        ctx = backup.clone();
-        mutable_ctx = MutableCtx::new(&mut ctx);
     }
     Ok(())
 }
