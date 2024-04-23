@@ -36,14 +36,14 @@ fn bench_interpret(c: &mut Criterion) {
             || src_val.clone(),
             |val| interpret_mutable(mutable_ctx.reborrow(), black_box(val)),
             BatchSize::SmallInput,
-        )
+        );
     });
 }
 
 fn bench_parse(c: &mut Criterion) {
     c.bench_function("parse", |b| {
         let s = include_str!("parse.air");
-        b.iter(|| parse(black_box(s)))
+        b.iter(|| parse(black_box(s)));
     });
 }
 
@@ -51,7 +51,7 @@ fn bench_generate(c: &mut Criterion) {
     c.bench_function("generate", |b| {
         let s = include_str!("generate.air");
         let repr = parse(s).expect("parse failed");
-        b.iter(|| generate(black_box(&repr)))
+        b.iter(|| generate(black_box(&repr)));
     });
 }
 

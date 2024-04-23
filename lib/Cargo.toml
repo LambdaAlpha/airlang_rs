@@ -10,6 +10,16 @@ repository = "https://github.com/LambdaAlpha/airlang_rs"
 keywords = ["air", "language", "specification", "formal", "logic"]
 categories = ["compilers"]
 
+[[bench]]
+name = "main"
+harness = false
+
+[[test]]
+name = "main"
+
+[lints]
+workspace = true
+
 [dependencies]
 rustc-hash = "1"
 nom = "7"
@@ -24,10 +34,3 @@ features = ["small_rng", "alloc"]
 
 [dev-dependencies]
 criterion = "0.5"
-
-[[bench]]
-name = "main"
-harness = false
-
-[[test]]
-name = "main"

@@ -8,6 +8,28 @@ members = [
     "air"
 ]
 
+[workspace.lints.rust]
+bad_style = "warn"
+improper_ctypes = "warn"
+non_shorthand_field_patterns = "warn"
+no_mangle_generic_items = "warn"
+overflowing_literals = "warn"
+path_statements = "warn"
+patterns_in_fns_without_body = "warn"
+private_interfaces = "warn"
+private_bounds = "warn"
+unconditional_recursion = "deny"
+while_true = "deny"
+dead_code = "warn"
+unused = "warn"
+unused_allocation = "warn"
+unused_comparisons = "warn"
+unused_parens = "warn"
+
+[workspace.lints.clippy]
+needless_return = "warn"
+semicolon_if_nothing_returned = "warn"
+
 [profile.release]
 lto = true
 codegen-units = 1

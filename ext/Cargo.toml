@@ -10,6 +10,9 @@ repository = "https://github.com/LambdaAlpha/airlang_rs"
 keywords = ["air", "language", "specification", "formal", "logic"]
 categories = ["compilers"]
 
+[lints]
+workspace = true
+
 [dependencies.airlang]
 path = "../lib"
 version = "0.1.0"
