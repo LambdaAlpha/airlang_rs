@@ -20,6 +20,13 @@ impl From<Box<Ctx>> for CtxVal {
     }
 }
 
+#[allow(clippy::from_over_into)]
+impl Into<Box<Ctx>> for CtxVal {
+    fn into(self) -> Box<Ctx> {
+        self.0
+    }
+}
+
 impl Debug for CtxVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Debug>::fmt(self.0.deref(), f)
