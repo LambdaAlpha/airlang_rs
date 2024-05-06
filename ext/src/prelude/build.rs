@@ -77,7 +77,7 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let mut ctx_for_mod = initial_ctx();
     let mut mut_ctx_for_mod = MutableCtx::new(&mut ctx_for_mod);
     init_ctx(mut_ctx_for_mod.reborrow());
-    set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key.clone(), new_url);
+    set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key, new_url);
     interpret_mutable(mut_ctx_for_mod, val)
 }
 

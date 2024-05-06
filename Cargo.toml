@@ -29,6 +29,7 @@ unused_parens = "warn"
 [workspace.lints.clippy]
 needless_return = "warn"
 semicolon_if_nothing_returned = "warn"
+redundant_clone = "warn"
 
 [profile.release]
 lto = true
