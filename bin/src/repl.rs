@@ -372,13 +372,12 @@ impl<W: Write + AsRawFd> Repl<W> {
         if self.history_index == 0 {
             self.previous_lines.clear();
             self.head_buffer.clear();
-            self.tail_buffer.clear();
         } else {
             let history = &self.histories[len - self.history_index];
             self.previous_lines.clone_from(&history.previous_lines);
             self.head_buffer.clone_from(&history.last_line);
-            self.tail_buffer.clear();
         }
+        self.tail_buffer.clear();
 
         self.terminal.move_up(move_up_line)?;
         self.terminal.queue(Clear(ClearType::FromCursorDown))?;

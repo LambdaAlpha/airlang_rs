@@ -171,6 +171,7 @@ impl Distribution<u8> for DistSymbol {
 
 impl DistString for DistSymbol {
     fn append_string<R: Rng + ?Sized>(&self, rng: &mut R, string: &mut String, len: usize) {
+        // safety: symbols are valid utf-8
         unsafe {
             let v = string.as_mut_vec();
             v.extend(self.sample_iter(rng).take(len));

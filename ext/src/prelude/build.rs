@@ -85,7 +85,7 @@ fn get_cur_url(mut ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
     if let Ok(meta) = ctx.meta() {
         if let Ok(val) = meta.get_ref(key) {
             return if let Val::String(url) = val {
-                Some((**url).to_owned())
+                Some((**url).clone())
             } else {
                 None
             };
