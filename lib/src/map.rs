@@ -1,6 +1,5 @@
 use std::{
     collections::hash_map::{
-        DefaultHasher,
         IntoIter,
         IntoKeys,
         IntoValues,
@@ -21,7 +20,10 @@ use std::{
     },
 };
 
-use rustc_hash::FxHashMap;
+use rustc_hash::{
+    FxHashMap,
+    FxHasher,
+};
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Map<K: Eq + Hash, V>(FxHashMap<K, V>);
@@ -91,7 +93,7 @@ impl<K: Eq + Hash, V: Hash> Hash for Map<K, V> {
             self.0
                 .iter()
                 .map(|kv| {
-                    let mut h = DefaultHasher::new();
+                    let mut h = FxHasher::default();
                     kv.hash(&mut h);
                     h.finish()
                 })
