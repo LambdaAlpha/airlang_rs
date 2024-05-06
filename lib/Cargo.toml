@@ -23,10 +23,10 @@ workspace = true
 [dependencies]
 rustc-hash = "1"
 nom = "7"
-smartstring = "1"
 num-bigint = "0.4"
 num-traits = "0.2"
 num-integer = "0.1"
+string_cache = "0.8"
 
 [dependencies.rand]
 version = "0.8"

@@ -7,10 +7,13 @@ use std::{
     ops::Deref,
 };
 
-use smartstring::alias::CompactString;
+use string_cache::{
+    Atom,
+    EmptyStaticAtomSet,
+};
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
-pub struct Symbol(CompactString);
+pub struct Symbol(Atom<EmptyStaticAtomSet>);
 
 impl Symbol {
     pub(crate) const MIN: char = '!';
@@ -20,15 +23,15 @@ impl Symbol {
     ///
     /// the input must be a valid symbol
     pub unsafe fn from_str_unchecked(s: &str) -> Self {
-        Symbol(CompactString::from(s))
+        Symbol(Atom::from(s))
     }
 
     pub(crate) fn from_str(s: &str) -> Self {
-        Symbol(CompactString::from(s))
+        Symbol(Atom::from(s))
     }
 
     pub(crate) fn from_string(s: String) -> Self {
-        Symbol(CompactString::from(s))
+        Symbol(Atom::from(s))
     }
 
     pub(crate) fn is_symbol(c: char) -> bool {
@@ -52,7 +55,7 @@ impl ToString for Symbol {
 
 impl From<Symbol> for String {
     fn from(value: Symbol) -> Self {
-        value.0.into()
+        value.0.to_string()
     }
 }
 
