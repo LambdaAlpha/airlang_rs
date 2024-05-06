@@ -449,7 +449,7 @@ fn keep_eval_restore(
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_invariant);
     let output = Eval.transform(&mut MutableCtx::new(&mut new_ctx), body);
-    restore_ctx(ctx, new_ctx, &caller_name);
+    restore_ctx(ctx, new_ctx, caller_name);
     output
 }
 
@@ -465,7 +465,7 @@ fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
     let _ = new_ctx.put_value(name, CtxValue { val, invariant });
 }
 
-fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: &Symbol) {
+fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: Symbol) {
     let Ok(Val::Ctx(CtxVal(caller))) = new_ctx.into_val(name) else {
         return;
     };

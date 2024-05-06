@@ -152,7 +152,7 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    DefaultCtx.get_or_default(&ctx, &s)
+    DefaultCtx.get_or_default(&ctx, s)
 }
 
 fn move1() -> Named<FuncVal> {
@@ -165,7 +165,7 @@ fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    ctx.remove(&s).unwrap_or_default()
+    ctx.remove(s).unwrap_or_default()
 }
 
 fn assign() -> Named<FuncVal> {
@@ -387,7 +387,7 @@ fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    let _ = ctx.set_final(&s);
+    let _ = ctx.set_final(s);
     Val::default()
 }
 
@@ -401,7 +401,7 @@ fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    let _ = ctx.set_const(&s);
+    let _ = ctx.set_const(s);
     Val::default()
 }
 
@@ -415,7 +415,7 @@ fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match ctx.is_final(&s) {
+    match ctx.is_final(s) {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(CtxError::NotFound) => Val::Bool(Bool::f()),
         _ => Val::default(),
@@ -432,7 +432,7 @@ fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match ctx.is_const(&s) {
+    match ctx.is_const(s) {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(CtxError::NotFound) => Val::Bool(Bool::f()),
         _ => Val::default(),
@@ -449,7 +449,7 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match DefaultCtx.is_null(&ctx, &s) {
+    match DefaultCtx.is_null(&ctx, s) {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(_) => Val::default(),
     }
@@ -742,7 +742,7 @@ where
             }
         }
         Val::Symbol(name) => {
-            let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name) else {
+            let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name.clone()) else {
                 return None;
             };
             let Val::Ctx(CtxVal(target_ctx)) = ref1 else {

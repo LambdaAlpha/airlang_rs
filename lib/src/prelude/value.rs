@@ -201,7 +201,7 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
 fn get_by_ref<'a>(ctx: &'a CtxForConstFn<'a>, v: &'a Val) -> Option<&'a Val> {
     match v {
         Val::Symbol(v) => {
-            if let Ok(v1) = ctx.get_ref(v) {
+            if let Ok(v1) = ctx.get_ref(v.clone()) {
                 Some(v1)
             } else {
                 None

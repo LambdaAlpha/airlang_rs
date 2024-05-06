@@ -47,7 +47,7 @@ fn fn_read_to_string(ctx: CtxForConstFn, input: Val) -> Val {
     let result = match input {
         Val::String(path) => std::fs::read_to_string(&*path),
         Val::Symbol(s) => {
-            let Ok(val) = ctx.get_ref(&s) else {
+            let Ok(val) = ctx.get_ref(s) else {
                 return Val::default();
             };
             let Val::String(path) = val else {

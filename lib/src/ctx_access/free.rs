@@ -18,19 +18,19 @@ use crate::{
 pub struct FreeCtx;
 
 impl CtxTrait for FreeCtx {
-    fn get_ref(&self, _name: &Symbol) -> Result<&Val, CtxError> {
+    fn get_ref(&self, _name: Symbol) -> Result<&Val, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_ref_mut(&mut self, _name: &Symbol) -> Result<&mut Val, CtxError> {
+    fn get_ref_mut(&mut self, _name: Symbol) -> Result<&mut Val, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_ref_dyn(&mut self, _name: &Symbol) -> Result<DynRef<Val>, CtxError> {
+    fn get_ref_dyn(&mut self, _name: Symbol) -> Result<DynRef<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn remove(&mut self, _name: &Symbol) -> Result<Val, CtxError> {
+    fn remove(&mut self, _name: Symbol) -> Result<Val, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
@@ -38,19 +38,19 @@ impl CtxTrait for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_final(&mut self, _name: &Symbol) -> Result<(), CtxError> {
+    fn set_final(&mut self, _name: Symbol) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn is_final(&self, _name: &Symbol) -> Result<bool, CtxError> {
+    fn is_final(&self, _name: Symbol) -> Result<bool, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_const(&mut self, _name: &Symbol) -> Result<(), CtxError> {
+    fn set_const(&mut self, _name: Symbol) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn is_const(&self, _name: &Symbol) -> Result<bool, CtxError> {
+    fn is_const(&self, _name: Symbol) -> Result<bool, CtxError> {
         Err(CtxError::AccessDenied)
     }
 

@@ -40,7 +40,7 @@ where
     }
 
     fn transform_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
-        DefaultCtx.get_or_default(ctx, &s)
+        DefaultCtx.get_or_default(ctx, s)
     }
 
     fn transform_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
