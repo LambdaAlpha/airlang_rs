@@ -30,10 +30,7 @@ impl From<Func> for FuncVal {
 
 impl PartialEq for FuncVal {
     fn eq(&self, other: &Self) -> bool {
-        if self.0 == other.0 {
-            return true;
-        }
-        *self.0 == *other.0
+        self.0 == other.0
     }
 }
 

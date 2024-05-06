@@ -24,10 +24,7 @@ impl From<Rc<Assert>> for AssertVal {
 
 impl PartialEq for AssertVal {
     fn eq(&self, other: &Self) -> bool {
-        if self.0 == other.0 {
-            return true;
-        }
-        *self.0 == *other.0
+        self.0 == other.0
     }
 }
 
