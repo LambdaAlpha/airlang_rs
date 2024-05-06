@@ -10,6 +10,7 @@ use crate::{
     },
     val::func::FuncVal,
     AssertVal,
+    Symbol,
     Val,
 };
 
@@ -32,7 +33,7 @@ pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val)
     let Ok(meta) = ctx.get_meta() else {
         return Val::default();
     };
-    let Ok(solver) = meta.get_ref(SOLVER) else {
+    let Ok(solver) = meta.get_ref(&Symbol::from_str(SOLVER)) else {
         return Val::default();
     };
     let Val::Func(FuncVal(solver)) = solver.clone() else {
