@@ -96,9 +96,9 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let input = map_remove(&mut map, INPUT);
-    let input = func.input_mode.transform(&mut ctx, input);
+    let input = func.input_mode.transform(ctx.reborrow(), input);
     let output = map_remove(&mut map, OUTPUT);
-    let output = func.output_mode.transform(&mut ctx, output);
+    let output = func.output_mode.transform(ctx, output);
     let assert = Assert::new(func, input, output);
     Val::Assert(AssertVal(Rc::new(assert)))
 }
@@ -144,7 +144,7 @@ fn is_verified() -> Named<FuncVal> {
 }
 
 fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
@@ -159,7 +159,7 @@ fn func() -> Named<FuncVal> {
 }
 
 fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
@@ -174,7 +174,7 @@ fn input() -> Named<FuncVal> {
 }
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };
@@ -189,7 +189,7 @@ fn output() -> Named<FuncVal> {
 }
 
 fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Assert(AssertVal(assert)) = val else {
             return Val::default();
         };

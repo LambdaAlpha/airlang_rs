@@ -83,8 +83,11 @@ fn sequence() -> Named<FuncVal> {
     named_mutable_fn(";", input_mode, output_mode, func)
 }
 
-fn fn_sequence<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
-    block(&mut ctx, input).0
+fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
+    block(ctx, input).0
 }
 
 fn if1() -> Named<FuncVal> {
@@ -104,7 +107,10 @@ fn if1() -> Named<FuncVal> {
     named_mutable_fn("if", input_mode, output_mode, func)
 }
 
-fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_if<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -120,7 +126,7 @@ fn fn_if<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     } else {
         branches.second
     };
-    block(&mut ctx, branch).0
+    block(ctx, branch).0
 }
 
 fn if_not() -> Named<FuncVal> {
@@ -140,7 +146,10 @@ fn if_not() -> Named<FuncVal> {
     named_mutable_fn("if_not", input_mode, output_mode, func)
 }
 
-fn fn_if_not<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_if_not<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -156,7 +165,7 @@ fn fn_if_not<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     } else {
         branches.first
     };
-    block(&mut ctx, branch).0
+    block(ctx, branch).0
 }
 
 fn match1() -> Named<FuncVal> {
@@ -179,7 +188,10 @@ fn match1() -> Named<FuncVal> {
     named_mutable_fn("match", input_mode, output_mode, func)
 }
 
-fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -194,11 +206,11 @@ fn fn_match<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
-            let k = Eval.transform(&mut ctx, k);
+            let k = Eval.transform(ctx.reborrow(), k);
             if k == val { Some(v) } else { None }
         })
         .unwrap_or(default);
-    block(&mut ctx, eval).0
+    block(ctx, eval).0
 }
 
 fn while1() -> Named<FuncVal> {
@@ -215,20 +227,23 @@ fn while1() -> Named<FuncVal> {
     named_mutable_fn("while", input_mode, output_mode, func)
 }
 
-fn fn_while<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let condition = pair.first;
     let body = pair.second;
     loop {
-        let Val::Bool(b) = Eval.transform(&mut ctx, condition.clone()) else {
+        let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
             return Val::default();
         };
         if !b.bool() {
             break;
         }
-        let (output, tag) = block(&mut ctx, body.clone());
+        let (output, tag) = block(ctx.reborrow(), body.clone());
         match tag {
             CtrlFlowTag::Error => return output,
             CtrlFlowTag::None => {}
@@ -253,20 +268,23 @@ fn while_not() -> Named<FuncVal> {
     named_mutable_fn("while_not", input_mode, output_mode, func)
 }
 
-fn fn_while_not<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let condition = pair.first;
     let body = pair.second;
     loop {
-        let Val::Bool(b) = Eval.transform(&mut ctx, condition.clone()) else {
+        let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
             return Val::default();
         };
         if b.bool() {
             break;
         }
-        let (output, tag) = block(&mut ctx, body.clone());
+        let (output, tag) = block(ctx.reborrow(), body.clone());
         match tag {
             CtrlFlowTag::Error => return output,
             CtrlFlowTag::None => {}
@@ -277,28 +295,31 @@ fn fn_while_not<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
     Val::default()
 }
 
-fn block<Ctx: CtxAccessor>(ctx: &mut Ctx, input: Val) -> (Val, CtrlFlowTag) {
+fn block<'a, Ctx>(mut ctx: Ctx, input: Val) -> (Val, CtrlFlowTag)
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::List(list) = input else {
         return (Eval.transform(ctx, input), CtrlFlowTag::None);
     };
     let mut output = Val::default();
     for val in list {
         let Val::Call(call) = val else {
-            output = Eval.transform(ctx, val);
+            output = Eval.transform(ctx.reborrow(), val);
             continue;
         };
         let Val::Symbol(s) = &call.func else {
-            output = Eval.transform(ctx, Val::Call(call));
+            output = Eval.transform(ctx.reborrow(), Val::Call(call));
             continue;
         };
         let Some((tag, target)) = parse_tag(s) else {
-            output = Eval.transform(ctx, Val::Call(call));
+            output = Eval.transform(ctx.reborrow(), Val::Call(call));
             continue;
         };
         let Val::Pair(pair) = call.input else {
             return (Val::default(), CtrlFlowTag::Error);
         };
-        let condition = Eval.transform(ctx, pair.first);
+        let condition = Eval.transform(ctx.reborrow(), pair.first);
         let Val::Bool(condition) = condition else {
             return (Val::default(), CtrlFlowTag::Error);
         };

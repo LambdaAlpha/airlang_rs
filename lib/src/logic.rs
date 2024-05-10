@@ -43,7 +43,7 @@ impl Assert {
 
     pub(crate) fn new_verified(func: FuncVal, input: Val) -> Self {
         debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
-        let output = func.transformer.transform(&mut FreeCtx, input.clone());
+        let output = func.transformer.transform(FreeCtx, input.clone());
         Self {
             func,
             input,

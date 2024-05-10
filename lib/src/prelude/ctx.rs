@@ -6,7 +6,7 @@ use crate::{
         Ctx,
         CtxError,
         CtxMap,
-        CtxTrait,
+        CtxRef,
         CtxValue,
         DefaultCtx,
         DynRef,
@@ -152,7 +152,7 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    DefaultCtx.get_or_default(&ctx, s)
+    DefaultCtx.get_or_default(ctx, s)
 }
 
 fn move1() -> Named<FuncVal> {
@@ -161,7 +161,7 @@ fn move1() -> Named<FuncVal> {
     named_mutable_fn("move", input_mode, output_mode, fn_move)
 }
 
-fn fn_move(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_move(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -174,27 +174,27 @@ fn assign() -> Named<FuncVal> {
     named_mutable_fn("=", input_mode, output_mode, fn_assign)
 }
 
-fn fn_assign(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_assign(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let name = pair.first;
     let val = pair.second;
     let options = AssignOptions::default();
-    assign_allow_options(&mut ctx, name, val, options)
+    assign_allow_options(ctx, name, val, options)
 }
 
 const INVARIANT: &str = "invariant";
 
 fn assign_destruct(
-    ctx: &mut CtxForMutableFn,
+    mut ctx: CtxForMutableFn,
     name: Val,
     val: Val,
     options: AssignOptions,
     allow_options: bool,
 ) -> Val {
     match name {
-        Val::Symbol(s) => assign_symbol(ctx, s, val, options),
+        Val::Symbol(s) => assign_symbol(ctx.reborrow(), s, val, options),
         Val::Pair(name) => assign_pair(ctx, *name, val, options),
         Val::Call(name) => {
             if allow_options {
@@ -220,16 +220,11 @@ fn assign_destruct(
     }
 }
 
-fn assign_allow_options(
-    ctx: &mut CtxForMutableFn,
-    name: Val,
-    val: Val,
-    options: AssignOptions,
-) -> Val {
+fn assign_allow_options(ctx: CtxForMutableFn, name: Val, val: Val, options: AssignOptions) -> Val {
     assign_destruct(ctx, name, val, options, true)
 }
 
-fn assign_symbol(ctx: &mut CtxForMutableFn, name: Symbol, val: Val, options: AssignOptions) -> Val {
+fn assign_symbol(ctx: CtxForMutableFn, name: Symbol, val: Val, options: AssignOptions) -> Val {
     let ctx_value = CtxValue {
         val,
         invariant: options.invariant,
@@ -240,34 +235,34 @@ fn assign_symbol(ctx: &mut CtxForMutableFn, name: Symbol, val: Val, options: Ass
     last.unwrap_or_default()
 }
 
-fn assign_pair(ctx: &mut CtxForMutableFn, name: PairVal, val: Val, options: AssignOptions) -> Val {
+fn assign_pair(mut ctx: CtxForMutableFn, name: PairVal, val: Val, options: AssignOptions) -> Val {
     let Val::Pair(val) = val else {
         return Val::default();
     };
-    let first = assign_allow_options(ctx, name.first, val.first, options);
+    let first = assign_allow_options(ctx.reborrow(), name.first, val.first, options);
     let second = assign_allow_options(ctx, name.second, val.second, options);
     Val::Pair(Box::new(Pair::new(first, second)))
 }
 
-fn assign_call(ctx: &mut CtxForMutableFn, name: CallVal, val: Val, options: AssignOptions) -> Val {
+fn assign_call(mut ctx: CtxForMutableFn, name: CallVal, val: Val, options: AssignOptions) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
     };
-    let func = assign_allow_options(ctx, name.func, val.func, options);
+    let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
     let input = assign_allow_options(ctx, name.input, val.input, options);
     Val::Call(Box::new(Call::new(func, input)))
 }
 
-fn assign_ask(ctx: &mut CtxForMutableFn, name: AskVal, val: Val, options: AssignOptions) -> Val {
+fn assign_ask(mut ctx: CtxForMutableFn, name: AskVal, val: Val, options: AssignOptions) -> Val {
     let Val::Ask(val) = val else {
         return Val::default();
     };
-    let func = assign_allow_options(ctx, name.func, val.func, options);
+    let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
     let output = assign_allow_options(ctx, name.output, val.output, options);
     Val::Ask(Box::new(Ask::new(func, output)))
 }
 
-fn assign_list(ctx: &mut CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
+fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
     let Val::List(val) = val else {
         return Val::default();
     };
@@ -287,12 +282,12 @@ fn assign_list(ctx: &mut CtxForMutableFn, name: ListVal, val: Val, options: Assi
             }
         }
         let val = val.unwrap_or_default();
-        list.push(assign_allow_options(ctx, name, val, options));
+        list.push(assign_allow_options(ctx.reborrow(), name, val, options));
     }
     Val::List(list)
 }
 
-fn assign_map(ctx: &mut CtxForMutableFn, name: MapVal, val: Val, options: AssignOptions) -> Val {
+fn assign_map(mut ctx: CtxForMutableFn, name: MapVal, val: Val, options: AssignOptions) -> Val {
     let Val::Map(mut val) = val else {
         return Val::default();
     };
@@ -300,7 +295,7 @@ fn assign_map(ctx: &mut CtxForMutableFn, name: MapVal, val: Val, options: Assign
         .into_iter()
         .map(|(k, name)| {
             let val = val.remove(&k).unwrap_or_default();
-            let last_val = assign_allow_options(ctx, name, val, options);
+            let last_val = assign_allow_options(ctx.reborrow(), name, val, options);
             (k, last_val)
         })
         .collect();
@@ -383,7 +378,7 @@ fn set_final() -> Named<FuncVal> {
     named_mutable_fn("set_final", input_mode, output_mode, fn_set_final)
 }
 
-fn fn_set_final(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -397,7 +392,7 @@ fn set_const() -> Named<FuncVal> {
     named_mutable_fn("set_constant", input_mode, output_mode, fn_set_const)
 }
 
-fn fn_set_const(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_const(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -449,7 +444,7 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match DefaultCtx.is_null(&ctx, s) {
+    match DefaultCtx.is_null(ctx, s) {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(_) => Val::default(),
     }
@@ -494,7 +489,7 @@ fn set_meta() -> Named<FuncVal> {
     named_mutable_fn("set_meta", input_mode, output_mode, fn_set_meta)
 }
 
-fn fn_set_meta(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_meta(ctx: CtxForMutableFn, input: Val) -> Val {
     match input {
         Val::Unit(_) => {
             let _ = ctx.set_meta(None);
@@ -537,17 +532,17 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
     match pair.second {
         Val::Call(call) => {
             let func = call.func;
-            let input = Eval.eval_input(&mut ctx, &func, call.input);
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval::call(&mut target_ctx, func, input)
+            let input = Eval.eval_input(ctx.reborrow(), &func, call.input);
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval::call(target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
             let func = ask.func;
-            let output = Eval.eval_output(&mut ctx, &func, ask.output);
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval::solve(&mut target_ctx, func, output)
+            let output = Eval.eval_output(ctx.reborrow(), &func, ask.output);
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval::solve(target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -586,28 +581,28 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
         Val::Call(call) => {
             let func = call.func;
             let input = call.input;
-            let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
-                Eval.transform(&mut target_ctx, func)
+            let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |target_ctx| {
+                Eval.transform(target_ctx, func)
             }) else {
                 return Val::default();
             };
-            let input = Eval.eval_input(&mut ctx, &func, input);
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval::call(&mut target_ctx, func, input)
+            let input = Eval.eval_input(ctx.reborrow(), &func, input);
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval::call(target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
             let func = ask.func;
             let output = ask.output;
-            let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |mut target_ctx| {
-                Eval.transform(&mut target_ctx, func)
+            let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |target_ctx| {
+                Eval.transform(target_ctx, func)
             }) else {
                 return Val::default();
             };
-            let output = Eval.eval_output(&mut ctx, &func, output);
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval::solve(&mut target_ctx, func, output)
+            let output = Eval.eval_output(ctx.reborrow(), &func, output);
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval::solve(target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -646,16 +641,16 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
         Val::Call(call) => {
             let func = call.func;
             let input = call.input;
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval.eval_input_then_call(&mut target_ctx, func, input)
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval.eval_input_then_call(target_ctx, func, input)
             });
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
             let func = ask.func;
             let output = ask.output;
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval.eval_output_then_solve(&mut target_ctx, func, output)
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval.eval_output_then_solve(target_ctx, func, output)
             });
             result.unwrap_or_default()
         }
@@ -692,14 +687,14 @@ fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
     };
     match pair.second {
         Val::Call(call) => {
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval.transform_call(&mut target_ctx, call.func, call.input)
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval.transform_call(target_ctx, call.func, call.input)
             });
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
-            let result = with_target_ctx(ctx, &pair.first, |mut target_ctx| {
-                Eval.transform_ask(&mut target_ctx, ask.func, ask.output)
+            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+                Eval.transform_ask(target_ctx, ask.func, ask.output)
             });
             result.unwrap_or_default()
         }
@@ -717,7 +712,7 @@ where
     }
 }
 
-fn with_target_ctx_basic<F>(mut ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
+fn with_target_ctx_basic<F>(ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
 where
     F: FnOnce(CtxForMutableFn) -> Option<Val>,
 {

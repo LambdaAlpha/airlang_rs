@@ -1,6 +1,7 @@
 use crate::{
     ask::Ask,
     call::Call,
+    ctx_access::CtxAccessor,
     pair::Pair,
     symbol::Symbol,
     transformer::{
@@ -18,38 +19,62 @@ use crate::{
 #[derive(Copy, Clone)]
 pub(crate) struct Id;
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Id {
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Id {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         DefaultByVal::transform_val(self, ctx, input)
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for Id {
-    fn transform_default(&self, _ctx: &mut Ctx, input: Val) -> Val {
+impl ByVal<Val> for Id {
+    fn transform_default<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         input
     }
 
-    fn transform_symbol(&self, _ctx: &mut Ctx, s: Symbol) -> Val {
+    fn transform_symbol<'a, Ctx>(&self, _ctx: Ctx, s: Symbol) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Val::Symbol(s)
     }
 
-    fn transform_pair(&self, _ctx: &mut Ctx, first: Val, second: Val) -> Val {
+    fn transform_pair<'a, Ctx>(&self, _ctx: Ctx, first: Val, second: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Val::Pair(Box::new(Pair::new(first, second)))
     }
 
-    fn transform_list(&self, _ctx: &mut Ctx, list: ListVal) -> Val {
+    fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Val::List(list)
     }
 
-    fn transform_map(&self, _ctx: &mut Ctx, map: MapVal) -> Val {
+    fn transform_map<'a, Ctx>(&self, _ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Val::Map(map)
     }
 
-    fn transform_call(&self, _ctx: &mut Ctx, func: Val, input: Val) -> Val {
+    fn transform_call<'a, Ctx>(&self, _ctx: Ctx, func: Val, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Val::Call(Box::new(Call::new(func, input)))
     }
 
-    fn transform_ask(&self, _ctx: &mut Ctx, func: Val, output: Val) -> Val {
+    fn transform_ask<'a, Ctx>(&self, _ctx: Ctx, func: Val, output: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Val::Ask(Box::new(Ask::new(func, output)))
     }
 }

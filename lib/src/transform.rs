@@ -21,11 +21,11 @@ pub enum Transform {
     Lazy,
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Transform
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Transform {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         match self {
             Transform::Eval => Eval.transform(ctx, input),
             Transform::Id => Id.transform(ctx, input),

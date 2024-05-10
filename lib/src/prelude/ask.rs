@@ -67,9 +67,12 @@ fn ask() -> Named<FuncVal> {
     named_mutable_fn("??", input_mode, output_mode, func)
 }
 
-fn fn_ask<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_ask<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Ask(ask) = input else {
         return Val::default();
     };
-    Eval.eval_output_then_solve(&mut ctx, ask.func, ask.output)
+    Eval.eval_output_then_solve(ctx, ask.func, ask.output)
 }

@@ -81,7 +81,7 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
     interpret_mutable(mut_ctx_for_mod, val)
 }
 
-fn get_cur_url(mut ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
+fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
     if let Ok(meta) = ctx.meta() {
         if let Ok(val) = meta.get_ref(key) {
             return if let Val::String(url) = val {
@@ -101,11 +101,11 @@ fn get_cur_url(mut ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
 }
 
 fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) {
-    if let Some(mut meta) = ctx.meta() {
+    if let Some(meta) = ctx.reborrow().meta() {
         let _ = meta.put(key, Invariant::None, Val::String(Str::from(new_url)));
     } else {
         let mut meta = Ctx::default();
-        let mut meta_mut = MutableCtx::new(&mut meta);
+        let meta_mut = MutableCtx::new(&mut meta);
         let _ = meta_mut.put(key, Invariant::None, Val::String(Str::from(new_url)));
         ctx.set_meta(Some(meta));
     }

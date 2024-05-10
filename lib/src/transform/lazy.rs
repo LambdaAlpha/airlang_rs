@@ -8,6 +8,7 @@ use crate::{
     transformer::{
         input::ByVal,
         DefaultByVal,
+        Transformer,
         ValBuilder,
     },
     val::{
@@ -15,53 +16,70 @@ use crate::{
         map::MapVal,
         Val,
     },
-    Transformer,
 };
 
 #[derive(Copy, Clone)]
 pub(crate) struct Lazy;
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Lazy
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Lazy {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         DefaultByVal::transform_val(self, ctx, input)
     }
 }
 
-impl<Ctx> ByVal<Ctx, Val> for Lazy
-where
-    Ctx: CtxAccessor,
-{
-    fn transform_default(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl ByVal<Val> for Lazy {
+    fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Id.transform_default(ctx, input)
     }
 
-    fn transform_symbol(&self, ctx: &mut Ctx, s: Symbol) -> Val {
+    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, s: Symbol) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         Id.transform_symbol(ctx, s)
     }
 
-    fn transform_pair(&self, ctx: &mut Ctx, first: Val, second: Val) -> Val {
+    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, first: Val, second: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         DefaultByVal::transform_pair(self, ctx, first, second, ValBuilder)
     }
 
-    fn transform_list(&self, ctx: &mut Ctx, list: ListVal) -> Val {
+    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         DefaultByVal::transform_list(self, ctx, list, ValBuilder)
     }
 
-    fn transform_map(&self, ctx: &mut Ctx, map: MapVal) -> Val {
+    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         DefaultByVal::transform_map(self, ctx, map, ValBuilder)
     }
 
-    fn transform_call(&self, ctx: &mut Ctx, func: Val, input: Val) -> Val {
+    fn transform_call<'a, Ctx>(&self, ctx: Ctx, func: Val, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         if func.is_unit() {
             return Eval.transform(ctx, input);
         }
         DefaultByVal::transform_call(self, ctx, func, input, ValBuilder)
     }
 
-    fn transform_ask(&self, ctx: &mut Ctx, func: Val, output: Val) -> Val {
+    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, func: Val, output: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         DefaultByVal::transform_ask(self, ctx, func, output, ValBuilder)
     }
 }

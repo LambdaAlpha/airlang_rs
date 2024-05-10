@@ -13,7 +13,7 @@ use std::{
 use crate::{
     ctx::{
         Ctx,
-        CtxTrait,
+        CtxRef,
         CtxValue,
         Invariant,
     },
@@ -268,20 +268,20 @@ impl Func {
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Func
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Func {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         self.transformer.transform(ctx, input)
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for FuncTransformer
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for FuncTransformer {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         match self {
             FuncTransformer::Free(func) => func.transform(ctx, input),
             FuncTransformer::Const(func) => func.transform(ctx, input),
@@ -290,12 +290,11 @@ where
     }
 }
 
-impl<Ctx, P: Transformer<Ctx, Val, Val>, C: Transformer<Ctx, Val, Val>> Transformer<Ctx, Val, Val>
-    for FuncImpl<P, C>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> for FuncImpl<P, C> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         match self {
             FuncImpl::Primitive(p) => p.transform(ctx, input),
             FuncImpl::Composed(c) => c.transform(ctx, input),
@@ -303,20 +302,20 @@ where
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Primitive<Box<dyn CtxFreeFn>>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, _ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Primitive<Box<dyn CtxFreeFn>> {
+    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         self.fn1.call(input)
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Composed<CtxFreeInfo>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, _ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Composed<CtxFreeInfo> {
+    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         eval_free(
             self.ctx.clone(),
             input,
@@ -326,20 +325,20 @@ where
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Primitive<Box<dyn CtxConstFn>>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Primitive<Box<dyn CtxConstFn>> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         self.fn1.call(ctx.for_const_fn(), input)
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Composed<CtxConstInfo>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Composed<CtxConstInfo> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         match ctx.for_const_fn() {
             CtxForConstFn::Free(_ctx) => eval_free(
                 self.ctx.clone(),
@@ -366,20 +365,20 @@ where
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Primitive<Box<dyn CtxMutableFn>>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Primitive<Box<dyn CtxMutableFn>> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         self.fn1.call(ctx.for_mutable_fn(), input)
     }
 }
 
-impl<Ctx> Transformer<Ctx, Val, Val> for Composed<CtxMutableInfo>
-where
-    Ctx: CtxAccessor,
-{
-    fn transform(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl Transformer<Val, Val> for Composed<CtxMutableInfo> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         match ctx.for_mutable_fn() {
             CtxForMutableFn::Free(_ctx) => eval_free(
                 self.ctx.clone(),
@@ -422,8 +421,8 @@ where
 }
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
-    let _ = new_ctx.put_value(input_name, CtxValue::new(input));
-    Eval.transform(&mut MutableCtx::new(&mut new_ctx), body)
+    let _ = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
+    Eval.transform(MutableCtx::new(&mut new_ctx), body)
 }
 
 fn eval_aware(
@@ -435,7 +434,7 @@ fn eval_aware(
     input_name: Symbol,
     body: Val,
 ) -> Val {
-    let _ = new_ctx.put_value(input_name, CtxValue::new(input));
+    let _ = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
     keep_eval_restore(new_ctx, caller, caller_name, caller_invariant, body)
 }
 
@@ -448,7 +447,7 @@ fn keep_eval_restore(
 ) -> Val {
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_invariant);
-    let output = Eval.transform(&mut MutableCtx::new(&mut new_ctx), body);
+    let output = Eval.transform(MutableCtx::new(&mut new_ctx), body);
     restore_ctx(ctx, new_ctx, caller_name);
     output
 }

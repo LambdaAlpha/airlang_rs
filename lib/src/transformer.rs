@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use crate::{
+    ctx_access::CtxAccessor,
     transformer::{
         input::ByVal,
         output::OutputBuilder,
@@ -15,16 +16,19 @@ use crate::{
     Val,
 };
 
-pub(crate) trait Transformer<Ctx, Input, Output> {
-    fn transform(&self, ctx: &mut Ctx, input: Input) -> Output;
+pub(crate) trait Transformer<Input, Output> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Input) -> Output
+    where
+        Ctx: CtxAccessor<'a>;
 }
 
 pub(crate) struct DefaultByVal;
 
 impl DefaultByVal {
-    pub(crate) fn transform_val<Ctx, Output, T>(t: &T, ctx: &mut Ctx, input: Val) -> Output
+    pub(crate) fn transform_val<'a, Ctx, Output, T>(t: &T, ctx: Ctx, input: Val) -> Output
     where
-        T: ByVal<Ctx, Output>,
+        Ctx: CtxAccessor<'a>,
+        T: ByVal<Output>,
     {
         match input {
             Val::Symbol(s) => t.transform_symbol(ctx, s),
@@ -37,82 +41,87 @@ impl DefaultByVal {
         }
     }
 
-    pub(crate) fn transform_pair<Ctx, Output, T, Builder>(
+    pub(crate) fn transform_pair<'a, Ctx, Output, T, Builder>(
         t: &T,
-        ctx: &mut Ctx,
+        mut ctx: Ctx,
         first: Val,
         second: Val,
         builder: Builder,
     ) -> Output
     where
-        T: Transformer<Ctx, Val, Output>,
+        Ctx: CtxAccessor<'a>,
+        T: Transformer<Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let first = t.transform(ctx, first);
+        let first = t.transform(ctx.reborrow(), first);
         let second = t.transform(ctx, second);
         builder.from_pair(first, second)
     }
 
-    pub(crate) fn transform_list<Ctx, Output, T, Builder>(
+    pub(crate) fn transform_list<'a, Ctx, Output, T, Builder>(
         t: &T,
-        ctx: &mut Ctx,
+        mut ctx: Ctx,
         list: ListVal,
         builder: Builder,
     ) -> Output
     where
-        T: Transformer<Ctx, Val, Output>,
+        Ctx: CtxAccessor<'a>,
+        T: Transformer<Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let list = list.into_iter().map(|v| t.transform(ctx, v));
+        let list = list.into_iter().map(|v| t.transform(ctx.reborrow(), v));
         builder.from_list(list)
     }
 
-    pub(crate) fn transform_map<Ctx, Output, T, Builder>(
+    pub(crate) fn transform_map<'a, Ctx, Output, T, Builder>(
         t: &T,
-        ctx: &mut Ctx,
+        mut ctx: Ctx,
         map: MapVal,
         builder: Builder,
     ) -> Output
     where
-        T: Transformer<Ctx, Val, Output>,
+        Ctx: CtxAccessor<'a>,
+        T: Transformer<Val, Output>,
         Builder: OutputBuilder<Output>,
     {
         let map = map.into_iter().map(|(k, v)| {
-            let key = t.transform(ctx, k);
-            let value = t.transform(ctx, v);
+            let key = t.transform(ctx.reborrow(), k);
+            let value = t.transform(ctx.reborrow(), v);
             (key, value)
         });
         builder.from_map(map)
     }
 
-    pub(crate) fn transform_call<Ctx, Output, T, Builder>(
+    pub(crate) fn transform_call<'a, Ctx, Output, T, Builder>(
         t: &T,
-        ctx: &mut Ctx,
+        mut ctx: Ctx,
         func: Val,
         input: Val,
         builder: Builder,
     ) -> Output
     where
-        T: Transformer<Ctx, Val, Output>,
+        Ctx: CtxAccessor<'a>,
+        T: Transformer<Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let func = t.transform(ctx, func);
+        let func = t.transform(ctx.reborrow(), func);
         let input = t.transform(ctx, input);
         builder.from_call(func, input)
     }
 
-    pub(crate) fn transform_ask<Ctx, Output, T, Builder>(
+    pub(crate) fn transform_ask<'a, Ctx, Output, T, Builder>(
         t: &T,
-        ctx: &mut Ctx,
+        mut ctx: Ctx,
         func: Val,
         output: Val,
         builder: Builder,
     ) -> Output
     where
-        T: Transformer<Ctx, Val, Output>,
+        Ctx: CtxAccessor<'a>,
+        T: Transformer<Val, Output>,
         Builder: OutputBuilder<Output>,
     {
-        let func = t.transform(ctx, func);
+        let func = t.transform(ctx.reborrow(), func);
         let output = t.transform(ctx, output);
         builder.from_ask(func, output)
     }
@@ -149,11 +158,14 @@ impl OutputBuilder<Val> for ValBuilder {
     }
 }
 
-impl<Ctx, I, O, T> Transformer<Ctx, I, O> for Box<T>
+impl<I, O, T> Transformer<I, O> for Box<T>
 where
-    T: Transformer<Ctx, I, O>,
+    T: Transformer<I, O>,
 {
-    fn transform(&self, ctx: &mut Ctx, input: I) -> O {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: I) -> O
+    where
+        Ctx: CtxAccessor<'a>,
+    {
         self.deref().transform(ctx, input)
     }
 }

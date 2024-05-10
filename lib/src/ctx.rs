@@ -25,33 +25,35 @@ pub enum CtxError {
     Unexpected,
 }
 
-pub(crate) trait CtxTrait {
-    fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError>;
+pub(crate) trait CtxRef<'a> {
+    fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError>;
 
-    fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError>;
+    fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError>;
 
-    fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<Val>, CtxError>;
+    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'a, Val>, CtxError>;
 
-    fn remove(&mut self, name: Symbol) -> Result<Val, CtxError>;
+    fn remove(self, name: Symbol) -> Result<Val, CtxError>;
 
-    fn put_value(&mut self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
+    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
 
-    fn set_final(&mut self, name: Symbol) -> Result<(), CtxError>;
+    fn set_final(self, name: Symbol) -> Result<(), CtxError>;
 
-    fn is_final(&self, name: Symbol) -> Result<bool, CtxError>;
+    #[allow(clippy::wrong_self_convention)]
+    fn is_final(self, name: Symbol) -> Result<bool, CtxError>;
 
-    fn set_const(&mut self, name: Symbol) -> Result<(), CtxError>;
+    fn set_const(self, name: Symbol) -> Result<(), CtxError>;
 
-    fn is_const(&self, name: Symbol) -> Result<bool, CtxError>;
+    #[allow(clippy::wrong_self_convention)]
+    fn is_const(self, name: Symbol) -> Result<bool, CtxError>;
 
-    fn get_meta(&self) -> Result<&Ctx, CtxError>;
+    fn get_meta(self) -> Result<&'a Ctx, CtxError>;
 
     #[allow(unused)]
-    fn get_meta_mut(&mut self) -> Result<&mut Ctx, CtxError>;
+    fn get_meta_mut(self) -> Result<&'a mut Ctx, CtxError>;
 
-    fn get_meta_dyn(&mut self) -> Result<DynRef<Ctx>, CtxError>;
+    fn get_meta_dyn(self) -> Result<DynRef<'a, Ctx>, CtxError>;
 
-    fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError>;
+    fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError>;
 }
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
@@ -84,19 +86,12 @@ pub(crate) struct DynRef<'a, T> {
     pub(crate) is_const: bool,
 }
 
-impl CtxTrait for Ctx {
-    fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError> {
-        let dispatch = self.dispatch_const(name.clone())?;
-        if dispatch.foreword {
-            return dispatch.ctx.get_ref(name);
-        }
-        let Some(tagged_val) = dispatch.ctx.map.get(&name) else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(&tagged_val.val)
+impl<'l> CtxRef<'l> for &'l mut Ctx {
+    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
+        (&*self).get_ref(name)
     }
 
-    fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError> {
+    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
         let dispatch = self.dispatch_mut(name.clone())?;
         if dispatch.foreword {
             return dispatch.ctx.get_ref_mut(name);
@@ -110,7 +105,7 @@ impl CtxTrait for Ctx {
         Ok(&mut value.val)
     }
 
-    fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<Val>, CtxError> {
+    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
         let dispatch = self.dispatch_dyn(name.clone())?;
         if dispatch.foreword {
             let mut dyn_ref = dispatch.ctx.ref1.get_ref_dyn(name)?;
@@ -125,7 +120,7 @@ impl CtxTrait for Ctx {
         Ok(DynRef::new(&mut ctx_value.val, is_const))
     }
 
-    fn remove(&mut self, name: Symbol) -> Result<Val, CtxError> {
+    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
         let dispatch = self.dispatch_mut(name.clone())?;
         if dispatch.foreword {
             return dispatch.ctx.remove(name);
@@ -139,7 +134,7 @@ impl CtxTrait for Ctx {
         Ok(dispatch.ctx.map.remove(&name).unwrap().val)
     }
 
-    fn put_value(&mut self, name: Symbol, val: CtxValue) -> Result<Option<Val>, CtxError> {
+    fn put_value(self, name: Symbol, val: CtxValue) -> Result<Option<Val>, CtxError> {
         let dispatch = self.dispatch_mut(name.clone())?;
         if dispatch.foreword {
             return dispatch.ctx.put_value(name, val);
@@ -153,7 +148,7 @@ impl CtxTrait for Ctx {
         Ok(dispatch.ctx.put_unchecked(name, val))
     }
 
-    fn set_final(&mut self, name: Symbol) -> Result<(), CtxError> {
+    fn set_final(self, name: Symbol) -> Result<(), CtxError> {
         let dispatch = self.dispatch_mut(name.clone())?;
         if dispatch.foreword {
             return dispatch.ctx.set_final(name);
@@ -168,18 +163,11 @@ impl CtxTrait for Ctx {
         Ok(())
     }
 
-    fn is_final(&self, name: Symbol) -> Result<bool, CtxError> {
-        let dispatch = self.dispatch_const(name.clone())?;
-        if dispatch.foreword {
-            return dispatch.ctx.is_final(name);
-        }
-        let Some(value) = dispatch.ctx.map.get(&name) else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(value.invariant != Invariant::None)
+    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
+        (&*self).is_final(name)
     }
 
-    fn set_const(&mut self, name: Symbol) -> Result<(), CtxError> {
+    fn set_const(self, name: Symbol) -> Result<(), CtxError> {
         let dispatch = self.dispatch_mut(name.clone())?;
         if dispatch.foreword {
             return dispatch.ctx.set_final(name);
@@ -191,7 +179,82 @@ impl CtxTrait for Ctx {
         Ok(())
     }
 
-    fn is_const(&self, name: Symbol) -> Result<bool, CtxError> {
+    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
+        (&*self).is_const(name)
+    }
+
+    fn get_meta(self) -> Result<&'l Ctx, CtxError> {
+        (&*self).get_meta()
+    }
+
+    fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
+        let Some(meta) = &mut self.meta else {
+            return Err(CtxError::NotFound);
+        };
+        Ok(meta)
+    }
+
+    fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
+        let Some(meta) = &mut self.meta else {
+            return Err(CtxError::NotFound);
+        };
+        Ok(DynRef::new(meta, false))
+    }
+
+    fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError> {
+        self.meta = meta.map(Box::new);
+        Ok(())
+    }
+}
+
+impl<'l> CtxRef<'l> for &'l Ctx {
+    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
+        let dispatch = self.dispatch_const(name.clone())?;
+        if dispatch.foreword {
+            return dispatch.ctx.get_ref(name);
+        }
+        let Some(tagged_val) = dispatch.ctx.map.get(&name) else {
+            return Err(CtxError::NotFound);
+        };
+        Ok(&tagged_val.val)
+    }
+
+    fn get_ref_mut(self, _name: Symbol) -> Result<&'l mut Val, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_ref_dyn(self, _name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn remove(self, _name: Symbol) -> Result<Val, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn put_value(self, _name: Symbol, _val: CtxValue) -> Result<Option<Val>, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn set_final(self, _name: Symbol) -> Result<(), CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
+        let dispatch = self.dispatch_const(name.clone())?;
+        if dispatch.foreword {
+            return dispatch.ctx.is_final(name);
+        }
+        let Some(value) = dispatch.ctx.map.get(&name) else {
+            return Err(CtxError::NotFound);
+        };
+        Ok(value.invariant != Invariant::None)
+    }
+
+    fn set_const(self, _name: Symbol) -> Result<(), CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
         let dispatch = self.dispatch_const(name.clone())?;
         if dispatch.foreword {
             return dispatch.ctx.is_final(name);
@@ -202,30 +265,23 @@ impl CtxTrait for Ctx {
         Ok(value.invariant == Invariant::Const)
     }
 
-    fn get_meta(&self) -> Result<&Ctx, CtxError> {
+    fn get_meta(self) -> Result<&'l Ctx, CtxError> {
         let Some(meta) = &self.meta else {
             return Err(CtxError::NotFound);
         };
         Ok(meta)
     }
 
-    fn get_meta_mut(&mut self) -> Result<&mut Ctx, CtxError> {
-        let Some(meta) = &mut self.meta else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(meta)
+    fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn get_meta_dyn(&mut self) -> Result<DynRef<Ctx>, CtxError> {
-        let Some(meta) = &mut self.meta else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(DynRef::new(meta, false))
+    fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
+        Err(CtxError::AccessDenied)
     }
 
-    fn set_meta(&mut self, meta: Option<Ctx>) -> Result<(), CtxError> {
-        self.meta = meta.map(Box::new);
-        Ok(())
+    fn set_meta(self, _meta: Option<Ctx>) -> Result<(), CtxError> {
+        Err(CtxError::AccessDenied)
     }
 }
 
@@ -264,7 +320,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(name);
-        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -301,7 +357,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(name);
-        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -341,7 +397,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(name);
-        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -379,7 +435,7 @@ impl Ctx {
             return Err(CtxError::Unexpected);
         }
         let target_name = Val::Symbol(name);
-        let ctx_name = dispatcher.transform(&mut FreeCtx, target_name);
+        let ctx_name = dispatcher.transform(FreeCtx, target_name);
         match ctx_name {
             Val::Bool(b) => {
                 let dispatch = if b.bool() {
@@ -485,14 +541,20 @@ impl DispatchOwned {
 pub(crate) struct DefaultCtx;
 
 impl DefaultCtx {
-    pub(crate) fn get_or_default<Ctx: CtxTrait>(&self, ctx: &Ctx, name: Symbol) -> Val {
+    pub(crate) fn get_or_default<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Val
+    where
+        Ctx: CtxRef<'a>,
+    {
         let Ok(val) = ctx.get_ref(name) else {
             return Val::default();
         };
         val.clone()
     }
 
-    pub(crate) fn is_null<Ctx: CtxTrait>(&self, ctx: &Ctx, name: Symbol) -> Result<bool, CtxError> {
+    pub(crate) fn is_null<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Result<bool, CtxError>
+    where
+        Ctx: CtxRef<'a>,
+    {
         match ctx.get_ref(name) {
             Ok(_) => Ok(false),
             Err(err) => {
@@ -505,8 +567,9 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_dyn<Ctx: CtxTrait, T, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_dyn<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
     where
+        Ctx: CtxRef<'a>,
         T: Default,
         F: FnOnce(Either<DynRef<Val>, Val>) -> T,
         Self: Sized,
@@ -523,8 +586,9 @@ impl DefaultCtx {
     }
 
     #[allow(unused)]
-    pub(crate) fn with_ref<Ctx: CtxTrait, T, F>(&self, ctx: &Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_ref<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
     where
+        Ctx: CtxRef<'a>,
         T: Default,
         F: FnOnce(&Val) -> T,
         Self: Sized,
@@ -540,8 +604,9 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_ref_lossless<Ctx: CtxTrait, F>(&self, ctx: &Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_lossless<'a, Ctx, F>(&self, ctx: Ctx, name: Val, f: F) -> Val
     where
+        Ctx: CtxRef<'a>,
         F: FnOnce(&Val) -> Val,
         Self: Sized,
     {
@@ -560,8 +625,9 @@ impl DefaultCtx {
     }
 
     #[allow(unused)]
-    pub(crate) fn with_ref_mut<Ctx: CtxTrait, T, F>(&self, ctx: &mut Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_ref_mut<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
     where
+        Ctx: CtxRef<'a>,
         T: Default,
         F: FnOnce(&mut Val) -> T,
         Self: Sized,
@@ -577,13 +643,9 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_ref_mut_lossless<Ctx: CtxTrait, F>(
-        &self,
-        ctx: &mut Ctx,
-        name: Val,
-        f: F,
-    ) -> Val
+    pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(&self, ctx: Ctx, name: Val, f: F) -> Val
     where
+        Ctx: CtxRef<'a>,
         F: FnOnce(&mut Val) -> Val,
         Self: Sized,
     {
@@ -601,13 +663,9 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_ref_mut_no_ret<Ctx: CtxTrait, F>(
-        &self,
-        ctx: &mut Ctx,
-        name: Val,
-        f: F,
-    ) -> Val
+    pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(&self, ctx: Ctx, name: Val, f: F) -> Val
     where
+        Ctx: CtxRef<'a>,
         F: FnOnce(&mut Val),
         Self: Sized,
     {

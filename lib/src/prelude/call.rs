@@ -67,9 +67,12 @@ fn call() -> Named<FuncVal> {
     named_mutable_fn("!!", input_mode, output_mode, func)
 }
 
-fn fn_call<Ctx: CtxAccessor>(mut ctx: Ctx, input: Val) -> Val {
+fn fn_call<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     let Val::Call(call) = input else {
         return Val::default();
     };
-    Eval.eval_input_then_call(&mut ctx, call.func, call.input)
+    Eval.eval_input_then_call(ctx, call.func, call.input)
 }

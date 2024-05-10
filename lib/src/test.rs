@@ -180,7 +180,7 @@ fn test_map() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
     let mut ctx = initial_ctx();
-    let mut mutable_ctx = MutableCtx::new(&mut ctx);
+    let mutable_ctx = MutableCtx::new(&mut ctx);
     let func_ext_name = Symbol::from_str("func_ext");
     mutable_ctx.put(
         func_ext_name.clone(),

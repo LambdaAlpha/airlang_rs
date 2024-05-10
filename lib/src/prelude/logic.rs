@@ -47,7 +47,7 @@ fn verified() -> Named<FuncVal> {
     named_mutable_fn("assert.verified", input_mode, output_mode, fn_verified)
 }
 
-fn fn_verified(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_verified(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
@@ -57,7 +57,7 @@ fn fn_verified(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let FuncTransformer::Free(_) = &func.0.transformer else {
         return Val::default();
     };
-    let input = func.input_mode.transform(&mut ctx, call.input);
+    let input = func.input_mode.transform(ctx, call.input);
     let verified = Assert::new_verified(func, input);
     Val::Assert(AssertVal(Rc::new(verified)))
 }

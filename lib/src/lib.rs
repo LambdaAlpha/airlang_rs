@@ -85,16 +85,16 @@ pub fn initial_ctx() -> Ctx {
     prelude::initial_ctx()
 }
 
-pub fn interpret_mutable(mut ctx: MutableCtx, input: Val) -> Val {
-    Eval.transform(&mut ctx, input)
+pub fn interpret_mutable(ctx: MutableCtx, input: Val) -> Val {
+    Eval.transform(ctx, input)
 }
 
-pub fn interpret_const(mut ctx: ConstCtx, input: Val) -> Val {
-    Eval.transform(&mut ctx, input)
+pub fn interpret_const(ctx: ConstCtx, input: Val) -> Val {
+    Eval.transform(ctx, input)
 }
 
-pub fn interpret_free(mut ctx: FreeCtx, input: Val) -> Val {
-    Eval.transform(&mut ctx, input)
+pub fn interpret_free(ctx: FreeCtx, input: Val) -> Val {
+    Eval.transform(ctx, input)
 }
 
 pub(crate) mod val;

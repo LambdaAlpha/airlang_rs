@@ -59,8 +59,8 @@ fn eval() -> Named<FuncVal> {
     named_mutable_fn(EVAL, input_mode, output_mode, fn_eval)
 }
 
-fn fn_eval(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    Eval.transform(&mut ctx, input)
+fn fn_eval(ctx: CtxForMutableFn, input: Val) -> Val {
+    Eval.transform(ctx, input)
 }
 
 fn id() -> Named<FuncVal> {
@@ -70,7 +70,7 @@ fn id() -> Named<FuncVal> {
 }
 
 fn fn_id(input: Val) -> Val {
-    Id.transform(&mut FreeCtx, input)
+    Id.transform(FreeCtx, input)
 }
 
 fn lazy() -> Named<FuncVal> {
@@ -79,6 +79,6 @@ fn lazy() -> Named<FuncVal> {
     named_mutable_fn(LAZY, input_mode, output_mode, fn_lazy)
 }
 
-fn fn_lazy(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    Lazy.transform(&mut ctx, input)
+fn fn_lazy(ctx: CtxForMutableFn, input: Val) -> Val {
+    Lazy.transform(ctx, input)
 }

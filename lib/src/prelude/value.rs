@@ -27,6 +27,7 @@ use crate::{
     bool::Bool,
     ctx::{
         CtxMap,
+        CtxRef,
         DefaultCtx,
     },
     ctx_access::constant::CtxForConstFn,
@@ -61,6 +62,7 @@ use crate::{
         SYMBOL,
         UNIT,
     },
+    Ctx,
     Mode,
     Val,
 };
@@ -136,7 +138,7 @@ fn type_of() -> Named<FuncVal> {
 }
 
 fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
             Val::Bool(_) => BOOL,
@@ -170,10 +172,11 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Some(v1) = get_by_ref(&ctx, &pair.first) else {
+    let ctx = ctx.borrow();
+    let Some(v1) = get_by_ref(ctx, &pair.first) else {
         return Val::default();
     };
-    let Some(v2) = get_by_ref(&ctx, &pair.second) else {
+    let Some(v2) = get_by_ref(ctx, &pair.second) else {
         return Val::default();
     };
     Val::Bool(Bool::new(*v1 == *v2))
@@ -189,18 +192,20 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Some(v1) = get_by_ref(&ctx, &pair.first) else {
+    let ctx = ctx.borrow();
+    let Some(v1) = get_by_ref(ctx, &pair.first) else {
         return Val::default();
     };
-    let Some(v2) = get_by_ref(&ctx, &pair.second) else {
+    let Some(v2) = get_by_ref(ctx, &pair.second) else {
         return Val::default();
     };
     Val::Bool(Bool::new(*v1 != *v2))
 }
 
-fn get_by_ref<'a>(ctx: &'a CtxForConstFn<'a>, v: &'a Val) -> Option<&'a Val> {
+fn get_by_ref<'a>(ctx: Option<&'a Ctx>, v: &'a Val) -> Option<&'a Val> {
     match v {
         Val::Symbol(v) => {
+            let ctx = ctx?;
             if let Ok(v1) = ctx.get_ref(v.clone()) {
                 Some(v1)
             } else {

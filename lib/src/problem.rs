@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use crate::{
-    ctx::CtxTrait,
+    ctx::CtxRef,
     ctx_access::CtxAccessor,
     transformer::{
         output::OutputBuilder,
@@ -26,11 +26,14 @@ pub enum Answer {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Verified(pub(crate) AssertVal);
 
-pub(crate) fn solve<Ctx: CtxAccessor>(ctx: &mut Ctx, func: FuncVal, output: Val) -> Val {
+pub(crate) fn solve<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> Val
+where
+    Ctx: CtxAccessor<'a>,
+{
     if !func.is_ctx_free() {
         return Val::default();
     }
-    let Ok(meta) = ctx.get_meta() else {
+    let Ok(meta) = ctx.reborrow().get_meta() else {
         return Val::default();
     };
     let Ok(solver) = meta.get_ref(Symbol::from_str(SOLVER)) else {

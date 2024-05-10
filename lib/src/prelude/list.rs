@@ -82,7 +82,7 @@ fn length() -> Named<FuncVal> {
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::List(list) = val else {
             return Val::default();
         };
@@ -96,7 +96,7 @@ fn set() -> Named<FuncVal> {
     named_mutable_fn("list.set", input_mode, output_mode, fn_set)
 }
 
-fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -109,7 +109,7 @@ fn fn_set(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let mut value = index_value.second;
-    DefaultCtx.with_ref_mut_lossless(&mut ctx, name, |val| {
+    DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
         let Val::List(list) = val else {
             return Val::default();
         };
@@ -127,7 +127,7 @@ fn set_many() -> Named<FuncVal> {
     named_mutable_fn("list.set_many", input_mode, output_mode, fn_set_many)
 }
 
-fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -142,7 +142,7 @@ fn fn_set_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    DefaultCtx.with_ref_mut_lossless(&mut ctx, name, |val| {
+    DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
         let Val::List(list) = val else {
             return Val::default();
         };
@@ -170,7 +170,7 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        DefaultCtx.with_ref_lossless(&ctx, name, |val| {
+        DefaultCtx.with_ref_lossless(ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -185,7 +185,7 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        DefaultCtx.with_ref_lossless(&ctx, name, |val| {
+        DefaultCtx.with_ref_lossless(ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -203,7 +203,7 @@ fn insert() -> Named<FuncVal> {
     named_mutable_fn("list.insert", input_mode, output_mode, fn_insert)
 }
 
-fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_insert(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -216,7 +216,7 @@ fn fn_insert(mut ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let value = index_value.second;
-    DefaultCtx.with_ref_mut_no_ret(&mut ctx, name, |val| {
+    DefaultCtx.with_ref_mut_no_ret(ctx, name, |val| {
         let Val::List(list) = val else {
             return;
         };
@@ -233,7 +233,7 @@ fn insert_many() -> Named<FuncVal> {
     named_mutable_fn("list.insert_many", input_mode, output_mode, fn_insert_many)
 }
 
-fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_insert_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -248,7 +248,7 @@ fn fn_insert_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
-    DefaultCtx.with_ref_mut_no_ret(&mut ctx, name, |val| {
+    DefaultCtx.with_ref_mut_no_ret(ctx, name, |val| {
         let Val::List(list) = val else {
             return;
         };
@@ -265,7 +265,7 @@ fn remove() -> Named<FuncVal> {
     named_mutable_fn("list.remove", input_mode, output_mode, fn_remove)
 }
 
-fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -274,7 +274,7 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
         let Some((from, to)) = to_range(*range) else {
             return Val::default();
         };
-        DefaultCtx.with_ref_mut_lossless(&mut ctx, name, |val| {
+        DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -290,7 +290,7 @@ fn fn_remove(mut ctx: CtxForMutableFn, input: Val) -> Val {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        DefaultCtx.with_ref_mut_lossless(&mut ctx, name, |val| {
+        DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -308,13 +308,13 @@ fn push() -> Named<FuncVal> {
     named_mutable_fn("list.push", input_mode, output_mode, fn_push)
 }
 
-fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
     let name = name_value.first;
     let value = name_value.second;
-    DefaultCtx.with_ref_mut_no_ret(&mut ctx, name, |val| {
+    DefaultCtx.with_ref_mut_no_ret(ctx, name, |val| {
         let Val::List(list) = val else {
             return;
         };
@@ -328,7 +328,7 @@ fn push_many() -> Named<FuncVal> {
     named_mutable_fn("list.push_many", input_mode, output_mode, fn_push_many)
 }
 
-fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_push_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
@@ -337,7 +337,7 @@ fn fn_push_many(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(mut values) = values else {
         return Val::default();
     };
-    DefaultCtx.with_ref_mut_no_ret(&mut ctx, name, |val| {
+    DefaultCtx.with_ref_mut_no_ret(ctx, name, |val| {
         let Val::List(list) = val else {
             return;
         };
@@ -351,14 +351,14 @@ fn pop() -> Named<FuncVal> {
     named_mutable_fn("list.pop", input_mode, output_mode, fn_pop)
 }
 
-fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_pop(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
     let name = name_count.first;
     let count = name_count.second;
     match count {
-        Val::Unit(_) => DefaultCtx.with_ref_mut_lossless(&mut ctx, name, |val| {
+        Val::Unit(_) => DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -368,7 +368,7 @@ fn fn_pop(mut ctx: CtxForMutableFn, input: Val) -> Val {
             let Some(i) = i.to_usize() else {
                 return Val::default();
             };
-            DefaultCtx.with_ref_mut_lossless(&mut ctx, name, |val| {
+            DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
                 let Val::List(list) = val else {
                     return Val::default();
                 };
@@ -390,8 +390,8 @@ fn clear() -> Named<FuncVal> {
     named_mutable_fn("list.clear", input_mode, output_mode, fn_clear)
 }
 
-fn fn_clear(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    DefaultCtx.with_ref_mut_no_ret(&mut ctx, input, |val| {
+fn fn_clear(ctx: CtxForMutableFn, input: Val) -> Val {
+    DefaultCtx.with_ref_mut_no_ret(ctx, input, |val| {
         let Val::List(list) = val else {
             return;
         };

@@ -65,7 +65,7 @@ fn read_line() -> Named<FuncVal> {
     named_mutable_fn("io.read_line", input_mode, output_mode, fn_read_line)
 }
 
-fn fn_read_line(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_read_line(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };

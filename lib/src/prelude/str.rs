@@ -91,7 +91,7 @@ fn length() -> Named<FuncVal> {
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(&ctx, input, |val| {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::String(s) = val else {
             return Val::default();
         };
@@ -105,14 +105,14 @@ fn push() -> Named<FuncVal> {
     named_mutable_fn("string.push", input_mode, output_mode, fn_push)
 }
 
-fn fn_push(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let Val::String(s) = pair.second else {
         return Val::default();
     };
-    DefaultCtx.with_ref_mut_no_ret(&mut ctx, pair.first, |val| {
+    DefaultCtx.with_ref_mut_no_ret(ctx, pair.first, |val| {
         let Val::String(str) = val else {
             return;
         };
