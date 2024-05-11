@@ -2,7 +2,6 @@
 name = "airlang_bin"
 version = "0.2.0"
 edition = "2021"
-rust-version = "1.60"
 license = "MIT OR Apache-2.0"
 description = "The Air Programming Language"
 homepage = "https://github.com/LambdaAlpha/airlang"
