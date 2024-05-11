@@ -9,13 +9,15 @@ use crate::{
         input::ByVal,
         DefaultByVal,
         Transformer,
-        ValBuilder,
     },
     val::{
         list::ListVal,
         map::MapVal,
         Val,
     },
+    AskVal,
+    CallVal,
+    PairVal,
 };
 
 #[derive(Copy, Clone)]
@@ -45,41 +47,41 @@ impl ByVal<Val> for Lazy {
         Id.transform_symbol(ctx, s)
     }
 
-    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, first: Val, second: Val) -> Val
+    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_pair(self, ctx, first, second, ValBuilder)
+        DefaultByVal::transform_pair(self, ctx, pair)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_list(self, ctx, list, ValBuilder)
+        DefaultByVal::transform_list(self, ctx, list)
     }
 
     fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_map(self, ctx, map, ValBuilder)
+        DefaultByVal::transform_map(self, ctx, map)
     }
 
-    fn transform_call<'a, Ctx>(&self, ctx: Ctx, func: Val, input: Val) -> Val
+    fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        if func.is_unit() {
-            return Eval.transform(ctx, input);
+        if call.func.is_unit() {
+            return Eval.transform(ctx, call.unwrap().input);
         }
-        DefaultByVal::transform_call(self, ctx, func, input, ValBuilder)
+        DefaultByVal::transform_call(self, ctx, call)
     }
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, func: Val, output: Val) -> Val
+    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_ask(self, ctx, func, output, ValBuilder)
+        DefaultByVal::transform_ask(self, ctx, ask)
     }
 }

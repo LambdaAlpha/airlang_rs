@@ -103,14 +103,14 @@ pub(crate) trait ParseRepr:
     + From<Bytes>
     + From<Symbol>
     + From<Str>
-    + From<Box<Pair<Self, Self>>>
-    + From<Box<Call<Self, Self>>>
-    + From<Box<Ask<Self, Self>>>
+    + From<Pair<Self, Self>>
+    + From<Call<Self, Self>>
+    + From<Ask<Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
     + From<Map<Self, Self>>
-    + From<Box<Annotation<Self, Self>>>
+    + From<Annotation<Self, Self>>
     + Clone
 {
     fn try_into_pair(self) -> Result<(Self, Self), Self>;
@@ -360,29 +360,29 @@ fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
     let repr = match func {
         Token::Unquote(s) => match &*s {
             PAIR_INFIX => {
-                let pair = Box::new(Pair::new(input.clone(), input));
+                let pair = Pair::new(input.clone(), input);
                 From::from(pair)
             }
             CALL_INFIX => {
-                let call = Box::new(Call::new(input.clone(), input));
+                let call = Call::new(input.clone(), input);
                 From::from(call)
             }
             ASK_INFIX => {
-                let ask = Box::new(Ask::new(input.clone(), input));
+                let ask = Ask::new(input.clone(), input);
                 From::from(ask)
             }
             ANNOTATION_INFIX => {
-                let annotation = Box::new(Annotation::new(input.clone(), input));
+                let annotation = Annotation::new(input.clone(), input);
                 From::from(annotation)
             }
             _ => {
                 let func = From::from(s);
-                let call = Box::new(Call::new(func, input));
+                let call = Call::new(func, input);
                 From::from(call)
             }
         },
         Token::Default(func) => {
-            let call = Box::new(Call::new(func, input));
+            let call = Call::new(func, input);
             From::from(call)
         }
     };
@@ -414,33 +414,33 @@ fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
     match middle {
         Token::Unquote(s) => match &*s {
             PAIR_INFIX => {
-                let pair = Box::new(Pair::new(left, right));
+                let pair = Pair::new(left, right);
                 From::from(pair)
             }
             CALL_INFIX => {
-                let call = Box::new(Call::new(left, right));
+                let call = Call::new(left, right);
                 From::from(call)
             }
             ASK_INFIX => {
-                let ask = Box::new(Ask::new(left, right));
+                let ask = Ask::new(left, right);
                 From::from(ask)
             }
             ANNOTATION_INFIX => {
-                let annotation = Box::new(Annotation::new(left, right));
+                let annotation = Annotation::new(left, right);
                 From::from(annotation)
             }
             _ => {
                 let middle = From::from(s);
-                let pair = Box::new(Pair::new(left, right));
+                let pair = Pair::new(left, right);
                 let pair = From::from(pair);
-                let infix = Box::new(Call::new(middle, pair));
+                let infix = Call::new(middle, pair);
                 From::from(infix)
             }
         },
         Token::Default(middle) => {
-            let pair = Box::new(Pair::new(left, right));
+            let pair = Pair::new(left, right);
             let pair = From::from(pair);
-            let infix = Box::new(Call::new(middle, pair));
+            let infix = Call::new(middle, pair);
             From::from(infix)
         }
     }

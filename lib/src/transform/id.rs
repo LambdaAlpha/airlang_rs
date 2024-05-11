@@ -1,8 +1,5 @@
 use crate::{
-    ask::Ask,
-    call::Call,
     ctx_access::CtxAccessor,
-    pair::Pair,
     symbol::Symbol,
     transformer::{
         input::ByVal,
@@ -14,6 +11,9 @@ use crate::{
         map::MapVal,
         Val,
     },
+    AskVal,
+    CallVal,
+    PairVal,
 };
 
 #[derive(Copy, Clone)]
@@ -43,11 +43,11 @@ impl ByVal<Val> for Id {
         Val::Symbol(s)
     }
 
-    fn transform_pair<'a, Ctx>(&self, _ctx: Ctx, first: Val, second: Val) -> Val
+    fn transform_pair<'a, Ctx>(&self, _ctx: Ctx, pair: PairVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        Val::Pair(Box::new(Pair::new(first, second)))
+        Val::Pair(pair)
     }
 
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val
@@ -64,17 +64,17 @@ impl ByVal<Val> for Id {
         Val::Map(map)
     }
 
-    fn transform_call<'a, Ctx>(&self, _ctx: Ctx, func: Val, input: Val) -> Val
+    fn transform_call<'a, Ctx>(&self, _ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        Val::Call(Box::new(Call::new(func, input)))
+        Val::Call(call)
     }
 
-    fn transform_ask<'a, Ctx>(&self, _ctx: Ctx, func: Val, output: Val) -> Val
+    fn transform_ask<'a, Ctx>(&self, _ctx: Ctx, ask: AskVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        Val::Ask(Box::new(Ask::new(func, output)))
+        Val::Ask(ask)
     }
 }

@@ -9,6 +9,7 @@ use crate::{
     },
     syntax::ANNOTATION_INFIX,
     FuncVal,
+    Pair,
     Val,
 };
 
@@ -39,5 +40,5 @@ fn fn_new(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    pair.second
+    Pair::from(pair).second
 }

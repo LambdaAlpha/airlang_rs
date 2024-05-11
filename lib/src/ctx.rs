@@ -452,7 +452,7 @@ impl Ctx {
                 let Val::Ctx(ctx) = val.val else {
                     return Err(CtxError::Unexpected);
                 };
-                Ok(DispatchOwned::foreword(*ctx.0))
+                Ok(DispatchOwned::foreword(ctx.into()))
             }
             _ => Err(CtxError::Unexpected),
         }
@@ -471,6 +471,12 @@ impl Ctx {
             return Err(CtxError::NotFound);
         };
         Ok(ctx_value.val)
+    }
+}
+
+impl Ctx {
+    pub(crate) fn new(map: CtxMap, meta: Option<Box<Ctx>>) -> Self {
+        Self { map, meta }
     }
 }
 
@@ -619,7 +625,7 @@ impl DefaultCtx {
             }
             val => {
                 let result = f(&val);
-                Val::Pair(Box::new(Pair::new(val, result)))
+                Val::Pair(Pair::new(val, result).into())
             }
         }
     }
@@ -658,7 +664,7 @@ impl DefaultCtx {
             }
             mut val => {
                 let result = f(&mut val);
-                Val::Pair(Box::new(Pair::new(val, result)))
+                Val::Pair(Pair::new(val, result).into())
             }
         }
     }

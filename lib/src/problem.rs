@@ -3,12 +3,9 @@ use std::ops::Deref;
 use crate::{
     ctx::CtxRef,
     ctx_access::CtxAccessor,
-    transformer::{
-        output::OutputBuilder,
-        Transformer,
-        ValBuilder,
-    },
+    transformer::Transformer,
     val::func::FuncVal,
+    Ask,
     AssertVal,
     Symbol,
     Val,
@@ -24,7 +21,7 @@ pub enum Answer {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Verified(pub(crate) AssertVal);
+pub struct Verified(AssertVal);
 
 pub(crate) fn solve<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> Val
 where
@@ -39,10 +36,11 @@ where
     let Ok(solver) = meta.get_ref(Symbol::from_str(SOLVER)) else {
         return Val::default();
     };
-    let Val::Func(FuncVal(solver)) = solver.clone() else {
+    let Val::Func(solver) = solver.clone() else {
         return Val::default();
     };
-    let ask = ValBuilder.from_ask(Val::Func(func.clone()), output.clone());
+    let ask = Ask::new(Val::Func(func.clone()), output.clone());
+    let ask = Val::Ask(ask.into());
     let input = solver.transform(ctx, ask);
     let Val::Answer(answer) = &input else {
         return Val::default();
@@ -65,6 +63,10 @@ impl Verified {
         } else {
             None
         }
+    }
+
+    pub fn unwrap(self) -> AssertVal {
+        self.0
     }
 }
 

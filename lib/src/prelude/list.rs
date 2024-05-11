@@ -21,9 +21,10 @@ use crate::{
     },
     val::{
         func::FuncVal,
-        pair::PairVal,
         Val,
     },
+    Int,
+    Pair,
 };
 
 #[derive(Clone)]
@@ -86,7 +87,8 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::List(list) = val else {
             return Val::default();
         };
-        Val::Int(list.len().into())
+        let len: Int = list.len().into();
+        Val::Int(len.into())
     })
 }
 
@@ -100,10 +102,12 @@ fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
+    let list_pair = Pair::from(list_pair);
     let Val::Pair(index_value) = list_pair.second else {
         return Val::default();
     };
     let name = list_pair.first;
+    let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -131,10 +135,12 @@ fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
+    let list_pair = Pair::from(list_pair);
     let Val::Pair(index_value) = list_pair.second else {
         return Val::default();
     };
     let name = list_pair.first;
+    let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -142,6 +148,7 @@ fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
+    let values = List::from(values);
     DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
         let Val::List(list) = val else {
             return Val::default();
@@ -150,8 +157,8 @@ fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
         if end > list.len() {
             return Val::default();
         }
-        let ret = list.splice(i..end, values).collect();
-        Val::List(ret)
+        let ret: List<Val> = list.splice(i..end, values).collect();
+        Val::List(ret.into())
     })
 }
 
@@ -165,9 +172,11 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
+    let name_index = Pair::from(name_index);
     let name = name_index.first;
     if let Val::Pair(range) = name_index.second {
-        let Some((from, to)) = to_range(*range) else {
+        let range = Pair::from(range);
+        let Some((from, to)) = to_range(range) else {
             return Val::default();
         };
         DefaultCtx.with_ref_lossless(ctx, name, |val| {
@@ -179,7 +188,7 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
             let Some(slice) = list.get(from..to) else {
                 return Val::default();
             };
-            Val::List(List::from(slice.to_owned()))
+            Val::List(List::from(slice.to_owned()).into())
         })
     } else {
         let Some(i) = to_index(name_index.second) else {
@@ -207,10 +216,12 @@ fn fn_insert(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
+    let name_pair = Pair::from(name_pair);
     let Val::Pair(index_value) = name_pair.second else {
         return Val::default();
     };
     let name = name_pair.first;
+    let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -237,10 +248,12 @@ fn fn_insert_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
+    let name_pair = Pair::from(name_pair);
     let Val::Pair(index_value) = name_pair.second else {
         return Val::default();
     };
     let name = name_pair.first;
+    let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         return Val::default();
@@ -248,6 +261,7 @@ fn fn_insert_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::List(values) = index_value.second else {
         return Val::default();
     };
+    let values = List::from(values);
     DefaultCtx.with_ref_mut_no_ret(ctx, name, |val| {
         let Val::List(list) = val else {
             return;
@@ -269,9 +283,11 @@ fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
+    let name_index = Pair::from(name_index);
     let name = name_index.first;
     if let Val::Pair(range) = name_index.second {
-        let Some((from, to)) = to_range(*range) else {
+        let range = Pair::from(range);
+        let Some((from, to)) = to_range(range) else {
             return Val::default();
         };
         DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
@@ -283,8 +299,8 @@ fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
             if from > to || to > list.len() {
                 return Val::default();
             }
-            let ret = list.splice(from..to, Vec::new()).collect();
-            Val::List(ret)
+            let ret: List<Val> = list.splice(from..to, Vec::new()).collect();
+            Val::List(ret.into())
         })
     } else {
         let Some(i) = to_index(name_index.second) else {
@@ -312,6 +328,7 @@ fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
+    let name_value = Pair::from(name_value);
     let name = name_value.first;
     let value = name_value.second;
     DefaultCtx.with_ref_mut_no_ret(ctx, name, |val| {
@@ -332,6 +349,7 @@ fn fn_push_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
+    let name_values = Pair::from(name_values);
     let name = name_values.first;
     let values = name_values.second;
     let Val::List(mut values) = values else {
@@ -355,6 +373,7 @@ fn fn_pop(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
+    let name_count = Pair::from(name_count);
     let name = name_count.first;
     let count = name_count.second;
     match count {
@@ -372,12 +391,14 @@ fn fn_pop(ctx: CtxForMutableFn, input: Val) -> Val {
                 let Val::List(list) = val else {
                     return Val::default();
                 };
+                let list = &mut **list;
                 if i > list.len() {
                     return Val::default();
                 }
                 let start = list.len() - i;
-                let ret = list.split_off(start);
-                Val::List(ret.into())
+                let list = list.split_off(start);
+                let list: List<Val> = list.into();
+                Val::List(list.into())
             })
         }
         _ => Val::default(),
@@ -406,7 +427,7 @@ fn to_index(val: Val) -> Option<usize> {
     i.to_usize()
 }
 
-fn to_range(pair: PairVal) -> Option<(Option<usize>, Option<usize>)> {
+fn to_range(pair: Pair<Val, Val>) -> Option<(Option<usize>, Option<usize>)> {
     let from = match pair.first {
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,

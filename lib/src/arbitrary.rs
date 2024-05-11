@@ -56,18 +56,8 @@ use crate::{
     symbol::Symbol,
     transform::Transform,
     unit::Unit,
-    val::{
-        ask::AskVal,
-        assert::AssertVal,
-        call::CallVal,
-        ctx::CtxVal,
-        func::FuncVal,
-        list::ListVal,
-        map::MapVal,
-        pair::PairVal,
-    },
+    val::func::FuncVal,
     Answer,
-    AnswerVal,
     Ask,
     AskDepMode,
     AskMode,
@@ -88,10 +78,10 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
     let weights = [
         weight, // unit
         weight, // bool
+        weight, // symbol
         weight, // int
         weight, // float
         weight, // bytes
-        weight, // symbol
         weight, // string
         1,      // pair
         1,      // call
@@ -111,20 +101,20 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
     match i {
         0 => Val::Unit(any_unit(rng)),
         1 => Val::Bool(any_bool(rng)),
-        2 => Val::Int(any_int(rng)),
-        3 => Val::Float(any_float(rng)),
-        4 => Val::Bytes(any_bytes(rng)),
-        5 => Val::Symbol(any_symbol(rng)),
-        6 => Val::String(any_string(rng)),
-        7 => Val::Pair(Box::new(any_pair(rng, new_depth))),
-        8 => Val::Call(Box::new(any_call(rng, new_depth))),
-        9 => Val::Ask(Box::new(any_ask(rng, new_depth))),
-        10 => Val::List(any_list(rng, new_depth)),
-        11 => Val::Map(any_map(rng, new_depth)),
-        12 => Val::Ctx(any_ctx(rng, new_depth)),
-        13 => Val::Func(any_func(rng, new_depth)),
-        14 => Val::Assert(any_assert(rng, new_depth)),
-        15 => Val::Answer(any_answer(rng, new_depth)),
+        2 => Val::Symbol(any_symbol(rng)),
+        3 => Val::Int(any_int(rng).into()),
+        4 => Val::Float(any_float(rng).into()),
+        5 => Val::Bytes(any_bytes(rng).into()),
+        6 => Val::String(any_string(rng).into()),
+        7 => Val::Pair(any_pair(rng, new_depth).into()),
+        8 => Val::Call(any_call(rng, new_depth).into()),
+        9 => Val::Ask(any_ask(rng, new_depth).into()),
+        10 => Val::List(any_list(rng, new_depth).into()),
+        11 => Val::Map(any_map(rng, new_depth).into()),
+        12 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        13 => Val::Func(FuncVal::new(any_func(rng, new_depth))),
+        14 => Val::Assert(any_assert(rng, new_depth).into()),
+        15 => Val::Answer(any_answer(rng, new_depth).into()),
         16 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
@@ -191,19 +181,19 @@ pub(crate) fn any_string(rng: &mut SmallRng) -> Str {
     Str::from(s)
 }
 
-pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> PairVal {
-    PairVal::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> Pair<Val, Val> {
+    Pair::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> CallVal {
-    CallVal::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
+    Call::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> AskVal {
-    AskVal::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
+    Ask::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> ListVal {
+pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
     let len = any_len_weighted(rng, depth);
     let mut list = Vec::with_capacity(len);
     for _ in 0..len {
@@ -212,7 +202,7 @@ pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> ListVal {
     List::from(list)
 }
 
-pub(crate) fn any_map(rng: &mut SmallRng, depth: usize) -> MapVal {
+pub(crate) fn any_map(rng: &mut SmallRng, depth: usize) -> Map<Val, Val> {
     let len = any_len_weighted(rng, depth);
     let mut map = Map::with_capacity(len);
     for _ in 0..len {
@@ -226,7 +216,7 @@ pub(crate) fn any_invariant(rng: &mut SmallRng) -> Invariant {
     *(INVARIANTS.choose(rng).unwrap())
 }
 
-pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> CtxVal {
+pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let len = any_len_weighted(rng, depth);
     let mut ctx_map = Map::with_capacity(len);
     for _ in 0..len {
@@ -237,12 +227,11 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> CtxVal {
         ctx_map.insert(any_symbol(rng), ctx_value);
     }
     let meta = if rng.gen_bool(0.1) {
-        Some(any_ctx(rng, depth).0)
+        Some(Box::new(any_ctx(rng, depth)))
     } else {
         None
     };
-    let ctx = Ctx { map: ctx_map, meta };
-    CtxVal(Box::new(ctx))
+    Ctx::new(ctx_map, meta)
 }
 
 pub(crate) fn any_transform(rng: &mut SmallRng) -> Transform {
@@ -407,7 +396,7 @@ pub(crate) fn any_mode(rng: &mut SmallRng, depth: usize) -> Mode {
     }
 }
 
-pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
+pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> Rc<Func> {
     if rng.gen() {
         let prelude = PRELUDE.with(|prelude| {
             let mut m = CtxMap::default();
@@ -422,20 +411,20 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let Val::Func(func) = func.val else {
             unreachable!()
         };
-        func
+        func.unwrap()
     } else {
         let input_mode = any_mode(rng, depth);
         let output_mode = any_mode(rng, depth);
         let transformer = match rng.gen_range(0..3) {
             0 => FuncTransformer::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
-                ctx: *any_ctx(rng, depth).0,
+                ctx: any_ctx(rng, depth),
                 input_name: any_symbol(rng),
                 caller: CtxFreeInfo {},
             })),
             1 => FuncTransformer::Const(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
-                ctx: *any_ctx(rng, depth).0,
+                ctx: any_ctx(rng, depth),
                 input_name: any_symbol(rng),
                 caller: CtxConstInfo {
                     name: any_symbol(rng),
@@ -443,7 +432,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
             })),
             2 => FuncTransformer::Mutable(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
-                ctx: *any_ctx(rng, depth).0,
+                ctx: any_ctx(rng, depth),
                 input_name: any_symbol(rng),
                 caller: CtxMutableInfo {
                     name: any_symbol(rng),
@@ -456,7 +445,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
             output_mode,
             transformer,
         };
-        FuncVal(Rc::new(func))
+        Rc::new(func)
     }
 }
 
@@ -489,7 +478,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let output_mode = any_mode(rng, depth);
         let transformer = FuncTransformer::Free(FuncImpl::Composed(Composed {
             body: any_val(rng, depth),
-            ctx: *any_ctx(rng, depth).0,
+            ctx: any_ctx(rng, depth),
             input_name: any_symbol(rng),
             caller: CtxFreeInfo {},
         }));
@@ -498,30 +487,28 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
             output_mode,
             transformer,
         };
-        FuncVal(Rc::new(func))
+        FuncVal::from(func)
     }
 }
 
-pub(crate) fn any_assert(rng: &mut SmallRng, depth: usize) -> AssertVal {
+pub(crate) fn any_assert(rng: &mut SmallRng, depth: usize) -> Assert {
     let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
-    let assert = if rng.gen() {
+    if rng.gen() {
         Assert::new_verified(func, input)
     } else {
         let output = any_val(rng, depth);
         Assert::new(func, input, output)
-    };
-    AssertVal(Rc::new(assert))
+    }
 }
 
-pub(crate) fn any_proved_assert(rng: &mut SmallRng, depth: usize) -> AssertVal {
+pub(crate) fn any_proved_assert(rng: &mut SmallRng, depth: usize) -> Assert {
     let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
-    let assert = Assert::new_verified(func, input);
-    AssertVal(Rc::new(assert))
+    Assert::new_verified(func, input)
 }
 
-pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
+pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> Answer {
     let weight: usize = 1 << min(depth, 32);
     let weights = [
         weight, // unsolved
@@ -533,14 +520,16 @@ pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> AnswerVal {
     let i = dist.sample(rng);
     let new_depth = depth + 1;
 
-    let answer = match i {
+    match i {
         0 => Answer::Unsolved,
         1 => Answer::Unsolvable,
         2 => Answer::Unverified(any_val(rng, new_depth)),
-        3 => Answer::Verified(Verified(any_proved_assert(rng, new_depth))),
+        3 => {
+            let proved_assert = any_proved_assert(rng, new_depth);
+            Answer::Verified(Verified::new(proved_assert.into()).unwrap())
+        }
         _ => unreachable!(),
-    };
-    AnswerVal::from(Box::new(answer))
+    }
 }
 
 pub(crate) fn any_extension(_rng: &mut SmallRng, _depth: usize) -> Box<dyn ValExt> {

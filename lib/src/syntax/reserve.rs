@@ -67,6 +67,12 @@ impl From<Bool> for Repr {
     }
 }
 
+impl From<Symbol> for Repr {
+    fn from(s: Symbol) -> Self {
+        Repr::Symbol(s)
+    }
+}
+
 impl From<Int> for Repr {
     fn from(i: Int) -> Self {
         Repr::Int(i)
@@ -79,39 +85,21 @@ impl From<Float> for Repr {
     }
 }
 
-impl From<Bytes> for Repr {
-    fn from(b: Bytes) -> Self {
-        Repr::Bytes(b)
-    }
-}
-
-impl From<Symbol> for Repr {
-    fn from(s: Symbol) -> Self {
-        Repr::Symbol(s)
-    }
-}
-
 impl From<Str> for Repr {
     fn from(s: Str) -> Self {
         Repr::String(s)
     }
 }
 
+impl From<PairRepr> for Repr {
+    fn from(p: PairRepr) -> Self {
+        Repr::Pair(Box::new(p))
+    }
+}
+
 impl From<Box<PairRepr>> for Repr {
     fn from(p: Box<PairRepr>) -> Self {
         Repr::Pair(p)
-    }
-}
-
-impl From<Box<CallRepr>> for Repr {
-    fn from(a: Box<CallRepr>) -> Self {
-        Repr::Call(a)
-    }
-}
-
-impl From<Box<AskRepr>> for Repr {
-    fn from(a: Box<AskRepr>) -> Self {
-        Repr::Ask(a)
     }
 }
 
@@ -127,9 +115,39 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<Box<AnnotationRepr>> for Repr {
-    fn from(a: Box<AnnotationRepr>) -> Self {
-        Repr::Annotation(a)
+impl From<AnnotationRepr> for Repr {
+    fn from(a: AnnotationRepr) -> Self {
+        Repr::Annotation(Box::new(a))
+    }
+}
+
+impl From<Bytes> for Repr {
+    fn from(b: Bytes) -> Self {
+        Repr::Bytes(b)
+    }
+}
+
+impl From<CallRepr> for Repr {
+    fn from(c: CallRepr) -> Self {
+        Repr::Call(Box::new(c))
+    }
+}
+
+impl From<Box<CallRepr>> for Repr {
+    fn from(c: Box<CallRepr>) -> Self {
+        Repr::Call(c)
+    }
+}
+
+impl From<AskRepr> for Repr {
+    fn from(a: AskRepr) -> Self {
+        Repr::Ask(Box::new(a))
+    }
+}
+
+impl From<Box<AskRepr>> for Repr {
+    fn from(a: Box<AskRepr>) -> Self {
+        Repr::Ask(a)
     }
 }
 

@@ -128,7 +128,7 @@ pub(crate) fn generate_val(mode: &ValMode) -> Val {
         let val = generate_map(&mode.map);
         map.insert(symbol(MAP), val);
     }
-    Val::Map(map)
+    Val::Map(map.into())
 }
 
 fn parse_symbol(mode: Val) -> Option<SymbolMode> {
@@ -155,6 +155,7 @@ fn parse_pair(mode: Val) -> Option<Pair<Mode, Mode>> {
     let Val::Pair(pair) = mode else {
         return None;
     };
+    let pair = Pair::from(pair);
     let first = parse(pair.first)?;
     let second = parse(pair.second)?;
     Some(Pair::new(first, second))
@@ -163,7 +164,7 @@ fn parse_pair(mode: Val) -> Option<Pair<Mode, Mode>> {
 fn generate_pair(mode: &Pair<Mode, Mode>) -> Val {
     let first = generate(&mode.first);
     let second = generate(&mode.second);
-    Val::Pair(Box::new(Pair::new(first, second)))
+    Val::Pair(Pair::new(first, second).into())
 }
 
 fn parse_call(mode: Val) -> Option<CallMode> {
@@ -176,6 +177,7 @@ fn parse_call(mode: Val) -> Option<CallMode> {
             CallMode::Eval
         }
         Val::Call(call) => {
+            let call = Call::from(call);
             let func = parse(call.func)?;
             let input = parse(call.input)?;
             CallMode::Struct(Call::new(func, input))
@@ -221,7 +223,7 @@ pub(crate) fn generate_call(mode: &CallMode) -> Val {
         CallMode::Struct(call) => {
             let func = generate(&call.func);
             let input = generate(&call.input);
-            Val::Call(Box::new(Call::new(func, input)))
+            Val::Call(Call::new(func, input).into())
         }
         CallMode::Dependent(call) => generate_call_dep(call),
     }
@@ -250,7 +252,7 @@ fn generate_call_dep(mode: &CallDepMode) -> Val {
     if mode.symbol != Default::default() {
         map.insert(symbol(SYMBOL), generate(&mode.symbol));
     }
-    Val::Map(map)
+    Val::Map(map.into())
 }
 
 fn parse_ask(mode: Val) -> Option<AskMode> {
@@ -263,6 +265,7 @@ fn parse_ask(mode: Val) -> Option<AskMode> {
             AskMode::Eval
         }
         Val::Ask(ask) => {
+            let ask = Ask::from(ask);
             let func = parse(ask.func)?;
             let output = parse(ask.output)?;
             AskMode::Struct(Ask::new(func, output))
@@ -308,7 +311,7 @@ pub(crate) fn generate_ask(mode: &AskMode) -> Val {
         AskMode::Struct(ask) => {
             let func = generate(&ask.func);
             let output = generate(&ask.output);
-            Val::Ask(Box::new(Ask::new(func, output)))
+            Val::Ask(Ask::new(func, output).into())
         }
         AskMode::Dependent(ask) => generate_ask_dep(ask),
     }
@@ -337,13 +340,14 @@ fn generate_ask_dep(mode: &AskDepMode) -> Val {
     if mode.symbol != Default::default() {
         map.insert(symbol(SYMBOL), generate(&mode.symbol));
     }
-    Val::Map(map)
+    Val::Map(map.into())
 }
 
 fn parse_list(mode: Val) -> Option<ListMode> {
     match mode {
         Val::List(list) => Some(parse_list_some(list)?),
         Val::Call(call) => {
+            let call = Call::from(call);
             let Val::Symbol(tag) = call.func else {
                 return None;
             };
@@ -357,6 +361,7 @@ fn parse_list(mode: Val) -> Option<ListMode> {
 }
 
 fn parse_list_some(mode: ListVal) -> Option<ListMode> {
+    let mode = List::from(mode);
     let list = mode
         .into_iter()
         .map(parse_list_item)
@@ -373,6 +378,7 @@ fn parse_list_item(mode: Val) -> Option<ListItemMode> {
             ellipsis: false,
         });
     };
+    let call = Call::from(call);
     let Val::Symbol(tag) = call.func else {
         return None;
     };
@@ -391,22 +397,22 @@ pub(crate) fn generate_list(mode: &ListMode) -> Val {
     match mode {
         ListMode::All(mode) => {
             let mode = generate(mode);
-            Val::Call(Box::new(Call::new(symbol(FOR_ALL), mode)))
+            Val::Call(Call::new(symbol(FOR_ALL), mode).into())
         }
         ListMode::Some(mode_list) => {
-            let list = mode_list
+            let list: List<Val> = mode_list
                 .iter()
                 .map(|mode| {
                     if mode.ellipsis {
                         let tag = symbol(ELLIPSIS);
                         let mode = generate(&mode.mode);
-                        Val::Call(Box::new(Call::new(tag, mode)))
+                        Val::Call(Call::new(tag, mode).into())
                     } else {
                         generate(&mode.mode)
                     }
                 })
                 .collect();
-            Val::List(list)
+            Val::List(list.into())
         }
     }
 }
@@ -415,6 +421,7 @@ fn parse_map(mode: Val) -> Option<MapMode> {
     match mode {
         Val::Map(map) => Some(parse_map_some(map)?),
         Val::Call(call) => {
+            let call = Call::from(call);
             let Val::Symbol(tag) = call.func else {
                 return None;
             };
@@ -424,6 +431,7 @@ fn parse_map(mode: Val) -> Option<MapMode> {
             let Val::Pair(pair) = call.input else {
                 return None;
             };
+            let pair = Pair::from(pair);
             let first = parse(pair.first)?;
             let second = parse(pair.second)?;
             Some(MapMode::All(Pair::new(first, second)))
@@ -433,6 +441,7 @@ fn parse_map(mode: Val) -> Option<MapMode> {
 }
 
 fn parse_map_some(mode: MapVal) -> Option<MapMode> {
+    let mode = Map::from(mode);
     let map = mode
         .into_iter()
         .map(|(k, v)| {
@@ -449,18 +458,18 @@ pub(crate) fn generate_map(mode: &MapMode) -> Val {
         MapMode::All(mode) => {
             let first = generate(&mode.first);
             let second = generate(&mode.second);
-            let pair = Val::Pair(Box::new(Pair::new(first, second)));
-            Val::Call(Box::new(Call::new(symbol(FOR_ALL), pair)))
+            let pair = Val::Pair(Pair::new(first, second).into());
+            Val::Call(Call::new(symbol(FOR_ALL), pair).into())
         }
         MapMode::Some(mode_map) => {
-            let map = mode_map
+            let map: Map<Val, Val> = mode_map
                 .iter()
                 .map(|(k, v)| {
                     let mode = generate(v);
                     (k.clone(), mode)
                 })
                 .collect();
-            Val::Map(map)
+            Val::Map(map.into())
         }
     }
 }

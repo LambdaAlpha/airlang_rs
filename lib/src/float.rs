@@ -18,10 +18,7 @@ use num_traits::Zero;
 // temporary representation
 // int * 10^exp
 #[derive(Clone, PartialEq, Hash)]
-pub struct Float(Box<FloatInner>);
-
-#[derive(Clone, PartialEq, Hash)]
-struct FloatInner {
+pub struct Float {
     int: BigInt,
     exp: BigInt,
 }
@@ -47,7 +44,7 @@ impl Float {
         };
         let exp = BigInt::from_biguint(exp_sign, exp);
         let exp = exp - fractional.len();
-        Self(Box::new(FloatInner { int, exp }))
+        Self { int, exp }
     }
 }
 
@@ -55,21 +52,9 @@ impl Eq for Float {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-impl Display for FloatInner {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}e{}", self.int, self.exp)
-    }
-}
-
 impl Display for Float {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl Debug for FloatInner {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Display>::fmt(self, f)
+        write!(f, "{}e{}", self.int, self.exp)
     }
 }
 

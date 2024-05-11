@@ -6,6 +6,9 @@ use crate::{
         list::ListVal,
         map::MapVal,
     },
+    AskVal,
+    CallVal,
+    PairVal,
     Val,
 };
 
@@ -18,7 +21,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where
         Ctx: CtxAccessor<'a>;
 
-    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, first: Val, second: Val) -> Output
+    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Output
     where
         Ctx: CtxAccessor<'a>;
 
@@ -30,11 +33,11 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where
         Ctx: CtxAccessor<'a>;
 
-    fn transform_call<'a, Ctx>(&self, ctx: Ctx, func: Val, input: Val) -> Output
+    fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
     where
         Ctx: CtxAccessor<'a>;
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, func: Val, output: Val) -> Output
+    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Output
     where
         Ctx: CtxAccessor<'a>;
 }

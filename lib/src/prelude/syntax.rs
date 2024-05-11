@@ -58,5 +58,5 @@ fn fn_stringify(input: Val) -> Val {
     let Ok(str) = crate::generate(&input) else {
         return Val::default();
     };
-    Val::String(Str::from(str))
+    Val::String(Str::from(str).into())
 }

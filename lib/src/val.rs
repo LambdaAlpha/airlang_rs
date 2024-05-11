@@ -12,33 +12,35 @@ use crate::{
     bytes::Bytes,
     extension::ValExt,
     float::Float,
-    int::Int,
     string::Str,
     symbol::Symbol,
     syntax::{
         generator::GenerateRepr,
         parser::ParseRepr,
-        repr::{
-            ask::AskRepr,
-            call::CallRepr,
-            list::ListRepr,
-            map::MapRepr,
-            pair::PairRepr,
-            Repr,
-        },
+        repr::Repr,
     },
     unit::Unit,
     val::{
         answer::AnswerVal,
         ask::AskVal,
         assert::AssertVal,
+        bytes::BytesVal,
         call::CallVal,
         ctx::CtxVal,
+        float::FloatVal,
         func::FuncVal,
+        int::IntVal,
         list::ListVal,
         map::MapVal,
         pair::PairVal,
+        string::StrVal,
     },
+    Ask,
+    Call,
+    Int,
+    List,
+    Map,
+    Pair,
     ReprError,
 };
 
@@ -46,17 +48,18 @@ use crate::{
 pub enum Val {
     Unit(Unit),
     Bool(Bool),
-    Int(Int),
-    Float(Float),
     Symbol(Symbol),
-    String(Str),
-    Pair(Box<PairVal>),
+
+    Int(IntVal),
+    Float(FloatVal),
+    String(StrVal),
+    Pair(PairVal),
     List(ListVal),
     Map(MapVal),
 
-    Bytes(Bytes),
-    Call(Box<CallVal>),
-    Ask(Box<AskVal>),
+    Bytes(BytesVal),
+    Call(CallVal),
+    Ask(AskVal),
 
     Ctx(CtxVal),
     Func(FuncVal),
@@ -70,9 +73,9 @@ pub enum Val {
 
 pub(crate) const UNIT: &str = "unit";
 pub(crate) const BOOL: &str = "bool";
+pub(crate) const SYMBOL: &str = "symbol";
 pub(crate) const INT: &str = "int";
 pub(crate) const FLOAT: &str = "float";
-pub(crate) const SYMBOL: &str = "symbol";
 pub(crate) const STRING: &str = "string";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const LIST: &str = "list";
@@ -110,33 +113,63 @@ impl From<Bool> for Val {
     }
 }
 
-impl From<Int> for Val {
-    fn from(value: Int) -> Self {
-        Val::Int(value)
-    }
-}
-
-impl From<Float> for Val {
-    fn from(value: Float) -> Self {
-        Val::Float(value)
-    }
-}
-
-impl From<Str> for Val {
-    fn from(value: Str) -> Self {
-        Val::String(value)
-    }
-}
-
 impl From<Symbol> for Val {
     fn from(value: Symbol) -> Self {
         Val::Symbol(value)
     }
 }
 
-impl From<Box<PairVal>> for Val {
-    fn from(value: Box<PairVal>) -> Self {
+impl From<Int> for Val {
+    fn from(value: Int) -> Self {
+        Val::Int(IntVal::from(value))
+    }
+}
+
+impl From<IntVal> for Val {
+    fn from(value: IntVal) -> Self {
+        Val::Int(value)
+    }
+}
+
+impl From<Float> for Val {
+    fn from(value: Float) -> Self {
+        Val::Float(FloatVal::from(value))
+    }
+}
+
+impl From<FloatVal> for Val {
+    fn from(value: FloatVal) -> Self {
+        Val::Float(value)
+    }
+}
+
+impl From<Str> for Val {
+    fn from(value: Str) -> Self {
+        Val::String(StrVal::from(value))
+    }
+}
+
+impl From<StrVal> for Val {
+    fn from(value: StrVal) -> Self {
+        Val::String(value)
+    }
+}
+
+impl From<Pair<Val, Val>> for Val {
+    fn from(value: Pair<Val, Val>) -> Self {
+        Val::Pair(PairVal::from(value))
+    }
+}
+
+impl From<PairVal> for Val {
+    fn from(value: PairVal) -> Self {
         Val::Pair(value)
+    }
+}
+
+impl From<List<Val>> for Val {
+    fn from(value: List<Val>) -> Self {
+        Val::List(ListVal::from(value))
     }
 }
 
@@ -146,32 +179,56 @@ impl From<ListVal> for Val {
     }
 }
 
+impl From<Map<Val, Val>> for Val {
+    fn from(value: Map<Val, Val>) -> Self {
+        Val::Map(MapVal::from(value))
+    }
+}
+
 impl From<MapVal> for Val {
     fn from(value: MapVal) -> Self {
         Val::Map(value)
     }
 }
 
-impl From<Box<Annotation<Val, Val>>> for Val {
-    fn from(value: Box<Annotation<Val, Val>>) -> Self {
+impl From<Annotation<Val, Val>> for Val {
+    fn from(value: Annotation<Val, Val>) -> Self {
         value.value
     }
 }
 
 impl From<Bytes> for Val {
     fn from(value: Bytes) -> Self {
+        Val::Bytes(BytesVal::from(value))
+    }
+}
+
+impl From<BytesVal> for Val {
+    fn from(value: BytesVal) -> Self {
         Val::Bytes(value)
     }
 }
 
-impl From<Box<CallVal>> for Val {
-    fn from(value: Box<CallVal>) -> Self {
+impl From<Call<Val, Val>> for Val {
+    fn from(value: Call<Val, Val>) -> Self {
+        Val::Call(CallVal::from(value))
+    }
+}
+
+impl From<CallVal> for Val {
+    fn from(value: CallVal) -> Self {
         Val::Call(value)
     }
 }
 
-impl From<Box<AskVal>> for Val {
-    fn from(value: Box<AskVal>) -> Self {
+impl From<Ask<Val, Val>> for Val {
+    fn from(value: Ask<Val, Val>) -> Self {
+        Val::Ask(AskVal::from(value))
+    }
+}
+
+impl From<AskVal> for Val {
+    fn from(value: AskVal) -> Self {
         Val::Ask(value)
     }
 }
@@ -211,16 +268,16 @@ impl From<&Repr> for Val {
         match value {
             Repr::Unit(u) => Val::Unit(*u),
             Repr::Bool(b) => Val::Bool(*b),
-            Repr::Int(i) => Val::Int(i.clone()),
-            Repr::Float(f) => Val::Float(f.clone()),
             Repr::Symbol(s) => Val::Symbol(s.clone()),
-            Repr::String(s) => Val::String(s.clone()),
-            Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(&**p))),
+            Repr::Int(i) => Val::Int(IntVal::from(i.clone())),
+            Repr::Float(f) => Val::Float(FloatVal::from(f.clone())),
+            Repr::String(s) => Val::String(StrVal::from(s.clone())),
+            Repr::Pair(p) => Val::Pair(PairVal::from(&**p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
-            Repr::Bytes(b) => Val::Bytes(b.clone()),
-            Repr::Call(c) => Val::Call(Box::new(CallVal::from(&**c))),
-            Repr::Ask(a) => Val::Ask(Box::new(AskVal::from(&**a))),
+            Repr::Bytes(b) => Val::Bytes(BytesVal::from(b.clone())),
+            Repr::Call(c) => Val::Call(CallVal::from(&**c)),
+            Repr::Ask(a) => Val::Ask(AskVal::from(&**a)),
         }
     }
 }
@@ -230,16 +287,16 @@ impl From<Repr> for Val {
         match value {
             Repr::Unit(u) => Val::Unit(u),
             Repr::Bool(b) => Val::Bool(b),
-            Repr::Int(i) => Val::Int(i),
-            Repr::Float(f) => Val::Float(f),
             Repr::Symbol(s) => Val::Symbol(s),
-            Repr::String(s) => Val::String(s),
-            Repr::Pair(p) => Val::Pair(Box::new(PairVal::from(*p))),
+            Repr::Int(i) => Val::Int(IntVal::from(i)),
+            Repr::Float(f) => Val::Float(FloatVal::from(f)),
+            Repr::String(s) => Val::String(StrVal::from(s)),
+            Repr::Pair(p) => Val::Pair(PairVal::from(*p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
-            Repr::Bytes(b) => Val::Bytes(b),
-            Repr::Call(c) => Val::Call(Box::new(CallVal::from(*c))),
-            Repr::Ask(a) => Val::Ask(Box::new(AskVal::from(*a))),
+            Repr::Bytes(b) => Val::Bytes(BytesVal::from(b)),
+            Repr::Call(c) => Val::Call(CallVal::from(*c)),
+            Repr::Ask(a) => Val::Ask(AskVal::from(*a)),
         }
     }
 }
@@ -250,22 +307,16 @@ impl TryInto<Repr> for &Val {
         match self {
             Val::Unit(u) => Ok(Repr::Unit(*u)),
             Val::Bool(b) => Ok(Repr::Bool(*b)),
-            Val::Int(i) => Ok(Repr::Int((*i).clone())),
-            Val::Float(f) => Ok(Repr::Float((*f).clone())),
-            Val::Symbol(s) => Ok(Repr::Symbol((*s).clone())),
-            Val::String(s) => Ok(Repr::String((*s).clone())),
-            Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
-                &**p,
-            )?))),
-            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
-            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
-            Val::Bytes(b) => Ok(Repr::Bytes((*b).clone())),
-            Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
-                &**c,
-            )?))),
-            Val::Ask(a) => Ok(Repr::Ask(Box::new(<_ as TryInto<AskRepr>>::try_into(
-                &**a,
-            )?))),
+            Val::Symbol(s) => Ok(Repr::Symbol(s.clone())),
+            Val::Int(i) => Ok(Repr::Int(i.into())),
+            Val::Float(f) => Ok(Repr::Float(f.into())),
+            Val::String(s) => Ok(Repr::String(s.into())),
+            Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
+            Val::List(l) => Ok(Repr::List(l.try_into()?)),
+            Val::Map(m) => Ok(Repr::Map(m.try_into()?)),
+            Val::Bytes(b) => Ok(Repr::Bytes(b.into())),
+            Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
+            Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
             _ => Err(ReprError {}),
         }
     }
@@ -277,20 +328,16 @@ impl TryInto<Repr> for Val {
         match self {
             Val::Unit(u) => Ok(Repr::Unit(u)),
             Val::Bool(b) => Ok(Repr::Bool(b)),
-            Val::Int(i) => Ok(Repr::Int(i)),
-            Val::Float(f) => Ok(Repr::Float(f)),
             Val::Symbol(s) => Ok(Repr::Symbol(s)),
-            Val::String(s) => Ok(Repr::String(s)),
-            Val::Pair(p) => Ok(Repr::Pair(Box::new(<_ as TryInto<PairRepr>>::try_into(
-                *p,
-            )?))),
-            Val::List(l) => Ok(Repr::List(<_ as TryInto<ListRepr>>::try_into(l)?)),
-            Val::Map(m) => Ok(Repr::Map(<_ as TryInto<MapRepr>>::try_into(m)?)),
-            Val::Bytes(b) => Ok(Repr::Bytes(b)),
-            Val::Call(c) => Ok(Repr::Call(Box::new(<_ as TryInto<CallRepr>>::try_into(
-                *c,
-            )?))),
-            Val::Ask(a) => Ok(Repr::Ask(Box::new(<_ as TryInto<AskRepr>>::try_into(*a)?))),
+            Val::Int(i) => Ok(Repr::Int(i.into())),
+            Val::Float(f) => Ok(Repr::Float(f.into())),
+            Val::String(s) => Ok(Repr::String(s.into())),
+            Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
+            Val::List(l) => Ok(Repr::List(l.try_into()?)),
+            Val::Map(m) => Ok(Repr::Map(m.try_into()?)),
+            Val::Bytes(b) => Ok(Repr::Bytes(b.into())),
+            Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
+            Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
             _ => Err(ReprError {}),
         }
     }
@@ -299,7 +346,10 @@ impl TryInto<Repr> for Val {
 impl ParseRepr for Val {
     fn try_into_pair(self) -> Result<(Self, Self), Self> {
         match self {
-            Val::Pair(pair) => Ok((pair.first, pair.second)),
+            Val::Pair(pair) => {
+                let pair = Pair::from(pair);
+                Ok((pair.first, pair.second))
+            }
             other => Err(other),
         }
     }
@@ -312,9 +362,9 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
         let r = match self {
             Val::Unit(u) => GenerateRepr::Unit(u),
             Val::Bool(b) => GenerateRepr::Bool(b),
+            Val::Symbol(s) => GenerateRepr::Symbol(s),
             Val::Int(i) => GenerateRepr::Int(i),
             Val::Float(f) => GenerateRepr::Float(f),
-            Val::Symbol(s) => GenerateRepr::Symbol(s),
             Val::String(s) => GenerateRepr::String(s),
             Val::Pair(p) => GenerateRepr::Pair(p),
             Val::List(l) => GenerateRepr::List(l),
@@ -333,9 +383,9 @@ impl Debug for Val {
         match self {
             Val::Unit(u) => <_ as Debug>::fmt(u, f),
             Val::Bool(b) => <_ as Debug>::fmt(b, f),
+            Val::Symbol(s) => <_ as Debug>::fmt(s, f),
             Val::Int(i) => <_ as Debug>::fmt(i, f),
             Val::Float(float) => <_ as Debug>::fmt(float, f),
-            Val::Symbol(s) => <_ as Debug>::fmt(s, f),
             Val::String(s) => <_ as Debug>::fmt(s, f),
             Val::Pair(p) => <_ as Debug>::fmt(p, f),
             Val::List(l) => <_ as Debug>::fmt(l, f),
@@ -352,11 +402,19 @@ impl Debug for Val {
     }
 }
 
+pub(crate) mod int;
+
+pub(crate) mod float;
+
+pub(crate) mod string;
+
 pub(crate) mod pair;
 
 pub(crate) mod list;
 
 pub(crate) mod map;
+
+pub(crate) mod bytes;
 
 pub(crate) mod call;
 

@@ -18,6 +18,7 @@ use crate::{
     transform::eval::Eval,
     val::func::FuncVal,
     Call,
+    Pair,
     Val,
 };
 
@@ -53,7 +54,8 @@ fn fn_new(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    Val::Call(Box::new(Call::new(pair.first, pair.second)))
+    let pair = Pair::from(pair);
+    Val::Call(Call::new(pair.first, pair.second).into())
 }
 
 fn call() -> Named<FuncVal> {
@@ -74,5 +76,6 @@ where
     let Val::Call(call) = input else {
         return Val::default();
     };
+    let call = Call::from(call);
     Eval.eval_input_then_call(ctx, call.func, call.input)
 }

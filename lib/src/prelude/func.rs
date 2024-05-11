@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     bool::Bool,
     ctx::{
@@ -142,7 +140,7 @@ fn fn_new(input: Val) -> Val {
     };
     let body = map_remove(&mut map, BODY);
     let func_ctx = match map_remove(&mut map, CTX) {
-        Val::Ctx(func_ctx) => *func_ctx.0,
+        Val::Ctx(func_ctx) => func_ctx.into(),
         Val::Unit(_) => Ctx::default(),
         _ => return Val::default(),
     };
@@ -192,7 +190,7 @@ fn fn_new(input: Val) -> Val {
         _ => return Val::default(),
     };
     let func = Func::new(input_mode, output_mode, transformer);
-    Val::Func(Rc::new(func).into())
+    Val::Func(FuncVal::from(func))
 }
 
 fn repr() -> Named<FuncVal> {
@@ -212,10 +210,10 @@ fn repr() -> Named<FuncVal> {
 }
 
 fn fn_repr(input: Val) -> Val {
-    let Val::Func(FuncVal(func)) = input else {
+    let Val::Func(func) = input else {
         return Val::default();
     };
-    let mut repr = MapVal::default();
+    let mut repr = MapVal::from(Map::<Val, Val>::default());
 
     if func.input_mode != Mode::default() {
         let input_mode = generate(&func.input_mode);
@@ -237,7 +235,7 @@ fn fn_repr(input: Val) -> Val {
             CtxFree::Composed(c) => {
                 repr.insert(symbol(BODY), c.body.clone());
                 if c.ctx != Ctx::default() {
-                    repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
+                    repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(c.ctx.clone())));
                 }
                 if &*c.input_name != DEFAULT_INPUT_NAME {
                     repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
@@ -256,7 +254,7 @@ fn fn_repr(input: Val) -> Val {
                 CtxConst::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
                     if c.ctx != Ctx::default() {
-                        repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
+                        repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(c.ctx.clone())));
                     }
                     if &*c.input_name != DEFAULT_INPUT_NAME {
                         repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
@@ -279,7 +277,7 @@ fn fn_repr(input: Val) -> Val {
                 CtxMutable::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
                     if c.ctx != Ctx::default() {
-                        repr.insert(symbol(CTX), Val::Ctx(CtxVal(Box::new(c.ctx.clone()))));
+                        repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(c.ctx.clone())));
                     }
                     if &*c.input_name != DEFAULT_INPUT_NAME {
                         repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
@@ -307,7 +305,7 @@ fn caller_access() -> Named<FuncVal> {
 
 fn fn_caller_access(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let access = match &func.transformer {
@@ -332,7 +330,7 @@ fn input_mode() -> Named<FuncVal> {
 
 fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         generate(&func.input_mode)
@@ -352,7 +350,7 @@ fn output_mode() -> Named<FuncVal> {
 
 fn fn_output_mode(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         generate(&func.output_mode)
@@ -372,7 +370,7 @@ fn is_primitive() -> Named<FuncVal> {
 
 fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let is_primitive = func.is_primitive();
@@ -393,7 +391,7 @@ fn is_extension() -> Named<FuncVal> {
 
 fn fn_is_extension(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let Some(is_extension) = func.primitive_is_extension() else {
@@ -411,7 +409,7 @@ fn id() -> Named<FuncVal> {
 
 fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let Some(id) = func.primitive_id() else {
@@ -429,7 +427,7 @@ fn body() -> Named<FuncVal> {
 
 fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let Some(body) = func.composed_body() else {
@@ -447,13 +445,13 @@ fn ctx() -> Named<FuncVal> {
 
 fn fn_ctx(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let Some(ctx) = func.composed_context() else {
             return Val::default();
         };
-        Val::Ctx(CtxVal(Box::new(ctx)))
+        Val::Ctx(CtxVal::from(ctx))
     })
 }
 
@@ -470,7 +468,7 @@ fn input_name() -> Named<FuncVal> {
 
 fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let Some(name) = func.composed_input_name() else {
@@ -493,7 +491,7 @@ fn caller_name() -> Named<FuncVal> {
 
 fn fn_caller_name(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Func(FuncVal(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
         let Some(name) = func.composed_caller_name() else {

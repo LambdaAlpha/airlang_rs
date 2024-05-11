@@ -64,6 +64,7 @@ use crate::{
     CallMode,
     ListMode,
     ListVal,
+    Map,
     PairVal,
     SymbolMode,
     ValMode,
@@ -178,6 +179,7 @@ fn fn_assign(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = pair.unwrap();
     let name = pair.first;
     let val = pair.second;
     let options = AssignOptions::default();
@@ -195,7 +197,7 @@ fn assign_destruct(
 ) -> Val {
     match name {
         Val::Symbol(s) => assign_symbol(ctx.reborrow(), s, val, options),
-        Val::Pair(name) => assign_pair(ctx, *name, val, options),
+        Val::Pair(name) => assign_pair(ctx, name, val, options),
         Val::Call(name) => {
             if allow_options {
                 match parse_ctx_val_pair(name) {
@@ -206,14 +208,14 @@ fn assign_destruct(
                         let options = AssignOptions { invariant };
                         assign_destruct(ctx, name, val, options, false)
                     }
-                    ParseCtxValPairResult::Fallback(name) => assign_call(ctx, *name, val, options),
+                    ParseCtxValPairResult::Fallback(name) => assign_call(ctx, name, val, options),
                     ParseCtxValPairResult::None => Val::default(),
                 }
             } else {
-                assign_call(ctx, *name, val, options)
+                assign_call(ctx, name, val, options)
             }
         }
-        Val::Ask(name) => assign_ask(ctx, *name, val, options),
+        Val::Ask(name) => assign_ask(ctx, name, val, options),
         Val::List(name) => assign_list(ctx, name, val, options),
         Val::Map(name) => assign_map(ctx, name, val, options),
         _ => Val::default(),
@@ -239,33 +241,41 @@ fn assign_pair(mut ctx: CtxForMutableFn, name: PairVal, val: Val, options: Assig
     let Val::Pair(val) = val else {
         return Val::default();
     };
+    let val = Pair::from(val);
+    let name = Pair::from(name);
     let first = assign_allow_options(ctx.reborrow(), name.first, val.first, options);
     let second = assign_allow_options(ctx, name.second, val.second, options);
-    Val::Pair(Box::new(Pair::new(first, second)))
+    Val::Pair(Pair::new(first, second).into())
 }
 
 fn assign_call(mut ctx: CtxForMutableFn, name: CallVal, val: Val, options: AssignOptions) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
     };
+    let name = Call::from(name);
+    let val = Call::from(val);
     let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
     let input = assign_allow_options(ctx, name.input, val.input, options);
-    Val::Call(Box::new(Call::new(func, input)))
+    Val::Call(Call::new(func, input).into())
 }
 
 fn assign_ask(mut ctx: CtxForMutableFn, name: AskVal, val: Val, options: AssignOptions) -> Val {
     let Val::Ask(val) = val else {
         return Val::default();
     };
+    let name = Ask::from(name);
+    let val = Ask::from(val);
     let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
     let output = assign_allow_options(ctx, name.output, val.output, options);
-    Val::Ask(Box::new(Ask::new(func, output)))
+    Val::Ask(Ask::new(func, output).into())
 }
 
 fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
     let Val::List(val) = val else {
         return Val::default();
     };
+    let name = List::from(name);
+    let val = List::from(val);
     let mut list = List::default();
     let mut name_iter = name.into_iter();
     let mut val_iter: Box<dyn ExactSizeIterator<Item = Val>> = Box::new(val.into_iter());
@@ -284,14 +294,15 @@ fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: Assig
         let val = val.unwrap_or_default();
         list.push(assign_allow_options(ctx.reborrow(), name, val, options));
     }
-    Val::List(list)
+    Val::List(list.into())
 }
 
 fn assign_map(mut ctx: CtxForMutableFn, name: MapVal, val: Val, options: AssignOptions) -> Val {
     let Val::Map(mut val) = val else {
         return Val::default();
     };
-    let map = name
+    let name = Map::from(name);
+    let map: Map<Val, Val> = name
         .into_iter()
         .map(|(k, name)| {
             let val = val.remove(&k).unwrap_or_default();
@@ -299,7 +310,7 @@ fn assign_map(mut ctx: CtxForMutableFn, name: MapVal, val: Val, options: AssignO
             (k, last_val)
         })
         .collect();
-    Val::Map(map)
+    Val::Map(map.into())
 }
 
 #[derive(Copy, Clone)]
@@ -317,17 +328,19 @@ impl Default for AssignOptions {
 
 enum ParseCtxValPairResult {
     Parsed { val: Val, invariant: Invariant },
-    Fallback(Box<CallVal>),
+    Fallback(CallVal),
     None,
 }
 
-fn parse_ctx_val_pair(call: Box<CallVal>) -> ParseCtxValPairResult {
+fn parse_ctx_val_pair(call: CallVal) -> ParseCtxValPairResult {
     let Val::Unit(_) = &call.func else {
         return ParseCtxValPairResult::Fallback(call);
     };
+    let call = Call::from(call);
     let Val::Pair(pair) = call.input else {
         return ParseCtxValPairResult::None;
     };
+    let pair = Pair::from(pair);
     let val = pair.first;
     let invariant = match pair.second {
         Val::Symbol(s) => {
@@ -495,7 +508,8 @@ fn fn_set_meta(ctx: CtxForMutableFn, input: Val) -> Val {
             let _ = ctx.set_meta(None);
         }
         Val::Ctx(meta) => {
-            let _ = ctx.set_meta(Some(*meta.0));
+            let meta = Ctx::from(meta);
+            let _ = ctx.set_meta(Some(meta));
         }
         _ => {}
     }
@@ -529,8 +543,10 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     match pair.second {
         Val::Call(call) => {
+            let call = Call::from(call);
             let func = call.func;
             let input = Eval.eval_input(ctx.reborrow(), &func, call.input);
             let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
@@ -539,6 +555,7 @@ fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
+            let ask = Ask::from(ask);
             let func = ask.func;
             let output = Eval.eval_output(ctx.reborrow(), &func, ask.output);
             let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
@@ -577,8 +594,10 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     match pair.second {
         Val::Call(call) => {
+            let call = Call::from(call);
             let func = call.func;
             let input = call.input;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |target_ctx| {
@@ -593,6 +612,7 @@ fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
+            let ask = Ask::from(ask);
             let func = ask.func;
             let output = ask.output;
             let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |target_ctx| {
@@ -637,8 +657,10 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     match pair.second {
         Val::Call(call) => {
+            let call = Call::from(call);
             let func = call.func;
             let input = call.input;
             let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
@@ -647,6 +669,7 @@ fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
+            let ask = Ask::from(ask);
             let func = ask.func;
             let output = ask.output;
             let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
@@ -685,16 +708,17 @@ fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     match pair.second {
         Val::Call(call) => {
             let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval.transform_call(target_ctx, call.func, call.input)
+                Eval.transform_call(target_ctx, call)
             });
             result.unwrap_or_default()
         }
         Val::Ask(ask) => {
             let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval.transform_ask(target_ctx, ask.func, ask.output)
+                Eval.transform_ask(target_ctx, ask)
             });
             result.unwrap_or_default()
         }
@@ -740,7 +764,7 @@ where
             let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name.clone()) else {
                 return None;
             };
-            let Val::Ctx(CtxVal(target_ctx)) = ref1 else {
+            let Val::Ctx(target_ctx) = ref1 else {
                 return None;
             };
             if is_const {
@@ -782,16 +806,16 @@ fn fn_ctx_new(input: Val) -> Val {
     let Val::Pair(meta_map) = input else {
         return Val::default();
     };
-
+    let meta_map = Pair::from(meta_map);
     let meta = match meta_map.first {
         Val::Unit(_) => None,
-        Val::Ctx(meta) => Some(meta.0),
+        Val::Ctx(meta) => Some(meta.unwrap()),
         _ => return Val::default(),
     };
 
     let ctx_map_repr = match meta_map.second {
-        Val::Map(ctx_map) => ctx_map,
-        Val::Unit(_) => MapVal::default(),
+        Val::Map(ctx_map) => Map::from(ctx_map),
+        Val::Unit(_) => Map::default(),
         _ => return Val::default(),
     };
 
@@ -819,7 +843,7 @@ fn fn_ctx_new(input: Val) -> Val {
         ctx_map.insert(name, ctx_value);
     }
 
-    Val::Ctx(CtxVal(Box::new(Ctx { map: ctx_map, meta })))
+    Val::Ctx(Ctx::new(ctx_map, meta).into())
 }
 
 fn ctx_repr() -> Named<FuncVal> {
@@ -832,16 +856,17 @@ fn ctx_repr() -> Named<FuncVal> {
 }
 
 fn fn_ctx_repr(input: Val) -> Val {
-    let Val::Ctx(CtxVal(ctx)) = input else {
+    let Val::Ctx(ctx) = input else {
         return Val::default();
     };
+    let ctx = Ctx::from(ctx);
 
     let meta = match ctx.meta {
-        Some(meta) => Val::Ctx(CtxVal(meta)),
+        Some(meta) => Val::Ctx(CtxVal::new(meta)),
         None => Val::Unit(Unit),
     };
 
-    let map = ctx
+    let map: Map<Val, Val> = ctx
         .map
         .into_iter()
         .map(|(k, v)| {
@@ -857,16 +882,16 @@ fn fn_ctx_repr(input: Val) -> Val {
             let v = if use_normal_form {
                 let func = Val::Unit(Unit);
                 let invariant = generate_invariant(v.invariant);
-                let pair = Val::Pair(Box::new(Pair::new(v.val, Val::Symbol(invariant))));
-                Val::Call(Box::new(Call::new(func, pair)))
+                let pair = Val::Pair(Pair::new(v.val, Val::Symbol(invariant)).into());
+                Val::Call(Call::new(func, pair).into())
             } else {
                 v.val
             };
             (k, v)
         })
         .collect();
-    let map = Val::Map(map);
-    Val::Pair(Box::new(Pair::new(meta, map)))
+    let map = Val::Map(map.into());
+    Val::Pair(Pair::new(meta, map).into())
 }
 
 fn ctx_prelude() -> Named<FuncVal> {
@@ -876,7 +901,7 @@ fn ctx_prelude() -> Named<FuncVal> {
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {
-    Val::Ctx(CtxVal(Box::new(initial_ctx())))
+    Val::Ctx(CtxVal::from(initial_ctx()))
 }
 
 fn ctx_this() -> Named<FuncVal> {
@@ -889,5 +914,5 @@ fn fn_ctx_this(ctx: CtxForConstFn, _input: Val) -> Val {
     let CtxForConstFn::Const(ctx) = ctx else {
         return Val::default();
     };
-    Val::Ctx(CtxVal(Box::new(ctx.get_ctx_ref().clone())))
+    Val::Ctx(CtxVal::from(ctx.get_ctx_ref().clone()))
 }

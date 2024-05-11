@@ -21,6 +21,9 @@ use crate::{
     },
     Bytes,
     CtxForMutableFn,
+    Int,
+    List,
+    Pair,
 };
 
 #[derive(Clone)]
@@ -64,8 +67,9 @@ fn fn_from_utf8(input: Val) -> Val {
     let Val::Bytes(bytes) = input else {
         return Val::default();
     };
+    let bytes = Bytes::from(bytes);
     if let Ok(str) = String::from_utf8(bytes.into()) {
-        Val::String(Str::from(str))
+        Val::String(Str::from(str).into())
     } else {
         Val::default()
     }
@@ -81,7 +85,9 @@ fn fn_into_utf8(input: Val) -> Val {
     let Val::String(str) = input else {
         return Val::default();
     };
-    Val::Bytes(Bytes::from(String::from(str).into_bytes()))
+    let str = Str::from(str);
+    let bytes = Bytes::from(String::from(str).into_bytes());
+    Val::Bytes(bytes.into())
 }
 
 fn length() -> Named<FuncVal> {
@@ -95,7 +101,8 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::String(s) = val else {
             return Val::default();
         };
-        Val::Int(s.len().into())
+        let len: Int = s.len().into();
+        Val::Int(len.into())
     })
 }
 
@@ -109,6 +116,7 @@ fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::String(s) = pair.second else {
         return Val::default();
     };
@@ -130,6 +138,7 @@ fn fn_concat(input: Val) -> Val {
     let Val::List(strings) = input else {
         return Val::default();
     };
+    let strings = List::from(strings);
     let mut ret = String::new();
     for str in strings {
         let Val::String(str) = str else {
@@ -137,5 +146,5 @@ fn fn_concat(input: Val) -> Val {
         };
         ret.push_str(&str);
     }
-    Val::String(Str::from(ret))
+    Val::String(Str::from(ret).into())
 }

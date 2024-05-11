@@ -89,7 +89,7 @@ fn fn_print(input: Val) -> Val {
     let Val::String(s) = input else {
         return Val::default();
     };
-    print!("{s}");
+    print!("{}", &**s);
     Val::default()
 }
 
@@ -103,7 +103,7 @@ fn fn_print_line(input: Val) -> Val {
     let Val::String(s) = input else {
         return Val::default();
     };
-    println!("{s}");
+    println!("{}", &**s);
     Val::default()
 }
 
@@ -128,7 +128,7 @@ fn fn_error_print(input: Val) -> Val {
     let Val::String(s) = input else {
         return Val::default();
     };
-    eprint!("{s}");
+    eprint!("{}", &**s);
     Val::default()
 }
 
@@ -147,7 +147,7 @@ fn fn_error_print_line(input: Val) -> Val {
     let Val::String(s) = input else {
         return Val::default();
     };
-    eprintln!("{s}");
+    eprintln!("{}", &**s);
     Val::default()
 }
 

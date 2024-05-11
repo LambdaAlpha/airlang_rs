@@ -26,9 +26,10 @@ use crate::{
     transform::Transform,
     val::{
         func::FuncVal,
-        map::MapVal,
         Val,
     },
+    List,
+    Map,
     Mode,
 };
 
@@ -116,7 +117,8 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        Val::Int(map.len().into())
+        let len: Int = map.len().into();
+        Val::Int(len.into())
     })
 }
 
@@ -131,11 +133,11 @@ fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let items = map
+        let items: List<Val> = map
             .iter()
-            .map(|(k, v)| Val::Pair(Box::new(Pair::new(k.clone(), v.clone()))))
+            .map(|(k, v)| Val::Pair(Pair::new(k.clone(), v.clone()).into()))
             .collect();
-        Val::List(items)
+        Val::List(items.into())
     })
 }
 
@@ -150,13 +152,13 @@ fn fn_into_items(ctx: CtxForMutableFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let mut origin = MapVal::default();
-        swap(map, &mut origin);
-        let items = origin
+        let mut origin = Map::default();
+        swap(&mut **map, &mut origin);
+        let items: List<Val> = origin
             .into_iter()
-            .map(|(k, v)| Val::Pair(Box::new(Pair::new(k, v))))
+            .map(|(k, v)| Val::Pair(Pair::new(k, v).into()))
             .collect();
-        Val::List(items)
+        Val::List(items.into())
     })
 }
 
@@ -171,7 +173,8 @@ fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        Val::List(map.keys().cloned().collect())
+        let keys: List<Val> = map.keys().cloned().collect();
+        Val::List(keys.into())
     })
 }
 
@@ -186,9 +189,10 @@ fn fn_into_keys(ctx: CtxForMutableFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let mut origin = MapVal::default();
-        swap(map, &mut origin);
-        Val::List(origin.into_keys().collect())
+        let mut origin = Map::default();
+        swap(&mut **map, &mut origin);
+        let keys: List<Val> = origin.into_keys().collect();
+        Val::List(keys.into())
     })
 }
 
@@ -203,7 +207,8 @@ fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        Val::List(map.values().cloned().collect())
+        let values: List<Val> = map.values().cloned().collect();
+        Val::List(values.into())
     })
 }
 
@@ -218,9 +223,10 @@ fn fn_into_values(ctx: CtxForMutableFn, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let mut origin = MapVal::default();
-        swap(map, &mut origin);
-        Val::List(origin.into_values().collect())
+        let mut origin = Map::default();
+        swap(&mut **map, &mut origin);
+        let values: List<Val> = origin.into_values().collect();
+        Val::List(values.into())
     })
 }
 
@@ -234,6 +240,7 @@ fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
+    let name_key = Pair::from(name_key);
     let name = name_key.first;
     let key = &name_key.second;
     DefaultCtx.with_ref_lossless(ctx, name, |val| {
@@ -262,10 +269,12 @@ fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
+    let name_keys = Pair::from(name_keys);
     let name = name_keys.first;
     let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
+    let keys = List::from(keys);
     DefaultCtx.with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -285,10 +294,12 @@ fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
+    let name_pair = Pair::from(name_pair);
     let name = name_pair.first;
     let Val::Pair(key_value) = name_pair.second else {
         return Val::default();
     };
+    let key_value = Pair::from(key_value);
     let key = key_value.first;
     let value = key_value.second;
     DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
@@ -309,19 +320,21 @@ fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
+    let name_pair = Pair::from(name_pair);
     let name = name_pair.first;
     let Val::Map(update) = name_pair.second else {
         return Val::default();
     };
+    let update = Map::from(update);
     DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let ret = update
+        let map: Map<Val, Val> = update
             .into_iter()
             .filter_map(|(k, v)| map.insert(k.clone(), v).map(|v| (k, v)))
             .collect();
-        Val::Map(ret)
+        Val::Map(map.into())
     })
 }
 
@@ -335,6 +348,7 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
+    let name_key = Pair::from(name_key);
     let name = name_key.first;
     let key = &name_key.second;
     DefaultCtx.with_ref_lossless(ctx, name, |val| {
@@ -355,19 +369,21 @@ fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
+    let name_keys = Pair::from(name_keys);
     let name = name_keys.first;
     let Val::List(keys) = name_keys.second else {
         return Val::default();
     };
+    let keys = List::from(keys);
     DefaultCtx.with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let ret = keys
+        let map: Map<Val, Val> = keys
             .into_iter()
             .filter_map(|k| map.get(&k).map(|v| (k, v.clone())))
             .collect();
-        Val::Map(ret)
+        Val::Map(map.into())
     })
 }
 
@@ -381,6 +397,7 @@ fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
+    let name_key = Pair::from(name_key);
     let name = name_key.first;
     let key = name_key.second;
     DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
@@ -401,20 +418,22 @@ fn fn_remove_many(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
+    let name_keys = Pair::from(name_keys);
     let name = name_keys.first;
     let keys = name_keys.second;
     let Val::List(keys) = keys else {
         return Val::default();
     };
+    let keys = List::from(keys);
     DefaultCtx.with_ref_mut_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let ret = keys
+        let map: Map<Val, Val> = keys
             .into_iter()
             .filter_map(|k| map.remove(&k).map(|v| (k, v)))
             .collect();
-        Val::Map(ret)
+        Val::Map(map.into())
     })
 }
 
@@ -443,17 +462,19 @@ fn fn_new_map(input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
-    let map = list
+    let list = List::from(list);
+    let map: Option<Map<Val, Val>> = list
         .into_iter()
         .map(|item| {
             let Val::Pair(pair) = item else {
                 return None;
             };
+            let pair = Pair::from(pair);
             Some((pair.first, pair.second))
         })
         .collect();
     match map {
-        Some(map) => Val::Map(map),
+        Some(map) => Val::Map(map.into()),
         None => Val::default(),
     }
 }
@@ -468,8 +489,9 @@ fn fn_new_set(input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
-    let map = list.into_iter().map(|k| (k, Val::default())).collect();
-    Val::Map(map)
+    let list = List::from(list);
+    let map: Map<Val, Val> = list.into_iter().map(|k| (k, Val::default())).collect();
+    Val::Map(map.into())
 }
 
 fn new_multiset() -> Named<FuncVal> {
@@ -482,13 +504,16 @@ fn fn_new_multiset(input: Val) -> Val {
     let Val::List(list) = input else {
         return Val::default();
     };
-    let mut multiset = MapVal::with_capacity(list.len());
+    let list = List::from(list);
+    let mut multiset = Map::with_capacity(list.len());
     for item in list {
-        let count = multiset.entry(item).or_insert(Val::Int(Int::from(0)));
+        let count = multiset
+            .entry(item)
+            .or_insert(Val::Int(Int::from(0).into()));
         let Val::Int(count) = count else {
             unreachable!()
         };
         count.increase();
     }
-    Val::Map(multiset)
+    Val::Map(multiset.into())
 }

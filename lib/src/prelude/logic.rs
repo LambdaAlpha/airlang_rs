@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     ctx::CtxMap,
     func::FuncTransformer,
@@ -16,6 +14,7 @@ use crate::{
         assert::AssertVal,
         func::FuncVal,
     },
+    Call,
     CtxForMutableFn,
     Mode,
     Transform,
@@ -51,13 +50,14 @@ fn fn_verified(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
+    let call = Call::from(call);
     let Val::Func(func) = call.func else {
         return Val::default();
     };
-    let FuncTransformer::Free(_) = &func.0.transformer else {
+    let FuncTransformer::Free(_) = &func.transformer else {
         return Val::default();
     };
     let input = func.input_mode.transform(ctx, call.input);
     let verified = Assert::new_verified(func, input);
-    Val::Assert(AssertVal(Rc::new(verified)))
+    Val::Assert(AssertVal::from(verified))
 }

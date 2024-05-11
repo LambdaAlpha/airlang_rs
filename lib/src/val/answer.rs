@@ -3,13 +3,28 @@ use std::{
         Debug,
         Formatter,
     },
-    ops::Deref,
+    ops::{
+        Deref,
+        DerefMut,
+    },
 };
 
 use crate::problem::Answer;
 
 #[derive(Default, Clone, PartialEq, Eq, Hash)]
-pub struct AnswerVal(pub(crate) Box<Answer>);
+pub struct AnswerVal(Box<Answer>);
+
+impl AnswerVal {
+    #[allow(unused)]
+    pub(crate) fn new(answer: Box<Answer>) -> Self {
+        Self(answer)
+    }
+
+    #[allow(unused)]
+    pub(crate) fn unwrap(self) -> Box<Answer> {
+        self.0
+    }
+}
 
 impl From<Answer> for AnswerVal {
     fn from(value: Answer) -> Self {
@@ -17,15 +32,15 @@ impl From<Answer> for AnswerVal {
     }
 }
 
-impl From<Box<Answer>> for AnswerVal {
-    fn from(value: Box<Answer>) -> Self {
-        Self(value)
+impl From<AnswerVal> for Answer {
+    fn from(value: AnswerVal) -> Self {
+        *value.0
     }
 }
 
 impl Debug for AnswerVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Debug>::fmt(self.0.deref(), f)
+        Answer::fmt(self, f)
     }
 }
 
@@ -34,5 +49,11 @@ impl Deref for AnswerVal {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for AnswerVal {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

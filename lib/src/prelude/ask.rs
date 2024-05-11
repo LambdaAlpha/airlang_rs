@@ -18,6 +18,7 @@ use crate::{
     transform::eval::Eval,
     val::func::FuncVal,
     Ask,
+    Pair,
     Val,
 };
 
@@ -53,7 +54,8 @@ fn fn_new(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    Val::Ask(Box::new(Ask::new(pair.first, pair.second)))
+    let pair = Pair::from(pair);
+    Val::Ask(Ask::new(pair.first, pair.second).into())
 }
 
 fn ask() -> Named<FuncVal> {
@@ -74,5 +76,6 @@ where
     let Val::Ask(ask) = input else {
         return Val::default();
     };
+    let ask = Ask::from(ask);
     Eval.eval_output_then_solve(ctx, ask.func, ask.output)
 }

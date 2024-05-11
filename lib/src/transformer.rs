@@ -2,17 +2,19 @@ use std::ops::Deref;
 
 use crate::{
     ctx_access::CtxAccessor,
-    transformer::{
-        input::ByVal,
-        output::OutputBuilder,
-    },
+    transformer::input::ByVal,
     val::{
         list::ListVal,
         map::MapVal,
     },
     Ask,
+    AskVal,
     Call,
+    CallVal,
+    List,
+    Map,
     Pair,
+    PairVal,
     Val,
 };
 
@@ -25,136 +27,86 @@ pub(crate) trait Transformer<Input, Output> {
 pub(crate) struct DefaultByVal;
 
 impl DefaultByVal {
-    pub(crate) fn transform_val<'a, Ctx, Output, T>(t: &T, ctx: Ctx, input: Val) -> Output
+    pub(crate) fn transform_val<'a, Ctx, T>(t: &T, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxAccessor<'a>,
-        T: ByVal<Output>,
+        T: ByVal<Val>,
     {
         match input {
             Val::Symbol(s) => t.transform_symbol(ctx, s),
-            Val::Pair(p) => t.transform_pair(ctx, p.first, p.second),
+            Val::Pair(p) => t.transform_pair(ctx, p),
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
-            Val::Call(c) => t.transform_call(ctx, c.func, c.input),
-            Val::Ask(a) => t.transform_ask(ctx, a.func, a.output),
+            Val::Call(c) => t.transform_call(ctx, c),
+            Val::Ask(a) => t.transform_ask(ctx, a),
             v => t.transform_default(ctx, v),
         }
     }
 
-    pub(crate) fn transform_pair<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        mut ctx: Ctx,
-        first: Val,
-        second: Val,
-        builder: Builder,
-    ) -> Output
+    pub(crate) fn transform_pair<'a, Ctx, T>(t: &T, mut ctx: Ctx, pair: PairVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
-        T: Transformer<Val, Output>,
-        Builder: OutputBuilder<Output>,
+        T: Transformer<Val, Val>,
     {
-        let first = t.transform(ctx.reborrow(), first);
-        let second = t.transform(ctx, second);
-        builder.from_pair(first, second)
+        let pair = Pair::from(pair);
+        let first = t.transform(ctx.reborrow(), pair.first);
+        let second = t.transform(ctx, pair.second);
+        let pair = Pair::new(first, second);
+        Val::Pair(pair.into())
     }
 
-    pub(crate) fn transform_list<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        mut ctx: Ctx,
-        list: ListVal,
-        builder: Builder,
-    ) -> Output
+    pub(crate) fn transform_list<'a, Ctx, T>(t: &T, mut ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
-        T: Transformer<Val, Output>,
-        Builder: OutputBuilder<Output>,
+        T: Transformer<Val, Val>,
     {
-        let list = list.into_iter().map(|v| t.transform(ctx.reborrow(), v));
-        builder.from_list(list)
+        let list = List::from(list);
+        let list: List<Val> = list
+            .into_iter()
+            .map(|v| t.transform(ctx.reborrow(), v))
+            .collect();
+        Val::List(list.into())
     }
 
-    pub(crate) fn transform_map<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        mut ctx: Ctx,
-        map: MapVal,
-        builder: Builder,
-    ) -> Output
+    pub(crate) fn transform_map<'a, Ctx, T>(t: &T, mut ctx: Ctx, map: MapVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
-        T: Transformer<Val, Output>,
-        Builder: OutputBuilder<Output>,
+        T: Transformer<Val, Val>,
     {
-        let map = map.into_iter().map(|(k, v)| {
-            let key = t.transform(ctx.reborrow(), k);
-            let value = t.transform(ctx.reborrow(), v);
-            (key, value)
-        });
-        builder.from_map(map)
+        let map = Map::from(map);
+        let map: Map<Val, Val> = map
+            .into_iter()
+            .map(|(k, v)| {
+                let key = t.transform(ctx.reborrow(), k);
+                let value = t.transform(ctx.reborrow(), v);
+                (key, value)
+            })
+            .collect();
+        Val::Map(map.into())
     }
 
-    pub(crate) fn transform_call<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        mut ctx: Ctx,
-        func: Val,
-        input: Val,
-        builder: Builder,
-    ) -> Output
+    pub(crate) fn transform_call<'a, Ctx, T>(t: &T, mut ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
-        T: Transformer<Val, Output>,
-        Builder: OutputBuilder<Output>,
+        T: Transformer<Val, Val>,
     {
-        let func = t.transform(ctx.reborrow(), func);
-        let input = t.transform(ctx, input);
-        builder.from_call(func, input)
+        let call = Call::from(call);
+        let func = t.transform(ctx.reborrow(), call.func);
+        let input = t.transform(ctx, call.input);
+        let call = Call::new(func, input);
+        Val::Call(call.into())
     }
 
-    pub(crate) fn transform_ask<'a, Ctx, Output, T, Builder>(
-        t: &T,
-        mut ctx: Ctx,
-        func: Val,
-        output: Val,
-        builder: Builder,
-    ) -> Output
+    pub(crate) fn transform_ask<'a, Ctx, T>(t: &T, mut ctx: Ctx, ask: AskVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
-        T: Transformer<Val, Output>,
-        Builder: OutputBuilder<Output>,
+        T: Transformer<Val, Val>,
     {
-        let func = t.transform(ctx.reborrow(), func);
-        let output = t.transform(ctx, output);
-        builder.from_ask(func, output)
-    }
-}
-
-#[derive(Copy, Clone)]
-pub(crate) struct ValBuilder;
-
-impl OutputBuilder<Val> for ValBuilder {
-    fn from_pair(&self, first: Val, second: Val) -> Val {
-        Val::Pair(Box::new(Pair::new(first, second)))
-    }
-
-    fn from_list<Iter>(&self, iter: Iter) -> Val
-    where
-        Iter: Iterator<Item = Val>,
-    {
-        Val::List(iter.collect())
-    }
-
-    fn from_map<Iter>(&self, kv_iter: Iter) -> Val
-    where
-        Iter: Iterator<Item = (Val, Val)>,
-    {
-        Val::Map(kv_iter.collect())
-    }
-
-    fn from_call(&self, func: Val, input: Val) -> Val {
-        Val::Call(Box::new(Call::new(func, input)))
-    }
-
-    fn from_ask(&self, func: Val, output: Val) -> Val {
-        Val::Ask(Box::new(Ask::new(func, output)))
+        let ask = Ask::from(ask);
+        let func = t.transform(ctx.reborrow(), ask.func);
+        let output = t.transform(ctx, ask.output);
+        let ask = Ask::new(func, output);
+        Val::Ask(ask.into())
     }
 }
 
@@ -171,5 +123,3 @@ where
 }
 
 pub(crate) mod input;
-
-pub(crate) mod output;

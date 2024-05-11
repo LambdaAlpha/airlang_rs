@@ -36,9 +36,9 @@ use crate::{
 pub enum Repr {
     Unit(Unit),
     Bool(Bool),
+    Symbol(Symbol),
     Int(Int),
     Float(Float),
-    Symbol(Symbol),
     String(Str),
     Pair(Box<PairRepr>),
     List(ListRepr),
@@ -66,6 +66,12 @@ impl From<Bool> for Repr {
     }
 }
 
+impl From<Symbol> for Repr {
+    fn from(s: Symbol) -> Self {
+        Repr::Symbol(s)
+    }
+}
+
 impl From<Int> for Repr {
     fn from(i: Int) -> Self {
         Repr::Int(i)
@@ -78,15 +84,15 @@ impl From<Float> for Repr {
     }
 }
 
-impl From<Symbol> for Repr {
-    fn from(s: Symbol) -> Self {
-        Repr::Symbol(s)
-    }
-}
-
 impl From<Str> for Repr {
     fn from(s: Str) -> Self {
         Repr::String(s)
+    }
+}
+
+impl From<PairRepr> for Repr {
+    fn from(p: PairRepr) -> Self {
+        Repr::Pair(Box::new(p))
     }
 }
 
@@ -108,9 +114,9 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<Box<Annotation<Repr, Repr>>> for Repr {
-    fn from(value: Box<Annotation<Repr, Repr>>) -> Self {
-        value.value
+impl From<Annotation<Repr, Repr>> for Repr {
+    fn from(a: Annotation<Repr, Repr>) -> Self {
+        a.value
     }
 }
 
@@ -120,9 +126,21 @@ impl From<Bytes> for Repr {
     }
 }
 
+impl From<CallRepr> for Repr {
+    fn from(c: CallRepr) -> Self {
+        Repr::Call(Box::new(c))
+    }
+}
+
 impl From<Box<CallRepr>> for Repr {
-    fn from(a: Box<CallRepr>) -> Self {
-        Repr::Call(a)
+    fn from(c: Box<CallRepr>) -> Self {
+        Repr::Call(c)
+    }
+}
+
+impl From<AskRepr> for Repr {
+    fn from(a: AskRepr) -> Self {
+        Repr::Ask(Box::new(a))
     }
 }
 

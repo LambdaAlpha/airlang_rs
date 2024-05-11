@@ -20,6 +20,6 @@ fn test_build_import() -> Result<(), Box<dyn Error>> {
     let mut mut_ctx = MutableCtx::new(&mut ctx);
     init_ctx(mut_ctx.reborrow());
     let output = interpret_mutable(mut_ctx, src);
-    assert_eq!(output, Val::Int(Int::from(5)));
+    assert_eq!(output, Val::Int(Int::from(5).into()));
     Ok(())
 }

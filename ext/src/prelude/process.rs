@@ -4,9 +4,10 @@ use airlang::{
     Bytes,
     FuncVal,
     Int,
+    List,
     Map,
-    MapVal,
     MutableCtx,
+    Str,
     Symbol,
     Val,
 };
@@ -62,12 +63,14 @@ fn fn_call(input: Val) -> Val {
     let Some(Val::List(arguments)) = map.remove(&arguments_key) else {
         return Val::default();
     };
+    let arguments = List::from(arguments);
     let arguments = arguments
         .into_iter()
         .map(|val| {
             let Val::String(arg) = val else {
                 return None;
             };
+            let arg = Str::from(arg);
             Some(String::from(arg))
         })
         .collect::<Option<Vec<String>>>();
@@ -75,25 +78,25 @@ fn fn_call(input: Val) -> Val {
         return Val::default();
     };
 
-    let output = Command::new(&*program).args(arguments).output();
+    let output = Command::new(&**program).args(arguments).output();
     let Ok(output) = output else {
         return Val::default();
     };
 
-    let stdout = Val::Bytes(Bytes::from(output.stdout));
-    let stderr = Val::Bytes(Bytes::from(output.stderr));
+    let stdout = Val::Bytes(Bytes::from(output.stdout).into());
+    let stderr = Val::Bytes(Bytes::from(output.stderr).into());
     let status = if let Some(status) = output.status.code() {
-        Val::Int(Int::from(status))
+        Val::Int(Int::from(status).into())
     } else {
         Val::default()
     };
 
-    let mut map = MapVal::default();
+    let mut map = Map::default();
     let output_key = Val::Symbol(unsafe { Symbol::from_str_unchecked("output") });
     map.insert(output_key, stdout);
     let error_key = Val::Symbol(unsafe { Symbol::from_str_unchecked("error") });
     map.insert(error_key, stderr);
     let status_key = Val::Symbol(unsafe { Symbol::from_str_unchecked("status") });
     map.insert(status_key, status);
-    Val::Map(map)
+    Val::Map(map.into())
 }

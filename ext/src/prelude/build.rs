@@ -56,6 +56,7 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::String(url) = input else {
         return Val::default();
     };
+    let url = Str::from(url);
     let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
     let cur_url = get_cur_url(ctx.reborrow(), cur_url_key.clone());
     let new_url = cur_url
@@ -85,7 +86,7 @@ fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
     if let Ok(meta) = ctx.meta() {
         if let Ok(val) = meta.get_ref(key) {
             return if let Val::String(url) = val {
-                Some((**url).clone())
+                Some((***url).clone())
             } else {
                 None
             };
@@ -102,11 +103,11 @@ fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
 
 fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) {
     if let Some(meta) = ctx.reborrow().meta() {
-        let _ = meta.put(key, Invariant::None, Val::String(Str::from(new_url)));
+        let _ = meta.put(key, Invariant::None, Val::String(Str::from(new_url).into()));
     } else {
         let mut meta = Ctx::default();
         let meta_mut = MutableCtx::new(&mut meta);
-        let _ = meta_mut.put(key, Invariant::None, Val::String(Str::from(new_url)));
+        let _ = meta_mut.put(key, Invariant::None, Val::String(Str::from(new_url).into()));
         ctx.set_meta(Some(meta));
     }
 }

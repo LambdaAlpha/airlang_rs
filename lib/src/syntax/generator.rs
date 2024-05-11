@@ -129,16 +129,16 @@ where
     #[allow(unused)]
     Unit(&'a Unit),
     Bool(&'a Bool),
+    Symbol(&'a Symbol),
     Int(&'a Int),
     Float(&'a Float),
-    Bytes(&'a Bytes),
     String(&'a Str),
-    Symbol(&'a Symbol),
     Pair(&'a Pair<T, T>),
-    Call(&'a Call<T, T>),
-    Ask(&'a Ask<T, T>),
     List(&'a List<T>),
     Map(&'a Map<T, T>),
+    Bytes(&'a Bytes),
+    Call(&'a Call<T, T>),
+    Ask(&'a Ask<T, T>),
     Annotation(&'a Annotation<T, T>),
 }
 
@@ -155,16 +155,16 @@ where
     match repr.try_into()? {
         GenerateRepr::Unit(_) => generate_unit(s),
         GenerateRepr::Bool(b) => generate_bool(b.bool(), s),
+        GenerateRepr::Symbol(str) => generate_symbol(str, s),
         GenerateRepr::Int(i) => generate_int(i, s),
         GenerateRepr::Float(f) => generate_float(f, s),
-        GenerateRepr::Bytes(bytes) => generate_bytes(bytes, s),
         GenerateRepr::String(str) => generate_string(str, s),
-        GenerateRepr::Symbol(str) => generate_symbol(str, s),
         GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
-        GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
-        GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
+        GenerateRepr::Bytes(bytes) => generate_bytes(bytes, s),
+        GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
+        GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
         GenerateRepr::Annotation(a) => generate_annotation(a, s, format, indent)?,
     }
     Ok(())

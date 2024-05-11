@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     bool::Bool,
     ctx::{
@@ -26,7 +24,6 @@ use crate::{
         symbol,
     },
     val::{
-        assert::AssertVal,
         func::FuncVal,
         map::MapVal,
     },
@@ -92,7 +89,7 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Func(func) = map_remove(&mut map, FUNCTION) else {
         return Val::default();
     };
-    let FuncTransformer::Free(_) = &func.0.transformer else {
+    let FuncTransformer::Free(_) = &func.transformer else {
         return Val::default();
     };
     let input = map_remove(&mut map, INPUT);
@@ -100,7 +97,7 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let output = map_remove(&mut map, OUTPUT);
     let output = func.output_mode.transform(ctx, output);
     let assert = Assert::new(func, input, output);
-    Val::Assert(AssertVal(Rc::new(assert)))
+    Val::Assert(assert.into())
 }
 
 fn repr() -> Named<FuncVal> {
@@ -115,10 +112,10 @@ fn repr() -> Named<FuncVal> {
 }
 
 fn fn_repr(input: Val) -> Val {
-    let Val::Assert(AssertVal(assert)) = input else {
+    let Val::Assert(assert) = input else {
         return Val::default();
     };
-    let mut repr = MapVal::default();
+    let mut repr = MapVal::from(Map::<Val, Val>::default());
     generate_assert(&mut repr, &assert);
     Val::Map(repr)
 }
@@ -145,7 +142,7 @@ fn is_verified() -> Named<FuncVal> {
 
 fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(AssertVal(assert)) = val else {
+        let Val::Assert(assert) = val else {
             return Val::default();
         };
         Val::Bool(Bool::new(assert.is_verified()))
@@ -160,7 +157,7 @@ fn func() -> Named<FuncVal> {
 
 fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(AssertVal(assert)) = val else {
+        let Val::Assert(assert) = val else {
             return Val::default();
         };
         Val::Func(assert.func().clone())
@@ -175,7 +172,7 @@ fn input() -> Named<FuncVal> {
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(AssertVal(assert)) = val else {
+        let Val::Assert(assert) = val else {
             return Val::default();
         };
         assert.input().clone()
@@ -190,7 +187,7 @@ fn output() -> Named<FuncVal> {
 
 fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(AssertVal(assert)) = val else {
+        let Val::Assert(assert) = val else {
             return Val::default();
         };
         assert.output().clone()

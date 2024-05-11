@@ -12,6 +12,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Int,
 };
 
 #[derive(Clone)]
@@ -73,13 +74,16 @@ fn fn_add(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Int(i1.add(i2))
+    let i1 = Int::from(i1);
+    let i2 = Int::from(i2);
+    Val::Int(i1.add(i2).into())
 }
 
 fn subtract() -> Named<FuncVal> {
@@ -92,13 +96,16 @@ fn fn_subtract(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Int(i1.subtract(i2))
+    let i1 = Int::from(i1);
+    let i2 = Int::from(i2);
+    Val::Int(i1.subtract(i2).into())
 }
 
 fn multiply() -> Named<FuncVal> {
@@ -111,13 +118,16 @@ fn fn_multiply(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Int(i1.multiply(i2))
+    let i1 = Int::from(i1);
+    let i2 = Int::from(i2);
+    Val::Int(i1.multiply(i2).into())
 }
 
 fn divide() -> Named<FuncVal> {
@@ -130,16 +140,19 @@ fn fn_divide(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
+    let i1 = Int::from(i1);
+    let i2 = Int::from(i2);
     let Some(i) = i1.divide(i2) else {
         return Val::default();
     };
-    Val::Int(i)
+    Val::Int(i.into())
 }
 
 fn remainder() -> Named<FuncVal> {
@@ -152,16 +165,19 @@ fn fn_remainder(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
+    let i1 = Int::from(i1);
+    let i2 = Int::from(i2);
     let Some(i) = i1.remainder(i2) else {
         return Val::default();
     };
-    Val::Int(i)
+    Val::Int(i.into())
 }
 
 fn divide_remainder() -> Named<FuncVal> {
@@ -174,16 +190,19 @@ fn fn_divide_remainder(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
+    let i1 = Int::from(i1);
+    let i2 = Int::from(i2);
     let Some((quotient, rem)) = i1.divide_remainder(i2) else {
         return Val::default();
     };
-    Val::Pair(Box::new(Pair::new(Val::Int(quotient), Val::Int(rem))))
+    Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 
 fn less_than() -> Named<FuncVal> {
@@ -196,6 +215,7 @@ fn fn_less_than(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
@@ -215,6 +235,7 @@ fn fn_less_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
@@ -234,6 +255,7 @@ fn fn_greater_than(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
@@ -253,6 +275,7 @@ fn fn_greater_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };
@@ -272,6 +295,7 @@ fn fn_less_greater(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         return Val::default();
     };

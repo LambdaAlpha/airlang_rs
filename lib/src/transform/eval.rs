@@ -6,17 +6,19 @@ use crate::{
     transform::id::Id,
     transformer::{
         input::ByVal,
-        output::OutputBuilder,
         DefaultByVal,
         Transformer,
-        ValBuilder,
     },
     val::{
-        func::FuncVal,
         list::ListVal,
         map::MapVal,
         Val,
     },
+    Ask,
+    AskVal,
+    Call,
+    CallVal,
+    PairVal,
 };
 
 #[derive(Copy, Clone)]
@@ -46,41 +48,43 @@ impl ByVal<Val> for Eval {
         DefaultCtx.get_or_default(ctx, s)
     }
 
-    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, first: Val, second: Val) -> Val
+    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_pair(self, ctx, first, second, ValBuilder)
+        DefaultByVal::transform_pair(self, ctx, pair)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_list(self, ctx, list, ValBuilder)
+        DefaultByVal::transform_list(self, ctx, list)
     }
 
     fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        DefaultByVal::transform_map(self, ctx, map, ValBuilder)
+        DefaultByVal::transform_map(self, ctx, map)
     }
 
-    fn transform_call<'a, Ctx>(&self, mut ctx: Ctx, func: Val, input: Val) -> Val
+    fn transform_call<'a, Ctx>(&self, mut ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        let func = self.transform(ctx.reborrow(), func);
-        self.eval_input_then_call(ctx, func, input)
+        let call = Call::from(call);
+        let func = self.transform(ctx.reborrow(), call.func);
+        self.eval_input_then_call(ctx, func, call.input)
     }
 
-    fn transform_ask<'a, Ctx>(&self, mut ctx: Ctx, func: Val, output: Val) -> Val
+    fn transform_ask<'a, Ctx>(&self, mut ctx: Ctx, ask: AskVal) -> Val
     where
         Ctx: CtxAccessor<'a>,
     {
-        let func = self.transform(ctx.reborrow(), func);
-        self.eval_output_then_solve(ctx, func, output)
+        let ask = Ask::from(ask);
+        let func = self.transform(ctx.reborrow(), ask.func);
+        self.eval_output_then_solve(ctx, func, ask.output)
     }
 }
 
@@ -89,12 +93,13 @@ impl Eval {
     where
         Ctx: CtxAccessor<'a>,
     {
-        if let Val::Func(FuncVal(func)) = &func {
+        if let Val::Func(func) = &func {
             let input = func.input_mode.transform(ctx.reborrow(), input);
             func.transform(ctx, input)
         } else {
             let input = self.transform(ctx, input);
-            ValBuilder.from_call(func, input)
+            let call = Call::new(func, input);
+            Val::Call(call.into())
         }
     }
 
@@ -102,7 +107,7 @@ impl Eval {
     where
         Ctx: CtxAccessor<'a>,
     {
-        if let Val::Func(FuncVal(func)) = func {
+        if let Val::Func(func) = func {
             func.input_mode.transform(ctx, input)
         } else {
             self.transform(ctx, input)
@@ -113,10 +118,11 @@ impl Eval {
     where
         Ctx: CtxAccessor<'a>,
     {
-        if let Val::Func(FuncVal(func)) = &func {
+        if let Val::Func(func) = &func {
             func.transform(ctx, input)
         } else {
-            ValBuilder.from_call(func, input)
+            let call = Call::new(func, input);
+            Val::Call(call.into())
         }
     }
 
@@ -134,7 +140,8 @@ impl Eval {
             solve(ctx, func, output)
         } else {
             let output = self.transform(ctx, output);
-            ValBuilder.from_ask(func, output)
+            let ask = Ask::new(func, output);
+            Val::Ask(ask.into())
         }
     }
 
@@ -142,7 +149,7 @@ impl Eval {
     where
         Ctx: CtxAccessor<'a>,
     {
-        if let Val::Func(FuncVal(f)) = func {
+        if let Val::Func(f) = func {
             f.output_mode.transform(ctx, output)
         } else {
             self.transform(ctx, output)
@@ -156,7 +163,8 @@ impl Eval {
         if let Val::Func(func) = func {
             solve(ctx, func, output)
         } else {
-            ValBuilder.from_ask(func, output)
+            let ask = Ask::new(func, output);
+            Val::Ask(ask.into())
         }
     }
 }

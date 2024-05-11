@@ -102,7 +102,9 @@ fn fn_verified(input: Val) -> Val {
     if !assert.is_verified() {
         return Val::default();
     }
-    Val::Answer(AnswerVal::from(Answer::Verified(Verified(assert))))
+    Val::Answer(AnswerVal::from(Answer::Verified(
+        Verified::new(assert).unwrap(),
+    )))
 }
 
 fn is_unsolved() -> Named<FuncVal> {
@@ -201,7 +203,8 @@ fn fn_into_input(input: Val) -> Val {
     let Val::Answer(answer) = input else {
         return Val::default();
     };
-    match *answer.0 {
+    let answer = Answer::from(answer);
+    match answer {
         Answer::Unsolved => Val::default(),
         Answer::Unsolvable => Val::default(),
         Answer::Unverified(value) => value,
@@ -242,8 +245,9 @@ fn fn_into_evidence(input: Val) -> Val {
     let Val::Answer(answer) = input else {
         return Val::default();
     };
-    let Answer::Verified(Verified(assert)) = *answer.0 else {
+    let answer = Answer::from(answer);
+    let Answer::Verified(verified) = answer else {
         return Val::default();
     };
-    Val::Assert(assert)
+    Val::Assert(verified.unwrap())
 }

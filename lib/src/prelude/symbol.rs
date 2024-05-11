@@ -69,5 +69,5 @@ fn fn_into_str(input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    Val::String(Str::from(String::from(s)))
+    Val::String(Str::from(String::from(s)).into())
 }

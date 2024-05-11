@@ -13,9 +13,7 @@ use crate::{
     },
     transformer::{
         input::ByVal,
-        output::OutputBuilder,
         Transformer,
-        ValBuilder,
     },
     AskVal,
     CallVal,
@@ -147,9 +145,9 @@ impl Transformer<Val, Val> for ValMode {
     {
         match input {
             Val::Symbol(s) => self.symbol.transform(ctx, s),
-            Val::Pair(pair) => self.pair.transform(ctx, *pair),
-            Val::Call(call) => self.call.transform(ctx, *call),
-            Val::Ask(ask) => self.ask.transform(ctx, *ask),
+            Val::Pair(pair) => self.pair.transform(ctx, pair),
+            Val::Call(call) => self.call.transform(ctx, call),
+            Val::Ask(ask) => self.ask.transform(ctx, ask),
             Val::List(list) => self.list.transform(ctx, list),
             Val::Map(map) => self.map.transform(ctx, map),
             val => val,
@@ -174,9 +172,11 @@ impl Transformer<PairVal, Val> for PairMode {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let input = Pair::from(input);
         let first = self.first.transform(ctx.reborrow(), input.first);
         let second = self.second.transform(ctx, input.second);
-        ValBuilder.from_pair(first, second)
+        let pair = Pair::new(first, second);
+        Val::Pair(pair.into())
     }
 }
 
@@ -185,13 +185,14 @@ impl Transformer<ListVal, Val> for ListMode {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let val_list = List::from(val_list);
         match self {
             ListMode::All(mode) => {
-                let list = val_list
+                let list: List<Val> = val_list
                     .into_iter()
                     .map(|val| mode.transform(ctx.reborrow(), val))
                     .collect();
-                Val::List(list)
+                Val::List(list.into())
             }
             ListMode::Some(mode_list) => {
                 let mut list = Vec::with_capacity(val_list.len());
@@ -218,7 +219,7 @@ impl Transformer<ListVal, Val> for ListMode {
                 for val in val_iter {
                     list.push(Eval.transform(ctx.reborrow(), val));
                 }
-                ValBuilder.from_list(list.into_iter())
+                Val::List(List::from(list).into())
             }
         }
     }
@@ -229,26 +230,33 @@ impl Transformer<MapVal, Val> for MapMode {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let val_map = Map::from(val_map);
         match self {
             MapMode::All(mode) => {
-                let map = val_map.into_iter().map(|(k, v)| {
-                    let k = mode.first.transform(ctx.reborrow(), k);
-                    let v = mode.second.transform(ctx.reborrow(), v);
-                    (k, v)
-                });
-                ValBuilder.from_map(map)
+                let map: Map<Val, Val> = val_map
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let k = mode.first.transform(ctx.reborrow(), k);
+                        let v = mode.second.transform(ctx.reborrow(), v);
+                        (k, v)
+                    })
+                    .collect();
+                Val::Map(map.into())
             }
             MapMode::Some(mode_map) => {
-                let map = val_map.into_iter().map(|(k, v)| {
-                    let v = if let Some(mode) = mode_map.get(&k) {
-                        mode.transform(ctx.reborrow(), v)
-                    } else {
-                        Eval.transform(ctx.reborrow(), v)
-                    };
-                    let k = Id.transform(ctx.reborrow(), k);
-                    (k, v)
-                });
-                ValBuilder.from_map(map)
+                let map: Map<Val, Val> = val_map
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let v = if let Some(mode) = mode_map.get(&k) {
+                            mode.transform(ctx.reborrow(), v)
+                        } else {
+                            Eval.transform(ctx.reborrow(), v)
+                        };
+                        let k = Id.transform(ctx.reborrow(), k);
+                        (k, v)
+                    })
+                    .collect();
+                Val::Map(map.into())
             }
         }
     }
@@ -260,7 +268,7 @@ impl Transformer<CallVal, Val> for CallMode {
         Ctx: CtxAccessor<'a>,
     {
         match self {
-            CallMode::Eval => Eval.transform_call(ctx, call.func, call.input),
+            CallMode::Eval => Eval.transform_call(ctx, call),
             CallMode::Struct(mode) => mode.transform(ctx, call),
             CallMode::Dependent(mode) => mode.transform(ctx, call),
         }
@@ -272,6 +280,7 @@ impl Transformer<CallVal, Val> for CallDepMode {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let call = Call::from(call);
         let func = Eval.transform(ctx.reborrow(), call.func);
         let transformer = match func {
             Val::Func(f) => {
@@ -287,11 +296,13 @@ impl Transformer<CallVal, Val> for CallDepMode {
             Val::Symbol(_) => &self.symbol,
             _ => {
                 let input = Eval.transform(ctx, call.input);
-                return ValBuilder.from_call(func, input);
+                let call = Call::new(func, input);
+                return Val::Call(call.into());
             }
         };
         let input = transformer.transform(ctx, call.input);
-        ValBuilder.from_call(func, input)
+        let call = Call::new(func, input);
+        Val::Call(call.into())
     }
 }
 
@@ -300,9 +311,11 @@ impl Transformer<CallVal, Val> for Call<Mode, Mode> {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let call = Call::from(call);
         let func = self.func.transform(ctx.reborrow(), call.func);
         let input = self.input.transform(ctx, call.input);
-        ValBuilder.from_call(func, input)
+        let call = Call::new(func, input);
+        Val::Call(call.into())
     }
 }
 
@@ -312,7 +325,7 @@ impl Transformer<AskVal, Val> for AskMode {
         Ctx: CtxAccessor<'a>,
     {
         match self {
-            AskMode::Eval => Eval.transform_ask(ctx, input.func, input.output),
+            AskMode::Eval => Eval.transform_ask(ctx, input),
             AskMode::Struct(ask) => ask.transform(ctx, input),
             AskMode::Dependent(ask) => ask.transform(ctx, input),
         }
@@ -324,6 +337,7 @@ impl Transformer<AskVal, Val> for AskDepMode {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let ask = Ask::from(ask);
         let func = Eval.transform(ctx.reborrow(), ask.func);
         let transformer = match func {
             Val::Func(f) => {
@@ -339,11 +353,13 @@ impl Transformer<AskVal, Val> for AskDepMode {
             Val::Symbol(_) => &self.symbol,
             _ => {
                 let output = Eval.transform(ctx, ask.output);
-                return ValBuilder.from_ask(func, output);
+                let ask = Ask::new(func, output);
+                return Val::Ask(ask.into());
             }
         };
         let output = transformer.transform(ctx, ask.output);
-        ValBuilder.from_ask(func, output)
+        let ask = Ask::new(func, output);
+        Val::Ask(ask.into())
     }
 }
 
@@ -352,9 +368,11 @@ impl Transformer<AskVal, Val> for Ask<Mode, Mode> {
     where
         Ctx: CtxAccessor<'a>,
     {
+        let ask = Ask::from(ask);
         let func = self.func.transform(ctx.reborrow(), ask.func);
         let output = self.output.transform(ctx, ask.output);
-        ValBuilder.from_ask(func, output)
+        let ask = Ask::new(func, output);
+        Val::Ask(ask.into())
     }
 }
 

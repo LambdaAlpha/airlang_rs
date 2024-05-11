@@ -25,6 +25,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Pair,
 };
 
 #[derive(Clone)]
@@ -84,7 +85,7 @@ fn fn_get_first(ctx: CtxForConstFn, input: Val) -> Val {
             _ => Val::default(),
         },
         Either::Right(val) => match val {
-            Val::Pair(pair) => pair.first,
+            Val::Pair(pair) => Pair::from(pair).first,
             _ => Val::default(),
         },
     })
@@ -100,6 +101,7 @@ fn fn_set_first(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
+    let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
@@ -127,7 +129,7 @@ fn fn_get_second(ctx: CtxForConstFn, input: Val) -> Val {
             _ => Val::default(),
         },
         Either::Right(val) => match val {
-            Val::Pair(pair) => pair.second,
+            Val::Pair(pair) => Pair::from(pair).second,
             _ => Val::default(),
         },
     })
@@ -143,6 +145,7 @@ fn fn_set_second(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
+    let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {

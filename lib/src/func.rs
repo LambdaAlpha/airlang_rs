@@ -460,15 +460,16 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
 }
 
 fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
-    let val = Val::Ctx(CtxVal(Box::new(ctx)));
+    let val = Val::Ctx(CtxVal::from(ctx));
     let _ = new_ctx.put_value(name, CtxValue { val, invariant });
 }
 
 fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: Symbol) {
-    let Ok(Val::Ctx(CtxVal(caller))) = new_ctx.into_val(name) else {
+    let Ok(Val::Ctx(caller)) = new_ctx.into_val(name) else {
         return;
     };
-    *ctx = *caller;
+    let caller = Ctx::from(caller);
+    *ctx = caller;
 }
 
 impl<F> PartialEq for Primitive<F> {

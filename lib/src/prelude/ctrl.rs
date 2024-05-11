@@ -22,7 +22,11 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Call,
+    List,
+    Map,
     Mode,
+    Pair,
 };
 
 #[derive(Clone)]
@@ -114,6 +118,7 @@ where
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let condition = pair.first;
     let Val::Pair(branches) = pair.second else {
         return Val::default();
@@ -121,6 +126,7 @@ where
     let Val::Bool(b) = condition else {
         return Val::default();
     };
+    let branches = Pair::from(branches);
     let branch = if b.bool() {
         branches.first
     } else {
@@ -153,6 +159,7 @@ where
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let condition = pair.first;
     let Val::Pair(branches) = pair.second else {
         return Val::default();
@@ -160,6 +167,7 @@ where
     let Val::Bool(b) = condition else {
         return Val::default();
     };
+    let branches = Pair::from(branches);
     let branch = if b.bool() {
         branches.second
     } else {
@@ -195,14 +203,17 @@ where
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let val = pair.first;
     let Val::Pair(pair) = pair.second else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let Val::Map(map) = pair.first else {
         return Val::default();
     };
     let default = pair.second;
+    let map = Map::from(map);
     let eval = map
         .into_iter()
         .find_map(|(k, v)| {
@@ -234,6 +245,7 @@ where
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let condition = pair.first;
     let body = pair.second;
     loop {
@@ -275,6 +287,7 @@ where
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
     let condition = pair.first;
     let body = pair.second;
     loop {
@@ -302,6 +315,7 @@ where
     let Val::List(list) = input else {
         return (Eval.transform(ctx, input), CtrlFlowTag::None);
     };
+    let list = List::from(list);
     let mut output = Val::default();
     for val in list {
         let Val::Call(call) = val else {
@@ -316,9 +330,11 @@ where
             output = Eval.transform(ctx.reborrow(), Val::Call(call));
             continue;
         };
+        let call = Call::from(call);
         let Val::Pair(pair) = call.input else {
             return (Val::default(), CtrlFlowTag::Error);
         };
+        let pair = Pair::from(pair);
         let condition = Eval.transform(ctx.reborrow(), pair.first);
         let Val::Bool(condition) = condition else {
             return (Val::default(), CtrlFlowTag::Error);

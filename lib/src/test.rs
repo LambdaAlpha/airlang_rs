@@ -69,7 +69,7 @@ fn test_doc() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_val_size() {
     let size = size_of::<Val>();
-    assert!(size <= 40);
+    assert_eq!(size, 24);
 }
 
 #[test]

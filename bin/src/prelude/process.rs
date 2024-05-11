@@ -2,8 +2,10 @@ use std::process::Command;
 
 use airlang::{
     FuncVal,
+    List,
     Map,
     MutableCtx,
+    Str,
     Symbol,
     Val,
 };
@@ -59,12 +61,14 @@ fn fn_call(input: Val) -> Val {
     let Some(Val::List(arguments)) = map.remove(&arguments_key) else {
         return Val::default();
     };
+    let arguments = List::from(arguments);
     let arguments = arguments
         .into_iter()
         .map(|val| {
             let Val::String(arg) = val else {
                 return None;
             };
+            let arg = Str::from(arg);
             Some(String::from(arg))
         })
         .collect::<Option<Vec<String>>>();
@@ -72,7 +76,7 @@ fn fn_call(input: Val) -> Val {
         return Val::default();
     };
 
-    let child = Command::new(&*program).args(arguments).spawn();
+    let child = Command::new(&**program).args(arguments).spawn();
     let Ok(mut child) = child else {
         eprintln!("failed to execute program");
         return Val::default();

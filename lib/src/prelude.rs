@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     ctx::{
         Ctx,
@@ -170,7 +168,7 @@ fn named_free_fn(
         output_mode,
         FuncTransformer::Free(FuncImpl::Primitive(primitive)),
     );
-    let func_val = FuncVal(Rc::new(func));
+    let func_val = FuncVal::from(func);
     Named::new(name, func_val)
 }
 
@@ -186,7 +184,7 @@ fn named_const_fn(
         output_mode,
         FuncTransformer::Const(FuncImpl::Primitive(primitive)),
     );
-    let func_val = FuncVal(Rc::new(func));
+    let func_val = FuncVal::from(func);
     Named::new(name, func_val)
 }
 
@@ -202,7 +200,7 @@ fn named_mutable_fn(
         output_mode,
         FuncTransformer::Mutable(FuncImpl::Primitive(primitive)),
     );
-    let func_val = FuncVal(Rc::new(func));
+    let func_val = FuncVal::from(func);
     Named::new(name, func_val)
 }
 
