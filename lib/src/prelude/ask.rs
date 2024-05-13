@@ -77,5 +77,5 @@ where
         return Val::default();
     };
     let ask = Ask::from(ask);
-    Eval.eval_output_then_solve(ctx, ask.func, ask.output)
+    Eval::solve(ctx, ask.func, ask.output)
 }

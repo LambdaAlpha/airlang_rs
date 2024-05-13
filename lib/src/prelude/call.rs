@@ -77,5 +77,5 @@ where
         return Val::default();
     };
     let call = Call::from(call);
-    Eval.eval_input_then_call(ctx, call.func, call.input)
+    Eval::call(ctx, call.func, call.input)
 }
