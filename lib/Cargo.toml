@@ -25,7 +25,10 @@ nom = "7"
 num-bigint = "0.4"
 num-traits = "0.2"
 num-integer = "0.1"
-string_cache = "0.8"
+
+[dependencies.string_cache]
+version = "0.8"
+features = []
 
 [dependencies.rand]
 version = "0.8"
