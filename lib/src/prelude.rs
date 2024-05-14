@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     ctx::{
         Ctx,
@@ -162,7 +164,7 @@ fn named_free_fn(
     output_mode: Mode,
     func: impl CtxFreeFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Box<dyn CtxFreeFn>>::new(name, func);
+    let primitive = Primitive::<Rc<dyn CtxFreeFn>>::new(name, func);
     let func = Func::new(
         input_mode,
         output_mode,
@@ -178,7 +180,7 @@ fn named_const_fn(
     output_mode: Mode,
     func: impl CtxConstFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Box<dyn CtxConstFn>>::new(name, func);
+    let primitive = Primitive::<Rc<dyn CtxConstFn>>::new(name, func);
     let func = Func::new(
         input_mode,
         output_mode,
@@ -194,7 +196,7 @@ fn named_mutable_fn(
     output_mode: Mode,
     func: impl CtxMutableFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Box<dyn CtxMutableFn>>::new(name, func);
+    let primitive = Primitive::<Rc<dyn CtxMutableFn>>::new(name, func);
     let func = Func::new(
         input_mode,
         output_mode,

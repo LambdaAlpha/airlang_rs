@@ -4,7 +4,10 @@ use std::{
         Formatter,
     },
     hash::Hash,
-    ops::Deref,
+    ops::{
+        Deref,
+        DerefMut,
+    },
     rc::Rc,
 };
 
@@ -40,5 +43,11 @@ impl Deref for FuncVal {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for FuncVal {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        Rc::make_mut(&mut self.0)
     }
 }

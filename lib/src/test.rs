@@ -1,6 +1,7 @@
 use std::{
     error::Error,
     mem::size_of,
+    rc::Rc,
 };
 
 use crate::{
@@ -189,7 +190,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
             Mode::Predefined(Transform::Eval),
             Mode::Predefined(Transform::Eval),
             func_ext_name,
-            Box::new(FuncExt),
+            Rc::new(FuncExt),
         ))),
     )?;
     test_interpret_with_ctx(

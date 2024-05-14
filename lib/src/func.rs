@@ -8,6 +8,7 @@ use std::{
         Hasher,
     },
     mem::swap,
+    rc::Rc,
 };
 
 use crate::{
@@ -39,7 +40,7 @@ use crate::{
     },
 };
 
-#[derive(Eq, PartialEq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Func {
     pub(crate) input_mode: Mode,
     pub(crate) output_mode: Mode,
@@ -58,20 +59,20 @@ pub trait CtxMutableFn {
     fn call(&self, ctx: CtxForMutableFn, input: Val) -> Val;
 }
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum FuncTransformer {
     Free(CtxFree),
     Const(CtxConst),
     Mutable(CtxMutable),
 }
 
-pub(crate) type CtxFree = FuncImpl<Primitive<Box<dyn CtxFreeFn>>, Composed<CtxFreeInfo>>;
+pub(crate) type CtxFree = FuncImpl<Primitive<Rc<dyn CtxFreeFn>>, Composed<CtxFreeInfo>>;
 
-pub(crate) type CtxConst = FuncImpl<Primitive<Box<dyn CtxConstFn>>, Composed<CtxConstInfo>>;
+pub(crate) type CtxConst = FuncImpl<Primitive<Rc<dyn CtxConstFn>>, Composed<CtxConstInfo>>;
 
-pub(crate) type CtxMutable = FuncImpl<Primitive<Box<dyn CtxMutableFn>>, Composed<CtxMutableInfo>>;
+pub(crate) type CtxMutable = FuncImpl<Primitive<Rc<dyn CtxMutableFn>>, Composed<CtxMutableInfo>>;
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum FuncImpl<P, C> {
     Primitive(P),
     Composed(C),
@@ -302,7 +303,7 @@ impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> f
     }
 }
 
-impl Transformer<Val, Val> for Primitive<Box<dyn CtxFreeFn>> {
+impl Transformer<Val, Val> for Primitive<Rc<dyn CtxFreeFn>> {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxAccessor<'a>,
@@ -325,7 +326,7 @@ impl Transformer<Val, Val> for Composed<CtxFreeInfo> {
     }
 }
 
-impl Transformer<Val, Val> for Primitive<Box<dyn CtxConstFn>> {
+impl Transformer<Val, Val> for Primitive<Rc<dyn CtxConstFn>> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxAccessor<'a>,
@@ -365,7 +366,7 @@ impl Transformer<Val, Val> for Composed<CtxConstInfo> {
     }
 }
 
-impl Transformer<Val, Val> for Primitive<Box<dyn CtxMutableFn>> {
+impl Transformer<Val, Val> for Primitive<Rc<dyn CtxMutableFn>> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxAccessor<'a>,
@@ -559,7 +560,7 @@ impl Func {
         input_mode: Mode,
         output_mode: Mode,
         id: Symbol,
-        fn1: Box<dyn CtxFreeFn>,
+        fn1: Rc<dyn CtxFreeFn>,
     ) -> Self {
         let transformer = FuncTransformer::Free(CtxFree::Primitive(Primitive {
             is_extension: true,
@@ -577,7 +578,7 @@ impl Func {
         input_mode: Mode,
         output_mode: Mode,
         id: Symbol,
-        fn1: Box<dyn CtxConstFn>,
+        fn1: Rc<dyn CtxConstFn>,
     ) -> Self {
         let transformer = FuncTransformer::Const(CtxConst::Primitive(Primitive {
             is_extension: true,
@@ -595,7 +596,7 @@ impl Func {
         input_mode: Mode,
         output_mode: Mode,
         id: Symbol,
-        fn1: Box<dyn CtxMutableFn>,
+        fn1: Rc<dyn CtxMutableFn>,
     ) -> Self {
         let transformer = FuncTransformer::Mutable(CtxMutable::Primitive(Primitive {
             is_extension: true,
@@ -620,22 +621,22 @@ impl<C> Primitive<C> {
     }
 }
 
-impl Primitive<Box<dyn CtxFreeFn>> {
+impl Primitive<Rc<dyn CtxFreeFn>> {
     pub(crate) fn new(id: &str, f: impl CtxFreeFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            fn1: Box::new(f),
+            fn1: Rc::new(f),
         }
     }
 }
 
-impl Primitive<Box<dyn CtxConstFn>> {
+impl Primitive<Rc<dyn CtxConstFn>> {
     pub(crate) fn new(id: &str, f: impl CtxConstFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            fn1: Box::new(f),
+            fn1: Rc::new(f),
         }
     }
 }
@@ -669,12 +670,12 @@ where
     }
 }
 
-impl Primitive<Box<dyn CtxMutableFn>> {
+impl Primitive<Rc<dyn CtxMutableFn>> {
     pub(crate) fn new(id: &str, f: impl CtxMutableFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            fn1: Box::new(f),
+            fn1: Rc::new(f),
         }
     }
 }

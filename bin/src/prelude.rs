@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use airlang::{
     Ask,
     AskMode,
@@ -77,7 +79,7 @@ fn named_free_fn(
     func: impl CtxFreeFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = Func::new_free(input_mode, output_mode, name_symbol, Box::new(func));
+    let func = Func::new_free(input_mode, output_mode, name_symbol, Rc::new(func));
     let func_val = FuncVal::from(func);
     Named::new(name, func_val)
 }
@@ -90,7 +92,7 @@ fn named_const_fn(
     func: impl CtxConstFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = Func::new_const(input_mode, output_mode, name_symbol, Box::new(func));
+    let func = Func::new_const(input_mode, output_mode, name_symbol, Rc::new(func));
     let func_val = FuncVal::from(func);
     Named::new(name, func_val)
 }
@@ -102,7 +104,7 @@ fn named_mutable_fn(
     func: impl CtxMutableFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = Func::new_mutable(input_mode, output_mode, name_symbol, Box::new(func));
+    let func = Func::new_mutable(input_mode, output_mode, name_symbol, Rc::new(func));
     let func_val = FuncVal::from(func);
     Named::new(name, func_val)
 }
