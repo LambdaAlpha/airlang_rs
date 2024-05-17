@@ -1,3 +1,35 @@
 1 '?' 2
 -----
 1 ? 2
+=====
+; [a = 1 '?' 2, ask.function a]
+-----
+1
+=====
+; [a = 1 '?' 2, ask.output a]
+-----
+2
+=====
+ask.function ! 1 '?' 2
+-----
+1
+=====
+ask.output ! 1 '?' 2
+-----
+2
+=====
+; [a = 1 '?' 2, a ask.set_function 3]
+-----
+1
+=====
+; [a = 1 '?' 2, a ask.set_function 3, a]
+-----
+3 ? 2
+=====
+; [a = 1 '?' 2, a ask.set_output 3]
+-----
+2
+=====
+; [a = 1 '?' 2, a ask.set_output 3, a]
+-----
+1 ? 3

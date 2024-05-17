@@ -178,11 +178,11 @@ true
 -----
 1
 =====
-; [(a . final) = 1 : 2, a set_1 3, a]
+; [(a . final) = 1 : 2, a pair.set_first 3, a]
 -----
 3 : 2
 =====
-; [(a . constant) = 1 : 2, a set_1 3, a]
+; [(a . constant) = 1 : 2, a pair.set_first 3, a]
 -----
 1 : 2
 =====
@@ -359,14 +359,14 @@ true
 ; [
     a = . context {p : 1 : 2},
     b = 3,
-    a | p set_1 b,
+    a | p pair.set_first b,
     a | read ! p,
 ]
 -----
 3 : 2
 =====
 ; [
-    set_first = set_1,
+    set_first = pair.set_first,
     a = . context {set_first : move ! set_first, p : 1 : 2},
     b = 3,
     a .| p set_first b,
@@ -377,14 +377,14 @@ true
 =====
 ; [
     a = . context {p : 1 : 2, b : 3},
-    a |. p set_1 b,
+    a |. p pair.set_first b,
     a | read ! p,
 ]
 -----
 3 : 2
 =====
 ; [
-    set_first = set_1,
+    set_first = pair.set_first,
     a = . context {set_first : move ! set_first, p : 1 : 2, b : 3},
     a .|. p set_first b,
     a | read ! p,
@@ -436,7 +436,7 @@ true
 -----
 .
 =====
-. | get_1 ! 1 : 2
+. | pair.first ! 1 : 2
 -----
 1
 =====

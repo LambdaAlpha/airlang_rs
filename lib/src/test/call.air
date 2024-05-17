@@ -2,6 +2,38 @@
 -----
 1 ! 2
 =====
+; [a = 1 '!' 2, call.function a]
+-----
+1
+=====
+; [a = 1 '!' 2, call.input a]
+-----
+2
+=====
+call.function ! 1 '!' 2
+-----
+1
+=====
+call.input ! 1 '!' 2
+-----
+2
+=====
+; [a = 1 '!' 2, a call.set_function 3]
+-----
+1
+=====
+; [a = 1 '!' 2, a call.set_function 3, a]
+-----
+3 ! 2
+=====
+; [a = 1 '!' 2, a call.set_input 3]
+-----
+2
+=====
+; [a = 1 '!' 2, a call.set_input 3, a]
+-----
+1 ! 3
+=====
 ; [a = 1, b = id ! a, !! ! read ! b]
 -----
 1
