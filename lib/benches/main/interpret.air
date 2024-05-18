@@ -1,26 +1,22 @@
 "bench interpret" @ ; ! [
   ctx = . context {
     : ;,
-    : while,
-    : <>,
-    : if,
-    : >,
     : =,
-    : -,
+    : for,
+    : ==,
+    : %,
+    : +,
   },
   f = function ! {
     body : ; ! [
-      (x : y) = input,
-      (x <> y) while (x > y) if (
-        x = x - y
-      ) : (
-        y = y - x
-      ),
-      x
+      sum = 0,
+      input for i : [
+        (0 == i % 3) continue .,
+        sum = sum + i,
+      ],
+      sum
     ],
     context : move ! ctx,
   },
-  x = 42,
-  y = 24,
-  x f y
+  f 100
 ]

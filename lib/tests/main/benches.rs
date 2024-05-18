@@ -17,7 +17,7 @@ fn test_interpret() -> Result<(), Box<dyn Error>> {
     let s = include_str!("../../benches/main/interpret.air");
     let src_val = parse(s)?;
     let output = interpret_mutable(mutable_ctx, src_val);
-    let expected = Val::Int(Int::from(6).into());
+    let expected = Val::Int(Int::from(3267).into());
     assert_eq!(output, expected);
     Ok(())
 }
