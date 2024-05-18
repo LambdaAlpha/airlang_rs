@@ -93,6 +93,17 @@ enum CtrlFlow {
     Exit(Exit),
 }
 
+#[derive(Clone)]
+enum BlockItem {
+    Normal(Val),
+    Exit {
+        exit: Exit,
+        target: bool,
+        condition: Val,
+        body: Val,
+    },
+}
+
 fn sequence() -> Named<FuncVal> {
     let input_mode = Mode::Predefined(Transform::Id);
     let output_mode = default_mode();
@@ -108,7 +119,7 @@ fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxAccessor<'a>,
 {
-    block(ctx, input).0
+    eval_block(ctx, input).0
 }
 
 fn if1() -> Named<FuncVal> {
@@ -149,7 +160,7 @@ where
     } else {
         branches.second
     };
-    block(ctx, branch).0
+    eval_block(ctx, branch).0
 }
 
 fn if_not() -> Named<FuncVal> {
@@ -190,7 +201,7 @@ where
     } else {
         branches.first
     };
-    block(ctx, branch).0
+    eval_block(ctx, branch).0
 }
 
 fn match1() -> Named<FuncVal> {
@@ -238,7 +249,7 @@ where
             if k == val { Some(v) } else { None }
         })
         .unwrap_or(default);
-    block(ctx, eval).0
+    eval_block(ctx, eval).0
 }
 
 fn while1() -> Named<FuncVal> {
@@ -265,21 +276,38 @@ where
     let pair = Pair::from(pair);
     let condition = pair.first;
     let body = pair.second;
-    loop {
-        let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+    if let Val::List(body) = body {
+        let body = List::from(body);
+        let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
+        let Some(block_items) = block_items else {
             return Val::default();
         };
-        if !b.bool() {
-            break;
+        loop {
+            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+                return Val::default();
+            };
+            if !b.bool() {
+                break;
+            }
+            let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
+            match ctrl_flow {
+                CtrlFlow::None => {}
+                CtrlFlow::Error => return Val::default(),
+                CtrlFlow::Exit(exit) => match exit {
+                    Exit::Continue => {}
+                    Exit::Break => return output,
+                },
+            }
         }
-        let (output, ctrl_flow) = block(ctx.reborrow(), body.clone());
-        match ctrl_flow {
-            CtrlFlow::None => {}
-            CtrlFlow::Error => return Val::default(),
-            CtrlFlow::Exit(exit) => match exit {
-                Exit::Continue => {}
-                Exit::Break => return output,
-            },
+    } else {
+        loop {
+            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+                return Val::default();
+            };
+            if !b.bool() {
+                break;
+            }
+            Eval.transform(ctx.reborrow(), body.clone());
         }
     }
     Val::default()
@@ -309,21 +337,38 @@ where
     let pair = Pair::from(pair);
     let condition = pair.first;
     let body = pair.second;
-    loop {
-        let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+    if let Val::List(body) = body {
+        let body = List::from(body);
+        let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
+        let Some(block_items) = block_items else {
             return Val::default();
         };
-        if b.bool() {
-            break;
+        loop {
+            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+                return Val::default();
+            };
+            if b.bool() {
+                break;
+            }
+            let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
+            match ctrl_flow {
+                CtrlFlow::None => {}
+                CtrlFlow::Error => return Val::default(),
+                CtrlFlow::Exit(exit) => match exit {
+                    Exit::Continue => {}
+                    Exit::Break => return output,
+                },
+            }
         }
-        let (output, ctrl_flow) = block(ctx.reborrow(), body.clone());
-        match ctrl_flow {
-            CtrlFlow::None => {}
-            CtrlFlow::Error => return Val::default(),
-            CtrlFlow::Exit(exit) => match exit {
-                Exit::Continue => {}
-                Exit::Break => return output,
-            },
+    } else {
+        loop {
+            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+                return Val::default();
+            };
+            if b.bool() {
+                break;
+            }
+            Eval.transform(ctx.reborrow(), body.clone());
         }
     }
     Val::default()
@@ -418,22 +463,34 @@ where
     Ctx: CtxAccessor<'a>,
     ValIter: Iterator<Item = Val>,
 {
-    for val in values {
-        let _ = ctx.reborrow().put_value(name.clone(), CtxValue::new(val));
-        let (output, ctrl_flow) = block(ctx.reborrow(), body.clone());
-        match ctrl_flow {
-            CtrlFlow::None => {}
-            CtrlFlow::Error => return Val::default(),
-            CtrlFlow::Exit(exit) => match exit {
-                Exit::Continue => {}
-                Exit::Break => return output,
-            },
+    if let Val::List(body) = body {
+        let body = List::from(body);
+        let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
+        let Some(block_items) = block_items else {
+            return Val::default();
+        };
+        for val in values {
+            let _ = ctx.reborrow().put_value(name.clone(), CtxValue::new(val));
+            let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
+            match ctrl_flow {
+                CtrlFlow::None => {}
+                CtrlFlow::Error => return Val::default(),
+                CtrlFlow::Exit(exit) => match exit {
+                    Exit::Continue => {}
+                    Exit::Break => return output,
+                },
+            }
+        }
+    } else {
+        for val in values {
+            let _ = ctx.reborrow().put_value(name.clone(), CtxValue::new(val));
+            Eval.transform(ctx.reborrow(), body.clone());
         }
     }
     Val::default()
 }
 
-fn block<'a, Ctx>(mut ctx: Ctx, input: Val) -> (Val, CtrlFlow)
+fn eval_block<'a, Ctx>(ctx: Ctx, input: Val) -> (Val, CtrlFlow)
 where
     Ctx: CtxAccessor<'a>,
 {
@@ -441,34 +498,67 @@ where
         return (Eval.transform(ctx, input), CtrlFlow::None);
     };
     let list = List::from(list);
+    let block_items: Option<List<BlockItem>> = list.into_iter().map(parse_block_item).collect();
+    let Some(block_items) = block_items else {
+        return (Val::default(), CtrlFlow::Error);
+    };
+    eval_block_items(ctx, block_items)
+}
+
+fn eval_block_items<'a, Ctx>(mut ctx: Ctx, block_items: List<BlockItem>) -> (Val, CtrlFlow)
+where
+    Ctx: CtxAccessor<'a>,
+{
     let mut output = Val::default();
-    for val in list {
-        let Val::Call(call) = val else {
-            output = Eval.transform(ctx.reborrow(), val);
-            continue;
-        };
-        let Val::Symbol(s) = &call.func else {
-            output = Eval.transform(ctx.reborrow(), Val::Call(call));
-            continue;
-        };
-        let Some((exit, target)) = parse_exit(s) else {
-            output = Eval.transform(ctx.reborrow(), Val::Call(call));
-            continue;
-        };
-        let call = Call::from(call);
-        let Val::Pair(pair) = call.input else {
-            return (Val::default(), CtrlFlow::Error);
-        };
-        let pair = Pair::from(pair);
-        let condition = Eval.transform(ctx.reborrow(), pair.first);
-        let Val::Bool(condition) = condition else {
-            return (Val::default(), CtrlFlow::Error);
-        };
-        if condition.bool() == target {
-            return (Eval.transform(ctx, pair.second), CtrlFlow::from(exit));
+    for block_item in block_items {
+        match block_item {
+            BlockItem::Normal(val) => {
+                output = Eval.transform(ctx.reborrow(), val);
+            }
+            BlockItem::Exit {
+                exit,
+                target,
+                condition,
+                body,
+            } => {
+                let condition = Eval.transform(ctx.reborrow(), condition);
+                let Val::Bool(condition) = condition else {
+                    return (Val::default(), CtrlFlow::Error);
+                };
+                if condition.bool() == target {
+                    let output = Eval.transform(ctx, body);
+                    return (output, CtrlFlow::from(exit));
+                }
+            }
         }
     }
     (output, CtrlFlow::None)
+}
+
+fn parse_block_item(val: Val) -> Option<BlockItem> {
+    let Val::Call(call) = val else {
+        return Some(BlockItem::Normal(val));
+    };
+    let Val::Symbol(s) = &call.func else {
+        return Some(BlockItem::Normal(Val::Call(call)));
+    };
+    let Some((exit, target)) = parse_exit(s) else {
+        return Some(BlockItem::Normal(Val::Call(call)));
+    };
+    let call = Call::from(call);
+    let Val::Pair(pair) = call.input else {
+        return None;
+    };
+    let pair = Pair::from(pair);
+    let condition = pair.first;
+    let body = pair.second;
+    let block_item = BlockItem::Exit {
+        exit,
+        target,
+        condition,
+        body,
+    };
+    Some(block_item)
 }
 
 fn parse_exit(str: &str) -> Option<(Exit, bool /* target */)> {
