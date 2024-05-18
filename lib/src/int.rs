@@ -17,6 +17,7 @@ use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{
     Num,
+    Signed,
     ToPrimitive,
     Zero,
 };
@@ -33,6 +34,18 @@ impl Int {
         let s = format!("{sign}{digits}");
         let i = BigInt::from_str_radix(&s, radix as u32).unwrap();
         Int(i)
+    }
+
+    pub(crate) fn is_zero(&self) -> bool {
+        self.0.is_zero()
+    }
+
+    pub(crate) fn is_positive(&self) -> bool {
+        self.0.is_positive()
+    }
+
+    pub(crate) fn is_negative(&self) -> bool {
+        self.0.is_negative()
     }
 
     pub(crate) fn to_i8(&self) -> Option<i8> {
