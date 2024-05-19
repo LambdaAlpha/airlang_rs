@@ -5,7 +5,6 @@ use crate::{
         DefaultCtx,
     },
     ctx_access::constant::CtxForConstFn,
-    func::FuncTransformer,
     logic::Assert,
     map::Map,
     prelude::{
@@ -18,7 +17,7 @@ use crate::{
         Named,
         Prelude,
     },
-    transformer::Transformer,
+    transform::eval::Eval,
     utils::val::{
         map_remove,
         symbol,
@@ -86,16 +85,11 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let Val::Func(func) = map_remove(&mut map, FUNCTION) else {
-        return Val::default();
-    };
-    let FuncTransformer::Free(_) = &func.transformer else {
-        return Val::default();
-    };
+    let func = map_remove(&mut map, FUNCTION);
     let input = map_remove(&mut map, INPUT);
-    let input = func.input_mode.transform(ctx.reborrow(), input);
+    let input = Eval.eval_input(ctx.reborrow(), &func, input);
     let output = map_remove(&mut map, OUTPUT);
-    let output = func.output_mode.transform(ctx, output);
+    let output = Eval.eval_output(ctx, &func, output);
     let assert = Assert::new(func, input, output);
     Val::Assert(assert.into())
 }
@@ -121,7 +115,7 @@ fn fn_repr(input: Val) -> Val {
 }
 
 fn generate_assert(repr: &mut MapVal, assert: &Assert) {
-    repr.insert(symbol(FUNCTION), Val::Func(assert.func().clone()));
+    repr.insert(symbol(FUNCTION), assert.func().clone());
     repr.insert(symbol(INPUT), assert.input().clone());
     repr.insert(symbol(OUTPUT), assert.output().clone());
     if assert.is_verified() {
@@ -160,7 +154,7 @@ fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
         let Val::Assert(assert) = val else {
             return Val::default();
         };
-        Val::Func(assert.func().clone())
+        assert.func().clone()
     })
 }
 

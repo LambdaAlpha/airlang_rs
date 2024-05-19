@@ -48,7 +48,10 @@ where
     let Answer::Verified(assert) = &**answer else {
         return input;
     };
-    if *assert.func() != func || *assert.output() != output || !assert.is_verified() {
+    let Val::Func(assert_func) = assert.func() else {
+        return Val::default();
+    };
+    if *assert_func != func || *assert.output() != output || !assert.is_verified() {
         return Val::default();
     }
     input

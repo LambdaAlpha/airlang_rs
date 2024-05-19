@@ -32,6 +32,17 @@
 true
 =====
 ; [
+    p = assert ! {
+        function : "not",
+        input : 1,
+        output : 2,
+    },
+    (assert.function p) == "not"
+]
+-----
+true
+=====
+; [
     !map = function ! {
         body : input,
         input_mode : {map : id all eval},

@@ -8,15 +8,14 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Assert {
-    func: FuncVal,
+    func: Val,
     input: Val,
     output: Val,
     verified: bool,
 }
 
 impl Assert {
-    pub(crate) fn new(func: FuncVal, input: Val, output: Val) -> Self {
-        debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
+    pub(crate) fn new(func: Val, input: Val, output: Val) -> Self {
         Self {
             func,
             input,
@@ -25,7 +24,7 @@ impl Assert {
         }
     }
 
-    pub fn func(&self) -> &FuncVal {
+    pub fn func(&self) -> &Val {
         &self.func
     }
 
@@ -44,6 +43,7 @@ impl Assert {
     pub(crate) fn new_verified(func: FuncVal, input: Val) -> Self {
         debug_assert!(matches!(func.transformer, FuncTransformer::Free(_)));
         let output = func.transformer.transform(FreeCtx, input.clone());
+        let func = Val::Func(func);
         Self {
             func,
             input,

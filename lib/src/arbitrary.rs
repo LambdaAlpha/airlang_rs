@@ -492,11 +492,12 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 }
 
 pub(crate) fn any_assert(rng: &mut SmallRng, depth: usize) -> Assert {
-    let func = any_free_func(rng, depth);
     let input = any_val(rng, depth);
     if rng.gen() {
+        let func = any_free_func(rng, depth);
         Assert::new_verified(func, input)
     } else {
+        let func = any_val(rng, depth);
         let output = any_val(rng, depth);
         Assert::new(func, input, output)
     }
