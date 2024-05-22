@@ -63,10 +63,10 @@ use crate::{
     bool::Bool,
     bytes::Bytes,
     call::Call,
-    float::Float,
     int::Int,
     list::List,
     map::Map,
+    number::Number,
     pair::Pair,
     string::Str,
     symbol::Symbol,
@@ -99,7 +99,7 @@ pub(crate) trait ParseRepr:
     From<Unit>
     + From<Bool>
     + From<Int>
-    + From<Float>
+    + From<Number>
     + From<Bytes>
     + From<Symbol>
     + From<Str>
@@ -766,8 +766,8 @@ where
         None => (true, ""),
         Some((exp_sign, exp)) => (*exp_sign, &**exp),
     };
-    let f = Float::from_parts(SIGN, &integral, fractional, exp_sign, exp);
-    From::from(f)
+    let n = Number::from_parts(SIGN, &integral, fractional, exp_sign, exp);
+    From::from(n)
 }
 
 fn bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>

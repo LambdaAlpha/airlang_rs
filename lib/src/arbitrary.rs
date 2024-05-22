@@ -28,7 +28,6 @@ use crate::{
         Invariant,
     },
     extension::UnitExt,
-    float::Float,
     func::{
         Composed,
         CtxConstInfo,
@@ -46,6 +45,7 @@ use crate::{
         ListItemMode,
         Mode,
     },
+    number::Number,
     pair::Pair,
     prelude::{
         Prelude,
@@ -80,7 +80,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // bool
         weight, // symbol
         weight, // int
-        weight, // float
+        weight, // number
         weight, // bytes
         weight, // string
         1,      // pair
@@ -103,7 +103,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1 => Val::Bool(any_bool(rng)),
         2 => Val::Symbol(any_symbol(rng)),
         3 => Val::Int(any_int(rng).into()),
-        4 => Val::Float(any_float(rng).into()),
+        4 => Val::Number(any_number(rng).into()),
         5 => Val::Bytes(any_bytes(rng).into()),
         6 => Val::String(any_string(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
@@ -132,7 +132,7 @@ pub(crate) fn any_int(rng: &mut SmallRng) -> Int {
     Int::from(rng.gen::<i128>())
 }
 
-pub(crate) fn any_float(rng: &mut SmallRng) -> Float {
+pub(crate) fn any_number(rng: &mut SmallRng) -> Number {
     let sign: bool = rng.gen();
     let integral: u32 = rng.gen();
     let integral: String = integral.to_string();
@@ -141,7 +141,7 @@ pub(crate) fn any_float(rng: &mut SmallRng) -> Float {
     let exp_sign: bool = rng.gen();
     let exp: u8 = rng.gen();
     let exp: String = exp.to_string();
-    Float::from_parts(sign, &integral, &fractional, exp_sign, &exp)
+    Number::from_parts(sign, &integral, &fractional, exp_sign, &exp)
 }
 
 pub(crate) fn any_bytes(rng: &mut SmallRng) -> Bytes {
@@ -290,7 +290,7 @@ pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
             unit: any_mode(rng, new_depth),
             bool: any_mode(rng, new_depth),
             int: any_mode(rng, new_depth),
-            float: any_mode(rng, new_depth),
+            number: any_mode(rng, new_depth),
             bytes: any_mode(rng, new_depth),
             string: any_mode(rng, new_depth),
             symbol: any_mode(rng, new_depth),
@@ -317,7 +317,7 @@ pub(crate) fn any_ask_mode(rng: &mut SmallRng, depth: usize) -> AskMode {
             unit: any_mode(rng, new_depth),
             bool: any_mode(rng, new_depth),
             int: any_mode(rng, new_depth),
-            float: any_mode(rng, new_depth),
+            number: any_mode(rng, new_depth),
             bytes: any_mode(rng, new_depth),
             string: any_mode(rng, new_depth),
             symbol: any_mode(rng, new_depth),

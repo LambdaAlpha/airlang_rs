@@ -11,8 +11,8 @@ use crate::{
     annotation::Annotation,
     bool::Bool,
     bytes::Bytes,
-    float::Float,
     int::Int,
+    number::Number,
     string::Str,
     symbol::Symbol,
     syntax::{
@@ -38,7 +38,7 @@ pub enum Repr {
     Bool(Bool),
     Symbol(Symbol),
     Int(Int),
-    Float(Float),
+    Number(Number),
     String(Str),
     Pair(Box<PairRepr>),
     List(ListRepr),
@@ -78,9 +78,9 @@ impl From<Int> for Repr {
     }
 }
 
-impl From<Float> for Repr {
-    fn from(f: Float) -> Self {
-        Repr::Float(f)
+impl From<Number> for Repr {
+    fn from(n: Number) -> Self {
+        Repr::Number(n)
     }
 }
 
@@ -205,7 +205,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Unit(u) => GenerateRepr::Unit(u),
             Repr::Bool(b) => GenerateRepr::Bool(b),
             Repr::Int(i) => GenerateRepr::Int(i),
-            Repr::Float(f) => GenerateRepr::Float(f),
+            Repr::Number(n) => GenerateRepr::Number(n),
             Repr::Bytes(b) => GenerateRepr::Bytes(b),
             Repr::Symbol(s) => GenerateRepr::Symbol(s),
             Repr::String(s) => GenerateRepr::String(s),

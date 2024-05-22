@@ -15,10 +15,10 @@ use crate::{
         BOOL,
         BYTES,
         CALL,
-        FLOAT,
         INT,
         LIST,
         MAP,
+        NUMBER,
         PAIR,
         STRING,
         SYMBOL,
@@ -202,8 +202,8 @@ fn parse_call_dep(mut map: MapVal) -> Option<CallDepMode> {
     if let Some(int_mode) = map.remove(&symbol(INT)) {
         mode.int = parse(int_mode)?;
     }
-    if let Some(float_mode) = map.remove(&symbol(FLOAT)) {
-        mode.float = parse(float_mode)?;
+    if let Some(number_mode) = map.remove(&symbol(NUMBER)) {
+        mode.number = parse(number_mode)?;
     }
     if let Some(bytes_mode) = map.remove(&symbol(BYTES)) {
         mode.bytes = parse(bytes_mode)?;
@@ -240,8 +240,8 @@ fn generate_call_dep(mode: &CallDepMode) -> Val {
     if mode.int != Default::default() {
         map.insert(symbol(INT), generate(&mode.int));
     }
-    if mode.float != Default::default() {
-        map.insert(symbol(FLOAT), generate(&mode.float));
+    if mode.number != Default::default() {
+        map.insert(symbol(NUMBER), generate(&mode.number));
     }
     if mode.bytes != Default::default() {
         map.insert(symbol(BYTES), generate(&mode.bytes));
@@ -290,8 +290,8 @@ fn parse_ask_dep(mut map: MapVal) -> Option<AskDepMode> {
     if let Some(int_mode) = map.remove(&symbol(INT)) {
         mode.int = parse(int_mode)?;
     }
-    if let Some(float_mode) = map.remove(&symbol(FLOAT)) {
-        mode.float = parse(float_mode)?;
+    if let Some(number_mode) = map.remove(&symbol(NUMBER)) {
+        mode.number = parse(number_mode)?;
     }
     if let Some(bytes_mode) = map.remove(&symbol(BYTES)) {
         mode.bytes = parse(bytes_mode)?;
@@ -328,8 +328,8 @@ fn generate_ask_dep(mode: &AskDepMode) -> Val {
     if mode.int != Default::default() {
         map.insert(symbol(INT), generate(&mode.int));
     }
-    if mode.float != Default::default() {
-        map.insert(symbol(FLOAT), generate(&mode.float));
+    if mode.number != Default::default() {
+        map.insert(symbol(NUMBER), generate(&mode.number));
     }
     if mode.bytes != Default::default() {
         map.insert(symbol(BYTES), generate(&mode.bytes));

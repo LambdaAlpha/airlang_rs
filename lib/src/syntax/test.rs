@@ -2,9 +2,9 @@ use std::error::Error;
 
 use crate::{
     bool::Bool,
-    float::Float,
     int::Int,
     map::Map,
+    number::Number,
     string::Str,
     symbol::Symbol,
     syntax::{
@@ -25,7 +25,7 @@ mod booleans;
 mod bytes;
 mod calls;
 mod annotations;
-mod floats;
+mod numbers;
 mod infixes;
 mod ints;
 mod lists;
@@ -53,8 +53,8 @@ fn positive_decimal_int(s: &str) -> Repr {
     Repr::Int(Int::from_sign_string_radix(true, s, 10))
 }
 
-fn float(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digits: &str) -> Repr {
-    Repr::Float(Float::from_parts(
+fn number(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digits: &str) -> Repr {
+    Repr::Number(Number::from_parts(
         sign, integral, fractional, exp_sign, exp_digits,
     ))
 }
@@ -233,17 +233,17 @@ fn test_generate_ints() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_floats() -> Result<(), Box<dyn Error>> {
+fn test_parse_numbers() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/floats.air"),
-        "test/floats.air",
-        floats::expected,
+        include_str!("test/numbers.air"),
+        "test/numbers.air",
+        numbers::expected,
     )
 }
 
 #[test]
-fn test_generate_floats() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/floats.air"), "test/floats.air")
+fn test_generate_numbers() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/numbers.air"), "test/numbers.air")
 }
 
 #[test]

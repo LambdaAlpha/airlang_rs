@@ -2,17 +2,17 @@
 -----
 unit
 =====
-; [b = any ! bool, type_of b]
+; [b = any ! boolean, type_of b]
 -----
-bool
+boolean
 =====
-; [i = any ! int, type_of i]
+; [i = any ! integer, type_of i]
 -----
-int
+integer
 =====
-; [f = any ! float, type_of f]
+; [f = any ! number, type_of f]
 -----
-float
+number
 =====
 ; [b = any ! bytes, type_of b]
 -----
@@ -64,19 +64,19 @@ unit
 =====
 ; [a = true, type_of a]
 -----
-bool
+boolean
 =====
 type_of ! not ! true
 -----
-false : bool
+false : boolean
 =====
 ; [a = 1, type_of a]
 -----
-int
+integer
 =====
 ; [a = 1.0, type_of a]
 -----
-float
+number
 =====
 ; [a = #xff, type_of a]
 -----

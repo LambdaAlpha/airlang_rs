@@ -11,7 +11,7 @@ use crate::{
     bool::Bool,
     bytes::Bytes,
     extension::ValExt,
-    float::Float,
+    number::Number,
     string::Str,
     symbol::Symbol,
     syntax::{
@@ -27,11 +27,11 @@ use crate::{
         bytes::BytesVal,
         call::CallVal,
         ctx::CtxVal,
-        float::FloatVal,
         func::FuncVal,
         int::IntVal,
         list::ListVal,
         map::MapVal,
+        number::NumberVal,
         pair::PairVal,
         string::StrVal,
     },
@@ -51,7 +51,7 @@ pub enum Val {
     Symbol(Symbol),
 
     Int(IntVal),
-    Float(FloatVal),
+    Number(NumberVal),
     String(StrVal),
     Pair(PairVal),
     List(ListVal),
@@ -72,10 +72,10 @@ pub enum Val {
 }
 
 pub(crate) const UNIT: &str = "unit";
-pub(crate) const BOOL: &str = "bool";
+pub(crate) const BOOL: &str = "boolean";
 pub(crate) const SYMBOL: &str = "symbol";
-pub(crate) const INT: &str = "int";
-pub(crate) const FLOAT: &str = "float";
+pub(crate) const INT: &str = "integer";
+pub(crate) const NUMBER: &str = "number";
 pub(crate) const STRING: &str = "string";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const LIST: &str = "list";
@@ -131,15 +131,15 @@ impl From<IntVal> for Val {
     }
 }
 
-impl From<Float> for Val {
-    fn from(value: Float) -> Self {
-        Val::Float(FloatVal::from(value))
+impl From<Number> for Val {
+    fn from(value: Number) -> Self {
+        Val::Number(NumberVal::from(value))
     }
 }
 
-impl From<FloatVal> for Val {
-    fn from(value: FloatVal) -> Self {
-        Val::Float(value)
+impl From<NumberVal> for Val {
+    fn from(value: NumberVal) -> Self {
+        Val::Number(value)
     }
 }
 
@@ -270,7 +270,7 @@ impl From<&Repr> for Val {
             Repr::Bool(b) => Val::Bool(*b),
             Repr::Symbol(s) => Val::Symbol(s.clone()),
             Repr::Int(i) => Val::Int(IntVal::from(i.clone())),
-            Repr::Float(f) => Val::Float(FloatVal::from(f.clone())),
+            Repr::Number(n) => Val::Number(NumberVal::from(n.clone())),
             Repr::String(s) => Val::String(StrVal::from(s.clone())),
             Repr::Pair(p) => Val::Pair(PairVal::from(&**p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
@@ -289,7 +289,7 @@ impl From<Repr> for Val {
             Repr::Bool(b) => Val::Bool(b),
             Repr::Symbol(s) => Val::Symbol(s),
             Repr::Int(i) => Val::Int(IntVal::from(i)),
-            Repr::Float(f) => Val::Float(FloatVal::from(f)),
+            Repr::Number(n) => Val::Number(NumberVal::from(n)),
             Repr::String(s) => Val::String(StrVal::from(s)),
             Repr::Pair(p) => Val::Pair(PairVal::from(*p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
@@ -309,7 +309,7 @@ impl TryInto<Repr> for &Val {
             Val::Bool(b) => Ok(Repr::Bool(*b)),
             Val::Symbol(s) => Ok(Repr::Symbol(s.clone())),
             Val::Int(i) => Ok(Repr::Int(i.into())),
-            Val::Float(f) => Ok(Repr::Float(f.into())),
+            Val::Number(n) => Ok(Repr::Number(n.into())),
             Val::String(s) => Ok(Repr::String(s.into())),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
             Val::List(l) => Ok(Repr::List(l.try_into()?)),
@@ -330,7 +330,7 @@ impl TryInto<Repr> for Val {
             Val::Bool(b) => Ok(Repr::Bool(b)),
             Val::Symbol(s) => Ok(Repr::Symbol(s)),
             Val::Int(i) => Ok(Repr::Int(i.into())),
-            Val::Float(f) => Ok(Repr::Float(f.into())),
+            Val::Number(n) => Ok(Repr::Number(n.into())),
             Val::String(s) => Ok(Repr::String(s.into())),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
             Val::List(l) => Ok(Repr::List(l.try_into()?)),
@@ -364,7 +364,7 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             Val::Bool(b) => GenerateRepr::Bool(b),
             Val::Symbol(s) => GenerateRepr::Symbol(s),
             Val::Int(i) => GenerateRepr::Int(i),
-            Val::Float(f) => GenerateRepr::Float(f),
+            Val::Number(n) => GenerateRepr::Number(n),
             Val::String(s) => GenerateRepr::String(s),
             Val::Pair(p) => GenerateRepr::Pair(p),
             Val::List(l) => GenerateRepr::List(l),
@@ -385,7 +385,7 @@ impl Debug for Val {
             Val::Bool(b) => <_ as Debug>::fmt(b, f),
             Val::Symbol(s) => <_ as Debug>::fmt(s, f),
             Val::Int(i) => <_ as Debug>::fmt(i, f),
-            Val::Float(float) => <_ as Debug>::fmt(float, f),
+            Val::Number(n) => <_ as Debug>::fmt(n, f),
             Val::String(s) => <_ as Debug>::fmt(s, f),
             Val::Pair(p) => <_ as Debug>::fmt(p, f),
             Val::List(l) => <_ as Debug>::fmt(l, f),
@@ -404,7 +404,7 @@ impl Debug for Val {
 
 pub(crate) mod int;
 
-pub(crate) mod float;
+pub(crate) mod number;
 
 pub(crate) mod string;
 

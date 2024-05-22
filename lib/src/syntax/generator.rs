@@ -13,10 +13,10 @@ use crate::{
     bool::Bool,
     bytes::Bytes,
     call::Call,
-    float::Float,
     int::Int,
     list::List,
     map::Map,
+    number::Number,
     pair::Pair,
     string::Str,
     symbol::Symbol,
@@ -131,7 +131,7 @@ where
     Bool(&'a Bool),
     Symbol(&'a Symbol),
     Int(&'a Int),
-    Float(&'a Float),
+    Number(&'a Number),
     String(&'a Str),
     Pair(&'a Pair<T, T>),
     List(&'a List<T>),
@@ -157,7 +157,7 @@ where
         GenerateRepr::Bool(b) => generate_bool(b.bool(), s),
         GenerateRepr::Symbol(str) => generate_symbol(str, s),
         GenerateRepr::Int(i) => generate_int(i, s),
-        GenerateRepr::Float(f) => generate_float(f, s),
+        GenerateRepr::Number(n) => generate_number(n, s),
         GenerateRepr::String(str) => generate_string(str, s),
         GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
@@ -182,8 +182,8 @@ fn generate_int(i: &Int, s: &mut String) {
     s.push_str(&i.to_string());
 }
 
-fn generate_float(f: &Float, s: &mut String) {
-    s.push_str(&f.to_string());
+fn generate_number(n: &Number, s: &mut String) {
+    s.push_str(&n.to_string());
 }
 
 fn generate_bytes(bytes: &Bytes, s: &mut String) {

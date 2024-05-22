@@ -20,7 +20,6 @@ pub use self::{
         },
     },
     extension::ValExt,
-    float::Float,
     func::{
         CtxConstFn,
         CtxFreeFn,
@@ -44,6 +43,7 @@ pub use self::{
         SymbolMode,
         ValMode,
     },
+    number::Number,
     pair::Pair,
     problem::{
         Answer,
@@ -61,11 +61,11 @@ pub use self::{
         bytes::BytesVal,
         call::CallVal,
         ctx::CtxVal,
-        float::FloatVal,
         func::FuncVal,
         int::IntVal,
         list::ListVal,
         map::MapVal,
+        number::NumberVal,
         pair::PairVal,
         string::StrVal,
         Val,
@@ -133,7 +133,7 @@ pub(crate) mod bool;
 
 pub(crate) mod int;
 
-pub(crate) mod float;
+pub(crate) mod number;
 
 pub(crate) mod bytes;
 

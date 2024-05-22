@@ -18,12 +18,12 @@ use num_traits::Zero;
 // temporary representation
 // int * 10^exp
 #[derive(Clone, PartialEq, Hash)]
-pub struct Float {
+pub struct Number {
     int: BigInt,
     exp: BigInt,
 }
 
-impl Float {
+impl Number {
     pub(crate) fn from_parts(
         sign: bool,
         integral: &str,
@@ -48,17 +48,17 @@ impl Float {
     }
 }
 
-impl Eq for Float {
+impl Eq for Number {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-impl Display for Float {
+impl Display for Number {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}e{}", self.int, self.exp)
     }
 }
 
-impl Debug for Float {
+impl Debug for Number {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <_ as Display>::fmt(self, f)
     }

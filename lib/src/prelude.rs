@@ -32,13 +32,13 @@ use crate::{
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
         extension::ExtPrelude,
-        float::FloatPrelude,
         func::FuncPrelude,
         int::IntPrelude,
         list::ListPrelude,
         logic::LogicPrelude,
         map::MapPrelude,
         meta::MetaPrelude,
+        number::NumberPrelude,
         pair::PairPrelude,
         str::StrPrelude,
         symbol::SymbolPrelude,
@@ -83,7 +83,7 @@ pub(crate) struct AllPrelude {
     pub(crate) unit: UnitPrelude,
     pub(crate) bool: BoolPrelude,
     pub(crate) int: IntPrelude,
-    pub(crate) float: FloatPrelude,
+    pub(crate) number: NumberPrelude,
     pub(crate) bytes: BytesPrelude,
     pub(crate) str: StrPrelude,
     pub(crate) pair: PairPrelude,
@@ -111,7 +111,7 @@ impl Prelude for AllPrelude {
         self.unit.put(m);
         self.bool.put(m);
         self.int.put(m);
-        self.float.put(m);
+        self.number.put(m);
         self.bytes.put(m);
         self.str.put(m);
         self.pair.put(m);
@@ -307,7 +307,7 @@ mod bool;
 
 mod int;
 
-mod float;
+mod number;
 
 mod bytes;
 

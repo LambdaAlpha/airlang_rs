@@ -3,15 +3,15 @@ use crate::{
     prelude::Prelude,
 };
 #[derive(Clone)]
-pub(crate) struct FloatPrelude {}
+pub(crate) struct NumberPrelude {}
 
 #[allow(clippy::derivable_impls)]
-impl Default for FloatPrelude {
+impl Default for NumberPrelude {
     fn default() -> Self {
-        FloatPrelude {}
+        NumberPrelude {}
     }
 }
 
-impl Prelude for FloatPrelude {
+impl Prelude for NumberPrelude {
     fn put(&self, _m: &mut CtxMap) {}
 }

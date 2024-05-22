@@ -149,8 +149,8 @@ fn test_int() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_float() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/float.air"), "test/float.air")
+fn test_number() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/number.air"), "test/number.air")
 }
 
 #[test]
