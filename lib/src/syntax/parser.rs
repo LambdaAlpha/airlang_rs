@@ -791,10 +791,10 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = preceded(
-        char1(BYTES_PREFIX),
-        alt((hexadecimal_bytes, binary_bytes, empty_bytes)),
-    );
+    let hex = preceded(tag("X"), cut(hexadecimal_bytes));
+    let bin = preceded(tag("B"), cut(binary_bytes));
+    let bytes = alt((hex, bin, hexadecimal_bytes));
+    let f = preceded(char1(BYTES_PREFIX), bytes);
     context("bytes", f)(src)
 }
 
@@ -804,8 +804,8 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(hexadecimal1, |s: &str| s.len() % 2 == 0);
-    let tagged_digits = preceded(tag("X"), cut(trim_num0(digits)));
-    let f = map_res(tagged_digits, |s: String| {
+    let digits = trim_num0(digits);
+    let f = map_res(digits, |s| {
         Ok(From::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
         )))
@@ -819,22 +819,13 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digits = verify(binary1, |s: &str| s.len() % 8 == 0);
-    let tagged_digits = preceded(tag("B"), cut(trim_num0(digits)));
-    let f = map_res(tagged_digits, |s: String| {
+    let digits = trim_num0(digits);
+    let f = map_res(digits, |s| {
         Ok(From::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
         )))
     });
     context("binary_bytes", f)(src)
-}
-
-fn empty_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let f = |s| Ok((s, From::from(Bytes::default())));
-    context("empty_bytes", f)(src)
 }
 
 fn hexadecimal1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>

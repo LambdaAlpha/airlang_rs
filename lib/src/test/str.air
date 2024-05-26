@@ -32,8 +32,8 @@ string.concat ["1", "2"]
 =====
 string.into_utf8 "abc"
 -----
-#X616263
+#616263
 =====
-string.from_utf8 #X616263
+string.from_utf8 #616263
 -----
 "abc"

@@ -78,7 +78,7 @@ integer
 -----
 number
 =====
-; [a = #Xff, type_of a]
+; [a = #ff, type_of a]
 -----
 bytes
 =====
