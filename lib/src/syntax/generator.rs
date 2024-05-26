@@ -191,7 +191,7 @@ fn generate_bytes(bytes: &Bytes, s: &mut String) {
     if bytes.as_ref().is_empty() {
         return;
     }
-    s.push('x');
+    s.push('X');
     utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
 }
 

@@ -54,7 +54,7 @@ impl Eq for Number {
 
 impl Display for Number {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}e{}", self.int, self.exp)
+        write!(f, "{}E{}", self.int, self.exp)
     }
 }
 

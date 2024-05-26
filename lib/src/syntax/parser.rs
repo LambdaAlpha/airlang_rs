@@ -7,7 +7,7 @@ use nom::{
     branch::alt,
     bytes::complete::{
         is_not,
-        tag_no_case,
+        tag,
         take_while,
         take_while1,
         take_while_m_n,
@@ -16,7 +16,6 @@ use nom::{
         anychar,
         char as char1,
         digit1,
-        hex_digit1,
         multispace1,
     },
     combinator::{
@@ -674,8 +673,8 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = alt((
-        hex_int::<SIGN, _, _>,
-        bin_int::<SIGN, _, _>,
+        hexadecimal_int::<SIGN, _, _>,
+        binary_int::<SIGN, _, _>,
         decimal::<SIGN, _, _>,
     ));
     context("number", f)(src)
@@ -697,33 +696,30 @@ where
     map(separated_list1(char1('_'), f), |s| s.join(""))
 }
 
-fn hex_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn hexadecimal_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let digits = preceded(tag_no_case("0x"), cut(trim_num1(hex_digit1)));
+    let digits = preceded(tag("0X"), cut(trim_num1(take_while1(is_hexadecimal))));
     let f = map(digits, |digits: String| {
         let i = Int::from_sign_string_radix(SIGN, &digits, 16);
         From::from(i)
     });
-    context("hex_int", f)(src)
+    context("hexadecimal_int", f)(src)
 }
 
-fn bin_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn binary_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let digits = preceded(
-        tag_no_case("0b"),
-        cut(trim_num1(take_while1(|c: char| c == '0' || c == '1'))),
-    );
+    let digits = preceded(tag("0B"), cut(trim_num1(take_while1(is_binary))));
     let f = map(digits, |digits: String| {
         let i = Int::from_sign_string_radix(SIGN, &digits, 2);
         From::from(i)
     });
-    context("bin_int", f)(src)
+    context("binary_int", f)(src)
 }
 
 fn decimal<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -739,7 +735,7 @@ where
         success(true),
     ));
     let exponential = opt(preceded(
-        tag_no_case("e"),
+        tag("E"),
         cut(tuple((exp_sign, trim_num1(digit1)))),
     ));
     let fragments = tuple((integral, fractional, exponential));
@@ -777,41 +773,39 @@ where
 {
     let f = preceded(
         char1(BYTES_PREFIX),
-        alt((hex_bytes, bin_bytes, empty_bytes)),
+        alt((hexadecimal_bytes, binary_bytes, empty_bytes)),
     );
     context("bytes", f)(src)
 }
 
-fn hex_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn hexadecimal_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let digits = verify(hex_digit1, |s: &str| s.len() % 2 == 0);
-    let tagged_digits = preceded(tag_no_case("x"), cut(trim_num0(digits)));
+    let digits = verify(take_while1(is_hexadecimal), |s: &str| s.len() % 2 == 0);
+    let tagged_digits = preceded(tag("X"), cut(trim_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(From::from(Bytes::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
         )))
     });
-    context("hex_bytes", f)(src)
+    context("hexadecimal_bytes", f)(src)
 }
 
-fn bin_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn binary_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let digits = verify(take_while1(|c| c == '0' || c == '1'), |s: &str| {
-        s.len() % 8 == 0
-    });
-    let tagged_digits = preceded(tag_no_case("b"), cut(trim_num0(digits)));
+    let digits = verify(take_while1(is_binary), |s: &str| s.len() % 8 == 0);
+    let tagged_digits = preceded(tag("B"), cut(trim_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(From::from(Bytes::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
         )))
     });
-    context("bin_bytes", f)(src)
+    context("binary_bytes", f)(src)
 }
 
 fn empty_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -821,4 +815,12 @@ where
 {
     let f = |s| Ok((s, From::from(Bytes::default())));
     context("empty_bytes", f)(src)
+}
+
+fn is_hexadecimal(c: char) -> bool {
+    matches!(c, '0'..='9' | 'a'..='f')
+}
+
+fn is_binary(c: char) -> bool {
+    matches!(c, '0'..='1')
 }
