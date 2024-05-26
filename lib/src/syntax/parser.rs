@@ -1,6 +1,8 @@
 use std::{
     hash::Hash,
     num::ParseIntError,
+    ops::Neg,
+    str::FromStr,
 };
 
 use nom::{
@@ -55,6 +57,8 @@ use nom::{
     IResult,
     Parser,
 };
+use num_bigint::BigInt;
+use num_traits::Num;
 
 use crate::{
     annotation::Annotation,
@@ -245,16 +249,9 @@ where
 
     let mut chars = src.chars();
     let first = chars.next().unwrap();
-    let second = chars.next();
 
     match first {
-        '0'..='9' => return token_all_consuming(src, rest, number::<POSITIVE, _, _>),
-        '+' if matches!(second, Some('0'..='9')) => {
-            return token_all_consuming(&src[1..], rest, number::<POSITIVE, _, _>);
-        }
-        '-' if matches!(second, Some('0'..='9')) => {
-            return token_all_consuming(&src[1..], rest, number::<NEGATIVE, _, _>);
-        }
+        '0'..='9' => return token_all_consuming(src, rest, number),
         BYTES_PREFIX => return token_all_consuming(src, rest, bytes),
         _ => {}
     }
@@ -664,25 +661,22 @@ where
     context("string_literal", f)(src)
 }
 
-const POSITIVE: bool = true;
-const NEGATIVE: bool = false;
-
-fn number<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = alt((
-        hexadecimal_int::<SIGN, _, _>,
-        binary_int::<SIGN, _, _>,
-        decimal::<SIGN, _, _>,
-    ));
+    let norm = preceded(tag("0"), tuple((sign, significand, exponent)));
+    let short = tuple((success(true), significand_radix(10, digit1), exponent));
+    let f = map(alt((norm, short)), |(sign, significand, exponent)| {
+        build_number(sign, significand, exponent)
+    });
     context("number", f)(src)
 }
 
 fn trim_num0<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str>,
+    E: ParseError<&'a str>,
     F: Parser<&'a str, &'a str, E>,
 {
     map(separated_list0(char1('_'), f), |s| s.join(""))
@@ -690,79 +684,105 @@ where
 
 fn trim_num1<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str>,
+    E: ParseError<&'a str>,
     F: Parser<&'a str, &'a str, E>,
 {
     map(separated_list1(char1('_'), f), |s| s.join(""))
 }
 
-fn hexadecimal_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn sign<'a, E>(src: &'a str) -> IResult<&'a str, bool, E>
 where
-    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let digits = preceded(tag("0X"), cut(trim_num1(take_while1(is_hexadecimal))));
-    let f = map(digits, |digits: String| {
-        let i = Int::from_sign_string_radix(SIGN, &digits, 16);
-        From::from(i)
-    });
-    context("hexadecimal_int", f)(src)
-}
-
-fn binary_int<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let digits = preceded(tag("0B"), cut(trim_num1(take_while1(is_binary))));
-    let f = map(digits, |digits: String| {
-        let i = Int::from_sign_string_radix(SIGN, &digits, 2);
-        From::from(i)
-    });
-    context("binary_int", f)(src)
-}
-
-fn decimal<'a, const SIGN: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let integral = trim_num1(digit1);
-    let fractional = opt(preceded(char1('.'), cut(trim_num0(digit1))));
-    let exp_sign = alt((
+    let f = alt((
         value(true, char1('+')),
         value(false, char1('-')),
         success(true),
     ));
-    let exponential = opt(preceded(
-        tag("E"),
-        cut(tuple((exp_sign, trim_num1(digit1)))),
-    ));
-    let fragments = tuple((integral, fractional, exponential));
-    let f = map(fragments, |(integral, fractional, exponential)| {
-        build_decimal::<SIGN, _>(integral, fractional, exponential)
-    });
-    context("decimal", f)(src)
+    context("sign", f)(src)
 }
 
-fn build_decimal<const SIGN: bool, T>(
-    integral: String,
-    fractional: Option<String>,
-    exponential: Option<(bool, String)>,
-) -> T
+struct Significand {
+    int: BigInt,
+    radix: u8,
+    shift: Option<usize>,
+}
+
+fn significand<'a, E>(src: &'a str) -> IResult<&'a str, Significand, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let dec_no_tag = significand_radix(10, digit1);
+    let hex = preceded(tag("X"), cut(significand_radix(16, hexadecimal1)));
+    let bin = preceded(tag("B"), cut(significand_radix(2, binary1)));
+    let dec = preceded(tag("D"), cut(significand_radix(10, digit1)));
+
+    let f = alt((dec_no_tag, hex, bin, dec));
+    context("significand", f)(src)
+}
+
+fn significand_radix<'a, E, F>(
+    radix: u8,
+    f: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, Significand, E>
+where
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, &'a str, E> + Clone,
+{
+    let int = trim_num1(f.clone());
+    let fraction = opt(preceded(char1('.'), cut(trim_num0(f))));
+    map(tuple((int, fraction)), move |(int, fraction)| {
+        build_significand(radix, int, fraction)
+    })
+}
+
+fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Significand {
+    if let Some(fraction) = fraction {
+        let sig = format!("{int}{fraction}");
+        let int = BigInt::from_str_radix(&sig, radix as u32).unwrap();
+        let shift = Some(fraction.len());
+        Significand { int, radix, shift }
+    } else {
+        let int = BigInt::from_str_radix(&int, radix as u32).unwrap();
+        Significand {
+            int,
+            radix,
+            shift: None,
+        }
+    }
+}
+
+fn exponent<'a, E>(src: &'a str) -> IResult<&'a str, Option<BigInt>, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let fragment = tuple((sign, trim_num1(digit1)));
+    let exp = map(fragment, |(sign, exp)| build_exponent(sign, exp));
+    let f = opt(preceded(tag("E"), cut(exp)));
+    context("exponent", f)(src)
+}
+
+fn build_exponent(sign: bool, exp: String) -> BigInt {
+    let i = BigInt::from_str(&exp).unwrap();
+    if sign { i } else { i.neg() }
+}
+
+fn build_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
 where
     T: ParseRepr,
 {
-    if fractional.is_none() && exponential.is_none() {
-        let i = Int::from_sign_string_radix(SIGN, &integral, 10);
+    let int = if sign {
+        significand.int
+    } else {
+        significand.int.neg()
+    };
+    if significand.shift.is_none() && exp.is_none() {
+        let i = Int::new(int);
         return From::from(i);
     }
-    let fractional = fractional.as_deref().unwrap_or("");
-    let (exp_sign, exp) = match &exponential {
-        None => (true, ""),
-        Some((exp_sign, exp)) => (*exp_sign, &**exp),
-    };
-    let n = Number::from_parts(SIGN, &integral, fractional, exp_sign, exp);
+    let shift = significand.shift.unwrap_or(0);
+    let exp = exp.unwrap_or_default() - shift;
+    let n = Number::new(int, significand.radix, exp);
     From::from(n)
 }
 
@@ -783,7 +803,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let digits = verify(take_while1(is_hexadecimal), |s: &str| s.len() % 2 == 0);
+    let digits = verify(hexadecimal1, |s: &str| s.len() % 2 == 0);
     let tagged_digits = preceded(tag("X"), cut(trim_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(From::from(Bytes::from(
@@ -798,7 +818,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let digits = verify(take_while1(is_binary), |s: &str| s.len() % 8 == 0);
+    let digits = verify(binary1, |s: &str| s.len() % 8 == 0);
     let tagged_digits = preceded(tag("B"), cut(trim_num0(digits)));
     let f = map_res(tagged_digits, |s: String| {
         Ok(From::from(Bytes::from(
@@ -817,8 +837,22 @@ where
     context("empty_bytes", f)(src)
 }
 
+fn hexadecimal1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+where
+    E: ParseError<&'a str>,
+{
+    take_while1(is_hexadecimal)(src)
+}
+
 fn is_hexadecimal(c: char) -> bool {
     matches!(c, '0'..='9' | 'a'..='f')
+}
+
+fn binary1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+where
+    E: ParseError<&'a str>,
+{
+    take_while1(is_binary)(src)
 }
 
 fn is_binary(c: char) -> bool {

@@ -1,7 +1,6 @@
 use std::{
     fmt::{
         Debug,
-        Display,
         Formatter,
     },
     ops::{
@@ -16,7 +15,6 @@ use std::{
 use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{
-    Num,
     Signed,
     ToPrimitive,
     Zero,
@@ -29,11 +27,8 @@ pub struct Int(BigInt);
 
 #[allow(unused)]
 impl Int {
-    pub(crate) fn from_sign_string_radix(positive_sign: bool, digits: &str, radix: u8) -> Self {
-        let sign = if positive_sign { "+" } else { "-" };
-        let s = format!("{sign}{digits}");
-        let i = BigInt::from_str_radix(&s, radix as u32).unwrap();
-        Int(i)
+    pub(crate) fn new(int: BigInt) -> Self {
+        Self(int)
     }
 
     pub(crate) fn is_zero(&self) -> bool {
@@ -159,12 +154,6 @@ impl Int {
 
     pub(crate) fn less_greater(&self, other: &Int) -> Bool {
         Bool::new(self.0.ne(&other.0))
-    }
-}
-
-impl Display for Int {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Display>::fmt(&self.0, f)
     }
 }
 

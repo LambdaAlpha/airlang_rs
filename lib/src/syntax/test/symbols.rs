@@ -52,6 +52,8 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("->"),
         symbol("==="),
         symbol("!=="),
+        symbol("+1"),
+        symbol("-1.1"),
         list(vec![symbol("%"), call(list(vec![]), list(vec![]))]),
         symbol("a%"),
         symbol("%a"),

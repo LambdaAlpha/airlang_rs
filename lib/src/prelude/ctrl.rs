@@ -412,7 +412,7 @@ where
                 return Val::default();
             }
             let Some(i) = i.to_u128() else {
-                panic!("iterate on super big int {i}!!!")
+                panic!("iterate on super big int {i:?}!!!")
             };
             let iter = (0..i).map(|i| {
                 let i = Int::from(i);

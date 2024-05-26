@@ -3,6 +3,7 @@ use std::{
     rc::Rc,
 };
 
+use num_bigint::BigInt;
 use rand::{
     distributions::{
         DistString,
@@ -133,15 +134,11 @@ pub(crate) fn any_int(rng: &mut SmallRng) -> Int {
 }
 
 pub(crate) fn any_number(rng: &mut SmallRng) -> Number {
-    let sign: bool = rng.gen();
-    let integral: u32 = rng.gen();
-    let integral: String = integral.to_string();
-    let fractional: u32 = rng.gen();
-    let fractional: String = fractional.to_string();
-    let exp_sign: bool = rng.gen();
-    let exp: u8 = rng.gen();
-    let exp: String = exp.to_string();
-    Number::from_parts(sign, &integral, &fractional, exp_sign, &exp)
+    let int: i64 = rng.gen();
+    let int = BigInt::from(int);
+    let exp: i8 = rng.gen();
+    let exp = BigInt::from(exp);
+    Number::new(int, 10, exp)
 }
 
 pub(crate) fn any_bytes(rng: &mut SmallRng) -> Bytes {

@@ -1,4 +1,10 @@
-use std::error::Error;
+use std::{
+    error::Error,
+    str::FromStr,
+};
+
+use num_bigint::BigInt;
+use num_traits::Num;
 
 use crate::{
     bool::Bool,
@@ -45,18 +51,21 @@ fn bool(b: bool) -> Repr {
     Repr::Bool(Bool::new(b))
 }
 
-fn int(sign: bool, s: &str, radix: u8) -> Repr {
-    Repr::Int(Int::from_sign_string_radix(sign, s, radix))
+fn int(s: &str, radix: u8) -> Repr {
+    let i = Int::new(BigInt::from_str_radix(s, radix as u32).unwrap());
+    Repr::Int(i)
 }
 
 fn positive_decimal_int(s: &str) -> Repr {
-    Repr::Int(Int::from_sign_string_radix(true, s, 10))
+    let i = Int::new(BigInt::from_str(s).unwrap());
+    Repr::Int(i)
 }
 
-fn number(sign: bool, integral: &str, fractional: &str, exp_sign: bool, exp_digits: &str) -> Repr {
-    Repr::Number(Number::from_parts(
-        sign, integral, fractional, exp_sign, exp_digits,
-    ))
+fn number(radix: u8, significand: &str, shift: usize, exp: &str) -> Repr {
+    let i = BigInt::from_str_radix(significand, radix as u32).unwrap();
+    let exp = BigInt::from_str(exp).unwrap();
+    let num = Number::new(i, radix, exp - shift);
+    Repr::Number(num)
 }
 
 fn bytes(b: Vec<u8>) -> Repr {

@@ -3,9 +3,12 @@ use std::{
     fmt::{
         Display,
         Formatter,
+        Write,
     },
     hash::Hash,
 };
+
+use num_traits::Signed;
 
 use crate::{
     annotation::Annotation,
@@ -179,11 +182,30 @@ fn generate_bool(b: bool, s: &mut String) {
 }
 
 fn generate_int(i: &Int, s: &mut String) {
-    s.push_str(&i.to_string());
+    if i.is_negative() {
+        s.push('0');
+    }
+    let _ = write!(s, "{i:?}");
 }
 
 fn generate_number(n: &Number, s: &mut String) {
-    s.push_str(&n.to_string());
+    let int = n.int();
+    let radix = n.radix();
+    if int.is_negative() || radix != 10 {
+        s.push('0');
+    }
+    if int.is_negative() {
+        s.push('-');
+    }
+    match radix {
+        16 => s.push('X'),
+        2 => s.push('B'),
+        10 => {}
+        _ => unreachable!(),
+    }
+    s.push_str(&int.abs().to_str_radix(radix as u32));
+    s.push('E');
+    let _ = write!(s, "{}", n.exp());
 }
 
 fn generate_bytes(bytes: &Bytes, s: &mut String) {

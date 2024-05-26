@@ -1,3 +1,7 @@
+use std::str::FromStr;
+
+use num_bigint::BigInt;
+
 use crate::{
     ctx::CtxMap,
     int::Int,
@@ -34,15 +38,15 @@ impl Prelude for MetaPrelude {
 
 fn version_major() -> Int {
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
-    Int::from_sign_string_radix(true, MAJOR, 10)
+    Int::new(BigInt::from_str(MAJOR).unwrap())
 }
 
 fn version_minor() -> Int {
     const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
-    Int::from_sign_string_radix(true, MINOR, 10)
+    Int::new(BigInt::from_str(MINOR).unwrap())
 }
 
 fn version_patch() -> Int {
     const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
-    Int::from_sign_string_radix(true, PATCH, 10)
+    Int::new(BigInt::from_str(PATCH).unwrap())
 }
