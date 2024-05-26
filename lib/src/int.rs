@@ -29,7 +29,7 @@ pub struct Int(BigInt);
 
 #[allow(unused)]
 impl Int {
-    pub fn from_sign_string_radix(positive_sign: bool, digits: &str, radix: u8) -> Self {
+    pub(crate) fn from_sign_string_radix(positive_sign: bool, digits: &str, radix: u8) -> Self {
         let sign = if positive_sign { "+" } else { "-" };
         let s = format!("{sign}{digits}");
         let i = BigInt::from_str_radix(&s, radix as u32).unwrap();
