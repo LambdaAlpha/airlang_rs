@@ -1,9 +1,9 @@
 use crate::syntax::{
     repr::Repr,
     test::{
+        call_list,
         infix,
         list,
-        ltree,
         positive_decimal_int as int,
     },
 };
@@ -20,7 +20,7 @@ pub fn expected() -> Vec<Repr> {
             int("6"),
             int("7"),
         ),
-        ltree(infix(int("1"), int("2"), int("3")), vec![]),
+        call_list(infix(int("1"), int("2"), int("3")), vec![]),
         infix(infix(int("1"), int("2"), int("3")), int("4"), int("5")),
     ]
 }

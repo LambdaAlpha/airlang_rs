@@ -3,9 +3,9 @@ use crate::syntax::{
     test::{
         ask,
         call,
+        call_list,
         infix,
         list,
-        ltree,
         pair,
         symbol,
     },
@@ -17,7 +17,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         infix(list(vec![]), symbol("b"), symbol("c")),
         infix(pair(symbol("a"), symbol("b")), symbol("c"), symbol("d")),
         infix(call(symbol("a"), symbol("b")), symbol("c"), symbol("d")),
-        infix(ltree(symbol("a"), vec![]), symbol("b"), symbol("c")),
+        infix(call_list(symbol("a"), vec![]), symbol("b"), symbol("c")),
         infix(ask(symbol("a"), symbol("b")), symbol("c"), symbol("d")),
         infix(
             infix(symbol("a"), symbol("b"), symbol("c")),
@@ -27,7 +27,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         infix(symbol("a"), list(vec![]), symbol("b")),
         infix(symbol("a"), pair(symbol("b"), symbol("c")), symbol("d")),
         infix(symbol("a"), call(symbol("b"), symbol("c")), symbol("d")),
-        infix(symbol("a"), ltree(symbol("b"), vec![]), symbol("c")),
+        infix(symbol("a"), call_list(symbol("b"), vec![]), symbol("c")),
         infix(symbol("a"), ask(symbol("b"), symbol("c")), symbol("d")),
         infix(
             symbol("a"),
@@ -37,7 +37,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         infix(symbol("a"), symbol("b"), list(vec![])),
         infix(symbol("a"), symbol("b"), pair(symbol("c"), symbol("d"))),
         infix(symbol("a"), symbol("b"), call(symbol("c"), symbol("d"))),
-        infix(symbol("a"), symbol("b"), ltree(symbol("c"), vec![])),
+        infix(symbol("a"), symbol("b"), call_list(symbol("c"), vec![])),
         infix(symbol("a"), symbol("b"), ask(symbol("c"), symbol("d"))),
         infix(
             symbol("a"),

@@ -91,14 +91,14 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
 }
 
-fn ltree(root: Repr, leaves: Vec<Repr>) -> Repr {
+fn call_list(root: Repr, leaves: Vec<Repr>) -> Repr {
     Repr::Call(Box::new(CallRepr::new(
         root,
         Repr::List(ListRepr::from(leaves)),
     )))
 }
 
-fn mtree(root: Repr, leaves: Vec<(Repr, Repr)>) -> Repr {
+fn call_map(root: Repr, leaves: Vec<(Repr, Repr)>) -> Repr {
     Repr::Call(Box::new(CallRepr::new(
         root,
         Repr::Map(MapRepr::from_iter(leaves)),
