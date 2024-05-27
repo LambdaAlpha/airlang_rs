@@ -392,6 +392,10 @@ true
 -----
 3 : 2
 =====
+; [(c : a) = (. context {: =, a : 1}) :: a = 2, [c | read ! a, a]]
+-----
+[2, 1]
+=====
 ; [
     set_meta ! . context {a : 1},
     true | read ! a

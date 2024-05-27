@@ -87,6 +87,7 @@ pub(crate) struct CtxPrelude {
     pub(crate) with_ctx_func: Named<FuncVal>,
     pub(crate) with_ctx_input: Named<FuncVal>,
     pub(crate) with_ctx_func_input: Named<FuncVal>,
+    pub(crate) ctx_in_ctx_out: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
     pub(crate) ctx_repr: Named<FuncVal>,
     pub(crate) ctx_prelude: Named<FuncVal>,
@@ -111,6 +112,7 @@ impl Default for CtxPrelude {
             with_ctx_func: with_ctx_func(),
             with_ctx_input: with_ctx_input(),
             with_ctx_func_input: with_ctx_func_input(),
+            ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
             ctx_prelude: ctx_prelude(),
@@ -136,6 +138,7 @@ impl Prelude for CtxPrelude {
         self.with_ctx_func.put(m);
         self.with_ctx_input.put(m);
         self.with_ctx_func_input.put(m);
+        self.ctx_in_ctx_out.put(m);
         self.ctx_new.put(m);
         self.ctx_repr.put(m);
         self.ctx_prelude.put(m);
@@ -787,6 +790,27 @@ where
     let rest = &names[1..];
 
     with_target_ctx_basic(ctx, target_ctx, |ctx| get_ctx_nested(ctx, rest, f))
+}
+
+fn ctx_in_ctx_out() -> Named<FuncVal> {
+    let input_mode = pair_mode(default_mode(), Mode::Predefined(Transform::Id));
+    let output_mode = pair_mode(default_mode(), default_mode());
+    named_free_fn("::", input_mode, output_mode, fn_ctx_in_ctx_out)
+}
+
+fn fn_ctx_in_ctx_out(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let ctx_input = Pair::from(pair);
+    let Val::Ctx(ctx) = ctx_input.first else {
+        return Val::default();
+    };
+    let mut ctx = Ctx::from(ctx);
+    let input = ctx_input.second;
+    let output = Eval.transform(MutableCtx::new(&mut ctx), input);
+    let pair = Pair::new(Val::Ctx(ctx.into()), output);
+    Val::Pair(pair.into())
 }
 
 const NONE: &str = "none";
