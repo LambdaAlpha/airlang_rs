@@ -1,7 +1,10 @@
 use crate::{
     ask::Ask,
     call::Call,
-    ctx_access::CtxAccessor,
+    ctx::{
+        mutable::CtxForMutableFn,
+        ref1::CtxMeta,
+    },
     list::List,
     map::Map,
     pair::Pair,
@@ -17,7 +20,6 @@ use crate::{
     },
     AskVal,
     CallVal,
-    CtxForMutableFn,
     ListVal,
     MapVal,
     PairVal,
@@ -129,7 +131,7 @@ impl Default for MapMode {
 impl Transformer<Val, Val> for Mode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             Mode::Predefined(mode) => mode.transform(ctx, input),
@@ -141,7 +143,7 @@ impl Transformer<Val, Val> for Mode {
 impl Transformer<Val, Val> for ValMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match input {
             Val::Symbol(s) => self.symbol.transform(ctx, s),
@@ -158,7 +160,7 @@ impl Transformer<Val, Val> for ValMode {
 impl Transformer<Symbol, Val> for SymbolMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Symbol) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             SymbolMode::Eval => Eval.transform_symbol(ctx, input),
@@ -170,7 +172,7 @@ impl Transformer<Symbol, Val> for SymbolMode {
 impl Transformer<PairVal, Val> for PairMode {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, input: PairVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let input = Pair::from(input);
         let first = self.first.transform(ctx.reborrow(), input.first);
@@ -183,7 +185,7 @@ impl Transformer<PairVal, Val> for PairMode {
 impl Transformer<ListVal, Val> for ListMode {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, val_list: ListVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let val_list = List::from(val_list);
         match self {
@@ -228,7 +230,7 @@ impl Transformer<ListVal, Val> for ListMode {
 impl Transformer<MapVal, Val> for MapMode {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, val_map: MapVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let val_map = Map::from(val_map);
         match self {
@@ -265,7 +267,7 @@ impl Transformer<MapVal, Val> for MapMode {
 impl Transformer<CallVal, Val> for CallMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             CallMode::Eval => Eval.transform_call(ctx, call),
@@ -278,7 +280,7 @@ impl Transformer<CallVal, Val> for CallMode {
 impl Transformer<CallVal, Val> for CallDepMode {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, call: CallVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let call = Call::from(call);
         let func = Eval.transform(ctx.reborrow(), call.func);
@@ -309,7 +311,7 @@ impl Transformer<CallVal, Val> for CallDepMode {
 impl Transformer<CallVal, Val> for Call<Mode, Mode> {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, call: CallVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let call = Call::from(call);
         let func = self.func.transform(ctx.reborrow(), call.func);
@@ -322,7 +324,7 @@ impl Transformer<CallVal, Val> for Call<Mode, Mode> {
 impl Transformer<AskVal, Val> for AskMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: AskVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             AskMode::Eval => Eval.transform_ask(ctx, input),
@@ -335,7 +337,7 @@ impl Transformer<AskVal, Val> for AskMode {
 impl Transformer<AskVal, Val> for AskDepMode {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, ask: AskVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let ask = Ask::from(ask);
         let func = Eval.transform(ctx.reborrow(), ask.func);
@@ -366,7 +368,7 @@ impl Transformer<AskVal, Val> for AskDepMode {
 impl Transformer<AskVal, Val> for Ask<Mode, Mode> {
     fn transform<'a, Ctx>(&self, mut ctx: Ctx, ask: AskVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         let ask = Ask::from(ask);
         let func = self.func.transform(ctx.reborrow(), ask.func);

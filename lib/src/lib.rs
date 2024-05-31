@@ -1,3 +1,15 @@
+pub use ctx::{
+    constant::{
+        ConstCtx,
+        CtxForConstFn,
+    },
+    free::FreeCtx,
+    mutable::{
+        CtxForMutableFn,
+        MutableCtx,
+    },
+};
+
 pub use self::{
     ask::Ask,
     bool::Bool,
@@ -7,17 +19,6 @@ pub use self::{
         Ctx,
         CtxError,
         Invariant,
-    },
-    ctx_access::{
-        constant::{
-            ConstCtx,
-            CtxForConstFn,
-        },
-        free::FreeCtx,
-        mutable::{
-            CtxForMutableFn,
-            MutableCtx,
-        },
     },
     extension::ValExt,
     func::{
@@ -110,8 +111,6 @@ pub(crate) mod transform;
 pub(crate) mod mode;
 
 pub(crate) mod ctx;
-
-pub(crate) mod ctx_access;
 
 pub(crate) mod func;
 

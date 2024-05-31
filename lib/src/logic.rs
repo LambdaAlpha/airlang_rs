@@ -1,5 +1,5 @@
 use crate::{
-    ctx_access::free::FreeCtx,
+    ctx::free::FreeCtx,
     func::FuncTransformer,
     transformer::Transformer,
     val::func::FuncVal,

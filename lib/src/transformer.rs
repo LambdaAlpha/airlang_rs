@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use crate::{
-    ctx_access::CtxAccessor,
+    ctx::ref1::CtxMeta,
     transformer::input::ByVal,
     val::{
         list::ListVal,
@@ -21,7 +21,7 @@ use crate::{
 pub(crate) trait Transformer<Input, Output> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Input) -> Output
     where
-        Ctx: CtxAccessor<'a>;
+        Ctx: CtxMeta<'a>;
 }
 
 pub(crate) struct DefaultByVal;
@@ -29,7 +29,7 @@ pub(crate) struct DefaultByVal;
 impl DefaultByVal {
     pub(crate) fn transform_val<'a, Ctx, T>(t: &T, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
         T: ByVal<Val>,
     {
         match input {
@@ -45,7 +45,7 @@ impl DefaultByVal {
 
     pub(crate) fn transform_pair<'a, Ctx, T>(t: &T, mut ctx: Ctx, pair: PairVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
         T: Transformer<Val, Val>,
     {
         let pair = Pair::from(pair);
@@ -57,7 +57,7 @@ impl DefaultByVal {
 
     pub(crate) fn transform_list<'a, Ctx, T>(t: &T, mut ctx: Ctx, list: ListVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
         T: Transformer<Val, Val>,
     {
         let list = List::from(list);
@@ -70,7 +70,7 @@ impl DefaultByVal {
 
     pub(crate) fn transform_map<'a, Ctx, T>(t: &T, mut ctx: Ctx, map: MapVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
         T: Transformer<Val, Val>,
     {
         let map = Map::from(map);
@@ -87,7 +87,7 @@ impl DefaultByVal {
 
     pub(crate) fn transform_call<'a, Ctx, T>(t: &T, mut ctx: Ctx, call: CallVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
         T: Transformer<Val, Val>,
     {
         let call = Call::from(call);
@@ -99,7 +99,7 @@ impl DefaultByVal {
 
     pub(crate) fn transform_ask<'a, Ctx, T>(t: &T, mut ctx: Ctx, ask: AskVal) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
         T: Transformer<Val, Val>,
     {
         let ask = Ask::from(ask);
@@ -116,7 +116,7 @@ where
 {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: I) -> O
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         self.deref().transform(ctx, input)
     }

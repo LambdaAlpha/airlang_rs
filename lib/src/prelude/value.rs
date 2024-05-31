@@ -26,11 +26,11 @@ use crate::{
     },
     bool::Bool,
     ctx::{
+        constant::CtxForConstFn,
+        ref1::CtxRef,
         CtxMap,
-        CtxRef,
         DefaultCtx,
     },
-    ctx_access::constant::CtxForConstFn,
     prelude::{
         default_mode,
         named_const_fn,

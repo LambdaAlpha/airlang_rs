@@ -13,12 +13,6 @@ use std::{
 
 use crate::{
     ctx::{
-        Ctx,
-        CtxRef,
-        CtxValue,
-        Invariant,
-    },
-    ctx_access::{
         constant::{
             ConstCtx,
             CtxForConstFn,
@@ -28,7 +22,13 @@ use crate::{
             CtxForMutableFn,
             MutableCtx,
         },
-        CtxAccessor,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
+        Ctx,
+        CtxValue,
+        Invariant,
     },
     mode::Mode,
     symbol::Symbol,
@@ -272,7 +272,7 @@ impl Func {
 impl Transformer<Val, Val> for Func {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         self.transformer.transform(ctx, input)
     }
@@ -281,7 +281,7 @@ impl Transformer<Val, Val> for Func {
 impl Transformer<Val, Val> for FuncTransformer {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             FuncTransformer::Free(func) => func.transform(ctx, input),
@@ -294,7 +294,7 @@ impl Transformer<Val, Val> for FuncTransformer {
 impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> for FuncImpl<P, C> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             FuncImpl::Primitive(p) => p.transform(ctx, input),
@@ -306,7 +306,7 @@ impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> f
 impl Transformer<Val, Val> for Primitive<Rc<dyn CtxFreeFn>> {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         self.fn1.call(input)
     }
@@ -315,7 +315,7 @@ impl Transformer<Val, Val> for Primitive<Rc<dyn CtxFreeFn>> {
 impl Transformer<Val, Val> for Composed<CtxFreeInfo> {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         eval_free(
             self.ctx.clone(),
@@ -329,7 +329,7 @@ impl Transformer<Val, Val> for Composed<CtxFreeInfo> {
 impl Transformer<Val, Val> for Primitive<Rc<dyn CtxConstFn>> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         self.fn1.call(ctx.for_const_fn(), input)
     }
@@ -338,7 +338,7 @@ impl Transformer<Val, Val> for Primitive<Rc<dyn CtxConstFn>> {
 impl Transformer<Val, Val> for Composed<CtxConstInfo> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match ctx.for_const_fn() {
             CtxForConstFn::Free(_ctx) => eval_free(
@@ -369,7 +369,7 @@ impl Transformer<Val, Val> for Composed<CtxConstInfo> {
 impl Transformer<Val, Val> for Primitive<Rc<dyn CtxMutableFn>> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         self.fn1.call(ctx.for_mutable_fn(), input)
     }
@@ -378,7 +378,7 @@ impl Transformer<Val, Val> for Primitive<Rc<dyn CtxMutableFn>> {
 impl Transformer<Val, Val> for Composed<CtxMutableInfo> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match ctx.for_mutable_fn() {
             CtxForMutableFn::Free(_ctx) => eval_free(

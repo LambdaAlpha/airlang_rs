@@ -2,12 +2,12 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
+        constant::CtxForConstFn,
+        free::FreeCtx,
+        mutable::CtxForMutableFn,
+        ref1::CtxMeta,
         CtxMap,
         DefaultCtx,
-    },
-    ctx_access::{
-        free::FreeCtx,
-        CtxAccessor,
     },
     func::MutableDispatcher,
     prelude::{
@@ -26,8 +26,6 @@ use crate::{
     types::either::Either,
     val::func::FuncVal,
     Ask,
-    CtxForConstFn,
-    CtxForMutableFn,
     Pair,
     Val,
 };
@@ -181,7 +179,7 @@ fn ask() -> Named<FuncVal> {
 
 fn fn_ask<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Ask(ask) = input else {
         return Val::default();

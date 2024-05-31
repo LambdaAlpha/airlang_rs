@@ -1,8 +1,10 @@
 use std::ops::Deref;
 
 use crate::{
-    ctx::CtxRef,
-    ctx_access::CtxAccessor,
+    ctx::ref1::{
+        CtxMeta,
+        CtxRef,
+    },
     transformer::Transformer,
     val::func::FuncVal,
     Ask,
@@ -25,7 +27,7 @@ pub struct Verified(AssertVal);
 
 pub(crate) fn solve<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     if !func.is_ctx_free() {
         return Val::default();

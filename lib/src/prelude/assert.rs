@@ -1,10 +1,11 @@
 use crate::{
     bool::Bool,
     ctx::{
+        constant::CtxForConstFn,
+        mutable::CtxForMutableFn,
         CtxMap,
         DefaultCtx,
     },
-    ctx_access::constant::CtxForConstFn,
     logic::Assert,
     map::Map,
     prelude::{
@@ -26,7 +27,6 @@ use crate::{
         func::FuncVal,
         map::MapVal,
     },
-    CtxForMutableFn,
     Mode,
     Transform,
     Val,

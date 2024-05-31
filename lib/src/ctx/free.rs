@@ -1,18 +1,18 @@
 use crate::{
     ctx::{
-        Ctx,
-        CtxError,
-        CtxRef,
+        constant::CtxForConstFn,
+        mutable::CtxForMutableFn,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
         CtxValue,
         DynRef,
     },
-    ctx_access::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
-        CtxAccessor,
-    },
-    symbol::Symbol,
-    val::Val,
+    Ctx,
+    CtxError,
+    Symbol,
+    Val,
 };
 
 pub struct FreeCtx;
@@ -71,7 +71,7 @@ impl<'a> CtxRef<'a> for FreeCtx {
     }
 }
 
-impl<'a> CtxAccessor<'a> for FreeCtx {
+impl<'a> CtxMeta<'a> for FreeCtx {
     type Reborrow<'s> = FreeCtx where Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {

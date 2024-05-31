@@ -2,12 +2,10 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
-        CtxMap,
-        DefaultCtx,
-    },
-    ctx_access::{
         constant::CtxForConstFn,
         mutable::CtxForMutableFn,
+        CtxMap,
+        DefaultCtx,
     },
     prelude::{
         default_mode,

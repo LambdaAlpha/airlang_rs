@@ -1,11 +1,11 @@
 use crate::{
     bool::Bool,
     ctx::{
+        constant::CtxForConstFn,
         Ctx,
         CtxMap,
         DefaultCtx,
     },
-    ctx_access::constant::CtxForConstFn,
     func::{
         Composed,
         CtxConst,

@@ -1,17 +1,19 @@
+use std::matches;
+
 use crate::{
     ctx::{
-        Ctx,
-        CtxError,
-        CtxRef,
+        mutable::CtxForMutableFn,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
         CtxValue,
         DynRef,
     },
-    ctx_access::{
-        free::FreeCtx,
-        mutable::CtxForMutableFn,
-        CtxAccessor,
-    },
-    symbol::Symbol,
+    Ctx,
+    CtxError,
+    FreeCtx,
+    Symbol,
     Val,
 };
 
@@ -86,7 +88,7 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
     }
 }
 
-impl<'l> CtxAccessor<'l> for ConstCtx<'l> {
+impl<'l> CtxMeta<'l> for ConstCtx<'l> {
     type Reborrow<'s> = ConstCtx<'s> where Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
@@ -207,7 +209,7 @@ impl<'l> CtxRef<'l> for CtxForConstFn<'l> {
     }
 }
 
-impl<'l> CtxAccessor<'l> for CtxForConstFn<'l> {
+impl<'l> CtxMeta<'l> for CtxForConstFn<'l> {
     type Reborrow<'s> = CtxForConstFn<'s> where 'l: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
@@ -250,11 +252,11 @@ impl<'a> ConstCtx<'a> {
     }
 
     pub fn reborrow(&mut self) -> ConstCtx {
-        <_ as CtxAccessor<'a>>::reborrow(self)
+        <_ as CtxMeta<'a>>::reborrow(self)
     }
 
     pub fn borrow(&self) -> Option<&Ctx> {
-        <_ as CtxAccessor<'a>>::borrow(self)
+        <_ as CtxMeta<'a>>::borrow(self)
     }
 
     pub fn meta(self) -> Option<ConstCtx<'a>> {
@@ -281,11 +283,11 @@ impl<'a> ConstCtx<'a> {
 
 impl<'a> CtxForConstFn<'a> {
     pub fn reborrow(&mut self) -> CtxForConstFn {
-        <_ as CtxAccessor<'a>>::reborrow(self)
+        <_ as CtxMeta<'a>>::reborrow(self)
     }
 
     pub fn borrow(&self) -> Option<&Ctx> {
-        <_ as CtxAccessor<'a>>::borrow(self)
+        <_ as CtxMeta<'a>>::borrow(self)
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {

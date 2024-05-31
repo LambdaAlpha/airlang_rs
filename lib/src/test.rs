@@ -5,7 +5,10 @@ use std::{
 };
 
 use crate::{
-    ctx::Invariant,
+    ctx::{
+        mutable::MutableCtx,
+        Invariant,
+    },
     initial_ctx,
     interpret_mutable,
     parse,
@@ -15,7 +18,6 @@ use crate::{
     Func,
     FuncVal,
     Mode,
-    MutableCtx,
     Symbol,
     Transform,
 };

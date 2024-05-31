@@ -3,12 +3,10 @@ use std::mem::swap;
 use crate::{
     bool::Bool,
     ctx::{
-        CtxMap,
-        DefaultCtx,
-    },
-    ctx_access::{
         constant::CtxForConstFn,
         mutable::CtxForMutableFn,
+        CtxMap,
+        DefaultCtx,
     },
     int::Int,
     pair::Pair,

@@ -1,5 +1,5 @@
 use crate::{
-    ctx_access::CtxAccessor,
+    ctx::ref1::CtxMeta,
     transform::{
         eval::Eval,
         id::Id,
@@ -24,7 +24,7 @@ pub enum Transform {
 impl Transformer<Val, Val> for Transform {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
-        Ctx: CtxAccessor<'a>,
+        Ctx: CtxMeta<'a>,
     {
         match self {
             Transform::Eval => Eval.transform(ctx, input),

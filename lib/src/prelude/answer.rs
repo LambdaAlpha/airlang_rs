@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use crate::{
     ctx::{
+        constant::CtxForConstFn,
         CtxMap,
         DefaultCtx,
     },
@@ -17,7 +18,6 @@ use crate::{
     Answer,
     AnswerVal,
     Bool,
-    CtxForConstFn,
     FuncVal,
     Val,
 };

@@ -1,5 +1,8 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::{
+        mutable::CtxForMutableFn,
+        CtxMap,
+    },
     func::FuncTransformer,
     logic::Assert,
     prelude::{
@@ -15,7 +18,6 @@ use crate::{
         func::FuncVal,
     },
     Call,
-    CtxForMutableFn,
     Mode,
     Transform,
     Val,

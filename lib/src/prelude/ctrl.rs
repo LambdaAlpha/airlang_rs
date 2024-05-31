@@ -1,12 +1,12 @@
 use crate::{
     ctx::{
-        CtxMap,
-        CtxRef,
-        CtxValue,
-    },
-    ctx_access::{
         free::FreeCtx,
-        CtxAccessor,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
+        CtxMap,
+        CtxValue,
     },
     func::MutableDispatcher,
     prelude::{
@@ -117,7 +117,7 @@ fn sequence() -> Named<FuncVal> {
 
 fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     eval_block(ctx, input).0
 }
@@ -141,7 +141,7 @@ fn if1() -> Named<FuncVal> {
 
 fn fn_if<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Pair(pair) = input else {
         return Val::default();
@@ -182,7 +182,7 @@ fn if_not() -> Named<FuncVal> {
 
 fn fn_if_not<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Pair(pair) = input else {
         return Val::default();
@@ -226,7 +226,7 @@ fn match1() -> Named<FuncVal> {
 
 fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Pair(pair) = input else {
         return Val::default();
@@ -268,7 +268,7 @@ fn while1() -> Named<FuncVal> {
 
 fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Pair(pair) = input else {
         return Val::default();
@@ -329,7 +329,7 @@ fn while_not() -> Named<FuncVal> {
 
 fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Pair(pair) = input else {
         return Val::default();
@@ -390,7 +390,7 @@ fn for1() -> Named<FuncVal> {
 
 fn fn_for<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::Pair(pair) = input else {
         return Val::default();
@@ -460,7 +460,7 @@ where
 
 fn for_iter<'a, Ctx, ValIter>(mut ctx: Ctx, body: Val, name: Symbol, values: ValIter) -> Val
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
     ValIter: Iterator<Item = Val>,
 {
     if let Val::List(body) = body {
@@ -492,7 +492,7 @@ where
 
 fn eval_block<'a, Ctx>(ctx: Ctx, input: Val) -> (Val, CtrlFlow)
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let Val::List(list) = input else {
         return (Eval.transform(ctx, input), CtrlFlow::None);
@@ -507,7 +507,7 @@ where
 
 fn eval_block_items<'a, Ctx>(mut ctx: Ctx, block_items: List<BlockItem>) -> (Val, CtrlFlow)
 where
-    Ctx: CtxAccessor<'a>,
+    Ctx: CtxMeta<'a>,
 {
     let mut output = Val::default();
     for block_item in block_items {

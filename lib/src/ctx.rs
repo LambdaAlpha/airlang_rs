@@ -8,6 +8,9 @@ use std::{
     hash::Hash,
 };
 
+use free::FreeCtx;
+use ref1::CtxRef;
+
 use crate::{
     map::Map,
     pair::Pair,
@@ -15,7 +18,6 @@ use crate::{
     transformer::Transformer,
     types::either::Either,
     val::Val,
-    FreeCtx,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -23,37 +25,6 @@ pub enum CtxError {
     NotFound,
     AccessDenied,
     Unexpected,
-}
-
-pub(crate) trait CtxRef<'a> {
-    fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError>;
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError>;
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'a, Val>, CtxError>;
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError>;
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
-
-    fn set_final(self, name: Symbol) -> Result<(), CtxError>;
-
-    #[allow(clippy::wrong_self_convention)]
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError>;
-
-    fn set_const(self, name: Symbol) -> Result<(), CtxError>;
-
-    #[allow(clippy::wrong_self_convention)]
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError>;
-
-    fn get_meta(self) -> Result<&'a Ctx, CtxError>;
-
-    #[allow(unused)]
-    fn get_meta_mut(self) -> Result<&'a mut Ctx, CtxError>;
-
-    fn get_meta_dyn(self) -> Result<DynRef<'a, Ctx>, CtxError>;
-
-    fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError>;
 }
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
@@ -761,3 +732,11 @@ impl Display for CtxError {
 impl Error for CtxError {}
 
 pub(crate) const DISPATCHER: &str = "dispatcher";
+
+pub(crate) mod ref1;
+
+pub(crate) mod free;
+
+pub(crate) mod constant;
+
+pub(crate) mod mutable;

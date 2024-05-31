@@ -1,9 +1,10 @@
 use crate::{
     ctx::{
+        constant::CtxForConstFn,
+        mutable::CtxForMutableFn,
         CtxMap,
         DefaultCtx,
     },
-    ctx_access::constant::CtxForConstFn,
     prelude::{
         default_mode,
         named_const_fn,
@@ -20,7 +21,6 @@ use crate::{
         Val,
     },
     Bytes,
-    CtxForMutableFn,
     Int,
     List,
     Pair,
