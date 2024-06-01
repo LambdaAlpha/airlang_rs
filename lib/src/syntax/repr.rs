@@ -16,7 +16,7 @@ use crate::{
     string::Str,
     symbol::Symbol,
     syntax::{
-        generate,
+        generate_pretty,
         generator::GenerateRepr,
         parse,
         parser::ParseRepr,
@@ -152,13 +152,13 @@ impl From<Box<AskRepr>> for Repr {
 
 impl Display for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate(self))
+        write!(f, "{}", generate_pretty(self))
     }
 }
 
 impl Debug for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate(self))
+        write!(f, "{}", generate_pretty(self))
     }
 }
 
@@ -178,7 +178,7 @@ impl FromStr for Repr {
 
 impl From<&Repr> for String {
     fn from(value: &Repr) -> Self {
-        generate(value)
+        generate_pretty(value)
     }
 }
 

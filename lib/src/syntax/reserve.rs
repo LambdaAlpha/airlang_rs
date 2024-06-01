@@ -9,7 +9,7 @@ use std::{
 
 use crate::{
     syntax::{
-        generate_reserve,
+        generate_reserve_pretty,
         generator::GenerateRepr,
         parse_reserve,
         parser::ParseRepr,
@@ -153,13 +153,13 @@ impl From<Box<AskRepr>> for Repr {
 
 impl Display for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_reserve(self))
+        write!(f, "{}", generate_reserve_pretty(self))
     }
 }
 
 impl Debug for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_reserve(self))
+        write!(f, "{}", generate_reserve_pretty(self))
     }
 }
 
@@ -179,7 +179,7 @@ impl FromStr for Repr {
 
 impl From<&Repr> for String {
     fn from(value: &Repr) -> Self {
-        generate_reserve(value)
+        generate_reserve_pretty(value)
     }
 }
 

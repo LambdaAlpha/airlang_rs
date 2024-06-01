@@ -1,5 +1,5 @@
 use airlang::syntax::{
-    generate,
+    generate_compact,
     parse,
 };
 use criterion::{
@@ -23,6 +23,6 @@ fn bench_generate(c: &mut Criterion) {
     c.bench_function("repr-generate", |b| {
         let s = include_str!("generate.air");
         let repr = parse(s).expect("parse failed");
-        b.iter(|| generate(black_box(&repr)));
+        b.iter(|| generate_compact(black_box(&repr)));
     });
 }

@@ -53,12 +53,11 @@ pub struct ReprError {}
 
 pub(crate) const INDENT: &str = "  ";
 
-#[allow(unused)]
-pub(crate) fn generate_compat<'a, T>(
+pub(crate) fn generate_compact<'a, T>(
     repr: &'a T,
 ) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
 where
-    &'a T: Into<GenerateRepr<'a, T>>,
+    &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
     let mut str = String::new();
@@ -67,27 +66,6 @@ where
         before_first: "".to_owned(),
         after_last: "".to_owned(),
         separator: SEPARATOR.to_string(),
-        left_padding: "".to_owned(),
-        right_padding: "".to_owned(),
-    };
-    generate(repr, &mut str, &config, 0)?;
-    Ok(str)
-}
-
-#[allow(unused)]
-pub(crate) fn generate_comfort<'a, T>(
-    repr: &'a T,
-) -> Result<String, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
-where
-    &'a T: Into<GenerateRepr<'a, T>>,
-    T: Eq + Hash,
-{
-    let mut str = String::new();
-    let config = GenerateFormat {
-        indent: "".to_owned(),
-        before_first: "".to_owned(),
-        after_last: "".to_owned(),
-        separator: format!("{SEPARATOR} "),
         left_padding: "".to_owned(),
         right_padding: "".to_owned(),
     };

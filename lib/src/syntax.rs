@@ -58,12 +58,20 @@ pub fn parse_reserve(src: &str) -> Result<reserve::Repr, ParseError> {
     parser::parse(src)
 }
 
-pub fn generate(src: &Repr) -> String {
+pub fn generate_pretty(src: &Repr) -> String {
     generator::generate_pretty(src).unwrap()
 }
 
-pub fn generate_reserve(src: &reserve::Repr) -> String {
+pub fn generate_compact(src: &Repr) -> String {
+    generator::generate_compact(src).unwrap()
+}
+
+pub fn generate_reserve_pretty(src: &reserve::Repr) -> String {
     generator::generate_pretty(src).unwrap()
+}
+
+pub fn generate_reserve_compact(src: &reserve::Repr) -> String {
+    generator::generate_compact(src).unwrap()
 }
 
 pub(crate) fn is_delimiter(c: char) -> bool {
