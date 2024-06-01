@@ -1,6 +1,6 @@
 [package]
 name = "airlang_bin"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "The Air Programming Language"
@@ -14,11 +14,11 @@ workspace = true
 
 [dependencies.airlang]
 path = "../lib"
-version = "0.2.0"
+version = "0.3.0"
 
 [dependencies.airlang_ext]
 path = "../ext"
-version = "0.2.0"
+version = "0.3.0"
 
 [dependencies]
 crossterm = "0.27"
