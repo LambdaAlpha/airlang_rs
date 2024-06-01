@@ -165,16 +165,28 @@ fn is_empty(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
-fn brackets<'a, T, E, F>(
+fn delimited_cut<'a, T, E, F>(
     left: char,
-    right: char,
     f: F,
+    right: char,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
 where
     E: ParseError<&'a str>,
     F: Parser<&'a str, T, E>,
 {
-    delimited(char1(left), cut(trim(f)), cut(char1(right)))
+    delimited(char1(left), cut(f), cut(char1(right)))
+}
+
+fn delimited_trim<'a, T, E, F>(
+    left: char,
+    f: F,
+    right: char,
+) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
+where
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, T, E>,
+{
+    delimited_cut(left, trim(f), right)
 }
 
 const RIGHT_ASSOCIATIVE: bool = true;
@@ -201,7 +213,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = brackets(WRAP_LEFT, WRAP_RIGHT, compose::<ASSOCIATIVITY, _, _>);
+    let f = delimited_trim(WRAP_LEFT, compose::<ASSOCIATIVITY, _, _>, WRAP_RIGHT);
     context("wrap", f)(src)
 }
 
@@ -305,7 +317,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = brackets(LIST_LEFT, LIST_RIGHT, separated_list0(empty1, token));
+    let collect = delimited_trim(LIST_LEFT, separated_list0(empty1, token), LIST_RIGHT);
     let f = map(collect, |tokens| {
         let list = tokens
             .into_iter()
@@ -482,7 +494,7 @@ where
         char1(SEPARATOR),
         compose_right_associative,
     );
-    let delimited_items = brackets(LIST_LEFT, LIST_RIGHT, items);
+    let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
 }
@@ -493,7 +505,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let items = items(key_value_pair, char1(SEPARATOR), key_value_pair);
-    let delimited_items = brackets(MAP_LEFT, MAP_RIGHT, items);
+    let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
     let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
     context("map", f)(src)
 }
@@ -528,11 +540,7 @@ where
         }
         string
     });
-    let delimited_string = delimited(
-        char1(SYMBOL_QUOTE),
-        cut(collect_fragments),
-        cut(char1(SYMBOL_QUOTE)),
-    );
+    let delimited_string = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
     let f = map(delimited_string, |s| From::from(Symbol::from_string(s)));
     context("quoted_symbol", f)(src)
 }
@@ -587,11 +595,7 @@ where
         }
         string
     });
-    let delimited_string = delimited(
-        char1(STRING_QUOTE),
-        cut(collect_fragments),
-        cut(char1(STRING_QUOTE)),
-    );
+    let delimited_string = delimited_cut(STRING_QUOTE, collect_fragments, STRING_QUOTE);
     let f = map(delimited_string, |s| From::from(Str::from(s)));
     context("string", f)(src)
 }
@@ -628,10 +632,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let digit = take_while_m_n(1, 6, |c: char| c.is_hex_digit());
-    let delimited_digit = preceded(
-        char1('u'),
-        delimited(char1('('), cut(digit), cut(char1(')'))),
-    );
+    let delimited_digit = preceded(char1('u'), delimited_trim(WRAP_LEFT, digit, WRAP_RIGHT));
     let parse_u32 = map_res(delimited_digit, move |hex| u32::from_str_radix(hex, 16));
     let f = map_opt(parse_u32, std::char::from_u32);
     context("unicode", f)(src)
