@@ -26,7 +26,11 @@ false
 -----
 true
 =====
-; [p = assert ! {function : not, input : true, output : false}, a = answer.verified ! p, (type_of p) == assert and a == .]
+; [
+    p = assert ! {function : not, input : true, output : false},
+    a = answer.verified ! p,
+    ((type_of p) == assert) and a == .
+]
 -----
 true
 =====

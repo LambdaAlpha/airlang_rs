@@ -131,6 +131,11 @@ fn test_assert() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_answer() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/answer.air"), "test/answer.air")
+}
+
+#[test]
 fn test_symbol() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/symbol.air"), "test/symbol.air")
 }
