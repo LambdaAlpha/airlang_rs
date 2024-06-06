@@ -34,7 +34,7 @@ true
 -----
 1
 =====
-!! ! func_ext ! 1
+call.apply ! func_ext ! 1
 -----
 1
 =====

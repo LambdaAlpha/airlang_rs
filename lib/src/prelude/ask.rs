@@ -38,7 +38,7 @@ pub(crate) struct AskPrelude {
     pub(crate) set_func: Named<FuncVal>,
     pub(crate) get_output: Named<FuncVal>,
     pub(crate) set_output: Named<FuncVal>,
-    pub(crate) ask: Named<FuncVal>,
+    pub(crate) apply: Named<FuncVal>,
 }
 
 impl Default for AskPrelude {
@@ -49,7 +49,7 @@ impl Default for AskPrelude {
             set_func: set_func(),
             get_output: get_output(),
             set_output: set_output(),
-            ask: ask(),
+            apply: apply(),
         }
     }
 }
@@ -61,7 +61,7 @@ impl Prelude for AskPrelude {
         self.set_func.put(m);
         self.get_output.put(m);
         self.set_output.put(m);
-        self.ask.put(m);
+        self.apply.put(m);
     }
 }
 
@@ -170,18 +170,18 @@ fn fn_set_output(ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-fn ask() -> Named<FuncVal> {
+fn apply() -> Named<FuncVal> {
     let input_mode = ask_mode(default_mode(), default_mode());
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
-        fn_ask::<FreeCtx>,
-        |ctx, val| fn_ask(ctx, val),
-        |ctx, val| fn_ask(ctx, val),
+        fn_apply::<FreeCtx>,
+        |ctx, val| fn_apply(ctx, val),
+        |ctx, val| fn_apply(ctx, val),
     );
-    named_mutable_fn("??", input_mode, output_mode, func)
+    named_mutable_fn("ask.apply", input_mode, output_mode, func)
 }
 
-fn fn_ask<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {

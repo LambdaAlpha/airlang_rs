@@ -38,10 +38,14 @@ call.input ! 1 '!' 2
 -----
 1 ! 3
 =====
-; [a = 1, b = id ! a, !! ! read ! b]
+; [a = 1, b = id ! a, call.apply ! read ! b]
 -----
 1
 =====
-!! ! id ! not ! false
+call.apply ! id ! not ! false
 -----
 true
+=====
+; [a = 1, c = read '!' a, call.apply c]
+-----
+1

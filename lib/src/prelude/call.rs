@@ -38,7 +38,7 @@ pub(crate) struct CallPrelude {
     pub(crate) set_func: Named<FuncVal>,
     pub(crate) get_input: Named<FuncVal>,
     pub(crate) set_input: Named<FuncVal>,
-    pub(crate) call: Named<FuncVal>,
+    pub(crate) apply: Named<FuncVal>,
 }
 
 impl Default for CallPrelude {
@@ -49,7 +49,7 @@ impl Default for CallPrelude {
             set_func: set_func(),
             get_input: get_input(),
             set_input: set_input(),
-            call: call(),
+            apply: apply(),
         }
     }
 }
@@ -61,7 +61,7 @@ impl Prelude for CallPrelude {
         self.set_func.put(m);
         self.get_input.put(m);
         self.set_input.put(m);
-        self.call.put(m);
+        self.apply.put(m);
     }
 }
 
@@ -170,18 +170,18 @@ fn fn_set_input(ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-fn call() -> Named<FuncVal> {
+fn apply() -> Named<FuncVal> {
     let input_mode = call_mode(default_mode(), default_mode());
     let output_mode = default_mode();
     let func = MutableDispatcher::new(
-        fn_call::<FreeCtx>,
-        |ctx, val| fn_call(ctx, val),
-        |ctx, val| fn_call(ctx, val),
+        fn_apply::<FreeCtx>,
+        |ctx, val| fn_apply(ctx, val),
+        |ctx, val| fn_apply(ctx, val),
     );
-    named_mutable_fn("!!", input_mode, output_mode, func)
+    named_mutable_fn("call.apply", input_mode, output_mode, func)
 }
 
-fn fn_call<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {
