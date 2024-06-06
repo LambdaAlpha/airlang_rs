@@ -76,9 +76,13 @@ impl Prelude for CtrlPrelude {
 }
 
 const BREAK: &str = "break";
+const UNIT_BREAK: &str = ".break";
 const ELSE_BREAK: &str = "else_break";
+const UNIT_ELSE_BREAK: &str = ".else_break";
 const CONTINUE: &str = "continue";
+const UNIT_CONTINUE: &str = ".continue";
 const ELSE_CONTINUE: &str = "else_continue";
+const UNIT_ELSE_CONTINUE: &str = ".else_continue";
 
 #[derive(Copy, Clone)]
 enum Exit {
@@ -96,7 +100,12 @@ enum CtrlFlow {
 #[derive(Clone)]
 enum BlockItem {
     Normal(Val),
-    Exit {
+    UnitExit {
+        exit: Exit,
+        target: bool,
+        body: Val,
+    },
+    BoolExit {
         exit: Exit,
         target: bool,
         condition: Val,
@@ -515,7 +524,13 @@ where
             BlockItem::Normal(val) => {
                 output = Eval.transform(ctx.reborrow(), val);
             }
-            BlockItem::Exit {
+            BlockItem::UnitExit { exit, target, body } => {
+                output = Eval.transform(ctx.reborrow(), body);
+                if output.is_unit() == target {
+                    return (output, CtrlFlow::from(exit));
+                }
+            }
+            BlockItem::BoolExit {
                 exit,
                 target,
                 condition,
@@ -529,6 +544,7 @@ where
                     let output = Eval.transform(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }
+                output = Val::default();
             }
         }
     }
@@ -542,36 +558,66 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
     let Val::Symbol(s) = &call.func else {
         return Some(BlockItem::Normal(Val::Call(call)));
     };
-    let Some((exit, target)) = parse_exit(s) else {
+    let Some(ParseExit {
+        is_unit,
+        exit,
+        target,
+    }) = parse_exit(s)
+    else {
         return Some(BlockItem::Normal(Val::Call(call)));
     };
     let call = Call::from(call);
-    let Val::Pair(pair) = call.input else {
-        return None;
-    };
-    let pair = Pair::from(pair);
-    let condition = pair.first;
-    let body = pair.second;
-    let block_item = BlockItem::Exit {
-        exit,
-        target,
-        condition,
-        body,
+    let block_item = if is_unit {
+        let body = call.input;
+        BlockItem::UnitExit { exit, target, body }
+    } else {
+        let Val::Pair(pair) = call.input else {
+            return None;
+        };
+        let pair = Pair::from(pair);
+        let condition = pair.first;
+        let body = pair.second;
+        BlockItem::BoolExit {
+            exit,
+            target,
+            condition,
+            body,
+        }
     };
     Some(block_item)
 }
 
-fn parse_exit(str: &str) -> Option<(Exit, bool /* target */)> {
-    let (exit, target) = match str {
-        BREAK => (Exit::Break, true),
-        ELSE_BREAK => (Exit::Break, false),
-        CONTINUE => (Exit::Continue, true),
-        ELSE_CONTINUE => (Exit::Continue, false),
+struct ParseExit {
+    is_unit: bool,
+    exit: Exit,
+    target: bool,
+}
+
+impl ParseExit {
+    fn new(is_unit: bool, exit: Exit, target: bool) -> Self {
+        Self {
+            is_unit,
+            exit,
+            target,
+        }
+    }
+}
+
+fn parse_exit(str: &str) -> Option<ParseExit> {
+    let (is_unit, exit, target) = match str {
+        BREAK => (false, Exit::Break, true),
+        UNIT_BREAK => (true, Exit::Break, true),
+        ELSE_BREAK => (false, Exit::Break, false),
+        UNIT_ELSE_BREAK => (true, Exit::Break, false),
+        CONTINUE => (false, Exit::Continue, true),
+        UNIT_CONTINUE => (true, Exit::Continue, true),
+        ELSE_CONTINUE => (false, Exit::Continue, false),
+        UNIT_ELSE_CONTINUE => (true, Exit::Continue, false),
         _ => {
             return None;
         }
     };
-    Some((exit, target))
+    Some(ParseExit::new(is_unit, exit, target))
 }
 
 impl From<Exit> for CtrlFlow {
