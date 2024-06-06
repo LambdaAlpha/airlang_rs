@@ -2,6 +2,10 @@
 -----
 1 ! 2
 =====
+; [a = id '!' b, call.input a]
+-----
+b
+=====
 ; [a = 1 '!' 2, call.function a]
 -----
 1

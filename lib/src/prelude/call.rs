@@ -3,7 +3,6 @@ use std::mem::swap;
 use crate::{
     ctx::{
         constant::CtxForConstFn,
-        free::FreeCtx,
         mutable::CtxForMutableFn,
         ref1::CtxMeta,
         CtxMap,
@@ -14,7 +13,6 @@ use crate::{
         call_mode,
         default_mode,
         named_const_fn,
-        named_free_fn,
         named_mutable_fn,
         pair_mode,
         symbol_id_mode,
@@ -26,7 +24,10 @@ use crate::{
     types::either::Either,
     val::func::FuncVal,
     Call,
+    FreeCtx,
+    Mode,
     Pair,
+    Transform,
     Val,
 };
 
@@ -65,17 +66,20 @@ impl Prelude for CallPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
+    let input_mode = pair_mode(default_mode(), Mode::Predefined(Transform::Id));
     let output_mode = default_mode();
-    named_free_fn(CALL_INFIX, input_mode, output_mode, fn_new)
+    named_mutable_fn(CALL_INFIX, input_mode, output_mode, fn_new)
 }
 
-fn fn_new(input: Val) -> Val {
+fn fn_new(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    Val::Call(Call::new(pair.first, pair.second).into())
+    let func = pair.first;
+    let input = pair.second;
+    let input = Eval.eval_input(ctx, &func, input);
+    Val::Call(Call::new(func, input).into())
 }
 
 fn get_func() -> Named<FuncVal> {
