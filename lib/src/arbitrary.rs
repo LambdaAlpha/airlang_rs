@@ -415,23 +415,23 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> Rc<Func> {
         let transformer = match rng.gen_range(0..3) {
             0 => FuncTransformer::Free(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
-                ctx: any_ctx(rng, depth),
+                prelude: any_ctx(rng, depth),
                 input_name: any_symbol(rng),
-                caller: CtxFreeInfo {},
+                ctx: CtxFreeInfo {},
             })),
             1 => FuncTransformer::Const(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
-                ctx: any_ctx(rng, depth),
+                prelude: any_ctx(rng, depth),
                 input_name: any_symbol(rng),
-                caller: CtxConstInfo {
+                ctx: CtxConstInfo {
                     name: any_symbol(rng),
                 },
             })),
             2 => FuncTransformer::Mutable(FuncImpl::Composed(Composed {
                 body: any_val(rng, depth),
-                ctx: any_ctx(rng, depth),
+                prelude: any_ctx(rng, depth),
                 input_name: any_symbol(rng),
-                caller: CtxMutableInfo {
+                ctx: CtxMutableInfo {
                     name: any_symbol(rng),
                 },
             })),
@@ -475,9 +475,9 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         let output_mode = any_mode(rng, depth);
         let transformer = FuncTransformer::Free(FuncImpl::Composed(Composed {
             body: any_val(rng, depth),
-            ctx: any_ctx(rng, depth),
+            prelude: any_ctx(rng, depth),
             input_name: any_symbol(rng),
-            caller: CtxFreeInfo {},
+            ctx: CtxFreeInfo {},
         }));
         let func = Func {
             input_mode,

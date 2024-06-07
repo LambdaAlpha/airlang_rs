@@ -290,12 +290,12 @@ false
     a = . context {a1 : 1},
     b = . context {b1 : 2},
     dispatcher = function ! {
-        body : input match {
+        body : .input match {
             (id a1) : (id a),
             (id b1) : (id b),
         } : false,
-        caller_access : free,
-        context : . context {
+        context_access : free,
+        prelude : . context {
             : match,
             : id,
         },
@@ -309,15 +309,15 @@ true
 ; [
     da = function ! {
         body : id ! b,
-        caller_access : free,
-        context : . context {
+        context_access : free,
+        prelude : . context {
             : id,
         },
     },
     db = function ! {
         body : id ! c,
-        caller_access : free,
-        context : . context {
+        context_access : free,
+        prelude : . context {
             : id,
         },
     },
@@ -336,7 +336,7 @@ true
 ; [
     dispatcher = function ! {
         body : true,
-        caller_access : free,
+        context_access : free,
     },
     set_meta ! . context {: dispatcher, a : 1},
     a
@@ -348,7 +348,7 @@ true
     a = 1,
     dispatcher = function ! {
         body : false,
-        caller_access : free,
+        context_access : free,
     },
     set_meta ! . context {: dispatcher},
     a

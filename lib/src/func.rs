@@ -88,9 +88,9 @@ pub(crate) struct Primitive<Fn> {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composed<C> {
     pub(crate) body: Val,
-    pub(crate) ctx: Ctx,
+    pub(crate) prelude: Ctx,
     pub(crate) input_name: Symbol,
-    pub(crate) caller: C,
+    pub(crate) ctx: C,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -204,25 +204,25 @@ impl Func {
         }
     }
 
-    pub(crate) fn composed_context(&self) -> Option<Ctx> {
+    pub(crate) fn composed_prelude(&self) -> Option<Ctx> {
         match &self.transformer {
             FuncTransformer::Free(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(f.ctx.clone())
+                Some(f.prelude.clone())
             }
             FuncTransformer::Const(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(f.ctx.clone())
+                Some(f.prelude.clone())
             }
             FuncTransformer::Mutable(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(f.ctx.clone())
+                Some(f.prelude.clone())
             }
         }
     }
@@ -250,20 +250,20 @@ impl Func {
         }
     }
 
-    pub(crate) fn composed_caller_name(&self) -> Option<Symbol> {
+    pub(crate) fn composed_ctx_name(&self) -> Option<Symbol> {
         match &self.transformer {
             FuncTransformer::Free(_) => None,
             FuncTransformer::Const(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(f.caller.name.clone())
+                Some(f.ctx.name.clone())
             }
             FuncTransformer::Mutable(f) => {
                 let FuncImpl::Composed(f) = f else {
                     return None;
                 };
-                Some(f.caller.name.clone())
+                Some(f.ctx.name.clone())
             }
         }
     }
@@ -318,7 +318,7 @@ impl Transformer<Val, Val> for Composed<CtxFreeInfo> {
         Ctx: CtxMeta<'a>,
     {
         eval_free(
-            self.ctx.clone(),
+            self.prelude.clone(),
             input,
             self.input_name.clone(),
             self.body.clone(),
@@ -342,7 +342,7 @@ impl Transformer<Val, Val> for Composed<CtxConstInfo> {
     {
         match ctx.for_const_fn() {
             CtxForConstFn::Free(_ctx) => eval_free(
-                self.ctx.clone(),
+                self.prelude.clone(),
                 input,
                 self.input_name.clone(),
                 self.body.clone(),
@@ -350,9 +350,9 @@ impl Transformer<Val, Val> for Composed<CtxConstInfo> {
             CtxForConstFn::Const(mut ctx) => {
                 let f = |ctx| {
                     eval_aware(
-                        self.ctx.clone(),
+                        self.prelude.clone(),
                         ctx,
-                        self.caller.name.clone(),
+                        self.ctx.name.clone(),
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
@@ -382,7 +382,7 @@ impl Transformer<Val, Val> for Composed<CtxMutableInfo> {
     {
         match ctx.for_mutable_fn() {
             CtxForMutableFn::Free(_ctx) => eval_free(
-                self.ctx.clone(),
+                self.prelude.clone(),
                 input,
                 self.input_name.clone(),
                 self.body.clone(),
@@ -390,9 +390,9 @@ impl Transformer<Val, Val> for Composed<CtxMutableInfo> {
             CtxForMutableFn::Const(mut ctx) => {
                 let f = |ctx| {
                     eval_aware(
-                        self.ctx.clone(),
+                        self.prelude.clone(),
                         ctx,
-                        self.caller.name.clone(),
+                        self.ctx.name.clone(),
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
@@ -405,9 +405,9 @@ impl Transformer<Val, Val> for Composed<CtxMutableInfo> {
             CtxForMutableFn::Mutable(mut ctx) => {
                 let f = |ctx| {
                     eval_aware(
-                        self.ctx.clone(),
+                        self.prelude.clone(),
                         ctx,
-                        self.caller.name.clone(),
+                        self.ctx.name.clone(),
                         Invariant::Final,
                         input,
                         self.input_name.clone(),
@@ -506,9 +506,9 @@ impl Debug for Func {
                 CtxFree::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
                     s.field("output_mode", &self.output_mode);
-                    s.field("caller_access", &"free");
+                    s.field("context_access", &"free");
                     s.field("body", &c.body);
-                    s.field("context", &c.ctx);
+                    s.field("prelude", &c.prelude);
                     s.field("input_name", &c.input_name);
                 }
             },
@@ -520,10 +520,10 @@ impl Debug for Func {
                 CtxConst::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
                     s.field("output_mode", &self.output_mode);
-                    s.field("caller_access", &"constant");
+                    s.field("context_access", &"constant");
                     s.field("body", &c.body);
-                    s.field("context", &c.ctx);
-                    s.field("caller_name", &c.caller.name);
+                    s.field("prelude", &c.prelude);
+                    s.field("context_name", &c.ctx.name);
                     s.field("input_name", &c.input_name);
                 }
             },
@@ -535,10 +535,10 @@ impl Debug for Func {
                 CtxMutable::Composed(c) => {
                     s.field("input_mode", &self.input_mode);
                     s.field("output_mode", &self.output_mode);
-                    s.field("caller_access", &"mutable");
+                    s.field("context_access", &"mutable");
                     s.field("body", &c.body);
-                    s.field("context", &c.ctx);
-                    s.field("caller_name", &c.caller.name);
+                    s.field("prelude", &c.prelude);
+                    s.field("context_name", &c.ctx.name);
                     s.field("input_name", &c.input_name);
                 }
             },

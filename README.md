@@ -42,7 +42,7 @@ The Air language seeks to solve programming problems once and for all.
     },
     gcd = function ! {
         body : ; ! [
-            (x : y) = input,
+            (x : y) = .input,
             (y <> 0) while [
                 z = y,
                 y = x % y,
@@ -50,7 +50,7 @@ The Air language seeks to solve programming problems once and for all.
             ],
             x
         ],
-        context : move ! ctx,
+        prelude : move ! ctx,
     },
     42 gcd 24
 ]

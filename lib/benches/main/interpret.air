@@ -10,13 +10,13 @@
   f = function ! {
     body : ; ! [
       sum = 0,
-      input for i : [
+      .input for i : [
         (0 == i % 3) continue .,
         sum = sum + i,
       ],
       sum
     ],
-    context : move ! ctx,
+    prelude : move ! ctx,
   },
   f 100
 ]
