@@ -10,9 +10,9 @@ use crate::{
     },
     func::MutableDispatcher,
     prelude::{
-        ask_mode,
         default_mode,
         named_const_fn,
+        named_free_fn,
         named_mutable_fn,
         pair_mode,
         symbol_id_mode,
@@ -24,32 +24,36 @@ use crate::{
     types::either::Either,
     val::func::FuncVal,
     Ask,
+    AskMode,
     FreeCtx,
     Mode,
     Pair,
     Transform,
     Val,
+    ValMode,
 };
 
 #[derive(Clone)]
 pub(crate) struct AskPrelude {
     pub(crate) new: Named<FuncVal>,
+    pub(crate) new_dependent: Named<FuncVal>,
+    pub(crate) apply: Named<FuncVal>,
     pub(crate) get_func: Named<FuncVal>,
     pub(crate) set_func: Named<FuncVal>,
     pub(crate) get_output: Named<FuncVal>,
     pub(crate) set_output: Named<FuncVal>,
-    pub(crate) apply: Named<FuncVal>,
 }
 
 impl Default for AskPrelude {
     fn default() -> Self {
         AskPrelude {
             new: new(),
+            new_dependent: new_dependent(),
+            apply: apply(),
             get_func: get_func(),
             set_func: set_func(),
             get_output: get_output(),
             set_output: set_output(),
-            apply: apply(),
         }
     }
 }
@@ -57,29 +61,91 @@ impl Default for AskPrelude {
 impl Prelude for AskPrelude {
     fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
+        self.new_dependent.put(m);
+        self.apply.put(m);
         self.get_func.put(m);
         self.set_func.put(m);
         self.get_output.put(m);
         self.set_output.put(m);
-        self.apply.put(m);
     }
 }
 
 fn new() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), Mode::Predefined(Transform::Id));
+    let val_mode = ValMode {
+        pair: Box::new(Pair::new(default_mode(), default_mode())),
+        ask: Box::new(AskMode::Struct(Ask::new(default_mode(), default_mode()))),
+        ..Default::default()
+    };
+    let input_mode = Mode::Custom(Box::new(val_mode));
     let output_mode = default_mode();
-    named_mutable_fn(ASK_INFIX, input_mode, output_mode, fn_new)
+    named_free_fn(ASK_INFIX, input_mode, output_mode, fn_new)
 }
 
-fn fn_new(ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_new(input: Val) -> Val {
+    match input {
+        Val::Pair(pair) => {
+            let pair = Pair::from(pair);
+            Val::Ask(Ask::new(pair.first, pair.second).into())
+        }
+        Val::Ask(ask) => Val::Ask(ask),
+        _ => Val::default(),
+    }
+}
+
+fn new_dependent() -> Named<FuncVal> {
+    let val_mode = ValMode {
+        pair: Box::new(Pair::new(default_mode(), Mode::Predefined(Transform::Id))),
+        ask: Box::new(AskMode::Struct(Ask::new(
+            default_mode(),
+            Mode::Predefined(Transform::Id),
+        ))),
+        ..Default::default()
+    };
+    let input_mode = Mode::Custom(Box::new(val_mode));
+    let output_mode = default_mode();
+    named_mutable_fn("??", input_mode, output_mode, fn_new_dependent)
+}
+
+fn fn_new_dependent(ctx: CtxForMutableFn, input: Val) -> Val {
+    match input {
+        Val::Pair(pair) => {
+            let pair = Pair::from(pair);
+            let func = pair.first;
+            let output = pair.second;
+            let output = Eval.eval_output(ctx, &func, output);
+            Val::Ask(Ask::new(func, output).into())
+        }
+        Val::Ask(ask) => {
+            let ask = Ask::from(ask);
+            let func = ask.func;
+            let output = ask.output;
+            let output = Eval.eval_output(ctx, &func, output);
+            Val::Ask(Ask::new(func, output).into())
+        }
+        _ => Val::default(),
+    }
+}
+
+fn apply() -> Named<FuncVal> {
+    let input_mode = default_mode();
+    let output_mode = default_mode();
+    let func = MutableDispatcher::new(
+        fn_apply::<FreeCtx>,
+        |ctx, val| fn_apply(ctx, val),
+        |ctx, val| fn_apply(ctx, val),
+    );
+    named_mutable_fn("ask.apply", input_mode, output_mode, func)
+}
+
+fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+where
+    Ctx: CtxMeta<'a>,
+{
+    let Val::Ask(ask) = input else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    let func = pair.first;
-    let output = pair.second;
-    let output = Eval.eval_output(ctx, &func, output);
-    Val::Ask(Ask::new(func, output).into())
+    let ask = Ask::from(ask);
+    Eval::solve(ctx, ask.func, ask.output)
 }
 
 fn get_func() -> Named<FuncVal> {
@@ -168,26 +234,4 @@ fn fn_set_output(ctx: CtxForMutableFn, input: Val) -> Val {
         }
         Either::Right(_) => Val::default(),
     })
-}
-
-fn apply() -> Named<FuncVal> {
-    let input_mode = ask_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
-    let func = MutableDispatcher::new(
-        fn_apply::<FreeCtx>,
-        |ctx, val| fn_apply(ctx, val),
-        |ctx, val| fn_apply(ctx, val),
-    );
-    named_mutable_fn("ask.apply", input_mode, output_mode, func)
-}
-
-fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
-    let Val::Ask(ask) = input else {
-        return Val::default();
-    };
-    let ask = Ask::from(ask);
-    Eval::solve(ctx, ask.func, ask.output)
 }

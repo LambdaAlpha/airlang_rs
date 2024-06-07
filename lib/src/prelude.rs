@@ -234,6 +234,7 @@ fn call_mode(func: Mode, input: Mode) -> Mode {
     Mode::Custom(Box::new(mode))
 }
 
+#[allow(unused)]
 fn ask_mode(func: Mode, output: Mode) -> Mode {
     let mode = ValMode {
         ask: Box::new(AskMode::Struct(Ask::new(func, output))),

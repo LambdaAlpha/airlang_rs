@@ -359,13 +359,14 @@ true
 =====
 ; [
     f = function ! {
-        body : caller | call.apply ! input = 2,
+        body : caller | call.apply ! '!' ! input = 2,
         input_mode : id,
         caller_access : mutable,
         context : . context {
             : |,
             : =,
             : call.apply,
+            : '!',
         }
     },
     a = 1,
@@ -377,13 +378,14 @@ true
 =====
 ; [
     f = function ! {
-        body : caller | call.apply ! input = 2,
+        body : caller | call.apply ! '!' ! input = 2,
         input_mode : id,
         caller_access : mutable,
         context : . context {
             : |,
             : =,
             : call.apply,
+            : '!',
         }
     },
     (a . final) = 1,
@@ -395,13 +397,14 @@ true
 =====
 ; [
     f = function ! {
-        body : caller | call.apply ! input = 2,
+        body : caller | call.apply ! '!' ! input = 2,
         input_mode : id,
         caller_access : constant,
         context : . context {
             : |,
             : =,
-            : !!,
+            : call.apply,
+            : '!',
         }
     },
     a = 1,
