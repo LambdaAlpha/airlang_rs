@@ -41,10 +41,7 @@ use crate::{
         eval::Eval,
         Transform,
     },
-    transformer::{
-        input::ByVal,
-        Transformer,
-    },
+    transformer::Transformer,
     unit::Unit,
     utils::val::{
         map_remove,
@@ -57,9 +54,7 @@ use crate::{
         map::MapVal,
         Val,
     },
-    AskMode,
     AskVal,
-    CallMode,
     ListMode,
     ListVal,
     Map,
@@ -82,9 +77,6 @@ pub(crate) struct CtxPrelude {
     pub(crate) has_meta: Named<FuncVal>,
     pub(crate) set_meta: Named<FuncVal>,
     pub(crate) with_ctx: Named<FuncVal>,
-    pub(crate) with_ctx_func: Named<FuncVal>,
-    pub(crate) with_ctx_input: Named<FuncVal>,
-    pub(crate) with_ctx_func_input: Named<FuncVal>,
     pub(crate) ctx_in_ctx_out: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
     pub(crate) ctx_repr: Named<FuncVal>,
@@ -107,9 +99,6 @@ impl Default for CtxPrelude {
             has_meta: has_meta(),
             set_meta: set_meta(),
             with_ctx: with_ctx(),
-            with_ctx_func: with_ctx_func(),
-            with_ctx_input: with_ctx_input(),
-            with_ctx_func_input: with_ctx_func_input(),
             ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
@@ -133,9 +122,6 @@ impl Prelude for CtxPrelude {
         self.has_meta.put(m);
         self.set_meta.put(m);
         self.with_ctx.put(m);
-        self.with_ctx_func.put(m);
-        self.with_ctx_input.put(m);
-        self.with_ctx_func_input.put(m);
         self.ctx_in_ctx_out.put(m);
         self.ctx_new.put(m);
         self.ctx_repr.put(m);
@@ -524,207 +510,22 @@ fn with_ctx() -> Named<FuncVal> {
             list: Box::new(ListMode::All(symbol_id_mode())),
             ..Default::default()
         })),
-        Mode::Custom(Box::new(ValMode {
-            call: Box::new(CallMode::Struct(Call::new(
-                Mode::Predefined(Transform::Eval),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ask: Box::new(AskMode::Struct(Ask::new(
-                Mode::Predefined(Transform::Eval),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ..Default::default()
-        })),
+        default_mode(),
     );
     let output_mode = default_mode();
     named_mutable_fn("|", input_mode, output_mode, fn_with_ctx)
 }
 
-fn fn_with_ctx(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_with_ctx(ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    match pair.second {
-        Val::Call(call) => {
-            let call = Call::from(call);
-            let func = call.func;
-            let input = Eval.eval_input(ctx.reborrow(), &func, call.input);
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval::call(target_ctx, func, input)
-            });
-            result.unwrap_or_default()
-        }
-        Val::Ask(ask) => {
-            let ask = Ask::from(ask);
-            let func = ask.func;
-            let output = Eval.eval_output(ctx.reborrow(), &func, ask.output);
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval::solve(target_ctx, func, output)
-            });
-            result.unwrap_or_default()
-        }
-        _ => Val::default(),
-    }
-}
-
-fn with_ctx_func() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        Mode::Custom(Box::new(ValMode {
-            symbol: SymbolMode::Id,
-            list: Box::new(ListMode::All(symbol_id_mode())),
-            ..Default::default()
-        })),
-        Mode::Custom(Box::new(ValMode {
-            call: Box::new(CallMode::Struct(Call::new(
-                Mode::Predefined(Transform::Id),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ask: Box::new(AskMode::Struct(Ask::new(
-                Mode::Predefined(Transform::Id),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ..Default::default()
-        })),
-    );
-    let output_mode = default_mode();
-    named_mutable_fn(".|", input_mode, output_mode, fn_with_ctx_func)
-}
-
-fn fn_with_ctx_func(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    match pair.second {
-        Val::Call(call) => {
-            let call = Call::from(call);
-            let func = call.func;
-            let input = call.input;
-            let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |target_ctx| {
-                Eval.transform(target_ctx, func)
-            }) else {
-                return Val::default();
-            };
-            let input = Eval.eval_input(ctx.reborrow(), &func, input);
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval::call(target_ctx, func, input)
-            });
-            result.unwrap_or_default()
-        }
-        Val::Ask(ask) => {
-            let ask = Ask::from(ask);
-            let func = ask.func;
-            let output = ask.output;
-            let Some(func) = with_target_ctx(ctx.reborrow(), &pair.first, |target_ctx| {
-                Eval.transform(target_ctx, func)
-            }) else {
-                return Val::default();
-            };
-            let output = Eval.eval_output(ctx.reborrow(), &func, output);
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval::solve(target_ctx, func, output)
-            });
-            result.unwrap_or_default()
-        }
-        _ => Val::default(),
-    }
-}
-
-fn with_ctx_input() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        Mode::Custom(Box::new(ValMode {
-            symbol: SymbolMode::Id,
-            list: Box::new(ListMode::All(symbol_id_mode())),
-            ..Default::default()
-        })),
-        Mode::Custom(Box::new(ValMode {
-            call: Box::new(CallMode::Struct(Call::new(
-                Mode::Predefined(Transform::Eval),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ask: Box::new(AskMode::Struct(Ask::new(
-                Mode::Predefined(Transform::Eval),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ..Default::default()
-        })),
-    );
-    let output_mode = default_mode();
-    named_mutable_fn("|.", input_mode, output_mode, fn_with_ctx_input)
-}
-
-fn fn_with_ctx_input(ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    match pair.second {
-        Val::Call(call) => {
-            let call = Call::from(call);
-            let func = call.func;
-            let input = call.input;
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval.eval_input_then_call(target_ctx, func, input)
-            });
-            result.unwrap_or_default()
-        }
-        Val::Ask(ask) => {
-            let ask = Ask::from(ask);
-            let func = ask.func;
-            let output = ask.output;
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval.eval_output_then_solve(target_ctx, func, output)
-            });
-            result.unwrap_or_default()
-        }
-        _ => Val::default(),
-    }
-}
-
-fn with_ctx_func_input() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        Mode::Custom(Box::new(ValMode {
-            symbol: SymbolMode::Id,
-            list: Box::new(ListMode::All(symbol_id_mode())),
-            ..Default::default()
-        })),
-        Mode::Custom(Box::new(ValMode {
-            call: Box::new(CallMode::Struct(Call::new(
-                Mode::Predefined(Transform::Id),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ask: Box::new(AskMode::Struct(Ask::new(
-                Mode::Predefined(Transform::Id),
-                Mode::Predefined(Transform::Id),
-            ))),
-            ..Default::default()
-        })),
-    );
-    let output_mode = default_mode();
-    named_mutable_fn(".|.", input_mode, output_mode, fn_with_ctx_func_input)
-}
-
-fn fn_with_ctx_func_input(ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    match pair.second {
-        Val::Call(call) => {
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval.transform_call(target_ctx, call)
-            });
-            result.unwrap_or_default()
-        }
-        Val::Ask(ask) => {
-            let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
-                Eval.transform_ask(target_ctx, ask)
-            });
-            result.unwrap_or_default()
-        }
-        _ => Val::default(),
-    }
+    let val = pair.second;
+    let result = with_target_ctx(ctx, &pair.first, |target_ctx| {
+        Eval.transform(target_ctx, val)
+    });
+    result.unwrap_or_default()
 }
 
 fn with_target_ctx<F>(ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>

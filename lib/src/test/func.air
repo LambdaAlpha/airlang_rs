@@ -300,11 +300,11 @@ true
 ; [
     a = 1,
     f = function ! {
-        body : .context | read ! a,
+        body : .context | id ! a,
         context_access : free,
         prelude : . context {
             : |,
-            : read,
+            : id,
         }
     },
     f .
@@ -315,11 +315,11 @@ true
 ; [
     a = 1,
     f = function ! {
-        body : .context | read ! a,
+        body : .context | id ! a,
         context_access : constant,
         prelude : . context {
             : |,
-            : read,
+            : id,
         }
     },
     f .
@@ -330,11 +330,11 @@ true
 ; [
     a = 1,
     f = function ! {
-        body : .context | read ! a,
+        body : .context | id ! a,
         context_access : mutable,
         prelude : . context {
             : |,
-            : read,
+            : id,
         }
     },
     f .
@@ -345,11 +345,11 @@ true
 ; [
     a = 1,
     f = function ! {
-        body : .context | read ! a,
+        body : .context | id ! a,
         context_access : constant,
         prelude : . context {
             : |,
-            : read,
+            : id,
         }
     },
     f .
@@ -359,13 +359,12 @@ true
 =====
 ; [
     f = function ! {
-        body : .context | call.apply ! '!' ! .input = 2,
+        body : .context | '!' ! .input = 2,
         input_mode : id,
         context_access : mutable,
         prelude : . context {
             : |,
             : =,
-            : call.apply,
             : '!',
         }
     },
@@ -378,13 +377,12 @@ true
 =====
 ; [
     f = function ! {
-        body : .context | call.apply ! '!' ! .input = 2,
+        body : .context | '!' ! .input = 2,
         input_mode : id,
         context_access : mutable,
         prelude : . context {
             : |,
             : =,
-            : call.apply,
             : '!',
         }
     },
@@ -397,13 +395,12 @@ true
 =====
 ; [
     f = function ! {
-        body : .context | call.apply ! '!' ! .input = 2,
+        body : .context | '!' ! .input = 2,
         input_mode : id,
         context_access : constant,
         prelude : . context {
             : |,
             : =,
-            : call.apply,
             : '!',
         }
     },
@@ -425,11 +422,12 @@ true
         },
     },
     f = function ! {
-        body : .context | a = 1,
+        body : .context | !! ! a = 1,
         context_access : mutable,
         prelude : (. context {: dispatcher}) context {
             : =,
             : |,
+            : !!,
             c : . context {},
         }
     },

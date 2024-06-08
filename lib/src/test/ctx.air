@@ -258,15 +258,15 @@ access .
 -----
 mutable
 =====
-. | access ! .
+. | access !! .
 -----
 free
 =====
-; [(a . constant) = . context {}, a | access ! .]
+; [(a . constant) = . context {}, a | access !! .]
 -----
 constant
 =====
-; [a = . context {}, a | access ! .]
+; [a = . context {}, a | access !! .]
 -----
 mutable
 =====
@@ -278,11 +278,11 @@ false
 -----
 true
 =====
-; [m1 = . context {}, set_meta m1, m2 = true | this ! ., m1 == m2]
+; [m1 = . context {}, set_meta m1, m2 = true | this !! ., m1 == m2]
 -----
 true
 =====
-; [a = (. context {}) context {}, a | set_meta ! ., a | has_meta ! .]
+; [a = (. context {}) context {}, a | set_meta !! ., a | has_meta !! .]
 -----
 false
 =====
@@ -328,7 +328,7 @@ true
             }
         }
     },
-    a | read ! d
+    a | id ! d
 ]
 -----
 1
@@ -359,26 +359,16 @@ true
 ; [
     a = . context {p : 1 : 2},
     b = 3,
-    a | p pair.set_first b,
-    a | read ! p,
-]
------
-3 : 2
-=====
-; [
-    set_first = pair.set_first,
-    a = . context {set_first : move ! set_first, p : 1 : 2},
-    b = 3,
-    a .| p set_first b,
-    a | read ! p,
+    a | !! ! p pair.set_first b,
+    a | id ! p,
 ]
 -----
 3 : 2
 =====
 ; [
     a = . context {p : 1 : 2, b : 3},
-    a |. p pair.set_first b,
-    a | read ! p,
+    a | pair.set_first '!' id ! p : b,
+    a | id ! p,
 ]
 -----
 3 : 2
@@ -386,68 +376,68 @@ true
 ; [
     set_first = pair.set_first,
     a = . context {set_first : move ! set_first, p : 1 : 2, b : 3},
-    a .|. p set_first b,
-    a | read ! p,
+    a | id ! p set_first b,
+    a | id ! p,
 ]
 -----
 3 : 2
 =====
-; [(c : a) = (. context {: =, a : 1}) :: a = 2, [c | read ! a, a]]
+; [(c : a) = (. context {: =, a : 1}) :: a = 2, [c | id ! a, a]]
 -----
 [2, 1]
 =====
 ; [
     set_meta ! . context {a : 1},
-    true | read ! a
+    true | id ! a
 ]
 -----
 1
 =====
 ; [
-    false | a = 1,
+    false | !! ! a = 1,
     a
 ]
 -----
 1
 =====
-; [a = 1, [] | read ! a]
+; [a = 1, [] | id ! a]
 -----
 1
 =====
 ; [
     a = (. context {b : 1}) context {c : 2},
-    [a, true] | read ! b
+    [a, true] | id ! b
 ]
 -----
 1
 =====
 ; [
     a = . context {b : . context {c : 1}},
-    [a, b] | read ! c
+    [a, b] | id ! c
 ]
 -----
 1
 =====
-. | this ! .
+. | this !! .
 -----
 .
 =====
-. | 1 + 1
+. | !! ! 1 + 1
 -----
 2
 =====
-; [a = 1, . | move ! a]
+; [a = 1, . | move !! a]
 -----
 .
 =====
-. | pair.first ! 1 : 2
+. | pair.first !! 1 : 2
 -----
 1
 =====
 ; [
     a = . context {b : 1},
-    hm = a | has_meta ! .,
-    b = a | read ! b,
+    hm = a | has_meta !! .,
+    b = a | id ! b,
     (not hm) and b == 1
 ]
 -----
@@ -473,26 +463,26 @@ context.represent ! . context {}
 -----
 context
 =====
-; [a = prelude ! ., a | not ! true]
+; [a = prelude ! ., a | not !! true]
 -----
 false
 =====
-; [a = prelude ! ., a | is_null ! prelude]
+; [a = prelude ! ., a | is_null !! prelude]
 -----
 false
 =====
-; [a = 1, b = prelude ! ., b | is_null ! a]
+; [a = 1, b = prelude ! ., b | is_null !! a]
 -----
 true
 =====
-; [a = prelude ! ., a | is_constant ! prelude]
+; [a = prelude ! ., a | is_constant !! prelude]
 -----
 true
 =====
-; [a = 1, b = this ! ., b | read ! a]
+; [a = 1, b = this ! ., b | id ! a]
 -----
 1
 =====
-; [a = this ! ., b = 1, a | is_null ! b]
+; [a = this ! ., b = 1, a | is_null !! b]
 -----
 true
