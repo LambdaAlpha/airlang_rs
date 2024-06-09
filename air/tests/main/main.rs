@@ -50,8 +50,11 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
-    // pwd is air/
-    let src = "build.import \"main/main.air\"";
+    let src = concat!(
+        "build.import \"",
+        env!("CARGO_MANIFEST_DIR"),
+        "/main/main.air\""
+    );
     let src = parse(src)?;
     let mut ctx = initial_ctx();
     let mut mut_ctx = MutableCtx::new(&mut ctx);
