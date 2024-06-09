@@ -290,7 +290,7 @@ false
     a = . context {a1 : 1},
     b = . context {b1 : 2},
     dispatcher = function ! {
-        body : .input match {
+        body : the_input match {
             (id a1) : (id a),
             (id b1) : (id b),
         } : false,

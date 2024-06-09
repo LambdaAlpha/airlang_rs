@@ -114,8 +114,8 @@ const INPUT_MODE: &str = "input_mode";
 const OUTPUT_MODE: &str = "output_mode";
 const CTX_ACCESS: &str = "context_access";
 
-const DEFAULT_INPUT_NAME: &str = ".input";
-const DEFAULT_CTX_NAME: &str = ".context";
+const DEFAULT_INPUT_NAME: &str = "the_input";
+const DEFAULT_CTX_NAME: &str = "the_context";
 const FREE: &str = "free";
 const CONST: &str = "constant";
 const MUTABLE: &str = "mutable";

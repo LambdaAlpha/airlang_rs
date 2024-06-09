@@ -44,7 +44,7 @@ true
 =====
 ; [
     !map = function ! {
-        body : .input,
+        body : the_input,
         input_mode : {map : id all eval},
     },
     m = !map ! {
@@ -60,7 +60,7 @@ true
 ; [
     m = assert.represent ! assert.verified ! not ! true,
     !map = function ! {
-        body : .input,
+        body : the_input,
         input_mode : {map : id all eval},
     },
     expected = !map ! {
