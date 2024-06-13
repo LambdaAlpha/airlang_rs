@@ -27,11 +27,10 @@ use crate::{
         Mode,
     },
     prelude::{
-        default_mode,
-        map_some_mode,
+        form_mode,
+        map_mode,
         named_const_fn,
         named_free_fn,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -122,15 +121,15 @@ const MUTABLE: &str = "mutable";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(BODY), Mode::Predefined(Transform::Lazy));
-    map.insert(symbol(PRELUDE), default_mode());
-    map.insert(symbol(INPUT_NAME), symbol_id_mode());
-    map.insert(symbol(CTX_NAME), symbol_id_mode());
-    map.insert(symbol(CTX_ACCESS), symbol_id_mode());
-    map.insert(symbol(INPUT_MODE), Mode::Predefined(Transform::Lazy));
-    map.insert(symbol(OUTPUT_MODE), Mode::Predefined(Transform::Lazy));
-    let input_mode = map_some_mode(map);
-    let output_mode = default_mode();
+    map.insert(symbol(BODY), form_mode());
+    map.insert(symbol(PRELUDE), Mode::default());
+    map.insert(symbol(INPUT_NAME), Mode::default());
+    map.insert(symbol(CTX_NAME), Mode::default());
+    map.insert(symbol(CTX_ACCESS), Mode::default());
+    map.insert(symbol(INPUT_MODE), form_mode());
+    map.insert(symbol(OUTPUT_MODE), form_mode());
+    let input_mode = map_mode(map, Transform::default());
+    let output_mode = Mode::default();
     named_free_fn("function", input_mode, output_mode, fn_new)
 }
 
@@ -194,18 +193,18 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = default_mode();
+    let input_mode = Mode::default();
     let mut map = Map::default();
-    map.insert(symbol(BODY), Mode::Predefined(Transform::Lazy));
-    map.insert(symbol(PRELUDE), default_mode());
-    map.insert(symbol(INPUT_NAME), symbol_id_mode());
-    map.insert(symbol(CTX_NAME), symbol_id_mode());
-    map.insert(symbol(CTX_ACCESS), symbol_id_mode());
-    map.insert(symbol(INPUT_MODE), Mode::Predefined(Transform::Lazy));
-    map.insert(symbol(OUTPUT_MODE), Mode::Predefined(Transform::Lazy));
-    map.insert(symbol(ID), symbol_id_mode());
-    map.insert(symbol(IS_EXTENSION), default_mode());
-    let output_mode = map_some_mode(map);
+    map.insert(symbol(BODY), form_mode());
+    map.insert(symbol(PRELUDE), Mode::default());
+    map.insert(symbol(INPUT_NAME), Mode::default());
+    map.insert(symbol(CTX_NAME), Mode::default());
+    map.insert(symbol(CTX_ACCESS), Mode::default());
+    map.insert(symbol(INPUT_MODE), form_mode());
+    map.insert(symbol(OUTPUT_MODE), form_mode());
+    map.insert(symbol(ID), Mode::default());
+    map.insert(symbol(IS_EXTENSION), Mode::default());
+    let output_mode = map_mode(map, Transform::default());
     named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
 
@@ -293,8 +292,8 @@ fn fn_repr(input: Val) -> Val {
 }
 
 fn ctx_access() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = symbol_id_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.context_access",
         input_mode,
@@ -318,8 +317,8 @@ fn fn_ctx_access(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input_mode() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = Mode::Predefined(Transform::Lazy);
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.input_mode",
         input_mode,
@@ -338,8 +337,8 @@ fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn output_mode() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = Mode::Predefined(Transform::Lazy);
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.output_mode",
         input_mode,
@@ -358,8 +357,8 @@ fn fn_output_mode(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_primitive() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.is_primitive",
         input_mode,
@@ -379,8 +378,8 @@ fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_extension() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.is_extension",
         input_mode,
@@ -402,8 +401,8 @@ fn fn_is_extension(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn id() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = symbol_id_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("function.id", input_mode, output_mode, fn_id)
 }
 
@@ -420,8 +419,8 @@ fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn body() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = Mode::Predefined(Transform::Lazy);
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 
@@ -438,8 +437,8 @@ fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn prelude() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("function.prelude", input_mode, output_mode, fn_prelude)
 }
 
@@ -456,8 +455,8 @@ fn fn_prelude(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input_name() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = symbol_id_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.input_name",
         input_mode,
@@ -479,8 +478,8 @@ fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn ctx_name() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = symbol_id_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "function.context_name",
         input_mode,

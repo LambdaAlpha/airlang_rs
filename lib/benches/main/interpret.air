@@ -16,7 +16,7 @@
       ],
       sum
     ],
-    prelude : move ! ctx,
+    prelude : &ctx,
   },
   f 100
 ]

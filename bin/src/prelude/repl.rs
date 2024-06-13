@@ -1,11 +1,11 @@
 use airlang::{
     FuncVal,
+    Mode,
     MutableCtx,
     Val,
 };
 
 use crate::prelude::{
-    default_mode,
     named_free_fn,
     Named,
     Prelude,
@@ -28,8 +28,8 @@ impl Prelude for ReplPrelude {
 }
 
 fn help() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("help", input_mode, output_mode, fn_help)
 }
 

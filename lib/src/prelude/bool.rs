@@ -1,9 +1,11 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::{
+        CtxMap,
+        DefaultCtx,
+    },
     prelude::{
-        default_mode,
+        named_const_fn,
         named_free_fn,
-        pair_mode,
         Named,
         Prelude,
     },
@@ -12,6 +14,8 @@ use crate::{
         Val,
     },
     Bool,
+    CtxForConstFn,
+    Mode,
 };
 
 #[derive(Clone)]
@@ -52,34 +56,38 @@ impl Prelude for BoolPrelude {
 }
 
 fn is_true() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
-    named_free_fn("is_true", input_mode, output_mode, fn_is_true)
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn("is_true", input_mode, output_mode, fn_is_true)
 }
 
-fn fn_is_true(input: Val) -> Val {
-    let Val::Bool(b) = input else {
-        return Val::Bool(Bool::f());
-    };
-    Val::Bool(b)
+fn fn_is_true(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref(ctx, input, |val| {
+        let Val::Bool(b) = val else {
+            return Val::Bool(Bool::f());
+        };
+        Val::Bool(*b)
+    })
 }
 
 fn is_false() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
-    named_free_fn("is_false", input_mode, output_mode, fn_is_false)
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn("is_false", input_mode, output_mode, fn_is_false)
 }
 
-fn fn_is_false(input: Val) -> Val {
-    let Val::Bool(b) = input else {
-        return Val::Bool(Bool::f());
-    };
-    Val::Bool(b.not())
+fn fn_is_false(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref(ctx, input, |val| {
+        let Val::Bool(b) = val else {
+            return Val::Bool(Bool::f());
+        };
+        Val::Bool(b.not())
+    })
 }
 
 fn not() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("not", input_mode, output_mode, fn_not)
 }
 
@@ -91,8 +99,8 @@ fn fn_not(input: Val) -> Val {
 }
 
 fn and() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("and", input_mode, output_mode, fn_and)
 }
 
@@ -110,8 +118,8 @@ fn fn_and(input: Val) -> Val {
 }
 
 fn or() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("or", input_mode, output_mode, fn_or)
 }
 
@@ -129,8 +137,8 @@ fn fn_or(input: Val) -> Val {
 }
 
 fn xor() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("xor", input_mode, output_mode, fn_xor)
 }
 
@@ -148,8 +156,8 @@ fn fn_xor(input: Val) -> Val {
 }
 
 fn imply() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("imply", input_mode, output_mode, fn_imply)
 }
 

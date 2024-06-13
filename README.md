@@ -50,7 +50,7 @@ The Air language seeks to solve programming problems once and for all.
             ],
             x
         ],
-        prelude : move ! ctx,
+        prelude : &ctx,
     },
     42 gcd 24
 ]

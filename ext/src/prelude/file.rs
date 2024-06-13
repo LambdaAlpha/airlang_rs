@@ -1,15 +1,14 @@
 use airlang::{
     CtxForConstFn,
     FuncVal,
+    Mode,
     MutableCtx,
     Str,
     Val,
 };
 
 use crate::prelude::{
-    default_mode,
     named_const_fn,
-    symbol_id_mode,
     Named,
     Prelude,
 };
@@ -33,8 +32,8 @@ impl Prelude for FilePrelude {
 }
 
 fn read_to_string() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "file.read_to_string",
         input_mode,

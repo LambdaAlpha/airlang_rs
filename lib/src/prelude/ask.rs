@@ -10,12 +10,11 @@ use crate::{
     },
     func::MutableDispatcher,
     prelude::{
-        default_mode,
+        form_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
         pair_mode,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -24,13 +23,11 @@ use crate::{
     types::either::Either,
     val::func::FuncVal,
     Ask,
-    AskMode,
     FreeCtx,
     Mode,
     Pair,
     Transform,
     Val,
-    ValMode,
 };
 
 #[derive(Clone)]
@@ -71,64 +68,39 @@ impl Prelude for AskPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let val_mode = ValMode {
-        pair: Box::new(Pair::new(default_mode(), default_mode())),
-        ask: Box::new(AskMode::Struct(Ask::new(default_mode(), default_mode()))),
-        ..Default::default()
-    };
-    let input_mode = Mode::Custom(Box::new(val_mode));
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn(ASK_INFIX, input_mode, output_mode, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
-    match input {
-        Val::Pair(pair) => {
-            let pair = Pair::from(pair);
-            Val::Ask(Ask::new(pair.first, pair.second).into())
-        }
-        Val::Ask(ask) => Val::Ask(ask),
-        _ => Val::default(),
-    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    Val::Ask(Ask::new(pair.first, pair.second).into())
 }
 
 fn new_dependent() -> Named<FuncVal> {
-    let val_mode = ValMode {
-        pair: Box::new(Pair::new(default_mode(), Mode::Predefined(Transform::Id))),
-        ask: Box::new(AskMode::Struct(Ask::new(
-            default_mode(),
-            Mode::Predefined(Transform::Id),
-        ))),
-        ..Default::default()
-    };
-    let input_mode = Mode::Custom(Box::new(val_mode));
-    let output_mode = default_mode();
+    let input_mode = pair_mode(Mode::default(), form_mode(), Transform::default());
+    let output_mode = Mode::default();
     named_mutable_fn("??", input_mode, output_mode, fn_new_dependent)
 }
 
 fn fn_new_dependent(ctx: CtxForMutableFn, input: Val) -> Val {
-    match input {
-        Val::Pair(pair) => {
-            let pair = Pair::from(pair);
-            let func = pair.first;
-            let output = pair.second;
-            let output = Eval.eval_output(ctx, &func, output);
-            Val::Ask(Ask::new(func, output).into())
-        }
-        Val::Ask(ask) => {
-            let ask = Ask::from(ask);
-            let func = ask.func;
-            let output = ask.output;
-            let output = Eval.eval_output(ctx, &func, output);
-            Val::Ask(Ask::new(func, output).into())
-        }
-        _ => Val::default(),
-    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let func = pair.first;
+    let output = pair.second;
+    let output = Eval.eval_output(ctx, &func, output);
+    Val::Ask(Ask::new(func, output).into())
 }
 
 fn apply() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_apply::<FreeCtx>,
         |ctx, val| fn_apply(ctx, val),
@@ -149,8 +121,8 @@ where
 }
 
 fn get_func() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("ask.function", input_mode, output_mode, fn_get_func)
 }
 
@@ -168,8 +140,8 @@ fn fn_get_func(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn set_func() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_id_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("ask.set_function", input_mode, output_mode, fn_set_func)
 }
 
@@ -193,8 +165,8 @@ fn fn_set_func(ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn get_output() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("ask.output", input_mode, output_mode, fn_get_output)
 }
 
@@ -212,8 +184,8 @@ fn fn_get_output(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn set_output() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_id_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("ask.set_output", input_mode, output_mode, fn_set_output)
 }
 

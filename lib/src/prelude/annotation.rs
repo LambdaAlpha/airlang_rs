@@ -1,14 +1,13 @@
 use crate::{
     ctx::CtxMap,
     prelude::{
-        default_mode,
         named_free_fn,
-        pair_mode,
         Named,
         Prelude,
     },
     syntax::ANNOTATION_INFIX,
     FuncVal,
+    Mode,
     Pair,
     Val,
 };
@@ -31,8 +30,8 @@ impl Prelude for AnnotationPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn(ANNOTATION_INFIX, input_mode, output_mode, fn_new)
 }
 

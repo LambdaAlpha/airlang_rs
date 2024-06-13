@@ -3,7 +3,6 @@ use crate::{
     symbol::Symbol,
     transformer::{
         input::ByVal,
-        DefaultByVal,
         Transformer,
     },
     val::{
@@ -20,11 +19,11 @@ use crate::{
 pub(crate) struct Id;
 
 impl Transformer<Val, Val> for Id {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        DefaultByVal::transform_val(self, ctx, input)
+        input
     }
 }
 

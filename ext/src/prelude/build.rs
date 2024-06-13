@@ -12,6 +12,7 @@ use airlang::{
     CtxForMutableFn,
     FuncVal,
     Invariant,
+    Mode,
     MutableCtx,
     Str,
     Symbol,
@@ -21,7 +22,6 @@ use airlang::{
 use crate::{
     init_ctx,
     prelude::{
-        default_mode,
         named_mutable_fn,
         Named,
         Prelude,
@@ -45,8 +45,8 @@ impl Prelude for BuildPrelude {
 }
 
 fn import() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("build.import", input_mode, output_mode, fn_import)
 }
 

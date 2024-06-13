@@ -1,7 +1,4 @@
-use std::{
-    cmp::min,
-    rc::Rc,
-};
+use std::cmp::min;
 
 use num_bigint::BigInt;
 use rand::{
@@ -60,15 +57,10 @@ use crate::{
     val::func::FuncVal,
     Answer,
     Ask,
-    AskDepMode,
-    AskMode,
     Call,
-    CallDepMode,
-    CallMode,
     ListMode,
     MapMode,
     PairMode,
-    SymbolMode,
     Val,
     ValExt,
     ValMode,
@@ -113,7 +105,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         10 => Val::List(any_list(rng, new_depth).into()),
         11 => Val::Map(any_map(rng, new_depth).into()),
         12 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        13 => Val::Func(FuncVal::new(any_func(rng, new_depth))),
+        13 => Val::Func(any_func(rng, new_depth)),
         14 => Val::Assert(any_assert(rng, new_depth).into()),
         15 => Val::Answer(any_answer(rng, new_depth).into()),
         16 => Val::Ext(any_extension(rng, new_depth)),
@@ -232,95 +224,20 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
 }
 
 pub(crate) fn any_transform(rng: &mut SmallRng) -> Transform {
-    const TRANSFORMS: [Transform; 3] = [Transform::Eval, Transform::Id, Transform::Lazy];
+    const TRANSFORMS: [Transform; 3] = [Transform::Eval, Transform::Id, Transform::Form];
     *(TRANSFORMS.choose(rng).unwrap())
 }
 
 pub(crate) fn any_val_mode(rng: &mut SmallRng, depth: usize) -> ValMode {
-    let symbol = any_symbol_mode(rng);
-    let pair = Box::new(any_pair_mode(rng, depth));
-    let call = Box::new(any_call_mode(rng, depth));
-    let ask = Box::new(any_ask_mode(rng, depth));
-    let list = Box::new(any_list_mode(rng, depth));
-    let map = Box::new(any_map_mode(rng, depth));
-    ValMode {
-        symbol,
-        pair,
-        call,
-        ask,
-        list,
-        map,
-    }
-}
-
-pub(crate) fn any_symbol_mode(rng: &mut SmallRng) -> SymbolMode {
-    if rng.gen() {
-        SymbolMode::Eval
-    } else {
-        SymbolMode::Id
-    }
+    let pair = any_pair_mode(rng, depth);
+    let list = any_list_mode(rng, depth);
+    let map = any_map_mode(rng, depth);
+    ValMode { pair, list, map }
 }
 
 pub(crate) fn any_pair_mode(rng: &mut SmallRng, depth: usize) -> PairMode {
     let new_depth = depth + 1;
     Pair::new(any_mode(rng, new_depth), any_mode(rng, new_depth))
-}
-
-pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [
-        weight,      // eval
-        weight >> 1, // structure
-        1,           // dependent
-    ];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
-    let new_depth = depth + 1;
-
-    match i {
-        0 => CallMode::Eval,
-        1 => CallMode::Struct(Call::new(
-            any_mode(rng, new_depth),
-            any_mode(rng, new_depth),
-        )),
-        2 => CallMode::Dependent(CallDepMode {
-            unit: any_mode(rng, new_depth),
-            bool: any_mode(rng, new_depth),
-            int: any_mode(rng, new_depth),
-            number: any_mode(rng, new_depth),
-            bytes: any_mode(rng, new_depth),
-            string: any_mode(rng, new_depth),
-            symbol: any_mode(rng, new_depth),
-        }),
-        _ => unreachable!(),
-    }
-}
-
-pub(crate) fn any_ask_mode(rng: &mut SmallRng, depth: usize) -> AskMode {
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [
-        weight,      // eval
-        weight >> 1, // structure
-        1,           // dependent
-    ];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
-    let new_depth = depth + 1;
-
-    match i {
-        0 => AskMode::Eval,
-        1 => AskMode::Struct(Ask::new(any_mode(rng, new_depth), any_mode(rng, new_depth))),
-        2 => AskMode::Dependent(AskDepMode {
-            unit: any_mode(rng, new_depth),
-            bool: any_mode(rng, new_depth),
-            int: any_mode(rng, new_depth),
-            number: any_mode(rng, new_depth),
-            bytes: any_mode(rng, new_depth),
-            string: any_mode(rng, new_depth),
-            symbol: any_mode(rng, new_depth),
-        }),
-        _ => unreachable!(),
-    }
 }
 
 pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
@@ -386,14 +303,19 @@ pub(crate) fn any_mode(rng: &mut SmallRng, depth: usize) -> Mode {
     let i = dist.sample(rng);
     let new_depth = depth + 1;
 
-    match i {
-        0 => Mode::Predefined(any_transform(rng)),
-        1 => Mode::Custom(Box::new(any_val_mode(rng, new_depth))),
+    let default = any_transform(rng);
+    let specialized = match i {
+        0 => None,
+        1 => Some(Box::new(any_val_mode(rng, new_depth))),
         _ => unreachable!(),
+    };
+    Mode {
+        default,
+        specialized,
     }
 }
 
-pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> Rc<Func> {
+pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     if rng.gen() {
         let prelude = PRELUDE.with(|prelude| {
             let mut m = CtxMap::default();
@@ -408,7 +330,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> Rc<Func> {
         let Val::Func(func) = func.val else {
             unreachable!()
         };
-        func.unwrap()
+        func
     } else {
         let input_mode = any_mode(rng, depth);
         let output_mode = any_mode(rng, depth);
@@ -442,7 +364,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> Rc<Func> {
             output_mode,
             transformer,
         };
-        Rc::new(func)
+        FuncVal::from(func)
     }
 }
 

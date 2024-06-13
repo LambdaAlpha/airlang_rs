@@ -7,10 +7,8 @@ use crate::{
         DefaultCtx,
     },
     prelude::{
-        default_mode,
         named_const_fn,
         named_free_fn,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -19,6 +17,7 @@ use crate::{
     AnswerVal,
     Bool,
     FuncVal,
+    Mode,
     Val,
 };
 
@@ -80,8 +79,8 @@ fn unsolvable() -> Named<AnswerVal> {
 }
 
 fn unverified() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("answer.unverified", input_mode, output_mode, fn_unverified)
 }
 
@@ -90,8 +89,8 @@ fn fn_unverified(input: Val) -> Val {
 }
 
 fn verified() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("answer.verified", input_mode, output_mode, fn_verified)
 }
 
@@ -108,8 +107,8 @@ fn fn_verified(input: Val) -> Val {
 }
 
 fn is_unsolved() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "answer.is_unsolved",
         input_mode,
@@ -129,8 +128,8 @@ fn fn_is_unsolved(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_unsolvable() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "answer.is_unsolvable",
         input_mode,
@@ -150,8 +149,8 @@ fn fn_is_unsolvable(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_verified() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "answer.is_verified",
         input_mode,
@@ -174,8 +173,8 @@ fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("answer.input", input_mode, output_mode, fn_input)
 }
 
@@ -194,8 +193,8 @@ fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn into_input() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("answer.into_input", input_mode, output_mode, fn_into_input)
 }
 
@@ -213,8 +212,8 @@ fn fn_into_input(input: Val) -> Val {
 }
 
 fn evidence() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("answer.evidence", input_mode, output_mode, fn_evidence)
 }
 
@@ -231,8 +230,8 @@ fn fn_evidence(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn into_evidence() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn(
         "answer.into_evidence",
         input_mode,

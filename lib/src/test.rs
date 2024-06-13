@@ -19,7 +19,6 @@ use crate::{
     FuncVal,
     Mode,
     Symbol,
-    Transform,
 };
 
 const MAIN_DELIMITER: &str = "=====";
@@ -194,8 +193,8 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         func_ext_name.clone(),
         Invariant::Const,
         Val::Func(FuncVal::from(Func::new_free(
-            Mode::Predefined(Transform::Eval),
-            Mode::Predefined(Transform::Eval),
+            Mode::default(),
+            Mode::default(),
             func_ext_name,
             Rc::new(FuncExt),
         ))),

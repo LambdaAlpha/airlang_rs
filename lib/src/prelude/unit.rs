@@ -1,15 +1,18 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::{
+        CtxMap,
+        DefaultCtx,
+    },
     prelude::{
-        default_mode,
+        named_const_fn,
         named_free_fn,
         Named,
         Prelude,
     },
-    transform::Transform,
     unit::Unit,
     val::func::FuncVal,
     Bool,
+    CtxForConstFn,
     Mode,
     Val,
 };
@@ -37,8 +40,8 @@ impl Prelude for UnitPrelude {
 }
 
 fn unit() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = Mode::Predefined(Transform::Id);
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("unit", input_mode, output_mode, fn_unit)
 }
 
@@ -47,11 +50,11 @@ fn fn_unit(_input: Val) -> Val {
 }
 
 fn is_unit() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
-    named_free_fn("is_unit", input_mode, output_mode, fn_is_unit)
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn("is_unit", input_mode, output_mode, fn_is_unit)
 }
 
-fn fn_is_unit(input: Val) -> Val {
-    Val::Bool(Bool::new(input.is_unit()))
+fn fn_is_unit(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref(ctx, input, |val| Val::Bool(Bool::new(val.is_unit())))
 }

@@ -1,12 +1,12 @@
 use crate::{
     ctx::CtxMap,
     prelude::{
-        default_mode,
         named_free_fn,
         Named,
         Prelude,
     },
     FuncVal,
+    Mode,
     Str,
     Symbol,
     Val,
@@ -14,7 +14,6 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct SymbolPrelude {
-    pub(crate) empty: Named<Symbol>,
     pub(crate) from_str: Named<FuncVal>,
     pub(crate) into_str: Named<FuncVal>,
 }
@@ -22,7 +21,6 @@ pub(crate) struct SymbolPrelude {
 impl Default for SymbolPrelude {
     fn default() -> Self {
         SymbolPrelude {
-            empty: empty(),
             from_str: from_str(),
             into_str: into_str(),
         }
@@ -31,19 +29,14 @@ impl Default for SymbolPrelude {
 
 impl Prelude for SymbolPrelude {
     fn put(&self, m: &mut CtxMap) {
-        self.empty.put(m);
         self.from_str.put(m);
         self.into_str.put(m);
     }
 }
 
-fn empty() -> Named<Symbol> {
-    Named::new("", Symbol::from_str(""))
-}
-
 fn from_str() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("symbol.from_string", input_mode, output_mode, fn_from_str)
 }
 
@@ -60,8 +53,8 @@ fn fn_from_str(input: Val) -> Val {
 }
 
 fn into_str() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("symbol.into_string", input_mode, output_mode, fn_into_str)
 }
 

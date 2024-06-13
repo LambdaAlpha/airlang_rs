@@ -1,51 +1,52 @@
-answer.is_unsolved answer.unsolved
+answer.is_unsolved .answer.unsolved
 -----
 true
 =====
-answer.is_unsolvable answer.unsolvable
+answer.is_unsolvable .answer.unsolvable
 -----
 true
 =====
-answer.is_verified answer.unsolvable
+answer.is_verified .answer.unsolvable
 -----
 .
 =====
-; [a = answer.unverified ! 1, answer.is_verified a]
+; [a = answer.unverified ! 1, answer.is_verified .a]
 -----
 false
 =====
-; [a = answer.unverified ! 1, answer.input a]
+; [a = answer.unverified ! 1, answer.input .a]
 -----
 1
 =====
-; [a = answer.unverified ! 1, answer.into_input (move a)]
+; [a = answer.unverified ! 1, answer.into_input &a]
 -----
 1
 =====
-; [a = answer.verified ! assert.verified ! not ! true, answer.is_verified a]
+; [a = answer.verified ! assert.verified ! not '!' true, answer.is_verified .a]
 -----
 true
 =====
 ; [
     p = assert ! {function : not, input : true, output : false},
-    a = answer.verified ! p,
-    ((type_of p) == assert) and a == .
+    a = answer.verified ! .p,
+    tp = type_of ! .p,
+    (.tp == ..assert) and .a == .
 ]
 -----
 true
 =====
-; [a = answer.verified ! assert.verified ! not ! true, answer.input a]
+; [a = answer.verified ! assert.verified ! not '!' true, answer.input .a]
 -----
 true
 =====
-; [a = answer.verified ! assert.verified ! not ! true, answer.into_input ! move ! a]
+; [a = answer.verified ! assert.verified ! not '!' true, answer.into_input ! &a]
 -----
 true
 =====
-; [a = answer.verified ! assert.verified ! not ! true, p = answer.evidence ! a, type_of p]
+; [a = answer.verified ! assert.verified ! not '!' true, p = answer.evidence ! .a, type_of .p]
 -----
 assert
 =====
-; [a = answer.verified ! assert.verified ! not ! true, p = answer.into_evidence ! move ! a, type_of p]
+; [a = answer.verified ! assert.verified ! not '!' true, p = answer.into_evidence ! &a, type_of .p]
 -----
 assert

@@ -18,6 +18,7 @@ pub struct Symbol(Atom<EmptyStaticAtomSet>);
 impl Symbol {
     pub(crate) const MIN: char = '!';
     pub(crate) const MAX: char = '~';
+    pub(crate) const ID_PREFIX: char = '.';
 
     /// # Safety
     ///

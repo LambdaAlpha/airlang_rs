@@ -15,6 +15,7 @@ use crate::{
     map::Map,
     pair::Pair,
     symbol::Symbol,
+    transform::SYMBOL_READ_PREFIX,
     transformer::Transformer,
     types::either::Either,
     val::Val,
@@ -552,12 +553,25 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => {
-                let Ok(dyn_ref) = ctx.get_ref_dyn(s) else {
-                    return T::default();
-                };
-                f(Either::Left(dyn_ref))
-            }
+            Val::Symbol(s) => match s.chars().next() {
+                Some(Symbol::ID_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    f(Either::Right(Val::Symbol(s)))
+                }
+                Some(SYMBOL_READ_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(dyn_ref) = ctx.get_ref_dyn(s) else {
+                        return T::default();
+                    };
+                    f(Either::Left(dyn_ref))
+                }
+                _ => {
+                    let Ok(dyn_ref) = ctx.get_ref_dyn(s) else {
+                        return T::default();
+                    };
+                    f(Either::Left(dyn_ref))
+                }
+            },
             val => f(Either::Right(val)),
         }
     }
@@ -571,12 +585,25 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => {
-                let Ok(val) = ctx.get_ref(s) else {
-                    return T::default();
-                };
-                f(val)
-            }
+            Val::Symbol(s) => match s.chars().next() {
+                Some(Symbol::ID_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    f(&Val::Symbol(s))
+                }
+                Some(SYMBOL_READ_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(val) = ctx.get_ref(s) else {
+                        return T::default();
+                    };
+                    f(val)
+                }
+                _ => {
+                    let Ok(val) = ctx.get_ref(s) else {
+                        return T::default();
+                    };
+                    f(val)
+                }
+            },
             val => f(&val),
         }
     }
@@ -588,12 +615,27 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => {
-                let Ok(val) = ctx.get_ref(s) else {
-                    return Val::default();
-                };
-                f(val)
-            }
+            Val::Symbol(s) => match s.chars().next() {
+                Some(Symbol::ID_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let val = Val::Symbol(s);
+                    let result = f(&val);
+                    Val::Pair(Pair::new(val, result).into())
+                }
+                Some(SYMBOL_READ_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(val) = ctx.get_ref(s) else {
+                        return Val::default();
+                    };
+                    f(val)
+                }
+                _ => {
+                    let Ok(val) = ctx.get_ref(s) else {
+                        return Val::default();
+                    };
+                    f(val)
+                }
+            },
             val => {
                 let result = f(&val);
                 Val::Pair(Pair::new(val, result).into())
@@ -610,12 +652,25 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => {
-                let Ok(val) = ctx.get_ref_mut(s) else {
-                    return T::default();
-                };
-                f(val)
-            }
+            Val::Symbol(s) => match s.chars().next() {
+                Some(Symbol::ID_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    f(&mut Val::Symbol(s))
+                }
+                Some(SYMBOL_READ_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(val) = ctx.get_ref_mut(s) else {
+                        return T::default();
+                    };
+                    f(val)
+                }
+                _ => {
+                    let Ok(val) = ctx.get_ref_mut(s) else {
+                        return T::default();
+                    };
+                    f(val)
+                }
+            },
             mut val => f(&mut val),
         }
     }
@@ -627,12 +682,27 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => {
-                let Ok(val) = ctx.get_ref_mut(s) else {
-                    return Val::default();
-                };
-                f(val)
-            }
+            Val::Symbol(s) => match s.chars().next() {
+                Some(Symbol::ID_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let mut val = Val::Symbol(s);
+                    let result = f(&mut val);
+                    Val::Pair(Pair::new(val, result).into())
+                }
+                Some(SYMBOL_READ_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(val) = ctx.get_ref_mut(s) else {
+                        return Val::default();
+                    };
+                    f(val)
+                }
+                _ => {
+                    let Ok(val) = ctx.get_ref_mut(s) else {
+                        return Val::default();
+                    };
+                    f(val)
+                }
+            },
             mut val => {
                 let result = f(&mut val);
                 Val::Pair(Pair::new(val, result).into())
@@ -647,13 +717,29 @@ impl DefaultCtx {
         Self: Sized,
     {
         match name {
-            Val::Symbol(s) => {
-                let Ok(val) = ctx.get_ref_mut(s) else {
-                    return Val::default();
-                };
-                f(val);
-                Val::default()
-            }
+            Val::Symbol(s) => match s.chars().next() {
+                Some(Symbol::ID_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let mut val = Val::Symbol(s);
+                    f(&mut val);
+                    val
+                }
+                Some(SYMBOL_READ_PREFIX) => {
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(val) = ctx.get_ref_mut(s) else {
+                        return Val::default();
+                    };
+                    f(val);
+                    Val::default()
+                }
+                _ => {
+                    let Ok(val) = ctx.get_ref_mut(s) else {
+                        return Val::default();
+                    };
+                    f(val);
+                    Val::default()
+                }
+            },
             mut val => {
                 f(&mut val);
                 val

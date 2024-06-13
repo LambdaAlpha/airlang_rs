@@ -6,15 +6,17 @@ use airlang::{
     Int,
     List,
     Map,
+    Mode,
     MutableCtx,
     Str,
     Symbol,
+    Transform,
     Val,
 };
 
 use crate::prelude::{
-    default_mode,
-    map_some_mode,
+    form_mode,
+    map_all_mode,
     named_free_fn,
     Named,
     Prelude,
@@ -40,14 +42,8 @@ const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
-    let mut map = Map::default();
-    let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
-    map.insert(program_key, default_mode());
-    let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
-    map.insert(arguments_key, default_mode());
-
-    let input_mode = map_some_mode(map);
-    let output_mode = default_mode();
+    let input_mode = map_all_mode(form_mode(), Mode::default(), Transform::default());
+    let output_mode = Mode::default();
     named_free_fn("process.call", input_mode, output_mode, fn_call)
 }
 

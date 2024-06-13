@@ -2,5 +2,5 @@
     major = stringify ! air.version_major,
     minor = stringify ! air.version_minor,
     patch = stringify ! air.version_patch,
-    string.concat [major, ".", minor, ".", patch]
+    string.concat [&major, ".", &minor, ".", &patch]
 ]

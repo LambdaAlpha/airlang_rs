@@ -5,7 +5,11 @@ use crate::{
     },
     problem::solve,
     symbol::Symbol,
-    transform::id::Id,
+    transform::{
+        id::Id,
+        SYMBOL_MOVE_PREFIX,
+        SYMBOL_READ_PREFIX,
+    },
     transformer::{
         input::ByVal,
         DefaultByVal,
@@ -47,7 +51,21 @@ impl ByVal<Val> for Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        DefaultCtx.get_or_default(ctx, s)
+        match s.chars().next() {
+            Some(Symbol::ID_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                Id.transform_symbol(ctx, s)
+            }
+            Some(SYMBOL_READ_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                DefaultCtx.get_or_default(ctx, s)
+            }
+            Some(SYMBOL_MOVE_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                ctx.remove(s).unwrap_or_default()
+            }
+            _ => DefaultCtx.get_or_default(ctx, s),
+        }
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val

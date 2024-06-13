@@ -17,10 +17,12 @@ use crate::func::Func;
 pub struct FuncVal(Rc<Func>);
 
 impl FuncVal {
+    #[allow(unused)]
     pub(crate) fn new(func: Rc<Func>) -> Self {
         Self(func)
     }
 
+    #[allow(unused)]
     pub(crate) fn unwrap(self) -> Rc<Func> {
         self.0
     }

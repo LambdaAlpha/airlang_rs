@@ -1,7 +1,6 @@
 use crate::{
     ctx::CtxMap,
     prelude::{
-        default_mode,
         named_free_fn,
         Named,
         Prelude,
@@ -11,6 +10,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Mode,
 };
 
 #[derive(Clone)]
@@ -36,8 +36,8 @@ impl Prelude for SyntaxPrelude {
 }
 
 fn parse() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("parse", input_mode, output_mode, fn_parse)
 }
 
@@ -49,8 +49,8 @@ fn fn_parse(input: Val) -> Val {
 }
 
 fn stringify() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("stringify", input_mode, output_mode, fn_stringify)
 }
 

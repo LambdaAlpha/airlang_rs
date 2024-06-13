@@ -4,7 +4,7 @@
         input : 1,
         output : 2,
     },
-    assert.input p
+    assert.input .p
 ]
 -----
 1
@@ -15,7 +15,7 @@
         input : 1,
         output : 2,
     },
-    assert.output p
+    assert.output .p
 ]
 -----
 2
@@ -26,7 +26,7 @@
         input : 1,
         output : 2,
     },
-    (assert.function p) == not
+    (assert.function .p) == .not
 ]
 -----
 true
@@ -37,39 +37,39 @@ true
         input : 1,
         output : 2,
     },
-    (assert.function p) == "not"
+    (assert.function .p) == "not"
 ]
 -----
 true
 =====
 ; [
-    !map = function ! {
+    map_mode = function ! {
         body : the_input,
-        input_mode : {map : id all eval},
+        input_mode : {map : id : eval},
     },
-    m = !map ! {
+    m = map_mode ! {
         function : not,
         input : true,
         output : false,
     },
-    m == assert.represent ! assert ! m
+    .m == assert.represent ! assert ! m
 ]
 -----
 true
 =====
 ; [
-    m = assert.represent ! assert.verified ! not ! true,
-    !map = function ! {
+    m = assert.represent ! assert.verified ! not '!' true,
+    map_mode = function ! {
         body : the_input,
-        input_mode : {map : id all eval},
+        input_mode : {map : id : eval},
     },
-    expected = !map ! {
+    expected = map_mode ! {
         function : not,
         input : true,
         output : false,
         verified : true,
     },
-    m == expected
+    .m == .expected
 ]
 -----
 true
@@ -80,7 +80,8 @@ true
         input : 1,
         output : 2,
     },
-    ((type_of p) == id ! assert) and (assert.is_verified p) == false
+    tp = type_of ! .p,
+    (.tp == ..assert) and (assert.is_verified .p) == false
 ]
 -----
 true

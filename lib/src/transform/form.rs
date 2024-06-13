@@ -1,9 +1,13 @@
 use crate::{
-    ctx::ref1::CtxMeta,
+    ctx::{
+        ref1::CtxMeta,
+        DefaultCtx,
+    },
     symbol::Symbol,
     transform::{
-        eval::Eval,
         id::Id,
+        SYMBOL_MOVE_PREFIX,
+        SYMBOL_READ_PREFIX,
     },
     transformer::{
         input::ByVal,
@@ -21,9 +25,9 @@ use crate::{
 };
 
 #[derive(Copy, Clone)]
-pub(crate) struct Lazy;
+pub(crate) struct Form;
 
-impl Transformer<Val, Val> for Lazy {
+impl Transformer<Val, Val> for Form {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -32,7 +36,7 @@ impl Transformer<Val, Val> for Lazy {
     }
 }
 
-impl ByVal<Val> for Lazy {
+impl ByVal<Val> for Form {
     fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -44,7 +48,21 @@ impl ByVal<Val> for Lazy {
     where
         Ctx: CtxMeta<'a>,
     {
-        Id.transform_symbol(ctx, s)
+        match s.chars().next() {
+            Some(Symbol::ID_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                Id.transform_symbol(ctx, s)
+            }
+            Some(SYMBOL_READ_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                DefaultCtx.get_or_default(ctx, s)
+            }
+            Some(SYMBOL_MOVE_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                ctx.remove(s).unwrap_or_default()
+            }
+            _ => Id.transform_symbol(ctx, s),
+        }
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -72,9 +90,6 @@ impl ByVal<Val> for Lazy {
     where
         Ctx: CtxMeta<'a>,
     {
-        if call.func.is_unit() {
-            return Eval.transform(ctx, call.unwrap().input);
-        }
         DefaultByVal::transform_call(self, ctx, call)
     }
 

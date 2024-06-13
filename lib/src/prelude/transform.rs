@@ -5,7 +5,7 @@ use crate::{
         CtxMap,
     },
     prelude::{
-        default_mode,
+        id_mode,
         named_free_fn,
         named_mutable_fn,
         Named,
@@ -13,12 +13,11 @@ use crate::{
     },
     transform::{
         eval::Eval,
+        form::Form,
         id::Id,
-        lazy::Lazy,
-        Transform,
         EVAL,
+        FORM,
         ID,
-        LAZY,
     },
     transformer::Transformer,
     val::{
@@ -30,42 +29,32 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct TransformPrelude {
-    pub(crate) eval: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
-    pub(crate) lazy: Named<FuncVal>,
+    pub(crate) form: Named<FuncVal>,
+    pub(crate) eval: Named<FuncVal>,
 }
 
 impl Default for TransformPrelude {
     fn default() -> Self {
         TransformPrelude {
-            eval: eval(),
             id: id(),
-            lazy: lazy(),
+            form: form(),
+            eval: eval(),
         }
     }
 }
 
 impl Prelude for TransformPrelude {
     fn put(&self, m: &mut CtxMap) {
-        self.eval.put(m);
         self.id.put(m);
-        self.lazy.put(m);
+        self.form.put(m);
+        self.eval.put(m);
     }
 }
 
-fn eval() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
-    named_mutable_fn(EVAL, input_mode, output_mode, fn_eval)
-}
-
-fn fn_eval(ctx: CtxForMutableFn, input: Val) -> Val {
-    Eval.transform(ctx, input)
-}
-
 fn id() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
+    let input_mode = id_mode();
+    let output_mode = Mode::default();
     named_free_fn(ID, input_mode, output_mode, fn_id)
 }
 
@@ -73,12 +62,22 @@ fn fn_id(input: Val) -> Val {
     Id.transform(FreeCtx, input)
 }
 
-fn lazy() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
-    named_mutable_fn(LAZY, input_mode, output_mode, fn_lazy)
+fn form() -> Named<FuncVal> {
+    let input_mode = id_mode();
+    let output_mode = Mode::default();
+    named_mutable_fn(FORM, input_mode, output_mode, fn_form)
 }
 
-fn fn_lazy(ctx: CtxForMutableFn, input: Val) -> Val {
-    Lazy.transform(ctx, input)
+fn fn_form(ctx: CtxForMutableFn, input: Val) -> Val {
+    Form.transform(ctx, input)
+}
+
+fn eval() -> Named<FuncVal> {
+    let input_mode = id_mode();
+    let output_mode = Mode::default();
+    named_mutable_fn(EVAL, input_mode, output_mode, fn_eval)
+}
+
+fn fn_eval(ctx: CtxForMutableFn, input: Val) -> Val {
+    Eval.transform(ctx, input)
 }

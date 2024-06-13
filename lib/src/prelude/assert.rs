@@ -9,12 +9,11 @@ use crate::{
     logic::Assert,
     map::Map,
     prelude::{
-        default_mode,
-        map_some_mode,
+        form_mode,
+        map_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -73,11 +72,11 @@ const VERIFIED: &str = "verified";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), Mode::Predefined(Transform::Id));
-    map.insert(symbol(OUTPUT), Mode::Predefined(Transform::Id));
-    let input_mode = map_some_mode(map);
-    let output_mode = default_mode();
+    map.insert(symbol(FUNCTION), Mode::default());
+    map.insert(symbol(INPUT), form_mode());
+    map.insert(symbol(OUTPUT), form_mode());
+    let input_mode = map_mode(map, Transform::default());
+    let output_mode = Mode::default();
     named_mutable_fn("assert", input_mode, output_mode, fn_new)
 }
 
@@ -95,13 +94,13 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = default_mode();
+    let input_mode = Mode::default();
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), default_mode());
-    map.insert(symbol(INPUT), Mode::Predefined(Transform::Id));
-    map.insert(symbol(OUTPUT), Mode::Predefined(Transform::Id));
-    map.insert(symbol(VERIFIED), default_mode());
-    let output_mode = map_some_mode(map);
+    map.insert(symbol(FUNCTION), Mode::default());
+    map.insert(symbol(INPUT), form_mode());
+    map.insert(symbol(OUTPUT), form_mode());
+    map.insert(symbol(VERIFIED), Mode::default());
+    let output_mode = map_mode(map, Transform::default());
     named_free_fn("assert.represent", input_mode, output_mode, fn_repr)
 }
 
@@ -124,8 +123,8 @@ fn generate_assert(repr: &mut MapVal, assert: &Assert) {
 }
 
 fn is_verified() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn(
         "assert.is_verified",
         input_mode,
@@ -144,8 +143,8 @@ fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn func() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("assert.function", input_mode, output_mode, fn_func)
 }
 
@@ -159,8 +158,8 @@ fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("assert.input", input_mode, output_mode, fn_input)
 }
 
@@ -174,8 +173,8 @@ fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn output() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("assert.output", input_mode, output_mode, fn_output)
 }
 

@@ -10,6 +10,10 @@ is_true .
 -----
 false
 =====
+; [a = true, is_true .a]
+-----
+true
+=====
 is_false false
 -----
 true
@@ -19,6 +23,10 @@ is_false true
 false
 =====
 is_false .
+-----
+false
+=====
+; [a = true, is_false .a]
 -----
 false
 =====

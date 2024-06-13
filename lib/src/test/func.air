@@ -9,7 +9,7 @@ false
 =====
 ; [
     f = function ! {
-        body : (. not) ! the_input
+        body : $not ! the_input
     },
     f ! not ! true
 ]
@@ -29,7 +29,7 @@ true
 ; [
     f = function ! {
         body : n ! a,
-        input_name : a,
+        input_name : .a,
         prelude : . context {n : not}
     },
     f ! not ! true
@@ -49,7 +49,7 @@ not true
 =====
 ; [
     f = function ! {
-        body : (. not) ! the_input,
+        body : $not ! the_input,
         input_mode : eval,
     },
     f ! not ! true
@@ -60,7 +60,7 @@ true
 ; [
     f = function ! {
         body : the_input,
-        input_mode : lazy,
+        input_mode : form,
     },
     f ! not ! true
 ]
@@ -68,16 +68,8 @@ true
 not true
 =====
 ; [
-    f = function ! {
-        body : the_input,
-        input_mode : lazy,
-    },
-    f ! . ! not ! true
-]
------
-false
-=====
-; [
+    a = 1,
+    b = 2,
     f = function ! {
         body : the_input,
         input_mode : eval,
@@ -85,27 +77,29 @@ false
     f {a : b}
 ]
 -----
-{. : .}
+{1 : 2}
 =====
 ; [
+    b = 1,
     f = function ! {
         body : the_input,
-        input_mode : {pair : lazy : eval},
+        input_mode : {pair : form : eval},
     },
     a f b
 ]
 -----
-a : .
+a : 1
 =====
 ; [
+    b = 1,
     f = function ! {
         body : the_input,
-        input_mode : {pair : lazy : eval, symbol : id},
+        input_mode : {pair : form : eval, ... : id},
     },
-    [a f b, f a]
+    [a f b, f $a]
 ]
 -----
-[a : ., a]
+[a : 1, $a]
 =====
 ; [
     f = function ! {
@@ -118,51 +112,20 @@ a : .
 not false
 =====
 ; [
-    f = function ! {
-        body : the_input,
-        input_mode : {symbol : id},
-    },
-    f ! not ! false
-]
------
-true
-=====
-; [
-    f = function ! {
-        body : the_input,
-        input_mode : {symbol : id},
-    },
-    f a
-]
------
-a
-=====
-; [
     a = 1,
     f = function ! {
         body : the_input,
-        input_mode : {symbol : id},
+        input_mode : {list : [eval, form, ... id, eval]},
     },
-    f [a]
+    f [a, a, a, a, $a, a]
 ]
 -----
-[1]
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_input,
-        input_mode : {list : [eval, lazy, ... id, eval]},
-    },
-    f [a, a, a, a, a, a]
-]
------
-[1, a, a, a, a, 1]
+[1, a, a, a, $a, 1]
 =====
 ; [
     f = function ! {
         body : the_input,
-        input_mode : {list : all ! id},
+        input_mode : {list : id},
     },
     f [a, b]
 ]
@@ -172,22 +135,12 @@ a
 ; [
     f = function ! {
         body : the_input,
-        input_mode : {list : all ! id},
+        input_mode : {list : id},
     },
     f ! not ! false
 ]
 -----
 true
-=====
-; [
-    f = function ! {
-        body : the_input,
-        input_mode : {list : all ! {symbol : id}},
-    },
-    f [not true, b]
-]
------
-[false, b]
 =====
 ; [
     a = 1,
@@ -201,30 +154,10 @@ true
 {a : 1, b : a}
 =====
 ; [
-    f = function ! {
-        body : the_input,
-        input_mode : {map : id all id},
-    },
-    f {a : b}
-]
------
-{a : b}
-=====
-; [
-    f = function ! {
-        body : the_input,
-        input_mode : {map : id all id},
-    },
-    f (not true)
-]
------
-false
-=====
-; [
     a = 1,
     f = function ! {
         body : the_input,
-        input_mode : {map : lazy all eval},
+        input_mode : {map : form : eval},
     },
     f {: a}
 ]
@@ -234,77 +167,10 @@ false
 ; [
     a = 1,
     f = function ! {
-        body : the_input,
-        input_mode : {call : eval ! id},
-    },
-    f (a a)
-]
------
-1 a
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_input,
-        input_mode : {call : {unit : id}},
-    },
-    ((f ! . ! a) == id ! . ! a) and (f ! not ! false) == true
-]
------
-true
-=====
-; [
-    a = id ! b,
-    f = function ! {
-        body : the_input,
-        input_mode : {call : {symbol : id}},
-    },
-    ((f ! a ! a) == id ! b ! a) and (f ! not ! false) == true
-]
------
-true
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_input,
-        input_mode : {ask : eval ? id},
-    },
-    f ! a ? a
-]
------
-1 ? a
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_input,
-        input_mode : {ask : {unit : id}},
-    },
-    (f ! . ? a) == id ! . ? a
-]
------
-true
-=====
-; [
-    a = id ! b,
-    f = function ! {
-        body : the_input,
-        input_mode : {ask : {symbol : id}},
-    },
-    ((f ! a ? a) == id ! b ? a) and (f ! . ? a) == id ! . ? b
-]
------
-true
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_context | id ! a,
-        context_access : free,
+        body : the_context | ..a,
+        context_access : .free,
         prelude : . context {
             : |,
-            : id,
         }
     },
     f .
@@ -315,11 +181,10 @@ true
 ; [
     a = 1,
     f = function ! {
-        body : the_context | id ! a,
-        context_access : constant,
+        body : the_context | ..a,
+        context_access : .constant,
         prelude : . context {
             : |,
-            : id,
         }
     },
     f .
@@ -330,26 +195,10 @@ true
 ; [
     a = 1,
     f = function ! {
-        body : the_context | id ! a,
-        context_access : mutable,
+        body : the_context | ..a,
+        context_access : .mutable,
         prelude : . context {
             : |,
-            : id,
-        }
-    },
-    f .
-]
------
-1
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_context | id ! a,
-        context_access : constant,
-        prelude : . context {
-            : |,
-            : id,
         }
     },
     f .
@@ -359,9 +208,9 @@ true
 =====
 ; [
     f = function ! {
-        body : the_context | '!' ! the_input = 2,
+        body : the_context | = '!' the_input : 2,
         input_mode : id,
-        context_access : mutable,
+        context_access : .mutable,
         prelude : . context {
             : |,
             : =,
@@ -377,9 +226,9 @@ true
 =====
 ; [
     f = function ! {
-        body : the_context | '!' ! the_input = 2,
+        body : the_context | = '!' the_input : 2,
         input_mode : id,
-        context_access : mutable,
+        context_access : .mutable,
         prelude : . context {
             : |,
             : =,
@@ -395,9 +244,9 @@ true
 =====
 ; [
     f = function ! {
-        body : the_context | '!' ! the_input = 2,
+        body : the_context | = '!' the_input : 2,
         input_mode : id,
-        context_access : constant,
+        context_access : .constant,
         prelude : . context {
             : |,
             : =,
@@ -413,8 +262,8 @@ true
 =====
 ; [
     dispatcher = function ! {
-        body : (the_input == (. .) ! id ! the_context) if (id c) : false,
-        context_access : free,
+        body : (..the_input == ...the_context) if ..c : false,
+        context_access : .free,
         prelude : . context {
             : if,
             : ==,
@@ -422,12 +271,12 @@ true
         },
     },
     f = function ! {
-        body : the_context | !! ! a = 1,
-        context_access : mutable,
+        body : the_context | = '!' ..a : 1,
+        context_access : .mutable,
         prelude : (. context {: dispatcher}) context {
             : =,
             : |,
-            : !!,
+            : '!',
             c : . context {},
         }
     },
@@ -445,21 +294,21 @@ function.represent not
 -----
 {id : not}
 =====
-function.represent ! function ! {body : the_input, context_access : constant}
+function.represent ! function ! {body : the_input, context_access : .constant}
 -----
 {body : the_input, context_access : constant}
 =====
 function.represent ==
 -----
-{id : ==, context_access : constant, input_mode : {pair : {symbol : id} : {symbol : id}}}
+{id : ==, context_access : constant}
 =====
 function.represent ! function ! {
     body : i,
-    input_name : i,
-    context_name : c,
+    input_name : .i,
+    context_name : .c,
     input_mode : {pair : eval : id},
-    output_mode : {pair : lazy : lazy},
-    context_access : mutable,
+    output_mode : {pair : form : form},
+    context_access : .mutable,
 }
 -----
 {
@@ -467,201 +316,165 @@ function.represent ! function ! {
     input_name : i,
     context_name : c,
     input_mode : {pair : eval : id},
-    output_mode : {pair : lazy : lazy},
+    output_mode : {pair : form : form},
     context_access : mutable,
 }
 =====
-function.context_access function
+function.context_access .function
 -----
 free
 =====
-function.context_access function.context_access
+function.context_access .function.context_access
 -----
 constant
 =====
-function.context_access eval
+function.context_access .eval
 -----
 mutable
 =====
-; [f = function ! {}, function.context_access f]
+; [f = function ! {}, function.context_access .f]
 -----
 free
 =====
-function.input_mode not
+function.input_mode .not
 -----
 eval
 =====
-function.input_mode eval
+function.input_mode .eval
 -----
 id
 =====
-function.input_mode function.input_mode
+function.input_mode .read
 -----
-{symbol : id}
+form
 =====
-; [f = function ! {}, function.input_mode f]
+; [f = function ! {}, function.input_mode .f]
 -----
 eval
 =====
 ; [
     f = function ! {
-        input_mode : {pair : eval : lazy},
+        input_mode : {pair : eval : form},
     },
-    function.input_mode f
+    function.input_mode .f
 ]
 -----
-{pair : eval : lazy}
+{pair : eval : form}
 =====
 ; [
     f = function ! {
-        input_mode : {symbol : id},
+        input_mode : {list : [eval, form, id, ... eval, id]},
     },
-    function.input_mode f
+    function.input_mode .f
 ]
 -----
-{symbol : id}
+{list : [eval, form, id, .. eval, id]}
 =====
 ; [
     f = function ! {
-        input_mode : {call : eval ! id},
+        input_mode : {list : id},
     },
-    function.input_mode f
+    function.input_mode .f
 ]
 -----
-{call : eval ! id}
-=====
-; [
-    f = function ! {
-        input_mode : {list : [eval, lazy, id, ... eval, id]},
-    },
-    function.input_mode f
-]
------
-{list : [eval, lazy, id, ... eval, id]}
-=====
-; [
-    f = function ! {
-        input_mode : {list : all ! id},
-    },
-    function.input_mode f
-]
------
-{list : all ! id}
-=====
-; [
-    f = function ! {
-        input_mode : {list : (all {symbol : id})},
-    },
-    function.input_mode f
-]
------
-{list : all ! {symbol : id}}
+{list : id}
 =====
 ; [
     f = function ! {
         input_mode : {map : {a : eval, b : id}},
     },
-    function.input_mode f
+    function.input_mode .f
 ]
 -----
 {map : {a : eval, b : id}}
 =====
 ; [
     f = function ! {
-        input_mode : {map : id all id},
+        input_mode : {map : eval : id},
     },
-    function.input_mode f
+    function.input_mode .f
 ]
 -----
-{map : id all id}
+{map : eval : id}
 =====
 ; [
     f = function ! {
-        input_mode : {map : eval all id},
+        input_mode : {map : {list : [form, {list : id}]} : {list : {map : id : id}}},
     },
-    function.input_mode f
+    function.input_mode .f
 ]
 -----
-{map : eval all id}
+{map : {list : [form, {list : id}]} : {list : {map : id : id}}}
 =====
 ; [
     f = function ! {
-        input_mode : {map : {list : [{symbol : id}, {list : all ! id}]} all {list : all ! {map : id all id}}},
+        output_mode : {map : eval : id},
     },
-    function.input_mode f
+    function.output_mode .f
 ]
 -----
-{map : {list : [{symbol : id}, {list : all ! id}]} all {list : all ! {map : id all id}}}
+{map : eval : id}
 =====
-; [
-    f = function ! {
-        output_mode : {map : eval all id},
-    },
-    function.output_mode f
-]
------
-{map : eval all id}
-=====
-function.is_primitive not
+function.is_primitive .not
 -----
 true
 =====
-; [f = function ! {}, function.is_primitive f]
+; [f = function ! {}, function.is_primitive .f]
 -----
 false
 =====
-function.is_extension not
+function.is_extension .not
 -----
 false
 =====
-function.id not
+function.id .not
 -----
 not
 =====
-; [neg = not, function.id neg]
+; [neg = not, function.id .neg]
 -----
 not
 =====
-; [f = function ! {}, function.id f]
+; [f = function ! {}, function.id .f]
 -----
 .
 =====
-; [f = function ! {body : the_input}, function.body f]
+; [f = function ! {body : the_input}, function.body .f]
 -----
 the_input
 =====
-function.body not
+function.body .not
 -----
 .
 =====
 ; [
     ctx = . context {a : 1},
     f = function ! {prelude : ctx},
-    (function.prelude f) == ctx
+    (function.prelude .f) == .ctx
 ]
 -----
 true
 =====
-function.prelude not
+function.prelude .not
 -----
 .
 =====
-; [f = function ! {}, function.input_name f]
+; [f = function ! {}, function.input_name .f]
 -----
 the_input
 =====
-function.input_name not
+function.input_name .not
 -----
 .
 =====
-; [f = function ! {context_access : constant}, function.context_name f]
+; [f = function ! {context_access : .constant}, function.context_name .f]
 -----
 the_context
 =====
-; [f = function ! {}, function.context_name f]
+; [f = function ! {}, function.context_name .f]
 -----
 .
 =====
-function.context_name not
+function.context_name .not
 -----
 .

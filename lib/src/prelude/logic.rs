@@ -6,8 +6,6 @@ use crate::{
     func::FuncTransformer,
     logic::Assert,
     prelude::{
-        call_mode,
-        default_mode,
         named_mutable_fn,
         Named,
         Prelude,
@@ -19,7 +17,6 @@ use crate::{
     },
     Call,
     Mode,
-    Transform,
     Val,
 };
 
@@ -43,8 +40,8 @@ impl Prelude for LogicPrelude {
 }
 
 fn verified() -> Named<FuncVal> {
-    let input_mode = call_mode(default_mode(), Mode::Predefined(Transform::Id));
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("assert.verified", input_mode, output_mode, fn_verified)
 }
 

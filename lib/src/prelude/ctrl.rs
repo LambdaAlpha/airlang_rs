@@ -10,11 +10,10 @@ use crate::{
     },
     func::MutableDispatcher,
     prelude::{
-        default_mode,
-        map_all_mode,
+        form_mode,
+        id_mode,
         named_mutable_fn,
         pair_mode,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -114,8 +113,8 @@ enum BlockItem {
 }
 
 fn sequence() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
+    let input_mode = id_mode();
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
@@ -132,14 +131,8 @@ where
 }
 
 fn if1() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        default_mode(),
-        pair_mode(
-            Mode::Predefined(Transform::Id),
-            Mode::Predefined(Transform::Id),
-        ),
-    );
-    let output_mode = default_mode();
+    let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
@@ -173,14 +166,8 @@ where
 }
 
 fn if_not() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        default_mode(),
-        pair_mode(
-            Mode::Predefined(Transform::Id),
-            Mode::Predefined(Transform::Id),
-        ),
-    );
-    let output_mode = default_mode();
+    let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_if_not::<FreeCtx>,
         |ctx, val| fn_if_not(ctx, val),
@@ -214,17 +201,8 @@ where
 }
 
 fn match1() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        default_mode(),
-        pair_mode(
-            map_all_mode(
-                Mode::Predefined(Transform::Id),
-                Mode::Predefined(Transform::Id),
-            ),
-            Mode::Predefined(Transform::Id),
-        ),
-    );
-    let output_mode = default_mode();
+    let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
@@ -262,11 +240,8 @@ where
 }
 
 fn while1() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        Mode::Predefined(Transform::Id),
-        Mode::Predefined(Transform::Id),
-    );
-    let output_mode = default_mode();
+    let input_mode = id_mode();
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),
@@ -323,11 +298,8 @@ where
 }
 
 fn while_not() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        Mode::Predefined(Transform::Id),
-        Mode::Predefined(Transform::Id),
-    );
-    let output_mode = default_mode();
+    let input_mode = id_mode();
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_while_not::<FreeCtx>,
         |ctx, val| fn_while_not(ctx, val),
@@ -385,10 +357,11 @@ where
 
 fn for1() -> Named<FuncVal> {
     let input_mode = pair_mode(
-        default_mode(),
-        pair_mode(symbol_id_mode(), Mode::Predefined(Transform::Id)),
+        Mode::default(),
+        pair_mode(form_mode(), id_mode(), Transform::default()),
+        Transform::default(),
     );
-    let output_mode = default_mode();
+    let output_mode = Mode::default();
     let func = MutableDispatcher::new(
         fn_for::<FreeCtx>,
         |ctx, val| fn_for(ctx, val),

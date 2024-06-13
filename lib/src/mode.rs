@@ -1,6 +1,4 @@
 use crate::{
-    ask::Ask,
-    call::Call,
     ctx::{
         mutable::CtxForMutableFn,
         ref1::CtxMeta,
@@ -8,7 +6,6 @@ use crate::{
     list::List,
     map::Map,
     pair::Pair,
-    problem::solve,
     transform::{
         eval::Eval,
         id::Id,
@@ -18,102 +15,43 @@ use crate::{
         input::ByVal,
         Transformer,
     },
-    AskVal,
-    CallVal,
     ListVal,
     MapVal,
     PairVal,
-    Symbol,
     Val,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Mode {
-    Predefined(Transform),
-    Custom(Box<ValMode>),
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+pub struct Mode {
+    pub default: Transform,
+    pub specialized: Option<Box<ValMode>>,
 }
 
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub struct ValMode {
-    pub symbol: SymbolMode,
-    pub pair: Box<PairMode>,
-    pub list: Box<ListMode>,
-    pub map: Box<MapMode>,
-    pub call: Box<CallMode>,
-    pub ask: Box<AskMode>,
-}
-
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub enum SymbolMode {
-    #[default]
-    Eval,
-    Id,
+    pub pair: PairMode,
+    pub list: ListMode,
+    pub map: MapMode,
 }
 
 pub type PairMode = Pair<Mode, Mode>;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ListMode {
     All(Mode),
     Some(List<ListItemMode>),
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ListItemMode {
     pub mode: Mode,
     pub ellipsis: bool,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum MapMode {
     All(PairMode),
     Some(Map<Val, Mode>),
-}
-
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub enum CallMode {
-    #[default]
-    Eval,
-    Struct(Call<Mode, Mode>),
-    Dependent(CallDepMode),
-}
-
-// decide transform mode of input by the type of function
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub struct CallDepMode {
-    pub unit: Mode,
-    pub bool: Mode,
-    pub int: Mode,
-    pub number: Mode,
-    pub bytes: Mode,
-    pub string: Mode,
-    pub symbol: Mode,
-}
-
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub enum AskMode {
-    #[default]
-    Eval,
-    Struct(Ask<Mode, Mode>),
-    Dependent(AskDepMode),
-}
-
-// decide transform mode of output by the type of function
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub struct AskDepMode {
-    pub unit: Mode,
-    pub bool: Mode,
-    pub int: Mode,
-    pub number: Mode,
-    pub bytes: Mode,
-    pub string: Mode,
-    pub symbol: Mode,
-}
-
-impl Default for Mode {
-    fn default() -> Self {
-        Mode::Predefined(Default::default())
-    }
 }
 
 impl Default for ListMode {
@@ -133,38 +71,17 @@ impl Transformer<Val, Val> for Mode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            Mode::Predefined(mode) => mode.transform(ctx, input),
-            Mode::Custom(mode) => mode.transform(ctx, input),
-        }
-    }
-}
-
-impl Transformer<Val, Val> for ValMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+        let Some(val_mode) = &self.specialized else {
+            return self.default.transform(ctx, input);
+        };
         match input {
-            Val::Symbol(s) => self.symbol.transform(ctx, s),
-            Val::Pair(pair) => self.pair.transform(ctx, pair),
-            Val::Call(call) => self.call.transform(ctx, call),
-            Val::Ask(ask) => self.ask.transform(ctx, ask),
-            Val::List(list) => self.list.transform(ctx, list),
-            Val::Map(map) => self.map.transform(ctx, map),
+            Val::Symbol(s) => self.default.transform_symbol(ctx, s),
+            Val::Call(call) => self.default.transform_call(ctx, call),
+            Val::Ask(ask) => self.default.transform_ask(ctx, ask),
+            Val::Pair(pair) => val_mode.pair.transform(ctx, pair),
+            Val::List(list) => val_mode.list.transform(ctx, list),
+            Val::Map(map) => val_mode.map.transform(ctx, map),
             val => val,
-        }
-    }
-}
-
-impl Transformer<Symbol, Val> for SymbolMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Symbol) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self {
-            SymbolMode::Eval => Eval.transform_symbol(ctx, input),
-            SymbolMode::Id => Id.transform_symbol(ctx, input),
         }
     }
 }
@@ -261,120 +178,6 @@ impl Transformer<MapVal, Val> for MapMode {
                 Val::Map(map.into())
             }
         }
-    }
-}
-
-impl Transformer<CallVal, Val> for CallMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self {
-            CallMode::Eval => Eval.transform_call(ctx, call),
-            CallMode::Struct(mode) => mode.transform(ctx, call),
-            CallMode::Dependent(mode) => mode.transform(ctx, call),
-        }
-    }
-}
-
-impl Transformer<CallVal, Val> for CallDepMode {
-    fn transform<'a, Ctx>(&self, mut ctx: Ctx, call: CallVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        let call = Call::from(call);
-        let func = Eval.transform(ctx.reborrow(), call.func);
-        let transformer = match func {
-            Val::Func(f) => {
-                let input = f.input_mode.transform(ctx.reborrow(), call.input);
-                return f.transform(ctx, input);
-            }
-            Val::Unit(_) => &self.unit,
-            Val::Bool(_) => &self.bool,
-            Val::Int(_) => &self.int,
-            Val::Number(_) => &self.number,
-            Val::Bytes(_) => &self.bytes,
-            Val::String(_) => &self.string,
-            Val::Symbol(_) => &self.symbol,
-            _ => {
-                let input = Eval.transform(ctx, call.input);
-                let call = Call::new(func, input);
-                return Val::Call(call.into());
-            }
-        };
-        let input = transformer.transform(ctx, call.input);
-        let call = Call::new(func, input);
-        Val::Call(call.into())
-    }
-}
-
-impl Transformer<CallVal, Val> for Call<Mode, Mode> {
-    fn transform<'a, Ctx>(&self, mut ctx: Ctx, call: CallVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        let call = Call::from(call);
-        let func = self.func.transform(ctx.reborrow(), call.func);
-        let input = self.input.transform(ctx, call.input);
-        let call = Call::new(func, input);
-        Val::Call(call.into())
-    }
-}
-
-impl Transformer<AskVal, Val> for AskMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: AskVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self {
-            AskMode::Eval => Eval.transform_ask(ctx, input),
-            AskMode::Struct(ask) => ask.transform(ctx, input),
-            AskMode::Dependent(ask) => ask.transform(ctx, input),
-        }
-    }
-}
-
-impl Transformer<AskVal, Val> for AskDepMode {
-    fn transform<'a, Ctx>(&self, mut ctx: Ctx, ask: AskVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        let ask = Ask::from(ask);
-        let func = Eval.transform(ctx.reborrow(), ask.func);
-        let transformer = match func {
-            Val::Func(f) => {
-                let output = f.output_mode.transform(ctx.reborrow(), ask.output);
-                return solve(ctx, f, output);
-            }
-            Val::Unit(_) => &self.unit,
-            Val::Bool(_) => &self.bool,
-            Val::Int(_) => &self.int,
-            Val::Number(_) => &self.number,
-            Val::Bytes(_) => &self.bytes,
-            Val::String(_) => &self.string,
-            Val::Symbol(_) => &self.symbol,
-            _ => {
-                let output = Eval.transform(ctx, ask.output);
-                let ask = Ask::new(func, output);
-                return Val::Ask(ask.into());
-            }
-        };
-        let output = transformer.transform(ctx, ask.output);
-        let ask = Ask::new(func, output);
-        Val::Ask(ask.into())
-    }
-}
-
-impl Transformer<AskVal, Val> for Ask<Mode, Mode> {
-    fn transform<'a, Ctx>(&self, mut ctx: Ctx, ask: AskVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        let ask = Ask::from(ask);
-        let func = self.func.transform(ctx.reborrow(), ask.func);
-        let output = self.output.transform(ctx, ask.output);
-        let ask = Ask::new(func, output);
-        Val::Ask(ask.into())
     }
 }
 

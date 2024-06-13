@@ -32,16 +32,13 @@ use crate::{
         DefaultCtx,
     },
     prelude::{
-        default_mode,
         named_const_fn,
         named_free_fn,
-        pair_mode,
-        symbol_id_mode,
         Named,
         Prelude,
     },
     symbol::Symbol,
-    transform::Transform,
+    transform::SYMBOL_READ_PREFIX,
     val::{
         func::FuncVal,
         ANSWER,
@@ -96,8 +93,8 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Lazy);
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("any", input_mode, output_mode, fn_any)
 }
 
@@ -121,7 +118,7 @@ fn fn_any(input: Val) -> Val {
             LIST => Val::List(any_list(rng, DEPTH).into()),
             MAP => Val::Map(any_map(rng, DEPTH).into()),
             CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
-            FUNC => Val::Func(FuncVal::new(any_func(rng, DEPTH))),
+            FUNC => Val::Func(any_func(rng, DEPTH)),
             ASSERT => Val::Assert(any_assert(rng, DEPTH).into()),
             ANSWER => Val::Answer(any_answer(rng, DEPTH).into()),
             EXT => Val::Ext(any_extension(rng, DEPTH)),
@@ -132,8 +129,8 @@ fn fn_any(input: Val) -> Val {
 }
 
 fn type_of() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = symbol_id_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("type_of", input_mode, output_mode, fn_type_of)
 }
 
@@ -163,8 +160,8 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn equal() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_id_mode(), symbol_id_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("==", input_mode, output_mode, fn_equal)
 }
 
@@ -173,18 +170,22 @@ fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     let ctx = ctx.borrow();
-    let Some(v1) = get_by_ref(ctx, &pair.first) else {
-        return Val::default();
-    };
-    let Some(v2) = get_by_ref(ctx, &pair.second) else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(*v1 == *v2))
+    get_by_ref(ctx, &pair.first, |v1| {
+        let Some(v1) = v1 else {
+            return Val::default();
+        };
+        get_by_ref(ctx, &pair.second, |v2| {
+            let Some(v2) = v2 else {
+                return Val::default();
+            };
+            Val::Bool(Bool::new(*v1 == *v2))
+        })
+    })
 }
 
 fn not_equal() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_id_mode(), symbol_id_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("!=", input_mode, output_mode, fn_not_equal)
 }
 
@@ -193,32 +194,49 @@ fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
         return Val::default();
     };
     let ctx = ctx.borrow();
-    let Some(v1) = get_by_ref(ctx, &pair.first) else {
-        return Val::default();
-    };
-    let Some(v2) = get_by_ref(ctx, &pair.second) else {
-        return Val::default();
-    };
-    Val::Bool(Bool::new(*v1 != *v2))
+    get_by_ref(ctx, &pair.first, |v1| {
+        let Some(v1) = v1 else {
+            return Val::default();
+        };
+        get_by_ref(ctx, &pair.second, |v2| {
+            let Some(v2) = v2 else {
+                return Val::default();
+            };
+            Val::Bool(Bool::new(*v1 != *v2))
+        })
+    })
 }
 
-fn get_by_ref<'a>(ctx: Option<&'a Ctx>, v: &'a Val) -> Option<&'a Val> {
+fn get_by_ref<T, F>(ctx: Option<&Ctx>, v: &Val, f: F) -> T
+where
+    F: FnOnce(Option<&Val>) -> T,
+{
     match v {
-        Val::Symbol(v) => {
-            let ctx = ctx?;
-            if let Ok(v1) = ctx.get_ref(v.clone()) {
-                Some(v1)
-            } else {
-                None
+        Val::Symbol(s) => match s.chars().next() {
+            Some(Symbol::ID_PREFIX) => {
+                let s = Symbol::from_str(&s[1..]);
+                f(Some(&Val::Symbol(s)))
             }
-        }
-        Val::Call(c) => {
-            if c.func.is_unit() {
-                Some(&c.input)
-            } else {
-                Some(v)
+            Some(SYMBOL_READ_PREFIX) => {
+                let Some(ctx) = ctx else {
+                    return f(None);
+                };
+                let s = Symbol::from_str(&s[1..]);
+                let Ok(val) = ctx.get_ref(s) else {
+                    return f(None);
+                };
+                f(Some(val))
             }
-        }
-        v => Some(v),
+            _ => {
+                let Some(ctx) = ctx else {
+                    return f(None);
+                };
+                let Ok(val) = ctx.get_ref(s.clone()) else {
+                    return f(None);
+                };
+                f(Some(val))
+            }
+        },
+        val => f(Some(val)),
     }
 }

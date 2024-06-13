@@ -1,10 +1,6 @@
 use std::rc::Rc;
 
 use airlang::{
-    Ask,
-    AskMode,
-    Call,
-    CallMode,
     CtxConstFn,
     CtxFreeFn,
     CtxMutableFn,
@@ -20,7 +16,7 @@ use airlang::{
     MutableCtx,
     Pair,
     Symbol,
-    SymbolMode,
+    Transform,
     Val,
     ValMode,
 };
@@ -109,79 +105,94 @@ fn named_mutable_fn(
     Named::new(name, func_val)
 }
 
-fn default_mode() -> Mode {
-    Mode::default()
+#[allow(unused)]
+fn id_mode() -> Mode {
+    Mode {
+        default: Transform::Id,
+        specialized: None,
+    }
+}
+
+fn form_mode() -> Mode {
+    Mode {
+        default: Transform::Form,
+        specialized: None,
+    }
 }
 
 #[allow(unused)]
-fn symbol_id_mode() -> Mode {
-    let mode = ValMode {
-        symbol: SymbolMode::Id,
-        ..Default::default()
-    };
-    Mode::Custom(Box::new(mode))
+fn eval_mode() -> Mode {
+    Mode {
+        default: Transform::Eval,
+        specialized: None,
+    }
 }
 
 #[allow(unused)]
-fn pair_mode(first: Mode, second: Mode) -> Mode {
-    let mode = ValMode {
-        pair: Box::new(Pair::new(first, second)),
-        ..Default::default()
+fn pair_mode(first: Mode, second: Mode, default: Transform) -> Mode {
+    let default_mode = Mode {
+        default,
+        specialized: None,
     };
-    Mode::Custom(Box::new(mode))
+    let val_mode = ValMode {
+        pair: Pair::new(first, second),
+        list: ListMode::All(default_mode.clone()),
+        map: MapMode::All(Pair::new(default_mode.clone(), default_mode)),
+    };
+    Mode {
+        default,
+        specialized: Some(Box::new(val_mode)),
+    }
 }
 
 #[allow(unused)]
-fn call_mode(func: Mode, input: Mode) -> Mode {
-    let mode = ValMode {
-        call: Box::new(CallMode::Struct(Call::new(func, input))),
-        ..Default::default()
+fn list_mode(list_item: List<ListItemMode>, default: Transform) -> Mode {
+    let default_mode = Mode {
+        default,
+        specialized: None,
     };
-    Mode::Custom(Box::new(mode))
+    let val_mode = ValMode {
+        list: ListMode::Some(list_item),
+        pair: Pair::new(default_mode.clone(), default_mode.clone()),
+        map: MapMode::All(Pair::new(default_mode.clone(), default_mode)),
+    };
+    Mode {
+        default,
+        specialized: Some(Box::new(val_mode)),
+    }
 }
 
 #[allow(unused)]
-fn ask_mode(func: Mode, output: Mode) -> Mode {
-    let mode = ValMode {
-        ask: Box::new(AskMode::Struct(Ask::new(func, output))),
-        ..Default::default()
+fn map_mode(map_mode: Map<Val, Mode>, default: Transform) -> Mode {
+    let default_mode = Mode {
+        default,
+        specialized: None,
     };
-    Mode::Custom(Box::new(mode))
+    let val_mode = ValMode {
+        map: MapMode::Some(map_mode),
+        pair: Pair::new(default_mode.clone(), default_mode.clone()),
+        list: ListMode::All(default_mode),
+    };
+    Mode {
+        default,
+        specialized: Some(Box::new(val_mode)),
+    }
 }
 
-#[allow(unused)]
-fn list_all_mode(mode: Mode) -> Mode {
-    let mode = ValMode {
-        list: Box::new(ListMode::All(mode)),
-        ..Default::default()
+fn map_all_mode(key: Mode, value: Mode, default: Transform) -> Mode {
+    let default_mode = Mode {
+        default,
+        specialized: None,
     };
-    Mode::Custom(Box::new(mode))
-}
-
-#[allow(unused)]
-fn list_some_mode(list_item: List<ListItemMode>) -> Mode {
-    let mode = ValMode {
-        list: Box::new(ListMode::Some(list_item)),
-        ..Default::default()
+    let val_mode = ValMode {
+        map: MapMode::All(Pair::new(key, value)),
+        pair: Pair::new(default_mode.clone(), default_mode.clone()),
+        list: ListMode::All(default_mode),
     };
-    Mode::Custom(Box::new(mode))
-}
-
-#[allow(unused)]
-fn map_all_mode(key: Mode, value: Mode) -> Mode {
-    let mode = ValMode {
-        map: Box::new(MapMode::All(Pair::new(key, value))),
-        ..Default::default()
-    };
-    Mode::Custom(Box::new(mode))
-}
-
-fn map_some_mode(map_mode: Map<Val, Mode>) -> Mode {
-    let mode = ValMode {
-        map: Box::new(MapMode::Some(map_mode)),
-        ..Default::default()
-    };
-    Mode::Custom(Box::new(mode))
+    Mode {
+        default,
+        specialized: Some(Box::new(val_mode)),
+    }
 }
 
 mod repl;

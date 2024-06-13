@@ -1,27 +1,27 @@
 ; [
-    p = assert.verified ! not ! (not false),
-    assert.input p
+    p = assert.verified ! not '!' (not false),
+    assert.input .p
 ]
 -----
 true
 =====
 ; [
-    p = assert.verified ! not ! true,
-    assert.output p
+    p = assert.verified ! not '!' true,
+    assert.output .p
 ]
 -----
 false
 =====
 ; [
-    p = assert.verified ! not ! true,
-    (assert.function p) == not
+    p = assert.verified ! not '!' true,
+    (assert.function .p) == .not
 ]
 -----
 true
 =====
 ; [
-    p = assert.verified ! not ! true,
-    assert.is_verified p
+    p = assert.verified ! not '!' true,
+    assert.is_verified .p
 ]
 -----
 true

@@ -2,55 +2,55 @@ map.length {1 : 2, : 3}
 -----
 {1 : 2, : 3} : 2
 =====
-; [a = {1 : 2, : 3}, map.length a]
+; [a = {1 : 2, : 3}, map.length .a]
 -----
 2
 =====
-; [(m : i) = map.items ! {1 : 2, : 3}, map i]
+; [(m : i) = map.items ! {1 : 2, : 3}, map &i]
 -----
 {1 : 2, : 3}
 =====
-; [a = {1 : 2, : 3}, b = map.items ! a, map b]
+; [a = {1 : 2, : 3}, b = map.items ! .a, map &b]
 -----
 {1 : 2, : 3}
 =====
-; [(m : i) = map.into_items ! {1 : 2, : 3}, map i]
+; [(m : i) = map.into_items ! {1 : 2, : 3}, map &i]
 -----
 {1 : 2, : 3}
 =====
-; [a = {1 : 2, : 3}, b = map.into_items ! a, map b]
+; [a = {1 : 2, : 3}, b = map.into_items ! .a, map &b]
 -----
 {1 : 2, : 3}
 =====
-; [(m : k) = map.keys ! {1 : 2, : 3}, set k]
+; [(m : k) = map.keys ! {1 : 2, : 3}, set &k]
 -----
 {1, 3}
 =====
-; [a = {1 : 2, : 3}, b = map.keys ! a, set b]
+; [a = {1 : 2, : 3}, b = map.keys ! .a, set &b]
 -----
 {1, 3}
 =====
-; [(m : k) = map.into_keys ! {1 : 2, : 3}, set k]
+; [(m : k) = map.into_keys ! {1 : 2, : 3}, set &k]
 -----
 {1, 3}
 =====
-; [a = {1 : 2, : 3}, k = map.into_keys ! a, set k]
+; [a = {1 : 2, : 3}, k = map.into_keys ! .a, set &k]
 -----
 {1, 3}
 =====
-; [(m : v) = map.values ! {1 : 2, 3 : 2}, multiset v]
+; [(m : v) = map.values ! {1 : 2, 3 : 2}, multiset &v]
 -----
 {2 : 2}
 =====
-; [a = {1 : 2, 3 : 2}, b = map.values ! a, multiset b]
+; [a = {1 : 2, 3 : 2}, b = map.values ! .a, multiset &b]
 -----
 {2 : 2}
 =====
-; [(m : k) = map.into_values ! {1 : 2, 3 : 2}, multiset k]
+; [(m : k) = map.into_values ! {1 : 2, 3 : 2}, multiset &k]
 -----
 {2 : 2}
 =====
-; [a = {1 : 2, 3 : 2}, v = map.into_values ! a, multiset v]
+; [a = {1 : 2, 3 : 2}, v = map.into_values ! .a, multiset &v]
 -----
 {2 : 2}
 =====
@@ -62,19 +62,19 @@ map.length {1 : 2, : 3}
 -----
 {1 : 2} : false
 =====
-{(id a) : 1} map.contains id ! a
+{.a : 1} map.contains .a
 -----
 {a : 1} : true
 =====
-; [b = id ! a, {(id a) : 1} map.contains b]
+; [b = .a, {.a : 1} map.contains b]
 -----
 {a : 1} : true
 =====
-; [a = {1 : 2}, a map.contains 1]
+; [a = {1 : 2}, .a map.contains 1]
 -----
 true
 =====
-; [a = {1 : 2}, a map.contains 2]
+; [a = {1 : 2}, .a map.contains 2]
 -----
 false
 =====
@@ -86,15 +86,15 @@ false
 -----
 {1 : 2, 3 : 4} : false
 =====
-{(id a) : 1} map.contains_many [id a]
+{.a : 1} map.contains_many [.a]
 -----
 {a : 1} : true
 =====
-; [a = {1 : 2, 3 : 4}, a map.contains_many [1, 3]]
+; [a = {1 : 2, 3 : 4}, .a map.contains_many [1, 3]]
 -----
 true
 =====
-; [a = {1 : 2, 3 : 4}, a map.contains_many [1, 2]]
+; [a = {1 : 2, 3 : 4}, .a map.contains_many [1, 2]]
 -----
 false
 =====
@@ -106,23 +106,23 @@ false
 -----
 {1 : 2, 2 : 3} : .
 =====
-{(id a) : 1} map.set (id a) : 2
+{.a : 1} map.set .a : 2
 -----
 {a : 2} : 1
 =====
-; [a = {1 : 2, 3 : 4}, a map.set 1 : 3]
+; [a = {1 : 2, 3 : 4}, .a map.set 1 : 3]
 -----
 2
 =====
-; [a = {1 : 2, 3 : 4}, a map.set 1 : 3, a]
+; [a = {1 : 2, 3 : 4}, .a map.set 1 : 3, &a]
 -----
 {1 : 3, 3 : 4}
 =====
-; [a = {1 : 2}, a map.set 2 : 3]
+; [a = {1 : 2}, .a map.set 2 : 3]
 -----
 .
 =====
-; [a = {1 : 2}, a map.set 2 : 3, a]
+; [a = {1 : 2}, .a map.set 2 : 3, &a]
 -----
 {1 : 2, 2 : 3}
 =====
@@ -130,15 +130,15 @@ false
 -----
 {1 : 3, 2 : 3, 3 : 4} : {1 : 2}
 =====
-{(id a) : 1} map.set_many {(id a) : 2}
+{.a : 1} map.set_many {.a : 2}
 -----
 {a : 2} : {a : 1}
 =====
-; [a = {1 : 2, 2 : 3}, a map.set_many {1 : 3, 3 : 4}]
+; [a = {1 : 2, 2 : 3}, .a map.set_many {1 : 3, 3 : 4}]
 -----
 {1 : 2}
 =====
-; [a = {1 : 2, 2 : 3}, a map.set_many {1 : 3, 3 : 4}, a]
+; [a = {1 : 2, 2 : 3}, .a map.set_many {1 : 3, 3 : 4}, &a]
 -----
 {1 : 3, 2 : 3, 3 : 4}
 =====
@@ -150,19 +150,19 @@ false
 -----
 {1 : 2} : .
 =====
-{(id a) : 1} map.get id ! a
+{.a : 1} map.get .a
 -----
 {a : 1} : 1
 =====
-; [a = {1 : 2}, a map.get 1]
+; [a = {1 : 2}, .a map.get 1]
 -----
 2
 =====
-; [a = {1 : 2}, a map.get 1, a]
+; [a = {1 : 2}, .a map.get 1, &a]
 -----
 {1 : 2}
 =====
-; [a = {1 : 2}, a map.get 2]
+; [a = {1 : 2}, .a map.get 2]
 -----
 .
 =====
@@ -170,15 +170,15 @@ false
 -----
 {1 : 2, 2 : 3, 3 : 4} : {1 : 2, 2 : 3}
 =====
-; [a = {1 : 2, 2 : 3, 3 : 4}, a map.get_many [1, 2, 1, 4]]
+; [a = {1 : 2, 2 : 3, 3 : 4}, .a map.get_many [1, 2, 1, 4]]
 -----
 {1 : 2, 2 : 3}
 =====
-{(id a) : 1} map.get_many [id a]
+{.a : 1} map.get_many [.a]
 -----
 {a : 1} : {a : 1}
 =====
-; [a = {1 : 2, 2 : 3, 3 : 4}, a map.get_many [1, 2, 1, 4], a]
+; [a = {1 : 2, 2 : 3, 3 : 4}, .a map.get_many [1, 2, 1, 4], &a]
 -----
 {1 : 2, 2 : 3, 3 : 4}
 =====
@@ -190,23 +190,23 @@ false
 -----
 {1 : 2} : .
 =====
-{(id a) : 1} map.remove id ! a
+{.a : 1} map.remove .a
 -----
 {} : 1
 =====
-; [a = {1 : 2, 3 : 4}, a map.remove 1]
+; [a = {1 : 2, 3 : 4}, .a map.remove 1]
 -----
 2
 =====
-; [a = {1 : 2, 3 : 4}, a map.remove 1, a]
+; [a = {1 : 2, 3 : 4}, .a map.remove 1, &a]
 -----
 {3 : 4}
 =====
-; [a = {1 : 2}, a map.remove 2]
+; [a = {1 : 2}, .a map.remove 2]
 -----
 .
 =====
-; [a = {1 : 2}, a map.remove 2, a]
+; [a = {1 : 2}, .a map.remove 2, a]
 -----
 {1 : 2}
 =====
@@ -214,15 +214,15 @@ false
 -----
 {2 : 3} : {1 : 2, 3 : 4}
 =====
-{(id a) : 1} map.remove_many [id a]
+{.a : 1} map.remove_many [.a]
 -----
 {} : {a : 1}
 =====
-; [a = {1 : 2, 2 : 3, 3 : 4}, a map.remove_many [1, 3, 5]]
+; [a = {1 : 2, 2 : 3, 3 : 4}, .a map.remove_many [1, 3, 5]]
 -----
 {1 : 2, 3 : 4}
 =====
-; [a = {1 : 2, 2 : 3, 3 : 4}, a map.remove_many [1, 3, 5], a]
+; [a = {1 : 2, 2 : 3, 3 : 4}, .a map.remove_many [1, 3, 5], &a]
 -----
 {2 : 3}
 =====
@@ -230,11 +230,11 @@ map.clear {1 : 2, 2 : 3}
 -----
 {}
 =====
-; [a = {1 : 2, 2 : 3}, map.clear a]
+; [a = {1 : 2, 2 : 3}, map.clear .a]
 -----
 .
 =====
-; [a = {1 : 2, 2 : 3}, map.clear a, a]
+; [a = {1 : 2, 2 : 3}, map.clear .a, &a]
 -----
 {}
 =====

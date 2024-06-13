@@ -6,12 +6,9 @@ use crate::{
         DefaultCtx,
     },
     prelude::{
-        default_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
-        pair_mode,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -23,6 +20,7 @@ use crate::{
     Bytes,
     Int,
     List,
+    Mode,
     Pair,
 };
 
@@ -58,8 +56,8 @@ impl Prelude for StrPrelude {
 }
 
 fn from_utf8() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("string.from_utf8", input_mode, output_mode, fn_from_utf8)
 }
 
@@ -76,8 +74,8 @@ fn fn_from_utf8(input: Val) -> Val {
 }
 
 fn into_utf8() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("string.into_utf8", input_mode, output_mode, fn_into_utf8)
 }
 
@@ -91,8 +89,8 @@ fn fn_into_utf8(input: Val) -> Val {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("string.length", input_mode, output_mode, fn_length)
 }
 
@@ -107,8 +105,8 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn push() -> Named<FuncVal> {
-    let input_mode = pair_mode(symbol_id_mode(), default_mode());
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("string.push", input_mode, output_mode, fn_push)
 }
 
@@ -129,8 +127,8 @@ fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn concat() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("string.concat", input_mode, output_mode, fn_concat)
 }
 

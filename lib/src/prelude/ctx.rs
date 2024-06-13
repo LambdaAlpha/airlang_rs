@@ -25,14 +25,13 @@ use crate::{
     mode::Mode,
     pair::Pair,
     prelude::{
-        default_mode,
+        form_mode,
         initial_ctx,
         map_all_mode,
         named_const_fn,
         named_free_fn,
         named_mutable_fn,
         pair_mode,
-        symbol_id_mode,
         Named,
         Prelude,
     },
@@ -55,12 +54,9 @@ use crate::{
         Val,
     },
     AskVal,
-    ListMode,
     ListVal,
     Map,
     PairVal,
-    SymbolMode,
-    ValMode,
 };
 
 #[derive(Clone)]
@@ -131,8 +127,8 @@ impl Prelude for CtxPrelude {
 }
 
 fn read() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_const_fn("read", input_mode, output_mode, fn_read)
 }
 
@@ -144,8 +140,8 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn move1() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_mutable_fn("move", input_mode, output_mode, fn_move)
 }
 
@@ -157,8 +153,8 @@ fn fn_move(ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn assign() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::Predefined(Transform::Id), default_mode());
-    let output_mode = default_mode();
+    let input_mode = pair_mode(form_mode(), Mode::default(), Transform::default());
+    let output_mode = Mode::default();
     named_mutable_fn("=", input_mode, output_mode, fn_assign)
 }
 
@@ -268,7 +264,7 @@ fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: Assig
     let mut val_iter: Box<dyn ExactSizeIterator<Item = Val>> = Box::new(val.into_iter());
     while let (Some(name), val) = (name_iter.next(), val_iter.next()) {
         if let Val::Symbol(s) = &name {
-            if &**s == "..." {
+            if &**s == ".." {
                 let name_len = name_iter.len();
                 let val_len = val_iter.len();
                 if val_len > name_len {
@@ -373,8 +369,8 @@ fn generate_invariant(invariant: Invariant) -> Symbol {
 }
 
 fn set_final() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = Mode::Predefined(Transform::Id);
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_mutable_fn("set_final", input_mode, output_mode, fn_set_final)
 }
 
@@ -387,8 +383,8 @@ fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn set_const() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = Mode::Predefined(Transform::Id);
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_mutable_fn("set_constant", input_mode, output_mode, fn_set_const)
 }
 
@@ -401,8 +397,8 @@ fn fn_set_const(ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn is_final() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_const_fn("is_final", input_mode, output_mode, fn_is_final)
 }
 
@@ -418,8 +414,8 @@ fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_const() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_const_fn("is_constant", input_mode, output_mode, fn_is_const)
 }
 
@@ -435,8 +431,8 @@ fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn is_null() -> Named<FuncVal> {
-    let input_mode = symbol_id_mode();
-    let output_mode = default_mode();
+    let input_mode = form_mode();
+    let output_mode = Mode::default();
     named_const_fn("is_null", input_mode, output_mode, fn_is_null)
 }
 
@@ -451,8 +447,8 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
 }
 
 fn get_access() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = symbol_id_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("access", input_mode, output_mode, fn_get_access)
 }
 
@@ -470,8 +466,8 @@ fn fn_get_access(ctx: CtxForMutableFn, _input: Val) -> Val {
 }
 
 fn has_meta() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("has_meta", input_mode, output_mode, fn_has_meta)
 }
 
@@ -484,8 +480,8 @@ fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
 }
 
 fn set_meta() -> Named<FuncVal> {
-    let input_mode = default_mode();
-    let output_mode = Mode::Predefined(Transform::Id);
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_mutable_fn("set_meta", input_mode, output_mode, fn_set_meta)
 }
 
@@ -504,15 +500,8 @@ fn fn_set_meta(ctx: CtxForMutableFn, input: Val) -> Val {
 }
 
 fn with_ctx() -> Named<FuncVal> {
-    let input_mode = pair_mode(
-        Mode::Custom(Box::new(ValMode {
-            symbol: SymbolMode::Id,
-            list: Box::new(ListMode::All(symbol_id_mode())),
-            ..Default::default()
-        })),
-        default_mode(),
-    );
-    let output_mode = default_mode();
+    let input_mode = pair_mode(form_mode(), Mode::default(), Transform::default());
+    let output_mode = Mode::default();
     named_mutable_fn("|", input_mode, output_mode, fn_with_ctx)
 }
 
@@ -592,8 +581,8 @@ where
 }
 
 fn ctx_in_ctx_out() -> Named<FuncVal> {
-    let input_mode = pair_mode(default_mode(), Mode::Predefined(Transform::Id));
-    let output_mode = pair_mode(default_mode(), default_mode());
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("::", input_mode, output_mode, fn_ctx_in_ctx_out)
 }
 
@@ -618,10 +607,11 @@ const CONST: &str = "constant";
 
 fn ctx_new() -> Named<FuncVal> {
     let input_mode = pair_mode(
-        default_mode(),
-        map_all_mode(symbol_id_mode(), default_mode()),
+        Mode::default(),
+        map_all_mode(form_mode(), Mode::default(), Transform::default()),
+        Transform::default(),
     );
-    let output_mode = default_mode();
+    let output_mode = Mode::default();
     named_free_fn("context", input_mode, output_mode, fn_ctx_new)
 }
 
@@ -670,10 +660,11 @@ fn fn_ctx_new(input: Val) -> Val {
 }
 
 fn ctx_repr() -> Named<FuncVal> {
-    let input_mode = default_mode();
+    let input_mode = Mode::default();
     let output_mode = pair_mode(
-        default_mode(),
-        map_all_mode(symbol_id_mode(), default_mode()),
+        Mode::default(),
+        map_all_mode(form_mode(), Mode::default(), Transform::default()),
+        Transform::default(),
     );
     named_free_fn("context.represent", input_mode, output_mode, fn_ctx_repr)
 }
@@ -718,8 +709,8 @@ fn fn_ctx_repr(input: Val) -> Val {
 }
 
 fn ctx_prelude() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_free_fn("prelude", input_mode, output_mode, fn_ctx_prelude)
 }
 
@@ -728,8 +719,8 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 }
 
 fn ctx_this() -> Named<FuncVal> {
-    let input_mode = Mode::Predefined(Transform::Id);
-    let output_mode = default_mode();
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
     named_const_fn("this", input_mode, output_mode, fn_ctx_this)
 }
 

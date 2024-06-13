@@ -16,7 +16,7 @@
             ],
             x
         ],
-        prelude : move ! ctx,
+        prelude : &ctx,
     },
     42 gcd 24
 ]

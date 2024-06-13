@@ -2,9 +2,9 @@ id a
 -----
 a
 =====
-id ! lazy ! a
+id ! form ! a
 -----
-lazy a
+form a
 =====
 id ! . ! a
 -----
@@ -34,7 +34,7 @@ eval ! id ! not ! false
 -----
 not false
 =====
-eval ! lazy ! a
+eval ! form ! a
 -----
 a
 =====
@@ -46,34 +46,30 @@ eval [(not true) : not ! true, not true, {: (not true)}]
 -----
 [: false, false, {: false}]
 =====
-lazy a
+form a
 -----
 a
 =====
-lazy ! . ! not ! false
------
-true
-=====
-lazy ! true ! not ! false
+form ! true ! not ! false
 -----
 true ! not ! false
 =====
-lazy ! id ! a
+form ! id ! a
 -----
 id a
 =====
-lazy ! eval ! a
+form ! eval ! a
 -----
 eval a
 =====
-lazy ! lazy ! a
+form ! form ! a
 -----
-lazy ! a
+form ! a
 =====
-lazy ! . ! .
+form ! . ! .
 -----
-.
+. .
 =====
-lazy [a, f a, a : b, f ? a, {a : b}]
+form [a, f a, a : b, f ? a, {a : b}]
 -----
 [a, f a, a : b, f ? a, {a : b}]

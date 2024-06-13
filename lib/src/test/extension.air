@@ -1,8 +1,8 @@
-; [a = extension.unit, b = extension.unit, a == b]
+; [a = extension.unit, b = extension.unit, .a == .b]
 -----
 true
 =====
-type_of extension.unit
+type_of .extension.unit
 -----
 extension
 =====
@@ -14,11 +14,11 @@ func_ext 2
 -----
 2
 =====
-type_of func_ext
+type_of .func_ext
 -----
 function
 =====
-function.is_extension func_ext
+function.is_extension .func_ext
 -----
 true
 =====
@@ -26,11 +26,11 @@ function.represent func_ext
 -----
 {id : func_ext, is_extension : true}
 =====
-; [a = func_ext, b = func_ext, a == b]
+; [a = func_ext, b = func_ext, .a == .b]
 -----
 true
 =====
-. | func_ext ! 1
+. | func_ext '!' 1
 -----
 1
 =====
@@ -38,6 +38,6 @@ call.apply ! func_ext '!' 1
 -----
 1
 =====
-; [p = assert.verified ! func_ext ! true, assert.is_verified p]
+; [p = assert.verified ! func_ext '!' true, assert.is_verified .p]
 -----
 true
