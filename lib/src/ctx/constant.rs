@@ -49,6 +49,10 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
         Err(CtxError::AccessDenied)
     }
 
+    fn is_assignable(self, name: Symbol) -> bool {
+        self.0.is_assignable(name)
+    }
+
     fn put_value(self, _name: Symbol, _value: CtxValue) -> Result<Option<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
@@ -142,6 +146,13 @@ impl<'l> CtxRef<'l> for CtxForConstFn<'l> {
         match self {
             CtxForConstFn::Free(ctx) => ctx.remove(name),
             CtxForConstFn::Const(ctx) => ctx.remove(name),
+        }
+    }
+
+    fn is_assignable(self, name: Symbol) -> bool {
+        match self {
+            CtxForConstFn::Free(ctx) => ctx.is_assignable(name),
+            CtxForConstFn::Const(ctx) => ctx.is_assignable(name),
         }
     }
 

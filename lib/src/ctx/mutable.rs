@@ -47,6 +47,10 @@ impl<'l> CtxRef<'l> for MutableCtx<'l> {
         self.0.remove(name)
     }
 
+    fn is_assignable(self, name: Symbol) -> bool {
+        self.0.is_assignable(name)
+    }
+
     fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
         self.0.put_value(name, value)
     }
@@ -138,6 +142,14 @@ impl<'l> CtxRef<'l> for CtxForMutableFn<'l> {
             CtxForMutableFn::Free(ctx) => ctx.remove(name),
             CtxForMutableFn::Const(ctx) => ctx.remove(name),
             CtxForMutableFn::Mutable(ctx) => ctx.remove(name),
+        }
+    }
+
+    fn is_assignable(self, name: Symbol) -> bool {
+        match self {
+            CtxForMutableFn::Free(ctx) => ctx.is_assignable(name),
+            CtxForMutableFn::Const(ctx) => ctx.is_assignable(name),
+            CtxForMutableFn::Mutable(ctx) => ctx.is_assignable(name),
         }
     }
 
@@ -300,6 +312,11 @@ impl<'a> MutableCtx<'a> {
         <_ as CtxRef>::get_ref_mut(self, name)
     }
 
+    #[allow(clippy::wrong_self_convention)]
+    pub fn is_assignable(self, name: Symbol) -> bool {
+        <_ as CtxRef>::is_assignable(self, name)
+    }
+
     pub fn put(
         self,
         name: Symbol,
@@ -333,6 +350,11 @@ impl<'a> CtxForMutableFn<'a> {
 
     pub fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError> {
         <_ as CtxRef>::get_ref_mut(self, name)
+    }
+
+    #[allow(clippy::wrong_self_convention)]
+    pub fn is_assignable(self, name: Symbol) -> bool {
+        <_ as CtxRef>::is_assignable(self, name)
     }
 
     pub fn meta(self) -> Result<ConstCtx<'a>, CtxError> {

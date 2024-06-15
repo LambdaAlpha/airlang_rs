@@ -20,6 +20,9 @@ pub(crate) trait CtxRef<'a> {
 
     fn remove(self, name: Symbol) -> Result<Val, CtxError>;
 
+    #[allow(clippy::wrong_self_convention)]
+    fn is_assignable(self, name: Symbol) -> bool;
+
     fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
 
     fn set_final(self, name: Symbol) -> Result<(), CtxError>;

@@ -260,32 +260,6 @@ true
 -----
 1
 =====
-; [
-    dispatcher = function ! {
-        body : (..the_input == ...the_context) if ..c : false,
-        context_access : .free,
-        prelude : . context {
-            : if,
-            : ==,
-            : id,
-        },
-    },
-    f = function ! {
-        body : the_context | = '!' ..a : 1,
-        context_access : .mutable,
-        prelude : (. context {: dispatcher}) context {
-            : =,
-            : |,
-            : '!',
-            c : . context {},
-        }
-    },
-    f .,
-    a
-]
------
-1
-=====
 function.represent ! function ! {body : the_input}
 -----
 {body : the_input}

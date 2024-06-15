@@ -78,7 +78,9 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let mut ctx_for_mod = initial_ctx();
     let mut mut_ctx_for_mod = MutableCtx::new(&mut ctx_for_mod);
     init_ctx(mut_ctx_for_mod.reborrow());
-    set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key, new_url);
+    if !set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key, new_url) {
+        return Val::default();
+    }
     interpret_mutable(mut_ctx_for_mod, val)
 }
 
@@ -101,14 +103,18 @@ fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
     Some(cur_dir)
 }
 
-fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) {
+fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) -> bool {
     if let Some(meta) = ctx.reborrow().meta() {
-        let _ = meta.put(key, Invariant::None, Val::String(Str::from(new_url).into()));
+        meta.put(key, Invariant::None, Val::String(Str::from(new_url).into()))
+            .is_ok()
     } else {
         let mut meta = Ctx::default();
         let meta_mut = MutableCtx::new(&mut meta);
-        let _ = meta_mut.put(key, Invariant::None, Val::String(Str::from(new_url).into()));
+        meta_mut
+            .put(key, Invariant::None, Val::String(Str::from(new_url).into()))
+            .expect("put into a mutable empty ctx should never fail");
         ctx.set_meta(Some(meta));
+        true
     }
 }
 

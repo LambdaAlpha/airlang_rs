@@ -422,7 +422,10 @@ impl Transformer<Val, Val> for Composed<CtxMutableInfo> {
 }
 
 fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
-    let _ = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
+    let result = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
+    if result.is_err() {
+        return Val::default();
+    }
     Eval.transform(MutableCtx::new(&mut new_ctx), body)
 }
 
@@ -435,7 +438,10 @@ fn eval_aware(
     input_name: Symbol,
     body: Val,
 ) -> Val {
-    let _ = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
+    let result = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
+    if result.is_err() {
+        return Val::default();
+    }
     keep_eval_restore(new_ctx, caller, caller_name, caller_invariant, body)
 }
 
@@ -446,6 +452,9 @@ fn keep_eval_restore(
     caller_invariant: Invariant,
     body: Val,
 ) -> Val {
+    if !ctx.is_assignable(caller_name.clone()) {
+        return Val::default();
+    }
     let caller = own_ctx(ctx);
     keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_invariant);
     let output = Eval.transform(MutableCtx::new(&mut new_ctx), body);
@@ -462,7 +471,9 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
 
 fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
     let val = Val::Ctx(CtxVal::from(ctx));
-    let _ = new_ctx.put_value(name, CtxValue { val, invariant });
+    new_ctx
+        .put_value(name, CtxValue { val, invariant })
+        .expect("name should be assignable");
 }
 
 fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: Symbol) {

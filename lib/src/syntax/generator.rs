@@ -163,7 +163,7 @@ fn generate_int(i: &Int, s: &mut String) {
     if i.is_negative() {
         s.push('0');
     }
-    let _ = write!(s, "{i:?}");
+    write!(s, "{i:?}").unwrap();
 }
 
 fn generate_number(n: &Number, s: &mut String) {
@@ -183,7 +183,7 @@ fn generate_number(n: &Number, s: &mut String) {
     }
     s.push_str(&int.abs().to_str_radix(radix as u32));
     s.push('E');
-    let _ = write!(s, "{}", n.exp());
+    write!(s, "{}", n.exp()).unwrap();
 }
 
 fn generate_bytes(bytes: &Bytes, s: &mut String) {

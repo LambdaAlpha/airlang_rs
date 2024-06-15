@@ -445,6 +445,9 @@ where
     Ctx: CtxMeta<'a>,
     ValIter: Iterator<Item = Val>,
 {
+    if !ctx.reborrow().is_assignable(name.clone()) {
+        return Val::default();
+    }
     if let Val::List(body) = body {
         let body = List::from(body);
         let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
@@ -452,7 +455,9 @@ where
             return Val::default();
         };
         for val in values {
-            let _ = ctx.reborrow().put_value(name.clone(), CtxValue::new(val));
+            ctx.reborrow()
+                .put_value(name.clone(), CtxValue::new(val))
+                .expect("name should be assignable");
             let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
             match ctrl_flow {
                 CtrlFlow::None => {}
@@ -465,7 +470,9 @@ where
         }
     } else {
         for val in values {
-            let _ = ctx.reborrow().put_value(name.clone(), CtxValue::new(val));
+            ctx.reborrow()
+                .put_value(name.clone(), CtxValue::new(val))
+                .expect("name should be assignable");
             Eval.transform(ctx.reborrow(), body.clone());
         }
     }

@@ -34,6 +34,10 @@ impl<'a> CtxRef<'a> for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
+    fn is_assignable(self, _name: Symbol) -> bool {
+        false
+    }
+
     fn put_value(self, _name: Symbol, _value: CtxValue) -> Result<Option<Val>, CtxError> {
         Err(CtxError::AccessDenied)
     }
