@@ -282,7 +282,7 @@ false
 -----
 true
 =====
-; [m1 = . context {}, set_meta m1, m2 = true | this '!' ., .m1 == .m2]
+; [m1 = . context {}, set_meta m1, m2 = ..meta | this '!' ., .m1 == .m2]
 -----
 true
 =====
@@ -322,13 +322,13 @@ false
 =====
 ; [
     set_meta ! . context {a : 1},
-    true | .a
+    ..meta | .a
 ]
 -----
 1
 =====
 ; [
-    false | = '!' .a : 1,
+    ..this | = '!' .a : 1,
     a
 ]
 -----
@@ -340,7 +340,7 @@ false
 =====
 ; [
     a = (. context {b : 1}) context {c : 2},
-    [a, true] | .b
+    [a, ..meta] | .b
 ]
 -----
 1
@@ -348,6 +348,13 @@ false
 ; [
     a = . context {b : . context {c : 1}},
     [a, b] | .c
+]
+-----
+1
+=====
+; [
+    ..meta = . context {a : 1},
+    .$.meta | .a
 ]
 -----
 1

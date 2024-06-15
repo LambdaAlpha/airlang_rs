@@ -39,6 +39,7 @@ use crate::{
     transform::{
         eval::Eval,
         Transform,
+        SYMBOL_READ_PREFIX,
     },
     transformer::Transformer,
     unit::Unit,
@@ -527,43 +528,62 @@ where
     }
 }
 
+const META: &str = "meta";
+const THIS: &str = "this";
+
 fn with_target_ctx_basic<F>(ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
 where
     F: FnOnce(CtxForMutableFn) -> Option<Val>,
 {
     match target_ctx {
         Val::Unit(_) => callback(CtxForMutableFn::Free(FreeCtx)),
-        Val::Bool(is_meta) => {
-            if is_meta.bool() {
-                let Ok(DynRef {
-                    is_const,
-                    ref1: meta_ctx,
-                }) = ctx.get_meta_dyn()
-                else {
+        Val::Symbol(name) => match name.chars().next() {
+            Some(Symbol::ID_PREFIX) => match &name[1..] {
+                META => {
+                    let Ok(DynRef {
+                        is_const,
+                        ref1: meta_ctx,
+                    }) = ctx.get_meta_dyn()
+                    else {
+                        return None;
+                    };
+                    if is_const {
+                        callback(CtxForMutableFn::Const(ConstCtx::new(meta_ctx)))
+                    } else {
+                        callback(CtxForMutableFn::Mutable(MutableCtx::new(meta_ctx)))
+                    }
+                }
+                THIS => callback(ctx),
+                _ => None,
+            },
+            Some(SYMBOL_READ_PREFIX) => {
+                let name = Symbol::from_str(&name[1..]);
+                let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name) else {
+                    return None;
+                };
+                let Val::Ctx(target_ctx) = ref1 else {
                     return None;
                 };
                 if is_const {
-                    callback(CtxForMutableFn::Const(ConstCtx::new(meta_ctx)))
+                    callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx)))
                 } else {
-                    callback(CtxForMutableFn::Mutable(MutableCtx::new(meta_ctx)))
+                    callback(CtxForMutableFn::Mutable(MutableCtx::new(target_ctx)))
                 }
-            } else {
-                callback(ctx)
             }
-        }
-        Val::Symbol(name) => {
-            let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name.clone()) else {
-                return None;
-            };
-            let Val::Ctx(target_ctx) = ref1 else {
-                return None;
-            };
-            if is_const {
-                callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx)))
-            } else {
-                callback(CtxForMutableFn::Mutable(MutableCtx::new(target_ctx)))
+            _ => {
+                let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name.clone()) else {
+                    return None;
+                };
+                let Val::Ctx(target_ctx) = ref1 else {
+                    return None;
+                };
+                if is_const {
+                    callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx)))
+                } else {
+                    callback(CtxForMutableFn::Mutable(MutableCtx::new(target_ctx)))
+                }
             }
-        }
+        },
         _ => None,
     }
 }
