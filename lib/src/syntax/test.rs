@@ -30,7 +30,7 @@ use crate::{
 mod booleans;
 mod bytes;
 mod calls;
-mod annotations;
+mod annotates;
 mod numbers;
 mod infixes;
 mod ints;
@@ -381,17 +381,17 @@ fn test_generate_maps() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_annotations() -> Result<(), Box<dyn Error>> {
+fn test_parse_annotates() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/annotations.air"),
-        "test/annotations.air",
-        annotations::expected,
+        include_str!("test/annotates.air"),
+        "test/annotates.air",
+        annotates::expected,
     )
 }
 
 #[test]
-fn test_generate_annotations() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/annotations.air"), "test/annotations.air")
+fn test_generate_annotates() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/annotates.air"), "test/annotates.air")
 }
 
 #[test]

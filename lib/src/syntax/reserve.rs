@@ -14,7 +14,7 @@ use crate::{
         parse_reserve,
         parser::ParseRepr,
         reserve::{
-            annotation::AnnotationRepr,
+            annotate::AnnotateRepr,
             ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
@@ -46,7 +46,7 @@ pub enum Repr {
     Ask(Box<AskRepr>),
     List(ListRepr),
     Map(MapRepr),
-    Annotation(Box<AnnotationRepr>),
+    Annotate(Box<AnnotateRepr>),
 }
 
 impl Repr {
@@ -115,9 +115,9 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<AnnotationRepr> for Repr {
-    fn from(a: AnnotationRepr) -> Self {
-        Repr::Annotation(Box::new(a))
+impl From<AnnotateRepr> for Repr {
+    fn from(a: AnnotateRepr) -> Self {
+        Repr::Annotate(Box::new(a))
     }
 }
 
@@ -215,7 +215,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Ask(a) => GenerateRepr::Ask(a),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),
-            Repr::Annotation(a) => GenerateRepr::Annotation(a),
+            Repr::Annotate(a) => GenerateRepr::Annotate(a),
         };
         Ok(r)
     }
@@ -231,4 +231,4 @@ pub(crate) mod list;
 
 pub(crate) mod map;
 
-pub(crate) mod annotation;
+pub(crate) mod annotate;

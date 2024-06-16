@@ -7,7 +7,7 @@ use std::{
 };
 
 use crate::{
-    annotation::Annotation,
+    annotate::Annotate,
     bool::Bool,
     bytes::Bytes,
     extension::ValExt,
@@ -191,8 +191,8 @@ impl From<MapVal> for Val {
     }
 }
 
-impl From<Annotation<Val, Val>> for Val {
-    fn from(value: Annotation<Val, Val>) -> Self {
+impl From<Annotate<Val, Val>> for Val {
+    fn from(value: Annotate<Val, Val>) -> Self {
         value.value
     }
 }

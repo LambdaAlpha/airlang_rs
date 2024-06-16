@@ -5,7 +5,7 @@ use crate::{
         Named,
         Prelude,
     },
-    syntax::ANNOTATION_INFIX,
+    syntax::ANNOTATE_INFIX,
     FuncVal,
     Mode,
     Pair,
@@ -13,17 +13,17 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct AnnotationPrelude {
+pub(crate) struct AnnotatePrelude {
     pub(crate) new: Named<FuncVal>,
 }
 
-impl Default for AnnotationPrelude {
+impl Default for AnnotatePrelude {
     fn default() -> Self {
-        AnnotationPrelude { new: new() }
+        AnnotatePrelude { new: new() }
     }
 }
 
-impl Prelude for AnnotationPrelude {
+impl Prelude for AnnotatePrelude {
     fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
     }
@@ -32,7 +32,7 @@ impl Prelude for AnnotationPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(ANNOTATION_INFIX, input_mode, output_mode, fn_new)
+    named_free_fn(ANNOTATE_INFIX, input_mode, output_mode, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {

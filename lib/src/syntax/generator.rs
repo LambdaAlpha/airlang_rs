@@ -11,7 +11,7 @@ use std::{
 use num_traits::Signed;
 
 use crate::{
-    annotation::Annotation,
+    annotate::Annotate,
     ask::Ask,
     bool::Bool,
     bytes::Bytes,
@@ -26,7 +26,7 @@ use crate::{
     syntax::{
         is_delimiter,
         maybe_keyword,
-        ANNOTATION_INFIX,
+        ANNOTATE_INFIX,
         ASK_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
@@ -120,7 +120,7 @@ where
     Bytes(&'a Bytes),
     Call(&'a Call<T, T>),
     Ask(&'a Ask<T, T>),
-    Annotation(&'a Annotation<T, T>),
+    Annotate(&'a Annotate<T, T>),
 }
 
 pub(crate) fn generate<'a, T>(
@@ -146,7 +146,7 @@ where
         GenerateRepr::Bytes(bytes) => generate_bytes(bytes, s),
         GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
         GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
-        GenerateRepr::Annotation(a) => generate_annotation(a, s, format, indent)?,
+        GenerateRepr::Annotate(a) => generate_annotate(a, s, format, indent)?,
     }
     Ok(())
 }
@@ -530,8 +530,8 @@ where
     Ok(())
 }
 
-fn generate_annotation<'a, T>(
-    annotation: &'a Annotation<T, T>,
+fn generate_annotate<'a, T>(
+    annotate: &'a Annotate<T, T>,
     s: &mut String,
     format: &GenerateFormat,
     indent: usize,
@@ -541,12 +541,12 @@ where
     T: Eq + Hash,
 {
     generate_infix(
-        &annotation.note,
+        &annotate.note,
         |s, _format, _indent| {
-            s.push_str(ANNOTATION_INFIX);
+            s.push_str(ANNOTATE_INFIX);
             Ok(())
         },
-        &annotation.value,
+        &annotate.value,
         s,
         format,
         indent,

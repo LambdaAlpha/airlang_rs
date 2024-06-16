@@ -145,7 +145,7 @@ pub(crate) mod call;
 
 pub(crate) mod ask;
 
-pub(crate) mod annotation;
+pub(crate) mod annotate;
 
 pub(crate) mod types;
 

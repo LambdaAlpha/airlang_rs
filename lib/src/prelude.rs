@@ -22,7 +22,7 @@ use crate::{
         ValMode,
     },
     prelude::{
-        annotation::AnnotationPrelude,
+        annotate::AnnotatePrelude,
         answer::AnswerPrelude,
         ask::AskPrelude,
         assert::AssertPrelude,
@@ -86,7 +86,7 @@ pub(crate) struct AllPrelude {
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) extension: ExtPrelude,
-    pub(crate) annotation: AnnotationPrelude,
+    pub(crate) annotate: AnnotatePrelude,
 }
 
 impl Prelude for AllPrelude {
@@ -114,7 +114,7 @@ impl Prelude for AllPrelude {
         self.list.put(m);
         self.map.put(m);
         self.extension.put(m);
-        self.annotation.put(m);
+        self.annotate.put(m);
     }
 }
 
@@ -335,4 +335,4 @@ mod map;
 
 mod extension;
 
-mod annotation;
+mod annotate;
