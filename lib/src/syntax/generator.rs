@@ -252,7 +252,10 @@ where
 {
     let b = matches!(
         repr.try_into()?,
-        GenerateRepr::Call(_) | GenerateRepr::Ask(_) | GenerateRepr::Pair(_)
+        GenerateRepr::Call(_)
+            | GenerateRepr::Ask(_)
+            | GenerateRepr::Pair(_)
+            | GenerateRepr::Annotate(_)
     );
     Ok(b)
 }
@@ -264,7 +267,10 @@ where
 {
     let b = matches!(
         repr.try_into()?,
-        GenerateRepr::Call(_) | GenerateRepr::Ask(_) | GenerateRepr::Pair(_)
+        GenerateRepr::Call(_)
+            | GenerateRepr::Ask(_)
+            | GenerateRepr::Pair(_)
+            | GenerateRepr::Annotate(_)
     );
     Ok(b)
 }
