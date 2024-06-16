@@ -20,6 +20,8 @@ use crate::{
         map::MapVal,
         Val,
     },
+    Annotate,
+    AnnotateVal,
     Ask,
     AskVal,
     Call,
@@ -105,6 +107,14 @@ impl ByVal<Val> for Eval {
         let ask = Ask::from(ask);
         let func = self.transform(ctx.reborrow(), ask.func);
         self.eval_output_then_solve(ctx, func, ask.output)
+    }
+
+    fn transform_annotate<'a, Ctx>(&self, ctx: Ctx, annotate: AnnotateVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        let annotate = Annotate::from(annotate);
+        self.transform(ctx, annotate.value)
     }
 }
 

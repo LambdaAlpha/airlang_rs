@@ -19,6 +19,7 @@ use crate::{
         map::MapVal,
         Val,
     },
+    AnnotateVal,
     AskVal,
     CallVal,
     PairVal,
@@ -98,5 +99,12 @@ impl ByVal<Val> for Form {
         Ctx: CtxMeta<'a>,
     {
         DefaultByVal::transform_ask(self, ctx, ask)
+    }
+
+    fn transform_annotate<'a, Ctx>(&self, ctx: Ctx, annotate: AnnotateVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        DefaultByVal::transform_annotate(self, ctx, annotate)
     }
 }

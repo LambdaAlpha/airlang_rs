@@ -1,3 +1,43 @@
-a '@' 1
+1 '@' 2
+-----
+1 @ 2
+=====
+; [a = 1, a '@' not ! true]
+-----
+1 @ false
+=====
+; [a = id ! 1 @ 2, annotate.apply &a]
+-----
+2
+=====
+; [a = id ! 1 @ 2, annotate.note .a]
 -----
 1
+=====
+; [a = id ! 1 @ 2, annotate.value .a]
+-----
+2
+=====
+annotate.note ! id ! 1 @ 2
+-----
+1
+=====
+annotate.value ! id ! 1 @ 2
+-----
+2
+=====
+; [a = id ! 1 @ 2, .a annotate.set_note 3]
+-----
+1
+=====
+; [a = id ! 1 @ 2, .a annotate.set_note 3, &a]
+-----
+3 @ 2
+=====
+; [a = id ! 1 @ 2, .a annotate.set_value 3]
+-----
+2
+=====
+; [a = id ! 1 @ 2, .a annotate.set_value 3, &a]
+-----
+1 @ 3

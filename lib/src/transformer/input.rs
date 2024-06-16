@@ -6,6 +6,7 @@ use crate::{
         list::ListVal,
         map::MapVal,
     },
+    AnnotateVal,
     AskVal,
     CallVal,
     PairVal,
@@ -38,6 +39,10 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
         Ctx: CtxMeta<'a>;
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_annotate<'a, Ctx>(&self, ctx: Ctx, annotate: AnnotateVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 }

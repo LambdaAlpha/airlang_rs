@@ -1,6 +1,6 @@
 use crate::{
     annotate::Annotate,
-    syntax::reserve::Repr,
+    syntax::Repr,
 };
 
 pub type AnnotateRepr = Annotate<Repr, Repr>;

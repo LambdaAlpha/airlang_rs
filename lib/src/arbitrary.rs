@@ -55,6 +55,7 @@ use crate::{
     transform::Transform,
     unit::Unit,
     val::func::FuncVal,
+    Annotate,
     Answer,
     Ask,
     Call,
@@ -79,6 +80,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // pair
         1,      // call
         1,      // ask
+        1,      // annotate
         1,      // list
         1,      // map
         1,      // ctx
@@ -102,13 +104,14 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Call(any_call(rng, new_depth).into()),
         9 => Val::Ask(any_ask(rng, new_depth).into()),
-        10 => Val::List(any_list(rng, new_depth).into()),
-        11 => Val::Map(any_map(rng, new_depth).into()),
-        12 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        13 => Val::Func(any_func(rng, new_depth)),
-        14 => Val::Assert(any_assert(rng, new_depth).into()),
-        15 => Val::Answer(any_answer(rng, new_depth).into()),
-        16 => Val::Ext(any_extension(rng, new_depth)),
+        10 => Val::Annotate(any_annotate(rng, new_depth).into()),
+        11 => Val::List(any_list(rng, new_depth).into()),
+        12 => Val::Map(any_map(rng, new_depth).into()),
+        13 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        14 => Val::Func(any_func(rng, new_depth)),
+        15 => Val::Assert(any_assert(rng, new_depth).into()),
+        16 => Val::Answer(any_answer(rng, new_depth).into()),
+        17 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -180,6 +183,10 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
 
 pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
     Ask::new(any_val(rng, depth), any_val(rng, depth))
+}
+
+pub(crate) fn any_annotate(rng: &mut SmallRng, depth: usize) -> Annotate<Val, Val> {
+    Annotate::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {

@@ -16,6 +16,7 @@ use crate::{
     syntax::{
         parse,
         repr::{
+            annotate::AnnotateRepr,
             ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
@@ -90,6 +91,10 @@ fn call(func: Repr, input: Repr) -> Repr {
 
 fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
+}
+
+fn annotate(note: Repr, value: Repr) -> Repr {
+    Repr::Annotate(Box::new(AnnotateRepr::new(note, value)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {

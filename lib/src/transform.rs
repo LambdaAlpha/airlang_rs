@@ -9,6 +9,7 @@ use crate::{
         input::ByVal,
         Transformer,
     },
+    AnnotateVal,
     AskVal,
     CallVal,
     ListVal,
@@ -121,6 +122,17 @@ impl ByVal<Val> for Transform {
             Transform::Id => Id.transform_ask(ctx, ask),
             Transform::Form => Form.transform_ask(ctx, ask),
             Transform::Eval => Eval.transform_ask(ctx, ask),
+        }
+    }
+
+    fn transform_annotate<'a, Ctx>(&self, ctx: Ctx, annotate: AnnotateVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            Transform::Id => Id.transform_annotate(ctx, annotate),
+            Transform::Form => Form.transform_annotate(ctx, annotate),
+            Transform::Eval => Eval.transform_annotate(ctx, annotate),
         }
     }
 }

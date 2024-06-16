@@ -5,6 +5,7 @@ use rand::{
 
 use crate::{
     arbitrary::{
+        any_annotate,
         any_answer,
         any_ask,
         any_assert,
@@ -41,6 +42,7 @@ use crate::{
     transform::SYMBOL_READ_PREFIX,
     val::{
         func::FuncVal,
+        ANNOTATE,
         ANSWER,
         ASK,
         ASSERT,
@@ -115,6 +117,7 @@ fn fn_any(input: Val) -> Val {
             PAIR => Val::Pair(any_pair(rng, DEPTH).into()),
             CALL => Val::Call(any_call(rng, DEPTH).into()),
             ASK => Val::Ask(any_ask(rng, DEPTH).into()),
+            ANNOTATE => Val::Annotate(any_annotate(rng, DEPTH).into()),
             LIST => Val::List(any_list(rng, DEPTH).into()),
             MAP => Val::Map(any_map(rng, DEPTH).into()),
             CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
@@ -147,6 +150,7 @@ fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
             Val::Pair(_) => PAIR,
             Val::Call(_) => CALL,
             Val::Ask(_) => ASK,
+            Val::Annotate(_) => ANNOTATE,
             Val::List(_) => LIST,
             Val::Map(_) => MAP,
             Val::Func(_) => FUNC,

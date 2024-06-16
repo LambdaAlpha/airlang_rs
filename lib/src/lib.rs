@@ -11,6 +11,7 @@ pub use ctx::{
 };
 
 pub use self::{
+    annotate::Annotate,
     ask::Ask,
     bool::Bool,
     bytes::Bytes,
@@ -51,6 +52,7 @@ pub use self::{
     transform::Transform,
     unit::Unit,
     val::{
+        annotate::AnnotateVal,
         answer::AnswerVal,
         ask::AskVal,
         assert::AssertVal,

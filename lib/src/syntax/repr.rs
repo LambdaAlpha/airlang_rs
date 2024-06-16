@@ -8,19 +8,13 @@ use std::{
 };
 
 use crate::{
-    annotate::Annotate,
-    bool::Bool,
-    bytes::Bytes,
-    int::Int,
-    number::Number,
-    string::Str,
-    symbol::Symbol,
     syntax::{
         generate_pretty,
         generator::GenerateRepr,
         parse,
         parser::ParseRepr,
         repr::{
+            annotate::AnnotateRepr,
             ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
@@ -29,7 +23,13 @@ use crate::{
         },
         ParseError,
     },
-    unit::Unit,
+    Bool,
+    Bytes,
+    Int,
+    Number,
+    Str,
+    Symbol,
+    Unit,
 };
 
 #[derive(PartialEq, Eq, Clone, Hash)]
@@ -46,6 +46,7 @@ pub enum Repr {
     Bytes(Bytes),
     Call(Box<CallRepr>),
     Ask(Box<AskRepr>),
+    Annotate(Box<AnnotateRepr>),
 }
 
 impl Repr {
@@ -114,9 +115,9 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<Annotate<Repr, Repr>> for Repr {
-    fn from(a: Annotate<Repr, Repr>) -> Self {
-        a.value
+impl From<AnnotateRepr> for Repr {
+    fn from(a: AnnotateRepr) -> Self {
+        Repr::Annotate(Box::new(a))
     }
 }
 
@@ -204,16 +205,17 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
         let r = match self {
             Repr::Unit(u) => GenerateRepr::Unit(u),
             Repr::Bool(b) => GenerateRepr::Bool(b),
+            Repr::Symbol(s) => GenerateRepr::Symbol(s),
             Repr::Int(i) => GenerateRepr::Int(i),
             Repr::Number(n) => GenerateRepr::Number(n),
-            Repr::Bytes(b) => GenerateRepr::Bytes(b),
-            Repr::Symbol(s) => GenerateRepr::Symbol(s),
             Repr::String(s) => GenerateRepr::String(s),
             Repr::Pair(p) => GenerateRepr::Pair(p),
-            Repr::Call(c) => GenerateRepr::Call(c),
-            Repr::Ask(a) => GenerateRepr::Ask(a),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),
+            Repr::Bytes(b) => GenerateRepr::Bytes(b),
+            Repr::Call(c) => GenerateRepr::Call(c),
+            Repr::Ask(a) => GenerateRepr::Ask(a),
+            Repr::Annotate(a) => GenerateRepr::Annotate(a),
         };
         Ok(r)
     }
@@ -228,3 +230,5 @@ pub(crate) mod map;
 pub(crate) mod call;
 
 pub(crate) mod ask;
+
+pub(crate) mod annotate;

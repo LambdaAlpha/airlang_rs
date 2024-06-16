@@ -54,23 +54,11 @@ pub fn parse(src: &str) -> Result<Repr, ParseError> {
     parser::parse(src)
 }
 
-pub fn parse_reserve(src: &str) -> Result<reserve::Repr, ParseError> {
-    parser::parse(src)
-}
-
 pub fn generate_pretty(src: &Repr) -> String {
     generator::generate_pretty(src).unwrap()
 }
 
 pub fn generate_compact(src: &Repr) -> String {
-    generator::generate_compact(src).unwrap()
-}
-
-pub fn generate_reserve_pretty(src: &reserve::Repr) -> String {
-    generator::generate_pretty(src).unwrap()
-}
-
-pub fn generate_reserve_compact(src: &reserve::Repr) -> String {
     generator::generate_compact(src).unwrap()
 }
 
@@ -103,8 +91,6 @@ impl Display for ParseError {
 }
 
 impl Error for ParseError {}
-
-pub mod reserve;
 
 pub(crate) mod repr;
 

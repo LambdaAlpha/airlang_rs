@@ -38,6 +38,10 @@ call
 -----
 ask
 =====
+; [a = any ! .annotate, type_of .a]
+-----
+annotate
+=====
 ; [c = any ! .context, type_of .c]
 -----
 context
@@ -101,6 +105,10 @@ call
 ; [a = id ! f ? a, type_of .a]
 -----
 ask
+=====
+; [a = id ! n @ v, type_of .a]
+-----
+annotate
 =====
 ; [a = [], type_of .a]
 -----
@@ -167,6 +175,10 @@ true
 true
 =====
 (1 ? 2) == (1 ? 2)
+-----
+true
+=====
+; [a = id ! n @ v, b = id ! n @ v, (.a == .b) and .a != .]
 -----
 true
 =====
