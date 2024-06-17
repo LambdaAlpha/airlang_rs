@@ -54,6 +54,8 @@ use crate::{
         map::MapVal,
         Val,
     },
+    Annotate,
+    AnnotateVal,
     AskVal,
     ListVal,
     Map,
@@ -200,6 +202,7 @@ fn assign_destruct(
             }
         }
         Val::Ask(name) => assign_ask(ctx, name, val, options),
+        Val::Annotate(name) => assign_annotate(ctx, name, val, options),
         Val::List(name) => assign_list(ctx, name, val, options),
         Val::Map(name) => assign_map(ctx, name, val, options),
         _ => Val::default(),
@@ -252,6 +255,22 @@ fn assign_ask(mut ctx: CtxForMutableFn, name: AskVal, val: Val, options: AssignO
     let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
     let output = assign_allow_options(ctx, name.output, val.output, options);
     Val::Ask(Ask::new(func, output).into())
+}
+
+fn assign_annotate(
+    mut ctx: CtxForMutableFn,
+    name: AnnotateVal,
+    val: Val,
+    options: AssignOptions,
+) -> Val {
+    let Val::Annotate(val) = val else {
+        return Val::default();
+    };
+    let name = Annotate::from(name);
+    let val = Annotate::from(val);
+    let note = assign_allow_options(ctx.reborrow(), name.note, val.note, options);
+    let value = assign_allow_options(ctx, name.value, val.value, options);
+    Val::Annotate(Annotate::new(note, value).into())
 }
 
 fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
