@@ -7,6 +7,7 @@ use airlang::{
     Ctx,
     Invariant,
     MutableCtx,
+    Str,
     Symbol,
 };
 use airlang_ext::init_ctx;
@@ -50,12 +51,8 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
-    let src = concat!(
-        "build.import \"",
-        env!("CARGO_MANIFEST_DIR"),
-        "/main/main.air\""
-    );
-    let src = parse(src)?;
+    let src = generate_import("/main/main.air");
+    let src = parse(&src)?;
     let mut ctx = initial_ctx();
     let mut mut_ctx = MutableCtx::new(&mut ctx);
     init_ctx(mut_ctx.reborrow());
@@ -63,4 +60,12 @@ fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
     mut_ctx.put(main_name, Invariant::Const, main)?;
     Ok(ctx)
+}
+
+fn generate_import(path: &str) -> String {
+    let mut src = Str::from("build.import \"");
+    src.push_str_escaped(env!("CARGO_MANIFEST_DIR"));
+    src.push_str(path);
+    src.push('"');
+    src.into()
 }

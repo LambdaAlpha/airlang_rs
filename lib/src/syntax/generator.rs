@@ -197,6 +197,11 @@ fn generate_bytes(bytes: &Bytes, s: &mut String) {
 
 fn generate_string(str: &str, s: &mut String) {
     s.push(STRING_QUOTE);
+    escape_string(str, s);
+    s.push(STRING_QUOTE);
+}
+
+pub(crate) fn escape_string(str: &str, s: &mut String) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\".to_owned(),
@@ -208,7 +213,6 @@ fn generate_string(str: &str, s: &mut String) {
         };
         s.push_str(&escaped);
     }
-    s.push(STRING_QUOTE);
 }
 
 fn generate_symbol(str: &str, s: &mut String) {

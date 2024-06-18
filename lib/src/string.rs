@@ -11,12 +11,18 @@ use std::{
     },
 };
 
+use crate::syntax::generator::escape_string;
+
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Str(String);
 
 impl Str {
     pub fn push_str(&mut self, s: &str) {
         self.0.push_str(s);
+    }
+
+    pub fn push_str_escaped(&mut self, s: &str) {
+        escape_string(s, self);
     }
 }
 
