@@ -7,7 +7,6 @@ use std::{
         Write,
     },
     mem::take,
-    os::fd::AsRawFd,
 };
 
 use airlang::{
@@ -65,7 +64,7 @@ use crossterm::{
 
 use crate::init_ctx;
 
-pub(crate) struct Repl<W: Write + AsRawFd> {
+pub(crate) struct Repl<W: Write + IsTty> {
     ctx: Ctx,
     terminal: Terminal<W>,
     is_raw_mode_enabled: bool,
@@ -86,7 +85,7 @@ struct History {
     last_line: String,
 }
 
-struct Terminal<W: Write + AsRawFd>(W);
+struct Terminal<W: Write + IsTty>(W);
 
 enum CtrlFlow {
     None,
@@ -94,7 +93,7 @@ enum CtrlFlow {
     Break,
 }
 
-impl<W: Write + AsRawFd> Repl<W> {
+impl<W: Write + IsTty> Repl<W> {
     pub(crate) fn new(out: W) -> Self {
         let mut ctx = initial_ctx();
         init_ctx(MutableCtx::new(&mut ctx));
@@ -527,7 +526,7 @@ impl<W: Write + AsRawFd> Repl<W> {
     }
 }
 
-impl<W: Write + AsRawFd> Drop for Repl<W> {
+impl<W: Write + IsTty> Drop for Repl<W> {
     fn drop(&mut self) {
         self.cleanup();
     }
@@ -536,7 +535,7 @@ impl<W: Write + AsRawFd> Drop for Repl<W> {
 const DEFAULT_PROMPT: &str = "❯ ";
 const MULTILINE_PROMPT: &str = "┃ ";
 
-impl<W: Write + AsRawFd> Terminal<W> {
+impl<W: Write + IsTty> Terminal<W> {
     fn update_prompt(&mut self, prompt: &str) -> Result<()> {
         self.0.queue(SavePosition)?;
         self.0.queue(MoveToColumn(0))?;
