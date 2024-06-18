@@ -35,6 +35,7 @@ use crossterm::{
         Event,
         KeyCode,
         KeyEvent,
+        KeyEventKind,
         KeyModifiers,
     },
     style::{
@@ -199,6 +200,9 @@ impl<W: Write + IsTty> Repl<W> {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> Result<CtrlFlow> {
+        if key.kind != KeyEventKind::Press {
+            return Ok(CtrlFlow::None);
+        }
         match key.code {
             KeyCode::Enter => {
                 return self.handle_enter();
