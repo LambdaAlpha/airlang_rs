@@ -28,21 +28,21 @@ use crate::{
     unit::Unit,
 };
 
-mod booleans;
+mod boolean;
 mod bytes;
-mod calls;
-mod comments;
-mod numbers;
-mod infixes;
-mod ints;
-mod lists;
-mod maps;
-mod pairs;
-mod asks;
-mod strings;
-mod symbols;
-mod units;
-mod wraps;
+mod call;
+mod comment;
+mod number;
+mod infix;
+mod int;
+mod list;
+mod map;
+mod pair;
+mod ask;
+mod string;
+mod symbol;
+mod unit;
+mod wrap;
 
 fn unit() -> Repr {
     Repr::Unit(Unit)
@@ -205,59 +205,55 @@ fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_units() -> Result<(), Box<dyn Error>> {
+fn test_parse_unit() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/units.air"),
-        "test/units.air",
-        units::expected,
+        include_str!("test/unit.air"),
+        "test/unit.air",
+        unit::expected,
     )
 }
 
 #[test]
-fn test_generate_units() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/units.air"), "test/units.air")
+fn test_generate_unit() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/unit.air"), "test/unit.air")
 }
 
 #[test]
-fn test_parse_booleans() -> Result<(), Box<dyn Error>> {
+fn test_parse_boolean() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/booleans.air"),
-        "test/booleans.air",
-        booleans::expected,
+        include_str!("test/boolean.air"),
+        "test/boolean.air",
+        boolean::expected,
     )
 }
 
 #[test]
-fn test_generate_booleans() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/booleans.air"), "test/booleans.air")
+fn test_generate_boolean() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/boolean.air"), "test/boolean.air")
 }
 
 #[test]
-fn test_parse_ints() -> Result<(), Box<dyn Error>> {
+fn test_parse_int() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/int.air"), "test/int.air", int::expected)
+}
+
+#[test]
+fn test_generate_int() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/int.air"), "test/int.air")
+}
+
+#[test]
+fn test_parse_number() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/ints.air"),
-        "test/ints.air",
-        ints::expected,
+        include_str!("test/number.air"),
+        "test/number.air",
+        number::expected,
     )
 }
 
 #[test]
-fn test_generate_ints() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/ints.air"), "test/ints.air")
-}
-
-#[test]
-fn test_parse_numbers() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/numbers.air"),
-        "test/numbers.air",
-        numbers::expected,
-    )
-}
-
-#[test]
-fn test_generate_numbers() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/numbers.air"), "test/numbers.air")
+fn test_generate_number() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/number.air"), "test/number.air")
 }
 
 #[test]
@@ -275,150 +271,142 @@ fn test_generate_bytes() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_symbols() -> Result<(), Box<dyn Error>> {
+fn test_parse_symbol() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/symbols.air"),
-        "test/symbols.air",
-        symbols::expected,
+        include_str!("test/symbol.air"),
+        "test/symbol.air",
+        symbol::expected,
     )
 }
 
 #[test]
-fn test_generate_symbols() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/symbols.air"), "test/symbols.air")
+fn test_generate_symbol() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/symbol.air"), "test/symbol.air")
 }
 
 #[test]
-fn test_parse_strings() -> Result<(), Box<dyn Error>> {
+fn test_parse_string() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/strings.air"),
-        "test/strings.air",
-        strings::expected,
+        include_str!("test/string.air"),
+        "test/string.air",
+        string::expected,
     )
 }
 
 #[test]
-fn test_generate_strings() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/strings.air"), "test/strings.air")
+fn test_generate_string() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/string.air"), "test/string.air")
 }
 #[test]
-fn test_parse_pairs() -> Result<(), Box<dyn Error>> {
+fn test_parse_pair() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/pairs.air"),
-        "test/pairs.air",
-        pairs::expected,
+        include_str!("test/pair.air"),
+        "test/pair.air",
+        pair::expected,
     )
 }
 
 #[test]
-fn test_generate_pairs() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/pairs.air"), "test/pairs.air")
+fn test_generate_pair() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/pair.air"), "test/pair.air")
 }
 
 #[test]
-fn test_parse_calls() -> Result<(), Box<dyn Error>> {
+fn test_parse_call() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/calls.air"),
-        "test/calls.air",
-        calls::expected,
+        include_str!("test/call.air"),
+        "test/call.air",
+        call::expected,
     )
 }
 
 #[test]
-fn test_generate_calls() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/calls.air"), "test/calls.air")
+fn test_generate_call() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/call.air"), "test/call.air")
 }
 
 #[test]
-fn test_parse_asks() -> Result<(), Box<dyn Error>> {
+fn test_parse_ask() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/ask.air"), "test/ask.air", ask::expected)
+}
+
+#[test]
+fn test_generate_ask() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/ask.air"), "test/ask.air")
+}
+
+#[test]
+fn test_parse_wrap() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/asks.air"),
-        "test/asks.air",
-        asks::expected,
+        include_str!("test/wrap.air"),
+        "test/wrap.air",
+        wrap::expected,
     )
 }
 
 #[test]
-fn test_generate_asks() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/asks.air"), "test/asks.air")
+fn test_generate_wrap() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/wrap.air"), "test/wrap.air")
 }
 
 #[test]
-fn test_parse_wraps() -> Result<(), Box<dyn Error>> {
+fn test_parse_list() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/wraps.air"),
-        "test/wraps.air",
-        wraps::expected,
+        include_str!("test/list.air"),
+        "test/list.air",
+        list::expected,
     )
 }
 
 #[test]
-fn test_generate_wraps() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/wraps.air"), "test/wraps.air")
+fn test_generate_list() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/list.air"), "test/list.air")
 }
 
 #[test]
-fn test_parse_lists() -> Result<(), Box<dyn Error>> {
+fn test_parse_map() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/map.air"), "test/map.air", map::expected)
+}
+
+#[test]
+fn test_generate_map() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/map.air"), "test/map.air")
+}
+
+#[test]
+fn test_parse_comment() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/lists.air"),
-        "test/lists.air",
-        lists::expected,
+        include_str!("test/comment.air"),
+        "test/comment.air",
+        comment::expected,
     )
 }
 
 #[test]
-fn test_generate_lists() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/lists.air"), "test/lists.air")
+fn test_generate_comment() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/comment.air"), "test/comment.air")
 }
 
 #[test]
-fn test_parse_maps() -> Result<(), Box<dyn Error>> {
+fn test_parse_infix() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/maps.air"),
-        "test/maps.air",
-        maps::expected,
+        include_str!("test/infix.air"),
+        "test/infix.air",
+        infix::expected,
     )
 }
 
 #[test]
-fn test_generate_maps() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/maps.air"), "test/maps.air")
+fn test_generate_infix() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/infix.air"), "test/infix.air")
 }
 
 #[test]
-fn test_parse_comments() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/comments.air"),
-        "test/comments.air",
-        comments::expected,
-    )
+fn test_parse_illegal_example() -> Result<(), Box<dyn Error>> {
+    test_parse_illegal(include_str!("test/illegal.air"), "test/illegal.air")
 }
 
 #[test]
-fn test_generate_comments() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/comments.air"), "test/comments.air")
-}
-
-#[test]
-fn test_parse_infixes() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/infixes.air"),
-        "test/infixes.air",
-        infixes::expected,
-    )
-}
-
-#[test]
-fn test_generate_infixes() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/infixes.air"), "test/infixes.air")
-}
-
-#[test]
-fn test_parse_illegal_examples() -> Result<(), Box<dyn Error>> {
-    test_parse_illegal(include_str!("test/illegals.air"), "test/illegals.air")
-}
-
-#[test]
-fn test_parse_bad_examples() -> Result<(), Box<dyn Error>> {
+fn test_parse_bad_example() -> Result<(), Box<dyn Error>> {
     test_parse_bad(include_str!("test/bad.air"), "test/bad.air")
 }
