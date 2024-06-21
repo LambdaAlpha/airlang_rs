@@ -7,9 +7,9 @@ use std::{
 };
 
 use crate::{
-    annotate::Annotate,
     bool::Bool,
     bytes::Bytes,
+    comment::Comment,
     extension::ValExt,
     number::Number,
     string::Str,
@@ -21,12 +21,12 @@ use crate::{
     },
     unit::Unit,
     val::{
-        annotate::AnnotateVal,
         answer::AnswerVal,
         ask::AskVal,
         assert::AssertVal,
         bytes::BytesVal,
         call::CallVal,
+        comment::CommentVal,
         ctx::CtxVal,
         func::FuncVal,
         int::IntVal,
@@ -62,7 +62,7 @@ pub enum Val {
     Call(CallVal),
     Ask(AskVal),
 
-    Annotate(AnnotateVal),
+    Comment(CommentVal),
 
     Ctx(CtxVal),
     Func(FuncVal),
@@ -86,7 +86,7 @@ pub(crate) const MAP: &str = "map";
 pub(crate) const BYTES: &str = "bytes";
 pub(crate) const CALL: &str = "call";
 pub(crate) const ASK: &str = "ask";
-pub(crate) const ANNOTATE: &str = "annotate";
+pub(crate) const COMMENT: &str = "comment";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 pub(crate) const ASSERT: &str = "assert";
@@ -195,15 +195,15 @@ impl From<MapVal> for Val {
     }
 }
 
-impl From<Annotate<Val, Val>> for Val {
-    fn from(value: Annotate<Val, Val>) -> Self {
-        Val::Annotate(AnnotateVal::from(value))
+impl From<Comment<Val, Val>> for Val {
+    fn from(value: Comment<Val, Val>) -> Self {
+        Val::Comment(CommentVal::from(value))
     }
 }
 
-impl From<AnnotateVal> for Val {
-    fn from(value: AnnotateVal) -> Self {
-        Val::Annotate(value)
+impl From<CommentVal> for Val {
+    fn from(value: CommentVal) -> Self {
+        Val::Comment(value)
     }
 }
 
@@ -288,7 +288,7 @@ impl From<&Repr> for Val {
             Repr::Bytes(b) => Val::Bytes(BytesVal::from(b.clone())),
             Repr::Call(c) => Val::Call(CallVal::from(&**c)),
             Repr::Ask(a) => Val::Ask(AskVal::from(&**a)),
-            Repr::Annotate(a) => Val::Annotate(AnnotateVal::from(&**a)),
+            Repr::Comment(a) => Val::Comment(CommentVal::from(&**a)),
         }
     }
 }
@@ -308,7 +308,7 @@ impl From<Repr> for Val {
             Repr::Bytes(b) => Val::Bytes(BytesVal::from(b)),
             Repr::Call(c) => Val::Call(CallVal::from(*c)),
             Repr::Ask(a) => Val::Ask(AskVal::from(*a)),
-            Repr::Annotate(a) => Val::Annotate(AnnotateVal::from(*a)),
+            Repr::Comment(a) => Val::Comment(CommentVal::from(*a)),
         }
     }
 }
@@ -329,7 +329,7 @@ impl TryInto<Repr> for &Val {
             Val::Bytes(b) => Ok(Repr::Bytes(b.into())),
             Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
             Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
-            Val::Annotate(a) => Ok(Repr::Annotate(Box::new(a.try_into()?))),
+            Val::Comment(a) => Ok(Repr::Comment(Box::new(a.try_into()?))),
             _ => Err(ReprError {}),
         }
     }
@@ -351,7 +351,7 @@ impl TryInto<Repr> for Val {
             Val::Bytes(b) => Ok(Repr::Bytes(b.into())),
             Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
             Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
-            Val::Annotate(a) => Ok(Repr::Annotate(Box::new(a.try_into()?))),
+            Val::Comment(a) => Ok(Repr::Comment(Box::new(a.try_into()?))),
             _ => Err(ReprError {}),
         }
     }
@@ -386,7 +386,7 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             Val::Bytes(b) => GenerateRepr::Bytes(b),
             Val::Call(c) => GenerateRepr::Call(c),
             Val::Ask(a) => GenerateRepr::Ask(a),
-            Val::Annotate(a) => GenerateRepr::Annotate(a),
+            Val::Comment(a) => GenerateRepr::Comment(a),
             _ => return Err(ReprError {}),
         };
         Ok(r)
@@ -408,7 +408,7 @@ impl Debug for Val {
             Val::Bytes(b) => <_ as Debug>::fmt(b, f),
             Val::Call(c) => <_ as Debug>::fmt(c, f),
             Val::Ask(a) => <_ as Debug>::fmt(a, f),
-            Val::Annotate(a) => <_ as Debug>::fmt(a, f),
+            Val::Comment(a) => <_ as Debug>::fmt(a, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
             Val::Func(func) => <_ as Debug>::fmt(func, f),
             Val::Assert(a) => <_ as Debug>::fmt(a, f),
@@ -436,7 +436,7 @@ pub(crate) mod call;
 
 pub(crate) mod ask;
 
-pub(crate) mod annotate;
+pub(crate) mod comment;
 
 pub(crate) mod ctx;
 

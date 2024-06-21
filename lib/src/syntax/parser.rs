@@ -61,11 +61,11 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
-    annotate::Annotate,
     ask::Ask,
     bool::Bool,
     bytes::Bytes,
     call::Call,
+    comment::Comment,
     int::Int,
     list::List,
     map::Map,
@@ -75,10 +75,10 @@ use crate::{
     symbol::Symbol,
     syntax::{
         is_delimiter,
-        ANNOTATE_INFIX,
         ASK_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
+        COMMENT_INFIX,
         FALSE,
         LIST_LEFT,
         LIST_RIGHT,
@@ -113,7 +113,7 @@ pub(crate) trait ParseRepr:
     + Eq
     + Hash
     + From<Map<Self, Self>>
-    + From<Annotate<Self, Self>>
+    + From<Comment<Self, Self>>
     + Clone
 {
     fn try_into_pair(self) -> Result<(Self, Self), Self>;
@@ -379,9 +379,9 @@ fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
                 let ask = Ask::new(input.clone(), input);
                 From::from(ask)
             }
-            ANNOTATE_INFIX => {
-                let annotate = Annotate::new(input.clone(), input);
-                From::from(annotate)
+            COMMENT_INFIX => {
+                let comment = Comment::new(input.clone(), input);
+                From::from(comment)
             }
             _ => {
                 let func = From::from(s);
@@ -433,9 +433,9 @@ fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
                 let ask = Ask::new(left, right);
                 From::from(ask)
             }
-            ANNOTATE_INFIX => {
-                let annotate = Annotate::new(left, right);
-                From::from(annotate)
+            COMMENT_INFIX => {
+                let comment = Comment::new(left, right);
+                From::from(comment)
             }
             _ => {
                 let middle = From::from(s);

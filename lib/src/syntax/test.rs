@@ -16,9 +16,9 @@ use crate::{
     syntax::{
         parse,
         repr::{
-            annotate::AnnotateRepr,
             ask::AskRepr,
             call::CallRepr,
+            comment::CommentRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
@@ -31,7 +31,7 @@ use crate::{
 mod booleans;
 mod bytes;
 mod calls;
-mod annotates;
+mod comments;
 mod numbers;
 mod infixes;
 mod ints;
@@ -93,8 +93,8 @@ fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
-fn annotate(note: Repr, value: Repr) -> Repr {
-    Repr::Annotate(Box::new(AnnotateRepr::new(note, value)))
+fn comment(note: Repr, value: Repr) -> Repr {
+    Repr::Comment(Box::new(CommentRepr::new(note, value)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -386,17 +386,17 @@ fn test_generate_maps() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_annotates() -> Result<(), Box<dyn Error>> {
+fn test_parse_comments() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/annotates.air"),
-        "test/annotates.air",
-        annotates::expected,
+        include_str!("test/comments.air"),
+        "test/comments.air",
+        comments::expected,
     )
 }
 
 #[test]
-fn test_generate_annotates() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/annotates.air"), "test/annotates.air")
+fn test_generate_comments() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/comments.air"), "test/comments.air")
 }
 
 #[test]

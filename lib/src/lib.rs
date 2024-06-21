@@ -11,11 +11,11 @@ pub use ctx::{
 };
 
 pub use self::{
-    annotate::Annotate,
     ask::Ask,
     bool::Bool,
     bytes::Bytes,
     call::Call,
+    comment::Comment,
     ctx::{
         Ctx,
         CtxError,
@@ -52,12 +52,12 @@ pub use self::{
     transform::Transform,
     unit::Unit,
     val::{
-        annotate::AnnotateVal,
         answer::AnswerVal,
         ask::AskVal,
         assert::AssertVal,
         bytes::BytesVal,
         call::CallVal,
+        comment::CommentVal,
         ctx::CtxVal,
         func::FuncVal,
         int::IntVal,
@@ -147,7 +147,7 @@ pub(crate) mod call;
 
 pub(crate) mod ask;
 
-pub(crate) mod annotate;
+pub(crate) mod comment;
 
 pub(crate) mod types;
 

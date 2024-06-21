@@ -54,9 +54,9 @@ use crate::{
         map::MapVal,
         Val,
     },
-    Annotate,
-    AnnotateVal,
     AskVal,
+    Comment,
+    CommentVal,
     ListVal,
     Map,
     PairVal,
@@ -202,7 +202,7 @@ fn assign_destruct(
             }
         }
         Val::Ask(name) => assign_ask(ctx, name, val, options),
-        Val::Annotate(name) => assign_annotate(ctx, name, val, options),
+        Val::Comment(name) => assign_comment(ctx, name, val, options),
         Val::List(name) => assign_list(ctx, name, val, options),
         Val::Map(name) => assign_map(ctx, name, val, options),
         _ => Val::default(),
@@ -257,20 +257,20 @@ fn assign_ask(mut ctx: CtxForMutableFn, name: AskVal, val: Val, options: AssignO
     Val::Ask(Ask::new(func, output).into())
 }
 
-fn assign_annotate(
+fn assign_comment(
     mut ctx: CtxForMutableFn,
-    name: AnnotateVal,
+    name: CommentVal,
     val: Val,
     options: AssignOptions,
 ) -> Val {
-    let Val::Annotate(val) = val else {
+    let Val::Comment(val) = val else {
         return Val::default();
     };
-    let name = Annotate::from(name);
-    let val = Annotate::from(val);
+    let name = Comment::from(name);
+    let val = Comment::from(val);
     let note = assign_allow_options(ctx.reborrow(), name.note, val.note, options);
     let value = assign_allow_options(ctx, name.value, val.value, options);
-    Val::Annotate(Annotate::new(note, value).into())
+    Val::Comment(Comment::new(note, value).into())
 }
 
 fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {

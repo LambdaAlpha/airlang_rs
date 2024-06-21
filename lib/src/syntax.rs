@@ -40,7 +40,7 @@ pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
 pub(crate) const SHIFT_PREFIX: &str = "^";
-pub(crate) const ANNOTATE_INFIX: &str = "@";
+pub(crate) const COMMENT_INFIX: &str = "@";
 pub(crate) const PAIR_INFIX: &str = ":";
 pub(crate) const CALL_INFIX: &str = "!";
 pub(crate) const ASK_INFIX: &str = "?";
@@ -80,7 +80,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 pub(crate) fn maybe_keyword(s: &str) -> bool {
     matches!(
         s,
-        UNIT | TRUE | FALSE | ANNOTATE_INFIX | PAIR_INFIX | CALL_INFIX | ASK_INFIX
+        UNIT | TRUE | FALSE | COMMENT_INFIX | PAIR_INFIX | CALL_INFIX | ASK_INFIX
     )
 }
 

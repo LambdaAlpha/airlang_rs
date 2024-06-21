@@ -6,9 +6,9 @@ use crate::{
         list::ListVal,
         map::MapVal,
     },
-    AnnotateVal,
     AskVal,
     CallVal,
+    CommentVal,
     PairVal,
     Val,
 };
@@ -42,7 +42,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where
         Ctx: CtxMeta<'a>;
 
-    fn transform_annotate<'a, Ctx>(&self, ctx: Ctx, annotate: AnnotateVal) -> Output
+    fn transform_comment<'a, Ctx>(&self, ctx: Ctx, comment: CommentVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 }

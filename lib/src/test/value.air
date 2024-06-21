@@ -38,9 +38,9 @@ call
 -----
 ask
 =====
-; [a = any ! .annotate, type_of .a]
+; [c = any ! .comment, type_of .c]
 -----
-annotate
+comment
 =====
 ; [c = any ! .context, type_of .c]
 -----
@@ -106,9 +106,9 @@ call
 -----
 ask
 =====
-; [a = id ! n @ v, type_of .a]
+; [c = id ! n @ v, type_of .c]
 -----
-annotate
+comment
 =====
 ; [a = [], type_of .a]
 -----

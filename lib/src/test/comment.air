@@ -1,0 +1,43 @@
+1 '@' 2
+-----
+1 @ 2
+=====
+; [a = 1, a '@' not ! true]
+-----
+1 @ false
+=====
+; [c = id ! 1 @ 2, comment.apply &c]
+-----
+2
+=====
+; [c = id ! 1 @ 2, comment.note .c]
+-----
+1
+=====
+; [c = id ! 1 @ 2, comment.value .c]
+-----
+2
+=====
+comment.note ! id ! 1 @ 2
+-----
+1
+=====
+comment.value ! id ! 1 @ 2
+-----
+2
+=====
+; [c = id ! 1 @ 2, .c comment.set_note 3]
+-----
+1
+=====
+; [c = id ! 1 @ 2, .c comment.set_note 3, &c]
+-----
+3 @ 2
+=====
+; [c = id ! 1 @ 2, .c comment.set_value 3]
+-----
+2
+=====
+; [c = id ! 1 @ 2, .c comment.set_value 3, &c]
+-----
+1 @ 3

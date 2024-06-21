@@ -10,9 +10,9 @@ use crate::{
         map::MapVal,
         Val,
     },
-    AnnotateVal,
     AskVal,
     CallVal,
+    CommentVal,
     PairVal,
 };
 
@@ -78,10 +78,10 @@ impl ByVal<Val> for Id {
         Val::Ask(ask)
     }
 
-    fn transform_annotate<'a, Ctx>(&self, _ctx: Ctx, annotate: AnnotateVal) -> Val
+    fn transform_comment<'a, Ctx>(&self, _ctx: Ctx, comment: CommentVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        Val::Annotate(annotate)
+        Val::Comment(comment)
     }
 }

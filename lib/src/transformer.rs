@@ -7,12 +7,12 @@ use crate::{
         list::ListVal,
         map::MapVal,
     },
-    Annotate,
-    AnnotateVal,
     Ask,
     AskVal,
     Call,
     CallVal,
+    Comment,
+    CommentVal,
     List,
     Map,
     Pair,
@@ -41,7 +41,7 @@ impl DefaultByVal {
             Val::Map(m) => t.transform_map(ctx, m),
             Val::Call(c) => t.transform_call(ctx, c),
             Val::Ask(a) => t.transform_ask(ctx, a),
-            Val::Annotate(a) => t.transform_annotate(ctx, a),
+            Val::Comment(a) => t.transform_comment(ctx, a),
             v => t.transform_default(ctx, v),
         }
     }
@@ -112,16 +112,16 @@ impl DefaultByVal {
         Val::Ask(ask.into())
     }
 
-    pub(crate) fn transform_annotate<'a, Ctx, T>(t: &T, mut ctx: Ctx, annotate: AnnotateVal) -> Val
+    pub(crate) fn transform_comment<'a, Ctx, T>(t: &T, mut ctx: Ctx, comment: CommentVal) -> Val
     where
         Ctx: CtxMeta<'a>,
         T: Transformer<Val, Val>,
     {
-        let annotate = Annotate::from(annotate);
-        let note = t.transform(ctx.reborrow(), annotate.note);
-        let value = t.transform(ctx, annotate.value);
-        let annotate = Annotate::new(note, value);
-        Val::Annotate(annotate.into())
+        let comment = Comment::from(comment);
+        let note = t.transform(ctx.reborrow(), comment.note);
+        let value = t.transform(ctx, comment.value);
+        let comment = Comment::new(note, value);
+        Val::Comment(comment.into())
     }
 }
 

@@ -11,11 +11,11 @@ use std::{
 use num_traits::Signed;
 
 use crate::{
-    annotate::Annotate,
     ask::Ask,
     bool::Bool,
     bytes::Bytes,
     call::Call,
+    comment::Comment,
     int::Int,
     list::List,
     map::Map,
@@ -26,10 +26,10 @@ use crate::{
     syntax::{
         is_delimiter,
         maybe_keyword,
-        ANNOTATE_INFIX,
         ASK_INFIX,
         BYTES_PREFIX,
         CALL_INFIX,
+        COMMENT_INFIX,
         FALSE,
         LIST_LEFT,
         LIST_RIGHT,
@@ -120,7 +120,7 @@ where
     Bytes(&'a Bytes),
     Call(&'a Call<T, T>),
     Ask(&'a Ask<T, T>),
-    Annotate(&'a Annotate<T, T>),
+    Comment(&'a Comment<T, T>),
 }
 
 pub(crate) fn generate<'a, T>(
@@ -146,7 +146,7 @@ where
         GenerateRepr::Bytes(bytes) => generate_bytes(bytes, s),
         GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
         GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
-        GenerateRepr::Annotate(a) => generate_annotate(a, s, format, indent)?,
+        GenerateRepr::Comment(a) => generate_comment(a, s, format, indent)?,
     }
     Ok(())
 }
@@ -259,7 +259,7 @@ where
         GenerateRepr::Call(_)
             | GenerateRepr::Ask(_)
             | GenerateRepr::Pair(_)
-            | GenerateRepr::Annotate(_)
+            | GenerateRepr::Comment(_)
     );
     Ok(b)
 }
@@ -274,7 +274,7 @@ where
         GenerateRepr::Call(_)
             | GenerateRepr::Ask(_)
             | GenerateRepr::Pair(_)
-            | GenerateRepr::Annotate(_)
+            | GenerateRepr::Comment(_)
     );
     Ok(b)
 }
@@ -540,8 +540,8 @@ where
     Ok(())
 }
 
-fn generate_annotate<'a, T>(
-    annotate: &'a Annotate<T, T>,
+fn generate_comment<'a, T>(
+    comment: &'a Comment<T, T>,
     s: &mut String,
     format: &GenerateFormat,
     indent: usize,
@@ -551,12 +551,12 @@ where
     T: Eq + Hash,
 {
     generate_infix(
-        &annotate.note,
+        &comment.note,
         |s, _format, _indent| {
-            s.push_str(ANNOTATE_INFIX);
+            s.push_str(COMMENT_INFIX);
             Ok(())
         },
-        &annotate.value,
+        &comment.value,
         s,
         format,
         indent,
