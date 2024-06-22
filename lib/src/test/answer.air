@@ -1,52 +1,76 @@
-answer.is_unsolved .answer.unsolved
+answer.is_none .answer.none
 -----
 true
 =====
-answer.is_unsolvable .answer.unsolvable
------
-true
-=====
-answer.is_verified .answer.unsolvable
------
-.
-=====
-; [a = answer.unverified ! 1, answer.is_verified .a]
+answer.is_none .answer.never
 -----
 false
 =====
-; [a = answer.unverified ! 1, answer.input .a]
+answer.type_of .answer.none
 -----
-1
+none
 =====
-; [a = answer.unverified ! 1, answer.into_input &a]
+answer.represent answer.none
 -----
-1
+{type : none}
 =====
-; [a = answer.verified ! case.cache ! not '!' true, answer.is_verified .a]
+answer.is_never .answer.never
 -----
 true
 =====
+answer.is_never .answer.none
+-----
+false
+=====
+answer.type_of .answer.never
+-----
+never
+=====
+answer.represent answer.never
+-----
+{type : never}
+=====
+; [a = answer.maybe ! 1, answer.is_maybe .a]
+-----
+true
+=====
+answer.is_maybe .answer.none
+-----
+false
+=====
+; [a = answer.maybe ! 1, answer.type_of .a]
+-----
+maybe
+=====
+answer.represent ! answer.maybe ! 1
+-----
+{type : maybe, value : 1}
+=====
+; [a = answer.cache ! case.cache ! not '!' true, answer.is_cache .a]
+-----
+true
+=====
+answer.is_cache .answer.none
+-----
+false
+=====
+; [a = answer.cache ! case.cache ! not '!' true, answer.type_of .a]
+-----
+cache
+=====
 ; [
-    p = case ! {function : not, input : true, output : false},
-    a = answer.verified ! .p,
-    tp = type_of ! .p,
-    (.tp == ..case) and .a == .
+    c = case ! {function : not, input : true, output : false},
+    a = answer.cache ! .c,
+    tc = type_of ! .c,
+    (.tc == ..case) and .a == .
 ]
 -----
 true
 =====
-; [a = answer.verified ! case.cache ! not '!' true, answer.input .a]
+; [
+    c = case.cache ! not '!' true,
+    m = answer.represent ! answer.cache ! c,
+    .m == {.type : .cache, .value : &c}
+]
 -----
 true
-=====
-; [a = answer.verified ! case.cache ! not '!' true, answer.into_input ! &a]
------
-true
-=====
-; [a = answer.verified ! case.cache ! not '!' true, p = answer.cache ! .a, type_of .p]
------
-case
-=====
-; [a = answer.verified ! case.cache ! not '!' true, p = answer.into_cache ! &a, type_of .p]
------
-case

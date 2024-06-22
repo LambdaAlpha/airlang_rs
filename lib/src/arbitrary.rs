@@ -401,22 +401,22 @@ pub(crate) fn any_cache(rng: &mut SmallRng, depth: usize) -> Cache<Val, Val, Val
 pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> Answer {
     let weight: usize = 1 << min(depth, 32);
     let weights = [
-        weight, // unsolved
-        weight, // unsolvable
-        1,      // unverified
-        1,      // verified
+        weight, // none
+        weight, // never
+        1,      // maybe
+        1,      // cache
     ];
     let dist = WeightedIndex::new(weights).unwrap();
     let i = dist.sample(rng);
     let new_depth = depth + 1;
 
     match i {
-        0 => Answer::Unsolved,
-        1 => Answer::Unsolvable,
-        2 => Answer::Unverified(any_val(rng, new_depth)),
+        0 => Answer::None,
+        1 => Answer::Never,
+        2 => Answer::Maybe(any_val(rng, new_depth)),
         3 => {
             let cache = any_cache(rng, new_depth);
-            Answer::Verified(cache.into())
+            Answer::Cache(cache.into())
         }
         _ => unreachable!(),
     }

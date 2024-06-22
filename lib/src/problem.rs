@@ -30,7 +30,7 @@ where
     let Val::Answer(answer) = &input else {
         return Val::default();
     };
-    let Answer::Verified(cache) = &**answer else {
+    let Answer::Cache(cache) = &**answer else {
         return input;
     };
     let Val::Func(cache_func) = &cache.func else {

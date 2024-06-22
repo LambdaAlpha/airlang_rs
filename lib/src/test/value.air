@@ -199,8 +199,8 @@ true
 true
 =====
 ; [
-    a = answer.unverified ! 1,
-    b = answer.unverified ! 1,
+    a = answer.maybe ! 1,
+    b = answer.maybe ! 1,
     (.a == .b) and .a != .
 ]
 -----

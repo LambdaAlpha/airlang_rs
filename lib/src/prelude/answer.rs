@@ -1,5 +1,11 @@
 use crate::{
-    answer::Answer,
+    answer::{
+        Answer,
+        CACHE,
+        MAYBE,
+        NEVER,
+        NONE,
+    },
     ctx::{
         constant::CtxForConstFn,
         CtxMap,
@@ -11,233 +17,211 @@ use crate::{
         Named,
         Prelude,
     },
+    utils::val::symbol,
     AnswerVal,
     Bool,
     CaseVal,
     FuncVal,
+    Map,
     Mode,
     Val,
 };
 
 #[derive(Clone)]
 pub(crate) struct AnswerPrelude {
-    pub(crate) unsolved: Named<AnswerVal>,
-    pub(crate) unsolvable: Named<AnswerVal>,
-    pub(crate) unverified: Named<FuncVal>,
-    pub(crate) verified: Named<FuncVal>,
-    pub(crate) is_unsolved: Named<FuncVal>,
-    pub(crate) is_unsolvable: Named<FuncVal>,
-    pub(crate) is_verified: Named<FuncVal>,
-    pub(crate) input: Named<FuncVal>,
-    pub(crate) into_input: Named<FuncVal>,
+    pub(crate) none: Named<AnswerVal>,
+    pub(crate) never: Named<AnswerVal>,
+    pub(crate) maybe: Named<FuncVal>,
     pub(crate) cache: Named<FuncVal>,
-    pub(crate) into_cache: Named<FuncVal>,
+    pub(crate) repr: Named<FuncVal>,
+    pub(crate) type_of: Named<FuncVal>,
+    pub(crate) is_none: Named<FuncVal>,
+    pub(crate) is_never: Named<FuncVal>,
+    pub(crate) is_maybe: Named<FuncVal>,
+    pub(crate) is_cache: Named<FuncVal>,
 }
 
 impl Default for AnswerPrelude {
     fn default() -> Self {
         AnswerPrelude {
-            unsolved: unsolved(),
-            unsolvable: unsolvable(),
-            unverified: unverified(),
-            verified: verified(),
-            is_unsolved: is_unsolved(),
-            is_unsolvable: is_unsolvable(),
-            is_verified: is_verified(),
-            input: input(),
-            into_input: into_input(),
+            none: none(),
+            never: never(),
+            maybe: maybe(),
             cache: cache(),
-            into_cache: into_cache(),
+            repr: repr(),
+            type_of: type_of(),
+            is_none: is_none(),
+            is_never: is_never(),
+            is_maybe: is_maybe(),
+            is_cache: is_cache(),
         }
     }
 }
 
 impl Prelude for AnswerPrelude {
     fn put(&self, m: &mut CtxMap) {
-        self.unsolved.put(m);
-        self.unsolvable.put(m);
-        self.unverified.put(m);
-        self.verified.put(m);
-        self.is_unsolved.put(m);
-        self.is_unsolvable.put(m);
-        self.is_verified.put(m);
-        self.input.put(m);
-        self.into_input.put(m);
+        self.none.put(m);
+        self.never.put(m);
+        self.maybe.put(m);
         self.cache.put(m);
-        self.into_cache.put(m);
+        self.repr.put(m);
+        self.type_of.put(m);
+        self.is_none.put(m);
+        self.is_never.put(m);
+        self.is_maybe.put(m);
+        self.is_cache.put(m);
     }
 }
 
-fn unsolved() -> Named<AnswerVal> {
-    Named::new("answer.unsolved", AnswerVal::from(Answer::Unsolved))
+fn none() -> Named<AnswerVal> {
+    Named::new("answer.none", AnswerVal::from(Answer::None))
 }
 
-fn unsolvable() -> Named<AnswerVal> {
-    Named::new("answer.unsolvable", AnswerVal::from(Answer::Unsolvable))
+fn never() -> Named<AnswerVal> {
+    Named::new("answer.never", AnswerVal::from(Answer::Never))
 }
 
-fn unverified() -> Named<FuncVal> {
+fn maybe() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("answer.unverified", input_mode, output_mode, fn_unverified)
+    named_free_fn("answer.maybe", input_mode, output_mode, fn_maybe)
 }
 
-fn fn_unverified(input: Val) -> Val {
-    Val::Answer(AnswerVal::from(Answer::Unverified(input)))
+fn fn_maybe(input: Val) -> Val {
+    Val::Answer(AnswerVal::from(Answer::Maybe(input)))
 }
 
-fn verified() -> Named<FuncVal> {
+fn cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("answer.verified", input_mode, output_mode, fn_verified)
+    named_free_fn("answer.cache", input_mode, output_mode, fn_cached)
 }
 
-fn fn_verified(input: Val) -> Val {
+fn fn_cached(input: Val) -> Val {
     let Val::Case(case) = input else {
         return Val::default();
     };
     let CaseVal::Cache(cache) = case else {
         return Val::default();
     };
-    Val::Answer(Answer::Verified(cache).into())
+    Val::Answer(Answer::Cache(cache).into())
 }
 
-fn is_unsolved() -> Named<FuncVal> {
+fn repr() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn(
-        "answer.is_unsolved",
-        input_mode,
-        output_mode,
-        fn_is_unsolved,
-    )
+    named_free_fn("answer.represent", input_mode, output_mode, fn_repr)
 }
 
-fn fn_is_unsolved(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Answer(answer) = val else {
-            return Val::default();
-        };
-        let is_unknown = matches!(&**answer, Answer::Unsolved);
-        Val::Bool(Bool::new(is_unknown))
-    })
-}
+const TYPE: &str = "type";
+const VALUE: &str = "value";
 
-fn is_unsolvable() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn(
-        "answer.is_unsolvable",
-        input_mode,
-        output_mode,
-        fn_is_unsolvable,
-    )
-}
-
-fn fn_is_unsolvable(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Answer(answer) = val else {
-            return Val::default();
-        };
-        let is_unsolvable = matches!(&**answer, Answer::Unsolvable);
-        Val::Bool(Bool::new(is_unsolvable))
-    })
-}
-
-fn is_verified() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn(
-        "answer.is_verified",
-        input_mode,
-        output_mode,
-        fn_is_verified,
-    )
-}
-
-fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Answer(answer) = val else {
-            return Val::default();
-        };
-        match &**answer {
-            Answer::Unverified(_) => Val::Bool(Bool::f()),
-            Answer::Verified(_) => Val::Bool(Bool::t()),
-            _ => Val::default(),
-        }
-    })
-}
-
-fn input() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("answer.input", input_mode, output_mode, fn_input)
-}
-
-fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Answer(answer) = val else {
-            return Val::default();
-        };
-        match &**answer {
-            Answer::Unsolved => Val::default(),
-            Answer::Unsolvable => Val::default(),
-            Answer::Unverified(value) => value.clone(),
-            Answer::Verified(cache) => cache.input.clone(),
-        }
-    })
-}
-
-fn into_input() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_free_fn("answer.into_input", input_mode, output_mode, fn_into_input)
-}
-
-fn fn_into_input(input: Val) -> Val {
+fn fn_repr(input: Val) -> Val {
     let Val::Answer(answer) = input else {
         return Val::default();
     };
+    let mut repr = Map::<Val, Val>::default();
     let answer = Answer::from(answer);
     match answer {
-        Answer::Unsolved => Val::default(),
-        Answer::Unsolvable => Val::default(),
-        Answer::Unverified(value) => value,
-        Answer::Verified(cache) => cache.input.clone(),
+        Answer::None => {
+            repr.insert(symbol(TYPE), symbol(NONE));
+        }
+        Answer::Never => {
+            repr.insert(symbol(TYPE), symbol(NEVER));
+        }
+        Answer::Maybe(val) => {
+            repr.insert(symbol(TYPE), symbol(MAYBE));
+            repr.insert(symbol(VALUE), val);
+        }
+        Answer::Cache(cache) => {
+            repr.insert(symbol(TYPE), symbol(CACHE));
+            repr.insert(symbol(VALUE), Val::Case(CaseVal::Cache(cache)));
+        }
     }
+    Val::Map(repr.into())
 }
 
-fn cache() -> Named<FuncVal> {
+fn type_of() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("answer.cache", input_mode, output_mode, fn_cache)
+    named_const_fn("answer.type_of", input_mode, output_mode, fn_type_of)
 }
 
-fn fn_cache(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
-        let Answer::Verified(cache) = &**answer else {
-            return Val::default();
+        let s = match &**answer {
+            Answer::None => NONE,
+            Answer::Never => NEVER,
+            Answer::Maybe(_) => MAYBE,
+            Answer::Cache(_) => CACHE,
         };
-        Val::Case(CaseVal::Cache(cache.clone()))
+        symbol(s)
     })
 }
 
-fn into_cache() -> Named<FuncVal> {
+fn is_none() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("answer.into_cache", input_mode, output_mode, fn_into_cache)
+    named_const_fn("answer.is_none", input_mode, output_mode, fn_is_none)
 }
 
-fn fn_into_cache(input: Val) -> Val {
-    let Val::Answer(answer) = input else {
-        return Val::default();
-    };
-    let answer = Answer::from(answer);
-    let Answer::Verified(cache) = answer else {
-        return Val::default();
-    };
-    Val::Case(CaseVal::Cache(cache))
+fn fn_is_none(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Answer(answer) = val else {
+            return Val::default();
+        };
+        let is_none = matches!(&**answer, Answer::None);
+        Val::Bool(Bool::new(is_none))
+    })
+}
+
+fn is_never() -> Named<FuncVal> {
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn("answer.is_never", input_mode, output_mode, fn_is_never)
+}
+
+fn fn_is_never(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Answer(answer) = val else {
+            return Val::default();
+        };
+        let is_never = matches!(&**answer, Answer::Never);
+        Val::Bool(Bool::new(is_never))
+    })
+}
+
+fn is_maybe() -> Named<FuncVal> {
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn("answer.is_maybe", input_mode, output_mode, fn_is_maybe)
+}
+
+fn fn_is_maybe(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Answer(answer) = val else {
+            return Val::default();
+        };
+        let is_maybe = matches!(&**answer, Answer::Maybe(_));
+        Val::Bool(Bool::new(is_maybe))
+    })
+}
+
+fn is_cache() -> Named<FuncVal> {
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn("answer.is_cache", input_mode, output_mode, fn_is_cache)
+}
+
+fn fn_is_cache(ctx: CtxForConstFn, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Answer(answer) = val else {
+            return Val::default();
+        };
+        let is_cache = matches!(&**answer, Answer::Cache(_));
+        Val::Bool(Bool::new(is_cache))
+    })
 }
