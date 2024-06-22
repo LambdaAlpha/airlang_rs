@@ -22,31 +22,31 @@ false
 -----
 1
 =====
-; [a = answer.verified ! assert.verified ! not '!' true, answer.is_verified .a]
+; [a = answer.verified ! case.cache ! not '!' true, answer.is_verified .a]
 -----
 true
 =====
 ; [
-    p = assert ! {function : not, input : true, output : false},
+    p = case ! {function : not, input : true, output : false},
     a = answer.verified ! .p,
     tp = type_of ! .p,
-    (.tp == ..assert) and .a == .
+    (.tp == ..case) and .a == .
 ]
 -----
 true
 =====
-; [a = answer.verified ! assert.verified ! not '!' true, answer.input .a]
+; [a = answer.verified ! case.cache ! not '!' true, answer.input .a]
 -----
 true
 =====
-; [a = answer.verified ! assert.verified ! not '!' true, answer.into_input ! &a]
+; [a = answer.verified ! case.cache ! not '!' true, answer.into_input ! &a]
 -----
 true
 =====
-; [a = answer.verified ! assert.verified ! not '!' true, p = answer.evidence ! .a, type_of .p]
+; [a = answer.verified ! case.cache ! not '!' true, p = answer.cache ! .a, type_of .p]
 -----
-assert
+case
 =====
-; [a = answer.verified ! assert.verified ! not '!' true, p = answer.into_evidence ! &a, type_of .p]
+; [a = answer.verified ! case.cache ! not '!' true, p = answer.into_cache ! &a, type_of .p]
 -----
-assert
+case

@@ -6,7 +6,6 @@ use crate::{
         CtxMap,
         DefaultCtx,
     },
-    logic::Assert,
     map::Map,
     prelude::{
         form_mode,
@@ -18,6 +17,7 @@ use crate::{
         Prelude,
     },
     transform::eval::Eval,
+    transformer::Transformer,
     utils::val::{
         map_remove,
         symbol,
@@ -26,27 +26,33 @@ use crate::{
         func::FuncVal,
         map::MapVal,
     },
+    Cache,
+    Call,
+    Case,
+    CaseVal,
     Mode,
     Transform,
     Val,
 };
 
 #[derive(Clone)]
-pub(crate) struct AssertPrelude {
+pub(crate) struct CasePrelude {
     pub(crate) new: Named<FuncVal>,
+    pub(crate) new_cache: Named<FuncVal>,
     pub(crate) repr: Named<FuncVal>,
-    pub(crate) verified: Named<FuncVal>,
+    pub(crate) is_cache: Named<FuncVal>,
     pub(crate) func: Named<FuncVal>,
     pub(crate) input: Named<FuncVal>,
     pub(crate) output: Named<FuncVal>,
 }
 
-impl Default for AssertPrelude {
+impl Default for CasePrelude {
     fn default() -> Self {
-        AssertPrelude {
+        CasePrelude {
             new: new(),
+            new_cache: new_cache(),
             repr: repr(),
-            verified: is_verified(),
+            is_cache: is_cache(),
             func: func(),
             input: input(),
             output: output(),
@@ -54,11 +60,12 @@ impl Default for AssertPrelude {
     }
 }
 
-impl Prelude for AssertPrelude {
+impl Prelude for CasePrelude {
     fn put(&self, m: &mut CtxMap) {
         self.new.put(m);
+        self.new_cache.put(m);
         self.repr.put(m);
-        self.verified.put(m);
+        self.is_cache.put(m);
         self.func.put(m);
         self.input.put(m);
         self.output.put(m);
@@ -68,7 +75,7 @@ impl Prelude for AssertPrelude {
 const FUNCTION: &str = "function";
 const INPUT: &str = "input";
 const OUTPUT: &str = "output";
-const VERIFIED: &str = "verified";
+const IS_CACHE: &str = "is_cache";
 
 fn new() -> Named<FuncVal> {
     let mut map = Map::default();
@@ -77,7 +84,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(OUTPUT), form_mode());
     let input_mode = map_mode(map, Transform::default());
     let output_mode = Mode::default();
-    named_mutable_fn("assert", input_mode, output_mode, fn_new)
+    named_mutable_fn("case", input_mode, output_mode, fn_new)
 }
 
 fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
@@ -89,8 +96,27 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let input = Eval.eval_input(ctx.reborrow(), &func, input);
     let output = map_remove(&mut map, OUTPUT);
     let output = Eval.eval_output(ctx, &func, output);
-    let assert = Assert::new(func, input, output);
-    Val::Assert(assert.into())
+    let case = Case::new(func, input, output);
+    Val::Case(CaseVal::Trivial(case.into()))
+}
+
+fn new_cache() -> Named<FuncVal> {
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_mutable_fn("case.cache", input_mode, output_mode, fn_new_cache)
+}
+
+fn fn_new_cache(mut ctx: CtxForMutableFn, input: Val) -> Val {
+    let Val::Call(call) = input else {
+        return Val::default();
+    };
+    let call = Call::from(call);
+    let Val::Func(func) = call.func else {
+        return Val::default();
+    };
+    let input = func.input_mode.transform(ctx.reborrow(), call.input);
+    let cache = Cache::new(ctx, func, input);
+    Val::Case(CaseVal::Cache(cache.into()))
 }
 
 fn repr() -> Named<FuncVal> {
@@ -99,90 +125,85 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
-    map.insert(symbol(VERIFIED), Mode::default());
+    map.insert(symbol(IS_CACHE), Mode::default());
     let output_mode = map_mode(map, Transform::default());
-    named_free_fn("assert.represent", input_mode, output_mode, fn_repr)
+    named_free_fn("case.represent", input_mode, output_mode, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
-    let Val::Assert(assert) = input else {
+    let Val::Case(case) = input else {
         return Val::default();
     };
     let mut repr = MapVal::from(Map::<Val, Val>::default());
-    generate_assert(&mut repr, &assert);
+    generate_case(&mut repr, &case);
     Val::Map(repr)
 }
 
-fn generate_assert(repr: &mut MapVal, assert: &Assert) {
-    repr.insert(symbol(FUNCTION), assert.func().clone());
-    repr.insert(symbol(INPUT), assert.input().clone());
-    repr.insert(symbol(OUTPUT), assert.output().clone());
-    if assert.is_verified() {
-        repr.insert(symbol(VERIFIED), Val::Bool(Bool::t()));
+fn generate_case(repr: &mut MapVal, case: &CaseVal) {
+    repr.insert(symbol(FUNCTION), case.as_ref().func.clone());
+    repr.insert(symbol(INPUT), case.as_ref().input.clone());
+    repr.insert(symbol(OUTPUT), case.as_ref().output.clone());
+    if matches!(case, CaseVal::Cache(_)) {
+        repr.insert(symbol(IS_CACHE), Val::Bool(Bool::t()));
     }
 }
 
-fn is_verified() -> Named<FuncVal> {
+fn is_cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn(
-        "assert.is_verified",
-        input_mode,
-        output_mode,
-        fn_is_verified,
-    )
+    named_const_fn("case.is_cache", input_mode, output_mode, fn_is_cache)
 }
 
-fn fn_is_verified(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_cache(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(assert) = val else {
+        let Val::Case(case) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(assert.is_verified()))
+        Val::Bool(Bool::new(matches!(case, CaseVal::Cache(_))))
     })
 }
 
 fn func() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("assert.function", input_mode, output_mode, fn_func)
+    named_const_fn("case.function", input_mode, output_mode, fn_func)
 }
 
 fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(assert) = val else {
+        let Val::Case(case) = val else {
             return Val::default();
         };
-        assert.func().clone()
+        case.as_ref().func.clone()
     })
 }
 
 fn input() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("assert.input", input_mode, output_mode, fn_input)
+    named_const_fn("case.input", input_mode, output_mode, fn_input)
 }
 
 fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(assert) = val else {
+        let Val::Case(case) = val else {
             return Val::default();
         };
-        assert.input().clone()
+        case.as_ref().input.clone()
     })
 }
 
 fn output() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("assert.output", input_mode, output_mode, fn_output)
+    named_const_fn("case.output", input_mode, output_mode, fn_output)
 }
 
 fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::Assert(assert) = val else {
+        let Val::Case(case) = val else {
             return Val::default();
         };
-        assert.output().clone()
+        case.as_ref().output.clone()
     })
 }

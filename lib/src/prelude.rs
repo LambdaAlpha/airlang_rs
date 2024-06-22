@@ -24,10 +24,10 @@ use crate::{
     prelude::{
         answer::AnswerPrelude,
         ask::AskPrelude,
-        assert::AssertPrelude,
         bool::BoolPrelude,
         bytes::BytesPrelude,
         call::CallPrelude,
+        case::CasePrelude,
         comment::CommentPrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
@@ -35,7 +35,6 @@ use crate::{
         func::FuncPrelude,
         int::IntPrelude,
         list::ListPrelude,
-        logic::LogicPrelude,
         map::MapPrelude,
         meta::MetaPrelude,
         number::NumberPrelude,
@@ -69,11 +68,10 @@ pub(crate) struct AllPrelude {
     pub(crate) ctx: CtxPrelude,
     pub(crate) ctrl: CtrlPrelude,
     pub(crate) transform: TransformPrelude,
-    pub(crate) logic: LogicPrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
     pub(crate) ask: AskPrelude,
-    pub(crate) assert: AssertPrelude,
+    pub(crate) case: CasePrelude,
     pub(crate) answer: AnswerPrelude,
     pub(crate) symbol: SymbolPrelude,
     pub(crate) unit: UnitPrelude,
@@ -97,11 +95,10 @@ impl Prelude for AllPrelude {
         self.ctx.put(m);
         self.ctrl.put(m);
         self.transform.put(m);
-        self.logic.put(m);
         self.func.put(m);
         self.call.put(m);
         self.ask.put(m);
-        self.assert.put(m);
+        self.case.put(m);
         self.answer.put(m);
         self.symbol.put(m);
         self.unit.put(m);
@@ -301,15 +298,13 @@ mod ctrl;
 
 mod transform;
 
-mod logic;
-
 mod func;
 
 mod call;
 
 mod ask;
 
-mod assert;
+mod case;
 
 mod answer;
 

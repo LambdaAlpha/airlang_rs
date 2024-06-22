@@ -9,7 +9,7 @@ use std::{
     },
 };
 
-use crate::problem::Answer;
+use crate::answer::Answer;
 
 #[derive(Default, Clone, PartialEq, Eq, Hash)]
 pub struct AnswerVal(Box<Answer>);

@@ -115,6 +115,7 @@ impl Func {
         &self.output_mode
     }
 
+    #[allow(unused)]
     pub(crate) fn is_ctx_free(&self) -> bool {
         matches!(&self.transformer, FuncTransformer::Free(_))
     }

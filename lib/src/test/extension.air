@@ -38,6 +38,6 @@ call.apply ! func_ext '!' 1
 -----
 1
 =====
-; [p = assert.verified ! func_ext '!' true, assert.is_verified .p]
+; [p = case.cache ! func_ext '!' true, case.is_cache .p]
 -----
 true

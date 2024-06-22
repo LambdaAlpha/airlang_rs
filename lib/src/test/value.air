@@ -50,9 +50,9 @@ context
 -----
 function
 =====
-; [a = any ! .assert, type_of .a]
+; [a = any ! .case, type_of .a]
 -----
-assert
+case
 =====
 ; [a = any ! .answer, type_of .a]
 -----
@@ -126,13 +126,13 @@ function
 -----
 context
 =====
-; [a = assert ! {function : not, input : true, output : false}, type_of .a]
+; [a = case ! {function : not, input : true, output : false}, type_of .a]
 -----
-assert
+case
 =====
-; [a = assert.verified ! not '!' true, type_of .a]
+; [a = case.cache ! not '!' true, type_of .a]
 -----
-assert
+case
 =====
 true == false
 -----
@@ -191,8 +191,8 @@ true
 true
 =====
 ; [
-    a = assert ! {function : not, input : true, output : false},
-    b = assert ! {function : not, input : true, output : false},
+    a = case ! {function : not, input : true, output : false},
+    b = case ! {function : not, input : true, output : false},
     (.a == .b) and .a != .
 ]
 -----

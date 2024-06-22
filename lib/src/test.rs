@@ -105,11 +105,6 @@ fn test_transform() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_logic() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/logic.air"), "test/logic.air")
-}
-
-#[test]
 fn test_func() -> Result<(), Box<dyn Error>> {
     test_interpret(include_str!("test/func.air"), "test/func.air")
 }
@@ -125,8 +120,8 @@ fn test_ask() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_assert() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/assert.air"), "test/assert.air")
+fn test_case() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/case.air"), "test/case.air")
 }
 
 #[test]

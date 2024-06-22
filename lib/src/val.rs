@@ -23,9 +23,9 @@ use crate::{
     val::{
         answer::AnswerVal,
         ask::AskVal,
-        assert::AssertVal,
         bytes::BytesVal,
         call::CallVal,
+        case::CaseVal,
         comment::CommentVal,
         ctx::CtxVal,
         func::FuncVal,
@@ -67,7 +67,7 @@ pub enum Val {
     Ctx(CtxVal),
     Func(FuncVal),
 
-    Assert(AssertVal),
+    Case(CaseVal),
 
     Answer(AnswerVal),
 
@@ -89,7 +89,7 @@ pub(crate) const ASK: &str = "ask";
 pub(crate) const COMMENT: &str = "comment";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
-pub(crate) const ASSERT: &str = "assert";
+pub(crate) const CASE: &str = "case";
 pub(crate) const ANSWER: &str = "answer";
 pub(crate) const EXT: &str = "extension";
 
@@ -255,9 +255,9 @@ impl From<FuncVal> for Val {
     }
 }
 
-impl From<AssertVal> for Val {
-    fn from(value: AssertVal) -> Self {
-        Val::Assert(value)
+impl From<CaseVal> for Val {
+    fn from(value: CaseVal) -> Self {
+        Val::Case(value)
     }
 }
 
@@ -411,7 +411,7 @@ impl Debug for Val {
             Val::Comment(a) => <_ as Debug>::fmt(a, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
             Val::Func(func) => <_ as Debug>::fmt(func, f),
-            Val::Assert(a) => <_ as Debug>::fmt(a, f),
+            Val::Case(c) => <_ as Debug>::fmt(c, f),
             Val::Answer(a) => <_ as Debug>::fmt(a, f),
             Val::Ext(e) => <_ as Debug>::fmt(e, f),
         }
@@ -436,12 +436,12 @@ pub(crate) mod call;
 
 pub(crate) mod ask;
 
+pub(crate) mod case;
+
 pub(crate) mod comment;
 
 pub(crate) mod ctx;
 
 pub(crate) mod func;
-
-pub(crate) mod assert;
 
 pub(crate) mod answer;

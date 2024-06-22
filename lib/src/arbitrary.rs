@@ -17,6 +17,7 @@ use rand::{
 };
 
 use crate::{
+    answer::Answer,
     bool::Bool,
     bytes::Bytes,
     ctx::{
@@ -37,7 +38,6 @@ use crate::{
     },
     int::Int,
     list::List,
-    logic::Assert,
     map::Map,
     mode::{
         ListItemMode,
@@ -49,16 +49,18 @@ use crate::{
         Prelude,
         PRELUDE,
     },
-    problem::Verified,
     string::Str,
     symbol::Symbol,
     transform::Transform,
     unit::Unit,
     val::func::FuncVal,
-    Answer,
     Ask,
+    Cache,
     Call,
+    Case,
+    CaseVal,
     Comment,
+    FreeCtx,
     ListMode,
     MapMode,
     PairMode,
@@ -85,7 +87,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // map
         1,      // ctx
         1,      // func
-        1,      // assert
+        1,      // case
         1,      // answer
         1,      // extension
     ];
@@ -109,7 +111,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         12 => Val::Map(any_map(rng, new_depth).into()),
         13 => Val::Ctx(any_ctx(rng, new_depth).into()),
         14 => Val::Func(any_func(rng, new_depth)),
-        15 => Val::Assert(any_assert(rng, new_depth).into()),
+        15 => Val::Case(any_case_val(rng, new_depth)),
         16 => Val::Answer(any_answer(rng, new_depth).into()),
         17 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
@@ -375,64 +377,25 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     }
 }
 
-pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
+pub(crate) fn any_case_val(rng: &mut SmallRng, depth: usize) -> CaseVal {
     if rng.gen() {
-        let prelude = PRELUDE.with(|prelude| {
-            let mut m = CtxMap::default();
-            prelude.put(&mut m);
-            m
-        });
-        let func = prelude
-            .into_values()
-            .filter(|v| {
-                let Val::Func(func) = &v.val else {
-                    return false;
-                };
-                let FuncTransformer::Free(_) = &func.transformer else {
-                    return false;
-                };
-                true
-            })
-            .choose(rng)
-            .unwrap();
-        let Val::Func(func) = func.val else {
-            unreachable!()
-        };
-        func
+        CaseVal::Trivial(any_case(rng, depth).into())
     } else {
-        let input_mode = any_mode(rng, depth);
-        let output_mode = any_mode(rng, depth);
-        let transformer = FuncTransformer::Free(FuncImpl::Composed(Composed {
-            body: any_val(rng, depth),
-            prelude: any_ctx(rng, depth),
-            input_name: any_symbol(rng),
-            ctx: CtxFreeInfo {},
-        }));
-        let func = Func {
-            input_mode,
-            output_mode,
-            transformer,
-        };
-        FuncVal::from(func)
+        CaseVal::Cache(any_cache(rng, depth).into())
     }
 }
 
-pub(crate) fn any_assert(rng: &mut SmallRng, depth: usize) -> Assert {
+pub(crate) fn any_case(rng: &mut SmallRng, depth: usize) -> Case<Val, Val, Val> {
+    let func = any_val(rng, depth);
     let input = any_val(rng, depth);
-    if rng.gen() {
-        let func = any_free_func(rng, depth);
-        Assert::new_verified(func, input)
-    } else {
-        let func = any_val(rng, depth);
-        let output = any_val(rng, depth);
-        Assert::new(func, input, output)
-    }
+    let output = any_val(rng, depth);
+    Case::new(func, input, output)
 }
 
-pub(crate) fn any_proved_assert(rng: &mut SmallRng, depth: usize) -> Assert {
-    let func = any_free_func(rng, depth);
+pub(crate) fn any_cache(rng: &mut SmallRng, depth: usize) -> Cache<Val, Val, Val> {
+    let func = any_func(rng, depth);
     let input = any_val(rng, depth);
-    Assert::new_verified(func, input)
+    Cache::new(FreeCtx, func, input)
 }
 
 pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> Answer {
@@ -452,8 +415,8 @@ pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> Answer {
         1 => Answer::Unsolvable,
         2 => Answer::Unverified(any_val(rng, new_depth)),
         3 => {
-            let proved_assert = any_proved_assert(rng, new_depth);
-            Answer::Verified(Verified::new(proved_assert.into()).unwrap())
+            let cache = any_cache(rng, new_depth);
+            Answer::Verified(cache.into())
         }
         _ => unreachable!(),
     }

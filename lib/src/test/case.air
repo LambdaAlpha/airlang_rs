@@ -1,43 +1,43 @@
 ; [
-    p = assert ! {
+    p = case ! {
         function : not,
         input : 1,
         output : 2,
     },
-    assert.input .p
+    case.input .p
 ]
 -----
 1
 =====
 ; [
-    p = assert ! {
+    p = case ! {
         function : not,
         input : 1,
         output : 2,
     },
-    assert.output .p
+    case.output .p
 ]
 -----
 2
 =====
 ; [
-    p = assert ! {
+    p = case ! {
         function : not,
         input : 1,
         output : 2,
     },
-    (assert.function .p) == .not
+    (case.function .p) == .not
 ]
 -----
 true
 =====
 ; [
-    p = assert ! {
+    p = case ! {
         function : "not",
         input : 1,
         output : 2,
     },
-    (assert.function .p) == "not"
+    (case.function .p) == "not"
 ]
 -----
 true
@@ -52,13 +52,13 @@ true
         input : true,
         output : false,
     },
-    .m == assert.represent ! assert ! m
+    .m == case.represent ! case ! m
 ]
 -----
 true
 =====
 ; [
-    m = assert.represent ! assert.verified ! not '!' true,
+    m = case.represent ! case.cache ! not '!' true,
     map_mode = function ! {
         body : the_input,
         input_mode : {map : id : eval},
@@ -67,7 +67,7 @@ true
         function : not,
         input : true,
         output : false,
-        verified : true,
+        is_cache : true,
     },
     .m == .expected
 ]
@@ -75,13 +75,41 @@ true
 true
 =====
 ; [
-    p = assert ! {
+    p = case ! {
         function : not,
         input : 1,
         output : 2,
     },
     tp = type_of ! .p,
-    (.tp == ..assert) and (assert.is_verified .p) == false
+    (.tp == ..case) and (case.is_cache .p) == false
+]
+-----
+true
+=====
+; [
+    p = case.cache ! not '!' (not false),
+    case.input .p
+]
+-----
+true
+=====
+; [
+    p = case.cache ! not '!' true,
+    case.output .p
+]
+-----
+false
+=====
+; [
+    p = case.cache ! not '!' true,
+    (case.function .p) == .not
+]
+-----
+true
+=====
+; [
+    p = case.cache ! not '!' true,
+    case.is_cache .p
 ]
 -----
 true

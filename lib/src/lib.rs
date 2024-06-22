@@ -11,10 +11,13 @@ pub use ctx::{
 };
 
 pub use self::{
+    answer::Answer,
     ask::Ask,
     bool::Bool,
     bytes::Bytes,
+    cache::Cache,
     call::Call,
+    case::Case,
     comment::Comment,
     ctx::{
         Ctx,
@@ -30,7 +33,6 @@ pub use self::{
     },
     int::Int,
     list::List,
-    logic::Assert,
     map::Map,
     mode::{
         ListItemMode,
@@ -42,10 +44,6 @@ pub use self::{
     },
     number::Number,
     pair::Pair,
-    problem::{
-        Answer,
-        Verified,
-    },
     string::Str,
     symbol::Symbol,
     syntax::generator::ReprError,
@@ -54,9 +52,9 @@ pub use self::{
     val::{
         answer::AnswerVal,
         ask::AskVal,
-        assert::AssertVal,
         bytes::BytesVal,
         call::CallVal,
+        case::CaseVal,
         comment::CommentVal,
         ctx::CtxVal,
         func::FuncVal,
@@ -111,8 +109,6 @@ pub(crate) mod ctx;
 
 pub(crate) mod func;
 
-pub(crate) mod logic;
-
 pub(crate) mod arbitrary;
 
 pub(crate) mod problem;
@@ -146,6 +142,12 @@ pub(crate) mod map;
 pub(crate) mod call;
 
 pub(crate) mod ask;
+
+pub(crate) mod case;
+
+pub(crate) mod cache;
+
+pub(crate) mod answer;
 
 pub(crate) mod comment;
 

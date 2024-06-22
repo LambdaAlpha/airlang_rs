@@ -1,6 +1,5 @@
-use std::ops::Deref;
-
 use crate::{
+    answer::Answer,
     ctx::{
         constant::CtxForConstFn,
         CtxMap,
@@ -12,10 +11,9 @@ use crate::{
         Named,
         Prelude,
     },
-    problem::Verified,
-    Answer,
     AnswerVal,
     Bool,
+    CaseVal,
     FuncVal,
     Mode,
     Val,
@@ -32,8 +30,8 @@ pub(crate) struct AnswerPrelude {
     pub(crate) is_verified: Named<FuncVal>,
     pub(crate) input: Named<FuncVal>,
     pub(crate) into_input: Named<FuncVal>,
-    pub(crate) evidence: Named<FuncVal>,
-    pub(crate) into_evidence: Named<FuncVal>,
+    pub(crate) cache: Named<FuncVal>,
+    pub(crate) into_cache: Named<FuncVal>,
 }
 
 impl Default for AnswerPrelude {
@@ -48,8 +46,8 @@ impl Default for AnswerPrelude {
             is_verified: is_verified(),
             input: input(),
             into_input: into_input(),
-            evidence: evidence(),
-            into_evidence: into_evidence(),
+            cache: cache(),
+            into_cache: into_cache(),
         }
     }
 }
@@ -65,8 +63,8 @@ impl Prelude for AnswerPrelude {
         self.is_verified.put(m);
         self.input.put(m);
         self.into_input.put(m);
-        self.evidence.put(m);
-        self.into_evidence.put(m);
+        self.cache.put(m);
+        self.into_cache.put(m);
     }
 }
 
@@ -95,15 +93,13 @@ fn verified() -> Named<FuncVal> {
 }
 
 fn fn_verified(input: Val) -> Val {
-    let Val::Assert(assert) = input else {
+    let Val::Case(case) = input else {
         return Val::default();
     };
-    if !assert.is_verified() {
+    let CaseVal::Cache(cache) = case else {
         return Val::default();
-    }
-    Val::Answer(AnswerVal::from(Answer::Verified(
-        Verified::new(assert).unwrap(),
-    )))
+    };
+    Val::Answer(Answer::Verified(cache).into())
 }
 
 fn is_unsolved() -> Named<FuncVal> {
@@ -187,7 +183,7 @@ fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
             Answer::Unsolved => Val::default(),
             Answer::Unsolvable => Val::default(),
             Answer::Unverified(value) => value.clone(),
-            Answer::Verified(assert) => assert.input().clone(),
+            Answer::Verified(cache) => cache.input.clone(),
         }
     })
 }
@@ -207,46 +203,41 @@ fn fn_into_input(input: Val) -> Val {
         Answer::Unsolved => Val::default(),
         Answer::Unsolvable => Val::default(),
         Answer::Unverified(value) => value,
-        Answer::Verified(assert) => assert.input().clone(),
+        Answer::Verified(cache) => cache.input.clone(),
     }
 }
 
-fn evidence() -> Named<FuncVal> {
+fn cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("answer.evidence", input_mode, output_mode, fn_evidence)
+    named_const_fn("answer.cache", input_mode, output_mode, fn_cache)
 }
 
-fn fn_evidence(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_cache(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
         };
-        let Answer::Verified(assert) = &**answer else {
+        let Answer::Verified(cache) = &**answer else {
             return Val::default();
         };
-        Val::Assert(assert.deref().clone())
+        Val::Case(CaseVal::Cache(cache.clone()))
     })
 }
 
-fn into_evidence() -> Named<FuncVal> {
+fn into_cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
-        "answer.into_evidence",
-        input_mode,
-        output_mode,
-        fn_into_evidence,
-    )
+    named_free_fn("answer.into_cache", input_mode, output_mode, fn_into_cache)
 }
 
-fn fn_into_evidence(input: Val) -> Val {
+fn fn_into_cache(input: Val) -> Val {
     let Val::Answer(answer) = input else {
         return Val::default();
     };
     let answer = Answer::from(answer);
-    let Answer::Verified(verified) = answer else {
+    let Answer::Verified(cache) = answer else {
         return Val::default();
     };
-    Val::Assert(verified.unwrap())
+    Val::Case(CaseVal::Cache(cache))
 }
