@@ -167,7 +167,7 @@ impl Eval {
     {
         if let Val::Func(func) = func {
             let output = func.output_mode.transform(ctx.reborrow(), output);
-            solve(ctx, func, output)
+            Val::Answer(solve(ctx, func, output))
         } else {
             let output = self.transform(ctx, output);
             let ask = Ask::new(func, output);
@@ -191,7 +191,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            solve(ctx, func, output)
+            Val::Answer(solve(ctx, func, output))
         } else {
             let ask = Ask::new(func, output);
             Val::Ask(ask.into())
