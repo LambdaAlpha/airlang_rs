@@ -16,7 +16,7 @@ use airlang::{
     parse,
     Ctx,
     MutableCtx,
-    Str,
+    Text,
     Val,
 };
 use crossterm::{
@@ -463,8 +463,8 @@ impl<W: Write + IsTty> Repl<W> {
         self.terminal.print(" ")?;
         match parse(include_str!("air/version.air")) {
             Ok(repr) => match interpret_mutable(MutableCtx::new(&mut self.ctx), repr) {
-                Val::String(s) => {
-                    let s = Str::from(s);
+                Val::Text(t) => {
+                    let s = Text::from(t);
                     self.terminal.print(s)
                 }
                 _ => self.terminal.eprint("unknown version"),

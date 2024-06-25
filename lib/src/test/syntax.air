@@ -10,18 +10,18 @@ parse "1 @ 2"
 -----
 1 @ 2
 =====
-parse ! stringify ! [1, 2]
+parse ! generate ! [1, 2]
 -----
 [1, 2]
 =====
-stringify "1"
+generate "1"
 -----
 "\"1\""
 =====
-stringify ! 1 @ 2
+generate ! 1 @ 2
 -----
 "2"
 =====
-stringify ! id ! 1 @ 2
+generate ! id ! 1 @ 2
 -----
 "1 @ 2"

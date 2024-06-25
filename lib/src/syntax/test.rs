@@ -11,7 +11,6 @@ use crate::{
     int::Int,
     map::Map,
     number::Number,
-    string::Str,
     symbol::Symbol,
     syntax::{
         parse,
@@ -25,21 +24,22 @@ use crate::{
             Repr,
         },
     },
+    text::Text,
     unit::Unit,
 };
 
 mod boolean;
 mod bytes;
 mod call;
+mod infix;
 mod comment;
 mod number;
-mod infix;
 mod int;
 mod list;
 mod map;
 mod pair;
 mod ask;
-mod string;
+mod text;
 mod symbol;
 mod unit;
 mod wrap;
@@ -77,8 +77,8 @@ fn symbol(s: &str) -> Repr {
     Repr::Symbol(Symbol::from_str(s))
 }
 
-fn string(s: &str) -> Repr {
-    Repr::String(Str::from(s))
+fn text(s: &str) -> Repr {
+    Repr::Text(Text::from(s))
 }
 
 fn pair(first: Repr, second: Repr) -> Repr {
@@ -285,17 +285,17 @@ fn test_generate_symbol() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_string() -> Result<(), Box<dyn Error>> {
+fn test_parse_text() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/string.air"),
-        "test/string.air",
-        string::expected,
+        include_str!("test/text.air"),
+        "test/text.air",
+        text::expected,
     )
 }
 
 #[test]
-fn test_generate_string() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/string.air"), "test/string.air")
+fn test_generate_text() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/text.air"), "test/text.air")
 }
 #[test]
 fn test_parse_pair() -> Result<(), Box<dyn Error>> {

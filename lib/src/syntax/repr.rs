@@ -27,8 +27,8 @@ use crate::{
     Bytes,
     Int,
     Number,
-    Str,
     Symbol,
+    Text,
     Unit,
 };
 
@@ -39,7 +39,7 @@ pub enum Repr {
     Symbol(Symbol),
     Int(Int),
     Number(Number),
-    String(Str),
+    Text(Text),
     Pair(Box<PairRepr>),
     List(ListRepr),
     Map(MapRepr),
@@ -85,9 +85,9 @@ impl From<Number> for Repr {
     }
 }
 
-impl From<Str> for Repr {
-    fn from(s: Str) -> Self {
-        Repr::String(s)
+impl From<Text> for Repr {
+    fn from(t: Text) -> Self {
+        Repr::Text(t)
     }
 }
 
@@ -208,7 +208,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Symbol(s) => GenerateRepr::Symbol(s),
             Repr::Int(i) => GenerateRepr::Int(i),
             Repr::Number(n) => GenerateRepr::Number(n),
-            Repr::String(s) => GenerateRepr::String(s),
+            Repr::Text(t) => GenerateRepr::Text(t),
             Repr::Pair(p) => GenerateRepr::Pair(p),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),

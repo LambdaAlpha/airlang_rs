@@ -5,7 +5,7 @@ use crate::{
         Named,
         Prelude,
     },
-    string::Str,
+    text::Text,
     val::{
         func::FuncVal,
         Val,
@@ -16,14 +16,14 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct SyntaxPrelude {
     pub(crate) parse: Named<FuncVal>,
-    pub(crate) stringify: Named<FuncVal>,
+    pub(crate) generate: Named<FuncVal>,
 }
 
 impl Default for SyntaxPrelude {
     fn default() -> Self {
         SyntaxPrelude {
             parse: parse(),
-            stringify: stringify(),
+            generate: generate(),
         }
     }
 }
@@ -31,7 +31,7 @@ impl Default for SyntaxPrelude {
 impl Prelude for SyntaxPrelude {
     fn put(&self, m: &mut CtxMap) {
         self.parse.put(m);
-        self.stringify.put(m);
+        self.generate.put(m);
     }
 }
 
@@ -42,21 +42,21 @@ fn parse() -> Named<FuncVal> {
 }
 
 fn fn_parse(input: Val) -> Val {
-    let Val::String(input) = input else {
+    let Val::Text(input) = input else {
         return Val::default();
     };
     crate::parse(&input).unwrap_or_default()
 }
 
-fn stringify() -> Named<FuncVal> {
+fn generate() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("stringify", input_mode, output_mode, fn_stringify)
+    named_free_fn("generate", input_mode, output_mode, fn_generate)
 }
 
-fn fn_stringify(input: Val) -> Val {
+fn fn_generate(input: Val) -> Val {
     let Ok(str) = crate::generate(&input) else {
         return Val::default();
     };
-    Val::String(Str::from(str).into())
+    Val::Text(Text::from(str).into())
 }

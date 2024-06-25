@@ -1,0 +1,39 @@
+text.length ""
+-----
+"" : 0
+=====
+text.length "1"
+-----
+"1" : 1
+=====
+; [a = "12", text.length .a]
+-----
+2
+=====
+; [a = "hello", b = "world", .a text.push " ", .a text.push &b, &a]
+-----
+"hello world"
+=====
+text.concat ["1", "2"]
+-----
+"12"
+=====
+; [a = "1", b = "2", c = "3", text.concat [&a, &b, &c]]
+-----
+"123"
+=====
+text.concat []
+-----
+""
+=====
+text.concat ["1", "2"]
+-----
+"12"
+=====
+text.into_utf8 "abc"
+-----
+#616263
+=====
+text.from_utf8 #616263
+-----
+"abc"

@@ -7,8 +7,8 @@ use airlang::{
     Ctx,
     Invariant,
     MutableCtx,
-    Str,
     Symbol,
+    Text,
 };
 use airlang_ext::init_ctx;
 
@@ -63,7 +63,7 @@ fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
 }
 
 fn generate_import(path: &str) -> String {
-    let mut src = Str::from("build.import \"");
+    let mut src = Text::from("build.import \"");
     src.push_str_escaped(env!("CARGO_MANIFEST_DIR"));
     src.push_str(path);
     src.push('"');

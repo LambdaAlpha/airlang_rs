@@ -33,8 +33,8 @@ use crate::{
     Map,
     Mode,
     Pair,
-    Str,
     Symbol,
+    Text,
 };
 
 #[derive(Clone)]
@@ -416,10 +416,10 @@ where
             });
             for_iter(ctx, body, name, iter)
         }
-        Val::String(str) => {
-            let iter = str.chars().map(|c| {
-                let str = Str::from(c.to_string());
-                Val::String(str.into())
+        Val::Text(t) => {
+            let iter = t.chars().map(|c| {
+                let str = Text::from(c.to_string());
+                Val::Text(str.into())
             });
             for_iter(ctx, body, name, iter)
         }

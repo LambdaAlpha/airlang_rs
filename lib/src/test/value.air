@@ -22,9 +22,9 @@ bytes
 -----
 symbol
 =====
-; [s = any ! .string, type_of .s]
+; [s = any ! .text, type_of .s]
 -----
-string
+text
 =====
 ; [p = any ! .pair, type_of .p]
 -----
@@ -92,7 +92,7 @@ symbol
 =====
 ; [a = "", type_of .a]
 -----
-string
+text
 =====
 ; [a = 1 : 2, type_of .a]
 -----

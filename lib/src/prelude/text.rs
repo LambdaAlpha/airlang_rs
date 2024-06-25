@@ -12,7 +12,7 @@ use crate::{
         Named,
         Prelude,
     },
-    string::Str,
+    text::Text,
     val::{
         func::FuncVal,
         Val,
@@ -25,7 +25,7 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct StrPrelude {
+pub(crate) struct TextPrelude {
     pub(crate) from_utf8: Named<FuncVal>,
     pub(crate) into_utf8: Named<FuncVal>,
     pub(crate) length: Named<FuncVal>,
@@ -33,9 +33,9 @@ pub(crate) struct StrPrelude {
     pub(crate) concat: Named<FuncVal>,
 }
 
-impl Default for StrPrelude {
+impl Default for TextPrelude {
     fn default() -> Self {
-        StrPrelude {
+        TextPrelude {
             from_utf8: from_utf8(),
             into_utf8: into_utf8(),
             length: length(),
@@ -45,7 +45,7 @@ impl Default for StrPrelude {
     }
 }
 
-impl Prelude for StrPrelude {
+impl Prelude for TextPrelude {
     fn put(&self, m: &mut CtxMap) {
         self.from_utf8.put(m);
         self.into_utf8.put(m);
@@ -58,7 +58,7 @@ impl Prelude for StrPrelude {
 fn from_utf8() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("string.from_utf8", input_mode, output_mode, fn_from_utf8)
+    named_free_fn("text.from_utf8", input_mode, output_mode, fn_from_utf8)
 }
 
 fn fn_from_utf8(input: Val) -> Val {
@@ -67,7 +67,7 @@ fn fn_from_utf8(input: Val) -> Val {
     };
     let bytes = Bytes::from(bytes);
     if let Ok(str) = String::from_utf8(bytes.into()) {
-        Val::String(Str::from(str).into())
+        Val::Text(Text::from(str).into())
     } else {
         Val::default()
     }
@@ -76,30 +76,30 @@ fn fn_from_utf8(input: Val) -> Val {
 fn into_utf8() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("string.into_utf8", input_mode, output_mode, fn_into_utf8)
+    named_free_fn("text.into_utf8", input_mode, output_mode, fn_into_utf8)
 }
 
 fn fn_into_utf8(input: Val) -> Val {
-    let Val::String(str) = input else {
+    let Val::Text(text) = input else {
         return Val::default();
     };
-    let str = Str::from(str);
-    let bytes = Bytes::from(String::from(str).into_bytes());
+    let text = Text::from(text);
+    let bytes = Bytes::from(String::from(text).into_bytes());
     Val::Bytes(bytes.into())
 }
 
 fn length() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("string.length", input_mode, output_mode, fn_length)
+    named_const_fn("text.length", input_mode, output_mode, fn_length)
 }
 
 fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
-        let Val::String(s) = val else {
+        let Val::Text(t) = val else {
             return Val::default();
         };
-        let len: Int = s.len().into();
+        let len: Int = t.len().into();
         Val::Int(len.into())
     })
 }
@@ -107,7 +107,7 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("string.push", input_mode, output_mode, fn_push)
+    named_mutable_fn("text.push", input_mode, output_mode, fn_push)
 }
 
 fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
@@ -115,34 +115,34 @@ fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let Val::String(s) = pair.second else {
+    let Val::Text(t) = pair.second else {
         return Val::default();
     };
     DefaultCtx.with_ref_mut_no_ret(ctx, pair.first, |val| {
-        let Val::String(str) = val else {
+        let Val::Text(text) = val else {
             return;
         };
-        str.push_str(&s);
+        text.push_str(&t);
     })
 }
 
 fn concat() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("string.concat", input_mode, output_mode, fn_concat)
+    named_free_fn("text.concat", input_mode, output_mode, fn_concat)
 }
 
 fn fn_concat(input: Val) -> Val {
-    let Val::List(strings) = input else {
+    let Val::List(texts) = input else {
         return Val::default();
     };
-    let strings = List::from(strings);
+    let texts = List::from(texts);
     let mut ret = String::new();
-    for str in strings {
-        let Val::String(str) = str else {
+    for text in texts {
+        let Val::Text(text) = text else {
             return Val::default();
         };
-        ret.push_str(&str);
+        ret.push_str(&text);
     }
-    Val::String(Str::from(ret).into())
+    Val::Text(Text::from(ret).into())
 }

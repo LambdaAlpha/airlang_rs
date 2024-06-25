@@ -12,13 +12,13 @@ use crate::{
     comment::Comment,
     extension::ValExt,
     number::Number,
-    string::Str,
     symbol::Symbol,
     syntax::{
         generator::GenerateRepr,
         parser::ParseRepr,
         repr::Repr,
     },
+    text::Text,
     unit::Unit,
     val::{
         answer::AnswerVal,
@@ -34,7 +34,7 @@ use crate::{
         map::MapVal,
         number::NumberVal,
         pair::PairVal,
-        string::StrVal,
+        text::TextVal,
     },
     Ask,
     Call,
@@ -53,7 +53,7 @@ pub enum Val {
 
     Int(IntVal),
     Number(NumberVal),
-    String(StrVal),
+    Text(TextVal),
     Pair(PairVal),
     List(ListVal),
     Map(MapVal),
@@ -79,7 +79,7 @@ pub(crate) const BOOL: &str = "boolean";
 pub(crate) const SYMBOL: &str = "symbol";
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
-pub(crate) const STRING: &str = "string";
+pub(crate) const TEXT: &str = "text";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
@@ -147,15 +147,15 @@ impl From<NumberVal> for Val {
     }
 }
 
-impl From<Str> for Val {
-    fn from(value: Str) -> Self {
-        Val::String(StrVal::from(value))
+impl From<Text> for Val {
+    fn from(value: Text) -> Self {
+        Val::Text(TextVal::from(value))
     }
 }
 
-impl From<StrVal> for Val {
-    fn from(value: StrVal) -> Self {
-        Val::String(value)
+impl From<TextVal> for Val {
+    fn from(value: TextVal) -> Self {
+        Val::Text(value)
     }
 }
 
@@ -281,7 +281,7 @@ impl From<&Repr> for Val {
             Repr::Symbol(s) => Val::Symbol(s.clone()),
             Repr::Int(i) => Val::Int(IntVal::from(i.clone())),
             Repr::Number(n) => Val::Number(NumberVal::from(n.clone())),
-            Repr::String(s) => Val::String(StrVal::from(s.clone())),
+            Repr::Text(t) => Val::Text(TextVal::from(t.clone())),
             Repr::Pair(p) => Val::Pair(PairVal::from(&**p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
@@ -301,7 +301,7 @@ impl From<Repr> for Val {
             Repr::Symbol(s) => Val::Symbol(s),
             Repr::Int(i) => Val::Int(IntVal::from(i)),
             Repr::Number(n) => Val::Number(NumberVal::from(n)),
-            Repr::String(s) => Val::String(StrVal::from(s)),
+            Repr::Text(t) => Val::Text(TextVal::from(t)),
             Repr::Pair(p) => Val::Pair(PairVal::from(*p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
@@ -322,7 +322,7 @@ impl TryInto<Repr> for &Val {
             Val::Symbol(s) => Ok(Repr::Symbol(s.clone())),
             Val::Int(i) => Ok(Repr::Int(i.into())),
             Val::Number(n) => Ok(Repr::Number(n.into())),
-            Val::String(s) => Ok(Repr::String(s.into())),
+            Val::Text(t) => Ok(Repr::Text(t.into())),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
             Val::List(l) => Ok(Repr::List(l.try_into()?)),
             Val::Map(m) => Ok(Repr::Map(m.try_into()?)),
@@ -344,7 +344,7 @@ impl TryInto<Repr> for Val {
             Val::Symbol(s) => Ok(Repr::Symbol(s)),
             Val::Int(i) => Ok(Repr::Int(i.into())),
             Val::Number(n) => Ok(Repr::Number(n.into())),
-            Val::String(s) => Ok(Repr::String(s.into())),
+            Val::Text(t) => Ok(Repr::Text(t.into())),
             Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
             Val::List(l) => Ok(Repr::List(l.try_into()?)),
             Val::Map(m) => Ok(Repr::Map(m.try_into()?)),
@@ -379,7 +379,7 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             Val::Symbol(s) => GenerateRepr::Symbol(s),
             Val::Int(i) => GenerateRepr::Int(i),
             Val::Number(n) => GenerateRepr::Number(n),
-            Val::String(s) => GenerateRepr::String(s),
+            Val::Text(t) => GenerateRepr::Text(t),
             Val::Pair(p) => GenerateRepr::Pair(p),
             Val::List(l) => GenerateRepr::List(l),
             Val::Map(m) => GenerateRepr::Map(m),
@@ -401,7 +401,7 @@ impl Debug for Val {
             Val::Symbol(s) => <_ as Debug>::fmt(s, f),
             Val::Int(i) => <_ as Debug>::fmt(i, f),
             Val::Number(n) => <_ as Debug>::fmt(n, f),
-            Val::String(s) => <_ as Debug>::fmt(s, f),
+            Val::Text(t) => <_ as Debug>::fmt(t, f),
             Val::Pair(p) => <_ as Debug>::fmt(p, f),
             Val::List(l) => <_ as Debug>::fmt(l, f),
             Val::Map(m) => <_ as Debug>::fmt(m, f),
@@ -422,7 +422,7 @@ pub(crate) mod int;
 
 pub(crate) mod number;
 
-pub(crate) mod string;
+pub(crate) mod text;
 
 pub(crate) mod pair;
 

@@ -10,8 +10,8 @@ use crate::syntax::{
         map,
         number,
         positive_decimal_int as int,
-        string,
         symbol,
+        text,
         unit,
     },
 };
@@ -25,7 +25,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         comment(bytes(vec![0x7f]), int("5")),
         comment(symbol("a"), int("6")),
         comment(symbol("%"), int("7")),
-        comment(string("s"), int("8")),
+        comment(text("s"), int("8")),
         comment(list(vec![int("1")]), int("9")),
         comment(map(vec![(int("1"), int("2"))]), int("10")),
         comment(call(symbol("a"), list(vec![])), int("11")),

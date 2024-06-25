@@ -27,7 +27,7 @@ pub(crate) const WRAP_RIGHT: char = ')';
 
 pub(crate) const SEPARATOR: char = ',';
 
-pub(crate) const STRING_QUOTE: char = '"';
+pub(crate) const TEXT_QUOTE: char = '"';
 pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // prefixes
@@ -72,7 +72,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
             | MAP_RIGHT
             | WRAP_LEFT
             | WRAP_RIGHT
-            | STRING_QUOTE
+            | TEXT_QUOTE
             | SYMBOL_QUOTE
     )
 }

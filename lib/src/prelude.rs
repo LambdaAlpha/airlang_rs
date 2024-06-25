@@ -39,9 +39,9 @@ use crate::{
         meta::MetaPrelude,
         number::NumberPrelude,
         pair::PairPrelude,
-        str::StrPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
+        text::TextPrelude,
         transform::TransformPrelude,
         unit::UnitPrelude,
         value::ValuePrelude,
@@ -79,7 +79,7 @@ pub(crate) struct AllPrelude {
     pub(crate) int: IntPrelude,
     pub(crate) number: NumberPrelude,
     pub(crate) bytes: BytesPrelude,
-    pub(crate) str: StrPrelude,
+    pub(crate) text: TextPrelude,
     pub(crate) pair: PairPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
@@ -106,7 +106,7 @@ impl Prelude for AllPrelude {
         self.int.put(m);
         self.number.put(m);
         self.bytes.put(m);
-        self.str.put(m);
+        self.text.put(m);
         self.pair.put(m);
         self.list.put(m);
         self.map.put(m);
@@ -320,7 +320,7 @@ mod number;
 
 mod bytes;
 
-mod str;
+mod text;
 
 mod pair;
 

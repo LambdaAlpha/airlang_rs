@@ -44,9 +44,9 @@ pub use self::{
     },
     number::Number,
     pair::Pair,
-    string::Str,
     symbol::Symbol,
     syntax::generator::ReprError,
+    text::Text,
     transform::Transform,
     unit::Unit,
     val::{
@@ -63,7 +63,7 @@ pub use self::{
         map::MapVal,
         number::NumberVal,
         pair::PairVal,
-        string::StrVal,
+        text::TextVal,
         Val,
     },
 };
@@ -131,7 +131,7 @@ pub(crate) mod bytes;
 
 pub(crate) mod symbol;
 
-pub(crate) mod string;
+pub(crate) mod text;
 
 pub(crate) mod pair;
 

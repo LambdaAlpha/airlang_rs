@@ -71,7 +71,6 @@ use crate::{
     map::Map,
     number::Number,
     pair::Pair,
-    string::Str,
     symbol::Symbol,
     syntax::{
         is_delimiter,
@@ -87,13 +86,14 @@ use crate::{
         PAIR_INFIX,
         SEPARATOR,
         SHIFT_PREFIX,
-        STRING_QUOTE,
         SYMBOL_QUOTE,
+        TEXT_QUOTE,
         TRUE,
         UNIT,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
+    text::Text,
     unit::Unit,
     utils,
 };
@@ -105,7 +105,7 @@ pub(crate) trait ParseRepr:
     + From<Number>
     + From<Bytes>
     + From<Symbol>
-    + From<Str>
+    + From<Text>
     + From<Pair<Self, Self>>
     + From<Call<Self, Self>>
     + From<Ask<Self, Self>>
@@ -232,7 +232,7 @@ where
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
 
-        STRING_QUOTE => |s| map(string, Token::Default)(s),
+        TEXT_QUOTE => |s| map(text, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
 
         s if is_symbol(s) => unquote_symbol,
@@ -528,20 +528,20 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let fragment = alt((
-        map(symbol_literal, StringFragment::Literal),
-        map(symbol_escaped_char, StringFragment::Escaped),
-        value(StringFragment::Space(""), symbol_whitespace),
+        map(symbol_literal, TextFragment::Literal),
+        map(symbol_escaped_char, TextFragment::Escaped),
+        value(TextFragment::Space(""), symbol_whitespace),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         match fragment {
-            StringFragment::Literal(s) => string.push_str(s),
-            StringFragment::Escaped(c) => string.push(c),
-            StringFragment::Space(_s) => {}
+            TextFragment::Literal(s) => string.push_str(s),
+            TextFragment::Escaped(c) => string.push(c),
+            TextFragment::Space(_s) => {}
         }
         string
     });
-    let delimited_string = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
-    let f = map(delimited_string, |s| From::from(Symbol::from_string(s)));
+    let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
+    let f = map(delimited_symbol, |s| From::from(Symbol::from_string(s)));
     context("quoted_symbol", f)(src)
 }
 
@@ -577,37 +577,37 @@ where
     context("symbol_literal", f)(src)
 }
 
-fn string<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let fragment = alt((
-        map(string_literal, StringFragment::Literal),
-        map(string_escaped_char, StringFragment::Escaped),
-        map(string_whitespace, StringFragment::Space),
+        map(text_literal, TextFragment::Literal),
+        map(text_escaped_char, TextFragment::Escaped),
+        map(text_whitespace, TextFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         match fragment {
-            StringFragment::Literal(s) => string.push_str(s),
-            StringFragment::Escaped(c) => string.push(c),
-            StringFragment::Space(s) => string.push_str(s),
+            TextFragment::Literal(s) => string.push_str(s),
+            TextFragment::Escaped(c) => string.push(c),
+            TextFragment::Space(s) => string.push_str(s),
         }
         string
     });
-    let delimited_string = delimited_cut(STRING_QUOTE, collect_fragments, STRING_QUOTE);
-    let f = map(delimited_string, |s| From::from(Str::from(s)));
-    context("string", f)(src)
+    let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
+    let f = map(delimited_text, |s| From::from(Text::from(s)));
+    context("text", f)(src)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum StringFragment<'a> {
+enum TextFragment<'a> {
     Literal(&'a str),
     Escaped(char),
     Space(&'a str),
 }
 
-fn string_escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
+fn text_escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
@@ -619,12 +619,12 @@ where
             value('\r', char1('r')),
             value('\t', char1('t')),
             value('\\', char1('\\')),
-            value(STRING_QUOTE, char1(STRING_QUOTE)),
+            value(TEXT_QUOTE, char1(TEXT_QUOTE)),
             value(' ', char1(' ')),
             value(' ', char1('s')),
         )),
     );
-    context("string_escaped_char", f)(src)
+    context("text_escaped_char", f)(src)
 }
 
 fn unicode<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
@@ -639,7 +639,7 @@ where
 }
 
 // ignore \t, \r, \n and the spaces around them
-fn string_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn text_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
@@ -650,16 +650,16 @@ where
             &s[0..0]
         }
     });
-    context("string_whitespace", f)(src)
+    context("text_whitespace", f)(src)
 }
 
-fn string_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn text_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let normal = is_not("\"\\ \t\r\n");
     let f = verify(normal, |s: &str| !s.is_empty());
-    context("string_literal", f)(src)
+    context("text_literal", f)(src)
 }
 
 fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>

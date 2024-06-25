@@ -5,8 +5,8 @@ use airlang::{
     List,
     Mode,
     MutableCtx,
-    Str,
     Symbol,
+    Text,
     Transform,
     Val,
 };
@@ -49,7 +49,7 @@ fn fn_call(input: Val) -> Val {
         return Val::default();
     };
     let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
-    let Some(Val::String(program)) = map.remove(&program_key) else {
+    let Some(Val::Text(program)) = map.remove(&program_key) else {
         return Val::default();
     };
     let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
@@ -60,10 +60,10 @@ fn fn_call(input: Val) -> Val {
     let arguments = arguments
         .into_iter()
         .map(|val| {
-            let Val::String(arg) = val else {
+            let Val::Text(arg) = val else {
                 return None;
             };
-            let arg = Str::from(arg);
+            let arg = Text::from(arg);
             Some(String::from(arg))
         })
         .collect::<Option<Vec<String>>>();

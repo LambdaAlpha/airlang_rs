@@ -21,7 +21,6 @@ use crate::{
     map::Map,
     number::Number,
     pair::Pair,
-    string::Str,
     symbol::Symbol,
     syntax::{
         is_delimiter,
@@ -37,13 +36,14 @@ use crate::{
         MAP_RIGHT,
         PAIR_INFIX,
         SEPARATOR,
-        STRING_QUOTE,
         SYMBOL_QUOTE,
+        TEXT_QUOTE,
         TRUE,
         UNIT,
         WRAP_LEFT,
         WRAP_RIGHT,
     },
+    text::Text,
     unit::Unit,
     utils,
 };
@@ -113,7 +113,7 @@ where
     Symbol(&'a Symbol),
     Int(&'a Int),
     Number(&'a Number),
-    String(&'a Str),
+    Text(&'a Text),
     Pair(&'a Pair<T, T>),
     List(&'a List<T>),
     Map(&'a Map<T, T>),
@@ -139,7 +139,7 @@ where
         GenerateRepr::Symbol(str) => generate_symbol(str, s),
         GenerateRepr::Int(i) => generate_int(i, s),
         GenerateRepr::Number(n) => generate_number(n, s),
-        GenerateRepr::String(str) => generate_string(str, s),
+        GenerateRepr::Text(t) => generate_text(t, s),
         GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
@@ -195,33 +195,33 @@ fn generate_bytes(bytes: &Bytes, s: &mut String) {
     utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
 }
 
-fn generate_string(str: &str, s: &mut String) {
-    s.push(STRING_QUOTE);
-    escape_string(str, s);
-    s.push(STRING_QUOTE);
+fn generate_text(str: &Text, s: &mut String) {
+    s.push(TEXT_QUOTE);
+    escape_text(str, s);
+    s.push(TEXT_QUOTE);
 }
 
-pub(crate) fn escape_string(str: &str, s: &mut String) {
+pub(crate) fn escape_text(str: &str, s: &mut String) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\".to_owned(),
             '\n' => "\\n".to_owned(),
             '\r' => "\\r".to_owned(),
             '\t' => "\\t".to_owned(),
-            STRING_QUOTE => format!("\\{}", STRING_QUOTE),
+            TEXT_QUOTE => format!("\\{}", TEXT_QUOTE),
             _ => c.to_string(),
         };
         s.push_str(&escaped);
     }
 }
 
-fn generate_symbol(str: &str, s: &mut String) {
-    if !is_need_quote(str) {
-        return s.push_str(str);
+fn generate_symbol(symbol: &Symbol, s: &mut String) {
+    if !is_need_quote(symbol) {
+        return s.push_str(symbol);
     }
 
     s.push(SYMBOL_QUOTE);
-    for c in str.chars() {
+    for c in symbol.chars() {
         let escaped = match c {
             '\\' => "\\\\".to_owned(),
             SYMBOL_QUOTE => format!("\\{}", SYMBOL_QUOTE),
@@ -242,7 +242,7 @@ fn is_need_quote(str: &str) -> bool {
     let mut chars = str.chars();
     let first = chars.next().unwrap();
     match first {
-        BYTES_PREFIX | SYMBOL_QUOTE | STRING_QUOTE | '0'..='9' => return true,
+        BYTES_PREFIX | SYMBOL_QUOTE | TEXT_QUOTE | '0'..='9' => return true,
         '+' | '-' if matches!(chars.next(), Some('0'..='9')) => return true,
         _ => {}
     }

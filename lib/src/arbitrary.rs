@@ -49,8 +49,8 @@ use crate::{
         Prelude,
         PRELUDE,
     },
-    string::Str,
     symbol::Symbol,
+    text::Text,
     transform::Transform,
     unit::Unit,
     val::func::FuncVal,
@@ -78,7 +78,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // int
         weight, // number
         weight, // bytes
-        weight, // string
+        weight, // text
         1,      // pair
         1,      // call
         1,      // ask
@@ -102,7 +102,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         3 => Val::Int(any_int(rng).into()),
         4 => Val::Number(any_number(rng).into()),
         5 => Val::Bytes(any_bytes(rng).into()),
-        6 => Val::String(any_string(rng).into()),
+        6 => Val::Text(any_text(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Call(any_call(rng, new_depth).into()),
         9 => Val::Ask(any_ask(rng, new_depth).into()),
@@ -169,10 +169,10 @@ pub(crate) fn any_symbol(rng: &mut SmallRng) -> Symbol {
     Symbol::from_string(s)
 }
 
-pub(crate) fn any_string(rng: &mut SmallRng) -> Str {
+pub(crate) fn any_text(rng: &mut SmallRng) -> Text {
     let len = any_len(rng);
     let s: String = rng.sample_iter::<char, _>(Standard).take(len).collect();
-    Str::from(s)
+    Text::from(s)
 }
 
 pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> Pair<Val, Val> {

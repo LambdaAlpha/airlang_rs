@@ -14,8 +14,8 @@ use airlang::{
     Invariant,
     Mode,
     MutableCtx,
-    Str,
     Symbol,
+    Text,
     Val,
 };
 
@@ -53,10 +53,10 @@ fn import() -> Named<FuncVal> {
 const CUR_URL_KEY: &str = "build.this_url";
 
 fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
-    let Val::String(url) = input else {
+    let Val::Text(url) = input else {
         return Val::default();
     };
-    let url = Str::from(url);
+    let url = Text::from(url);
     let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
     let cur_url = get_cur_url(ctx.reborrow(), cur_url_key.clone());
     let new_url = cur_url
@@ -87,7 +87,7 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
     if let Ok(meta) = ctx.meta() {
         if let Ok(val) = meta.get_ref(key) {
-            return if let Val::String(url) = val {
+            return if let Val::Text(url) = val {
                 Some((***url).clone())
             } else {
                 None
@@ -105,13 +105,13 @@ fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
 
 fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) -> bool {
     if let Some(meta) = ctx.reborrow().meta() {
-        meta.put(key, Invariant::None, Val::String(Str::from(new_url).into()))
+        meta.put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
             .is_ok()
     } else {
         let mut meta = Ctx::default();
         let meta_mut = MutableCtx::new(&mut meta);
         meta_mut
-            .put(key, Invariant::None, Val::String(Str::from(new_url).into()))
+            .put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
             .expect("put into a mutable empty ctx should never fail");
         ctx.set_meta(Some(meta));
         true

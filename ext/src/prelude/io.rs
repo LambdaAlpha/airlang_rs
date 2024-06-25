@@ -69,10 +69,10 @@ fn fn_read_line(ctx: CtxForMutableFn, input: Val) -> Val {
     let Ok(str) = ctx.get_ref_mut(s) else {
         return Val::default();
     };
-    let Val::String(str) = str else {
+    let Val::Text(t) = str else {
         return Val::default();
     };
-    let _ = stdin().read_line(str);
+    let _ = stdin().read_line(t);
     Val::default()
 }
 
@@ -83,10 +83,10 @@ fn print() -> Named<FuncVal> {
 }
 
 fn fn_print(input: Val) -> Val {
-    let Val::String(s) = input else {
+    let Val::Text(t) = input else {
         return Val::default();
     };
-    print!("{}", &**s);
+    print!("{}", &**t);
     Val::default()
 }
 
@@ -97,10 +97,10 @@ fn print_line() -> Named<FuncVal> {
 }
 
 fn fn_print_line(input: Val) -> Val {
-    let Val::String(s) = input else {
+    let Val::Text(t) = input else {
         return Val::default();
     };
-    println!("{}", &**s);
+    println!("{}", &**t);
     Val::default()
 }
 
@@ -122,10 +122,10 @@ fn error_print() -> Named<FuncVal> {
 }
 
 fn fn_error_print(input: Val) -> Val {
-    let Val::String(s) = input else {
+    let Val::Text(t) = input else {
         return Val::default();
     };
-    eprint!("{}", &**s);
+    eprint!("{}", &**t);
     Val::default()
 }
 
@@ -141,10 +141,10 @@ fn error_print_line() -> Named<FuncVal> {
 }
 
 fn fn_error_print_line(input: Val) -> Val {
-    let Val::String(s) = input else {
+    let Val::Text(t) = input else {
         return Val::default();
     };
-    eprintln!("{}", &**s);
+    eprintln!("{}", &**t);
     Val::default()
 }
 

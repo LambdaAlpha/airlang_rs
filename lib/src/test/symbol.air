@@ -1,23 +1,23 @@
-symbol.from_string ""
+symbol.from_text ""
 -----
 ''
 =====
-symbol.from_string "hello world"
+symbol.from_text "hello world"
 -----
 .
 =====
-symbol.from_string "hello_world!"
+symbol.from_text "hello_world!"
 -----
 hello_world!
 =====
-symbol.from_string "{}"
+symbol.from_text "{}"
 -----
 '{}'
 =====
-symbol.into_string '.'
+symbol.into_text '.'
 -----
 ""
 =====
-symbol.into_string ! .hello_world!
+symbol.into_text ! .hello_world!
 -----
 "hello_world!"
