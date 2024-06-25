@@ -14,21 +14,21 @@ text.length "1"
 -----
 "hello world"
 =====
-text.concat ["1", "2"]
+"" text.join ["1", "2"]
 -----
 "12"
 =====
-; [a = "1", b = "2", c = "3", text.concat [&a, &b, &c]]
+; [a = "1", b = "2", c = "3", . text.join [&a, &b, &c]]
 -----
 "123"
 =====
-text.concat []
+. text.join []
 -----
 ""
 =====
-text.concat ["1", "2"]
+"." text.join ["1", "2"]
 -----
-"12"
+"1.2"
 =====
 text.into_utf8 "abc"
 -----

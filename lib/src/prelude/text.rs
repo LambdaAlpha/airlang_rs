@@ -19,7 +19,6 @@ use crate::{
     },
     Bytes,
     Int,
-    List,
     Mode,
     Pair,
 };
@@ -30,7 +29,7 @@ pub(crate) struct TextPrelude {
     pub(crate) into_utf8: Named<FuncVal>,
     pub(crate) length: Named<FuncVal>,
     pub(crate) push: Named<FuncVal>,
-    pub(crate) concat: Named<FuncVal>,
+    pub(crate) join: Named<FuncVal>,
 }
 
 impl Default for TextPrelude {
@@ -40,7 +39,7 @@ impl Default for TextPrelude {
             into_utf8: into_utf8(),
             length: length(),
             push: push(),
-            concat: concat(),
+            join: join(),
         }
     }
 }
@@ -51,7 +50,7 @@ impl Prelude for TextPrelude {
         self.into_utf8.put(m);
         self.length.put(m);
         self.push.put(m);
-        self.concat.put(m);
+        self.join.put(m);
     }
 }
 
@@ -126,23 +125,37 @@ fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
     })
 }
 
-fn concat() -> Named<FuncVal> {
+fn join() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("text.concat", input_mode, output_mode, fn_concat)
+    named_free_fn("text.join", input_mode, output_mode, fn_join)
 }
 
-fn fn_concat(input: Val) -> Val {
-    let Val::List(texts) = input else {
+fn fn_join(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let texts = List::from(texts);
-    let mut ret = String::new();
-    for text in texts {
-        let Val::Text(text) = text else {
-            return Val::default();
-        };
-        ret.push_str(&text);
-    }
-    Val::Text(Text::from(ret).into())
+    let separator = match &pair.first {
+        Val::Unit(_) => "",
+        Val::Text(t) => t,
+        _ => return Val::default(),
+    };
+    let Val::List(texts) = &pair.second else {
+        return Val::default();
+    };
+    let texts: Option<Vec<&str>> = texts
+        .iter()
+        .map(|v| {
+            let Val::Text(t) = v else {
+                return None;
+            };
+            let s: &str = t;
+            Some(s)
+        })
+        .collect();
+    let Some(texts) = texts else {
+        return Val::default();
+    };
+    let text = texts.join(separator);
+    Val::Text(Text::from(text).into())
 }
