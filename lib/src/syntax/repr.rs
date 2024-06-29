@@ -24,7 +24,7 @@ use crate::{
         ParseError,
     },
     Bool,
-    Bytes,
+    Byte,
     Int,
     Number,
     Symbol,
@@ -43,7 +43,7 @@ pub enum Repr {
     Pair(Box<PairRepr>),
     List(ListRepr),
     Map(MapRepr),
-    Bytes(Bytes),
+    Byte(Byte),
     Call(Box<CallRepr>),
     Ask(Box<AskRepr>),
     Comment(Box<CommentRepr>),
@@ -121,9 +121,9 @@ impl From<CommentRepr> for Repr {
     }
 }
 
-impl From<Bytes> for Repr {
-    fn from(b: Bytes) -> Self {
-        Repr::Bytes(b)
+impl From<Byte> for Repr {
+    fn from(b: Byte) -> Self {
+        Repr::Byte(b)
     }
 }
 
@@ -212,7 +212,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Pair(p) => GenerateRepr::Pair(p),
             Repr::List(l) => GenerateRepr::List(l),
             Repr::Map(m) => GenerateRepr::Map(m),
-            Repr::Bytes(b) => GenerateRepr::Bytes(b),
+            Repr::Byte(b) => GenerateRepr::Byte(b),
             Repr::Call(c) => GenerateRepr::Call(c),
             Repr::Ask(a) => GenerateRepr::Ask(a),
             Repr::Comment(a) => GenerateRepr::Comment(a),

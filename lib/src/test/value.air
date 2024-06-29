@@ -14,9 +14,9 @@ integer
 -----
 number
 =====
-; [b = any ! .bytes, type_of .b]
+; [b = any ! .byte, type_of .b]
 -----
-bytes
+byte
 =====
 ; [s = any ! .symbol, type_of .s]
 -----
@@ -84,7 +84,7 @@ number
 =====
 ; [a = #ff, type_of .a]
 -----
-bytes
+byte
 =====
 ; [a = .a, type_of .a]
 -----

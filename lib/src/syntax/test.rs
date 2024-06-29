@@ -29,7 +29,7 @@ use crate::{
 };
 
 mod boolean;
-mod bytes;
+mod byte;
 mod call;
 mod infix;
 mod comment;
@@ -69,8 +69,8 @@ fn number(radix: u8, significand: &str, shift: usize, exp: &str) -> Repr {
     Repr::Number(num)
 }
 
-fn bytes(b: Vec<u8>) -> Repr {
-    Repr::Bytes(b.into())
+fn byte(b: Vec<u8>) -> Repr {
+    Repr::Byte(b.into())
 }
 
 fn symbol(s: &str) -> Repr {
@@ -257,17 +257,17 @@ fn test_generate_number() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_bytes() -> Result<(), Box<dyn Error>> {
+fn test_parse_byte() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/bytes.air"),
-        "test/bytes.air",
-        bytes::expected,
+        include_str!("test/byte.air"),
+        "test/byte.air",
+        byte::expected,
     )
 }
 
 #[test]
-fn test_generate_bytes() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/bytes.air"), "test/bytes.air")
+fn test_generate_byte() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/byte.air"), "test/byte.air")
 }
 
 #[test]

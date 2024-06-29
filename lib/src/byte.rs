@@ -4,40 +4,40 @@ use std::fmt::{
 };
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
-pub struct Bytes(Vec<u8>);
+pub struct Byte(Vec<u8>);
 
-impl From<&[u8]> for Bytes {
+impl From<&[u8]> for Byte {
     fn from(value: &[u8]) -> Self {
-        Bytes(value.to_owned())
+        Byte(value.to_owned())
     }
 }
 
-impl From<Vec<u8>> for Bytes {
+impl From<Vec<u8>> for Byte {
     fn from(value: Vec<u8>) -> Self {
-        Bytes(value)
+        Byte(value)
     }
 }
 
-impl From<Bytes> for Vec<u8> {
-    fn from(value: Bytes) -> Self {
+impl From<Byte> for Vec<u8> {
+    fn from(value: Byte) -> Self {
         value.0
     }
 }
 
-impl From<&Bytes> for Vec<u8> {
-    fn from(value: &Bytes) -> Self {
+impl From<&Byte> for Vec<u8> {
+    fn from(value: &Byte) -> Self {
         value.0.clone()
     }
 }
 
-impl AsRef<[u8]> for Bytes {
+impl AsRef<[u8]> for Byte {
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
 }
 
-impl Debug for Bytes {
+impl Debug for Byte {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Bytes({:02x?})", self.0)
+        write!(f, "Byte({:02x?})", self.0)
     }
 }

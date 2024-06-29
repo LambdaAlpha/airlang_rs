@@ -63,7 +63,7 @@ use num_traits::Num;
 use crate::{
     ask::Ask,
     bool::Bool,
-    bytes::Bytes,
+    byte::Byte,
     call::Call,
     comment::Comment,
     int::Int,
@@ -75,7 +75,7 @@ use crate::{
     syntax::{
         is_delimiter,
         ASK_INFIX,
-        BYTES_PREFIX,
+        BYTE_PREFIX,
         CALL_INFIX,
         COMMENT_INFIX,
         FALSE,
@@ -103,7 +103,7 @@ pub(crate) trait ParseRepr:
     + From<Bool>
     + From<Int>
     + From<Number>
-    + From<Bytes>
+    + From<Byte>
     + From<Symbol>
     + From<Text>
     + From<Pair<Self, Self>>
@@ -264,7 +264,7 @@ where
 
     match first {
         '0'..='9' => return token_all_consuming(src, rest, number),
-        BYTES_PREFIX => return token_all_consuming(src, rest, bytes),
+        BYTE_PREFIX => return token_all_consuming(src, rest, byte),
         _ => {}
     }
 
@@ -787,19 +787,19 @@ where
     From::from(n)
 }
 
-fn bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let hex = preceded(tag("X"), cut(hexadecimal_bytes));
-    let bin = preceded(tag("B"), cut(binary_bytes));
-    let bytes = alt((hex, bin, hexadecimal_bytes));
-    let f = preceded(char1(BYTES_PREFIX), bytes);
-    context("bytes", f)(src)
+    let hex = preceded(tag("X"), cut(hexadecimal_byte));
+    let bin = preceded(tag("B"), cut(binary_byte));
+    let byte = alt((hex, bin, hexadecimal_byte));
+    let f = preceded(char1(BYTE_PREFIX), byte);
+    context("byte", f)(src)
 }
 
-fn hexadecimal_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn hexadecimal_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
@@ -807,14 +807,14 @@ where
     let digits = verify(hexadecimal1, |s: &str| s.len() % 2 == 0);
     let digits = trim_num0(digits);
     let f = map_res(digits, |s| {
-        Ok(From::from(Bytes::from(
+        Ok(From::from(Byte::from(
             utils::conversion::hex_str_to_vec_u8(&s)?,
         )))
     });
-    context("hexadecimal_bytes", f)(src)
+    context("hexadecimal_byte", f)(src)
 }
 
-fn binary_bytes<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn binary_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
@@ -822,11 +822,11 @@ where
     let digits = verify(binary1, |s: &str| s.len() % 8 == 0);
     let digits = trim_num0(digits);
     let f = map_res(digits, |s| {
-        Ok(From::from(Bytes::from(
+        Ok(From::from(Byte::from(
             utils::conversion::bin_str_to_vec_u8(&s)?,
         )))
     });
-    context("binary_bytes", f)(src)
+    context("binary_byte", f)(src)
 }
 
 fn hexadecimal1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>

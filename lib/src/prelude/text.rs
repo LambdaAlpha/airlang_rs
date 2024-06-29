@@ -17,7 +17,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
-    Bytes,
+    Byte,
     Int,
     Mode,
     Pair,
@@ -61,11 +61,11 @@ fn from_utf8() -> Named<FuncVal> {
 }
 
 fn fn_from_utf8(input: Val) -> Val {
-    let Val::Bytes(bytes) = input else {
+    let Val::Byte(byte) = input else {
         return Val::default();
     };
-    let bytes = Bytes::from(bytes);
-    if let Ok(str) = String::from_utf8(bytes.into()) {
+    let byte = Byte::from(byte);
+    if let Ok(str) = String::from_utf8(byte.into()) {
         Val::Text(Text::from(str).into())
     } else {
         Val::default()
@@ -83,8 +83,8 @@ fn fn_into_utf8(input: Val) -> Val {
         return Val::default();
     };
     let text = Text::from(text);
-    let bytes = Bytes::from(String::from(text).into_bytes());
-    Val::Bytes(bytes.into())
+    let byte = Byte::from(String::from(text).into_bytes());
+    Val::Byte(byte.into())
 }
 
 fn length() -> Named<FuncVal> {

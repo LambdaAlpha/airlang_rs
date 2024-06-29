@@ -25,7 +25,7 @@ use crate::{
         answer::AnswerPrelude,
         ask::AskPrelude,
         bool::BoolPrelude,
-        bytes::BytesPrelude,
+        byte::BytePrelude,
         call::CallPrelude,
         case::CasePrelude,
         comment::CommentPrelude,
@@ -78,7 +78,7 @@ pub(crate) struct AllPrelude {
     pub(crate) bool: BoolPrelude,
     pub(crate) int: IntPrelude,
     pub(crate) number: NumberPrelude,
-    pub(crate) bytes: BytesPrelude,
+    pub(crate) byte: BytePrelude,
     pub(crate) text: TextPrelude,
     pub(crate) pair: PairPrelude,
     pub(crate) list: ListPrelude,
@@ -105,7 +105,7 @@ impl Prelude for AllPrelude {
         self.bool.put(m);
         self.int.put(m);
         self.number.put(m);
-        self.bytes.put(m);
+        self.byte.put(m);
         self.text.put(m);
         self.pair.put(m);
         self.list.put(m);
@@ -318,7 +318,7 @@ mod int;
 
 mod number;
 
-mod bytes;
+mod byte;
 
 mod text;
 

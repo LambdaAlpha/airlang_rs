@@ -4,15 +4,15 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct BytesPrelude {}
+pub(crate) struct BytePrelude {}
 
 #[allow(clippy::derivable_impls)]
-impl Default for BytesPrelude {
+impl Default for BytePrelude {
     fn default() -> Self {
-        BytesPrelude {}
+        BytePrelude {}
     }
 }
 
-impl Prelude for BytesPrelude {
+impl Prelude for BytePrelude {
     fn put(&self, _m: &mut CtxMap) {}
 }

@@ -13,7 +13,7 @@ use num_traits::Signed;
 use crate::{
     ask::Ask,
     bool::Bool,
-    bytes::Bytes,
+    byte::Byte,
     call::Call,
     comment::Comment,
     int::Int,
@@ -26,7 +26,7 @@ use crate::{
         is_delimiter,
         maybe_keyword,
         ASK_INFIX,
-        BYTES_PREFIX,
+        BYTE_PREFIX,
         CALL_INFIX,
         COMMENT_INFIX,
         FALSE,
@@ -117,7 +117,7 @@ where
     Pair(&'a Pair<T, T>),
     List(&'a List<T>),
     Map(&'a Map<T, T>),
-    Bytes(&'a Bytes),
+    Byte(&'a Byte),
     Call(&'a Call<T, T>),
     Ask(&'a Ask<T, T>),
     Comment(&'a Comment<T, T>),
@@ -143,7 +143,7 @@ where
         GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
-        GenerateRepr::Bytes(bytes) => generate_bytes(bytes, s),
+        GenerateRepr::Byte(byte) => generate_byte(byte, s),
         GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
         GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
         GenerateRepr::Comment(a) => generate_comment(a, s, format, indent)?,
@@ -186,13 +186,13 @@ fn generate_number(n: &Number, s: &mut String) {
     write!(s, "{}", n.exp()).unwrap();
 }
 
-fn generate_bytes(bytes: &Bytes, s: &mut String) {
-    s.push(BYTES_PREFIX);
-    if bytes.as_ref().is_empty() {
+fn generate_byte(byte: &Byte, s: &mut String) {
+    s.push(BYTE_PREFIX);
+    if byte.as_ref().is_empty() {
         return;
     }
     s.push('X');
-    utils::conversion::u8_array_to_hex_string_mut(bytes.as_ref(), s);
+    utils::conversion::u8_array_to_hex_string_mut(byte.as_ref(), s);
 }
 
 fn generate_text(str: &Text, s: &mut String) {
@@ -242,7 +242,7 @@ fn is_need_quote(str: &str) -> bool {
     let mut chars = str.chars();
     let first = chars.next().unwrap();
     match first {
-        BYTES_PREFIX | SYMBOL_QUOTE | TEXT_QUOTE | '0'..='9' => return true,
+        BYTE_PREFIX | SYMBOL_QUOTE | TEXT_QUOTE | '0'..='9' => return true,
         '+' | '-' if matches!(chars.next(), Some('0'..='9')) => return true,
         _ => {}
     }

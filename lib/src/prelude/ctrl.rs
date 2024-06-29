@@ -26,7 +26,7 @@ use crate::{
         func::FuncVal,
         Val,
     },
-    Bytes,
+    Byte,
     Call,
     Int,
     List,
@@ -402,10 +402,10 @@ where
             });
             for_iter(ctx, body, name, iter)
         }
-        Val::Bytes(bytes) => {
-            let iter = bytes.as_ref().iter().map(|byte| {
-                let bytes = Bytes::from(std::slice::from_ref(byte));
-                Val::Bytes(bytes.into())
+        Val::Byte(byte) => {
+            let iter = byte.as_ref().iter().map(|byte| {
+                let byte = Byte::from(std::slice::from_ref(byte));
+                Val::Byte(byte.into())
             });
             for_iter(ctx, body, name, iter)
         }

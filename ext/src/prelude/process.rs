@@ -1,7 +1,7 @@
 use std::process::Command;
 
 use airlang::{
-    Bytes,
+    Byte,
     FuncVal,
     Int,
     List,
@@ -79,8 +79,8 @@ fn fn_call(input: Val) -> Val {
         return Val::default();
     };
 
-    let stdout = Val::Bytes(Bytes::from(output.stdout).into());
-    let stderr = Val::Bytes(Bytes::from(output.stderr).into());
+    let stdout = Val::Byte(Byte::from(output.stdout).into());
+    let stderr = Val::Byte(Byte::from(output.stderr).into());
     let status = if let Some(status) = output.status.code() {
         Val::Int(Int::from(status).into())
     } else {

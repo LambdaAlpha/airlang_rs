@@ -155,8 +155,8 @@ fn test_number() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_bytes() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/bytes.air"), "test/bytes.air")
+fn test_byte() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/byte.air"), "test/byte.air")
 }
 
 #[test]

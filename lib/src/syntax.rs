@@ -32,7 +32,7 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // prefixes
 
-pub(crate) const BYTES_PREFIX: char = '#';
+pub(crate) const BYTE_PREFIX: char = '#';
 
 // keywords
 

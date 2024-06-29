@@ -8,7 +8,7 @@ use std::{
 
 use crate::{
     bool::Bool,
-    bytes::Bytes,
+    byte::Byte,
     comment::Comment,
     extension::ValExt,
     number::Number,
@@ -23,7 +23,7 @@ use crate::{
     val::{
         answer::AnswerVal,
         ask::AskVal,
-        bytes::BytesVal,
+        byte::ByteVal,
         call::CallVal,
         case::CaseVal,
         comment::CommentVal,
@@ -58,7 +58,7 @@ pub enum Val {
     List(ListVal),
     Map(MapVal),
 
-    Bytes(BytesVal),
+    Byte(ByteVal),
     Call(CallVal),
     Ask(AskVal),
 
@@ -83,7 +83,7 @@ pub(crate) const TEXT: &str = "text";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
-pub(crate) const BYTES: &str = "bytes";
+pub(crate) const BYTE: &str = "byte";
 pub(crate) const CALL: &str = "call";
 pub(crate) const ASK: &str = "ask";
 pub(crate) const COMMENT: &str = "comment";
@@ -207,15 +207,15 @@ impl From<CommentVal> for Val {
     }
 }
 
-impl From<Bytes> for Val {
-    fn from(value: Bytes) -> Self {
-        Val::Bytes(BytesVal::from(value))
+impl From<Byte> for Val {
+    fn from(value: Byte) -> Self {
+        Val::Byte(ByteVal::from(value))
     }
 }
 
-impl From<BytesVal> for Val {
-    fn from(value: BytesVal) -> Self {
-        Val::Bytes(value)
+impl From<ByteVal> for Val {
+    fn from(value: ByteVal) -> Self {
+        Val::Byte(value)
     }
 }
 
@@ -285,7 +285,7 @@ impl From<&Repr> for Val {
             Repr::Pair(p) => Val::Pair(PairVal::from(&**p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
-            Repr::Bytes(b) => Val::Bytes(BytesVal::from(b.clone())),
+            Repr::Byte(b) => Val::Byte(ByteVal::from(b.clone())),
             Repr::Call(c) => Val::Call(CallVal::from(&**c)),
             Repr::Ask(a) => Val::Ask(AskVal::from(&**a)),
             Repr::Comment(a) => Val::Comment(CommentVal::from(&**a)),
@@ -305,7 +305,7 @@ impl From<Repr> for Val {
             Repr::Pair(p) => Val::Pair(PairVal::from(*p)),
             Repr::List(l) => Val::List(ListVal::from(l)),
             Repr::Map(m) => Val::Map(MapVal::from(m)),
-            Repr::Bytes(b) => Val::Bytes(BytesVal::from(b)),
+            Repr::Byte(b) => Val::Byte(ByteVal::from(b)),
             Repr::Call(c) => Val::Call(CallVal::from(*c)),
             Repr::Ask(a) => Val::Ask(AskVal::from(*a)),
             Repr::Comment(a) => Val::Comment(CommentVal::from(*a)),
@@ -326,7 +326,7 @@ impl TryInto<Repr> for &Val {
             Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
             Val::List(l) => Ok(Repr::List(l.try_into()?)),
             Val::Map(m) => Ok(Repr::Map(m.try_into()?)),
-            Val::Bytes(b) => Ok(Repr::Bytes(b.into())),
+            Val::Byte(b) => Ok(Repr::Byte(b.into())),
             Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
             Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
             Val::Comment(a) => Ok(Repr::Comment(Box::new(a.try_into()?))),
@@ -348,7 +348,7 @@ impl TryInto<Repr> for Val {
             Val::Pair(p) => Ok(Repr::Pair(Box::new(p.try_into()?))),
             Val::List(l) => Ok(Repr::List(l.try_into()?)),
             Val::Map(m) => Ok(Repr::Map(m.try_into()?)),
-            Val::Bytes(b) => Ok(Repr::Bytes(b.into())),
+            Val::Byte(b) => Ok(Repr::Byte(b.into())),
             Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
             Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
             Val::Comment(a) => Ok(Repr::Comment(Box::new(a.try_into()?))),
@@ -383,7 +383,7 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             Val::Pair(p) => GenerateRepr::Pair(p),
             Val::List(l) => GenerateRepr::List(l),
             Val::Map(m) => GenerateRepr::Map(m),
-            Val::Bytes(b) => GenerateRepr::Bytes(b),
+            Val::Byte(b) => GenerateRepr::Byte(b),
             Val::Call(c) => GenerateRepr::Call(c),
             Val::Ask(a) => GenerateRepr::Ask(a),
             Val::Comment(a) => GenerateRepr::Comment(a),
@@ -405,7 +405,7 @@ impl Debug for Val {
             Val::Pair(p) => <_ as Debug>::fmt(p, f),
             Val::List(l) => <_ as Debug>::fmt(l, f),
             Val::Map(m) => <_ as Debug>::fmt(m, f),
-            Val::Bytes(b) => <_ as Debug>::fmt(b, f),
+            Val::Byte(b) => <_ as Debug>::fmt(b, f),
             Val::Call(c) => <_ as Debug>::fmt(c, f),
             Val::Ask(a) => <_ as Debug>::fmt(a, f),
             Val::Comment(a) => <_ as Debug>::fmt(a, f),
@@ -430,7 +430,7 @@ pub(crate) mod list;
 
 pub(crate) mod map;
 
-pub(crate) mod bytes;
+pub(crate) mod byte;
 
 pub(crate) mod call;
 

@@ -19,7 +19,7 @@ use rand::{
 use crate::{
     answer::Answer,
     bool::Bool,
-    bytes::Bytes,
+    byte::Byte,
     ctx::{
         Ctx,
         CtxMap,
@@ -77,7 +77,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // symbol
         weight, // int
         weight, // number
-        weight, // bytes
+        weight, // byte
         weight, // text
         1,      // pair
         1,      // call
@@ -101,7 +101,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         2 => Val::Symbol(any_symbol(rng)),
         3 => Val::Int(any_int(rng).into()),
         4 => Val::Number(any_number(rng).into()),
-        5 => Val::Bytes(any_bytes(rng).into()),
+        5 => Val::Byte(any_byte(rng).into()),
         6 => Val::Text(any_text(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Call(any_call(rng, new_depth).into()),
@@ -138,11 +138,11 @@ pub(crate) fn any_number(rng: &mut SmallRng) -> Number {
     Number::new(int, 10, exp)
 }
 
-pub(crate) fn any_bytes(rng: &mut SmallRng) -> Bytes {
+pub(crate) fn any_byte(rng: &mut SmallRng) -> Byte {
     let len = any_len(rng);
-    let mut bytes = vec![0u8; len];
-    rng.fill(&mut *bytes);
-    Bytes::from(bytes)
+    let mut byte = vec![0u8; len];
+    rng.fill(&mut *byte);
+    Byte::from(byte)
 }
 
 struct DistSymbol;

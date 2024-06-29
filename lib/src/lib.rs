@@ -14,7 +14,7 @@ pub use self::{
     answer::Answer,
     ask::Ask,
     bool::Bool,
-    bytes::Bytes,
+    byte::Byte,
     cache::Cache,
     call::Call,
     case::Case,
@@ -52,7 +52,7 @@ pub use self::{
     val::{
         answer::AnswerVal,
         ask::AskVal,
-        bytes::BytesVal,
+        byte::ByteVal,
         call::CallVal,
         case::CaseVal,
         comment::CommentVal,
@@ -127,7 +127,7 @@ pub(crate) mod int;
 
 pub(crate) mod number;
 
-pub(crate) mod bytes;
+pub(crate) mod byte;
 
 pub(crate) mod symbol;
 

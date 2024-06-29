@@ -2,7 +2,7 @@ use crate::syntax::{
     repr::Repr,
     test::{
         bool,
-        bytes,
+        byte,
         call,
         comment,
         infix,
@@ -22,7 +22,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         comment(bool(true), int("2")),
         comment(int("1"), int("3")),
         comment(number(10, "10", 1, "0"), int("4")),
-        comment(bytes(vec![0x7f]), int("5")),
+        comment(byte(vec![0x7f]), int("5")),
         comment(symbol("a"), int("6")),
         comment(symbol("%"), int("7")),
         comment(text("s"), int("8")),
