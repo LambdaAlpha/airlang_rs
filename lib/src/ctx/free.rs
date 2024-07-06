@@ -1,7 +1,7 @@
 use crate::{
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         ref1::{
             CtxMeta,
             CtxRef,
@@ -94,11 +94,11 @@ impl<'a> CtxMeta<'a> for FreeCtx {
         true
     }
 
-    fn for_const_fn(self) -> CtxForConstFn<'a> {
-        CtxForConstFn::Free(FreeCtx)
+    fn for_const_fn(self) -> ConstFnCtx<'a> {
+        ConstFnCtx::Free(FreeCtx)
     }
 
-    fn for_mutable_fn(self) -> CtxForMutableFn<'a> {
-        CtxForMutableFn::Free(FreeCtx)
+    fn for_mut_fn(self) -> MutFnCtx<'a> {
+        MutFnCtx::Free(FreeCtx)
     }
 }

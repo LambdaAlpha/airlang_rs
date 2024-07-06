@@ -1,16 +1,16 @@
 use airlang::{
     initial_ctx,
-    CtxForMutableFn,
     FuncVal,
     Mode,
-    MutableCtx,
+    MutCtx,
+    MutFnCtx,
     Val,
 };
 
 use crate::{
     init_ctx,
     prelude::{
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -27,7 +27,7 @@ impl Default for EvalPrelude {
 }
 
 impl Prelude for EvalPrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.reset.put(ctx.reborrow());
     }
 }
@@ -35,16 +35,16 @@ impl Prelude for EvalPrelude {
 fn reset() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("repl.reset", input_mode, output_mode, fn_reset)
+    named_mut_fn("repl.reset", input_mode, output_mode, fn_reset)
 }
 
-fn fn_reset(ctx: CtxForMutableFn, _input: Val) -> Val {
-    let CtxForMutableFn::Mutable(mut ctx) = ctx else {
+fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {
+    let MutFnCtx::Mut(mut ctx) = ctx else {
         eprintln!("Unable to reset context, context is immutable.");
         return Val::default();
     };
     let mut initial_ctx = initial_ctx();
-    init_ctx(MutableCtx::new(&mut initial_ctx));
+    init_ctx(MutCtx::new(&mut initial_ctx));
     ctx.set(initial_ctx);
     Val::default()
 }

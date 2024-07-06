@@ -8,11 +8,11 @@ use crate::{
         CtxMap,
         CtxValue,
     },
-    func::MutableDispatcher,
+    func::mut1::MutDispatcher,
     prelude::{
         form_mode,
         id_mode,
-        named_mutable_fn,
+        named_mut_fn,
         pair_mode,
         Named,
         Prelude,
@@ -115,12 +115,12 @@ enum BlockItem {
 fn sequence() -> Named<FuncVal> {
     let input_mode = id_mode();
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    named_mutable_fn(";", input_mode, output_mode, func)
+    named_mut_fn(";", input_mode, output_mode, func)
 }
 
 fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -133,12 +133,12 @@ where
 fn if1() -> Named<FuncVal> {
     let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    named_mutable_fn("if", input_mode, output_mode, func)
+    named_mut_fn("if", input_mode, output_mode, func)
 }
 
 fn fn_if<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -168,12 +168,12 @@ where
 fn if_not() -> Named<FuncVal> {
     let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_if_not::<FreeCtx>,
         |ctx, val| fn_if_not(ctx, val),
         |ctx, val| fn_if_not(ctx, val),
     );
-    named_mutable_fn("if_not", input_mode, output_mode, func)
+    named_mut_fn("if_not", input_mode, output_mode, func)
 }
 
 fn fn_if_not<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -203,12 +203,12 @@ where
 fn match1() -> Named<FuncVal> {
     let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    named_mutable_fn("match", input_mode, output_mode, func)
+    named_mut_fn("match", input_mode, output_mode, func)
 }
 
 fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -242,12 +242,12 @@ where
 fn while1() -> Named<FuncVal> {
     let input_mode = id_mode();
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
     );
-    named_mutable_fn("while", input_mode, output_mode, func)
+    named_mut_fn("while", input_mode, output_mode, func)
 }
 
 fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -300,12 +300,12 @@ where
 fn while_not() -> Named<FuncVal> {
     let input_mode = id_mode();
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_while_not::<FreeCtx>,
         |ctx, val| fn_while_not(ctx, val),
         |ctx, val| fn_while_not(ctx, val),
     );
-    named_mutable_fn("while_not", input_mode, output_mode, func)
+    named_mut_fn("while_not", input_mode, output_mode, func)
 }
 
 fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -362,12 +362,12 @@ fn for1() -> Named<FuncVal> {
         Transform::default(),
     );
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_for::<FreeCtx>,
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    named_mutable_fn("for", input_mode, output_mode, func)
+    named_mut_fn("for", input_mode, output_mode, func)
 }
 
 fn fn_for<'a, Ctx>(ctx: Ctx, input: Val) -> Val

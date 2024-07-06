@@ -1,8 +1,8 @@
 use airlang::{
-    CtxForConstFn,
+    ConstFnCtx,
     FuncVal,
     Mode,
-    MutableCtx,
+    MutCtx,
     Text,
     Val,
 };
@@ -26,7 +26,7 @@ impl Default for FilePrelude {
 }
 
 impl Prelude for FilePrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.read_to_text.put(ctx.reborrow());
     }
 }
@@ -42,7 +42,7 @@ fn read_to_text() -> Named<FuncVal> {
     )
 }
 
-fn fn_read_to_text(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_read_to_text(ctx: ConstFnCtx, input: Val) -> Val {
     let result = match input {
         Val::Text(path) => std::fs::read_to_string(&**path),
         Val::Symbol(s) => {

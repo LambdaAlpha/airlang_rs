@@ -2,11 +2,11 @@ use std::error::Error;
 
 use airlang::{
     initial_ctx,
-    interpret_mutable,
+    interpret_mut,
     parse,
     Ctx,
     Invariant,
-    MutableCtx,
+    MutCtx,
     Symbol,
     Text,
 };
@@ -24,7 +24,7 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     }
     let mut ctx = generate_ext_ctx_with_main()?;
     let backup = ctx.clone();
-    let mut mut_ctx = MutableCtx::new(&mut ctx);
+    let mut mut_ctx = MutCtx::new(&mut ctx);
 
     let tests = input.split(MAIN_DELIMITER);
     for test in tests {
@@ -34,7 +34,7 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
             e
         })?;
-        let ret = interpret_mutable(mut_ctx.reborrow(), src);
+        let ret = interpret_mut(mut_ctx.reborrow(), src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
             e
@@ -45,7 +45,7 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             current context: {ctx:#?}",
         );
         ctx = backup.clone();
-        mut_ctx = MutableCtx::new(&mut ctx);
+        mut_ctx = MutCtx::new(&mut ctx);
     }
     Ok(())
 }
@@ -54,9 +54,9 @@ fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
     let src = generate_import("/main/main.air");
     let src = parse(&src)?;
     let mut ctx = initial_ctx();
-    let mut mut_ctx = MutableCtx::new(&mut ctx);
+    let mut mut_ctx = MutCtx::new(&mut ctx);
     init_ctx(mut_ctx.reborrow());
-    let main = interpret_mutable(mut_ctx.reborrow(), src);
+    let main = interpret_mut(mut_ctx.reborrow(), src);
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
     mut_ctx.put(main_name, Invariant::Const, main)?;
     Ok(ctx)

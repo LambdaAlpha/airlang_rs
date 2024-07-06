@@ -3,8 +3,8 @@ use std::mem::swap;
 use crate::{
     bool::Bool,
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         CtxMap,
         DefaultCtx,
     },
@@ -13,7 +13,7 @@ use crate::{
     prelude::{
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -105,7 +105,7 @@ fn length() -> Named<FuncVal> {
     named_const_fn("map.length", input_mode, output_mode, fn_length)
 }
 
-fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -121,7 +121,7 @@ fn items() -> Named<FuncVal> {
     named_const_fn("map.items", input_mode, output_mode, fn_items)
 }
 
-fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -137,10 +137,10 @@ fn fn_items(ctx: CtxForConstFn, input: Val) -> Val {
 fn into_items() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.into_items", input_mode, output_mode, fn_into_items)
+    named_mut_fn("map.into_items", input_mode, output_mode, fn_into_items)
 }
 
-fn fn_into_items(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_mut_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -161,7 +161,7 @@ fn keys() -> Named<FuncVal> {
     named_const_fn("map.keys", input_mode, output_mode, fn_keys)
 }
 
-fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -174,10 +174,10 @@ fn fn_keys(ctx: CtxForConstFn, input: Val) -> Val {
 fn into_keys() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.into_keys", input_mode, output_mode, fn_into_keys)
+    named_mut_fn("map.into_keys", input_mode, output_mode, fn_into_keys)
 }
 
-fn fn_into_keys(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_mut_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -195,7 +195,7 @@ fn values() -> Named<FuncVal> {
     named_const_fn("map.values", input_mode, output_mode, fn_values)
 }
 
-fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -208,10 +208,10 @@ fn fn_values(ctx: CtxForConstFn, input: Val) -> Val {
 fn into_values() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.into_values", input_mode, output_mode, fn_into_values)
+    named_mut_fn("map.into_values", input_mode, output_mode, fn_into_values)
 }
 
-fn fn_into_values(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_mut_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -229,7 +229,7 @@ fn contains() -> Named<FuncVal> {
     named_const_fn("map.contains", input_mode, output_mode, fn_contains)
 }
 
-fn fn_contains(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
@@ -255,7 +255,7 @@ fn contains_many() -> Named<FuncVal> {
     )
 }
 
-fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -277,10 +277,10 @@ fn fn_contains_many(ctx: CtxForConstFn, input: Val) -> Val {
 fn set() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.set", input_mode, output_mode, fn_set)
+    named_mut_fn("map.set", input_mode, output_mode, fn_set)
 }
 
-fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -303,10 +303,10 @@ fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
 fn set_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.set_many", input_mode, output_mode, fn_set_many)
+    named_mut_fn("map.set_many", input_mode, output_mode, fn_set_many)
 }
 
-fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -334,7 +334,7 @@ fn get() -> Named<FuncVal> {
     named_const_fn("map.get", input_mode, output_mode, fn_get)
 }
 
-fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
@@ -355,7 +355,7 @@ fn get_many() -> Named<FuncVal> {
     named_const_fn("map.get_many", input_mode, output_mode, fn_get_many)
 }
 
-fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -380,10 +380,10 @@ fn fn_get_many(ctx: CtxForConstFn, input: Val) -> Val {
 fn remove() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.remove", input_mode, output_mode, fn_remove)
+    named_mut_fn("map.remove", input_mode, output_mode, fn_remove)
 }
 
-fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
@@ -401,10 +401,10 @@ fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
 fn remove_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.remove_many", input_mode, output_mode, fn_remove_many)
+    named_mut_fn("map.remove_many", input_mode, output_mode, fn_remove_many)
 }
 
-fn fn_remove_many(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -430,10 +430,10 @@ fn fn_remove_many(ctx: CtxForMutableFn, input: Val) -> Val {
 fn clear() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("map.clear", input_mode, output_mode, fn_clear)
+    named_mut_fn("map.clear", input_mode, output_mode, fn_clear)
 }
 
-fn fn_clear(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_mut_no_ret(ctx, input, |val| {
         let Val::Map(map) = val else {
             return;

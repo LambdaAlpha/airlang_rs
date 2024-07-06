@@ -7,7 +7,7 @@ use crate::{
         NONE,
     },
     ctx::{
-        constant::CtxForConstFn,
+        const1::ConstFnCtx,
         CtxMap,
         DefaultCtx,
     },
@@ -147,7 +147,7 @@ fn type_of() -> Named<FuncVal> {
     named_const_fn("answer.type_of", input_mode, output_mode, fn_type_of)
 }
 
-fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
@@ -168,7 +168,7 @@ fn is_none() -> Named<FuncVal> {
     named_const_fn("answer.is_none", input_mode, output_mode, fn_is_none)
 }
 
-fn fn_is_none(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
@@ -184,7 +184,7 @@ fn is_never() -> Named<FuncVal> {
     named_const_fn("answer.is_never", input_mode, output_mode, fn_is_never)
 }
 
-fn fn_is_never(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
@@ -200,7 +200,7 @@ fn is_maybe() -> Named<FuncVal> {
     named_const_fn("answer.is_maybe", input_mode, output_mode, fn_is_maybe)
 }
 
-fn fn_is_maybe(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();
@@ -216,7 +216,7 @@ fn is_cache() -> Named<FuncVal> {
     named_const_fn("answer.is_cache", input_mode, output_mode, fn_is_cache)
 }
 
-fn fn_is_cache(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Answer(answer) = val else {
             return Val::default();

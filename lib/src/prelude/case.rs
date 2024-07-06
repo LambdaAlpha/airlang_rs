@@ -1,8 +1,8 @@
 use crate::{
     bool::Bool,
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         CtxMap,
         DefaultCtx,
     },
@@ -12,7 +12,7 @@ use crate::{
         map_mode,
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -84,10 +84,10 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(OUTPUT), form_mode());
     let input_mode = map_mode(map, Transform::default());
     let output_mode = Mode::default();
-    named_mutable_fn("case", input_mode, output_mode, fn_new)
+    named_mut_fn("case", input_mode, output_mode, fn_new)
 }
 
-fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
@@ -103,10 +103,10 @@ fn fn_new(mut ctx: CtxForMutableFn, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("case.cache", input_mode, output_mode, fn_new_cache)
+    named_mut_fn("case.cache", input_mode, output_mode, fn_new_cache)
 }
 
-fn fn_new_cache(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
@@ -114,7 +114,7 @@ fn fn_new_cache(mut ctx: CtxForMutableFn, input: Val) -> Val {
     let Val::Func(func) = call.func else {
         return Val::default();
     };
-    let input = func.input_mode.transform(ctx.reborrow(), call.input);
+    let input = func.input_mode().transform(ctx.reborrow(), call.input);
     let cache = Cache::new(ctx, func, input);
     Val::Case(CaseVal::Cache(cache.into()))
 }
@@ -154,7 +154,7 @@ fn is_cache() -> Named<FuncVal> {
     named_const_fn("case.is_cache", input_mode, output_mode, fn_is_cache)
 }
 
-fn fn_is_cache(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
@@ -169,7 +169,7 @@ fn func() -> Named<FuncVal> {
     named_const_fn("case.function", input_mode, output_mode, fn_func)
 }
 
-fn fn_func(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
@@ -184,7 +184,7 @@ fn input() -> Named<FuncVal> {
     named_const_fn("case.input", input_mode, output_mode, fn_input)
 }
 
-fn fn_input(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
@@ -199,7 +199,7 @@ fn output() -> Named<FuncVal> {
     named_const_fn("case.output", input_mode, output_mode, fn_output)
 }
 
-fn fn_output(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();

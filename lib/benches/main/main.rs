@@ -1,9 +1,9 @@
 use airlang::{
     generate,
     initial_ctx,
-    interpret_mutable,
+    interpret_mut,
     parse,
-    MutableCtx,
+    MutCtx,
 };
 use criterion::{
     black_box,
@@ -29,12 +29,12 @@ pub fn bench_all(c: &mut Criterion) {
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
         let mut ctx = initial_ctx();
-        let mut mutable_ctx = MutableCtx::new(&mut ctx);
+        let mut mut_ctx = MutCtx::new(&mut ctx);
         let s = include_str!("interpret.air");
         let src_val = parse(s).expect("parse failed");
         b.iter_batched(
             || src_val.clone(),
-            |val| interpret_mutable(mutable_ctx.reborrow(), black_box(val)),
+            |val| interpret_mut(mut_ctx.reborrow(), black_box(val)),
             BatchSize::SmallInput,
         );
     });

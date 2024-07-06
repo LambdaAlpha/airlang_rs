@@ -2,18 +2,18 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         ref1::CtxMeta,
         CtxMap,
         DefaultCtx,
     },
-    func::MutableDispatcher,
+    func::mut1::MutDispatcher,
     prelude::{
         form_mode,
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         pair_mode,
         Named,
         Prelude,
@@ -84,10 +84,10 @@ fn fn_new(input: Val) -> Val {
 fn new_dependent() -> Named<FuncVal> {
     let input_mode = pair_mode(Mode::default(), form_mode(), Transform::default());
     let output_mode = Mode::default();
-    named_mutable_fn("!!", input_mode, output_mode, fn_new_dependent)
+    named_mut_fn("!!", input_mode, output_mode, fn_new_dependent)
 }
 
-fn fn_new_dependent(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -101,12 +101,12 @@ fn fn_new_dependent(ctx: CtxForMutableFn, input: Val) -> Val {
 fn apply() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_apply::<FreeCtx>,
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mutable_fn("call.apply", input_mode, output_mode, func)
+    named_mut_fn("call.apply", input_mode, output_mode, func)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -126,7 +126,7 @@ fn get_func() -> Named<FuncVal> {
     named_const_fn("call.function", input_mode, output_mode, fn_get_func)
 }
 
-fn fn_get_func(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Call(call) => call.func.clone(),
@@ -142,10 +142,10 @@ fn fn_get_func(ctx: CtxForConstFn, input: Val) -> Val {
 fn set_func() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("call.set_function", input_mode, output_mode, fn_set_func)
+    named_mut_fn("call.set_function", input_mode, output_mode, fn_set_func)
 }
 
-fn fn_set_func(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -170,7 +170,7 @@ fn get_input() -> Named<FuncVal> {
     named_const_fn("call.input", input_mode, output_mode, fn_get_input)
 }
 
-fn fn_get_input(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Call(call) => call.input.clone(),
@@ -186,10 +186,10 @@ fn fn_get_input(ctx: CtxForConstFn, input: Val) -> Val {
 fn set_input() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("call.set_input", input_mode, output_mode, fn_set_input)
+    named_mut_fn("call.set_input", input_mode, output_mode, fn_set_input)
 }
 
-fn fn_set_input(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };

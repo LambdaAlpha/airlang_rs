@@ -14,7 +14,7 @@ use crate::{
         Val,
     },
     Bool,
-    CtxForConstFn,
+    ConstFnCtx,
     Mode,
 };
 
@@ -61,7 +61,7 @@ fn is_true() -> Named<FuncVal> {
     named_const_fn("is_true", input_mode, output_mode, fn_is_true)
 }
 
-fn fn_is_true(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| {
         let Val::Bool(b) = val else {
             return Val::Bool(Bool::f());
@@ -76,7 +76,7 @@ fn is_false() -> Named<FuncVal> {
     named_const_fn("is_false", input_mode, output_mode, fn_is_false)
 }
 
-fn fn_is_false(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| {
         let Val::Bool(b) = val else {
             return Val::Bool(Bool::f());

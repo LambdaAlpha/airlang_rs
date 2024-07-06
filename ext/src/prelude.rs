@@ -1,10 +1,12 @@
 use std::rc::Rc;
 
 use airlang::{
-    CtxConstFn,
-    CtxFreeFn,
-    CtxMutableFn,
-    Func,
+    ConstFn,
+    ConstFunc,
+    ConstFuncVal,
+    FreeFn,
+    FreeFunc,
+    FreeFuncVal,
     FuncVal,
     Invariant,
     List,
@@ -13,7 +15,10 @@ use airlang::{
     Map,
     MapMode,
     Mode,
-    MutableCtx,
+    MutCtx,
+    MutFn,
+    MutFunc,
+    MutFuncVal,
     Pair,
     Symbol,
     Transform,
@@ -39,7 +44,7 @@ pub(crate) struct AllPrelude {
 }
 
 impl Prelude for AllPrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.io.put(ctx.reborrow());
         self.file.put(ctx.reborrow());
         self.process.put(ctx.reborrow());
@@ -48,7 +53,7 @@ impl Prelude for AllPrelude {
 }
 
 pub(crate) trait Prelude {
-    fn put(&self, ctx: MutableCtx);
+    fn put(&self, ctx: MutCtx);
 }
 
 #[derive(Clone)]
@@ -64,7 +69,7 @@ impl<T> Named<T> {
 }
 
 impl<T: Into<Val> + Clone> Named<T> {
-    pub(crate) fn put(&self, ctx: MutableCtx) {
+    pub(crate) fn put(&self, ctx: MutCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
         let val = self.value.clone().into();
         ctx.put(name, Invariant::Const, val)
@@ -76,36 +81,36 @@ fn named_free_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
-    func: impl CtxFreeFn + 'static,
+    func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = Func::new_free(input_mode, output_mode, name_symbol, Rc::new(func));
-    let func_val = FuncVal::from(func);
-    Named::new(name, func_val)
+    let func = FreeFunc::new(input_mode, output_mode, name_symbol, Rc::new(func));
+    let func_val = FreeFuncVal::from(func);
+    Named::new(name, FuncVal::Free(func_val))
 }
 
 fn named_const_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
-    func: impl CtxConstFn + 'static,
+    func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = Func::new_const(input_mode, output_mode, name_symbol, Rc::new(func));
-    let func_val = FuncVal::from(func);
-    Named::new(name, func_val)
+    let func = ConstFunc::new(input_mode, output_mode, name_symbol, Rc::new(func));
+    let func_val = ConstFuncVal::from(func);
+    Named::new(name, FuncVal::Const(func_val))
 }
 
-fn named_mutable_fn(
+fn named_mut_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
-    func: impl CtxMutableFn + 'static,
+    func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = Func::new_mutable(input_mode, output_mode, name_symbol, Rc::new(func));
-    let func_val = FuncVal::from(func);
-    Named::new(name, func_val)
+    let func = MutFunc::new(input_mode, output_mode, name_symbol, Rc::new(func));
+    let func_val = MutFuncVal::from(func);
+    Named::new(name, FuncVal::Mut(func_val))
 }
 
 #[allow(unused)]

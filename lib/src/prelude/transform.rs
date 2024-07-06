@@ -1,13 +1,13 @@
 use crate::{
     ctx::{
         free::FreeCtx,
-        mutable::CtxForMutableFn,
+        mut1::MutFnCtx,
         CtxMap,
     },
     prelude::{
         id_mode,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -65,19 +65,19 @@ fn fn_id(input: Val) -> Val {
 fn form() -> Named<FuncVal> {
     let input_mode = id_mode();
     let output_mode = Mode::default();
-    named_mutable_fn(FORM, input_mode, output_mode, fn_form)
+    named_mut_fn(FORM, input_mode, output_mode, fn_form)
 }
 
-fn fn_form(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_form(ctx: MutFnCtx, input: Val) -> Val {
     Form.transform(ctx, input)
 }
 
 fn eval() -> Named<FuncVal> {
     let input_mode = id_mode();
     let output_mode = Mode::default();
-    named_mutable_fn(EVAL, input_mode, output_mode, fn_eval)
+    named_mut_fn(EVAL, input_mode, output_mode, fn_eval)
 }
 
-fn fn_eval(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_eval(ctx: MutFnCtx, input: Val) -> Val {
     Eval.transform(ctx, input)
 }

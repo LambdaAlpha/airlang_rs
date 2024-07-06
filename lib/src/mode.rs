@@ -1,6 +1,6 @@
 use crate::{
     ctx::{
-        mutable::CtxForMutableFn,
+        mut1::MutFnCtx,
         ref1::CtxMeta,
     },
     list::List,
@@ -182,7 +182,7 @@ impl Transformer<MapVal, Val> for MapMode {
 }
 
 impl Mode {
-    pub fn apply(&self, ctx: CtxForMutableFn, val: Val) -> Val {
+    pub fn apply(&self, ctx: MutFnCtx, val: Val) -> Val {
         self.transform(ctx, val)
     }
 }

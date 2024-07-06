@@ -1,11 +1,11 @@
-use airlang::MutableCtx;
+use airlang::MutCtx;
 
 use crate::prelude::{
     Prelude,
     PRELUDE,
 };
 
-pub fn init_ctx(ctx: MutableCtx) {
+pub fn init_ctx(ctx: MutCtx) {
     PRELUDE.with(|prelude| prelude.put(ctx));
 }
 

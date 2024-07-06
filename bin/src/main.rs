@@ -1,6 +1,6 @@
 use std::io::stdout;
 
-use airlang::MutableCtx;
+use airlang::MutCtx;
 
 use crate::{
     prelude::{
@@ -15,7 +15,7 @@ fn main() -> std::io::Result<()> {
     repl.run()
 }
 
-pub(crate) fn init_ctx(mut ctx: MutableCtx) {
+pub(crate) fn init_ctx(mut ctx: MutCtx) {
     airlang_ext::init_ctx(ctx.reborrow());
     PRELUDE.with(|prelude| prelude.put(ctx));
 }

@@ -4,7 +4,7 @@ use airlang::{
     FuncVal,
     List,
     Mode,
-    MutableCtx,
+    MutCtx,
     Symbol,
     Text,
     Transform,
@@ -30,7 +30,7 @@ impl Default for ProcessPrelude {
 }
 
 impl Prelude for ProcessPrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.call.put(ctx.reborrow());
     }
 }

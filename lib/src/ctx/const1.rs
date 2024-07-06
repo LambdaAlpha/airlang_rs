@@ -2,7 +2,7 @@ use std::matches;
 
 use crate::{
     ctx::{
-        mutable::CtxForMutableFn,
+        mut1::MutFnCtx,
         ref1::{
             CtxMeta,
             CtxRef,
@@ -25,7 +25,7 @@ The `const` is just a flag and a runtime invariant.
 */
 pub struct ConstCtx<'a>(&'a mut Ctx);
 
-pub enum CtxForConstFn<'a> {
+pub enum ConstFnCtx<'a> {
     Free(FreeCtx),
     Const(ConstCtx<'a>),
 }
@@ -111,148 +111,148 @@ impl<'l> CtxMeta<'l> for ConstCtx<'l> {
         true
     }
 
-    fn for_const_fn(self) -> CtxForConstFn<'l> {
-        CtxForConstFn::Const(self)
+    fn for_const_fn(self) -> ConstFnCtx<'l> {
+        ConstFnCtx::Const(self)
     }
 
-    fn for_mutable_fn(self) -> CtxForMutableFn<'l> {
-        CtxForMutableFn::Const(self)
+    fn for_mut_fn(self) -> MutFnCtx<'l> {
+        MutFnCtx::Const(self)
     }
 }
 
-impl<'l> CtxRef<'l> for CtxForConstFn<'l> {
+impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_ref(name),
-            CtxForConstFn::Const(ctx) => <_ as CtxRef>::get_ref(ctx, name),
+            ConstFnCtx::Free(ctx) => ctx.get_ref(name),
+            ConstFnCtx::Const(ctx) => <_ as CtxRef>::get_ref(ctx, name),
         }
     }
 
     fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_ref_mut(name),
-            CtxForConstFn::Const(ctx) => ctx.get_ref_mut(name),
+            ConstFnCtx::Free(ctx) => ctx.get_ref_mut(name),
+            ConstFnCtx::Const(ctx) => ctx.get_ref_mut(name),
         }
     }
 
     fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_ref_dyn(name),
-            CtxForConstFn::Const(ctx) => ctx.get_ref_dyn(name),
+            ConstFnCtx::Free(ctx) => ctx.get_ref_dyn(name),
+            ConstFnCtx::Const(ctx) => ctx.get_ref_dyn(name),
         }
     }
 
     fn remove(self, name: Symbol) -> Result<Val, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.remove(name),
-            CtxForConstFn::Const(ctx) => ctx.remove(name),
+            ConstFnCtx::Free(ctx) => ctx.remove(name),
+            ConstFnCtx::Const(ctx) => ctx.remove(name),
         }
     }
 
     fn is_assignable(self, name: Symbol) -> bool {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.is_assignable(name),
-            CtxForConstFn::Const(ctx) => ctx.is_assignable(name),
+            ConstFnCtx::Free(ctx) => ctx.is_assignable(name),
+            ConstFnCtx::Const(ctx) => ctx.is_assignable(name),
         }
     }
 
     fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.put_value(name, value),
-            CtxForConstFn::Const(ctx) => ctx.put_value(name, value),
+            ConstFnCtx::Free(ctx) => ctx.put_value(name, value),
+            ConstFnCtx::Const(ctx) => ctx.put_value(name, value),
         }
     }
 
     fn set_final(self, name: Symbol) -> Result<(), CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.set_final(name),
-            CtxForConstFn::Const(ctx) => ctx.set_final(name),
+            ConstFnCtx::Free(ctx) => ctx.set_final(name),
+            ConstFnCtx::Const(ctx) => ctx.set_final(name),
         }
     }
 
     fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.is_final(name),
-            CtxForConstFn::Const(ctx) => ctx.is_final(name),
+            ConstFnCtx::Free(ctx) => ctx.is_final(name),
+            ConstFnCtx::Const(ctx) => ctx.is_final(name),
         }
     }
 
     fn set_const(self, name: Symbol) -> Result<(), CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.set_const(name),
-            CtxForConstFn::Const(ctx) => ctx.set_const(name),
+            ConstFnCtx::Free(ctx) => ctx.set_const(name),
+            ConstFnCtx::Const(ctx) => ctx.set_const(name),
         }
     }
 
     fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.is_const(name),
-            CtxForConstFn::Const(ctx) => ctx.is_const(name),
+            ConstFnCtx::Free(ctx) => ctx.is_const(name),
+            ConstFnCtx::Const(ctx) => ctx.is_const(name),
         }
     }
 
     fn get_meta(self) -> Result<&'l Ctx, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_meta(),
-            CtxForConstFn::Const(ctx) => ctx.get_meta(),
+            ConstFnCtx::Free(ctx) => ctx.get_meta(),
+            ConstFnCtx::Const(ctx) => ctx.get_meta(),
         }
     }
 
     fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_meta_mut(),
-            CtxForConstFn::Const(ctx) => ctx.get_meta_mut(),
+            ConstFnCtx::Free(ctx) => ctx.get_meta_mut(),
+            ConstFnCtx::Const(ctx) => ctx.get_meta_mut(),
         }
     }
 
     fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.get_meta_dyn(),
-            CtxForConstFn::Const(ctx) => ctx.get_meta_dyn(),
+            ConstFnCtx::Free(ctx) => ctx.get_meta_dyn(),
+            ConstFnCtx::Const(ctx) => ctx.get_meta_dyn(),
         }
     }
 
     fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.set_meta(meta),
-            CtxForConstFn::Const(ctx) => ctx.set_meta(meta),
+            ConstFnCtx::Free(ctx) => ctx.set_meta(meta),
+            ConstFnCtx::Const(ctx) => ctx.set_meta(meta),
         }
     }
 }
 
-impl<'l> CtxMeta<'l> for CtxForConstFn<'l> {
-    type Reborrow<'s> = CtxForConstFn<'s> where 'l: 's;
+impl<'l> CtxMeta<'l> for ConstFnCtx<'l> {
+    type Reborrow<'s> = ConstFnCtx<'s> where 'l: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         match self {
-            CtxForConstFn::Free(ctx) => CtxForConstFn::Free(ctx.reborrow()),
-            CtxForConstFn::Const(ctx) => CtxForConstFn::Const(ctx.reborrow()),
+            ConstFnCtx::Free(ctx) => ConstFnCtx::Free(ctx.reborrow()),
+            ConstFnCtx::Const(ctx) => ConstFnCtx::Const(ctx.reborrow()),
         }
     }
 
     fn borrow(&self) -> Option<&Ctx> {
         match self {
-            CtxForConstFn::Free(ctx) => ctx.borrow(),
-            CtxForConstFn::Const(ctx) => ctx.borrow(),
+            ConstFnCtx::Free(ctx) => ctx.borrow(),
+            ConstFnCtx::Const(ctx) => ctx.borrow(),
         }
     }
 
     fn is_ctx_free(self) -> bool {
-        matches!(self, CtxForConstFn::Free(_))
+        matches!(self, ConstFnCtx::Free(_))
     }
 
     fn is_ctx_const(self) -> bool {
         true
     }
 
-    fn for_const_fn(self) -> CtxForConstFn<'l> {
+    fn for_const_fn(self) -> ConstFnCtx<'l> {
         self
     }
 
-    fn for_mutable_fn(self) -> CtxForMutableFn<'l> {
+    fn for_mut_fn(self) -> MutFnCtx<'l> {
         match self {
-            CtxForConstFn::Free(_ctx) => CtxForMutableFn::Free(FreeCtx),
-            CtxForConstFn::Const(ctx) => CtxForMutableFn::Const(ctx),
+            ConstFnCtx::Free(_ctx) => MutFnCtx::Free(FreeCtx),
+            ConstFnCtx::Const(ctx) => MutFnCtx::Const(ctx),
         }
     }
 }
@@ -292,8 +292,8 @@ impl<'a> ConstCtx<'a> {
     }
 }
 
-impl<'a> CtxForConstFn<'a> {
-    pub fn reborrow(&mut self) -> CtxForConstFn {
+impl<'a> ConstFnCtx<'a> {
+    pub fn reborrow(&mut self) -> ConstFnCtx {
         <_ as CtxMeta<'a>>::reborrow(self)
     }
 
@@ -307,8 +307,8 @@ impl<'a> CtxForConstFn<'a> {
 
     pub fn meta(self) -> Result<ConstCtx<'a>, CtxError> {
         match self {
-            CtxForConstFn::Free(_ctx) => Err(CtxError::AccessDenied),
-            CtxForConstFn::Const(ctx) => match ctx.meta() {
+            ConstFnCtx::Free(_ctx) => Err(CtxError::AccessDenied),
+            ConstFnCtx::Const(ctx) => match ctx.meta() {
                 Some(meta) => Ok(meta),
                 None => Err(CtxError::NotFound),
             },

@@ -12,7 +12,7 @@ use crate::{
     unit::Unit,
     val::func::FuncVal,
     Bool,
-    CtxForConstFn,
+    ConstFnCtx,
     Mode,
     Val,
 };
@@ -55,6 +55,6 @@ fn is_unit() -> Named<FuncVal> {
     named_const_fn("is_unit", input_mode, output_mode, fn_is_unit)
 }
 
-fn fn_is_unit(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_unit(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| Val::Bool(Bool::new(val.is_unit())))
 }

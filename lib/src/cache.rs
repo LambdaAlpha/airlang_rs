@@ -16,7 +16,7 @@ impl Cache<Val, Val, Val> {
     where
         Ctx: CtxMeta<'a>,
     {
-        let output = func.transformer.transform(ctx, input.clone());
+        let output = func.transform(ctx, input.clone());
         let func = Val::Func(func);
         let case = Case::new(func, input, output);
         Self(case)

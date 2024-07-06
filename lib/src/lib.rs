@@ -1,15 +1,3 @@
-pub use ctx::{
-    constant::{
-        ConstCtx,
-        CtxForConstFn,
-    },
-    free::FreeCtx,
-    mutable::{
-        CtxForMutableFn,
-        MutableCtx,
-    },
-};
-
 pub use self::{
     answer::Answer,
     ask::Ask,
@@ -20,16 +8,33 @@ pub use self::{
     case::Case,
     comment::Comment,
     ctx::{
+        const1::{
+            ConstCtx,
+            ConstFnCtx,
+        },
+        free::FreeCtx,
+        mut1::{
+            MutCtx,
+            MutFnCtx,
+        },
         Ctx,
         CtxError,
         Invariant,
     },
     extension::ValExt,
     func::{
-        CtxConstFn,
-        CtxFreeFn,
-        CtxMutableFn,
-        Func,
+        const1::{
+            ConstFn,
+            ConstFunc,
+        },
+        free::{
+            FreeFn,
+            FreeFunc,
+        },
+        mut1::{
+            MutFn,
+            MutFunc,
+        },
     },
     int::Int,
     list::List,
@@ -54,10 +59,19 @@ pub use self::{
         ask::AskVal,
         byte::ByteVal,
         call::CallVal,
-        case::CaseVal,
+        case::{
+            CacheCaseVal,
+            CaseVal,
+            TrivialCaseVal,
+        },
         comment::CommentVal,
         ctx::CtxVal,
-        func::FuncVal,
+        func::{
+            ConstFuncVal,
+            FreeFuncVal,
+            FuncVal,
+            MutFuncVal,
+        },
         int::IntVal,
         list::ListVal,
         map::MapVal,
@@ -85,7 +99,7 @@ pub fn initial_ctx() -> Ctx {
     prelude::initial_ctx()
 }
 
-pub fn interpret_mutable(ctx: MutableCtx, input: Val) -> Val {
+pub fn interpret_mut(ctx: MutCtx, input: Val) -> Val {
     Eval.transform(ctx, input)
 }
 

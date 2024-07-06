@@ -28,13 +28,11 @@ use crate::{
     },
     extension::UnitExt,
     func::{
+        const1::ConstInfo,
+        free::FreeInfo,
+        mut1::MutInfo,
         Composed,
-        CtxConstInfo,
-        CtxFreeInfo,
-        CtxMutableInfo,
         Func,
-        FuncImpl,
-        FuncTransformer,
     },
     int::Int,
     list::List,
@@ -60,9 +58,12 @@ use crate::{
     Case,
     CaseVal,
     Comment,
+    ConstFuncVal,
     FreeCtx,
+    FreeFuncVal,
     ListMode,
     MapMode,
+    MutFuncVal,
     PairMode,
     Val,
     ValExt,
@@ -343,37 +344,43 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         let input_mode = any_mode(rng, depth);
         let output_mode = any_mode(rng, depth);
-        let transformer = match rng.gen_range(0..3) {
-            0 => FuncTransformer::Free(FuncImpl::Composed(Composed {
-                body: any_val(rng, depth),
-                prelude: any_ctx(rng, depth),
-                input_name: any_symbol(rng),
-                ctx: CtxFreeInfo {},
-            })),
-            1 => FuncTransformer::Const(FuncImpl::Composed(Composed {
-                body: any_val(rng, depth),
-                prelude: any_ctx(rng, depth),
-                input_name: any_symbol(rng),
-                ctx: CtxConstInfo {
-                    name: any_symbol(rng),
-                },
-            })),
-            2 => FuncTransformer::Mutable(FuncImpl::Composed(Composed {
-                body: any_val(rng, depth),
-                prelude: any_ctx(rng, depth),
-                input_name: any_symbol(rng),
-                ctx: CtxMutableInfo {
-                    name: any_symbol(rng),
-                },
-            })),
+        match rng.gen_range(0..3) {
+            0 => {
+                let transformer = Composed {
+                    body: any_val(rng, depth),
+                    prelude: any_ctx(rng, depth),
+                    input_name: any_symbol(rng),
+                    ctx: FreeInfo {},
+                };
+                let func = Func::new_composed(input_mode, output_mode, transformer);
+                FuncVal::Free(FreeFuncVal::from(func))
+            }
+            1 => {
+                let transformer = Composed {
+                    body: any_val(rng, depth),
+                    prelude: any_ctx(rng, depth),
+                    input_name: any_symbol(rng),
+                    ctx: ConstInfo {
+                        name: any_symbol(rng),
+                    },
+                };
+                let func = Func::new_composed(input_mode, output_mode, transformer);
+                FuncVal::Const(ConstFuncVal::from(func))
+            }
+            2 => {
+                let transformer = Composed {
+                    body: any_val(rng, depth),
+                    prelude: any_ctx(rng, depth),
+                    input_name: any_symbol(rng),
+                    ctx: MutInfo {
+                        name: any_symbol(rng),
+                    },
+                };
+                let func = Func::new_composed(input_mode, output_mode, transformer);
+                FuncVal::Mut(MutFuncVal::from(func))
+            }
             _ => unreachable!(),
-        };
-        let func = Func {
-            input_mode,
-            output_mode,
-            transformer,
-        };
-        FuncVal::from(func)
+        }
     }
 }
 

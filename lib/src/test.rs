@@ -6,16 +6,17 @@ use std::{
 
 use crate::{
     ctx::{
-        mutable::MutableCtx,
+        mut1::MutCtx,
         Invariant,
     },
+    func::free::FreeFn,
     initial_ctx,
-    interpret_mutable,
+    interpret_mut,
     parse,
     val::Val,
     Ctx,
-    CtxFreeFn,
-    Func,
+    FreeFunc,
+    FreeFuncVal,
     FuncVal,
     Mode,
     Symbol,
@@ -44,7 +45,7 @@ fn test_interpret_with_ctx(ctx: Ctx, input: &str, file_name: &str) -> Result<(),
             eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
             e
         })?;
-        let ret = interpret_mutable(MutableCtx::new(&mut ctx), src);
+        let ret = interpret_mut(MutCtx::new(&mut ctx), src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
             e
@@ -182,17 +183,17 @@ fn test_map() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
     let mut ctx = initial_ctx();
-    let mutable_ctx = MutableCtx::new(&mut ctx);
+    let mut_ctx = MutCtx::new(&mut ctx);
     let func_ext_name = Symbol::from_str("func_ext");
-    mutable_ctx.put(
+    mut_ctx.put(
         func_ext_name.clone(),
         Invariant::Const,
-        Val::Func(FuncVal::from(Func::new_free(
+        Val::Func(FuncVal::Free(FreeFuncVal::from(FreeFunc::new(
             Mode::default(),
             Mode::default(),
             func_ext_name,
             Rc::new(FuncExt),
-        ))),
+        )))),
     )?;
     test_interpret_with_ctx(
         ctx,
@@ -204,7 +205,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FuncExt;
 
-impl CtxFreeFn for FuncExt {
+impl FreeFn for FuncExt {
     fn call(&self, input: Val) -> Val {
         input
     }

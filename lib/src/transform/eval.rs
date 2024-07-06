@@ -124,7 +124,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = &func {
-            let input = func.input_mode.transform(ctx.reborrow(), input);
+            let input = func.input_mode().transform(ctx.reborrow(), input);
             func.transform(ctx, input)
         } else {
             let input = self.transform(ctx, input);
@@ -138,7 +138,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            func.input_mode.transform(ctx, input)
+            func.input_mode().transform(ctx, input)
         } else {
             self.transform(ctx, input)
         }
@@ -166,7 +166,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            let output = func.output_mode.transform(ctx.reborrow(), output);
+            let output = func.output_mode().transform(ctx.reborrow(), output);
             Val::Answer(solve(ctx, func, output))
         } else {
             let output = self.transform(ctx, output);
@@ -180,7 +180,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(f) = func {
-            f.output_mode.transform(ctx, output)
+            f.output_mode().transform(ctx, output)
         } else {
             self.transform(ctx, output)
         }

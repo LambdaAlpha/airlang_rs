@@ -1,5 +1,5 @@
 use crate::{
-    val::case::CacheCase,
+    val::case::CacheCaseVal,
     Val,
 };
 
@@ -9,7 +9,7 @@ pub enum Answer {
     None,
     Never,
     Maybe(Val),
-    Cache(CacheCase),
+    Cache(CacheCaseVal),
 }
 
 pub(crate) const NONE: &str = "none";

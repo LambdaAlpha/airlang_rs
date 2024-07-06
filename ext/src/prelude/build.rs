@@ -6,14 +6,14 @@ use std::{
 
 use airlang::{
     initial_ctx,
-    interpret_mutable,
+    interpret_mut,
     parse,
     Ctx,
-    CtxForMutableFn,
     FuncVal,
     Invariant,
     Mode,
-    MutableCtx,
+    MutCtx,
+    MutFnCtx,
     Symbol,
     Text,
     Val,
@@ -22,7 +22,7 @@ use airlang::{
 use crate::{
     init_ctx,
     prelude::{
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -39,7 +39,7 @@ impl Default for BuildPrelude {
 }
 
 impl Prelude for BuildPrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.import.put(ctx.reborrow());
     }
 }
@@ -47,12 +47,12 @@ impl Prelude for BuildPrelude {
 fn import() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("build.import", input_mode, output_mode, fn_import)
+    named_mut_fn("build.import", input_mode, output_mode, fn_import)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";
 
-fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_import(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Text(url) = input else {
         return Val::default();
     };
@@ -76,15 +76,15 @@ fn fn_import(mut ctx: CtxForMutableFn, input: Val) -> Val {
     };
 
     let mut ctx_for_mod = initial_ctx();
-    let mut mut_ctx_for_mod = MutableCtx::new(&mut ctx_for_mod);
+    let mut mut_ctx_for_mod = MutCtx::new(&mut ctx_for_mod);
     init_ctx(mut_ctx_for_mod.reborrow());
     if !set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key, new_url) {
         return Val::default();
     }
-    interpret_mutable(mut_ctx_for_mod, val)
+    interpret_mut(mut_ctx_for_mod, val)
 }
 
-fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
+fn get_cur_url(ctx: MutFnCtx, key: Symbol) -> Option<String> {
     if let Ok(meta) = ctx.meta() {
         if let Ok(val) = meta.get_ref(key) {
             return if let Val::Text(url) = val {
@@ -103,13 +103,13 @@ fn get_cur_url(ctx: CtxForMutableFn, key: Symbol) -> Option<String> {
     Some(cur_dir)
 }
 
-fn set_cur_url(mut ctx: MutableCtx, key: Symbol, new_url: String) -> bool {
+fn set_cur_url(mut ctx: MutCtx, key: Symbol, new_url: String) -> bool {
     if let Some(meta) = ctx.reborrow().meta() {
         meta.put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
             .is_ok()
     } else {
         let mut meta = Ctx::default();
-        let meta_mut = MutableCtx::new(&mut meta);
+        let meta_mut = MutCtx::new(&mut meta);
         meta_mut
             .put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
             .expect("put into a mutable empty ctx should never fail");

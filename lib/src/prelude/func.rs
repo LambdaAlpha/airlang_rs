@@ -1,22 +1,18 @@
 use crate::{
     bool::Bool,
     ctx::{
-        constant::CtxForConstFn,
+        const1::ConstFnCtx,
         Ctx,
         CtxMap,
         DefaultCtx,
     },
     func::{
+        const1::ConstInfo,
+        free::FreeInfo,
+        mut1::MutInfo,
         Composed,
-        CtxConst,
-        CtxConstInfo,
-        CtxFree,
-        CtxFreeInfo,
-        CtxMutable,
-        CtxMutableInfo,
         Func,
         FuncImpl,
-        FuncTransformer,
     },
     map::Map,
     mode::{
@@ -46,9 +42,11 @@ use crate::{
     val::{
         ctx::CtxVal,
         func::FuncVal,
-        map::MapVal,
         Val,
     },
+    ConstFuncVal,
+    FreeFuncVal,
+    MutFuncVal,
 };
 
 #[derive(Clone)]
@@ -167,29 +165,40 @@ fn fn_new(input: Val) -> Val {
         Val::Unit(_) => FREE,
         _ => return Val::default(),
     };
-    let transformer = match ctx_access {
-        FREE => FuncTransformer::Free(FuncImpl::Composed(Composed {
-            body,
-            prelude,
-            input_name,
-            ctx: CtxFreeInfo {},
-        })),
-        CONST => FuncTransformer::Const(FuncImpl::Composed(Composed {
-            body,
-            prelude,
-            input_name,
-            ctx: CtxConstInfo { name: ctx_name },
-        })),
-        MUTABLE => FuncTransformer::Mutable(FuncImpl::Composed(Composed {
-            body,
-            prelude,
-            input_name,
-            ctx: CtxMutableInfo { name: ctx_name },
-        })),
+    let func = match ctx_access {
+        FREE => {
+            let transformer = Composed {
+                body,
+                prelude,
+                input_name,
+                ctx: FreeInfo {},
+            };
+            let func = Func::new_composed(input_mode, output_mode, transformer);
+            FuncVal::Free(FreeFuncVal::from(func))
+        }
+        CONST => {
+            let transformer = Composed {
+                body,
+                prelude,
+                input_name,
+                ctx: ConstInfo { name: ctx_name },
+            };
+            let func = Func::new_composed(input_mode, output_mode, transformer);
+            FuncVal::Const(ConstFuncVal::from(func))
+        }
+        MUTABLE => {
+            let transformer = Composed {
+                body,
+                prelude,
+                input_name,
+                ctx: MutInfo { name: ctx_name },
+            };
+            let func = Func::new_composed(input_mode, output_mode, transformer);
+            FuncVal::Mut(MutFuncVal::from(func))
+        }
         _ => return Val::default(),
     };
-    let func = Func::new(input_mode, output_mode, transformer);
-    Val::Func(FuncVal::from(func))
+    Val::Func(func)
 }
 
 fn repr() -> Named<FuncVal> {
@@ -212,26 +221,28 @@ fn fn_repr(input: Val) -> Val {
     let Val::Func(func) = input else {
         return Val::default();
     };
-    let mut repr = MapVal::from(Map::<Val, Val>::default());
+    let mut repr = Map::<Val, Val>::default();
 
-    if func.input_mode != Mode::default() {
-        let input_mode = generate(&func.input_mode);
+    let input_mode = func.input_mode();
+    if *input_mode != Mode::default() {
+        let input_mode = generate(input_mode);
         repr.insert(symbol(INPUT_MODE), input_mode);
     }
-    if func.output_mode != Mode::default() {
-        let output_mode = generate(&func.output_mode);
+    let output_mode = func.output_mode();
+    if *output_mode != Mode::default() {
+        let output_mode = generate(output_mode);
         repr.insert(symbol(OUTPUT_MODE), output_mode);
     }
 
-    match &func.transformer {
-        FuncTransformer::Free(t) => match t {
-            CtxFree::Primitive(p) => {
+    match func {
+        FuncVal::Free(t) => match &t.transformer {
+            FuncImpl::Primitive(p) => {
                 repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                 if p.is_extension() {
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                 }
             }
-            CtxFree::Composed(c) => {
+            FuncImpl::Composed(c) => {
                 repr.insert(symbol(BODY), c.body.clone());
                 if c.prelude != Ctx::default() {
                     repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
@@ -241,16 +252,16 @@ fn fn_repr(input: Val) -> Val {
                 }
             }
         },
-        FuncTransformer::Const(t) => {
+        FuncVal::Const(t) => {
             repr.insert(symbol(CTX_ACCESS), symbol(CONST));
-            match t {
-                CtxConst::Primitive(p) => {
+            match &t.transformer {
+                FuncImpl::Primitive(p) => {
                     repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                     if p.is_extension() {
                         repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                     }
                 }
-                CtxConst::Composed(c) => {
+                FuncImpl::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
                     if c.prelude != Ctx::default() {
                         repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
@@ -264,16 +275,16 @@ fn fn_repr(input: Val) -> Val {
                 }
             }
         }
-        FuncTransformer::Mutable(t) => {
+        FuncVal::Mut(t) => {
             repr.insert(symbol(CTX_ACCESS), symbol(MUTABLE));
-            match t {
-                CtxMutable::Primitive(p) => {
+            match &t.transformer {
+                FuncImpl::Primitive(p) => {
                     repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                     if p.is_extension() {
                         repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                     }
                 }
-                CtxMutable::Composed(c) => {
+                FuncImpl::Composed(c) => {
                     repr.insert(symbol(BODY), c.body.clone());
                     if c.prelude != Ctx::default() {
                         repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
@@ -288,7 +299,7 @@ fn fn_repr(input: Val) -> Val {
             }
         }
     }
-    Val::Map(repr)
+    Val::Map(repr.into())
 }
 
 fn ctx_access() -> Named<FuncVal> {
@@ -302,15 +313,15 @@ fn ctx_access() -> Named<FuncVal> {
     )
 }
 
-fn fn_ctx_access(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let access = match &func.transformer {
-            FuncTransformer::Free(_) => FREE,
-            FuncTransformer::Const(_) => CONST,
-            FuncTransformer::Mutable(_) => MUTABLE,
+        let access = match func {
+            FuncVal::Free(_) => FREE,
+            FuncVal::Const(_) => CONST,
+            FuncVal::Mut(_) => MUTABLE,
         };
         Val::Symbol(Symbol::from_str(access))
     })
@@ -327,12 +338,12 @@ fn input_mode() -> Named<FuncVal> {
     )
 }
 
-fn fn_input_mode(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_input_mode(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        generate(&func.input_mode)
+        generate(func.input_mode())
     })
 }
 
@@ -347,12 +358,12 @@ fn output_mode() -> Named<FuncVal> {
     )
 }
 
-fn fn_output_mode(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_output_mode(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        generate(&func.output_mode)
+        generate(func.output_mode())
     })
 }
 
@@ -367,7 +378,7 @@ fn is_primitive() -> Named<FuncVal> {
     )
 }
 
-fn fn_is_primitive(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -388,7 +399,7 @@ fn is_extension() -> Named<FuncVal> {
     )
 }
 
-fn fn_is_extension(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -406,7 +417,7 @@ fn id() -> Named<FuncVal> {
     named_const_fn("function.id", input_mode, output_mode, fn_id)
 }
 
-fn fn_id(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -424,7 +435,7 @@ fn body() -> Named<FuncVal> {
     named_const_fn("function.body", input_mode, output_mode, fn_body)
 }
 
-fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -432,7 +443,7 @@ fn fn_body(ctx: CtxForConstFn, input: Val) -> Val {
         let Some(body) = func.composed_body() else {
             return Val::default();
         };
-        body
+        body.clone()
     })
 }
 
@@ -442,7 +453,7 @@ fn prelude() -> Named<FuncVal> {
     named_const_fn("function.prelude", input_mode, output_mode, fn_prelude)
 }
 
-fn fn_prelude(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -450,7 +461,7 @@ fn fn_prelude(ctx: CtxForConstFn, input: Val) -> Val {
         let Some(prelude) = func.composed_prelude() else {
             return Val::default();
         };
-        Val::Ctx(CtxVal::from(prelude))
+        Val::Ctx(CtxVal::from(prelude.clone()))
     })
 }
 
@@ -465,7 +476,7 @@ fn input_name() -> Named<FuncVal> {
     )
 }
 
-fn fn_input_name(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_input_name(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -488,7 +499,7 @@ fn ctx_name() -> Named<FuncVal> {
     )
 }
 
-fn fn_ctx_name(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_ctx_name(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();

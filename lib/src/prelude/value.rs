@@ -27,7 +27,7 @@ use crate::{
     },
     bool::Bool,
     ctx::{
-        constant::CtxForConstFn,
+        const1::ConstFnCtx,
         ref1::CtxRef,
         CtxMap,
         DefaultCtx,
@@ -137,7 +137,7 @@ fn type_of() -> Named<FuncVal> {
     named_const_fn("type_of", input_mode, output_mode, fn_type_of)
 }
 
-fn fn_type_of(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
@@ -169,7 +169,7 @@ fn equal() -> Named<FuncVal> {
     named_const_fn("==", input_mode, output_mode, fn_equal)
 }
 
-fn fn_equal(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -193,7 +193,7 @@ fn not_equal() -> Named<FuncVal> {
     named_const_fn("!=", input_mode, output_mode, fn_not_equal)
 }
 
-fn fn_not_equal(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

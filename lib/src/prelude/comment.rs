@@ -6,11 +6,11 @@ use crate::{
         CtxMap,
         DefaultCtx,
     },
-    func::MutableDispatcher,
+    func::mut1::MutDispatcher,
     prelude::{
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -19,11 +19,11 @@ use crate::{
     transformer::input::ByVal,
     types::either::Either,
     Comment,
-    CtxForConstFn,
-    CtxForMutableFn,
+    ConstFnCtx,
     FreeCtx,
     FuncVal,
     Mode,
+    MutFnCtx,
     Pair,
     Val,
 };
@@ -79,12 +79,12 @@ fn fn_new(input: Val) -> Val {
 fn apply() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    let func = MutableDispatcher::new(
+    let func = MutDispatcher::new(
         fn_apply::<FreeCtx>,
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mutable_fn("comment.apply", input_mode, output_mode, func)
+    named_mut_fn("comment.apply", input_mode, output_mode, func)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -103,7 +103,7 @@ fn get_note() -> Named<FuncVal> {
     named_const_fn("comment.note", input_mode, output_mode, fn_get_note)
 }
 
-fn fn_get_note(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_note(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Comment(comment) => comment.note.clone(),
@@ -119,10 +119,10 @@ fn fn_get_note(ctx: CtxForConstFn, input: Val) -> Val {
 fn set_note() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("comment.set_note", input_mode, output_mode, fn_set_note)
+    named_mut_fn("comment.set_note", input_mode, output_mode, fn_set_note)
 }
 
-fn fn_set_note(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -147,7 +147,7 @@ fn get_value() -> Named<FuncVal> {
     named_const_fn("comment.value", input_mode, output_mode, fn_get_value)
 }
 
-fn fn_get_value(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Comment(comment) => comment.value.clone(),
@@ -163,10 +163,10 @@ fn fn_get_value(ctx: CtxForConstFn, input: Val) -> Val {
 fn set_value() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("comment.set_value", input_mode, output_mode, fn_set_value)
+    named_mut_fn("comment.set_value", input_mode, output_mode, fn_set_value)
 }
 
-fn fn_set_value(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_value(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };

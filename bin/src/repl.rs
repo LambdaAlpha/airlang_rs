@@ -12,10 +12,10 @@ use std::{
 use airlang::{
     generate,
     initial_ctx,
-    interpret_mutable,
+    interpret_mut,
     parse,
     Ctx,
-    MutableCtx,
+    MutCtx,
     Text,
     Val,
 };
@@ -97,7 +97,7 @@ enum CtrlFlow {
 impl<W: Write + IsTty> Repl<W> {
     pub(crate) fn new(out: W) -> Self {
         let mut ctx = initial_ctx();
-        init_ctx(MutableCtx::new(&mut ctx));
+        init_ctx(MutCtx::new(&mut ctx));
         let terminal = Terminal(out);
         Self {
             ctx,
@@ -445,7 +445,7 @@ impl<W: Write + IsTty> Repl<W> {
     fn eval(&mut self, input: &str) -> Result<()> {
         match parse(input) {
             Ok(input) => {
-                let output = interpret_mutable(MutableCtx::new(&mut self.ctx), input);
+                let output = interpret_mut(MutCtx::new(&mut self.ctx), input);
                 match generate(&output) {
                     Ok(o) => self.terminal.print(o),
                     Err(e) => self.terminal.eprint(e.to_string()),
@@ -462,7 +462,7 @@ impl<W: Write + IsTty> Repl<W> {
         self.terminal.print(Self::TITLE)?;
         self.terminal.print(" ")?;
         match parse(include_str!("air/version.air")) {
-            Ok(repr) => match interpret_mutable(MutableCtx::new(&mut self.ctx), repr) {
+            Ok(repr) => match interpret_mut(MutCtx::new(&mut self.ctx), repr) {
                 Val::Text(t) => {
                     let s = Text::from(t);
                     self.terminal.print(s)

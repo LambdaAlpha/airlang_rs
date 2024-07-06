@@ -1,14 +1,14 @@
 use crate::{
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         CtxMap,
         DefaultCtx,
     },
     prelude::{
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -93,7 +93,7 @@ fn length() -> Named<FuncVal> {
     named_const_fn("text.length", input_mode, output_mode, fn_length)
 }
 
-fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Text(t) = val else {
             return Val::default();
@@ -106,10 +106,10 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("text.push", input_mode, output_mode, fn_push)
+    named_mut_fn("text.push", input_mode, output_mode, fn_push)
 }
 
-fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

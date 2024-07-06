@@ -2,15 +2,15 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         CtxMap,
         DefaultCtx,
     },
     prelude::{
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -74,7 +74,7 @@ fn get_first() -> Named<FuncVal> {
     named_const_fn("pair.first", input_mode, output_mode, fn_get_first)
 }
 
-fn fn_get_first(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
@@ -90,10 +90,10 @@ fn fn_get_first(ctx: CtxForConstFn, input: Val) -> Val {
 fn set_first() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("pair.set_first", input_mode, output_mode, fn_set_first)
+    named_mut_fn("pair.set_first", input_mode, output_mode, fn_set_first)
 }
 
-fn fn_set_first(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -118,7 +118,7 @@ fn get_second() -> Named<FuncVal> {
     named_const_fn("pair.second", input_mode, output_mode, fn_get_second)
 }
 
-fn fn_get_second(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
@@ -134,10 +134,10 @@ fn fn_get_second(ctx: CtxForConstFn, input: Val) -> Val {
 fn set_second() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("pair.set_second", input_mode, output_mode, fn_set_second)
+    named_mut_fn("pair.set_second", input_mode, output_mode, fn_set_second)
 }
 
-fn fn_set_second(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };

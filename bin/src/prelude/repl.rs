@@ -1,7 +1,7 @@
 use airlang::{
     FuncVal,
     Mode,
-    MutableCtx,
+    MutCtx,
     Val,
 };
 
@@ -22,7 +22,7 @@ impl Default for ReplPrelude {
 }
 
 impl Prelude for ReplPrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.help.put(ctx.reborrow());
     }
 }

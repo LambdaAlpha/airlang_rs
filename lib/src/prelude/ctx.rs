@@ -3,14 +3,14 @@ use crate::{
     bool::Bool,
     call::Call,
     ctx::{
-        constant::{
+        const1::{
             ConstCtx,
-            CtxForConstFn,
+            ConstFnCtx,
         },
         free::FreeCtx,
-        mutable::{
-            CtxForMutableFn,
-            MutableCtx,
+        mut1::{
+            MutCtx,
+            MutFnCtx,
         },
         ref1::CtxRef,
         Ctx,
@@ -30,7 +30,7 @@ use crate::{
         map_all_mode,
         named_const_fn,
         named_free_fn,
-        named_mutable_fn,
+        named_mut_fn,
         pair_mode,
         Named,
         Prelude,
@@ -135,7 +135,7 @@ fn read() -> Named<FuncVal> {
     named_const_fn("read", input_mode, output_mode, fn_read)
 }
 
-fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -145,10 +145,10 @@ fn fn_read(ctx: CtxForConstFn, input: Val) -> Val {
 fn move1() -> Named<FuncVal> {
     let input_mode = form_mode();
     let output_mode = Mode::default();
-    named_mutable_fn("move", input_mode, output_mode, fn_move)
+    named_mut_fn("move", input_mode, output_mode, fn_move)
 }
 
-fn fn_move(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -158,10 +158,10 @@ fn fn_move(ctx: CtxForMutableFn, input: Val) -> Val {
 fn assign() -> Named<FuncVal> {
     let input_mode = pair_mode(form_mode(), Mode::default(), Transform::default());
     let output_mode = Mode::default();
-    named_mutable_fn("=", input_mode, output_mode, fn_assign)
+    named_mut_fn("=", input_mode, output_mode, fn_assign)
 }
 
-fn fn_assign(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -175,7 +175,7 @@ fn fn_assign(ctx: CtxForMutableFn, input: Val) -> Val {
 const INVARIANT: &str = "invariant";
 
 fn assign_destruct(
-    mut ctx: CtxForMutableFn,
+    mut ctx: MutFnCtx,
     name: Val,
     val: Val,
     options: AssignOptions,
@@ -209,11 +209,11 @@ fn assign_destruct(
     }
 }
 
-fn assign_allow_options(ctx: CtxForMutableFn, name: Val, val: Val, options: AssignOptions) -> Val {
+fn assign_allow_options(ctx: MutFnCtx, name: Val, val: Val, options: AssignOptions) -> Val {
     assign_destruct(ctx, name, val, options, true)
 }
 
-fn assign_symbol(ctx: CtxForMutableFn, name: Symbol, val: Val, options: AssignOptions) -> Val {
+fn assign_symbol(ctx: MutFnCtx, name: Symbol, val: Val, options: AssignOptions) -> Val {
     let ctx_value = CtxValue {
         val,
         invariant: options.invariant,
@@ -224,7 +224,7 @@ fn assign_symbol(ctx: CtxForMutableFn, name: Symbol, val: Val, options: AssignOp
     last.unwrap_or_default()
 }
 
-fn assign_pair(mut ctx: CtxForMutableFn, name: PairVal, val: Val, options: AssignOptions) -> Val {
+fn assign_pair(mut ctx: MutFnCtx, name: PairVal, val: Val, options: AssignOptions) -> Val {
     let Val::Pair(val) = val else {
         return Val::default();
     };
@@ -235,7 +235,7 @@ fn assign_pair(mut ctx: CtxForMutableFn, name: PairVal, val: Val, options: Assig
     Val::Pair(Pair::new(first, second).into())
 }
 
-fn assign_call(mut ctx: CtxForMutableFn, name: CallVal, val: Val, options: AssignOptions) -> Val {
+fn assign_call(mut ctx: MutFnCtx, name: CallVal, val: Val, options: AssignOptions) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
     };
@@ -246,7 +246,7 @@ fn assign_call(mut ctx: CtxForMutableFn, name: CallVal, val: Val, options: Assig
     Val::Call(Call::new(func, input).into())
 }
 
-fn assign_ask(mut ctx: CtxForMutableFn, name: AskVal, val: Val, options: AssignOptions) -> Val {
+fn assign_ask(mut ctx: MutFnCtx, name: AskVal, val: Val, options: AssignOptions) -> Val {
     let Val::Ask(val) = val else {
         return Val::default();
     };
@@ -257,12 +257,7 @@ fn assign_ask(mut ctx: CtxForMutableFn, name: AskVal, val: Val, options: AssignO
     Val::Ask(Ask::new(func, output).into())
 }
 
-fn assign_comment(
-    mut ctx: CtxForMutableFn,
-    name: CommentVal,
-    val: Val,
-    options: AssignOptions,
-) -> Val {
+fn assign_comment(mut ctx: MutFnCtx, name: CommentVal, val: Val, options: AssignOptions) -> Val {
     let Val::Comment(val) = val else {
         return Val::default();
     };
@@ -273,7 +268,7 @@ fn assign_comment(
     Val::Comment(Comment::new(note, value).into())
 }
 
-fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: AssignOptions) -> Val {
+fn assign_list(mut ctx: MutFnCtx, name: ListVal, val: Val, options: AssignOptions) -> Val {
     let Val::List(val) = val else {
         return Val::default();
     };
@@ -300,7 +295,7 @@ fn assign_list(mut ctx: CtxForMutableFn, name: ListVal, val: Val, options: Assig
     Val::List(list.into())
 }
 
-fn assign_map(mut ctx: CtxForMutableFn, name: MapVal, val: Val, options: AssignOptions) -> Val {
+fn assign_map(mut ctx: MutFnCtx, name: MapVal, val: Val, options: AssignOptions) -> Val {
     let Val::Map(mut val) = val else {
         return Val::default();
     };
@@ -391,10 +386,10 @@ fn generate_invariant(invariant: Invariant) -> Symbol {
 fn set_final() -> Named<FuncVal> {
     let input_mode = form_mode();
     let output_mode = Mode::default();
-    named_mutable_fn("set_final", input_mode, output_mode, fn_set_final)
+    named_mut_fn("set_final", input_mode, output_mode, fn_set_final)
 }
 
-fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_final(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -405,10 +400,10 @@ fn fn_set_final(ctx: CtxForMutableFn, input: Val) -> Val {
 fn set_const() -> Named<FuncVal> {
     let input_mode = form_mode();
     let output_mode = Mode::default();
-    named_mutable_fn("set_constant", input_mode, output_mode, fn_set_const)
+    named_mut_fn("set_constant", input_mode, output_mode, fn_set_const)
 }
 
-fn fn_set_const(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_const(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -422,7 +417,7 @@ fn is_final() -> Named<FuncVal> {
     named_const_fn("is_final", input_mode, output_mode, fn_is_final)
 }
 
-fn fn_is_final(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_final(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -439,7 +434,7 @@ fn is_const() -> Named<FuncVal> {
     named_const_fn("is_constant", input_mode, output_mode, fn_is_const)
 }
 
-fn fn_is_const(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_const(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -456,7 +451,7 @@ fn is_null() -> Named<FuncVal> {
     named_const_fn("is_null", input_mode, output_mode, fn_is_null)
 }
 
-fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -469,18 +464,18 @@ fn fn_is_null(ctx: CtxForConstFn, input: Val) -> Val {
 fn get_access() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("access", input_mode, output_mode, fn_get_access)
+    named_mut_fn("access", input_mode, output_mode, fn_get_access)
 }
 
 const ACCESS_FREE: &str = "free";
 const ACCESS_CONSTANT: &str = "constant";
 const ACCESS_MUTABLE: &str = "mutable";
 
-fn fn_get_access(ctx: CtxForMutableFn, _input: Val) -> Val {
+fn fn_get_access(ctx: MutFnCtx, _input: Val) -> Val {
     let access = match ctx {
-        CtxForMutableFn::Free(_) => ACCESS_FREE,
-        CtxForMutableFn::Const(_) => ACCESS_CONSTANT,
-        CtxForMutableFn::Mutable(_) => ACCESS_MUTABLE,
+        MutFnCtx::Free(_) => ACCESS_FREE,
+        MutFnCtx::Const(_) => ACCESS_CONSTANT,
+        MutFnCtx::Mut(_) => ACCESS_MUTABLE,
     };
     symbol(access)
 }
@@ -491,7 +486,7 @@ fn has_meta() -> Named<FuncVal> {
     named_const_fn("has_meta", input_mode, output_mode, fn_has_meta)
 }
 
-fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
+fn fn_has_meta(ctx: ConstFnCtx, _input: Val) -> Val {
     match ctx.get_meta() {
         Ok(_) => Val::Bool(Bool::t()),
         Err(CtxError::NotFound) => Val::Bool(Bool::f()),
@@ -502,10 +497,10 @@ fn fn_has_meta(ctx: CtxForConstFn, _input: Val) -> Val {
 fn set_meta() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("set_meta", input_mode, output_mode, fn_set_meta)
+    named_mut_fn("set_meta", input_mode, output_mode, fn_set_meta)
 }
 
-fn fn_set_meta(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_meta(ctx: MutFnCtx, input: Val) -> Val {
     match input {
         Val::Unit(_) => {
             let _ = ctx.set_meta(None);
@@ -522,10 +517,10 @@ fn fn_set_meta(ctx: CtxForMutableFn, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let input_mode = pair_mode(form_mode(), Mode::default(), Transform::default());
     let output_mode = Mode::default();
-    named_mutable_fn("|", input_mode, output_mode, fn_with_ctx)
+    named_mut_fn("|", input_mode, output_mode, fn_with_ctx)
 }
 
-fn fn_with_ctx(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -537,9 +532,9 @@ fn fn_with_ctx(ctx: CtxForMutableFn, input: Val) -> Val {
     result.unwrap_or_default()
 }
 
-fn with_target_ctx<F>(ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
+fn with_target_ctx<F>(ctx: MutFnCtx, target_ctx: &Val, callback: F) -> Option<Val>
 where
-    F: FnOnce(CtxForMutableFn) -> Val,
+    F: FnOnce(MutFnCtx) -> Val,
 {
     match target_ctx {
         Val::List(names) => get_ctx_nested(ctx, &names[..], callback),
@@ -550,12 +545,12 @@ where
 const META: &str = "meta";
 const THIS: &str = "this";
 
-fn with_target_ctx_basic<F>(ctx: CtxForMutableFn, target_ctx: &Val, callback: F) -> Option<Val>
+fn with_target_ctx_basic<F>(ctx: MutFnCtx, target_ctx: &Val, callback: F) -> Option<Val>
 where
-    F: FnOnce(CtxForMutableFn) -> Option<Val>,
+    F: FnOnce(MutFnCtx) -> Option<Val>,
 {
     match target_ctx {
-        Val::Unit(_) => callback(CtxForMutableFn::Free(FreeCtx)),
+        Val::Unit(_) => callback(MutFnCtx::Free(FreeCtx)),
         Val::Symbol(name) => match name.chars().next() {
             Some(Symbol::ID_PREFIX) => match &name[1..] {
                 META => {
@@ -567,9 +562,9 @@ where
                         return None;
                     };
                     if is_const {
-                        callback(CtxForMutableFn::Const(ConstCtx::new(meta_ctx)))
+                        callback(MutFnCtx::Const(ConstCtx::new(meta_ctx)))
                     } else {
-                        callback(CtxForMutableFn::Mutable(MutableCtx::new(meta_ctx)))
+                        callback(MutFnCtx::Mut(MutCtx::new(meta_ctx)))
                     }
                 }
                 THIS => callback(ctx),
@@ -584,9 +579,9 @@ where
                     return None;
                 };
                 if is_const {
-                    callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx)))
+                    callback(MutFnCtx::Const(ConstCtx::new(target_ctx)))
                 } else {
-                    callback(CtxForMutableFn::Mutable(MutableCtx::new(target_ctx)))
+                    callback(MutFnCtx::Mut(MutCtx::new(target_ctx)))
                 }
             }
             _ => {
@@ -597,9 +592,9 @@ where
                     return None;
                 };
                 if is_const {
-                    callback(CtxForMutableFn::Const(ConstCtx::new(target_ctx)))
+                    callback(MutFnCtx::Const(ConstCtx::new(target_ctx)))
                 } else {
-                    callback(CtxForMutableFn::Mutable(MutableCtx::new(target_ctx)))
+                    callback(MutFnCtx::Mut(MutCtx::new(target_ctx)))
                 }
             }
         },
@@ -607,9 +602,9 @@ where
     }
 }
 
-fn get_ctx_nested<F>(ctx: CtxForMutableFn, names: &[Val], f: F) -> Option<Val>
+fn get_ctx_nested<F>(ctx: MutFnCtx, names: &[Val], f: F) -> Option<Val>
 where
-    F: for<'a> FnOnce(CtxForMutableFn<'a>) -> Val,
+    F: for<'a> FnOnce(MutFnCtx<'a>) -> Val,
 {
     let Some(target_ctx) = names.first() else {
         return Some(f(ctx));
@@ -635,7 +630,7 @@ fn fn_ctx_in_ctx_out(input: Val) -> Val {
     };
     let mut ctx = Ctx::from(ctx);
     let input = ctx_input.second;
-    let output = Eval.transform(MutableCtx::new(&mut ctx), input);
+    let output = Eval.transform(MutCtx::new(&mut ctx), input);
     let pair = Pair::new(Val::Ctx(ctx.into()), output);
     Val::Pair(pair.into())
 }
@@ -763,8 +758,8 @@ fn ctx_this() -> Named<FuncVal> {
     named_const_fn("this", input_mode, output_mode, fn_ctx_this)
 }
 
-fn fn_ctx_this(ctx: CtxForConstFn, _input: Val) -> Val {
-    let CtxForConstFn::Const(ctx) = ctx else {
+fn fn_ctx_this(ctx: ConstFnCtx, _input: Val) -> Val {
+    let ConstFnCtx::Const(ctx) = ctx else {
         return Val::default();
     };
     Val::Ctx(CtxVal::from(ctx.get_ctx_ref().clone()))

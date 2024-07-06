@@ -552,6 +552,6 @@ pub(crate) mod ref1;
 
 pub(crate) mod free;
 
-pub(crate) mod constant;
+pub(crate) mod const1;
 
-pub(crate) mod mutable;
+pub(crate) mod mut1;

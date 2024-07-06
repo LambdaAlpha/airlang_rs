@@ -7,12 +7,10 @@ use crate::{
         CtxValue,
     },
     func::{
-        CtxConstFn,
-        CtxFreeFn,
-        CtxMutableFn,
+        const1::ConstFn,
+        free::FreeFn,
+        mut1::MutFn,
         Func,
-        FuncImpl,
-        FuncTransformer,
         Primitive,
     },
     mode::{
@@ -48,7 +46,12 @@ use crate::{
     },
     symbol::Symbol,
     val::{
-        func::FuncVal,
+        func::{
+            ConstFuncVal,
+            FreeFuncVal,
+            FuncVal,
+            MutFuncVal,
+        },
         Val,
     },
     List,
@@ -155,48 +158,36 @@ fn named_free_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
-    func: impl CtxFreeFn + 'static,
+    func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Rc<dyn CtxFreeFn>>::new(name, func);
-    let func = Func::new(
-        input_mode,
-        output_mode,
-        FuncTransformer::Free(FuncImpl::Primitive(primitive)),
-    );
-    let func_val = FuncVal::from(func);
-    Named::new(name, func_val)
+    let primitive = Primitive::<Rc<dyn FreeFn>>::new(name, func);
+    let func = Func::new_primitive(input_mode, output_mode, primitive);
+    let func_val = FreeFuncVal::from(func);
+    Named::new(name, FuncVal::Free(func_val))
 }
 
 fn named_const_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
-    func: impl CtxConstFn + 'static,
+    func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Rc<dyn CtxConstFn>>::new(name, func);
-    let func = Func::new(
-        input_mode,
-        output_mode,
-        FuncTransformer::Const(FuncImpl::Primitive(primitive)),
-    );
-    let func_val = FuncVal::from(func);
-    Named::new(name, func_val)
+    let primitive = Primitive::<Rc<dyn ConstFn>>::new(name, func);
+    let func = Func::new_primitive(input_mode, output_mode, primitive);
+    let func_val = ConstFuncVal::from(func);
+    Named::new(name, FuncVal::Const(func_val))
 }
 
-fn named_mutable_fn(
+fn named_mut_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
-    func: impl CtxMutableFn + 'static,
+    func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Rc<dyn CtxMutableFn>>::new(name, func);
-    let func = Func::new(
-        input_mode,
-        output_mode,
-        FuncTransformer::Mutable(FuncImpl::Primitive(primitive)),
-    );
-    let func_val = FuncVal::from(func);
-    Named::new(name, func_val)
+    let primitive = Primitive::<Rc<dyn MutFn>>::new(name, func);
+    let func = Func::new_primitive(input_mode, output_mode, primitive);
+    let func_val = MutFuncVal::from(func);
+    Named::new(name, FuncVal::Mut(func_val))
 }
 
 fn id_mode() -> Mode {

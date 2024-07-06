@@ -6,16 +6,16 @@ use std::io::{
 };
 
 use airlang::{
-    CtxForMutableFn,
     FuncVal,
     Mode,
-    MutableCtx,
+    MutCtx,
+    MutFnCtx,
     Val,
 };
 
 use crate::prelude::{
     named_free_fn,
-    named_mutable_fn,
+    named_mut_fn,
     Named,
     Prelude,
 };
@@ -45,7 +45,7 @@ impl Default for IoPrelude {
 }
 
 impl Prelude for IoPrelude {
-    fn put(&self, mut ctx: MutableCtx) {
+    fn put(&self, mut ctx: MutCtx) {
         self.read_line.put(ctx.reborrow());
         self.print.put(ctx.reborrow());
         self.print_line.put(ctx.reborrow());
@@ -59,10 +59,10 @@ impl Prelude for IoPrelude {
 fn read_line() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("io.read_line", input_mode, output_mode, fn_read_line)
+    named_mut_fn("io.read_line", input_mode, output_mode, fn_read_line)
 }
 
-fn fn_read_line(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };

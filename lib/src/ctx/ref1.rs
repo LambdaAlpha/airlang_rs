@@ -1,7 +1,7 @@
 use crate::{
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         CtxValue,
         DynRef,
     },
@@ -62,7 +62,7 @@ pub(crate) trait CtxMeta<'a>: CtxRef<'a> {
     #[allow(unused)]
     fn is_ctx_const(self) -> bool;
 
-    fn for_const_fn(self) -> CtxForConstFn<'a>;
+    fn for_const_fn(self) -> ConstFnCtx<'a>;
 
-    fn for_mutable_fn(self) -> CtxForMutableFn<'a>;
+    fn for_mut_fn(self) -> MutFnCtx<'a>;
 }

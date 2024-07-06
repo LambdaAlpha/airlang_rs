@@ -2,15 +2,15 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
-        constant::CtxForConstFn,
-        mutable::CtxForMutableFn,
+        const1::ConstFnCtx,
+        mut1::MutFnCtx,
         CtxMap,
         DefaultCtx,
     },
     list::List,
     prelude::{
         named_const_fn,
-        named_mutable_fn,
+        named_mut_fn,
         Named,
         Prelude,
     },
@@ -78,7 +78,7 @@ fn length() -> Named<FuncVal> {
     named_const_fn("list.length", input_mode, output_mode, fn_length)
 }
 
-fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::List(list) = val else {
             return Val::default();
@@ -91,10 +91,10 @@ fn fn_length(ctx: CtxForConstFn, input: Val) -> Val {
 fn set() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.set", input_mode, output_mode, fn_set)
+    named_mut_fn("list.set", input_mode, output_mode, fn_set)
 }
 
-fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -124,10 +124,10 @@ fn fn_set(ctx: CtxForMutableFn, input: Val) -> Val {
 fn set_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.set_many", input_mode, output_mode, fn_set_many)
+    named_mut_fn("list.set_many", input_mode, output_mode, fn_set_many)
 }
 
-fn fn_set_many(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -164,7 +164,7 @@ fn get() -> Named<FuncVal> {
     named_const_fn("list.get", input_mode, output_mode, fn_get)
 }
 
-fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
+fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -205,10 +205,10 @@ fn fn_get(ctx: CtxForConstFn, input: Val) -> Val {
 fn insert() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.insert", input_mode, output_mode, fn_insert)
+    named_mut_fn("list.insert", input_mode, output_mode, fn_insert)
 }
 
-fn fn_insert(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -237,10 +237,10 @@ fn fn_insert(ctx: CtxForMutableFn, input: Val) -> Val {
 fn insert_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.insert_many", input_mode, output_mode, fn_insert_many)
+    named_mut_fn("list.insert_many", input_mode, output_mode, fn_insert_many)
 }
 
-fn fn_insert_many(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -272,10 +272,10 @@ fn fn_insert_many(ctx: CtxForMutableFn, input: Val) -> Val {
 fn remove() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.remove", input_mode, output_mode, fn_remove)
+    named_mut_fn("list.remove", input_mode, output_mode, fn_remove)
 }
 
-fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -317,10 +317,10 @@ fn fn_remove(ctx: CtxForMutableFn, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.push", input_mode, output_mode, fn_push)
+    named_mut_fn("list.push", input_mode, output_mode, fn_push)
 }
 
-fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
@@ -338,10 +338,10 @@ fn fn_push(ctx: CtxForMutableFn, input: Val) -> Val {
 fn push_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.push_many", input_mode, output_mode, fn_push_many)
+    named_mut_fn("list.push_many", input_mode, output_mode, fn_push_many)
 }
 
-fn fn_push_many(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
@@ -362,10 +362,10 @@ fn fn_push_many(ctx: CtxForMutableFn, input: Val) -> Val {
 fn pop() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.pop", input_mode, output_mode, fn_pop)
+    named_mut_fn("list.pop", input_mode, output_mode, fn_pop)
 }
 
-fn fn_pop(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
@@ -404,10 +404,10 @@ fn fn_pop(ctx: CtxForMutableFn, input: Val) -> Val {
 fn clear() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mutable_fn("list.clear", input_mode, output_mode, fn_clear)
+    named_mut_fn("list.clear", input_mode, output_mode, fn_clear)
 }
 
-fn fn_clear(ctx: CtxForMutableFn, input: Val) -> Val {
+fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_mut_no_ret(ctx, input, |val| {
         let Val::List(list) = val else {
             return;
