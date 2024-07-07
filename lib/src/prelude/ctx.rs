@@ -22,7 +22,12 @@ use crate::{
         Invariant,
     },
     list::List,
-    mode::Mode,
+    mode::{
+        basic::BasicMode,
+        eval::Eval,
+        Mode,
+        SYMBOL_READ_PREFIX,
+    },
     pair::Pair,
     prelude::{
         form_mode,
@@ -36,11 +41,6 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
-    transform::{
-        eval::Eval,
-        Transform,
-        SYMBOL_READ_PREFIX,
-    },
     transformer::Transformer,
     unit::Unit,
     utils::val::{
@@ -156,7 +156,7 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn assign() -> Named<FuncVal> {
-    let input_mode = pair_mode(form_mode(), Mode::default(), Transform::default());
+    let input_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
     named_mut_fn("=", input_mode, output_mode, fn_assign)
 }
@@ -515,7 +515,7 @@ fn fn_set_meta(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn with_ctx() -> Named<FuncVal> {
-    let input_mode = pair_mode(form_mode(), Mode::default(), Transform::default());
+    let input_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
     named_mut_fn("|", input_mode, output_mode, fn_with_ctx)
 }
@@ -642,8 +642,8 @@ const CONST: &str = "constant";
 fn ctx_new() -> Named<FuncVal> {
     let input_mode = pair_mode(
         Mode::default(),
-        map_all_mode(form_mode(), Mode::default(), Transform::default()),
-        Transform::default(),
+        map_all_mode(form_mode(), Mode::default(), BasicMode::default()),
+        BasicMode::default(),
     );
     let output_mode = Mode::default();
     named_free_fn("context", input_mode, output_mode, fn_ctx_new)
@@ -697,8 +697,8 @@ fn ctx_repr() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = pair_mode(
         Mode::default(),
-        map_all_mode(form_mode(), Mode::default(), Transform::default()),
-        Transform::default(),
+        map_all_mode(form_mode(), Mode::default(), BasicMode::default()),
+        BasicMode::default(),
     );
     named_free_fn("context.represent", input_mode, output_mode, fn_ctx_repr)
 }

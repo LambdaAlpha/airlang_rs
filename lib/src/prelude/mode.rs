@@ -4,20 +4,22 @@ use crate::{
         mut1::MutFnCtx,
         CtxMap,
     },
+    mode::{
+        basic::{
+            EVAL,
+            FORM,
+            ID,
+        },
+        eval::Eval,
+        form::Form,
+        id::Id,
+    },
     prelude::{
         id_mode,
         named_free_fn,
         named_mut_fn,
         Named,
         Prelude,
-    },
-    transform::{
-        eval::Eval,
-        form::Form,
-        id::Id,
-        EVAL,
-        FORM,
-        ID,
     },
     transformer::Transformer,
     val::{
@@ -28,15 +30,15 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct TransformPrelude {
+pub(crate) struct ModePrelude {
     pub(crate) id: Named<FuncVal>,
     pub(crate) form: Named<FuncVal>,
     pub(crate) eval: Named<FuncVal>,
 }
 
-impl Default for TransformPrelude {
+impl Default for ModePrelude {
     fn default() -> Self {
-        TransformPrelude {
+        ModePrelude {
             id: id(),
             form: form(),
             eval: eval(),
@@ -44,7 +46,7 @@ impl Default for TransformPrelude {
     }
 }
 
-impl Prelude for TransformPrelude {
+impl Prelude for ModePrelude {
     fn put(&self, m: &mut CtxMap) {
         self.id.put(m);
         self.form.put(m);

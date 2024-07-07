@@ -21,9 +21,11 @@ use crate::{
         CtxValue,
         Invariant,
     },
-    mode::Mode,
+    mode::{
+        eval::Eval,
+        Mode,
+    },
     symbol::Symbol,
-    transform::eval::Eval,
     transformer::Transformer,
     val::{
         ctx::CtxVal,

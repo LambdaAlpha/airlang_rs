@@ -14,8 +14,12 @@ use crate::{
         Primitive,
     },
     mode::{
-        ListMode,
-        MapMode,
+        basic::BasicMode,
+        list::{
+            ListItemMode,
+            ListMode,
+        },
+        map::MapMode,
         Mode,
         ValMode,
     },
@@ -35,12 +39,12 @@ use crate::{
         list::ListPrelude,
         map::MapPrelude,
         meta::MetaPrelude,
+        mode::ModePrelude,
         number::NumberPrelude,
         pair::PairPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
         text::TextPrelude,
-        transform::TransformPrelude,
         unit::UnitPrelude,
         value::ValuePrelude,
     },
@@ -55,10 +59,8 @@ use crate::{
         Val,
     },
     List,
-    ListItemMode,
     Map,
     Pair,
-    Transform,
 };
 
 thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
@@ -70,7 +72,7 @@ pub(crate) struct AllPrelude {
     pub(crate) value: ValuePrelude,
     pub(crate) ctx: CtxPrelude,
     pub(crate) ctrl: CtrlPrelude,
-    pub(crate) transform: TransformPrelude,
+    pub(crate) mode: ModePrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
     pub(crate) ask: AskPrelude,
@@ -97,7 +99,7 @@ impl Prelude for AllPrelude {
         self.value.put(m);
         self.ctx.put(m);
         self.ctrl.put(m);
-        self.transform.put(m);
+        self.mode.put(m);
         self.func.put(m);
         self.call.put(m);
         self.ask.put(m);
@@ -192,14 +194,14 @@ fn named_mut_fn(
 
 fn id_mode() -> Mode {
     Mode {
-        default: Transform::Id,
+        default: BasicMode::Id,
         specialized: None,
     }
 }
 
 fn form_mode() -> Mode {
     Mode {
-        default: Transform::Form,
+        default: BasicMode::Form,
         specialized: None,
     }
 }
@@ -207,12 +209,12 @@ fn form_mode() -> Mode {
 #[allow(unused)]
 fn eval_mode() -> Mode {
     Mode {
-        default: Transform::Eval,
+        default: BasicMode::Eval,
         specialized: None,
     }
 }
 
-fn pair_mode(first: Mode, second: Mode, default: Transform) -> Mode {
+fn pair_mode(first: Mode, second: Mode, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -229,7 +231,7 @@ fn pair_mode(first: Mode, second: Mode, default: Transform) -> Mode {
 }
 
 #[allow(unused)]
-fn list_mode(list_item: List<ListItemMode>, default: Transform) -> Mode {
+fn list_mode(list_item: List<ListItemMode>, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -245,7 +247,7 @@ fn list_mode(list_item: List<ListItemMode>, default: Transform) -> Mode {
     }
 }
 
-fn map_mode(map_mode: Map<Val, Mode>, default: Transform) -> Mode {
+fn map_mode(map_mode: Map<Val, Mode>, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -261,7 +263,7 @@ fn map_mode(map_mode: Map<Val, Mode>, default: Transform) -> Mode {
     }
 }
 
-fn map_all_mode(key: Mode, value: Mode, default: Transform) -> Mode {
+fn map_all_mode(key: Mode, value: Mode, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -287,7 +289,7 @@ mod ctx;
 
 mod ctrl;
 
-mod transform;
+mod mode;
 
 mod func;
 

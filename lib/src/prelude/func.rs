@@ -16,6 +16,10 @@ use crate::{
     },
     map::Map,
     mode::{
+        basic::{
+            BasicMode,
+            EVAL,
+        },
         repr::{
             generate,
             parse,
@@ -31,10 +35,6 @@ use crate::{
         Prelude,
     },
     symbol::Symbol,
-    transform::{
-        Transform,
-        EVAL,
-    },
     utils::val::{
         map_remove,
         symbol,
@@ -126,7 +126,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(CTX_ACCESS), Mode::default());
     map.insert(symbol(INPUT_MODE), form_mode());
     map.insert(symbol(OUTPUT_MODE), form_mode());
-    let input_mode = map_mode(map, Transform::default());
+    let input_mode = map_mode(map, BasicMode::default());
     let output_mode = Mode::default();
     named_free_fn("function", input_mode, output_mode, fn_new)
 }
@@ -213,7 +213,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(OUTPUT_MODE), form_mode());
     map.insert(symbol(ID), Mode::default());
     map.insert(symbol(IS_EXTENSION), Mode::default());
-    let output_mode = map_mode(map, Transform::default());
+    let output_mode = map_mode(map, BasicMode::default());
     named_free_fn("function.represent", input_mode, output_mode, fn_repr)
 }
 

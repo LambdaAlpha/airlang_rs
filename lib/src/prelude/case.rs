@@ -7,6 +7,10 @@ use crate::{
         DefaultCtx,
     },
     map::Map,
+    mode::{
+        basic::BasicMode,
+        eval::Eval,
+    },
     prelude::{
         form_mode,
         map_mode,
@@ -16,7 +20,6 @@ use crate::{
         Named,
         Prelude,
     },
-    transform::eval::Eval,
     transformer::Transformer,
     utils::val::{
         map_remove,
@@ -31,7 +34,6 @@ use crate::{
     Case,
     CaseVal,
     Mode,
-    Transform,
     Val,
 };
 
@@ -82,7 +84,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
-    let input_mode = map_mode(map, Transform::default());
+    let input_mode = map_mode(map, BasicMode::default());
     let output_mode = Mode::default();
     named_mut_fn("case", input_mode, output_mode, fn_new)
 }
@@ -126,7 +128,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
     map.insert(symbol(IS_CACHE), Mode::default());
-    let output_mode = map_mode(map, Transform::default());
+    let output_mode = map_mode(map, BasicMode::default());
     named_free_fn("case.represent", input_mode, output_mode, fn_repr)
 }
 

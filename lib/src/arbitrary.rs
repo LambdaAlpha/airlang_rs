@@ -38,8 +38,15 @@ use crate::{
     list::List,
     map::Map,
     mode::{
-        ListItemMode,
+        basic::BasicMode,
+        list::{
+            ListItemMode,
+            ListMode,
+        },
+        map::MapMode,
+        pair::PairMode,
         Mode,
+        ValMode,
     },
     number::Number,
     pair::Pair,
@@ -49,7 +56,6 @@ use crate::{
     },
     symbol::Symbol,
     text::Text,
-    transform::Transform,
     unit::Unit,
     val::func::FuncVal,
     Ask,
@@ -61,13 +67,9 @@ use crate::{
     ConstFuncVal,
     FreeCtx,
     FreeFuncVal,
-    ListMode,
-    MapMode,
     MutFuncVal,
-    PairMode,
     Val,
     ValExt,
-    ValMode,
 };
 
 pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
@@ -233,8 +235,8 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     Ctx::new(ctx_map, meta)
 }
 
-pub(crate) fn any_transform(rng: &mut SmallRng) -> Transform {
-    const TRANSFORMS: [Transform; 3] = [Transform::Eval, Transform::Id, Transform::Form];
+pub(crate) fn any_transform(rng: &mut SmallRng) -> BasicMode {
+    const TRANSFORMS: [BasicMode; 3] = [BasicMode::Eval, BasicMode::Id, BasicMode::Form];
     *(TRANSFORMS.choose(rng).unwrap())
 }
 

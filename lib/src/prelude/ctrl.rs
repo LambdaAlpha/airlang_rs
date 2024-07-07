@@ -9,6 +9,10 @@ use crate::{
         CtxValue,
     },
     func::mut1::MutDispatcher,
+    mode::{
+        basic::BasicMode,
+        eval::Eval,
+    },
     prelude::{
         form_mode,
         id_mode,
@@ -16,10 +20,6 @@ use crate::{
         pair_mode,
         Named,
         Prelude,
-    },
-    transform::{
-        eval::Eval,
-        Transform,
     },
     transformer::Transformer,
     val::{
@@ -131,7 +131,7 @@ where
 }
 
 fn if1() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
+    let input_mode = pair_mode(Mode::default(), id_mode(), BasicMode::default());
     let output_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_if::<FreeCtx>,
@@ -166,7 +166,7 @@ where
 }
 
 fn if_not() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
+    let input_mode = pair_mode(Mode::default(), id_mode(), BasicMode::default());
     let output_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_if_not::<FreeCtx>,
@@ -201,7 +201,7 @@ where
 }
 
 fn match1() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::default(), id_mode(), Transform::default());
+    let input_mode = pair_mode(Mode::default(), id_mode(), BasicMode::default());
     let output_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_match::<FreeCtx>,
@@ -358,8 +358,8 @@ where
 fn for1() -> Named<FuncVal> {
     let input_mode = pair_mode(
         Mode::default(),
-        pair_mode(form_mode(), id_mode(), Transform::default()),
-        Transform::default(),
+        pair_mode(form_mode(), id_mode(), BasicMode::default()),
+        BasicMode::default(),
     );
     let output_mode = Mode::default();
     let func = MutDispatcher::new(

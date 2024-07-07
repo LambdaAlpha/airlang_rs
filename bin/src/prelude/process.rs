@@ -1,13 +1,13 @@
 use std::process::Command;
 
 use airlang::{
+    BasicMode,
     FuncVal,
     List,
     Mode,
     MutCtx,
     Symbol,
     Text,
-    Transform,
     Val,
 };
 
@@ -39,7 +39,7 @@ const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
-    let input_mode = map_all_mode(form_mode(), Mode::default(), Transform::default());
+    let input_mode = map_all_mode(form_mode(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
     named_free_fn("repl.execute", input_mode, output_mode, fn_call)
 }

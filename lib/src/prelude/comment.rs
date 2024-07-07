@@ -7,6 +7,7 @@ use crate::{
         DefaultCtx,
     },
     func::mut1::MutDispatcher,
+    mode::eval::Eval,
     prelude::{
         named_const_fn,
         named_free_fn,
@@ -15,7 +16,6 @@ use crate::{
         Prelude,
     },
     syntax::COMMENT_INFIX,
-    transform::eval::Eval,
     transformer::input::ByVal,
     types::either::Either,
     Comment,

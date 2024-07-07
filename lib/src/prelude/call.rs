@@ -9,6 +9,10 @@ use crate::{
         DefaultCtx,
     },
     func::mut1::MutDispatcher,
+    mode::{
+        basic::BasicMode,
+        eval::Eval,
+    },
     prelude::{
         form_mode,
         named_const_fn,
@@ -19,14 +23,12 @@ use crate::{
         Prelude,
     },
     syntax::CALL_INFIX,
-    transform::eval::Eval,
     types::either::Either,
     val::func::FuncVal,
     Call,
     FreeCtx,
     Mode,
     Pair,
-    Transform,
     Val,
 };
 
@@ -82,7 +84,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn new_dependent() -> Named<FuncVal> {
-    let input_mode = pair_mode(Mode::default(), form_mode(), Transform::default());
+    let input_mode = pair_mode(Mode::default(), form_mode(), BasicMode::default());
     let output_mode = Mode::default();
     named_mut_fn("!!", input_mode, output_mode, fn_new_dependent)
 }

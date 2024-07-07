@@ -3,13 +3,13 @@ use crate::{
         ref1::CtxMeta,
         DefaultCtx,
     },
-    problem::solve,
-    symbol::Symbol,
-    transform::{
+    mode::{
         id::Id,
         SYMBOL_MOVE_PREFIX,
         SYMBOL_READ_PREFIX,
     },
+    problem::solve,
+    symbol::Symbol,
     transformer::{
         input::ByVal,
         DefaultByVal,

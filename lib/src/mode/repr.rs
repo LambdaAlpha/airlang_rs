@@ -1,9 +1,18 @@
 use crate::{
-    mode::Mode,
-    transform::{
-        EVAL,
-        FORM,
-        ID,
+    mode::{
+        basic::{
+            BasicMode,
+            EVAL,
+            FORM,
+            ID,
+        },
+        list::{
+            ListItemMode,
+            ListMode,
+        },
+        map::MapMode,
+        Mode,
+        ValMode,
     },
     utils::val::{
         map_remove,
@@ -16,16 +25,11 @@ use crate::{
     },
     Call,
     List,
-    ListItemMode,
-    ListMode,
     ListVal,
     Map,
-    MapMode,
     MapVal,
     Pair,
-    Transform,
     Val,
-    ValMode,
 };
 
 const ELLIPSIS: &str = "..";
@@ -35,7 +39,7 @@ pub(crate) fn parse(mode: Val) -> Option<Mode> {
     let mode = match mode {
         Val::Unit(_) => Mode::default(),
         Val::Symbol(s) => Mode {
-            default: parse_transform(&s)?,
+            default: parse_basic_mode(&s)?,
             specialized: None,
         },
         Val::Map(mut map) => {
@@ -53,7 +57,7 @@ pub(crate) fn parse(mode: Val) -> Option<Mode> {
 
 pub(crate) fn generate(mode: &Mode) -> Val {
     let Some(specialized) = &mode.specialized else {
-        return generate_transform(mode.default);
+        return generate_basic_mode(mode.default);
     };
     let mut map = Map::default();
     generate_default(mode.default, &mut map);
@@ -61,49 +65,49 @@ pub(crate) fn generate(mode: &Mode) -> Val {
     Val::Map(map.into())
 }
 
-fn parse_transform(s: &str) -> Option<Transform> {
-    let transform = match s {
-        ID => Transform::Id,
-        FORM => Transform::Form,
-        EVAL => Transform::Eval,
+fn parse_basic_mode(s: &str) -> Option<BasicMode> {
+    let basic_mode = match s {
+        ID => BasicMode::Id,
+        FORM => BasicMode::Form,
+        EVAL => BasicMode::Eval,
         _ => return None,
     };
-    Some(transform)
+    Some(basic_mode)
 }
 
-pub(crate) fn generate_transform(transform: Transform) -> Val {
-    let s = match transform {
-        Transform::Id => ID,
-        Transform::Form => FORM,
-        Transform::Eval => EVAL,
+pub(crate) fn generate_basic_mode(basic_mode: BasicMode) -> Val {
+    let s = match basic_mode {
+        BasicMode::Id => ID,
+        BasicMode::Form => FORM,
+        BasicMode::Eval => EVAL,
     };
     symbol(s)
 }
 
-fn parse_default(map: &mut MapVal) -> Option<Transform> {
+fn parse_default(map: &mut MapVal) -> Option<BasicMode> {
     let transform = match map_remove(map, DEFAULT) {
-        Val::Unit(_) => Transform::default(),
-        Val::Symbol(s) => parse_transform(&s)?,
+        Val::Unit(_) => BasicMode::default(),
+        Val::Symbol(s) => parse_basic_mode(&s)?,
         _ => return None,
     };
     Some(transform)
 }
 
-fn generate_default(default: Transform, map: &mut Map<Val, Val>) {
-    if default != Transform::default() {
-        let default = generate_transform(default);
+fn generate_default(default: BasicMode, map: &mut Map<Val, Val>) {
+    if default != BasicMode::default() {
+        let default = generate_basic_mode(default);
         map.insert(symbol(DEFAULT), default);
     }
 }
 
-fn parse_specialized(map: &mut MapVal, default: Transform) -> Option<ValMode> {
+fn parse_specialized(map: &mut MapVal, default: BasicMode) -> Option<ValMode> {
     let pair = parse_pair(map_remove(map, PAIR), default)?;
     let list = parse_list(map_remove(map, LIST), default)?;
     let map = parse_map(map_remove(map, MAP), default)?;
     Some(ValMode { pair, list, map })
 }
 
-pub(crate) fn generate_specialized(mode: &ValMode, default: Transform, map: &mut Map<Val, Val>) {
+pub(crate) fn generate_specialized(mode: &ValMode, default: BasicMode, map: &mut Map<Val, Val>) {
     if let Some(val) = generate_pair(&mode.pair, default) {
         map.insert(symbol(PAIR), val);
     }
@@ -115,7 +119,7 @@ pub(crate) fn generate_specialized(mode: &ValMode, default: Transform, map: &mut
     }
 }
 
-fn parse_pair(mode: Val, default: Transform) -> Option<Pair<Mode, Mode>> {
+fn parse_pair(mode: Val, default: BasicMode) -> Option<Pair<Mode, Mode>> {
     if mode.is_unit() {
         let default = Mode {
             default,
@@ -132,7 +136,7 @@ fn parse_pair(mode: Val, default: Transform) -> Option<Pair<Mode, Mode>> {
     Some(Pair::new(first, second))
 }
 
-fn generate_pair(mode: &Pair<Mode, Mode>, default: Transform) -> Option<Val> {
+fn generate_pair(mode: &Pair<Mode, Mode>, default: BasicMode) -> Option<Val> {
     let default = Mode {
         default,
         specialized: None,
@@ -145,7 +149,7 @@ fn generate_pair(mode: &Pair<Mode, Mode>, default: Transform) -> Option<Val> {
     Some(Val::Pair(Pair::new(first, second).into()))
 }
 
-fn parse_list(mode: Val, default: Transform) -> Option<ListMode> {
+fn parse_list(mode: Val, default: BasicMode) -> Option<ListMode> {
     match mode {
         Val::Unit(_) => Some(ListMode::All(Mode {
             default,
@@ -189,7 +193,7 @@ fn parse_list_item(mode: Val) -> Option<ListItemMode> {
     Some(mode)
 }
 
-pub(crate) fn generate_list(mode: &ListMode, default: Transform) -> Option<Val> {
+pub(crate) fn generate_list(mode: &ListMode, default: BasicMode) -> Option<Val> {
     match mode {
         ListMode::All(mode) => {
             let default = Mode {
@@ -219,7 +223,7 @@ pub(crate) fn generate_list(mode: &ListMode, default: Transform) -> Option<Val> 
     }
 }
 
-fn parse_map(mode: Val, default: Transform) -> Option<MapMode> {
+fn parse_map(mode: Val, default: BasicMode) -> Option<MapMode> {
     match mode {
         Val::Unit(_) => {
             let default = Mode {
@@ -252,7 +256,7 @@ fn parse_map_some(mode: MapVal) -> Option<MapMode> {
     Some(map)
 }
 
-pub(crate) fn generate_map(mode: &MapMode, default: Transform) -> Option<Val> {
+pub(crate) fn generate_map(mode: &MapMode, default: BasicMode) -> Option<Val> {
     match mode {
         MapMode::All(mode) => {
             let default = Mode {

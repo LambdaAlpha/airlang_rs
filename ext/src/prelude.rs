@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use airlang::{
+    BasicMode,
     ConstFn,
     ConstFunc,
     ConstFuncVal,
@@ -21,7 +22,6 @@ use airlang::{
     MutFuncVal,
     Pair,
     Symbol,
-    Transform,
     Val,
     ValMode,
 };
@@ -116,14 +116,14 @@ fn named_mut_fn(
 #[allow(unused)]
 fn id_mode() -> Mode {
     Mode {
-        default: Transform::Id,
+        default: BasicMode::Id,
         specialized: None,
     }
 }
 
 fn form_mode() -> Mode {
     Mode {
-        default: Transform::Form,
+        default: BasicMode::Form,
         specialized: None,
     }
 }
@@ -131,13 +131,13 @@ fn form_mode() -> Mode {
 #[allow(unused)]
 fn eval_mode() -> Mode {
     Mode {
-        default: Transform::Eval,
+        default: BasicMode::Eval,
         specialized: None,
     }
 }
 
 #[allow(unused)]
-fn pair_mode(first: Mode, second: Mode, default: Transform) -> Mode {
+fn pair_mode(first: Mode, second: Mode, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -154,7 +154,7 @@ fn pair_mode(first: Mode, second: Mode, default: Transform) -> Mode {
 }
 
 #[allow(unused)]
-fn list_mode(list_item: List<ListItemMode>, default: Transform) -> Mode {
+fn list_mode(list_item: List<ListItemMode>, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -171,7 +171,7 @@ fn list_mode(list_item: List<ListItemMode>, default: Transform) -> Mode {
 }
 
 #[allow(unused)]
-fn map_mode(map_mode: Map<Val, Mode>, default: Transform) -> Mode {
+fn map_mode(map_mode: Map<Val, Mode>, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
@@ -187,7 +187,7 @@ fn map_mode(map_mode: Map<Val, Mode>, default: Transform) -> Mode {
     }
 }
 
-fn map_all_mode(key: Mode, value: Mode, default: Transform) -> Mode {
+fn map_all_mode(key: Mode, value: Mode, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,

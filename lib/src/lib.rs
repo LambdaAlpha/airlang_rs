@@ -40,11 +40,14 @@ pub use self::{
     list::List,
     map::Map,
     mode::{
-        ListItemMode,
-        ListMode,
-        MapMode,
+        basic::BasicMode,
+        list::{
+            ListItemMode,
+            ListMode,
+        },
+        map::MapMode,
+        pair::PairMode,
         Mode,
-        PairMode,
         ValMode,
     },
     number::Number,
@@ -52,7 +55,6 @@ pub use self::{
     symbol::Symbol,
     syntax::generator::ReprError,
     text::Text,
-    transform::Transform,
     unit::Unit,
     val::{
         answer::AnswerVal,
@@ -82,8 +84,8 @@ pub use self::{
     },
 };
 use crate::{
+    mode::eval::Eval,
     syntax::ParseError,
-    transform::eval::Eval,
     transformer::Transformer,
 };
 
@@ -114,8 +116,6 @@ pub fn interpret_free(ctx: FreeCtx, input: Val) -> Val {
 pub(crate) mod val;
 
 pub(crate) mod transformer;
-
-pub(crate) mod transform;
 
 pub(crate) mod mode;
 
