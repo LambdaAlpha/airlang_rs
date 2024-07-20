@@ -101,8 +101,8 @@ fn test_ctrl() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_transform() -> Result<(), Box<dyn Error>> {
-    test_interpret(include_str!("test/transform.air"), "test/transform.air")
+fn test_mode() -> Result<(), Box<dyn Error>> {
+    test_interpret(include_str!("test/mode.air"), "test/mode.air")
 }
 
 #[test]
