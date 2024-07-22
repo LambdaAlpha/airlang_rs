@@ -151,7 +151,7 @@ impl<T> Named<T> {
 impl<T: Into<Val> + Clone> Named<T> {
     pub(crate) fn put(&self, m: &mut CtxMap) {
         let name = Symbol::from_str(self.name);
-        let value = CtxValue::new_const(self.value.clone().into());
+        let value = CtxValue::new(self.value.clone().into());
         m.insert(name, value);
     }
 }

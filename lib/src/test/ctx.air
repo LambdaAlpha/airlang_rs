@@ -420,9 +420,9 @@ false
 -----
 true
 =====
-; [a = prelude ! ., a | is_constant '!' .prelude]
+; [a = prelude ! ., a | is_null '!' .prelude]
 -----
-true
+false
 =====
 ; [a = 1, b = this ! ., b | .a]
 -----
