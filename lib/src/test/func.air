@@ -274,7 +274,7 @@ function.represent ! function ! {body : the_input, context_access : .constant}
 =====
 function.represent ==
 -----
-{id : ==, context_access : constant}
+{id : ==}
 =====
 function.represent ! function ! {
     body : i,
@@ -282,7 +282,7 @@ function.represent ! function ! {
     context_name : .c,
     input_mode : {pair : eval : id},
     output_mode : {pair : form : form},
-    context_access : .mutable,
+    context_access : .constant,
 }
 -----
 {
@@ -291,7 +291,7 @@ function.represent ! function ! {
     context_name : c,
     input_mode : {pair : eval : id},
     output_mode : {pair : form : form},
-    context_access : mutable,
+    context_access : constant,
 }
 =====
 function.context_access .function
@@ -308,7 +308,7 @@ mutable
 =====
 ; [f = function ! {}, function.context_access .f]
 -----
-free
+mutable
 =====
 function.input_mode .not
 -----
@@ -445,7 +445,7 @@ function.input_name .not
 -----
 the_context
 =====
-; [f = function ! {}, function.context_name .f]
+; [f = function ! {context_access : .free}, function.context_name .f]
 -----
 .
 =====

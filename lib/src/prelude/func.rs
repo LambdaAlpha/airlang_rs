@@ -16,10 +16,7 @@ use crate::{
     },
     map::Map,
     mode::{
-        basic::{
-            BasicMode,
-            EVAL,
-        },
+        basic::BasicMode,
         repr::{
             generate,
             parse,
@@ -146,11 +143,11 @@ fn fn_new(input: Val) -> Val {
         Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
         _ => return Val::default(),
     };
-    let input_mode = map.remove(&symbol(INPUT_MODE)).unwrap_or(symbol(EVAL));
+    let input_mode = map_remove(&mut map, INPUT_MODE);
     let Some(input_mode) = parse(input_mode) else {
         return Val::default();
     };
-    let output_mode = map.remove(&symbol(OUTPUT_MODE)).unwrap_or(symbol(EVAL));
+    let output_mode = map_remove(&mut map, OUTPUT_MODE);
     let Some(output_mode) = parse(output_mode) else {
         return Val::default();
     };
@@ -162,7 +159,7 @@ fn fn_new(input: Val) -> Val {
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
-        Val::Unit(_) => FREE,
+        Val::Unit(_) => MUTABLE,
         _ => return Val::default(),
     };
     let func = match ctx_access {
@@ -223,23 +220,58 @@ fn fn_repr(input: Val) -> Val {
     };
     let mut repr = Map::<Val, Val>::default();
 
-    let input_mode = func.input_mode();
-    if *input_mode != Mode::default() {
-        let input_mode = generate(input_mode);
-        repr.insert(symbol(INPUT_MODE), input_mode);
-    }
-    let output_mode = func.output_mode();
-    if *output_mode != Mode::default() {
-        let output_mode = generate(output_mode);
-        repr.insert(symbol(OUTPUT_MODE), output_mode);
-    }
-
     match func {
-        FuncVal::Free(t) => match &t.transformer {
+        FuncVal::Free(f) => match &f.transformer {
+            FuncImpl::Primitive(p) => {
+                repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                if p.is_extension() {
+                    repr.insert(symbol(CTX_ACCESS), symbol(FREE));
+                    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    generate_mode(f.input_mode(), f.output_mode(), &mut repr);
+                }
+            }
+            FuncImpl::Composed(c) => {
+                repr.insert(symbol(CTX_ACCESS), symbol(FREE));
+                repr.insert(symbol(BODY), c.body.clone());
+                if c.prelude != Ctx::default() {
+                    repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
+                }
+                if &*c.input_name != DEFAULT_INPUT_NAME {
+                    repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
+                }
+                generate_mode(f.input_mode(), f.output_mode(), &mut repr);
+            }
+        },
+        FuncVal::Const(f) => match &f.transformer {
+            FuncImpl::Primitive(p) => {
+                repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
+                if p.is_extension() {
+                    repr.insert(symbol(CTX_ACCESS), symbol(CONST));
+                    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    generate_mode(f.input_mode(), f.output_mode(), &mut repr);
+                }
+            }
+            FuncImpl::Composed(c) => {
+                repr.insert(symbol(CTX_ACCESS), symbol(CONST));
+                repr.insert(symbol(BODY), c.body.clone());
+                if c.prelude != Ctx::default() {
+                    repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
+                }
+                if &*c.input_name != DEFAULT_INPUT_NAME {
+                    repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
+                }
+                if &*c.ctx.name != DEFAULT_CTX_NAME {
+                    repr.insert(symbol(CTX_NAME), Val::Symbol(c.ctx.name.clone()));
+                }
+                generate_mode(f.input_mode(), f.output_mode(), &mut repr);
+            }
+        },
+        FuncVal::Mut(f) => match &f.transformer {
             FuncImpl::Primitive(p) => {
                 repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                 if p.is_extension() {
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    generate_mode(f.input_mode(), f.output_mode(), &mut repr);
                 }
             }
             FuncImpl::Composed(c) => {
@@ -250,56 +282,25 @@ fn fn_repr(input: Val) -> Val {
                 if &*c.input_name != DEFAULT_INPUT_NAME {
                     repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
                 }
+                if &*c.ctx.name != DEFAULT_CTX_NAME {
+                    repr.insert(symbol(CTX_NAME), Val::Symbol(c.ctx.name.clone()));
+                }
+                generate_mode(f.input_mode(), f.output_mode(), &mut repr);
             }
         },
-        FuncVal::Const(t) => {
-            repr.insert(symbol(CTX_ACCESS), symbol(CONST));
-            match &t.transformer {
-                FuncImpl::Primitive(p) => {
-                    repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
-                    if p.is_extension() {
-                        repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-                    }
-                }
-                FuncImpl::Composed(c) => {
-                    repr.insert(symbol(BODY), c.body.clone());
-                    if c.prelude != Ctx::default() {
-                        repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
-                    }
-                    if &*c.input_name != DEFAULT_INPUT_NAME {
-                        repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
-                    }
-                    if &*c.ctx.name != DEFAULT_CTX_NAME {
-                        repr.insert(symbol(CTX_NAME), Val::Symbol(c.ctx.name.clone()));
-                    }
-                }
-            }
-        }
-        FuncVal::Mut(t) => {
-            repr.insert(symbol(CTX_ACCESS), symbol(MUTABLE));
-            match &t.transformer {
-                FuncImpl::Primitive(p) => {
-                    repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
-                    if p.is_extension() {
-                        repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-                    }
-                }
-                FuncImpl::Composed(c) => {
-                    repr.insert(symbol(BODY), c.body.clone());
-                    if c.prelude != Ctx::default() {
-                        repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
-                    }
-                    if &*c.input_name != DEFAULT_INPUT_NAME {
-                        repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
-                    }
-                    if &*c.ctx.name != DEFAULT_CTX_NAME {
-                        repr.insert(symbol(CTX_NAME), Val::Symbol(c.ctx.name.clone()));
-                    }
-                }
-            }
-        }
     }
     Val::Map(repr.into())
+}
+
+fn generate_mode(input_mode: &Mode, output_mode: &Mode, repr: &mut Map<Val, Val>) {
+    if *input_mode != Mode::default() {
+        let input_mode = generate(input_mode);
+        repr.insert(symbol(INPUT_MODE), input_mode);
+    }
+    if *output_mode != Mode::default() {
+        let output_mode = generate(output_mode);
+        repr.insert(symbol(OUTPUT_MODE), output_mode);
+    }
 }
 
 fn ctx_access() -> Named<FuncVal> {
