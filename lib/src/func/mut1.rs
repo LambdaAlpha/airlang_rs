@@ -88,7 +88,13 @@ impl Transformer<Val, Val> for Composed<MutInfo> {
 }
 
 impl MutFunc {
-    pub fn new(input_mode: Mode, output_mode: Mode, id: Symbol, fn1: Rc<dyn MutFn>) -> Self {
+    pub fn new(
+        input_mode: Mode,
+        output_mode: Mode,
+        cacheable: bool,
+        id: Symbol,
+        fn1: Rc<dyn MutFn>,
+    ) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
@@ -97,6 +103,7 @@ impl MutFunc {
         Self {
             input_mode,
             output_mode,
+            cacheable,
             transformer,
         }
     }

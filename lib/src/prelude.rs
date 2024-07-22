@@ -160,10 +160,11 @@ fn named_free_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
+    cacheable: bool,
     func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<Rc<dyn FreeFn>>::new(name, func);
-    let func = Func::new_primitive(input_mode, output_mode, primitive);
+    let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
 }
@@ -172,10 +173,11 @@ fn named_const_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
+    cacheable: bool,
     func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<Rc<dyn ConstFn>>::new(name, func);
-    let func = Func::new_primitive(input_mode, output_mode, primitive);
+    let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
     let func_val = ConstFuncVal::from(func);
     Named::new(name, FuncVal::Const(func_val))
 }
@@ -184,10 +186,11 @@ fn named_mut_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
+    cacheable: bool,
     func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<Rc<dyn MutFn>>::new(name, func);
-    let func = Func::new_primitive(input_mode, output_mode, primitive);
+    let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
     let func_val = MutFuncVal::from(func);
     Named::new(name, FuncVal::Mut(func_val))
 }

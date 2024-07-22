@@ -78,10 +78,17 @@ fn named_free_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
+    cacheable: bool,
     func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = FreeFunc::new(input_mode, output_mode, name_symbol, Rc::new(func));
+    let func = FreeFunc::new(
+        input_mode,
+        output_mode,
+        cacheable,
+        name_symbol,
+        Rc::new(func),
+    );
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
 }
@@ -91,10 +98,17 @@ fn named_const_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
+    cacheable: bool,
     func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = ConstFunc::new(input_mode, output_mode, name_symbol, Rc::new(func));
+    let func = ConstFunc::new(
+        input_mode,
+        output_mode,
+        cacheable,
+        name_symbol,
+        Rc::new(func),
+    );
     let func_val = ConstFuncVal::from(func);
     Named::new(name, FuncVal::Const(func_val))
 }
@@ -103,10 +117,17 @@ fn named_mut_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
+    cacheable: bool,
     func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = MutFunc::new(input_mode, output_mode, name_symbol, Rc::new(func));
+    let func = MutFunc::new(
+        input_mode,
+        output_mode,
+        cacheable,
+        name_symbol,
+        Rc::new(func),
+    );
     let func_val = MutFuncVal::from(func);
     Named::new(name, FuncVal::Mut(func_val))
 }

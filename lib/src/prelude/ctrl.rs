@@ -120,7 +120,7 @@ fn sequence() -> Named<FuncVal> {
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    named_mut_fn(";", input_mode, output_mode, func)
+    named_mut_fn(";", input_mode, output_mode, false, func)
 }
 
 fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -138,7 +138,7 @@ fn if1() -> Named<FuncVal> {
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    named_mut_fn("if", input_mode, output_mode, func)
+    named_mut_fn("if", input_mode, output_mode, false, func)
 }
 
 fn fn_if<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -173,7 +173,7 @@ fn if_not() -> Named<FuncVal> {
         |ctx, val| fn_if_not(ctx, val),
         |ctx, val| fn_if_not(ctx, val),
     );
-    named_mut_fn("if_not", input_mode, output_mode, func)
+    named_mut_fn("if_not", input_mode, output_mode, false, func)
 }
 
 fn fn_if_not<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -208,7 +208,7 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    named_mut_fn("match", input_mode, output_mode, func)
+    named_mut_fn("match", input_mode, output_mode, false, func)
 }
 
 fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -247,7 +247,7 @@ fn while1() -> Named<FuncVal> {
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
     );
-    named_mut_fn("while", input_mode, output_mode, func)
+    named_mut_fn("while", input_mode, output_mode, false, func)
 }
 
 fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -305,7 +305,7 @@ fn while_not() -> Named<FuncVal> {
         |ctx, val| fn_while_not(ctx, val),
         |ctx, val| fn_while_not(ctx, val),
     );
-    named_mut_fn("while_not", input_mode, output_mode, func)
+    named_mut_fn("while_not", input_mode, output_mode, false, func)
 }
 
 fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -367,7 +367,7 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    named_mut_fn("for", input_mode, output_mode, func)
+    named_mut_fn("for", input_mode, output_mode, false, func)
 }
 
 fn fn_for<'a, Ctx>(ctx: Ctx, input: Val) -> Val

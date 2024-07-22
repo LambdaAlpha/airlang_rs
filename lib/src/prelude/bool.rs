@@ -58,7 +58,7 @@ impl Prelude for BoolPrelude {
 fn is_true() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("is_true", input_mode, output_mode, fn_is_true)
+    named_const_fn("is_true", input_mode, output_mode, true, fn_is_true)
 }
 
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
@@ -73,7 +73,7 @@ fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_false() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("is_false", input_mode, output_mode, fn_is_false)
+    named_const_fn("is_false", input_mode, output_mode, true, fn_is_false)
 }
 
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
@@ -88,7 +88,7 @@ fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
 fn not() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("not", input_mode, output_mode, fn_not)
+    named_free_fn("not", input_mode, output_mode, true, fn_not)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -101,7 +101,7 @@ fn fn_not(input: Val) -> Val {
 fn and() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("and", input_mode, output_mode, fn_and)
+    named_free_fn("and", input_mode, output_mode, true, fn_and)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -120,7 +120,7 @@ fn fn_and(input: Val) -> Val {
 fn or() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("or", input_mode, output_mode, fn_or)
+    named_free_fn("or", input_mode, output_mode, true, fn_or)
 }
 
 fn fn_or(input: Val) -> Val {
@@ -139,7 +139,7 @@ fn fn_or(input: Val) -> Val {
 fn xor() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("xor", input_mode, output_mode, fn_xor)
+    named_free_fn("xor", input_mode, output_mode, true, fn_xor)
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -158,7 +158,7 @@ fn fn_xor(input: Val) -> Val {
 fn imply() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("imply", input_mode, output_mode, fn_imply)
+    named_free_fn("imply", input_mode, output_mode, true, fn_imply)
 }
 
 fn fn_imply(input: Val) -> Val {

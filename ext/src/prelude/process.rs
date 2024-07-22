@@ -44,7 +44,7 @@ const ARGUMENTS: &str = "arguments";
 fn call() -> Named<FuncVal> {
     let input_mode = map_all_mode(form_mode(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
-    named_free_fn("process.call", input_mode, output_mode, fn_call)
+    named_free_fn("process.call", input_mode, output_mode, false, fn_call)
 }
 
 fn fn_call(input: Val) -> Val {

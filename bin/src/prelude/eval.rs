@@ -35,7 +35,7 @@ impl Prelude for EvalPrelude {
 fn reset() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("repl.reset", input_mode, output_mode, fn_reset)
+    named_mut_fn("repl.reset", input_mode, output_mode, false, fn_reset)
 }
 
 fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {

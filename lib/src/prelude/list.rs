@@ -75,7 +75,7 @@ impl Prelude for ListPrelude {
 fn length() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("list.length", input_mode, output_mode, fn_length)
+    named_const_fn("list.length", input_mode, output_mode, true, fn_length)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -91,7 +91,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 fn set() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.set", input_mode, output_mode, fn_set)
+    named_mut_fn("list.set", input_mode, output_mode, true, fn_set)
 }
 
 fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
@@ -124,7 +124,7 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
 fn set_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.set_many", input_mode, output_mode, fn_set_many)
+    named_mut_fn("list.set_many", input_mode, output_mode, true, fn_set_many)
 }
 
 fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -161,7 +161,7 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
 fn get() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("list.get", input_mode, output_mode, fn_get)
+    named_const_fn("list.get", input_mode, output_mode, true, fn_get)
 }
 
 fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
@@ -205,7 +205,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
 fn insert() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.insert", input_mode, output_mode, fn_insert)
+    named_mut_fn("list.insert", input_mode, output_mode, true, fn_insert)
 }
 
 fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
@@ -237,7 +237,13 @@ fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
 fn insert_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.insert_many", input_mode, output_mode, fn_insert_many)
+    named_mut_fn(
+        "list.insert_many",
+        input_mode,
+        output_mode,
+        true,
+        fn_insert_many,
+    )
 }
 
 fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -272,7 +278,7 @@ fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
 fn remove() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.remove", input_mode, output_mode, fn_remove)
+    named_mut_fn("list.remove", input_mode, output_mode, true, fn_remove)
 }
 
 fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
@@ -317,7 +323,7 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.push", input_mode, output_mode, fn_push)
+    named_mut_fn("list.push", input_mode, output_mode, true, fn_push)
 }
 
 fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
@@ -338,7 +344,13 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 fn push_many() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.push_many", input_mode, output_mode, fn_push_many)
+    named_mut_fn(
+        "list.push_many",
+        input_mode,
+        output_mode,
+        true,
+        fn_push_many,
+    )
 }
 
 fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -362,7 +374,7 @@ fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
 fn pop() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.pop", input_mode, output_mode, fn_pop)
+    named_mut_fn("list.pop", input_mode, output_mode, true, fn_pop)
 }
 
 fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
@@ -404,7 +416,7 @@ fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
 fn clear() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("list.clear", input_mode, output_mode, fn_clear)
+    named_mut_fn("list.clear", input_mode, output_mode, true, fn_clear)
 }
 
 fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {

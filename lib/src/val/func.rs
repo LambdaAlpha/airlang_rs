@@ -72,6 +72,14 @@ impl FuncVal {
         }
     }
 
+    pub(crate) fn cacheable(&self) -> bool {
+        match self {
+            FuncVal::Free(f) => f.cacheable,
+            FuncVal::Const(f) => f.cacheable,
+            FuncVal::Mut(f) => f.cacheable,
+        }
+    }
+
     pub(crate) fn is_primitive(&self) -> bool {
         match self {
             FuncVal::Free(f) => f.is_primitive(),

@@ -37,6 +37,7 @@ use crate::{
 pub struct Func<P, C> {
     pub(crate) input_mode: Mode,
     pub(crate) output_mode: Mode,
+    pub(crate) cacheable: bool,
     pub(crate) transformer: FuncImpl<Primitive<P>, Composed<C>>,
 }
 
@@ -149,18 +150,30 @@ fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: Symbol) {
 }
 
 impl<P, C> Func<P, C> {
-    pub(crate) fn new_primitive(input_mode: Mode, output_mode: Mode, f: Primitive<P>) -> Self {
+    pub(crate) fn new_primitive(
+        input_mode: Mode,
+        output_mode: Mode,
+        cacheable: bool,
+        f: Primitive<P>,
+    ) -> Self {
         Self {
             input_mode,
             output_mode,
+            cacheable,
             transformer: FuncImpl::Primitive(f),
         }
     }
 
-    pub(crate) fn new_composed(input_mode: Mode, output_mode: Mode, f: Composed<C>) -> Self {
+    pub(crate) fn new_composed(
+        input_mode: Mode,
+        output_mode: Mode,
+        cacheable: bool,
+        f: Composed<C>,
+    ) -> Self {
         Self {
             input_mode,
             output_mode,
+            cacheable,
             transformer: FuncImpl::Composed(f),
         }
     }
@@ -171,6 +184,10 @@ impl<P, C> Func<P, C> {
 
     pub fn output_mode(&self) -> &Mode {
         &self.output_mode
+    }
+
+    pub fn cacheable(&self) -> bool {
+        self.cacheable
     }
 
     pub(crate) fn transformer(&self) -> &FuncImpl<Primitive<P>, Composed<C>> {

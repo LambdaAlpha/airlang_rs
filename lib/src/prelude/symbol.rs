@@ -37,7 +37,13 @@ impl Prelude for SymbolPrelude {
 fn from_text() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("symbol.from_text", input_mode, output_mode, fn_from_text)
+    named_free_fn(
+        "symbol.from_text",
+        input_mode,
+        output_mode,
+        true,
+        fn_from_text,
+    )
 }
 
 fn fn_from_text(input: Val) -> Val {
@@ -55,7 +61,13 @@ fn fn_from_text(input: Val) -> Val {
 fn into_text() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("symbol.into_text", input_mode, output_mode, fn_into_text)
+    named_free_fn(
+        "symbol.into_text",
+        input_mode,
+        output_mode,
+        true,
+        fn_into_text,
+    )
 }
 
 fn fn_into_text(input: Val) -> Val {

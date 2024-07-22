@@ -66,7 +66,7 @@ impl Prelude for IntPrelude {
 fn add() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("+", input_mode, output_mode, fn_add)
+    named_free_fn("+", input_mode, output_mode, true, fn_add)
 }
 
 fn fn_add(input: Val) -> Val {
@@ -88,7 +88,7 @@ fn fn_add(input: Val) -> Val {
 fn subtract() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("-", input_mode, output_mode, fn_subtract)
+    named_free_fn("-", input_mode, output_mode, true, fn_subtract)
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -110,7 +110,7 @@ fn fn_subtract(input: Val) -> Val {
 fn multiply() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("*", input_mode, output_mode, fn_multiply)
+    named_free_fn("*", input_mode, output_mode, true, fn_multiply)
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -132,7 +132,7 @@ fn fn_multiply(input: Val) -> Val {
 fn divide() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("/", input_mode, output_mode, fn_divide)
+    named_free_fn("/", input_mode, output_mode, true, fn_divide)
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -157,7 +157,7 @@ fn fn_divide(input: Val) -> Val {
 fn remainder() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("%", input_mode, output_mode, fn_remainder)
+    named_free_fn("%", input_mode, output_mode, true, fn_remainder)
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -182,7 +182,7 @@ fn fn_remainder(input: Val) -> Val {
 fn divide_remainder() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("/%", input_mode, output_mode, fn_divide_remainder)
+    named_free_fn("/%", input_mode, output_mode, true, fn_divide_remainder)
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -207,7 +207,7 @@ fn fn_divide_remainder(input: Val) -> Val {
 fn less_than() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("<", input_mode, output_mode, fn_less_than)
+    named_free_fn("<", input_mode, output_mode, true, fn_less_than)
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -227,7 +227,7 @@ fn fn_less_than(input: Val) -> Val {
 fn less_equal() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("<=", input_mode, output_mode, fn_less_equal)
+    named_free_fn("<=", input_mode, output_mode, true, fn_less_equal)
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -247,7 +247,7 @@ fn fn_less_equal(input: Val) -> Val {
 fn greater_than() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(">", input_mode, output_mode, fn_greater_than)
+    named_free_fn(">", input_mode, output_mode, true, fn_greater_than)
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -267,7 +267,7 @@ fn fn_greater_than(input: Val) -> Val {
 fn greater_equal() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(">=", input_mode, output_mode, fn_greater_equal)
+    named_free_fn(">=", input_mode, output_mode, true, fn_greater_equal)
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -287,7 +287,7 @@ fn fn_greater_equal(input: Val) -> Val {
 fn less_greater() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("<>", input_mode, output_mode, fn_less_greater)
+    named_free_fn("<>", input_mode, output_mode, true, fn_less_greater)
 }
 
 fn fn_less_greater(input: Val) -> Val {

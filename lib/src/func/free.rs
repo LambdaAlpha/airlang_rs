@@ -48,7 +48,13 @@ impl Transformer<Val, Val> for Composed<FreeInfo> {
 }
 
 impl FreeFunc {
-    pub fn new(input_mode: Mode, output_mode: Mode, id: Symbol, fn1: Rc<dyn FreeFn>) -> Self {
+    pub fn new(
+        input_mode: Mode,
+        output_mode: Mode,
+        cacheable: bool,
+        id: Symbol,
+        fn1: Rc<dyn FreeFn>,
+    ) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
@@ -57,6 +63,7 @@ impl FreeFunc {
         Self {
             input_mode,
             output_mode,
+            cacheable,
             transformer,
         }
     }

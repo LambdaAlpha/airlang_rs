@@ -72,7 +72,13 @@ impl Transformer<Val, Val> for Composed<ConstInfo> {
 }
 
 impl ConstFunc {
-    pub fn new(input_mode: Mode, output_mode: Mode, id: Symbol, fn1: Rc<dyn ConstFn>) -> Self {
+    pub fn new(
+        input_mode: Mode,
+        output_mode: Mode,
+        cacheable: bool,
+        id: Symbol,
+        fn1: Rc<dyn ConstFn>,
+    ) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
@@ -81,6 +87,7 @@ impl ConstFunc {
         Self {
             input_mode,
             output_mode,
+            cacheable,
             transformer,
         }
     }

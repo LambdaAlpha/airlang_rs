@@ -53,6 +53,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) ctx_access: Named<FuncVal>,
     pub(crate) input_mode: Named<FuncVal>,
     pub(crate) output_mode: Named<FuncVal>,
+    pub(crate) is_cacheable: Named<FuncVal>,
     pub(crate) is_primitive: Named<FuncVal>,
     pub(crate) is_extension: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
@@ -70,6 +71,7 @@ impl Default for FuncPrelude {
             ctx_access: ctx_access(),
             input_mode: input_mode(),
             output_mode: output_mode(),
+            is_cacheable: is_cacheable(),
             is_primitive: is_primitive(),
             is_extension: is_extension(),
             id: id(),
@@ -88,6 +90,7 @@ impl Prelude for FuncPrelude {
         self.ctx_access.put(m);
         self.input_mode.put(m);
         self.output_mode.put(m);
+        self.is_cacheable.put(m);
         self.is_primitive.put(m);
         self.is_extension.put(m);
         self.id.put(m);
@@ -106,6 +109,7 @@ const ID: &str = "id";
 const IS_EXTENSION: &str = "is_extension";
 const INPUT_MODE: &str = "input_mode";
 const OUTPUT_MODE: &str = "output_mode";
+const CACHEABLE: &str = "cacheable";
 const CTX_ACCESS: &str = "context_access";
 
 const DEFAULT_INPUT_NAME: &str = "the_input";
@@ -123,9 +127,10 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(CTX_ACCESS), Mode::default());
     map.insert(symbol(INPUT_MODE), form_mode());
     map.insert(symbol(OUTPUT_MODE), form_mode());
+    map.insert(symbol(CACHEABLE), Mode::default());
     let input_mode = map_mode(map, BasicMode::default());
     let output_mode = Mode::default();
-    named_free_fn("function", input_mode, output_mode, fn_new)
+    named_free_fn("function", input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -151,6 +156,11 @@ fn fn_new(input: Val) -> Val {
     let Some(output_mode) = parse(output_mode) else {
         return Val::default();
     };
+    let cacheable = match map_remove(&mut map, CACHEABLE) {
+        Val::Unit(_) => false,
+        Val::Bool(b) => b.bool(),
+        _ => return Val::default(),
+    };
     let ctx_name = match map_remove(&mut map, CTX_NAME) {
         Val::Symbol(name) => name,
         Val::Unit(_) => Symbol::from_str(DEFAULT_CTX_NAME),
@@ -170,7 +180,7 @@ fn fn_new(input: Val) -> Val {
                 input_name,
                 ctx: FreeInfo {},
             };
-            let func = Func::new_composed(input_mode, output_mode, transformer);
+            let func = Func::new_composed(input_mode, output_mode, cacheable, transformer);
             FuncVal::Free(FreeFuncVal::from(func))
         }
         CONST => {
@@ -180,7 +190,7 @@ fn fn_new(input: Val) -> Val {
                 input_name,
                 ctx: ConstInfo { name: ctx_name },
             };
-            let func = Func::new_composed(input_mode, output_mode, transformer);
+            let func = Func::new_composed(input_mode, output_mode, cacheable, transformer);
             FuncVal::Const(ConstFuncVal::from(func))
         }
         MUTABLE => {
@@ -190,7 +200,7 @@ fn fn_new(input: Val) -> Val {
                 input_name,
                 ctx: MutInfo { name: ctx_name },
             };
-            let func = Func::new_composed(input_mode, output_mode, transformer);
+            let func = Func::new_composed(input_mode, output_mode, cacheable, transformer);
             FuncVal::Mut(MutFuncVal::from(func))
         }
         _ => return Val::default(),
@@ -208,10 +218,11 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(CTX_ACCESS), Mode::default());
     map.insert(symbol(INPUT_MODE), form_mode());
     map.insert(symbol(OUTPUT_MODE), form_mode());
+    map.insert(symbol(CACHEABLE), Mode::default());
     map.insert(symbol(ID), Mode::default());
     map.insert(symbol(IS_EXTENSION), Mode::default());
     let output_mode = map_mode(map, BasicMode::default());
-    named_free_fn("function.represent", input_mode, output_mode, fn_repr)
+    named_free_fn("function.represent", input_mode, output_mode, true, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -227,6 +238,7 @@ fn fn_repr(input: Val) -> Val {
                 if p.is_extension() {
                     repr.insert(symbol(CTX_ACCESS), symbol(FREE));
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    generate_cacheable(f.cacheable(), &mut repr);
                     generate_mode(f.input_mode(), f.output_mode(), &mut repr);
                 }
             }
@@ -239,6 +251,7 @@ fn fn_repr(input: Val) -> Val {
                 if &*c.input_name != DEFAULT_INPUT_NAME {
                     repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
                 }
+                generate_cacheable(f.cacheable(), &mut repr);
                 generate_mode(f.input_mode(), f.output_mode(), &mut repr);
             }
         },
@@ -248,6 +261,7 @@ fn fn_repr(input: Val) -> Val {
                 if p.is_extension() {
                     repr.insert(symbol(CTX_ACCESS), symbol(CONST));
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    generate_cacheable(f.cacheable(), &mut repr);
                     generate_mode(f.input_mode(), f.output_mode(), &mut repr);
                 }
             }
@@ -263,6 +277,7 @@ fn fn_repr(input: Val) -> Val {
                 if &*c.ctx.name != DEFAULT_CTX_NAME {
                     repr.insert(symbol(CTX_NAME), Val::Symbol(c.ctx.name.clone()));
                 }
+                generate_cacheable(f.cacheable(), &mut repr);
                 generate_mode(f.input_mode(), f.output_mode(), &mut repr);
             }
         },
@@ -271,6 +286,7 @@ fn fn_repr(input: Val) -> Val {
                 repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
                 if p.is_extension() {
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+                    generate_cacheable(f.cacheable(), &mut repr);
                     generate_mode(f.input_mode(), f.output_mode(), &mut repr);
                 }
             }
@@ -285,6 +301,7 @@ fn fn_repr(input: Val) -> Val {
                 if &*c.ctx.name != DEFAULT_CTX_NAME {
                     repr.insert(symbol(CTX_NAME), Val::Symbol(c.ctx.name.clone()));
                 }
+                generate_cacheable(f.cacheable(), &mut repr);
                 generate_mode(f.input_mode(), f.output_mode(), &mut repr);
             }
         },
@@ -303,6 +320,12 @@ fn generate_mode(input_mode: &Mode, output_mode: &Mode, repr: &mut Map<Val, Val>
     }
 }
 
+fn generate_cacheable(cacheable: bool, repr: &mut Map<Val, Val>) {
+    if cacheable {
+        repr.insert(symbol(CACHEABLE), Val::Bool(Bool::new(cacheable)));
+    }
+}
+
 fn ctx_access() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
@@ -310,6 +333,7 @@ fn ctx_access() -> Named<FuncVal> {
         "function.context_access",
         input_mode,
         output_mode,
+        true,
         fn_ctx_access,
     )
 }
@@ -335,6 +359,7 @@ fn input_mode() -> Named<FuncVal> {
         "function.input_mode",
         input_mode,
         output_mode,
+        true,
         fn_input_mode,
     )
 }
@@ -355,6 +380,7 @@ fn output_mode() -> Named<FuncVal> {
         "function.output_mode",
         input_mode,
         output_mode,
+        true,
         fn_output_mode,
     )
 }
@@ -368,6 +394,28 @@ fn fn_output_mode(ctx: ConstFnCtx, input: Val) -> Val {
     })
 }
 
+fn is_cacheable() -> Named<FuncVal> {
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn(
+        "function.is_cacheable",
+        input_mode,
+        output_mode,
+        true,
+        fn_is_cacheable,
+    )
+}
+
+fn fn_is_cacheable(ctx: ConstFnCtx, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Func(func) = val else {
+            return Val::default();
+        };
+        let cacheable = func.cacheable();
+        Val::Bool(Bool::new(cacheable))
+    })
+}
+
 fn is_primitive() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
@@ -375,6 +423,7 @@ fn is_primitive() -> Named<FuncVal> {
         "function.is_primitive",
         input_mode,
         output_mode,
+        true,
         fn_is_primitive,
     )
 }
@@ -396,6 +445,7 @@ fn is_extension() -> Named<FuncVal> {
         "function.is_extension",
         input_mode,
         output_mode,
+        true,
         fn_is_extension,
     )
 }
@@ -415,7 +465,7 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
 fn id() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("function.id", input_mode, output_mode, fn_id)
+    named_const_fn("function.id", input_mode, output_mode, true, fn_id)
 }
 
 fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
@@ -433,7 +483,7 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
 fn body() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("function.body", input_mode, output_mode, fn_body)
+    named_const_fn("function.body", input_mode, output_mode, true, fn_body)
 }
 
 fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
@@ -451,7 +501,13 @@ fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
 fn prelude() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("function.prelude", input_mode, output_mode, fn_prelude)
+    named_const_fn(
+        "function.prelude",
+        input_mode,
+        output_mode,
+        true,
+        fn_prelude,
+    )
 }
 
 fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
@@ -473,6 +529,7 @@ fn input_name() -> Named<FuncVal> {
         "function.input_name",
         input_mode,
         output_mode,
+        true,
         fn_input_name,
     )
 }
@@ -496,6 +553,7 @@ fn ctx_name() -> Named<FuncVal> {
         "function.context_name",
         input_mode,
         output_mode,
+        true,
         fn_ctx_name,
     )
 }

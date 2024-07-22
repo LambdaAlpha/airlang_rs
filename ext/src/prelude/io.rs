@@ -59,7 +59,7 @@ impl Prelude for IoPrelude {
 fn read_line() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("io.read_line", input_mode, output_mode, fn_read_line)
+    named_mut_fn("io.read_line", input_mode, output_mode, false, fn_read_line)
 }
 
 fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
@@ -79,7 +79,7 @@ fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
 fn print() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.print", input_mode, output_mode, fn_print)
+    named_free_fn("io.print", input_mode, output_mode, false, fn_print)
 }
 
 fn fn_print(input: Val) -> Val {
@@ -93,7 +93,13 @@ fn fn_print(input: Val) -> Val {
 fn print_line() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.print_line", input_mode, output_mode, fn_print_line)
+    named_free_fn(
+        "io.print_line",
+        input_mode,
+        output_mode,
+        false,
+        fn_print_line,
+    )
 }
 
 fn fn_print_line(input: Val) -> Val {
@@ -107,7 +113,7 @@ fn fn_print_line(input: Val) -> Val {
 fn flush() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.flush", input_mode, output_mode, fn_flush)
+    named_free_fn("io.flush", input_mode, output_mode, false, fn_flush)
 }
 
 fn fn_flush(_input: Val) -> Val {
@@ -118,7 +124,13 @@ fn fn_flush(_input: Val) -> Val {
 fn error_print() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.error_print", input_mode, output_mode, fn_error_print)
+    named_free_fn(
+        "io.error_print",
+        input_mode,
+        output_mode,
+        false,
+        fn_error_print,
+    )
 }
 
 fn fn_error_print(input: Val) -> Val {
@@ -136,6 +148,7 @@ fn error_print_line() -> Named<FuncVal> {
         "io.error_print_line",
         input_mode,
         output_mode,
+        false,
         fn_error_print_line,
     )
 }
@@ -151,7 +164,13 @@ fn fn_error_print_line(input: Val) -> Val {
 fn error_flush() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.error_flush", input_mode, output_mode, fn_error_flush)
+    named_free_fn(
+        "io.error_flush",
+        input_mode,
+        output_mode,
+        false,
+        fn_error_flush,
+    )
 }
 
 fn fn_error_flush(_input: Val) -> Val {

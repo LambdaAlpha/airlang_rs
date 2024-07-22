@@ -38,7 +38,7 @@ impl Prelude for SyntaxPrelude {
 fn parse() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("parse", input_mode, output_mode, fn_parse)
+    named_free_fn("parse", input_mode, output_mode, true, fn_parse)
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -51,7 +51,7 @@ fn fn_parse(input: Val) -> Val {
 fn generate() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("generate", input_mode, output_mode, fn_generate)
+    named_free_fn("generate", input_mode, output_mode, true, fn_generate)
 }
 
 fn fn_generate(input: Val) -> Val {

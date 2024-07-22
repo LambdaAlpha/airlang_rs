@@ -38,6 +38,7 @@ fn read_to_text() -> Named<FuncVal> {
         "file.read_to_text",
         input_mode,
         output_mode,
+        false,
         fn_read_to_text,
     )
 }

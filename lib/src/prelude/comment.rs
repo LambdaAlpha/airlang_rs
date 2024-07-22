@@ -65,7 +65,7 @@ impl Prelude for CommentPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(COMMENT_INFIX, input_mode, output_mode, fn_new)
+    named_free_fn(COMMENT_INFIX, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -84,7 +84,7 @@ fn apply() -> Named<FuncVal> {
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mut_fn("comment.apply", input_mode, output_mode, func)
+    named_mut_fn("comment.apply", input_mode, output_mode, false, func)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -100,7 +100,7 @@ where
 fn get_note() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("comment.note", input_mode, output_mode, fn_get_note)
+    named_const_fn("comment.note", input_mode, output_mode, true, fn_get_note)
 }
 
 fn fn_get_note(ctx: ConstFnCtx, input: Val) -> Val {
@@ -119,7 +119,13 @@ fn fn_get_note(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_note() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("comment.set_note", input_mode, output_mode, fn_set_note)
+    named_mut_fn(
+        "comment.set_note",
+        input_mode,
+        output_mode,
+        true,
+        fn_set_note,
+    )
 }
 
 fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
@@ -144,7 +150,7 @@ fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
 fn get_value() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("comment.value", input_mode, output_mode, fn_get_value)
+    named_const_fn("comment.value", input_mode, output_mode, true, fn_get_value)
 }
 
 fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
@@ -163,7 +169,13 @@ fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_value() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("comment.set_value", input_mode, output_mode, fn_set_value)
+    named_mut_fn(
+        "comment.set_value",
+        input_mode,
+        output_mode,
+        true,
+        fn_set_value,
+    )
 }
 
 fn fn_set_value(ctx: MutFnCtx, input: Val) -> Val {

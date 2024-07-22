@@ -47,7 +47,7 @@ impl Prelude for BuildPrelude {
 fn import() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("build.import", input_mode, output_mode, fn_import)
+    named_mut_fn("build.import", input_mode, output_mode, true, fn_import)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

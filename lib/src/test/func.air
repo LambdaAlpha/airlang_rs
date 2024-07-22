@@ -283,6 +283,7 @@ function.represent ! function ! {
     input_mode : {pair : eval : id},
     output_mode : {pair : form : form},
     context_access : .constant,
+    cacheable : true,
 }
 -----
 {
@@ -292,6 +293,7 @@ function.represent ! function ! {
     input_mode : {pair : eval : id},
     output_mode : {pair : form : form},
     context_access : constant,
+    cacheable : true,
 }
 =====
 function.context_access .function
@@ -388,6 +390,14 @@ eval
 ]
 -----
 {map : eval : id}
+=====
+; [f = function ! {cacheable : false}, function.is_cacheable .f]
+-----
+false
+=====
+function.is_cacheable .not
+-----
+true
 =====
 function.is_primitive .not
 -----

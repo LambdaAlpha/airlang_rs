@@ -86,7 +86,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(OUTPUT), form_mode());
     let input_mode = map_mode(map, BasicMode::default());
     let output_mode = Mode::default();
-    named_mut_fn("case", input_mode, output_mode, fn_new)
+    named_mut_fn("case", input_mode, output_mode, false, fn_new)
 }
 
 fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -105,7 +105,7 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("case.cache", input_mode, output_mode, fn_new_cache)
+    named_mut_fn("case.cache", input_mode, output_mode, false, fn_new_cache)
 }
 
 fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -129,7 +129,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(OUTPUT), form_mode());
     map.insert(symbol(IS_CACHE), Mode::default());
     let output_mode = map_mode(map, BasicMode::default());
-    named_free_fn("case.represent", input_mode, output_mode, fn_repr)
+    named_free_fn("case.represent", input_mode, output_mode, true, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -153,7 +153,7 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 fn is_cache() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("case.is_cache", input_mode, output_mode, fn_is_cache)
+    named_const_fn("case.is_cache", input_mode, output_mode, true, fn_is_cache)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
@@ -168,7 +168,7 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
 fn func() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("case.function", input_mode, output_mode, fn_func)
+    named_const_fn("case.function", input_mode, output_mode, true, fn_func)
 }
 
 fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -183,7 +183,7 @@ fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
 fn input() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("case.input", input_mode, output_mode, fn_input)
+    named_const_fn("case.input", input_mode, output_mode, true, fn_input)
 }
 
 fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
@@ -198,7 +198,7 @@ fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
 fn output() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("case.output", input_mode, output_mode, fn_output)
+    named_const_fn("case.output", input_mode, output_mode, true, fn_output)
 }
 
 fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {

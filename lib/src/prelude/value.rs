@@ -97,7 +97,7 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("any", input_mode, output_mode, fn_any)
+    named_free_fn("any", input_mode, output_mode, true, fn_any)
 }
 
 fn fn_any(input: Val) -> Val {
@@ -134,7 +134,7 @@ fn fn_any(input: Val) -> Val {
 fn type_of() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("type_of", input_mode, output_mode, fn_type_of)
+    named_const_fn("type_of", input_mode, output_mode, true, fn_type_of)
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
@@ -166,7 +166,7 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("==", input_mode, output_mode, fn_equal)
+    named_const_fn("==", input_mode, output_mode, true, fn_equal)
 }
 
 fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
@@ -190,7 +190,7 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
 fn not_equal() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("!=", input_mode, output_mode, fn_not_equal)
+    named_const_fn("!=", input_mode, output_mode, true, fn_not_equal)
 }
 
 fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {

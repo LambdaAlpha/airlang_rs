@@ -58,7 +58,7 @@ impl Prelude for PairPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(PAIR_INFIX, input_mode, output_mode, fn_new)
+    named_free_fn(PAIR_INFIX, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -71,7 +71,7 @@ fn fn_new(input: Val) -> Val {
 fn get_first() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("pair.first", input_mode, output_mode, fn_get_first)
+    named_const_fn("pair.first", input_mode, output_mode, true, fn_get_first)
 }
 
 fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
@@ -90,7 +90,13 @@ fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_first() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("pair.set_first", input_mode, output_mode, fn_set_first)
+    named_mut_fn(
+        "pair.set_first",
+        input_mode,
+        output_mode,
+        true,
+        fn_set_first,
+    )
 }
 
 fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
@@ -115,7 +121,7 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
 fn get_second() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("pair.second", input_mode, output_mode, fn_get_second)
+    named_const_fn("pair.second", input_mode, output_mode, true, fn_get_second)
 }
 
 fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
@@ -134,7 +140,13 @@ fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_second() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("pair.set_second", input_mode, output_mode, fn_set_second)
+    named_mut_fn(
+        "pair.set_second",
+        input_mode,
+        output_mode,
+        true,
+        fn_set_second,
+    )
 }
 
 fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {

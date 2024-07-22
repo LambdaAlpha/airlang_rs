@@ -72,7 +72,7 @@ impl Prelude for AskPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(ASK_INFIX, input_mode, output_mode, fn_new)
+    named_free_fn(ASK_INFIX, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -86,7 +86,7 @@ fn fn_new(input: Val) -> Val {
 fn new_dependent() -> Named<FuncVal> {
     let input_mode = pair_mode(Mode::default(), form_mode(), BasicMode::default());
     let output_mode = Mode::default();
-    named_mut_fn("??", input_mode, output_mode, fn_new_dependent)
+    named_mut_fn("??", input_mode, output_mode, true, fn_new_dependent)
 }
 
 fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
@@ -108,7 +108,7 @@ fn apply() -> Named<FuncVal> {
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mut_fn("ask.apply", input_mode, output_mode, func)
+    named_mut_fn("ask.apply", input_mode, output_mode, false, func)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -125,7 +125,7 @@ where
 fn get_func() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("ask.function", input_mode, output_mode, fn_get_func)
+    named_const_fn("ask.function", input_mode, output_mode, true, fn_get_func)
 }
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -144,7 +144,13 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_func() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("ask.set_function", input_mode, output_mode, fn_set_func)
+    named_mut_fn(
+        "ask.set_function",
+        input_mode,
+        output_mode,
+        true,
+        fn_set_func,
+    )
 }
 
 fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
@@ -169,7 +175,7 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
 fn get_output() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("ask.output", input_mode, output_mode, fn_get_output)
+    named_const_fn("ask.output", input_mode, output_mode, true, fn_get_output)
 }
 
 fn fn_get_output(ctx: ConstFnCtx, input: Val) -> Val {
@@ -188,7 +194,13 @@ fn fn_get_output(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_output() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_mut_fn("ask.set_output", input_mode, output_mode, fn_set_output)
+    named_mut_fn(
+        "ask.set_output",
+        input_mode,
+        output_mode,
+        true,
+        fn_set_output,
+    )
 }
 
 fn fn_set_output(ctx: MutFnCtx, input: Val) -> Val {
