@@ -51,7 +51,6 @@ use crate::{
         call::CallVal,
         ctx::CtxVal,
         func::FuncVal,
-        map::MapVal,
         Val,
     },
     AskVal,
@@ -59,6 +58,7 @@ use crate::{
     CommentVal,
     ListVal,
     Map,
+    MapVal,
     PairVal,
 };
 
@@ -166,202 +166,246 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = pair.unwrap();
-    let name = pair.first;
+    let pattern_ctx = PatternCtx {
+        extra: Extra {
+            invariant: Invariant::None,
+        },
+        allow_extra: true,
+    };
+    let Some(pattern) = parse_pattern(pair.first, pattern_ctx) else {
+        return Val::default();
+    };
     let val = pair.second;
-    let options = AssignOptions::default();
-    assign_allow_options(ctx, name, val, options)
+    assign_pattern(ctx, pattern, val)
 }
 
 const INVARIANT: &str = "invariant";
 
-fn assign_destruct(
-    mut ctx: MutFnCtx,
-    name: Val,
-    val: Val,
-    options: AssignOptions,
-    allow_options: bool,
-) -> Val {
-    match name {
-        Val::Symbol(s) => assign_symbol(ctx.reborrow(), s, val, options),
-        Val::Pair(name) => assign_pair(ctx, name, val, options),
-        Val::Call(name) => {
-            if allow_options {
-                match parse_ctx_val_pair(name) {
-                    ParseCtxValPairResult::Parsed {
-                        val: name,
-                        invariant,
-                    } => {
-                        let options = AssignOptions { invariant };
-                        assign_destruct(ctx, name, val, options, false)
-                    }
-                    ParseCtxValPairResult::Fallback(name) => assign_call(ctx, name, val, options),
-                    ParseCtxValPairResult::None => Val::default(),
-                }
+struct Binding<T> {
+    name: T,
+    extra: Extra,
+}
+
+#[derive(Copy, Clone)]
+struct Extra {
+    invariant: Invariant,
+}
+
+#[derive(Copy, Clone)]
+struct PatternCtx {
+    extra: Extra,
+    allow_extra: bool,
+}
+
+enum Pattern {
+    Any(Binding<Symbol>),
+    Pair(Box<Pair<Pattern, Pattern>>),
+    Call(Box<Call<Pattern, Pattern>>),
+    Ask(Box<Ask<Pattern, Pattern>>),
+    Comment(Box<Comment<Pattern, Pattern>>),
+    List(List<Pattern>),
+    Map(Map<Val, Pattern>),
+}
+
+fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
+    match pattern {
+        Val::Symbol(name) => Some(parse_pattern_any(name, ctx)),
+        Val::Pair(pair) => parse_pattern_pair(pair, ctx),
+        Val::Call(call) => {
+            if ctx.allow_extra && call.func.is_unit() {
+                parse_pattern_extra(call, ctx)
             } else {
-                assign_call(ctx, name, val, options)
+                parse_pattern_call(call, ctx)
             }
         }
-        Val::Ask(name) => assign_ask(ctx, name, val, options),
-        Val::Comment(name) => assign_comment(ctx, name, val, options),
-        Val::List(name) => assign_list(ctx, name, val, options),
-        Val::Map(name) => assign_map(ctx, name, val, options),
-        _ => Val::default(),
+        Val::Ask(ask) => parse_pattern_ask(ask, ctx),
+        Val::Comment(comment) => parse_pattern_comment(comment, ctx),
+        Val::List(list) => parse_pattern_list(list, ctx),
+        Val::Map(map) => parse_pattern_map(map, ctx),
+        _ => None,
     }
 }
 
-fn assign_allow_options(ctx: MutFnCtx, name: Val, val: Val, options: AssignOptions) -> Val {
-    assign_destruct(ctx, name, val, options, true)
+fn parse_pattern_any(name: Symbol, ctx: PatternCtx) -> Pattern {
+    Pattern::Any(Binding {
+        name,
+        extra: ctx.extra,
+    })
 }
 
-fn assign_symbol(ctx: MutFnCtx, name: Symbol, val: Val, options: AssignOptions) -> Val {
+fn parse_pattern_pair(pair: PairVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let pair = Pair::from(pair);
+    let first = parse_pattern(pair.first, ctx)?;
+    let second = parse_pattern(pair.second, ctx)?;
+    Some(Pattern::Pair(Box::new(Pair::new(first, second))))
+}
+
+fn parse_pattern_call(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let call = Call::from(call);
+    let func = parse_pattern(call.func, ctx)?;
+    let input = parse_pattern(call.input, ctx)?;
+    Some(Pattern::Call(Box::new(Call::new(func, input))))
+}
+
+fn parse_pattern_ask(ask: AskVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let ask = Ask::from(ask);
+    let func = parse_pattern(ask.func, ctx)?;
+    let output = parse_pattern(ask.output, ctx)?;
+    Some(Pattern::Ask(Box::new(Ask::new(func, output))))
+}
+
+fn parse_pattern_comment(comment: CommentVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let comment = Comment::from(comment);
+    let note = parse_pattern(comment.note, ctx)?;
+    let value = parse_pattern(comment.value, ctx)?;
+    Some(Pattern::Comment(Box::new(Comment::new(note, value))))
+}
+
+fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let list = List::from(list);
+    let list = list
+        .into_iter()
+        .map(|item| parse_pattern(item, ctx))
+        .collect::<Option<List<_>>>()?;
+    Some(Pattern::List(list))
+}
+
+fn parse_pattern_map(map: MapVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let map = Map::from(map);
+    let map = map
+        .into_iter()
+        .map(|(k, v)| {
+            let v = parse_pattern(v, ctx)?;
+            Some((k, v))
+        })
+        .collect::<Option<Map<_, _>>>()?;
+    Some(Pattern::Map(map))
+}
+
+fn parse_pattern_extra(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = false;
+    let call = Call::from(call);
+    let Val::Pair(pair) = call.input else {
+        return None;
+    };
+    let pair = Pair::from(pair);
+    ctx.extra = parse_extra(pair.second, ctx.extra)?;
+    parse_pattern(pair.first, ctx)
+}
+
+fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
+    match extra {
+        Val::Symbol(s) => {
+            default.invariant = parse_invariant(&s)?;
+        }
+        Val::Map(mut map) => match map_remove(&mut map, INVARIANT) {
+            Val::Symbol(invariant) => {
+                default.invariant = parse_invariant(&invariant)?;
+            }
+            Val::Unit(_) => {}
+            _ => return None,
+        },
+        _ => return None,
+    }
+    Some(default)
+}
+
+fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
+    match pattern {
+        Pattern::Any(binding) => assign_any(ctx, binding, val),
+        Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
+        Pattern::Call(call) => assign_call(ctx, *call, val),
+        Pattern::Ask(ask) => assign_ask(ctx, *ask, val),
+        Pattern::Comment(comment) => assign_comment(ctx, *comment, val),
+        Pattern::List(list) => assign_list(ctx, list, val),
+        Pattern::Map(map) => assign_map(ctx, map, val),
+    }
+}
+
+fn assign_any(ctx: MutFnCtx, binding: Binding<Symbol>, val: Val) -> Val {
     let ctx_value = CtxValue {
         val,
-        invariant: options.invariant,
+        invariant: binding.extra.invariant,
     };
-    let Ok(last) = ctx.put_value(name, ctx_value) else {
+    let Ok(last) = ctx.put_value(binding.name, ctx_value) else {
         return Val::default();
     };
     last.unwrap_or_default()
 }
 
-fn assign_pair(mut ctx: MutFnCtx, name: PairVal, val: Val, options: AssignOptions) -> Val {
+fn assign_pair(mut ctx: MutFnCtx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val {
     let Val::Pair(val) = val else {
         return Val::default();
     };
     let val = Pair::from(val);
-    let name = Pair::from(name);
-    let first = assign_allow_options(ctx.reborrow(), name.first, val.first, options);
-    let second = assign_allow_options(ctx, name.second, val.second, options);
+    let first = assign_pattern(ctx.reborrow(), pattern.first, val.first);
+    let second = assign_pattern(ctx, pattern.second, val.second);
     Val::Pair(Pair::new(first, second).into())
 }
 
-fn assign_call(mut ctx: MutFnCtx, name: CallVal, val: Val, options: AssignOptions) -> Val {
+fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
     };
-    let name = Call::from(name);
     let val = Call::from(val);
-    let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
-    let input = assign_allow_options(ctx, name.input, val.input, options);
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    let input = assign_pattern(ctx, pattern.input, val.input);
     Val::Call(Call::new(func, input).into())
 }
 
-fn assign_ask(mut ctx: MutFnCtx, name: AskVal, val: Val, options: AssignOptions) -> Val {
+fn assign_ask(mut ctx: MutFnCtx, pattern: Ask<Pattern, Pattern>, val: Val) -> Val {
     let Val::Ask(val) = val else {
         return Val::default();
     };
-    let name = Ask::from(name);
     let val = Ask::from(val);
-    let func = assign_allow_options(ctx.reborrow(), name.func, val.func, options);
-    let output = assign_allow_options(ctx, name.output, val.output, options);
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    let output = assign_pattern(ctx, pattern.output, val.output);
     Val::Ask(Ask::new(func, output).into())
 }
 
-fn assign_comment(mut ctx: MutFnCtx, name: CommentVal, val: Val, options: AssignOptions) -> Val {
+fn assign_comment(mut ctx: MutFnCtx, pattern: Comment<Pattern, Pattern>, val: Val) -> Val {
     let Val::Comment(val) = val else {
         return Val::default();
     };
-    let name = Comment::from(name);
     let val = Comment::from(val);
-    let note = assign_allow_options(ctx.reborrow(), name.note, val.note, options);
-    let value = assign_allow_options(ctx, name.value, val.value, options);
+    let note = assign_pattern(ctx.reborrow(), pattern.note, val.note);
+    let value = assign_pattern(ctx, pattern.value, val.value);
     Val::Comment(Comment::new(note, value).into())
 }
 
-fn assign_list(mut ctx: MutFnCtx, name: ListVal, val: Val, options: AssignOptions) -> Val {
+fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {
     let Val::List(val) = val else {
         return Val::default();
     };
-    let name = List::from(name);
-    let val = List::from(val);
-    let mut list = List::default();
-    let mut name_iter = name.into_iter();
-    let mut val_iter: Box<dyn ExactSizeIterator<Item = Val>> = Box::new(val.into_iter());
-    while let (Some(name), val) = (name_iter.next(), val_iter.next()) {
-        if let Val::Symbol(s) = &name {
-            if &**s == ".." {
-                let name_len = name_iter.len();
-                let val_len = val_iter.len();
-                if val_len > name_len {
-                    val_iter = Box::new(val_iter.skip(val_len - name_len));
-                }
-                list.push(Val::default());
-                continue;
-            }
-        }
-        let val = val.unwrap_or_default();
-        list.push(assign_allow_options(ctx.reborrow(), name, val, options));
+    let mut list = List::from(Vec::with_capacity(pattern.len()));
+    let mut val_iter = List::from(val).into_iter();
+    for p in pattern {
+        let val = val_iter.next().unwrap_or_default();
+        let last_val = assign_pattern(ctx.reborrow(), p, val);
+        list.push(last_val);
     }
     Val::List(list.into())
 }
 
-fn assign_map(mut ctx: MutFnCtx, name: MapVal, val: Val, options: AssignOptions) -> Val {
+fn assign_map(mut ctx: MutFnCtx, pattern: Map<Val, Pattern>, val: Val) -> Val {
     let Val::Map(mut val) = val else {
         return Val::default();
     };
-    let name = Map::from(name);
-    let map: Map<Val, Val> = name
+    let map: Map<Val, Val> = pattern
         .into_iter()
-        .map(|(k, name)| {
+        .map(|(k, pattern)| {
             let val = val.remove(&k).unwrap_or_default();
-            let last_val = assign_allow_options(ctx.reborrow(), name, val, options);
+            let last_val = assign_pattern(ctx.reborrow(), pattern, val);
             (k, last_val)
         })
         .collect();
     Val::Map(map.into())
-}
-
-#[derive(Copy, Clone)]
-struct AssignOptions {
-    invariant: Invariant,
-}
-
-impl Default for AssignOptions {
-    fn default() -> Self {
-        AssignOptions {
-            invariant: Invariant::None,
-        }
-    }
-}
-
-enum ParseCtxValPairResult {
-    Parsed { val: Val, invariant: Invariant },
-    Fallback(CallVal),
-    None,
-}
-
-fn parse_ctx_val_pair(call: CallVal) -> ParseCtxValPairResult {
-    let Val::Unit(_) = &call.func else {
-        return ParseCtxValPairResult::Fallback(call);
-    };
-    let call = Call::from(call);
-    let Val::Pair(pair) = call.input else {
-        return ParseCtxValPairResult::None;
-    };
-    let pair = Pair::from(pair);
-    let val = pair.first;
-    let invariant = match pair.second {
-        Val::Symbol(s) => {
-            if let Some(invariant) = parse_invariant(&s) {
-                invariant
-            } else {
-                return ParseCtxValPairResult::None;
-            }
-        }
-        Val::Map(mut map) => match map_remove(&mut map, INVARIANT) {
-            Val::Symbol(invariant) => {
-                if let Some(invariant) = parse_invariant(&invariant) {
-                    invariant
-                } else {
-                    return ParseCtxValPairResult::None;
-                }
-            }
-            Val::Unit(_) => Invariant::None,
-            _ => return ParseCtxValPairResult::None,
-        },
-        _ => return ParseCtxValPairResult::None,
-    };
-    ParseCtxValPairResult::Parsed { val, invariant }
 }
 
 fn parse_invariant(invariant: &str) -> Option<Invariant> {
@@ -679,14 +723,23 @@ fn fn_ctx_new(input: Val) -> Val {
         };
         let ctx_value = {
             if let Val::Call(call) = val {
-                match parse_ctx_val_pair(call) {
-                    ParseCtxValPairResult::Parsed { val, invariant, .. } => {
-                        CtxValue { val, invariant }
-                    }
-                    ParseCtxValPairResult::Fallback(call) => CtxValue::new(Val::Call(call)),
-                    ParseCtxValPairResult::None => {
+                if call.func.is_unit() {
+                    let call = Call::from(call);
+                    let Val::Pair(pair) = call.input else {
                         return Val::default();
+                    };
+                    let pair = Pair::from(pair);
+                    let Some(extra) = parse_extra(pair.second, Extra {
+                        invariant: Invariant::None,
+                    }) else {
+                        return Val::default();
+                    };
+                    CtxValue {
+                        val: pair.first,
+                        invariant: extra.invariant,
                     }
+                } else {
+                    CtxValue::new(Val::Call(call))
                 }
             } else {
                 CtxValue::new(val)
