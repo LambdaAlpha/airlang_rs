@@ -41,10 +41,7 @@ pub use self::{
     map::Map,
     mode::{
         basic::BasicMode,
-        list::{
-            ListItemMode,
-            ListMode,
-        },
+        list::ListMode,
         map::MapMode,
         pair::PairMode,
         Mode,

@@ -1,9 +1,5 @@
 use crate::{
     ctx::ref1::CtxMeta,
-    mode::{
-        eval::Eval,
-        id::Id,
-    },
     transformer::Transformer,
     Map,
     MapVal,
@@ -12,16 +8,10 @@ use crate::{
     Val,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum MapMode {
-    All(PairMode),
-    Some(Map<Val, Mode>),
-}
-
-impl Default for MapMode {
-    fn default() -> Self {
-        MapMode::All(Default::default())
-    }
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+pub struct MapMode {
+    pub some: Map<Val, Mode>,
+    pub else1: PairMode,
 }
 
 impl Transformer<MapVal, Val> for MapMode {
@@ -30,33 +20,19 @@ impl Transformer<MapVal, Val> for MapMode {
         Ctx: CtxMeta<'a>,
     {
         let val_map = Map::from(val_map);
-        match self {
-            MapMode::All(mode) => {
-                let map: Map<Val, Val> = val_map
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let k = mode.first.transform(ctx.reborrow(), k);
-                        let v = mode.second.transform(ctx.reborrow(), v);
-                        (k, v)
-                    })
-                    .collect();
-                Val::Map(map.into())
-            }
-            MapMode::Some(mode_map) => {
-                let map: Map<Val, Val> = val_map
-                    .into_iter()
-                    .map(|(k, v)| {
-                        let v = if let Some(mode) = mode_map.get(&k) {
-                            mode.transform(ctx.reborrow(), v)
-                        } else {
-                            Eval.transform(ctx.reborrow(), v)
-                        };
-                        let k = Id.transform(ctx.reborrow(), k);
-                        (k, v)
-                    })
-                    .collect();
-                Val::Map(map.into())
-            }
-        }
+        let map: Map<Val, Val> = val_map
+            .into_iter()
+            .map(|(k, v)| {
+                if let Some(mode) = self.some.get(&k) {
+                    let v = mode.transform(ctx.reborrow(), v);
+                    (k, v)
+                } else {
+                    let k = self.else1.first.transform(ctx.reborrow(), k);
+                    let v = self.else1.second.transform(ctx.reborrow(), v);
+                    (k, v)
+                }
+            })
+            .collect();
+        Val::Map(map.into())
     }
 }

@@ -32,7 +32,7 @@ use crate::{
     prelude::{
         form_mode,
         initial_ctx,
-        map_all_mode,
+        map_mode,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
@@ -642,7 +642,12 @@ const CONST: &str = "constant";
 fn ctx_new() -> Named<FuncVal> {
     let input_mode = pair_mode(
         Mode::default(),
-        map_all_mode(form_mode(), Mode::default(), BasicMode::default()),
+        map_mode(
+            Map::default(),
+            form_mode(),
+            Mode::default(),
+            BasicMode::default(),
+        ),
         BasicMode::default(),
     );
     let output_mode = Mode::default();
@@ -697,7 +702,12 @@ fn ctx_repr() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = pair_mode(
         Mode::default(),
-        map_all_mode(form_mode(), Mode::default(), BasicMode::default()),
+        map_mode(
+            Map::default(),
+            form_mode(),
+            Mode::default(),
+            BasicMode::default(),
+        ),
         BasicMode::default(),
     );
     named_free_fn(

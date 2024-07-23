@@ -115,54 +115,24 @@ not false
     a = 1,
     f = function ! {
         body : the_input,
-        input_mode : {list : [eval, form, ... id, eval]},
+        input_mode : {list : [eval, form] : id},
     },
     f [a, a, a, a, $a, a]
 ]
 -----
-[1, a, a, a, $a, 1]
-=====
-; [
-    f = function ! {
-        body : the_input,
-        input_mode : {list : id},
-    },
-    f [a, b]
-]
------
-[a, b]
-=====
-; [
-    f = function ! {
-        body : the_input,
-        input_mode : {list : id},
-    },
-    f ! not ! false
-]
------
-true
+[1, a, a, a, $a, a]
 =====
 ; [
     a = 1,
+    c = 2,
     f = function ! {
         body : the_input,
-        input_mode : {map : {a : eval, b : id}},
+        input_mode : {map : {a : eval, b : id} : eval : id},
     },
-    f {a : a, b : a}
+    f {a : a, b : a, c : d}
 ]
 -----
-{a : 1, b : a}
-=====
-; [
-    a = 1,
-    f = function ! {
-        body : the_input,
-        input_mode : {map : form : eval},
-    },
-    f {: a}
-]
------
-{a : 1}
+{a : 1, b : a, 2 : d}
 =====
 ; [
     a = 1,
@@ -339,57 +309,30 @@ eval
 =====
 ; [
     f = function ! {
-        input_mode : {list : [eval, form, id, ... eval, id]},
+        input_mode : {list : [eval, form, id] : form},
     },
     function.input_mode .f
 ]
 -----
-{list : [eval, form, id, .. eval, id]}
+{list : [eval, form, id] : form}
 =====
 ; [
     f = function ! {
-        input_mode : {list : id},
+        input_mode : {map : {a : eval, b : id} : id : form},
     },
     function.input_mode .f
 ]
 -----
-{list : id}
+{map : {a : eval, b : id} : id : form}
 =====
 ; [
     f = function ! {
-        input_mode : {map : {a : eval, b : id}},
-    },
-    function.input_mode .f
-]
------
-{map : {a : eval, b : id}}
-=====
-; [
-    f = function ! {
-        input_mode : {map : eval : id},
-    },
-    function.input_mode .f
-]
------
-{map : eval : id}
-=====
-; [
-    f = function ! {
-        input_mode : {map : {list : [form, {list : id}]} : {list : {map : id : id}}},
-    },
-    function.input_mode .f
-]
------
-{map : {list : [form, {list : id}]} : {list : {map : id : id}}}
-=====
-; [
-    f = function ! {
-        output_mode : {map : eval : id},
+        output_mode : {map : {a : form} : eval : id},
     },
     function.output_mode .f
 ]
 -----
-{map : eval : id}
+{map : {a : form} : eval : id}
 =====
 ; [f = function ! {cacheable : false}, function.is_cacheable .f]
 -----

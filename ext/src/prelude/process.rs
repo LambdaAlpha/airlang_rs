@@ -16,7 +16,7 @@ use airlang::{
 
 use crate::prelude::{
     form_mode,
-    map_all_mode,
+    map_mode,
     named_free_fn,
     Named,
     Prelude,
@@ -42,7 +42,12 @@ const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
-    let input_mode = map_all_mode(form_mode(), Mode::default(), BasicMode::default());
+    let input_mode = map_mode(
+        Map::default(),
+        form_mode(),
+        Mode::default(),
+        BasicMode::default(),
+    );
     let output_mode = Mode::default();
     named_free_fn("process.call", input_mode, output_mode, false, fn_call)
 }

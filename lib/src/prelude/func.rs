@@ -128,7 +128,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(INPUT_MODE), form_mode());
     map.insert(symbol(OUTPUT_MODE), form_mode());
     map.insert(symbol(CACHEABLE), Mode::default());
-    let input_mode = map_mode(map, BasicMode::default());
+    let input_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
     named_free_fn("function", input_mode, output_mode, true, fn_new)
 }
@@ -221,7 +221,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(CACHEABLE), Mode::default());
     map.insert(symbol(ID), Mode::default());
     map.insert(symbol(IS_EXTENSION), Mode::default());
-    let output_mode = map_mode(map, BasicMode::default());
+    let output_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
     named_free_fn("function.represent", input_mode, output_mode, true, fn_repr)
 }
 

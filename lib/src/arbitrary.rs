@@ -39,10 +39,7 @@ use crate::{
     map::Map,
     mode::{
         basic::BasicMode,
-        list::{
-            ListItemMode,
-            ListMode,
-        },
+        list::ListMode,
         map::MapMode,
         pair::PairMode,
         Mode,
@@ -254,55 +251,25 @@ pub(crate) fn any_pair_mode(rng: &mut SmallRng, depth: usize) -> PairMode {
 
 pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
     let new_depth = depth + 1;
-
-    match rng.gen_range(0..2) {
-        0 => ListMode::All(any_mode(rng, new_depth)),
-        1 => {
-            let left = any_len_weighted(rng, depth) >> 1;
-            let right = any_len_weighted(rng, depth) >> 1;
-            let mut list = Vec::with_capacity(left + 1 + right);
-            for _ in 0..left {
-                list.push(ListItemMode {
-                    ellipsis: false,
-                    mode: any_mode(rng, new_depth),
-                });
-            }
-            if rng.gen() {
-                list.push(ListItemMode {
-                    ellipsis: true,
-                    mode: any_mode(rng, new_depth),
-                });
-            }
-            for _ in 0..right {
-                list.push(ListItemMode {
-                    ellipsis: false,
-                    mode: any_mode(rng, new_depth),
-                });
-            }
-            ListMode::Some(List::from(list))
-        }
-        _ => unreachable!(),
+    let head_size = any_len_weighted(rng, depth);
+    let mut head = Vec::with_capacity(head_size);
+    for _ in 0..head_size {
+        head.push(any_mode(rng, new_depth));
     }
+    let head = List::from(head);
+    let tail = any_mode(rng, new_depth);
+    ListMode { head, tail }
 }
 
 pub(crate) fn any_map_mode(rng: &mut SmallRng, depth: usize) -> MapMode {
     let new_depth = depth + 1;
-
-    match rng.gen_range(0..2) {
-        0 => MapMode::All(Pair::new(
-            any_mode(rng, new_depth),
-            any_mode(rng, new_depth),
-        )),
-        1 => {
-            let len = any_len_weighted(rng, new_depth);
-            let mut map = Map::with_capacity(len);
-            for _ in 0..len {
-                map.insert(any_val(rng, new_depth), any_mode(rng, new_depth));
-            }
-            MapMode::Some(map)
-        }
-        _ => unreachable!(),
+    let len = any_len_weighted(rng, new_depth);
+    let mut some = Map::with_capacity(len);
+    for _ in 0..len {
+        some.insert(any_val(rng, new_depth), any_mode(rng, new_depth));
     }
+    let else1 = Pair::new(any_mode(rng, new_depth), any_mode(rng, new_depth));
+    MapMode { some, else1 }
 }
 
 pub(crate) fn any_mode(rng: &mut SmallRng, depth: usize) -> Mode {

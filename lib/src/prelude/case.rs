@@ -84,7 +84,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
-    let input_mode = map_mode(map, BasicMode::default());
+    let input_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
     named_mut_fn("case", input_mode, output_mode, false, fn_new)
 }
@@ -128,7 +128,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
     map.insert(symbol(IS_CACHE), Mode::default());
-    let output_mode = map_mode(map, BasicMode::default());
+    let output_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
     named_free_fn("case.represent", input_mode, output_mode, true, fn_repr)
 }
 

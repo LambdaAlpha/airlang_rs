@@ -15,10 +15,7 @@ use crate::{
     },
     mode::{
         basic::BasicMode,
-        list::{
-            ListItemMode,
-            ListMode,
-        },
+        list::ListMode,
         map::MapMode,
         Mode,
         ValMode,
@@ -224,8 +221,14 @@ fn pair_mode(first: Mode, second: Mode, default: BasicMode) -> Mode {
     };
     let val_mode = ValMode {
         pair: Pair::new(first, second),
-        list: ListMode::All(default_mode.clone()),
-        map: MapMode::All(Pair::new(default_mode.clone(), default_mode)),
+        list: ListMode {
+            head: List::default(),
+            tail: default_mode.clone(),
+        },
+        map: MapMode {
+            some: Map::default(),
+            else1: Pair::new(default_mode.clone(), default_mode),
+        },
     };
     Mode {
         default,
@@ -234,15 +237,18 @@ fn pair_mode(first: Mode, second: Mode, default: BasicMode) -> Mode {
 }
 
 #[allow(unused)]
-fn list_mode(list_item: List<ListItemMode>, default: BasicMode) -> Mode {
+fn list_mode(head: List<Mode>, tail: Mode, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
     };
     let val_mode = ValMode {
-        list: ListMode::Some(list_item),
+        list: ListMode { head, tail },
         pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        map: MapMode::All(Pair::new(default_mode.clone(), default_mode)),
+        map: MapMode {
+            some: Map::default(),
+            else1: Pair::new(default_mode.clone(), default_mode),
+        },
     };
     Mode {
         default,
@@ -250,31 +256,19 @@ fn list_mode(list_item: List<ListItemMode>, default: BasicMode) -> Mode {
     }
 }
 
-fn map_mode(map_mode: Map<Val, Mode>, default: BasicMode) -> Mode {
+fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode, default: BasicMode) -> Mode {
     let default_mode = Mode {
         default,
         specialized: None,
     };
+    let else1 = Pair::new(key, value);
     let val_mode = ValMode {
-        map: MapMode::Some(map_mode),
+        map: MapMode { some, else1 },
         pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        list: ListMode::All(default_mode),
-    };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
-}
-
-fn map_all_mode(key: Mode, value: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
-    };
-    let val_mode = ValMode {
-        map: MapMode::All(Pair::new(key, value)),
-        pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        list: ListMode::All(default_mode),
+        list: ListMode {
+            head: List::default(),
+            tail: default_mode,
+        },
     };
     Mode {
         default,

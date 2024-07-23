@@ -6,10 +6,7 @@ use crate::{
             FORM,
             ID,
         },
-        list::{
-            ListItemMode,
-            ListMode,
-        },
+        list::ListMode,
         map::MapMode,
         Mode,
         ValMode,
@@ -23,16 +20,13 @@ use crate::{
         MAP,
         PAIR,
     },
-    Call,
     List,
-    ListVal,
     Map,
     MapVal,
     Pair,
     Val,
 };
 
-const ELLIPSIS: &str = "..";
 const DEFAULT: &str = "..";
 
 pub(crate) fn parse(mode: Val) -> Option<Mode> {
@@ -151,76 +145,42 @@ fn generate_pair(mode: &Pair<Mode, Mode>, default: BasicMode) -> Option<Val> {
 
 fn parse_list(mode: Val, default: BasicMode) -> Option<ListMode> {
     match mode {
-        Val::Unit(_) => Some(ListMode::All(Mode {
-            default,
-            specialized: None,
-        })),
-        Val::List(list) => Some(parse_list_some(list)?),
-        mode => Some(ListMode::All(parse(mode)?)),
+        Val::Unit(_) => Some(ListMode {
+            head: List::default(),
+            tail: Mode {
+                default,
+                specialized: None,
+            },
+        }),
+        Val::Pair(head_tail) => {
+            let head_tail = Pair::from(head_tail);
+            let Val::List(head) = head_tail.first else {
+                return None;
+            };
+            let head = List::from(head)
+                .into_iter()
+                .map(parse)
+                .collect::<Option<List<_>>>()?;
+            let tail = parse(head_tail.second)?;
+            Some(ListMode { head, tail })
+        }
+        _ => None,
     }
-}
-
-fn parse_list_some(mode: ListVal) -> Option<ListMode> {
-    let mode = List::from(mode);
-    let list = mode
-        .into_iter()
-        .map(parse_list_item)
-        .collect::<Option<List<_>>>()?;
-    let list = ListMode::Some(list);
-    Some(list)
-}
-
-fn parse_list_item(mode: Val) -> Option<ListItemMode> {
-    let Val::Call(call) = mode else {
-        let mode = parse(mode)?;
-        return Some(ListItemMode {
-            mode,
-            ellipsis: false,
-        });
-    };
-    let call = Call::from(call);
-    let Val::Symbol(tag) = call.func else {
-        return None;
-    };
-    if &*tag != ELLIPSIS {
-        return None;
-    }
-    let mode = parse(call.input)?;
-    let mode = ListItemMode {
-        mode,
-        ellipsis: true,
-    };
-    Some(mode)
 }
 
 pub(crate) fn generate_list(mode: &ListMode, default: BasicMode) -> Option<Val> {
-    match mode {
-        ListMode::All(mode) => {
-            let default = Mode {
-                default,
-                specialized: None,
-            };
-            if *mode == default {
-                return None;
-            }
-            Some(generate(mode))
-        }
-        ListMode::Some(mode_list) => {
-            let list: List<Val> = mode_list
-                .iter()
-                .map(|mode| {
-                    if mode.ellipsis {
-                        let tag = symbol(ELLIPSIS);
-                        let mode = generate(&mode.mode);
-                        Val::Call(Call::new(tag, mode).into())
-                    } else {
-                        generate(&mode.mode)
-                    }
-                })
-                .collect();
-            Some(Val::List(list.into()))
-        }
+    let default = Mode {
+        default,
+        specialized: None,
+    };
+    if mode.head.is_empty() && mode.tail == default {
+        return None;
     }
+    let head: List<Val> = mode.head.iter().map(generate).collect();
+    let head = Val::List(head.into());
+    let tail = generate(&mode.tail);
+    let pair = Pair::new(head, tail);
+    Some(Val::Pair(pair.into()))
 }
 
 fn parse_map(mode: Val, default: BasicMode) -> Option<MapMode> {
@@ -230,56 +190,56 @@ fn parse_map(mode: Val, default: BasicMode) -> Option<MapMode> {
                 default,
                 specialized: None,
             };
-            Some(MapMode::All(Pair::new(default.clone(), default)))
+            Some(MapMode {
+                some: Map::default(),
+                else1: Pair::new(default.clone(), default),
+            })
         }
-        Val::Map(map) => Some(parse_map_some(map)?),
-        Val::Pair(pair) => {
-            let pair = Pair::from(pair);
-            let first = parse(pair.first)?;
-            let second = parse(pair.second)?;
-            Some(MapMode::All(Pair::new(first, second)))
+        Val::Pair(some_else) => {
+            let some_else = Pair::from(some_else);
+            let Val::Map(some) = some_else.first else {
+                return None;
+            };
+            let Val::Pair(else1) = some_else.second else {
+                return None;
+            };
+            let some = Map::from(some)
+                .into_iter()
+                .map(|(k, v)| {
+                    let mode = parse(v)?;
+                    Some((k, mode))
+                })
+                .collect::<Option<Map<_, _>>>()?;
+            let else1 = Pair::from(else1);
+            let key = parse(else1.first)?;
+            let value = parse(else1.second)?;
+            let else1 = Pair::new(key, value);
+            Some(MapMode { some, else1 })
         }
         _ => None,
     }
 }
 
-fn parse_map_some(mode: MapVal) -> Option<MapMode> {
-    let mode = Map::from(mode);
-    let map = mode
-        .into_iter()
-        .map(|(k, v)| {
-            let mode = parse(v)?;
-            Some((k, mode))
-        })
-        .collect::<Option<Map<_, _>>>()?;
-    let map = MapMode::Some(map);
-    Some(map)
-}
-
 pub(crate) fn generate_map(mode: &MapMode, default: BasicMode) -> Option<Val> {
-    match mode {
-        MapMode::All(mode) => {
-            let default = Mode {
-                default,
-                specialized: None,
-            };
-            if mode.first == default && mode.second == default {
-                return None;
-            }
-            let first = generate(&mode.first);
-            let second = generate(&mode.second);
-            let pair = Val::Pair(Pair::new(first, second).into());
-            Some(pair)
-        }
-        MapMode::Some(mode_map) => {
-            let map: Map<Val, Val> = mode_map
-                .iter()
-                .map(|(k, v)| {
-                    let mode = generate(v);
-                    (k.clone(), mode)
-                })
-                .collect();
-            Some(Val::Map(map.into()))
-        }
+    let default = Mode {
+        default,
+        specialized: None,
+    };
+    if mode.some.is_empty() && mode.else1.first == default && mode.else1.second == default {
+        return None;
     }
+    let some: Map<Val, Val> = mode
+        .some
+        .iter()
+        .map(|(k, v)| {
+            let mode = generate(v);
+            (k.clone(), mode)
+        })
+        .collect();
+    let some = Val::Map(some.into());
+    let first = generate(&mode.else1.first);
+    let second = generate(&mode.else1.second);
+    let else1 = Val::Pair(Pair::new(first, second).into());
+    let some_else = Pair::new(some, else1);
+    Some(Val::Pair(some_else.into()))
 }
