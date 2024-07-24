@@ -198,11 +198,7 @@ false if_not (eval []) : .
 -----
 [., ., 3]
 =====
-1 match {(2 - 1) : 2, (2 + 1) : 4} : .
------
-2
-=====
-; [a = id ! a, a match {(id a) : 1, (id b) : 2} : .]
+; [a = id ! a, a match {a : 1, b : 2} : .]
 -----
 1
 =====
@@ -229,6 +225,25 @@ false if_not (eval []) : .
 true match {true : 1, false : 2} : 3
 -----
 1
+=====
+; [
+    2 ;match [
+        (a = 1) : b = 1,
+        (; [c = 2, 2]) : d = 2,
+        (e = 3) : f = 3
+    ] : g = 4,
+    [a, b, c, d, e, f, g]
+]
+-----
+[1, ., 2, 2, ., ., .]
+=====
+1 ;match [1 : [2, true break 3, 4]] : 5
+-----
+3
+=====
+1 ;match [1 : [2, true continue 3, 4]] : 5
+-----
+3
 =====
 ; [a = 1, false while a = 2, a]
 -----
