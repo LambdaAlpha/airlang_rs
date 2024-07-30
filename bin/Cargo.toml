@@ -4,9 +4,8 @@ version = "0.4.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "The Air Programming Language"
-homepage = "https://github.com/LambdaAlpha/airlang"
 repository = "https://github.com/LambdaAlpha/airlang_rs"
-keywords = ["air", "language", "specification", "formal", "logic"]
+keywords = ["language", "solver", "specification", "formal", "logic"]
 categories = ["compilers"]
 
 [lints]

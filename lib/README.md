@@ -1,16 +1,18 @@
 # The Air Programming Language
 
-The [Air](https://github.com/LambdaAlpha/airlang) programming language is carefully designed to solve programming problems once and for all.
+The Air programming language is carefully designed to solve programming problems once and for all.
+
+It is an experimental proof-of-concept project and is still in the very early stages of development.
 
 ## Goals
 
-The Air language seeks to solve programming problems once and for all.
+The Air language seeks to solve programming problems once and for all. It should be able to
 
-- It can express any describable information, such as requirements and implementations, problems and solutions, propositions and proofs.
-- It can provide any information about the language and the program itself.
-- It can implement any theoretically possible information processing requirement, such as implementing requirements, answering questions, and proving propositions.
-- It can use information about the language and the program itself to perform property proofs and performance optimizations, achieving the best properties and optimal performance.
-- It provides stable syntax and semantics, allowing users to learn the programming language once and for all.
+- express any describable information, such as requirements and implementations, problems and solutions, propositions and proofs.
+- provide any information about the language and the program itself.
+- implement any theoretically possible information processing requirement, such as implementing requirements, answering questions, and proving propositions.
+- use information about the language and the program itself to perform property proofs and performance optimizations, achieving the best properties and optimal performance.
+- provides stable syntax and semantics, allowing users to learn the programming language once and for all.
 
 ## Non-Goals
 
@@ -32,26 +34,25 @@ The Air language seeks to solve programming problems once and for all.
 ## Demo
 
 ```Air
-"Demonstration of the gcd algorithm" @ ; ! [
-    ctx = . context {
-        : ;,
-        : =,
-        : while,
-        : <>,
-        : %,
-    },
-    gcd = function ! {
+"A demo of implementing a C-like for loop function" @ ; ! [
+    c_for = function ! {
+        input_name : .args,
+        context_name : .ctx,
+        context_access : .mutable,
+        input_mode : id,
+        prelude : prelude ! .,
         body : ; ! [
-            (x : y) = the_input,
-            (y <> 0) while [
-                z = y,
-                y = x % y,
-                x = z,
+            [init, condition, next, body] = args,
+            ctx | form ! ; ! [
+                .&init,
+                .&condition while [
+                    .&body,
+                    .&next,
+                ],
             ],
-            x
         ],
-        prelude : &ctx,
     },
-    42 gcd 24
+    c_for [[i = 1, sum = 0], i <= 10, i = i + 1, sum = sum + i],
+    sum
 ]
 ```
