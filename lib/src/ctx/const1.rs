@@ -2,6 +2,7 @@ use std::matches;
 
 use crate::{
     ctx::{
+        map::CtxMapRef,
         mut1::MutFnCtx,
         ref1::{
             CtxMeta,
@@ -13,6 +14,7 @@ use crate::{
     Ctx,
     CtxError,
     FreeCtx,
+    FuncVal,
     Symbol,
     Val,
 };
@@ -30,7 +32,7 @@ pub enum ConstFnCtx<'a> {
     Const(ConstCtx<'a>),
 }
 
-impl<'l> CtxRef<'l> for ConstCtx<'l> {
+impl<'l> CtxMapRef<'l> for ConstCtx<'l> {
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         self.0.get_ref(name)
     }
@@ -72,22 +74,24 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
     fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
         self.0.is_const(name)
     }
+}
 
-    fn get_meta(self) -> Result<&'l Ctx, CtxError> {
-        self.0.get_meta()
+impl<'l> CtxRef<'l> for ConstCtx<'l> {
+    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
+        self.0.get_solver()
     }
 
-    fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
-        let mut dyn_ref = self.0.get_meta_dyn()?;
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+        let mut dyn_ref = self.0.get_solver_dyn()?;
         dyn_ref.is_const = true;
         Ok(dyn_ref)
     }
 
-    fn set_meta(self, _meta: Option<Ctx>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 }
@@ -120,11 +124,11 @@ impl<'l> CtxMeta<'l> for ConstCtx<'l> {
     }
 }
 
-impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
+impl<'l> CtxMapRef<'l> for ConstFnCtx<'l> {
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.get_ref(name),
-            ConstFnCtx::Const(ctx) => <_ as CtxRef>::get_ref(ctx, name),
+            ConstFnCtx::Const(ctx) => <_ as CtxMapRef>::get_ref(ctx, name),
         }
     }
 
@@ -190,32 +194,34 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
             ConstFnCtx::Const(ctx) => ctx.is_const(name),
         }
     }
+}
 
-    fn get_meta(self) -> Result<&'l Ctx, CtxError> {
+impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
+    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.get_meta(),
-            ConstFnCtx::Const(ctx) => ctx.get_meta(),
+            ConstFnCtx::Free(ctx) => ctx.get_solver(),
+            ConstFnCtx::Const(ctx) => ctx.get_solver(),
         }
     }
 
-    fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.get_meta_mut(),
-            ConstFnCtx::Const(ctx) => ctx.get_meta_mut(),
+            ConstFnCtx::Free(ctx) => ctx.get_solver_mut(),
+            ConstFnCtx::Const(ctx) => ctx.get_solver_mut(),
         }
     }
 
-    fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.get_meta_dyn(),
-            ConstFnCtx::Const(ctx) => ctx.get_meta_dyn(),
+            ConstFnCtx::Free(ctx) => ctx.get_solver_dyn(),
+            ConstFnCtx::Const(ctx) => ctx.get_solver_dyn(),
         }
     }
 
-    fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.set_meta(meta),
-            ConstFnCtx::Const(ctx) => ctx.set_meta(meta),
+            ConstFnCtx::Free(ctx) => ctx.set_solver(solver),
+            ConstFnCtx::Const(ctx) => ctx.set_solver(solver),
         }
     }
 }
@@ -270,16 +276,12 @@ impl<'a> ConstCtx<'a> {
         <_ as CtxMeta<'a>>::borrow(self)
     }
 
-    pub fn meta(self) -> Option<ConstCtx<'a>> {
-        self.0.meta.as_mut().map(|meta| ConstCtx(&mut *meta))
-    }
-
     pub(crate) fn get_ctx_ref(self) -> &'a Ctx {
         self.0
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxRef>::get_ref(self, name)
+        <_ as CtxMapRef>::get_ref(self, name)
     }
 
     // INVARIANT: The function f can take the ctx out during its execution,
@@ -302,16 +304,6 @@ impl<'a> ConstFnCtx<'a> {
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxRef>::get_ref(self, name)
-    }
-
-    pub fn meta(self) -> Result<ConstCtx<'a>, CtxError> {
-        match self {
-            ConstFnCtx::Free(_ctx) => Err(CtxError::AccessDenied),
-            ConstFnCtx::Const(ctx) => match ctx.meta() {
-                Some(meta) => Ok(meta),
-                None => Err(CtxError::NotFound),
-            },
-        }
+        <_ as CtxMapRef>::get_ref(self, name)
     }
 }

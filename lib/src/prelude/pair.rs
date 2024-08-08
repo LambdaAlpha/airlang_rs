@@ -3,9 +3,9 @@ use std::mem::swap;
 use crate::{
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         mut1::MutFnCtx,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     prelude::{
         named_const_fn,
@@ -20,8 +20,10 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Map,
     Mode,
     Pair,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -46,7 +48,7 @@ impl Default for PairPrelude {
 }
 
 impl Prelude for PairPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.get_first.put(m);
         self.set_first.put(m);

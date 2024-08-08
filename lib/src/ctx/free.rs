@@ -1,6 +1,7 @@
 use crate::{
     ctx::{
         const1::ConstFnCtx,
+        map::CtxMapRef,
         mut1::MutFnCtx,
         ref1::{
             CtxMeta,
@@ -11,13 +12,14 @@ use crate::{
     },
     Ctx,
     CtxError,
+    FuncVal,
     Symbol,
     Val,
 };
 
 pub struct FreeCtx;
 
-impl<'a> CtxRef<'a> for FreeCtx {
+impl<'a> CtxMapRef<'a> for FreeCtx {
     fn get_ref(self, _name: Symbol) -> Result<&'a Val, CtxError> {
         Err(CtxError::AccessDenied)
     }
@@ -57,20 +59,22 @@ impl<'a> CtxRef<'a> for FreeCtx {
     fn is_const(self, _name: Symbol) -> Result<bool, CtxError> {
         Err(CtxError::AccessDenied)
     }
+}
 
-    fn get_meta(self) -> Result<&'a Ctx, CtxError> {
+impl<'a> CtxRef<'a> for FreeCtx {
+    fn get_solver(self) -> Result<&'a FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_meta_mut(self) -> Result<&'a mut Ctx, CtxError> {
+    fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_meta_dyn(self) -> Result<DynRef<'a, Ctx>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_meta(self, _meta: Option<Ctx>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

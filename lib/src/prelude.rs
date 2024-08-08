@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use crate::{
     ctx::{
+        map::CtxMap,
         Ctx,
-        CtxMap,
         CtxValue,
     },
     func::{
@@ -90,7 +90,7 @@ pub(crate) struct AllPrelude {
 }
 
 impl Prelude for AllPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.meta.put(m);
         self.syntax.put(m);
         self.value.put(m);
@@ -119,18 +119,19 @@ impl Prelude for AllPrelude {
 
 pub(crate) fn initial_ctx() -> Ctx {
     let ctx_map = PRELUDE.with(|prelude| {
-        let mut m = CtxMap::default();
+        let mut m = Map::default();
         prelude.put(&mut m);
         m
     });
+    let variables = CtxMap::new(ctx_map);
     Ctx {
-        map: ctx_map,
-        meta: None,
+        variables,
+        solver: None,
     }
 }
 
 pub(crate) trait Prelude {
-    fn put(&self, m: &mut CtxMap);
+    fn put(&self, m: &mut Map<Symbol, CtxValue>);
 }
 
 #[derive(Clone)]
@@ -146,7 +147,7 @@ impl<T> Named<T> {
 }
 
 impl<T: Into<Val> + Clone> Named<T> {
-    pub(crate) fn put(&self, m: &mut CtxMap) {
+    pub(crate) fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         let name = Symbol::from_str(self.name);
         let value = CtxValue::new(self.value.clone().into());
         m.insert(name, value);

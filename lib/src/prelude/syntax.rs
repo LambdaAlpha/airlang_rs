@@ -1,5 +1,5 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::CtxValue,
     prelude::{
         named_free_fn,
         Named,
@@ -10,7 +10,9 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Map,
     Mode,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -29,7 +31,7 @@ impl Default for SyntaxPrelude {
 }
 
 impl Prelude for SyntaxPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.parse.put(m);
         self.generate.put(m);
     }

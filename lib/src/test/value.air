@@ -122,7 +122,7 @@ map
 -----
 function
 =====
-; [a = . context {}, type_of .a]
+; [a = context ! {}, type_of .a]
 -----
 context
 =====
@@ -186,7 +186,7 @@ true
 -----
 true
 =====
-; [a = . context {}, b = . context {}, (.a == .b) and .a != .]
+; [a = context ! {}, b = context ! {}, (.a == .b) and .a != .]
 -----
 true
 =====

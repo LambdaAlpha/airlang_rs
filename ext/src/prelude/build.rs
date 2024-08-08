@@ -8,7 +8,6 @@ use airlang::{
     initial_ctx,
     interpret_mut,
     parse,
-    Ctx,
     FuncVal,
     Invariant,
     Mode,
@@ -85,14 +84,12 @@ fn fn_import(mut ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get_cur_url(ctx: MutFnCtx, key: Symbol) -> Option<String> {
-    if let Ok(meta) = ctx.meta() {
-        if let Ok(val) = meta.get_ref(key) {
-            return if let Val::Text(url) = val {
-                Some((***url).clone())
-            } else {
-                None
-            };
-        }
+    if let Ok(val) = ctx.get_ref(key) {
+        return if let Val::Text(url) = val {
+            Some((***url).clone())
+        } else {
+            None
+        };
     }
     let Ok(cur_dir) = current_dir() else {
         return None;
@@ -103,19 +100,9 @@ fn get_cur_url(ctx: MutFnCtx, key: Symbol) -> Option<String> {
     Some(cur_dir)
 }
 
-fn set_cur_url(mut ctx: MutCtx, key: Symbol, new_url: String) -> bool {
-    if let Some(meta) = ctx.reborrow().meta() {
-        meta.put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
-            .is_ok()
-    } else {
-        let mut meta = Ctx::default();
-        let meta_mut = MutCtx::new(&mut meta);
-        meta_mut
-            .put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
-            .expect("put into a mutable empty ctx should never fail");
-        ctx.set_meta(Some(meta));
-        true
-    }
+fn set_cur_url(ctx: MutCtx, key: Symbol, new_url: String) -> bool {
+    ctx.put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
+        .is_ok()
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {

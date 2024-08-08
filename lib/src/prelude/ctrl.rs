@@ -1,11 +1,8 @@
 use crate::{
     ctx::{
         free::FreeCtx,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-        CtxMap,
+        map::CtxMapRef,
+        ref1::CtxMeta,
         CtxValue,
     },
     func::mut1::MutDispatcher,
@@ -66,7 +63,7 @@ impl Default for CtrlPrelude {
 }
 
 impl Prelude for CtrlPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.sequence.put(m);
         self.if1.put(m);
         self.if_not.put(m);

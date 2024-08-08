@@ -28,9 +28,9 @@ use crate::{
     bool::Bool,
     ctx::{
         const1::ConstFnCtx,
-        ref1::CtxRef,
-        CtxMap,
-        DefaultCtx,
+        default::DefaultCtx,
+        map::CtxMapRef,
+        CtxValue,
     },
     mode::SYMBOL_READ_PREFIX,
     prelude::{
@@ -62,6 +62,7 @@ use crate::{
         UNIT,
     },
     Ctx,
+    Map,
     Mode,
     Val,
 };
@@ -86,7 +87,7 @@ impl Default for ValuePrelude {
 }
 
 impl Prelude for ValuePrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.any.put(m);
         self.type_of.put(m);
         self.equal.put(m);

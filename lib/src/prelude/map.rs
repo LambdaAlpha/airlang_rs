@@ -4,9 +4,9 @@ use crate::{
     bool::Bool,
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         mut1::MutFnCtx,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     int::Int,
     pair::Pair,
@@ -24,6 +24,7 @@ use crate::{
     List,
     Map,
     Mode,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -76,7 +77,7 @@ impl Default for MapPrelude {
 }
 
 impl Prelude for MapPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.length.put(m);
         self.items.put(m);
         self.into_items.put(m);

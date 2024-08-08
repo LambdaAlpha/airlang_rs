@@ -250,32 +250,24 @@ mutable
 -----
 free
 =====
-; [(a . constant) = . context {}, a | access '!' .]
+; [(a . constant) = context ! {}, a | access '!' .]
 -----
 constant
 =====
-; [a = . context {}, a | access '!' .]
+; [a = context ! {}, a | access '!' .]
 -----
 mutable
 =====
-has_meta .
------
-false
-=====
-; [set_meta ! . context {}, has_meta .]
+; [set_solver not, solver = get_solver ! ., .not == .solver]
 -----
 true
 =====
-; [m1 = . context {}, set_meta m1, m2 = ..meta | this '!' ., .m1 == .m2]
+; [set_solver ., solver = get_solver ! ., .solver == .]
 -----
 true
-=====
-; [a = (. context {}) context {}, a | set_meta '!' ., a | has_meta '!' .]
------
-false
 =====
 ; [
-    a = . context {p : 1 : 2},
+    a = context ! {variables : {p : 1 : 2}},
     b = 3,
     a | pair.set_first '!' ..p : b,
     a | .&p,
@@ -284,7 +276,7 @@ false
 3 : 2
 =====
 ; [
-    a = . context {p : 1 : 2, b : 3},
+    a = context ! {variables : {p : 1 : 2, b : 3}},
     a | pair.set_first '!' ..p : .b,
     a | .&p,
 ]
@@ -293,52 +285,20 @@ false
 =====
 ; [
     set_first = pair.set_first,
-    a = . context {set_first : &set_first, p : 1 : 2, b : 3},
+    a = context ! {variables : {set_first : &set_first, p : 1 : 2, b : 3}},
     a | id ! .p set_first b,
     a | .&p,
 ]
 -----
 3 : 2
 =====
-; [(c : a) = (. context {: =, a : 1}) :: = '!' .a : 2, [c | .a, &a]]
+; [(c : a) = (context ! {variables : {: =, a : 1}}) :: = '!' .a : 2, [c | .a, &a]]
 -----
 [2, 1]
 =====
 ; [
-    set_meta ! . context {a : 1},
-    ..meta | .a
-]
------
-1
-=====
-; [
-    ..this | = '!' .a : 1,
-    a
-]
------
-1
-=====
-; [a = 1, [] | .a]
------
-1
-=====
-; [
-    a = (. context {b : 1}) context {c : 2},
-    [a, ..meta] | .b
-]
------
-1
-=====
-; [
-    a = . context {b : . context {c : 1}},
-    [a, b] | .c
-]
------
-1
-=====
-; [
-    ..meta = . context {a : 1},
-    .$.meta | .a
+    a = context ! {variables : {b : context ! {variables : {c : 1}}}},
+    a | form ! b $| ..c
 ]
 -----
 1
@@ -359,32 +319,15 @@ false
 -----
 1
 =====
-; [
-    a = . context {b : 1},
-    hm = a | has_meta '!' .,
-    b = a | .b,
-    (not hm) and .b == 1
-]
+context.represent ! context ! {}
 -----
-true
+{}
 =====
-context.represent ! . context {}
+context.represent ! context ! {variables : {a : 1 . .final}}
 -----
-. : {}
+{variables : {a : 1 . final}}
 =====
-; [
-    (meta : m) = context.represent ! (. context {super : .b}) context {a : 1},
-    meta = context.represent ! &meta,
-    &meta : &m
-]
------
-(. : {super : b}) : {a : 1}
-=====
-; [context.represent ! . context {a : 1 . .final}]
------
-. : {a : 1 . final}
-=====
-; [(_ : m) = context.represent ! . context {b : . context {}}, b = .m map.remove .b, type_of .b]
+; [{variables : m} = context.represent ! context ! {variables : {b : context ! {}}}, b = .m map.remove .b, type_of .b]
 -----
 context
 =====

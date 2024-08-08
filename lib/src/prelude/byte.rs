@@ -1,6 +1,8 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::CtxValue,
     prelude::Prelude,
+    Map,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -14,5 +16,5 @@ impl Default for BytePrelude {
 }
 
 impl Prelude for BytePrelude {
-    fn put(&self, _m: &mut CtxMap) {}
+    fn put(&self, _m: &mut Map<Symbol, CtxValue>) {}
 }

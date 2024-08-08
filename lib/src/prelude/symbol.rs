@@ -1,11 +1,12 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::CtxValue,
     prelude::{
         named_free_fn,
         Named,
         Prelude,
     },
     FuncVal,
+    Map,
     Mode,
     Symbol,
     Text,
@@ -28,7 +29,7 @@ impl Default for SymbolPrelude {
 }
 
 impl Prelude for SymbolPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.from_text.put(m);
         self.into_text.put(m);
     }

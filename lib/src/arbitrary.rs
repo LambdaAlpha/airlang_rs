@@ -21,8 +21,8 @@ use crate::{
     bool::Bool,
     byte::Byte,
     ctx::{
+        map::CtxMap,
         Ctx,
-        CtxMap,
         CtxValue,
         Invariant,
     },
@@ -224,12 +224,12 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
         };
         ctx_map.insert(any_symbol(rng), ctx_value);
     }
-    let meta = if rng.gen_bool(0.1) {
-        Some(Box::new(any_ctx(rng, depth)))
+    let solver = if rng.gen_bool(0.1) {
+        Some(any_func(rng, depth))
     } else {
         None
     };
-    Ctx::new(ctx_map, meta)
+    Ctx::new(CtxMap::new(ctx_map), solver)
 }
 
 pub(crate) fn any_transform(rng: &mut SmallRng) -> BasicMode {
@@ -297,7 +297,7 @@ pub(crate) fn any_mode(rng: &mut SmallRng, depth: usize) -> Mode {
 pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     if rng.gen() {
         let prelude = PRELUDE.with(|prelude| {
-            let mut m = CtxMap::default();
+            let mut m = Map::default();
             prelude.put(&mut m);
             m
         });

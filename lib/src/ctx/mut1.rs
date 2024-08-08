@@ -5,6 +5,7 @@ use std::{
 
 use crate::{
     ctx::{
+        map::CtxMapRef,
         ref1::{
             CtxMeta,
             CtxRef,
@@ -17,6 +18,7 @@ use crate::{
     Ctx,
     CtxError,
     FreeCtx,
+    FuncVal,
     Invariant,
     Symbol,
     Val,
@@ -30,7 +32,7 @@ pub enum MutFnCtx<'a> {
     Mut(MutCtx<'a>),
 }
 
-impl<'l> CtxRef<'l> for MutCtx<'l> {
+impl<'l> CtxMapRef<'l> for MutCtx<'l> {
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         self.0.get_ref(name)
     }
@@ -70,21 +72,23 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
     fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
         self.0.is_const(name)
     }
+}
 
-    fn get_meta(self) -> Result<&'l Ctx, CtxError> {
-        self.0.get_meta()
+impl<'l> CtxRef<'l> for MutCtx<'l> {
+    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
+        self.0.get_solver()
     }
 
-    fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
-        self.0.get_meta_mut()
+    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+        self.0.get_solver_mut()
     }
 
-    fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
-        self.0.get_meta_dyn()
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+        self.0.get_solver_dyn()
     }
 
-    fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError> {
-        self.0.set_meta(meta)
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
+        self.0.set_solver(solver)
     }
 }
 
@@ -112,12 +116,12 @@ impl<'l> CtxMeta<'l> for MutCtx<'l> {
     }
 }
 
-impl<'l> CtxRef<'l> for MutFnCtx<'l> {
+impl<'l> CtxMapRef<'l> for MutFnCtx<'l> {
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.get_ref(name),
-            MutFnCtx::Const(ctx) => <_ as CtxRef>::get_ref(ctx, name),
-            MutFnCtx::Mut(ctx) => <_ as CtxRef>::get_ref(ctx, name),
+            MutFnCtx::Const(ctx) => <_ as CtxMapRef>::get_ref(ctx, name),
+            MutFnCtx::Mut(ctx) => <_ as CtxMapRef>::get_ref(ctx, name),
         }
     }
 
@@ -125,7 +129,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
         match self {
             MutFnCtx::Free(ctx) => ctx.get_ref_mut(name),
             MutFnCtx::Const(ctx) => ctx.get_ref_mut(name),
-            MutFnCtx::Mut(ctx) => <_ as CtxRef>::get_ref_mut(ctx, name),
+            MutFnCtx::Mut(ctx) => <_ as CtxMapRef>::get_ref_mut(ctx, name),
         }
     }
 
@@ -192,36 +196,38 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
             MutFnCtx::Mut(ctx) => ctx.is_const(name),
         }
     }
+}
 
-    fn get_meta(self) -> Result<&'l Ctx, CtxError> {
+impl<'l> CtxRef<'l> for MutFnCtx<'l> {
+    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         match self {
-            MutFnCtx::Free(ctx) => ctx.get_meta(),
-            MutFnCtx::Const(ctx) => ctx.get_meta(),
-            MutFnCtx::Mut(ctx) => ctx.get_meta(),
+            MutFnCtx::Free(ctx) => ctx.get_solver(),
+            MutFnCtx::Const(ctx) => ctx.get_solver(),
+            MutFnCtx::Mut(ctx) => ctx.get_solver(),
         }
     }
 
-    fn get_meta_mut(self) -> Result<&'l mut Ctx, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
         match self {
-            MutFnCtx::Free(ctx) => ctx.get_meta_mut(),
-            MutFnCtx::Const(ctx) => ctx.get_meta_mut(),
-            MutFnCtx::Mut(ctx) => ctx.get_meta_mut(),
+            MutFnCtx::Free(ctx) => ctx.get_solver_mut(),
+            MutFnCtx::Const(ctx) => ctx.get_solver_mut(),
+            MutFnCtx::Mut(ctx) => ctx.get_solver_mut(),
         }
     }
 
-    fn get_meta_dyn(self) -> Result<DynRef<'l, Ctx>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
         match self {
-            MutFnCtx::Free(ctx) => ctx.get_meta_dyn(),
-            MutFnCtx::Const(ctx) => ctx.get_meta_dyn(),
-            MutFnCtx::Mut(ctx) => ctx.get_meta_dyn(),
+            MutFnCtx::Free(ctx) => ctx.get_solver_dyn(),
+            MutFnCtx::Const(ctx) => ctx.get_solver_dyn(),
+            MutFnCtx::Mut(ctx) => ctx.get_solver_dyn(),
         }
     }
 
-    fn set_meta(self, meta: Option<Ctx>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
         match self {
-            MutFnCtx::Free(ctx) => ctx.set_meta(meta),
-            MutFnCtx::Const(ctx) => ctx.set_meta(meta),
-            MutFnCtx::Mut(ctx) => <_ as CtxRef>::set_meta(ctx, meta),
+            MutFnCtx::Free(ctx) => ctx.set_solver(solver),
+            MutFnCtx::Const(ctx) => ctx.set_solver(solver),
+            MutFnCtx::Mut(ctx) => ctx.set_solver(solver),
         }
     }
 }
@@ -279,14 +285,6 @@ impl<'a> MutCtx<'a> {
         <_ as CtxMeta<'a>>::borrow(self)
     }
 
-    pub fn meta(self) -> Option<MutCtx<'a>> {
-        self.0.meta.as_mut().map(|meta| MutCtx(&mut *meta))
-    }
-
-    pub fn set_meta(self, meta: Option<Ctx>) {
-        self.0.meta = meta.map(Box::new);
-    }
-
     pub fn swap(&mut self, other: &mut Self) {
         swap(self.0, other.0);
     }
@@ -305,16 +303,16 @@ impl<'a> MutCtx<'a> {
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxRef>::get_ref(self, name)
+        <_ as CtxMapRef>::get_ref(self, name)
     }
 
     pub fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError> {
-        <_ as CtxRef>::get_ref_mut(self, name)
+        <_ as CtxMapRef>::get_ref_mut(self, name)
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn is_assignable(self, name: Symbol) -> bool {
-        <_ as CtxRef>::is_assignable(self, name)
+        <_ as CtxMapRef>::is_assignable(self, name)
     }
 
     pub fn put(
@@ -345,40 +343,15 @@ impl<'a> MutFnCtx<'a> {
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxRef>::get_ref(self, name)
+        <_ as CtxMapRef>::get_ref(self, name)
     }
 
     pub fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError> {
-        <_ as CtxRef>::get_ref_mut(self, name)
+        <_ as CtxMapRef>::get_ref_mut(self, name)
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn is_assignable(self, name: Symbol) -> bool {
-        <_ as CtxRef>::is_assignable(self, name)
-    }
-
-    pub fn meta(self) -> Result<ConstCtx<'a>, CtxError> {
-        match self {
-            MutFnCtx::Free(_ctx) => Err(CtxError::AccessDenied),
-            MutFnCtx::Const(ctx) => match ctx.meta() {
-                Some(meta) => Ok(meta),
-                None => Err(CtxError::NotFound),
-            },
-            MutFnCtx::Mut(ctx) => match ctx.meta() {
-                Some(meta) => Ok(ConstCtx::new(meta.0)),
-                None => Err(CtxError::NotFound),
-            },
-        }
-    }
-
-    pub fn meta_mut(self) -> Result<MutCtx<'a>, CtxError> {
-        match self {
-            MutFnCtx::Free(_ctx) => Err(CtxError::AccessDenied),
-            MutFnCtx::Const(_ctx) => Err(CtxError::AccessDenied),
-            MutFnCtx::Mut(ctx) => match ctx.meta() {
-                Some(meta) => Ok(meta),
-                None => Err(CtxError::NotFound),
-            },
-        }
+        <_ as CtxMapRef>::is_assignable(self, name)
     }
 }

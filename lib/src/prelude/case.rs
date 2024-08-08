@@ -2,9 +2,9 @@ use crate::{
     bool::Bool,
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         mut1::MutFnCtx,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     map::Map,
     mode::{
@@ -34,6 +34,7 @@ use crate::{
     Case,
     CaseVal,
     Mode,
+    Symbol,
     Val,
 };
 
@@ -63,7 +64,7 @@ impl Default for CasePrelude {
 }
 
 impl Prelude for CasePrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.new_cache.put(m);
         self.repr.put(m);

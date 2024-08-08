@@ -15,10 +15,12 @@ use crate::ctx::Ctx;
 pub struct CtxVal(Box<Ctx>);
 
 impl CtxVal {
+    #[allow(unused)]
     pub(crate) fn new(ctx: Box<Ctx>) -> Self {
         Self(ctx)
     }
 
+    #[allow(unused)]
     pub(crate) fn unwrap(self) -> Box<Ctx> {
         self.0
     }

@@ -3,10 +3,10 @@ use std::mem::swap;
 use crate::{
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         mut1::MutFnCtx,
         ref1::CtxMeta,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     func::mut1::MutDispatcher,
     mode::{
@@ -27,8 +27,10 @@ use crate::{
     val::func::FuncVal,
     Ask,
     FreeCtx,
+    Map,
     Mode,
     Pair,
+    Symbol,
     Val,
 };
 
@@ -58,7 +60,7 @@ impl Default for AskPrelude {
 }
 
 impl Prelude for AskPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.new_dependent.put(m);
         self.apply.put(m);

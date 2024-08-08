@@ -2,9 +2,9 @@ use std::mem::swap;
 
 use crate::{
     ctx::{
+        default::DefaultCtx,
         ref1::CtxMeta,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     func::mut1::MutDispatcher,
     mode::eval::Eval,
@@ -22,9 +22,11 @@ use crate::{
     ConstFnCtx,
     FreeCtx,
     FuncVal,
+    Map,
     Mode,
     MutFnCtx,
     Pair,
+    Symbol,
     Val,
 };
 
@@ -52,7 +54,7 @@ impl Default for CommentPrelude {
 }
 
 impl Prelude for CommentPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.apply.put(m);
         self.get_note.put(m);

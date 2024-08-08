@@ -1,9 +1,9 @@
 use crate::{
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         mut1::MutFnCtx,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     prelude::{
         named_const_fn,
@@ -19,8 +19,10 @@ use crate::{
     },
     Byte,
     Int,
+    Map,
     Mode,
     Pair,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -45,7 +47,7 @@ impl Default for TextPrelude {
 }
 
 impl Prelude for TextPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.from_utf8.put(m);
         self.into_utf8.put(m);
         self.length.put(m);

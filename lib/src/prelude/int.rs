@@ -1,5 +1,5 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::CtxValue,
     pair::Pair,
     prelude::{
         named_free_fn,
@@ -11,7 +11,9 @@ use crate::{
         Val,
     },
     Int,
+    Map,
     Mode,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -48,7 +50,7 @@ impl Default for IntPrelude {
 }
 
 impl Prelude for IntPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.add.put(m);
         self.subtract.put(m);
         self.multiply.put(m);

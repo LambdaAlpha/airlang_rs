@@ -2,9 +2,9 @@ use crate::{
     bool::Bool,
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         Ctx,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     func::{
         const1::ConstInfo,
@@ -84,7 +84,7 @@ impl Default for FuncPrelude {
 }
 
 impl Prelude for FuncPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.repr.put(m);
         self.ctx_access.put(m);

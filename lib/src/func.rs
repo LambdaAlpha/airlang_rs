@@ -12,11 +12,9 @@ use std::{
 
 use crate::{
     ctx::{
+        map::CtxMapRef,
         mut1::MutCtx,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
+        ref1::CtxMeta,
         Ctx,
         CtxValue,
         Invariant,

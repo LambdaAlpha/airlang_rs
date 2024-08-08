@@ -1,7 +1,7 @@
 use crate::{
     ctx::{
-        CtxMap,
-        DefaultCtx,
+        default::DefaultCtx,
+        CtxValue,
     },
     prelude::{
         named_const_fn,
@@ -15,7 +15,9 @@ use crate::{
     },
     Bool,
     ConstFnCtx,
+    Map,
     Mode,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -44,7 +46,7 @@ impl Default for BoolPrelude {
 }
 
 impl Prelude for BoolPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.is_true.put(m);
         self.is_false.put(m);
         self.not.put(m);

@@ -8,7 +8,6 @@ use crate::{
     val::func::FuncVal,
     AnswerVal,
     Ask,
-    Symbol,
     Val,
 };
 
@@ -17,15 +16,10 @@ where
     Ctx: CtxMeta<'a>,
 {
     let none = AnswerVal::from(Answer::None);
-    let Ok(meta) = ctx.reborrow().get_meta() else {
+    let Ok(solver) = ctx.reborrow().get_solver() else {
         return none;
     };
-    let Ok(solver) = meta.get_ref(Symbol::from_str(SOLVER)) else {
-        return none;
-    };
-    let Val::Func(solver) = solver.clone() else {
-        return none;
-    };
+    let solver = solver.clone();
     let ask = Ask::new(Val::Func(func.clone()), output.clone());
     let ask = Val::Ask(ask.into());
     let answer = solver.transform(ctx, ask);
@@ -43,5 +37,3 @@ where
     }
     answer
 }
-
-pub(crate) const SOLVER: &str = "solver";

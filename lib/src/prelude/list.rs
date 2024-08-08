@@ -3,9 +3,9 @@ use std::mem::swap;
 use crate::{
     ctx::{
         const1::ConstFnCtx,
+        default::DefaultCtx,
         mut1::MutFnCtx,
-        CtxMap,
-        DefaultCtx,
+        CtxValue,
     },
     list::List,
     prelude::{
@@ -19,8 +19,10 @@ use crate::{
         Val,
     },
     Int,
+    Map,
     Mode,
     Pair,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -57,7 +59,7 @@ impl Default for ListPrelude {
 }
 
 impl Prelude for ListPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.length.put(m);
         self.set.put(m);
         self.set_many.put(m);

@@ -3,12 +3,14 @@ use std::str::FromStr;
 use num_bigint::BigInt;
 
 use crate::{
-    ctx::CtxMap,
+    ctx::CtxValue,
     int::Int,
     prelude::{
         Named,
         Prelude,
     },
+    Map,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -29,7 +31,7 @@ impl Default for MetaPrelude {
 }
 
 impl Prelude for MetaPrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.version_major.put(m);
         self.version_minor.put(m);
         self.version_patch.put(m);

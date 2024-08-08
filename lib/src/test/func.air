@@ -19,7 +19,7 @@ true
 ; [
     f = function ! {
         body : not ! the_input,
-        prelude : . context {: not}
+        prelude : context ! {variables :  {: not}},
     },
     f ! not ! true
 ]
@@ -30,7 +30,7 @@ true
     f = function ! {
         body : n ! a,
         input_name : .a,
-        prelude : . context {n : not}
+        prelude : context ! {variables :  {n : not}},
     },
     f ! not ! true
 ]
@@ -139,9 +139,7 @@ not false
     f = function ! {
         body : the_context | ..a,
         context_access : .free,
-        prelude : . context {
-            : |,
-        }
+        prelude : context ! {variables : {: |}},
     },
     f .
 ]
@@ -153,9 +151,7 @@ not false
     f = function ! {
         body : the_context | ..a,
         context_access : .constant,
-        prelude : . context {
-            : |,
-        }
+        prelude : context ! {variables : {: |}},
     },
     f .
 ]
@@ -167,9 +163,7 @@ not false
     f = function ! {
         body : the_context | ..a,
         context_access : .mutable,
-        prelude : . context {
-            : |,
-        }
+        prelude : context ! {variables : {: |}},
     },
     f .
 ]
@@ -181,11 +175,13 @@ not false
         body : the_context | = '!' the_input : 2,
         input_mode : id,
         context_access : .mutable,
-        prelude : . context {
-            : |,
-            : =,
-            : '!',
-        }
+        prelude : context ! {
+            variables : {
+                : |,
+                : =,
+                : '!',
+            }
+        },
     },
     a = 1,
     f a,
@@ -199,11 +195,13 @@ not false
         body : the_context | = '!' the_input : 2,
         input_mode : id,
         context_access : .mutable,
-        prelude : . context {
-            : |,
-            : =,
-            : '!',
-        }
+        prelude : context ! {
+            variables : {
+                : |,
+                : =,
+                : '!',
+            }
+        },
     },
     (a . final) = 1,
     f a,
@@ -217,11 +215,13 @@ not false
         body : the_context | = '!' the_input : 2,
         input_mode : id,
         context_access : .constant,
-        prelude : . context {
-            : |,
-            : =,
-            : '!',
-        }
+        prelude : context ! {
+            variables : {
+                : |,
+                : =,
+                : '!',
+            }
+        },
     },
     a = 1,
     f a,
@@ -375,7 +375,7 @@ function.body .not
 .
 =====
 ; [
-    ctx = . context {a : 1},
+    ctx = context ! {variables : {a : 1}},
     f = function ! {prelude : ctx},
     (function.prelude .f) == .ctx
 ]

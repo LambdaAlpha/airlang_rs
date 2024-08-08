@@ -2,7 +2,7 @@ use crate::{
     ctx::{
         free::FreeCtx,
         mut1::MutFnCtx,
-        CtxMap,
+        CtxValue,
     },
     mode::{
         basic::{
@@ -26,7 +26,9 @@ use crate::{
         func::FuncVal,
         Val,
     },
+    Map,
     Mode,
+    Symbol,
 };
 
 #[derive(Clone)]
@@ -47,7 +49,7 @@ impl Default for ModePrelude {
 }
 
 impl Prelude for ModePrelude {
-    fn put(&self, m: &mut CtxMap) {
+    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.id.put(m);
         self.form.put(m);
         self.eval.put(m);

@@ -1,7 +1,10 @@
 use crate::{
-    ctx::CtxMap,
+    ctx::CtxValue,
     prelude::Prelude,
+    Map,
+    Symbol,
 };
+
 #[derive(Clone)]
 pub(crate) struct NumberPrelude {}
 
@@ -13,5 +16,5 @@ impl Default for NumberPrelude {
 }
 
 impl Prelude for NumberPrelude {
-    fn put(&self, _m: &mut CtxMap) {}
+    fn put(&self, _m: &mut Map<Symbol, CtxValue>) {}
 }
