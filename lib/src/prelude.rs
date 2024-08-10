@@ -118,16 +118,13 @@ impl Prelude for AllPrelude {
 }
 
 pub(crate) fn initial_ctx() -> Ctx {
-    let ctx_map = PRELUDE.with(|prelude| {
+    let variables = PRELUDE.with(|prelude| {
         let mut m = Map::default();
         prelude.put(&mut m);
         m
     });
-    let variables = CtxMap::new(ctx_map);
-    Ctx {
-        variables,
-        solver: None,
-    }
+    let variables = CtxMap::new(variables, false);
+    Ctx::new(variables, None)
 }
 
 pub(crate) trait Prelude {

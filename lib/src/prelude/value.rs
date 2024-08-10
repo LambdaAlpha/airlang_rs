@@ -30,6 +30,7 @@ use crate::{
         const1::ConstFnCtx,
         default::DefaultCtx,
         map::CtxMapRef,
+        ref1::CtxRef,
         CtxValue,
     },
     mode::SYMBOL_READ_PREFIX,
@@ -226,6 +227,9 @@ where
                 let Some(ctx) = ctx else {
                     return f(None);
                 };
+                let Ok(ctx) = ctx.get_variables() else {
+                    return f(None);
+                };
                 let s = Symbol::from_str(&s[1..]);
                 let Ok(val) = ctx.get_ref(s) else {
                     return f(None);
@@ -234,6 +238,9 @@ where
             }
             _ => {
                 let Some(ctx) = ctx else {
+                    return f(None);
+                };
+                let Ok(ctx) = ctx.get_variables() else {
                     return f(None);
                 };
                 let Ok(val) = ctx.get_ref(s.clone()) else {

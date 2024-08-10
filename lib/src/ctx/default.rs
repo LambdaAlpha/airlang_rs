@@ -1,5 +1,6 @@
 use crate::{
     ctx::{
+        map::CtxMapRef,
         ref1::CtxRef,
         DynRef,
     },
@@ -18,6 +19,9 @@ impl DefaultCtx {
     where
         Ctx: CtxRef<'a>,
     {
+        let Ok(ctx) = ctx.get_variables() else {
+            return Val::default();
+        };
         let Ok(val) = ctx.get_ref(name) else {
             return Val::default();
         };
@@ -28,6 +32,7 @@ impl DefaultCtx {
     where
         Ctx: CtxRef<'a>,
     {
+        let ctx = ctx.get_variables()?;
         match ctx.get_ref(name) {
             Ok(_) => Ok(false),
             Err(err) => {
@@ -43,7 +48,6 @@ impl DefaultCtx {
     pub(crate) fn with_dyn<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxRef<'a>,
-        T: Default,
         F: FnOnce(Either<DynRef<Val>, Val>) -> T,
         Self: Sized,
     {
@@ -54,16 +58,24 @@ impl DefaultCtx {
                     f(Either::Right(Val::Symbol(s)))
                 }
                 Some(SYMBOL_READ_PREFIX) => {
-                    let s = Symbol::from_str(&s[1..]);
-                    let Ok(dyn_ref) = ctx.get_ref_dyn(s) else {
-                        return T::default();
+                    let Ok(ctx) = ctx.get_variables_dyn() else {
+                        return f(Either::Right(Val::default()));
                     };
+                    let s = Symbol::from_str(&s[1..]);
+                    let Ok(mut dyn_ref) = ctx.ref1.get_ref_dyn(s) else {
+                        return f(Either::Right(Val::default()));
+                    };
+                    dyn_ref.is_const |= ctx.is_const;
                     f(Either::Left(dyn_ref))
                 }
                 _ => {
-                    let Ok(dyn_ref) = ctx.get_ref_dyn(s) else {
-                        return T::default();
+                    let Ok(ctx) = ctx.get_variables_dyn() else {
+                        return f(Either::Right(Val::default()));
                     };
+                    let Ok(mut dyn_ref) = ctx.ref1.get_ref_dyn(s) else {
+                        return f(Either::Right(Val::default()));
+                    };
+                    dyn_ref.is_const |= ctx.is_const;
                     f(Either::Left(dyn_ref))
                 }
             },
@@ -75,7 +87,6 @@ impl DefaultCtx {
     pub(crate) fn with_ref<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxRef<'a>,
-        T: Default,
         F: FnOnce(&Val) -> T,
         Self: Sized,
     {
@@ -86,15 +97,21 @@ impl DefaultCtx {
                     f(&Val::Symbol(s))
                 }
                 Some(SYMBOL_READ_PREFIX) => {
+                    let Ok(ctx) = ctx.get_variables() else {
+                        return f(&Val::default());
+                    };
                     let s = Symbol::from_str(&s[1..]);
                     let Ok(val) = ctx.get_ref(s) else {
-                        return T::default();
+                        return f(&Val::default());
                     };
                     f(val)
                 }
                 _ => {
+                    let Ok(ctx) = ctx.get_variables() else {
+                        return f(&Val::default());
+                    };
                     let Ok(val) = ctx.get_ref(s) else {
-                        return T::default();
+                        return f(&Val::default());
                     };
                     f(val)
                 }
@@ -118,15 +135,21 @@ impl DefaultCtx {
                     Val::Pair(Pair::new(val, result).into())
                 }
                 Some(SYMBOL_READ_PREFIX) => {
+                    let Ok(ctx) = ctx.get_variables() else {
+                        return f(&Val::default());
+                    };
                     let s = Symbol::from_str(&s[1..]);
                     let Ok(val) = ctx.get_ref(s) else {
-                        return Val::default();
+                        return f(&Val::default());
                     };
                     f(val)
                 }
                 _ => {
+                    let Ok(ctx) = ctx.get_variables() else {
+                        return f(&Val::default());
+                    };
                     let Ok(val) = ctx.get_ref(s) else {
-                        return Val::default();
+                        return f(&Val::default());
                     };
                     f(val)
                 }
@@ -142,7 +165,6 @@ impl DefaultCtx {
     pub(crate) fn with_ref_mut<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxRef<'a>,
-        T: Default,
         F: FnOnce(&mut Val) -> T,
         Self: Sized,
     {
@@ -153,15 +175,21 @@ impl DefaultCtx {
                     f(&mut Val::Symbol(s))
                 }
                 Some(SYMBOL_READ_PREFIX) => {
+                    let Ok(ctx) = ctx.get_variables_mut() else {
+                        return f(&mut Val::default());
+                    };
                     let s = Symbol::from_str(&s[1..]);
                     let Ok(val) = ctx.get_ref_mut(s) else {
-                        return T::default();
+                        return f(&mut Val::default());
                     };
                     f(val)
                 }
                 _ => {
+                    let Ok(ctx) = ctx.get_variables_mut() else {
+                        return f(&mut Val::default());
+                    };
                     let Ok(val) = ctx.get_ref_mut(s) else {
-                        return T::default();
+                        return f(&mut Val::default());
                     };
                     f(val)
                 }
@@ -185,6 +213,9 @@ impl DefaultCtx {
                     Val::Pair(Pair::new(val, result).into())
                 }
                 Some(SYMBOL_READ_PREFIX) => {
+                    let Ok(ctx) = ctx.get_variables_mut() else {
+                        return f(&mut Val::default());
+                    };
                     let s = Symbol::from_str(&s[1..]);
                     let Ok(val) = ctx.get_ref_mut(s) else {
                         return Val::default();
@@ -192,8 +223,11 @@ impl DefaultCtx {
                     f(val)
                 }
                 _ => {
+                    let Ok(ctx) = ctx.get_variables_mut() else {
+                        return f(&mut Val::default());
+                    };
                     let Ok(val) = ctx.get_ref_mut(s) else {
-                        return Val::default();
+                        return f(&mut Val::default());
                     };
                     f(val)
                 }
@@ -220,15 +254,25 @@ impl DefaultCtx {
                     val
                 }
                 Some(SYMBOL_READ_PREFIX) => {
+                    let Ok(ctx) = ctx.get_variables_mut() else {
+                        f(&mut Val::default());
+                        return Val::default();
+                    };
                     let s = Symbol::from_str(&s[1..]);
                     let Ok(val) = ctx.get_ref_mut(s) else {
+                        f(&mut Val::default());
                         return Val::default();
                     };
                     f(val);
                     Val::default()
                 }
                 _ => {
+                    let Ok(ctx) = ctx.get_variables_mut() else {
+                        f(&mut Val::default());
+                        return Val::default();
+                    };
                     let Ok(val) = ctx.get_ref_mut(s) else {
+                        f(&mut Val::default());
                         return Val::default();
                     };
                     f(val);

@@ -230,6 +230,44 @@ not false
 -----
 1
 =====
+; [
+    f = function ! {
+        body : 1,
+        context_access : .constant,
+    },
+    . | f '!' .
+]
+-----
+1
+=====
+; [
+    a = 1,
+    f = function ! {
+        context_name : .ctx,
+        body : 2,
+        context_access : .constant,
+        prelude : context ! {variables : {ctx : 3 . .constant}},
+    },
+    b = f ! .,
+    (a == 1) and b == 2
+]
+-----
+true
+=====
+; [
+    a = 1,
+    f = function ! {
+        context_name : .ctx,
+        body : ctx $= 2,
+        context_access : .constant,
+        prelude : context ! {unchecked : true},
+    },
+    f .,
+    a
+]
+-----
+1
+=====
 function.represent ! function ! {body : the_input}
 -----
 {body : the_input}

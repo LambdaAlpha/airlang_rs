@@ -14,7 +14,10 @@ use crate::{
     ctx::{
         map::CtxMapRef,
         mut1::MutCtx,
-        ref1::CtxMeta,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
         Ctx,
         CtxValue,
         Invariant,
@@ -84,45 +87,44 @@ impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> f
     }
 }
 
-fn eval_free(mut new_ctx: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
-    let result = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
-    if result.is_err() {
-        return Val::default();
-    }
-    Eval.transform(MutCtx::new(&mut new_ctx), body)
+fn eval_free(mut prelude: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
+    let _ = prelude
+        .variables_mut()
+        .put_value(input_name, CtxValue::new(input));
+    Eval.transform(MutCtx::new(&mut prelude), body)
 }
 
 fn eval_aware(
-    mut new_ctx: Ctx,
-    caller: &mut Ctx,
-    caller_name: Symbol,
-    caller_invariant: Invariant,
+    mut prelude: Ctx,
+    ctx: &mut Ctx,
+    ctx_name: Symbol,
+    ctx_invariant: Invariant,
     input: Val,
     input_name: Symbol,
     body: Val,
 ) -> Val {
-    let result = (&mut new_ctx).put_value(input_name, CtxValue::new(input));
-    if result.is_err() {
-        return Val::default();
-    }
-    keep_eval_restore(new_ctx, caller, caller_name, caller_invariant, body)
+    let _ = prelude
+        .variables_mut()
+        .put_value(input_name, CtxValue::new(input));
+    keep_eval_restore(prelude, ctx, ctx_name, ctx_invariant, body)
 }
 
 fn keep_eval_restore(
-    mut new_ctx: Ctx,
+    mut prelude: Ctx,
     ctx: &mut Ctx,
-    caller_name: Symbol,
-    caller_invariant: Invariant,
+    ctx_name: Symbol,
+    ctx_invariant: Invariant,
     body: Val,
 ) -> Val {
-    if !ctx.is_assignable(caller_name.clone()) {
-        return Val::default();
+    if !prelude.is_unchecked() && prelude.variables().is_assignable(ctx_name.clone()) {
+        let caller = own_ctx(ctx);
+        keep_ctx(&mut prelude, caller, ctx_name.clone(), ctx_invariant);
+        let output = Eval.transform(MutCtx::new(&mut prelude), body);
+        restore_ctx(prelude, ctx, ctx_name);
+        output
+    } else {
+        Eval.transform(MutCtx::new(&mut prelude), body)
     }
-    let caller = own_ctx(ctx);
-    keep_ctx(&mut new_ctx, caller, caller_name.clone(), caller_invariant);
-    let output = Eval.transform(MutCtx::new(&mut new_ctx), body);
-    restore_ctx(ctx, new_ctx, caller_name);
-    output
 }
 
 // here is why we need a `&mut Ctx` for a const func
@@ -132,15 +134,16 @@ fn own_ctx(ctx: &mut Ctx) -> Ctx {
     owned
 }
 
-fn keep_ctx(new_ctx: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
+fn keep_ctx(prelude: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
     let val = Val::Ctx(CtxVal::from(ctx));
-    new_ctx
+    prelude
+        .variables_mut()
         .put_value(name, CtxValue { val, invariant })
         .expect("name should be assignable");
 }
 
-fn restore_ctx(ctx: &mut Ctx, new_ctx: Ctx, name: Symbol) {
-    let Ok(Val::Ctx(caller)) = new_ctx.into_val(name) else {
+fn restore_ctx(prelude: Ctx, ctx: &mut Ctx, name: Symbol) {
+    let Ok(Val::Ctx(caller)) = prelude.into_val(name) else {
         unreachable!("restore_ctx ctx invariant is broken!!!");
     };
     let caller = Ctx::from(caller);

@@ -1,6 +1,7 @@
 use crate::{
     ctx::{
         default::DefaultCtx,
+        map::CtxMapRef,
         ref1::CtxMeta,
     },
     mode::{
@@ -59,8 +60,11 @@ impl ByVal<Val> for Form {
                 DefaultCtx.get_or_default(ctx, s)
             }
             Some(SYMBOL_MOVE_PREFIX) => {
+                let Ok(variables) = ctx.get_variables_mut() else {
+                    return Val::default();
+                };
                 let s = Symbol::from_str(&s[1..]);
-                ctx.remove(s).unwrap_or_default()
+                variables.remove(s).unwrap_or_default()
             }
             _ => Id.transform_symbol(ctx, s),
         }

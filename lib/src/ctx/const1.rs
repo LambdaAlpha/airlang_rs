@@ -2,13 +2,15 @@ use std::matches;
 
 use crate::{
     ctx::{
-        map::CtxMapRef,
+        map::{
+            CtxMap,
+            CtxMapRef,
+        },
         mut1::MutFnCtx,
         ref1::{
             CtxMeta,
             CtxRef,
         },
-        CtxValue,
         DynRef,
     },
     Ctx,
@@ -18,7 +20,6 @@ use crate::{
     Symbol,
     Val,
 };
-
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when
 evaluating a ctx-aware function. But a `&mut Ctx` is more compact and convenient, and we can
@@ -32,51 +33,21 @@ pub enum ConstFnCtx<'a> {
     Const(ConstCtx<'a>),
 }
 
-impl<'l> CtxMapRef<'l> for ConstCtx<'l> {
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        self.0.get_ref(name)
+impl<'l> CtxRef<'l> for ConstCtx<'l> {
+    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
+        self.0.get_variables()
     }
 
-    fn get_ref_mut(self, _name: Symbol) -> Result<&'l mut Val, CtxError> {
+    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        let mut dyn_ref = self.0.get_ref_dyn(name)?;
+    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
+        let mut dyn_ref = self.0.get_variables_dyn()?;
         dyn_ref.is_const = true;
         Ok(dyn_ref)
     }
 
-    fn remove(self, _name: Symbol) -> Result<Val, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        self.0.is_assignable(name)
-    }
-
-    fn put_value(self, _name: Symbol, _value: CtxValue) -> Result<Option<Val>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn set_final(self, _name: Symbol) -> Result<(), CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
-        self.0.is_final(name)
-    }
-
-    fn set_const(self, _name: Symbol) -> Result<(), CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
-        self.0.is_const(name)
-    }
-}
-
-impl<'l> CtxRef<'l> for ConstCtx<'l> {
     fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         self.0.get_solver()
     }
@@ -93,6 +64,10 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
 
     fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
+    }
+
+    fn is_unchecked(self) -> bool {
+        self.0.is_unchecked()
     }
 }
 
@@ -124,79 +99,28 @@ impl<'l> CtxMeta<'l> for ConstCtx<'l> {
     }
 }
 
-impl<'l> CtxMapRef<'l> for ConstFnCtx<'l> {
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.get_ref(name),
-            ConstFnCtx::Const(ctx) => <_ as CtxMapRef>::get_ref(ctx, name),
-        }
-    }
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.get_ref_mut(name),
-            ConstFnCtx::Const(ctx) => ctx.get_ref_mut(name),
-        }
-    }
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.get_ref_dyn(name),
-            ConstFnCtx::Const(ctx) => ctx.get_ref_dyn(name),
-        }
-    }
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.remove(name),
-            ConstFnCtx::Const(ctx) => ctx.remove(name),
-        }
-    }
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.is_assignable(name),
-            ConstFnCtx::Const(ctx) => ctx.is_assignable(name),
-        }
-    }
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.put_value(name, value),
-            ConstFnCtx::Const(ctx) => ctx.put_value(name, value),
-        }
-    }
-
-    fn set_final(self, name: Symbol) -> Result<(), CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.set_final(name),
-            ConstFnCtx::Const(ctx) => ctx.set_final(name),
-        }
-    }
-
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.is_final(name),
-            ConstFnCtx::Const(ctx) => ctx.is_final(name),
-        }
-    }
-
-    fn set_const(self, name: Symbol) -> Result<(), CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.set_const(name),
-            ConstFnCtx::Const(ctx) => ctx.set_const(name),
-        }
-    }
-
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.is_const(name),
-            ConstFnCtx::Const(ctx) => ctx.is_const(name),
-        }
-    }
-}
-
 impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
+    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
+        match self {
+            ConstFnCtx::Free(ctx) => ctx.get_variables(),
+            ConstFnCtx::Const(ctx) => ctx.get_variables(),
+        }
+    }
+
+    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
+        match self {
+            ConstFnCtx::Free(ctx) => ctx.get_variables_mut(),
+            ConstFnCtx::Const(ctx) => ctx.get_variables_mut(),
+        }
+    }
+
+    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
+        match self {
+            ConstFnCtx::Free(ctx) => ctx.get_variables_dyn(),
+            ConstFnCtx::Const(ctx) => ctx.get_variables_dyn(),
+        }
+    }
+
     fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.get_solver(),
@@ -222,6 +146,13 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.set_solver(solver),
             ConstFnCtx::Const(ctx) => ctx.set_solver(solver),
+        }
+    }
+
+    fn is_unchecked(self) -> bool {
+        match self {
+            ConstFnCtx::Free(ctx) => ctx.is_unchecked(),
+            ConstFnCtx::Const(ctx) => ctx.is_unchecked(),
         }
     }
 }
@@ -281,7 +212,7 @@ impl<'a> ConstCtx<'a> {
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxMapRef>::get_ref(self, name)
+        self.get_variables()?.get_ref(name)
     }
 
     // INVARIANT: The function f can take the ctx out during its execution,
@@ -304,6 +235,6 @@ impl<'a> ConstFnCtx<'a> {
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxMapRef>::get_ref(self, name)
+        self.get_variables()?.get_ref(name)
     }
 }

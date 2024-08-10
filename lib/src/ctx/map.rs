@@ -20,6 +20,9 @@ pub(crate) trait CtxMapRef<'a> {
     fn remove(self, name: Symbol) -> Result<Val, CtxError>;
 
     #[allow(clippy::wrong_self_convention)]
+    fn is_unchecked(self) -> bool;
+
+    #[allow(clippy::wrong_self_convention)]
     fn is_assignable(self, name: Symbol) -> bool;
 
     fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
@@ -38,11 +41,12 @@ pub(crate) trait CtxMapRef<'a> {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMap {
     map: Map<Symbol, CtxValue>,
+    unchecked: bool,
 }
 
 impl CtxMap {
-    pub(crate) fn new(map: Map<Symbol, CtxValue>) -> Self {
-        Self { map }
+    pub(crate) fn new(map: Map<Symbol, CtxValue>, unchecked: bool) -> Self {
+        Self { map, unchecked }
     }
 
     pub(crate) fn unwrap(self) -> Map<Symbol, CtxValue> {
@@ -53,7 +57,18 @@ impl CtxMap {
         self.map.is_empty()
     }
 
-    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
+    #[allow(unused)]
+    pub(crate) fn set_checked(&mut self) {
+        self.unchecked = false;
+    }
+
+    #[allow(unused)]
+    pub(crate) fn into_unchecked(mut self) -> Self {
+        self.unchecked = true;
+        self
+    }
+
+    fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
         self.map.insert(name, val).map(|ctx_value| ctx_value.val)
     }
 
@@ -74,7 +89,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.invariant == Invariant::Const {
+        if !self.unchecked && value.invariant == Invariant::Const {
             return Err(CtxError::AccessDenied);
         }
         Ok(&mut value.val)
@@ -85,7 +100,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
             return Err(CtxError::NotFound);
         }
         let ctx_value = self.map.get_mut(&name).unwrap();
-        let is_const = ctx_value.invariant == Invariant::Const;
+        let is_const = !self.unchecked && ctx_value.invariant == Invariant::Const;
         Ok(DynRef::new(&mut ctx_value.val, is_const))
     }
 
@@ -93,10 +108,14 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         let Some(value) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.invariant != Invariant::None {
+        if !self.unchecked && value.invariant != Invariant::None {
             return Err(CtxError::AccessDenied);
         }
         Ok(self.map.remove(&name).unwrap().val)
+    }
+
+    fn is_unchecked(self) -> bool {
+        self.unchecked
     }
 
     fn is_assignable(self, name: Symbol) -> bool {
@@ -107,7 +126,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         let Some(value) = self.map.get(&name) else {
             return Ok(self.put_unchecked(name, val));
         };
-        if value.invariant != Invariant::None {
+        if !self.unchecked && value.invariant != Invariant::None {
             return Err(CtxError::AccessDenied);
         }
         Ok(self.put_unchecked(name, val))
@@ -117,7 +136,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.invariant == Invariant::Const {
+        if !self.unchecked && value.invariant == Invariant::Const {
             return Err(CtxError::AccessDenied);
         }
         value.invariant = Invariant::Final;
@@ -159,6 +178,10 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
 
     fn remove(self, _name: Symbol) -> Result<Val, CtxError> {
         Err(CtxError::AccessDenied)
+    }
+
+    fn is_unchecked(self) -> bool {
+        self.unchecked
     }
 
     fn is_assignable(self, name: Symbol) -> bool {

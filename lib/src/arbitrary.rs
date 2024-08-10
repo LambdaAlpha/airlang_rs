@@ -214,7 +214,7 @@ pub(crate) fn any_invariant(rng: &mut SmallRng) -> Invariant {
     *(INVARIANTS.choose(rng).unwrap())
 }
 
-pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
+pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxValue> {
     let len = any_len_weighted(rng, depth);
     let mut ctx_map = Map::with_capacity(len);
     for _ in 0..len {
@@ -224,12 +224,18 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
         };
         ctx_map.insert(any_symbol(rng), ctx_value);
     }
-    let solver = if rng.gen_bool(0.1) {
+    ctx_map
+}
+
+pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
+    let variables = any_ctx_map(rng, depth);
+    let variables = CtxMap::new(variables, rng.gen());
+    let solver = if rng.gen() {
         Some(any_func(rng, depth))
     } else {
         None
     };
-    Ctx::new(CtxMap::new(ctx_map), solver)
+    Ctx::new(variables, solver)
 }
 
 pub(crate) fn any_transform(rng: &mut SmallRng) -> BasicMode {

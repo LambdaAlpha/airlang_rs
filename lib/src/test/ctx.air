@@ -242,6 +242,18 @@ true
 -----
 false
 =====
+is_unchecked .
+-----
+false
+=====
+; [c = context ! {unchecked : true}, c | is_unchecked '!' .]
+-----
+true
+=====
+; [c = context ! {unchecked : true}, c | form ! $; ! [(a . constant) $= 1, a $= 2, a]]
+-----
+2
+=====
 access .
 -----
 mutable

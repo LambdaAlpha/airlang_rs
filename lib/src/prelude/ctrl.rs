@@ -2,7 +2,10 @@ use crate::{
     ctx::{
         free::FreeCtx,
         map::CtxMapRef,
-        ref1::CtxMeta,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
         CtxValue,
     },
     func::mut1::MutDispatcher,
@@ -499,7 +502,10 @@ where
     Ctx: CtxMeta<'a>,
     ValIter: Iterator<Item = Val>,
 {
-    if !ctx.reborrow().is_assignable(name.clone()) {
+    let Ok(variables) = ctx.reborrow().get_variables() else {
+        return Val::default();
+    };
+    if !variables.is_assignable(name.clone()) {
         return Val::default();
     }
     if let Val::List(body) = body {
@@ -509,7 +515,10 @@ where
             return Val::default();
         };
         for val in values {
-            ctx.reborrow()
+            let Ok(variables) = ctx.reborrow().get_variables_mut() else {
+                return Val::default();
+            };
+            variables
                 .put_value(name.clone(), CtxValue::new(val))
                 .expect("name should be assignable");
             let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
@@ -524,7 +533,10 @@ where
         }
     } else {
         for val in values {
-            ctx.reborrow()
+            let Ok(variables) = ctx.reborrow().get_variables_mut() else {
+                return Val::default();
+            };
+            variables
                 .put_value(name.clone(), CtxValue::new(val))
                 .expect("name should be assignable");
             Eval.transform(ctx.reborrow(), body.clone());

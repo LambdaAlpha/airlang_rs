@@ -5,7 +5,10 @@ use std::{
 
 use crate::{
     ctx::{
-        map::CtxMapRef,
+        map::{
+            CtxMap,
+            CtxMapRef,
+        },
         ref1::{
             CtxMeta,
             CtxRef,
@@ -32,49 +35,19 @@ pub enum MutFnCtx<'a> {
     Mut(MutCtx<'a>),
 }
 
-impl<'l> CtxMapRef<'l> for MutCtx<'l> {
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        self.0.get_ref(name)
-    }
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
-        self.0.get_ref_mut(name)
-    }
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        self.0.get_ref_dyn(name)
-    }
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
-        self.0.remove(name)
-    }
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        self.0.is_assignable(name)
-    }
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
-        self.0.put_value(name, value)
-    }
-
-    fn set_final(self, name: Symbol) -> Result<(), CtxError> {
-        self.0.set_final(name)
-    }
-
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
-        self.0.is_final(name)
-    }
-
-    fn set_const(self, name: Symbol) -> Result<(), CtxError> {
-        self.0.set_const(name)
-    }
-
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
-        self.0.is_const(name)
-    }
-}
-
 impl<'l> CtxRef<'l> for MutCtx<'l> {
+    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
+        self.0.get_variables()
+    }
+
+    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
+        self.0.get_variables_mut()
+    }
+
+    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
+        self.0.get_variables_dyn()
+    }
+
     fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         self.0.get_solver()
     }
@@ -89,6 +62,10 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
 
     fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
         self.0.set_solver(solver)
+    }
+
+    fn is_unchecked(self) -> bool {
+        self.0.is_unchecked()
     }
 }
 
@@ -116,89 +93,31 @@ impl<'l> CtxMeta<'l> for MutCtx<'l> {
     }
 }
 
-impl<'l> CtxMapRef<'l> for MutFnCtx<'l> {
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.get_ref(name),
-            MutFnCtx::Const(ctx) => <_ as CtxMapRef>::get_ref(ctx, name),
-            MutFnCtx::Mut(ctx) => <_ as CtxMapRef>::get_ref(ctx, name),
-        }
-    }
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.get_ref_mut(name),
-            MutFnCtx::Const(ctx) => ctx.get_ref_mut(name),
-            MutFnCtx::Mut(ctx) => <_ as CtxMapRef>::get_ref_mut(ctx, name),
-        }
-    }
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.get_ref_dyn(name),
-            MutFnCtx::Const(ctx) => ctx.get_ref_dyn(name),
-            MutFnCtx::Mut(ctx) => ctx.get_ref_dyn(name),
-        }
-    }
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.remove(name),
-            MutFnCtx::Const(ctx) => ctx.remove(name),
-            MutFnCtx::Mut(ctx) => ctx.remove(name),
-        }
-    }
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.is_assignable(name),
-            MutFnCtx::Const(ctx) => ctx.is_assignable(name),
-            MutFnCtx::Mut(ctx) => ctx.is_assignable(name),
-        }
-    }
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.put_value(name, value),
-            MutFnCtx::Const(ctx) => ctx.put_value(name, value),
-            MutFnCtx::Mut(ctx) => ctx.put_value(name, value),
-        }
-    }
-
-    fn set_final(self, name: Symbol) -> Result<(), CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.set_final(name),
-            MutFnCtx::Const(ctx) => ctx.set_final(name),
-            MutFnCtx::Mut(ctx) => ctx.set_final(name),
-        }
-    }
-
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.is_final(name),
-            MutFnCtx::Const(ctx) => ctx.is_final(name),
-            MutFnCtx::Mut(ctx) => ctx.is_final(name),
-        }
-    }
-
-    fn set_const(self, name: Symbol) -> Result<(), CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.set_const(name),
-            MutFnCtx::Const(ctx) => ctx.set_const(name),
-            MutFnCtx::Mut(ctx) => ctx.set_const(name),
-        }
-    }
-
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.is_const(name),
-            MutFnCtx::Const(ctx) => ctx.is_const(name),
-            MutFnCtx::Mut(ctx) => ctx.is_const(name),
-        }
-    }
-}
-
 impl<'l> CtxRef<'l> for MutFnCtx<'l> {
+    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
+        match self {
+            MutFnCtx::Free(ctx) => ctx.get_variables(),
+            MutFnCtx::Const(ctx) => ctx.get_variables(),
+            MutFnCtx::Mut(ctx) => ctx.get_variables(),
+        }
+    }
+
+    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
+        match self {
+            MutFnCtx::Free(ctx) => ctx.get_variables_mut(),
+            MutFnCtx::Const(ctx) => ctx.get_variables_mut(),
+            MutFnCtx::Mut(ctx) => ctx.get_variables_mut(),
+        }
+    }
+
+    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
+        match self {
+            MutFnCtx::Free(ctx) => ctx.get_variables_dyn(),
+            MutFnCtx::Const(ctx) => ctx.get_variables_dyn(),
+            MutFnCtx::Mut(ctx) => ctx.get_variables_dyn(),
+        }
+    }
+
     fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.get_solver(),
@@ -228,6 +147,14 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
             MutFnCtx::Free(ctx) => ctx.set_solver(solver),
             MutFnCtx::Const(ctx) => ctx.set_solver(solver),
             MutFnCtx::Mut(ctx) => ctx.set_solver(solver),
+        }
+    }
+
+    fn is_unchecked(self) -> bool {
+        match self {
+            MutFnCtx::Free(ctx) => ctx.is_unchecked(),
+            MutFnCtx::Const(ctx) => ctx.is_unchecked(),
+            MutFnCtx::Mut(ctx) => ctx.is_unchecked(),
         }
     }
 }
@@ -303,16 +230,19 @@ impl<'a> MutCtx<'a> {
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxMapRef>::get_ref(self, name)
+        self.get_variables()?.get_ref(name)
     }
 
     pub fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError> {
-        <_ as CtxMapRef>::get_ref_mut(self, name)
+        self.get_variables_mut()?.get_ref_mut(name)
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn is_assignable(self, name: Symbol) -> bool {
-        <_ as CtxMapRef>::is_assignable(self, name)
+        let Ok(ctx) = self.get_variables() else {
+            return false;
+        };
+        ctx.is_assignable(name)
     }
 
     pub fn put(
@@ -321,7 +251,8 @@ impl<'a> MutCtx<'a> {
         invariant: Invariant,
         val: Val,
     ) -> Result<Option<Val>, CtxError> {
-        self.put_value(name, CtxValue { invariant, val })
+        self.get_variables_mut()?
+            .put_value(name, CtxValue { invariant, val })
     }
 }
 
@@ -335,23 +266,22 @@ impl<'a> MutFnCtx<'a> {
     }
 
     pub fn to_const(self) -> ConstFnCtx<'a> {
-        match self {
-            MutFnCtx::Free(_ctx) => ConstFnCtx::Free(FreeCtx),
-            MutFnCtx::Const(ctx) => ConstFnCtx::Const(ctx),
-            MutFnCtx::Mut(ctx) => ConstFnCtx::Const(ConstCtx::new(ctx.0)),
-        }
+        <_ as CtxMeta>::for_const_fn(self)
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
-        <_ as CtxMapRef>::get_ref(self, name)
+        self.get_variables()?.get_ref(name)
     }
 
     pub fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError> {
-        <_ as CtxMapRef>::get_ref_mut(self, name)
+        self.get_variables_mut()?.get_ref_mut(name)
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn is_assignable(self, name: Symbol) -> bool {
-        <_ as CtxMapRef>::is_assignable(self, name)
+        let Ok(ctx) = self.get_variables() else {
+            return false;
+        };
+        ctx.is_assignable(name)
     }
 }

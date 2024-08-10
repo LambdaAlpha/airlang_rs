@@ -1,7 +1,7 @@
 use crate::{
     ctx::{
         const1::ConstFnCtx,
-        map::CtxMapRef,
+        map::CtxMap,
         mut1::MutFnCtx,
         DynRef,
     },
@@ -10,7 +10,13 @@ use crate::{
     FuncVal,
 };
 
-pub(crate) trait CtxRef<'a>: CtxMapRef<'a> {
+pub(crate) trait CtxRef<'a> {
+    fn get_variables(self) -> Result<&'a CtxMap, CtxError>;
+
+    fn get_variables_mut(self) -> Result<&'a mut CtxMap, CtxError>;
+
+    fn get_variables_dyn(self) -> Result<DynRef<'a, CtxMap>, CtxError>;
+
     fn get_solver(self) -> Result<&'a FuncVal, CtxError>;
 
     #[allow(unused)]
@@ -20,6 +26,9 @@ pub(crate) trait CtxRef<'a>: CtxMapRef<'a> {
     fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
 
     fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError>;
+
+    #[allow(clippy::wrong_self_convention)]
+    fn is_unchecked(self) -> bool;
 }
 
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {

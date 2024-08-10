@@ -18,6 +18,7 @@ use crate::{
     symbol::Symbol,
     val::Val,
     FuncVal,
+    Map,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -27,8 +28,13 @@ pub enum CtxError {
     Unexpected,
 }
 
-#[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Ctx {
+    variables: CtxMap,
+    solver: Option<FuncVal>,
+}
+
+pub(crate) struct PubCtx {
     pub(crate) variables: CtxMap,
     pub(crate) solver: Option<FuncVal>,
 }
@@ -55,49 +61,19 @@ pub(crate) struct DynRef<'a, T> {
     pub(crate) is_const: bool,
 }
 
-impl<'l> CtxMapRef<'l> for &'l mut Ctx {
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        (&mut self.variables).get_ref(name)
-    }
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
-        (&mut self.variables).get_ref_mut(name)
-    }
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        (&mut self.variables).get_ref_dyn(name)
-    }
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
-        (&mut self.variables).remove(name)
-    }
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        (&mut self.variables).is_assignable(name)
-    }
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
-        (&mut self.variables).put_value(name, value)
-    }
-
-    fn set_final(self, name: Symbol) -> Result<(), CtxError> {
-        (&mut self.variables).set_final(name)
-    }
-
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
-        (&mut self.variables).is_final(name)
-    }
-
-    fn set_const(self, name: Symbol) -> Result<(), CtxError> {
-        (&mut self.variables).set_const(name)
-    }
-
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
-        (&mut self.variables).is_const(name)
-    }
-}
-
 impl<'l> CtxRef<'l> for &'l mut Ctx {
+    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
+        Ok(&self.variables)
+    }
+
+    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
+        Ok(&mut self.variables)
+    }
+
+    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
+        Ok(DynRef::new(&mut self.variables, false))
+    }
+
     fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         let Some(solver) = &self.solver else {
             return Err(CtxError::NotFound);
@@ -123,51 +99,25 @@ impl<'l> CtxRef<'l> for &'l mut Ctx {
         self.solver = solver;
         Ok(())
     }
-}
 
-impl<'l> CtxMapRef<'l> for &'l Ctx {
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        self.variables.get_ref(name)
-    }
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
-        self.variables.get_ref_mut(name)
-    }
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        self.variables.get_ref_dyn(name)
-    }
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
-        self.variables.remove(name)
-    }
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        self.variables.is_assignable(name)
-    }
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError> {
-        self.variables.put_value(name, value)
-    }
-
-    fn set_final(self, name: Symbol) -> Result<(), CtxError> {
-        self.variables.set_final(name)
-    }
-
-    fn is_final(self, name: Symbol) -> Result<bool, CtxError> {
-        self.variables.is_final(name)
-    }
-
-    fn set_const(self, name: Symbol) -> Result<(), CtxError> {
-        self.variables.set_const(name)
-    }
-
-    fn is_const(self, name: Symbol) -> Result<bool, CtxError> {
-        self.variables.is_const(name)
+    fn is_unchecked(self) -> bool {
+        self.variables.is_unchecked()
     }
 }
 
 impl<'l> CtxRef<'l> for &'l Ctx {
+    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
+        Ok(&self.variables)
+    }
+
+    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
+    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
+        Err(CtxError::AccessDenied)
+    }
+
     fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         let Some(solver) = &self.solver else {
             return Err(CtxError::NotFound);
@@ -186,6 +136,10 @@ impl<'l> CtxRef<'l> for &'l Ctx {
     fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
+
+    fn is_unchecked(self) -> bool {
+        self.variables.is_unchecked()
+    }
 }
 
 impl Ctx {
@@ -193,8 +147,24 @@ impl Ctx {
         Self { variables, solver }
     }
 
+    pub(crate) fn destruct(self) -> PubCtx {
+        PubCtx {
+            variables: self.variables,
+            solver: self.solver,
+        }
+    }
+
     pub(crate) fn into_val(self, name: Symbol) -> Result<Val, CtxError> {
         self.variables.into_val(name)
+    }
+
+    #[allow(unused)]
+    pub(crate) fn variables(&self) -> &CtxMap {
+        &self.variables
+    }
+
+    pub(crate) fn variables_mut(&mut self) -> &mut CtxMap {
+        &mut self.variables
     }
 }
 
@@ -218,6 +188,15 @@ impl CtxValue {
         CtxValue {
             invariant: Invariant::Const,
             val,
+        }
+    }
+}
+
+impl Default for Ctx {
+    fn default() -> Self {
+        Self {
+            variables: CtxMap::new(Map::default(), false),
+            solver: None,
         }
     }
 }

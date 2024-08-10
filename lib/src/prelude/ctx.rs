@@ -74,6 +74,7 @@ pub(crate) struct CtxPrelude {
     pub(crate) is_final: Named<FuncVal>,
     pub(crate) is_const: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
+    pub(crate) is_unchecked: Named<FuncVal>,
     pub(crate) get_access: Named<FuncVal>,
     pub(crate) get_solver: Named<FuncVal>,
     pub(crate) set_solver: Named<FuncVal>,
@@ -96,6 +97,7 @@ impl Default for CtxPrelude {
             is_final: is_final(),
             is_const: is_const(),
             is_null: is_null(),
+            is_unchecked: is_unchecked(),
             get_access: get_access(),
             get_solver: get_solver(),
             set_solver: set_solver(),
@@ -119,6 +121,7 @@ impl Prelude for CtxPrelude {
         self.is_final.put(m);
         self.is_const.put(m);
         self.is_null.put(m);
+        self.is_unchecked.put(m);
         self.get_access.put(m);
         self.get_solver.put(m);
         self.set_solver.put(m);
@@ -152,6 +155,9 @@ fn move1() -> Named<FuncVal> {
 
 fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    let Ok(ctx) = ctx.get_variables_mut() else {
         return Val::default();
     };
     ctx.remove(s).unwrap_or_default()
@@ -335,6 +341,9 @@ fn assign_any(ctx: MutFnCtx, binding: Binding<Symbol>, val: Val) -> Val {
         val,
         invariant: binding.extra.invariant,
     };
+    let Ok(ctx) = ctx.get_variables_mut() else {
+        return Val::default();
+    };
     let Ok(last) = ctx.put_value(binding.name, ctx_value) else {
         return Val::default();
     };
@@ -439,6 +448,9 @@ fn fn_set_final(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
+    let Ok(ctx) = ctx.get_variables_mut() else {
+        return Val::default();
+    };
     let _ = ctx.set_final(s);
     Val::default()
 }
@@ -453,6 +465,9 @@ fn fn_set_const(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
+    let Ok(ctx) = ctx.get_variables_mut() else {
+        return Val::default();
+    };
     let _ = ctx.set_const(s);
     Val::default()
 }
@@ -465,6 +480,9 @@ fn is_final() -> Named<FuncVal> {
 
 fn fn_is_final(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    let Ok(ctx) = ctx.get_variables() else {
         return Val::default();
     };
     match ctx.is_final(s) {
@@ -482,6 +500,9 @@ fn is_const() -> Named<FuncVal> {
 
 fn fn_is_const(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    let Ok(ctx) = ctx.get_variables() else {
         return Val::default();
     };
     match ctx.is_const(s) {
@@ -505,6 +526,22 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
         Ok(b) => Val::Bool(Bool::new(b)),
         Err(_) => Val::default(),
     }
+}
+
+fn is_unchecked() -> Named<FuncVal> {
+    let input_mode = Mode::default();
+    let output_mode = Mode::default();
+    named_const_fn(
+        "is_unchecked",
+        input_mode,
+        output_mode,
+        true,
+        fn_is_unchecked,
+    )
+}
+
+fn fn_is_unchecked(ctx: ConstFnCtx, _input: Val) -> Val {
+    Val::Bool(Bool::new(ctx.is_unchecked()))
 }
 
 fn get_access() -> Named<FuncVal> {
@@ -573,13 +610,16 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
     let target_ctx = match pair.first {
         Val::Unit(_) => MutFnCtx::Free(FreeCtx),
         Val::Symbol(name) => {
-            let Ok(DynRef { ref1, is_const }) = ctx.get_ref_dyn(name) else {
+            let Ok(ctx) = ctx.get_variables_dyn() else {
+                return Val::default();
+            };
+            let Ok(DynRef { ref1, is_const }) = ctx.ref1.get_ref_dyn(name) else {
                 return Val::default();
             };
             let Val::Ctx(target_ctx) = ref1 else {
                 return Val::default();
             };
-            if is_const {
+            if ctx.is_const || is_const {
                 MutFnCtx::Const(ConstCtx::new(target_ctx))
             } else {
                 MutFnCtx::Mut(MutCtx::new(target_ctx))
@@ -615,12 +655,12 @@ const NONE: &str = "none";
 const FINAL: &str = "final";
 const CONST: &str = "constant";
 
-const SOLVER: &str = "solver";
 const VARIABLES: &str = "variables";
+const UNCHECKED: &str = "unchecked";
+const SOLVER: &str = "solver";
 
 fn ctx_new() -> Named<FuncVal> {
     let mut map = Map::default();
-    map.insert(symbol(SOLVER), Mode::default());
     map.insert(
         symbol(VARIABLES),
         map_mode(
@@ -630,6 +670,8 @@ fn ctx_new() -> Named<FuncVal> {
             BasicMode::default(),
         ),
     );
+    map.insert(symbol(UNCHECKED), Mode::default());
+    map.insert(symbol(SOLVER), Mode::default());
     let input_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
     let output_mode = Mode::default();
     named_free_fn("context", input_mode, output_mode, true, fn_ctx_new)
@@ -639,11 +681,6 @@ fn fn_ctx_new(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let solver = match map_remove(&mut map, SOLVER) {
-        Val::Unit(_) => None,
-        Val::Func(solver) => Some(solver),
-        _ => return Val::default(),
-    };
     let variables = match map_remove(&mut map, VARIABLES) {
         Val::Unit(_) => Map::default(),
         Val::Map(map) => Map::from(map),
@@ -652,12 +689,23 @@ fn fn_ctx_new(input: Val) -> Val {
     let Some(variables) = parse_ctx_map(variables) else {
         return Val::default();
     };
-    Val::Ctx(Ctx::new(variables, solver).into())
+    let unchecked = match map_remove(&mut map, UNCHECKED) {
+        Val::Unit(_) => false,
+        Val::Bool(b) => b.bool(),
+        _ => return Val::default(),
+    };
+    let variables = CtxMap::new(variables, unchecked);
+    let solver = match map_remove(&mut map, SOLVER) {
+        Val::Unit(_) => None,
+        Val::Func(solver) => Some(solver),
+        _ => return Val::default(),
+    };
+    let ctx = Ctx::new(variables, solver);
+    Val::Ctx(ctx.into())
 }
 
-fn parse_ctx_map(map: Map<Val, Val>) -> Option<CtxMap> {
-    let map = map
-        .into_iter()
+fn parse_ctx_map(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
+    map.into_iter()
         .map(|(key, val)| {
             let Val::Symbol(name) = key else {
                 return None;
@@ -665,8 +713,7 @@ fn parse_ctx_map(map: Map<Val, Val>) -> Option<CtxMap> {
             let ctx_value = parse_ctx_value(val)?;
             Some((name, ctx_value))
         })
-        .collect::<Option<Map<Symbol, CtxValue>>>()?;
-    Some(CtxMap::new(map))
+        .collect()
 }
 
 fn parse_ctx_value(val: Val) -> Option<CtxValue> {
@@ -693,7 +740,6 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
 fn ctx_repr() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let mut map = Map::default();
-    map.insert(symbol(SOLVER), Mode::default());
     map.insert(
         symbol(VARIABLES),
         map_mode(
@@ -703,6 +749,8 @@ fn ctx_repr() -> Named<FuncVal> {
             BasicMode::default(),
         ),
     );
+    map.insert(symbol(UNCHECKED), Mode::default());
+    map.insert(symbol(SOLVER), Mode::default());
     let output_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
     named_free_fn(
         "context.represent",
@@ -717,14 +765,18 @@ fn fn_ctx_repr(input: Val) -> Val {
     let Val::Ctx(ctx) = input else {
         return Val::default();
     };
-    let ctx = Ctx::from(ctx);
+    let ctx = Ctx::from(ctx).destruct();
     let mut map = Map::default();
-    if let Some(solver) = ctx.solver {
-        map.insert(symbol(SOLVER), Val::Func(solver));
-    };
+    let unchecked = ctx.variables.is_unchecked();
+    if unchecked {
+        map.insert(symbol(UNCHECKED), Val::Bool(Bool::t()));
+    }
     if let Some(variables) = generate_ctx_map(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);
     }
+    if let Some(solver) = ctx.solver {
+        map.insert(symbol(SOLVER), Val::Func(solver));
+    };
     Val::Map(map.into())
 }
 
@@ -783,5 +835,6 @@ fn fn_ctx_this(ctx: ConstFnCtx, _input: Val) -> Val {
     let ConstFnCtx::Const(ctx) = ctx else {
         return Val::default();
     };
-    Val::Ctx(CtxVal::from(ctx.get_ctx_ref().clone()))
+    let ctx = ctx.get_ctx_ref().clone();
+    Val::Ctx(CtxVal::from(ctx))
 }
