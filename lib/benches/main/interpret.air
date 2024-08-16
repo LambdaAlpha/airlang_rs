@@ -10,9 +10,10 @@
     }
   },
   f = function ! {
+    input_name : .n,
     body : ; ! [
       sum = 0,
-      the_input for i : [
+      n for i : [
         (0 == i % 3) continue .,
         sum = sum + i,
       ],

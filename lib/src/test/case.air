@@ -44,7 +44,7 @@ true
 =====
 ; [
     map_mode = function ! {
-        body : the_input,
+        body : i,
         input_mode : {map : {} : id : eval},
     },
     m = map_mode ! {
@@ -60,7 +60,7 @@ true
 ; [
     m = case.represent ! case.cache ! not '!' true,
     map_mode = function ! {
-        body : the_input,
+        body : i,
         input_mode : {map : {} : id : eval},
     },
     expected = map_mode ! {

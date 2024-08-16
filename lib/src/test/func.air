@@ -1,6 +1,6 @@
 ; [
     f = function ! {
-        body : the_input,
+        body : i,
     },
     f ! not ! true
 ]
@@ -9,7 +9,7 @@ false
 =====
 ; [
     f = function ! {
-        body : $not ! the_input
+        body : $not ! i
     },
     f ! not ! true
 ]
@@ -18,7 +18,7 @@ true
 =====
 ; [
     f = function ! {
-        body : not ! the_input,
+        body : not ! i,
         prelude : context ! {variables :  {: not}},
     },
     f ! not ! true
@@ -39,7 +39,7 @@ true
 =====
 ; [
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : id,
     },
     f ! not ! true
@@ -49,7 +49,7 @@ not true
 =====
 ; [
     f = function ! {
-        body : $not ! the_input,
+        body : $not ! i,
         input_mode : eval,
     },
     f ! not ! true
@@ -59,7 +59,7 @@ true
 =====
 ; [
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : form,
     },
     f ! not ! true
@@ -71,7 +71,7 @@ not true
     a = 1,
     b = 2,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : eval,
     },
     f {a : b}
@@ -82,7 +82,7 @@ not true
 ; [
     b = 1,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : {pair : form : eval},
     },
     a f b
@@ -93,7 +93,7 @@ a : 1
 ; [
     b = 1,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : {pair : form : eval, default : id},
     },
     [a f b, f $a]
@@ -103,7 +103,7 @@ a : 1
 =====
 ; [
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : id,
     },
     f ! not ! false
@@ -114,7 +114,7 @@ not false
 ; [
     a = 1,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : {list : [eval, form] : id},
     },
     f [a, a, a, a, $a, a]
@@ -125,7 +125,7 @@ not false
 ; [
     a = 1,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : {list : [eval, form], default : id},
     },
     f [a, a, a, a, $a, a]
@@ -137,7 +137,7 @@ not false
     a = 1,
     c = 2,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : {map : {a : eval, b : id} : eval : id},
     },
     f {a : a, b : a, c : d}
@@ -149,7 +149,7 @@ not false
     a = 1,
     c = 2,
     f = function ! {
-        body : the_input,
+        body : i,
         input_mode : {map : {a : eval, b : id}, default : id},
     },
     f {a : a, b : a, c : d}
@@ -160,7 +160,7 @@ not false
 ; [
     a = 1,
     f = function ! {
-        body : the_context | ..a,
+        body : c | ..a,
         context_access : .free,
         prelude : context ! {variables : {: |}},
     },
@@ -172,7 +172,7 @@ not false
 ; [
     a = 1,
     f = function ! {
-        body : the_context | ..a,
+        body : c | ..a,
         context_access : .constant,
         prelude : context ! {variables : {: |}},
     },
@@ -184,7 +184,7 @@ not false
 ; [
     a = 1,
     f = function ! {
-        body : the_context | ..a,
+        body : c | ..a,
         context_access : .mutable,
         prelude : context ! {variables : {: |}},
     },
@@ -195,7 +195,7 @@ not false
 =====
 ; [
     f = function ! {
-        body : the_context | = '!' the_input : 2,
+        body : c | = '!' i : 2,
         input_mode : id,
         context_access : .mutable,
         prelude : context ! {
@@ -215,7 +215,7 @@ not false
 =====
 ; [
     f = function ! {
-        body : the_context | = '!' the_input : 2,
+        body : c | = '!' i : 2,
         input_mode : id,
         context_access : .mutable,
         prelude : context ! {
@@ -235,7 +235,7 @@ not false
 =====
 ; [
     f = function ! {
-        body : the_context | = '!' the_input : 2,
+        body : c | = '!' i : 2,
         input_mode : id,
         context_access : .constant,
         prelude : context ! {
@@ -291,26 +291,26 @@ true
 -----
 1
 =====
-function.represent ! function ! {body : the_input}
+function.represent ! function ! {body : i}
 -----
-{body : the_input}
+{body : i}
 =====
 function.represent not
 -----
 {id : not}
 =====
-function.represent ! function ! {body : the_input, context_access : .constant}
+function.represent ! function ! {body : i, context_access : .constant}
 -----
-{body : the_input, context_access : constant}
+{body : i, context_access : constant}
 =====
 function.represent ==
 -----
 {id : ==}
 =====
 function.represent ! function ! {
-    body : i,
-    input_name : .i,
-    context_name : .c,
+    body : in,
+    input_name : .in,
+    context_name : .ctx,
     input_mode : {pair : eval : id},
     output_mode : {pair : form : form},
     context_access : .constant,
@@ -318,9 +318,9 @@ function.represent ! function ! {
 }
 -----
 {
-    body : i,
-    input_name : i,
-    context_name : c,
+    body : in,
+    input_name : in,
+    context_name : ctx,
     input_mode : {pair : eval : id},
     output_mode : {pair : form : form},
     context_access : constant,
@@ -427,9 +427,9 @@ not
 -----
 .
 =====
-; [f = function ! {body : the_input}, function.body .f]
+; [f = function ! {body : i}, function.body .f]
 -----
-the_input
+i
 =====
 function.body .not
 -----
@@ -449,7 +449,7 @@ function.prelude .not
 =====
 ; [f = function ! {}, function.input_name .f]
 -----
-the_input
+i
 =====
 function.input_name .not
 -----
@@ -457,7 +457,7 @@ function.input_name .not
 =====
 ; [f = function ! {context_access : .constant}, function.context_name .f]
 -----
-the_context
+c
 =====
 ; [f = function ! {context_access : .free}, function.context_name .f]
 -----
