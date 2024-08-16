@@ -94,7 +94,7 @@ a : 1
     b = 1,
     f = function ! {
         body : the_input,
-        input_mode : {pair : form : eval, ... : id},
+        input_mode : {pair : form : eval, default : id},
     },
     [a f b, f $a]
 ]
@@ -124,6 +124,17 @@ not false
 =====
 ; [
     a = 1,
+    f = function ! {
+        body : the_input,
+        input_mode : {list : [eval, form], default : id},
+    },
+    f [a, a, a, a, $a, a]
+]
+-----
+[1, a, a, a, $a, a]
+=====
+; [
+    a = 1,
     c = 2,
     f = function ! {
         body : the_input,
@@ -133,6 +144,18 @@ not false
 ]
 -----
 {a : 1, b : a, 2 : d}
+=====
+; [
+    a = 1,
+    c = 2,
+    f = function ! {
+        body : the_input,
+        input_mode : {map : {a : eval, b : id}, default : id},
+    },
+    f {a : a, b : a, c : d}
+]
+-----
+{a : 1, b : a, c : d}
 =====
 ; [
     a = 1,

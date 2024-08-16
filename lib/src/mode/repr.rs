@@ -21,13 +21,14 @@ use crate::{
         PAIR,
     },
     List,
+    ListVal,
     Map,
     MapVal,
     Pair,
     Val,
 };
 
-const DEFAULT: &str = "..";
+const DEFAULT: &str = "default";
 
 pub(crate) fn parse(mode: Val) -> Option<Mode> {
     let mode = match mode {
@@ -115,11 +116,7 @@ pub(crate) fn generate_specialized(mode: &ValMode, default: BasicMode, map: &mut
 
 fn parse_pair(mode: Val, default: BasicMode) -> Option<Pair<Mode, Mode>> {
     if mode.is_unit() {
-        let default = Mode {
-            default,
-            specialized: None,
-        };
-        return Some(Pair::new(default.clone(), default));
+        return Some(default_pair(default));
     }
     let Val::Pair(pair) = mode else {
         return None;
@@ -152,20 +149,29 @@ fn parse_list(mode: Val, default: BasicMode) -> Option<ListMode> {
                 specialized: None,
             },
         }),
+        Val::List(head) => {
+            let head = parse_list_head(head)?;
+            let tail = Mode {
+                default,
+                specialized: None,
+            };
+            Some(ListMode { head, tail })
+        }
         Val::Pair(head_tail) => {
             let head_tail = Pair::from(head_tail);
             let Val::List(head) = head_tail.first else {
                 return None;
             };
-            let head = List::from(head)
-                .into_iter()
-                .map(parse)
-                .collect::<Option<List<_>>>()?;
+            let head = parse_list_head(head)?;
             let tail = parse(head_tail.second)?;
             Some(ListMode { head, tail })
         }
         _ => None,
     }
+}
+
+fn parse_list_head(head: ListVal) -> Option<List<Mode>> {
+    List::from(head).into_iter().map(parse).collect()
 }
 
 pub(crate) fn generate_list(mode: &ListMode, default: BasicMode) -> Option<Val> {
@@ -178,6 +184,9 @@ pub(crate) fn generate_list(mode: &ListMode, default: BasicMode) -> Option<Val> 
     }
     let head: List<Val> = mode.head.iter().map(generate).collect();
     let head = Val::List(head.into());
+    if mode.tail == default {
+        return Some(head);
+    }
     let tail = generate(&mode.tail);
     let pair = Pair::new(head, tail);
     Some(Val::Pair(pair.into()))
@@ -195,6 +204,11 @@ fn parse_map(mode: Val, default: BasicMode) -> Option<MapMode> {
                 else1: Pair::new(default.clone(), default),
             })
         }
+        Val::Map(some) => {
+            let some = parse_map_some(some)?;
+            let else1 = default_pair(default);
+            Some(MapMode { some, else1 })
+        }
         Val::Pair(some_else) => {
             let some_else = Pair::from(some_else);
             let Val::Map(some) = some_else.first else {
@@ -203,13 +217,7 @@ fn parse_map(mode: Val, default: BasicMode) -> Option<MapMode> {
             let Val::Pair(else1) = some_else.second else {
                 return None;
             };
-            let some = Map::from(some)
-                .into_iter()
-                .map(|(k, v)| {
-                    let mode = parse(v)?;
-                    Some((k, mode))
-                })
-                .collect::<Option<Map<_, _>>>()?;
+            let some = parse_map_some(some)?;
             let else1 = Pair::from(else1);
             let key = parse(else1.first)?;
             let value = parse(else1.second)?;
@@ -218,6 +226,16 @@ fn parse_map(mode: Val, default: BasicMode) -> Option<MapMode> {
         }
         _ => None,
     }
+}
+
+fn parse_map_some(some: MapVal) -> Option<Map<Val, Mode>> {
+    Map::from(some)
+        .into_iter()
+        .map(|(k, v)| {
+            let mode = parse(v)?;
+            Some((k, mode))
+        })
+        .collect()
 }
 
 pub(crate) fn generate_map(mode: &MapMode, default: BasicMode) -> Option<Val> {
@@ -237,9 +255,20 @@ pub(crate) fn generate_map(mode: &MapMode, default: BasicMode) -> Option<Val> {
         })
         .collect();
     let some = Val::Map(some.into());
+    if mode.else1.first == default && mode.else1.second == default {
+        return Some(some);
+    }
     let first = generate(&mode.else1.first);
     let second = generate(&mode.else1.second);
     let else1 = Val::Pair(Pair::new(first, second).into());
     let some_else = Pair::new(some, else1);
     Some(Val::Pair(some_else.into()))
+}
+
+fn default_pair(default: BasicMode) -> Pair<Mode, Mode> {
+    let default = Mode {
+        default,
+        specialized: None,
+    };
+    Pair::new(default.clone(), default)
 }
