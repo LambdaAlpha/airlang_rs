@@ -25,16 +25,16 @@ use crate::{
     syntax::{
         is_delimiter,
         maybe_keyword,
-        ASK_INFIX,
+        ASK,
         BYTE_PREFIX,
-        CALL_INFIX,
-        COMMENT_INFIX,
+        CALL,
+        COMMENT,
         FALSE,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
-        PAIR_INFIX,
+        PAIR,
         SEPARATOR,
         SYMBOL_QUOTE,
         TEXT_QUOTE,
@@ -352,7 +352,7 @@ where
     generate_infix(
         first,
         |s, _format, _indent| {
-            s.push_str(PAIR_INFIX);
+            s.push_str(PAIR);
             Ok(())
         },
         second,
@@ -384,7 +384,7 @@ where
         _ => generate_infix(
             &call.func,
             |s, _format, _indent| {
-                s.push_str(CALL_INFIX);
+                s.push_str(CALL);
                 Ok(())
             },
             &call.input,
@@ -408,7 +408,7 @@ where
     generate_infix(
         &ask.func,
         |s, _format, _indent| {
-            s.push_str(ASK_INFIX);
+            s.push_str(ASK);
             Ok(())
         },
         &ask.output,
@@ -553,7 +553,7 @@ where
     generate_infix(
         &comment.note,
         |s, _format, _indent| {
-            s.push_str(COMMENT_INFIX);
+            s.push_str(COMMENT);
             Ok(())
         },
         &comment.value,

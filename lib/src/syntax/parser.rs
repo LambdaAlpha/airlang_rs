@@ -74,18 +74,24 @@ use crate::{
     symbol::Symbol,
     syntax::{
         is_delimiter,
-        ASK_INFIX,
+        ASK,
         BYTE_PREFIX,
-        CALL_INFIX,
-        COMMENT_INFIX,
+        CALL,
+        COMMENT,
         FALSE,
+        LEFT,
+        LEFT_ASK_PREFIX,
+        LEFT_CALL_PREFIX,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
-        PAIR_INFIX,
+        MIDDLE,
+        PAIR,
+        RIGHT,
+        RIGHT_ASK_PREFIX,
+        RIGHT_CALL_PREFIX,
         SEPARATOR,
-        SHIFT_PREFIX,
         SYMBOL_QUOTE,
         TEXT_QUOTE,
         TRUE,
@@ -135,7 +141,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(trim(compose_right_associative));
+    let f = all_consuming(trim(compose_default));
     context("top", f)(src)
 }
 
@@ -191,29 +197,25 @@ where
 
 const RIGHT_ASSOCIATIVE: bool = true;
 const LEFT_ASSOCIATIVE: bool = false;
+const TYPE_CALL: bool = true;
+const TYPE_ASK: bool = false;
 
-fn wrap_left_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn wrap_default<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    wrap::<LEFT_ASSOCIATIVE, _, _>(src)
+    wrap::<RIGHT_ASSOCIATIVE, TYPE_CALL, _, _>(src)
 }
 
-fn wrap_right_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn wrap<'a, const ASSOCIATIVITY: bool, const TYPE: bool, T, E>(
+    src: &'a str,
+) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    wrap::<RIGHT_ASSOCIATIVE, _, _>(src)
-}
-
-fn wrap<'a, const ASSOCIATIVITY: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    let f = delimited_trim(WRAP_LEFT, compose::<ASSOCIATIVITY, _, _>, WRAP_RIGHT);
+    let f = delimited_trim(WRAP_LEFT, compose::<ASSOCIATIVITY, TYPE, _, _>, WRAP_RIGHT);
     context("wrap", f)(src)
 }
 
@@ -228,7 +230,7 @@ where
         LIST_RIGHT => fail,
         MAP_LEFT => |s| map(map1, Token::Default)(s),
         MAP_RIGHT => fail,
-        WRAP_LEFT => |s| map(wrap_right_associative, Token::Default)(s),
+        WRAP_LEFT => |s| map(wrap_default, Token::Default)(s),
         WRAP_RIGHT => fail,
         SEPARATOR => fail,
 
@@ -274,9 +276,37 @@ where
         UNIT => Ok((rest, Token::Default(From::from(Unit)))),
         TRUE => Ok((rest, Token::Default(From::from(Bool::t())))),
         FALSE => Ok((rest, Token::Default(From::from(Bool::f())))),
-        SHIFT_PREFIX => alt((
-            map(wrap_left_associative, Token::Default),
-            map(tokens, Token::Default),
+        MIDDLE => alt((map(no_compose, Token::Default), symbol))(rest),
+        LEFT => alt((
+            map(wrap::<LEFT_ASSOCIATIVE, TYPE_CALL, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        RIGHT => alt((
+            map(wrap::<RIGHT_ASSOCIATIVE, TYPE_CALL, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        CALL => alt((
+            map(wrap::<RIGHT_ASSOCIATIVE, TYPE_CALL, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        ASK => alt((
+            map(wrap::<RIGHT_ASSOCIATIVE, TYPE_ASK, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        LEFT_CALL_PREFIX => alt((
+            map(wrap::<LEFT_ASSOCIATIVE, TYPE_CALL, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        LEFT_ASK_PREFIX => alt((
+            map(wrap::<LEFT_ASSOCIATIVE, TYPE_ASK, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        RIGHT_CALL_PREFIX => alt((
+            map(wrap::<RIGHT_ASSOCIATIVE, TYPE_CALL, _, _>, Token::Default),
+            symbol,
+        ))(rest),
+        RIGHT_ASK_PREFIX => alt((
+            map(wrap::<RIGHT_ASSOCIATIVE, TYPE_ASK, _, _>, Token::Default),
             symbol,
         ))(rest),
         _ => symbol(rest),
@@ -312,12 +342,12 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn tokens<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn no_compose<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let collect = delimited_trim(LIST_LEFT, separated_list0(empty1, token), LIST_RIGHT);
+    let collect = delimited_trim(WRAP_LEFT, separated_list0(empty1, token), WRAP_RIGHT);
     let f = map(collect, |tokens| {
         let list = tokens
             .into_iter()
@@ -328,76 +358,76 @@ where
     context("tokens", f)(src)
 }
 
-fn compose_right_associative<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn compose_default<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    compose::<RIGHT_ASSOCIATIVE, _, _>(src)
+    compose::<RIGHT_ASSOCIATIVE, TYPE_CALL, _, _>(src)
 }
 
-fn compose<'a, const ASSOCIATIVITY: bool, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn compose<'a, const ASSOCIATIVITY: bool, const TYPE: bool, T, E>(
+    src: &'a str,
+) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let delimited_tokens = separated_list1(empty1, token);
-    let f = map_opt(delimited_tokens, compose_tokens::<ASSOCIATIVITY, _>);
+    let f = map_opt(delimited_tokens, compose_tokens::<ASSOCIATIVITY, TYPE, _>);
     context("compose", f)(src)
 }
 
-fn compose_tokens<const ASSOCIATIVITY: bool, T: ParseRepr>(tokens: Vec<Token<T>>) -> Option<T> {
+fn compose_tokens<const ASSOCIATIVITY: bool, const TYPE: bool, T: ParseRepr>(
+    tokens: Vec<Token<T>>,
+) -> Option<T> {
     let len = tokens.len();
     let mut iter = tokens.into_iter();
     if len == 2 {
         let func = iter.next().unwrap();
         let input = iter.next().unwrap();
-        return compose_two(func, input);
+        return compose_two::<TYPE, _>(func, input);
     } else if len % 2 == 0 {
         return None;
     }
     if ASSOCIATIVITY == RIGHT_ASSOCIATIVE {
-        compose_many::<RIGHT_ASSOCIATIVE, _, _>(iter.rev())
+        compose_many::<RIGHT_ASSOCIATIVE, TYPE, _, _>(iter.rev())
     } else {
-        compose_many::<LEFT_ASSOCIATIVE, _, _>(iter)
+        compose_many::<LEFT_ASSOCIATIVE, TYPE, _, _>(iter)
     }
 }
 
-fn compose_two<T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
+fn compose_two<const TYPE: bool, T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
     let input = input.into_repr();
     let repr = match func {
         Token::Unquote(s) => match &*s {
-            PAIR_INFIX => {
+            PAIR => {
                 let pair = Pair::new(input.clone(), input);
                 From::from(pair)
             }
-            CALL_INFIX => {
+            CALL => {
                 let call = Call::new(input.clone(), input);
                 From::from(call)
             }
-            ASK_INFIX => {
+            ASK => {
                 let ask = Ask::new(input.clone(), input);
                 From::from(ask)
             }
-            COMMENT_INFIX => {
+            COMMENT => {
                 let comment = Comment::new(input.clone(), input);
                 From::from(comment)
             }
             _ => {
                 let func = From::from(s);
-                let call = Call::new(func, input);
-                From::from(call)
+                compose_type::<TYPE, _>(func, input)
             }
         },
-        Token::Default(func) => {
-            let call = Call::new(func, input);
-            From::from(call)
-        }
+        Token::Default(func) => compose_type::<TYPE, _>(func, input),
     };
     Some(repr)
 }
 
-fn compose_many<const ASSOCIATIVITY: bool, T, I>(mut iter: I) -> Option<T>
+fn compose_many<const ASSOCIATIVITY: bool, const TYPE: bool, T, I>(mut iter: I) -> Option<T>
 where
     T: ParseRepr,
     I: Iterator<Item = Token<T>>,
@@ -409,31 +439,31 @@ where
         };
         let last = iter.next()?.into_repr();
         let repr = if ASSOCIATIVITY == RIGHT_ASSOCIATIVE {
-            compose_infix(last, middle, first)
+            compose_infix::<TYPE, _>(last, middle, first)
         } else {
-            compose_infix(first, middle, last)
+            compose_infix::<TYPE, _>(first, middle, last)
         };
         first = repr;
     }
     Some(first)
 }
 
-fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
+fn compose_infix<const TYPE: bool, T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
     match middle {
         Token::Unquote(s) => match &*s {
-            PAIR_INFIX => {
+            PAIR => {
                 let pair = Pair::new(left, right);
                 From::from(pair)
             }
-            CALL_INFIX => {
+            CALL => {
                 let call = Call::new(left, right);
                 From::from(call)
             }
-            ASK_INFIX => {
+            ASK => {
                 let ask = Ask::new(left, right);
                 From::from(ask)
             }
-            COMMENT_INFIX => {
+            COMMENT => {
                 let comment = Comment::new(left, right);
                 From::from(comment)
             }
@@ -441,16 +471,24 @@ fn compose_infix<T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
                 let middle = From::from(s);
                 let pair = Pair::new(left, right);
                 let pair = From::from(pair);
-                let infix = Call::new(middle, pair);
-                From::from(infix)
+                compose_type::<TYPE, _>(middle, pair)
             }
         },
         Token::Default(middle) => {
             let pair = Pair::new(left, right);
             let pair = From::from(pair);
-            let infix = Call::new(middle, pair);
-            From::from(infix)
+            compose_type::<TYPE, _>(middle, pair)
         }
+    }
+}
+
+fn compose_type<const TYPE: bool, T: ParseRepr>(func: T, input: T) -> T {
+    if TYPE == TYPE_CALL {
+        let repr = Call::new(func, input);
+        From::from(repr)
+    } else {
+        let repr = Ask::new(func, input);
+        From::from(repr)
     }
 }
 
@@ -489,11 +527,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(
-        compose_right_associative,
-        char1(SEPARATOR),
-        compose_right_associative,
-    );
+    let items = items(compose_default, char1(SEPARATOR), compose_default);
     let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
@@ -515,7 +549,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = map(compose_right_associative, |repr: T| {
+    let f = map(compose_default, |repr: T| {
         repr.try_into_pair()
             .unwrap_or_else(|repr| (repr, From::from(Unit)))
     });

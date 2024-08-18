@@ -22,7 +22,7 @@ use crate::{
         Named,
         Prelude,
     },
-    syntax::ASK_INFIX,
+    syntax::ASK,
     types::either::Either,
     val::func::FuncVal,
     Ask,
@@ -74,7 +74,7 @@ impl Prelude for AskPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(ASK_INFIX, input_mode, output_mode, true, fn_new)
+    named_free_fn(ASK, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {

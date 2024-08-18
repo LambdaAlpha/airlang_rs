@@ -14,7 +14,7 @@ use crate::{
         Named,
         Prelude,
     },
-    syntax::PAIR_INFIX,
+    syntax::PAIR,
     types::either::Either,
     val::{
         func::FuncVal,
@@ -60,7 +60,7 @@ impl Prelude for PairPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(PAIR_INFIX, input_mode, output_mode, true, fn_new)
+    named_free_fn(PAIR, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {

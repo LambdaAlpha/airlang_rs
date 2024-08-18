@@ -39,11 +39,19 @@ pub(crate) const BYTE_PREFIX: char = '#';
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
-pub(crate) const SHIFT_PREFIX: &str = "^";
-pub(crate) const COMMENT_INFIX: &str = "@";
-pub(crate) const PAIR_INFIX: &str = ":";
-pub(crate) const CALL_INFIX: &str = "!";
-pub(crate) const ASK_INFIX: &str = "?";
+
+pub(crate) const MIDDLE: &str = "^";
+pub(crate) const LEFT: &str = "<";
+pub(crate) const RIGHT: &str = ">";
+pub(crate) const LEFT_CALL_PREFIX: &str = "<!";
+pub(crate) const LEFT_ASK_PREFIX: &str = "<?";
+pub(crate) const RIGHT_CALL_PREFIX: &str = ">!";
+pub(crate) const RIGHT_ASK_PREFIX: &str = ">?";
+
+pub(crate) const COMMENT: &str = "@";
+pub(crate) const PAIR: &str = ":";
+pub(crate) const CALL: &str = "!";
+pub(crate) const ASK: &str = "?";
 
 #[derive(Debug)]
 pub struct ParseError {
@@ -78,10 +86,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn maybe_keyword(s: &str) -> bool {
-    matches!(
-        s,
-        UNIT | TRUE | FALSE | COMMENT_INFIX | PAIR_INFIX | CALL_INFIX | ASK_INFIX
-    )
+    matches!(s, UNIT | TRUE | FALSE | COMMENT | PAIR | CALL | ASK)
 }
 
 impl Display for ParseError {

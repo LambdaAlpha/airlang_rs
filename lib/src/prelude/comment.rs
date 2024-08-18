@@ -15,7 +15,7 @@ use crate::{
         Named,
         Prelude,
     },
-    syntax::COMMENT_INFIX,
+    syntax::COMMENT,
     transformer::input::ByVal,
     types::either::Either,
     Comment,
@@ -67,7 +67,7 @@ impl Prelude for CommentPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(COMMENT_INFIX, input_mode, output_mode, true, fn_new)
+    named_free_fn(COMMENT, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {

@@ -126,6 +126,13 @@ fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
     )))
 }
 
+fn infix_ask(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Ask(Box::new(AskRepr::new(
+        middle,
+        Repr::Pair(Box::new(PairRepr::new(left, right))),
+    )))
+}
+
 const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";
 
