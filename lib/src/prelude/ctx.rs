@@ -83,7 +83,7 @@ pub(crate) struct CtxPrelude {
     pub(crate) ctx_new: Named<FuncVal>,
     pub(crate) ctx_repr: Named<FuncVal>,
     pub(crate) ctx_prelude: Named<FuncVal>,
-    pub(crate) ctx_this: Named<FuncVal>,
+    pub(crate) ctx_self: Named<FuncVal>,
 }
 
 impl Default for CtxPrelude {
@@ -106,7 +106,7 @@ impl Default for CtxPrelude {
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
             ctx_prelude: ctx_prelude(),
-            ctx_this: ctx_this(),
+            ctx_self: ctx_self(),
         }
     }
 }
@@ -130,7 +130,7 @@ impl Prelude for CtxPrelude {
         self.ctx_new.put(m);
         self.ctx_repr.put(m);
         self.ctx_prelude.put(m);
-        self.ctx_this.put(m);
+        self.ctx_self.put(m);
     }
 }
 
@@ -633,7 +633,7 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("::", input_mode, output_mode, false, fn_ctx_in_ctx_out)
+    named_free_fn("|:", input_mode, output_mode, false, fn_ctx_in_ctx_out)
 }
 
 fn fn_ctx_in_ctx_out(input: Val) -> Val {
@@ -825,13 +825,13 @@ fn fn_ctx_prelude(_input: Val) -> Val {
     Val::Ctx(CtxVal::from(initial_ctx()))
 }
 
-fn ctx_this() -> Named<FuncVal> {
+fn ctx_self() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_const_fn("this", input_mode, output_mode, true, fn_ctx_this)
+    named_const_fn("self", input_mode, output_mode, true, fn_ctx_self)
 }
 
-fn fn_ctx_this(ctx: ConstFnCtx, _input: Val) -> Val {
+fn fn_ctx_self(ctx: ConstFnCtx, _input: Val) -> Val {
     let ConstFnCtx::Const(ctx) = ctx else {
         return Val::default();
     };

@@ -304,7 +304,7 @@ true
 -----
 3 : 2
 =====
-; [(c : a) = (context ! {variables : {: =, a : 1}}) :: = '!' .a : 2, [c | .a, &a]]
+; [(c : a) = (context ! {variables : {: =, a : 1}}) |: = '!' .a : 2, [c | .a, &a]]
 -----
 [2, 1]
 =====
@@ -315,7 +315,7 @@ true
 -----
 1
 =====
-. | this '!' .
+. | self '!' .
 -----
 .
 =====
@@ -359,10 +359,10 @@ true
 -----
 false
 =====
-; [a = 1, b = this ! ., b | .a]
+; [a = 1, b = self ! ., b | .a]
 -----
 1
 =====
-; [a = this ! ., b = 1, a | is_null '!' .b]
+; [a = self ! ., b = 1, a | is_null '!' .b]
 -----
 true
