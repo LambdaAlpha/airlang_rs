@@ -36,7 +36,7 @@ use crate::{
     mode::SYMBOL_READ_PREFIX,
     prelude::{
         named_const_fn,
-        named_free_fn,
+        named_static_fn,
         Named,
         Prelude,
     },
@@ -99,7 +99,7 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("any", input_mode, output_mode, true, fn_any)
+    named_static_fn("any", input_mode, output_mode, true, fn_any)
 }
 
 fn fn_any(input: Val) -> Val {
@@ -218,37 +218,28 @@ where
     F: FnOnce(Option<&Val>) -> T,
 {
     match v {
-        Val::Symbol(s) => match s.chars().next() {
-            Some(Symbol::ID_PREFIX) => {
+        Val::Symbol(s) => {
+            let prefix = s.chars().next();
+            if let Some(Symbol::ID_PREFIX) = prefix {
                 let s = Symbol::from_str(&s[1..]);
-                f(Some(&Val::Symbol(s)))
+                return f(Some(&Val::Symbol(s)));
             }
-            Some(SYMBOL_READ_PREFIX) => {
-                let Some(ctx) = ctx else {
-                    return f(None);
-                };
-                let Ok(ctx) = ctx.get_variables() else {
-                    return f(None);
-                };
-                let s = Symbol::from_str(&s[1..]);
-                let Ok(val) = ctx.get_ref(s) else {
-                    return f(None);
-                };
-                f(Some(val))
-            }
-            _ => {
-                let Some(ctx) = ctx else {
-                    return f(None);
-                };
-                let Ok(ctx) = ctx.get_variables() else {
-                    return f(None);
-                };
-                let Ok(val) = ctx.get_ref(s.clone()) else {
-                    return f(None);
-                };
-                f(Some(val))
-            }
-        },
+            let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                Symbol::from_str(&s[1..])
+            } else {
+                s.clone()
+            };
+            let Some(ctx) = ctx else {
+                return f(None);
+            };
+            let Ok(ctx) = ctx.get_variables() else {
+                return f(None);
+            };
+            let Ok(val) = ctx.get_ref(s) else {
+                return f(None);
+            };
+            f(Some(val))
+        }
         val => f(Some(val)),
     }
 }

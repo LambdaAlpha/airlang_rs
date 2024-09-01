@@ -4,7 +4,6 @@ use crate::{
         CtxMeta,
         CtxRef,
     },
-    transformer::Transformer,
     val::func::FuncVal,
     AnswerVal,
     Ask,
@@ -16,13 +15,16 @@ where
     Ctx: CtxMeta<'a>,
 {
     let none = AnswerVal::from(Answer::None);
-    let Ok(solver) = ctx.reborrow().get_solver() else {
+    let Ok(solver) = ctx.reborrow().get_solver_dyn() else {
         return none;
     };
-    let solver = solver.clone();
     let ask = Ask::new(Val::Func(func.clone()), output.clone());
     let ask = Val::Ask(ask.into());
-    let answer = solver.transform(ctx, ask);
+    let answer = if solver.is_const {
+        solver.ref1.transform(ask)
+    } else {
+        solver.ref1.transform_mut(ask)
+    };
     let Val::Answer(answer) = answer else {
         return none;
     };

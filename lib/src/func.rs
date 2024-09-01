@@ -36,33 +36,33 @@ pub struct Func<P, C> {
     pub(crate) input_mode: Mode,
     pub(crate) output_mode: Mode,
     pub(crate) cacheable: bool,
-    pub(crate) transformer: FuncImpl<Primitive<P>, Composed<C>>,
+    pub(crate) transformer: FuncImpl<Primitive<P>, Composite<C>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum FuncImpl<P, C> {
     Primitive(P),
-    Composed(C),
+    Composite(C),
 }
 
 #[derive(Clone)]
-pub(crate) struct Primitive<Fn> {
+pub(crate) struct Primitive<Ext> {
     is_extension: bool,
     id: Symbol,
-    fn1: Fn,
+    ext: Ext,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct Composed<C> {
+pub(crate) struct Composite<Ext> {
     pub(crate) body: Val,
     pub(crate) prelude: Ctx,
     pub(crate) input_name: Symbol,
-    pub(crate) ctx: C,
+    pub(crate) ext: Ext,
 }
 
 impl<P, C> Transformer<Val, Val> for Func<P, C>
 where
-    FuncImpl<Primitive<P>, Composed<C>>: Transformer<Val, Val>,
+    FuncImpl<Primitive<P>, Composite<C>>: Transformer<Val, Val>,
 {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
@@ -79,16 +79,16 @@ impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> f
     {
         match self {
             FuncImpl::Primitive(p) => p.transform(ctx, input),
-            FuncImpl::Composed(c) => c.transform(ctx, input),
+            FuncImpl::Composite(c) => c.transform(ctx, input),
         }
     }
 }
 
-fn eval_free(mut prelude: Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
+fn eval_free(prelude: &mut Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
     let _ = prelude
         .variables_mut()
         .put_value(input_name, CtxValue::new(input));
-    Eval.transform(MutCtx::new(&mut prelude), body)
+    Eval.transform(MutCtx::new(prelude), body)
 }
 
 fn eval_aware(
@@ -162,17 +162,17 @@ impl<P, C> Func<P, C> {
         }
     }
 
-    pub(crate) fn new_composed(
+    pub(crate) fn new_composite(
         input_mode: Mode,
         output_mode: Mode,
         cacheable: bool,
-        f: Composed<C>,
+        f: Composite<C>,
     ) -> Self {
         Self {
             input_mode,
             output_mode,
             cacheable,
-            transformer: FuncImpl::Composed(f),
+            transformer: FuncImpl::Composite(f),
         }
     }
 
@@ -188,7 +188,7 @@ impl<P, C> Func<P, C> {
         self.cacheable
     }
 
-    pub(crate) fn transformer(&self) -> &FuncImpl<Primitive<P>, Composed<C>> {
+    pub(crate) fn transformer(&self) -> &FuncImpl<Primitive<P>, Composite<C>> {
         &self.transformer
     }
 
@@ -210,22 +210,22 @@ impl<P, C> Func<P, C> {
         Some(p.is_extension)
     }
 
-    pub(crate) fn composed_body(&self) -> Option<&Val> {
-        let FuncImpl::Composed(c) = &self.transformer else {
+    pub(crate) fn composite_body(&self) -> Option<&Val> {
+        let FuncImpl::Composite(c) = &self.transformer else {
             return None;
         };
         Some(&c.body)
     }
 
-    pub(crate) fn composed_prelude(&self) -> Option<&Ctx> {
-        let FuncImpl::Composed(c) = &self.transformer else {
+    pub(crate) fn composite_prelude(&self) -> Option<&Ctx> {
+        let FuncImpl::Composite(c) = &self.transformer else {
             return None;
         };
         Some(&c.prelude)
     }
 
-    pub(crate) fn composed_input_name(&self) -> Option<Symbol> {
-        let FuncImpl::Composed(c) = &self.transformer else {
+    pub(crate) fn composite_input_name(&self) -> Option<Symbol> {
+        let FuncImpl::Composite(c) = &self.transformer else {
             return None;
         };
         Some(c.input_name.clone())
@@ -235,7 +235,7 @@ impl<P, C> Func<P, C> {
 impl<P, C> PartialEq for Func<P, C>
 where
     Primitive<P>: PartialEq,
-    Composed<C>: PartialEq,
+    Composite<C>: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.input_mode == other.input_mode
@@ -247,14 +247,14 @@ where
 impl<P, C> Eq for Func<P, C>
 where
     Primitive<P>: Eq,
-    Composed<C>: Eq,
+    Composite<C>: Eq,
 {
 }
 
 impl<P, C> Hash for Func<P, C>
 where
     Primitive<P>: Hash,
-    Composed<C>: Hash,
+    Composite<C>: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.input_mode.hash(state);
@@ -295,6 +295,8 @@ impl<C> Primitive<C> {
 }
 
 pub(crate) mod free;
+
+pub(crate) mod static1;
 
 pub(crate) mod const1;
 

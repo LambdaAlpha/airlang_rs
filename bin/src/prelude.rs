@@ -5,7 +5,7 @@ use airlang::{
     ConstFn,
     ConstFunc,
     ConstFuncVal,
-    FreeFn,
+    FreeFnExt,
     FreeFunc,
     FreeFuncVal,
     FuncVal,
@@ -20,6 +20,9 @@ use airlang::{
     MutFunc,
     MutFuncVal,
     Pair,
+    StaticFn,
+    StaticFunc,
+    StaticFuncVal,
     Symbol,
     Val,
     ValMode,
@@ -73,12 +76,13 @@ impl<T: Into<Val> + Clone> Named<T> {
     }
 }
 
+#[allow(unused)]
 fn named_free_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
     cacheable: bool,
-    func: impl FreeFn + 'static,
+    func: impl FreeFnExt + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
     let func = FreeFunc::new(
@@ -86,10 +90,29 @@ fn named_free_fn(
         output_mode,
         cacheable,
         name_symbol,
-        Rc::new(func),
+        Box::new(func),
     );
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
+}
+
+fn named_static_fn(
+    name: &'static str,
+    input_mode: Mode,
+    output_mode: Mode,
+    cacheable: bool,
+    func: impl StaticFn + 'static,
+) -> Named<FuncVal> {
+    let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
+    let func = StaticFunc::new(
+        input_mode,
+        output_mode,
+        cacheable,
+        name_symbol,
+        Rc::new(func),
+    );
+    let func_val = StaticFuncVal::from(func);
+    Named::new(name, FuncVal::Static(func_val))
 }
 
 #[allow(unused)]

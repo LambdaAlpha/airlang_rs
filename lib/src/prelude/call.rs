@@ -16,8 +16,8 @@ use crate::{
     prelude::{
         form_mode,
         named_const_fn,
-        named_free_fn,
         named_mut_fn,
+        named_static_fn,
         pair_mode,
         Named,
         Prelude,
@@ -74,7 +74,7 @@ impl Prelude for CallPrelude {
 fn new() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(CALL, input_mode, output_mode, true, fn_new)
+    named_static_fn(CALL, input_mode, output_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {

@@ -5,7 +5,7 @@ use crate::{
     func::{
         eval_aware,
         eval_free,
-        Composed,
+        Composite,
         Func,
         FuncImpl,
         Primitive,
@@ -24,30 +24,35 @@ pub trait ConstFn {
     fn call(&self, ctx: ConstFnCtx, input: Val) -> Val;
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ConstInfo {
-    pub(crate) name: Symbol,
+#[derive(Clone)]
+pub struct ConstPrimitiveExt {
+    pub(crate) fn1: Rc<dyn ConstFn>,
 }
 
-pub type ConstFunc = Func<Rc<dyn ConstFn>, ConstInfo>;
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct ConstCompositeExt {
+    pub(crate) ctx_name: Symbol,
+}
 
-impl Transformer<Val, Val> for Primitive<Rc<dyn ConstFn>> {
+pub type ConstFunc = Func<ConstPrimitiveExt, ConstCompositeExt>;
+
+impl Transformer<Val, Val> for Primitive<ConstPrimitiveExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.fn1.call(ctx.for_const_fn(), input)
+        self.ext.fn1.call(ctx.for_const_fn(), input)
     }
 }
 
-impl Transformer<Val, Val> for Composed<ConstInfo> {
+impl Transformer<Val, Val> for Composite<ConstCompositeExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match ctx.for_const_fn() {
             ConstFnCtx::Free(_ctx) => eval_free(
-                self.prelude.clone(),
+                &mut self.prelude.clone(),
                 input,
                 self.input_name.clone(),
                 self.body.clone(),
@@ -57,7 +62,7 @@ impl Transformer<Val, Val> for Composed<ConstInfo> {
                     eval_aware(
                         self.prelude.clone(),
                         ctx,
-                        self.ctx.name.clone(),
+                        self.ext.ctx_name.clone(),
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
@@ -82,7 +87,7 @@ impl ConstFunc {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
-            fn1,
+            ext: ConstPrimitiveExt { fn1 },
         });
         Self {
             input_mode,
@@ -93,12 +98,12 @@ impl ConstFunc {
     }
 }
 
-impl Primitive<Rc<dyn ConstFn>> {
+impl Primitive<ConstPrimitiveExt> {
     pub(crate) fn new(id: &str, f: impl ConstFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            fn1: Rc::new(f),
+            ext: ConstPrimitiveExt { fn1: Rc::new(f) },
         }
     }
 }

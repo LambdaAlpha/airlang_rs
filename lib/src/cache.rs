@@ -3,7 +3,6 @@ use std::ops::Deref;
 use crate::{
     case::Case,
     ctx::ref1::CtxMeta,
-    transformer::Transformer,
     FuncVal,
     Val,
 };

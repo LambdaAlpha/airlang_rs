@@ -27,6 +27,10 @@ use crate::{
     CallVal,
     Comment,
     CommentVal,
+    ConstCtx,
+    FuncVal,
+    MutCtx,
+    MutFnCtx,
     PairVal,
 };
 
@@ -127,13 +131,62 @@ impl Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        if let Val::Func(func) = &func {
-            let input = func.input_mode().transform(ctx.reborrow(), input);
-            func.transform(ctx, input)
+        match func {
+            Val::Func(mut func) => {
+                let input = func.input_mode().transform(ctx.reborrow(), input);
+                func.transform_mut(ctx, input)
+            }
+            Val::Symbol(s) => self.call_free(ctx, s, input),
+            _ => {
+                let input = self.transform(ctx, input);
+                let call = Call::new(func, input);
+                Val::Call(call.into())
+            }
+        }
+    }
+
+    pub(crate) fn call_free<'a, Ctx>(&self, ctx: Ctx, func_name: Symbol, input: Val) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match ctx.for_mut_fn() {
+            MutFnCtx::Free(_) => Val::default(),
+            MutFnCtx::Const(ctx) => self.call_free_const(ctx, func_name, input),
+            MutFnCtx::Mut(ctx) => self.call_free_mut(ctx, func_name, input),
+        }
+    }
+
+    fn call_free_const(&self, mut ctx: ConstCtx, func_name: Symbol, input: Val) -> Val {
+        let Ok(val) = ctx.reborrow().get_ctx_ref().variables().get_ref(func_name) else {
+            return Val::default();
+        };
+        let Val::Func(FuncVal::Free(func)) = val else {
+            return Val::default();
+        };
+        let mut func = func.clone();
+        let input = func.input_mode().transform(ctx, input);
+        func.transform_mut(input)
+    }
+
+    fn call_free_mut(&self, ctx: MutCtx, func_name: Symbol, input: Val) -> Val {
+        let ctx = ctx.unwrap();
+        let Ok(val) = ctx.variables().get_ref(func_name.clone()) else {
+            return Val::default();
+        };
+        let Val::Func(FuncVal::Free(func)) = val else {
+            return Val::default();
+        };
+        let input = func.input_mode().clone().transform(MutCtx::new(ctx), input);
+        let Ok(val) = ctx.variables_mut().get_ref_dyn(func_name) else {
+            return Val::default();
+        };
+        let Val::Func(FuncVal::Free(func)) = val.ref1 else {
+            return Val::default();
+        };
+        if val.is_const {
+            func.transform(input)
         } else {
-            let input = self.transform(ctx, input);
-            let call = Call::new(func, input);
-            Val::Call(call.into())
+            func.transform_mut(input)
         }
     }
 
@@ -152,8 +205,8 @@ impl Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        if let Val::Func(func) = &func {
-            func.transform(ctx, input)
+        if let Val::Func(mut func) = func {
+            func.transform_mut(ctx, input)
         } else {
             let call = Call::new(func, input);
             Val::Call(call.into())

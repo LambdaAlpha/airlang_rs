@@ -6,7 +6,7 @@ use airlang::{
 };
 
 use crate::prelude::{
-    named_free_fn,
+    named_static_fn,
     Named,
     Prelude,
 };
@@ -30,7 +30,7 @@ impl Prelude for ReplPrelude {
 fn help() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("help", input_mode, output_mode, false, fn_help)
+    named_static_fn("help", input_mode, output_mode, false, fn_help)
 }
 
 const HELP_DOC: &str = "\

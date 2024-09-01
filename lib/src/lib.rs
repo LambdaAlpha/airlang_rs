@@ -29,11 +29,16 @@ pub use self::{
         },
         free::{
             FreeFn,
+            FreeFnExt,
             FreeFunc,
         },
         mut1::{
             MutFn,
             MutFunc,
+        },
+        static1::{
+            StaticFn,
+            StaticFunc,
         },
     },
     int::Int,
@@ -70,6 +75,7 @@ pub use self::{
             FreeFuncVal,
             FuncVal,
             MutFuncVal,
+            StaticFuncVal,
         },
         int::IntVal,
         list::ListVal,

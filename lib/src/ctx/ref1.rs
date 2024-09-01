@@ -5,9 +5,9 @@ use crate::{
         mut1::MutFnCtx,
         DynRef,
     },
+    val::func::FreeFuncVal,
     Ctx,
     CtxError,
-    FuncVal,
 };
 
 pub(crate) trait CtxRef<'a> {
@@ -17,15 +17,15 @@ pub(crate) trait CtxRef<'a> {
 
     fn get_variables_dyn(self) -> Result<DynRef<'a, CtxMap>, CtxError>;
 
-    fn get_solver(self) -> Result<&'a FuncVal, CtxError>;
+    fn get_solver(self) -> Result<&'a FreeFuncVal, CtxError>;
 
     #[allow(unused)]
-    fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError>;
+    fn get_solver_mut(self) -> Result<&'a mut FreeFuncVal, CtxError>;
 
     #[allow(unused)]
-    fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
+    fn get_solver_dyn(self) -> Result<DynRef<'a, FreeFuncVal>, CtxError>;
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError>;
+    fn set_solver(self, solver: Option<FreeFuncVal>) -> Result<(), CtxError>;
 }
 
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {

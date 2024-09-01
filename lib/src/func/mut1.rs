@@ -5,7 +5,7 @@ use crate::{
     func::{
         eval_aware,
         eval_free,
-        Composed,
+        Composite,
         Func,
         FuncImpl,
         Primitive,
@@ -25,30 +25,35 @@ pub trait MutFn {
     fn call(&self, ctx: MutFnCtx, input: Val) -> Val;
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MutInfo {
-    pub(crate) name: Symbol,
+#[derive(Clone)]
+pub struct MutPrimitiveExt {
+    pub(crate) fn1: Rc<dyn MutFn>,
 }
 
-pub type MutFunc = Func<Rc<dyn MutFn>, MutInfo>;
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct MutCompositeExt {
+    pub(crate) ctx_name: Symbol,
+}
 
-impl Transformer<Val, Val> for Primitive<Rc<dyn MutFn>> {
+pub type MutFunc = Func<MutPrimitiveExt, MutCompositeExt>;
+
+impl Transformer<Val, Val> for Primitive<MutPrimitiveExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.fn1.call(ctx.for_mut_fn(), input)
+        self.ext.fn1.call(ctx.for_mut_fn(), input)
     }
 }
 
-impl Transformer<Val, Val> for Composed<MutInfo> {
+impl Transformer<Val, Val> for Composite<MutCompositeExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match ctx.for_mut_fn() {
             MutFnCtx::Free(_ctx) => eval_free(
-                self.prelude.clone(),
+                &mut self.prelude.clone(),
                 input,
                 self.input_name.clone(),
                 self.body.clone(),
@@ -58,7 +63,7 @@ impl Transformer<Val, Val> for Composed<MutInfo> {
                     eval_aware(
                         self.prelude.clone(),
                         ctx,
-                        self.ctx.name.clone(),
+                        self.ext.ctx_name.clone(),
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
@@ -73,7 +78,7 @@ impl Transformer<Val, Val> for Composed<MutInfo> {
                     eval_aware(
                         self.prelude.clone(),
                         ctx,
-                        self.ctx.name.clone(),
+                        self.ext.ctx_name.clone(),
                         Invariant::Final,
                         input,
                         self.input_name.clone(),
@@ -98,7 +103,7 @@ impl MutFunc {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
-            fn1,
+            ext: MutPrimitiveExt { fn1 },
         });
         Self {
             input_mode,
@@ -109,12 +114,12 @@ impl MutFunc {
     }
 }
 
-impl Primitive<Rc<dyn MutFn>> {
+impl Primitive<MutPrimitiveExt> {
     pub(crate) fn new(id: &str, f: impl MutFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            fn1: Rc::new(f),
+            ext: MutPrimitiveExt { fn1: Rc::new(f) },
         }
     }
 }

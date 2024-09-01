@@ -12,8 +12,8 @@ use crate::{
     pair::Pair,
     prelude::{
         named_const_fn,
-        named_free_fn,
         named_mut_fn,
+        named_static_fn,
         Named,
         Prelude,
     },
@@ -465,7 +465,7 @@ fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
 fn new_map() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("map", input_mode, output_mode, true, fn_new_map)
+    named_static_fn("map", input_mode, output_mode, true, fn_new_map)
 }
 
 fn fn_new_map(input: Val) -> Val {
@@ -492,7 +492,7 @@ fn fn_new_map(input: Val) -> Val {
 fn new_set() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("set", input_mode, output_mode, true, fn_new_set)
+    named_static_fn("set", input_mode, output_mode, true, fn_new_set)
 }
 
 fn fn_new_set(input: Val) -> Val {
@@ -507,7 +507,7 @@ fn fn_new_set(input: Val) -> Val {
 fn new_multiset() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("multiset", input_mode, output_mode, true, fn_new_multiset)
+    named_static_fn("multiset", input_mode, output_mode, true, fn_new_multiset)
 }
 
 fn fn_new_multiset(input: Val) -> Val {

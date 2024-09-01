@@ -13,10 +13,10 @@ use crate::{
         },
         DynRef,
     },
+    val::func::FreeFuncVal,
     Ctx,
     CtxError,
     FreeCtx,
-    FuncVal,
     Symbol,
     Val,
 };
@@ -48,21 +48,21 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
         Ok(dyn_ref)
     }
 
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l FreeFuncVal, CtxError> {
         self.0.get_solver()
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FreeFuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FreeFuncVal>, CtxError> {
         let mut dyn_ref = self.0.get_solver_dyn()?;
         dyn_ref.is_const = true;
         Ok(dyn_ref)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 }
@@ -117,28 +117,28 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
         }
     }
 
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l FreeFuncVal, CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.get_solver(),
             ConstFnCtx::Const(ctx) => ctx.get_solver(),
         }
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FreeFuncVal, CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.get_solver_mut(),
             ConstFnCtx::Const(ctx) => ctx.get_solver_mut(),
         }
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FreeFuncVal>, CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.get_solver_dyn(),
             ConstFnCtx::Const(ctx) => ctx.get_solver_dyn(),
         }
     }
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.set_solver(solver),
             ConstFnCtx::Const(ctx) => ctx.set_solver(solver),

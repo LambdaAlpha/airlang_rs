@@ -15,7 +15,7 @@ use airlang::{
 use crate::prelude::{
     form_mode,
     map_mode,
-    named_free_fn,
+    named_static_fn,
     Named,
     Prelude,
 };
@@ -47,7 +47,7 @@ fn call() -> Named<FuncVal> {
         BasicMode::default(),
     );
     let output_mode = Mode::default();
-    named_free_fn("repl.execute", input_mode, output_mode, false, fn_call)
+    named_static_fn("repl.execute", input_mode, output_mode, false, fn_call)
 }
 
 fn fn_call(input: Val) -> Val {

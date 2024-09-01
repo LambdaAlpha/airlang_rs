@@ -16,8 +16,8 @@ use crate::{
     },
     prelude::{
         id_mode,
-        named_free_fn,
         named_mut_fn,
+        named_static_fn,
         Named,
         Prelude,
     },
@@ -59,7 +59,7 @@ impl Prelude for ModePrelude {
 fn id() -> Named<FuncVal> {
     let input_mode = id_mode();
     let output_mode = Mode::default();
-    named_free_fn(ID, input_mode, output_mode, true, fn_id)
+    named_static_fn(ID, input_mode, output_mode, true, fn_id)
 }
 
 fn fn_id(input: Val) -> Val {

@@ -28,10 +28,11 @@ use crate::{
     },
     extension::UnitExt,
     func::{
-        const1::ConstInfo,
-        free::FreeInfo,
-        mut1::MutInfo,
-        Composed,
+        const1::ConstCompositeExt,
+        free::FreeCompositeExt,
+        mut1::MutCompositeExt,
+        static1::StaticCompositeExt,
+        Composite,
         Func,
     },
     int::Int,
@@ -54,7 +55,10 @@ use crate::{
     symbol::Symbol,
     text::Text,
     unit::Unit,
-    val::func::FuncVal,
+    val::func::{
+        FreeFuncVal,
+        FuncVal,
+    },
     Ask,
     Cache,
     Call,
@@ -63,8 +67,8 @@ use crate::{
     Comment,
     ConstFuncVal,
     FreeCtx,
-    FreeFuncVal,
     MutFuncVal,
+    StaticFuncVal,
     Val,
     ValExt,
 };
@@ -231,7 +235,7 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
     let variables = CtxMap::new(variables, rng.gen());
     let solver = if rng.gen() {
-        Some(any_func(rng, depth))
+        Some(any_free_func(rng, depth))
     } else {
         None
     };
@@ -317,47 +321,86 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         };
         func
     } else {
-        let input_mode = any_mode(rng, depth);
-        let output_mode = any_mode(rng, depth);
-        let cacheable = rng.gen();
-        match rng.gen_range(0..3) {
+        match rng.gen_range(0..4) {
             0 => {
-                let transformer = Composed {
-                    body: any_val(rng, depth),
-                    prelude: any_ctx(rng, depth),
-                    input_name: any_symbol(rng),
-                    ctx: FreeInfo {},
-                };
-                let func = Func::new_composed(input_mode, output_mode, cacheable, transformer);
-                FuncVal::Free(FreeFuncVal::from(func))
+                let func = any_free_func(rng, depth);
+                FuncVal::Free(func)
             }
             1 => {
-                let transformer = Composed {
-                    body: any_val(rng, depth),
-                    prelude: any_ctx(rng, depth),
-                    input_name: any_symbol(rng),
-                    ctx: ConstInfo {
-                        name: any_symbol(rng),
-                    },
-                };
-                let func = Func::new_composed(input_mode, output_mode, cacheable, transformer);
-                FuncVal::Const(ConstFuncVal::from(func))
+                let func = any_static_func(rng, depth);
+                FuncVal::Static(func)
             }
             2 => {
-                let transformer = Composed {
-                    body: any_val(rng, depth),
-                    prelude: any_ctx(rng, depth),
-                    input_name: any_symbol(rng),
-                    ctx: MutInfo {
-                        name: any_symbol(rng),
-                    },
-                };
-                let func = Func::new_composed(input_mode, output_mode, cacheable, transformer);
-                FuncVal::Mut(MutFuncVal::from(func))
+                let func = any_const_func(rng, depth);
+                FuncVal::Const(func)
+            }
+            3 => {
+                let func = any_mut_func(rng, depth);
+                FuncVal::Mut(func)
             }
             _ => unreachable!(),
         }
     }
+}
+
+pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
+    let input_mode = any_mode(rng, depth);
+    let output_mode = any_mode(rng, depth);
+    let cacheable = rng.gen();
+    let transformer = Composite {
+        body: any_val(rng, depth),
+        prelude: any_ctx(rng, depth),
+        input_name: any_symbol(rng),
+        ext: FreeCompositeExt {},
+    };
+    let func = Func::new_composite(input_mode, output_mode, cacheable, transformer);
+    FreeFuncVal::from(func)
+}
+
+pub(crate) fn any_static_func(rng: &mut SmallRng, depth: usize) -> StaticFuncVal {
+    let input_mode = any_mode(rng, depth);
+    let output_mode = any_mode(rng, depth);
+    let cacheable = rng.gen();
+    let transformer = Composite {
+        body: any_val(rng, depth),
+        prelude: any_ctx(rng, depth),
+        input_name: any_symbol(rng),
+        ext: StaticCompositeExt {},
+    };
+    let func = Func::new_composite(input_mode, output_mode, cacheable, transformer);
+    StaticFuncVal::from(func)
+}
+
+pub(crate) fn any_const_func(rng: &mut SmallRng, depth: usize) -> ConstFuncVal {
+    let input_mode = any_mode(rng, depth);
+    let output_mode = any_mode(rng, depth);
+    let cacheable = rng.gen();
+    let transformer = Composite {
+        body: any_val(rng, depth),
+        prelude: any_ctx(rng, depth),
+        input_name: any_symbol(rng),
+        ext: ConstCompositeExt {
+            ctx_name: any_symbol(rng),
+        },
+    };
+    let func = Func::new_composite(input_mode, output_mode, cacheable, transformer);
+    ConstFuncVal::from(func)
+}
+
+pub(crate) fn any_mut_func(rng: &mut SmallRng, depth: usize) -> MutFuncVal {
+    let input_mode = any_mode(rng, depth);
+    let output_mode = any_mode(rng, depth);
+    let cacheable = rng.gen();
+    let transformer = Composite {
+        body: any_val(rng, depth),
+        prelude: any_ctx(rng, depth),
+        input_name: any_symbol(rng),
+        ext: MutCompositeExt {
+            ctx_name: any_symbol(rng),
+        },
+    };
+    let func = Func::new_composite(input_mode, output_mode, cacheable, transformer);
+    MutFuncVal::from(func)
 }
 
 pub(crate) fn any_case_val(rng: &mut SmallRng, depth: usize) -> CaseVal {

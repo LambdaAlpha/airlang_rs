@@ -158,10 +158,23 @@ not false
 {a : 1, b : a, c : d}
 =====
 ; [
+    f = function ! {
+        body : ; ! [a = a + 1, a],
+        context_access : .free,
+        static : false,
+        prelude : context ! {variables : {: ;, : =, : +, a : 0}},
+    },
+    [.f ., .f ., .f .]
+]
+-----
+[1, 2, 3]
+=====
+; [
     a = 1,
     f = function ! {
         body : c | ..a,
         context_access : .free,
+        static : true,
         prelude : context ! {variables : {: |}},
     },
     f .
@@ -327,6 +340,16 @@ function.represent ! function ! {
     cacheable : true,
 }
 =====
+function.represent ! function ! {
+    context_access : .free,
+    static : true,
+}
+-----
+{
+    context_access : free,
+    static : true,
+}
+=====
 function.context_access .function
 -----
 free
@@ -415,6 +438,14 @@ function.is_extension .not
 -----
 false
 =====
+function.is_static .not
+-----
+true
+=====
+; [f = function ! {}, function.is_static .f]
+-----
+false
+=====
 function.id .not
 -----
 not
@@ -423,17 +454,9 @@ not
 -----
 not
 =====
-; [f = function ! {}, function.id .f]
------
-.
-=====
 ; [f = function ! {body : i}, function.body .f]
 -----
 i
-=====
-function.body .not
------
-.
 =====
 ; [
     ctx = context ! {variables : {a : 1}},
@@ -443,26 +466,10 @@ function.body .not
 -----
 true
 =====
-function.prelude .not
------
-.
-=====
 ; [f = function ! {}, function.input_name .f]
 -----
 i
 =====
-function.input_name .not
------
-.
-=====
 ; [f = function ! {context_access : .constant}, function.context_name .f]
 -----
 c
-=====
-; [f = function ! {context_access : .free}, function.context_name .f]
------
-.
-=====
-function.context_name .not
------
-.

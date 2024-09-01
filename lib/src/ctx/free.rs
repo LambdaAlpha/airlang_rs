@@ -9,9 +9,9 @@ use crate::{
         },
         DynRef,
     },
+    val::func::FreeFuncVal,
     Ctx,
     CtxError,
-    FuncVal,
 };
 
 pub struct FreeCtx;
@@ -29,19 +29,19 @@ impl<'a> CtxRef<'a> for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver(self) -> Result<&'a FuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'a FreeFuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'a mut FreeFuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'a, FreeFuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

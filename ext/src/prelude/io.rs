@@ -14,8 +14,8 @@ use airlang::{
 };
 
 use crate::prelude::{
-    named_free_fn,
     named_mut_fn,
+    named_static_fn,
     Named,
     Prelude,
 };
@@ -79,7 +79,7 @@ fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
 fn print() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.print", input_mode, output_mode, false, fn_print)
+    named_static_fn("io.print", input_mode, output_mode, false, fn_print)
 }
 
 fn fn_print(input: Val) -> Val {
@@ -93,7 +93,7 @@ fn fn_print(input: Val) -> Val {
 fn print_line() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
+    named_static_fn(
         "io.print_line",
         input_mode,
         output_mode,
@@ -113,7 +113,7 @@ fn fn_print_line(input: Val) -> Val {
 fn flush() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("io.flush", input_mode, output_mode, false, fn_flush)
+    named_static_fn("io.flush", input_mode, output_mode, false, fn_flush)
 }
 
 fn fn_flush(_input: Val) -> Val {
@@ -124,7 +124,7 @@ fn fn_flush(_input: Val) -> Val {
 fn error_print() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
+    named_static_fn(
         "io.error_print",
         input_mode,
         output_mode,
@@ -144,7 +144,7 @@ fn fn_error_print(input: Val) -> Val {
 fn error_print_line() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
+    named_static_fn(
         "io.error_print_line",
         input_mode,
         output_mode,
@@ -164,7 +164,7 @@ fn fn_error_print_line(input: Val) -> Val {
 fn error_flush() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
+    named_static_fn(
         "io.error_flush",
         input_mode,
         output_mode,

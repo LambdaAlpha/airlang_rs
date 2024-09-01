@@ -7,8 +7,8 @@ use crate::{
     },
     prelude::{
         named_const_fn,
-        named_free_fn,
         named_mut_fn,
+        named_static_fn,
         Named,
         Prelude,
     },
@@ -59,7 +59,7 @@ impl Prelude for TextPrelude {
 fn from_utf8() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
+    named_static_fn(
         "text.from_utf8",
         input_mode,
         output_mode,
@@ -83,7 +83,7 @@ fn fn_from_utf8(input: Val) -> Val {
 fn into_utf8() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn(
+    named_static_fn(
         "text.into_utf8",
         input_mode,
         output_mode,
@@ -142,7 +142,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 fn join() -> Named<FuncVal> {
     let input_mode = Mode::default();
     let output_mode = Mode::default();
-    named_free_fn("text.join", input_mode, output_mode, true, fn_join)
+    named_static_fn("text.join", input_mode, output_mode, true, fn_join)
 }
 
 fn fn_join(input: Val) -> Val {

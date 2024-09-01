@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     ctx::{
         map::CtxMap,
@@ -7,9 +5,22 @@ use crate::{
         CtxValue,
     },
     func::{
-        const1::ConstFn,
-        free::FreeFn,
-        mut1::MutFn,
+        const1::{
+            ConstFn,
+            ConstPrimitiveExt,
+        },
+        free::{
+            FreeFnExt,
+            FreePrimitiveExt,
+        },
+        mut1::{
+            MutFn,
+            MutPrimitiveExt,
+        },
+        static1::{
+            StaticFn,
+            StaticPrimitiveExt,
+        },
         Func,
         Primitive,
     },
@@ -52,6 +63,7 @@ use crate::{
             FreeFuncVal,
             FuncVal,
             MutFuncVal,
+            StaticFuncVal,
         },
         Val,
     },
@@ -151,17 +163,31 @@ impl<T: Into<Val> + Clone> Named<T> {
     }
 }
 
+#[allow(unused)]
 fn named_free_fn(
     name: &'static str,
     input_mode: Mode,
     output_mode: Mode,
     cacheable: bool,
-    func: impl FreeFn + 'static,
+    func: impl FreeFnExt + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Rc<dyn FreeFn>>::new(name, func);
+    let primitive = Primitive::<FreePrimitiveExt>::new(name, func);
     let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
+}
+
+fn named_static_fn(
+    name: &'static str,
+    input_mode: Mode,
+    output_mode: Mode,
+    cacheable: bool,
+    func: impl StaticFn + 'static,
+) -> Named<FuncVal> {
+    let primitive = Primitive::<StaticPrimitiveExt>::new(name, func);
+    let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
+    let func_val = StaticFuncVal::from(func);
+    Named::new(name, FuncVal::Static(func_val))
 }
 
 fn named_const_fn(
@@ -171,7 +197,7 @@ fn named_const_fn(
     cacheable: bool,
     func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Rc<dyn ConstFn>>::new(name, func);
+    let primitive = Primitive::<ConstPrimitiveExt>::new(name, func);
     let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
     let func_val = ConstFuncVal::from(func);
     Named::new(name, FuncVal::Const(func_val))
@@ -184,7 +210,7 @@ fn named_mut_fn(
     cacheable: bool,
     func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<Rc<dyn MutFn>>::new(name, func);
+    let primitive = Primitive::<MutPrimitiveExt>::new(name, func);
     let func = Func::new_primitive(input_mode, output_mode, cacheable, primitive);
     let func_val = MutFuncVal::from(func);
     Named::new(name, FuncVal::Mut(func_val))
