@@ -62,25 +62,25 @@ true
 -----
 1
 =====
-; [(a . none) = 1, (is_final a) and not ! is_null ! a]
+; [(a . none) = 1, invariant a]
 -----
-false
+none
 =====
-; [(a . final) = 1, is_final a]
+; [(a . final) = 1, invariant a]
 -----
-true
+final
 =====
-; [(a . constant) = 1, is_constant a]
+; [(a . constant) = 1, invariant a]
 -----
-true
+constant
 =====
-; [(a . {invariant : final}) = 1, is_final a]
+; [(a . {invariant : final}) = 1, invariant a]
 -----
-true
+final
 =====
-; [(a . {}) = 1, (is_final a) and not ! is_null ! a]
+; [(a . {}) = 1, invariant ! a]
 -----
-false
+none
 =====
 ; [(a : b) = 1 : 2, a : b]
 -----
@@ -94,17 +94,17 @@ false
 -----
 [1, 2, 3]
 =====
-; [((a : b) . final) = 1 : 2, (is_final a) and is_final ! b]
+; [((a : b) . final) = 1 : 2, [invariant a, invariant b]]
 -----
-true
+[final, final]
 =====
-; [((a . final) : (b . constant)) = 1 : 2, (is_final a) and is_constant ! b]
+; [((a . final) : (b . constant)) = 1 : 2, [invariant a, invariant b]]
 -----
-true
+[final, constant]
 =====
-; [((a : (b . final)) . constant) = 1 : 2, (is_constant a) and (not ! is_constant ! b) and is_final ! b]
+; [((a : (b . final)) . constant) = 1 : 2, [invariant a, invariant b]]
 -----
-true
+[constant, final]
 =====
 ; [(f a) = 1 ! 2, [f, a]]
 -----
@@ -186,53 +186,21 @@ true
 -----
 1
 =====
-; [a = 1, set_final a, (is_final a) and not ! is_constant ! a]
+; [a = 1, a set_invariant final, invariant a]
 -----
-true
+final
 =====
-; [(a . constant) = 1, set_final a, is_constant a]
+; [(a . constant) = 1, a set_invariant final, invariant a]
 -----
-true
+constant
 =====
-; [a = 1, set_constant a, is_constant a]
+; [a = 1, a set_invariant constant, invariant a]
 -----
-true
+constant
 =====
-; [(a . final) = 1, set_constant a, is_constant a]
+; [(a . final) = 1, a set_invariant constant, invariant a]
 -----
-true
-=====
-is_final a
------
-false
-=====
-; [a = 1, is_final a]
------
-false
-=====
-; [(a . final) = 1, is_final a]
------
-true
-=====
-; [(a . constant) = 1, is_final a]
------
-true
-=====
-is_constant a
------
-false
-=====
-; [a = 1, is_constant a]
------
-false
-=====
-; [(a . final) = 1, is_constant a]
------
-false
-=====
-; [(a . constant) = 1, is_constant a]
------
-true
+constant
 =====
 is_null a
 -----
@@ -242,17 +210,17 @@ true
 -----
 false
 =====
-is_unchecked .
+fallback .
 -----
 false
 =====
-; [c = context ! {unchecked : true}, c | is_unchecked '!' .]
+; [c = context ! {fallback : true}, c | fallback '!' .]
 -----
 true
 =====
-; [c = context ! {unchecked : true}, c | form ! $; ! [(a . constant) $= 1, a $= 2, a]]
+; [c = context ! {fallback : true}, c | form ! $; ! [(a . constant) $= 1, a $set_invariant final, $invariant a]]
 -----
-2
+final
 =====
 access .
 -----
@@ -270,11 +238,11 @@ constant
 -----
 mutable
 =====
-; [set_solver not, solver = get_solver ! ., .not == .solver]
+; [set_solver not, s = solver ! ., .not == .s]
 -----
 true
 =====
-; [set_solver ., solver = get_solver ! ., .solver == .]
+; [set_solver ., s = solver ! ., .s == .]
 -----
 true
 =====

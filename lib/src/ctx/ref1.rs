@@ -26,9 +26,6 @@ pub(crate) trait CtxRef<'a> {
     fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
 
     fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError>;
-
-    #[allow(clippy::wrong_self_convention)]
-    fn is_unchecked(self) -> bool;
 }
 
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {

@@ -63,10 +63,6 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
     fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
         self.0.set_solver(solver)
     }
-
-    fn is_unchecked(self) -> bool {
-        self.0.is_unchecked()
-    }
 }
 
 impl<'l> CtxMeta<'l> for MutCtx<'l> {
@@ -147,14 +143,6 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
             MutFnCtx::Free(ctx) => ctx.set_solver(solver),
             MutFnCtx::Const(ctx) => ctx.set_solver(solver),
             MutFnCtx::Mut(ctx) => ctx.set_solver(solver),
-        }
-    }
-
-    fn is_unchecked(self) -> bool {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.is_unchecked(),
-            MutFnCtx::Const(ctx) => ctx.is_unchecked(),
-            MutFnCtx::Mut(ctx) => ctx.is_unchecked(),
         }
     }
 }

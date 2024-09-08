@@ -11,10 +11,7 @@ use std::{
 use ref1::CtxRef;
 
 use crate::{
-    ctx::map::{
-        CtxMap,
-        CtxMapRef,
-    },
+    ctx::map::CtxMap,
     symbol::Symbol,
     val::Val,
     FuncVal,
@@ -25,7 +22,6 @@ use crate::{
 pub enum CtxError {
     NotFound,
     AccessDenied,
-    Unexpected,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -99,10 +95,6 @@ impl<'l> CtxRef<'l> for &'l mut Ctx {
         self.solver = solver;
         Ok(())
     }
-
-    fn is_unchecked(self) -> bool {
-        self.variables.is_unchecked()
-    }
 }
 
 impl<'l> CtxRef<'l> for &'l Ctx {
@@ -135,10 +127,6 @@ impl<'l> CtxRef<'l> for &'l Ctx {
 
     fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
-    }
-
-    fn is_unchecked(self) -> bool {
-        self.variables.is_unchecked()
     }
 }
 
@@ -236,9 +224,6 @@ impl Display for CtxError {
             }
             CtxError::AccessDenied => {
                 write!(f, "access denied")
-            }
-            CtxError::Unexpected => {
-                write!(f, "unexpected")
             }
         }
     }

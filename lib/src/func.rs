@@ -14,10 +14,7 @@ use crate::{
     ctx::{
         map::CtxMapRef,
         mut1::MutCtx,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
+        ref1::CtxMeta,
         Ctx,
         CtxValue,
         Invariant,
@@ -116,7 +113,7 @@ fn keep_eval_restore(
     ctx_invariant: Invariant,
     body: Val,
 ) -> Val {
-    if !prelude.is_unchecked() && prelude.variables().is_assignable(ctx_name.clone()) {
+    if !prelude.variables().fallback() && prelude.variables().is_assignable(ctx_name.clone()) {
         let caller = own_ctx(ctx);
         keep_ctx(&mut prelude, caller, ctx_name.clone(), ctx_invariant);
         let output = Eval.transform(MutCtx::new(&mut prelude), body);

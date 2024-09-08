@@ -44,10 +44,6 @@ impl<'a> CtxRef<'a> for FreeCtx {
     fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
-
-    fn is_unchecked(self) -> bool {
-        true
-    }
 }
 
 impl<'a> CtxMeta<'a> for FreeCtx {

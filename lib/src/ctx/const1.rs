@@ -65,10 +65,6 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
     fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
-
-    fn is_unchecked(self) -> bool {
-        self.0.is_unchecked()
-    }
 }
 
 impl<'l> CtxMeta<'l> for ConstCtx<'l> {
@@ -146,13 +142,6 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.set_solver(solver),
             ConstFnCtx::Const(ctx) => ctx.set_solver(solver),
-        }
-    }
-
-    fn is_unchecked(self) -> bool {
-        match self {
-            ConstFnCtx::Free(ctx) => ctx.is_unchecked(),
-            ConstFnCtx::Const(ctx) => ctx.is_unchecked(),
         }
     }
 }

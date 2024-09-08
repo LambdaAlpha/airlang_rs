@@ -283,7 +283,7 @@ true
         context_name : .ctx,
         body : ctx $= 2,
         context_access : .constant,
-        prelude : context ! {unchecked : true},
+        prelude : context ! {fallback : true},
     },
     f .,
     a
