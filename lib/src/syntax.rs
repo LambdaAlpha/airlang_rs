@@ -25,6 +25,7 @@ pub(crate) const MAP_RIGHT: char = '}';
 pub(crate) const WRAP_LEFT: char = '(';
 pub(crate) const WRAP_RIGHT: char = ')';
 
+pub(crate) const SPACE: char = ' ';
 pub(crate) const SEPARATOR: char = ',';
 
 pub(crate) const TEXT_QUOTE: char = '"';
@@ -73,7 +74,8 @@ pub fn generate_compact(src: &Repr) -> String {
 pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(
         c,
-        SEPARATOR
+        SPACE
+            | SEPARATOR
             | LIST_LEFT
             | LIST_RIGHT
             | MAP_LEFT

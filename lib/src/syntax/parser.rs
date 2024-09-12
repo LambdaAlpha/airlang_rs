@@ -18,6 +18,7 @@ use nom::{
         anychar,
         char as char1,
         digit1,
+        multispace0,
         multispace1,
     },
     combinator::{
@@ -52,7 +53,6 @@ use nom::{
         terminated,
         tuple,
     },
-    AsChar,
     Finish,
     IResult,
     Parser,
@@ -559,19 +559,15 @@ where
 fn quoted_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let fragment = alt((
-        map(symbol_literal, TextFragment::Literal),
-        map(symbol_escaped_char, TextFragment::Escaped),
-        value(TextFragment::Space(""), symbol_whitespace),
+        map(symbol_literal, StrFragment::Literal),
+        map(symbol_escaped, StrFragment::Escaped),
+        map(symbol_whitespace, StrFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
-        match fragment {
-            TextFragment::Literal(s) => string.push_str(s),
-            TextFragment::Escaped(c) => string.push(c),
-            TextFragment::Space(_s) => {}
-        }
+        fragment.push(&mut string);
         string
     });
     let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
@@ -579,26 +575,32 @@ where
     context("quoted_symbol", f)(src)
 }
 
-fn symbol_escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
+fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = preceded(
         char1('\\'),
         alt((
-            value('\\', char1('\\')),
-            value(SYMBOL_QUOTE, char1(SYMBOL_QUOTE)),
+            value(Some('\\'), char1('\\')),
+            value(Some(' '), char1('_')),
+            value(Some(SYMBOL_QUOTE), char1(SYMBOL_QUOTE)),
+            value(None, multispace1),
         )),
     );
-    context("symbol_escaped_char", f)(src)
+    context("symbol_escaped", f)(src)
 }
 
-// ignore \t, \r, \n and spaces
-fn symbol_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
+// ignore spaces following \n
+fn symbol_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = value((), multispace1);
+    let f = alt((
+        value(&src[0..0], preceded(char1('\n'), multispace0)),
+        value(&src[0..0], char1('\r')),
+        value(&src[0..0], take_while1(|c| c == '\t')),
+    ));
     context("symbol_whitespace", f)(src)
 }
 
@@ -617,16 +619,12 @@ where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let fragment = alt((
-        map(text_literal, TextFragment::Literal),
-        map(text_escaped_char, TextFragment::Escaped),
-        map(text_whitespace, TextFragment::Space),
+        map(text_literal, StrFragment::Literal),
+        map(text_escaped, StrFragment::Escaped),
+        map(text_whitespace, StrFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
-        match fragment {
-            TextFragment::Literal(s) => string.push_str(s),
-            TextFragment::Escaped(c) => string.push(c),
-            TextFragment::Space(s) => string.push_str(s),
-        }
+        fragment.push(&mut string);
         string
     });
     let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
@@ -634,56 +632,43 @@ where
     context("text", f)(src)
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum TextFragment<'a> {
-    Literal(&'a str),
-    Escaped(char),
-    Space(&'a str),
-}
-
-fn text_escaped_char<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
+fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
     let f = preceded(
         char1('\\'),
         alt((
-            unicode,
-            value('\n', char1('n')),
-            value('\r', char1('r')),
-            value('\t', char1('t')),
-            value('\\', char1('\\')),
-            value(TEXT_QUOTE, char1(TEXT_QUOTE)),
-            value(' ', char1(' ')),
-            value(' ', char1('s')),
+            map(unicode, Some),
+            value(Some('\n'), char1('n')),
+            value(Some('\r'), char1('r')),
+            value(Some('\t'), char1('t')),
+            value(Some('\\'), char1('\\')),
+            value(Some(' '), char1('_')),
+            value(Some(TEXT_QUOTE), char1(TEXT_QUOTE)),
+            value(None, multispace1),
         )),
     );
-    context("text_escaped_char", f)(src)
+    context("text_escaped", f)(src)
 }
 
 fn unicode<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let digit = take_while_m_n(1, 6, |c: char| c.is_hex_digit());
+    let digit = take_while_m_n(1, 6, is_hexadecimal);
     let delimited_digit = preceded(char1('u'), delimited_trim(WRAP_LEFT, digit, WRAP_RIGHT));
     let parse_u32 = map_res(delimited_digit, move |hex| u32::from_str_radix(hex, 16));
     let f = map_opt(parse_u32, std::char::from_u32);
     context("unicode", f)(src)
 }
 
-// ignore \t, \r, \n and the spaces around them
+// ignore spaces following \n
 fn text_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = map(multispace1, |s: &str| {
-        if s.chars().all(|c| c == ' ') {
-            s
-        } else {
-            &s[0..0]
-        }
-    });
+    let f = terminated(tag("\n"), multispace0);
     context("text_whitespace", f)(src)
 }
 
@@ -691,9 +676,30 @@ fn text_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let normal = is_not("\"\\ \t\r\n");
+    let normal = is_not("\"\\\n");
     let f = verify(normal, |s: &str| !s.is_empty());
     context("text_literal", f)(src)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum StrFragment<'a> {
+    Literal(&'a str),
+    Escaped(Option<char>),
+    Space(&'a str),
+}
+
+impl<'a> StrFragment<'a> {
+    fn push(self, str: &mut String) {
+        match self {
+            StrFragment::Literal(s) => str.push_str(s),
+            StrFragment::Escaped(c) => {
+                if let Some(c) = c {
+                    str.push(c);
+                }
+            }
+            StrFragment::Space(s) => str.push_str(s),
+        }
+    }
 }
 
 fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>

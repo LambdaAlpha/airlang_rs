@@ -10,6 +10,7 @@ use crate::syntax::{
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         symbol(""),
+        symbol(" "),
         symbol("a"),
         symbol("Abc"),
         symbol("A_BB__CCC_"),
@@ -79,6 +80,8 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("'!"),
         symbol("'?"),
         symbol("'a"),
-        symbol("ab"),
+        symbol("\\"),
+        symbol(" "),
+        symbol(" ab cd"),
     ]
 }
