@@ -142,8 +142,10 @@ fn test_parse(
     expected: impl FnOnce() -> Vec<Repr>,
 ) -> Result<(), Box<dyn Error>> {
     let sources = src.split(MAIN_DELIMITER);
+    let mut expected = expected().into_iter();
 
-    for (s, expected_repr) in sources.zip(expected()) {
+    for s in sources {
+        let expected_repr = expected.next().expect("expected result should exist");
         let real_repr = parse(s).map_err(|e| {
             eprintln!("file {file_name}, case ({s}): parse failed\n{e}");
             e

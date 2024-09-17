@@ -54,5 +54,10 @@ pub fn expected() -> Vec<Repr> {
         ]),
         list(vec![list(vec![int("1"), int("2")]), list(vec![])]),
         list(vec![map(vec![(symbol("a"), symbol("b"))]), map(vec![])]),
+        list(vec![
+            symbol("a"),
+            list(vec![symbol("b"), symbol("c")]),
+            symbol("d"),
+        ]),
     ]
 }
