@@ -357,17 +357,7 @@ impl TryInto<Repr> for Val {
     }
 }
 
-impl ParseRepr for Val {
-    fn try_into_pair(self) -> Result<(Self, Self), Self> {
-        match self {
-            Val::Pair(pair) => {
-                let pair = Pair::from(pair);
-                Ok((pair.first, pair.second))
-            }
-            other => Err(other),
-        }
-    }
-}
+impl ParseRepr for Val {}
 
 impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
     type Error = ReprError;

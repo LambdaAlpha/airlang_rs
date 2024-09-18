@@ -22,8 +22,8 @@ pub(crate) const LIST_LEFT: char = '[';
 pub(crate) const LIST_RIGHT: char = ']';
 pub(crate) const MAP_LEFT: char = '{';
 pub(crate) const MAP_RIGHT: char = '}';
-pub(crate) const WRAP_LEFT: char = '(';
-pub(crate) const WRAP_RIGHT: char = ')';
+pub(crate) const SCOPE_LEFT: char = '(';
+pub(crate) const SCOPE_RIGHT: char = ')';
 
 pub(crate) const SPACE: char = ' ';
 pub(crate) const SEPARATOR: char = ',';
@@ -33,7 +33,7 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // prefixes
 
-pub(crate) const BYTE_PREFIX: char = '#';
+pub(crate) const BYTE: char = '#';
 
 // keywords
 
@@ -44,10 +44,10 @@ pub(crate) const FALSE: &str = "false";
 pub(crate) const MIDDLE: &str = "^";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
-pub(crate) const LEFT_CALL_PREFIX: &str = "<!";
-pub(crate) const LEFT_ASK_PREFIX: &str = "<?";
-pub(crate) const RIGHT_CALL_PREFIX: &str = ">!";
-pub(crate) const RIGHT_ASK_PREFIX: &str = ">?";
+pub(crate) const LEFT_CALL: &str = "<!";
+pub(crate) const LEFT_ASK: &str = "<?";
+pub(crate) const RIGHT_CALL: &str = ">!";
+pub(crate) const RIGHT_ASK: &str = ">?";
 
 pub(crate) const COMMENT: &str = "@";
 pub(crate) const PAIR: &str = ":";
@@ -80,8 +80,8 @@ pub(crate) fn is_delimiter(c: char) -> bool {
             | LIST_RIGHT
             | MAP_LEFT
             | MAP_RIGHT
-            | WRAP_LEFT
-            | WRAP_RIGHT
+            | SCOPE_LEFT
+            | SCOPE_RIGHT
             | TEXT_QUOTE
             | SYMBOL_QUOTE
     )

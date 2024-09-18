@@ -1,12 +1,12 @@
 "bench interpret" @ ; ! [
   ctx = context ! {
     variables : {
-      : ;,
-      : =,
-      : for,
-      : ==,
-      : %,
-      : +,
+      ; : :,
+      = : :,
+      for : :,
+      == : :,
+      % : :,
+      + : :,
     }
   },
   f = function ! {

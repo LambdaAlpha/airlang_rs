@@ -42,9 +42,9 @@ eval ! eval ! id ! a
 -----
 a
 =====
-eval [(not true) : not ! true, not true, {: (not true)}]
+eval [(not true) : not ! true, not true, {(not true) : :}]
 -----
-[: false, false, {: false}]
+[false : :, false, {false : :}]
 =====
 form a
 -----

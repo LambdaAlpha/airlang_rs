@@ -19,7 +19,7 @@ true
 ; [
     f = function ! {
         body : not ! i,
-        prelude : context ! {variables :  {: not}},
+        prelude : context ! {variables :  {not : :}},
     },
     f ! not ! true
 ]
@@ -162,7 +162,7 @@ not false
         body : ; ! [a = a + 1, a],
         context_access : .free,
         static : false,
-        prelude : context ! {variables : {: ;, : =, : +, a : 0}},
+        prelude : context ! {variables : {; : :, = : :, + : :, a : 0}},
     },
     [.f ., .f ., .f .]
 ]
@@ -175,7 +175,7 @@ not false
         body : c | ..a,
         context_access : .free,
         static : true,
-        prelude : context ! {variables : {: |}},
+        prelude : context ! {variables : {| : :}},
     },
     f .
 ]
@@ -187,7 +187,7 @@ not false
     f = function ! {
         body : c | ..a,
         context_access : .constant,
-        prelude : context ! {variables : {: |}},
+        prelude : context ! {variables : {| : :}},
     },
     f .
 ]
@@ -199,7 +199,7 @@ not false
     f = function ! {
         body : c | ..a,
         context_access : .mutable,
-        prelude : context ! {variables : {: |}},
+        prelude : context ! {variables : {| : :}},
     },
     f .
 ]
@@ -213,9 +213,9 @@ not false
         context_access : .mutable,
         prelude : context ! {
             variables : {
-                : |,
-                : =,
-                : '!',
+                | : :,
+                = : :,
+                '!' : :,
             }
         },
     },
@@ -233,9 +233,9 @@ not false
         context_access : .mutable,
         prelude : context ! {
             variables : {
-                : |,
-                : =,
-                : '!',
+                | : :,
+                = : :,
+                '!' : :,
             }
         },
     },
@@ -253,9 +253,9 @@ not false
         context_access : .constant,
         prelude : context ! {
             variables : {
-                : |,
-                : =,
-                : '!',
+                | : :,
+                = : :,
+                '!' : :,
             }
         },
     },

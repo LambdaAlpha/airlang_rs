@@ -189,14 +189,7 @@ impl Default for Repr {
     }
 }
 
-impl ParseRepr for Repr {
-    fn try_into_pair(self) -> Result<(Self, Self), Self> {
-        match self {
-            Repr::Pair(pair) => Ok((pair.first, pair.second)),
-            other => Err(other),
-        }
-    }
-}
+impl ParseRepr for Repr {}
 
 impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
     type Error = Infallible;

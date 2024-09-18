@@ -138,7 +138,7 @@ none
 -----
 [1, 2]
 =====
-; [{: a, : b} = {.a : 1, .b : 2, .c : 3}, [a, b]]
+; [{a : :, b : :} = {.a : 1, .b : 2, .c : 3}, [a, b]]
 -----
 [1, 2]
 =====
@@ -243,7 +243,7 @@ mutable
         static : false,
         context_access : .free,
         body : ; ! [a = a + 1, a],
-        prelude : context ! {variables : {a : 0, : ;, : =, : +}},
+        prelude : context ! {variables : {a : 0, ; : :, = : :, + : :}},
     },
     set_solver &s1,
     s2 = solver ! .,
@@ -282,7 +282,7 @@ true
 -----
 3 : 2
 =====
-; [(c : a) = (context ! {variables : {: =, a : 1}}) |: = '!' .a : 2, [c | .a, &a]]
+; [(c : a) = (context ! {variables : {= : :, a : 1}}) |: = '!' .a : 2, [c | .a, &a]]
 -----
 [2, 1]
 =====

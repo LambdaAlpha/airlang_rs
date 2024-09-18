@@ -44,5 +44,6 @@ pub(crate) fn expected() -> Vec<Repr> {
             symbol("b"),
             infix(symbol("c"), symbol("d"), symbol("e")),
         ),
+        infix(symbol("a"), symbol("b"), symbol("a")),
     ]
 }

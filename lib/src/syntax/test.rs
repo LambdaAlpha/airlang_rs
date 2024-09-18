@@ -23,6 +23,7 @@ use crate::{
             pair::PairRepr,
             Repr,
         },
+        MIDDLE,
     },
     text::Text,
     unit::Unit,
@@ -42,7 +43,7 @@ mod ask;
 mod text;
 mod symbol;
 mod unit;
-mod wrap;
+mod scope;
 
 fn unit() -> Repr {
     Repr::Unit(Unit)
@@ -94,6 +95,12 @@ fn ask(func: Repr, output: Repr) -> Repr {
 }
 
 fn comment(note: Repr, value: Repr) -> Repr {
+    Repr::Comment(Box::new(CommentRepr::new(note, value)))
+}
+
+fn no_compose(v: Vec<Repr>) -> Repr {
+    let note = Repr::Symbol(Symbol::from_str(MIDDLE));
+    let value = Repr::List(v.into());
     Repr::Comment(Box::new(CommentRepr::new(note, value)))
 }
 
@@ -345,17 +352,17 @@ fn test_generate_ask() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_wrap() -> Result<(), Box<dyn Error>> {
+fn test_parse_scope() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/wrap.air"),
-        "test/wrap.air",
-        wrap::expected,
+        include_str!("test/scope.air"),
+        "test/scope.air",
+        scope::expected,
     )
 }
 
 #[test]
-fn test_generate_wrap() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/wrap.air"), "test/wrap.air")
+fn test_generate_scope() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/scope.air"), "test/scope.air")
 }
 
 #[test]

@@ -26,7 +26,7 @@ use crate::{
         is_delimiter,
         maybe_keyword,
         ASK,
-        BYTE_PREFIX,
+        BYTE,
         CALL,
         COMMENT,
         FALSE,
@@ -35,13 +35,13 @@ use crate::{
         MAP_LEFT,
         MAP_RIGHT,
         PAIR,
+        SCOPE_LEFT,
+        SCOPE_RIGHT,
         SEPARATOR,
         SYMBOL_QUOTE,
         TEXT_QUOTE,
         TRUE,
         UNIT,
-        WRAP_LEFT,
-        WRAP_RIGHT,
     },
     text::Text,
     unit::Unit,
@@ -187,7 +187,7 @@ fn generate_number(n: &Number, s: &mut String) {
 }
 
 fn generate_byte(byte: &Byte, s: &mut String) {
-    s.push(BYTE_PREFIX);
+    s.push(BYTE);
     if byte.as_ref().is_empty() {
         return;
     }
@@ -242,7 +242,7 @@ fn is_need_quote(str: &str) -> bool {
     let mut chars = str.chars();
     let first = chars.next().unwrap();
     match first {
-        BYTE_PREFIX | SYMBOL_QUOTE | TEXT_QUOTE | '0'..='9' => return true,
+        BYTE | SYMBOL_QUOTE | TEXT_QUOTE | '0'..='9' => return true,
         '+' | '-' if matches!(chars.next(), Some('0'..='9')) => return true,
         _ => {}
     }
@@ -293,8 +293,8 @@ where
     Ok(b)
 }
 
-fn wrap<'a, T>(
-    wrap: bool,
+fn scope<'a, T>(
+    scope: bool,
     repr: &'a T,
     s: &mut String,
     format: &GenerateFormat,
@@ -304,15 +304,15 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    if wrap {
-        generate_wrapped(repr, s, format, indent)
+    if scope {
+        generate_scope(repr, s, format, indent)
     } else {
         generate(repr, s, format, indent)
     }
 }
 
 #[allow(unused)]
-fn wrap_if_left_open<'a, T>(
+fn scope_if_left_open<'a, T>(
     repr: &'a T,
     s: &mut String,
     format: &GenerateFormat,
@@ -322,10 +322,10 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    wrap(is_left_open(repr)?, repr, s, format, indent)
+    scope(is_left_open(repr)?, repr, s, format, indent)
 }
 
-fn wrap_if_right_open<'a, T>(
+fn scope_if_right_open<'a, T>(
     repr: &'a T,
     s: &mut String,
     format: &GenerateFormat,
@@ -335,7 +335,7 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    wrap(is_right_open(repr)?, repr, s, format, indent)
+    scope(is_right_open(repr)?, repr, s, format, indent)
 }
 
 fn generate_pair<'a, T>(
@@ -375,7 +375,7 @@ where
     match (&call.input).try_into()? {
         GenerateRepr::Pair(p) => generate_infix(
             &p.first,
-            |s, format, indent| wrap_if_right_open(&call.func, s, format, indent),
+            |s, format, indent| scope_if_right_open(&call.func, s, format, indent),
             &p.second,
             s,
             format,
@@ -434,7 +434,7 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    wrap_if_right_open(left, s, format, indent)?;
+    scope_if_right_open(left, s, format, indent)?;
 
     s.push(' ');
 
@@ -442,10 +442,10 @@ where
 
     s.push(' ');
 
-    wrap(is_normal_call(right)?, right, s, format, indent)
+    scope(is_normal_call(right)?, right, s, format, indent)
 }
 
-fn generate_wrapped<'a, T>(
+fn generate_scope<'a, T>(
     repr: &'a T,
     s: &mut String,
     format: &GenerateFormat,
@@ -455,11 +455,11 @@ where
     &'a T: TryInto<GenerateRepr<'a, T>>,
     T: Eq + Hash,
 {
-    s.push(WRAP_LEFT);
+    s.push(SCOPE_LEFT);
     s.push_str(&format.left_padding);
     generate(repr, s, format, indent)?;
     s.push_str(&format.right_padding);
-    s.push(WRAP_RIGHT);
+    s.push(SCOPE_RIGHT);
     Ok(())
 }
 
