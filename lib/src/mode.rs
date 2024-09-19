@@ -45,7 +45,7 @@ impl Transformer<Val, Val> for Mode {
             Val::Pair(pair) => val_mode.pair.transform(ctx, pair),
             Val::List(list) => val_mode.list.transform(ctx, list),
             Val::Map(map) => val_mode.map.transform(ctx, map),
-            val => val,
+            val => self.default.transform(ctx, val),
         }
     }
 }
