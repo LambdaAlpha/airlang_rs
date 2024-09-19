@@ -240,6 +240,7 @@ where
     fn eq(&self, other: &Self) -> bool {
         self.input_mode == other.input_mode
             && self.output_mode == other.output_mode
+            && self.cacheable == other.cacheable
             && self.transformer == other.transformer
     }
 }
@@ -259,6 +260,7 @@ where
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.input_mode.hash(state);
         self.output_mode.hash(state);
+        self.cacheable.hash(state);
         self.transformer.hash(state);
     }
 }
