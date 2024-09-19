@@ -56,3 +56,9 @@ The Air language seeks to solve programming problems once and for all. It should
     sum
 ]
 ```
+
+## Installation
+
+```bash
+cargo install airlang_bin
+```
