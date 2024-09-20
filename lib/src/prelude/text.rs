@@ -57,15 +57,9 @@ impl Prelude for TextPrelude {
 }
 
 fn from_utf8() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn(
-        "text.from_utf8",
-        input_mode,
-        output_mode,
-        true,
-        fn_from_utf8,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("text.from_utf8", call_mode, ask_mode, true, fn_from_utf8)
 }
 
 fn fn_from_utf8(input: Val) -> Val {
@@ -81,15 +75,9 @@ fn fn_from_utf8(input: Val) -> Val {
 }
 
 fn into_utf8() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn(
-        "text.into_utf8",
-        input_mode,
-        output_mode,
-        true,
-        fn_into_utf8,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("text.into_utf8", call_mode, ask_mode, true, fn_into_utf8)
 }
 
 fn fn_into_utf8(input: Val) -> Val {
@@ -102,9 +90,9 @@ fn fn_into_utf8(input: Val) -> Val {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("text.length", input_mode, output_mode, true, fn_length)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("text.length", call_mode, ask_mode, true, fn_length)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -118,9 +106,9 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn push() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("text.push", input_mode, output_mode, true, fn_push)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("text.push", call_mode, ask_mode, true, fn_push)
 }
 
 fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
@@ -140,9 +128,9 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn join() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("text.join", input_mode, output_mode, true, fn_join)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("text.join", call_mode, ask_mode, true, fn_join)
 }
 
 fn fn_join(input: Val) -> Val {

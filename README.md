@@ -39,7 +39,7 @@ The Air language seeks to solve programming problems once and for all. It should
         input_name : .args,
         context_name : .ctx,
         context_access : .mutable,
-        input_mode : id,
+        call_mode : id,
         prelude : prelude ! .,
         body : ; ! [
             [init, condition, next, body] = args,

@@ -58,9 +58,9 @@ impl Prelude for BoolPrelude {
 }
 
 fn is_true() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("is_true", input_mode, output_mode, true, fn_is_true)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("is_true", call_mode, ask_mode, true, fn_is_true)
 }
 
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
@@ -73,9 +73,9 @@ fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_false() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("is_false", input_mode, output_mode, true, fn_is_false)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("is_false", call_mode, ask_mode, true, fn_is_false)
 }
 
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
@@ -88,9 +88,9 @@ fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn not() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("not", input_mode, output_mode, true, fn_not)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("not", call_mode, ask_mode, true, fn_not)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -101,9 +101,9 @@ fn fn_not(input: Val) -> Val {
 }
 
 fn and() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("and", input_mode, output_mode, true, fn_and)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("and", call_mode, ask_mode, true, fn_and)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -120,9 +120,9 @@ fn fn_and(input: Val) -> Val {
 }
 
 fn or() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("or", input_mode, output_mode, true, fn_or)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("or", call_mode, ask_mode, true, fn_or)
 }
 
 fn fn_or(input: Val) -> Val {
@@ -139,9 +139,9 @@ fn fn_or(input: Val) -> Val {
 }
 
 fn xor() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("xor", input_mode, output_mode, true, fn_xor)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("xor", call_mode, ask_mode, true, fn_xor)
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -158,9 +158,9 @@ fn fn_xor(input: Val) -> Val {
 }
 
 fn imply() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("imply", input_mode, output_mode, true, fn_imply)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("imply", call_mode, ask_mode, true, fn_imply)
 }
 
 fn fn_imply(input: Val) -> Val {

@@ -57,9 +57,9 @@ impl Prelude for ModePrelude {
 }
 
 fn id() -> Named<FuncVal> {
-    let input_mode = id_mode();
-    let output_mode = Mode::default();
-    named_static_fn(ID, input_mode, output_mode, true, fn_id)
+    let call_mode = id_mode();
+    let ask_mode = Mode::default();
+    named_static_fn(ID, call_mode, ask_mode, true, fn_id)
 }
 
 fn fn_id(input: Val) -> Val {
@@ -67,9 +67,9 @@ fn fn_id(input: Val) -> Val {
 }
 
 fn form() -> Named<FuncVal> {
-    let input_mode = id_mode();
-    let output_mode = Mode::default();
-    named_mut_fn(FORM, input_mode, output_mode, true, fn_form)
+    let call_mode = id_mode();
+    let ask_mode = Mode::default();
+    named_mut_fn(FORM, call_mode, ask_mode, true, fn_form)
 }
 
 fn fn_form(ctx: MutFnCtx, input: Val) -> Val {
@@ -77,9 +77,9 @@ fn fn_form(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn eval() -> Named<FuncVal> {
-    let input_mode = id_mode();
-    let output_mode = Mode::default();
-    named_mut_fn(EVAL, input_mode, output_mode, false, fn_eval)
+    let call_mode = id_mode();
+    let ask_mode = Mode::default();
+    named_mut_fn(EVAL, call_mode, ask_mode, false, fn_eval)
 }
 
 fn fn_eval(ctx: MutFnCtx, input: Val) -> Val {

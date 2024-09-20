@@ -42,9 +42,9 @@ impl Prelude for UnitPrelude {
 }
 
 fn unit() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("unit", input_mode, output_mode, true, fn_unit)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("unit", call_mode, ask_mode, true, fn_unit)
 }
 
 fn fn_unit(_input: Val) -> Val {
@@ -52,9 +52,9 @@ fn fn_unit(_input: Val) -> Val {
 }
 
 fn is_unit() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("is_unit", input_mode, output_mode, true, fn_is_unit)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("is_unit", call_mode, ask_mode, true, fn_is_unit)
 }
 
 fn fn_is_unit(ctx: ConstFnCtx, input: Val) -> Val {

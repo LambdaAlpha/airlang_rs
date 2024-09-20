@@ -78,8 +78,8 @@ impl Transformer<Val, Val> for Composite<ConstCompositeExt> {
 
 impl ConstFunc {
     pub fn new(
-        input_mode: Mode,
-        output_mode: Mode,
+        call_mode: Mode,
+        ask_mode: Mode,
         cacheable: bool,
         id: Symbol,
         fn1: Rc<dyn ConstFn>,
@@ -90,8 +90,8 @@ impl ConstFunc {
             ext: ConstPrimitiveExt { fn1 },
         });
         Self {
-            input_mode,
-            output_mode,
+            call_mode,
+            ask_mode,
             cacheable,
             transformer,
         }

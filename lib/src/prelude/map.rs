@@ -101,9 +101,9 @@ impl Prelude for MapPrelude {
 }
 
 fn length() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.length", input_mode, output_mode, true, fn_length)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.length", call_mode, ask_mode, true, fn_length)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -117,9 +117,9 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn items() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.items", input_mode, output_mode, true, fn_items)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.items", call_mode, ask_mode, true, fn_items)
 }
 
 fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
@@ -136,15 +136,9 @@ fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn into_items() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "map.into_items",
-        input_mode,
-        output_mode,
-        true,
-        fn_into_items,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.into_items", call_mode, ask_mode, true, fn_into_items)
 }
 
 fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
@@ -163,9 +157,9 @@ fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn keys() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.keys", input_mode, output_mode, true, fn_keys)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.keys", call_mode, ask_mode, true, fn_keys)
 }
 
 fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
@@ -179,9 +173,9 @@ fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn into_keys() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("map.into_keys", input_mode, output_mode, true, fn_into_keys)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.into_keys", call_mode, ask_mode, true, fn_into_keys)
 }
 
 fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
@@ -197,9 +191,9 @@ fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn values() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.values", input_mode, output_mode, true, fn_values)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.values", call_mode, ask_mode, true, fn_values)
 }
 
 fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
@@ -213,15 +207,9 @@ fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn into_values() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "map.into_values",
-        input_mode,
-        output_mode,
-        true,
-        fn_into_values,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.into_values", call_mode, ask_mode, true, fn_into_values)
 }
 
 fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
@@ -237,9 +225,9 @@ fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn contains() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.contains", input_mode, output_mode, true, fn_contains)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.contains", call_mode, ask_mode, true, fn_contains)
 }
 
 fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
@@ -258,12 +246,12 @@ fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn contains_many() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
     named_const_fn(
         "map.contains_many",
-        input_mode,
-        output_mode,
+        call_mode,
+        ask_mode,
         true,
         fn_contains_many,
     )
@@ -289,9 +277,9 @@ fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("map.set", input_mode, output_mode, true, fn_set)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.set", call_mode, ask_mode, true, fn_set)
 }
 
 fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
@@ -315,9 +303,9 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn set_many() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("map.set_many", input_mode, output_mode, true, fn_set_many)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.set_many", call_mode, ask_mode, true, fn_set_many)
 }
 
 fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -343,9 +331,9 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.get", input_mode, output_mode, true, fn_get)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.get", call_mode, ask_mode, true, fn_get)
 }
 
 fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
@@ -364,9 +352,9 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn get_many() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("map.get_many", input_mode, output_mode, true, fn_get_many)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("map.get_many", call_mode, ask_mode, true, fn_get_many)
 }
 
 fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
@@ -392,9 +380,9 @@ fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn remove() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("map.remove", input_mode, output_mode, true, fn_remove)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.remove", call_mode, ask_mode, true, fn_remove)
 }
 
 fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
@@ -413,15 +401,9 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn remove_many() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "map.remove_many",
-        input_mode,
-        output_mode,
-        true,
-        fn_remove_many,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.remove_many", call_mode, ask_mode, true, fn_remove_many)
 }
 
 fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -448,9 +430,9 @@ fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn clear() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("map.clear", input_mode, output_mode, true, fn_clear)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("map.clear", call_mode, ask_mode, true, fn_clear)
 }
 
 fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
@@ -463,9 +445,9 @@ fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn new_map() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("map", input_mode, output_mode, true, fn_new_map)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("map", call_mode, ask_mode, true, fn_new_map)
 }
 
 fn fn_new_map(input: Val) -> Val {
@@ -490,9 +472,9 @@ fn fn_new_map(input: Val) -> Val {
 }
 
 fn new_set() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("set", input_mode, output_mode, true, fn_new_set)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("set", call_mode, ask_mode, true, fn_new_set)
 }
 
 fn fn_new_set(input: Val) -> Val {
@@ -505,9 +487,9 @@ fn fn_new_set(input: Val) -> Val {
 }
 
 fn new_multiset() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("multiset", input_mode, output_mode, true, fn_new_multiset)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("multiset", call_mode, ask_mode, true, fn_new_multiset)
 }
 
 fn fn_new_multiset(input: Val) -> Val {

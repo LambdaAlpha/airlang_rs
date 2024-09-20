@@ -83,9 +83,9 @@ fn never() -> Named<AnswerVal> {
 }
 
 fn maybe() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("answer.maybe", input_mode, output_mode, true, fn_maybe)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("answer.maybe", call_mode, ask_mode, true, fn_maybe)
 }
 
 fn fn_maybe(input: Val) -> Val {
@@ -93,9 +93,9 @@ fn fn_maybe(input: Val) -> Val {
 }
 
 fn cache() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("answer.cache", input_mode, output_mode, true, fn_cached)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("answer.cache", call_mode, ask_mode, true, fn_cached)
 }
 
 fn fn_cached(input: Val) -> Val {
@@ -109,9 +109,9 @@ fn fn_cached(input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("answer.represent", input_mode, output_mode, true, fn_repr)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("answer.represent", call_mode, ask_mode, true, fn_repr)
 }
 
 const TYPE: &str = "type";
@@ -143,9 +143,9 @@ fn fn_repr(input: Val) -> Val {
 }
 
 fn type_of() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("answer.type_of", input_mode, output_mode, true, fn_type_of)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("answer.type_of", call_mode, ask_mode, true, fn_type_of)
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
@@ -164,9 +164,9 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_none() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("answer.is_none", input_mode, output_mode, true, fn_is_none)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("answer.is_none", call_mode, ask_mode, true, fn_is_none)
 }
 
 fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
@@ -180,15 +180,9 @@ fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_never() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn(
-        "answer.is_never",
-        input_mode,
-        output_mode,
-        true,
-        fn_is_never,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("answer.is_never", call_mode, ask_mode, true, fn_is_never)
 }
 
 fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
@@ -202,15 +196,9 @@ fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_maybe() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn(
-        "answer.is_maybe",
-        input_mode,
-        output_mode,
-        true,
-        fn_is_maybe,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("answer.is_maybe", call_mode, ask_mode, true, fn_is_maybe)
 }
 
 fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
@@ -224,15 +212,9 @@ fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_cache() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn(
-        "answer.is_cache",
-        input_mode,
-        output_mode,
-        true,
-        fn_is_cache,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("answer.is_cache", call_mode, ask_mode, true, fn_is_cache)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {

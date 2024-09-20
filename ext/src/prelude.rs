@@ -82,76 +82,52 @@ impl<T: Into<Val> + Clone> Named<T> {
 #[allow(unused)]
 fn named_free_fn(
     name: &'static str,
-    input_mode: Mode,
-    output_mode: Mode,
+    call_mode: Mode,
+    ask_mode: Mode,
     cacheable: bool,
     func: impl FreeFnExt + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = FreeFunc::new(
-        input_mode,
-        output_mode,
-        cacheable,
-        name_symbol,
-        Box::new(func),
-    );
+    let func = FreeFunc::new(call_mode, ask_mode, cacheable, name_symbol, Box::new(func));
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
 }
 
 fn named_static_fn(
     name: &'static str,
-    input_mode: Mode,
-    output_mode: Mode,
+    call_mode: Mode,
+    ask_mode: Mode,
     cacheable: bool,
     func: impl StaticFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = StaticFunc::new(
-        input_mode,
-        output_mode,
-        cacheable,
-        name_symbol,
-        Rc::new(func),
-    );
+    let func = StaticFunc::new(call_mode, ask_mode, cacheable, name_symbol, Rc::new(func));
     let func_val = StaticFuncVal::from(func);
     Named::new(name, FuncVal::Static(func_val))
 }
 
 fn named_const_fn(
     name: &'static str,
-    input_mode: Mode,
-    output_mode: Mode,
+    call_mode: Mode,
+    ask_mode: Mode,
     cacheable: bool,
     func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = ConstFunc::new(
-        input_mode,
-        output_mode,
-        cacheable,
-        name_symbol,
-        Rc::new(func),
-    );
+    let func = ConstFunc::new(call_mode, ask_mode, cacheable, name_symbol, Rc::new(func));
     let func_val = ConstFuncVal::from(func);
     Named::new(name, FuncVal::Const(func_val))
 }
 
 fn named_mut_fn(
     name: &'static str,
-    input_mode: Mode,
-    output_mode: Mode,
+    call_mode: Mode,
+    ask_mode: Mode,
     cacheable: bool,
     func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = MutFunc::new(
-        input_mode,
-        output_mode,
-        cacheable,
-        name_symbol,
-        Rc::new(func),
-    );
+    let func = MutFunc::new(call_mode, ask_mode, cacheable, name_symbol, Rc::new(func));
     let func_val = MutFuncVal::from(func);
     Named::new(name, FuncVal::Mut(func_val))
 }

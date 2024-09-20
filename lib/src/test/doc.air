@@ -3,7 +3,7 @@
         input_name : .args,
         context_name : .ctx,
         context_access : .mutable,
-        input_mode : id,
+        call_mode : id,
         prelude : prelude ! .,
         body : ; ! [
             [init, condition, next, body] = args,

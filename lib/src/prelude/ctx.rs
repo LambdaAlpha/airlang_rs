@@ -128,9 +128,9 @@ impl Prelude for CtxPrelude {
 }
 
 fn read() -> Named<FuncVal> {
-    let input_mode = form_mode();
-    let output_mode = Mode::default();
-    named_const_fn("read", input_mode, output_mode, true, fn_read)
+    let call_mode = form_mode();
+    let ask_mode = Mode::default();
+    named_const_fn("read", call_mode, ask_mode, true, fn_read)
 }
 
 fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
@@ -141,9 +141,9 @@ fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn move1() -> Named<FuncVal> {
-    let input_mode = form_mode();
-    let output_mode = Mode::default();
-    named_mut_fn("move", input_mode, output_mode, true, fn_move)
+    let call_mode = form_mode();
+    let ask_mode = Mode::default();
+    named_mut_fn("move", call_mode, ask_mode, true, fn_move)
 }
 
 fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
@@ -157,9 +157,9 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn assign() -> Named<FuncVal> {
-    let input_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
-    let output_mode = Mode::default();
-    named_mut_fn("=", input_mode, output_mode, true, fn_assign)
+    let call_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
+    let ask_mode = Mode::default();
+    named_mut_fn("=", call_mode, ask_mode, true, fn_assign)
 }
 
 fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
@@ -432,15 +432,9 @@ fn generate_invariant(invariant: Invariant) -> Symbol {
 }
 
 fn set_invariant() -> Named<FuncVal> {
-    let input_mode = form_mode();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "set_invariant",
-        input_mode,
-        output_mode,
-        true,
-        fn_set_invariant,
-    )
+    let call_mode = form_mode();
+    let ask_mode = Mode::default();
+    named_mut_fn("set_invariant", call_mode, ask_mode, true, fn_set_invariant)
 }
 
 fn fn_set_invariant(ctx: MutFnCtx, input: Val) -> Val {
@@ -465,9 +459,9 @@ fn fn_set_invariant(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get_invariant() -> Named<FuncVal> {
-    let input_mode = form_mode();
-    let output_mode = Mode::default();
-    named_const_fn("invariant", input_mode, output_mode, true, fn_get_invariant)
+    let call_mode = form_mode();
+    let ask_mode = Mode::default();
+    named_const_fn("invariant", call_mode, ask_mode, true, fn_get_invariant)
 }
 
 fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
@@ -484,9 +478,9 @@ fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn fallback() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("fallback", input_mode, output_mode, true, fn_fallback)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("fallback", call_mode, ask_mode, true, fn_fallback)
 }
 
 fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
@@ -497,9 +491,9 @@ fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
 }
 
 fn is_null() -> Named<FuncVal> {
-    let input_mode = form_mode();
-    let output_mode = Mode::default();
-    named_const_fn("is_null", input_mode, output_mode, true, fn_is_null)
+    let call_mode = form_mode();
+    let ask_mode = Mode::default();
+    named_const_fn("is_null", call_mode, ask_mode, true, fn_is_null)
 }
 
 fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
@@ -513,9 +507,9 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn get_access() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("access", input_mode, output_mode, true, fn_get_access)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("access", call_mode, ask_mode, true, fn_get_access)
 }
 
 const ACCESS_FREE: &str = "free";
@@ -532,9 +526,9 @@ fn fn_get_access(ctx: MutFnCtx, _input: Val) -> Val {
 }
 
 fn get_solver() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("solver", input_mode, output_mode, true, fn_get_solver)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("solver", call_mode, ask_mode, true, fn_get_solver)
 }
 
 fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
@@ -545,9 +539,9 @@ fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
 }
 
 fn set_solver() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("set_solver", input_mode, output_mode, true, fn_set_solver)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("set_solver", call_mode, ask_mode, true, fn_set_solver)
 }
 
 fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
@@ -564,9 +558,9 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn with_ctx() -> Named<FuncVal> {
-    let input_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
-    let output_mode = Mode::default();
-    named_mut_fn("|", input_mode, output_mode, false, fn_with_ctx)
+    let call_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
+    let ask_mode = Mode::default();
+    named_mut_fn("|", call_mode, ask_mode, false, fn_with_ctx)
 }
 
 fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
@@ -599,9 +593,9 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn ctx_in_ctx_out() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("|:", input_mode, output_mode, false, fn_ctx_in_ctx_out)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("|:", call_mode, ask_mode, false, fn_ctx_in_ctx_out)
 }
 
 fn fn_ctx_in_ctx_out(input: Val) -> Val {
@@ -640,9 +634,9 @@ fn ctx_new() -> Named<FuncVal> {
     );
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
-    let input_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
-    let output_mode = Mode::default();
-    named_static_fn("context", input_mode, output_mode, true, fn_ctx_new)
+    let call_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
+    let ask_mode = Mode::default();
+    named_static_fn("context", call_mode, ask_mode, true, fn_ctx_new)
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -706,7 +700,7 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
 }
 
 fn ctx_repr() -> Named<FuncVal> {
-    let input_mode = Mode::default();
+    let call_mode = Mode::default();
     let mut map = Map::default();
     map.insert(
         symbol(VARIABLES),
@@ -719,14 +713,8 @@ fn ctx_repr() -> Named<FuncVal> {
     );
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
-    let output_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
-    named_static_fn(
-        "context.represent",
-        input_mode,
-        output_mode,
-        true,
-        fn_ctx_repr,
-    )
+    let ask_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
+    named_static_fn("context.represent", call_mode, ask_mode, true, fn_ctx_repr)
 }
 
 fn fn_ctx_repr(input: Val) -> Val {
@@ -784,9 +772,9 @@ fn generate_ctx_value(ctx_value: CtxValue) -> Val {
 }
 
 fn ctx_prelude() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("prelude", input_mode, output_mode, true, fn_ctx_prelude)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("prelude", call_mode, ask_mode, true, fn_ctx_prelude)
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {
@@ -794,9 +782,9 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 }
 
 fn ctx_self() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("self", input_mode, output_mode, true, fn_ctx_self)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("self", call_mode, ask_mode, true, fn_ctx_self)
 }
 
 fn fn_ctx_self(ctx: ConstFnCtx, _input: Val) -> Val {

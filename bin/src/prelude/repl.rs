@@ -28,9 +28,9 @@ impl Prelude for ReplPrelude {
 }
 
 fn help() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn("help", input_mode, output_mode, false, fn_help)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn("help", call_mode, ask_mode, false, fn_help)
 }
 
 const HELP_DOC: &str = "\

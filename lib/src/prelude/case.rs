@@ -85,9 +85,9 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
-    let input_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
-    let output_mode = Mode::default();
-    named_mut_fn("case", input_mode, output_mode, false, fn_new)
+    let call_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
+    let ask_mode = Mode::default();
+    named_mut_fn("case", call_mode, ask_mode, false, fn_new)
 }
 
 fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -104,9 +104,9 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn new_cache() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn("case.cache", input_mode, output_mode, false, fn_new_cache)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("case.cache", call_mode, ask_mode, false, fn_new_cache)
 }
 
 fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -117,20 +117,20 @@ fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Func(func) = call.func else {
         return Val::default();
     };
-    let input = func.input_mode().transform(ctx.reborrow(), call.input);
+    let input = func.call_mode().transform(ctx.reborrow(), call.input);
     let cache = Cache::new(ctx, func, input);
     Val::Case(CaseVal::Cache(cache.into()))
 }
 
 fn repr() -> Named<FuncVal> {
-    let input_mode = Mode::default();
+    let call_mode = Mode::default();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
     map.insert(symbol(IS_CACHE), Mode::default());
-    let output_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
-    named_static_fn("case.represent", input_mode, output_mode, true, fn_repr)
+    let ask_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
+    named_static_fn("case.represent", call_mode, ask_mode, true, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -152,9 +152,9 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 }
 
 fn is_cache() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("case.is_cache", input_mode, output_mode, true, fn_is_cache)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("case.is_cache", call_mode, ask_mode, true, fn_is_cache)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
@@ -167,9 +167,9 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn func() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("case.function", input_mode, output_mode, true, fn_func)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("case.function", call_mode, ask_mode, true, fn_func)
 }
 
 fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -182,9 +182,9 @@ fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("case.input", input_mode, output_mode, true, fn_input)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("case.input", call_mode, ask_mode, true, fn_input)
 }
 
 fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
@@ -197,9 +197,9 @@ fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn output() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("case.output", input_mode, output_mode, true, fn_output)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("case.output", call_mode, ask_mode, true, fn_output)
 }
 
 fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {

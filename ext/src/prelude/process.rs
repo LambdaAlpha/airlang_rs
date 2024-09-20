@@ -42,14 +42,14 @@ const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
-    let input_mode = map_mode(
+    let call_mode = map_mode(
         Map::default(),
         form_mode(),
         Mode::default(),
         BasicMode::default(),
     );
-    let output_mode = Mode::default();
-    named_static_fn("process.call", input_mode, output_mode, false, fn_call)
+    let ask_mode = Mode::default();
+    named_static_fn("process.call", call_mode, ask_mode, false, fn_call)
 }
 
 fn fn_call(input: Val) -> Val {

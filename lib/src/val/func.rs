@@ -72,21 +72,21 @@ impl FuncVal {
         }
     }
 
-    pub(crate) fn input_mode(&self) -> &Mode {
+    pub(crate) fn call_mode(&self) -> &Mode {
         match self {
-            FuncVal::Free(f) => &f.input_mode,
-            FuncVal::Static(f) => &f.input_mode,
-            FuncVal::Const(f) => &f.input_mode,
-            FuncVal::Mut(f) => &f.input_mode,
+            FuncVal::Free(f) => &f.call_mode,
+            FuncVal::Static(f) => &f.call_mode,
+            FuncVal::Const(f) => &f.call_mode,
+            FuncVal::Mut(f) => &f.call_mode,
         }
     }
 
-    pub(crate) fn output_mode(&self) -> &Mode {
+    pub(crate) fn ask_mode(&self) -> &Mode {
         match self {
-            FuncVal::Free(f) => &f.output_mode,
-            FuncVal::Static(f) => &f.output_mode,
-            FuncVal::Const(f) => &f.output_mode,
-            FuncVal::Mut(f) => &f.output_mode,
+            FuncVal::Free(f) => &f.ask_mode,
+            FuncVal::Static(f) => &f.ask_mode,
+            FuncVal::Const(f) => &f.ask_mode,
+            FuncVal::Mut(f) => &f.ask_mode,
         }
     }
 
@@ -211,8 +211,8 @@ impl Debug for FreeFuncVal {
                 s.field("is_extension", &p.is_extension());
             }
             FuncImpl::Composite(c) => {
-                s.field("input_mode", &self.input_mode);
-                s.field("output_mode", &self.output_mode);
+                s.field("call_mode", &self.call_mode);
+                s.field("ask_mode", &self.ask_mode);
                 s.field("body", &c.body);
                 s.field("prelude", &c.prelude);
                 s.field("input_name", &c.input_name);
@@ -263,8 +263,8 @@ impl Debug for StaticFuncVal {
                 s.field("is_extension", &p.is_extension());
             }
             FuncImpl::Composite(c) => {
-                s.field("input_mode", &self.input_mode);
-                s.field("output_mode", &self.output_mode);
+                s.field("call_mode", &self.call_mode);
+                s.field("ask_mode", &self.ask_mode);
                 s.field("body", &c.body);
                 s.field("prelude", &c.prelude);
                 s.field("input_name", &c.input_name);
@@ -315,8 +315,8 @@ impl Debug for ConstFuncVal {
                 s.field("is_extension", &p.is_extension());
             }
             FuncImpl::Composite(c) => {
-                s.field("input_mode", &self.input_mode);
-                s.field("output_mode", &self.output_mode);
+                s.field("call_mode", &self.call_mode);
+                s.field("ask_mode", &self.ask_mode);
                 s.field("body", &c.body);
                 s.field("prelude", &c.prelude);
                 s.field("context_name", &c.ext.ctx_name);
@@ -368,8 +368,8 @@ impl Debug for MutFuncVal {
                 s.field("is_extension", &p.is_extension());
             }
             FuncImpl::Composite(c) => {
-                s.field("input_mode", &self.input_mode);
-                s.field("output_mode", &self.output_mode);
+                s.field("call_mode", &self.call_mode);
+                s.field("ask_mode", &self.ask_mode);
                 s.field("body", &c.body);
                 s.field("prelude", &c.prelude);
                 s.field("context_name", &c.ext.ctx_name);

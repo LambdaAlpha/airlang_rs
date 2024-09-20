@@ -40,7 +40,7 @@ true
 ; [
     f = function ! {
         body : i,
-        input_mode : id,
+        call_mode : id,
     },
     f ! not ! true
 ]
@@ -50,7 +50,7 @@ not true
 ; [
     f = function ! {
         body : $not ! i,
-        input_mode : eval,
+        call_mode : eval,
     },
     f ! not ! true
 ]
@@ -60,7 +60,7 @@ true
 ; [
     f = function ! {
         body : i,
-        input_mode : form,
+        call_mode : form,
     },
     f ! not ! true
 ]
@@ -72,7 +72,7 @@ not true
     b = 2,
     f = function ! {
         body : i,
-        input_mode : eval,
+        call_mode : eval,
     },
     f {a : b}
 ]
@@ -83,7 +83,7 @@ not true
     b = 1,
     f = function ! {
         body : i,
-        input_mode : {pair : form : eval},
+        call_mode : {pair : form : eval},
     },
     a f b
 ]
@@ -94,7 +94,7 @@ a : 1
     b = 1,
     f = function ! {
         body : i,
-        input_mode : {pair : form : eval, default : id},
+        call_mode : {pair : form : eval, default : id},
     },
     [a f b, f $a]
 ]
@@ -104,7 +104,7 @@ a : 1
 ; [
     f = function ! {
         body : i,
-        input_mode : id,
+        call_mode : id,
     },
     f ! not ! false
 ]
@@ -115,7 +115,7 @@ not false
     a = 1,
     f = function ! {
         body : i,
-        input_mode : {list : [eval, form] : id},
+        call_mode : {list : [eval, form] : id},
     },
     f [a, a, a, a, $a, a]
 ]
@@ -126,7 +126,7 @@ not false
     a = 1,
     f = function ! {
         body : i,
-        input_mode : {list : [eval, form], default : id},
+        call_mode : {list : [eval, form], default : id},
     },
     f [a, a, a, a, $a, a]
 ]
@@ -138,7 +138,7 @@ not false
     c = 2,
     f = function ! {
         body : i,
-        input_mode : {map : {a : eval, b : id} : eval : id},
+        call_mode : {map : {a : eval, b : id} : eval : id},
     },
     f {a : a, b : a, c : d}
 ]
@@ -150,7 +150,7 @@ not false
     c = 2,
     f = function ! {
         body : i,
-        input_mode : {map : {a : eval, b : id}, default : id},
+        call_mode : {map : {a : eval, b : id}, default : id},
     },
     f {a : a, b : a, c : d}
 ]
@@ -209,7 +209,7 @@ not false
 ; [
     f = function ! {
         body : c | = '!' i : 2,
-        input_mode : id,
+        call_mode : id,
         context_access : .mutable,
         prelude : context ! {
             variables : {
@@ -229,7 +229,7 @@ not false
 ; [
     f = function ! {
         body : c | = '!' i : 2,
-        input_mode : id,
+        call_mode : id,
         context_access : .mutable,
         prelude : context ! {
             variables : {
@@ -249,7 +249,7 @@ not false
 ; [
     f = function ! {
         body : c | = '!' i : 2,
-        input_mode : id,
+        call_mode : id,
         context_access : .constant,
         prelude : context ! {
             variables : {
@@ -324,8 +324,8 @@ function.represent ! function ! {
     body : in,
     input_name : .in,
     context_name : .ctx,
-    input_mode : {pair : eval : id},
-    output_mode : {pair : form : form},
+    call_mode : {pair : eval : id},
+    ask_mode : {pair : form : form},
     context_access : .constant,
     cacheable : true,
 }
@@ -334,8 +334,8 @@ function.represent ! function ! {
     body : in,
     input_name : in,
     context_name : ctx,
-    input_mode : {pair : eval : id},
-    output_mode : {pair : form : form},
+    call_mode : {pair : eval : id},
+    ask_mode : {pair : form : form},
     context_access : constant,
     cacheable : true,
 }
@@ -366,54 +366,54 @@ mutable
 -----
 mutable
 =====
-function.input_mode .not
+function.call_mode .not
 -----
 eval
 =====
-function.input_mode .eval
+function.call_mode .eval
 -----
 id
 =====
-function.input_mode .read
+function.call_mode .read
 -----
 form
 =====
-; [f = function ! {}, function.input_mode .f]
+; [f = function ! {}, function.call_mode .f]
 -----
 eval
 =====
 ; [
     f = function ! {
-        input_mode : {pair : eval : form},
+        call_mode : {pair : eval : form},
     },
-    function.input_mode .f
+    function.call_mode .f
 ]
 -----
 {pair : eval : form}
 =====
 ; [
     f = function ! {
-        input_mode : {list : [eval, form, id] : form},
+        call_mode : {list : [eval, form, id] : form},
     },
-    function.input_mode .f
+    function.call_mode .f
 ]
 -----
 {list : [eval, form, id] : form}
 =====
 ; [
     f = function ! {
-        input_mode : {map : {a : eval, b : id} : id : form},
+        call_mode : {map : {a : eval, b : id} : id : form},
     },
-    function.input_mode .f
+    function.call_mode .f
 ]
 -----
 {map : {a : eval, b : id} : id : form}
 =====
 ; [
     f = function ! {
-        output_mode : {map : {a : form} : eval : id},
+        ask_mode : {map : {a : form} : eval : id},
     },
-    function.output_mode .f
+    function.ask_mode .f
 ]
 -----
 {map : {a : form} : eval : id}

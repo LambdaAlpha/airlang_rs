@@ -133,7 +133,7 @@ impl Eval {
     {
         match func {
             Val::Func(mut func) => {
-                let input = func.input_mode().transform(ctx.reborrow(), input);
+                let input = func.call_mode().transform(ctx.reborrow(), input);
                 func.transform_mut(ctx, input)
             }
             Val::Symbol(s) => self.call_free(ctx, s, input),
@@ -164,7 +164,7 @@ impl Eval {
             return Val::default();
         };
         let mut func = func.clone();
-        let input = func.input_mode().transform(ctx, input);
+        let input = func.call_mode().transform(ctx, input);
         func.transform_mut(input)
     }
 
@@ -176,7 +176,7 @@ impl Eval {
         let Val::Func(FuncVal::Free(func)) = val else {
             return Val::default();
         };
-        let input = func.input_mode().clone().transform(MutCtx::new(ctx), input);
+        let input = func.call_mode().clone().transform(MutCtx::new(ctx), input);
         let Ok(val) = ctx.variables_mut().get_ref_dyn(func_name) else {
             return Val::default();
         };
@@ -195,7 +195,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            func.input_mode().transform(ctx, input)
+            func.call_mode().transform(ctx, input)
         } else {
             self.transform(ctx, input)
         }
@@ -223,7 +223,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            let output = func.output_mode().transform(ctx.reborrow(), output);
+            let output = func.ask_mode().transform(ctx.reborrow(), output);
             Val::Answer(solve(ctx, func, output))
         } else {
             let output = self.transform(ctx, output);
@@ -237,7 +237,7 @@ impl Eval {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(f) = func {
-            f.output_mode().transform(ctx, output)
+            f.ask_mode().transform(ctx, output)
         } else {
             self.transform(ctx, output)
         }

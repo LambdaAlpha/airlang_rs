@@ -33,8 +33,8 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct Func<P, C> {
-    pub(crate) input_mode: Mode,
-    pub(crate) output_mode: Mode,
+    pub(crate) call_mode: Mode,
+    pub(crate) ask_mode: Mode,
     pub(crate) cacheable: bool,
     pub(crate) transformer: FuncImpl<Primitive<P>, Composite<C>>,
 }
@@ -149,39 +149,39 @@ fn restore_ctx(prelude: Ctx, ctx: &mut Ctx, name: Symbol) {
 
 impl<P, C> Func<P, C> {
     pub(crate) fn new_primitive(
-        input_mode: Mode,
-        output_mode: Mode,
+        call_mode: Mode,
+        ask_mode: Mode,
         cacheable: bool,
         f: Primitive<P>,
     ) -> Self {
         Self {
-            input_mode,
-            output_mode,
+            call_mode,
+            ask_mode,
             cacheable,
             transformer: FuncImpl::Primitive(f),
         }
     }
 
     pub(crate) fn new_composite(
-        input_mode: Mode,
-        output_mode: Mode,
+        call_mode: Mode,
+        ask_mode: Mode,
         cacheable: bool,
         f: Composite<C>,
     ) -> Self {
         Self {
-            input_mode,
-            output_mode,
+            call_mode,
+            ask_mode,
             cacheable,
             transformer: FuncImpl::Composite(f),
         }
     }
 
-    pub fn input_mode(&self) -> &Mode {
-        &self.input_mode
+    pub fn call_mode(&self) -> &Mode {
+        &self.call_mode
     }
 
-    pub fn output_mode(&self) -> &Mode {
-        &self.output_mode
+    pub fn ask_mode(&self) -> &Mode {
+        &self.ask_mode
     }
 
     pub fn cacheable(&self) -> bool {
@@ -238,8 +238,8 @@ where
     Composite<C>: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.input_mode == other.input_mode
-            && self.output_mode == other.output_mode
+        self.call_mode == other.call_mode
+            && self.ask_mode == other.ask_mode
             && self.cacheable == other.cacheable
             && self.transformer == other.transformer
     }
@@ -258,8 +258,8 @@ where
     Composite<C>: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.input_mode.hash(state);
-        self.output_mode.hash(state);
+        self.call_mode.hash(state);
+        self.ask_mode.hash(state);
         self.cacheable.hash(state);
         self.transformer.hash(state);
     }

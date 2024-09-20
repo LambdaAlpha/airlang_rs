@@ -65,9 +65,9 @@ impl Prelude for CommentPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn(COMMENT, input_mode, output_mode, true, fn_new)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn(COMMENT, call_mode, ask_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -79,14 +79,14 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn apply() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_apply::<FreeCtx>,
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mut_fn("comment.apply", input_mode, output_mode, false, func)
+    named_mut_fn("comment.apply", call_mode, ask_mode, false, func)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -100,9 +100,9 @@ where
 }
 
 fn get_note() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("comment.note", input_mode, output_mode, true, fn_get_note)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("comment.note", call_mode, ask_mode, true, fn_get_note)
 }
 
 fn fn_get_note(ctx: ConstFnCtx, input: Val) -> Val {
@@ -119,15 +119,9 @@ fn fn_get_note(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_note() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "comment.set_note",
-        input_mode,
-        output_mode,
-        true,
-        fn_set_note,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("comment.set_note", call_mode, ask_mode, true, fn_set_note)
 }
 
 fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
@@ -150,9 +144,9 @@ fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get_value() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("comment.value", input_mode, output_mode, true, fn_get_value)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("comment.value", call_mode, ask_mode, true, fn_get_value)
 }
 
 fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
@@ -169,15 +163,9 @@ fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_value() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "comment.set_value",
-        input_mode,
-        output_mode,
-        true,
-        fn_set_value,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("comment.set_value", call_mode, ask_mode, true, fn_set_value)
 }
 
 fn fn_set_value(ctx: MutFnCtx, input: Val) -> Val {

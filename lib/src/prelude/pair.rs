@@ -58,9 +58,9 @@ impl Prelude for PairPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_static_fn(PAIR, input_mode, output_mode, true, fn_new)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_static_fn(PAIR, call_mode, ask_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -71,9 +71,9 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn get_first() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("pair.first", input_mode, output_mode, true, fn_get_first)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("pair.first", call_mode, ask_mode, true, fn_get_first)
 }
 
 fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
@@ -90,15 +90,9 @@ fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_first() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "pair.set_first",
-        input_mode,
-        output_mode,
-        true,
-        fn_set_first,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("pair.set_first", call_mode, ask_mode, true, fn_set_first)
 }
 
 fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
@@ -121,9 +115,9 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get_second() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_const_fn("pair.second", input_mode, output_mode, true, fn_get_second)
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("pair.second", call_mode, ask_mode, true, fn_get_second)
 }
 
 fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
@@ -140,15 +134,9 @@ fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_second() -> Named<FuncVal> {
-    let input_mode = Mode::default();
-    let output_mode = Mode::default();
-    named_mut_fn(
-        "pair.set_second",
-        input_mode,
-        output_mode,
-        true,
-        fn_set_second,
-    )
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_mut_fn("pair.set_second", call_mode, ask_mode, true, fn_set_second)
 }
 
 fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {

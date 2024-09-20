@@ -89,8 +89,8 @@ impl Composite<FreeCompositeExt> {
 
 impl FreeFunc {
     pub fn new(
-        input_mode: Mode,
-        output_mode: Mode,
+        call_mode: Mode,
+        ask_mode: Mode,
         cacheable: bool,
         id: Symbol,
         fn1: Box<dyn FreeFnExt>,
@@ -101,8 +101,8 @@ impl FreeFunc {
             ext: FreePrimitiveExt { fn1 },
         });
         Self {
-            input_mode,
-            output_mode,
+            call_mode,
+            ask_mode,
             cacheable,
             transformer,
         }

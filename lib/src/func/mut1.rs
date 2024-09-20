@@ -94,8 +94,8 @@ impl Transformer<Val, Val> for Composite<MutCompositeExt> {
 
 impl MutFunc {
     pub fn new(
-        input_mode: Mode,
-        output_mode: Mode,
+        call_mode: Mode,
+        ask_mode: Mode,
         cacheable: bool,
         id: Symbol,
         fn1: Rc<dyn MutFn>,
@@ -106,8 +106,8 @@ impl MutFunc {
             ext: MutPrimitiveExt { fn1 },
         });
         Self {
-            input_mode,
-            output_mode,
+            call_mode,
+            ask_mode,
             cacheable,
             transformer,
         }
