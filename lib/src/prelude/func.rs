@@ -260,8 +260,8 @@ fn fn_repr(input: Val) -> Val {
             let f = f.unwrap();
             match f.transformer {
                 FuncImpl::Primitive(p) => {
-                    repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
-                    if p.is_extension() {
+                    repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
+                    if p.is_extension {
                         repr.insert(symbol(CTX_ACCESS), symbol(FREE));
                         repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                         generate_cacheable(f.cacheable, &mut repr);
@@ -286,8 +286,8 @@ fn fn_repr(input: Val) -> Val {
         }
         FuncVal::Static(f) => match &f.transformer {
             FuncImpl::Primitive(p) => {
-                repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
-                if p.is_extension() {
+                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
+                if p.is_extension {
                     repr.insert(symbol(STATIC), Val::Bool(Bool::t()));
                     repr.insert(symbol(CTX_ACCESS), symbol(FREE));
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
@@ -313,8 +313,8 @@ fn fn_repr(input: Val) -> Val {
         },
         FuncVal::Const(f) => match &f.transformer {
             FuncImpl::Primitive(p) => {
-                repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
-                if p.is_extension() {
+                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
+                if p.is_extension {
                     repr.insert(symbol(CTX_ACCESS), symbol(CONST));
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                     generate_cacheable(f.cacheable(), &mut repr);
@@ -341,8 +341,8 @@ fn fn_repr(input: Val) -> Val {
         },
         FuncVal::Mut(f) => match &f.transformer {
             FuncImpl::Primitive(p) => {
-                repr.insert(symbol(ID), Val::Symbol(p.get_id().clone()));
-                if p.is_extension() {
+                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
+                if p.is_extension {
                     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
                     generate_cacheable(f.cacheable(), &mut repr);
                     generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
@@ -510,7 +510,7 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let Some(is_extension) = func.primitive_is_extension() else {
+        let Some(is_extension) = func.is_extension() else {
             return Val::default();
         };
         Val::Bool(Bool::new(is_extension))
@@ -549,7 +549,7 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let Some(id) = func.primitive_id() else {
+        let Some(id) = func.id() else {
             return Val::default();
         };
         Val::Symbol(id)
@@ -567,7 +567,7 @@ fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let Some(body) = func.composite_body() else {
+        let Some(body) = func.body() else {
             return Val::default();
         };
         body.clone()
@@ -585,7 +585,7 @@ fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let Some(prelude) = func.composite_prelude() else {
+        let Some(prelude) = func.prelude() else {
             return Val::default();
         };
         Val::Ctx(CtxVal::from(prelude.clone()))
@@ -609,7 +609,7 @@ fn fn_input_name(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let Some(name) = func.composite_input_name() else {
+        let Some(name) = func.input_name() else {
             return Val::default();
         };
         Val::Symbol(name)
@@ -633,7 +633,7 @@ fn fn_ctx_name(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let Some(name) = func.composite_ctx_name() else {
+        let Some(name) = func.ctx_name() else {
             return Val::default();
         };
         Val::Symbol(name)

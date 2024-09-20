@@ -108,67 +108,57 @@ impl FuncVal {
         }
     }
 
-    pub(crate) fn primitive_id(&self) -> Option<Symbol> {
+    pub(crate) fn id(&self) -> Option<Symbol> {
         match self {
-            FuncVal::Free(f) => f.primitive_id(),
-            FuncVal::Static(f) => f.primitive_id(),
-            FuncVal::Const(f) => f.primitive_id(),
-            FuncVal::Mut(f) => f.primitive_id(),
+            FuncVal::Free(f) => f.id(),
+            FuncVal::Static(f) => f.id(),
+            FuncVal::Const(f) => f.id(),
+            FuncVal::Mut(f) => f.id(),
         }
     }
 
-    pub(crate) fn primitive_is_extension(&self) -> Option<bool> {
+    pub(crate) fn is_extension(&self) -> Option<bool> {
         match self {
-            FuncVal::Free(f) => f.primitive_is_extension(),
-            FuncVal::Static(f) => f.primitive_is_extension(),
-            FuncVal::Const(f) => f.primitive_is_extension(),
-            FuncVal::Mut(f) => f.primitive_is_extension(),
+            FuncVal::Free(f) => f.is_extension(),
+            FuncVal::Static(f) => f.is_extension(),
+            FuncVal::Const(f) => f.is_extension(),
+            FuncVal::Mut(f) => f.is_extension(),
         }
     }
 
-    pub(crate) fn composite_body(&self) -> Option<&Val> {
+    pub(crate) fn body(&self) -> Option<&Val> {
         match self {
-            FuncVal::Free(f) => f.composite_body(),
-            FuncVal::Static(f) => f.composite_body(),
-            FuncVal::Const(f) => f.composite_body(),
-            FuncVal::Mut(f) => f.composite_body(),
+            FuncVal::Free(f) => f.body(),
+            FuncVal::Static(f) => f.body(),
+            FuncVal::Const(f) => f.body(),
+            FuncVal::Mut(f) => f.body(),
         }
     }
 
-    pub(crate) fn composite_prelude(&self) -> Option<&Ctx> {
+    pub(crate) fn prelude(&self) -> Option<&Ctx> {
         match self {
-            FuncVal::Free(f) => f.composite_prelude(),
-            FuncVal::Static(f) => f.composite_prelude(),
-            FuncVal::Const(f) => f.composite_prelude(),
-            FuncVal::Mut(f) => f.composite_prelude(),
+            FuncVal::Free(f) => f.prelude(),
+            FuncVal::Static(f) => f.prelude(),
+            FuncVal::Const(f) => f.prelude(),
+            FuncVal::Mut(f) => f.prelude(),
         }
     }
 
-    pub(crate) fn composite_input_name(&self) -> Option<Symbol> {
+    pub(crate) fn input_name(&self) -> Option<Symbol> {
         match self {
-            FuncVal::Free(f) => f.composite_input_name(),
-            FuncVal::Static(f) => f.composite_input_name(),
-            FuncVal::Const(f) => f.composite_input_name(),
-            FuncVal::Mut(f) => f.composite_input_name(),
+            FuncVal::Free(f) => f.input_name(),
+            FuncVal::Static(f) => f.input_name(),
+            FuncVal::Const(f) => f.input_name(),
+            FuncVal::Mut(f) => f.input_name(),
         }
     }
 
-    pub(crate) fn composite_ctx_name(&self) -> Option<Symbol> {
+    pub(crate) fn ctx_name(&self) -> Option<Symbol> {
         match self {
             FuncVal::Free(_) => None,
             FuncVal::Static(_) => None,
-            FuncVal::Const(f) => {
-                let FuncImpl::Composite(c) = f.transformer() else {
-                    return None;
-                };
-                Some(c.ext.ctx_name.clone())
-            }
-            FuncVal::Mut(f) => {
-                let FuncImpl::Composite(c) = f.transformer() else {
-                    return None;
-                };
-                Some(c.ext.ctx_name.clone())
-            }
+            FuncVal::Const(f) => f.ctx_name(),
+            FuncVal::Mut(f) => f.ctx_name(),
         }
     }
 }
@@ -207,15 +197,12 @@ impl Debug for FreeFuncVal {
         let mut s = f.debug_struct("FreeFunc");
         match &self.transformer {
             FuncImpl::Primitive(p) => {
-                s.field("id", p.get_id());
-                s.field("is_extension", &p.is_extension());
+                p.dbg_field(&mut s);
+                p.dbg_field_ext(&mut s);
             }
             FuncImpl::Composite(c) => {
-                s.field("call_mode", &self.call_mode);
-                s.field("ask_mode", &self.ask_mode);
-                s.field("body", &c.body);
-                s.field("prelude", &c.prelude);
-                s.field("input_name", &c.input_name);
+                self.dbg_field(&mut s);
+                c.dbg_field(&mut s);
             }
         }
         s.finish()
@@ -259,15 +246,11 @@ impl Debug for StaticFuncVal {
         let mut s = f.debug_struct("StaticFunc");
         match &self.transformer {
             FuncImpl::Primitive(p) => {
-                s.field("id", p.get_id());
-                s.field("is_extension", &p.is_extension());
+                p.dbg_field(&mut s);
             }
             FuncImpl::Composite(c) => {
-                s.field("call_mode", &self.call_mode);
-                s.field("ask_mode", &self.ask_mode);
-                s.field("body", &c.body);
-                s.field("prelude", &c.prelude);
-                s.field("input_name", &c.input_name);
+                self.dbg_field(&mut s);
+                c.dbg_field(&mut s);
             }
         }
         s.finish()
@@ -311,16 +294,12 @@ impl Debug for ConstFuncVal {
         let mut s = f.debug_struct("ConstFunc");
         match &self.transformer {
             FuncImpl::Primitive(p) => {
-                s.field("id", p.get_id());
-                s.field("is_extension", &p.is_extension());
+                p.dbg_field(&mut s);
             }
             FuncImpl::Composite(c) => {
-                s.field("call_mode", &self.call_mode);
-                s.field("ask_mode", &self.ask_mode);
-                s.field("body", &c.body);
-                s.field("prelude", &c.prelude);
-                s.field("context_name", &c.ext.ctx_name);
-                s.field("input_name", &c.input_name);
+                self.dbg_field(&mut s);
+                c.dbg_field(&mut s);
+                c.dbg_field_ext(&mut s);
             }
         }
         s.finish()
@@ -364,16 +343,12 @@ impl Debug for MutFuncVal {
         let mut s = f.debug_struct("MutFunc");
         match &self.transformer {
             FuncImpl::Primitive(p) => {
-                s.field("id", p.get_id());
-                s.field("is_extension", &p.is_extension());
+                p.dbg_field(&mut s);
             }
             FuncImpl::Composite(c) => {
-                s.field("call_mode", &self.call_mode);
-                s.field("ask_mode", &self.ask_mode);
-                s.field("body", &c.body);
-                s.field("prelude", &c.prelude);
-                s.field("context_name", &c.ext.ctx_name);
-                s.field("input_name", &c.input_name);
+                self.dbg_field(&mut s);
+                c.dbg_field(&mut s);
+                c.dbg_field_ext(&mut s);
             }
         }
         s.finish()

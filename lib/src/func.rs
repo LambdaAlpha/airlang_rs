@@ -1,6 +1,7 @@
 use std::{
     fmt::{
         Debug,
+        DebugStruct,
         Formatter,
     },
     hash::{
@@ -47,9 +48,9 @@ pub(crate) enum FuncImpl<P, C> {
 
 #[derive(Clone)]
 pub(crate) struct Primitive<Ext> {
-    is_extension: bool,
-    id: Symbol,
-    ext: Ext,
+    pub(crate) is_extension: bool,
+    pub(crate) id: Symbol,
+    pub(crate) ext: Ext,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -196,35 +197,35 @@ impl<P, C> Func<P, C> {
         matches!(&self.transformer, FuncImpl::Primitive(_))
     }
 
-    pub(crate) fn primitive_id(&self) -> Option<Symbol> {
+    pub(crate) fn id(&self) -> Option<Symbol> {
         let FuncImpl::Primitive(p) = &self.transformer else {
             return None;
         };
         Some(p.id.clone())
     }
 
-    pub(crate) fn primitive_is_extension(&self) -> Option<bool> {
+    pub(crate) fn is_extension(&self) -> Option<bool> {
         let FuncImpl::Primitive(p) = &self.transformer else {
             return None;
         };
         Some(p.is_extension)
     }
 
-    pub(crate) fn composite_body(&self) -> Option<&Val> {
+    pub(crate) fn body(&self) -> Option<&Val> {
         let FuncImpl::Composite(c) = &self.transformer else {
             return None;
         };
         Some(&c.body)
     }
 
-    pub(crate) fn composite_prelude(&self) -> Option<&Ctx> {
+    pub(crate) fn prelude(&self) -> Option<&Ctx> {
         let FuncImpl::Composite(c) = &self.transformer else {
             return None;
         };
         Some(&c.prelude)
     }
 
-    pub(crate) fn composite_input_name(&self) -> Option<Symbol> {
+    pub(crate) fn input_name(&self) -> Option<Symbol> {
         let FuncImpl::Composite(c) = &self.transformer else {
             return None;
         };
@@ -282,17 +283,32 @@ impl<F> Hash for Primitive<F> {
 
 impl<T> Debug for Primitive<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("Primitive").field(&self.id).finish()
+        let mut s = f.debug_struct("Primitive");
+        self.dbg_field(&mut s);
+        s.finish()
     }
 }
 
-impl<C> Primitive<C> {
-    pub(crate) fn get_id(&self) -> &Symbol {
-        &self.id
+impl<T> Primitive<T> {
+    pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
+        s.field("id", &self.id);
+        s.field("is_extension", &self.is_extension);
     }
+}
 
-    pub(crate) fn is_extension(&self) -> bool {
-        self.is_extension
+impl<T> Composite<T> {
+    pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
+        s.field("body", &self.body);
+        s.field("prelude", &self.prelude);
+        s.field("input_name", &self.input_name);
+    }
+}
+
+impl<P, C> Func<P, C> {
+    pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
+        s.field("call_mode", &self.call_mode);
+        s.field("ask_mode", &self.ask_mode);
+        s.field("cacheable", &self.cacheable);
     }
 }
 

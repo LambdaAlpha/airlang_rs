@@ -1,4 +1,7 @@
-use std::rc::Rc;
+use std::{
+    fmt::DebugStruct,
+    rc::Rc,
+};
 
 use crate::{
     ctx::ref1::CtxMeta,
@@ -112,6 +115,13 @@ impl MutFunc {
             transformer,
         }
     }
+
+    pub(crate) fn ctx_name(&self) -> Option<Symbol> {
+        let FuncImpl::Composite(c) = self.transformer() else {
+            return None;
+        };
+        Some(c.ext.ctx_name.clone())
+    }
 }
 
 impl Primitive<MutPrimitiveExt> {
@@ -121,6 +131,12 @@ impl Primitive<MutPrimitiveExt> {
             id: Symbol::from_str(id),
             ext: MutPrimitiveExt { fn1: Rc::new(f) },
         }
+    }
+}
+
+impl Composite<MutCompositeExt> {
+    pub(crate) fn dbg_field_ext(&self, s: &mut DebugStruct) {
+        s.field("ctx_name", &self.ext.ctx_name);
     }
 }
 

@@ -1,6 +1,9 @@
 use std::{
     any::Any,
-    fmt::Debug,
+    fmt::{
+        Debug,
+        DebugStruct,
+    },
     hash::{
         Hash,
         Hasher,
@@ -116,6 +119,10 @@ impl Primitive<FreePrimitiveExt> {
             id: Symbol::from_str(id),
             ext: FreePrimitiveExt { fn1: Box::new(f) },
         }
+    }
+
+    pub(crate) fn dbg_field_ext(&self, s: &mut DebugStruct) {
+        s.field("fn", &self.ext.fn1);
     }
 }
 

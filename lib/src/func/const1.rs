@@ -1,4 +1,7 @@
-use std::rc::Rc;
+use std::{
+    fmt::DebugStruct,
+    rc::Rc,
+};
 
 use crate::{
     ctx::ref1::CtxMeta,
@@ -96,6 +99,13 @@ impl ConstFunc {
             transformer,
         }
     }
+
+    pub(crate) fn ctx_name(&self) -> Option<Symbol> {
+        let FuncImpl::Composite(c) = self.transformer() else {
+            return None;
+        };
+        Some(c.ext.ctx_name.clone())
+    }
 }
 
 impl Primitive<ConstPrimitiveExt> {
@@ -105,6 +115,12 @@ impl Primitive<ConstPrimitiveExt> {
             id: Symbol::from_str(id),
             ext: ConstPrimitiveExt { fn1: Rc::new(f) },
         }
+    }
+}
+
+impl Composite<ConstCompositeExt> {
+    pub(crate) fn dbg_field_ext(&self, s: &mut DebugStruct) {
+        s.field("ctx_name", &self.ext.ctx_name);
     }
 }
 
