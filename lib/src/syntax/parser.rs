@@ -200,7 +200,6 @@ const A_NONE: u8 = 2;
 
 const TYPE_CALL: u8 = 0;
 const TYPE_ASK: u8 = 1;
-const TYPE_NONE: u8 = 2;
 
 fn scope<'a, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
@@ -270,7 +269,7 @@ where
         UNIT => Ok((rest, Token::Default(From::from(Unit)))),
         TRUE => Ok((rest, Token::Default(From::from(Bool::t())))),
         FALSE => Ok((rest, Token::Default(From::from(Bool::f())))),
-        MIDDLE => scope_or_symbol::<A_NONE, TYPE_NONE, _, _>(s, rest),
+        MIDDLE => scope_or_symbol::<A_NONE, TYPE, _, _>(s, rest),
         LEFT => scope_or_symbol::<A_LEFT, TYPE, _, _>(s, rest),
         RIGHT => scope_or_symbol::<A_RIGHT, TYPE, _, _>(s, rest),
         CALL => scope_or_symbol::<A, TYPE_CALL, _, _>(s, rest),

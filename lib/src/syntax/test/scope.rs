@@ -82,5 +82,7 @@ pub fn expected() -> Vec<Repr> {
             no_compose(vec![symbol("b"), symbol("c")]),
             symbol("d"),
         ]),
+        infix(infix(int("1"), int("2"), int("3")), int("4"), int("5")),
+        no_compose(vec![int("1"), int("2"), int("3")]),
     ]
 }
