@@ -2,12 +2,12 @@ use std::hash::Hash;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Comment<A, B> {
-    pub note: A,
+    pub meta: A,
     pub value: B,
 }
 
 impl<A, B> Comment<A, B> {
-    pub fn new(note: A, value: B) -> Self {
-        Self { note, value }
+    pub fn new(meta: A, value: B) -> Self {
+        Self { meta, value }
     }
 }

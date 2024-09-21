@@ -551,7 +551,7 @@ where
     T: Eq + Hash,
 {
     generate_infix(
-        &comment.note,
+        &comment.meta,
         |s, _format, _indent| {
             s.push_str(COMMENT);
             Ok(())

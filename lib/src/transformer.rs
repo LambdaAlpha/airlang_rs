@@ -118,9 +118,9 @@ impl DefaultByVal {
         T: Transformer<Val, Val>,
     {
         let comment = Comment::from(comment);
-        let note = t.transform(ctx.reborrow(), comment.note);
+        let meta = t.transform(ctx.reborrow(), comment.meta);
         let value = t.transform(ctx, comment.value);
-        let comment = Comment::new(note, value);
+        let comment = Comment::new(meta, value);
         Val::Comment(comment.into())
     }
 }

@@ -45,14 +45,14 @@ impl From<CommentVal> for Comment<Val, Val> {
 
 impl From<&CommentRepr> for CommentVal {
     fn from(value: &CommentRepr) -> Self {
-        let comment = Comment::new(Val::from(&value.note), Val::from(&value.value));
+        let comment = Comment::new(Val::from(&value.meta), Val::from(&value.value));
         Self(Box::new(comment))
     }
 }
 
 impl From<CommentRepr> for CommentVal {
     fn from(value: CommentRepr) -> Self {
-        let comment = Comment::new(Val::from(value.note), Val::from(value.value));
+        let comment = Comment::new(Val::from(value.meta), Val::from(value.value));
         Self(Box::new(comment))
     }
 }
@@ -61,7 +61,7 @@ impl TryInto<CommentRepr> for &CommentVal {
     type Error = ReprError;
     fn try_into(self) -> Result<CommentRepr, Self::Error> {
         Ok(CommentRepr::new(
-            (&self.note).try_into()?,
+            (&self.meta).try_into()?,
             (&self.value).try_into()?,
         ))
     }
@@ -70,7 +70,7 @@ impl TryInto<CommentRepr> for &CommentVal {
 impl TryInto<CommentRepr> for CommentVal {
     type Error = ReprError;
     fn try_into(self) -> Result<CommentRepr, Self::Error> {
-        let comment = CommentRepr::new(self.0.note.try_into()?, self.0.value.try_into()?);
+        let comment = CommentRepr::new(self.0.meta.try_into()?, self.0.value.try_into()?);
         Ok(comment)
     }
 }

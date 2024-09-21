@@ -94,14 +94,14 @@ fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
-fn comment(note: Repr, value: Repr) -> Repr {
-    Repr::Comment(Box::new(CommentRepr::new(note, value)))
+fn comment(meta: Repr, value: Repr) -> Repr {
+    Repr::Comment(Box::new(CommentRepr::new(meta, value)))
 }
 
 fn no_compose(v: Vec<Repr>) -> Repr {
-    let note = Repr::Symbol(Symbol::from_str(MIDDLE));
+    let meta = Repr::Symbol(Symbol::from_str(MIDDLE));
     let value = Repr::List(v.into());
-    Repr::Comment(Box::new(CommentRepr::new(note, value)))
+    Repr::Comment(Box::new(CommentRepr::new(meta, value)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {

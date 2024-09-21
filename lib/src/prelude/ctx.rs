@@ -261,9 +261,9 @@ fn parse_pattern_ask(ask: AskVal, mut ctx: PatternCtx) -> Option<Pattern> {
 fn parse_pattern_comment(comment: CommentVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
     let comment = Comment::from(comment);
-    let note = parse_pattern(comment.note, ctx)?;
+    let meta = parse_pattern(comment.meta, ctx)?;
     let value = parse_pattern(comment.value, ctx)?;
-    Some(Pattern::Comment(Box::new(Comment::new(note, value))))
+    Some(Pattern::Comment(Box::new(Comment::new(meta, value))))
 }
 
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -378,9 +378,9 @@ fn assign_comment(mut ctx: MutFnCtx, pattern: Comment<Pattern, Pattern>, val: Va
         return Val::default();
     };
     let val = Comment::from(val);
-    let note = assign_pattern(ctx.reborrow(), pattern.note, val.note);
+    let meta = assign_pattern(ctx.reborrow(), pattern.meta, val.meta);
     let value = assign_pattern(ctx, pattern.value, val.value);
-    Val::Comment(Comment::new(note, value).into())
+    Val::Comment(Comment::new(meta, value).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

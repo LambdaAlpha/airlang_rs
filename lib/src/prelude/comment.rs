@@ -34,8 +34,8 @@ use crate::{
 pub(crate) struct CommentPrelude {
     pub(crate) new: Named<FuncVal>,
     pub(crate) apply: Named<FuncVal>,
-    pub(crate) get_note: Named<FuncVal>,
-    pub(crate) set_note: Named<FuncVal>,
+    pub(crate) get_meta: Named<FuncVal>,
+    pub(crate) set_meta: Named<FuncVal>,
     pub(crate) get_value: Named<FuncVal>,
     pub(crate) set_value: Named<FuncVal>,
 }
@@ -45,8 +45,8 @@ impl Default for CommentPrelude {
         CommentPrelude {
             new: new(),
             apply: apply(),
-            get_note: get_note(),
-            set_note: set_note(),
+            get_meta: get_meta(),
+            set_meta: set_meta(),
             get_value: get_value(),
             set_value: set_value(),
         }
@@ -57,8 +57,8 @@ impl Prelude for CommentPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.apply.put(m);
-        self.get_note.put(m);
-        self.set_note.put(m);
+        self.get_meta.put(m);
+        self.set_meta.put(m);
         self.get_value.put(m);
         self.set_value.put(m);
     }
@@ -99,32 +99,32 @@ where
     Eval.transform_comment(ctx, comment)
 }
 
-fn get_note() -> Named<FuncVal> {
+fn get_meta() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("comment.note", call_mode, ask_mode, true, fn_get_note)
+    named_const_fn("comment.meta", call_mode, ask_mode, true, fn_get_meta)
 }
 
-fn fn_get_note(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_meta(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
-            Val::Comment(comment) => comment.note.clone(),
+            Val::Comment(comment) => comment.meta.clone(),
             _ => Val::default(),
         },
         Either::Right(val) => match val {
-            Val::Comment(comment) => Comment::from(comment).note,
+            Val::Comment(comment) => Comment::from(comment).meta,
             _ => Val::default(),
         },
     })
 }
 
-fn set_note() -> Named<FuncVal> {
+fn set_meta() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("comment.set_note", call_mode, ask_mode, true, fn_set_note)
+    named_mut_fn("comment.set_meta", call_mode, ask_mode, true, fn_set_meta)
 }
 
-fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_meta(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -136,7 +136,7 @@ fn fn_set_note(ctx: MutFnCtx, input: Val) -> Val {
             let Some(Val::Comment(comment)) = comment.as_mut() else {
                 return Val::default();
             };
-            swap(&mut comment.note, &mut val);
+            swap(&mut comment.meta, &mut val);
             val
         }
         Either::Right(_) => Val::default(),

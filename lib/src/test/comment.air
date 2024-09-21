@@ -10,7 +10,7 @@
 -----
 2
 =====
-; [c = id ! 1 @ 2, comment.note .c]
+; [c = id ! 1 @ 2, comment.meta .c]
 -----
 1
 =====
@@ -18,7 +18,7 @@
 -----
 2
 =====
-comment.note ! id ! 1 @ 2
+comment.meta ! id ! 1 @ 2
 -----
 1
 =====
@@ -26,11 +26,11 @@ comment.value ! id ! 1 @ 2
 -----
 2
 =====
-; [c = id ! 1 @ 2, .c comment.set_note 3]
+; [c = id ! 1 @ 2, .c comment.set_meta 3]
 -----
 1
 =====
-; [c = id ! 1 @ 2, .c comment.set_note 3, &c]
+; [c = id ! 1 @ 2, .c comment.set_meta 3, &c]
 -----
 3 @ 2
 =====
