@@ -255,46 +255,45 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let (rest, src) = take_while(is_trivial_symbol)(src)?;
+    let (rest, s) = take_while(is_trivial_symbol)(src)?;
 
-    let mut chars = src.chars();
+    let mut chars = s.chars();
     let first = chars.next().unwrap();
 
     match first {
-        '0'..='9' => return token_all_consuming(src, rest, number),
-        BYTE => return token_all_consuming(src, rest, byte),
+        '0'..='9' => return token_all_consuming(s, rest, number),
+        BYTE => return token_all_consuming(s, rest, byte),
         _ => {}
     }
 
-    let symbol = |s| Ok((s, Token::Unquote(Symbol::from_str(src))));
-
-    match src {
+    match s {
         UNIT => Ok((rest, Token::Default(From::from(Unit)))),
         TRUE => Ok((rest, Token::Default(From::from(Bool::t())))),
         FALSE => Ok((rest, Token::Default(From::from(Bool::f())))),
-        MIDDLE => alt((
-            map(scope::<A_NONE, TYPE_NONE, _, _>, Token::Default),
-            symbol,
-        ))(rest),
-        LEFT => alt((map(scope::<A_LEFT, TYPE, _, _>, Token::Default), symbol))(rest),
-        RIGHT => alt((map(scope::<A_RIGHT, TYPE, _, _>, Token::Default), symbol))(rest),
-        CALL => alt((map(scope::<A, TYPE_CALL, _, _>, Token::Default), symbol))(rest),
-        ASK => alt((map(scope::<A, TYPE_ASK, _, _>, Token::Default), symbol))(rest),
-        LEFT_CALL => alt((
-            map(scope::<A_LEFT, TYPE_CALL, _, _>, Token::Default),
-            symbol,
-        ))(rest),
-        LEFT_ASK => alt((map(scope::<A_LEFT, TYPE_ASK, _, _>, Token::Default), symbol))(rest),
-        RIGHT_CALL => alt((
-            map(scope::<A_RIGHT, TYPE_CALL, _, _>, Token::Default),
-            symbol,
-        ))(rest),
-        RIGHT_ASK => alt((
-            map(scope::<A_RIGHT, TYPE_ASK, _, _>, Token::Default),
-            symbol,
-        ))(rest),
-        _ => symbol(rest),
+        MIDDLE => scope_or_symbol::<A_NONE, TYPE_NONE, _, _>(s, rest),
+        LEFT => scope_or_symbol::<A_LEFT, TYPE, _, _>(s, rest),
+        RIGHT => scope_or_symbol::<A_RIGHT, TYPE, _, _>(s, rest),
+        CALL => scope_or_symbol::<A, TYPE_CALL, _, _>(s, rest),
+        ASK => scope_or_symbol::<A, TYPE_ASK, _, _>(s, rest),
+        LEFT_CALL => scope_or_symbol::<A_LEFT, TYPE_CALL, _, _>(s, rest),
+        LEFT_ASK => scope_or_symbol::<A_LEFT, TYPE_ASK, _, _>(s, rest),
+        RIGHT_CALL => scope_or_symbol::<A_RIGHT, TYPE_CALL, _, _>(s, rest),
+        RIGHT_ASK => scope_or_symbol::<A_RIGHT, TYPE_ASK, _, _>(s, rest),
+        _ => Ok((rest, Token::Unquote(Symbol::from_str(s)))),
     }
+}
+
+fn scope_or_symbol<'a, const A: u8, const TYPE: u8, T, E>(
+    src: &'a str,
+    rest: &'a str,
+) -> IResult<&'a str, Token<T>, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+{
+    alt((map(scope::<A, TYPE, _, _>, Token::Default), |s| {
+        Ok((s, Token::Unquote(Symbol::from_str(src))))
+    }))(rest)
 }
 
 fn token_all_consuming<'a, T, E, F>(
@@ -409,37 +408,19 @@ where
 }
 
 fn compose_infix<const TYPE: u8, T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
-    match middle {
+    let middle = match middle {
         Token::Unquote(s) => match &*s {
-            PAIR => {
-                let pair = Pair::new(left, right);
-                From::from(pair)
-            }
-            CALL => {
-                let call = Call::new(left, right);
-                From::from(call)
-            }
-            ASK => {
-                let ask = Ask::new(left, right);
-                From::from(ask)
-            }
-            COMMENT => {
-                let comment = Comment::new(left, right);
-                From::from(comment)
-            }
-            _ => {
-                let middle = From::from(s);
-                let pair = Pair::new(left, right);
-                let pair = From::from(pair);
-                compose_type::<TYPE, _>(middle, pair)
-            }
+            PAIR => return From::from(Pair::new(left, right)),
+            CALL => return From::from(Call::new(left, right)),
+            ASK => return From::from(Ask::new(left, right)),
+            COMMENT => return From::from(Comment::new(left, right)),
+            _ => From::from(s),
         },
-        Token::Default(middle) => {
-            let pair = Pair::new(left, right);
-            let pair = From::from(pair);
-            compose_type::<TYPE, _>(middle, pair)
-        }
-    }
+        Token::Default(middle) => middle,
+    };
+    let pair = Pair::new(left, right);
+    let pair = From::from(pair);
+    compose_type::<TYPE, _>(middle, pair)
 }
 
 fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
