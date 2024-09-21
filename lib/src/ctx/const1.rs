@@ -23,7 +23,7 @@ use crate::{
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when
 evaluating a ctx-aware function. But a `&mut Ctx` is more compact and convenient, and we can
-change `&mut Ctx` back to `Ctx` at anytime we need by swapping its memory with a default ctx.
+change `&mut Ctx` back to `Ctx` at any time we need by swapping its memory with a default ctx.
 The `const` is just a flag and a runtime invariant.
 */
 pub struct ConstCtx<'a>(&'a mut Ctx);
