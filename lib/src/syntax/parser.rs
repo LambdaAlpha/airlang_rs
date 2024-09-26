@@ -441,27 +441,25 @@ fn compose_type<const TYPE: u8, T: ParseRepr>(func: T, input: T) -> T {
     }
 }
 
-fn items<'a, O1, O2, E, S, F, G>(
+fn items<'a, O1, O2, E, S, F>(
     item: F,
     separator: S,
-    last: G,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<O2>, E>
 where
     E: ParseError<&'a str>,
     S: Parser<&'a str, O1, E>,
-    F: Parser<&'a str, O2, E>,
-    G: Parser<&'a str, O2, E>,
+    F: Parser<&'a str, O2, E> + Clone,
 {
     let items_last = tuple((
         fold_many0(
-            terminated(item, trim(separator)),
+            terminated(item.clone(), trim(separator)),
             Vec::new,
             |mut items, item| {
                 items.push(item);
                 items
             },
         ),
-        opt(last),
+        opt(item),
     ));
     map(items_last, |(mut items, last)| {
         if let Some(last) = last {
@@ -476,11 +474,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(
-        compose::<A, TYPE, _, _>,
-        char1(SEPARATOR),
-        compose::<A, TYPE, _, _>,
-    );
+    let items = items(compose::<A, TYPE, _, _>, char1(SEPARATOR));
     let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
@@ -491,11 +485,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(
-        key_value::<A, TYPE, _, _>,
-        char1(SEPARATOR),
-        key_value::<A, TYPE, _, _>,
-    );
+    let items = items(key_value::<A, TYPE, _, _>, char1(SEPARATOR));
     let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
     let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
     context("map", f)(src)
