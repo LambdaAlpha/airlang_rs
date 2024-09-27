@@ -6,11 +6,11 @@ text.length "1"
 -----
 "1" : 1
 =====
-; [a = "12", text.length .a]
+do [a = "12", text.length .a]
 -----
 2
 =====
-; [a = "hello", b = "world", .a text.push " ", .a text.push &b, &a]
+do [a = "hello", b = "world", .a text.push " ", .a text.push &b, &a]
 -----
 "hello world"
 =====
@@ -18,7 +18,7 @@ text.length "1"
 -----
 "12"
 =====
-; [a = "1", b = "2", c = "3", . text.join [&a, &b, &c]]
+do [a = "1", b = "2", c = "3", . text.join [&a, &b, &c]]
 -----
 "123"
 =====

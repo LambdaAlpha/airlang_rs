@@ -14,7 +14,7 @@ is_unit .
 -----
 true
 =====
-; [a = true, is_unit .a]
+do [a = true, is_unit .a]
 -----
 false
 =====

@@ -1,204 +1,204 @@
-; [a = 1, read a]
+do [a = 1, read a]
 -----
 1
 =====
-; [a = 1, b = .a, read $b]
+do [a = 1, b = .a, read $b]
 -----
 1
 =====
-; [(a . constant) = 1, read a]
+do [(a . constant) = 1, read a]
 -----
 1
 =====
-; [a = 1, move a]
+do [a = 1, move a]
 -----
 1
 =====
-; [a = 1, move a, is_null a]
+do [a = 1, move a, is_null a]
 -----
 true
 =====
-; [(a . final) = 1, [move a, a]]
+do [(a . final) = 1, [move a, a]]
 -----
 [., 1]
 =====
-; [(a . constant) = 1, [move a, a]]
+do [(a . constant) = 1, [move a, a]]
 -----
 [., 1]
 =====
-; [a = .b, b = 1, move ! $a]
+do [a = .b, b = 1, move ! $a]
 -----
 1
 =====
-; [a = 1, a]
+do [a = 1, a]
 -----
 1
 =====
-; [a = 1, a = 2]
+do [a = 1, a = 2]
 -----
 1
 =====
-; [a = 1, a = 2, a]
+do [a = 1, a = 2, a]
 -----
 2
 =====
-; [a = 1, b = a, b]
+do [a = 1, b = a, b]
 -----
 1
 =====
-; [a = .b, $a = 1, b]
+do [a = .b, $a = 1, b]
 -----
 1
 =====
-; [..a = 1, $.a]
+do [..a = 1, $.a]
 -----
 1
 =====
-; [..p = 1 : 2, pair.first .$.p]
+do [..p = 1 : 2, pair.first .$.p]
 -----
 1
 =====
-; [(a . none) = 1, a]
+do [(a . none) = 1, a]
 -----
 1
 =====
-; [(a . none) = 1, invariant a]
+do [(a . none) = 1, invariant a]
 -----
 none
 =====
-; [(a . final) = 1, invariant a]
+do [(a . final) = 1, invariant a]
 -----
 final
 =====
-; [(a . constant) = 1, invariant a]
+do [(a . constant) = 1, invariant a]
 -----
 constant
 =====
-; [(a . {invariant : final}) = 1, invariant a]
+do [(a . {invariant : final}) = 1, invariant a]
 -----
 final
 =====
-; [(a . {}) = 1, invariant ! a]
+do [(a . {}) = 1, invariant ! a]
 -----
 none
 =====
-; [(a : b) = 1 : 2, a : b]
+do [(a : b) = 1 : 2, a : b]
 -----
 1 : 2
 =====
-; [a = 1, b = 2, (a : b) = 3 : 4]
+do [a = 1, b = 2, (a : b) = 3 : 4]
 -----
 1 : 2
 =====
-; [(a : b : c) = 1 : 2 : 3, [a, b, c]]
+do [(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-; [((a : b) . final) = 1 : 2, [invariant a, invariant b]]
+do [((a : b) . final) = 1 : 2, [invariant a, invariant b]]
 -----
 [final, final]
 =====
-; [((a . final) : (b . constant)) = 1 : 2, [invariant a, invariant b]]
+do [((a . final) : (b . constant)) = 1 : 2, [invariant a, invariant b]]
 -----
 [final, constant]
 =====
-; [((a : (b . final)) . constant) = 1 : 2, [invariant a, invariant b]]
+do [((a : (b . final)) . constant) = 1 : 2, [invariant a, invariant b]]
 -----
 [constant, final]
 =====
-; [(f a) = 1 ! 2, [f, a]]
+do [(f a) = 1 ! 2, [f, a]]
 -----
 [1, 2]
 =====
-; [(a b c) = 1 2 3, [a, b, c]]
+do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-; [(f ? b) = 1 ? 2, [f, b]]
+do [(f ? b) = 1 ? 2, [f, b]]
 -----
 [1, 2]
 =====
-; [(n @ v) = id ! 1 @ 2, [n, v]]
+do [(n ; v) = id ! 1 ; 2, [n, v]]
 -----
 [1, 2]
 =====
-; [[a, b, c] = [1, 2, 3], [a, b, c]]
+do [[a, b, c] = [1, 2, 3], [a, b, c]]
 -----
 [1, 2, 3]
 =====
-; [[a, b] = [1, 2, 3], [a, b]]
+do [[a, b] = [1, 2, 3], [a, b]]
 -----
 [1, 2]
 =====
-; [a = 1, b = 2, [a, b] = [3], [a, b]]
+do [a = 1, b = 2, [a, b] = [3], [a, b]]
 -----
 [3, .]
 =====
-; [a = 1, b = 2, [a, b] = [3]]
+do [a = 1, b = 2, [a, b] = [3]]
 -----
 [1, 2]
 =====
-; [{a : :, b : :} = {.a : 1, .b : 2, .c : 3}, [a, b]]
+do [{a : :, b : :} = {.a : 1, .b : 2, .c : 3}, [a, b]]
 -----
 [1, 2]
 =====
-; [{1 : a, 3 : b} = {1 : 2, 3 : 4}, [a, b]]
+do [{1 : a, 3 : b} = {1 : 2, 3 : 4}, [a, b]]
 -----
 [2, 4]
 =====
-; [a = 1, b = 2, {1 : a, 2 : b} = {1 : 2, 3 : 4}]
+do [a = 1, b = 2, {1 : a, 2 : b} = {1 : 2, 3 : 4}]
 -----
 {1 : 1, 2 : 2}
 =====
-; [(a . final) = 1, a = 2]
+do [(a . final) = 1, a = 2]
 -----
 .
 =====
-; [(a . final) = 1, a = 2, a]
+do [(a . final) = 1, a = 2, a]
 -----
 1
 =====
-; [(a . final) = 1, (a . final) = 2, a]
+do [(a . final) = 1, (a . final) = 2, a]
 -----
 1
 =====
-; [(a . final) = 1, (a . constant) = 2, a]
+do [(a . final) = 1, (a . constant) = 2, a]
 -----
 1
 =====
-; [(a . final) = 1 : 2, .a pair.set_first 3, a]
+do [(a . final) = 1 : 2, .a pair.set_first 3, a]
 -----
 3 : 2
 =====
-; [(a . constant) = 1 : 2, .a pair.set_first 3, a]
+do [(a . constant) = 1 : 2, .a pair.set_first 3, a]
 -----
 1 : 2
 =====
-; [(a . constant) = 1, a = 2, a]
+do [(a . constant) = 1, a = 2, a]
 -----
 1
 =====
-; [(a . constant) = 1, (a . final) = 2, a]
+do [(a . constant) = 1, (a . final) = 2, a]
 -----
 1
 =====
-; [(a . constant) = 1, (a . constant) = 2, a]
+do [(a . constant) = 1, (a . constant) = 2, a]
 -----
 1
 =====
-; [a = 1, a set_invariant final, invariant a]
+do [a = 1, a set_invariant final, invariant a]
 -----
 final
 =====
-; [(a . constant) = 1, a set_invariant final, invariant a]
+do [(a . constant) = 1, a set_invariant final, invariant a]
 -----
 constant
 =====
-; [a = 1, a set_invariant constant, invariant a]
+do [a = 1, a set_invariant constant, invariant a]
 -----
 constant
 =====
-; [(a . final) = 1, a set_invariant constant, invariant a]
+do [(a . final) = 1, a set_invariant constant, invariant a]
 -----
 constant
 =====
@@ -206,7 +206,7 @@ is_null a
 -----
 true
 =====
-; [a = 1, is_null a]
+do [a = 1, is_null a]
 -----
 false
 =====
@@ -214,11 +214,11 @@ fallback .
 -----
 false
 =====
-; [c = context ! {fallback : true}, c | fallback '!' .]
+do [c = context ! {fallback : true}, c | fallback '!' .]
 -----
 true
 =====
-; [c = context ! {fallback : true}, c | form ! $; ! [(a . constant) $= 1, a $set_invariant final, $invariant a]]
+do [c = context ! {fallback : true}, c | form ! $do ! [(a . constant) $= 1, a $set_invariant final, $invariant a]]
 -----
 final
 =====
@@ -230,20 +230,20 @@ mutable
 -----
 free
 =====
-; [(a . constant) = context ! {}, a | access '!' .]
+do [(a . constant) = context ! {}, a | access '!' .]
 -----
 constant
 =====
-; [a = context ! {}, a | access '!' .]
+do [a = context ! {}, a | access '!' .]
 -----
 mutable
 =====
-; [
+do [
     s1 = function ! {
         static : false,
         context_access : .free,
-        body : ; ! [a = a + 1, a],
-        prelude : context ! {variables : {a : 0, ; : :, = : :, + : :}},
+        body : do ! [a = a + 1, a],
+        prelude : context ! {variables : {a : 0, do : :, = : :, + : :}},
     },
     set_solver &s1,
     s2 = solver ! .,
@@ -252,11 +252,11 @@ mutable
 -----
 [1, 2, 3]
 =====
-; [set_solver ., s = solver ! ., .s == .]
+do [set_solver ., s = solver ! ., .s == .]
 -----
 true
 =====
-; [
+do [
     a = context ! {variables : {p : 1 : 2}},
     b = 3,
     a | pair.set_first '!' ..p : b,
@@ -265,7 +265,7 @@ true
 -----
 3 : 2
 =====
-; [
+do [
     a = context ! {variables : {p : 1 : 2, b : 3}},
     a | pair.set_first '!' ..p : .b,
     a | .&p,
@@ -273,7 +273,7 @@ true
 -----
 3 : 2
 =====
-; [
+do [
     set_first = pair.set_first,
     a = context ! {variables : {set_first : &set_first, p : 1 : 2, b : 3}},
     a | id ! .p set_first b,
@@ -282,11 +282,11 @@ true
 -----
 3 : 2
 =====
-; [(c : a) = (context ! {variables : {= : :, a : 1}}) |: = '!' .a : 2, [c | .a, &a]]
+do [(c : a) = (context ! {variables : {= : :, a : 1}}) |: = '!' .a : 2, [c | .a, &a]]
 -----
 [2, 1]
 =====
-; [
+do [
     a = context ! {variables : {b : context ! {variables : {c : 1}}}},
     a | form ! b $| ..c
 ]
@@ -301,7 +301,7 @@ true
 -----
 2
 =====
-; [a = 1, . | move '!' .a, a]
+do [a = 1, . | move '!' .a, a]
 -----
 1
 =====
@@ -317,30 +317,30 @@ context.represent ! context ! {variables : {a : 1 . .final}}
 -----
 {variables : {a : 1 . final}}
 =====
-; [{variables : m} = context.represent ! context ! {variables : {b : context ! {}}}, b = .m map.remove .b, type_of .b]
+do [{variables : m} = context.represent ! context ! {variables : {b : context ! {}}}, b = .m map.remove .b, type_of .b]
 -----
 context
 =====
-; [a = prelude ! ., a | not '!' true]
+do [a = prelude ! ., a | not '!' true]
 -----
 false
 =====
-; [a = prelude ! ., a | is_null '!' .prelude]
+do [a = prelude ! ., a | is_null '!' .prelude]
 -----
 false
 =====
-; [a = 1, b = prelude ! ., b | is_null '!' .a]
+do [a = 1, b = prelude ! ., b | is_null '!' .a]
 -----
 true
 =====
-; [a = prelude ! ., a | is_null '!' .prelude]
+do [a = prelude ! ., a | is_null '!' .prelude]
 -----
 false
 =====
-; [a = 1, b = self ! ., b | .a]
+do [a = 1, b = self ! ., b | .a]
 -----
 1
 =====
-; [a = self ! ., b = 1, a | is_null '!' .b]
+do [a = self ! ., b = 1, a | is_null '!' .b]
 -----
 true

@@ -2,11 +2,11 @@
 -----
 1 : 2
 =====
-; [a = 1 : 2, pair.first .a]
+do [a = 1 : 2, pair.first .a]
 -----
 1
 =====
-; [a = 1 : 2, pair.second .a]
+do [a = 1 : 2, pair.second .a]
 -----
 2
 =====
@@ -18,18 +18,18 @@ pair.second ! 1 : 2
 -----
 2
 =====
-; [a = 1 : 2, .a pair.set_first 3]
+do [a = 1 : 2, .a pair.set_first 3]
 -----
 1
 =====
-; [a = 1 : 2, .a pair.set_first 3, &a]
+do [a = 1 : 2, .a pair.set_first 3, &a]
 -----
 3 : 2
 =====
-; [a = 1 : 2, .a pair.set_second 3]
+do [a = 1 : 2, .a pair.set_second 3]
 -----
 2
 =====
-; [a = 1 : 2, .a pair.set_second 3, &a]
+do [a = 1 : 2, .a pair.set_second 3, &a]
 -----
 1 : 3

@@ -1,4 +1,4 @@
-; [
+do [
     f = function ! {
         body : i,
     },
@@ -7,7 +7,7 @@
 -----
 false
 =====
-; [
+do [
     f = function ! {
         body : $not ! i
     },
@@ -16,7 +16,7 @@ false
 -----
 true
 =====
-; [
+do [
     f = function ! {
         body : not ! i,
         prelude : context ! {variables :  {not : :}},
@@ -26,7 +26,7 @@ true
 -----
 true
 =====
-; [
+do [
     f = function ! {
         body : n ! a,
         input_name : .a,
@@ -37,7 +37,7 @@ true
 -----
 true
 =====
-; [
+do [
     f = function ! {
         body : i,
         call_mode : id,
@@ -47,7 +47,7 @@ true
 -----
 not true
 =====
-; [
+do [
     f = function ! {
         body : $not ! i,
         call_mode : eval,
@@ -57,7 +57,7 @@ not true
 -----
 true
 =====
-; [
+do [
     f = function ! {
         body : i,
         call_mode : form,
@@ -67,7 +67,7 @@ true
 -----
 not true
 =====
-; [
+do [
     a = 1,
     b = 2,
     f = function ! {
@@ -79,7 +79,7 @@ not true
 -----
 {1 : 2}
 =====
-; [
+do [
     b = 1,
     f = function ! {
         body : i,
@@ -90,7 +90,7 @@ not true
 -----
 a : 1
 =====
-; [
+do [
     b = 1,
     f = function ! {
         body : i,
@@ -101,7 +101,7 @@ a : 1
 -----
 [a : 1, $a]
 =====
-; [
+do [
     f = function ! {
         body : i,
         call_mode : id,
@@ -111,7 +111,7 @@ a : 1
 -----
 not false
 =====
-; [
+do [
     a = 1,
     f = function ! {
         body : i,
@@ -122,7 +122,7 @@ not false
 -----
 [1, a, a, a, $a, a]
 =====
-; [
+do [
     a = 1,
     f = function ! {
         body : i,
@@ -133,7 +133,7 @@ not false
 -----
 [1, a, a, a, $a, a]
 =====
-; [
+do [
     a = 1,
     c = 2,
     f = function ! {
@@ -145,7 +145,7 @@ not false
 -----
 {a : 1, b : a, 2 : d}
 =====
-; [
+do [
     a = 1,
     c = 2,
     f = function ! {
@@ -157,19 +157,19 @@ not false
 -----
 {a : 1, b : a, c : d}
 =====
-; [
+do [
     f = function ! {
-        body : ; ! [a = a + 1, a],
+        body : do ! [a = a + 1, a],
         context_access : .free,
         static : false,
-        prelude : context ! {variables : {; : :, = : :, + : :, a : 0}},
+        prelude : context ! {variables : {do : :, = : :, + : :, a : 0}},
     },
     [.f ., .f ., .f .]
 ]
 -----
 [1, 2, 3]
 =====
-; [
+do [
     a = 1,
     f = function ! {
         body : c | ..a,
@@ -182,7 +182,7 @@ not false
 -----
 .
 =====
-; [
+do [
     a = 1,
     f = function ! {
         body : c | ..a,
@@ -194,7 +194,7 @@ not false
 -----
 1
 =====
-; [
+do [
     a = 1,
     f = function ! {
         body : c | ..a,
@@ -206,7 +206,7 @@ not false
 -----
 1
 =====
-; [
+do [
     f = function ! {
         body : c | = '!' i : 2,
         call_mode : id,
@@ -226,7 +226,7 @@ not false
 -----
 2
 =====
-; [
+do [
     f = function ! {
         body : c | = '!' i : 2,
         call_mode : id,
@@ -246,7 +246,7 @@ not false
 -----
 1
 =====
-; [
+do [
     f = function ! {
         body : c | = '!' i : 2,
         call_mode : id,
@@ -266,7 +266,7 @@ not false
 -----
 1
 =====
-; [
+do [
     f = function ! {
         body : 1,
         context_access : .constant,
@@ -276,7 +276,7 @@ not false
 -----
 1
 =====
-; [
+do [
     a = 1,
     f = function ! {
         context_name : .ctx,
@@ -290,7 +290,7 @@ not false
 -----
 true
 =====
-; [
+do [
     a = 1,
     f = function ! {
         context_name : .ctx,
@@ -362,7 +362,7 @@ function.context_access .eval
 -----
 mutable
 =====
-; [f = function ! {}, function.context_access .f]
+do [f = function ! {}, function.context_access .f]
 -----
 mutable
 =====
@@ -378,11 +378,11 @@ function.call_mode .read
 -----
 form
 =====
-; [f = function ! {}, function.call_mode .f]
+do [f = function ! {}, function.call_mode .f]
 -----
 eval
 =====
-; [
+do [
     f = function ! {
         call_mode : {pair : eval : form},
     },
@@ -391,7 +391,7 @@ eval
 -----
 {pair : eval : form}
 =====
-; [
+do [
     f = function ! {
         call_mode : {list : [eval, form, id] : form},
     },
@@ -400,7 +400,7 @@ eval
 -----
 {list : [eval, form, id] : form}
 =====
-; [
+do [
     f = function ! {
         call_mode : {map : {a : eval, b : id} : id : form},
     },
@@ -409,7 +409,7 @@ eval
 -----
 {map : {a : eval, b : id} : id : form}
 =====
-; [
+do [
     f = function ! {
         ask_mode : {map : {a : form} : eval : id},
     },
@@ -418,7 +418,7 @@ eval
 -----
 {map : {a : form} : eval : id}
 =====
-; [f = function ! {cacheable : false}, function.is_cacheable .f]
+do [f = function ! {cacheable : false}, function.is_cacheable .f]
 -----
 false
 =====
@@ -430,7 +430,7 @@ function.is_primitive .not
 -----
 true
 =====
-; [f = function ! {}, function.is_primitive .f]
+do [f = function ! {}, function.is_primitive .f]
 -----
 false
 =====
@@ -442,7 +442,7 @@ function.is_static .not
 -----
 true
 =====
-; [f = function ! {}, function.is_static .f]
+do [f = function ! {}, function.is_static .f]
 -----
 false
 =====
@@ -450,15 +450,15 @@ function.id .not
 -----
 not
 =====
-; [neg = not, function.id .neg]
+do [neg = not, function.id .neg]
 -----
 not
 =====
-; [f = function ! {body : i}, function.body .f]
+do [f = function ! {body : i}, function.body .f]
 -----
 i
 =====
-; [
+do [
     ctx = context ! {variables : {a : 1}},
     f = function ! {prelude : ctx},
     (function.prelude .f) == .ctx
@@ -466,10 +466,10 @@ i
 -----
 true
 =====
-; [f = function ! {}, function.input_name .f]
+do [f = function ! {}, function.input_name .f]
 -----
 i
 =====
-; [f = function ! {context_access : .constant}, function.context_name .f]
+do [f = function ! {context_access : .constant}, function.context_name .f]
 -----
 c

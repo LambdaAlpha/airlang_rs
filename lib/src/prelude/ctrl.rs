@@ -124,7 +124,7 @@ fn sequence() -> Named<FuncVal> {
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    named_mut_fn(";", call_mode, ask_mode, false, func)
+    named_mut_fn("do", call_mode, ask_mode, false, func)
 }
 
 fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -253,7 +253,7 @@ fn match_ordered() -> Named<FuncVal> {
         |ctx, val| fn_match_ordered(ctx, val),
         |ctx, val| fn_match_ordered(ctx, val),
     );
-    named_mut_fn(";match", call_mode, ask_mode, false, func)
+    named_mut_fn("do_match", call_mode, ask_mode, false, func)
 }
 
 fn fn_match_ordered<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val

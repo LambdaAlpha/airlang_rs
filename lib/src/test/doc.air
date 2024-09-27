@@ -1,13 +1,13 @@
-"A demo of implementing a C-like for loop function" @ ; ! [
+"A demo of implementing a C-like for loop function" ; do ! [
     c_for = function ! {
         input_name : .args,
         context_name : .ctx,
         context_access : .mutable,
         call_mode : id,
         prelude : prelude ! .,
-        body : ; ! [
+        body : do ! [
             [init, condition, next, body] = args,
-            ctx | form ! ; ! [
+            ctx | form ! do ! [
                 .&init,
                 .&condition while [
                     .&body,

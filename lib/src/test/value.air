@@ -1,72 +1,72 @@
-; [u = any ! .unit, type_of .u]
+do [u = any ! .unit, type_of .u]
 -----
 unit
 =====
-; [b = any ! .boolean, type_of .b]
+do [b = any ! .boolean, type_of .b]
 -----
 boolean
 =====
-; [i = any ! .integer, type_of .i]
+do [i = any ! .integer, type_of .i]
 -----
 integer
 =====
-; [f = any ! .number, type_of .f]
+do [f = any ! .number, type_of .f]
 -----
 number
 =====
-; [b = any ! .byte, type_of .b]
+do [b = any ! .byte, type_of .b]
 -----
 byte
 =====
-; [s = any ! .symbol, type_of .s]
+do [s = any ! .symbol, type_of .s]
 -----
 symbol
 =====
-; [s = any ! .text, type_of .s]
+do [s = any ! .text, type_of .s]
 -----
 text
 =====
-; [p = any ! .pair, type_of .p]
+do [p = any ! .pair, type_of .p]
 -----
 pair
 =====
-; [c = any ! .call, type_of .c]
+do [c = any ! .call, type_of .c]
 -----
 call
 =====
-; [a = any ! .ask, type_of .a]
+do [a = any ! .ask, type_of .a]
 -----
 ask
 =====
-; [c = any ! .comment, type_of .c]
+do [c = any ! .comment, type_of .c]
 -----
 comment
 =====
-; [c = any ! .context, type_of .c]
+do [c = any ! .context, type_of .c]
 -----
 context
 =====
-; [f = any ! .function, type_of .f]
+do [f = any ! .function, type_of .f]
 -----
 function
 =====
-; [a = any ! .case, type_of .a]
+do [a = any ! .case, type_of .a]
 -----
 case
 =====
-; [a = any ! .answer, type_of .a]
+do [a = any ! .answer, type_of .a]
 -----
 answer
 =====
-; [e = any ! .extension, type_of .e]
+do [e = any ! .extension, type_of .e]
 -----
 extension
 =====
-; [a = ., type_of .a]
+do [a = ., type_of .a]
 -----
 unit
 =====
-; [a = true, type_of .a]
+do [a = true, type_of .a]
 -----
 boolean
 =====
@@ -74,63 +74,63 @@ type_of ! not ! true
 -----
 false : boolean
 =====
-; [a = 1, type_of .a]
+do [a = 1, type_of .a]
 -----
 integer
 =====
-; [a = 1.0, type_of .a]
+do [a = 1.0, type_of .a]
 -----
 number
 =====
-; [a = #ff, type_of .a]
+do [a = #ff, type_of .a]
 -----
 byte
 =====
-; [a = .a, type_of .a]
+do [a = .a, type_of .a]
 -----
 symbol
 =====
-; [a = "", type_of .a]
+do [a = "", type_of .a]
 -----
 text
 =====
-; [a = 1 : 2, type_of .a]
+do [a = 1 : 2, type_of .a]
 -----
 pair
 =====
-; [a = id ! f ! a, type_of .a]
+do [a = id ! f ! a, type_of .a]
 -----
 call
 =====
-; [a = id ! f ? a, type_of .a]
+do [a = id ! f ? a, type_of .a]
 -----
 ask
 =====
-; [c = id ! n @ v, type_of .c]
+do [c = id ! n ; v, type_of .c]
 -----
 comment
 =====
-; [a = [], type_of .a]
+do [a = [], type_of .a]
 -----
 list
 =====
-; [a = {}, type_of .a]
+do [a = {}, type_of .a]
 -----
 map
 =====
-; [a = function ! {body : $input}, type_of .a]
+do [a = function ! {body : $input}, type_of .a]
 -----
 function
 =====
-; [a = context ! {}, type_of .a]
+do [a = context ! {}, type_of .a]
 -----
 context
 =====
-; [a = case ! {function : not, input : true, output : false}, type_of .a]
+do [a = case ! {function : not, input : true, output : false}, type_of .a]
 -----
 case
 =====
-; [a = case.cache ! not '!' true, type_of .a]
+do [a = case.cache ! not '!' true, type_of .a]
 -----
 case
 =====
@@ -178,19 +178,19 @@ true
 -----
 true
 =====
-; [a = id ! n @ v, b = id ! n @ v, (.a == .b) and .a != .]
+do [a = id ! n ; v, b = id ! n ; v, (.a == .b) and .a != .]
 -----
 true
 =====
-; [a = function ! {body : $input}, b = function ! {body : $input}, (.a == .b) and .a != .]
+do [a = function ! {body : $input}, b = function ! {body : $input}, (.a == .b) and .a != .]
 -----
 true
 =====
-; [a = context ! {}, b = context ! {}, (.a == .b) and .a != .]
+do [a = context ! {}, b = context ! {}, (.a == .b) and .a != .]
 -----
 true
 =====
-; [
+do [
     a = case ! {function : not, input : true, output : false},
     b = case ! {function : not, input : true, output : false},
     (.a == .b) and .a != .
@@ -198,7 +198,7 @@ true
 -----
 true
 =====
-; [
+do [
     a = answer.maybe ! 1,
     b = answer.maybe ! 1,
     (.a == .b) and .a != .
@@ -222,35 +222,35 @@ true
 -----
 false
 =====
-; [a = 1, .a == 1]
+do [a = 1, .a == 1]
 -----
 true
 =====
-; [a = 1, .a != 1]
+do [a = 1, .a != 1]
 -----
 false
 =====
-; [a = 1, 1 == .a]
+do [a = 1, 1 == .a]
 -----
 true
 =====
-; [a = 1, 1 != .a]
+do [a = 1, 1 != .a]
 -----
 false
 =====
-; [a = 1, b = 1, .a == .b]
+do [a = 1, b = 1, .a == .b]
 -----
 true
 =====
-; [a = 1, b = 1, .a != .b]
+do [a = 1, b = 1, .a != .b]
 -----
 false
 =====
-; [a = 1, .a == .a]
+do [a = 1, .a == .a]
 -----
 true
 =====
-; [a = 1, .a != .a]
+do [a = 1, .a != .a]
 -----
 false
 =====
@@ -262,6 +262,6 @@ false
 -----
 .
 =====
-; [..a = 1, .$.a == 1]
+do [..a = 1, .$.a == 1]
 -----
 true

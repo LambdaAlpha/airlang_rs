@@ -1,100 +1,100 @@
-; 1
+do 1
 -----
 1
 =====
-; []
+do []
 -----
 .
 =====
-; [1]
+do [1]
 -----
 1
 =====
-; [1, 2]
+do [1, 2]
 -----
 2
 =====
-; [; [1, 2], 3]
+do [do [1, 2], 3]
 -----
 3
 =====
-; [1, ; [2, 3]]
+do [1, do [2, 3]]
 -----
 3
 =====
-; [1, 2, true break 3, 4]
+do [1, 2, true break 3, 4]
 -----
 3
 =====
-; [1, 2, .break ., 3]
+do [1, 2, .break ., 3]
 -----
 .
 =====
-; [1, 2, .break 3, 4]
+do [1, 2, .break 3, 4]
 -----
 4
 =====
-; [1, 2, false else_break 3, 4]
+do [1, 2, false else_break 3, 4]
 -----
 3
 =====
-; [1, 2, .else_break ., 3]
+do [1, 2, .else_break ., 3]
 -----
 3
 =====
-; [1, 2, .else_break 3, 4]
+do [1, 2, .else_break 3, 4]
 -----
 3
 =====
-; [1, true break ; ! [2, true break 3, 4], 5]
+do [1, true break do ! [2, true break 3, 4], 5]
 -----
 3
 =====
-; [1, false else_break ; ! [2, false else_break 3, 4], 5]
+do [1, false else_break do ! [2, false else_break 3, 4], 5]
 -----
 3
 =====
-; [1, false break ; ! [true break 3, 4], 5]
+do [1, false break do ! [true break 3, 4], 5]
 -----
 5
 =====
-; [1, true else_break ; ! [false else_break 3, 4], 5]
+do [1, true else_break do ! [false else_break 3, 4], 5]
 -----
 5
 =====
-; [b = 2, (b > 0) break b - 1, b + 1]
+do [b = 2, (b > 0) break b - 1, b + 1]
 -----
 1
 =====
-; [b = 2, (b > 0) else_break b - 1, b + 1]
+do [b = 2, (b > 0) else_break b - 1, b + 1]
 -----
 3
 =====
-; [1, true continue 2, 3]
+do [1, true continue 2, 3]
 -----
 2
 =====
-; [1, .continue ., 2]
+do [1, .continue ., 2]
 -----
 .
 =====
-; [1, .continue 2, 3]
+do [1, .continue 2, 3]
 -----
 3
 =====
-; [1, false else_continue 2, 3]
+do [1, false else_continue 2, 3]
 -----
 2
 =====
-; [1, .else_continue ., 2]
+do [1, .else_continue ., 2]
 -----
 2
 =====
-; [1, .else_continue 2, 3]
+do [1, .else_continue 2, 3]
 -----
 2
 =====
-; [[]]
+do [[]]
 -----
 []
 =====
@@ -122,11 +122,11 @@ false if_not 1 : .
 -----
 1
 =====
-; [a = 1, true if 1 : a = 2, a]
+do [a = 1, true if 1 : a = 2, a]
 -----
 1
 =====
-; [a = 1, false if_not 1 : a = 2, a]
+do [a = 1, false if_not 1 : a = 2, a]
 -----
 1
 =====
@@ -178,7 +178,7 @@ false if_not (eval []) : .
 -----
 []
 =====
-; [a = 1, a match {1 : 1 + 2, 2 : 2 + 3} : .]
+do [a = 1, a match {1 : 1 + 2, 2 : 2 + 3} : .]
 -----
 3
 =====
@@ -190,15 +190,15 @@ false if_not (eval []) : .
 -----
 4
 =====
-; [1 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
+do [1 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
 -----
 [1, ., .]
 =====
-; [3 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
+do [3 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
 -----
 [., ., 3]
 =====
-; [a = id ! a, a match {a : 1, b : 2} : .]
+do [a = id ! a, a match {a : 1, b : 2} : .]
 -----
 1
 =====
@@ -226,10 +226,10 @@ true match {true : 1, false : 2} : 3
 -----
 1
 =====
-; [
-    2 ;match [
+do [
+    2 do_match [
         (a = 1) : b = 1,
-        (; [c = 2, 2]) : d = 2,
+        (do [c = 2, 2]) : d = 2,
         (e = 3) : f = 3
     ] : g = 4,
     [a, b, c, d, e, f, g]
@@ -237,23 +237,23 @@ true match {true : 1, false : 2} : 3
 -----
 [1, ., 2, 2, ., ., .]
 =====
-1 ;match [1 : [2, true break 3, 4]] : 5
+1 do_match [1 : [2, true break 3, 4]] : 5
 -----
 3
 =====
-1 ;match [1 : [2, true continue 3, 4]] : 5
+1 do_match [1 : [2, true continue 3, 4]] : 5
 -----
 3
 =====
-; [a = 1, false while a = 2, a]
+do [a = 1, false while a = 2, a]
 -----
 1
 =====
-; [a = 1, true while_not a = 2, a]
+do [a = 1, true while_not a = 2, a]
 -----
 1
 =====
-; [
+do [
     a = 0,
     b = 0,
     (a < 100) while [
@@ -265,7 +265,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 0,
     b = 0,
     (a >= 100) while_not [
@@ -277,7 +277,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 42,
     b = 24,
     (a <> b) while (a > b) if (
@@ -290,7 +290,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 42,
     b = 24,
     (a == b) while_not (a > b) if (
@@ -303,7 +303,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b < 5) while [
@@ -316,7 +316,7 @@ true match {true : 1, false : 2} : 3
 -----
 13
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b >= 5) while_not [
@@ -329,7 +329,7 @@ true match {true : 1, false : 2} : 3
 -----
 13
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b < 5) while [
@@ -342,7 +342,7 @@ true match {true : 1, false : 2} : 3
 -----
 13
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b >= 5) while_not [
@@ -355,7 +355,7 @@ true match {true : 1, false : 2} : 3
 -----
 13
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b < 5) while [
@@ -367,7 +367,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b >= 5) while_not [
@@ -379,7 +379,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b < 5) while [
@@ -391,7 +391,7 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [
+do [
     a = 0,
     b = 0,
     (b >= 5) while_not [
@@ -403,11 +403,11 @@ true match {true : 1, false : 2} : 3
 -----
 6
 =====
-; [sum = 0, [1, 2, 3, 4, 5] for i : sum = sum + i, sum]
+do [sum = 0, [1, 2, 3, 4, 5] for i : sum = sum + i, sum]
 -----
 15
 =====
-; [sum = 0, [] for i : sum = sum + i, sum]
+do [sum = 0, [] for i : sum = sum + i, sum]
 -----
 0
 =====
@@ -415,11 +415,11 @@ true match {true : 1, false : 2} : 3
 -----
 true
 =====
-; [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
+do [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
 -----
 2
 =====
-; [
+do [
     a = 0,
     b = 0,
     [1, 2, 3, 4, 5] for i : [
@@ -432,15 +432,15 @@ true
 -----
 15 : 12
 =====
-; [a = [], [1, 2, 3, 4, 5] for i : .a list.push i + 1, a]
+do [a = [], [1, 2, 3, 4, 5] for i : .a list.push i + 1, a]
 -----
 [2, 3, 4, 5, 6]
 =====
-; [sum = 0, 10 for i : sum = sum + i, sum]
+do [sum = 0, 10 for i : sum = sum + i, sum]
 -----
 45
 =====
-; [sum = 0, 0 for i : sum = sum + i, sum]
+do [sum = 0, 0 for i : sum = sum + i, sum]
 -----
 0
 =====

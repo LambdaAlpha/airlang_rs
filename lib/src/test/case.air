@@ -1,4 +1,4 @@
-; [
+do [
     p = case ! {
         function : not,
         input : 1,
@@ -9,7 +9,7 @@
 -----
 1
 =====
-; [
+do [
     p = case ! {
         function : not,
         input : 1,
@@ -20,7 +20,7 @@
 -----
 2
 =====
-; [
+do [
     p = case ! {
         function : not,
         input : 1,
@@ -31,7 +31,7 @@
 -----
 true
 =====
-; [
+do [
     p = case ! {
         function : "not",
         input : 1,
@@ -42,7 +42,7 @@ true
 -----
 true
 =====
-; [
+do [
     map_mode = function ! {
         body : i,
         call_mode : {map : {} : id : eval},
@@ -57,7 +57,7 @@ true
 -----
 true
 =====
-; [
+do [
     m = case.represent ! case.cache ! not '!' true,
     map_mode = function ! {
         body : i,
@@ -74,7 +74,7 @@ true
 -----
 true
 =====
-; [
+do [
     p = case ! {
         function : not,
         input : 1,
@@ -86,28 +86,28 @@ true
 -----
 true
 =====
-; [
+do [
     p = case.cache ! not '!' (not false),
     case.input .p
 ]
 -----
 true
 =====
-; [
+do [
     p = case.cache ! not '!' true,
     case.output .p
 ]
 -----
 false
 =====
-; [
+do [
     p = case.cache ! not '!' true,
     (case.function .p) == .not
 ]
 -----
 true
 =====
-; [
+do [
     p = case.cache ! not '!' true,
     case.is_cache .p
 ]

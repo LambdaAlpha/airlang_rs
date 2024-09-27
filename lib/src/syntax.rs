@@ -49,7 +49,7 @@ pub(crate) const LEFT_ASK: &str = "<?";
 pub(crate) const RIGHT_CALL: &str = ">!";
 pub(crate) const RIGHT_ASK: &str = ">?";
 
-pub(crate) const COMMENT: &str = "@";
+pub(crate) const COMMENT: &str = ";";
 pub(crate) const PAIR: &str = ":";
 pub(crate) const CALL: &str = "!";
 pub(crate) const ASK: &str = "?";
