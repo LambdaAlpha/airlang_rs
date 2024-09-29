@@ -2,6 +2,7 @@ use crate::syntax::{
     repr::Repr,
     test::{
         ask,
+        call,
         call_list,
         infix,
         infix_ask,
@@ -51,10 +52,6 @@ pub fn expected() -> Vec<Repr> {
         infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
         infix_ask(int("1"), int("2"), infix_ask(int("3"), int("4"), int("5"))),
         ask(int("1"), int("2")),
-        infix(infix(int("1"), int("2"), int("3")), int("4"), int("5")),
-        infix_ask(infix_ask(int("1"), int("2"), int("3")), int("4"), int("5")),
-        infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
-        infix_ask(int("1"), int("2"), infix_ask(int("3"), int("4"), int("5"))),
         int("1"),
         int("1"),
         no_compose(vec![int("1"), int("2")]),
@@ -84,5 +81,10 @@ pub fn expected() -> Vec<Repr> {
         ]),
         infix(infix(int("1"), int("2"), int("3")), int("4"), int("5")),
         no_compose(vec![int("1"), int("2"), int("3")]),
+        call(int("1"), call(int("2"), int("3"))),
+        call(int("1"), call(int("2"), call(int("3"), int("4")))),
+        call(call(int("1"), int("2")), int("3")),
+        ask(int("1"), ask(int("2"), int("3"))),
+        infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
     ]
 }

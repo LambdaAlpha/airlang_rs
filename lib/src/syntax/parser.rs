@@ -80,8 +80,6 @@ use crate::{
         COMMENT,
         FALSE,
         LEFT,
-        LEFT_ASK,
-        LEFT_CALL,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
@@ -89,8 +87,6 @@ use crate::{
         MIDDLE,
         PAIR,
         RIGHT,
-        RIGHT_ASK,
-        RIGHT_CALL,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -140,7 +136,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = all_consuming(trim(compose::<A_RIGHT, TYPE_CALL, _, _>));
+    let f = all_consuming(trim(compose::<2, A_RIGHT, TYPE_CALL, _, _>));
     context("top", f)(src)
 }
 
@@ -201,16 +197,16 @@ const A_NONE: u8 = 2;
 const TYPE_CALL: u8 = 0;
 const TYPE_ASK: u8 = 1;
 
-fn scope<'a, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn scope<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let f = delimited_trim(SCOPE_LEFT, compose::<A, TYPE, _, _>, SCOPE_RIGHT);
+    let f = delimited_trim(SCOPE_LEFT, compose::<N, A, TYPE, _, _>, SCOPE_RIGHT);
     context("scope", f)(src)
 }
 
-fn token<'a, const A: u8, const TYPE: u8, T: ParseRepr, E>(
+fn token<'a, const N: u8, const A: u8, const TYPE: u8, T: ParseRepr, E>(
     src: &'a str,
 ) -> IResult<&'a str, Token<T>, E>
 where
@@ -219,18 +215,18 @@ where
     let (src, first) = peek(anychar)(src)?;
 
     let parser = match first {
-        LIST_LEFT => |s| map(list1::<A, TYPE, _, _>, Token::Default)(s),
+        LIST_LEFT => |s| map(list1::<N, A, TYPE, _, _>, Token::Default)(s),
         LIST_RIGHT => fail,
-        MAP_LEFT => |s| map(map1::<A, TYPE, _, _>, Token::Default)(s),
+        MAP_LEFT => |s| map(map1::<N, A, TYPE, _, _>, Token::Default)(s),
         MAP_RIGHT => fail,
-        SCOPE_LEFT => |s| map(scope::<A, TYPE, _, _>, Token::Default)(s),
+        SCOPE_LEFT => |s| map(scope::<N, A, TYPE, _, _>, Token::Default)(s),
         SCOPE_RIGHT => fail,
         SEPARATOR => fail,
 
         TEXT_QUOTE => |s| map(text, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
 
-        s if is_symbol(s) => unquote_symbol::<A, TYPE, _, _>,
+        s if is_symbol(s) => unquote_symbol::<N, A, TYPE, _, _>,
         _ => fail,
     };
     context("token", parser)(src)
@@ -247,7 +243,7 @@ fn is_symbol(c: char) -> bool {
     Symbol::is_symbol(c)
 }
 
-fn unquote_symbol<'a, const A: u8, const TYPE: u8, T, E>(
+fn unquote_symbol<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
     src: &'a str,
 ) -> IResult<&'a str, Token<T>, E>
 where
@@ -266,23 +262,35 @@ where
     }
 
     match s {
-        UNIT => Ok((rest, Token::Default(From::from(Unit)))),
+        UNIT => scope_or::<1, A, TYPE, _, _, _>(s, rest, |_s| Token::Default(From::from(Unit))),
         TRUE => Ok((rest, Token::Default(From::from(Bool::t())))),
         FALSE => Ok((rest, Token::Default(From::from(Bool::f())))),
-        MIDDLE => scope_or_symbol::<A_NONE, TYPE, _, _>(s, rest),
-        LEFT => scope_or_symbol::<A_LEFT, TYPE, _, _>(s, rest),
-        RIGHT => scope_or_symbol::<A_RIGHT, TYPE, _, _>(s, rest),
-        CALL => scope_or_symbol::<A, TYPE_CALL, _, _>(s, rest),
-        ASK => scope_or_symbol::<A, TYPE_ASK, _, _>(s, rest),
-        LEFT_CALL => scope_or_symbol::<A_LEFT, TYPE_CALL, _, _>(s, rest),
-        LEFT_ASK => scope_or_symbol::<A_LEFT, TYPE_ASK, _, _>(s, rest),
-        RIGHT_CALL => scope_or_symbol::<A_RIGHT, TYPE_CALL, _, _>(s, rest),
-        RIGHT_ASK => scope_or_symbol::<A_RIGHT, TYPE_ASK, _, _>(s, rest),
+        MIDDLE => scope_or_symbol::<N, A_NONE, TYPE, _, _>(s, rest),
+        LEFT => scope_or_symbol::<N, A_LEFT, TYPE, _, _>(s, rest),
+        RIGHT => scope_or_symbol::<N, A_RIGHT, TYPE, _, _>(s, rest),
+        CALL => scope_or_symbol::<N, A, TYPE_CALL, _, _>(s, rest),
+        ASK => scope_or_symbol::<N, A, TYPE_ASK, _, _>(s, rest),
+        PAIR => scope_or_symbol::<2, A, TYPE, _, _>(s, rest),
         _ => Ok((rest, Token::Unquote(Symbol::from_str(s)))),
     }
 }
 
-fn scope_or_symbol<'a, const A: u8, const TYPE: u8, T, E>(
+fn scope_or<'a, const N: u8, const A: u8, const TYPE: u8, T, E, F>(
+    src: &'a str,
+    rest: &'a str,
+    f: F,
+) -> IResult<&'a str, Token<T>, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    F: Fn(&'a str) -> Token<T>,
+{
+    let scope = map(scope::<N, A, TYPE, _, _>, Token::Default);
+    let else1 = |s| Ok((s, f(src)));
+    alt((scope, else1))(rest)
+}
+
+fn scope_or_symbol<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
     src: &'a str,
     rest: &'a str,
 ) -> IResult<&'a str, Token<T>, E>
@@ -290,9 +298,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    alt((map(scope::<A, TYPE, _, _>, Token::Default), |s| {
-        Ok((s, Token::Unquote(Symbol::from_str(src))))
-    }))(rest)
+    scope_or::<N, A, TYPE, _, _, _>(src, rest, |s| Token::Unquote(Symbol::from_str(s)))
 }
 
 fn token_all_consuming<'a, T, E, F>(
@@ -324,42 +330,59 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn compose<'a, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn compose<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
+    src: &'a str,
+) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let tokens = separated_list1(empty1, token::<A, TYPE, _, _>);
+    let tokens = separated_list1(empty1, token::<N, A, TYPE, _, _>);
     let f = map_opt(tokens, |tokens| {
-        compose_tokens::<A, TYPE, _, _>(tokens.into_iter())
+        compose_tokens::<N, A, TYPE, _, _>(tokens.into_iter())
     });
     context("compose", f)(src)
 }
 
-fn compose_tokens<const A: u8, const TYPE: u8, T, I>(mut tokens: I) -> Option<T>
+fn compose_tokens<const N: u8, const A: u8, const TYPE: u8, T, I>(mut tokens: I) -> Option<T>
 where
     T: ParseRepr,
     I: ExactSizeIterator<Item = Token<T>> + DoubleEndedIterator<Item = Token<T>>,
 {
-    if tokens.len() == 0 {
+    let len = tokens.len();
+    if len == 0 {
         return None;
+    }
+    if len == 1 {
+        let repr = tokens.next().unwrap().into_repr();
+        return Some(repr);
     }
     if A == A_NONE {
         return compose_none(tokens);
     }
-    let len = tokens.len();
     if len == 2 {
         let func = tokens.next().unwrap();
         let input = tokens.next().unwrap();
         return compose_two::<TYPE, _>(func, input);
-    } else if len % 2 == 0 {
-        return None;
     }
-    if A == A_RIGHT {
-        compose_many::<A_RIGHT, TYPE, _, _>(tokens.rev())
-    } else {
-        compose_many::<A_LEFT, TYPE, _, _>(tokens)
+    if N == 2 {
+        if len % 2 == 0 {
+            return None;
+        }
+        return if A == A_RIGHT {
+            compose_many2::<A_RIGHT, TYPE, _, _>(tokens.rev())
+        } else {
+            compose_many2::<A_LEFT, TYPE, _, _>(tokens)
+        };
     }
+    if N == 1 {
+        return if A == A_RIGHT {
+            compose_many1::<A_RIGHT, TYPE, _, _>(tokens.rev())
+        } else {
+            compose_many1::<A_LEFT, TYPE, _, _>(tokens)
+        };
+    }
+    None
 }
 
 fn compose_none<T, I>(mut tokens: I) -> Option<T>
@@ -378,14 +401,33 @@ where
     Some(comment)
 }
 
-fn compose_two<const TYPE: u8, T: ParseRepr>(func: Token<T>, input: Token<T>) -> Option<T> {
-    let func = func.into_repr();
-    let input = input.into_repr();
-    let repr = compose_type::<TYPE, _>(func, input);
+fn compose_two<const TYPE: u8, T: ParseRepr>(left: Token<T>, right: Token<T>) -> Option<T> {
+    let left = left.into_repr();
+    let right = right.into_repr();
+    let repr = compose_type::<TYPE, _>(left, right);
     Some(repr)
 }
 
-fn compose_many<const A: u8, const TYPE: u8, T, I>(mut iter: I) -> Option<T>
+fn compose_many1<const A: u8, const TYPE: u8, T, I>(mut iter: I) -> Option<T>
+where
+    T: ParseRepr,
+    I: Iterator<Item = Token<T>>,
+{
+    let mut first = iter.next().unwrap().into_repr();
+    loop {
+        let Some(second) = iter.next() else {
+            break;
+        };
+        first = if A == A_RIGHT {
+            compose_type::<TYPE, _>(second.into_repr(), first)
+        } else {
+            compose_type::<TYPE, _>(first, second.into_repr())
+        };
+    }
+    Some(first)
+}
+
+fn compose_many2<const A: u8, const TYPE: u8, T, I>(mut iter: I) -> Option<T>
 where
     T: ParseRepr,
     I: Iterator<Item = Token<T>>,
@@ -431,12 +473,12 @@ fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
     (left, right.into_repr())
 }
 
-fn compose_type<const TYPE: u8, T: ParseRepr>(func: T, input: T) -> T {
+fn compose_type<const TYPE: u8, T: ParseRepr>(left: T, right: T) -> T {
     if TYPE == TYPE_CALL {
-        let repr = Call::new(func, input);
+        let repr = Call::new(left, right);
         From::from(repr)
     } else {
-        let repr = Ask::new(func, input);
+        let repr = Ask::new(left, right);
         From::from(repr)
     }
 }
@@ -469,34 +511,36 @@ where
     })
 }
 
-fn list1<'a, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn list1<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(compose::<A, TYPE, _, _>, char1(SEPARATOR));
+    let items = items(compose::<N, A, TYPE, _, _>, char1(SEPARATOR));
     let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
     let f = map(delimited_items, |list| From::from(List::from(list)));
     context("list", f)(src)
 }
 
-fn map1<'a, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn map1<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let items = items(key_value::<A, TYPE, _, _>, char1(SEPARATOR));
+    let items = items(key_value::<N, A, TYPE, _, _>, char1(SEPARATOR));
     let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
     let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
     context("map", f)(src)
 }
 
-fn key_value<'a, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, (T, T), E>
+fn key_value<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
+    src: &'a str,
+) -> IResult<&'a str, (T, T), E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
-    let (rest, tokens) = separated_list1(empty1, token::<A, TYPE, _, _>)(src)?;
+    let (rest, tokens) = separated_list1(empty1, token::<N, A, TYPE, _, _>)(src)?;
     let mut tokens = tokens.into_iter();
     let key: T = tokens.next().unwrap().into_repr();
     if tokens.len() == 0 {
@@ -512,7 +556,7 @@ where
         let value = tokens.next().unwrap();
         return Ok((rest, left_right(key, value)));
     }
-    let Some(value) = compose_tokens::<A, TYPE, _, _>(tokens) else {
+    let Some(value) = compose_tokens::<N, A, TYPE, _, _>(tokens) else {
         return fail(src);
     };
     Ok((rest, (key, value)))

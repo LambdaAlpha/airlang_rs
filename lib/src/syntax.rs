@@ -44,10 +44,6 @@ pub(crate) const FALSE: &str = "false";
 pub(crate) const MIDDLE: &str = "^";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
-pub(crate) const LEFT_CALL: &str = "<!";
-pub(crate) const LEFT_ASK: &str = "<?";
-pub(crate) const RIGHT_CALL: &str = ">!";
-pub(crate) const RIGHT_ASK: &str = ">?";
 
 pub(crate) const COMMENT: &str = ";";
 pub(crate) const PAIR: &str = ":";
