@@ -4,16 +4,6 @@ use std::{
 };
 
 use crate::{
-    ctx::ref1::CtxMeta,
-    func::{
-        eval_aware,
-        eval_free,
-        Composite,
-        Func,
-        FuncImpl,
-        Primitive,
-    },
-    transformer::Transformer,
     ConstCtx,
     FreeCtx,
     Invariant,
@@ -22,6 +12,16 @@ use crate::{
     MutFnCtx,
     Symbol,
     Val,
+    ctx::ref1::CtxMeta,
+    func::{
+        Composite,
+        Func,
+        FuncImpl,
+        Primitive,
+        eval_aware,
+        eval_free,
+    },
+    transformer::Transformer,
 };
 
 pub trait MutFn {

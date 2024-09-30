@@ -1,10 +1,10 @@
 use crate::{
-    ctx::ref1::CtxMeta,
-    transformer::Transformer,
     Mode,
     Pair,
     PairVal,
     Val,
+    ctx::ref1::CtxMeta,
+    transformer::Transformer,
 };
 
 pub type PairMode = Pair<Mode, Mode>;

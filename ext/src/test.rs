@@ -1,13 +1,13 @@
 use std::error::Error;
 
 use airlang::{
-    initial_ctx,
-    interpret_mut,
-    parse,
     Int,
     MutCtx,
     Text,
     Val,
+    initial_ctx,
+    interpret_mut,
+    parse,
 };
 
 use crate::init_ctx;

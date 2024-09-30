@@ -1,16 +1,16 @@
 use crate::{
-    ctx::CtxValue,
-    prelude::{
-        named_static_fn,
-        Named,
-        Prelude,
-    },
     FuncVal,
     Map,
     Mode,
     Symbol,
     Text,
     Val,
+    ctx::CtxValue,
+    prelude::{
+        Named,
+        Prelude,
+        named_static_fn,
+    },
 };
 
 #[derive(Clone)]

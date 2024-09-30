@@ -11,13 +11,13 @@ use std::{
 use ref1::CtxRef;
 
 use crate::{
+    Map,
     ctx::map::CtxMap,
     symbol::Symbol,
     val::{
-        func::FreeFuncVal,
         Val,
+        func::FreeFuncVal,
     },
-    Map,
 };
 
 #[derive(Copy, Clone, Debug)]

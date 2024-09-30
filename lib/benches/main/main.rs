@@ -1,16 +1,16 @@
 use airlang::{
+    MutCtx,
     generate,
     initial_ctx,
     interpret_mut,
     parse,
-    MutCtx,
 };
 use criterion::{
+    BatchSize,
+    Criterion,
     black_box,
     criterion_group,
     criterion_main,
-    BatchSize,
-    Criterion,
 };
 
 use crate::syntax::bench_syntax;

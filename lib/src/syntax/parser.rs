@@ -6,13 +6,16 @@ use std::{
 };
 
 use nom::{
+    Finish,
+    IResult,
+    Parser,
     branch::alt,
     bytes::complete::{
         is_not,
         tag,
         take_while,
-        take_while1,
         take_while_m_n,
+        take_while1,
     },
     character::complete::{
         anychar,
@@ -35,12 +38,12 @@ use nom::{
         verify,
     },
     error::{
-        context,
-        convert_error,
         ContextError,
         FromExternalError,
         ParseError,
         VerboseError,
+        context,
+        convert_error,
     },
     multi::{
         fold_many0,
@@ -53,9 +56,6 @@ use nom::{
         terminated,
         tuple,
     },
-    Finish,
-    IResult,
-    Parser,
 };
 use num_bigint::BigInt;
 use num_traits::Num;
@@ -73,7 +73,6 @@ use crate::{
     pair::Pair,
     symbol::Symbol,
     syntax::{
-        is_delimiter,
         ASK,
         BYTE,
         CALL,
@@ -94,6 +93,7 @@ use crate::{
         TEXT_QUOTE,
         TRUE,
         UNIT,
+        is_delimiter,
     },
     text::Text,
     unit::Unit,

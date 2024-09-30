@@ -1,13 +1,13 @@
 use crate::{
+    AnswerVal,
+    Ask,
+    Val,
     answer::Answer,
     ctx::ref1::{
         CtxMeta,
         CtxRef,
     },
     val::func::FuncVal,
-    AnswerVal,
-    Ask,
-    Val,
 };
 
 pub(crate) fn solve<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> AnswerVal

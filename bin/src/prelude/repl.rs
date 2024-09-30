@@ -6,9 +6,9 @@ use airlang::{
 };
 
 use crate::prelude::{
-    named_static_fn,
     Named,
     Prelude,
+    named_static_fn,
 };
 
 pub(crate) struct ReplPrelude {

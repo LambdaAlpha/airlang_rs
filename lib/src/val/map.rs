@@ -10,10 +10,10 @@ use std::{
 };
 
 use crate::{
-    map::Map,
-    syntax::repr::map::MapRepr,
     ReprError,
     Val,
+    map::Map,
+    syntax::repr::map::MapRepr,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]

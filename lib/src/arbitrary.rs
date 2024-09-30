@@ -2,6 +2,7 @@ use std::cmp::min;
 
 use num_bigint::BigInt;
 use rand::{
+    Rng,
     distributions::{
         DistString,
         Standard,
@@ -13,52 +14,9 @@ use rand::{
         SliceRandom,
         SmallRng,
     },
-    Rng,
 };
 
 use crate::{
-    answer::Answer,
-    bool::Bool,
-    byte::Byte,
-    ctx::{
-        map::CtxMap,
-        Ctx,
-        CtxValue,
-        Invariant,
-    },
-    extension::UnitExt,
-    func::{
-        const1::ConstCompositeExt,
-        free::FreeCompositeExt,
-        mut1::MutCompositeExt,
-        static1::StaticCompositeExt,
-        Composite,
-        Func,
-    },
-    int::Int,
-    list::List,
-    map::Map,
-    mode::{
-        basic::BasicMode,
-        list::ListMode,
-        map::MapMode,
-        pair::PairMode,
-        Mode,
-        ValMode,
-    },
-    number::Number,
-    pair::Pair,
-    prelude::{
-        Prelude,
-        PRELUDE,
-    },
-    symbol::Symbol,
-    text::Text,
-    unit::Unit,
-    val::func::{
-        FreeFuncVal,
-        FuncVal,
-    },
     Ask,
     Cache,
     Call,
@@ -71,6 +29,48 @@ use crate::{
     StaticFuncVal,
     Val,
     ValExt,
+    answer::Answer,
+    bool::Bool,
+    byte::Byte,
+    ctx::{
+        Ctx,
+        CtxValue,
+        Invariant,
+        map::CtxMap,
+    },
+    extension::UnitExt,
+    func::{
+        Composite,
+        Func,
+        const1::ConstCompositeExt,
+        free::FreeCompositeExt,
+        mut1::MutCompositeExt,
+        static1::StaticCompositeExt,
+    },
+    int::Int,
+    list::List,
+    map::Map,
+    mode::{
+        Mode,
+        ValMode,
+        basic::BasicMode,
+        list::ListMode,
+        map::MapMode,
+        pair::PairMode,
+    },
+    number::Number,
+    pair::Pair,
+    prelude::{
+        PRELUDE,
+        Prelude,
+    },
+    symbol::Symbol,
+    text::Text,
+    unit::Unit,
+    val::func::{
+        FreeFuncVal,
+        FuncVal,
+    },
 };
 
 pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {

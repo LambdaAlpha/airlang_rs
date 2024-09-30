@@ -11,16 +11,16 @@ use std::{
 };
 
 use crate::{
+    Mode,
+    Symbol,
+    Val,
     func::{
-        eval_free,
         Composite,
         Func,
         FuncImpl,
         Primitive,
+        eval_free,
     },
-    Mode,
-    Symbol,
-    Val,
 };
 
 pub trait FreeFn {

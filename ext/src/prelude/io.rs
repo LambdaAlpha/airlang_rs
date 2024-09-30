@@ -1,8 +1,8 @@
 use std::io::{
+    Write,
     stderr,
     stdin,
     stdout,
-    Write,
 };
 
 use airlang::{
@@ -14,10 +14,10 @@ use airlang::{
 };
 
 use crate::prelude::{
-    named_mut_fn,
-    named_static_fn,
     Named,
     Prelude,
+    named_mut_fn,
+    named_static_fn,
 };
 
 pub(crate) struct IoPrelude {

@@ -8,7 +8,15 @@ use std::{
 };
 
 use crate::{
+    Bool,
+    Byte,
+    Int,
+    Number,
+    Symbol,
+    Text,
+    Unit,
     syntax::{
+        ParseError,
         generate_pretty,
         generator::GenerateRepr,
         parse,
@@ -21,15 +29,7 @@ use crate::{
             map::MapRepr,
             pair::PairRepr,
         },
-        ParseError,
     },
-    Bool,
-    Byte,
-    Int,
-    Number,
-    Symbol,
-    Text,
-    Unit,
 };
 
 #[derive(PartialEq, Eq, Clone, Hash)]

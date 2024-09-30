@@ -8,6 +8,9 @@ pub use self::{
     case::Case,
     comment::Comment,
     ctx::{
+        Ctx,
+        CtxError,
+        Invariant,
         const1::{
             ConstCtx,
             ConstFnCtx,
@@ -17,9 +20,6 @@ pub use self::{
             MutCtx,
             MutFnCtx,
         },
-        Ctx,
-        CtxError,
-        Invariant,
     },
     extension::ValExt,
     func::{
@@ -45,12 +45,12 @@ pub use self::{
     list::List,
     map::Map,
     mode::{
+        Mode,
+        ValMode,
         basic::BasicMode,
         list::ListMode,
         map::MapMode,
         pair::PairMode,
-        Mode,
-        ValMode,
     },
     number::Number,
     pair::Pair,
@@ -59,6 +59,7 @@ pub use self::{
     text::Text,
     unit::Unit,
     val::{
+        Val,
         answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
@@ -83,7 +84,6 @@ pub use self::{
         number::NumberVal,
         pair::PairVal,
         text::TextVal,
-        Val,
     },
 };
 use crate::{

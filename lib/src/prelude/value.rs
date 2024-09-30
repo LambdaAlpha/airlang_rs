@@ -1,9 +1,13 @@
 use rand::{
-    prelude::SmallRng,
     SeedableRng,
+    prelude::SmallRng,
 };
 
 use crate::{
+    Ctx,
+    Map,
+    Mode,
+    Val,
     arbitrary::{
         any_answer,
         any_ask,
@@ -27,22 +31,21 @@ use crate::{
     },
     bool::Bool,
     ctx::{
+        CtxValue,
         const1::ConstFnCtx,
         default::DefaultCtx,
         map::CtxMapRef,
         ref1::CtxRef,
-        CtxValue,
     },
     mode::SYMBOL_READ_PREFIX,
     prelude::{
-        named_const_fn,
-        named_static_fn,
         Named,
         Prelude,
+        named_const_fn,
+        named_static_fn,
     },
     symbol::Symbol,
     val::{
-        func::FuncVal,
         ANSWER,
         ASK,
         BOOL,
@@ -61,11 +64,8 @@ use crate::{
         SYMBOL,
         TEXT,
         UNIT,
+        func::FuncVal,
     },
-    Ctx,
-    Map,
-    Mode,
-    Val,
 };
 
 #[derive(Clone)]

@@ -1,23 +1,6 @@
 use std::mem::swap;
 
 use crate::{
-    ctx::{
-        default::DefaultCtx,
-        ref1::CtxMeta,
-        CtxValue,
-    },
-    func::mut1::MutDispatcher,
-    mode::eval::Eval,
-    prelude::{
-        named_const_fn,
-        named_mut_fn,
-        named_static_fn,
-        Named,
-        Prelude,
-    },
-    syntax::COMMENT,
-    transformer::input::ByVal,
-    types::either::Either,
     Comment,
     ConstFnCtx,
     FreeCtx,
@@ -28,6 +11,23 @@ use crate::{
     Pair,
     Symbol,
     Val,
+    ctx::{
+        CtxValue,
+        default::DefaultCtx,
+        ref1::CtxMeta,
+    },
+    func::mut1::MutDispatcher,
+    mode::eval::Eval,
+    prelude::{
+        Named,
+        Prelude,
+        named_const_fn,
+        named_mut_fn,
+        named_static_fn,
+    },
+    syntax::COMMENT,
+    transformer::input::ByVal,
+    types::either::Either,
 };
 
 #[derive(Clone)]

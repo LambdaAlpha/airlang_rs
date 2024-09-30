@@ -1,7 +1,13 @@
 use std::matches;
 
 use crate::{
+    Ctx,
+    CtxError,
+    FreeCtx,
+    Symbol,
+    Val,
     ctx::{
+        DynRef,
         map::{
             CtxMap,
             CtxMapRef,
@@ -11,14 +17,8 @@ use crate::{
             CtxMeta,
             CtxRef,
         },
-        DynRef,
     },
     val::func::FreeFuncVal,
-    Ctx,
-    CtxError,
-    FreeCtx,
-    Symbol,
-    Val,
 };
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when
@@ -68,7 +68,10 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
 }
 
 impl<'l> CtxMeta<'l> for ConstCtx<'l> {
-    type Reborrow<'s> = ConstCtx<'s> where Self: 's;
+    type Reborrow<'s>
+        = ConstCtx<'s>
+    where
+        Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         ConstCtx(self.0)
@@ -147,7 +150,10 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
 }
 
 impl<'l> CtxMeta<'l> for ConstFnCtx<'l> {
-    type Reborrow<'s> = ConstFnCtx<'s> where 'l: 's;
+    type Reborrow<'s>
+        = ConstFnCtx<'s>
+    where
+        'l: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         match self {

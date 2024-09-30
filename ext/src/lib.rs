@@ -1,8 +1,8 @@
 use airlang::MutCtx;
 
 use crate::prelude::{
-    Prelude,
     PRELUDE,
+    Prelude,
 };
 
 pub fn init_ctx(ctx: MutCtx) {

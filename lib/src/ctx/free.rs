@@ -1,5 +1,8 @@
 use crate::{
+    Ctx,
+    CtxError,
     ctx::{
+        DynRef,
         const1::ConstFnCtx,
         map::CtxMap,
         mut1::MutFnCtx,
@@ -7,11 +10,8 @@ use crate::{
             CtxMeta,
             CtxRef,
         },
-        DynRef,
     },
     val::func::FreeFuncVal,
-    Ctx,
-    CtxError,
 };
 
 pub struct FreeCtx;
@@ -47,7 +47,10 @@ impl<'a> CtxRef<'a> for FreeCtx {
 }
 
 impl<'a> CtxMeta<'a> for FreeCtx {
-    type Reborrow<'s> = FreeCtx where Self: 's;
+    type Reborrow<'s>
+        = FreeCtx
+    where
+        Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         FreeCtx

@@ -5,21 +5,21 @@ use std::{
 };
 
 use crate::{
-    ctx::{
-        mut1::MutCtx,
-        Invariant,
-    },
-    func::static1::StaticFn,
-    initial_ctx,
-    interpret_mut,
-    parse,
-    val::Val,
     Ctx,
     FuncVal,
     Mode,
     StaticFunc,
     StaticFuncVal,
     Symbol,
+    ctx::{
+        Invariant,
+        mut1::MutCtx,
+    },
+    func::static1::StaticFn,
+    initial_ctx,
+    interpret_mut,
+    parse,
+    val::Val,
 };
 
 const MAIN_DELIMITER: &str = "=====";

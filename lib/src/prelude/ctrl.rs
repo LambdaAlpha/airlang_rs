@@ -1,32 +1,4 @@
 use crate::{
-    ctx::{
-        free::FreeCtx,
-        map::CtxMapRef,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-        CtxValue,
-    },
-    func::mut1::MutDispatcher,
-    mode::{
-        basic::BasicMode,
-        eval::Eval,
-    },
-    prelude::{
-        form_mode,
-        id_mode,
-        map_mode,
-        named_mut_fn,
-        pair_mode,
-        Named,
-        Prelude,
-    },
-    transformer::Transformer,
-    val::{
-        func::FuncVal,
-        Val,
-    },
     Byte,
     Call,
     Int,
@@ -36,6 +8,34 @@ use crate::{
     Pair,
     Symbol,
     Text,
+    ctx::{
+        CtxValue,
+        free::FreeCtx,
+        map::CtxMapRef,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
+    },
+    func::mut1::MutDispatcher,
+    mode::{
+        basic::BasicMode,
+        eval::Eval,
+    },
+    prelude::{
+        Named,
+        Prelude,
+        form_mode,
+        id_mode,
+        map_mode,
+        named_mut_fn,
+        pair_mode,
+    },
+    transformer::Transformer,
+    val::{
+        Val,
+        func::FuncVal,
+    },
 };
 
 #[derive(Clone)]

@@ -1,28 +1,28 @@
 use crate::{
-    ctx::{
-        const1::ConstFnCtx,
-        default::DefaultCtx,
-        mut1::MutFnCtx,
-        CtxValue,
-    },
-    prelude::{
-        named_const_fn,
-        named_mut_fn,
-        named_static_fn,
-        Named,
-        Prelude,
-    },
-    text::Text,
-    val::{
-        func::FuncVal,
-        Val,
-    },
     Byte,
     Int,
     Map,
     Mode,
     Pair,
     Symbol,
+    ctx::{
+        CtxValue,
+        const1::ConstFnCtx,
+        default::DefaultCtx,
+        mut1::MutFnCtx,
+    },
+    prelude::{
+        Named,
+        Prelude,
+        named_const_fn,
+        named_mut_fn,
+        named_static_fn,
+    },
+    text::Text,
+    val::{
+        Val,
+        func::FuncVal,
+    },
 };
 
 #[derive(Clone)]

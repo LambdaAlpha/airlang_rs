@@ -4,8 +4,8 @@ use airlang::MutCtx;
 
 use crate::{
     prelude::{
-        Prelude,
         PRELUDE,
+        Prelude,
     },
     repl::Repl,
 };

@@ -1,8 +1,11 @@
 use crate::{
+    Map,
+    Mode,
+    Symbol,
     ctx::{
+        CtxValue,
         free::FreeCtx,
         mut1::MutFnCtx,
-        CtxValue,
     },
     mode::{
         basic::{
@@ -15,20 +18,17 @@ use crate::{
         id::Id,
     },
     prelude::{
+        Named,
+        Prelude,
         id_mode,
         named_mut_fn,
         named_static_fn,
-        Named,
-        Prelude,
     },
     transformer::Transformer,
     val::{
-        func::FuncVal,
         Val,
+        func::FuncVal,
     },
-    Map,
-    Mode,
-    Symbol,
 };
 
 #[derive(Clone)]

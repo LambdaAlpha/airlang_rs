@@ -1,13 +1,13 @@
 use crate::{
-    ctx::{
-        CtxValue,
-        DynRef,
-    },
     CtxError,
     Invariant,
     Map,
     Symbol,
     Val,
+    ctx::{
+        CtxValue,
+        DynRef,
+    },
 };
 
 pub(crate) trait CtxMapRef<'a>: Sized {

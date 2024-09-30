@@ -1,18 +1,18 @@
 use airlang::{
-    initial_ctx,
     FuncVal,
     Mode,
     MutCtx,
     MutFnCtx,
     Val,
+    initial_ctx,
 };
 
 use crate::{
     init_ctx,
     prelude::{
-        named_mut_fn,
         Named,
         Prelude,
+        named_mut_fn,
     },
 };
 

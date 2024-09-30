@@ -1,14 +1,14 @@
 use std::error::Error;
 
 use airlang::{
-    initial_ctx,
-    interpret_mut,
-    parse,
     Ctx,
     Invariant,
     MutCtx,
     Symbol,
     Text,
+    initial_ctx,
+    interpret_mut,
+    parse,
 };
 use airlang_ext::init_ctx;
 

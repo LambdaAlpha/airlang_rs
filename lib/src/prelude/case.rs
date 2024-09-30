@@ -1,10 +1,17 @@
 use crate::{
+    Cache,
+    Call,
+    Case,
+    CaseVal,
+    Mode,
+    Symbol,
+    Val,
     bool::Bool,
     ctx::{
+        CtxValue,
         const1::ConstFnCtx,
         default::DefaultCtx,
         mut1::MutFnCtx,
-        CtxValue,
     },
     map::Map,
     mode::{
@@ -12,13 +19,13 @@ use crate::{
         eval::Eval,
     },
     prelude::{
+        Named,
+        Prelude,
         form_mode,
         map_mode,
         named_const_fn,
         named_mut_fn,
         named_static_fn,
-        Named,
-        Prelude,
     },
     transformer::Transformer,
     utils::val::{
@@ -29,13 +36,6 @@ use crate::{
         func::FuncVal,
         map::MapVal,
     },
-    Cache,
-    Call,
-    Case,
-    CaseVal,
-    Mode,
-    Symbol,
-    Val,
 };
 
 #[derive(Clone)]

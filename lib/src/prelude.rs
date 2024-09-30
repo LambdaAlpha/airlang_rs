@@ -1,10 +1,15 @@
 use crate::{
+    List,
+    Map,
+    Pair,
     ctx::{
-        map::CtxMap,
         Ctx,
         CtxValue,
+        map::CtxMap,
     },
     func::{
+        Func,
+        Primitive,
         const1::{
             ConstFn,
             ConstPrimitiveExt,
@@ -21,15 +26,13 @@ use crate::{
             StaticFn,
             StaticPrimitiveExt,
         },
-        Func,
-        Primitive,
     },
     mode::{
+        Mode,
+        ValMode,
         basic::BasicMode,
         list::ListMode,
         map::MapMode,
-        Mode,
-        ValMode,
     },
     prelude::{
         answer::AnswerPrelude,
@@ -58,6 +61,7 @@ use crate::{
     },
     symbol::Symbol,
     val::{
+        Val,
         func::{
             ConstFuncVal,
             FreeFuncVal,
@@ -65,11 +69,7 @@ use crate::{
             MutFuncVal,
             StaticFuncVal,
         },
-        Val,
     },
-    List,
-    Map,
-    Pair,
 };
 
 thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());

@@ -1,5 +1,13 @@
 use crate::{
+    List,
+    ListVal,
+    Map,
+    MapVal,
+    Pair,
+    Val,
     mode::{
+        Mode,
+        ValMode,
         basic::{
             BasicMode,
             EVAL,
@@ -8,8 +16,6 @@ use crate::{
         },
         list::ListMode,
         map::MapMode,
-        Mode,
-        ValMode,
     },
     utils::val::{
         map_remove,
@@ -20,12 +26,6 @@ use crate::{
         MAP,
         PAIR,
     },
-    List,
-    ListVal,
-    Map,
-    MapVal,
-    Pair,
-    Val,
 };
 
 const DEFAULT: &str = "default";

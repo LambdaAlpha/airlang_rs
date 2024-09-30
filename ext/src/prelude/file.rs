@@ -8,9 +8,9 @@ use airlang::{
 };
 
 use crate::prelude::{
-    named_const_fn,
     Named,
     Prelude,
+    named_const_fn,
 };
 
 pub(crate) struct FilePrelude {

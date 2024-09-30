@@ -1,4 +1,9 @@
 use crate::{
+    AskVal,
+    CallVal,
+    CommentVal,
+    PairVal,
+    Val,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
     transformer::Transformer,
@@ -6,11 +11,6 @@ use crate::{
         list::ListVal,
         map::MapVal,
     },
-    AskVal,
-    CallVal,
-    CommentVal,
-    PairVal,
-    Val,
 };
 
 pub(crate) trait ByVal<Output>: Transformer<Val, Output> {

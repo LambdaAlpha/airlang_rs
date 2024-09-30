@@ -1,13 +1,13 @@
 use crate::{
+    Map,
+    Symbol,
+    ValExt,
     ctx::CtxValue,
     extension::UnitExt,
     prelude::{
         Named,
         Prelude,
     },
-    Map,
-    Symbol,
-    ValExt,
 };
 
 #[derive(Clone)]

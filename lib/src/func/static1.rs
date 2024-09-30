@@ -1,18 +1,18 @@
 use std::rc::Rc;
 
 use crate::{
+    Mode,
+    Symbol,
+    Val,
     ctx::ref1::CtxMeta,
     func::{
-        eval_free,
         Composite,
         Func,
         FuncImpl,
         Primitive,
+        eval_free,
     },
     transformer::Transformer,
-    Mode,
-    Symbol,
-    Val,
 };
 
 pub trait StaticFn {

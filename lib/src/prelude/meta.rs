@@ -3,14 +3,14 @@ use std::str::FromStr;
 use num_bigint::BigInt;
 
 use crate::{
+    Map,
+    Symbol,
     ctx::CtxValue,
     int::Int,
     prelude::{
         Named,
         Prelude,
     },
-    Map,
-    Symbol,
 };
 
 #[derive(Clone)]

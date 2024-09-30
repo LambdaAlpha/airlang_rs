@@ -5,9 +5,6 @@ use std::{
 };
 
 use airlang::{
-    initial_ctx,
-    interpret_mut,
-    parse,
     FuncVal,
     Invariant,
     Mode,
@@ -16,14 +13,17 @@ use airlang::{
     Symbol,
     Text,
     Val,
+    initial_ctx,
+    interpret_mut,
+    parse,
 };
 
 use crate::{
     init_ctx,
     prelude::{
-        named_mut_fn,
         Named,
         Prelude,
+        named_mut_fn,
     },
 };
 

@@ -1,6 +1,6 @@
 use crate::{
-    val::case::CacheCaseVal,
     Val,
+    val::case::CacheCaseVal,
 };
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]

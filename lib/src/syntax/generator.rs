@@ -23,8 +23,6 @@ use crate::{
     pair::Pair,
     symbol::Symbol,
     syntax::{
-        is_delimiter,
-        maybe_keyword,
         ASK,
         BYTE,
         CALL,
@@ -42,6 +40,8 @@ use crate::{
         TEXT_QUOTE,
         TRUE,
         UNIT,
+        is_delimiter,
+        maybe_keyword,
     },
     text::Text,
     unit::Unit,

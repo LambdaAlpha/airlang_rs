@@ -7,6 +7,13 @@ use std::{
 };
 
 use crate::{
+    Ask,
+    Call,
+    Int,
+    List,
+    Map,
+    Pair,
+    ReprError,
     bool::Bool,
     byte::Byte,
     comment::Comment,
@@ -36,13 +43,6 @@ use crate::{
         pair::PairVal,
         text::TextVal,
     },
-    Ask,
-    Call,
-    Int,
-    List,
-    Map,
-    Pair,
-    ReprError,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]

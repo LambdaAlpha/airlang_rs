@@ -1,10 +1,10 @@
 use std::ops::Deref;
 
 use crate::{
-    case::Case,
-    ctx::ref1::CtxMeta,
     FuncVal,
     Val,
+    case::Case,
+    ctx::ref1::CtxMeta,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

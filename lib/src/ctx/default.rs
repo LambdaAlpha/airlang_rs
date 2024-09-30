@@ -1,15 +1,15 @@
 use crate::{
-    ctx::{
-        map::CtxMapRef,
-        ref1::CtxRef,
-        DynRef,
-    },
-    mode::SYMBOL_READ_PREFIX,
-    types::either::Either,
     CtxError,
     Pair,
     Symbol,
     Val,
+    ctx::{
+        DynRef,
+        map::CtxMapRef,
+        ref1::CtxRef,
+    },
+    mode::SYMBOL_READ_PREFIX,
+    types::either::Either,
 };
 
 pub(crate) struct DefaultCtx;

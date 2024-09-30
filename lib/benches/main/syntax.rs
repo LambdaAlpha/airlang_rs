@@ -3,8 +3,8 @@ use airlang::syntax::{
     parse,
 };
 use criterion::{
-    black_box,
     Criterion,
+    black_box,
 };
 
 pub fn bench_syntax(c: &mut Criterion) {

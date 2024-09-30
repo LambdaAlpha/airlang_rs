@@ -4,19 +4,6 @@ use std::{
 };
 
 use crate::{
-    ctx::{
-        map::{
-            CtxMap,
-            CtxMapRef,
-        },
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-        CtxValue,
-        DynRef,
-    },
-    val::func::FreeFuncVal,
     ConstCtx,
     ConstFnCtx,
     Ctx,
@@ -25,6 +12,19 @@ use crate::{
     Invariant,
     Symbol,
     Val,
+    ctx::{
+        CtxValue,
+        DynRef,
+        map::{
+            CtxMap,
+            CtxMapRef,
+        },
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
+    },
+    val::func::FreeFuncVal,
 };
 
 pub struct MutCtx<'a>(&'a mut Ctx);
@@ -66,7 +66,10 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
 }
 
 impl<'l> CtxMeta<'l> for MutCtx<'l> {
-    type Reborrow<'s> = MutCtx<'s> where Self: 's;
+    type Reborrow<'s>
+        = MutCtx<'s>
+    where
+        Self: 's;
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         MutCtx(self.0)
     }
@@ -148,7 +151,10 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
 }
 
 impl<'l> CtxMeta<'l> for MutFnCtx<'l> {
-    type Reborrow<'s> = MutFnCtx<'s> where Self: 's;
+    type Reborrow<'s>
+        = MutFnCtx<'s>
+    where
+        Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         match self {

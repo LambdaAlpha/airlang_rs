@@ -1,13 +1,13 @@
 use std::error::Error;
 
 use airlang::{
+    Int,
+    MutCtx,
+    Val,
     generate,
     initial_ctx,
     interpret_mut,
     parse,
-    Int,
-    MutCtx,
-    Val,
 };
 
 #[test]

@@ -1,36 +1,40 @@
 use crate::{
+    ConstFuncVal,
+    FreeFuncVal,
+    MutFuncVal,
+    StaticFuncVal,
     bool::Bool,
     ctx::{
-        const1::ConstFnCtx,
-        default::DefaultCtx,
         Ctx,
         CtxValue,
+        const1::ConstFnCtx,
+        default::DefaultCtx,
     },
     func::{
+        Composite,
+        Func,
+        FuncImpl,
         const1::ConstCompositeExt,
         free::FreeCompositeExt,
         mut1::MutCompositeExt,
         static1::StaticCompositeExt,
-        Composite,
-        Func,
-        FuncImpl,
     },
     map::Map,
     mode::{
+        Mode,
         basic::BasicMode,
         repr::{
             generate,
             parse,
         },
-        Mode,
     },
     prelude::{
+        Named,
+        Prelude,
         form_mode,
         map_mode,
         named_const_fn,
         named_static_fn,
-        Named,
-        Prelude,
     },
     symbol::Symbol,
     utils::val::{
@@ -38,14 +42,10 @@ use crate::{
         symbol,
     },
     val::{
+        Val,
         ctx::CtxVal,
         func::FuncVal,
-        Val,
     },
-    ConstFuncVal,
-    FreeFuncVal,
-    MutFuncVal,
-    StaticFuncVal,
 };
 
 #[derive(Clone)]

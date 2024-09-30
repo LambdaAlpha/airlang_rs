@@ -1,35 +1,37 @@
 use std::{
     fmt::Display,
     io::{
-        stdin,
         Read,
         Result,
         Write,
+        stdin,
     },
     mem::take,
 };
 
 use airlang::{
-    generate,
-    initial_ctx,
-    interpret_mut,
-    parse,
     Ctx,
     MutCtx,
     Text,
     Val,
+    generate,
+    initial_ctx,
+    interpret_mut,
+    parse,
 };
 use crossterm::{
+    Command,
+    ExecutableCommand,
+    QueueableCommand,
     cursor::{
-        position,
         MoveToColumn,
         MoveToNextLine,
         MoveToPreviousLine,
         RestorePosition,
         SavePosition,
+        position,
     },
     event::{
-        read,
         DisableBracketedPaste,
         EnableBracketedPaste,
         Event,
@@ -37,6 +39,7 @@ use crossterm::{
         KeyEvent,
         KeyEventKind,
         KeyModifiers,
+        read,
     },
     style::{
         Color,
@@ -47,20 +50,17 @@ use crossterm::{
         Stylize,
     },
     terminal::{
-        disable_raw_mode,
-        enable_raw_mode,
-        is_raw_mode_enabled,
-        size,
         Clear,
         ClearType,
         ScrollDown,
         ScrollUp,
         SetTitle,
+        disable_raw_mode,
+        enable_raw_mode,
+        is_raw_mode_enabled,
+        size,
     },
     tty::IsTty,
-    Command,
-    ExecutableCommand,
-    QueueableCommand,
 };
 
 use crate::init_ctx;

@@ -15,11 +15,11 @@ use airlang::{
 };
 
 use crate::prelude::{
+    Named,
+    Prelude,
     form_mode,
     map_mode,
     named_static_fn,
-    Named,
-    Prelude,
 };
 
 pub(crate) struct ProcessPrelude {

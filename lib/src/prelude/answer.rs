@@ -1,23 +1,4 @@
 use crate::{
-    answer::{
-        Answer,
-        CACHE,
-        MAYBE,
-        NEVER,
-        NONE,
-    },
-    ctx::{
-        const1::ConstFnCtx,
-        default::DefaultCtx,
-        CtxValue,
-    },
-    prelude::{
-        named_const_fn,
-        named_static_fn,
-        Named,
-        Prelude,
-    },
-    utils::val::symbol,
     AnswerVal,
     Bool,
     CaseVal,
@@ -26,6 +7,25 @@ use crate::{
     Mode,
     Symbol,
     Val,
+    answer::{
+        Answer,
+        CACHE,
+        MAYBE,
+        NEVER,
+        NONE,
+    },
+    ctx::{
+        CtxValue,
+        const1::ConstFnCtx,
+        default::DefaultCtx,
+    },
+    prelude::{
+        Named,
+        Prelude,
+        named_const_fn,
+        named_static_fn,
+    },
+    utils::val::symbol,
 };
 
 #[derive(Clone)]
