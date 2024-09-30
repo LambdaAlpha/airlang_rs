@@ -415,7 +415,7 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn call_mode() -> Named<FuncVal> {
     let call_mode = Mode::default();
-    let ask_mode = Mode::default();
+    let ask_mode = form_mode();
     named_const_fn(
         "function.call_mode",
         call_mode,
@@ -436,7 +436,7 @@ fn fn_call_mode(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn ask_mode() -> Named<FuncVal> {
     let call_mode = Mode::default();
-    let ask_mode = Mode::default();
+    let ask_mode = form_mode();
     named_const_fn("function.ask_mode", call_mode, ask_mode, true, fn_ask_mode)
 }
 
@@ -558,7 +558,7 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn body() -> Named<FuncVal> {
     let call_mode = Mode::default();
-    let ask_mode = Mode::default();
+    let ask_mode = form_mode();
     named_const_fn("function.body", call_mode, ask_mode, true, fn_body)
 }
 

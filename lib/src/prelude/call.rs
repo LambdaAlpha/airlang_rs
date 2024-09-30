@@ -88,7 +88,7 @@ fn fn_new(input: Val) -> Val {
 fn new_dependent() -> Named<FuncVal> {
     let call_mode = pair_mode(Mode::default(), form_mode(), BasicMode::default());
     let ask_mode = Mode::default();
-    named_mut_fn("!!", call_mode, ask_mode, true, fn_new_dependent)
+    named_mut_fn("!!", call_mode, ask_mode, false, fn_new_dependent)
 }
 
 fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
