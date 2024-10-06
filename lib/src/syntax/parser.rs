@@ -261,44 +261,23 @@ where
         _ => {}
     }
 
-    match s {
-        UNIT => scope_or::<1, A, TYPE, _, _, _>(s, rest, |_s| Token::Default(From::from(Unit))),
-        TRUE => Ok((rest, Token::Default(From::from(Bool::t())))),
-        FALSE => Ok((rest, Token::Default(From::from(Bool::f())))),
-        MIDDLE => scope_or_symbol::<N, A_NONE, TYPE, _, _>(s, rest),
-        LEFT => scope_or_symbol::<N, A_LEFT, TYPE, _, _>(s, rest),
-        RIGHT => scope_or_symbol::<N, A_RIGHT, TYPE, _, _>(s, rest),
-        CALL => scope_or_symbol::<N, A, TYPE_CALL, _, _>(s, rest),
-        ASK => scope_or_symbol::<N, A, TYPE_ASK, _, _>(s, rest),
-        PAIR => scope_or_symbol::<2, A, TYPE, _, _>(s, rest),
-        _ => Ok((rest, Token::Unquote(Symbol::from_str(s)))),
-    }
-}
-
-fn scope_or<'a, const N: u8, const A: u8, const TYPE: u8, T, E, F>(
-    src: &'a str,
-    rest: &'a str,
-    f: F,
-) -> IResult<&'a str, Token<T>, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-    F: Fn(&'a str) -> Token<T>,
-{
-    let scope = map(scope::<N, A, TYPE, _, _>, Token::Default);
-    let else1 = |s| Ok((s, f(src)));
-    alt((scope, else1))(rest)
-}
-
-fn scope_or_symbol<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
-    src: &'a str,
-    rest: &'a str,
-) -> IResult<&'a str, Token<T>, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
-{
-    scope_or::<N, A, TYPE, _, _, _>(src, rest, |s| Token::Unquote(Symbol::from_str(s)))
+    let parser = |src| match s {
+        UNIT => alt((scope::<1, A, TYPE, _, _>, success(From::from(Unit))))(src),
+        TRUE => success(From::from(Bool::t()))(src),
+        FALSE => success(From::from(Bool::f()))(src),
+        MIDDLE => scope::<N, A_NONE, TYPE, _, _>(src),
+        LEFT => scope::<N, A_LEFT, TYPE, _, _>(src),
+        RIGHT => scope::<N, A_RIGHT, TYPE, _, _>(src),
+        CALL => scope::<N, A, TYPE_CALL, _, _>(src),
+        ASK => scope::<N, A, TYPE_ASK, _, _>(src),
+        PAIR => scope::<2, A, TYPE, _, _>(src),
+        _ => fail(src),
+    };
+    let mut f = alt((
+        map(parser, Token::Default),
+        map(success(Symbol::from_str(s)), Token::Unquote),
+    ));
+    f(rest)
 }
 
 fn token_all_consuming<'a, T, E, F>(
@@ -602,10 +581,11 @@ fn symbol_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
+    let empty = &src[0..0];
     let f = alt((
-        value(&src[0..0], preceded(char1('\n'), multispace0)),
-        value(&src[0..0], char1('\r')),
-        value(&src[0..0], take_while1(|c| c == '\t')),
+        value(empty, preceded(char1('\n'), multispace0)),
+        value(empty, char1('\r')),
+        value(empty, take_while1(|c| c == '\t')),
     ));
     context("symbol_whitespace", f)(src)
 }
