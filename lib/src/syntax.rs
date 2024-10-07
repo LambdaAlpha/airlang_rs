@@ -50,6 +50,8 @@ pub(crate) const PAIR: &str = ":";
 pub(crate) const CALL: &str = "!";
 pub(crate) const ASK: &str = "?";
 
+pub(crate) const MULTILINE: &str = "-";
+
 #[derive(Debug)]
 pub struct ParseError {
     pub(crate) msg: String,

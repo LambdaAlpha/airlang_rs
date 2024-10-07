@@ -16,5 +16,9 @@ pub(crate) fn expected() -> Vec<Repr> {
         text("\u{1f701}"),
         text("multiple lines"),
         text("a\nb\n  cd"),
+        text("`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?"),
+        text("12345 67890\n12345 67890\n"),
+        text("\"\""),
+        text(""),
     ]
 }

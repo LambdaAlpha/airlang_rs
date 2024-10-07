@@ -11,7 +11,6 @@ use nom::{
     Parser,
     branch::alt,
     bytes::complete::{
-        is_not,
         tag,
         take_while,
         take_while_m_n,
@@ -33,6 +32,7 @@ use nom::{
         map_res,
         opt,
         peek,
+        recognize,
         success,
         value,
         verify,
@@ -84,6 +84,7 @@ use crate::{
         MAP_LEFT,
         MAP_RIGHT,
         MIDDLE,
+        MULTILINE,
         PAIR,
         RIGHT,
         SCOPE_LEFT,
@@ -271,6 +272,7 @@ where
         CALL => scope::<N, A, TYPE_CALL, _, _>(src),
         ASK => scope::<N, A, TYPE_ASK, _, _>(src),
         PAIR => scope::<2, A, TYPE, _, _>(src),
+        MULTILINE => text_multiline(src),
         _ => fail(src),
     };
     let mut f = alt((
@@ -546,8 +548,9 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
+    let literal = take_while1(|c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
     let fragment = alt((
-        map(symbol_literal, StrFragment::Literal),
+        map(literal, StrFragment::Literal),
         map(symbol_escaped, StrFragment::Escaped),
         map(symbol_whitespace, StrFragment::Space),
     ));
@@ -590,24 +593,17 @@ where
     context("symbol_whitespace", f)(src)
 }
 
-fn symbol_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let normal = take_while(|c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
-    let f = verify(normal, |s: &str| !s.is_empty());
-    context("symbol_literal", f)(src)
-}
-
 fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
 {
+    let literal = take_while1(|c| !matches!(c, '"' | '\\' | '\n'));
+    let whitespace = terminated(tag("\n"), multispace0);
     let fragment = alt((
-        map(text_literal, StrFragment::Literal),
+        map(literal, StrFragment::Literal),
         map(text_escaped, StrFragment::Escaped),
-        map(text_whitespace, StrFragment::Space),
+        map(whitespace, StrFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         fragment.push(&mut string);
@@ -649,22 +645,40 @@ where
     context("unicode", f)(src)
 }
 
-// ignore spaces following \n
-fn text_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn text_multiline<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = terminated(tag("\n"), multispace0);
-    context("text_whitespace", f)(src)
+    let literal = take_while(|c| !matches!(c, '\r' | '\n'));
+    let fragment = separated_list1(char1(' '), tuple((literal, text_multiline_newline)));
+    let collect_fragments = map(fragment, |fragments| {
+        let mut s = String::new();
+        for (literal, newline) in fragments {
+            s.push_str(literal);
+            s.push_str(newline);
+        }
+        s
+    });
+    let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
+    let f = map(delimited_text, |s| From::from(Text::from(s)));
+    context("text_multiline", f)(src)
 }
 
-fn text_literal<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn text_multiline_newline<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let normal = is_not("\"\\\n");
-    let f = verify(normal, |s: &str| !s.is_empty());
-    context("text_literal", f)(src)
+    let physical = recognize(tuple((opt(char1('\r')), char1('\n'))));
+    let whitespace = take_while(|c| matches!(c, ' ' | '\t'));
+    let logical = alt((value(true, char1('-')), value(false, char1('|'))));
+    let f = map(
+        tuple((physical, whitespace, logical)),
+        |(physical, _, logical): (&str, _, _)| {
+            if logical { physical } else { &physical[0..0] }
+        },
+    );
+    context("text_multiline_newline", f)(src)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
