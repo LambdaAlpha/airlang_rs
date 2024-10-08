@@ -31,10 +31,6 @@ pub(crate) const SEPARATOR: char = ',';
 pub(crate) const TEXT_QUOTE: char = '"';
 pub(crate) const SYMBOL_QUOTE: char = '\'';
 
-// prefixes
-
-pub(crate) const BYTE: char = '#';
-
 // keywords
 
 pub(crate) const UNIT: &str = ".";
@@ -49,6 +45,10 @@ pub(crate) const COMMENT: &str = ";";
 pub(crate) const PAIR: &str = ":";
 pub(crate) const CALL: &str = "!";
 pub(crate) const ASK: &str = "?";
+
+pub(crate) const INT: &str = "i";
+pub(crate) const NUMBER: &str = "n";
+pub(crate) const BYTE: &str = "b";
 
 pub(crate) const MULTILINE: &str = "-";
 

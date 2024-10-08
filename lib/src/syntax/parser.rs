@@ -1,6 +1,5 @@
 use std::{
     hash::Hash,
-    num::ParseIntError,
     ops::Neg,
     str::FromStr,
 };
@@ -29,7 +28,6 @@ use nom::{
         fail,
         map,
         map_opt,
-        map_res,
         opt,
         peek,
         recognize,
@@ -39,7 +37,6 @@ use nom::{
     },
     error::{
         ContextError,
-        FromExternalError,
         ParseError,
         VerboseError,
         context,
@@ -78,6 +75,7 @@ use crate::{
         CALL,
         COMMENT,
         FALSE,
+        INT,
         LEFT,
         LIST_LEFT,
         LIST_RIGHT,
@@ -85,6 +83,7 @@ use crate::{
         MAP_RIGHT,
         MIDDLE,
         MULTILINE,
+        NUMBER,
         PAIR,
         RIGHT,
         SCOPE_LEFT,
@@ -135,7 +134,7 @@ pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseEr
 fn top<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = all_consuming(trim(compose::<2, A_RIGHT, TYPE_CALL, _, _>));
     context("top", f)(src)
@@ -201,7 +200,7 @@ const TYPE_ASK: u8 = 1;
 fn scope<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = delimited_trim(SCOPE_LEFT, compose::<N, A, TYPE, _, _>, SCOPE_RIGHT);
     context("scope", f)(src)
@@ -211,7 +210,7 @@ fn token<'a, const N: u8, const A: u8, const TYPE: u8, T: ParseRepr, E>(
     src: &'a str,
 ) -> IResult<&'a str, Token<T>, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let (src, first) = peek(anychar)(src)?;
 
@@ -249,17 +248,16 @@ fn unquote_symbol<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
 ) -> IResult<&'a str, Token<T>, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let (rest, s) = take_while(is_trivial_symbol)(src)?;
 
+    // the only special case
     let mut chars = s.chars();
     let first = chars.next().unwrap();
-
-    match first {
-        '0'..='9' => return token_all_consuming(s, rest, number),
-        BYTE => return token_all_consuming(s, rest, byte),
-        _ => {}
+    if first.is_ascii_digit() {
+        let (_, token) = all_consuming(int_or_number)(s)?;
+        return Ok((rest, Token::Default(token)));
     }
 
     let parser = |src| match s {
@@ -272,6 +270,9 @@ where
         CALL => scope::<N, A, TYPE_CALL, _, _>(src),
         ASK => scope::<N, A, TYPE_ASK, _, _>(src),
         PAIR => scope::<2, A, TYPE, _, _>(src),
+        INT => int(src),
+        NUMBER => number(src),
+        BYTE => byte(src),
         MULTILINE => text_multiline(src),
         _ => fail(src),
     };
@@ -280,20 +281,6 @@ where
         map(success(Symbol::from_str(s)), Token::Unquote),
     ));
     f(rest)
-}
-
-fn token_all_consuming<'a, T, E, F>(
-    src: &'a str,
-    rest: &'a str,
-    f: F,
-) -> IResult<&'a str, Token<T>, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, T, E>,
-{
-    let (_, token) = all_consuming(f)(src)?;
-    Ok((rest, Token::Default(token)))
 }
 
 #[derive(Clone)]
@@ -316,7 +303,7 @@ fn compose<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
 ) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let tokens = separated_list1(empty1, token::<N, A, TYPE, _, _>);
     let f = map_opt(tokens, |tokens| {
@@ -495,7 +482,7 @@ where
 fn list1<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let items = items(compose::<N, A, TYPE, _, _>, char1(SEPARATOR));
     let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
@@ -506,7 +493,7 @@ where
 fn map1<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let items = items(key_value::<N, A, TYPE, _, _>, char1(SEPARATOR));
     let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
@@ -519,7 +506,7 @@ fn key_value<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
 ) -> IResult<&'a str, (T, T), E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let (rest, tokens) = separated_list1(empty1, token::<N, A, TYPE, _, _>)(src)?;
     let mut tokens = tokens.into_iter();
@@ -596,7 +583,7 @@ where
 fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let literal = take_while1(|c| !matches!(c, '"' | '\\' | '\n'));
     let whitespace = terminated(tag("\n"), multispace0);
@@ -616,7 +603,7 @@ where
 
 fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = preceded(
         char1('\\'),
@@ -636,12 +623,14 @@ where
 
 fn unicode<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
 where
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let digit = take_while_m_n(1, 6, is_hexadecimal);
     let delimited_digit = preceded(char1('u'), delimited_trim(SCOPE_LEFT, digit, SCOPE_RIGHT));
-    let parse_u32 = map_res(delimited_digit, move |hex| u32::from_str_radix(hex, 16));
-    let f = map_opt(parse_u32, std::char::from_u32);
+    let code = map(delimited_digit, move |hex| {
+        u32::from_str_radix(hex, 16).unwrap()
+    });
+    let f = map_opt(code, std::char::from_u32);
     context("unicode", f)(src)
 }
 
@@ -702,7 +691,7 @@ impl<'a> StrFragment<'a> {
     }
 }
 
-fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn int_or_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -710,8 +699,31 @@ where
     let norm = preceded(tag("0"), tuple((sign, significand, exponent)));
     let short = tuple((success(true), significand_radix(10, digit1), exponent));
     let f = map(alt((norm, short)), |(sign, significand, exponent)| {
-        build_number(sign, significand, exponent)
+        build_int_or_number(sign, significand, exponent)
     });
+    context("int_or_number", f)(src)
+}
+
+fn int<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let int = map(tuple((sign, integral)), |(sign, i)| build_int(sign, i));
+    let f = delimited_trim(SCOPE_LEFT, int, SCOPE_RIGHT);
+    context("int", f)(src)
+}
+
+fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let number = map(
+        tuple((sign, significand, exponent)),
+        |(sign, significand, exponent)| build_number(sign, significand, exponent),
+    );
+    let f = delimited_trim(SCOPE_LEFT, number, SCOPE_RIGHT);
     context("number", f)(src)
 }
 
@@ -741,6 +753,29 @@ where
         success(true),
     ));
     context("sign", f)(src)
+}
+
+fn integral<'a, E>(src: &'a str) -> IResult<&'a str, BigInt, E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let dec_no_tag = int_radix(10, digit1);
+    let hex = preceded(tag("X"), cut(int_radix(16, hexadecimal1)));
+    let bin = preceded(tag("B"), cut(int_radix(2, binary1)));
+    let dec = preceded(tag("D"), cut(int_radix(10, digit1)));
+
+    let f = alt((dec_no_tag, hex, bin, dec));
+    context("integral", f)(src)
+}
+
+fn int_radix<'a, E, F>(radix: u8, f: F) -> impl FnMut(&'a str) -> IResult<&'a str, BigInt, E>
+where
+    E: ParseError<&'a str>,
+    F: Parser<&'a str, &'a str, E>,
+{
+    map(trim_num1(f), move |int| {
+        BigInt::from_str_radix(&int, radix as u32).unwrap()
+    })
 }
 
 struct Significand {
@@ -808,48 +843,59 @@ fn build_exponent(sign: bool, exp: String) -> BigInt {
     if sign { i } else { i.neg() }
 }
 
+fn build_int<T>(sign: bool, i: BigInt) -> T
+where
+    T: ParseRepr,
+{
+    let i = Int::new(if sign { i } else { i.neg() });
+    From::from(i)
+}
+
 fn build_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
 where
     T: ParseRepr,
 {
-    let int = if sign {
-        significand.int
-    } else {
-        significand.int.neg()
-    };
-    if significand.shift.is_none() && exp.is_none() {
-        let i = Int::new(int);
-        return From::from(i);
-    }
+    let int = significand.int;
+    let int = if sign { int } else { int.neg() };
     let shift = significand.shift.unwrap_or(0);
     let exp = exp.unwrap_or_default() - shift;
     let n = Number::new(int, significand.radix, exp);
     From::from(n)
 }
 
+fn build_int_or_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
+where
+    T: ParseRepr,
+{
+    if significand.shift.is_some() || exp.is_some() {
+        build_number(sign, significand, exp)
+    } else {
+        build_int(sign, significand.int)
+    }
+}
+
 fn byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let hex = preceded(tag("X"), cut(hexadecimal_byte));
     let bin = preceded(tag("B"), cut(binary_byte));
     let byte = alt((hex, bin, hexadecimal_byte));
-    let f = preceded(char1(BYTE), byte);
+    let f = delimited_trim(SCOPE_LEFT, byte, SCOPE_RIGHT);
     context("byte", f)(src)
 }
 
 fn hexadecimal_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let digits = verify(hexadecimal1, |s: &str| s.len() % 2 == 0);
     let digits = trim_num0(digits);
-    let f = map_res(digits, |s| {
-        Ok(From::from(Byte::from(
-            utils::conversion::hex_str_to_vec_u8(&s)?,
-        )))
+    let f = map(digits, |s| {
+        let byte = utils::conversion::hex_str_to_vec_u8(&s).unwrap();
+        From::from(Byte::from(byte))
     });
     context("hexadecimal_byte", f)(src)
 }
@@ -857,14 +903,13 @@ where
 fn binary_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str> + FromExternalError<&'a str, ParseIntError>,
+    E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let digits = verify(binary1, |s: &str| s.len() % 8 == 0);
     let digits = trim_num0(digits);
-    let f = map_res(digits, |s| {
-        Ok(From::from(Byte::from(
-            utils::conversion::bin_str_to_vec_u8(&s)?,
-        )))
+    let f = map(digits, |s| {
+        let byte = utils::conversion::bin_str_to_vec_u8(&s).unwrap();
+        From::from(Byte::from(byte))
     });
     context("binary_byte", f)(src)
 }

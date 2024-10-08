@@ -32,8 +32,8 @@ do [a = "1", b = "2", c = "3", . text.join [&a, &b, &c]]
 =====
 text.into_utf8 "abc"
 -----
-#616263
+b(616263)
 =====
-text.from_utf8 #616263
+text.from_utf8 b(616263)
 -----
 "abc"

@@ -187,12 +187,13 @@ fn generate_number(n: &Number, s: &mut String) {
 }
 
 fn generate_byte(byte: &Byte, s: &mut String) {
-    s.push(BYTE);
-    if byte.as_ref().is_empty() {
-        return;
+    s.push_str(BYTE);
+    s.push(SCOPE_LEFT);
+    if !byte.as_ref().is_empty() {
+        s.push('X');
+        utils::conversion::u8_array_to_hex_string_mut(byte.as_ref(), s);
     }
-    s.push('X');
-    utils::conversion::u8_array_to_hex_string_mut(byte.as_ref(), s);
+    s.push(SCOPE_RIGHT);
 }
 
 fn generate_text(str: &Text, s: &mut String) {
@@ -241,10 +242,8 @@ fn is_need_quote(str: &str) -> bool {
     }
     let mut chars = str.chars();
     let first = chars.next().unwrap();
-    match first {
-        BYTE | SYMBOL_QUOTE | TEXT_QUOTE | '0'..='9' => return true,
-        '+' | '-' if matches!(chars.next(), Some('0'..='9')) => return true,
-        _ => {}
+    if first.is_ascii_digit() {
+        return true;
     }
     str.chars().any(is_delimiter)
 }
