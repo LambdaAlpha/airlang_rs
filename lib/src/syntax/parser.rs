@@ -82,9 +82,10 @@ use crate::{
         MAP_LEFT,
         MAP_RIGHT,
         MIDDLE,
-        MULTILINE,
         NUMBER,
         PAIR,
+        RAW_TEXT,
+        RICH_TEXT,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
@@ -223,7 +224,7 @@ where
         SCOPE_RIGHT => fail,
         SEPARATOR => fail,
 
-        TEXT_QUOTE => |s| map(text, Token::Default)(s),
+        TEXT_QUOTE => |s| map(rich_text, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
 
         s if is_symbol(s) => unquote_symbol::<N, A, TYPE, _, _>,
@@ -273,7 +274,8 @@ where
         INT => int(src),
         NUMBER => number(src),
         BYTE => byte(src),
-        MULTILINE => text_multiline(src),
+        RICH_TEXT => rich_text(src),
+        RAW_TEXT => raw_text(src),
         _ => fail(src),
     };
     let mut f = alt((
@@ -580,7 +582,7 @@ where
     context("symbol_whitespace", f)(src)
 }
 
-fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn rich_text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -598,7 +600,7 @@ where
     });
     let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
     let f = map(delimited_text, |s| From::from(Text::from(s)));
-    context("text", f)(src)
+    context("rich_text", f)(src)
 }
 
 fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
@@ -634,13 +636,13 @@ where
     context("unicode", f)(src)
 }
 
-fn text_multiline<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn raw_text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let literal = take_while(|c| !matches!(c, '\r' | '\n'));
-    let fragment = separated_list1(char1(' '), tuple((literal, text_multiline_newline)));
+    let fragment = separated_list1(char1(' '), tuple((literal, raw_text_newline)));
     let collect_fragments = map(fragment, |fragments| {
         let mut s = String::new();
         for (literal, newline) in fragments {
@@ -651,10 +653,10 @@ where
     });
     let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
     let f = map(delimited_text, |s| From::from(Text::from(s)));
-    context("text_multiline", f)(src)
+    context("raw_text", f)(src)
 }
 
-fn text_multiline_newline<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn raw_text_newline<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
@@ -667,7 +669,7 @@ where
             if logical { physical } else { &physical[0..0] }
         },
     );
-    context("text_multiline_newline", f)(src)
+    context("raw_text_newline", f)(src)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
