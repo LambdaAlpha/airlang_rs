@@ -50,8 +50,8 @@ pub(crate) const INT: &str = "i";
 pub(crate) const NUMBER: &str = "n";
 pub(crate) const BYTE: &str = "b";
 
-pub(crate) const RAW_TEXT: &str = "/";
-pub(crate) const RICH_TEXT: &str = "\\";
+pub(crate) const RAW: &str = "/";
+pub(crate) const RICH: &str = "\\";
 
 #[derive(Debug)]
 pub struct ParseError {

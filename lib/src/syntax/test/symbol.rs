@@ -83,5 +83,8 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("\\"),
         symbol(" "),
         symbol(" ab cd"),
+        symbol(" '"),
+        symbol("\\_\\''"),
+        symbol("-|/\\:;!?"),
     ]
 }

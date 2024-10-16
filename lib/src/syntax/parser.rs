@@ -84,8 +84,8 @@ use crate::{
         MIDDLE,
         NUMBER,
         PAIR,
-        RAW_TEXT,
-        RICH_TEXT,
+        RAW,
+        RICH,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
@@ -225,9 +225,9 @@ where
         SEPARATOR => fail,
 
         TEXT_QUOTE => |s| map(rich_text, Token::Default)(s),
-        SYMBOL_QUOTE => |s| map(quoted_symbol, Token::Default)(s),
+        SYMBOL_QUOTE => |s| map(rich_symbol, Token::Default)(s),
 
-        s if is_symbol(s) => unquote_symbol::<N, A, TYPE, _, _>,
+        s if is_symbol(s) => trivial_symbol::<N, A, TYPE, _, _>,
         _ => fail,
     };
     context("token", parser)(src)
@@ -244,7 +244,7 @@ fn is_symbol(c: char) -> bool {
     Symbol::is_symbol(c)
 }
 
-fn unquote_symbol<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
+fn trivial_symbol<'a, const N: u8, const A: u8, const TYPE: u8, T, E>(
     src: &'a str,
 ) -> IResult<&'a str, Token<T>, E>
 where
@@ -274,8 +274,8 @@ where
         INT => int(src),
         NUMBER => number(src),
         BYTE => byte(src),
-        RICH_TEXT => rich_text(src),
-        RAW_TEXT => raw_text(src),
+        RICH => alt((rich_text, rich_symbol))(src),
+        RAW => alt((raw_text, raw_symbol))(src),
         _ => fail(src),
     };
     let mut f = alt((
@@ -532,7 +532,7 @@ where
     Ok((rest, (key, value)))
 }
 
-fn quoted_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn rich_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -541,7 +541,7 @@ where
     let fragment = alt((
         map(literal, StrFragment::Literal),
         map(symbol_escaped, StrFragment::Escaped),
-        map(symbol_whitespace, StrFragment::Space),
+        map(symbol_space, StrFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         fragment.push(&mut string);
@@ -549,7 +549,7 @@ where
     });
     let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
     let f = map(delimited_symbol, |s| From::from(Symbol::from_string(s)));
-    context("quoted_symbol", f)(src)
+    context("rich_symbol", f)(src)
 }
 
 fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
@@ -569,7 +569,7 @@ where
 }
 
 // ignore spaces following \n
-fn symbol_whitespace<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
+fn symbol_space<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
@@ -579,7 +579,30 @@ where
         value(empty, char1('\r')),
         value(empty, take_while1(|c| c == '\t')),
     ));
-    context("symbol_whitespace", f)(src)
+    context("symbol_space", f)(src)
+}
+
+fn raw_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let literal = take_while(is_symbol);
+    let fragment = separated_list1(char1(' '), terminated(literal, raw_symbol_newline));
+    let collect_fragments = map(fragment, |fragments| fragments.join(""));
+    let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
+    let f = map(delimited_symbol, |s| From::from(Symbol::from_string(s)));
+    context("raw_symbol", f)(src)
+}
+
+fn raw_symbol_newline<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
+where
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    let newline = tuple((opt(char1('\r')), char1('\n')));
+    let space = take_while(|c| matches!(c, ' ' | '\t'));
+    let f = value((), tuple((newline, space, char1('|'))));
+    context("raw_symbol_newline", f)(src)
 }
 
 fn rich_text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
@@ -588,11 +611,11 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let literal = take_while1(|c| !matches!(c, '"' | '\\' | '\n'));
-    let whitespace = terminated(tag("\n"), multispace0);
+    let space = terminated(tag("\n"), multispace0);
     let fragment = alt((
         map(literal, StrFragment::Literal),
         map(text_escaped, StrFragment::Escaped),
-        map(whitespace, StrFragment::Space),
+        map(space, StrFragment::Space),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         fragment.push(&mut string);
@@ -661,10 +684,10 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let physical = recognize(tuple((opt(char1('\r')), char1('\n'))));
-    let whitespace = take_while(|c| matches!(c, ' ' | '\t'));
+    let space = take_while(|c| matches!(c, ' ' | '\t'));
     let logical = alt((value(true, char1('-')), value(false, char1('|'))));
     let f = map(
-        tuple((physical, whitespace, logical)),
+        tuple((physical, space, logical)),
         |(physical, _, logical): (&str, _, _)| {
             if logical { physical } else { &physical[0..0] }
         },
