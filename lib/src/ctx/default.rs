@@ -3,12 +3,15 @@ use crate::{
     Pair,
     Symbol,
     Val,
+    core::{
+        SYMBOL_ID_PREFIX,
+        SYMBOL_REF_PREFIX,
+    },
     ctx::{
         DynRef,
         map::CtxMapRef,
         ref1::CtxRef,
     },
-    mode::SYMBOL_READ_PREFIX,
     types::either::Either,
 };
 
@@ -26,6 +29,16 @@ impl DefaultCtx {
             return Val::default();
         };
         val.clone()
+    }
+
+    pub(crate) fn remove_or_default<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Val
+    where
+        Ctx: CtxRef<'a>,
+    {
+        let Ok(variables) = ctx.get_variables_mut() else {
+            return Val::default();
+        };
+        variables.remove(name).unwrap_or_default()
     }
 
     pub(crate) fn is_null<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Result<bool, CtxError>
@@ -54,11 +67,11 @@ impl DefaultCtx {
         match name {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
-                if let Some(Symbol::ID_PREFIX) = prefix {
+                if let Some(SYMBOL_ID_PREFIX) = prefix {
                     let s = Symbol::from_str(&s[1..]);
                     return f(Either::Right(Val::Symbol(s)));
                 }
-                let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                     Symbol::from_str(&s[1..])
                 } else {
                     s
@@ -86,11 +99,11 @@ impl DefaultCtx {
         match name {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
-                if let Some(Symbol::ID_PREFIX) = prefix {
+                if let Some(SYMBOL_ID_PREFIX) = prefix {
                     let s = Symbol::from_str(&s[1..]);
                     return f(&Val::Symbol(s));
                 }
-                let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                     Symbol::from_str(&s[1..])
                 } else {
                     s
@@ -116,13 +129,13 @@ impl DefaultCtx {
         match name {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
-                if let Some(Symbol::ID_PREFIX) = prefix {
+                if let Some(SYMBOL_ID_PREFIX) = prefix {
                     let s = Symbol::from_str(&s[1..]);
                     let val = Val::Symbol(s);
                     let result = f(&val);
                     return Val::Pair(Pair::new(val, result).into());
                 }
-                let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                     Symbol::from_str(&s[1..])
                 } else {
                     s
@@ -152,11 +165,11 @@ impl DefaultCtx {
         match name {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
-                if let Some(Symbol::ID_PREFIX) = prefix {
+                if let Some(SYMBOL_ID_PREFIX) = prefix {
                     let s = Symbol::from_str(&s[1..]);
                     return f(&mut Val::Symbol(s));
                 }
-                let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                     Symbol::from_str(&s[1..])
                 } else {
                     s
@@ -182,13 +195,13 @@ impl DefaultCtx {
         match name {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
-                if let Some(Symbol::ID_PREFIX) = prefix {
+                if let Some(SYMBOL_ID_PREFIX) = prefix {
                     let s = Symbol::from_str(&s[1..]);
                     let mut val = Val::Symbol(s);
                     let result = f(&mut val);
                     return Val::Pair(Pair::new(val, result).into());
                 }
-                let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                     Symbol::from_str(&s[1..])
                 } else {
                     s
@@ -217,13 +230,13 @@ impl DefaultCtx {
         match name {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
-                if let Some(Symbol::ID_PREFIX) = prefix {
+                if let Some(SYMBOL_ID_PREFIX) = prefix {
                     let s = Symbol::from_str(&s[1..]);
                     let mut val = Val::Symbol(s);
                     f(&mut val);
                     return val;
                 }
-                let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                     Symbol::from_str(&s[1..])
                 } else {
                     s

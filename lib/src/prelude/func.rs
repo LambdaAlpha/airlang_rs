@@ -1,46 +1,36 @@
 use crate::{
-    ConstFuncVal,
-    FreeFuncVal,
-    MutFuncVal,
-    StaticFuncVal,
     bool::Bool,
     ctx::{
-        Ctx,
         CtxValue,
         const1::ConstFnCtx,
         default::DefaultCtx,
     },
     func::{
-        Composite,
-        Func,
-        FuncImpl,
-        const1::ConstCompositeExt,
-        free::FreeCompositeExt,
-        mut1::MutCompositeExt,
-        static1::StaticCompositeExt,
+        mode::ModeFunc,
+        repr::{
+            CONST,
+            FREE,
+            MUTABLE,
+            generate_func,
+            generate_mode,
+            parse_func,
+            parse_mode,
+        },
     },
     map::Map,
     mode::{
         Mode,
-        basic::BasicMode,
-        repr::{
-            generate,
-            parse,
-        },
+        primitive::PrimitiveMode,
+        repr::parse,
     },
     prelude::{
         Named,
         Prelude,
         form_mode,
-        map_mode,
         named_const_fn,
         named_static_fn,
     },
     symbol::Symbol,
-    utils::val::{
-        map_remove,
-        symbol,
-    },
     val::{
         Val,
         ctx::CtxVal,
@@ -50,6 +40,10 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct FuncPrelude {
+    pub(crate) mode_id: Named<FuncVal>,
+    pub(crate) mode_form: Named<FuncVal>,
+    pub(crate) mode_eval: Named<FuncVal>,
+    pub(crate) mode: Named<FuncVal>,
     pub(crate) new: Named<FuncVal>,
     pub(crate) repr: Named<FuncVal>,
     pub(crate) ctx_access: Named<FuncVal>,
@@ -59,6 +53,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) is_primitive: Named<FuncVal>,
     pub(crate) is_extension: Named<FuncVal>,
     pub(crate) is_static: Named<FuncVal>,
+    pub(crate) is_mode: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
     pub(crate) body: Named<FuncVal>,
     pub(crate) prelude: Named<FuncVal>,
@@ -69,6 +64,10 @@ pub(crate) struct FuncPrelude {
 impl Default for FuncPrelude {
     fn default() -> Self {
         FuncPrelude {
+            mode_id: mode_id(),
+            mode_form: mode_form(),
+            mode_eval: mode_eval(),
+            mode: mode(),
             new: new(),
             repr: repr(),
             ctx_access: ctx_access(),
@@ -78,6 +77,7 @@ impl Default for FuncPrelude {
             is_primitive: is_primitive(),
             is_extension: is_extension(),
             is_static: is_static(),
+            is_mode: is_mode(),
             id: id(),
             body: body(),
             prelude: prelude(),
@@ -89,6 +89,10 @@ impl Default for FuncPrelude {
 
 impl Prelude for FuncPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
+        self.mode_id.put(m);
+        self.mode_form.put(m);
+        self.mode_eval.put(m);
+        self.mode.put(m);
         self.new.put(m);
         self.repr.put(m);
         self.ctx_access.put(m);
@@ -98,6 +102,7 @@ impl Prelude for FuncPrelude {
         self.is_primitive.put(m);
         self.is_extension.put(m);
         self.is_static.put(m);
+        self.is_mode.put(m);
         self.id.put(m);
         self.body.put(m);
         self.prelude.put(m);
@@ -106,146 +111,54 @@ impl Prelude for FuncPrelude {
     }
 }
 
-const BODY: &str = "body";
-const PRELUDE: &str = "prelude";
-const INPUT_NAME: &str = "input_name";
-const CTX_NAME: &str = "context_name";
-const ID: &str = "id";
-const IS_EXTENSION: &str = "is_extension";
-const CALL_MODE: &str = "call_mode";
-const ASK_MODE: &str = "ask_mode";
-const CACHEABLE: &str = "cacheable";
-const CTX_ACCESS: &str = "context_access";
-const STATIC: &str = "static";
+fn mode_id() -> Named<FuncVal> {
+    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Id));
+    let func = FuncVal::Mode(func.into());
+    Named::new("id", func)
+}
 
-const DEFAULT_INPUT_NAME: &str = "i";
-const DEFAULT_CTX_NAME: &str = "c";
-const FREE: &str = "free";
-const CONST: &str = "constant";
-const MUTABLE: &str = "mutable";
+fn mode_form() -> Named<FuncVal> {
+    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Form));
+    let func = FuncVal::Mode(func.into());
+    Named::new("form", func)
+}
+
+fn mode_eval() -> Named<FuncVal> {
+    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Eval));
+    let func = FuncVal::Mode(func.into());
+    Named::new("eval", func)
+}
+
+fn mode() -> Named<FuncVal> {
+    let call_mode = form_mode();
+    let ask_mode = Mode::default();
+    named_static_fn("mode", call_mode, ask_mode, true, fn_mode)
+}
+
+fn fn_mode(input: Val) -> Val {
+    let Some(mode) = parse(input) else {
+        return Val::default();
+    };
+    let func = ModeFunc::new(mode);
+    Val::Func(FuncVal::Mode(func.into()))
+}
 
 fn new() -> Named<FuncVal> {
-    let mut map = Map::default();
-    map.insert(symbol(BODY), form_mode());
-    map.insert(symbol(PRELUDE), Mode::default());
-    map.insert(symbol(INPUT_NAME), Mode::default());
-    map.insert(symbol(CTX_NAME), Mode::default());
-    map.insert(symbol(CTX_ACCESS), Mode::default());
-    map.insert(symbol(CALL_MODE), form_mode());
-    map.insert(symbol(ASK_MODE), form_mode());
-    map.insert(symbol(CACHEABLE), Mode::default());
-    map.insert(symbol(STATIC), Mode::default());
-    let call_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
+    let call_mode = parse_mode();
     let ask_mode = Mode::default();
     named_static_fn("function", call_mode, ask_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
-    let Val::Map(mut map) = input else {
-        return Val::default();
-    };
-    let body = map_remove(&mut map, BODY);
-    let prelude = match map_remove(&mut map, PRELUDE) {
-        Val::Ctx(prelude) => prelude.into(),
-        Val::Unit(_) => Ctx::default(),
-        _ => return Val::default(),
-    };
-    let input_name = match map_remove(&mut map, INPUT_NAME) {
-        Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
-        _ => return Val::default(),
-    };
-    let call_mode = map_remove(&mut map, CALL_MODE);
-    let Some(call_mode) = parse(call_mode) else {
-        return Val::default();
-    };
-    let ask_mode = map_remove(&mut map, ASK_MODE);
-    let Some(ask_mode) = parse(ask_mode) else {
-        return Val::default();
-    };
-    let cacheable = match map_remove(&mut map, CACHEABLE) {
-        Val::Unit(_) => false,
-        Val::Bool(b) => b.bool(),
-        _ => return Val::default(),
-    };
-    let ctx_name = match map_remove(&mut map, CTX_NAME) {
-        Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from_str(DEFAULT_CTX_NAME),
-        _ => return Val::default(),
-    };
-    let ctx_access = map_remove(&mut map, CTX_ACCESS);
-    let ctx_access = match &ctx_access {
-        Val::Symbol(s) => &**s,
-        Val::Unit(_) => MUTABLE,
-        _ => return Val::default(),
-    };
-    let static1 = match map_remove(&mut map, STATIC) {
-        Val::Unit(_) => false,
-        Val::Bool(b) => b.bool(),
-        _ => return Val::default(),
-    };
-    let func = match ctx_access {
-        FREE => {
-            if static1 {
-                let transformer = Composite {
-                    body,
-                    prelude,
-                    input_name,
-                    ext: StaticCompositeExt {},
-                };
-                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-                FuncVal::Static(StaticFuncVal::from(func))
-            } else {
-                let transformer = Composite {
-                    body,
-                    prelude,
-                    input_name,
-                    ext: FreeCompositeExt {},
-                };
-                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-                FuncVal::Free(FreeFuncVal::from(func))
-            }
-        }
-        CONST => {
-            let transformer = Composite {
-                body,
-                prelude,
-                input_name,
-                ext: ConstCompositeExt { ctx_name },
-            };
-            let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-            FuncVal::Const(ConstFuncVal::from(func))
-        }
-        MUTABLE => {
-            let transformer = Composite {
-                body,
-                prelude,
-                input_name,
-                ext: MutCompositeExt { ctx_name },
-            };
-            let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-            FuncVal::Mut(MutFuncVal::from(func))
-        }
-        _ => return Val::default(),
-    };
-    Val::Func(func)
+    match parse_func(input) {
+        Some(func) => Val::Func(func),
+        None => Val::default(),
+    }
 }
 
 fn repr() -> Named<FuncVal> {
     let call_mode = Mode::default();
-    let mut map = Map::default();
-    map.insert(symbol(BODY), form_mode());
-    map.insert(symbol(PRELUDE), Mode::default());
-    map.insert(symbol(INPUT_NAME), Mode::default());
-    map.insert(symbol(CTX_NAME), Mode::default());
-    map.insert(symbol(CTX_ACCESS), Mode::default());
-    map.insert(symbol(CALL_MODE), form_mode());
-    map.insert(symbol(ASK_MODE), form_mode());
-    map.insert(symbol(CACHEABLE), Mode::default());
-    map.insert(symbol(ID), Mode::default());
-    map.insert(symbol(IS_EXTENSION), Mode::default());
-    map.insert(symbol(STATIC), Mode::default());
-    let ask_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
+    let ask_mode = generate_mode();
     named_static_fn("function.represent", call_mode, ask_mode, true, fn_repr)
 }
 
@@ -253,137 +166,7 @@ fn fn_repr(input: Val) -> Val {
     let Val::Func(func) = input else {
         return Val::default();
     };
-    let mut repr = Map::<Val, Val>::default();
-
-    match func {
-        FuncVal::Free(f) => {
-            let f = f.unwrap();
-            match f.transformer {
-                FuncImpl::Primitive(p) => {
-                    repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-                    if p.is_extension {
-                        repr.insert(symbol(CTX_ACCESS), symbol(FREE));
-                        repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-                        generate_cacheable(f.cacheable, &mut repr);
-                        generate_mode(&f.call_mode, &f.ask_mode, &mut repr);
-                    }
-                }
-                FuncImpl::Composite(c) => {
-                    repr.insert(symbol(CTX_ACCESS), symbol(FREE));
-                    if c.body != Val::default() {
-                        repr.insert(symbol(BODY), c.body);
-                    }
-                    if c.prelude != Ctx::default() {
-                        repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude)));
-                    }
-                    if &*c.input_name != DEFAULT_INPUT_NAME {
-                        repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name));
-                    }
-                    generate_cacheable(f.cacheable, &mut repr);
-                    generate_mode(&f.call_mode, &f.ask_mode, &mut repr);
-                }
-            }
-        }
-        FuncVal::Static(f) => match &f.transformer {
-            FuncImpl::Primitive(p) => {
-                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-                if p.is_extension {
-                    repr.insert(symbol(STATIC), Val::Bool(Bool::t()));
-                    repr.insert(symbol(CTX_ACCESS), symbol(FREE));
-                    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-                    generate_cacheable(f.cacheable(), &mut repr);
-                    generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
-                }
-            }
-            FuncImpl::Composite(c) => {
-                repr.insert(symbol(STATIC), Val::Bool(Bool::t()));
-                repr.insert(symbol(CTX_ACCESS), symbol(FREE));
-                if c.body != Val::default() {
-                    repr.insert(symbol(BODY), c.body.clone());
-                }
-                if c.prelude != Ctx::default() {
-                    repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
-                }
-                if &*c.input_name != DEFAULT_INPUT_NAME {
-                    repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
-                }
-                generate_cacheable(f.cacheable(), &mut repr);
-                generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
-            }
-        },
-        FuncVal::Const(f) => match &f.transformer {
-            FuncImpl::Primitive(p) => {
-                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-                if p.is_extension {
-                    repr.insert(symbol(CTX_ACCESS), symbol(CONST));
-                    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-                    generate_cacheable(f.cacheable(), &mut repr);
-                    generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
-                }
-            }
-            FuncImpl::Composite(c) => {
-                repr.insert(symbol(CTX_ACCESS), symbol(CONST));
-                if c.body != Val::default() {
-                    repr.insert(symbol(BODY), c.body.clone());
-                }
-                if c.prelude != Ctx::default() {
-                    repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
-                }
-                if &*c.input_name != DEFAULT_INPUT_NAME {
-                    repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
-                }
-                if &*c.ext.ctx_name != DEFAULT_CTX_NAME {
-                    repr.insert(symbol(CTX_NAME), Val::Symbol(c.ext.ctx_name.clone()));
-                }
-                generate_cacheable(f.cacheable(), &mut repr);
-                generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
-            }
-        },
-        FuncVal::Mut(f) => match &f.transformer {
-            FuncImpl::Primitive(p) => {
-                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-                if p.is_extension {
-                    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-                    generate_cacheable(f.cacheable(), &mut repr);
-                    generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
-                }
-            }
-            FuncImpl::Composite(c) => {
-                if c.body != Val::default() {
-                    repr.insert(symbol(BODY), c.body.clone());
-                }
-                if c.prelude != Ctx::default() {
-                    repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(c.prelude.clone())));
-                }
-                if &*c.input_name != DEFAULT_INPUT_NAME {
-                    repr.insert(symbol(INPUT_NAME), Val::Symbol(c.input_name.clone()));
-                }
-                if &*c.ext.ctx_name != DEFAULT_CTX_NAME {
-                    repr.insert(symbol(CTX_NAME), Val::Symbol(c.ext.ctx_name.clone()));
-                }
-                generate_cacheable(f.cacheable(), &mut repr);
-                generate_mode(f.call_mode(), f.ask_mode(), &mut repr);
-            }
-        },
-    }
-    Val::Map(repr.into())
-}
-
-fn generate_mode(call_mode: &Mode, ask_mode: &Mode, repr: &mut Map<Val, Val>) {
-    if *call_mode != Mode::default() {
-        let call_mode = generate(call_mode);
-        repr.insert(symbol(CALL_MODE), call_mode);
-    }
-    if *ask_mode != Mode::default() {
-        let ask_mode = generate(ask_mode);
-        repr.insert(symbol(ASK_MODE), ask_mode);
-    }
-}
-
-fn generate_cacheable(cacheable: bool, repr: &mut Map<Val, Val>) {
-    if cacheable {
-        repr.insert(symbol(CACHEABLE), Val::Bool(Bool::new(cacheable)));
-    }
+    generate_func(func)
 }
 
 fn ctx_access() -> Named<FuncVal> {
@@ -404,6 +187,7 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let access = match func {
+            FuncVal::Mode(_) => MUTABLE,
             FuncVal::Free(_) => FREE,
             FuncVal::Static(_) => FREE,
             FuncVal::Const(_) => CONST,
@@ -415,7 +199,7 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn call_mode() -> Named<FuncVal> {
     let call_mode = Mode::default();
-    let ask_mode = form_mode();
+    let ask_mode = Mode::default();
     named_const_fn(
         "function.call_mode",
         call_mode,
@@ -430,13 +214,14 @@ fn fn_call_mode(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        generate(func.call_mode())
+        let mode = func.call_mode().clone();
+        Val::Func(FuncVal::Mode(ModeFunc::new(mode).into()))
     })
 }
 
 fn ask_mode() -> Named<FuncVal> {
     let call_mode = Mode::default();
-    let ask_mode = form_mode();
+    let ask_mode = Mode::default();
     named_const_fn("function.ask_mode", call_mode, ask_mode, true, fn_ask_mode)
 }
 
@@ -445,7 +230,8 @@ fn fn_ask_mode(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        generate(func.ask_mode())
+        let mode = func.ask_mode().clone();
+        Val::Func(FuncVal::Mode(ModeFunc::new(mode).into()))
     })
 }
 
@@ -535,6 +321,21 @@ fn fn_is_static(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         Val::Bool(Bool::new(matches!(func, FuncVal::Static(_))))
+    })
+}
+
+fn is_mode() -> Named<FuncVal> {
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn("function.is_mode", call_mode, ask_mode, true, fn_is_mode)
+}
+
+fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Func(func) = val else {
+            return Val::default();
+        };
+        Val::Bool(Bool::new(matches!(func, FuncVal::Mode(_))))
     })
 }
 

@@ -7,6 +7,7 @@ use crate::{
     Symbol,
     Val,
     bool::Bool,
+    core::EvalCore,
     ctx::{
         CtxValue,
         const1::ConstFnCtx,
@@ -15,8 +16,8 @@ use crate::{
     },
     map::Map,
     mode::{
-        basic::BasicMode,
         eval::Eval,
+        primitive::PrimitiveMode,
     },
     prelude::{
         Named,
@@ -85,7 +86,12 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
-    let call_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
+    let call_mode = map_mode(
+        map,
+        Mode::default(),
+        Mode::default(),
+        PrimitiveMode::default(),
+    );
     let ask_mode = Mode::default();
     named_mut_fn("case", call_mode, ask_mode, false, fn_new)
 }
@@ -96,9 +102,9 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
     };
     let func = map_remove(&mut map, FUNCTION);
     let input = map_remove(&mut map, INPUT);
-    let input = Eval.eval_input(ctx.reborrow(), &func, input);
+    let input = EvalCore::eval_input(&Eval, ctx.reborrow(), &func, input);
     let output = map_remove(&mut map, OUTPUT);
-    let output = Eval.eval_output(ctx, &func, output);
+    let output = EvalCore::eval_output(&Eval, ctx, &func, output);
     let case = Case::new(func, input, output);
     Val::Case(CaseVal::Trivial(case.into()))
 }
@@ -129,7 +135,12 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
     map.insert(symbol(IS_CACHE), Mode::default());
-    let ask_mode = map_mode(map, Mode::default(), Mode::default(), BasicMode::default());
+    let ask_mode = map_mode(
+        map,
+        Mode::default(),
+        Mode::default(),
+        PrimitiveMode::default(),
+    );
     named_static_fn("case.represent", call_mode, ask_mode, true, fn_repr)
 }
 

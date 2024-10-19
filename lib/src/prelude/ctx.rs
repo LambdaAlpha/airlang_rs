@@ -33,8 +33,8 @@ use crate::{
     list::List,
     mode::{
         Mode,
-        basic::BasicMode,
         eval::Eval,
+        primitive::PrimitiveMode,
     },
     pair::Pair,
     prelude::{
@@ -157,7 +157,7 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn assign() -> Named<FuncVal> {
-    let call_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
+    let call_mode = pair_mode(form_mode(), Mode::default(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     named_mut_fn("=", call_mode, ask_mode, true, fn_assign)
 }
@@ -558,7 +558,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn with_ctx() -> Named<FuncVal> {
-    let call_mode = pair_mode(form_mode(), Mode::default(), BasicMode::default());
+    let call_mode = pair_mode(form_mode(), Mode::default(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     named_mut_fn("|", call_mode, ask_mode, false, fn_with_ctx)
 }
@@ -629,12 +629,12 @@ fn ctx_new() -> Named<FuncVal> {
             Map::default(),
             form_mode(),
             Mode::default(),
-            BasicMode::default(),
+            PrimitiveMode::default(),
         ),
     );
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
-    let call_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
+    let call_mode = map_mode(map, form_mode(), Mode::default(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     named_static_fn("context", call_mode, ask_mode, true, fn_ctx_new)
 }
@@ -708,12 +708,12 @@ fn ctx_repr() -> Named<FuncVal> {
             Map::default(),
             form_mode(),
             Mode::default(),
-            BasicMode::default(),
+            PrimitiveMode::default(),
         ),
     );
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
-    let ask_mode = map_mode(map, form_mode(), Mode::default(), BasicMode::default());
+    let ask_mode = map_mode(map, form_mode(), Mode::default(), PrimitiveMode::default());
     named_static_fn("context.represent", call_mode, ask_mode, true, fn_ctx_repr)
 }
 

@@ -30,6 +30,10 @@ use crate::{
         any_val,
     },
     bool::Bool,
+    core::{
+        SYMBOL_ID_PREFIX,
+        SYMBOL_REF_PREFIX,
+    },
     ctx::{
         CtxValue,
         const1::ConstFnCtx,
@@ -37,7 +41,6 @@ use crate::{
         map::CtxMapRef,
         ref1::CtxRef,
     },
-    mode::SYMBOL_READ_PREFIX,
     prelude::{
         Named,
         Prelude,
@@ -220,11 +223,11 @@ where
     match v {
         Val::Symbol(s) => {
             let prefix = s.chars().next();
-            if let Some(Symbol::ID_PREFIX) = prefix {
+            if let Some(SYMBOL_ID_PREFIX) = prefix {
                 let s = Symbol::from_str(&s[1..]);
                 return f(Some(&Val::Symbol(s)));
             }
-            let s = if let Some(SYMBOL_READ_PREFIX) = prefix {
+            let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
                 Symbol::from_str(&s[1..])
             } else {
                 s.clone()

@@ -8,6 +8,7 @@ use crate::{
     Pair,
     Symbol,
     Val,
+    core::EvalCore,
     ctx::{
         CtxValue,
         const1::ConstFnCtx,
@@ -17,8 +18,8 @@ use crate::{
     },
     func::mut1::MutDispatcher,
     mode::{
-        basic::BasicMode,
         eval::Eval,
+        primitive::PrimitiveMode,
     },
     prelude::{
         Named,
@@ -86,7 +87,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn new_dependent() -> Named<FuncVal> {
-    let call_mode = pair_mode(Mode::default(), form_mode(), BasicMode::default());
+    let call_mode = pair_mode(Mode::default(), form_mode(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     named_mut_fn("??", call_mode, ask_mode, false, fn_new_dependent)
 }
@@ -98,7 +99,7 @@ fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
     let pair = Pair::from(pair);
     let func = pair.first;
     let output = pair.second;
-    let output = Eval.eval_output(ctx, &func, output);
+    let output = EvalCore::eval_output(&Eval, ctx, &func, output);
     Val::Ask(Ask::new(func, output).into())
 }
 
@@ -121,7 +122,7 @@ where
         return Val::default();
     };
     let ask = Ask::from(ask);
-    Eval::solve(ctx, ask.func, ask.output)
+    EvalCore::ask(ctx, ask.func, ask.output)
 }
 
 fn get_func() -> Named<FuncVal> {

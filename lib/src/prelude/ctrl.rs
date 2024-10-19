@@ -19,8 +19,8 @@ use crate::{
     },
     func::mut1::MutDispatcher,
     mode::{
-        basic::BasicMode,
         eval::Eval,
+        primitive::PrimitiveMode,
     },
     prelude::{
         Named,
@@ -135,7 +135,7 @@ where
 }
 
 fn if1() -> Named<FuncVal> {
-    let call_mode = pair_mode(Mode::default(), id_mode(), BasicMode::default());
+    let call_mode = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_if::<FreeCtx>,
@@ -170,7 +170,7 @@ where
 }
 
 fn if_not() -> Named<FuncVal> {
-    let call_mode = pair_mode(Mode::default(), id_mode(), BasicMode::default());
+    let call_mode = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_if_not::<FreeCtx>,
@@ -205,15 +205,14 @@ where
 }
 
 fn match1() -> Named<FuncVal> {
-    let call_mode = pair_mode(
-        Mode::default(),
-        pair_mode(
-            map_mode(Map::default(), form_mode(), id_mode(), BasicMode::default()),
-            id_mode(),
-            BasicMode::default(),
-        ),
-        BasicMode::default(),
+    let map = map_mode(
+        Map::default(),
+        form_mode(),
+        id_mode(),
+        PrimitiveMode::default(),
     );
+    let map_default = pair_mode(map, id_mode(), PrimitiveMode::default());
+    let call_mode = pair_mode(Mode::default(), map_default, PrimitiveMode::default());
     let ask_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_match::<FreeCtx>,
@@ -246,7 +245,7 @@ where
 }
 
 fn match_ordered() -> Named<FuncVal> {
-    let call_mode = pair_mode(Mode::default(), id_mode(), BasicMode::default());
+    let call_mode = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
     let ask_mode = Mode::default();
     let func = MutDispatcher::new(
         fn_match_ordered::<FreeCtx>,
@@ -415,8 +414,8 @@ where
 fn for1() -> Named<FuncVal> {
     let call_mode = pair_mode(
         Mode::default(),
-        pair_mode(form_mode(), id_mode(), BasicMode::default()),
-        BasicMode::default(),
+        pair_mode(form_mode(), id_mode(), PrimitiveMode::default()),
+        PrimitiveMode::default(),
     );
     let ask_mode = Mode::default();
     let func = MutDispatcher::new(

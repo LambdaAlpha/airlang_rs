@@ -7,7 +7,7 @@ use crate::{
     ctx::ref1::CtxMeta,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Cache<F, I, O>(Case<F, I, O>);
 
 impl Cache<Val, Val, Val> {

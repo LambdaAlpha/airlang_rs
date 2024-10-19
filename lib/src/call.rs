@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Call<A, B> {
     pub func: A,
     pub input: B,

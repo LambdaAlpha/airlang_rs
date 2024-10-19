@@ -2,37 +2,87 @@ use crate::{
     Map,
     MapVal,
     Mode,
-    PairMode,
+    Pair,
+    PrimitiveMode,
     Val,
+    core::FormCore,
     ctx::ref1::CtxMeta,
-    transformer::Transformer,
+    mode::{
+        id::Id,
+        recursive::SelfMode,
+    },
+    transformer::{
+        ByVal,
+        Transformer,
+    },
 };
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
-pub struct MapMode {
-    pub some: Map<Val, Mode>,
-    pub else1: PairMode,
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum MapMode<M> {
+    Id,
+    Form {
+        some: Map<Val, M>,
+        else1: Pair<M, M>,
+    },
 }
 
-impl Transformer<MapVal, Val> for MapMode {
-    fn transform<'a, Ctx>(&self, mut ctx: Ctx, val_map: MapVal) -> Val
+impl Transformer<MapVal, Val> for MapMode<Mode> {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        let val_map = Map::from(val_map);
-        let map: Map<Val, Val> = val_map
-            .into_iter()
-            .map(|(k, v)| {
-                if let Some(mode) = self.some.get(&k) {
-                    let v = mode.transform(ctx.reborrow(), v);
-                    (k, v)
-                } else {
-                    let k = self.else1.first.transform(ctx.reborrow(), k);
-                    let v = self.else1.second.transform(ctx.reborrow(), v);
-                    (k, v)
-                }
-            })
-            .collect();
-        Val::Map(map.into())
+        match self {
+            MapMode::Id => Id.transform_map(ctx, map),
+            MapMode::Form { some, else1 } => {
+                FormCore::transform_map_some_else(some, &else1.first, &else1.second, ctx, map)
+            }
+        }
+    }
+}
+
+impl<M: Default> Default for MapMode<M> {
+    fn default() -> Self {
+        Self::Form {
+            some: Map::default(),
+            else1: Pair::default(),
+        }
+    }
+}
+
+impl From<PrimitiveMode> for MapMode<Mode> {
+    fn from(mode: PrimitiveMode) -> Self {
+        match mode {
+            PrimitiveMode::Id => MapMode::Id,
+            PrimitiveMode::Form => MapMode::Form {
+                some: Map::default(),
+                else1: Pair::new(
+                    Mode::Primitive(PrimitiveMode::Form),
+                    Mode::Primitive(PrimitiveMode::Form),
+                ),
+            },
+            PrimitiveMode::Eval => MapMode::Form {
+                some: Map::default(),
+                else1: Pair::new(
+                    Mode::Primitive(PrimitiveMode::Eval),
+                    Mode::Primitive(PrimitiveMode::Eval),
+                ),
+            },
+        }
+    }
+}
+
+impl From<PrimitiveMode> for MapMode<SelfMode> {
+    fn from(mode: PrimitiveMode) -> Self {
+        match mode {
+            PrimitiveMode::Id => MapMode::Id,
+            PrimitiveMode::Form => MapMode::Form {
+                some: Map::default(),
+                else1: Pair::new(SelfMode::Self1, SelfMode::Self1),
+            },
+            PrimitiveMode::Eval => MapMode::Form {
+                some: Map::default(),
+                else1: Pair::new(SelfMode::Self1, SelfMode::Self1),
+            },
+        }
     }
 }

@@ -1,7 +1,9 @@
 use crate::{
+    CompositeMode,
     List,
     Map,
     Pair,
+    PairMode,
     ctx::{
         Ctx,
         CtxValue,
@@ -29,10 +31,9 @@ use crate::{
     },
     mode::{
         Mode,
-        ValMode,
-        basic::BasicMode,
         list::ListMode,
         map::MapMode,
+        primitive::PrimitiveMode,
     },
     prelude::{
         answer::AnswerPrelude,
@@ -50,7 +51,6 @@ use crate::{
         list::ListPrelude,
         map::MapPrelude,
         meta::MetaPrelude,
-        mode::ModePrelude,
         number::NumberPrelude,
         pair::PairPrelude,
         symbol::SymbolPrelude,
@@ -81,7 +81,6 @@ pub(crate) struct AllPrelude {
     pub(crate) value: ValuePrelude,
     pub(crate) ctx: CtxPrelude,
     pub(crate) ctrl: CtrlPrelude,
-    pub(crate) mode: ModePrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) call: CallPrelude,
     pub(crate) ask: AskPrelude,
@@ -108,7 +107,6 @@ impl Prelude for AllPrelude {
         self.value.put(m);
         self.ctx.put(m);
         self.ctrl.put(m);
-        self.mode.put(m);
         self.func.put(m);
         self.call.put(m);
         self.ask.put(m);
@@ -216,88 +214,48 @@ fn named_mut_fn(
     Named::new(name, FuncVal::Mut(func_val))
 }
 
-fn id_mode() -> Mode {
-    Mode {
-        default: BasicMode::Id,
-        specialized: None,
-    }
+pub(crate) fn id_mode() -> Mode {
+    Mode::Primitive(PrimitiveMode::Id)
 }
 
-fn form_mode() -> Mode {
-    Mode {
-        default: BasicMode::Form,
-        specialized: None,
-    }
+pub(crate) fn form_mode() -> Mode {
+    Mode::Primitive(PrimitiveMode::Form)
 }
 
 #[allow(unused)]
-fn eval_mode() -> Mode {
-    Mode {
-        default: BasicMode::Eval,
-        specialized: None,
-    }
+pub(crate) fn eval_mode() -> Mode {
+    Mode::Primitive(PrimitiveMode::Eval)
 }
 
-fn pair_mode(first: Mode, second: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
+pub(crate) fn pair_mode(first: Mode, second: Mode, default: PrimitiveMode) -> Mode {
+    let mode = CompositeMode {
+        pair: PairMode::Form(Pair::new(first, second)),
+        ..CompositeMode::from(default)
     };
-    let val_mode = ValMode {
-        pair: Pair::new(first, second),
-        list: ListMode {
-            head: List::default(),
-            tail: default_mode.clone(),
-        },
-        map: MapMode {
-            some: Map::default(),
-            else1: Pair::new(default_mode.clone(), default_mode),
-        },
-    };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
+    Mode::Composite(Box::new(mode))
 }
 
 #[allow(unused)]
-fn list_mode(head: List<Mode>, tail: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
+pub(crate) fn list_mode(head: List<Mode>, tail: Mode, default: PrimitiveMode) -> Mode {
+    let mode = CompositeMode {
+        list: ListMode::Form { head, tail },
+        ..CompositeMode::from(default)
     };
-    let val_mode = ValMode {
-        list: ListMode { head, tail },
-        pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        map: MapMode {
-            some: Map::default(),
-            else1: Pair::new(default_mode.clone(), default_mode),
-        },
-    };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
+    Mode::Composite(Box::new(mode))
 }
 
-fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
-    };
+pub(crate) fn map_mode(
+    some: Map<Val, Mode>,
+    key: Mode,
+    value: Mode,
+    default: PrimitiveMode,
+) -> Mode {
     let else1 = Pair::new(key, value);
-    let val_mode = ValMode {
-        map: MapMode { some, else1 },
-        pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        list: ListMode {
-            head: List::default(),
-            tail: default_mode,
-        },
+    let mode = CompositeMode {
+        map: MapMode::Form { some, else1 },
+        ..CompositeMode::from(default)
     };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
+    Mode::Composite(Box::new(mode))
 }
 
 mod meta;
@@ -309,8 +267,6 @@ mod value;
 mod ctx;
 
 mod ctrl;
-
-mod mode;
 
 mod func;
 

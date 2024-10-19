@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Comment<A, B> {
     pub meta: A,
     pub value: B,

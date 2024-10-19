@@ -6,8 +6,8 @@ use crate::{
     ctx::ref1::CtxMeta,
     symbol::Symbol,
     transformer::{
+        ByVal,
         Transformer,
-        input::ByVal,
     },
     val::{
         Val,
@@ -50,6 +50,13 @@ impl ByVal<Val> for Id {
         Val::Pair(pair)
     }
 
+    fn transform_comment<'a, Ctx>(&self, _ctx: Ctx, comment: CommentVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        Val::Comment(comment)
+    }
+
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -76,12 +83,5 @@ impl ByVal<Val> for Id {
         Ctx: CtxMeta<'a>,
     {
         Val::Ask(ask)
-    }
-
-    fn transform_comment<'a, Ctx>(&self, _ctx: Ctx, comment: CommentVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        Val::Comment(comment)
     }
 }

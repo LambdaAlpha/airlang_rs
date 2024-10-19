@@ -1,4 +1,4 @@
-pub use self::{
+pub use crate::{
     answer::Answer,
     ask::Ask,
     bool::Bool,
@@ -46,11 +46,16 @@ pub use self::{
     map::Map,
     mode::{
         Mode,
-        ValMode,
-        basic::BasicMode,
+        ask::AskMode,
+        call::CallMode,
+        comment::CommentMode,
+        composite::CompositeMode,
         list::ListMode,
         map::MapMode,
         pair::PairMode,
+        primitive::PrimitiveMode,
+        recursive::SelfMode,
+        symbol::SymbolMode,
     },
     number::Number,
     pair::Pair,
@@ -118,6 +123,8 @@ pub fn interpret_free(ctx: FreeCtx, input: Val) -> Val {
 
 pub(crate) mod val;
 
+pub(crate) mod core;
+
 pub(crate) mod transformer;
 
 pub(crate) mod mode;
@@ -127,8 +134,6 @@ pub(crate) mod ctx;
 pub(crate) mod func;
 
 pub(crate) mod arbitrary;
-
-pub(crate) mod problem;
 
 pub(crate) mod extension;
 

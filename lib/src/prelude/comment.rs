@@ -26,7 +26,7 @@ use crate::{
         named_static_fn,
     },
     syntax::COMMENT,
-    transformer::input::ByVal,
+    transformer::ByVal,
     types::either::Either,
 };
 

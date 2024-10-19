@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Pair<A, B> {
     pub first: A,
     pub second: B,

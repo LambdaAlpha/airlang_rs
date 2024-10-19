@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use airlang::{
-    BasicMode,
+    CompositeMode,
     ConstFn,
     ConstFunc,
     ConstFuncVal,
@@ -20,12 +20,13 @@ use airlang::{
     MutFunc,
     MutFuncVal,
     Pair,
+    PairMode,
+    PrimitiveMode,
     StaticFn,
     StaticFunc,
     StaticFuncVal,
     Symbol,
     Val,
-    ValMode,
 };
 
 use crate::prelude::{
@@ -134,88 +135,43 @@ fn named_mut_fn(
 
 #[allow(unused)]
 fn id_mode() -> Mode {
-    Mode {
-        default: BasicMode::Id,
-        specialized: None,
-    }
+    Mode::Primitive(PrimitiveMode::Id)
 }
 
 fn form_mode() -> Mode {
-    Mode {
-        default: BasicMode::Form,
-        specialized: None,
-    }
+    Mode::Primitive(PrimitiveMode::Form)
 }
 
 #[allow(unused)]
 fn eval_mode() -> Mode {
-    Mode {
-        default: BasicMode::Eval,
-        specialized: None,
-    }
+    Mode::Primitive(PrimitiveMode::Eval)
 }
 
 #[allow(unused)]
-fn pair_mode(first: Mode, second: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
+fn pair_mode(first: Mode, second: Mode, default: PrimitiveMode) -> Mode {
+    let mode = CompositeMode {
+        pair: PairMode::Form(Pair::new(first, second)),
+        ..CompositeMode::from(default)
     };
-    let val_mode = ValMode {
-        pair: Pair::new(first, second),
-        list: ListMode {
-            head: List::default(),
-            tail: default_mode.clone(),
-        },
-        map: MapMode {
-            some: Map::default(),
-            else1: Pair::new(default_mode.clone(), default_mode),
-        },
-    };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
+    Mode::Composite(Box::new(mode))
 }
 
 #[allow(unused)]
-fn list_mode(head: List<Mode>, tail: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
+fn list_mode(head: List<Mode>, tail: Mode, default: PrimitiveMode) -> Mode {
+    let mode = CompositeMode {
+        list: ListMode::Form { head, tail },
+        ..CompositeMode::from(default)
     };
-    let val_mode = ValMode {
-        list: ListMode { head, tail },
-        pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        map: MapMode {
-            some: Map::default(),
-            else1: Pair::new(default_mode.clone(), default_mode),
-        },
-    };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
+    Mode::Composite(Box::new(mode))
 }
 
-fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode, default: BasicMode) -> Mode {
-    let default_mode = Mode {
-        default,
-        specialized: None,
-    };
+fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode, default: PrimitiveMode) -> Mode {
     let else1 = Pair::new(key, value);
-    let val_mode = ValMode {
-        map: MapMode { some, else1 },
-        pair: Pair::new(default_mode.clone(), default_mode.clone()),
-        list: ListMode {
-            head: List::default(),
-            tail: default_mode,
-        },
+    let mode = CompositeMode {
+        map: MapMode::Form { some, else1 },
+        ..CompositeMode::from(default)
     };
-    Mode {
-        default,
-        specialized: Some(Box::new(val_mode)),
-    }
+    Mode::Composite(Box::new(mode))
 }
 
 pub(crate) mod io;

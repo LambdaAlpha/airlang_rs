@@ -43,10 +43,7 @@ do [
 true
 =====
 do [
-    map_mode = function ! {
-        body : i,
-        call_mode : {map : {} : id : eval},
-    },
+    map_mode = mode ! {map : {} : id : eval},
     m = map_mode ! {
         function : not,
         input : true,
@@ -59,10 +56,7 @@ true
 =====
 do [
     m = case.represent ! case.cache ! not '!' true,
-    map_mode = function ! {
-        body : i,
-        call_mode : {map : {} : id : eval},
-    },
+    map_mode = mode ! {map : {} : id : eval},
     expected = map_mode ! {
         function : not,
         input : true,

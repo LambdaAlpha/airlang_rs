@@ -1,128 +1,21 @@
 use std::ops::Deref;
 
 use crate::{
-    Ask,
     AskVal,
-    Call,
     CallVal,
-    Comment,
     CommentVal,
-    List,
-    Map,
-    Pair,
+    ListVal,
+    MapVal,
     PairVal,
+    Symbol,
     Val,
     ctx::ref1::CtxMeta,
-    transformer::input::ByVal,
-    val::{
-        list::ListVal,
-        map::MapVal,
-    },
 };
 
 pub(crate) trait Transformer<Input, Output> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Input) -> Output
     where
         Ctx: CtxMeta<'a>;
-}
-
-pub(crate) struct DefaultByVal;
-
-impl DefaultByVal {
-    pub(crate) fn transform_val<'a, Ctx, T>(t: &T, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: ByVal<Val>,
-    {
-        match input {
-            Val::Symbol(s) => t.transform_symbol(ctx, s),
-            Val::Pair(p) => t.transform_pair(ctx, p),
-            Val::List(l) => t.transform_list(ctx, l),
-            Val::Map(m) => t.transform_map(ctx, m),
-            Val::Call(c) => t.transform_call(ctx, c),
-            Val::Ask(a) => t.transform_ask(ctx, a),
-            Val::Comment(a) => t.transform_comment(ctx, a),
-            v => t.transform_default(ctx, v),
-        }
-    }
-
-    pub(crate) fn transform_pair<'a, Ctx, T>(t: &T, mut ctx: Ctx, pair: PairVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: Transformer<Val, Val>,
-    {
-        let pair = Pair::from(pair);
-        let first = t.transform(ctx.reborrow(), pair.first);
-        let second = t.transform(ctx, pair.second);
-        let pair = Pair::new(first, second);
-        Val::Pair(pair.into())
-    }
-
-    pub(crate) fn transform_list<'a, Ctx, T>(t: &T, mut ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: Transformer<Val, Val>,
-    {
-        let list = List::from(list);
-        let list: List<Val> = list
-            .into_iter()
-            .map(|v| t.transform(ctx.reborrow(), v))
-            .collect();
-        Val::List(list.into())
-    }
-
-    pub(crate) fn transform_map<'a, Ctx, T>(t: &T, mut ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: Transformer<Val, Val>,
-    {
-        let map = Map::from(map);
-        let map: Map<Val, Val> = map
-            .into_iter()
-            .map(|(k, v)| {
-                let key = t.transform(ctx.reborrow(), k);
-                let value = t.transform(ctx.reborrow(), v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map.into())
-    }
-
-    pub(crate) fn transform_call<'a, Ctx, T>(t: &T, mut ctx: Ctx, call: CallVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: Transformer<Val, Val>,
-    {
-        let call = Call::from(call);
-        let func = t.transform(ctx.reborrow(), call.func);
-        let input = t.transform(ctx, call.input);
-        let call = Call::new(func, input);
-        Val::Call(call.into())
-    }
-
-    pub(crate) fn transform_ask<'a, Ctx, T>(t: &T, mut ctx: Ctx, ask: AskVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: Transformer<Val, Val>,
-    {
-        let ask = Ask::from(ask);
-        let func = t.transform(ctx.reborrow(), ask.func);
-        let output = t.transform(ctx, ask.output);
-        let ask = Ask::new(func, output);
-        Val::Ask(ask.into())
-    }
-
-    pub(crate) fn transform_comment<'a, Ctx, T>(t: &T, mut ctx: Ctx, comment: CommentVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: Transformer<Val, Val>,
-    {
-        let comment = Comment::from(comment);
-        let meta = t.transform(ctx.reborrow(), comment.meta);
-        let value = t.transform(ctx, comment.value);
-        let comment = Comment::new(meta, value);
-        Val::Comment(comment.into())
-    }
 }
 
 impl<I, O, T> Transformer<I, O> for Box<T>
@@ -137,4 +30,36 @@ where
     }
 }
 
-pub(crate) mod input;
+pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
+    fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, s: Symbol) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_comment<'a, Ctx>(&self, ctx: Ctx, comment: CommentVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+}

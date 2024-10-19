@@ -1,51 +1,33 @@
 use crate::{
-    BasicMode,
-    ListMode,
-    MapMode,
-    PairMode,
     Val,
     ctx::{
         mut1::MutFnCtx,
         ref1::CtxMeta,
     },
-    transformer::{
-        Transformer,
-        input::ByVal,
+    mode::{
+        composite::CompositeMode,
+        primitive::PrimitiveMode,
+        recursive::SelfMode,
     },
+    transformer::Transformer,
 };
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
-pub struct Mode {
-    pub default: BasicMode,
-    pub specialized: Option<Box<ValMode>>,
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Mode {
+    Primitive(PrimitiveMode),
+    Recursive(CompositeMode<SelfMode>),
+    Composite(Box<CompositeMode<Mode>>),
 }
-
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
-pub struct ValMode {
-    pub pair: PairMode,
-    pub list: ListMode,
-    pub map: MapMode,
-}
-
-pub(crate) const SYMBOL_READ_PREFIX: char = '$';
-pub(crate) const SYMBOL_MOVE_PREFIX: char = '&';
 
 impl Transformer<Val, Val> for Mode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        let Some(val_mode) = &self.specialized else {
-            return self.default.transform(ctx, input);
-        };
-        match input {
-            Val::Symbol(s) => self.default.transform_symbol(ctx, s),
-            Val::Call(call) => self.default.transform_call(ctx, call),
-            Val::Ask(ask) => self.default.transform_ask(ctx, ask),
-            Val::Pair(pair) => val_mode.pair.transform(ctx, pair),
-            Val::List(list) => val_mode.list.transform(ctx, list),
-            Val::Map(map) => val_mode.map.transform(ctx, map),
-            val => self.default.transform(ctx, val),
+        match self {
+            Mode::Primitive(mode) => mode.transform(ctx, input),
+            Mode::Recursive(mode) => mode.transform(ctx, input),
+            Mode::Composite(mode) => mode.transform(ctx, input),
         }
     }
 }
@@ -56,15 +38,39 @@ impl Mode {
     }
 }
 
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Primitive(PrimitiveMode::default())
+    }
+}
+
+impl From<PrimitiveMode> for Mode {
+    fn from(mode: PrimitiveMode) -> Self {
+        Mode::Primitive(mode)
+    }
+}
+
 pub(crate) mod id;
 
 pub(crate) mod form;
 
 pub(crate) mod eval;
 
-pub(crate) mod basic;
+pub(crate) mod primitive;
+
+pub(crate) mod recursive;
+
+pub(crate) mod composite;
+
+pub(crate) mod symbol;
 
 pub(crate) mod pair;
+
+pub(crate) mod comment;
+
+pub(crate) mod call;
+
+pub(crate) mod ask;
 
 pub(crate) mod list;
 

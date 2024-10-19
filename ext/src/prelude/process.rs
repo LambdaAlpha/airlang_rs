@@ -1,7 +1,6 @@
 use std::process::Command;
 
 use airlang::{
-    BasicMode,
     Byte,
     FuncVal,
     Int,
@@ -9,6 +8,7 @@ use airlang::{
     Map,
     Mode,
     MutCtx,
+    PrimitiveMode,
     Symbol,
     Text,
     Val,
@@ -46,7 +46,7 @@ fn call() -> Named<FuncVal> {
         Map::default(),
         form_mode(),
         Mode::default(),
-        BasicMode::default(),
+        PrimitiveMode::default(),
     );
     let ask_mode = Mode::default();
     named_static_fn("process.call", call_mode, ask_mode, false, fn_call)

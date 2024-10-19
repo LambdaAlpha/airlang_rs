@@ -312,6 +312,8 @@ impl<P, C> Func<P, C> {
     }
 }
 
+pub(crate) mod mode;
+
 pub(crate) mod free;
 
 pub(crate) mod static1;
@@ -319,3 +321,5 @@ pub(crate) mod static1;
 pub(crate) mod const1;
 
 pub(crate) mod mut1;
+
+pub(crate) mod repr;
