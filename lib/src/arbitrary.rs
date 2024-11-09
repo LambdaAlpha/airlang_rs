@@ -531,6 +531,7 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
+        body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
         prelude: any_ctx(rng, depth),
         input_name: any_symbol(rng),
@@ -545,6 +546,7 @@ pub(crate) fn any_static_func(rng: &mut SmallRng, depth: usize) -> StaticFuncVal
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
+        body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
         prelude: any_ctx(rng, depth),
         input_name: any_symbol(rng),
@@ -559,6 +561,7 @@ pub(crate) fn any_const_func(rng: &mut SmallRng, depth: usize) -> ConstFuncVal {
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
+        body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
         prelude: any_ctx(rng, depth),
         input_name: any_symbol(rng),
@@ -575,6 +578,7 @@ pub(crate) fn any_mut_func(rng: &mut SmallRng, depth: usize) -> MutFuncVal {
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
+        body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
         prelude: any_ctx(rng, depth),
         input_name: any_symbol(rng),

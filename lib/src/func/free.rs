@@ -76,6 +76,7 @@ impl Composite<FreeCompositeExt> {
             &mut self.prelude,
             input,
             self.input_name.clone(),
+            &self.body_mode,
             self.body.clone(),
         )
     }
@@ -85,6 +86,7 @@ impl Composite<FreeCompositeExt> {
             &mut self.prelude.clone(),
             input,
             self.input_name.clone(),
+            &self.body_mode,
             self.body.clone(),
         )
     }

@@ -140,6 +140,16 @@ impl FuncVal {
         }
     }
 
+    pub(crate) fn body_mode(&self) -> Option<&Mode> {
+        match self {
+            FuncVal::Mode(_) => None,
+            FuncVal::Free(f) => f.body_mode(),
+            FuncVal::Static(f) => f.body_mode(),
+            FuncVal::Const(f) => f.body_mode(),
+            FuncVal::Mut(f) => f.body_mode(),
+        }
+    }
+
     pub(crate) fn body(&self) -> Option<&Val> {
         match self {
             FuncVal::Mode(_) => None,

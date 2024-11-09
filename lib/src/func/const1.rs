@@ -58,6 +58,7 @@ impl Transformer<Val, Val> for Composite<ConstCompositeExt> {
                 &mut self.prelude.clone(),
                 input,
                 self.input_name.clone(),
+                &self.body_mode,
                 self.body.clone(),
             ),
             ConstFnCtx::Const(mut ctx) => {
@@ -69,6 +70,7 @@ impl Transformer<Val, Val> for Composite<ConstCompositeExt> {
                         Invariant::Const,
                         input,
                         self.input_name.clone(),
+                        &self.body_mode,
                         self.body.clone(),
                     )
                 };

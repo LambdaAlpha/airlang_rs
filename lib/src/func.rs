@@ -8,7 +8,7 @@ use std::{
         Hash,
         Hasher,
     },
-    mem::swap,
+    mem::take,
 };
 
 use crate::{
@@ -20,10 +20,7 @@ use crate::{
         mut1::MutCtx,
         ref1::CtxMeta,
     },
-    mode::{
-        Mode,
-        eval::Eval,
-    },
+    mode::Mode,
     symbol::Symbol,
     transformer::Transformer,
     val::{
@@ -55,6 +52,7 @@ pub(crate) struct Primitive<Ext> {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composite<Ext> {
+    pub(crate) body_mode: Mode,
     pub(crate) body: Val,
     pub(crate) prelude: Ctx,
     pub(crate) input_name: Symbol,
@@ -85,13 +83,14 @@ impl<P: Transformer<Val, Val>, C: Transformer<Val, Val>> Transformer<Val, Val> f
     }
 }
 
-fn eval_free(prelude: &mut Ctx, input: Val, input_name: Symbol, body: Val) -> Val {
+fn eval_free(prelude: &mut Ctx, input: Val, input_name: Symbol, mode: &Mode, body: Val) -> Val {
     let _ = prelude
         .variables_mut()
         .put_value(input_name, CtxValue::new(input));
-    Eval.transform(MutCtx::new(prelude), body)
+    mode.transform(MutCtx::new(prelude), body)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn eval_aware(
     mut prelude: Ctx,
     ctx: &mut Ctx,
@@ -99,12 +98,13 @@ fn eval_aware(
     ctx_invariant: Invariant,
     input: Val,
     input_name: Symbol,
+    mode: &Mode,
     body: Val,
 ) -> Val {
     let _ = prelude
         .variables_mut()
         .put_value(input_name, CtxValue::new(input));
-    keep_eval_restore(prelude, ctx, ctx_name, ctx_invariant, body)
+    keep_eval_restore(prelude, ctx, ctx_name, ctx_invariant, mode, body)
 }
 
 fn keep_eval_restore(
@@ -112,24 +112,19 @@ fn keep_eval_restore(
     ctx: &mut Ctx,
     ctx_name: Symbol,
     ctx_invariant: Invariant,
+    mode: &Mode,
     body: Val,
 ) -> Val {
     if !prelude.variables().fallback() && prelude.variables().is_assignable(ctx_name.clone()) {
-        let caller = own_ctx(ctx);
+        // here is why we need a `&mut Ctx` for a const func
+        let caller = take(ctx);
         keep_ctx(&mut prelude, caller, ctx_name.clone(), ctx_invariant);
-        let output = Eval.transform(MutCtx::new(&mut prelude), body);
+        let output = mode.transform(MutCtx::new(&mut prelude), body);
         restore_ctx(prelude, ctx, ctx_name);
         output
     } else {
-        Eval.transform(MutCtx::new(&mut prelude), body)
+        mode.transform(MutCtx::new(&mut prelude), body)
     }
-}
-
-// here is why we need a `&mut Ctx` for a const func
-fn own_ctx(ctx: &mut Ctx) -> Ctx {
-    let mut owned = Ctx::default();
-    swap(ctx, &mut owned);
-    owned
 }
 
 fn keep_ctx(prelude: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
@@ -209,6 +204,13 @@ impl<P, C> Func<P, C> {
             return None;
         };
         Some(p.is_extension)
+    }
+
+    pub(crate) fn body_mode(&self) -> Option<&Mode> {
+        let FuncImpl::Composite(c) = &self.transformer else {
+            return None;
+        };
+        Some(&c.body_mode)
     }
 
     pub(crate) fn body(&self) -> Option<&Val> {
@@ -298,6 +300,7 @@ impl<T> Primitive<T> {
 
 impl<T> Composite<T> {
     pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
+        s.field("body_mode", &self.body_mode);
         s.field("body", &self.body);
         s.field("prelude", &self.prelude);
         s.field("input_name", &self.input_name);

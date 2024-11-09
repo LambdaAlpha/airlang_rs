@@ -47,6 +47,7 @@ impl Transformer<Val, Val> for Composite<StaticCompositeExt> {
             &mut self.prelude.clone(),
             input,
             self.input_name.clone(),
+            &self.body_mode,
             self.body.clone(),
         )
     }

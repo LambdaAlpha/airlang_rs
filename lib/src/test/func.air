@@ -456,6 +456,16 @@ true
 =====
 do [
     f = function ! {
+        body_mode : form,
+        body : i ! .$i,
+    },
+    f .a
+]
+-----
+i ! a
+=====
+do [
+    f = function ! {
         body : do ! [a = a + 1, a],
         context_access : .free,
         static : false,
@@ -620,7 +630,9 @@ function.represent ==
 do [
     call_mode = mode ! {pair : eval : id},
     ask_mode = mode ! {pair : form : form},
+    body_mode = mode ! {list : [eval, form, id]},
     repr = form ! {
+        body_mode : &body_mode,
         body : in,
         input_name : in,
         context_name : ctx,
@@ -748,6 +760,13 @@ not
 do [neg = not, function.id .neg]
 -----
 not
+=====
+do [
+    f = function ! {body_mode : form},
+    function.represent ! function.body_mode ! .f
+]
+-----
+form
 =====
 do [f = function ! {body : i}, function.body .f]
 -----

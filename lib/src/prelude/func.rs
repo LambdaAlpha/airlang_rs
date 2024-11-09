@@ -55,6 +55,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) is_static: Named<FuncVal>,
     pub(crate) is_mode: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
+    pub(crate) body_mode: Named<FuncVal>,
     pub(crate) body: Named<FuncVal>,
     pub(crate) prelude: Named<FuncVal>,
     pub(crate) input_name: Named<FuncVal>,
@@ -79,6 +80,7 @@ impl Default for FuncPrelude {
             is_static: is_static(),
             is_mode: is_mode(),
             id: id(),
+            body_mode: body_mode(),
             body: body(),
             prelude: prelude(),
             input_name: input_name(),
@@ -104,6 +106,7 @@ impl Prelude for FuncPrelude {
         self.is_static.put(m);
         self.is_mode.put(m);
         self.id.put(m);
+        self.body_mode.put(m);
         self.body.put(m);
         self.prelude.put(m);
         self.input_name.put(m);
@@ -354,6 +357,30 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         Val::Symbol(id)
+    })
+}
+
+fn body_mode() -> Named<FuncVal> {
+    let call_mode = Mode::default();
+    let ask_mode = Mode::default();
+    named_const_fn(
+        "function.body_mode",
+        call_mode,
+        ask_mode,
+        true,
+        fn_body_mode,
+    )
+}
+
+fn fn_body_mode(ctx: ConstFnCtx, input: Val) -> Val {
+    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+        let Val::Func(func) = val else {
+            return Val::default();
+        };
+        let Some(mode) = func.body_mode() else {
+            return Val::default();
+        };
+        Val::Func(FuncVal::Mode(ModeFunc::new(mode.clone()).into()))
     })
 }
 

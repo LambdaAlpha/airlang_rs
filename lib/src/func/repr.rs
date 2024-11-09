@@ -33,6 +33,7 @@ use crate::{
     },
 };
 
+pub(crate) const BODY_MODE: &str = "body_mode";
 pub(crate) const BODY: &str = "body";
 pub(crate) const PRELUDE: &str = "prelude";
 pub(crate) const INPUT_NAME: &str = "input_name";
@@ -53,6 +54,7 @@ pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Mode {
     let mut map = Map::default();
+    map.insert(symbol(BODY_MODE), Mode::default());
     map.insert(symbol(BODY), form_mode());
     map.insert(symbol(PRELUDE), Mode::default());
     map.insert(symbol(INPUT_NAME), Mode::default());
@@ -72,6 +74,7 @@ pub(crate) fn parse_mode() -> Mode {
 
 pub(crate) fn generate_mode() -> Mode {
     let mut map = Map::default();
+    map.insert(symbol(BODY_MODE), Mode::default());
     map.insert(symbol(BODY), form_mode());
     map.insert(symbol(PRELUDE), Mode::default());
     map.insert(symbol(INPUT_NAME), Mode::default());
@@ -94,6 +97,11 @@ pub(crate) fn generate_mode() -> Mode {
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
         return None;
+    };
+    let body_mode = match map_remove(&mut map, BODY_MODE) {
+        Val::Unit(_) => Mode::default(),
+        Val::Func(FuncVal::Mode(mode)) => mode.mode().clone(),
+        _ => return None,
     };
     let body = map_remove(&mut map, BODY);
     let prelude = match map_remove(&mut map, PRELUDE) {
@@ -141,6 +149,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         FREE => {
             if static1 {
                 let transformer = Composite {
+                    body_mode,
                     body,
                     prelude,
                     input_name,
@@ -150,6 +159,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
                 FuncVal::Static(StaticFuncVal::from(func))
             } else {
                 let transformer = Composite {
+                    body_mode,
                     body,
                     prelude,
                     input_name,
@@ -161,6 +171,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         }
         CONST => {
             let transformer = Composite {
+                body_mode,
                 body,
                 prelude,
                 input_name,
@@ -171,6 +182,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         }
         MUTABLE => {
             let transformer = Composite {
+                body_mode,
                 body,
                 prelude,
                 input_name,
@@ -220,6 +232,7 @@ fn generate_free(f: FreeFuncVal) -> Val {
                 f.cacheable,
                 f.call_mode,
                 f.ask_mode,
+                c.body_mode,
                 c.body,
                 c.prelude,
                 c.input_name,
@@ -255,6 +268,7 @@ fn generate_static(f: StaticFuncVal) -> Val {
             f.cacheable,
             f.call_mode.clone(),
             f.ask_mode.clone(),
+            c.body_mode.clone(),
             c.body.clone(),
             c.prelude.clone(),
             c.input_name.clone(),
@@ -289,6 +303,7 @@ fn generate_const(f: ConstFuncVal) -> Val {
             f.cacheable,
             f.call_mode.clone(),
             f.ask_mode.clone(),
+            c.body_mode.clone(),
             c.body.clone(),
             c.prelude.clone(),
             c.input_name.clone(),
@@ -323,6 +338,7 @@ fn generate_mut(f: MutFuncVal) -> Val {
             f.cacheable,
             f.call_mode.clone(),
             f.ask_mode.clone(),
+            c.body_mode.clone(),
             c.body.clone(),
             c.prelude.clone(),
             c.input_name.clone(),
@@ -354,6 +370,7 @@ fn generate_composite(
     cacheable: bool,
     call_mode: Mode,
     ask_mode: Mode,
+    body_mode: Mode,
     body: Val,
     prelude: Ctx,
     input_name: Symbol,
@@ -361,6 +378,10 @@ fn generate_composite(
     repr: &mut Map<Val, Val>,
 ) {
     generate_func_common(static1, access, cacheable, call_mode, ask_mode, repr);
+    if body_mode != Mode::default() {
+        let mode = Val::Func(FuncVal::Mode(ModeFunc::new(body_mode).into()));
+        repr.insert(symbol(BODY_MODE), mode);
+    }
     if body != Val::default() {
         repr.insert(symbol(BODY), body);
     }
