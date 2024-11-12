@@ -6,7 +6,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        named_static_fn,
+        named_free_fn,
     },
     text::Text,
     val::{
@@ -40,7 +40,7 @@ impl Prelude for SyntaxPrelude {
 fn parse() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("parse", call_mode, ask_mode, true, fn_parse)
+    named_free_fn("parse", call_mode, ask_mode, true, fn_parse)
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -53,7 +53,7 @@ fn fn_parse(input: Val) -> Val {
 fn generate() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("generate", call_mode, ask_mode, true, fn_generate)
+    named_free_fn("generate", call_mode, ask_mode, true, fn_generate)
 }
 
 fn fn_generate(input: Val) -> Val {

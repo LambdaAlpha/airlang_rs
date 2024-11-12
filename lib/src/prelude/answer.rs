@@ -23,7 +23,7 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
-        named_static_fn,
+        named_free_fn,
     },
     utils::val::symbol,
 };
@@ -85,7 +85,7 @@ fn never() -> Named<AnswerVal> {
 fn maybe() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("answer.maybe", call_mode, ask_mode, true, fn_maybe)
+    named_free_fn("answer.maybe", call_mode, ask_mode, true, fn_maybe)
 }
 
 fn fn_maybe(input: Val) -> Val {
@@ -95,7 +95,7 @@ fn fn_maybe(input: Val) -> Val {
 fn cache() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("answer.cache", call_mode, ask_mode, true, fn_cached)
+    named_free_fn("answer.cache", call_mode, ask_mode, true, fn_cached)
 }
 
 fn fn_cached(input: Val) -> Val {
@@ -111,7 +111,7 @@ fn fn_cached(input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("answer.represent", call_mode, ask_mode, true, fn_repr)
+    named_free_fn("answer.represent", call_mode, ask_mode, true, fn_repr)
 }
 
 const TYPE: &str = "type";

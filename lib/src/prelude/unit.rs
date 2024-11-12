@@ -13,7 +13,7 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
-        named_static_fn,
+        named_free_fn,
     },
     unit::Unit,
     val::func::FuncVal,
@@ -44,7 +44,7 @@ impl Prelude for UnitPrelude {
 fn unit() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("unit", call_mode, ask_mode, true, fn_unit)
+    named_free_fn("unit", call_mode, ask_mode, true, fn_unit)
 }
 
 fn fn_unit(_input: Val) -> Val {

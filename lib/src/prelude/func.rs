@@ -28,7 +28,7 @@ use crate::{
         Prelude,
         form_mode,
         named_const_fn,
-        named_static_fn,
+        named_free_fn,
     },
     symbol::Symbol,
     val::{
@@ -52,7 +52,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) is_cacheable: Named<FuncVal>,
     pub(crate) is_primitive: Named<FuncVal>,
     pub(crate) is_extension: Named<FuncVal>,
-    pub(crate) is_static: Named<FuncVal>,
+    pub(crate) is_cell: Named<FuncVal>,
     pub(crate) is_mode: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
     pub(crate) body_mode: Named<FuncVal>,
@@ -77,7 +77,7 @@ impl Default for FuncPrelude {
             is_cacheable: is_cacheable(),
             is_primitive: is_primitive(),
             is_extension: is_extension(),
-            is_static: is_static(),
+            is_cell: is_cell(),
             is_mode: is_mode(),
             id: id(),
             body_mode: body_mode(),
@@ -103,7 +103,7 @@ impl Prelude for FuncPrelude {
         self.is_cacheable.put(m);
         self.is_primitive.put(m);
         self.is_extension.put(m);
-        self.is_static.put(m);
+        self.is_cell.put(m);
         self.is_mode.put(m);
         self.id.put(m);
         self.body_mode.put(m);
@@ -135,7 +135,7 @@ fn mode_eval() -> Named<FuncVal> {
 fn mode() -> Named<FuncVal> {
     let call_mode = form_mode();
     let ask_mode = Mode::default();
-    named_static_fn("mode", call_mode, ask_mode, true, fn_mode)
+    named_free_fn("mode", call_mode, ask_mode, true, fn_mode)
 }
 
 fn fn_mode(input: Val) -> Val {
@@ -149,7 +149,7 @@ fn fn_mode(input: Val) -> Val {
 fn new() -> Named<FuncVal> {
     let call_mode = parse_mode();
     let ask_mode = Mode::default();
-    named_static_fn("function", call_mode, ask_mode, true, fn_new)
+    named_free_fn("function", call_mode, ask_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -162,7 +162,7 @@ fn fn_new(input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = generate_mode();
-    named_static_fn("function.represent", call_mode, ask_mode, true, fn_repr)
+    named_free_fn("function.represent", call_mode, ask_mode, true, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -191,8 +191,8 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
         };
         let access = match func {
             FuncVal::Mode(_) => MUTABLE,
+            FuncVal::Cell(_) => FREE,
             FuncVal::Free(_) => FREE,
-            FuncVal::Static(_) => FREE,
             FuncVal::Const(_) => CONST,
             FuncVal::Mut(_) => MUTABLE,
         };
@@ -306,24 +306,18 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
     })
 }
 
-fn is_static() -> Named<FuncVal> {
+fn is_cell() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.is_static",
-        call_mode,
-        ask_mode,
-        true,
-        fn_is_static,
-    )
+    named_const_fn("function.is_cell", call_mode, ask_mode, true, fn_is_cell)
 }
 
-fn fn_is_static(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(matches!(func, FuncVal::Static(_))))
+        Val::Bool(Bool::new(matches!(func, FuncVal::Cell(_))))
     })
 }
 

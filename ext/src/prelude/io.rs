@@ -16,8 +16,8 @@ use airlang::{
 use crate::prelude::{
     Named,
     Prelude,
+    named_free_fn,
     named_mut_fn,
-    named_static_fn,
 };
 
 pub(crate) struct IoPrelude {
@@ -79,7 +79,7 @@ fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
 fn print() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("io.print", call_mode, ask_mode, false, fn_print)
+    named_free_fn("io.print", call_mode, ask_mode, false, fn_print)
 }
 
 fn fn_print(input: Val) -> Val {
@@ -93,7 +93,7 @@ fn fn_print(input: Val) -> Val {
 fn print_line() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("io.print_line", call_mode, ask_mode, false, fn_print_line)
+    named_free_fn("io.print_line", call_mode, ask_mode, false, fn_print_line)
 }
 
 fn fn_print_line(input: Val) -> Val {
@@ -107,7 +107,7 @@ fn fn_print_line(input: Val) -> Val {
 fn flush() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("io.flush", call_mode, ask_mode, false, fn_flush)
+    named_free_fn("io.flush", call_mode, ask_mode, false, fn_flush)
 }
 
 fn fn_flush(_input: Val) -> Val {
@@ -118,7 +118,7 @@ fn fn_flush(_input: Val) -> Val {
 fn error_print() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("io.error_print", call_mode, ask_mode, false, fn_error_print)
+    named_free_fn("io.error_print", call_mode, ask_mode, false, fn_error_print)
 }
 
 fn fn_error_print(input: Val) -> Val {
@@ -132,7 +132,7 @@ fn fn_error_print(input: Val) -> Val {
 fn error_print_line() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn(
+    named_free_fn(
         "io.error_print_line",
         call_mode,
         ask_mode,
@@ -152,7 +152,7 @@ fn fn_error_print_line(input: Val) -> Val {
 fn error_flush() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("io.error_flush", call_mode, ask_mode, false, fn_error_flush)
+    named_free_fn("io.error_flush", call_mode, ask_mode, false, fn_error_flush)
 }
 
 fn fn_error_flush(_input: Val) -> Val {

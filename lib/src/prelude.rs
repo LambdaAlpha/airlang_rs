@@ -12,21 +12,21 @@ use crate::{
     func::{
         Func,
         Primitive,
+        cell::{
+            CellFnExt,
+            CellPrimitiveExt,
+        },
         const1::{
             ConstFn,
             ConstPrimitiveExt,
         },
         free::{
-            FreeFnExt,
+            FreeFn,
             FreePrimitiveExt,
         },
         mut1::{
             MutFn,
             MutPrimitiveExt,
-        },
-        static1::{
-            StaticFn,
-            StaticPrimitiveExt,
         },
     },
     mode::{
@@ -63,11 +63,11 @@ use crate::{
     val::{
         Val,
         func::{
+            CellFuncVal,
             ConstFuncVal,
             FreeFuncVal,
             FuncVal,
             MutFuncVal,
-            StaticFuncVal,
         },
     },
 };
@@ -162,30 +162,30 @@ impl<T: Into<Val> + Clone> Named<T> {
 }
 
 #[allow(unused)]
+fn named_cell_fn(
+    name: &'static str,
+    call_mode: Mode,
+    ask_mode: Mode,
+    cacheable: bool,
+    func: impl CellFnExt + 'static,
+) -> Named<FuncVal> {
+    let primitive = Primitive::<CellPrimitiveExt>::new(name, func);
+    let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
+    let func_val = CellFuncVal::from(func);
+    Named::new(name, FuncVal::Cell(func_val))
+}
+
 fn named_free_fn(
     name: &'static str,
     call_mode: Mode,
     ask_mode: Mode,
     cacheable: bool,
-    func: impl FreeFnExt + 'static,
+    func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<FreePrimitiveExt>::new(name, func);
     let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
-}
-
-fn named_static_fn(
-    name: &'static str,
-    call_mode: Mode,
-    ask_mode: Mode,
-    cacheable: bool,
-    func: impl StaticFn + 'static,
-) -> Named<FuncVal> {
-    let primitive = Primitive::<StaticPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
-    let func_val = StaticFuncVal::from(func);
-    Named::new(name, FuncVal::Static(func_val))
 }
 
 fn named_const_fn(

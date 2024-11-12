@@ -12,7 +12,7 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
-        named_static_fn,
+        named_free_fn,
     },
     val::{
         Val,
@@ -90,7 +90,7 @@ fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
 fn not() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("not", call_mode, ask_mode, true, fn_not)
+    named_free_fn("not", call_mode, ask_mode, true, fn_not)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -103,7 +103,7 @@ fn fn_not(input: Val) -> Val {
 fn and() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("and", call_mode, ask_mode, true, fn_and)
+    named_free_fn("and", call_mode, ask_mode, true, fn_and)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -122,7 +122,7 @@ fn fn_and(input: Val) -> Val {
 fn or() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("or", call_mode, ask_mode, true, fn_or)
+    named_free_fn("or", call_mode, ask_mode, true, fn_or)
 }
 
 fn fn_or(input: Val) -> Val {
@@ -141,7 +141,7 @@ fn fn_or(input: Val) -> Val {
 fn xor() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("xor", call_mode, ask_mode, true, fn_xor)
+    named_free_fn("xor", call_mode, ask_mode, true, fn_xor)
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -160,7 +160,7 @@ fn fn_xor(input: Val) -> Val {
 fn imply() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("imply", call_mode, ask_mode, true, fn_imply)
+    named_free_fn("imply", call_mode, ask_mode, true, fn_imply)
 }
 
 fn fn_imply(input: Val) -> Val {

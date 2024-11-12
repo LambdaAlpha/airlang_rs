@@ -240,7 +240,7 @@ mutable
 =====
 do [
     s1 = function ! {
-        static : false,
+        cell : true,
         context_access : .free,
         body : do ! [a = a + 1, a],
         prelude : context ! {variables : {a : 0, do : :, = : :, + : :}},

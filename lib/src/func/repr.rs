@@ -1,5 +1,6 @@
 use crate::{
     Bool,
+    CellFuncVal,
     ConstFuncVal,
     Ctx,
     CtxVal,
@@ -9,18 +10,17 @@ use crate::{
     Mode,
     MutFuncVal,
     PrimitiveMode,
-    StaticFuncVal,
     Symbol,
     Val,
     func::{
         Composite,
         Func,
         FuncImpl,
+        cell::CellCompositeExt,
         const1::ConstCompositeExt,
         free::FreeCompositeExt,
         mode::ModeFunc,
         mut1::MutCompositeExt,
-        static1::StaticCompositeExt,
     },
     mode::repr::generate,
     prelude::{
@@ -44,7 +44,7 @@ pub(crate) const CALL_MODE: &str = "call_mode";
 pub(crate) const ASK_MODE: &str = "ask_mode";
 pub(crate) const CACHEABLE: &str = "cacheable";
 pub(crate) const CTX_ACCESS: &str = "context_access";
-pub(crate) const STATIC: &str = "static";
+pub(crate) const CELL: &str = "cell";
 
 pub(crate) const DEFAULT_INPUT_NAME: &str = "i";
 pub(crate) const DEFAULT_CTX_NAME: &str = "c";
@@ -63,7 +63,7 @@ pub(crate) fn parse_mode() -> Mode {
     map.insert(symbol(CALL_MODE), Mode::default());
     map.insert(symbol(ASK_MODE), Mode::default());
     map.insert(symbol(CACHEABLE), Mode::default());
-    map.insert(symbol(STATIC), Mode::default());
+    map.insert(symbol(CELL), Mode::default());
     map_mode(
         map,
         Mode::default(),
@@ -85,7 +85,7 @@ pub(crate) fn generate_mode() -> Mode {
     map.insert(symbol(CACHEABLE), Mode::default());
     map.insert(symbol(ID), Mode::default());
     map.insert(symbol(IS_EXTENSION), Mode::default());
-    map.insert(symbol(STATIC), Mode::default());
+    map.insert(symbol(CELL), Mode::default());
     map_mode(
         map,
         Mode::default(),
@@ -140,24 +140,24 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Unit(_) => MUTABLE,
         _ => return None,
     };
-    let static1 = match map_remove(&mut map, STATIC) {
+    let cell = match map_remove(&mut map, CELL) {
         Val::Unit(_) => false,
         Val::Bool(b) => b.bool(),
         _ => return None,
     };
-    let func = match ctx_access {
-        FREE => {
-            if static1 {
-                let transformer = Composite {
-                    body_mode,
-                    body,
-                    prelude,
-                    input_name,
-                    ext: StaticCompositeExt {},
-                };
-                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-                FuncVal::Static(StaticFuncVal::from(func))
-            } else {
+    let func = if cell {
+        let transformer = Composite {
+            body_mode,
+            body,
+            prelude,
+            input_name,
+            ext: CellCompositeExt {},
+        };
+        let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+        FuncVal::Cell(CellFuncVal::from(func))
+    } else {
+        match ctx_access {
+            FREE => {
                 let transformer = Composite {
                     body_mode,
                     body,
@@ -168,30 +168,30 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
                 let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
                 FuncVal::Free(FreeFuncVal::from(func))
             }
+            CONST => {
+                let transformer = Composite {
+                    body_mode,
+                    body,
+                    prelude,
+                    input_name,
+                    ext: ConstCompositeExt { ctx_name },
+                };
+                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+                FuncVal::Const(ConstFuncVal::from(func))
+            }
+            MUTABLE => {
+                let transformer = Composite {
+                    body_mode,
+                    body,
+                    prelude,
+                    input_name,
+                    ext: MutCompositeExt { ctx_name },
+                };
+                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+                FuncVal::Mut(MutFuncVal::from(func))
+            }
+            _ => return None,
         }
-        CONST => {
-            let transformer = Composite {
-                body_mode,
-                body,
-                prelude,
-                input_name,
-                ext: ConstCompositeExt { ctx_name },
-            };
-            let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-            FuncVal::Const(ConstFuncVal::from(func))
-        }
-        MUTABLE => {
-            let transformer = Composite {
-                body_mode,
-                body,
-                prelude,
-                input_name,
-                ext: MutCompositeExt { ctx_name },
-            };
-            let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-            FuncVal::Mut(MutFuncVal::from(func))
-        }
-        _ => return None,
     };
     Some(func)
 }
@@ -199,14 +199,14 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
 pub(crate) fn generate_func(f: FuncVal) -> Val {
     match f {
         FuncVal::Mode(f) => generate(f.mode()),
+        FuncVal::Cell(f) => generate_cell(f),
         FuncVal::Free(f) => generate_free(f),
-        FuncVal::Static(f) => generate_static(f),
         FuncVal::Const(f) => generate_const(f),
         FuncVal::Mut(f) => generate_mut(f),
     }
 }
 
-fn generate_free(f: FreeFuncVal) -> Val {
+fn generate_cell(f: CellFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     let f = f.unwrap();
     match f.transformer {
@@ -214,7 +214,7 @@ fn generate_free(f: FreeFuncVal) -> Val {
             if p.is_extension {
                 generate_extension(
                     p.id,
-                    false,
+                    true,
                     FREE,
                     f.cacheable,
                     f.call_mode,
@@ -227,7 +227,7 @@ fn generate_free(f: FreeFuncVal) -> Val {
         }
         FuncImpl::Composite(c) => {
             generate_composite(
-                false,
+                true,
                 FREE,
                 f.cacheable,
                 f.call_mode,
@@ -244,14 +244,14 @@ fn generate_free(f: FreeFuncVal) -> Val {
     Val::Map(repr.into())
 }
 
-fn generate_static(f: StaticFuncVal) -> Val {
+fn generate_free(f: FreeFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     match &f.transformer {
         FuncImpl::Primitive(p) => {
             if p.is_extension {
                 generate_extension(
                     p.id.clone(),
-                    true,
+                    false,
                     FREE,
                     f.cacheable,
                     f.call_mode.clone(),
@@ -263,7 +263,7 @@ fn generate_static(f: StaticFuncVal) -> Val {
             }
         }
         FuncImpl::Composite(c) => generate_composite(
-            true,
+            false,
             FREE,
             f.cacheable,
             f.call_mode.clone(),
@@ -351,7 +351,7 @@ fn generate_mut(f: MutFuncVal) -> Val {
 
 fn generate_extension(
     id: Symbol,
-    static1: bool,
+    cell: bool,
     access: &str,
     cacheable: bool,
     call_mode: Mode,
@@ -360,12 +360,12 @@ fn generate_extension(
 ) {
     repr.insert(symbol(ID), Val::Symbol(id));
     repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
-    generate_func_common(static1, access, cacheable, call_mode, ask_mode, repr);
+    generate_func_common(cell, access, cacheable, call_mode, ask_mode, repr);
 }
 
 #[allow(clippy::too_many_arguments)]
 fn generate_composite(
-    static1: bool,
+    cell: bool,
     access: &str,
     cacheable: bool,
     call_mode: Mode,
@@ -377,7 +377,7 @@ fn generate_composite(
     ctx_name: Option<Symbol>,
     repr: &mut Map<Val, Val>,
 ) {
-    generate_func_common(static1, access, cacheable, call_mode, ask_mode, repr);
+    generate_func_common(cell, access, cacheable, call_mode, ask_mode, repr);
     if body_mode != Mode::default() {
         let mode = Val::Func(FuncVal::Mode(ModeFunc::new(body_mode).into()));
         repr.insert(symbol(BODY_MODE), mode);
@@ -399,15 +399,15 @@ fn generate_composite(
 }
 
 fn generate_func_common(
-    static1: bool,
+    cell: bool,
     access: &str,
     cacheable: bool,
     call_mode: Mode,
     ask_mode: Mode,
     repr: &mut Map<Val, Val>,
 ) {
-    if static1 {
-        repr.insert(symbol(STATIC), Val::Bool(Bool::t()));
+    if cell {
+        repr.insert(symbol(CELL), Val::Bool(Bool::t()));
     }
     if access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(access));

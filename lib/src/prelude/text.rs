@@ -15,8 +15,8 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
+        named_free_fn,
         named_mut_fn,
-        named_static_fn,
     },
     text::Text,
     val::{
@@ -59,7 +59,7 @@ impl Prelude for TextPrelude {
 fn from_utf8() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("text.from_utf8", call_mode, ask_mode, true, fn_from_utf8)
+    named_free_fn("text.from_utf8", call_mode, ask_mode, true, fn_from_utf8)
 }
 
 fn fn_from_utf8(input: Val) -> Val {
@@ -77,7 +77,7 @@ fn fn_from_utf8(input: Val) -> Val {
 fn into_utf8() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("text.into_utf8", call_mode, ask_mode, true, fn_into_utf8)
+    named_free_fn("text.into_utf8", call_mode, ask_mode, true, fn_into_utf8)
 }
 
 fn fn_into_utf8(input: Val) -> Val {
@@ -130,7 +130,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 fn join() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("text.join", call_mode, ask_mode, true, fn_join)
+    named_free_fn("text.join", call_mode, ask_mode, true, fn_join)
 }
 
 fn fn_join(input: Val) -> Val {

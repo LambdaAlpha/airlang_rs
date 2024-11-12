@@ -11,7 +11,7 @@ use crate::{
             CtxRef,
         },
     },
-    val::func::FreeFuncVal,
+    val::func::CellFuncVal,
 };
 
 pub struct FreeCtx;
@@ -29,19 +29,19 @@ impl<'a> CtxRef<'a> for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver(self) -> Result<&'a FreeFuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'a CellFuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_mut(self) -> Result<&'a mut FreeFuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'a mut CellFuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'a, FreeFuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'a, CellFuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<CellFuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

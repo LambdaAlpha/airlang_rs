@@ -28,9 +28,9 @@ use crate::{
     CommentMode,
     ConstFuncVal,
     FreeCtx,
+    FreeFuncVal,
     MutFuncVal,
     SelfMode,
-    StaticFuncVal,
     SymbolMode,
     Val,
     ValExt,
@@ -47,11 +47,11 @@ use crate::{
     func::{
         Composite,
         Func,
+        cell::CellCompositeExt,
         const1::ConstCompositeExt,
         free::FreeCompositeExt,
         mode::ModeFunc,
         mut1::MutCompositeExt,
-        static1::StaticCompositeExt,
     },
     int::Int,
     list::List,
@@ -74,7 +74,7 @@ use crate::{
     text::Text,
     unit::Unit,
     val::func::{
-        FreeFuncVal,
+        CellFuncVal,
         FuncVal,
         ModeFuncVal,
     },
@@ -245,7 +245,7 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
     let variables = CtxMap::new(variables, rng.gen());
     let solver = if rng.gen() {
-        Some(any_free_func(rng, depth))
+        Some(any_cell_func(rng, depth))
     } else {
         None
     };
@@ -502,12 +502,12 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         match rng.gen_range(0..5) {
             0 => {
-                let func = any_free_func(rng, depth);
-                FuncVal::Free(func)
+                let func = any_cell_func(rng, depth);
+                FuncVal::Cell(func)
             }
             1 => {
-                let func = any_static_func(rng, depth);
-                FuncVal::Static(func)
+                let func = any_free_func(rng, depth);
+                FuncVal::Free(func)
             }
             2 => {
                 let func = any_const_func(rng, depth);
@@ -526,6 +526,21 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     }
 }
 
+pub(crate) fn any_cell_func(rng: &mut SmallRng, depth: usize) -> CellFuncVal {
+    let call_mode = any_mode(rng, depth);
+    let ask_mode = any_mode(rng, depth);
+    let cacheable = rng.gen();
+    let transformer = Composite {
+        body_mode: any_mode(rng, depth),
+        body: any_val(rng, depth),
+        prelude: any_ctx(rng, depth),
+        input_name: any_symbol(rng),
+        ext: CellCompositeExt {},
+    };
+    let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+    CellFuncVal::from(func)
+}
+
 pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
     let call_mode = any_mode(rng, depth);
     let ask_mode = any_mode(rng, depth);
@@ -539,21 +554,6 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
     };
     let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
     FreeFuncVal::from(func)
-}
-
-pub(crate) fn any_static_func(rng: &mut SmallRng, depth: usize) -> StaticFuncVal {
-    let call_mode = any_mode(rng, depth);
-    let ask_mode = any_mode(rng, depth);
-    let cacheable = rng.gen();
-    let transformer = Composite {
-        body_mode: any_mode(rng, depth),
-        body: any_val(rng, depth),
-        prelude: any_ctx(rng, depth),
-        input_name: any_symbol(rng),
-        ext: StaticCompositeExt {},
-    };
-    let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
-    StaticFuncVal::from(func)
 }
 
 pub(crate) fn any_const_func(rng: &mut SmallRng, depth: usize) -> ConstFuncVal {

@@ -24,7 +24,7 @@ use crate::{
             CtxRef,
         },
     },
-    val::func::FreeFuncVal,
+    val::func::CellFuncVal,
 };
 
 pub struct MutCtx<'a>(&'a mut Ctx);
@@ -48,19 +48,19 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
         self.0.get_variables_dyn()
     }
 
-    fn get_solver(self) -> Result<&'l FreeFuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l CellFuncVal, CtxError> {
         self.0.get_solver()
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FreeFuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut CellFuncVal, CtxError> {
         self.0.get_solver_mut()
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FreeFuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, CellFuncVal>, CtxError> {
         self.0.get_solver_dyn()
     }
 
-    fn set_solver(self, solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<CellFuncVal>) -> Result<(), CtxError> {
         self.0.set_solver(solver)
     }
 }
@@ -117,7 +117,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
         }
     }
 
-    fn get_solver(self) -> Result<&'l FreeFuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l CellFuncVal, CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.get_solver(),
             MutFnCtx::Const(ctx) => ctx.get_solver(),
@@ -125,7 +125,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
         }
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FreeFuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut CellFuncVal, CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.get_solver_mut(),
             MutFnCtx::Const(ctx) => ctx.get_solver_mut(),
@@ -133,7 +133,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
         }
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FreeFuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, CellFuncVal>, CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.get_solver_dyn(),
             MutFnCtx::Const(ctx) => ctx.get_solver_dyn(),
@@ -141,7 +141,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
         }
     }
 
-    fn set_solver(self, solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<CellFuncVal>) -> Result<(), CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.set_solver(solver),
             MutFnCtx::Const(ctx) => ctx.set_solver(solver),

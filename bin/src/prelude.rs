@@ -1,11 +1,14 @@
 use std::rc::Rc;
 
 use airlang::{
+    CellFnExt,
+    CellFunc,
+    CellFuncVal,
     CompositeMode,
     ConstFn,
     ConstFunc,
     ConstFuncVal,
-    FreeFnExt,
+    FreeFn,
     FreeFunc,
     FreeFuncVal,
     FuncVal,
@@ -22,9 +25,6 @@ use airlang::{
     Pair,
     PairMode,
     PrimitiveMode,
-    StaticFn,
-    StaticFunc,
-    StaticFuncVal,
     Symbol,
     Val,
 };
@@ -78,30 +78,30 @@ impl<T: Into<Val> + Clone> Named<T> {
 }
 
 #[allow(unused)]
+fn named_cell_fn(
+    name: &'static str,
+    call_mode: Mode,
+    ask_mode: Mode,
+    cacheable: bool,
+    func: impl CellFnExt + 'static,
+) -> Named<FuncVal> {
+    let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
+    let func = CellFunc::new(call_mode, ask_mode, cacheable, name_symbol, Box::new(func));
+    let func_val = CellFuncVal::from(func);
+    Named::new(name, FuncVal::Cell(func_val))
+}
+
 fn named_free_fn(
     name: &'static str,
     call_mode: Mode,
     ask_mode: Mode,
     cacheable: bool,
-    func: impl FreeFnExt + 'static,
+    func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
     let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = FreeFunc::new(call_mode, ask_mode, cacheable, name_symbol, Box::new(func));
+    let func = FreeFunc::new(call_mode, ask_mode, cacheable, name_symbol, Rc::new(func));
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
-}
-
-fn named_static_fn(
-    name: &'static str,
-    call_mode: Mode,
-    ask_mode: Mode,
-    cacheable: bool,
-    func: impl StaticFn + 'static,
-) -> Named<FuncVal> {
-    let name_symbol = unsafe { Symbol::from_str_unchecked(name) };
-    let func = StaticFunc::new(call_mode, ask_mode, cacheable, name_symbol, Rc::new(func));
-    let func_val = StaticFuncVal::from(func);
-    Named::new(name, FuncVal::Static(func_val))
 }
 
 #[allow(unused)]

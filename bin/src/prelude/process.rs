@@ -17,7 +17,7 @@ use crate::prelude::{
     Prelude,
     form_mode,
     map_mode,
-    named_static_fn,
+    named_free_fn,
 };
 
 pub(crate) struct ProcessPrelude {
@@ -47,7 +47,7 @@ fn call() -> Named<FuncVal> {
         PrimitiveMode::default(),
     );
     let ask_mode = Mode::default();
-    named_static_fn("repl.execute", call_mode, ask_mode, false, fn_call)
+    named_free_fn("repl.execute", call_mode, ask_mode, false, fn_call)
 }
 
 fn fn_call(input: Val) -> Val {

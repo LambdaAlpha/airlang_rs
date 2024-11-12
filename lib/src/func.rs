@@ -317,9 +317,9 @@ impl<P, C> Func<P, C> {
 
 pub(crate) mod mode;
 
-pub(crate) mod free;
+pub(crate) mod cell;
 
-pub(crate) mod static1;
+pub(crate) mod free;
 
 pub(crate) mod const1;
 

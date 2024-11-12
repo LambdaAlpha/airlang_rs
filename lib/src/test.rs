@@ -6,16 +6,16 @@ use std::{
 
 use crate::{
     Ctx,
+    FreeFunc,
+    FreeFuncVal,
     FuncVal,
     Mode,
-    StaticFunc,
-    StaticFuncVal,
     Symbol,
     ctx::{
         Invariant,
         mut1::MutCtx,
     },
-    func::static1::StaticFn,
+    func::free::FreeFn,
     initial_ctx,
     interpret_mut,
     parse,
@@ -183,7 +183,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
     mut_ctx.put(
         func_ext_name.clone(),
         Invariant::Const,
-        Val::Func(FuncVal::Static(StaticFuncVal::from(StaticFunc::new(
+        Val::Func(FuncVal::Free(FreeFuncVal::from(FreeFunc::new(
             Mode::default(),
             Mode::default(),
             false,
@@ -201,7 +201,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FuncExt;
 
-impl StaticFn for FuncExt {
+impl FreeFn for FuncExt {
     fn call(&self, input: Val) -> Val {
         input
     }

@@ -24,7 +24,7 @@ true
 =====
 function.represent func_ext
 -----
-{id : func_ext, is_extension : true, context_access : free, static : true}
+{id : func_ext, is_extension : true, context_access : free}
 =====
 do [a = func_ext, b = func_ext, .a == .b]
 -----

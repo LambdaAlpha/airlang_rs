@@ -45,7 +45,7 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
-        named_static_fn,
+        named_free_fn,
     },
     symbol::Symbol,
     val::{
@@ -102,7 +102,7 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("any", call_mode, ask_mode, true, fn_any)
+    named_free_fn("any", call_mode, ask_mode, true, fn_any)
 }
 
 fn fn_any(input: Val) -> Val {

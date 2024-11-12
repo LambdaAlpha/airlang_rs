@@ -297,7 +297,7 @@ impl EvalCore {
                 let input = func.call_mode().transform(ctx.reborrow(), input);
                 func.transform_mut(ctx, input)
             }
-            Val::Symbol(s) => EvalCore::call_free(ctx, s, input),
+            Val::Symbol(s) => EvalCore::call_cell(ctx, s, input),
             _ => {
                 let input = input_trans.transform(ctx, input);
                 Val::Call(Call::new(func, input).into())
@@ -333,22 +333,22 @@ impl EvalCore {
         }
     }
 
-    pub(crate) fn call_free<'a, Ctx>(ctx: Ctx, func_name: Symbol, input: Val) -> Val
+    pub(crate) fn call_cell<'a, Ctx>(ctx: Ctx, func_name: Symbol, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match ctx.for_mut_fn() {
             MutFnCtx::Free(_) => Val::default(),
-            MutFnCtx::Const(ctx) => Self::call_free_const(ctx, func_name, input),
-            MutFnCtx::Mut(ctx) => Self::call_free_mut(ctx, func_name, input),
+            MutFnCtx::Const(ctx) => Self::call_cell_const(ctx, func_name, input),
+            MutFnCtx::Mut(ctx) => Self::call_cell_mut(ctx, func_name, input),
         }
     }
 
-    fn call_free_const(mut ctx: ConstCtx, func_name: Symbol, input: Val) -> Val {
+    fn call_cell_const(mut ctx: ConstCtx, func_name: Symbol, input: Val) -> Val {
         let Ok(val) = ctx.reborrow().get_ctx_ref().variables().get_ref(func_name) else {
             return Val::default();
         };
-        let Val::Func(FuncVal::Free(func)) = val else {
+        let Val::Func(FuncVal::Cell(func)) = val else {
             return Val::default();
         };
         let mut func = func.clone();
@@ -356,19 +356,19 @@ impl EvalCore {
         func.transform_mut(input)
     }
 
-    fn call_free_mut(ctx: MutCtx, func_name: Symbol, input: Val) -> Val {
+    fn call_cell_mut(ctx: MutCtx, func_name: Symbol, input: Val) -> Val {
         let ctx = ctx.unwrap();
         let Ok(val) = ctx.variables().get_ref(func_name.clone()) else {
             return Val::default();
         };
-        let Val::Func(FuncVal::Free(func)) = val else {
+        let Val::Func(FuncVal::Cell(func)) = val else {
             return Val::default();
         };
         let input = func.call_mode().clone().transform(MutCtx::new(ctx), input);
         let Ok(val) = ctx.variables_mut().get_ref_dyn(func_name) else {
             return Val::default();
         };
-        let Val::Func(FuncVal::Free(func)) = val.ref1 else {
+        let Val::Func(FuncVal::Cell(func)) = val.ref1 else {
             return Val::default();
         };
         if val.is_const {

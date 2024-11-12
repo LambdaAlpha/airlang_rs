@@ -44,8 +44,8 @@ use crate::{
         initial_ctx,
         map_mode,
         named_const_fn,
+        named_free_fn,
         named_mut_fn,
-        named_static_fn,
         pair_mode,
     },
     symbol::Symbol,
@@ -533,7 +533,7 @@ fn get_solver() -> Named<FuncVal> {
 
 fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
     match ctx.get_solver() {
-        Ok(solver) => Val::Func(FuncVal::Free(solver.clone())),
+        Ok(solver) => Val::Func(FuncVal::Cell(solver.clone())),
         _ => Val::default(),
     }
 }
@@ -549,7 +549,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
         Val::Unit(_) => {
             let _ = ctx.set_solver(None);
         }
-        Val::Func(FuncVal::Free(solver)) => {
+        Val::Func(FuncVal::Cell(solver)) => {
             let _ = ctx.set_solver(Some(solver));
         }
         _ => {}
@@ -595,7 +595,7 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("|:", call_mode, ask_mode, false, fn_ctx_in_ctx_out)
+    named_free_fn("|:", call_mode, ask_mode, false, fn_ctx_in_ctx_out)
 }
 
 fn fn_ctx_in_ctx_out(input: Val) -> Val {
@@ -636,7 +636,7 @@ fn ctx_new() -> Named<FuncVal> {
     map.insert(symbol(SOLVER), Mode::default());
     let call_mode = map_mode(map, form_mode(), Mode::default(), PrimitiveMode::default());
     let ask_mode = Mode::default();
-    named_static_fn("context", call_mode, ask_mode, true, fn_ctx_new)
+    named_free_fn("context", call_mode, ask_mode, true, fn_ctx_new)
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -659,7 +659,7 @@ fn fn_ctx_new(input: Val) -> Val {
     let variables = CtxMap::new(variables, fallback);
     let solver = match map_remove(&mut map, SOLVER) {
         Val::Unit(_) => None,
-        Val::Func(FuncVal::Free(solver)) => Some(solver),
+        Val::Func(FuncVal::Cell(solver)) => Some(solver),
         _ => return Val::default(),
     };
     let ctx = Ctx::new(variables, solver);
@@ -714,7 +714,7 @@ fn ctx_repr() -> Named<FuncVal> {
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
     let ask_mode = map_mode(map, form_mode(), Mode::default(), PrimitiveMode::default());
-    named_static_fn("context.represent", call_mode, ask_mode, true, fn_ctx_repr)
+    named_free_fn("context.represent", call_mode, ask_mode, true, fn_ctx_repr)
 }
 
 fn fn_ctx_repr(input: Val) -> Val {
@@ -731,7 +731,7 @@ fn fn_ctx_repr(input: Val) -> Val {
         map.insert(symbol(VARIABLES), variables);
     }
     if let Some(solver) = ctx.solver {
-        map.insert(symbol(SOLVER), Val::Func(FuncVal::Free(solver)));
+        map.insert(symbol(SOLVER), Val::Func(FuncVal::Cell(solver)));
     };
     Val::Map(map.into())
 }
@@ -774,7 +774,7 @@ fn generate_ctx_value(ctx_value: CtxValue) -> Val {
 fn ctx_prelude() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("prelude", call_mode, ask_mode, true, fn_ctx_prelude)
+    named_free_fn("prelude", call_mode, ask_mode, true, fn_ctx_prelude)
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {

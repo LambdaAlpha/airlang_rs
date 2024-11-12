@@ -9,7 +9,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        named_static_fn,
+        named_free_fn,
     },
 };
 
@@ -38,7 +38,7 @@ impl Prelude for SymbolPrelude {
 fn from_text() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("symbol.from_text", call_mode, ask_mode, true, fn_from_text)
+    named_free_fn("symbol.from_text", call_mode, ask_mode, true, fn_from_text)
 }
 
 fn fn_from_text(input: Val) -> Val {
@@ -56,7 +56,7 @@ fn fn_from_text(input: Val) -> Val {
 fn into_text() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("symbol.into_text", call_mode, ask_mode, true, fn_into_text)
+    named_free_fn("symbol.into_text", call_mode, ask_mode, true, fn_into_text)
 }
 
 fn fn_into_text(input: Val) -> Val {

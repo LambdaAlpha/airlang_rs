@@ -23,22 +23,22 @@ pub use crate::{
     },
     extension::ValExt,
     func::{
+        cell::{
+            CellFn,
+            CellFnExt,
+            CellFunc,
+        },
         const1::{
             ConstFn,
             ConstFunc,
         },
         free::{
             FreeFn,
-            FreeFnExt,
             FreeFunc,
         },
         mut1::{
             MutFn,
             MutFunc,
-        },
-        static1::{
-            StaticFn,
-            StaticFunc,
         },
     },
     int::Int,
@@ -77,11 +77,11 @@ pub use crate::{
         comment::CommentVal,
         ctx::CtxVal,
         func::{
+            CellFuncVal,
             ConstFuncVal,
             FreeFuncVal,
             FuncVal,
             MutFuncVal,
-            StaticFuncVal,
         },
         int::IntVal,
         list::ListVal,

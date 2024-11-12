@@ -25,8 +25,8 @@ use crate::{
         form_mode,
         map_mode,
         named_const_fn,
+        named_free_fn,
         named_mut_fn,
-        named_static_fn,
     },
     transformer::Transformer,
     utils::val::{
@@ -141,7 +141,7 @@ fn repr() -> Named<FuncVal> {
         Mode::default(),
         PrimitiveMode::default(),
     );
-    named_static_fn("case.represent", call_mode, ask_mode, true, fn_repr)
+    named_free_fn("case.represent", call_mode, ask_mode, true, fn_repr)
 }
 
 fn fn_repr(input: Val) -> Val {

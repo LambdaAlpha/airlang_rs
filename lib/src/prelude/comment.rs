@@ -22,8 +22,8 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
+        named_free_fn,
         named_mut_fn,
-        named_static_fn,
     },
     syntax::COMMENT,
     transformer::ByVal,
@@ -67,7 +67,7 @@ impl Prelude for CommentPrelude {
 fn new() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn(COMMENT, call_mode, ask_mode, true, fn_new)
+    named_free_fn(COMMENT, call_mode, ask_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {

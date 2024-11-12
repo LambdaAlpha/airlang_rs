@@ -468,7 +468,7 @@ do [
     f = function ! {
         body : do ! [a = a + 1, a],
         context_access : .free,
-        static : false,
+        cell : true,
         prelude : context ! {variables : {do : :, = : :, + : :, a : 0}},
     },
     [.f ., .f ., .f .]
@@ -481,7 +481,7 @@ do [
     f = function ! {
         body : c | ..a,
         context_access : .free,
-        static : true,
+        cell : false,
         prelude : context ! {variables : {| : :}},
     },
     f .
@@ -649,12 +649,12 @@ true
 =====
 function.represent ! function ! {
     context_access : .free,
-    static : true,
+    cell : true,
 }
 -----
 {
     context_access : free,
-    static : true,
+    cell : true,
 }
 =====
 function.context_access .function
@@ -745,13 +745,13 @@ function.is_extension .not
 -----
 false
 =====
-function.is_static .not
------
-true
-=====
-do [f = function ! {}, function.is_static .f]
+function.is_cell .not
 -----
 false
+=====
+do [f = function ! {cell : true}, function.is_cell .f]
+-----
+true
 =====
 function.id .not
 -----

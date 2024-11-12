@@ -18,8 +18,8 @@ use crate::{
         Named,
         Prelude,
         named_const_fn,
+        named_free_fn,
         named_mut_fn,
-        named_static_fn,
     },
     val::{
         Val,
@@ -447,7 +447,7 @@ fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
 fn new_map() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("map", call_mode, ask_mode, true, fn_new_map)
+    named_free_fn("map", call_mode, ask_mode, true, fn_new_map)
 }
 
 fn fn_new_map(input: Val) -> Val {
@@ -474,7 +474,7 @@ fn fn_new_map(input: Val) -> Val {
 fn new_set() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("set", call_mode, ask_mode, true, fn_new_set)
+    named_free_fn("set", call_mode, ask_mode, true, fn_new_set)
 }
 
 fn fn_new_set(input: Val) -> Val {
@@ -489,7 +489,7 @@ fn fn_new_set(input: Val) -> Val {
 fn new_multiset() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_static_fn("multiset", call_mode, ask_mode, true, fn_new_multiset)
+    named_free_fn("multiset", call_mode, ask_mode, true, fn_new_multiset)
 }
 
 fn fn_new_multiset(input: Val) -> Val {

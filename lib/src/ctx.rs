@@ -16,7 +16,7 @@ use crate::{
     symbol::Symbol,
     val::{
         Val,
-        func::FreeFuncVal,
+        func::CellFuncVal,
     },
 };
 
@@ -29,12 +29,12 @@ pub enum CtxError {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Ctx {
     variables: CtxMap,
-    solver: Option<FreeFuncVal>,
+    solver: Option<CellFuncVal>,
 }
 
 pub(crate) struct PubCtx {
     pub(crate) variables: CtxMap,
-    pub(crate) solver: Option<FreeFuncVal>,
+    pub(crate) solver: Option<CellFuncVal>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -72,28 +72,28 @@ impl<'l> CtxRef<'l> for &'l mut Ctx {
         Ok(DynRef::new(&mut self.variables, false))
     }
 
-    fn get_solver(self) -> Result<&'l FreeFuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l CellFuncVal, CtxError> {
         let Some(solver) = &self.solver else {
             return Err(CtxError::NotFound);
         };
         Ok(solver)
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FreeFuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut CellFuncVal, CtxError> {
         let Some(solver) = &mut self.solver else {
             return Err(CtxError::NotFound);
         };
         Ok(solver)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FreeFuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, CellFuncVal>, CtxError> {
         let Some(solver) = &mut self.solver else {
             return Err(CtxError::NotFound);
         };
         Ok(DynRef::new(solver, false))
     }
 
-    fn set_solver(self, solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<CellFuncVal>) -> Result<(), CtxError> {
         self.solver = solver;
         Ok(())
     }
@@ -112,28 +112,28 @@ impl<'l> CtxRef<'l> for &'l Ctx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver(self) -> Result<&'l FreeFuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l CellFuncVal, CtxError> {
         let Some(solver) = &self.solver else {
             return Err(CtxError::NotFound);
         };
         Ok(solver)
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FreeFuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut CellFuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FreeFuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, CellFuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FreeFuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<CellFuncVal>) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 }
 
 impl Ctx {
-    pub(crate) fn new(variables: CtxMap, solver: Option<FreeFuncVal>) -> Self {
+    pub(crate) fn new(variables: CtxMap, solver: Option<CellFuncVal>) -> Self {
         Self { variables, solver }
     }
 
