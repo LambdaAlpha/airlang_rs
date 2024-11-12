@@ -5,6 +5,7 @@ use std::{
 };
 
 use airlang::{
+    AirCell,
     FuncVal,
     Invariant,
     Mode,
@@ -13,8 +14,6 @@ use airlang::{
     Symbol,
     Text,
     Val,
-    initial_ctx,
-    interpret_mut,
     parse,
 };
 
@@ -74,13 +73,12 @@ fn fn_import(mut ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
 
-    let mut ctx_for_mod = initial_ctx();
-    let mut mut_ctx_for_mod = MutCtx::new(&mut ctx_for_mod);
-    init_ctx(mut_ctx_for_mod.reborrow());
-    if !set_cur_url(mut_ctx_for_mod.reborrow(), cur_url_key, new_url) {
+    let mut mod_air = AirCell::default();
+    init_ctx(mod_air.ctx_mut());
+    if !set_cur_url(mod_air.ctx_mut(), cur_url_key, new_url) {
         return Val::default();
     }
-    interpret_mut(mut_ctx_for_mod, val)
+    mod_air.interpret(val)
 }
 
 fn get_cur_url(ctx: MutFnCtx, key: Symbol) -> Option<String> {

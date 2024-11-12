@@ -1,22 +1,19 @@
 use std::error::Error;
 
 use airlang::{
+    AirCell,
     Int,
-    MutCtx,
     Val,
     generate,
-    initial_ctx,
-    interpret_mut,
     parse,
 };
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
-    let mut ctx = initial_ctx();
-    let mut_ctx = MutCtx::new(&mut ctx);
+    let mut air = AirCell::default();
     let s = include_str!("../../benches/main/interpret.air");
     let src_val = parse(s)?;
-    let output = interpret_mut(mut_ctx, src_val);
+    let output = air.interpret(src_val);
     let expected = Val::Int(Int::from(3267).into());
     assert_eq!(output, expected);
     Ok(())

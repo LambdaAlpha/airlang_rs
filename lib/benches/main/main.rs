@@ -1,8 +1,6 @@
 use airlang::{
-    MutCtx,
+    AirCell,
     generate,
-    initial_ctx,
-    interpret_mut,
     parse,
 };
 use criterion::{
@@ -28,13 +26,12 @@ pub fn bench_all(c: &mut Criterion) {
 
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
-        let mut ctx = initial_ctx();
-        let mut mut_ctx = MutCtx::new(&mut ctx);
+        let mut air = AirCell::default();
         let s = include_str!("interpret.air");
         let src_val = parse(s).expect("parse failed");
         b.iter_batched(
             || src_val.clone(),
-            |val| interpret_mut(mut_ctx.reborrow(), black_box(val)),
+            |val| air.interpret(black_box(val)),
             BatchSize::SmallInput,
         );
     });

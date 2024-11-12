@@ -1,10 +1,10 @@
 use airlang::{
+    AirCell,
     FuncVal,
     Mode,
     MutCtx,
     MutFnCtx,
     Val,
-    initial_ctx,
 };
 
 use crate::{
@@ -43,7 +43,7 @@ fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {
         eprintln!("Unable to reset context, context is immutable.");
         return Val::default();
     };
-    let mut initial_ctx = initial_ctx();
+    let mut initial_ctx = AirCell::initial_ctx();
     init_ctx(MutCtx::new(&mut initial_ctx));
     ctx.set(initial_ctx);
     Val::default()

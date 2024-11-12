@@ -10,13 +10,10 @@ use std::{
 };
 
 use airlang::{
-    Ctx,
-    MutCtx,
+    AirCell,
     Text,
     Val,
     generate,
-    initial_ctx,
-    interpret_mut,
     parse,
 };
 use crossterm::{
@@ -66,7 +63,7 @@ use crossterm::{
 use crate::init_ctx;
 
 pub(crate) struct Repl<W: Write + IsTty> {
-    ctx: Ctx,
+    air: AirCell,
     terminal: Terminal<W>,
     is_raw_mode_enabled: bool,
 
@@ -96,11 +93,11 @@ enum CtrlFlow {
 
 impl<W: Write + IsTty> Repl<W> {
     pub(crate) fn new(out: W) -> Self {
-        let mut ctx = initial_ctx();
-        init_ctx(MutCtx::new(&mut ctx));
+        let mut air = AirCell::default();
+        init_ctx(air.ctx_mut());
         let terminal = Terminal(out);
         Self {
-            ctx,
+            air,
             terminal,
             is_raw_mode_enabled: false,
             multiline_mode: false,
@@ -445,7 +442,7 @@ impl<W: Write + IsTty> Repl<W> {
     fn eval(&mut self, input: &str) -> Result<()> {
         match parse(input) {
             Ok(input) => {
-                let output = interpret_mut(MutCtx::new(&mut self.ctx), input);
+                let output = self.air.interpret(input);
                 match generate(&output) {
                     Ok(o) => self.terminal.print(o),
                     Err(e) => self.terminal.eprint(e.to_string()),
@@ -462,7 +459,7 @@ impl<W: Write + IsTty> Repl<W> {
         self.terminal.print(Self::TITLE)?;
         self.terminal.print(" ")?;
         match parse(include_str!("air/version.air")) {
-            Ok(repr) => match interpret_mut(MutCtx::new(&mut self.ctx), repr) {
+            Ok(repr) => match self.air.interpret(repr) {
                 Val::Text(t) => {
                     let s = Text::from(t);
                     self.terminal.print(s)

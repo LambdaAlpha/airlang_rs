@@ -1,13 +1,10 @@
 use std::error::Error;
 
 use airlang::{
-    Ctx,
+    AirCell,
     Invariant,
-    MutCtx,
     Symbol,
     Text,
-    initial_ctx,
-    interpret_mut,
     parse,
 };
 use airlang_ext::init_ctx;
@@ -22,9 +19,8 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     if input.is_empty() {
         return Ok(());
     }
-    let mut ctx = generate_ext_ctx_with_main()?;
-    let backup = ctx.clone();
-    let mut mut_ctx = MutCtx::new(&mut ctx);
+    let mut air = generate_air_with_main()?;
+    let backup = air.clone();
 
     let tests = input.split(MAIN_DELIMITER);
     for test in tests {
@@ -34,7 +30,7 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
             e
         })?;
-        let ret = interpret_mut(mut_ctx.reborrow(), src);
+        let ret = air.interpret(src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
             e
@@ -42,24 +38,22 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
         assert_eq!(
             ret, ret_expected,
             "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:#?}, \
-            current context: {ctx:#?}",
+            current context: {air:#?}",
         );
-        ctx = backup.clone();
-        mut_ctx = MutCtx::new(&mut ctx);
+        air = backup.clone();
     }
     Ok(())
 }
 
-fn generate_ext_ctx_with_main() -> Result<Ctx, Box<dyn Error>> {
+fn generate_air_with_main() -> Result<AirCell, Box<dyn Error>> {
     let src = generate_import("/main/main.air");
     let src = parse(&src)?;
-    let mut ctx = initial_ctx();
-    let mut mut_ctx = MutCtx::new(&mut ctx);
-    init_ctx(mut_ctx.reborrow());
-    let main = interpret_mut(mut_ctx.reborrow(), src);
+    let mut air = AirCell::default();
+    init_ctx(air.ctx_mut());
+    let main = air.interpret(src);
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
-    mut_ctx.put(main_name, Invariant::Const, main)?;
-    Ok(ctx)
+    air.ctx_mut().put(main_name, Invariant::Const, main)?;
+    Ok(air)
 }
 
 fn generate_import(path: &str) -> String {

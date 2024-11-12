@@ -59,6 +59,7 @@ pub use crate::{
     },
     number::Number,
     pair::Pair,
+    pub1::*,
     symbol::Symbol,
     syntax::generator::ReprError,
     text::Text,
@@ -91,35 +92,8 @@ pub use crate::{
         text::TextVal,
     },
 };
-use crate::{
-    mode::eval::Eval,
-    syntax::ParseError,
-    transformer::Transformer,
-};
 
-pub fn parse(src: &str) -> Result<Val, ParseError> {
-    syntax::parser::parse(src)
-}
-
-pub fn generate(src: &Val) -> Result<String, ReprError> {
-    syntax::generator::generate_pretty(src)
-}
-
-pub fn initial_ctx() -> Ctx {
-    prelude::initial_ctx()
-}
-
-pub fn interpret_mut(ctx: MutCtx, input: Val) -> Val {
-    Eval.transform(ctx, input)
-}
-
-pub fn interpret_const(ctx: ConstCtx, input: Val) -> Val {
-    Eval.transform(ctx, input)
-}
-
-pub fn interpret_free(ctx: FreeCtx, input: Val) -> Val {
-    Eval.transform(ctx, input)
-}
+pub(crate) mod pub1;
 
 pub(crate) mod val;
 
