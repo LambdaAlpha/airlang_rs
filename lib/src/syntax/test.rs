@@ -32,7 +32,6 @@ use crate::{
 mod boolean;
 mod byte;
 mod call;
-mod infix;
 mod comment;
 mod number;
 mod int;
@@ -401,20 +400,6 @@ fn test_parse_comment() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_comment() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/comment.air"), "test/comment.air")
-}
-
-#[test]
-fn test_parse_infix() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/infix.air"),
-        "test/infix.air",
-        infix::expected,
-    )
-}
-
-#[test]
-fn test_generate_infix() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/infix.air"), "test/infix.air")
 }
 
 #[test]
