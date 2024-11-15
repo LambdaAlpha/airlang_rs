@@ -44,6 +44,7 @@ use nom::{
     },
     multi::{
         fold_many0,
+        many0,
         separated_list0,
         separated_list1,
     },
@@ -90,6 +91,7 @@ use crate::{
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
+        SPACE,
         SYMBOL_QUOTE,
         TEXT_QUOTE,
         TRUE,
@@ -216,6 +218,7 @@ where
     let (src, first) = peek(anychar)(src)?;
 
     let parser = match first {
+        // delimiters
         LIST_LEFT => |s| map(list1::<N, A, TYPE, _, _>, Token::Default)(s),
         LIST_RIGHT => fail,
         MAP_LEFT => |s| map(map1::<N, A, TYPE, _, _>, Token::Default)(s),
@@ -223,7 +226,7 @@ where
         SCOPE_LEFT => |s| map(scope::<N, A, TYPE, _, _>, Token::Default)(s),
         SCOPE_RIGHT => fail,
         SEPARATOR => fail,
-
+        SPACE => fail,
         TEXT_QUOTE => |s| map(rich_text, Token::Default)(s),
         SYMBOL_QUOTE => |s| map(rich_symbol, Token::Default)(s),
 
@@ -331,9 +334,9 @@ where
         return compose_none(tokens);
     }
     if len == 2 {
-        let func = tokens.next().unwrap();
-        let input = tokens.next().unwrap();
-        return compose_two::<TYPE, _>(func, input);
+        let func = tokens.next().unwrap().into_repr();
+        let input = tokens.next().unwrap().into_repr();
+        return Some(compose_two::<TYPE, _>(func, input));
     }
     if N == 2 {
         if len % 2 == 0 {
@@ -355,15 +358,11 @@ where
     None
 }
 
-fn compose_none<T, I>(mut tokens: I) -> Option<T>
+fn compose_none<T, I>(tokens: I) -> Option<T>
 where
     T: ParseRepr,
-    I: ExactSizeIterator<Item = Token<T>>,
+    I: Iterator<Item = Token<T>>,
 {
-    if tokens.len() == 1 {
-        let repr = tokens.next().unwrap().into_repr();
-        return Some(repr);
-    }
     let list = tokens.map(Token::into_repr).collect::<List<_>>();
     let list = From::from(list);
     let tag = From::from(Symbol::from_str(MIDDLE));
@@ -371,11 +370,12 @@ where
     Some(comment)
 }
 
-fn compose_two<const TYPE: u8, T: ParseRepr>(left: Token<T>, right: Token<T>) -> Option<T> {
-    let left = left.into_repr();
-    let right = right.into_repr();
-    let repr = compose_type::<TYPE, _>(left, right);
-    Some(repr)
+fn compose_two<const TYPE: u8, T: ParseRepr>(left: T, right: T) -> T {
+    if TYPE == TYPE_CALL {
+        From::from(Call::new(left, right))
+    } else {
+        From::from(Ask::new(left, right))
+    }
 }
 
 fn compose_many1<const A: u8, const TYPE: u8, T, I>(mut iter: I) -> Option<T>
@@ -389,9 +389,9 @@ where
             break;
         };
         first = if A == A_RIGHT {
-            compose_type::<TYPE, _>(second.into_repr(), first)
+            compose_two::<TYPE, _>(second.into_repr(), first)
         } else {
-            compose_type::<TYPE, _>(first, second.into_repr())
+            compose_two::<TYPE, _>(first, second.into_repr())
         };
     }
     Some(first)
@@ -431,7 +431,7 @@ fn compose_infix<const TYPE: u8, T: ParseRepr>(left: T, middle: Token<T>, right:
     };
     let pair = Pair::new(left, right);
     let pair = From::from(pair);
-    compose_type::<TYPE, _>(middle, pair)
+    compose_two::<TYPE, _>(middle, pair)
 }
 
 fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
@@ -443,16 +443,6 @@ fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
     (left, right.into_repr())
 }
 
-fn compose_type<const TYPE: u8, T: ParseRepr>(left: T, right: T) -> T {
-    if TYPE == TYPE_CALL {
-        let repr = Call::new(left, right);
-        From::from(repr)
-    } else {
-        let repr = Ask::new(left, right);
-        From::from(repr)
-    }
-}
-
 fn items<'a, O1, O2, E, S, F>(
     item: F,
     separator: S,
@@ -462,18 +452,8 @@ where
     S: Parser<&'a str, O1, E>,
     F: Parser<&'a str, O2, E> + Clone,
 {
-    let items_last = tuple((
-        fold_many0(
-            terminated(item.clone(), trim(separator)),
-            Vec::new,
-            |mut items, item| {
-                items.push(item);
-                items
-            },
-        ),
-        opt(item),
-    ));
-    map(items_last, |(mut items, last)| {
+    let items = many0(terminated(item.clone(), trim(separator)));
+    map(tuple((items, opt(item))), |(mut items, last)| {
         if let Some(last) = last {
             items.push(last);
         }
