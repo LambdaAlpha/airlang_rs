@@ -108,8 +108,9 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
                 FormCore::transform_comment(&meta, &value, ctx, comment)
             }
             CommentMode::Eval(mode) => {
-                let value = SelfTrans::new(self, mode);
-                EvalCore::transform_comment(&value, ctx, comment)
+                let meta = SelfTrans::new(self, mode.meta);
+                let value = SelfTrans::new(self, mode.value);
+                EvalCore::transform_comment(&meta, &value, ctx, comment)
             }
         }
     }

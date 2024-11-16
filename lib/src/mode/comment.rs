@@ -23,7 +23,7 @@ use crate::{
 pub enum CommentMode<M> {
     Id,
     Form(Comment<M, M>),
-    Eval(M),
+    Eval(Comment<M, M>),
 }
 
 impl Transformer<CommentVal, Val> for CommentMode<Mode> {
@@ -36,14 +36,16 @@ impl Transformer<CommentVal, Val> for CommentMode<Mode> {
             CommentMode::Form(mode) => {
                 FormCore::transform_comment(&mode.meta, &mode.value, ctx, comment)
             }
-            CommentMode::Eval(mode) => EvalCore::transform_comment(mode, ctx, comment),
+            CommentMode::Eval(mode) => {
+                EvalCore::transform_comment(&mode.meta, &mode.value, ctx, comment)
+            }
         }
     }
 }
 
 impl<M: Default> Default for CommentMode<M> {
     fn default() -> Self {
-        Self::Eval(M::default())
+        Self::Eval(Comment::default())
     }
 }
 
@@ -55,7 +57,10 @@ impl From<PrimitiveMode> for CommentMode<Mode> {
                 Mode::Primitive(PrimitiveMode::Form),
                 Mode::Primitive(PrimitiveMode::Form),
             )),
-            PrimitiveMode::Eval => CommentMode::Eval(Mode::Primitive(PrimitiveMode::Eval)),
+            PrimitiveMode::Eval => CommentMode::Eval(Comment::new(
+                Mode::Primitive(PrimitiveMode::Form),
+                Mode::Primitive(PrimitiveMode::Form),
+            )),
         }
     }
 }
@@ -67,7 +72,9 @@ impl From<PrimitiveMode> for CommentMode<SelfMode> {
             PrimitiveMode::Form => {
                 CommentMode::Form(Comment::new(SelfMode::Self1, SelfMode::Self1))
             }
-            PrimitiveMode::Eval => CommentMode::Eval(SelfMode::Self1),
+            PrimitiveMode::Eval => {
+                CommentMode::Eval(Comment::new(SelfMode::Self1, SelfMode::Self1))
+            }
         }
     }
 }

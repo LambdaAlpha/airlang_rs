@@ -32,6 +32,7 @@ use crate::{
             CtxRef,
         },
     },
+    optimize::optimize,
     transformer::{
         ByVal,
         Transformer,
@@ -237,17 +238,25 @@ impl FormCore {
 pub(crate) struct EvalCore;
 
 impl EvalCore {
-    pub(crate) fn transform_comment<'a, Ctx, Value>(
+    // f ; v evaluates to any i that (f ! i) == (f ! v)
+    pub(crate) fn transform_comment<'a, Ctx, Meta, Value>(
+        meta_trans: &Meta,
         value_trans: &Value,
-        ctx: Ctx,
+        mut ctx: Ctx,
         comment: CommentVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
+        Meta: Transformer<Val, Val>,
         Value: Transformer<Val, Val>,
     {
         let comment = Comment::from(comment);
-        value_trans.transform(ctx, comment.value)
+        let meta = meta_trans.transform(ctx.reborrow(), comment.meta);
+        let value = value_trans.transform(ctx, comment.value);
+        let Val::Func(func) = meta else {
+            return value;
+        };
+        optimize(func, value)
     }
 
     pub(crate) fn transform_call<'a, Ctx, Func, Input>(

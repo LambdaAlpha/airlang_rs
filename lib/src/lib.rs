@@ -6,6 +6,8 @@ pub(crate) mod val;
 
 pub(crate) mod core;
 
+pub(crate) mod optimize;
+
 pub(crate) mod transformer;
 
 pub(crate) mod mode;

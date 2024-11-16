@@ -316,8 +316,9 @@ where
             }
             Val::Comment(comment) => {
                 let comment = Comment::from(comment);
+                let meta = M::parse(comment.meta, default)?;
                 let value = M::parse(comment.value, default)?;
-                Some(CommentMode::Eval(value))
+                Some(CommentMode::Eval(Comment::new(meta, value)))
             }
             _ => None,
         }
@@ -334,8 +335,8 @@ impl<M: GenerateMode<Val>> GenerateMode<Val> for CommentMode<M> {
                 Val::Pair(Pair::new(meta, value).into())
             }
             CommentMode::Eval(mode) => {
-                let meta = Val::default();
-                let value = M::generate(mode, default);
+                let meta = M::generate(&mode.meta, default);
+                let value = M::generate(&mode.value, default);
                 Val::Comment(Comment::new(meta, value).into())
             }
         }

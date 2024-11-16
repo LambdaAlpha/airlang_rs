@@ -60,7 +60,7 @@ impl ByVal<Val> for Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        EvalCore::transform_comment(self, ctx, comment)
+        EvalCore::transform_comment(self, self, ctx, comment)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val

@@ -327,7 +327,10 @@ impl<M: Arbitrary> Arbitrary for CommentMode<M> {
                 let comment = Comment::new(M::any(rng, new_depth), M::any(rng, new_depth));
                 CommentMode::Form(comment)
             }
-            2 => CommentMode::Eval(M::any(rng, new_depth)),
+            2 => {
+                let comment = Comment::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                CommentMode::Eval(comment)
+            }
             _ => unreachable!(),
         }
     }

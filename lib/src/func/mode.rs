@@ -91,7 +91,7 @@ impl<M: IsCacheable> IsCacheable for CommentMode<M> {
         match self {
             CommentMode::Id => true,
             CommentMode::Form(mode) => mode.meta.is_cacheable() && mode.value.is_cacheable(),
-            CommentMode::Eval(mode) => mode.is_cacheable(),
+            CommentMode::Eval(mode) => mode.meta.is_cacheable() && mode.value.is_cacheable(),
         }
     }
 }
