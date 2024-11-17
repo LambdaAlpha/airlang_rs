@@ -22,9 +22,9 @@ use crate::{
         parse,
         parser::ParseRepr,
         repr::{
+            adapt::AdaptRepr,
             ask::AskRepr,
             call::CallRepr,
-            comment::CommentRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
@@ -46,7 +46,7 @@ pub enum Repr {
     Byte(Byte),
     Call(Box<CallRepr>),
     Ask(Box<AskRepr>),
-    Comment(Box<CommentRepr>),
+    Adapt(Box<AdaptRepr>),
 }
 
 impl Repr {
@@ -115,9 +115,9 @@ impl From<MapRepr> for Repr {
     }
 }
 
-impl From<CommentRepr> for Repr {
-    fn from(a: CommentRepr) -> Self {
-        Repr::Comment(Box::new(a))
+impl From<AdaptRepr> for Repr {
+    fn from(a: AdaptRepr) -> Self {
+        Repr::Adapt(Box::new(a))
     }
 }
 
@@ -208,7 +208,7 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
             Repr::Byte(b) => GenerateRepr::Byte(b),
             Repr::Call(c) => GenerateRepr::Call(c),
             Repr::Ask(a) => GenerateRepr::Ask(a),
-            Repr::Comment(a) => GenerateRepr::Comment(a),
+            Repr::Adapt(a) => GenerateRepr::Adapt(a),
         };
         Ok(r)
     }
@@ -224,4 +224,4 @@ pub(crate) mod call;
 
 pub(crate) mod ask;
 
-pub(crate) mod comment;
+pub(crate) mod adapt;

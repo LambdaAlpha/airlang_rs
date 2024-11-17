@@ -17,9 +17,9 @@ use crate::{
         parse,
         repr::{
             Repr,
+            adapt::AdaptRepr,
             ask::AskRepr,
             call::CallRepr,
-            comment::CommentRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
@@ -32,7 +32,7 @@ use crate::{
 mod boolean;
 mod byte;
 mod call;
-mod comment;
+mod adapt;
 mod number;
 mod int;
 mod list;
@@ -93,14 +93,14 @@ fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
-fn comment(meta: Repr, value: Repr) -> Repr {
-    Repr::Comment(Box::new(CommentRepr::new(meta, value)))
+fn adapt(func: Repr, value: Repr) -> Repr {
+    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
 
 fn no_compose(v: Vec<Repr>) -> Repr {
-    let meta = Repr::Symbol(Symbol::from_str(MIDDLE));
+    let func = Repr::Symbol(Symbol::from_str(MIDDLE));
     let value = Repr::List(v.into());
-    Repr::Comment(Box::new(CommentRepr::new(meta, value)))
+    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -389,17 +389,17 @@ fn test_generate_map() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_comment() -> Result<(), Box<dyn Error>> {
+fn test_parse_adapt() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/comment.air"),
-        "test/comment.air",
-        comment::expected,
+        include_str!("test/adapt.air"),
+        "test/adapt.air",
+        adapt::expected,
     )
 }
 
 #[test]
-fn test_generate_comment() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/comment.air"), "test/comment.air")
+fn test_generate_adapt() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/adapt.air"), "test/adapt.air")
 }
 
 #[test]

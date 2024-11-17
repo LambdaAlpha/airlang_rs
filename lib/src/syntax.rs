@@ -41,7 +41,7 @@ pub(crate) const MIDDLE: &str = "^";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 
-pub(crate) const COMMENT: &str = ";";
+pub(crate) const ADAPT: &str = ";";
 pub(crate) const PAIR: &str = ":";
 pub(crate) const CALL: &str = "!";
 pub(crate) const ASK: &str = "?";
@@ -87,7 +87,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn maybe_keyword(s: &str) -> bool {
-    matches!(s, UNIT | TRUE | FALSE | COMMENT | PAIR | CALL | ASK)
+    matches!(s, UNIT | TRUE | FALSE | ADAPT | PAIR | CALL | ASK)
 }
 
 impl Display for ParseError {

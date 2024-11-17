@@ -1,0 +1,43 @@
+1 ';' 2
+-----
+1 ; 2
+=====
+do [a = 1, a ';' not ! true]
+-----
+1 ; false
+=====
+do [c = id ! 1 ; 2, adapt.apply &c]
+-----
+2
+=====
+do [c = id ! 1 ; 2, adapt.specification .c]
+-----
+1
+=====
+do [c = id ! 1 ; 2, adapt.value .c]
+-----
+2
+=====
+adapt.specification ! id ! 1 ; 2
+-----
+1
+=====
+adapt.value ! id ! 1 ; 2
+-----
+2
+=====
+do [c = id ! 1 ; 2, .c adapt.set_specification 3]
+-----
+1
+=====
+do [c = id ! 1 ; 2, .c adapt.set_specification 3, &c]
+-----
+3 ; 2
+=====
+do [c = id ! 1 ; 2, .c adapt.set_value 3]
+-----
+2
+=====
+do [c = id ! 1 ; 2, .c adapt.set_value 3, &c]
+-----
+1 ; 3

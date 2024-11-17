@@ -1,4 +1,5 @@
 pub use crate::{
+    adapt::Adapt,
     answer::Answer,
     ask::Ask,
     bool::Bool,
@@ -6,7 +7,6 @@ pub use crate::{
     cache::Cache,
     call::Call,
     case::Case,
-    comment::Comment,
     ctx::{
         Ctx,
         CtxError,
@@ -46,9 +46,9 @@ pub use crate::{
     map::Map,
     mode::{
         Mode,
+        adapt::AdaptMode,
         ask::AskMode,
         call::CallMode,
-        comment::CommentMode,
         composite::CompositeMode,
         list::ListMode,
         map::MapMode,
@@ -65,6 +65,7 @@ pub use crate::{
     unit::Unit,
     val::{
         Val,
+        adapt::AdaptVal,
         answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
@@ -74,7 +75,6 @@ pub use crate::{
             CaseVal,
             TrivialCaseVal,
         },
-        comment::CommentVal,
         ctx::CtxVal,
         func::{
             CellFuncVal,

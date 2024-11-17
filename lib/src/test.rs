@@ -201,6 +201,6 @@ impl FreeFn for FuncExt {
 }
 
 #[test]
-fn test_comment() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/comment.air"), "test/comment.air")
+fn test_adapt() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/adapt.air"), "test/adapt.air")
 }

@@ -4,14 +4,14 @@ use std::{
 };
 
 use crate::{
+    Adapt,
+    AdaptVal,
     Answer,
     AnswerVal,
     Ask,
     AskVal,
     Call,
     CallVal,
-    Comment,
-    CommentVal,
     ConstCtx,
     FuncVal,
     List,
@@ -54,7 +54,7 @@ impl FormCore {
         match input {
             Val::Symbol(s) => t.transform_symbol(ctx, s),
             Val::Pair(p) => t.transform_pair(ctx, p),
-            Val::Comment(a) => t.transform_comment(ctx, a),
+            Val::Adapt(a) => t.transform_adapt(ctx, a),
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
             Val::Call(c) => t.transform_call(ctx, c),
@@ -98,21 +98,21 @@ impl FormCore {
         Val::Pair(Pair::new(first, second).into())
     }
 
-    pub(crate) fn transform_comment<'a, Ctx, Meta, Value>(
-        meta: &Meta,
+    pub(crate) fn transform_adapt<'a, Ctx, Spec, Value>(
+        spec: &Spec,
         value: &Value,
         mut ctx: Ctx,
-        comment: CommentVal,
+        adapt: AdaptVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Meta: Transformer<Val, Val>,
+        Spec: Transformer<Val, Val>,
         Value: Transformer<Val, Val>,
     {
-        let comment = Comment::from(comment);
-        let meta = meta.transform(ctx.reborrow(), comment.meta);
-        let value = value.transform(ctx, comment.value);
-        Val::Comment(Comment::new(meta, value).into())
+        let adapt = Adapt::from(adapt);
+        let spec = spec.transform(ctx.reborrow(), adapt.spec);
+        let value = value.transform(ctx, adapt.value);
+        Val::Adapt(Adapt::new(spec, value).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val
@@ -239,24 +239,24 @@ pub(crate) struct EvalCore;
 
 impl EvalCore {
     // f ; v evaluates to any i that (f ! i) == (f ! v)
-    pub(crate) fn transform_comment<'a, Ctx, Meta, Value>(
-        meta_trans: &Meta,
+    pub(crate) fn transform_adapt<'a, Ctx, Spec, Value>(
+        spec_trans: &Spec,
         value_trans: &Value,
         mut ctx: Ctx,
-        comment: CommentVal,
+        adapt: AdaptVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Meta: Transformer<Val, Val>,
+        Spec: Transformer<Val, Val>,
         Value: Transformer<Val, Val>,
     {
-        let comment = Comment::from(comment);
-        let meta = meta_trans.transform(ctx.reborrow(), comment.meta);
-        let value = value_trans.transform(ctx, comment.value);
-        let Val::Func(func) = meta else {
+        let adapt = Adapt::from(adapt);
+        let spec = spec_trans.transform(ctx.reborrow(), adapt.spec);
+        let value = value_trans.transform(ctx, adapt.value);
+        let Val::Func(spec) = spec else {
             return value;
         };
-        optimize(func, value)
+        optimize(spec, value)
     }
 
     pub(crate) fn transform_call<'a, Ctx, Func, Input>(

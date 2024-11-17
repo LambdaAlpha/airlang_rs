@@ -1,9 +1,9 @@
 use std::ops::Deref;
 
 use crate::{
+    AdaptVal,
     AskVal,
     CallVal,
-    CommentVal,
     ListVal,
     MapVal,
     PairVal,
@@ -43,7 +43,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where
         Ctx: CtxMeta<'a>;
 
-    fn transform_comment<'a, Ctx>(&self, ctx: Ctx, comment: CommentVal) -> Output
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 

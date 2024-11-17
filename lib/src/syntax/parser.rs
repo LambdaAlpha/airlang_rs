@@ -59,11 +59,11 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
+    adapt::Adapt,
     ask::Ask,
     bool::Bool,
     byte::Byte,
     call::Call,
-    comment::Comment,
     int::Int,
     list::List,
     map::Map,
@@ -71,10 +71,10 @@ use crate::{
     pair::Pair,
     symbol::Symbol,
     syntax::{
+        ADAPT,
         ASK,
         BYTE,
         CALL,
-        COMMENT,
         FALSE,
         INT,
         LEFT,
@@ -118,7 +118,7 @@ pub(crate) trait ParseRepr:
     + Eq
     + Hash
     + From<Map<Self, Self>>
-    + From<Comment<Self, Self>>
+    + From<Adapt<Self, Self>>
     + Clone
 {
 }
@@ -366,8 +366,8 @@ where
     let list = tokens.map(Token::into_repr).collect::<List<_>>();
     let list = From::from(list);
     let tag = From::from(Symbol::from_str(MIDDLE));
-    let comment = From::from(Comment::new(tag, list));
-    Some(comment)
+    let adapt = From::from(Adapt::new(tag, list));
+    Some(adapt)
 }
 
 fn compose_two<const TYPE: u8, T: ParseRepr>(left: T, right: T) -> T {
@@ -424,7 +424,7 @@ fn compose_infix<const TYPE: u8, T: ParseRepr>(left: T, middle: Token<T>, right:
             PAIR => return From::from(Pair::new(left, right)),
             CALL => return From::from(Call::new(left, right)),
             ASK => return From::from(Ask::new(left, right)),
-            COMMENT => return From::from(Comment::new(left, right)),
+            ADAPT => return From::from(Adapt::new(left, right)),
             _ => From::from(s),
         },
         Token::Default(middle) => middle,

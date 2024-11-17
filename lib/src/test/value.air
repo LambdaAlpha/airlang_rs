@@ -38,9 +38,9 @@ do [a = any ! .ask, type_of .a]
 -----
 ask
 =====
-do [c = any ! .comment, type_of .c]
+do [c = any ! .adapt, type_of .c]
 -----
-comment
+adapt
 =====
 do [c = any ! .context, type_of .c]
 -----
@@ -108,7 +108,7 @@ ask
 =====
 do [c = id ! n ; v, type_of .c]
 -----
-comment
+adapt
 =====
 do [a = [], type_of .a]
 -----

@@ -14,9 +14,9 @@ use crate::{
     Map,
     Pair,
     ReprError,
+    adapt::Adapt,
     bool::Bool,
     byte::Byte,
-    comment::Comment,
     extension::ValExt,
     number::Number,
     symbol::Symbol,
@@ -28,12 +28,12 @@ use crate::{
     text::Text,
     unit::Unit,
     val::{
+        adapt::AdaptVal,
         answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
         call::CallVal,
         case::CaseVal,
-        comment::CommentVal,
         ctx::CtxVal,
         func::FuncVal,
         int::IntVal,
@@ -62,7 +62,7 @@ pub enum Val {
     Call(CallVal),
     Ask(AskVal),
 
-    Comment(CommentVal),
+    Adapt(AdaptVal),
 
     Ctx(CtxVal),
     Func(FuncVal),
@@ -86,7 +86,7 @@ pub(crate) const MAP: &str = "map";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const CALL: &str = "call";
 pub(crate) const ASK: &str = "ask";
-pub(crate) const COMMENT: &str = "comment";
+pub(crate) const ADAPT: &str = "adapt";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 pub(crate) const CASE: &str = "case";
@@ -195,15 +195,15 @@ impl From<MapVal> for Val {
     }
 }
 
-impl From<Comment<Val, Val>> for Val {
-    fn from(value: Comment<Val, Val>) -> Self {
-        Val::Comment(CommentVal::from(value))
+impl From<Adapt<Val, Val>> for Val {
+    fn from(value: Adapt<Val, Val>) -> Self {
+        Val::Adapt(AdaptVal::from(value))
     }
 }
 
-impl From<CommentVal> for Val {
-    fn from(value: CommentVal) -> Self {
-        Val::Comment(value)
+impl From<AdaptVal> for Val {
+    fn from(value: AdaptVal) -> Self {
+        Val::Adapt(value)
     }
 }
 
@@ -288,7 +288,7 @@ impl From<&Repr> for Val {
             Repr::Byte(b) => Val::Byte(ByteVal::from(b.clone())),
             Repr::Call(c) => Val::Call(CallVal::from(&**c)),
             Repr::Ask(a) => Val::Ask(AskVal::from(&**a)),
-            Repr::Comment(a) => Val::Comment(CommentVal::from(&**a)),
+            Repr::Adapt(a) => Val::Adapt(AdaptVal::from(&**a)),
         }
     }
 }
@@ -308,7 +308,7 @@ impl From<Repr> for Val {
             Repr::Byte(b) => Val::Byte(ByteVal::from(b)),
             Repr::Call(c) => Val::Call(CallVal::from(*c)),
             Repr::Ask(a) => Val::Ask(AskVal::from(*a)),
-            Repr::Comment(a) => Val::Comment(CommentVal::from(*a)),
+            Repr::Adapt(a) => Val::Adapt(AdaptVal::from(*a)),
         }
     }
 }
@@ -329,7 +329,7 @@ impl TryInto<Repr> for &Val {
             Val::Byte(b) => Ok(Repr::Byte(b.into())),
             Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
             Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
-            Val::Comment(a) => Ok(Repr::Comment(Box::new(a.try_into()?))),
+            Val::Adapt(a) => Ok(Repr::Adapt(Box::new(a.try_into()?))),
             _ => Err(ReprError {}),
         }
     }
@@ -351,7 +351,7 @@ impl TryInto<Repr> for Val {
             Val::Byte(b) => Ok(Repr::Byte(b.into())),
             Val::Call(c) => Ok(Repr::Call(Box::new(c.try_into()?))),
             Val::Ask(a) => Ok(Repr::Ask(Box::new(a.try_into()?))),
-            Val::Comment(a) => Ok(Repr::Comment(Box::new(a.try_into()?))),
+            Val::Adapt(a) => Ok(Repr::Adapt(Box::new(a.try_into()?))),
             _ => Err(ReprError {}),
         }
     }
@@ -376,7 +376,7 @@ impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
             Val::Byte(b) => GenerateRepr::Byte(b),
             Val::Call(c) => GenerateRepr::Call(c),
             Val::Ask(a) => GenerateRepr::Ask(a),
-            Val::Comment(a) => GenerateRepr::Comment(a),
+            Val::Adapt(a) => GenerateRepr::Adapt(a),
             _ => return Err(ReprError {}),
         };
         Ok(r)
@@ -398,7 +398,7 @@ impl Debug for Val {
             Val::Byte(b) => <_ as Debug>::fmt(b, f),
             Val::Call(c) => <_ as Debug>::fmt(c, f),
             Val::Ask(a) => <_ as Debug>::fmt(a, f),
-            Val::Comment(a) => <_ as Debug>::fmt(a, f),
+            Val::Adapt(a) => <_ as Debug>::fmt(a, f),
             Val::Ctx(c) => <_ as Debug>::fmt(c, f),
             Val::Func(func) => <_ as Debug>::fmt(func, f),
             Val::Case(c) => <_ as Debug>::fmt(c, f),
@@ -428,7 +428,7 @@ pub(crate) mod ask;
 
 pub(crate) mod case;
 
-pub(crate) mod comment;
+pub(crate) mod adapt;
 
 pub(crate) mod ctx;
 

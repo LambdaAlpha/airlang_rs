@@ -1,7 +1,7 @@
 use crate::{
+    AdaptVal,
     AskVal,
     CallVal,
-    CommentVal,
     ListVal,
     MapVal,
     PairVal,
@@ -78,14 +78,14 @@ impl ByVal<Val> for PrimitiveMode {
         }
     }
 
-    fn transform_comment<'a, Ctx>(&self, ctx: Ctx, comment: CommentVal) -> Val
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_comment(ctx, comment),
-            PrimitiveMode::Form => Form.transform_comment(ctx, comment),
-            PrimitiveMode::Eval => Eval.transform_comment(ctx, comment),
+            PrimitiveMode::Id => Id.transform_adapt(ctx, adapt),
+            PrimitiveMode::Form => Form.transform_adapt(ctx, adapt),
+            PrimitiveMode::Eval => Eval.transform_adapt(ctx, adapt),
         }
     }
 

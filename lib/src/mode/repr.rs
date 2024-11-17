@@ -1,8 +1,8 @@
 use crate::{
+    Adapt,
     Ask,
     Bool,
     Call,
-    Comment,
     List,
     ListVal,
     Map,
@@ -16,9 +16,9 @@ use crate::{
     Val,
     mode::{
         Mode,
+        adapt::AdaptMode,
         ask::AskMode,
         call::CallMode,
-        comment::CommentMode,
         composite::CompositeMode,
         list::ListMode,
         map::MapMode,
@@ -34,9 +34,9 @@ use crate::{
         symbol,
     },
     val::{
+        ADAPT,
         ASK,
         CALL,
-        COMMENT,
         LIST,
         MAP,
         PAIR,
@@ -189,7 +189,7 @@ impl<M> ParseMode<MapVal> for CompositeMode<M>
 where
     M: ParseMode<Val> + ParseMode<Unit> + ParseMode<Symbol>,
     PairMode<M>: From<PrimitiveMode>,
-    CommentMode<M>: From<PrimitiveMode>,
+    AdaptMode<M>: From<PrimitiveMode>,
     CallMode<M>: From<PrimitiveMode>,
     AskMode<M>: From<PrimitiveMode>,
     ListMode<M>: From<PrimitiveMode>,
@@ -199,7 +199,7 @@ where
         let default = PrimitiveMode::parse(map_remove(&mut map, DEFAULT), default)?;
         let symbol = SymbolMode::parse(map_remove(&mut map, SYMBOL), default)?;
         let pair = PairMode::parse(map_remove(&mut map, PAIR), default)?;
-        let comment = CommentMode::parse(map_remove(&mut map, COMMENT), default)?;
+        let adapt = AdaptMode::parse(map_remove(&mut map, ADAPT), default)?;
         let call = CallMode::parse(map_remove(&mut map, CALL), default)?;
         let ask = AskMode::parse(map_remove(&mut map, ASK), default)?;
         let list = ListMode::parse(map_remove(&mut map, LIST), default)?;
@@ -207,7 +207,7 @@ where
         Some(CompositeMode {
             symbol,
             pair,
-            comment,
+            adapt,
             call,
             ask,
             list,
@@ -220,7 +220,7 @@ impl<M> GenerateMode<MapVal> for CompositeMode<M>
 where
     M: GenerateMode<Val> + ParseMode<Unit> + PartialEq,
     PairMode<M>: From<PrimitiveMode> + PartialEq,
-    CommentMode<M>: From<PrimitiveMode> + PartialEq,
+    AdaptMode<M>: From<PrimitiveMode> + PartialEq,
     CallMode<M>: From<PrimitiveMode> + PartialEq,
     AskMode<M>: From<PrimitiveMode> + PartialEq,
     ListMode<M>: From<PrimitiveMode> + PartialEq,
@@ -234,8 +234,8 @@ where
         if PairMode::from(default) != self.pair {
             map.insert(symbol(PAIR), self.pair.generate(default));
         }
-        if CommentMode::from(default) != self.comment {
-            map.insert(symbol(COMMENT), self.comment.generate(default));
+        if AdaptMode::from(default) != self.adapt {
+            map.insert(symbol(ADAPT), self.adapt.generate(default));
         }
         if CallMode::from(default) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
@@ -299,10 +299,10 @@ impl<M: GenerateMode<Val>> GenerateMode<Val> for PairMode<M> {
     }
 }
 
-impl<M> ParseMode<Val> for CommentMode<M>
+impl<M> ParseMode<Val> for AdaptMode<M>
 where
     M: ParseMode<Val>,
-    CommentMode<M>: From<PrimitiveMode>,
+    AdaptMode<M>: From<PrimitiveMode>,
 {
     fn parse(mode: Val, default: PrimitiveMode) -> Option<Self> {
         match mode {
@@ -310,34 +310,34 @@ where
             Val::Symbol(s) => Some(Self::from(PrimitiveMode::parse(s, default)?)),
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
-                let meta = M::parse(pair.first, default)?;
+                let func = M::parse(pair.first, default)?;
                 let value = M::parse(pair.second, default)?;
-                Some(CommentMode::Form(Comment::new(meta, value)))
+                Some(AdaptMode::Form(Adapt::new(func, value)))
             }
-            Val::Comment(comment) => {
-                let comment = Comment::from(comment);
-                let meta = M::parse(comment.meta, default)?;
-                let value = M::parse(comment.value, default)?;
-                Some(CommentMode::Eval(Comment::new(meta, value)))
+            Val::Adapt(adapt) => {
+                let adapt = Adapt::from(adapt);
+                let spec = M::parse(adapt.spec, default)?;
+                let value = M::parse(adapt.value, default)?;
+                Some(AdaptMode::Eval(Adapt::new(spec, value)))
             }
             _ => None,
         }
     }
 }
 
-impl<M: GenerateMode<Val>> GenerateMode<Val> for CommentMode<M> {
+impl<M: GenerateMode<Val>> GenerateMode<Val> for AdaptMode<M> {
     fn generate(&self, default: PrimitiveMode) -> Val {
         match self {
-            CommentMode::Id => symbol(ID),
-            CommentMode::Form(mode) => {
-                let meta = M::generate(&mode.meta, default);
+            AdaptMode::Id => symbol(ID),
+            AdaptMode::Form(mode) => {
+                let spec = M::generate(&mode.spec, default);
                 let value = M::generate(&mode.value, default);
-                Val::Pair(Pair::new(meta, value).into())
+                Val::Pair(Pair::new(spec, value).into())
             }
-            CommentMode::Eval(mode) => {
-                let meta = M::generate(&mode.meta, default);
+            AdaptMode::Eval(mode) => {
+                let spec = M::generate(&mode.spec, default);
                 let value = M::generate(&mode.value, default);
-                Val::Comment(Comment::new(meta, value).into())
+                Val::Adapt(Adapt::new(spec, value).into())
             }
         }
     }

@@ -1,7 +1,7 @@
 use std::mem::swap;
 
 use crate::{
-    Comment,
+    Adapt,
     ConstFnCtx,
     FreeCtx,
     FuncVal,
@@ -25,40 +25,40 @@ use crate::{
         named_free_fn,
         named_mut_fn,
     },
-    syntax::COMMENT,
+    syntax::ADAPT,
     transformer::ByVal,
     types::either::Either,
 };
 
 #[derive(Clone)]
-pub(crate) struct CommentPrelude {
+pub(crate) struct AdaptPrelude {
     pub(crate) new: Named<FuncVal>,
     pub(crate) apply: Named<FuncVal>,
-    pub(crate) get_meta: Named<FuncVal>,
-    pub(crate) set_meta: Named<FuncVal>,
+    pub(crate) get_spec: Named<FuncVal>,
+    pub(crate) set_spec: Named<FuncVal>,
     pub(crate) get_value: Named<FuncVal>,
     pub(crate) set_value: Named<FuncVal>,
 }
 
-impl Default for CommentPrelude {
+impl Default for AdaptPrelude {
     fn default() -> Self {
-        CommentPrelude {
+        AdaptPrelude {
             new: new(),
             apply: apply(),
-            get_meta: get_meta(),
-            set_meta: set_meta(),
+            get_spec: get_spec(),
+            set_spec: set_spec(),
             get_value: get_value(),
             set_value: set_value(),
         }
     }
 }
 
-impl Prelude for CommentPrelude {
+impl Prelude for AdaptPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.apply.put(m);
-        self.get_meta.put(m);
-        self.set_meta.put(m);
+        self.get_spec.put(m);
+        self.set_spec.put(m);
         self.get_value.put(m);
         self.set_value.put(m);
     }
@@ -67,7 +67,7 @@ impl Prelude for CommentPrelude {
 fn new() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn(COMMENT, call_mode, ask_mode, true, fn_new)
+    named_free_fn(ADAPT, call_mode, ask_mode, true, fn_new)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -75,7 +75,7 @@ fn fn_new(input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    Val::Comment(Comment::new(pair.first, pair.second).into())
+    Val::Adapt(Adapt::new(pair.first, pair.second).into())
 }
 
 fn apply() -> Named<FuncVal> {
@@ -86,45 +86,57 @@ fn apply() -> Named<FuncVal> {
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mut_fn("comment.apply", call_mode, ask_mode, false, func)
+    named_mut_fn("adapt.apply", call_mode, ask_mode, false, func)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {
-    let Val::Comment(comment) = input else {
+    let Val::Adapt(adapt) = input else {
         return Val::default();
     };
-    Eval.transform_comment(ctx, comment)
+    Eval.transform_adapt(ctx, adapt)
 }
 
-fn get_meta() -> Named<FuncVal> {
+fn get_spec() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("comment.meta", call_mode, ask_mode, true, fn_get_meta)
+    named_const_fn(
+        "adapt.specification",
+        call_mode,
+        ask_mode,
+        true,
+        fn_get_spec,
+    )
 }
 
-fn fn_get_meta(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_spec(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
-            Val::Comment(comment) => comment.meta.clone(),
+            Val::Adapt(adapt) => adapt.spec.clone(),
             _ => Val::default(),
         },
         Either::Right(val) => match val {
-            Val::Comment(comment) => Comment::from(comment).meta,
+            Val::Adapt(adapt) => Adapt::from(adapt).spec,
             _ => Val::default(),
         },
     })
 }
 
-fn set_meta() -> Named<FuncVal> {
+fn set_spec() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("comment.set_meta", call_mode, ask_mode, true, fn_set_meta)
+    named_mut_fn(
+        "adapt.set_specification",
+        call_mode,
+        ask_mode,
+        true,
+        fn_set_spec,
+    )
 }
 
-fn fn_set_meta(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_spec(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -132,11 +144,11 @@ fn fn_set_meta(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut comment) => {
-            let Some(Val::Comment(comment)) = comment.as_mut() else {
+        Either::Left(mut adapt) => {
+            let Some(Val::Adapt(adapt)) = adapt.as_mut() else {
                 return Val::default();
             };
-            swap(&mut comment.meta, &mut val);
+            swap(&mut adapt.spec, &mut val);
             val
         }
         Either::Right(_) => Val::default(),
@@ -146,17 +158,17 @@ fn fn_set_meta(ctx: MutFnCtx, input: Val) -> Val {
 fn get_value() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("comment.value", call_mode, ask_mode, true, fn_get_value)
+    named_const_fn("adapt.value", call_mode, ask_mode, true, fn_get_value)
 }
 
 fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::Left(val) => match val.as_const() {
-            Val::Comment(comment) => comment.value.clone(),
+            Val::Adapt(adapt) => adapt.value.clone(),
             _ => Val::default(),
         },
         Either::Right(val) => match val {
-            Val::Comment(comment) => Comment::from(comment).value,
+            Val::Adapt(adapt) => Adapt::from(adapt).value,
             _ => Val::default(),
         },
     })
@@ -165,7 +177,7 @@ fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_value() -> Named<FuncVal> {
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("comment.set_value", call_mode, ask_mode, true, fn_set_value)
+    named_mut_fn("adapt.set_value", call_mode, ask_mode, true, fn_set_value)
 }
 
 fn fn_set_value(ctx: MutFnCtx, input: Val) -> Val {
@@ -176,11 +188,11 @@ fn fn_set_value(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut comment) => {
-            let Some(Val::Comment(comment)) = comment.as_mut() else {
+        Either::Left(mut adapt) => {
+            let Some(Val::Adapt(adapt)) = adapt.as_mut() else {
                 return Val::default();
             };
-            swap(&mut comment.value, &mut val);
+            swap(&mut adapt.value, &mut val);
             val
         }
         Either::Right(_) => Val::default(),

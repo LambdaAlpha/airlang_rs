@@ -168,14 +168,14 @@ do [
 a : .b
 =====
 do [
-    f = mode ! {comment : form : id, recursive : true},
+    f = mode ! {adapt : form : id, recursive : true},
     f ! .a ; &b
 ]
 -----
 a ; &b
 =====
 do [
-    f = mode ! {comment : form ; id, recursive : true},
+    f = mode ! {adapt : form ; id, recursive : true},
     f ! .a ; &b
 ]
 -----
@@ -183,7 +183,7 @@ do [
 =====
 do [
     b = 1,
-    f = mode ! {comment : form, recursive : true},
+    f = mode ! {adapt : form, recursive : true},
     f ! .a ; b
 ]
 -----
@@ -191,7 +191,7 @@ a ; 1
 =====
 do [
     b = 1,
-    f = mode ! {comment : id ; self, recursive : true},
+    f = mode ! {adapt : id ; self, recursive : true},
     f ! .a ; b
 ]
 -----

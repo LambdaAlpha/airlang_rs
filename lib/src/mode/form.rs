@@ -1,7 +1,7 @@
 use crate::{
+    AdaptVal,
     AskVal,
     CallVal,
-    CommentVal,
     PairVal,
     core::{
         FormCore,
@@ -55,11 +55,11 @@ impl ByVal<Val> for Form {
         FormCore::transform_pair(self, self, ctx, pair)
     }
 
-    fn transform_comment<'a, Ctx>(&self, ctx: Ctx, comment: CommentVal) -> Val
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        FormCore::transform_comment(self, self, ctx, comment)
+        FormCore::transform_adapt(self, self, ctx, adapt)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val

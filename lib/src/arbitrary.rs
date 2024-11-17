@@ -17,6 +17,8 @@ use rand::{
 };
 
 use crate::{
+    Adapt,
+    AdaptMode,
     Ask,
     AskMode,
     Cache,
@@ -24,8 +26,6 @@ use crate::{
     CallMode,
     Case,
     CaseVal,
-    Comment,
-    CommentMode,
     ConstFuncVal,
     FreeCtx,
     FreeFuncVal,
@@ -97,7 +97,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // pair
         1,      // call
         1,      // ask
-        1,      // comment
+        1,      // adapt
         1,      // list
         1,      // map
         1,      // ctx
@@ -120,7 +120,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Call(any_call(rng, new_depth).into()),
         9 => Val::Ask(any_ask(rng, new_depth).into()),
-        10 => Val::Comment(any_comment(rng, new_depth).into()),
+        10 => Val::Adapt(any_adapt(rng, new_depth).into()),
         11 => Val::List(any_list(rng, new_depth).into()),
         12 => Val::Map(any_map(rng, new_depth).into()),
         13 => Val::Ctx(any_ctx(rng, new_depth).into()),
@@ -201,8 +201,8 @@ pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
     Ask::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_comment(rng: &mut SmallRng, depth: usize) -> Comment<Val, Val> {
-    Comment::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_adapt(rng: &mut SmallRng, depth: usize) -> Adapt<Val, Val> {
+    Adapt::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
@@ -263,7 +263,7 @@ pub(crate) fn any_composite_mode<M: Arbitrary>(
 ) -> CompositeMode<M> {
     let symbol = any_symbol_mode(rng);
     let pair = any_pair_mode(rng, depth);
-    let comment = any_comment_mode(rng, depth);
+    let adapt = any_adapt_mode(rng, depth);
     let call = any_call_mode(rng, depth);
     let ask = any_ask_mode(rng, depth);
     let list = any_list_mode(rng, depth);
@@ -271,7 +271,7 @@ pub(crate) fn any_composite_mode<M: Arbitrary>(
     CompositeMode {
         symbol,
         pair,
-        comment,
+        adapt,
         call,
         ask,
         list,
@@ -307,11 +307,11 @@ impl<M: Arbitrary> Arbitrary for PairMode<M> {
     }
 }
 
-pub(crate) fn any_comment_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> CommentMode<M> {
-    CommentMode::any(rng, depth)
+pub(crate) fn any_adapt_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> AdaptMode<M> {
+    AdaptMode::any(rng, depth)
 }
 
-impl<M: Arbitrary> Arbitrary for CommentMode<M> {
+impl<M: Arbitrary> Arbitrary for AdaptMode<M> {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let weight: usize = 1 << min(depth, 32);
         let weights = [
@@ -322,14 +322,14 @@ impl<M: Arbitrary> Arbitrary for CommentMode<M> {
         let i = sample(rng, weights);
         let new_depth = depth + 1;
         match i {
-            0 => CommentMode::Id,
+            0 => AdaptMode::Id,
             1 => {
-                let comment = Comment::new(M::any(rng, new_depth), M::any(rng, new_depth));
-                CommentMode::Form(comment)
+                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                AdaptMode::Form(adapt)
             }
             2 => {
-                let comment = Comment::new(M::any(rng, new_depth), M::any(rng, new_depth));
-                CommentMode::Eval(comment)
+                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                AdaptMode::Eval(adapt)
             }
             _ => unreachable!(),
         }

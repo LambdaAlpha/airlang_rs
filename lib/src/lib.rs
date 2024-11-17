@@ -48,13 +48,13 @@ pub(crate) mod call;
 
 pub(crate) mod ask;
 
+pub(crate) mod adapt;
+
 pub(crate) mod case;
 
 pub(crate) mod cache;
 
 pub(crate) mod answer;
-
-pub(crate) mod comment;
 
 pub(crate) mod types;
 

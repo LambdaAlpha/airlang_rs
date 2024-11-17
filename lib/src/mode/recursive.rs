@@ -1,10 +1,10 @@
 use crate::{
+    AdaptMode,
+    AdaptVal,
     AskMode,
     AskVal,
     CallMode,
     CallVal,
-    CommentMode,
-    CommentVal,
     CompositeMode,
     ListMode,
     ListVal,
@@ -96,21 +96,21 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
         }
     }
 
-    fn transform_comment<'a, Ctx>(&self, ctx: Ctx, comment: CommentVal) -> Val
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        match self.comment {
-            CommentMode::Id => Id.transform_comment(ctx, comment),
-            CommentMode::Form(mode) => {
-                let meta = SelfTrans::new(self, mode.meta);
+        match self.adapt {
+            AdaptMode::Id => Id.transform_adapt(ctx, adapt),
+            AdaptMode::Form(mode) => {
+                let spec = SelfTrans::new(self, mode.spec);
                 let value = SelfTrans::new(self, mode.value);
-                FormCore::transform_comment(&meta, &value, ctx, comment)
+                FormCore::transform_adapt(&spec, &value, ctx, adapt)
             }
-            CommentMode::Eval(mode) => {
-                let meta = SelfTrans::new(self, mode.meta);
+            AdaptMode::Eval(mode) => {
+                let spec = SelfTrans::new(self, mode.spec);
                 let value = SelfTrans::new(self, mode.value);
-                EvalCore::transform_comment(&meta, &value, ctx, comment)
+                EvalCore::transform_adapt(&spec, &value, ctx, adapt)
             }
         }
     }

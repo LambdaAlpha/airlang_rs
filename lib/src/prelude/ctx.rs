@@ -1,7 +1,7 @@
 use crate::{
+    Adapt,
+    AdaptVal,
     AskVal,
-    Comment,
-    CommentVal,
     ListVal,
     Map,
     MapVal,
@@ -203,7 +203,7 @@ enum Pattern {
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
     Ask(Box<Ask<Pattern, Pattern>>),
-    Comment(Box<Comment<Pattern, Pattern>>),
+    Adapt(Box<Adapt<Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -220,7 +220,7 @@ fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
             }
         }
         Val::Ask(ask) => parse_pattern_ask(ask, ctx),
-        Val::Comment(comment) => parse_pattern_comment(comment, ctx),
+        Val::Adapt(adapt) => parse_pattern_adapt(adapt, ctx),
         Val::List(list) => parse_pattern_list(list, ctx),
         Val::Map(map) => parse_pattern_map(map, ctx),
         _ => None,
@@ -258,12 +258,12 @@ fn parse_pattern_ask(ask: AskVal, mut ctx: PatternCtx) -> Option<Pattern> {
     Some(Pattern::Ask(Box::new(Ask::new(func, output))))
 }
 
-fn parse_pattern_comment(comment: CommentVal, mut ctx: PatternCtx) -> Option<Pattern> {
+fn parse_pattern_adapt(adapt: AdaptVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
-    let comment = Comment::from(comment);
-    let meta = parse_pattern(comment.meta, ctx)?;
-    let value = parse_pattern(comment.value, ctx)?;
-    Some(Pattern::Comment(Box::new(Comment::new(meta, value))))
+    let adapt = Adapt::from(adapt);
+    let func = parse_pattern(adapt.spec, ctx)?;
+    let value = parse_pattern(adapt.value, ctx)?;
+    Some(Pattern::Adapt(Box::new(Adapt::new(func, value))))
 }
 
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -323,7 +323,7 @@ fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
         Pattern::Ask(ask) => assign_ask(ctx, *ask, val),
-        Pattern::Comment(comment) => assign_comment(ctx, *comment, val),
+        Pattern::Adapt(adapt) => assign_adapt(ctx, *adapt, val),
         Pattern::List(list) => assign_list(ctx, list, val),
         Pattern::Map(map) => assign_map(ctx, map, val),
     }
@@ -373,14 +373,14 @@ fn assign_ask(mut ctx: MutFnCtx, pattern: Ask<Pattern, Pattern>, val: Val) -> Va
     Val::Ask(Ask::new(func, output).into())
 }
 
-fn assign_comment(mut ctx: MutFnCtx, pattern: Comment<Pattern, Pattern>, val: Val) -> Val {
-    let Val::Comment(val) = val else {
+fn assign_adapt(mut ctx: MutFnCtx, pattern: Adapt<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Adapt(val) = val else {
         return Val::default();
     };
-    let val = Comment::from(val);
-    let meta = assign_pattern(ctx.reborrow(), pattern.meta, val.meta);
+    let val = Adapt::from(val);
+    let spec = assign_pattern(ctx.reborrow(), pattern.spec, val.spec);
     let value = assign_pattern(ctx, pattern.value, val.value);
-    Val::Comment(Comment::new(meta, value).into())
+    Val::Adapt(Adapt::new(spec, value).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

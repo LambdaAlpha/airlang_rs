@@ -11,11 +11,11 @@ use std::{
 use num_traits::Signed;
 
 use crate::{
+    adapt::Adapt,
     ask::Ask,
     bool::Bool,
     byte::Byte,
     call::Call,
-    comment::Comment,
     int::Int,
     list::List,
     map::Map,
@@ -23,10 +23,10 @@ use crate::{
     pair::Pair,
     symbol::Symbol,
     syntax::{
+        ADAPT,
         ASK,
         BYTE,
         CALL,
-        COMMENT,
         FALSE,
         LIST_LEFT,
         LIST_RIGHT,
@@ -120,7 +120,7 @@ where
     Byte(&'a Byte),
     Call(&'a Call<T, T>),
     Ask(&'a Ask<T, T>),
-    Comment(&'a Comment<T, T>),
+    Adapt(&'a Adapt<T, T>),
 }
 
 pub(crate) fn generate<'a, T>(
@@ -146,7 +146,7 @@ where
         GenerateRepr::Byte(byte) => generate_byte(byte, s),
         GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
         GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
-        GenerateRepr::Comment(a) => generate_comment(a, s, format, indent)?,
+        GenerateRepr::Adapt(f) => generate_adapt(f, s, format, indent)?,
     }
     Ok(())
 }
@@ -258,7 +258,7 @@ where
         GenerateRepr::Call(_)
             | GenerateRepr::Ask(_)
             | GenerateRepr::Pair(_)
-            | GenerateRepr::Comment(_)
+            | GenerateRepr::Adapt(_)
     );
     Ok(b)
 }
@@ -273,7 +273,7 @@ where
         GenerateRepr::Call(_)
             | GenerateRepr::Ask(_)
             | GenerateRepr::Pair(_)
-            | GenerateRepr::Comment(_)
+            | GenerateRepr::Adapt(_)
     );
     Ok(b)
 }
@@ -539,8 +539,8 @@ where
     Ok(())
 }
 
-fn generate_comment<'a, T>(
-    comment: &'a Comment<T, T>,
+fn generate_adapt<'a, T>(
+    adapt: &'a Adapt<T, T>,
     s: &mut String,
     format: &GenerateFormat,
     indent: usize,
@@ -550,12 +550,12 @@ where
     T: Eq + Hash,
 {
     generate_infix(
-        &comment.meta,
+        &adapt.spec,
         |s, _format, _indent| {
-            s.push_str(COMMENT);
+            s.push_str(ADAPT);
             Ok(())
         },
-        &comment.value,
+        &adapt.value,
         s,
         format,
         indent,

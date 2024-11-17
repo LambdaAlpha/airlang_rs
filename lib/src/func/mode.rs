@@ -1,7 +1,7 @@
 use crate::{
+    AdaptMode,
     AskMode,
     CallMode,
-    CommentMode,
     CompositeMode,
     ListMode,
     MapMode,
@@ -86,12 +86,12 @@ impl<M: IsCacheable> IsCacheable for PairMode<M> {
     }
 }
 
-impl<M: IsCacheable> IsCacheable for CommentMode<M> {
+impl<M: IsCacheable> IsCacheable for AdaptMode<M> {
     fn is_cacheable(&self) -> bool {
         match self {
-            CommentMode::Id => true,
-            CommentMode::Form(mode) => mode.meta.is_cacheable() && mode.value.is_cacheable(),
-            CommentMode::Eval(mode) => mode.meta.is_cacheable() && mode.value.is_cacheable(),
+            AdaptMode::Id => true,
+            AdaptMode::Form(mode) => mode.spec.is_cacheable() && mode.value.is_cacheable(),
+            AdaptMode::Eval(mode) => mode.spec.is_cacheable() && mode.value.is_cacheable(),
         }
     }
 }
@@ -145,7 +145,7 @@ impl<M: IsCacheable> IsCacheable for MapMode<M> {
 impl<M: IsCacheable> IsCacheable for CompositeMode<M> {
     fn is_cacheable(&self) -> bool {
         self.pair.is_cacheable()
-            && self.comment.is_cacheable()
+            && self.adapt.is_cacheable()
             && self.call.is_cacheable()
             && self.ask.is_cacheable()
             && self.list.is_cacheable()

@@ -36,13 +36,13 @@ use crate::{
         primitive::PrimitiveMode,
     },
     prelude::{
+        adapt::AdaptPrelude,
         answer::AnswerPrelude,
         ask::AskPrelude,
         bool::BoolPrelude,
         byte::BytePrelude,
         call::CallPrelude,
         case::CasePrelude,
-        comment::CommentPrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
         extension::ExtPrelude,
@@ -97,7 +97,7 @@ pub(crate) struct AllPrelude {
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) extension: ExtPrelude,
-    pub(crate) comment: CommentPrelude,
+    pub(crate) adapt: AdaptPrelude,
 }
 
 impl Prelude for AllPrelude {
@@ -123,7 +123,7 @@ impl Prelude for AllPrelude {
         self.list.put(m);
         self.map.put(m);
         self.extension.put(m);
-        self.comment.put(m);
+        self.adapt.put(m);
     }
 }
 
@@ -300,4 +300,4 @@ mod map;
 
 mod extension;
 
-mod comment;
+mod adapt;
