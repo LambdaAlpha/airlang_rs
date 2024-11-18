@@ -37,7 +37,6 @@ pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
 
-pub(crate) const MIDDLE: &str = "^";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 

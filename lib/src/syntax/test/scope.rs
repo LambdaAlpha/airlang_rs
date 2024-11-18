@@ -56,7 +56,7 @@ pub fn expected() -> Vec<Repr> {
         int("1"),
         no_compose(vec![int("1"), int("2")]),
         no_compose(vec![symbol("@"), symbol("!"), symbol(":"), symbol("?")]),
-        symbol("^"),
+        symbol(";"),
         no_compose(vec![
             no_compose(vec![symbol("a"), symbol("b"), symbol("c")]),
             symbol("d"),
@@ -76,11 +76,11 @@ pub fn expected() -> Vec<Repr> {
         map(vec![(int("1"), symbol(":"))]),
         no_compose(vec![
             symbol("a"),
-            no_compose(vec![symbol("b"), symbol("c")]),
+            call(symbol("b"), symbol("c")),
             symbol("d"),
         ]),
         infix(infix(int("1"), int("2"), int("3")), int("4"), int("5")),
-        no_compose(vec![int("1"), int("2"), int("3")]),
+        infix_ask(int("1"), int("2"), int("3")),
         call(int("1"), call(int("2"), int("3"))),
         call(int("1"), call(int("2"), call(int("3"), int("4")))),
         call(call(int("1"), int("2")), int("3")),

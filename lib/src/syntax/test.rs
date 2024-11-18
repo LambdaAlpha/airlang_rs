@@ -13,7 +13,7 @@ use crate::{
     number::Number,
     symbol::Symbol,
     syntax::{
-        MIDDLE,
+        ADAPT,
         parse,
         repr::{
             Repr,
@@ -98,7 +98,7 @@ fn adapt(func: Repr, value: Repr) -> Repr {
 }
 
 fn no_compose(v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(MIDDLE));
+    let func = Repr::Symbol(Symbol::from_str(ADAPT));
     let value = Repr::List(v.into());
     Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
