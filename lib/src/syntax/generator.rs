@@ -8,6 +8,7 @@ use std::{
     hash::Hash,
 };
 
+use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
@@ -62,12 +63,12 @@ where
 {
     let mut str = String::new();
     let config = GenerateFormat {
-        indent: "".to_owned(),
-        before_first: "".to_owned(),
-        after_last: "".to_owned(),
-        separator: SEPARATOR.to_string(),
-        left_padding: "".to_owned(),
-        right_padding: "".to_owned(),
+        indent: "",
+        before_first: "",
+        after_last: "",
+        separator: concatcp!(SEPARATOR),
+        left_padding: "",
+        right_padding: "",
     };
     generate(repr, &mut str, &config, 0)?;
     Ok(str)
@@ -82,24 +83,24 @@ where
 {
     let mut str = String::new();
     let config = GenerateFormat {
-        indent: INDENT.to_owned(),
-        before_first: "\n".to_owned(),
-        after_last: format!("{SEPARATOR}\n"),
-        separator: format!("{SEPARATOR}\n"),
-        left_padding: "".to_owned(),
-        right_padding: "".to_owned(),
+        indent: INDENT,
+        before_first: "\n",
+        after_last: concatcp!(SEPARATOR, '\n'),
+        separator: concatcp!(SEPARATOR, '\n'),
+        left_padding: "",
+        right_padding: "",
     };
     generate(repr, &mut str, &config, 0)?;
     Ok(str)
 }
 
 pub(crate) struct GenerateFormat {
-    pub(crate) indent: String,
-    pub(crate) before_first: String,
-    pub(crate) after_last: String,
-    pub(crate) separator: String,
-    pub(crate) left_padding: String,
-    pub(crate) right_padding: String,
+    pub(crate) indent: &'static str,
+    pub(crate) before_first: &'static str,
+    pub(crate) after_last: &'static str,
+    pub(crate) separator: &'static str,
+    pub(crate) left_padding: &'static str,
+    pub(crate) right_padding: &'static str,
 }
 
 pub(crate) enum GenerateRepr<'a, T>
@@ -205,14 +206,17 @@ fn generate_text(str: &Text, s: &mut String) {
 pub(crate) fn escape_text(str: &str, s: &mut String) {
     for c in str.chars() {
         let escaped = match c {
-            '\\' => "\\\\".to_owned(),
-            '\n' => "\\n".to_owned(),
-            '\r' => "\\r".to_owned(),
-            '\t' => "\\t".to_owned(),
-            TEXT_QUOTE => format!("\\{}", TEXT_QUOTE),
-            _ => c.to_string(),
+            '\\' => "\\\\",
+            '\n' => "\\n",
+            '\r' => "\\r",
+            '\t' => "\\t",
+            TEXT_QUOTE => concatcp!('\\', TEXT_QUOTE),
+            _ => {
+                s.push(c);
+                continue;
+            }
         };
-        s.push_str(&escaped);
+        s.push_str(escaped);
     }
 }
 
@@ -224,11 +228,14 @@ fn generate_symbol(symbol: &Symbol, s: &mut String) {
     s.push(SYMBOL_QUOTE);
     for c in symbol.chars() {
         let escaped = match c {
-            '\\' => "\\\\".to_owned(),
-            SYMBOL_QUOTE => format!("\\{}", SYMBOL_QUOTE),
-            _ => c.to_string(),
+            '\\' => "\\\\",
+            SYMBOL_QUOTE => concatcp!('\\', SYMBOL_QUOTE),
+            _ => {
+                s.push(c);
+                continue;
+            }
         };
-        s.push_str(&escaped);
+        s.push_str(escaped);
     }
     s.push(SYMBOL_QUOTE);
 }
@@ -455,9 +462,9 @@ where
     T: Eq + Hash,
 {
     s.push(SCOPE_LEFT);
-    s.push_str(&format.left_padding);
+    s.push_str(format.left_padding);
     generate(repr, s, format, indent)?;
-    s.push_str(&format.right_padding);
+    s.push_str(format.right_padding);
     s.push(SCOPE_RIGHT);
     Ok(())
 }
@@ -479,21 +486,21 @@ where
     }
 
     if list.len() == 1 {
-        s.push_str(&format.left_padding);
+        s.push_str(format.left_padding);
         generate(list.first().unwrap(), s, format, indent)?;
-        s.push_str(&format.right_padding);
+        s.push_str(format.right_padding);
         s.push(LIST_RIGHT);
         return Ok(());
     }
 
-    s.push_str(&format.before_first);
+    s.push_str(format.before_first);
     for repr in list.iter() {
         s.push_str(&format.indent.repeat(indent + 1));
         generate(repr, s, format, indent + 1)?;
-        s.push_str(&format.separator);
+        s.push_str(format.separator);
     }
     s.truncate(s.len() - format.separator.len());
-    s.push_str(&format.after_last);
+    s.push_str(format.after_last);
 
     s.push_str(&format.indent.repeat(indent));
     s.push(LIST_RIGHT);
@@ -518,21 +525,21 @@ where
 
     if map.len() == 1 {
         let pair = map.iter().next().unwrap();
-        s.push_str(&format.left_padding);
+        s.push_str(format.left_padding);
         generate_pair(pair.0, pair.1, s, format, indent)?;
-        s.push_str(&format.right_padding);
+        s.push_str(format.right_padding);
         s.push(MAP_RIGHT);
         return Ok(());
     }
 
-    s.push_str(&format.before_first);
+    s.push_str(format.before_first);
     for pair in map.iter() {
         s.push_str(&format.indent.repeat(indent + 1));
         generate_pair(pair.0, pair.1, s, format, indent + 1)?;
-        s.push_str(&format.separator);
+        s.push_str(format.separator);
     }
     s.truncate(s.len() - format.separator.len());
-    s.push_str(&format.after_last);
+    s.push_str(format.after_last);
 
     s.push_str(&format.indent.repeat(indent));
     s.push(MAP_RIGHT);

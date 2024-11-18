@@ -1,5 +1,7 @@
 use std::mem::swap;
 
+use const_format::concatcp;
+
 use crate::{
     Call,
     FreeCtx,
@@ -89,7 +91,13 @@ fn fn_new(input: Val) -> Val {
 fn new_dependent() -> Named<FuncVal> {
     let call_mode = pair_mode(Mode::default(), form_mode(), PrimitiveMode::default());
     let ask_mode = Mode::default();
-    named_mut_fn("!!", call_mode, ask_mode, false, fn_new_dependent)
+    named_mut_fn(
+        concatcp!(CALL, CALL),
+        call_mode,
+        ask_mode,
+        false,
+        fn_new_dependent,
+    )
 }
 
 fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
