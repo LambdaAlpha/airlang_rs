@@ -90,14 +90,14 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // unit
         weight, // bool
         weight, // symbol
+        weight, // text
         weight, // int
         weight, // number
         weight, // byte
-        weight, // text
         1,      // pair
+        1,      // adapt
         1,      // call
         1,      // ask
-        1,      // adapt
         1,      // list
         1,      // map
         1,      // ctx
@@ -113,14 +113,14 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         0 => Val::Unit(any_unit(rng)),
         1 => Val::Bool(any_bool(rng)),
         2 => Val::Symbol(any_symbol(rng)),
-        3 => Val::Int(any_int(rng).into()),
-        4 => Val::Number(any_number(rng).into()),
-        5 => Val::Byte(any_byte(rng).into()),
-        6 => Val::Text(any_text(rng).into()),
+        3 => Val::Text(any_text(rng).into()),
+        4 => Val::Int(any_int(rng).into()),
+        5 => Val::Number(any_number(rng).into()),
+        6 => Val::Byte(any_byte(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
-        8 => Val::Call(any_call(rng, new_depth).into()),
-        9 => Val::Ask(any_ask(rng, new_depth).into()),
-        10 => Val::Adapt(any_adapt(rng, new_depth).into()),
+        8 => Val::Adapt(any_adapt(rng, new_depth).into()),
+        9 => Val::Call(any_call(rng, new_depth).into()),
+        10 => Val::Ask(any_ask(rng, new_depth).into()),
         11 => Val::List(any_list(rng, new_depth).into()),
         12 => Val::Map(any_map(rng, new_depth).into()),
         13 => Val::Ctx(any_ctx(rng, new_depth).into()),
@@ -138,25 +138,6 @@ pub(crate) fn any_unit(_rng: &mut SmallRng) -> Unit {
 
 pub(crate) fn any_bool(rng: &mut SmallRng) -> Bool {
     Bool::new(rng.gen())
-}
-
-pub(crate) fn any_int(rng: &mut SmallRng) -> Int {
-    Int::from(rng.gen::<i128>())
-}
-
-pub(crate) fn any_number(rng: &mut SmallRng) -> Number {
-    let int: i64 = rng.gen();
-    let int = BigInt::from(int);
-    let exp: i8 = rng.gen();
-    let exp = BigInt::from(exp);
-    Number::new(int, 10, exp)
-}
-
-pub(crate) fn any_byte(rng: &mut SmallRng) -> Byte {
-    let len = any_len(rng);
-    let mut byte = vec![0u8; len];
-    rng.fill(&mut *byte);
-    Byte::from(byte)
 }
 
 struct DistSymbol;
@@ -189,8 +170,31 @@ pub(crate) fn any_text(rng: &mut SmallRng) -> Text {
     Text::from(s)
 }
 
+pub(crate) fn any_int(rng: &mut SmallRng) -> Int {
+    Int::from(rng.gen::<i128>())
+}
+
+pub(crate) fn any_number(rng: &mut SmallRng) -> Number {
+    let int: i64 = rng.gen();
+    let int = BigInt::from(int);
+    let exp: i8 = rng.gen();
+    let exp = BigInt::from(exp);
+    Number::new(int, 10, exp)
+}
+
+pub(crate) fn any_byte(rng: &mut SmallRng) -> Byte {
+    let len = any_len(rng);
+    let mut byte = vec![0u8; len];
+    rng.fill(&mut *byte);
+    Byte::from(byte)
+}
+
 pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> Pair<Val, Val> {
     Pair::new(any_val(rng, depth), any_val(rng, depth))
+}
+
+pub(crate) fn any_adapt(rng: &mut SmallRng, depth: usize) -> Adapt<Val, Val> {
+    Adapt::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
@@ -199,10 +203,6 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
 
 pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
     Ask::new(any_val(rng, depth), any_val(rng, depth))
-}
-
-pub(crate) fn any_adapt(rng: &mut SmallRng, depth: usize) -> Adapt<Val, Val> {
-    Adapt::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {

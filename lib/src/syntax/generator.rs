@@ -112,16 +112,16 @@ where
     Unit(&'a Unit),
     Bool(&'a Bool),
     Symbol(&'a Symbol),
+    Text(&'a Text),
     Int(&'a Int),
     Number(&'a Number),
-    Text(&'a Text),
-    Pair(&'a Pair<T, T>),
-    List(&'a List<T>),
-    Map(&'a Map<T, T>),
     Byte(&'a Byte),
+    Pair(&'a Pair<T, T>),
+    Adapt(&'a Adapt<T, T>),
     Call(&'a Call<T, T>),
     Ask(&'a Ask<T, T>),
-    Adapt(&'a Adapt<T, T>),
+    List(&'a List<T>),
+    Map(&'a Map<T, T>),
 }
 
 pub(crate) fn generate<'a, T>(
@@ -136,18 +136,18 @@ where
 {
     match repr.try_into()? {
         GenerateRepr::Unit(_) => generate_unit(s),
-        GenerateRepr::Bool(b) => generate_bool(b.bool(), s),
-        GenerateRepr::Symbol(str) => generate_symbol(str, s),
-        GenerateRepr::Int(i) => generate_int(i, s),
-        GenerateRepr::Number(n) => generate_number(n, s),
-        GenerateRepr::Text(t) => generate_text(t, s),
-        GenerateRepr::Pair(p) => generate_pair(&p.first, &p.second, s, format, indent)?,
+        GenerateRepr::Bool(bool) => generate_bool(bool.bool(), s),
+        GenerateRepr::Symbol(symbol) => generate_symbol(symbol, s),
+        GenerateRepr::Text(text) => generate_text(text, s),
+        GenerateRepr::Int(int) => generate_int(int, s),
+        GenerateRepr::Number(number) => generate_number(number, s),
+        GenerateRepr::Byte(byte) => generate_byte(byte, s),
+        GenerateRepr::Pair(pair) => generate_pair(&pair.first, &pair.second, s, format, indent)?,
+        GenerateRepr::Adapt(adapt) => generate_adapt(adapt, s, format, indent)?,
+        GenerateRepr::Call(call) => generate_call(call, s, format, indent)?,
+        GenerateRepr::Ask(ask) => generate_ask(ask, s, format, indent)?,
         GenerateRepr::List(list) => generate_list(list, s, format, indent)?,
         GenerateRepr::Map(map) => generate_map(map, s, format, indent)?,
-        GenerateRepr::Byte(byte) => generate_byte(byte, s),
-        GenerateRepr::Call(c) => generate_call(c, s, format, indent)?,
-        GenerateRepr::Ask(i) => generate_ask(i, s, format, indent)?,
-        GenerateRepr::Adapt(f) => generate_adapt(f, s, format, indent)?,
     }
     Ok(())
 }
@@ -158,6 +158,64 @@ fn generate_unit(s: &mut String) {
 
 fn generate_bool(b: bool, s: &mut String) {
     s.push_str(if b { TRUE } else { FALSE });
+}
+
+fn generate_symbol(symbol: &Symbol, s: &mut String) {
+    if !is_need_quote(symbol) {
+        return s.push_str(symbol);
+    }
+
+    s.push(SYMBOL_QUOTE);
+    for c in symbol.chars() {
+        let escaped = match c {
+            '\\' => "\\\\",
+            SYMBOL_QUOTE => concatcp!('\\', SYMBOL_QUOTE),
+            _ => {
+                s.push(c);
+                continue;
+            }
+        };
+        s.push_str(escaped);
+    }
+    s.push(SYMBOL_QUOTE);
+}
+
+fn is_need_quote(str: &str) -> bool {
+    if str.is_empty() {
+        return true;
+    }
+    if maybe_keyword(str) {
+        return true;
+    }
+    let mut chars = str.chars();
+    let first = chars.next().unwrap();
+    if first.is_ascii_digit() {
+        return true;
+    }
+    str.chars().any(is_delimiter)
+}
+
+fn generate_text(str: &Text, s: &mut String) {
+    s.push(TEXT_QUOTE);
+    escape_text(str, s);
+    s.push(TEXT_QUOTE);
+}
+
+pub(crate) fn escape_text(str: &str, s: &mut String) {
+    for c in str.chars() {
+        let escaped = match c {
+            '\\' => "\\\\",
+            '\n' => "\\n",
+            '\r' => "\\r",
+            '\t' => "\\t",
+            TEXT_QUOTE => concatcp!('\\', TEXT_QUOTE),
+            _ => {
+                s.push(c);
+                continue;
+            }
+        };
+        s.push_str(escaped);
+    }
 }
 
 fn generate_int(i: &Int, s: &mut String) {
@@ -195,64 +253,6 @@ fn generate_byte(byte: &Byte, s: &mut String) {
         utils::conversion::u8_array_to_hex_string_mut(byte.as_ref(), s);
     }
     s.push(SCOPE_RIGHT);
-}
-
-fn generate_text(str: &Text, s: &mut String) {
-    s.push(TEXT_QUOTE);
-    escape_text(str, s);
-    s.push(TEXT_QUOTE);
-}
-
-pub(crate) fn escape_text(str: &str, s: &mut String) {
-    for c in str.chars() {
-        let escaped = match c {
-            '\\' => "\\\\",
-            '\n' => "\\n",
-            '\r' => "\\r",
-            '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', TEXT_QUOTE),
-            _ => {
-                s.push(c);
-                continue;
-            }
-        };
-        s.push_str(escaped);
-    }
-}
-
-fn generate_symbol(symbol: &Symbol, s: &mut String) {
-    if !is_need_quote(symbol) {
-        return s.push_str(symbol);
-    }
-
-    s.push(SYMBOL_QUOTE);
-    for c in symbol.chars() {
-        let escaped = match c {
-            '\\' => "\\\\",
-            SYMBOL_QUOTE => concatcp!('\\', SYMBOL_QUOTE),
-            _ => {
-                s.push(c);
-                continue;
-            }
-        };
-        s.push_str(escaped);
-    }
-    s.push(SYMBOL_QUOTE);
-}
-
-fn is_need_quote(str: &str) -> bool {
-    if str.is_empty() {
-        return true;
-    }
-    if maybe_keyword(str) {
-        return true;
-    }
-    let mut chars = str.chars();
-    let first = chars.next().unwrap();
-    if first.is_ascii_digit() {
-        return true;
-    }
-    str.chars().any(is_delimiter)
 }
 
 fn is_left_open<'a, T>(repr: &'a T) -> Result<bool, <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
@@ -362,6 +362,29 @@ where
             Ok(())
         },
         second,
+        s,
+        format,
+        indent,
+    )
+}
+
+fn generate_adapt<'a, T>(
+    adapt: &'a Adapt<T, T>,
+    s: &mut String,
+    format: &GenerateFormat,
+    indent: usize,
+) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
+where
+    &'a T: TryInto<GenerateRepr<'a, T>>,
+    T: Eq + Hash,
+{
+    generate_infix(
+        &adapt.spec,
+        |s, _format, _indent| {
+            s.push_str(ADAPT);
+            Ok(())
+        },
+        &adapt.value,
         s,
         format,
         indent,
@@ -544,29 +567,6 @@ where
     s.push_str(&format.indent.repeat(indent));
     s.push(MAP_RIGHT);
     Ok(())
-}
-
-fn generate_adapt<'a, T>(
-    adapt: &'a Adapt<T, T>,
-    s: &mut String,
-    format: &GenerateFormat,
-    indent: usize,
-) -> Result<(), <&'a T as TryInto<GenerateRepr<'a, T>>>::Error>
-where
-    &'a T: TryInto<GenerateRepr<'a, T>>,
-    T: Eq + Hash,
-{
-    generate_infix(
-        &adapt.spec,
-        |s, _format, _indent| {
-            s.push_str(ADAPT);
-            Ok(())
-        },
-        &adapt.value,
-        s,
-        format,
-        indent,
-    )
 }
 
 impl Display for ReprError {

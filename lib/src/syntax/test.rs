@@ -29,19 +29,32 @@ use crate::{
     unit::Unit,
 };
 
-mod boolean;
-mod byte;
-mod call;
-mod adapt;
-mod number;
-mod int;
-mod list;
-mod map;
-mod pair;
-mod ask;
-mod text;
-mod symbol;
 mod unit;
+
+mod boolean;
+
+mod symbol;
+
+mod text;
+
+mod int;
+
+mod number;
+
+mod byte;
+
+mod pair;
+
+mod adapt;
+
+mod call;
+
+mod ask;
+
+mod list;
+
+mod map;
+
 mod scope;
 
 fn unit() -> Repr {
@@ -50,6 +63,14 @@ fn unit() -> Repr {
 
 fn bool(b: bool) -> Repr {
     Repr::Bool(Bool::new(b))
+}
+
+fn symbol(s: &str) -> Repr {
+    Repr::Symbol(Symbol::from_str(s))
+}
+
+fn text(s: &str) -> Repr {
+    Repr::Text(Text::from(s))
 }
 
 fn int(s: &str, radix: u8) -> Repr {
@@ -73,16 +94,12 @@ fn byte(b: Vec<u8>) -> Repr {
     Repr::Byte(b.into())
 }
 
-fn symbol(s: &str) -> Repr {
-    Repr::Symbol(Symbol::from_str(s))
-}
-
-fn text(s: &str) -> Repr {
-    Repr::Text(Text::from(s))
-}
-
 fn pair(first: Repr, second: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
+}
+
+fn adapt(func: Repr, value: Repr) -> Repr {
+    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
 
 fn call(func: Repr, input: Repr) -> Repr {
@@ -91,10 +108,6 @@ fn call(func: Repr, input: Repr) -> Repr {
 
 fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
-}
-
-fn adapt(func: Repr, value: Repr) -> Repr {
-    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
 
 fn no_compose(v: Vec<Repr>) -> Repr {
@@ -248,6 +261,34 @@ fn test_generate_boolean() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_parse_symbol() -> Result<(), Box<dyn Error>> {
+    test_parse(
+        include_str!("test/symbol.air"),
+        "test/symbol.air",
+        symbol::expected,
+    )
+}
+
+#[test]
+fn test_generate_symbol() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/symbol.air"), "test/symbol.air")
+}
+
+#[test]
+fn test_parse_text() -> Result<(), Box<dyn Error>> {
+    test_parse(
+        include_str!("test/text.air"),
+        "test/text.air",
+        text::expected,
+    )
+}
+
+#[test]
+fn test_generate_text() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/text.air"), "test/text.air")
+}
+
+#[test]
 fn test_parse_int() -> Result<(), Box<dyn Error>> {
     test_parse(include_str!("test/int.air"), "test/int.air", int::expected)
 }
@@ -286,33 +327,6 @@ fn test_generate_byte() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_symbol() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/symbol.air"),
-        "test/symbol.air",
-        symbol::expected,
-    )
-}
-
-#[test]
-fn test_generate_symbol() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/symbol.air"), "test/symbol.air")
-}
-
-#[test]
-fn test_parse_text() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/text.air"),
-        "test/text.air",
-        text::expected,
-    )
-}
-
-#[test]
-fn test_generate_text() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/text.air"), "test/text.air")
-}
-#[test]
 fn test_parse_pair() -> Result<(), Box<dyn Error>> {
     test_parse(
         include_str!("test/pair.air"),
@@ -324,6 +338,20 @@ fn test_parse_pair() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_pair() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/pair.air"), "test/pair.air")
+}
+
+#[test]
+fn test_parse_adapt() -> Result<(), Box<dyn Error>> {
+    test_parse(
+        include_str!("test/adapt.air"),
+        "test/adapt.air",
+        adapt::expected,
+    )
+}
+
+#[test]
+fn test_generate_adapt() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/adapt.air"), "test/adapt.air")
 }
 
 #[test]
@@ -386,20 +414,6 @@ fn test_parse_map() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_map() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/map.air"), "test/map.air")
-}
-
-#[test]
-fn test_parse_adapt() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/adapt.air"),
-        "test/adapt.air",
-        adapt::expected,
-    )
-}
-
-#[test]
-fn test_generate_adapt() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/adapt.air"), "test/adapt.air")
 }
 
 #[test]

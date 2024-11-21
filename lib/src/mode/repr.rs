@@ -68,7 +68,7 @@ impl ParseMode<Val> for Mode {
     fn parse(mode: Val, default: PrimitiveMode) -> Option<Self> {
         match mode {
             Val::Unit(_) => Some(Self::from(default)),
-            Val::Symbol(s) => Some(Self::from(PrimitiveMode::parse(s, default)?)),
+            Val::Symbol(symbol) => Some(Self::from(PrimitiveMode::parse(symbol, default)?)),
             Val::Map(mut map) => {
                 let recursive = match map_remove(&mut map, RECURSIVE) {
                     Val::Unit(_) => false,

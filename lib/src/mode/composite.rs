@@ -55,11 +55,11 @@ impl ByVal<Val> for CompositeMode<Mode> {
         Id.transform(ctx, input)
     }
 
-    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, s: Symbol) -> Val
+    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.symbol.transform(ctx, s)
+        self.symbol.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -76,20 +76,6 @@ impl ByVal<Val> for CompositeMode<Mode> {
         self.adapt.transform(ctx, adapt)
     }
 
-    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        self.list.transform(ctx, list)
-    }
-
-    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        self.map.transform(ctx, map)
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -102,6 +88,20 @@ impl ByVal<Val> for CompositeMode<Mode> {
         Ctx: CtxMeta<'a>,
     {
         self.ask.transform(ctx, ask)
+    }
+
+    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        self.list.transform(ctx, list)
+    }
+
+    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        self.map.transform(ctx, map)
     }
 }
 

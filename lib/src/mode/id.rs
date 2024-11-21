@@ -36,11 +36,11 @@ impl ByVal<Val> for Id {
         input
     }
 
-    fn transform_symbol<'a, Ctx>(&self, _ctx: Ctx, s: Symbol) -> Val
+    fn transform_symbol<'a, Ctx>(&self, _ctx: Ctx, symbol: Symbol) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        Val::Symbol(s)
+        Val::Symbol(symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, _ctx: Ctx, pair: PairVal) -> Val
@@ -57,20 +57,6 @@ impl ByVal<Val> for Id {
         Val::Adapt(adapt)
     }
 
-    fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        Val::List(list)
-    }
-
-    fn transform_map<'a, Ctx>(&self, _ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        Val::Map(map)
-    }
-
     fn transform_call<'a, Ctx>(&self, _ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -83,5 +69,19 @@ impl ByVal<Val> for Id {
         Ctx: CtxMeta<'a>,
     {
         Val::Ask(ask)
+    }
+
+    fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        Val::List(list)
+    }
+
+    fn transform_map<'a, Ctx>(&self, _ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        Val::Map(map)
     }
 }

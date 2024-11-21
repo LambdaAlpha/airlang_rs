@@ -41,11 +41,11 @@ impl ByVal<Val> for Form {
         Id.transform_default(ctx, input)
     }
 
-    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, s: Symbol) -> Val
+    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        FormCore::transform_symbol::<SYMBOL_ID_PREFIX, _>(ctx, s)
+        FormCore::transform_symbol::<SYMBOL_ID_PREFIX, _>(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -62,20 +62,6 @@ impl ByVal<Val> for Form {
         FormCore::transform_adapt(self, self, ctx, adapt)
     }
 
-    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        FormCore::transform_list(self, ctx, list)
-    }
-
-    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        FormCore::transform_map(self, self, ctx, map)
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -88,5 +74,19 @@ impl ByVal<Val> for Form {
         Ctx: CtxMeta<'a>,
     {
         FormCore::transform_ask(self, self, ctx, ask)
+    }
+
+    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        FormCore::transform_list(self, ctx, list)
+    }
+
+    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        FormCore::transform_map(self, self, ctx, map)
     }
 }

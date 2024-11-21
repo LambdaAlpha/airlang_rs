@@ -75,11 +75,11 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
         Id.transform(ctx, input)
     }
 
-    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, s: Symbol) -> Val
+    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.symbol.transform(ctx, s)
+        self.symbol.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -111,41 +111,6 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
                 let spec = SelfTrans::new(self, mode.spec);
                 let value = SelfTrans::new(self, mode.value);
                 EvalCore::transform_adapt(&spec, &value, ctx, adapt)
-            }
-        }
-    }
-
-    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match &self.list {
-            ListMode::Id => Id.transform_list(ctx, list),
-            ListMode::Form { head, tail } => {
-                let head = head
-                    .iter()
-                    .map(|mode| SelfTrans::new(self, *mode))
-                    .collect();
-                let tail = &SelfTrans::new(self, *tail);
-                FormCore::transform_list_head_tail(&head, tail, ctx, list)
-            }
-        }
-    }
-
-    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match &self.map {
-            MapMode::Id => Id.transform_map(ctx, map),
-            MapMode::Form { some, else1 } => {
-                let some = some
-                    .iter()
-                    .map(|(k, v)| (k, SelfTrans::new(self, *v)))
-                    .collect();
-                let key = SelfTrans::new(self, else1.first);
-                let value = SelfTrans::new(self, else1.second);
-                FormCore::transform_map_some_else(&some, &key, &value, ctx, map)
             }
         }
     }
@@ -184,6 +149,41 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
                 let func = SelfTrans::new(self, mode.func);
                 let output = SelfTrans::new(self, mode.output);
                 EvalCore::transform_ask(&func, &output, ctx, ask)
+            }
+        }
+    }
+
+    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match &self.list {
+            ListMode::Id => Id.transform_list(ctx, list),
+            ListMode::Form { head, tail } => {
+                let head = head
+                    .iter()
+                    .map(|mode| SelfTrans::new(self, *mode))
+                    .collect();
+                let tail = &SelfTrans::new(self, *tail);
+                FormCore::transform_list_head_tail(&head, tail, ctx, list)
+            }
+        }
+    }
+
+    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match &self.map {
+            MapMode::Id => Id.transform_map(ctx, map),
+            MapMode::Form { some, else1 } => {
+                let some = some
+                    .iter()
+                    .map(|(k, v)| (k, SelfTrans::new(self, *v)))
+                    .collect();
+                let key = SelfTrans::new(self, else1.first);
+                let value = SelfTrans::new(self, else1.second);
+                FormCore::transform_map_some_else(&some, &key, &value, ctx, map)
             }
         }
     }

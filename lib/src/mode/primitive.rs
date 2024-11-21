@@ -56,14 +56,14 @@ impl ByVal<Val> for PrimitiveMode {
         }
     }
 
-    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, s: Symbol) -> Val
+    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_symbol(ctx, s),
-            PrimitiveMode::Form => Form.transform_symbol(ctx, s),
-            PrimitiveMode::Eval => Eval.transform_symbol(ctx, s),
+            PrimitiveMode::Id => Id.transform_symbol(ctx, symbol),
+            PrimitiveMode::Form => Form.transform_symbol(ctx, symbol),
+            PrimitiveMode::Eval => Eval.transform_symbol(ctx, symbol),
         }
     }
 
@@ -89,28 +89,6 @@ impl ByVal<Val> for PrimitiveMode {
         }
     }
 
-    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self {
-            PrimitiveMode::Id => Id.transform_list(ctx, list),
-            PrimitiveMode::Form => Form.transform_list(ctx, list),
-            PrimitiveMode::Eval => Eval.transform_list(ctx, list),
-        }
-    }
-
-    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self {
-            PrimitiveMode::Id => Id.transform_map(ctx, map),
-            PrimitiveMode::Form => Form.transform_map(ctx, map),
-            PrimitiveMode::Eval => Eval.transform_map(ctx, map),
-        }
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -130,6 +108,28 @@ impl ByVal<Val> for PrimitiveMode {
             PrimitiveMode::Id => Id.transform_ask(ctx, ask),
             PrimitiveMode::Form => Form.transform_ask(ctx, ask),
             PrimitiveMode::Eval => Eval.transform_ask(ctx, ask),
+        }
+    }
+
+    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            PrimitiveMode::Id => Id.transform_list(ctx, list),
+            PrimitiveMode::Form => Form.transform_list(ctx, list),
+            PrimitiveMode::Eval => Eval.transform_list(ctx, list),
+        }
+    }
+
+    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            PrimitiveMode::Id => Id.transform_map(ctx, map),
+            PrimitiveMode::Form => Form.transform_map(ctx, map),
+            PrimitiveMode::Eval => Eval.transform_map(ctx, map),
         }
     }
 }

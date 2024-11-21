@@ -37,16 +37,16 @@ pub enum Repr {
     Unit(Unit),
     Bool(Bool),
     Symbol(Symbol),
+    Text(Text),
     Int(Int),
     Number(Number),
-    Text(Text),
-    Pair(Box<PairRepr>),
-    List(ListRepr),
-    Map(MapRepr),
     Byte(Byte),
+    Pair(Box<PairRepr>),
+    Adapt(Box<AdaptRepr>),
     Call(Box<CallRepr>),
     Ask(Box<AskRepr>),
-    Adapt(Box<AdaptRepr>),
+    List(ListRepr),
+    Map(MapRepr),
 }
 
 impl Repr {
@@ -73,6 +73,12 @@ impl From<Symbol> for Repr {
     }
 }
 
+impl From<Text> for Repr {
+    fn from(t: Text) -> Self {
+        Repr::Text(t)
+    }
+}
+
 impl From<Int> for Repr {
     fn from(i: Int) -> Self {
         Repr::Int(i)
@@ -85,9 +91,9 @@ impl From<Number> for Repr {
     }
 }
 
-impl From<Text> for Repr {
-    fn from(t: Text) -> Self {
-        Repr::Text(t)
+impl From<Byte> for Repr {
+    fn from(b: Byte) -> Self {
+        Repr::Byte(b)
     }
 }
 
@@ -103,27 +109,15 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
-impl From<ListRepr> for Repr {
-    fn from(l: ListRepr) -> Self {
-        Repr::List(l)
-    }
-}
-
-impl From<MapRepr> for Repr {
-    fn from(m: MapRepr) -> Self {
-        Repr::Map(m)
-    }
-}
-
 impl From<AdaptRepr> for Repr {
     fn from(a: AdaptRepr) -> Self {
         Repr::Adapt(Box::new(a))
     }
 }
 
-impl From<Byte> for Repr {
-    fn from(b: Byte) -> Self {
-        Repr::Byte(b)
+impl From<Box<AdaptRepr>> for Repr {
+    fn from(a: Box<AdaptRepr>) -> Self {
+        Repr::Adapt(a)
     }
 }
 
@@ -148,6 +142,18 @@ impl From<AskRepr> for Repr {
 impl From<Box<AskRepr>> for Repr {
     fn from(a: Box<AskRepr>) -> Self {
         Repr::Ask(a)
+    }
+}
+
+impl From<ListRepr> for Repr {
+    fn from(l: ListRepr) -> Self {
+        Repr::List(l)
+    }
+}
+
+impl From<MapRepr> for Repr {
+    fn from(m: MapRepr) -> Self {
+        Repr::Map(m)
     }
 }
 
@@ -196,19 +202,19 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
 
     fn try_into(self) -> Result<GenerateRepr<'a, Repr>, Self::Error> {
         let r = match self {
-            Repr::Unit(u) => GenerateRepr::Unit(u),
-            Repr::Bool(b) => GenerateRepr::Bool(b),
-            Repr::Symbol(s) => GenerateRepr::Symbol(s),
-            Repr::Int(i) => GenerateRepr::Int(i),
-            Repr::Number(n) => GenerateRepr::Number(n),
-            Repr::Text(t) => GenerateRepr::Text(t),
-            Repr::Pair(p) => GenerateRepr::Pair(p),
-            Repr::List(l) => GenerateRepr::List(l),
-            Repr::Map(m) => GenerateRepr::Map(m),
-            Repr::Byte(b) => GenerateRepr::Byte(b),
-            Repr::Call(c) => GenerateRepr::Call(c),
-            Repr::Ask(a) => GenerateRepr::Ask(a),
-            Repr::Adapt(a) => GenerateRepr::Adapt(a),
+            Repr::Unit(unit) => GenerateRepr::Unit(unit),
+            Repr::Bool(bool) => GenerateRepr::Bool(bool),
+            Repr::Symbol(symbol) => GenerateRepr::Symbol(symbol),
+            Repr::Text(text) => GenerateRepr::Text(text),
+            Repr::Int(int) => GenerateRepr::Int(int),
+            Repr::Number(number) => GenerateRepr::Number(number),
+            Repr::Byte(byte) => GenerateRepr::Byte(byte),
+            Repr::Pair(pair) => GenerateRepr::Pair(pair),
+            Repr::Adapt(adapt) => GenerateRepr::Adapt(adapt),
+            Repr::Call(call) => GenerateRepr::Call(call),
+            Repr::Ask(ask) => GenerateRepr::Ask(ask),
+            Repr::List(list) => GenerateRepr::List(list),
+            Repr::Map(map) => GenerateRepr::Map(map),
         };
         Ok(r)
     }
@@ -216,12 +222,12 @@ impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
 
 pub(crate) mod pair;
 
-pub(crate) mod list;
-
-pub(crate) mod map;
+pub(crate) mod adapt;
 
 pub(crate) mod call;
 
 pub(crate) mod ask;
 
-pub(crate) mod adapt;
+pub(crate) mod list;
+
+pub(crate) mod map;

@@ -105,19 +105,19 @@ use crate::{
 pub(crate) trait ParseRepr:
     From<Unit>
     + From<Bool>
+    + From<Symbol>
+    + From<Text>
     + From<Int>
     + From<Number>
     + From<Byte>
-    + From<Symbol>
-    + From<Text>
     + From<Pair<Self, Self>>
+    + From<Adapt<Self, Self>>
     + From<Call<Self, Self>>
     + From<Ask<Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
     + From<Map<Self, Self>>
-    + From<Adapt<Self, Self>>
     + Clone
 {
 }

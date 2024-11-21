@@ -76,54 +76,54 @@ thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default, Clone)]
 pub(crate) struct AllPrelude {
-    pub(crate) meta: MetaPrelude,
-    pub(crate) syntax: SyntaxPrelude,
-    pub(crate) value: ValuePrelude,
-    pub(crate) ctx: CtxPrelude,
-    pub(crate) ctrl: CtrlPrelude,
-    pub(crate) func: FuncPrelude,
-    pub(crate) call: CallPrelude,
-    pub(crate) ask: AskPrelude,
-    pub(crate) case: CasePrelude,
-    pub(crate) answer: AnswerPrelude,
-    pub(crate) symbol: SymbolPrelude,
     pub(crate) unit: UnitPrelude,
     pub(crate) bool: BoolPrelude,
+    pub(crate) symbol: SymbolPrelude,
+    pub(crate) text: TextPrelude,
     pub(crate) int: IntPrelude,
     pub(crate) number: NumberPrelude,
     pub(crate) byte: BytePrelude,
-    pub(crate) text: TextPrelude,
     pub(crate) pair: PairPrelude,
+    pub(crate) adapt: AdaptPrelude,
+    pub(crate) call: CallPrelude,
+    pub(crate) ask: AskPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
+    pub(crate) ctx: CtxPrelude,
+    pub(crate) func: FuncPrelude,
+    pub(crate) case: CasePrelude,
+    pub(crate) answer: AnswerPrelude,
     pub(crate) extension: ExtPrelude,
-    pub(crate) adapt: AdaptPrelude,
+    pub(crate) meta: MetaPrelude,
+    pub(crate) syntax: SyntaxPrelude,
+    pub(crate) value: ValuePrelude,
+    pub(crate) ctrl: CtrlPrelude,
 }
 
 impl Prelude for AllPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.meta.put(m);
-        self.syntax.put(m);
-        self.value.put(m);
-        self.ctx.put(m);
-        self.ctrl.put(m);
-        self.func.put(m);
-        self.call.put(m);
-        self.ask.put(m);
-        self.case.put(m);
-        self.answer.put(m);
-        self.symbol.put(m);
         self.unit.put(m);
         self.bool.put(m);
+        self.symbol.put(m);
+        self.text.put(m);
         self.int.put(m);
         self.number.put(m);
         self.byte.put(m);
-        self.text.put(m);
         self.pair.put(m);
+        self.adapt.put(m);
+        self.call.put(m);
+        self.ask.put(m);
         self.list.put(m);
         self.map.put(m);
+        self.ctx.put(m);
+        self.func.put(m);
+        self.case.put(m);
+        self.answer.put(m);
         self.extension.put(m);
-        self.adapt.put(m);
+        self.meta.put(m);
+        self.syntax.put(m);
+        self.value.put(m);
+        self.ctrl.put(m);
     }
 }
 
@@ -258,31 +258,13 @@ pub(crate) fn map_mode(
     Mode::Composite(Box::new(mode))
 }
 
-mod meta;
-
-mod syntax;
-
-mod value;
-
-mod ctx;
-
-mod ctrl;
-
-mod func;
-
-mod call;
-
-mod ask;
-
-mod case;
-
-mod answer;
-
-mod symbol;
-
 mod unit;
 
 mod bool;
+
+mod symbol;
+
+mod text;
 
 mod int;
 
@@ -290,14 +272,32 @@ mod number;
 
 mod byte;
 
-mod text;
-
 mod pair;
+
+mod adapt;
+
+mod call;
+
+mod ask;
 
 mod list;
 
 mod map;
 
+mod ctx;
+
+mod func;
+
+mod case;
+
+mod answer;
+
 mod extension;
 
-mod adapt;
+mod meta;
+
+mod syntax;
+
+mod value;
+
+mod ctrl;

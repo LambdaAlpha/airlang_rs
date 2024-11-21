@@ -54,69 +54,13 @@ fn test_interpret(air: AirCell, input: &str, file_name: &str) -> Result<(), Box<
 }
 
 #[test]
-fn test_debug() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/debug.air"), "test/debug.air")
+fn test_unit() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/unit.air"), "test/unit.air")
 }
 
 #[test]
-fn test_doc() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/doc.air"), "test/doc.air")
-}
-
-#[test]
-fn test_val_size() {
-    let size = size_of::<Val>();
-    assert_eq!(size, 24);
-}
-
-#[test]
-fn test_core() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/core.air"), "test/core.air")
-}
-
-#[test]
-fn test_syntax() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/syntax.air"), "test/syntax.air")
-}
-
-#[test]
-fn test_value() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/value.air"), "test/value.air")
-}
-
-#[test]
-fn test_ctx() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ctx.air"), "test/ctx.air")
-}
-
-#[test]
-fn test_ctrl() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ctrl.air"), "test/ctx.air")
-}
-
-#[test]
-fn test_func() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/func.air"), "test/func.air")
-}
-
-#[test]
-fn test_call() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/call.air"), "test/call.air")
-}
-
-#[test]
-fn test_ask() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ask.air"), "test/ask.air")
-}
-
-#[test]
-fn test_case() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/case.air"), "test/case.air")
-}
-
-#[test]
-fn test_answer() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/answer.air"), "test/answer.air")
+fn test_bool() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/bool.air"), "test/bool.air")
 }
 
 #[test]
@@ -125,13 +69,8 @@ fn test_symbol() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_unit() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/unit.air"), "test/unit.air")
-}
-
-#[test]
-fn test_bool() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/bool.air"), "test/bool.air")
+fn test_text() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/text.air"), "test/text.air")
 }
 
 #[test]
@@ -150,13 +89,23 @@ fn test_byte() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_text() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/text.air"), "test/text.air")
+fn test_pair() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/pair.air"), "test/pair.air")
 }
 
 #[test]
-fn test_pair() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/pair.air"), "test/pair.air")
+fn test_adapt() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/adapt.air"), "test/adapt.air")
+}
+
+#[test]
+fn test_call() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/call.air"), "test/call.air")
+}
+
+#[test]
+fn test_ask() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/ask.air"), "test/ask.air")
 }
 
 #[test]
@@ -167,6 +116,26 @@ fn test_list() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_map() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/map.air"), "test/map.air")
+}
+
+#[test]
+fn test_ctx() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/ctx.air"), "test/ctx.air")
+}
+
+#[test]
+fn test_func() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/func.air"), "test/func.air")
+}
+
+#[test]
+fn test_case() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/case.air"), "test/case.air")
+}
+
+#[test]
+fn test_answer() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/answer.air"), "test/answer.air")
 }
 
 #[test]
@@ -201,6 +170,37 @@ impl FreeFn for FuncExt {
 }
 
 #[test]
-fn test_adapt() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/adapt.air"), "test/adapt.air")
+fn test_debug() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/debug.air"), "test/debug.air")
+}
+
+#[test]
+fn test_doc() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/doc.air"), "test/doc.air")
+}
+
+#[test]
+fn test_val_size() {
+    let size = size_of::<Val>();
+    assert_eq!(size, 24);
+}
+
+#[test]
+fn test_core() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/core.air"), "test/core.air")
+}
+
+#[test]
+fn test_syntax() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/syntax.air"), "test/syntax.air")
+}
+
+#[test]
+fn test_value() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/value.air"), "test/value.air")
+}
+
+#[test]
+fn test_ctrl() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/ctrl.air"), "test/ctrl.air")
 }
