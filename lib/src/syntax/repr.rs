@@ -8,17 +8,21 @@ use std::{
 };
 
 use crate::{
+    Adapt,
+    Ask,
     Bool,
     Byte,
+    Call,
     Int,
     Number,
+    Pair,
     Symbol,
     Text,
     Unit,
     syntax::{
         ParseError,
         generate_pretty,
-        generator::GenerateRepr,
+        generator::GenRepr,
         parse,
         parser::ParseRepr,
         repr::{
@@ -197,24 +201,56 @@ impl Default for Repr {
 
 impl ParseRepr for Repr {}
 
-impl<'a> TryInto<GenerateRepr<'a, Repr>> for &'a Repr {
+impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
     type Error = Infallible;
 
-    fn try_into(self) -> Result<GenerateRepr<'a, Repr>, Self::Error> {
+    fn try_into(self) -> Result<GenRepr<'a>, Self::Error> {
         let r = match self {
-            Repr::Unit(unit) => GenerateRepr::Unit(unit),
-            Repr::Bool(bool) => GenerateRepr::Bool(bool),
-            Repr::Symbol(symbol) => GenerateRepr::Symbol(symbol),
-            Repr::Text(text) => GenerateRepr::Text(text),
-            Repr::Int(int) => GenerateRepr::Int(int),
-            Repr::Number(number) => GenerateRepr::Number(number),
-            Repr::Byte(byte) => GenerateRepr::Byte(byte),
-            Repr::Pair(pair) => GenerateRepr::Pair(pair),
-            Repr::Adapt(adapt) => GenerateRepr::Adapt(adapt),
-            Repr::Call(call) => GenerateRepr::Call(call),
-            Repr::Ask(ask) => GenerateRepr::Ask(ask),
-            Repr::List(list) => GenerateRepr::List(list),
-            Repr::Map(map) => GenerateRepr::Map(map),
+            Repr::Unit(unit) => GenRepr::Unit(unit),
+            Repr::Bool(bool) => GenRepr::Bool(bool),
+            Repr::Symbol(symbol) => GenRepr::Symbol(symbol),
+            Repr::Text(text) => GenRepr::Text(text),
+            Repr::Int(int) => GenRepr::Int(int),
+            Repr::Number(number) => GenRepr::Number(number),
+            Repr::Byte(byte) => GenRepr::Byte(byte),
+            Repr::Pair(pair) => {
+                let first = (&pair.first).try_into()?;
+                let second = (&pair.second).try_into()?;
+                GenRepr::Pair(Box::new(Pair::new(first, second)))
+            }
+            Repr::Adapt(adapt) => {
+                let spec = (&adapt.spec).try_into()?;
+                let value = (&adapt.value).try_into()?;
+                GenRepr::Adapt(Box::new(Adapt::new(spec, value)))
+            }
+            Repr::Call(call) => {
+                let func = (&call.func).try_into()?;
+                let input = (&call.input).try_into()?;
+                GenRepr::Call(Box::new(Call::new(func, input)))
+            }
+            Repr::Ask(ask) => {
+                let func = (&ask.func).try_into()?;
+                let output = (&ask.output).try_into()?;
+                GenRepr::Ask(Box::new(Ask::new(func, output)))
+            }
+            Repr::List(list) => {
+                let list = list
+                    .iter()
+                    .map(TryInto::try_into)
+                    .collect::<Result<_, _>>()?;
+                GenRepr::List(list)
+            }
+            Repr::Map(map) => {
+                let map = map
+                    .iter()
+                    .map(|(k, v)| {
+                        let k = k.try_into()?;
+                        let v = v.try_into()?;
+                        Ok((k, v))
+                    })
+                    .collect::<Result<_, Infallible>>()?;
+                GenRepr::Map(map)
+            }
         };
         Ok(r)
     }

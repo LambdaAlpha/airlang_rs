@@ -21,7 +21,7 @@ use crate::{
     number::Number,
     symbol::Symbol,
     syntax::{
-        generator::GenerateRepr,
+        generator::GenRepr,
         parser::ParseRepr,
         repr::Repr,
     },
@@ -359,24 +359,56 @@ impl TryInto<Repr> for Val {
 
 impl ParseRepr for Val {}
 
-impl<'a> TryInto<GenerateRepr<'a, Val>> for &'a Val {
+impl<'a> TryInto<GenRepr<'a>> for &'a Val {
     type Error = ReprError;
 
-    fn try_into(self) -> Result<GenerateRepr<'a, Val>, Self::Error> {
+    fn try_into(self) -> Result<GenRepr<'a>, Self::Error> {
         let r = match self {
-            Val::Unit(unit) => GenerateRepr::Unit(unit),
-            Val::Bool(bool) => GenerateRepr::Bool(bool),
-            Val::Symbol(symbol) => GenerateRepr::Symbol(symbol),
-            Val::Text(text) => GenerateRepr::Text(text),
-            Val::Int(int) => GenerateRepr::Int(int),
-            Val::Number(number) => GenerateRepr::Number(number),
-            Val::Byte(byte) => GenerateRepr::Byte(byte),
-            Val::Pair(pair) => GenerateRepr::Pair(pair),
-            Val::Adapt(adapt) => GenerateRepr::Adapt(adapt),
-            Val::Call(call) => GenerateRepr::Call(call),
-            Val::Ask(ask) => GenerateRepr::Ask(ask),
-            Val::List(list) => GenerateRepr::List(list),
-            Val::Map(map) => GenerateRepr::Map(map),
+            Val::Unit(unit) => GenRepr::Unit(unit),
+            Val::Bool(bool) => GenRepr::Bool(bool),
+            Val::Symbol(symbol) => GenRepr::Symbol(symbol),
+            Val::Text(text) => GenRepr::Text(text),
+            Val::Int(int) => GenRepr::Int(int),
+            Val::Number(number) => GenRepr::Number(number),
+            Val::Byte(byte) => GenRepr::Byte(byte),
+            Val::Pair(pair) => {
+                let first = (&pair.first).try_into()?;
+                let second = (&pair.second).try_into()?;
+                GenRepr::Pair(Box::new(Pair::new(first, second)))
+            }
+            Val::Adapt(adapt) => {
+                let spec = (&adapt.spec).try_into()?;
+                let value = (&adapt.value).try_into()?;
+                GenRepr::Adapt(Box::new(Adapt::new(spec, value)))
+            }
+            Val::Call(call) => {
+                let func = (&call.func).try_into()?;
+                let input = (&call.input).try_into()?;
+                GenRepr::Call(Box::new(Call::new(func, input)))
+            }
+            Val::Ask(ask) => {
+                let func = (&ask.func).try_into()?;
+                let output = (&ask.output).try_into()?;
+                GenRepr::Ask(Box::new(Ask::new(func, output)))
+            }
+            Val::List(list) => {
+                let list: List<GenRepr> = list
+                    .iter()
+                    .map(TryInto::try_into)
+                    .collect::<Result<_, _>>()?;
+                GenRepr::List(list)
+            }
+            Val::Map(map) => {
+                let map = map
+                    .iter()
+                    .map(|(k, v)| {
+                        let k = k.try_into()?;
+                        let v = v.try_into()?;
+                        Ok((k, v))
+                    })
+                    .collect::<Result<_, _>>()?;
+                GenRepr::Map(map)
+            }
             _ => return Err(ReprError {}),
         };
         Ok(r)

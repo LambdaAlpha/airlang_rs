@@ -94,7 +94,10 @@ pub use crate::{
 use crate::{
     prelude,
     syntax,
-    syntax::ParseError,
+    syntax::{
+        ParseError,
+        generator::PRETTY_FMT,
+    },
     transformer::Transformer,
 };
 
@@ -103,7 +106,9 @@ pub fn parse(src: &str) -> Result<Val, ParseError> {
 }
 
 pub fn generate(src: &Val) -> Result<String, ReprError> {
-    syntax::generator::generate_pretty(src)
+    let repr = src.try_into()?;
+    let repr = syntax::generator::generate(repr, PRETTY_FMT);
+    Ok(repr)
 }
 
 #[derive(Debug, Clone)]
