@@ -123,8 +123,8 @@ fn gen(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Number(number) => gen_number(number, s),
         GenRepr::Byte(byte) => gen_byte(byte, s),
         GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
-        GenRepr::Adapt(adapt) => gen_adapt(ctx, *adapt, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
+        GenRepr::Adapt(adapt) => gen_adapt(ctx, *adapt, s),
         GenRepr::Ask(ask) => gen_ask(ctx, *ask, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
@@ -243,14 +243,6 @@ fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
     gen(ctx, pair.second, s);
 }
 
-fn gen_adapt(ctx: GenCtx, adapt: Adapt<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, adapt.spec, s);
-    s.push(' ');
-    s.push_str(ADAPT);
-    s.push(' ');
-    gen(ctx, adapt.value, s);
-}
-
 fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     if let GenRepr::Pair(pair) = call.input {
         gen_scope_if_need(ctx, pair.first, s);
@@ -265,6 +257,14 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
         s.push(' ');
         gen(ctx, call.input, s);
     }
+}
+
+fn gen_adapt(ctx: GenCtx, adapt: Adapt<GenRepr, GenRepr>, s: &mut String) {
+    gen_scope_if_need(ctx, adapt.spec, s);
+    s.push(' ');
+    s.push_str(ADAPT);
+    s.push(' ');
+    gen(ctx, adapt.value, s);
 }
 
 fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
@@ -294,7 +294,7 @@ fn gen_scope(ctx: GenCtx, repr: GenRepr, s: &mut String) {
 fn is_composite(repr: &GenRepr) -> bool {
     matches!(
         repr,
-        GenRepr::Call(_) | GenRepr::Ask(_) | GenRepr::Pair(_) | GenRepr::Adapt(_)
+        GenRepr::Pair(_) | GenRepr::Call(_) | GenRepr::Adapt(_) | GenRepr::Ask(_)
     )
 }
 

@@ -84,8 +84,8 @@ pub(crate) struct AllPrelude {
     pub(crate) number: NumberPrelude,
     pub(crate) byte: BytePrelude,
     pub(crate) pair: PairPrelude,
-    pub(crate) adapt: AdaptPrelude,
     pub(crate) call: CallPrelude,
+    pub(crate) adapt: AdaptPrelude,
     pub(crate) ask: AskPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
@@ -110,8 +110,8 @@ impl Prelude for AllPrelude {
         self.number.put(m);
         self.byte.put(m);
         self.pair.put(m);
-        self.adapt.put(m);
         self.call.put(m);
+        self.adapt.put(m);
         self.ask.put(m);
         self.list.put(m);
         self.map.put(m);
@@ -274,9 +274,9 @@ mod byte;
 
 mod pair;
 
-mod adapt;
-
 mod call;
+
+mod adapt;
 
 mod ask;
 

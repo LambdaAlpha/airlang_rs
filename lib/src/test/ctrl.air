@@ -46,19 +46,19 @@ do [1, 2, .else_break 3, 4]
 -----
 3
 =====
-do [1, true break do ! [2, true break 3, 4], 5]
+do [1, true break do ; [2, true break 3, 4], 5]
 -----
 3
 =====
-do [1, false else_break do ! [2, false else_break 3, 4], 5]
+do [1, false else_break do ; [2, false else_break 3, 4], 5]
 -----
 3
 =====
-do [1, false break do ! [true break 3, 4], 5]
+do [1, false break do ; [true break 3, 4], 5]
 -----
 5
 =====
-do [1, true else_break do ! [false else_break 3, 4], 5]
+do [1, true else_break do ; [false else_break 3, 4], 5]
 -----
 5
 =====
@@ -198,7 +198,7 @@ do [3 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
 -----
 [., ., 3]
 =====
-do [a = id ! a, a match {a : 1, b : 2} : .]
+do [a = id ; a, a match {a : 1, b : 2} : .]
 -----
 1
 =====

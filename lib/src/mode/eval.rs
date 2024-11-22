@@ -56,18 +56,18 @@ impl ByVal<Val> for Eval {
         FormCore::transform_pair(self, self, ctx, pair)
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        EvalCore::transform_adapt(self, self, ctx, adapt)
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         EvalCore::transform_call(self, self, ctx, call)
+    }
+
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        EvalCore::transform_adapt(self, self, ctx, adapt)
     }
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val

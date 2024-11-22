@@ -46,7 +46,7 @@ true and true
 -----
 true
 =====
-do [false and do ! [a = 1, true], a]
+do [false and do ; [a = 1, true], a]
 -----
 1
 =====
@@ -58,7 +58,7 @@ false or false
 -----
 false
 =====
-do [true or do ! [a = 1, false], a]
+do [true or do ; [a = 1, false], a]
 -----
 1
 =====

@@ -3,6 +3,7 @@ use std::{
     str::FromStr,
 };
 
+use const_format::concatcp;
 use num_bigint::BigInt;
 use num_traits::Num;
 
@@ -13,7 +14,7 @@ use crate::{
     number::Number,
     symbol::Symbol,
     syntax::{
-        ADAPT,
+        SEPARATOR,
         parse,
         repr::{
             Repr,
@@ -45,9 +46,9 @@ mod byte;
 
 mod pair;
 
-mod adapt;
-
 mod call;
+
+mod adapt;
 
 mod ask;
 
@@ -98,12 +99,12 @@ fn pair(first: Repr, second: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
 }
 
-fn adapt(func: Repr, value: Repr) -> Repr {
-    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
-}
-
 fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
+}
+
+fn adapt(func: Repr, value: Repr) -> Repr {
+    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
 
 fn ask(func: Repr, output: Repr) -> Repr {
@@ -111,7 +112,7 @@ fn ask(func: Repr, output: Repr) -> Repr {
 }
 
 fn no_compose(v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(ADAPT));
+    let func = Repr::Symbol(Symbol::from_str(concatcp!(SEPARATOR)));
     let value = Repr::List(v.into());
     Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
 }
@@ -140,6 +141,13 @@ fn call_map(root: Repr, leaves: Vec<(Repr, Repr)>) -> Repr {
 
 fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(
+        middle,
+        Repr::Pair(Box::new(PairRepr::new(left, right))),
+    )))
+}
+
+fn infix_adapt(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Adapt(Box::new(AdaptRepr::new(
         middle,
         Repr::Pair(Box::new(PairRepr::new(left, right))),
     )))
@@ -341,20 +349,6 @@ fn test_generate_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_adapt() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/adapt.air"),
-        "test/adapt.air",
-        adapt::expected,
-    )
-}
-
-#[test]
-fn test_generate_adapt() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/adapt.air"), "test/adapt.air")
-}
-
-#[test]
 fn test_parse_call() -> Result<(), Box<dyn Error>> {
     test_parse(
         include_str!("test/call.air"),
@@ -366,6 +360,20 @@ fn test_parse_call() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_call() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/call.air"), "test/call.air")
+}
+
+#[test]
+fn test_parse_adapt() -> Result<(), Box<dyn Error>> {
+    test_parse(
+        include_str!("test/adapt.air"),
+        "test/adapt.air",
+        adapt::expected,
+    )
+}
+
+#[test]
+fn test_generate_adapt() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/adapt.air"), "test/adapt.air")
 }
 
 #[test]

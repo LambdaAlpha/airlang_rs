@@ -1,4 +1,4 @@
-"bench generate" ; do ! [
+"bench generate" ! do ; [
   x = 42,
   y = 24,
   (x <> y) while (x > y) if (

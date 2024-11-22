@@ -6,51 +6,51 @@ do [a = {1 : 2, 3 : :}, map.length .a]
 -----
 2
 =====
-do [(m : i) = map.items ! {1 : 2, 3 : :}, map &i]
+do [(m : i) = map.items ; {1 : 2, 3 : :}, map &i]
 -----
 {1 : 2, 3 : :}
 =====
-do [a = {1 : 2, 3 : :}, b = map.items ! .a, map &b]
+do [a = {1 : 2, 3 : :}, b = map.items ; .a, map &b]
 -----
 {1 : 2, 3 : :}
 =====
-do [(m : i) = map.into_items ! {1 : 2, 3 : :}, map &i]
+do [(m : i) = map.into_items ; {1 : 2, 3 : :}, map &i]
 -----
 {1 : 2, 3 : :}
 =====
-do [a = {1 : 2, 3 : :}, b = map.into_items ! .a, map &b]
+do [a = {1 : 2, 3 : :}, b = map.into_items ; .a, map &b]
 -----
 {1 : 2, 3 : :}
 =====
-do [(m : k) = map.keys ! {1 : 2, 3 : :}, set &k]
+do [(m : k) = map.keys ; {1 : 2, 3 : :}, set &k]
 -----
 {1, 3}
 =====
-do [a = {1 : 2, 3 : :}, b = map.keys ! .a, set &b]
+do [a = {1 : 2, 3 : :}, b = map.keys ; .a, set &b]
 -----
 {1, 3}
 =====
-do [(m : k) = map.into_keys ! {1 : 2, 3 : :}, set &k]
+do [(m : k) = map.into_keys ; {1 : 2, 3 : :}, set &k]
 -----
 {1, 3}
 =====
-do [a = {1 : 2, 3 : :}, k = map.into_keys ! .a, set &k]
+do [a = {1 : 2, 3 : :}, k = map.into_keys ; .a, set &k]
 -----
 {1, 3}
 =====
-do [(m : v) = map.values ! {1 : 2, 3 : 2}, multiset &v]
+do [(m : v) = map.values ; {1 : 2, 3 : 2}, multiset &v]
 -----
 {2 : 2}
 =====
-do [a = {1 : 2, 3 : 2}, b = map.values ! .a, multiset &b]
+do [a = {1 : 2, 3 : 2}, b = map.values ; .a, multiset &b]
 -----
 {2 : 2}
 =====
-do [(m : k) = map.into_values ! {1 : 2, 3 : 2}, multiset &k]
+do [(m : k) = map.into_values ; {1 : 2, 3 : 2}, multiset &k]
 -----
 {2 : 2}
 =====
-do [a = {1 : 2, 3 : 2}, v = map.into_values ! .a, multiset &v]
+do [a = {1 : 2, 3 : 2}, v = map.into_values ; .a, multiset &v]
 -----
 {2 : 2}
 =====

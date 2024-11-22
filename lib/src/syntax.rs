@@ -44,9 +44,9 @@ pub(crate) const FALSE: &str = "false";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 
-pub(crate) const ADAPT: &str = ";";
 pub(crate) const PAIR: &str = ":";
-pub(crate) const CALL: &str = "!";
+pub(crate) const CALL: &str = ";";
+pub(crate) const ADAPT: &str = "!";
 pub(crate) const ASK: &str = "?";
 
 pub(crate) const INT: &str = "i";

@@ -1,10 +1,12 @@
 use crate::syntax::{
     repr::Repr,
     test::{
+        adapt,
         ask,
         call,
         call_list,
         infix,
+        infix_adapt,
         infix_ask,
         list,
         map,
@@ -50,13 +52,18 @@ pub fn expected() -> Vec<Repr> {
             infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
         )]),
         infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
+        infix_adapt(
+            int("1"),
+            int("2"),
+            infix_adapt(int("3"), int("4"), int("5")),
+        ),
+        adapt(int("1"), int("2")),
         infix_ask(int("1"), int("2"), infix_ask(int("3"), int("4"), int("5"))),
         ask(int("1"), int("2")),
         int("1"),
         int("1"),
         no_compose(vec![int("1"), int("2")]),
         no_compose(vec![symbol("@"), symbol("!"), symbol(":"), symbol("?")]),
-        symbol(";"),
         no_compose(vec![
             no_compose(vec![symbol("a"), symbol("b"), symbol("c")]),
             symbol("d"),

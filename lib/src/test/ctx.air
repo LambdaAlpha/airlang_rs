@@ -26,7 +26,7 @@ do [(a . constant) = 1, [move a, a]]
 -----
 [., 1]
 =====
-do [a = .b, b = 1, move ! $a]
+do [a = .b, b = 1, move ; $a]
 -----
 1
 =====
@@ -78,7 +78,7 @@ do [(a . {invariant : final}) = 1, invariant a]
 -----
 final
 =====
-do [(a . {}) = 1, invariant ! a]
+do [(a . {}) = 1, invariant ; a]
 -----
 none
 =====
@@ -106,7 +106,7 @@ do [((a : (b . final)) . constant) = 1 : 2, [invariant a, invariant b]]
 -----
 [constant, final]
 =====
-do [(f a) = 1 ! 2, [f, a]]
+do [(f a) = 1 ; 2, [f, a]]
 -----
 [1, 2]
 =====
@@ -118,7 +118,7 @@ do [(f ? b) = 1 ? 2, [f, b]]
 -----
 [1, 2]
 =====
-do [(n ; v) = id ! 1 ; 2, [n, v]]
+do [(n ; v) = id ; 1 ; 2, [n, v]]
 -----
 [1, 2]
 =====
@@ -214,11 +214,11 @@ fallback .
 -----
 false
 =====
-do [c = context ! {fallback : true}, c | fallback '!' .]
+do [c = context ; {fallback : true}, c | fallback ';' .]
 -----
 true
 =====
-do [c = context ! {fallback : true}, c | form ! $do ! [(a . constant) $= 1, a $set_invariant final, $invariant a]]
+do [c = context ; {fallback : true}, c | form ; $do ; [(a . constant) $= 1, a $set_invariant final, $invariant a]]
 -----
 final
 =====
@@ -226,48 +226,48 @@ access .
 -----
 mutable
 =====
-. | access '!' .
+. | access ';' .
 -----
 free
 =====
-do [(a . constant) = context ! {}, a | access '!' .]
+do [(a . constant) = context ; {}, a | access ';' .]
 -----
 constant
 =====
-do [a = context ! {}, a | access '!' .]
+do [a = context ; {}, a | access ';' .]
 -----
 mutable
 =====
 do [
-    s1 = function ! {
+    s1 = function ; {
         cell : true,
         context_access : .free,
-        body : do ! [a = a + 1, a],
-        prelude : context ! {variables : {a : 0, do : :, = : :, + : :}},
+        body : do ; [a = a + 1, a],
+        prelude : context ; {variables : {a : 0, do : :, = : :, + : :}},
     },
     set_solver &s1,
-    s2 = solver ! .,
-    [.s2 ! ., .s2 ! ., .s2 ! .]
+    s2 = solver ; .,
+    [.s2 ; ., .s2 ; ., .s2 ; .]
 ]
 -----
 [1, 2, 3]
 =====
-do [set_solver ., s = solver ! ., .s == .]
+do [set_solver ., s = solver ; ., .s == .]
 -----
 true
 =====
 do [
-    a = context ! {variables : {p : 1 : 2}},
+    a = context ; {variables : {p : 1 : 2}},
     b = 3,
-    a | pair.set_first '!' ..p : b,
+    a | pair.set_first ';' ..p : b,
     a | .&p,
 ]
 -----
 3 : 2
 =====
 do [
-    a = context ! {variables : {p : 1 : 2, b : 3}},
-    a | pair.set_first '!' ..p : .b,
+    a = context ; {variables : {p : 1 : 2, b : 3}},
+    a | pair.set_first ';' ..p : .b,
     a | .&p,
 ]
 -----
@@ -275,72 +275,72 @@ do [
 =====
 do [
     set_first = pair.set_first,
-    a = context ! {variables : {set_first : &set_first, p : 1 : 2, b : 3}},
-    a | id ! .p set_first b,
+    a = context ; {variables : {set_first : &set_first, p : 1 : 2, b : 3}},
+    a | id ; .p set_first b,
     a | .&p,
 ]
 -----
 3 : 2
 =====
-do [(c : a) = (context ! {variables : {= : :, a : 1}}) |: = '!' .a : 2, [c | .a, &a]]
+do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: = ';' .a : 2, [c | .a, &a]]
 -----
 [2, 1]
 =====
 do [
-    a = context ! {variables : {b : context ! {variables : {c : 1}}}},
-    a | form ! b $| ..c
+    a = context ; {variables : {b : context ; {variables : {c : 1}}}},
+    a | form ; b $| ..c
 ]
 -----
 1
 =====
-. | self '!' .
+. | self ';' .
 -----
 .
 =====
-. | + '!' 1 : 1
+. | + ';' 1 : 1
 -----
 2
 =====
-do [a = 1, . | move '!' .a, a]
+do [a = 1, . | move ';' .a, a]
 -----
 1
 =====
-. | pair.first '!' 1 : 2
+. | pair.first ';' 1 : 2
 -----
 1
 =====
-context.represent ! context ! {}
+context.represent ; context ; {}
 -----
 {}
 =====
-context.represent ! context ! {variables : {a : 1 . .final}}
+context.represent ; context ; {variables : {a : 1 . .final}}
 -----
 {variables : {a : 1 . final}}
 =====
-do [{variables : m} = context.represent ! context ! {variables : {b : context ! {}}}, b = .m map.remove .b, type_of .b]
+do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = .m map.remove .b, type_of .b]
 -----
 context
 =====
-do [a = prelude ! ., a | not '!' true]
+do [a = prelude ; ., a | not ';' true]
 -----
 false
 =====
-do [a = prelude ! ., a | is_null '!' .prelude]
+do [a = prelude ; ., a | is_null ';' .prelude]
 -----
 false
 =====
-do [a = 1, b = prelude ! ., b | is_null '!' .a]
+do [a = 1, b = prelude ; ., b | is_null ';' .a]
 -----
 true
 =====
-do [a = prelude ! ., a | is_null '!' .prelude]
+do [a = prelude ; ., a | is_null ';' .prelude]
 -----
 false
 =====
-do [a = 1, b = self ! ., b | .a]
+do [a = 1, b = self ; ., b | .a]
 -----
 1
 =====
-do [a = self ! ., b = 1, a | is_null '!' .b]
+do [a = self ; ., b = 1, a | is_null ';' .b]
 -----
 true

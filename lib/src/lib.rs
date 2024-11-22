@@ -18,9 +18,9 @@ pub(crate) mod byte;
 
 pub(crate) mod pair;
 
-pub(crate) mod adapt;
-
 pub(crate) mod call;
+
+pub(crate) mod adapt;
 
 pub(crate) mod ask;
 

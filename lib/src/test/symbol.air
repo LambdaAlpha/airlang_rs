@@ -14,6 +14,6 @@ symbol.into_text '.'
 -----
 ""
 =====
-symbol.into_text ! .hello_world!
+symbol.into_text ; .hello_world!
 -----
 "hello_world!"

@@ -46,8 +46,8 @@ pub enum Repr {
     Number(Number),
     Byte(Byte),
     Pair(Box<PairRepr>),
-    Adapt(Box<AdaptRepr>),
     Call(Box<CallRepr>),
+    Adapt(Box<AdaptRepr>),
     Ask(Box<AskRepr>),
     List(ListRepr),
     Map(MapRepr),
@@ -113,18 +113,6 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
-impl From<AdaptRepr> for Repr {
-    fn from(a: AdaptRepr) -> Self {
-        Repr::Adapt(Box::new(a))
-    }
-}
-
-impl From<Box<AdaptRepr>> for Repr {
-    fn from(a: Box<AdaptRepr>) -> Self {
-        Repr::Adapt(a)
-    }
-}
-
 impl From<CallRepr> for Repr {
     fn from(c: CallRepr) -> Self {
         Repr::Call(Box::new(c))
@@ -134,6 +122,18 @@ impl From<CallRepr> for Repr {
 impl From<Box<CallRepr>> for Repr {
     fn from(c: Box<CallRepr>) -> Self {
         Repr::Call(c)
+    }
+}
+
+impl From<AdaptRepr> for Repr {
+    fn from(a: AdaptRepr) -> Self {
+        Repr::Adapt(Box::new(a))
+    }
+}
+
+impl From<Box<AdaptRepr>> for Repr {
+    fn from(a: Box<AdaptRepr>) -> Self {
+        Repr::Adapt(a)
     }
 }
 
@@ -218,15 +218,15 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
-            Repr::Adapt(adapt) => {
-                let spec = (&adapt.spec).try_into()?;
-                let value = (&adapt.value).try_into()?;
-                GenRepr::Adapt(Box::new(Adapt::new(spec, value)))
-            }
             Repr::Call(call) => {
                 let func = (&call.func).try_into()?;
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
+            }
+            Repr::Adapt(adapt) => {
+                let spec = (&adapt.spec).try_into()?;
+                let value = (&adapt.value).try_into()?;
+                GenRepr::Adapt(Box::new(Adapt::new(spec, value)))
             }
             Repr::Ask(ask) => {
                 let func = (&ask.func).try_into()?;
@@ -258,9 +258,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
 
 pub(crate) mod pair;
 
-pub(crate) mod adapt;
-
 pub(crate) mod call;
+
+pub(crate) mod adapt;
 
 pub(crate) mod ask;
 

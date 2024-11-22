@@ -54,11 +54,11 @@ impl FormCore {
         match input {
             Val::Symbol(s) => t.transform_symbol(ctx, s),
             Val::Pair(p) => t.transform_pair(ctx, p),
+            Val::Call(c) => t.transform_call(ctx, c),
             Val::Adapt(a) => t.transform_adapt(ctx, a),
+            Val::Ask(a) => t.transform_ask(ctx, a),
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
-            Val::Call(c) => t.transform_call(ctx, c),
-            Val::Ask(a) => t.transform_ask(ctx, a),
             v => t.transform_default(ctx, v),
         }
     }
@@ -98,6 +98,23 @@ impl FormCore {
         Val::Pair(Pair::new(first, second).into())
     }
 
+    pub(crate) fn transform_call<'a, Ctx, Func, Input>(
+        func: &Func,
+        input: &Input,
+        mut ctx: Ctx,
+        call: CallVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Func: Transformer<Val, Val>,
+        Input: Transformer<Val, Val>,
+    {
+        let call = Call::from(call);
+        let func = func.transform(ctx.reborrow(), call.func);
+        let input = input.transform(ctx, call.input);
+        Val::Call(Call::new(func, input).into())
+    }
+
     pub(crate) fn transform_adapt<'a, Ctx, Spec, Value>(
         spec: &Spec,
         value: &Value,
@@ -113,6 +130,23 @@ impl FormCore {
         let spec = spec.transform(ctx.reborrow(), adapt.spec);
         let value = value.transform(ctx, adapt.value);
         Val::Adapt(Adapt::new(spec, value).into())
+    }
+
+    pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
+        func: &Func,
+        output: &Output,
+        mut ctx: Ctx,
+        ask: AskVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Func: Transformer<Val, Val>,
+        Output: Transformer<Val, Val>,
+    {
+        let ask = Ask::from(ask);
+        let func = func.transform(ctx.reborrow(), ask.func);
+        let output = output.transform(ctx, ask.output);
+        Val::Ask(Ask::new(func, output).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val
@@ -199,10 +233,14 @@ impl FormCore {
             .collect();
         Val::Map(map.into())
     }
+}
 
+pub(crate) struct EvalCore;
+
+impl EvalCore {
     pub(crate) fn transform_call<'a, Ctx, Func, Input>(
-        func: &Func,
-        input: &Input,
+        func_trans: &Func,
+        input_trans: &Input,
         mut ctx: Ctx,
         call: CallVal,
     ) -> Val
@@ -212,32 +250,10 @@ impl FormCore {
         Input: Transformer<Val, Val>,
     {
         let call = Call::from(call);
-        let func = func.transform(ctx.reborrow(), call.func);
-        let input = input.transform(ctx, call.input);
-        Val::Call(Call::new(func, input).into())
+        let func = func_trans.transform(ctx.reborrow(), call.func);
+        Self::eval_input_then_call(input_trans, ctx, func, call.input)
     }
 
-    pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
-        func: &Func,
-        output: &Output,
-        mut ctx: Ctx,
-        ask: AskVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Output: Transformer<Val, Val>,
-    {
-        let ask = Ask::from(ask);
-        let func = func.transform(ctx.reborrow(), ask.func);
-        let output = output.transform(ctx, ask.output);
-        Val::Ask(Ask::new(func, output).into())
-    }
-}
-
-pub(crate) struct EvalCore;
-
-impl EvalCore {
     // f ; v evaluates to any i that (f ! i) == (f ! v)
     pub(crate) fn transform_adapt<'a, Ctx, Spec, Value>(
         spec_trans: &Spec,
@@ -257,22 +273,6 @@ impl EvalCore {
             return value;
         };
         optimize(spec, value)
-    }
-
-    pub(crate) fn transform_call<'a, Ctx, Func, Input>(
-        func_trans: &Func,
-        input_trans: &Input,
-        mut ctx: Ctx,
-        call: CallVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Input: Transformer<Val, Val>,
-    {
-        let call = Call::from(call);
-        let func = func_trans.transform(ctx.reborrow(), call.func);
-        Self::eval_input_then_call(input_trans, ctx, func, call.input)
     }
 
     pub(crate) fn transform_ask<'a, Ctx, Func, Output>(

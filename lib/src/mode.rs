@@ -66,9 +66,9 @@ pub(crate) mod symbol;
 
 pub(crate) mod pair;
 
-pub(crate) mod adapt;
-
 pub(crate) mod call;
+
+pub(crate) mod adapt;
 
 pub(crate) mod ask;
 

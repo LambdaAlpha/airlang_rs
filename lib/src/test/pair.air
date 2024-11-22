@@ -10,11 +10,11 @@ do [a = 1 : 2, pair.second .a]
 -----
 2
 =====
-pair.first ! 1 : 2
+pair.first ; 1 : 2
 -----
 1
 =====
-pair.second ! 1 : 2
+pair.second ; 1 : 2
 -----
 2
 =====

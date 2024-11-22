@@ -4,6 +4,7 @@ use std::{
     str::FromStr,
 };
 
+use const_format::concatcp;
 use nom::{
     Finish,
     IResult,
@@ -150,6 +151,7 @@ enum Arity {
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Struct {
     Call,
+    Adapt,
     Ask,
 }
 
@@ -272,7 +274,13 @@ where
             MAP_RIGHT => fail(s),
             SCOPE_LEFT => map(ScopeParser::new(self.ctx), Token::Default)(s),
             SCOPE_RIGHT => fail(s),
-            SEPARATOR => fail(s),
+            SEPARATOR => {
+                let ctx = ParseCtx {
+                    enable: !self.ctx.enable,
+                    ..self.ctx
+                };
+                map(ScopeParser::new(ctx), Token::Default)(&s[1..])
+            }
             SPACE => fail(s),
             TEXT_QUOTE => map(rich_text, Token::Default)(s),
             SYMBOL_QUOTE => map(rich_symbol, Token::Default)(s),
@@ -349,22 +357,6 @@ where
                 });
                 scope_parser.parse(src)
             }
-            CALL => {
-                let mut scope_parser = ScopeParser::new(ParseCtx {
-                    enable: true,
-                    struct1: Struct::Call,
-                    ..self.ctx
-                });
-                scope_parser.parse(src)
-            }
-            ASK => {
-                let mut scope_parser = ScopeParser::new(ParseCtx {
-                    enable: true,
-                    struct1: Struct::Ask,
-                    ..self.ctx
-                });
-                scope_parser.parse(src)
-            }
             PAIR => {
                 let mut scope_parser = ScopeParser::new(ParseCtx {
                     enable: true,
@@ -373,9 +365,26 @@ where
                 });
                 scope_parser.parse(src)
             }
+            CALL => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    struct1: Struct::Call,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
             ADAPT => {
                 let mut scope_parser = ScopeParser::new(ParseCtx {
-                    enable: !self.ctx.enable,
+                    enable: true,
+                    struct1: Struct::Adapt,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            ASK => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    struct1: Struct::Ask,
                     ..self.ctx
                 });
                 scope_parser.parse(src)
@@ -483,7 +492,7 @@ impl ComposeParser {
     {
         let list = tokens.map(Token::into_repr).collect::<List<_>>();
         let list = From::from(list);
-        let tag = From::from(Symbol::from_str(ADAPT));
+        let tag = From::from(Symbol::from_str(concatcp!(SEPARATOR)));
         let adapt = From::from(Adapt::new(tag, list));
         Some(adapt)
     }
@@ -491,6 +500,7 @@ impl ComposeParser {
     fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
         match self.ctx.struct1 {
             Struct::Call => From::from(Call::new(left, right)),
+            Struct::Adapt => From::from(Adapt::new(left, right)),
             Struct::Ask => From::from(Ask::new(left, right)),
         }
     }

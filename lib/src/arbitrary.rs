@@ -95,8 +95,8 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // number
         weight, // byte
         1,      // pair
-        1,      // adapt
         1,      // call
+        1,      // adapt
         1,      // ask
         1,      // list
         1,      // map
@@ -118,8 +118,8 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         5 => Val::Number(any_number(rng).into()),
         6 => Val::Byte(any_byte(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
-        8 => Val::Adapt(any_adapt(rng, new_depth).into()),
-        9 => Val::Call(any_call(rng, new_depth).into()),
+        8 => Val::Call(any_call(rng, new_depth).into()),
+        9 => Val::Adapt(any_adapt(rng, new_depth).into()),
         10 => Val::Ask(any_ask(rng, new_depth).into()),
         11 => Val::List(any_list(rng, new_depth).into()),
         12 => Val::Map(any_map(rng, new_depth).into()),
@@ -193,12 +193,12 @@ pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> Pair<Val, Val> {
     Pair::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_adapt(rng: &mut SmallRng, depth: usize) -> Adapt<Val, Val> {
-    Adapt::new(any_val(rng, depth), any_val(rng, depth))
-}
-
 pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
+}
+
+pub(crate) fn any_adapt(rng: &mut SmallRng, depth: usize) -> Adapt<Val, Val> {
+    Adapt::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
@@ -263,16 +263,16 @@ pub(crate) fn any_composite_mode<M: Arbitrary>(
 ) -> CompositeMode<M> {
     let symbol = any_symbol_mode(rng);
     let pair = any_pair_mode(rng, depth);
-    let adapt = any_adapt_mode(rng, depth);
     let call = any_call_mode(rng, depth);
+    let adapt = any_adapt_mode(rng, depth);
     let ask = any_ask_mode(rng, depth);
     let list = any_list_mode(rng, depth);
     let map = any_map_mode(rng, depth);
     CompositeMode {
         symbol,
         pair,
-        adapt,
         call,
+        adapt,
         ask,
         list,
         map,
@@ -307,35 +307,6 @@ impl<M: Arbitrary> Arbitrary for PairMode<M> {
     }
 }
 
-pub(crate) fn any_adapt_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> AdaptMode<M> {
-    AdaptMode::any(rng, depth)
-}
-
-impl<M: Arbitrary> Arbitrary for AdaptMode<M> {
-    fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-            1,      // eval
-        ];
-        let i = sample(rng, weights);
-        let new_depth = depth + 1;
-        match i {
-            0 => AdaptMode::Id,
-            1 => {
-                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
-                AdaptMode::Form(adapt)
-            }
-            2 => {
-                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
-                AdaptMode::Eval(adapt)
-            }
-            _ => unreachable!(),
-        }
-    }
-}
-
 pub(crate) fn any_call_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> CallMode<M> {
     CallMode::any(rng, depth)
 }
@@ -359,6 +330,35 @@ impl<M: Arbitrary> Arbitrary for CallMode<M> {
             2 => {
                 let call = Call::new(M::any(rng, new_depth), M::any(rng, new_depth));
                 CallMode::Eval(call)
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+pub(crate) fn any_adapt_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> AdaptMode<M> {
+    AdaptMode::any(rng, depth)
+}
+
+impl<M: Arbitrary> Arbitrary for AdaptMode<M> {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let weight: usize = 1 << min(depth, 32);
+        let weights = [
+            weight, // id
+            1,      // form
+            1,      // eval
+        ];
+        let i = sample(rng, weights);
+        let new_depth = depth + 1;
+        match i {
+            0 => AdaptMode::Id,
+            1 => {
+                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                AdaptMode::Form(adapt)
+            }
+            2 => {
+                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                AdaptMode::Eval(adapt)
             }
             _ => unreachable!(),
         }

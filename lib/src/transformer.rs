@@ -43,11 +43,11 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where
         Ctx: CtxMeta<'a>;
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Output
+    fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 
-    fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 

@@ -96,25 +96,6 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
         }
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self.adapt {
-            AdaptMode::Id => Id.transform_adapt(ctx, adapt),
-            AdaptMode::Form(mode) => {
-                let spec = SelfTrans::new(self, mode.spec);
-                let value = SelfTrans::new(self, mode.value);
-                FormCore::transform_adapt(&spec, &value, ctx, adapt)
-            }
-            AdaptMode::Eval(mode) => {
-                let spec = SelfTrans::new(self, mode.spec);
-                let value = SelfTrans::new(self, mode.value);
-                EvalCore::transform_adapt(&spec, &value, ctx, adapt)
-            }
-        }
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -130,6 +111,25 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
                 let func = SelfTrans::new(self, mode.func);
                 let input = SelfTrans::new(self, mode.input);
                 EvalCore::transform_call(&func, &input, ctx, call)
+            }
+        }
+    }
+
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self.adapt {
+            AdaptMode::Id => Id.transform_adapt(ctx, adapt),
+            AdaptMode::Form(mode) => {
+                let spec = SelfTrans::new(self, mode.spec);
+                let value = SelfTrans::new(self, mode.value);
+                FormCore::transform_adapt(&spec, &value, ctx, adapt)
+            }
+            AdaptMode::Eval(mode) => {
+                let spec = SelfTrans::new(self, mode.spec);
+                let value = SelfTrans::new(self, mode.value);
+                EvalCore::transform_adapt(&spec, &value, ctx, adapt)
             }
         }
     }

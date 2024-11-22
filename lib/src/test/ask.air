@@ -10,11 +10,11 @@ do [a = 1 '?' 2, ask.output .a]
 -----
 2
 =====
-ask.function ! 1 ? 2
+ask.function ; 1 ? 2
 -----
 1
 =====
-ask.output ! 1 ? 2
+ask.output ; 1 ? 2
 -----
 2
 =====

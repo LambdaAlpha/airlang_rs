@@ -31,8 +31,8 @@ use crate::{
 pub struct CompositeMode<M> {
     pub symbol: SymbolMode,
     pub pair: PairMode<M>,
-    pub adapt: AdaptMode<M>,
     pub call: CallMode<M>,
+    pub adapt: AdaptMode<M>,
     pub ask: AskMode<M>,
     pub list: ListMode<M>,
     pub map: MapMode<M>,
@@ -69,18 +69,18 @@ impl ByVal<Val> for CompositeMode<Mode> {
         self.pair.transform(ctx, pair)
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        self.adapt.transform(ctx, adapt)
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         self.call.transform(ctx, call)
+    }
+
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        self.adapt.transform(ctx, adapt)
     }
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
@@ -118,8 +118,8 @@ where
         Self {
             symbol: SymbolMode::from(mode),
             pair: PairMode::from(mode),
-            adapt: AdaptMode::from(mode),
             call: CallMode::from(mode),
+            adapt: AdaptMode::from(mode),
             ask: AskMode::from(mode),
             list: ListMode::from(mode),
             map: MapMode::from(mode),

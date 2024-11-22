@@ -78,17 +78,6 @@ impl ByVal<Val> for PrimitiveMode {
         }
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        match self {
-            PrimitiveMode::Id => Id.transform_adapt(ctx, adapt),
-            PrimitiveMode::Form => Form.transform_adapt(ctx, adapt),
-            PrimitiveMode::Eval => Eval.transform_adapt(ctx, adapt),
-        }
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -97,6 +86,17 @@ impl ByVal<Val> for PrimitiveMode {
             PrimitiveMode::Id => Id.transform_call(ctx, call),
             PrimitiveMode::Form => Form.transform_call(ctx, call),
             PrimitiveMode::Eval => Eval.transform_call(ctx, call),
+        }
+    }
+
+    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            PrimitiveMode::Id => Id.transform_adapt(ctx, adapt),
+            PrimitiveMode::Form => Form.transform_adapt(ctx, adapt),
+            PrimitiveMode::Eval => Eval.transform_adapt(ctx, adapt),
         }
     }
 

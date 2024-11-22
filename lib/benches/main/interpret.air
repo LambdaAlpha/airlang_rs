@@ -1,5 +1,5 @@
-"bench interpret" ; do ! [
-  ctx = context ! {
+"bench interpret" ! do ; [
+  ctx = context ; {
     variables : {
       do : :,
       = : :,
@@ -9,9 +9,9 @@
       + : :,
     }
   },
-  f = function ! {
+  f = function ; {
     input_name : .n,
-    body : do ! [
+    body : do ; [
       sum = 0,
       n for i : [
         (0 == i % 3) continue .,

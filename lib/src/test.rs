@@ -94,13 +94,13 @@ fn test_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_adapt() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/adapt.air"), "test/adapt.air")
+fn test_call() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/call.air"), "test/call.air")
 }
 
 #[test]
-fn test_call() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/call.air"), "test/call.air")
+fn test_adapt() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/adapt.air"), "test/adapt.air")
 }
 
 #[test]

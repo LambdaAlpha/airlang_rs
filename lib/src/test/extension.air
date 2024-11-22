@@ -30,14 +30,14 @@ do [a = func_ext, b = func_ext, .a == .b]
 -----
 true
 =====
-. | func_ext '!' 1
+. | func_ext ';' 1
 -----
 1
 =====
-call.apply ! func_ext '!' 1
+call.apply ; func_ext ';' 1
 -----
 1
 =====
-do [p = case.cache ! func_ext '!' true, case.is_cache .p]
+do [p = case.cache ; func_ext ';' true, case.is_cache .p]
 -----
 true

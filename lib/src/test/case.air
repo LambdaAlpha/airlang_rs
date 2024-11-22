@@ -1,5 +1,5 @@
 do [
-    p = case ! {
+    p = case ; {
         function : not,
         input : 1,
         output : 2,
@@ -10,7 +10,7 @@ do [
 1
 =====
 do [
-    p = case ! {
+    p = case ; {
         function : not,
         input : 1,
         output : 2,
@@ -21,7 +21,7 @@ do [
 2
 =====
 do [
-    p = case ! {
+    p = case ; {
         function : not,
         input : 1,
         output : 2,
@@ -32,7 +32,7 @@ do [
 true
 =====
 do [
-    p = case ! {
+    p = case ; {
         function : "not",
         input : 1,
         output : 2,
@@ -43,21 +43,21 @@ do [
 true
 =====
 do [
-    map_mode = mode ! {map : {} : id : eval},
-    m = map_mode ! {
+    map_mode = mode ; {map : {} : id : eval},
+    m = map_mode ; {
         function : not,
         input : true,
         output : false,
     },
-    .m == case.represent ! case ! m
+    .m == case.represent ; case ; m
 ]
 -----
 true
 =====
 do [
-    m = case.represent ! case.cache ! not '!' true,
-    map_mode = mode ! {map : {} : id : eval},
-    expected = map_mode ! {
+    m = case.represent ; case.cache ; not ';' true,
+    map_mode = mode ; {map : {} : id : eval},
+    expected = map_mode ; {
         function : not,
         input : true,
         output : false,
@@ -69,40 +69,40 @@ do [
 true
 =====
 do [
-    p = case ! {
+    p = case ; {
         function : not,
         input : 1,
         output : 2,
     },
-    tp = type_of ! .p,
+    tp = type_of ; .p,
     (.tp == ..case) and (case.is_cache .p) == false
 ]
 -----
 true
 =====
 do [
-    p = case.cache ! not '!' (not false),
+    p = case.cache ; not ';' (not false),
     case.input .p
 ]
 -----
 true
 =====
 do [
-    p = case.cache ! not '!' true,
+    p = case.cache ; not ';' true,
     case.output .p
 ]
 -----
 false
 =====
 do [
-    p = case.cache ! not '!' true,
+    p = case.cache ; not ';' true,
     (case.function .p) == .not
 ]
 -----
 true
 =====
 do [
-    p = case.cache ! not '!' true,
+    p = case.cache ; not ';' true,
     case.is_cache .p
 ]
 -----
