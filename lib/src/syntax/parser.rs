@@ -122,6 +122,43 @@ pub(crate) trait ParseRepr:
 {
 }
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+struct ParseCtx {
+    enable: bool,
+    arity: Arity,
+    struct1: Struct,
+    direction: Direction,
+}
+
+impl Default for ParseCtx {
+    fn default() -> Self {
+        Self {
+            enable: true,
+            arity: Arity::Two,
+            struct1: Struct::Call,
+            direction: Direction::Right,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum Arity {
+    One,
+    Two,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum Struct {
+    Call,
+    Ask,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum Direction {
+    Left,
+    Right,
+}
+
 pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseError> {
     let ret = top::<T, VerboseError<&str>>(src).finish();
     match ret {
@@ -138,7 +175,7 @@ where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = all_consuming(trim(compose::<C_ON, 2, D_RIGHT, F_CALL, _, _>));
+    let f = all_consuming(trim(ComposeParser::new(ParseCtx::default())));
     context("top", f)(src)
 }
 
@@ -192,54 +229,65 @@ where
     delimited_cut(left, trim(f), right)
 }
 
-// compose
-const C_OFF: bool = false;
-const C_ON: bool = true;
+#[derive(Copy, Clone)]
+struct ScopeParser {
+    ctx: ParseCtx,
+}
 
-// direction
-const D_LEFT: bool = false;
-const D_RIGHT: bool = true;
-
-// function
-const F_CALL: u8 = 0;
-const F_ASK: u8 = 1;
-
-fn scope<'a, const C: bool, const N: u8, const D: bool, const F: u8, T, E>(
-    src: &'a str,
-) -> IResult<&'a str, T, E>
+impl<'a, T, E> Parser<&'a str, T, E> for ScopeParser
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let f = delimited_trim(SCOPE_LEFT, compose::<C, N, D, F, _, _>, SCOPE_RIGHT);
-    context("scope", f)(src)
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
+        let f = delimited_trim(SCOPE_LEFT, ComposeParser::new(self.ctx), SCOPE_RIGHT);
+        context("scope", f)(input)
+    }
 }
 
-fn token<'a, const C: bool, const N: u8, const D: bool, const F: u8, T: ParseRepr, E>(
-    src: &'a str,
-) -> IResult<&'a str, Token<T>, E>
+impl ScopeParser {
+    fn new(ctx: ParseCtx) -> Self {
+        Self { ctx }
+    }
+}
+
+#[derive(Copy, Clone)]
+struct TokenParser {
+    ctx: ParseCtx,
+}
+
+impl<'a, T, E> Parser<&'a str, Token<T>, E> for TokenParser
 where
+    T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let (src, first) = peek(anychar)(src)?;
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, Token<T>, E> {
+        let (src, first) = peek(anychar)(input)?;
 
-    let parser = match first {
-        // delimiters
-        LIST_LEFT => |s| map(list1::<C, N, D, F, _, _>, Token::Default)(s),
-        LIST_RIGHT => fail,
-        MAP_LEFT => |s| map(map1::<C, N, D, F, _, _>, Token::Default)(s),
-        MAP_RIGHT => fail,
-        SCOPE_LEFT => |s| map(scope::<C, N, D, F, _, _>, Token::Default)(s),
-        SCOPE_RIGHT => fail,
-        SEPARATOR => fail,
-        SPACE => fail,
-        TEXT_QUOTE => |s| map(rich_text, Token::Default)(s),
-        SYMBOL_QUOTE => |s| map(rich_symbol, Token::Default)(s),
+        let parser = move |s| match first {
+            // delimiters
+            LIST_LEFT => map(ListParser::new(self.ctx), Token::Default)(s),
+            LIST_RIGHT => fail(s),
+            MAP_LEFT => map(MapParser::new(self.ctx), Token::Default)(s),
+            MAP_RIGHT => fail(s),
+            SCOPE_LEFT => map(ScopeParser::new(self.ctx), Token::Default)(s),
+            SCOPE_RIGHT => fail(s),
+            SEPARATOR => fail(s),
+            SPACE => fail(s),
+            TEXT_QUOTE => map(rich_text, Token::Default)(s),
+            SYMBOL_QUOTE => map(rich_symbol, Token::Default)(s),
 
-        s if is_symbol(s) => trivial_symbol::<C, N, D, F, _, _>,
-        _ => fail,
-    };
-    context("token", parser)(src)
+            sym if is_symbol(sym) => TrivialSymbolParser::new(self.ctx).parse(s),
+            _ => fail(s),
+        };
+        context("token", parser)(src)
+    }
+}
+
+impl TokenParser {
+    fn new(ctx: ParseCtx) -> Self {
+        Self { ctx }
+    }
 }
 
 fn is_trivial_symbol(c: char) -> bool {
@@ -253,51 +301,104 @@ fn is_symbol(c: char) -> bool {
     Symbol::is_symbol(c)
 }
 
-fn trivial_symbol<'a, const C: bool, const N: u8, const D: bool, const F: u8, T, E>(
-    src: &'a str,
-) -> IResult<&'a str, Token<T>, E>
+#[derive(Copy, Clone)]
+struct TrivialSymbolParser {
+    ctx: ParseCtx,
+}
+
+impl<'a, T, E> Parser<&'a str, Token<T>, E> for TrivialSymbolParser
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let (rest, s) = take_while(is_trivial_symbol)(src)?;
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, Token<T>, E> {
+        let (rest, s) = take_while(is_trivial_symbol)(input)?;
 
-    // the only special case
-    let mut chars = s.chars();
-    let first = chars.next().unwrap();
-    if first.is_ascii_digit() {
-        let (_, token) = all_consuming(int_or_number)(s)?;
-        return Ok((rest, Token::Default(token)));
-    }
-
-    let parser = |src| match s {
-        UNIT => alt((scope::<C_ON, 1, D, F, _, _>, success(From::from(Unit))))(src),
-        TRUE => success(From::from(Bool::t()))(src),
-        FALSE => success(From::from(Bool::f()))(src),
-        LEFT => scope::<C_ON, N, D_LEFT, F, _, _>(src),
-        RIGHT => scope::<C_ON, N, D_RIGHT, F, _, _>(src),
-        CALL => scope::<C_ON, N, D, F_CALL, _, _>(src),
-        ASK => scope::<C_ON, N, D, F_ASK, _, _>(src),
-        PAIR => scope::<C_ON, 2, D, F, _, _>(src),
-        ADAPT => {
-            if C == C_ON {
-                scope::<C_OFF, N, D, F, _, _>(src)
-            } else {
-                scope::<C_ON, N, D, F, _, _>(src)
-            }
+        // the only special case
+        let mut chars = s.chars();
+        let first = chars.next().unwrap();
+        if first.is_ascii_digit() {
+            let (_, token) = all_consuming(int_or_number)(s)?;
+            return Ok((rest, Token::Default(token)));
         }
-        INT => int(src),
-        NUMBER => number(src),
-        BYTE => byte(src),
-        RICH => alt((rich_text, rich_symbol))(src),
-        RAW => alt((raw_text, raw_symbol))(src),
-        _ => fail(src),
-    };
-    let mut f = alt((
-        map(parser, Token::Default),
-        map(success(Symbol::from_str(s)), Token::Unquote),
-    ));
-    f(rest)
+
+        let parser = |src| match s {
+            UNIT => {
+                let scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    arity: Arity::One,
+                    ..self.ctx
+                });
+                alt((scope_parser, success(From::from(Unit))))(src)
+            }
+            TRUE => success(From::from(Bool::t()))(src),
+            FALSE => success(From::from(Bool::f()))(src),
+            LEFT => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    direction: Direction::Left,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            RIGHT => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    direction: Direction::Right,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            CALL => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    struct1: Struct::Call,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            ASK => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    struct1: Struct::Ask,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            PAIR => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    arity: Arity::Two,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            ADAPT => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: !self.ctx.enable,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            INT => int(src),
+            NUMBER => number(src),
+            BYTE => byte(src),
+            RICH => alt((rich_text, rich_symbol))(src),
+            RAW => alt((raw_text, raw_symbol))(src),
+            _ => fail(src),
+        };
+        let mut f = alt((
+            map(parser, Token::Default),
+            map(success(Symbol::from_str(s)), Token::Unquote),
+        ));
+        f(rest)
+    }
+}
+
+impl TrivialSymbolParser {
+    fn new(ctx: ParseCtx) -> Self {
+        Self { ctx }
+    }
 }
 
 #[derive(Clone)]
@@ -315,137 +416,138 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn compose<'a, const C: bool, const N: u8, const D: bool, const F: u8, T, E>(
-    src: &'a str,
-) -> IResult<&'a str, T, E>
+#[derive(Copy, Clone)]
+struct ComposeParser {
+    ctx: ParseCtx,
+}
+
+impl<'a, T, E> Parser<&'a str, T, E> for ComposeParser
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let tokens = separated_list1(empty1, token::<C, N, D, F, _, _>);
-    let f = map_opt(tokens, |tokens| {
-        compose_tokens::<C, N, D, F, _, _>(tokens.into_iter())
-    });
-    context("compose", f)(src)
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
+        let tokens = separated_list1(empty1, TokenParser::new(self.ctx));
+        let f = map_opt(tokens, |tokens| self.compose_tokens(tokens.into_iter()));
+        context("compose", f)(input)
+    }
 }
 
-fn compose_tokens<const C: bool, const N: u8, const D: bool, const F: u8, T, I>(
-    mut tokens: I,
-) -> Option<T>
-where
-    T: ParseRepr,
-    I: ExactSizeIterator<Item = Token<T>> + DoubleEndedIterator<Item = Token<T>>,
-{
-    let len = tokens.len();
-    if len == 0 {
-        return None;
+impl ComposeParser {
+    fn new(ctx: ParseCtx) -> Self {
+        ComposeParser { ctx }
     }
-    if len == 1 {
-        let repr = tokens.next().unwrap().into_repr();
-        return Some(repr);
-    }
-    if C == C_OFF {
-        return compose_none(tokens);
-    }
-    if len == 2 {
-        let func = tokens.next().unwrap().into_repr();
-        let input = tokens.next().unwrap().into_repr();
-        return Some(compose_two::<F, _>(func, input));
-    }
-    if N == 2 {
-        if len % 2 == 0 {
+
+    fn compose_tokens<T, I>(&self, mut tokens: I) -> Option<T>
+    where
+        T: ParseRepr,
+        I: ExactSizeIterator<Item = Token<T>> + DoubleEndedIterator<Item = Token<T>>,
+    {
+        let len = tokens.len();
+        if len == 0 {
             return None;
         }
-        return if D == D_RIGHT {
-            compose_many2::<D_RIGHT, F, _, _>(tokens.rev())
-        } else {
-            compose_many2::<D_LEFT, F, _, _>(tokens)
-        };
+        if len == 1 {
+            let repr = tokens.next().unwrap().into_repr();
+            return Some(repr);
+        }
+        if !self.ctx.enable {
+            return Self::compose_none(tokens);
+        }
+        if len == 2 {
+            let func = tokens.next().unwrap().into_repr();
+            let input = tokens.next().unwrap().into_repr();
+            return Some(self.compose_two(func, input));
+        }
+        match self.ctx.arity {
+            Arity::One => match self.ctx.direction {
+                Direction::Left => self.compose_many1(tokens),
+                Direction::Right => self.compose_many1(tokens.rev()),
+            },
+            Arity::Two => {
+                if len % 2 == 0 {
+                    return None;
+                }
+                match self.ctx.direction {
+                    Direction::Left => self.compose_many2(tokens),
+                    Direction::Right => self.compose_many2(tokens.rev()),
+                }
+            }
+        }
     }
-    if N == 1 {
-        return if D == D_RIGHT {
-            compose_many1::<D_RIGHT, F, _, _>(tokens.rev())
-        } else {
-            compose_many1::<D_LEFT, F, _, _>(tokens)
-        };
+
+    fn compose_none<T, I>(tokens: I) -> Option<T>
+    where
+        T: ParseRepr,
+        I: Iterator<Item = Token<T>>,
+    {
+        let list = tokens.map(Token::into_repr).collect::<List<_>>();
+        let list = From::from(list);
+        let tag = From::from(Symbol::from_str(ADAPT));
+        let adapt = From::from(Adapt::new(tag, list));
+        Some(adapt)
     }
-    None
-}
 
-fn compose_none<T, I>(tokens: I) -> Option<T>
-where
-    T: ParseRepr,
-    I: Iterator<Item = Token<T>>,
-{
-    let list = tokens.map(Token::into_repr).collect::<List<_>>();
-    let list = From::from(list);
-    let tag = From::from(Symbol::from_str(ADAPT));
-    let adapt = From::from(Adapt::new(tag, list));
-    Some(adapt)
-}
-
-fn compose_two<const F: u8, T: ParseRepr>(left: T, right: T) -> T {
-    if F == F_CALL {
-        From::from(Call::new(left, right))
-    } else {
-        From::from(Ask::new(left, right))
+    fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
+        match self.ctx.struct1 {
+            Struct::Call => From::from(Call::new(left, right)),
+            Struct::Ask => From::from(Ask::new(left, right)),
+        }
     }
-}
 
-fn compose_many1<const D: bool, const F: u8, T, I>(mut iter: I) -> Option<T>
-where
-    T: ParseRepr,
-    I: Iterator<Item = Token<T>>,
-{
-    let mut first = iter.next().unwrap().into_repr();
-    loop {
-        let Some(second) = iter.next() else {
-            break;
-        };
-        first = if D == D_RIGHT {
-            compose_two::<F, _>(second.into_repr(), first)
-        } else {
-            compose_two::<F, _>(first, second.into_repr())
-        };
+    fn compose_many1<T, I>(&self, mut iter: I) -> Option<T>
+    where
+        T: ParseRepr,
+        I: Iterator<Item = Token<T>>,
+    {
+        let mut first = iter.next().unwrap().into_repr();
+        loop {
+            let Some(second) = iter.next() else {
+                break;
+            };
+            first = match self.ctx.direction {
+                Direction::Left => self.compose_two(first, second.into_repr()),
+                Direction::Right => self.compose_two(second.into_repr(), first),
+            }
+        }
+        Some(first)
     }
-    Some(first)
-}
 
-fn compose_many2<const D: bool, const F: u8, T, I>(mut iter: I) -> Option<T>
-where
-    T: ParseRepr,
-    I: Iterator<Item = Token<T>>,
-{
-    let mut first = iter.next().unwrap();
-    loop {
-        let Some(middle) = iter.next() else {
-            break;
-        };
-        let last = iter.next()?;
-        let (left, right) = if D == D_RIGHT {
-            left_right(last.into_repr(), first)
-        } else {
-            left_right(first.into_repr(), last)
-        };
-        first = Token::Default(compose_infix::<F, _>(left, middle, right));
+    fn compose_many2<T, I>(&self, mut iter: I) -> Option<T>
+    where
+        T: ParseRepr,
+        I: Iterator<Item = Token<T>>,
+    {
+        let mut first = iter.next().unwrap();
+        loop {
+            let Some(middle) = iter.next() else {
+                break;
+            };
+            let last = iter.next()?;
+            let (left, right) = match self.ctx.direction {
+                Direction::Left => left_right(first.into_repr(), last),
+                Direction::Right => left_right(last.into_repr(), first),
+            };
+            first = Token::Default(self.compose_infix(left, middle, right));
+        }
+        Some(first.into_repr())
     }
-    Some(first.into_repr())
-}
 
-fn compose_infix<const F: u8, T: ParseRepr>(left: T, middle: Token<T>, right: T) -> T {
-    let middle = match middle {
-        Token::Unquote(s) => match &*s {
-            PAIR => return From::from(Pair::new(left, right)),
-            CALL => return From::from(Call::new(left, right)),
-            ASK => return From::from(Ask::new(left, right)),
-            ADAPT => return From::from(Adapt::new(left, right)),
-            _ => From::from(s),
-        },
-        Token::Default(middle) => middle,
-    };
-    let pair = Pair::new(left, right);
-    let pair = From::from(pair);
-    compose_two::<F, _>(middle, pair)
+    fn compose_infix<T: ParseRepr>(&self, left: T, middle: Token<T>, right: T) -> T {
+        let middle = match middle {
+            Token::Unquote(s) => match &*s {
+                PAIR => return From::from(Pair::new(left, right)),
+                CALL => return From::from(Call::new(left, right)),
+                ASK => return From::from(Ask::new(left, right)),
+                ADAPT => return From::from(Adapt::new(left, right)),
+                _ => From::from(s),
+            },
+            Token::Default(middle) => middle,
+        };
+        let pair = Pair::new(left, right);
+        let pair = From::from(pair);
+        self.compose_two(middle, pair)
+    }
 }
 
 fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
@@ -475,59 +577,79 @@ where
     })
 }
 
-fn list1<'a, const C: bool, const N: u8, const D: bool, const F: u8, T, E>(
-    src: &'a str,
-) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let items = items(compose::<C, N, D, F, _, _>, char1(SEPARATOR));
-    let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
-    let f = map(delimited_items, |list| From::from(List::from(list)));
-    context("list", f)(src)
+#[derive(Copy, Clone)]
+struct ListParser {
+    ctx: ParseCtx,
 }
 
-fn map1<'a, const C: bool, const N: u8, const D: bool, const F: u8, T, E>(
-    src: &'a str,
-) -> IResult<&'a str, T, E>
+impl<'a, T, E> Parser<&'a str, T, E> for ListParser
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let items = items(key_value::<C, N, D, F, _, _>, char1(SEPARATOR));
-    let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
-    let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
-    context("map", f)(src)
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
+        let items = items(ComposeParser::new(self.ctx), char1(SEPARATOR));
+        let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
+        let f = map(delimited_items, |list| From::from(List::from(list)));
+        context("list", f)(input)
+    }
 }
 
-fn key_value<'a, const C: bool, const N: u8, const D: bool, const F: u8, T, E>(
-    src: &'a str,
-) -> IResult<&'a str, (T, T), E>
+impl ListParser {
+    fn new(ctx: ParseCtx) -> Self {
+        ListParser { ctx }
+    }
+}
+
+#[derive(Copy, Clone)]
+struct MapParser {
+    ctx: ParseCtx,
+}
+
+impl<'a, T, E> Parser<&'a str, T, E> for MapParser
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let (rest, tokens) = separated_list1(empty1, token::<C, N, D, F, _, _>)(src)?;
-    let mut tokens = tokens.into_iter();
-    let key: T = tokens.next().unwrap().into_repr();
-    if tokens.len() == 0 {
-        return Ok((rest, (key, From::from(Unit))));
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
+        let items = items(|s| self.key_value(s), char1(SEPARATOR));
+        let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
+        let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
+        context("map", f)(input)
     }
-    let Token::Unquote(s) = tokens.next().unwrap() else {
-        return fail(src);
-    };
-    if &*s != PAIR {
-        return fail(src);
+}
+
+impl MapParser {
+    fn new(ctx: ParseCtx) -> Self {
+        MapParser { ctx }
     }
-    if C == C_ON && tokens.len() == 1 {
-        let value = tokens.next().unwrap();
-        return Ok((rest, left_right(key, value)));
+
+    fn key_value<'a, T, E>(&self, src: &'a str) -> IResult<&'a str, (T, T), E>
+    where
+        T: ParseRepr,
+        E: ParseError<&'a str> + ContextError<&'a str>,
+    {
+        let (rest, tokens) = separated_list1(empty1, TokenParser::new(self.ctx))(src)?;
+        let mut tokens = tokens.into_iter();
+        let key: T = tokens.next().unwrap().into_repr();
+        if tokens.len() == 0 {
+            return Ok((rest, (key, From::from(Unit))));
+        }
+        let Token::Unquote(s) = tokens.next().unwrap() else {
+            return fail(src);
+        };
+        if &*s != PAIR {
+            return fail(src);
+        }
+        if self.ctx.enable && tokens.len() == 1 {
+            let value = tokens.next().unwrap();
+            return Ok((rest, left_right(key, value)));
+        }
+        let Some(value) = ComposeParser::new(self.ctx).compose_tokens(tokens) else {
+            return fail(src);
+        };
+        Ok((rest, (key, value)))
     }
-    let Some(value) = compose_tokens::<C, N, D, F, _, _>(tokens) else {
-        return fail(src);
-    };
-    Ok((rest, (key, value)))
 }
 
 fn rich_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
