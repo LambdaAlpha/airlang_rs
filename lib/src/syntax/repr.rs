@@ -8,7 +8,7 @@ use std::{
 };
 
 use crate::{
-    Adapt,
+    Abstract,
     Ask,
     Bool,
     Byte,
@@ -26,7 +26,7 @@ use crate::{
         parse,
         parser::ParseRepr,
         repr::{
-            adapt::AdaptRepr,
+            abstract1::AbstractRepr,
             ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
@@ -47,7 +47,7 @@ pub enum Repr {
     Byte(Byte),
     Pair(Box<PairRepr>),
     Call(Box<CallRepr>),
-    Adapt(Box<AdaptRepr>),
+    Abstract(Box<AbstractRepr>),
     Ask(Box<AskRepr>),
     List(ListRepr),
     Map(MapRepr),
@@ -125,15 +125,15 @@ impl From<Box<CallRepr>> for Repr {
     }
 }
 
-impl From<AdaptRepr> for Repr {
-    fn from(a: AdaptRepr) -> Self {
-        Repr::Adapt(Box::new(a))
+impl From<AbstractRepr> for Repr {
+    fn from(a: AbstractRepr) -> Self {
+        Repr::Abstract(Box::new(a))
     }
 }
 
-impl From<Box<AdaptRepr>> for Repr {
-    fn from(a: Box<AdaptRepr>) -> Self {
-        Repr::Adapt(a)
+impl From<Box<AbstractRepr>> for Repr {
+    fn from(a: Box<AbstractRepr>) -> Self {
+        Repr::Abstract(a)
     }
 }
 
@@ -223,10 +223,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Repr::Adapt(adapt) => {
-                let spec = (&adapt.spec).try_into()?;
-                let value = (&adapt.value).try_into()?;
-                GenRepr::Adapt(Box::new(Adapt::new(spec, value)))
+            Repr::Abstract(abstract1) => {
+                let func = (&abstract1.func).try_into()?;
+                let input = (&abstract1.input).try_into()?;
+                GenRepr::Abstract(Box::new(Abstract::new(func, input)))
             }
             Repr::Ask(ask) => {
                 let func = (&ask.func).try_into()?;
@@ -260,7 +260,7 @@ pub(crate) mod pair;
 
 pub(crate) mod call;
 
-pub(crate) mod adapt;
+pub(crate) mod abstract1;
 
 pub(crate) mod ask;
 

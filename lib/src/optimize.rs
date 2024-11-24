@@ -3,6 +3,6 @@ use crate::{
     Val,
 };
 
-pub(crate) fn optimize(_meta: FuncVal, value: Val) -> Val {
-    value
+pub(crate) fn optimize(_func: FuncVal, input: Val) -> Val {
+    input
 }

@@ -17,8 +17,8 @@ use rand::{
 };
 
 use crate::{
-    Adapt,
-    AdaptMode,
+    Abstract,
+    AbstractMode,
     Ask,
     AskMode,
     Cache,
@@ -96,7 +96,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // byte
         1,      // pair
         1,      // call
-        1,      // adapt
+        1,      // abstract
         1,      // ask
         1,      // list
         1,      // map
@@ -119,7 +119,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         6 => Val::Byte(any_byte(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Call(any_call(rng, new_depth).into()),
-        9 => Val::Adapt(any_adapt(rng, new_depth).into()),
+        9 => Val::Abstract(any_abstract(rng, new_depth).into()),
         10 => Val::Ask(any_ask(rng, new_depth).into()),
         11 => Val::List(any_list(rng, new_depth).into()),
         12 => Val::Map(any_map(rng, new_depth).into()),
@@ -197,8 +197,8 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_adapt(rng: &mut SmallRng, depth: usize) -> Adapt<Val, Val> {
-    Adapt::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val, Val> {
+    Abstract::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
@@ -264,7 +264,7 @@ pub(crate) fn any_composite_mode<M: Arbitrary>(
     let symbol = any_symbol_mode(rng);
     let pair = any_pair_mode(rng, depth);
     let call = any_call_mode(rng, depth);
-    let adapt = any_adapt_mode(rng, depth);
+    let abstract1 = any_abstract_mode(rng, depth);
     let ask = any_ask_mode(rng, depth);
     let list = any_list_mode(rng, depth);
     let map = any_map_mode(rng, depth);
@@ -272,7 +272,7 @@ pub(crate) fn any_composite_mode<M: Arbitrary>(
         symbol,
         pair,
         call,
-        adapt,
+        abstract1,
         ask,
         list,
         map,
@@ -336,11 +336,11 @@ impl<M: Arbitrary> Arbitrary for CallMode<M> {
     }
 }
 
-pub(crate) fn any_adapt_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> AdaptMode<M> {
-    AdaptMode::any(rng, depth)
+pub(crate) fn any_abstract_mode<M: Arbitrary>(rng: &mut SmallRng, depth: usize) -> AbstractMode<M> {
+    AbstractMode::any(rng, depth)
 }
 
-impl<M: Arbitrary> Arbitrary for AdaptMode<M> {
+impl<M: Arbitrary> Arbitrary for AbstractMode<M> {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let weight: usize = 1 << min(depth, 32);
         let weights = [
@@ -351,14 +351,14 @@ impl<M: Arbitrary> Arbitrary for AdaptMode<M> {
         let i = sample(rng, weights);
         let new_depth = depth + 1;
         match i {
-            0 => AdaptMode::Id,
+            0 => AbstractMode::Id,
             1 => {
-                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
-                AdaptMode::Form(adapt)
+                let abstract1 = Abstract::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                AbstractMode::Form(abstract1)
             }
             2 => {
-                let adapt = Adapt::new(M::any(rng, new_depth), M::any(rng, new_depth));
-                AdaptMode::Eval(adapt)
+                let abstract1 = Abstract::new(M::any(rng, new_depth), M::any(rng, new_depth));
+                AbstractMode::Eval(abstract1)
             }
             _ => unreachable!(),
         }

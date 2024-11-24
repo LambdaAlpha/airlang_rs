@@ -18,7 +18,7 @@ use crate::{
         parse,
         repr::{
             Repr,
-            adapt::AdaptRepr,
+            abstract1::AbstractRepr,
             ask::AskRepr,
             call::CallRepr,
             list::ListRepr,
@@ -48,7 +48,7 @@ mod pair;
 
 mod call;
 
-mod adapt;
+mod abstract1;
 
 mod ask;
 
@@ -103,8 +103,8 @@ fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn adapt(func: Repr, value: Repr) -> Repr {
-    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
+fn abstract1(func: Repr, value: Repr) -> Repr {
+    Repr::Abstract(Box::new(AbstractRepr::new(func, value)))
 }
 
 fn ask(func: Repr, output: Repr) -> Repr {
@@ -113,8 +113,8 @@ fn ask(func: Repr, output: Repr) -> Repr {
 
 fn no_compose(v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(concatcp!(SEPARATOR)));
-    let value = Repr::List(v.into());
-    Repr::Adapt(Box::new(AdaptRepr::new(func, value)))
+    let input = Repr::List(v.into());
+    Repr::Abstract(Box::new(AbstractRepr::new(func, input)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -146,8 +146,8 @@ fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
     )))
 }
 
-fn infix_adapt(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Adapt(Box::new(AdaptRepr::new(
+fn infix_abstract(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Abstract(Box::new(AbstractRepr::new(
         middle,
         Repr::Pair(Box::new(PairRepr::new(left, right))),
     )))
@@ -363,17 +363,17 @@ fn test_generate_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_adapt() -> Result<(), Box<dyn Error>> {
+fn test_parse_abstract() -> Result<(), Box<dyn Error>> {
     test_parse(
-        include_str!("test/adapt.air"),
-        "test/adapt.air",
-        adapt::expected,
+        include_str!("test/abstract.air"),
+        "test/abstract.air",
+        abstract1::expected,
     )
 }
 
 #[test]
-fn test_generate_adapt() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/adapt.air"), "test/adapt.air")
+fn test_generate_abstract() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/abstract.air"), "test/abstract.air")
 }
 
 #[test]

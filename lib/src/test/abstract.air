@@ -1,0 +1,43 @@
+1 '!' 2
+-----
+1 ! 2
+=====
+do [a = 1, a '!' not ; true]
+-----
+1 ! false
+=====
+do [c = id ; 1 ! 2, abstract.apply &c]
+-----
+2
+=====
+do [c = id ; 1 ! 2, abstract.function .c]
+-----
+1
+=====
+do [c = id ; 1 ! 2, abstract.input .c]
+-----
+2
+=====
+abstract.function ; id ; 1 ! 2
+-----
+1
+=====
+abstract.input ; id ; 1 ! 2
+-----
+2
+=====
+do [c = id ; 1 ! 2, .c abstract.set_function 3]
+-----
+1
+=====
+do [c = id ; 1 ! 2, .c abstract.set_function 3, &c]
+-----
+3 ! 2
+=====
+do [c = id ; 1 ! 2, .c abstract.set_input 3]
+-----
+2
+=====
+do [c = id ; 1 ! 2, .c abstract.set_input 3, &c]
+-----
+1 ! 3

@@ -1,5 +1,5 @@
 use crate::{
-    AdaptVal,
+    AbstractVal,
     AskVal,
     CallVal,
     ListMode,
@@ -15,7 +15,7 @@ use crate::{
     core::FormCore,
     ctx::ref1::CtxMeta,
     mode::{
-        adapt::AdaptMode,
+        abstract1::AbstractMode,
         ask::AskMode,
         call::CallMode,
         id::Id,
@@ -32,7 +32,7 @@ pub struct CompositeMode<M> {
     pub symbol: SymbolMode,
     pub pair: PairMode<M>,
     pub call: CallMode<M>,
-    pub adapt: AdaptMode<M>,
+    pub abstract1: AbstractMode<M>,
     pub ask: AskMode<M>,
     pub list: ListMode<M>,
     pub map: MapMode<M>,
@@ -76,11 +76,11 @@ impl ByVal<Val> for CompositeMode<Mode> {
         self.call.transform(ctx, call)
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.adapt.transform(ctx, adapt)
+        self.abstract1.transform(ctx, abstract1)
     }
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
@@ -108,7 +108,7 @@ impl ByVal<Val> for CompositeMode<Mode> {
 impl<M> From<PrimitiveMode> for CompositeMode<M>
 where
     PairMode<M>: From<PrimitiveMode>,
-    AdaptMode<M>: From<PrimitiveMode>,
+    AbstractMode<M>: From<PrimitiveMode>,
     CallMode<M>: From<PrimitiveMode>,
     AskMode<M>: From<PrimitiveMode>,
     ListMode<M>: From<PrimitiveMode>,
@@ -119,7 +119,7 @@ where
             symbol: SymbolMode::from(mode),
             pair: PairMode::from(mode),
             call: CallMode::from(mode),
-            adapt: AdaptMode::from(mode),
+            abstract1: AbstractMode::from(mode),
             ask: AskMode::from(mode),
             list: ListMode::from(mode),
             map: MapMode::from(mode),

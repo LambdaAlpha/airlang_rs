@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use crate::{
-    AdaptVal,
+    AbstractVal,
     AskVal,
     CallVal,
     ListVal,
@@ -47,7 +47,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where
         Ctx: CtxMeta<'a>;
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Output
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 

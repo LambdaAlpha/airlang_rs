@@ -99,8 +99,8 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_adapt() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/adapt.air"), "test/adapt.air")
+fn test_abstract() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/abstract.air"), "test/abstract.air")
 }
 
 #[test]

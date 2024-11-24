@@ -20,7 +20,7 @@ pub(crate) mod pair;
 
 pub(crate) mod call;
 
-pub(crate) mod adapt;
+pub(crate) mod abstract1;
 
 pub(crate) mod ask;
 

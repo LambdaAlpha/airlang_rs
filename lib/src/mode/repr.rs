@@ -1,5 +1,5 @@
 use crate::{
-    Adapt,
+    Abstract,
     Ask,
     Bool,
     Call,
@@ -16,7 +16,7 @@ use crate::{
     Val,
     mode::{
         Mode,
-        adapt::AdaptMode,
+        abstract1::AbstractMode,
         ask::AskMode,
         call::CallMode,
         composite::CompositeMode,
@@ -34,7 +34,7 @@ use crate::{
         symbol,
     },
     val::{
-        ADAPT,
+        ABSTRACT,
         ASK,
         CALL,
         LIST,
@@ -189,7 +189,7 @@ impl<M> ParseMode<MapVal> for CompositeMode<M>
 where
     M: ParseMode<Val> + ParseMode<Unit> + ParseMode<Symbol>,
     PairMode<M>: From<PrimitiveMode>,
-    AdaptMode<M>: From<PrimitiveMode>,
+    AbstractMode<M>: From<PrimitiveMode>,
     CallMode<M>: From<PrimitiveMode>,
     AskMode<M>: From<PrimitiveMode>,
     ListMode<M>: From<PrimitiveMode>,
@@ -199,7 +199,7 @@ where
         let default = PrimitiveMode::parse(map_remove(&mut map, DEFAULT), default)?;
         let symbol = SymbolMode::parse(map_remove(&mut map, SYMBOL), default)?;
         let pair = PairMode::parse(map_remove(&mut map, PAIR), default)?;
-        let adapt = AdaptMode::parse(map_remove(&mut map, ADAPT), default)?;
+        let abstract1 = AbstractMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let call = CallMode::parse(map_remove(&mut map, CALL), default)?;
         let ask = AskMode::parse(map_remove(&mut map, ASK), default)?;
         let list = ListMode::parse(map_remove(&mut map, LIST), default)?;
@@ -207,7 +207,7 @@ where
         Some(CompositeMode {
             symbol,
             pair,
-            adapt,
+            abstract1,
             call,
             ask,
             list,
@@ -220,7 +220,7 @@ impl<M> GenerateMode<MapVal> for CompositeMode<M>
 where
     M: GenerateMode<Val> + ParseMode<Unit> + PartialEq,
     PairMode<M>: From<PrimitiveMode> + PartialEq,
-    AdaptMode<M>: From<PrimitiveMode> + PartialEq,
+    AbstractMode<M>: From<PrimitiveMode> + PartialEq,
     CallMode<M>: From<PrimitiveMode> + PartialEq,
     AskMode<M>: From<PrimitiveMode> + PartialEq,
     ListMode<M>: From<PrimitiveMode> + PartialEq,
@@ -234,8 +234,8 @@ where
         if PairMode::from(default) != self.pair {
             map.insert(symbol(PAIR), self.pair.generate(default));
         }
-        if AdaptMode::from(default) != self.adapt {
-            map.insert(symbol(ADAPT), self.adapt.generate(default));
+        if AbstractMode::from(default) != self.abstract1 {
+            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
         }
         if CallMode::from(default) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
@@ -299,10 +299,10 @@ impl<M: GenerateMode<Val>> GenerateMode<Val> for PairMode<M> {
     }
 }
 
-impl<M> ParseMode<Val> for AdaptMode<M>
+impl<M> ParseMode<Val> for AbstractMode<M>
 where
     M: ParseMode<Val>,
-    AdaptMode<M>: From<PrimitiveMode>,
+    AbstractMode<M>: From<PrimitiveMode>,
 {
     fn parse(mode: Val, default: PrimitiveMode) -> Option<Self> {
         match mode {
@@ -311,33 +311,33 @@ where
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
                 let func = M::parse(pair.first, default)?;
-                let value = M::parse(pair.second, default)?;
-                Some(AdaptMode::Form(Adapt::new(func, value)))
+                let input = M::parse(pair.second, default)?;
+                Some(AbstractMode::Form(Abstract::new(func, input)))
             }
-            Val::Adapt(adapt) => {
-                let adapt = Adapt::from(adapt);
-                let spec = M::parse(adapt.spec, default)?;
-                let value = M::parse(adapt.value, default)?;
-                Some(AdaptMode::Eval(Adapt::new(spec, value)))
+            Val::Abstract(abstract1) => {
+                let abstract1 = Abstract::from(abstract1);
+                let func = M::parse(abstract1.func, default)?;
+                let input = M::parse(abstract1.input, default)?;
+                Some(AbstractMode::Eval(Abstract::new(func, input)))
             }
             _ => None,
         }
     }
 }
 
-impl<M: GenerateMode<Val>> GenerateMode<Val> for AdaptMode<M> {
+impl<M: GenerateMode<Val>> GenerateMode<Val> for AbstractMode<M> {
     fn generate(&self, default: PrimitiveMode) -> Val {
         match self {
-            AdaptMode::Id => symbol(ID),
-            AdaptMode::Form(mode) => {
-                let spec = M::generate(&mode.spec, default);
-                let value = M::generate(&mode.value, default);
-                Val::Pair(Pair::new(spec, value).into())
+            AbstractMode::Id => symbol(ID),
+            AbstractMode::Form(mode) => {
+                let func = M::generate(&mode.func, default);
+                let input = M::generate(&mode.input, default);
+                Val::Pair(Pair::new(func, input).into())
             }
-            AdaptMode::Eval(mode) => {
-                let spec = M::generate(&mode.spec, default);
-                let value = M::generate(&mode.value, default);
-                Val::Adapt(Adapt::new(spec, value).into())
+            AbstractMode::Eval(mode) => {
+                let func = M::generate(&mode.func, default);
+                let input = M::generate(&mode.input, default);
+                Val::Abstract(Abstract::new(func, input).into())
             }
         }
     }

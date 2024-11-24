@@ -4,8 +4,8 @@ use std::{
 };
 
 use crate::{
-    Adapt,
-    AdaptVal,
+    Abstract,
+    AbstractVal,
     Answer,
     AnswerVal,
     Ask,
@@ -55,7 +55,7 @@ impl FormCore {
             Val::Symbol(s) => t.transform_symbol(ctx, s),
             Val::Pair(p) => t.transform_pair(ctx, p),
             Val::Call(c) => t.transform_call(ctx, c),
-            Val::Adapt(a) => t.transform_adapt(ctx, a),
+            Val::Abstract(a) => t.transform_abstract(ctx, a),
             Val::Ask(a) => t.transform_ask(ctx, a),
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
@@ -115,21 +115,21 @@ impl FormCore {
         Val::Call(Call::new(func, input).into())
     }
 
-    pub(crate) fn transform_adapt<'a, Ctx, Spec, Value>(
+    pub(crate) fn transform_abstract<'a, Ctx, Spec, Value>(
         spec: &Spec,
         value: &Value,
         mut ctx: Ctx,
-        adapt: AdaptVal,
+        abstract1: AbstractVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
         Spec: Transformer<Val, Val>,
         Value: Transformer<Val, Val>,
     {
-        let adapt = Adapt::from(adapt);
-        let spec = spec.transform(ctx.reborrow(), adapt.spec);
-        let value = value.transform(ctx, adapt.value);
-        Val::Adapt(Adapt::new(spec, value).into())
+        let abstract1 = Abstract::from(abstract1);
+        let func = spec.transform(ctx.reborrow(), abstract1.func);
+        let input = value.transform(ctx, abstract1.input);
+        Val::Abstract(Abstract::new(func, input).into())
     }
 
     pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
@@ -255,24 +255,24 @@ impl EvalCore {
     }
 
     // f ; v evaluates to any i that (f ! i) == (f ! v)
-    pub(crate) fn transform_adapt<'a, Ctx, Spec, Value>(
+    pub(crate) fn transform_abstract<'a, Ctx, Spec, Value>(
         spec_trans: &Spec,
         value_trans: &Value,
         mut ctx: Ctx,
-        adapt: AdaptVal,
+        abstract1: AbstractVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
         Spec: Transformer<Val, Val>,
         Value: Transformer<Val, Val>,
     {
-        let adapt = Adapt::from(adapt);
-        let spec = spec_trans.transform(ctx.reborrow(), adapt.spec);
-        let value = value_trans.transform(ctx, adapt.value);
-        let Val::Func(spec) = spec else {
-            return value;
+        let abstract1 = Abstract::from(abstract1);
+        let func = spec_trans.transform(ctx.reborrow(), abstract1.func);
+        let input = value_trans.transform(ctx, abstract1.input);
+        let Val::Func(func) = func else {
+            return input;
         };
-        optimize(spec, value)
+        optimize(func, input)
     }
 
     pub(crate) fn transform_ask<'a, Ctx, Func, Output>(

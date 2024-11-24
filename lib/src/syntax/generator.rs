@@ -12,7 +12,7 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
-    adapt::Adapt,
+    abstract1::Abstract,
     ask::Ask,
     bool::Bool,
     byte::Byte,
@@ -24,7 +24,7 @@ use crate::{
     pair::Pair,
     symbol::Symbol,
     syntax::{
-        ADAPT,
+        ABSTRACT,
         ASK,
         BYTE,
         CALL,
@@ -63,7 +63,7 @@ pub(crate) enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
-    Adapt(Box<Adapt<GenRepr<'a>, GenRepr<'a>>>),
+    Abstract(Box<Abstract<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     Ask(Box<Ask<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
@@ -124,7 +124,7 @@ fn gen(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Byte(byte) => gen_byte(byte, s),
         GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
-        GenRepr::Adapt(adapt) => gen_adapt(ctx, *adapt, s),
+        GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
         GenRepr::Ask(ask) => gen_ask(ctx, *ask, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
@@ -259,12 +259,12 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     }
 }
 
-fn gen_adapt(ctx: GenCtx, adapt: Adapt<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, adapt.spec, s);
+fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut String) {
+    gen_scope_if_need(ctx, abstract1.func, s);
     s.push(' ');
-    s.push_str(ADAPT);
+    s.push_str(ABSTRACT);
     s.push(' ');
-    gen(ctx, adapt.value, s);
+    gen(ctx, abstract1.input, s);
 }
 
 fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
@@ -294,7 +294,7 @@ fn gen_scope(ctx: GenCtx, repr: GenRepr, s: &mut String) {
 fn is_composite(repr: &GenRepr) -> bool {
     matches!(
         repr,
-        GenRepr::Pair(_) | GenRepr::Call(_) | GenRepr::Adapt(_) | GenRepr::Ask(_)
+        GenRepr::Pair(_) | GenRepr::Call(_) | GenRepr::Abstract(_) | GenRepr::Ask(_)
     )
 }
 

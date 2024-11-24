@@ -14,7 +14,7 @@ use crate::{
     Map,
     Pair,
     ReprError,
-    adapt::Adapt,
+    abstract1::Abstract,
     bool::Bool,
     byte::Byte,
     extension::ValExt,
@@ -28,7 +28,7 @@ use crate::{
     text::Text,
     unit::Unit,
     val::{
-        adapt::AdaptVal,
+        abstract1::AbstractVal,
         answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
@@ -58,7 +58,7 @@ pub enum Val {
 
     Pair(PairVal),
     Call(CallVal),
-    Adapt(AdaptVal),
+    Abstract(AbstractVal),
     Ask(AskVal),
 
     List(ListVal),
@@ -83,7 +83,7 @@ pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const CALL: &str = "call";
-pub(crate) const ADAPT: &str = "adapt";
+pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const ASK: &str = "ask";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
@@ -195,15 +195,15 @@ impl From<CallVal> for Val {
     }
 }
 
-impl From<Adapt<Val, Val>> for Val {
-    fn from(value: Adapt<Val, Val>) -> Self {
-        Val::Adapt(AdaptVal::from(value))
+impl From<Abstract<Val, Val>> for Val {
+    fn from(value: Abstract<Val, Val>) -> Self {
+        Val::Abstract(AbstractVal::from(value))
     }
 }
 
-impl From<AdaptVal> for Val {
-    fn from(value: AdaptVal) -> Self {
-        Val::Adapt(value)
+impl From<AbstractVal> for Val {
+    fn from(value: AbstractVal) -> Self {
+        Val::Abstract(value)
     }
 }
 
@@ -285,7 +285,7 @@ impl From<&Repr> for Val {
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte.clone())),
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
-            Repr::Adapt(adapt) => Val::Adapt(AdaptVal::from(&**adapt)),
+            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::Ask(ask) => Val::Ask(AskVal::from(&**ask)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -305,7 +305,7 @@ impl From<Repr> for Val {
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte)),
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
-            Repr::Adapt(adapt) => Val::Adapt(AdaptVal::from(*adapt)),
+            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::Ask(ask) => Val::Ask(AskVal::from(*ask)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -326,7 +326,7 @@ impl TryInto<Repr> for &Val {
             Val::Byte(byte) => Ok(Repr::Byte(byte.into())),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Adapt(adapt) => Ok(Repr::Adapt(Box::new(adapt.try_into()?))),
+            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -348,7 +348,7 @@ impl TryInto<Repr> for Val {
             Val::Byte(byte) => Ok(Repr::Byte(byte.into())),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Adapt(adapt) => Ok(Repr::Adapt(Box::new(adapt.try_into()?))),
+            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -381,10 +381,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Val::Adapt(adapt) => {
-                let spec = (&adapt.spec).try_into()?;
-                let value = (&adapt.value).try_into()?;
-                GenRepr::Adapt(Box::new(Adapt::new(spec, value)))
+            Val::Abstract(abstract1) => {
+                let func = (&abstract1.func).try_into()?;
+                let input = (&abstract1.input).try_into()?;
+                GenRepr::Abstract(Box::new(Abstract::new(func, input)))
             }
             Val::Ask(ask) => {
                 let func = (&ask.func).try_into()?;
@@ -427,7 +427,7 @@ impl Debug for Val {
             Val::Byte(byte) => <_ as Debug>::fmt(byte, f),
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
-            Val::Adapt(adapt) => <_ as Debug>::fmt(adapt, f),
+            Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
             Val::Ask(ask) => <_ as Debug>::fmt(ask, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
@@ -452,7 +452,7 @@ pub(crate) mod pair;
 
 pub(crate) mod call;
 
-pub(crate) mod adapt;
+pub(crate) mod abstract1;
 
 pub(crate) mod ask;
 

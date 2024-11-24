@@ -60,7 +60,7 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
-    adapt::Adapt,
+    abstract1::Abstract,
     ask::Ask,
     bool::Bool,
     byte::Byte,
@@ -72,7 +72,7 @@ use crate::{
     pair::Pair,
     symbol::Symbol,
     syntax::{
-        ADAPT,
+        ABSTRACT,
         ASK,
         BYTE,
         CALL,
@@ -112,7 +112,7 @@ pub(crate) trait ParseRepr:
     + From<Number>
     + From<Byte>
     + From<Pair<Self, Self>>
-    + From<Adapt<Self, Self>>
+    + From<Abstract<Self, Self>>
     + From<Call<Self, Self>>
     + From<Ask<Self, Self>>
     + From<List<Self>>
@@ -151,7 +151,7 @@ enum Arity {
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Struct {
     Call,
-    Adapt,
+    Abstract,
     Ask,
 }
 
@@ -373,10 +373,10 @@ where
                 });
                 scope_parser.parse(src)
             }
-            ADAPT => {
+            ABSTRACT => {
                 let mut scope_parser = ScopeParser::new(ParseCtx {
                     enable: true,
-                    struct1: Struct::Adapt,
+                    struct1: Struct::Abstract,
                     ..self.ctx
                 });
                 scope_parser.parse(src)
@@ -493,14 +493,14 @@ impl ComposeParser {
         let list = tokens.map(Token::into_repr).collect::<List<_>>();
         let list = From::from(list);
         let tag = From::from(Symbol::from_str(concatcp!(SEPARATOR)));
-        let adapt = From::from(Adapt::new(tag, list));
-        Some(adapt)
+        let abstract1 = From::from(Abstract::new(tag, list));
+        Some(abstract1)
     }
 
     fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
         match self.ctx.struct1 {
             Struct::Call => From::from(Call::new(left, right)),
-            Struct::Adapt => From::from(Adapt::new(left, right)),
+            Struct::Abstract => From::from(Abstract::new(left, right)),
             Struct::Ask => From::from(Ask::new(left, right)),
         }
     }
@@ -549,7 +549,7 @@ impl ComposeParser {
                 PAIR => return From::from(Pair::new(left, right)),
                 CALL => return From::from(Call::new(left, right)),
                 ASK => return From::from(Ask::new(left, right)),
-                ADAPT => return From::from(Adapt::new(left, right)),
+                ABSTRACT => return From::from(Abstract::new(left, right)),
                 _ => From::from(s),
             },
             Token::Default(middle) => middle,

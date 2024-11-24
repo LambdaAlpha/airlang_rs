@@ -1,5 +1,5 @@
 use crate::{
-    AdaptVal,
+    AbstractVal,
     AskVal,
     CallVal,
     ListVal,
@@ -89,14 +89,14 @@ impl ByVal<Val> for PrimitiveMode {
         }
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_adapt(ctx, adapt),
-            PrimitiveMode::Form => Form.transform_adapt(ctx, adapt),
-            PrimitiveMode::Eval => Eval.transform_adapt(ctx, adapt),
+            PrimitiveMode::Id => Id.transform_abstract(ctx, abstract1),
+            PrimitiveMode::Form => Form.transform_abstract(ctx, abstract1),
+            PrimitiveMode::Eval => Eval.transform_abstract(ctx, abstract1),
         }
     }
 

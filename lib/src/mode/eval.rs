@@ -1,5 +1,5 @@
 use crate::{
-    AdaptVal,
+    AbstractVal,
     AskVal,
     CallVal,
     PairVal,
@@ -63,11 +63,11 @@ impl ByVal<Val> for Eval {
         EvalCore::transform_call(self, self, ctx, call)
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        EvalCore::transform_adapt(self, self, ctx, adapt)
+        EvalCore::transform_abstract(self, self, ctx, abstract1)
     }
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val

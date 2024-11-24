@@ -36,7 +36,7 @@ use crate::{
         primitive::PrimitiveMode,
     },
     prelude::{
-        adapt::AdaptPrelude,
+        abstract1::AbstractPrelude,
         answer::AnswerPrelude,
         ask::AskPrelude,
         bool::BoolPrelude,
@@ -85,7 +85,7 @@ pub(crate) struct AllPrelude {
     pub(crate) byte: BytePrelude,
     pub(crate) pair: PairPrelude,
     pub(crate) call: CallPrelude,
-    pub(crate) adapt: AdaptPrelude,
+    pub(crate) abstract1: AbstractPrelude,
     pub(crate) ask: AskPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
@@ -111,7 +111,7 @@ impl Prelude for AllPrelude {
         self.byte.put(m);
         self.pair.put(m);
         self.call.put(m);
-        self.adapt.put(m);
+        self.abstract1.put(m);
         self.ask.put(m);
         self.list.put(m);
         self.map.put(m);
@@ -276,7 +276,7 @@ mod pair;
 
 mod call;
 
-mod adapt;
+mod abstract1;
 
 mod ask;
 

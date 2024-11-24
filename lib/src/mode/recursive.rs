@@ -1,6 +1,6 @@
 use crate::{
-    AdaptMode,
-    AdaptVal,
+    AbstractMode,
+    AbstractVal,
     AskMode,
     AskVal,
     CallMode,
@@ -115,21 +115,21 @@ impl ByVal<Val> for CompositeMode<SelfMode> {
         }
     }
 
-    fn transform_adapt<'a, Ctx>(&self, ctx: Ctx, adapt: AdaptVal) -> Val
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        match self.adapt {
-            AdaptMode::Id => Id.transform_adapt(ctx, adapt),
-            AdaptMode::Form(mode) => {
-                let spec = SelfTrans::new(self, mode.spec);
-                let value = SelfTrans::new(self, mode.value);
-                FormCore::transform_adapt(&spec, &value, ctx, adapt)
+        match self.abstract1 {
+            AbstractMode::Id => Id.transform_abstract(ctx, abstract1),
+            AbstractMode::Form(mode) => {
+                let func = SelfTrans::new(self, mode.func);
+                let input = SelfTrans::new(self, mode.input);
+                FormCore::transform_abstract(&func, &input, ctx, abstract1)
             }
-            AdaptMode::Eval(mode) => {
-                let spec = SelfTrans::new(self, mode.spec);
-                let value = SelfTrans::new(self, mode.value);
-                EvalCore::transform_adapt(&spec, &value, ctx, adapt)
+            AbstractMode::Eval(mode) => {
+                let func = SelfTrans::new(self, mode.func);
+                let input = SelfTrans::new(self, mode.input);
+                EvalCore::transform_abstract(&func, &input, ctx, abstract1)
             }
         }
     }

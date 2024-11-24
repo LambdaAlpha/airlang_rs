@@ -1,5 +1,5 @@
 use crate::{
-    AdaptVal,
+    AbstractVal,
     AskVal,
     CallVal,
     PairVal,
@@ -57,11 +57,11 @@ impl ByVal<Val> for Id {
         Val::Call(call)
     }
 
-    fn transform_adapt<'a, Ctx>(&self, _ctx: Ctx, adapt: AdaptVal) -> Val
+    fn transform_abstract<'a, Ctx>(&self, _ctx: Ctx, abstract1: AbstractVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        Val::Adapt(adapt)
+        Val::Abstract(abstract1)
     }
 
     fn transform_ask<'a, Ctx>(&self, _ctx: Ctx, ask: AskVal) -> Val

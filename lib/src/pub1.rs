@@ -1,5 +1,5 @@
 pub use crate::{
-    adapt::Adapt,
+    abstract1::Abstract,
     answer::Answer,
     ask::Ask,
     bool::Bool,
@@ -46,7 +46,7 @@ pub use crate::{
     map::Map,
     mode::{
         Mode,
-        adapt::AdaptMode,
+        abstract1::AbstractMode,
         ask::AskMode,
         call::CallMode,
         composite::CompositeMode,
@@ -65,7 +65,7 @@ pub use crate::{
     unit::Unit,
     val::{
         Val,
-        adapt::AdaptVal,
+        abstract1::AbstractVal,
         answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
