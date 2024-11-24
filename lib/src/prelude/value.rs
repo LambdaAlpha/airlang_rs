@@ -100,9 +100,12 @@ impl Prelude for ValuePrelude {
 }
 
 fn any() -> Named<FuncVal> {
+    let id = "any";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("any", call_mode, ask_mode, true, fn_any)
+    let cacheable = true;
+    let f = fn_any;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_any(input: Val) -> Val {
@@ -137,9 +140,12 @@ fn fn_any(input: Val) -> Val {
 }
 
 fn type_of() -> Named<FuncVal> {
+    let id = "type_of";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("type_of", call_mode, ask_mode, true, fn_type_of)
+    let cacheable = true;
+    let f = fn_type_of;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
@@ -169,9 +175,12 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn equal() -> Named<FuncVal> {
+    let id = "==";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("==", call_mode, ask_mode, true, fn_equal)
+    let cacheable = true;
+    let f = fn_equal;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
@@ -193,9 +202,12 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn not_equal() -> Named<FuncVal> {
+    let id = "!=";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("!=", call_mode, ask_mode, true, fn_not_equal)
+    let cacheable = true;
+    let f = fn_not_equal;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {

@@ -23,9 +23,9 @@ pub(crate) struct MetaPrelude {
 impl Default for MetaPrelude {
     fn default() -> Self {
         MetaPrelude {
-            version_major: Named::new("air.version_major", version_major()),
-            version_minor: Named::new("air.version_minor", version_minor()),
-            version_patch: Named::new("air.version_patch", version_patch()),
+            version_major: version_major(),
+            version_minor: version_minor(),
+            version_patch: version_patch(),
         }
     }
 }
@@ -38,17 +38,23 @@ impl Prelude for MetaPrelude {
     }
 }
 
-fn version_major() -> Int {
+fn version_major() -> Named<Int> {
+    let id = "air.version_major";
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
-    Int::new(BigInt::from_str(MAJOR).unwrap())
+    let v = Int::new(BigInt::from_str(MAJOR).unwrap());
+    Named::new(id, v)
 }
 
-fn version_minor() -> Int {
+fn version_minor() -> Named<Int> {
+    let id = "air.version_minor";
     const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
-    Int::new(BigInt::from_str(MINOR).unwrap())
+    let v = Int::new(BigInt::from_str(MINOR).unwrap());
+    Named::new(id, v)
 }
 
-fn version_patch() -> Int {
+fn version_patch() -> Named<Int> {
+    let id = "air.version_patch";
     const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
-    Int::new(BigInt::from_str(PATCH).unwrap())
+    let v = Int::new(BigInt::from_str(PATCH).unwrap());
+    Named::new(id, v)
 }

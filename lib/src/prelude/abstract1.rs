@@ -65,9 +65,12 @@ impl Prelude for AbstractPrelude {
 }
 
 fn new() -> Named<FuncVal> {
+    let id = ABSTRACT;
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn(ABSTRACT, call_mode, ask_mode, true, fn_new)
+    let cacheable = true;
+    let f = fn_new;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -79,14 +82,16 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn apply() -> Named<FuncVal> {
+    let id = "abstract.apply";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    let func = MutDispatcher::new(
+    let cacheable = false;
+    let f = MutDispatcher::new(
         fn_apply::<FreeCtx>,
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mut_fn("abstract.apply", call_mode, ask_mode, false, func)
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -100,9 +105,12 @@ where
 }
 
 fn get_func() -> Named<FuncVal> {
+    let id = "abstract.function";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("abstract.function", call_mode, ask_mode, true, fn_get_func)
+    let cacheable = true;
+    let f = fn_get_func;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -119,15 +127,12 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_func() -> Named<FuncVal> {
+    let id = "abstract.set_function";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn(
-        "abstract.set_function",
-        call_mode,
-        ask_mode,
-        true,
-        fn_set_func,
-    )
+    let cacheable = true;
+    let f = fn_set_func;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
@@ -150,9 +155,12 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get_input() -> Named<FuncVal> {
+    let id = "abstract.input";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("abstract.input", call_mode, ask_mode, true, fn_get_input)
+    let cacheable = true;
+    let f = fn_get_input;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
@@ -169,15 +177,12 @@ fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_input() -> Named<FuncVal> {
+    let id = "abstract.set_input";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn(
-        "abstract.set_input",
-        call_mode,
-        ask_mode,
-        true,
-        fn_set_input,
-    )
+    let cacheable = true;
+    let f = fn_set_input;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {

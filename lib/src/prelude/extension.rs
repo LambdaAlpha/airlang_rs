@@ -28,5 +28,7 @@ impl Prelude for ExtPrelude {
 }
 
 fn unit() -> Named<Box<dyn ValExt>> {
-    Named::new("extension.unit", Box::new(UnitExt))
+    let id = "extension.unit";
+    let v = Box::new(UnitExt);
+    Named::new(id, v)
 }

@@ -66,9 +66,12 @@ impl Prelude for IntPrelude {
 }
 
 fn add() -> Named<FuncVal> {
+    let id = "+";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("+", call_mode, ask_mode, true, fn_add)
+    let cacheable = true;
+    let f = fn_add;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_add(input: Val) -> Val {
@@ -88,9 +91,12 @@ fn fn_add(input: Val) -> Val {
 }
 
 fn subtract() -> Named<FuncVal> {
+    let id = "-";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("-", call_mode, ask_mode, true, fn_subtract)
+    let cacheable = true;
+    let f = fn_subtract;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -110,9 +116,12 @@ fn fn_subtract(input: Val) -> Val {
 }
 
 fn multiply() -> Named<FuncVal> {
+    let id = "*";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("*", call_mode, ask_mode, true, fn_multiply)
+    let cacheable = true;
+    let f = fn_multiply;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -132,9 +141,12 @@ fn fn_multiply(input: Val) -> Val {
 }
 
 fn divide() -> Named<FuncVal> {
+    let id = "/";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("/", call_mode, ask_mode, true, fn_divide)
+    let cacheable = true;
+    let f = fn_divide;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -157,9 +169,12 @@ fn fn_divide(input: Val) -> Val {
 }
 
 fn remainder() -> Named<FuncVal> {
+    let id = "%";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("%", call_mode, ask_mode, true, fn_remainder)
+    let cacheable = true;
+    let f = fn_remainder;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -182,9 +197,12 @@ fn fn_remainder(input: Val) -> Val {
 }
 
 fn divide_remainder() -> Named<FuncVal> {
+    let id = "/%";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("/%", call_mode, ask_mode, true, fn_divide_remainder)
+    let cacheable = true;
+    let f = fn_divide_remainder;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -207,9 +225,12 @@ fn fn_divide_remainder(input: Val) -> Val {
 }
 
 fn less_than() -> Named<FuncVal> {
+    let id = "<";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("<", call_mode, ask_mode, true, fn_less_than)
+    let cacheable = true;
+    let f = fn_less_than;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -227,9 +248,12 @@ fn fn_less_than(input: Val) -> Val {
 }
 
 fn less_equal() -> Named<FuncVal> {
+    let id = "<=";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("<=", call_mode, ask_mode, true, fn_less_equal)
+    let cacheable = true;
+    let f = fn_less_equal;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -247,9 +271,12 @@ fn fn_less_equal(input: Val) -> Val {
 }
 
 fn greater_than() -> Named<FuncVal> {
+    let id = ">";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn(">", call_mode, ask_mode, true, fn_greater_than)
+    let cacheable = true;
+    let f = fn_greater_than;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -267,9 +294,12 @@ fn fn_greater_than(input: Val) -> Val {
 }
 
 fn greater_equal() -> Named<FuncVal> {
+    let id = ">=";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn(">=", call_mode, ask_mode, true, fn_greater_equal)
+    let cacheable = true;
+    let f = fn_greater_equal;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -287,9 +317,12 @@ fn fn_greater_equal(input: Val) -> Val {
 }
 
 fn less_greater() -> Named<FuncVal> {
+    let id = "<>";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn("<>", call_mode, ask_mode, true, fn_less_greater)
+    let cacheable = true;
+    let f = fn_less_greater;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_less_greater(input: Val) -> Val {

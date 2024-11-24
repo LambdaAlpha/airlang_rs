@@ -82,6 +82,7 @@ const OUTPUT: &str = "output";
 const IS_CACHE: &str = "is_cache";
 
 fn new() -> Named<FuncVal> {
+    let id = "case";
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
@@ -93,7 +94,9 @@ fn new() -> Named<FuncVal> {
         PrimitiveMode::default(),
     );
     let ask_mode = Mode::default();
-    named_mut_fn("case", call_mode, ask_mode, false, fn_new)
+    let cacheable = false;
+    let f = fn_new;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -110,9 +113,12 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn new_cache() -> Named<FuncVal> {
+    let id = "case.cache";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("case.cache", call_mode, ask_mode, false, fn_new_cache)
+    let cacheable = false;
+    let f = fn_new_cache;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -129,6 +135,7 @@ fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
+    let id = "case.represent";
     let call_mode = Mode::default();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), Mode::default());
@@ -141,7 +148,9 @@ fn repr() -> Named<FuncVal> {
         Mode::default(),
         PrimitiveMode::default(),
     );
-    named_free_fn("case.represent", call_mode, ask_mode, true, fn_repr)
+    let cacheable = true;
+    let f = fn_repr;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -163,9 +172,12 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 }
 
 fn is_cache() -> Named<FuncVal> {
+    let id = "case.is_cache";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("case.is_cache", call_mode, ask_mode, true, fn_is_cache)
+    let cacheable = true;
+    let f = fn_is_cache;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
@@ -178,9 +190,12 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn func() -> Named<FuncVal> {
+    let id = "case.function";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("case.function", call_mode, ask_mode, true, fn_func)
+    let cacheable = true;
+    let f = fn_func;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -193,9 +208,12 @@ fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn input() -> Named<FuncVal> {
+    let id = "case.input";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("case.input", call_mode, ask_mode, true, fn_input)
+    let cacheable = true;
+    let f = fn_input;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
@@ -208,9 +226,12 @@ fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn output() -> Named<FuncVal> {
+    let id = "case.output";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("case.output", call_mode, ask_mode, true, fn_output)
+    let cacheable = true;
+    let f = fn_output;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {

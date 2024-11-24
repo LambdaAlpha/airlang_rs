@@ -75,9 +75,12 @@ impl Prelude for ListPrelude {
 }
 
 fn length() -> Named<FuncVal> {
+    let id = "list.length";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("list.length", call_mode, ask_mode, true, fn_length)
+    let cacheable = true;
+    let f = fn_length;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -91,9 +94,12 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set() -> Named<FuncVal> {
+    let id = "list.set";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.set", call_mode, ask_mode, true, fn_set)
+    let cacheable = true;
+    let f = fn_set;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
@@ -124,9 +130,12 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn set_many() -> Named<FuncVal> {
+    let id = "list.set_many";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.set_many", call_mode, ask_mode, true, fn_set_many)
+    let cacheable = true;
+    let f = fn_set_many;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -161,9 +170,12 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get() -> Named<FuncVal> {
+    let id = "list.get";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("list.get", call_mode, ask_mode, true, fn_get)
+    let cacheable = true;
+    let f = fn_get;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
@@ -205,9 +217,12 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn insert() -> Named<FuncVal> {
+    let id = "list.insert";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.insert", call_mode, ask_mode, true, fn_insert)
+    let cacheable = true;
+    let f = fn_insert;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
@@ -237,15 +252,12 @@ fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn insert_many() -> Named<FuncVal> {
+    let id = "list.insert_many";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn(
-        "list.insert_many",
-        call_mode,
-        ask_mode,
-        true,
-        fn_insert_many,
-    )
+    let cacheable = true;
+    let f = fn_insert_many;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -278,9 +290,12 @@ fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn remove() -> Named<FuncVal> {
+    let id = "list.remove";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.remove", call_mode, ask_mode, true, fn_remove)
+    let cacheable = true;
+    let f = fn_remove;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
@@ -323,9 +338,12 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn push() -> Named<FuncVal> {
+    let id = "list.push";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.push", call_mode, ask_mode, true, fn_push)
+    let cacheable = true;
+    let f = fn_push;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
@@ -344,9 +362,12 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn push_many() -> Named<FuncVal> {
+    let id = "list.push_many";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.push_many", call_mode, ask_mode, true, fn_push_many)
+    let cacheable = true;
+    let f = fn_push_many;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -368,9 +389,12 @@ fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn pop() -> Named<FuncVal> {
+    let id = "list.pop";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.pop", call_mode, ask_mode, true, fn_pop)
+    let cacheable = true;
+    let f = fn_pop;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
@@ -410,9 +434,12 @@ fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn clear() -> Named<FuncVal> {
+    let id = "list.clear";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("list.clear", call_mode, ask_mode, true, fn_clear)
+    let cacheable = true;
+    let f = fn_clear;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {

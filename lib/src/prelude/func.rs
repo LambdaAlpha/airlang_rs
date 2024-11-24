@@ -115,27 +115,33 @@ impl Prelude for FuncPrelude {
 }
 
 fn mode_id() -> Named<FuncVal> {
+    let id = "id";
     let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Id));
-    let func = FuncVal::Mode(func.into());
-    Named::new("id", func)
+    let f = FuncVal::Mode(func.into());
+    Named::new(id, f)
 }
 
 fn mode_form() -> Named<FuncVal> {
+    let id = "form";
     let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Form));
-    let func = FuncVal::Mode(func.into());
-    Named::new("form", func)
+    let f = FuncVal::Mode(func.into());
+    Named::new(id, f)
 }
 
 fn mode_eval() -> Named<FuncVal> {
+    let id = "eval";
     let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Eval));
-    let func = FuncVal::Mode(func.into());
-    Named::new("eval", func)
+    let f = FuncVal::Mode(func.into());
+    Named::new(id, f)
 }
 
 fn mode() -> Named<FuncVal> {
+    let id = "mode";
     let call_mode = form_mode();
     let ask_mode = Mode::default();
-    named_free_fn("mode", call_mode, ask_mode, true, fn_mode)
+    let cacheable = true;
+    let f = fn_mode;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_mode(input: Val) -> Val {
@@ -147,9 +153,12 @@ fn fn_mode(input: Val) -> Val {
 }
 
 fn new() -> Named<FuncVal> {
+    let id = "function";
     let call_mode = parse_mode();
     let ask_mode = Mode::default();
-    named_free_fn("function", call_mode, ask_mode, true, fn_new)
+    let cacheable = true;
+    let f = fn_new;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -160,9 +169,12 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn repr() -> Named<FuncVal> {
+    let id = "function.represent";
     let call_mode = Mode::default();
     let ask_mode = generate_mode();
-    named_free_fn("function.represent", call_mode, ask_mode, true, fn_repr)
+    let cacheable = true;
+    let f = fn_repr;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -173,15 +185,12 @@ fn fn_repr(input: Val) -> Val {
 }
 
 fn ctx_access() -> Named<FuncVal> {
+    let id = "function.context_access";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.context_access",
-        call_mode,
-        ask_mode,
-        true,
-        fn_ctx_access,
-    )
+    let cacheable = true;
+    let f = fn_ctx_access;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
@@ -201,15 +210,12 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn call_mode() -> Named<FuncVal> {
+    let id = "function.call_mode";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.call_mode",
-        call_mode,
-        ask_mode,
-        true,
-        fn_call_mode,
-    )
+    let cacheable = true;
+    let f = fn_call_mode;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_call_mode(ctx: ConstFnCtx, input: Val) -> Val {
@@ -223,9 +229,12 @@ fn fn_call_mode(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn ask_mode() -> Named<FuncVal> {
+    let id = "function.ask_mode";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("function.ask_mode", call_mode, ask_mode, true, fn_ask_mode)
+    let cacheable = true;
+    let f = fn_ask_mode;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_ask_mode(ctx: ConstFnCtx, input: Val) -> Val {
@@ -239,15 +248,12 @@ fn fn_ask_mode(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_cacheable() -> Named<FuncVal> {
+    let id = "function.is_cacheable";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.is_cacheable",
-        call_mode,
-        ask_mode,
-        true,
-        fn_is_cacheable,
-    )
+    let cacheable = true;
+    let f = fn_is_cacheable;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_cacheable(ctx: ConstFnCtx, input: Val) -> Val {
@@ -261,15 +267,12 @@ fn fn_is_cacheable(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_primitive() -> Named<FuncVal> {
+    let id = "function.is_primitive";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.is_primitive",
-        call_mode,
-        ask_mode,
-        true,
-        fn_is_primitive,
-    )
+    let cacheable = true;
+    let f = fn_is_primitive;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
@@ -283,15 +286,12 @@ fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_extension() -> Named<FuncVal> {
+    let id = "function.is_extension";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.is_extension",
-        call_mode,
-        ask_mode,
-        true,
-        fn_is_extension,
-    )
+    let cacheable = true;
+    let f = fn_is_extension;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
@@ -307,9 +307,12 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_cell() -> Named<FuncVal> {
+    let id = "function.is_cell";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("function.is_cell", call_mode, ask_mode, true, fn_is_cell)
+    let cacheable = true;
+    let f = fn_is_cell;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
@@ -322,9 +325,12 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn is_mode() -> Named<FuncVal> {
+    let id = "function.is_mode";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("function.is_mode", call_mode, ask_mode, true, fn_is_mode)
+    let cacheable = true;
+    let f = fn_is_mode;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
@@ -337,9 +343,12 @@ fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn id() -> Named<FuncVal> {
+    let id = "function.id";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("function.id", call_mode, ask_mode, true, fn_id)
+    let cacheable = true;
+    let f = fn_id;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
@@ -355,15 +364,12 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn body_mode() -> Named<FuncVal> {
+    let id = "function.body_mode";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.body_mode",
-        call_mode,
-        ask_mode,
-        true,
-        fn_body_mode,
-    )
+    let cacheable = true;
+    let f = fn_body_mode;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_body_mode(ctx: ConstFnCtx, input: Val) -> Val {
@@ -379,9 +385,12 @@ fn fn_body_mode(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn body() -> Named<FuncVal> {
+    let id = "function.body";
     let call_mode = Mode::default();
     let ask_mode = form_mode();
-    named_const_fn("function.body", call_mode, ask_mode, true, fn_body)
+    let cacheable = true;
+    let f = fn_body;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
@@ -397,9 +406,12 @@ fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn prelude() -> Named<FuncVal> {
+    let id = "function.prelude";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("function.prelude", call_mode, ask_mode, true, fn_prelude)
+    let cacheable = true;
+    let f = fn_prelude;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
@@ -415,15 +427,12 @@ fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn input_name() -> Named<FuncVal> {
+    let id = "function.input_name";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.input_name",
-        call_mode,
-        ask_mode,
-        true,
-        fn_input_name,
-    )
+    let cacheable = true;
+    let f = fn_input_name;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_input_name(ctx: ConstFnCtx, input: Val) -> Val {
@@ -439,15 +448,12 @@ fn fn_input_name(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn ctx_name() -> Named<FuncVal> {
+    let id = "function.context_name";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "function.context_name",
-        call_mode,
-        ask_mode,
-        true,
-        fn_ctx_name,
-    )
+    let cacheable = true;
+    let f = fn_ctx_name;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_ctx_name(ctx: ConstFnCtx, input: Val) -> Val {

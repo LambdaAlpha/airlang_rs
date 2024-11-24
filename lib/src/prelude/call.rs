@@ -75,9 +75,12 @@ impl Prelude for CallPrelude {
 }
 
 fn new() -> Named<FuncVal> {
+    let id = CALL;
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_free_fn(CALL, call_mode, ask_mode, true, fn_new)
+    let cacheable = true;
+    let f = fn_new;
+    named_free_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -89,15 +92,12 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn new_dependent() -> Named<FuncVal> {
+    let id = concatcp!(CALL, CALL);
     let call_mode = pair_mode(Mode::default(), form_mode(), PrimitiveMode::default());
     let ask_mode = Mode::default();
-    named_mut_fn(
-        concatcp!(CALL, CALL),
-        call_mode,
-        ask_mode,
-        false,
-        fn_new_dependent,
-    )
+    let cacheable = false;
+    let f = fn_new_dependent;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
@@ -112,14 +112,16 @@ fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn apply() -> Named<FuncVal> {
+    let id = "call.apply";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    let func = MutDispatcher::new(
+    let cacheable = false;
+    let f = MutDispatcher::new(
         fn_apply::<FreeCtx>,
         |ctx, val| fn_apply(ctx, val),
         |ctx, val| fn_apply(ctx, val),
     );
-    named_mut_fn("call.apply", call_mode, ask_mode, false, func)
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -134,9 +136,12 @@ where
 }
 
 fn get_func() -> Named<FuncVal> {
+    let id = "call.function";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("call.function", call_mode, ask_mode, true, fn_get_func)
+    let cacheable = true;
+    let f = fn_get_func;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -153,9 +158,12 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_func() -> Named<FuncVal> {
+    let id = "call.set_function";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("call.set_function", call_mode, ask_mode, true, fn_set_func)
+    let cacheable = true;
+    let f = fn_set_func;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
@@ -178,9 +186,12 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn get_input() -> Named<FuncVal> {
+    let id = "call.input";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_const_fn("call.input", call_mode, ask_mode, true, fn_get_input)
+    let cacheable = true;
+    let f = fn_get_input;
+    named_const_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
@@ -197,9 +208,12 @@ fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn set_input() -> Named<FuncVal> {
+    let id = "call.set_input";
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
-    named_mut_fn("call.set_input", call_mode, ask_mode, true, fn_set_input)
+    let cacheable = true;
+    let f = fn_set_input;
+    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
 }
 
 fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {
