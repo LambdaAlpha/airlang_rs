@@ -115,20 +115,20 @@ impl FormCore {
         Val::Call(Call::new(func, input).into())
     }
 
-    pub(crate) fn transform_abstract<'a, Ctx, Spec, Value>(
-        spec: &Spec,
-        value: &Value,
+    pub(crate) fn transform_abstract<'a, Ctx, Func, Input>(
+        func: &Func,
+        input: &Input,
         mut ctx: Ctx,
         abstract1: AbstractVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Spec: Transformer<Val, Val>,
-        Value: Transformer<Val, Val>,
+        Func: Transformer<Val, Val>,
+        Input: Transformer<Val, Val>,
     {
         let abstract1 = Abstract::from(abstract1);
-        let func = spec.transform(ctx.reborrow(), abstract1.func);
-        let input = value.transform(ctx, abstract1.input);
+        let func = func.transform(ctx.reborrow(), abstract1.func);
+        let input = input.transform(ctx, abstract1.input);
         Val::Abstract(Abstract::new(func, input).into())
     }
 
@@ -254,21 +254,21 @@ impl EvalCore {
         Self::eval_input_then_call(input_trans, ctx, func, call.input)
     }
 
-    // f ; v evaluates to any i that (f ! i) == (f ! v)
-    pub(crate) fn transform_abstract<'a, Ctx, Spec, Value>(
-        spec_trans: &Spec,
-        value_trans: &Value,
+    // f ! v evaluates to any i that (f ; i) == (f ; v)
+    pub(crate) fn transform_abstract<'a, Ctx, Func, Input>(
+        func_trans: &Func,
+        input_trans: &Input,
         mut ctx: Ctx,
         abstract1: AbstractVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Spec: Transformer<Val, Val>,
-        Value: Transformer<Val, Val>,
+        Func: Transformer<Val, Val>,
+        Input: Transformer<Val, Val>,
     {
         let abstract1 = Abstract::from(abstract1);
-        let func = spec_trans.transform(ctx.reborrow(), abstract1.func);
-        let input = value_trans.transform(ctx, abstract1.input);
+        let func = func_trans.transform(ctx.reborrow(), abstract1.func);
+        let input = input_trans.transform(ctx, abstract1.input);
         let Val::Func(func) = func else {
             return input;
         };
