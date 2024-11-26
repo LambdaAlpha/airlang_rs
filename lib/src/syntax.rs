@@ -37,12 +37,15 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // keywords
 
+pub(crate) const LEFT: &str = "<";
+pub(crate) const RIGHT: &str = ">";
+
+pub(crate) const ARITY_1: &str = "-";
+pub(crate) const ARITY_2: &str = "=";
+
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
-
-pub(crate) const LEFT: &str = "<";
-pub(crate) const RIGHT: &str = ">";
 
 pub(crate) const PAIR: &str = ":";
 pub(crate) const CALL: &str = ";";

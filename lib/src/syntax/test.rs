@@ -139,6 +139,13 @@ fn call_map(root: Repr, leaves: Vec<(Repr, Repr)>) -> Repr {
     )))
 }
 
+fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Pair(Box::new(PairRepr::new(
+        middle,
+        Repr::Pair(Box::new(PairRepr::new(left, right))),
+    )))
+}
+
 fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(
         middle,

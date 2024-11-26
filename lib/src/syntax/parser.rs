@@ -73,6 +73,8 @@ use crate::{
     symbol::Symbol,
     syntax::{
         ABSTRACT,
+        ARITY_1,
+        ARITY_2,
         ASK,
         BYTE,
         CALL,
@@ -150,6 +152,7 @@ enum Arity {
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Struct {
+    Pair,
     Call,
     Abstract,
     Ask,
@@ -331,14 +334,7 @@ where
         }
 
         let parser = |src| match s {
-            UNIT => {
-                let scope_parser = ScopeParser::new(ParseCtx {
-                    enable: true,
-                    arity: Arity::One,
-                    ..self.ctx
-                });
-                alt((scope_parser, success(From::from(Unit))))(src)
-            }
+            UNIT => success(From::from(Unit))(src),
             TRUE => success(From::from(Bool::t()))(src),
             FALSE => success(From::from(Bool::f()))(src),
             LEFT => {
@@ -357,10 +353,26 @@ where
                 });
                 scope_parser.parse(src)
             }
-            PAIR => {
+            ARITY_1 => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    arity: Arity::One,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            ARITY_2 => {
                 let mut scope_parser = ScopeParser::new(ParseCtx {
                     enable: true,
                     arity: Arity::Two,
+                    ..self.ctx
+                });
+                scope_parser.parse(src)
+            }
+            PAIR => {
+                let mut scope_parser = ScopeParser::new(ParseCtx {
+                    enable: true,
+                    struct1: Struct::Pair,
                     ..self.ctx
                 });
                 scope_parser.parse(src)
@@ -499,6 +511,7 @@ impl ComposeParser {
 
     fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
         match self.ctx.struct1 {
+            Struct::Pair => From::from(Pair::new(left, right)),
             Struct::Call => From::from(Call::new(left, right)),
             Struct::Abstract => From::from(Abstract::new(left, right)),
             Struct::Ask => From::from(Ask::new(left, right)),

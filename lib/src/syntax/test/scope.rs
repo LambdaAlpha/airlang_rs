@@ -8,6 +8,7 @@ use crate::syntax::{
         infix,
         infix_abstract,
         infix_ask,
+        infix_pair,
         list,
         map,
         no_compose,
@@ -51,6 +52,7 @@ pub fn expected() -> Vec<Repr> {
             int("0"),
             infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
         )]),
+        infix_pair(int("1"), int("2"), infix_pair(int("3"), int("4"), int("5"))),
         infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
         infix_abstract(
             int("1"),
