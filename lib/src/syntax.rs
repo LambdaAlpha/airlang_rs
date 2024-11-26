@@ -1,24 +1,4 @@
-use std::{
-    error::Error,
-    fmt::{
-        Debug,
-        Display,
-        Formatter,
-    },
-};
-
-pub use self::repr::{
-    Repr,
-    ask::AskRepr,
-    call::CallRepr,
-    list::ListRepr,
-    map::MapRepr,
-    pair::PairRepr,
-};
-use crate::syntax::generator::{
-    COMPACT_FMT,
-    PRETTY_FMT,
-};
+pub use pub1::*;
 
 // delimiters
 
@@ -59,23 +39,6 @@ pub(crate) const BYTE: &str = "b";
 pub(crate) const RAW: &str = "/";
 pub(crate) const RICH: &str = "\\";
 
-#[derive(Debug)]
-pub struct ParseError {
-    pub(crate) msg: String,
-}
-
-pub fn parse(src: &str) -> Result<Repr, ParseError> {
-    parser::parse(src)
-}
-
-pub fn generate_pretty(src: &Repr) -> String {
-    generator::generate(src.try_into().unwrap(), PRETTY_FMT)
-}
-
-pub fn generate_compact(src: &Repr) -> String {
-    generator::generate(src.try_into().unwrap(), COMPACT_FMT)
-}
-
 pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(
         c,
@@ -96,19 +59,15 @@ pub(crate) fn ambiguous(s: &str) -> bool {
     matches!(s, UNIT | TRUE | FALSE | ABSTRACT | PAIR | CALL | ASK)
 }
 
-impl Display for ParseError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ParseError\n{}", self.msg)
-    }
-}
-
-impl Error for ParseError {}
+pub(crate) mod pub1;
 
 pub(crate) mod repr;
 
 pub(crate) mod parser;
 
 pub(crate) mod generator;
+
+pub(crate) mod error;
 
 #[cfg(test)]
 mod test;

@@ -60,7 +60,6 @@ pub use crate::{
     number::Number,
     pair::Pair,
     symbol::Symbol,
-    syntax::generator::ReprError,
     text::Text,
     unit::Unit,
     val::{
@@ -96,6 +95,7 @@ use crate::{
     syntax,
     syntax::{
         ParseError,
+        ReprError,
         generator::PRETTY_FMT,
     },
     transformer::Transformer,

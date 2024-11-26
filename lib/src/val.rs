@@ -13,7 +13,6 @@ use crate::{
     List,
     Map,
     Pair,
-    ReprError,
     abstract1::Abstract,
     bool::Bool,
     byte::Byte,
@@ -21,6 +20,7 @@ use crate::{
     number::Number,
     symbol::Symbol,
     syntax::{
+        ReprError,
         generator::GenRepr,
         parser::ParseRepr,
         repr::Repr,

@@ -10,10 +10,12 @@ use std::{
 };
 
 use crate::{
-    ReprError,
     Val,
     ask::Ask,
-    syntax::repr::ask::AskRepr,
+    syntax::{
+        ReprError,
+        repr::ask::AskRepr,
+    },
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]

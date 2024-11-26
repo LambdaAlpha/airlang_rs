@@ -1,10 +1,5 @@
 use std::{
-    error::Error,
-    fmt::{
-        Display,
-        Formatter,
-        Write,
-    },
+    fmt::Write,
     hash::Hash,
 };
 
@@ -48,9 +43,6 @@ use crate::{
     unit::Unit,
     utils,
 };
-
-#[derive(Debug)]
-pub struct ReprError {}
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GenRepr<'a> {
@@ -372,11 +364,3 @@ fn gen_kv(ctx: GenCtx, key: GenRepr, value: GenRepr, s: &mut String) {
     s.push(' ');
     gen(ctx, value, s);
 }
-
-impl Display for ReprError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ReprError")
-    }
-}
-
-impl Error for ReprError {}
