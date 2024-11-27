@@ -10,7 +10,7 @@ use std::{
 use crate::{
     Abstract,
     Ask,
-    Bool,
+    Bit,
     Byte,
     Call,
     Int,
@@ -39,7 +39,7 @@ use crate::{
 #[derive(PartialEq, Eq, Clone, Hash)]
 pub enum Repr {
     Unit(Unit),
-    Bool(Bool),
+    Bit(Bit),
     Symbol(Symbol),
     Text(Text),
     Int(Int),
@@ -65,9 +65,9 @@ impl From<Unit> for Repr {
     }
 }
 
-impl From<Bool> for Repr {
-    fn from(b: Bool) -> Self {
-        Repr::Bool(b)
+impl From<Bit> for Repr {
+    fn from(b: Bit) -> Self {
+        Repr::Bit(b)
     }
 }
 
@@ -207,7 +207,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
     fn try_into(self) -> Result<GenRepr<'a>, Self::Error> {
         let r = match self {
             Repr::Unit(unit) => GenRepr::Unit(unit),
-            Repr::Bool(bool) => GenRepr::Bool(bool),
+            Repr::Bit(bit) => GenRepr::Bit(bit),
             Repr::Symbol(symbol) => GenRepr::Symbol(symbol),
             Repr::Text(text) => GenRepr::Text(text),
             Repr::Int(int) => GenRepr::Int(int),

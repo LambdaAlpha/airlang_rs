@@ -7,7 +7,7 @@ use crate::{
     MapVal,
     PairVal,
     ask::Ask,
-    bool::Bool,
+    bit::Bit,
     call::Call,
     ctx::{
         Ctx,
@@ -505,7 +505,7 @@ fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
     let Ok(variables) = ctx.get_variables() else {
         return Val::default();
     };
-    Val::Bool(Bool::new(variables.fallback()))
+    Val::Bit(Bit::new(variables.fallback()))
 }
 
 fn is_null() -> Named<FuncVal> {
@@ -522,7 +522,7 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     match DefaultCtx.is_null(ctx, s) {
-        Ok(b) => Val::Bool(Bool::new(b)),
+        Ok(b) => Val::Bit(Bit::new(b)),
         Err(_) => Val::default(),
     }
 }
@@ -692,7 +692,7 @@ fn fn_ctx_new(input: Val) -> Val {
     };
     let fallback = match map_remove(&mut map, FALLBACK) {
         Val::Unit(_) => false,
-        Val::Bool(b) => b.bool(),
+        Val::Bit(b) => b.bool(),
         _ => return Val::default(),
     };
     let variables = CtxMap::new(variables, fallback);
@@ -767,7 +767,7 @@ fn fn_ctx_repr(input: Val) -> Val {
     let mut map = Map::default();
     let fallback = ctx.variables.fallback();
     if fallback {
-        map.insert(symbol(FALLBACK), Val::Bool(Bool::t()));
+        map.insert(symbol(FALLBACK), Val::Bit(Bit::t()));
     }
     if let Some(variables) = generate_ctx_map(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);

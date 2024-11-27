@@ -39,7 +39,7 @@ use crate::{
         abstract1::AbstractPrelude,
         answer::AnswerPrelude,
         ask::AskPrelude,
-        bool::BoolPrelude,
+        bit::BitPrelude,
         byte::BytePrelude,
         call::CallPrelude,
         case::CasePrelude,
@@ -77,7 +77,7 @@ thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 #[derive(Default, Clone)]
 pub(crate) struct AllPrelude {
     pub(crate) unit: UnitPrelude,
-    pub(crate) bool: BoolPrelude,
+    pub(crate) bool: BitPrelude,
     pub(crate) symbol: SymbolPrelude,
     pub(crate) text: TextPrelude,
     pub(crate) int: IntPrelude,
@@ -260,7 +260,7 @@ pub(crate) fn map_mode(
 
 mod unit;
 
-mod bool;
+mod bit;
 
 mod symbol;
 

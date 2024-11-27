@@ -62,7 +62,7 @@ use num_traits::Num;
 use crate::{
     abstract1::Abstract,
     ask::Ask,
-    bool::Bool,
+    bit::Bit,
     byte::Byte,
     call::Call,
     int::Int,
@@ -107,7 +107,7 @@ use crate::{
 
 pub(crate) trait ParseRepr:
     From<Unit>
-    + From<Bool>
+    + From<Bit>
     + From<Symbol>
     + From<Text>
     + From<Int>
@@ -335,8 +335,8 @@ where
 
         let parser = |src| match s {
             UNIT => success(From::from(Unit))(src),
-            TRUE => success(From::from(Bool::t()))(src),
-            FALSE => success(From::from(Bool::f()))(src),
+            TRUE => success(From::from(Bit::t()))(src),
+            FALSE => success(From::from(Bit::f()))(src),
             LEFT => {
                 let mut scope_parser = ScopeParser::new(ParseCtx {
                     enable: true,

@@ -1,6 +1,6 @@
 use crate::{
     AnswerVal,
-    Bool,
+    Bit,
     CaseVal,
     FuncVal,
     Map,
@@ -194,7 +194,7 @@ fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let is_none = matches!(&**answer, Answer::None);
-        Val::Bool(Bool::new(is_none))
+        Val::Bit(Bit::new(is_none))
     })
 }
 
@@ -213,7 +213,7 @@ fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let is_never = matches!(&**answer, Answer::Never);
-        Val::Bool(Bool::new(is_never))
+        Val::Bit(Bit::new(is_never))
     })
 }
 
@@ -232,7 +232,7 @@ fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let is_maybe = matches!(&**answer, Answer::Maybe(_));
-        Val::Bool(Bool::new(is_maybe))
+        Val::Bit(Bit::new(is_maybe))
     })
 }
 
@@ -251,6 +251,6 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let is_cache = matches!(&**answer, Answer::Cache(_));
-        Val::Bool(Bool::new(is_cache))
+        Val::Bit(Bit::new(is_cache))
     })
 }

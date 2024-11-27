@@ -244,7 +244,7 @@ fn fn_less_than(input: Val) -> Val {
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Bool(i1.less_than(&i2))
+    Val::Bit(i1.less_than(&i2))
 }
 
 fn less_equal() -> Named<FuncVal> {
@@ -267,7 +267,7 @@ fn fn_less_equal(input: Val) -> Val {
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Bool(i1.less_equal(&i2))
+    Val::Bit(i1.less_equal(&i2))
 }
 
 fn greater_than() -> Named<FuncVal> {
@@ -290,7 +290,7 @@ fn fn_greater_than(input: Val) -> Val {
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Bool(i1.greater_than(&i2))
+    Val::Bit(i1.greater_than(&i2))
 }
 
 fn greater_equal() -> Named<FuncVal> {
@@ -313,7 +313,7 @@ fn fn_greater_equal(input: Val) -> Val {
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Bool(i1.greater_equal(&i2))
+    Val::Bit(i1.greater_equal(&i2))
 }
 
 fn less_greater() -> Named<FuncVal> {
@@ -336,5 +336,5 @@ fn fn_less_greater(input: Val) -> Val {
     let Val::Int(i2) = pair.second else {
         return Val::default();
     };
-    Val::Bool(i1.less_greater(&i2))
+    Val::Bit(i1.less_greater(&i2))
 }

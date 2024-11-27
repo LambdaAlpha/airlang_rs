@@ -6,7 +6,7 @@ use crate::{
     Mode,
     Symbol,
     Val,
-    bool::Bool,
+    bit::Bit,
     core::EvalCore,
     ctx::{
         CtxValue,
@@ -167,7 +167,7 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
     repr.insert(symbol(INPUT), case.as_ref().input.clone());
     repr.insert(symbol(OUTPUT), case.as_ref().output.clone());
     if matches!(case, CaseVal::Cache(_)) {
-        repr.insert(symbol(IS_CACHE), Val::Bool(Bool::t()));
+        repr.insert(symbol(IS_CACHE), Val::Bit(Bit::t()));
     }
 }
 
@@ -185,7 +185,7 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Case(case) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(matches!(case, CaseVal::Cache(_))))
+        Val::Bit(Bit::new(matches!(case, CaseVal::Cache(_))))
     })
 }
 

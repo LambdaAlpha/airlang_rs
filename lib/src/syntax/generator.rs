@@ -9,7 +9,7 @@ use num_traits::Signed;
 use crate::{
     abstract1::Abstract,
     ask::Ask,
-    bool::Bool,
+    bit::Bit,
     byte::Byte,
     call::Call,
     int::Int,
@@ -48,7 +48,7 @@ use crate::{
 pub(crate) enum GenRepr<'a> {
     #[allow(unused)]
     Unit(&'a Unit),
-    Bool(&'a Bool),
+    Bit(&'a Bit),
     Symbol(&'a Symbol),
     Int(&'a Int),
     Number(&'a Number),
@@ -108,7 +108,7 @@ struct GenCtx {
 fn gen(ctx: GenCtx, repr: GenRepr, s: &mut String) {
     match repr {
         GenRepr::Unit(_) => gen_unit(s),
-        GenRepr::Bool(bool) => gen_bool(bool.bool(), s),
+        GenRepr::Bit(bit) => gen_bit(bit.bool(), s),
         GenRepr::Symbol(symbol) => gen_symbol(symbol, s),
         GenRepr::Text(text) => gen_text(text, s),
         GenRepr::Int(int) => gen_int(int, s),
@@ -127,7 +127,7 @@ fn gen_unit(s: &mut String) {
     s.push_str(UNIT);
 }
 
-fn gen_bool(bool: bool, s: &mut String) {
+fn gen_bit(bool: bool, s: &mut String) {
     s.push_str(if bool { TRUE } else { FALSE });
 }
 

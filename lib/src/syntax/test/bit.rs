@@ -1,8 +1,8 @@
 use crate::syntax::{
     repr::Repr,
-    test::bool,
+    test::bit,
 };
 
 pub(crate) fn expected() -> Vec<Repr> {
-    vec![bool(false), bool(true)]
+    vec![bit(false), bit(true)]
 }

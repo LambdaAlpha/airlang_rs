@@ -1,5 +1,5 @@
 use crate::{
-    Bool,
+    Bit,
     CellFuncVal,
     ConstFuncVal,
     Ctx,
@@ -126,7 +126,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     };
     let cacheable = match map_remove(&mut map, CACHEABLE) {
         Val::Unit(_) => false,
-        Val::Bool(b) => b.bool(),
+        Val::Bit(b) => b.bool(),
         _ => return None,
     };
     let ctx_name = match map_remove(&mut map, CTX_NAME) {
@@ -142,7 +142,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     };
     let cell = match map_remove(&mut map, CELL) {
         Val::Unit(_) => false,
-        Val::Bool(b) => b.bool(),
+        Val::Bit(b) => b.bool(),
         _ => return None,
     };
     let func = if cell {
@@ -359,7 +359,7 @@ fn generate_extension(
     repr: &mut Map<Val, Val>,
 ) {
     repr.insert(symbol(ID), Val::Symbol(id));
-    repr.insert(symbol(IS_EXTENSION), Val::Bool(Bool::t()));
+    repr.insert(symbol(IS_EXTENSION), Val::Bit(Bit::t()));
     generate_func_common(cell, access, cacheable, call_mode, ask_mode, repr);
 }
 
@@ -407,13 +407,13 @@ fn generate_func_common(
     repr: &mut Map<Val, Val>,
 ) {
     if cell {
-        repr.insert(symbol(CELL), Val::Bool(Bool::t()));
+        repr.insert(symbol(CELL), Val::Bit(Bit::t()));
     }
     if access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(access));
     }
     if cacheable {
-        repr.insert(symbol(CACHEABLE), Val::Bool(Bool::new(true)));
+        repr.insert(symbol(CACHEABLE), Val::Bit(Bit::new(true)));
     }
     if call_mode != Mode::default() {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(call_mode).into()));

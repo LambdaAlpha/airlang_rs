@@ -4,7 +4,7 @@ pub(crate) mod pub1;
 
 pub(crate) mod unit;
 
-pub(crate) mod bool;
+pub(crate) mod bit;
 
 pub(crate) mod symbol;
 

@@ -59,8 +59,8 @@ fn test_unit() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_bool() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/bool.air"), "test/bool.air")
+fn test_bit() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/bit.air"), "test/bit.air")
 }
 
 #[test]

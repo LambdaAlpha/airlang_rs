@@ -14,7 +14,7 @@ use crate::{
     Map,
     Pair,
     abstract1::Abstract,
-    bool::Bool,
+    bit::Bit,
     byte::Byte,
     extension::ValExt,
     number::Number,
@@ -48,7 +48,7 @@ use crate::{
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Val {
     Unit(Unit),
-    Bool(Bool),
+    Bit(Bit),
     Symbol(Symbol),
     Text(TextVal),
 
@@ -75,7 +75,7 @@ pub enum Val {
 }
 
 pub(crate) const UNIT: &str = "unit";
-pub(crate) const BOOL: &str = "boolean";
+pub(crate) const BIT: &str = "bit";
 pub(crate) const SYMBOL: &str = "symbol";
 pub(crate) const TEXT: &str = "text";
 pub(crate) const INT: &str = "integer";
@@ -111,9 +111,9 @@ impl From<Unit> for Val {
     }
 }
 
-impl From<Bool> for Val {
-    fn from(value: Bool) -> Self {
-        Val::Bool(value)
+impl From<Bit> for Val {
+    fn from(value: Bit) -> Self {
+        Val::Bit(value)
     }
 }
 
@@ -277,7 +277,7 @@ impl From<&Repr> for Val {
     fn from(value: &Repr) -> Self {
         match value {
             Repr::Unit(unit) => Val::Unit(*unit),
-            Repr::Bool(bool) => Val::Bool(*bool),
+            Repr::Bit(bit) => Val::Bit(*bit),
             Repr::Symbol(symbol) => Val::Symbol(symbol.clone()),
             Repr::Text(text) => Val::Text(TextVal::from(text.clone())),
             Repr::Int(int) => Val::Int(IntVal::from(int.clone())),
@@ -297,7 +297,7 @@ impl From<Repr> for Val {
     fn from(value: Repr) -> Self {
         match value {
             Repr::Unit(unit) => Val::Unit(unit),
-            Repr::Bool(bool) => Val::Bool(bool),
+            Repr::Bit(bit) => Val::Bit(bit),
             Repr::Symbol(symbol) => Val::Symbol(symbol),
             Repr::Text(text) => Val::Text(TextVal::from(text)),
             Repr::Int(int) => Val::Int(IntVal::from(int)),
@@ -318,7 +318,7 @@ impl TryInto<Repr> for &Val {
     fn try_into(self) -> Result<Repr, Self::Error> {
         match self {
             Val::Unit(unit) => Ok(Repr::Unit(*unit)),
-            Val::Bool(bool) => Ok(Repr::Bool(*bool)),
+            Val::Bit(bit) => Ok(Repr::Bit(*bit)),
             Val::Symbol(symbol) => Ok(Repr::Symbol(symbol.clone())),
             Val::Text(text) => Ok(Repr::Text(text.into())),
             Val::Int(int) => Ok(Repr::Int(int.into())),
@@ -340,7 +340,7 @@ impl TryInto<Repr> for Val {
     fn try_into(self) -> Result<Repr, Self::Error> {
         match self {
             Val::Unit(unit) => Ok(Repr::Unit(unit)),
-            Val::Bool(bool) => Ok(Repr::Bool(bool)),
+            Val::Bit(bit) => Ok(Repr::Bit(bit)),
             Val::Symbol(symbol) => Ok(Repr::Symbol(symbol)),
             Val::Text(text) => Ok(Repr::Text(text.into())),
             Val::Int(int) => Ok(Repr::Int(int.into())),
@@ -365,7 +365,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
     fn try_into(self) -> Result<GenRepr<'a>, Self::Error> {
         let r = match self {
             Val::Unit(unit) => GenRepr::Unit(unit),
-            Val::Bool(bool) => GenRepr::Bool(bool),
+            Val::Bit(bit) => GenRepr::Bit(bit),
             Val::Symbol(symbol) => GenRepr::Symbol(symbol),
             Val::Text(text) => GenRepr::Text(text),
             Val::Int(int) => GenRepr::Int(int),
@@ -419,7 +419,7 @@ impl Debug for Val {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Val::Unit(unit) => <_ as Debug>::fmt(unit, f),
-            Val::Bool(bool) => <_ as Debug>::fmt(bool, f),
+            Val::Bit(bool) => <_ as Debug>::fmt(bool, f),
             Val::Symbol(symbol) => <_ as Debug>::fmt(symbol, f),
             Val::Text(text) => <_ as Debug>::fmt(text, f),
             Val::Int(int) => <_ as Debug>::fmt(int, f),

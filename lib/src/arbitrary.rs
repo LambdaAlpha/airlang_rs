@@ -35,7 +35,7 @@ use crate::{
     Val,
     ValExt,
     answer::Answer,
-    bool::Bool,
+    bit::Bit,
     byte::Byte,
     ctx::{
         Ctx,
@@ -88,7 +88,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
     let weight: usize = 1 << min(depth, 32);
     let weights = [
         weight, // unit
-        weight, // bool
+        weight, // bit
         weight, // symbol
         weight, // text
         weight, // int
@@ -111,7 +111,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
 
     match i {
         0 => Val::Unit(any_unit(rng)),
-        1 => Val::Bool(any_bool(rng)),
+        1 => Val::Bit(any_bit(rng)),
         2 => Val::Symbol(any_symbol(rng)),
         3 => Val::Text(any_text(rng).into()),
         4 => Val::Int(any_int(rng).into()),
@@ -136,8 +136,8 @@ pub(crate) fn any_unit(_rng: &mut SmallRng) -> Unit {
     Unit
 }
 
-pub(crate) fn any_bool(rng: &mut SmallRng) -> Bool {
-    Bool::new(rng.gen())
+pub(crate) fn any_bit(rng: &mut SmallRng) -> Bit {
+    Bit::new(rng.gen())
 }
 
 struct DistSymbol;

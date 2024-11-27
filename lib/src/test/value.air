@@ -2,9 +2,9 @@ do [u = any ; .unit, type_of .u]
 -----
 unit
 =====
-do [b = any ; .boolean, type_of .b]
+do [b = any ; .bit, type_of .b]
 -----
-boolean
+bit
 =====
 do [i = any ; .integer, type_of .i]
 -----
@@ -68,11 +68,11 @@ unit
 =====
 do [a = true, type_of .a]
 -----
-boolean
+bit
 =====
 type_of ; not ; true
 -----
-false : boolean
+false : bit
 =====
 do [a = 1, type_of .a]
 -----

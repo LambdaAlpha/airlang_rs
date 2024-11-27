@@ -1,7 +1,7 @@
 use crate::{
     Abstract,
     Ask,
-    Bool,
+    Bit,
     Call,
     List,
     ListVal,
@@ -72,7 +72,7 @@ impl ParseMode<Val> for Mode {
             Val::Map(mut map) => {
                 let recursive = match map_remove(&mut map, RECURSIVE) {
                     Val::Unit(_) => false,
-                    Val::Bool(b) => b.bool(),
+                    Val::Bit(b) => b.bool(),
                     _ => return None,
                 };
                 let mode = if recursive {
@@ -106,7 +106,7 @@ impl GenerateMode<Val> for Mode {
             Mode::Primitive(mode) => mode.generate(default),
             Mode::Recursive(mode) => {
                 let mut map = mode.generate(default);
-                map.insert(symbol(RECURSIVE), Val::Bool(Bool::t()));
+                map.insert(symbol(RECURSIVE), Val::Bit(Bit::t()));
                 Val::Map(map)
             }
             Mode::Composite(mode) => {

@@ -1,5 +1,5 @@
 use crate::{
-    Bool,
+    Bit,
     ConstFnCtx,
     Map,
     Mode,
@@ -21,7 +21,7 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct BoolPrelude {
+pub(crate) struct BitPrelude {
     pub(crate) is_true: Named<FuncVal>,
     pub(crate) is_false: Named<FuncVal>,
     pub(crate) not: Named<FuncVal>,
@@ -31,9 +31,9 @@ pub(crate) struct BoolPrelude {
     pub(crate) imply: Named<FuncVal>,
 }
 
-impl Default for BoolPrelude {
+impl Default for BitPrelude {
     fn default() -> Self {
-        BoolPrelude {
+        BitPrelude {
             is_true: is_true(),
             is_false: is_false(),
             not: not(),
@@ -45,7 +45,7 @@ impl Default for BoolPrelude {
     }
 }
 
-impl Prelude for BoolPrelude {
+impl Prelude for BitPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.is_true.put(m);
         self.is_false.put(m);
@@ -68,10 +68,10 @@ fn is_true() -> Named<FuncVal> {
 
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| {
-        let Val::Bool(b) = val else {
-            return Val::Bool(Bool::f());
+        let Val::Bit(b) = val else {
+            return Val::Bit(Bit::f());
         };
-        Val::Bool(*b)
+        Val::Bit(*b)
     })
 }
 
@@ -86,10 +86,10 @@ fn is_false() -> Named<FuncVal> {
 
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| {
-        let Val::Bool(b) = val else {
-            return Val::Bool(Bool::f());
+        let Val::Bit(b) = val else {
+            return Val::Bit(Bit::f());
         };
-        Val::Bool(b.not())
+        Val::Bit(b.not())
     })
 }
 
@@ -103,10 +103,10 @@ fn not() -> Named<FuncVal> {
 }
 
 fn fn_not(input: Val) -> Val {
-    let Val::Bool(b) = input else {
+    let Val::Bit(b) = input else {
         return Val::default();
     };
-    Val::Bool(b.not())
+    Val::Bit(b.not())
 }
 
 fn and() -> Named<FuncVal> {
@@ -122,13 +122,13 @@ fn fn_and(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Bool(left) = pair.first else {
+    let Val::Bit(left) = pair.first else {
         return Val::default();
     };
-    let Val::Bool(right) = pair.second else {
+    let Val::Bit(right) = pair.second else {
         return Val::default();
     };
-    Val::Bool(left.and(right))
+    Val::Bit(left.and(right))
 }
 
 fn or() -> Named<FuncVal> {
@@ -144,13 +144,13 @@ fn fn_or(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Bool(left) = pair.first else {
+    let Val::Bit(left) = pair.first else {
         return Val::default();
     };
-    let Val::Bool(right) = pair.second else {
+    let Val::Bit(right) = pair.second else {
         return Val::default();
     };
-    Val::Bool(left.or(right))
+    Val::Bit(left.or(right))
 }
 
 fn xor() -> Named<FuncVal> {
@@ -166,13 +166,13 @@ fn fn_xor(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Bool(left) = pair.first else {
+    let Val::Bit(left) = pair.first else {
         return Val::default();
     };
-    let Val::Bool(right) = pair.second else {
+    let Val::Bit(right) = pair.second else {
         return Val::default();
     };
-    Val::Bool(left.xor(right))
+    Val::Bit(left.xor(right))
 }
 
 fn imply() -> Named<FuncVal> {
@@ -188,11 +188,11 @@ fn fn_imply(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let Val::Bool(left) = pair.first else {
+    let Val::Bit(left) = pair.first else {
         return Val::default();
     };
-    let Val::Bool(right) = pair.second else {
+    let Val::Bit(right) = pair.second else {
         return Val::default();
     };
-    Val::Bool(left.imply(right))
+    Val::Bit(left.imply(right))
 }

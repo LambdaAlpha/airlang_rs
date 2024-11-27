@@ -1,5 +1,5 @@
 use crate::{
-    bool::Bool,
+    bit::Bit,
     ctx::{
         CtxValue,
         const1::ConstFnCtx,
@@ -262,7 +262,7 @@ fn fn_is_cacheable(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let cacheable = func.cacheable();
-        Val::Bool(Bool::new(cacheable))
+        Val::Bit(Bit::new(cacheable))
     })
 }
 
@@ -281,7 +281,7 @@ fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let is_primitive = func.is_primitive();
-        Val::Bool(Bool::new(is_primitive))
+        Val::Bit(Bit::new(is_primitive))
     })
 }
 
@@ -302,7 +302,7 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
         let Some(is_extension) = func.is_extension() else {
             return Val::default();
         };
-        Val::Bool(Bool::new(is_extension))
+        Val::Bit(Bit::new(is_extension))
     })
 }
 
@@ -320,7 +320,7 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(matches!(func, FuncVal::Cell(_))))
+        Val::Bit(Bit::new(matches!(func, FuncVal::Cell(_))))
     })
 }
 
@@ -338,7 +338,7 @@ fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(matches!(func, FuncVal::Mode(_))))
+        Val::Bit(Bit::new(matches!(func, FuncVal::Mode(_))))
     })
 }
 

@@ -108,7 +108,7 @@ enum BlockItem {
         target: bool,
         body: Val,
     },
-    BoolExit {
+    BitExit {
         exit: Exit,
         target: bool,
         condition: Val,
@@ -161,7 +161,7 @@ where
     let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
-    let Val::Bool(b) = condition else {
+    let Val::Bit(b) = condition else {
         return Val::default();
     };
     let branches = Pair::from(branches);
@@ -198,7 +198,7 @@ where
     let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
-    let Val::Bool(b) = condition else {
+    let Val::Bit(b) = condition else {
         return Val::default();
     };
     let branches = Pair::from(branches);
@@ -335,7 +335,7 @@ where
             return Val::default();
         };
         loop {
-            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
@@ -353,7 +353,7 @@ where
         }
     } else {
         loop {
-            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
@@ -395,7 +395,7 @@ where
             return Val::default();
         };
         loop {
-            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if b.bool() {
@@ -413,7 +413,7 @@ where
         }
     } else {
         loop {
-            let Val::Bool(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if b.bool() {
@@ -591,14 +591,14 @@ where
                     return (output, CtrlFlow::from(exit));
                 }
             }
-            BlockItem::BoolExit {
+            BlockItem::BitExit {
                 exit,
                 target,
                 condition,
                 body,
             } => {
                 let condition = Eval.transform(ctx.reborrow(), condition);
-                let Val::Bool(condition) = condition else {
+                let Val::Bit(condition) = condition else {
                     return (Val::default(), CtrlFlow::Error);
                 };
                 if condition.bool() == target {
@@ -638,7 +638,7 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
         let pair = Pair::from(pair);
         let condition = pair.first;
         let body = pair.second;
-        BlockItem::BoolExit {
+        BlockItem::BitExit {
             exit,
             target,
             condition,

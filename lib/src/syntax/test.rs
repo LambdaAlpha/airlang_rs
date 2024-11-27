@@ -8,7 +8,7 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
-    bool::Bool,
+    bit::Bit,
     int::Int,
     map::Map,
     number::Number,
@@ -32,7 +32,7 @@ use crate::{
 
 mod unit;
 
-mod boolean;
+mod bit;
 
 mod symbol;
 
@@ -62,8 +62,8 @@ fn unit() -> Repr {
     Repr::Unit(Unit)
 }
 
-fn bool(b: bool) -> Repr {
-    Repr::Bool(Bool::new(b))
+fn bit(b: bool) -> Repr {
+    Repr::Bit(Bit::new(b))
 }
 
 fn symbol(s: &str) -> Repr {
@@ -262,17 +262,13 @@ fn test_generate_unit() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_boolean() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/boolean.air"),
-        "test/boolean.air",
-        boolean::expected,
-    )
+fn test_parse_bit() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/bit.air"), "test/bit.air", bit::expected)
 }
 
 #[test]
-fn test_generate_boolean() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/boolean.air"), "test/boolean.air")
+fn test_generate_bit() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/bit.air"), "test/bit.air")
 }
 
 #[test]

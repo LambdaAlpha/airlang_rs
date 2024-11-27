@@ -2,7 +2,7 @@ pub use crate::{
     abstract1::Abstract,
     answer::Answer,
     ask::Ask,
-    bool::Bool,
+    bit::Bit,
     byte::Byte,
     cache::Cache,
     call::Call,

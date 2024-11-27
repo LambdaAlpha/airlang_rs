@@ -5,7 +5,7 @@ use crate::{
     Map,
     Mode,
     Symbol,
-    bool::Bool,
+    bit::Bit,
     ctx::{
         CtxValue,
         const1::ConstFnCtx,
@@ -265,7 +265,7 @@ fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        Val::Bool(Bool::new(map.contains_key(key)))
+        Val::Bit(Bit::new(map.contains_key(key)))
     })
 }
 
@@ -293,7 +293,7 @@ fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         let b = keys.into_iter().all(|k| map.contains_key(&k));
-        Val::Bool(Bool::new(b))
+        Val::Bit(Bit::new(b))
     })
 }
 

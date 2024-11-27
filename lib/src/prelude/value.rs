@@ -12,7 +12,7 @@ use crate::{
         any_abstract,
         any_answer,
         any_ask,
-        any_bool,
+        any_bit,
         any_byte,
         any_call,
         any_case_val,
@@ -29,7 +29,7 @@ use crate::{
         any_unit,
         any_val,
     },
-    bool::Bool,
+    bit::Bit,
     core::{
         SYMBOL_ID_PREFIX,
         SYMBOL_REF_PREFIX,
@@ -52,7 +52,7 @@ use crate::{
         ABSTRACT,
         ANSWER,
         ASK,
-        BOOL,
+        BIT,
         BYTE,
         CALL,
         CASE,
@@ -116,7 +116,7 @@ fn fn_any(input: Val) -> Val {
         Val::Unit(_) => any_val(rng, DEPTH),
         Val::Symbol(s) => match &*s {
             UNIT => Val::Unit(any_unit(rng)),
-            BOOL => Val::Bool(any_bool(rng)),
+            BIT => Val::Bit(any_bit(rng)),
             SYMBOL => Val::Symbol(any_symbol(rng)),
             TEXT => Val::Text(any_text(rng).into()),
             INT => Val::Int(any_int(rng).into()),
@@ -152,7 +152,7 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
-            Val::Bool(_) => BOOL,
+            Val::Bit(_) => BIT,
             Val::Symbol(_) => SYMBOL,
             Val::Text(_) => TEXT,
             Val::Int(_) => INT,
@@ -196,7 +196,7 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
             let Some(v2) = v2 else {
                 return Val::default();
             };
-            Val::Bool(Bool::new(*v1 == *v2))
+            Val::Bit(Bit::new(*v1 == *v2))
         })
     })
 }
@@ -223,7 +223,7 @@ fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
             let Some(v2) = v2 else {
                 return Val::default();
             };
-            Val::Bool(Bool::new(*v1 != *v2))
+            Val::Bit(Bit::new(*v1 != *v2))
         })
     })
 }

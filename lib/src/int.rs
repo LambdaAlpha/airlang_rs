@@ -20,7 +20,7 @@ use num_traits::{
     Zero,
 };
 
-use crate::bool::Bool;
+use crate::bit::Bit;
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Int(BigInt);
@@ -136,24 +136,24 @@ impl Int {
         self.0 -= 1;
     }
 
-    pub(crate) fn less_than(&self, other: &Int) -> Bool {
-        Bool::new(self.0.lt(&other.0))
+    pub(crate) fn less_than(&self, other: &Int) -> Bit {
+        Bit::new(self.0.lt(&other.0))
     }
 
-    pub(crate) fn less_equal(&self, other: &Int) -> Bool {
-        Bool::new(self.0.le(&other.0))
+    pub(crate) fn less_equal(&self, other: &Int) -> Bit {
+        Bit::new(self.0.le(&other.0))
     }
 
-    pub(crate) fn greater_than(&self, other: &Int) -> Bool {
-        Bool::new(self.0.gt(&other.0))
+    pub(crate) fn greater_than(&self, other: &Int) -> Bit {
+        Bit::new(self.0.gt(&other.0))
     }
 
-    pub(crate) fn greater_equal(&self, other: &Int) -> Bool {
-        Bool::new(self.0.ge(&other.0))
+    pub(crate) fn greater_equal(&self, other: &Int) -> Bit {
+        Bit::new(self.0.ge(&other.0))
     }
 
-    pub(crate) fn less_greater(&self, other: &Int) -> Bool {
-        Bool::new(self.0.ne(&other.0))
+    pub(crate) fn less_greater(&self, other: &Int) -> Bit {
+        Bit::new(self.0.ne(&other.0))
     }
 }
 

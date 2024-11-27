@@ -1,5 +1,5 @@
 use crate::{
-    Bool,
+    Bit,
     ConstFnCtx,
     Map,
     Mode,
@@ -64,5 +64,5 @@ fn is_unit() -> Named<FuncVal> {
 }
 
 fn fn_is_unit(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref(ctx, input, |val| Val::Bool(Bool::new(val.is_unit())))
+    DefaultCtx.with_ref(ctx, input, |val| Val::Bit(Bit::new(val.is_unit())))
 }

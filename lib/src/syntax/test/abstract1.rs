@@ -2,7 +2,7 @@ use crate::syntax::{
     repr::Repr,
     test::{
         abstract1,
-        bool,
+        bit,
         byte,
         call,
         infix,
@@ -19,7 +19,7 @@ use crate::syntax::{
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         abstract1(unit(), int("1")),
-        abstract1(bool(true), int("2")),
+        abstract1(bit(true), int("2")),
         abstract1(int("1"), int("3")),
         abstract1(number(10, "10", 1, "0"), int("4")),
         abstract1(byte(vec![0x7f]), int("5")),
