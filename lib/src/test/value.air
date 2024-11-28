@@ -82,7 +82,7 @@ do [a = 1.0, type_of .a]
 -----
 number
 =====
-do [a = b(ff), type_of .a]
+do [a = byte(ff), type_of .a]
 -----
 byte
 =====

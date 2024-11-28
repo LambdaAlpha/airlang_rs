@@ -32,9 +32,9 @@ pub(crate) const CALL: &str = ";";
 pub(crate) const ABSTRACT: &str = "!";
 pub(crate) const ASK: &str = "?";
 
-pub(crate) const INT: &str = "i";
-pub(crate) const NUMBER: &str = "n";
-pub(crate) const BYTE: &str = "b";
+pub(crate) const INT: &str = "integer";
+pub(crate) const NUMBER: &str = "number";
+pub(crate) const BYTE: &str = "byte";
 
 pub(crate) const RAW: &str = "/";
 pub(crate) const RICH: &str = "\\";
