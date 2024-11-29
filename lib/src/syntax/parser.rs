@@ -845,7 +845,7 @@ enum StrFragment<'a> {
     Space(&'a str),
 }
 
-impl<'a> StrFragment<'a> {
+impl StrFragment<'_> {
     fn push(self, str: &mut String) {
         match self {
             StrFragment::Literal(s) => str.push_str(s),
