@@ -96,6 +96,16 @@ pub fn expected() -> Vec<Repr> {
         call(call(int("1"), int("2")), int("3")),
         ask(int("1"), ask(int("2"), int("3"))),
         infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
+        infix_abstract(
+            infix_abstract(int("1"), int("2"), int("3")),
+            int("4"),
+            int("5"),
+        ),
+        call(
+            int("1"),
+            call(int("2"), call(int("3"), call(int("4"), int("5")))),
+        ),
+        infix_ask(infix_ask(int("1"), int("2"), int("3")), int("4"), int("5")),
         pair(symbol("a"), symbol("a")),
         call(symbol("a"), symbol("a")),
         abstract1(symbol("a"), symbol("a")),

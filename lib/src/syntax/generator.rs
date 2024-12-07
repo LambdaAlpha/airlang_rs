@@ -230,7 +230,7 @@ fn gen_byte(byte: &Byte, s: &mut String) {
 fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
     gen_scope_if_need(ctx, pair.first, s);
     s.push(' ');
-    s.push_str(PAIR);
+    s.push(PAIR);
     s.push(' ');
     gen(ctx, pair.second, s);
 }
@@ -245,7 +245,7 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     } else {
         gen_scope_if_need(ctx, call.func, s);
         s.push(' ');
-        s.push_str(CALL);
+        s.push(CALL);
         s.push(' ');
         gen(ctx, call.input, s);
     }
@@ -254,7 +254,7 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
 fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut String) {
     gen_scope_if_need(ctx, abstract1.func, s);
     s.push(' ');
-    s.push_str(ABSTRACT);
+    s.push(ABSTRACT);
     s.push(' ');
     gen(ctx, abstract1.input, s);
 }
@@ -262,7 +262,7 @@ fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut Stri
 fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
     gen_scope_if_need(ctx, ask.func, s);
     s.push(' ');
-    s.push_str(ASK);
+    s.push(ASK);
     s.push(' ');
     gen(ctx, ask.output, s);
 }
@@ -360,7 +360,7 @@ fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
 fn gen_kv(ctx: GenCtx, key: GenRepr, value: GenRepr, s: &mut String) {
     gen_scope_if_need(ctx, key, s);
     s.push(' ');
-    s.push_str(PAIR);
+    s.push(PAIR);
     s.push(' ');
     gen(ctx, value, s);
 }

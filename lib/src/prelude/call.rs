@@ -32,7 +32,10 @@ use crate::{
         named_mut_fn,
         pair_mode,
     },
-    syntax::CALL,
+    syntax::{
+        CALL,
+        CALL_STR,
+    },
     types::either::Either,
     val::func::FuncVal,
 };
@@ -75,7 +78,7 @@ impl Prelude for CallPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = CALL;
+    let id = CALL_STR;
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
     let cacheable = true;

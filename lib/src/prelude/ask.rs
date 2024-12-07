@@ -32,7 +32,10 @@ use crate::{
         named_mut_fn,
         pair_mode,
     },
-    syntax::ASK,
+    syntax::{
+        ASK,
+        ASK_STR,
+    },
     types::either::Either,
     val::func::FuncVal,
 };
@@ -75,7 +78,7 @@ impl Prelude for AskPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = ASK;
+    let id = ASK_STR;
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
     let cacheable = true;

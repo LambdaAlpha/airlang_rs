@@ -18,7 +18,7 @@ use crate::{
         named_free_fn,
         named_mut_fn,
     },
-    syntax::PAIR,
+    syntax::PAIR_STR,
     types::either::Either,
     val::{
         Val,
@@ -58,7 +58,7 @@ impl Prelude for PairPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = PAIR;
+    let id = PAIR_STR;
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
     let cacheable = true;

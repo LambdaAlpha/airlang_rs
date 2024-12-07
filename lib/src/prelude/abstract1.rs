@@ -25,7 +25,7 @@ use crate::{
         named_free_fn,
         named_mut_fn,
     },
-    syntax::ABSTRACT,
+    syntax::ABSTRACT_STR,
     transformer::ByVal,
     types::either::Either,
 };
@@ -65,7 +65,7 @@ impl Prelude for AbstractPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = ABSTRACT;
+    let id = ABSTRACT_STR;
     let call_mode = Mode::default();
     let ask_mode = Mode::default();
     let cacheable = true;
