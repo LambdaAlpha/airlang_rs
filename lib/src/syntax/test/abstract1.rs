@@ -47,6 +47,5 @@ pub(crate) fn expected() -> Vec<Repr> {
             symbol("e"),
             symbol("f"),
         ),
-        abstract1(symbol("a"), symbol("a")),
     ]
 }

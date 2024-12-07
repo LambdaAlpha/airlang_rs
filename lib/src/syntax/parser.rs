@@ -477,7 +477,8 @@ impl ComposeParser {
         }
         if len == 2 {
             let func = tokens.next().unwrap().into_repr();
-            let input = tokens.next().unwrap().into_repr();
+            let input = tokens.next().unwrap();
+            let (func, input) = left_right(func, input);
             return Some(self.compose_two(func, input));
         }
         match self.ctx.arity {
@@ -523,17 +524,18 @@ impl ComposeParser {
         T: ParseRepr,
         I: Iterator<Item = Token<T>>,
     {
-        let mut first = iter.next().unwrap().into_repr();
+        let mut first = iter.next().unwrap();
         loop {
             let Some(second) = iter.next() else {
                 break;
             };
-            first = match self.ctx.direction {
-                Direction::Left => self.compose_two(first, second.into_repr()),
-                Direction::Right => self.compose_two(second.into_repr(), first),
-            }
+            let (left, right) = match self.ctx.direction {
+                Direction::Left => left_right(first.into_repr(), second),
+                Direction::Right => left_right(second.into_repr(), first),
+            };
+            first = Token::Default(self.compose_two(left, right));
         }
-        Some(first)
+        Some(first.into_repr())
     }
 
     fn compose_many2<T, I>(&self, mut iter: I) -> Option<T>

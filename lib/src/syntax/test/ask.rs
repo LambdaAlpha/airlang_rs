@@ -26,6 +26,5 @@ pub(crate) fn expected() -> Vec<Repr> {
         ask(call_list(symbol("a"), vec![]), symbol("b")),
         ask(ask(symbol("a"), symbol("b")), symbol("c")),
         ask(infix(symbol("a"), symbol("b"), symbol("c")), symbol("d")),
-        ask(symbol("a"), symbol("a")),
     ]
 }

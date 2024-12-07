@@ -69,6 +69,5 @@ pub(crate) fn expected() -> Vec<Repr> {
         call_map(call_list(symbol("a"), vec![]), vec![]),
         call_list(call_map(symbol("a"), vec![]), vec![]),
         call_list(call_map(symbol("a"), vec![]), vec![]),
-        call(symbol("a"), symbol("a")),
     ]
 }

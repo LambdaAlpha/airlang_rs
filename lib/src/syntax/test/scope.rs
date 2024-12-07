@@ -12,6 +12,7 @@ use crate::syntax::{
         list,
         map,
         no_compose,
+        pair,
         positive_decimal_int as int,
         symbol,
     },
@@ -95,5 +96,31 @@ pub fn expected() -> Vec<Repr> {
         call(call(int("1"), int("2")), int("3")),
         ask(int("1"), ask(int("2"), int("3"))),
         infix(int("1"), int("2"), infix(int("3"), int("4"), int("5"))),
+        pair(symbol("a"), symbol("a")),
+        call(symbol("a"), symbol("a")),
+        abstract1(symbol("a"), symbol("a")),
+        ask(symbol("a"), symbol("a")),
+        call(symbol("a"), symbol("a")),
+        infix(
+            infix(symbol("a"), symbol("b"), symbol("a")),
+            symbol("c"),
+            infix(symbol("a"), symbol("b"), symbol("a")),
+        ),
+        infix(
+            infix(symbol("a"), symbol("b"), symbol("a")),
+            symbol("c"),
+            infix(symbol("a"), symbol("b"), symbol("a")),
+        ),
+        call(symbol("a"), symbol("a")),
+        pair(symbol("a"), symbol("a")),
+        call(symbol("a"), call(symbol("b"), symbol("b"))),
+        call(
+            call(symbol("a"), symbol("a")),
+            call(symbol("a"), symbol("a")),
+        ),
+        call(
+            call(symbol("a"), symbol("a")),
+            call(symbol("a"), symbol("a")),
+        ),
     ]
 }
