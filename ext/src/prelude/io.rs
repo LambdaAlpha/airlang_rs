@@ -57,9 +57,13 @@ impl Prelude for IoPrelude {
 }
 
 fn read_line() -> Named<FuncVal> {
+    let id = "io.read_line";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_mut_fn("io.read_line", call_mode, ask_mode, false, fn_read_line)
+    let cacheable = false;
+    let f = fn_read_line;
+    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
@@ -77,9 +81,13 @@ fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
 }
 
 fn print() -> Named<FuncVal> {
+    let id = "io.print";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn("io.print", call_mode, ask_mode, false, fn_print)
+    let cacheable = false;
+    let f = fn_print;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_print(input: Val) -> Val {
@@ -91,9 +99,13 @@ fn fn_print(input: Val) -> Val {
 }
 
 fn print_line() -> Named<FuncVal> {
+    let id = "io.print_line";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn("io.print_line", call_mode, ask_mode, false, fn_print_line)
+    let cacheable = false;
+    let f = fn_print_line;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_print_line(input: Val) -> Val {
@@ -105,9 +117,13 @@ fn fn_print_line(input: Val) -> Val {
 }
 
 fn flush() -> Named<FuncVal> {
+    let id = "io.flush";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn("io.flush", call_mode, ask_mode, false, fn_flush)
+    let cacheable = false;
+    let f = fn_flush;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_flush(_input: Val) -> Val {
@@ -116,9 +132,13 @@ fn fn_flush(_input: Val) -> Val {
 }
 
 fn error_print() -> Named<FuncVal> {
+    let id = "io.error_print";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn("io.error_print", call_mode, ask_mode, false, fn_error_print)
+    let cacheable = false;
+    let f = fn_error_print;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_error_print(input: Val) -> Val {
@@ -130,15 +150,13 @@ fn fn_error_print(input: Val) -> Val {
 }
 
 fn error_print_line() -> Named<FuncVal> {
+    let id = "io.error_print_line";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn(
-        "io.error_print_line",
-        call_mode,
-        ask_mode,
-        false,
-        fn_error_print_line,
-    )
+    let cacheable = false;
+    let f = fn_error_print_line;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_error_print_line(input: Val) -> Val {
@@ -150,9 +168,13 @@ fn fn_error_print_line(input: Val) -> Val {
 }
 
 fn error_flush() -> Named<FuncVal> {
+    let id = "io.error_flush";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn("io.error_flush", call_mode, ask_mode, false, fn_error_flush)
+    let cacheable = false;
+    let f = fn_error_flush;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_error_flush(_input: Val) -> Val {

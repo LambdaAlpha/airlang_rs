@@ -41,6 +41,7 @@ pub(crate) const CTX_NAME: &str = "context_name";
 pub(crate) const ID: &str = "id";
 pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
+pub(crate) const ABSTRACT_MODE: &str = "abstract_mode";
 pub(crate) const ASK_MODE: &str = "ask_mode";
 pub(crate) const CACHEABLE: &str = "cacheable";
 pub(crate) const CTX_ACCESS: &str = "context_access";
@@ -61,6 +62,7 @@ pub(crate) fn parse_mode() -> Mode {
     map.insert(symbol(CTX_NAME), Mode::default());
     map.insert(symbol(CTX_ACCESS), Mode::default());
     map.insert(symbol(CALL_MODE), Mode::default());
+    map.insert(symbol(ABSTRACT_MODE), Mode::default());
     map.insert(symbol(ASK_MODE), Mode::default());
     map.insert(symbol(CACHEABLE), Mode::default());
     map.insert(symbol(CELL), Mode::default());
@@ -81,6 +83,7 @@ pub(crate) fn generate_mode() -> Mode {
     map.insert(symbol(CTX_NAME), Mode::default());
     map.insert(symbol(CTX_ACCESS), Mode::default());
     map.insert(symbol(CALL_MODE), Mode::default());
+    map.insert(symbol(ABSTRACT_MODE), Mode::default());
     map.insert(symbol(ASK_MODE), Mode::default());
     map.insert(symbol(CACHEABLE), Mode::default());
     map.insert(symbol(ID), Mode::default());
@@ -119,6 +122,11 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Func(FuncVal::Mode(call_mode)) => call_mode.mode().clone(),
         _ => return None,
     };
+    let abstract_mode = match map_remove(&mut map, ABSTRACT_MODE) {
+        Val::Unit(_) => Mode::default(),
+        Val::Func(FuncVal::Mode(abstract_mode)) => abstract_mode.mode().clone(),
+        _ => return None,
+    };
     let ask_mode = match map_remove(&mut map, ASK_MODE) {
         Val::Unit(_) => Mode::default(),
         Val::Func(FuncVal::Mode(ask_mode)) => ask_mode.mode().clone(),
@@ -153,7 +161,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
             input_name,
             ext: CellCompositeExt {},
         };
-        let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+        let func = Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
         FuncVal::Cell(CellFuncVal::from(func))
     } else {
         match ctx_access {
@@ -165,7 +173,8 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
                     input_name,
                     ext: FreeCompositeExt {},
                 };
-                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+                let func =
+                    Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
                 FuncVal::Free(FreeFuncVal::from(func))
             }
             CONST => {
@@ -176,7 +185,8 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
                     input_name,
                     ext: ConstCompositeExt { ctx_name },
                 };
-                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+                let func =
+                    Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
                 FuncVal::Const(ConstFuncVal::from(func))
             }
             MUTABLE => {
@@ -187,7 +197,8 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
                     input_name,
                     ext: MutCompositeExt { ctx_name },
                 };
-                let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+                let func =
+                    Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
                 FuncVal::Mut(MutFuncVal::from(func))
             }
             _ => return None,
@@ -218,6 +229,7 @@ fn generate_cell(f: CellFuncVal) -> Val {
                     FREE,
                     f.cacheable,
                     f.call_mode,
+                    f.abstract_mode,
                     f.ask_mode,
                     &mut repr,
                 );
@@ -231,6 +243,7 @@ fn generate_cell(f: CellFuncVal) -> Val {
                 FREE,
                 f.cacheable,
                 f.call_mode,
+                f.abstract_mode,
                 f.ask_mode,
                 c.body_mode,
                 c.body,
@@ -255,6 +268,7 @@ fn generate_free(f: FreeFuncVal) -> Val {
                     FREE,
                     f.cacheable,
                     f.call_mode.clone(),
+                    f.abstract_mode.clone(),
                     f.ask_mode.clone(),
                     &mut repr,
                 );
@@ -267,6 +281,7 @@ fn generate_free(f: FreeFuncVal) -> Val {
             FREE,
             f.cacheable,
             f.call_mode.clone(),
+            f.abstract_mode.clone(),
             f.ask_mode.clone(),
             c.body_mode.clone(),
             c.body.clone(),
@@ -290,6 +305,7 @@ fn generate_const(f: ConstFuncVal) -> Val {
                     CONST,
                     f.cacheable,
                     f.call_mode.clone(),
+                    f.abstract_mode.clone(),
                     f.ask_mode.clone(),
                     &mut repr,
                 );
@@ -302,6 +318,7 @@ fn generate_const(f: ConstFuncVal) -> Val {
             CONST,
             f.cacheable,
             f.call_mode.clone(),
+            f.abstract_mode.clone(),
             f.ask_mode.clone(),
             c.body_mode.clone(),
             c.body.clone(),
@@ -325,6 +342,7 @@ fn generate_mut(f: MutFuncVal) -> Val {
                     MUTABLE,
                     f.cacheable,
                     f.call_mode.clone(),
+                    f.abstract_mode.clone(),
                     f.ask_mode.clone(),
                     &mut repr,
                 );
@@ -337,6 +355,7 @@ fn generate_mut(f: MutFuncVal) -> Val {
             MUTABLE,
             f.cacheable,
             f.call_mode.clone(),
+            f.abstract_mode.clone(),
             f.ask_mode.clone(),
             c.body_mode.clone(),
             c.body.clone(),
@@ -349,18 +368,28 @@ fn generate_mut(f: MutFuncVal) -> Val {
     Val::Map(repr.into())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn generate_extension(
     id: Symbol,
     cell: bool,
     access: &str,
     cacheable: bool,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     repr: &mut Map<Val, Val>,
 ) {
     repr.insert(symbol(ID), Val::Symbol(id));
     repr.insert(symbol(IS_EXTENSION), Val::Bit(Bit::t()));
-    generate_func_common(cell, access, cacheable, call_mode, ask_mode, repr);
+    generate_func_common(
+        cell,
+        access,
+        cacheable,
+        call_mode,
+        abstract_mode,
+        ask_mode,
+        repr,
+    );
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -369,6 +398,7 @@ fn generate_composite(
     access: &str,
     cacheable: bool,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     body_mode: Mode,
     body: Val,
@@ -377,7 +407,15 @@ fn generate_composite(
     ctx_name: Option<Symbol>,
     repr: &mut Map<Val, Val>,
 ) {
-    generate_func_common(cell, access, cacheable, call_mode, ask_mode, repr);
+    generate_func_common(
+        cell,
+        access,
+        cacheable,
+        call_mode,
+        abstract_mode,
+        ask_mode,
+        repr,
+    );
     if body_mode != Mode::default() {
         let mode = Val::Func(FuncVal::Mode(ModeFunc::new(body_mode).into()));
         repr.insert(symbol(BODY_MODE), mode);
@@ -403,6 +441,7 @@ fn generate_func_common(
     access: &str,
     cacheable: bool,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     repr: &mut Map<Val, Val>,
 ) {
@@ -418,6 +457,10 @@ fn generate_func_common(
     if call_mode != Mode::default() {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(call_mode).into()));
         repr.insert(symbol(CALL_MODE), call_mode);
+    }
+    if abstract_mode != Mode::default() {
+        let abstract_mode = Val::Func(FuncVal::Mode(ModeFunc::new(abstract_mode).into()));
+        repr.insert(symbol(ABSTRACT_MODE), abstract_mode);
     }
     if ask_mode != Mode::default() {
         let ask_mode = Val::Func(FuncVal::Mode(ModeFunc::new(ask_mode).into()));

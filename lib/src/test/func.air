@@ -629,6 +629,7 @@ function.represent ==
 =====
 do [
     call_mode = mode ; {pair : eval : id},
+    abstract_mode = mode ; {pair : id : form},
     ask_mode = mode ; {pair : form : form},
     body_mode = mode ; {list : [eval, form, id]},
     repr = form ; {
@@ -637,6 +638,7 @@ do [
         input_name : in,
         context_name : ctx,
         call_mode : &call_mode,
+        abstract_mode : &abstract_mode,
         ask_mode : &ask_mode,
         context_access : constant,
         cacheable : true,
@@ -715,6 +717,15 @@ do [
 ]
 -----
 {map : {a : eval, b : id} : id : form}
+=====
+do [
+    f = function ; {
+        abstract_mode : mode ; {map : {a : form} : eval : id},
+    },
+    function.represent ; function.abstract_mode ; .f
+]
+-----
+{map : {a : form} : eval : id}
 =====
 do [
     f = function ; {

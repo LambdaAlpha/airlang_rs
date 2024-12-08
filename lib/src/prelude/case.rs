@@ -93,10 +93,11 @@ fn new() -> Named<FuncVal> {
         Mode::default(),
         PrimitiveMode::default(),
     );
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = false;
     let f = fn_new;
-    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -115,10 +116,11 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let id = "case.cache";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = false;
     let f = fn_new_cache;
-    named_mut_fn(id, call_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
@@ -137,6 +139,7 @@ fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let id = "case.represent";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
@@ -150,7 +153,7 @@ fn repr() -> Named<FuncVal> {
     );
     let cacheable = true;
     let f = fn_repr;
-    named_free_fn(id, call_mode, ask_mode, cacheable, f)
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -174,10 +177,11 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 fn is_cache() -> Named<FuncVal> {
     let id = "case.is_cache";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_is_cache;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
@@ -192,10 +196,11 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
 fn func() -> Named<FuncVal> {
     let id = "case.function";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_func;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
@@ -210,10 +215,11 @@ fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
 fn input() -> Named<FuncVal> {
     let id = "case.input";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_input;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
@@ -228,10 +234,11 @@ fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
 fn output() -> Named<FuncVal> {
     let id = "case.output";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_output;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {

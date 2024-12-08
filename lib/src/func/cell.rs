@@ -95,6 +95,7 @@ impl Composite<CellCompositeExt> {
 impl CellFunc {
     pub fn new(
         call_mode: Mode,
+        abstract_mode: Mode,
         ask_mode: Mode,
         cacheable: bool,
         id: Symbol,
@@ -107,6 +108,7 @@ impl CellFunc {
         });
         Self {
             call_mode,
+            abstract_mode,
             ask_mode,
             cacheable,
             transformer,

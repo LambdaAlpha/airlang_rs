@@ -268,11 +268,7 @@ impl EvalCore {
     {
         let abstract1 = Abstract::from(abstract1);
         let func = func_trans.transform(ctx.reborrow(), abstract1.func);
-        let input = input_trans.transform(ctx, abstract1.input);
-        let Val::Func(func) = func else {
-            return input;
-        };
-        optimize(func, input)
+        Self::eval_input_then_abstract(input_trans, ctx, func, abstract1.input)
     }
 
     pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
@@ -384,6 +380,35 @@ impl EvalCore {
             func.transform(input)
         } else {
             func.transform_mut(input)
+        }
+    }
+
+    pub(crate) fn eval_input_then_abstract<'a, Ctx, Input>(
+        input_trans: &Input,
+        mut ctx: Ctx,
+        func: Val,
+        input: Val,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Input: Transformer<Val, Val>,
+    {
+        if let Val::Func(func) = func {
+            let input = func.abstract_mode().transform(ctx.reborrow(), input);
+            optimize(ctx, func, input)
+        } else {
+            input_trans.transform(ctx, input)
+        }
+    }
+
+    pub(crate) fn abstract1<'a, Ctx>(ctx: Ctx, func: Val, input: Val) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        if let Val::Func(func) = func {
+            optimize(ctx, func, input)
+        } else {
+            input
         }
     }
 

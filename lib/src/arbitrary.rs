@@ -531,6 +531,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 
 pub(crate) fn any_cell_func(rng: &mut SmallRng, depth: usize) -> CellFuncVal {
     let call_mode = any_mode(rng, depth);
+    let abstract_mode = any_mode(rng, depth);
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
@@ -540,12 +541,13 @@ pub(crate) fn any_cell_func(rng: &mut SmallRng, depth: usize) -> CellFuncVal {
         input_name: any_symbol(rng),
         ext: CellCompositeExt {},
     };
-    let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+    let func = Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
     CellFuncVal::from(func)
 }
 
 pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
     let call_mode = any_mode(rng, depth);
+    let abstract_mode = any_mode(rng, depth);
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
@@ -555,12 +557,13 @@ pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
         input_name: any_symbol(rng),
         ext: FreeCompositeExt {},
     };
-    let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+    let func = Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
     FreeFuncVal::from(func)
 }
 
 pub(crate) fn any_const_func(rng: &mut SmallRng, depth: usize) -> ConstFuncVal {
     let call_mode = any_mode(rng, depth);
+    let abstract_mode = any_mode(rng, depth);
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
@@ -572,12 +575,13 @@ pub(crate) fn any_const_func(rng: &mut SmallRng, depth: usize) -> ConstFuncVal {
             ctx_name: any_symbol(rng),
         },
     };
-    let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+    let func = Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
     ConstFuncVal::from(func)
 }
 
 pub(crate) fn any_mut_func(rng: &mut SmallRng, depth: usize) -> MutFuncVal {
     let call_mode = any_mode(rng, depth);
+    let abstract_mode = any_mode(rng, depth);
     let ask_mode = any_mode(rng, depth);
     let cacheable = rng.gen();
     let transformer = Composite {
@@ -589,7 +593,7 @@ pub(crate) fn any_mut_func(rng: &mut SmallRng, depth: usize) -> MutFuncVal {
             ctx_name: any_symbol(rng),
         },
     };
-    let func = Func::new_composite(call_mode, ask_mode, cacheable, transformer);
+    let func = Func::new_composite(call_mode, abstract_mode, ask_mode, cacheable, transformer);
     MutFuncVal::from(func)
 }
 

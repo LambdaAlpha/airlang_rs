@@ -90,6 +90,16 @@ impl FuncVal {
         }
     }
 
+    pub(crate) fn abstract_mode(&self) -> &Mode {
+        match self {
+            FuncVal::Mode(_) => &Mode::Primitive(PrimitiveMode::Eval),
+            FuncVal::Cell(f) => &f.abstract_mode,
+            FuncVal::Free(f) => &f.abstract_mode,
+            FuncVal::Const(f) => &f.abstract_mode,
+            FuncVal::Mut(f) => &f.abstract_mode,
+        }
+    }
+
     pub(crate) fn ask_mode(&self) -> &Mode {
         match self {
             FuncVal::Mode(_) => &Mode::Primitive(PrimitiveMode::Eval),

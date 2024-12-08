@@ -56,6 +56,7 @@ impl Transformer<Val, Val> for Composite<FreeCompositeExt> {
 impl FreeFunc {
     pub fn new(
         call_mode: Mode,
+        abstract_mode: Mode,
         ask_mode: Mode,
         cacheable: bool,
         id: Symbol,
@@ -68,6 +69,7 @@ impl FreeFunc {
         });
         Self {
             call_mode,
+            abstract_mode,
             ask_mode,
             cacheable,
             transformer,

@@ -102,10 +102,11 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let id = "any";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_any;
-    named_free_fn(id, call_mode, ask_mode, cacheable, f)
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_any(input: Val) -> Val {
@@ -142,10 +143,11 @@ fn fn_any(input: Val) -> Val {
 fn type_of() -> Named<FuncVal> {
     let id = "type_of";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_type_of;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
@@ -177,10 +179,11 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let id = "==";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_equal;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
@@ -204,10 +207,11 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
 fn not_equal() -> Named<FuncVal> {
     let id = "!=";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_not_equal;
-    named_const_fn(id, call_mode, ask_mode, cacheable, f)
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {

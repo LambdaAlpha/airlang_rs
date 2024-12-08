@@ -148,6 +148,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         Val::Func(FuncVal::Free(FreeFuncVal::from(FreeFunc::new(
             Mode::default(),
             Mode::default(),
+            Mode::default(),
             false,
             func_ext_name,
             Rc::new(FuncExt),

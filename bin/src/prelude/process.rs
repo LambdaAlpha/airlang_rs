@@ -40,14 +40,18 @@ const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
+    let id = "repl.execute";
     let call_mode = map_mode(
         Map::default(),
         form_mode(),
         Mode::default(),
         PrimitiveMode::default(),
     );
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_free_fn("repl.execute", call_mode, ask_mode, false, fn_call)
+    let cacheable = false;
+    let f = fn_call;
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_call(input: Val) -> Val {

@@ -38,10 +38,11 @@ impl Prelude for SymbolPrelude {
 fn from_text() -> Named<FuncVal> {
     let id = "symbol.from_text";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_from_text;
-    named_free_fn(id, call_mode, ask_mode, cacheable, f)
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_from_text(input: Val) -> Val {
@@ -59,10 +60,11 @@ fn fn_from_text(input: Val) -> Val {
 fn into_text() -> Named<FuncVal> {
     let id = "symbol.into_text";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
     let cacheable = true;
     let f = fn_into_text;
-    named_free_fn(id, call_mode, ask_mode, cacheable, f)
+    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_into_text(input: Val) -> Val {

@@ -165,12 +165,13 @@ impl<T: Into<Val> + Clone> Named<T> {
 fn named_cell_fn(
     name: &'static str,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     cacheable: bool,
     func: impl CellFnExt + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<CellPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
+    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
     let func_val = CellFuncVal::from(func);
     Named::new(name, FuncVal::Cell(func_val))
 }
@@ -178,12 +179,13 @@ fn named_cell_fn(
 fn named_free_fn(
     name: &'static str,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     cacheable: bool,
     func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<FreePrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
+    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
 }
@@ -191,12 +193,13 @@ fn named_free_fn(
 fn named_const_fn(
     name: &'static str,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     cacheable: bool,
     func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<ConstPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
+    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
     let func_val = ConstFuncVal::from(func);
     Named::new(name, FuncVal::Const(func_val))
 }
@@ -204,12 +207,13 @@ fn named_const_fn(
 fn named_mut_fn(
     name: &'static str,
     call_mode: Mode,
+    abstract_mode: Mode,
     ask_mode: Mode,
     cacheable: bool,
     func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
     let primitive = Primitive::<MutPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, ask_mode, cacheable, primitive);
+    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
     let func_val = MutFuncVal::from(func);
     Named::new(name, FuncVal::Mut(func_val))
 }

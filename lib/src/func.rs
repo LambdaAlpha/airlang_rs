@@ -32,6 +32,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Func<P, C> {
     pub(crate) call_mode: Mode,
+    pub(crate) abstract_mode: Mode,
     pub(crate) ask_mode: Mode,
     pub(crate) cacheable: bool,
     pub(crate) transformer: FuncImpl<Primitive<P>, Composite<C>>,
@@ -146,12 +147,14 @@ fn restore_ctx(prelude: Ctx, ctx: &mut Ctx, name: Symbol) {
 impl<P, C> Func<P, C> {
     pub(crate) fn new_primitive(
         call_mode: Mode,
+        abstract_mode: Mode,
         ask_mode: Mode,
         cacheable: bool,
         f: Primitive<P>,
     ) -> Self {
         Self {
             call_mode,
+            abstract_mode,
             ask_mode,
             cacheable,
             transformer: FuncImpl::Primitive(f),
@@ -160,12 +163,14 @@ impl<P, C> Func<P, C> {
 
     pub(crate) fn new_composite(
         call_mode: Mode,
+        abstract_mode: Mode,
         ask_mode: Mode,
         cacheable: bool,
         f: Composite<C>,
     ) -> Self {
         Self {
             call_mode,
+            abstract_mode,
             ask_mode,
             cacheable,
             transformer: FuncImpl::Composite(f),
@@ -174,6 +179,10 @@ impl<P, C> Func<P, C> {
 
     pub fn call_mode(&self) -> &Mode {
         &self.call_mode
+    }
+
+    pub fn abstract_mode(&self) -> &Mode {
+        &self.abstract_mode
     }
 
     pub fn ask_mode(&self) -> &Mode {
@@ -242,6 +251,7 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self.call_mode == other.call_mode
+            && self.abstract_mode == other.abstract_mode
             && self.ask_mode == other.ask_mode
             && self.cacheable == other.cacheable
             && self.transformer == other.transformer
@@ -262,6 +272,7 @@ where
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.call_mode.hash(state);
+        self.abstract_mode.hash(state);
         self.ask_mode.hash(state);
         self.cacheable.hash(state);
         self.transformer.hash(state);
@@ -310,6 +321,7 @@ impl<T> Composite<T> {
 impl<P, C> Func<P, C> {
     pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
         s.field("call_mode", &self.call_mode);
+        s.field("abstract_mode", &self.abstract_mode);
         s.field("ask_mode", &self.ask_mode);
         s.field("cacheable", &self.cacheable);
     }

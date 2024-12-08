@@ -32,15 +32,13 @@ impl Prelude for FilePrelude {
 }
 
 fn read_to_text() -> Named<FuncVal> {
+    let id = "file.read_to_text";
     let call_mode = Mode::default();
+    let abstract_mode = call_mode.clone();
     let ask_mode = Mode::default();
-    named_const_fn(
-        "file.read_to_text",
-        call_mode,
-        ask_mode,
-        false,
-        fn_read_to_text,
-    )
+    let cacheable = false;
+    let f = fn_read_to_text;
+    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
 }
 
 fn fn_read_to_text(ctx: ConstFnCtx, input: Val) -> Val {

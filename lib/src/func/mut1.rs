@@ -101,6 +101,7 @@ impl Transformer<Val, Val> for Composite<MutCompositeExt> {
 impl MutFunc {
     pub fn new(
         call_mode: Mode,
+        abstract_mode: Mode,
         ask_mode: Mode,
         cacheable: bool,
         id: Symbol,
@@ -113,6 +114,7 @@ impl MutFunc {
         });
         Self {
             call_mode,
+            abstract_mode,
             ask_mode,
             cacheable,
             transformer,
