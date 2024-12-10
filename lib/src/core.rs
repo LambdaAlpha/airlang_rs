@@ -310,7 +310,7 @@ impl EvalCore {
         }
     }
 
-    pub(crate) fn eval_input<'a, Ctx, Input>(
+    pub(crate) fn call_eval_input<'a, Ctx, Input>(
         input_trans: &Input,
         ctx: Ctx,
         func: &Val,
@@ -401,6 +401,23 @@ impl EvalCore {
         }
     }
 
+    pub(crate) fn abstract_eval_input<'a, Ctx, Input>(
+        input_trans: &Input,
+        ctx: Ctx,
+        func: &Val,
+        input: Val,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Input: Transformer<Val, Val>,
+    {
+        if let Val::Func(func) = func {
+            func.abstract_mode().transform(ctx, input)
+        } else {
+            input_trans.transform(ctx, input)
+        }
+    }
+
     pub(crate) fn abstract1<'a, Ctx>(ctx: Ctx, func: Val, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -431,7 +448,7 @@ impl EvalCore {
         }
     }
 
-    pub(crate) fn eval_output<'a, Ctx, Output>(
+    pub(crate) fn ask_eval_output<'a, Ctx, Output>(
         output_trans: &Output,
         ctx: Ctx,
         func: &Val,

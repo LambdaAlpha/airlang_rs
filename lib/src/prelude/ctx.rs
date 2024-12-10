@@ -365,6 +365,16 @@ fn assign_pair(mut ctx: MutFnCtx, pattern: Pair<Pattern, Pattern>, val: Val) -> 
     Val::Pair(Pair::new(first, second).into())
 }
 
+fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Abstract(val) = val else {
+        return Val::default();
+    };
+    let val = Abstract::from(val);
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    let input = assign_pattern(ctx, pattern.input, val.input);
+    Val::Abstract(Abstract::new(func, input).into())
+}
+
 fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
@@ -383,16 +393,6 @@ fn assign_ask(mut ctx: MutFnCtx, pattern: Ask<Pattern, Pattern>, val: Val) -> Va
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let output = assign_pattern(ctx, pattern.output, val.output);
     Val::Ask(Ask::new(func, output).into())
-}
-
-fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern, Pattern>, val: Val) -> Val {
-    let Val::Abstract(val) = val else {
-        return Val::default();
-    };
-    let val = Abstract::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    let input = assign_pattern(ctx, pattern.input, val.input);
-    Val::Abstract(Abstract::new(func, input).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

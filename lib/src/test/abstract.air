@@ -18,6 +18,14 @@ do [c = id ; 1 ! 2, abstract.input .c]
 -----
 2
 =====
+do [a = 1 !! 2, abstract.input .a]
+-----
+2
+=====
+do [c = 1 !! 2, abstract.apply &c]
+-----
+2
+=====
 abstract.function ; id ; 1 ! 2
 -----
 1

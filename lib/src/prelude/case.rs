@@ -106,9 +106,9 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
     };
     let func = map_remove(&mut map, FUNCTION);
     let input = map_remove(&mut map, INPUT);
-    let input = EvalCore::eval_input(&Eval, ctx.reborrow(), &func, input);
+    let input = EvalCore::call_eval_input(&Eval, ctx.reborrow(), &func, input);
     let output = map_remove(&mut map, OUTPUT);
-    let output = EvalCore::eval_output(&Eval, ctx, &func, output);
+    let output = EvalCore::ask_eval_output(&Eval, ctx, &func, output);
     let case = Case::new(func, input, output);
     Val::Case(CaseVal::Trivial(case.into()))
 }

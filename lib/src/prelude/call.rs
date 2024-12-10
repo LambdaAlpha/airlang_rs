@@ -112,7 +112,7 @@ fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
     let pair = Pair::from(pair);
     let func = pair.first;
     let input = pair.second;
-    let input = EvalCore::eval_input(&Eval, ctx, &func, input);
+    let input = EvalCore::call_eval_input(&Eval, ctx, &func, input);
     Val::Call(Call::new(func, input).into())
 }
 
