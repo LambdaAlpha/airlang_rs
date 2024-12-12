@@ -40,8 +40,8 @@ use crate::{
 };
 
 pub(crate) const SYMBOL_ID_PREFIX: char = '.';
-pub(crate) const SYMBOL_REF_PREFIX: char = '$';
-pub(crate) const SYMBOL_MOVE_PREFIX: char = '&';
+pub(crate) const SYMBOL_REF_PREFIX: char = '*';
+pub(crate) const SYMBOL_MOVE_PREFIX: char = '^';
 
 pub(crate) struct FormCore;
 

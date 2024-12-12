@@ -10,7 +10,7 @@ do [a = "12", text.length .a]
 -----
 2
 =====
-do [a = "hello", b = "world", .a text.push " ", .a text.push &b, &a]
+do [a = "hello", b = "world", .a text.push " ", .a text.push ^b, ^a]
 -----
 "hello world"
 =====
@@ -18,7 +18,7 @@ do [a = "hello", b = "world", .a text.push " ", .a text.push &b, &a]
 -----
 "12"
 =====
-do [a = "1", b = "2", c = "3", . text.join [&a, &b, &c]]
+do [a = "1", b = "2", c = "3", . text.join [^a, ^b, ^c]]
 -----
 "123"
 =====

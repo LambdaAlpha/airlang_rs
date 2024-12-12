@@ -19,7 +19,7 @@
       ],
       sum
     ],
-    prelude : &ctx,
+    prelude : ^ctx,
   },
   f 100
 ]

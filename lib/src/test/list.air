@@ -22,15 +22,15 @@ do [a = [1], .a list.set (1 - 1) : (1 + 1)]
 -----
 1
 =====
-do [a = [1], .a list.set 0 : 2, &a]
+do [a = [1], .a list.set 0 : 2, ^a]
 -----
 [2]
 =====
-do [a = [1, 2], .a list.set 1 : 3, &a]
+do [a = [1, 2], .a list.set 1 : 3, ^a]
 -----
 [1, 3]
 =====
-do [a = [], .a list.set 1 : 1, &a]
+do [a = [], .a list.set 1 : 1, ^a]
 -----
 []
 =====
@@ -38,7 +38,7 @@ do [a = [], .a list.set -1 : 1]
 -----
 .
 =====
-do [a = [1], .a list.set 0 : [], &a]
+do [a = [1], .a list.set 0 : [], ^a]
 -----
 [[]]
 =====
@@ -54,15 +54,15 @@ do [a = [0, 1, 2], .a list.set_many 0 : []]
 -----
 []
 =====
-do [a = [0, 1, 2], .a list.set_many 0 : [3, 4], &a]
+do [a = [0, 1, 2], .a list.set_many 0 : [3, 4], ^a]
 -----
 [3, 4, 2]
 =====
-do [a = [0, 1, 2], .a list.set_many 1 : [3, 4], &a]
+do [a = [0, 1, 2], .a list.set_many 1 : [3, 4], ^a]
 -----
 [0, 3, 4]
 =====
-do [a = [0, 1, 2], .a list.set_many 2 : [], &a]
+do [a = [0, 1, 2], .a list.set_many 2 : [], ^a]
 -----
 [0, 1, 2]
 =====
@@ -110,7 +110,7 @@ do [a = [1, 2], .a list.get 1]
 -----
 2
 =====
-do [a = [1, 2], .a list.get 1, &a]
+do [a = [1, 2], .a list.get 1, ^a]
 -----
 [1, 2]
 =====
@@ -142,11 +142,11 @@ do [a = [], .a list.insert (1 - 1) : (1 + 0)]
 -----
 .
 =====
-do [a = [], .a list.insert 0 : 1, &a]
+do [a = [], .a list.insert 0 : 1, ^a]
 -----
 [1]
 =====
-do [a = [1, 2], .a list.insert 1 : 3, &a]
+do [a = [1, 2], .a list.insert 1 : 3, ^a]
 -----
 [1, 3, 2]
 =====
@@ -162,7 +162,7 @@ do [a = [1, 2], .a list.insert_many 1 : [3, 4]]
 -----
 .
 =====
-do [a = [1, 2], .a list.insert_many 1 : [3, 4], &a]
+do [a = [1, 2], .a list.insert_many 1 : [3, 4], ^a]
 -----
 [1, 3, 4, 2]
 =====
@@ -186,7 +186,7 @@ do [a = [1, 2, 3], .a list.remove 1 + 0]
 -----
 2
 =====
-do [a = [1, 2, 3], .a list.remove 1, &a]
+do [a = [1, 2, 3], .a list.remove 1, ^a]
 -----
 [1, 3]
 =====
@@ -194,11 +194,11 @@ do [a = [1, 2, 3], .a list.remove 1 : 3]
 -----
 [2, 3]
 =====
-do [a = [1, 2, 3], .a list.remove 1 : 3, &a]
+do [a = [1, 2, 3], .a list.remove 1 : 3, ^a]
 -----
 [1]
 =====
-do [a = [1, 2, 3], .a list.remove . : ., &a]
+do [a = [1, 2, 3], .a list.remove . : ., ^a]
 -----
 []
 =====
@@ -214,11 +214,11 @@ do [a = [], .a list.push 1 + 0]
 -----
 .
 =====
-do [a = [], .a list.push 1, &a]
+do [a = [], .a list.push 1, ^a]
 -----
 [1]
 =====
-do [a = [1], .a list.push 2, &a]
+do [a = [1], .a list.push 2, ^a]
 -----
 [1, 2]
 =====
@@ -234,7 +234,7 @@ do [a = [1], .a list.push_many [2, 3]]
 -----
 .
 =====
-do [a = [1], .a list.push_many [2, 3], &a]
+do [a = [1], .a list.push_many [2, 3], ^a]
 -----
 [1, 2, 3]
 =====
@@ -286,6 +286,6 @@ do [a = [1, 2], list.clear .a]
 -----
 .
 =====
-do [a = [1, 2], list.clear .a, &a]
+do [a = [1, 2], list.clear .a, ^a]
 -----
 []

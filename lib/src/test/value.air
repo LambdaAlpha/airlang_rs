@@ -118,7 +118,7 @@ do [a = {}, type_of .a]
 -----
 map
 =====
-do [a = function ; {body : $input}, type_of .a]
+do [a = function ; {body : *input}, type_of .a]
 -----
 function
 =====
@@ -182,7 +182,7 @@ do [a = id ; n ; v, b = id ; n ; v, (.a == .b) and .a != .]
 -----
 true
 =====
-do [a = function ; {body : $input}, b = function ; {body : $input}, (.a == .b) and .a != .]
+do [a = function ; {body : *input}, b = function ; {body : *input}, (.a == .b) and .a != .]
 -----
 true
 =====
@@ -262,6 +262,6 @@ false
 -----
 .
 =====
-do [..a = 1, .$.a == 1]
+do [..a = 1, .*.a == 1]
 -----
 true

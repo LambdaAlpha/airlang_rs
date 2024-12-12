@@ -2,7 +2,7 @@ do [a = 1, read a]
 -----
 1
 =====
-do [a = 1, b = .a, read $b]
+do [a = 1, b = .a, read *b]
 -----
 1
 =====
@@ -26,7 +26,7 @@ do [(a . constant) = 1, [move a, a]]
 -----
 [., 1]
 =====
-do [a = .b, b = 1, move ; $a]
+do [a = .b, b = 1, move ; *a]
 -----
 1
 =====
@@ -46,15 +46,15 @@ do [a = 1, b = a, b]
 -----
 1
 =====
-do [a = .b, $a = 1, b]
+do [a = .b, *a = 1, b]
 -----
 1
 =====
-do [..a = 1, $.a]
+do [..a = 1, *.a]
 -----
 1
 =====
-do [..p = 1 : 2, pair.first .$.p]
+do [..p = 1 : 2, pair.first .*.p]
 -----
 1
 =====
@@ -218,7 +218,7 @@ do [c = context ; {fallback : true}, c | fallback ';' .]
 -----
 true
 =====
-do [c = context ; {fallback : true}, c | form ; $do ; [(a . constant) $= 1, a $set_invariant final, $invariant a]]
+do [c = context ; {fallback : true}, c | form ; *do ; [(a . constant) *= 1, a *set_invariant final, *invariant a]]
 -----
 final
 =====
@@ -245,7 +245,7 @@ do [
         body : do ; [a = a + 1, a],
         prelude : context ; {variables : {a : 0, do : :, = : :, + : :}},
     },
-    set_solver &s1,
+    set_solver ^s1,
     s2 = solver ; .,
     [.s2 ; ., .s2 ; ., .s2 ; .]
 ]
@@ -260,7 +260,7 @@ do [
     a = context ; {variables : {p : 1 : 2}},
     b = 3,
     a | pair.set_first ';' ..p : b,
-    a | .&p,
+    a | .^p,
 ]
 -----
 3 : 2
@@ -268,27 +268,27 @@ do [
 do [
     a = context ; {variables : {p : 1 : 2, b : 3}},
     a | pair.set_first ';' ..p : .b,
-    a | .&p,
+    a | .^p,
 ]
 -----
 3 : 2
 =====
 do [
     set_first = pair.set_first,
-    a = context ; {variables : {set_first : &set_first, p : 1 : 2, b : 3}},
+    a = context ; {variables : {set_first : ^set_first, p : 1 : 2, b : 3}},
     a | id ; .p set_first b,
-    a | .&p,
+    a | .^p,
 ]
 -----
 3 : 2
 =====
-do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: = ';' .a : 2, [c | .a, &a]]
+do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: = ';' .a : 2, [c | .a, ^a]]
 -----
 [2, 1]
 =====
 do [
     a = context ; {variables : {b : context ; {variables : {c : 1}}}},
-    a | form ; b $| ..c
+    a | form ; b *| ..c
 ]
 -----
 1

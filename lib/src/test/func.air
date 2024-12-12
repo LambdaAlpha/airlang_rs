@@ -2,13 +2,13 @@ id .a
 -----
 .a
 =====
-id $a
+id *a
 -----
-$a
+*a
 =====
-id &a
+id ^a
 -----
-&a
+^a
 =====
 id a
 -----
@@ -22,19 +22,19 @@ form .a
 -----
 a
 =====
-do [a = 1, form $a]
+do [a = 1, form *a]
 -----
 1
 =====
-do [a = 1, form $a, a]
+do [a = 1, form *a, a]
 -----
 1
 =====
-do [a = 1, form &a]
+do [a = 1, form ^a]
 -----
 1
 =====
-do [a = 1, form &a, is_null a]
+do [a = 1, form ^a, is_null a]
 -----
 true
 =====
@@ -42,9 +42,9 @@ form a
 -----
 a
 =====
-form .$a
+form .*a
 -----
-$a
+*a
 =====
 form ; a ; b
 -----
@@ -66,15 +66,15 @@ eval .a
 -----
 a
 =====
-do [a = 1, eval $a]
+do [a = 1, eval *a]
 -----
 1
 =====
-do [a = 1, eval &a]
+do [a = 1, eval ^a]
 -----
 1
 =====
-do [a = 1, eval &a, is_null a]
+do [a = 1, eval ^a, is_null a]
 -----
 true
 =====
@@ -116,10 +116,10 @@ false
 =====
 do [
     f = mode ; {symbol : id, recursive : true},
-    f &a
+    f ^a
 ]
 -----
-&a
+^a
 =====
 do [
     f = mode ; {symbol : form, recursive : true},
@@ -155,10 +155,10 @@ a : 1
 do [
     b = 1,
     f = mode ; {pair : form : eval, default : id, recursive : true},
-    [a f b, f $a]
+    [a f b, f *a]
 ]
 -----
-[a : 1, $a]
+[a : 1, *a]
 =====
 do [
     f = mode ; {pair : form : self, default : id, recursive : true},
@@ -169,17 +169,17 @@ a : .b
 =====
 do [
     f = mode ; {abstract : form : id, recursive : true},
-    f ; .a ! &b
+    f ; .a ! ^b
 ]
 -----
-a ! &b
+a ! ^b
 =====
 do [
     f = mode ; {abstract : form ! id, recursive : true},
-    f ; .a ! &b
+    f ; .a ! ^b
 ]
 -----
-&b
+^b
 =====
 do [
     b = 1,
@@ -199,15 +199,15 @@ do [
 =====
 do [
     f = mode ; {call : form : id, recursive : true},
-    f ; .a ; &b
+    f ; .a ; ^b
 ]
 -----
-a ; &b
+a ; ^b
 =====
 do [
     a = false,
     f = mode ; {call : eval ; form, recursive : true},
-    f ; not ; &a
+    f ; not ; ^a
 ]
 -----
 true
@@ -239,10 +239,10 @@ do [
 =====
 do [
     f = mode ; {ask : form : id, recursive : true},
-    f ; .a ? &b
+    f ; .a ? ^b
 ]
 -----
-a ? &b
+a ? ^b
 =====
 do [
     b = 1,
@@ -263,33 +263,33 @@ a ? 1
 do [
     a = 1,
     f = mode ; {list : [eval, form] : id, recursive : true},
-    f [a, a, a, a, $a, a]
+    f [a, a, a, a, *a, a]
 ]
 -----
-[1, a, a, a, $a, a]
+[1, a, a, a, *a, a]
 =====
 do [
     a = 1,
     f = mode ; {list : [eval, form], default : id, recursive : true},
-    f [a, a, a, a, $a, a]
+    f [a, a, a, a, *a, a]
 ]
 -----
-[1, a, a, a, $a, a]
+[1, a, a, a, *a, a]
 =====
 do [
     f = mode ; {list : id, recursive : true},
-    f [a, .a, $a, &a]
+    f [a, .a, *a, ^a]
 ]
 -----
-[a, .a, $a, &a]
+[a, .a, *a, ^a]
 =====
 do [
     a = 1,
     f = mode ; {list : [eval, form, id, self], recursive : true},
-    f [a, .a, $a, &a]
+    f [a, .a, *a, ^a]
 ]
 -----
-[1, a, $a, 1]
+[1, a, *a, 1]
 =====
 do [
     a = 1,
@@ -322,10 +322,10 @@ do [
     a = 1,
     c = 2,
     f = mode ; {map : id, recursive : true},
-    f {.a : $a, &b : .a, c : d}
+    f {.a : *a, ^b : .a, c : d}
 ]
 -----
-{.a : $a, &b : .a, c : d}
+{.a : *a, ^b : .a, c : d}
 =====
 do [
     a = 1,
@@ -339,7 +339,7 @@ do [
 do [
     f = mode ; {symbol : id, call : eval ; self, default : form, recursive : true},
     a = false,
-    f ; [.a, not ; $a]
+    f ; [.a, not ; *a]
 ]
 -----
 [.a, true]
@@ -360,23 +360,23 @@ a : b
 =====
 do [
     f = mode ; {pair : form : {pair : id}},
-    f ; a : .b : $c ; &d
+    f ; a : .b : *c ; ^d
 ]
 -----
-a : .b : $c ; &d
+a : .b : *c ; ^d
 =====
 do [
     f = mode ; {pair : form : {default : id, recursive : true}},
-    f ; a : .b : $c ; &d
+    f ; a : .b : *c ; ^d
 ]
 -----
-a : .b : $c ; &d
+a : .b : *c ; ^d
 =====
 do [
     c = 1,
     d = 2,
     f = mode ; {pair : form : {symbol : id}, default : form},
-    f ; a : .b : $c ; &d
+    f ; a : .b : *c ; ^d
 ]
 -----
 a : b : 1 ; 2
@@ -426,7 +426,7 @@ false
 =====
 do [
     f = function ; {
-        body : $not ; i
+        body : *not ; i
     },
     f ; not ; true
 ]
@@ -457,7 +457,7 @@ true
 do [
     f = function ; {
         body_mode : form,
-        body : i ; .$i,
+        body : i ; .*i,
     },
     f .a
 ]
@@ -601,7 +601,7 @@ do [
     a = 1,
     f = function ; {
         context_name : .ctx,
-        body : ctx $= 2,
+        body : ctx *= 2,
         context_access : .constant,
         prelude : context ; {fallback : true},
     },
@@ -633,13 +633,13 @@ do [
     ask_mode = mode ; {pair : form : form},
     body_mode = mode ; {list : [eval, form, id]},
     repr = form ; {
-        body_mode : &body_mode,
+        body_mode : ^body_mode,
         body : in,
         input_name : in,
         context_name : ctx,
-        call_mode : &call_mode,
-        abstract_mode : &abstract_mode,
-        ask_mode : &ask_mode,
+        call_mode : ^call_mode,
+        abstract_mode : ^abstract_mode,
+        ask_mode : ^ask_mode,
         context_access : constant,
         cacheable : true,
     },
