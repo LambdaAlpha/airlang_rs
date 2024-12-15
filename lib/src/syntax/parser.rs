@@ -148,6 +148,13 @@ impl Default for ParseCtx {
     }
 }
 
+impl ParseCtx {
+    fn switch(mut self) -> Self {
+        self.enable = !self.enable;
+        self
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Arity {
     One,
@@ -258,73 +265,70 @@ impl ScopeParser {
     fn new(ctx: ParseCtx) -> Self {
         Self { ctx }
     }
+}
 
-    fn parse(s: &str, mut ctx: ParseCtx) -> Option<ParseCtx> {
-        let mut direction = false;
-        let mut arity = false;
-        let mut struct1 = false;
-        for c in s.chars() {
+#[derive(Copy, Clone)]
+struct CtxParser {
+    ctx: ParseCtx,
+}
+
+impl<'a, E> Parser<&'a str, ParseCtx, E> for CtxParser
+where
+    E: ParseError<&'a str>,
+{
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, ParseCtx, E> {
+        let mut ctx = self.ctx;
+        ctx.enable = true;
+        let mut direction = 0;
+        let mut arity = 0;
+        let mut struct1 = 0;
+        for c in input.chars() {
             match c {
                 LEFT => {
-                    if direction {
-                        return None;
-                    }
-                    direction = true;
+                    direction += 1;
                     ctx.direction = Direction::Left;
                 }
                 RIGHT => {
-                    if direction {
-                        return None;
-                    }
-                    direction = true;
+                    direction += 1;
                     ctx.direction = Direction::Right;
                 }
                 ARITY_1 => {
-                    if arity {
-                        return None;
-                    }
-                    arity = true;
+                    arity += 1;
                     ctx.arity = Arity::One;
                 }
                 ARITY_2 => {
-                    if arity {
-                        return None;
-                    }
-                    arity = true;
+                    arity += 1;
                     ctx.arity = Arity::Two;
                 }
                 PAIR => {
-                    if struct1 {
-                        return None;
-                    }
-                    struct1 = true;
+                    struct1 += 1;
                     ctx.struct1 = Struct::Pair;
                 }
                 CALL => {
-                    if struct1 {
-                        return None;
-                    }
-                    struct1 = true;
+                    struct1 += 1;
                     ctx.struct1 = Struct::Call;
                 }
                 ABSTRACT => {
-                    if struct1 {
-                        return None;
-                    }
-                    struct1 = true;
+                    struct1 += 1;
                     ctx.struct1 = Struct::Abstract;
                 }
                 ASK => {
-                    if struct1 {
-                        return None;
-                    }
-                    struct1 = true;
+                    struct1 += 1;
                     ctx.struct1 = Struct::Ask;
                 }
-                _ => return None,
+                _ => return fail(input),
             }
         }
-        Some(ctx)
+        if direction > 1 || arity > 1 || struct1 > 1 {
+            return fail(input);
+        }
+        Ok((&input[0..0], ctx))
+    }
+}
+
+impl CtxParser {
+    fn new(ctx: ParseCtx) -> Self {
+        Self { ctx }
     }
 
     fn is_ctx(c: char) -> bool {
@@ -356,13 +360,7 @@ where
             MAP_RIGHT => fail(s),
             SCOPE_LEFT => map(ScopeParser::new(self.ctx), Token::Default)(s),
             SCOPE_RIGHT => fail(s),
-            SEPARATOR => {
-                let ctx = ParseCtx {
-                    enable: !self.ctx.enable,
-                    ..self.ctx
-                };
-                map(ScopeParser::new(ctx), Token::Default)(&s[1..])
-            }
+            SEPARATOR => map(ScopeParser::new(self.ctx.switch()), Token::Default)(&s[1..]),
             SPACE => fail(s),
             TEXT_QUOTE => map(rich_text, Token::Default)(s),
             SYMBOL_QUOTE => map(rich_symbol, Token::Default)(s),
@@ -405,8 +403,7 @@ where
         let (rest, s) = take_while(is_trivial_symbol)(input)?;
 
         // the only special case
-        let mut chars = s.chars();
-        let first = chars.next().unwrap();
+        let first = s.chars().next().unwrap();
         if first.is_ascii_digit() {
             let (_, token) = all_consuming(int_or_number)(s)?;
             return Ok((rest, Token::Default(token)));
@@ -421,14 +418,9 @@ where
             BYTE => byte(src),
             RICH => alt((rich_text, rich_symbol))(src),
             RAW => alt((raw_text, raw_symbol))(src),
-            s if s.chars().all(ScopeParser::is_ctx) => {
-                let ctx = ScopeParser::parse(s, self.ctx);
-                if let Some(mut ctx) = ctx {
-                    ctx.enable = true;
-                    ScopeParser::new(ctx).parse(src)
-                } else {
-                    fail(src)
-                }
+            s if s.chars().all(CtxParser::is_ctx) => {
+                let ctx = context("ctx", CtxParser::new(self.ctx)).parse(s)?.1;
+                ScopeParser::new(ctx).parse(src)
             }
             _ => fail(src),
         };
