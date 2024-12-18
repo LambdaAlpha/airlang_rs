@@ -7,7 +7,7 @@ use crate::{
         map::CtxMap,
         mut1::MutFnCtx,
     },
-    val::func::CellFuncVal,
+    val::func::cell::CellFuncVal,
 };
 
 pub(crate) trait CtxRef<'a> {

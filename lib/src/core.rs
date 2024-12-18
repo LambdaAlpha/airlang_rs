@@ -299,7 +299,7 @@ impl EvalCore {
     {
         match func {
             Val::Func(mut func) => {
-                let input = func.call_mode().transform(ctx.reborrow(), input);
+                let input = func.mode().call.transform(ctx.reborrow(), input);
                 func.transform_mut(ctx, input)
             }
             Val::Symbol(s) => EvalCore::call_cell(ctx, s, input),
@@ -321,7 +321,7 @@ impl EvalCore {
         Input: Transformer<Val, Val>,
     {
         if let Val::Func(func) = func {
-            func.call_mode().transform(ctx, input)
+            func.mode().call.transform(ctx, input)
         } else {
             input_trans.transform(ctx, input)
         }
@@ -357,7 +357,7 @@ impl EvalCore {
             return Val::default();
         };
         let mut func = func.clone();
-        let input = func.call_mode().transform(ctx, input);
+        let input = func.mode().call.transform(ctx, input);
         func.transform_mut(input)
     }
 
@@ -369,7 +369,7 @@ impl EvalCore {
         let Val::Func(FuncVal::Cell(func)) = val else {
             return Val::default();
         };
-        let input = func.call_mode().clone().transform(MutCtx::new(ctx), input);
+        let input = func.mode().call.clone().transform(MutCtx::new(ctx), input);
         let Ok(val) = ctx.variables_mut().get_ref_dyn(func_name) else {
             return Val::default();
         };
@@ -394,7 +394,7 @@ impl EvalCore {
         Input: Transformer<Val, Val>,
     {
         if let Val::Func(func) = func {
-            let input = func.abstract_mode().transform(ctx.reborrow(), input);
+            let input = func.mode().abstract1.transform(ctx.reborrow(), input);
             optimize(ctx, func, input)
         } else {
             input_trans.transform(ctx, input)
@@ -412,7 +412,7 @@ impl EvalCore {
         Input: Transformer<Val, Val>,
     {
         if let Val::Func(func) = func {
-            func.abstract_mode().transform(ctx, input)
+            func.mode().abstract1.transform(ctx, input)
         } else {
             input_trans.transform(ctx, input)
         }
@@ -440,7 +440,7 @@ impl EvalCore {
         Output: Transformer<Val, Val>,
     {
         if let Val::Func(func) = func {
-            let output = func.ask_mode().transform(ctx.reborrow(), output);
+            let output = func.mode().ask.transform(ctx.reborrow(), output);
             Val::Answer(Self::solve(ctx, func, output))
         } else {
             let output = output_trans.transform(ctx, output);
@@ -459,7 +459,7 @@ impl EvalCore {
         Output: Transformer<Val, Val>,
     {
         if let Val::Func(f) = func {
-            f.ask_mode().transform(ctx, output)
+            f.mode().ask.transform(ctx, output)
         } else {
             output_trans.transform(ctx, output)
         }

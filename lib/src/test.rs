@@ -7,14 +7,16 @@ use std::{
 use crate::{
     AirCell,
     FreeFunc,
-    FreeFuncVal,
+    FuncMode,
     FuncVal,
-    Mode,
     Symbol,
     ctx::Invariant,
     func::free::FreeFn,
     parse,
-    val::Val,
+    val::{
+        Val,
+        func::free::FreeFuncVal,
+    },
 };
 
 const MAIN_DELIMITER: &str = "=====";
@@ -146,9 +148,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         func_ext_name.clone(),
         Invariant::Const,
         Val::Func(FuncVal::Free(FreeFuncVal::from(FreeFunc::new(
-            Mode::default(),
-            Mode::default(),
-            Mode::default(),
+            FuncMode::default(),
             false,
             func_ext_name,
             Rc::new(FuncExt),

@@ -6,6 +6,7 @@ use std::{
 
 use airlang::{
     AirCell,
+    FuncMode,
     FuncVal,
     Invariant,
     Mode,
@@ -44,12 +45,17 @@ impl Prelude for BuildPrelude {
 
 fn import() -> Named<FuncVal> {
     let id = "build.import";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_import;
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

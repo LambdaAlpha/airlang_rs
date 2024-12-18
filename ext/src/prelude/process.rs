@@ -2,6 +2,7 @@ use std::process::Command;
 
 use airlang::{
     Byte,
+    FuncMode,
     FuncVal,
     Int,
     List,
@@ -43,17 +44,22 @@ const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
     let id = "process.call";
-    let call_mode = map_mode(
+    let call = map_mode(
         Map::default(),
         form_mode(),
         Mode::default(),
         PrimitiveMode::default(),
     );
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = fn_call;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_call(input: Val) -> Val {

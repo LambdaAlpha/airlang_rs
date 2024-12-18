@@ -1,6 +1,7 @@
 use crate::{
     Byte,
     Call,
+    FuncMode,
     Int,
     List,
     Map,
@@ -118,16 +119,21 @@ enum BlockItem {
 
 fn sequence() -> Named<FuncVal> {
     let id = "do";
-    let call_mode = id_mode();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = id_mode();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_sequence::<FreeCtx>,
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -139,16 +145,21 @@ where
 
 fn if1() -> Named<FuncVal> {
     let id = "if";
-    let call_mode = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_if<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -177,16 +188,21 @@ where
 
 fn if_not() -> Named<FuncVal> {
     let id = "if_not";
-    let call_mode = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_if_not::<FreeCtx>,
         |ctx, val| fn_if_not(ctx, val),
         |ctx, val| fn_if_not(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_if_not<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -222,16 +238,21 @@ fn match1() -> Named<FuncVal> {
         PrimitiveMode::default(),
     );
     let map_default = pair_mode(map, id_mode(), PrimitiveMode::default());
-    let call_mode = pair_mode(Mode::default(), map_default, PrimitiveMode::default());
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = pair_mode(Mode::default(), map_default, PrimitiveMode::default());
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_match::<FreeCtx>,
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_match<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -258,16 +279,21 @@ where
 
 fn match_ordered() -> Named<FuncVal> {
     let id = "do_match";
-    let call_mode = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_match_ordered::<FreeCtx>,
         |ctx, val| fn_match_ordered(ctx, val),
         |ctx, val| fn_match_ordered(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_match_ordered<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -312,16 +338,21 @@ where
 
 fn while1() -> Named<FuncVal> {
     let id = "while";
-    let call_mode = id_mode();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = id_mode();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_while::<FreeCtx>,
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -373,16 +404,21 @@ where
 
 fn while_not() -> Named<FuncVal> {
     let id = "while_not";
-    let call_mode = id_mode();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = id_mode();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_while_not::<FreeCtx>,
         |ctx, val| fn_while_not(ctx, val),
         |ctx, val| fn_while_not(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -434,20 +470,25 @@ where
 
 fn for1() -> Named<FuncVal> {
     let id = "for";
-    let call_mode = pair_mode(
+    let call = pair_mode(
         Mode::default(),
         pair_mode(form_mode(), id_mode(), PrimitiveMode::default()),
         PrimitiveMode::default(),
     );
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = MutDispatcher::new(
         fn_for::<FreeCtx>,
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_for<'a, Ctx>(ctx: Ctx, input: Val) -> Val

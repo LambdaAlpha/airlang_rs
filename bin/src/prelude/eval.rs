@@ -1,5 +1,6 @@
 use airlang::{
     AirCell,
+    FuncMode,
     FuncVal,
     Mode,
     MutCtx,
@@ -34,12 +35,17 @@ impl Prelude for EvalPrelude {
 
 fn reset() -> Named<FuncVal> {
     let id = "repl.reset";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = fn_reset;
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {

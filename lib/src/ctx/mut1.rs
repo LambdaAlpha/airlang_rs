@@ -24,7 +24,7 @@ use crate::{
             CtxRef,
         },
     },
-    val::func::CellFuncVal,
+    val::func::cell::CellFuncVal,
 };
 
 pub struct MutCtx<'a>(&'a mut Ctx);

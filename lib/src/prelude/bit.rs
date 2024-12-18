@@ -1,6 +1,7 @@
 use crate::{
     Bit,
     ConstFnCtx,
+    FuncMode,
     Map,
     Mode,
     Symbol,
@@ -59,12 +60,17 @@ impl Prelude for BitPrelude {
 
 fn is_true() -> Named<FuncVal> {
     let id = "is_true";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_true;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
@@ -78,12 +84,17 @@ fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_false() -> Named<FuncVal> {
     let id = "is_false";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_false;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
@@ -97,12 +108,17 @@ fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn not() -> Named<FuncVal> {
     let id = "not";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_not;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -114,12 +130,17 @@ fn fn_not(input: Val) -> Val {
 
 fn and() -> Named<FuncVal> {
     let id = "and";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_and;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -137,12 +158,17 @@ fn fn_and(input: Val) -> Val {
 
 fn or() -> Named<FuncVal> {
     let id = "or";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_or;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_or(input: Val) -> Val {
@@ -160,12 +186,17 @@ fn fn_or(input: Val) -> Val {
 
 fn xor() -> Named<FuncVal> {
     let id = "xor";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_xor;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -183,12 +214,17 @@ fn fn_xor(input: Val) -> Val {
 
 fn imply() -> Named<FuncVal> {
     let id = "imply";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_imply;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_imply(input: Val) -> Val {

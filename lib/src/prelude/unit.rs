@@ -1,6 +1,7 @@
 use crate::{
     Bit,
     ConstFnCtx,
+    FuncMode,
     Map,
     Mode,
     Symbol,
@@ -43,12 +44,17 @@ impl Prelude for UnitPrelude {
 
 fn unit() -> Named<FuncVal> {
     let id = "unit";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_unit;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_unit(_input: Val) -> Val {
@@ -57,12 +63,17 @@ fn fn_unit(_input: Val) -> Val {
 
 fn is_unit() -> Named<FuncVal> {
     let id = "is_unit";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_unit;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_unit(ctx: ConstFnCtx, input: Val) -> Val {

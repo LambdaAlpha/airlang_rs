@@ -4,28 +4,22 @@ use std::{
         Formatter,
     },
     hash::Hash,
-    ops::{
-        Deref,
-        DerefMut,
-    },
-    rc::Rc,
 };
+
+use cell::CellFuncVal;
+use const1::ConstFuncVal;
+use free::FreeFuncVal;
+use mode::ModeFuncVal;
+use mut1::MutFuncVal;
 
 use crate::{
     Ctx,
+    FuncMode,
     Mode,
     PrimitiveMode,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
-    func::{
-        FuncImpl,
-        cell::CellFunc,
-        const1::ConstFunc,
-        free::FreeFunc,
-        mode::ModeFunc,
-        mut1::MutFunc,
-    },
     transformer::Transformer,
 };
 
@@ -37,21 +31,6 @@ pub enum FuncVal {
     Const(ConstFuncVal),
     Mut(MutFuncVal),
 }
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct ModeFuncVal(Rc<ModeFunc>);
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CellFuncVal(Box<CellFunc>);
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct FreeFuncVal(Rc<FreeFunc>);
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct ConstFuncVal(Rc<ConstFunc>);
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MutFuncVal(Rc<MutFunc>);
 
 impl FuncVal {
     pub(crate) fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
@@ -80,33 +59,17 @@ impl FuncVal {
         }
     }
 
-    pub(crate) fn call_mode(&self) -> &Mode {
+    pub(crate) fn mode(&self) -> &FuncMode {
         match self {
-            FuncVal::Mode(_) => &Mode::Primitive(PrimitiveMode::Id),
-            FuncVal::Cell(f) => &f.call_mode,
-            FuncVal::Free(f) => &f.call_mode,
-            FuncVal::Const(f) => &f.call_mode,
-            FuncVal::Mut(f) => &f.call_mode,
-        }
-    }
-
-    pub(crate) fn abstract_mode(&self) -> &Mode {
-        match self {
-            FuncVal::Mode(_) => &Mode::Primitive(PrimitiveMode::Eval),
-            FuncVal::Cell(f) => &f.abstract_mode,
-            FuncVal::Free(f) => &f.abstract_mode,
-            FuncVal::Const(f) => &f.abstract_mode,
-            FuncVal::Mut(f) => &f.abstract_mode,
-        }
-    }
-
-    pub(crate) fn ask_mode(&self) -> &Mode {
-        match self {
-            FuncVal::Mode(_) => &Mode::Primitive(PrimitiveMode::Eval),
-            FuncVal::Cell(f) => &f.ask_mode,
-            FuncVal::Free(f) => &f.ask_mode,
-            FuncVal::Const(f) => &f.ask_mode,
-            FuncVal::Mut(f) => &f.ask_mode,
+            FuncVal::Mode(_) => &FuncMode {
+                call: Mode::Primitive(PrimitiveMode::Id),
+                abstract1: Mode::Primitive(PrimitiveMode::Eval),
+                ask: Mode::Primitive(PrimitiveMode::Eval),
+            },
+            FuncVal::Cell(f) => &f.mode,
+            FuncVal::Free(f) => &f.mode,
+            FuncVal::Const(f) => &f.mode,
+            FuncVal::Mut(f) => &f.mode,
         }
     }
 
@@ -213,237 +176,12 @@ impl Debug for FuncVal {
     }
 }
 
-impl ModeFuncVal {
-    #[allow(unused)]
-    pub(crate) fn new(func: Rc<ModeFunc>) -> Self {
-        Self(func)
-    }
+pub(crate) mod mode;
 
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Rc<ModeFunc> {
-        self.0
-    }
-}
+pub(crate) mod cell;
 
-impl From<ModeFunc> for ModeFuncVal {
-    fn from(func: ModeFunc) -> Self {
-        Self(Rc::new(func))
-    }
-}
+pub(crate) mod free;
 
-impl Debug for ModeFuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("ModeFunc");
-        s.field("mode", self.mode());
-        s.finish()
-    }
-}
+pub(crate) mod const1;
 
-impl Deref for ModeFuncVal {
-    type Target = ModeFunc;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for ModeFuncVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        Rc::make_mut(&mut self.0)
-    }
-}
-
-impl CellFuncVal {
-    #[allow(unused)]
-    pub(crate) fn new(func: Box<CellFunc>) -> Self {
-        Self(func)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Box<CellFunc> {
-        self.0
-    }
-}
-
-impl From<CellFunc> for CellFuncVal {
-    fn from(value: CellFunc) -> Self {
-        Self(Box::new(value))
-    }
-}
-
-impl Debug for CellFuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("CellFunc");
-        match &self.transformer {
-            FuncImpl::Primitive(p) => {
-                p.dbg_field(&mut s);
-                p.dbg_field_ext(&mut s);
-            }
-            FuncImpl::Composite(c) => {
-                self.dbg_field(&mut s);
-                c.dbg_field(&mut s);
-            }
-        }
-        s.finish()
-    }
-}
-
-impl Deref for CellFuncVal {
-    type Target = CellFunc;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for CellFuncVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl FreeFuncVal {
-    #[allow(unused)]
-    pub(crate) fn new(func: Rc<FreeFunc>) -> Self {
-        Self(func)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Rc<FreeFunc> {
-        self.0
-    }
-}
-
-impl From<FreeFunc> for FreeFuncVal {
-    fn from(value: FreeFunc) -> Self {
-        Self(Rc::new(value))
-    }
-}
-
-impl Debug for FreeFuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("FreeFunc");
-        match &self.transformer {
-            FuncImpl::Primitive(p) => {
-                p.dbg_field(&mut s);
-            }
-            FuncImpl::Composite(c) => {
-                self.dbg_field(&mut s);
-                c.dbg_field(&mut s);
-            }
-        }
-        s.finish()
-    }
-}
-
-impl Deref for FreeFuncVal {
-    type Target = FreeFunc;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for FreeFuncVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        Rc::make_mut(&mut self.0)
-    }
-}
-
-impl ConstFuncVal {
-    #[allow(unused)]
-    pub(crate) fn new(func: Rc<ConstFunc>) -> Self {
-        Self(func)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Rc<ConstFunc> {
-        self.0
-    }
-}
-
-impl From<ConstFunc> for ConstFuncVal {
-    fn from(value: ConstFunc) -> Self {
-        Self(Rc::new(value))
-    }
-}
-
-impl Debug for ConstFuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("ConstFunc");
-        match &self.transformer {
-            FuncImpl::Primitive(p) => {
-                p.dbg_field(&mut s);
-            }
-            FuncImpl::Composite(c) => {
-                self.dbg_field(&mut s);
-                c.dbg_field(&mut s);
-                c.dbg_field_ext(&mut s);
-            }
-        }
-        s.finish()
-    }
-}
-
-impl Deref for ConstFuncVal {
-    type Target = ConstFunc;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for ConstFuncVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        Rc::make_mut(&mut self.0)
-    }
-}
-
-impl MutFuncVal {
-    #[allow(unused)]
-    pub(crate) fn new(func: Rc<MutFunc>) -> Self {
-        Self(func)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Rc<MutFunc> {
-        self.0
-    }
-}
-
-impl From<MutFunc> for MutFuncVal {
-    fn from(value: MutFunc) -> Self {
-        Self(Rc::new(value))
-    }
-}
-
-impl Debug for MutFuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("MutFunc");
-        match &self.transformer {
-            FuncImpl::Primitive(p) => {
-                p.dbg_field(&mut s);
-            }
-            FuncImpl::Composite(c) => {
-                self.dbg_field(&mut s);
-                c.dbg_field(&mut s);
-                c.dbg_field_ext(&mut s);
-            }
-        }
-        s.finish()
-    }
-}
-
-impl Deref for MutFuncVal {
-    type Target = MutFunc;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for MutFuncVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        Rc::make_mut(&mut self.0)
-    }
-}
+pub(crate) mod mut1;

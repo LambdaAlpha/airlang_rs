@@ -18,7 +18,7 @@ use crate::{
             CtxRef,
         },
     },
-    val::func::CellFuncVal,
+    val::func::cell::CellFuncVal,
 };
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when

@@ -2,7 +2,6 @@ use std::{
     fmt::{
         Debug,
         DebugStruct,
-        Formatter,
     },
     hash::{
         Hash,
@@ -20,6 +19,10 @@ use crate::{
         mut1::MutCtx,
         ref1::CtxMeta,
     },
+    func::{
+        comp::Composite,
+        prim::Primitive,
+    },
     mode::Mode,
     symbol::Symbol,
     transformer::Transformer,
@@ -31,33 +34,22 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct Func<P, C> {
-    pub(crate) call_mode: Mode,
-    pub(crate) abstract_mode: Mode,
-    pub(crate) ask_mode: Mode,
+    pub(crate) mode: FuncMode,
     pub(crate) cacheable: bool,
     pub(crate) transformer: FuncImpl<Primitive<P>, Composite<C>>,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+pub struct FuncMode {
+    pub call: Mode,
+    pub abstract1: Mode,
+    pub ask: Mode,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum FuncImpl<P, C> {
     Primitive(P),
     Composite(C),
-}
-
-#[derive(Clone)]
-pub(crate) struct Primitive<Ext> {
-    pub(crate) is_extension: bool,
-    pub(crate) id: Symbol,
-    pub(crate) ext: Ext,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct Composite<Ext> {
-    pub(crate) body_mode: Mode,
-    pub(crate) body: Val,
-    pub(crate) prelude: Ctx,
-    pub(crate) input_name: Symbol,
-    pub(crate) ext: Ext,
 }
 
 impl<P, C> Transformer<Val, Val> for Func<P, C>
@@ -145,48 +137,24 @@ fn restore_ctx(prelude: Ctx, ctx: &mut Ctx, name: Symbol) {
 }
 
 impl<P, C> Func<P, C> {
-    pub(crate) fn new_primitive(
-        call_mode: Mode,
-        abstract_mode: Mode,
-        ask_mode: Mode,
-        cacheable: bool,
-        f: Primitive<P>,
-    ) -> Self {
+    pub(crate) fn new_primitive(mode: FuncMode, cacheable: bool, f: Primitive<P>) -> Self {
         Self {
-            call_mode,
-            abstract_mode,
-            ask_mode,
+            mode,
             cacheable,
             transformer: FuncImpl::Primitive(f),
         }
     }
 
-    pub(crate) fn new_composite(
-        call_mode: Mode,
-        abstract_mode: Mode,
-        ask_mode: Mode,
-        cacheable: bool,
-        f: Composite<C>,
-    ) -> Self {
+    pub(crate) fn new_composite(mode: FuncMode, cacheable: bool, f: Composite<C>) -> Self {
         Self {
-            call_mode,
-            abstract_mode,
-            ask_mode,
+            mode,
             cacheable,
             transformer: FuncImpl::Composite(f),
         }
     }
 
-    pub fn call_mode(&self) -> &Mode {
-        &self.call_mode
-    }
-
-    pub fn abstract_mode(&self) -> &Mode {
-        &self.abstract_mode
-    }
-
-    pub fn ask_mode(&self) -> &Mode {
-        &self.ask_mode
+    pub fn mode(&self) -> &FuncMode {
+        &self.mode
     }
 
     pub fn cacheable(&self) -> bool {
@@ -250,9 +218,7 @@ where
     Composite<C>: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.call_mode == other.call_mode
-            && self.abstract_mode == other.abstract_mode
-            && self.ask_mode == other.ask_mode
+        self.mode == other.mode
             && self.cacheable == other.cacheable
             && self.transformer == other.transformer
     }
@@ -271,63 +237,24 @@ where
     Composite<C>: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.call_mode.hash(state);
-        self.abstract_mode.hash(state);
-        self.ask_mode.hash(state);
+        self.mode.hash(state);
         self.cacheable.hash(state);
         self.transformer.hash(state);
     }
 }
 
-impl<F> PartialEq for Primitive<F> {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.is_extension == other.is_extension
-    }
-}
-
-impl<F> Eq for Primitive<F> {}
-
-impl<F> Hash for Primitive<F> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-        self.is_extension.hash(state);
-    }
-}
-
-impl<T> Debug for Primitive<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("Primitive");
-        self.dbg_field(&mut s);
-        s.finish()
-    }
-}
-
-impl<T> Primitive<T> {
-    pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
-        s.field("id", &self.id);
-        s.field("is_extension", &self.is_extension);
-    }
-}
-
-impl<T> Composite<T> {
-    pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
-        s.field("body_mode", &self.body_mode);
-        s.field("body", &self.body);
-        s.field("prelude", &self.prelude);
-        s.field("input_name", &self.input_name);
-    }
-}
-
 impl<P, C> Func<P, C> {
     pub(crate) fn dbg_field(&self, s: &mut DebugStruct) {
-        s.field("call_mode", &self.call_mode);
-        s.field("abstract_mode", &self.abstract_mode);
-        s.field("ask_mode", &self.ask_mode);
+        s.field("mode", &self.mode);
         s.field("cacheable", &self.cacheable);
     }
 }
 
 pub(crate) mod mode;
+
+pub(crate) mod prim;
+
+pub(crate) mod comp;
 
 pub(crate) mod cell;
 

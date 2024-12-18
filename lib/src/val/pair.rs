@@ -1,16 +1,11 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    ops::{
-        Deref,
-        DerefMut,
-    },
+use std::fmt::{
+    Debug,
+    Formatter,
 };
 
 use crate::{
     Val,
+    box_wrap,
     pair::Pair,
     syntax::{
         ReprError,
@@ -18,32 +13,7 @@ use crate::{
     },
 };
 
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct PairVal(Box<Pair<Val, Val>>);
-
-impl PairVal {
-    #[allow(unused)]
-    pub(crate) fn new(pair: Box<Pair<Val, Val>>) -> Self {
-        Self(pair)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Box<Pair<Val, Val>> {
-        self.0
-    }
-}
-
-impl From<Pair<Val, Val>> for PairVal {
-    fn from(value: Pair<Val, Val>) -> Self {
-        Self(Box::new(value))
-    }
-}
-
-impl From<PairVal> for Pair<Val, Val> {
-    fn from(value: PairVal) -> Self {
-        *value.0
-    }
-}
+box_wrap!(pub PairVal(Pair<Val, Val>));
 
 impl From<&PairRepr> for PairVal {
     fn from(value: &PairRepr) -> Self {
@@ -80,19 +50,5 @@ impl TryInto<PairRepr> for PairVal {
 impl Debug for PairVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         Pair::fmt(self, f)
-    }
-}
-
-impl Deref for PairVal {
-    type Target = Pair<Val, Val>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for PairVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }

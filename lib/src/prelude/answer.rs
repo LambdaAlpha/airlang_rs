@@ -2,6 +2,7 @@ use crate::{
     AnswerVal,
     Bit,
     CaseVal,
+    FuncMode,
     FuncVal,
     Map,
     Mode,
@@ -88,12 +89,17 @@ fn never() -> Named<AnswerVal> {
 
 fn maybe() -> Named<FuncVal> {
     let id = "answer.maybe";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_maybe;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_maybe(input: Val) -> Val {
@@ -102,12 +108,17 @@ fn fn_maybe(input: Val) -> Val {
 
 fn cache() -> Named<FuncVal> {
     let id = "answer.cache";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_cached;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_cached(input: Val) -> Val {
@@ -122,12 +133,17 @@ fn fn_cached(input: Val) -> Val {
 
 fn repr() -> Named<FuncVal> {
     let id = "answer.represent";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_repr;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 const TYPE: &str = "type";
@@ -160,12 +176,17 @@ fn fn_repr(input: Val) -> Val {
 
 fn type_of() -> Named<FuncVal> {
     let id = "answer.type_of";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_type_of;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
@@ -185,12 +206,17 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_none() -> Named<FuncVal> {
     let id = "answer.is_none";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_none;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
@@ -205,12 +231,17 @@ fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_never() -> Named<FuncVal> {
     let id = "answer.is_never";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_never;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
@@ -225,12 +256,17 @@ fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_maybe() -> Named<FuncVal> {
     let id = "answer.is_maybe";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_maybe;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
@@ -245,12 +281,17 @@ fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_cache() -> Named<FuncVal> {
     let id = "answer.is_cache";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_is_cache;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {

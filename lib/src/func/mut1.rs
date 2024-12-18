@@ -7,19 +7,19 @@ use crate::{
     ConstCtx,
     FreeCtx,
     Invariant,
-    Mode,
     MutCtx,
     MutFnCtx,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
     func::{
-        Composite,
         Func,
         FuncImpl,
-        Primitive,
+        FuncMode,
+        comp::Composite,
         eval_aware,
         eval_free,
+        prim::Primitive,
     },
     transformer::Transformer,
 };
@@ -29,18 +29,18 @@ pub trait MutFn {
 }
 
 #[derive(Clone)]
-pub struct MutPrimitiveExt {
+pub struct MutPrimExt {
     pub(crate) fn1: Rc<dyn MutFn>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MutCompositeExt {
+pub struct MutCompExt {
     pub(crate) ctx_name: Symbol,
 }
 
-pub type MutFunc = Func<MutPrimitiveExt, MutCompositeExt>;
+pub type MutFunc = Func<MutPrimExt, MutCompExt>;
 
-impl Transformer<Val, Val> for Primitive<MutPrimitiveExt> {
+impl Transformer<Val, Val> for Primitive<MutPrimExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -49,7 +49,7 @@ impl Transformer<Val, Val> for Primitive<MutPrimitiveExt> {
     }
 }
 
-impl Transformer<Val, Val> for Composite<MutCompositeExt> {
+impl Transformer<Val, Val> for Composite<MutCompExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -99,23 +99,14 @@ impl Transformer<Val, Val> for Composite<MutCompositeExt> {
 }
 
 impl MutFunc {
-    pub fn new(
-        call_mode: Mode,
-        abstract_mode: Mode,
-        ask_mode: Mode,
-        cacheable: bool,
-        id: Symbol,
-        fn1: Rc<dyn MutFn>,
-    ) -> Self {
+    pub fn new(mode: FuncMode, cacheable: bool, id: Symbol, fn1: Rc<dyn MutFn>) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
-            ext: MutPrimitiveExt { fn1 },
+            ext: MutPrimExt { fn1 },
         });
         Self {
-            call_mode,
-            abstract_mode,
-            ask_mode,
+            mode,
             cacheable,
             transformer,
         }
@@ -129,17 +120,17 @@ impl MutFunc {
     }
 }
 
-impl Primitive<MutPrimitiveExt> {
+impl Primitive<MutPrimExt> {
     pub(crate) fn new(id: &str, f: impl MutFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            ext: MutPrimitiveExt { fn1: Rc::new(f) },
+            ext: MutPrimExt { fn1: Rc::new(f) },
         }
     }
 }
 
-impl Composite<MutCompositeExt> {
+impl Composite<MutCompExt> {
     pub(crate) fn dbg_field_ext(&self, s: &mut DebugStruct) {
         s.field("ctx_name", &self.ext.ctx_name);
     }

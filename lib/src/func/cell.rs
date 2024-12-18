@@ -7,16 +7,16 @@ use std::{
 };
 
 use crate::{
-    Mode,
     Symbol,
     Val,
     ext,
     func::{
-        Composite,
         Func,
         FuncImpl,
-        Primitive,
+        FuncMode,
+        comp::Composite,
         eval_free,
+        prim::Primitive,
     },
 };
 
@@ -26,15 +26,15 @@ pub trait CellFn {
 
 ext!(pub CellFnExt : CellFn);
 
-pub type CellFunc = Func<CellPrimitiveExt, CellCompositeExt>;
+pub type CellFunc = Func<CellPrimExt, CellCompExt>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct CellPrimitiveExt {
+pub struct CellPrimExt {
     pub(crate) fn1: Box<dyn CellFnExt>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct CellCompositeExt {}
+pub struct CellCompExt {}
 
 impl CellFunc {
     pub(crate) fn transform_mut(&mut self, input: Val) -> Val {
@@ -52,7 +52,7 @@ impl CellFunc {
     }
 }
 
-impl Primitive<CellPrimitiveExt> {
+impl Primitive<CellPrimExt> {
     fn transform_mut(&mut self, input: Val) -> Val {
         self.ext.fn1.call_mut(input)
     }
@@ -62,7 +62,7 @@ impl Primitive<CellPrimitiveExt> {
     }
 }
 
-impl Composite<CellCompositeExt> {
+impl Composite<CellCompExt> {
     fn transform_mut(&mut self, input: Val) -> Val {
         eval_free(
             &mut self.prelude,
@@ -85,35 +85,26 @@ impl Composite<CellCompositeExt> {
 }
 
 impl CellFunc {
-    pub fn new(
-        call_mode: Mode,
-        abstract_mode: Mode,
-        ask_mode: Mode,
-        cacheable: bool,
-        id: Symbol,
-        fn1: Box<dyn CellFnExt>,
-    ) -> Self {
+    pub fn new(mode: FuncMode, cacheable: bool, id: Symbol, fn1: Box<dyn CellFnExt>) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
-            ext: CellPrimitiveExt { fn1 },
+            ext: CellPrimExt { fn1 },
         });
         Self {
-            call_mode,
-            abstract_mode,
-            ask_mode,
+            mode,
             cacheable,
             transformer,
         }
     }
 }
 
-impl Primitive<CellPrimitiveExt> {
+impl Primitive<CellPrimExt> {
     pub(crate) fn new(id: &str, f: impl CellFnExt + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            ext: CellPrimitiveExt { fn1: Box::new(f) },
+            ext: CellPrimExt { fn1: Box::new(f) },
         }
     }
 

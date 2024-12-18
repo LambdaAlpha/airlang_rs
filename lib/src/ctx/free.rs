@@ -11,7 +11,7 @@ use crate::{
             CtxRef,
         },
     },
-    val::func::CellFuncVal,
+    val::func::cell::CellFuncVal,
 };
 
 pub struct FreeCtx;

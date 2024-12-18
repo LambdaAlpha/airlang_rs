@@ -23,6 +23,7 @@ pub use crate::{
     },
     extension::ValExt,
     func::{
+        FuncMode,
         cell::{
             CellFn,
             CellFnExt,
@@ -76,11 +77,11 @@ pub use crate::{
         },
         ctx::CtxVal,
         func::{
-            CellFuncVal,
-            ConstFuncVal,
-            FreeFuncVal,
             FuncVal,
-            MutFuncVal,
+            cell::CellFuncVal,
+            const1::ConstFuncVal,
+            free::FreeFuncVal,
+            mut1::MutFuncVal,
         },
         int::IntVal,
         list::ListVal,

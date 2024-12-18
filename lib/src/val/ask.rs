@@ -1,49 +1,19 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    ops::{
-        Deref,
-        DerefMut,
-    },
+use std::fmt::{
+    Debug,
+    Formatter,
 };
 
 use crate::{
     Val,
     ask::Ask,
+    box_wrap,
     syntax::{
         ReprError,
         repr::ask::AskRepr,
     },
 };
 
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct AskVal(Box<Ask<Val, Val>>);
-
-impl AskVal {
-    #[allow(unused)]
-    pub(crate) fn new(ask: Box<Ask<Val, Val>>) -> Self {
-        Self(ask)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn unwrap(self) -> Box<Ask<Val, Val>> {
-        self.0
-    }
-}
-
-impl From<Ask<Val, Val>> for AskVal {
-    fn from(value: Ask<Val, Val>) -> Self {
-        Self(Box::new(value))
-    }
-}
-
-impl From<AskVal> for Ask<Val, Val> {
-    fn from(value: AskVal) -> Self {
-        *value.0
-    }
-}
+box_wrap!(pub AskVal(Ask<Val, Val>));
 
 impl From<&AskRepr> for AskVal {
     fn from(value: &AskRepr) -> Self {
@@ -80,19 +50,5 @@ impl TryInto<AskRepr> for AskVal {
 impl Debug for AskVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         Ask::fmt(self, f)
-    }
-}
-
-impl Deref for AskVal {
-    type Target = Ask<Val, Val>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for AskVal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }

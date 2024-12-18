@@ -1,5 +1,6 @@
 use airlang::{
     ConstFnCtx,
+    FuncMode,
     FuncVal,
     Mode,
     MutCtx,
@@ -33,12 +34,17 @@ impl Prelude for FilePrelude {
 
 fn read_to_text() -> Named<FuncVal> {
     let id = "file.read_to_text";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     let f = fn_read_to_text;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_read_to_text(ctx: ConstFnCtx, input: Val) -> Val {

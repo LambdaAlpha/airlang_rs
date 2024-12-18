@@ -16,7 +16,7 @@ use crate::{
     symbol::Symbol,
     val::{
         Val,
-        func::CellFuncVal,
+        func::cell::CellFuncVal,
     },
 };
 

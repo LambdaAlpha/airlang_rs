@@ -1,16 +1,16 @@
 use std::rc::Rc;
 
 use crate::{
-    Mode,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
     func::{
-        Composite,
         Func,
         FuncImpl,
-        Primitive,
+        FuncMode,
+        comp::Composite,
         eval_free,
+        prim::Primitive,
     },
     transformer::Transformer,
 };
@@ -20,16 +20,16 @@ pub trait FreeFn {
 }
 
 #[derive(Clone)]
-pub struct FreePrimitiveExt {
+pub struct FreePrimExt {
     pub(crate) fn1: Rc<dyn FreeFn>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct FreeCompositeExt {}
+pub struct FreeCompExt {}
 
-pub type FreeFunc = Func<FreePrimitiveExt, FreeCompositeExt>;
+pub type FreeFunc = Func<FreePrimExt, FreeCompExt>;
 
-impl Transformer<Val, Val> for Primitive<FreePrimitiveExt> {
+impl Transformer<Val, Val> for Primitive<FreePrimExt> {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -38,7 +38,7 @@ impl Transformer<Val, Val> for Primitive<FreePrimitiveExt> {
     }
 }
 
-impl Transformer<Val, Val> for Composite<FreeCompositeExt> {
+impl Transformer<Val, Val> for Composite<FreeCompExt> {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -54,35 +54,26 @@ impl Transformer<Val, Val> for Composite<FreeCompositeExt> {
 }
 
 impl FreeFunc {
-    pub fn new(
-        call_mode: Mode,
-        abstract_mode: Mode,
-        ask_mode: Mode,
-        cacheable: bool,
-        id: Symbol,
-        fn1: Rc<dyn FreeFn>,
-    ) -> Self {
+    pub fn new(mode: FuncMode, cacheable: bool, id: Symbol, fn1: Rc<dyn FreeFn>) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
-            ext: FreePrimitiveExt { fn1 },
+            ext: FreePrimExt { fn1 },
         });
         Self {
-            call_mode,
-            abstract_mode,
-            ask_mode,
+            mode,
             cacheable,
             transformer,
         }
     }
 }
 
-impl Primitive<FreePrimitiveExt> {
+impl Primitive<FreePrimExt> {
     pub(crate) fn new(id: &str, f: impl FreeFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            ext: FreePrimitiveExt { fn1: Rc::new(f) },
+            ext: FreePrimExt { fn1: Rc::new(f) },
         }
     }
 }

@@ -11,23 +11,24 @@ use crate::{
     },
     func::{
         Func,
-        Primitive,
+        FuncMode,
         cell::{
             CellFnExt,
-            CellPrimitiveExt,
+            CellPrimExt,
         },
         const1::{
             ConstFn,
-            ConstPrimitiveExt,
+            ConstPrimExt,
         },
         free::{
             FreeFn,
-            FreePrimitiveExt,
+            FreePrimExt,
         },
         mut1::{
             MutFn,
-            MutPrimitiveExt,
+            MutPrimExt,
         },
+        prim::Primitive,
     },
     mode::{
         Mode,
@@ -63,11 +64,11 @@ use crate::{
     val::{
         Val,
         func::{
-            CellFuncVal,
-            ConstFuncVal,
-            FreeFuncVal,
             FuncVal,
-            MutFuncVal,
+            cell::CellFuncVal,
+            const1::ConstFuncVal,
+            free::FreeFuncVal,
+            mut1::MutFuncVal,
         },
     },
 };
@@ -164,56 +165,48 @@ impl<T: Into<Val> + Clone> Named<T> {
 #[allow(unused)]
 fn named_cell_fn(
     name: &'static str,
-    call_mode: Mode,
-    abstract_mode: Mode,
-    ask_mode: Mode,
+    mode: FuncMode,
     cacheable: bool,
     func: impl CellFnExt + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<CellPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
+    let primitive = Primitive::<CellPrimExt>::new(name, func);
+    let func = Func::new_primitive(mode, cacheable, primitive);
     let func_val = CellFuncVal::from(func);
     Named::new(name, FuncVal::Cell(func_val))
 }
 
 fn named_free_fn(
     name: &'static str,
-    call_mode: Mode,
-    abstract_mode: Mode,
-    ask_mode: Mode,
+    mode: FuncMode,
     cacheable: bool,
     func: impl FreeFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<FreePrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
+    let primitive = Primitive::<FreePrimExt>::new(name, func);
+    let func = Func::new_primitive(mode, cacheable, primitive);
     let func_val = FreeFuncVal::from(func);
     Named::new(name, FuncVal::Free(func_val))
 }
 
 fn named_const_fn(
     name: &'static str,
-    call_mode: Mode,
-    abstract_mode: Mode,
-    ask_mode: Mode,
+    mode: FuncMode,
     cacheable: bool,
     func: impl ConstFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<ConstPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
+    let primitive = Primitive::<ConstPrimExt>::new(name, func);
+    let func = Func::new_primitive(mode, cacheable, primitive);
     let func_val = ConstFuncVal::from(func);
     Named::new(name, FuncVal::Const(func_val))
 }
 
 fn named_mut_fn(
     name: &'static str,
-    call_mode: Mode,
-    abstract_mode: Mode,
-    ask_mode: Mode,
+    mode: FuncMode,
     cacheable: bool,
     func: impl MutFn + 'static,
 ) -> Named<FuncVal> {
-    let primitive = Primitive::<MutPrimitiveExt>::new(name, func);
-    let func = Func::new_primitive(call_mode, abstract_mode, ask_mode, cacheable, primitive);
+    let primitive = Primitive::<MutPrimExt>::new(name, func);
+    let func = Func::new_primitive(mode, cacheable, primitive);
     let func_val = MutFuncVal::from(func);
     Named::new(name, FuncVal::Mut(func_val))
 }

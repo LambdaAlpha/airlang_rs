@@ -1,5 +1,6 @@
 use crate::{
     Byte,
+    FuncMode,
     Int,
     Map,
     Mode,
@@ -58,12 +59,17 @@ impl Prelude for TextPrelude {
 
 fn from_utf8() -> Named<FuncVal> {
     let id = "text.from_utf8";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_from_utf8;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_from_utf8(input: Val) -> Val {
@@ -80,12 +86,17 @@ fn fn_from_utf8(input: Val) -> Val {
 
 fn into_utf8() -> Named<FuncVal> {
     let id = "text.into_utf8";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_into_utf8;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_into_utf8(input: Val) -> Val {
@@ -99,12 +110,17 @@ fn fn_into_utf8(input: Val) -> Val {
 
 fn length() -> Named<FuncVal> {
     let id = "text.length";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_length;
-    named_const_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_const_fn(id, mode, cacheable, f)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -119,12 +135,17 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn push() -> Named<FuncVal> {
     let id = "text.push";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_push;
-    named_mut_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_mut_fn(id, mode, cacheable, f)
 }
 
 fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
@@ -145,12 +166,17 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 
 fn join() -> Named<FuncVal> {
     let id = "text.join";
-    let call_mode = Mode::default();
-    let abstract_mode = call_mode.clone();
-    let ask_mode = Mode::default();
+    let call = Mode::default();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = true;
     let f = fn_join;
-    named_free_fn(id, call_mode, abstract_mode, ask_mode, cacheable, f)
+    named_free_fn(id, mode, cacheable, f)
 }
 
 fn fn_join(input: Val) -> Val {

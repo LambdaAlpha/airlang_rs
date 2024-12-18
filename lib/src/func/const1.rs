@@ -8,17 +8,17 @@ use crate::{
     ConstFnCtx,
     FreeCtx,
     Invariant,
-    Mode,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
     func::{
-        Composite,
         Func,
         FuncImpl,
-        Primitive,
+        FuncMode,
+        comp::Composite,
         eval_aware,
         eval_free,
+        prim::Primitive,
     },
     transformer::Transformer,
 };
@@ -28,18 +28,18 @@ pub trait ConstFn {
 }
 
 #[derive(Clone)]
-pub struct ConstPrimitiveExt {
+pub struct ConstPrimExt {
     pub(crate) fn1: Rc<dyn ConstFn>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ConstCompositeExt {
+pub struct ConstCompExt {
     pub(crate) ctx_name: Symbol,
 }
 
-pub type ConstFunc = Func<ConstPrimitiveExt, ConstCompositeExt>;
+pub type ConstFunc = Func<ConstPrimExt, ConstCompExt>;
 
-impl Transformer<Val, Val> for Primitive<ConstPrimitiveExt> {
+impl Transformer<Val, Val> for Primitive<ConstPrimExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -48,7 +48,7 @@ impl Transformer<Val, Val> for Primitive<ConstPrimitiveExt> {
     }
 }
 
-impl Transformer<Val, Val> for Composite<ConstCompositeExt> {
+impl Transformer<Val, Val> for Composite<ConstCompExt> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -82,23 +82,14 @@ impl Transformer<Val, Val> for Composite<ConstCompositeExt> {
 }
 
 impl ConstFunc {
-    pub fn new(
-        call_mode: Mode,
-        abstract_mode: Mode,
-        ask_mode: Mode,
-        cacheable: bool,
-        id: Symbol,
-        fn1: Rc<dyn ConstFn>,
-    ) -> Self {
+    pub fn new(mode: FuncMode, cacheable: bool, id: Symbol, fn1: Rc<dyn ConstFn>) -> Self {
         let transformer = FuncImpl::Primitive(Primitive {
             is_extension: true,
             id,
-            ext: ConstPrimitiveExt { fn1 },
+            ext: ConstPrimExt { fn1 },
         });
         Self {
-            call_mode,
-            abstract_mode,
-            ask_mode,
+            mode,
             cacheable,
             transformer,
         }
@@ -112,17 +103,17 @@ impl ConstFunc {
     }
 }
 
-impl Primitive<ConstPrimitiveExt> {
+impl Primitive<ConstPrimExt> {
     pub(crate) fn new(id: &str, f: impl ConstFn + 'static) -> Self {
         Primitive {
             is_extension: false,
             id: Symbol::from_str(id),
-            ext: ConstPrimitiveExt { fn1: Rc::new(f) },
+            ext: ConstPrimExt { fn1: Rc::new(f) },
         }
     }
 }
 
-impl Composite<ConstCompositeExt> {
+impl Composite<ConstCompExt> {
     pub(crate) fn dbg_field_ext(&self, s: &mut DebugStruct) {
         s.field("ctx_name", &self.ext.ctx_name);
     }
