@@ -1,8 +1,3 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
-
 use crate::{
     Val,
     ask::Ask,
@@ -44,11 +39,5 @@ impl TryInto<AskRepr> for AskVal {
     fn try_into(self) -> Result<AskRepr, Self::Error> {
         let ask = AskRepr::new(self.0.func.try_into()?, self.0.output.try_into()?);
         Ok(ask)
-    }
-}
-
-impl Debug for AskVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Ask::fmt(self, f)
     }
 }

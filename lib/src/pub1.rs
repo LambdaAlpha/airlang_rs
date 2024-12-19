@@ -24,22 +24,27 @@ pub use crate::{
     extension::ValExt,
     func::{
         FuncMode,
-        cell::{
-            CellFn,
-            CellFnExt,
-            CellFunc,
+        const_static_comp::ConstStaticCompFunc,
+        const_static_prim::{
+            ConstStaticFn,
+            ConstStaticPrimFunc,
         },
-        const1::{
-            ConstFn,
-            ConstFunc,
+        free_cell_comp::FreeCellCompFunc,
+        free_cell_prim::{
+            FreeCellFn,
+            FreeCellFnExt,
+            FreeCellPrimFunc,
         },
-        free::{
-            FreeFn,
-            FreeFunc,
+        free_static_comp::FreeStaticCompFunc,
+        free_static_prim::{
+            FreeStaticFn,
+            FreeStaticPrimFunc,
         },
-        mut1::{
-            MutFn,
-            MutFunc,
+        mode::ModeFunc,
+        mut_static_comp::MutStaticCompFunc,
+        mut_static_prim::{
+            MutStaticFn,
+            MutStaticPrimFunc,
         },
     },
     int::Int,
@@ -78,10 +83,15 @@ pub use crate::{
         ctx::CtxVal,
         func::{
             FuncVal,
-            cell::CellFuncVal,
-            const1::ConstFuncVal,
-            free::FreeFuncVal,
-            mut1::MutFuncVal,
+            const_static_comp::ConstStaticCompFuncVal,
+            const_static_prim::ConstStaticPrimFuncVal,
+            free_cell_comp::FreeCellCompFuncVal,
+            free_cell_prim::FreeCellPrimFuncVal,
+            free_static_comp::FreeStaticCompFuncVal,
+            free_static_prim::FreeStaticPrimFuncVal,
+            mode::ModeFuncVal,
+            mut_static_comp::MutStaticCompFuncVal,
+            mut_static_prim::MutStaticPrimFuncVal,
         },
         int::IntVal,
         list::ListVal,

@@ -59,6 +59,7 @@ impl Prelude for TextPrelude {
 
 fn from_utf8() -> Named<FuncVal> {
     let id = "text.from_utf8";
+    let f = fn_from_utf8;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -68,8 +69,7 @@ fn from_utf8() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_from_utf8;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_from_utf8(input: Val) -> Val {
@@ -86,6 +86,7 @@ fn fn_from_utf8(input: Val) -> Val {
 
 fn into_utf8() -> Named<FuncVal> {
     let id = "text.into_utf8";
+    let f = fn_into_utf8;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -95,8 +96,7 @@ fn into_utf8() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_into_utf8;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_into_utf8(input: Val) -> Val {
@@ -110,6 +110,7 @@ fn fn_into_utf8(input: Val) -> Val {
 
 fn length() -> Named<FuncVal> {
     let id = "text.length";
+    let f = fn_length;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -119,8 +120,7 @@ fn length() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_length;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -135,6 +135,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn push() -> Named<FuncVal> {
     let id = "text.push";
+    let f = fn_push;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -144,8 +145,7 @@ fn push() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_push;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
@@ -166,6 +166,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 
 fn join() -> Named<FuncVal> {
     let id = "text.join";
+    let f = fn_join;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -175,8 +176,7 @@ fn join() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_join;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_join(input: Val) -> Val {

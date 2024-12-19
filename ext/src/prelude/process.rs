@@ -44,6 +44,7 @@ const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
     let id = "process.call";
+    let f = fn_call;
     let call = map_mode(
         Map::default(),
         form_mode(),
@@ -58,8 +59,7 @@ fn call() -> Named<FuncVal> {
         ask,
     };
     let cacheable = false;
-    let f = fn_call;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_call(input: Val) -> Val {

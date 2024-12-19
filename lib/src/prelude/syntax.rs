@@ -40,6 +40,7 @@ impl Prelude for SyntaxPrelude {
 
 fn parse() -> Named<FuncVal> {
     let id = "parse";
+    let f = fn_parse;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -49,8 +50,7 @@ fn parse() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_parse;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -62,6 +62,7 @@ fn fn_parse(input: Val) -> Val {
 
 fn generate() -> Named<FuncVal> {
     let id = "generate";
+    let f = fn_generate;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -71,8 +72,7 @@ fn generate() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_generate;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_generate(input: Val) -> Val {

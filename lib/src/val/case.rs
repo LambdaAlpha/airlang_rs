@@ -1,7 +1,4 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
+use std::fmt::Debug;
 
 use crate::{
     Cache,
@@ -19,18 +16,6 @@ pub enum CaseVal {
 rc_wrap!(pub TrivialCaseVal(Case<Val, Val, Val>));
 
 rc_wrap!(pub CacheCaseVal(Cache<Val, Val, Val>));
-
-impl Debug for TrivialCaseVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Case::fmt(self, f)
-    }
-}
-
-impl Debug for CacheCaseVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Cache::fmt(self, f)
-    }
-}
 
 impl AsRef<Case<Val, Val, Val>> for CaseVal {
     fn as_ref(&self) -> &Case<Val, Val, Val> {

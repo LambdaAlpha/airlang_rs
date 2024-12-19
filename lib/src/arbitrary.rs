@@ -26,7 +26,17 @@ use crate::{
     CallMode,
     Case,
     CaseVal,
+    ConstStaticCompFunc,
+    ConstStaticCompFuncVal,
+    FreeCellCompFunc,
+    FreeCellCompFuncVal,
     FreeCtx,
+    FreeStaticCompFunc,
+    FreeStaticCompFuncVal,
+    ModeFunc,
+    ModeFuncVal,
+    MutStaticCompFunc,
+    MutStaticCompFuncVal,
     SelfMode,
     SymbolMode,
     Val,
@@ -42,14 +52,8 @@ use crate::{
     },
     extension::UnitExt,
     func::{
-        Func,
         FuncMode,
-        cell::CellCompExt,
         comp::Composite,
-        const1::ConstCompExt,
-        free::FreeCompExt,
-        mode::ModeFunc,
-        mut1::MutCompExt,
     },
     int::Int,
     list::List,
@@ -71,14 +75,7 @@ use crate::{
     symbol::Symbol,
     text::Text,
     unit::Unit,
-    val::func::{
-        FuncVal,
-        cell::CellFuncVal,
-        const1::ConstFuncVal,
-        free::FreeFuncVal,
-        mode::ModeFuncVal,
-        mut1::MutFuncVal,
-    },
+    val::func::FuncVal,
 };
 
 pub(crate) trait Arbitrary {
@@ -246,7 +243,7 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
     let variables = CtxMap::new(variables, rng.gen());
     let solver = if rng.gen() {
-        Some(any_cell_func(rng, depth))
+        Some(any_func(rng, depth))
     } else {
         None
     };
@@ -506,24 +503,24 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
     } else {
         match rng.gen_range(0..5) {
             0 => {
-                let func = any_cell_func(rng, depth);
-                FuncVal::Cell(func)
-            }
-            1 => {
-                let func = any_free_func(rng, depth);
-                FuncVal::Free(func)
-            }
-            2 => {
-                let func = any_const_func(rng, depth);
-                FuncVal::Const(func)
-            }
-            3 => {
-                let func = any_mut_func(rng, depth);
-                FuncVal::Mut(func)
-            }
-            4 => {
                 let func = any_mode_func(rng, depth);
                 FuncVal::Mode(func)
+            }
+            1 => {
+                let func = any_free_static_comp_func(rng, depth);
+                FuncVal::FreeStaticComp(func)
+            }
+            2 => {
+                let func = any_const_static_comp_func(rng, depth);
+                FuncVal::ConstStaticComp(func)
+            }
+            3 => {
+                let func = any_mut_static_comp_func(rng, depth);
+                FuncVal::MutStaticComp(func)
+            }
+            4 => {
+                let func = any_free_cell_comp_func(rng, depth);
+                FuncVal::FreeCellComp(func)
             }
             _ => unreachable!(),
         }
@@ -541,64 +538,50 @@ fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     }
 }
 
-pub(crate) fn any_cell_func(rng: &mut SmallRng, depth: usize) -> CellFuncVal {
-    let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
-    let transformer = Composite {
+fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {
+    Composite {
         body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
         prelude: any_ctx(rng, depth),
         input_name: any_symbol(rng),
-        ext: CellCompExt {},
-    };
-    let func = Func::new_composite(mode, cacheable, transformer);
-    CellFuncVal::from(func)
+    }
 }
 
-pub(crate) fn any_free_func(rng: &mut SmallRng, depth: usize) -> FreeFuncVal {
+pub(crate) fn any_free_cell_comp_func(rng: &mut SmallRng, depth: usize) -> FreeCellCompFuncVal {
+    let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
     let cacheable = rng.gen();
-    let transformer = Composite {
-        body_mode: any_mode(rng, depth),
-        body: any_val(rng, depth),
-        prelude: any_ctx(rng, depth),
-        input_name: any_symbol(rng),
-        ext: FreeCompExt {},
-    };
-    let func = Func::new_composite(mode, cacheable, transformer);
-    FreeFuncVal::from(func)
+    let func = FreeCellCompFunc::new(composite, mode, cacheable);
+    FreeCellCompFuncVal::from(func)
 }
 
-pub(crate) fn any_const_func(rng: &mut SmallRng, depth: usize) -> ConstFuncVal {
+pub(crate) fn any_free_static_comp_func(rng: &mut SmallRng, depth: usize) -> FreeStaticCompFuncVal {
+    let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
     let cacheable = rng.gen();
-    let transformer = Composite {
-        body_mode: any_mode(rng, depth),
-        body: any_val(rng, depth),
-        prelude: any_ctx(rng, depth),
-        input_name: any_symbol(rng),
-        ext: ConstCompExt {
-            ctx_name: any_symbol(rng),
-        },
-    };
-    let func = Func::new_composite(mode, cacheable, transformer);
-    ConstFuncVal::from(func)
+    let func = FreeStaticCompFunc::new(composite, mode, cacheable);
+    FreeStaticCompFuncVal::from(func)
 }
 
-pub(crate) fn any_mut_func(rng: &mut SmallRng, depth: usize) -> MutFuncVal {
+pub(crate) fn any_const_static_comp_func(
+    rng: &mut SmallRng,
+    depth: usize,
+) -> ConstStaticCompFuncVal {
+    let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
     let cacheable = rng.gen();
-    let transformer = Composite {
-        body_mode: any_mode(rng, depth),
-        body: any_val(rng, depth),
-        prelude: any_ctx(rng, depth),
-        input_name: any_symbol(rng),
-        ext: MutCompExt {
-            ctx_name: any_symbol(rng),
-        },
-    };
-    let func = Func::new_composite(mode, cacheable, transformer);
-    MutFuncVal::from(func)
+    let ctx_name = any_symbol(rng);
+    let func = ConstStaticCompFunc::new(composite, mode, cacheable, ctx_name);
+    ConstStaticCompFuncVal::from(func)
+}
+
+pub(crate) fn any_mut_static_comp_func(rng: &mut SmallRng, depth: usize) -> MutStaticCompFuncVal {
+    let composite = any_composite(rng, depth);
+    let mode = any_func_mode(rng, depth);
+    let cacheable = rng.gen();
+    let ctx_name = any_symbol(rng);
+    let func = MutStaticCompFunc::new(composite, mode, cacheable, ctx_name);
+    MutStaticCompFuncVal::from(func)
 }
 
 pub(crate) fn any_mode_func(rng: &mut SmallRng, depth: usize) -> ModeFuncVal {

@@ -41,6 +41,12 @@ macro_rules! box_wrap {
                 &mut self.0
             }
         }
+
+        impl ::std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                <$value as ::std::fmt::Debug>::fmt(self, f)
+            }
+        }
     };
 }
 
@@ -85,6 +91,12 @@ macro_rules! rc_wrap {
         impl ::std::ops::DerefMut for $name {
             fn deref_mut(&mut self) -> &mut Self::Target {
                 ::std::rc::Rc::make_mut(&mut self.0)
+            }
+        }
+
+        impl ::std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                <$value as ::std::fmt::Debug>::fmt(self, f)
             }
         }
     };

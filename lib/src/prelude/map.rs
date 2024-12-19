@@ -103,6 +103,7 @@ impl Prelude for MapPrelude {
 
 fn length() -> Named<FuncVal> {
     let id = "map.length";
+    let f = fn_length;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -112,8 +113,7 @@ fn length() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_length;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -128,6 +128,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn items() -> Named<FuncVal> {
     let id = "map.items";
+    let f = fn_items;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -137,8 +138,7 @@ fn items() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_items;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
@@ -156,6 +156,7 @@ fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn into_items() -> Named<FuncVal> {
     let id = "map.into_items";
+    let f = fn_into_items;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -165,8 +166,7 @@ fn into_items() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_into_items;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
@@ -186,6 +186,7 @@ fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
 
 fn keys() -> Named<FuncVal> {
     let id = "map.keys";
+    let f = fn_keys;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -195,8 +196,7 @@ fn keys() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_keys;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
@@ -211,6 +211,7 @@ fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn into_keys() -> Named<FuncVal> {
     let id = "map.into_keys";
+    let f = fn_into_keys;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -220,8 +221,7 @@ fn into_keys() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_into_keys;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
@@ -238,6 +238,7 @@ fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
 
 fn values() -> Named<FuncVal> {
     let id = "map.values";
+    let f = fn_values;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -247,8 +248,7 @@ fn values() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_values;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
@@ -263,6 +263,7 @@ fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn into_values() -> Named<FuncVal> {
     let id = "map.into_values";
+    let f = fn_into_values;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -272,8 +273,7 @@ fn into_values() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_into_values;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
@@ -290,6 +290,7 @@ fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
 
 fn contains() -> Named<FuncVal> {
     let id = "map.contains";
+    let f = fn_contains;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -299,8 +300,7 @@ fn contains() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_contains;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
@@ -320,6 +320,7 @@ fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn contains_many() -> Named<FuncVal> {
     let id = "map.contains_many";
+    let f = fn_contains_many;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -329,8 +330,7 @@ fn contains_many() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_contains_many;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
@@ -354,6 +354,7 @@ fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn set() -> Named<FuncVal> {
     let id = "map.set";
+    let f = fn_set;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -363,8 +364,7 @@ fn set() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_set;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
@@ -389,6 +389,7 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
 
 fn set_many() -> Named<FuncVal> {
     let id = "map.set_many";
+    let f = fn_set_many;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -398,8 +399,7 @@ fn set_many() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_set_many;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -426,6 +426,7 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
 
 fn get() -> Named<FuncVal> {
     let id = "map.get";
+    let f = fn_get;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -435,8 +436,7 @@ fn get() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
@@ -456,6 +456,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn get_many() -> Named<FuncVal> {
     let id = "map.get_many";
+    let f = fn_get_many;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -465,8 +466,7 @@ fn get_many() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get_many;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
@@ -493,6 +493,7 @@ fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn remove() -> Named<FuncVal> {
     let id = "map.remove";
+    let f = fn_remove;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -502,8 +503,7 @@ fn remove() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_remove;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
@@ -523,6 +523,7 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
 
 fn remove_many() -> Named<FuncVal> {
     let id = "map.remove_many";
+    let f = fn_remove_many;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -532,8 +533,7 @@ fn remove_many() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_remove_many;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -561,6 +561,7 @@ fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
 
 fn clear() -> Named<FuncVal> {
     let id = "map.clear";
+    let f = fn_clear;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -570,8 +571,7 @@ fn clear() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_clear;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
@@ -585,6 +585,7 @@ fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
 
 fn new_map() -> Named<FuncVal> {
     let id = "map";
+    let f = fn_new_map;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -594,8 +595,7 @@ fn new_map() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_new_map;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_new_map(input: Val) -> Val {
@@ -621,6 +621,7 @@ fn fn_new_map(input: Val) -> Val {
 
 fn new_set() -> Named<FuncVal> {
     let id = "set";
+    let f = fn_new_set;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -630,8 +631,7 @@ fn new_set() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_new_set;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_new_set(input: Val) -> Val {
@@ -645,6 +645,7 @@ fn fn_new_set(input: Val) -> Val {
 
 fn new_multiset() -> Named<FuncVal> {
     let id = "multiset";
+    let f = fn_new_multiset;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -654,8 +655,7 @@ fn new_multiset() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_new_multiset;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_new_multiset(input: Val) -> Val {

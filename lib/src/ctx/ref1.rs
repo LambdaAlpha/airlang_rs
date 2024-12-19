@@ -1,13 +1,13 @@
 use crate::{
     Ctx,
     CtxError,
+    FuncVal,
     ctx::{
         DynRef,
         const1::ConstFnCtx,
         map::CtxMap,
         mut1::MutFnCtx,
     },
-    val::func::cell::CellFuncVal,
 };
 
 pub(crate) trait CtxRef<'a> {
@@ -17,15 +17,15 @@ pub(crate) trait CtxRef<'a> {
 
     fn get_variables_dyn(self) -> Result<DynRef<'a, CtxMap>, CtxError>;
 
-    fn get_solver(self) -> Result<&'a CellFuncVal, CtxError>;
+    fn get_solver(self) -> Result<&'a FuncVal, CtxError>;
 
     #[allow(unused)]
-    fn get_solver_mut(self) -> Result<&'a mut CellFuncVal, CtxError>;
+    fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError>;
 
     #[allow(unused)]
-    fn get_solver_dyn(self) -> Result<DynRef<'a, CellFuncVal>, CtxError>;
+    fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
 
-    fn set_solver(self, solver: Option<CellFuncVal>) -> Result<(), CtxError>;
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError>;
 }
 
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {

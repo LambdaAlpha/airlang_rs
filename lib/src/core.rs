@@ -13,6 +13,7 @@ use crate::{
     Call,
     CallVal,
     ConstCtx,
+    FreeCtx,
     FuncVal,
     List,
     ListVal,
@@ -32,6 +33,7 @@ use crate::{
             CtxRef,
         },
     },
+    func::FuncTrait,
     optimize::optimize,
     transformer::{
         ByVal,
@@ -298,9 +300,9 @@ impl EvalCore {
         Input: Transformer<Val, Val>,
     {
         match func {
-            Val::Func(mut func) => {
+            Val::Func(func) => {
                 let input = func.mode().call.transform(ctx.reborrow(), input);
-                func.transform_mut(ctx, input)
+                func.transform(ctx, input)
             }
             Val::Symbol(s) => EvalCore::call_cell(ctx, s, input),
             _ => {
@@ -353,12 +355,15 @@ impl EvalCore {
         let Ok(val) = ctx.reborrow().get_ctx_ref().variables().get_ref(func_name) else {
             return Val::default();
         };
-        let Val::Func(FuncVal::Cell(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
+        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
+            return Val::default();
+        }
         let mut func = func.clone();
         let input = func.mode().call.transform(ctx, input);
-        func.transform_mut(input)
+        func.transform_mut(FreeCtx, input)
     }
 
     fn call_cell_mut(ctx: MutCtx, func_name: Symbol, input: Val) -> Val {
@@ -366,20 +371,26 @@ impl EvalCore {
         let Ok(val) = ctx.variables().get_ref(func_name.clone()) else {
             return Val::default();
         };
-        let Val::Func(FuncVal::Cell(func)) = val else {
+        let Val::Func(func) = val else {
             return Val::default();
         };
+        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
+            return Val::default();
+        }
         let input = func.mode().call.clone().transform(MutCtx::new(ctx), input);
         let Ok(val) = ctx.variables_mut().get_ref_dyn(func_name) else {
             return Val::default();
         };
-        let Val::Func(FuncVal::Cell(func)) = val.ref1 else {
+        let Val::Func(func) = val.ref1 else {
             return Val::default();
         };
+        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
+            return Val::default();
+        }
         if val.is_const {
-            func.transform(input)
+            func.transform(FreeCtx, input)
         } else {
-            func.transform_mut(input)
+            func.transform_mut(FreeCtx, input)
         }
     }
 
@@ -481,15 +492,18 @@ impl EvalCore {
         Ctx: CtxMeta<'a>,
     {
         let none = AnswerVal::from(Answer::None);
-        let Ok(solver) = ctx.reborrow().get_solver_dyn() else {
+        let Ok(solver_ref) = ctx.reborrow().get_solver_dyn() else {
             return none;
         };
+        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
+            return none;
+        }
         let ask = Ask::new(Val::Func(func.clone()), output.clone());
         let ask = Val::Ask(ask.into());
-        let answer = if solver.is_const {
-            solver.ref1.transform(ask)
+        let answer = if solver_ref.is_const {
+            solver_ref.ref1.transform(FreeCtx, ask)
         } else {
-            solver.ref1.transform_mut(ask)
+            solver_ref.ref1.transform_mut(FreeCtx, ask)
         };
         let Val::Answer(answer) = answer else {
             return none;

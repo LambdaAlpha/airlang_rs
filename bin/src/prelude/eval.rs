@@ -35,6 +35,7 @@ impl Prelude for EvalPrelude {
 
 fn reset() -> Named<FuncVal> {
     let id = "repl.reset";
+    let f = fn_reset;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -44,8 +45,7 @@ fn reset() -> Named<FuncVal> {
         ask,
     };
     let cacheable = false;
-    let f = fn_reset;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {

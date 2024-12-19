@@ -60,6 +60,7 @@ impl Prelude for BitPrelude {
 
 fn is_true() -> Named<FuncVal> {
     let id = "is_true";
+    let f = fn_is_true;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -69,8 +70,7 @@ fn is_true() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_true;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
@@ -84,6 +84,7 @@ fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_false() -> Named<FuncVal> {
     let id = "is_false";
+    let f = fn_is_false;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -93,8 +94,7 @@ fn is_false() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_false;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
@@ -108,6 +108,7 @@ fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn not() -> Named<FuncVal> {
     let id = "not";
+    let f = fn_not;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -117,8 +118,7 @@ fn not() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_not;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_not(input: Val) -> Val {
@@ -130,6 +130,7 @@ fn fn_not(input: Val) -> Val {
 
 fn and() -> Named<FuncVal> {
     let id = "and";
+    let f = fn_and;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -139,8 +140,7 @@ fn and() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_and;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_and(input: Val) -> Val {
@@ -158,6 +158,7 @@ fn fn_and(input: Val) -> Val {
 
 fn or() -> Named<FuncVal> {
     let id = "or";
+    let f = fn_or;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -167,8 +168,7 @@ fn or() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_or;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_or(input: Val) -> Val {
@@ -186,6 +186,7 @@ fn fn_or(input: Val) -> Val {
 
 fn xor() -> Named<FuncVal> {
     let id = "xor";
+    let f = fn_xor;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -195,8 +196,7 @@ fn xor() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_xor;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -214,6 +214,7 @@ fn fn_xor(input: Val) -> Val {
 
 fn imply() -> Named<FuncVal> {
     let id = "imply";
+    let f = fn_imply;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -223,8 +224,7 @@ fn imply() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_imply;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_imply(input: Val) -> Val {

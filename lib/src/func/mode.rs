@@ -1,8 +1,14 @@
+use std::fmt::{
+    Debug,
+    Formatter,
+};
+
 use crate::{
     AbstractMode,
     AskMode,
     CallMode,
     CompositeMode,
+    FuncMode,
     ListMode,
     MapMode,
     Mode,
@@ -11,10 +17,11 @@ use crate::{
     SelfMode,
     Val,
     ctx::ref1::CtxMeta,
+    func::FuncTrait,
     transformer::Transformer,
 };
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Default, Clone, PartialEq, Eq, Hash)]
 pub struct ModeFunc {
     mode: Mode,
     cacheable: bool,
@@ -29,22 +36,40 @@ impl Transformer<Val, Val> for ModeFunc {
     }
 }
 
+impl FuncTrait for ModeFunc {
+    fn mode(&self) -> &FuncMode {
+        &FuncMode {
+            call: Mode::Primitive(PrimitiveMode::Id),
+            abstract1: Mode::Primitive(PrimitiveMode::Eval),
+            ask: Mode::Primitive(PrimitiveMode::Eval),
+        }
+    }
+
+    fn cacheable(&self) -> bool {
+        self.cacheable
+    }
+}
+
 impl ModeFunc {
     pub fn new(mode: Mode) -> ModeFunc {
         let cacheable = mode.is_cacheable();
         Self { mode, cacheable }
     }
 
-    pub fn mode(&self) -> &Mode {
+    pub fn self_mode(&self) -> &Mode {
         &self.mode
-    }
-
-    pub fn cacheable(&self) -> bool {
-        self.cacheable
     }
 
     pub(crate) fn is_primitive(&self) -> bool {
         matches!(self.mode, Mode::Primitive(_))
+    }
+}
+
+impl Debug for ModeFunc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut s = f.debug_struct("ModeFunc");
+        s.field("mode", &self.mode);
+        s.finish()
     }
 }
 

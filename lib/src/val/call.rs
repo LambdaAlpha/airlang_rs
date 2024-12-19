@@ -1,8 +1,3 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
-
 use crate::{
     Val,
     box_wrap,
@@ -44,11 +39,5 @@ impl TryInto<CallRepr> for CallVal {
     fn try_into(self) -> Result<CallRepr, Self::Error> {
         let call = CallRepr::new(self.0.func.try_into()?, self.0.input.try_into()?);
         Ok(call)
-    }
-}
-
-impl Debug for CallVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Call::fmt(self, f)
     }
 }

@@ -44,6 +44,7 @@ impl Prelude for UnitPrelude {
 
 fn unit() -> Named<FuncVal> {
     let id = "unit";
+    let f = fn_unit;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -53,8 +54,7 @@ fn unit() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_unit;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_unit(_input: Val) -> Val {
@@ -63,6 +63,7 @@ fn fn_unit(_input: Val) -> Val {
 
 fn is_unit() -> Named<FuncVal> {
     let id = "is_unit";
+    let f = fn_is_unit;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -72,8 +73,7 @@ fn is_unit() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_unit;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_unit(ctx: ConstFnCtx, input: Val) -> Val {

@@ -1,23 +1,30 @@
 use crate::{
     Bit,
+    ConstStaticCompFunc,
+    ConstStaticCompFuncVal,
+    ConstStaticPrimFuncVal,
     Ctx,
     CtxVal,
+    FreeCellCompFunc,
+    FreeCellCompFuncVal,
+    FreeCellPrimFunc,
+    FreeCellPrimFuncVal,
+    FreeStaticCompFunc,
+    FreeStaticCompFuncVal,
+    FreeStaticPrimFuncVal,
     FuncVal,
     Map,
     Mode,
+    ModeFunc,
+    MutStaticCompFunc,
+    MutStaticCompFuncVal,
+    MutStaticPrimFuncVal,
     PrimitiveMode,
     Symbol,
     Val,
     func::{
-        Func,
-        FuncImpl,
         FuncMode,
-        cell::CellCompExt,
         comp::Composite,
-        const1::ConstCompExt,
-        free::FreeCompExt,
-        mode::ModeFunc,
-        mut1::MutCompExt,
     },
     mode::repr::generate,
     prelude::{
@@ -27,12 +34,6 @@ use crate::{
     utils::val::{
         map_remove,
         symbol,
-    },
-    val::func::{
-        cell::CellFuncVal,
-        const1::ConstFuncVal,
-        free::FreeFuncVal,
-        mut1::MutFuncVal,
     },
 };
 
@@ -106,7 +107,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     };
     let body_mode = match map_remove(&mut map, BODY_MODE) {
         Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(mode)) => mode.mode().clone(),
+        Val::Func(FuncVal::Mode(mode)) => mode.self_mode().clone(),
         _ => return None,
     };
     let body = map_remove(&mut map, BODY);
@@ -122,17 +123,17 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     };
     let call = match map_remove(&mut map, CALL_MODE) {
         Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(call_mode)) => call_mode.mode().clone(),
+        Val::Func(FuncVal::Mode(call_mode)) => call_mode.self_mode().clone(),
         _ => return None,
     };
     let abstract1 = match map_remove(&mut map, ABSTRACT_MODE) {
         Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(abstract_mode)) => abstract_mode.mode().clone(),
+        Val::Func(FuncVal::Mode(abstract_mode)) => abstract_mode.self_mode().clone(),
         _ => return None,
     };
     let ask = match map_remove(&mut map, ASK_MODE) {
         Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(ask_mode)) => ask_mode.mode().clone(),
+        Val::Func(FuncVal::Mode(ask_mode)) => ask_mode.self_mode().clone(),
         _ => return None,
     };
     let mode = FuncMode {
@@ -161,50 +162,28 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Bit(b) => b.bool(),
         _ => return None,
     };
+    let comp = Composite {
+        body_mode,
+        body,
+        prelude,
+        input_name,
+    };
     let func = if cell {
-        let transformer = Composite {
-            body_mode,
-            body,
-            prelude,
-            input_name,
-            ext: CellCompExt {},
-        };
-        let func = Func::new_composite(mode, cacheable, transformer);
-        FuncVal::Cell(CellFuncVal::from(func))
+        let func = FreeCellCompFunc::new(comp, mode, cacheable);
+        FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
     } else {
         match ctx_access {
             FREE => {
-                let transformer = Composite {
-                    body_mode,
-                    body,
-                    prelude,
-                    input_name,
-                    ext: FreeCompExt {},
-                };
-                let func = Func::new_composite(mode, cacheable, transformer);
-                FuncVal::Free(FreeFuncVal::from(func))
+                let func = FreeStaticCompFunc::new(comp, mode, cacheable);
+                FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
             }
             CONST => {
-                let transformer = Composite {
-                    body_mode,
-                    body,
-                    prelude,
-                    input_name,
-                    ext: ConstCompExt { ctx_name },
-                };
-                let func = Func::new_composite(mode, cacheable, transformer);
-                FuncVal::Const(ConstFuncVal::from(func))
+                let func = ConstStaticCompFunc::new(comp, mode, cacheable, ctx_name);
+                FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
             }
             MUTABLE => {
-                let transformer = Composite {
-                    body_mode,
-                    body,
-                    prelude,
-                    input_name,
-                    ext: MutCompExt { ctx_name },
-                };
-                let func = Func::new_composite(mode, cacheable, transformer);
-                FuncVal::Mut(MutFuncVal::from(func))
+                let func = MutStaticCompFunc::new(comp, mode, cacheable, ctx_name);
+                FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
             }
             _ => return None,
         }
@@ -214,143 +193,129 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
 
 pub(crate) fn generate_func(f: FuncVal) -> Val {
     match f {
-        FuncVal::Mode(f) => generate(f.mode()),
-        FuncVal::Cell(f) => generate_cell(f),
-        FuncVal::Free(f) => generate_free(f),
-        FuncVal::Const(f) => generate_const(f),
-        FuncVal::Mut(f) => generate_mut(f),
+        FuncVal::Mode(f) => generate(f.self_mode()),
+        FuncVal::FreeCellPrim(f) => generate_free_cell_prim(f),
+        FuncVal::FreeCellComp(f) => generate_free_cell_comp(f),
+        FuncVal::FreeStaticPrim(f) => generate_free_prim(f),
+        FuncVal::FreeStaticComp(f) => generate_free_comp(f),
+        FuncVal::ConstStaticPrim(f) => generate_const_prim(f),
+        FuncVal::ConstStaticComp(f) => generate_const_comp(f),
+        FuncVal::MutStaticPrim(f) => generate_mut_prim(f),
+        FuncVal::MutStaticComp(f) => generate_mut_comp(f),
     }
 }
 
-fn generate_cell(f: CellFuncVal) -> Val {
+fn generate_free_cell_prim(f: FreeCellPrimFuncVal) -> Val {
+    let f = FreeCellPrimFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
-    let f = f.unwrap();
-    match f.transformer {
-        FuncImpl::Primitive(p) => {
-            if p.is_extension {
-                generate_extension(p.id, true, FREE, f.cacheable, f.mode, &mut repr);
-            } else {
-                repr.insert(symbol(ID), Val::Symbol(p.id));
-            }
-        }
-        FuncImpl::Composite(c) => {
-            generate_composite(
-                true,
-                FREE,
-                f.cacheable,
-                f.mode,
-                c.body_mode,
-                c.body,
-                c.prelude,
-                c.input_name,
-                None,
-                &mut repr,
-            );
-        }
+    if f.prim.is_extension {
+        generate_extension(f.prim.id, true, FREE, f.cacheable, f.mode, &mut repr);
+    } else {
+        repr.insert(symbol(ID), Val::Symbol(f.prim.id));
     }
     Val::Map(repr.into())
 }
 
-fn generate_free(f: FreeFuncVal) -> Val {
+fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
+    let f = FreeCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
-    match &f.transformer {
-        FuncImpl::Primitive(p) => {
-            if p.is_extension {
-                generate_extension(
-                    p.id.clone(),
-                    false,
-                    FREE,
-                    f.cacheable,
-                    f.mode.clone(),
-                    &mut repr,
-                );
-            } else {
-                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-            }
-        }
-        FuncImpl::Composite(c) => generate_composite(
+    generate_composite(true, FREE, f.cacheable, f.mode, f.comp, None, &mut repr);
+    Val::Map(repr.into())
+}
+
+fn generate_free_prim(f: FreeStaticPrimFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    if f.prim.is_extension {
+        generate_extension(
+            f.prim.id.clone(),
             false,
             FREE,
             f.cacheable,
             f.mode.clone(),
-            c.body_mode.clone(),
-            c.body.clone(),
-            c.prelude.clone(),
-            c.input_name.clone(),
-            None,
             &mut repr,
-        ),
+        );
+    } else {
+        repr.insert(symbol(ID), Val::Symbol(f.prim.id.clone()));
     }
     Val::Map(repr.into())
 }
 
-fn generate_const(f: ConstFuncVal) -> Val {
+fn generate_free_comp(f: FreeStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
-    match &f.transformer {
-        FuncImpl::Primitive(p) => {
-            if p.is_extension {
-                generate_extension(
-                    p.id.clone(),
-                    false,
-                    CONST,
-                    f.cacheable,
-                    f.mode.clone(),
-                    &mut repr,
-                );
-            } else {
-                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-            }
-        }
-        FuncImpl::Composite(c) => generate_composite(
+    generate_composite(
+        false,
+        FREE,
+        f.cacheable,
+        f.mode.clone(),
+        f.comp.clone(),
+        None,
+        &mut repr,
+    );
+    Val::Map(repr.into())
+}
+
+fn generate_const_prim(f: ConstStaticPrimFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    if f.prim.is_extension {
+        generate_extension(
+            f.prim.id.clone(),
             false,
             CONST,
             f.cacheable,
             f.mode.clone(),
-            c.body_mode.clone(),
-            c.body.clone(),
-            c.prelude.clone(),
-            c.input_name.clone(),
-            Some(c.ext.ctx_name.clone()),
             &mut repr,
-        ),
+        );
+    } else {
+        repr.insert(symbol(ID), Val::Symbol(f.prim.id.clone()));
     }
     Val::Map(repr.into())
 }
 
-fn generate_mut(f: MutFuncVal) -> Val {
+fn generate_const_comp(f: ConstStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
-    match &f.transformer {
-        FuncImpl::Primitive(p) => {
-            if p.is_extension {
-                generate_extension(
-                    p.id.clone(),
-                    false,
-                    MUTABLE,
-                    f.cacheable,
-                    f.mode.clone(),
-                    &mut repr,
-                );
-            } else {
-                repr.insert(symbol(ID), Val::Symbol(p.id.clone()));
-            }
-        }
-        FuncImpl::Composite(c) => generate_composite(
+    generate_composite(
+        false,
+        CONST,
+        f.cacheable,
+        f.mode.clone(),
+        f.comp.clone(),
+        Some(f.ctx_name.clone()),
+        &mut repr,
+    );
+    Val::Map(repr.into())
+}
+
+fn generate_mut_prim(f: MutStaticPrimFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    if f.prim.is_extension {
+        generate_extension(
+            f.prim.id.clone(),
             false,
             MUTABLE,
             f.cacheable,
             f.mode.clone(),
-            c.body_mode.clone(),
-            c.body.clone(),
-            c.prelude.clone(),
-            c.input_name.clone(),
-            Some(c.ext.ctx_name.clone()),
             &mut repr,
-        ),
+        );
+    } else {
+        repr.insert(symbol(ID), Val::Symbol(f.prim.id.clone()));
     }
     Val::Map(repr.into())
 }
 
-#[allow(clippy::too_many_arguments)]
+fn generate_mut_comp(f: MutStaticCompFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    generate_composite(
+        false,
+        MUTABLE,
+        f.cacheable,
+        f.mode.clone(),
+        f.comp.clone(),
+        Some(f.ctx_name.clone()),
+        &mut repr,
+    );
+    Val::Map(repr.into())
+}
+
 fn generate_extension(
     id: Symbol,
     cell: bool,
@@ -370,26 +335,23 @@ fn generate_composite(
     access: &str,
     cacheable: bool,
     mode: FuncMode,
-    body_mode: Mode,
-    body: Val,
-    prelude: Ctx,
-    input_name: Symbol,
+    composite: Composite,
     ctx_name: Option<Symbol>,
     repr: &mut Map<Val, Val>,
 ) {
     generate_func_common(cell, access, cacheable, mode, repr);
-    if body_mode != Mode::default() {
-        let mode = Val::Func(FuncVal::Mode(ModeFunc::new(body_mode).into()));
+    if composite.body_mode != Mode::default() {
+        let mode = Val::Func(FuncVal::Mode(ModeFunc::new(composite.body_mode).into()));
         repr.insert(symbol(BODY_MODE), mode);
     }
-    if body != Val::default() {
-        repr.insert(symbol(BODY), body);
+    if composite.body != Val::default() {
+        repr.insert(symbol(BODY), composite.body);
     }
-    if prelude != Ctx::default() {
-        repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(prelude)));
+    if composite.prelude != Ctx::default() {
+        repr.insert(symbol(PRELUDE), Val::Ctx(CtxVal::from(composite.prelude)));
     }
-    if &*input_name != DEFAULT_INPUT_NAME {
-        repr.insert(symbol(INPUT_NAME), Val::Symbol(input_name));
+    if &*composite.input_name != DEFAULT_INPUT_NAME {
+        repr.insert(symbol(INPUT_NAME), Val::Symbol(composite.input_name));
     }
     if let Some(ctx_name) = ctx_name {
         if &*ctx_name != DEFAULT_CTX_NAME {

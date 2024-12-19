@@ -6,17 +6,15 @@ use std::{
 
 use crate::{
     AirCell,
-    FreeFunc,
+    FreeStaticPrimFunc,
+    FreeStaticPrimFuncVal,
     FuncMode,
     FuncVal,
     Symbol,
     ctx::Invariant,
-    func::free::FreeFn,
+    func::free_static_prim::FreeStaticFn,
     parse,
-    val::{
-        Val,
-        func::free::FreeFuncVal,
-    },
+    val::Val,
 };
 
 const MAIN_DELIMITER: &str = "=====";
@@ -147,12 +145,9 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
     air.ctx_mut().put(
         func_ext_name.clone(),
         Invariant::Const,
-        Val::Func(FuncVal::Free(FreeFuncVal::from(FreeFunc::new(
-            FuncMode::default(),
-            false,
-            func_ext_name,
-            Rc::new(FuncExt),
-        )))),
+        Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(
+            FreeStaticPrimFunc::new(func_ext_name, Rc::new(FuncExt), FuncMode::default(), false),
+        ))),
     )?;
     test_interpret(
         air,
@@ -164,7 +159,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FuncExt;
 
-impl FreeFn for FuncExt {
+impl FreeStaticFn for FuncExt {
     fn call(&self, input: Val) -> Val {
         input
     }

@@ -89,6 +89,7 @@ fn never() -> Named<AnswerVal> {
 
 fn maybe() -> Named<FuncVal> {
     let id = "answer.maybe";
+    let f = fn_maybe;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -98,8 +99,7 @@ fn maybe() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_maybe;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_maybe(input: Val) -> Val {
@@ -108,6 +108,7 @@ fn fn_maybe(input: Val) -> Val {
 
 fn cache() -> Named<FuncVal> {
     let id = "answer.cache";
+    let f = fn_cached;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -117,8 +118,7 @@ fn cache() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_cached;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_cached(input: Val) -> Val {
@@ -133,6 +133,7 @@ fn fn_cached(input: Val) -> Val {
 
 fn repr() -> Named<FuncVal> {
     let id = "answer.represent";
+    let f = fn_repr;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -142,8 +143,7 @@ fn repr() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_repr;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 const TYPE: &str = "type";
@@ -176,6 +176,7 @@ fn fn_repr(input: Val) -> Val {
 
 fn type_of() -> Named<FuncVal> {
     let id = "answer.type_of";
+    let f = fn_type_of;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -185,8 +186,7 @@ fn type_of() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_type_of;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
@@ -206,6 +206,7 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_none() -> Named<FuncVal> {
     let id = "answer.is_none";
+    let f = fn_is_none;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -215,8 +216,7 @@ fn is_none() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_none;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
@@ -231,6 +231,7 @@ fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_never() -> Named<FuncVal> {
     let id = "answer.is_never";
+    let f = fn_is_never;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -240,8 +241,7 @@ fn is_never() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_never;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
@@ -256,6 +256,7 @@ fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_maybe() -> Named<FuncVal> {
     let id = "answer.is_maybe";
+    let f = fn_is_maybe;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -265,8 +266,7 @@ fn is_maybe() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_maybe;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
@@ -281,6 +281,7 @@ fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_cache() -> Named<FuncVal> {
     let id = "answer.is_cache";
+    let f = fn_is_cache;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -290,8 +291,7 @@ fn is_cache() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_cache;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {

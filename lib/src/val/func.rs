@@ -6,182 +6,182 @@ use std::{
     hash::Hash,
 };
 
-use cell::CellFuncVal;
-use const1::ConstFuncVal;
-use free::FreeFuncVal;
-use mode::ModeFuncVal;
-use mut1::MutFuncVal;
-
 use crate::{
-    Ctx,
     FuncMode,
-    Mode,
-    PrimitiveMode,
-    Symbol,
     Val,
     ctx::ref1::CtxMeta,
+    func::{
+        FuncTrait,
+        comp::Composite,
+        prim::Primitive,
+    },
     transformer::Transformer,
+    val::func::{
+        const_static_comp::ConstStaticCompFuncVal,
+        const_static_prim::ConstStaticPrimFuncVal,
+        free_cell_comp::FreeCellCompFuncVal,
+        free_cell_prim::FreeCellPrimFuncVal,
+        free_static_comp::FreeStaticCompFuncVal,
+        free_static_prim::FreeStaticPrimFuncVal,
+        mode::ModeFuncVal,
+        mut_static_comp::MutStaticCompFuncVal,
+        mut_static_prim::MutStaticPrimFuncVal,
+    },
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum FuncVal {
     Mode(ModeFuncVal),
-    Cell(CellFuncVal),
-    Free(FreeFuncVal),
-    Const(ConstFuncVal),
-    Mut(MutFuncVal),
+    FreeCellPrim(FreeCellPrimFuncVal),
+    FreeCellComp(FreeCellCompFuncVal),
+    FreeStaticPrim(FreeStaticPrimFuncVal),
+    FreeStaticComp(FreeStaticCompFuncVal),
+    ConstStaticPrim(ConstStaticPrimFuncVal),
+    ConstStaticComp(ConstStaticCompFuncVal),
+    MutStaticPrim(MutStaticPrimFuncVal),
+    MutStaticComp(MutStaticCompFuncVal),
+}
+
+impl Transformer<Val, Val> for FuncVal {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            FuncVal::Mode(f) => f.transform(ctx, input),
+            FuncVal::FreeCellPrim(f) => f.transform(ctx, input),
+            FuncVal::FreeCellComp(f) => f.transform(ctx, input),
+            FuncVal::FreeStaticPrim(f) => f.transform(ctx, input),
+            FuncVal::FreeStaticComp(f) => f.transform(ctx, input),
+            FuncVal::ConstStaticPrim(f) => f.transform(ctx, input),
+            FuncVal::ConstStaticComp(f) => f.transform(ctx, input),
+            FuncVal::MutStaticPrim(f) => f.transform(ctx, input),
+            FuncVal::MutStaticComp(f) => f.transform(ctx, input),
+        }
+    }
+}
+
+impl FuncTrait for FuncVal {
+    fn mode(&self) -> &FuncMode {
+        match self {
+            FuncVal::Mode(f) => f.mode(),
+            FuncVal::FreeCellPrim(f) => f.mode(),
+            FuncVal::FreeCellComp(f) => f.mode(),
+            FuncVal::FreeStaticPrim(f) => f.mode(),
+            FuncVal::FreeStaticComp(f) => f.mode(),
+            FuncVal::ConstStaticPrim(f) => f.mode(),
+            FuncVal::ConstStaticComp(f) => f.mode(),
+            FuncVal::MutStaticPrim(f) => f.mode(),
+            FuncVal::MutStaticComp(f) => f.mode(),
+        }
+    }
+
+    fn cacheable(&self) -> bool {
+        match self {
+            FuncVal::Mode(f) => f.cacheable(),
+            FuncVal::FreeCellPrim(f) => f.cacheable(),
+            FuncVal::FreeCellComp(f) => f.cacheable(),
+            FuncVal::FreeStaticPrim(f) => f.cacheable(),
+            FuncVal::FreeStaticComp(f) => f.cacheable(),
+            FuncVal::ConstStaticPrim(f) => f.cacheable(),
+            FuncVal::ConstStaticComp(f) => f.cacheable(),
+            FuncVal::MutStaticPrim(f) => f.cacheable(),
+            FuncVal::MutStaticComp(f) => f.cacheable(),
+        }
+    }
+
+    fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            FuncVal::Mode(f) => f.transform_mut(ctx, input),
+            FuncVal::FreeCellPrim(f) => f.transform_mut(ctx, input),
+            FuncVal::FreeCellComp(f) => f.transform_mut(ctx, input),
+            FuncVal::FreeStaticPrim(f) => f.transform_mut(ctx, input),
+            FuncVal::FreeStaticComp(f) => f.transform_mut(ctx, input),
+            FuncVal::ConstStaticPrim(f) => f.transform_mut(ctx, input),
+            FuncVal::ConstStaticComp(f) => f.transform_mut(ctx, input),
+            FuncVal::MutStaticPrim(f) => f.transform_mut(ctx, input),
+            FuncVal::MutStaticComp(f) => f.transform_mut(ctx, input),
+        }
+    }
 }
 
 impl FuncVal {
-    pub(crate) fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    pub(crate) fn primitive(&self) -> Option<&Primitive> {
         match self {
-            FuncVal::Mode(f) => f.transform(ctx, input),
-            FuncVal::Cell(f) => f.transform(input),
-            FuncVal::Free(f) => f.transform(ctx, input),
-            FuncVal::Const(f) => f.transform(ctx, input),
-            FuncVal::Mut(f) => f.transform(ctx, input),
+            FuncVal::Mode(_) => None,
+            FuncVal::FreeCellPrim(f) => Some(&f.prim),
+            FuncVal::FreeCellComp(_) => None,
+            FuncVal::FreeStaticPrim(f) => Some(&f.prim),
+            FuncVal::FreeStaticComp(_) => None,
+            FuncVal::ConstStaticPrim(f) => Some(&f.prim),
+            FuncVal::ConstStaticComp(_) => None,
+            FuncVal::MutStaticPrim(f) => Some(&f.prim),
+            FuncVal::MutStaticComp(_) => None,
         }
     }
 
-    pub(crate) fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    pub(crate) fn composite(&self) -> Option<&Composite> {
         match self {
-            FuncVal::Mode(f) => f.transform(ctx, input),
-            FuncVal::Cell(f) => f.transform_mut(input),
-            FuncVal::Free(f) => f.transform(ctx, input),
-            FuncVal::Const(f) => f.transform(ctx, input),
-            FuncVal::Mut(f) => f.transform(ctx, input),
-        }
-    }
-
-    pub(crate) fn mode(&self) -> &FuncMode {
-        match self {
-            FuncVal::Mode(_) => &FuncMode {
-                call: Mode::Primitive(PrimitiveMode::Id),
-                abstract1: Mode::Primitive(PrimitiveMode::Eval),
-                ask: Mode::Primitive(PrimitiveMode::Eval),
-            },
-            FuncVal::Cell(f) => &f.mode,
-            FuncVal::Free(f) => &f.mode,
-            FuncVal::Const(f) => &f.mode,
-            FuncVal::Mut(f) => &f.mode,
-        }
-    }
-
-    pub(crate) fn cacheable(&self) -> bool {
-        match self {
-            FuncVal::Mode(f) => f.cacheable(),
-            FuncVal::Cell(f) => f.cacheable,
-            FuncVal::Free(f) => f.cacheable,
-            FuncVal::Const(f) => f.cacheable,
-            FuncVal::Mut(f) => f.cacheable,
+            FuncVal::Mode(_) => None,
+            FuncVal::FreeCellPrim(_) => None,
+            FuncVal::FreeCellComp(f) => Some(&f.comp),
+            FuncVal::FreeStaticPrim(_) => None,
+            FuncVal::FreeStaticComp(f) => Some(&f.comp),
+            FuncVal::ConstStaticPrim(_) => None,
+            FuncVal::ConstStaticComp(f) => Some(&f.comp),
+            FuncVal::MutStaticPrim(_) => None,
+            FuncVal::MutStaticComp(f) => Some(&f.comp),
         }
     }
 
     pub(crate) fn is_primitive(&self) -> bool {
         match self {
             FuncVal::Mode(f) => f.is_primitive(),
-            FuncVal::Cell(f) => f.is_primitive(),
-            FuncVal::Free(f) => f.is_primitive(),
-            FuncVal::Const(f) => f.is_primitive(),
-            FuncVal::Mut(f) => f.is_primitive(),
-        }
-    }
-
-    pub(crate) fn id(&self) -> Option<Symbol> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(f) => f.id(),
-            FuncVal::Free(f) => f.id(),
-            FuncVal::Const(f) => f.id(),
-            FuncVal::Mut(f) => f.id(),
-        }
-    }
-
-    pub(crate) fn is_extension(&self) -> Option<bool> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(f) => f.is_extension(),
-            FuncVal::Free(f) => f.is_extension(),
-            FuncVal::Const(f) => f.is_extension(),
-            FuncVal::Mut(f) => f.is_extension(),
-        }
-    }
-
-    pub(crate) fn body_mode(&self) -> Option<&Mode> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(f) => f.body_mode(),
-            FuncVal::Free(f) => f.body_mode(),
-            FuncVal::Const(f) => f.body_mode(),
-            FuncVal::Mut(f) => f.body_mode(),
-        }
-    }
-
-    pub(crate) fn body(&self) -> Option<&Val> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(f) => f.body(),
-            FuncVal::Free(f) => f.body(),
-            FuncVal::Const(f) => f.body(),
-            FuncVal::Mut(f) => f.body(),
-        }
-    }
-
-    pub(crate) fn prelude(&self) -> Option<&Ctx> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(f) => f.prelude(),
-            FuncVal::Free(f) => f.prelude(),
-            FuncVal::Const(f) => f.prelude(),
-            FuncVal::Mut(f) => f.prelude(),
-        }
-    }
-
-    pub(crate) fn input_name(&self) -> Option<Symbol> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(f) => f.input_name(),
-            FuncVal::Free(f) => f.input_name(),
-            FuncVal::Const(f) => f.input_name(),
-            FuncVal::Mut(f) => f.input_name(),
-        }
-    }
-
-    pub(crate) fn ctx_name(&self) -> Option<Symbol> {
-        match self {
-            FuncVal::Mode(_) => None,
-            FuncVal::Cell(_) => None,
-            FuncVal::Free(_) => None,
-            FuncVal::Const(f) => f.ctx_name(),
-            FuncVal::Mut(f) => f.ctx_name(),
+            FuncVal::FreeCellPrim(_) => true,
+            FuncVal::FreeCellComp(_) => false,
+            FuncVal::FreeStaticPrim(_) => true,
+            FuncVal::FreeStaticComp(_) => false,
+            FuncVal::ConstStaticPrim(_) => true,
+            FuncVal::ConstStaticComp(_) => false,
+            FuncVal::MutStaticPrim(_) => true,
+            FuncVal::MutStaticComp(_) => false,
         }
     }
 }
 
 impl Debug for FuncVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            FuncVal::Mode(func) => ModeFuncVal::fmt(func, f),
-            FuncVal::Cell(func) => CellFuncVal::fmt(func, f),
-            FuncVal::Free(func) => FreeFuncVal::fmt(func, f),
-            FuncVal::Const(func) => ConstFuncVal::fmt(func, f),
-            FuncVal::Mut(func) => MutFuncVal::fmt(func, f),
+            FuncVal::Mode(f) => f.fmt(formatter),
+            FuncVal::FreeCellPrim(f) => f.fmt(formatter),
+            FuncVal::FreeCellComp(f) => f.fmt(formatter),
+            FuncVal::FreeStaticPrim(f) => f.fmt(formatter),
+            FuncVal::FreeStaticComp(f) => f.fmt(formatter),
+            FuncVal::ConstStaticPrim(f) => f.fmt(formatter),
+            FuncVal::ConstStaticComp(f) => f.fmt(formatter),
+            FuncVal::MutStaticPrim(f) => f.fmt(formatter),
+            FuncVal::MutStaticComp(f) => f.fmt(formatter),
         }
     }
 }
 
 pub(crate) mod mode;
 
-pub(crate) mod cell;
+pub(crate) mod free_cell_prim;
 
-pub(crate) mod free;
+pub(crate) mod free_cell_comp;
 
-pub(crate) mod const1;
+pub(crate) mod free_static_prim;
 
-pub(crate) mod mut1;
+pub(crate) mod free_static_comp;
+
+pub(crate) mod const_static_prim;
+
+pub(crate) mod const_static_comp;
+
+pub(crate) mod mut_static_prim;
+
+pub(crate) mod mut_static_comp;

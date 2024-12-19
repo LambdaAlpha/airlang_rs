@@ -45,6 +45,7 @@ impl Prelude for BuildPrelude {
 
 fn import() -> Named<FuncVal> {
     let id = "build.import";
+    let f = fn_import;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -54,8 +55,7 @@ fn import() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_import;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

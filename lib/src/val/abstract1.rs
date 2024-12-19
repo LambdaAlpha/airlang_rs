@@ -1,8 +1,3 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
-
 use crate::{
     Val,
     abstract1::Abstract,
@@ -44,11 +39,5 @@ impl TryInto<AbstractRepr> for AbstractVal {
     fn try_into(self) -> Result<AbstractRepr, Self::Error> {
         let abstract1 = AbstractRepr::new(self.0.func.try_into()?, self.0.input.try_into()?);
         Ok(abstract1)
-    }
-}
-
-impl Debug for AbstractVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Abstract::fmt(self, f)
     }
 }

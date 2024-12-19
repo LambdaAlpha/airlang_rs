@@ -30,6 +30,7 @@ impl Prelude for ReplPrelude {
 
 fn help() -> Named<FuncVal> {
     let id = "help";
+    let f = fn_help;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -39,8 +40,7 @@ fn help() -> Named<FuncVal> {
         ask,
     };
     let cacheable = false;
-    let f = fn_help;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 const HELP_DOC: &str = "\

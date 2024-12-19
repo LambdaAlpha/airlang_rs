@@ -130,6 +130,7 @@ impl Prelude for CtxPrelude {
 
 fn read() -> Named<FuncVal> {
     let id = "read";
+    let f = fn_read;
     let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -139,8 +140,7 @@ fn read() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_read;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
@@ -152,6 +152,7 @@ fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn move1() -> Named<FuncVal> {
     let id = "move";
+    let f = fn_move;
     let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -161,8 +162,7 @@ fn move1() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_move;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
@@ -177,6 +177,7 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 
 fn assign() -> Named<FuncVal> {
     let id = "=";
+    let f = fn_assign;
     let call = pair_mode(form_mode(), Mode::default(), PrimitiveMode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -186,8 +187,7 @@ fn assign() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_assign;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
@@ -461,6 +461,7 @@ fn generate_invariant(invariant: Invariant) -> Symbol {
 
 fn set_invariant() -> Named<FuncVal> {
     let id = "set_invariant";
+    let f = fn_set_invariant;
     let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -470,8 +471,7 @@ fn set_invariant() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_set_invariant;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_set_invariant(ctx: MutFnCtx, input: Val) -> Val {
@@ -497,6 +497,7 @@ fn fn_set_invariant(ctx: MutFnCtx, input: Val) -> Val {
 
 fn get_invariant() -> Named<FuncVal> {
     let id = "invariant";
+    let f = fn_get_invariant;
     let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -506,8 +507,7 @@ fn get_invariant() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get_invariant;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
@@ -525,6 +525,7 @@ fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn fallback() -> Named<FuncVal> {
     let id = "fallback";
+    let f = fn_fallback;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -534,8 +535,7 @@ fn fallback() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_fallback;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
@@ -547,6 +547,7 @@ fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
 
 fn is_null() -> Named<FuncVal> {
     let id = "is_null";
+    let f = fn_is_null;
     let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -556,8 +557,7 @@ fn is_null() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_is_null;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
@@ -572,6 +572,7 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn get_access() -> Named<FuncVal> {
     let id = "access";
+    let f = fn_get_access;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -581,8 +582,7 @@ fn get_access() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get_access;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 const ACCESS_FREE: &str = "free";
@@ -600,6 +600,7 @@ fn fn_get_access(ctx: MutFnCtx, _input: Val) -> Val {
 
 fn get_solver() -> Named<FuncVal> {
     let id = "solver";
+    let f = fn_get_solver;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -609,19 +610,19 @@ fn get_solver() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get_solver;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
     match ctx.get_solver() {
-        Ok(solver) => Val::Func(FuncVal::Cell(solver.clone())),
+        Ok(solver) => Val::Func(solver.clone()),
         _ => Val::default(),
     }
 }
 
 fn set_solver() -> Named<FuncVal> {
     let id = "set_solver";
+    let f = fn_set_solver;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -631,8 +632,7 @@ fn set_solver() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_set_solver;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
@@ -640,7 +640,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
         Val::Unit(_) => {
             let _ = ctx.set_solver(None);
         }
-        Val::Func(FuncVal::Cell(solver)) => {
+        Val::Func(solver) => {
             let _ = ctx.set_solver(Some(solver));
         }
         _ => {}
@@ -650,6 +650,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
+    let f = fn_with_ctx;
     let call = pair_mode(form_mode(), Mode::default(), PrimitiveMode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -659,8 +660,7 @@ fn with_ctx() -> Named<FuncVal> {
         ask,
     };
     let cacheable = false;
-    let f = fn_with_ctx;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
@@ -694,6 +694,7 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let id = "|:";
+    let f = fn_ctx_in_ctx_out;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -703,8 +704,7 @@ fn ctx_in_ctx_out() -> Named<FuncVal> {
         ask,
     };
     let cacheable = false;
-    let f = fn_ctx_in_ctx_out;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_ctx_in_ctx_out(input: Val) -> Val {
@@ -732,6 +732,7 @@ const SOLVER: &str = "solver";
 
 fn ctx_new() -> Named<FuncVal> {
     let id = "context";
+    let f = fn_ctx_new;
     let mut map = Map::default();
     map.insert(
         symbol(VARIABLES),
@@ -753,8 +754,7 @@ fn ctx_new() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_ctx_new;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -777,7 +777,7 @@ fn fn_ctx_new(input: Val) -> Val {
     let variables = CtxMap::new(variables, fallback);
     let solver = match map_remove(&mut map, SOLVER) {
         Val::Unit(_) => None,
-        Val::Func(FuncVal::Cell(solver)) => Some(solver),
+        Val::Func(solver) => Some(solver),
         _ => return Val::default(),
     };
     let ctx = Ctx::new(variables, solver);
@@ -819,6 +819,7 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
 
 fn ctx_repr() -> Named<FuncVal> {
     let id = "context.represent";
+    let f = fn_ctx_repr;
     let call = Mode::default();
     let abstract1 = call.clone();
     let mut map = Map::default();
@@ -840,8 +841,7 @@ fn ctx_repr() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_ctx_repr;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_ctx_repr(input: Val) -> Val {
@@ -858,7 +858,7 @@ fn fn_ctx_repr(input: Val) -> Val {
         map.insert(symbol(VARIABLES), variables);
     }
     if let Some(solver) = ctx.solver {
-        map.insert(symbol(SOLVER), Val::Func(FuncVal::Cell(solver)));
+        map.insert(symbol(SOLVER), Val::Func(solver));
     };
     Val::Map(map.into())
 }
@@ -900,6 +900,7 @@ fn generate_ctx_value(ctx_value: CtxValue) -> Val {
 
 fn ctx_prelude() -> Named<FuncVal> {
     let id = "prelude";
+    let f = fn_ctx_prelude;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -909,8 +910,7 @@ fn ctx_prelude() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_ctx_prelude;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {
@@ -919,6 +919,7 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 
 fn ctx_self() -> Named<FuncVal> {
     let id = "self";
+    let f = fn_ctx_self;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -928,8 +929,7 @@ fn ctx_self() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_ctx_self;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_ctx_self(ctx: ConstFnCtx, _input: Val) -> Val {

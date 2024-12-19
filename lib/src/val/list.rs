@@ -1,8 +1,3 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
-
 use crate::{
     Val,
     box_wrap,
@@ -40,11 +35,5 @@ impl TryInto<ListRepr> for ListVal {
     type Error = ReprError;
     fn try_into(self) -> Result<ListRepr, Self::Error> {
         self.0.into_iter().map(TryInto::try_into).collect()
-    }
-}
-
-impl Debug for ListVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        List::fmt(self, f)
     }
 }

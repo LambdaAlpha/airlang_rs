@@ -60,6 +60,7 @@ impl Prelude for PairPrelude {
 
 fn new() -> Named<FuncVal> {
     let id = PAIR_STR;
+    let f = fn_new;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -69,8 +70,7 @@ fn new() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_new;
-    named_free_fn(id, mode, cacheable, f)
+    named_free_fn(id, f, mode, cacheable)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -82,6 +82,7 @@ fn fn_new(input: Val) -> Val {
 
 fn get_first() -> Named<FuncVal> {
     let id = "pair.first";
+    let f = fn_get_first;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -91,8 +92,7 @@ fn get_first() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get_first;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
@@ -110,6 +110,7 @@ fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn set_first() -> Named<FuncVal> {
     let id = "pair.set_first";
+    let f = fn_set_first;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -119,8 +120,7 @@ fn set_first() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_set_first;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
@@ -144,6 +144,7 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
 
 fn get_second() -> Named<FuncVal> {
     let id = "pair.second";
+    let f = fn_get_second;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -153,8 +154,7 @@ fn get_second() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    let f = fn_get_second;
-    named_const_fn(id, mode, cacheable, f)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
@@ -182,7 +182,7 @@ fn set_second() -> Named<FuncVal> {
     };
     let cacheable = true;
     let f = fn_set_second;
-    named_mut_fn(id, mode, cacheable, f)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {

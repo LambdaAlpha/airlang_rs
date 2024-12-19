@@ -1,8 +1,3 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
-
 use crate::{
     Val,
     box_wrap,
@@ -44,11 +39,5 @@ impl TryInto<PairRepr> for PairVal {
     fn try_into(self) -> Result<PairRepr, Self::Error> {
         let pair = PairRepr::new(self.0.first.try_into()?, self.0.second.try_into()?);
         Ok(pair)
-    }
-}
-
-impl Debug for PairVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Pair::fmt(self, f)
     }
 }

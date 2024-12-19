@@ -1,8 +1,3 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
-
 use crate::{
     Val,
     box_wrap,
@@ -52,11 +47,5 @@ impl TryInto<MapRepr> for MapVal {
             .into_iter()
             .map(|(k, v)| Ok((k.try_into()?, v.try_into()?)))
             .collect()
-    }
-}
-
-impl Debug for MapVal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Map::fmt(self, f)
     }
 }
