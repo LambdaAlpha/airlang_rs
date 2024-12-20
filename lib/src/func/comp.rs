@@ -19,72 +19,60 @@ use crate::{
 pub(crate) struct Composite {
     pub(crate) body_mode: Mode,
     pub(crate) body: Val,
-    pub(crate) prelude: Ctx,
+    pub(crate) ctx: Ctx,
     pub(crate) input_name: Symbol,
 }
 
-pub(crate) fn eval_free(
-    prelude: &mut Ctx,
-    input: Val,
-    input_name: Symbol,
-    mode: &Mode,
-    body: Val,
-) -> Val {
-    let _ = prelude
-        .variables_mut()
-        .put_value(input_name, CtxValue::new(input));
-    mode.transform(MutCtx::new(prelude), body)
-}
-
-#[allow(clippy::too_many_arguments)]
-pub(crate) fn eval_aware(
-    mut prelude: Ctx,
-    ctx: &mut Ctx,
-    ctx_name: Symbol,
-    ctx_invariant: Invariant,
-    input: Val,
-    input_name: Symbol,
-    mode: &Mode,
-    body: Val,
-) -> Val {
-    let _ = prelude
-        .variables_mut()
-        .put_value(input_name, CtxValue::new(input));
-    keep_eval_restore(prelude, ctx, ctx_name, ctx_invariant, mode, body)
-}
-
-fn keep_eval_restore(
-    mut prelude: Ctx,
-    ctx: &mut Ctx,
-    ctx_name: Symbol,
-    ctx_invariant: Invariant,
-    mode: &Mode,
-    body: Val,
-) -> Val {
-    if !prelude.variables().fallback() && prelude.variables().is_assignable(ctx_name.clone()) {
-        // here is why we need a `&mut Ctx` for a const func
-        let caller = take(ctx);
-        keep_ctx(&mut prelude, caller, ctx_name.clone(), ctx_invariant);
-        let output = mode.transform(MutCtx::new(&mut prelude), body);
-        restore_ctx(prelude, ctx, ctx_name);
-        output
-    } else {
-        mode.transform(MutCtx::new(&mut prelude), body)
+impl Composite {
+    pub(crate) fn put_input(inner: &mut Ctx, input_name: Symbol, input: Val) {
+        let _ = inner
+            .variables_mut()
+            .put_value(input_name, CtxValue::new(input));
     }
-}
 
-fn keep_ctx(prelude: &mut Ctx, ctx: Ctx, name: Symbol, invariant: Invariant) {
-    let val = Val::Ctx(CtxVal::from(ctx));
-    prelude
-        .variables_mut()
-        .put_value(name, CtxValue { val, invariant })
-        .expect("name should be assignable");
-}
+    pub(crate) fn transform(mode: &Mode, ctx: &mut Ctx, body: Val) -> Val {
+        mode.transform(MutCtx::new(ctx), body)
+    }
 
-fn restore_ctx(prelude: Ctx, ctx: &mut Ctx, name: Symbol) {
-    let Ok(Val::Ctx(caller)) = prelude.into_val(name) else {
-        unreachable!("restore_ctx ctx invariant is broken!!!");
-    };
-    let caller = Ctx::from(caller);
-    *ctx = caller;
+    pub(crate) fn with_ctx(
+        inner: &mut Ctx,
+        outer: &mut Ctx,
+        name: Symbol,
+        invariant: Invariant,
+        f: impl FnOnce(&mut Ctx) -> Val,
+    ) -> Val {
+        if !Self::can_keep(inner, name.clone()) {
+            return f(inner);
+        }
+        Self::keep_ctx(inner, outer, name.clone(), invariant);
+        let output = f(inner);
+        Self::restore_ctx(inner, outer, name);
+        output
+    }
+
+    fn can_keep(ctx: &Ctx, name: Symbol) -> bool {
+        !ctx.variables().fallback() && ctx.variables().is_assignable(name)
+    }
+
+    fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, invariant: Invariant) {
+        // here is why we need a `&mut Ctx` for a const func
+        let outer = take(outer);
+        let val = Val::Ctx(CtxVal::from(outer));
+        inner
+            .variables_mut()
+            .put_value(name, CtxValue { val, invariant })
+            .expect("name should be assignable");
+    }
+
+    fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {
+        let Some(CtxValue {
+            val: Val::Ctx(outer_val),
+            ..
+        }) = inner.remove_unchecked(&name)
+        else {
+            unreachable!("restore_ctx ctx invariant is broken!!!");
+        };
+        let outer_val = Ctx::from(outer_val);
+        *outer = outer_val;
+    }
 }

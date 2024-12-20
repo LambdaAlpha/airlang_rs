@@ -66,15 +66,12 @@ impl CtxMap {
         self
     }
 
-    fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
+    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
         self.map.insert(name, val).map(|ctx_value| ctx_value.val)
     }
 
-    pub(crate) fn into_val(mut self, name: Symbol) -> Result<Val, CtxError> {
-        let Some(ctx_value) = self.map.remove(&name) else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(ctx_value.val)
+    pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
+        self.map.remove(name)
     }
 }
 

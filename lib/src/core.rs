@@ -333,8 +333,8 @@ impl EvalCore {
     where
         Ctx: CtxMeta<'a>,
     {
-        if let Val::Func(mut func) = func {
-            func.transform_mut(ctx, input)
+        if let Val::Func(func) = func {
+            func.transform(ctx, input)
         } else {
             Val::Call(Call::new(func, input).into())
         }
@@ -352,7 +352,7 @@ impl EvalCore {
     }
 
     fn call_cell_const(mut ctx: ConstCtx, func_name: Symbol, input: Val) -> Val {
-        let Ok(val) = ctx.reborrow().get_ctx_ref().variables().get_ref(func_name) else {
+        let Ok(val) = ctx.reborrow().unwrap().variables().get_ref(func_name) else {
             return Val::default();
         };
         let Val::Func(func) = val else {

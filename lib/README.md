@@ -40,7 +40,7 @@ The Air language seeks to solve programming problems once and for all. It should
         context_name : .ctx,
         context_access : .mutable,
         call_mode : id,
-        prelude : prelude .,
+        context : prelude .,
         body : do [
             [init, condition, next, body] = args,
             ctx | form ; do ; [

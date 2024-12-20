@@ -4,10 +4,7 @@ use crate::{
     ctx::ref1::CtxMeta,
     func::{
         FuncTrait,
-        comp::{
-            Composite,
-            eval_free,
-        },
+        comp::Composite,
     },
     transformer::Transformer,
 };
@@ -24,13 +21,9 @@ impl Transformer<Val, Val> for FreeStaticCompFunc {
     where
         Ctx: CtxMeta<'a>,
     {
-        eval_free(
-            &mut self.comp.prelude.clone(),
-            input,
-            self.comp.input_name.clone(),
-            &self.comp.body_mode,
-            self.comp.body.clone(),
-        )
+        let inner = &mut self.comp.ctx.clone();
+        Composite::put_input(inner, self.comp.input_name.clone(), input);
+        Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
     }
 }
 

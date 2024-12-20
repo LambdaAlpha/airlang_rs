@@ -7,11 +7,7 @@ use crate::{
     ctx::ref1::CtxMeta,
     func::{
         FuncTrait,
-        comp::{
-            Composite,
-            eval_aware,
-            eval_free,
-        },
+        comp::Composite,
     },
     transformer::Transformer,
 };
@@ -29,45 +25,26 @@ impl Transformer<Val, Val> for MutStaticCompFunc {
     where
         Ctx: CtxMeta<'a>,
     {
+        let inner = &mut self.comp.ctx.clone();
+        Composite::put_input(inner, self.comp.input_name.clone(), input);
+
         match ctx.for_mut_fn() {
-            MutFnCtx::Free(_ctx) => eval_free(
-                &mut self.comp.prelude.clone(),
-                input,
-                self.comp.input_name.clone(),
-                &self.comp.body_mode,
-                self.comp.body.clone(),
-            ),
-            MutFnCtx::Const(mut ctx) => {
-                let f = |ctx| {
-                    eval_aware(
-                        self.comp.prelude.clone(),
-                        ctx,
-                        self.ctx_name.clone(),
-                        Invariant::Const,
-                        input,
-                        self.comp.input_name.clone(),
-                        &self.comp.body_mode,
-                        self.comp.body.clone(),
-                    )
-                };
-                // INVARIANT: We use the const invariant to indicate not to modify this context.
-                ctx.temp_take(f)
+            MutFnCtx::Free(_ctx) => {
+                Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
             }
-            MutFnCtx::Mut(mut ctx) => {
-                let f = |ctx| {
-                    eval_aware(
-                        self.comp.prelude.clone(),
-                        ctx,
-                        self.ctx_name.clone(),
-                        Invariant::Final,
-                        input,
-                        self.comp.input_name.clone(),
-                        &self.comp.body_mode,
-                        self.comp.body.clone(),
-                    )
+            MutFnCtx::Const(ctx) => {
+                let eval = |inner: &mut crate::Ctx| {
+                    Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
                 };
-                // INVARIANT: We use the final invariant to indicate not to move this context.
-                ctx.temp_take(f)
+                let name = self.ctx_name.clone();
+                Composite::with_ctx(inner, ctx.unwrap(), name, Invariant::Const, eval)
+            }
+            MutFnCtx::Mut(ctx) => {
+                let eval = |inner: &mut crate::Ctx| {
+                    Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
+                };
+                let name = self.ctx_name.clone();
+                Composite::with_ctx(inner, ctx.unwrap(), name, Invariant::Final, eval)
             }
         }
     }
@@ -84,7 +61,7 @@ impl FuncTrait for MutStaticCompFunc {
 }
 
 impl MutStaticCompFunc {
-    pub(crate) fn new(comp: Composite, mode: FuncMode, cacheable: bool, ctx_name: Symbol) -> Self {
+    pub(crate) fn new(comp: Composite, ctx_name: Symbol, mode: FuncMode, cacheable: bool) -> Self {
         Self {
             comp,
             mode,

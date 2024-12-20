@@ -936,6 +936,6 @@ fn fn_ctx_self(ctx: ConstFnCtx, _input: Val) -> Val {
     let ConstFnCtx::Const(ctx) = ctx else {
         return Val::default();
     };
-    let ctx = ctx.get_ctx_ref().clone();
+    let ctx = ctx.unwrap().clone();
     Val::Ctx(CtxVal::from(ctx))
 }

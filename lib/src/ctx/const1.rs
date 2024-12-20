@@ -202,21 +202,12 @@ impl<'a> ConstCtx<'a> {
         <_ as CtxMeta<'a>>::borrow(self)
     }
 
-    pub(crate) fn get_ctx_ref(self) -> &'a Ctx {
+    pub(crate) fn unwrap(self) -> &'a mut Ctx {
         self.0
     }
 
     pub fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError> {
         self.get_variables()?.get_ref(name)
-    }
-
-    // INVARIANT: The function f can take the ctx out during its execution,
-    // but when f returns, ctx must be equal to its original value.
-    pub(crate) fn temp_take<'b, T, F>(&'b mut self, f: F) -> T
-    where
-        F: FnOnce(&'b mut Ctx) -> T,
-    {
-        f(self.0)
     }
 }
 

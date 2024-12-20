@@ -436,7 +436,7 @@ true
 do [
     f = function ; {
         body : not ; i,
-        prelude : context ; {variables :  {not : :}},
+        context : context ; {variables :  {not : :}},
     },
     f ; not ; true
 ]
@@ -447,7 +447,7 @@ do [
     f = function ; {
         body : n ; a,
         input_name : .a,
-        prelude : context ; {variables :  {n : not}},
+        context : context ; {variables :  {n : not}},
     },
     f ; not ; true
 ]
@@ -469,7 +469,7 @@ do [
         body : do ; [a = a + 1, a],
         context_access : .free,
         cell : true,
-        prelude : context ; {variables : {do : :, = : :, + : :, a : 0}},
+        context : context ; {variables : {do : :, = : :, + : :, a : 0}},
     },
     [.f ., .f ., .f .]
 ]
@@ -482,7 +482,7 @@ do [
         body : c | ..a,
         context_access : .free,
         cell : false,
-        prelude : context ; {variables : {| : :}},
+        context : context ; {variables : {| : :}},
     },
     f .
 ]
@@ -494,7 +494,7 @@ do [
     f = function ; {
         body : c | ..a,
         context_access : .constant,
-        prelude : context ; {variables : {| : :}},
+        context : context ; {variables : {| : :}},
     },
     f .
 ]
@@ -506,7 +506,7 @@ do [
     f = function ; {
         body : c | ..a,
         context_access : .mutable,
-        prelude : context ; {variables : {| : :}},
+        context : context ; {variables : {| : :}},
     },
     f .
 ]
@@ -518,7 +518,7 @@ do [
         body : c | = ';' i : 2,
         call_mode : id,
         context_access : .mutable,
-        prelude : context ; {
+        context : context ; {
             variables : {
                 | : :,
                 = : :,
@@ -538,7 +538,7 @@ do [
         body : c | = ';' i : 2,
         call_mode : id,
         context_access : .mutable,
-        prelude : context ; {
+        context : context ; {
             variables : {
                 | : :,
                 = : :,
@@ -558,7 +558,7 @@ do [
         body : c | = ';' i : 2,
         call_mode : id,
         context_access : .constant,
-        prelude : context ; {
+        context : context ; {
             variables : {
                 | : :,
                 = : :,
@@ -589,7 +589,7 @@ do [
         context_name : .ctx,
         body : 2,
         context_access : .constant,
-        prelude : context ; {variables : {ctx : 3 . .constant}},
+        context : context ; {variables : {ctx : 3 . .constant}},
     },
     b = f ; .,
     (a == 1) and b == 2
@@ -603,7 +603,7 @@ do [
         context_name : .ctx,
         body : ctx *= 2,
         context_access : .constant,
-        prelude : context ; {fallback : true},
+        context : context ; {fallback : true},
     },
     f .,
     a
@@ -785,8 +785,8 @@ i
 =====
 do [
     ctx = context ; {variables : {a : 1}},
-    f = function ; {prelude : ctx},
-    (function.prelude .f) == .ctx
+    f = function ; {context : ctx},
+    (function.context .f) == .ctx
 ]
 -----
 true

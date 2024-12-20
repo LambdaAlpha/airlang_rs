@@ -142,8 +142,8 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn into_val(self, name: Symbol) -> Result<Val, CtxError> {
-        self.variables.into_val(name)
+    pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
+        self.variables.remove_unchecked(name)
     }
 
     #[allow(unused)]

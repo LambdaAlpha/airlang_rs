@@ -542,7 +542,7 @@ fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {
     Composite {
         body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
-        prelude: any_ctx(rng, depth),
+        ctx: any_ctx(rng, depth),
         input_name: any_symbol(rng),
     }
 }
@@ -568,19 +568,19 @@ pub(crate) fn any_const_static_comp_func(
     depth: usize,
 ) -> ConstStaticCompFuncVal {
     let composite = any_composite(rng, depth);
+    let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
     let cacheable = rng.gen();
-    let ctx_name = any_symbol(rng);
-    let func = ConstStaticCompFunc::new(composite, mode, cacheable, ctx_name);
+    let func = ConstStaticCompFunc::new(composite, ctx_name, mode, cacheable);
     ConstStaticCompFuncVal::from(func)
 }
 
 pub(crate) fn any_mut_static_comp_func(rng: &mut SmallRng, depth: usize) -> MutStaticCompFuncVal {
     let composite = any_composite(rng, depth);
+    let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
     let cacheable = rng.gen();
-    let ctx_name = any_symbol(rng);
-    let func = MutStaticCompFunc::new(composite, mode, cacheable, ctx_name);
+    let func = MutStaticCompFunc::new(composite, ctx_name, mode, cacheable);
     MutStaticCompFuncVal::from(func)
 }
 

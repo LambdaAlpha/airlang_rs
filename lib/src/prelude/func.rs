@@ -60,7 +60,7 @@ pub(crate) struct FuncPrelude {
     pub(crate) id: Named<FuncVal>,
     pub(crate) body_mode: Named<FuncVal>,
     pub(crate) body: Named<FuncVal>,
-    pub(crate) prelude: Named<FuncVal>,
+    pub(crate) ctx: Named<FuncVal>,
     pub(crate) input_name: Named<FuncVal>,
     pub(crate) ctx_name: Named<FuncVal>,
 }
@@ -86,7 +86,7 @@ impl Default for FuncPrelude {
             id: id(),
             body_mode: body_mode(),
             body: body(),
-            prelude: prelude(),
+            ctx: ctx(),
             input_name: input_name(),
             ctx_name: ctx_name(),
         }
@@ -113,7 +113,7 @@ impl Prelude for FuncPrelude {
         self.id.put(m);
         self.body_mode.put(m);
         self.body.put(m);
-        self.prelude.put(m);
+        self.ctx.put(m);
         self.input_name.put(m);
         self.ctx_name.put(m);
     }
@@ -526,9 +526,9 @@ fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
     })
 }
 
-fn prelude() -> Named<FuncVal> {
-    let id = "function.prelude";
-    let f = fn_prelude;
+fn ctx() -> Named<FuncVal> {
+    let id = "function.context";
+    let f = fn_ctx;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -541,7 +541,7 @@ fn prelude() -> Named<FuncVal> {
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_ctx(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref_lossless(ctx, input, |val| {
         let Val::Func(func) = val else {
             return Val::default();
@@ -549,7 +549,7 @@ fn fn_prelude(ctx: ConstFnCtx, input: Val) -> Val {
         let Some(composite) = func.composite() else {
             return Val::default();
         };
-        Val::Ctx(CtxVal::from(composite.prelude.clone()))
+        Val::Ctx(CtxVal::from(composite.ctx.clone()))
     })
 }
 
