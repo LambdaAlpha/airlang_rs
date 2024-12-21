@@ -41,7 +41,7 @@ impl<'a> CtxRef<'a> for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

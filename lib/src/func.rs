@@ -47,8 +47,16 @@ pub(crate) mod const_static_prim;
 
 pub(crate) mod const_static_comp;
 
+pub(crate) mod const_cell_prim;
+
+pub(crate) mod const_cell_comp;
+
 pub(crate) mod mut_static_prim;
 
 pub(crate) mod mut_static_comp;
+
+pub(crate) mod mut_cell_prim;
+
+pub(crate) mod mut_cell_comp;
 
 pub(crate) mod repr;

@@ -25,7 +25,7 @@ pub(crate) trait CtxRef<'a> {
     #[allow(unused)]
     fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError>;
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError>;
 }
 
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {

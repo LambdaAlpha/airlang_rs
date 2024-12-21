@@ -60,7 +60,7 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
         self.0.get_solver_dyn()
     }
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         self.0.set_solver(solver)
     }
 }
@@ -141,7 +141,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
         }
     }
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         match self {
             MutFnCtx::Free(ctx) => ctx.set_solver(solver),
             MutFnCtx::Const(ctx) => ctx.set_solver(solver),

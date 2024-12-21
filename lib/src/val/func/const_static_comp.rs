@@ -4,3 +4,5 @@ use crate::{
 };
 
 rc_wrap!(pub ConstStaticCompFuncVal(ConstStaticCompFunc));
+
+impl_const_func_trait!(ConstStaticCompFuncVal);

@@ -24,6 +24,12 @@ pub use crate::{
     extension::ValExt,
     func::{
         FuncMode,
+        const_cell_comp::ConstCellCompFunc,
+        const_cell_prim::{
+            ConstCellFn,
+            ConstCellFnExt,
+            ConstCellPrimFunc,
+        },
         const_static_comp::ConstStaticCompFunc,
         const_static_prim::{
             ConstStaticFn,
@@ -41,6 +47,12 @@ pub use crate::{
             FreeStaticPrimFunc,
         },
         mode::ModeFunc,
+        mut_cell_comp::MutCellCompFunc,
+        mut_cell_prim::{
+            MutCellFn,
+            MutCellFnExt,
+            MutCellPrimFunc,
+        },
         mut_static_comp::MutStaticCompFunc,
         mut_static_prim::{
             MutStaticFn,
@@ -83,6 +95,8 @@ pub use crate::{
         ctx::CtxVal,
         func::{
             FuncVal,
+            const_cell_comp::ConstCellCompFuncVal,
+            const_cell_prim::ConstCellPrimFuncVal,
             const_static_comp::ConstStaticCompFuncVal,
             const_static_prim::ConstStaticPrimFuncVal,
             free_cell_comp::FreeCellCompFuncVal,
@@ -90,6 +104,8 @@ pub use crate::{
             free_static_comp::FreeStaticCompFuncVal,
             free_static_prim::FreeStaticPrimFuncVal,
             mode::ModeFuncVal,
+            mut_cell_comp::MutCellCompFuncVal,
+            mut_cell_prim::MutCellPrimFuncVal,
             mut_static_comp::MutStaticCompFuncVal,
             mut_static_prim::MutStaticPrimFuncVal,
         },

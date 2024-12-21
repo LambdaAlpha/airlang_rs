@@ -62,7 +62,7 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
         Ok(dyn_ref)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }
@@ -141,7 +141,7 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
         }
     }
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         match self {
             ConstFnCtx::Free(ctx) => ctx.set_solver(solver),
             ConstFnCtx::Const(ctx) => ctx.set_solver(solver),

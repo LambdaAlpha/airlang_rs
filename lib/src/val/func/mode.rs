@@ -4,3 +4,5 @@ use crate::{
 };
 
 rc_wrap!(pub ModeFuncVal(ModeFunc));
+
+impl_const_func_trait!(ModeFuncVal);

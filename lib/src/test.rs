@@ -142,13 +142,14 @@ fn test_answer() -> Result<(), Box<dyn Error>> {
 fn test_extension() -> Result<(), Box<dyn Error>> {
     let mut air = AirCell::default();
     let func_ext_name = Symbol::from_str("func_ext");
-    air.ctx_mut().put(
+    let func = FreeStaticPrimFunc::new_extension(
         func_ext_name.clone(),
-        Invariant::Const,
-        Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(
-            FreeStaticPrimFunc::new(func_ext_name, Rc::new(FuncExt), FuncMode::default(), false),
-        ))),
-    )?;
+        Rc::new(FuncExt),
+        FuncMode::default(),
+        false,
+    );
+    let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
+    air.ctx_mut().put(func_ext_name, Invariant::Const, func)?;
     test_interpret(
         air,
         include_str!("test/extension.air"),

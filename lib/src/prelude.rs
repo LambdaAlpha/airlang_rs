@@ -20,12 +20,20 @@ use crate::{
     },
     func::{
         FuncMode,
+        const_cell_prim::{
+            ConstCellFnExt,
+            ConstCellPrimFunc,
+        },
         const_static_prim::{
             ConstStaticFn,
             ConstStaticPrimFunc,
         },
         free_cell_prim::FreeCellFnExt,
         free_static_prim::FreeStaticFn,
+        mut_cell_prim::{
+            MutCellFnExt,
+            MutCellPrimFunc,
+        },
         mut_static_prim::MutStaticFn,
     },
     mode::{
@@ -61,7 +69,11 @@ use crate::{
     symbol::Symbol,
     val::{
         Val,
-        func::FuncVal,
+        func::{
+            FuncVal,
+            const_cell_prim::ConstCellPrimFuncVal,
+            mut_cell_prim::MutCellPrimFuncVal,
+        },
     },
 };
 
@@ -163,9 +175,37 @@ fn named_free_cell_fn(
 ) -> Named<FuncVal> {
     let id = Symbol::from_str(name);
     let fn1 = Box::new(func);
-    let func = FreeCellPrimFunc::new_inner(id, fn1, mode, cacheable);
+    let func = FreeCellPrimFunc::new(id, fn1, mode, cacheable);
     let func_val = FreeCellPrimFuncVal::from(func);
     Named::new(name, FuncVal::FreeCellPrim(func_val))
+}
+
+#[allow(unused)]
+fn named_const_cell_fn(
+    name: &'static str,
+    func: impl ConstCellFnExt + 'static,
+    mode: FuncMode,
+    cacheable: bool,
+) -> Named<FuncVal> {
+    let id = Symbol::from_str(name);
+    let fn1 = Box::new(func);
+    let func = ConstCellPrimFunc::new(id, fn1, mode, cacheable);
+    let func_val = ConstCellPrimFuncVal::from(func);
+    Named::new(name, FuncVal::ConstCellPrim(func_val))
+}
+
+#[allow(unused)]
+fn named_mut_cell_fn(
+    name: &'static str,
+    func: impl MutCellFnExt + 'static,
+    mode: FuncMode,
+    cacheable: bool,
+) -> Named<FuncVal> {
+    let id = Symbol::from_str(name);
+    let fn1 = Box::new(func);
+    let func = MutCellPrimFunc::new(id, fn1, mode, cacheable);
+    let func_val = MutCellPrimFuncVal::from(func);
+    Named::new(name, FuncVal::MutCellPrim(func_val))
 }
 
 fn named_free_fn(
@@ -176,7 +216,7 @@ fn named_free_fn(
 ) -> Named<FuncVal> {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
-    let func = FreeStaticPrimFunc::new_inner(id, fn1, mode, cacheable);
+    let func = FreeStaticPrimFunc::new(id, fn1, mode, cacheable);
     let func_val = FreeStaticPrimFuncVal::from(func);
     Named::new(name, FuncVal::FreeStaticPrim(func_val))
 }
@@ -189,7 +229,7 @@ fn named_const_fn(
 ) -> Named<FuncVal> {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
-    let func = ConstStaticPrimFunc::new_inner(id, fn1, mode, cacheable);
+    let func = ConstStaticPrimFunc::new(id, fn1, mode, cacheable);
     let func_val = ConstStaticPrimFuncVal::from(func);
     Named::new(name, FuncVal::ConstStaticPrim(func_val))
 }

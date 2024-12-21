@@ -233,8 +233,12 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
             FuncVal::FreeCellComp(_) => FREE,
             FuncVal::FreeStaticPrim(_) => FREE,
             FuncVal::FreeStaticComp(_) => FREE,
+            FuncVal::ConstCellPrim(_) => CONST,
+            FuncVal::ConstCellComp(_) => CONST,
             FuncVal::ConstStaticPrim(_) => CONST,
             FuncVal::ConstStaticComp(_) => CONST,
+            FuncVal::MutCellPrim(_) => MUTABLE,
+            FuncVal::MutCellComp(_) => MUTABLE,
             FuncVal::MutStaticPrim(_) => MUTABLE,
             FuncVal::MutStaticComp(_) => MUTABLE,
         };
@@ -414,7 +418,15 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let is_cell = matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_));
+        let is_cell = matches!(
+            func,
+            FuncVal::FreeCellPrim(_)
+                | FuncVal::FreeCellComp(_)
+                | FuncVal::ConstCellPrim(_)
+                | FuncVal::ConstCellComp(_)
+                | FuncVal::MutCellPrim(_)
+                | FuncVal::MutCellComp(_)
+        );
         Val::Bit(Bit::new(is_cell))
     })
 }

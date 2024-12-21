@@ -13,7 +13,6 @@ use crate::{
     Call,
     CallVal,
     ConstCtx,
-    FreeCtx,
     FuncVal,
     List,
     ListVal,
@@ -26,8 +25,8 @@ use crate::{
     Symbol,
     Val,
     ctx::{
+        CtxValue,
         default::DefaultCtx,
-        map::CtxMapRef,
         ref1::{
             CtxMeta,
             CtxRef,
@@ -256,39 +255,6 @@ impl EvalCore {
         Self::eval_input_then_call(input_trans, ctx, func, call.input)
     }
 
-    // f ! v evaluates to any i that (f ; i) == (f ; v)
-    pub(crate) fn transform_abstract<'a, Ctx, Func, Input>(
-        func_trans: &Func,
-        input_trans: &Input,
-        mut ctx: Ctx,
-        abstract1: AbstractVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Input: Transformer<Val, Val>,
-    {
-        let abstract1 = Abstract::from(abstract1);
-        let func = func_trans.transform(ctx.reborrow(), abstract1.func);
-        Self::eval_input_then_abstract(input_trans, ctx, func, abstract1.input)
-    }
-
-    pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
-        func_trans: &Func,
-        output_trans: &Output,
-        mut ctx: Ctx,
-        ask: AskVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Output: Transformer<Val, Val>,
-    {
-        let ask = Ask::from(ask);
-        let func = func_trans.transform(ctx.reborrow(), ask.func);
-        Self::eval_output_then_solve(output_trans, ctx, func, ask.output)
-    }
-
     pub(crate) fn eval_input_then_call<'a, Ctx, Input>(
         input_trans: &Input,
         mut ctx: Ctx,
@@ -304,7 +270,10 @@ impl EvalCore {
                 let input = func.mode().call.transform(ctx.reborrow(), input);
                 func.transform(ctx, input)
             }
-            Val::Symbol(s) => EvalCore::call_cell(ctx, s, input),
+            Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
+                let input = Self::call_ref_eval_input(func, ctx, is_const, input);
+                Self::call_ref(func, ctx, is_const, input)
+            }),
             _ => {
                 let input = input_trans.transform(ctx, input);
                 Val::Call(Call::new(func, input).into())
@@ -322,10 +291,25 @@ impl EvalCore {
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>,
     {
-        if let Val::Func(func) = func {
-            func.mode().call.transform(ctx, input)
+        match func {
+            Val::Func(func) => func.mode().call.transform(ctx, input),
+            Val::Symbol(func) => Self::with_ref(ctx, func.clone(), |func, ctx, is_const| {
+                Self::call_ref_eval_input(func, ctx, is_const, input)
+            }),
+            _ => input_trans.transform(ctx, input),
+        }
+    }
+
+    fn call_ref_eval_input(
+        func: &FuncVal,
+        ctx: &mut crate::Ctx,
+        is_const: bool,
+        input: Val,
+    ) -> Val {
+        if is_const {
+            func.mode().call.transform(ConstCtx::new(ctx), input)
         } else {
-            input_trans.transform(ctx, input)
+            func.mode().call.transform(MutCtx::new(ctx), input)
         }
     }
 
@@ -333,65 +317,68 @@ impl EvalCore {
     where
         Ctx: CtxMeta<'a>,
     {
-        if let Val::Func(func) = func {
-            func.transform(ctx, input)
-        } else {
-            Val::Call(Call::new(func, input).into())
+        match func {
+            Val::Func(func) => func.transform(ctx, input),
+            Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
+                Self::call_ref(func, ctx, is_const, input)
+            }),
+            _ => Val::Call(Call::new(func, input).into()),
         }
     }
 
-    pub(crate) fn call_cell<'a, Ctx>(ctx: Ctx, func_name: Symbol, input: Val) -> Val
+    fn call_ref(func: &mut FuncVal, ctx: &mut crate::Ctx, is_const: bool, input: Val) -> Val {
+        if is_const {
+            func.transform(ConstCtx::new(ctx), input)
+        } else {
+            func.transform_mut(MutCtx::new(ctx), input)
+        }
+    }
+
+    pub(crate) fn with_ref<'a, Ctx>(
+        ctx: Ctx,
+        func_name: Symbol,
+        f: impl FnOnce(&mut FuncVal, &mut crate::Ctx, bool /*is_const*/) -> Val,
+    ) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        match ctx.for_mut_fn() {
-            MutFnCtx::Free(_) => Val::default(),
-            MutFnCtx::Const(ctx) => Self::call_cell_const(ctx, func_name, input),
-            MutFnCtx::Mut(ctx) => Self::call_cell_mut(ctx, func_name, input),
-        }
+        let (ctx, is_const) = match ctx.for_mut_fn() {
+            MutFnCtx::Free(_) => return Val::default(),
+            MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
+            MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
+        };
+        let variables = ctx.variables_mut();
+        let Some(ctx_value) = variables.remove_unchecked(&func_name) else {
+            return Val::default();
+        };
+        let Val::Func(mut func) = ctx_value.val else {
+            variables.put_unchecked(func_name, ctx_value);
+            return Val::default();
+        };
+        let output = f(&mut func, ctx, is_const);
+        let ctx_value = CtxValue {
+            val: Val::Func(func),
+            invariant: ctx_value.invariant,
+        };
+        ctx.variables_mut().put_unchecked(func_name, ctx_value);
+        output
     }
 
-    fn call_cell_const(mut ctx: ConstCtx, func_name: Symbol, input: Val) -> Val {
-        let Ok(val) = ctx.reborrow().unwrap().variables().get_ref(func_name) else {
-            return Val::default();
-        };
-        let Val::Func(func) = val else {
-            return Val::default();
-        };
-        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
-            return Val::default();
-        }
-        let mut func = func.clone();
-        let input = func.mode().call.transform(ctx, input);
-        func.transform_mut(FreeCtx, input)
-    }
-
-    fn call_cell_mut(ctx: MutCtx, func_name: Symbol, input: Val) -> Val {
-        let ctx = ctx.unwrap();
-        let Ok(val) = ctx.variables().get_ref(func_name.clone()) else {
-            return Val::default();
-        };
-        let Val::Func(func) = val else {
-            return Val::default();
-        };
-        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
-            return Val::default();
-        }
-        let input = func.mode().call.clone().transform(MutCtx::new(ctx), input);
-        let Ok(val) = ctx.variables_mut().get_ref_dyn(func_name) else {
-            return Val::default();
-        };
-        let Val::Func(func) = val.ref1 else {
-            return Val::default();
-        };
-        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
-            return Val::default();
-        }
-        if val.is_const {
-            func.transform(FreeCtx, input)
-        } else {
-            func.transform_mut(FreeCtx, input)
-        }
+    // f ! v evaluates to any i that (f ; i) == (f ; v)
+    pub(crate) fn transform_abstract<'a, Ctx, Func, Input>(
+        func_trans: &Func,
+        input_trans: &Input,
+        mut ctx: Ctx,
+        abstract1: AbstractVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Func: Transformer<Val, Val>,
+        Input: Transformer<Val, Val>,
+    {
+        let abstract1 = Abstract::from(abstract1);
+        let func = func_trans.transform(ctx.reborrow(), abstract1.func);
+        Self::eval_input_then_abstract(input_trans, ctx, func, abstract1.input)
     }
 
     pub(crate) fn eval_input_then_abstract<'a, Ctx, Input>(
@@ -438,6 +425,22 @@ impl EvalCore {
         } else {
             input
         }
+    }
+
+    pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
+        func_trans: &Func,
+        output_trans: &Output,
+        mut ctx: Ctx,
+        ask: AskVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Func: Transformer<Val, Val>,
+        Output: Transformer<Val, Val>,
+    {
+        let ask = Ask::from(ask);
+        let func = func_trans.transform(ctx.reborrow(), ask.func);
+        Self::eval_output_then_solve(output_trans, ctx, func, ask.output)
     }
 
     pub(crate) fn eval_output_then_solve<'a, Ctx, Output>(
@@ -487,24 +490,30 @@ impl EvalCore {
         }
     }
 
-    pub(crate) fn solve<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> AnswerVal
+    pub(crate) fn solve<'a, Ctx>(ctx: Ctx, func: FuncVal, output: Val) -> AnswerVal
     where
         Ctx: CtxMeta<'a>,
     {
         let none = AnswerVal::from(Answer::None);
-        let Ok(solver_ref) = ctx.reborrow().get_solver_dyn() else {
+        let (ctx, is_const) = match ctx.for_mut_fn() {
+            MutFnCtx::Free(_) => return none,
+            MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
+            MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
+        };
+        let Ok(solver) = ctx.set_solver(None) else {
             return none;
         };
-        if !matches!(func, FuncVal::FreeCellPrim(_) | FuncVal::FreeCellComp(_)) {
+        let Some(mut solver) = solver else {
             return none;
-        }
+        };
         let ask = Ask::new(Val::Func(func.clone()), output.clone());
         let ask = Val::Ask(ask.into());
-        let answer = if solver_ref.is_const {
-            solver_ref.ref1.transform(FreeCtx, ask)
+        let answer = if is_const {
+            solver.transform(ConstCtx::new(ctx), ask)
         } else {
-            solver_ref.ref1.transform_mut(FreeCtx, ask)
+            solver.transform_mut(MutCtx::new(ctx), ask)
         };
+        let _ = ctx.set_solver(Some(solver));
         let Val::Answer(answer) = answer else {
             return none;
         };

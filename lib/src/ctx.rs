@@ -6,6 +6,7 @@ use std::{
         Formatter,
     },
     hash::Hash,
+    mem::swap,
 };
 
 use ref1::CtxRef;
@@ -91,9 +92,9 @@ impl<'l> CtxRef<'l> for &'l mut Ctx {
         Ok(DynRef::new(solver, false))
     }
 
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<(), CtxError> {
-        self.solver = solver;
-        Ok(())
+    fn set_solver(self, mut solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
+        swap(&mut self.solver, &mut solver);
+        Ok(solver)
     }
 }
 
@@ -125,7 +126,7 @@ impl<'l> CtxRef<'l> for &'l Ctx {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<(), CtxError> {
+    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

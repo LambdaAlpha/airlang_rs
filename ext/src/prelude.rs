@@ -2,6 +2,9 @@ use std::rc::Rc;
 
 use airlang::{
     CompositeMode,
+    ConstCellFnExt,
+    ConstCellPrimFunc,
+    ConstCellPrimFuncVal,
     ConstStaticFn,
     ConstStaticPrimFunc,
     ConstStaticPrimFuncVal,
@@ -19,6 +22,9 @@ use airlang::{
     Map,
     MapMode,
     Mode,
+    MutCellFnExt,
+    MutCellPrimFunc,
+    MutCellPrimFuncVal,
     MutCtx,
     MutStaticFn,
     MutStaticPrimFunc,
@@ -90,9 +96,37 @@ fn named_free_cell_fn(
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Box::new(func);
-    let func = FreeCellPrimFunc::new(id, fn1, mode, cacheable);
+    let func = FreeCellPrimFunc::new_extension(id, fn1, mode, cacheable);
     let func_val = FreeCellPrimFuncVal::from(func);
     Named::new(name, FuncVal::FreeCellPrim(func_val))
+}
+
+#[allow(unused)]
+fn named_const_cell_fn(
+    name: &'static str,
+    func: impl ConstCellFnExt + 'static,
+    mode: FuncMode,
+    cacheable: bool,
+) -> Named<FuncVal> {
+    let id = unsafe { Symbol::from_str_unchecked(name) };
+    let fn1 = Box::new(func);
+    let func = ConstCellPrimFunc::new_extension(id, fn1, mode, cacheable);
+    let func_val = ConstCellPrimFuncVal::from(func);
+    Named::new(name, FuncVal::ConstCellPrim(func_val))
+}
+
+#[allow(unused)]
+fn named_mut_cell_fn(
+    name: &'static str,
+    func: impl MutCellFnExt + 'static,
+    mode: FuncMode,
+    cacheable: bool,
+) -> Named<FuncVal> {
+    let id = unsafe { Symbol::from_str_unchecked(name) };
+    let fn1 = Box::new(func);
+    let func = MutCellPrimFunc::new_extension(id, fn1, mode, cacheable);
+    let func_val = MutCellPrimFuncVal::from(func);
+    Named::new(name, FuncVal::MutCellPrim(func_val))
 }
 
 fn named_free_fn(
@@ -103,7 +137,7 @@ fn named_free_fn(
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Rc::new(func);
-    let func = FreeStaticPrimFunc::new(id, fn1, mode, cacheable);
+    let func = FreeStaticPrimFunc::new_extension(id, fn1, mode, cacheable);
     let func_val = FreeStaticPrimFuncVal::from(func);
     Named::new(name, FuncVal::FreeStaticPrim(func_val))
 }
@@ -116,7 +150,7 @@ fn named_const_fn(
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Rc::new(func);
-    let func = ConstStaticPrimFunc::new(id, fn1, mode, cacheable);
+    let func = ConstStaticPrimFunc::new_extension(id, fn1, mode, cacheable);
     let func_val = ConstStaticPrimFuncVal::from(func);
     Named::new(name, FuncVal::ConstStaticPrim(func_val))
 }

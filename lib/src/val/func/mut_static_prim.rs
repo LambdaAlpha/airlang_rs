@@ -4,3 +4,5 @@ use crate::{
 };
 
 rc_wrap!(pub MutStaticPrimFuncVal(MutStaticPrimFunc));
+
+impl_const_func_trait!(MutStaticPrimFuncVal);

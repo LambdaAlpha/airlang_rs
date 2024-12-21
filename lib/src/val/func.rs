@@ -17,6 +17,8 @@ use crate::{
     },
     transformer::Transformer,
     val::func::{
+        const_cell_comp::ConstCellCompFuncVal,
+        const_cell_prim::ConstCellPrimFuncVal,
         const_static_comp::ConstStaticCompFuncVal,
         const_static_prim::ConstStaticPrimFuncVal,
         free_cell_comp::FreeCellCompFuncVal,
@@ -24,6 +26,8 @@ use crate::{
         free_static_comp::FreeStaticCompFuncVal,
         free_static_prim::FreeStaticPrimFuncVal,
         mode::ModeFuncVal,
+        mut_cell_comp::MutCellCompFuncVal,
+        mut_cell_prim::MutCellPrimFuncVal,
         mut_static_comp::MutStaticCompFuncVal,
         mut_static_prim::MutStaticPrimFuncVal,
     },
@@ -36,8 +40,12 @@ pub enum FuncVal {
     FreeCellComp(FreeCellCompFuncVal),
     FreeStaticPrim(FreeStaticPrimFuncVal),
     FreeStaticComp(FreeStaticCompFuncVal),
+    ConstCellPrim(ConstCellPrimFuncVal),
+    ConstCellComp(ConstCellCompFuncVal),
     ConstStaticPrim(ConstStaticPrimFuncVal),
     ConstStaticComp(ConstStaticCompFuncVal),
+    MutCellPrim(MutCellPrimFuncVal),
+    MutCellComp(MutCellCompFuncVal),
     MutStaticPrim(MutStaticPrimFuncVal),
     MutStaticComp(MutStaticCompFuncVal),
 }
@@ -53,8 +61,12 @@ impl Transformer<Val, Val> for FuncVal {
             FuncVal::FreeCellComp(f) => f.transform(ctx, input),
             FuncVal::FreeStaticPrim(f) => f.transform(ctx, input),
             FuncVal::FreeStaticComp(f) => f.transform(ctx, input),
+            FuncVal::ConstCellPrim(f) => f.transform(ctx, input),
+            FuncVal::ConstCellComp(f) => f.transform(ctx, input),
             FuncVal::ConstStaticPrim(f) => f.transform(ctx, input),
             FuncVal::ConstStaticComp(f) => f.transform(ctx, input),
+            FuncVal::MutCellPrim(f) => f.transform(ctx, input),
+            FuncVal::MutCellComp(f) => f.transform(ctx, input),
             FuncVal::MutStaticPrim(f) => f.transform(ctx, input),
             FuncVal::MutStaticComp(f) => f.transform(ctx, input),
         }
@@ -69,8 +81,12 @@ impl FuncTrait for FuncVal {
             FuncVal::FreeCellComp(f) => f.mode(),
             FuncVal::FreeStaticPrim(f) => f.mode(),
             FuncVal::FreeStaticComp(f) => f.mode(),
+            FuncVal::ConstCellPrim(f) => f.mode(),
+            FuncVal::ConstCellComp(f) => f.mode(),
             FuncVal::ConstStaticPrim(f) => f.mode(),
             FuncVal::ConstStaticComp(f) => f.mode(),
+            FuncVal::MutCellPrim(f) => f.mode(),
+            FuncVal::MutCellComp(f) => f.mode(),
             FuncVal::MutStaticPrim(f) => f.mode(),
             FuncVal::MutStaticComp(f) => f.mode(),
         }
@@ -83,8 +99,12 @@ impl FuncTrait for FuncVal {
             FuncVal::FreeCellComp(f) => f.cacheable(),
             FuncVal::FreeStaticPrim(f) => f.cacheable(),
             FuncVal::FreeStaticComp(f) => f.cacheable(),
+            FuncVal::ConstCellPrim(f) => f.cacheable(),
+            FuncVal::ConstCellComp(f) => f.cacheable(),
             FuncVal::ConstStaticPrim(f) => f.cacheable(),
             FuncVal::ConstStaticComp(f) => f.cacheable(),
+            FuncVal::MutCellPrim(f) => f.cacheable(),
+            FuncVal::MutCellComp(f) => f.cacheable(),
             FuncVal::MutStaticPrim(f) => f.cacheable(),
             FuncVal::MutStaticComp(f) => f.cacheable(),
         }
@@ -100,8 +120,12 @@ impl FuncTrait for FuncVal {
             FuncVal::FreeCellComp(f) => f.transform_mut(ctx, input),
             FuncVal::FreeStaticPrim(f) => f.transform_mut(ctx, input),
             FuncVal::FreeStaticComp(f) => f.transform_mut(ctx, input),
+            FuncVal::ConstCellPrim(f) => f.transform_mut(ctx, input),
+            FuncVal::ConstCellComp(f) => f.transform_mut(ctx, input),
             FuncVal::ConstStaticPrim(f) => f.transform_mut(ctx, input),
             FuncVal::ConstStaticComp(f) => f.transform_mut(ctx, input),
+            FuncVal::MutCellPrim(f) => f.transform_mut(ctx, input),
+            FuncVal::MutCellComp(f) => f.transform_mut(ctx, input),
             FuncVal::MutStaticPrim(f) => f.transform_mut(ctx, input),
             FuncVal::MutStaticComp(f) => f.transform_mut(ctx, input),
         }
@@ -116,8 +140,12 @@ impl FuncVal {
             FuncVal::FreeCellComp(_) => None,
             FuncVal::FreeStaticPrim(f) => Some(&f.prim),
             FuncVal::FreeStaticComp(_) => None,
+            FuncVal::ConstCellPrim(f) => Some(&f.prim),
+            FuncVal::ConstCellComp(_) => None,
             FuncVal::ConstStaticPrim(f) => Some(&f.prim),
             FuncVal::ConstStaticComp(_) => None,
+            FuncVal::MutCellPrim(f) => Some(&f.prim),
+            FuncVal::MutCellComp(_) => None,
             FuncVal::MutStaticPrim(f) => Some(&f.prim),
             FuncVal::MutStaticComp(_) => None,
         }
@@ -130,8 +158,12 @@ impl FuncVal {
             FuncVal::FreeCellComp(f) => Some(&f.comp),
             FuncVal::FreeStaticPrim(_) => None,
             FuncVal::FreeStaticComp(f) => Some(&f.comp),
+            FuncVal::ConstCellPrim(_) => None,
+            FuncVal::ConstCellComp(f) => Some(&f.comp),
             FuncVal::ConstStaticPrim(_) => None,
             FuncVal::ConstStaticComp(f) => Some(&f.comp),
+            FuncVal::MutCellPrim(_) => None,
+            FuncVal::MutCellComp(f) => Some(&f.comp),
             FuncVal::MutStaticPrim(_) => None,
             FuncVal::MutStaticComp(f) => Some(&f.comp),
         }
@@ -144,8 +176,12 @@ impl FuncVal {
             FuncVal::FreeCellComp(_) => false,
             FuncVal::FreeStaticPrim(_) => true,
             FuncVal::FreeStaticComp(_) => false,
+            FuncVal::ConstCellPrim(_) => true,
+            FuncVal::ConstCellComp(_) => false,
             FuncVal::ConstStaticPrim(_) => true,
             FuncVal::ConstStaticComp(_) => false,
+            FuncVal::MutCellPrim(_) => true,
+            FuncVal::MutCellComp(_) => false,
             FuncVal::MutStaticPrim(_) => true,
             FuncVal::MutStaticComp(_) => false,
         }
@@ -160,12 +196,54 @@ impl Debug for FuncVal {
             FuncVal::FreeCellComp(f) => f.fmt(formatter),
             FuncVal::FreeStaticPrim(f) => f.fmt(formatter),
             FuncVal::FreeStaticComp(f) => f.fmt(formatter),
+            FuncVal::ConstCellPrim(f) => f.fmt(formatter),
+            FuncVal::ConstCellComp(f) => f.fmt(formatter),
             FuncVal::ConstStaticPrim(f) => f.fmt(formatter),
             FuncVal::ConstStaticComp(f) => f.fmt(formatter),
+            FuncVal::MutCellPrim(f) => f.fmt(formatter),
+            FuncVal::MutCellComp(f) => f.fmt(formatter),
             FuncVal::MutStaticPrim(f) => f.fmt(formatter),
             FuncVal::MutStaticComp(f) => f.fmt(formatter),
         }
     }
+}
+
+// improve performance by redirecting transform_mut to transform
+// to avoid calling deref_mut, which calls Rc::make_mut
+#[macro_export]
+macro_rules! impl_const_func_trait {
+    ($type1:ty) => {
+        impl $crate::transformer::Transformer<$crate::val::Val, $crate::val::Val> for $type1 {
+            fn transform<'a, Ctx>(&self, ctx: Ctx, input: $crate::val::Val) -> $crate::val::Val
+            where
+                Ctx: $crate::ctx::ref1::CtxMeta<'a>,
+            {
+                self.0.transform(ctx, input)
+            }
+        }
+
+        impl $crate::func::FuncTrait for $type1 {
+            fn mode(&self) -> &$crate::func::FuncMode {
+                self.0.mode()
+            }
+
+            fn cacheable(&self) -> bool {
+                self.0.cacheable()
+            }
+
+            fn transform_mut<'a, Ctx>(
+                &mut self,
+                ctx: Ctx,
+                input: $crate::val::Val,
+            ) -> $crate::val::Val
+            where
+                Ctx: $crate::ctx::ref1::CtxMeta<'a>,
+            {
+                use $crate::transformer::Transformer;
+                self.0.transform(ctx, input)
+            }
+        }
+    };
 }
 
 pub(crate) mod mode;
@@ -178,9 +256,17 @@ pub(crate) mod free_static_prim;
 
 pub(crate) mod free_static_comp;
 
+pub(crate) mod const_cell_prim;
+
+pub(crate) mod const_cell_comp;
+
 pub(crate) mod const_static_prim;
 
 pub(crate) mod const_static_comp;
+
+pub(crate) mod mut_cell_prim;
+
+pub(crate) mod mut_cell_comp;
 
 pub(crate) mod mut_static_prim;
 

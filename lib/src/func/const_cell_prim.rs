@@ -10,6 +10,7 @@ use std::{
 };
 
 use crate::{
+    ConstFnCtx,
     FuncMode,
     Symbol,
     Val,
@@ -22,30 +23,30 @@ use crate::{
     transformer::Transformer,
 };
 
-pub trait FreeCellFn {
-    fn call(&mut self, input: Val) -> Val;
+pub trait ConstCellFn {
+    fn call(&mut self, ctx: ConstFnCtx, input: Val) -> Val;
 }
 
-ext!(pub FreeCellFnExt : FreeCellFn);
+ext!(pub ConstCellFnExt : ConstCellFn);
 
 #[derive(Clone)]
-pub struct FreeCellPrimFunc {
+pub struct ConstCellPrimFunc {
     pub(crate) prim: Primitive,
-    pub(crate) fn1: Box<dyn FreeCellFnExt>,
+    pub(crate) fn1: Box<dyn ConstCellFnExt>,
     pub(crate) mode: FuncMode,
     pub(crate) cacheable: bool,
 }
 
-impl Transformer<Val, Val> for FreeCellPrimFunc {
-    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
+impl Transformer<Val, Val> for ConstCellPrimFunc {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.fn1.dyn_clone().call(input)
+        self.fn1.dyn_clone().call(ctx.for_const_fn(), input)
     }
 }
 
-impl FuncTrait for FreeCellPrimFunc {
+impl FuncTrait for ConstCellPrimFunc {
     fn mode(&self) -> &FuncMode {
         &self.mode
     }
@@ -54,18 +55,18 @@ impl FuncTrait for FreeCellPrimFunc {
         self.cacheable
     }
 
-    fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val
+    fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        self.fn1.call(input)
+        self.fn1.call(ctx.for_const_fn(), input)
     }
 }
 
-impl FreeCellPrimFunc {
+impl ConstCellPrimFunc {
     pub fn new_extension(
         id: Symbol,
-        fn1: Box<dyn FreeCellFnExt>,
+        fn1: Box<dyn ConstCellFnExt>,
         mode: FuncMode,
         cacheable: bool,
     ) -> Self {
@@ -82,7 +83,7 @@ impl FreeCellPrimFunc {
 
     pub(crate) fn new(
         id: Symbol,
-        fn1: Box<dyn FreeCellFnExt>,
+        fn1: Box<dyn ConstCellFnExt>,
         mode: FuncMode,
         cacheable: bool,
     ) -> Self {
@@ -98,21 +99,21 @@ impl FreeCellPrimFunc {
     }
 }
 
-impl Debug for FreeCellPrimFunc {
+impl Debug for ConstCellPrimFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.prim.fmt(f)
     }
 }
 
-impl PartialEq for FreeCellPrimFunc {
-    fn eq(&self, other: &FreeCellPrimFunc) -> bool {
+impl PartialEq for ConstCellPrimFunc {
+    fn eq(&self, other: &ConstCellPrimFunc) -> bool {
         self.prim == other.prim
     }
 }
 
-impl Eq for FreeCellPrimFunc {}
+impl Eq for ConstCellPrimFunc {}
 
-impl Hash for FreeCellPrimFunc {
+impl Hash for ConstCellPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.prim.hash(state);
     }

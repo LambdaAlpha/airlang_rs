@@ -54,7 +54,12 @@ impl FuncTrait for FreeStaticPrimFunc {
 }
 
 impl FreeStaticPrimFunc {
-    pub fn new(id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode, cacheable: bool) -> Self {
+    pub fn new_extension(
+        id: Symbol,
+        fn1: Rc<dyn FreeStaticFn>,
+        mode: FuncMode,
+        cacheable: bool,
+    ) -> Self {
         Self {
             prim: Primitive {
                 id,
@@ -66,7 +71,7 @@ impl FreeStaticPrimFunc {
         }
     }
 
-    pub(crate) fn new_inner(
+    pub(crate) fn new(
         id: Symbol,
         fn1: Rc<dyn FreeStaticFn>,
         mode: FuncMode,
