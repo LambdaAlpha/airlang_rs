@@ -123,7 +123,7 @@ impl<W: Write + IsTty> Repl<W> {
         self.terminal.flush()?;
 
         loop {
-            self.terminal.newline_default_prompt()?;
+            self.terminal.newline_prompt(DEFAULT_PROMPT)?;
             self.terminal.flush()?;
 
             let should_break = self.handle_event()?;
@@ -201,40 +201,20 @@ impl<W: Write + IsTty> Repl<W> {
             return Ok(CtrlFlow::None);
         }
         match key.code {
-            KeyCode::Enter => {
-                return self.handle_enter();
-            }
-            KeyCode::Char(c) => {
-                return self.handle_char(c, key.modifiers);
-            }
-            KeyCode::Backspace => {
-                self.handle_backspace()?;
-            }
-            KeyCode::Left => {
-                self.handle_left()?;
-            }
-            KeyCode::Right => {
-                self.handle_right()?;
-            }
-            KeyCode::Up => {
-                self.handle_up_down(true)?;
-            }
-            KeyCode::Down => {
-                self.handle_up_down(false)?;
-            }
-            KeyCode::Home => {
-                self.handle_home()?;
-            }
-            KeyCode::End => {
-                self.handle_end()?;
-            }
+            KeyCode::Enter => return self.handle_enter(),
+            KeyCode::Char(c) => return self.handle_char(c, key.modifiers),
+            KeyCode::Backspace => self.handle_backspace()?,
+            KeyCode::Left => self.handle_left()?,
+            KeyCode::Right => self.handle_right()?,
+            KeyCode::Up => self.handle_up_down(true)?,
+            KeyCode::Down => self.handle_up_down(false)?,
+            KeyCode::Home => self.handle_home()?,
+            KeyCode::End => self.handle_end()?,
             KeyCode::PageUp => {}
             KeyCode::PageDown => {}
             KeyCode::Tab => {}
             KeyCode::BackTab => {}
-            KeyCode::Delete => {
-                self.handle_delete()?;
-            }
+            KeyCode::Delete => self.handle_delete()?,
             KeyCode::Insert => {}
             KeyCode::F(_) => {}
             KeyCode::Null => {}
@@ -558,10 +538,6 @@ impl<W: Write + IsTty> Terminal<W> {
             }
         }
         Ok(())
-    }
-
-    fn newline_default_prompt(&mut self) -> Result<()> {
-        self.newline_prompt(DEFAULT_PROMPT)
     }
 
     fn newline_multiline_prompt(&mut self) -> Result<()> {
