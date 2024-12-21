@@ -1,6 +1,6 @@
 use crate::{
     Text,
-    box_wrap,
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub TextVal(Text));

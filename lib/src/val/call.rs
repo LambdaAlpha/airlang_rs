@@ -1,11 +1,11 @@
 use crate::{
     Val,
-    box_wrap,
     call::Call,
     syntax::{
         ReprError,
         repr::call::CallRepr,
     },
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub CallVal(Call<Val, Val>));

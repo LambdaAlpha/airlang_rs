@@ -4,7 +4,6 @@ use std::{
     hash::Hash,
 };
 
-#[macro_export]
 macro_rules! ext {
     ($visibility:vis $trait_name:ident : $super_trait:ident) => {
         $visibility trait $trait_name: ::std::fmt::Debug + $super_trait {
@@ -73,6 +72,8 @@ macro_rules! ext {
         }
     };
 }
+
+pub(crate) use ext;
 
 ext!(pub ValExt : Any);
 

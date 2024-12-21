@@ -1,4 +1,3 @@
-#[macro_export]
 macro_rules! box_wrap {
     ($visibility:vis $name:ident($value:ty)) => {
         #[derive(std::clone::Clone, std::cmp::PartialEq, std::cmp::Eq, std::hash::Hash)]
@@ -50,7 +49,8 @@ macro_rules! box_wrap {
     };
 }
 
-#[macro_export]
+pub(crate) use box_wrap;
+
 macro_rules! rc_wrap {
     ($visibility:vis $name:ident($value:ty)) => {
         #[derive(std::clone::Clone, std::cmp::PartialEq, std::cmp::Eq, std::hash::Hash)]
@@ -101,3 +101,5 @@ macro_rules! rc_wrap {
         }
     };
 }
+
+pub(crate) use rc_wrap;

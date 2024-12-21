@@ -1,11 +1,11 @@
 use crate::{
     Val,
-    box_wrap,
     map::Map,
     syntax::{
         ReprError,
         repr::map::MapRepr,
     },
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub MapVal(Map<Val, Val>));

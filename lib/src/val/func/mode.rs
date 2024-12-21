@@ -1,6 +1,6 @@
 use crate::{
     func::mode::ModeFunc,
-    rc_wrap,
+    types::wrap::rc_wrap,
 };
 
 rc_wrap!(pub ModeFuncVal(ModeFunc));

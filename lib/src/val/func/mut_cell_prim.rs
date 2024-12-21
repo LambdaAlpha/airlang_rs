@@ -1,6 +1,6 @@
 use crate::{
-    box_wrap,
     func::mut_cell_prim::MutCellPrimFunc,
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub MutCellPrimFuncVal(MutCellPrimFunc));

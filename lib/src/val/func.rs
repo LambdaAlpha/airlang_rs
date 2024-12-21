@@ -210,7 +210,6 @@ impl Debug for FuncVal {
 
 // improve performance by redirecting transform_mut to transform
 // to avoid calling deref_mut, which calls Rc::make_mut
-#[macro_export]
 macro_rules! impl_const_func_trait {
     ($type1:ty) => {
         impl $crate::transformer::Transformer<$crate::val::Val, $crate::val::Val> for $type1 {
@@ -245,6 +244,9 @@ macro_rules! impl_const_func_trait {
         }
     };
 }
+
+#[allow(unused)]
+pub(crate) use impl_const_func_trait;
 
 pub(crate) mod mode;
 

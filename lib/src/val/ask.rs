@@ -1,11 +1,11 @@
 use crate::{
     Val,
     ask::Ask,
-    box_wrap,
     syntax::{
         ReprError,
         repr::ask::AskRepr,
     },
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub AskVal(Ask<Val, Val>));

@@ -4,7 +4,7 @@ use crate::{
     Cache,
     Case,
     Val,
-    rc_wrap,
+    types::wrap::rc_wrap,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

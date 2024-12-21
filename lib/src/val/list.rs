@@ -1,11 +1,11 @@
 use crate::{
     Val,
-    box_wrap,
     list::List,
     syntax::{
         ReprError,
         repr::list::ListRepr,
     },
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub ListVal(List<Val>));

@@ -14,7 +14,7 @@ use crate::{
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
-    ext,
+    extension::ext,
     func::{
         FuncTrait,
         prim::Primitive,

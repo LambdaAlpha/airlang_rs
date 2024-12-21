@@ -1,11 +1,11 @@
 use crate::{
     Val,
     abstract1::Abstract,
-    box_wrap,
     syntax::{
         ReprError,
         repr::abstract1::AbstractRepr,
     },
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub AbstractVal(Abstract<Val, Val>));

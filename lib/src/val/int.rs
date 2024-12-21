@@ -1,6 +1,6 @@
 use crate::{
     Int,
-    box_wrap,
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub IntVal(Int));

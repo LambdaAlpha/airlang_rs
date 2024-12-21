@@ -1,11 +1,11 @@
 use crate::{
     Val,
-    box_wrap,
     pair::Pair,
     syntax::{
         ReprError,
         repr::pair::PairRepr,
     },
+    types::wrap::box_wrap,
 };
 
 box_wrap!(pub PairVal(Pair<Val, Val>));

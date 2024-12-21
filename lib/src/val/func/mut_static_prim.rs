@@ -1,6 +1,6 @@
 use crate::{
     func::mut_static_prim::MutStaticPrimFunc,
-    rc_wrap,
+    types::wrap::rc_wrap,
 };
 
 rc_wrap!(pub MutStaticPrimFuncVal(MutStaticPrimFunc));
