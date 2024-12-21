@@ -621,8 +621,8 @@ do [
         context_access : .constant,
         context : context ; {variables : {ctx : 3 . .constant}},
     },
-    b = f ; .,
-    (a == 1) and b == 2
+    f .,
+    a == 1
 ]
 -----
 true

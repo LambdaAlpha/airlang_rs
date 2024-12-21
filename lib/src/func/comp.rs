@@ -41,17 +41,13 @@ impl Composite {
         invariant: Invariant,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
-        if !Self::can_keep(inner, name.clone()) {
-            return f(inner);
+        if !inner.variables().is_assignable(name.clone()) {
+            return Val::default();
         }
         Self::keep_ctx(inner, outer, name.clone(), invariant);
         let output = f(inner);
         Self::restore_ctx(inner, outer, name);
         output
-    }
-
-    fn can_keep(ctx: &Ctx, name: Symbol) -> bool {
-        !ctx.variables().fallback() && ctx.variables().is_assignable(name)
     }
 
     fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, invariant: Invariant) {

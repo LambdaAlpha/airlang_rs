@@ -22,6 +22,7 @@ use crate::{
     PrimitiveMode,
     Symbol,
     Val,
+    ctx::map::CtxMapRef,
     func::{
         FuncMode,
         comp::Composite,
@@ -122,7 +123,12 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     };
     let body = map_remove(&mut map, BODY);
     let ctx = match map_remove(&mut map, CTX) {
-        Val::Ctx(ctx) => ctx.into(),
+        Val::Ctx(ctx) => {
+            if ctx.variables().fallback() {
+                return None;
+            }
+            Ctx::from(ctx)
+        }
         Val::Unit(_) => Ctx::default(),
         _ => return None,
     };
