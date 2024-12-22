@@ -46,6 +46,8 @@ fn help() -> Named<FuncVal> {
 const HELP_DOC: &str = "\
 functions:
     help: display this message
+    $: call a program, i.e. `git $ [status]`
+    repl.reset: reset the repl context to its initial state
 
 keyboard shortcuts:
     Ctrl + C: exit this program
