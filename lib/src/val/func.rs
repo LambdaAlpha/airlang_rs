@@ -186,6 +186,24 @@ impl FuncVal {
             FuncVal::MutStaticComp(_) => false,
         }
     }
+
+    pub(crate) fn is_cell(&self) -> bool {
+        match self {
+            FuncVal::Mode(_) => false,
+            FuncVal::FreeCellPrim(_) => true,
+            FuncVal::FreeCellComp(_) => true,
+            FuncVal::FreeStaticPrim(_) => false,
+            FuncVal::FreeStaticComp(_) => false,
+            FuncVal::ConstCellPrim(_) => true,
+            FuncVal::ConstCellComp(_) => true,
+            FuncVal::ConstStaticPrim(_) => false,
+            FuncVal::ConstStaticComp(_) => false,
+            FuncVal::MutCellPrim(_) => true,
+            FuncVal::MutCellComp(_) => true,
+            FuncVal::MutStaticPrim(_) => false,
+            FuncVal::MutStaticComp(_) => false,
+        }
+    }
 }
 
 impl Debug for FuncVal {

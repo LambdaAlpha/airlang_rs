@@ -13,6 +13,7 @@ use crate::{
     Call,
     CallVal,
     ConstCtx,
+    Ctx,
     FuncVal,
     List,
     ListVal,
@@ -300,12 +301,7 @@ impl EvalCore {
         }
     }
 
-    fn call_ref_eval_input(
-        func: &FuncVal,
-        ctx: &mut crate::Ctx,
-        is_const: bool,
-        input: Val,
-    ) -> Val {
+    fn call_ref_eval_input(func: &FuncVal, ctx: &mut Ctx, is_const: bool, input: Val) -> Val {
         if is_const {
             func.mode().call.transform(ConstCtx::new(ctx), input)
         } else {
@@ -495,6 +491,26 @@ impl EvalCore {
         Ctx: CtxMeta<'a>,
     {
         let none = AnswerVal::from(Answer::None);
+        let ask = Ask::new(Val::Func(func.clone()), output.clone());
+        let ask = Val::Ask(ask.into());
+        let answer = Self::call_solver(ctx, ask);
+        let Answer::Cache(cache) = &*answer else {
+            return answer;
+        };
+        let Val::Func(cache_func) = &cache.func else {
+            return none;
+        };
+        if *cache_func != func || cache.output != output {
+            return none;
+        }
+        answer
+    }
+
+    fn call_solver<'a, Ctx>(ctx: Ctx, ask: Val) -> AnswerVal
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        let none = AnswerVal::from(Answer::None);
         let (ctx, is_const) = match ctx.for_mut_fn() {
             MutFnCtx::Free(_) => return none,
             MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
@@ -506,26 +522,21 @@ impl EvalCore {
         let Some(mut solver) = solver else {
             return none;
         };
-        let ask = Ask::new(Val::Func(func.clone()), output.clone());
-        let ask = Val::Ask(ask.into());
-        let answer = if is_const {
-            solver.transform(ConstCtx::new(ctx), ask)
+        let answer = if solver.is_cell() {
+            let answer = Self::call_ref(&mut solver, ctx, is_const, ask);
+            let _ = ctx.set_solver(Some(solver));
+            answer
         } else {
-            solver.transform_mut(MutCtx::new(ctx), ask)
+            let _ = ctx.set_solver(Some(solver.clone()));
+            if is_const {
+                solver.transform(ConstCtx::new(ctx), ask)
+            } else {
+                solver.transform(MutCtx::new(ctx), ask)
+            }
         };
-        let _ = ctx.set_solver(Some(solver));
         let Val::Answer(answer) = answer else {
             return none;
         };
-        let Answer::Cache(cache) = &*answer else {
-            return answer;
-        };
-        let Val::Func(cache_func) = &cache.func else {
-            return none;
-        };
-        if *cache_func != func || cache.output != output {
-            return none;
-        }
         answer
     }
 }

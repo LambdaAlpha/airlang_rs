@@ -418,16 +418,7 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let is_cell = matches!(
-            func,
-            FuncVal::FreeCellPrim(_)
-                | FuncVal::FreeCellComp(_)
-                | FuncVal::ConstCellPrim(_)
-                | FuncVal::ConstCellComp(_)
-                | FuncVal::MutCellPrim(_)
-                | FuncVal::MutCellComp(_)
-        );
-        Val::Bit(Bit::new(is_cell))
+        Val::Bit(Bit::new(func.is_cell()))
     })
 }
 
