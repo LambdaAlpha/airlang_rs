@@ -198,6 +198,7 @@ fn list_mode(head: List<Mode>, tail: Mode, default: PrimitiveMode) -> Mode {
     Mode::Composite(Box::new(mode))
 }
 
+#[allow(unused)]
 fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode, default: PrimitiveMode) -> Mode {
     let else1 = Pair::new(key, value);
     let mode = CompositeMode {

@@ -3,13 +3,8 @@ use std::process::Command;
 use airlang::{
     FuncMode,
     FuncVal,
-    List,
-    Map,
     Mode,
     MutCtx,
-    PrimitiveMode,
-    Symbol,
-    Text,
     Val,
 };
 
@@ -17,7 +12,6 @@ use crate::prelude::{
     Named,
     Prelude,
     form_mode,
-    map_mode,
     named_free_fn,
 };
 
@@ -37,18 +31,10 @@ impl Prelude for ProcessPrelude {
     }
 }
 
-const PROGRAM: &str = "program";
-const ARGUMENTS: &str = "arguments";
-
 fn call() -> Named<FuncVal> {
-    let id = "repl.execute";
+    let id = "$";
     let f = fn_call;
-    let call = map_mode(
-        Map::default(),
-        form_mode(),
-        Mode::default(),
-        PrimitiveMode::default(),
-    );
+    let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -61,33 +47,33 @@ fn call() -> Named<FuncVal> {
 }
 
 fn fn_call(input: Val) -> Val {
-    let Val::Map(mut map) = input else {
+    let Val::Pair(pair) = input else {
         return Val::default();
     };
-    let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
-    let Some(Val::Text(program)) = map.remove(&program_key) else {
+    let program: &str = match &pair.first {
+        Val::Text(program) => program,
+        Val::Symbol(symbol) => symbol,
+        _ => return Val::default(),
+    };
+    let Val::List(arguments) = &pair.second else {
         return Val::default();
     };
-    let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
-    let Some(Val::List(arguments)) = map.remove(&arguments_key) else {
-        return Val::default();
-    };
-    let arguments = List::from(arguments);
     let arguments = arguments
-        .into_iter()
+        .iter()
         .map(|val| {
-            let Val::Text(arg) = val else {
-                return None;
+            let arg: &str = match val {
+                Val::Text(text) => text,
+                Val::Symbol(symbol) => symbol,
+                _ => return None,
             };
-            let arg = Text::from(arg);
-            Some(String::from(arg))
+            Some(arg)
         })
-        .collect::<Option<Vec<String>>>();
+        .collect::<Option<Vec<&str>>>();
     let Some(arguments) = arguments else {
         return Val::default();
     };
 
-    let child = Command::new(&**program).args(arguments).spawn();
+    let child = Command::new(program).args(arguments).spawn();
     let Ok(mut child) = child else {
         eprintln!("failed to execute program");
         return Val::default();
