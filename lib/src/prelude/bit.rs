@@ -76,7 +76,7 @@ fn is_true() -> Named<FuncVal> {
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| {
         let Val::Bit(b) = val else {
-            return Val::Bit(Bit::f());
+            return Val::Bit(Bit::false1());
         };
         Val::Bit(*b)
     })
@@ -100,7 +100,7 @@ fn is_false() -> Named<FuncVal> {
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_ref(ctx, input, |val| {
         let Val::Bit(b) = val else {
-            return Val::Bit(Bit::f());
+            return Val::Bit(Bit::false1());
         };
         Val::Bit(b.not())
     })

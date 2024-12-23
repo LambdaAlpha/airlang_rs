@@ -416,7 +416,7 @@ fn generate_primitive_prelude(id: Symbol) -> Val {
 fn generate_primitive_extension(id: Symbol, common: FuncCommon) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(ID), Val::Symbol(id));
-    repr.insert(symbol(IS_EXTENSION), Val::Bit(Bit::t()));
+    repr.insert(symbol(IS_EXTENSION), Val::Bit(Bit::true1()));
     generate_func_common(&mut repr, common);
     Val::Map(repr.into())
 }
@@ -446,7 +446,7 @@ struct FuncCommon {
 
 fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
     if common.cell {
-        repr.insert(symbol(CELL), Val::Bit(Bit::t()));
+        repr.insert(symbol(CELL), Val::Bit(Bit::true1()));
     }
     if common.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(common.access));

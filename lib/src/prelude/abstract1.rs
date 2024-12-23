@@ -172,11 +172,11 @@ fn get_func() -> Named<FuncVal> {
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Abstract(abstract1) => abstract1.func.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Abstract(abstract1) => Abstract::from(abstract1).func,
             _ => Val::default(),
         },
@@ -206,14 +206,14 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut abstract1) => {
+        Either::This(mut abstract1) => {
             let Some(Val::Abstract(abstract1)) = abstract1.as_mut() else {
                 return Val::default();
             };
             swap(&mut abstract1.func, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }
 
@@ -234,11 +234,11 @@ fn get_input() -> Named<FuncVal> {
 
 fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Abstract(abstract1) => abstract1.input.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Abstract(abstract1) => Abstract::from(abstract1).input,
             _ => Val::default(),
         },
@@ -268,13 +268,13 @@ fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut abstract1) => {
+        Either::This(mut abstract1) => {
             let Some(Val::Abstract(abstract1)) = abstract1.as_mut() else {
                 return Val::default();
             };
             swap(&mut abstract1.input, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }

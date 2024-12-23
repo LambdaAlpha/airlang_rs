@@ -68,24 +68,19 @@ impl DefaultCtx {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
                 if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let s = Symbol::from_str(&s[1..]);
-                    return f(Either::Right(Val::Symbol(s)));
+                    return f(Either::That(Self::remove_prefix(s)));
                 }
-                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                    Symbol::from_str(&s[1..])
-                } else {
-                    s
-                };
+                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
                 let Ok(ctx) = ctx.get_variables_dyn() else {
-                    return f(Either::Right(Val::default()));
+                    return f(Either::That(Val::default()));
                 };
                 let Ok(mut dyn_ref) = ctx.ref1.get_ref_dyn(s) else {
-                    return f(Either::Right(Val::default()));
+                    return f(Either::That(Val::default()));
                 };
                 dyn_ref.is_const |= ctx.is_const;
-                f(Either::Left(dyn_ref))
+                f(Either::This(dyn_ref))
             }
-            val => f(Either::Right(val)),
+            val => f(Either::That(val)),
         }
     }
 
@@ -100,14 +95,9 @@ impl DefaultCtx {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
                 if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let s = Symbol::from_str(&s[1..]);
-                    return f(&Val::Symbol(s));
+                    return f(&Self::remove_prefix(s));
                 }
-                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                    Symbol::from_str(&s[1..])
-                } else {
-                    s
-                };
+                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
                 let Ok(ctx) = ctx.get_variables() else {
                     return f(&Val::default());
                 };
@@ -130,16 +120,11 @@ impl DefaultCtx {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
                 if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let s = Symbol::from_str(&s[1..]);
-                    let val = Val::Symbol(s);
+                    let val = Self::remove_prefix(s);
                     let result = f(&val);
                     return Val::Pair(Pair::new(val, result).into());
                 }
-                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                    Symbol::from_str(&s[1..])
-                } else {
-                    s
-                };
+                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
                 let Ok(ctx) = ctx.get_variables() else {
                     return f(&Val::default());
                 };
@@ -166,14 +151,9 @@ impl DefaultCtx {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
                 if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let s = Symbol::from_str(&s[1..]);
-                    return f(&mut Val::Symbol(s));
+                    return f(&mut Self::remove_prefix(s));
                 }
-                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                    Symbol::from_str(&s[1..])
-                } else {
-                    s
-                };
+                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
                 let Ok(ctx) = ctx.get_variables_mut() else {
                     return f(&mut Val::default());
                 };
@@ -196,16 +176,11 @@ impl DefaultCtx {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
                 if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let s = Symbol::from_str(&s[1..]);
-                    let mut val = Val::Symbol(s);
+                    let mut val = Self::remove_prefix(s);
                     let result = f(&mut val);
                     return Val::Pair(Pair::new(val, result).into());
                 }
-                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                    Symbol::from_str(&s[1..])
-                } else {
-                    s
-                };
+                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
                 let Ok(ctx) = ctx.get_variables_mut() else {
                     return f(&mut Val::default());
                 };
@@ -231,16 +206,11 @@ impl DefaultCtx {
             Val::Symbol(s) => {
                 let prefix = s.chars().next();
                 if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let s = Symbol::from_str(&s[1..]);
-                    let mut val = Val::Symbol(s);
+                    let mut val = Self::remove_prefix(s);
                     f(&mut val);
                     return val;
                 }
-                let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                    Symbol::from_str(&s[1..])
-                } else {
-                    s
-                };
+                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
                 let Ok(ctx) = ctx.get_variables_mut() else {
                     f(&mut Val::default());
                     return Val::default();
@@ -257,5 +227,20 @@ impl DefaultCtx {
                 val
             }
         }
+    }
+
+    fn remove_prefix_expect(s: Symbol, real_prefix: Option<char>, expect_prefix: char) -> Symbol {
+        let Some(prefix) = real_prefix else {
+            return s;
+        };
+        if prefix == expect_prefix {
+            Symbol::from_str(&s[1..])
+        } else {
+            s
+        }
+    }
+
+    fn remove_prefix(s: Symbol) -> Val {
+        Val::Symbol(Symbol::from_str(&s[1..]))
     }
 }

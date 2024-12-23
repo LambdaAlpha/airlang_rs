@@ -174,11 +174,11 @@ fn get_func() -> Named<FuncVal> {
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Call(call) => call.func.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Call(call) => Call::from(call).func,
             _ => Val::default(),
         },
@@ -208,14 +208,14 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut call) => {
+        Either::This(mut call) => {
             let Some(Val::Call(call)) = call.as_mut() else {
                 return Val::default();
             };
             swap(&mut call.func, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }
 
@@ -236,11 +236,11 @@ fn get_input() -> Named<FuncVal> {
 
 fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Call(call) => call.input.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Call(call) => Call::from(call).input,
             _ => Val::default(),
         },
@@ -270,13 +270,13 @@ fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut call) => {
+        Either::This(mut call) => {
             let Some(Val::Call(call)) = call.as_mut() else {
                 return Val::default();
             };
             swap(&mut call.input, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }

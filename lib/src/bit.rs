@@ -11,11 +11,11 @@ impl Bit {
         Bit(b)
     }
 
-    pub fn f() -> Bit {
+    pub fn false1() -> Bit {
         Bit(false)
     }
 
-    pub fn t() -> Bit {
+    pub fn true1() -> Bit {
         Bit(true)
     }
 

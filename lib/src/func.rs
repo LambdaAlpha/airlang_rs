@@ -35,6 +35,8 @@ pub(crate) mod comp;
 
 pub(crate) mod mode;
 
+pub(crate) mod ctx_aware_comp;
+
 pub(crate) mod free_static_prim;
 
 pub(crate) mod free_static_comp;

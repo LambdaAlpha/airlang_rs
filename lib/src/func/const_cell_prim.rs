@@ -15,11 +15,11 @@ use crate::{
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
-    extension::ext,
     func::{
         FuncTrait,
         prim::Primitive,
     },
+    traits::dyn_safe::dyn_any_clone_eq_hash,
     transformer::Transformer,
 };
 
@@ -27,7 +27,7 @@ pub trait ConstCellFn {
     fn call(&mut self, ctx: ConstFnCtx, input: Val) -> Val;
 }
 
-ext!(pub ConstCellFnExt : ConstCellFn);
+dyn_any_clone_eq_hash!(pub ConstCellFnExt : ConstCellFn);
 
 #[derive(Clone)]
 pub struct ConstCellPrimFunc {

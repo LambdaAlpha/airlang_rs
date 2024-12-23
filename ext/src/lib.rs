@@ -1,13 +1,6 @@
-use airlang::MutCtx;
+pub use pub1::*;
 
-use crate::prelude::{
-    PRELUDE,
-    Prelude,
-};
-
-pub fn init_ctx(ctx: MutCtx) {
-    PRELUDE.with(|prelude| prelude.put(ctx));
-}
+pub(crate) mod pub1;
 
 pub(crate) mod prelude;
 

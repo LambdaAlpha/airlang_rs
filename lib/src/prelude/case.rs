@@ -187,7 +187,7 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
     repr.insert(symbol(INPUT), case.as_ref().input.clone());
     repr.insert(symbol(OUTPUT), case.as_ref().output.clone());
     if matches!(case, CaseVal::Cache(_)) {
-        repr.insert(symbol(IS_CACHE), Val::Bit(Bit::t()));
+        repr.insert(symbol(IS_CACHE), Val::Bit(Bit::true1()));
     }
 }
 

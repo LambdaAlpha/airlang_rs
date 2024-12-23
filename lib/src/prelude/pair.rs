@@ -97,11 +97,11 @@ fn get_first() -> Named<FuncVal> {
 
 fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Pair(pair) => Pair::from(pair).first,
             _ => Val::default(),
         },
@@ -131,14 +131,14 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut pair) => {
+        Either::This(mut pair) => {
             let Some(Val::Pair(pair)) = pair.as_mut() else {
                 return Val::default();
             };
             swap(&mut pair.first, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }
 
@@ -159,11 +159,11 @@ fn get_second() -> Named<FuncVal> {
 
 fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Pair(pair) => Pair::from(pair).second,
             _ => Val::default(),
         },
@@ -193,13 +193,13 @@ fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut pair) => {
+        Either::This(mut pair) => {
             let Some(Val::Pair(pair)) = pair.as_mut() else {
                 return Val::default();
             };
             swap(&mut pair.second, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }

@@ -1,13 +1,12 @@
 use crate::{
-    ConstFnCtx,
     FuncMode,
-    Invariant,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
     func::{
         FuncTrait,
         comp::Composite,
+        ctx_aware_comp::const_func_transform,
     },
     transformer::Transformer,
 };
@@ -26,20 +25,11 @@ impl Transformer<Val, Val> for ConstStaticCompFunc {
         Ctx: CtxMeta<'a>,
     {
         let inner = &mut self.comp.ctx.clone();
-        Composite::put_input(inner, self.comp.input_name.clone(), input);
-
-        match ctx.for_const_fn() {
-            ConstFnCtx::Free(_ctx) => {
-                Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
-            }
-            ConstFnCtx::Const(ctx) => {
-                let eval = |inner: &mut crate::Ctx| {
-                    Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
-                };
-                let name = self.ctx_name.clone();
-                Composite::with_ctx(inner, ctx.unwrap(), name, Invariant::Const, eval)
-            }
-        }
+        let ctx_name = self.ctx_name.clone();
+        let input_name = self.comp.input_name.clone();
+        let body_mode = &self.comp.body_mode;
+        let body = self.comp.body.clone();
+        const_func_transform(inner, ctx_name, ctx, input_name, input, body_mode, body)
     }
 }
 

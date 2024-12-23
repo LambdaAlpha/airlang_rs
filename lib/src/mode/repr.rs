@@ -106,7 +106,7 @@ impl GenerateMode<Val> for Mode {
             Mode::Primitive(mode) => mode.generate(default),
             Mode::Recursive(mode) => {
                 let mut map = mode.generate(default);
-                map.insert(symbol(RECURSIVE), Val::Bit(Bit::t()));
+                map.insert(symbol(RECURSIVE), Val::Bit(Bit::true1()));
                 Val::Map(map)
             }
             Mode::Composite(mode) => {

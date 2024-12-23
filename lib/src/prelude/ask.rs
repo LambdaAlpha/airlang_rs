@@ -174,11 +174,11 @@ fn get_func() -> Named<FuncVal> {
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.func.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Ask(ask) => Ask::from(ask).func,
             _ => Val::default(),
         },
@@ -208,14 +208,14 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut ask) => {
+        Either::This(mut ask) => {
             let Some(Val::Ask(ask)) = ask.as_mut() else {
                 return Val::default();
             };
             swap(&mut ask.func, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }
 
@@ -236,11 +236,11 @@ fn get_output() -> Named<FuncVal> {
 
 fn fn_get_output(ctx: ConstFnCtx, input: Val) -> Val {
     DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
-        Either::Left(val) => match val.as_const() {
+        Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.output.clone(),
             _ => Val::default(),
         },
-        Either::Right(val) => match val {
+        Either::That(val) => match val {
             Val::Ask(ask) => Ask::from(ask).output,
             _ => Val::default(),
         },
@@ -270,13 +270,13 @@ fn fn_set_output(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::Left(mut ask) => {
+        Either::This(mut ask) => {
             let Some(Val::Ask(ask)) = ask.as_mut() else {
                 return Val::default();
             };
             swap(&mut ask.output, &mut val);
             val
         }
-        Either::Right(_) => Val::default(),
+        Either::That(_) => Val::default(),
     })
 }

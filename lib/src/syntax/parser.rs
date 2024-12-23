@@ -411,8 +411,8 @@ where
 
         let parser = |src| match s {
             UNIT => success(From::from(Unit))(src),
-            TRUE => success(From::from(Bit::t()))(src),
-            FALSE => success(From::from(Bit::f()))(src),
+            TRUE => success(From::from(Bit::true1()))(src),
+            FALSE => success(From::from(Bit::false1()))(src),
             INT => int(src),
             NUMBER => number(src),
             BYTE => byte(src),

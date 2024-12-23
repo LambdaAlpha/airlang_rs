@@ -852,7 +852,7 @@ fn fn_ctx_repr(input: Val) -> Val {
     let mut map = Map::default();
     let fallback = ctx.variables.fallback();
     if fallback {
-        map.insert(symbol(FALLBACK), Val::Bit(Bit::t()));
+        map.insert(symbol(FALLBACK), Val::Bit(Bit::true1()));
     }
     if let Some(variables) = generate_ctx_map(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);
