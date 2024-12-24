@@ -45,8 +45,11 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        form_mode,
         named_const_fn,
         named_free_fn,
+        pair_mode,
+        symbol_form_mode,
     },
     symbol::Symbol,
     val::{
@@ -103,7 +106,7 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
-    let call = Mode::default();
+    let call = form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -149,9 +152,9 @@ fn fn_any(input: Val) -> Val {
 fn type_of() -> Named<FuncVal> {
     let id = "type_of";
     let f = fn_type_of;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = symbol_form_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -190,7 +193,7 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), symbol_form_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -223,7 +226,7 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
 fn not_equal() -> Named<FuncVal> {
     let id = "!=";
     let f = fn_not_equal;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), symbol_form_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

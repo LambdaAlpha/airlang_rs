@@ -18,6 +18,8 @@ use crate::{
         named_const_fn,
         named_free_fn,
         named_mut_fn,
+        pair_mode,
+        symbol_form_mode,
     },
     syntax::PAIR_STR,
     types::either::Either,
@@ -83,7 +85,7 @@ fn fn_new(input: Val) -> Val {
 fn get_first() -> Named<FuncVal> {
     let id = "pair.first";
     let f = fn_get_first;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -111,7 +113,7 @@ fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_first() -> Named<FuncVal> {
     let id = "pair.set_first";
     let f = fn_set_first;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -145,7 +147,7 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
 fn get_second() -> Named<FuncVal> {
     let id = "pair.second";
     let f = fn_get_second;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -172,7 +174,7 @@ fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn set_second() -> Named<FuncVal> {
     let id = "pair.set_second";
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

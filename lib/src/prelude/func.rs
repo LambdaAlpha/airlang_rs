@@ -31,6 +31,7 @@ use crate::{
         form_mode,
         named_const_fn,
         named_free_fn,
+        symbol_form_mode,
     },
     symbol::Symbol,
     val::{
@@ -210,9 +211,9 @@ fn fn_repr(input: Val) -> Val {
 fn ctx_access() -> Named<FuncVal> {
     let id = "function.context_access";
     let f = fn_ctx_access;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = symbol_form_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -249,7 +250,7 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
 fn call_mode() -> Named<FuncVal> {
     let id = "function.call_mode";
     let f = fn_call_mode;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -274,7 +275,7 @@ fn fn_call_mode(ctx: ConstFnCtx, input: Val) -> Val {
 fn abstract_mode() -> Named<FuncVal> {
     let id = "function.abstract_mode";
     let f = fn_abstract_mode;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -299,7 +300,7 @@ fn fn_abstract_mode(ctx: ConstFnCtx, input: Val) -> Val {
 fn ask_mode() -> Named<FuncVal> {
     let id = "function.ask_mode";
     let f = fn_ask_mode;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -324,7 +325,7 @@ fn fn_ask_mode(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_cacheable() -> Named<FuncVal> {
     let id = "function.is_cacheable";
     let f = fn_is_cacheable;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -349,7 +350,7 @@ fn fn_is_cacheable(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_primitive() -> Named<FuncVal> {
     let id = "function.is_primitive";
     let f = fn_is_primitive;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -374,7 +375,7 @@ fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_extension() -> Named<FuncVal> {
     let id = "function.is_extension";
     let f = fn_is_extension;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -401,7 +402,7 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_cell() -> Named<FuncVal> {
     let id = "function.is_cell";
     let f = fn_is_cell;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -425,7 +426,7 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_mode() -> Named<FuncVal> {
     let id = "function.is_mode";
     let f = fn_is_mode;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -449,9 +450,9 @@ fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
 fn id() -> Named<FuncVal> {
     let id = "function.id";
     let f = fn_id;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = symbol_form_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -476,7 +477,7 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
 fn body_mode() -> Named<FuncVal> {
     let id = "function.body_mode";
     let f = fn_body_mode;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -505,7 +506,7 @@ fn fn_body_mode(ctx: ConstFnCtx, input: Val) -> Val {
 fn body() -> Named<FuncVal> {
     let id = "function.body";
     let f = fn_body;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = form_mode();
     let mode = FuncMode {
@@ -532,7 +533,7 @@ fn fn_body(ctx: ConstFnCtx, input: Val) -> Val {
 fn ctx() -> Named<FuncVal> {
     let id = "function.context";
     let f = fn_ctx;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -559,9 +560,9 @@ fn fn_ctx(ctx: ConstFnCtx, input: Val) -> Val {
 fn input_name() -> Named<FuncVal> {
     let id = "function.input_name";
     let f = fn_input_name;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = symbol_form_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -586,9 +587,9 @@ fn fn_input_name(ctx: ConstFnCtx, input: Val) -> Val {
 fn ctx_name() -> Named<FuncVal> {
     let id = "function.context_name";
     let f = fn_ctx_name;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = symbol_form_mode();
     let mode = FuncMode {
         call,
         abstract1,

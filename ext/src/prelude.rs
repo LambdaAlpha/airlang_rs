@@ -33,6 +33,7 @@ use airlang::{
     PairMode,
     PrimitiveMode,
     Symbol,
+    SymbolMode,
     Val,
 };
 
@@ -180,6 +181,15 @@ fn form_mode() -> Mode {
 #[allow(unused)]
 fn eval_mode() -> Mode {
     Mode::Primitive(PrimitiveMode::Eval)
+}
+
+#[allow(unused)]
+fn symbol_form_mode(default: PrimitiveMode) -> Mode {
+    let mode = CompositeMode {
+        symbol: SymbolMode::Form,
+        ..CompositeMode::from(default)
+    };
+    Mode::Composite(Box::new(mode))
 }
 
 #[allow(unused)]

@@ -6,7 +6,7 @@ unit 1
 -----
 .
 =====
-type_of .unit
+type_of unit
 -----
 function
 =====
@@ -14,7 +14,7 @@ is_unit .
 -----
 true
 =====
-do [a = true, is_unit .a]
+do [a = true, is_unit a]
 -----
 false
 =====

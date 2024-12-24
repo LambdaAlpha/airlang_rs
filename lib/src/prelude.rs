@@ -13,6 +13,7 @@ use crate::{
     MutStaticPrimFuncVal,
     Pair,
     PairMode,
+    SymbolMode,
     ctx::{
         Ctx,
         CtxValue,
@@ -258,6 +259,14 @@ pub(crate) fn form_mode() -> Mode {
 #[allow(unused)]
 pub(crate) fn eval_mode() -> Mode {
     Mode::Primitive(PrimitiveMode::Eval)
+}
+
+pub(crate) fn symbol_form_mode() -> Mode {
+    let mode = CompositeMode {
+        symbol: SymbolMode::Form,
+        ..CompositeMode::from(PrimitiveMode::default())
+    };
+    Mode::Composite(Box::new(mode))
 }
 
 pub(crate) fn pair_mode(first: Mode, second: Mode) -> Mode {

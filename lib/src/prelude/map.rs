@@ -21,6 +21,8 @@ use crate::{
         named_const_fn,
         named_free_fn,
         named_mut_fn,
+        pair_mode,
+        symbol_form_mode,
     },
     val::{
         Val,
@@ -104,7 +106,7 @@ impl Prelude for MapPrelude {
 fn length() -> Named<FuncVal> {
     let id = "map.length";
     let f = fn_length;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -129,7 +131,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 fn items() -> Named<FuncVal> {
     let id = "map.items";
     let f = fn_items;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -157,7 +159,7 @@ fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
 fn into_items() -> Named<FuncVal> {
     let id = "map.into_items";
     let f = fn_into_items;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -187,7 +189,7 @@ fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
 fn keys() -> Named<FuncVal> {
     let id = "map.keys";
     let f = fn_keys;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -212,7 +214,7 @@ fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
 fn into_keys() -> Named<FuncVal> {
     let id = "map.into_keys";
     let f = fn_into_keys;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -239,7 +241,7 @@ fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
 fn values() -> Named<FuncVal> {
     let id = "map.values";
     let f = fn_values;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -264,7 +266,7 @@ fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
 fn into_values() -> Named<FuncVal> {
     let id = "map.into_values";
     let f = fn_into_values;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -291,7 +293,7 @@ fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
 fn contains() -> Named<FuncVal> {
     let id = "map.contains";
     let f = fn_contains;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -321,7 +323,7 @@ fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
 fn contains_many() -> Named<FuncVal> {
     let id = "map.contains_many";
     let f = fn_contains_many;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -355,7 +357,7 @@ fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
 fn set() -> Named<FuncVal> {
     let id = "map.set";
     let f = fn_set;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -390,7 +392,7 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
 fn set_many() -> Named<FuncVal> {
     let id = "map.set_many";
     let f = fn_set_many;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -427,7 +429,7 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
 fn get() -> Named<FuncVal> {
     let id = "map.get";
     let f = fn_get;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -457,7 +459,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
 fn get_many() -> Named<FuncVal> {
     let id = "map.get_many";
     let f = fn_get_many;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -494,7 +496,7 @@ fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
 fn remove() -> Named<FuncVal> {
     let id = "map.remove";
     let f = fn_remove;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -524,7 +526,7 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
 fn remove_many() -> Named<FuncVal> {
     let id = "map.remove_many";
     let f = fn_remove_many;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -562,7 +564,7 @@ fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
 fn clear() -> Named<FuncVal> {
     let id = "map.clear";
     let f = fn_clear;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

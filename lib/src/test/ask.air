@@ -2,11 +2,11 @@
 -----
 1 ? 2
 =====
-do [a = 1 '?' 2, ask.function .a]
+do [a = 1 '?' 2, ask.function a]
 -----
 1
 =====
-do [a = 1 '?' 2, ask.output .a]
+do [a = 1 '?' 2, ask.output a]
 -----
 2
 =====
@@ -18,18 +18,18 @@ ask.output ; 1 ? 2
 -----
 2
 =====
-do [a = 1 '?' 2, .a ask.set_function 3]
+do [a = 1 '?' 2, a ask.set_function 3]
 -----
 1
 =====
-do [a = 1 '?' 2, .a ask.set_function 3, ^a]
+do [a = 1 '?' 2, a ask.set_function 3, ^a]
 -----
 3 ? 2
 =====
-do [a = 1 '?' 2, .a ask.set_output 3]
+do [a = 1 '?' 2, a ask.set_output 3]
 -----
 2
 =====
-do [a = 1 '?' 2, .a ask.set_output 3, ^a]
+do [a = 1 '?' 2, a ask.set_output 3, ^a]
 -----
 1 ? 3

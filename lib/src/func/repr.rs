@@ -34,6 +34,7 @@ use crate::{
     prelude::{
         form_mode,
         map_mode,
+        symbol_form_mode,
     },
     utils::val::{
         map_remove,
@@ -72,9 +73,9 @@ pub(crate) fn parse_mode() -> Mode {
     map.insert(symbol(BODY_MODE), Mode::default());
     map.insert(symbol(BODY), form_mode());
     map.insert(symbol(CTX), Mode::default());
-    map.insert(symbol(INPUT_NAME), Mode::default());
-    map.insert(symbol(CTX_NAME), Mode::default());
-    map.insert(symbol(CTX_ACCESS), Mode::default());
+    map.insert(symbol(INPUT_NAME), symbol_form_mode());
+    map.insert(symbol(CTX_NAME), symbol_form_mode());
+    map.insert(symbol(CTX_ACCESS), symbol_form_mode());
     map.insert(symbol(CALL_MODE), Mode::default());
     map.insert(symbol(ABSTRACT_MODE), Mode::default());
     map.insert(symbol(ASK_MODE), Mode::default());
@@ -88,9 +89,9 @@ pub(crate) fn generate_mode() -> Mode {
     map.insert(symbol(BODY_MODE), Mode::default());
     map.insert(symbol(BODY), form_mode());
     map.insert(symbol(CTX), Mode::default());
-    map.insert(symbol(INPUT_NAME), Mode::default());
-    map.insert(symbol(CTX_NAME), Mode::default());
-    map.insert(symbol(CTX_ACCESS), Mode::default());
+    map.insert(symbol(INPUT_NAME), symbol_form_mode());
+    map.insert(symbol(CTX_NAME), symbol_form_mode());
+    map.insert(symbol(CTX_ACCESS), symbol_form_mode());
     map.insert(symbol(CALL_MODE), Mode::default());
     map.insert(symbol(ABSTRACT_MODE), Mode::default());
     map.insert(symbol(ASK_MODE), Mode::default());

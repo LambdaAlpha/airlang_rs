@@ -15,19 +15,19 @@ use crate::{
         default::DefaultCtx,
         mut1::MutFnCtx,
     },
-    func::FuncTrait,
     map::Map,
     mode::eval::Eval,
     prelude::{
         Named,
         Prelude,
         form_mode,
+        id_mode,
         map_mode,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
+        symbol_form_mode,
     },
-    transformer::Transformer,
     utils::val::{
         map_remove,
         symbol,
@@ -85,8 +85,8 @@ fn new() -> Named<FuncVal> {
     let f = fn_new;
     let mut map = Map::default();
     map.insert(symbol(FUNCTION), Mode::default());
-    map.insert(symbol(INPUT), form_mode());
-    map.insert(symbol(OUTPUT), form_mode());
+    map.insert(symbol(INPUT), id_mode());
+    map.insert(symbol(OUTPUT), id_mode());
     let call = map_mode(map, Mode::default(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -127,7 +127,7 @@ fn new_cache() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
+fn fn_new_cache(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
@@ -135,8 +135,7 @@ fn fn_new_cache(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Func(func) = call.func else {
         return Val::default();
     };
-    let input = func.mode().call.transform(ctx.reborrow(), call.input);
-    let cache = Cache::new(ctx, func, input);
+    let cache = Cache::new(ctx, func, call.input);
     Val::Case(CaseVal::Cache(cache.into()))
 }
 
@@ -181,7 +180,7 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 fn is_cache() -> Named<FuncVal> {
     let id = "case.is_cache";
     let f = fn_is_cache;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -205,7 +204,7 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
 fn func() -> Named<FuncVal> {
     let id = "case.function";
     let f = fn_func;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -229,7 +228,7 @@ fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
 fn input() -> Named<FuncVal> {
     let id = "case.input";
     let f = fn_input;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -253,7 +252,7 @@ fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
 fn output() -> Named<FuncVal> {
     let id = "case.output";
     let f = fn_output;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

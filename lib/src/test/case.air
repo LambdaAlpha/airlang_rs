@@ -1,43 +1,43 @@
 do [
-    p = case ; {
+    c = case ; {
         function : not,
         input : 1,
         output : 2,
     },
-    case.input .p
+    case.input c
 ]
 -----
 1
 =====
 do [
-    p = case ; {
+    c = case ; {
         function : not,
         input : 1,
         output : 2,
     },
-    case.output .p
+    case.output c
 ]
 -----
 2
 =====
 do [
-    p = case ; {
+    c = case ; {
         function : not,
         input : 1,
         output : 2,
     },
-    (case.function .p) == .not
+    (case.function c) == not
 ]
 -----
 true
 =====
 do [
-    p = case ; {
+    c = case ; {
         function : "not",
         input : 1,
         output : 2,
     },
-    (case.function .p) == "not"
+    (case.function c) == "not"
 ]
 -----
 true
@@ -49,7 +49,7 @@ do [
         input : true,
         output : false,
     },
-    .m == case.represent ; case ; m
+    m == case.represent ; case ; m
 ]
 -----
 true
@@ -63,47 +63,47 @@ do [
         output : false,
         is_cache : true,
     },
-    .m == .expected
+    m == expected
 ]
 -----
 true
 =====
 do [
-    p = case ; {
+    c = case ; {
         function : not,
         input : 1,
         output : 2,
     },
-    tp = type_of ; .p,
-    (.tp == ..case) and (case.is_cache .p) == false
+    tc = type_of ; c,
+    (tc == ..case) and not ; (case.is_cache c)
 ]
 -----
 true
 =====
 do [
-    p = case.cache ; not ';' (not false),
-    case.input .p
+    c = case.cache ; not ';' (not false),
+    case.input c
 ]
 -----
 true
 =====
 do [
-    p = case.cache ; not ';' true,
-    case.output .p
+    c = case.cache ; not ';' true,
+    case.output c
 ]
 -----
 false
 =====
 do [
-    p = case.cache ; not ';' true,
-    (case.function .p) == .not
+    c = case.cache ; not ';' true,
+    (case.function c) == not
 ]
 -----
 true
 =====
 do [
-    p = case.cache ; not ';' true,
-    case.is_cache .p
+    c = case.cache ; not ';' true,
+    case.is_cache c
 ]
 -----
 true

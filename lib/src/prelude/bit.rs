@@ -14,6 +14,7 @@ use crate::{
         Prelude,
         named_const_fn,
         named_free_fn,
+        symbol_form_mode,
     },
     val::{
         Val,
@@ -61,7 +62,7 @@ impl Prelude for BitPrelude {
 fn is_true() -> Named<FuncVal> {
     let id = "is_true";
     let f = fn_is_true;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -85,7 +86,7 @@ fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_false() -> Named<FuncVal> {
     let id = "is_false";
     let f = fn_is_false;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

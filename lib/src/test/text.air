@@ -6,11 +6,11 @@ text.length "1"
 -----
 "1" : 1
 =====
-do [a = "12", text.length .a]
+do [a = "12", text.length a]
 -----
 2
 =====
-do [a = "hello", b = "world", .a text.push " ", .a text.push ^b, ^a]
+do [a = "hello", b = "world", a text.push " ", a text.push ^b, ^a]
 -----
 "hello world"
 =====

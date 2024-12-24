@@ -18,6 +18,8 @@ use crate::{
         named_const_fn,
         named_free_fn,
         named_mut_fn,
+        pair_mode,
+        symbol_form_mode,
     },
     text::Text,
     val::{
@@ -111,7 +113,7 @@ fn fn_into_utf8(input: Val) -> Val {
 fn length() -> Named<FuncVal> {
     let id = "text.length";
     let f = fn_length;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -136,7 +138,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let id = "text.push";
     let f = fn_push;
-    let call = Mode::default();
+    let call = pair_mode(symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

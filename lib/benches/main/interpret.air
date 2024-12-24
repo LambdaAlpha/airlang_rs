@@ -10,7 +10,7 @@
     }
   },
   f = function ; {
-    input_name : .n,
+    input_name : n,
     body : do ; [
       sum = 0,
       n for i : [

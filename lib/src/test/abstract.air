@@ -10,15 +10,15 @@ do [c = id ; 1 ! 2, abstract.apply ^c]
 -----
 2
 =====
-do [c = id ; 1 ! 2, abstract.function .c]
+do [c = id ; 1 ! 2, abstract.function c]
 -----
 1
 =====
-do [c = id ; 1 ! 2, abstract.input .c]
+do [c = id ; 1 ! 2, abstract.input c]
 -----
 2
 =====
-do [a = 1 !! 2, abstract.input .a]
+do [a = 1 !! 2, abstract.input a]
 -----
 2
 =====
@@ -34,18 +34,18 @@ abstract.input ; id ; 1 ! 2
 -----
 2
 =====
-do [c = id ; 1 ! 2, .c abstract.set_function 3]
+do [c = id ; 1 ! 2, c abstract.set_function 3]
 -----
 1
 =====
-do [c = id ; 1 ! 2, .c abstract.set_function 3, ^c]
+do [c = id ; 1 ! 2, c abstract.set_function 3, ^c]
 -----
 3 ! 2
 =====
-do [c = id ; 1 ! 2, .c abstract.set_input 3]
+do [c = id ; 1 ! 2, c abstract.set_input 3]
 -----
 2
 =====
-do [c = id ; 1 ! 2, .c abstract.set_input 3, ^c]
+do [c = id ; 1 ! 2, c abstract.set_input 3, ^c]
 -----
 1 ! 3

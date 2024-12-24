@@ -25,6 +25,7 @@ use crate::{
         Prelude,
         named_const_fn,
         named_free_fn,
+        symbol_form_mode,
     },
     utils::val::symbol,
 };
@@ -177,9 +178,9 @@ fn fn_repr(input: Val) -> Val {
 fn type_of() -> Named<FuncVal> {
     let id = "answer.type_of";
     let f = fn_type_of;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = symbol_form_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -207,7 +208,7 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_none() -> Named<FuncVal> {
     let id = "answer.is_none";
     let f = fn_is_none;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -232,7 +233,7 @@ fn fn_is_none(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_never() -> Named<FuncVal> {
     let id = "answer.is_never";
     let f = fn_is_never;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -257,7 +258,7 @@ fn fn_is_never(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_maybe() -> Named<FuncVal> {
     let id = "answer.is_maybe";
     let f = fn_is_maybe;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -282,7 +283,7 @@ fn fn_is_maybe(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_cache() -> Named<FuncVal> {
     let id = "answer.is_cache";
     let f = fn_is_cache;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

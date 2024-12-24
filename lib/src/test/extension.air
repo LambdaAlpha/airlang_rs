@@ -2,7 +2,7 @@ do [a = extension.unit, b = extension.unit, .a == .b]
 -----
 true
 =====
-type_of .extension.unit
+type_of extension.unit
 -----
 extension
 =====
@@ -14,7 +14,7 @@ func_ext 2
 -----
 2
 =====
-type_of .func_ext
+type_of func_ext
 -----
 function
 =====

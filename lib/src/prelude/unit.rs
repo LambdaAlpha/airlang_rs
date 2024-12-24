@@ -15,6 +15,7 @@ use crate::{
         Prelude,
         named_const_fn,
         named_free_fn,
+        symbol_form_mode,
     },
     unit::Unit,
     val::func::FuncVal,
@@ -64,7 +65,7 @@ fn fn_unit(_input: Val) -> Val {
 fn is_unit() -> Named<FuncVal> {
     let id = "is_unit";
     let f = fn_is_unit;
-    let call = Mode::default();
+    let call = symbol_form_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

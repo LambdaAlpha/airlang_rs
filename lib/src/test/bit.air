@@ -10,7 +10,7 @@ is_true .
 -----
 false
 =====
-do [a = true, is_true .a]
+do [a = true, is_true a]
 -----
 true
 =====
@@ -26,7 +26,7 @@ is_false .
 -----
 false
 =====
-do [a = true, is_false .a]
+do [a = true, is_false a]
 -----
 false
 =====

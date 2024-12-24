@@ -446,7 +446,7 @@ true
 do [
     f = function ; {
         body : n ; a,
-        input_name : .a,
+        input_name : a,
         context : context ; {variables :  {n : not}},
     },
     f ; not ; true
@@ -467,7 +467,7 @@ i ; a
 do [
     f = function ; {
         body : do ; [a = a + 1, a],
-        context_access : .free,
+        context_access : free,
         cell : true,
         context : context ; {variables : {do : :, = : :, + : :, a : 0}},
     },
@@ -480,7 +480,7 @@ do [
     a = 1,
     f = function ; {
         body : do ; [b = b + c | ..a, b],
-        context_access : .constant,
+        context_access : constant,
         cell : true,
         context : context ; {variables : {
             do : :,
@@ -503,7 +503,7 @@ do [
             c | id ; a = a + 1,
             b,
         ],
-        context_access : .mutable,
+        context_access : mutable,
         cell : true,
         context : context ; {variables : {
             do : :,
@@ -523,7 +523,7 @@ do [
     a = 1,
     f = function ; {
         body : c | ..a,
-        context_access : .constant,
+        context_access : constant,
         context : context ; {variables : {| : :}},
     },
     f .
@@ -535,7 +535,7 @@ do [
     a = 1,
     f = function ; {
         body : c | ..a,
-        context_access : .mutable,
+        context_access : mutable,
         context : context ; {variables : {| : :}},
     },
     f .
@@ -547,7 +547,7 @@ do [
     f = function ; {
         body : c | = ';' i : 2,
         call_mode : id,
-        context_access : .mutable,
+        context_access : mutable,
         context : context ; {
             variables : {
                 | : :,
@@ -567,7 +567,7 @@ do [
     f = function ; {
         body : c | = ';' i : 2,
         call_mode : id,
-        context_access : .mutable,
+        context_access : mutable,
         context : context ; {
             variables : {
                 | : :,
@@ -587,7 +587,7 @@ do [
     f = function ; {
         body : c | = ';' i : 2,
         call_mode : id,
-        context_access : .constant,
+        context_access : constant,
         context : context ; {
             variables : {
                 | : :,
@@ -606,7 +606,7 @@ do [
 do [
     f = function ; {
         body : 1,
-        context_access : .constant,
+        context_access : constant,
     },
     . | f ';' .
 ]
@@ -616,9 +616,9 @@ do [
 do [
     a = 1,
     f = function ; {
-        context_name : .ctx,
+        context_name : ctx,
         body : 2,
-        context_access : .constant,
+        context_access : constant,
         context : context ; {variables : {ctx : 3 . .constant}},
     },
     f .,
@@ -630,9 +630,9 @@ true
 do [
     a = 1,
     f = function ; {
-        context_name : .ctx,
+        context_name : ctx,
         body : ctx *= 2,
-        context_access : .constant,
+        context_access : constant,
         context : context ; {fallback : true},
     },
     f .,
@@ -649,7 +649,7 @@ function.represent not
 -----
 {id : not}
 =====
-function.represent ; function ; {body : i, context_access : .constant}
+function.represent ; function ; {body : i, context_access : constant}
 -----
 {body : i, context_access : constant}
 =====
@@ -675,40 +675,36 @@ do [
         cell : true,
     },
     new_repr = function.represent ; function ; repr,
-    .repr == .new_repr
+    repr == new_repr
 ]
 -----
 true
 =====
-function.context_access .function
+function.context_access function
 -----
 free
 =====
-function.context_access .function.context_access
+function.context_access function.context_access
 -----
 constant
 =====
-function.context_access .eval
+function.context_access eval
 -----
 mutable
 =====
-do [f = function ; {}, function.context_access .f]
+do [f = function ; {}, function.context_access f]
 -----
 mutable
 =====
-function.represent ; function.call_mode ; .not
+function.represent ; function.call_mode ; not
 -----
 eval
 =====
-function.represent ; function.call_mode ; .eval
+function.represent ; function.call_mode ; eval
 -----
 id
 =====
-function.represent ; function.call_mode ; .read
------
-form
-=====
-do [f = function ; {}, function.represent ; function.call_mode ; .f]
+do [f = function ; {}, function.represent ; function.call_mode ; f]
 -----
 eval
 =====
@@ -716,7 +712,7 @@ do [
     f = function ; {
         call_mode : mode ; {pair : eval : form},
     },
-    function.represent ; function.call_mode ; .f
+    function.represent ; function.call_mode ; f
 ]
 -----
 {pair : eval : form}
@@ -725,7 +721,7 @@ do [
     f = function ; {
         call_mode : mode ; {list : [eval, form, id] : form},
     },
-    function.represent ; function.call_mode ; .f
+    function.represent ; function.call_mode ; f
 ]
 -----
 {list : [eval, form, id] : form}
@@ -734,7 +730,7 @@ do [
     f = function ; {
         call_mode : mode ; {map : {a : eval, b : id} : id : form},
     },
-    function.represent ; function.call_mode ; .f
+    function.represent ; function.call_mode ; f
 ]
 -----
 {map : {a : eval, b : id} : id : form}
@@ -743,7 +739,7 @@ do [
     f = function ; {
         abstract_mode : mode ; {map : {a : form} : eval : id},
     },
-    function.represent ; function.abstract_mode ; .f
+    function.represent ; function.abstract_mode ; f
 ]
 -----
 {map : {a : form} : eval : id}
@@ -752,70 +748,70 @@ do [
     f = function ; {
         ask_mode : mode ; {map : {a : form} : eval : id},
     },
-    function.represent ; function.ask_mode ; .f
+    function.represent ; function.ask_mode ; f
 ]
 -----
 {map : {a : form} : eval : id}
 =====
-do [f = function ; {cacheable : false}, function.is_cacheable .f]
+do [f = function ; {cacheable : false}, function.is_cacheable f]
 -----
 false
 =====
-function.is_cacheable .not
+function.is_cacheable not
 -----
 true
 =====
-function.is_primitive .not
+function.is_primitive not
 -----
 true
 =====
-do [f = function ; {}, function.is_primitive .f]
+do [f = function ; {}, function.is_primitive f]
 -----
 false
 =====
-function.is_extension .not
+function.is_extension not
 -----
 false
 =====
-function.is_cell .not
+function.is_cell not
 -----
 false
 =====
-do [f = function ; {cell : true}, function.is_cell .f]
+do [f = function ; {cell : true}, function.is_cell f]
 -----
 true
 =====
-function.id .not
+function.id not
 -----
 not
 =====
-do [neg = not, function.id .neg]
+do [neg = not, function.id neg]
 -----
 not
 =====
 do [
     f = function ; {body_mode : form},
-    function.represent ; function.body_mode ; .f
+    function.represent ; function.body_mode ; f
 ]
 -----
 form
 =====
-do [f = function ; {body : i}, function.body .f]
+do [f = function ; {body : i}, function.body f]
 -----
 i
 =====
 do [
     ctx = context ; {variables : {a : 1}},
     f = function ; {context : ctx},
-    (function.context .f) == .ctx
+    (function.context f) == ctx
 ]
 -----
 true
 =====
-do [f = function ; {}, function.input_name .f]
+do [f = function ; {}, function.input_name f]
 -----
 i
 =====
-do [f = function ; {context_access : .constant}, function.context_name .f]
+do [f = function ; {context_access : constant}, function.context_name f]
 -----
 c

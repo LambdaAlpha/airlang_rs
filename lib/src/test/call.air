@@ -2,7 +2,7 @@
 -----
 1 ; 2
 =====
-do [b = 1, a = id ';' b, call.input .a]
+do [b = 1, a = id ';' b, call.input a]
 -----
 1
 =====
@@ -10,7 +10,7 @@ do [a = .b, c = = ';' a : 1, call.apply ^c, ^b]
 -----
 1
 =====
-do [a = id ;; b, call.input .a]
+do [a = id ;; b, call.input a]
 -----
 b
 =====
@@ -18,11 +18,11 @@ do [c = = ;; a : 1, call.apply ^c, ^a]
 -----
 1
 =====
-do [a = 1 ';' 2, call.function .a]
+do [a = 1 ';' 2, call.function a]
 -----
 1
 =====
-do [a = 1 ';' 2, call.input .a]
+do [a = 1 ';' 2, call.input a]
 -----
 2
 =====
@@ -34,18 +34,18 @@ call.input ; 1 ';' 2
 -----
 2
 =====
-do [a = 1 ';' 2, .a call.set_function 3]
+do [a = 1 ';' 2, a call.set_function 3]
 -----
 1
 =====
-do [a = 1 ';' 2, .a call.set_function 3, ^a]
+do [a = 1 ';' 2, a call.set_function 3, ^a]
 -----
 3 ; 2
 =====
-do [a = 1 ';' 2, .a call.set_input 3]
+do [a = 1 ';' 2, a call.set_input 3]
 -----
 2
 =====
-do [a = 1 ';' 2, .a call.set_input 3, ^a]
+do [a = 1 ';' 2, a call.set_input 3, ^a]
 -----
 1 ; 3

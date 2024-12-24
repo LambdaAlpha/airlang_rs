@@ -1,12 +1,12 @@
-answer.is_none .answer.none
+answer.is_none answer.none
 -----
 true
 =====
-answer.is_none .answer.never
+answer.is_none answer.never
 -----
 false
 =====
-answer.type_of .answer.none
+answer.type_of answer.none
 -----
 none
 =====
@@ -14,15 +14,15 @@ answer.represent answer.none
 -----
 {type : none}
 =====
-answer.is_never .answer.never
+answer.is_never answer.never
 -----
 true
 =====
-answer.is_never .answer.none
+answer.is_never answer.none
 -----
 false
 =====
-answer.type_of .answer.never
+answer.type_of answer.never
 -----
 never
 =====
@@ -30,15 +30,15 @@ answer.represent answer.never
 -----
 {type : never}
 =====
-do [a = answer.maybe ; 1, answer.is_maybe .a]
+do [a = answer.maybe ; 1, answer.is_maybe a]
 -----
 true
 =====
-answer.is_maybe .answer.none
+answer.is_maybe answer.none
 -----
 false
 =====
-do [a = answer.maybe ; 1, answer.type_of .a]
+do [a = answer.maybe ; 1, answer.type_of a]
 -----
 maybe
 =====
@@ -46,7 +46,7 @@ answer.represent ; answer.maybe ; 1
 -----
 {type : maybe, value : 1}
 =====
-do [a = answer.cache ; case.cache ; not ';' true, answer.is_cache .a]
+do [a = answer.cache ; case.cache ; not ';' true, answer.is_cache a]
 -----
 true
 =====
@@ -54,15 +54,15 @@ answer.is_cache .answer.none
 -----
 false
 =====
-do [a = answer.cache ; case.cache ; not ';' true, answer.type_of .a]
+do [a = answer.cache ; case.cache ; not ';' true, answer.type_of a]
 -----
 cache
 =====
 do [
     c = case ; {function : not, input : true, output : false},
-    a = answer.cache ; .c,
-    tc = type_of ; .c,
-    (.tc == ..case) and .a == .
+    a = answer.cache ; c,
+    tc = type_of ; c,
+    (tc == ..case) and a == .
 ]
 -----
 true
@@ -70,7 +70,7 @@ true
 do [
     c = case.cache ; not ';' true,
     m = answer.represent ; answer.cache ; c,
-    .m == {.type : .cache, .value : ^c}
+    m == {.type : .cache, .value : ^c}
 ]
 -----
 true

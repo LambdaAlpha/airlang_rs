@@ -317,7 +317,7 @@ context.represent ; context ; {variables : {a : 1 . .final}}
 -----
 {variables : {a : 1 . final}}
 =====
-do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = .m map.remove .b, type_of .b]
+do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = .m map.remove .b, type_of b]
 -----
 context
 =====

@@ -36,9 +36,9 @@ The Air language seeks to solve programming problems once and for all. It should
 ```Air
 "A demo of implementing a C-like for loop function" ! do ; [
     c_for = function ; {
-        input_name : .args,
-        context_name : .ctx,
-        context_access : .mutable,
+        input_name : args,
+        context_name : ctx,
+        context_access : mutable,
         call_mode : id,
         context : prelude .,
         body : do [
