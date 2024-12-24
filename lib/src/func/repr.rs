@@ -19,7 +19,6 @@ use crate::{
     MutStaticCompFunc,
     MutStaticCompFuncVal,
     MutStaticPrimFuncVal,
-    PrimitiveMode,
     Symbol,
     Val,
     ctx::map::CtxMapRef,
@@ -81,12 +80,7 @@ pub(crate) fn parse_mode() -> Mode {
     map.insert(symbol(ASK_MODE), Mode::default());
     map.insert(symbol(CACHEABLE), Mode::default());
     map.insert(symbol(CELL), Mode::default());
-    map_mode(
-        map,
-        Mode::default(),
-        Mode::default(),
-        PrimitiveMode::default(),
-    )
+    map_mode(map, Mode::default(), Mode::default())
 }
 
 pub(crate) fn generate_mode() -> Mode {
@@ -104,12 +98,7 @@ pub(crate) fn generate_mode() -> Mode {
     map.insert(symbol(ID), Mode::default());
     map.insert(symbol(IS_EXTENSION), Mode::default());
     map.insert(symbol(CELL), Mode::default());
-    map_mode(
-        map,
-        Mode::default(),
-        Mode::default(),
-        PrimitiveMode::default(),
-    )
+    map_mode(map, Mode::default(), Mode::default())
 }
 
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {

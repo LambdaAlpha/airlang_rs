@@ -17,10 +17,7 @@ use crate::{
     },
     func::FuncTrait,
     map::Map,
-    mode::{
-        eval::Eval,
-        primitive::PrimitiveMode,
-    },
+    mode::eval::Eval,
     prelude::{
         Named,
         Prelude,
@@ -90,12 +87,7 @@ fn new() -> Named<FuncVal> {
     map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
-    let call = map_mode(
-        map,
-        Mode::default(),
-        Mode::default(),
-        PrimitiveMode::default(),
-    );
+    let call = map_mode(map, Mode::default(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -158,12 +150,7 @@ fn repr() -> Named<FuncVal> {
     map.insert(symbol(INPUT), form_mode());
     map.insert(symbol(OUTPUT), form_mode());
     map.insert(symbol(IS_CACHE), Mode::default());
-    let ask = map_mode(
-        map,
-        Mode::default(),
-        Mode::default(),
-        PrimitiveMode::default(),
-    );
+    let ask = map_mode(map, Mode::default(), Mode::default());
     let mode = FuncMode {
         call,
         abstract1,

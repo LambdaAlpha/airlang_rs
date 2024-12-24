@@ -35,7 +35,6 @@ use crate::{
     mode::{
         Mode,
         eval::Eval,
-        primitive::PrimitiveMode,
     },
     pair::Pair,
     prelude::{
@@ -178,7 +177,7 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 fn assign() -> Named<FuncVal> {
     let id = "=";
     let f = fn_assign;
-    let call = pair_mode(form_mode(), Mode::default(), PrimitiveMode::default());
+    let call = pair_mode(form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -651,7 +650,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = fn_with_ctx;
-    let call = pair_mode(form_mode(), Mode::default(), PrimitiveMode::default());
+    let call = pair_mode(form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -736,16 +735,11 @@ fn ctx_new() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(
         symbol(VARIABLES),
-        map_mode(
-            Map::default(),
-            form_mode(),
-            Mode::default(),
-            PrimitiveMode::default(),
-        ),
+        map_mode(Map::default(), form_mode(), Mode::default()),
     );
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
-    let call = map_mode(map, form_mode(), Mode::default(), PrimitiveMode::default());
+    let call = map_mode(map, form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -825,16 +819,11 @@ fn ctx_repr() -> Named<FuncVal> {
     let mut map = Map::default();
     map.insert(
         symbol(VARIABLES),
-        map_mode(
-            Map::default(),
-            form_mode(),
-            Mode::default(),
-            PrimitiveMode::default(),
-        ),
+        map_mode(Map::default(), form_mode(), Mode::default()),
     );
     map.insert(symbol(FALLBACK), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
-    let ask = map_mode(map, form_mode(), Mode::default(), PrimitiveMode::default());
+    let ask = map_mode(map, form_mode(), Mode::default());
     let mode = FuncMode {
         call,
         abstract1,

@@ -19,10 +19,7 @@ use crate::{
         },
     },
     func::mut_static_prim::MutDispatcher,
-    mode::{
-        eval::Eval,
-        primitive::PrimitiveMode,
-    },
+    mode::eval::Eval,
     prelude::{
         Named,
         Prelude,
@@ -150,7 +147,7 @@ fn if1() -> Named<FuncVal> {
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    let call = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
+    let call = pair_mode(Mode::default(), id_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -193,7 +190,7 @@ fn if_not() -> Named<FuncVal> {
         |ctx, val| fn_if_not(ctx, val),
         |ctx, val| fn_if_not(ctx, val),
     );
-    let call = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
+    let call = pair_mode(Mode::default(), id_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -236,14 +233,9 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    let map = map_mode(
-        Map::default(),
-        form_mode(),
-        id_mode(),
-        PrimitiveMode::default(),
-    );
-    let map_default = pair_mode(map, id_mode(), PrimitiveMode::default());
-    let call = pair_mode(Mode::default(), map_default, PrimitiveMode::default());
+    let map = map_mode(Map::default(), form_mode(), id_mode());
+    let map_default = pair_mode(map, id_mode());
+    let call = pair_mode(Mode::default(), map_default);
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -284,7 +276,7 @@ fn match_ordered() -> Named<FuncVal> {
         |ctx, val| fn_match_ordered(ctx, val),
         |ctx, val| fn_match_ordered(ctx, val),
     );
-    let call = pair_mode(Mode::default(), id_mode(), PrimitiveMode::default());
+    let call = pair_mode(Mode::default(), id_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -475,11 +467,7 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    let call = pair_mode(
-        Mode::default(),
-        pair_mode(form_mode(), id_mode(), PrimitiveMode::default()),
-        PrimitiveMode::default(),
-    );
+    let call = pair_mode(Mode::default(), pair_mode(form_mode(), id_mode()));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

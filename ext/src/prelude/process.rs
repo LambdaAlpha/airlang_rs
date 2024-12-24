@@ -9,7 +9,6 @@ use airlang::{
     Map,
     Mode,
     MutCtx,
-    PrimitiveMode,
     Symbol,
     Text,
     Val,
@@ -45,12 +44,7 @@ const ARGUMENTS: &str = "arguments";
 fn call() -> Named<FuncVal> {
     let id = "process.call";
     let f = fn_call;
-    let call = map_mode(
-        Map::default(),
-        form_mode(),
-        Mode::default(),
-        PrimitiveMode::default(),
-    );
+    let call = map_mode(Map::default(), form_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

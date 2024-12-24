@@ -20,10 +20,7 @@ use crate::{
         ref1::CtxMeta,
     },
     func::mut_static_prim::MutDispatcher,
-    mode::{
-        eval::Eval,
-        primitive::PrimitiveMode,
-    },
+    mode::eval::Eval,
     prelude::{
         Named,
         Prelude,
@@ -104,7 +101,7 @@ fn fn_new(input: Val) -> Val {
 fn new_dependent() -> Named<FuncVal> {
     let id = concatcp!(CALL, CALL);
     let f = fn_new_dependent;
-    let call = pair_mode(Mode::default(), form_mode(), PrimitiveMode::default());
+    let call = pair_mode(Mode::default(), form_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

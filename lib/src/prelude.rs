@@ -260,33 +260,28 @@ pub(crate) fn eval_mode() -> Mode {
     Mode::Primitive(PrimitiveMode::Eval)
 }
 
-pub(crate) fn pair_mode(first: Mode, second: Mode, default: PrimitiveMode) -> Mode {
+pub(crate) fn pair_mode(first: Mode, second: Mode) -> Mode {
     let mode = CompositeMode {
         pair: PairMode::Form(Pair::new(first, second)),
-        ..CompositeMode::from(default)
+        ..CompositeMode::from(PrimitiveMode::default())
     };
     Mode::Composite(Box::new(mode))
 }
 
 #[allow(unused)]
-pub(crate) fn list_mode(head: List<Mode>, tail: Mode, default: PrimitiveMode) -> Mode {
+pub(crate) fn list_mode(head: List<Mode>, tail: Mode) -> Mode {
     let mode = CompositeMode {
         list: ListMode::Form { head, tail },
-        ..CompositeMode::from(default)
+        ..CompositeMode::from(PrimitiveMode::default())
     };
     Mode::Composite(Box::new(mode))
 }
 
-pub(crate) fn map_mode(
-    some: Map<Val, Mode>,
-    key: Mode,
-    value: Mode,
-    default: PrimitiveMode,
-) -> Mode {
+pub(crate) fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode) -> Mode {
     let else1 = Pair::new(key, value);
     let mode = CompositeMode {
         map: MapMode::Form { some, else1 },
-        ..CompositeMode::from(default)
+        ..CompositeMode::from(PrimitiveMode::default())
     };
     Mode::Composite(Box::new(mode))
 }
