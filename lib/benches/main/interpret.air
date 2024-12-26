@@ -14,7 +14,7 @@
     body : do ; [
       sum = 0,
       n for i : [
-        (0 == i % 3) continue .,
+        (0 == i % 3) continue_if .,
         sum = sum + i,
       ],
       sum

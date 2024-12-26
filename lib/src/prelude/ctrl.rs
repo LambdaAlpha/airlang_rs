@@ -76,14 +76,14 @@ impl Prelude for CtrlPrelude {
     }
 }
 
-const BREAK: &str = "break";
-const UNIT_BREAK: &str = ".break";
-const ELSE_BREAK: &str = "else_break";
-const UNIT_ELSE_BREAK: &str = ".else_break";
-const CONTINUE: &str = "continue";
-const UNIT_CONTINUE: &str = ".continue";
-const ELSE_CONTINUE: &str = "else_continue";
-const UNIT_ELSE_CONTINUE: &str = ".else_continue";
+const BREAK_IF: &str = "break_if";
+const BREAK_IF_UNIT: &str = "break_if_.";
+const BREAK_IF_NOT: &str = "break_if_not";
+const BREAK_IF_NOT_UNIT: &str = "break_if_not_.";
+const CONTINUE_IF: &str = "continue_if";
+const CONTINUE_IF_UNIT: &str = "continue_if_.";
+const CONTINUE_IF_NOT: &str = "continue_if_not";
+const CONTINUE_IF_NOT_UNIT: &str = "continue_if_not_.";
 
 #[derive(Copy, Clone)]
 enum Exit {
@@ -703,14 +703,14 @@ impl ParseExit {
 
 fn parse_exit(str: &str) -> Option<ParseExit> {
     let (is_unit, exit, target) = match str {
-        BREAK => (false, Exit::Break, true),
-        UNIT_BREAK => (true, Exit::Break, true),
-        ELSE_BREAK => (false, Exit::Break, false),
-        UNIT_ELSE_BREAK => (true, Exit::Break, false),
-        CONTINUE => (false, Exit::Continue, true),
-        UNIT_CONTINUE => (true, Exit::Continue, true),
-        ELSE_CONTINUE => (false, Exit::Continue, false),
-        UNIT_ELSE_CONTINUE => (true, Exit::Continue, false),
+        BREAK_IF => (false, Exit::Break, true),
+        BREAK_IF_UNIT => (true, Exit::Break, true),
+        BREAK_IF_NOT => (false, Exit::Break, false),
+        BREAK_IF_NOT_UNIT => (true, Exit::Break, false),
+        CONTINUE_IF => (false, Exit::Continue, true),
+        CONTINUE_IF_UNIT => (true, Exit::Continue, true),
+        CONTINUE_IF_NOT => (false, Exit::Continue, false),
+        CONTINUE_IF_NOT_UNIT => (true, Exit::Continue, false),
         _ => {
             return None;
         }
