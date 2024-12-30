@@ -1,6 +1,5 @@
 pub use crate::{
     abstract1::Abstract,
-    answer::Answer,
     ask::Ask,
     bit::Bit,
     byte::Byte,
@@ -83,7 +82,6 @@ pub use crate::{
     val::{
         Val,
         abstract1::AbstractVal,
-        answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
         call::CallVal,

@@ -6,8 +6,6 @@ use std::{
 use crate::{
     Abstract,
     AbstractVal,
-    Answer,
-    AnswerVal,
     Ask,
     AskVal,
     Call,
@@ -451,7 +449,7 @@ impl EvalCore {
     {
         if let Val::Func(func) = func {
             let output = func.mode().ask.transform(ctx.reborrow(), output);
-            Val::Answer(Self::solve(ctx, func, output))
+            Self::solve(ctx, func, output)
         } else {
             let output = output_trans.transform(ctx, output);
             Val::Ask(Ask::new(func, output).into())
@@ -480,49 +478,30 @@ impl EvalCore {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            Val::Answer(Self::solve(ctx, func, output))
+            Self::solve(ctx, func, output)
         } else {
             Val::Ask(Ask::new(func, output).into())
         }
     }
 
-    pub(crate) fn solve<'a, Ctx>(ctx: Ctx, func: FuncVal, output: Val) -> AnswerVal
+    pub(crate) fn solve<'a, Ctx>(ctx: Ctx, func: FuncVal, output: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
-        let none = AnswerVal::from(Answer::None);
-        let ask = Ask::new(Val::Func(func.clone()), output.clone());
-        let ask = Val::Ask(ask.into());
-        let answer = Self::call_solver(ctx, ask);
-        let Answer::Cache(cache) = &*answer else {
-            return answer;
-        };
-        let Val::Func(cache_func) = &cache.func else {
-            return none;
-        };
-        if *cache_func != func || cache.output != output {
-            return none;
-        }
-        answer
-    }
-
-    fn call_solver<'a, Ctx>(ctx: Ctx, ask: Val) -> AnswerVal
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        let none = AnswerVal::from(Answer::None);
         let (ctx, is_const) = match ctx.for_mut_fn() {
-            MutFnCtx::Free(_) => return none,
+            MutFnCtx::Free(_) => return Val::default(),
             MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
             MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
         };
         let Ok(solver) = ctx.set_solver(None) else {
-            return none;
+            return Val::default();
         };
         let Some(mut solver) = solver else {
-            return none;
+            return Val::default();
         };
-        let answer = if solver.is_cell() {
+        let ask = Ask::new(Val::Func(func), output);
+        let ask = Val::Ask(ask.into());
+        if solver.is_cell() {
             let answer = Self::call_ref(&mut solver, ctx, is_const, ask);
             let _ = ctx.set_solver(Some(solver));
             answer
@@ -533,10 +512,6 @@ impl EvalCore {
             } else {
                 solver.transform(MutCtx::new(ctx), ask)
             }
-        };
-        let Val::Answer(answer) = answer else {
-            return none;
-        };
-        answer
+        }
     }
 }

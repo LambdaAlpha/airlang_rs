@@ -54,10 +54,6 @@ do [c = any ; case, type_of c]
 -----
 case
 =====
-do [a = any ; answer, type_of a]
------
-answer
-=====
 do [e = any ; extension, type_of e]
 -----
 extension
@@ -189,14 +185,6 @@ true
 do [
     a = case ; {function : not, input : true, output : false},
     b = case ; {function : not, input : true, output : false},
-    (a == b) and a != .
-]
------
-true
-=====
-do [
-    a = answer.maybe ; 1,
-    b = answer.maybe ; 1,
     (a == b) and a != .
 ]
 -----

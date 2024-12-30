@@ -41,7 +41,6 @@ use crate::{
     SymbolMode,
     Val,
     ValExt,
-    answer::Answer,
     bit::Bit,
     byte::Byte,
     ctx::{
@@ -107,7 +106,6 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // ctx
         1,      // func
         1,      // case
-        1,      // answer
         1,      // extension
     ];
     let i = sample(rng, weights);
@@ -130,8 +128,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         13 => Val::Ctx(any_ctx(rng, new_depth).into()),
         14 => Val::Func(any_func(rng, new_depth)),
         15 => Val::Case(any_case_val(rng, new_depth)),
-        16 => Val::Answer(any_answer(rng, new_depth).into()),
-        17 => Val::Ext(any_extension(rng, new_depth)),
+        16 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -640,30 +637,6 @@ pub(crate) fn any_cache(rng: &mut SmallRng, depth: usize) -> Cache<Val, Val, Val
     let func = any_func(rng, depth);
     let input = any_val(rng, depth);
     Cache::new(FreeCtx, func, input)
-}
-
-pub(crate) fn any_answer(rng: &mut SmallRng, depth: usize) -> Answer {
-    let weight: usize = 1 << min(depth, 32);
-    let weights = [
-        weight, // none
-        weight, // never
-        1,      // maybe
-        1,      // cache
-    ];
-    let dist = WeightedIndex::new(weights).unwrap();
-    let i = dist.sample(rng);
-    let new_depth = depth + 1;
-
-    match i {
-        0 => Answer::None,
-        1 => Answer::Never,
-        2 => Answer::Maybe(any_val(rng, new_depth)),
-        3 => {
-            let cache = any_cache(rng, new_depth);
-            Answer::Cache(cache.into())
-        }
-        _ => unreachable!(),
-    }
 }
 
 pub(crate) fn any_extension(_rng: &mut SmallRng, _depth: usize) -> Box<dyn ValExt> {

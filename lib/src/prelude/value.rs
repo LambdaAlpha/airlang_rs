@@ -11,7 +11,6 @@ use crate::{
     Val,
     arbitrary::{
         any_abstract,
-        any_answer,
         any_ask,
         any_bit,
         any_byte,
@@ -54,7 +53,6 @@ use crate::{
     symbol::Symbol,
     val::{
         ABSTRACT,
-        ANSWER,
         ASK,
         BIT,
         BYTE,
@@ -141,7 +139,6 @@ fn fn_any(input: Val) -> Val {
             CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
             FUNC => Val::Func(any_func(rng, DEPTH)),
             CASE => Val::Case(any_case_val(rng, DEPTH)),
-            ANSWER => Val::Answer(any_answer(rng, DEPTH).into()),
             EXT => Val::Ext(any_extension(rng, DEPTH)),
             _ => Val::default(),
         },
@@ -183,7 +180,6 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Func(_) => FUNC,
             Val::Ctx(_) => CTX,
             Val::Case(_) => CASE,
-            Val::Answer(_) => ANSWER,
             Val::Ext(_) => EXT,
         };
         Val::Symbol(Symbol::from_str(s))

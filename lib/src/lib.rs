@@ -36,8 +36,6 @@ pub(crate) mod func;
 
 pub(crate) mod cache;
 
-pub(crate) mod answer;
-
 pub(crate) mod extension;
 
 pub(crate) mod val;

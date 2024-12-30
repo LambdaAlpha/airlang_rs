@@ -29,7 +29,6 @@ use crate::{
     unit::Unit,
     val::{
         abstract1::AbstractVal,
-        answer::AnswerVal,
         ask::AskVal,
         byte::ByteVal,
         call::CallVal,
@@ -69,8 +68,6 @@ pub enum Val {
 
     Case(CaseVal),
 
-    Answer(AnswerVal),
-
     Ext(Box<dyn ValExt>),
 }
 
@@ -90,7 +87,6 @@ pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 pub(crate) const CASE: &str = "case";
-pub(crate) const ANSWER: &str = "answer";
 pub(crate) const EXT: &str = "extension";
 
 impl Val {
@@ -261,12 +257,6 @@ impl From<CaseVal> for Val {
     }
 }
 
-impl From<AnswerVal> for Val {
-    fn from(value: AnswerVal) -> Self {
-        Val::Answer(value)
-    }
-}
-
 impl From<Box<dyn ValExt>> for Val {
     fn from(value: Box<dyn ValExt>) -> Self {
         Val::Ext(value)
@@ -434,7 +424,6 @@ impl Debug for Val {
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
             Val::Func(func) => <_ as Debug>::fmt(func, f),
             Val::Case(case) => <_ as Debug>::fmt(case, f),
-            Val::Answer(answer) => <_ as Debug>::fmt(answer, f),
             Val::Ext(ext) => <_ as Debug>::fmt(ext, f),
         }
     }
@@ -465,5 +454,3 @@ pub(crate) mod case;
 pub(crate) mod ctx;
 
 pub(crate) mod func;
-
-pub(crate) mod answer;
