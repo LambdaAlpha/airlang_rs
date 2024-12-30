@@ -10,3 +10,10 @@ where
 {
     input
 }
+
+pub(crate) fn solve<'a, Ctx>(_ctx: Ctx, _func: FuncVal, _output: Val) -> Val
+where
+    Ctx: CtxMeta<'a>,
+{
+    Val::default()
+}

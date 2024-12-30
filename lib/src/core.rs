@@ -32,7 +32,10 @@ use crate::{
         },
     },
     func::FuncTrait,
-    optimize::optimize,
+    solver::{
+        optimize,
+        solve,
+    },
     transformer::{
         ByVal,
         Transformer,
@@ -320,7 +323,7 @@ impl EvalCore {
         }
     }
 
-    fn call_ref(func: &mut FuncVal, ctx: &mut crate::Ctx, is_const: bool, input: Val) -> Val {
+    fn call_ref(func: &mut FuncVal, ctx: &mut Ctx, is_const: bool, input: Val) -> Val {
         if is_const {
             func.transform(ConstCtx::new(ctx), input)
         } else {
@@ -387,7 +390,7 @@ impl EvalCore {
     {
         if let Val::Func(func) = func {
             let input = func.mode().abstract1.transform(ctx.reborrow(), input);
-            optimize(ctx, func, input)
+            Self::abstract_func(ctx, func, input)
         } else {
             input_trans.transform(ctx, input)
         }
@@ -415,10 +418,24 @@ impl EvalCore {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            optimize(ctx, func, input)
+            Self::abstract_func(ctx, func, input)
         } else {
             input
         }
+    }
+
+    pub(crate) fn abstract_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        let question = Abstract::new(Val::Func(func.clone()), input.clone());
+        let question = Val::Abstract(question.into());
+        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
+            if answer != input {
+                return answer;
+            }
+        }
+        optimize(ctx, func, input)
     }
 
     pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
@@ -449,7 +466,7 @@ impl EvalCore {
     {
         if let Val::Func(func) = func {
             let output = func.mode().ask.transform(ctx.reborrow(), output);
-            Self::solve(ctx, func, output)
+            Self::ask_func(ctx, func, output)
         } else {
             let output = output_trans.transform(ctx, output);
             Val::Ask(Ask::new(func, output).into())
@@ -478,40 +495,48 @@ impl EvalCore {
         Ctx: CtxMeta<'a>,
     {
         if let Val::Func(func) = func {
-            Self::solve(ctx, func, output)
+            Self::ask_func(ctx, func, output)
         } else {
             Val::Ask(Ask::new(func, output).into())
         }
     }
 
-    pub(crate) fn solve<'a, Ctx>(ctx: Ctx, func: FuncVal, output: Val) -> Val
+    pub(crate) fn ask_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        let question = Ask::new(Val::Func(func.clone()), output.clone());
+        let question = Val::Ask(question.into());
+        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
+            if !answer.is_unit() {
+                return answer;
+            }
+        }
+        solve(ctx, func, output)
+    }
+
+    pub(crate) fn call_solver<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>
     where
         Ctx: CtxMeta<'a>,
     {
         let (ctx, is_const) = match ctx.for_mut_fn() {
-            MutFnCtx::Free(_) => return Val::default(),
+            MutFnCtx::Free(_) => return None,
             MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
             MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
         };
-        let Ok(solver) = ctx.set_solver(None) else {
-            return Val::default();
-        };
-        let Some(mut solver) = solver else {
-            return Val::default();
-        };
-        let ask = Ask::new(Val::Func(func), output);
-        let ask = Val::Ask(ask.into());
-        if solver.is_cell() {
-            let answer = Self::call_ref(&mut solver, ctx, is_const, ask);
+        let mut solver = ctx.set_solver(None).unwrap()?;
+        let answer = if solver.is_cell() {
+            let answer = Self::call_ref(&mut solver, ctx, is_const, question);
             let _ = ctx.set_solver(Some(solver));
             answer
         } else {
             let _ = ctx.set_solver(Some(solver.clone()));
             if is_const {
-                solver.transform(ConstCtx::new(ctx), ask)
+                solver.transform(ConstCtx::new(ctx), question)
             } else {
-                solver.transform(MutCtx::new(ctx), ask)
+                solver.transform(MutCtx::new(ctx), question)
             }
-        }
+        };
+        Some(answer)
     }
 }
