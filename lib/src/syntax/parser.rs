@@ -268,6 +268,35 @@ impl ScopeParser {
 }
 
 #[derive(Copy, Clone)]
+struct SeparateParser {
+    ctx: ParseCtx,
+}
+
+impl<'a, T, E> Parser<&'a str, T, E> for SeparateParser
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
+        let tokens = separated_list1(empty1, TokenParser::new(self.ctx));
+        let tokens = map(tokens, |tokens| {
+            let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
+            T::from(list)
+        });
+        let list = delimited_trim(LIST_LEFT, tokens, LIST_RIGHT);
+        let scope = ScopeParser::new(self.ctx.switch());
+        let f = alt((list, scope));
+        context("separate", f)(input)
+    }
+}
+
+impl SeparateParser {
+    fn new(ctx: ParseCtx) -> Self {
+        Self { ctx }
+    }
+}
+
+#[derive(Copy, Clone)]
 struct CtxParser {
     ctx: ParseCtx,
 }
@@ -360,7 +389,7 @@ where
             MAP_RIGHT => fail(s),
             SCOPE_LEFT => map(ScopeParser::new(self.ctx), Token::Default)(s),
             SCOPE_RIGHT => fail(s),
-            SEPARATOR => map(ScopeParser::new(self.ctx.switch()), Token::Default)(&s[1..]),
+            SEPARATOR => map(SeparateParser::new(self.ctx), Token::Default)(&s[1..]),
             SPACE => fail(s),
             TEXT_QUOTE => map(rich_text, Token::Default)(s),
             SYMBOL_QUOTE => map(rich_symbol, Token::Default)(s),
