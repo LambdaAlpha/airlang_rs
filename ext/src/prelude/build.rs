@@ -9,7 +9,6 @@ use airlang::{
     FuncMode,
     FuncVal,
     Invariant,
-    Mode,
     MutCtx,
     MutFnCtx,
     Symbol,
@@ -46,14 +45,7 @@ impl Prelude for BuildPrelude {
 fn import() -> Named<FuncVal> {
     let id = "build.import";
     let f = fn_import;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

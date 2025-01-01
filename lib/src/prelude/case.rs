@@ -115,14 +115,7 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let id = "case.cache";
     let f = fn_new_cache;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }

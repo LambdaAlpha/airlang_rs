@@ -1,7 +1,6 @@
 use crate::{
     FuncMode,
     Map,
-    Mode,
     Symbol,
     ctx::CtxValue,
     prelude::{
@@ -41,14 +40,7 @@ impl Prelude for SyntaxPrelude {
 fn parse() -> Named<FuncVal> {
     let id = "parse";
     let f = fn_parse;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -63,14 +55,7 @@ fn fn_parse(input: Val) -> Val {
 fn generate() -> Named<FuncVal> {
     let id = "generate";
     let f = fn_generate;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

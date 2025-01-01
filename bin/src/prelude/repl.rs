@@ -1,7 +1,6 @@
 use airlang::{
     FuncMode,
     FuncVal,
-    Mode,
     MutCtx,
     Val,
 };
@@ -31,14 +30,7 @@ impl Prelude for ReplPrelude {
 fn help() -> Named<FuncVal> {
     let id = "help";
     let f = fn_help;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = false;
     named_free_fn(id, f, mode, cacheable)
 }

@@ -588,14 +588,7 @@ fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
 fn new_map() -> Named<FuncVal> {
     let id = "map";
     let f = fn_new_map;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -624,14 +617,7 @@ fn fn_new_map(input: Val) -> Val {
 fn new_set() -> Named<FuncVal> {
     let id = "set";
     let f = fn_new_set;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -648,14 +634,7 @@ fn fn_new_set(input: Val) -> Val {
 fn new_multiset() -> Named<FuncVal> {
     let id = "multiset";
     let f = fn_new_multiset;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

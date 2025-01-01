@@ -46,14 +46,7 @@ impl Prelude for UnitPrelude {
 fn unit() -> Named<FuncVal> {
     let id = "unit";
     let f = fn_unit;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

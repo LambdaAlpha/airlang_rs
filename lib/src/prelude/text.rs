@@ -62,14 +62,7 @@ impl Prelude for TextPrelude {
 fn from_utf8() -> Named<FuncVal> {
     let id = "text.from_utf8";
     let f = fn_from_utf8;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -89,14 +82,7 @@ fn fn_from_utf8(input: Val) -> Val {
 fn into_utf8() -> Named<FuncVal> {
     let id = "text.into_utf8";
     let f = fn_into_utf8;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -169,14 +155,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 fn join() -> Named<FuncVal> {
     let id = "text.join";
     let f = fn_join;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

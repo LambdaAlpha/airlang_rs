@@ -110,14 +110,7 @@ fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
 fn not() -> Named<FuncVal> {
     let id = "not";
     let f = fn_not;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -132,14 +125,7 @@ fn fn_not(input: Val) -> Val {
 fn and() -> Named<FuncVal> {
     let id = "and";
     let f = fn_and;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -160,14 +146,7 @@ fn fn_and(input: Val) -> Val {
 fn or() -> Named<FuncVal> {
     let id = "or";
     let f = fn_or;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -188,14 +167,7 @@ fn fn_or(input: Val) -> Val {
 fn xor() -> Named<FuncVal> {
     let id = "xor";
     let f = fn_xor;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -216,14 +188,7 @@ fn fn_xor(input: Val) -> Val {
 fn imply() -> Named<FuncVal> {
     let id = "imply";
     let f = fn_imply;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

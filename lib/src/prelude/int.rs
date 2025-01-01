@@ -2,7 +2,6 @@ use crate::{
     FuncMode,
     Int,
     Map,
-    Mode,
     Symbol,
     ctx::CtxValue,
     pair::Pair,
@@ -69,14 +68,7 @@ impl Prelude for IntPrelude {
 fn add() -> Named<FuncVal> {
     let id = "+";
     let f = fn_add;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -100,14 +92,7 @@ fn fn_add(input: Val) -> Val {
 fn subtract() -> Named<FuncVal> {
     let id = "-";
     let f = fn_subtract;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -131,14 +116,7 @@ fn fn_subtract(input: Val) -> Val {
 fn multiply() -> Named<FuncVal> {
     let id = "*";
     let f = fn_multiply;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -162,14 +140,7 @@ fn fn_multiply(input: Val) -> Val {
 fn divide() -> Named<FuncVal> {
     let id = "/";
     let f = fn_divide;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -196,14 +167,7 @@ fn fn_divide(input: Val) -> Val {
 fn remainder() -> Named<FuncVal> {
     let id = "%";
     let f = fn_remainder;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -230,14 +194,7 @@ fn fn_remainder(input: Val) -> Val {
 fn divide_remainder() -> Named<FuncVal> {
     let id = "/%";
     let f = fn_divide_remainder;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -264,14 +221,7 @@ fn fn_divide_remainder(input: Val) -> Val {
 fn less_than() -> Named<FuncVal> {
     let id = "<";
     let f = fn_less_than;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -293,14 +243,7 @@ fn fn_less_than(input: Val) -> Val {
 fn less_equal() -> Named<FuncVal> {
     let id = "<=";
     let f = fn_less_equal;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -322,14 +265,7 @@ fn fn_less_equal(input: Val) -> Val {
 fn greater_than() -> Named<FuncVal> {
     let id = ">";
     let f = fn_greater_than;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -351,14 +287,7 @@ fn fn_greater_than(input: Val) -> Val {
 fn greater_equal() -> Named<FuncVal> {
     let id = ">=";
     let f = fn_greater_equal;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -380,14 +309,7 @@ fn fn_greater_equal(input: Val) -> Val {
 fn less_greater() -> Named<FuncVal> {
     let id = "<>";
     let f = fn_less_greater;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

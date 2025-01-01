@@ -526,14 +526,7 @@ fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
 fn fallback() -> Named<FuncVal> {
     let id = "fallback";
     let f = fn_fallback;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -623,14 +616,7 @@ fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
 fn set_solver() -> Named<FuncVal> {
     let id = "set_solver";
     let f = fn_set_solver;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -695,14 +681,7 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let id = "|:";
     let f = fn_ctx_in_ctx_out;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = false;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -891,14 +870,7 @@ fn generate_ctx_value(ctx_value: CtxValue) -> Val {
 fn ctx_prelude() -> Named<FuncVal> {
     let id = "prelude";
     let f = fn_ctx_prelude;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -910,14 +882,7 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 fn ctx_self() -> Named<FuncVal> {
     let id = "self";
     let f = fn_ctx_self;
-    let call = Mode::default();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode::default();
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
