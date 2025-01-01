@@ -72,6 +72,7 @@ pub(crate) struct CtxPrelude {
     pub(crate) set_invariant: Named<FuncVal>,
     pub(crate) get_invariant: Named<FuncVal>,
     pub(crate) fallback: Named<FuncVal>,
+    pub(crate) set_fallback: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
     pub(crate) get_access: Named<FuncVal>,
     pub(crate) get_solver: Named<FuncVal>,
@@ -93,6 +94,7 @@ impl Default for CtxPrelude {
             set_invariant: set_invariant(),
             get_invariant: get_invariant(),
             fallback: fallback(),
+            set_fallback: set_fallback(),
             is_null: is_null(),
             get_access: get_access(),
             get_solver: get_solver(),
@@ -115,6 +117,7 @@ impl Prelude for CtxPrelude {
         self.set_invariant.put(m);
         self.get_invariant.put(m);
         self.fallback.put(m);
+        self.set_fallback.put(m);
         self.is_null.put(m);
         self.get_access.put(m);
         self.get_solver.put(m);
@@ -536,6 +539,29 @@ fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
         return Val::default();
     };
     Val::Bit(Bit::new(variables.fallback()))
+}
+
+fn set_fallback() -> Named<FuncVal> {
+    let id = "set_fallback";
+    let f = fn_set_fallback;
+    let mode = FuncMode::default();
+    let cacheable = true;
+    named_free_fn(id, f, mode, cacheable)
+}
+
+fn fn_set_fallback(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Ctx(mut ctx) = pair.first else {
+        return Val::default();
+    };
+    let Val::Bit(bit) = pair.second else {
+        return Val::default();
+    };
+    ctx.variables_mut().set_fallback(bit.bool());
+    Val::Ctx(ctx)
 }
 
 fn is_null() -> Named<FuncVal> {

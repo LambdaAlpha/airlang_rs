@@ -55,15 +55,8 @@ impl CtxMap {
         self.map.is_empty()
     }
 
-    #[allow(unused)]
-    pub(crate) fn disable_fallback(&mut self) {
-        self.fallback = false;
-    }
-
-    #[allow(unused)]
-    pub(crate) fn into_fallback(mut self) -> Self {
-        self.fallback = true;
-        self
+    pub(crate) fn set_fallback(&mut self, fallback: bool) {
+        self.fallback = fallback;
     }
 
     pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {

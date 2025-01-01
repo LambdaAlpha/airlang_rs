@@ -222,6 +222,14 @@ do [c = context ; {fallback : true}, c | form ; *do ; [(a . constant) *= 1, a *s
 -----
 final
 =====
+do [c = context ; {fallback : true}, c = ^c set_fallback false, c | fallback ';' .]
+-----
+false
+=====
+do [c = context ; {fallback : false}, c = ^c set_fallback true, c | fallback ';' .]
+-----
+true
+=====
 access .
 -----
 mutable
