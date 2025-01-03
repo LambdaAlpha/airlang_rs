@@ -28,6 +28,7 @@ pub(crate) trait CtxRef<'a> {
     fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError>;
 }
 
+#[allow(clippy::wrong_self_convention)]
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {
     type Reborrow<'b>: CtxMeta<'b>
     where
@@ -37,11 +38,9 @@ pub(crate) trait CtxMeta<'a>: CtxRef<'a> {
 
     fn borrow(&self) -> Option<&Ctx>;
 
-    #[allow(clippy::wrong_self_convention)]
     #[allow(unused)]
     fn is_ctx_free(self) -> bool;
 
-    #[allow(clippy::wrong_self_convention)]
     #[allow(unused)]
     fn is_ctx_const(self) -> bool;
 

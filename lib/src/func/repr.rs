@@ -21,7 +21,6 @@ use crate::{
     MutStaticPrimFuncVal,
     Symbol,
     Val,
-    ctx::map::CtxMapRef,
     func::{
         FuncMode,
         comp::Composite,
@@ -117,7 +116,6 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Unit(_) => Ctx::default(),
         _ => return None,
     };
-    let fallback = ctx.variables().fallback();
     let input_name = match map_remove(&mut map, INPUT_NAME) {
         Val::Symbol(name) => name,
         Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
@@ -181,9 +179,6 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
             }
         }
         CONST => {
-            if fallback {
-                return None;
-            }
             if cell {
                 let func = ConstCellCompFunc::new(comp, ctx_name, mode, cacheable);
                 FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
@@ -193,9 +188,6 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
             }
         }
         MUTABLE => {
-            if fallback {
-                return None;
-            }
             if cell {
                 let func = MutCellCompFunc::new(comp, ctx_name, mode, cacheable);
                 FuncVal::MutCellComp(MutCellCompFuncVal::from(func))

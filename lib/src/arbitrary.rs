@@ -236,6 +236,7 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
         let ctx_value = CtxValue {
             val: any_val(rng, depth),
             invariant: any_invariant(rng),
+            static1: rng.gen(),
         };
         ctx_map.insert(any_symbol(rng), ctx_value);
     }

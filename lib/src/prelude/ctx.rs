@@ -6,7 +6,6 @@ use crate::{
         Ctx,
         CtxValue,
         DynRef,
-        Invariant,
         const1::{
             ConstCtx,
             ConstFnCtx,
@@ -21,8 +20,8 @@ use crate::{
         ref1::CtxRef,
         repr::{
             Extra,
-            FALLBACK,
             PatternCtx,
+            REVERSE,
             SOLVER,
             VARIABLES,
             assign_pattern,
@@ -67,9 +66,10 @@ pub(crate) struct CtxPrelude {
     pub(crate) assign: Named<FuncVal>,
     pub(crate) set_invariant: Named<FuncVal>,
     pub(crate) get_invariant: Named<FuncVal>,
-    pub(crate) fallback: Named<FuncVal>,
-    pub(crate) set_fallback: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
+    pub(crate) is_static: Named<FuncVal>,
+    pub(crate) is_reverse: Named<FuncVal>,
+    pub(crate) set_reverse: Named<FuncVal>,
     pub(crate) get_access: Named<FuncVal>,
     pub(crate) get_solver: Named<FuncVal>,
     pub(crate) set_solver: Named<FuncVal>,
@@ -89,9 +89,10 @@ impl Default for CtxPrelude {
             assign: assign(),
             set_invariant: set_invariant(),
             get_invariant: get_invariant(),
-            fallback: fallback(),
-            set_fallback: set_fallback(),
             is_null: is_null(),
+            is_static: is_static(),
+            is_reverse: is_reverse(),
+            set_reverse: set_reverse(),
             get_access: get_access(),
             get_solver: get_solver(),
             set_solver: set_solver(),
@@ -112,9 +113,10 @@ impl Prelude for CtxPrelude {
         self.assign.put(m);
         self.set_invariant.put(m);
         self.get_invariant.put(m);
-        self.fallback.put(m);
-        self.set_fallback.put(m);
         self.is_null.put(m);
+        self.is_static.put(m);
+        self.is_reverse.put(m);
+        self.set_reverse.put(m);
         self.get_access.put(m);
         self.get_solver.put(m);
         self.set_solver.put(m);
@@ -195,9 +197,7 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
     };
     let pair = pair.unwrap();
     let pattern_ctx = PatternCtx {
-        extra: Extra {
-            invariant: Invariant::None,
-        },
+        extra: Extra::default(),
         allow_extra: true,
     };
     let Some(pattern) = parse_pattern(pair.first, pattern_ctx) else {
@@ -271,44 +271,6 @@ fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
     Val::Symbol(generate_invariant(invariant))
 }
 
-fn fallback() -> Named<FuncVal> {
-    let id = "fallback";
-    let f = fn_fallback;
-    let mode = FuncMode::default();
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
-}
-
-fn fn_fallback(ctx: ConstFnCtx, _input: Val) -> Val {
-    let Ok(variables) = ctx.get_variables() else {
-        return Val::default();
-    };
-    Val::Bit(Bit::new(variables.fallback()))
-}
-
-fn set_fallback() -> Named<FuncVal> {
-    let id = "set_fallback";
-    let f = fn_set_fallback;
-    let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
-}
-
-fn fn_set_fallback(input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Ctx(mut ctx) = pair.first else {
-        return Val::default();
-    };
-    let Val::Bit(bit) = pair.second else {
-        return Val::default();
-    };
-    ctx.variables_mut().set_fallback(bit.bool());
-    Val::Ctx(ctx)
-}
-
 fn is_null() -> Named<FuncVal> {
     let id = "is_null";
     let f = fn_is_null;
@@ -332,6 +294,72 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
         Ok(b) => Val::Bit(Bit::new(b)),
         Err(_) => Val::default(),
     }
+}
+
+fn is_static() -> Named<FuncVal> {
+    let id = "is_static";
+    let f = fn_is_static;
+    let call = symbol_form_mode();
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
+    let cacheable = true;
+    named_const_fn(id, f, mode, cacheable)
+}
+
+fn fn_is_static(ctx: ConstFnCtx, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    let Ok(ctx) = ctx.get_variables() else {
+        return Val::default();
+    };
+    let Some(is_static) = ctx.is_static(s) else {
+        return Val::default();
+    };
+    Val::Bit(Bit::new(is_static))
+}
+
+fn is_reverse() -> Named<FuncVal> {
+    let id = "is_reverse";
+    let f = fn_is_reverse;
+    let mode = FuncMode::default();
+    let cacheable = true;
+    named_const_fn(id, f, mode, cacheable)
+}
+
+fn fn_is_reverse(ctx: ConstFnCtx, _input: Val) -> Val {
+    let Ok(variables) = ctx.get_variables() else {
+        return Val::default();
+    };
+    Val::Bit(Bit::new(variables.is_reverse()))
+}
+
+fn set_reverse() -> Named<FuncVal> {
+    let id = "set_reverse";
+    let f = fn_set_reverse;
+    let mode = FuncMode::default();
+    let cacheable = true;
+    named_free_fn(id, f, mode, cacheable)
+}
+
+fn fn_set_reverse(input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Ctx(mut ctx) = pair.first else {
+        return Val::default();
+    };
+    let Val::Bit(bit) = pair.second else {
+        return Val::default();
+    };
+    ctx.variables_mut().set_reverse(bit.bool());
+    Val::Ctx(ctx)
 }
 
 fn get_access() -> Named<FuncVal> {
@@ -480,7 +508,7 @@ fn ctx_new() -> Named<FuncVal> {
         symbol(VARIABLES),
         map_mode(Map::default(), symbol_form_mode(), Mode::default()),
     );
-    map.insert(symbol(FALLBACK), Mode::default());
+    map.insert(symbol(REVERSE), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
     let call = map_mode(map, symbol_form_mode(), Mode::default());
     let abstract1 = call.clone();
@@ -511,7 +539,7 @@ fn ctx_repr() -> Named<FuncVal> {
         symbol(VARIABLES),
         map_mode(Map::default(), symbol_form_mode(), Mode::default()),
     );
-    map.insert(symbol(FALLBACK), Mode::default());
+    map.insert(symbol(REVERSE), Mode::default());
     map.insert(symbol(SOLVER), Mode::default());
     let ask = map_mode(map, symbol_form_mode(), Mode::default());
     let mode = FuncMode {

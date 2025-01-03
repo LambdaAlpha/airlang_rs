@@ -193,6 +193,7 @@ impl<'l> CtxMeta<'l> for MutFnCtx<'l> {
     }
 }
 
+#[allow(clippy::wrong_self_convention)]
 impl<'a> MutCtx<'a> {
     pub fn new(ctx: &'a mut Ctx) -> Self {
         Self(ctx)
@@ -226,7 +227,6 @@ impl<'a> MutCtx<'a> {
         self.get_variables_mut()?.get_ref_mut(name)
     }
 
-    #[allow(clippy::wrong_self_convention)]
     pub fn is_assignable(self, name: Symbol) -> bool {
         let Ok(ctx) = self.get_variables() else {
             return false;
@@ -240,11 +240,16 @@ impl<'a> MutCtx<'a> {
         invariant: Invariant,
         val: Val,
     ) -> Result<Option<Val>, CtxError> {
-        self.get_variables_mut()?
-            .put_value(name, CtxValue { invariant, val })
+        let ctx_value = CtxValue {
+            invariant,
+            static1: false,
+            val,
+        };
+        self.get_variables_mut()?.put_value(name, ctx_value)
     }
 }
 
+#[allow(clippy::wrong_self_convention)]
 impl<'a> MutFnCtx<'a> {
     pub fn reborrow(&mut self) -> MutFnCtx {
         <_ as CtxMeta<'a>>::reborrow(self)
@@ -266,7 +271,6 @@ impl<'a> MutFnCtx<'a> {
         self.get_variables_mut()?.get_ref_mut(name)
     }
 
-    #[allow(clippy::wrong_self_convention)]
     pub fn is_assignable(self, name: Symbol) -> bool {
         let Ok(ctx) = self.get_variables() else {
             return false;

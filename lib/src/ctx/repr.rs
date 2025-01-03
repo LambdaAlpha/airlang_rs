@@ -33,14 +33,15 @@ use crate::{
     },
 };
 
-pub(crate) const INVARIANT: &str = "invariant";
+const INVARIANT: &str = "invariant";
+const STATIC: &str = "static";
 
 pub(crate) const NONE: &str = "none";
 pub(crate) const FINAL: &str = "final";
 pub(crate) const CONST: &str = "constant";
 
 pub(crate) const VARIABLES: &str = "variables";
-pub(crate) const FALLBACK: &str = "fallback";
+pub(crate) const REVERSE: &str = "reverse";
 pub(crate) const SOLVER: &str = "solver";
 
 pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
@@ -53,12 +54,12 @@ pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
         _ => return None,
     };
     let variables = parse_ctx_map(variables)?;
-    let fallback = match map_remove(&mut map, FALLBACK) {
+    let reverse = match map_remove(&mut map, REVERSE) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
         _ => return None,
     };
-    let variables = CtxMap::new(variables, fallback);
+    let variables = CtxMap::new(variables, reverse);
     let solver = match map_remove(&mut map, SOLVER) {
         Val::Unit(_) => None,
         Val::Func(solver) => Some(solver),
@@ -92,12 +93,11 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
         return None;
     };
     let pair = Pair::from(pair);
-    let extra = parse_extra(pair.second, Extra {
-        invariant: Invariant::None,
-    })?;
+    let extra = parse_extra(pair.second, Extra::default())?;
     Some(CtxValue {
         val: pair.first,
         invariant: extra.invariant,
+        static1: extra.static1,
     })
 }
 
@@ -106,13 +106,22 @@ fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
         Val::Symbol(s) => {
             default.invariant = parse_invariant(&s)?;
         }
-        Val::Map(mut map) => match map_remove(&mut map, INVARIANT) {
-            Val::Symbol(invariant) => {
-                default.invariant = parse_invariant(&invariant)?;
+        Val::Map(mut map) => {
+            match map_remove(&mut map, INVARIANT) {
+                Val::Symbol(invariant) => {
+                    default.invariant = parse_invariant(&invariant)?;
+                }
+                Val::Unit(_) => {}
+                _ => return None,
             }
-            Val::Unit(_) => {}
-            _ => return None,
-        },
+            let static1 = match map.remove(&symbol(STATIC)) {
+                Some(Val::Unit(_)) => true,
+                Some(Val::Bit(bit)) => bit.bool(),
+                None => false,
+                _ => return None,
+            };
+            default.static1 = static1;
+        }
         _ => return None,
     }
     Some(default)
@@ -131,9 +140,9 @@ pub(crate) fn parse_invariant(invariant: &str) -> Option<Invariant> {
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     let ctx = Ctx::from(ctx).destruct();
     let mut map = Map::default();
-    let fallback = ctx.variables.fallback();
-    if fallback {
-        map.insert(symbol(FALLBACK), Val::Bit(Bit::true1()));
+    let reverse = ctx.variables.is_reverse();
+    if reverse {
+        map.insert(symbol(REVERSE), Val::Bit(Bit::true1()));
     }
     if let Some(variables) = generate_ctx_map(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);
@@ -193,9 +202,10 @@ pub(crate) struct Binding<T> {
     extra: Extra,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub(crate) struct Extra {
     pub(crate) invariant: Invariant,
+    pub(crate) static1: bool,
 }
 
 #[derive(Copy, Clone)]
@@ -303,6 +313,9 @@ fn parse_pattern_extra(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
     };
     let pair = Pair::from(pair);
     ctx.extra = parse_extra(pair.second, ctx.extra)?;
+    if ctx.extra.static1 {
+        return None;
+    }
     parse_pattern(pair.first, ctx)
 }
 
@@ -322,6 +335,7 @@ fn assign_any(ctx: MutFnCtx, binding: Binding<Symbol>, val: Val) -> Val {
     let ctx_value = CtxValue {
         val,
         invariant: binding.extra.invariant,
+        static1: false,
     };
     let Ok(ctx) = ctx.get_variables_mut() else {
         return Val::default();

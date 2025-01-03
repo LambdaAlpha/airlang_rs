@@ -10,7 +10,10 @@ use crate::{
     },
 };
 
+#[allow(clippy::wrong_self_convention)]
 pub(crate) trait CtxMapRef<'a>: Sized {
+    fn is_reverse(self) -> bool;
+
     fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError>;
 
     fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError>;
@@ -25,9 +28,8 @@ pub(crate) trait CtxMapRef<'a>: Sized {
 
     fn get_invariant(self, name: Symbol) -> Option<Invariant>;
 
-    fn fallback(self) -> bool;
+    fn is_static(self, name: Symbol) -> Option<bool>;
 
-    #[allow(clippy::wrong_self_convention)]
     fn is_assignable(self, name: Symbol) -> bool {
         let Some(invariant) = self.get_invariant(name) else {
             return true;
@@ -39,12 +41,12 @@ pub(crate) trait CtxMapRef<'a>: Sized {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMap {
     map: Map<Symbol, CtxValue>,
-    fallback: bool,
+    reverse: bool,
 }
 
 impl CtxMap {
-    pub(crate) fn new(map: Map<Symbol, CtxValue>, fallback: bool) -> Self {
-        Self { map, fallback }
+    pub(crate) fn new(map: Map<Symbol, CtxValue>, reverse: bool) -> Self {
+        Self { map, reverse }
     }
 
     pub(crate) fn unwrap(self) -> Map<Symbol, CtxValue> {
@@ -55,8 +57,8 @@ impl CtxMap {
         self.map.is_empty()
     }
 
-    pub(crate) fn set_fallback(&mut self, fallback: bool) {
-        self.fallback = fallback;
+    pub(crate) fn set_reverse(&mut self, reverse: bool) {
+        self.reverse = reverse;
     }
 
     pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
@@ -69,6 +71,10 @@ impl CtxMap {
 }
 
 impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
+    fn is_reverse(self) -> bool {
+        (&*self).is_reverse()
+    }
+
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         (&*self).get_ref(name)
     }
@@ -96,33 +102,71 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         let Some(value) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.invariant != Invariant::None {
+        if value.static1 {
+            return Err(CtxError::AccessDenied);
+        }
+        if !self.reverse && value.invariant != Invariant::None {
             return Err(CtxError::AccessDenied);
         }
         Ok(self.map.remove(&name).unwrap().val)
     }
 
-    fn put_value(self, name: Symbol, val: CtxValue) -> Result<Option<Val>, CtxError> {
-        let Some(value) = self.map.get(&name) else {
-            return Ok(self.put_unchecked(name, val));
+    // ignore static field of CtxValue
+    fn put_value(self, name: Symbol, mut new: CtxValue) -> Result<Option<Val>, CtxError> {
+        debug_assert!(!new.static1);
+        let Some(old) = self.map.get(&name) else {
+            if self.reverse && new.invariant != Invariant::None {
+                return Err(CtxError::AccessDenied);
+            }
+            new.static1 = false;
+            return Ok(self.put_unchecked(name, new));
         };
-        if value.invariant != Invariant::None {
-            return Err(CtxError::AccessDenied);
+        if old.static1 {
+            if old.invariant != Invariant::None || new.invariant != Invariant::None {
+                return Err(CtxError::AccessDenied);
+            }
+            new.static1 = true;
+            return Ok(self.put_unchecked(name, new));
         }
-        Ok(self.put_unchecked(name, val))
+        #[allow(clippy::collapsible_else_if)]
+        if self.reverse {
+            if new.invariant != Invariant::None {
+                return Err(CtxError::AccessDenied);
+            }
+        } else {
+            if old.invariant != Invariant::None {
+                return Err(CtxError::AccessDenied);
+            }
+        }
+        new.static1 = false;
+        Ok(self.put_unchecked(name, new))
     }
 
-    fn set_invariant(self, name: Symbol, invariant: Invariant) -> Result<(), CtxError> {
-        let Some(value) = self.map.get_mut(&name) else {
+    fn set_invariant(self, name: Symbol, new: Invariant) -> Result<(), CtxError> {
+        let Some(old) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if !self.fallback
-            && (invariant == Invariant::None && value.invariant != Invariant::None
-                || invariant != Invariant::Const && value.invariant == Invariant::Const)
-        {
-            return Err(CtxError::AccessDenied);
+        if old.static1 {
+            if old.invariant != new {
+                return Err(CtxError::AccessDenied);
+            }
+            return Ok(());
         }
-        value.invariant = invariant;
+        #[allow(clippy::collapsible_else_if)]
+        if self.reverse {
+            if new != Invariant::None && old.invariant == Invariant::None
+                || new == Invariant::Const && old.invariant != Invariant::Const
+            {
+                return Err(CtxError::AccessDenied);
+            }
+        } else {
+            if new == Invariant::None && old.invariant != Invariant::None
+                || new != Invariant::Const && old.invariant == Invariant::Const
+            {
+                return Err(CtxError::AccessDenied);
+            }
+        }
+        old.invariant = new;
         Ok(())
     }
 
@@ -130,12 +174,16 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         (&*self).get_invariant(name)
     }
 
-    fn fallback(self) -> bool {
-        (&*self).fallback()
+    fn is_static(self, name: Symbol) -> Option<bool> {
+        (&*self).is_static(name)
     }
 }
 
 impl<'l> CtxMapRef<'l> for &'l CtxMap {
+    fn is_reverse(self) -> bool {
+        self.reverse
+    }
+
     fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
         let Some(tagged_val) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
@@ -168,7 +216,8 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
         Some(value.invariant)
     }
 
-    fn fallback(self) -> bool {
-        self.fallback
+    fn is_static(self, name: Symbol) -> Option<bool> {
+        let value = self.map.get(&name)?;
+        Some(value.static1)
     }
 }

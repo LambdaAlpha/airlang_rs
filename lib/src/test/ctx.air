@@ -210,23 +210,67 @@ do [a = 1, is_null a]
 -----
 false
 =====
-fallback .
------
-false
-=====
-do [c = context ; {fallback : true}, c | fallback ';' .]
+do [c = context ; {variables : {a : 1 . {.static}}}, c | is_static ;; a]
 -----
 true
 =====
-do [c = context ; {fallback : true}, c | form ; *do ; [(a . constant) *= 1, a *set_invariant final, *invariant a]]
------
-final
-=====
-do [c = context ; {fallback : true}, c = ^c set_fallback false, c | fallback ';' .]
+do [c = context ; {variables : {a : 1}}, c | is_static ;; a]
 -----
 false
 =====
-do [c = context ; {fallback : false}, c = ^c set_fallback true, c | fallback ';' .]
+do [c = context ; {variables : {a : 1 . {.static : true}}}, c | is_static ;; a]
+-----
+true
+=====
+do [c = context ; {variables : {a : 1 . {.static : false}}}, c | is_static ;; a]
+-----
+false
+=====
+do [c = context ; {variables : {a : 1 . {.static}}}, c | .^a, c | .a]
+-----
+1
+=====
+do [c = context ; {reverse : true, variables : {a : 1 . {.static}}}, c | .^a, c | .a]
+-----
+1
+=====
+do [c = context ; {variables : {a : 1 . {.static}}}, c | form ; a *= 2, c | .a]
+-----
+2
+=====
+do [c = context ; {}, c | form ; (a . {static}) *= 1, c | is_null ;; a]
+-----
+true
+=====
+is_reverse .
+-----
+false
+=====
+do [c = context ; {reverse : true}, c | is_reverse ';' .]
+-----
+true
+=====
+do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | form ; *do ; [a *set_invariant final, *invariant a]]
+-----
+final
+=====
+do [c = context ; {reverse : true, variables : {a : 1 . .final}}, c | form ; *do ; [a *set_invariant constant, *invariant a]]
+-----
+final
+=====
+do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | .^a]
+-----
+1
+=====
+do [c = context ; {reverse : true}, c | form ; (a . final) *= 1, c | is_null ;; a]
+-----
+true
+=====
+do [c = context ; {reverse : true}, c = ^c set_reverse false, c | is_reverse ';' .]
+-----
+false
+=====
+do [c = context ; {reverse : false}, c = ^c set_reverse true, c | is_reverse ';' .]
 -----
 true
 =====

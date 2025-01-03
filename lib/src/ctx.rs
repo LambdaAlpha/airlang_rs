@@ -36,9 +36,10 @@ pub(crate) struct PubCtx {
     pub(crate) solver: Option<FuncVal>,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Invariant {
     // no limit
+    #[default]
     None,
     // can't be assigned
     Final,
@@ -49,6 +50,9 @@ pub enum Invariant {
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxValue {
     pub(crate) invariant: Invariant,
+    // static binding exists from beginning to end
+    // the key and invariant can't be changed
+    pub(crate) static1: bool,
     pub(crate) val: Val,
 }
 
@@ -162,6 +166,7 @@ impl CtxValue {
     pub(crate) fn new(val: Val) -> CtxValue {
         CtxValue {
             invariant: Invariant::None,
+            static1: false,
             val,
         }
     }
@@ -169,6 +174,7 @@ impl CtxValue {
     pub(crate) fn new_final(val: Val) -> CtxValue {
         CtxValue {
             invariant: Invariant::Final,
+            static1: false,
             val,
         }
     }
@@ -176,6 +182,7 @@ impl CtxValue {
     pub(crate) fn new_const(val: Val) -> CtxValue {
         CtxValue {
             invariant: Invariant::Const,
+            static1: false,
             val,
         }
     }

@@ -355,7 +355,7 @@ impl EvalCore {
         let output = f(&mut func, ctx, is_const);
         let ctx_value = CtxValue {
             val: Val::Func(func),
-            invariant: ctx_value.invariant,
+            ..ctx_value
         };
         ctx.variables_mut().put_unchecked(func_name, ctx_value);
         output
