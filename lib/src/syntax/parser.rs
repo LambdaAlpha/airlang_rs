@@ -278,7 +278,7 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
-        let tokens = separated_list1(empty1, TokenParser::new(self.ctx));
+        let tokens = separated_list0(empty1, TokenParser::new(self.ctx));
         let tokens = map(tokens, |tokens| {
             let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
             T::from(list)
