@@ -62,4 +62,4 @@ pub(crate) mod traits;
 pub(crate) mod utils;
 
 #[cfg(test)]
-mod test;
+pub(crate) mod test;

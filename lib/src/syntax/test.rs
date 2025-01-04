@@ -26,6 +26,7 @@ use crate::{
             pair::PairRepr,
         },
     },
+    test::parse_test_file,
     text::Text,
     unit::Unit,
 };
@@ -167,81 +168,70 @@ fn infix_ask(left: Repr, middle: Repr, right: Repr) -> Repr {
     )))
 }
 
-const MAIN_DELIMITER: &str = "=====";
-const SUB_DELIMITER: &str = "-----";
-
 fn test_parse(
     src: &str,
     file_name: &str,
     expected: impl FnOnce() -> Vec<Repr>,
 ) -> Result<(), Box<dyn Error>> {
-    let sources = src.split(MAIN_DELIMITER);
     let mut expected = expected().into_iter();
-
-    for s in sources {
+    for [title, s] in parse_test_file::<2>(src, file_name) {
         let expected_repr = expected.next().expect("expected result should exist");
         let real_repr = parse(s).map_err(|e| {
-            eprintln!("file {file_name}, case ({s}): parse failed\n{e}");
+            eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
         assert_eq!(
             real_repr, expected_repr,
-            "file {file_name}, case ({s}): expected: ({expected_repr}) != real: ({real_repr})"
+            "file {file_name} case ({title}) src({s}): expect({expected_repr}) != real({real_repr})"
         );
     }
     Ok(())
 }
 
 fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    let sources = src.split(MAIN_DELIMITER);
-    for s in sources {
+    for [title, s] in parse_test_file::<2>(src, file_name) {
         let repr = parse(s).map_err(|e| {
-            eprintln!("file {file_name}, case ({s}): parse failed\n{e}");
+            eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
         let string = repr.to_string();
         let new_repr = parse(&string).map_err(|e| {
             eprintln!(
-                "file {file_name}, case ({s}): parse error with generated string ({string})!\n{e}"
+                "file {file_name} case ({title}) src({s}): parse error with generated string ({string})!\n{e}"
             );
             e
         })?;
         assert_eq!(
             repr, new_repr,
-            "file {file_name}, case ({s}): original: ({repr}) != re-parsed: ({new_repr})"
+            "file {file_name} case ({title}) src({s}): original({repr}) != re-parsed({new_repr})"
         );
     }
     Ok(())
 }
 
 fn test_parse_illegal(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    let sources = src.split(MAIN_DELIMITER);
-    for s in sources {
+    for [title, s] in parse_test_file::<2>(src, file_name) {
         assert!(
             parse(s).is_err(),
-            "file {file_name}, case ({s}): shouldn't parse"
+            "file {file_name} case ({title}) src({s}): shouldn't parse"
         );
     }
     Ok(())
 }
 
 fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    let tests = src.split(MAIN_DELIMITER);
-
-    for test in tests {
-        let split_err = format!("file {file_name}, case ({test}): invalid test case format");
-        let (i1, i2) = test.split_once(SUB_DELIMITER).expect(&split_err);
+    for [title, i1, i2] in parse_test_file::<3>(src, file_name) {
         let i1 = parse(i1).map_err(|e| {
-            eprintln!("file {file_name}, case ({test}): ({i1}) parse failed\n{e}");
+            eprintln!("file {file_name} case ({title}): ({i1}) parse failed\n{e}");
             e
         })?;
         let i2 = parse(i2).map_err(|e| {
-            eprintln!("file {file_name}, case ({test}): ({i2}) parse failed\n{e}");
+            eprintln!("file {file_name} case ({title}): ({i2}) parse failed\n{e}");
             e
         })?;
         assert_eq!(
             i1, i2,
-            "file {file_name}, case ({test}): expected: ({i2}) != real: ({i1})"
+            "file {file_name} case ({title}): expect({i2}) != real({i1})"
         );
     }
     Ok(())

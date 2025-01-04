@@ -17,36 +17,47 @@ use crate::{
     val::Val,
 };
 
-const MAIN_DELIMITER: &str = "=====";
-const SUB_DELIMITER: &str = "-----";
+const MAIN_DELIMITER: &str = "\n=====\n";
+const SUB_DELIMITER: &str = "\n-----\n";
+
+pub(crate) fn parse_test_file<'a, const N: usize>(
+    input: &'a str,
+    file_name: &str,
+) -> Vec<[&'a str; N]> {
+    let mut cases = Vec::with_capacity(100);
+    if input.is_empty() {
+        return cases;
+    }
+    let cases_str = input.split(MAIN_DELIMITER);
+    for case_str in cases_str {
+        let split_err = format!("file {file_name} case ({case_str}): invalid test case format");
+        let case: Vec<&str> = case_str.split(SUB_DELIMITER).collect();
+        let case: [&str; N] = case.try_into().expect(&split_err);
+        cases.push(case);
+    }
+    cases
+}
 
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     test_interpret(AirCell::default(), input, file_name)
 }
 
 fn test_interpret(air: AirCell, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    if input.is_empty() {
-        return Ok(());
-    }
     let backup = air;
-
-    let tests = input.split(MAIN_DELIMITER);
-    for test in tests {
+    for [title, i, o] in parse_test_file::<3>(input, file_name) {
         let mut air = backup.clone();
-        let split_err = format!("file {file_name}, case ({test}): invalid test case format");
-        let (i, o) = test.split_once(SUB_DELIMITER).expect(&split_err);
         let src = parse(i).map_err(|e| {
-            eprintln!("file {file_name}, case ({test}): input ({i}) parse failed\n{e}");
+            eprintln!("file {file_name} case ({title}): input ({i}) parse failed\n{e}");
             e
         })?;
         let ret = air.interpret(src);
         let ret_expected = parse(o).map_err(|e| {
-            eprintln!("file {file_name}, case ({test}): output ({o}) parse failed\n{e}");
+            eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");
             e
         })?;
         assert_eq!(
             ret, ret_expected,
-            "file {file_name}, case({test}): interpreting output is not as expected! real output: {ret:#?}, \
+            "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#?})\n\
             current context: {air:#?}",
         );
     }

@@ -1,43 +1,65 @@
+
+-----
 do [a = extension.unit, b = extension.unit, .a == .b]
 -----
 true
 =====
+
+-----
 type_of extension.unit
 -----
 extension
 =====
+
+-----
 func_ext 1
 -----
 1
 =====
+
+-----
 func_ext 2
 -----
 2
 =====
+
+-----
 type_of func_ext
 -----
 function
 =====
+
+-----
 function.is_extension .func_ext
 -----
 true
 =====
+
+-----
 function.represent func_ext
 -----
 {id : func_ext, is_extension : true, context_access : free}
 =====
+
+-----
 do [a = func_ext, b = func_ext, .a == .b]
 -----
 true
 =====
+
+-----
 . | func_ext ';' 1
 -----
 1
 =====
+
+-----
 call.apply ; func_ext ';' 1
 -----
 1
 =====
+
+-----
 do [p = case.cache ; func_ext ';' true, case.is_cache .p]
 -----
 true

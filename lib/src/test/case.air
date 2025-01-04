@@ -1,3 +1,5 @@
+
+-----
 do [
     c = case ; {
         function : not,
@@ -9,6 +11,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     c = case ; {
         function : not,
@@ -20,6 +24,8 @@ do [
 -----
 2
 =====
+
+-----
 do [
     c = case ; {
         function : not,
@@ -31,6 +37,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     c = case ; {
         function : "not",
@@ -42,6 +50,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     map_mode = mode ; {map : {} : id : eval},
     m = map_mode ; {
@@ -54,6 +64,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     m = case.represent ; case.cache ; not ';' true,
     map_mode = mode ; {map : {} : id : eval},
@@ -68,6 +80,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     c = case ; {
         function : not,
@@ -80,6 +94,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     c = case.cache ; not ';' (not false),
     case.input c
@@ -87,6 +103,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     c = case.cache ; not ';' true,
     case.output c
@@ -94,6 +112,8 @@ do [
 -----
 false
 =====
+
+-----
 do [
     c = case.cache ; not ';' true,
     (case.function c) == not
@@ -101,6 +121,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     c = case.cache ; not ';' true,
     case.is_cache c

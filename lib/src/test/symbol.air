@@ -1,19 +1,29 @@
+
+-----
 symbol.from_text ""
 -----
 ''
 =====
+
+-----
 symbol.from_text "hello_world!"
 -----
 hello_world!
 =====
+
+-----
 symbol.from_text "{}"
 -----
 '{}'
 =====
+
+-----
 symbol.into_text '.'
 -----
 ""
 =====
+
+-----
 symbol.into_text ; .hello_world!
 -----
 "hello_world!"

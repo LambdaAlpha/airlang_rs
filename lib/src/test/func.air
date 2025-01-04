@@ -1,119 +1,179 @@
+
+-----
 id .a
 -----
 .a
 =====
+
+-----
 id *a
 -----
 *a
 =====
+
+-----
 id ^a
 -----
 ^a
 =====
+
+-----
 id a
 -----
 a
 =====
+
+-----
 form a
 -----
 a
 =====
+
+-----
 form .a
 -----
 a
 =====
+
+-----
 do [a = 1, form *a]
 -----
 1
 =====
+
+-----
 do [a = 1, form *a, a]
 -----
 1
 =====
+
+-----
 do [a = 1, form ^a]
 -----
 1
 =====
+
+-----
 do [a = 1, form ^a, is_null a]
 -----
 true
 =====
+
+-----
 form a
 -----
 a
 =====
+
+-----
 form .*a
 -----
 *a
 =====
+
+-----
 form ; a ; b
 -----
 a ; b
 =====
+
+-----
 form ; a ; b
 -----
 a ; b
 =====
+
+-----
 form ; a ? b
 -----
 a ? b
 =====
+
+-----
 form [a, b c]
 -----
 [a, b c]
 =====
+
+-----
 eval .a
 -----
 a
 =====
+
+-----
 do [a = 1, eval *a]
 -----
 1
 =====
+
+-----
 do [a = 1, eval ^a]
 -----
 1
 =====
+
+-----
 do [a = 1, eval ^a, is_null a]
 -----
 true
 =====
+
+-----
 do [a = 1, eval a]
 -----
 1
 =====
+
+-----
 do [a = 1, eval a, a]
 -----
 1
 =====
+
+-----
 eval ; not ; true
 -----
 false
 =====
+
+-----
 eval ; a ! 1
 -----
 1
 =====
+
+-----
 do [a = 1, b = 2, eval ; a ? b]
 -----
 1 ? 2
 =====
+
+-----
 do [f = mode ; id, f ; .a]
 -----
 .a
 =====
+
+-----
 do [f = mode ; form, f ; a ; .b]
 -----
 a ; b
 =====
+
+-----
 do [f = mode ; eval, f ; not ; true]
 -----
 false
 =====
+
+-----
 do [f = mode ; ., f ; not ; true]
 -----
 false
 =====
+
+-----
 do [
     f = mode ; {symbol : id, recursive : true},
     f ^a
@@ -121,6 +181,8 @@ do [
 -----
 ^a
 =====
+
+-----
 do [
     f = mode ; {symbol : form, recursive : true},
     f .a
@@ -128,6 +190,8 @@ do [
 -----
 a
 =====
+
+-----
 do [
     a = 1,
     f = mode ; {symbol : eval, recursive : true},
@@ -136,6 +200,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {pair : form : eval, recursive : true},
@@ -144,6 +210,8 @@ do [
 -----
 a : 1
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {pair : form, recursive : true},
@@ -152,6 +220,8 @@ do [
 -----
 a : 1
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {pair : form : eval, default : id, recursive : true},
@@ -160,6 +230,8 @@ do [
 -----
 [a : 1, *a]
 =====
+
+-----
 do [
     f = mode ; {pair : form : self, default : id, recursive : true},
     .a f .b
@@ -167,6 +239,8 @@ do [
 -----
 a : .b
 =====
+
+-----
 do [
     f = mode ; {abstract : form : id, recursive : true},
     f ; .a ! ^b
@@ -174,6 +248,8 @@ do [
 -----
 a ! ^b
 =====
+
+-----
 do [
     f = mode ; {abstract : form ! id, recursive : true},
     f ; .a ! ^b
@@ -181,6 +257,8 @@ do [
 -----
 ^b
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {abstract : form, recursive : true},
@@ -189,6 +267,8 @@ do [
 -----
 a ! 1
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {abstract : id ! self, recursive : true},
@@ -197,6 +277,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     f = mode ; {call : form : id, recursive : true},
     f ; .a ; ^b
@@ -204,6 +286,8 @@ do [
 -----
 a ; ^b
 =====
+
+-----
 do [
     a = false,
     f = mode ; {call : eval ; form, recursive : true},
@@ -212,6 +296,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     f = mode ; {call : form, recursive : true},
     a = 1,
@@ -221,6 +307,8 @@ do [
 -----
 1 ; 2
 =====
+
+-----
 do [
     f = mode ; {call : form : self, recursive : true},
     a = 1,
@@ -229,6 +317,8 @@ do [
 -----
 not ; 1
 =====
+
+-----
 do [
     f = mode ; {call : self ; form, recursive : true},
     a = 1,
@@ -237,6 +327,8 @@ do [
 -----
 [1 ; a, false]
 =====
+
+-----
 do [
     f = mode ; {ask : form : id, recursive : true},
     f ; .a ? ^b
@@ -244,6 +336,8 @@ do [
 -----
 a ? ^b
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {ask : form, recursive : true},
@@ -252,6 +346,8 @@ do [
 -----
 a ? 1
 =====
+
+-----
 do [
     b = 1,
     f = mode ; {ask : form : self, recursive : true},
@@ -260,6 +356,8 @@ do [
 -----
 a ? 1
 =====
+
+-----
 do [
     a = 1,
     f = mode ; {list : [eval, form] : id, recursive : true},
@@ -268,6 +366,8 @@ do [
 -----
 [1, a, a, a, *a, a]
 =====
+
+-----
 do [
     a = 1,
     f = mode ; {list : [eval, form], default : id, recursive : true},
@@ -276,6 +376,8 @@ do [
 -----
 [1, a, a, a, *a, a]
 =====
+
+-----
 do [
     f = mode ; {list : id, recursive : true},
     f [a, .a, *a, ^a]
@@ -283,6 +385,8 @@ do [
 -----
 [a, .a, *a, ^a]
 =====
+
+-----
 do [
     a = 1,
     f = mode ; {list : [eval, form, id, self], recursive : true},
@@ -291,6 +395,8 @@ do [
 -----
 [1, a, *a, 1]
 =====
+
+-----
 do [
     a = 1,
     c = 2,
@@ -300,6 +406,8 @@ do [
 -----
 {a : 1, b : a, 2 : d}
 =====
+
+-----
 do [
     a = 1,
     c = 2,
@@ -309,6 +417,8 @@ do [
 -----
 {a : 1, b : a, c : d}
 =====
+
+-----
 do [
     a = 1,
     c = 2,
@@ -318,6 +428,8 @@ do [
 -----
 {a : 1, b : a, c : d}
 =====
+
+-----
 do [
     a = 1,
     c = 2,
@@ -327,6 +439,8 @@ do [
 -----
 {.a : *a, ^b : .a, c : d}
 =====
+
+-----
 do [
     a = 1,
     c = 2,
@@ -336,6 +450,8 @@ do [
 -----
 {a : a, b : 1, 2 : 2}
 =====
+
+-----
 do [
     f = mode ; {symbol : id, call : eval ; self, default : form, recursive : true},
     a = false,
@@ -344,6 +460,8 @@ do [
 -----
 [.a, true]
 =====
+
+-----
 do [
     f = mode ; {symbol : form},
     f a
@@ -351,6 +469,8 @@ do [
 -----
 a
 =====
+
+-----
 do [
     f = mode ; {pair : form},
     a f .b
@@ -358,6 +478,8 @@ do [
 -----
 a : b
 =====
+
+-----
 do [
     f = mode ; {pair : form : {pair : id}},
     f ; a : .b : *c ; ^d
@@ -365,6 +487,8 @@ do [
 -----
 a : .b : *c ; ^d
 =====
+
+-----
 do [
     f = mode ; {pair : form : {default : id, recursive : true}},
     f ; a : .b : *c ; ^d
@@ -372,6 +496,8 @@ do [
 -----
 a : .b : *c ; ^d
 =====
+
+-----
 do [
     c = 1,
     d = 2,
@@ -381,10 +507,14 @@ do [
 -----
 a : b : 1 ; 2
 =====
+
+-----
 function.represent eval
 -----
 eval
 =====
+
+-----
 function.represent ; mode ; {
     symbol : id,
     pair : form : eval,
@@ -399,6 +529,8 @@ function.represent ; mode ; {
     map : {a : eval, b : form} : id : id,
 }
 =====
+
+-----
 function.represent ; mode ; {
     symbol : id,
     pair : form : eval,
@@ -415,6 +547,8 @@ function.represent ; mode ; {
     recursive : true,
 }
 =====
+
+-----
 do [
     f = function ; {
         body : i,
@@ -424,6 +558,8 @@ do [
 -----
 false
 =====
+
+-----
 do [
     f = function ; {
         body : *not ; i
@@ -433,6 +569,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     f = function ; {
         body : not ; i,
@@ -443,6 +581,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     f = function ; {
         body : n ; a,
@@ -454,6 +594,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     f = function ; {
         body_mode : form,
@@ -464,6 +606,8 @@ do [
 -----
 i ; a
 =====
+
+-----
 do [
     f = function ; {
         body : do ; [a = a + 1, a],
@@ -476,6 +620,8 @@ do [
 -----
 [1, 2, 3]
 =====
+
+-----
 do [
     a = 1,
     f = function ; {
@@ -495,6 +641,8 @@ do [
 -----
 [1, 2, 3]
 =====
+
+-----
 do [
     a = 1,
     f = function ; {
@@ -519,6 +667,8 @@ do [
 -----
 [1, 3, 6]
 =====
+
+-----
 do [
     a = 1,
     f = function ; {
@@ -531,6 +681,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     a = 1,
     f = function ; {
@@ -543,6 +695,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     f = function ; {
         body : c | = ';' i : 2,
@@ -563,6 +717,8 @@ do [
 -----
 2
 =====
+
+-----
 do [
     f = function ; {
         body : c | = ';' i : 2,
@@ -583,6 +739,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     f = function ; {
         body : c | = ';' i : 2,
@@ -603,6 +761,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     f = function ; {
         body : 1,
@@ -613,6 +773,8 @@ do [
 -----
 1
 =====
+
+-----
 do [
     a = 1,
     f = function ; {
@@ -627,6 +789,8 @@ do [
 -----
 true
 =====
+
+-----
 do [
     a = 1,
     f = function ; {
@@ -641,22 +805,32 @@ do [
 -----
 1
 =====
+
+-----
 function.represent ; function ; {body : i}
 -----
 {body : i}
 =====
+
+-----
 function.represent not
 -----
 {id : not}
 =====
+
+-----
 function.represent ; function ; {body : i, context_access : constant}
 -----
 {body : i, context_access : constant}
 =====
+
+-----
 function.represent ==
 -----
 {id : ==}
 =====
+
+-----
 do [
     call_mode = mode ; {pair : eval : id},
     abstract_mode = mode ; {pair : id : form},
@@ -680,34 +854,50 @@ do [
 -----
 true
 =====
+
+-----
 function.context_access function
 -----
 free
 =====
+
+-----
 function.context_access function.context_access
 -----
 constant
 =====
+
+-----
 function.context_access eval
 -----
 mutable
 =====
+
+-----
 do [f = function ; {}, function.context_access f]
 -----
 mutable
 =====
+
+-----
 function.represent ; function.call_mode ; not
 -----
 eval
 =====
+
+-----
 function.represent ; function.call_mode ; eval
 -----
 id
 =====
+
+-----
 do [f = function ; {}, function.represent ; function.call_mode ; f]
 -----
 eval
 =====
+
+-----
 do [
     f = function ; {
         call_mode : mode ; {pair : eval : form},
@@ -717,6 +907,8 @@ do [
 -----
 {pair : eval : form}
 =====
+
+-----
 do [
     f = function ; {
         call_mode : mode ; {list : [eval, form, id] : form},
@@ -726,6 +918,8 @@ do [
 -----
 {list : [eval, form, id] : form}
 =====
+
+-----
 do [
     f = function ; {
         call_mode : mode ; {map : {a : eval, b : id} : id : form},
@@ -735,6 +929,8 @@ do [
 -----
 {map : {a : eval, b : id} : id : form}
 =====
+
+-----
 do [
     f = function ; {
         abstract_mode : mode ; {map : {a : form} : eval : id},
@@ -744,6 +940,8 @@ do [
 -----
 {map : {a : form} : eval : id}
 =====
+
+-----
 do [
     f = function ; {
         ask_mode : mode ; {map : {a : form} : eval : id},
@@ -753,42 +951,62 @@ do [
 -----
 {map : {a : form} : eval : id}
 =====
+
+-----
 do [f = function ; {cacheable : false}, function.is_cacheable f]
 -----
 false
 =====
+
+-----
 function.is_cacheable not
 -----
 true
 =====
+
+-----
 function.is_primitive not
 -----
 true
 =====
+
+-----
 do [f = function ; {}, function.is_primitive f]
 -----
 false
 =====
+
+-----
 function.is_extension not
 -----
 false
 =====
+
+-----
 function.is_cell not
 -----
 false
 =====
+
+-----
 do [f = function ; {cell : true}, function.is_cell f]
 -----
 true
 =====
+
+-----
 function.id not
 -----
 not
 =====
+
+-----
 do [neg = not, function.id neg]
 -----
 not
 =====
+
+-----
 do [
     f = function ; {body_mode : form},
     function.represent ; function.body_mode ; f
@@ -796,10 +1014,14 @@ do [
 -----
 form
 =====
+
+-----
 do [f = function ; {body : i}, function.body f]
 -----
 i
 =====
+
+-----
 do [
     ctx = context ; {variables : {a : 1}},
     f = function ; {context : ctx},
@@ -808,10 +1030,14 @@ do [
 -----
 true
 =====
+
+-----
 do [f = function ; {}, function.input_name f]
 -----
 i
 =====
+
+-----
 do [f = function ; {context_access : constant}, function.context_name f]
 -----
 c

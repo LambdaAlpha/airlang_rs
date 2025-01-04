@@ -1,39 +1,59 @@
+
+-----
 text.length ""
 -----
 "" : 0
 =====
+
+-----
 text.length "1"
 -----
 "1" : 1
 =====
+
+-----
 do [a = "12", text.length a]
 -----
 2
 =====
+
+-----
 do [a = "hello", b = "world", a text.push " ", a text.push ^b, ^a]
 -----
 "hello world"
 =====
+
+-----
 "" text.join ["1", "2"]
 -----
 "12"
 =====
+
+-----
 do [a = "1", b = "2", c = "3", . text.join [^a, ^b, ^c]]
 -----
 "123"
 =====
+
+-----
 . text.join []
 -----
 ""
 =====
+
+-----
 "." text.join ["1", "2"]
 -----
 "1.2"
 =====
+
+-----
 text.into_utf8 "abc"
 -----
 byte(616263)
 =====
+
+-----
 text.from_utf8 byte(616263)
 -----
 "abc"

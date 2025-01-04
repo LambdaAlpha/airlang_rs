@@ -1,27 +1,41 @@
+
+-----
 unit .
 -----
 .
 =====
+
+-----
 unit 1
 -----
 .
 =====
+
+-----
 type_of unit
 -----
 function
 =====
+
+-----
 is_unit .
 -----
 true
 =====
+
+-----
 do [a = true, is_unit a]
 -----
 false
 =====
+
+-----
 is_unit false
 -----
 false
 =====
+
+-----
 is_unit ..a
 -----
 false

@@ -1,187 +1,281 @@
+
+-----
 do [u = any ; unit, type_of u]
 -----
 unit
 =====
+
+-----
 do [b = any ; bit, type_of b]
 -----
 bit
 =====
+
+-----
 do [i = any ; integer, type_of i]
 -----
 integer
 =====
+
+-----
 do [n = any ; number, type_of n]
 -----
 number
 =====
+
+-----
 do [b = any ; byte, type_of b]
 -----
 byte
 =====
+
+-----
 do [s = any ; symbol, type_of s]
 -----
 symbol
 =====
+
+-----
 do [t = any ; text, type_of t]
 -----
 text
 =====
+
+-----
 do [p = any ; pair, type_of p]
 -----
 pair
 =====
+
+-----
 do [c = any ; call, type_of c]
 -----
 call
 =====
+
+-----
 do [a = any ; ask, type_of a]
 -----
 ask
 =====
+
+-----
 do [a = any ; abstract, type_of a]
 -----
 abstract
 =====
+
+-----
 do [c = any ; context, type_of c]
 -----
 context
 =====
+
+-----
 do [f = any ; function, type_of f]
 -----
 function
 =====
+
+-----
 do [c = any ; case, type_of c]
 -----
 case
 =====
+
+-----
 do [e = any ; extension, type_of e]
 -----
 extension
 =====
+
+-----
 do [a = ., type_of a]
 -----
 unit
 =====
+
+-----
 do [a = true, type_of a]
 -----
 bit
 =====
+
+-----
 do [a = 1, type_of a]
 -----
 integer
 =====
+
+-----
 do [a = 1.0, type_of a]
 -----
 number
 =====
+
+-----
 do [a = byte(ff), type_of a]
 -----
 byte
 =====
+
+-----
 do [a = .a, type_of a]
 -----
 symbol
 =====
+
+-----
 do [a = "", type_of a]
 -----
 text
 =====
+
+-----
 do [a = 1 : 2, type_of a]
 -----
 pair
 =====
+
+-----
 do [a = id ; f ; a, type_of a]
 -----
 call
 =====
+
+-----
 do [a = id ; f ? a, type_of a]
 -----
 ask
 =====
+
+-----
 do [c = id ; n ! v, type_of c]
 -----
 abstract
 =====
+
+-----
 do [a = [], type_of a]
 -----
 list
 =====
+
+-----
 do [a = {}, type_of a]
 -----
 map
 =====
+
+-----
 do [a = function ; {body : *input}, type_of a]
 -----
 function
 =====
+
+-----
 do [a = context ; {}, type_of a]
 -----
 context
 =====
+
+-----
 do [a = case ; {function : not, input : true, output : false}, type_of a]
 -----
 case
 =====
+
+-----
 do [a = case.cache ; not ';' true, type_of a]
 -----
 case
 =====
+
+-----
 true == false
 -----
 false
 =====
+
+-----
 false == false
 -----
 true
 =====
+
+-----
 1 == 1
 -----
 true
 =====
+
+-----
 1.0 == 1.0
 -----
 true
 =====
+
+-----
 ..a == ..a
 -----
 true
 =====
+
+-----
 "" == ""
 -----
 true
 =====
+
+-----
 (1 : 2) == (1 : 2)
 -----
 true
 =====
+
+-----
 [1, 2] == [1, 2]
 -----
 true
 =====
+
+-----
 {} == {}
 -----
 true
 =====
+
+-----
 (1 2) == (1 2)
 -----
 true
 =====
+
+-----
 (1 ? 2) == (1 ? 2)
 -----
 true
 =====
+
+-----
 do [a = id ; n ; v, b = id ; n ; v, (a == b) and a != .]
 -----
 true
 =====
+
+-----
 do [a = function ; {body : *input}, b = function ; {body : *input}, (a == b) and a != .]
 -----
 true
 =====
+
+-----
 do [a = context ; {}, b = context ; {}, (a == b) and a != .]
 -----
 true
 =====
+
+-----
 do [
     a = case ; {function : not, input : true, output : false},
     b = case ; {function : not, input : true, output : false},
@@ -190,62 +284,92 @@ do [
 -----
 true
 =====
+
+-----
 (1 + 1) == (3 - 1)
 -----
 true
 =====
+
+-----
 1 == "a"
 -----
 false
 =====
+
+-----
 1 != "a"
 -----
 true
 =====
+
+-----
 1 != 1
 -----
 false
 =====
+
+-----
 do [a = 1, a == 1]
 -----
 true
 =====
+
+-----
 do [a = 1, a != 1]
 -----
 false
 =====
+
+-----
 do [a = 1, 1 == a]
 -----
 true
 =====
+
+-----
 do [a = 1, 1 != a]
 -----
 false
 =====
+
+-----
 do [a = 1, b = 1, a == b]
 -----
 true
 =====
+
+-----
 do [a = 1, b = 1, a != b]
 -----
 false
 =====
+
+-----
 do [a = 1, a == a]
 -----
 true
 =====
+
+-----
 do [a = 1, a != a]
 -----
 false
 =====
+
+-----
 a == b
 -----
 .
 =====
+
+-----
 a != b
 -----
 .
 =====
+
+-----
 do [..a = 1, .*.a == 1]
 -----
 true

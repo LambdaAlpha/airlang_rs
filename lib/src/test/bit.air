@@ -1,91 +1,137 @@
+
+-----
 is_true true
 -----
 true
 =====
+
+-----
 is_true false
 -----
 false
 =====
+
+-----
 is_true .
 -----
 false
 =====
+
+-----
 do [a = true, is_true a]
 -----
 true
 =====
+
+-----
 is_false false
 -----
 true
 =====
+
+-----
 is_false true
 -----
 false
 =====
+
+-----
 is_false .
 -----
 false
 =====
+
+-----
 do [a = true, is_false a]
 -----
 false
 =====
+
+-----
 not true
 -----
 false
 =====
+
+-----
 not false
 -----
 true
 =====
+
+-----
 true and false
 -----
 false
 =====
+
+-----
 true and true
 -----
 true
 =====
+
+-----
 do [false and do ; [a = 1, true], a]
 -----
 1
 =====
+
+-----
 true or false
 -----
 true
 =====
+
+-----
 false or false
 -----
 false
 =====
+
+-----
 do [true or do ; [a = 1, false], a]
 -----
 1
 =====
+
+-----
 true xor false
 -----
 true
 =====
+
+-----
 true xor true
 -----
 false
 =====
+
+-----
 false xor false
 -----
 false
 =====
+
+-----
 true imply false
 -----
 false
 =====
+
+-----
 true imply true
 -----
 true
 =====
+
+-----
 false imply true
 -----
 true
 =====
+
+-----
 false imply false
 -----
 true

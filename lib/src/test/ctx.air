@@ -1,295 +1,443 @@
+
+-----
 do [a = 1, read a]
 -----
 1
 =====
+
+-----
 do [a = 1, b = .a, read *b]
 -----
 1
 =====
+
+-----
 do [(a . constant) = 1, read a]
 -----
 1
 =====
+
+-----
 do [a = 1, move a]
 -----
 1
 =====
+
+-----
 do [a = 1, move a, is_null a]
 -----
 true
 =====
+
+-----
 do [(a . final) = 1, [move a, a]]
 -----
 [., 1]
 =====
+
+-----
 do [(a . constant) = 1, [move a, a]]
 -----
 [., 1]
 =====
+
+-----
 do [a = .b, b = 1, move ; *a]
 -----
 1
 =====
+
+-----
 do [a = 1, a]
 -----
 1
 =====
+
+-----
 do [a = 1, a = 2]
 -----
 1
 =====
+
+-----
 do [a = 1, a = 2, a]
 -----
 2
 =====
+
+-----
 do [a = 1, b = a, b]
 -----
 1
 =====
+
+-----
 do [a = .b, *a = 1, b]
 -----
 1
 =====
+
+-----
 do [..a = 1, *.a]
 -----
 1
 =====
+
+-----
 do [..p = 1 : 2, pair.first .*.p]
 -----
 1
 =====
+
+-----
 do [(a . none) = 1, a]
 -----
 1
 =====
+
+-----
 do [(a . none) = 1, invariant a]
 -----
 none
 =====
+
+-----
 do [(a . final) = 1, invariant a]
 -----
 final
 =====
+
+-----
 do [(a . constant) = 1, invariant a]
 -----
 constant
 =====
+
+-----
 do [(a . {invariant : final}) = 1, invariant a]
 -----
 final
 =====
+
+-----
 do [(a . {}) = 1, invariant ; a]
 -----
 none
 =====
+
+-----
 do [(a : b) = 1 : 2, a : b]
 -----
 1 : 2
 =====
+
+-----
 do [a = 1, b = 2, (a : b) = 3 : 4]
 -----
 1 : 2
 =====
+
+-----
 do [(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
+
+-----
 do [((a : b) . final) = 1 : 2, [invariant a, invariant b]]
 -----
 [final, final]
 =====
+
+-----
 do [((a . final) : (b . constant)) = 1 : 2, [invariant a, invariant b]]
 -----
 [final, constant]
 =====
+
+-----
 do [((a : (b . final)) . constant) = 1 : 2, [invariant a, invariant b]]
 -----
 [constant, final]
 =====
+
+-----
 do [(f a) = 1 ; 2, [f, a]]
 -----
 [1, 2]
 =====
+
+-----
 do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
+
+-----
 do [(f ? b) = 1 ? 2, [f, b]]
 -----
 [1, 2]
 =====
+
+-----
 do [(n ; v) = id ; 1 ; 2, [n, v]]
 -----
 [1, 2]
 =====
+
+-----
 do [[a, b, c] = [1, 2, 3], [a, b, c]]
 -----
 [1, 2, 3]
 =====
+
+-----
 do [[a, b] = [1, 2, 3], [a, b]]
 -----
 [1, 2]
 =====
+
+-----
 do [a = 1, b = 2, [a, b] = [3], [a, b]]
 -----
 [3, .]
 =====
+
+-----
 do [a = 1, b = 2, [a, b] = [3]]
 -----
 [1, 2]
 =====
+
+-----
 do [{a : :, b : :} = {.a : 1, .b : 2, .c : 3}, [a, b]]
 -----
 [1, 2]
 =====
+
+-----
 do [{1 : a, 3 : b} = {1 : 2, 3 : 4}, [a, b]]
 -----
 [2, 4]
 =====
+
+-----
 do [a = 1, b = 2, {1 : a, 2 : b} = {1 : 2, 3 : 4}]
 -----
 {1 : 1, 2 : 2}
 =====
+
+-----
 do [(a . final) = 1, a = 2]
 -----
 .
 =====
+
+-----
 do [(a . final) = 1, a = 2, a]
 -----
 1
 =====
+
+-----
 do [(a . final) = 1, (a . final) = 2, a]
 -----
 1
 =====
+
+-----
 do [(a . final) = 1, (a . constant) = 2, a]
 -----
 1
 =====
+
+-----
 do [(a . final) = 1 : 2, .a pair.set_first 3, a]
 -----
 3 : 2
 =====
+
+-----
 do [(a . constant) = 1 : 2, .a pair.set_first 3, a]
 -----
 1 : 2
 =====
+
+-----
 do [(a . constant) = 1, a = 2, a]
 -----
 1
 =====
+
+-----
 do [(a . constant) = 1, (a . final) = 2, a]
 -----
 1
 =====
+
+-----
 do [(a . constant) = 1, (a . constant) = 2, a]
 -----
 1
 =====
+
+-----
 do [a = 1, a set_invariant final, invariant a]
 -----
 final
 =====
+
+-----
 do [(a . constant) = 1, a set_invariant final, invariant a]
 -----
 constant
 =====
+
+-----
 do [a = 1, a set_invariant constant, invariant a]
 -----
 constant
 =====
+
+-----
 do [(a . final) = 1, a set_invariant constant, invariant a]
 -----
 constant
 =====
+
+-----
 is_null a
 -----
 true
 =====
+
+-----
 do [a = 1, is_null a]
 -----
 false
 =====
+
+-----
 do [c = context ; {variables : {a : 1 . {.static}}}, c | is_static ;; a]
 -----
 true
 =====
+
+-----
 do [c = context ; {variables : {a : 1}}, c | is_static ;; a]
 -----
 false
 =====
+
+-----
 do [c = context ; {variables : {a : 1 . {.static : true}}}, c | is_static ;; a]
 -----
 true
 =====
+
+-----
 do [c = context ; {variables : {a : 1 . {.static : false}}}, c | is_static ;; a]
 -----
 false
 =====
+
+-----
 do [c = context ; {variables : {a : 1 . {.static}}}, c | .^a, c | .a]
 -----
 1
 =====
+
+-----
 do [c = context ; {reverse : true, variables : {a : 1 . {.static}}}, c | .^a, c | .a]
 -----
 1
 =====
+
+-----
 do [c = context ; {variables : {a : 1 . {.static}}}, c | form ; a *= 2, c | .a]
 -----
 2
 =====
+
+-----
 do [c = context ; {}, c | form ; (a . {static}) *= 1, c | is_null ;; a]
 -----
 true
 =====
+
+-----
 is_reverse .
 -----
 false
 =====
+
+-----
 do [c = context ; {reverse : true}, c | is_reverse ';' .]
 -----
 true
 =====
+
+-----
 do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | form ; *do ; [a *set_invariant final, *invariant a]]
 -----
 final
 =====
+
+-----
 do [c = context ; {reverse : true, variables : {a : 1 . .final}}, c | form ; *do ; [a *set_invariant constant, *invariant a]]
 -----
 final
 =====
+
+-----
 do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | .^a]
 -----
 1
 =====
+
+-----
 do [c = context ; {reverse : true}, c | form ; (a . final) *= 1, c | is_null ;; a]
 -----
 true
 =====
+
+-----
 do [c = context ; {reverse : true}, c = ^c set_reverse false, c | is_reverse ';' .]
 -----
 false
 =====
+
+-----
 do [c = context ; {reverse : false}, c = ^c set_reverse true, c | is_reverse ';' .]
 -----
 true
 =====
+
+-----
 access .
 -----
 mutable
 =====
+
+-----
 . | access ';' .
 -----
 free
 =====
+
+-----
 do [(a . constant) = context ; {}, a | access ';' .]
 -----
 constant
 =====
+
+-----
 do [a = context ; {}, a | access ';' .]
 -----
 mutable
 =====
+
+-----
 do [
     s1 = function ; {
         cell : true,
@@ -304,10 +452,14 @@ do [
 -----
 [1, 2, 3]
 =====
+
+-----
 do [set_solver ., s = solver ; ., .s == .]
 -----
 true
 =====
+
+-----
 do [
     a = context ; {variables : {p : 1 : 2}},
     b = 3,
@@ -317,6 +469,8 @@ do [
 -----
 3 : 2
 =====
+
+-----
 do [
     a = context ; {variables : {p : 1 : 2, b : 3}},
     a | pair.set_first ';' ..p : .b,
@@ -325,6 +479,8 @@ do [
 -----
 3 : 2
 =====
+
+-----
 do [
     set_first = pair.set_first,
     a = context ; {variables : {set_first : ^set_first, p : 1 : 2, b : 3}},
@@ -334,10 +490,14 @@ do [
 -----
 3 : 2
 =====
+
+-----
 do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: = ';' .a : 2, [c | .a, ^a]]
 -----
 [2, 1]
 =====
+
+-----
 do [
     a = context ; {variables : {b : context ; {variables : {c : 1}}}},
     a | form ; b *| ..c
@@ -345,54 +505,80 @@ do [
 -----
 1
 =====
+
+-----
 . | self ';' .
 -----
 .
 =====
+
+-----
 . | + ';' 1 : 1
 -----
 2
 =====
+
+-----
 do [a = 1, . | move ';' .a, a]
 -----
 1
 =====
+
+-----
 . | pair.first ';' 1 : 2
 -----
 1
 =====
+
+-----
 context.represent ; context ; {}
 -----
 {}
 =====
+
+-----
 context.represent ; context ; {variables : {a : 1 . .final}}
 -----
 {variables : {a : 1 . final}}
 =====
+
+-----
 do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = .m map.remove .b, type_of b]
 -----
 context
 =====
+
+-----
 do [a = prelude ; ., a | not ';' true]
 -----
 false
 =====
+
+-----
 do [a = prelude ; ., a | is_null ';' .prelude]
 -----
 false
 =====
+
+-----
 do [a = 1, b = prelude ; ., b | is_null ';' .a]
 -----
 true
 =====
+
+-----
 do [a = prelude ; ., a | is_null ';' .prelude]
 -----
 false
 =====
+
+-----
 do [a = 1, b = self ; ., b | .a]
 -----
 1
 =====
+
+-----
 do [a = self ; ., b = 1, a | is_null ';' .b]
 -----
 true
