@@ -1,75 +1,47 @@
-
+abstract
 -----
-. ! 1
+a ! b
 =====
-
+abstract ctx
 -----
-true ! 2
+!(a b)
 =====
-
+abstract abstract
 -----
-1 ! 3
+a ! b ! c
 =====
-
+abstract other
 -----
-1.0 ! 4
+a ! b : c
 =====
-
+other abstract
 -----
-byte(X7f) ! 5
+a : b ! c
 =====
-
+abstract infix
 -----
-a ! 6
+a ! b c d
 =====
-
+infix abstract
 -----
-% ! 7
+a b c ! d
 =====
-
+non-atomic first
 -----
-"s" ! 8
+{a : b} ! c
 =====
-
+non-atomic second
 -----
-[1] ! 9
+a ! {b : c}
 =====
-
+list item
 -----
-{1 : 2} ! 10
+[a ! b]
 =====
-
+map key
 -----
-(a []) ! 11
+{(a ! b) : c}
 =====
-
+map value
 -----
-(a {}) ! 12
-=====
-
------
-(a b c) ! 13
-=====
-
------
-a ! b ! 14
-=====
-
------
-a ! []
-=====
-
------
-[1 ! 2, 3 ! 4]
-=====
-
------
-{(1 ! 2) : 3 ! 4}
-=====
-
------
-(1 ! 2)
-=====
-
------
-((a b c) ! d) e f
+{a : b ! c}

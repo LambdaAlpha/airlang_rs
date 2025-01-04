@@ -1,55 +1,55 @@
-
+empty
 -----
 {}
 =====
-
+one
 -----
-{1 : 2}
+{a : b}
 =====
-
+one trailing comma
 -----
-{1 : 2,}
+{a : b,}
 =====
-
+two
 -----
-{1 : 2, 3 : 4}
+{a : b, c : d}
 =====
-
+two trailing comma
 -----
-{1 : 2, 3 : 4,}
+{a : b, c : d,}
 =====
-
+recursive
 -----
 {{} : {}}
 =====
-
+sequence
 -----
-{{1 : 2} : {3 : 4}}
+,[{} {}]
 =====
-
+omit value
 -----
-{1}
+{a}
 =====
-
+mix omit and normal
 -----
-{1, 2 : 3}
+{a, b : c}
 =====
-
+repeat key value
 -----
-{1 : :}
+{a : :}
 =====
-
+mix repeat and normal
 -----
-{1 : :, 2 : 3}
+{a : :, b : c}
 =====
-
+duplicate key
 -----
-{1 : 2, 1 : 3}
+{a : b, a : c}
 =====
-
+non-atomic key
 -----
-{1 : 2 3}
+{(a : b) : c}
 =====
-
+non-atomic value
 -----
-{1 : 2 3 4}
+{a : b : c}

@@ -6,9 +6,8 @@ use crate::syntax::{
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         text(""),
-        text("abc"),
-        text("0123"),
-        text("`~!@#$%^&*()-_=+[]{};:'\",.<>?\\|/"),
+        text(" ()[]{}<>\\|/'\":;!?,.`~@#$%^&*-+_="),
+        text("abc ABC 0123"),
         text("🜁🜂🜃🜄"),
         text("  \n\r\t\u{1f701}"),
         text(" \\_\\n\\r\\t\\u(1f701)"),
@@ -18,6 +17,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         text("a\nb\n  cd"),
         text("  \n\r\t\u{1f701}"),
         text("`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?"),
+        text("12345 67890\n12345 67890\n"),
         text("12345 67890\n12345 67890\n"),
         text("\"\""),
         text(""),

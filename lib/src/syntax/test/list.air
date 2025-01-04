@@ -1,27 +1,43 @@
-
+empty
 -----
 []
 =====
-
+alt empty
 -----
-[1]
+,[]
 =====
-
+one
 -----
-[1,]
+[a]
 =====
-
+alt one
 -----
-[1,2]
+,[a]
 =====
-
+one trailing comma
 -----
-[1,2,]
+[a,]
 =====
-
+two
+-----
+[a, b]
+=====
+alt two
+-----
+,[a b]
+=====
+alt two non-atomic
+-----
+,[(a : b) c]
+=====
+two trailing comma
+-----
+[a, b,]
+=====
+recursive
 -----
 [[]]
 =====
-
+sequence
 -----
-[[],[]]
+,[[] []]

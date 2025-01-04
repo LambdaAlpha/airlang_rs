@@ -2,8 +2,6 @@ use crate::syntax::{
     repr::Repr,
     test::{
         ask,
-        call,
-        call_list,
         infix,
         list,
         map,
@@ -15,20 +13,16 @@ use crate::syntax::{
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         pair(symbol("a"), symbol("b")),
-        pair(symbol("a"), list(vec![])),
+        pair(symbol("a"), symbol("b")),
         pair(symbol("a"), pair(symbol("b"), symbol("c"))),
-        pair(symbol("a"), call(symbol("b"), symbol("c"))),
-        pair(symbol("a"), call_list(symbol("b"), vec![])),
         pair(symbol("a"), ask(symbol("b"), symbol("c"))),
+        ask(symbol("a"), pair(symbol("b"), symbol("c"))),
         pair(symbol("a"), infix(symbol("b"), symbol("c"), symbol("d"))),
-        pair(list(vec![]), symbol("a")),
+        infix(symbol("a"), symbol("b"), pair(symbol("c"), symbol("d"))),
         pair(pair(symbol("a"), symbol("b")), symbol("c")),
-        pair(call(symbol("a"), symbol("b")), symbol("c")),
-        pair(call_list(symbol("a"), vec![]), symbol("b")),
-        pair(ask(symbol("a"), symbol("b")), symbol("c")),
-        pair(infix(symbol("a"), symbol("b"), symbol("c")), symbol("d")),
+        pair(symbol("a"), pair(symbol("b"), symbol("c"))),
         list(vec![pair(symbol("a"), symbol("b"))]),
-        map(vec![(symbol("a"), symbol("b"))]),
         map(vec![(pair(symbol("a"), symbol("b")), symbol("c"))]),
+        map(vec![(symbol("a"), pair(symbol("b"), symbol("c")))]),
     ]
 }

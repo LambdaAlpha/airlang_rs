@@ -1,437 +1,421 @@
-
------
-"
-=====
-
------
-"a
-=====
-
------
-"""
-=====
-
------
-"\"
-=====
-
------
-"\\\"
-=====
-
+text unknown alphabet prefix
 -----
 a""
 =====
-
+text unknown digit prefix
 -----
 1""
 =====
-
+text unknown symbol prefix
 -----
 .""
 =====
-
------
-a"
-=====
-
------
-\"
-=====
-
+text alphabet postfix
 -----
 "a"b
 =====
-
+text digit postfix
 -----
 "a"1
 =====
-
+text symbol postfix
 -----
 "a".
 =====
-
+text empty unpaired
 -----
-a"
+"
 =====
-
+text unpaired
+-----
+"a
+=====
+text extra unpaired
+-----
+"""
+=====
+text escape unpaired
+-----
+"\"
+=====
+text prefixed unpaired
+-----
+\"a
+=====
+text concat
 -----
 "a""b"
 =====
-
+text unknown escape
 -----
 "\a"
 =====
-
+unicode no body
 -----
 "\u"
 =====
-
+unicode wrong bracket
 -----
 "\u{32}"
 =====
-
+unicode not exist
 -----
 "\u(1234567)"
 =====
-
+raw text one line 
+-----
+/""
+=====
+raw text no space after line indicator
 -----
 /"
 |abc
 -"
 =====
-
+raw text no last line indicator
 -----
 /"
 | abc
 "
 =====
-
+raw text no line indicator
 -----
 /"
 abc
 -"
 =====
-
+symbol empty unpaired
 -----
 '
 =====
-
+symbol unpaired
 -----
 'a
 =====
-
+symbol extra unpaired
 -----
 '''
 =====
-
+symbol escape unpaired
 -----
 '\'
 =====
-
------
-'\\\'
-=====
-
+symbol unknown escape
 -----
 '\a'
 =====
-
+symbol illegal
 -----
 '中'
 =====
-
+symbol unknown alphabet prefix
 -----
 a''
 =====
-
+symbol unknown digit prefix
 -----
 1''
 =====
-
+symbol unknown symbol prefix
 -----
 .''
 =====
-
------
-a'
-=====
-
+symbol tab
 -----
 /'	a
 |'
 =====
-
+raw symbol one line
 -----
 /''
 =====
-
+raw symbol wrong line indicator
 -----
 /'
 -'
 =====
-
+raw symbol illegal
 -----
 /'
 | 中
 '
 =====
-
+unknown prefix
 -----
 a()
 =====
-
+unknown prefix with value
 -----
 a(1)
 =====
-
+quoted prefix
 -----
-'a'(1)
+'integer'(1)
 =====
-
+digit prefix
 -----
 1(a)
 =====
-
+duplicate ctx prefix
 -----
 <<(a)
 =====
-
+conflict ctx prefix
 -----
 <>(a)
 =====
-
+duplicate ctx prefix 2
 -----
 <;=<(a)
 =====
-
+int lower case tag
 -----
 0xff
 =====
-
+int upper case digit
 -----
 0XFF
 =====
-
+int no digit
 -----
 0B
 =====
-
+int wrong order
 -----
 0X-1
 =====
-
+int hexadecimal no base
 -----
 0ff
 =====
-
+int unexpected _
 -----
 0X_0
 =====
-
+int long _ 1
 -----
 0B0__0
 =====
-
------
-0X0_
-=====
-
+int long _ 2
 -----
 1__2
 =====
-
+int trailing _ 1
+-----
+0X0_
+=====
+int trailing _ 2
 -----
 1_
 =====
-
+int norm prefixed 0
 -----
 integer(0-1)
 =====
-
+int norm hexadecimal prefix 0
 -----
 integer(0Xff)
 =====
-
+number lower case tag
 -----
 1.0e-1
 =====
-
+number wrong exponent
 -----
 1.Ea
 =====
-
+number exponent no digit
 -----
 1.E+
 =====
-
+number wrong order
 -----
 0X-1.0
 =====
-
+number hexadecimal no base
 -----
 0ff.0
 =====
-
+number long _ integral
 -----
 1__0.
 =====
-
------
-1_.
-=====
-
------
-1._0
-=====
-
+number long _ fractional
 -----
 1.0__0
 =====
-
------
-1.0_
-=====
-
+number long _ exponent
 -----
 1.E2__2
 =====
-
+number unexpected _ 1
+-----
+1_.
+=====
+number unexpected _ 2
+-----
+1._0
+=====
+number trailing _ 1
+-----
+1.0_
+=====
+number trailing _ 2
 -----
 1.E2_
 =====
-
+number norm prefixed 0
 -----
 number(0-1.0)
 =====
-
+number norm hexadecimal prefixed 0
 -----
 number(0X1.0)
 =====
-
+byte wrong length
 -----
 byte(B0000)
 =====
-
+byte illegal group
 -----
 byte(B0000_0000)
 =====
-
+byte illegal digit
 -----
 byte(B00000002)
 =====
-
+byte unexpected _
 -----
 byte(B_00000000)
 =====
-
+byte trailing _
 -----
 byte(B00000000_)
 =====
-
+byte long _
 -----
 byte(B00000000__00000000)
 =====
-
+byte hexadecimal wrong length
 -----
 byte(Xf)
 =====
-
+byte hexadecimal illegal group
 -----
 byte(Xf_f)
 =====
-
+byte hexadecimal unexpected _
 -----
 byte(X_ff)
 =====
-
+byte hexadecimal trailing _
 -----
 byte(Xff_)
 =====
-
+byte hexadecimal long _
 -----
 byte(Xff__ff)
 =====
-
+byte hexadecimal illegal digit
 -----
 byte(Xfg)
 =====
-
+byte unknown base
 -----
 byte(z)
 =====
-
+byte point
 -----
 byte(Xff.)
 =====
-
+unquoted symbol with [
 -----
 %[
 =====
-
+unquoted symbol begin with [
 -----
 [%
 =====
-
+unpaired [
 -----
 [
 =====
-
+unmatched delimiter
 -----
 [}
 =====
-
+extra [
 -----
 [[[]]
 =====
-
+extra ]
 -----
 [[]]]
 =====
-
+unmatched cross
 -----
 [{]}
 =====
-
+list empty comma
 -----
 [,]
 =====
-
+list leading comma
 -----
 [,1]
 =====
-
+list leading comma trailing comma
 -----
 [,1,]
 =====
-
+map empty comma
 -----
 {,}
 =====
-
+map leading comma
 -----
 {,1 : 2}
 =====
-
+map leading comma trailing comma
 -----
 {,1 : 2,}
 =====
-
+map missing comma
 -----
 {1 : 2 3 : 4}
 =====
-
+map concat
 -----
 {}{}
 =====
-
+map list concat
 -----
 {}[]
 =====
-
+scope concat
 -----
 (1)(2)
 =====
-
+empty token
 -----
 ,()
 =====
-
+token list
 -----
 ,([1, ,])
 =====
-
+even number composition
 -----
 a b c d
 =====
-
+empty scope
 -----
 () a
 =====
-
+empty
 -----
 
 =====
-
+illegal unicode
 -----
 中

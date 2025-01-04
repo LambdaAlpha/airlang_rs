@@ -1,119 +1,119 @@
-
+0
 -----
 0
 =====
-
+redundant 0
 -----
 00
 =====
-
++0
 -----
 0+0
 =====
-
+-0
 -----
 0-0
 =====
-
+unsigned decimal
 -----
 123
 =====
-
+positive decimal
 -----
 0+123
 =====
-
+negative decimal
 -----
 0-123
 =====
-
+big decimal
 -----
 11111111_22222222_33333333_44444444
 =====
-
+group
 -----
 1_1111111_22_222222_333_33333_4444_4444
 =====
-
+explicit decimal
 -----
 0D123
 =====
-
+negative explicit decimal
 -----
 0-D123
 =====
-
+hexadecimal 0
 -----
 0X0
 =====
-
+hexadecimal redundant 0
 -----
 0X00
 =====
-
+hexadecimal a-f
 -----
 0Xa0_b1_c2_d3
 =====
-
+negative hexadecimal a-f
 -----
 0-Xa0_b1_c2_d3
 =====
-
+big hexadecimal
 -----
 0X99999999_00000000_aaaaaaaa_bbbbbbbb_cccccccc
 =====
-
+hexadecimal group
 -----
 0X9_9999999_00_000000_aaa_aaaaa_bbbb_bbbb_ccccc_ccc
 =====
-
+binary 0
 -----
 0B0
 =====
-
+positive binary
 -----
 0B1101_0010
 =====
-
+negative binary
 -----
 0-B1101_0010
 =====
-
+norm 0
 -----
 integer(0)
 =====
-
+norm unsigned
 -----
 integer(1)
 =====
-
+norm signed positive
 -----
 integer(+1)
 =====
-
+norm signed negative
 -----
 integer(-1)
 =====
-
+norm positive decimal
 -----
 integer(+D123)
 =====
-
+norm negative decimal
 -----
 integer(-D123)
 =====
-
+norm positive hexadecimal
 -----
 integer(Xa0_b1_c2_d3)
 =====
-
+norm negative hexadecimal
 -----
 integer(-Xa0_b1_c2_d3)
 =====
-
+norm positive binary
 -----
 integer(B1101_0010)
 =====
-
+norm negative binary
 -----
 integer(-B1101_0010)

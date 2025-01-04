@@ -1,10 +1,10 @@
 use crate::syntax::{
     repr::Repr,
     test::{
-        call,
-        infix,
+        list,
         map,
-        positive_decimal_int as int,
+        pair,
+        symbol,
         unit,
     },
 };
@@ -12,21 +12,18 @@ use crate::syntax::{
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         map(vec![]),
-        map(vec![(int("1"), int("2"))]),
-        map(vec![(int("1"), int("2"))]),
-        map(vec![(int("1"), int("2")), (int("3"), int("4"))]),
-        map(vec![(int("1"), int("2")), (int("3"), int("4"))]),
+        map(vec![(symbol("a"), symbol("b"))]),
+        map(vec![(symbol("a"), symbol("b"))]),
+        map(vec![(symbol("a"), symbol("b")), (symbol("c"), symbol("d"))]),
+        map(vec![(symbol("a"), symbol("b")), (symbol("c"), symbol("d"))]),
         map(vec![(map(vec![]), map(vec![]))]),
-        map(vec![(
-            map(vec![(int("1"), int("2"))]),
-            map(vec![(int("3"), int("4"))]),
-        )]),
-        map(vec![(int("1"), unit())]),
-        map(vec![(int("1"), unit()), (int("2"), int("3"))]),
-        map(vec![(int("1"), int("1"))]),
-        map(vec![(int("1"), int("1")), (int("2"), int("3"))]),
-        map(vec![(int("1"), int("2")), (int("1"), int("3"))]),
-        map(vec![(int("1"), call(int("2"), int("3")))]),
-        map(vec![(int("1"), infix(int("2"), int("3"), int("4")))]),
+        list(vec![map(vec![]), map(vec![])]),
+        map(vec![(symbol("a"), unit())]),
+        map(vec![(symbol("a"), unit()), (symbol("b"), symbol("c"))]),
+        map(vec![(symbol("a"), symbol("a"))]),
+        map(vec![(symbol("a"), symbol("a")), (symbol("b"), symbol("c"))]),
+        map(vec![(symbol("a"), symbol("c"))]),
+        map(vec![(pair(symbol("a"), symbol("b")), symbol("c"))]),
+        map(vec![(symbol("a"), pair(symbol("b"), symbol("c")))]),
     ]
 }

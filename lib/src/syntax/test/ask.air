@@ -1,51 +1,47 @@
-
+ask
 -----
 a ? b
 =====
-
+ask ctx
 -----
-a ? []
+?(a b)
 =====
-
------
-a ? b : c
-=====
-
------
-a ? (b c)
-=====
-
------
-a ? (b [])
-=====
-
+ask ask
 -----
 a ? b ? c
 =====
-
+ask other
+-----
+a ? b : c
+=====
+other ask
+-----
+a : b ? c
+=====
+ask infix
 -----
 a ? b c d
 =====
-
+infix ask
 -----
-[] ? a
+a b c ? d
 =====
-
+non-atomic first
 -----
-(a : b) ? c
+,[a b] ? c
 =====
-
+non-atomic second
 -----
-(a b) ? c
+a ? ,[b c]
 =====
-
+list item
 -----
-(a []) ? b
+[a ? b]
 =====
-
+map key
 -----
-(a ? b) ? c
+{(a ? b) : c}
 =====
-
+map value
 -----
-(a b c) ? d
+{a : b ? c}

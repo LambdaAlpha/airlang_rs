@@ -2,17 +2,22 @@ use crate::syntax::{
     repr::Repr,
     test::{
         list,
-        positive_decimal_int as int,
+        pair,
+        symbol,
     },
 };
 
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         list(vec![]),
-        list(vec![int("1")]),
-        list(vec![int("1")]),
-        list(vec![int("1"), int("2")]),
-        list(vec![int("1"), int("2")]),
+        list(vec![]),
+        list(vec![symbol("a")]),
+        list(vec![symbol("a")]),
+        list(vec![symbol("a")]),
+        list(vec![symbol("a"), symbol("b")]),
+        list(vec![symbol("a"), symbol("b")]),
+        list(vec![pair(symbol("a"), symbol("b")), symbol("c")]),
+        list(vec![symbol("a"), symbol("b")]),
         list(vec![list(vec![])]),
         list(vec![list(vec![]), list(vec![])]),
     ]

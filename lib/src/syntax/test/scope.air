@@ -1,227 +1,231 @@
-
+empty ctx
 -----
-(1)
+(a)
 =====
-
+recursive
 -----
-(((1)))
+(((a)))
 =====
-
+association
 -----
-[(1)]
+(a b (c d e)) f g
 =====
-
+list item
 -----
-1 2 []
+[(a)]
 =====
-
+map key
 -----
-1 [] 2
+{(a : b) : c}
 =====
-
+map value
 -----
-(1 2 (3 4 5)) 6 7
+{a : (b : c)}
 =====
-
+left ctx
 -----
-(1 2 3) []
+<(a b c d e)
 =====
-
+left ctx + empty ctx
 -----
-<(1 2 3 4 5)
+<((a b c d e))
 =====
-
+left ctx + list
 -----
-<((1 2 3 4 5))
+<([a b c d e])
 =====
-
+left ctx + map
 -----
-<([1 2 3 4 5])
+<({(a b c d e) : f g h i j})
 =====
-
+right ctx
 -----
-<({0 : 1 2 3 4 5})
+>(a b c d e)
 =====
-
+right ctx + empty ctx
 -----
->(1 2 3 4 5)
+>((a b c d e))
 =====
-
+right ctx + list
 -----
->((1 2 3 4 5))
+>([a b c d e])
 =====
-
+right ctx + map
 -----
->([1 2 3 4 5])
+>({(a b c d e) : f g h i j})
 =====
-
+pair ctx
 -----
->({0 : 1 2 3 4 5})
+:(a b c d e)
 =====
-
+pair ctx two
 -----
-:(1 2 3 4 5)
+:(a b)
 =====
-
+call ctx
 -----
-;(1 2 3 4 5)
+;(a b c d e)
 =====
-
+call ctx two
 -----
-!(1 2 3 4 5)
+;(a b)
 =====
-
+abstract ctx
 -----
-!(1 2)
+!(a b c d e)
 =====
-
+abstract ctx two
 -----
-?(1 2 3 4 5)
+!(a b)
 =====
-
+ask ctx
 -----
-?(1 2)
+?(a b c d e)
 =====
-
+ask ctx two
 -----
-,[1]
+?(a b)
 =====
-
+unary ctx
 -----
-,[1 2]
+-(a b c)
 =====
-
+unary ctx even
+-----
+-(a b c d)
+=====
+unary ctx left
+-----
+<-(a b c)
+=====
+unary ctx struct
+-----
+?-(a b c)
+=====
+binary ctx
+-----
+=(a b c d e)
+=====
+list empty
+-----
+,[]
+=====
+list one
+-----
+,[a]
+=====
+list multiple
+-----
+,[a b]
+=====
+list soft keyword
 -----
 ,[: ; ! ?]
 =====
-
+token one
 -----
-,(1)
+,(a)
 =====
-
+token trailing space
 -----
-,(1 )
+,(a )
 =====
-
+token multiple
 -----
-,(1 2)
+,(a b)
 =====
-
+token soft keyword
 -----
-,(@ ! : ?)
+,(: ; ! ?)
 =====
-
+token empty ctx
 -----
 ,((a b c) d e)
 =====
-
+token list
 -----
-,((a ! b) c d)
+,([a, b,] [])
 =====
-
------
-,([1, 2,] [])
-=====
-
+token map
 -----
 ,({a : b} {})
 =====
-
+token map value
 -----
-,({1 : 2 3 4})
+,({a : b c d})
 =====
-
+token map no repeat
 -----
-,({1 : :})
+,({a : :})
 =====
-
+token recover
 -----
 ,(a ,(b c) d)
 =====
-
+token recover by direction ctx
 -----
-,(<(1 2 3 4 5))
+,(<(a b c d e))
 =====
-
+token recover by struct ctx
 -----
-,(?(1 2 3))
+,(?(a b c))
 =====
-
+ctx composition
 -----
--(1 2 3)
+!<=(a b c d e)
 =====
-
+ctx composition any order
 -----
--(1 2 3 4)
+-;>(a b c d e)
 =====
-
+ctx composition any length
 -----
-<-(1 2 3)
+?<(a b c d e)
 =====
-
------
-?-(1 2 3)
-=====
-
------
-=(1 2 3 4 5)
-=====
-
------
-!<=(1 2 3 4 5)
-=====
-
------
--;>(1 2 3 4 5)
-=====
-
------
-?<(1 2 3 4 5)
-=====
-
+pair repeat
 -----
 a : :
 =====
-
+call repeat
 -----
 a ; :
 =====
-
+abstract repeat
 -----
 a ! :
 =====
-
+ask repeat
 -----
 a ? :
 =====
-
+implicit struct repeat
 -----
 a :
 =====
-
+repeat composition
 -----
 (a b :) c :
 =====
-
+repeat composition left ctx
 -----
 <(a b : c :)
 =====
-
+repeat unary ctx
 -----
 -(a :)
 =====
-
+repeat unary pair ctx
 -----
 -(:(a :))
 =====
-
+repeat unary last
 -----
 -(a b :)
 =====
-
+repeat composition unary ctx
 -----
 -((a :) :)
 =====
-
+repeat composition unary left ctx
 -----
 -<(a : :)

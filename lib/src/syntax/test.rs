@@ -21,8 +21,6 @@ use crate::{
             abstract1::AbstractRepr,
             ask::AskRepr,
             call::CallRepr,
-            list::ListRepr,
-            map::MapRepr,
             pair::PairRepr,
         },
     },
@@ -80,11 +78,6 @@ fn int(s: &str, radix: u8) -> Repr {
     Repr::Int(i)
 }
 
-fn positive_decimal_int(s: &str) -> Repr {
-    let i = Int::new(BigInt::from_str(s).unwrap());
-    Repr::Int(i)
-}
-
 fn number(radix: u8, significand: &str, shift: usize, exp: &str) -> Repr {
     let i = BigInt::from_str_radix(significand, radix as u32).unwrap();
     let exp = BigInt::from_str(exp).unwrap();
@@ -124,20 +117,6 @@ fn list(v: Vec<Repr>) -> Repr {
 
 fn map(v: Vec<(Repr, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
-}
-
-fn call_list(root: Repr, leaves: Vec<Repr>) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(
-        root,
-        Repr::List(ListRepr::from(leaves)),
-    )))
-}
-
-fn call_map(root: Repr, leaves: Vec<(Repr, Repr)>) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(
-        root,
-        Repr::Map(MapRepr::from_iter(leaves)),
-    )))
 }
 
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {

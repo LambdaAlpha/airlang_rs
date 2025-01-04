@@ -1,63 +1,47 @@
-
+pair
 -----
 a : b
 =====
-
+pair ctx
 -----
-a : []
+:(a b)
 =====
-
+pair pair
 -----
 a : b : c
 =====
-
------
-a : (b c)
-=====
-
------
-a : (b [])
-=====
-
+pair other
 -----
 a : b ? c
 =====
-
+other pair
+-----
+a ? b : c
+=====
+pair infix
 -----
 a : b c d
 =====
-
+infix pair
 -----
-[] : a
+a b c : d
 =====
-
+non-atomic first
 -----
 (a : b) : c
 =====
-
+non-atomic second
 -----
-(a b) : c
+a : (b : c)
 =====
-
------
-(a []) : b
-=====
-
------
-(a ? b) : c
-=====
-
------
-(a b c) : d
-=====
-
+list item
 -----
 [a : b]
 =====
-
------
-{a : b}
-=====
-
+map key
 -----
 {(a : b) : c}
+=====
+map value
+-----
+{a : b : c}

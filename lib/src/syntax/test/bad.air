@@ -1,22 +1,22 @@
-
+first trailing :
 -----
 a: b
 -----
 (a:) b
 =====
-
+second leading :
 -----
 a :b
 -----
 a (:b)
 =====
-
+map key trailing :
 -----
 {a:}
 -----
 {a: : .}
 =====
-
+map key leading :
 -----
 {:a}
 -----
