@@ -24,6 +24,10 @@ pub(crate) const RIGHT: char = '>';
 pub(crate) const ARITY_1: char = '-';
 pub(crate) const ARITY_2: char = '=';
 
+pub(crate) const RAW: &str = "raw";
+pub(crate) const ESCAPE: char = '\\';
+pub(crate) const ESCAPE_STR: &str = concatcp!(ESCAPE);
+
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
@@ -40,9 +44,6 @@ pub(crate) const ASK_STR: &str = concatcp!(ASK);
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
-
-pub(crate) const RAW: &str = "/";
-pub(crate) const RICH: &str = "\\";
 
 pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(

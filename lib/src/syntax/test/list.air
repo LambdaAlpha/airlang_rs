@@ -2,17 +2,17 @@ empty
 -----
 []
 =====
-alt empty
+raw empty
 -----
-,[]
+raw[]
 =====
 one
 -----
 [a]
 =====
-alt one
+raw one
 -----
-,[a]
+raw[a]
 =====
 one trailing comma
 -----
@@ -22,17 +22,21 @@ two
 -----
 [a, b]
 =====
-alt two
+raw two
 -----
-,[a b]
+raw[a b]
 =====
-alt two non-atomic
+raw two non-atomic
 -----
-,[(a : b) c]
+raw[(a : b) c]
 =====
 two trailing comma
 -----
 [a, b,]
+=====
+raw soft keyword
+-----
+raw[: ; ! ?]
 =====
 recursive
 -----
@@ -40,4 +44,4 @@ recursive
 =====
 sequence
 -----
-,[[] []]
+raw[[] []]

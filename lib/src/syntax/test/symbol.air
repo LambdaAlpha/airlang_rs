@@ -242,18 +242,14 @@ multiline
   d
 '
 =====
-rich prefixed
------
-\'\_\''
-=====
 raw escape
 -----
-/'\_\''
+raw'\_\''
 |'
 =====
 raw special symbol
 -----
-/'
+raw'
 | -|/\
 | :;!?
 |'

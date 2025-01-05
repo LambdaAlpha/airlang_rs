@@ -38,10 +38,6 @@ text escape unpaired
 -----
 "\"
 =====
-text prefixed unpaired
------
-\"a
-=====
 text concat
 -----
 "a""b"
@@ -64,23 +60,23 @@ unicode not exist
 =====
 raw text one line 
 -----
-/""
+raw""
 =====
 raw text no space after line indicator
 -----
-/"
+raw"
 |abc
 -"
 =====
 raw text no last line indicator
 -----
-/"
+raw"
 | abc
 "
 =====
 raw text no line indicator
 -----
-/"
+raw"
 abc
 -"
 =====
@@ -120,23 +116,23 @@ symbol unknown symbol prefix
 -----
 .''
 =====
-symbol tab
+raw symbol tab
 -----
-/'	a
+raw'	a
 |'
 =====
 raw symbol one line
 -----
-/''
+raw''
 =====
 raw symbol wrong line indicator
 -----
-/'
+raw'
 -'
 =====
 raw symbol illegal
 -----
-/'
+raw'
 | 中
 '
 =====
@@ -396,13 +392,13 @@ scope concat
 -----
 (1)(2)
 =====
-empty token
+empty raw
 -----
-,()
+\r()
 =====
-token list
+raw list
 -----
-,([1, ,])
+\r([1, ,])
 =====
 even number composition
 -----

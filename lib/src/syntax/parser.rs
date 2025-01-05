@@ -4,7 +4,6 @@ use std::{
     str::FromStr,
 };
 
-use const_format::concatcp;
 use nom::{
     Finish,
     IResult,
@@ -81,6 +80,8 @@ use crate::{
         BYTE,
         CALL,
         CALL_STR,
+        ESCAPE,
+        ESCAPE_STR,
         FALSE,
         INT,
         LEFT,
@@ -92,7 +93,6 @@ use crate::{
         PAIR,
         PAIR_STR,
         RAW,
-        RICH,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
@@ -130,17 +130,19 @@ pub(crate) trait ParseRepr:
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-struct ParseCtx {
-    enable: bool,
+struct ParseCtx<'a> {
+    raw: bool,
+    tag: &'a str,
     arity: Arity,
     struct1: Struct,
     direction: Direction,
 }
 
-impl Default for ParseCtx {
+impl Default for ParseCtx<'_> {
     fn default() -> Self {
         Self {
-            enable: true,
+            raw: false,
+            tag: "",
             arity: Arity::Two,
             struct1: Struct::Call,
             direction: Direction::Right,
@@ -148,9 +150,15 @@ impl Default for ParseCtx {
     }
 }
 
-impl ParseCtx {
-    fn switch(mut self) -> Self {
-        self.enable = !self.enable;
+impl<'a> ParseCtx<'a> {
+    fn raw(mut self, tag: &'a str) -> Self {
+        self.raw = true;
+        self.tag = tag;
+        self
+    }
+
+    fn escape(mut self) -> Self {
+        self.raw = false;
         self
     }
 }
@@ -246,11 +254,11 @@ where
 }
 
 #[derive(Copy, Clone)]
-struct ScopeParser {
-    ctx: ParseCtx,
+struct ScopeParser<'a> {
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for ScopeParser
+impl<'a, T, E> Parser<&'a str, T, E> for ScopeParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -261,53 +269,23 @@ where
     }
 }
 
-impl ScopeParser {
-    fn new(ctx: ParseCtx) -> Self {
+impl<'a> ScopeParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
         Self { ctx }
     }
 }
 
 #[derive(Copy, Clone)]
-struct SeparateParser {
-    ctx: ParseCtx,
+struct CtxParser<'a> {
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for SeparateParser
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
-        let tokens = separated_list0(empty1, TokenParser::new(self.ctx));
-        let tokens = map(tokens, |tokens| {
-            let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
-            T::from(list)
-        });
-        let list = delimited_trim(LIST_LEFT, tokens, LIST_RIGHT);
-        let scope = ScopeParser::new(self.ctx.switch());
-        let f = alt((list, scope));
-        context("separate", f)(input)
-    }
-}
-
-impl SeparateParser {
-    fn new(ctx: ParseCtx) -> Self {
-        Self { ctx }
-    }
-}
-
-#[derive(Copy, Clone)]
-struct CtxParser {
-    ctx: ParseCtx,
-}
-
-impl<'a, E> Parser<&'a str, ParseCtx, E> for CtxParser
+impl<'a, E> Parser<&'a str, ParseCtx<'a>, E> for CtxParser<'a>
 where
     E: ParseError<&'a str>,
 {
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, ParseCtx, E> {
-        let mut ctx = self.ctx;
-        ctx.enable = true;
+    fn parse(&mut self, input: &'a str) -> IResult<&'a str, ParseCtx<'a>, E> {
+        let mut ctx = self.ctx.escape();
         let mut direction = 0;
         let mut arity = 0;
         let mut struct1 = 0;
@@ -355,8 +333,8 @@ where
     }
 }
 
-impl CtxParser {
-    fn new(ctx: ParseCtx) -> Self {
+impl<'a> CtxParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
         Self { ctx }
     }
 
@@ -369,11 +347,11 @@ impl CtxParser {
 }
 
 #[derive(Copy, Clone)]
-struct TokenParser {
-    ctx: ParseCtx,
+struct TokenParser<'a> {
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, Token<T>, E> for TokenParser
+impl<'a, T, E> Parser<&'a str, Token<T>, E> for TokenParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -389,10 +367,10 @@ where
             MAP_RIGHT => fail(s),
             SCOPE_LEFT => map(ScopeParser::new(self.ctx), Token::Default)(s),
             SCOPE_RIGHT => fail(s),
-            SEPARATOR => map(SeparateParser::new(self.ctx), Token::Default)(&s[1..]),
+            SEPARATOR => fail(s),
             SPACE => fail(s),
-            TEXT_QUOTE => map(rich_text, Token::Default)(s),
-            SYMBOL_QUOTE => map(rich_symbol, Token::Default)(s),
+            TEXT_QUOTE => map(text, Token::Default)(s),
+            SYMBOL_QUOTE => map(symbol, Token::Default)(s),
 
             sym if is_symbol(sym) => TrivialSymbolParser::new(self.ctx).parse(s),
             _ => fail(s),
@@ -401,8 +379,8 @@ where
     }
 }
 
-impl TokenParser {
-    fn new(ctx: ParseCtx) -> Self {
+impl<'a> TokenParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
         Self { ctx }
     }
 }
@@ -419,11 +397,11 @@ fn is_symbol(c: char) -> bool {
 }
 
 #[derive(Copy, Clone)]
-struct TrivialSymbolParser {
-    ctx: ParseCtx,
+struct TrivialSymbolParser<'a> {
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, Token<T>, E> for TrivialSymbolParser
+impl<'a, T, E> Parser<&'a str, Token<T>, E> for TrivialSymbolParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -445,8 +423,12 @@ where
             INT => int(src),
             NUMBER => number(src),
             BYTE => byte(src),
-            RICH => alt((rich_text, rich_symbol))(src),
-            RAW => alt((raw_text, raw_symbol))(src),
+            RAW => alt((raw_text, raw_symbol, ListParser::new_raw(self.ctx)))(src),
+            ESCAPE_STR => ScopeParser::new(self.ctx.escape()).parse(src),
+            s if s.starts_with(ESCAPE) => {
+                let tag = s.strip_prefix(ESCAPE).unwrap();
+                ScopeParser::new(self.ctx.raw(tag)).parse(src)
+            }
             s if s.chars().all(CtxParser::is_ctx) => {
                 let ctx = context("ctx", CtxParser::new(self.ctx)).parse(s)?.1;
                 ScopeParser::new(ctx).parse(src)
@@ -461,8 +443,8 @@ where
     }
 }
 
-impl TrivialSymbolParser {
-    fn new(ctx: ParseCtx) -> Self {
+impl<'a> TrivialSymbolParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
         Self { ctx }
     }
 }
@@ -483,11 +465,11 @@ impl<T: ParseRepr> Token<T> {
 }
 
 #[derive(Copy, Clone)]
-struct ComposeParser {
-    ctx: ParseCtx,
+struct ComposeParser<'a> {
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for ComposeParser
+impl<'a, T, E> Parser<&'a str, T, E> for ComposeParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -499,8 +481,8 @@ where
     }
 }
 
-impl ComposeParser {
-    fn new(ctx: ParseCtx) -> Self {
+impl<'a> ComposeParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
         ComposeParser { ctx }
     }
 
@@ -513,12 +495,12 @@ impl ComposeParser {
         if len == 0 {
             return None;
         }
+        if self.ctx.raw {
+            return Self::compose_raw(tokens, self.ctx.tag);
+        }
         if len == 1 {
             let repr = tokens.next().unwrap().into_repr();
             return Some(repr);
-        }
-        if !self.ctx.enable {
-            return Self::compose_none(tokens);
         }
         if len == 2 {
             let func = tokens.next().unwrap().into_repr();
@@ -543,16 +525,16 @@ impl ComposeParser {
         }
     }
 
-    fn compose_none<T, I>(tokens: I) -> Option<T>
+    fn compose_raw<T, I>(tokens: I, tag: &str) -> Option<T>
     where
         T: ParseRepr,
         I: Iterator<Item = Token<T>>,
     {
         let list = tokens.map(Token::into_repr).collect::<List<_>>();
         let list = From::from(list);
-        let tag = From::from(Symbol::from_str(concatcp!(SEPARATOR)));
-        let abstract1 = From::from(Abstract::new(tag, list));
-        Some(abstract1)
+        let tag = From::from(Symbol::from_str(tag));
+        let call = From::from(Call::new(tag, list));
+        Some(call)
     }
 
     fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
@@ -648,35 +630,50 @@ where
 }
 
 #[derive(Copy, Clone)]
-struct ListParser {
-    ctx: ParseCtx,
+struct ListParser<'a> {
+    raw: bool,
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for ListParser
+impl<'a, T, E> Parser<&'a str, T, E> for ListParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
-        let items = items(ComposeParser::new(self.ctx), char1(SEPARATOR));
-        let delimited_items = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
-        let f = map(delimited_items, |list| From::from(List::from(list)));
-        context("list", f)(input)
+        if self.raw {
+            let items = separated_list0(empty1, TokenParser::new(self.ctx));
+            let items = map(items, |tokens| {
+                let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
+                T::from(list)
+            });
+            let f = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
+            context("raw_list", f)(input)
+        } else {
+            let items = items(ComposeParser::new(self.ctx), char1(SEPARATOR));
+            let items = map(items, |list| From::from(List::from(list)));
+            let f = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
+            context("list", f)(input)
+        }
     }
 }
 
-impl ListParser {
-    fn new(ctx: ParseCtx) -> Self {
-        ListParser { ctx }
+impl<'a> ListParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
+        ListParser { raw: false, ctx }
+    }
+
+    fn new_raw(ctx: ParseCtx<'a>) -> Self {
+        Self { raw: true, ctx }
     }
 }
 
 #[derive(Copy, Clone)]
-struct MapParser {
-    ctx: ParseCtx,
+struct MapParser<'a> {
+    ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for MapParser
+impl<'a, T, E> Parser<&'a str, T, E> for MapParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -689,19 +686,20 @@ where
     }
 }
 
-impl MapParser {
-    fn new(ctx: ParseCtx) -> Self {
+impl<'a> MapParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
         MapParser { ctx }
     }
 
-    fn key_value<'a, T, E>(&self, src: &'a str) -> IResult<&'a str, (T, T), E>
+    fn key_value<T, E>(&self, src: &'a str) -> IResult<&'a str, (T, T), E>
     where
         T: ParseRepr,
         E: ParseError<&'a str> + ContextError<&'a str>,
     {
         let (rest, tokens) = separated_list1(empty1, TokenParser::new(self.ctx))(src)?;
         let mut tokens = tokens.into_iter();
-        let key: T = tokens.next().unwrap().into_repr();
+        let key = [tokens.next().unwrap()].into_iter();
+        let key = ComposeParser::new(self.ctx).compose_tokens(key).unwrap();
         if tokens.len() == 0 {
             return Ok((rest, (key, From::from(Unit))));
         }
@@ -711,7 +709,7 @@ impl MapParser {
         if &*s != PAIR_STR {
             return fail(src);
         }
-        if self.ctx.enable && tokens.len() == 1 {
+        if !self.ctx.raw && tokens.len() == 1 {
             let value = tokens.next().unwrap();
             return Ok((rest, left_right(key, value)));
         }
@@ -722,7 +720,7 @@ impl MapParser {
     }
 }
 
-fn rich_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -739,7 +737,7 @@ where
     });
     let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
     let f = map(delimited_symbol, |s| From::from(Symbol::from_string(s)));
-    context("rich_symbol", f)(src)
+    context("symbol", f)(src)
 }
 
 fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
@@ -795,7 +793,7 @@ where
     context("raw_symbol_newline", f)(src)
 }
 
-fn rich_text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
+fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -813,7 +811,7 @@ where
     });
     let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
     let f = map(delimited_text, |s| From::from(Text::from(s)));
-    context("rich_text", f)(src)
+    context("text", f)(src)
 }
 
 fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>

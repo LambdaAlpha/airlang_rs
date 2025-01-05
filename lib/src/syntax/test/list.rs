@@ -18,6 +18,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         list(vec![symbol("a"), symbol("b")]),
         list(vec![pair(symbol("a"), symbol("b")), symbol("c")]),
         list(vec![symbol("a"), symbol("b")]),
+        list(vec![symbol(":"), symbol(";"), symbol("!"), symbol("?")]),
         list(vec![list(vec![])]),
         list(vec![list(vec![]), list(vec![])]),
     ]

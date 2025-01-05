@@ -106,69 +106,69 @@ binary ctx
 -----
 =(a b c d e)
 =====
-list empty
+raw one
 -----
-,[]
+\r(a)
 =====
-list one
+raw trailing space
 -----
-,[a]
+\r(a )
 =====
-list multiple
+raw recursive
 -----
-,[a b]
+\r(\r(a))
 =====
-list soft keyword
+raw recursive implicit
 -----
-,[: ; ! ?]
+\r((a))
 =====
-token one
+raw any tag
 -----
-,(a)
+\a(b)
 =====
-token trailing space
+raw digit tag
 -----
-,(a )
+\1(a)
 =====
-token multiple
+raw multiple
 -----
-,(a b)
+\r(a b)
 =====
-token soft keyword
+raw soft keyword
 -----
-,(: ; ! ?)
+\r(: ; ! ?)
 =====
-token empty ctx
+raw empty ctx
 -----
-,((a b c) d e)
+\r((a b c) d e)
 =====
-token list
+raw list
 -----
-,([a, b,] [])
+\r([a, b,] [])
 =====
-token map
+raw map
 -----
-,({a : b} {})
+\r({a : b} {})
 =====
-token map value
+raw map value
 -----
-,({a : b c d})
+\r({a : b c d})
 =====
-token map no repeat
+raw map no repeat
 -----
-,({a : :})
+\r({a : :})
 =====
-token recover
+raw escape
 -----
-,(a ,(b c) d)
+\r(a \(b c) d)
 =====
-token recover by direction ctx
+raw escape by direction ctx
 -----
-,(<(a b c d e))
+\r(<(a b c d e))
 =====
-token recover by struct ctx
+raw escape by struct ctx
 -----
-,(?(a b c))
+\r(?(a b c))
 =====
 ctx composition
 -----

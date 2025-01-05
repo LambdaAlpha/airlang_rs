@@ -3,7 +3,6 @@ use std::{
     str::FromStr,
 };
 
-use const_format::concatcp;
 use num_bigint::BigInt;
 use num_traits::Num;
 
@@ -14,7 +13,6 @@ use crate::{
     number::Number,
     symbol::Symbol,
     syntax::{
-        SEPARATOR,
         parse,
         repr::{
             Repr,
@@ -105,10 +103,10 @@ fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
-fn no_compose(v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(concatcp!(SEPARATOR)));
+fn raw(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
-    Repr::Abstract(Box::new(AbstractRepr::new(func, input)))
+    Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {

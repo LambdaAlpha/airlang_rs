@@ -46,18 +46,14 @@ multiline indent
   d\
 "
 =====
-rich prefixed
------
-\" \_\n\r\t\u(1f701)"
-=====
 raw special symbol
 -----
-/"`!@#$%^&*()-_=+[{]}\|;:'",<.>/?
+raw"`!@#$%^&*()-_=+[{]}\|;:'",<.>/?
 |"
 =====
 raw line indicator
 -----
-/"
+raw"
 | 12345
 |  67890
 - 12345 
@@ -66,7 +62,7 @@ raw line indicator
 =====
 raw indent
 -----
-  /"
+  raw"
    | 12345
    |  67890
   - 12345 
@@ -75,12 +71,12 @@ raw indent
 =====
 raw escape
 -----
-/""
+raw""
 | "
 |"
 =====
 raw empty
 -----
-/"
+raw"
 | 
 |"

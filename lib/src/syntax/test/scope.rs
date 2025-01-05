@@ -10,8 +10,8 @@ use crate::syntax::{
         infix_pair,
         list,
         map,
-        no_compose,
         pair,
+        raw,
         symbol,
     },
 };
@@ -122,37 +122,57 @@ pub fn expected() -> Vec<Repr> {
             symbol("b"),
             infix(symbol("c"), symbol("d"), symbol("e")),
         ),
-        list(vec![]),
-        list(vec![symbol("a")]),
-        list(vec![symbol("a"), symbol("b")]),
-        list(vec![symbol(":"), symbol(";"), symbol("!"), symbol("?")]),
-        symbol("a"),
-        symbol("a"),
-        no_compose(vec![symbol("a"), symbol("b")]),
-        no_compose(vec![symbol(":"), symbol(";"), symbol("!"), symbol("?")]),
-        no_compose(vec![
-            no_compose(vec![symbol("a"), symbol("b"), symbol("c")]),
+        raw("r", vec![symbol("a")]),
+        raw("r", vec![symbol("a")]),
+        raw("r", vec![raw("r", vec![symbol("a")])]),
+        raw("r", vec![raw("r", vec![symbol("a")])]),
+        raw("a", vec![symbol("b")]),
+        raw("1", vec![symbol("a")]),
+        raw("r", vec![symbol("a"), symbol("b")]),
+        raw("r", vec![
+            symbol(":"),
+            symbol(";"),
+            symbol("!"),
+            symbol("?"),
+        ]),
+        raw("r", vec![
+            raw("r", vec![symbol("a"), symbol("b"), symbol("c")]),
             symbol("d"),
             symbol("e"),
         ]),
-        no_compose(vec![list(vec![symbol("a"), symbol("b")]), list(vec![])]),
-        no_compose(vec![map(vec![(symbol("a"), symbol("b"))]), map(vec![])]),
-        map(vec![(
-            symbol("a"),
-            no_compose(vec![symbol("b"), symbol("c"), symbol("d")]),
-        )]),
-        map(vec![(symbol("a"), symbol(":"))]),
-        no_compose(vec![
+        raw("r", vec![
+            list(vec![
+                raw("r", vec![symbol("a")]),
+                raw("r", vec![symbol("b")]),
+            ]),
+            list(vec![]),
+        ]),
+        raw("r", vec![
+            map(vec![(
+                raw("r", vec![symbol("a")]),
+                raw("r", vec![symbol("b")]),
+            )]),
+            map(vec![]),
+        ]),
+        raw("r", vec![map(vec![(
+            raw("r", vec![symbol("a")]),
+            raw("r", vec![symbol("b"), symbol("c"), symbol("d")]),
+        )])]),
+        raw("r", vec![map(vec![(
+            raw("r", vec![symbol("a")]),
+            raw("r", vec![symbol(":")]),
+        )])]),
+        raw("r", vec![
             symbol("a"),
             call(symbol("b"), symbol("c")),
             symbol("d"),
         ]),
-        infix(
+        raw("r", vec![infix(
             infix(symbol("a"), symbol("b"), symbol("c")),
             symbol("d"),
             symbol("e"),
-        ),
-        infix_ask(symbol("a"), symbol("b"), symbol("c")),
+        )]),
+        raw("r", vec![infix_ask(symbol("a"), symbol("b"), symbol("c"))]),
         infix_abstract(
             infix_abstract(symbol("a"), symbol("b"), symbol("c")),
             symbol("d"),
