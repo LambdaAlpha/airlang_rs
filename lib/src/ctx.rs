@@ -50,8 +50,10 @@ pub enum Invariant {
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxValue {
     pub(crate) invariant: Invariant,
-    // static binding exists from beginning to end
-    // the key and invariant can't be changed
+    // the invariant of static binding is hold both in the past and in the future
+    // corollaries
+    // - static binding either always exists or never exists
+    // - the invariant of static binding is constant
     pub(crate) static1: bool,
     pub(crate) val: Val,
 }

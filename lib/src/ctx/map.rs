@@ -41,6 +41,8 @@ pub(crate) trait CtxMapRef<'a>: Sized {
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMap {
     map: Map<Symbol, CtxValue>,
+    // the invariants of normal map are hold in the future
+    // the invariants of reverse map are hold in the past
     reverse: bool,
 }
 
