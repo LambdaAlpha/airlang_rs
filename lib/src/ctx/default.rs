@@ -10,15 +10,20 @@ use crate::{
     ctx::{
         DynRef,
         map::CtxMapRef,
-        ref1::CtxRef,
+        ref1::{
+            CtxMeta,
+            CtxRef,
+        },
     },
+    mode::eval::Eval,
+    transformer::Transformer,
     types::either::Either,
 };
 
 pub(crate) struct DefaultCtx;
 
 impl DefaultCtx {
-    pub(crate) fn get_or_default<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Val
+    pub(crate) fn get_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
     where
         Ctx: CtxRef<'a>,
     {
@@ -31,7 +36,7 @@ impl DefaultCtx {
         val.clone()
     }
 
-    pub(crate) fn remove_or_default<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Val
+    pub(crate) fn remove_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
     where
         Ctx: CtxRef<'a>,
     {
@@ -41,7 +46,7 @@ impl DefaultCtx {
         variables.remove(name).unwrap_or_default()
     }
 
-    pub(crate) fn is_null<'a, Ctx>(&self, ctx: Ctx, name: Symbol) -> Result<bool, CtxError>
+    pub(crate) fn is_null<'a, Ctx>(ctx: Ctx, name: Symbol) -> Result<bool, CtxError>
     where
         Ctx: CtxRef<'a>,
     {
@@ -58,19 +63,14 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_dyn<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_dyn<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
-        Ctx: CtxRef<'a>,
+        Ctx: CtxMeta<'a>,
         F: FnOnce(Either<DynRef<Val>, Val>) -> T,
-        Self: Sized,
     {
-        match name {
-            Val::Symbol(s) => {
-                let prefix = s.chars().next();
-                if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    return f(Either::That(Self::remove_prefix(s)));
-                }
-                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+        let val = Self::ref_or_val(ctx.reborrow(), name);
+        match val {
+            Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_dyn() else {
                     return f(Either::That(Val::default()));
                 };
@@ -80,24 +80,19 @@ impl DefaultCtx {
                 dyn_ref.is_const |= ctx.is_const;
                 f(Either::This(dyn_ref))
             }
-            val => f(Either::That(val)),
+            Either::That(val) => f(Either::That(val)),
         }
     }
 
     #[allow(unused)]
-    pub(crate) fn with_ref<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_ref<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
-        Ctx: CtxRef<'a>,
+        Ctx: CtxMeta<'a>,
         F: FnOnce(&Val) -> T,
-        Self: Sized,
     {
-        match name {
-            Val::Symbol(s) => {
-                let prefix = s.chars().next();
-                if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    return f(&Self::remove_prefix(s));
-                }
-                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+        let val = Self::ref_or_val(ctx.reborrow(), name);
+        match val {
+            Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables() else {
                     return f(&Val::default());
                 };
@@ -106,25 +101,18 @@ impl DefaultCtx {
                 };
                 f(val)
             }
-            val => f(&val),
+            Either::That(val) => f(&val),
         }
     }
 
-    pub(crate) fn with_ref_lossless<'a, Ctx, F>(&self, ctx: Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_lossless<'a, Ctx, F>(mut ctx: Ctx, name: Val, f: F) -> Val
     where
-        Ctx: CtxRef<'a>,
+        Ctx: CtxMeta<'a>,
         F: FnOnce(&Val) -> Val,
-        Self: Sized,
     {
-        match name {
-            Val::Symbol(s) => {
-                let prefix = s.chars().next();
-                if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let val = Self::remove_prefix(s);
-                    let result = f(&val);
-                    return Val::Pair(Pair::new(val, result).into());
-                }
-                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+        let val = Self::ref_or_val(ctx.reborrow(), name);
+        match val {
+            Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables() else {
                     return f(&Val::default());
                 };
@@ -133,7 +121,7 @@ impl DefaultCtx {
                 };
                 f(val)
             }
-            val => {
+            Either::That(val) => {
                 let result = f(&val);
                 Val::Pair(Pair::new(val, result).into())
             }
@@ -141,19 +129,14 @@ impl DefaultCtx {
     }
 
     #[allow(unused)]
-    pub(crate) fn with_ref_mut<'a, Ctx, T, F>(&self, ctx: Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_ref_mut<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
-        Ctx: CtxRef<'a>,
+        Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val) -> T,
-        Self: Sized,
     {
-        match name {
-            Val::Symbol(s) => {
-                let prefix = s.chars().next();
-                if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    return f(&mut Self::remove_prefix(s));
-                }
-                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+        let val = Self::ref_or_val(ctx.reborrow(), name);
+        match val {
+            Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_mut() else {
                     return f(&mut Val::default());
                 };
@@ -162,25 +145,18 @@ impl DefaultCtx {
                 };
                 f(val)
             }
-            mut val => f(&mut val),
+            Either::That(mut val) => f(&mut val),
         }
     }
 
-    pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(&self, ctx: Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(mut ctx: Ctx, name: Val, f: F) -> Val
     where
-        Ctx: CtxRef<'a>,
+        Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val) -> Val,
-        Self: Sized,
     {
-        match name {
-            Val::Symbol(s) => {
-                let prefix = s.chars().next();
-                if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let mut val = Self::remove_prefix(s);
-                    let result = f(&mut val);
-                    return Val::Pair(Pair::new(val, result).into());
-                }
-                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+        let val = Self::ref_or_val(ctx.reborrow(), name);
+        match val {
+            Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_mut() else {
                     return f(&mut Val::default());
                 };
@@ -189,28 +165,21 @@ impl DefaultCtx {
                 };
                 f(val)
             }
-            mut val => {
+            Either::That(mut val) => {
                 let result = f(&mut val);
                 Val::Pair(Pair::new(val, result).into())
             }
         }
     }
 
-    pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(&self, ctx: Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(mut ctx: Ctx, name: Val, f: F) -> Val
     where
-        Ctx: CtxRef<'a>,
+        Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val),
-        Self: Sized,
     {
-        match name {
-            Val::Symbol(s) => {
-                let prefix = s.chars().next();
-                if let Some(SYMBOL_ID_PREFIX) = prefix {
-                    let mut val = Self::remove_prefix(s);
-                    f(&mut val);
-                    return val;
-                }
-                let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+        let val = Self::ref_or_val(ctx.reborrow(), name);
+        match val {
+            Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_mut() else {
                     f(&mut Val::default());
                     return Val::default();
@@ -222,10 +191,27 @@ impl DefaultCtx {
                 f(val);
                 Val::default()
             }
-            mut val => {
+            Either::That(mut val) => {
                 f(&mut val);
                 val
             }
+        }
+    }
+
+    pub(crate) fn ref_or_val<'a, Ctx>(ctx: Ctx, val: Val) -> Either<Symbol, Val>
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        let Val::Symbol(s) = val else {
+            let val = Eval.transform(ctx, val);
+            return Either::That(val);
+        };
+        let prefix = s.chars().next();
+        if let Some(SYMBOL_ID_PREFIX) = prefix {
+            Either::That(Self::remove_prefix(s))
+        } else {
+            let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
+            Either::This(s)
         }
     }
 

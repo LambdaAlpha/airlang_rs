@@ -1,6 +1,6 @@
 
 -----
-do [a = extension.unit, b = extension.unit, .a == .b]
+do [a = extension.unit, b = extension.unit, a == b]
 -----
 true
 =====
@@ -30,7 +30,7 @@ function
 =====
 
 -----
-function.is_extension .func_ext
+function.is_extension func_ext
 -----
 true
 =====
@@ -42,7 +42,7 @@ function.represent func_ext
 =====
 
 -----
-do [a = func_ext, b = func_ext, .a == .b]
+do [a = func_ext, b = func_ext, a == b]
 -----
 true
 =====
@@ -60,6 +60,6 @@ call.apply ; func_ext ';' 1
 =====
 
 -----
-do [p = case.cache ; func_ext ';' true, case.is_cache .p]
+do [p = case.cache ; func_ext ';' true, case.is_cache p]
 -----
 true

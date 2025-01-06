@@ -89,7 +89,7 @@ do [
         output : 2,
     },
     tc = type_of ; c,
-    (tc == ..case) and not ; (case.is_cache c)
+    (tc == .case) and not ; (case.is_cache c)
 ]
 -----
 true

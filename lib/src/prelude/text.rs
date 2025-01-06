@@ -15,11 +15,11 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        id_mode,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
         pair_mode,
-        symbol_form_mode,
     },
     text::Text,
     val::{
@@ -99,7 +99,7 @@ fn fn_into_utf8(input: Val) -> Val {
 fn length() -> Named<FuncVal> {
     let id = "text.length";
     let f = fn_length;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -112,7 +112,7 @@ fn length() -> Named<FuncVal> {
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+    DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Text(t) = val else {
             return Val::default();
         };
@@ -124,7 +124,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 fn push() -> Named<FuncVal> {
     let id = "text.push";
     let f = fn_push;
-    let call = pair_mode(symbol_form_mode(), Mode::default());
+    let call = pair_mode(id_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -144,7 +144,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Text(t) = pair.second else {
         return Val::default();
     };
-    DefaultCtx.with_ref_mut_no_ret(ctx, pair.first, |val| {
+    DefaultCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
         let Val::Text(text) = val else {
             return;
         };

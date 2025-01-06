@@ -8,6 +8,7 @@ use crate::{
     FuncMode,
     Map,
     Mode,
+    Pair,
     Val,
     arbitrary::{
         any_abstract,
@@ -30,10 +31,6 @@ use crate::{
         any_val,
     },
     bit::Bit,
-    core::{
-        SYMBOL_ID_PREFIX,
-        SYMBOL_REF_PREFIX,
-    },
     ctx::{
         CtxValue,
         const1::ConstFnCtx,
@@ -45,12 +42,14 @@ use crate::{
         Named,
         Prelude,
         form_mode,
+        id_mode,
         named_const_fn,
         named_free_fn,
         pair_mode,
         symbol_form_mode,
     },
     symbol::Symbol,
+    types::either::Either,
     val::{
         ABSTRACT,
         ASK,
@@ -149,7 +148,7 @@ fn fn_any(input: Val) -> Val {
 fn type_of() -> Named<FuncVal> {
     let id = "type_of";
     let f = fn_type_of;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = symbol_form_mode();
     let mode = FuncMode {
@@ -162,7 +161,7 @@ fn type_of() -> Named<FuncVal> {
 }
 
 fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+    DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
             Val::Bit(_) => BIT,
@@ -189,7 +188,7 @@ fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
-    let call = pair_mode(symbol_form_mode(), symbol_form_mode());
+    let call = pair_mode(id_mode(), id_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -201,16 +200,19 @@ fn equal() -> Named<FuncVal> {
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_equal(mut ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
+    let left = DefaultCtx::ref_or_val(ctx.reborrow(), pair.first);
+    let right = DefaultCtx::ref_or_val(ctx.reborrow(), pair.second);
     let ctx = ctx.borrow();
-    get_by_ref(ctx, &pair.first, |v1| {
+    get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {
             return Val::default();
         };
-        get_by_ref(ctx, &pair.second, |v2| {
+        get_by_ref(ctx, right, |v2| {
             let Some(v2) = v2 else {
                 return Val::default();
             };
@@ -222,7 +224,7 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
 fn not_equal() -> Named<FuncVal> {
     let id = "!=";
     let f = fn_not_equal;
-    let call = pair_mode(symbol_form_mode(), symbol_form_mode());
+    let call = pair_mode(id_mode(), id_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -234,16 +236,19 @@ fn not_equal() -> Named<FuncVal> {
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_not_equal(mut ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
+    let pair = Pair::from(pair);
+    let left = DefaultCtx::ref_or_val(ctx.reborrow(), pair.first);
+    let right = DefaultCtx::ref_or_val(ctx.reborrow(), pair.second);
     let ctx = ctx.borrow();
-    get_by_ref(ctx, &pair.first, |v1| {
+    get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {
             return Val::default();
         };
-        get_by_ref(ctx, &pair.second, |v2| {
+        get_by_ref(ctx, right, |v2| {
             let Some(v2) = v2 else {
                 return Val::default();
             };
@@ -252,22 +257,12 @@ fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
     })
 }
 
-fn get_by_ref<T, F>(ctx: Option<&Ctx>, v: &Val, f: F) -> T
+fn get_by_ref<T, F>(ctx: Option<&Ctx>, v: Either<Symbol, Val>, f: F) -> T
 where
     F: FnOnce(Option<&Val>) -> T,
 {
     match v {
-        Val::Symbol(s) => {
-            let prefix = s.chars().next();
-            if let Some(SYMBOL_ID_PREFIX) = prefix {
-                let s = Symbol::from_str(&s[1..]);
-                return f(Some(&Val::Symbol(s)));
-            }
-            let s = if let Some(SYMBOL_REF_PREFIX) = prefix {
-                Symbol::from_str(&s[1..])
-            } else {
-                s.clone()
-            };
+        Either::This(s) => {
             let Some(ctx) = ctx else {
                 return f(None);
             };
@@ -279,6 +274,6 @@ where
             };
             f(Some(val))
         }
-        val => f(Some(val)),
+        Either::That(val) => f(Some(&val)),
     }
 }

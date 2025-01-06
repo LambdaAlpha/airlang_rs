@@ -29,7 +29,6 @@ use crate::{
         named_free_fn,
         named_mut_fn,
         pair_mode,
-        symbol_form_mode,
     },
     syntax::{
         ASK,
@@ -144,7 +143,7 @@ where
 fn get_func() -> Named<FuncVal> {
     let id = "ask.function";
     let f = fn_get_func;
-    let call = pair_mode(symbol_form_mode(), Mode::default());
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -157,7 +156,7 @@ fn get_func() -> Named<FuncVal> {
 }
 
 fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
+    DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.func.clone(),
             _ => Val::default(),
@@ -172,7 +171,7 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_func() -> Named<FuncVal> {
     let id = "ask.set_function";
     let f = fn_set_func;
-    let call = pair_mode(symbol_form_mode(), Mode::default());
+    let call = pair_mode(id_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -191,7 +190,7 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut ask) => {
             let Some(Val::Ask(ask)) = ask.as_mut() else {
                 return Val::default();
@@ -206,7 +205,7 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
 fn get_output() -> Named<FuncVal> {
     let id = "ask.output";
     let f = fn_get_output;
-    let call = pair_mode(symbol_form_mode(), Mode::default());
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -219,7 +218,7 @@ fn get_output() -> Named<FuncVal> {
 }
 
 fn fn_get_output(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_dyn(ctx, input, |ref_or_val| match ref_or_val {
+    DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.output.clone(),
             _ => Val::default(),
@@ -234,7 +233,7 @@ fn fn_get_output(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_output() -> Named<FuncVal> {
     let id = "ask.set_output";
     let f = fn_set_output;
-    let call = pair_mode(symbol_form_mode(), Mode::default());
+    let call = pair_mode(id_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -253,7 +252,7 @@ fn fn_set_output(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx.with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut ask) => {
             let Some(Val::Ask(ask)) = ask.as_mut() else {
                 return Val::default();

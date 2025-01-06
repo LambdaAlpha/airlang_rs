@@ -148,7 +148,7 @@ fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    DefaultCtx.get_or_default(ctx, s)
+    DefaultCtx::get_or_default(ctx, s)
 }
 
 fn move1() -> Named<FuncVal> {
@@ -290,7 +290,7 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match DefaultCtx.is_null(ctx, s) {
+    match DefaultCtx::is_null(ctx, s) {
         Ok(b) => Val::Bit(Bit::new(b)),
         Err(_) => Val::default(),
     }

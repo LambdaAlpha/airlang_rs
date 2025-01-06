@@ -12,9 +12,9 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        id_mode,
         named_const_fn,
         named_free_fn,
-        symbol_form_mode,
     },
     val::{
         Val,
@@ -62,7 +62,7 @@ impl Prelude for BitPrelude {
 fn is_true() -> Named<FuncVal> {
     let id = "is_true";
     let f = fn_is_true;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -75,7 +75,7 @@ fn is_true() -> Named<FuncVal> {
 }
 
 fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref(ctx, input, |val| {
+    DefaultCtx::with_ref(ctx, input, |val| {
         let Val::Bit(b) = val else {
             return Val::Bit(Bit::false1());
         };
@@ -86,7 +86,7 @@ fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_false() -> Named<FuncVal> {
     let id = "is_false";
     let f = fn_is_false;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -99,7 +99,7 @@ fn is_false() -> Named<FuncVal> {
 }
 
 fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref(ctx, input, |val| {
+    DefaultCtx::with_ref(ctx, input, |val| {
         let Val::Bit(b) = val else {
             return Val::Bit(Bit::false1());
         };

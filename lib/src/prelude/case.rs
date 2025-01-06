@@ -26,7 +26,6 @@ use crate::{
         named_const_fn,
         named_free_fn,
         named_mut_fn,
-        symbol_form_mode,
     },
     utils::val::{
         map_remove,
@@ -173,7 +172,7 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 fn is_cache() -> Named<FuncVal> {
     let id = "case.is_cache";
     let f = fn_is_cache;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -186,7 +185,7 @@ fn is_cache() -> Named<FuncVal> {
 }
 
 fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+    DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };
@@ -197,7 +196,7 @@ fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
 fn func() -> Named<FuncVal> {
     let id = "case.function";
     let f = fn_func;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -210,7 +209,7 @@ fn func() -> Named<FuncVal> {
 }
 
 fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+    DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };
@@ -221,7 +220,7 @@ fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
 fn input() -> Named<FuncVal> {
     let id = "case.input";
     let f = fn_input;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -234,7 +233,7 @@ fn input() -> Named<FuncVal> {
 }
 
 fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+    DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };
@@ -245,7 +244,7 @@ fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
 fn output() -> Named<FuncVal> {
     let id = "case.output";
     let f = fn_output;
-    let call = symbol_form_mode();
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -258,7 +257,7 @@ fn output() -> Named<FuncVal> {
 }
 
 fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {
-    DefaultCtx.with_ref_lossless(ctx, input, |val| {
+    DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };

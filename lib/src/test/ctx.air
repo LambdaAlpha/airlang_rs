@@ -84,7 +84,7 @@ do [..a = 1, *.a]
 =====
 
 -----
-do [..p = 1 : 2, pair.first .*.p]
+do [..p = 1 : 2, pair.first *.p]
 -----
 1
 =====
@@ -252,13 +252,13 @@ do [(a . final) = 1, (a . constant) = 2, a]
 =====
 
 -----
-do [(a . final) = 1 : 2, .a pair.set_first 3, a]
+do [(a . final) = 1 : 2, a pair.set_first 3, a]
 -----
 3 : 2
 =====
 
 -----
-do [(a . constant) = 1 : 2, .a pair.set_first 3, a]
+do [(a . constant) = 1 : 2, a pair.set_first 3, a]
 -----
 1 : 2
 =====
@@ -454,7 +454,7 @@ do [
 =====
 
 -----
-do [set_solver ., s = solver ; ., .s == .]
+do [set_solver ., s = solver ; ., s == .]
 -----
 true
 =====
@@ -463,7 +463,7 @@ true
 do [
     a = context ; {variables : {p : 1 : 2}},
     b = 3,
-    a | pair.set_first ';' ..p : b,
+    a | pair.set_first ';' .p : b,
     a | .^p,
 ]
 -----
@@ -473,7 +473,7 @@ do [
 -----
 do [
     a = context ; {variables : {p : 1 : 2, b : 3}},
-    a | pair.set_first ';' ..p : .b,
+    a | pair.set_first ';' .p : .b,
     a | .^p,
 ]
 -----
@@ -484,7 +484,7 @@ do [
 do [
     set_first = pair.set_first,
     a = context ; {variables : {set_first : ^set_first, p : 1 : 2, b : 3}},
-    a | id ; .p set_first b,
+    a | id ; p set_first b,
     a | .^p,
 ]
 -----
@@ -543,7 +543,7 @@ context.represent ; context ; {variables : {a : 1 . .final}}
 =====
 
 -----
-do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = .m map.remove .b, type_of b]
+do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = m map.remove .b, type_of b]
 -----
 context
 =====

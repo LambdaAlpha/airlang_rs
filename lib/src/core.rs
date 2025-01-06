@@ -78,8 +78,8 @@ impl FormCore {
         };
         match prefix {
             SYMBOL_ID_PREFIX => Val::Symbol(s),
-            SYMBOL_REF_PREFIX => DefaultCtx.get_or_default(ctx, s),
-            SYMBOL_MOVE_PREFIX => DefaultCtx.remove_or_default(ctx, s),
+            SYMBOL_REF_PREFIX => DefaultCtx::get_or_default(ctx, s),
+            SYMBOL_MOVE_PREFIX => DefaultCtx::remove_or_default(ctx, s),
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }
