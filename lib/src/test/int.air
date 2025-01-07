@@ -1,275 +1,274 @@
-
++ 0
+-----
+do [a = any ; integer, a == a + 0]
+-----
+true
+=====
+- 0
+-----
+do [a = any ; integer, a == a - 0]
+-----
+true
+=====
++ -
+-----
+do [a = any ; integer, b = any ; integer, a == <(a + b - b)]
+-----
+true
+=====
+- +
+-----
+do [a = any ; integer, b = any ; integer, a == <(a - b + b)]
+-----
+true
+=====
++ trivial
 -----
 1 + 1
 -----
 2
 =====
-
------
-0-1 + 1
------
-0
-=====
-
------
-1 + 0
------
-1
-=====
-
+- trivial
 -----
 1 - 1
 -----
 0
 =====
-
+* 0
 -----
-1 - 2
+do [a = any ; integer, 0 == a ** 0]
 -----
-0-1
+true
 =====
-
+* 1
 -----
-1 - 0
+do [a = any ; integer, a == a ** 1]
 -----
-1
+true
 =====
-
+* -1
+-----
+do [a = any ; integer, 0 == a + a ** 0-1]
+-----
+true
+=====
+/ 0
+-----
+do [a = any ; integer, . == a / 0]
+-----
+true
+=====
+/ 1
+-----
+do [a = any ; integer, a == a / 1]
+-----
+true
+=====
+/ -1
+-----
+do [a = any ; integer, 0 == a + a / 0-1]
+-----
+true
+=====
+0 /
+-----
+do [a = any ; integer, (a == 0) break_if true, 0 == 0 / a]
+-----
+true
+=====
+0 %
+-----
+do [a = any ; integer, (a == 0) break_if true, 0 == 0 % a]
+-----
+true
+=====
+% 0
+-----
+do [a = any ; integer, . == a % 0]
+-----
+true
+=====
+% 1
+-----
+do [a = any ; integer, 0 == a % 1]
+-----
+true
+=====
+% exact
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, 0 == (a ** b) % b]
+-----
+true
+=====
+sign(a % b) == sign(a)
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (0 <= a) == 0 <= a % b]
+-----
+true
+=====
+abs(a % b) < abs(b)
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (0 <= b) == 0 <= b + a % b]
+-----
+true
+=====
+* /
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, a == <(a ** b / b)]
+-----
+true
+=====
+exact / *
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, c = a ** b, c == <(c / b ** b)]
+-----
+true
+=====
+inexact / abs(a) > abs(a / b * b)
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (0 <= a) == 0 <= a - a / b ** b]
+-----
+true
+=====
+a == b * a / b + a % b
+-----
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, a == (b ** a / b) + a % b]
+-----
+true
+=====
+* trivial
 -----
 2 ** 3
 -----
 6
 =====
-
------
-0-2 ** 3
------
-0-6
-=====
-
------
-1 ** 0
------
-0
-=====
-
+/ exact
 -----
 6 / 3
 -----
 2
 =====
-
+/ inexact smaller
 -----
 5 / 3
 -----
 1
 =====
-
+/ inexact bigger
 -----
 7 / 3
 -----
 2
 =====
-
+/ inexact negative 1
 -----
 7 / 0-3
 -----
 0-2
 =====
-
+/ inexact negative 2
 -----
 0-7 / 3
 -----
 0-2
 =====
-
+/ inexact negative 3
 -----
 0-7 / 0-3
 -----
 2
 =====
-
------
-0 / 3
------
-0
-=====
-
------
-3 / 0
------
-.
-=====
-
+% exact
 -----
 6 % 3
 -----
 0
 =====
-
+% inexact smaller
 -----
 5 % 3
 -----
 2
 =====
-
+% inexact bigger
 -----
 7 % 3
 -----
 1
 =====
-
+% inexact negative 1
 -----
 7 % 0-3
 -----
 1
 =====
-
+% inexact negative 2
 -----
 0-7 % 3
 -----
 0-1
 =====
-
+% inexact negative 3
 -----
 0-7 % 0-3
 -----
 0-1
 =====
-
+a /% b == (a / b) : (a % b)
 -----
-0 % 3
+do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (a /% b) == (a / b) : (a % b)]
 -----
-0
+true
 =====
-
------
-3 % 0
------
-.
-=====
-
+/% both positive
 -----
 7 /% 3
 -----
 2 : 1
 =====
-
+/% positive negative
 -----
 7 /% 0-3
 -----
 0-2 : 1
 =====
-
+/% negative positive
 -----
 0-7 /% 3
 -----
 0-2 : 0-1
 =====
-
+/% negative negative
 -----
 0-7 /% 0-3
 -----
 2 : 0-1
 =====
-
+order relations
 -----
-0 < 1
+do [
+    a = any ; integer,
+    b = any ; integer,
+    c = any ; integer,
+    [
+        (a > b) == (b < a),
+        (a < b) == (b > a),
+        (a >= b) == (b <= a),
+        (a <= b) == (b >= a),
+        (a < b) xor (b <= a),
+        (a <= b) xor (b < a),
+        (a > b) xor (b >= a),
+        (a >= b) xor (b > a),
+        (a < b) or (a == b) or (a > b),
+        (a <> b) == (a < b) or (a > b),
+        (a < b) == ((a + c) < (b + c)),
+    ]
+]
 -----
-true
+[true, true, true, true, true, true, true, true, true, true, true]
 =====
-
+order trivial
 -----
-1 < 1
------
-false
-=====
-
------
-2 < 1
------
-false
-=====
-
------
-2 > 1
------
-true
-=====
-
------
-1 > 1
------
-false
-=====
-
------
-0 > 1
------
-false
-=====
-
------
-0 <= 1
------
-true
-=====
-
------
-1 <= 1
------
-true
-=====
-
------
-2 <= 1
------
-false
-=====
-
------
-2 >= 1
------
-true
-=====
-
------
-1 >= 1
------
-true
-=====
-
------
-0 >= 1
------
-false
-=====
-
------
-1 != "1"
------
-true
-=====
-
------
-1 <> "1"
------
-.
-=====
-
------
-1 <> 0
------
-true
-=====
-
------
-1 <> 1
------
-false
-=====
-
------
-1 <> 2
+(0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1) and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
 -----
 true

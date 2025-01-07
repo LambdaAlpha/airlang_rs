@@ -1,136 +1,124 @@
-
+is_true
+-----
+do [a = any ; ., (a == true) == is_true ; a]
+-----
+true
+=====
+is_true true
 -----
 is_true true
 -----
 true
 =====
-
+is_false
 -----
-is_true false
------
-false
-=====
-
------
-is_true .
------
-false
-=====
-
------
-do [a = true, is_true a]
+do [a = any ; ., (a == false) == is_false ; a]
 -----
 true
 =====
-
+is_false false
 -----
 is_false false
 -----
 true
 =====
-
------
-is_false true
------
-false
-=====
-
------
-is_false .
------
-false
-=====
-
------
-do [a = true, is_false a]
------
-false
-=====
-
+not true
 -----
 not true
 -----
 false
 =====
-
+not false
 -----
 not false
 -----
 true
 =====
-
------
-true and false
------
-false
-=====
-
+and both true
 -----
 true and true
 -----
 true
 =====
-
+and true false
+-----
+true and false
+-----
+false
+=====
+and both false
+-----
+false and false
+-----
+false
+=====
+and not short-circuit
 -----
 do [false and do ; [a = 1, true], a]
 -----
 1
 =====
-
------
-true or false
------
-true
-=====
-
+or both false
 -----
 false or false
 -----
 false
 =====
-
+or true false
+-----
+true or false
+-----
+true
+=====
+or both true
+-----
+true or true
+-----
+true
+=====
+or not short-circuit
 -----
 do [true or do ; [a = 1, false], a]
 -----
 1
 =====
-
+xor true false
 -----
 true xor false
 -----
 true
 =====
-
+xor both true
 -----
 true xor true
 -----
 false
 =====
-
+xor both false
 -----
 false xor false
 -----
 false
 =====
-
+imply true false
 -----
 true imply false
 -----
 false
 =====
-
+imply true true
 -----
 true imply true
 -----
 true
 =====
-
+imply false true
 -----
 false imply true
 -----
 true
 =====
-
+imply false false
 -----
 false imply false
 -----

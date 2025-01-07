@@ -1,41 +1,17 @@
-
+unit return .
 -----
-unit .
------
-.
-=====
-
------
-unit 1
+unit ; any ; .
 -----
 .
 =====
-
+is_unit
 -----
-type_of unit
+do [a = any ; ., (a == .) == is_unit ; a]
 -----
-function
+true
 =====
-
+is_unit .
 -----
 is_unit .
 -----
 true
-=====
-
------
-do [a = true, is_unit a]
------
-false
-=====
-
------
-is_unit false
------
-false
-=====
-
------
-is_unit ..a
------
-false

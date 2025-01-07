@@ -1,28 +1,34 @@
-
+into_text from_text
+-----
+do [s = any ; symbol, s == symbol.from_text ; symbol.into_text ; s]
+-----
+true
+=====
+from_text empty
 -----
 symbol.from_text ""
 -----
 ''
 =====
-
+from_text trivial
 -----
 symbol.from_text "hello_world!"
 -----
 hello_world!
 =====
-
+from_text special
 -----
 symbol.from_text "{}"
 -----
 '{}'
 =====
-
+into_text empty
 -----
-symbol.into_text '.'
+symbol.into_text ; id ; ''
 -----
 ""
 =====
-
+into_text trivial
 -----
 symbol.into_text ; .hello_world!
 -----

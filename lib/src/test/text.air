@@ -1,58 +1,64 @@
-
+length empty
 -----
 text.length ""
 -----
 "" : 0
 =====
-
+length else
 -----
 text.length "1"
 -----
 "1" : 1
 =====
-
+length ref
 -----
 do [a = "12", text.length a]
 -----
 2
 =====
-
+push
 -----
 do [a = "hello", b = "world", a text.push " ", a text.push ^b, ^a]
 -----
 "hello world"
 =====
-
+join empty
 -----
 "" text.join ["1", "2"]
 -----
 "12"
 =====
-
+join unit
 -----
 do [a = "1", b = "2", c = "3", . text.join [^a, ^b, ^c]]
 -----
 "123"
 =====
-
+join no text
 -----
 . text.join []
 -----
 ""
 =====
-
+join else
 -----
 "." text.join ["1", "2"]
 -----
 "1.2"
 =====
-
+into_utf8 from_utf8
+-----
+do [t = any ; text, t == text.from_utf8 ; text.into_utf8 ; t]
+-----
+true
+=====
+into_utf8
 -----
 text.into_utf8 "abc"
 -----
 byte(616263)
 =====
-
+from_utf8
 -----
 text.from_utf8 byte(616263)
 -----
