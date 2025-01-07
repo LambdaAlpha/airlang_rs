@@ -9,7 +9,6 @@ use crate::{
     bit::Bit,
     ctx::{
         CtxValue,
-        const1::ConstFnCtx,
         default::DefaultCtx,
         mut1::MutFnCtx,
     },
@@ -19,7 +18,6 @@ use crate::{
         Named,
         Prelude,
         id_mode,
-        named_const_fn,
         named_free_fn,
         named_mut_fn,
         pair_mode,
@@ -115,10 +113,10 @@ fn length() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_length(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -140,10 +138,10 @@ fn items() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_items(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -198,10 +196,10 @@ fn keys() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_keys(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -250,10 +248,10 @@ fn values() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_values(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Map(map) = val else {
             return Val::default();
@@ -302,10 +300,10 @@ fn contains() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_contains(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
@@ -332,10 +330,10 @@ fn contains_many() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_contains_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };
@@ -438,10 +436,10 @@ fn get() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_key) = input else {
         return Val::default();
     };
@@ -468,10 +466,10 @@ fn get_many() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_many(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_keys) = input else {
         return Val::default();
     };

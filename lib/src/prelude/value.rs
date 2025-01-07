@@ -8,6 +8,7 @@ use crate::{
     FuncMode,
     Map,
     Mode,
+    MutFnCtx,
     Pair,
     Val,
     arbitrary::{
@@ -33,7 +34,6 @@ use crate::{
     bit::Bit,
     ctx::{
         CtxValue,
-        const1::ConstFnCtx,
         default::DefaultCtx,
         map::CtxMapRef,
         ref1::CtxRef,
@@ -43,8 +43,8 @@ use crate::{
         Prelude,
         form_mode,
         id_mode,
-        named_const_fn,
         named_free_fn,
+        named_mut_fn,
         pair_mode,
         symbol_form_mode,
     },
@@ -157,10 +157,10 @@ fn type_of() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_type_of(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_type_of(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
@@ -197,10 +197,10 @@ fn equal() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_equal(mut ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_equal(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -233,10 +233,10 @@ fn not_equal() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_not_equal(mut ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_not_equal(mut ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

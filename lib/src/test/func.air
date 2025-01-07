@@ -862,7 +862,7 @@ free
 =====
 
 -----
-function.context_access function.context_access
+function.context_access read
 -----
 constant
 =====

@@ -9,7 +9,6 @@ use crate::{
     Symbol,
     ctx::{
         CtxValue,
-        const1::ConstFnCtx,
         default::DefaultCtx,
         mut1::MutFnCtx,
     },
@@ -18,7 +17,6 @@ use crate::{
         Named,
         Prelude,
         id_mode,
-        named_const_fn,
         named_mut_fn,
         pair_mode,
     },
@@ -89,10 +87,10 @@ fn length() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_length(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::List(list) = val else {
             return Val::default();
@@ -202,10 +200,10 @@ fn get() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };

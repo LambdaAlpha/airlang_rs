@@ -1,9 +1,9 @@
 use crate::{
     Bit,
-    ConstFnCtx,
     FuncMode,
     Map,
     Mode,
+    MutFnCtx,
     Symbol,
     Val,
     ctx::{
@@ -14,8 +14,8 @@ use crate::{
         Named,
         Prelude,
         id_mode,
-        named_const_fn,
         named_free_fn,
+        named_mut_fn,
     },
     unit::Unit,
     val::func::FuncVal,
@@ -67,9 +67,9 @@ fn is_unit() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_is_unit(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_unit(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref(ctx, input, |val| Val::Bit(Bit::new(val.is_unit())))
 }

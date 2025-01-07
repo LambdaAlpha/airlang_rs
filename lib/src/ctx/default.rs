@@ -5,6 +5,7 @@ use crate::{
     Val,
     core::{
         SYMBOL_ID_PREFIX,
+        SYMBOL_MOVE_PREFIX,
         SYMBOL_REF_PREFIX,
     },
     ctx::{
@@ -207,26 +208,14 @@ impl DefaultCtx {
             return Either::That(val);
         };
         let prefix = s.chars().next();
-        if let Some(SYMBOL_ID_PREFIX) = prefix {
-            Either::That(Self::remove_prefix(s))
-        } else {
-            let s = Self::remove_prefix_expect(s, prefix, SYMBOL_REF_PREFIX);
-            Either::This(s)
+        match prefix {
+            Some(SYMBOL_ID_PREFIX) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
+            Some(SYMBOL_REF_PREFIX) => Either::This(Symbol::from_str(&s[1..])),
+            Some(SYMBOL_MOVE_PREFIX) => {
+                let val = Self::remove_or_default(ctx, Symbol::from_str(&s[1..]));
+                Either::That(val)
+            }
+            _ => Either::This(s),
         }
-    }
-
-    fn remove_prefix_expect(s: Symbol, real_prefix: Option<char>, expect_prefix: char) -> Symbol {
-        let Some(prefix) = real_prefix else {
-            return s;
-        };
-        if prefix == expect_prefix {
-            Symbol::from_str(&s[1..])
-        } else {
-            s
-        }
-    }
-
-    fn remove_prefix(s: Symbol) -> Val {
-        Val::Symbol(Symbol::from_str(&s[1..]))
     }
 }

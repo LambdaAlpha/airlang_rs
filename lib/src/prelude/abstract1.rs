@@ -4,7 +4,6 @@ use const_format::concatcp;
 
 use crate::{
     Abstract,
-    ConstFnCtx,
     FreeCtx,
     FuncMode,
     FuncVal,
@@ -26,7 +25,6 @@ use crate::{
         Named,
         Prelude,
         id_mode,
-        named_const_fn,
         named_free_fn,
         named_mut_fn,
         pair_mode,
@@ -152,10 +150,10 @@ fn get_func() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_func(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Abstract(abstract1) => abstract1.func.clone(),
@@ -214,10 +212,10 @@ fn get_input() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_input(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Abstract(abstract1) => abstract1.input.clone(),

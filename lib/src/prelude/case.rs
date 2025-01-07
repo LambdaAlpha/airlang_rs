@@ -11,7 +11,6 @@ use crate::{
     core::EvalCore,
     ctx::{
         CtxValue,
-        const1::ConstFnCtx,
         default::DefaultCtx,
         mut1::MutFnCtx,
     },
@@ -23,7 +22,6 @@ use crate::{
         form_mode,
         id_mode,
         map_mode,
-        named_const_fn,
         named_free_fn,
         named_mut_fn,
     },
@@ -181,10 +179,10 @@ fn is_cache() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_cache(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
@@ -205,10 +203,10 @@ fn func() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_func(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
@@ -229,10 +227,10 @@ fn input() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_input(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();
@@ -253,10 +251,10 @@ fn output() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_output(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_ref_lossless(ctx, input, |val| {
         let Val::Case(case) = val else {
             return Val::default();

@@ -14,7 +14,6 @@ use crate::{
     core::EvalCore,
     ctx::{
         CtxValue,
-        const1::ConstFnCtx,
         default::DefaultCtx,
         mut1::MutFnCtx,
         ref1::CtxMeta,
@@ -25,7 +24,6 @@ use crate::{
         Named,
         Prelude,
         id_mode,
-        named_const_fn,
         named_free_fn,
         named_mut_fn,
         pair_mode,
@@ -152,10 +150,10 @@ fn get_func() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_func(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.func.clone(),
@@ -214,10 +212,10 @@ fn get_output() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_output(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_output(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.output.clone(),

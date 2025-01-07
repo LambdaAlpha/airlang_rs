@@ -8,7 +8,6 @@ use crate::{
     Symbol,
     ctx::{
         CtxValue,
-        const1::ConstFnCtx,
         default::DefaultCtx,
         mut1::MutFnCtx,
     },
@@ -16,7 +15,6 @@ use crate::{
         Named,
         Prelude,
         id_mode,
-        named_const_fn,
         named_free_fn,
         named_mut_fn,
         pair_mode,
@@ -87,10 +85,10 @@ fn get_first() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_first(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
@@ -149,10 +147,10 @@ fn get_second() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_second(ctx: MutFnCtx, input: Val) -> Val {
     DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
