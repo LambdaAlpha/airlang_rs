@@ -1,53 +1,48 @@
-
+new
 -----
-1 ':' 2
+do [
+    f = any ; .,
+    s = any ; .,
+    p1 = f ':' s,
+    p2 = f : s,
+    p1 == p2
+]
 -----
-1 : 2
+true
 =====
-
+new get
 -----
-do [a = 1 : 2, pair.first a]
+do [
+    f = any ; .,
+    s = any ; .,
+    p = f ':' s,
+    (f == pair.first ; p) and (s == pair.second ; p)
+]
 -----
-1
+true
 =====
-
+set get
 -----
-do [a = 1 : 2, pair.second a]
+do [
+    p = any ; pair,
+    f = any ; .,
+    s = any ; .,
+    p pair.set_first f,
+    p pair.set_second s,
+    (f == pair.first ; p) and (s == pair.second ; p)
+]
 -----
-2
+true
 =====
-
+set return
 -----
-pair.first ; 1 : 2
+do [
+    f1 = any ; .,
+    s1 = any ; .,
+    p = f1 : s1,
+    f2 = p pair.set_first any ; .,
+    s2 = p pair.set_second any ; .,
+    (f1 == f2) and s1 == s2
+]
 -----
-1
-=====
-
------
-pair.second ; 1 : 2
------
-2
-=====
-
------
-do [a = 1 : 2, a pair.set_first 3]
------
-1
-=====
-
------
-do [a = 1 : 2, a pair.set_first 3, ^a]
------
-3 : 2
-=====
-
------
-do [a = 1 : 2, a pair.set_second 3]
------
-2
-=====
-
------
-do [a = 1 : 2, a pair.set_second 3, ^a]
------
-1 : 3
+true

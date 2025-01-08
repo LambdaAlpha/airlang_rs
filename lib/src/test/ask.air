@@ -1,53 +1,66 @@
-
+new
 -----
-1 '?' 2
+do [
+    f = any ; .,
+    o = any ; .,
+    a1 = f '?' o,
+    a2 = form ; *f ? *o,
+    a1 == a2
+]
 -----
-1 ? 2
+true
 =====
-
+new get
 -----
-do [a = 1 '?' 2, ask.function a]
+do [
+    f = any ; .,
+    o = any ; .,
+    a = f '?' o,
+    (f == ask.function ; a) and (o == ask.output ; a)
+]
 -----
-1
+true
 =====
-
+set get
 -----
-do [a = 1 '?' 2, ask.output a]
+do [
+    a = any ; ask,
+    f = any ; .,
+    o = any ; .,
+    a ask.set_function f,
+    a ask.set_output o,
+    (f == ask.function ; a) and (o == ask.output ; a)
+]
 -----
-2
+true
 =====
-
+set return
 -----
-ask.function ; 1 ? 2
+do [
+    f1 = any ; .,
+    o1 = any ; .,
+    a = f1 '?' o1,
+    f2 = a ask.set_function any ; .,
+    o2 = a ask.set_output any ; .,
+    (f1 == f2) and o1 == o2
+]
 -----
-1
+true
 =====
-
+?? id
 -----
-ask.output ; 1 ? 2
+do [a = (function {ask_mode : id}) ?? b, ask.output a]
 -----
-2
+b
 =====
-
+?? form
 -----
-do [a = 1 '?' 2, a ask.set_function 3]
+do [a = (function {ask_mode : form}) ?? .b, ask.output a]
 -----
-1
+b
 =====
-
+?? eval
 -----
-do [a = 1 '?' 2, a ask.set_function 3, ^a]
+do [a = (function {ask_mode : eval}) ?? id ; b, ask.output a]
 -----
-3 ? 2
-=====
-
------
-do [a = 1 '?' 2, a ask.set_output 3]
------
-2
-=====
-
------
-do [a = 1 '?' 2, a ask.set_output 3, ^a]
------
-1 ? 3
+b

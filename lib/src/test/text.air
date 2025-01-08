@@ -1,3 +1,9 @@
+length push
+-----
+do [t = any ; text, l = text.length ; t, t text.push "a", (text.length t) == l + 1]
+-----
+true
+=====
 length empty
 -----
 text.length ""
@@ -15,6 +21,12 @@ length ref
 do [a = "12", text.length a]
 -----
 2
+=====
+push join
+-----
+do [a = any ; text, b = any ; text, t = a, t text.push b, t == . text.join [^a, ^b]]
+-----
+true
 =====
 push
 -----

@@ -1,77 +1,72 @@
-
+new
 -----
-1 '!' 2
+do [
+    f = any ; .,
+    i = any ; .,
+    a1 = f '!' i,
+    a2 = form ; *f ! *i,
+    a1 == a2
+]
 -----
-1 ! 2
+true
 =====
-
+new get
 -----
-do [a = 1, a '!' not ; true]
+do [
+    f = any ; .,
+    i = any ; .,
+    a = f '!' i,
+    (f == abstract.function ; a) and (i == abstract.input ; a)
+]
 -----
-1 ! false
+true
 =====
-
+set get
+-----
+do [
+    a = any ; abstract,
+    f = any ; .,
+    i = any ; .,
+    a abstract.set_function f,
+    a abstract.set_input i,
+    (f == abstract.function ; a) and (i == abstract.input ; a)
+]
+-----
+true
+=====
+set return
+-----
+do [
+    f1 = any ; .,
+    i1 = any ; .,
+    a = f1 '!' i1,
+    f2 = a abstract.set_function any ; .,
+    i2 = a abstract.set_input any ; .,
+    (f1 == f2) and i1 == i2
+]
+-----
+true
+=====
+!! id
+-----
+do [a = (function {abstract_mode : id}) !! b, abstract.input a]
+-----
+b
+=====
+!! form
+-----
+do [a = (function {abstract_mode : form}) !! .b, abstract.input a]
+-----
+b
+=====
+!! eval
+-----
+do [a = (function {abstract_mode : eval}) !! id ; b, abstract.input a]
+-----
+b
+=====
+apply
 -----
 do [c = id ; 1 ! 2, abstract.apply ^c]
 -----
 2
-=====
-
------
-do [c = id ; 1 ! 2, abstract.function c]
------
-1
-=====
-
------
-do [c = id ; 1 ! 2, abstract.input c]
------
-2
-=====
-
------
-do [a = 1 !! 2, abstract.input a]
------
-2
-=====
-
------
-do [c = 1 !! 2, abstract.apply ^c]
------
-2
-=====
-
------
-abstract.function ; id ; 1 ! 2
------
-1
-=====
-
------
-abstract.input ; id ; 1 ! 2
------
-2
-=====
-
------
-do [c = id ; 1 ! 2, c abstract.set_function 3]
------
-1
-=====
-
------
-do [c = id ; 1 ! 2, c abstract.set_function 3, ^c]
------
-3 ! 2
-=====
-
------
-do [c = id ; 1 ! 2, c abstract.set_input 3]
------
-2
-=====
-
------
-do [c = id ; 1 ! 2, c abstract.set_input 3, ^c]
------
-1 ! 3

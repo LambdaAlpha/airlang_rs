@@ -38,7 +38,8 @@ pub(crate) struct MapPrelude {
     pub(crate) values: Named<FuncVal>,
     pub(crate) into_values: Named<FuncVal>,
     pub(crate) contains: Named<FuncVal>,
-    pub(crate) contains_many: Named<FuncVal>,
+    pub(crate) contains_all: Named<FuncVal>,
+    pub(crate) contains_any: Named<FuncVal>,
     pub(crate) set: Named<FuncVal>,
     pub(crate) set_many: Named<FuncVal>,
     pub(crate) get: Named<FuncVal>,
@@ -62,7 +63,8 @@ impl Default for MapPrelude {
             values: values(),
             into_values: into_values(),
             contains: contains(),
-            contains_many: contains_many(),
+            contains_all: contains_all(),
+            contains_any: contains_any(),
             set: set(),
             set_many: set_many(),
             get: get(),
@@ -87,7 +89,8 @@ impl Prelude for MapPrelude {
         self.values.put(m);
         self.into_values.put(m);
         self.contains.put(m);
-        self.contains_many.put(m);
+        self.contains_all.put(m);
+        self.contains_any.put(m);
         self.set.put(m);
         self.set_many.put(m);
         self.get.put(m);
@@ -318,8 +321,42 @@ fn fn_contains(ctx: MutFnCtx, input: Val) -> Val {
     })
 }
 
-fn contains_many() -> Named<FuncVal> {
-    let id = "map.contains_many";
+fn contains_all() -> Named<FuncVal> {
+    let id = "map.contains_all";
+    let f = fn_contains_all;
+    let call = pair_mode(id_mode(), Mode::default());
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
+    let cacheable = true;
+    named_mut_fn(id, f, mode, cacheable)
+}
+
+fn fn_contains_all(ctx: MutFnCtx, input: Val) -> Val {
+    let Val::Pair(name_keys) = input else {
+        return Val::default();
+    };
+    let name_keys = Pair::from(name_keys);
+    let name = name_keys.first;
+    let Val::List(keys) = name_keys.second else {
+        return Val::default();
+    };
+    let keys = List::from(keys);
+    DefaultCtx::with_ref_lossless(ctx, name, |val| {
+        let Val::Map(map) = val else {
+            return Val::default();
+        };
+        let b = keys.into_iter().all(|k| map.contains_key(&k));
+        Val::Bit(Bit::new(b))
+    })
+}
+
+fn contains_any() -> Named<FuncVal> {
+    let id = "map.contains_any";
     let f = fn_contains_many;
     let call = pair_mode(id_mode(), Mode::default());
     let abstract1 = call.clone();
@@ -347,7 +384,7 @@ fn fn_contains_many(ctx: MutFnCtx, input: Val) -> Val {
         let Val::Map(map) = val else {
             return Val::default();
         };
-        let b = keys.into_iter().all(|k| map.contains_key(&k));
+        let b = keys.into_iter().any(|k| map.contains_key(&k));
         Val::Bit(Bit::new(b))
     })
 }

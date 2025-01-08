@@ -1,437 +1,401 @@
-
+length push
+-----
+do [
+    a = any ; list,
+    l1 = list.length ;
+    a, a list.push .,
+    l2 = list.length ; a,
+    l2 == l1 + 1
+]
+-----
+true
+=====
+length push_many
+-----
+do [
+    a = any ; list,
+    la = list.length ; a,
+    b = any ; list,
+    lb = list.length ; b,
+    a list.push_many b,
+    lab = list.length ; a,
+    lab == la + lb
+]
+-----
+true
+=====
+length pop
+-----
+do [
+    a = any ; list,
+    l1 = list.length ; a,
+    (l1 == 0) break_if true,
+    i = (l1 + (any ; integer) % l1) % l1,
+    a list.pop i,
+    l2 = list.length ; a,
+    l2 == l1 - i
+]
+-----
+true
+=====
+set get
+-----
+do [
+    a = any ; list,
+    b = a,
+    l = list.length ; a,
+    (l == 0) break_if true,
+    i = (l + (any ; integer) % l) % l,
+    v1 = a list.get i,
+    v2 = any ; .,
+    v3 = a list.set i : v2,
+    v4 = a list.get i,
+    a list.set i : v1,
+    (v1 == v3) and (v2 == v4) and (a == b)
+]
+-----
+true
+=====
+set_many get
+-----
+do [
+    a = any ; list,
+    la = list.length ; a,
+    (la == 0) break_if true,
+    b = any ; list,
+    lb = list.length ; b,
+    (lb == 0) break_if true,
+    (la < lb) if [
+        t = a,
+        a = b,
+        b = t,
+        t = la,
+        la = lb,
+        lb = t,
+    ] : .,
+    a1 = a,
+    d = la - lb,
+    i = (d == 0) if 0 : (d + (any ; integer) % d) % d,
+    c1 = a list.get i : i + lb,
+    c2 = a list.set_many i : b,
+    b1 = a list.get i : i + lb,
+    a list.set_many i : c1,
+    (b == b1) and (c1 == c2) and (a == a1)
+]
+-----
+true
+=====
+insert get length
+-----
+do [
+    a = any ; list,
+    l = 1 + list.length ; a,
+    i = (l + (any ; integer) % l) % l,
+    v = any ; .,
+    a list.insert i : v,
+    v1 = a list.get i,
+    l1 = list.length ; a,
+    (v == v1) and (l == l1)
+]
+-----
+true
+=====
+insert remove
+-----
+do [
+    a = any ; list,
+    b = a,
+    l = 1 + list.length ; a,
+    i = (l + (any ; integer) % l) % l,
+    v1 = any ; .,
+    a list.insert i : v1,
+    v2 = a list.remove i,
+    (v1 == v2) and a == b
+]
+-----
+true
+=====
+insert_many get length
+-----
+do [
+    a = any ; list,
+    l1 = 1 + list.length ; a,
+    i = (l1 + (any ; integer) % l1) % l1,
+    v1 = any ; list,
+    vl = list.length ; v1,
+    a list.insert_many i : v1,
+    v2 = a list.get i : i + vl,
+    l2 = list.length ; a,
+    (v1 == v2) and l2 == l1 + vl - 1,
+]
+-----
+true
+=====
+insert_many remove
+-----
+do [
+    a = any ; list,
+    b = a,
+    l = 1 + list.length ; a,
+    i = (l + (any ; integer) % l) % l,
+    v1 = any ; list,
+    v1l = list.length ; v1,
+    a list.insert_many i : v1,
+    v2 = a list.remove i : i + v1l,
+    (v1 == v2) and a == b
+]
+-----
+true
+=====
+push pop
+-----
+do [
+    a1 = any ; list,
+    a2 = a1,
+    v1 = any ; .,
+    a1 list.push v1,
+    v2 = a1 list.pop .,
+    (v1 == v2) and (a1 == a2)
+]
+-----
+true
+=====
+push_many pop
+-----
+do [
+    a1 = any ; list,
+    a2 = a1,
+    b1 = any ; list,
+    lb = list.length ; b1,
+    a1 list.push_many b1,
+    b2 = a1 list.pop lb,
+    (b1 == b2) and a1 == a2
+]
+-----
+true
+=====
+clear
+-----
+do [
+    a = any ; list,
+    list.clear a,
+    a == []
+]
+-----
+true
+=====
+length empty
 -----
 list.length []
 -----
 [] : 0
 =====
-
+length else
 -----
 list.length [1, 2]
 -----
 [1, 2] : 2
 =====
-
------
-do [a = [], list.length a]
------
-0
-=====
-
+length ref
 -----
 do [a = [1, 2], list.length a]
 -----
 2
 =====
-
------
-[1] list.set (1 - 1) : (1 + 1)
------
-[2] : 1
-=====
-
------
-do [a = [1], a list.set (1 - 1) : (1 + 1)]
------
-1
-=====
-
+set 1
 -----
 do [a = [1], a list.set 0 : 2, ^a]
 -----
 [2]
 =====
-
+set 2
 -----
 do [a = [1, 2], a list.set 1 : 3, ^a]
 -----
 [1, 3]
 =====
-
+set length
 -----
 do [a = [], a list.set 1 : 1, ^a]
 -----
 []
 =====
-
------
-do [a = [], a list.set -1 : 1]
------
-.
-=====
-
------
-do [a = [1], a list.set 0 : [], ^a]
------
-[[]]
-=====
-
------
-[0, 1, 2] list.set_many (1 - 1) : [1 + 2, 4]
------
-[3, 4, 2] : [0, 1]
-=====
-
------
-do [a = [0, 1, 2], a list.set_many (1 - 1) : [1 + 2, 4]]
------
-[0, 1]
-=====
-
+set_many empty
 -----
 do [a = [0, 1, 2], a list.set_many 0 : []]
 -----
 []
 =====
-
+set_many 1
 -----
 do [a = [0, 1, 2], a list.set_many 0 : [3, 4], ^a]
 -----
 [3, 4, 2]
 =====
-
+set_many 2
 -----
 do [a = [0, 1, 2], a list.set_many 1 : [3, 4], ^a]
 -----
 [0, 3, 4]
 =====
-
+set_many last
 -----
 do [a = [0, 1, 2], a list.set_many 2 : [], ^a]
 -----
 [0, 1, 2]
 =====
-
+get out of bound
 -----
 [] list.get 0
 -----
 [] : .
 =====
-
+get 0
 -----
 [1] list.get 0
 -----
 [1] : 1
 =====
-
+get else
 -----
 [1, 2] list.get 1
 -----
 [1, 2] : 2
 =====
-
------
-[1, 2] list.get (1 - 1) : (1 - 1)
------
-[1, 2] : []
-=====
-
+get range 1
 -----
 [1, 2] list.get 0 : 1
 -----
 [1, 2] : [1]
 =====
-
+get range 2
 -----
 [1, 2] list.get 1 : 2
 -----
 [1, 2] : [2]
 =====
-
+get range . 1
 -----
 [1, 2] list.get . : .
 -----
 [1, 2] : [1, 2]
 =====
-
+get range . 2
 -----
 [1, 2] list.get 1 : .
 -----
 [1, 2] : [2]
 =====
-
+get range . 3
 -----
 [1, 2] list.get . : 1
 -----
 [1, 2] : [1]
 =====
-
------
-do [a = [], a list.get 0]
------
-.
-=====
-
------
-do [a = [1, 2], a list.get 1]
------
-2
-=====
-
------
-do [a = [1, 2], a list.get 1, ^a]
------
-[1, 2]
-=====
-
------
-do [a = [1, 2], a list.get 0 : 0]
------
-[]
-=====
-
------
-do [a = [1, 2], a list.get 0 : 2]
------
-[1, 2]
-=====
-
------
-do [a = [1, 2], a list.get . : .]
------
-[1, 2]
-=====
-
------
-[] list.insert (1 - 1) : (1 + 0)
------
-[1]
-=====
-
+insert out of bound
 -----
 [] list.insert 1 : 1
 -----
 []
 =====
-
+insert
 -----
 [1, 2] list.insert 1 : 3
 -----
 [1, 3, 2]
 =====
-
------
-do [a = [], a list.insert (1 - 1) : (1 + 0)]
------
-.
-=====
-
+insert length
 -----
 do [a = [], a list.insert 0 : 1, ^a]
 -----
 [1]
 =====
-
------
-do [a = [1, 2], a list.insert 1 : 3, ^a]
------
-[1, 3, 2]
-=====
-
------
-[] list.insert_many (0 + 0) : [1, 2, 3]
------
-[1, 2, 3]
-=====
-
+insert_many
 -----
 [1, 2] list.insert_many 1 : [3, 4]
 -----
 [1, 3, 4, 2]
 =====
-
------
-do [a = [1, 2], a list.insert_many 1 : [3, 4]]
------
-.
-=====
-
------
-do [a = [1, 2], a list.insert_many 1 : [3, 4], ^a]
------
-[1, 3, 4, 2]
-=====
-
------
-[1] list.remove 0 + 0
------
-[] : 1
-=====
-
+remove
 -----
 [1, 2, 3] list.remove 1
 -----
 [1, 3] : 2
 =====
-
+remove range
 -----
 [1, 2, 3] list.remove 1 : 3
 -----
 [1] : [2, 3]
 =====
-
+remove range .
 -----
 [1, 2, 3] list.remove . : .
 -----
 [] : [1, 2, 3]
 =====
-
------
-do [a = [1, 2, 3], a list.remove 1 + 0]
------
-2
-=====
-
------
-do [a = [1, 2, 3], a list.remove 1, ^a]
------
-[1, 3]
-=====
-
------
-do [a = [1, 2, 3], a list.remove 1 : 3]
------
-[2, 3]
-=====
-
------
-do [a = [1, 2, 3], a list.remove 1 : 3, ^a]
------
-[1]
-=====
-
------
-do [a = [1, 2, 3], a list.remove . : ., ^a]
------
-[]
-=====
-
------
-[] list.push 1 + 0
------
-[1]
-=====
-
+push
 -----
 [1] list.push 2
 -----
 [1, 2]
 =====
-
------
-do [a = [], a list.push 1 + 0]
------
-.
-=====
-
------
-do [a = [], a list.push 1, ^a]
------
-[1]
-=====
-
------
-do [a = [1], a list.push 2, ^a]
------
-[1, 2]
-=====
-
+push_many
 -----
 [1] list.push_many [2, 3]
 -----
 [1, 2, 3]
 =====
-
+push_many empty
 -----
 [1] list.push_many []
 -----
 [1]
 =====
-
------
-do [a = [1], a list.push_many [2, 3]]
------
-.
-=====
-
------
-do [a = [1], a list.push_many [2, 3], ^a]
------
-[1, 2, 3]
-=====
-
+pop . empty
 -----
 [] list.pop .
 -----
 [] : .
 =====
-
+pop . 1
 -----
 [1] list.pop .
 -----
 [] : 1
 =====
-
+pop . 2
 -----
 [1, 2] list.pop .
 -----
 [1] : 2
 =====
-
+pop 0
 -----
 [1, 2] list.pop 0
 -----
 [1, 2] : []
 =====
-
+pop 1
 -----
 [1, 2] list.pop 1
 -----
 [1] : [2]
 =====
-
+pop else
 -----
 [1, 2] list.pop 2
 -----
 [] : [1, 2]
 =====
-
+pop out of bound
 -----
 [1, 2] list.pop 3
 -----
 [1, 2] : .
 =====
-
------
-do [a = [1, 2], a list.pop .]
------
-2
-=====
-
------
-do [a = [1, 2], a list.pop 1]
------
-[2]
-=====
-
------
-do [a = [1, 2], a list.pop 2]
------
-[1, 2]
-=====
-
+clear
 -----
 list.clear [1, 2]
------
-[]
-=====
-
------
-do [a = [1, 2], list.clear a]
------
-.
-=====
-
------
-do [a = [1, 2], list.clear a, ^a]
 -----
 []
