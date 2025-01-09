@@ -32,6 +32,11 @@ use crate::{
         },
     },
     func::FuncTrait,
+    mode::form::{
+        LITERAL,
+        MOVE,
+        REF,
+    },
     solver::{
         optimize,
         solve,
@@ -41,10 +46,6 @@ use crate::{
         Transformer,
     },
 };
-
-pub(crate) const SYMBOL_ID_PREFIX: char = '.';
-pub(crate) const SYMBOL_REF_PREFIX: char = '*';
-pub(crate) const SYMBOL_MOVE_PREFIX: char = '^';
 
 pub(crate) struct FormCore;
 
@@ -71,15 +72,15 @@ impl FormCore {
         Ctx: CtxMeta<'a>,
     {
         let (prefix, s) = match s.chars().next() {
-            Some(SYMBOL_ID_PREFIX) => (SYMBOL_ID_PREFIX, Symbol::from_str(&s[1..])),
-            Some(SYMBOL_REF_PREFIX) => (SYMBOL_REF_PREFIX, Symbol::from_str(&s[1..])),
-            Some(SYMBOL_MOVE_PREFIX) => (SYMBOL_MOVE_PREFIX, Symbol::from_str(&s[1..])),
+            Some(LITERAL) => (LITERAL, Symbol::from_str(&s[1..])),
+            Some(REF) => (REF, Symbol::from_str(&s[1..])),
+            Some(MOVE) => (MOVE, Symbol::from_str(&s[1..])),
             _ => (DEFAULT, s),
         };
         match prefix {
-            SYMBOL_ID_PREFIX => Val::Symbol(s),
-            SYMBOL_REF_PREFIX => DefaultCtx::get_or_default(ctx, s),
-            SYMBOL_MOVE_PREFIX => DefaultCtx::remove_or_default(ctx, s),
+            LITERAL => Val::Symbol(s),
+            REF => DefaultCtx::get_or_default(ctx, s),
+            MOVE => DefaultCtx::remove_or_default(ctx, s),
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }

@@ -53,18 +53,18 @@ impl From<PrimitiveMode> for MapMode<Mode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => MapMode::Id,
-            PrimitiveMode::Form => MapMode::Form {
+            PrimitiveMode::Form(mode) => MapMode::Form {
                 some: Map::default(),
                 else1: Pair::new(
-                    Mode::Primitive(PrimitiveMode::Form),
-                    Mode::Primitive(PrimitiveMode::Form),
+                    Mode::Primitive(PrimitiveMode::Form(mode)),
+                    Mode::Primitive(PrimitiveMode::Form(mode)),
                 ),
             },
-            PrimitiveMode::Eval => MapMode::Form {
+            PrimitiveMode::Eval(mode) => MapMode::Form {
                 some: Map::default(),
                 else1: Pair::new(
-                    Mode::Primitive(PrimitiveMode::Eval),
-                    Mode::Primitive(PrimitiveMode::Eval),
+                    Mode::Primitive(PrimitiveMode::Eval(mode)),
+                    Mode::Primitive(PrimitiveMode::Eval(mode)),
                 ),
             },
         }
@@ -75,11 +75,11 @@ impl From<PrimitiveMode> for MapMode<SelfMode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => MapMode::Id,
-            PrimitiveMode::Form => MapMode::Form {
+            PrimitiveMode::Form(_) => MapMode::Form {
                 some: Map::default(),
                 else1: Pair::new(SelfMode::Self1, SelfMode::Self1),
             },
-            PrimitiveMode::Eval => MapMode::Form {
+            PrimitiveMode::Eval(_) => MapMode::Form {
                 some: Map::default(),
                 else1: Pair::new(SelfMode::Self1, SelfMode::Self1),
             },

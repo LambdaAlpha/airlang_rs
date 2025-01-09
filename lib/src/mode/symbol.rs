@@ -4,7 +4,6 @@ use crate::{
     Val,
     ctx::ref1::CtxMeta,
     mode::{
-        eval::Eval,
         form::Form,
         id::Id,
     },
@@ -14,12 +13,10 @@ use crate::{
     },
 };
 
-#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SymbolMode {
     Id,
-    Form,
-    #[default]
-    Eval,
+    Form(Form),
 }
 
 impl Transformer<Symbol, Val> for SymbolMode {
@@ -29,8 +26,7 @@ impl Transformer<Symbol, Val> for SymbolMode {
     {
         match self {
             SymbolMode::Id => Id.transform_symbol(ctx, symbol),
-            SymbolMode::Form => Form.transform_symbol(ctx, symbol),
-            SymbolMode::Eval => Eval.transform_symbol(ctx, symbol),
+            SymbolMode::Form(mode) => mode.transform(ctx, symbol),
         }
     }
 }
@@ -39,8 +35,8 @@ impl From<PrimitiveMode> for SymbolMode {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => SymbolMode::Id,
-            PrimitiveMode::Form => SymbolMode::Form,
-            PrimitiveMode::Eval => SymbolMode::Eval,
+            PrimitiveMode::Form(mode) => SymbolMode::Form(mode),
+            PrimitiveMode::Eval(mode) => SymbolMode::Form(Form::from(mode)),
         }
     }
 }
@@ -49,8 +45,13 @@ impl From<SymbolMode> for PrimitiveMode {
     fn from(mode: SymbolMode) -> Self {
         match mode {
             SymbolMode::Id => PrimitiveMode::Id,
-            SymbolMode::Form => PrimitiveMode::Form,
-            SymbolMode::Eval => PrimitiveMode::Eval,
+            SymbolMode::Form(mode) => PrimitiveMode::Form(mode),
         }
+    }
+}
+
+impl Default for SymbolMode {
+    fn default() -> Self {
+        SymbolMode::Form(Form::default())
     }
 }

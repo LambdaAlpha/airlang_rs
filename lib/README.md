@@ -43,7 +43,7 @@ The Air language seeks to solve programming problems once and for all. It should
         context : prelude .,
         body : do [
             [init, condition, next, body] = args,
-            ctx | form ; do ; [
+            ctx | form. ; do ; [
                 .^init,
                 .^condition while [
                     .^body,

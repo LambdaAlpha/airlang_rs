@@ -1,6 +1,7 @@
 use std::process::Command;
 
 use airlang::{
+    Form,
     FuncMode,
     FuncVal,
     Mode,
@@ -34,7 +35,7 @@ impl Prelude for ProcessPrelude {
 fn call() -> Named<FuncVal> {
     let id = "$";
     let f = fn_call;
-    let call = form_mode();
+    let call = form_mode(Form::Literal);
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

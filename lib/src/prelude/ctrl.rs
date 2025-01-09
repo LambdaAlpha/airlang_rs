@@ -1,6 +1,7 @@
 use crate::{
     Byte,
     Call,
+    Form,
     FuncMode,
     Int,
     List,
@@ -19,7 +20,7 @@ use crate::{
         },
     },
     func::mut_static_prim::MutDispatcher,
-    mode::eval::Eval,
+    mode::eval::EVAL,
     prelude::{
         Named,
         Prelude,
@@ -28,6 +29,7 @@ use crate::{
         map_mode,
         named_mut_fn,
         pair_mode,
+        symbol_literal_mode,
     },
     transformer::Transformer,
     val::{
@@ -233,7 +235,7 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    let map = map_mode(Map::default(), form_mode(), id_mode());
+    let map = map_mode(Map::default(), form_mode(Form::Ref), id_mode());
     let map_default = pair_mode(map, id_mode());
     let call = pair_mode(Mode::default(), map_default);
     let abstract1 = call.clone();
@@ -319,7 +321,7 @@ where
     };
     for arm in arms {
         let arm = Pair::from(arm);
-        let v = Eval.transform(ctx.reborrow(), arm.first);
+        let v = EVAL.transform(ctx.reborrow(), arm.first);
         if v == val {
             return eval_block(ctx, arm.second).0;
         }
@@ -364,7 +366,7 @@ where
             return Val::default();
         };
         loop {
-            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
@@ -382,13 +384,13 @@ where
         }
     } else {
         loop {
-            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
                 break;
             }
-            Eval.transform(ctx.reborrow(), body.clone());
+            EVAL.transform(ctx.reborrow(), body.clone());
         }
     }
     Val::default()
@@ -430,7 +432,7 @@ where
             return Val::default();
         };
         loop {
-            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if b.bool() {
@@ -448,13 +450,13 @@ where
         }
     } else {
         loop {
-            let Val::Bit(b) = Eval.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
                 return Val::default();
             };
             if b.bool() {
                 break;
             }
-            Eval.transform(ctx.reborrow(), body.clone());
+            EVAL.transform(ctx.reborrow(), body.clone());
         }
     }
     Val::default()
@@ -467,7 +469,7 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    let call = pair_mode(Mode::default(), pair_mode(form_mode(), id_mode()));
+    let call = pair_mode(Mode::default(), pair_mode(symbol_literal_mode(), id_mode()));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -591,7 +593,7 @@ where
             variables
                 .put_value(name.clone(), CtxValue::new(val))
                 .expect("name should be assignable");
-            Eval.transform(ctx.reborrow(), body.clone());
+            EVAL.transform(ctx.reborrow(), body.clone());
         }
     }
     Val::default()
@@ -602,7 +604,7 @@ where
     Ctx: CtxMeta<'a>,
 {
     let Val::List(list) = input else {
-        return (Eval.transform(ctx, input), CtrlFlow::None);
+        return (EVAL.transform(ctx, input), CtrlFlow::None);
     };
     let list = List::from(list);
     let block_items: Option<List<BlockItem>> = list.into_iter().map(parse_block_item).collect();
@@ -620,10 +622,10 @@ where
     for block_item in block_items {
         match block_item {
             BlockItem::Normal(val) => {
-                output = Eval.transform(ctx.reborrow(), val);
+                output = EVAL.transform(ctx.reborrow(), val);
             }
             BlockItem::UnitExit { exit, target, body } => {
-                output = Eval.transform(ctx.reborrow(), body);
+                output = EVAL.transform(ctx.reborrow(), body);
                 if output.is_unit() == target {
                     return (output, CtrlFlow::from(exit));
                 }
@@ -634,12 +636,12 @@ where
                 condition,
                 body,
             } => {
-                let condition = Eval.transform(ctx.reborrow(), condition);
+                let condition = EVAL.transform(ctx.reborrow(), condition);
                 let Val::Bit(condition) = condition else {
                     return (Val::default(), CtrlFlow::Error);
                 };
                 if condition.bool() == target {
-                    let output = Eval.transform(ctx, body);
+                    let output = EVAL.transform(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }
                 output = Val::default();

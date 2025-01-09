@@ -5,6 +5,7 @@ use rand::{
 
 use crate::{
     Ctx,
+    Form,
     FuncMode,
     Map,
     Mode,
@@ -46,7 +47,7 @@ use crate::{
         named_free_fn,
         named_mut_fn,
         pair_mode,
-        symbol_form_mode,
+        symbol_literal_mode,
     },
     symbol::Symbol,
     types::either::Either,
@@ -103,7 +104,7 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
-    let call = form_mode();
+    let call = form_mode(Form::Literal);
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -150,7 +151,7 @@ fn type_of() -> Named<FuncVal> {
     let f = fn_type_of;
     let call = id_mode();
     let abstract1 = call.clone();
-    let ask = symbol_form_mode();
+    let ask = symbol_literal_mode();
     let mode = FuncMode {
         call,
         abstract1,

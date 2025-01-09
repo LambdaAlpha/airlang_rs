@@ -1,3 +1,5 @@
+use const_format::concatcp;
+
 use crate::{
     AbstractVal,
     AskVal,
@@ -10,7 +12,12 @@ use crate::{
     ctx::ref1::CtxMeta,
     mode::{
         eval::Eval,
-        form::Form,
+        form::{
+            Form,
+            LITERAL,
+            MOVE,
+            REF,
+        },
         id::Id,
     },
     transformer::{
@@ -23,12 +30,18 @@ pub(crate) const ID: &str = "id";
 pub(crate) const FORM: &str = "form";
 pub(crate) const EVAL: &str = "eval";
 
-#[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) const FORM_LITERAL: &str = concatcp!(FORM, LITERAL);
+pub(crate) const FORM_REF: &str = concatcp!(FORM, REF);
+pub(crate) const FORM_MOVE: &str = concatcp!(FORM, MOVE);
+pub(crate) const EVAL_LITERAL: &str = concatcp!(EVAL, LITERAL);
+pub(crate) const EVAL_REF: &str = concatcp!(EVAL, REF);
+pub(crate) const EVAL_MOVE: &str = concatcp!(EVAL, MOVE);
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum PrimitiveMode {
     Id,
-    Form,
-    #[default]
-    Eval,
+    Form(Form),
+    Eval(Eval),
 }
 
 impl Transformer<Val, Val> for PrimitiveMode {
@@ -38,8 +51,8 @@ impl Transformer<Val, Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform(ctx, input),
-            PrimitiveMode::Form => Form.transform(ctx, input),
-            PrimitiveMode::Eval => Eval.transform(ctx, input),
+            PrimitiveMode::Form(mode) => mode.transform(ctx, input),
+            PrimitiveMode::Eval(mode) => mode.transform(ctx, input),
         }
     }
 }
@@ -51,8 +64,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_default(ctx, input),
-            PrimitiveMode::Form => Form.transform_default(ctx, input),
-            PrimitiveMode::Eval => Eval.transform_default(ctx, input),
+            PrimitiveMode::Form(mode) => mode.transform_default(ctx, input),
+            PrimitiveMode::Eval(mode) => mode.transform_default(ctx, input),
         }
     }
 
@@ -62,8 +75,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_symbol(ctx, symbol),
-            PrimitiveMode::Form => Form.transform_symbol(ctx, symbol),
-            PrimitiveMode::Eval => Eval.transform_symbol(ctx, symbol),
+            PrimitiveMode::Form(mode) => mode.transform_symbol(ctx, symbol),
+            PrimitiveMode::Eval(mode) => mode.transform_symbol(ctx, symbol),
         }
     }
 
@@ -73,8 +86,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_pair(ctx, pair),
-            PrimitiveMode::Form => Form.transform_pair(ctx, pair),
-            PrimitiveMode::Eval => Eval.transform_pair(ctx, pair),
+            PrimitiveMode::Form(mode) => mode.transform_pair(ctx, pair),
+            PrimitiveMode::Eval(mode) => mode.transform_pair(ctx, pair),
         }
     }
 
@@ -84,8 +97,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_call(ctx, call),
-            PrimitiveMode::Form => Form.transform_call(ctx, call),
-            PrimitiveMode::Eval => Eval.transform_call(ctx, call),
+            PrimitiveMode::Form(mode) => mode.transform_call(ctx, call),
+            PrimitiveMode::Eval(mode) => mode.transform_call(ctx, call),
         }
     }
 
@@ -95,8 +108,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_abstract(ctx, abstract1),
-            PrimitiveMode::Form => Form.transform_abstract(ctx, abstract1),
-            PrimitiveMode::Eval => Eval.transform_abstract(ctx, abstract1),
+            PrimitiveMode::Form(mode) => mode.transform_abstract(ctx, abstract1),
+            PrimitiveMode::Eval(mode) => mode.transform_abstract(ctx, abstract1),
         }
     }
 
@@ -106,8 +119,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_ask(ctx, ask),
-            PrimitiveMode::Form => Form.transform_ask(ctx, ask),
-            PrimitiveMode::Eval => Eval.transform_ask(ctx, ask),
+            PrimitiveMode::Form(mode) => mode.transform_ask(ctx, ask),
+            PrimitiveMode::Eval(mode) => mode.transform_ask(ctx, ask),
         }
     }
 
@@ -117,8 +130,8 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_list(ctx, list),
-            PrimitiveMode::Form => Form.transform_list(ctx, list),
-            PrimitiveMode::Eval => Eval.transform_list(ctx, list),
+            PrimitiveMode::Form(mode) => mode.transform_list(ctx, list),
+            PrimitiveMode::Eval(mode) => mode.transform_list(ctx, list),
         }
     }
 
@@ -128,8 +141,14 @@ impl ByVal<Val> for PrimitiveMode {
     {
         match self {
             PrimitiveMode::Id => Id.transform_map(ctx, map),
-            PrimitiveMode::Form => Form.transform_map(ctx, map),
-            PrimitiveMode::Eval => Eval.transform_map(ctx, map),
+            PrimitiveMode::Form(mode) => mode.transform_map(ctx, map),
+            PrimitiveMode::Eval(mode) => mode.transform_map(ctx, map),
         }
+    }
+}
+
+impl Default for PrimitiveMode {
+    fn default() -> Self {
+        PrimitiveMode::Eval(Eval::default())
     }
 }

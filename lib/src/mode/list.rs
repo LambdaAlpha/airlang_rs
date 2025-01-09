@@ -49,13 +49,13 @@ impl From<PrimitiveMode> for ListMode<Mode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => ListMode::Id,
-            PrimitiveMode::Form => ListMode::Form {
+            PrimitiveMode::Form(mode) => ListMode::Form {
                 head: List::default(),
-                tail: Mode::Primitive(PrimitiveMode::Form),
+                tail: Mode::Primitive(PrimitiveMode::Form(mode)),
             },
-            PrimitiveMode::Eval => ListMode::Form {
+            PrimitiveMode::Eval(mode) => ListMode::Form {
                 head: List::default(),
-                tail: Mode::Primitive(PrimitiveMode::Eval),
+                tail: Mode::Primitive(PrimitiveMode::Eval(mode)),
             },
         }
     }
@@ -65,11 +65,11 @@ impl From<PrimitiveMode> for ListMode<SelfMode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => ListMode::Id,
-            PrimitiveMode::Form => ListMode::Form {
+            PrimitiveMode::Form(_) => ListMode::Form {
                 head: List::default(),
                 tail: SelfMode::Self1,
             },
-            PrimitiveMode::Eval => ListMode::Form {
+            PrimitiveMode::Eval(_) => ListMode::Form {
                 head: List::default(),
                 tail: SelfMode::Self1,
             },

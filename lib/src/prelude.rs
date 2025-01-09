@@ -39,6 +39,8 @@ use crate::{
     },
     mode::{
         Mode,
+        eval::Eval,
+        form::Form,
         list::ListMode,
         map::MapMode,
         primitive::PrimitiveMode,
@@ -249,18 +251,18 @@ pub(crate) fn id_mode() -> Mode {
     Mode::Primitive(PrimitiveMode::Id)
 }
 
-pub(crate) fn form_mode() -> Mode {
-    Mode::Primitive(PrimitiveMode::Form)
+pub(crate) fn form_mode(form: Form) -> Mode {
+    Mode::Primitive(PrimitiveMode::Form(form))
 }
 
 #[allow(unused)]
-pub(crate) fn eval_mode() -> Mode {
-    Mode::Primitive(PrimitiveMode::Eval)
+pub(crate) fn eval_mode(eval: Eval) -> Mode {
+    Mode::Primitive(PrimitiveMode::Eval(eval))
 }
 
-pub(crate) fn symbol_form_mode() -> Mode {
+pub(crate) fn symbol_literal_mode() -> Mode {
     let mode = CompositeMode {
-        symbol: SymbolMode::Form,
+        symbol: SymbolMode::Form(Form::Literal),
         ..CompositeMode::from(PrimitiveMode::default())
     };
     Mode::Composite(Box::new(mode))

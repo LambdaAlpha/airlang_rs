@@ -354,13 +354,13 @@ do [c = context ; {reverse : true, variables : {a : 1 . {.static}}}, c | .^a, c 
 =====
 
 -----
-do [c = context ; {variables : {a : 1 . {.static}}}, c | form ; a *= 2, c | .a]
+do [c = context ; {variables : {a : 1 . {.static}}}, c | form* ; .a = 2, c | .a]
 -----
 2
 =====
 
 -----
-do [c = context ; {}, c | form ; (a . {static}) *= 1, c | is_null ;; a]
+do [c = context ; {}, c | form. ; (a . {static}) *= 1, c | is_null ;; a]
 -----
 true
 =====
@@ -378,13 +378,13 @@ true
 =====
 
 -----
-do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | form ; *do ; [a *set_invariant final, *invariant a]]
+do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | form* ; do ; [.a set_invariant .final, invariant .a]]
 -----
 final
 =====
 
 -----
-do [c = context ; {reverse : true, variables : {a : 1 . .final}}, c | form ; *do ; [a *set_invariant constant, *invariant a]]
+do [c = context ; {reverse : true, variables : {a : 1 . .final}}, c | form. ; *do ; [a *set_invariant constant, *invariant a]]
 -----
 final
 =====
@@ -396,7 +396,7 @@ do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | .^a]
 =====
 
 -----
-do [c = context ; {reverse : true}, c | form ; (a . final) *= 1, c | is_null ;; a]
+do [c = context ; {reverse : true}, c | form. ; (a . final) *= 1, c | is_null ;; a]
 -----
 true
 =====
@@ -500,7 +500,7 @@ do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: = ';' .a : 2, [c | .a,
 -----
 do [
     a = context ; {variables : {b : context ; {variables : {c : 1}}}},
-    a | form ; b *| ..c
+    a | form* ; .b | ..c
 ]
 -----
 1

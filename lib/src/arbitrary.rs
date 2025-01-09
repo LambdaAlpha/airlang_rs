@@ -62,6 +62,8 @@ use crate::{
     mode::{
         Mode,
         composite::CompositeMode,
+        eval::Eval,
+        form::Form,
         list::ListMode,
         map::MapMode,
         pair::PairMode,
@@ -255,7 +257,15 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
 }
 
 pub(crate) fn any_primitive_mode(rng: &mut SmallRng) -> PrimitiveMode {
-    const MODES: [PrimitiveMode; 3] = [PrimitiveMode::Eval, PrimitiveMode::Id, PrimitiveMode::Form];
+    const MODES: [PrimitiveMode; 7] = [
+        PrimitiveMode::Id,
+        PrimitiveMode::Form(Form::Literal),
+        PrimitiveMode::Form(Form::Ref),
+        PrimitiveMode::Form(Form::Move),
+        PrimitiveMode::Eval(Eval::Literal),
+        PrimitiveMode::Eval(Eval::Ref),
+        PrimitiveMode::Eval(Eval::Move),
+    ];
     *(MODES.choose(rng).unwrap())
 }
 

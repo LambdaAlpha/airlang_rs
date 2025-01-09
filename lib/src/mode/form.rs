@@ -3,10 +3,7 @@ use crate::{
     AskVal,
     CallVal,
     PairVal,
-    core::{
-        FormCore,
-        SYMBOL_ID_PREFIX,
-    },
+    core::FormCore,
     ctx::ref1::CtxMeta,
     mode::id::Id,
     symbol::Symbol,
@@ -21,8 +18,34 @@ use crate::{
     },
 };
 
-#[derive(Copy, Clone)]
-pub(crate) struct Form;
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum Form {
+    Literal,
+    #[default]
+    Ref,
+    Move,
+}
+
+// default instance
+#[allow(unused)]
+pub(crate) const FORM: Form = Form::Ref;
+
+pub(crate) const LITERAL: char = '.';
+pub(crate) const REF: char = '*';
+pub(crate) const MOVE: char = '^';
+
+impl Transformer<Symbol, Val> for Form {
+    fn transform<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            Form::Literal => FormCore::transform_symbol::<LITERAL, _>(ctx, symbol),
+            Form::Ref => FormCore::transform_symbol::<REF, _>(ctx, symbol),
+            Form::Move => FormCore::transform_symbol::<MOVE, _>(ctx, symbol),
+        }
+    }
+}
 
 impl Transformer<Val, Val> for Form {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
@@ -45,7 +68,7 @@ impl ByVal<Val> for Form {
     where
         Ctx: CtxMeta<'a>,
     {
-        FormCore::transform_symbol::<SYMBOL_ID_PREFIX, _>(ctx, symbol)
+        self.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val

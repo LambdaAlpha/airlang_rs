@@ -67,6 +67,8 @@ pub use crate::{
         ask::AskMode,
         call::CallMode,
         composite::CompositeMode,
+        eval::Eval,
+        form::Form,
         list::ListMode,
         map::MapMode,
         pair::PairMode,

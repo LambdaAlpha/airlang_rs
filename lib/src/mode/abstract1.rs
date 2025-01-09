@@ -53,13 +53,13 @@ impl From<PrimitiveMode> for AbstractMode<Mode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => AbstractMode::Id,
-            PrimitiveMode::Form => AbstractMode::Form(Abstract::new(
-                Mode::Primitive(PrimitiveMode::Form),
-                Mode::Primitive(PrimitiveMode::Form),
+            PrimitiveMode::Form(mode) => AbstractMode::Form(Abstract::new(
+                Mode::Primitive(PrimitiveMode::Form(mode)),
+                Mode::Primitive(PrimitiveMode::Form(mode)),
             )),
-            PrimitiveMode::Eval => AbstractMode::Eval(Abstract::new(
-                Mode::Primitive(PrimitiveMode::Form),
-                Mode::Primitive(PrimitiveMode::Form),
+            PrimitiveMode::Eval(mode) => AbstractMode::Eval(Abstract::new(
+                Mode::Primitive(PrimitiveMode::Eval(mode)),
+                Mode::Primitive(PrimitiveMode::Eval(mode)),
             )),
         }
     }
@@ -69,10 +69,10 @@ impl From<PrimitiveMode> for AbstractMode<SelfMode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => AbstractMode::Id,
-            PrimitiveMode::Form => {
+            PrimitiveMode::Form(_) => {
                 AbstractMode::Form(Abstract::new(SelfMode::Self1, SelfMode::Self1))
             }
-            PrimitiveMode::Eval => {
+            PrimitiveMode::Eval(_) => {
                 AbstractMode::Eval(Abstract::new(SelfMode::Self1, SelfMode::Self1))
             }
         }

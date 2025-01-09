@@ -44,13 +44,13 @@ impl From<PrimitiveMode> for PairMode<Mode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => PairMode::Id,
-            PrimitiveMode::Form => PairMode::Form(Pair::new(
-                Mode::Primitive(PrimitiveMode::Form),
-                Mode::Primitive(PrimitiveMode::Form),
+            PrimitiveMode::Form(mode) => PairMode::Form(Pair::new(
+                Mode::Primitive(PrimitiveMode::Form(mode)),
+                Mode::Primitive(PrimitiveMode::Form(mode)),
             )),
-            PrimitiveMode::Eval => PairMode::Form(Pair::new(
-                Mode::Primitive(PrimitiveMode::Eval),
-                Mode::Primitive(PrimitiveMode::Eval),
+            PrimitiveMode::Eval(mode) => PairMode::Form(Pair::new(
+                Mode::Primitive(PrimitiveMode::Eval(mode)),
+                Mode::Primitive(PrimitiveMode::Eval(mode)),
             )),
         }
     }
@@ -60,8 +60,8 @@ impl From<PrimitiveMode> for PairMode<SelfMode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => PairMode::Id,
-            PrimitiveMode::Form => PairMode::Form(Pair::new(SelfMode::Self1, SelfMode::Self1)),
-            PrimitiveMode::Eval => PairMode::Form(Pair::new(SelfMode::Self1, SelfMode::Self1)),
+            PrimitiveMode::Form(_) => PairMode::Form(Pair::new(SelfMode::Self1, SelfMode::Self1)),
+            PrimitiveMode::Eval(_) => PairMode::Form(Pair::new(SelfMode::Self1, SelfMode::Self1)),
         }
     }
 }

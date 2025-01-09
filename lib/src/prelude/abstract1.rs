@@ -20,7 +20,7 @@ use crate::{
         ref1::CtxMeta,
     },
     func::mut_static_prim::MutDispatcher,
-    mode::eval::Eval,
+    mode::eval::EVAL,
     prelude::{
         Named,
         Prelude,
@@ -111,7 +111,7 @@ fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
     let pair = Pair::from(pair);
     let func = pair.first;
     let input = pair.second;
-    let input = EvalCore::abstract_eval_input(&Eval, ctx, &func, input);
+    let input = EvalCore::abstract_eval_input(&EVAL, ctx, &func, input);
     Val::Abstract(Abstract::new(func, input).into())
 }
 

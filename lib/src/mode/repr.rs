@@ -20,11 +20,17 @@ use crate::{
         ask::AskMode,
         call::CallMode,
         composite::CompositeMode,
+        eval::Eval,
+        form::Form,
         list::ListMode,
         map::MapMode,
         primitive::{
-            EVAL,
-            FORM,
+            EVAL_LITERAL,
+            EVAL_MOVE,
+            EVAL_REF,
+            FORM_LITERAL,
+            FORM_MOVE,
+            FORM_REF,
             ID,
         },
         recursive::SelfMode,
@@ -166,8 +172,12 @@ impl ParseMode<Symbol> for PrimitiveMode {
     fn parse(mode: Symbol, _default: PrimitiveMode) -> Option<Self> {
         let mode = match &*mode {
             ID => PrimitiveMode::Id,
-            FORM => PrimitiveMode::Form,
-            EVAL => PrimitiveMode::Eval,
+            FORM_LITERAL => PrimitiveMode::Form(Form::Literal),
+            FORM_REF => PrimitiveMode::Form(Form::Ref),
+            FORM_MOVE => PrimitiveMode::Form(Form::Move),
+            EVAL_LITERAL => PrimitiveMode::Eval(Eval::Literal),
+            EVAL_REF => PrimitiveMode::Eval(Eval::Ref),
+            EVAL_MOVE => PrimitiveMode::Eval(Eval::Move),
             _ => return None,
         };
         Some(mode)
@@ -178,8 +188,16 @@ impl GenerateMode<Val> for PrimitiveMode {
     fn generate(&self, _default: PrimitiveMode) -> Val {
         let s = match self {
             PrimitiveMode::Id => ID,
-            PrimitiveMode::Form => FORM,
-            PrimitiveMode::Eval => EVAL,
+            PrimitiveMode::Form(mode) => match mode {
+                Form::Literal => FORM_LITERAL,
+                Form::Ref => FORM_REF,
+                Form::Move => FORM_MOVE,
+            },
+            PrimitiveMode::Eval(mode) => match mode {
+                Eval::Literal => EVAL_LITERAL,
+                Eval::Ref => EVAL_REF,
+                Eval::Move => EVAL_MOVE,
+            },
         };
         symbol(s)
     }

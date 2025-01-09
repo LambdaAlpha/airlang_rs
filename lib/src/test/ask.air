@@ -4,7 +4,7 @@ do [
     f = any ; .,
     o = any ; .,
     a1 = f '?' o,
-    a2 = form ; *f ? *o,
+    a2 = form* ; f ? o,
     a1 == a2
 ]
 -----
@@ -53,14 +53,14 @@ do [a = (function {ask_mode : id}) ?? b, ask.output a]
 -----
 b
 =====
-?? form
+?? form.
 -----
-do [a = (function {ask_mode : form}) ?? .b, ask.output a]
+do [a = (function {ask_mode : form.}) ?? .b, ask.output a]
 -----
 b
 =====
-?? eval
+?? eval*
 -----
-do [a = (function {ask_mode : eval}) ?? id ; b, ask.output a]
+do [a = (function {ask_mode : eval*}) ?? id ; b, ask.output a]
 -----
 b

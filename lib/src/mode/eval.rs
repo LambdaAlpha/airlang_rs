@@ -2,11 +2,11 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    Form,
     PairVal,
     core::{
         EvalCore,
         FormCore,
-        SYMBOL_REF_PREFIX,
     },
     ctx::ref1::CtxMeta,
     mode::id::Id,
@@ -22,8 +22,16 @@ use crate::{
     },
 };
 
-#[derive(Copy, Clone)]
-pub(crate) struct Eval;
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum Eval {
+    Literal,
+    #[default]
+    Ref,
+    Move,
+}
+
+// default instance
+pub(crate) const EVAL: Eval = Eval::Ref;
 
 impl Transformer<Val, Val> for Eval {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
@@ -46,7 +54,7 @@ impl ByVal<Val> for Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        FormCore::transform_symbol::<SYMBOL_REF_PREFIX, _>(ctx, symbol)
+        Form::from(*self).transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -89,5 +97,25 @@ impl ByVal<Val> for Eval {
         Ctx: CtxMeta<'a>,
     {
         FormCore::transform_map(self, self, ctx, map)
+    }
+}
+
+impl From<Form> for Eval {
+    fn from(form: Form) -> Self {
+        match form {
+            Form::Literal => Eval::Literal,
+            Form::Ref => Eval::Ref,
+            Form::Move => Eval::Move,
+        }
+    }
+}
+
+impl From<Eval> for Form {
+    fn from(eval: Eval) -> Self {
+        match eval {
+            Eval::Literal => Form::Literal,
+            Eval::Ref => Form::Ref,
+            Eval::Move => Form::Move,
+        }
     }
 }

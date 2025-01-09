@@ -4,7 +4,7 @@ do [
     f = any ; .,
     i = any ; .,
     a1 = f '!' i,
-    a2 = form ; *f ! *i,
+    a2 = form* ; f ! i,
     a1 == a2
 ]
 -----
@@ -53,15 +53,15 @@ do [a = (function {abstract_mode : id}) !! b, abstract.input a]
 -----
 b
 =====
-!! form
+!! form.
 -----
-do [a = (function {abstract_mode : form}) !! .b, abstract.input a]
+do [a = (function {abstract_mode : form.}) !! .b, abstract.input a]
 -----
 b
 =====
-!! eval
+!! eval*
 -----
-do [a = (function {abstract_mode : eval}) !! id ; b, abstract.input a]
+do [a = (function {abstract_mode : eval*}) !! id ; b, abstract.input a]
 -----
 b
 =====

@@ -3,11 +3,6 @@ use crate::{
     Pair,
     Symbol,
     Val,
-    core::{
-        SYMBOL_ID_PREFIX,
-        SYMBOL_MOVE_PREFIX,
-        SYMBOL_REF_PREFIX,
-    },
     ctx::{
         DynRef,
         map::CtxMapRef,
@@ -16,7 +11,14 @@ use crate::{
             CtxRef,
         },
     },
-    mode::eval::Eval,
+    mode::{
+        eval::EVAL,
+        form::{
+            LITERAL,
+            MOVE,
+            REF,
+        },
+    },
     transformer::Transformer,
     types::either::Either,
 };
@@ -204,14 +206,14 @@ impl DefaultCtx {
         Ctx: CtxMeta<'a>,
     {
         let Val::Symbol(s) = val else {
-            let val = Eval.transform(ctx, val);
+            let val = EVAL.transform(ctx, val);
             return Either::That(val);
         };
         let prefix = s.chars().next();
         match prefix {
-            Some(SYMBOL_ID_PREFIX) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
-            Some(SYMBOL_REF_PREFIX) => Either::This(Symbol::from_str(&s[1..])),
-            Some(SYMBOL_MOVE_PREFIX) => {
+            Some(LITERAL) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
+            Some(REF) => Either::This(Symbol::from_str(&s[1..])),
+            Some(MOVE) => {
                 let val = Self::remove_or_default(ctx, Symbol::from_str(&s[1..]));
                 Either::That(val)
             }

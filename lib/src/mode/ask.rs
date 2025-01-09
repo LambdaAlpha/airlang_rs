@@ -49,13 +49,13 @@ impl From<PrimitiveMode> for AskMode<Mode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => AskMode::Id,
-            PrimitiveMode::Form => AskMode::Form(Ask::new(
-                Mode::Primitive(PrimitiveMode::Form),
-                Mode::Primitive(PrimitiveMode::Form),
+            PrimitiveMode::Form(mode) => AskMode::Form(Ask::new(
+                Mode::Primitive(PrimitiveMode::Form(mode)),
+                Mode::Primitive(PrimitiveMode::Form(mode)),
             )),
-            PrimitiveMode::Eval => AskMode::Eval(Ask::new(
-                Mode::Primitive(PrimitiveMode::Eval),
-                Mode::Primitive(PrimitiveMode::Eval),
+            PrimitiveMode::Eval(mode) => AskMode::Eval(Ask::new(
+                Mode::Primitive(PrimitiveMode::Eval(mode)),
+                Mode::Primitive(PrimitiveMode::Eval(mode)),
             )),
         }
     }
@@ -65,8 +65,8 @@ impl From<PrimitiveMode> for AskMode<SelfMode> {
     fn from(mode: PrimitiveMode) -> Self {
         match mode {
             PrimitiveMode::Id => AskMode::Id,
-            PrimitiveMode::Form => AskMode::Form(Ask::new(SelfMode::Self1, SelfMode::Self1)),
-            PrimitiveMode::Eval => AskMode::Eval(Ask::new(SelfMode::Self1, SelfMode::Self1)),
+            PrimitiveMode::Form(_) => AskMode::Form(Ask::new(SelfMode::Self1, SelfMode::Self1)),
+            PrimitiveMode::Eval(_) => AskMode::Eval(Ask::new(SelfMode::Self1, SelfMode::Self1)),
         }
     }
 }

@@ -18,6 +18,7 @@ use crate::{
     Val,
     ctx::ref1::CtxMeta,
     func::FuncTrait,
+    mode::eval::EVAL,
     transformer::Transformer,
 };
 
@@ -40,8 +41,8 @@ impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
         &FuncMode {
             call: Mode::Primitive(PrimitiveMode::Id),
-            abstract1: Mode::Primitive(PrimitiveMode::Eval),
-            ask: Mode::Primitive(PrimitiveMode::Eval),
+            abstract1: Mode::Primitive(PrimitiveMode::Id),
+            ask: Mode::Primitive(PrimitiveMode::Eval(EVAL)),
         }
     }
 
@@ -89,7 +90,7 @@ impl IsCacheable for Mode {
 
 impl IsCacheable for PrimitiveMode {
     fn is_cacheable(&self) -> bool {
-        !matches!(self, PrimitiveMode::Eval)
+        !matches!(self, PrimitiveMode::Eval(_))
     }
 }
 

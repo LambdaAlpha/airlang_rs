@@ -8,6 +8,8 @@ use airlang::{
     ConstStaticFn,
     ConstStaticPrimFunc,
     ConstStaticPrimFuncVal,
+    Eval,
+    Form,
     FreeCellFnExt,
     FreeCellPrimFunc,
     FreeCellPrimFuncVal,
@@ -174,20 +176,20 @@ fn id_mode() -> Mode {
     Mode::Primitive(PrimitiveMode::Id)
 }
 
-fn form_mode() -> Mode {
-    Mode::Primitive(PrimitiveMode::Form)
+fn form_mode(form: Form) -> Mode {
+    Mode::Primitive(PrimitiveMode::Form(form))
 }
 
 #[allow(unused)]
-fn eval_mode() -> Mode {
-    Mode::Primitive(PrimitiveMode::Eval)
+fn eval_mode(eval: Eval) -> Mode {
+    Mode::Primitive(PrimitiveMode::Eval(eval))
 }
 
 #[allow(unused)]
-fn symbol_form_mode(default: PrimitiveMode) -> Mode {
+fn symbol_literal_mode() -> Mode {
     let mode = CompositeMode {
-        symbol: SymbolMode::Form,
-        ..CompositeMode::from(default)
+        symbol: SymbolMode::Form(Form::Literal),
+        ..CompositeMode::from(PrimitiveMode::default())
     };
     Mode::Composite(Box::new(mode))
 }

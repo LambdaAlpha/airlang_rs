@@ -9,7 +9,7 @@
         context : prelude .,
         body : do [
             [init, condition, next, body] = args,
-            ctx | form ; do ; [
+            ctx | form. ; do ; [
                 .^init,
                 .^condition while [
                     .^body,
