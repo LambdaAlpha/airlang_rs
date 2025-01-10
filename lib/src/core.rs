@@ -439,6 +439,7 @@ impl EvalCore {
         optimize(ctx, func, input)
     }
 
+    // f ? v evaluates to . or any i that (f ; i) == v
     pub(crate) fn transform_ask<'a, Ctx, Func, Output>(
         func_trans: &Func,
         output_trans: &Output,
