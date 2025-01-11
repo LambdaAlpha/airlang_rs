@@ -3,6 +3,7 @@ use crate::{
     Call,
     Case,
     CaseVal,
+    Form,
     FuncMode,
     Mode,
     Symbol,
@@ -19,6 +20,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        form_mode,
         id_mode,
         map_mode,
         named_free_fn,
@@ -111,7 +113,14 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let id = "case.cache";
     let f = fn_new_cache;
-    let mode = FuncMode::default();
+    let call = form_mode(Form::Ref);
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }

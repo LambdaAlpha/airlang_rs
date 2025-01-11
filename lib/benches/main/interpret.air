@@ -1,25 +1,14 @@
 "bench interpret" ! do ; [
-  ctx = context ; {
-    variables : {
-      do : :,
-      = : :,
-      for : :,
-      == : :,
-      % : :,
-      + : :,
-    }
-  },
   f = function ; {
     input_name : n,
     body : do ; [
-      sum = 0,
-      n for i : [
-        (0 == i % 3) continue_if .,
-        sum = sum + i,
+      .sum = 0,
+      .n for .i : [
+        (0 == .i % 3) .continue_if .,
+        .sum = .sum + .i,
       ],
-      sum
+      .sum
     ],
-    context : ^ctx,
   },
   f 100
 ]

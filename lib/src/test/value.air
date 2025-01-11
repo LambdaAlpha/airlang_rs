@@ -186,7 +186,7 @@ case
 =====
 
 -----
-do [a = case.cache ; not ';' true, type_of a]
+do [a = case.cache ; not ; true, type_of a]
 -----
 case
 =====

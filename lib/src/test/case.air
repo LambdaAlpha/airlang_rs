@@ -67,7 +67,7 @@ true
 
 -----
 do [
-    m = case.represent ; case.cache ; not ';' true,
+    m = case.represent ; case.cache ; not ; true,
     map_mode = mode ; {map : {} : id : eval*},
     expected = map_mode ; {
         function : not,
@@ -97,7 +97,7 @@ true
 
 -----
 do [
-    c = case.cache ; not ';' (not false),
+    c = case.cache ; not ; true,
     case.input c
 ]
 -----
@@ -106,7 +106,7 @@ true
 
 -----
 do [
-    c = case.cache ; not ';' true,
+    c = case.cache ; not ; true,
     case.output c
 ]
 -----
@@ -115,7 +115,7 @@ false
 
 -----
 do [
-    c = case.cache ; not ';' true,
+    c = case.cache ; not ; true,
     (case.function c) == not
 ]
 -----
@@ -124,7 +124,7 @@ true
 
 -----
 do [
-    c = case.cache ; not ';' true,
+    c = case.cache ; not ; true,
     case.is_cache c
 ]
 -----

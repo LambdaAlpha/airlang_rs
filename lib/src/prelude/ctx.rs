@@ -437,7 +437,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = fn_with_ctx;
-    let call = pair_mode(symbol_literal_mode(), Mode::default());
+    let call = pair_mode(symbol_literal_mode(), form_mode(Form::Ref));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -481,7 +481,14 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let id = "|:";
     let f = fn_ctx_in_ctx_out;
-    let mode = FuncMode::default();
+    let call = pair_mode(Mode::default(), form_mode(Form::Ref));
+    let abstract1 = call.clone();
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
     let cacheable = false;
     named_free_fn(id, f, mode, cacheable)
 }

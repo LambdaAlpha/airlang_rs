@@ -33,21 +33,20 @@ The Air language seeks to solve programming problems once and for all. It should
 
 ## Demo
 
-```Air
+```air
 "A demo of implementing a C-like for loop function" ! do ; [
     c_for = function ; {
         input_name : args,
         context_name : ctx,
         context_access : mutable,
         call_mode : id,
-        context : prelude .,
         body : do [
-            [init, condition, next, body] = args,
-            ctx | form. ; do ; [
-                .^init,
-                .^condition while [
-                    .^body,
-                    .^next,
+            [.init, .condition, .next, .body] = .args,
+            .ctx | do ; [
+                .init,
+                .condition while [
+                    .body,
+                    .next,
                 ],
             ],
         ],

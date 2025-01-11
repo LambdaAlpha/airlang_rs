@@ -617,7 +617,7 @@ function.represent ; mode ; {
 -----
 do [
     f = function ; {
-        body : i,
+        body : .i,
     },
     f ; not ; true
 ]
@@ -628,7 +628,7 @@ false
 -----
 do [
     f = function ; {
-        body : *not ; i
+        body : not ; .i
     },
     f ; not ; true
 ]
@@ -639,7 +639,7 @@ true
 -----
 do [
     f = function ; {
-        body : not ; i,
+        body : .not ; .i,
         context : context ; {variables :  {not : :}},
     },
     f ; not ; true
@@ -651,7 +651,7 @@ true
 -----
 do [
     f = function ; {
-        body : n ; a,
+        body : .n ; .a,
         input_name : a,
         context : context ; {variables :  {n : not}},
     },
@@ -665,7 +665,7 @@ true
 do [
     f = function ; {
         body_mode : form.,
-        body : i ; .*i,
+        body : .i ; .*i,
     },
     f .a
 ]
@@ -676,10 +676,10 @@ i ; a
 -----
 do [
     f = function ; {
-        body : do ; [a = a + 1, a],
+        body : do ; [.a = .a + 1, .a],
         context_access : free,
         cell : true,
-        context : context ; {variables : {do : :, = : :, + : :, a : 0}},
+        context : context ; {variables : {a : 0}},
     },
     [.f ., .f ., .f .]
 ]
@@ -691,14 +691,10 @@ do [
 do [
     a = 1,
     f = function ; {
-        body : do ; [b = b + c | ..a, b],
+        body : do ; [.b = .b + .c | ..a, .b],
         context_access : constant,
         cell : true,
         context : context ; {variables : {
-            do : :,
-            = : :,
-            + : :,
-            | : :,
             b : 0,
         }},
     },
@@ -713,18 +709,13 @@ do [
     a = 1,
     f = function ; {
         body : do ; [
-            b = b + c | ..a,
-            c | id ; a = a + 1,
-            b,
+            .b = .b + .c | ..a,
+            .c | ..a = ..a + 1,
+            .b,
         ],
         context_access : mutable,
         cell : true,
         context : context ; {variables : {
-            do : :,
-            = : :,
-            + : :,
-            | : :,
-            id : :,
             b : 0,
         }},
     },
@@ -738,9 +729,8 @@ do [
 do [
     a = 1,
     f = function ; {
-        body : c | ..a,
+        body : .c | ..a,
         context_access : constant,
-        context : context ; {variables : {| : :}},
     },
     f .
 ]
@@ -752,9 +742,8 @@ do [
 do [
     a = 1,
     f = function ; {
-        body : c | ..a,
+        body : .c | ..a,
         context_access : mutable,
-        context : context ; {variables : {| : :}},
     },
     f .
 ]
@@ -765,16 +754,9 @@ do [
 -----
 do [
     f = function ; {
-        body : c | = ';' i : 2,
+        body : .c | .i = 2,
         call_mode : id,
         context_access : mutable,
-        context : context ; {
-            variables : {
-                | : :,
-                = : :,
-                ';' : :,
-            }
-        },
     },
     a = 1,
     f a,
@@ -787,16 +769,9 @@ do [
 -----
 do [
     f = function ; {
-        body : c | = ';' i : 2,
+        body : .c | .i = 2,
         call_mode : id,
         context_access : mutable,
-        context : context ; {
-            variables : {
-                | : :,
-                = : :,
-                ';' : :,
-            }
-        },
     },
     (a . final) = 1,
     f a,
@@ -809,16 +784,9 @@ do [
 -----
 do [
     f = function ; {
-        body : c | = ';' i : 2,
+        body : .c | .i = 2,
         call_mode : id,
         context_access : constant,
-        context : context ; {
-            variables : {
-                | : :,
-                = : :,
-                ';' : :,
-            }
-        },
     },
     a = 1,
     f a,
@@ -834,7 +802,7 @@ do [
         body : 1,
         context_access : constant,
     },
-    . | f ';' .
+    . | f ; .
 ]
 -----
 1
@@ -861,7 +829,7 @@ do [
     a = 1,
     f = function ; {
         context_name : ctx,
-        body : ctx *= 2,
+        body : .ctx = 2,
         context_access : constant,
         context : context ; {fallback : true},
     },
@@ -873,7 +841,7 @@ do [
 =====
 
 -----
-function.represent ; function ; {body : i}
+function.represent ; function ; {body : .i}
 -----
 {body : i}
 =====
@@ -885,7 +853,7 @@ function.represent not
 =====
 
 -----
-function.represent ; function ; {body : i, context_access : constant}
+function.represent ; function ; {body : .i, context_access : constant}
 -----
 {body : i, context_access : constant}
 =====
@@ -1082,7 +1050,7 @@ form.
 =====
 
 -----
-do [f = function ; {body : i}, function.body f]
+do [f = function ; {body : .i}, function.body f]
 -----
 i
 =====
