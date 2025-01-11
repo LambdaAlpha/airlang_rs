@@ -1,3 +1,59 @@
+length join
+-----
+do [
+    a = any ; symbol,
+    la = symbol.length ; a,
+    b = any ; symbol,
+    lb = symbol.length ; b,
+    ab = . symbol.join [^a, ^b],
+    lab = symbol.length ; ab,
+    lab == la + lb
+]
+-----
+true
+=====
+length empty
+-----
+symbol.length '.'
+-----
+'' : 0
+=====
+length else
+-----
+symbol.length .a
+-----
+a : 1
+=====
+length ref
+-----
+do [a = .abc, symbol.length a]
+-----
+3
+=====
+join empty
+-----
+'.' symbol.join [.a, .b]
+-----
+ab
+=====
+join unit
+-----
+do [a = .a1, b = .b1, c = .c1, . symbol.join [^a, ^b, ^c]]
+-----
+a1b1c1
+=====
+join no symbol
+-----
+. symbol.join []
+-----
+''
+=====
+join else
+-----
+.. symbol.join [.a, .b]
+-----
+a.b
+=====
 into_text from_text
 -----
 do [s = any ; symbol, s == symbol.from_text ; symbol.into_text ; s]

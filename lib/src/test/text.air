@@ -4,6 +4,20 @@ do [t = any ; text, l = text.length ; t, t text.push "a", (text.length t) == l +
 -----
 true
 =====
+length join
+-----
+do [
+    a = any ; text,
+    la = text.length ; a,
+    b = any ; text,
+    lb = text.length ; b,
+    ab = . text.join [^a, ^b],
+    lab = text.length ; ab,
+    lab == la + lb
+]
+-----
+true
+=====
 length empty
 -----
 text.length ""

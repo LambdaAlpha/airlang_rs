@@ -515,7 +515,7 @@ where
         }
         Val::Byte(byte) => {
             let iter = byte.as_ref().iter().map(|byte| {
-                let byte = Byte::from(std::slice::from_ref(byte));
+                let byte = Byte::from(vec![*byte]);
                 Val::Byte(byte.into())
             });
             for_iter(ctx, body, name, iter)

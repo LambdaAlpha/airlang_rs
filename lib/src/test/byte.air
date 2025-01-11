@@ -1,0 +1,73 @@
+length push
+-----
+do [b = any ; byte, l = byte.length ; b, b byte.push byte(00), (byte.length b) == l + 1]
+-----
+true
+=====
+length join
+-----
+do [
+    a = any ; byte,
+    la = byte.length ; a,
+    b = any ; byte,
+    lb = byte.length ; b,
+    ab = . byte.join [^a, ^b],
+    lab = byte.length ; ab,
+    lab == la + lb
+]
+-----
+true
+=====
+length empty
+-----
+byte.length byte()
+-----
+byte() : 0
+=====
+length else
+-----
+byte.length byte(ff)
+-----
+byte(ff) : 1
+=====
+length ref
+-----
+do [a = byte(aa00), byte.length a]
+-----
+2
+=====
+push join
+-----
+do [a = any ; byte, b = any ; byte, ab = a, ab byte.push b, ab == . byte.join [^a, ^b]]
+-----
+true
+=====
+push
+-----
+do [a = byte(00), b = byte(1122), a byte.push ^b, ^a]
+-----
+byte(001122)
+=====
+join empty
+-----
+byte() byte.join [byte(1234), byte(56)]
+-----
+byte(123456)
+=====
+join unit
+-----
+do [a = byte(1234), b = byte(5678), c = byte(9abc), . byte.join [^a, ^b, ^c]]
+-----
+byte(123456789abc)
+=====
+join no byte
+-----
+. byte.join []
+-----
+byte()
+=====
+join else
+-----
+byte(00) byte.join [byte(1111), byte(22)]
+-----
+byte(11110022)

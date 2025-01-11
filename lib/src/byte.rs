@@ -1,14 +1,20 @@
-use std::fmt::{
-    Debug,
-    Formatter,
+use std::{
+    fmt::{
+        Debug,
+        Formatter,
+    },
+    ops::{
+        Deref,
+        DerefMut,
+    },
 };
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Byte(Vec<u8>);
 
-impl From<&[u8]> for Byte {
-    fn from(value: &[u8]) -> Self {
-        Byte(value.to_owned())
+impl Byte {
+    pub(crate) fn push(&mut self, byte: &[u8]) {
+        self.0.extend_from_slice(byte);
     }
 }
 
@@ -24,15 +30,16 @@ impl From<Byte> for Vec<u8> {
     }
 }
 
-impl From<&Byte> for Vec<u8> {
-    fn from(value: &Byte) -> Self {
-        value.0.clone()
+impl Deref for Byte {
+    type Target = [u8];
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
-impl AsRef<[u8]> for Byte {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
+impl DerefMut for Byte {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
