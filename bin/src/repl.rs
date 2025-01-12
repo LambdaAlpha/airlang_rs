@@ -279,7 +279,7 @@ impl<W: Write + IsTty> Repl<W> {
         let input = self.get_input_buffer();
         let previous_lines = take(&mut self.previous_lines);
         let mut last_line = take(&mut self.head_buffer);
-        for c in take(&mut self.tail_buffer) {
+        for c in take(&mut self.tail_buffer).into_iter().rev() {
             last_line.push(c);
         }
 
