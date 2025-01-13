@@ -13,6 +13,7 @@ use crate::{
     ListVal,
     Map,
     MapVal,
+    Mode,
     MutFnCtx,
     Pair,
     PairVal,
@@ -26,6 +27,10 @@ use crate::{
             CtxMapRef,
         },
         ref1::CtxRef,
+    },
+    prelude::{
+        map_mode,
+        symbol_literal_mode,
     },
     utils::val::{
         map_remove,
@@ -43,6 +48,17 @@ pub(crate) const CONST: &str = "constant";
 pub(crate) const VARIABLES: &str = "variables";
 pub(crate) const REVERSE: &str = "reverse";
 pub(crate) const SOLVER: &str = "solver";
+
+pub(crate) fn parse_mode() -> Mode {
+    let mut map = Map::default();
+    map.insert(
+        symbol(VARIABLES),
+        map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
+    );
+    map.insert(symbol(REVERSE), Mode::default());
+    map.insert(symbol(SOLVER), Mode::default());
+    map_mode(map, symbol_literal_mode(), Mode::default())
+}
 
 pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
     let Val::Map(mut map) = input else {
@@ -103,9 +119,13 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
 
 fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
     match extra {
-        Val::Symbol(s) => {
-            default.invariant = parse_invariant(&s)?;
-        }
+        Val::Symbol(s) => match &*s {
+            NONE => default.invariant = Invariant::None,
+            FINAL => default.invariant = Invariant::Final,
+            CONST => default.invariant = Invariant::Const,
+            STATIC => default.static1 = true,
+            _ => return None,
+        },
         Val::Map(mut map) => {
             match map_remove(&mut map, INVARIANT) {
                 Val::Symbol(invariant) => {
@@ -135,6 +155,17 @@ pub(crate) fn parse_invariant(invariant: &str) -> Option<Invariant> {
         _ => return None,
     };
     Some(invariant)
+}
+
+pub(crate) fn generate_mode() -> Mode {
+    let mut map = Map::default();
+    map.insert(
+        symbol(VARIABLES),
+        map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
+    );
+    map.insert(symbol(REVERSE), Mode::default());
+    map.insert(symbol(SOLVER), Mode::default());
+    map_mode(map, symbol_literal_mode(), Mode::default())
 }
 
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {

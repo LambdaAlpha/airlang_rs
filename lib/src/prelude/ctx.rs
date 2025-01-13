@@ -22,14 +22,13 @@ use crate::{
         repr::{
             Extra,
             PatternCtx,
-            REVERSE,
-            SOLVER,
-            VARIABLES,
             assign_pattern,
             generate_ctx,
             generate_invariant,
+            generate_mode,
             parse_ctx,
             parse_invariant,
+            parse_mode,
             parse_pattern,
         },
     },
@@ -43,7 +42,6 @@ use crate::{
         Prelude,
         form_mode,
         initial_ctx,
-        map_mode,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
@@ -511,14 +509,7 @@ fn fn_ctx_in_ctx_out(input: Val) -> Val {
 fn ctx_new() -> Named<FuncVal> {
     let id = "context";
     let f = fn_ctx_new;
-    let mut map = Map::default();
-    map.insert(
-        symbol(VARIABLES),
-        map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
-    );
-    map.insert(symbol(REVERSE), Mode::default());
-    map.insert(symbol(SOLVER), Mode::default());
-    let call = map_mode(map, symbol_literal_mode(), Mode::default());
+    let call = parse_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -542,14 +533,7 @@ fn ctx_repr() -> Named<FuncVal> {
     let f = fn_ctx_repr;
     let call = Mode::default();
     let abstract1 = call.clone();
-    let mut map = Map::default();
-    map.insert(
-        symbol(VARIABLES),
-        map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
-    );
-    map.insert(symbol(REVERSE), Mode::default());
-    map.insert(symbol(SOLVER), Mode::default());
-    let ask = map_mode(map, symbol_literal_mode(), Mode::default());
+    let ask = generate_mode();
     let mode = FuncMode {
         call,
         abstract1,

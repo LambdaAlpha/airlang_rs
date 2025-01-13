@@ -1,442 +1,476 @@
-
+read ref
 -----
-do [a = 1, read a]
------
-1
-=====
-
------
-do [a = 1, b = .a, read *b]
------
-1
-=====
-
------
-do [(a . constant) = 1, read a]
------
-1
-=====
-
------
-do [a = 1, move a]
------
-1
-=====
-
------
-do [a = 1, move a, is_null a]
+do [a = any ; ., a == read ; a]
 -----
 true
 =====
-
+read indirect
 -----
-do [(a . final) = 1, [move a, a]]
+do [a = any ; ., b = .a, a == read ; *b]
 -----
-[., 1]
+true
 =====
-
+read final
 -----
-do [(a . constant) = 1, [move a, a]]
+do [(a . final) = any ; ., a == read ; a]
 -----
-[., 1]
+true
 =====
-
+read const
 -----
-do [a = .b, b = 1, move ; *a]
+do [(a . constant) = any ; ., a == read ; a]
 -----
-1
+true
 =====
-
+read static
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {b : v . .static}},
+    v == a | read ; .b
+]
+-----
+true
+=====
+move ref
+-----
+do [a = any ; ., b = a, (b == move ; a) and (is_null ; a)]
+-----
+true
+=====
+move indirect
+-----
+do [a = any ; ., b = .a, c = a, (c == move ; *b) and (is_null ; a)]
+-----
+true
+=====
+move final
+-----
+do [(a . final) = any ; ., (. == move ; a) and (not ; is_null ; a)]
+-----
+true
+=====
+move const
+-----
+do [(a . constant) = any ; ., (. == move ; a) and (not ; is_null ; a)]
+-----
+true
+=====
+move static
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {b : v . .static}},
+    (. == a | move ; .b) and (not ; a | is_null ; .b)
+]
+-----
+true
+=====
+move static final
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {b : v . {.static, .invariant : .final}}},
+    (. == a | move ; .b) and (not ; a | is_null ; .b)
+]
+-----
+true
+=====
+move static const
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {b : v . {.static, .invariant : .constant}}},
+    (. == a | move ; .b) and (not ; a | is_null ; .b)
+]
+-----
+true
+=====
+= read
 -----
 do [a = 1, a]
 -----
 1
 =====
-
+= return
 -----
-do [a = 1, a = 2]
+do [a = 1, a = any ; .]
 -----
 1
 =====
-
+= another
 -----
-do [a = 1, a = 2, a]
+do [a = any ; ., a = 2, a]
 -----
 2
 =====
-
+= self
 -----
-do [a = 1, b = a, b]
+do [a = 1, a = a, a]
 -----
 1
 =====
-
+= indirect
 -----
 do [a = .b, *a = 1, b]
 -----
 1
 =====
-
+= special key 1
 -----
 do [..a = 1, *.a]
 -----
 1
 =====
-
+= special key 2
 -----
 do [..p = 1 : 2, pair.first *.p]
 -----
 1
 =====
-
+= none
 -----
-do [(a . none) = 1, a]
+do [(a . none) = 1, [a, invariant a]]
 -----
-1
+[1, none]
 =====
-
+= final
 -----
-do [(a . none) = 1, invariant a]
+do [(a . final) = 1, [a, invariant a]]
 -----
-none
+[1, final]
 =====
-
+= constant
 -----
-do [(a . final) = 1, invariant a]
+do [(a . constant) = 1, [a, invariant a]]
 -----
-final
+[1, constant]
 =====
-
+= map
 -----
-do [(a . constant) = 1, invariant a]
+do [(a . {invariant : final}) = 1, [a, invariant a]]
 -----
-constant
+[1, final]
 =====
-
+= default map
 -----
-do [(a . {invariant : final}) = 1, invariant a]
+do [(a . {}) = 1, [a, invariant a]]
 -----
-final
+[1, none]
 =====
-
------
-do [(a . {}) = 1, invariant ; a]
------
-none
-=====
-
+= destruct pair
 -----
 do [(a : b) = 1 : 2, a : b]
 -----
 1 : 2
 =====
-
+= destruct pair return
 -----
 do [a = 1, b = 2, (a : b) = 3 : 4]
 -----
 1 : 2
 =====
-
+= destruct recursive
 -----
 do [(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-
+= destruct invariant default
 -----
-do [((a : b) . final) = 1 : 2, [invariant a, invariant b]]
+do [((a : b) . final) = (any ; .) : (any ; .), [invariant a, invariant b]]
 -----
 [final, final]
 =====
-
+= destruct invariant one by one
 -----
-do [((a . final) : (b . constant)) = 1 : 2, [invariant a, invariant b]]
+do [((a . final) : (b . constant)) = (any ; .) : (any ; .), [invariant a, invariant b]]
 -----
 [final, constant]
 =====
-
+= destruct invariant mix
 -----
-do [((a : (b . final)) . constant) = 1 : 2, [invariant a, invariant b]]
+do [((a : (b . final)) . constant) = (any ; .) : (any ; .), [invariant a, invariant b]]
 -----
 [constant, final]
 =====
-
+= destruct call
 -----
-do [(f a) = 1 ; 2, [f, a]]
+do [(f ; a) = 1 ; 2, [f, a]]
 -----
 [1, 2]
 =====
-
+= destruct infix
 -----
 do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-
+= destruct abstract
+-----
+do [(f ! a) = id ; 1 ! 2, [f, a]]
+-----
+[1, 2]
+=====
+= destruct ask
 -----
 do [(f ? b) = 1 ? 2, [f, b]]
 -----
 [1, 2]
 =====
-
------
-do [(n ; v) = id ; 1 ; 2, [n, v]]
------
-[1, 2]
-=====
-
+= destruct list equal length
 -----
 do [[a, b, c] = [1, 2, 3], [a, b, c]]
 -----
 [1, 2, 3]
 =====
-
+= destruct list more value
 -----
 do [[a, b] = [1, 2, 3], [a, b]]
 -----
 [1, 2]
 =====
-
+= destruct list more pattern
 -----
 do [a = 1, b = 2, [a, b] = [3], [a, b]]
 -----
 [3, .]
 =====
-
+= destruct list more pattern return
 -----
 do [a = 1, b = 2, [a, b] = [3]]
 -----
 [1, 2]
 =====
-
+= destruct map symbol key
 -----
 do [{a : :, b : :} = {.a : 1, .b : 2, .c : 3}, [a, b]]
 -----
 [1, 2]
 =====
-
+= destruct map other key
 -----
 do [{1 : a, 3 : b} = {1 : 2, 3 : 4}, [a, b]]
 -----
 [2, 4]
 =====
-
+= destruct map not full match
 -----
-do [a = 1, b = 2, {1 : a, 2 : b} = {1 : 2, 3 : 4}]
+do [a = 1, b = 2, {3 : a, 4 : b} = {3 : 5, 6 : 7}]
 -----
-{1 : 1, 2 : 2}
+{3 : 1, 4 : 2}
 =====
-
+final = return .
 -----
-do [(a . final) = 1, a = 2]
+do [(a . final) = 1, . == a = any ; .]
 -----
-.
+true
 =====
-
+final = unchanged
 -----
-do [(a . final) = 1, a = 2, a]
+do [(a . final) = 1, a = any ; ., a]
 -----
 1
 =====
-
+final = final
 -----
-do [(a . final) = 1, (a . final) = 2, a]
------
-1
-=====
-
------
-do [(a . final) = 1, (a . constant) = 2, a]
+do [(a . final) = 1, (a . final) = any ; ., a]
 -----
 1
 =====
-
+final = constant
+-----
+do [(a . final) = 1, (a . constant) = any ; ., a]
+-----
+1
+=====
+final mutate
 -----
 do [(a . final) = 1 : 2, a pair.set_first 3, a]
 -----
 3 : 2
 =====
-
+constant mutate
 -----
-do [(a . constant) = 1 : 2, a pair.set_first 3, a]
+do [(a . constant) = 1 : 2, a pair.set_first any ; ., a]
 -----
 1 : 2
 =====
-
+constant =
 -----
-do [(a . constant) = 1, a = 2, a]
------
-1
-=====
-
------
-do [(a . constant) = 1, (a . final) = 2, a]
+do [(a . constant) = 1, a = any ; ., a]
 -----
 1
 =====
-
+constant = final
 -----
-do [(a . constant) = 1, (a . constant) = 2, a]
+do [(a . constant) = 1, (a . final) = any ; ., a]
 -----
 1
 =====
-
+constant = constant
 -----
-do [a = 1, a set_invariant final, invariant a]
+do [(a . constant) = 1, (a . constant) = any ; ., a]
+-----
+1
+=====
+set_invariant none final
+-----
+do [a = any ; ., a set_invariant final, invariant a]
 -----
 final
 =====
-
+set_invariant constant final
 -----
-do [(a . constant) = 1, a set_invariant final, invariant a]
------
-constant
-=====
-
------
-do [a = 1, a set_invariant constant, invariant a]
+do [(a . constant) = any ; ., a set_invariant final, invariant a]
 -----
 constant
 =====
-
+set_invariant none constant
 -----
-do [(a . final) = 1, a set_invariant constant, invariant a]
+do [a = any ; ., a set_invariant constant, invariant a]
 -----
 constant
 =====
-
+set_invariant final constant
+-----
+do [(a . final) = any ; ., a set_invariant constant, invariant a]
+-----
+constant
+=====
+is_null true
 -----
 is_null a
 -----
 true
 =====
-
+is_null false
 -----
-do [a = 1, is_null a]
+do [a = any ; ., is_null a]
 -----
 false
 =====
-
+is_static true
 -----
-do [c = context ; {variables : {a : 1 . {.static}}}, c | is_static ; .a]
+do [c = context ; {variables : {a : (any ; .) . .static}}, c | is_static ; .a]
 -----
 true
 =====
-
+is_static false
 -----
-do [c = context ; {variables : {a : 1}}, c | is_static ; .a]
+do [c = context ; {variables : {a : any ; .}}, c | is_static ; .a]
 -----
 false
 =====
-
+static init true
 -----
-do [c = context ; {variables : {a : 1 . {.static : true}}}, c | is_static ; .a]
+do [c = context ; {variables : {a : (any ; .) . {.static : true}}}, c | is_static ; .a]
 -----
 true
 =====
-
+static init false
 -----
-do [c = context ; {variables : {a : 1 . {.static : false}}}, c | is_static ; .a]
+do [c = context ; {variables : {a : (any ; .) . {.static : false}}}, c | is_static ; .a]
 -----
 false
 =====
-
+static move
 -----
-do [c = context ; {variables : {a : 1 . {.static}}}, c | .^a, c | .a]
------
-1
-=====
-
------
-do [c = context ; {reverse : true, variables : {a : 1 . {.static}}}, c | .^a, c | .a]
+do [c = context ; {variables : {a : 1 . .static}}, c | .^a, c | .a]
 -----
 1
 =====
-
+static move reverse
 -----
-do [c = context ; {variables : {a : 1 . {.static}}}, c | .a = 2, c | .a]
+do [c = context ; {reverse : true, variables : {a : 1 . .static}}, c | .^a, c | .a]
+-----
+1
+=====
+static = to static
+-----
+do [c = context ; {variables : {a : 1 . .static}}, c | .a = 2, c | .a]
 -----
 2
 =====
-
+static = from static
 -----
 do [c = context ; {}, c | (a . {static}) *= 1, c | is_null ; .a]
 -----
 true
 =====
-
+is_reverse false
 -----
 is_reverse .
 -----
 false
 =====
-
+is_reverse true
 -----
 do [c = context ; {reverse : true}, c | is_reverse ; .]
 -----
 true
 =====
-
+reverse set_invariant constant final
 -----
-do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | do ; [.a set_invariant .final, invariant .a]]
------
-final
-=====
-
------
-do [c = context ; {reverse : true, variables : {a : 1 . .final}}, c | do ; [.a set_invariant .constant, invariant .a]]
+do [c = context ; {reverse : true, variables : {a : (any ; .) . .constant}}, c | do ; [.a set_invariant .final, invariant .a]]
 -----
 final
 =====
-
+reverse set_invariant final constant
+-----
+do [c = context ; {reverse : true, variables : {a : (any ; .) . .final}}, c | do ; [.a set_invariant .constant, invariant .a]]
+-----
+final
+=====
+reverse move constant
 -----
 do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | .^a]
 -----
 1
 =====
-
+reverse = final
 -----
 do [c = context ; {reverse : true}, c | (.a . .final) = 1, c | is_null ; .a]
 -----
 true
 =====
-
+set_reverse false
 -----
 do [c = context ; {reverse : true}, c = ^c set_reverse false, c | is_reverse ; .]
 -----
 false
 =====
-
+set_reverse true
 -----
 do [c = context ; {reverse : false}, c = ^c set_reverse true, c | is_reverse ; .]
 -----
 true
 =====
-
+access default
 -----
 access .
 -----
 mutable
 =====
-
+access free
 -----
 . | access ; .
 -----
 free
 =====
-
+access constant
 -----
 do [(a . constant) = context ; {}, a | access ; .]
 -----
 constant
 =====
-
+access mutable
 -----
 do [a = context ; {}, a | access ; .]
 -----
 mutable
 =====
-
+set_solver
 -----
 do [
     s1 = function ; {
@@ -452,13 +486,13 @@ do [
 -----
 [1, 2, 3]
 =====
-
+set_solver .
 -----
 do [set_solver ., s = solver ; ., s == .]
 -----
 true
 =====
-
+| 1
 -----
 do [
     a = context ; {variables : {p : 1 : 2}},
@@ -469,7 +503,7 @@ do [
 -----
 3 : 2
 =====
-
+| 2
 -----
 do [
     a = context ; {variables : {p : 1 : 2, b : 3}},
@@ -479,7 +513,7 @@ do [
 -----
 3 : 2
 =====
-
+| 3
 -----
 do [
     set_first = pair.set_first,
@@ -490,13 +524,13 @@ do [
 -----
 3 : 2
 =====
-
+|:
 -----
 do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: .a = 2, [c | .a, ^a]]
 -----
 [2, 1]
 =====
-
+| recursive
 -----
 do [
     a = context ; {variables : {b : context ; {variables : {c : 1}}}},
@@ -505,80 +539,74 @@ do [
 -----
 1
 =====
-
+free self
 -----
 . | self ; .
 -----
 .
 =====
-
+free free
 -----
 . | 1 + 1
 -----
 2
 =====
-
+free mutate
 -----
 do [a = 1, . | move ; .a, a]
 -----
 1
 =====
-
+free const func
 -----
 . | pair.first ; 1 : 2
 -----
 1
 =====
-
+represent default
 -----
 context.represent ; context ; {}
 -----
 {}
 =====
-
+represent else
 -----
 context.represent ; context ; {variables : {a : 1 . .final}}
 -----
 {variables : {a : 1 . final}}
 =====
-
+represent non-recursive
 -----
 do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = m map.remove .b, type_of b]
 -----
 context
 =====
-
+prelude
 -----
-do [a = prelude ; ., a | not ; true]
+do [a = prelude ; ., a | .not ; true]
 -----
 false
 =====
-
+prelude self
 -----
 do [a = prelude ; ., a | is_null ; .prelude]
 -----
 false
 =====
-
+prelude current
 -----
-do [a = 1, b = prelude ; ., b | is_null ; .a]
+do [a = any ; ., b = prelude ; ., b | is_null ; .a]
 -----
 true
 =====
-
------
-do [a = prelude ; ., a | is_null ; .prelude]
------
-false
-=====
-
+self
 -----
 do [a = 1, b = self ; ., b | .a]
 -----
 1
 =====
-
+self non-sync
 -----
-do [a = self ; ., b = 1, a | is_null ; .b]
+do [a = self ; ., b = any ; ., a | is_null ; .b]
 -----
 true
