@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use airlang::{
-    CompositeMode,
+    CompMode,
     ConstCellFnExt,
     ConstCellPrimFunc,
     ConstCellPrimFuncVal,
@@ -18,6 +18,7 @@ use airlang::{
     FreeStaticPrimFuncVal,
     FuncMode,
     FuncVal,
+    Id,
     Invariant,
     List,
     ListMode,
@@ -33,9 +34,10 @@ use airlang::{
     MutStaticPrimFuncVal,
     Pair,
     PairMode,
-    PrimitiveMode,
+    PrefixMode,
     Symbol,
     SymbolMode,
+    UniMode,
     Val,
 };
 
@@ -173,52 +175,52 @@ fn named_mut_fn(
 
 #[allow(unused)]
 fn id_mode() -> Mode {
-    Mode::Primitive(PrimitiveMode::Id)
+    Mode::Uni(UniMode::Id(Id))
 }
 
-fn form_mode(form: Form) -> Mode {
-    Mode::Primitive(PrimitiveMode::Form(form))
+fn form_mode(prefix_mode: PrefixMode) -> Mode {
+    Mode::Uni(UniMode::Form(Form::new(prefix_mode)))
 }
 
 #[allow(unused)]
-fn eval_mode(eval: Eval) -> Mode {
-    Mode::Primitive(PrimitiveMode::Eval(eval))
+fn eval_mode(prefix_mode: PrefixMode) -> Mode {
+    Mode::Uni(UniMode::Eval(Eval::new(prefix_mode)))
 }
 
 #[allow(unused)]
 fn symbol_literal_mode() -> Mode {
-    let mode = CompositeMode {
-        symbol: SymbolMode::Form(Form::Literal),
-        ..CompositeMode::from(PrimitiveMode::default())
+    let mode = CompMode {
+        symbol: SymbolMode::Form(PrefixMode::Literal),
+        ..CompMode::from(UniMode::default())
     };
-    Mode::Composite(Box::new(mode))
+    Mode::Comp(Box::new(mode))
 }
 
 #[allow(unused)]
 fn pair_mode(first: Mode, second: Mode) -> Mode {
-    let mode = CompositeMode {
+    let mode = CompMode {
         pair: PairMode::Form(Pair::new(first, second)),
-        ..CompositeMode::from(PrimitiveMode::default())
+        ..CompMode::from(UniMode::default())
     };
-    Mode::Composite(Box::new(mode))
+    Mode::Comp(Box::new(mode))
 }
 
 #[allow(unused)]
 fn list_mode(head: List<Mode>, tail: Mode) -> Mode {
-    let mode = CompositeMode {
+    let mode = CompMode {
         list: ListMode::Form { head, tail },
-        ..CompositeMode::from(PrimitiveMode::default())
+        ..CompMode::from(UniMode::default())
     };
-    Mode::Composite(Box::new(mode))
+    Mode::Comp(Box::new(mode))
 }
 
 fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode) -> Mode {
     let else1 = Pair::new(key, value);
-    let mode = CompositeMode {
+    let mode = CompMode {
         map: MapMode::Form { some, else1 },
-        ..CompositeMode::from(PrimitiveMode::default())
+        ..CompMode::from(UniMode::default())
     };
-    Mode::Composite(Box::new(mode))
+    Mode::Comp(Box::new(mode))
 }
 
 pub(crate) mod io;

@@ -2,14 +2,18 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
-    Form,
+    FormMode,
     PairVal,
+    UniMode,
     core::{
         EvalCore,
         FormCore,
     },
     ctx::ref1::CtxMeta,
-    mode::id::Id,
+    mode::{
+        id::Id,
+        symbol::PrefixMode,
+    },
     symbol::Symbol,
     transformer::{
         ByVal,
@@ -23,15 +27,20 @@ use crate::{
 };
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Eval {
-    Literal,
-    #[default]
-    Ref,
-    Move,
+pub struct Eval {
+    prefix: PrefixMode,
 }
 
 // default instance
-pub(crate) const EVAL: Eval = Eval::Ref;
+pub(crate) const EVAL: Eval = Eval::new(PrefixMode::Ref);
+
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum EvalMode {
+    Id,
+    Form,
+    #[default]
+    Eval,
+}
 
 impl Transformer<Val, Val> for Eval {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
@@ -54,7 +63,7 @@ impl ByVal<Val> for Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        Form::from(*self).transform(ctx, symbol)
+        self.prefix.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -100,22 +109,31 @@ impl ByVal<Val> for Eval {
     }
 }
 
-impl From<Form> for Eval {
-    fn from(form: Form) -> Self {
-        match form {
-            Form::Literal => Eval::Literal,
-            Form::Ref => Eval::Ref,
-            Form::Move => Eval::Move,
+impl Eval {
+    pub const fn new(prefix: PrefixMode) -> Self {
+        Eval { prefix }
+    }
+
+    pub fn prefix_mode(&self) -> PrefixMode {
+        self.prefix
+    }
+}
+
+impl From<UniMode> for EvalMode {
+    fn from(mode: UniMode) -> Self {
+        match mode {
+            UniMode::Id(_) => EvalMode::Id,
+            UniMode::Form(_) => EvalMode::Form,
+            UniMode::Eval(_) => EvalMode::Eval,
         }
     }
 }
 
-impl From<Eval> for Form {
-    fn from(eval: Eval) -> Self {
-        match eval {
-            Eval::Literal => Form::Literal,
-            Eval::Ref => Form::Ref,
-            Eval::Move => Form::Move,
+impl From<FormMode> for EvalMode {
+    fn from(mode: FormMode) -> Self {
+        match mode {
+            FormMode::Id => EvalMode::Id,
+            FormMode::Form => EvalMode::Form,
         }
     }
 }

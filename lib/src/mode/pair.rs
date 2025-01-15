@@ -2,66 +2,53 @@ use crate::{
     Mode,
     Pair,
     PairVal,
-    PrimitiveMode,
+    UniMode,
     Val,
     core::FormCore,
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        recursive::SelfMode,
-    },
+    mode::id::Id,
     transformer::{
         ByVal,
         Transformer,
     },
 };
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum PairMode<M> {
-    Id,
-    Form(Pair<M, M>),
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum PairMode {
+    Id(Id),
+    Form(Pair<Mode, Mode>),
 }
 
-impl Transformer<PairVal, Val> for PairMode<Mode> {
+impl Transformer<PairVal, Val> for PairMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PairMode::Id => Id.transform_pair(ctx, pair),
+            PairMode::Id(mode) => mode.transform_pair(ctx, pair),
             PairMode::Form(mode) => FormCore::transform_pair(&mode.first, &mode.second, ctx, pair),
         }
     }
 }
 
-impl<M: Default> Default for PairMode<M> {
+impl Default for PairMode {
     fn default() -> Self {
         Self::Form(Pair::default())
     }
 }
 
-impl From<PrimitiveMode> for PairMode<Mode> {
-    fn from(mode: PrimitiveMode) -> Self {
+impl From<UniMode> for PairMode {
+    fn from(mode: UniMode) -> Self {
         match mode {
-            PrimitiveMode::Id => PairMode::Id,
-            PrimitiveMode::Form(mode) => PairMode::Form(Pair::new(
-                Mode::Primitive(PrimitiveMode::Form(mode)),
-                Mode::Primitive(PrimitiveMode::Form(mode)),
+            UniMode::Id(mode) => PairMode::Id(mode),
+            UniMode::Form(mode) => PairMode::Form(Pair::new(
+                Mode::Uni(UniMode::Form(mode)),
+                Mode::Uni(UniMode::Form(mode)),
             )),
-            PrimitiveMode::Eval(mode) => PairMode::Form(Pair::new(
-                Mode::Primitive(PrimitiveMode::Eval(mode)),
-                Mode::Primitive(PrimitiveMode::Eval(mode)),
+            UniMode::Eval(mode) => PairMode::Form(Pair::new(
+                Mode::Uni(UniMode::Eval(mode)),
+                Mode::Uni(UniMode::Eval(mode)),
             )),
-        }
-    }
-}
-
-impl From<PrimitiveMode> for PairMode<SelfMode> {
-    fn from(mode: PrimitiveMode) -> Self {
-        match mode {
-            PrimitiveMode::Id => PairMode::Id,
-            PrimitiveMode::Form(_) => PairMode::Form(Pair::new(SelfMode::Self1, SelfMode::Self1)),
-            PrimitiveMode::Eval(_) => PairMode::Form(Pair::new(SelfMode::Self1, SelfMode::Self1)),
         }
     }
 }

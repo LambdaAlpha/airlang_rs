@@ -3,9 +3,9 @@ use crate::{
     Call,
     Case,
     CaseVal,
-    Form,
     FuncMode,
     Mode,
+    PrefixMode,
     Symbol,
     Val,
     bit::Bit,
@@ -113,7 +113,7 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let id = "case.cache";
     let f = fn_new_cache;
-    let call = form_mode(Form::Ref);
+    let call = form_mode(PrefixMode::Ref);
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

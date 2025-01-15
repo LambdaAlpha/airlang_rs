@@ -2,71 +2,58 @@ use crate::{
     Call,
     CallVal,
     Mode,
-    PrimitiveMode,
+    UniMode,
     Val,
     core::{
         EvalCore,
         FormCore,
     },
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        recursive::SelfMode,
-    },
+    mode::id::Id,
     transformer::{
         ByVal,
         Transformer,
     },
 };
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum CallMode<M> {
-    Id,
-    Form(Call<M, M>),
-    Eval(Call<M, M>),
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum CallMode {
+    Id(Id),
+    Form(Call<Mode, Mode>),
+    Eval(Call<Mode, Mode>),
 }
 
-impl Transformer<CallVal, Val> for CallMode<Mode> {
+impl Transformer<CallVal, Val> for CallMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            CallMode::Id => Id.transform_call(ctx, call),
+            CallMode::Id(mode) => mode.transform_call(ctx, call),
             CallMode::Form(mode) => FormCore::transform_call(&mode.func, &mode.input, ctx, call),
             CallMode::Eval(mode) => EvalCore::transform_call(&mode.func, &mode.input, ctx, call),
         }
     }
 }
 
-impl<M: Default> Default for CallMode<M> {
+impl Default for CallMode {
     fn default() -> Self {
         Self::Eval(Call::default())
     }
 }
 
-impl From<PrimitiveMode> for CallMode<Mode> {
-    fn from(mode: PrimitiveMode) -> Self {
+impl From<UniMode> for CallMode {
+    fn from(mode: UniMode) -> Self {
         match mode {
-            PrimitiveMode::Id => CallMode::Id,
-            PrimitiveMode::Form(mode) => CallMode::Form(Call::new(
-                Mode::Primitive(PrimitiveMode::Form(mode)),
-                Mode::Primitive(PrimitiveMode::Form(mode)),
+            UniMode::Id(mode) => CallMode::Id(mode),
+            UniMode::Form(mode) => CallMode::Form(Call::new(
+                Mode::Uni(UniMode::Form(mode)),
+                Mode::Uni(UniMode::Form(mode)),
             )),
-            PrimitiveMode::Eval(mode) => CallMode::Eval(Call::new(
-                Mode::Primitive(PrimitiveMode::Eval(mode)),
-                Mode::Primitive(PrimitiveMode::Eval(mode)),
+            UniMode::Eval(mode) => CallMode::Eval(Call::new(
+                Mode::Uni(UniMode::Eval(mode)),
+                Mode::Uni(UniMode::Eval(mode)),
             )),
-        }
-    }
-}
-
-impl From<PrimitiveMode> for CallMode<SelfMode> {
-    fn from(mode: PrimitiveMode) -> Self {
-        match mode {
-            PrimitiveMode::Id => CallMode::Id,
-            PrimitiveMode::Form(_) => CallMode::Form(Call::new(SelfMode::Self1, SelfMode::Self1)),
-            PrimitiveMode::Eval(_) => CallMode::Eval(Call::new(SelfMode::Self1, SelfMode::Self1)),
         }
     }
 }

@@ -5,18 +5,18 @@ use crate::{
         ref1::CtxMeta,
     },
     mode::{
-        composite::CompositeMode,
-        primitive::PrimitiveMode,
-        recursive::SelfMode,
+        comp::CompMode,
+        prim::PrimMode,
+        united::UniMode,
     },
     transformer::Transformer,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Mode {
-    Primitive(PrimitiveMode),
-    Recursive(CompositeMode<SelfMode>),
-    Composite(Box<CompositeMode<Mode>>),
+    Uni(UniMode),
+    Prim(PrimMode),
+    Comp(Box<CompMode>),
 }
 
 impl Transformer<Val, Val> for Mode {
@@ -25,9 +25,9 @@ impl Transformer<Val, Val> for Mode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            Mode::Primitive(mode) => mode.transform(ctx, input),
-            Mode::Recursive(mode) => mode.transform(ctx, input),
-            Mode::Composite(mode) => mode.transform(ctx, input),
+            Mode::Uni(mode) => mode.transform(ctx, input),
+            Mode::Prim(mode) => mode.transform(ctx, input),
+            Mode::Comp(mode) => mode.transform(ctx, input),
         }
     }
 }
@@ -40,13 +40,13 @@ impl Mode {
 
 impl Default for Mode {
     fn default() -> Self {
-        Mode::Primitive(PrimitiveMode::default())
+        Mode::Uni(UniMode::default())
     }
 }
 
-impl From<PrimitiveMode> for Mode {
-    fn from(mode: PrimitiveMode) -> Self {
-        Mode::Primitive(mode)
+impl From<UniMode> for Mode {
+    fn from(mode: UniMode) -> Self {
+        Mode::Uni(mode)
     }
 }
 
@@ -56,11 +56,11 @@ pub(crate) mod form;
 
 pub(crate) mod eval;
 
-pub(crate) mod primitive;
+pub(crate) mod united;
 
-pub(crate) mod recursive;
+pub(crate) mod prim;
 
-pub(crate) mod composite;
+pub(crate) mod comp;
 
 pub(crate) mod symbol;
 

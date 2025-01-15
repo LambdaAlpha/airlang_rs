@@ -2,7 +2,9 @@ use crate::{
     Eval,
     Form,
     FuncMode,
+    Id,
     MutFnCtx,
+    PrefixMode,
     bit::Bit,
     ctx::{
         CtxValue,
@@ -24,7 +26,8 @@ use crate::{
     map::Map,
     mode::{
         Mode,
-        primitive::{
+        repr::parse,
+        united::{
             EVAL_LITERAL,
             EVAL_MOVE,
             EVAL_REF,
@@ -32,9 +35,8 @@ use crate::{
             FORM_MOVE,
             FORM_REF,
             ID,
-            PrimitiveMode,
+            UniMode,
         },
-        repr::parse,
     },
     prelude::{
         Named,
@@ -146,49 +148,55 @@ impl Prelude for FuncPrelude {
 
 fn mode_id() -> Named<FuncVal> {
     let id = ID;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Id));
+    let func = ModeFunc::new(Mode::Uni(UniMode::Id(Id)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_form_literal() -> Named<FuncVal> {
     let id = FORM_LITERAL;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Form(Form::Literal)));
+    let mode = Form::new(PrefixMode::Literal);
+    let func = ModeFunc::new(Mode::Uni(UniMode::Form(mode)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_form_ref() -> Named<FuncVal> {
     let id = FORM_REF;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Form(Form::Ref)));
+    let mode = Form::new(PrefixMode::Ref);
+    let func = ModeFunc::new(Mode::Uni(UniMode::Form(mode)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_form_move() -> Named<FuncVal> {
     let id = FORM_MOVE;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Form(Form::Move)));
+    let mode = Form::new(PrefixMode::Move);
+    let func = ModeFunc::new(Mode::Uni(UniMode::Form(mode)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_eval_literal() -> Named<FuncVal> {
     let id = EVAL_LITERAL;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Eval(Eval::Literal)));
+    let mode = Eval::new(PrefixMode::Literal);
+    let func = ModeFunc::new(Mode::Uni(UniMode::Eval(mode)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_eval_ref() -> Named<FuncVal> {
     let id = EVAL_REF;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Eval(Eval::Ref)));
+    let mode = Eval::new(PrefixMode::Ref);
+    let func = ModeFunc::new(Mode::Uni(UniMode::Eval(mode)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_eval_move() -> Named<FuncVal> {
     let id = EVAL_MOVE;
-    let func = ModeFunc::new(Mode::Primitive(PrimitiveMode::Eval(Eval::Move)));
+    let mode = Eval::new(PrefixMode::Move);
+    let func = ModeFunc::new(Mode::Uni(UniMode::Eval(mode)));
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
@@ -196,7 +204,7 @@ fn mode_eval_move() -> Named<FuncVal> {
 fn mode() -> Named<FuncVal> {
     let id = "mode";
     let f = fn_mode;
-    let call = form_mode(Form::Literal);
+    let call = form_mode(PrefixMode::Literal);
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -560,7 +568,7 @@ fn body() -> Named<FuncVal> {
     let f = fn_body;
     let call = id_mode();
     let abstract1 = call.clone();
-    let ask = form_mode(Form::Literal);
+    let ask = form_mode(PrefixMode::Ref);
     let mode = FuncMode {
         call,
         abstract1,

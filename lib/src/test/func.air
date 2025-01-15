@@ -1,541 +1,479 @@
-
------
-id .a
------
-.a
-=====
-
------
-id *a
------
-*a
-=====
-
------
-id ^a
------
-^a
-=====
-
+id trivial
 -----
 id a
 -----
 a
 =====
-
+id .
+-----
+id .a
+-----
+.a
+=====
+id *
+-----
+id *a
+-----
+*a
+=====
+id ^
+-----
+id ^a
+-----
+^a
+=====
+form. trivial
 -----
 form. a
 -----
 a
 =====
-
+form. .
 -----
 form. .a
 -----
 a
 =====
-
+form. . special
 -----
 form. .*a
 -----
 *a
 =====
-
+form. *
 -----
 do [a = 1, [form. *a, a]]
 -----
 [1, 1]
 =====
-
+form. * special
 -----
 do [..a = 1, [form. *.a, *.a]]
 -----
 [1, 1]
 =====
-
+form. ^
 -----
 do [a = 1, [form. ^a, is_null a]]
 -----
 [1, true]
 =====
-
+form. ^ special
 -----
 do [.*a = 1, [form. ^*a, is_null .*a]]
 -----
 [1, true]
 =====
-
+form* trivial
 -----
 do [a = 1, [form* a, a]]
 -----
 [1, 1]
 =====
-
+form* .
 -----
 form* .a
 -----
 a
 =====
-
+form* *
 -----
 do [a = 1, [form* *a, a]]
 -----
 [1, 1]
 =====
-
+form* ^
 -----
 do [a = 1, [form* ^a, is_null a]]
 -----
 [1, true]
 =====
-
+form^ trivial
 -----
 do [a = 1, [form^ a, is_null a]]
 -----
 [1, true]
 =====
-
+form^ .
 -----
 form^ .a
 -----
 a
 =====
-
+form^ *
 -----
 do [a = 1, [form^ *a, a]]
 -----
 [1, 1]
 =====
-
+form^ ^
 -----
 do [a = 1, [form^ ^a, is_null a]]
 -----
 [1, true]
 =====
-
+form ;
 -----
 form. ; a ; b
 -----
 a ; b
 =====
-
+form !
 -----
-form. ; a ; b
+form. ; a ! b
 -----
-a ; b
+a ! b
 =====
-
+form ?
 -----
 form. ; a ? b
 -----
 a ? b
 =====
-
+form primitive
 -----
 form. [a, b c]
 -----
 [a, b c]
 =====
-
+eval. trivial
 -----
 eval. a
 -----
 a
 =====
-
+eval. .
+-----
+eval. .a
+-----
+a
+=====
+eval. *
 -----
 do [a = 1, [eval. *a, a]]
 -----
 [1, 1]
 =====
-
+eval. ^
+-----
+do [a = 1, [eval. ^a, is_null a]]
+-----
+[1, true]
+=====
+eval* trivial
 -----
 do [a = 1, [eval* a, a]]
 -----
 [1, 1]
 =====
-
+eval* .
 -----
 eval* .a
 -----
 a
 =====
-
+eval* *
 -----
 do [a = 1, [eval* *a, a]]
 -----
 [1, 1]
 =====
-
+eval* ^
 -----
 do [a = 1, [eval* ^a, is_null a]]
 -----
 [1, true]
 =====
-
+eval^ trivial
 -----
 do [a = 1, [eval^ a, is_null a]]
 -----
 [1, true]
 =====
-
+eval^ .
 -----
 eval^ .a
 -----
 a
 =====
-
+eval^ *
 -----
 do [a = 1, [eval^ *a, a]]
 -----
 [1, 1]
 =====
-
+eval^ ^
 -----
 do [a = 1, [eval^ ^a, is_null a]]
 -----
 [1, true]
 =====
-
------
-eval* ; not ; true
------
-false
-=====
-
------
-eval* ; a ! 1
------
-1
-=====
-
------
-do [a = 1, b = 2, eval* ; a ? b]
------
-1 ? 2
-=====
-
+mode id
 -----
 do [f = mode ; id, f ; .a]
 -----
 .a
 =====
-
+mode uni mode 1
 -----
 do [f = mode ; form., f ; a ; .b]
 -----
 a ; b
 =====
-
+mode uni mode 2
 -----
 do [f = mode ; eval*, f ; not ; true]
 -----
 false
 =====
-
+mode uni mode 3
+-----
+do [a = 1, f = mode ; form^, [f ; a ; .b, is_null a]]
+-----
+[1 ; b, true]
+=====
+default mode
 -----
 do [f = mode ; ., f ; not ; true]
 -----
 false
 =====
-
+mode primitive default prefix
 -----
 do [
-    f = mode ; {symbol : id, recursive : true},
-    f ^a
+    b = 1,
+    f = mode ; {default : .., primitive : true},
+    [f a, f *b, f ; not ; true, f [a]]
 ]
 -----
-^a
+[a, 1, false, [a]]
 =====
-
+mode primitive default eval
 -----
 do [
-    f = mode ; {symbol : form., recursive : true},
-    f .a
+    b = 1,
+    f = mode ; {default : form, primitive : true},
+    [f .a, f *b, f ; .a ; b, f [b]]
 ]
 -----
-a
+[a, 1, a ; 1, [1]]
 =====
-
+mode primitive default united
+-----
+do [
+    b = 1,
+    f = mode ; {default : eval^, primitive : true},
+    [f .a, f *b, f ; 1 ; .a, f [b]]
+]
+-----
+[a, 1, 1 ; a, [1]]
+=====
+mode primitive symbol id
+-----
+do [
+    f = mode ; {symbol : id, primitive : true},
+    f [^a]
+]
+-----
+[^a]
+=====
+mode primitive symbol .
+-----
+do [
+    f = mode ; {symbol : .., primitive : true},
+    f [.a]
+]
+-----
+[a]
+=====
+mode primitive symbol *
 -----
 do [
     a = 1,
-    f = mode ; {symbol : eval*, recursive : true},
-    f a
+    f = mode ; {symbol : .*, primitive : true},
+    f [a]
 ]
 -----
-1
+[1]
 =====
-
------
-do [
-    b = 1,
-    f = mode ; {pair : form. : eval*, recursive : true},
-    .a f b
-]
------
-a : 1
-=====
-
------
-do [
-    b = 1,
-    f = mode ; {pair : form., recursive : true},
-    .a f b
-]
------
-a : 1
-=====
-
------
-do [
-    b = 1,
-    f = mode ; {pair : form. : eval*, default : id, recursive : true},
-    [a f b, f *a]
-]
------
-[a : 1, *a]
-=====
-
------
-do [
-    f = mode ; {pair : form. : self, default : id, recursive : true},
-    .a f .b
-]
------
-a : .b
-=====
-
------
-do [
-    f = mode ; {abstract : form. : id, recursive : true},
-    f ; .a ! ^b
-]
------
-a ! ^b
-=====
-
------
-do [
-    f = mode ; {abstract : form. ! id, recursive : true},
-    f ; .a ! ^b
-]
------
-^b
-=====
-
------
-do [
-    b = 1,
-    f = mode ; {abstract : form., recursive : true},
-    f ; .a ! b
-]
------
-a ! 1
-=====
-
------
-do [
-    b = 1,
-    f = mode ; {abstract : id ! self, recursive : true},
-    f ; .a ! b
-]
------
-1
-=====
-
------
-do [
-    f = mode ; {call : form. : id, recursive : true},
-    f ; .a ; ^b
-]
------
-a ; ^b
-=====
-
------
-do [
-    a = false,
-    f = mode ; {call : eval* ; form., recursive : true},
-    f ; not ; ^a
-]
------
-true
-=====
-
------
-do [
-    f = mode ; {call : form., recursive : true},
-    a = 1,
-    b = 2,
-    f ; a ; b
-]
------
-1 ; 2
-=====
-
------
-do [
-    f = mode ; {call : form. : self, recursive : true},
-    a = 1,
-    f ; not ; a
-]
------
-not ; 1
-=====
-
------
-do [
-    f = mode ; {call : self ; form., recursive : true},
-    a = 1,
-    f ; [a ; a, not ; true]
-]
------
-[1 ; a, false]
-=====
-
------
-do [
-    f = mode ; {ask : form. : id, recursive : true},
-    f ; .a ? ^b
-]
------
-a ? ^b
-=====
-
------
-do [
-    b = 1,
-    f = mode ; {ask : form., recursive : true},
-    f ; .a ? b
-]
------
-a ? 1
-=====
-
------
-do [
-    b = 1,
-    f = mode ; {ask : form. : self, recursive : true},
-    f ; .a ? b
-]
------
-a ? 1
-=====
-
+mode primitive symbol ^
 -----
 do [
     a = 1,
-    f = mode ; {list : [eval*, form.] : id, recursive : true},
-    f [a, a, a, a, *a, a]
+    f = mode ; {symbol : .^, primitive : true},
+    [f [a], is_null a]
 ]
 -----
-[1, a, a, a, *a, a]
+[[1], true]
 =====
-
+mode primitive pair id
 -----
 do [
-    a = 1,
-    f = mode ; {list : [eval*, form.], default : id, recursive : true},
-    f [a, a, a, a, *a, a]
+    b = 1,
+    f = mode ; {pair : id, primitive : true},
+    f [.a : b]
 ]
 -----
-[1, a, a, a, *a, a]
+[.a : b]
 =====
-
+mode primitive pair form
 -----
 do [
-    f = mode ; {list : id, recursive : true},
+    b = 1,
+    f = mode ; {pair : form, primitive : true},
+    f [.a : b]
+]
+-----
+[a : 1]
+=====
+mode primitive call id
+-----
+do [
+    f = mode ; {call : id, primitive : true},
+    f [.a ; ^b]
+]
+-----
+[.a ; ^b]
+=====
+mode primitive call form
+-----
+do [
+    b = 1,
+    f = mode ; {call : form, primitive : true},
+    f [.a ; b]
+]
+-----
+[a ; 1]
+=====
+mode primitive call eval
+-----
+do [
+    f = mode ; {call : eval, primitive : true},
+    f ; [not ; true]
+]
+-----
+[false]
+=====
+mode primitive abstract id
+-----
+do [
+    f = mode ; {abstract : id, primitive : true},
+    f [.a ! ^b]
+]
+-----
+[.a ! ^b]
+=====
+mode primitive abstract form
+-----
+do [
+    b = 1,
+    f = mode ; {abstract : form, primitive : true},
+    f [.a ! ^b]
+]
+-----
+[a ! 1]
+=====
+mode primitive abstract eval
+-----
+do [
+    b = 1,
+    f = mode ; {abstract : eval, primitive : true},
+    f [.a ! b]
+]
+-----
+[1]
+=====
+mode primitive ask id
+-----
+do [
+    f = mode ; {ask : id, primitive : true},
+    f [.a ? ^b]
+]
+-----
+[.a ? ^b]
+=====
+mode primitive ask form
+-----
+do [
+    b = 1,
+    f = mode ; {ask : form, primitive : true},
+    f [.a ? b]
+]
+-----
+[a ? 1]
+=====
+mode primitive list id
+-----
+do [
+    f = mode ; {list : id, primitive : true},
     f [a, .a, *a, ^a]
 ]
 -----
 [a, .a, *a, ^a]
 =====
-
+mode primitive list form
 -----
 do [
     a = 1,
-    f = mode ; {list : [eval*, form., id, self], recursive : true},
+    f = mode ; {list : form, primitive : true},
     f [a, .a, *a, ^a]
 ]
 -----
-[1, a, *a, 1]
+[1, a, 1, 1]
 =====
-
+mode primitive map id
 -----
 do [
     a = 1,
     c = 2,
-    f = mode ; {map : {a : eval*, b : id} : eval* : id, recursive : true},
-    f {a : a, b : a, c : d}
-]
------
-{a : 1, b : a, 2 : d}
-=====
-
------
-do [
-    a = 1,
-    c = 2,
-    f = mode ; {map : {a : eval*, b : id}, default : id, recursive : true},
-    f {a : a, b : a, c : d}
-]
------
-{a : 1, b : a, c : d}
-=====
-
------
-do [
-    a = 1,
-    c = 2,
-    f = mode ; {map : {a : eval*, b : id} : form., recursive : true},
-    f {a : a, b : a, .c : .d}
-]
------
-{a : 1, b : a, c : d}
-=====
-
------
-do [
-    a = 1,
-    c = 2,
-    f = mode ; {map : id, recursive : true},
+    f = mode ; {map : id, primitive : true},
     f {.a : *a, ^b : .a, c : d}
 ]
 -----
 {.a : *a, ^b : .a, c : d}
 =====
-
+mode primitive map form
 -----
 do [
     a = 1,
-    c = 2,
-    f = mode ; {map : {a : id, b : self}, recursive : true},
-    f {a : a, b : a, c : c}
+    b = 2,
+    c = 3,
+    f = mode ; {map : form, primitive : true},
+    f {.a : a, b : .a, *c : .d}
 ]
 -----
-{a : a, b : 1, 2 : 2}
+{a : 1, 2 : a, 3 : d}
 =====
-
+mode primitive multiple
 -----
 do [
-    f = mode ; {symbol : id, call : eval* ; self, default : form., recursive : true},
-    a = false,
-    f ; [.a, not ; *a]
+    f = mode ; {symbol : id, call : form, default : eval^, primitive : true},
+    f ; [.a, .b ; .c]
 ]
 -----
-[.a, true]
+[.a, .b ; .c]
 =====
-
+mode symbol .
 -----
 do [
-    f = mode ; {symbol : form.},
-    f a
+    a = 1,
+    f = mode ; {symbol : ..},
+    [f a, f [a]]
 ]
 -----
-a
+[a, [1]]
 =====
-
+mode symbol *
+-----
+do [
+    a = 1,
+    f = mode ; {symbol : .*, default : ..},
+    [f a, f [a]]
+]
+-----
+[1, [a]]
+=====
+mode pair united
 -----
 do [
     f = mode ; {pair : form.},
@@ -544,7 +482,7 @@ do [
 -----
 a : b
 =====
-
+mode composite
 -----
 do [
     f = mode ; {pair : form. : {pair : id}},
@@ -553,16 +491,7 @@ do [
 -----
 a : .b : *c ; ^d
 =====
-
------
-do [
-    f = mode ; {pair : form. : {default : id, recursive : true}},
-    f ; a : .b : *c ; ^d
-]
------
-a : .b : *c ; ^d
-=====
-
+mode multiple
 -----
 do [
     c = 1,
@@ -573,13 +502,13 @@ do [
 -----
 a : b : 1 ; 2
 =====
-
+mode repr
 -----
 function.represent eval*
 -----
 eval*
 =====
-
+mode repr composite
 -----
 function.represent ; mode ; {
     symbol : id,
@@ -595,25 +524,25 @@ function.represent ; mode ; {
     map : {a : eval*, b : form.} : id : id,
 }
 =====
-
+mode repr primitive
 -----
 function.represent ; mode ; {
-    symbol : id,
-    pair : form. : eval*,
-    list : [eval*, id],
-    map : {a : eval*, b : form.},
-    recursive : true,
+    symbol : .^,
+    pair : id,
+    call : form,
+    map : id,
+    primitive : true,
 }
 -----
 {
-    symbol : id,
-    pair : form. : eval*,
-    list : [eval*, id],
-    map : {a : eval*, b : form.},
-    recursive : true,
+    symbol : ^,
+    pair : id,
+    call : form,
+    map : id,
+    primitive : true,
 }
 =====
-
+recursive call
 -----
 do [
     f = function ; {
@@ -624,7 +553,7 @@ do [
 -----
 false
 =====
-
+body external func
 -----
 do [
     f = function ; {
@@ -635,7 +564,7 @@ do [
 -----
 true
 =====
-
+body internal func
 -----
 do [
     f = function ; {
@@ -647,7 +576,7 @@ do [
 -----
 true
 =====
-
+body rename
 -----
 do [
     f = function ; {
@@ -660,7 +589,7 @@ do [
 -----
 true
 =====
-
+body mode
 -----
 do [
     f = function ; {
@@ -672,7 +601,7 @@ do [
 -----
 i ; a
 =====
-
+cell free
 -----
 do [
     f = function ; {
@@ -686,7 +615,7 @@ do [
 -----
 [1, 2, 3]
 =====
-
+cell const
 -----
 do [
     a = 1,
@@ -703,7 +632,7 @@ do [
 -----
 [1, 2, 3]
 =====
-
+cell mutable
 -----
 do [
     a = 1,
@@ -724,7 +653,7 @@ do [
 -----
 [1, 3, 6]
 =====
-
+const const
 -----
 do [
     a = 1,
@@ -737,7 +666,7 @@ do [
 -----
 1
 =====
-
+mutable const
 -----
 do [
     a = 1,
@@ -750,7 +679,7 @@ do [
 -----
 1
 =====
-
+mutable mutate
 -----
 do [
     f = function ; {
@@ -765,7 +694,7 @@ do [
 -----
 2
 =====
-
+mutable mutate fail
 -----
 do [
     f = function ; {
@@ -780,7 +709,7 @@ do [
 -----
 1
 =====
-
+const mutate fail
 -----
 do [
     f = function ; {
@@ -795,7 +724,7 @@ do [
 -----
 1
 =====
-
+const free
 -----
 do [
     f = function ; {
@@ -807,7 +736,7 @@ do [
 -----
 1
 =====
-
+ctx name occupied
 -----
 do [
     a = 1,
@@ -823,7 +752,7 @@ do [
 -----
 true
 =====
-
+reverse ctx
 -----
 do [
     a = 1,
@@ -831,7 +760,7 @@ do [
         context_name : ctx,
         body : .ctx = 2,
         context_access : constant,
-        context : context ; {fallback : true},
+        context : context ; {reverse : true},
     },
     f .,
     a
@@ -839,31 +768,31 @@ do [
 -----
 1
 =====
-
+repr
 -----
 function.represent ; function ; {body : .i}
 -----
 {body : i}
 =====
-
+repr primitive free
 -----
 function.represent not
 -----
 {id : not}
 =====
-
+repr const
 -----
 function.represent ; function ; {body : .i, context_access : constant}
 -----
 {body : i, context_access : constant}
 =====
-
+repr primitive const
 -----
 function.represent ==
 -----
 {id : ==}
 =====
-
+repr composite
 -----
 do [
     call_mode = mode ; {pair : eval* : id},
@@ -888,49 +817,49 @@ do [
 -----
 true
 =====
-
+access free
 -----
 function.context_access function
 -----
 free
 =====
-
+access const
 -----
 function.context_access read
 -----
 constant
 =====
-
+access mutable
 -----
 function.context_access eval*
 -----
 mutable
 =====
-
+access default
 -----
 do [f = function ; {}, function.context_access f]
 -----
 mutable
 =====
-
+call mode primitive
 -----
 function.represent ; function.call_mode ; not
 -----
 eval*
 =====
-
+call mode mode 
 -----
 function.represent ; function.call_mode ; eval*
 -----
 id
 =====
-
+call mode default
 -----
 do [f = function ; {}, function.represent ; function.call_mode ; f]
 -----
 eval*
 =====
-
+call mode 1
 -----
 do [
     f = function ; {
@@ -941,7 +870,7 @@ do [
 -----
 {pair : eval* : form.}
 =====
-
+call mode 2
 -----
 do [
     f = function ; {
@@ -952,7 +881,7 @@ do [
 -----
 {list : [eval*, form., id] : form.}
 =====
-
+call mode 3
 -----
 do [
     f = function ; {
@@ -963,7 +892,7 @@ do [
 -----
 {map : {a : eval*, b : id} : id : form.}
 =====
-
+abstract mode
 -----
 do [
     f = function ; {
@@ -974,7 +903,7 @@ do [
 -----
 {map : {a : form.} : eval* : id}
 =====
-
+ask mode
 -----
 do [
     f = function ; {
@@ -985,61 +914,61 @@ do [
 -----
 {map : {a : form.} : eval* : id}
 =====
-
+cacheable
 -----
 do [f = function ; {cacheable : false}, function.is_cacheable f]
 -----
 false
 =====
-
+cacheable primitive
 -----
 function.is_cacheable not
 -----
 true
 =====
-
+is_primitive primitive
 -----
 function.is_primitive not
 -----
 true
 =====
-
+is_primitive composite
 -----
 do [f = function ; {}, function.is_primitive f]
 -----
 false
 =====
-
+is_extension prelude
 -----
 function.is_extension not
 -----
 false
 =====
-
+is_cell false
 -----
 function.is_cell not
 -----
 false
 =====
-
+is_cell true
 -----
 do [f = function ; {cell : true}, function.is_cell f]
 -----
 true
 =====
-
+id primitive
 -----
 function.id not
 -----
 not
 =====
-
+id rename
 -----
 do [neg = not, function.id neg]
 -----
 not
 =====
-
+body mode
 -----
 do [
     f = function ; {body_mode : form.},
@@ -1048,13 +977,13 @@ do [
 -----
 form.
 =====
-
+body
 -----
 do [f = function ; {body : .i}, function.body f]
 -----
 i
 =====
-
+ctx
 -----
 do [
     ctx = context ; {variables : {a : 1}},
@@ -1064,13 +993,13 @@ do [
 -----
 true
 =====
-
+input name
 -----
 do [f = function ; {}, function.input_name f]
 -----
 i
 =====
-
+ctx name
 -----
 do [f = function ; {context_access : constant}, function.context_name f]
 -----

@@ -1,13 +1,13 @@
 use crate::{
     Byte,
     Call,
-    Form,
     FuncMode,
     Int,
     List,
     Map,
     Mode,
     Pair,
+    PrefixMode,
     Symbol,
     Text,
     ctx::{
@@ -235,7 +235,7 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    let map = map_mode(Map::default(), form_mode(Form::Ref), id_mode());
+    let map = map_mode(Map::default(), form_mode(PrefixMode::Ref), id_mode());
     let map_default = pair_mode(map, id_mode());
     let call = pair_mode(Mode::default(), map_default);
     let abstract1 = call.clone();

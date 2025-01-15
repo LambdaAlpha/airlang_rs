@@ -1,7 +1,7 @@
 use crate::{
-    Form,
     FuncMode,
     Map,
+    PrefixMode,
     bit::Bit,
     ctx::{
         Ctx,
@@ -178,7 +178,7 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 fn assign() -> Named<FuncVal> {
     let id = "=";
     let f = fn_assign;
-    let call = pair_mode(form_mode(Form::Literal), Mode::default());
+    let call = pair_mode(form_mode(PrefixMode::Literal), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -435,7 +435,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = fn_with_ctx;
-    let call = pair_mode(symbol_literal_mode(), form_mode(Form::Ref));
+    let call = pair_mode(symbol_literal_mode(), form_mode(PrefixMode::Ref));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -479,7 +479,7 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let id = "|:";
     let f = fn_ctx_in_ctx_out;
-    let call = pair_mode(Mode::default(), form_mode(Form::Ref));
+    let call = pair_mode(Mode::default(), form_mode(PrefixMode::Ref));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

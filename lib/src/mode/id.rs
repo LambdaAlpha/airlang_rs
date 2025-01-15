@@ -16,8 +16,8 @@ use crate::{
     },
 };
 
-#[derive(Copy, Clone)]
-pub(crate) struct Id;
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct Id;
 
 impl Transformer<Val, Val> for Id {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val

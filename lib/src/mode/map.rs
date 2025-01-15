@@ -3,14 +3,11 @@ use crate::{
     MapVal,
     Mode,
     Pair,
-    PrimitiveMode,
+    UniMode,
     Val,
     core::FormCore,
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        recursive::SelfMode,
-    },
+    mode::id::Id,
     transformer::{
         ByVal,
         Transformer,
@@ -18,21 +15,21 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum MapMode<M> {
-    Id,
+pub enum MapMode {
+    Id(Id),
     Form {
-        some: Map<Val, M>,
-        else1: Pair<M, M>,
+        some: Map<Val, Mode>,
+        else1: Pair<Mode, Mode>,
     },
 }
 
-impl Transformer<MapVal, Val> for MapMode<Mode> {
+impl Transformer<MapVal, Val> for MapMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            MapMode::Id => Id.transform_map(ctx, map),
+            MapMode::Id(mode) => mode.transform_map(ctx, map),
             MapMode::Form { some, else1 } => {
                 FormCore::transform_map_some_else(some, &else1.first, &else1.second, ctx, map)
             }
@@ -40,7 +37,7 @@ impl Transformer<MapVal, Val> for MapMode<Mode> {
     }
 }
 
-impl<M: Default> Default for MapMode<M> {
+impl Default for MapMode {
     fn default() -> Self {
         Self::Form {
             some: Map::default(),
@@ -49,39 +46,23 @@ impl<M: Default> Default for MapMode<M> {
     }
 }
 
-impl From<PrimitiveMode> for MapMode<Mode> {
-    fn from(mode: PrimitiveMode) -> Self {
+impl From<UniMode> for MapMode {
+    fn from(mode: UniMode) -> Self {
         match mode {
-            PrimitiveMode::Id => MapMode::Id,
-            PrimitiveMode::Form(mode) => MapMode::Form {
+            UniMode::Id(mode) => MapMode::Id(mode),
+            UniMode::Form(mode) => MapMode::Form {
                 some: Map::default(),
                 else1: Pair::new(
-                    Mode::Primitive(PrimitiveMode::Form(mode)),
-                    Mode::Primitive(PrimitiveMode::Form(mode)),
+                    Mode::Uni(UniMode::Form(mode)),
+                    Mode::Uni(UniMode::Form(mode)),
                 ),
             },
-            PrimitiveMode::Eval(mode) => MapMode::Form {
+            UniMode::Eval(mode) => MapMode::Form {
                 some: Map::default(),
                 else1: Pair::new(
-                    Mode::Primitive(PrimitiveMode::Eval(mode)),
-                    Mode::Primitive(PrimitiveMode::Eval(mode)),
+                    Mode::Uni(UniMode::Eval(mode)),
+                    Mode::Uni(UniMode::Eval(mode)),
                 ),
-            },
-        }
-    }
-}
-
-impl From<PrimitiveMode> for MapMode<SelfMode> {
-    fn from(mode: PrimitiveMode) -> Self {
-        match mode {
-            PrimitiveMode::Id => MapMode::Id,
-            PrimitiveMode::Form(_) => MapMode::Form {
-                some: Map::default(),
-                else1: Pair::new(SelfMode::Self1, SelfMode::Self1),
-            },
-            PrimitiveMode::Eval(_) => MapMode::Form {
-                some: Map::default(),
-                else1: Pair::new(SelfMode::Self1, SelfMode::Self1),
             },
         }
     }

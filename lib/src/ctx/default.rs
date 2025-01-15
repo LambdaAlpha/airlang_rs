@@ -13,7 +13,7 @@ use crate::{
     },
     mode::{
         eval::EVAL,
-        form::{
+        symbol::{
             LITERAL,
             MOVE,
             REF,

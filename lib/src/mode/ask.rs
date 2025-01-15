@@ -2,71 +2,58 @@ use crate::{
     Ask,
     AskVal,
     Mode,
-    PrimitiveMode,
+    UniMode,
     Val,
     core::{
         EvalCore,
         FormCore,
     },
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        recursive::SelfMode,
-    },
+    mode::id::Id,
     transformer::{
         ByVal,
         Transformer,
     },
 };
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum AskMode<M> {
-    Id,
-    Form(Ask<M, M>),
-    Eval(Ask<M, M>),
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum AskMode {
+    Id(Id),
+    Form(Ask<Mode, Mode>),
+    Eval(Ask<Mode, Mode>),
 }
 
-impl Transformer<AskVal, Val> for AskMode<Mode> {
+impl Transformer<AskVal, Val> for AskMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            AskMode::Id => Id.transform_ask(ctx, ask),
+            AskMode::Id(mode) => mode.transform_ask(ctx, ask),
             AskMode::Form(mode) => FormCore::transform_ask(&mode.func, &mode.output, ctx, ask),
             AskMode::Eval(mode) => EvalCore::transform_ask(&mode.func, &mode.output, ctx, ask),
         }
     }
 }
 
-impl<M: Default> Default for AskMode<M> {
+impl Default for AskMode {
     fn default() -> Self {
         Self::Eval(Ask::default())
     }
 }
 
-impl From<PrimitiveMode> for AskMode<Mode> {
-    fn from(mode: PrimitiveMode) -> Self {
+impl From<UniMode> for AskMode {
+    fn from(mode: UniMode) -> Self {
         match mode {
-            PrimitiveMode::Id => AskMode::Id,
-            PrimitiveMode::Form(mode) => AskMode::Form(Ask::new(
-                Mode::Primitive(PrimitiveMode::Form(mode)),
-                Mode::Primitive(PrimitiveMode::Form(mode)),
+            UniMode::Id(mode) => AskMode::Id(mode),
+            UniMode::Form(mode) => AskMode::Form(Ask::new(
+                Mode::Uni(UniMode::Form(mode)),
+                Mode::Uni(UniMode::Form(mode)),
             )),
-            PrimitiveMode::Eval(mode) => AskMode::Eval(Ask::new(
-                Mode::Primitive(PrimitiveMode::Eval(mode)),
-                Mode::Primitive(PrimitiveMode::Eval(mode)),
+            UniMode::Eval(mode) => AskMode::Eval(Ask::new(
+                Mode::Uni(UniMode::Eval(mode)),
+                Mode::Uni(UniMode::Eval(mode)),
             )),
-        }
-    }
-}
-
-impl From<PrimitiveMode> for AskMode<SelfMode> {
-    fn from(mode: PrimitiveMode) -> Self {
-        match mode {
-            PrimitiveMode::Id => AskMode::Id,
-            PrimitiveMode::Form(_) => AskMode::Form(Ask::new(SelfMode::Self1, SelfMode::Self1)),
-            PrimitiveMode::Eval(_) => AskMode::Eval(Ask::new(SelfMode::Self1, SelfMode::Self1)),
         }
     }
 }

@@ -2,14 +2,11 @@ use crate::{
     List,
     ListVal,
     Mode,
-    PrimitiveMode,
+    UniMode,
     Val,
     core::FormCore,
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        recursive::SelfMode,
-    },
+    mode::id::Id,
     transformer::{
         ByVal,
         Transformer,
@@ -17,18 +14,18 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ListMode<M> {
-    Id,
-    Form { head: List<M>, tail: M },
+pub enum ListMode {
+    Id(Id),
+    Form { head: List<Mode>, tail: Mode },
 }
 
-impl Transformer<ListVal, Val> for ListMode<Mode> {
+impl Transformer<ListVal, Val> for ListMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            ListMode::Id => Id.transform_list(ctx, list),
+            ListMode::Id(mode) => mode.transform_list(ctx, list),
             ListMode::Form { head, tail } => {
                 FormCore::transform_list_head_tail(head, tail, ctx, list)
             }
@@ -36,42 +33,26 @@ impl Transformer<ListVal, Val> for ListMode<Mode> {
     }
 }
 
-impl<M: Default> Default for ListMode<M> {
+impl Default for ListMode {
     fn default() -> Self {
         Self::Form {
             head: List::default(),
-            tail: M::default(),
+            tail: Mode::default(),
         }
     }
 }
 
-impl From<PrimitiveMode> for ListMode<Mode> {
-    fn from(mode: PrimitiveMode) -> Self {
+impl From<UniMode> for ListMode {
+    fn from(mode: UniMode) -> Self {
         match mode {
-            PrimitiveMode::Id => ListMode::Id,
-            PrimitiveMode::Form(mode) => ListMode::Form {
+            UniMode::Id(mode) => ListMode::Id(mode),
+            UniMode::Form(mode) => ListMode::Form {
                 head: List::default(),
-                tail: Mode::Primitive(PrimitiveMode::Form(mode)),
+                tail: Mode::Uni(UniMode::Form(mode)),
             },
-            PrimitiveMode::Eval(mode) => ListMode::Form {
+            UniMode::Eval(mode) => ListMode::Form {
                 head: List::default(),
-                tail: Mode::Primitive(PrimitiveMode::Eval(mode)),
-            },
-        }
-    }
-}
-
-impl From<PrimitiveMode> for ListMode<SelfMode> {
-    fn from(mode: PrimitiveMode) -> Self {
-        match mode {
-            PrimitiveMode::Id => ListMode::Id,
-            PrimitiveMode::Form(_) => ListMode::Form {
-                head: List::default(),
-                tail: SelfMode::Self1,
-            },
-            PrimitiveMode::Eval(_) => ListMode::Form {
-                head: List::default(),
-                tail: SelfMode::Self1,
+                tail: Mode::Uni(UniMode::Eval(mode)),
             },
         }
     }

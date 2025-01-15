@@ -6,11 +6,10 @@ use crate::{
     ListVal,
     MapMode,
     MapVal,
-    Mode,
     PairMode,
     PairVal,
-    PrimitiveMode,
     Symbol,
+    UniMode,
     Val,
     core::FormCore,
     ctx::ref1::CtxMeta,
@@ -28,17 +27,17 @@ use crate::{
 };
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
-pub struct CompositeMode<M> {
+pub struct CompMode {
     pub symbol: SymbolMode,
-    pub pair: PairMode<M>,
-    pub call: CallMode<M>,
-    pub abstract1: AbstractMode<M>,
-    pub ask: AskMode<M>,
-    pub list: ListMode<M>,
-    pub map: MapMode<M>,
+    pub pair: PairMode,
+    pub call: CallMode,
+    pub abstract1: AbstractMode,
+    pub ask: AskMode,
+    pub list: ListMode,
+    pub map: MapMode,
 }
 
-impl Transformer<Val, Val> for CompositeMode<Mode> {
+impl Transformer<Val, Val> for CompMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -47,7 +46,7 @@ impl Transformer<Val, Val> for CompositeMode<Mode> {
     }
 }
 
-impl ByVal<Val> for CompositeMode<Mode> {
+impl ByVal<Val> for CompMode {
     fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -105,16 +104,8 @@ impl ByVal<Val> for CompositeMode<Mode> {
     }
 }
 
-impl<M> From<PrimitiveMode> for CompositeMode<M>
-where
-    PairMode<M>: From<PrimitiveMode>,
-    AbstractMode<M>: From<PrimitiveMode>,
-    CallMode<M>: From<PrimitiveMode>,
-    AskMode<M>: From<PrimitiveMode>,
-    ListMode<M>: From<PrimitiveMode>,
-    MapMode<M>: From<PrimitiveMode>,
-{
-    fn from(mode: PrimitiveMode) -> Self {
+impl From<UniMode> for CompMode {
+    fn from(mode: UniMode) -> Self {
         Self {
             symbol: SymbolMode::from(mode),
             pair: PairMode::from(mode),

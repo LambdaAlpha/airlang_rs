@@ -7,18 +7,25 @@ use crate::{
     AbstractMode,
     AskMode,
     CallMode,
-    CompositeMode,
+    CompMode,
     FuncMode,
+    Id,
     ListMode,
     MapMode,
     Mode,
     PairMode,
-    PrimitiveMode,
-    SelfMode,
+    PrimMode,
+    UniMode,
     Val,
     ctx::ref1::CtxMeta,
     func::FuncTrait,
-    mode::eval::EVAL,
+    mode::{
+        eval::{
+            EVAL,
+            EvalMode,
+        },
+        form::FormMode,
+    },
     transformer::Transformer,
 };
 
@@ -40,9 +47,9 @@ impl Transformer<Val, Val> for ModeFunc {
 impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
         &FuncMode {
-            call: Mode::Primitive(PrimitiveMode::Id),
-            abstract1: Mode::Primitive(PrimitiveMode::Id),
-            ask: Mode::Primitive(PrimitiveMode::Eval(EVAL)),
+            call: Mode::Uni(UniMode::Id(Id)),
+            abstract1: Mode::Uni(UniMode::Id(Id)),
+            ask: Mode::Uni(UniMode::Eval(EVAL)),
         }
     }
 
@@ -62,7 +69,7 @@ impl ModeFunc {
     }
 
     pub(crate) fn is_primitive(&self) -> bool {
-        matches!(self.mode, Mode::Primitive(_))
+        matches!(self.mode, Mode::Uni(_) | Mode::Prim(_))
     }
 }
 
@@ -81,73 +88,64 @@ trait IsCacheable {
 impl IsCacheable for Mode {
     fn is_cacheable(&self) -> bool {
         match self {
-            Mode::Primitive(mode) => mode.is_cacheable(),
-            Mode::Recursive(mode) => mode.is_cacheable(),
-            Mode::Composite(mode) => mode.is_cacheable(),
+            Mode::Uni(mode) => mode.is_cacheable(),
+            Mode::Prim(mode) => mode.is_cacheable(),
+            Mode::Comp(mode) => mode.is_cacheable(),
         }
     }
 }
 
-impl IsCacheable for PrimitiveMode {
+impl IsCacheable for UniMode {
     fn is_cacheable(&self) -> bool {
-        !matches!(self, PrimitiveMode::Eval(_))
+        !matches!(self, UniMode::Eval(_))
     }
 }
 
-impl IsCacheable for SelfMode {
+impl IsCacheable for PairMode {
     fn is_cacheable(&self) -> bool {
         match self {
-            SelfMode::Self1 => true,
-            SelfMode::Primitive(mode) => mode.is_cacheable(),
-        }
-    }
-}
-
-impl<M: IsCacheable> IsCacheable for PairMode<M> {
-    fn is_cacheable(&self) -> bool {
-        match self {
-            PairMode::Id => true,
+            PairMode::Id(_) => true,
             PairMode::Form(mode) => mode.first.is_cacheable() && mode.second.is_cacheable(),
         }
     }
 }
 
-impl<M: IsCacheable> IsCacheable for AbstractMode<M> {
+impl IsCacheable for AbstractMode {
     fn is_cacheable(&self) -> bool {
         match self {
-            AbstractMode::Id => true,
+            AbstractMode::Id(_) => true,
             AbstractMode::Form(mode) => mode.func.is_cacheable() && mode.input.is_cacheable(),
             AbstractMode::Eval(mode) => mode.func.is_cacheable() && mode.input.is_cacheable(),
         }
     }
 }
 
-impl<M: IsCacheable> IsCacheable for CallMode<M> {
+impl IsCacheable for CallMode {
     fn is_cacheable(&self) -> bool {
         match self {
-            CallMode::Id => true,
+            CallMode::Id(_) => true,
             CallMode::Form(mode) => mode.func.is_cacheable() && mode.input.is_cacheable(),
             CallMode::Eval(_) => false,
         }
     }
 }
 
-impl<M: IsCacheable> IsCacheable for AskMode<M> {
+impl IsCacheable for AskMode {
     fn is_cacheable(&self) -> bool {
         match self {
-            AskMode::Id => true,
+            AskMode::Id(_) => true,
             AskMode::Form(mode) => mode.func.is_cacheable() && mode.output.is_cacheable(),
             AskMode::Eval(_) => false,
         }
     }
 }
 
-impl<M: IsCacheable> IsCacheable for ListMode<M> {
+impl IsCacheable for ListMode {
     fn is_cacheable(&self) -> bool {
         match self {
-            ListMode::Id => true,
+            ListMode::Id(_) => true,
             ListMode::Form { head, tail } => {
-                let head = head.iter().all(M::is_cacheable);
+                let head = head.iter().all(Mode::is_cacheable);
                 let tail = tail.is_cacheable();
                 head && tail
             }
@@ -155,12 +153,12 @@ impl<M: IsCacheable> IsCacheable for ListMode<M> {
     }
 }
 
-impl<M: IsCacheable> IsCacheable for MapMode<M> {
+impl IsCacheable for MapMode {
     fn is_cacheable(&self) -> bool {
         match self {
-            MapMode::Id => true,
+            MapMode::Id(_) => true,
             MapMode::Form { some, else1 } => {
-                let some = some.values().all(M::is_cacheable);
+                let some = some.values().all(Mode::is_cacheable);
                 let else1 = else1.first.is_cacheable() && else1.second.is_cacheable();
                 some && else1
             }
@@ -168,7 +166,30 @@ impl<M: IsCacheable> IsCacheable for MapMode<M> {
     }
 }
 
-impl<M: IsCacheable> IsCacheable for CompositeMode<M> {
+impl IsCacheable for CompMode {
+    fn is_cacheable(&self) -> bool {
+        self.pair.is_cacheable()
+            && self.abstract1.is_cacheable()
+            && self.call.is_cacheable()
+            && self.ask.is_cacheable()
+            && self.list.is_cacheable()
+            && self.map.is_cacheable()
+    }
+}
+
+impl IsCacheable for FormMode {
+    fn is_cacheable(&self) -> bool {
+        true
+    }
+}
+
+impl IsCacheable for EvalMode {
+    fn is_cacheable(&self) -> bool {
+        *self != EvalMode::Eval
+    }
+}
+
+impl IsCacheable for PrimMode {
     fn is_cacheable(&self) -> bool {
         self.pair.is_cacheable()
             && self.abstract1.is_cacheable()

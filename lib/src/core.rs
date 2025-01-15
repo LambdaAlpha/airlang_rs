@@ -32,7 +32,7 @@ use crate::{
         },
     },
     func::FuncTrait,
-    mode::form::{
+    mode::symbol::{
         LITERAL,
         MOVE,
         REF,

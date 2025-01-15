@@ -12,13 +12,13 @@ use crate::{
     ctx::ref1::CtxMeta,
     mode::{
         eval::Eval,
-        form::{
-            Form,
+        form::Form,
+        id::Id,
+        symbol::{
             LITERAL,
             MOVE,
             REF,
         },
-        id::Id,
     },
     transformer::{
         ByVal,
@@ -38,34 +38,34 @@ pub(crate) const EVAL_REF: &str = concatcp!(EVAL, REF);
 pub(crate) const EVAL_MOVE: &str = concatcp!(EVAL, MOVE);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum PrimitiveMode {
-    Id,
+pub enum UniMode {
+    Id(Id),
     Form(Form),
     Eval(Eval),
 }
 
-impl Transformer<Val, Val> for PrimitiveMode {
+impl Transformer<Val, Val> for UniMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform(ctx, input),
-            PrimitiveMode::Form(mode) => mode.transform(ctx, input),
-            PrimitiveMode::Eval(mode) => mode.transform(ctx, input),
+            UniMode::Id(mode) => mode.transform(ctx, input),
+            UniMode::Form(mode) => mode.transform(ctx, input),
+            UniMode::Eval(mode) => mode.transform(ctx, input),
         }
     }
 }
 
-impl ByVal<Val> for PrimitiveMode {
+impl ByVal<Val> for UniMode {
     fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_default(ctx, input),
-            PrimitiveMode::Form(mode) => mode.transform_default(ctx, input),
-            PrimitiveMode::Eval(mode) => mode.transform_default(ctx, input),
+            UniMode::Id(mode) => mode.transform_default(ctx, input),
+            UniMode::Form(mode) => mode.transform_default(ctx, input),
+            UniMode::Eval(mode) => mode.transform_default(ctx, input),
         }
     }
 
@@ -74,9 +74,9 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_symbol(ctx, symbol),
-            PrimitiveMode::Form(mode) => mode.transform_symbol(ctx, symbol),
-            PrimitiveMode::Eval(mode) => mode.transform_symbol(ctx, symbol),
+            UniMode::Id(mode) => mode.transform_symbol(ctx, symbol),
+            UniMode::Form(mode) => mode.transform_symbol(ctx, symbol),
+            UniMode::Eval(mode) => mode.transform_symbol(ctx, symbol),
         }
     }
 
@@ -85,9 +85,9 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_pair(ctx, pair),
-            PrimitiveMode::Form(mode) => mode.transform_pair(ctx, pair),
-            PrimitiveMode::Eval(mode) => mode.transform_pair(ctx, pair),
+            UniMode::Id(mode) => mode.transform_pair(ctx, pair),
+            UniMode::Form(mode) => mode.transform_pair(ctx, pair),
+            UniMode::Eval(mode) => mode.transform_pair(ctx, pair),
         }
     }
 
@@ -96,9 +96,9 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_call(ctx, call),
-            PrimitiveMode::Form(mode) => mode.transform_call(ctx, call),
-            PrimitiveMode::Eval(mode) => mode.transform_call(ctx, call),
+            UniMode::Id(mode) => mode.transform_call(ctx, call),
+            UniMode::Form(mode) => mode.transform_call(ctx, call),
+            UniMode::Eval(mode) => mode.transform_call(ctx, call),
         }
     }
 
@@ -107,9 +107,9 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_abstract(ctx, abstract1),
-            PrimitiveMode::Form(mode) => mode.transform_abstract(ctx, abstract1),
-            PrimitiveMode::Eval(mode) => mode.transform_abstract(ctx, abstract1),
+            UniMode::Id(mode) => mode.transform_abstract(ctx, abstract1),
+            UniMode::Form(mode) => mode.transform_abstract(ctx, abstract1),
+            UniMode::Eval(mode) => mode.transform_abstract(ctx, abstract1),
         }
     }
 
@@ -118,9 +118,9 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_ask(ctx, ask),
-            PrimitiveMode::Form(mode) => mode.transform_ask(ctx, ask),
-            PrimitiveMode::Eval(mode) => mode.transform_ask(ctx, ask),
+            UniMode::Id(mode) => mode.transform_ask(ctx, ask),
+            UniMode::Form(mode) => mode.transform_ask(ctx, ask),
+            UniMode::Eval(mode) => mode.transform_ask(ctx, ask),
         }
     }
 
@@ -129,9 +129,9 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_list(ctx, list),
-            PrimitiveMode::Form(mode) => mode.transform_list(ctx, list),
-            PrimitiveMode::Eval(mode) => mode.transform_list(ctx, list),
+            UniMode::Id(mode) => mode.transform_list(ctx, list),
+            UniMode::Form(mode) => mode.transform_list(ctx, list),
+            UniMode::Eval(mode) => mode.transform_list(ctx, list),
         }
     }
 
@@ -140,15 +140,15 @@ impl ByVal<Val> for PrimitiveMode {
         Ctx: CtxMeta<'a>,
     {
         match self {
-            PrimitiveMode::Id => Id.transform_map(ctx, map),
-            PrimitiveMode::Form(mode) => mode.transform_map(ctx, map),
-            PrimitiveMode::Eval(mode) => mode.transform_map(ctx, map),
+            UniMode::Id(mode) => mode.transform_map(ctx, map),
+            UniMode::Form(mode) => mode.transform_map(ctx, map),
+            UniMode::Eval(mode) => mode.transform_map(ctx, map),
         }
     }
 }
 
-impl Default for PrimitiveMode {
+impl Default for UniMode {
     fn default() -> Self {
-        PrimitiveMode::Eval(Eval::default())
+        UniMode::Eval(Eval::default())
     }
 }
