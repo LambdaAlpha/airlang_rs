@@ -14,10 +14,9 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        id_mode,
         named_free_fn,
         named_mut_fn,
-        pair_mode,
+        ref_pair_mode,
     },
     syntax::PAIR_STR,
     types::either::Either,
@@ -76,7 +75,7 @@ fn fn_new(input: Val) -> Val {
 fn get_first() -> Named<FuncVal> {
     let id = "pair.first";
     let f = fn_get_first;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -89,7 +88,11 @@ fn get_first() -> Named<FuncVal> {
 }
 
 fn fn_get_first(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Pair(pair) => pair.first.clone(),
             _ => Val::default(),
@@ -104,7 +107,7 @@ fn fn_get_first(ctx: MutFnCtx, input: Val) -> Val {
 fn set_first() -> Named<FuncVal> {
     let id = "pair.set_first";
     let f = fn_set_first;
-    let call = pair_mode(id_mode(), Mode::default());
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -138,7 +141,7 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
 fn get_second() -> Named<FuncVal> {
     let id = "pair.second";
     let f = fn_get_second;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -151,7 +154,11 @@ fn get_second() -> Named<FuncVal> {
 }
 
 fn fn_get_second(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Pair(pair) => pair.second.clone(),
             _ => Val::default(),
@@ -165,7 +172,7 @@ fn fn_get_second(ctx: MutFnCtx, input: Val) -> Val {
 
 fn set_second() -> Named<FuncVal> {
     let id = "pair.set_second";
-    let call = pair_mode(id_mode(), Mode::default());
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

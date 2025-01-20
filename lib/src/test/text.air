@@ -1,6 +1,6 @@
 length push
 -----
-do [t = any ; text, l = text.length ; t, t text.push "a", (text.length t) == l + 1]
+do [t = any ; text, l = t text.length ., t text.push "a", (t text.length .) == l + 1]
 -----
 true
 =====
@@ -8,11 +8,11 @@ length join
 -----
 do [
     a = any ; text,
-    la = text.length ; a,
+    la = a text.length .,
     b = any ; text,
-    lb = text.length ; b,
+    lb = b text.length .,
     ab = . text.join [^a, ^b],
-    lab = text.length ; ab,
+    lab = ab text.length .,
     lab == la + lb
 ]
 -----
@@ -20,19 +20,19 @@ true
 =====
 length empty
 -----
-text.length ""
+"" text.length .
 -----
 "" : 0
 =====
 length else
 -----
-text.length "1"
+"1" text.length .
 -----
 "1" : 1
 =====
 length ref
 -----
-do [a = "12", text.length a]
+do [a = "12", a text.length .]
 -----
 2
 =====

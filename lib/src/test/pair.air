@@ -16,7 +16,7 @@ do [
     f = any ; .,
     s = any ; .,
     p = f ':' s,
-    (f == pair.first ; p) and (s == pair.second ; p)
+    (f == p pair.first .) and (s == p pair.second .)
 ]
 -----
 true
@@ -29,7 +29,7 @@ do [
     s = any ; .,
     p pair.set_first f,
     p pair.set_second s,
-    (f == pair.first ; p) and (s == pair.second ; p)
+    (f == p pair.first .) and (s == p pair.second .)
 ]
 -----
 true

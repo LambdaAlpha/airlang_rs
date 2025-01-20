@@ -6,7 +6,7 @@ true
 =====
 
 -----
-type_of extension.unit
+extension.unit type .
 -----
 extension
 =====
@@ -24,13 +24,13 @@ func_ext 2
 =====
 
 -----
-type_of func_ext
+func_ext type .
 -----
 function
 =====
 
 -----
-function.is_extension func_ext
+func_ext function.is_extension .
 -----
 true
 =====
@@ -60,6 +60,6 @@ call.apply ; func_ext ';' 1
 =====
 
 -----
-do [p = case.cache ; func_ext ; true, case.is_cache p]
+do [p = case.cache ; func_ext ; true, p case.is_cache .]
 -----
 true

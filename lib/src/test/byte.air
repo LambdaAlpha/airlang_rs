@@ -1,6 +1,6 @@
 length push
 -----
-do [b = any ; byte, l = byte.length ; b, b byte.push byte(00), (byte.length b) == l + 1]
+do [b = any ; byte, l = b byte.length ., b byte.push byte(00), (b byte.length .) == l + 1]
 -----
 true
 =====
@@ -8,11 +8,11 @@ length join
 -----
 do [
     a = any ; byte,
-    la = byte.length ; a,
+    la = a byte.length .,
     b = any ; byte,
-    lb = byte.length ; b,
+    lb = b byte.length .,
     ab = . byte.join [^a, ^b],
-    lab = byte.length ; ab,
+    lab = ab byte.length .,
     lab == la + lb
 ]
 -----
@@ -20,19 +20,19 @@ true
 =====
 length empty
 -----
-byte.length byte()
+byte() byte.length .
 -----
 byte() : 0
 =====
 length else
 -----
-byte.length byte(ff)
+byte(ff) byte.length .
 -----
 byte(ff) : 1
 =====
 length ref
 -----
-do [a = byte(aa00), byte.length a]
+do [a = byte(aa00), a byte.length .]
 -----
 2
 =====

@@ -6,7 +6,6 @@ use crate::{
     ctx::{
         Ctx,
         CtxValue,
-        DynRef,
         const1::{
             ConstCtx,
             ConstFnCtx,
@@ -41,6 +40,7 @@ use crate::{
         Named,
         Prelude,
         form_mode,
+        id_mode,
         initial_ctx,
         named_const_fn,
         named_free_fn,
@@ -50,6 +50,7 @@ use crate::{
     },
     symbol::Symbol,
     transformer::Transformer,
+    types::either::Either,
     utils::val::symbol,
     val::{
         Val,
@@ -435,7 +436,7 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = fn_with_ctx;
-    let call = pair_mode(symbol_literal_mode(), form_mode(PrefixMode::Ref));
+    let call = pair_mode(id_mode(), form_mode(PrefixMode::Ref));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -453,27 +454,27 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     let val = pair.second;
-    let target_ctx = match pair.first {
-        Val::Unit(_) => MutFnCtx::Free(FreeCtx),
-        Val::Symbol(name) => {
-            let Ok(ctx) = ctx.get_variables_dyn() else {
-                return Val::default();
-            };
-            let Ok(DynRef { ref1, is_const }) = ctx.ref1.get_ref_dyn(name) else {
-                return Val::default();
-            };
-            let Val::Ctx(target_ctx) = ref1 else {
-                return Val::default();
-            };
-            if ctx.is_const || is_const {
-                MutFnCtx::Const(ConstCtx::new(target_ctx))
-            } else {
-                MutFnCtx::Mut(MutCtx::new(target_ctx))
+    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| {
+        let target_ctx = match ref_or_val {
+            Either::This(dyn_ref) => {
+                let Val::Ctx(target_ctx) = dyn_ref.ref1 else {
+                    return Val::default();
+                };
+                if dyn_ref.is_const {
+                    MutFnCtx::Const(ConstCtx::new(target_ctx))
+                } else {
+                    MutFnCtx::Mut(MutCtx::new(target_ctx))
+                }
             }
-        }
-        _ => return Val::default(),
-    };
-    EVAL.transform(target_ctx, val)
+            Either::That(val) => {
+                if !val.is_unit() {
+                    return Val::default();
+                }
+                MutFnCtx::Free(FreeCtx)
+            }
+        };
+        EVAL.transform(target_ctx, val)
+    })
 }
 
 fn ctx_in_ctx_out() -> Named<FuncVal> {

@@ -196,7 +196,7 @@ impl DefaultCtx {
             }
             Either::That(mut val) => {
                 f(&mut val);
-                val
+                Val::Pair(Pair::new(val, Val::default()).into())
             }
         }
     }

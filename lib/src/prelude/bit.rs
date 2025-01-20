@@ -4,6 +4,7 @@ use crate::{
     Map,
     Mode,
     MutFnCtx,
+    Pair,
     Symbol,
     ctx::{
         CtxValue,
@@ -12,9 +13,9 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        id_mode,
         named_free_fn,
         named_mut_fn,
+        ref_pair_mode,
     },
     val::{
         Val,
@@ -62,7 +63,7 @@ impl Prelude for BitPrelude {
 fn is_true() -> Named<FuncVal> {
     let id = "is_true";
     let f = fn_is_true;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -75,7 +76,11 @@ fn is_true() -> Named<FuncVal> {
 }
 
 fn fn_is_true(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Bit(b) = val else {
             return Val::Bit(Bit::false1());
         };
@@ -86,7 +91,7 @@ fn fn_is_true(ctx: MutFnCtx, input: Val) -> Val {
 fn is_false() -> Named<FuncVal> {
     let id = "is_false";
     let f = fn_is_false;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -99,7 +104,11 @@ fn is_false() -> Named<FuncVal> {
 }
 
 fn fn_is_false(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Bit(b) = val else {
             return Val::Bit(Bit::false1());
         };

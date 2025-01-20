@@ -296,6 +296,10 @@ pub(crate) fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode) -> Mode {
     Mode::Comp(Box::new(mode))
 }
 
+pub(crate) fn ref_pair_mode() -> Mode {
+    pair_mode(id_mode(), Mode::default())
+}
+
 mod unit;
 
 mod bit;

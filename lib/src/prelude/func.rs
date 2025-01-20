@@ -4,6 +4,7 @@ use crate::{
     FuncMode,
     Id,
     MutFnCtx,
+    Pair,
     PrefixMode,
     bit::Bit,
     ctx::{
@@ -42,9 +43,9 @@ use crate::{
         Named,
         Prelude,
         form_mode,
-        id_mode,
         named_free_fn,
         named_mut_fn,
+        ref_pair_mode,
         symbol_literal_mode,
     },
     symbol::Symbol,
@@ -271,7 +272,7 @@ fn fn_repr(input: Val) -> Val {
 fn ctx_access() -> Named<FuncVal> {
     let id = "function.context_access";
     let f = fn_ctx_access;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
     let mode = FuncMode {
@@ -284,7 +285,11 @@ fn ctx_access() -> Named<FuncVal> {
 }
 
 fn fn_ctx_access(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -310,7 +315,7 @@ fn fn_ctx_access(ctx: MutFnCtx, input: Val) -> Val {
 fn call_mode() -> Named<FuncVal> {
     let id = "function.call_mode";
     let f = fn_call_mode;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -323,7 +328,11 @@ fn call_mode() -> Named<FuncVal> {
 }
 
 fn fn_call_mode(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -335,7 +344,7 @@ fn fn_call_mode(ctx: MutFnCtx, input: Val) -> Val {
 fn abstract_mode() -> Named<FuncVal> {
     let id = "function.abstract_mode";
     let f = fn_abstract_mode;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -348,7 +357,11 @@ fn abstract_mode() -> Named<FuncVal> {
 }
 
 fn fn_abstract_mode(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -360,7 +373,7 @@ fn fn_abstract_mode(ctx: MutFnCtx, input: Val) -> Val {
 fn ask_mode() -> Named<FuncVal> {
     let id = "function.ask_mode";
     let f = fn_ask_mode;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -373,7 +386,11 @@ fn ask_mode() -> Named<FuncVal> {
 }
 
 fn fn_ask_mode(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -385,7 +402,7 @@ fn fn_ask_mode(ctx: MutFnCtx, input: Val) -> Val {
 fn is_cacheable() -> Named<FuncVal> {
     let id = "function.is_cacheable";
     let f = fn_is_cacheable;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -398,7 +415,11 @@ fn is_cacheable() -> Named<FuncVal> {
 }
 
 fn fn_is_cacheable(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -410,7 +431,7 @@ fn fn_is_cacheable(ctx: MutFnCtx, input: Val) -> Val {
 fn is_primitive() -> Named<FuncVal> {
     let id = "function.is_primitive";
     let f = fn_is_primitive;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -423,7 +444,11 @@ fn is_primitive() -> Named<FuncVal> {
 }
 
 fn fn_is_primitive(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -435,7 +460,7 @@ fn fn_is_primitive(ctx: MutFnCtx, input: Val) -> Val {
 fn is_extension() -> Named<FuncVal> {
     let id = "function.is_extension";
     let f = fn_is_extension;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -448,7 +473,11 @@ fn is_extension() -> Named<FuncVal> {
 }
 
 fn fn_is_extension(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -462,7 +491,7 @@ fn fn_is_extension(ctx: MutFnCtx, input: Val) -> Val {
 fn is_cell() -> Named<FuncVal> {
     let id = "function.is_cell";
     let f = fn_is_cell;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -475,7 +504,11 @@ fn is_cell() -> Named<FuncVal> {
 }
 
 fn fn_is_cell(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -486,7 +519,7 @@ fn fn_is_cell(ctx: MutFnCtx, input: Val) -> Val {
 fn is_mode() -> Named<FuncVal> {
     let id = "function.is_mode";
     let f = fn_is_mode;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -499,7 +532,11 @@ fn is_mode() -> Named<FuncVal> {
 }
 
 fn fn_is_mode(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -510,7 +547,7 @@ fn fn_is_mode(ctx: MutFnCtx, input: Val) -> Val {
 fn id() -> Named<FuncVal> {
     let id = "function.id";
     let f = fn_id;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
     let mode = FuncMode {
@@ -523,7 +560,11 @@ fn id() -> Named<FuncVal> {
 }
 
 fn fn_id(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -537,7 +578,7 @@ fn fn_id(ctx: MutFnCtx, input: Val) -> Val {
 fn body_mode() -> Named<FuncVal> {
     let id = "function.body_mode";
     let f = fn_body_mode;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -550,7 +591,11 @@ fn body_mode() -> Named<FuncVal> {
 }
 
 fn fn_body_mode(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -566,7 +611,7 @@ fn fn_body_mode(ctx: MutFnCtx, input: Val) -> Val {
 fn body() -> Named<FuncVal> {
     let id = "function.body";
     let f = fn_body;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = form_mode(PrefixMode::Ref);
     let mode = FuncMode {
@@ -579,7 +624,11 @@ fn body() -> Named<FuncVal> {
 }
 
 fn fn_body(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -593,7 +642,7 @@ fn fn_body(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx() -> Named<FuncVal> {
     let id = "function.context";
     let f = fn_ctx;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -606,7 +655,11 @@ fn ctx() -> Named<FuncVal> {
 }
 
 fn fn_ctx(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -620,7 +673,7 @@ fn fn_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn input_name() -> Named<FuncVal> {
     let id = "function.input_name";
     let f = fn_input_name;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
     let mode = FuncMode {
@@ -633,7 +686,11 @@ fn input_name() -> Named<FuncVal> {
 }
 
 fn fn_input_name(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -647,7 +704,7 @@ fn fn_input_name(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_name() -> Named<FuncVal> {
     let id = "function.context_name";
     let f = fn_ctx_name;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
     let mode = FuncMode {
@@ -660,7 +717,11 @@ fn ctx_name() -> Named<FuncVal> {
 }
 
 fn fn_ctx_name(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };

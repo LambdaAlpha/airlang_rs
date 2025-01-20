@@ -1,11 +1,13 @@
 use crate::{
     Cache,
     Call,
+    CallMode,
     Case,
     CaseVal,
+    CompMode,
     FuncMode,
     Mode,
-    PrefixMode,
+    Pair,
     Symbol,
     Val,
     bit::Bit,
@@ -20,11 +22,12 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        form_mode,
         id_mode,
         map_mode,
         named_free_fn,
         named_mut_fn,
+        ref_pair_mode,
+        symbol_literal_mode,
     },
     utils::val::{
         map_remove,
@@ -82,10 +85,9 @@ fn new() -> Named<FuncVal> {
     let id = "case";
     let f = fn_new;
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), id_mode());
     map.insert(symbol(OUTPUT), id_mode());
-    let call = map_mode(map, Mode::default(), Mode::default());
+    let call = map_mode(map, symbol_literal_mode(), Mode::default());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -113,7 +115,10 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
 fn new_cache() -> Named<FuncVal> {
     let id = "case.cache";
     let f = fn_new_cache;
-    let call = form_mode(PrefixMode::Ref);
+    let call = Mode::Comp(Box::new(CompMode {
+        call: CallMode::Form(Call::new(Mode::default(), Mode::default())),
+        ..CompMode::default()
+    }));
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -143,11 +148,9 @@ fn repr() -> Named<FuncVal> {
     let call = Mode::default();
     let abstract1 = call.clone();
     let mut map = Map::default();
-    map.insert(symbol(FUNCTION), Mode::default());
     map.insert(symbol(INPUT), id_mode());
     map.insert(symbol(OUTPUT), id_mode());
-    map.insert(symbol(IS_CACHE), Mode::default());
-    let ask = map_mode(map, Mode::default(), Mode::default());
+    let ask = map_mode(map, symbol_literal_mode(), Mode::default());
     let mode = FuncMode {
         call,
         abstract1,
@@ -178,7 +181,7 @@ fn generate_case(repr: &mut MapVal, case: &CaseVal) {
 fn is_cache() -> Named<FuncVal> {
     let id = "case.is_cache";
     let f = fn_is_cache;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -191,7 +194,11 @@ fn is_cache() -> Named<FuncVal> {
 }
 
 fn fn_is_cache(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };
@@ -202,7 +209,7 @@ fn fn_is_cache(ctx: MutFnCtx, input: Val) -> Val {
 fn func() -> Named<FuncVal> {
     let id = "case.function";
     let f = fn_func;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -215,7 +222,11 @@ fn func() -> Named<FuncVal> {
 }
 
 fn fn_func(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };
@@ -226,7 +237,7 @@ fn fn_func(ctx: MutFnCtx, input: Val) -> Val {
 fn input() -> Named<FuncVal> {
     let id = "case.input";
     let f = fn_input;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -239,7 +250,11 @@ fn input() -> Named<FuncVal> {
 }
 
 fn fn_input(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };
@@ -250,7 +265,7 @@ fn fn_input(ctx: MutFnCtx, input: Val) -> Val {
 fn output() -> Named<FuncVal> {
     let id = "case.output";
     let f = fn_output;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -263,7 +278,11 @@ fn output() -> Named<FuncVal> {
 }
 
 fn fn_output(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Case(case) = val else {
             return Val::default();
         };

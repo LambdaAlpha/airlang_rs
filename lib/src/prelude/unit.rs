@@ -4,6 +4,7 @@ use crate::{
     Map,
     Mode,
     MutFnCtx,
+    Pair,
     Symbol,
     Val,
     ctx::{
@@ -13,9 +14,9 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        id_mode,
         named_free_fn,
         named_mut_fn,
+        ref_pair_mode,
     },
     unit::Unit,
     val::func::FuncVal,
@@ -58,7 +59,7 @@ fn fn_unit(_input: Val) -> Val {
 fn is_unit() -> Named<FuncVal> {
     let id = "is_unit";
     let f = fn_is_unit;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -71,5 +72,9 @@ fn is_unit() -> Named<FuncVal> {
 }
 
 fn fn_is_unit(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref(ctx, input, |val| Val::Bit(Bit::new(val.is_unit())))
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| Val::Bit(Bit::new(val.is_unit())))
 }

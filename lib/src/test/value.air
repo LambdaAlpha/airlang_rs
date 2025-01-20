@@ -1,192 +1,192 @@
 
 -----
-do [u = any ; unit, type_of u]
+do [u = any ; unit, u type .]
 -----
 unit
 =====
 
 -----
-do [b = any ; bit, type_of b]
+do [b = any ; bit, b type .]
 -----
 bit
 =====
 
 -----
-do [i = any ; integer, type_of i]
+do [i = any ; integer, i type .]
 -----
 integer
 =====
 
 -----
-do [n = any ; number, type_of n]
+do [n = any ; number, n type .]
 -----
 number
 =====
 
 -----
-do [b = any ; byte, type_of b]
+do [b = any ; byte, b type .]
 -----
 byte
 =====
 
 -----
-do [s = any ; symbol, type_of s]
+do [s = any ; symbol, s type .]
 -----
 symbol
 =====
 
 -----
-do [t = any ; text, type_of t]
+do [t = any ; text, t type .]
 -----
 text
 =====
 
 -----
-do [p = any ; pair, type_of p]
+do [p = any ; pair, p type .]
 -----
 pair
 =====
 
 -----
-do [c = any ; call, type_of c]
+do [c = any ; call, c type .]
 -----
 call
 =====
 
 -----
-do [a = any ; ask, type_of a]
+do [a = any ; ask, a type .]
 -----
 ask
 =====
 
 -----
-do [a = any ; abstract, type_of a]
+do [a = any ; abstract, a type .]
 -----
 abstract
 =====
 
 -----
-do [c = any ; context, type_of c]
+do [c = any ; context, c type .]
 -----
 context
 =====
 
 -----
-do [f = any ; function, type_of f]
+do [f = any ; function, f type .]
 -----
 function
 =====
 
 -----
-do [c = any ; case, type_of c]
+do [c = any ; case, c type .]
 -----
 case
 =====
 
 -----
-do [e = any ; extension, type_of e]
+do [e = any ; extension, e type .]
 -----
 extension
 =====
 
 -----
-do [a = ., type_of a]
+do [a = ., a type .]
 -----
 unit
 =====
 
 -----
-do [a = true, type_of a]
+do [a = true, a type .]
 -----
 bit
 =====
 
 -----
-do [a = 1, type_of a]
+do [a = 1, a type .]
 -----
 integer
 =====
 
 -----
-do [a = 1.0, type_of a]
+do [a = 1.0, a type .]
 -----
 number
 =====
 
 -----
-do [a = byte(ff), type_of a]
+do [a = byte(ff), a type .]
 -----
 byte
 =====
 
 -----
-do [a = .a, type_of a]
+do [a = .a, a type .]
 -----
 symbol
 =====
 
 -----
-do [a = "", type_of a]
+do [a = "", a type .]
 -----
 text
 =====
 
 -----
-do [a = 1 : 2, type_of a]
+do [a = 1 : 2, a type .]
 -----
 pair
 =====
 
 -----
-do [a = id ; f ; a, type_of a]
+do [a = id ; f ; a, a type .]
 -----
 call
 =====
 
 -----
-do [a = id ; f ? a, type_of a]
+do [a = id ; f ? a, a type .]
 -----
 ask
 =====
 
 -----
-do [c = id ; n ! v, type_of c]
+do [c = id ; n ! v, c type .]
 -----
 abstract
 =====
 
 -----
-do [a = [], type_of a]
+do [a = [], a type .]
 -----
 list
 =====
 
 -----
-do [a = {}, type_of a]
+do [a = {}, a type .]
 -----
 map
 =====
 
 -----
-do [a = function ; {body : *input}, type_of a]
+do [a = function ; {body : *input}, a type .]
 -----
 function
 =====
 
 -----
-do [a = context ; {}, type_of a]
+do [a = context ; {}, a type .]
 -----
 context
 =====
 
 -----
-do [a = case ; {function : not, input : true, output : false}, type_of a]
+do [a = case ; {function : not, input : true, output : false}, a type .]
 -----
 case
 =====
 
 -----
-do [a = case.cache ; not ; true, type_of a]
+do [a = case.cache ; not ; true, a type .]
 -----
 case
 =====

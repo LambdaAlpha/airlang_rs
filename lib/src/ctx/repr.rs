@@ -55,8 +55,6 @@ pub(crate) fn parse_mode() -> Mode {
         symbol(VARIABLES),
         map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
     );
-    map.insert(symbol(REVERSE), Mode::default());
-    map.insert(symbol(SOLVER), Mode::default());
     map_mode(map, symbol_literal_mode(), Mode::default())
 }
 
@@ -163,8 +161,6 @@ pub(crate) fn generate_mode() -> Mode {
         symbol(VARIABLES),
         map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
     );
-    map.insert(symbol(REVERSE), Mode::default());
-    map.insert(symbol(SOLVER), Mode::default());
     map_mode(map, symbol_literal_mode(), Mode::default())
 }
 

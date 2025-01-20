@@ -6,12 +6,12 @@ unit ; any ; .
 =====
 is_unit
 -----
-do [a = any ; ., (a == .) == is_unit ; a]
+do [a = any ; ., (a == .) == a is_unit .]
 -----
 true
 =====
-is_unit .
+. is_unit .
 -----
-is_unit .
+. is_unit .
 -----
-true
+. : true

@@ -16,7 +16,7 @@ do [
     f = any ; .,
     i = any ; .,
     c = f ';' i,
-    (f == call.function ; c) and (i == call.input ; c)
+    (f == c call.function .) and (i == c call.input .)
 ]
 -----
 true
@@ -29,7 +29,7 @@ do [
     i = any ; .,
     c call.set_function f,
     c call.set_input i,
-    (f == call.function ; c) and (i == call.input ; c)
+    (f == c call.function .) and (i == c call.input .)
 ]
 -----
 true
@@ -49,19 +49,19 @@ true
 =====
 ;; id
 -----
-do [a = (function {call_mode : id}) ;; b, call.input a]
+do [a = (function {call_mode : id}) ;; b, a call.input .]
 -----
 b
 =====
 ;; form.
 -----
-do [a = (function {call_mode : form.}) ;; .b, call.input a]
+do [a = (function {call_mode : form.}) ;; .b, a call.input .]
 -----
 b
 =====
 ;; eval*
 -----
-do [a = (function {call_mode : eval*}) ;; id ; b, call.input a]
+do [a = (function {call_mode : eval*}) ;; id ; b, a call.input .]
 -----
 b
 =====

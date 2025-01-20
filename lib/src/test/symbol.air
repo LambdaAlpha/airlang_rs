@@ -2,11 +2,11 @@ length join
 -----
 do [
     a = any ; symbol,
-    la = symbol.length ; a,
+    la = a symbol.length .,
     b = any ; symbol,
-    lb = symbol.length ; b,
+    lb = b symbol.length .,
     ab = . symbol.join [^a, ^b],
-    lab = symbol.length ; ab,
+    lab = ab symbol.length .,
     lab == la + lb
 ]
 -----
@@ -14,19 +14,19 @@ true
 =====
 length empty
 -----
-symbol.length '.'
+'.' symbol.length .
 -----
 '' : 0
 =====
 length else
 -----
-symbol.length .a
+.a symbol.length .
 -----
 a : 1
 =====
 length ref
 -----
-do [a = .abc, symbol.length a]
+do [a = .abc, a symbol.length .]
 -----
 3
 =====

@@ -5,6 +5,7 @@ use crate::{
     Int,
     List,
     Map,
+    MapMode,
     Mode,
     Pair,
     PrefixMode,
@@ -26,10 +27,7 @@ use crate::{
         Prelude,
         form_mode,
         id_mode,
-        map_mode,
         named_mut_fn,
-        pair_mode,
-        symbol_literal_mode,
     },
     transformer::Transformer,
     val::{
@@ -149,7 +147,7 @@ fn if1() -> Named<FuncVal> {
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    let call = pair_mode(Mode::default(), id_mode());
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -161,7 +159,7 @@ fn if1() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_if<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_if<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {
@@ -169,10 +167,10 @@ where
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let condition = pair.first;
     let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
+    let condition = EVAL.transform(ctx.reborrow(), pair.first);
     let Val::Bit(b) = condition else {
         return Val::default();
     };
@@ -192,7 +190,7 @@ fn if_not() -> Named<FuncVal> {
         |ctx, val| fn_if_not(ctx, val),
         |ctx, val| fn_if_not(ctx, val),
     );
-    let call = pair_mode(Mode::default(), id_mode());
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -204,7 +202,7 @@ fn if_not() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_if_not<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_if_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {
@@ -212,10 +210,10 @@ where
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let condition = pair.first;
     let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
+    let condition = EVAL.transform(ctx.reborrow(), pair.first);
     let Val::Bit(b) = condition else {
         return Val::default();
     };
@@ -235,9 +233,7 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    let map = map_mode(Map::default(), form_mode(PrefixMode::Ref), id_mode());
-    let map_default = pair_mode(map, id_mode());
-    let call = pair_mode(Mode::default(), map_default);
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -249,7 +245,7 @@ fn match1() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_match<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {
@@ -257,7 +253,7 @@ where
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let val = pair.first;
+    let val = EVAL.transform(ctx.reborrow(), pair.first);
     let Val::Pair(pair) = pair.second else {
         return Val::default();
     };
@@ -265,6 +261,12 @@ where
     let Val::Map(map) = pair.first else {
         return Val::default();
     };
+    let map_mode = MapMode::Form {
+        some: Map::default(),
+        else1: Pair::new(form_mode(PrefixMode::Ref), id_mode()),
+    };
+    let map = map_mode.transform(ctx.reborrow(), map);
+    let Val::Map(map) = map else { unreachable!() };
     let default = pair.second;
     let mut map = Map::from(map);
     let eval = map.remove(&val).unwrap_or(default);
@@ -278,7 +280,7 @@ fn match_ordered() -> Named<FuncVal> {
         |ctx, val| fn_match_ordered(ctx, val),
         |ctx, val| fn_match_ordered(ctx, val),
     );
-    let call = pair_mode(Mode::default(), id_mode());
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -298,7 +300,7 @@ where
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let val = pair.first;
+    let val = EVAL.transform(ctx.reborrow(), pair.first);
     let Val::Pair(pair) = pair.second else {
         return Val::default();
     };
@@ -469,7 +471,7 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    let call = pair_mode(Mode::default(), pair_mode(symbol_literal_mode(), id_mode()));
+    let call = id_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -481,7 +483,7 @@ fn for1() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_for<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_for<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where
     Ctx: CtxMeta<'a>,
 {
@@ -489,7 +491,7 @@ where
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let iterable = pair.first;
+    let iterable = EVAL.transform(ctx.reborrow(), pair.first);
     let Val::Pair(name_body) = pair.second else {
         return Val::default();
     };

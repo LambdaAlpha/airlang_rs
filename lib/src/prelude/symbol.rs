@@ -5,6 +5,7 @@ use crate::{
     Map,
     Mode,
     MutFnCtx,
+    Pair,
     Symbol,
     Text,
     Val,
@@ -15,9 +16,9 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        id_mode,
         named_free_fn,
         named_mut_fn,
+        ref_pair_mode,
     },
 };
 
@@ -87,7 +88,7 @@ fn fn_into_text(input: Val) -> Val {
 fn length() -> Named<FuncVal> {
     let id = "symbol.length";
     let f = fn_length;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -100,7 +101,11 @@ fn length() -> Named<FuncVal> {
 }
 
 fn fn_length(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Symbol(symbol) = val else {
             return Val::default();
         };

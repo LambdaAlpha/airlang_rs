@@ -47,6 +47,7 @@ use crate::{
         named_free_fn,
         named_mut_fn,
         pair_mode,
+        ref_pair_mode,
         symbol_literal_mode,
     },
     symbol::Symbol,
@@ -76,7 +77,7 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct ValuePrelude {
     pub(crate) any: Named<FuncVal>,
-    pub(crate) type_of: Named<FuncVal>,
+    pub(crate) type1: Named<FuncVal>,
     pub(crate) equal: Named<FuncVal>,
     pub(crate) not_equal: Named<FuncVal>,
 }
@@ -85,7 +86,7 @@ impl Default for ValuePrelude {
     fn default() -> Self {
         ValuePrelude {
             any: any(),
-            type_of: type_of(),
+            type1: type1(),
             equal: equal(),
             not_equal: not_equal(),
         }
@@ -95,7 +96,7 @@ impl Default for ValuePrelude {
 impl Prelude for ValuePrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.any.put(m);
-        self.type_of.put(m);
+        self.type1.put(m);
         self.equal.put(m);
         self.not_equal.put(m);
     }
@@ -146,10 +147,10 @@ fn fn_any(input: Val) -> Val {
     }
 }
 
-fn type_of() -> Named<FuncVal> {
-    let id = "type_of";
-    let f = fn_type_of;
-    let call = id_mode();
+fn type1() -> Named<FuncVal> {
+    let id = "type";
+    let f = fn_type1;
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
     let mode = FuncMode {
@@ -161,8 +162,12 @@ fn type_of() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_type_of(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_ref_lossless(ctx, input, |val| {
+fn fn_type1(ctx: MutFnCtx, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
             Val::Bit(_) => BIT,

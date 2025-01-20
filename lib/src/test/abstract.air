@@ -16,7 +16,7 @@ do [
     f = any ; .,
     i = any ; .,
     a = f '!' i,
-    (f == abstract.function ; a) and (i == abstract.input ; a)
+    (f == a abstract.function .) and (i == a abstract.input .)
 ]
 -----
 true
@@ -29,7 +29,7 @@ do [
     i = any ; .,
     a abstract.set_function f,
     a abstract.set_input i,
-    (f == abstract.function ; a) and (i == abstract.input ; a)
+    (f == a abstract.function .) and (i == a abstract.input .)
 ]
 -----
 true
@@ -49,19 +49,19 @@ true
 =====
 !! id
 -----
-do [a = (function {abstract_mode : id}) !! b, abstract.input a]
+do [a = (function {abstract_mode : id}) !! b, a abstract.input .]
 -----
 b
 =====
 !! form.
 -----
-do [a = (function {abstract_mode : form.}) !! .b, abstract.input a]
+do [a = (function {abstract_mode : form.}) !! .b, a abstract.input .]
 -----
 b
 =====
 !! eval*
 -----
-do [a = (function {abstract_mode : eval*}) !! id ; b, abstract.input a]
+do [a = (function {abstract_mode : eval*}) !! id ; b, a abstract.input .]
 -----
 b
 =====

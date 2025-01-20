@@ -27,6 +27,7 @@ use crate::{
         named_free_fn,
         named_mut_fn,
         pair_mode,
+        ref_pair_mode,
     },
     syntax::{
         ASK,
@@ -141,7 +142,7 @@ where
 fn get_func() -> Named<FuncVal> {
     let id = "ask.function";
     let f = fn_get_func;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -154,7 +155,11 @@ fn get_func() -> Named<FuncVal> {
 }
 
 fn fn_get_func(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.func.clone(),
             _ => Val::default(),
@@ -169,7 +174,7 @@ fn fn_get_func(ctx: MutFnCtx, input: Val) -> Val {
 fn set_func() -> Named<FuncVal> {
     let id = "ask.set_function";
     let f = fn_set_func;
-    let call = pair_mode(id_mode(), Mode::default());
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -203,7 +208,7 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
 fn get_output() -> Named<FuncVal> {
     let id = "ask.output";
     let f = fn_get_output;
-    let call = id_mode();
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -216,7 +221,11 @@ fn get_output() -> Named<FuncVal> {
 }
 
 fn fn_get_output(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::with_dyn(ctx, input, |ref_or_val| match ref_or_val {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Ask(ask) => ask.output.clone(),
             _ => Val::default(),
@@ -231,7 +240,7 @@ fn fn_get_output(ctx: MutFnCtx, input: Val) -> Val {
 fn set_output() -> Named<FuncVal> {
     let id = "ask.set_output";
     let f = fn_set_output;
-    let call = pair_mode(id_mode(), Mode::default());
+    let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {

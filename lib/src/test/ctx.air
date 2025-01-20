@@ -124,7 +124,7 @@ do [..a = 1, *.a]
 =====
 = special key 2
 -----
-do [..p = 1 : 2, pair.first *.p]
+do [..p = 1 : 2, *.p pair.first .]
 -----
 1
 =====
@@ -497,7 +497,7 @@ true
 do [
     a = context ; {variables : {p : 1 : 2}},
     b = 3,
-    a | pair.set_first ; .p : b,
+    a | .p pair.set_first b,
     a | .^p,
 ]
 -----
@@ -507,7 +507,7 @@ do [
 -----
 do [
     a = context ; {variables : {p : 1 : 2, b : 3}},
-    a | pair.set_first ; .p : .b,
+    a | .p pair.set_first .b,
     a | .^p,
 ]
 -----
@@ -559,7 +559,7 @@ do [a = 1, . | move ; .a, a]
 =====
 free const func
 -----
-. | pair.first ; 1 : 2
+. | (1 : 2) pair.first .
 -----
 1
 =====
@@ -577,7 +577,7 @@ context.represent ; context ; {variables : {a : 1 . .final}}
 =====
 represent non-recursive
 -----
-do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = m map.remove .b, type_of b]
+do [{variables : m} = context.represent ; context ; {variables : {b : context ; {}}}, b = m map.remove .b, b type .]
 -----
 context
 =====

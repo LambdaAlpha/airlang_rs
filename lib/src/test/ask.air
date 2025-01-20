@@ -16,7 +16,7 @@ do [
     f = any ; .,
     o = any ; .,
     a = f '?' o,
-    (f == ask.function ; a) and (o == ask.output ; a)
+    (f == a ask.function .) and (o == a ask.output .)
 ]
 -----
 true
@@ -29,7 +29,7 @@ do [
     o = any ; .,
     a ask.set_function f,
     a ask.set_output o,
-    (f == ask.function ; a) and (o == ask.output ; a)
+    (f == a ask.function .) and (o == a ask.output .)
 ]
 -----
 true
@@ -49,18 +49,18 @@ true
 =====
 ?? id
 -----
-do [a = (function {ask_mode : id}) ?? b, ask.output a]
+do [a = (function {ask_mode : id}) ?? b, a ask.output .]
 -----
 b
 =====
 ?? form.
 -----
-do [a = (function {ask_mode : form.}) ?? .b, ask.output a]
+do [a = (function {ask_mode : form.}) ?? .b, a ask.output .]
 -----
 b
 =====
 ?? eval*
 -----
-do [a = (function {ask_mode : eval*}) ?? id ; b, ask.output a]
+do [a = (function {ask_mode : eval*}) ?? id ; b, a ask.output .]
 -----
 b

@@ -6,7 +6,7 @@ do [
         input : 1,
         output : 2,
     },
-    case.input c
+    c case.input .
 ]
 -----
 1
@@ -19,7 +19,7 @@ do [
         input : 1,
         output : 2,
     },
-    case.output c
+    c case.output .
 ]
 -----
 2
@@ -32,7 +32,7 @@ do [
         input : 1,
         output : 2,
     },
-    (case.function c) == not
+    (c case.function .) == not
 ]
 -----
 true
@@ -45,7 +45,7 @@ do [
         input : 1,
         output : 2,
     },
-    (case.function c) == "not"
+    (c case.function .) == "not"
 ]
 -----
 true
@@ -88,8 +88,8 @@ do [
         input : 1,
         output : 2,
     },
-    tc = type_of ; c,
-    (tc == .case) and not ; (case.is_cache c)
+    tc = c type .,
+    (tc == .case) and not ; c case.is_cache .
 ]
 -----
 true
@@ -98,7 +98,7 @@ true
 -----
 do [
     c = case.cache ; not ; true,
-    case.input c
+    c case.input .
 ]
 -----
 true
@@ -107,7 +107,7 @@ true
 -----
 do [
     c = case.cache ; not ; true,
-    case.output c
+    c case.output .
 ]
 -----
 false
@@ -116,7 +116,7 @@ false
 -----
 do [
     c = case.cache ; not ; true,
-    (case.function c) == not
+    (c case.function .) == not
 ]
 -----
 true
@@ -125,7 +125,7 @@ true
 -----
 do [
     c = case.cache ; not ; true,
-    case.is_cache c
+    c case.is_cache .
 ]
 -----
 true

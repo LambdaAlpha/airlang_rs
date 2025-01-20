@@ -72,36 +72,20 @@ pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Mode {
     let mut map = Map::default();
-    map.insert(symbol(BODY_MODE), Mode::default());
     map.insert(symbol(BODY), form_mode(PrefixMode::Ref));
-    map.insert(symbol(CTX), Mode::default());
     map.insert(symbol(INPUT_NAME), symbol_literal_mode());
     map.insert(symbol(CTX_NAME), symbol_literal_mode());
     map.insert(symbol(CTX_ACCESS), symbol_literal_mode());
-    map.insert(symbol(CALL_MODE), Mode::default());
-    map.insert(symbol(ABSTRACT_MODE), Mode::default());
-    map.insert(symbol(ASK_MODE), Mode::default());
-    map.insert(symbol(CACHEABLE), Mode::default());
-    map.insert(symbol(CELL), Mode::default());
-    map_mode(map, Mode::default(), Mode::default())
+    map_mode(map, symbol_literal_mode(), Mode::default())
 }
 
 pub(crate) fn generate_mode() -> Mode {
     let mut map = Map::default();
-    map.insert(symbol(BODY_MODE), Mode::default());
     map.insert(symbol(BODY), form_mode(PrefixMode::Ref));
-    map.insert(symbol(CTX), Mode::default());
     map.insert(symbol(INPUT_NAME), symbol_literal_mode());
     map.insert(symbol(CTX_NAME), symbol_literal_mode());
     map.insert(symbol(CTX_ACCESS), symbol_literal_mode());
-    map.insert(symbol(CALL_MODE), Mode::default());
-    map.insert(symbol(ABSTRACT_MODE), Mode::default());
-    map.insert(symbol(ASK_MODE), Mode::default());
-    map.insert(symbol(CACHEABLE), Mode::default());
-    map.insert(symbol(ID), Mode::default());
-    map.insert(symbol(IS_EXTENSION), Mode::default());
-    map.insert(symbol(CELL), Mode::default());
-    map_mode(map, Mode::default(), Mode::default())
+    map_mode(map, symbol_literal_mode(), Mode::default())
 }
 
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
