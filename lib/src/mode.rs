@@ -1,4 +1,5 @@
 use crate::{
+    FuncVal,
     Val,
     ctx::{
         mut1::MutFnCtx,
@@ -17,6 +18,7 @@ pub enum Mode {
     Uni(UniMode),
     Prim(PrimMode),
     Comp(Box<CompMode>),
+    Func(FuncVal),
 }
 
 impl Transformer<Val, Val> for Mode {
@@ -28,6 +30,7 @@ impl Transformer<Val, Val> for Mode {
             Mode::Uni(mode) => mode.transform(ctx, input),
             Mode::Prim(mode) => mode.transform(ctx, input),
             Mode::Comp(mode) => mode.transform(ctx, input),
+            Mode::Func(mode) => mode.transform(ctx, input),
         }
     }
 }

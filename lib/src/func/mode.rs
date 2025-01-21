@@ -91,6 +91,7 @@ impl IsCacheable for Mode {
             Mode::Uni(mode) => mode.is_cacheable(),
             Mode::Prim(mode) => mode.is_cacheable(),
             Mode::Comp(mode) => mode.is_cacheable(),
+            Mode::Func(mode) => mode.cacheable(),
         }
     }
 }

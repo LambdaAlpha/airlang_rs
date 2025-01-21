@@ -502,6 +502,25 @@ do [
 -----
 a : b : 1 ; 2
 =====
+mode func
+-----
+do [
+    f = mode ; *not,
+    f true
+]
+-----
+false
+=====
+mode func call mode
+-----
+do [
+    m = mode ; *not,
+    f = function ; {call_mode : ^m, body : .i},
+    f true
+]
+-----
+false
+=====
 mode repr
 -----
 function.represent eval*

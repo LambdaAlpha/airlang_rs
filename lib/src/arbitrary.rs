@@ -515,6 +515,7 @@ impl Arbitrary for Mode {
             weight, // primitive
             weight, // recursive
             1,      // composite
+            1,      // function
         ];
         let i = sample(rng, weights);
         let new_depth = depth + 1;
@@ -522,6 +523,7 @@ impl Arbitrary for Mode {
             0 => Mode::Uni(any_uni_mode(rng)),
             1 => Mode::Prim(any_prim_mode(rng)),
             2 => Mode::Comp(Box::new(any_comp_mode(rng, new_depth))),
+            3 => Mode::Func(any_func(rng, new_depth)),
             _ => unreachable!(),
         }
     }

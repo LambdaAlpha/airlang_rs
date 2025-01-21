@@ -101,6 +101,7 @@ impl ParseMode<Val> for Mode {
                 };
                 Some(mode)
             }
+            Val::Func(mode) => Some(Mode::Func(mode)),
             _ => None,
         }
     }
@@ -126,6 +127,7 @@ impl GenerateMode<Val> for Mode {
                 let mode = mode.generate(default);
                 Val::Map(mode)
             }
+            Mode::Func(mode) => Val::Func(mode.clone()),
         }
     }
 }
