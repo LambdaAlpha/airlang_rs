@@ -4,6 +4,7 @@ use const_format::concatcp;
 
 use crate::{
     Call,
+    ConstFnCtx,
     FreeCtx,
     FuncMode,
     Map,
@@ -24,6 +25,7 @@ use crate::{
         Named,
         Prelude,
         id_mode,
+        named_const_fn,
         named_free_fn,
         named_mut_fn,
         pair_mode,
@@ -151,10 +153,10 @@ fn get_func() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_func(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -217,10 +219,10 @@ fn get_input() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_input(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

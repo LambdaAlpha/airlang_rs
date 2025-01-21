@@ -5,6 +5,7 @@ use crate::{
     Case,
     CaseVal,
     CompMode,
+    ConstFnCtx,
     FuncMode,
     Mode,
     Pair,
@@ -24,6 +25,7 @@ use crate::{
         Prelude,
         id_mode,
         map_mode,
+        named_const_fn,
         named_free_fn,
         named_mut_fn,
         ref_pair_mode,
@@ -190,10 +192,10 @@ fn is_cache() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_is_cache(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_is_cache(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -218,10 +220,10 @@ fn func() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_func(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_func(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -246,10 +248,10 @@ fn input() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_input(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_input(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -274,10 +276,10 @@ fn output() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_output(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_output(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

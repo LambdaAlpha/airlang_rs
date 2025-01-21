@@ -1,9 +1,9 @@
 use crate::{
     Bit,
+    ConstFnCtx,
     FuncMode,
     Map,
     Mode,
-    MutFnCtx,
     Pair,
     Symbol,
     ctx::{
@@ -13,8 +13,8 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        named_const_fn,
         named_free_fn,
-        named_mut_fn,
         ref_pair_mode,
     },
     val::{
@@ -72,10 +72,10 @@ fn is_true() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_is_true(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_is_true(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -100,10 +100,10 @@ fn is_false() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_is_false(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_is_false(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

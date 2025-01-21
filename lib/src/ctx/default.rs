@@ -1,5 +1,6 @@
 use crate::{
     CtxError,
+    MutFnCtx,
     Pair,
     Symbol,
     Val,
@@ -66,12 +67,12 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_dyn<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
+    pub(crate) fn with_dyn<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
         F: FnOnce(Either<DynRef<Val>, Val>) -> T,
     {
-        let val = Self::ref_or_val(ctx.reborrow(), name);
+        let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_dyn() else {
@@ -93,7 +94,7 @@ impl DefaultCtx {
         Ctx: CtxMeta<'a>,
         F: FnOnce(&Val) -> T,
     {
-        let val = Self::ref_or_val(ctx.reborrow(), name);
+        let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables() else {
@@ -108,12 +109,12 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_ref_lossless<'a, Ctx, F>(mut ctx: Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_lossless<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
     where
         Ctx: CtxMeta<'a>,
         F: FnOnce(&Val) -> Val,
     {
-        let val = Self::ref_or_val(ctx.reborrow(), name);
+        let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables() else {
@@ -137,7 +138,7 @@ impl DefaultCtx {
         Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val) -> T,
     {
-        let val = Self::ref_or_val(ctx.reborrow(), name);
+        let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_mut() else {
@@ -152,12 +153,12 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(mut ctx: Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
     where
         Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val) -> Val,
     {
-        let val = Self::ref_or_val(ctx.reborrow(), name);
+        let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_mut() else {
@@ -175,12 +176,12 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(mut ctx: Ctx, name: Val, f: F) -> Val
+    pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
     where
         Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val),
     {
-        let val = Self::ref_or_val(ctx.reborrow(), name);
+        let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
                 let Ok(ctx) = ctx.get_variables_mut() else {
@@ -201,22 +202,35 @@ impl DefaultCtx {
         }
     }
 
-    pub(crate) fn ref_or_val<'a, Ctx>(ctx: Ctx, val: Val) -> Either<Symbol, Val>
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    pub(crate) fn eval_escape_symbol(ctx: MutFnCtx, input: Val) -> Val {
+        let Val::Symbol(s) = &input else {
+            let val = EVAL.transform(ctx, input);
+            return Self::escape_symbol(val);
+        };
+        let prefix = s.chars().next();
+        if let Some(MOVE) = prefix {
+            let val = DefaultCtx::remove_or_default(ctx, Symbol::from_str(&s[1..]));
+            return Self::escape_symbol(val);
+        }
+        input
+    }
+
+    fn escape_symbol(val: Val) -> Val {
+        if let Val::Symbol(s) = val {
+            Val::Symbol(Symbol::from_string(format!("{}{}", LITERAL, &*s)))
+        } else {
+            val
+        }
+    }
+
+    pub(crate) fn ref_or_val(val: Val) -> Either<Symbol, Val> {
         let Val::Symbol(s) = val else {
-            let val = EVAL.transform(ctx, val);
             return Either::That(val);
         };
         let prefix = s.chars().next();
         match prefix {
             Some(LITERAL) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
             Some(REF) => Either::This(Symbol::from_str(&s[1..])),
-            Some(MOVE) => {
-                let val = Self::remove_or_default(ctx, Symbol::from_str(&s[1..]));
-                Either::That(val)
-            }
             _ => Either::This(s),
         }
     }

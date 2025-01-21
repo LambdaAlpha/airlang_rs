@@ -4,11 +4,11 @@ use rand::{
 };
 
 use crate::{
+    ConstFnCtx,
     Ctx,
     FuncMode,
     Map,
     Mode,
-    MutFnCtx,
     Pair,
     PrefixMode,
     Val,
@@ -43,10 +43,10 @@ use crate::{
         Named,
         Prelude,
         form_mode,
-        id_mode,
+        named_const_fn,
         named_free_fn,
-        named_mut_fn,
         pair_mode,
+        ref_mode,
         ref_pair_mode,
         symbol_literal_mode,
     },
@@ -159,10 +159,10 @@ fn type1() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_type1(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -194,7 +194,7 @@ fn fn_type1(ctx: MutFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
-    let call = pair_mode(id_mode(), id_mode());
+    let call = pair_mode(ref_mode(), ref_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -203,16 +203,16 @@ fn equal() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_equal(mut ctx: MutFnCtx, input: Val) -> Val {
+fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let left = DefaultCtx::ref_or_val(ctx.reborrow(), pair.first);
-    let right = DefaultCtx::ref_or_val(ctx.reborrow(), pair.second);
+    let left = DefaultCtx::ref_or_val(pair.first);
+    let right = DefaultCtx::ref_or_val(pair.second);
     let ctx = ctx.borrow();
     get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {
@@ -230,7 +230,7 @@ fn fn_equal(mut ctx: MutFnCtx, input: Val) -> Val {
 fn not_equal() -> Named<FuncVal> {
     let id = "!=";
     let f = fn_not_equal;
-    let call = pair_mode(id_mode(), id_mode());
+    let call = pair_mode(ref_mode(), ref_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
     let mode = FuncMode {
@@ -239,16 +239,16 @@ fn not_equal() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_not_equal(mut ctx: MutFnCtx, input: Val) -> Val {
+fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let left = DefaultCtx::ref_or_val(ctx.reborrow(), pair.first);
-    let right = DefaultCtx::ref_or_val(ctx.reborrow(), pair.second);
+    let left = DefaultCtx::ref_or_val(pair.first);
+    let right = DefaultCtx::ref_or_val(pair.second);
     let ctx = ctx.borrow();
     get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {

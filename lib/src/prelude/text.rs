@@ -1,5 +1,6 @@
 use crate::{
     Byte,
+    ConstFnCtx,
     FuncMode,
     Int,
     Map,
@@ -14,6 +15,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        named_const_fn,
         named_free_fn,
         named_mut_fn,
         ref_pair_mode,
@@ -105,10 +107,10 @@ fn length() -> Named<FuncVal> {
         ask,
     };
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_length(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
