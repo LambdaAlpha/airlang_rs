@@ -8,6 +8,7 @@ use crate::{
     AskMode,
     CallMode,
     CompMode,
+    CtxAccess,
     FuncMode,
     Id,
     ListMode,
@@ -15,6 +16,7 @@ use crate::{
     Mode,
     PairMode,
     PrimMode,
+    SymbolMode,
     UniMode,
     Val,
     ctx::ref1::CtxMeta,
@@ -33,6 +35,7 @@ use crate::{
 pub struct ModeFunc {
     mode: Mode,
     cacheable: bool,
+    ctx_access: CtxAccess,
 }
 
 impl Transformer<Val, Val> for ModeFunc {
@@ -61,7 +64,12 @@ impl FuncTrait for ModeFunc {
 impl ModeFunc {
     pub fn new(mode: Mode) -> ModeFunc {
         let cacheable = mode.is_cacheable();
-        Self { mode, cacheable }
+        let ctx_access = mode.ctx_access();
+        Self {
+            mode,
+            cacheable,
+            ctx_access,
+        }
     }
 
     pub fn self_mode(&self) -> &Mode {
@@ -70,6 +78,10 @@ impl ModeFunc {
 
     pub(crate) fn is_primitive(&self) -> bool {
         matches!(self.mode, Mode::Uni(_) | Mode::Prim(_))
+    }
+
+    pub(crate) fn ctx_access(&self) -> CtxAccess {
+        self.ctx_access
     }
 }
 
@@ -198,5 +210,148 @@ impl IsCacheable for PrimMode {
             && self.ask.is_cacheable()
             && self.list.is_cacheable()
             && self.map.is_cacheable()
+    }
+}
+
+trait GetCtxAccess {
+    fn ctx_access(&self) -> CtxAccess;
+}
+
+impl GetCtxAccess for Mode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            Mode::Uni(mode) => mode.ctx_access(),
+            Mode::Prim(mode) => mode.ctx_access(),
+            Mode::Comp(mode) => mode.ctx_access(),
+            Mode::Func(mode) => mode.ctx_access(),
+        }
+    }
+}
+
+impl GetCtxAccess for UniMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            UniMode::Id(_) => CtxAccess::Free,
+            UniMode::Form(_) => CtxAccess::Mut,
+            UniMode::Eval(_) => CtxAccess::Mut,
+        }
+    }
+}
+
+impl GetCtxAccess for PrimMode {
+    fn ctx_access(&self) -> CtxAccess {
+        self.symbol.ctx_access()
+            & self.pair.ctx_access()
+            & self.call.ctx_access()
+            & self.abstract1.ctx_access()
+            & self.ask.ctx_access()
+            & self.list.ctx_access()
+            & self.map.ctx_access()
+    }
+}
+
+impl GetCtxAccess for FormMode {
+    fn ctx_access(&self) -> CtxAccess {
+        CtxAccess::Free
+    }
+}
+
+impl GetCtxAccess for EvalMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            EvalMode::Id => CtxAccess::Free,
+            EvalMode::Form => CtxAccess::Free,
+            EvalMode::Eval => CtxAccess::Mut,
+        }
+    }
+}
+
+impl GetCtxAccess for CompMode {
+    fn ctx_access(&self) -> CtxAccess {
+        self.symbol.ctx_access()
+            & self.pair.ctx_access()
+            & self.call.ctx_access()
+            & self.abstract1.ctx_access()
+            & self.ask.ctx_access()
+            & self.list.ctx_access()
+            & self.map.ctx_access()
+    }
+}
+
+impl GetCtxAccess for SymbolMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            SymbolMode::Id(_) => CtxAccess::Free,
+            SymbolMode::Form(_) => CtxAccess::Mut,
+        }
+    }
+}
+
+impl GetCtxAccess for PairMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            PairMode::Id(_) => CtxAccess::Free,
+            PairMode::Form(mode) => mode.first.ctx_access() & mode.second.ctx_access(),
+        }
+    }
+}
+
+impl GetCtxAccess for CallMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            CallMode::Id(_) => CtxAccess::Free,
+            CallMode::Form(mode) => mode.func.ctx_access() & mode.input.ctx_access(),
+            CallMode::Eval(_) => CtxAccess::Mut,
+        }
+    }
+}
+
+impl GetCtxAccess for AbstractMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            AbstractMode::Id(_) => CtxAccess::Free,
+            AbstractMode::Form(mode) => mode.func.ctx_access() & mode.input.ctx_access(),
+            AbstractMode::Eval(_) => CtxAccess::Mut,
+        }
+    }
+}
+
+impl GetCtxAccess for AskMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            AskMode::Id(_) => CtxAccess::Free,
+            AskMode::Form(mode) => mode.func.ctx_access() & mode.output.ctx_access(),
+            AskMode::Eval(_) => CtxAccess::Mut,
+        }
+    }
+}
+
+impl GetCtxAccess for ListMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            ListMode::Id(_) => CtxAccess::Free,
+            ListMode::Form { head, tail } => {
+                let head = head
+                    .iter()
+                    .fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
+                let tail = tail.ctx_access();
+                head & tail
+            }
+        }
+    }
+}
+
+impl GetCtxAccess for MapMode {
+    fn ctx_access(&self) -> CtxAccess {
+        match self {
+            MapMode::Id(_) => CtxAccess::Free,
+            MapMode::Form { some, else1 } => {
+                let some = some
+                    .values()
+                    .fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
+                let else1 = else1.first.ctx_access() & else1.second.ctx_access();
+                some & else1
+            }
+        }
     }
 }

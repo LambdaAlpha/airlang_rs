@@ -1,5 +1,6 @@
 use crate::{
     ConstFnCtx,
+    CtxAccess,
     Eval,
     Form,
     FuncMode,
@@ -293,20 +294,10 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Func(func) = val else {
             return Val::default();
         };
-        let access = match func {
-            FuncVal::Mode(_) => MUTABLE,
-            FuncVal::FreeCellPrim(_) => FREE,
-            FuncVal::FreeCellComp(_) => FREE,
-            FuncVal::FreeStaticPrim(_) => FREE,
-            FuncVal::FreeStaticComp(_) => FREE,
-            FuncVal::ConstCellPrim(_) => CONST,
-            FuncVal::ConstCellComp(_) => CONST,
-            FuncVal::ConstStaticPrim(_) => CONST,
-            FuncVal::ConstStaticComp(_) => CONST,
-            FuncVal::MutCellPrim(_) => MUTABLE,
-            FuncVal::MutCellComp(_) => MUTABLE,
-            FuncVal::MutStaticPrim(_) => MUTABLE,
-            FuncVal::MutStaticComp(_) => MUTABLE,
+        let access = match func.ctx_access() {
+            CtxAccess::Free => FREE,
+            CtxAccess::Const => CONST,
+            CtxAccess::Mut => MUTABLE,
         };
         Val::Symbol(Symbol::from_str(access))
     })

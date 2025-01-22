@@ -521,6 +521,24 @@ do [
 -----
 false
 =====
+mode access free
+-----
+id function.context_access .
+-----
+free
+=====
+mode access const
+-----
+do [f = mode ; *read, f function.context_access .]
+-----
+constant
+=====
+mode access mutable
+-----
+eval* function.context_access .
+-----
+mutable
+=====
 mode repr
 -----
 function.represent eval*

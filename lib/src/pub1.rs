@@ -8,6 +8,7 @@ pub use crate::{
     case::Case,
     ctx::{
         Ctx,
+        CtxAccess,
         CtxError,
         Invariant,
         const1::{

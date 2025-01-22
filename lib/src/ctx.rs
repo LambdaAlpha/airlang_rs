@@ -7,6 +7,7 @@ use std::{
     },
     hash::Hash,
     mem::swap,
+    ops::BitAnd,
 };
 
 use ref1::CtxRef;
@@ -34,6 +35,14 @@ pub struct Ctx {
 pub(crate) struct PubCtx {
     pub(crate) variables: CtxMap,
     pub(crate) solver: Option<FuncVal>,
+}
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum CtxAccess {
+    Free,
+    Const,
+    #[default]
+    Mut,
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -236,6 +245,19 @@ impl Display for CtxError {
                 write!(f, "access denied")
             }
         }
+    }
+}
+
+impl BitAnd for CtxAccess {
+    type Output = Self;
+    fn bitand(self, rhs: Self) -> Self::Output {
+        if self == CtxAccess::Mut || rhs == CtxAccess::Mut {
+            return CtxAccess::Mut;
+        }
+        if self == CtxAccess::Const || rhs == CtxAccess::Const {
+            return CtxAccess::Const;
+        }
+        CtxAccess::Free
     }
 }
 

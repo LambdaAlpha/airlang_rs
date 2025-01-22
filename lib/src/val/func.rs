@@ -7,6 +7,7 @@ use std::{
 };
 
 use crate::{
+    CtxAccess,
     FuncMode,
     Val,
     ctx::ref1::CtxMeta,
@@ -202,6 +203,24 @@ impl FuncVal {
             FuncVal::MutCellComp(_) => true,
             FuncVal::MutStaticPrim(_) => false,
             FuncVal::MutStaticComp(_) => false,
+        }
+    }
+
+    pub(crate) fn ctx_access(&self) -> CtxAccess {
+        match self {
+            FuncVal::Mode(mode) => mode.ctx_access(),
+            FuncVal::FreeCellPrim(_) => CtxAccess::Free,
+            FuncVal::FreeCellComp(_) => CtxAccess::Free,
+            FuncVal::FreeStaticPrim(_) => CtxAccess::Free,
+            FuncVal::FreeStaticComp(_) => CtxAccess::Free,
+            FuncVal::ConstCellPrim(_) => CtxAccess::Const,
+            FuncVal::ConstCellComp(_) => CtxAccess::Const,
+            FuncVal::ConstStaticPrim(_) => CtxAccess::Const,
+            FuncVal::ConstStaticComp(_) => CtxAccess::Const,
+            FuncVal::MutCellPrim(_) => CtxAccess::Mut,
+            FuncVal::MutCellComp(_) => CtxAccess::Mut,
+            FuncVal::MutStaticPrim(_) => CtxAccess::Mut,
+            FuncVal::MutStaticComp(_) => CtxAccess::Mut,
         }
     }
 }
