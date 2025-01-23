@@ -1,280 +1,316 @@
-
+== !=
+-----
+do [a = any ; ., b = any ; ., (a == b) or (a != b)]
+-----
+true
+=====
+== true
+-----
+do [a = any ; ., b = a, a == b]
+-----
+true
+=====
+!= false
+-----
+do [a = any ; ., b = a, a != b]
+-----
+false
+=====
+any unit
 -----
 do [u = any ; unit, u type .]
 -----
 unit
 =====
-
+any bit
 -----
 do [b = any ; bit, b type .]
 -----
 bit
 =====
-
------
-do [i = any ; integer, i type .]
------
-integer
-=====
-
------
-do [n = any ; number, n type .]
------
-number
-=====
-
------
-do [b = any ; byte, b type .]
------
-byte
-=====
-
+any symbol
 -----
 do [s = any ; symbol, s type .]
 -----
 symbol
 =====
-
+any text
 -----
 do [t = any ; text, t type .]
 -----
 text
 =====
-
+any integer
+-----
+do [i = any ; integer, i type .]
+-----
+integer
+=====
+any number
+-----
+do [n = any ; number, n type .]
+-----
+number
+=====
+any byte
+-----
+do [b = any ; byte, b type .]
+-----
+byte
+=====
+any pair
 -----
 do [p = any ; pair, p type .]
 -----
 pair
 =====
-
+any call
 -----
 do [c = any ; call, c type .]
 -----
 call
 =====
-
------
-do [a = any ; ask, a type .]
------
-ask
-=====
-
+any abstract
 -----
 do [a = any ; abstract, a type .]
 -----
 abstract
 =====
-
+any ask
+-----
+do [a = any ; ask, a type .]
+-----
+ask
+=====
+any list
+-----
+do [a = any ; list, a type .]
+-----
+list
+=====
+any map
+-----
+do [a = any ; map, a type .]
+-----
+map
+=====
+any context
 -----
 do [c = any ; context, c type .]
 -----
 context
 =====
-
+any function
 -----
 do [f = any ; function, f type .]
 -----
 function
 =====
-
+any case
 -----
 do [c = any ; case, c type .]
 -----
 case
 =====
-
+any extension
 -----
 do [e = any ; extension, e type .]
 -----
 extension
 =====
-
+type unit
 -----
 do [a = ., a type .]
 -----
 unit
 =====
-
+type bit
 -----
 do [a = true, a type .]
 -----
 bit
 =====
-
------
-do [a = 1, a type .]
------
-integer
-=====
-
------
-do [a = 1.0, a type .]
------
-number
-=====
-
------
-do [a = byte(ff), a type .]
------
-byte
-=====
-
+type symbol
 -----
 do [a = .a, a type .]
 -----
 symbol
 =====
-
+type text
 -----
 do [a = "", a type .]
 -----
 text
 =====
-
+type integer
+-----
+do [a = 1, a type .]
+-----
+integer
+=====
+type number
+-----
+do [a = 1.0, a type .]
+-----
+number
+=====
+type byte
+-----
+do [a = byte(ff), a type .]
+-----
+byte
+=====
+type pair
 -----
 do [a = 1 : 2, a type .]
 -----
 pair
 =====
-
+type call
 -----
 do [a = id ; f ; a, a type .]
 -----
 call
 =====
-
------
-do [a = id ; f ? a, a type .]
------
-ask
-=====
-
+type abstract
 -----
 do [c = id ; n ! v, c type .]
 -----
 abstract
 =====
-
+type ask
+-----
+do [a = id ; f ? a, a type .]
+-----
+ask
+=====
+type list
 -----
 do [a = [], a type .]
 -----
 list
 =====
-
+type map
 -----
 do [a = {}, a type .]
 -----
 map
 =====
-
------
-do [a = function ; {body : *input}, a type .]
------
-function
-=====
-
+type context
 -----
 do [a = context ; {}, a type .]
 -----
 context
 =====
-
+type function
+-----
+do [a = function ; {body : *input}, a type .]
+-----
+function
+=====
+type case
 -----
 do [a = case ; {function : not, input : true, output : false}, a type .]
 -----
 case
 =====
-
+type case cache
 -----
 do [a = case.cache ; not ; true, a type .]
 -----
 case
 =====
-
+== unit
+-----
+. == .
+-----
+true
+=====
+== false
 -----
 true == false
 -----
 false
 =====
-
+== true
 -----
 false == false
 -----
 true
 =====
-
+== symbol
 -----
-1 == 1
------
-true
-=====
-
------
-1.0 == 1.0
+.a == .a
 -----
 true
 =====
-
------
-..a == ..a
------
-true
-=====
-
+== text
 -----
 "" == ""
 -----
 true
 =====
-
+== integer
+-----
+1 == 1
+-----
+true
+=====
+== number
+-----
+1.0 == 1.0
+-----
+true
+=====
+== pair
 -----
 (1 : 2) == (1 : 2)
 -----
 true
 =====
-
+== call
 -----
-[1, 2] == [1, 2]
------
-true
-=====
-
------
-{} == {}
+(1 ; 2) == (1 ; 2)
 -----
 true
 =====
-
+== abstract
 -----
-(1 2) == (1 2)
+do [a = id ; f ! i, b = id ; f ! i, (a == b) and a != .]
 -----
 true
 =====
-
+== ask
 -----
 (1 ? 2) == (1 ? 2)
 -----
 true
 =====
-
+== list
 -----
-do [a = id ; n ; v, b = id ; n ; v, (a == b) and a != .]
------
-true
-=====
-
------
-do [a = function ; {body : *input}, b = function ; {body : *input}, (a == b) and a != .]
+[1, 2] == [1, 2]
 -----
 true
 =====
-
+== map
+-----
+{} == {}
+-----
+true
+=====
+== context
 -----
 do [a = context ; {}, b = context ; {}, (a == b) and a != .]
 -----
 true
 =====
-
+== function
+-----
+do [a = function ; {body : *input}, b = function ; {body : *input}, (a == b) and a != .]
+-----
+true
+=====
+== case
 -----
 do [
     a = case ; {function : not, input : true, output : false},
@@ -284,97 +320,97 @@ do [
 -----
 true
 =====
-
+== eval
 -----
 (1 + 1) == (3 - 1)
 -----
 true
 =====
-
+== diff type
 -----
 1 == "a"
 -----
 false
 =====
-
+!= diff type
 -----
 1 != "a"
 -----
 true
 =====
-
+!= self
 -----
 1 != 1
 -----
 false
 =====
-
+== ref val
 -----
 do [a = 1, a == 1]
 -----
 true
 =====
-
+!= ref val
 -----
 do [a = 1, a != 1]
 -----
 false
 =====
-
+== val ref
 -----
 do [a = 1, 1 == a]
 -----
 true
 =====
-
+!= val ref
 -----
 do [a = 1, 1 != a]
 -----
 false
 =====
-
+== ref ref
 -----
 do [a = 1, b = 1, a == b]
 -----
 true
 =====
-
+!= ref ref
 -----
 do [a = 1, b = 1, a != b]
 -----
 false
 =====
-
+== same ref
 -----
 do [a = 1, a == a]
 -----
 true
 =====
-
+!= same ref
 -----
 do [a = 1, a != a]
 -----
 false
 =====
-
+== null null
 -----
 a == b
 -----
 .
 =====
-
+!= null null
 -----
 a != b
 -----
 .
 =====
-
+== special ref
 -----
 do [..a = 1, *.a == 1]
 -----
 true
 =====
-
+== ^a
 -----
 do [a = 1, ^a == 1]
 -----

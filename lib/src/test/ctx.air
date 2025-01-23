@@ -358,7 +358,7 @@ true
 =====
 is_static false
 -----
-do [c = context ; {variables : {a : any ; .}}, c | is_static ; .a]
+do [c = context ; {variables : {a : (any ; .) . {}}}, c | is_static ; .a]
 -----
 false
 =====

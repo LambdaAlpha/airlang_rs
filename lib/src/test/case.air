@@ -1,127 +1,66 @@
-
+new access
 -----
 do [
-    c = case ; {
-        function : not,
-        input : 1,
-        output : 2,
+    f = any ; .,
+    i = any ; .,
+    o = any ; .,
+    c = call.apply ; case ';' {
+        .function : f,
+        .input : i,
+        .output : o,
     },
-    c case.input .
-]
------
-1
-=====
-
------
-do [
-    c = case ; {
-        function : not,
-        input : 1,
-        output : 2,
-    },
-    c case.output .
-]
------
-2
-=====
-
------
-do [
-    c = case ; {
-        function : not,
-        input : 1,
-        output : 2,
-    },
-    (c case.function .) == not
+    cf = c case.function .,
+    ci = c case.input .,
+    co = c case.output .,
+    ic = c case.is_cache .,
+    (f == cf) and (i == ci) and (o == co) and (not ; ic)
 ]
 -----
 true
 =====
-
+new repr
 -----
 do [
-    c = case ; {
-        function : "not",
-        input : 1,
-        output : 2,
+    m1 = {
+        .function : any .,
+        .input : any .,
+        .output : any .,
     },
-    (c case.function .) == "not"
+    c = call.apply ; case ';' m1,
+    m2 = case.represent ; ^c,
+    m1 == m2
 ]
 -----
 true
 =====
-
------
-do [
-    map_mode = mode ; {map : {} : id : eval*},
-    m = map_mode ; {
-        function : not,
-        input : true,
-        output : false,
-    },
-    m == case.represent ; case ; m
-]
------
-true
-=====
-
+repr cache
 -----
 do [
     m = case.represent ; case.cache ; not ; true,
-    map_mode = mode ; {map : {} : id : eval*},
-    expected = map_mode ; {
-        function : not,
-        input : true,
-        output : false,
-        is_cache : true,
+    expected = {
+        .function : not,
+        .input : true,
+        .output : false,
+        .is_cache : true,
     },
     m == expected
 ]
 -----
 true
 =====
-
+cache access
 -----
 do [
-    c = case ; {
-        function : not,
-        input : 1,
-        output : 2,
-    },
-    tc = c type .,
-    (tc == .case) and not ; c case.is_cache .
+    c = case.cache ; not ; true,
+    cf = c case.function .,
+    ci = c case.input .,
+    co = c case.output .,
+    (cf == not) and (ci == true) and (co == false)
 ]
 -----
 true
 =====
-
------
-do [
-    c = case.cache ; not ; true,
-    c case.input .
-]
------
-true
-=====
-
------
-do [
-    c = case.cache ; not ; true,
-    c case.output .
-]
------
-false
-=====
-
------
-do [
-    c = case.cache ; not ; true,
-    (c case.function .) == not
-]
------
-true
-=====
-
+is_cache true
 -----
 do [
     c = case.cache ; not ; true,

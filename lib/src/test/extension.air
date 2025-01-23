@@ -1,64 +1,64 @@
-
+==
 -----
 do [a = extension.unit, b = extension.unit, a == b]
 -----
 true
 =====
-
+type
 -----
 extension.unit type .
 -----
 extension
 =====
-
+call 1
 -----
 func_ext 1
 -----
 1
 =====
-
+call 2
 -----
 func_ext 2
 -----
 2
 =====
-
+func type
 -----
 func_ext type .
 -----
 function
 =====
-
+is_extension
 -----
 func_ext function.is_extension .
 -----
 true
 =====
-
+represent
 -----
 function.represent func_ext
 -----
 {id : func_ext, is_extension : true, context_access : free}
 =====
-
+func ==
 -----
 do [a = func_ext, b = func_ext, a == b]
 -----
 true
 =====
-
+func |
 -----
 . | func_ext ; 1
 -----
 1
 =====
-
+func call.apply
 -----
 call.apply ; func_ext ';' 1
 -----
 1
 =====
-
+func case.cache
 -----
 do [p = case.cache ; func_ext ; true, p case.is_cache .]
 -----
