@@ -23,14 +23,17 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        id_func_mode,
         id_mode,
         map_mode,
+        mut_fn,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
         ref_pair_mode,
         symbol_literal_mode,
     },
+    transformer::Transformer,
     utils::val::{
         map_remove,
         symbol,
@@ -83,25 +86,19 @@ const INPUT: &str = "input";
 const OUTPUT: &str = "output";
 const IS_CACHE: &str = "is_cache";
 
-fn new() -> Named<FuncVal> {
-    let id = "case";
-    let f = fn_new;
+fn mode_repr(id: &'static str) -> FuncVal {
+    let f = fn_mode_repr;
+    let mode = id_func_mode();
+    let cacheable = false;
+    mut_fn(id, f, mode, cacheable)
+}
+
+fn fn_mode_repr(mut ctx: MutFnCtx, input: Val) -> Val {
     let mut map = Map::default();
     map.insert(symbol(INPUT), id_mode());
     map.insert(symbol(OUTPUT), id_mode());
-    let call = map_mode(map, symbol_literal_mode(), Mode::default());
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
-}
-
-fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
+    let mode = map_mode(map, symbol_literal_mode(), Mode::default());
+    let input = mode.transform(ctx.reborrow(), input);
     let Val::Map(mut map) = input else {
         return Val::default();
     };
@@ -110,6 +107,34 @@ fn fn_new(mut ctx: MutFnCtx, input: Val) -> Val {
     let input = EvalCore::call_eval_input(&EVAL, ctx.reborrow(), &func, input);
     let output = map_remove(&mut map, OUTPUT);
     let output = EvalCore::ask_eval_output(&EVAL, ctx, &func, output);
+    map.insert(symbol(FUNCTION), func);
+    map.insert(symbol(INPUT), input);
+    map.insert(symbol(OUTPUT), output);
+    Val::Map(map)
+}
+
+fn new() -> Named<FuncVal> {
+    let id = "case";
+    let f = fn_new;
+    let call = Mode::Func(mode_repr("case.call_mode"));
+    let abstract1 = Mode::Func(mode_repr("case.abstract_mode"));
+    let ask = Mode::default();
+    let mode = FuncMode {
+        call,
+        abstract1,
+        ask,
+    };
+    let cacheable = true;
+    named_free_fn(id, f, mode, cacheable)
+}
+
+fn fn_new(input: Val) -> Val {
+    let Val::Map(mut map) = input else {
+        return Val::default();
+    };
+    let func = map_remove(&mut map, FUNCTION);
+    let input = map_remove(&mut map, INPUT);
+    let output = map_remove(&mut map, OUTPUT);
     let case = Case::new(func, input, output);
     Val::Case(CaseVal::Trivial(case.into()))
 }
@@ -149,10 +174,7 @@ fn repr() -> Named<FuncVal> {
     let f = fn_repr;
     let call = Mode::default();
     let abstract1 = call.clone();
-    let mut map = Map::default();
-    map.insert(symbol(INPUT), id_mode());
-    map.insert(symbol(OUTPUT), id_mode());
-    let ask = map_mode(map, symbol_literal_mode(), Mode::default());
+    let ask = Mode::Func(mode_repr("case.represent.ask_mode"));
     let mode = FuncMode {
         call,
         abstract1,
