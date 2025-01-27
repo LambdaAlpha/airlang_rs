@@ -150,7 +150,7 @@ quoted prefix
 =====
 digit prefix
 -----
-1(a)
+9(a)
 =====
 duplicate ctx prefix
 -----
@@ -162,7 +162,7 @@ conflict ctx prefix
 =====
 duplicate ctx prefix 2
 -----
-<;=<(a)
+<;2<(a)
 =====
 int lower case tag
 -----

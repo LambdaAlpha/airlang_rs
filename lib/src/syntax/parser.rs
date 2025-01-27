@@ -73,8 +73,8 @@ use crate::{
     syntax::{
         ABSTRACT,
         ABSTRACT_STR,
-        ARITY_1,
         ARITY_2,
+        ARITY_3,
         ASK,
         ASK_STR,
         BYTE,
@@ -143,7 +143,7 @@ impl Default for ParseCtx<'_> {
         Self {
             raw: false,
             tag: "",
-            arity: Arity::Two,
+            arity: Arity::Three,
             struct1: Struct::Call,
             direction: Direction::Right,
         }
@@ -165,8 +165,8 @@ impl<'a> ParseCtx<'a> {
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Arity {
-    One,
     Two,
+    Three,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -299,13 +299,13 @@ where
                     direction += 1;
                     ctx.direction = Direction::Right;
                 }
-                ARITY_1 => {
-                    arity += 1;
-                    ctx.arity = Arity::One;
-                }
                 ARITY_2 => {
                     arity += 1;
                     ctx.arity = Arity::Two;
+                }
+                ARITY_3 => {
+                    arity += 1;
+                    ctx.arity = Arity::Three;
                 }
                 PAIR => {
                     struct1 += 1;
@@ -341,7 +341,7 @@ impl<'a> CtxParser<'a> {
     fn is_ctx(c: char) -> bool {
         matches!(
             c,
-            LEFT | RIGHT | ARITY_1 | ARITY_2 | PAIR | CALL | ABSTRACT | ASK
+            LEFT | RIGHT | ARITY_2 | ARITY_3 | PAIR | CALL | ABSTRACT | ASK
         )
     }
 }
@@ -411,7 +411,9 @@ where
 
         // the only special case
         let first = s.chars().next().unwrap();
-        if first.is_ascii_digit() {
+        const LEFT_DELIMITERS: [char; 5] =
+            [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
+        if first.is_ascii_digit() && !rest.starts_with(LEFT_DELIMITERS) {
             let (_, token) = all_consuming(int_or_number)(s)?;
             return Ok((rest, Token::Default(token)));
         }
@@ -509,17 +511,17 @@ impl<'a> ComposeParser<'a> {
             return Some(self.compose_two(func, input));
         }
         match self.ctx.arity {
-            Arity::One => match self.ctx.direction {
-                Direction::Left => self.compose_many1(tokens),
-                Direction::Right => self.compose_many1(tokens.rev()),
+            Arity::Two => match self.ctx.direction {
+                Direction::Left => self.compose_many2(tokens),
+                Direction::Right => self.compose_many2(tokens.rev()),
             },
-            Arity::Two => {
+            Arity::Three => {
                 if len % 2 == 0 {
                     return None;
                 }
                 match self.ctx.direction {
-                    Direction::Left => self.compose_many2(tokens),
-                    Direction::Right => self.compose_many2(tokens.rev()),
+                    Direction::Left => self.compose_many3(tokens),
+                    Direction::Right => self.compose_many3(tokens.rev()),
                 }
             }
         }
@@ -546,7 +548,7 @@ impl<'a> ComposeParser<'a> {
         }
     }
 
-    fn compose_many1<T, I>(&self, mut iter: I) -> Option<T>
+    fn compose_many2<T, I>(&self, mut iter: I) -> Option<T>
     where
         T: ParseRepr,
         I: Iterator<Item = Token<T>>,
@@ -565,7 +567,7 @@ impl<'a> ComposeParser<'a> {
         Some(first.into_repr())
     }
 
-    fn compose_many2<T, I>(&self, mut iter: I) -> Option<T>
+    fn compose_many3<T, I>(&self, mut iter: I) -> Option<T>
     where
         T: ParseRepr,
         I: Iterator<Item = Token<T>>,

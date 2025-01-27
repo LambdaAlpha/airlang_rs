@@ -88,23 +88,23 @@ ask ctx two
 =====
 unary ctx
 -----
--(a b c)
+2(a b c)
 =====
 unary ctx even
 -----
--(a b c d)
+2(a b c d)
 =====
 unary ctx left
 -----
-<-(a b c)
+<2(a b c)
 =====
 unary ctx struct
 -----
-?-(a b c)
+?2(a b c)
 =====
 binary ctx
 -----
-=(a b c d e)
+3(a b c d e)
 =====
 raw one
 -----
@@ -172,11 +172,11 @@ raw escape by struct ctx
 =====
 ctx composition
 -----
-!<=(a b c d e)
+!<3(a b c d e)
 =====
 ctx composition any order
 -----
--;>(a b c d e)
+2;>(a b c d e)
 =====
 ctx composition any length
 -----
@@ -212,20 +212,20 @@ repeat composition left ctx
 =====
 repeat unary ctx
 -----
--(a :)
+2(a :)
 =====
 repeat unary pair ctx
 -----
--(:(a :))
+2(:(a :))
 =====
 repeat unary last
 -----
--(a b :)
+2(a b :)
 =====
 repeat composition unary ctx
 -----
--((a :) :)
+2((a :) :)
 =====
 repeat composition unary left ctx
 -----
--<(a : :)
+2<(a : :)

@@ -21,8 +21,8 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 pub(crate) const LEFT: char = '<';
 pub(crate) const RIGHT: char = '>';
 
-pub(crate) const ARITY_1: char = '-';
-pub(crate) const ARITY_2: char = '=';
+pub(crate) const ARITY_2: char = '2';
+pub(crate) const ARITY_3: char = '3';
 
 pub(crate) const RAW: &str = "raw";
 pub(crate) const ESCAPE: char = '\\';
