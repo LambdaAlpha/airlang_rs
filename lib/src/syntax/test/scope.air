@@ -86,23 +86,23 @@ ask ctx two
 -----
 ?(a b)
 =====
-unary ctx
+2 ctx
 -----
 2(a b c)
 =====
-unary ctx even
+2 ctx even
 -----
 2(a b c d)
 =====
-unary ctx left
+2 ctx left
 -----
 <2(a b c)
 =====
-unary ctx struct
+2 ctx struct
 -----
 ?2(a b c)
 =====
-binary ctx
+3 ctx
 -----
 3(a b c d e)
 =====
@@ -210,22 +210,22 @@ repeat composition left ctx
 -----
 <(a b : c :)
 =====
-repeat unary ctx
+repeat 2 ctx
 -----
 2(a :)
 =====
-repeat unary pair ctx
+repeat 2 pair ctx
 -----
 2(:(a :))
 =====
-repeat unary last
+repeat 2 last
 -----
 2(a b :)
 =====
-repeat composition unary ctx
+repeat composition 2 ctx
 -----
 2((a :) :)
 =====
-repeat composition unary left ctx
+repeat composition 2 left ctx
 -----
 2<(a : :)
