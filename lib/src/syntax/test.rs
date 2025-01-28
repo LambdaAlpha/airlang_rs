@@ -13,6 +13,7 @@ use crate::{
     number::Number,
     symbol::Symbol,
     syntax::{
+        ChangeRepr,
         parse,
         repr::{
             Repr,
@@ -48,6 +49,8 @@ mod call;
 mod abstract1;
 
 mod ask;
+
+mod change;
 
 mod list;
 
@@ -103,6 +106,10 @@ fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
+fn change(from: Repr, to: Repr) -> Repr {
+    Repr::Change(Box::new(ChangeRepr::new(from, to)))
+}
+
 fn raw(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
@@ -140,6 +147,13 @@ fn infix_abstract(left: Repr, middle: Repr, right: Repr) -> Repr {
 
 fn infix_ask(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(
+        middle,
+        Repr::Pair(Box::new(PairRepr::new(left, right))),
+    )))
+}
+
+fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Change(Box::new(ChangeRepr::new(
         middle,
         Repr::Pair(Box::new(PairRepr::new(left, right))),
     )))
@@ -354,6 +368,20 @@ fn test_parse_ask() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_ask() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/ask.air"), "test/ask.air")
+}
+
+#[test]
+fn test_parse_change() -> Result<(), Box<dyn Error>> {
+    test_parse(
+        include_str!("test/change.air"),
+        "test/change.air",
+        change::expected,
+    )
+}
+
+#[test]
+fn test_generate_change() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/change.air"), "test/change.air")
 }
 
 #[test]

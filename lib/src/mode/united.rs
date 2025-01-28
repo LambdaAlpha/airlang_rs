@@ -4,6 +4,7 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    ChangeVal,
     ListVal,
     MapVal,
     PairVal,
@@ -121,6 +122,17 @@ impl ByVal<Val> for UniMode {
             UniMode::Id(mode) => mode.transform_ask(ctx, ask),
             UniMode::Form(mode) => mode.transform_ask(ctx, ask),
             UniMode::Eval(mode) => mode.transform_ask(ctx, ask),
+        }
+    }
+
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            UniMode::Id(mode) => mode.transform_change(ctx, change),
+            UniMode::Form(mode) => mode.transform_change(ctx, change),
+            UniMode::Eval(mode) => mode.transform_change(ctx, change),
         }
     }
 

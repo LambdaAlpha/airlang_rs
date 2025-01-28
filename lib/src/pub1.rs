@@ -6,6 +6,7 @@ pub use crate::{
     cache::Cache,
     call::Call,
     case::Case,
+    change::Change,
     ctx::{
         Ctx,
         CtxAccess,
@@ -67,6 +68,7 @@ pub use crate::{
         abstract1::AbstractMode,
         ask::AskMode,
         call::CallMode,
+        change::ChangeMode,
         comp::CompMode,
         eval::{
             Eval,
@@ -103,6 +105,7 @@ pub use crate::{
             CaseVal,
             TrivialCaseVal,
         },
+        change::ChangeVal,
         ctx::CtxVal,
         func::{
             FuncVal,

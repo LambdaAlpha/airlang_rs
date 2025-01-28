@@ -33,7 +33,7 @@ use crate::{
     },
     syntax::{
         CALL,
-        CALL_STR,
+        CALL_CHAR,
     },
     types::either::Either,
     val::func::FuncVal,
@@ -77,7 +77,7 @@ impl Prelude for CallPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = CALL_STR;
+    let id = CALL;
     let f = fn_new;
     let mode = FuncMode::default();
     let cacheable = true;
@@ -93,7 +93,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn new_dependent() -> Named<FuncVal> {
-    let id = concatcp!(CALL, CALL);
+    let id = concatcp!(CALL_CHAR, CALL_CHAR);
     let f = fn_new_dependent;
     let call = pair_mode(Mode::default(), id_mode());
     let abstract1 = call.clone();

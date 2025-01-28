@@ -82,6 +82,12 @@ do [a = any ; ask, a type .]
 -----
 ask
 =====
+any change
+-----
+do [a = any ; change, a type .]
+-----
+change
+=====
 any list
 -----
 do [a = any ; list, a type .]
@@ -184,6 +190,12 @@ do [a = id ; f ? a, a type .]
 -----
 ask
 =====
+type change
+-----
+do [a = 1 -> 2, a type .]
+-----
+change
+=====
 type list
 -----
 do [a = [], a type .]
@@ -283,6 +295,12 @@ true
 == ask
 -----
 (1 ? 2) == (1 ? 2)
+-----
+true
+=====
+== change
+-----
+(1 -> 2) == (1 -> 2)
 -----
 true
 =====

@@ -18,28 +18,33 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // keywords
 
-pub(crate) const LEFT: char = '<';
-pub(crate) const RIGHT: char = '>';
+pub(crate) const LEFT_CHAR: char = '<';
+pub(crate) const LEFT: &str = concatcp!(LEFT_CHAR);
+pub(crate) const RIGHT_CHAR: char = '>';
+pub(crate) const RIGHT: &str = concatcp!(RIGHT_CHAR);
 
-pub(crate) const ARITY_2: char = '2';
-pub(crate) const ARITY_3: char = '3';
+pub(crate) const ARITY_2_CHAR: char = '2';
+pub(crate) const ARITY_2: &str = concatcp!(ARITY_2_CHAR);
+pub(crate) const ARITY_3_CHAR: char = '3';
+pub(crate) const ARITY_3: &str = concatcp!(ARITY_3_CHAR);
 
 pub(crate) const RAW: &str = "raw";
-pub(crate) const ESCAPE: char = '\\';
-pub(crate) const ESCAPE_STR: &str = concatcp!(ESCAPE);
+pub(crate) const ESCAPE_CHAR: char = '\\';
+pub(crate) const ESCAPE: &str = concatcp!(ESCAPE_CHAR);
 
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
 
-pub(crate) const PAIR: char = ':';
-pub(crate) const PAIR_STR: &str = concatcp!(PAIR);
-pub(crate) const CALL: char = ';';
-pub(crate) const CALL_STR: &str = concatcp!(CALL);
-pub(crate) const ABSTRACT: char = '!';
-pub(crate) const ABSTRACT_STR: &str = concatcp!(ABSTRACT);
-pub(crate) const ASK: char = '?';
-pub(crate) const ASK_STR: &str = concatcp!(ASK);
+pub(crate) const PAIR_CHAR: char = ':';
+pub(crate) const PAIR: &str = concatcp!(PAIR_CHAR);
+pub(crate) const CALL_CHAR: char = ';';
+pub(crate) const CALL: &str = concatcp!(CALL_CHAR);
+pub(crate) const ABSTRACT_CHAR: char = '!';
+pub(crate) const ABSTRACT: &str = concatcp!(ABSTRACT_CHAR);
+pub(crate) const ASK_CHAR: char = '?';
+pub(crate) const ASK: &str = concatcp!(ASK_CHAR);
+pub(crate) const CHANGE: &str = "->";
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
@@ -64,7 +69,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 pub(crate) fn ambiguous(s: &str) -> bool {
     matches!(
         s,
-        UNIT | TRUE | FALSE | PAIR_STR | CALL_STR | ABSTRACT_STR | ASK_STR
+        UNIT | TRUE | FALSE | PAIR | CALL | ABSTRACT | ASK | CHANGE
     )
 }
 

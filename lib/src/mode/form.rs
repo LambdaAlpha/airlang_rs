@@ -2,6 +2,7 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    ChangeVal,
     EvalMode,
     PairVal,
     UniMode,
@@ -89,6 +90,13 @@ impl ByVal<Val> for Form {
         Ctx: CtxMeta<'a>,
     {
         FormCore::transform_ask(self, self, ctx, ask)
+    }
+
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        FormCore::transform_change(self, self, ctx, change)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val

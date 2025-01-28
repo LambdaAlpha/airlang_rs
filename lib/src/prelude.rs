@@ -54,6 +54,7 @@ use crate::{
         byte::BytePrelude,
         call::CallPrelude,
         case::CasePrelude,
+        change::ChangePrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
         extension::ExtPrelude,
@@ -97,6 +98,7 @@ pub(crate) struct AllPrelude {
     pub(crate) call: CallPrelude,
     pub(crate) abstract1: AbstractPrelude,
     pub(crate) ask: AskPrelude,
+    pub(crate) change: ChangePrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) ctx: CtxPrelude,
@@ -122,6 +124,7 @@ impl Prelude for AllPrelude {
         self.call.put(m);
         self.abstract1.put(m);
         self.ask.put(m);
+        self.change.put(m);
         self.list.put(m);
         self.map.put(m);
         self.ctx.put(m);
@@ -397,6 +400,8 @@ mod call;
 mod abstract1;
 
 mod ask;
+
+mod change;
 
 mod list;
 

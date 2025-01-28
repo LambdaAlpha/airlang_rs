@@ -2,6 +2,7 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    ChangeVal,
     ListVal,
     MapVal,
     PairVal,
@@ -32,6 +33,7 @@ pub struct PrimMode {
     pub call: EvalMode,
     pub abstract1: EvalMode,
     pub ask: EvalMode,
+    pub change: FormMode,
     pub list: FormMode,
     pub map: FormMode,
 }
@@ -103,6 +105,16 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self.change {
+            FormMode::Id => Id.transform_change(ctx, change),
+            FormMode::Form => FormCore::transform_change(self, self, ctx, change),
+        }
+    }
+
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -132,6 +144,7 @@ impl From<UniMode> for PrimMode {
             call: EvalMode::from(mode),
             abstract1: EvalMode::from(mode),
             ask: EvalMode::from(mode),
+            change: FormMode::from(mode),
             list: FormMode::from(mode),
             map: FormMode::from(mode),
         }

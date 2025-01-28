@@ -43,6 +43,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("+"),
         symbol("_"),
         symbol("="),
+        symbol("->"),
         symbol("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
         symbol("a"),
         symbol("Z"),

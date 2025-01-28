@@ -218,6 +218,12 @@ do [(f ? b) = 1 ? 2, [f, b]]
 -----
 [1, 2]
 =====
+= destruct change
+-----
+do [(f -> b) = 1 -> 2, [f, b]]
+-----
+[1, 2]
+=====
 = destruct list equal length
 -----
 do [[a, b, c] = [1, 2, 3], [a, b, c]]

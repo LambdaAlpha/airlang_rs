@@ -6,6 +6,8 @@ use crate::{
     Bit,
     Call,
     CallVal,
+    Change,
+    ChangeVal,
     Ctx,
     CtxVal,
     Invariant,
@@ -245,8 +247,9 @@ pub(crate) enum Pattern {
     Any(Binding<Symbol>),
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
-    Ask(Box<Ask<Pattern, Pattern>>),
     Abstract(Box<Abstract<Pattern, Pattern>>),
+    Ask(Box<Ask<Pattern, Pattern>>),
+    Change(Box<Change<Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -262,8 +265,9 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
                 parse_pattern_call(call, ctx)
             }
         }
-        Val::Ask(ask) => parse_pattern_ask(ask, ctx),
         Val::Abstract(abstract1) => parse_pattern_abstract(abstract1, ctx),
+        Val::Ask(ask) => parse_pattern_ask(ask, ctx),
+        Val::Change(change) => parse_pattern_change(change, ctx),
         Val::List(list) => parse_pattern_list(list, ctx),
         Val::Map(map) => parse_pattern_map(map, ctx),
         _ => None,
@@ -293,6 +297,14 @@ fn parse_pattern_call(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
     Some(Pattern::Call(Box::new(Call::new(func, input))))
 }
 
+fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let abstract1 = Abstract::from(abstract1);
+    let func = parse_pattern(abstract1.func, ctx)?;
+    let input = parse_pattern(abstract1.input, ctx)?;
+    Some(Pattern::Abstract(Box::new(Abstract::new(func, input))))
+}
+
 fn parse_pattern_ask(ask: AskVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
     let ask = Ask::from(ask);
@@ -301,12 +313,12 @@ fn parse_pattern_ask(ask: AskVal, mut ctx: PatternCtx) -> Option<Pattern> {
     Some(Pattern::Ask(Box::new(Ask::new(func, output))))
 }
 
-fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
+fn parse_pattern_change(change: ChangeVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
-    let abstract1 = Abstract::from(abstract1);
-    let func = parse_pattern(abstract1.func, ctx)?;
-    let input = parse_pattern(abstract1.input, ctx)?;
-    Some(Pattern::Abstract(Box::new(Abstract::new(func, input))))
+    let change = Change::from(change);
+    let from = parse_pattern(change.from, ctx)?;
+    let to = parse_pattern(change.to, ctx)?;
+    Some(Pattern::Change(Box::new(Change::new(from, to))))
 }
 
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -351,8 +363,9 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Any(binding) => assign_any(ctx, binding, val),
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
-        Pattern::Ask(ask) => assign_ask(ctx, *ask, val),
         Pattern::Abstract(abstract1) => assign_abstract(ctx, *abstract1, val),
+        Pattern::Ask(ask) => assign_ask(ctx, *ask, val),
+        Pattern::Change(change) => assign_change(ctx, *change, val),
         Pattern::List(list) => assign_list(ctx, list, val),
         Pattern::Map(map) => assign_map(ctx, map, val),
     }
@@ -383,16 +396,6 @@ fn assign_pair(mut ctx: MutFnCtx, pattern: Pair<Pattern, Pattern>, val: Val) -> 
     Val::Pair(Pair::new(first, second).into())
 }
 
-fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern, Pattern>, val: Val) -> Val {
-    let Val::Abstract(val) = val else {
-        return Val::default();
-    };
-    let val = Abstract::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    let input = assign_pattern(ctx, pattern.input, val.input);
-    Val::Abstract(Abstract::new(func, input).into())
-}
-
 fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
@@ -403,6 +406,16 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     Val::Call(Call::new(func, input).into())
 }
 
+fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Abstract(val) = val else {
+        return Val::default();
+    };
+    let val = Abstract::from(val);
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    let input = assign_pattern(ctx, pattern.input, val.input);
+    Val::Abstract(Abstract::new(func, input).into())
+}
+
 fn assign_ask(mut ctx: MutFnCtx, pattern: Ask<Pattern, Pattern>, val: Val) -> Val {
     let Val::Ask(val) = val else {
         return Val::default();
@@ -411,6 +424,16 @@ fn assign_ask(mut ctx: MutFnCtx, pattern: Ask<Pattern, Pattern>, val: Val) -> Va
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let output = assign_pattern(ctx, pattern.output, val.output);
     Val::Ask(Ask::new(func, output).into())
+}
+
+fn assign_change(mut ctx: MutFnCtx, pattern: Change<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Change(val) = val else {
+        return Val::default();
+    };
+    let val = Change::from(val);
+    let from = assign_pattern(ctx.reborrow(), pattern.from, val.from);
+    let to = assign_pattern(ctx, pattern.to, val.to);
+    Val::Change(Change::new(from, to).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

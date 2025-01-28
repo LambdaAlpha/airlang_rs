@@ -7,6 +7,7 @@ pub use crate::syntax::{
         Repr,
         ask::AskRepr,
         call::CallRepr,
+        change::ChangeRepr,
         list::ListRepr,
         map::MapRepr,
         pair::PairRepr,

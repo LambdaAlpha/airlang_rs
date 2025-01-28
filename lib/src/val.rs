@@ -16,6 +16,7 @@ use crate::{
     abstract1::Abstract,
     bit::Bit,
     byte::Byte,
+    change::Change,
     extension::ValExt,
     number::Number,
     symbol::Symbol,
@@ -33,6 +34,7 @@ use crate::{
         byte::ByteVal,
         call::CallVal,
         case::CaseVal,
+        change::ChangeVal,
         ctx::CtxVal,
         func::FuncVal,
         int::IntVal,
@@ -59,6 +61,7 @@ pub enum Val {
     Call(CallVal),
     Abstract(AbstractVal),
     Ask(AskVal),
+    Change(ChangeVal),
 
     List(ListVal),
     Map(MapVal),
@@ -82,6 +85,7 @@ pub(crate) const PAIR: &str = "pair";
 pub(crate) const CALL: &str = "call";
 pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const ASK: &str = "ask";
+pub(crate) const CHANGE: &str = "change";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
@@ -215,6 +219,18 @@ impl From<AskVal> for Val {
     }
 }
 
+impl From<Change<Val, Val>> for Val {
+    fn from(value: Change<Val, Val>) -> Self {
+        Val::Change(ChangeVal::from(value))
+    }
+}
+
+impl From<ChangeVal> for Val {
+    fn from(value: ChangeVal) -> Self {
+        Val::Change(value)
+    }
+}
+
 impl From<List<Val>> for Val {
     fn from(value: List<Val>) -> Self {
         Val::List(ListVal::from(value))
@@ -277,6 +293,7 @@ impl From<&Repr> for Val {
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::Ask(ask) => Val::Ask(AskVal::from(&**ask)),
+            Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -297,6 +314,7 @@ impl From<Repr> for Val {
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::Ask(ask) => Val::Ask(AskVal::from(*ask)),
+            Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -318,6 +336,7 @@ impl TryInto<Repr> for &Val {
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
+            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -340,6 +359,7 @@ impl TryInto<Repr> for Val {
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
+            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -381,6 +401,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let output = (&ask.output).try_into()?;
                 GenRepr::Ask(Box::new(Ask::new(func, output)))
             }
+            Val::Change(change) => {
+                let from = (&change.from).try_into()?;
+                let to = (&change.to).try_into()?;
+                GenRepr::Change(Box::new(Change::new(from, to)))
+            }
             Val::List(list) => {
                 let list: List<GenRepr> = list
                     .iter()
@@ -419,6 +444,7 @@ impl Debug for Val {
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
             Val::Ask(ask) => <_ as Debug>::fmt(ask, f),
+            Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
@@ -444,6 +470,8 @@ pub(crate) mod call;
 pub(crate) mod abstract1;
 
 pub(crate) mod ask;
+
+pub(crate) mod change;
 
 pub(crate) mod list;
 

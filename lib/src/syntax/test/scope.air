@@ -86,6 +86,14 @@ ask ctx two
 -----
 ?(a b)
 =====
+change ctx
+-----
+->(a b c d e)
+=====
+change ctx two
+-----
+->(a b)
+=====
 2 ctx
 -----
 2(a b c)

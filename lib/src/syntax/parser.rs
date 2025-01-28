@@ -64,6 +64,7 @@ use crate::{
     bit::Bit,
     byte::Byte,
     call::Call,
+    change::Change,
     int::Int,
     list::List,
     map::Map,
@@ -72,28 +73,33 @@ use crate::{
     symbol::Symbol,
     syntax::{
         ABSTRACT,
-        ABSTRACT_STR,
+        ABSTRACT_CHAR,
         ARITY_2,
+        ARITY_2_CHAR,
         ARITY_3,
+        ARITY_3_CHAR,
         ASK,
-        ASK_STR,
+        ASK_CHAR,
         BYTE,
         CALL,
-        CALL_STR,
+        CALL_CHAR,
+        CHANGE,
         ESCAPE,
-        ESCAPE_STR,
+        ESCAPE_CHAR,
         FALSE,
         INT,
         LEFT,
+        LEFT_CHAR,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         NUMBER,
         PAIR,
-        PAIR_STR,
+        PAIR_CHAR,
         RAW,
         RIGHT,
+        RIGHT_CHAR,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -121,6 +127,7 @@ pub(crate) trait ParseRepr:
     + From<Abstract<Self, Self>>
     + From<Call<Self, Self>>
     + From<Ask<Self, Self>>
+    + From<Change<Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -161,6 +168,21 @@ impl<'a> ParseCtx<'a> {
         self.raw = false;
         self
     }
+
+    fn with_arity(mut self, arity: Arity) -> Self {
+        self.arity = arity;
+        self
+    }
+
+    fn with_direction(mut self, direction: Direction) -> Self {
+        self.direction = direction;
+        self
+    }
+
+    fn with_struct(mut self, struct1: Struct) -> Self {
+        self.struct1 = struct1;
+        self
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -175,6 +197,7 @@ enum Struct {
     Call,
     Abstract,
     Ask,
+    Change,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -291,35 +314,35 @@ where
         let mut struct1 = 0;
         for c in input.chars() {
             match c {
-                LEFT => {
+                LEFT_CHAR => {
                     direction += 1;
                     ctx.direction = Direction::Left;
                 }
-                RIGHT => {
+                RIGHT_CHAR => {
                     direction += 1;
                     ctx.direction = Direction::Right;
                 }
-                ARITY_2 => {
+                ARITY_2_CHAR => {
                     arity += 1;
                     ctx.arity = Arity::Two;
                 }
-                ARITY_3 => {
+                ARITY_3_CHAR => {
                     arity += 1;
                     ctx.arity = Arity::Three;
                 }
-                PAIR => {
+                PAIR_CHAR => {
                     struct1 += 1;
                     ctx.struct1 = Struct::Pair;
                 }
-                CALL => {
+                CALL_CHAR => {
                     struct1 += 1;
                     ctx.struct1 = Struct::Call;
                 }
-                ABSTRACT => {
+                ABSTRACT_CHAR => {
                     struct1 += 1;
                     ctx.struct1 = Struct::Abstract;
                 }
-                ASK => {
+                ASK_CHAR => {
                     struct1 += 1;
                     ctx.struct1 = Struct::Ask;
                 }
@@ -341,7 +364,14 @@ impl<'a> CtxParser<'a> {
     fn is_ctx(c: char) -> bool {
         matches!(
             c,
-            LEFT | RIGHT | ARITY_2 | ARITY_3 | PAIR | CALL | ABSTRACT | ASK
+            LEFT_CHAR
+                | RIGHT_CHAR
+                | ARITY_2_CHAR
+                | ARITY_3_CHAR
+                | PAIR_CHAR
+                | CALL_CHAR
+                | ABSTRACT_CHAR
+                | ASK_CHAR
         )
     }
 }
@@ -425,10 +455,46 @@ where
             INT => int(src),
             NUMBER => number(src),
             BYTE => byte(src),
+            LEFT => {
+                let ctx = self.ctx.escape().with_direction(Direction::Left);
+                ScopeParser::new(ctx).parse(src)
+            }
+            RIGHT => {
+                let ctx = self.ctx.escape().with_direction(Direction::Right);
+                ScopeParser::new(ctx).parse(src)
+            }
+            ARITY_2 => {
+                let ctx = self.ctx.escape().with_arity(Arity::Two);
+                ScopeParser::new(ctx).parse(src)
+            }
+            ARITY_3 => {
+                let ctx = self.ctx.escape().with_arity(Arity::Three);
+                ScopeParser::new(ctx).parse(src)
+            }
+            PAIR => {
+                let ctx = self.ctx.escape().with_struct(Struct::Pair);
+                ScopeParser::new(ctx).parse(src)
+            }
+            CALL => {
+                let ctx = self.ctx.escape().with_struct(Struct::Call);
+                ScopeParser::new(ctx).parse(src)
+            }
+            ABSTRACT => {
+                let ctx = self.ctx.escape().with_struct(Struct::Abstract);
+                ScopeParser::new(ctx).parse(src)
+            }
+            ASK => {
+                let ctx = self.ctx.escape().with_struct(Struct::Ask);
+                ScopeParser::new(ctx).parse(src)
+            }
+            CHANGE => {
+                let ctx = self.ctx.escape().with_struct(Struct::Change);
+                ScopeParser::new(ctx).parse(src)
+            }
             RAW => alt((raw_text, raw_symbol, ListParser::new_raw(self.ctx)))(src),
-            ESCAPE_STR => ScopeParser::new(self.ctx.escape()).parse(src),
-            s if s.starts_with(ESCAPE) => {
-                let tag = s.strip_prefix(ESCAPE).unwrap();
+            ESCAPE => ScopeParser::new(self.ctx.escape()).parse(src),
+            s if s.starts_with(ESCAPE_CHAR) => {
+                let tag = s.strip_prefix(ESCAPE_CHAR).unwrap();
                 ScopeParser::new(self.ctx.raw(tag)).parse(src)
             }
             s if s.chars().all(CtxParser::is_ctx) => {
@@ -545,6 +611,7 @@ impl<'a> ComposeParser<'a> {
             Struct::Call => From::from(Call::new(left, right)),
             Struct::Abstract => From::from(Abstract::new(left, right)),
             Struct::Ask => From::from(Ask::new(left, right)),
+            Struct::Change => From::from(Change::new(left, right)),
         }
     }
 
@@ -590,10 +657,11 @@ impl<'a> ComposeParser<'a> {
     fn compose_infix<T: ParseRepr>(&self, left: T, middle: Token<T>, right: T) -> T {
         let middle = match middle {
             Token::Unquote(s) => match &*s {
-                PAIR_STR => return From::from(Pair::new(left, right)),
-                CALL_STR => return From::from(Call::new(left, right)),
-                ASK_STR => return From::from(Ask::new(left, right)),
-                ABSTRACT_STR => return From::from(Abstract::new(left, right)),
+                PAIR => return From::from(Pair::new(left, right)),
+                CALL => return From::from(Call::new(left, right)),
+                ASK => return From::from(Ask::new(left, right)),
+                ABSTRACT => return From::from(Abstract::new(left, right)),
+                CHANGE => return From::from(Change::new(left, right)),
                 _ => From::from(s),
             },
             Token::Default(middle) => middle,
@@ -606,7 +674,7 @@ impl<'a> ComposeParser<'a> {
 
 fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
     if let Token::Unquote(s) = &right {
-        if &**s == PAIR_STR {
+        if &**s == PAIR {
             return (left.clone(), left);
         }
     }
@@ -708,7 +776,7 @@ impl<'a> MapParser<'a> {
         let Token::Unquote(s) = tokens.next().unwrap() else {
             return fail(src);
         };
-        if &*s != PAIR_STR {
+        if &*s != PAIR {
             return fail(src);
         }
         if !self.ctx.raw && tokens.len() == 1 {

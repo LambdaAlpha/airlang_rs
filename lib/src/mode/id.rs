@@ -2,6 +2,7 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    ChangeVal,
     PairVal,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
@@ -69,6 +70,13 @@ impl ByVal<Val> for Id {
         Ctx: CtxMeta<'a>,
     {
         Val::Ask(ask)
+    }
+
+    fn transform_change<'a, Ctx>(&self, _ctx: Ctx, change: ChangeVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        Val::Change(change)
     }
 
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val

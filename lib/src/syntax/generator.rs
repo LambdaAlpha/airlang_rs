@@ -12,6 +12,7 @@ use crate::{
     bit::Bit,
     byte::Byte,
     call::Call,
+    change::Change,
     int::Int,
     list::List,
     map::Map,
@@ -23,6 +24,7 @@ use crate::{
         ASK,
         BYTE,
         CALL,
+        CHANGE,
         FALSE,
         LIST_LEFT,
         LIST_RIGHT,
@@ -55,9 +57,10 @@ pub(crate) enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
-    Abstract(Box<Abstract<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
+    Abstract(Box<Abstract<GenRepr<'a>, GenRepr<'a>>>),
     Ask(Box<Ask<GenRepr<'a>, GenRepr<'a>>>),
+    Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -118,6 +121,7 @@ fn gen(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Call(call) => gen_call(ctx, *call, s),
         GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
         GenRepr::Ask(ask) => gen_ask(ctx, *ask, s),
+        GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
     }
@@ -230,7 +234,7 @@ fn gen_byte(byte: &Byte, s: &mut String) {
 fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
     gen_scope_if_need(ctx, pair.first, s);
     s.push(' ');
-    s.push(PAIR);
+    s.push_str(PAIR);
     s.push(' ');
     gen(ctx, pair.second, s);
 }
@@ -245,7 +249,7 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     } else {
         gen_scope_if_need(ctx, call.func, s);
         s.push(' ');
-        s.push(CALL);
+        s.push_str(CALL);
         s.push(' ');
         gen(ctx, call.input, s);
     }
@@ -254,7 +258,7 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
 fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut String) {
     gen_scope_if_need(ctx, abstract1.func, s);
     s.push(' ');
-    s.push(ABSTRACT);
+    s.push_str(ABSTRACT);
     s.push(' ');
     gen(ctx, abstract1.input, s);
 }
@@ -262,9 +266,17 @@ fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut Stri
 fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
     gen_scope_if_need(ctx, ask.func, s);
     s.push(' ');
-    s.push(ASK);
+    s.push_str(ASK);
     s.push(' ');
     gen(ctx, ask.output, s);
+}
+
+fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {
+    gen_scope_if_need(ctx, change.from, s);
+    s.push(' ');
+    s.push_str(CHANGE);
+    s.push(' ');
+    gen(ctx, change.to, s);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, repr: GenRepr, s: &mut String) {
@@ -286,7 +298,11 @@ fn gen_scope(ctx: GenCtx, repr: GenRepr, s: &mut String) {
 fn is_composite(repr: &GenRepr) -> bool {
     matches!(
         repr,
-        GenRepr::Pair(_) | GenRepr::Call(_) | GenRepr::Abstract(_) | GenRepr::Ask(_)
+        GenRepr::Pair(_)
+            | GenRepr::Call(_)
+            | GenRepr::Abstract(_)
+            | GenRepr::Ask(_)
+            | GenRepr::Change(_)
     )
 }
 
@@ -360,7 +376,7 @@ fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
 fn gen_kv(ctx: GenCtx, key: GenRepr, value: GenRepr, s: &mut String) {
     gen_scope_if_need(ctx, key, s);
     s.push(' ');
-    s.push(PAIR);
+    s.push_str(PAIR);
     s.push(' ');
     gen(ctx, value, s);
 }

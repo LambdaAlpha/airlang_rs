@@ -33,7 +33,7 @@ use crate::{
     },
     syntax::{
         ASK,
-        ASK_STR,
+        ASK_CHAR,
     },
     types::either::Either,
     val::func::FuncVal,
@@ -77,7 +77,7 @@ impl Prelude for AskPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = ASK_STR;
+    let id = ASK;
     let f = fn_new;
     let mode = FuncMode::default();
     let cacheable = true;
@@ -93,7 +93,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn new_dependent() -> Named<FuncVal> {
-    let id = concatcp!(ASK, ASK);
+    let id = concatcp!(ASK_CHAR, ASK_CHAR);
     let f = fn_new_dependent;
     let call = pair_mode(Mode::default(), id_mode());
     let abstract1 = call.clone();

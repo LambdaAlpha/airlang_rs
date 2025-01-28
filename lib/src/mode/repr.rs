@@ -3,6 +3,7 @@ use crate::{
     Ask,
     Bit,
     Call,
+    Change,
     Id,
     List,
     ListVal,
@@ -21,6 +22,7 @@ use crate::{
         abstract1::AbstractMode,
         ask::AskMode,
         call::CallMode,
+        change::ChangeMode,
         comp::CompMode,
         eval::{
             Eval,
@@ -57,6 +59,7 @@ use crate::{
         ABSTRACT,
         ASK,
         CALL,
+        CHANGE,
         LIST,
         MAP,
         PAIR,
@@ -252,6 +255,7 @@ impl ParseMode<MapVal> for CompMode {
         let abstract1 = AbstractMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let call = CallMode::parse(map_remove(&mut map, CALL), default)?;
         let ask = AskMode::parse(map_remove(&mut map, ASK), default)?;
+        let change = ChangeMode::parse(map_remove(&mut map, CHANGE), default)?;
         let list = ListMode::parse(map_remove(&mut map, LIST), default)?;
         let map = MapMode::parse(map_remove(&mut map, MAP), default)?;
         Some(CompMode {
@@ -260,6 +264,7 @@ impl ParseMode<MapVal> for CompMode {
             abstract1,
             call,
             ask,
+            change,
             list,
             map,
         })
@@ -302,6 +307,7 @@ impl ParseMode<MapVal> for PrimMode {
         let abstract1 = EvalMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let call = EvalMode::parse(map_remove(&mut map, CALL), default)?;
         let ask = EvalMode::parse(map_remove(&mut map, ASK), default)?;
+        let change = FormMode::parse(map_remove(&mut map, CHANGE), default)?;
         let list = FormMode::parse(map_remove(&mut map, LIST), default)?;
         let map = FormMode::parse(map_remove(&mut map, MAP), default)?;
         Some(PrimMode {
@@ -310,6 +316,7 @@ impl ParseMode<MapVal> for PrimMode {
             abstract1,
             call,
             ask,
+            change,
             list,
             map,
         })
@@ -528,6 +535,35 @@ impl GenerateMode<Val> for AskMode {
                 let func = Mode::generate(&mode.func, default);
                 let output = Mode::generate(&mode.output, default);
                 Val::Ask(Ask::new(func, output).into())
+            }
+        }
+    }
+}
+
+impl ParseMode<Val> for ChangeMode {
+    fn parse(mode: Val, default: UniMode) -> Option<Self> {
+        match mode {
+            Val::Unit(_) => Some(Self::from(default)),
+            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
+            Val::Pair(pair) => {
+                let pair = Pair::from(pair);
+                let from = Mode::parse(pair.first, default)?;
+                let to = Mode::parse(pair.second, default)?;
+                Some(ChangeMode::Form(Change::new(from, to)))
+            }
+            _ => None,
+        }
+    }
+}
+
+impl GenerateMode<Val> for ChangeMode {
+    fn generate(&self, default: UniMode) -> Val {
+        match self {
+            ChangeMode::Id(_) => symbol(ID),
+            ChangeMode::Form(mode) => {
+                let from = Mode::generate(&mode.from, default);
+                let to = Mode::generate(&mode.to, default);
+                Val::Pair(Pair::new(from, to).into())
             }
         }
     }

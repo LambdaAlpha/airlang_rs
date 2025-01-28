@@ -1,5 +1,6 @@
 use std::{
     borrow::Borrow,
+    convert::From,
     hash::Hash,
 };
 
@@ -10,6 +11,8 @@ use crate::{
     AskVal,
     Call,
     CallVal,
+    Change,
+    ChangeVal,
     ConstCtx,
     Ctx,
     FuncVal,
@@ -61,6 +64,7 @@ impl FormCore {
             Val::Call(c) => t.transform_call(ctx, c),
             Val::Abstract(a) => t.transform_abstract(ctx, a),
             Val::Ask(a) => t.transform_ask(ctx, a),
+            Val::Change(c) => t.transform_change(ctx, c),
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
             v => t.transform_default(ctx, v),
@@ -151,6 +155,23 @@ impl FormCore {
         let func = func.transform(ctx.reborrow(), ask.func);
         let output = output.transform(ctx, ask.output);
         Val::Ask(Ask::new(func, output).into())
+    }
+
+    pub(crate) fn transform_change<'a, Ctx, From, To>(
+        from: &From,
+        to: &To,
+        mut ctx: Ctx,
+        change: ChangeVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        From: Transformer<Val, Val>,
+        To: Transformer<Val, Val>,
+    {
+        let change = Change::from(change);
+        let from = from.transform(ctx.reborrow(), change.from);
+        let to = to.transform(ctx, change.to);
+        Val::Change(Change::new(from, to).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val

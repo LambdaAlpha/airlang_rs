@@ -26,6 +26,7 @@ use crate::{
     CallMode,
     Case,
     CaseVal,
+    Change,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
     FreeCellCompFunc,
@@ -61,6 +62,7 @@ use crate::{
     map::Map,
     mode::{
         Mode,
+        change::ChangeMode,
         comp::CompMode,
         eval::{
             Eval,
@@ -111,6 +113,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // call
         1,      // abstract
         1,      // ask
+        1,      // change
         1,      // list
         1,      // map
         1,      // ctx
@@ -133,12 +136,13 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         8 => Val::Call(any_call(rng, new_depth).into()),
         9 => Val::Abstract(any_abstract(rng, new_depth).into()),
         10 => Val::Ask(any_ask(rng, new_depth).into()),
-        11 => Val::List(any_list(rng, new_depth).into()),
-        12 => Val::Map(any_map(rng, new_depth).into()),
-        13 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        14 => Val::Func(any_func(rng, new_depth)),
-        15 => Val::Case(any_case_val(rng, new_depth)),
-        16 => Val::Ext(any_extension(rng, new_depth)),
+        11 => Val::Change(any_change(rng, new_depth).into()),
+        12 => Val::List(any_list(rng, new_depth).into()),
+        13 => Val::Map(any_map(rng, new_depth).into()),
+        14 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        15 => Val::Func(any_func(rng, new_depth)),
+        16 => Val::Case(any_case_val(rng, new_depth)),
+        17 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -216,6 +220,10 @@ pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
     Ask::new(any_val(rng, depth), any_val(rng, depth))
 }
 
+pub(crate) fn any_change(rng: &mut SmallRng, depth: usize) -> Change<Val, Val> {
+    Change::new(any_val(rng, depth), any_val(rng, depth))
+}
+
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
     let len = any_len_weighted(rng, depth);
     let mut list = Vec::with_capacity(len);
@@ -279,6 +287,7 @@ pub(crate) fn any_comp_mode(rng: &mut SmallRng, depth: usize) -> CompMode {
     let call = any_call_mode(rng, depth);
     let abstract1 = any_abstract_mode(rng, depth);
     let ask = any_ask_mode(rng, depth);
+    let change = any_change_mode(rng, depth);
     let list = any_list_mode(rng, depth);
     let map = any_map_mode(rng, depth);
     CompMode {
@@ -287,6 +296,7 @@ pub(crate) fn any_comp_mode(rng: &mut SmallRng, depth: usize) -> CompMode {
         call,
         abstract1,
         ask,
+        change,
         list,
         map,
     }
@@ -391,6 +401,10 @@ pub(crate) fn any_ask_mode(rng: &mut SmallRng, depth: usize) -> AskMode {
     AskMode::any(rng, depth)
 }
 
+pub(crate) fn any_change_mode(rng: &mut SmallRng, depth: usize) -> ChangeMode {
+    ChangeMode::any(rng, depth)
+}
+
 impl Arbitrary for AskMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let weight: usize = 1 << min(depth, 32);
@@ -410,6 +424,26 @@ impl Arbitrary for AskMode {
             2 => {
                 let ask = Ask::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
                 AskMode::Eval(ask)
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Arbitrary for ChangeMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let weight: usize = 1 << min(depth, 32);
+        let weights = [
+            weight, // id
+            1,      // form
+        ];
+        let i = sample(rng, weights);
+        let new_depth = depth + 1;
+        match i {
+            0 => ChangeMode::Id(Id),
+            1 => {
+                let change = Change::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
+                ChangeMode::Form(change)
             }
             _ => unreachable!(),
         }
@@ -491,6 +525,7 @@ pub(crate) fn any_prim_mode(rng: &mut SmallRng) -> PrimMode {
     let call = any_eval_mode(rng);
     let abstract1 = any_eval_mode(rng);
     let ask = any_eval_mode(rng);
+    let change = any_form_mode(rng);
     let list = any_form_mode(rng);
     let map = any_form_mode(rng);
     PrimMode {
@@ -499,6 +534,7 @@ pub(crate) fn any_prim_mode(rng: &mut SmallRng) -> PrimMode {
         call,
         abstract1,
         ask,
+        change,
         list,
         map,
     }

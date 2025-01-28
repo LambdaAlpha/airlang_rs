@@ -402,6 +402,25 @@ do [
 -----
 [a ? 1]
 =====
+mode primitive change id
+-----
+do [
+    f = mode ; {change : id, primitive : true},
+    f [.a -> ^b]
+]
+-----
+[.a -> ^b]
+=====
+mode primitive change form
+-----
+do [
+    b = 1,
+    f = mode ; {change : form, primitive : true},
+    f [.a -> b]
+]
+-----
+[a -> 1]
+=====
 mode primitive list id
 -----
 do [

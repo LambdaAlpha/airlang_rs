@@ -1,6 +1,7 @@
 use std::mem::swap;
 
 use crate::{
+    Change,
     ConstFnCtx,
     FuncMode,
     Map,
@@ -20,7 +21,7 @@ use crate::{
         named_mut_fn,
         ref_pair_mode,
     },
-    syntax::PAIR,
+    syntax::CHANGE,
     types::either::Either,
     val::{
         Val,
@@ -29,38 +30,38 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct PairPrelude {
+pub(crate) struct ChangePrelude {
     pub(crate) new: Named<FuncVal>,
-    pub(crate) get_first: Named<FuncVal>,
-    pub(crate) set_first: Named<FuncVal>,
-    pub(crate) get_second: Named<FuncVal>,
-    pub(crate) set_second: Named<FuncVal>,
+    pub(crate) get_from: Named<FuncVal>,
+    pub(crate) set_from: Named<FuncVal>,
+    pub(crate) get_to: Named<FuncVal>,
+    pub(crate) set_to: Named<FuncVal>,
 }
 
-impl Default for PairPrelude {
+impl Default for ChangePrelude {
     fn default() -> Self {
-        PairPrelude {
+        ChangePrelude {
             new: new(),
-            get_first: get_first(),
-            set_first: set_first(),
-            get_second: get_second(),
-            set_second: set_second(),
+            get_from: get_from(),
+            set_from: set_from(),
+            get_to: get_to(),
+            set_to: set_to(),
         }
     }
 }
 
-impl Prelude for PairPrelude {
+impl Prelude for ChangePrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
-        self.get_first.put(m);
-        self.set_first.put(m);
-        self.get_second.put(m);
-        self.set_second.put(m);
+        self.get_from.put(m);
+        self.set_from.put(m);
+        self.get_to.put(m);
+        self.set_to.put(m);
     }
 }
 
 fn new() -> Named<FuncVal> {
-    let id = PAIR;
+    let id = CHANGE;
     let f = fn_new;
     let mode = FuncMode::default();
     let cacheable = true;
@@ -68,15 +69,18 @@ fn new() -> Named<FuncVal> {
 }
 
 fn fn_new(input: Val) -> Val {
-    let Val::Pair(_) = input else {
+    let Val::Pair(pair) = input else {
         return Val::default();
     };
-    input
+    let pair = Pair::from(pair);
+    let from = pair.first;
+    let to = pair.second;
+    Val::Change(Change::new(from, to).into())
 }
 
-fn get_first() -> Named<FuncVal> {
-    let id = "pair.first";
-    let f = fn_get_first;
+fn get_from() -> Named<FuncVal> {
+    let id = "change.from";
+    let f = fn_get_from;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -89,26 +93,26 @@ fn get_first() -> Named<FuncVal> {
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_from(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
     DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
-            Val::Pair(pair) => pair.first.clone(),
+            Val::Change(change) => change.from.clone(),
             _ => Val::default(),
         },
         Either::That(val) => match val {
-            Val::Pair(pair) => Pair::from(pair).first,
+            Val::Change(change) => Change::from(change).from,
             _ => Val::default(),
         },
     })
 }
 
-fn set_first() -> Named<FuncVal> {
-    let id = "pair.set_first";
-    let f = fn_set_first;
+fn set_from() -> Named<FuncVal> {
+    let id = "change.set_from";
+    let f = fn_set_from;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -121,7 +125,7 @@ fn set_first() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_from(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -129,20 +133,20 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(mut pair) => {
-            let Some(Val::Pair(pair)) = pair.as_mut() else {
+        Either::This(mut change) => {
+            let Some(Val::Change(change)) = change.as_mut() else {
                 return Val::default();
             };
-            swap(&mut pair.first, &mut val);
+            swap(&mut change.from, &mut val);
             val
         }
         Either::That(_) => Val::default(),
     })
 }
 
-fn get_second() -> Named<FuncVal> {
-    let id = "pair.second";
-    let f = fn_get_second;
+fn get_to() -> Named<FuncVal> {
+    let id = "change.to";
+    let f = fn_get_to;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -155,26 +159,26 @@ fn get_second() -> Named<FuncVal> {
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_to(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
     DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
-            Val::Pair(pair) => pair.second.clone(),
+            Val::Change(change) => change.to.clone(),
             _ => Val::default(),
         },
         Either::That(val) => match val {
-            Val::Pair(pair) => Pair::from(pair).second,
+            Val::Change(change) => Change::from(change).to,
             _ => Val::default(),
         },
     })
 }
 
-fn set_second() -> Named<FuncVal> {
-    let id = "pair.set_second";
-    let f = fn_set_second;
+fn set_to() -> Named<FuncVal> {
+    let id = "change.set_to";
+    let f = fn_set_to;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -187,7 +191,7 @@ fn set_second() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_to(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
@@ -195,11 +199,11 @@ fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(mut pair) => {
-            let Some(Val::Pair(pair)) = pair.as_mut() else {
+        Either::This(mut change) => {
+            let Some(Val::Change(change)) = change.as_mut() else {
                 return Val::default();
             };
-            swap(&mut pair.second, &mut val);
+            swap(&mut change.to, &mut val);
             val
         }
         Either::That(_) => Val::default(),

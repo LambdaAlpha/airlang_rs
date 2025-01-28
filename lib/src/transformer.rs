@@ -4,6 +4,7 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    ChangeVal,
     ListVal,
     MapVal,
     PairVal,
@@ -52,6 +53,10 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
         Ctx: CtxMeta<'a>;
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Output
+    where
+        Ctx: CtxMeta<'a>;
+
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Output
     where
         Ctx: CtxMeta<'a>;
 

@@ -1,0 +1,48 @@
+new
+-----
+do [
+    f = any ; .,
+    t = any ; .,
+    c1 = f '->' t,
+    c2 = f -> t,
+    c1 == c2
+]
+-----
+true
+=====
+new get
+-----
+do [
+    f = any ; .,
+    t = any ; .,
+    c = f '->' t,
+    (f == c change.from .) and (t == c change.to .)
+]
+-----
+true
+=====
+set get
+-----
+do [
+    c = any ; change,
+    f = any ; .,
+    t = any ; .,
+    c change.set_from f,
+    c change.set_to t,
+    (f == c change.from .) and (t == c change.to .)
+]
+-----
+true
+=====
+set return
+-----
+do [
+    f1 = any ; .,
+    t1 = any ; .,
+    c = f1 : t1,
+    f2 = c change.set_from any ; .,
+    t2 = c change.set_to any ; .,
+    (f1 == f2) and t1 == t2
+]
+-----
+true

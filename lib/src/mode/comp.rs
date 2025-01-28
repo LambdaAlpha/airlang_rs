@@ -2,6 +2,7 @@ use crate::{
     AbstractVal,
     AskVal,
     CallVal,
+    ChangeVal,
     ListMode,
     ListVal,
     MapMode,
@@ -17,6 +18,7 @@ use crate::{
         abstract1::AbstractMode,
         ask::AskMode,
         call::CallMode,
+        change::ChangeMode,
         id::Id,
         symbol::SymbolMode,
     },
@@ -33,6 +35,7 @@ pub struct CompMode {
     pub call: CallMode,
     pub abstract1: AbstractMode,
     pub ask: AskMode,
+    pub change: ChangeMode,
     pub list: ListMode,
     pub map: MapMode,
 }
@@ -89,6 +92,13 @@ impl ByVal<Val> for CompMode {
         self.ask.transform(ctx, ask)
     }
 
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        self.change.transform(ctx, change)
+    }
+
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -112,6 +122,7 @@ impl From<UniMode> for CompMode {
             call: CallMode::from(mode),
             abstract1: AbstractMode::from(mode),
             ask: AskMode::from(mode),
+            change: ChangeMode::from(mode),
             list: ListMode::from(mode),
             map: MapMode::from(mode),
         }

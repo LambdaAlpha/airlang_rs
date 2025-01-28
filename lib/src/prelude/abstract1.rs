@@ -34,7 +34,7 @@ use crate::{
     },
     syntax::{
         ABSTRACT,
-        ABSTRACT_STR,
+        ABSTRACT_CHAR,
     },
     types::either::Either,
 };
@@ -77,7 +77,7 @@ impl Prelude for AbstractPrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = ABSTRACT_STR;
+    let id = ABSTRACT;
     let f = fn_new;
     let mode = FuncMode::default();
     let cacheable = true;
@@ -93,7 +93,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 fn new_dependent() -> Named<FuncVal> {
-    let id = concatcp!(ABSTRACT, ABSTRACT);
+    let id = concatcp!(ABSTRACT_CHAR, ABSTRACT_CHAR);
     let f = fn_new_dependent;
     let call = pair_mode(Mode::default(), id_mode());
     let abstract1 = call.clone();

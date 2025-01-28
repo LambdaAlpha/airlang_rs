@@ -19,6 +19,7 @@ use crate::{
     Symbol,
     Text,
     Unit,
+    change::Change,
     syntax::{
         ParseError,
         generate_pretty,
@@ -29,6 +30,7 @@ use crate::{
             abstract1::AbstractRepr,
             ask::AskRepr,
             call::CallRepr,
+            change::ChangeRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
@@ -49,6 +51,7 @@ pub enum Repr {
     Call(Box<CallRepr>),
     Abstract(Box<AbstractRepr>),
     Ask(Box<AskRepr>),
+    Change(Box<ChangeRepr>),
     List(ListRepr),
     Map(MapRepr),
 }
@@ -149,6 +152,18 @@ impl From<Box<AskRepr>> for Repr {
     }
 }
 
+impl From<ChangeRepr> for Repr {
+    fn from(c: ChangeRepr) -> Self {
+        Repr::Change(Box::new(c))
+    }
+}
+
+impl From<Box<ChangeRepr>> for Repr {
+    fn from(c: Box<ChangeRepr>) -> Self {
+        Repr::Change(c)
+    }
+}
+
 impl From<ListRepr> for Repr {
     fn from(l: ListRepr) -> Self {
         Repr::List(l)
@@ -233,6 +248,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let output = (&ask.output).try_into()?;
                 GenRepr::Ask(Box::new(Ask::new(func, output)))
             }
+            Repr::Change(change) => {
+                let from = (&change.from).try_into()?;
+                let to = (&change.to).try_into()?;
+                GenRepr::Change(Box::new(Change::new(from, to)))
+            }
             Repr::List(list) => {
                 let list = list
                     .iter()
@@ -263,6 +283,8 @@ pub(crate) mod call;
 pub(crate) mod abstract1;
 
 pub(crate) mod ask;
+
+pub(crate) mod change;
 
 pub(crate) mod list;
 
