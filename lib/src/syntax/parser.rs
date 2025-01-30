@@ -357,7 +357,7 @@ where
             TEXT_QUOTE => map(text, Token::Default)(s),
             SYMBOL_QUOTE => map(symbol, Token::Default)(s),
 
-            sym if is_symbol(sym) => TrivialSymbolParser::new(self.ctx).parse(s),
+            sym if is_symbol(sym) => ExtParser::new(self.ctx).parse(s),
             _ => fail(s),
         };
         context("token", parser)(src)
@@ -382,11 +382,11 @@ fn is_symbol(c: char) -> bool {
 }
 
 #[derive(Copy, Clone)]
-struct TrivialSymbolParser<'a> {
+struct ExtParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, Token<T>, E> for TrivialSymbolParser<'a>
+impl<'a, T, E> Parser<&'a str, Token<T>, E> for ExtParser<'a>
 where
     T: ParseRepr,
     E: ParseError<&'a str> + ContextError<&'a str>,
@@ -403,7 +403,33 @@ where
             return Ok((rest, Token::Default(token)));
         }
 
-        let parser = |src| match s {
+        let mut f = alt((
+            map(PrefixParser::new(s, self.ctx), Token::Default),
+            map(success(Symbol::from_str(s)), Token::Unquote),
+        ));
+        f(rest)
+    }
+}
+
+impl<'a> ExtParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
+        Self { ctx }
+    }
+}
+
+#[derive(Copy, Clone)]
+struct PrefixParser<'a> {
+    prefix: &'a str,
+    ctx: ParseCtx<'a>,
+}
+
+impl<'a, T, E> Parser<&'a str, T, E> for PrefixParser<'a>
+where
+    T: ParseRepr,
+    E: ParseError<&'a str> + ContextError<&'a str>,
+{
+    fn parse(&mut self, src: &'a str) -> IResult<&'a str, T, E> {
+        match self.prefix {
             UNIT => success(From::from(Unit))(src),
             TRUE => success(From::from(Bit::true1()))(src),
             FALSE => success(From::from(Bit::false1()))(src),
@@ -441,18 +467,13 @@ where
                 ScopeParser::new(ctx).parse(src)
             }
             _ => fail(src),
-        };
-        let mut f = alt((
-            map(parser, Token::Default),
-            map(success(Symbol::from_str(s)), Token::Unquote),
-        ));
-        f(rest)
+        }
     }
 }
 
-impl<'a> TrivialSymbolParser<'a> {
-    fn new(ctx: ParseCtx<'a>) -> Self {
-        Self { ctx }
+impl<'a> PrefixParser<'a> {
+    fn new(prefix: &'a str, ctx: ParseCtx<'a>) -> Self {
+        Self { prefix, ctx }
     }
 }
 
