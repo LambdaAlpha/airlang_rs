@@ -5,7 +5,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "The Extension of the Air Programming Language"
 repository = "https://github.com/LambdaAlpha/airlang_rs"
-keywords = ["language", "solver", "specification", "formal", "logic"]
+keywords = ["abstraction", "optimizer", "specification", "solver", "reflect"]
 categories = ["compilers"]
 
 [lints]
