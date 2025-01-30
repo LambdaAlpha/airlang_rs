@@ -73,33 +73,25 @@ use crate::{
     symbol::Symbol,
     syntax::{
         ABSTRACT,
-        ABSTRACT_CHAR,
         ARITY_2,
-        ARITY_2_CHAR,
         ARITY_3,
-        ARITY_3_CHAR,
         ASK,
-        ASK_CHAR,
         BYTE,
         CALL,
-        CALL_CHAR,
         CHANGE,
         ESCAPE,
         ESCAPE_CHAR,
         FALSE,
         INT,
         LEFT,
-        LEFT_CHAR,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         NUMBER,
         PAIR,
-        PAIR_CHAR,
         RAW,
         RIGHT,
-        RIGHT_CHAR,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -166,16 +158,6 @@ impl<'a> ParseCtx<'a> {
 
     fn escape(mut self) -> Self {
         self.raw = false;
-        self
-    }
-
-    fn with_arity(mut self, arity: Arity) -> Self {
-        self.arity = arity;
-        self
-    }
-
-    fn with_direction(mut self, direction: Direction) -> Self {
-        self.direction = direction;
         self
     }
 
@@ -311,45 +293,28 @@ where
         let mut ctx = self.ctx.escape();
         let mut direction = 0;
         let mut arity = 0;
-        let mut struct1 = 0;
         for c in input.chars() {
             match c {
-                LEFT_CHAR => {
+                LEFT => {
                     direction += 1;
                     ctx.direction = Direction::Left;
                 }
-                RIGHT_CHAR => {
+                RIGHT => {
                     direction += 1;
                     ctx.direction = Direction::Right;
                 }
-                ARITY_2_CHAR => {
+                ARITY_2 => {
                     arity += 1;
                     ctx.arity = Arity::Two;
                 }
-                ARITY_3_CHAR => {
+                ARITY_3 => {
                     arity += 1;
                     ctx.arity = Arity::Three;
-                }
-                PAIR_CHAR => {
-                    struct1 += 1;
-                    ctx.struct1 = Struct::Pair;
-                }
-                CALL_CHAR => {
-                    struct1 += 1;
-                    ctx.struct1 = Struct::Call;
-                }
-                ABSTRACT_CHAR => {
-                    struct1 += 1;
-                    ctx.struct1 = Struct::Abstract;
-                }
-                ASK_CHAR => {
-                    struct1 += 1;
-                    ctx.struct1 = Struct::Ask;
                 }
                 _ => return fail(input),
             }
         }
-        if direction > 1 || arity > 1 || struct1 > 1 {
+        if direction > 1 || arity > 1 {
             return fail(input);
         }
         Ok((&input[0..0], ctx))
@@ -362,17 +327,7 @@ impl<'a> CtxParser<'a> {
     }
 
     fn is_ctx(c: char) -> bool {
-        matches!(
-            c,
-            LEFT_CHAR
-                | RIGHT_CHAR
-                | ARITY_2_CHAR
-                | ARITY_3_CHAR
-                | PAIR_CHAR
-                | CALL_CHAR
-                | ABSTRACT_CHAR
-                | ASK_CHAR
-        )
+        matches!(c, LEFT | RIGHT | ARITY_2 | ARITY_3)
     }
 }
 
@@ -455,22 +410,6 @@ where
             INT => int(src),
             NUMBER => number(src),
             BYTE => byte(src),
-            LEFT => {
-                let ctx = self.ctx.escape().with_direction(Direction::Left);
-                ScopeParser::new(ctx).parse(src)
-            }
-            RIGHT => {
-                let ctx = self.ctx.escape().with_direction(Direction::Right);
-                ScopeParser::new(ctx).parse(src)
-            }
-            ARITY_2 => {
-                let ctx = self.ctx.escape().with_arity(Arity::Two);
-                ScopeParser::new(ctx).parse(src)
-            }
-            ARITY_3 => {
-                let ctx = self.ctx.escape().with_arity(Arity::Three);
-                ScopeParser::new(ctx).parse(src)
-            }
             PAIR => {
                 let ctx = self.ctx.escape().with_struct(Struct::Pair);
                 ScopeParser::new(ctx).parse(src)

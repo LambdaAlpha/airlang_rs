@@ -18,15 +18,11 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // keywords
 
-pub(crate) const LEFT_CHAR: char = '<';
-pub(crate) const LEFT: &str = concatcp!(LEFT_CHAR);
-pub(crate) const RIGHT_CHAR: char = '>';
-pub(crate) const RIGHT: &str = concatcp!(RIGHT_CHAR);
+pub(crate) const LEFT: char = '<';
+pub(crate) const RIGHT: char = '>';
 
-pub(crate) const ARITY_2_CHAR: char = '2';
-pub(crate) const ARITY_2: &str = concatcp!(ARITY_2_CHAR);
-pub(crate) const ARITY_3_CHAR: char = '3';
-pub(crate) const ARITY_3: &str = concatcp!(ARITY_3_CHAR);
+pub(crate) const ARITY_2: char = '2';
+pub(crate) const ARITY_3: char = '3';
 
 pub(crate) const RAW: &str = "raw";
 pub(crate) const ESCAPE_CHAR: char = '\\';

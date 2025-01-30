@@ -106,10 +106,6 @@ change ctx two
 -----
 <2(a b c)
 =====
-2 ctx struct
------
-?2(a b c)
-=====
 3 ctx
 -----
 3(a b c d e)
@@ -180,15 +176,11 @@ raw escape by struct ctx
 =====
 ctx composition
 -----
-!<3(a b c d e)
+<3(a b c d e)
 =====
 ctx composition any order
 -----
-2;>(a b c d e)
-=====
-ctx composition any length
------
-?<(a b c d e)
+2>(a b c d e)
 =====
 pair repeat
 -----

@@ -124,7 +124,6 @@ pub fn expected() -> Vec<Repr> {
             call(symbol("b"), call(symbol("c"), symbol("d"))),
         ),
         call(call(symbol("a"), symbol("b")), symbol("c")),
-        ask(symbol("a"), ask(symbol("b"), symbol("c"))),
         infix(
             symbol("a"),
             symbol("b"),
@@ -181,8 +180,8 @@ pub fn expected() -> Vec<Repr> {
             symbol("e"),
         )]),
         raw("r", vec![infix_ask(symbol("a"), symbol("b"), symbol("c"))]),
-        infix_abstract(
-            infix_abstract(symbol("a"), symbol("b"), symbol("c")),
+        infix(
+            infix(symbol("a"), symbol("b"), symbol("c")),
             symbol("d"),
             symbol("e"),
         ),
@@ -192,11 +191,6 @@ pub fn expected() -> Vec<Repr> {
                 symbol("b"),
                 call(symbol("c"), call(symbol("d"), symbol("e"))),
             ),
-        ),
-        infix_ask(
-            infix_ask(symbol("a"), symbol("b"), symbol("c")),
-            symbol("d"),
-            symbol("e"),
         ),
         pair(symbol("a"), symbol("a")),
         call(symbol("a"), symbol("a")),
