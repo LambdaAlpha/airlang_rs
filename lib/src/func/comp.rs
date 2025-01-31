@@ -3,14 +3,14 @@ use std::mem::take;
 use crate::{
     Ctx,
     CtxVal,
-    Invariant,
     Mode,
     MutCtx,
     Symbol,
     Val,
-    ctx::{
+    ctx::map::{
+        CtxMapRef,
         CtxValue,
-        map::CtxMapRef,
+        Invariant,
     },
     transformer::Transformer,
 };

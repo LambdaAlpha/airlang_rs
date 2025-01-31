@@ -9,8 +9,8 @@ use crate::{
     Symbol,
     bit::Bit,
     ctx::{
-        CtxValue,
         default::DefaultCtx,
+        map::CtxValue,
         mut1::MutFnCtx,
     },
     int::Int,

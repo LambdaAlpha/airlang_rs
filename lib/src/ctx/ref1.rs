@@ -3,9 +3,11 @@ use crate::{
     CtxError,
     FuncVal,
     ctx::{
-        DynRef,
         const1::ConstFnCtx,
-        map::CtxMap,
+        map::{
+            CtxMap,
+            DynRef,
+        },
         mut1::MutFnCtx,
     },
 };

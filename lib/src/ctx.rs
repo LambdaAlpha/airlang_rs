@@ -10,6 +10,10 @@ use std::{
     ops::BitAnd,
 };
 
+use map::{
+    CtxValue,
+    DynRef,
+};
 use ref1::CtxRef;
 
 use crate::{
@@ -17,7 +21,6 @@ use crate::{
     Map,
     ctx::map::CtxMap,
     symbol::Symbol,
-    val::Val,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -43,34 +46,6 @@ pub enum CtxAccess {
     Const,
     #[default]
     Mut,
-}
-
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Invariant {
-    // no limit
-    #[default]
-    None,
-    // can't be assigned
-    Final,
-    // can't be modified
-    Const,
-}
-
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub(crate) struct CtxValue {
-    pub(crate) invariant: Invariant,
-    // the invariant of static binding is hold both in the past and in the future
-    // corollaries
-    // - static binding either always exists or never exists
-    // - the invariant of static binding is constant
-    pub(crate) static1: bool,
-    pub(crate) val: Val,
-}
-
-#[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) struct DynRef<'a, T> {
-    pub(crate) ref1: &'a mut T,
-    pub(crate) is_const: bool,
 }
 
 impl<'l> CtxRef<'l> for &'l mut Ctx {
@@ -172,65 +147,11 @@ impl Ctx {
     }
 }
 
-#[allow(unused)]
-impl CtxValue {
-    pub(crate) fn new(val: Val) -> CtxValue {
-        CtxValue {
-            invariant: Invariant::None,
-            static1: false,
-            val,
-        }
-    }
-
-    pub(crate) fn new_final(val: Val) -> CtxValue {
-        CtxValue {
-            invariant: Invariant::Final,
-            static1: false,
-            val,
-        }
-    }
-
-    pub(crate) fn new_const(val: Val) -> CtxValue {
-        CtxValue {
-            invariant: Invariant::Const,
-            static1: false,
-            val,
-        }
-    }
-}
-
 impl Default for Ctx {
     fn default() -> Self {
         Self {
             variables: CtxMap::new(Map::default(), false),
             solver: None,
-        }
-    }
-}
-
-impl Debug for CtxValue {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("")
-            .field(&self.invariant)
-            .field(&self.val)
-            .finish()
-    }
-}
-
-impl<'a, T> DynRef<'a, T> {
-    pub(crate) fn new(ref1: &'a mut T, is_const: bool) -> Self {
-        DynRef { ref1, is_const }
-    }
-
-    pub(crate) fn as_const(&'a self) -> &'a T {
-        self.ref1
-    }
-
-    pub(crate) fn as_mut(&'a mut self) -> Option<&'a mut T> {
-        if self.is_const {
-            None
-        } else {
-            Some(&mut self.ref1)
         }
     }
 }

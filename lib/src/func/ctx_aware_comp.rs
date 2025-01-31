@@ -1,11 +1,13 @@
 use crate::{
     ConstFnCtx,
-    Invariant,
     Mode,
     MutFnCtx,
     Symbol,
     Val,
-    ctx::ref1::CtxMeta,
+    ctx::{
+        map::Invariant,
+        ref1::CtxMeta,
+    },
     func::comp::Composite,
 };
 

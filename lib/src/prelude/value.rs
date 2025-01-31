@@ -35,9 +35,11 @@ use crate::{
     },
     bit::Bit,
     ctx::{
-        CtxValue,
         default::DefaultCtx,
-        map::CtxMapRef,
+        map::{
+            CtxMapRef,
+            CtxValue,
+        },
         ref1::CtxRef,
     },
     prelude::{

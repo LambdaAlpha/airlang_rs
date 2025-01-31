@@ -11,7 +11,7 @@ use crate::{
     FuncMode,
     FuncVal,
     Symbol,
-    ctx::Invariant,
+    ctx::map::Invariant,
     func::free_static_prim::FreeStaticFn,
     parse,
     val::Val,

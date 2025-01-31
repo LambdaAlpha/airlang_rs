@@ -5,14 +5,16 @@ use crate::{
     bit::Bit,
     ctx::{
         Ctx,
-        CtxValue,
         const1::{
             ConstCtx,
             ConstFnCtx,
         },
         default::DefaultCtx,
         free::FreeCtx,
-        map::CtxMapRef,
+        map::{
+            CtxMapRef,
+            CtxValue,
+        },
         mut1::{
             MutCtx,
             MutFnCtx,

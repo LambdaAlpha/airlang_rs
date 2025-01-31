@@ -46,9 +46,11 @@ use crate::{
     byte::Byte,
     ctx::{
         Ctx,
-        CtxValue,
-        Invariant,
-        map::CtxMap,
+        map::{
+            CtxMap,
+            CtxValue,
+            Invariant,
+        },
     },
     extension::UnitExt,
     func::{

@@ -8,10 +8,10 @@ use crate::{
     Symbol,
     Val,
     ctx::{
-        DynRef,
         map::{
             CtxMap,
             CtxMapRef,
+            DynRef,
         },
         mut1::MutFnCtx,
         ref1::{

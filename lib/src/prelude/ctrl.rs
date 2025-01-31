@@ -12,9 +12,11 @@ use crate::{
     Symbol,
     Text,
     ctx::{
-        CtxValue,
         free::FreeCtx,
-        map::CtxMapRef,
+        map::{
+            CtxMapRef,
+            CtxValue,
+        },
         ref1::{
             CtxMeta,
             CtxRef,

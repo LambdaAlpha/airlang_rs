@@ -17,8 +17,10 @@ use crate::{
     SymbolMode,
     ctx::{
         Ctx,
-        CtxValue,
-        map::CtxMap,
+        map::{
+            CtxMap,
+            CtxValue,
+        },
     },
     func::{
         FuncMode,

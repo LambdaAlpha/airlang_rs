@@ -10,15 +10,15 @@ use crate::{
     CtxError,
     FreeCtx,
     FuncVal,
-    Invariant,
     Symbol,
     Val,
     ctx::{
-        CtxValue,
-        DynRef,
         map::{
             CtxMap,
             CtxMapRef,
+            CtxValue,
+            DynRef,
+            Invariant,
         },
         ref1::{
             CtxMeta,

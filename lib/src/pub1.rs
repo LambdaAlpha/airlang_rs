@@ -11,12 +11,12 @@ pub use crate::{
         Ctx,
         CtxAccess,
         CtxError,
-        Invariant,
         const1::{
             ConstCtx,
             ConstFnCtx,
         },
         free::FreeCtx,
+        map::Invariant,
         mut1::{
             MutCtx,
             MutFnCtx,

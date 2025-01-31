@@ -9,8 +9,8 @@ use crate::{
     PrefixMode,
     bit::Bit,
     ctx::{
-        CtxValue,
         default::DefaultCtx,
+        map::CtxValue,
     },
     func::{
         FuncTrait,

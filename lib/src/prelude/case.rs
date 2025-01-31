@@ -14,8 +14,8 @@ use crate::{
     bit::Bit,
     core::EvalCore,
     ctx::{
-        CtxValue,
         default::DefaultCtx,
+        map::CtxValue,
         mut1::MutFnCtx,
     },
     map::Map,

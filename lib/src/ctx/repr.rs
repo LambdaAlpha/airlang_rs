@@ -10,7 +10,6 @@ use crate::{
     ChangeVal,
     Ctx,
     CtxVal,
-    Invariant,
     List,
     ListVal,
     Map,
@@ -23,10 +22,11 @@ use crate::{
     Unit,
     Val,
     ctx::{
-        CtxValue,
         map::{
             CtxMap,
             CtxMapRef,
+            CtxValue,
+            Invariant,
         },
         ref1::CtxRef,
     },

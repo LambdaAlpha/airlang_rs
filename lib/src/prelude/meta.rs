@@ -5,7 +5,7 @@ use num_bigint::BigInt;
 use crate::{
     Map,
     Symbol,
-    ctx::CtxValue,
+    ctx::map::CtxValue,
     int::Int,
     prelude::{
         Named,

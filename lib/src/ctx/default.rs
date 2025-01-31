@@ -5,8 +5,10 @@ use crate::{
     Symbol,
     Val,
     ctx::{
-        DynRef,
-        map::CtxMapRef,
+        map::{
+            CtxMapRef,
+            DynRef,
+        },
         ref1::{
             CtxMeta,
             CtxRef,
