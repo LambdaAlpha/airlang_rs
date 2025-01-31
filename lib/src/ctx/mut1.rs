@@ -18,7 +18,7 @@ use crate::{
             CtxMapRef,
             CtxValue,
             DynRef,
-            Invariant,
+            VarAccess,
         },
         ref1::{
             CtxMeta,
@@ -234,14 +234,9 @@ impl<'a> MutCtx<'a> {
         ctx.is_assignable(name)
     }
 
-    pub fn put(
-        self,
-        name: Symbol,
-        invariant: Invariant,
-        val: Val,
-    ) -> Result<Option<Val>, CtxError> {
+    pub fn put(self, name: Symbol, access: VarAccess, val: Val) -> Result<Option<Val>, CtxError> {
         let ctx_value = CtxValue {
-            invariant,
+            access,
             static1: false,
             val,
         };

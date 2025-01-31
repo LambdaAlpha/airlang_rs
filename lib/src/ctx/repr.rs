@@ -26,7 +26,7 @@ use crate::{
             CtxMap,
             CtxMapRef,
             CtxValue,
-            Invariant,
+            VarAccess,
         },
         ref1::CtxRef,
     },
@@ -40,11 +40,11 @@ use crate::{
     },
 };
 
-const INVARIANT: &str = "invariant";
+const ACCESS: &str = "access";
 const STATIC: &str = "static";
 
-pub(crate) const NONE: &str = "none";
-pub(crate) const FINAL: &str = "final";
+pub(crate) const ASSIGNABLE: &str = "assignable";
+pub(crate) const MUTABLE: &str = "mutable";
 pub(crate) const CONST: &str = "constant";
 
 pub(crate) const VARIABLES: &str = "variables";
@@ -112,7 +112,7 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
     let extra = parse_extra(pair.second, Extra::default())?;
     Some(CtxValue {
         val: pair.first,
-        invariant: extra.invariant,
+        access: extra.access,
         static1: extra.static1,
     })
 }
@@ -120,16 +120,16 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
 fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
     match extra {
         Val::Symbol(s) => match &*s {
-            NONE => default.invariant = Invariant::None,
-            FINAL => default.invariant = Invariant::Final,
-            CONST => default.invariant = Invariant::Const,
+            ASSIGNABLE => default.access = VarAccess::Assign,
+            MUTABLE => default.access = VarAccess::Mut,
+            CONST => default.access = VarAccess::Const,
             STATIC => default.static1 = true,
             _ => return None,
         },
         Val::Map(mut map) => {
-            match map_remove(&mut map, INVARIANT) {
-                Val::Symbol(invariant) => {
-                    default.invariant = parse_invariant(&invariant)?;
+            match map_remove(&mut map, ACCESS) {
+                Val::Symbol(access) => {
+                    default.access = parse_var_access(&access)?;
                 }
                 Val::Unit(_) => {}
                 _ => return None,
@@ -147,14 +147,14 @@ fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
     Some(default)
 }
 
-pub(crate) fn parse_invariant(invariant: &str) -> Option<Invariant> {
-    let invariant = match invariant {
-        NONE => Invariant::None,
-        FINAL => Invariant::Final,
-        CONST => Invariant::Const,
+pub(crate) fn parse_var_access(access: &str) -> Option<VarAccess> {
+    let access = match access {
+        ASSIGNABLE => VarAccess::Assign,
+        MUTABLE => VarAccess::Mut,
+        CONST => VarAccess::Const,
         _ => return None,
     };
-    Some(invariant)
+    Some(access)
 }
 
 pub(crate) fn generate_mode() -> Mode {
@@ -205,25 +205,25 @@ fn generate_ctx_value(ctx_value: CtxValue) -> Val {
                 break 'a true;
             }
         }
-        !matches!(ctx_value.invariant, Invariant::None)
+        !matches!(ctx_value.access, VarAccess::Assign)
     };
     if use_normal_form {
         let func = Val::Unit(Unit);
-        let invariant = generate_invariant(ctx_value.invariant);
-        let pair = Val::Pair(Pair::new(ctx_value.val, Val::Symbol(invariant)).into());
+        let access = generate_var_access(ctx_value.access);
+        let pair = Val::Pair(Pair::new(ctx_value.val, Val::Symbol(access)).into());
         Val::Call(Call::new(func, pair).into())
     } else {
         ctx_value.val
     }
 }
 
-pub(crate) fn generate_invariant(invariant: Invariant) -> Symbol {
-    let invariant = match invariant {
-        Invariant::None => NONE,
-        Invariant::Final => FINAL,
-        Invariant::Const => CONST,
+pub(crate) fn generate_var_access(access: VarAccess) -> Symbol {
+    let access = match access {
+        VarAccess::Assign => ASSIGNABLE,
+        VarAccess::Mut => MUTABLE,
+        VarAccess::Const => CONST,
     };
-    Symbol::from_str(invariant)
+    Symbol::from_str(access)
 }
 
 pub(crate) struct Binding<T> {
@@ -233,7 +233,7 @@ pub(crate) struct Binding<T> {
 
 #[derive(Default, Copy, Clone)]
 pub(crate) struct Extra {
-    pub(crate) invariant: Invariant,
+    pub(crate) access: VarAccess,
     pub(crate) static1: bool,
 }
 
@@ -374,7 +374,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
 fn assign_any(ctx: MutFnCtx, binding: Binding<Symbol>, val: Val) -> Val {
     let ctx_value = CtxValue {
         val,
-        invariant: binding.extra.invariant,
+        access: binding.extra.access,
         static1: false,
     };
     let Ok(ctx) = ctx.get_variables_mut() else {

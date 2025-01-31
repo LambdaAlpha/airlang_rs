@@ -24,17 +24,17 @@ pub(crate) trait CtxMapRef<'a>: Sized {
 
     fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
 
-    fn set_invariant(self, name: Symbol, invariant: Invariant) -> Result<(), CtxError>;
+    fn set_access(self, name: Symbol, access: VarAccess) -> Result<(), CtxError>;
 
-    fn get_invariant(self, name: Symbol) -> Option<Invariant>;
+    fn get_access(self, name: Symbol) -> Option<VarAccess>;
 
     fn is_static(self, name: Symbol) -> Option<bool>;
 
     fn is_assignable(self, name: Symbol) -> bool {
-        let Some(invariant) = self.get_invariant(name) else {
+        let Some(access) = self.get_access(name) else {
             return true;
         };
-        invariant == Invariant::None
+        access == VarAccess::Assign
     }
 }
 
@@ -47,19 +47,16 @@ pub(crate) struct CtxMap {
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Invariant {
-    // no limit
+pub enum VarAccess {
     #[default]
-    None,
-    // can't be assigned
-    Final,
-    // can't be modified
+    Assign,
+    Mut,
     Const,
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxValue {
-    pub(crate) invariant: Invariant,
+    pub(crate) access: VarAccess,
     // the invariant of static binding is hold both in the past and in the future
     // corollaries
     // - static binding either always exists or never exists
@@ -113,7 +110,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.invariant == Invariant::Const {
+        if value.access == VarAccess::Const {
             return Err(CtxError::AccessDenied);
         }
         Ok(&mut value.val)
@@ -124,7 +121,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
             return Err(CtxError::NotFound);
         }
         let ctx_value = self.map.get_mut(&name).unwrap();
-        let is_const = ctx_value.invariant == Invariant::Const;
+        let is_const = ctx_value.access == VarAccess::Const;
         Ok(DynRef::new(&mut ctx_value.val, is_const))
     }
 
@@ -135,7 +132,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         if value.static1 {
             return Err(CtxError::AccessDenied);
         }
-        if !self.reverse && value.invariant != Invariant::None {
+        if !self.reverse && value.access != VarAccess::Assign {
             return Err(CtxError::AccessDenied);
         }
         Ok(self.map.remove(&name).unwrap().val)
@@ -145,14 +142,14 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
     fn put_value(self, name: Symbol, mut new: CtxValue) -> Result<Option<Val>, CtxError> {
         debug_assert!(!new.static1);
         let Some(old) = self.map.get(&name) else {
-            if self.reverse && new.invariant != Invariant::None {
+            if self.reverse && new.access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
             new.static1 = false;
             return Ok(self.put_unchecked(name, new));
         };
         if old.static1 {
-            if old.invariant != Invariant::None || new.invariant != Invariant::None {
+            if old.access != VarAccess::Assign || new.access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
             new.static1 = true;
@@ -160,11 +157,11 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         }
         #[allow(clippy::collapsible_else_if)]
         if self.reverse {
-            if new.invariant != Invariant::None {
+            if new.access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
         } else {
-            if old.invariant != Invariant::None {
+            if old.access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
         }
@@ -172,36 +169,36 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         Ok(self.put_unchecked(name, new))
     }
 
-    fn set_invariant(self, name: Symbol, new: Invariant) -> Result<(), CtxError> {
+    fn set_access(self, name: Symbol, new: VarAccess) -> Result<(), CtxError> {
         let Some(old) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
         if old.static1 {
-            if old.invariant != new {
+            if old.access != new {
                 return Err(CtxError::AccessDenied);
             }
             return Ok(());
         }
         #[allow(clippy::collapsible_else_if)]
         if self.reverse {
-            if new != Invariant::None && old.invariant == Invariant::None
-                || new == Invariant::Const && old.invariant != Invariant::Const
+            if new != VarAccess::Assign && old.access == VarAccess::Assign
+                || new == VarAccess::Const && old.access != VarAccess::Const
             {
                 return Err(CtxError::AccessDenied);
             }
         } else {
-            if new == Invariant::None && old.invariant != Invariant::None
-                || new != Invariant::Const && old.invariant == Invariant::Const
+            if new == VarAccess::Assign && old.access != VarAccess::Assign
+                || new != VarAccess::Const && old.access == VarAccess::Const
             {
                 return Err(CtxError::AccessDenied);
             }
         }
-        old.invariant = new;
+        old.access = new;
         Ok(())
     }
 
-    fn get_invariant(self, name: Symbol) -> Option<Invariant> {
-        (&*self).get_invariant(name)
+    fn get_access(self, name: Symbol) -> Option<VarAccess> {
+        (&*self).get_access(name)
     }
 
     fn is_static(self, name: Symbol) -> Option<bool> {
@@ -237,13 +234,13 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_invariant(self, _name: Symbol, _invariant: Invariant) -> Result<(), CtxError> {
+    fn set_access(self, _name: Symbol, _access: VarAccess) -> Result<(), CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_invariant(self, name: Symbol) -> Option<Invariant> {
+    fn get_access(self, name: Symbol) -> Option<VarAccess> {
         let value = self.map.get(&name)?;
-        Some(value.invariant)
+        Some(value.access)
     }
 
     fn is_static(self, name: Symbol) -> Option<bool> {
@@ -256,7 +253,7 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
 impl CtxValue {
     pub(crate) fn new(val: Val) -> CtxValue {
         CtxValue {
-            invariant: Invariant::None,
+            access: VarAccess::Assign,
             static1: false,
             val,
         }
@@ -264,7 +261,7 @@ impl CtxValue {
 
     pub(crate) fn new_final(val: Val) -> CtxValue {
         CtxValue {
-            invariant: Invariant::Final,
+            access: VarAccess::Mut,
             static1: false,
             val,
         }
@@ -272,7 +269,7 @@ impl CtxValue {
 
     pub(crate) fn new_const(val: Val) -> CtxValue {
         CtxValue {
-            invariant: Invariant::Const,
+            access: VarAccess::Const,
             static1: false,
             val,
         }
@@ -282,7 +279,7 @@ impl CtxValue {
 impl Debug for CtxValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("")
-            .field(&self.invariant)
+            .field(&self.access)
             .field(&self.val)
             .finish()
     }

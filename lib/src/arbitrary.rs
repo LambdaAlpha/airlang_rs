@@ -49,7 +49,7 @@ use crate::{
         map::{
             CtxMap,
             CtxValue,
-            Invariant,
+            VarAccess,
         },
     },
     extension::UnitExt,
@@ -244,9 +244,9 @@ pub(crate) fn any_map(rng: &mut SmallRng, depth: usize) -> Map<Val, Val> {
     map
 }
 
-pub(crate) fn any_invariant(rng: &mut SmallRng) -> Invariant {
-    const INVARIANTS: [Invariant; 3] = [Invariant::None, Invariant::Final, Invariant::Const];
-    *(INVARIANTS.choose(rng).unwrap())
+pub(crate) fn any_var_access(rng: &mut SmallRng) -> VarAccess {
+    const ACCESSES: [VarAccess; 3] = [VarAccess::Assign, VarAccess::Mut, VarAccess::Const];
+    *(ACCESSES.choose(rng).unwrap())
 }
 
 pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxValue> {
@@ -255,7 +255,7 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
     for _ in 0..len {
         let ctx_value = CtxValue {
             val: any_val(rng, depth),
-            invariant: any_invariant(rng),
+            access: any_var_access(rng),
             static1: rng.gen(),
         };
         ctx_map.insert(any_symbol(rng), ctx_value);

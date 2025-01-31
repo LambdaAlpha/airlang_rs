@@ -10,9 +10,9 @@ do [a = any ; ., b = .a, a == read ; *b]
 -----
 true
 =====
-read final
+read mutable
 -----
-do [(a . final) = any ; ., a == read ; a]
+do [(a . mutable) = any ; ., a == read ; a]
 -----
 true
 =====
@@ -44,9 +44,9 @@ do [a = any ; ., b = .a, c = a, (c == move ; *b) and (is_null ; a)]
 -----
 true
 =====
-move final
+move mutable
 -----
-do [(a . final) = any ; ., (. == move ; a) and (not ; is_null ; a)]
+do [(a . mutable) = any ; ., (. == move ; a) and (not ; is_null ; a)]
 -----
 true
 =====
@@ -66,11 +66,11 @@ do [
 -----
 true
 =====
-move static final
+move static mutable
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {b : v . {.static, .invariant : .final}}},
+    a = context ; {variables : {b : v . {.static, .access : .mutable}}},
     (. == a | move ; .b) and (not ; a | is_null ; .b)
 ]
 -----
@@ -80,7 +80,7 @@ move static const
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {b : v . {.static, .invariant : .constant}}},
+    a = context ; {variables : {b : v . {.static, .access : .constant}}},
     (. == a | move ; .b) and (not ; a | is_null ; .b)
 ]
 -----
@@ -128,35 +128,35 @@ do [..p = 1 : 2, *.p pair.first .]
 -----
 1
 =====
-= none
+= assignable
 -----
-do [(a . none) = 1, [a, invariant a]]
+do [(a . assignable) = 1, [a, variable_access a]]
 -----
-[1, none]
+[1, assignable]
 =====
-= final
+= mutable
 -----
-do [(a . final) = 1, [a, invariant a]]
+do [(a . mutable) = 1, [a, variable_access a]]
 -----
-[1, final]
+[1, mutable]
 =====
 = constant
 -----
-do [(a . constant) = 1, [a, invariant a]]
+do [(a . constant) = 1, [a, variable_access a]]
 -----
 [1, constant]
 =====
 = map
 -----
-do [(a . {invariant : final}) = 1, [a, invariant a]]
+do [(a . {access : mutable}) = 1, [a, variable_access a]]
 -----
-[1, final]
+[1, mutable]
 =====
 = default map
 -----
-do [(a . {}) = 1, [a, invariant a]]
+do [(a . {}) = 1, [a, variable_access a]]
 -----
-[1, none]
+[1, assignable]
 =====
 = destruct pair
 -----
@@ -176,23 +176,23 @@ do [(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-= destruct invariant default
+= destruct variable_access default
 -----
-do [((a : b) . final) = (any ; .) : (any ; .), [invariant a, invariant b]]
+do [((a : b) . mutable) = (any ; .) : (any ; .), [variable_access a, variable_access b]]
 -----
-[final, final]
+[mutable, mutable]
 =====
-= destruct invariant one by one
+= destruct variable_access one by one
 -----
-do [((a . final) : (b . constant)) = (any ; .) : (any ; .), [invariant a, invariant b]]
+do [((a . mutable) : (b . constant)) = (any ; .) : (any ; .), [variable_access a, variable_access b]]
 -----
-[final, constant]
+[mutable, constant]
 =====
-= destruct invariant mix
+= destruct variable_access mix
 -----
-do [((a : (b . final)) . constant) = (any ; .) : (any ; .), [invariant a, invariant b]]
+do [((a : (b . mutable)) . constant) = (any ; .) : (any ; .), [variable_access a, variable_access b]]
 -----
-[constant, final]
+[constant, mutable]
 =====
 = destruct call
 -----
@@ -266,33 +266,33 @@ do [a = 1, b = 2, {3 : a, 4 : b} = {3 : 5, 6 : 7}]
 -----
 {3 : 1, 4 : 2}
 =====
-final = return .
+mutable = return .
 -----
-do [(a . final) = 1, . == a = any ; .]
+do [(a . mutable) = 1, . == a = any ; .]
 -----
 true
 =====
-final = unchanged
+mutable = unchanged
 -----
-do [(a . final) = 1, a = any ; ., a]
------
-1
-=====
-final = final
------
-do [(a . final) = 1, (a . final) = any ; ., a]
+do [(a . mutable) = 1, a = any ; ., a]
 -----
 1
 =====
-final = constant
+mutable = mutable
 -----
-do [(a . final) = 1, (a . constant) = any ; ., a]
+do [(a . mutable) = 1, (a . mutable) = any ; ., a]
 -----
 1
 =====
-final mutate
+mutable = constant
 -----
-do [(a . final) = 1 : 2, a pair.set_first 3, a]
+do [(a . mutable) = 1, (a . constant) = any ; ., a]
+-----
+1
+=====
+mutable mutate
+-----
+do [(a . mutable) = 1 : 2, a pair.set_first 3, a]
 -----
 3 : 2
 =====
@@ -308,9 +308,9 @@ do [(a . constant) = 1, a = any ; ., a]
 -----
 1
 =====
-constant = final
+constant = mutable
 -----
-do [(a . constant) = 1, (a . final) = any ; ., a]
+do [(a . constant) = 1, (a . mutable) = any ; ., a]
 -----
 1
 =====
@@ -320,27 +320,27 @@ do [(a . constant) = 1, (a . constant) = any ; ., a]
 -----
 1
 =====
-set_invariant none final
+set_variable_access assignable mutable
 -----
-do [a = any ; ., a set_invariant final, invariant a]
+do [a = any ; ., a set_variable_access mutable, variable_access a]
 -----
-final
+mutable
 =====
-set_invariant constant final
+set_variable_access constant mutable
 -----
-do [(a . constant) = any ; ., a set_invariant final, invariant a]
+do [(a . constant) = any ; ., a set_variable_access mutable, variable_access a]
 -----
 constant
 =====
-set_invariant none constant
+set_variable_access assignable constant
 -----
-do [a = any ; ., a set_invariant constant, invariant a]
+do [a = any ; ., a set_variable_access constant, variable_access a]
 -----
 constant
 =====
-set_invariant final constant
+set_variable_access mutable constant
 -----
-do [(a . final) = any ; ., a set_invariant constant, invariant a]
+do [(a . mutable) = any ; ., a set_variable_access constant, variable_access a]
 -----
 constant
 =====
@@ -416,17 +416,17 @@ do [c = context ; {reverse : true}, c | is_reverse ; .]
 -----
 true
 =====
-reverse set_invariant constant final
+reverse set_variable_access constant mutable
 -----
-do [c = context ; {reverse : true, variables : {a : (any ; .) . .constant}}, c | do ; [.a set_invariant .final, invariant .a]]
+do [c = context ; {reverse : true, variables : {a : (any ; .) . .constant}}, c | do ; [.a set_variable_access .mutable, variable_access .a]]
 -----
-final
+mutable
 =====
-reverse set_invariant final constant
+reverse set_variable_access mutable constant
 -----
-do [c = context ; {reverse : true, variables : {a : (any ; .) . .final}}, c | do ; [.a set_invariant .constant, invariant .a]]
+do [c = context ; {reverse : true, variables : {a : (any ; .) . .mutable}}, c | do ; [.a set_variable_access .constant, variable_access .a]]
 -----
-final
+mutable
 =====
 reverse move constant
 -----
@@ -434,9 +434,9 @@ do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | .^a]
 -----
 1
 =====
-reverse = final
+reverse = mutable
 -----
-do [c = context ; {reverse : true}, c | (.a . .final) = 1, c | is_null ; .a]
+do [c = context ; {reverse : true}, c | (.a . .mutable) = 1, c | is_null ; .a]
 -----
 true
 =====
@@ -577,9 +577,9 @@ context.represent ; context ; {}
 =====
 represent else
 -----
-context.represent ; context ; {variables : {a : 1 . .final}}
+context.represent ; context ; {variables : {a : 1 . .mutable}}
 -----
-{variables : {a : 1 . final}}
+{variables : {a : 1 . mutable}}
 =====
 represent non-recursive
 -----

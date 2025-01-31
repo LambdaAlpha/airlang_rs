@@ -11,7 +11,7 @@ use crate::{
     FuncMode,
     FuncVal,
     Symbol,
-    ctx::map::Invariant,
+    ctx::map::VarAccess,
     func::free_static_prim::FreeStaticFn,
     parse,
     val::Val,
@@ -155,7 +155,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         false,
     );
     let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
-    air.ctx_mut().put(func_ext_name, Invariant::Const, func)?;
+    air.ctx_mut().put(func_ext_name, VarAccess::Const, func)?;
     test_interpret(
         air,
         include_str!("test/extension.air"),

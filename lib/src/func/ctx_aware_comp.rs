@@ -5,7 +5,7 @@ use crate::{
     Symbol,
     Val,
     ctx::{
-        map::Invariant,
+        map::VarAccess,
         ref1::CtxMeta,
     },
     func::comp::Composite,
@@ -29,7 +29,7 @@ where
         ConstFnCtx::Free(_ctx) => Composite::transform(body_mode, inner, body),
         ConstFnCtx::Const(ctx) => {
             let eval = |inner: &mut crate::Ctx| Composite::transform(body_mode, inner, body);
-            Composite::with_ctx(inner, ctx.unwrap(), ctx_name, Invariant::Const, eval)
+            Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Const, eval)
         }
     }
 }
@@ -52,11 +52,11 @@ where
         MutFnCtx::Free(_ctx) => Composite::transform(body_mode, inner, body),
         MutFnCtx::Const(ctx) => {
             let eval = |inner: &mut crate::Ctx| Composite::transform(body_mode, inner, body);
-            Composite::with_ctx(inner, ctx.unwrap(), ctx_name, Invariant::Const, eval)
+            Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Const, eval)
         }
         MutFnCtx::Mut(ctx) => {
             let eval = |inner: &mut crate::Ctx| Composite::transform(body_mode, inner, body);
-            Composite::with_ctx(inner, ctx.unwrap(), ctx_name, Invariant::Final, eval)
+            Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Mut, eval)
         }
     }
 }

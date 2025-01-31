@@ -10,7 +10,7 @@ use crate::{
     ctx::map::{
         CtxMapRef,
         CtxValue,
-        Invariant,
+        VarAccess,
     },
     transformer::Transformer,
 };
@@ -38,25 +38,25 @@ impl Composite {
         inner: &mut Ctx,
         outer: &mut Ctx,
         name: Symbol,
-        invariant: Invariant,
+        access: VarAccess,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
         if !inner.variables().is_assignable(name.clone()) {
             return Val::default();
         }
-        Self::keep_ctx(inner, outer, name.clone(), invariant);
+        Self::keep_ctx(inner, outer, name.clone(), access);
         let output = f(inner);
         Self::restore_ctx(inner, outer, name);
         output
     }
 
-    fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, invariant: Invariant) {
+    fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, access: VarAccess) {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
         let old_val = inner.variables_mut().put_unchecked(name, CtxValue {
             val,
-            invariant,
+            access,
             static1: true,
         });
         assert!(old_val.is_none(), "keep_ctx variable already present");

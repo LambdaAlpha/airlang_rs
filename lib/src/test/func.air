@@ -758,7 +758,7 @@ do [
         call_mode : id,
         context_access : mutable,
     },
-    (a . final) = 1,
+    (a . mutable) = 1,
     f a,
     a
 ]

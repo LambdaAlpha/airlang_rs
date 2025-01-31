@@ -16,7 +16,7 @@ pub use crate::{
             ConstFnCtx,
         },
         free::FreeCtx,
-        map::Invariant,
+        map::VarAccess,
         mut1::{
             MutCtx,
             MutFnCtx,

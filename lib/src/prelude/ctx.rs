@@ -25,12 +25,12 @@ use crate::{
             PatternCtx,
             assign_pattern,
             generate_ctx,
-            generate_invariant,
             generate_mode,
+            generate_var_access,
             parse_ctx,
-            parse_invariant,
             parse_mode,
             parse_pattern,
+            parse_var_access,
         },
     },
     mode::{
@@ -66,13 +66,13 @@ pub(crate) struct CtxPrelude {
     pub(crate) read: Named<FuncVal>,
     pub(crate) move1: Named<FuncVal>,
     pub(crate) assign: Named<FuncVal>,
-    pub(crate) set_invariant: Named<FuncVal>,
-    pub(crate) get_invariant: Named<FuncVal>,
+    pub(crate) set_variable_access: Named<FuncVal>,
+    pub(crate) get_variable_access: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
     pub(crate) is_static: Named<FuncVal>,
     pub(crate) is_reverse: Named<FuncVal>,
     pub(crate) set_reverse: Named<FuncVal>,
-    pub(crate) get_access: Named<FuncVal>,
+    pub(crate) get_ctx_access: Named<FuncVal>,
     pub(crate) get_solver: Named<FuncVal>,
     pub(crate) set_solver: Named<FuncVal>,
     pub(crate) with_ctx: Named<FuncVal>,
@@ -89,13 +89,13 @@ impl Default for CtxPrelude {
             read: read(),
             move1: move1(),
             assign: assign(),
-            set_invariant: set_invariant(),
-            get_invariant: get_invariant(),
+            set_variable_access: set_variable_access(),
+            get_variable_access: get_variable_access(),
             is_null: is_null(),
             is_static: is_static(),
             is_reverse: is_reverse(),
             set_reverse: set_reverse(),
-            get_access: get_access(),
+            get_ctx_access: get_ctx_access(),
             get_solver: get_solver(),
             set_solver: set_solver(),
             with_ctx: with_ctx(),
@@ -113,13 +113,13 @@ impl Prelude for CtxPrelude {
         self.read.put(m);
         self.move1.put(m);
         self.assign.put(m);
-        self.set_invariant.put(m);
-        self.get_invariant.put(m);
+        self.set_variable_access.put(m);
+        self.get_variable_access.put(m);
         self.is_null.put(m);
         self.is_static.put(m);
         self.is_reverse.put(m);
         self.set_reverse.put(m);
-        self.get_access.put(m);
+        self.get_ctx_access.put(m);
         self.get_solver.put(m);
         self.set_solver.put(m);
         self.with_ctx.put(m);
@@ -209,9 +209,9 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
     assign_pattern(ctx, pattern, val)
 }
 
-fn set_invariant() -> Named<FuncVal> {
-    let id = "set_invariant";
-    let f = fn_set_invariant;
+fn set_variable_access() -> Named<FuncVal> {
+    let id = "set_variable_access";
+    let f = fn_set_variable_access;
     let call = pair_mode(symbol_literal_mode(), symbol_literal_mode());
     let abstract1 = call.clone();
     let ask = Mode::default();
@@ -224,7 +224,7 @@ fn set_invariant() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_set_invariant(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_variable_access(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -232,22 +232,22 @@ fn fn_set_invariant(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
-    let Val::Symbol(invariant) = pair.second else {
+    let Val::Symbol(access) = pair.second else {
         return Val::default();
     };
-    let Some(invariant) = parse_invariant(&invariant) else {
+    let Some(access) = parse_var_access(&access) else {
         return Val::default();
     };
     let Ok(ctx) = ctx.get_variables_mut() else {
         return Val::default();
     };
-    let _ = ctx.set_invariant(s, invariant);
+    let _ = ctx.set_access(s, access);
     Val::default()
 }
 
-fn get_invariant() -> Named<FuncVal> {
-    let id = "invariant";
-    let f = fn_get_invariant;
+fn get_variable_access() -> Named<FuncVal> {
+    let id = "variable_access";
+    let f = fn_get_variable_access;
     let call = symbol_literal_mode();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
@@ -260,17 +260,17 @@ fn get_invariant() -> Named<FuncVal> {
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_invariant(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_variable_access(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
     let Ok(ctx) = ctx.get_variables() else {
         return Val::default();
     };
-    let Some(invariant) = ctx.get_invariant(s) else {
+    let Some(access) = ctx.get_access(s) else {
         return Val::default();
     };
-    Val::Symbol(generate_invariant(invariant))
+    Val::Symbol(generate_var_access(access))
 }
 
 fn is_null() -> Named<FuncVal> {
@@ -364,9 +364,9 @@ fn fn_set_reverse(input: Val) -> Val {
     Val::Ctx(ctx)
 }
 
-fn get_access() -> Named<FuncVal> {
+fn get_ctx_access() -> Named<FuncVal> {
     let id = "access";
-    let f = fn_get_access;
+    let f = fn_get_ctx_access;
     let call = Mode::default();
     let abstract1 = call.clone();
     let ask = symbol_literal_mode();
@@ -383,7 +383,7 @@ const ACCESS_FREE: &str = "free";
 const ACCESS_CONSTANT: &str = "constant";
 const ACCESS_MUTABLE: &str = "mutable";
 
-fn fn_get_access(ctx: MutFnCtx, _input: Val) -> Val {
+fn fn_get_ctx_access(ctx: MutFnCtx, _input: Val) -> Val {
     let access = match ctx {
         MutFnCtx::Free(_) => ACCESS_FREE,
         MutFnCtx::Const(_) => ACCESS_CONSTANT,

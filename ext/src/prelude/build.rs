@@ -8,12 +8,12 @@ use airlang::{
     AirCell,
     FuncMode,
     FuncVal,
-    Invariant,
     MutCtx,
     MutFnCtx,
     Symbol,
     Text,
     Val,
+    VarAccess,
     parse,
 };
 
@@ -101,8 +101,12 @@ fn get_cur_url(ctx: MutFnCtx, key: Symbol) -> Option<String> {
 }
 
 fn set_cur_url(ctx: MutCtx, key: Symbol, new_url: String) -> bool {
-    ctx.put(key, Invariant::None, Val::Text(Text::from(new_url).into()))
-        .is_ok()
+    ctx.put(
+        key,
+        VarAccess::Assign,
+        Val::Text(Text::from(new_url).into()),
+    )
+    .is_ok()
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {

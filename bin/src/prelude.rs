@@ -19,7 +19,6 @@ use airlang::{
     FuncMode,
     FuncVal,
     Id,
-    Invariant,
     List,
     ListMode,
     Map,
@@ -39,6 +38,7 @@ use airlang::{
     SymbolMode,
     UniMode,
     Val,
+    VarAccess,
 };
 
 use crate::prelude::{
@@ -84,7 +84,7 @@ impl<T: Into<Val> + Clone> Named<T> {
     pub(crate) fn put(&self, ctx: MutCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
         let val = self.value.clone().into();
-        ctx.put(name, Invariant::None, val)
+        ctx.put(name, VarAccess::Assign, val)
             .expect("the name of preludes should be unique");
     }
 }
