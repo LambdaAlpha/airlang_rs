@@ -27,9 +27,8 @@ impl Transformer<Val, Val> for MutStaticCompFunc {
         let inner = &mut self.comp.ctx.clone();
         let ctx_name = self.ctx_name.clone();
         let input_name = self.comp.input_name.clone();
-        let body_mode = &self.comp.body_mode;
         let body = self.comp.body.clone();
-        mut_func_transform(inner, ctx_name, ctx, input_name, input, body_mode, body)
+        mut_func_transform(inner, ctx_name, ctx, input_name, input, body)
     }
 }
 

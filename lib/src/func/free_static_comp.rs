@@ -23,7 +23,7 @@ impl Transformer<Val, Val> for FreeStaticCompFunc {
     {
         let inner = &mut self.comp.ctx.clone();
         Composite::put_input(inner, self.comp.input_name.clone(), input);
-        Composite::transform(&self.comp.body_mode, inner, self.comp.body.clone())
+        Composite::transform(inner, self.comp.body.clone())
     }
 }
 

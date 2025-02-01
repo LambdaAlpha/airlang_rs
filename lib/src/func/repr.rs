@@ -50,7 +50,6 @@ use crate::{
     },
 };
 
-pub(crate) const BODY_MODE: &str = "body_mode";
 pub(crate) const BODY: &str = "body";
 pub(crate) const CTX: &str = "context";
 pub(crate) const INPUT_NAME: &str = "input_name";
@@ -91,11 +90,6 @@ pub(crate) fn generate_mode() -> Mode {
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
         return None;
-    };
-    let body_mode = match map_remove(&mut map, BODY_MODE) {
-        Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(mode)) => mode.self_mode().clone(),
-        _ => return None,
     };
     let body = map_remove(&mut map, BODY);
     let ctx = match map_remove(&mut map, CTX) {
@@ -150,7 +144,6 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         _ => return None,
     };
     let comp = Composite {
-        body_mode,
         body,
         ctx,
         input_name,
@@ -393,10 +386,6 @@ fn generate_primitive_extension(id: Symbol, common: FuncCommon) -> Val {
 }
 
 fn generate_composite(repr: &mut Map<Val, Val>, composite: Composite) {
-    if composite.body_mode != Mode::default() {
-        let mode = Val::Func(FuncVal::Mode(ModeFunc::new(composite.body_mode).into()));
-        repr.insert(symbol(BODY_MODE), mode);
-    }
     if composite.body != Val::default() {
         repr.insert(symbol(BODY), composite.body);
     }

@@ -631,7 +631,6 @@ fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {
     Composite {
-        body_mode: any_mode(rng, depth),
         body: any_val(rng, depth),
         ctx: any_ctx(rng, depth),
         input_name: any_symbol(rng),

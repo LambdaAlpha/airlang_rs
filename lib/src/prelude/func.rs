@@ -79,7 +79,6 @@ pub(crate) struct FuncPrelude {
     pub(crate) is_cell: Named<FuncVal>,
     pub(crate) is_mode: Named<FuncVal>,
     pub(crate) id: Named<FuncVal>,
-    pub(crate) body_mode: Named<FuncVal>,
     pub(crate) body: Named<FuncVal>,
     pub(crate) ctx: Named<FuncVal>,
     pub(crate) input_name: Named<FuncVal>,
@@ -109,7 +108,6 @@ impl Default for FuncPrelude {
             is_cell: is_cell(),
             is_mode: is_mode(),
             id: id(),
-            body_mode: body_mode(),
             body: body(),
             ctx: ctx(),
             input_name: input_name(),
@@ -140,7 +138,6 @@ impl Prelude for FuncPrelude {
         self.is_cell.put(m);
         self.is_mode.put(m);
         self.id.put(m);
-        self.body_mode.put(m);
         self.body.put(m);
         self.ctx.put(m);
         self.input_name.put(m);
@@ -563,39 +560,6 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
             return Val::default();
         };
         Val::Symbol(primitive.id.clone())
-    })
-}
-
-fn body_mode() -> Named<FuncVal> {
-    let id = "function.body_mode";
-    let f = fn_body_mode;
-    let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = Mode::default();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
-}
-
-fn fn_body_mode(ctx: ConstFnCtx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
-        let Val::Func(func) = val else {
-            return Val::default();
-        };
-        let Some(composite) = func.composite() else {
-            return Val::default();
-        };
-        Val::Func(FuncVal::Mode(
-            ModeFunc::new(composite.body_mode.clone()).into(),
-        ))
     })
 }
 

@@ -645,18 +645,6 @@ do [
 -----
 true
 =====
-body mode
------
-do [
-    f = function ; {
-        body_mode : form.,
-        body : .i ; .*i,
-    },
-    f .a
-]
------
-i ; a
-=====
 cell free
 -----
 do [
@@ -854,9 +842,7 @@ do [
     call_mode = mode ; {pair : eval* : id},
     abstract_mode = mode ; {pair : id : form.},
     ask_mode = mode ; {pair : form. : form.},
-    body_mode = mode ; {list : [eval*, form., id]},
     repr = form. ; {
-        body_mode : ^body_mode,
         body : in,
         input_name : in,
         context_name : ctx,
@@ -1023,15 +1009,6 @@ id rename
 do [neg = not, neg function.id .]
 -----
 not
-=====
-body mode
------
-do [
-    f = function ; {body_mode : form.},
-    function.represent ; f function.body_mode .
-]
------
-form.
 =====
 body
 -----

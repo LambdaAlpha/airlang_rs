@@ -1,6 +1,5 @@
 use crate::{
     ConstFnCtx,
-    Mode,
     MutFnCtx,
     Symbol,
     Val,
@@ -17,7 +16,6 @@ pub(crate) fn const_func_transform<'a, Ctx>(
     outer: Ctx,
     input_name: Symbol,
     input: Val,
-    body_mode: &Mode,
     body: Val,
 ) -> Val
 where
@@ -26,9 +24,9 @@ where
     Composite::put_input(inner, input_name, input);
 
     match outer.for_const_fn() {
-        ConstFnCtx::Free(_ctx) => Composite::transform(body_mode, inner, body),
+        ConstFnCtx::Free(_ctx) => Composite::transform(inner, body),
         ConstFnCtx::Const(ctx) => {
-            let eval = |inner: &mut crate::Ctx| Composite::transform(body_mode, inner, body);
+            let eval = |inner: &mut crate::Ctx| Composite::transform(inner, body);
             Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Const, eval)
         }
     }
@@ -40,7 +38,6 @@ pub(crate) fn mut_func_transform<'a, Ctx>(
     outer: Ctx,
     input_name: Symbol,
     input: Val,
-    body_mode: &Mode,
     body: Val,
 ) -> Val
 where
@@ -49,13 +46,13 @@ where
     Composite::put_input(inner, input_name, input);
 
     match outer.for_mut_fn() {
-        MutFnCtx::Free(_ctx) => Composite::transform(body_mode, inner, body),
+        MutFnCtx::Free(_ctx) => Composite::transform(inner, body),
         MutFnCtx::Const(ctx) => {
-            let eval = |inner: &mut crate::Ctx| Composite::transform(body_mode, inner, body);
+            let eval = |inner: &mut crate::Ctx| Composite::transform(inner, body);
             Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Const, eval)
         }
         MutFnCtx::Mut(ctx) => {
-            let eval = |inner: &mut crate::Ctx| Composite::transform(body_mode, inner, body);
+            let eval = |inner: &mut crate::Ctx| Composite::transform(inner, body);
             Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Mut, eval)
         }
     }

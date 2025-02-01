@@ -3,7 +3,6 @@ use std::mem::take;
 use crate::{
     Ctx,
     CtxVal,
-    Mode,
     MutCtx,
     Symbol,
     Val,
@@ -12,12 +11,12 @@ use crate::{
         CtxValue,
         VarAccess,
     },
+    mode::eval::EVAL,
     transformer::Transformer,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composite {
-    pub(crate) body_mode: Mode,
     pub(crate) body: Val,
     pub(crate) ctx: Ctx,
     pub(crate) input_name: Symbol,
@@ -30,8 +29,8 @@ impl Composite {
             .put_value(input_name, CtxValue::new(input));
     }
 
-    pub(crate) fn transform(mode: &Mode, ctx: &mut Ctx, body: Val) -> Val {
-        mode.transform(MutCtx::new(ctx), body)
+    pub(crate) fn transform(ctx: &mut Ctx, body: Val) -> Val {
+        EVAL.transform(MutCtx::new(ctx), body)
     }
 
     pub(crate) fn with_ctx(
