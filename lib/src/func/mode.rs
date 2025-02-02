@@ -59,6 +59,10 @@ impl FuncTrait for ModeFunc {
     fn cacheable(&self) -> bool {
         self.cacheable
     }
+
+    fn call(&self) -> Val {
+        Val::default()
+    }
 }
 
 impl ModeFunc {

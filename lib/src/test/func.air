@@ -534,7 +534,7 @@ mode func call mode
 -----
 do [
     m = mode ; *not,
-    f = function ; {call_mode : ^m, body : .i},
+    f = function ; {call_mode : ^m, call : _ : i -> .i},
     f true
 ]
 -----
@@ -602,29 +602,29 @@ recursive call
 -----
 do [
     f = function ; {
-        body : .i,
+        call : _ : i -> .i,
     },
     f ; not ; true
 ]
 -----
 false
 =====
-body external func
+call external func
 -----
 do [
     f = function ; {
-        body : not ; .i
+        call : _ : i -> not ; .i
     },
     f ; not ; true
 ]
 -----
 true
 =====
-body internal func
+call internal func
 -----
 do [
     f = function ; {
-        body : .not ; .i,
+        call : _ : i -> .not ; .i,
         context : context ; {variables :  {not : :}},
     },
     f ; not ; true
@@ -632,12 +632,11 @@ do [
 -----
 true
 =====
-body rename
+call rename
 -----
 do [
     f = function ; {
-        body : .n ; .a,
-        input_name : a,
+        call : _ : a -> .n ; .a,
         context : context ; {variables :  {n : not}},
     },
     f ; not ; true
@@ -649,7 +648,7 @@ cell free
 -----
 do [
     f = function ; {
-        body : do ; [.a = .a + 1, .a],
+        call : _ -> do ; [.a = .a + 1, .a],
         context_access : free,
         cell : true,
         context : context ; {variables : {a : 0}},
@@ -664,7 +663,7 @@ cell const
 do [
     a = 1,
     f = function ; {
-        body : do ; [.b = .b + .c | ..a, .b],
+        call : c : _ -> do ; [.b = .b + .c | ..a, .b],
         context_access : constant,
         cell : true,
         context : context ; {variables : {
@@ -681,7 +680,7 @@ cell mutable
 do [
     a = 1,
     f = function ; {
-        body : do ; [
+        call : c : _ -> do ; [
             .b = .b + .c | ..a,
             .c | ..a = ..a + 1,
             .b,
@@ -702,7 +701,7 @@ const const
 do [
     a = 1,
     f = function ; {
-        body : .c | ..a,
+        call : c : _ -> .c | ..a,
         context_access : constant,
     },
     f .
@@ -715,7 +714,7 @@ mutable const
 do [
     a = 1,
     f = function ; {
-        body : .c | ..a,
+        call : c : _ -> .c | ..a,
         context_access : mutable,
     },
     f .
@@ -727,7 +726,7 @@ mutable mutate
 -----
 do [
     f = function ; {
-        body : .c | .i = 2,
+        call : c : i -> .c | .i = 2,
         call_mode : id,
         context_access : mutable,
     },
@@ -742,7 +741,7 @@ mutable mutate fail
 -----
 do [
     f = function ; {
-        body : .c | .i = 2,
+        call : c : i -> .c | .i = 2,
         call_mode : id,
         context_access : mutable,
     },
@@ -757,7 +756,7 @@ const mutate fail
 -----
 do [
     f = function ; {
-        body : .c | .i = 2,
+        call : c : i -> .c | .i = 2,
         call_mode : id,
         context_access : constant,
     },
@@ -772,7 +771,7 @@ const free
 -----
 do [
     f = function ; {
-        body : 1,
+        call : _c : _ -> 1,
         context_access : constant,
     },
     . | f ; .
@@ -785,8 +784,7 @@ ctx name occupied
 do [
     a = 1,
     f = function ; {
-        context_name : ctx,
-        body : 2,
+        call : ctx : _ -> 2,
         context_access : constant,
         context : context ; {variables : {ctx : 3 . .constant}},
     },
@@ -801,8 +799,7 @@ reverse ctx
 do [
     a = 1,
     f = function ; {
-        context_name : ctx,
-        body : .ctx = 2,
+        call : ctx : _ -> .ctx = 2,
         context_access : constant,
         context : context ; {reverse : true},
     },
@@ -814,9 +811,9 @@ do [
 =====
 repr
 -----
-function.represent ; function ; {body : .i}
+function.represent ; function ; {call : _ : i -> .i}
 -----
-{body : i}
+{call : _ : i -> i}
 =====
 repr primitive free
 -----
@@ -826,9 +823,9 @@ function.represent not
 =====
 repr const
 -----
-function.represent ; function ; {body : .i, context_access : constant}
+function.represent ; function ; {call : _ : i -> .i, context_access : constant}
 -----
-{body : i, context_access : constant}
+{call : _ : i -> i, context_access : constant}
 =====
 repr primitive const
 -----
@@ -843,9 +840,7 @@ do [
     abstract_mode = mode ; {pair : id : form.},
     ask_mode = mode ; {pair : form. : form.},
     repr = form. ; {
-        body : in,
-        input_name : in,
-        context_name : ctx,
+        call : ctx : in -> in,
         call_mode : ^call_mode,
         abstract_mode : ^abstract_mode,
         ask_mode : ^ask_mode,
@@ -1010,11 +1005,11 @@ do [neg = not, neg function.id .]
 -----
 not
 =====
-body
+call
 -----
-do [f = function ; {body : .i}, f function.body .]
+do [f = function ; {call : ctx : i -> .i}, f function.call .]
 -----
-i
+ctx : i -> i
 =====
 ctx
 -----
@@ -1025,15 +1020,3 @@ do [
 ]
 -----
 true
-=====
-input name
------
-do [f = function ; {}, f function.input_name .]
------
-i
-=====
-ctx name
------
-do [f = function ; {context_access : constant}, f function.context_name .]
------
-c

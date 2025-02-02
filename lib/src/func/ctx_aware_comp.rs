@@ -1,6 +1,8 @@
 use crate::{
+    Change,
     ConstFnCtx,
     MutFnCtx,
+    Pair,
     Symbol,
     Val,
     ctx::{
@@ -56,4 +58,11 @@ where
             Composite::with_ctx(inner, ctx.unwrap(), ctx_name, VarAccess::Mut, eval)
         }
     }
+}
+
+pub(crate) fn func_call(ctx: Symbol, input: Symbol, output: Val) -> Val {
+    let ctx = Val::Symbol(ctx);
+    let input = Val::Symbol(input);
+    let change = Val::Change(Change::new(input, output).into());
+    Val::Pair(Pair::new(ctx, change).into())
 }

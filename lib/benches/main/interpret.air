@@ -1,7 +1,6 @@
 "bench interpret" ! do ; [
   f = function ; {
-    input_name : n,
-    body : do ; [
+    call : n -> do ; [
       .sum = 0,
       .n for .i : [
         (0 == .i % 3) .continue_if .,
@@ -9,6 +8,7 @@
       ],
       .sum
     ],
+    context_access : free,
   },
   f 100
 ]

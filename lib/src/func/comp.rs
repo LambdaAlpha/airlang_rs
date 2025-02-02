@@ -1,6 +1,7 @@
 use std::mem::take;
 
 use crate::{
+    Change,
     Ctx,
     CtxVal,
     MutCtx,
@@ -71,5 +72,11 @@ impl Composite {
         };
         let outer_val = Ctx::from(outer_val);
         *outer = outer_val;
+    }
+
+    pub(crate) fn func_call(&self) -> Val {
+        let input = Val::Symbol(self.input_name.clone());
+        let output = self.body.clone();
+        Val::Change(Change::new(input, output).into())
     }
 }

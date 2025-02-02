@@ -51,6 +51,10 @@ impl FuncTrait for FreeStaticPrimFunc {
     fn cacheable(&self) -> bool {
         self.cacheable
     }
+
+    fn call(&self) -> Val {
+        Val::default()
+    }
 }
 
 impl FreeStaticPrimFunc {

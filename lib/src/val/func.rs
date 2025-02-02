@@ -111,6 +111,24 @@ impl FuncTrait for FuncVal {
         }
     }
 
+    fn call(&self) -> Val {
+        match self {
+            FuncVal::Mode(f) => f.call(),
+            FuncVal::FreeCellPrim(f) => f.call(),
+            FuncVal::FreeCellComp(f) => f.call(),
+            FuncVal::FreeStaticPrim(f) => f.call(),
+            FuncVal::FreeStaticComp(f) => f.call(),
+            FuncVal::ConstCellPrim(f) => f.call(),
+            FuncVal::ConstCellComp(f) => f.call(),
+            FuncVal::ConstStaticPrim(f) => f.call(),
+            FuncVal::ConstStaticComp(f) => f.call(),
+            FuncVal::MutCellPrim(f) => f.call(),
+            FuncVal::MutCellComp(f) => f.call(),
+            FuncVal::MutStaticPrim(f) => f.call(),
+            FuncVal::MutStaticComp(f) => f.call(),
+        }
+    }
+
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,
@@ -265,6 +283,10 @@ macro_rules! impl_const_func_trait {
 
             fn cacheable(&self) -> bool {
                 self.0.cacheable()
+            }
+
+            fn call(&self) -> $crate::val::Val {
+                self.0.call()
             }
 
             fn transform_mut<'a, Ctx>(

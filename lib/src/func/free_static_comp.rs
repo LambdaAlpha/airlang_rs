@@ -35,6 +35,10 @@ impl FuncTrait for FreeStaticCompFunc {
     fn cacheable(&self) -> bool {
         self.cacheable
     }
+
+    fn call(&self) -> Val {
+        self.comp.func_call()
+    }
 }
 
 impl FreeStaticCompFunc {

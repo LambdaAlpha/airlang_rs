@@ -482,7 +482,7 @@ do [
     s1 = function ; {
         cell : true,
         context_access : .free,
-        body : do ; [.a = .a + 1, .a],
+        call : _ -> do ; [.a = .a + 1, .a],
         context : context ; {variables : {a : 0}},
     },
     set_solver ^s1,

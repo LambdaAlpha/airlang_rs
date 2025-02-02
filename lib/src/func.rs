@@ -14,6 +14,8 @@ pub(crate) trait FuncTrait: Transformer<Val, Val> {
     fn mode(&self) -> &FuncMode;
     fn cacheable(&self) -> bool;
 
+    fn call(&self) -> Val;
+
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,

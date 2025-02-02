@@ -55,6 +55,10 @@ impl FuncTrait for MutCellPrimFunc {
         self.cacheable
     }
 
+    fn call(&self) -> Val {
+        Val::default()
+    }
+
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,

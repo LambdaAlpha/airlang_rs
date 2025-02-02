@@ -55,6 +55,10 @@ impl FuncTrait for MutStaticPrimFunc {
     fn cacheable(&self) -> bool {
         self.cacheable
     }
+
+    fn call(&self) -> Val {
+        Val::default()
+    }
 }
 
 impl MutStaticPrimFunc {

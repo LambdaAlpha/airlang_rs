@@ -36,6 +36,10 @@ impl FuncTrait for FreeCellCompFunc {
         self.cacheable
     }
 
+    fn call(&self) -> Val {
+        self.comp.func_call()
+    }
+
     fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val
     where
         Ctx: CtxMeta<'a>,

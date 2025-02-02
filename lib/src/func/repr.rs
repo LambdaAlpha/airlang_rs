@@ -1,5 +1,8 @@
 use crate::{
     Bit,
+    Change,
+    ChangeMode,
+    CompMode,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
     ConstStaticPrimFuncVal,
@@ -19,10 +22,13 @@ use crate::{
     MutStaticCompFunc,
     MutStaticCompFuncVal,
     MutStaticPrimFuncVal,
+    Pair,
+    PairMode,
     Symbol,
     Val,
     func::{
         FuncMode,
+        FuncTrait,
         comp::Composite,
         const_cell_comp::ConstCellCompFunc,
         const_cell_prim::ConstCellPrimFunc,
@@ -34,6 +40,7 @@ use crate::{
         symbol::PrefixMode,
     },
     prelude::{
+        change_mode,
         form_mode,
         map_mode,
         symbol_literal_mode,
@@ -50,10 +57,8 @@ use crate::{
     },
 };
 
-pub(crate) const BODY: &str = "body";
+pub(crate) const CALL: &str = "call";
 pub(crate) const CTX: &str = "context";
-pub(crate) const INPUT_NAME: &str = "input_name";
-pub(crate) const CTX_NAME: &str = "context_name";
 pub(crate) const ID: &str = "id";
 pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
@@ -63,43 +68,70 @@ pub(crate) const CACHEABLE: &str = "cacheable";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
 
-pub(crate) const DEFAULT_INPUT_NAME: &str = "i";
-pub(crate) const DEFAULT_CTX_NAME: &str = "c";
 pub(crate) const FREE: &str = "free";
 pub(crate) const CONST: &str = "constant";
 pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Mode {
     let mut map = Map::default();
-    map.insert(symbol(BODY), form_mode(PrefixMode::Ref));
-    map.insert(symbol(INPUT_NAME), symbol_literal_mode());
-    map.insert(symbol(CTX_NAME), symbol_literal_mode());
+    map.insert(symbol(CALL), func_call_mode());
     map.insert(symbol(CTX_ACCESS), symbol_literal_mode());
     map_mode(map, symbol_literal_mode(), Mode::default())
 }
 
 pub(crate) fn generate_mode() -> Mode {
     let mut map = Map::default();
-    map.insert(symbol(BODY), form_mode(PrefixMode::Ref));
-    map.insert(symbol(INPUT_NAME), symbol_literal_mode());
-    map.insert(symbol(CTX_NAME), symbol_literal_mode());
+    map.insert(symbol(CALL), func_call_mode());
     map.insert(symbol(CTX_ACCESS), symbol_literal_mode());
     map_mode(map, symbol_literal_mode(), Mode::default())
+}
+
+fn func_call_mode() -> Mode {
+    Mode::Comp(Box::new(CompMode {
+        pair: PairMode::Form(Pair::new(
+            symbol_literal_mode(),
+            change_mode(symbol_literal_mode(), form_mode(PrefixMode::Ref)),
+        )),
+        change: ChangeMode::Form(Change::new(
+            symbol_literal_mode(),
+            form_mode(PrefixMode::Ref),
+        )),
+        ..CompMode::default()
+    }))
 }
 
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
         return None;
     };
-    let body = map_remove(&mut map, BODY);
+    let (ctx_name, input_name, body) = match map_remove(&mut map, CALL) {
+        Val::Unit(_) => (Some(Symbol::default()), Symbol::default(), Val::default()),
+        Val::Pair(ctx_change) => {
+            let ctx_change = Pair::from(ctx_change);
+            let Val::Symbol(ctx) = ctx_change.first else {
+                return None;
+            };
+            let Val::Change(change) = ctx_change.second else {
+                return None;
+            };
+            let change = Change::from(change);
+            let Val::Symbol(input) = change.from else {
+                return None;
+            };
+            (Some(ctx), input, change.to)
+        }
+        Val::Change(change) => {
+            let change = Change::from(change);
+            let Val::Symbol(input) = change.from else {
+                return None;
+            };
+            (None, input, change.to)
+        }
+        _ => return None,
+    };
     let ctx = match map_remove(&mut map, CTX) {
         Val::Ctx(ctx) => Ctx::from(ctx),
         Val::Unit(_) => Ctx::default(),
-        _ => return None,
-    };
-    let input_name = match map_remove(&mut map, INPUT_NAME) {
-        Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from_str(DEFAULT_INPUT_NAME),
         _ => return None,
     };
     let call = match map_remove(&mut map, CALL_MODE) {
@@ -125,11 +157,6 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let cacheable = match map_remove(&mut map, CACHEABLE) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
-        _ => return None,
-    };
-    let ctx_name = match map_remove(&mut map, CTX_NAME) {
-        Val::Symbol(name) => name,
-        Val::Unit(_) => Symbol::from_str(DEFAULT_CTX_NAME),
         _ => return None,
     };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
@@ -159,6 +186,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
             }
         }
         CONST => {
+            let ctx_name = ctx_name?;
             if cell {
                 let func = ConstCellCompFunc::new(comp, ctx_name, mode, cacheable);
                 FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
@@ -168,6 +196,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
             }
         }
         MUTABLE => {
+            let ctx_name = ctx_name?;
             if cell {
                 let func = MutCellCompFunc::new(comp, ctx_name, mode, cacheable);
                 FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
@@ -216,15 +245,16 @@ fn generate_free_cell_prim(f: FreeCellPrimFuncVal) -> Val {
 
 fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
     let f = FreeCellCompFunc::from(f);
+    let mut repr = Map::<Val, Val>::default();
+    generate_call(&mut repr, &f);
     let common = FuncCommon {
         access: FREE,
         cell: true,
         mode: f.mode,
         cacheable: f.cacheable,
     };
-    let mut repr = Map::<Val, Val>::default();
     generate_func_common(&mut repr, common);
-    generate_composite(&mut repr, f.comp);
+    generate_ctx(&mut repr, f.comp.ctx);
     Val::Map(repr.into())
 }
 
@@ -243,15 +273,16 @@ fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
 }
 
 fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    generate_call(&mut repr, &f);
     let common = FuncCommon {
         access: FREE,
         cell: false,
         mode: f.mode.clone(),
         cacheable: f.cacheable,
     };
-    let mut repr = Map::<Val, Val>::default();
     generate_func_common(&mut repr, common);
-    generate_composite(&mut repr, f.comp.clone());
+    generate_ctx(&mut repr, f.comp.ctx.clone());
     Val::Map(repr.into())
 }
 
@@ -272,16 +303,16 @@ fn generate_const_cell_prim(f: ConstCellPrimFuncVal) -> Val {
 
 fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
     let f = ConstCellCompFunc::from(f);
+    let mut repr = Map::<Val, Val>::default();
+    generate_call(&mut repr, &f);
     let common = FuncCommon {
         access: CONST,
         cell: true,
         mode: f.mode,
         cacheable: f.cacheable,
     };
-    let mut repr = Map::<Val, Val>::default();
     generate_func_common(&mut repr, common);
-    generate_composite(&mut repr, f.comp);
-    generate_ctx_name(&mut repr, f.ctx_name);
+    generate_ctx(&mut repr, f.comp.ctx);
     Val::Map(repr.into())
 }
 
@@ -300,16 +331,16 @@ fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
 }
 
 fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    generate_call(&mut repr, &f);
     let common = FuncCommon {
         access: CONST,
         cell: false,
         mode: f.mode.clone(),
         cacheable: f.cacheable,
     };
-    let mut repr = Map::<Val, Val>::default();
     generate_func_common(&mut repr, common);
-    generate_composite(&mut repr, f.comp.clone());
-    generate_ctx_name(&mut repr, f.ctx_name.clone());
+    generate_ctx(&mut repr, f.comp.ctx.clone());
     Val::Map(repr.into())
 }
 
@@ -330,16 +361,16 @@ fn generate_mut_cell_prim(f: MutCellPrimFuncVal) -> Val {
 
 fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
     let f = MutCellCompFunc::from(f);
+    let mut repr = Map::<Val, Val>::default();
+    generate_call(&mut repr, &f);
     let common = FuncCommon {
         access: MUTABLE,
         cell: true,
         mode: f.mode,
         cacheable: f.cacheable,
     };
-    let mut repr = Map::<Val, Val>::default();
     generate_func_common(&mut repr, common);
-    generate_composite(&mut repr, f.comp);
-    generate_ctx_name(&mut repr, f.ctx_name);
+    generate_ctx(&mut repr, f.comp.ctx);
     Val::Map(repr.into())
 }
 
@@ -358,16 +389,16 @@ fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
 }
 
 fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
+    let mut repr = Map::<Val, Val>::default();
+    generate_call(&mut repr, &f);
     let common = FuncCommon {
         access: MUTABLE,
         cell: false,
         mode: f.mode.clone(),
         cacheable: f.cacheable,
     };
-    let mut repr = Map::<Val, Val>::default();
     generate_func_common(&mut repr, common);
-    generate_composite(&mut repr, f.comp.clone());
-    generate_ctx_name(&mut repr, f.ctx_name.clone());
+    generate_ctx(&mut repr, f.comp.ctx.clone());
     Val::Map(repr.into())
 }
 
@@ -385,15 +416,16 @@ fn generate_primitive_extension(id: Symbol, common: FuncCommon) -> Val {
     Val::Map(repr.into())
 }
 
-fn generate_composite(repr: &mut Map<Val, Val>, composite: Composite) {
-    if composite.body != Val::default() {
-        repr.insert(symbol(BODY), composite.body);
+fn generate_call<F: FuncTrait>(repr: &mut Map<Val, Val>, func: &F) {
+    let call = func.call();
+    if !call.is_unit() {
+        repr.insert(symbol(CALL), call);
     }
-    if composite.ctx != Ctx::default() {
-        repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(composite.ctx)));
-    }
-    if &*composite.input_name != DEFAULT_INPUT_NAME {
-        repr.insert(symbol(INPUT_NAME), Val::Symbol(composite.input_name));
+}
+
+fn generate_ctx(repr: &mut Map<Val, Val>, ctx: Ctx) {
+    if ctx != Ctx::default() {
+        repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(ctx)));
     }
 }
 
@@ -425,11 +457,5 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
     if common.mode.ask != Mode::default() {
         let ask_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.ask).into()));
         repr.insert(symbol(ASK_MODE), ask_mode);
-    }
-}
-
-fn generate_ctx_name(repr: &mut Map<Val, Val>, ctx_name: Symbol) {
-    if &*ctx_name != DEFAULT_CTX_NAME {
-        repr.insert(symbol(CTX_NAME), Val::Symbol(ctx_name));
     }
 }

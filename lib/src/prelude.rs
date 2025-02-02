@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
+    Change,
+    ChangeMode,
     CompMode,
     ConstStaticPrimFuncVal,
     FreeCellPrimFunc,
@@ -347,6 +349,14 @@ pub(crate) fn symbol_literal_mode() -> Mode {
 pub(crate) fn pair_mode(first: Mode, second: Mode) -> Mode {
     let mode = CompMode {
         pair: PairMode::Form(Pair::new(first, second)),
+        ..CompMode::from(UniMode::default())
+    };
+    Mode::Comp(Box::new(mode))
+}
+
+pub(crate) fn change_mode(from: Mode, to: Mode) -> Mode {
+    let mode = CompMode {
+        change: ChangeMode::Form(Change::new(from, to)),
         ..CompMode::from(UniMode::default())
     };
     Mode::Comp(Box::new(mode))

@@ -6,7 +6,10 @@ use crate::{
     func::{
         FuncTrait,
         comp::Composite,
-        ctx_aware_comp::const_func_transform,
+        ctx_aware_comp::{
+            const_func_transform,
+            func_call,
+        },
     },
     transformer::Transformer,
 };
@@ -39,6 +42,13 @@ impl FuncTrait for ConstStaticCompFunc {
 
     fn cacheable(&self) -> bool {
         self.cacheable
+    }
+
+    fn call(&self) -> Val {
+        let ctx = self.ctx_name.clone();
+        let input = self.comp.input_name.clone();
+        let output = self.comp.body.clone();
+        func_call(ctx, input, output)
     }
 }
 
