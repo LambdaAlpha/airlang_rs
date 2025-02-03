@@ -21,17 +21,13 @@ use crate::{
     AbstractMode,
     Ask,
     AskMode,
-    Cache,
     Call,
     CallMode,
-    Case,
-    CaseVal,
     Change,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
     FreeCellCompFunc,
     FreeCellCompFuncVal,
-    FreeCtx,
     FreeStaticCompFunc,
     FreeStaticCompFuncVal,
     Id,
@@ -120,7 +116,6 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // map
         1,      // ctx
         1,      // func
-        1,      // case
         1,      // extension
     ];
     let i = sample(rng, weights);
@@ -143,8 +138,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         13 => Val::Map(any_map(rng, new_depth).into()),
         14 => Val::Ctx(any_ctx(rng, new_depth).into()),
         15 => Val::Func(any_func(rng, new_depth)),
-        16 => Val::Case(any_case_val(rng, new_depth)),
-        17 => Val::Ext(any_extension(rng, new_depth)),
+        16 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -695,27 +689,6 @@ pub(crate) fn any_mut_static_comp_func(rng: &mut SmallRng, depth: usize) -> MutS
 pub(crate) fn any_mode_func(rng: &mut SmallRng, depth: usize) -> ModeFuncVal {
     let mode = any_mode(rng, depth);
     ModeFuncVal::from(ModeFunc::new(mode))
-}
-
-pub(crate) fn any_case_val(rng: &mut SmallRng, depth: usize) -> CaseVal {
-    if rng.gen() {
-        CaseVal::Trivial(any_case(rng, depth).into())
-    } else {
-        CaseVal::Cache(any_cache(rng, depth).into())
-    }
-}
-
-pub(crate) fn any_case(rng: &mut SmallRng, depth: usize) -> Case<Val, Val, Val> {
-    let func = any_val(rng, depth);
-    let input = any_val(rng, depth);
-    let output = any_val(rng, depth);
-    Case::new(func, input, output)
-}
-
-pub(crate) fn any_cache(rng: &mut SmallRng, depth: usize) -> Cache<Val, Val, Val> {
-    let func = any_func(rng, depth);
-    let input = any_val(rng, depth);
-    Cache::new(FreeCtx, func, input)
 }
 
 pub(crate) fn any_extension(_rng: &mut SmallRng, _depth: usize) -> Box<dyn ValExt> {

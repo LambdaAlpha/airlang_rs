@@ -57,9 +57,3 @@ func call.apply
 call.apply ; func_ext ';' 1
 -----
 1
-=====
-func case.cache
------
-do [p = case.cache ; func_ext ; true, p case.is_cache .]
------
-true

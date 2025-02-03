@@ -112,12 +112,6 @@ do [f = any ; function, f type .]
 -----
 function
 =====
-any case
------
-do [c = any ; case, c type .]
------
-case
-=====
 any extension
 -----
 do [e = any ; extension, e type .]
@@ -220,18 +214,6 @@ do [a = function ; {body : *input}, a type .]
 -----
 function
 =====
-type case
------
-do [a = case ; {function : not, input : true, output : false}, a type .]
------
-case
-=====
-type case cache
------
-do [a = case.cache ; not ; true, a type .]
------
-case
-=====
 == unit
 -----
 . == .
@@ -325,16 +307,6 @@ true
 == function
 -----
 do [a = function ; {body : *input}, b = function ; {body : *input}, (a == b) and a != .]
------
-true
-=====
-== case
------
-do [
-    a = case ; {function : not, input : true, output : false},
-    b = case ; {function : not, input : true, output : false},
-    (a == b) and a != .
-]
 -----
 true
 =====

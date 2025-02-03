@@ -3,9 +3,7 @@ pub use crate::{
     ask::Ask,
     bit::Bit,
     byte::Byte,
-    cache::Cache,
     call::Call,
-    case::Case,
     change::Change,
     ctx::{
         Ctx,
@@ -100,11 +98,6 @@ pub use crate::{
         ask::AskVal,
         byte::ByteVal,
         call::CallVal,
-        case::{
-            CacheCaseVal,
-            CaseVal,
-            TrivialCaseVal,
-        },
         change::ChangeVal,
         ctx::CtxVal,
         func::{

@@ -18,7 +18,6 @@ use crate::{
         any_bit,
         any_byte,
         any_call,
-        any_case_val,
         any_change,
         any_ctx,
         any_extension,
@@ -61,7 +60,6 @@ use crate::{
         BIT,
         BYTE,
         CALL,
-        CASE,
         CHANGE,
         CTX,
         EXT,
@@ -144,7 +142,6 @@ fn fn_any(input: Val) -> Val {
             MAP => Val::Map(any_map(rng, DEPTH).into()),
             CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
             FUNC => Val::Func(any_func(rng, DEPTH)),
-            CASE => Val::Case(any_case_val(rng, DEPTH)),
             EXT => Val::Ext(any_extension(rng, DEPTH)),
             _ => Val::default(),
         },
@@ -190,7 +187,6 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Map(_) => MAP,
             Val::Func(_) => FUNC,
             Val::Ctx(_) => CTX,
-            Val::Case(_) => CASE,
             Val::Ext(_) => EXT,
         };
         Val::Symbol(Symbol::from_str(s))

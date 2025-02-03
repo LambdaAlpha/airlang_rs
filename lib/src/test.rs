@@ -140,11 +140,6 @@ fn test_func() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_case() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/case.air"), "test/case.air")
-}
-
-#[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
     let mut air = AirCell::default();
     let func_ext_name = Symbol::from_str("func_ext");

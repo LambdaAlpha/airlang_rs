@@ -57,7 +57,6 @@ use crate::{
         bit::BitPrelude,
         byte::BytePrelude,
         call::CallPrelude,
-        case::CasePrelude,
         change::ChangePrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
@@ -107,7 +106,6 @@ pub(crate) struct AllPrelude {
     pub(crate) map: MapPrelude,
     pub(crate) ctx: CtxPrelude,
     pub(crate) func: FuncPrelude,
-    pub(crate) case: CasePrelude,
     pub(crate) extension: ExtPrelude,
     pub(crate) meta: MetaPrelude,
     pub(crate) syntax: SyntaxPrelude,
@@ -133,7 +131,6 @@ impl Prelude for AllPrelude {
         self.map.put(m);
         self.ctx.put(m);
         self.func.put(m);
-        self.case.put(m);
         self.extension.put(m);
         self.meta.put(m);
         self.syntax.put(m);
@@ -422,8 +419,6 @@ mod map;
 mod ctx;
 
 mod func;
-
-mod case;
 
 mod extension;
 

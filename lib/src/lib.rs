@@ -30,13 +30,9 @@ pub(crate) mod list;
 
 pub(crate) mod map;
 
-pub(crate) mod case;
-
 pub(crate) mod ctx;
 
 pub(crate) mod func;
-
-pub(crate) mod cache;
 
 pub(crate) mod extension;
 
