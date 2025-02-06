@@ -14,6 +14,9 @@ use crate::{
     symbol::Symbol,
     syntax::{
         ChangeRepr,
+        generate_compact,
+        generate_pretty,
+        generate_symbol,
         parse,
         repr::{
             Repr,
@@ -180,22 +183,25 @@ fn test_parse(
 }
 
 fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
+    let gen_fmt_list = [generate_compact, generate_pretty, generate_symbol];
     for [title, s] in parse_test_file::<2>(src, file_name) {
         let repr = parse(s).map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
-        let string = repr.to_string();
-        let new_repr = parse(&string).map_err(|e| {
-            eprintln!(
-                "file {file_name} case ({title}) src({s}): parse error with generated string ({string})!\n{e}"
+        for gen1 in gen_fmt_list {
+            let string = gen1(&repr);
+            let new_repr = parse(&string).map_err(|e| {
+                eprintln!(
+                    "file {file_name} case ({title}) src({s}): parse error with generated string ({string})!\n{e}"
+                );
+                e
+            })?;
+            assert_eq!(
+                repr, new_repr,
+                "file {file_name} case ({title}) src({s}): original({repr}) != re-parsed({new_repr})"
             );
-            e
-        })?;
-        assert_eq!(
-            repr, new_repr,
-            "file {file_name} case ({title}) src({s}): original({repr}) != re-parsed({new_repr})"
-        );
+        }
     }
     Ok(())
 }

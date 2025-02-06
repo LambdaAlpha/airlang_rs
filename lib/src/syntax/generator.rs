@@ -73,6 +73,7 @@ pub(crate) struct GenFmt {
     pub(crate) separator: &'static str,
     pub(crate) left_padding: &'static str,
     pub(crate) right_padding: &'static str,
+    pub(crate) symbol_encoding: bool,
 }
 
 pub(crate) const COMPACT_FMT: GenFmt = GenFmt {
@@ -82,6 +83,17 @@ pub(crate) const COMPACT_FMT: GenFmt = GenFmt {
     separator: concatcp!(SEPARATOR),
     left_padding: "",
     right_padding: "",
+    symbol_encoding: false,
+};
+
+pub(crate) const SYMBOL_FMT: GenFmt = GenFmt {
+    indent: "",
+    before_first: "",
+    after_last: "",
+    separator: concatcp!(SEPARATOR),
+    left_padding: "",
+    right_padding: "",
+    symbol_encoding: true,
 };
 
 pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
@@ -91,6 +103,7 @@ pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
     separator: concatcp!(SEPARATOR, '\n'),
     left_padding: "",
     right_padding: "",
+    symbol_encoding: false,
 };
 
 const INDENT: &str = "  ";
@@ -113,7 +126,7 @@ fn gen(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Unit(_) => gen_unit(s),
         GenRepr::Bit(bit) => gen_bit(bit.bool(), s),
         GenRepr::Symbol(symbol) => gen_symbol(symbol, s),
-        GenRepr::Text(text) => gen_text(text, s),
+        GenRepr::Text(text) => gen_text(ctx, text, s),
         GenRepr::Int(int) => gen_int(int, s),
         GenRepr::Number(number) => gen_number(number, s),
         GenRepr::Byte(byte) => gen_byte(byte, s),
@@ -172,9 +185,13 @@ fn should_quote(str: &str) -> bool {
     str.chars().any(is_delimiter)
 }
 
-fn gen_text(text: &Text, s: &mut String) {
+fn gen_text(ctx: GenCtx, text: &Text, s: &mut String) {
     s.push(TEXT_QUOTE);
-    escape_text(text, s);
+    if ctx.fmt.symbol_encoding {
+        escape_text_symbol(text, s);
+    } else {
+        escape_text(text, s);
+    }
     s.push(TEXT_QUOTE);
 }
 
@@ -190,6 +207,21 @@ pub(crate) fn escape_text(str: &str, s: &mut String) {
                 s.push(c);
                 continue;
             }
+        };
+        s.push_str(escaped);
+    }
+}
+
+pub(crate) fn escape_text_symbol(str: &str, s: &mut String) {
+    for c in str.chars() {
+        let escaped = match c {
+            '\\' => "\\\\",
+            '\n' => "\\n",
+            '\r' => "\\r",
+            '\t' => "\\t",
+            TEXT_QUOTE => concatcp!('\\', TEXT_QUOTE),
+            c if Symbol::is_symbol(c) => &format!("{}", c),
+            c => &format!("\\u({:x})", c as u32),
         };
         s.push_str(escaped);
     }

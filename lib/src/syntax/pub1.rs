@@ -18,6 +18,7 @@ use crate::syntax::{
     generator::{
         COMPACT_FMT,
         PRETTY_FMT,
+        SYMBOL_FMT,
     },
     parser,
 };
@@ -32,4 +33,8 @@ pub fn generate_pretty(src: &Repr) -> String {
 
 pub fn generate_compact(src: &Repr) -> String {
     generator::generate(src.try_into().unwrap(), COMPACT_FMT)
+}
+
+pub fn generate_symbol(src: &Repr) -> String {
+    generator::generate(src.try_into().unwrap(), SYMBOL_FMT)
 }
