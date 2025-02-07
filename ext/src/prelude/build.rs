@@ -6,10 +6,10 @@ use std::{
 
 use airlang::{
     AirCell,
+    ConstFnCtx,
     FuncMode,
     FuncVal,
     MutCtx,
-    MutFnCtx,
     Symbol,
     Text,
     Val,
@@ -22,7 +22,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        named_mut_fn,
+        named_const_fn,
     },
 };
 
@@ -47,12 +47,12 @@ fn import() -> Named<FuncVal> {
     let f = fn_import;
     let mode = FuncMode::default();
     let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode, cacheable)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";
 
-fn fn_import(mut ctx: MutFnCtx, input: Val) -> Val {
+fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Text(url) = input else {
         return Val::default();
     };
@@ -83,7 +83,7 @@ fn fn_import(mut ctx: MutFnCtx, input: Val) -> Val {
     mod_air.interpret(val)
 }
 
-fn get_cur_url(ctx: MutFnCtx, key: Symbol) -> Option<String> {
+fn get_cur_url(ctx: ConstFnCtx, key: Symbol) -> Option<String> {
     if let Ok(val) = ctx.get_ref(key) {
         return if let Val::Text(url) = val {
             Some((***url).clone())
