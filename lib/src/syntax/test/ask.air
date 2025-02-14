@@ -28,11 +28,11 @@ a b c ? d
 =====
 non-atomic first
 -----
-raw[a b] ? c
+.[a b] ? c
 =====
 non-atomic second
 -----
-a ? raw[b c]
+a ? .[b c]
 =====
 list item
 -----

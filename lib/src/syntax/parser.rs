@@ -90,7 +90,6 @@ use crate::{
         MAP_RIGHT,
         NUMBER,
         PAIR,
-        RAW,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
@@ -317,7 +316,7 @@ where
         if direction > 1 || arity > 1 {
             return fail(input);
         }
-        Ok((&input[0..0], ctx))
+        Ok(("", ctx))
     }
 }
 
@@ -430,7 +429,12 @@ where
 {
     fn parse(&mut self, src: &'a str) -> IResult<&'a str, T, E> {
         match self.prefix {
-            UNIT => success(From::from(Unit))(src),
+            UNIT => alt((
+                raw_text,
+                raw_symbol,
+                ListParser::new_raw(self.ctx),
+                success(From::from(Unit)),
+            ))(src),
             TRUE => success(From::from(Bit::true1()))(src),
             FALSE => success(From::from(Bit::false1()))(src),
             INT => int(src),
@@ -456,12 +460,8 @@ where
                 let ctx = self.ctx.escape().with_struct(Struct::Change);
                 ScopeParser::new(ctx).parse(src)
             }
-            RAW => alt((raw_text, raw_symbol, ListParser::new_raw(self.ctx)))(src),
             ESCAPE => ScopeParser::new(self.ctx.escape()).parse(src),
-            s if s.starts_with(ESCAPE_CHAR) => {
-                let tag = s.strip_prefix(ESCAPE_CHAR).unwrap();
-                ScopeParser::new(self.ctx.raw(tag)).parse(src)
-            }
+            s if s.starts_with(ESCAPE_CHAR) => ScopeParser::new(self.ctx.raw(&s[1..])).parse(src),
             s if s.chars().all(CtxParser::is_ctx) => {
                 let ctx = context("ctx", CtxParser::new(self.ctx)).parse(s)?.1;
                 ScopeParser::new(ctx).parse(src)
@@ -791,11 +791,10 @@ fn symbol_space<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
-    let empty = &src[0..0];
     let f = alt((
-        value(empty, preceded(char1('\n'), multispace0)),
-        value(empty, char1('\r')),
-        value(empty, take_while1(|c| c == '\t')),
+        value("", preceded(char1('\n'), multispace0)),
+        value("", char1('\r')),
+        value("", take_while1(|c| c == '\t')),
     ));
     context("symbol_space", f)(src)
 }
@@ -907,7 +906,7 @@ where
     let f = map(
         tuple((physical, space, logical)),
         |(physical, _, logical): (&str, _, _)| {
-            if logical { physical } else { &physical[0..0] }
+            if logical { physical } else { "" }
         },
     );
     context("raw_text_newline", f)(src)

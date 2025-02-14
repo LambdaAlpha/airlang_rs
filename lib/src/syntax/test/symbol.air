@@ -248,12 +248,12 @@ multiline
 =====
 raw escape
 -----
-raw'\_\''
+.'\_\''
 |'
 =====
 raw special symbol
 -----
-raw'
+.'
 | -|/\
 | :;!?
 |'

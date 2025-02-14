@@ -48,12 +48,12 @@ multiline indent
 =====
 raw special symbol
 -----
-raw"`!@#$%^&*()-_=+[{]}\|;:'",<.>/?
+."`!@#$%^&*()-_=+[{]}\|;:'",<.>/?
 |"
 =====
 raw line indicator
 -----
-raw"
+."
 | 12345
 |  67890
 - 12345 
@@ -62,7 +62,7 @@ raw"
 =====
 raw indent
 -----
-  raw"
+  ."
    | 12345
    |  67890
   - 12345 
@@ -71,12 +71,12 @@ raw indent
 =====
 raw escape
 -----
-raw""
+.""
 | "
 |"
 =====
 raw empty
 -----
-raw"
+."
 | 
 |"
