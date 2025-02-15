@@ -24,8 +24,8 @@ pub(crate) const RIGHT: char = '>';
 pub(crate) const ARITY_2: char = '2';
 pub(crate) const ARITY_3: char = '3';
 
-pub(crate) const ESCAPE_CHAR: char = '\\';
-pub(crate) const ESCAPE: &str = concatcp!(ESCAPE_CHAR);
+pub(crate) const TAG_CHAR: char = '#';
+pub(crate) const TAG: &str = concatcp!(TAG_CHAR);
 
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";

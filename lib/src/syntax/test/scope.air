@@ -110,69 +110,85 @@ change ctx two
 -----
 3(a b c d e)
 =====
-raw one
+tag one
 -----
-\r(a)
+#t(a)
 =====
-raw trailing space
+tag trailing space
 -----
-\r(a )
+#t(a )
 =====
-raw recursive
+tag recursive
 -----
-\r(\r(a))
+#t(#t(a))
 =====
-raw recursive implicit
+tag recursive implicit
 -----
-\r((a))
+#t((a))
 =====
-raw any tag
+tag any tag
 -----
-\a(b)
+#a(b)
 =====
-raw digit tag
+tag digit tag
 -----
-\1(a)
+#1(a)
 =====
-raw multiple
+tag multiple
 -----
-\r(a b)
+#t(a b)
 =====
-raw soft keyword
+tag soft keyword
 -----
-\r(: ; ! ?)
+#t(: ; ! ?)
 =====
-raw empty ctx
+tag empty ctx
 -----
-\r((a b c) d e)
+#t((a b c) d e)
 =====
-raw list
+tag struct pair
 -----
-\r([a, b,] [])
+:(#t(a))
 =====
-raw map
+tag struct abstract
 -----
-\r({a : b} {})
+!(#t(a))
 =====
-raw map value
+tag struct ask
 -----
-\r({a : b c d})
+?(#t(a))
 =====
-raw map no repeat
+tag struct change
 -----
-\r({a : :})
+->(#t(a))
 =====
-raw escape
+tag list
 -----
-\r(a \(b c) d)
+#t([a, b,] [])
 =====
-raw escape by direction ctx
+tag map
 -----
-\r(<(a b c d e))
+#t({a : b} {})
 =====
-raw escape by struct ctx
+tag map value
 -----
-\r(?(a b c))
+#t({a : b c d})
+=====
+tag map no repeat
+-----
+#t({a : :})
+=====
+tag escape
+-----
+#t(a #(b c) d)
+=====
+tag escape by direction ctx
+-----
+#t(<(a b c d e))
+=====
+tag escape by struct ctx
+-----
+#t(?(a b c))
 =====
 ctx composition
 -----

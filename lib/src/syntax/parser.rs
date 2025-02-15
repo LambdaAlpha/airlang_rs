@@ -79,8 +79,6 @@ use crate::{
         BYTE,
         CALL,
         CHANGE,
-        ESCAPE,
-        ESCAPE_CHAR,
         FALSE,
         INT,
         LEFT,
@@ -96,6 +94,8 @@ use crate::{
         SEPARATOR,
         SPACE,
         SYMBOL_QUOTE,
+        TAG,
+        TAG_CHAR,
         TEXT_QUOTE,
         TRUE,
         UNIT,
@@ -129,7 +129,7 @@ pub(crate) trait ParseRepr:
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 struct ParseCtx<'a> {
-    raw: bool,
+    is_tag: bool,
     tag: &'a str,
     arity: Arity,
     struct1: Struct,
@@ -139,7 +139,7 @@ struct ParseCtx<'a> {
 impl Default for ParseCtx<'_> {
     fn default() -> Self {
         Self {
-            raw: false,
+            is_tag: false,
             tag: "",
             arity: Arity::Three,
             struct1: Struct::Call,
@@ -149,14 +149,14 @@ impl Default for ParseCtx<'_> {
 }
 
 impl<'a> ParseCtx<'a> {
-    fn raw(mut self, tag: &'a str) -> Self {
-        self.raw = true;
+    fn tag(mut self, tag: &'a str) -> Self {
+        self.is_tag = true;
         self.tag = tag;
         self
     }
 
     fn escape(mut self) -> Self {
-        self.raw = false;
+        self.is_tag = false;
         self
     }
 
@@ -460,8 +460,8 @@ where
                 let ctx = self.ctx.escape().with_struct(Struct::Change);
                 ScopeParser::new(ctx).parse(src)
             }
-            ESCAPE => ScopeParser::new(self.ctx.escape()).parse(src),
-            s if s.starts_with(ESCAPE_CHAR) => ScopeParser::new(self.ctx.raw(&s[1..])).parse(src),
+            TAG => ScopeParser::new(self.ctx.escape()).parse(src),
+            s if s.starts_with(TAG_CHAR) => ScopeParser::new(self.ctx.tag(&s[1..])).parse(src),
             s if s.chars().all(CtxParser::is_ctx) => {
                 let ctx = context("ctx", CtxParser::new(self.ctx)).parse(s)?.1;
                 ScopeParser::new(ctx).parse(src)
@@ -523,8 +523,8 @@ impl<'a> ComposeParser<'a> {
         if len == 0 {
             return None;
         }
-        if self.ctx.raw {
-            return Self::compose_raw(tokens, self.ctx.tag);
+        if self.ctx.is_tag {
+            return self.compose_tag(tokens, self.ctx.tag);
         }
         if len == 1 {
             let repr = tokens.next().unwrap().into_repr();
@@ -553,7 +553,7 @@ impl<'a> ComposeParser<'a> {
         }
     }
 
-    fn compose_raw<T, I>(tokens: I, tag: &str) -> Option<T>
+    fn compose_tag<T, I>(&self, tokens: I, tag: &str) -> Option<T>
     where
         T: ParseRepr,
         I: Iterator<Item = Token<T>>,
@@ -561,8 +561,8 @@ impl<'a> ComposeParser<'a> {
         let list = tokens.map(Token::into_repr).collect::<List<_>>();
         let list = From::from(list);
         let tag = From::from(Symbol::from_str(tag));
-        let call = From::from(Call::new(tag, list));
-        Some(call)
+        let repr = self.compose_two(tag, list);
+        Some(repr)
     }
 
     fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
@@ -739,7 +739,7 @@ impl<'a> MapParser<'a> {
         if &*s != PAIR {
             return fail(src);
         }
-        if !self.ctx.raw && tokens.len() == 1 {
+        if !self.ctx.is_tag && tokens.len() == 1 {
             let value = tokens.next().unwrap();
             return Ok((rest, left_right(key, value)));
         }

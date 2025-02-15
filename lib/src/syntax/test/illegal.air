@@ -392,13 +392,13 @@ scope concat
 -----
 (1)(2)
 =====
-empty raw
+empty tag
 -----
-\r()
+#t()
 =====
-raw list
+tag list
 -----
-\r([1, ,])
+#t([1, ,])
 =====
 even number composition
 -----

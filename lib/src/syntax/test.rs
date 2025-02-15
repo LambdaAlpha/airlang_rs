@@ -113,18 +113,42 @@ fn change(from: Repr, to: Repr) -> Repr {
     Repr::Change(Box::new(ChangeRepr::new(from, to)))
 }
 
-fn raw(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
-    let input = Repr::List(v.into());
-    Repr::Call(Box::new(CallRepr::new(func, input)))
-}
-
 fn list(v: Vec<Repr>) -> Repr {
     Repr::List(v.into())
 }
 
 fn map(v: Vec<(Repr, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
+}
+
+fn tag_pair(tag: &str, v: Vec<Repr>) -> Repr {
+    let first = Repr::Symbol(Symbol::from_str(tag));
+    let second = Repr::List(v.into());
+    Repr::Pair(Box::new(PairRepr::new(first, second)))
+}
+
+fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
+    let input = Repr::List(v.into());
+    Repr::Call(Box::new(CallRepr::new(func, input)))
+}
+
+fn tag_abstract(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
+    let input = Repr::List(v.into());
+    Repr::Abstract(Box::new(AbstractRepr::new(func, input)))
+}
+
+fn tag_ask(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
+    let output = Repr::List(v.into());
+    Repr::Ask(Box::new(AskRepr::new(func, output)))
+}
+
+fn tag_change(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
+    let output = Repr::List(v.into());
+    Repr::Change(Box::new(ChangeRepr::new(func, output)))
 }
 
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
@@ -134,7 +158,7 @@ fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
     )))
 }
 
-fn infix(left: Repr, middle: Repr, right: Repr) -> Repr {
+fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(
         middle,
         Repr::Pair(Box::new(PairRepr::new(left, right))),

@@ -2,7 +2,7 @@ use crate::syntax::{
     repr::Repr,
     test::{
         call,
-        infix,
+        infix_call,
         list,
         map,
         pair,
@@ -17,8 +17,11 @@ pub(crate) fn expected() -> Vec<Repr> {
         call(symbol("a"), call(symbol("b"), symbol("c"))),
         call(symbol("a"), pair(symbol("b"), symbol("c"))),
         pair(symbol("a"), call(symbol("b"), symbol("c"))),
-        call(symbol("a"), infix(symbol("b"), symbol("c"), symbol("d"))),
-        infix(symbol("a"), symbol("b"), call(symbol("c"), symbol("d"))),
+        call(
+            symbol("a"),
+            infix_call(symbol("b"), symbol("c"), symbol("d")),
+        ),
+        infix_call(symbol("a"), symbol("b"), call(symbol("c"), symbol("d"))),
         call(list(vec![symbol("a"), symbol("b")]), symbol("c")),
         call(symbol("a"), list(vec![symbol("b"), symbol("c")])),
         list(vec![call(symbol("a"), symbol("b"))]),
