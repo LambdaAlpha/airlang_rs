@@ -34,14 +34,6 @@ mix omit and normal
 -----
 {a, b : c}
 =====
-repeat key value
------
-{a : :}
-=====
-mix repeat and normal
------
-{a : :, b : c}
-=====
 duplicate key
 -----
 {a : b, a : c}

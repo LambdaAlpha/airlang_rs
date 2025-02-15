@@ -72,6 +72,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol(" ab cd"),
         symbol("\\_\\''"),
         symbol("-|/\\:;!?"),
-        list(vec![symbol("%"), call(list(vec![]), list(vec![]))]),
+        list(vec![symbol("%"), call(list(vec![]), symbol(":"))]),
     ]
 }

@@ -625,7 +625,7 @@ call internal func
 do [
     f = function ; {
         call : _ : i -> .not ; .i,
-        context : context ; {variables :  {not : :}},
+        context : context ; {variables :  {not : not}},
     },
     f ; not ; true
 ]

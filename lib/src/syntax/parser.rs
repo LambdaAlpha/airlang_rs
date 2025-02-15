@@ -532,8 +532,7 @@ impl<'a> ComposeParser<'a> {
         }
         if len == 2 {
             let func = tokens.next().unwrap().into_repr();
-            let input = tokens.next().unwrap();
-            let (func, input) = left_right(func, input);
+            let input = tokens.next().unwrap().into_repr();
             return Some(self.compose_two(func, input));
         }
         match self.ctx.arity {
@@ -585,9 +584,11 @@ impl<'a> ComposeParser<'a> {
             let Some(second) = iter.next() else {
                 break;
             };
+            let first1 = first.into_repr();
+            let second = second.into_repr();
             let (left, right) = match self.ctx.direction {
-                Direction::Left => left_right(first.into_repr(), second),
-                Direction::Right => left_right(second.into_repr(), first),
+                Direction::Left => (first1, second),
+                Direction::Right => (second, first1),
             };
             first = Token::Default(self.compose_two(left, right));
         }
@@ -604,10 +605,11 @@ impl<'a> ComposeParser<'a> {
             let Some(middle) = iter.next() else {
                 break;
             };
-            let last = iter.next()?;
+            let first1 = first.into_repr();
+            let last = iter.next()?.into_repr();
             let (left, right) = match self.ctx.direction {
-                Direction::Left => left_right(first.into_repr(), last),
-                Direction::Right => left_right(last.into_repr(), first),
+                Direction::Left => (first1, last),
+                Direction::Right => (last, first1),
             };
             first = Token::Default(self.compose_infix(left, middle, right));
         }
@@ -630,15 +632,6 @@ impl<'a> ComposeParser<'a> {
         let pair = From::from(pair);
         self.compose_two(middle, pair)
     }
-}
-
-fn left_right<T: ParseRepr>(left: T, right: Token<T>) -> (T, T) {
-    if let Token::Unquote(s) = &right {
-        if &**s == PAIR {
-            return (left.clone(), left);
-        }
-    }
-    (left, right.into_repr())
 }
 
 fn items<'a, O1, O2, E, S, F>(
@@ -738,10 +731,6 @@ impl<'a> MapParser<'a> {
         };
         if &*s != PAIR {
             return fail(src);
-        }
-        if !self.ctx.is_tag && tokens.len() == 1 {
-            let value = tokens.next().unwrap();
-            return Ok((rest, left_right(key, value)));
         }
         let Some(value) = ComposeParser::new(self.ctx).compose_tokens(tokens) else {
             return fail(src);

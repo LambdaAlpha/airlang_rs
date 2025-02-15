@@ -196,19 +196,19 @@ true
 =====
 length
 -----
-{1 : 2, 3 : :} map.length .
+{1 : 2, 3 : 3} map.length .
 -----
-{1 : 2, 3 : :} : 2
+{1 : 2, 3 : 3} : 2
 =====
 items map 1
 -----
-do [(m : i) = {1 : 2, 3 : :} map.items ., map ^i]
+do [(m : i) = {1 : 2, 3 : 3} map.items ., map ^i]
 -----
-{1 : 2, 3 : :}
+{1 : 2, 3 : 3}
 =====
 keys set 1
 -----
-do [(m : k) = {1 : 2, 3 : :} map.keys ., set ^k]
+do [(m : k) = {1 : 2, 3 : 3} map.keys ., set ^k]
 -----
 {1, 3}
 =====

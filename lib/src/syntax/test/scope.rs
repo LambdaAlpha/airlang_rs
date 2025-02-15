@@ -173,10 +173,6 @@ pub fn expected() -> Vec<Repr> {
             tag_call("t", vec![symbol("a")]),
             tag_call("t", vec![symbol("b"), symbol("c"), symbol("d")]),
         )])]),
-        tag_call("t", vec![map(vec![(
-            tag_call("t", vec![symbol("a")]),
-            tag_call("t", vec![symbol(":")]),
-        )])]),
         tag_call("t", vec![
             symbol("a"),
             call(symbol("b"), symbol("c")),
@@ -199,32 +195,6 @@ pub fn expected() -> Vec<Repr> {
                 symbol("b"),
                 call(symbol("c"), call(symbol("d"), symbol("e"))),
             ),
-        ),
-        pair(symbol("a"), symbol("a")),
-        call(symbol("a"), symbol("a")),
-        abstract1(symbol("a"), symbol("a")),
-        ask(symbol("a"), symbol("a")),
-        call(symbol("a"), symbol("a")),
-        infix_call(
-            infix_call(symbol("a"), symbol("b"), symbol("a")),
-            symbol("c"),
-            infix_call(symbol("a"), symbol("b"), symbol("a")),
-        ),
-        infix_call(
-            infix_call(symbol("a"), symbol("b"), symbol("a")),
-            symbol("c"),
-            infix_call(symbol("a"), symbol("b"), symbol("a")),
-        ),
-        call(symbol("a"), symbol("a")),
-        pair(symbol("a"), symbol("a")),
-        call(symbol("a"), call(symbol("b"), symbol("b"))),
-        call(
-            call(symbol("a"), symbol("a")),
-            call(symbol("a"), symbol("a")),
-        ),
-        call(
-            call(symbol("a"), symbol("a")),
-            call(symbol("a"), symbol("a")),
         ),
     ]
 }

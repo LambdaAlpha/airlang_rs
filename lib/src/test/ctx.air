@@ -250,7 +250,7 @@ do [a = 1, b = 2, [a, b] = [3]]
 =====
 = destruct map symbol key
 -----
-do [{a : :, b : :} = {.a : 1, .b : 2, .c : 3}, [a, b]]
+do [{a : a, b : b} = {.a : 1, .b : 2, .c : 3}, [a, b]]
 -----
 [1, 2]
 =====
@@ -532,7 +532,7 @@ do [
 =====
 |:
 -----
-do [(c : a) = (context ; {variables : {= : :, a : 1}}) |: .a = 2, [c | .a, ^a]]
+do [(c : a) = (context ; {variables : {a : 1}}) |: .a = 2, [c | .a, ^a]]
 -----
 [2, 1]
 =====

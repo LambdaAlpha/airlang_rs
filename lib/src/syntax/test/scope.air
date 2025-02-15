@@ -174,10 +174,6 @@ tag map value
 -----
 #t({a : b c d})
 =====
-tag map no repeat
------
-#t({a : :})
-=====
 tag escape
 -----
 #t(a #(b c) d)
@@ -197,51 +193,3 @@ ctx composition
 ctx composition any order
 -----
 2>(a b c d e)
-=====
-pair repeat
------
-a : :
-=====
-call repeat
------
-a ; :
-=====
-abstract repeat
------
-a ! :
-=====
-ask repeat
------
-a ? :
-=====
-implicit struct repeat
------
-a :
-=====
-repeat composition
------
-(a b :) c :
-=====
-repeat composition left ctx
------
-<(a b : c :)
-=====
-repeat 2 ctx
------
-2(a :)
-=====
-repeat 2 pair ctx
------
-2(:(a :))
-=====
-repeat 2 last
------
-2(a b :)
-=====
-repeat composition 2 ctx
------
-2((a :) :)
-=====
-repeat composition 2 left ctx
------
-2<(a : :)
