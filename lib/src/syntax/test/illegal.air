@@ -66,7 +66,7 @@ raw text no space after line indicator
 -----
 ."
 |abc
--"
++"
 =====
 raw text no last line indicator
 -----
@@ -78,7 +78,7 @@ raw text no line indicator
 -----
 ."
 abc
--"
++"
 =====
 symbol empty unpaired
 -----
@@ -128,7 +128,7 @@ raw symbol one line
 raw symbol wrong line indicator
 -----
 .'
--'
++'
 =====
 raw symbol illegal
 -----

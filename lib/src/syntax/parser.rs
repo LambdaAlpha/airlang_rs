@@ -891,7 +891,7 @@ where
 {
     let physical = recognize(tuple((opt(char1('\r')), char1('\n'))));
     let space = take_while(|c| matches!(c, ' ' | '\t'));
-    let logical = alt((value(true, char1('-')), value(false, char1('|'))));
+    let logical = alt((value(true, char1('+')), value(false, char1('|'))));
     let f = map(
         tuple((physical, space, logical)),
         |(physical, _, logical): (&str, _, _)| {
