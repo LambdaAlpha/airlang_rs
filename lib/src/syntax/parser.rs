@@ -4,6 +4,7 @@ use std::{
     str::FromStr,
 };
 
+use const_format::concatcp;
 use nom::{
     Finish,
     IResult,
@@ -745,13 +746,9 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let literal = take_while1(|c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
-    let fragment = alt((
-        map(literal, StrFragment::Literal),
-        map(symbol_escaped, StrFragment::Escaped),
-        map(symbol_space, StrFragment::Space),
-    ));
+    let fragment = alt((literal, symbol_escaped, symbol_space));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
-        fragment.push(&mut string);
+        string.push_str(fragment);
         string
     });
     let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
@@ -759,17 +756,17 @@ where
     context("symbol", f)(src)
 }
 
-fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
+fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = preceded(
         char1('\\'),
         alt((
-            value(Some('\\'), char1('\\')),
-            value(Some(' '), char1('_')),
-            value(Some(SYMBOL_QUOTE), char1(SYMBOL_QUOTE)),
-            value(None, multispace1),
+            value("\\", char1('\\')),
+            value(" ", char1('_')),
+            value(concatcp!(SYMBOL_QUOTE), char1(SYMBOL_QUOTE)),
+            value("", multispace1),
         )),
     );
     context("symbol_escaped", f)(src)
@@ -819,9 +816,9 @@ where
     let literal = take_while1(|c| !matches!(c, '"' | '\\' | '\n'));
     let space = terminated(tag("\n"), multispace0);
     let fragment = alt((
-        map(literal, StrFragment::Literal),
-        map(text_escaped, StrFragment::Escaped),
-        map(space, StrFragment::Space),
+        map(literal, StrFragment::Str),
+        text_escaped,
+        map(space, StrFragment::Str),
     ));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         fragment.push(&mut string);
@@ -832,21 +829,21 @@ where
     context("text", f)(src)
 }
 
-fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, Option<char>, E>
+fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, StrFragment<'a>, E>
 where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     let f = preceded(
         char1('\\'),
         alt((
-            map(unicode, Some),
-            value(Some('\n'), char1('n')),
-            value(Some('\r'), char1('r')),
-            value(Some('\t'), char1('t')),
-            value(Some('\\'), char1('\\')),
-            value(Some(' '), char1('_')),
-            value(Some(TEXT_QUOTE), char1(TEXT_QUOTE)),
-            value(None, multispace1),
+            map(unicode, StrFragment::Char),
+            value(StrFragment::Char('\n'), char1('n')),
+            value(StrFragment::Char('\r'), char1('r')),
+            value(StrFragment::Char('\t'), char1('t')),
+            value(StrFragment::Char('\\'), char1('\\')),
+            value(StrFragment::Char(' '), char1('_')),
+            value(StrFragment::Char(TEXT_QUOTE), char1(TEXT_QUOTE)),
+            value(StrFragment::Str(""), multispace1),
         )),
     );
     context("text_escaped", f)(src)
@@ -903,21 +900,15 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum StrFragment<'a> {
-    Literal(&'a str),
-    Escaped(Option<char>),
-    Space(&'a str),
+    Str(&'a str),
+    Char(char),
 }
 
 impl StrFragment<'_> {
     fn push(self, str: &mut String) {
         match self {
-            StrFragment::Literal(s) => str.push_str(s),
-            StrFragment::Escaped(c) => {
-                if let Some(c) = c {
-                    str.push(c);
-                }
-            }
-            StrFragment::Space(s) => str.push_str(s),
+            StrFragment::Str(s) => str.push_str(s),
+            StrFragment::Char(c) => str.push(c),
         }
     }
 }
