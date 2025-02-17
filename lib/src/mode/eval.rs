@@ -3,18 +3,14 @@ use crate::{
     AskVal,
     CallVal,
     ChangeVal,
-    FormMode,
     PairVal,
-    UniMode,
+    SymbolMode,
     core::{
         EvalCore,
         FormCore,
     },
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        symbol::PrefixMode,
-    },
+    mode::id::Id,
     symbol::Symbol,
     transformer::{
         ByVal,
@@ -27,21 +23,13 @@ use crate::{
     },
 };
 
-#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Eval {
-    prefix: PrefixMode,
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct Eval {
+    pub(crate) symbol: SymbolMode,
 }
 
 // default instance
-pub(crate) const EVAL: Eval = Eval::new(PrefixMode::Ref);
-
-#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum EvalMode {
-    Id,
-    Form,
-    #[default]
-    Eval,
-}
+pub(crate) const EVAL: Eval = Eval::new(SymbolMode::Ref);
 
 impl Transformer<Val, Val> for Eval {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
@@ -64,7 +52,7 @@ impl ByVal<Val> for Eval {
     where
         Ctx: CtxMeta<'a>,
     {
-        self.prefix.transform(ctx, symbol)
+        self.symbol.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -118,30 +106,7 @@ impl ByVal<Val> for Eval {
 }
 
 impl Eval {
-    pub const fn new(prefix: PrefixMode) -> Self {
-        Eval { prefix }
-    }
-
-    pub fn prefix_mode(&self) -> PrefixMode {
-        self.prefix
-    }
-}
-
-impl From<UniMode> for EvalMode {
-    fn from(mode: UniMode) -> Self {
-        match mode {
-            UniMode::Id(_) => EvalMode::Id,
-            UniMode::Form(_) => EvalMode::Form,
-            UniMode::Eval(_) => EvalMode::Eval,
-        }
-    }
-}
-
-impl From<FormMode> for EvalMode {
-    fn from(mode: FormMode) -> Self {
-        match mode {
-            FormMode::Id => EvalMode::Id,
-            FormMode::Form => EvalMode::Form,
-        }
+    pub(crate) const fn new(symbol: SymbolMode) -> Self {
+        Eval { symbol }
     }
 }

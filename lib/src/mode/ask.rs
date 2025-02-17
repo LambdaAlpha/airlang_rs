@@ -1,7 +1,7 @@
 use crate::{
     Ask,
     AskVal,
-    Mode,
+    CodeMode,
     UniMode,
     Val,
     core::{
@@ -9,18 +9,14 @@ use crate::{
         FormCore,
     },
     ctx::ref1::CtxMeta,
-    mode::id::Id,
-    transformer::{
-        ByVal,
-        Transformer,
-    },
+    mode::Mode,
+    transformer::Transformer,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum AskMode {
-    Id(Id),
-    Form(Ask<Mode, Mode>),
-    Eval(Ask<Mode, Mode>),
+pub struct AskMode {
+    pub code: CodeMode,
+    pub ask: Ask<Option<Mode>, Option<Mode>>,
 }
 
 impl Transformer<AskVal, Val> for AskMode {
@@ -28,32 +24,21 @@ impl Transformer<AskVal, Val> for AskMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            AskMode::Id(mode) => mode.transform_ask(ctx, ask),
-            AskMode::Form(mode) => FormCore::transform_ask(&mode.func, &mode.output, ctx, ask),
-            AskMode::Eval(mode) => EvalCore::transform_ask(&mode.func, &mode.output, ctx, ask),
+        let func = &self.ask.func;
+        let output = &self.ask.output;
+        match self.code {
+            CodeMode::Form => FormCore::transform_ask(func, output, ctx, ask),
+            CodeMode::Eval => EvalCore::transform_ask(func, output, ctx, ask),
         }
-    }
-}
-
-impl Default for AskMode {
-    fn default() -> Self {
-        Self::Eval(Ask::default())
     }
 }
 
 impl From<UniMode> for AskMode {
     fn from(mode: UniMode) -> Self {
-        match mode {
-            UniMode::Id(mode) => AskMode::Id(mode),
-            UniMode::Form(mode) => AskMode::Form(Ask::new(
-                Mode::Uni(UniMode::Form(mode)),
-                Mode::Uni(UniMode::Form(mode)),
-            )),
-            UniMode::Eval(mode) => AskMode::Eval(Ask::new(
-                Mode::Uni(UniMode::Eval(mode)),
-                Mode::Uni(UniMode::Eval(mode)),
-            )),
+        let m = Some(Mode::Uni(mode));
+        Self {
+            code: mode.code,
+            ask: Ask::new(m.clone(), m),
         }
     }
 }

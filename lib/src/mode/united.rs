@@ -5,20 +5,21 @@ use crate::{
     AskVal,
     CallVal,
     ChangeVal,
+    CodeMode,
     ListVal,
     MapVal,
     PairVal,
     Symbol,
+    SymbolMode,
     Val,
     ctx::ref1::CtxMeta,
     mode::{
         eval::Eval,
         form::Form,
-        id::Id,
         symbol::{
-            LITERAL,
-            MOVE,
-            REF,
+            LITERAL_CHAR,
+            MOVE_CHAR,
+            REF_CHAR,
         },
     },
     transformer::{
@@ -27,22 +28,20 @@ use crate::{
     },
 };
 
-pub(crate) const ID: &str = "id";
 pub(crate) const FORM: &str = "form";
 pub(crate) const EVAL: &str = "eval";
 
-pub(crate) const FORM_LITERAL: &str = concatcp!(FORM, LITERAL);
-pub(crate) const FORM_REF: &str = concatcp!(FORM, REF);
-pub(crate) const FORM_MOVE: &str = concatcp!(FORM, MOVE);
-pub(crate) const EVAL_LITERAL: &str = concatcp!(EVAL, LITERAL);
-pub(crate) const EVAL_REF: &str = concatcp!(EVAL, REF);
-pub(crate) const EVAL_MOVE: &str = concatcp!(EVAL, MOVE);
+pub(crate) const FORM_LITERAL: &str = concatcp!(FORM, LITERAL_CHAR);
+pub(crate) const FORM_REF: &str = concatcp!(FORM, REF_CHAR);
+pub(crate) const FORM_MOVE: &str = concatcp!(FORM, MOVE_CHAR);
+pub(crate) const EVAL_LITERAL: &str = concatcp!(EVAL, LITERAL_CHAR);
+pub(crate) const EVAL_REF: &str = concatcp!(EVAL, REF_CHAR);
+pub(crate) const EVAL_MOVE: &str = concatcp!(EVAL, MOVE_CHAR);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum UniMode {
-    Id(Id),
-    Form(Form),
-    Eval(Eval),
+pub struct UniMode {
+    pub code: CodeMode,
+    pub symbol: SymbolMode,
 }
 
 impl Transformer<Val, Val> for UniMode {
@@ -50,10 +49,9 @@ impl Transformer<Val, Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform(ctx, input),
-            UniMode::Form(mode) => mode.transform(ctx, input),
-            UniMode::Eval(mode) => mode.transform(ctx, input),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform(ctx, input),
+            CodeMode::Eval => Eval::new(self.symbol).transform(ctx, input),
         }
     }
 }
@@ -63,10 +61,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_default(ctx, input),
-            UniMode::Form(mode) => mode.transform_default(ctx, input),
-            UniMode::Eval(mode) => mode.transform_default(ctx, input),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_default(ctx, input),
+            CodeMode::Eval => Eval::new(self.symbol).transform_default(ctx, input),
         }
     }
 
@@ -74,10 +71,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_symbol(ctx, symbol),
-            UniMode::Form(mode) => mode.transform_symbol(ctx, symbol),
-            UniMode::Eval(mode) => mode.transform_symbol(ctx, symbol),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_symbol(ctx, symbol),
+            CodeMode::Eval => Eval::new(self.symbol).transform_symbol(ctx, symbol),
         }
     }
 
@@ -85,10 +81,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_pair(ctx, pair),
-            UniMode::Form(mode) => mode.transform_pair(ctx, pair),
-            UniMode::Eval(mode) => mode.transform_pair(ctx, pair),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_pair(ctx, pair),
+            CodeMode::Eval => Eval::new(self.symbol).transform_pair(ctx, pair),
         }
     }
 
@@ -96,10 +91,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_call(ctx, call),
-            UniMode::Form(mode) => mode.transform_call(ctx, call),
-            UniMode::Eval(mode) => mode.transform_call(ctx, call),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_call(ctx, call),
+            CodeMode::Eval => Eval::new(self.symbol).transform_call(ctx, call),
         }
     }
 
@@ -107,10 +101,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_abstract(ctx, abstract1),
-            UniMode::Form(mode) => mode.transform_abstract(ctx, abstract1),
-            UniMode::Eval(mode) => mode.transform_abstract(ctx, abstract1),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_abstract(ctx, abstract1),
+            CodeMode::Eval => Eval::new(self.symbol).transform_abstract(ctx, abstract1),
         }
     }
 
@@ -118,10 +111,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_ask(ctx, ask),
-            UniMode::Form(mode) => mode.transform_ask(ctx, ask),
-            UniMode::Eval(mode) => mode.transform_ask(ctx, ask),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_ask(ctx, ask),
+            CodeMode::Eval => Eval::new(self.symbol).transform_ask(ctx, ask),
         }
     }
 
@@ -129,10 +121,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_change(ctx, change),
-            UniMode::Form(mode) => mode.transform_change(ctx, change),
-            UniMode::Eval(mode) => mode.transform_change(ctx, change),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_change(ctx, change),
+            CodeMode::Eval => Eval::new(self.symbol).transform_change(ctx, change),
         }
     }
 
@@ -140,10 +131,9 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_list(ctx, list),
-            UniMode::Form(mode) => mode.transform_list(ctx, list),
-            UniMode::Eval(mode) => mode.transform_list(ctx, list),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_list(ctx, list),
+            CodeMode::Eval => Eval::new(self.symbol).transform_list(ctx, list),
         }
     }
 
@@ -151,16 +141,15 @@ impl ByVal<Val> for UniMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            UniMode::Id(mode) => mode.transform_map(ctx, map),
-            UniMode::Form(mode) => mode.transform_map(ctx, map),
-            UniMode::Eval(mode) => mode.transform_map(ctx, map),
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_map(ctx, map),
+            CodeMode::Eval => Eval::new(self.symbol).transform_map(ctx, map),
         }
     }
 }
 
-impl Default for UniMode {
-    fn default() -> Self {
-        UniMode::Eval(Eval::default())
+impl UniMode {
+    pub const fn new(code: CodeMode, symbol: SymbolMode) -> Self {
+        Self { code, symbol }
     }
 }

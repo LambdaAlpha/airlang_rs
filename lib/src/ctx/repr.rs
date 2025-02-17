@@ -10,6 +10,7 @@ use crate::{
     ChangeVal,
     Ctx,
     CtxVal,
+    FuncMode,
     List,
     ListVal,
     Map,
@@ -19,6 +20,7 @@ use crate::{
     Pair,
     PairVal,
     Symbol,
+    SymbolMode,
     Unit,
     Val,
     ctx::{
@@ -29,10 +31,6 @@ use crate::{
             VarAccess,
         },
         ref1::CtxRef,
-    },
-    prelude::{
-        map_mode,
-        symbol_literal_mode,
     },
     utils::val::{
         map_remove,
@@ -51,13 +49,21 @@ pub(crate) const VARIABLES: &str = "variables";
 pub(crate) const REVERSE: &str = "reverse";
 pub(crate) const SOLVER: &str = "solver";
 
-pub(crate) fn parse_mode() -> Mode {
+pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
     map.insert(
         symbol(VARIABLES),
-        map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
+        FuncMode::map_mode(
+            Map::default(),
+            FuncMode::symbol_mode(SymbolMode::Literal),
+            FuncMode::default_mode(),
+        ),
     );
-    map_mode(map, symbol_literal_mode(), Mode::default())
+    FuncMode::map_mode(
+        map,
+        FuncMode::symbol_mode(SymbolMode::Literal),
+        FuncMode::default_mode(),
+    )
 }
 
 pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
@@ -157,13 +163,21 @@ pub(crate) fn parse_var_access(access: &str) -> Option<VarAccess> {
     Some(access)
 }
 
-pub(crate) fn generate_mode() -> Mode {
+pub(crate) fn generate_mode() -> Option<Mode> {
     let mut map = Map::default();
     map.insert(
         symbol(VARIABLES),
-        map_mode(Map::default(), symbol_literal_mode(), Mode::default()),
+        FuncMode::map_mode(
+            Map::default(),
+            FuncMode::symbol_mode(SymbolMode::Literal),
+            FuncMode::default_mode(),
+        ),
     );
-    map_mode(map, symbol_literal_mode(), Mode::default())
+    FuncMode::map_mode(
+        map,
+        FuncMode::symbol_mode(SymbolMode::Literal),
+        FuncMode::default_mode(),
+    )
 }
 
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {

@@ -4,13 +4,13 @@ use rand::{
 };
 
 use crate::{
+    CodeMode,
     ConstFnCtx,
     Ctx,
     FuncMode,
     Map,
-    Mode,
     Pair,
-    PrefixMode,
+    SymbolMode,
     Val,
     arbitrary::{
         any_abstract,
@@ -44,13 +44,10 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        form_mode,
         named_const_fn,
         named_free_fn,
-        pair_mode,
         ref_mode,
         ref_pair_mode,
-        symbol_literal_mode,
     },
     symbol::Symbol,
     types::either::Either,
@@ -107,9 +104,9 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
-    let call = form_mode(PrefixMode::Literal);
+    let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -154,7 +151,7 @@ fn type1() -> Named<FuncVal> {
     let f = fn_type1;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = symbol_literal_mode();
+    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
     let mode = FuncMode {
         call,
         abstract1,
@@ -196,9 +193,9 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
-    let call = pair_mode(ref_mode(), ref_mode());
+    let call = FuncMode::pair_mode(ref_mode(), ref_mode());
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -232,9 +229,9 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
 fn not_equal() -> Named<FuncVal> {
     let id = "!=";
     let f = fn_not_equal;
-    let call = pair_mode(ref_mode(), ref_mode());
+    let call = FuncMode::pair_mode(ref_mode(), ref_mode());
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

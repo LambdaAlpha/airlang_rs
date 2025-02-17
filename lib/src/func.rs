@@ -1,11 +1,6 @@
-use std::{
-    fmt::Debug,
-    hash::Hash,
-};
-
 use crate::{
     ctx::ref1::CtxMeta,
-    mode::Mode,
+    func::func_mode::FuncMode,
     transformer::Transformer,
     val::Val,
 };
@@ -24,12 +19,7 @@ pub(crate) trait FuncTrait: Transformer<Val, Val> {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
-pub struct FuncMode {
-    pub call: Mode,
-    pub abstract1: Mode,
-    pub ask: Mode,
-}
+pub(crate) mod func_mode;
 
 pub(crate) mod prim;
 

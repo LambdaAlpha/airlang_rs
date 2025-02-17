@@ -4,7 +4,6 @@ use crate::{
     ConstFnCtx,
     FuncMode,
     Map,
-    Mode,
     Pair,
     Symbol,
     ctx::{
@@ -79,7 +78,7 @@ fn get_first() -> Named<FuncVal> {
     let f = fn_get_first;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -111,7 +110,7 @@ fn set_first() -> Named<FuncVal> {
     let f = fn_set_first;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -145,7 +144,7 @@ fn get_second() -> Named<FuncVal> {
     let f = fn_get_second;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -177,7 +176,7 @@ fn set_second() -> Named<FuncVal> {
     let f = fn_set_second;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

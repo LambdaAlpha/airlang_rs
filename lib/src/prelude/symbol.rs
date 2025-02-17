@@ -4,7 +4,6 @@ use crate::{
     FuncVal,
     Int,
     Map,
-    Mode,
     Pair,
     Symbol,
     Text,
@@ -90,7 +89,7 @@ fn length() -> Named<FuncVal> {
     let f = fn_length;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

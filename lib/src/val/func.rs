@@ -277,7 +277,7 @@ macro_rules! impl_const_func_trait {
         }
 
         impl $crate::func::FuncTrait for $type1 {
-            fn mode(&self) -> &$crate::func::FuncMode {
+            fn mode(&self) -> &$crate::func::func_mode::FuncMode {
                 self.0.mode()
             }
 

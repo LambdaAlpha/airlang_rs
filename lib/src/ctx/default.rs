@@ -17,9 +17,9 @@ use crate::{
     mode::{
         eval::EVAL,
         symbol::{
-            LITERAL,
-            MOVE,
-            REF,
+            LITERAL_CHAR,
+            MOVE_CHAR,
+            REF_CHAR,
         },
     },
     transformer::Transformer,
@@ -210,7 +210,7 @@ impl DefaultCtx {
             return Self::escape_symbol(val);
         };
         let prefix = s.chars().next();
-        if let Some(MOVE) = prefix {
+        if let Some(MOVE_CHAR) = prefix {
             let val = DefaultCtx::remove_or_default(ctx, Symbol::from_str(&s[1..]));
             return Self::escape_symbol(val);
         }
@@ -219,7 +219,7 @@ impl DefaultCtx {
 
     fn escape_symbol(val: Val) -> Val {
         if let Val::Symbol(s) = val {
-            Val::Symbol(Symbol::from_string(format!("{}{}", LITERAL, &*s)))
+            Val::Symbol(Symbol::from_string(format!("{}{}", LITERAL_CHAR, &*s)))
         } else {
             val
         }
@@ -231,8 +231,8 @@ impl DefaultCtx {
         };
         let prefix = s.chars().next();
         match prefix {
-            Some(LITERAL) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
-            Some(REF) => Either::This(Symbol::from_str(&s[1..])),
+            Some(LITERAL_CHAR) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
+            Some(REF_CHAR) => Either::This(Symbol::from_str(&s[1..])),
             _ => Either::This(s),
         }
     }

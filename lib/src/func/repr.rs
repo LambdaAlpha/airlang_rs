@@ -2,6 +2,7 @@ use crate::{
     Bit,
     Change,
     ChangeMode,
+    CodeMode,
     CompMode,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
@@ -25,6 +26,7 @@ use crate::{
     Pair,
     PairMode,
     Symbol,
+    SymbolMode,
     Val,
     func::{
         FuncMode,
@@ -35,16 +37,7 @@ use crate::{
         mut_cell_comp::MutCellCompFunc,
         mut_cell_prim::MutCellPrimFunc,
     },
-    mode::{
-        repr::generate,
-        symbol::PrefixMode,
-    },
-    prelude::{
-        change_mode,
-        form_mode,
-        map_mode,
-        symbol_literal_mode,
-    },
+    mode::repr::generate,
     utils::val::{
         map_remove,
         symbol,
@@ -72,32 +65,49 @@ pub(crate) const FREE: &str = "free";
 pub(crate) const CONST: &str = "constant";
 pub(crate) const MUTABLE: &str = "mutable";
 
-pub(crate) fn parse_mode() -> Mode {
+pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
     map.insert(symbol(CALL), func_call_mode());
-    map.insert(symbol(CTX_ACCESS), symbol_literal_mode());
-    map_mode(map, symbol_literal_mode(), Mode::default())
+    map.insert(
+        symbol(CTX_ACCESS),
+        FuncMode::symbol_mode(SymbolMode::Literal),
+    );
+    FuncMode::map_mode(
+        map,
+        FuncMode::symbol_mode(SymbolMode::Literal),
+        FuncMode::default_mode(),
+    )
 }
 
-pub(crate) fn generate_mode() -> Mode {
+pub(crate) fn generate_mode() -> Option<Mode> {
     let mut map = Map::default();
     map.insert(symbol(CALL), func_call_mode());
-    map.insert(symbol(CTX_ACCESS), symbol_literal_mode());
-    map_mode(map, symbol_literal_mode(), Mode::default())
+    map.insert(
+        symbol(CTX_ACCESS),
+        FuncMode::symbol_mode(SymbolMode::Literal),
+    );
+    FuncMode::map_mode(
+        map,
+        FuncMode::symbol_mode(SymbolMode::Literal),
+        FuncMode::default_mode(),
+    )
 }
 
-fn func_call_mode() -> Mode {
-    Mode::Comp(Box::new(CompMode {
-        pair: PairMode::Form(Pair::new(
-            symbol_literal_mode(),
-            change_mode(symbol_literal_mode(), form_mode(PrefixMode::Ref)),
-        )),
-        change: ChangeMode::Form(Change::new(
-            symbol_literal_mode(),
-            form_mode(PrefixMode::Ref),
-        )),
-        ..CompMode::default()
-    }))
+fn func_call_mode() -> Option<Mode> {
+    let symbol_literal = FuncMode::symbol_mode(SymbolMode::Literal);
+    let form_ref = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref);
+    Some(Mode::Comp(Box::new(CompMode {
+        pair: Some(PairMode {
+            pair: Pair::new(
+                symbol_literal.clone(),
+                FuncMode::change_mode(symbol_literal.clone(), form_ref.clone()),
+            ),
+        }),
+        change: Some(ChangeMode {
+            change: Change::new(symbol_literal, form_ref),
+        }),
+        ..CompMode::from(FuncMode::default_uni_mode())
+    })))
 }
 
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
@@ -135,18 +145,18 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         _ => return None,
     };
     let call = match map_remove(&mut map, CALL_MODE) {
-        Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(call_mode)) => call_mode.self_mode().clone(),
+        Val::Unit(_) => FuncMode::default_mode(),
+        Val::Func(FuncVal::Mode(call_mode)) => call_mode.inner().clone(),
         _ => return None,
     };
     let abstract1 = match map_remove(&mut map, ABSTRACT_MODE) {
-        Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(abstract_mode)) => abstract_mode.self_mode().clone(),
+        Val::Unit(_) => FuncMode::default_mode(),
+        Val::Func(FuncVal::Mode(abstract_mode)) => abstract_mode.inner().clone(),
         _ => return None,
     };
     let ask = match map_remove(&mut map, ASK_MODE) {
-        Val::Unit(_) => Mode::default(),
-        Val::Func(FuncVal::Mode(ask_mode)) => ask_mode.self_mode().clone(),
+        Val::Unit(_) => FuncMode::default_mode(),
+        Val::Func(FuncVal::Mode(ask_mode)) => ask_mode.inner().clone(),
         _ => return None,
     };
     let mode = FuncMode {
@@ -212,7 +222,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
 
 pub(crate) fn generate_func(f: FuncVal) -> Val {
     match f {
-        FuncVal::Mode(f) => generate(f.self_mode()),
+        FuncVal::Mode(f) => generate(f.inner()),
         FuncVal::FreeCellPrim(f) => generate_free_cell_prim(f),
         FuncVal::FreeCellComp(f) => generate_free_cell_comp(f),
         FuncVal::FreeStaticPrim(f) => generate_free_static_prim(f),
@@ -446,15 +456,15 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
     if common.cacheable {
         repr.insert(symbol(CACHEABLE), Val::Bit(Bit::new(true)));
     }
-    if common.mode.call != Mode::default() {
+    if common.mode.call != FuncMode::default_mode() {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.call).into()));
         repr.insert(symbol(CALL_MODE), call_mode);
     }
-    if common.mode.abstract1 != Mode::default() {
+    if common.mode.abstract1 != FuncMode::default_mode() {
         let abstract_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.abstract1).into()));
         repr.insert(symbol(ABSTRACT_MODE), abstract_mode);
     }
-    if common.mode.ask != Mode::default() {
+    if common.mode.ask != FuncMode::default_mode() {
         let ask_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.ask).into()));
         repr.insert(symbol(ASK_MODE), ask_mode);
     }

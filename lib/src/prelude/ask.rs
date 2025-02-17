@@ -8,7 +8,6 @@ use crate::{
     FreeCtx,
     FuncMode,
     Map,
-    Mode,
     Pair,
     Symbol,
     Val,
@@ -24,11 +23,9 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        id_mode,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
-        pair_mode,
         ref_pair_mode,
     },
     syntax::{
@@ -95,9 +92,9 @@ fn fn_new(input: Val) -> Val {
 fn new_dependent() -> Named<FuncVal> {
     let id = concatcp!(ASK_CHAR, ASK_CHAR);
     let f = fn_new_dependent;
-    let call = pair_mode(Mode::default(), id_mode());
+    let call = FuncMode::pair_mode(FuncMode::default_mode(), FuncMode::id_mode());
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -146,7 +143,7 @@ fn get_func() -> Named<FuncVal> {
     let f = fn_get_func;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -178,7 +175,7 @@ fn set_func() -> Named<FuncVal> {
     let f = fn_set_func;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -212,7 +209,7 @@ fn get_output() -> Named<FuncVal> {
     let f = fn_get_output;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -244,7 +241,7 @@ fn set_output() -> Named<FuncVal> {
     let f = fn_set_output;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

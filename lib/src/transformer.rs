@@ -31,6 +31,21 @@ where
     }
 }
 
+impl<I, T> Transformer<I, I> for Option<T>
+where
+    T: Transformer<I, I>,
+{
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: I) -> I
+    where
+        Ctx: CtxMeta<'a>,
+    {
+        match self {
+            None => input,
+            Some(t) => t.transform(ctx, input),
+        }
+    }
+}
+
 pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Output
     where

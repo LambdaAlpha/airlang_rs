@@ -3,15 +3,11 @@ use crate::{
     AskVal,
     CallVal,
     ChangeVal,
-    EvalMode,
     PairVal,
-    UniMode,
+    SymbolMode,
     core::FormCore,
     ctx::ref1::CtxMeta,
-    mode::{
-        id::Id,
-        symbol::PrefixMode,
-    },
+    mode::id::Id,
     symbol::Symbol,
     transformer::{
         ByVal,
@@ -24,21 +20,14 @@ use crate::{
     },
 };
 
-#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Form {
-    prefix: PrefixMode,
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct Form {
+    pub(crate) symbol: SymbolMode,
 }
 
 // default instance
 #[allow(unused)]
-pub(crate) const FORM: Form = Form::new(PrefixMode::Ref);
-
-#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum FormMode {
-    Id,
-    #[default]
-    Form,
-}
+pub(crate) const FORM: Form = Form::new(SymbolMode::Ref);
 
 impl Transformer<Val, Val> for Form {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
@@ -61,7 +50,7 @@ impl ByVal<Val> for Form {
     where
         Ctx: CtxMeta<'a>,
     {
-        self.prefix.transform(ctx, symbol)
+        self.symbol.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
@@ -115,31 +104,7 @@ impl ByVal<Val> for Form {
 }
 
 impl Form {
-    pub const fn new(prefix: PrefixMode) -> Self {
-        Form { prefix }
-    }
-
-    pub fn prefix_mode(&self) -> PrefixMode {
-        self.prefix
-    }
-}
-
-impl From<UniMode> for FormMode {
-    fn from(mode: UniMode) -> Self {
-        match mode {
-            UniMode::Id(_) => FormMode::Id,
-            UniMode::Form(_) => FormMode::Form,
-            UniMode::Eval(_) => FormMode::Form,
-        }
-    }
-}
-
-impl From<EvalMode> for FormMode {
-    fn from(mode: EvalMode) -> Self {
-        match mode {
-            EvalMode::Id => FormMode::Id,
-            EvalMode::Form => FormMode::Form,
-            EvalMode::Eval => FormMode::Form,
-        }
+    pub(crate) const fn new(symbol: SymbolMode) -> Self {
+        Form { symbol }
     }
 }

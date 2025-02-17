@@ -18,10 +18,12 @@ use crate::{
 };
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Id;
+pub(crate) struct Id;
 
-impl Transformer<Val, Val> for Id {
-    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
+pub(crate) const ID: &str = "id";
+
+impl<T> Transformer<T, T> for Id {
+    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: T) -> T
     where
         Ctx: CtxMeta<'a>,
     {

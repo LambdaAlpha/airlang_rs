@@ -3,7 +3,6 @@ use crate::{
     ConstFnCtx,
     FuncMode,
     Map,
-    Mode,
     Pair,
     Symbol,
     ctx::{
@@ -65,7 +64,7 @@ fn is_true() -> Named<FuncVal> {
     let f = fn_is_true;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -93,7 +92,7 @@ fn is_false() -> Named<FuncVal> {
     let f = fn_is_false;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

@@ -1,15 +1,12 @@
 use std::rc::Rc;
 
 use airlang::{
-    CompMode,
     ConstCellFnExt,
     ConstCellPrimFunc,
     ConstCellPrimFuncVal,
     ConstStaticFn,
     ConstStaticPrimFunc,
     ConstStaticPrimFuncVal,
-    Eval,
-    Form,
     FreeCellFnExt,
     FreeCellPrimFunc,
     FreeCellPrimFuncVal,
@@ -18,12 +15,6 @@ use airlang::{
     FreeStaticPrimFuncVal,
     FuncMode,
     FuncVal,
-    Id,
-    List,
-    ListMode,
-    Map,
-    MapMode,
-    Mode,
     MutCellFnExt,
     MutCellPrimFunc,
     MutCellPrimFuncVal,
@@ -31,12 +22,7 @@ use airlang::{
     MutStaticFn,
     MutStaticPrimFunc,
     MutStaticPrimFuncVal,
-    Pair,
-    PairMode,
-    PrefixMode,
     Symbol,
-    SymbolMode,
-    UniMode,
     Val,
     VarAccess,
 };
@@ -171,56 +157,6 @@ fn named_mut_fn(
     let func = MutStaticPrimFunc::new(id, fn1, mode, cacheable);
     let func_val = MutStaticPrimFuncVal::from(func);
     Named::new(name, FuncVal::MutStaticPrim(func_val))
-}
-
-#[allow(unused)]
-fn id_mode() -> Mode {
-    Mode::Uni(UniMode::Id(Id))
-}
-
-fn form_mode(prefix_mode: PrefixMode) -> Mode {
-    Mode::Uni(UniMode::Form(Form::new(prefix_mode)))
-}
-
-#[allow(unused)]
-fn eval_mode(prefix_mode: PrefixMode) -> Mode {
-    Mode::Uni(UniMode::Eval(Eval::new(prefix_mode)))
-}
-
-#[allow(unused)]
-fn symbol_literal_mode() -> Mode {
-    let mode = CompMode {
-        symbol: SymbolMode::Form(PrefixMode::Literal),
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-#[allow(unused)]
-fn pair_mode(first: Mode, second: Mode) -> Mode {
-    let mode = CompMode {
-        pair: PairMode::Form(Pair::new(first, second)),
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-#[allow(unused)]
-fn list_mode(head: List<Mode>, tail: Mode) -> Mode {
-    let mode = CompMode {
-        list: ListMode::Form { head, tail },
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode) -> Mode {
-    let else1 = Pair::new(key, value);
-    let mode = CompMode {
-        map: MapMode::Form { some, else1 },
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
 }
 
 pub(crate) mod io;

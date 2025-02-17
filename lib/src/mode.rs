@@ -41,12 +41,6 @@ impl Mode {
     }
 }
 
-impl Default for Mode {
-    fn default() -> Self {
-        Mode::Uni(UniMode::default())
-    }
-}
-
 impl From<UniMode> for Mode {
     fn from(mode: UniMode) -> Self {
         Mode::Uni(mode)

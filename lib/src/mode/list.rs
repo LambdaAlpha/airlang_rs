@@ -1,22 +1,18 @@
 use crate::{
     List,
     ListVal,
-    Mode,
     UniMode,
     Val,
     core::FormCore,
     ctx::ref1::CtxMeta,
-    mode::id::Id,
-    transformer::{
-        ByVal,
-        Transformer,
-    },
+    mode::Mode,
+    transformer::Transformer,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ListMode {
-    Id(Id),
-    Form { head: List<Mode>, tail: Mode },
+pub struct ListMode {
+    pub head: List<Option<Mode>>,
+    pub tail: Option<Mode>,
 }
 
 impl Transformer<ListVal, Val> for ListMode {
@@ -24,36 +20,16 @@ impl Transformer<ListVal, Val> for ListMode {
     where
         Ctx: CtxMeta<'a>,
     {
-        match self {
-            ListMode::Id(mode) => mode.transform_list(ctx, list),
-            ListMode::Form { head, tail } => {
-                FormCore::transform_list_head_tail(head, tail, ctx, list)
-            }
-        }
-    }
-}
-
-impl Default for ListMode {
-    fn default() -> Self {
-        Self::Form {
-            head: List::default(),
-            tail: Mode::default(),
-        }
+        FormCore::transform_list_head_tail(&self.head, &self.tail, ctx, list)
     }
 }
 
 impl From<UniMode> for ListMode {
     fn from(mode: UniMode) -> Self {
-        match mode {
-            UniMode::Id(mode) => ListMode::Id(mode),
-            UniMode::Form(mode) => ListMode::Form {
-                head: List::default(),
-                tail: Mode::Uni(UniMode::Form(mode)),
-            },
-            UniMode::Eval(mode) => ListMode::Form {
-                head: List::default(),
-                tail: Mode::Uni(UniMode::Eval(mode)),
-            },
+        let m = Some(Mode::Uni(mode));
+        ListMode {
+            head: List::default(),
+            tail: m,
         }
     }
 }

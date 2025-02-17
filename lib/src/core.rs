@@ -36,9 +36,9 @@ use crate::{
     },
     func::FuncTrait,
     mode::symbol::{
-        LITERAL,
-        MOVE,
-        REF,
+        LITERAL_CHAR,
+        MOVE_CHAR,
+        REF_CHAR,
     },
     solver::{
         optimize,
@@ -75,16 +75,16 @@ impl FormCore {
     where
         Ctx: CtxMeta<'a>,
     {
-        let (prefix, s) = match s.chars().next() {
-            Some(LITERAL) => (LITERAL, Symbol::from_str(&s[1..])),
-            Some(REF) => (REF, Symbol::from_str(&s[1..])),
-            Some(MOVE) => (MOVE, Symbol::from_str(&s[1..])),
+        let (mode, s) = match s.chars().next() {
+            Some(LITERAL_CHAR) => (LITERAL_CHAR, Symbol::from_str(&s[1..])),
+            Some(REF_CHAR) => (REF_CHAR, Symbol::from_str(&s[1..])),
+            Some(MOVE_CHAR) => (MOVE_CHAR, Symbol::from_str(&s[1..])),
             _ => (DEFAULT, s),
         };
-        match prefix {
-            LITERAL => Val::Symbol(s),
-            REF => DefaultCtx::get_or_default(ctx, s),
-            MOVE => DefaultCtx::remove_or_default(ctx, s),
+        match mode {
+            LITERAL_CHAR => Val::Symbol(s),
+            REF_CHAR => DefaultCtx::get_or_default(ctx, s),
+            MOVE_CHAR => DefaultCtx::remove_or_default(ctx, s),
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }

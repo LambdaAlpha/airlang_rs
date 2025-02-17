@@ -1,7 +1,8 @@
 use crate::{
+    CodeMode,
     FuncMode,
     Map,
-    PrefixMode,
+    SymbolMode,
     bit::Bit,
     ctx::{
         Ctx,
@@ -33,22 +34,15 @@ use crate::{
             parse_var_access,
         },
     },
-    mode::{
-        Mode,
-        eval::EVAL,
-    },
+    mode::eval::EVAL,
     pair::Pair,
     prelude::{
         Named,
         Prelude,
-        form_mode,
-        id_mode,
         initial_ctx,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
-        pair_mode,
-        symbol_literal_mode,
     },
     symbol::Symbol,
     transformer::Transformer,
@@ -134,9 +128,9 @@ impl Prelude for CtxPrelude {
 fn read() -> Named<FuncVal> {
     let id = "read";
     let f = fn_read;
-    let call = symbol_literal_mode();
+    let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -156,9 +150,9 @@ fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
 fn move1() -> Named<FuncVal> {
     let id = "move";
     let f = fn_move;
-    let call = symbol_literal_mode();
+    let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -181,9 +175,12 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 fn assign() -> Named<FuncVal> {
     let id = "=";
     let f = fn_assign;
-    let call = pair_mode(form_mode(PrefixMode::Literal), Mode::default());
+    let call = FuncMode::pair_mode(
+        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
+        FuncMode::default_mode(),
+    );
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -212,9 +209,12 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
 fn set_variable_access() -> Named<FuncVal> {
     let id = "set_variable_access";
     let f = fn_set_variable_access;
-    let call = pair_mode(symbol_literal_mode(), symbol_literal_mode());
+    let call = FuncMode::pair_mode(
+        FuncMode::symbol_mode(SymbolMode::Literal),
+        FuncMode::symbol_mode(SymbolMode::Literal),
+    );
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -248,9 +248,9 @@ fn fn_set_variable_access(ctx: MutFnCtx, input: Val) -> Val {
 fn get_variable_access() -> Named<FuncVal> {
     let id = "variable_access";
     let f = fn_get_variable_access;
-    let call = symbol_literal_mode();
+    let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = symbol_literal_mode();
+    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
     let mode = FuncMode {
         call,
         abstract1,
@@ -276,9 +276,9 @@ fn fn_get_variable_access(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_null() -> Named<FuncVal> {
     let id = "is_null";
     let f = fn_is_null;
-    let call = symbol_literal_mode();
+    let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -301,9 +301,9 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_static() -> Named<FuncVal> {
     let id = "is_static";
     let f = fn_is_static;
-    let call = symbol_literal_mode();
+    let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -367,9 +367,9 @@ fn fn_set_reverse(input: Val) -> Val {
 fn get_ctx_access() -> Named<FuncVal> {
     let id = "access";
     let f = fn_get_ctx_access;
-    let call = Mode::default();
+    let call = FuncMode::default_mode();
     let abstract1 = call.clone();
-    let ask = symbol_literal_mode();
+    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
     let mode = FuncMode {
         call,
         abstract1,
@@ -395,9 +395,9 @@ fn fn_get_ctx_access(ctx: MutFnCtx, _input: Val) -> Val {
 fn get_solver() -> Named<FuncVal> {
     let id = "solver";
     let f = fn_get_solver;
-    let call = Mode::default();
+    let call = FuncMode::default_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -438,9 +438,12 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = fn_with_ctx;
-    let call = pair_mode(id_mode(), form_mode(PrefixMode::Ref));
+    let call = FuncMode::pair_mode(
+        FuncMode::id_mode(),
+        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
+    );
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -482,9 +485,12 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let id = "|:";
     let f = fn_ctx_in_ctx_out;
-    let call = pair_mode(Mode::default(), form_mode(PrefixMode::Ref));
+    let call = FuncMode::pair_mode(
+        FuncMode::default_mode(),
+        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
+    );
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -514,7 +520,7 @@ fn ctx_new() -> Named<FuncVal> {
     let f = fn_ctx_new;
     let call = parse_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -534,7 +540,7 @@ fn fn_ctx_new(input: Val) -> Val {
 fn ctx_repr() -> Named<FuncVal> {
     let id = "context.represent";
     let f = fn_ctx_repr;
-    let call = Mode::default();
+    let call = FuncMode::default_mode();
     let abstract1 = call.clone();
     let ask = generate_mode();
     let mode = FuncMode {

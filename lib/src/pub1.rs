@@ -22,7 +22,6 @@ pub use crate::{
     },
     extension::ValExt,
     func::{
-        FuncMode,
         const_cell_comp::ConstCellCompFunc,
         const_cell_prim::{
             ConstCellFn,
@@ -45,6 +44,7 @@ pub use crate::{
             FreeStaticFn,
             FreeStaticPrimFunc,
         },
+        func_mode::FuncMode,
         mode::ModeFunc,
         mut_cell_comp::MutCellCompFunc,
         mut_cell_prim::{
@@ -68,23 +68,15 @@ pub use crate::{
         call::CallMode,
         change::ChangeMode,
         comp::CompMode,
-        eval::{
-            Eval,
-            EvalMode,
-        },
-        form::{
-            Form,
-            FormMode,
-        },
-        id::Id,
         list::ListMode,
         map::MapMode,
         pair::PairMode,
-        prim::PrimMode,
-        symbol::{
-            PrefixMode,
-            SymbolMode,
+        prim::{
+            CodeMode,
+            DataMode,
+            PrimMode,
         },
+        symbol::SymbolMode,
         united::UniMode,
     },
     number::Number,
@@ -147,12 +139,12 @@ pub fn generate(src: &Val) -> Result<String, ReprError> {
 
 #[derive(Debug, Clone)]
 pub struct AirCell {
-    mode: Mode,
+    mode: Option<Mode>,
     ctx: Ctx,
 }
 
 impl AirCell {
-    pub fn new(mode: Mode, ctx: Ctx) -> Self {
+    pub fn new(mode: Option<Mode>, ctx: Ctx) -> Self {
         Self { mode, ctx }
     }
 
@@ -172,7 +164,7 @@ impl AirCell {
 impl Default for AirCell {
     fn default() -> Self {
         Self {
-            mode: Mode::default(),
+            mode: FuncMode::default_mode(),
             ctx: Self::initial_ctx(),
         }
     }

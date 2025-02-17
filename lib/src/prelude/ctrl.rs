@@ -1,15 +1,15 @@
 use crate::{
     Byte,
     Call,
+    CodeMode,
     FuncMode,
     Int,
     List,
     Map,
     MapMode,
-    Mode,
     Pair,
-    PrefixMode,
     Symbol,
+    SymbolMode,
     Text,
     ctx::{
         free::FreeCtx,
@@ -27,8 +27,6 @@ use crate::{
     prelude::{
         Named,
         Prelude,
-        form_mode,
-        id_mode,
         named_mut_fn,
     },
     transformer::Transformer,
@@ -123,9 +121,9 @@ fn sequence() -> Named<FuncVal> {
         |ctx, val| fn_sequence(ctx, val),
         |ctx, val| fn_sequence(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -149,9 +147,9 @@ fn if1() -> Named<FuncVal> {
         |ctx, val| fn_if(ctx, val),
         |ctx, val| fn_if(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -192,9 +190,9 @@ fn if_not() -> Named<FuncVal> {
         |ctx, val| fn_if_not(ctx, val),
         |ctx, val| fn_if_not(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -235,9 +233,9 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
         |ctx, val| fn_match(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -263,9 +261,12 @@ where
     let Val::Map(map) = pair.first else {
         return Val::default();
     };
-    let map_mode = MapMode::Form {
+    let map_mode = MapMode {
         some: Map::default(),
-        else1: Pair::new(form_mode(PrefixMode::Ref), id_mode()),
+        else1: Pair::new(
+            FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
+            FuncMode::id_mode(),
+        ),
     };
     let map = map_mode.transform(ctx.reborrow(), map);
     let Val::Map(map) = map else { unreachable!() };
@@ -282,9 +283,9 @@ fn match_ordered() -> Named<FuncVal> {
         |ctx, val| fn_match_ordered(ctx, val),
         |ctx, val| fn_match_ordered(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -341,9 +342,9 @@ fn while1() -> Named<FuncVal> {
         |ctx, val| fn_while(ctx, val),
         |ctx, val| fn_while(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -407,9 +408,9 @@ fn while_not() -> Named<FuncVal> {
         |ctx, val| fn_while_not(ctx, val),
         |ctx, val| fn_while_not(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -473,9 +474,9 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
         |ctx, val| fn_for(ctx, val),
     );
-    let call = id_mode();
+    let call = FuncMode::id_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

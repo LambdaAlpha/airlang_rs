@@ -2,15 +2,15 @@ use std::process::Command;
 
 use airlang::{
     Byte,
+    CodeMode,
     FuncMode,
     FuncVal,
     Int,
     List,
     Map,
-    Mode,
     MutCtx,
-    PrefixMode,
     Symbol,
+    SymbolMode,
     Text,
     Val,
 };
@@ -18,8 +18,6 @@ use airlang::{
 use crate::prelude::{
     Named,
     Prelude,
-    form_mode,
-    map_mode,
     named_free_fn,
 };
 
@@ -45,13 +43,13 @@ const ARGUMENTS: &str = "arguments";
 fn call() -> Named<FuncVal> {
     let id = "process.call";
     let f = fn_call;
-    let call = map_mode(
+    let call = FuncMode::map_mode(
         Map::default(),
-        form_mode(PrefixMode::Literal),
-        Mode::default(),
+        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
+        FuncMode::default_mode(),
     );
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

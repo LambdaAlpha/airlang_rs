@@ -236,29 +236,9 @@ default mode
 -----
 do [f = mode ; ., f ; not ; true]
 -----
-false
+not ; true
 =====
-mode primitive default prefix
------
-do [
-    b = 1,
-    f = mode ; {default : .., primitive : true},
-    [f a, f *b, f ; not ; true, f [a]]
-]
------
-[a, 1, false, [a]]
-=====
-mode primitive default eval
------
-do [
-    b = 1,
-    f = mode ; {default : form, primitive : true},
-    [f .a, f *b, f ; .a ; b, f [b]]
-]
------
-[a, 1, a ; 1, [1]]
-=====
-mode primitive default united
+mode primitive default
 -----
 do [
     b = 1,
@@ -271,7 +251,7 @@ do [
 mode primitive symbol id
 -----
 do [
-    f = mode ; {symbol : id, primitive : true},
+    f = mode ; {symbol : id, default : form*, primitive : true},
     f [^a]
 ]
 -----
@@ -280,7 +260,7 @@ do [
 mode primitive symbol .
 -----
 do [
-    f = mode ; {symbol : .., primitive : true},
+    f = mode ; {symbol : .., default : form*, primitive : true},
     f [.a]
 ]
 -----
@@ -290,7 +270,7 @@ mode primitive symbol *
 -----
 do [
     a = 1,
-    f = mode ; {symbol : .*, primitive : true},
+    f = mode ; {symbol : .*, default : form^, primitive : true},
     f [a]
 ]
 -----
@@ -300,7 +280,7 @@ mode primitive symbol ^
 -----
 do [
     a = 1,
-    f = mode ; {symbol : .^, primitive : true},
+    f = mode ; {symbol : .^, default : form*, primitive : true},
     [f [a], is_null a]
 ]
 -----
@@ -310,7 +290,7 @@ mode primitive pair id
 -----
 do [
     b = 1,
-    f = mode ; {pair : id, primitive : true},
+    f = mode ; {pair : id, default : eval*, primitive : true},
     f [.a : b]
 ]
 -----
@@ -320,7 +300,7 @@ mode primitive pair form
 -----
 do [
     b = 1,
-    f = mode ; {pair : form, primitive : true},
+    f = mode ; {pair : form, default : eval*, primitive : true},
     f [.a : b]
 ]
 -----
@@ -329,7 +309,7 @@ do [
 mode primitive call id
 -----
 do [
-    f = mode ; {call : id, primitive : true},
+    f = mode ; {call : id, default : eval*, primitive : true},
     f [.a ; ^b]
 ]
 -----
@@ -339,7 +319,7 @@ mode primitive call form
 -----
 do [
     b = 1,
-    f = mode ; {call : form, primitive : true},
+    f = mode ; {call : form, default : eval*, primitive : true},
     f [.a ; b]
 ]
 -----
@@ -348,7 +328,7 @@ do [
 mode primitive call eval
 -----
 do [
-    f = mode ; {call : eval, primitive : true},
+    f = mode ; {call : eval, default : form*, primitive : true},
     f ; [not ; true]
 ]
 -----
@@ -357,7 +337,7 @@ do [
 mode primitive abstract id
 -----
 do [
-    f = mode ; {abstract : id, primitive : true},
+    f = mode ; {abstract : id, default : eval*, primitive : true},
     f [.a ! ^b]
 ]
 -----
@@ -367,7 +347,7 @@ mode primitive abstract form
 -----
 do [
     b = 1,
-    f = mode ; {abstract : form, primitive : true},
+    f = mode ; {abstract : form, default : eval*, primitive : true},
     f [.a ! ^b]
 ]
 -----
@@ -377,7 +357,7 @@ mode primitive abstract eval
 -----
 do [
     b = 1,
-    f = mode ; {abstract : eval, primitive : true},
+    f = mode ; {abstract : eval, default : form*, primitive : true},
     f [.a ! b]
 ]
 -----
@@ -386,7 +366,7 @@ do [
 mode primitive ask id
 -----
 do [
-    f = mode ; {ask : id, primitive : true},
+    f = mode ; {ask : id, default : eval*, primitive : true},
     f [.a ? ^b]
 ]
 -----
@@ -396,7 +376,7 @@ mode primitive ask form
 -----
 do [
     b = 1,
-    f = mode ; {ask : form, primitive : true},
+    f = mode ; {ask : form, default : eval*, primitive : true},
     f [.a ? b]
 ]
 -----
@@ -405,7 +385,7 @@ do [
 mode primitive change id
 -----
 do [
-    f = mode ; {change : id, primitive : true},
+    f = mode ; {change : id, default : form*, primitive : true},
     f [.a -> ^b]
 ]
 -----
@@ -415,7 +395,7 @@ mode primitive change form
 -----
 do [
     b = 1,
-    f = mode ; {change : form, primitive : true},
+    f = mode ; {change : form, default : eval*, primitive : true},
     f [.a -> b]
 ]
 -----
@@ -424,7 +404,7 @@ do [
 mode primitive list id
 -----
 do [
-    f = mode ; {list : id, primitive : true},
+    f = mode ; {list : id, default : eval*, primitive : true},
     f [a, .a, *a, ^a]
 ]
 -----
@@ -434,7 +414,7 @@ mode primitive list form
 -----
 do [
     a = 1,
-    f = mode ; {list : form, primitive : true},
+    f = mode ; {list : form, default : eval*, primitive : true},
     f [a, .a, *a, ^a]
 ]
 -----
@@ -445,7 +425,7 @@ mode primitive map id
 do [
     a = 1,
     c = 2,
-    f = mode ; {map : id, primitive : true},
+    f = mode ; {map : id, default : eval*, primitive : true},
     f {.a : *a, ^b : .a, c : d}
 ]
 -----
@@ -457,7 +437,7 @@ do [
     a = 1,
     b = 2,
     c = 3,
-    f = mode ; {map : form, primitive : true},
+    f = mode ; {map : form, default : eval*, primitive : true},
     f {.a : a, b : .a, *c : .d}
 ]
 -----
@@ -476,7 +456,7 @@ mode symbol .
 -----
 do [
     a = 1,
-    f = mode ; {symbol : ..},
+    f = mode ; {symbol : .., default : form*},
     [f a, f [a]]
 ]
 -----
@@ -486,7 +466,7 @@ mode symbol *
 -----
 do [
     a = 1,
-    f = mode ; {symbol : .*, default : ..},
+    f = mode ; {symbol : .*, default : form.},
     [f a, f [a]]
 ]
 -----
@@ -567,34 +547,34 @@ eval*
 mode repr composite
 -----
 function.represent ; mode ; {
-    symbol : id,
+    symbol : .*,
     pair : form. : eval*,
     list : [eval*, id],
-    map : {a : eval*, b : form.} : id,
+    map : {a : eval*, b : form.} : form*,
 }
 -----
 {
-    symbol : id,
+    symbol : *,
     pair : form. : eval*,
     list : [eval*, id],
-    map : {a : eval*, b : form.} : id : id,
+    map : {a : eval*, b : form.} : form* : form*,
 }
 =====
 mode repr primitive
 -----
 function.represent ; mode ; {
     symbol : .^,
-    pair : id,
-    call : form,
-    map : id,
+    pair : form,
+    call : eval,
+    map : form,
     primitive : true,
 }
 -----
 {
     symbol : ^,
-    pair : id,
-    call : form,
-    map : id,
+    pair : form,
+    call : eval,
+    map : form,
     primitive : true,
 }
 =====

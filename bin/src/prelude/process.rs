@@ -1,18 +1,17 @@
 use std::process::Command;
 
 use airlang::{
+    CodeMode,
     FuncMode,
     FuncVal,
-    Mode,
     MutCtx,
-    PrefixMode,
+    SymbolMode,
     Val,
 };
 
 use crate::prelude::{
     Named,
     Prelude,
-    form_mode,
     named_free_fn,
 };
 
@@ -35,9 +34,9 @@ impl Prelude for ProcessPrelude {
 fn call() -> Named<FuncVal> {
     let id = "$";
     let f = fn_call;
-    let call = form_mode(PrefixMode::Literal);
+    let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

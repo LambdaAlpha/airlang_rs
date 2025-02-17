@@ -1,12 +1,10 @@
 use crate::{
+    CodeMode,
     ConstFnCtx,
     CtxAccess,
-    Eval,
-    Form,
     FuncMode,
-    Id,
     Pair,
-    PrefixMode,
+    SymbolMode,
     bit::Bit,
     ctx::{
         default::DefaultCtx,
@@ -27,7 +25,7 @@ use crate::{
     },
     map::Map,
     mode::{
-        Mode,
+        id::ID,
         repr::parse,
         united::{
             EVAL_LITERAL,
@@ -36,18 +34,14 @@ use crate::{
             FORM_LITERAL,
             FORM_MOVE,
             FORM_REF,
-            ID,
-            UniMode,
         },
     },
     prelude::{
         Named,
         Prelude,
-        form_mode,
         named_const_fn,
         named_free_fn,
         ref_pair_mode,
-        symbol_literal_mode,
     },
     symbol::Symbol,
     val::{
@@ -141,55 +135,55 @@ impl Prelude for FuncPrelude {
 
 fn mode_id() -> Named<FuncVal> {
     let id = ID;
-    let func = ModeFunc::new(Mode::Uni(UniMode::Id(Id)));
+    let func = ModeFunc::new(None);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_form_literal() -> Named<FuncVal> {
     let id = FORM_LITERAL;
-    let mode = Form::new(PrefixMode::Literal);
-    let func = ModeFunc::new(Mode::Uni(UniMode::Form(mode)));
+    let mode = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
+    let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_form_ref() -> Named<FuncVal> {
     let id = FORM_REF;
-    let mode = Form::new(PrefixMode::Ref);
-    let func = ModeFunc::new(Mode::Uni(UniMode::Form(mode)));
+    let mode = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref);
+    let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_form_move() -> Named<FuncVal> {
     let id = FORM_MOVE;
-    let mode = Form::new(PrefixMode::Move);
-    let func = ModeFunc::new(Mode::Uni(UniMode::Form(mode)));
+    let mode = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Move);
+    let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_eval_literal() -> Named<FuncVal> {
     let id = EVAL_LITERAL;
-    let mode = Eval::new(PrefixMode::Literal);
-    let func = ModeFunc::new(Mode::Uni(UniMode::Eval(mode)));
+    let mode = FuncMode::uni_mode(CodeMode::Eval, SymbolMode::Literal);
+    let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_eval_ref() -> Named<FuncVal> {
     let id = EVAL_REF;
-    let mode = Eval::new(PrefixMode::Ref);
-    let func = ModeFunc::new(Mode::Uni(UniMode::Eval(mode)));
+    let mode = FuncMode::uni_mode(CodeMode::Eval, SymbolMode::Ref);
+    let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
 
 fn mode_eval_move() -> Named<FuncVal> {
     let id = EVAL_MOVE;
-    let mode = Eval::new(PrefixMode::Move);
-    let func = ModeFunc::new(Mode::Uni(UniMode::Eval(mode)));
+    let mode = FuncMode::uni_mode(CodeMode::Eval, SymbolMode::Move);
+    let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
 }
@@ -197,9 +191,9 @@ fn mode_eval_move() -> Named<FuncVal> {
 fn mode() -> Named<FuncVal> {
     let id = "mode";
     let f = fn_mode;
-    let call = form_mode(PrefixMode::Literal);
+    let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -222,7 +216,7 @@ fn new() -> Named<FuncVal> {
     let f = fn_new;
     let call = parse_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -242,7 +236,7 @@ fn fn_new(input: Val) -> Val {
 fn repr() -> Named<FuncVal> {
     let id = "function.represent";
     let f = fn_repr;
-    let call = Mode::default();
+    let call = FuncMode::default_mode();
     let abstract1 = call.clone();
     let ask = generate_mode();
     let mode = FuncMode {
@@ -266,7 +260,7 @@ fn ctx_access() -> Named<FuncVal> {
     let f = fn_ctx_access;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = symbol_literal_mode();
+    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
     let mode = FuncMode {
         call,
         abstract1,
@@ -299,7 +293,7 @@ fn call_mode() -> Named<FuncVal> {
     let f = fn_call_mode;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -328,7 +322,7 @@ fn abstract_mode() -> Named<FuncVal> {
     let f = fn_abstract_mode;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -357,7 +351,7 @@ fn ask_mode() -> Named<FuncVal> {
     let f = fn_ask_mode;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -386,7 +380,7 @@ fn is_cacheable() -> Named<FuncVal> {
     let f = fn_is_cacheable;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -415,7 +409,7 @@ fn is_primitive() -> Named<FuncVal> {
     let f = fn_is_primitive;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -444,7 +438,7 @@ fn is_extension() -> Named<FuncVal> {
     let f = fn_is_extension;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -475,7 +469,7 @@ fn is_cell() -> Named<FuncVal> {
     let f = fn_is_cell;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -503,7 +497,7 @@ fn is_mode() -> Named<FuncVal> {
     let f = fn_is_mode;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -531,7 +525,7 @@ fn id() -> Named<FuncVal> {
     let f = fn_id;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = symbol_literal_mode();
+    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
     let mode = FuncMode {
         call,
         abstract1,
@@ -562,7 +556,7 @@ fn call() -> Named<FuncVal> {
     let f = fn_call;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = form_mode(PrefixMode::Ref);
+    let ask = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref);
     let mode = FuncMode {
         call,
         abstract1,
@@ -590,7 +584,7 @@ fn ctx() -> Named<FuncVal> {
     let f = fn_ctx;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

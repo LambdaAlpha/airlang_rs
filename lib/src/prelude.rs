@@ -1,22 +1,15 @@
 use std::rc::Rc;
 
 use crate::{
-    Change,
-    ChangeMode,
-    CompMode,
     ConstStaticPrimFuncVal,
     FreeCellPrimFunc,
     FreeCellPrimFuncVal,
     FreeStaticPrimFunc,
     FreeStaticPrimFuncVal,
-    Id,
-    List,
     Map,
+    Mode,
     MutStaticPrimFunc,
     MutStaticPrimFuncVal,
-    Pair,
-    PairMode,
-    SymbolMode,
     ctx::{
         Ctx,
         map::{
@@ -25,7 +18,6 @@ use crate::{
         },
     },
     func::{
-        FuncMode,
         const_cell_prim::{
             ConstCellFnExt,
             ConstCellPrimFunc,
@@ -36,20 +28,12 @@ use crate::{
         },
         free_cell_prim::FreeCellFnExt,
         free_static_prim::FreeStaticFn,
+        func_mode::FuncMode,
         mut_cell_prim::{
             MutCellFnExt,
             MutCellPrimFunc,
         },
         mut_static_prim::MutStaticFn,
-    },
-    mode::{
-        Mode,
-        eval::Eval,
-        form::Form,
-        list::ListMode,
-        map::MapMode,
-        symbol::PrefixMode,
-        united::UniMode,
     },
     prelude::{
         abstract1::AbstractPrelude,
@@ -314,76 +298,13 @@ fn named_mut_fn(
     Named::new(name, f)
 }
 
-pub(crate) fn id_func_mode() -> FuncMode {
-    FuncMode {
-        call: id_mode(),
-        abstract1: id_mode(),
-        ask: id_mode(),
-    }
+pub(crate) fn ref_pair_mode() -> Option<Mode> {
+    FuncMode::pair_mode(ref_mode(), FuncMode::default_mode())
 }
 
-pub(crate) fn id_mode() -> Mode {
-    Mode::Uni(UniMode::Id(Id))
-}
-
-pub(crate) fn form_mode(prefix_mode: PrefixMode) -> Mode {
-    Mode::Uni(UniMode::Form(Form::new(prefix_mode)))
-}
-
-#[allow(unused)]
-pub(crate) fn eval_mode(prefix_mode: PrefixMode) -> Mode {
-    Mode::Uni(UniMode::Eval(Eval::new(prefix_mode)))
-}
-
-pub(crate) fn symbol_literal_mode() -> Mode {
-    let mode = CompMode {
-        symbol: SymbolMode::Form(PrefixMode::Literal),
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-pub(crate) fn pair_mode(first: Mode, second: Mode) -> Mode {
-    let mode = CompMode {
-        pair: PairMode::Form(Pair::new(first, second)),
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-pub(crate) fn change_mode(from: Mode, to: Mode) -> Mode {
-    let mode = CompMode {
-        change: ChangeMode::Form(Change::new(from, to)),
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-#[allow(unused)]
-pub(crate) fn list_mode(head: List<Mode>, tail: Mode) -> Mode {
-    let mode = CompMode {
-        list: ListMode::Form { head, tail },
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-pub(crate) fn map_mode(some: Map<Val, Mode>, key: Mode, value: Mode) -> Mode {
-    let else1 = Pair::new(key, value);
-    let mode = CompMode {
-        map: MapMode::Form { some, else1 },
-        ..CompMode::from(UniMode::default())
-    };
-    Mode::Comp(Box::new(mode))
-}
-
-pub(crate) fn ref_pair_mode() -> Mode {
-    pair_mode(ref_mode(), Mode::default())
-}
-
-pub(crate) fn ref_mode() -> Mode {
+pub(crate) fn ref_mode() -> Option<Mode> {
     let ref1 = MODE_PRELUDE.with(|p| p.ref_mode.clone());
-    Mode::Func(ref1)
+    Some(Mode::Func(ref1))
 }
 
 mod mode;

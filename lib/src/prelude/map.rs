@@ -5,7 +5,6 @@ use crate::{
     FuncMode,
     List,
     Map,
-    Mode,
     Symbol,
     bit::Bit,
     ctx::{
@@ -110,7 +109,7 @@ fn length() -> Named<FuncVal> {
     let f = fn_length;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -139,7 +138,7 @@ fn items() -> Named<FuncVal> {
     let f = fn_items;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -171,7 +170,7 @@ fn into_items() -> Named<FuncVal> {
     let f = fn_into_items;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -205,7 +204,7 @@ fn keys() -> Named<FuncVal> {
     let f = fn_keys;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -234,7 +233,7 @@ fn into_keys() -> Named<FuncVal> {
     let f = fn_into_keys;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -265,7 +264,7 @@ fn values() -> Named<FuncVal> {
     let f = fn_values;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -294,7 +293,7 @@ fn into_values() -> Named<FuncVal> {
     let f = fn_into_values;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -325,7 +324,7 @@ fn contains() -> Named<FuncVal> {
     let f = fn_contains;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -355,7 +354,7 @@ fn contains_all() -> Named<FuncVal> {
     let f = fn_contains_all;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -389,7 +388,7 @@ fn contains_any() -> Named<FuncVal> {
     let f = fn_contains_many;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -423,7 +422,7 @@ fn set() -> Named<FuncVal> {
     let f = fn_set;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -458,7 +457,7 @@ fn set_many() -> Named<FuncVal> {
     let f = fn_set_many;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -495,7 +494,7 @@ fn get() -> Named<FuncVal> {
     let f = fn_get;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -525,7 +524,7 @@ fn get_many() -> Named<FuncVal> {
     let f = fn_get_many;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -562,7 +561,7 @@ fn remove() -> Named<FuncVal> {
     let f = fn_remove;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -592,7 +591,7 @@ fn remove_many() -> Named<FuncVal> {
     let f = fn_remove_many;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,
@@ -630,7 +629,7 @@ fn clear() -> Named<FuncVal> {
     let f = fn_clear;
     let call = ref_pair_mode();
     let abstract1 = call.clone();
-    let ask = Mode::default();
+    let ask = FuncMode::default_mode();
     let mode = FuncMode {
         call,
         abstract1,

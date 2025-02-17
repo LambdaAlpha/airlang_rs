@@ -30,7 +30,7 @@ use crate::{
     FreeCellCompFuncVal,
     FreeStaticCompFunc,
     FreeStaticCompFuncVal,
-    Id,
+    Mode,
     ModeFunc,
     ModeFuncVal,
     MutStaticCompFunc,
@@ -50,31 +50,25 @@ use crate::{
     },
     extension::UnitExt,
     func::{
-        FuncMode,
         comp::Composite,
         const_cell_comp::ConstCellCompFunc,
+        func_mode::FuncMode,
         mut_cell_comp::MutCellCompFunc,
     },
     int::Int,
     list::List,
     map::Map,
     mode::{
-        Mode,
         change::ChangeMode,
         comp::CompMode,
-        eval::{
-            Eval,
-            EvalMode,
-        },
-        form::{
-            Form,
-            FormMode,
-        },
         list::ListMode,
         map::MapMode,
         pair::PairMode,
-        prim::PrimMode,
-        symbol::PrefixMode,
+        prim::{
+            CodeMode,
+            DataMode,
+            PrimMode,
+        },
         united::UniMode,
     },
     number::Number,
@@ -268,293 +262,187 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     Ctx::new(variables, solver)
 }
 
-pub(crate) fn any_uni_mode(rng: &mut SmallRng) -> UniMode {
-    match rng.gen_range(0..3) {
-        0 => UniMode::Id(Id),
-        1 => UniMode::Form(Form::new(any_prefix_mode(rng))),
-        2 => UniMode::Eval(Eval::new(any_prefix_mode(rng))),
-        _ => unreachable!(),
+impl<T: Arbitrary> Arbitrary for Option<T> {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        if rng.gen() {
+            None
+        } else {
+            Some(T::any(rng, depth))
+        }
     }
 }
 
-pub(crate) fn any_comp_mode(rng: &mut SmallRng, depth: usize) -> CompMode {
-    let symbol = any_symbol_mode(rng);
-    let pair = any_pair_mode(rng, depth);
-    let call = any_call_mode(rng, depth);
-    let abstract1 = any_abstract_mode(rng, depth);
-    let ask = any_ask_mode(rng, depth);
-    let change = any_change_mode(rng, depth);
-    let list = any_list_mode(rng, depth);
-    let map = any_map_mode(rng, depth);
-    CompMode {
-        symbol,
-        pair,
-        call,
-        abstract1,
-        ask,
-        change,
-        list,
-        map,
+impl Arbitrary for DataMode {
+    fn any(_rng: &mut SmallRng, _depth: usize) -> Self {
+        DataMode
     }
 }
 
-pub(crate) fn any_prefix_mode(rng: &mut SmallRng) -> PrefixMode {
-    const MODES: [PrefixMode; 3] = [PrefixMode::Literal, PrefixMode::Ref, PrefixMode::Move];
-    *(MODES.choose(rng).unwrap())
-}
-
-pub(crate) fn any_symbol_mode(rng: &mut SmallRng) -> SymbolMode {
-    if rng.gen() {
-        SymbolMode::Id(Id)
-    } else {
-        SymbolMode::Form(any_prefix_mode(rng))
+impl Arbitrary for CodeMode {
+    fn any(rng: &mut SmallRng, _depth: usize) -> Self {
+        const MODES: [CodeMode; 2] = [CodeMode::Form, CodeMode::Eval];
+        *(MODES.choose(rng).unwrap())
     }
 }
 
-pub(crate) fn any_pair_mode(rng: &mut SmallRng, depth: usize) -> PairMode {
-    PairMode::any(rng, depth)
+impl Arbitrary for SymbolMode {
+    fn any(rng: &mut SmallRng, _depth: usize) -> Self {
+        const MODES: [SymbolMode; 3] = [SymbolMode::Literal, SymbolMode::Ref, SymbolMode::Move];
+        *(MODES.choose(rng).unwrap())
+    }
+}
+
+impl Arbitrary for UniMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let code = CodeMode::any(rng, depth);
+        let symbol = SymbolMode::any(rng, depth);
+        UniMode::new(code, symbol)
+    }
+}
+
+impl Arbitrary for CompMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let symbol = Arbitrary::any(rng, depth);
+        let pair = Arbitrary::any(rng, depth);
+        let call = Arbitrary::any(rng, depth);
+        let abstract1 = Arbitrary::any(rng, depth);
+        let ask = Arbitrary::any(rng, depth);
+        let change = Arbitrary::any(rng, depth);
+        let list = Arbitrary::any(rng, depth);
+        let map = Arbitrary::any(rng, depth);
+        CompMode {
+            symbol,
+            pair,
+            call,
+            abstract1,
+            ask,
+            change,
+            list,
+            map,
+        }
+    }
 }
 
 impl Arbitrary for PairMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-        ];
-        let i = sample(rng, weights);
-        match i {
-            0 => PairMode::Id(Id),
-            1 => {
-                let new_depth = depth + 1;
-                let pair = Pair::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                PairMode::Form(pair)
-            }
-            _ => unreachable!(),
-        }
+        let new_depth = depth + 1;
+        let first = Arbitrary::any(rng, new_depth);
+        let second = Arbitrary::any(rng, new_depth);
+        let pair = Pair::new(first, second);
+        PairMode { pair }
     }
-}
-
-pub(crate) fn any_call_mode(rng: &mut SmallRng, depth: usize) -> CallMode {
-    CallMode::any(rng, depth)
 }
 
 impl Arbitrary for CallMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-            1,      // eval
-        ];
-        let i = sample(rng, weights);
+        let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
-        match i {
-            0 => CallMode::Id(Id),
-            1 => {
-                let call = Call::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                CallMode::Form(call)
-            }
-            2 => {
-                let call = Call::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                CallMode::Eval(call)
-            }
-            _ => unreachable!(),
-        }
+        let func = Arbitrary::any(rng, new_depth);
+        let input = Arbitrary::any(rng, new_depth);
+        let call = Call::new(func, input);
+        CallMode { code, call }
     }
-}
-
-pub(crate) fn any_abstract_mode(rng: &mut SmallRng, depth: usize) -> AbstractMode {
-    AbstractMode::any(rng, depth)
 }
 
 impl Arbitrary for AbstractMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-            1,      // eval
-        ];
-        let i = sample(rng, weights);
+        let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
-        match i {
-            0 => AbstractMode::Id(Id),
-            1 => {
-                let abstract1 = Abstract::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                AbstractMode::Form(abstract1)
-            }
-            2 => {
-                let abstract1 = Abstract::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                AbstractMode::Eval(abstract1)
-            }
-            _ => unreachable!(),
-        }
+        let func = Arbitrary::any(rng, new_depth);
+        let input = Arbitrary::any(rng, new_depth);
+        let abstract1 = Abstract::new(func, input);
+        AbstractMode { code, abstract1 }
     }
-}
-
-pub(crate) fn any_ask_mode(rng: &mut SmallRng, depth: usize) -> AskMode {
-    AskMode::any(rng, depth)
-}
-
-pub(crate) fn any_change_mode(rng: &mut SmallRng, depth: usize) -> ChangeMode {
-    ChangeMode::any(rng, depth)
 }
 
 impl Arbitrary for AskMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-            1,      // eval
-        ];
-        let i = sample(rng, weights);
+        let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
-        match i {
-            0 => AskMode::Id(Id),
-            1 => {
-                let ask = Ask::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                AskMode::Form(ask)
-            }
-            2 => {
-                let ask = Ask::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                AskMode::Eval(ask)
-            }
-            _ => unreachable!(),
-        }
+        let func = Arbitrary::any(rng, new_depth);
+        let output = Arbitrary::any(rng, new_depth);
+        let ask = Ask::new(func, output);
+        AskMode { code, ask }
     }
 }
 
 impl Arbitrary for ChangeMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-        ];
-        let i = sample(rng, weights);
         let new_depth = depth + 1;
-        match i {
-            0 => ChangeMode::Id(Id),
-            1 => {
-                let change = Change::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                ChangeMode::Form(change)
-            }
-            _ => unreachable!(),
-        }
+        let from = Arbitrary::any(rng, new_depth);
+        let to = Arbitrary::any(rng, new_depth);
+        let change = Change::new(from, to);
+        ChangeMode { change }
     }
-}
-
-pub(crate) fn any_list_mode(rng: &mut SmallRng, depth: usize) -> ListMode {
-    ListMode::any(rng, depth)
 }
 
 impl Arbitrary for ListMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-        ];
-        let i = sample(rng, weights);
-        match i {
-            0 => ListMode::Id(Id),
-            1 => {
-                let new_depth = depth + 1;
-                let head_size = any_len_weighted(rng, depth);
-                let mut head = Vec::with_capacity(head_size);
-                for _ in 0..head_size {
-                    head.push(Mode::any(rng, new_depth));
-                }
-                let head = List::from(head);
-                let tail = Mode::any(rng, new_depth);
-                ListMode::Form { head, tail }
-            }
-            _ => unreachable!(),
+        let new_depth = depth + 1;
+        let head_size = any_len_weighted(rng, depth);
+        let mut head = Vec::with_capacity(head_size);
+        for _ in 0..head_size {
+            head.push(Arbitrary::any(rng, new_depth));
         }
+        let head = List::from(head);
+        let tail = Arbitrary::any(rng, new_depth);
+        ListMode { head, tail }
     }
-}
-
-pub(crate) fn any_map_mode(rng: &mut SmallRng, depth: usize) -> MapMode {
-    MapMode::any(rng, depth)
 }
 
 impl Arbitrary for MapMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // id
-            1,      // form
-        ];
-        let i = sample(rng, weights);
-        match i {
-            0 => MapMode::Id(Id),
-            1 => {
-                let new_depth = depth + 1;
-                let len = any_len_weighted(rng, new_depth);
-                let mut some = Map::with_capacity(len);
-                for _ in 0..len {
-                    some.insert(any_val(rng, new_depth), Mode::any(rng, new_depth));
-                }
-                let else1 = Pair::new(Mode::any(rng, new_depth), Mode::any(rng, new_depth));
-                MapMode::Form { some, else1 }
-            }
-            _ => unreachable!(),
+        let new_depth = depth + 1;
+        let len = any_len_weighted(rng, new_depth);
+        let mut some = Map::with_capacity(len);
+        for _ in 0..len {
+            some.insert(any_val(rng, new_depth), Arbitrary::any(rng, new_depth));
+        }
+        let key = Arbitrary::any(rng, new_depth);
+        let value = Arbitrary::any(rng, new_depth);
+        let else1 = Pair::new(key, value);
+        MapMode { some, else1 }
+    }
+}
+
+impl Arbitrary for PrimMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let symbol = Arbitrary::any(rng, depth);
+        let pair = Arbitrary::any(rng, depth);
+        let call = Arbitrary::any(rng, depth);
+        let abstract1 = Arbitrary::any(rng, depth);
+        let ask = Arbitrary::any(rng, depth);
+        let change = Arbitrary::any(rng, depth);
+        let list = Arbitrary::any(rng, depth);
+        let map = Arbitrary::any(rng, depth);
+        PrimMode {
+            symbol,
+            pair,
+            call,
+            abstract1,
+            ask,
+            change,
+            list,
+            map,
         }
     }
-}
-
-pub(crate) fn any_form_mode(rng: &mut SmallRng) -> FormMode {
-    const MODES: [FormMode; 2] = [FormMode::Id, FormMode::Form];
-    *(MODES.choose(rng).unwrap())
-}
-
-pub(crate) fn any_eval_mode(rng: &mut SmallRng) -> EvalMode {
-    const MODES: [EvalMode; 3] = [EvalMode::Id, EvalMode::Form, EvalMode::Eval];
-    *(MODES.choose(rng).unwrap())
-}
-
-pub(crate) fn any_prim_mode(rng: &mut SmallRng) -> PrimMode {
-    let symbol = any_symbol_mode(rng);
-    let pair = any_form_mode(rng);
-    let call = any_eval_mode(rng);
-    let abstract1 = any_eval_mode(rng);
-    let ask = any_eval_mode(rng);
-    let change = any_form_mode(rng);
-    let list = any_form_mode(rng);
-    let map = any_form_mode(rng);
-    PrimMode {
-        symbol,
-        pair,
-        call,
-        abstract1,
-        ask,
-        change,
-        list,
-        map,
-    }
-}
-
-pub(crate) fn any_mode(rng: &mut SmallRng, depth: usize) -> Mode {
-    Mode::any(rng, depth)
 }
 
 impl Arbitrary for Mode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let weight: usize = 1 << min(depth, 32);
         let weights = [
+            weight, // united
             weight, // primitive
-            weight, // recursive
             1,      // composite
             1,      // function
         ];
         let i = sample(rng, weights);
         let new_depth = depth + 1;
         match i {
-            0 => Mode::Uni(any_uni_mode(rng)),
-            1 => Mode::Prim(any_prim_mode(rng)),
-            2 => Mode::Comp(Box::new(any_comp_mode(rng, new_depth))),
+            0 => Mode::Uni(Arbitrary::any(rng, depth)),
+            1 => Mode::Prim(Arbitrary::any(rng, depth)),
+            2 => Mode::Comp(Box::new(Arbitrary::any(rng, depth))),
             3 => Mode::Func(any_func(rng, new_depth)),
             _ => unreachable!(),
         }
@@ -613,9 +501,9 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 }
 
 fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
-    let call = any_mode(rng, depth);
-    let abstract1 = any_mode(rng, depth);
-    let ask = any_mode(rng, depth);
+    let call = Arbitrary::any(rng, depth);
+    let abstract1 = Arbitrary::any(rng, depth);
+    let ask = Arbitrary::any(rng, depth);
     FuncMode {
         call,
         abstract1,
@@ -687,7 +575,7 @@ pub(crate) fn any_mut_static_comp_func(rng: &mut SmallRng, depth: usize) -> MutS
 }
 
 pub(crate) fn any_mode_func(rng: &mut SmallRng, depth: usize) -> ModeFuncVal {
-    let mode = any_mode(rng, depth);
+    let mode = Arbitrary::any(rng, depth);
     ModeFuncVal::from(ModeFunc::new(mode))
 }
 
