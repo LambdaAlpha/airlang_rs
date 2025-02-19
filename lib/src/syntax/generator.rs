@@ -111,7 +111,7 @@ const INDENT: &str = "  ";
 pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
     let ctx = GenCtx { fmt, indent: 0 };
     let mut str = String::new();
-    gen(ctx, repr, &mut str);
+    gen1(ctx, repr, &mut str);
     str
 }
 
@@ -121,7 +121,7 @@ struct GenCtx {
     indent: u8,
 }
 
-fn gen(ctx: GenCtx, repr: GenRepr, s: &mut String) {
+fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
     match repr {
         GenRepr::Unit(_) => gen_unit(s),
         GenRepr::Bit(bit) => gen_bit(bit.bool(), s),
@@ -268,7 +268,7 @@ fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen(ctx, pair.second, s);
+    gen1(ctx, pair.second, s);
 }
 
 fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
@@ -277,13 +277,13 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
         s.push(' ');
         gen_scope_if_need(ctx, call.func, s);
         s.push(' ');
-        gen(ctx, pair.second, s);
+        gen1(ctx, pair.second, s);
     } else {
         gen_scope_if_need(ctx, call.func, s);
         s.push(' ');
         s.push_str(CALL);
         s.push(' ');
-        gen(ctx, call.input, s);
+        gen1(ctx, call.input, s);
     }
 }
 
@@ -292,7 +292,7 @@ fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut Stri
     s.push(' ');
     s.push_str(ABSTRACT);
     s.push(' ');
-    gen(ctx, abstract1.input, s);
+    gen1(ctx, abstract1.input, s);
 }
 
 fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
@@ -300,7 +300,7 @@ fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
     s.push(' ');
     s.push_str(ASK);
     s.push(' ');
-    gen(ctx, ask.output, s);
+    gen1(ctx, ask.output, s);
 }
 
 fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {
@@ -308,21 +308,21 @@ fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {
     s.push(' ');
     s.push_str(CHANGE);
     s.push(' ');
-    gen(ctx, change.to, s);
+    gen1(ctx, change.to, s);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, repr: GenRepr, s: &mut String) {
     if is_composite(&repr) {
         gen_scope(ctx, repr, s);
     } else {
-        gen(ctx, repr, s);
+        gen1(ctx, repr, s);
     }
 }
 
 fn gen_scope(ctx: GenCtx, repr: GenRepr, s: &mut String) {
     s.push(SCOPE_LEFT);
     s.push_str(ctx.fmt.left_padding);
-    gen(ctx, repr, s);
+    gen1(ctx, repr, s);
     s.push_str(ctx.fmt.right_padding);
     s.push(SCOPE_RIGHT);
 }
@@ -348,7 +348,7 @@ fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
     if list.len() == 1 {
         s.push(LIST_LEFT);
         s.push_str(ctx.fmt.left_padding);
-        gen(ctx, list.pop().unwrap(), s);
+        gen1(ctx, list.pop().unwrap(), s);
         s.push_str(ctx.fmt.right_padding);
         s.push(LIST_RIGHT);
         return;
@@ -360,7 +360,7 @@ fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
 
     for repr in list.into_iter() {
         s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-        gen(ctx, repr, s);
+        gen1(ctx, repr, s);
         s.push_str(ctx.fmt.separator);
     }
     s.truncate(s.len() - ctx.fmt.separator.len());
@@ -410,5 +410,5 @@ fn gen_kv(ctx: GenCtx, key: GenRepr, value: GenRepr, s: &mut String) {
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen(ctx, value, s);
+    gen1(ctx, value, s);
 }

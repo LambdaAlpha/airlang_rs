@@ -1,6 +1,7 @@
 use std::{
     fmt::Display,
     io::{
+        IsTerminal,
         Read,
         Result,
         Write,
@@ -57,14 +58,17 @@ use crossterm::{
         is_raw_mode_enabled,
         size,
     },
-    tty::IsTty,
 };
 
 use crate::init_ctx;
 
-pub(crate) struct Repl<W: Write + IsTty> {
+pub(crate) trait ReplTerminal: Write + IsTerminal {}
+
+impl<T: Write + IsTerminal> ReplTerminal for T {}
+
+pub(crate) struct Repl<T: ReplTerminal> {
     air: AirCell,
-    terminal: Terminal<W>,
+    terminal: Terminal<T>,
     is_raw_mode_enabled: bool,
 
     multiline_mode: bool,
@@ -83,7 +87,7 @@ struct History {
     last_line: String,
 }
 
-struct Terminal<W: Write + IsTty>(W);
+struct Terminal<T: ReplTerminal>(T);
 
 enum CtrlFlow {
     None,
@@ -91,8 +95,8 @@ enum CtrlFlow {
     Break,
 }
 
-impl<W: Write + IsTty> Repl<W> {
-    pub(crate) fn new(out: W) -> Self {
+impl<T: ReplTerminal> Repl<T> {
+    pub(crate) fn new(out: T) -> Self {
         let mut air = AirCell::default();
         init_ctx(air.ctx_mut());
         let terminal = Terminal(out);
@@ -110,8 +114,7 @@ impl<W: Write + IsTty> Repl<W> {
     }
 
     pub(crate) fn run(&mut self) -> Result<()> {
-        // is_terminal is stable since 1.70.0
-        if !stdin().is_tty() || !self.terminal.is_tty() {
+        if !stdin().is_terminal() || !self.terminal.is_terminal() {
             return self.run_once();
         }
 
@@ -507,7 +510,7 @@ impl<W: Write + IsTty> Repl<W> {
     }
 }
 
-impl<W: Write + IsTty> Drop for Repl<W> {
+impl<T: ReplTerminal> Drop for Repl<T> {
     fn drop(&mut self) {
         self.cleanup();
     }
@@ -516,7 +519,7 @@ impl<W: Write + IsTty> Drop for Repl<W> {
 const DEFAULT_PROMPT: &str = "❯ ";
 const MULTILINE_PROMPT: &str = "┃ ";
 
-impl<W: Write + IsTty> Terminal<W> {
+impl<T: ReplTerminal> Terminal<T> {
     fn update_prompt(&mut self, prompt: &str) -> Result<()> {
         self.0.queue(SavePosition)?;
         self.0.queue(MoveToColumn(0))?;
@@ -611,7 +614,7 @@ impl<W: Write + IsTty> Terminal<W> {
         self.0.flush()
     }
 
-    fn is_tty(&self) -> bool {
-        self.0.is_tty()
+    fn is_terminal(&self) -> bool {
+        self.0.is_terminal()
     }
 }

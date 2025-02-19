@@ -142,14 +142,14 @@ pub(crate) fn any_unit(_rng: &mut SmallRng) -> Unit {
 }
 
 pub(crate) fn any_bit(rng: &mut SmallRng) -> Bit {
-    Bit::new(rng.gen())
+    Bit::new(rng.r#gen())
 }
 
 struct DistSymbol;
 
 impl Distribution<u8> for DistSymbol {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u8 {
-        rng.gen_range(Symbol::MIN..=Symbol::MAX) as u8
+        rng.r#gen_range(Symbol::MIN..=Symbol::MAX) as u8
     }
 }
 
@@ -176,13 +176,13 @@ pub(crate) fn any_text(rng: &mut SmallRng) -> Text {
 }
 
 pub(crate) fn any_int(rng: &mut SmallRng) -> Int {
-    Int::from(rng.gen::<i128>())
+    Int::from(rng.r#gen::<i128>())
 }
 
 pub(crate) fn any_number(rng: &mut SmallRng) -> Number {
-    let int: i64 = rng.gen();
+    let int: i64 = rng.r#gen();
     let int = BigInt::from(int);
-    let exp: i8 = rng.gen();
+    let exp: i8 = rng.r#gen();
     let exp = BigInt::from(exp);
     Number::new(int, 10, exp)
 }
@@ -244,7 +244,7 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
         let ctx_value = CtxValue {
             val: any_val(rng, depth),
             access: any_var_access(rng),
-            static1: rng.gen(),
+            static1: rng.r#gen(),
         };
         ctx_map.insert(any_symbol(rng), ctx_value);
     }
@@ -253,8 +253,8 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
 
 pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
-    let variables = CtxMap::new(variables, rng.gen());
-    let solver = if rng.gen() {
+    let variables = CtxMap::new(variables, rng.r#gen());
+    let solver = if rng.r#gen() {
         Some(any_func(rng, depth))
     } else {
         None
@@ -264,7 +264,7 @@ pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
 
 impl<T: Arbitrary> Arbitrary for Option<T> {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        if rng.gen() {
+        if rng.r#gen() {
             None
         } else {
             Some(T::any(rng, depth))
@@ -450,7 +450,7 @@ impl Arbitrary for Mode {
 }
 
 pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
-    if rng.gen() {
+    if rng.r#gen() {
         let prelude = PRELUDE.with(|prelude| {
             let mut m = Map::default();
             prelude.put(&mut m);
@@ -466,7 +466,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
         };
         func
     } else {
-        match rng.gen_range(0..7) {
+        match rng.r#gen_range(0..7) {
             0 => {
                 let func = any_mode_func(rng, depth);
                 FuncVal::Mode(func)
@@ -522,7 +522,7 @@ fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {
 pub(crate) fn any_free_cell_comp_func(rng: &mut SmallRng, depth: usize) -> FreeCellCompFuncVal {
     let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
+    let cacheable = rng.r#gen();
     let func = FreeCellCompFunc::new(composite, mode, cacheable);
     FreeCellCompFuncVal::from(func)
 }
@@ -530,7 +530,7 @@ pub(crate) fn any_free_cell_comp_func(rng: &mut SmallRng, depth: usize) -> FreeC
 pub(crate) fn any_free_static_comp_func(rng: &mut SmallRng, depth: usize) -> FreeStaticCompFuncVal {
     let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
+    let cacheable = rng.r#gen();
     let func = FreeStaticCompFunc::new(composite, mode, cacheable);
     FreeStaticCompFuncVal::from(func)
 }
@@ -539,7 +539,7 @@ pub(crate) fn any_const_cell_comp_func(rng: &mut SmallRng, depth: usize) -> Cons
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
+    let cacheable = rng.r#gen();
     let func = ConstCellCompFunc::new(composite, ctx_name, mode, cacheable);
     ConstCellCompFuncVal::from(func)
 }
@@ -551,7 +551,7 @@ pub(crate) fn any_const_static_comp_func(
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
+    let cacheable = rng.r#gen();
     let func = ConstStaticCompFunc::new(composite, ctx_name, mode, cacheable);
     ConstStaticCompFuncVal::from(func)
 }
@@ -560,7 +560,7 @@ pub(crate) fn any_mut_cell_comp_func(rng: &mut SmallRng, depth: usize) -> MutCel
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
+    let cacheable = rng.r#gen();
     let func = MutCellCompFunc::new(composite, ctx_name, mode, cacheable);
     MutCellCompFuncVal::from(func)
 }
@@ -569,7 +569,7 @@ pub(crate) fn any_mut_static_comp_func(rng: &mut SmallRng, depth: usize) -> MutS
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.gen();
+    let cacheable = rng.r#gen();
     let func = MutStaticCompFunc::new(composite, ctx_name, mode, cacheable);
     MutStaticCompFuncVal::from(func)
 }
@@ -597,6 +597,6 @@ fn any_len_weighted(rng: &mut SmallRng, depth: usize) -> usize {
 }
 
 fn any_len(rng: &mut SmallRng) -> usize {
-    let len: u8 = rng.gen();
+    let len: u8 = rng.r#gen();
     len as usize
 }
