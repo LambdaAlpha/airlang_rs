@@ -378,12 +378,13 @@ where
     E: ParseError<&'a str> + ContextError<&'a str>,
 {
     fn parse(&mut self, input: &'a str) -> IResult<&'a str, Token<T>, E> {
+        const LEFT_DELIMITERS: [char; 5] =
+            [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
+
         let (rest, s) = take_while(is_trivial_symbol)(input)?;
 
         // the only special case
         let first = s.chars().next().unwrap();
-        const LEFT_DELIMITERS: [char; 5] =
-            [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
         if first.is_ascii_digit() && !rest.starts_with(LEFT_DELIMITERS) {
             let (_, token) = all_consuming(int_or_number)(s)?;
             return Ok((rest, Token::Default(token)));

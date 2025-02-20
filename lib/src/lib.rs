@@ -56,7 +56,7 @@ pub(crate) mod types;
 
 pub(crate) mod traits;
 
-#[allow(unused)]
+#[expect(unused)]
 pub(crate) mod utils;
 
 #[cfg(test)]

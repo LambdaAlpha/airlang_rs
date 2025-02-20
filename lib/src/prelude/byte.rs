@@ -30,7 +30,6 @@ pub(crate) struct BytePrelude {
     pub(crate) join: Named<FuncVal>,
 }
 
-#[allow(clippy::derivable_impls)]
 impl Default for BytePrelude {
     fn default() -> Self {
         BytePrelude { length: length(), push: push(), join: join() }

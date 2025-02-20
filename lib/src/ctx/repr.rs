@@ -180,7 +180,7 @@ pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     }
     if let Some(solver) = ctx.solver {
         map.insert(symbol(SOLVER), Val::Func(solver));
-    };
+    }
     Val::Map(map.into())
 }
 

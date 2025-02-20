@@ -26,7 +26,7 @@ pub(crate) struct Form {
 }
 
 // default instance
-#[allow(unused)]
+#[expect(unused)]
 pub(crate) const FORM: Form = Form::new(SymbolMode::Ref);
 
 impl Transformer<Val, Val> for Form {

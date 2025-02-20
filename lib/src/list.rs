@@ -28,7 +28,7 @@ impl<T> IntoIterator for List<T> {
 impl<'a, T> IntoIterator for &'a List<T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
-    #[allow(clippy::into_iter_on_ref)]
+    #[expect(clippy::into_iter_on_ref)]
     fn into_iter(self) -> Self::IntoIter {
         (&self.0).into_iter()
     }
@@ -37,7 +37,7 @@ impl<'a, T> IntoIterator for &'a List<T> {
 impl<'a, T> IntoIterator for &'a mut List<T> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
-    #[allow(clippy::into_iter_on_ref)]
+    #[expect(clippy::into_iter_on_ref)]
     fn into_iter(self) -> Self::IntoIter {
         (&mut self.0).into_iter()
     }

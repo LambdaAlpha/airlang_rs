@@ -39,7 +39,7 @@ impl Bit {
         Bit(!self.0 || b.0)
     }
 
-    #[allow(clippy::should_implement_trait)]
+    #[expect(clippy::should_implement_trait)]
     pub fn not(self) -> Bit {
         Bit(!self.0)
     }

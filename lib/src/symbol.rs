@@ -46,7 +46,7 @@ impl Deref for Symbol {
     }
 }
 
-#[allow(clippy::to_string_trait_impl)]
+#[expect(clippy::to_string_trait_impl)]
 impl ToString for Symbol {
     fn to_string(&self) -> String {
         self.0.to_string()

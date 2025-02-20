@@ -39,22 +39,22 @@ impl Prelude for MetaPrelude {
 }
 
 fn version_major() -> Named<Int> {
-    let id = "air.version_major";
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
+    let id = "air.version_major";
     let v = Int::new(BigInt::from_str(MAJOR).unwrap());
     Named::new(id, v)
 }
 
 fn version_minor() -> Named<Int> {
-    let id = "air.version_minor";
     const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
+    let id = "air.version_minor";
     let v = Int::new(BigInt::from_str(MINOR).unwrap());
     Named::new(id, v)
 }
 
 fn version_patch() -> Named<Int> {
-    let id = "air.version_patch";
     const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
+    let id = "air.version_patch";
     let v = Int::new(BigInt::from_str(PATCH).unwrap());
     Named::new(id, v)
 }

@@ -59,7 +59,7 @@ impl<K: Eq + Hash, V> IntoIterator for Map<K, V> {
 impl<'a, K: Eq + Hash, V> IntoIterator for &'a Map<K, V> {
     type Item = (&'a K, &'a V);
     type IntoIter = Iter<'a, K, V>;
-    #[allow(clippy::into_iter_on_ref)]
+    #[expect(clippy::into_iter_on_ref)]
     fn into_iter(self) -> Self::IntoIter {
         (&self.0).into_iter()
     }
@@ -68,7 +68,7 @@ impl<'a, K: Eq + Hash, V> IntoIterator for &'a Map<K, V> {
 impl<'a, K: Eq + Hash, V> IntoIterator for &'a mut Map<K, V> {
     type Item = (&'a K, &'a mut V);
     type IntoIter = IterMut<'a, K, V>;
-    #[allow(clippy::into_iter_on_ref)]
+    #[expect(clippy::into_iter_on_ref)]
     fn into_iter(self) -> Self::IntoIter {
         (&mut self.0).into_iter()
     }

@@ -48,7 +48,6 @@ use crate::{
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GenRepr<'a> {
-    #[allow(unused)]
     Unit(&'a Unit),
     Bit(&'a Bit),
     Symbol(&'a Symbol),
@@ -358,7 +357,7 @@ fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
     ctx.indent += 1;
     s.push_str(ctx.fmt.before_first);
 
-    for repr in list.into_iter() {
+    for repr in list {
         s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
         gen1(ctx, repr, s);
         s.push_str(ctx.fmt.separator);
@@ -392,7 +391,7 @@ fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
     ctx.indent += 1;
     s.push_str(ctx.fmt.before_first);
 
-    for pair in map.into_iter() {
+    for pair in map {
         s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
         gen_kv(ctx, pair.0, pair.1, s);
         s.push_str(ctx.fmt.separator);

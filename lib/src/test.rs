@@ -1,6 +1,5 @@
 use std::{
     error::Error,
-    mem::size_of,
     rc::Rc,
 };
 

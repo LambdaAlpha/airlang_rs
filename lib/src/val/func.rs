@@ -294,7 +294,7 @@ macro_rules! impl_const_func_trait {
     };
 }
 
-#[allow(unused)]
+#[expect(unused)]
 pub(crate) use impl_const_func_trait;
 
 pub(crate) mod mode;

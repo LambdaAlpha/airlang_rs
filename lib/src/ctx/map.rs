@@ -10,7 +10,7 @@ use crate::{
     Val,
 };
 
-#[allow(clippy::wrong_self_convention)]
+#[expect(clippy::wrong_self_convention)]
 pub(crate) trait CtxMapRef<'a>: Sized {
     fn is_reverse(self) -> bool;
 
@@ -140,7 +140,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
 
     // ignore static field of CtxValue
     fn put_value(self, name: Symbol, mut new: CtxValue) -> Result<Option<Val>, CtxError> {
-        debug_assert!(!new.static1);
+        debug_assert!(!new.static1, "should be non-static");
         let Some(old) = self.map.get(&name) else {
             if self.reverse && new.access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
@@ -155,7 +155,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
             new.static1 = true;
             return Ok(self.put_unchecked(name, new));
         }
-        #[allow(clippy::collapsible_else_if)]
+        #[expect(clippy::collapsible_else_if)]
         if self.reverse {
             if new.access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
@@ -179,7 +179,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
             }
             return Ok(());
         }
-        #[allow(clippy::collapsible_else_if)]
+        #[expect(clippy::collapsible_else_if)]
         if self.reverse {
             if new != VarAccess::Assign && old.access == VarAccess::Assign
                 || new == VarAccess::Const && old.access != VarAccess::Const
@@ -249,7 +249,7 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
     }
 }
 
-#[allow(unused)]
+#[expect(unused)]
 impl CtxValue {
     pub(crate) fn new(val: Val) -> CtxValue {
         CtxValue { access: VarAccess::Assign, static1: false, val }

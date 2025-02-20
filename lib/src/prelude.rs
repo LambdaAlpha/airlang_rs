@@ -167,7 +167,7 @@ fn free_cell_fn(
     FuncVal::FreeCellPrim(func_val)
 }
 
-#[allow(unused)]
+#[expect(unused)]
 fn named_free_cell_fn(
     name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
@@ -185,7 +185,7 @@ fn const_cell_fn(
     FuncVal::ConstCellPrim(func_val)
 }
 
-#[allow(unused)]
+#[expect(unused)]
 fn named_const_cell_fn(
     name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
@@ -203,7 +203,7 @@ fn mut_cell_fn(
     FuncVal::MutCellPrim(func_val)
 }
 
-#[allow(unused)]
+#[expect(unused)]
 fn named_mut_cell_fn(
     name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {

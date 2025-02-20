@@ -25,7 +25,7 @@ use crate::bit::Bit;
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Int(BigInt);
 
-#[allow(unused)]
+#[expect(unused)]
 impl Int {
     pub(crate) fn new(int: BigInt) -> Self {
         Self(int)

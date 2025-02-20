@@ -134,7 +134,6 @@ impl Ctx {
         self.variables.remove_unchecked(name)
     }
 
-    #[allow(unused)]
     pub(crate) fn variables(&self) -> &CtxMap {
         &self.variables
     }

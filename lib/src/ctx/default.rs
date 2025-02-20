@@ -83,7 +83,7 @@ impl DefaultCtx {
         }
     }
 
-    #[allow(unused)]
+    #[expect(unused)]
     pub(crate) fn with_ref<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
@@ -125,7 +125,7 @@ impl DefaultCtx {
         }
     }
 
-    #[allow(unused)]
+    #[expect(unused)]
     pub(crate) fn with_ref_mut<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,

@@ -563,10 +563,10 @@ impl<T: ReplTerminal> Terminal<T> {
     }
 
     fn new_line(&mut self) -> Result<()> {
+        const LINES: u16 = 1;
         let (_, row) = position()?;
         let (_, y) = size()?;
         let delta = y - row - 1;
-        const LINES: u16 = 1;
         if LINES > delta {
             self.0.queue(ScrollUp(LINES - delta))?;
         }
