@@ -59,10 +59,8 @@ fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
     let url = Text::from(url);
     let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
     let cur_url = get_cur_url(ctx.reborrow(), cur_url_key.clone());
-    let new_url = cur_url
-        .as_ref()
-        .and_then(|cur_url| join_url(cur_url, &url))
-        .unwrap_or(String::from(url));
+    let new_url =
+        cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
 
     let content = match read_to_string(&new_url) {
         Ok(content) => content,
@@ -85,11 +83,7 @@ fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
 
 fn get_cur_url(ctx: ConstFnCtx, key: Symbol) -> Option<String> {
     if let Ok(val) = ctx.get_ref(key) {
-        return if let Val::Text(url) = val {
-            Some((***url).clone())
-        } else {
-            None
-        };
+        return if let Val::Text(url) = val { Some((***url).clone()) } else { None };
     }
     let Ok(cur_dir) = current_dir() else {
         return None;
@@ -101,12 +95,7 @@ fn get_cur_url(ctx: ConstFnCtx, key: Symbol) -> Option<String> {
 }
 
 fn set_cur_url(ctx: MutCtx, key: Symbol, new_url: String) -> bool {
-    ctx.put(
-        key,
-        VarAccess::Assign,
-        Val::Text(Text::from(new_url).into()),
-    )
-    .is_ok()
+    ctx.put(key, VarAccess::Assign, Val::Text(Text::from(new_url).into())).is_ok()
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {

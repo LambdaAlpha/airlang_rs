@@ -81,11 +81,7 @@ fn length() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -110,11 +106,7 @@ fn set() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -152,11 +144,7 @@ fn set_many() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -187,7 +175,7 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
         if end > list.len() {
             return Val::default();
         }
-        let ret: List<Val> = list.splice(i..end, values).collect();
+        let ret: List<Val> = list.splice(i .. end, values).collect();
         Val::List(ret.into())
     })
 }
@@ -198,11 +186,7 @@ fn get() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -224,7 +208,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
             };
             let from = from.unwrap_or_default();
             let to = to.unwrap_or(list.len());
-            let Some(slice) = list.get(from..to) else {
+            let Some(slice) = list.get(from .. to) else {
                 return Val::default();
             };
             Val::List(List::from(slice.to_owned()).into())
@@ -251,11 +235,7 @@ fn insert() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -292,11 +272,7 @@ fn insert_many() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -326,7 +302,7 @@ fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
         if i > list.len() {
             return;
         }
-        list.splice(i..i, values);
+        list.splice(i .. i, values);
     })
 }
 
@@ -336,11 +312,7 @@ fn remove() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -365,7 +337,7 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
             if from > to || to > list.len() {
                 return Val::default();
             }
-            let ret: List<Val> = list.splice(from..to, Vec::new()).collect();
+            let ret: List<Val> = list.splice(from .. to, Vec::new()).collect();
             Val::List(ret.into())
         })
     } else {
@@ -390,11 +362,7 @@ fn push() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -420,11 +388,7 @@ fn push_many() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -453,11 +417,7 @@ fn pop() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -504,11 +464,7 @@ fn clear() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

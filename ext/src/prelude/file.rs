@@ -19,9 +19,7 @@ pub(crate) struct FilePrelude {
 
 impl Default for FilePrelude {
     fn default() -> Self {
-        Self {
-            read_to_text: read_to_text(),
-        }
+        Self { read_to_text: read_to_text() }
     }
 }
 

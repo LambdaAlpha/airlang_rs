@@ -23,10 +23,7 @@ pub(crate) struct SyntaxPrelude {
 
 impl Default for SyntaxPrelude {
     fn default() -> Self {
-        SyntaxPrelude {
-            parse: parse(),
-            generate: generate(),
-        }
+        SyntaxPrelude { parse: parse(), generate: generate() }
     }
 }
 

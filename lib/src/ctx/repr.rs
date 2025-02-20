@@ -59,11 +59,7 @@ pub(crate) fn parse_mode() -> Option<Mode> {
             FuncMode::default_mode(),
         ),
     );
-    FuncMode::map_mode(
-        map,
-        FuncMode::symbol_mode(SymbolMode::Literal),
-        FuncMode::default_mode(),
-    )
+    FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
 }
 
 pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
@@ -116,11 +112,7 @@ fn parse_ctx_value(val: Val) -> Option<CtxValue> {
     };
     let pair = Pair::from(pair);
     let extra = parse_extra(pair.second, Extra::default())?;
-    Some(CtxValue {
-        val: pair.first,
-        access: extra.access,
-        static1: extra.static1,
-    })
+    Some(CtxValue { val: pair.first, access: extra.access, static1: extra.static1 })
 }
 
 fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
@@ -173,11 +165,7 @@ pub(crate) fn generate_mode() -> Option<Mode> {
             FuncMode::default_mode(),
         ),
     );
-    FuncMode::map_mode(
-        map,
-        FuncMode::symbol_mode(SymbolMode::Literal),
-        FuncMode::default_mode(),
-    )
+    FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
 }
 
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
@@ -289,10 +277,7 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
 }
 
 fn parse_pattern_any(name: Symbol, ctx: PatternCtx) -> Pattern {
-    Pattern::Any(Binding {
-        name,
-        extra: ctx.extra,
-    })
+    Pattern::Any(Binding { name, extra: ctx.extra })
 }
 
 fn parse_pattern_pair(pair: PairVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -338,10 +323,8 @@ fn parse_pattern_change(change: ChangeVal, mut ctx: PatternCtx) -> Option<Patter
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
     let list = List::from(list);
-    let list = list
-        .into_iter()
-        .map(|item| parse_pattern(item, ctx))
-        .collect::<Option<List<_>>>()?;
+    let list =
+        list.into_iter().map(|item| parse_pattern(item, ctx)).collect::<Option<List<_>>>()?;
     Some(Pattern::List(list))
 }
 
@@ -386,11 +369,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
 }
 
 fn assign_any(ctx: MutFnCtx, binding: Binding<Symbol>, val: Val) -> Val {
-    let ctx_value = CtxValue {
-        val,
-        access: binding.extra.access,
-        static1: false,
-    };
+    let ctx_value = CtxValue { val, access: binding.extra.access, static1: false };
     let Ok(ctx) = ctx.get_variables_mut() else {
         return Val::default();
     };

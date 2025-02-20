@@ -287,10 +287,7 @@ impl<T: ReplTerminal> Repl<T> {
         }
 
         if !(previous_lines.is_empty() && last_line.is_empty()) {
-            self.histories.push(History {
-                previous_lines,
-                last_line,
-            });
+            self.histories.push(History { previous_lines, last_line });
         }
         self.history_index = 0;
 
@@ -502,11 +499,7 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn get_prompt(&self) -> &'static str {
-        if self.multiline_mode {
-            MULTILINE_PROMPT
-        } else {
-            DEFAULT_PROMPT
-        }
+        if self.multiline_mode { MULTILINE_PROMPT } else { DEFAULT_PROMPT }
     }
 }
 

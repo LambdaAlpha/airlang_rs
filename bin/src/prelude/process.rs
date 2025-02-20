@@ -37,11 +37,7 @@ fn call() -> Named<FuncVal> {
     let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_free_fn(id, f, mode, cacheable)
 }

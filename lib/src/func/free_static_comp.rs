@@ -18,9 +18,7 @@ pub struct FreeStaticCompFunc {
 
 impl Transformer<Val, Val> for FreeStaticCompFunc {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let inner = &mut self.comp.ctx.clone();
         Composite::put_input(inner, self.comp.input_name.clone(), input);
         Composite::transform(inner, self.comp.body.clone())
@@ -43,10 +41,6 @@ impl FuncTrait for FreeStaticCompFunc {
 
 impl FreeStaticCompFunc {
     pub(crate) fn new(comp: Composite, mode: FuncMode, cacheable: bool) -> Self {
-        Self {
-            comp,
-            mode,
-            cacheable,
-        }
+        Self { comp, mode, cacheable }
     }
 }

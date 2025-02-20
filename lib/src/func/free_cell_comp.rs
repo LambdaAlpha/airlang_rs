@@ -18,9 +18,7 @@ pub struct FreeCellCompFunc {
 
 impl Transformer<Val, Val> for FreeCellCompFunc {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let inner = &mut self.comp.ctx.clone();
         Composite::put_input(inner, self.comp.input_name.clone(), input);
         Composite::transform(inner, self.comp.body.clone())
@@ -41,9 +39,7 @@ impl FuncTrait for FreeCellCompFunc {
     }
 
     fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let inner = &mut self.comp.ctx;
         Composite::put_input(inner, self.comp.input_name.clone(), input);
         Composite::transform(inner, self.comp.body.clone())
@@ -52,10 +48,6 @@ impl FuncTrait for FreeCellCompFunc {
 
 impl FreeCellCompFunc {
     pub(crate) fn new(comp: Composite, mode: FuncMode, cacheable: bool) -> Self {
-        Self {
-            comp,
-            mode,
-            cacheable,
-        }
+        Self { comp, mode, cacheable }
     }
 }

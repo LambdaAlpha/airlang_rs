@@ -104,19 +104,11 @@ impl Int {
     }
 
     pub(crate) fn divide(self, other: Int) -> Option<Int> {
-        if other.0 == Zero::zero() {
-            None
-        } else {
-            Some(Int(self.0.div(other.0)))
-        }
+        if other.0 == Zero::zero() { None } else { Some(Int(self.0.div(other.0))) }
     }
 
     pub(crate) fn remainder(self, other: Int) -> Option<Int> {
-        if other.0 == Zero::zero() {
-            None
-        } else {
-            Some(Int(self.0.rem(other.0)))
-        }
+        if other.0 == Zero::zero() { None } else { Some(Int(self.0.rem(other.0))) }
     }
 
     pub(crate) fn divide_remainder(self, other: Int) -> Option<(Int, Int)> {

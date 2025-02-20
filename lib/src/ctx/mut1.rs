@@ -68,8 +68,7 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
 impl<'l> CtxMeta<'l> for MutCtx<'l> {
     type Reborrow<'s>
         = MutCtx<'s>
-    where
-        Self: 's;
+    where Self: 's;
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         MutCtx(self.0)
     }
@@ -153,8 +152,7 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
 impl<'l> CtxMeta<'l> for MutFnCtx<'l> {
     type Reborrow<'s>
         = MutFnCtx<'s>
-    where
-        Self: 's;
+    where Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         match self {
@@ -235,11 +233,7 @@ impl<'a> MutCtx<'a> {
     }
 
     pub fn put(self, name: Symbol, access: VarAccess, val: Val) -> Result<Option<Val>, CtxError> {
-        let ctx_value = CtxValue {
-            access,
-            static1: false,
-            val,
-        };
+        let ctx_value = CtxValue { access, static1: false, val };
         self.get_variables_mut()?.put_value(name, ctx_value)
     }
 }

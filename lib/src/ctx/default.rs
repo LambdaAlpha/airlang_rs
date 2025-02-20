@@ -30,9 +30,7 @@ pub(crate) struct DefaultCtx;
 
 impl DefaultCtx {
     pub(crate) fn get_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
-    where
-        Ctx: CtxRef<'a>,
-    {
+    where Ctx: CtxRef<'a> {
         let Ok(ctx) = ctx.get_variables() else {
             return Val::default();
         };
@@ -43,9 +41,7 @@ impl DefaultCtx {
     }
 
     pub(crate) fn remove_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
-    where
-        Ctx: CtxRef<'a>,
-    {
+    where Ctx: CtxRef<'a> {
         let Ok(variables) = ctx.get_variables_mut() else {
             return Val::default();
         };
@@ -53,9 +49,7 @@ impl DefaultCtx {
     }
 
     pub(crate) fn is_null<'a, Ctx>(ctx: Ctx, name: Symbol) -> Result<bool, CtxError>
-    where
-        Ctx: CtxRef<'a>,
-    {
+    where Ctx: CtxRef<'a> {
         let ctx = ctx.get_variables()?;
         match ctx.get_ref(name) {
             Ok(_) => Ok(false),
@@ -72,8 +66,7 @@ impl DefaultCtx {
     pub(crate) fn with_dyn<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
-        F: FnOnce(Either<DynRef<Val>, Val>) -> T,
-    {
+        F: FnOnce(Either<DynRef<Val>, Val>) -> T, {
         let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
@@ -94,8 +87,7 @@ impl DefaultCtx {
     pub(crate) fn with_ref<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
-        F: FnOnce(&Val) -> T,
-    {
+        F: FnOnce(&Val) -> T, {
         let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
@@ -114,8 +106,7 @@ impl DefaultCtx {
     pub(crate) fn with_ref_lossless<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
     where
         Ctx: CtxMeta<'a>,
-        F: FnOnce(&Val) -> Val,
-    {
+        F: FnOnce(&Val) -> Val, {
         let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
@@ -138,8 +129,7 @@ impl DefaultCtx {
     pub(crate) fn with_ref_mut<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
-        F: FnOnce(&mut Val) -> T,
-    {
+        F: FnOnce(&mut Val) -> T, {
         let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
@@ -158,8 +148,7 @@ impl DefaultCtx {
     pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
     where
         Ctx: CtxMeta<'a>,
-        F: FnOnce(&mut Val) -> Val,
-    {
+        F: FnOnce(&mut Val) -> Val, {
         let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
@@ -181,8 +170,7 @@ impl DefaultCtx {
     pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
     where
         Ctx: CtxMeta<'a>,
-        F: FnOnce(&mut Val),
-    {
+        F: FnOnce(&mut Val), {
         let val = Self::ref_or_val(name);
         match val {
             Either::This(s) => {
@@ -211,7 +199,7 @@ impl DefaultCtx {
         };
         let prefix = s.chars().next();
         if let Some(MOVE_CHAR) = prefix {
-            let val = DefaultCtx::remove_or_default(ctx, Symbol::from_str(&s[1..]));
+            let val = DefaultCtx::remove_or_default(ctx, Symbol::from_str(&s[1 ..]));
             return Self::escape_symbol(val);
         }
         input
@@ -231,8 +219,8 @@ impl DefaultCtx {
         };
         let prefix = s.chars().next();
         match prefix {
-            Some(LITERAL_CHAR) => Either::That(Val::Symbol(Symbol::from_str(&s[1..]))),
-            Some(REF_CHAR) => Either::This(Symbol::from_str(&s[1..])),
+            Some(LITERAL_CHAR) => Either::That(Val::Symbol(Symbol::from_str(&s[1 ..]))),
+            Some(REF_CHAR) => Either::This(Symbol::from_str(&s[1 ..])),
             _ => Either::This(s),
         }
     }

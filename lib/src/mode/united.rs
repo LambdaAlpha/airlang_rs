@@ -46,9 +46,7 @@ pub struct UniMode {
 
 impl Transformer<Val, Val> for UniMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform(ctx, input),
             CodeMode::Eval => Eval::new(self.symbol).transform(ctx, input),
@@ -58,9 +56,7 @@ impl Transformer<Val, Val> for UniMode {
 
 impl ByVal<Val> for UniMode {
     fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_default(ctx, input),
             CodeMode::Eval => Eval::new(self.symbol).transform_default(ctx, input),
@@ -68,9 +64,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_symbol(ctx, symbol),
             CodeMode::Eval => Eval::new(self.symbol).transform_symbol(ctx, symbol),
@@ -78,9 +72,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_pair(ctx, pair),
             CodeMode::Eval => Eval::new(self.symbol).transform_pair(ctx, pair),
@@ -88,9 +80,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_call(ctx, call),
             CodeMode::Eval => Eval::new(self.symbol).transform_call(ctx, call),
@@ -98,9 +88,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_abstract(ctx, abstract1),
             CodeMode::Eval => Eval::new(self.symbol).transform_abstract(ctx, abstract1),
@@ -108,9 +96,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_ask(ctx, ask),
             CodeMode::Eval => Eval::new(self.symbol).transform_ask(ctx, ask),
@@ -118,9 +104,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_change(ctx, change),
             CodeMode::Eval => Eval::new(self.symbol).transform_change(ctx, change),
@@ -128,9 +112,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_list(ctx, list),
             CodeMode::Eval => Eval::new(self.symbol).transform_list(ctx, list),
@@ -138,9 +120,7 @@ impl ByVal<Val> for UniMode {
     }
 
     fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_map(ctx, map),
             CodeMode::Eval => Eval::new(self.symbol).transform_map(ctx, map),

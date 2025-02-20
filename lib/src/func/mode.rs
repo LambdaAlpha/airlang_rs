@@ -38,9 +38,7 @@ pub struct ModeFunc {
 
 impl Transformer<Val, Val> for ModeFunc {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.mode.transform(ctx, input)
     }
 }
@@ -50,10 +48,7 @@ impl FuncTrait for ModeFunc {
         &FuncMode {
             call: None,
             abstract1: None,
-            ask: Some(Mode::Uni(UniMode {
-                code: CodeMode::Eval,
-                symbol: SymbolMode::Ref,
-            })),
+            ask: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
         }
     }
 
@@ -70,11 +65,7 @@ impl ModeFunc {
     pub fn new(mode: Option<Mode>) -> ModeFunc {
         let cacheable = mode.is_cacheable();
         let ctx_access = mode.ctx_access();
-        Self {
-            mode,
-            cacheable,
-            ctx_access,
-        }
+        Self { mode, cacheable, ctx_access }
     }
 
     pub fn inner(&self) -> &Option<Mode> {
@@ -329,10 +320,8 @@ impl GetCtxAccess for AskMode {
 
 impl GetCtxAccess for ListMode {
     fn ctx_access(&self) -> CtxAccess {
-        let head = self
-            .head
-            .iter()
-            .fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
+        let head =
+            self.head.iter().fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
         let tail = self.tail.ctx_access();
         head & tail
     }
@@ -340,10 +329,8 @@ impl GetCtxAccess for ListMode {
 
 impl GetCtxAccess for MapMode {
     fn ctx_access(&self) -> CtxAccess {
-        let some = self
-            .some
-            .values()
-            .fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
+        let some =
+            self.some.values().fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
         let else1 = self.else1.first.ctx_access() & self.else1.second.ctx_access();
         some & else1
     }

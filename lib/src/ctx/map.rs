@@ -252,36 +252,21 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
 #[allow(unused)]
 impl CtxValue {
     pub(crate) fn new(val: Val) -> CtxValue {
-        CtxValue {
-            access: VarAccess::Assign,
-            static1: false,
-            val,
-        }
+        CtxValue { access: VarAccess::Assign, static1: false, val }
     }
 
     pub(crate) fn new_final(val: Val) -> CtxValue {
-        CtxValue {
-            access: VarAccess::Mut,
-            static1: false,
-            val,
-        }
+        CtxValue { access: VarAccess::Mut, static1: false, val }
     }
 
     pub(crate) fn new_const(val: Val) -> CtxValue {
-        CtxValue {
-            access: VarAccess::Const,
-            static1: false,
-            val,
-        }
+        CtxValue { access: VarAccess::Const, static1: false, val }
     }
 }
 
 impl Debug for CtxValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("")
-            .field(&self.access)
-            .field(&self.val)
-            .finish()
+        f.debug_tuple("").field(&self.access).field(&self.val).finish()
     }
 }
 
@@ -295,10 +280,6 @@ impl<'a, T> DynRef<'a, T> {
     }
 
     pub(crate) fn as_mut(&'a mut self) -> Option<&'a mut T> {
-        if self.is_const {
-            None
-        } else {
-            Some(&mut self.ref1)
-        }
+        if self.is_const { None } else { Some(&mut self.ref1) }
     }
 }

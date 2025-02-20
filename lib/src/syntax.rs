@@ -62,10 +62,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn ambiguous(s: &str) -> bool {
-    matches!(
-        s,
-        UNIT | TRUE | FALSE | PAIR | CALL | ABSTRACT | ASK | CHANGE
-    )
+    matches!(s, UNIT | TRUE | FALSE | PAIR | CALL | ABSTRACT | ASK | CHANGE)
 }
 
 pub(crate) mod pub1;

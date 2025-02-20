@@ -27,10 +27,7 @@ impl From<PairRepr> for PairVal {
 impl TryInto<PairRepr> for &PairVal {
     type Error = ReprError;
     fn try_into(self) -> Result<PairRepr, Self::Error> {
-        Ok(PairRepr::new(
-            (&self.first).try_into()?,
-            (&self.second).try_into()?,
-        ))
+        Ok(PairRepr::new((&self.first).try_into()?, (&self.second).try_into()?))
     }
 }
 

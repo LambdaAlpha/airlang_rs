@@ -21,9 +21,7 @@ pub struct AskMode {
 
 impl Transformer<AskVal, Val> for AskMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let func = &self.ask.func;
         let output = &self.ask.output;
         match self.code {
@@ -36,9 +34,6 @@ impl Transformer<AskVal, Val> for AskMode {
 impl From<UniMode> for AskMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        Self {
-            code: mode.code,
-            ask: Ask::new(m.clone(), m),
-        }
+        Self { code: mode.code, ask: Ask::new(m.clone(), m) }
     }
 }

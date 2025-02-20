@@ -16,9 +16,7 @@ pub(crate) struct ModePrelude {
 
 impl Default for ModePrelude {
     fn default() -> Self {
-        Self {
-            ref_mode: ref_mode(),
-        }
+        Self { ref_mode: ref_mode() }
     }
 }
 

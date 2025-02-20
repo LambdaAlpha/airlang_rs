@@ -21,9 +21,7 @@ pub struct CallMode {
 
 impl Transformer<CallVal, Val> for CallMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let func = &self.call.func;
         let input = &self.call.input;
         match self.code {
@@ -36,9 +34,6 @@ impl Transformer<CallVal, Val> for CallMode {
 impl From<UniMode> for CallMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        Self {
-            code: mode.code,
-            call: Call::new(m.clone(), m),
-        }
+        Self { code: mode.code, call: Call::new(m.clone(), m) }
     }
 }

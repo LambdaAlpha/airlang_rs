@@ -27,10 +27,7 @@ impl From<AbstractRepr> for AbstractVal {
 impl TryInto<AbstractRepr> for &AbstractVal {
     type Error = ReprError;
     fn try_into(self) -> Result<AbstractRepr, Self::Error> {
-        Ok(AbstractRepr::new(
-            (&self.func).try_into()?,
-            (&self.input).try_into()?,
-        ))
+        Ok(AbstractRepr::new((&self.func).try_into()?, (&self.input).try_into()?))
     }
 }
 

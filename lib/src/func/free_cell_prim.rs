@@ -38,9 +38,7 @@ pub struct FreeCellPrimFunc {
 
 impl Transformer<Val, Val> for FreeCellPrimFunc {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.dyn_clone().call(input)
     }
 }
@@ -59,46 +57,22 @@ impl FuncTrait for FreeCellPrimFunc {
     }
 
     fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.call(input)
     }
 }
 
 impl FreeCellPrimFunc {
     pub fn new_extension(
-        id: Symbol,
-        fn1: Box<dyn FreeCellFnExt>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Box<dyn FreeCellFnExt>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: true,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
     }
 
     pub(crate) fn new(
-        id: Symbol,
-        fn1: Box<dyn FreeCellFnExt>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Box<dyn FreeCellFnExt>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: false,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
     }
 }
 

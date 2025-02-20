@@ -83,12 +83,7 @@ pub(crate) struct ValuePrelude {
 
 impl Default for ValuePrelude {
     fn default() -> Self {
-        ValuePrelude {
-            any: any(),
-            type1: type1(),
-            equal: equal(),
-            not_equal: not_equal(),
-        }
+        ValuePrelude { any: any(), type1: type1(), equal: equal(), not_equal: not_equal() }
     }
 }
 
@@ -107,11 +102,7 @@ fn any() -> Named<FuncVal> {
     let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -152,11 +143,7 @@ fn type1() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -196,11 +183,7 @@ fn equal() -> Named<FuncVal> {
     let call = FuncMode::pair_mode(ref_mode(), ref_mode());
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -232,11 +215,7 @@ fn not_equal() -> Named<FuncVal> {
     let call = FuncMode::pair_mode(ref_mode(), ref_mode());
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -263,9 +242,7 @@ fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
 }
 
 fn get_by_ref<T, F>(ctx: Option<&Ctx>, v: Either<Symbol, Val>, f: F) -> T
-where
-    F: FnOnce(Option<&Val>) -> T,
-{
+where F: FnOnce(Option<&Val>) -> T {
     match v {
         Either::This(s) => {
             let Some(ctx) = ctx else {

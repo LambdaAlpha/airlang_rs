@@ -25,9 +25,7 @@ pub(crate) struct Composite {
 
 impl Composite {
     pub(crate) fn put_input(inner: &mut Ctx, input_name: Symbol, input: Val) {
-        let _ = inner
-            .variables_mut()
-            .put_value(input_name, CtxValue::new(input));
+        let _ = inner.variables_mut().put_value(input_name, CtxValue::new(input));
     }
 
     pub(crate) fn transform(ctx: &mut Ctx, body: Val) -> Val {
@@ -35,10 +33,7 @@ impl Composite {
     }
 
     pub(crate) fn with_ctx(
-        inner: &mut Ctx,
-        outer: &mut Ctx,
-        name: Symbol,
-        access: VarAccess,
+        inner: &mut Ctx, outer: &mut Ctx, name: Symbol, access: VarAccess,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
         if !inner.variables().is_assignable(name.clone()) {
@@ -54,20 +49,13 @@ impl Composite {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
-        let old_val = inner.variables_mut().put_unchecked(name, CtxValue {
-            val,
-            access,
-            static1: true,
-        });
+        let old_val =
+            inner.variables_mut().put_unchecked(name, CtxValue { val, access, static1: true });
         assert!(old_val.is_none(), "keep_ctx variable already present");
     }
 
     fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {
-        let Some(CtxValue {
-            val: Val::Ctx(outer_val),
-            ..
-        }) = inner.remove_unchecked(&name)
-        else {
+        let Some(CtxValue { val: Val::Ctx(outer_val), .. }) = inner.remove_unchecked(&name) else {
             unreachable!("restore_ctx ctx invariant is broken!!!");
         };
         let outer_val = Ctx::from(outer_val);

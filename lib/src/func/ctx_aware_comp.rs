@@ -13,16 +13,9 @@ use crate::{
 };
 
 pub(crate) fn const_func_transform<'a, Ctx>(
-    inner: &mut crate::Ctx,
-    ctx_name: Symbol,
-    outer: Ctx,
-    input_name: Symbol,
-    input: Val,
-    body: Val,
+    inner: &mut crate::Ctx, ctx_name: Symbol, outer: Ctx, input_name: Symbol, input: Val, body: Val,
 ) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     Composite::put_input(inner, input_name, input);
 
     match outer.for_const_fn() {
@@ -35,16 +28,9 @@ where
 }
 
 pub(crate) fn mut_func_transform<'a, Ctx>(
-    inner: &mut crate::Ctx,
-    ctx_name: Symbol,
-    outer: Ctx,
-    input_name: Symbol,
-    input: Val,
-    body: Val,
+    inner: &mut crate::Ctx, ctx_name: Symbol, outer: Ctx, input_name: Symbol, input: Val, body: Val,
 ) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     Composite::put_input(inner, input_name, input);
 
     match outer.for_mut_fn() {

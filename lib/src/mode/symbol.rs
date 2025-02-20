@@ -25,9 +25,7 @@ pub(crate) const MOVE: &str = concatcp!(MOVE_CHAR);
 
 impl Transformer<Symbol, Val> for SymbolMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self {
             SymbolMode::Literal => FormCore::transform_symbol::<LITERAL_CHAR, _>(ctx, symbol),
             SymbolMode::Ref => FormCore::transform_symbol::<REF_CHAR, _>(ctx, symbol),

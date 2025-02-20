@@ -39,9 +39,7 @@ pub struct ConstStaticPrimFunc {
 
 impl Transformer<Val, Val> for ConstStaticPrimFunc {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.call(ctx.for_const_fn(), input)
     }
 }
@@ -62,37 +60,15 @@ impl FuncTrait for ConstStaticPrimFunc {
 
 impl ConstStaticPrimFunc {
     pub fn new_extension(
-        id: Symbol,
-        fn1: Rc<dyn ConstStaticFn>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Rc<dyn ConstStaticFn>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: true,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
     }
 
     pub(crate) fn new(
-        id: Symbol,
-        fn1: Rc<dyn ConstStaticFn>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Rc<dyn ConstStaticFn>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: false,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
     }
 }
 
@@ -146,8 +122,7 @@ where
 }
 
 impl<T> ConstStaticFn for T
-where
-    T: Fn(ConstFnCtx, Val) -> Val,
+where T: Fn(ConstFnCtx, Val) -> Val
 {
     fn call(&self, ctx: ConstFnCtx, input: Val) -> Val {
         self(ctx, input)

@@ -21,8 +21,7 @@ const MAIN_DELIMITER: &str = "\n=====\n";
 const SUB_DELIMITER: &str = "\n-----\n";
 
 pub(crate) fn parse_test_file<'a, const N: usize>(
-    input: &'a str,
-    file_name: &str,
+    input: &'a str, file_name: &str,
 ) -> Vec<[&'a str; N]> {
     let mut cases = Vec::with_capacity(100);
     if input.is_empty() {
@@ -151,11 +150,7 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
     );
     let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
     air.ctx_mut().put(func_ext_name, VarAccess::Const, func)?;
-    test_interpret(
-        air,
-        include_str!("test/extension.air"),
-        "test/extension.air",
-    )
+    test_interpret(air, include_str!("test/extension.air"), "test/extension.air")
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -23,9 +23,7 @@ pub enum Mode {
 
 impl Transformer<Val, Val> for Mode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self {
             Mode::Uni(mode) => mode.transform(ctx, input),
             Mode::Prim(mode) => mode.transform(ctx, input),

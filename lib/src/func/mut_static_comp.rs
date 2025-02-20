@@ -24,9 +24,7 @@ pub struct MutStaticCompFunc {
 
 impl Transformer<Val, Val> for MutStaticCompFunc {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let inner = &mut self.comp.ctx.clone();
         let ctx_name = self.ctx_name.clone();
         let input_name = self.comp.input_name.clone();
@@ -54,11 +52,6 @@ impl FuncTrait for MutStaticCompFunc {
 
 impl MutStaticCompFunc {
     pub(crate) fn new(comp: Composite, ctx_name: Symbol, mode: FuncMode, cacheable: bool) -> Self {
-        Self {
-            comp,
-            mode,
-            cacheable,
-            ctx_name,
-        }
+        Self { comp, mode, cacheable, ctx_name }
     }
 }

@@ -397,10 +397,8 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 GenRepr::Change(Box::new(Change::new(from, to)))
             }
             Val::List(list) => {
-                let list: List<GenRepr> = list
-                    .iter()
-                    .map(TryInto::try_into)
-                    .collect::<Result<_, _>>()?;
+                let list: List<GenRepr> =
+                    list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
                 GenRepr::List(list)
             }
             Val::Map(map) => {

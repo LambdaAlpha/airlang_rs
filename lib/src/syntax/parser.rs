@@ -124,8 +124,7 @@ pub(crate) trait ParseRepr:
     + Eq
     + Hash
     + From<Map<Self, Self>>
-    + Clone
-{
+    + Clone {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -202,8 +201,7 @@ pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseEr
 fn top<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let f = all_consuming(trim(ComposeParser::new(ParseCtx::default())));
     context("top", f)(src)
 }
@@ -211,22 +209,17 @@ where
 fn trim<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, O, E>,
-{
+    F: Parser<&'a str, O, E>, {
     delimited(empty0, f, empty0)
 }
 
 fn empty0<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str>,
-{
+where E: ParseError<&'a str> {
     take_while(is_empty)(src)
 }
 
 fn empty1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str>,
-{
+where E: ParseError<&'a str> {
     take_while1(is_empty)(src)
 }
 
@@ -235,26 +228,20 @@ fn is_empty(c: char) -> bool {
 }
 
 fn delimited_cut<'a, T, E, F>(
-    left: char,
-    f: F,
-    right: char,
+    left: char, f: F, right: char,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, T, E>,
-{
+    F: Parser<&'a str, T, E>, {
     delimited(char1(left), cut(f), cut(char1(right)))
 }
 
 fn delimited_trim<'a, T, E, F>(
-    left: char,
-    f: F,
-    right: char,
+    left: char, f: F, right: char,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, T, E>,
-{
+    F: Parser<&'a str, T, E>, {
     delimited_cut(left, trim(f), right)
 }
 
@@ -286,8 +273,7 @@ struct CtxParser<'a> {
 }
 
 impl<'a, E> Parser<&'a str, ParseCtx<'a>, E> for CtxParser<'a>
-where
-    E: ParseError<&'a str>,
+where E: ParseError<&'a str>
 {
     fn parse(&mut self, input: &'a str) -> IResult<&'a str, ParseCtx<'a>, E> {
         let mut ctx = self.ctx.escape();
@@ -462,7 +448,7 @@ where
                 ScopeParser::new(ctx).parse(src)
             }
             TAG => ScopeParser::new(self.ctx.escape()).parse(src),
-            s if s.starts_with(TAG_CHAR) => ScopeParser::new(self.ctx.tag(&s[1..])).parse(src),
+            s if s.starts_with(TAG_CHAR) => ScopeParser::new(self.ctx.tag(&s[1 ..])).parse(src),
             s if s.chars().all(CtxParser::is_ctx) => {
                 let ctx = context("ctx", CtxParser::new(self.ctx)).parse(s)?.1;
                 ScopeParser::new(ctx).parse(src)
@@ -518,8 +504,7 @@ impl<'a> ComposeParser<'a> {
     fn compose_tokens<T, I>(&self, mut tokens: I) -> Option<T>
     where
         T: ParseRepr,
-        I: ExactSizeIterator<Item = Token<T>> + DoubleEndedIterator<Item = Token<T>>,
-    {
+        I: ExactSizeIterator<Item = Token<T>> + DoubleEndedIterator<Item = Token<T>>, {
         let len = tokens.len();
         if len == 0 {
             return None;
@@ -556,8 +541,7 @@ impl<'a> ComposeParser<'a> {
     fn compose_tag<T, I>(&self, tokens: I, tag: &str) -> Option<T>
     where
         T: ParseRepr,
-        I: Iterator<Item = Token<T>>,
-    {
+        I: Iterator<Item = Token<T>>, {
         let list = tokens.map(Token::into_repr).collect::<List<_>>();
         let list = From::from(list);
         let tag = From::from(Symbol::from_str(tag));
@@ -578,8 +562,7 @@ impl<'a> ComposeParser<'a> {
     fn compose_many2<T, I>(&self, mut iter: I) -> Option<T>
     where
         T: ParseRepr,
-        I: Iterator<Item = Token<T>>,
-    {
+        I: Iterator<Item = Token<T>>, {
         let mut first = iter.next().unwrap();
         loop {
             let Some(second) = iter.next() else {
@@ -599,8 +582,7 @@ impl<'a> ComposeParser<'a> {
     fn compose_many3<T, I>(&self, mut iter: I) -> Option<T>
     where
         T: ParseRepr,
-        I: Iterator<Item = Token<T>>,
-    {
+        I: Iterator<Item = Token<T>>, {
         let mut first = iter.next().unwrap();
         loop {
             let Some(middle) = iter.next() else {
@@ -636,14 +618,12 @@ impl<'a> ComposeParser<'a> {
 }
 
 fn items<'a, O1, O2, E, S, F>(
-    item: F,
-    separator: S,
+    item: F, separator: S,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<O2>, E>
 where
     E: ParseError<&'a str>,
     S: Parser<&'a str, O1, E>,
-    F: Parser<&'a str, O2, E> + Clone,
-{
+    F: Parser<&'a str, O2, E> + Clone, {
     let items = many0(terminated(item.clone(), trim(separator)));
     map(tuple((items, opt(item))), |(mut items, last)| {
         if let Some(last) = last {
@@ -718,8 +698,7 @@ impl<'a> MapParser<'a> {
     fn key_value<T, E>(&self, src: &'a str) -> IResult<&'a str, (T, T), E>
     where
         T: ParseRepr,
-        E: ParseError<&'a str> + ContextError<&'a str>,
-    {
+        E: ParseError<&'a str> + ContextError<&'a str>, {
         let (rest, tokens) = separated_list1(empty1, TokenParser::new(self.ctx))(src)?;
         let mut tokens = tokens.into_iter();
         let key = [tokens.next().unwrap()].into_iter();
@@ -743,8 +722,7 @@ impl<'a> MapParser<'a> {
 fn symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let literal = take_while1(|c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
     let fragment = alt((literal, symbol_escaped, symbol_space));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
@@ -757,9 +735,7 @@ where
 }
 
 fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let f = preceded(
         char1('\\'),
         alt((
@@ -774,9 +750,7 @@ where
 
 // ignore spaces following \n
 fn symbol_space<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let f = alt((
         value("", preceded(char1('\n'), multispace0)),
         value("", char1('\r')),
@@ -788,8 +762,7 @@ where
 fn raw_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let literal = take_while(is_symbol);
     let fragment = separated_list1(char1(' '), terminated(literal, raw_symbol_newline));
     let collect_fragments = map(fragment, |fragments| fragments.join(""));
@@ -799,9 +772,7 @@ where
 }
 
 fn raw_symbol_newline<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let newline = tuple((opt(char1('\r')), char1('\n')));
     let space = take_while(|c| matches!(c, ' ' | '\t'));
     let f = value((), tuple((newline, space, char1('|'))));
@@ -811,15 +782,11 @@ where
 fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let literal = take_while1(|c| !matches!(c, '"' | '\\' | '\n'));
     let space = terminated(tag("\n"), multispace0);
-    let fragment = alt((
-        map(literal, StrFragment::Str),
-        text_escaped,
-        map(space, StrFragment::Str),
-    ));
+    let fragment =
+        alt((map(literal, StrFragment::Str), text_escaped, map(space, StrFragment::Str)));
     let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
         fragment.push(&mut string);
         string
@@ -830,9 +797,7 @@ where
 }
 
 fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, StrFragment<'a>, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let f = preceded(
         char1('\\'),
         alt((
@@ -850,14 +815,10 @@ where
 }
 
 fn unicode<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let digit = take_while_m_n(1, 6, is_hexadecimal);
     let delimited_digit = preceded(char1('u'), delimited_trim(SCOPE_LEFT, digit, SCOPE_RIGHT));
-    let code = map(delimited_digit, move |hex| {
-        u32::from_str_radix(hex, 16).unwrap()
-    });
+    let code = map(delimited_digit, move |hex| u32::from_str_radix(hex, 16).unwrap());
     let f = map_opt(code, std::char::from_u32);
     context("unicode", f)(src)
 }
@@ -865,8 +826,7 @@ where
 fn raw_text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let literal = take_while(|c| !matches!(c, '\r' | '\n'));
     let fragment = separated_list1(char1(' '), tuple((literal, raw_text_newline)));
     let collect_fragments = map(fragment, |fragments| {
@@ -883,9 +843,7 @@ where
 }
 
 fn raw_text_newline<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let physical = recognize(tuple((opt(char1('\r')), char1('\n'))));
     let space = take_while(|c| matches!(c, ' ' | '\t'));
     let logical = alt((value(true, char1('+')), value(false, char1('|'))));
@@ -916,8 +874,7 @@ impl StrFragment<'_> {
 fn int_or_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let norm = preceded(tag("0"), tuple((sign, significand, exponent)));
     let short = tuple((success(true), significand_radix(10, digit1), exponent));
     let f = map(alt((norm, short)), |(sign, significand, exponent)| {
@@ -929,8 +886,7 @@ where
 fn int<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let int = map(tuple((sign, integral)), |(sign, i)| build_int(sign, i));
     let f = delimited_trim(SCOPE_LEFT, int, SCOPE_RIGHT);
     context("int", f)(src)
@@ -939,12 +895,10 @@ where
 fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let number = map(
-        tuple((sign, significand, exponent)),
-        |(sign, significand, exponent)| build_number(sign, significand, exponent),
-    );
+    E: ParseError<&'a str> + ContextError<&'a str>, {
+    let number = map(tuple((sign, significand, exponent)), |(sign, significand, exponent)| {
+        build_number(sign, significand, exponent)
+    });
     let f = delimited_trim(SCOPE_LEFT, number, SCOPE_RIGHT);
     context("number", f)(src)
 }
@@ -952,35 +906,25 @@ where
 fn trim_num0<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E>,
-{
+    F: Parser<&'a str, &'a str, E>, {
     map(separated_list0(char1('_'), f), |s| s.join(""))
 }
 
 fn trim_num1<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E>,
-{
+    F: Parser<&'a str, &'a str, E>, {
     map(separated_list1(char1('_'), f), |s| s.join(""))
 }
 
 fn sign<'a, E>(src: &'a str) -> IResult<&'a str, bool, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    let f = alt((
-        value(true, char1('+')),
-        value(false, char1('-')),
-        success(true),
-    ));
+where E: ParseError<&'a str> + ContextError<&'a str> {
+    let f = alt((value(true, char1('+')), value(false, char1('-')), success(true)));
     context("sign", f)(src)
 }
 
 fn integral<'a, E>(src: &'a str) -> IResult<&'a str, BigInt, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let dec_no_tag = int_radix(10, digit1);
     let hex = preceded(tag("X"), cut(int_radix(16, hexadecimal1)));
     let bin = preceded(tag("B"), cut(int_radix(2, binary1)));
@@ -993,11 +937,8 @@ where
 fn int_radix<'a, E, F>(radix: u8, f: F) -> impl FnMut(&'a str) -> IResult<&'a str, BigInt, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E>,
-{
-    map(trim_num1(f), move |int| {
-        BigInt::from_str_radix(&int, radix as u32).unwrap()
-    })
+    F: Parser<&'a str, &'a str, E>, {
+    map(trim_num1(f), move |int| BigInt::from_str_radix(&int, radix as u32).unwrap())
 }
 
 struct Significand {
@@ -1007,9 +948,7 @@ struct Significand {
 }
 
 fn significand<'a, E>(src: &'a str) -> IResult<&'a str, Significand, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let dec_no_tag = significand_radix(10, digit1);
     let hex = preceded(tag("X"), cut(significand_radix(16, hexadecimal1)));
     let bin = preceded(tag("B"), cut(significand_radix(2, binary1)));
@@ -1020,18 +959,14 @@ where
 }
 
 fn significand_radix<'a, E, F>(
-    radix: u8,
-    f: F,
+    radix: u8, f: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, Significand, E>
 where
     E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E> + Clone,
-{
+    F: Parser<&'a str, &'a str, E> + Clone, {
     let int = trim_num1(f.clone());
     let fraction = opt(preceded(char1('.'), cut(trim_num0(f))));
-    map(tuple((int, fraction)), move |(int, fraction)| {
-        build_significand(radix, int, fraction)
-    })
+    map(tuple((int, fraction)), move |(int, fraction)| build_significand(radix, int, fraction))
 }
 
 fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Significand {
@@ -1042,18 +977,12 @@ fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Signif
         Significand { int, radix, shift }
     } else {
         let int = BigInt::from_str_radix(&int, radix as u32).unwrap();
-        Significand {
-            int,
-            radix,
-            shift: None,
-        }
+        Significand { int, radix, shift: None }
     }
 }
 
 fn exponent<'a, E>(src: &'a str) -> IResult<&'a str, Option<BigInt>, E>
-where
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+where E: ParseError<&'a str> + ContextError<&'a str> {
     let fragment = tuple((sign, trim_num1(digit1)));
     let exp = map(fragment, |(sign, exp)| build_exponent(sign, exp));
     let f = opt(preceded(tag("E"), cut(exp)));
@@ -1066,17 +995,13 @@ fn build_exponent(sign: bool, exp: String) -> BigInt {
 }
 
 fn build_int<T>(sign: bool, i: BigInt) -> T
-where
-    T: ParseRepr,
-{
+where T: ParseRepr {
     let i = Int::new(if sign { i } else { i.neg() });
     From::from(i)
 }
 
 fn build_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
-where
-    T: ParseRepr,
-{
+where T: ParseRepr {
     let int = significand.int;
     let int = if sign { int } else { int.neg() };
     let shift = significand.shift.unwrap_or(0);
@@ -1086,9 +1011,7 @@ where
 }
 
 fn build_int_or_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
-where
-    T: ParseRepr,
-{
+where T: ParseRepr {
     if significand.shift.is_some() || exp.is_some() {
         build_number(sign, significand, exp)
     } else {
@@ -1099,8 +1022,7 @@ where
 fn byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let hex = preceded(tag("X"), cut(hexadecimal_byte));
     let bin = preceded(tag("B"), cut(binary_byte));
     let byte = alt((hex, bin, hexadecimal_byte));
@@ -1111,8 +1033,7 @@ where
 fn hexadecimal_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let digits = verify(hexadecimal1, |s: &str| s.len() % 2 == 0);
     let digits = trim_num0(digits);
     let f = map(digits, |s| {
@@ -1125,8 +1046,7 @@ where
 fn binary_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
 where
     T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
+    E: ParseError<&'a str> + ContextError<&'a str>, {
     let digits = verify(binary1, |s: &str| s.len() % 8 == 0);
     let digits = trim_num0(digits);
     let f = map(digits, |s| {
@@ -1137,9 +1057,7 @@ where
 }
 
 fn hexadecimal1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str>,
-{
+where E: ParseError<&'a str> {
     take_while1(is_hexadecimal)(src)
 }
 
@@ -1148,12 +1066,10 @@ fn is_hexadecimal(c: char) -> bool {
 }
 
 fn binary1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where
-    E: ParseError<&'a str>,
-{
+where E: ParseError<&'a str> {
     take_while1(is_binary)(src)
 }
 
 fn is_binary(c: char) -> bool {
-    matches!(c, '0'..='1')
+    matches!(c, '0' ..= '1')
 }

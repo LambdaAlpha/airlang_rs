@@ -101,17 +101,8 @@ enum CtrlFlow {
 #[derive(Clone)]
 enum BlockItem {
     Normal(Val),
-    UnitExit {
-        exit: Exit,
-        target: bool,
-        body: Val,
-    },
-    BitExit {
-        exit: Exit,
-        target: bool,
-        condition: Val,
-        body: Val,
-    },
+    UnitExit { exit: Exit, target: bool, body: Val },
+    BitExit { exit: Exit, target: bool, condition: Val, body: Val },
 }
 
 fn sequence() -> Named<FuncVal> {
@@ -124,19 +115,13 @@ fn sequence() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     eval_block(ctx, input).0
 }
 
@@ -150,19 +135,13 @@ fn if1() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_if<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -175,11 +154,7 @@ where
         return Val::default();
     };
     let branches = Pair::from(branches);
-    let branch = if b.bool() {
-        branches.first
-    } else {
-        branches.second
-    };
+    let branch = if b.bool() { branches.first } else { branches.second };
     eval_block(ctx, branch).0
 }
 
@@ -193,19 +168,13 @@ fn if_not() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_if_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -218,11 +187,7 @@ where
         return Val::default();
     };
     let branches = Pair::from(branches);
-    let branch = if b.bool() {
-        branches.second
-    } else {
-        branches.first
-    };
+    let branch = if b.bool() { branches.second } else { branches.first };
     eval_block(ctx, branch).0
 }
 
@@ -236,19 +201,13 @@ fn match1() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -263,10 +222,7 @@ where
     };
     let map_mode = MapMode {
         some: Map::default(),
-        else1: Pair::new(
-            FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
-            FuncMode::id_mode(),
-        ),
+        else1: Pair::new(FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref), FuncMode::id_mode()),
     };
     let map = map_mode.transform(ctx.reborrow(), map);
     let Val::Map(map) = map else { unreachable!() };
@@ -286,19 +242,13 @@ fn match_ordered() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_match_ordered<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -345,19 +295,13 @@ fn while1() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -411,19 +355,13 @@ fn while_not() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -477,19 +415,13 @@ fn for1() -> Named<FuncVal> {
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
 
 fn fn_for<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -509,10 +441,8 @@ where
             if i.is_negative() {
                 return Val::default();
             }
-            let Some(i) = i.to_u128() else {
-                panic!("iterate on super big int {i:?}!!!")
-            };
-            let iter = (0..i).map(|i| {
+            let Some(i) = i.to_u128() else { panic!("iterate on super big int {i:?}!!!") };
+            let iter = (0 .. i).map(|i| {
                 let i = Int::from(i);
                 Val::Int(i.into())
             });
@@ -527,7 +457,7 @@ where
         }
         Val::Symbol(s) => {
             let iter = s.char_indices().map(|(start, c)| {
-                let symbol = Symbol::from_str(&s[start..start + c.len_utf8()]);
+                let symbol = Symbol::from_str(&s[start .. start + c.len_utf8()]);
                 Val::Symbol(symbol)
             });
             for_iter(ctx, body, name, iter)
@@ -559,8 +489,7 @@ where
 fn for_iter<'a, Ctx, ValIter>(mut ctx: Ctx, body: Val, name: Symbol, values: ValIter) -> Val
 where
     Ctx: CtxMeta<'a>,
-    ValIter: Iterator<Item = Val>,
-{
+    ValIter: Iterator<Item = Val>, {
     let Ok(variables) = ctx.reborrow().get_variables() else {
         return Val::default();
     };
@@ -605,9 +534,7 @@ where
 }
 
 fn eval_block<'a, Ctx>(ctx: Ctx, input: Val) -> (Val, CtrlFlow)
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::List(list) = input else {
         return (EVAL.transform(ctx, input), CtrlFlow::None);
     };
@@ -620,9 +547,7 @@ where
 }
 
 fn eval_block_items<'a, Ctx>(mut ctx: Ctx, block_items: List<BlockItem>) -> (Val, CtrlFlow)
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let mut output = Val::default();
     for block_item in block_items {
         match block_item {
@@ -635,12 +560,7 @@ where
                     return (output, CtrlFlow::from(exit));
                 }
             }
-            BlockItem::BitExit {
-                exit,
-                target,
-                condition,
-                body,
-            } => {
+            BlockItem::BitExit { exit, target, condition, body } => {
                 let condition = EVAL.transform(ctx.reborrow(), condition);
                 let Val::Bit(condition) = condition else {
                     return (Val::default(), CtrlFlow::Error);
@@ -663,12 +583,7 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
     let Val::Symbol(s) = &call.func else {
         return Some(BlockItem::Normal(Val::Call(call)));
     };
-    let Some(ParseExit {
-        is_unit,
-        exit,
-        target,
-    }) = parse_exit(s)
-    else {
+    let Some(ParseExit { is_unit, exit, target }) = parse_exit(s) else {
         return Some(BlockItem::Normal(Val::Call(call)));
     };
     let call = Call::from(call);
@@ -682,12 +597,7 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
         let pair = Pair::from(pair);
         let condition = pair.first;
         let body = pair.second;
-        BlockItem::BitExit {
-            exit,
-            target,
-            condition,
-            body,
-        }
+        BlockItem::BitExit { exit, target, condition, body }
     };
     Some(block_item)
 }
@@ -700,11 +610,7 @@ struct ParseExit {
 
 impl ParseExit {
     fn new(is_unit: bool, exit: Exit, target: bool) -> Self {
-        Self {
-            is_unit,
-            exit,
-            target,
-        }
+        Self { is_unit, exit, target }
     }
 }
 

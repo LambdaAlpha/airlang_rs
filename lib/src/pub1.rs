@@ -163,9 +163,6 @@ impl AirCell {
 
 impl Default for AirCell {
     fn default() -> Self {
-        Self {
-            mode: FuncMode::default_mode(),
-            ctx: Self::initial_ctx(),
-        }
+        Self { mode: FuncMode::default_mode(), ctx: Self::initial_ctx() }
     }
 }

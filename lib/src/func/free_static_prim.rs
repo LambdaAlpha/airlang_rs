@@ -36,9 +36,7 @@ pub struct FreeStaticPrimFunc {
 
 impl Transformer<Val, Val> for FreeStaticPrimFunc {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.call(input)
     }
 }
@@ -59,37 +57,15 @@ impl FuncTrait for FreeStaticPrimFunc {
 
 impl FreeStaticPrimFunc {
     pub fn new_extension(
-        id: Symbol,
-        fn1: Rc<dyn FreeStaticFn>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: true,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
     }
 
     pub(crate) fn new(
-        id: Symbol,
-        fn1: Rc<dyn FreeStaticFn>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: false,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
     }
 }
 
@@ -114,8 +90,7 @@ impl Hash for FreeStaticPrimFunc {
 }
 
 impl<T> FreeStaticFn for T
-where
-    T: Fn(Val) -> Val,
+where T: Fn(Val) -> Val
 {
     fn call(&self, input: Val) -> Val {
         self(input)

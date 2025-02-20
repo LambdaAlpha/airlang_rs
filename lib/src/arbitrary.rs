@@ -149,7 +149,7 @@ struct DistSymbol;
 
 impl Distribution<u8> for DistSymbol {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u8 {
-        rng.r#gen_range(Symbol::MIN..=Symbol::MAX) as u8
+        rng.r#gen_range(Symbol::MIN ..= Symbol::MAX) as u8
     }
 }
 
@@ -217,7 +217,7 @@ pub(crate) fn any_change(rng: &mut SmallRng, depth: usize) -> Change<Val, Val> {
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
     let len = any_len_weighted(rng, depth);
     let mut list = Vec::with_capacity(len);
-    for _ in 0..len {
+    for _ in 0 .. len {
         list.push(any_val(rng, depth));
     }
     List::from(list)
@@ -226,7 +226,7 @@ pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
 pub(crate) fn any_map(rng: &mut SmallRng, depth: usize) -> Map<Val, Val> {
     let len = any_len_weighted(rng, depth);
     let mut map = Map::with_capacity(len);
-    for _ in 0..len {
+    for _ in 0 .. len {
         map.insert(any_val(rng, depth), any_val(rng, depth));
     }
     map
@@ -240,7 +240,7 @@ pub(crate) fn any_var_access(rng: &mut SmallRng) -> VarAccess {
 pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxValue> {
     let len = any_len_weighted(rng, depth);
     let mut ctx_map = Map::with_capacity(len);
-    for _ in 0..len {
+    for _ in 0 .. len {
         let ctx_value = CtxValue {
             val: any_val(rng, depth),
             access: any_var_access(rng),
@@ -254,21 +254,13 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
 pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
     let variables = CtxMap::new(variables, rng.r#gen());
-    let solver = if rng.r#gen() {
-        Some(any_func(rng, depth))
-    } else {
-        None
-    };
+    let solver = if rng.r#gen() { Some(any_func(rng, depth)) } else { None };
     Ctx::new(variables, solver)
 }
 
 impl<T: Arbitrary> Arbitrary for Option<T> {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        if rng.r#gen() {
-            None
-        } else {
-            Some(T::any(rng, depth))
-        }
+        if rng.r#gen() { None } else { Some(T::any(rng, depth)) }
     }
 }
 
@@ -310,16 +302,7 @@ impl Arbitrary for CompMode {
         let change = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode {
-            symbol,
-            pair,
-            call,
-            abstract1,
-            ask,
-            change,
-            list,
-            map,
-        }
+        CompMode { symbol, pair, call, abstract1, ask, change, list, map }
     }
 }
 
@@ -381,7 +364,7 @@ impl Arbitrary for ListMode {
         let new_depth = depth + 1;
         let head_size = any_len_weighted(rng, depth);
         let mut head = Vec::with_capacity(head_size);
-        for _ in 0..head_size {
+        for _ in 0 .. head_size {
             head.push(Arbitrary::any(rng, new_depth));
         }
         let head = List::from(head);
@@ -395,7 +378,7 @@ impl Arbitrary for MapMode {
         let new_depth = depth + 1;
         let len = any_len_weighted(rng, new_depth);
         let mut some = Map::with_capacity(len);
-        for _ in 0..len {
+        for _ in 0 .. len {
             some.insert(any_val(rng, new_depth), Arbitrary::any(rng, new_depth));
         }
         let key = Arbitrary::any(rng, new_depth);
@@ -415,16 +398,7 @@ impl Arbitrary for PrimMode {
         let change = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode {
-            symbol,
-            pair,
-            call,
-            abstract1,
-            ask,
-            change,
-            list,
-            map,
-        }
+        PrimMode { symbol, pair, call, abstract1, ask, change, list, map }
     }
 }
 
@@ -456,17 +430,12 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
             prelude.put(&mut m);
             m
         });
-        let func = prelude
-            .into_values()
-            .filter(|v| matches!(v.val, Val::Func(_)))
-            .choose(rng)
-            .unwrap();
-        let Val::Func(func) = func.val else {
-            unreachable!()
-        };
+        let func =
+            prelude.into_values().filter(|v| matches!(v.val, Val::Func(_))).choose(rng).unwrap();
+        let Val::Func(func) = func.val else { unreachable!() };
         func
     } else {
-        match rng.r#gen_range(0..7) {
+        match rng.r#gen_range(0 .. 7) {
             0 => {
                 let func = any_mode_func(rng, depth);
                 FuncVal::Mode(func)
@@ -504,19 +473,11 @@ fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     let call = Arbitrary::any(rng, depth);
     let abstract1 = Arbitrary::any(rng, depth);
     let ask = Arbitrary::any(rng, depth);
-    FuncMode {
-        call,
-        abstract1,
-        ask,
-    }
+    FuncMode { call, abstract1, ask }
 }
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {
-    Composite {
-        body: any_val(rng, depth),
-        ctx: any_ctx(rng, depth),
-        input_name: any_symbol(rng),
-    }
+    Composite { body: any_val(rng, depth), ctx: any_ctx(rng, depth), input_name: any_symbol(rng) }
 }
 
 pub(crate) fn any_free_cell_comp_func(rng: &mut SmallRng, depth: usize) -> FreeCellCompFuncVal {
@@ -545,8 +506,7 @@ pub(crate) fn any_const_cell_comp_func(rng: &mut SmallRng, depth: usize) -> Cons
 }
 
 pub(crate) fn any_const_static_comp_func(
-    rng: &mut SmallRng,
-    depth: usize,
+    rng: &mut SmallRng, depth: usize,
 ) -> ConstStaticCompFuncVal {
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);

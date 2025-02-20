@@ -95,11 +95,7 @@ fn new_dependent() -> Named<FuncVal> {
     let call = FuncMode::pair_mode(FuncMode::default_mode(), FuncMode::id_mode());
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -128,9 +124,7 @@ fn apply() -> Named<FuncVal> {
 }
 
 fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
-where
-    Ctx: CtxMeta<'a>,
-{
+where Ctx: CtxMeta<'a> {
     let Val::Abstract(abstract1) = input else {
         return Val::default();
     };
@@ -144,11 +138,7 @@ fn get_func() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -176,11 +166,7 @@ fn set_func() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -210,11 +196,7 @@ fn get_input() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -242,11 +224,7 @@ fn set_input() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

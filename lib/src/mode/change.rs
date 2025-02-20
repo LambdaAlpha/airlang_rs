@@ -16,9 +16,7 @@ pub struct ChangeMode {
 
 impl Transformer<ChangeVal, Val> for ChangeMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         FormCore::transform_change(&self.change.from, &self.change.to, ctx, change)
     }
 }
@@ -26,8 +24,6 @@ impl Transformer<ChangeVal, Val> for ChangeMode {
 impl From<UniMode> for ChangeMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        ChangeMode {
-            change: Change::new(m.clone(), m),
-        }
+        ChangeMode { change: Change::new(m.clone(), m) }
     }
 }

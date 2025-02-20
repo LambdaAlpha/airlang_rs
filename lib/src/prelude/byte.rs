@@ -33,11 +33,7 @@ pub(crate) struct BytePrelude {
 #[allow(clippy::derivable_impls)]
 impl Default for BytePrelude {
     fn default() -> Self {
-        BytePrelude {
-            length: length(),
-            push: push(),
-            join: join(),
-        }
+        BytePrelude { length: length(), push: push(), join: join() }
     }
 }
 
@@ -55,11 +51,7 @@ fn length() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -84,11 +76,7 @@ fn push() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

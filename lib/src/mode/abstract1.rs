@@ -21,9 +21,7 @@ pub struct AbstractMode {
 
 impl Transformer<AbstractVal, Val> for AbstractMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let func = &self.abstract1.func;
         let input = &self.abstract1.input;
         match self.code {
@@ -36,9 +34,6 @@ impl Transformer<AbstractVal, Val> for AbstractMode {
 impl From<UniMode> for AbstractMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        Self {
-            code: mode.code,
-            abstract1: Abstract::new(m.clone(), m),
-        }
+        Self { code: mode.code, abstract1: Abstract::new(m.clone(), m) }
     }
 }

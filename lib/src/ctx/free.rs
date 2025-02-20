@@ -51,8 +51,7 @@ impl<'a> CtxRef<'a> for FreeCtx {
 impl<'a> CtxMeta<'a> for FreeCtx {
     type Reborrow<'s>
         = FreeCtx
-    where
-        Self: 's;
+    where Self: 's;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_> {
         FreeCtx

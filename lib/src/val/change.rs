@@ -27,10 +27,7 @@ impl From<ChangeRepr> for ChangeVal {
 impl TryInto<ChangeRepr> for &ChangeVal {
     type Error = ReprError;
     fn try_into(self) -> Result<ChangeRepr, Self::Error> {
-        Ok(ChangeRepr::new(
-            (&self.from).try_into()?,
-            (&self.to).try_into()?,
-        ))
+        Ok(ChangeRepr::new((&self.from).try_into()?, (&self.to).try_into()?))
     }
 }
 

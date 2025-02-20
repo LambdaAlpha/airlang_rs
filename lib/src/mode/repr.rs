@@ -78,8 +78,7 @@ pub(crate) fn generate(mode: &Option<Mode>) -> Val {
 }
 
 impl<T> ParseMode<Val> for Option<T>
-where
-    T: ParseMode<Val> + From<UniMode>,
+where T: ParseMode<Val> + From<UniMode>
 {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         let mode = match mode {
@@ -282,16 +281,7 @@ impl ParseMode<MapVal> for CompMode {
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode {
-            symbol,
-            pair,
-            abstract1,
-            call,
-            ask,
-            change,
-            list,
-            map,
-        })
+        Some(CompMode { symbol, pair, abstract1, call, ask, change, list, map })
     }
 }
 
@@ -334,16 +324,7 @@ impl ParseMode<MapVal> for PrimMode {
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode {
-            symbol,
-            pair,
-            abstract1,
-            call,
-            ask,
-            change,
-            list,
-            map,
-        })
+        Some(PrimMode { symbol, pair, abstract1, call, ask, change, list, map })
     }
 }
 
@@ -421,9 +402,7 @@ impl ParseMode<Val> for PairMode {
                 let pair = Pair::from(pair);
                 let first = ParseMode::parse(pair.first, default)?;
                 let second = ParseMode::parse(pair.second, default)?;
-                Some(PairMode {
-                    pair: Pair::new(first, second),
-                })
+                Some(PairMode { pair: Pair::new(first, second) })
             }
             _ => None,
         }
@@ -446,19 +425,13 @@ impl ParseMode<Val> for CallMode {
                 let pair = Pair::from(pair);
                 let func = ParseMode::parse(pair.first, default)?;
                 let input = ParseMode::parse(pair.second, default)?;
-                Some(CallMode {
-                    code: CodeMode::Form,
-                    call: Call::new(func, input),
-                })
+                Some(CallMode { code: CodeMode::Form, call: Call::new(func, input) })
             }
             Val::Call(call) => {
                 let call = Call::from(call);
                 let func = ParseMode::parse(call.func, default)?;
                 let input = ParseMode::parse(call.input, default)?;
-                Some(CallMode {
-                    code: CodeMode::Eval,
-                    call: Call::new(func, input),
-                })
+                Some(CallMode { code: CodeMode::Eval, call: Call::new(func, input) })
             }
             _ => None,
         }
@@ -484,19 +457,13 @@ impl ParseMode<Val> for AbstractMode {
                 let pair = Pair::from(pair);
                 let func = ParseMode::parse(pair.first, default)?;
                 let input = ParseMode::parse(pair.second, default)?;
-                Some(AbstractMode {
-                    code: CodeMode::Form,
-                    abstract1: Abstract::new(func, input),
-                })
+                Some(AbstractMode { code: CodeMode::Form, abstract1: Abstract::new(func, input) })
             }
             Val::Abstract(abstract1) => {
                 let abstract1 = Abstract::from(abstract1);
                 let func = ParseMode::parse(abstract1.func, default)?;
                 let input = ParseMode::parse(abstract1.input, default)?;
-                Some(AbstractMode {
-                    code: CodeMode::Eval,
-                    abstract1: Abstract::new(func, input),
-                })
+                Some(AbstractMode { code: CodeMode::Eval, abstract1: Abstract::new(func, input) })
             }
             _ => None,
         }
@@ -522,19 +489,13 @@ impl ParseMode<Val> for AskMode {
                 let pair = Pair::from(pair);
                 let func = ParseMode::parse(pair.first, default)?;
                 let output = ParseMode::parse(pair.second, default)?;
-                Some(AskMode {
-                    code: CodeMode::Form,
-                    ask: Ask::new(func, output),
-                })
+                Some(AskMode { code: CodeMode::Form, ask: Ask::new(func, output) })
             }
             Val::Ask(ask) => {
                 let ask = Ask::from(ask);
                 let func = ParseMode::parse(ask.func, default)?;
                 let output = ParseMode::parse(ask.output, default)?;
-                Some(AskMode {
-                    code: CodeMode::Eval,
-                    ask: Ask::new(func, output),
-                })
+                Some(AskMode { code: CodeMode::Eval, ask: Ask::new(func, output) })
             }
             _ => None,
         }
@@ -560,9 +521,7 @@ impl ParseMode<Val> for ChangeMode {
                 let pair = Pair::from(pair);
                 let from = ParseMode::parse(pair.first, default)?;
                 let to = ParseMode::parse(pair.second, default)?;
-                Some(ChangeMode {
-                    change: Change::new(from, to),
-                })
+                Some(ChangeMode { change: Change::new(from, to) })
             }
             _ => None,
         }
@@ -601,10 +560,7 @@ impl ParseMode<Val> for ListMode {
 }
 
 fn parse_list_head(head: ListVal, default: Option<UniMode>) -> Option<List<Option<Mode>>> {
-    List::from(head)
-        .into_iter()
-        .map(|item| ParseMode::parse(item, default))
-        .collect()
+    List::from(head).into_iter().map(|item| ParseMode::parse(item, default)).collect()
 }
 
 impl GenerateMode<Val> for ListMode {
@@ -620,10 +576,7 @@ impl GenerateMode<Val> for ListMode {
 }
 
 fn generate_list_head(head: &List<Option<Mode>>, default: Option<UniMode>) -> Val {
-    let head: List<Val> = head
-        .iter()
-        .map(|item| GenerateMode::generate(item, default))
-        .collect();
+    let head: List<Val> = head.iter().map(|item| GenerateMode::generate(item, default)).collect();
     Val::List(head.into())
 }
 

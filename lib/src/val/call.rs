@@ -27,10 +27,7 @@ impl From<CallRepr> for CallVal {
 impl TryInto<CallRepr> for &CallVal {
     type Error = ReprError;
     fn try_into(self) -> Result<CallRepr, Self::Error> {
-        Ok(CallRepr::new(
-            (&self.func).try_into()?,
-            (&self.input).try_into()?,
-        ))
+        Ok(CallRepr::new((&self.func).try_into()?, (&self.input).try_into()?))
     }
 }
 

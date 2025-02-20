@@ -27,82 +27,38 @@ pub fn expected() -> Vec<Repr> {
         symbol("a"),
         symbol("a"),
         infix_call(
-            infix_call(
-                symbol("a"),
-                symbol("b"),
-                infix_call(symbol("c"), symbol("d"), symbol("e")),
-            ),
+            infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
             symbol("f"),
             symbol("g"),
         ),
         list(vec![symbol("a")]),
         map(vec![(pair(symbol("a"), symbol("b")), symbol("c"))]),
         map(vec![(symbol("a"), pair(symbol("b"), symbol("c")))]),
-        infix_call(
-            infix_call(symbol("a"), symbol("b"), symbol("c")),
-            symbol("d"),
-            symbol("e"),
-        ),
-        infix_call(
-            infix_call(symbol("a"), symbol("b"), symbol("c")),
-            symbol("d"),
-            symbol("e"),
-        ),
+        infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
+        infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
         list(vec![infix_call(
             infix_call(symbol("a"), symbol("b"), symbol("c")),
             symbol("d"),
             symbol("e"),
         )]),
         map(vec![(
-            infix_call(
-                infix_call(symbol("a"), symbol("b"), symbol("c")),
-                symbol("d"),
-                symbol("e"),
-            ),
-            infix_call(
-                infix_call(symbol("f"), symbol("g"), symbol("h")),
-                symbol("i"),
-                symbol("j"),
-            ),
+            infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
+            infix_call(infix_call(symbol("f"), symbol("g"), symbol("h")), symbol("i"), symbol("j")),
         )]),
-        infix_call(
-            symbol("a"),
-            symbol("b"),
-            infix_call(symbol("c"), symbol("d"), symbol("e")),
-        ),
-        infix_call(
-            symbol("a"),
-            symbol("b"),
-            infix_call(symbol("c"), symbol("d"), symbol("e")),
-        ),
+        infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
+        infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         list(vec![infix_call(
             symbol("a"),
             symbol("b"),
             infix_call(symbol("c"), symbol("d"), symbol("e")),
         )]),
         map(vec![(
-            infix_call(
-                symbol("a"),
-                symbol("b"),
-                infix_call(symbol("c"), symbol("d"), symbol("e")),
-            ),
-            infix_call(
-                symbol("f"),
-                symbol("g"),
-                infix_call(symbol("h"), symbol("i"), symbol("j")),
-            ),
+            infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
+            infix_call(symbol("f"), symbol("g"), infix_call(symbol("h"), symbol("i"), symbol("j"))),
         )]),
-        infix_pair(
-            symbol("a"),
-            symbol("b"),
-            infix_pair(symbol("c"), symbol("d"), symbol("e")),
-        ),
+        infix_pair(symbol("a"), symbol("b"), infix_pair(symbol("c"), symbol("d"), symbol("e"))),
         pair(symbol("a"), symbol("b")),
-        infix_call(
-            symbol("a"),
-            symbol("b"),
-            infix_call(symbol("c"), symbol("d"), symbol("e")),
-        ),
+        infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         call(symbol("a"), symbol("b")),
         infix_abstract(
             symbol("a"),
@@ -110,29 +66,14 @@ pub fn expected() -> Vec<Repr> {
             infix_abstract(symbol("c"), symbol("d"), symbol("e")),
         ),
         abstract1(symbol("a"), symbol("b")),
-        infix_ask(
-            symbol("a"),
-            symbol("b"),
-            infix_ask(symbol("c"), symbol("d"), symbol("e")),
-        ),
+        infix_ask(symbol("a"), symbol("b"), infix_ask(symbol("c"), symbol("d"), symbol("e"))),
         ask(symbol("a"), symbol("b")),
-        infix_change(
-            symbol("a"),
-            symbol("b"),
-            infix_change(symbol("c"), symbol("d"), symbol("e")),
-        ),
+        infix_change(symbol("a"), symbol("b"), infix_change(symbol("c"), symbol("d"), symbol("e"))),
         change(symbol("a"), symbol("b")),
         call(symbol("a"), call(symbol("b"), symbol("c"))),
-        call(
-            symbol("a"),
-            call(symbol("b"), call(symbol("c"), symbol("d"))),
-        ),
+        call(symbol("a"), call(symbol("b"), call(symbol("c"), symbol("d")))),
         call(call(symbol("a"), symbol("b")), symbol("c")),
-        infix_call(
-            symbol("a"),
-            symbol("b"),
-            infix_call(symbol("c"), symbol("d"), symbol("e")),
-        ),
+        infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         tag_call("t", vec![symbol("a")]),
         tag_call("t", vec![symbol("a")]),
         tag_call("t", vec![tag_call("t", vec![symbol("a")])]),
@@ -140,12 +81,7 @@ pub fn expected() -> Vec<Repr> {
         tag_call("a", vec![symbol("b")]),
         tag_call("1", vec![symbol("a")]),
         tag_call("t", vec![symbol("a"), symbol("b")]),
-        tag_call("t", vec![
-            symbol(":"),
-            symbol(";"),
-            symbol("!"),
-            symbol("?"),
-        ]),
+        tag_call("t", vec![symbol(":"), symbol(";"), symbol("!"), symbol("?")]),
         tag_call("t", vec![
             tag_call("t", vec![symbol("a"), symbol("b"), symbol("c")]),
             symbol("d"),
@@ -156,45 +92,25 @@ pub fn expected() -> Vec<Repr> {
         tag_ask("t", vec![symbol("a")]),
         tag_change("t", vec![symbol("a")]),
         tag_call("t", vec![
-            list(vec![
-                tag_call("t", vec![symbol("a")]),
-                tag_call("t", vec![symbol("b")]),
-            ]),
+            list(vec![tag_call("t", vec![symbol("a")]), tag_call("t", vec![symbol("b")])]),
             list(vec![]),
         ]),
         tag_call("t", vec![
-            map(vec![(
-                tag_call("t", vec![symbol("a")]),
-                tag_call("t", vec![symbol("b")]),
-            )]),
+            map(vec![(tag_call("t", vec![symbol("a")]), tag_call("t", vec![symbol("b")]))]),
             map(vec![]),
         ]),
         tag_call("t", vec![map(vec![(
             tag_call("t", vec![symbol("a")]),
             tag_call("t", vec![symbol("b"), symbol("c"), symbol("d")]),
         )])]),
-        tag_call("t", vec![
-            symbol("a"),
-            call(symbol("b"), symbol("c")),
-            symbol("d"),
-        ]),
+        tag_call("t", vec![symbol("a"), call(symbol("b"), symbol("c")), symbol("d")]),
         tag_call("t", vec![infix_call(
             infix_call(symbol("a"), symbol("b"), symbol("c")),
             symbol("d"),
             symbol("e"),
         )]),
         tag_call("t", vec![infix_ask(symbol("a"), symbol("b"), symbol("c"))]),
-        infix_call(
-            infix_call(symbol("a"), symbol("b"), symbol("c")),
-            symbol("d"),
-            symbol("e"),
-        ),
-        call(
-            symbol("a"),
-            call(
-                symbol("b"),
-                call(symbol("c"), call(symbol("d"), symbol("e"))),
-            ),
-        ),
+        infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
+        call(symbol("a"), call(symbol("b"), call(symbol("c"), call(symbol("d"), symbol("e"))))),
     ]
 }

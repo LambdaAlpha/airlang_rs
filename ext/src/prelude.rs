@@ -73,17 +73,13 @@ impl<T: Into<Val> + Clone> Named<T> {
     pub(crate) fn put(&self, ctx: MutCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
         let val = self.value.clone().into();
-        ctx.put(name, VarAccess::Assign, val)
-            .expect("the name of preludes should be unique");
+        ctx.put(name, VarAccess::Assign, val).expect("the name of preludes should be unique");
     }
 }
 
 #[allow(unused)]
 fn named_free_cell_fn(
-    name: &'static str,
-    func: impl FreeCellFnExt + 'static,
-    mode: FuncMode,
-    cacheable: bool,
+    name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Box::new(func);
@@ -94,10 +90,7 @@ fn named_free_cell_fn(
 
 #[allow(unused)]
 fn named_const_cell_fn(
-    name: &'static str,
-    func: impl ConstCellFnExt + 'static,
-    mode: FuncMode,
-    cacheable: bool,
+    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Box::new(func);
@@ -108,10 +101,7 @@ fn named_const_cell_fn(
 
 #[allow(unused)]
 fn named_mut_cell_fn(
-    name: &'static str,
-    func: impl MutCellFnExt + 'static,
-    mode: FuncMode,
-    cacheable: bool,
+    name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Box::new(func);
@@ -121,10 +111,7 @@ fn named_mut_cell_fn(
 }
 
 fn named_free_fn(
-    name: &'static str,
-    func: impl FreeStaticFn + 'static,
-    mode: FuncMode,
-    cacheable: bool,
+    name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Rc::new(func);
@@ -134,10 +121,7 @@ fn named_free_fn(
 }
 
 fn named_const_fn(
-    name: &'static str,
-    func: impl ConstStaticFn + 'static,
-    mode: FuncMode,
-    cacheable: bool,
+    name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Rc::new(func);
@@ -147,10 +131,7 @@ fn named_const_fn(
 }
 
 fn named_mut_fn(
-    name: &'static str,
-    func: impl MutStaticFn + 'static,
-    mode: FuncMode,
-    cacheable: bool,
+    name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
     let id = unsafe { Symbol::from_str_unchecked(name) };
     let fn1 = Rc::new(func);

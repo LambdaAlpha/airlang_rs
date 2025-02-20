@@ -18,9 +18,7 @@ pub struct MapMode {
 
 impl Transformer<MapVal, Val> for MapMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         let some = &self.some;
         let key = &self.else1.first;
         let value = &self.else1.second;
@@ -31,9 +29,6 @@ impl Transformer<MapVal, Val> for MapMode {
 impl From<UniMode> for MapMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        MapMode {
-            some: Map::default(),
-            else1: Pair::new(m.clone(), m),
-        }
+        MapMode { some: Map::default(), else1: Pair::new(m.clone(), m) }
     }
 }

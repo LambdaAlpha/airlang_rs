@@ -29,10 +29,7 @@ pub(crate) struct UnitPrelude {
 
 impl Default for UnitPrelude {
     fn default() -> Self {
-        UnitPrelude {
-            unit: unit(),
-            is_unit: is_unit(),
-        }
+        UnitPrelude { unit: unit(), is_unit: is_unit() }
     }
 }
 
@@ -61,11 +58,7 @@ fn is_unit() -> Named<FuncVal> {
     let call = ref_pair_mode();
     let abstract1 = call.clone();
     let ask = FuncMode::default_mode();
-    let mode = FuncMode {
-        call,
-        abstract1,
-        ask,
-    };
+    let mode = FuncMode { call, abstract1, ask };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }

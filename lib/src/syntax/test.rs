@@ -152,17 +152,11 @@ fn tag_change(tag: &str, v: Vec<Repr>) -> Repr {
 }
 
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Pair(Box::new(PairRepr::new(
-        middle,
-        Repr::Pair(Box::new(PairRepr::new(left, right))),
-    )))
+    Repr::Pair(Box::new(PairRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(
-        middle,
-        Repr::Pair(Box::new(PairRepr::new(left, right))),
-    )))
+    Repr::Call(Box::new(CallRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
 
 fn infix_abstract(left: Repr, middle: Repr, right: Repr) -> Repr {
@@ -173,10 +167,7 @@ fn infix_abstract(left: Repr, middle: Repr, right: Repr) -> Repr {
 }
 
 fn infix_ask(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Ask(Box::new(AskRepr::new(
-        middle,
-        Repr::Pair(Box::new(PairRepr::new(left, right))),
-    )))
+    Repr::Ask(Box::new(AskRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
 
 fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
@@ -187,9 +178,7 @@ fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
 }
 
 fn test_parse(
-    src: &str,
-    file_name: &str,
-    expected: impl FnOnce() -> Vec<Repr>,
+    src: &str, file_name: &str, expected: impl FnOnce() -> Vec<Repr>,
 ) -> Result<(), Box<dyn Error>> {
     let mut expected = expected().into_iter();
     for [title, s] in parse_test_file::<2>(src, file_name) {
@@ -232,10 +221,7 @@ fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 
 fn test_parse_illegal(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     for [title, s] in parse_test_file::<2>(src, file_name) {
-        assert!(
-            parse(s).is_err(),
-            "file {file_name} case ({title}) src({s}): shouldn't parse"
-        );
+        assert!(parse(s).is_err(), "file {file_name} case ({title}) src({s}): shouldn't parse");
     }
     Ok(())
 }
@@ -250,21 +236,14 @@ fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             eprintln!("file {file_name} case ({title}): ({i2}) parse failed\n{e}");
             e
         })?;
-        assert_eq!(
-            i1, i2,
-            "file {file_name} case ({title}): expect({i2}) != real({i1})"
-        );
+        assert_eq!(i1, i2, "file {file_name} case ({title}): expect({i2}) != real({i1})");
     }
     Ok(())
 }
 
 #[test]
 fn test_parse_unit() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/unit.air"),
-        "test/unit.air",
-        unit::expected,
-    )
+    test_parse(include_str!("test/unit.air"), "test/unit.air", unit::expected)
 }
 
 #[test]
@@ -284,11 +263,7 @@ fn test_generate_bit() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_symbol() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/symbol.air"),
-        "test/symbol.air",
-        symbol::expected,
-    )
+    test_parse(include_str!("test/symbol.air"), "test/symbol.air", symbol::expected)
 }
 
 #[test]
@@ -298,11 +273,7 @@ fn test_generate_symbol() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_text() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/text.air"),
-        "test/text.air",
-        text::expected,
-    )
+    test_parse(include_str!("test/text.air"), "test/text.air", text::expected)
 }
 
 #[test]
@@ -322,11 +293,7 @@ fn test_generate_int() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_number() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/number.air"),
-        "test/number.air",
-        number::expected,
-    )
+    test_parse(include_str!("test/number.air"), "test/number.air", number::expected)
 }
 
 #[test]
@@ -336,11 +303,7 @@ fn test_generate_number() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_byte() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/byte.air"),
-        "test/byte.air",
-        byte::expected,
-    )
+    test_parse(include_str!("test/byte.air"), "test/byte.air", byte::expected)
 }
 
 #[test]
@@ -350,11 +313,7 @@ fn test_generate_byte() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_pair() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/pair.air"),
-        "test/pair.air",
-        pair::expected,
-    )
+    test_parse(include_str!("test/pair.air"), "test/pair.air", pair::expected)
 }
 
 #[test]
@@ -364,11 +323,7 @@ fn test_generate_pair() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_call() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/call.air"),
-        "test/call.air",
-        call::expected,
-    )
+    test_parse(include_str!("test/call.air"), "test/call.air", call::expected)
 }
 
 #[test]
@@ -378,11 +333,7 @@ fn test_generate_call() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_abstract() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/abstract.air"),
-        "test/abstract.air",
-        abstract1::expected,
-    )
+    test_parse(include_str!("test/abstract.air"), "test/abstract.air", abstract1::expected)
 }
 
 #[test]
@@ -402,11 +353,7 @@ fn test_generate_ask() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_change() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/change.air"),
-        "test/change.air",
-        change::expected,
-    )
+    test_parse(include_str!("test/change.air"), "test/change.air", change::expected)
 }
 
 #[test]
@@ -416,11 +363,7 @@ fn test_generate_change() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_scope() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/scope.air"),
-        "test/scope.air",
-        scope::expected,
-    )
+    test_parse(include_str!("test/scope.air"), "test/scope.air", scope::expected)
 }
 
 #[test]
@@ -430,11 +373,7 @@ fn test_generate_scope() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_parse_list() -> Result<(), Box<dyn Error>> {
-    test_parse(
-        include_str!("test/list.air"),
-        "test/list.air",
-        list::expected,
-    )
+    test_parse(include_str!("test/list.air"), "test/list.air", list::expected)
 }
 
 #[test]

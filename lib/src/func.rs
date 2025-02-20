@@ -12,9 +12,7 @@ pub(crate) trait FuncTrait: Transformer<Val, Val> {
     fn call(&self) -> Val;
 
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.transform(ctx, input)
     }
 }

@@ -33,8 +33,7 @@ pub(crate) trait CtxRef<'a> {
 #[allow(clippy::wrong_self_convention)]
 pub(crate) trait CtxMeta<'a>: CtxRef<'a> {
     type Reborrow<'b>: CtxMeta<'b>
-    where
-        Self: 'b;
+    where Self: 'b;
 
     fn reborrow(&mut self) -> Self::Reborrow<'_>;
 

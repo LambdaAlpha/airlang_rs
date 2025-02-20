@@ -53,9 +53,7 @@ pub enum FuncVal {
 
 impl Transformer<Val, Val> for FuncVal {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self {
             FuncVal::Mode(f) => f.transform(ctx, input),
             FuncVal::FreeCellPrim(f) => f.transform(ctx, input),
@@ -130,9 +128,7 @@ impl FuncTrait for FuncVal {
     }
 
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         match self {
             FuncVal::Mode(f) => f.transform_mut(ctx, input),
             FuncVal::FreeCellPrim(f) => f.transform_mut(ctx, input),
@@ -269,9 +265,7 @@ macro_rules! impl_const_func_trait {
     ($type1:ty) => {
         impl $crate::transformer::Transformer<$crate::val::Val, $crate::val::Val> for $type1 {
             fn transform<'a, Ctx>(&self, ctx: Ctx, input: $crate::val::Val) -> $crate::val::Val
-            where
-                Ctx: $crate::ctx::ref1::CtxMeta<'a>,
-            {
+            where Ctx: $crate::ctx::ref1::CtxMeta<'a> {
                 self.0.transform(ctx, input)
             }
         }
@@ -290,13 +284,9 @@ macro_rules! impl_const_func_trait {
             }
 
             fn transform_mut<'a, Ctx>(
-                &mut self,
-                ctx: Ctx,
-                input: $crate::val::Val,
+                &mut self, ctx: Ctx, input: $crate::val::Val,
             ) -> $crate::val::Val
-            where
-                Ctx: $crate::ctx::ref1::CtxMeta<'a>,
-            {
+            where Ctx: $crate::ctx::ref1::CtxMeta<'a> {
                 use $crate::transformer::Transformer;
                 self.0.transform(ctx, input)
             }

@@ -127,10 +127,7 @@ impl Ctx {
     }
 
     pub(crate) fn destruct(self) -> PubCtx {
-        PubCtx {
-            variables: self.variables,
-            solver: self.solver,
-        }
+        PubCtx { variables: self.variables, solver: self.solver }
     }
 
     pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
@@ -149,10 +146,7 @@ impl Ctx {
 
 impl Default for Ctx {
     fn default() -> Self {
-        Self {
-            variables: CtxMap::new(Map::default(), false),
-            solver: None,
-        }
+        Self { variables: CtxMap::new(Map::default(), false), solver: None }
     }
 }
 

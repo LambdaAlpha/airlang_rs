@@ -40,9 +40,7 @@ pub struct MutStaticPrimFunc {
 
 impl Transformer<Val, Val> for MutStaticPrimFunc {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.call(ctx.for_mut_fn(), input)
     }
 }
@@ -63,32 +61,13 @@ impl FuncTrait for MutStaticPrimFunc {
 
 impl MutStaticPrimFunc {
     pub fn new(id: Symbol, fn1: Rc<dyn MutStaticFn>, mode: FuncMode, cacheable: bool) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: true,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
     }
 
     pub(crate) fn new_inner(
-        id: Symbol,
-        fn1: Rc<dyn MutStaticFn>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Rc<dyn MutStaticFn>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: false,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
     }
 }
 
@@ -125,11 +104,7 @@ where
     Mut: Fn(MutCtx, Val) -> Val + 'static,
 {
     pub(crate) fn new(free_fn: Free, const_fn: Const, mut_fn: Mut) -> Self {
-        Self {
-            free_fn,
-            const_fn,
-            mut_fn,
-        }
+        Self { free_fn, const_fn, mut_fn }
     }
 }
 
@@ -149,8 +124,7 @@ where
 }
 
 impl<T> MutStaticFn for T
-where
-    T: Fn(MutFnCtx, Val) -> Val,
+where T: Fn(MutFnCtx, Val) -> Val
 {
     fn call(&self, ctx: MutFnCtx, input: Val) -> Val {
         self(ctx, input)

@@ -39,9 +39,7 @@ pub struct MutCellPrimFunc {
 
 impl Transformer<Val, Val> for MutCellPrimFunc {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.dyn_clone().call(ctx.for_mut_fn(), input)
     }
 }
@@ -60,46 +58,22 @@ impl FuncTrait for MutCellPrimFunc {
     }
 
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         self.fn1.call(ctx.for_mut_fn(), input)
     }
 }
 
 impl MutCellPrimFunc {
     pub fn new_extension(
-        id: Symbol,
-        fn1: Box<dyn MutCellFnExt>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Box<dyn MutCellFnExt>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: true,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
     }
 
     pub(crate) fn new(
-        id: Symbol,
-        fn1: Box<dyn MutCellFnExt>,
-        mode: FuncMode,
-        cacheable: bool,
+        id: Symbol, fn1: Box<dyn MutCellFnExt>, mode: FuncMode, cacheable: bool,
     ) -> Self {
-        Self {
-            prim: Primitive {
-                id,
-                is_extension: false,
-            },
-            fn1,
-            mode,
-            cacheable,
-        }
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
     }
 }
 

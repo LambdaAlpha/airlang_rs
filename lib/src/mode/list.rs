@@ -17,9 +17,7 @@ pub struct ListMode {
 
 impl Transformer<ListVal, Val> for ListMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
+    where Ctx: CtxMeta<'a> {
         FormCore::transform_list_head_tail(&self.head, &self.tail, ctx, list)
     }
 }
@@ -27,9 +25,6 @@ impl Transformer<ListVal, Val> for ListMode {
 impl From<UniMode> for ListMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        ListMode {
-            head: List::default(),
-            tail: m,
-        }
+        ListMode { head: List::default(), tail: m }
     }
 }
