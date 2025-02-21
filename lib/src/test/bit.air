@@ -1,27 +1,3 @@
-is_true
------
-do [a = any ; ., (a == true) == a is_true .]
------
-true
-=====
-is_true true
------
-true is_true .
------
-true : true
-=====
-is_false
------
-do [a = any ; ., (a == false) == a is_false .]
------
-true
-=====
-is_false false
------
-false is_false .
------
-false : true
-=====
 not true
 -----
 not true

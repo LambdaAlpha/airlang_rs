@@ -40,11 +40,9 @@ use crate::{
 pub(crate) struct CtrlPrelude {
     pub(crate) sequence: Named<FuncVal>,
     pub(crate) if1: Named<FuncVal>,
-    pub(crate) if_not: Named<FuncVal>,
     pub(crate) match1: Named<FuncVal>,
     pub(crate) match_ordered: Named<FuncVal>,
     pub(crate) while1: Named<FuncVal>,
-    pub(crate) while_not: Named<FuncVal>,
     pub(crate) for1: Named<FuncVal>,
 }
 
@@ -53,11 +51,9 @@ impl Default for CtrlPrelude {
         CtrlPrelude {
             sequence: sequence(),
             if1: if1(),
-            if_not: if_not(),
             match1: match1(),
             match_ordered: match_ordered(),
             while1: while1(),
-            while_not: while_not(),
             for1: for1(),
         }
     }
@@ -67,23 +63,15 @@ impl Prelude for CtrlPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.sequence.put(m);
         self.if1.put(m);
-        self.if_not.put(m);
         self.match1.put(m);
         self.match_ordered.put(m);
         self.while1.put(m);
-        self.while_not.put(m);
         self.for1.put(m);
     }
 }
 
-const BREAK_IF: &str = "break_if";
-const BREAK_IF_UNIT: &str = "break_if_.";
-const BREAK_IF_NOT: &str = "break_if_not";
-const BREAK_IF_NOT_UNIT: &str = "break_if_not_.";
-const CONTINUE_IF: &str = "continue_if";
-const CONTINUE_IF_UNIT: &str = "continue_if_.";
-const CONTINUE_IF_NOT: &str = "continue_if_not";
-const CONTINUE_IF_NOT_UNIT: &str = "continue_if_not_.";
+const BREAK: &str = "break";
+const CONTINUE: &str = "continue";
 
 #[derive(Copy, Clone)]
 enum Exit {
@@ -101,8 +89,7 @@ enum CtrlFlow {
 #[derive(Clone)]
 enum BlockItem {
     Normal(Val),
-    UnitExit { exit: Exit, target: bool, body: Val },
-    BitExit { exit: Exit, target: bool, condition: Val, body: Val },
+    Exit { exit: Exit, condition: Val, body: Val },
 }
 
 fn sequence() -> Named<FuncVal> {
@@ -155,39 +142,6 @@ where Ctx: CtxMeta<'a> {
     };
     let branches = Pair::from(branches);
     let branch = if b.bool() { branches.first } else { branches.second };
-    eval_block(ctx, branch).0
-}
-
-fn if_not() -> Named<FuncVal> {
-    let id = "if_not";
-    let f = MutDispatcher::new(
-        fn_if_not::<FreeCtx>,
-        |ctx, val| fn_if_not(ctx, val),
-        |ctx, val| fn_if_not(ctx, val),
-    );
-    let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
-}
-
-fn fn_if_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Pair(branches) = pair.second else {
-        return Val::default();
-    };
-    let condition = EVAL.transform(ctx.reborrow(), pair.first);
-    let Val::Bit(b) = condition else {
-        return Val::default();
-    };
-    let branches = Pair::from(branches);
-    let branch = if b.bool() { branches.second } else { branches.first };
     eval_block(ctx, branch).0
 }
 
@@ -345,66 +299,6 @@ where Ctx: CtxMeta<'a> {
     Val::default()
 }
 
-fn while_not() -> Named<FuncVal> {
-    let id = "while_not";
-    let f = MutDispatcher::new(
-        fn_while_not::<FreeCtx>,
-        |ctx, val| fn_while_not(ctx, val),
-        |ctx, val| fn_while_not(ctx, val),
-    );
-    let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
-}
-
-fn fn_while_not<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let condition = pair.first;
-    let body = pair.second;
-    if let Val::List(body) = body {
-        let body = List::from(body);
-        let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
-        let Some(block_items) = block_items else {
-            return Val::default();
-        };
-        loop {
-            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
-                return Val::default();
-            };
-            if b.bool() {
-                break;
-            }
-            let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
-            match ctrl_flow {
-                CtrlFlow::None => {}
-                CtrlFlow::Error => return Val::default(),
-                CtrlFlow::Exit(exit) => match exit {
-                    Exit::Continue => {}
-                    Exit::Break => return output,
-                },
-            }
-        }
-    } else {
-        loop {
-            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
-                return Val::default();
-            };
-            if b.bool() {
-                break;
-            }
-            EVAL.transform(ctx.reborrow(), body.clone());
-        }
-    }
-    Val::default()
-}
-
 fn for1() -> Named<FuncVal> {
     let id = "for";
     let f = MutDispatcher::new(
@@ -554,18 +448,12 @@ where Ctx: CtxMeta<'a> {
             BlockItem::Normal(val) => {
                 output = EVAL.transform(ctx.reborrow(), val);
             }
-            BlockItem::UnitExit { exit, target, body } => {
-                output = EVAL.transform(ctx.reborrow(), body);
-                if output.is_unit() == target {
-                    return (output, CtrlFlow::from(exit));
-                }
-            }
-            BlockItem::BitExit { exit, target, condition, body } => {
+            BlockItem::Exit { exit, condition, body } => {
                 let condition = EVAL.transform(ctx.reborrow(), condition);
                 let Val::Bit(condition) = condition else {
                     return (Val::default(), CtrlFlow::Error);
                 };
-                if condition.bool() == target {
+                if condition.bool() {
                     let output = EVAL.transform(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }
@@ -583,52 +471,27 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
     let Val::Symbol(s) = &call.func else {
         return Some(BlockItem::Normal(Val::Call(call)));
     };
-    let Some(ParseExit { is_unit, exit, target }) = parse_exit(s) else {
+    let Some(exit) = parse_exit(s) else {
         return Some(BlockItem::Normal(Val::Call(call)));
     };
     let call = Call::from(call);
-    let block_item = if is_unit {
-        let body = call.input;
-        BlockItem::UnitExit { exit, target, body }
-    } else {
-        let Val::Pair(pair) = call.input else {
-            return None;
-        };
-        let pair = Pair::from(pair);
-        let condition = pair.first;
-        let body = pair.second;
-        BlockItem::BitExit { exit, target, condition, body }
+    let Val::Pair(pair) = call.input else {
+        return None;
     };
+    let pair = Pair::from(pair);
+    let condition = pair.first;
+    let body = pair.second;
+    let block_item = BlockItem::Exit { exit, condition, body };
     Some(block_item)
 }
 
-struct ParseExit {
-    is_unit: bool,
-    exit: Exit,
-    target: bool,
-}
-
-impl ParseExit {
-    fn new(is_unit: bool, exit: Exit, target: bool) -> Self {
-        Self { is_unit, exit, target }
-    }
-}
-
-fn parse_exit(str: &str) -> Option<ParseExit> {
-    let (is_unit, exit, target) = match str {
-        BREAK_IF => (false, Exit::Break, true),
-        BREAK_IF_UNIT => (true, Exit::Break, true),
-        BREAK_IF_NOT => (false, Exit::Break, false),
-        BREAK_IF_NOT_UNIT => (true, Exit::Break, false),
-        CONTINUE_IF => (false, Exit::Continue, true),
-        CONTINUE_IF_UNIT => (true, Exit::Continue, true),
-        CONTINUE_IF_NOT => (false, Exit::Continue, false),
-        CONTINUE_IF_NOT_UNIT => (true, Exit::Continue, false),
-        _ => {
-            return None;
-        }
+fn parse_exit(str: &str) -> Option<Exit> {
+    let exit = match str {
+        BREAK => Exit::Break,
+        CONTINUE => Exit::Continue,
+        _ => return None,
     };
-    Some(ParseExit::new(is_unit, exit, target))
+    Some(exit)
 }
 
 impl From<Exit> for CtrlFlow {

@@ -29,7 +29,7 @@ length pop
 do [
     a = any ; list,
     l1 = a list.length .,
-    (l1 == 0) break_if true,
+    (l1 == 0) break true,
     i = (l1 + (any ; integer) % l1) % l1,
     a list.pop i,
     l2 = a list.length .,
@@ -44,7 +44,7 @@ do [
     a = any ; list,
     b = a,
     l = a list.length .,
-    (l == 0) break_if true,
+    (l == 0) break true,
     i = (l + (any ; integer) % l) % l,
     v1 = a list.get i,
     v2 = any ; .,
@@ -61,10 +61,10 @@ set_many get
 do [
     a = any ; list,
     la = a list.length .,
-    (la == 0) break_if true,
+    (la == 0) break true,
     b = any ; list,
     lb = b list.length .,
-    (lb == 0) break_if true,
+    (lb == 0) break true,
     (la < lb) if [
         t = a,
         a = b,

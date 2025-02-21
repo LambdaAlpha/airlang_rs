@@ -34,119 +34,47 @@ do [1, do [2, 3]]
 -----
 3
 =====
-do break_if true
+do break true
 -----
-do [1, 2, true break_if 3, 4]
+do [1, 2, true break 3, 4]
 -----
 3
 =====
-do break_if false
+do break false
 -----
-do [1, 2, false break_if 3, 4]
+do [1, 2, false break 3, 4]
 -----
 4
 =====
-do break_if_. .
+do break scope 1
 -----
-do [1, 2, break_if_. ., 3]
------
-.
-=====
-do break_if_. else
------
-do [1, 2, break_if_. 3, 4]
------
-4
-=====
-do break_if_not false
------
-do [1, 2, false break_if_not 3, 4]
------
-3
-=====
-do break_if_not true
------
-do [1, 2, true break_if_not 3, 4]
------
-4
-=====
-do break_if_not_. .
------
-do [1, 2, break_if_not_. ., 3]
------
-3
-=====
-do break_if_not_. else
------
-do [1, 2, break_if_not_. 3, 4]
------
-3
-=====
-do break_if scope 1
------
-do [1, do [2, true break_if 3, 4], 5]
+do [1, do [2, true break 3, 4], 5]
 -----
 5
 =====
-do break_if scope 2
+do break scope 2
 -----
-do [1, a = do ; [2, true break_if 3, 4], a + 2]
+do [1, a = do ; [2, true break 3, 4], a + 2]
 -----
 5
 =====
-do break_if eval
+do break eval
 -----
-do [b = 2, (b > 0) break_if b - 1, b + 1]
+do [b = 2, (b > 0) break b - 1, b + 1]
 -----
 1
 =====
-do continue_if true
+do continue true
 -----
-do [1, true continue_if 2, 3]
+do [1, true continue 2, 3]
 -----
 2
 =====
-do continue_if false
+do continue false
 -----
-do [1, false continue_if 2, 3]
+do [1, false continue 2, 3]
 -----
 3
-=====
-do continue_if_. .
------
-do [1, continue_if_. ., 2]
------
-.
-=====
-do continue_if_. else
------
-do [1, continue_if_. 2, 3]
------
-3
-=====
-do continue_if_not false
------
-do [1, false continue_if_not 2, 3]
------
-2
-=====
-do continue_if_not true
------
-do [1, true continue_if_not 2, 3]
------
-3
-=====
-do continue_if_not_. .
------
-do [1, continue_if_not_. ., 2]
------
-2
-=====
-do continue_if_not_. else
------
-do [1, continue_if_not_. 2, 3]
------
-2
 =====
 do list
 -----
@@ -160,33 +88,15 @@ true if 1 : 2
 -----
 1
 =====
-if_not true
------
-true if_not 1 : 2
------
-2
-=====
 if false
 -----
 false if 1 : 2
 -----
 2
 =====
-if_not false
------
-false if_not 1 : 2
------
-1
-=====
 if else .
 -----
 true if 1 : .
------
-1
-=====
-if_not else .
------
-false if_not 1 : .
 -----
 1
 =====
@@ -196,57 +106,27 @@ do [a = 1, true if 1 : a = 2, a]
 -----
 1
 =====
-if_not conditional eval
------
-do [a = 1, false if_not 1 : a = 2, a]
------
-1
-=====
 if recursive
 -----
 true if (false if 1 : 2) : 3
 -----
 2
 =====
-if_not recursive
+if break
 -----
-false if_not (true if_not 1 : 2) : 3
------
-2
-=====
-if break_if
------
-true if [1, true break_if 2, 3] : 4
+true if [1, true break 2, 3] : 4
 -----
 2
 =====
-if_not break_if
+if continue
 -----
-false if_not [1, true break_if 2, 3] : 4
------
-2
-=====
-if continue_if
------
-true if [1, true continue_if 2, 3] : 4
------
-2
-=====
-if_not continue_if
------
-false if_not [1, true continue_if 2, 3] : 4
+true if [1, true continue 2, 3] : 4
 -----
 2
 =====
 if list
 -----
 true if [[]] : .
------
-[]
-=====
-if_not list
------
-false if_not [[]] : .
 -----
 []
 =====
@@ -286,15 +166,15 @@ do [a = id ; a, a match {a : 1, b : 2} : .]
 -----
 1
 =====
-match break_if
+match break
 -----
-1 match {1 : [2, true break_if 3, 4]} : 5
+1 match {1 : [2, true break 3, 4]} : 5
 -----
 3
 =====
-match continue_if
+match continue
 -----
-1 match {1 : [2, true continue_if 3, 4]} : 5
+1 match {1 : [2, true continue 3, 4]} : 5
 -----
 3
 =====
@@ -329,15 +209,15 @@ do [
 -----
 [1, ., 2, 2, ., ., .]
 =====
-do_match break_if
+do_match break
 -----
-1 do_match [1 : [2, true break_if 3, 4]] : 5
+1 do_match [1 : [2, true break 3, 4]] : 5
 -----
 3
 =====
-do_match continue_if
+do_match continue
 -----
-1 do_match [1 : [2, true continue_if 3, 4]] : 5
+1 do_match [1 : [2, true continue 3, 4]] : 5
 -----
 3
 =====
@@ -347,32 +227,12 @@ do [a = 1, false while a = 2, a]
 -----
 1
 =====
-while_not true
------
-do [a = 1, true while_not a = 2, a]
------
-1
-=====
 while multiple
 -----
 do [
     a = 0,
     b = 0,
     (a < 100) while [
-        a = a + 17,
-        b = b + 1
-    ],
-    b
-]
------
-6
-=====
-while_not multiple
------
-do [
-    a = 0,
-    b = 0,
-    (a >= 100) while_not [
         a = a + 17,
         b = b + 1
     ],
@@ -396,29 +256,14 @@ do [
 -----
 6
 =====
-while_not if
------
-do [
-    a = 42,
-    b = 24,
-    (a == b) while_not (a > b) if (
-        a = a - b
-    ) : (
-        b = b - a
-    ),
-    a
-]
------
-6
-=====
-while continue_if
+while continue
 -----
 do [
     a = 0,
     b = 0,
     (b < 5) while [
         b = b + 1,
-        (b == 2) continue_if .,
+        (b == 2) continue .,
         a = a + b,
     ],
     a
@@ -426,100 +271,13 @@ do [
 -----
 13
 =====
-while_not continue_if
------
-do [
-    a = 0,
-    b = 0,
-    (b >= 5) while_not [
-        b = b + 1,
-        (b == 2) continue_if .,
-        a = a + b,
-    ],
-    a
-]
------
-13
-=====
-while continue_if_not
+while break
 -----
 do [
     a = 0,
     b = 0,
     (b < 5) while [
-        b = b + 1,
-        (b != 2) continue_if_not .,
-        a = a + b,
-    ],
-    a
-]
------
-13
-=====
-while_not continue_if_not
------
-do [
-    a = 0,
-    b = 0,
-    (b >= 5) while_not [
-        b = b + 1,
-        (b != 2) continue_if_not .,
-        a = a + b,
-    ],
-    a
-]
------
-13
-=====
-while break_if
------
-do [
-    a = 0,
-    b = 0,
-    (b < 5) while [
-        (a > 5) break_if a,
-        b = b + 1,
-        a = a + b,
-    ]
-]
------
-6
-=====
-while_not break_if
------
-do [
-    a = 0,
-    b = 0,
-    (b >= 5) while_not [
-        (a > 5) break_if a,
-        b = b + 1,
-        a = a + b,
-    ]
-]
------
-6
-=====
-while break_if_not
------
-do [
-    a = 0,
-    b = 0,
-    (b < 5) while [
-        (a <= 5) break_if_not a,
-        b = b + 1,
-        a = a + b,
-    ]
-]
------
-6
-=====
-while_not break_if_not
------
-do [
-    a = 0,
-    b = 0,
-    (b >= 5) while_not [
-        (a <= 5) break_if_not a,
+        (a > 5) break a,
         b = b + 1,
         a = a + b,
     ]
@@ -539,26 +297,26 @@ do [sum = 0, [] for i : sum = sum + i, sum]
 -----
 0
 =====
-for break_if 1
+for break 1
 -----
-[1, 2, 3, 4, 5] for i : [(i == 3) break_if true]
+[1, 2, 3, 4, 5] for i : [(i == 3) break true]
 -----
 true
 =====
-for break_if 2
+for break 2
 -----
-do [[1, 2, 3, 4, 5] for i : [(i == 3) break_if ., a = i], a]
+do [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
 -----
 2
 =====
-for continue_if
+for continue
 -----
 do [
     a = 0,
     b = 0,
     [1, 2, 3, 4, 5] for i : [
         a = a + i,
-        (i == 3) continue_if .,
+        (i == 3) continue .,
         b = b + i
     ],
     a : b

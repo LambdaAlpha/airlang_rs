@@ -3,7 +3,7 @@
     call : n -> do ; [
       .sum = 0,
       .n for .i : [
-        (0 == .i % 3) .continue_if .,
+        (0 == .i % 3) .continue .,
         .sum = .sum + .i,
       ],
       .sum

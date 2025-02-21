@@ -3,15 +3,3 @@ unit return .
 unit ; any ; .
 -----
 .
-=====
-is_unit
------
-do [a = any ; ., (a == .) == a is_unit .]
------
-true
-=====
-. is_unit .
------
-. is_unit .
------
-. : true

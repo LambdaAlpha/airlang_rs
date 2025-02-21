@@ -72,13 +72,13 @@ true
 =====
 0 /
 -----
-do [a = any ; integer, (a == 0) break_if true, 0 == 0 / a]
+do [a = any ; integer, (a == 0) break true, 0 == 0 / a]
 -----
 true
 =====
 0 %
 -----
-do [a = any ; integer, (a == 0) break_if true, 0 == 0 % a]
+do [a = any ; integer, (a == 0) break true, 0 == 0 % a]
 -----
 true
 =====
@@ -96,43 +96,43 @@ true
 =====
 % exact
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, 0 == (a ** b) % b]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, 0 == (a ** b) % b]
 -----
 true
 =====
 sign(a % b) == sign(a)
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (0 <= a) == 0 <= a % b]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, (0 <= a) == 0 <= a % b]
 -----
 true
 =====
 abs(a % b) < abs(b)
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (0 <= b) == 0 <= b + a % b]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, (0 <= b) == 0 <= b + a % b]
 -----
 true
 =====
 * /
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, a == <(a ** b / b)]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, a == <(a ** b / b)]
 -----
 true
 =====
 exact / *
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, c = a ** b, c == <(c / b ** b)]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, c = a ** b, c == <(c / b ** b)]
 -----
 true
 =====
 inexact / abs(a) > abs(a / b * b)
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (0 <= a) == 0 <= a - a / b ** b]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, (0 <= a) == 0 <= a - a / b ** b]
 -----
 true
 =====
 a == b * a / b + a % b
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, a == (b ** a / b) + a % b]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, a == (b ** a / b) + a % b]
 -----
 true
 =====
@@ -216,7 +216,7 @@ true
 =====
 a /% b == (a / b) : (a % b)
 -----
-do [a = any ; integer, b = any ; integer, (b == 0) break_if true, (a /% b) == (a / b) : (a % b)]
+do [a = any ; integer, b = any ; integer, (b == 0) break true, (a /% b) == (a / b) : (a % b)]
 -----
 true
 =====
