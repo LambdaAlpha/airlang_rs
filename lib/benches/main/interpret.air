@@ -2,7 +2,7 @@
   f = function ; {
     call : n -> do ; [
       .sum = 0,
-      .n for .i : [
+      .n for .i -> [
         (0 == .i % 3) .continue .,
         .sum = .sum + .i,
       ],

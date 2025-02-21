@@ -287,25 +287,25 @@ do [
 =====
 for list
 -----
-do [sum = 0, [1, 2, 3, 4, 5] for i : sum = sum + i, sum]
+do [sum = 0, [1, 2, 3, 4, 5] for i -> sum = sum + i, sum]
 -----
 15
 =====
 for empty list
 -----
-do [sum = 0, [] for i : sum = sum + i, sum]
+do [sum = 0, [] for i -> sum = sum + i, sum]
 -----
 0
 =====
 for break 1
 -----
-[1, 2, 3, 4, 5] for i : [(i == 3) break true]
+[1, 2, 3, 4, 5] for i -> [(i == 3) break true]
 -----
 true
 =====
 for break 2
 -----
-do [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
+do [[1, 2, 3, 4, 5] for i -> [(i == 3) break ., a = i], a]
 -----
 2
 =====
@@ -314,7 +314,7 @@ for continue
 do [
     a = 0,
     b = 0,
-    [1, 2, 3, 4, 5] for i : [
+    [1, 2, 3, 4, 5] for i -> [
         a = a + i,
         (i == 3) continue .,
         b = b + i
@@ -326,48 +326,48 @@ do [
 =====
 for list map
 -----
-do [a = [], [1, 2, 3, 4, 5] for i : a list.push i + 1, a]
+do [a = [], [1, 2, 3, 4, 5] for i -> a list.push i + 1, a]
 -----
 [2, 3, 4, 5, 6]
 =====
 for integer
 -----
-do [sum = 0, 10 for i : sum = sum + i, sum]
+do [sum = 0, 10 for i -> sum = sum + i, sum]
 -----
 45
 =====
 for integer 0
 -----
-do [sum = 0, 0 for i : sum = sum + i, sum]
+do [sum = 0, 0 for i -> sum = sum + i, sum]
 -----
 0
 =====
 for integer negative
 -----
--1 for i : .
+-1 for i -> .
 -----
 .
 =====
 for byte
 -----
-do [b = [], byte(1122334455) for i : b list.push i, b]
+do [b = [], byte(1122334455) for i -> b list.push i, b]
 -----
 [byte(11), byte(22), byte(33), byte(44), byte(55)]
 =====
 for symbol
 -----
-do [s = [], .abc for i : s list.push i, s]
+do [s = [], .abc for i -> s list.push i, s]
 -----
 [a, b, c]
 =====
 for text
 -----
-do [t = [], "hello" for i : t list.push i, t]
+do [t = [], "hello" for i -> t list.push i, t]
 -----
 ["h", "e", "l", "l", "o"]
 =====
 for map
 -----
-do [kv = [], {1 : 2, 3 : 4} for i : kv list.push i, kv]
+do [kv = [], {1 : 2, 3 : 4} for i -> kv list.push i, kv]
 -----
 [1 : 2, 3 : 4]
