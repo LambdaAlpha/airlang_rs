@@ -2,15 +2,12 @@ use crate::{
     Byte,
     Call,
     Change,
-    CodeMode,
     FuncMode,
     Int,
     List,
     Map,
-    MapMode,
     Pair,
     Symbol,
-    SymbolMode,
     Text,
     ctx::{
         free::FreeCtx,
@@ -42,21 +39,13 @@ pub(crate) struct CtrlPrelude {
     pub(crate) do1: Named<FuncVal>,
     pub(crate) if1: Named<FuncVal>,
     pub(crate) match1: Named<FuncVal>,
-    pub(crate) match_ordered: Named<FuncVal>,
     pub(crate) loop1: Named<FuncVal>,
     pub(crate) for1: Named<FuncVal>,
 }
 
 impl Default for CtrlPrelude {
     fn default() -> Self {
-        CtrlPrelude {
-            do1: do1(),
-            if1: if1(),
-            match1: match1(),
-            match_ordered: match_ordered(),
-            loop1: loop1(),
-            for1: for1(),
-        }
+        CtrlPrelude { do1: do1(), if1: if1(), match1: match1(), loop1: loop1(), for1: for1() }
     }
 }
 
@@ -65,7 +54,6 @@ impl Prelude for CtrlPrelude {
         self.do1.put(m);
         self.if1.put(m);
         self.match1.put(m);
-        self.match_ordered.put(m);
         self.loop1.put(m);
         self.for1.put(m);
     }
@@ -175,69 +163,14 @@ where Ctx: CtxMeta<'a> {
     let Val::Map(map) = pair.first else {
         return Val::default();
     };
-    let map_mode = MapMode {
-        some: Map::default(),
-        else1: Pair::new(FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref), FuncMode::id_mode()),
-    };
-    let map = map_mode.transform(ctx.reborrow(), map);
-    let Val::Map(map) = map else { unreachable!() };
-    let default = pair.second;
-    let mut map = Map::from(map);
-    let eval = map.remove(&val).unwrap_or(default);
-    eval_block(ctx, eval).0
-}
-
-fn match_ordered() -> Named<FuncVal> {
-    let id = "do_match";
-    let f = MutDispatcher::new(
-        fn_match_ordered::<FreeCtx>,
-        |ctx, val| fn_match_ordered(ctx, val),
-        |ctx, val| fn_match_ordered(ctx, val),
-    );
-    let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
-}
-
-fn fn_match_ordered<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let val = EVAL.transform(ctx.reborrow(), pair.first);
-    let Val::Pair(pair) = pair.second else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::List(list) = pair.first else {
-        return Val::default();
-    };
-    let list = List::from(list);
-    let arms = list
+    let eval = Map::from(map)
         .into_iter()
-        .map(|val| {
-            let Val::Pair(pair) = val else {
-                return None;
-            };
-            Some(pair)
+        .find_map(|(k, v)| {
+            let k = EVAL.transform(ctx.reborrow(), k);
+            if k == val { Some(v) } else { None }
         })
-        .collect::<Option<Vec<_>>>();
-    let Some(arms) = arms else {
-        return Val::default();
-    };
-    for arm in arms {
-        let arm = Pair::from(arm);
-        let v = EVAL.transform(ctx.reborrow(), arm.first);
-        if v == val {
-            return eval_block(ctx, arm.second).0;
-        }
-    }
-    let default = pair.second;
-    eval_block(ctx, default).0
+        .unwrap_or(pair.second);
+    eval_block(ctx, eval).0
 }
 
 fn loop1() -> Named<FuncVal> {

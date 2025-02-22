@@ -196,31 +196,6 @@ true match {true : 1, false : 2} : 3
 -----
 1
 =====
-do_match order eval
------
-do [
-    2 do_match [
-        (a = 1) : b = 1,
-        (do [c = 2, 2]) : d = 2,
-        (e = 3) : f = 3
-    ] : g = 4,
-    [a, b, c, d, e, f, g]
-]
------
-[1, ., 2, 2, ., ., .]
-=====
-do_match break
------
-1 do_match [1 : [2, true break 3, 4]] : 5
------
-3
-=====
-do_match continue
------
-1 do_match [1 : [2, true continue 3, 4]] : 5
------
-3
-=====
 loop false
 -----
 do [a = 1, false loop a = 2, a]
