@@ -78,12 +78,11 @@ pub(crate) struct ValuePrelude {
     pub(crate) any: Named<FuncVal>,
     pub(crate) type1: Named<FuncVal>,
     pub(crate) equal: Named<FuncVal>,
-    pub(crate) not_equal: Named<FuncVal>,
 }
 
 impl Default for ValuePrelude {
     fn default() -> Self {
-        ValuePrelude { any: any(), type1: type1(), equal: equal(), not_equal: not_equal() }
+        ValuePrelude { any: any(), type1: type1(), equal: equal() }
     }
 }
 
@@ -92,7 +91,6 @@ impl Prelude for ValuePrelude {
         self.any.put(m);
         self.type1.put(m);
         self.equal.put(m);
-        self.not_equal.put(m);
     }
 }
 
@@ -205,38 +203,6 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
                 return Val::default();
             };
             Val::Bit(Bit::new(*v1 == *v2))
-        })
-    })
-}
-
-fn not_equal() -> Named<FuncVal> {
-    let id = "!=";
-    let f = fn_not_equal;
-    let call = FuncMode::pair_mode(ref_mode(), ref_mode());
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
-}
-
-fn fn_not_equal(ctx: ConstFnCtx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let left = DefaultCtx::ref_or_val(pair.first);
-    let right = DefaultCtx::ref_or_val(pair.second);
-    let ctx = ctx.borrow();
-    get_by_ref(ctx, left, |v1| {
-        let Some(v1) = v1 else {
-            return Val::default();
-        };
-        get_by_ref(ctx, right, |v2| {
-            let Some(v2) = v2 else {
-                return Val::default();
-            };
-            Val::Bit(Bit::new(*v1 != *v2))
         })
     })
 }

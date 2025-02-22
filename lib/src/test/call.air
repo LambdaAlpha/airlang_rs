@@ -47,24 +47,6 @@ do [
 -----
 true
 =====
-;; id
------
-do [a = (function {call_mode : id}) ;; b, a call.input .]
------
-b
-=====
-;; form.
------
-do [a = (function {call_mode : form.}) ;; .b, a call.input .]
------
-b
-=====
-;; eval*
------
-do [a = (function {call_mode : eval*}) ;; id ; b, a call.input .]
------
-b
-=====
 apply const
 -----
 call.apply ; form* ; 1 + 1

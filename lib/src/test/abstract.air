@@ -47,24 +47,6 @@ do [
 -----
 true
 =====
-!! id
------
-do [a = (function {abstract_mode : id}) !! b, a abstract.input .]
------
-b
-=====
-!! form.
------
-do [a = (function {abstract_mode : form.}) !! .b, a abstract.input .]
------
-b
-=====
-!! eval*
------
-do [a = (function {abstract_mode : eval*}) !! id ; b, a abstract.input .]
------
-b
-=====
 apply
 -----
 do [c = id ; 1 ! 2, abstract.apply ^c]

@@ -1,7 +1,5 @@
 use std::mem::swap;
 
-use const_format::concatcp;
-
 use crate::{
     Call,
     ConstFnCtx,
@@ -19,7 +17,6 @@ use crate::{
         ref1::CtxMeta,
     },
     func::mut_static_prim::MutDispatcher,
-    mode::eval::EVAL,
     prelude::{
         Named,
         Prelude,
@@ -28,10 +25,7 @@ use crate::{
         named_mut_fn,
         ref_pair_mode,
     },
-    syntax::{
-        CALL,
-        CALL_CHAR,
-    },
+    syntax::CALL,
     types::either::Either,
     val::func::FuncVal,
 };
@@ -39,7 +33,6 @@ use crate::{
 #[derive(Clone)]
 pub(crate) struct CallPrelude {
     pub(crate) new: Named<FuncVal>,
-    pub(crate) new_dependent: Named<FuncVal>,
     pub(crate) apply: Named<FuncVal>,
     pub(crate) get_func: Named<FuncVal>,
     pub(crate) set_func: Named<FuncVal>,
@@ -51,7 +44,6 @@ impl Default for CallPrelude {
     fn default() -> Self {
         CallPrelude {
             new: new(),
-            new_dependent: new_dependent(),
             apply: apply(),
             get_func: get_func(),
             set_func: set_func(),
@@ -64,7 +56,6 @@ impl Default for CallPrelude {
 impl Prelude for CallPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
-        self.new_dependent.put(m);
         self.apply.put(m);
         self.get_func.put(m);
         self.set_func.put(m);
@@ -87,28 +78,6 @@ fn fn_new(input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     Val::Call(Call::new(pair.first, pair.second).into())
-}
-
-fn new_dependent() -> Named<FuncVal> {
-    let id = concatcp!(CALL_CHAR, CALL_CHAR);
-    let f = fn_new_dependent;
-    let call = FuncMode::pair_mode(FuncMode::default_mode(), FuncMode::id_mode());
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
-}
-
-fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let func = pair.first;
-    let input = pair.second;
-    let input = EvalCore::call_eval_input(&EVAL, ctx, &func, input);
-    Val::Call(Call::new(func, input).into())
 }
 
 fn apply() -> Named<FuncVal> {

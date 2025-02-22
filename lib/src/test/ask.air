@@ -46,21 +46,3 @@ do [
 ]
 -----
 true
-=====
-?? id
------
-do [a = (function {ask_mode : id}) ?? b, a ask.output .]
------
-b
-=====
-?? form.
------
-do [a = (function {ask_mode : form.}) ?? .b, a ask.output .]
------
-b
-=====
-?? eval*
------
-do [a = (function {ask_mode : eval*}) ?? id ; b, a ask.output .]
------
-b

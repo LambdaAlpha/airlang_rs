@@ -262,6 +262,7 @@ impl EvalCore {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn call_eval_input<'a, Ctx, Input>(
         input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
     ) -> Val
@@ -357,6 +358,7 @@ impl EvalCore {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn abstract_eval_input<'a, Ctx, Input>(
         input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
     ) -> Val
@@ -415,6 +417,7 @@ impl EvalCore {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn ask_eval_output<'a, Ctx, Output>(
         output_trans: &Output, ctx: Ctx, func: &Val, output: Val,
     ) -> Val

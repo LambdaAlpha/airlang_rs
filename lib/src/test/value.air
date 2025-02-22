@@ -1,20 +1,8 @@
-== !=
------
-do [a = any ; ., b = any ; ., (a == b) or (a != b)]
------
-true
-=====
 == true
 -----
 do [a = any ; ., b = a, a == b]
 -----
 true
-=====
-!= false
------
-do [a = any ; ., b = a, a != b]
------
-false
 =====
 any unit
 -----
@@ -270,7 +258,7 @@ true
 =====
 == abstract
 -----
-do [a = id ; f ! i, b = id ; f ! i, (a == b) and a != .]
+do [a = id ; f ! i, b = id ; f ! i, (a == b) and not ; a == .]
 -----
 true
 =====
@@ -300,13 +288,13 @@ true
 =====
 == context
 -----
-do [a = context ; {}, b = context ; {}, (a == b) and a != .]
+do [a = context ; {}, b = context ; {}, (a == b) and not ; a == .]
 -----
 true
 =====
 == function
 -----
-do [a = function ; {body : *input}, b = function ; {body : *input}, (a == b) and a != .]
+do [a = function ; {body : *input}, b = function ; {body : *input}, (a == b) and not ; a == .]
 -----
 true
 =====
@@ -322,29 +310,11 @@ true
 -----
 false
 =====
-!= diff type
------
-1 != "a"
------
-true
-=====
-!= self
------
-1 != 1
------
-false
-=====
 == ref val
 -----
 do [a = 1, a == 1]
 -----
 true
-=====
-!= ref val
------
-do [a = 1, a != 1]
------
-false
 =====
 == val ref
 -----
@@ -352,23 +322,11 @@ do [a = 1, 1 == a]
 -----
 true
 =====
-!= val ref
------
-do [a = 1, 1 != a]
------
-false
-=====
 == ref ref
 -----
 do [a = 1, b = 1, a == b]
 -----
 true
-=====
-!= ref ref
------
-do [a = 1, b = 1, a != b]
------
-false
 =====
 == same ref
 -----
@@ -376,21 +334,9 @@ do [a = 1, a == a]
 -----
 true
 =====
-!= same ref
------
-do [a = 1, a != a]
------
-false
-=====
 == null null
 -----
 a == b
------
-.
-=====
-!= null null
------
-a != b
 -----
 .
 =====

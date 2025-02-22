@@ -1,7 +1,5 @@
 use std::mem::swap;
 
-use const_format::concatcp;
-
 use crate::{
     Abstract,
     ConstFnCtx,
@@ -20,7 +18,6 @@ use crate::{
         ref1::CtxMeta,
     },
     func::mut_static_prim::MutDispatcher,
-    mode::eval::EVAL,
     prelude::{
         Named,
         Prelude,
@@ -29,17 +26,13 @@ use crate::{
         named_mut_fn,
         ref_pair_mode,
     },
-    syntax::{
-        ABSTRACT,
-        ABSTRACT_CHAR,
-    },
+    syntax::ABSTRACT,
     types::either::Either,
 };
 
 #[derive(Clone)]
 pub(crate) struct AbstractPrelude {
     pub(crate) new: Named<FuncVal>,
-    pub(crate) new_dependent: Named<FuncVal>,
     pub(crate) apply: Named<FuncVal>,
     pub(crate) get_func: Named<FuncVal>,
     pub(crate) set_func: Named<FuncVal>,
@@ -51,7 +44,6 @@ impl Default for AbstractPrelude {
     fn default() -> Self {
         AbstractPrelude {
             new: new(),
-            new_dependent: new_dependent(),
             apply: apply(),
             get_func: get_func(),
             set_func: set_func(),
@@ -64,7 +56,6 @@ impl Default for AbstractPrelude {
 impl Prelude for AbstractPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
-        self.new_dependent.put(m);
         self.apply.put(m);
         self.get_func.put(m);
         self.set_func.put(m);
@@ -87,28 +78,6 @@ fn fn_new(input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     Val::Abstract(Abstract::new(pair.first, pair.second).into())
-}
-
-fn new_dependent() -> Named<FuncVal> {
-    let id = concatcp!(ABSTRACT_CHAR, ABSTRACT_CHAR);
-    let f = fn_new_dependent;
-    let call = FuncMode::pair_mode(FuncMode::default_mode(), FuncMode::id_mode());
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
-}
-
-fn fn_new_dependent(ctx: MutFnCtx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let func = pair.first;
-    let input = pair.second;
-    let input = EvalCore::abstract_eval_input(&EVAL, ctx, &func, input);
-    Val::Abstract(Abstract::new(func, input).into())
 }
 
 fn apply() -> Named<FuncVal> {
