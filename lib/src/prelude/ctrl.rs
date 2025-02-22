@@ -39,22 +39,22 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct CtrlPrelude {
-    pub(crate) sequence: Named<FuncVal>,
+    pub(crate) do1: Named<FuncVal>,
     pub(crate) if1: Named<FuncVal>,
     pub(crate) match1: Named<FuncVal>,
     pub(crate) match_ordered: Named<FuncVal>,
-    pub(crate) while1: Named<FuncVal>,
+    pub(crate) loop1: Named<FuncVal>,
     pub(crate) for1: Named<FuncVal>,
 }
 
 impl Default for CtrlPrelude {
     fn default() -> Self {
         CtrlPrelude {
-            sequence: sequence(),
+            do1: do1(),
             if1: if1(),
             match1: match1(),
             match_ordered: match_ordered(),
-            while1: while1(),
+            loop1: loop1(),
             for1: for1(),
         }
     }
@@ -62,11 +62,11 @@ impl Default for CtrlPrelude {
 
 impl Prelude for CtrlPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.sequence.put(m);
+        self.do1.put(m);
         self.if1.put(m);
         self.match1.put(m);
         self.match_ordered.put(m);
-        self.while1.put(m);
+        self.loop1.put(m);
         self.for1.put(m);
     }
 }
@@ -93,12 +93,12 @@ enum BlockItem {
     Exit { exit: Exit, condition: Val, body: Val },
 }
 
-fn sequence() -> Named<FuncVal> {
+fn do1() -> Named<FuncVal> {
     let id = "do";
     let f = MutDispatcher::new(
-        fn_sequence::<FreeCtx>,
-        |ctx, val| fn_sequence(ctx, val),
-        |ctx, val| fn_sequence(ctx, val),
+        fn_do::<FreeCtx>,
+        |ctx, val| fn_do(ctx, val),
+        |ctx, val| fn_do(ctx, val),
     );
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
@@ -108,7 +108,7 @@ fn sequence() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_sequence<'a, Ctx>(ctx: Ctx, input: Val) -> Val
+fn fn_do<'a, Ctx>(ctx: Ctx, input: Val) -> Val
 where Ctx: CtxMeta<'a> {
     eval_block(ctx, input).0
 }
@@ -240,12 +240,12 @@ where Ctx: CtxMeta<'a> {
     eval_block(ctx, default).0
 }
 
-fn while1() -> Named<FuncVal> {
-    let id = "while";
+fn loop1() -> Named<FuncVal> {
+    let id = "loop";
     let f = MutDispatcher::new(
-        fn_while::<FreeCtx>,
-        |ctx, val| fn_while(ctx, val),
-        |ctx, val| fn_while(ctx, val),
+        fn_loop::<FreeCtx>,
+        |ctx, val| fn_loop(ctx, val),
+        |ctx, val| fn_loop(ctx, val),
     );
     let call = FuncMode::id_mode();
     let abstract1 = call.clone();
@@ -255,7 +255,7 @@ fn while1() -> Named<FuncVal> {
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_while<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
+fn fn_loop<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
 where Ctx: CtxMeta<'a> {
     let Val::Pair(pair) = input else {
         return Val::default();

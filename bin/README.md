@@ -34,7 +34,7 @@ The Air language seeks to solve programming problems once and for all. It should
 ## Demo
 
 ```air
-"A demo of implementing a C-like for loop function" ! do ; [
+"A demo of implementing a C-like for function" ! do ; [
     c_for = function ; {
         context_access : mutable,
         call_mode : id,
@@ -42,7 +42,7 @@ The Air language seeks to solve programming problems once and for all. It should
             [.init, .condition, .next, .body] = .args,
             .ctx | do ; [
                 .init,
-                .condition while [
+                .condition loop [
                     .body,
                     .next,
                 ],

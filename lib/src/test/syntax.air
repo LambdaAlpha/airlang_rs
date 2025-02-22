@@ -5,7 +5,7 @@ do [
     composite = [':', ';', '!', '?'],
     i = 3 + (any ; integer) % 4,
     a = atom list.get i,
-    (any ; bit) while (any ; bit) if [
+    (any ; bit) loop (any ; bit) if [
         i = 3 + (any ; integer) % 4,
         b = atom list.get i,
         i = (4 + (any ; integer) % 4) % 4,

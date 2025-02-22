@@ -1,6 +1,6 @@
 readme demo
 -----
-"A demo of implementing a C-like for loop function" ! do ; [
+"A demo of implementing a C-like for function" ! do ; [
     c_for = function ; {
         context_access : mutable,
         call_mode : id,
@@ -8,7 +8,7 @@ readme demo
             [.init, .condition, .next, .body] = .args,
             .ctx | do ; [
                 .init,
-                .condition while [
+                .condition loop [
                     .body,
                     .next,
                 ],

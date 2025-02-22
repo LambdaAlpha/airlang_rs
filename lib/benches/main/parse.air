@@ -1,7 +1,7 @@
 "bench parse" ! do ; [
   x = 42,
   y = 24,
-  (x <> y) while (x > y) if (
+  (x <> y) loop (x > y) if (
     x = x - y
   ) : (
     y = y - x

@@ -221,18 +221,18 @@ do_match continue
 -----
 3
 =====
-while false
+loop false
 -----
-do [a = 1, false while a = 2, a]
+do [a = 1, false loop a = 2, a]
 -----
 1
 =====
-while multiple
+loop multiple
 -----
 do [
     a = 0,
     b = 0,
-    (a < 100) while [
+    (a < 100) loop [
         a = a + 17,
         b = b + 1
     ],
@@ -241,12 +241,12 @@ do [
 -----
 6
 =====
-while if
+loop if
 -----
 do [
     a = 42,
     b = 24,
-    (a <> b) while (a > b) if (
+    (a <> b) loop (a > b) if (
         a = a - b
     ) : (
         b = b - a
@@ -256,12 +256,12 @@ do [
 -----
 6
 =====
-while continue
+loop continue
 -----
 do [
     a = 0,
     b = 0,
-    (b < 5) while [
+    (b < 5) loop [
         b = b + 1,
         (b == 2) continue .,
         a = a + b,
@@ -271,12 +271,12 @@ do [
 -----
 13
 =====
-while break
+loop break
 -----
 do [
     a = 0,
     b = 0,
-    (b < 5) while [
+    (b < 5) loop [
         (a > 5) break a,
         b = b + 1,
         a = a + b,
