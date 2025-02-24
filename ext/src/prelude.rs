@@ -77,7 +77,7 @@ impl<T: Into<Val> + Clone> Named<T> {
     }
 }
 
-#[expect(unused)]
+#[expect(dead_code)]
 fn named_free_cell_fn(
     name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
@@ -88,7 +88,7 @@ fn named_free_cell_fn(
     Named::new(name, FuncVal::FreeCellPrim(func_val))
 }
 
-#[expect(unused)]
+#[expect(dead_code)]
 fn named_const_cell_fn(
     name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {
@@ -99,7 +99,7 @@ fn named_const_cell_fn(
     Named::new(name, FuncVal::ConstCellPrim(func_val))
 }
 
-#[expect(unused)]
+#[expect(dead_code)]
 fn named_mut_cell_fn(
     name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, cacheable: bool,
 ) -> Named<FuncVal> {

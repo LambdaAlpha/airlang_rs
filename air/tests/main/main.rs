@@ -14,7 +14,7 @@ const SUB_DELIMITER: &str = "-----";
 
 const MAIN_NAME: &str = "main";
 
-#[expect(unused)]
+#[expect(dead_code)]
 fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     if input.is_empty() {
         return Ok(());

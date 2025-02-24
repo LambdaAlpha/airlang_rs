@@ -102,7 +102,7 @@ where
     Free: Fn(FreeCtx, Val) -> Val + 'static,
     Const: Fn(ConstCtx, Val) -> Val + 'static,
 {
-    #[expect(unused)]
+    #[expect(dead_code)]
     pub(crate) fn new(free_fn: Free, const_fn: Const) -> Self {
         Self { free_fn, const_fn }
     }

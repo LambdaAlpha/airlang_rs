@@ -21,10 +21,10 @@ pub(crate) trait CtxRef<'a> {
 
     fn get_solver(self) -> Result<&'a FuncVal, CtxError>;
 
-    #[allow(unused)]
+    #[allow(dead_code)]
     fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError>;
 
-    #[allow(unused)]
+    #[allow(dead_code)]
     fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
 
     fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError>;
@@ -39,10 +39,10 @@ pub(crate) trait CtxMeta<'a>: CtxRef<'a> {
 
     fn borrow(&self) -> Option<&Ctx>;
 
-    #[expect(unused)]
+    #[expect(dead_code)]
     fn is_ctx_free(self) -> bool;
 
-    #[expect(unused)]
+    #[expect(dead_code)]
     fn is_ctx_const(self) -> bool;
 
     fn for_const_fn(self) -> ConstFnCtx<'a>;

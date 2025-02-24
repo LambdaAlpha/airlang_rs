@@ -4,12 +4,12 @@ macro_rules! box_wrap {
         $visibility struct $name(::std::boxed::Box<$value>);
 
         impl $name {
-            #[allow(unused)]
+            #[allow(dead_code)]
             pub(crate) fn new(value: ::std::boxed::Box<$value>) -> Self {
                 Self(value)
             }
 
-            #[allow(unused)]
+            #[allow(dead_code)]
             pub(crate) fn unwrap(self) -> ::std::boxed::Box<$value> {
                 self.0
             }
@@ -57,12 +57,12 @@ macro_rules! rc_wrap {
         $visibility struct $name(::std::rc::Rc<$value>);
 
         impl $name {
-            #[allow(unused)]
+            #[allow(dead_code)]
             pub(crate) fn new(value: ::std::rc::Rc<$value>) -> Self {
                 Self(value)
             }
 
-            #[allow(unused)]
+            #[allow(dead_code)]
             pub(crate) fn unwrap(self) -> ::std::rc::Rc<$value> {
                 self.0
             }

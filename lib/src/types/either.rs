@@ -4,7 +4,7 @@ pub(crate) enum Either<This, That> {
     That(That),
 }
 
-#[expect(unused)]
+#[expect(dead_code)]
 impl<This, That> Either<This, That> {
     pub(crate) fn is_this(&self) -> bool {
         matches!(self, Either::This(_))

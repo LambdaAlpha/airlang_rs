@@ -83,8 +83,8 @@ impl DefaultCtx {
         }
     }
 
-    #[expect(unused)]
-    pub(crate) fn with_ref<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
+    #[expect(dead_code)]
+    pub(crate) fn with_ref<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
         F: FnOnce(&Val) -> T, {
@@ -125,8 +125,8 @@ impl DefaultCtx {
         }
     }
 
-    #[expect(unused)]
-    pub(crate) fn with_ref_mut<'a, Ctx, T, F>(mut ctx: Ctx, name: Val, f: F) -> T
+    #[expect(dead_code)]
+    pub(crate) fn with_ref_mut<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,
         F: FnOnce(&mut Val) -> T, {

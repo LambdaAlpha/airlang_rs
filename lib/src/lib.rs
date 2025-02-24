@@ -56,7 +56,7 @@ pub(crate) mod types;
 
 pub(crate) mod traits;
 
-#[expect(unused)]
+#[expect(dead_code)]
 pub(crate) mod utils;
 
 #[cfg(test)]

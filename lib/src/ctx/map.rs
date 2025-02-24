@@ -249,7 +249,7 @@ impl<'l> CtxMapRef<'l> for &'l CtxMap {
     }
 }
 
-#[expect(unused)]
+#[expect(dead_code)]
 impl CtxValue {
     pub(crate) fn new(val: Val) -> CtxValue {
         CtxValue { access: VarAccess::Assign, static1: false, val }
