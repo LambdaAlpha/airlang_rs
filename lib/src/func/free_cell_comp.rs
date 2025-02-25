@@ -20,7 +20,9 @@ impl Transformer<Val, Val> for FreeCellCompFunc {
     fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
         let inner = &mut self.comp.ctx.clone();
-        Composite::put_input(inner, self.comp.input_name.clone(), input);
+        if Composite::put_input(inner, self.comp.input_name.clone(), input).is_err() {
+            return Val::default();
+        }
         Composite::transform(inner, self.comp.body.clone())
     }
 }
@@ -41,7 +43,9 @@ impl FuncTrait for FreeCellCompFunc {
     fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
         let inner = &mut self.comp.ctx;
-        Composite::put_input(inner, self.comp.input_name.clone(), input);
+        if Composite::put_input(inner, self.comp.input_name.clone(), input).is_err() {
+            return Val::default();
+        }
         Composite::transform(inner, self.comp.body.clone())
     }
 }

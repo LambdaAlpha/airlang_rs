@@ -3,6 +3,7 @@ use std::mem::take;
 use crate::{
     Change,
     Ctx,
+    CtxError,
     CtxVal,
     MutCtx,
     Symbol,
@@ -24,8 +25,11 @@ pub(crate) struct Composite {
 }
 
 impl Composite {
-    pub(crate) fn put_input(inner: &mut Ctx, input_name: Symbol, input: Val) {
-        let _ = inner.variables_mut().put_value(input_name, CtxValue::new(input));
+    pub(crate) fn put_input(
+        inner: &mut Ctx, input_name: Symbol, input: Val,
+    ) -> Result<(), CtxError> {
+        let _ = inner.variables_mut().put_value(input_name, CtxValue::new(input))?;
+        Ok(())
     }
 
     pub(crate) fn transform(ctx: &mut Ctx, body: Val) -> Val {
