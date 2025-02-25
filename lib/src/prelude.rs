@@ -82,10 +82,10 @@ pub(crate) struct AllPrelude {
     pub(crate) number: NumberPrelude,
     pub(crate) byte: BytePrelude,
     pub(crate) pair: PairPrelude,
+    pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
     pub(crate) abstract1: AbstractPrelude,
     pub(crate) ask: AskPrelude,
-    pub(crate) change: ChangePrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) ctx: CtxPrelude,
@@ -107,10 +107,10 @@ impl Prelude for AllPrelude {
         self.number.put(m);
         self.byte.put(m);
         self.pair.put(m);
+        self.change.put(m);
         self.call.put(m);
         self.abstract1.put(m);
         self.ask.put(m);
-        self.change.put(m);
         self.list.put(m);
         self.map.put(m);
         self.ctx.put(m);
@@ -289,13 +289,13 @@ mod byte;
 
 mod pair;
 
+mod change;
+
 mod call;
 
 mod abstract1;
 
 mod ask;
-
-mod change;
 
 mod list;
 

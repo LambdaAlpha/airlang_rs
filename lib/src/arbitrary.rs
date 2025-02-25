@@ -102,10 +102,10 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // number
         weight, // byte
         1,      // pair
+        1,      // change
         1,      // call
         1,      // abstract
         1,      // ask
-        1,      // change
         1,      // list
         1,      // map
         1,      // ctx
@@ -124,10 +124,10 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         5 => Val::Number(any_number(rng).into()),
         6 => Val::Byte(any_byte(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
-        8 => Val::Call(any_call(rng, new_depth).into()),
-        9 => Val::Abstract(any_abstract(rng, new_depth).into()),
-        10 => Val::Ask(any_ask(rng, new_depth).into()),
-        11 => Val::Change(any_change(rng, new_depth).into()),
+        8 => Val::Change(any_change(rng, new_depth).into()),
+        9 => Val::Call(any_call(rng, new_depth).into()),
+        10 => Val::Abstract(any_abstract(rng, new_depth).into()),
+        11 => Val::Ask(any_ask(rng, new_depth).into()),
         12 => Val::List(any_list(rng, new_depth).into()),
         13 => Val::Map(any_map(rng, new_depth).into()),
         14 => Val::Ctx(any_ctx(rng, new_depth).into()),
@@ -198,6 +198,10 @@ pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> Pair<Val, Val> {
     Pair::new(any_val(rng, depth), any_val(rng, depth))
 }
 
+pub(crate) fn any_change(rng: &mut SmallRng, depth: usize) -> Change<Val, Val> {
+    Change::new(any_val(rng, depth), any_val(rng, depth))
+}
+
 pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
 }
@@ -208,10 +212,6 @@ pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val, Va
 
 pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
     Ask::new(any_val(rng, depth), any_val(rng, depth))
-}
-
-pub(crate) fn any_change(rng: &mut SmallRng, depth: usize) -> Change<Val, Val> {
-    Change::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
@@ -296,13 +296,13 @@ impl Arbitrary for CompMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
+        let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let ask = Arbitrary::any(rng, depth);
-        let change = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, call, abstract1, ask, change, list, map }
+        CompMode { symbol, pair, change, call, abstract1, ask, list, map }
     }
 }
 
@@ -313,6 +313,16 @@ impl Arbitrary for PairMode {
         let second = Arbitrary::any(rng, new_depth);
         let pair = Pair::new(first, second);
         PairMode { pair }
+    }
+}
+
+impl Arbitrary for ChangeMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let from = Arbitrary::any(rng, new_depth);
+        let to = Arbitrary::any(rng, new_depth);
+        let change = Change::new(from, to);
+        ChangeMode { change }
     }
 }
 
@@ -349,16 +359,6 @@ impl Arbitrary for AskMode {
     }
 }
 
-impl Arbitrary for ChangeMode {
-    fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let from = Arbitrary::any(rng, new_depth);
-        let to = Arbitrary::any(rng, new_depth);
-        let change = Change::new(from, to);
-        ChangeMode { change }
-    }
-}
-
 impl Arbitrary for ListMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
@@ -392,13 +392,13 @@ impl Arbitrary for PrimMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
+        let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let ask = Arbitrary::any(rng, depth);
-        let change = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, call, abstract1, ask, change, list, map }
+        PrimMode { symbol, pair, change, call, abstract1, ask, list, map }
     }
 }
 

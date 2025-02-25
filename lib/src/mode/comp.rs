@@ -32,10 +32,10 @@ use crate::{
 pub struct CompMode {
     pub symbol: Option<SymbolMode>,
     pub pair: Option<PairMode>,
+    pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
     pub abstract1: Option<AbstractMode>,
     pub ask: Option<AskMode>,
-    pub change: Option<ChangeMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
 }
@@ -69,6 +69,14 @@ impl ByVal<Val> for CompMode {
         }
     }
 
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match &self.change {
+            None => Id.transform_change(ctx, change),
+            Some(mode) => mode.transform(ctx, change),
+        }
+    }
+
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         match &self.call {
@@ -90,14 +98,6 @@ impl ByVal<Val> for CompMode {
         match &self.ask {
             None => Id.transform_ask(ctx, ask),
             Some(mode) => mode.transform(ctx, ask),
-        }
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match &self.change {
-            None => Id.transform_change(ctx, change),
-            Some(mode) => mode.transform(ctx, change),
         }
     }
 

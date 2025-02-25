@@ -98,6 +98,19 @@ impl FormCore {
         Val::Pair(Pair::new(first, second).into())
     }
 
+    pub(crate) fn transform_change<'a, Ctx, From, To>(
+        from: &From, to: &To, mut ctx: Ctx, change: ChangeVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        From: Transformer<Val, Val>,
+        To: Transformer<Val, Val>, {
+        let change = Change::from(change);
+        let from = from.transform(ctx.reborrow(), change.from);
+        let to = to.transform(ctx, change.to);
+        Val::Change(Change::new(from, to).into())
+    }
+
     pub(crate) fn transform_call<'a, Ctx, Func, Input>(
         func: &Func, input: &Input, mut ctx: Ctx, call: CallVal,
     ) -> Val
@@ -135,19 +148,6 @@ impl FormCore {
         let func = func.transform(ctx.reborrow(), ask.func);
         let output = output.transform(ctx, ask.output);
         Val::Ask(Ask::new(func, output).into())
-    }
-
-    pub(crate) fn transform_change<'a, Ctx, From, To>(
-        from: &From, to: &To, mut ctx: Ctx, change: ChangeVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        From: Transformer<Val, Val>,
-        To: Transformer<Val, Val>, {
-        let change = Change::from(change);
-        let from = from.transform(ctx.reborrow(), change.from);
-        let to = to.transform(ctx, change.to);
-        Val::Change(Change::new(from, to).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val

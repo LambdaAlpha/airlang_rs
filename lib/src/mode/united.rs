@@ -79,6 +79,14 @@ impl ByVal<Val> for UniMode {
         }
     }
 
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_change(ctx, change),
+            CodeMode::Eval => Eval::new(self.symbol).transform_change(ctx, change),
+        }
+    }
+
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.code {
@@ -100,14 +108,6 @@ impl ByVal<Val> for UniMode {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_ask(ctx, ask),
             CodeMode::Eval => Eval::new(self.symbol).transform_ask(ctx, ask),
-        }
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_change(ctx, change),
-            CodeMode::Eval => Eval::new(self.symbol).transform_change(ctx, change),
         }
     }
 

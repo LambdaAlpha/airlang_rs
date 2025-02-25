@@ -52,6 +52,12 @@ do [p = any ; pair, p type .]
 -----
 pair
 =====
+any change
+-----
+do [a = any ; change, a type .]
+-----
+change
+=====
 any call
 -----
 do [c = any ; call, c type .]
@@ -69,12 +75,6 @@ any ask
 do [a = any ; ask, a type .]
 -----
 ask
-=====
-any change
------
-do [a = any ; change, a type .]
------
-change
 =====
 any list
 -----
@@ -154,6 +154,12 @@ do [a = 1 : 2, a type .]
 -----
 pair
 =====
+type change
+-----
+do [a = 1 -> 2, a type .]
+-----
+change
+=====
 type call
 -----
 do [a = id ; f ; a, a type .]
@@ -171,12 +177,6 @@ type ask
 do [a = id ; f ? a, a type .]
 -----
 ask
-=====
-type change
------
-do [a = 1 -> 2, a type .]
------
-change
 =====
 type list
 -----
@@ -250,6 +250,12 @@ true
 -----
 true
 =====
+== change
+-----
+(1 -> 2) == (1 -> 2)
+-----
+true
+=====
 == call
 -----
 (1 ; 2) == (1 ; 2)
@@ -265,12 +271,6 @@ true
 == ask
 -----
 (1 ? 2) == (1 ? 2)
------
-true
-=====
-== change
------
-(1 -> 2) == (1 -> 2)
 -----
 true
 =====

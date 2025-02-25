@@ -42,16 +42,21 @@ use crate::{
 pub enum Repr {
     Unit(Unit),
     Bit(Bit),
+
     Symbol(Symbol),
+
     Text(Text),
     Int(Int),
     Number(Number),
     Byte(Byte),
+
     Pair(Box<PairRepr>),
+    Change(Box<ChangeRepr>),
+
     Call(Box<CallRepr>),
     Abstract(Box<AbstractRepr>),
     Ask(Box<AskRepr>),
-    Change(Box<ChangeRepr>),
+
     List(ListRepr),
     Map(MapRepr),
 }
@@ -116,6 +121,18 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
+impl From<ChangeRepr> for Repr {
+    fn from(c: ChangeRepr) -> Self {
+        Repr::Change(Box::new(c))
+    }
+}
+
+impl From<Box<ChangeRepr>> for Repr {
+    fn from(c: Box<ChangeRepr>) -> Self {
+        Repr::Change(c)
+    }
+}
+
 impl From<CallRepr> for Repr {
     fn from(c: CallRepr) -> Self {
         Repr::Call(Box::new(c))
@@ -149,18 +166,6 @@ impl From<AskRepr> for Repr {
 impl From<Box<AskRepr>> for Repr {
     fn from(a: Box<AskRepr>) -> Self {
         Repr::Ask(a)
-    }
-}
-
-impl From<ChangeRepr> for Repr {
-    fn from(c: ChangeRepr) -> Self {
-        Repr::Change(Box::new(c))
-    }
-}
-
-impl From<Box<ChangeRepr>> for Repr {
-    fn from(c: Box<ChangeRepr>) -> Self {
-        Repr::Change(c)
     }
 }
 
@@ -233,6 +238,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
+            Repr::Change(change) => {
+                let from = (&change.from).try_into()?;
+                let to = (&change.to).try_into()?;
+                GenRepr::Change(Box::new(Change::new(from, to)))
+            }
             Repr::Call(call) => {
                 let func = (&call.func).try_into()?;
                 let input = (&call.input).try_into()?;
@@ -247,11 +257,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let func = (&ask.func).try_into()?;
                 let output = (&ask.output).try_into()?;
                 GenRepr::Ask(Box::new(Ask::new(func, output)))
-            }
-            Repr::Change(change) => {
-                let from = (&change.from).try_into()?;
-                let to = (&change.to).try_into()?;
-                GenRepr::Change(Box::new(Change::new(from, to)))
             }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
@@ -275,13 +280,13 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
 
 pub(crate) mod pair;
 
+pub(crate) mod change;
+
 pub(crate) mod call;
 
 pub(crate) mod abstract1;
 
 pub(crate) mod ask;
-
-pub(crate) mod change;
 
 pub(crate) mod list;
 

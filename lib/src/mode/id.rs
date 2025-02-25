@@ -45,6 +45,11 @@ impl ByVal<Val> for Id {
         Val::Pair(pair)
     }
 
+    fn transform_change<'a, Ctx>(&self, _ctx: Ctx, change: ChangeVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        Val::Change(change)
+    }
+
     fn transform_call<'a, Ctx>(&self, _ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Call(call)
@@ -58,11 +63,6 @@ impl ByVal<Val> for Id {
     fn transform_ask<'a, Ctx>(&self, _ctx: Ctx, ask: AskVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Ask(ask)
-    }
-
-    fn transform_change<'a, Ctx>(&self, _ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        Val::Change(change)
     }
 
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val

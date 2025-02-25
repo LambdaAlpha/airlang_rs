@@ -49,18 +49,20 @@ use crate::{
 pub enum Val {
     Unit(Unit),
     Bit(Bit),
-    Symbol(Symbol),
-    Text(TextVal),
 
+    Symbol(Symbol),
+
+    Text(TextVal),
     Int(IntVal),
     Number(NumberVal),
     Byte(ByteVal),
 
     Pair(PairVal),
+    Change(ChangeVal),
+
     Call(CallVal),
     Abstract(AbstractVal),
     Ask(AskVal),
-    Change(ChangeVal),
 
     List(ListVal),
     Map(MapVal),
@@ -79,10 +81,10 @@ pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
+pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
 pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const ASK: &str = "ask";
-pub(crate) const CHANGE: &str = "change";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
@@ -179,6 +181,18 @@ impl From<PairVal> for Val {
     }
 }
 
+impl From<Change<Val, Val>> for Val {
+    fn from(value: Change<Val, Val>) -> Self {
+        Val::Change(ChangeVal::from(value))
+    }
+}
+
+impl From<ChangeVal> for Val {
+    fn from(value: ChangeVal) -> Self {
+        Val::Change(value)
+    }
+}
+
 impl From<Call<Val, Val>> for Val {
     fn from(value: Call<Val, Val>) -> Self {
         Val::Call(CallVal::from(value))
@@ -212,18 +226,6 @@ impl From<Ask<Val, Val>> for Val {
 impl From<AskVal> for Val {
     fn from(value: AskVal) -> Self {
         Val::Ask(value)
-    }
-}
-
-impl From<Change<Val, Val>> for Val {
-    fn from(value: Change<Val, Val>) -> Self {
-        Val::Change(ChangeVal::from(value))
-    }
-}
-
-impl From<ChangeVal> for Val {
-    fn from(value: ChangeVal) -> Self {
-        Val::Change(value)
     }
 }
 
@@ -280,10 +282,10 @@ impl From<&Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number.clone())),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte.clone())),
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
+            Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::Ask(ask) => Val::Ask(AskVal::from(&**ask)),
-            Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -301,10 +303,10 @@ impl From<Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number)),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte)),
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
+            Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::Ask(ask) => Val::Ask(AskVal::from(*ask)),
-            Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -323,10 +325,10 @@ impl TryInto<Repr> for &Val {
             Val::Number(number) => Ok(Repr::Number(Number::clone(number))),
             Val::Byte(byte) => Ok(Repr::Byte(Byte::clone(byte))),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
+            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
-            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -346,10 +348,10 @@ impl TryInto<Repr> for Val {
             Val::Number(number) => Ok(Repr::Number(number.into())),
             Val::Byte(byte) => Ok(Repr::Byte(byte.into())),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
+            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
-            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -376,6 +378,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
+            Val::Change(change) => {
+                let from = (&change.from).try_into()?;
+                let to = (&change.to).try_into()?;
+                GenRepr::Change(Box::new(Change::new(from, to)))
+            }
             Val::Call(call) => {
                 let func = (&call.func).try_into()?;
                 let input = (&call.input).try_into()?;
@@ -390,11 +397,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let func = (&ask.func).try_into()?;
                 let output = (&ask.output).try_into()?;
                 GenRepr::Ask(Box::new(Ask::new(func, output)))
-            }
-            Val::Change(change) => {
-                let from = (&change.from).try_into()?;
-                let to = (&change.to).try_into()?;
-                GenRepr::Change(Box::new(Change::new(from, to)))
             }
             Val::List(list) => {
                 let list: List<GenRepr> =
@@ -429,10 +431,10 @@ impl Debug for Val {
             Val::Number(number) => <_ as Debug>::fmt(number, f),
             Val::Byte(byte) => <_ as Debug>::fmt(byte, f),
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
+            Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
             Val::Ask(ask) => <_ as Debug>::fmt(ask, f),
-            Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
@@ -452,13 +454,13 @@ pub(crate) mod byte;
 
 pub(crate) mod pair;
 
+pub(crate) mod change;
+
 pub(crate) mod call;
 
 pub(crate) mod abstract1;
 
 pub(crate) mod ask;
-
-pub(crate) mod change;
 
 pub(crate) mod list;
 

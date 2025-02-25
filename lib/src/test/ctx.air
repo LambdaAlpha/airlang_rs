@@ -194,6 +194,12 @@ do [((a : (b . mutable)) . constant) = (any ; .) : (any ; .), [variable_access a
 -----
 [constant, mutable]
 =====
+= destruct change
+-----
+do [(f -> b) = 1 -> 2, [f, b]]
+-----
+[1, 2]
+=====
 = destruct call
 -----
 do [(f ; a) = 1 ; 2, [f, a]]
@@ -215,12 +221,6 @@ do [(f ! a) = id ; 1 ! 2, [f, a]]
 = destruct ask
 -----
 do [(f ? b) = 1 ? 2, [f, b]]
------
-[1, 2]
-=====
-= destruct change
------
-do [(f -> b) = 1 -> 2, [f, b]]
 -----
 [1, 2]
 =====

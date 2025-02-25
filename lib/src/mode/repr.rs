@@ -275,13 +275,13 @@ impl ParseMode<MapVal> for CompMode {
         let default = ParseMode::parse(map_remove(&mut map, DEFAULT), default)?;
         let symbol = ParseMode::parse(map_remove(&mut map, SYMBOL), default)?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
-        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
-        let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let ask = ParseMode::parse(map_remove(&mut map, ASK), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
+        let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
+        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
+        let ask = ParseMode::parse(map_remove(&mut map, ASK), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode { symbol, pair, abstract1, call, ask, change, list, map })
+        Some(CompMode { symbol, pair, change, call, abstract1, ask, list, map })
     }
 }
 
@@ -294,11 +294,14 @@ impl GenerateMode<MapVal> for CompMode {
         if default.map(Into::into) != self.pair {
             map.insert(symbol(PAIR), self.pair.generate(default));
         }
-        if default.map(Into::into) != self.abstract1 {
-            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
+        if default.map(Into::into) != self.change {
+            map.insert(symbol(CHANGE), self.change.generate(default));
         }
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
+        }
+        if default.map(Into::into) != self.abstract1 {
+            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
         }
         if default.map(Into::into) != self.ask {
             map.insert(symbol(ASK), self.ask.generate(default));
@@ -318,13 +321,13 @@ impl ParseMode<MapVal> for PrimMode {
         let default = ParseMode::parse(map_remove(&mut map, DEFAULT), default)?;
         let symbol = ParseMode::parse(map_remove(&mut map, SYMBOL), default)?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
-        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
-        let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let ask = ParseMode::parse(map_remove(&mut map, ASK), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
+        let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
+        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
+        let ask = ParseMode::parse(map_remove(&mut map, ASK), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode { symbol, pair, abstract1, call, ask, change, list, map })
+        Some(PrimMode { symbol, pair, change, call, abstract1, ask, list, map })
     }
 }
 
@@ -337,11 +340,14 @@ impl GenerateMode<MapVal> for PrimMode {
         if default.map(Into::into) != self.pair {
             map.insert(symbol(PAIR), self.pair.generate(default));
         }
-        if default.map(Into::into) != self.abstract1 {
-            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
+        if default.map(Into::into) != self.change {
+            map.insert(symbol(CHANGE), self.change.generate(default));
         }
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
+        }
+        if default.map(Into::into) != self.abstract1 {
+            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
         }
         if default.map(Into::into) != self.ask {
             map.insert(symbol(ASK), self.ask.generate(default));
@@ -414,6 +420,29 @@ impl GenerateMode<Val> for PairMode {
         let first = GenerateMode::generate(&self.pair.first, default);
         let second = GenerateMode::generate(&self.pair.second, default);
         Val::Pair(Pair::new(first, second).into())
+    }
+}
+
+impl ParseMode<Val> for ChangeMode {
+    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
+        match mode {
+            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
+            Val::Pair(pair) => {
+                let pair = Pair::from(pair);
+                let from = ParseMode::parse(pair.first, default)?;
+                let to = ParseMode::parse(pair.second, default)?;
+                Some(ChangeMode { change: Change::new(from, to) })
+            }
+            _ => None,
+        }
+    }
+}
+
+impl GenerateMode<Val> for ChangeMode {
+    fn generate(&self, default: Option<UniMode>) -> Val {
+        let from = GenerateMode::generate(&self.change.from, default);
+        let to = GenerateMode::generate(&self.change.to, default);
+        Val::Pair(Pair::new(from, to).into())
     }
 }
 
@@ -510,29 +539,6 @@ impl GenerateMode<Val> for AskMode {
             CodeMode::Form => Val::Pair(Pair::new(func, output).into()),
             CodeMode::Eval => Val::Ask(Ask::new(func, output).into()),
         }
-    }
-}
-
-impl ParseMode<Val> for ChangeMode {
-    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
-        match mode {
-            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Pair(pair) => {
-                let pair = Pair::from(pair);
-                let from = ParseMode::parse(pair.first, default)?;
-                let to = ParseMode::parse(pair.second, default)?;
-                Some(ChangeMode { change: Change::new(from, to) })
-            }
-            _ => None,
-        }
-    }
-}
-
-impl GenerateMode<Val> for ChangeMode {
-    fn generate(&self, default: Option<UniMode>) -> Val {
-        let from = GenerateMode::generate(&self.change.from, default);
-        let to = GenerateMode::generate(&self.change.to, default);
-        Val::Pair(Pair::new(from, to).into())
     }
 }
 

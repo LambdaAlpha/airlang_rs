@@ -175,10 +175,10 @@ enum Arity {
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Struct {
     Pair,
+    Change,
     Call,
     Abstract,
     Ask,
-    Change,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -432,6 +432,10 @@ where
                 let ctx = self.ctx.escape().with_struct(Struct::Pair);
                 ScopeParser::new(ctx).parse(src)
             }
+            CHANGE => {
+                let ctx = self.ctx.escape().with_struct(Struct::Change);
+                ScopeParser::new(ctx).parse(src)
+            }
             CALL => {
                 let ctx = self.ctx.escape().with_struct(Struct::Call);
                 ScopeParser::new(ctx).parse(src)
@@ -442,10 +446,6 @@ where
             }
             ASK => {
                 let ctx = self.ctx.escape().with_struct(Struct::Ask);
-                ScopeParser::new(ctx).parse(src)
-            }
-            CHANGE => {
-                let ctx = self.ctx.escape().with_struct(Struct::Change);
                 ScopeParser::new(ctx).parse(src)
             }
             TAG => ScopeParser::new(self.ctx.escape()).parse(src),
@@ -553,10 +553,10 @@ impl<'a> ComposeParser<'a> {
     fn compose_two<T: ParseRepr>(&self, left: T, right: T) -> T {
         match self.ctx.struct1 {
             Struct::Pair => From::from(Pair::new(left, right)),
+            Struct::Change => From::from(Change::new(left, right)),
             Struct::Call => From::from(Call::new(left, right)),
             Struct::Abstract => From::from(Abstract::new(left, right)),
             Struct::Ask => From::from(Ask::new(left, right)),
-            Struct::Change => From::from(Change::new(left, right)),
         }
     }
 
@@ -604,10 +604,10 @@ impl<'a> ComposeParser<'a> {
         let middle = match middle {
             Token::Unquote(s) => match &*s {
                 PAIR => return From::from(Pair::new(left, right)),
-                CALL => return From::from(Call::new(left, right)),
-                ASK => return From::from(Ask::new(left, right)),
-                ABSTRACT => return From::from(Abstract::new(left, right)),
                 CHANGE => return From::from(Change::new(left, right)),
+                CALL => return From::from(Call::new(left, right)),
+                ABSTRACT => return From::from(Abstract::new(left, right)),
+                ASK => return From::from(Ask::new(left, right)),
                 _ => From::from(s),
             },
             Token::Default(middle) => middle,

@@ -56,10 +56,10 @@ pub(crate) enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
+    Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     Abstract(Box<Abstract<GenRepr<'a>, GenRepr<'a>>>),
     Ask(Box<Ask<GenRepr<'a>, GenRepr<'a>>>),
-    Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -130,10 +130,10 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Number(number) => gen_number(number, s),
         GenRepr::Byte(byte) => gen_byte(byte, s),
         GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
+        GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
         GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
         GenRepr::Ask(ask) => gen_ask(ctx, *ask, s),
-        GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
     }
@@ -270,6 +270,14 @@ fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
     gen1(ctx, pair.second, s);
 }
 
+fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {
+    gen_scope_if_need(ctx, change.from, s);
+    s.push(' ');
+    s.push_str(CHANGE);
+    s.push(' ');
+    gen1(ctx, change.to, s);
+}
+
 fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     if let GenRepr::Pair(pair) = call.input {
         gen_scope_if_need(ctx, pair.first, s);
@@ -300,14 +308,6 @@ fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
     s.push_str(ASK);
     s.push(' ');
     gen1(ctx, ask.output, s);
-}
-
-fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, change.from, s);
-    s.push(' ');
-    s.push_str(CHANGE);
-    s.push(' ');
-    gen1(ctx, change.to, s);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, repr: GenRepr, s: &mut String) {

@@ -39,7 +39,7 @@ set return
 do [
     f1 = any ; .,
     t1 = any ; .,
-    c = f1 : t1,
+    c = f1 -> t1,
     f2 = c change.set_from any ; .,
     t2 = c change.set_to any ; .,
     (f1 == f2) and t1 == t2

@@ -26,10 +26,10 @@ use crate::{
 pub struct PrimMode {
     pub symbol: Option<SymbolMode>,
     pub pair: Option<DataMode>,
+    pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
     pub abstract1: Option<CodeMode>,
     pub ask: Option<CodeMode>,
-    pub change: Option<DataMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
 }
@@ -72,6 +72,14 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.change {
+            None => Id.transform_change(ctx, change),
+            Some(_) => FormCore::transform_change(self, self, ctx, change),
+        }
+    }
+
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.call {
@@ -102,14 +110,6 @@ impl ByVal<Val> for PrimMode {
                 CodeMode::Form => FormCore::transform_ask(self, self, ctx, ask),
                 CodeMode::Eval => EvalCore::transform_ask(self, self, ctx, ask),
             },
-        }
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.change {
-            None => Id.transform_change(ctx, change),
-            Some(_) => FormCore::transform_change(self, self, ctx, change),
         }
     }
 

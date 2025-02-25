@@ -47,13 +47,13 @@ mod byte;
 
 mod pair;
 
+mod change;
+
 mod call;
 
 mod abstract1;
 
 mod ask;
-
-mod change;
 
 mod list;
 
@@ -97,6 +97,10 @@ fn pair(first: Repr, second: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
 }
 
+fn change(from: Repr, to: Repr) -> Repr {
+    Repr::Change(Box::new(ChangeRepr::new(from, to)))
+}
+
 fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
@@ -107,10 +111,6 @@ fn abstract1(func: Repr, value: Repr) -> Repr {
 
 fn ask(func: Repr, output: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
-}
-
-fn change(from: Repr, to: Repr) -> Repr {
-    Repr::Change(Box::new(ChangeRepr::new(from, to)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -125,6 +125,12 @@ fn tag_pair(tag: &str, v: Vec<Repr>) -> Repr {
     let first = Repr::Symbol(Symbol::from_str(tag));
     let second = Repr::List(v.into());
     Repr::Pair(Box::new(PairRepr::new(first, second)))
+}
+
+fn tag_change(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
+    let output = Repr::List(v.into());
+    Repr::Change(Box::new(ChangeRepr::new(func, output)))
 }
 
 fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
@@ -145,14 +151,15 @@ fn tag_ask(tag: &str, v: Vec<Repr>) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(func, output)))
 }
 
-fn tag_change(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
-    let output = Repr::List(v.into());
-    Repr::Change(Box::new(ChangeRepr::new(func, output)))
-}
-
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
+}
+
+fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Change(Box::new(ChangeRepr::new(
+        middle,
+        Repr::Pair(Box::new(PairRepr::new(left, right))),
+    )))
 }
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
@@ -168,13 +175,6 @@ fn infix_abstract(left: Repr, middle: Repr, right: Repr) -> Repr {
 
 fn infix_ask(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Ask(Box::new(AskRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
-}
-
-fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Change(Box::new(ChangeRepr::new(
-        middle,
-        Repr::Pair(Box::new(PairRepr::new(left, right))),
-    )))
 }
 
 fn test_parse(
@@ -322,6 +322,16 @@ fn test_generate_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_parse_change() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/change.air"), "test/change.air", change::expected)
+}
+
+#[test]
+fn test_generate_change() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/change.air"), "test/change.air")
+}
+
+#[test]
 fn test_parse_call() -> Result<(), Box<dyn Error>> {
     test_parse(include_str!("test/call.air"), "test/call.air", call::expected)
 }
@@ -349,16 +359,6 @@ fn test_parse_ask() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_ask() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/ask.air"), "test/ask.air")
-}
-
-#[test]
-fn test_parse_change() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/change.air"), "test/change.air", change::expected)
-}
-
-#[test]
-fn test_generate_change() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/change.air"), "test/change.air")
 }
 
 #[test]

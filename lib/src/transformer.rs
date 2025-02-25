@@ -49,6 +49,9 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Output
     where Ctx: CtxMeta<'a>;
 
+    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Output
+    where Ctx: CtxMeta<'a>;
+
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
     where Ctx: CtxMeta<'a>;
 
@@ -56,9 +59,6 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where Ctx: CtxMeta<'a>;
 
     fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Output
-    where Ctx: CtxMeta<'a>;
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Output
