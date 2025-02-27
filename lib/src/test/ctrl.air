@@ -343,6 +343,6 @@ do [t = [], "hello" for i -> t list.push i, t]
 =====
 for map
 -----
-do [kv = [], {1 : 2, 3 : 4} for i -> kv list.push i, kv]
+do [kv = [], {1 : 2, 3 : 4} for i -> kv list.push i, map kv]
 -----
-[1 : 2, 3 : 4]
+{1 : 2, 3 : 4}
