@@ -107,7 +107,7 @@ fn any() -> Named<FuncVal> {
 
 fn fn_any(input: Val) -> Val {
     const DEPTH: usize = 0;
-    let mut rng = SmallRng::from_entropy();
+    let mut rng = SmallRng::from_os_rng();
     let rng = &mut rng;
     match input {
         Val::Unit(_) => any_val(rng, DEPTH),

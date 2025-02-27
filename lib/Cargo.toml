@@ -31,8 +31,9 @@ version = "0.8"
 features = []
 
 [dependencies.rand]
-version = "0.8"
-features = ["small_rng", "alloc"]
+version = "0.9"
+default-features = false
+features = ["small_rng", "alloc", "os_rng"]
 
 [dev-dependencies]
 criterion = "0.5"
