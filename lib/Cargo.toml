@@ -20,7 +20,8 @@ workspace = true
 
 [dependencies]
 rustc-hash = "2"
-nom = "7"
+nom = "8"
+nom-language = "0.1"
 num-bigint = "0.4"
 num-traits = "0.2"
 num-integer = "0.1"
