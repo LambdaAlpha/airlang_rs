@@ -5,59 +5,45 @@ use std::{
 };
 
 use const_format::concatcp;
-use nom::{
-    Finish,
-    IResult,
-    Parser,
-    branch::alt,
-    bytes::complete::{
-        tag,
-        take_while,
-        take_while_m_n,
-        take_while1,
-    },
-    character::complete::{
-        anychar,
-        char as char1,
-        digit1,
-        multispace0,
-        multispace1,
-    },
-    combinator::{
-        all_consuming,
-        cut,
-        fail,
-        map,
-        map_opt,
-        opt,
-        peek,
-        recognize,
-        success,
-        value,
-        verify,
-    },
-    error::{
-        ContextError,
-        ParseError,
-        VerboseError,
-        context,
-        convert_error,
-    },
-    multi::{
-        fold_many0,
-        many0,
-        separated_list0,
-        separated_list1,
-    },
-    sequence::{
-        delimited,
-        preceded,
-        terminated,
-        tuple,
-    },
-};
 use num_bigint::BigInt;
 use num_traits::Num;
+use winnow::{
+    ModalResult,
+    Parser,
+    Result,
+    ascii::{
+        digit1,
+        line_ending,
+        multispace0,
+        space0,
+        till_line_ending,
+    },
+    combinator::{
+        alt,
+        cut_err,
+        delimited,
+        empty,
+        eof,
+        fail,
+        opt,
+        peek,
+        preceded,
+        repeat,
+        separated,
+        terminated,
+    },
+    dispatch,
+    error::{
+        ContextError,
+        ErrMode,
+        StrContext,
+    },
+    stream::Stream,
+    token::{
+        any,
+        take_while,
+    },
+};
 
 use crate::{
     abstract1::Abstract,
@@ -116,10 +102,10 @@ pub(crate) trait ParseRepr:
     + From<Number>
     + From<Byte>
     + From<Pair<Self, Self>>
-    + From<Abstract<Self, Self>>
-    + From<Call<Self, Self>>
-    + From<Ask<Self, Self>>
     + From<Change<Self, Self>>
+    + From<Call<Self, Self>>
+    + From<Abstract<Self, Self>>
+    + From<Ask<Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -187,61 +173,38 @@ enum Direction {
     Right,
 }
 
-pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseError> {
-    let ret = top::<T, VerboseError<&str>>(src).finish();
-    match ret {
-        Ok(r) => Ok(r.1),
-        Err(e) => {
-            let msg = convert_error(src, e);
-            Err(crate::syntax::ParseError { msg })
-        }
-    }
+type E = ErrMode<ContextError>;
+
+pub(crate) fn parse<T: ParseRepr>(mut src: &str) -> Result<T, crate::syntax::ParseError> {
+    terminated(top::<T>, eof)
+        .parse(&mut src)
+        .map_err(|e| crate::syntax::ParseError { msg: e.to_string() })
 }
 
-fn top<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let f = all_consuming(trim(ComposeParser::new(ParseCtx::default())));
-    context("top", f)(src)
+fn top<T: ParseRepr>(src: &mut &str) -> ModalResult<T> {
+    trim(ComposeParser::new(ParseCtx::default())).context(StrContext::Label("top")).parse_next(src)
 }
 
-fn trim<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, O, E>, {
-    delimited(empty0, f, empty0)
+fn trim<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
+where F: Parser<&'a str, O, E> {
+    delimited(take_while(0 .., is_empty), f, take_while(0 .., is_empty))
 }
 
-fn empty0<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> {
-    take_while(is_empty)(src)
-}
-
-fn empty1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> {
-    take_while1(is_empty)(src)
+fn empty1<'a>(src: &mut &'a str) -> ModalResult<&'a str> {
+    take_while(1 .., is_empty).parse_next(src)
 }
 
 fn is_empty(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
 }
 
-fn delimited_cut<'a, T, E, F>(
-    left: char, f: F, right: char,
-) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, T, E>, {
-    delimited(char1(left), cut(f), cut(char1(right)))
+fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
+where F: Parser<&'a str, T, E> {
+    delimited(left, cut_err(f), cut_err(right))
 }
 
-fn delimited_trim<'a, T, E, F>(
-    left: char, f: F, right: char,
-) -> impl FnMut(&'a str) -> IResult<&'a str, T, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, T, E>, {
+fn delimited_trim<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
+where F: Parser<&'a str, T, E> {
     delimited_cut(left, trim(f), right)
 }
 
@@ -250,14 +213,11 @@ struct ScopeParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for ScopeParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
-        let f = delimited_trim(SCOPE_LEFT, ComposeParser::new(self.ctx), SCOPE_RIGHT);
-        context("scope", f)(input)
+impl<'a, T: ParseRepr> Parser<&'a str, T, E> for ScopeParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<T, E> {
+        delimited_trim(SCOPE_LEFT, ComposeParser::new(self.ctx), SCOPE_RIGHT)
+            .context(StrContext::Label("scope"))
+            .parse_next(input)
     }
 }
 
@@ -272,10 +232,8 @@ struct CtxParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, E> Parser<&'a str, ParseCtx<'a>, E> for CtxParser<'a>
-where E: ParseError<&'a str>
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, ParseCtx<'a>, E> {
+impl<'a> Parser<&'a str, ParseCtx<'a>, E> for CtxParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<ParseCtx<'a>, E> {
         let mut ctx = self.ctx.escape();
         let mut direction = 0;
         let mut arity = 0;
@@ -297,13 +255,14 @@ where E: ParseError<&'a str>
                     arity += 1;
                     ctx.arity = Arity::Three;
                 }
-                _ => return fail(input),
+                _ => return fail.parse_next(input),
             }
         }
         if direction > 1 || arity > 1 {
-            return fail(input);
+            return fail.parse_next(input);
         }
-        Ok(("", ctx))
+        input.finish();
+        Ok(ctx)
     }
 }
 
@@ -322,31 +281,26 @@ struct TokenParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, Token<T>, E> for TokenParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, Token<T>, E> {
-        let (src, first) = peek(anychar)(input)?;
-
-        let parser = move |s| match first {
+impl<'a, T: ParseRepr> Parser<&'a str, Token<T>, E> for TokenParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<Token<T>, E> {
+        dispatch! {peek(any);
             // delimiters
-            LIST_LEFT => map(ListParser::new(self.ctx), Token::Default)(s),
-            LIST_RIGHT => fail(s),
-            MAP_LEFT => map(MapParser::new(self.ctx), Token::Default)(s),
-            MAP_RIGHT => fail(s),
-            SCOPE_LEFT => map(ScopeParser::new(self.ctx), Token::Default)(s),
-            SCOPE_RIGHT => fail(s),
-            SEPARATOR => fail(s),
-            SPACE => fail(s),
-            TEXT_QUOTE => map(text, Token::Default)(s),
-            SYMBOL_QUOTE => map(symbol, Token::Default)(s),
+            LIST_LEFT => ListParser::new(self.ctx).map(Token::Default),
+            LIST_RIGHT => fail,
+            MAP_LEFT => MapParser::new(self.ctx).map(Token::Default),
+            MAP_RIGHT => fail,
+            SCOPE_LEFT => ScopeParser::new(self.ctx).map(Token::Default),
+            SCOPE_RIGHT => fail,
+            SEPARATOR => fail,
+            SPACE => fail,
+            TEXT_QUOTE => text.map(Token::Default),
+            SYMBOL_QUOTE => symbol.map(Token::Default),
 
-            sym if is_symbol(sym) => ExtParser::new(self.ctx).parse(s),
-            _ => fail(s),
-        };
-        context("token", parser)(src)
+            sym if is_symbol(sym) => ExtParser::new(self.ctx),
+            _ => fail,
+        }
+        .context(StrContext::Label("token"))
+        .parse_next(input)
     }
 }
 
@@ -372,29 +326,25 @@ struct ExtParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, Token<T>, E> for ExtParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, Token<T>, E> {
+impl<'a, T: ParseRepr> Parser<&'a str, Token<T>, E> for ExtParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<Token<T>, E> {
         const LEFT_DELIMITERS: [char; 5] =
             [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
 
-        let (rest, s) = take_while(is_trivial_symbol)(input)?;
+        let mut s = take_while(1 .., is_trivial_symbol).parse_next(input)?;
 
         // the only special case
         let first = s.chars().next().unwrap();
-        if first.is_ascii_digit() && !rest.starts_with(LEFT_DELIMITERS) {
-            let (_, token) = all_consuming(int_or_number)(s)?;
-            return Ok((rest, Token::Default(token)));
+        if first.is_ascii_digit() && !input.starts_with(LEFT_DELIMITERS) {
+            let token = terminated(int_or_number, eof).parse_next(&mut s)?;
+            return Ok(Token::Default(token));
         }
 
-        let mut f = alt((
-            map(PrefixParser::new(s, self.ctx), Token::Default),
-            map(success(Symbol::from_str(s)), Token::Unquote),
-        ));
-        f(rest)
+        alt((
+            PrefixParser::new(s, self.ctx).map(Token::Default),
+            empty.value(Symbol::from_str(s)).map(Token::Unquote),
+        ))
+        .parse_next(input)
     }
 }
 
@@ -410,51 +360,52 @@ struct PrefixParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for PrefixParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, src: &'a str) -> IResult<&'a str, T, E> {
+impl<'a, T: ParseRepr> Parser<&'a str, T, E> for PrefixParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<T, E> {
         match self.prefix {
             UNIT => alt((
                 raw_text,
                 raw_symbol,
                 ListParser::new_raw(self.ctx),
-                success(From::from(Unit)),
-            ))(src),
-            TRUE => success(From::from(Bit::true1()))(src),
-            FALSE => success(From::from(Bit::false1()))(src),
-            INT => int(src),
-            NUMBER => number(src),
-            BYTE => byte(src),
+                empty.value(From::from(Unit)),
+            ))
+            .parse_next(input),
+            TRUE => empty.value(From::from(Bit::true1())).parse_next(input),
+            FALSE => empty.value(From::from(Bit::false1())).parse_next(input),
+            INT => int(input),
+            NUMBER => number(input),
+            BYTE => byte(input),
             PAIR => {
                 let ctx = self.ctx.escape().with_struct(Struct::Pair);
-                ScopeParser::new(ctx).parse(src)
+                ScopeParser::new(ctx).parse_next(input)
             }
             CHANGE => {
                 let ctx = self.ctx.escape().with_struct(Struct::Change);
-                ScopeParser::new(ctx).parse(src)
+                ScopeParser::new(ctx).parse_next(input)
             }
             CALL => {
                 let ctx = self.ctx.escape().with_struct(Struct::Call);
-                ScopeParser::new(ctx).parse(src)
+                ScopeParser::new(ctx).parse_next(input)
             }
             ABSTRACT => {
                 let ctx = self.ctx.escape().with_struct(Struct::Abstract);
-                ScopeParser::new(ctx).parse(src)
+                ScopeParser::new(ctx).parse_next(input)
             }
             ASK => {
                 let ctx = self.ctx.escape().with_struct(Struct::Ask);
-                ScopeParser::new(ctx).parse(src)
+                ScopeParser::new(ctx).parse_next(input)
             }
-            TAG => ScopeParser::new(self.ctx.escape()).parse(src),
-            s if s.starts_with(TAG_CHAR) => ScopeParser::new(self.ctx.tag(&s[1 ..])).parse(src),
-            s if s.chars().all(CtxParser::is_ctx) => {
-                let ctx = context("ctx", CtxParser::new(self.ctx)).parse(s)?.1;
-                ScopeParser::new(ctx).parse(src)
+            TAG => ScopeParser::new(self.ctx.escape()).parse_next(input),
+            s if s.starts_with(TAG_CHAR) => {
+                ScopeParser::new(self.ctx.tag(&s[1 ..])).parse_next(input)
             }
-            _ => fail(src),
+            mut s if s.chars().all(CtxParser::is_ctx) => {
+                let ctx = CtxParser::new(self.ctx)
+                    .context(StrContext::Label("ctx"))
+                    .parse_next(&mut s)?;
+                ScopeParser::new(ctx).parse_next(input)
+            }
+            _ => fail.parse_next(input),
         }
     }
 }
@@ -485,15 +436,13 @@ struct ComposeParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for ComposeParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
-        let tokens = separated_list1(empty1, TokenParser::new(self.ctx));
-        let f = map_opt(tokens, |tokens| self.compose_tokens(tokens.into_iter()));
-        context("compose", f)(input)
+impl<'a, T: ParseRepr> Parser<&'a str, T, E> for ComposeParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<T, E> {
+        let tokens = separated(1 .., TokenParser::new(self.ctx), empty1);
+        tokens
+            .verify_map(|tokens: Vec<_>| self.compose_tokens(tokens.into_iter()))
+            .context(StrContext::Label("compose"))
+            .parse_next(input)
     }
 }
 
@@ -618,15 +567,12 @@ impl<'a> ComposeParser<'a> {
     }
 }
 
-fn items<'a, O1, O2, E, S, F>(
-    item: F, separator: S,
-) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<O2>, E>
+fn items<'a, O1, O2, S, F>(item: F, separator: S) -> impl Parser<&'a str, Vec<O2>, E>
 where
-    E: ParseError<&'a str>,
     S: Parser<&'a str, O1, E>,
     F: Parser<&'a str, O2, E> + Clone, {
-    let items = many0(terminated(item.clone(), trim(separator)));
-    map(tuple((items, opt(item))), |(mut items, last)| {
+    let items = repeat(0 .., terminated(item.clone(), trim(separator)));
+    (items, opt(item)).map(|(mut items, last): (Vec<O2>, _)| {
         if let Some(last) = last {
             items.push(last);
         }
@@ -640,25 +586,23 @@ struct ListParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for ListParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
+impl<'a, T: ParseRepr> Parser<&'a str, T, E> for ListParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<T, E> {
         if self.raw {
-            let items = separated_list0(empty1, TokenParser::new(self.ctx));
-            let items = map(items, |tokens| {
+            let items = separated(0 .., TokenParser::new(self.ctx), empty1);
+            let items = items.map(|tokens: Vec<_>| {
                 let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
                 T::from(list)
             });
-            let f = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
-            context("raw_list", f)(input)
+            delimited_trim(LIST_LEFT, items, LIST_RIGHT)
+                .context(StrContext::Label("raw_list"))
+                .parse_next(input)
         } else {
-            let items = items(ComposeParser::new(self.ctx), char1(SEPARATOR));
-            let items = map(items, |list| From::from(List::from(list)));
-            let f = delimited_trim(LIST_LEFT, items, LIST_RIGHT);
-            context("list", f)(input)
+            let items = items(ComposeParser::new(self.ctx), SEPARATOR);
+            let items = items.map(|list| From::from(List::from(list)));
+            delimited_trim(LIST_LEFT, items, LIST_RIGHT)
+                .context(StrContext::Label("list"))
+                .parse_next(input)
         }
     }
 }
@@ -678,16 +622,13 @@ struct MapParser<'a> {
     ctx: ParseCtx<'a>,
 }
 
-impl<'a, T, E> Parser<&'a str, T, E> for MapParser<'a>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>,
-{
-    fn parse(&mut self, input: &'a str) -> IResult<&'a str, T, E> {
-        let items = items(|s| self.key_value(s), char1(SEPARATOR));
-        let delimited_items = delimited_trim(MAP_LEFT, items, MAP_RIGHT);
-        let f = map(delimited_items, |pairs| From::from(Map::from_iter(pairs)));
-        context("map", f)(input)
+impl<'a, T: ParseRepr> Parser<&'a str, T, E> for MapParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<T, E> {
+        let items = items(KeyValueParser::new(self.ctx), SEPARATOR);
+        delimited_trim(MAP_LEFT, items, MAP_RIGHT)
+            .map(|pairs| From::from(Map::from_iter(pairs)))
+            .context(StrContext::Label("map"))
+            .parse_next(input)
     }
 }
 
@@ -695,142 +636,139 @@ impl<'a> MapParser<'a> {
     fn new(ctx: ParseCtx<'a>) -> Self {
         MapParser { ctx }
     }
+}
 
-    fn key_value<T, E>(&self, src: &'a str) -> IResult<&'a str, (T, T), E>
-    where
-        T: ParseRepr,
-        E: ParseError<&'a str> + ContextError<&'a str>, {
-        let (rest, tokens) = separated_list1(empty1, TokenParser::new(self.ctx))(src)?;
+#[derive(Copy, Clone)]
+struct KeyValueParser<'a> {
+    ctx: ParseCtx<'a>,
+}
+
+impl<'a, T: ParseRepr> Parser<&'a str, (T, T), E> for KeyValueParser<'a> {
+    fn parse_next(&mut self, input: &mut &'a str) -> Result<(T, T), E> {
+        let tokens: Vec<_> =
+            separated(1 .., TokenParser::new(self.ctx), empty1).parse_next(input)?;
         let mut tokens = tokens.into_iter();
         let key = [tokens.next().unwrap()].into_iter();
         let key = ComposeParser::new(self.ctx).compose_tokens(key).unwrap();
         if tokens.len() == 0 {
-            return Ok((rest, (key, From::from(Unit))));
+            return Ok((key, From::from(Unit)));
         }
         let Token::Unquote(s) = tokens.next().unwrap() else {
-            return fail(src);
+            return fail.parse_next(input);
         };
         if &*s != PAIR {
-            return fail(src);
+            return fail.parse_next(input);
         }
         let Some(value) = ComposeParser::new(self.ctx).compose_tokens(tokens) else {
-            return fail(src);
+            return fail.parse_next(input);
         };
-        Ok((rest, (key, value)))
+        Ok((key, value))
     }
 }
 
-fn symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let literal = take_while1(|c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
+impl<'a> KeyValueParser<'a> {
+    fn new(ctx: ParseCtx<'a>) -> Self {
+        Self { ctx }
+    }
+}
+
+fn symbol<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let literal = take_while(1 .., |c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
     let fragment = alt((literal, symbol_escaped, symbol_space));
-    let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
+    let collect_fragments = repeat(0 .., fragment).fold(String::new, |mut string, fragment| {
         string.push_str(fragment);
         string
     });
     let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
-    let f = map(delimited_symbol, |s| From::from(Symbol::from_string(s)));
-    context("symbol", f)(src)
+    delimited_symbol
+        .map(|s| From::from(Symbol::from_string(s)))
+        .context(StrContext::Label("symbol"))
+        .parse_next(input)
 }
 
-fn symbol_escaped<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let f = preceded(
-        char1('\\'),
-        alt((
-            value("\\", char1('\\')),
-            value(" ", char1('_')),
-            value(concatcp!(SYMBOL_QUOTE), char1(SYMBOL_QUOTE)),
-            value("", multispace1),
-        )),
-    );
-    context("symbol_escaped", f)(src)
+fn symbol_escaped<'a>(input: &mut &'a str) -> ModalResult<&'a str> {
+    preceded('\\', dispatch! {any;
+        '\\' => empty.value("\\"),
+        '_' => empty.value(" "),
+        SYMBOL_QUOTE => empty.value(concatcp!(SYMBOL_QUOTE)),
+        ' ' | '\t' | '\r' | '\n' => multispace0.value(""),
+        _ => fail,
+    })
+    .context(StrContext::Label("symbol_escaped"))
+    .parse_next(input)
 }
 
 // ignore spaces following \n
-fn symbol_space<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let f = alt((
-        value("", preceded(char1('\n'), multispace0)),
-        value("", char1('\r')),
-        value("", take_while1(|c| c == '\t')),
-    ));
-    context("symbol_space", f)(src)
+fn symbol_space<'a>(input: &mut &'a str) -> ModalResult<&'a str> {
+    dispatch! {any;
+        '\n' => multispace0.value(""),
+        '\r' => empty.value(""),
+        '\t' => take_while(0 .., |c| c == '\t').value(""),
+        _ => fail,
+    }
+    .context(StrContext::Label("symbol_space"))
+    .parse_next(input)
 }
 
-fn raw_symbol<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let literal = take_while(is_symbol);
-    let fragment = separated_list1(char1(' '), terminated(literal, raw_symbol_newline));
-    let collect_fragments = map(fragment, |fragments| fragments.join(""));
+fn raw_symbol<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let literal = take_while(0 .., is_symbol);
+    let fragment = separated(1 .., terminated(literal, raw_symbol_newline), ' ');
+    let collect_fragments = fragment.map(|fragments: Vec<_>| fragments.join(""));
     let delimited_symbol = delimited_cut(SYMBOL_QUOTE, collect_fragments, SYMBOL_QUOTE);
-    let f = map(delimited_symbol, |s| From::from(Symbol::from_string(s)));
-    context("raw_symbol", f)(src)
+    delimited_symbol
+        .map(|s| From::from(Symbol::from_string(s)))
+        .context(StrContext::Label("raw_symbol"))
+        .parse_next(input)
 }
 
-fn raw_symbol_newline<'a, E>(src: &'a str) -> IResult<&'a str, (), E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let newline = tuple((opt(char1('\r')), char1('\n')));
-    let space = take_while(|c| matches!(c, ' ' | '\t'));
-    let f = value((), tuple((newline, space, char1('|'))));
-    context("raw_symbol_newline", f)(src)
+fn raw_symbol_newline(input: &mut &str) -> ModalResult<()> {
+    (line_ending, space0, '|')
+        .void()
+        .context(StrContext::Label("raw_symbol_newline"))
+        .parse_next(input)
 }
 
-fn text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let literal = take_while1(|c| !matches!(c, '"' | '\\' | '\n'));
-    let space = terminated(tag("\n"), multispace0);
-    let fragment =
-        alt((map(literal, StrFragment::Str), text_escaped, map(space, StrFragment::Str)));
-    let collect_fragments = fold_many0(fragment, String::new, |mut string, fragment| {
+fn text<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let literal = take_while(1 .., |c| !matches!(c, '"' | '\\' | '\n'));
+    let space = terminated("\n", multispace0);
+    let fragment = alt((literal.map(StrFragment::Str), text_escaped, space.map(StrFragment::Str)));
+    let collect_fragments = repeat(0 .., fragment).fold(String::new, |mut string, fragment| {
         fragment.push(&mut string);
         string
     });
     let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
-    let f = map(delimited_text, |s| From::from(Text::from(s)));
-    context("text", f)(src)
+    delimited_text
+        .map(|s| From::from(Text::from(s)))
+        .context(StrContext::Label("text"))
+        .parse_next(input)
 }
 
-fn text_escaped<'a, E>(src: &'a str) -> IResult<&'a str, StrFragment<'a>, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let f = preceded(
-        char1('\\'),
-        alt((
-            map(unicode, StrFragment::Char),
-            value(StrFragment::Char('\n'), char1('n')),
-            value(StrFragment::Char('\r'), char1('r')),
-            value(StrFragment::Char('\t'), char1('t')),
-            value(StrFragment::Char('\\'), char1('\\')),
-            value(StrFragment::Char(' '), char1('_')),
-            value(StrFragment::Char(TEXT_QUOTE), char1(TEXT_QUOTE)),
-            value(StrFragment::Str(""), multispace1),
-        )),
-    );
-    context("text_escaped", f)(src)
+fn text_escaped<'a>(input: &mut &'a str) -> ModalResult<StrFragment<'a>> {
+    preceded('\\', dispatch! {any;
+        'u' => unicode.map(StrFragment::Char),
+        'n' => empty.value(StrFragment::Char('\n')),
+        'r' => empty.value(StrFragment::Char('\r')),
+        't' => empty.value(StrFragment::Char('\t')),
+        '\\' => empty.value(StrFragment::Char('\\')),
+        '_' => empty.value(StrFragment::Char(' ')),
+        TEXT_QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)),
+        ' ' | '\t' | '\r' | '\n' => multispace0.value(StrFragment::Str("")),
+        _ => fail,
+    })
+    .context(StrContext::Label("text_escaped"))
+    .parse_next(input)
 }
 
-fn unicode<'a, E>(src: &'a str) -> IResult<&'a str, char, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let digit = take_while_m_n(1, 6, is_hexadecimal);
-    let delimited_digit = preceded(char1('u'), delimited_trim(SCOPE_LEFT, digit, SCOPE_RIGHT));
-    let code = map(delimited_digit, move |hex| u32::from_str_radix(hex, 16).unwrap());
-    let f = map_opt(code, std::char::from_u32);
-    context("unicode", f)(src)
+fn unicode(input: &mut &str) -> ModalResult<char> {
+    let digit = take_while(1 .. 7, is_hexadecimal);
+    let delimited_digit = delimited_trim(SCOPE_LEFT, digit, SCOPE_RIGHT);
+    let code = delimited_digit.map(move |hex| u32::from_str_radix(hex, 16).unwrap());
+    code.verify_map(std::char::from_u32).context(StrContext::Label("unicode")).parse_next(input)
 }
 
-fn raw_text<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let literal = take_while(|c| !matches!(c, '\r' | '\n'));
-    let fragment = separated_list1(char1(' '), tuple((literal, raw_text_newline)));
-    let collect_fragments = map(fragment, |fragments| {
+fn raw_text<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let fragment = separated(1 .., (till_line_ending, raw_text_newline), ' ');
+    let collect_fragments = fragment.map(|fragments: Vec<_>| {
         let mut s = String::new();
         for (literal, newline) in fragments {
             s.push_str(literal);
@@ -839,22 +777,18 @@ where
         s
     });
     let delimited_text = delimited_cut(TEXT_QUOTE, collect_fragments, TEXT_QUOTE);
-    let f = map(delimited_text, |s| From::from(Text::from(s)));
-    context("raw_text", f)(src)
+    delimited_text
+        .map(|s| From::from(Text::from(s)))
+        .context(StrContext::Label("raw_text"))
+        .parse_next(input)
 }
 
-fn raw_text_newline<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let physical = recognize(tuple((opt(char1('\r')), char1('\n'))));
-    let space = take_while(|c| matches!(c, ' ' | '\t'));
-    let logical = alt((value(true, char1('+')), value(false, char1('|'))));
-    let f = map(
-        tuple((physical, space, logical)),
-        |(physical, _, logical): (&str, _, _)| {
-            if logical { physical } else { "" }
-        },
-    );
-    context("raw_text_newline", f)(src)
+fn raw_text_newline<'a>(input: &mut &'a str) -> ModalResult<&'a str> {
+    let newline = alt(('+'.value(true), '|'.value(false)));
+    (line_ending, space0, newline)
+        .map(|(ending, _, newline): (&str, _, _)| if newline { ending } else { "" })
+        .context(StrContext::Label("raw_text_newline"))
+        .parse_next(input)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -872,74 +806,56 @@ impl StrFragment<'_> {
     }
 }
 
-fn int_or_number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let norm = preceded(tag("0"), tuple((sign, significand, exponent)));
-    let short = tuple((success(true), significand_radix(10, digit1), exponent));
-    let f = map(alt((norm, short)), |(sign, significand, exponent)| {
-        build_int_or_number(sign, significand, exponent)
-    });
-    context("int_or_number", f)(src)
+fn int_or_number<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let norm = preceded("0", (sign, significand, opt(exponent)));
+    let short = (empty.value(true), significand_radix(10, digit1), opt(exponent));
+    alt((norm, short))
+        .map(|(sign, significand, exponent)| build_int_or_number(sign, significand, exponent))
+        .context(StrContext::Label("int_or_number"))
+        .parse_next(input)
 }
 
-fn int<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let int = map(tuple((sign, integral)), |(sign, i)| build_int(sign, i));
-    let f = delimited_trim(SCOPE_LEFT, int, SCOPE_RIGHT);
-    context("int", f)(src)
+fn int<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let int = (sign, integral).map(|(sign, i)| build_int(sign, i));
+    delimited_trim(SCOPE_LEFT, int, SCOPE_RIGHT).context(StrContext::Label("int")).parse_next(input)
 }
 
-fn number<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let number = map(tuple((sign, significand, exponent)), |(sign, significand, exponent)| {
-        build_number(sign, significand, exponent)
-    });
-    let f = delimited_trim(SCOPE_LEFT, number, SCOPE_RIGHT);
-    context("number", f)(src)
+fn number<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let number = (sign, significand, opt(exponent))
+        .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
+    delimited_trim(SCOPE_LEFT, number, SCOPE_RIGHT)
+        .context(StrContext::Label("number"))
+        .parse_next(input)
 }
 
-fn trim_num0<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E>, {
-    map(separated_list0(char1('_'), f), |s| s.join(""))
+fn trim_num0<'a, F>(f: F) -> impl Parser<&'a str, String, E>
+where F: Parser<&'a str, &'a str, E> {
+    separated(0 .., f, '_').map(|s: Vec<&str>| s.join(""))
 }
 
-fn trim_num1<'a, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&'a str, String, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E>, {
-    map(separated_list1(char1('_'), f), |s| s.join(""))
+fn trim_num1<'a, F>(f: F) -> impl Parser<&'a str, String, E>
+where F: Parser<&'a str, &'a str, E> {
+    separated(1 .., f, '_').map(|s: Vec<&str>| s.join(""))
 }
 
-fn sign<'a, E>(src: &'a str) -> IResult<&'a str, bool, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let f = alt((value(true, char1('+')), value(false, char1('-')), success(true)));
-    context("sign", f)(src)
+fn sign(input: &mut &str) -> ModalResult<bool> {
+    alt(('+'.value(true), '-'.value(false), empty.value(true)))
+        .context(StrContext::Label("sign"))
+        .parse_next(input)
 }
 
-fn integral<'a, E>(src: &'a str) -> IResult<&'a str, BigInt, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
+fn integral(input: &mut &str) -> ModalResult<BigInt> {
     let dec_no_tag = int_radix(10, digit1);
-    let hex = preceded(tag("X"), cut(int_radix(16, hexadecimal1)));
-    let bin = preceded(tag("B"), cut(int_radix(2, binary1)));
-    let dec = preceded(tag("D"), cut(int_radix(10, digit1)));
+    let hex = preceded("X", cut_err(int_radix(16, hexadecimal1)));
+    let bin = preceded("B", cut_err(int_radix(2, binary1)));
+    let dec = preceded("D", cut_err(int_radix(10, digit1)));
 
-    let f = alt((dec_no_tag, hex, bin, dec));
-    context("integral", f)(src)
+    alt((dec_no_tag, hex, bin, dec)).context(StrContext::Label("integral")).parse_next(input)
 }
 
-fn int_radix<'a, E, F>(radix: u8, f: F) -> impl FnMut(&'a str) -> IResult<&'a str, BigInt, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E>, {
-    map(trim_num1(f), move |int| BigInt::from_str_radix(&int, radix as u32).unwrap())
+fn int_radix<'a, F>(radix: u8, f: F) -> impl Parser<&'a str, BigInt, E>
+where F: Parser<&'a str, &'a str, E> {
+    trim_num1(f).map(move |int| BigInt::from_str_radix(&int, radix as u32).unwrap())
 }
 
 struct Significand {
@@ -948,26 +864,20 @@ struct Significand {
     shift: Option<usize>,
 }
 
-fn significand<'a, E>(src: &'a str) -> IResult<&'a str, Significand, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
+fn significand(input: &mut &str) -> ModalResult<Significand> {
     let dec_no_tag = significand_radix(10, digit1);
-    let hex = preceded(tag("X"), cut(significand_radix(16, hexadecimal1)));
-    let bin = preceded(tag("B"), cut(significand_radix(2, binary1)));
-    let dec = preceded(tag("D"), cut(significand_radix(10, digit1)));
+    let hex = preceded("X", cut_err(significand_radix(16, hexadecimal1)));
+    let bin = preceded("B", cut_err(significand_radix(2, binary1)));
+    let dec = preceded("D", cut_err(significand_radix(10, digit1)));
 
-    let f = alt((dec_no_tag, hex, bin, dec));
-    context("significand", f)(src)
+    alt((dec_no_tag, hex, bin, dec)).context(StrContext::Label("significand")).parse_next(input)
 }
 
-fn significand_radix<'a, E, F>(
-    radix: u8, f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, Significand, E>
-where
-    E: ParseError<&'a str>,
-    F: Parser<&'a str, &'a str, E> + Clone, {
+fn significand_radix<'a, F>(radix: u8, f: F) -> impl Parser<&'a str, Significand, E>
+where F: Parser<&'a str, &'a str, E> + Clone {
     let int = trim_num1(f.clone());
-    let fraction = opt(preceded(char1('.'), cut(trim_num0(f))));
-    map(tuple((int, fraction)), move |(int, fraction)| build_significand(radix, int, fraction))
+    let fraction = opt(preceded('.', cut_err(trim_num0(f))));
+    (int, fraction).map(move |(int, fraction)| build_significand(radix, int, fraction))
 }
 
 fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Significand {
@@ -982,12 +892,9 @@ fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Signif
     }
 }
 
-fn exponent<'a, E>(src: &'a str) -> IResult<&'a str, Option<BigInt>, E>
-where E: ParseError<&'a str> + ContextError<&'a str> {
-    let fragment = tuple((sign, trim_num1(digit1)));
-    let exp = map(fragment, |(sign, exp)| build_exponent(sign, exp));
-    let f = opt(preceded(tag("E"), cut(exp)));
-    context("exponent", f)(src)
+fn exponent(input: &mut &str) -> ModalResult<BigInt> {
+    let exp = (sign, trim_num1(digit1)).map(|(sign, exp)| build_exponent(sign, exp));
+    preceded("E", cut_err(exp)).context(StrContext::Label("exponent")).parse_next(input)
 }
 
 fn build_exponent(sign: bool, exp: String) -> BigInt {
@@ -995,14 +902,12 @@ fn build_exponent(sign: bool, exp: String) -> BigInt {
     if sign { i } else { i.neg() }
 }
 
-fn build_int<T>(sign: bool, i: BigInt) -> T
-where T: ParseRepr {
+fn build_int<T: ParseRepr>(sign: bool, i: BigInt) -> T {
     let i = Int::new(if sign { i } else { i.neg() });
     From::from(i)
 }
 
-fn build_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
-where T: ParseRepr {
+fn build_number<T: ParseRepr>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T {
     let int = significand.int;
     let int = if sign { int } else { int.neg() };
     let shift = significand.shift.unwrap_or(0);
@@ -1011,8 +916,9 @@ where T: ParseRepr {
     From::from(n)
 }
 
-fn build_int_or_number<T>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T
-where T: ParseRepr {
+fn build_int_or_number<T: ParseRepr>(
+    sign: bool, significand: Significand, exp: Option<BigInt>,
+) -> T {
     if significand.shift.is_some() || exp.is_some() {
         build_number(sign, significand, exp)
     } else {
@@ -1020,55 +926,47 @@ where T: ParseRepr {
     }
 }
 
-fn byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let hex = preceded(tag("X"), cut(hexadecimal_byte));
-    let bin = preceded(tag("B"), cut(binary_byte));
+fn byte<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let hex = preceded("X", cut_err(hexadecimal_byte));
+    let bin = preceded("B", cut_err(binary_byte));
     let byte = alt((hex, bin, hexadecimal_byte));
-    let f = delimited_trim(SCOPE_LEFT, byte, SCOPE_RIGHT);
-    context("byte", f)(src)
+    delimited_trim(SCOPE_LEFT, byte, SCOPE_RIGHT)
+        .context(StrContext::Label("byte"))
+        .parse_next(input)
 }
 
-fn hexadecimal_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let digits = verify(hexadecimal1, |s: &str| s.len() % 2 == 0);
-    let digits = trim_num0(digits);
-    let f = map(digits, |s| {
-        let byte = utils::conversion::hex_str_to_vec_u8(&s).unwrap();
-        From::from(Byte::from(byte))
-    });
-    context("hexadecimal_byte", f)(src)
+fn hexadecimal_byte<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let digits = hexadecimal1.verify(|s: &str| s.len() % 2 == 0);
+    trim_num0(digits)
+        .map(|s| {
+            let byte = utils::conversion::hex_str_to_vec_u8(&s).unwrap();
+            From::from(Byte::from(byte))
+        })
+        .context(StrContext::Label("hexadecimal_byte"))
+        .parse_next(input)
 }
 
-fn binary_byte<'a, T, E>(src: &'a str) -> IResult<&'a str, T, E>
-where
-    T: ParseRepr,
-    E: ParseError<&'a str> + ContextError<&'a str>, {
-    let digits = verify(binary1, |s: &str| s.len() % 8 == 0);
-    let digits = trim_num0(digits);
-    let f = map(digits, |s| {
-        let byte = utils::conversion::bin_str_to_vec_u8(&s).unwrap();
-        From::from(Byte::from(byte))
-    });
-    context("binary_byte", f)(src)
+fn binary_byte<T: ParseRepr>(input: &mut &str) -> ModalResult<T> {
+    let digits = binary1.verify(|s: &str| s.len() % 8 == 0);
+    trim_num0(digits)
+        .map(|s| {
+            let byte = utils::conversion::bin_str_to_vec_u8(&s).unwrap();
+            From::from(Byte::from(byte))
+        })
+        .context(StrContext::Label("binary_byte"))
+        .parse_next(input)
 }
 
-fn hexadecimal1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> {
-    take_while1(is_hexadecimal)(src)
+fn hexadecimal1<'a>(input: &mut &'a str) -> ModalResult<&'a str> {
+    take_while(1 .., is_hexadecimal).parse_next(input)
 }
 
 fn is_hexadecimal(c: char) -> bool {
     matches!(c, '0'..='9' | 'a'..='f')
 }
 
-fn binary1<'a, E>(src: &'a str) -> IResult<&'a str, &'a str, E>
-where E: ParseError<&'a str> {
-    take_while1(is_binary)(src)
+fn binary1<'a>(input: &mut &'a str) -> ModalResult<&'a str> {
+    take_while(1 .., is_binary).parse_next(input)
 }
 
 fn is_binary(c: char) -> bool {

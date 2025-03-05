@@ -277,7 +277,7 @@ where Ctx: CtxMeta<'a> {
             for_iter(ctx, body, name, iter)
         }
         Val::Byte(byte) => {
-            let iter = byte.as_ref().iter().map(|byte| {
+            let iter = byte.iter().map(|byte| {
                 let byte = Byte::from(vec![*byte]);
                 Val::Byte(byte.into())
             });

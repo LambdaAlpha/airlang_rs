@@ -1,18 +1,24 @@
 use std::{
     error::Error,
     fmt::{
+        Debug,
         Display,
         Formatter,
     },
 };
 
-#[derive(Debug)]
 pub struct ParseError {
     pub(crate) msg: String,
 }
 
 #[derive(Debug)]
 pub struct ReprError {}
+
+impl Debug for ParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ParseError\n{}", self.msg)
+    }
+}
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

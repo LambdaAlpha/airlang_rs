@@ -256,8 +256,8 @@ fn gen_number(number: &Number, s: &mut String) {
 fn gen_byte(byte: &Byte, s: &mut String) {
     s.push_str(BYTE);
     s.push(SCOPE_LEFT);
-    if !byte.as_ref().is_empty() {
-        utils::conversion::u8_array_to_hex_string_mut(byte.as_ref(), s);
+    if !byte.is_empty() {
+        utils::conversion::u8_array_to_hex_string_mut(byte, s);
     }
     s.push(SCOPE_RIGHT);
 }

@@ -64,7 +64,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
         let Val::Byte(t) = val else {
             return Val::default();
         };
-        let len: Int = t.as_ref().len().into();
+        let len: Int = t.len().into();
         Val::Int(len.into())
     })
 }
