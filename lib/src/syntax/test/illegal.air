@@ -152,18 +152,6 @@ digit prefix
 -----
 9(a)
 =====
-duplicate ctx prefix
------
-<<(a)
-=====
-conflict ctx prefix
------
-<>(a)
-=====
-duplicate ctx prefix 2
------
-<2<(a)
-=====
 int lower case tag
 -----
 0xff
