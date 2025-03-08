@@ -376,6 +376,10 @@ map list concat
 -----
 {}[]
 =====
+raw map odd
+-----
+.{a b c}
+=====
 scope concat
 -----
 (1)(2)

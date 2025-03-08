@@ -12,9 +12,16 @@ use crate::syntax::{
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         map(vec![]),
+        map(vec![]),
+        map(vec![(symbol("a"), symbol("b"))]),
         map(vec![(symbol("a"), symbol("b"))]),
         map(vec![(symbol("a"), symbol("b"))]),
         map(vec![(symbol("a"), symbol("b")), (symbol("c"), symbol("d"))]),
+        map(vec![(symbol("a"), symbol("b")), (symbol("c"), symbol("d"))]),
+        map(vec![
+            (pair(symbol("a"), symbol("b")), symbol("c")),
+            (symbol("d"), pair(symbol("e"), symbol("f"))),
+        ]),
         map(vec![(symbol("a"), symbol("b")), (symbol("c"), symbol("d"))]),
         map(vec![(map(vec![]), map(vec![]))]),
         list(vec![map(vec![]), map(vec![])]),

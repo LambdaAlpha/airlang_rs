@@ -332,6 +332,7 @@ fn prefix<'a, T: ParseRepr>(
                 Some(TEXT_QUOTE) => raw_text.parse_next(i),
                 Some(SYMBOL_QUOTE) => raw_symbol.parse_next(i),
                 Some(LIST_LEFT) => raw_list(ctx).parse_next(i),
+                Some(MAP_LEFT) => raw_map(ctx).parse_next(i),
                 _ => Ok(T::from(Unit)),
             },
             TRUE => Ok(T::from(Bit::true1())),
@@ -555,6 +556,23 @@ fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> + Clon
         .parse_next(i)?;
         Ok((key, value))
     }
+}
+
+fn raw_map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    let items = move |i: &mut _| {
+        let tokens = tokens(ctx, 0 ..).parse_next(i)?;
+        if tokens.len() % 2 != 0 {
+            return cut_err(fail.context(expect_desc("even number of tokens"))).parse_next(i);
+        }
+        let mut map = Map::with_capacity(tokens.len() / 2);
+        let mut tokens = tokens.into_iter();
+        while let Some(key) = tokens.next() {
+            let value = tokens.next().unwrap();
+            map.insert(key.into_repr(), value.into_repr());
+        }
+        Ok(T::from(map))
+    };
+    delimited_trim(MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
 }
 
 fn symbol<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {

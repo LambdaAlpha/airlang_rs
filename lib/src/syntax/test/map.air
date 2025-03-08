@@ -2,9 +2,17 @@ empty
 -----
 {}
 =====
+raw empty
+-----
+.{}
+=====
 one
 -----
 {a : b}
+=====
+raw one
+-----
+.{a b}
 =====
 one trailing comma
 -----
@@ -13,6 +21,17 @@ one trailing comma
 two
 -----
 {a : b, c : d}
+=====
+raw two
+-----
+.{
+a b
+c d
+}
+=====
+raw two non-atomic
+-----
+.{(a : b) c d (e : f)}
 =====
 two trailing comma
 -----
