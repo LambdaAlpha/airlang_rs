@@ -18,11 +18,11 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // keywords
 
-pub(crate) const LEFT: char = '<';
-pub(crate) const RIGHT: char = '>';
+pub(crate) const LEFT: &str = "<";
+pub(crate) const RIGHT: &str = ">";
 
-pub(crate) const ARITY_2: char = '2';
-pub(crate) const ARITY_3: char = '3';
+pub(crate) const ARITY_2: &str = "2";
+pub(crate) const ARITY_3: &str = "3";
 
 pub(crate) const TAG_CHAR: char = '#';
 pub(crate) const TAG: &str = concatcp!(TAG_CHAR);

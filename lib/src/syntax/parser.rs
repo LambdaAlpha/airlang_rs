@@ -157,6 +157,18 @@ impl<'a> ParseCtx<'a> {
         self.struct1 = struct1;
         self
     }
+
+    fn esc_direction(mut self, direction: Direction) -> Self {
+        self.is_tag = false;
+        self.direction = direction;
+        self
+    }
+
+    fn esc_arity(mut self, arity: Arity) -> Self {
+        self.is_tag = false;
+        self.arity = arity;
+        self
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -238,30 +250,6 @@ fn scope<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     scoped(compose(ctx)).context(label("scope"))
 }
 
-fn parse_ctx(init: ParseCtx) -> impl Parser<&str, ParseCtx, E> {
-    const CTX: [char; 4] = [LEFT, RIGHT, ARITY_2, ARITY_3];
-    repeat(1 .., one_of(CTX)).fold(move || init.escape(), update_ctx)
-}
-
-fn is_ctx_char(c: char) -> bool {
-    matches!(c, LEFT | RIGHT | ARITY_2 | ARITY_3)
-}
-
-fn is_ctx(s: &str) -> bool {
-    s.chars().all(is_ctx_char)
-}
-
-fn update_ctx(mut ctx: ParseCtx, c: char) -> ParseCtx {
-    match c {
-        LEFT => ctx.direction = Direction::Left,
-        RIGHT => ctx.direction = Direction::Right,
-        ARITY_2 => ctx.arity = Arity::Two,
-        ARITY_3 => ctx.arity = Arity::Three,
-        _ => unreachable!(),
-    }
-    ctx
-}
-
 fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
     (move |i: &mut _| match peek(any).parse_next(i)? {
         // delimiters
@@ -312,31 +300,50 @@ fn ext<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
         let i: &mut &str = i;
         let checkpoint = i.checkpoint();
         let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
-        alt((
-            prefix(symbol, ctx, checkpoint).map(Token::Default),
-            empty.value(Token::Unquote(Symbol::from_str(symbol))),
-        ))
-        .parse_next(i)
+        if i.starts_with(LEFT_DELIMITERS) {
+            prefix(symbol, ctx).map(Token::Default).parse_next(i)
+        } else {
+            alt((
+                keyword(symbol, checkpoint).map(Token::Default),
+                empty.value(Token::Unquote(Symbol::from_str(symbol))),
+            ))
+            .parse_next(i)
+        }
     }
 }
 
 const LEFT_DELIMITERS: [char; 5] = [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
 
-fn prefix<'a, T: ParseRepr>(
-    prefix: &'a str, ctx: ParseCtx<'a>, checkpoint: Checkpoint<&'a str, &'a str>,
+fn keyword<'a, T: ParseRepr>(
+    s: &'a str, checkpoint: Checkpoint<&'a str, &'a str>,
 ) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
-        match prefix {
-            UNIT => match i.chars().next() {
-                Some(TEXT_QUOTE) => raw_text.parse_next(i),
-                Some(SYMBOL_QUOTE) => raw_symbol.parse_next(i),
-                Some(LIST_LEFT) => raw_list(ctx).parse_next(i),
-                Some(MAP_LEFT) => raw_map(ctx).parse_next(i),
-                _ => Ok(T::from(Unit)),
-            },
+        match s {
+            UNIT => Ok(T::from(Unit)),
             TRUE => Ok(T::from(Bit::true1())),
             FALSE => Ok(T::from(Bit::false1())),
+            s if matches!(s.chars().next(), Some('0' ..= '9')) => {
+                i.reset(&checkpoint);
+                return cut_err(full_symbol(int_or_number).context(label("int or number")))
+                    .parse_next(i);
+            }
+            _ => fail.parse_next(i),
+        }
+    }
+}
+
+fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&'a str, T, E> {
+    move |i: &mut _| {
+        let i: &mut &str = i;
+        match prefix {
+            UNIT => match i.chars().next().unwrap() {
+                TEXT_QUOTE => raw_text.parse_next(i),
+                SYMBOL_QUOTE => raw_symbol.parse_next(i),
+                LIST_LEFT => raw_list(ctx).parse_next(i),
+                MAP_LEFT => raw_map(ctx).parse_next(i),
+                _ => fail.context(label("prefix token")).parse_next(i),
+            },
             INT => int.parse_next(i),
             NUMBER => number.parse_next(i),
             BYTE => byte.parse_next(i),
@@ -345,24 +352,13 @@ fn prefix<'a, T: ParseRepr>(
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
             ABSTRACT => scope(ctx.esc_struct(Struct::Abstract)).parse_next(i),
             ASK => scope(ctx.esc_struct(Struct::Ask)).parse_next(i),
+            LEFT => scope(ctx.esc_direction(Direction::Left)).parse_next(i),
+            RIGHT => scope(ctx.esc_direction(Direction::Right)).parse_next(i),
+            ARITY_2 => scope(ctx.esc_arity(Arity::Two)).parse_next(i),
+            ARITY_3 => scope(ctx.esc_arity(Arity::Three)).parse_next(i),
             TAG => scope(ctx.escape()).parse_next(i),
             s if s.starts_with(TAG_CHAR) => scope(ctx.tag(&s[1 ..])).parse_next(i),
-            s => {
-                if i.starts_with(LEFT_DELIMITERS) {
-                    if is_ctx(s) {
-                        i.reset(&checkpoint);
-                        let ctx = cut_err(full_symbol(parse_ctx(ctx))).parse_next(i)?;
-                        return scope(ctx).parse_next(i);
-                    }
-                    return cut_err(fail.context(label("prefix token"))).parse_next(i);
-                }
-                if matches!(s.chars().next(), Some('0' ..= '9')) {
-                    i.reset(&checkpoint);
-                    return cut_err(full_symbol(int_or_number).context(label("int or number")))
-                        .parse_next(i);
-                }
-                fail.parse_next(i)
-            }
+            _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
         }
     }
 }
