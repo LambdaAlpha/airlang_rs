@@ -36,8 +36,6 @@ use crate::{
         mut_static_prim::MutStaticFn,
     },
     prelude::{
-        abstract1::AbstractPrelude,
-        ask::AskPrelude,
         bit::BitPrelude,
         byte::BytePrelude,
         call::CallPrelude,
@@ -52,7 +50,9 @@ use crate::{
         meta::MetaPrelude,
         mode::MODE_PRELUDE,
         number::NumberPrelude,
+        optimize::OptimizePrelude,
         pair::PairPrelude,
+        solve::SolvePrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
         text::TextPrelude,
@@ -84,8 +84,8 @@ pub(crate) struct AllPrelude {
     pub(crate) pair: PairPrelude,
     pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
-    pub(crate) abstract1: AbstractPrelude,
-    pub(crate) ask: AskPrelude,
+    pub(crate) optimize: OptimizePrelude,
+    pub(crate) solve: SolvePrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) ctx: CtxPrelude,
@@ -109,8 +109,8 @@ impl Prelude for AllPrelude {
         self.pair.put(m);
         self.change.put(m);
         self.call.put(m);
-        self.abstract1.put(m);
-        self.ask.put(m);
+        self.optimize.put(m);
+        self.solve.put(m);
         self.list.put(m);
         self.map.put(m);
         self.ctx.put(m);
@@ -293,9 +293,9 @@ mod change;
 
 mod call;
 
-mod abstract1;
+mod optimize;
 
-mod ask;
+mod solve;
 
 mod list;
 

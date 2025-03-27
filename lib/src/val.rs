@@ -7,18 +7,18 @@ use std::{
 };
 
 use crate::{
-    Ask,
     Call,
     Int,
     List,
     Map,
     Pair,
-    abstract1::Abstract,
+    Solve,
     bit::Bit,
     byte::Byte,
     change::Change,
     extension::ValExt,
     number::Number,
+    optimize::Optimize,
     symbol::Symbol,
     syntax::{
         ReprError,
@@ -29,8 +29,6 @@ use crate::{
     text::Text,
     unit::Unit,
     val::{
-        abstract1::AbstractVal,
-        ask::AskVal,
         byte::ByteVal,
         call::CallVal,
         change::ChangeVal,
@@ -40,7 +38,9 @@ use crate::{
         list::ListVal,
         map::MapVal,
         number::NumberVal,
+        optimize::OptimizeVal,
         pair::PairVal,
+        solve::SolveVal,
         text::TextVal,
     },
 };
@@ -61,8 +61,8 @@ pub enum Val {
     Change(ChangeVal),
 
     Call(CallVal),
-    Abstract(AbstractVal),
-    Ask(AskVal),
+    Optimize(OptimizeVal),
+    Solve(SolveVal),
 
     List(ListVal),
     Map(MapVal),
@@ -83,8 +83,8 @@ pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
-pub(crate) const ABSTRACT: &str = "abstract";
-pub(crate) const ASK: &str = "ask";
+pub(crate) const OPTIMIZE: &str = "optimize";
+pub(crate) const SOLVE: &str = "solve";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
@@ -205,27 +205,27 @@ impl From<CallVal> for Val {
     }
 }
 
-impl From<Abstract<Val, Val>> for Val {
-    fn from(value: Abstract<Val, Val>) -> Self {
-        Val::Abstract(AbstractVal::from(value))
+impl From<Optimize<Val, Val>> for Val {
+    fn from(value: Optimize<Val, Val>) -> Self {
+        Val::Optimize(OptimizeVal::from(value))
     }
 }
 
-impl From<AbstractVal> for Val {
-    fn from(value: AbstractVal) -> Self {
-        Val::Abstract(value)
+impl From<OptimizeVal> for Val {
+    fn from(value: OptimizeVal) -> Self {
+        Val::Optimize(value)
     }
 }
 
-impl From<Ask<Val, Val>> for Val {
-    fn from(value: Ask<Val, Val>) -> Self {
-        Val::Ask(AskVal::from(value))
+impl From<Solve<Val, Val>> for Val {
+    fn from(value: Solve<Val, Val>) -> Self {
+        Val::Solve(SolveVal::from(value))
     }
 }
 
-impl From<AskVal> for Val {
-    fn from(value: AskVal) -> Self {
-        Val::Ask(value)
+impl From<SolveVal> for Val {
+    fn from(value: SolveVal) -> Self {
+        Val::Solve(value)
     }
 }
 
@@ -284,8 +284,8 @@ impl From<&Repr> for Val {
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
             Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
-            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
-            Repr::Ask(ask) => Val::Ask(AskVal::from(&**ask)),
+            Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(&**optimize)),
+            Repr::Solve(solve) => Val::Solve(SolveVal::from(&**solve)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -305,8 +305,8 @@ impl From<Repr> for Val {
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
             Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
-            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
-            Repr::Ask(ask) => Val::Ask(AskVal::from(*ask)),
+            Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(*optimize)),
+            Repr::Solve(solve) => Val::Solve(SolveVal::from(*solve)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -327,8 +327,8 @@ impl TryInto<Repr> for &Val {
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
-            Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
+            Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
+            Val::Solve(solve) => Ok(Repr::Solve(Box::new(solve.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -350,8 +350,8 @@ impl TryInto<Repr> for Val {
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
-            Val::Ask(ask) => Ok(Repr::Ask(Box::new(ask.try_into()?))),
+            Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
+            Val::Solve(solve) => Ok(Repr::Solve(Box::new(solve.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -388,15 +388,15 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Val::Abstract(abstract1) => {
-                let func = (&abstract1.func).try_into()?;
-                let input = (&abstract1.input).try_into()?;
-                GenRepr::Abstract(Box::new(Abstract::new(func, input)))
+            Val::Optimize(optimize) => {
+                let func = (&optimize.func).try_into()?;
+                let input = (&optimize.input).try_into()?;
+                GenRepr::Optimize(Box::new(Optimize::new(func, input)))
             }
-            Val::Ask(ask) => {
-                let func = (&ask.func).try_into()?;
-                let output = (&ask.output).try_into()?;
-                GenRepr::Ask(Box::new(Ask::new(func, output)))
+            Val::Solve(solve) => {
+                let func = (&solve.func).try_into()?;
+                let output = (&solve.output).try_into()?;
+                GenRepr::Solve(Box::new(Solve::new(func, output)))
             }
             Val::List(list) => {
                 let list: List<GenRepr> =
@@ -433,8 +433,8 @@ impl Debug for Val {
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
             Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
-            Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
-            Val::Ask(ask) => <_ as Debug>::fmt(ask, f),
+            Val::Optimize(optimize) => <_ as Debug>::fmt(optimize, f),
+            Val::Solve(solve) => <_ as Debug>::fmt(solve, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
@@ -458,9 +458,9 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod abstract1;
+pub(crate) mod optimize;
 
-pub(crate) mod ask;
+pub(crate) mod solve;
 
 pub(crate) mod list;
 

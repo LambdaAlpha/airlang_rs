@@ -353,49 +353,49 @@ do [
 -----
 [false]
 =====
-mode primitive abstract id
+mode primitive optimize id
 -----
 do [
-    f = mode ; {abstract : id, default : eval*, primitive : true},
+    f = mode ; {optimize : id, default : eval*, primitive : true},
     f [.a ! ^b]
 ]
 -----
 [.a ! ^b]
 =====
-mode primitive abstract form
+mode primitive optimize form
 -----
 do [
     b = 1,
-    f = mode ; {abstract : form, default : eval*, primitive : true},
+    f = mode ; {optimize : form, default : eval*, primitive : true},
     f [.a ! ^b]
 ]
 -----
 [a ! 1]
 =====
-mode primitive abstract eval
+mode primitive optimize eval
 -----
 do [
     b = 1,
-    f = mode ; {abstract : eval, default : form*, primitive : true},
+    f = mode ; {optimize : eval, default : form*, primitive : true},
     f [.a ! b]
 ]
 -----
 [1]
 =====
-mode primitive ask id
+mode primitive solve id
 -----
 do [
-    f = mode ; {ask : id, default : eval*, primitive : true},
+    f = mode ; {solve : id, default : eval*, primitive : true},
     f [.a ? ^b]
 ]
 -----
 [.a ? ^b]
 =====
-mode primitive ask form
+mode primitive solve form
 -----
 do [
     b = 1,
-    f = mode ; {ask : form, default : eval*, primitive : true},
+    f = mode ; {solve : form, default : eval*, primitive : true},
     f [.a ? b]
 ]
 -----
@@ -817,13 +817,13 @@ repr composite
 -----
 do [
     call_mode = mode ; {pair : eval* : id},
-    abstract_mode = mode ; {pair : id : form.},
-    ask_mode = mode ; {pair : form. : form.},
+    optimize_mode = mode ; {pair : id : form.},
+    solve_mode = mode ; {pair : form. : form.},
     repr = form. ; {
         call : ctx : in -> in,
         call_mode : ^call_mode,
-        abstract_mode : ^abstract_mode,
-        ask_mode : ^ask_mode,
+        optimize_mode : ^optimize_mode,
+        solve_mode : ^solve_mode,
         context_access : constant,
         cacheable : true,
         cell : true,
@@ -909,24 +909,24 @@ do [
 -----
 {map : {a : eval*, b : id} : id : form.}
 =====
-abstract mode
+optimize mode
 -----
 do [
     f = function ; {
-        abstract_mode : mode ; {map : {a : form.} : eval* : id},
+        optimize_mode : mode ; {map : {a : form.} : eval* : id},
     },
-    function.represent ; f function.abstract_mode .
+    function.represent ; f function.optimize_mode .
 ]
 -----
 {map : {a : form.} : eval* : id}
 =====
-ask mode
+solve mode
 -----
 do [
     f = function ; {
-        ask_mode : mode ; {map : {a : form.} : eval* : id},
+        solve_mode : mode ; {map : {a : form.} : eval* : id},
     },
-    function.represent ; f function.ask_mode .
+    function.represent ; f function.solve_mode .
 ]
 -----
 {map : {a : form.} : eval* : id}

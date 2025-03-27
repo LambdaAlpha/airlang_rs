@@ -89,9 +89,9 @@ fn do1() -> Named<FuncVal> {
         |ctx, val| fn_do(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -109,9 +109,9 @@ fn if1() -> Named<FuncVal> {
         |ctx, val| fn_if(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -142,9 +142,9 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -181,9 +181,9 @@ fn loop1() -> Named<FuncVal> {
         |ctx, val| fn_loop(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -241,9 +241,9 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }

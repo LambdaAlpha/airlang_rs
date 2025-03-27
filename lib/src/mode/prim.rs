@@ -1,11 +1,11 @@
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
     ListVal,
     MapVal,
+    OptimizeVal,
     PairVal,
+    SolveVal,
     Symbol,
     SymbolMode,
     UniMode,
@@ -28,8 +28,8 @@ pub struct PrimMode {
     pub pair: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
-    pub abstract1: Option<CodeMode>,
-    pub ask: Option<CodeMode>,
+    pub optimize: Option<CodeMode>,
+    pub solve: Option<CodeMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
 }
@@ -91,24 +91,24 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match self.abstract1 {
-            None => Id.transform_abstract(ctx, abstract1),
+        match self.optimize {
+            None => Id.transform_optimize(ctx, optimize),
             Some(mode) => match mode {
-                CodeMode::Form => FormCore::transform_abstract(self, self, ctx, abstract1),
-                CodeMode::Eval => EvalCore::transform_abstract(self, self, ctx, abstract1),
+                CodeMode::Form => FormCore::transform_optimize(self, self, ctx, optimize),
+                CodeMode::Eval => EvalCore::transform_optimize(self, self, ctx, optimize),
             },
         }
     }
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
+    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match self.ask {
-            None => Id.transform_ask(ctx, ask),
+        match self.solve {
+            None => Id.transform_solve(ctx, solve),
             Some(mode) => match mode {
-                CodeMode::Form => FormCore::transform_ask(self, self, ctx, ask),
-                CodeMode::Eval => EvalCore::transform_ask(self, self, ctx, ask),
+                CodeMode::Form => FormCore::transform_solve(self, self, ctx, solve),
+                CodeMode::Eval => EvalCore::transform_solve(self, self, ctx, solve),
             },
         }
     }
@@ -137,8 +137,8 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: None,
                 pair: None,
                 call: None,
-                abstract1: None,
-                ask: None,
+                optimize: None,
+                solve: None,
                 change: None,
                 list: None,
                 map: None,
@@ -147,8 +147,8 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
-                abstract1: Some(CodeMode::from(mode)),
-                ask: Some(CodeMode::from(mode)),
+                optimize: Some(CodeMode::from(mode)),
+                solve: Some(CodeMode::from(mode)),
                 change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),
                 map: Some(DataMode::from(mode)),

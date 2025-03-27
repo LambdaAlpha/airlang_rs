@@ -20,10 +20,10 @@ use crate::{
         parse,
         repr::{
             Repr,
-            abstract1::AbstractRepr,
-            ask::AskRepr,
             call::CallRepr,
+            optimize::OptimizeRepr,
             pair::PairRepr,
+            solve::SolveRepr,
         },
     },
     test::parse_test_file,
@@ -51,9 +51,9 @@ mod change;
 
 mod call;
 
-mod abstract1;
+mod optimize;
 
-mod ask;
+mod solve;
 
 mod list;
 
@@ -107,12 +107,12 @@ fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn abstract1(func: Repr, value: Repr) -> Repr {
-    Repr::Abstract(Box::new(AbstractRepr::new(func, value)))
+fn optimize(func: Repr, value: Repr) -> Repr {
+    Repr::Optimize(Box::new(OptimizeRepr::new(func, value)))
 }
 
-fn ask(func: Repr, output: Repr) -> Repr {
-    Repr::Ask(Box::new(AskRepr::new(func, output)))
+fn solve(func: Repr, output: Repr) -> Repr {
+    Repr::Solve(Box::new(SolveRepr::new(func, output)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -141,16 +141,16 @@ fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn tag_abstract(tag: &str, v: Vec<Repr>) -> Repr {
+fn tag_optimize(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
-    Repr::Abstract(Box::new(AbstractRepr::new(func, input)))
+    Repr::Optimize(Box::new(OptimizeRepr::new(func, input)))
 }
 
-fn tag_ask(tag: &str, v: Vec<Repr>) -> Repr {
+fn tag_solve(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let output = Repr::List(v.into());
-    Repr::Ask(Box::new(AskRepr::new(func, output)))
+    Repr::Solve(Box::new(SolveRepr::new(func, output)))
 }
 
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
@@ -168,15 +168,15 @@ fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
 
-fn infix_abstract(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Abstract(Box::new(AbstractRepr::new(
+fn infix_optimize(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Optimize(Box::new(OptimizeRepr::new(
         middle,
         Repr::Pair(Box::new(PairRepr::new(left, right))),
     )))
 }
 
-fn infix_ask(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Ask(Box::new(AskRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
+fn infix_solve(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Solve(Box::new(SolveRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
 
 fn test_parse(
@@ -349,23 +349,23 @@ fn test_generate_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_abstract() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/abstract.air"), "test/abstract.air", abstract1::expected)
+fn test_parse_optimize() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/optimize.air"), "test/optimize.air", optimize::expected)
 }
 
 #[test]
-fn test_generate_abstract() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/abstract.air"), "test/abstract.air")
+fn test_generate_optimize() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/optimize.air"), "test/optimize.air")
 }
 
 #[test]
-fn test_parse_ask() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/ask.air"), "test/ask.air", ask::expected)
+fn test_parse_solve() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/solve.air"), "test/solve.air", solve::expected)
 }
 
 #[test]
-fn test_generate_ask() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/ask.air"), "test/ask.air")
+fn test_generate_solve() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/solve.air"), "test/solve.air")
 }
 
 #[test]

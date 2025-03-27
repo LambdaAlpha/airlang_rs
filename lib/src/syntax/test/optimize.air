@@ -1,28 +1,28 @@
-abstract
+optimize
 -----
 a ! b
 =====
-abstract ctx
+optimize ctx
 -----
 !(a b)
 =====
-abstract abstract
+optimize optimize
 -----
 a ! b ! c
 =====
-abstract other
+optimize other
 -----
 a ! b : c
 =====
-other abstract
+other optimize
 -----
 a : b ! c
 =====
-abstract infix
+optimize infix
 -----
 a ! b c d
 =====
-infix abstract
+infix optimize
 -----
 a b c ! d
 =====

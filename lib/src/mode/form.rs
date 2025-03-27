@@ -1,9 +1,9 @@
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
+    OptimizeVal,
     PairVal,
+    SolveVal,
     SymbolMode,
     core::FormCore,
     ctx::ref1::CtxMeta,
@@ -62,14 +62,14 @@ impl ByVal<Val> for Form {
         FormCore::transform_call(self, self, ctx, call)
     }
 
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_abstract(self, self, ctx, abstract1)
+        FormCore::transform_optimize(self, self, ctx, optimize)
     }
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
+    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_ask(self, self, ctx, ask)
+        FormCore::transform_solve(self, self, ctx, solve)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val

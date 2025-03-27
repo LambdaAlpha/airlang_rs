@@ -39,10 +39,10 @@ pub(crate) const PAIR: &str = concatcp!(PAIR_CHAR);
 pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL_CHAR: char = ';';
 pub(crate) const CALL: &str = concatcp!(CALL_CHAR);
-pub(crate) const ABSTRACT_CHAR: char = '!';
-pub(crate) const ABSTRACT: &str = concatcp!(ABSTRACT_CHAR);
-pub(crate) const ASK_CHAR: char = '?';
-pub(crate) const ASK: &str = concatcp!(ASK_CHAR);
+pub(crate) const OPTIMIZE_CHAR: char = '!';
+pub(crate) const OPTIMIZE: &str = concatcp!(OPTIMIZE_CHAR);
+pub(crate) const SOLVE_CHAR: char = '?';
+pub(crate) const SOLVE: &str = concatcp!(SOLVE_CHAR);
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
@@ -65,7 +65,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn ambiguous(s: &str) -> bool {
-    matches!(s, UNIT | TRUE | FALSE | PAIR | CHANGE | CALL | ABSTRACT | ASK)
+    matches!(s, UNIT | TRUE | FALSE | PAIR | CHANGE | CALL | OPTIMIZE | SOLVE)
 }
 
 pub(crate) mod pub1;

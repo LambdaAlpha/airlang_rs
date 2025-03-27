@@ -70,19 +70,19 @@ call ctx two
 -----
 ;(a b)
 =====
-abstract ctx
+optimize ctx
 -----
 !(a b c d e)
 =====
-abstract ctx two
+optimize ctx two
 -----
 !(a b)
 =====
-ask ctx
+solve ctx
 -----
 ?(a b c d e)
 =====
-ask ctx two
+solve ctx two
 -----
 ?(a b)
 =====
@@ -150,11 +150,11 @@ tag struct pair
 -----
 :(#t(a))
 =====
-tag struct abstract
+tag struct optimize
 -----
 !(#t(a))
 =====
-tag struct ask
+tag struct solve
 -----
 ?(#t(a))
 =====

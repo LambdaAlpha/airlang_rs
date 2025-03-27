@@ -67,8 +67,8 @@ pub(crate) struct CtxPrelude {
     pub(crate) is_reverse: Named<FuncVal>,
     pub(crate) set_reverse: Named<FuncVal>,
     pub(crate) get_ctx_access: Named<FuncVal>,
-    pub(crate) get_solver: Named<FuncVal>,
-    pub(crate) set_solver: Named<FuncVal>,
+    pub(crate) get_advisor: Named<FuncVal>,
+    pub(crate) set_advisor: Named<FuncVal>,
     pub(crate) with_ctx: Named<FuncVal>,
     pub(crate) ctx_in_ctx_out: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
@@ -90,8 +90,8 @@ impl Default for CtxPrelude {
             is_reverse: is_reverse(),
             set_reverse: set_reverse(),
             get_ctx_access: get_ctx_access(),
-            get_solver: get_solver(),
-            set_solver: set_solver(),
+            get_advisor: get_advisor(),
+            set_advisor: set_advisor(),
             with_ctx: with_ctx(),
             ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
@@ -114,8 +114,8 @@ impl Prelude for CtxPrelude {
         self.is_reverse.put(m);
         self.set_reverse.put(m);
         self.get_ctx_access.put(m);
-        self.get_solver.put(m);
-        self.set_solver.put(m);
+        self.get_advisor.put(m);
+        self.set_advisor.put(m);
         self.with_ctx.put(m);
         self.ctx_in_ctx_out.put(m);
         self.ctx_new.put(m);
@@ -129,9 +129,9 @@ fn read() -> Named<FuncVal> {
     let id = "read";
     let f = fn_read;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -147,9 +147,9 @@ fn move1() -> Named<FuncVal> {
     let id = "move";
     let f = fn_move;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -171,9 +171,9 @@ fn assign() -> Named<FuncVal> {
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
         FuncMode::default_mode(),
     );
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -198,9 +198,9 @@ fn set_variable_access() -> Named<FuncVal> {
         FuncMode::symbol_mode(SymbolMode::Literal),
         FuncMode::symbol_mode(SymbolMode::Literal),
     );
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -230,9 +230,9 @@ fn get_variable_access() -> Named<FuncVal> {
     let id = "variable_access";
     let f = fn_get_variable_access;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let abstract1 = call.clone();
-    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::symbol_mode(SymbolMode::Literal);
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -254,9 +254,9 @@ fn is_null() -> Named<FuncVal> {
     let id = "is_null";
     let f = fn_is_null;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -275,9 +275,9 @@ fn is_static() -> Named<FuncVal> {
     let id = "is_static";
     let f = fn_is_static;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -337,9 +337,9 @@ fn get_ctx_access() -> Named<FuncVal> {
     let id = "access";
     let f = fn_get_ctx_access;
     let call = FuncMode::default_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::symbol_mode(SymbolMode::Literal);
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -357,39 +357,39 @@ fn fn_get_ctx_access(ctx: MutFnCtx, _input: Val) -> Val {
     symbol(access)
 }
 
-fn get_solver() -> Named<FuncVal> {
-    let id = "solver";
-    let f = fn_get_solver;
+fn get_advisor() -> Named<FuncVal> {
+    let id = "advisor";
+    let f = fn_get_advisor;
     let call = FuncMode::default_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
 
-fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
-    match ctx.get_solver() {
-        Ok(solver) => Val::Func(solver.clone()),
+fn fn_get_advisor(ctx: ConstFnCtx, _input: Val) -> Val {
+    match ctx.get_advisor() {
+        Ok(advisor) => Val::Func(advisor.clone()),
         _ => Val::default(),
     }
 }
 
-fn set_solver() -> Named<FuncVal> {
-    let id = "set_solver";
-    let f = fn_set_solver;
+fn set_advisor() -> Named<FuncVal> {
+    let id = "set_advisor";
+    let f = fn_set_advisor;
     let mode = FuncMode::default();
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
 
-fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_advisor(ctx: MutFnCtx, input: Val) -> Val {
     match input {
         Val::Unit(_) => {
-            let _ = ctx.set_solver(None);
+            let _ = ctx.set_advisor(None);
         }
-        Val::Func(solver) => {
-            let _ = ctx.set_solver(Some(solver));
+        Val::Func(advisor) => {
+            let _ = ctx.set_advisor(Some(advisor));
         }
         _ => {}
     }
@@ -403,9 +403,9 @@ fn with_ctx() -> Named<FuncVal> {
         FuncMode::id_mode(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -446,9 +446,9 @@ fn ctx_in_ctx_out() -> Named<FuncVal> {
         FuncMode::default_mode(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = false;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -472,9 +472,9 @@ fn ctx_new() -> Named<FuncVal> {
     let id = "context";
     let f = fn_ctx_new;
     let call = parse_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -490,9 +490,9 @@ fn ctx_repr() -> Named<FuncVal> {
     let id = "context.represent";
     let f = fn_ctx_repr;
     let call = FuncMode::default_mode();
-    let abstract1 = call.clone();
-    let ask = generate_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = generate_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }

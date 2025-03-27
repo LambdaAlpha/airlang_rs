@@ -4,16 +4,16 @@ use std::fmt::{
 };
 
 use crate::{
-    AbstractMode,
-    AskMode,
     CallMode,
     CompMode,
     CtxAccess,
     FuncMode,
     ListMode,
     MapMode,
+    OptimizeMode,
     PairMode,
     PrimMode,
+    SolveMode,
     SymbolMode,
     UniMode,
     Val,
@@ -47,8 +47,8 @@ impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
         &FuncMode {
             call: None,
-            abstract1: None,
-            ask: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
+            optimize: None,
+            solve: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
         }
     }
 
@@ -142,21 +142,21 @@ impl IsCacheable for CallMode {
     }
 }
 
-impl IsCacheable for AbstractMode {
+impl IsCacheable for OptimizeMode {
     fn is_cacheable(&self) -> bool {
         if matches!(self.code, CodeMode::Eval) {
             return false;
         }
-        self.abstract1.func.is_cacheable() && self.abstract1.input.is_cacheable()
+        self.optimize.func.is_cacheable() && self.optimize.input.is_cacheable()
     }
 }
 
-impl IsCacheable for AskMode {
+impl IsCacheable for SolveMode {
     fn is_cacheable(&self) -> bool {
         if matches!(self.code, CodeMode::Eval) {
             return false;
         }
-        self.ask.func.is_cacheable() && self.ask.output.is_cacheable()
+        self.solve.func.is_cacheable() && self.solve.output.is_cacheable()
     }
 }
 
@@ -179,9 +179,9 @@ impl IsCacheable for MapMode {
 impl IsCacheable for CompMode {
     fn is_cacheable(&self) -> bool {
         self.pair.is_cacheable()
-            && self.abstract1.is_cacheable()
+            && self.optimize.is_cacheable()
             && self.call.is_cacheable()
-            && self.ask.is_cacheable()
+            && self.solve.is_cacheable()
             && self.list.is_cacheable()
             && self.map.is_cacheable()
     }
@@ -202,9 +202,9 @@ impl IsCacheable for CodeMode {
 impl IsCacheable for PrimMode {
     fn is_cacheable(&self) -> bool {
         self.pair.is_cacheable()
-            && self.abstract1.is_cacheable()
+            && self.optimize.is_cacheable()
             && self.call.is_cacheable()
-            && self.ask.is_cacheable()
+            && self.solve.is_cacheable()
             && self.list.is_cacheable()
             && self.map.is_cacheable()
     }
@@ -245,8 +245,8 @@ impl GetCtxAccess for PrimMode {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
             & self.call.ctx_access()
-            & self.abstract1.ctx_access()
-            & self.ask.ctx_access()
+            & self.optimize.ctx_access()
+            & self.solve.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -272,8 +272,8 @@ impl GetCtxAccess for CompMode {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
             & self.call.ctx_access()
-            & self.abstract1.ctx_access()
-            & self.ask.ctx_access()
+            & self.optimize.ctx_access()
+            & self.solve.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -300,21 +300,21 @@ impl GetCtxAccess for CallMode {
     }
 }
 
-impl GetCtxAccess for AbstractMode {
+impl GetCtxAccess for OptimizeMode {
     fn ctx_access(&self) -> CtxAccess {
         if matches!(self.code, CodeMode::Eval) {
             return CtxAccess::Mut;
         }
-        self.abstract1.func.ctx_access() & self.abstract1.input.ctx_access()
+        self.optimize.func.ctx_access() & self.optimize.input.ctx_access()
     }
 }
 
-impl GetCtxAccess for AskMode {
+impl GetCtxAccess for SolveMode {
     fn ctx_access(&self) -> CtxAccess {
         if matches!(self.code, CodeMode::Eval) {
             return CtxAccess::Mut;
         }
-        self.ask.func.ctx_access() & self.ask.output.ctx_access()
+        self.solve.func.ctx_access() & self.solve.output.ctx_access()
     }
 }
 

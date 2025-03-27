@@ -52,8 +52,6 @@ use winnow::{
 };
 
 use crate::{
-    abstract1::Abstract,
-    ask::Ask,
     bit::Bit,
     byte::Byte,
     call::Call,
@@ -62,13 +60,13 @@ use crate::{
     list::List,
     map::Map,
     number::Number,
+    optimize::Optimize,
     pair::Pair,
+    solve::Solve,
     symbol::Symbol,
     syntax::{
-        ABSTRACT,
         ARITY_2,
         ARITY_3,
-        ASK,
         BYTE,
         CALL,
         CHANGE,
@@ -82,11 +80,13 @@ use crate::{
         MAP_RIGHT,
         MULTILINE_COMMENT,
         NUMBER,
+        OPTIMIZE,
         PAIR,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
+        SOLVE,
         SPACE,
         SYMBOL_QUOTE,
         TAG,
@@ -112,8 +112,8 @@ pub(crate) trait ParseRepr:
     + From<Pair<Self, Self>>
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
-    + From<Abstract<Self, Self>>
-    + From<Ask<Self, Self>>
+    + From<Optimize<Self, Self>>
+    + From<Solve<Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -184,8 +184,8 @@ enum Struct {
     Pair,
     Change,
     Call,
-    Abstract,
-    Ask,
+    Optimize,
+    Solve,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -356,8 +356,8 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
-            ABSTRACT => scope(ctx.esc_struct(Struct::Abstract)).parse_next(i),
-            ASK => scope(ctx.esc_struct(Struct::Ask)).parse_next(i),
+            OPTIMIZE => scope(ctx.esc_struct(Struct::Optimize)).parse_next(i),
+            SOLVE => scope(ctx.esc_struct(Struct::Solve)).parse_next(i),
             LEFT => scope(ctx.esc_direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.esc_direction(Direction::Right)).parse_next(i),
             ARITY_2 => scope(ctx.esc_arity(Arity::Two)).parse_next(i),
@@ -447,8 +447,8 @@ fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
         Struct::Pair => T::from(Pair::new(left, right)),
         Struct::Change => T::from(Change::new(left, right)),
         Struct::Call => T::from(Call::new(left, right)),
-        Struct::Abstract => T::from(Abstract::new(left, right)),
-        Struct::Ask => T::from(Ask::new(left, right)),
+        Struct::Optimize => T::from(Optimize::new(left, right)),
+        Struct::Solve => T::from(Solve::new(left, right)),
     }
 }
 
@@ -498,8 +498,8 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
             PAIR => return T::from(Pair::new(left, right)),
             CHANGE => return T::from(Change::new(left, right)),
             CALL => return T::from(Call::new(left, right)),
-            ABSTRACT => return T::from(Abstract::new(left, right)),
-            ASK => return T::from(Ask::new(left, right)),
+            OPTIMIZE => return T::from(Optimize::new(left, right)),
+            SOLVE => return T::from(Solve::new(left, right)),
             _ => T::from(s),
         },
         Token::Default(middle) => middle,

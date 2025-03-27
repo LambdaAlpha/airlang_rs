@@ -1,14 +1,14 @@
 use const_format::concatcp;
 
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
     CodeMode,
     ListVal,
     MapVal,
+    OptimizeVal,
     PairVal,
+    SolveVal,
     Symbol,
     SymbolMode,
     Val,
@@ -95,19 +95,19 @@ impl ByVal<Val> for UniMode {
         }
     }
 
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_abstract(ctx, abstract1),
-            CodeMode::Eval => Eval::new(self.symbol).transform_abstract(ctx, abstract1),
+            CodeMode::Form => Form::new(self.symbol).transform_optimize(ctx, optimize),
+            CodeMode::Eval => Eval::new(self.symbol).transform_optimize(ctx, optimize),
         }
     }
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
+    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_ask(ctx, ask),
-            CodeMode::Eval => Eval::new(self.symbol).transform_ask(ctx, ask),
+            CodeMode::Form => Form::new(self.symbol).transform_solve(ctx, solve),
+            CodeMode::Eval => Eval::new(self.symbol).transform_solve(ctx, solve),
         }
     }
 

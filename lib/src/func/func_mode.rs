@@ -1,8 +1,4 @@
 use crate::{
-    Abstract,
-    AbstractMode,
-    Ask,
-    AskMode,
     Call,
     CallMode,
     Change,
@@ -14,8 +10,12 @@ use crate::{
     Map,
     MapMode,
     Mode,
+    Optimize,
+    OptimizeMode,
     Pair,
     PairMode,
+    Solve,
+    SolveMode,
     SymbolMode,
     UniMode,
     Val,
@@ -24,8 +24,8 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FuncMode {
     pub call: Option<Mode>,
-    pub abstract1: Option<Mode>,
-    pub ask: Option<Mode>,
+    pub optimize: Option<Mode>,
+    pub solve: Option<Mode>,
 }
 
 impl FuncMode {
@@ -38,7 +38,7 @@ impl FuncMode {
     }
 
     pub fn id_func_mode() -> FuncMode {
-        FuncMode { call: None, abstract1: None, ask: None }
+        FuncMode { call: None, optimize: None, solve: None }
     }
 
     pub const fn id_mode() -> Option<Mode> {
@@ -70,17 +70,17 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn abstract_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
+    pub fn optimize_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            abstract1: Some(AbstractMode { code, abstract1: Abstract::new(func, input) }),
+            optimize: Some(OptimizeMode { code, optimize: Optimize::new(func, input) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn ask_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
+    pub fn solve_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            ask: Some(AskMode { code, ask: Ask::new(func, input) }),
+            solve: Some(SolveMode { code, solve: Solve::new(func, input) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
@@ -118,8 +118,8 @@ impl Default for FuncMode {
     fn default() -> Self {
         Self {
             call: Self::default_mode(),
-            abstract1: Self::default_mode(),
-            ask: Self::default_mode(),
+            optimize: Self::default_mode(),
+            solve: Self::default_mode(),
         }
     }
 }

@@ -81,9 +81,9 @@ fn get_from() -> Named<FuncVal> {
     let id = "change.from";
     let f = fn_get_from;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -109,9 +109,9 @@ fn set_from() -> Named<FuncVal> {
     let id = "change.set_from";
     let f = fn_set_from;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -139,9 +139,9 @@ fn get_to() -> Named<FuncVal> {
     let id = "change.to";
     let f = fn_get_to;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -167,9 +167,9 @@ fn set_to() -> Named<FuncVal> {
     let id = "change.set_to";
     let f = fn_set_to;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

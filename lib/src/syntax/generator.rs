@@ -7,8 +7,6 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
-    abstract1::Abstract,
-    ask::Ask,
     bit::Bit,
     byte::Byte,
     call::Call,
@@ -17,11 +15,11 @@ use crate::{
     list::List,
     map::Map,
     number::Number,
+    optimize::Optimize,
     pair::Pair,
+    solve::Solve,
     symbol::Symbol,
     syntax::{
-        ABSTRACT,
-        ASK,
         BYTE,
         CALL,
         CHANGE,
@@ -30,10 +28,12 @@ use crate::{
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
+        OPTIMIZE,
         PAIR,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
+        SOLVE,
         SYMBOL_QUOTE,
         TEXT_QUOTE,
         TRUE,
@@ -58,8 +58,8 @@ pub(crate) enum GenRepr<'a> {
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
     Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
-    Abstract(Box<Abstract<GenRepr<'a>, GenRepr<'a>>>),
-    Ask(Box<Ask<GenRepr<'a>, GenRepr<'a>>>),
+    Optimize(Box<Optimize<GenRepr<'a>, GenRepr<'a>>>),
+    Solve(Box<Solve<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -132,8 +132,8 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
         GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
-        GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
-        GenRepr::Ask(ask) => gen_ask(ctx, *ask, s),
+        GenRepr::Optimize(optimize) => gen_optimize(ctx, *optimize, s),
+        GenRepr::Solve(solve) => gen_solve(ctx, *solve, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
     }
@@ -294,20 +294,20 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     }
 }
 
-fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, abstract1.func, s);
+fn gen_optimize(ctx: GenCtx, optimize: Optimize<GenRepr, GenRepr>, s: &mut String) {
+    gen_scope_if_need(ctx, optimize.func, s);
     s.push(' ');
-    s.push_str(ABSTRACT);
+    s.push_str(OPTIMIZE);
     s.push(' ');
-    gen1(ctx, abstract1.input, s);
+    gen1(ctx, optimize.input, s);
 }
 
-fn gen_ask(ctx: GenCtx, ask: Ask<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, ask.func, s);
+fn gen_solve(ctx: GenCtx, solve: Solve<GenRepr, GenRepr>, s: &mut String) {
+    gen_scope_if_need(ctx, solve.func, s);
     s.push(' ');
-    s.push_str(ASK);
+    s.push_str(SOLVE);
     s.push(' ');
-    gen1(ctx, ask.output, s);
+    gen1(ctx, solve.output, s);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, repr: GenRepr, s: &mut String) {
@@ -331,8 +331,8 @@ fn is_composite(repr: &GenRepr) -> bool {
         repr,
         GenRepr::Pair(_)
             | GenRepr::Call(_)
-            | GenRepr::Abstract(_)
-            | GenRepr::Ask(_)
+            | GenRepr::Optimize(_)
+            | GenRepr::Solve(_)
             | GenRepr::Change(_)
     )
 }

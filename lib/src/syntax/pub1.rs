@@ -5,12 +5,12 @@ pub use crate::syntax::{
     },
     repr::{
         Repr,
-        ask::AskRepr,
         call::CallRepr,
         change::ChangeRepr,
         list::ListRepr,
         map::MapRepr,
         pair::PairRepr,
+        solve::SolveRepr,
     },
 };
 use crate::syntax::{

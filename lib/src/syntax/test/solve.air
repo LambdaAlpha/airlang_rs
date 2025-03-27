@@ -1,28 +1,28 @@
-ask
+solve
 -----
 a ? b
 =====
-ask ctx
+solve ctx
 -----
 ?(a b)
 =====
-ask ask
+solve solve
 -----
 a ? b ? c
 =====
-ask other
+solve other
 -----
 a ? b : c
 =====
-other ask
+other solve
 -----
 a : b ? c
 =====
-ask infix
+solve infix
 -----
 a ? b c d
 =====
-infix ask
+infix solve
 -----
 a b c ? d
 =====

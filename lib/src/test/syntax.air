@@ -44,7 +44,7 @@ parse "\"1\""
 -----
 "1"
 =====
-parse abstract
+parse optimize
 -----
 parse "1 ! 2"
 -----
@@ -56,7 +56,7 @@ generate "1"
 -----
 "\"1\""
 =====
-generate abstract
+generate optimize
 -----
 generate ; id ; 1 ! 2
 -----

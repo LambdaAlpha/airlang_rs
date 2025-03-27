@@ -108,9 +108,9 @@ fn length() -> Named<FuncVal> {
     let id = "map.length";
     let f = fn_length;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -133,9 +133,9 @@ fn items() -> Named<FuncVal> {
     let id = "map.items";
     let f = fn_items;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -159,9 +159,9 @@ fn into_items() -> Named<FuncVal> {
     let id = "map.into_items";
     let f = fn_into_items;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -187,9 +187,9 @@ fn keys() -> Named<FuncVal> {
     let id = "map.keys";
     let f = fn_keys;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -212,9 +212,9 @@ fn into_keys() -> Named<FuncVal> {
     let id = "map.into_keys";
     let f = fn_into_keys;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -239,9 +239,9 @@ fn values() -> Named<FuncVal> {
     let id = "map.values";
     let f = fn_values;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -264,9 +264,9 @@ fn into_values() -> Named<FuncVal> {
     let id = "map.into_values";
     let f = fn_into_values;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -291,9 +291,9 @@ fn contains() -> Named<FuncVal> {
     let id = "map.contains";
     let f = fn_contains;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -317,9 +317,9 @@ fn contains_all() -> Named<FuncVal> {
     let id = "map.contains_all";
     let f = fn_contains_all;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -347,9 +347,9 @@ fn contains_any() -> Named<FuncVal> {
     let id = "map.contains_any";
     let f = fn_contains_many;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -377,9 +377,9 @@ fn set() -> Named<FuncVal> {
     let id = "map.set";
     let f = fn_set;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -408,9 +408,9 @@ fn set_many() -> Named<FuncVal> {
     let id = "map.set_many";
     let f = fn_set_many;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -441,9 +441,9 @@ fn get() -> Named<FuncVal> {
     let id = "map.get";
     let f = fn_get;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -467,9 +467,9 @@ fn get_many() -> Named<FuncVal> {
     let id = "map.get_many";
     let f = fn_get_many;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -498,9 +498,9 @@ fn remove() -> Named<FuncVal> {
     let id = "map.remove";
     let f = fn_remove;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -524,9 +524,9 @@ fn remove_many() -> Named<FuncVal> {
     let id = "map.remove_many";
     let f = fn_remove_many;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }
@@ -556,9 +556,9 @@ fn clear() -> Named<FuncVal> {
     let id = "map.clear";
     let f = fn_clear;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

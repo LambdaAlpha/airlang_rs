@@ -1,9 +1,9 @@
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
+    OptimizeVal,
     PairVal,
+    SolveVal,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
     transformer::{
@@ -55,14 +55,14 @@ impl ByVal<Val> for Id {
         Val::Call(call)
     }
 
-    fn transform_abstract<'a, Ctx>(&self, _ctx: Ctx, abstract1: AbstractVal) -> Val
+    fn transform_optimize<'a, Ctx>(&self, _ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        Val::Abstract(abstract1)
+        Val::Optimize(optimize)
     }
 
-    fn transform_ask<'a, Ctx>(&self, _ctx: Ctx, ask: AskVal) -> Val
+    fn transform_solve<'a, Ctx>(&self, _ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
-        Val::Ask(ask)
+        Val::Solve(solve)
     }
 
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val

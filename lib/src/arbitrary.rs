@@ -17,10 +17,6 @@ use rand::{
 };
 
 use crate::{
-    Abstract,
-    AbstractMode,
-    Ask,
-    AskMode,
     Call,
     CallMode,
     Change,
@@ -35,6 +31,10 @@ use crate::{
     ModeFuncVal,
     MutStaticCompFunc,
     MutStaticCompFuncVal,
+    Optimize,
+    OptimizeMode,
+    Solve,
+    SolveMode,
     SymbolMode,
     Val,
     ValExt,
@@ -104,8 +104,8 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // pair
         1,      // change
         1,      // call
-        1,      // abstract
-        1,      // ask
+        1,      // optimize
+        1,      // solve
         1,      // list
         1,      // map
         1,      // ctx
@@ -126,8 +126,8 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Change(any_change(rng, new_depth).into()),
         9 => Val::Call(any_call(rng, new_depth).into()),
-        10 => Val::Abstract(any_abstract(rng, new_depth).into()),
-        11 => Val::Ask(any_ask(rng, new_depth).into()),
+        10 => Val::Optimize(any_optimize(rng, new_depth).into()),
+        11 => Val::Solve(any_solve(rng, new_depth).into()),
         12 => Val::List(any_list(rng, new_depth).into()),
         13 => Val::Map(any_map(rng, new_depth).into()),
         14 => Val::Ctx(any_ctx(rng, new_depth).into()),
@@ -206,12 +206,12 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val, Val> {
-    Abstract::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_optimize(rng: &mut SmallRng, depth: usize) -> Optimize<Val, Val> {
+    Optimize::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_ask(rng: &mut SmallRng, depth: usize) -> Ask<Val, Val> {
-    Ask::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_solve(rng: &mut SmallRng, depth: usize) -> Solve<Val, Val> {
+    Solve::new(any_val(rng, depth), any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
@@ -254,8 +254,8 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
 pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
     let variables = CtxMap::new(variables, rng.random());
-    let solver = if rng.random() { Some(any_func(rng, depth)) } else { None };
-    Ctx::new(variables, solver)
+    let advisor = if rng.random() { Some(any_func(rng, depth)) } else { None };
+    Ctx::new(variables, advisor)
 }
 
 impl<T: Arbitrary> Arbitrary for Option<T> {
@@ -298,11 +298,11 @@ impl Arbitrary for CompMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        let abstract1 = Arbitrary::any(rng, depth);
-        let ask = Arbitrary::any(rng, depth);
+        let optimize = Arbitrary::any(rng, depth);
+        let solve = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, abstract1, ask, list, map }
+        CompMode { symbol, pair, change, call, optimize, solve, list, map }
     }
 }
 
@@ -337,25 +337,25 @@ impl Arbitrary for CallMode {
     }
 }
 
-impl Arbitrary for AbstractMode {
+impl Arbitrary for OptimizeMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
-        let abstract1 = Abstract::new(func, input);
-        AbstractMode { code, abstract1 }
+        let optimize = Optimize::new(func, input);
+        OptimizeMode { code, optimize }
     }
 }
 
-impl Arbitrary for AskMode {
+impl Arbitrary for SolveMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
         let output = Arbitrary::any(rng, new_depth);
-        let ask = Ask::new(func, output);
-        AskMode { code, ask }
+        let solve = Solve::new(func, output);
+        SolveMode { code, solve }
     }
 }
 
@@ -394,11 +394,11 @@ impl Arbitrary for PrimMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        let abstract1 = Arbitrary::any(rng, depth);
-        let ask = Arbitrary::any(rng, depth);
+        let optimize = Arbitrary::any(rng, depth);
+        let solve = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, abstract1, ask, list, map }
+        PrimMode { symbol, pair, change, call, optimize, solve, list, map }
     }
 }
 
@@ -471,9 +471,9 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 
 fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     let call = Arbitrary::any(rng, depth);
-    let abstract1 = Arbitrary::any(rng, depth);
-    let ask = Arbitrary::any(rng, depth);
-    FuncMode { call, abstract1, ask }
+    let optimize = Arbitrary::any(rng, depth);
+    let solve = Arbitrary::any(rng, depth);
+    FuncMode { call, optimize, solve }
 }
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {

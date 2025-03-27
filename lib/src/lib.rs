@@ -22,9 +22,9 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod abstract1;
+pub(crate) mod optimize;
 
-pub(crate) mod ask;
+pub(crate) mod solve;
 
 pub(crate) mod list;
 
@@ -40,7 +40,7 @@ pub(crate) mod val;
 
 pub(crate) mod core;
 
-pub(crate) mod solver;
+pub(crate) mod advisor;
 
 pub(crate) mod transformer;
 

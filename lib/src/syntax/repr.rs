@@ -8,14 +8,14 @@ use std::{
 };
 
 use crate::{
-    Abstract,
-    Ask,
     Bit,
     Byte,
     Call,
     Int,
     Number,
+    Optimize,
     Pair,
+    Solve,
     Symbol,
     Text,
     Unit,
@@ -27,13 +27,13 @@ use crate::{
         parse,
         parser::ParseRepr,
         repr::{
-            abstract1::AbstractRepr,
-            ask::AskRepr,
             call::CallRepr,
             change::ChangeRepr,
             list::ListRepr,
             map::MapRepr,
+            optimize::OptimizeRepr,
             pair::PairRepr,
+            solve::SolveRepr,
         },
     },
 };
@@ -54,8 +54,8 @@ pub enum Repr {
     Change(Box<ChangeRepr>),
 
     Call(Box<CallRepr>),
-    Abstract(Box<AbstractRepr>),
-    Ask(Box<AskRepr>),
+    Optimize(Box<OptimizeRepr>),
+    Solve(Box<SolveRepr>),
 
     List(ListRepr),
     Map(MapRepr),
@@ -145,27 +145,27 @@ impl From<Box<CallRepr>> for Repr {
     }
 }
 
-impl From<AbstractRepr> for Repr {
-    fn from(a: AbstractRepr) -> Self {
-        Repr::Abstract(Box::new(a))
+impl From<OptimizeRepr> for Repr {
+    fn from(a: OptimizeRepr) -> Self {
+        Repr::Optimize(Box::new(a))
     }
 }
 
-impl From<Box<AbstractRepr>> for Repr {
-    fn from(a: Box<AbstractRepr>) -> Self {
-        Repr::Abstract(a)
+impl From<Box<OptimizeRepr>> for Repr {
+    fn from(a: Box<OptimizeRepr>) -> Self {
+        Repr::Optimize(a)
     }
 }
 
-impl From<AskRepr> for Repr {
-    fn from(a: AskRepr) -> Self {
-        Repr::Ask(Box::new(a))
+impl From<SolveRepr> for Repr {
+    fn from(a: SolveRepr) -> Self {
+        Repr::Solve(Box::new(a))
     }
 }
 
-impl From<Box<AskRepr>> for Repr {
-    fn from(a: Box<AskRepr>) -> Self {
-        Repr::Ask(a)
+impl From<Box<SolveRepr>> for Repr {
+    fn from(a: Box<SolveRepr>) -> Self {
+        Repr::Solve(a)
     }
 }
 
@@ -248,15 +248,15 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Repr::Abstract(abstract1) => {
-                let func = (&abstract1.func).try_into()?;
-                let input = (&abstract1.input).try_into()?;
-                GenRepr::Abstract(Box::new(Abstract::new(func, input)))
+            Repr::Optimize(optimize) => {
+                let func = (&optimize.func).try_into()?;
+                let input = (&optimize.input).try_into()?;
+                GenRepr::Optimize(Box::new(Optimize::new(func, input)))
             }
-            Repr::Ask(ask) => {
-                let func = (&ask.func).try_into()?;
-                let output = (&ask.output).try_into()?;
-                GenRepr::Ask(Box::new(Ask::new(func, output)))
+            Repr::Solve(solve) => {
+                let func = (&solve.func).try_into()?;
+                let output = (&solve.output).try_into()?;
+                GenRepr::Solve(Box::new(Solve::new(func, output)))
             }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
@@ -284,9 +284,9 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod abstract1;
+pub(crate) mod optimize;
 
-pub(crate) mod ask;
+pub(crate) mod solve;
 
 pub(crate) mod list;
 

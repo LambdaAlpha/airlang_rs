@@ -1,6 +1,4 @@
 use crate::{
-    Abstract,
-    Ask,
     Bit,
     Call,
     Change,
@@ -9,26 +7,28 @@ use crate::{
     Map,
     MapVal,
     Mode,
+    Optimize,
     Pair,
     PairMode,
     PrimMode,
+    Solve,
     Symbol,
     SymbolMode,
     UniMode,
     Val,
     mode::{
-        abstract1::AbstractMode,
-        ask::AskMode,
         call::CallMode,
         change::ChangeMode,
         comp::CompMode,
         id::ID,
         list::ListMode,
         map::MapMode,
+        optimize::OptimizeMode,
         prim::{
             CodeMode,
             DataMode,
         },
+        solve::SolveMode,
         symbol::{
             LITERAL,
             MOVE,
@@ -50,13 +50,13 @@ use crate::{
         symbol,
     },
     val::{
-        ABSTRACT,
-        ASK,
         CALL,
         CHANGE,
         LIST,
         MAP,
+        OPTIMIZE,
         PAIR,
+        SOLVE,
         SYMBOL,
     },
 };
@@ -277,11 +277,11 @@ impl ParseMode<MapVal> for CompMode {
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
-        let ask = ParseMode::parse(map_remove(&mut map, ASK), default)?;
+        let optimize = ParseMode::parse(map_remove(&mut map, OPTIMIZE), default)?;
+        let solve = ParseMode::parse(map_remove(&mut map, SOLVE), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode { symbol, pair, change, call, abstract1, ask, list, map })
+        Some(CompMode { symbol, pair, change, call, optimize, solve, list, map })
     }
 }
 
@@ -300,11 +300,11 @@ impl GenerateMode<MapVal> for CompMode {
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
         }
-        if default.map(Into::into) != self.abstract1 {
-            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
+        if default.map(Into::into) != self.optimize {
+            map.insert(symbol(OPTIMIZE), self.optimize.generate(default));
         }
-        if default.map(Into::into) != self.ask {
-            map.insert(symbol(ASK), self.ask.generate(default));
+        if default.map(Into::into) != self.solve {
+            map.insert(symbol(SOLVE), self.solve.generate(default));
         }
         if default.map(Into::into) != self.list {
             map.insert(symbol(LIST), self.list.generate(default));
@@ -323,11 +323,11 @@ impl ParseMode<MapVal> for PrimMode {
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
-        let ask = ParseMode::parse(map_remove(&mut map, ASK), default)?;
+        let optimize = ParseMode::parse(map_remove(&mut map, OPTIMIZE), default)?;
+        let solve = ParseMode::parse(map_remove(&mut map, SOLVE), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode { symbol, pair, change, call, abstract1, ask, list, map })
+        Some(PrimMode { symbol, pair, change, call, optimize, solve, list, map })
     }
 }
 
@@ -346,11 +346,11 @@ impl GenerateMode<MapVal> for PrimMode {
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
         }
-        if default.map(Into::into) != self.abstract1 {
-            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
+        if default.map(Into::into) != self.optimize {
+            map.insert(symbol(OPTIMIZE), self.optimize.generate(default));
         }
-        if default.map(Into::into) != self.ask {
-            map.insert(symbol(ASK), self.ask.generate(default));
+        if default.map(Into::into) != self.solve {
+            map.insert(symbol(SOLVE), self.solve.generate(default));
         }
         if default.map(Into::into) != self.list {
             map.insert(symbol(LIST), self.list.generate(default));
@@ -478,7 +478,7 @@ impl GenerateMode<Val> for CallMode {
     }
 }
 
-impl ParseMode<Val> for AbstractMode {
+impl ParseMode<Val> for OptimizeMode {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
@@ -486,31 +486,31 @@ impl ParseMode<Val> for AbstractMode {
                 let pair = Pair::from(pair);
                 let func = ParseMode::parse(pair.first, default)?;
                 let input = ParseMode::parse(pair.second, default)?;
-                Some(AbstractMode { code: CodeMode::Form, abstract1: Abstract::new(func, input) })
+                Some(OptimizeMode { code: CodeMode::Form, optimize: Optimize::new(func, input) })
             }
-            Val::Abstract(abstract1) => {
-                let abstract1 = Abstract::from(abstract1);
-                let func = ParseMode::parse(abstract1.func, default)?;
-                let input = ParseMode::parse(abstract1.input, default)?;
-                Some(AbstractMode { code: CodeMode::Eval, abstract1: Abstract::new(func, input) })
+            Val::Optimize(optimize) => {
+                let optimize = Optimize::from(optimize);
+                let func = ParseMode::parse(optimize.func, default)?;
+                let input = ParseMode::parse(optimize.input, default)?;
+                Some(OptimizeMode { code: CodeMode::Eval, optimize: Optimize::new(func, input) })
             }
             _ => None,
         }
     }
 }
 
-impl GenerateMode<Val> for AbstractMode {
+impl GenerateMode<Val> for OptimizeMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.abstract1.func, default);
-        let input = GenerateMode::generate(&self.abstract1.input, default);
+        let func = GenerateMode::generate(&self.optimize.func, default);
+        let input = GenerateMode::generate(&self.optimize.input, default);
         match self.code {
             CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
-            CodeMode::Eval => Val::Abstract(Abstract::new(func, input).into()),
+            CodeMode::Eval => Val::Optimize(Optimize::new(func, input).into()),
         }
     }
 }
 
-impl ParseMode<Val> for AskMode {
+impl ParseMode<Val> for SolveMode {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
@@ -518,26 +518,26 @@ impl ParseMode<Val> for AskMode {
                 let pair = Pair::from(pair);
                 let func = ParseMode::parse(pair.first, default)?;
                 let output = ParseMode::parse(pair.second, default)?;
-                Some(AskMode { code: CodeMode::Form, ask: Ask::new(func, output) })
+                Some(SolveMode { code: CodeMode::Form, solve: Solve::new(func, output) })
             }
-            Val::Ask(ask) => {
-                let ask = Ask::from(ask);
-                let func = ParseMode::parse(ask.func, default)?;
-                let output = ParseMode::parse(ask.output, default)?;
-                Some(AskMode { code: CodeMode::Eval, ask: Ask::new(func, output) })
+            Val::Solve(solve) => {
+                let solve = Solve::from(solve);
+                let func = ParseMode::parse(solve.func, default)?;
+                let output = ParseMode::parse(solve.output, default)?;
+                Some(SolveMode { code: CodeMode::Eval, solve: Solve::new(func, output) })
             }
             _ => None,
         }
     }
 }
 
-impl GenerateMode<Val> for AskMode {
+impl GenerateMode<Val> for SolveMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.ask.func, default);
-        let output = GenerateMode::generate(&self.ask.output, default);
+        let func = GenerateMode::generate(&self.solve.func, default);
+        let output = GenerateMode::generate(&self.solve.output, default);
         match self.code {
             CodeMode::Form => Val::Pair(Pair::new(func, output).into()),
-            CodeMode::Eval => Val::Ask(Ask::new(func, output).into()),
+            CodeMode::Eval => Val::Solve(Solve::new(func, output).into()),
         }
     }
 }

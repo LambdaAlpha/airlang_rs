@@ -55,8 +55,8 @@ pub(crate) const CTX: &str = "context";
 pub(crate) const ID: &str = "id";
 pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
-pub(crate) const ABSTRACT_MODE: &str = "abstract_mode";
-pub(crate) const ASK_MODE: &str = "ask_mode";
+pub(crate) const OPTIMIZE_MODE: &str = "optimize_mode";
+pub(crate) const SOLVE_MODE: &str = "solve_mode";
 pub(crate) const CACHEABLE: &str = "cacheable";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
@@ -133,17 +133,17 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Func(FuncVal::Mode(call_mode)) => call_mode.inner().clone(),
         _ => return None,
     };
-    let abstract1 = match map_remove(&mut map, ABSTRACT_MODE) {
+    let optimize = match map_remove(&mut map, OPTIMIZE_MODE) {
         Val::Unit(_) => FuncMode::default_mode(),
-        Val::Func(FuncVal::Mode(abstract_mode)) => abstract_mode.inner().clone(),
+        Val::Func(FuncVal::Mode(optimize_mode)) => optimize_mode.inner().clone(),
         _ => return None,
     };
-    let ask = match map_remove(&mut map, ASK_MODE) {
+    let solve = match map_remove(&mut map, SOLVE_MODE) {
         Val::Unit(_) => FuncMode::default_mode(),
-        Val::Func(FuncVal::Mode(ask_mode)) => ask_mode.inner().clone(),
+        Val::Func(FuncVal::Mode(solve_mode)) => solve_mode.inner().clone(),
         _ => return None,
     };
-    let mode = FuncMode { call, abstract1, ask };
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = match map_remove(&mut map, CACHEABLE) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
@@ -387,12 +387,12 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.call).into()));
         repr.insert(symbol(CALL_MODE), call_mode);
     }
-    if common.mode.abstract1 != FuncMode::default_mode() {
-        let abstract_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.abstract1).into()));
-        repr.insert(symbol(ABSTRACT_MODE), abstract_mode);
+    if common.mode.optimize != FuncMode::default_mode() {
+        let optimize_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.optimize).into()));
+        repr.insert(symbol(OPTIMIZE_MODE), optimize_mode);
     }
-    if common.mode.ask != FuncMode::default_mode() {
-        let ask_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.ask).into()));
-        repr.insert(symbol(ASK_MODE), ask_mode);
+    if common.mode.solve != FuncMode::default_mode() {
+        let solve_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.solve).into()));
+        repr.insert(symbol(SOLVE_MODE), solve_mode);
     }
 }

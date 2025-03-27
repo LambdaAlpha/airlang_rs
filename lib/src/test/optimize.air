@@ -16,7 +16,7 @@ do [
     f = any ; .,
     i = any ; .,
     a = f '!' i,
-    (f == a abstract.function .) and (i == a abstract.input .)
+    (f == a optimize.function .) and (i == a optimize.input .)
 ]
 -----
 true
@@ -24,12 +24,12 @@ true
 set get
 -----
 do [
-    a = any ; abstract,
+    a = any ; optimize,
     f = any ; .,
     i = any ; .,
-    a abstract.set_function f,
-    a abstract.set_input i,
-    (f == a abstract.function .) and (i == a abstract.input .)
+    a optimize.set_function f,
+    a optimize.set_input i,
+    (f == a optimize.function .) and (i == a optimize.input .)
 ]
 -----
 true
@@ -40,8 +40,8 @@ do [
     f1 = any ; .,
     i1 = any ; .,
     a = f1 '!' i1,
-    f2 = a abstract.set_function any ; .,
-    i2 = a abstract.set_input any ; .,
+    f2 = a optimize.set_function any ; .,
+    i2 = a optimize.set_input any ; .,
     (f1 == f2) and i1 == i2
 ]
 -----
@@ -49,6 +49,6 @@ true
 =====
 apply
 -----
-do [c = id ; 1 ! 2, abstract.apply ^c]
+do [c = id ; 1 ! 2, optimize.apply ^c]
 -----
 2

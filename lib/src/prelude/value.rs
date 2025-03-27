@@ -13,8 +13,6 @@ use crate::{
     SymbolMode,
     Val,
     arbitrary::{
-        any_abstract,
-        any_ask,
         any_bit,
         any_byte,
         any_call,
@@ -26,7 +24,9 @@ use crate::{
         any_list,
         any_map,
         any_number,
+        any_optimize,
         any_pair,
+        any_solve,
         any_symbol,
         any_text,
         any_unit,
@@ -52,8 +52,6 @@ use crate::{
     symbol::Symbol,
     types::either::Either,
     val::{
-        ABSTRACT,
-        ASK,
         BIT,
         BYTE,
         CALL,
@@ -65,7 +63,9 @@ use crate::{
         LIST,
         MAP,
         NUMBER,
+        OPTIMIZE,
         PAIR,
+        SOLVE,
         SYMBOL,
         TEXT,
         UNIT,
@@ -98,9 +98,9 @@ fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
     let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_free_fn(id, f, mode, cacheable)
 }
@@ -122,8 +122,8 @@ fn fn_any(input: Val) -> Val {
             PAIR => Val::Pair(any_pair(rng, DEPTH).into()),
             CHANGE => Val::Change(any_change(rng, DEPTH).into()),
             CALL => Val::Call(any_call(rng, DEPTH).into()),
-            ABSTRACT => Val::Abstract(any_abstract(rng, DEPTH).into()),
-            ASK => Val::Ask(any_ask(rng, DEPTH).into()),
+            OPTIMIZE => Val::Optimize(any_optimize(rng, DEPTH).into()),
+            SOLVE => Val::Solve(any_solve(rng, DEPTH).into()),
             LIST => Val::List(any_list(rng, DEPTH).into()),
             MAP => Val::Map(any_map(rng, DEPTH).into()),
             CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
@@ -139,9 +139,9 @@ fn type1() -> Named<FuncVal> {
     let id = "type";
     let f = fn_type1;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::symbol_mode(SymbolMode::Literal);
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -163,8 +163,8 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Pair(_) => PAIR,
             Val::Change(_) => CHANGE,
             Val::Call(_) => CALL,
-            Val::Abstract(_) => ABSTRACT,
-            Val::Ask(_) => ASK,
+            Val::Optimize(_) => OPTIMIZE,
+            Val::Solve(_) => SOLVE,
             Val::List(_) => LIST,
             Val::Map(_) => MAP,
             Val::Ctx(_) => CTX,
@@ -179,9 +179,9 @@ fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
     let call = FuncMode::pair_mode(ref_mode(), ref_mode());
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }

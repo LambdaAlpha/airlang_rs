@@ -64,17 +64,17 @@ do [c = any ; call, c type .]
 -----
 call
 =====
-any abstract
+any optimize
 -----
-do [a = any ; abstract, a type .]
+do [a = any ; optimize, a type .]
 -----
-abstract
+optimize
 =====
-any ask
+any solve
 -----
-do [a = any ; ask, a type .]
+do [a = any ; solve, a type .]
 -----
-ask
+solve
 =====
 any list
 -----
@@ -166,17 +166,17 @@ do [a = id ; f ; a, a type .]
 -----
 call
 =====
-type abstract
+type optimize
 -----
 do [c = id ; n ! v, c type .]
 -----
-abstract
+optimize
 =====
-type ask
+type solve
 -----
 do [a = id ; f ? a, a type .]
 -----
-ask
+solve
 =====
 type list
 -----
@@ -262,13 +262,13 @@ true
 -----
 true
 =====
-== abstract
+== optimize
 -----
 do [a = id ; f ! i, b = id ; f ! i, (a == b) and not ; a == .]
 -----
 true
 =====
-== ask
+== solve
 -----
 (1 ? 2) == (1 ? 2)
 -----

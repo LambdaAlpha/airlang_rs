@@ -1,25 +1,25 @@
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
     ListMode,
     ListVal,
     MapMode,
     MapVal,
+    OptimizeVal,
     PairMode,
     PairVal,
+    SolveVal,
     Symbol,
     UniMode,
     Val,
     core::FormCore,
     ctx::ref1::CtxMeta,
     mode::{
-        abstract1::AbstractMode,
-        ask::AskMode,
         call::CallMode,
         change::ChangeMode,
         id::Id,
+        optimize::OptimizeMode,
+        solve::SolveMode,
         symbol::SymbolMode,
     },
     transformer::{
@@ -34,8 +34,8 @@ pub struct CompMode {
     pub pair: Option<PairMode>,
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
-    pub abstract1: Option<AbstractMode>,
-    pub ask: Option<AskMode>,
+    pub optimize: Option<OptimizeMode>,
+    pub solve: Option<SolveMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
 }
@@ -85,19 +85,19 @@ impl ByVal<Val> for CompMode {
         }
     }
 
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.abstract1 {
-            None => Id.transform_abstract(ctx, abstract1),
-            Some(mode) => mode.transform(ctx, abstract1),
+        match &self.optimize {
+            None => Id.transform_optimize(ctx, optimize),
+            Some(mode) => mode.transform(ctx, optimize),
         }
     }
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
+    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.ask {
-            None => Id.transform_ask(ctx, ask),
-            Some(mode) => mode.transform(ctx, ask),
+        match &self.solve {
+            None => Id.transform_solve(ctx, solve),
+            Some(mode) => mode.transform(ctx, solve),
         }
     }
 
@@ -125,8 +125,8 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: None,
                 pair: None,
                 call: None,
-                abstract1: None,
-                ask: None,
+                optimize: None,
+                solve: None,
                 change: None,
                 list: None,
                 map: None,
@@ -135,8 +135,8 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(PairMode::from(mode)),
                 call: Some(CallMode::from(mode)),
-                abstract1: Some(AbstractMode::from(mode)),
-                ask: Some(AskMode::from(mode)),
+                optimize: Some(OptimizeMode::from(mode)),
+                solve: Some(SolveMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),
                 list: Some(ListMode::from(mode)),
                 map: Some(MapMode::from(mode)),

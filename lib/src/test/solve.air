@@ -16,7 +16,7 @@ do [
     f = any ; .,
     o = any ; .,
     a = f '?' o,
-    (f == a ask.function .) and (o == a ask.output .)
+    (f == a solve.function .) and (o == a solve.output .)
 ]
 -----
 true
@@ -24,12 +24,12 @@ true
 set get
 -----
 do [
-    a = any ; ask,
+    a = any ; solve,
     f = any ; .,
     o = any ; .,
-    a ask.set_function f,
-    a ask.set_output o,
-    (f == a ask.function .) and (o == a ask.output .)
+    a solve.set_function f,
+    a solve.set_output o,
+    (f == a solve.function .) and (o == a solve.output .)
 ]
 -----
 true
@@ -40,8 +40,8 @@ do [
     f1 = any ; .,
     o1 = any ; .,
     a = f1 '?' o1,
-    f2 = a ask.set_function any ; .,
-    o2 = a ask.set_output any ; .,
+    f2 = a solve.set_function any ; .,
+    o2 = a solve.set_output any ; .,
     (f1 == f2) and o1 == o2
 ]
 -----

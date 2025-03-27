@@ -48,9 +48,9 @@ fn length() -> Named<FuncVal> {
     let id = "byte.length";
     let f = fn_length;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_const_fn(id, f, mode, cacheable)
 }
@@ -73,9 +73,9 @@ fn push() -> Named<FuncVal> {
     let id = "byte.push";
     let f = fn_push;
     let call = ref_pair_mode();
-    let abstract1 = call.clone();
-    let ask = FuncMode::default_mode();
-    let mode = FuncMode { call, abstract1, ask };
+    let optimize = call.clone();
+    let solve = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, solve };
     let cacheable = true;
     named_mut_fn(id, f, mode, cacheable)
 }

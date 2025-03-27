@@ -1,13 +1,13 @@
 use std::ops::Deref;
 
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
     ListVal,
     MapVal,
+    OptimizeVal,
     PairVal,
+    SolveVal,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
@@ -55,10 +55,10 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
     where Ctx: CtxMeta<'a>;
 
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Output
+    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Output
     where Ctx: CtxMeta<'a>;
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Output
+    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Output

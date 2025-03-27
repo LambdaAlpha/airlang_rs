@@ -31,19 +31,19 @@ impl<'a> CtxRef<'a> for FreeCtx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver(self) -> Result<&'a FuncVal, CtxError> {
+    fn get_advisor(self) -> Result<&'a FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError> {
+    fn get_advisor_mut(self) -> Result<&'a mut FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError> {
+    fn get_advisor_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
+    fn set_advisor(self, _advisor: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }

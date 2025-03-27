@@ -1,8 +1,4 @@
 use crate::{
-    Abstract,
-    AbstractVal,
-    Ask,
-    AskVal,
     Bit,
     Call,
     CallVal,
@@ -17,8 +13,12 @@ use crate::{
     MapVal,
     Mode,
     MutFnCtx,
+    Optimize,
+    OptimizeVal,
     Pair,
     PairVal,
+    Solve,
+    SolveVal,
     Symbol,
     SymbolMode,
     Unit,
@@ -47,7 +47,7 @@ pub(crate) const CONST: &str = "constant";
 
 pub(crate) const VARIABLES: &str = "variables";
 pub(crate) const REVERSE: &str = "reverse";
-pub(crate) const SOLVER: &str = "solver";
+pub(crate) const ADVISOR: &str = "advisor";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
@@ -78,12 +78,12 @@ pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
         _ => return None,
     };
     let variables = CtxMap::new(variables, reverse);
-    let solver = match map_remove(&mut map, SOLVER) {
+    let advisor = match map_remove(&mut map, ADVISOR) {
         Val::Unit(_) => None,
-        Val::Func(solver) => Some(solver),
+        Val::Func(advisor) => Some(advisor),
         _ => return None,
     };
-    let ctx = Ctx::new(variables, solver);
+    let ctx = Ctx::new(variables, advisor);
     Some(ctx.into())
 }
 
@@ -178,8 +178,8 @@ pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     if let Some(variables) = generate_ctx_map(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);
     }
-    if let Some(solver) = ctx.solver {
-        map.insert(symbol(SOLVER), Val::Func(solver));
+    if let Some(advisor) = ctx.advisor {
+        map.insert(symbol(ADVISOR), Val::Func(advisor));
     }
     Val::Map(map.into())
 }
@@ -250,8 +250,8 @@ pub(crate) enum Pattern {
     Pair(Box<Pair<Pattern, Pattern>>),
     Change(Box<Change<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
-    Abstract(Box<Abstract<Pattern, Pattern>>),
-    Ask(Box<Ask<Pattern, Pattern>>),
+    Optimize(Box<Optimize<Pattern, Pattern>>),
+    Solve(Box<Solve<Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -268,8 +268,8 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
                 parse_pattern_call(call, ctx)
             }
         }
-        Val::Abstract(abstract1) => parse_pattern_abstract(abstract1, ctx),
-        Val::Ask(ask) => parse_pattern_ask(ask, ctx),
+        Val::Optimize(optimize) => parse_pattern_optimize(optimize, ctx),
+        Val::Solve(solve) => parse_pattern_solve(solve, ctx),
         Val::List(list) => parse_pattern_list(list, ctx),
         Val::Map(map) => parse_pattern_map(map, ctx),
         _ => None,
@@ -304,20 +304,20 @@ fn parse_pattern_call(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
     Some(Pattern::Call(Box::new(Call::new(func, input))))
 }
 
-fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
+fn parse_pattern_optimize(optimize: OptimizeVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
-    let abstract1 = Abstract::from(abstract1);
-    let func = parse_pattern(abstract1.func, ctx)?;
-    let input = parse_pattern(abstract1.input, ctx)?;
-    Some(Pattern::Abstract(Box::new(Abstract::new(func, input))))
+    let optimize = Optimize::from(optimize);
+    let func = parse_pattern(optimize.func, ctx)?;
+    let input = parse_pattern(optimize.input, ctx)?;
+    Some(Pattern::Optimize(Box::new(Optimize::new(func, input))))
 }
 
-fn parse_pattern_ask(ask: AskVal, mut ctx: PatternCtx) -> Option<Pattern> {
+fn parse_pattern_solve(solve: SolveVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
-    let ask = Ask::from(ask);
-    let func = parse_pattern(ask.func, ctx)?;
-    let output = parse_pattern(ask.output, ctx)?;
-    Some(Pattern::Ask(Box::new(Ask::new(func, output))))
+    let solve = Solve::from(solve);
+    let func = parse_pattern(solve.func, ctx)?;
+    let output = parse_pattern(solve.output, ctx)?;
+    Some(Pattern::Solve(Box::new(Solve::new(func, output))))
 }
 
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -361,8 +361,8 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
         Pattern::Change(change) => assign_change(ctx, *change, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
-        Pattern::Abstract(abstract1) => assign_abstract(ctx, *abstract1, val),
-        Pattern::Ask(ask) => assign_ask(ctx, *ask, val),
+        Pattern::Optimize(optimize) => assign_optimize(ctx, *optimize, val),
+        Pattern::Solve(solve) => assign_solve(ctx, *solve, val),
         Pattern::List(list) => assign_list(ctx, list, val),
         Pattern::Map(map) => assign_map(ctx, map, val),
     }
@@ -409,24 +409,24 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     Val::Call(Call::new(func, input).into())
 }
 
-fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern, Pattern>, val: Val) -> Val {
-    let Val::Abstract(val) = val else {
+fn assign_optimize(mut ctx: MutFnCtx, pattern: Optimize<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Optimize(val) = val else {
         return Val::default();
     };
-    let val = Abstract::from(val);
+    let val = Optimize::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let input = assign_pattern(ctx, pattern.input, val.input);
-    Val::Abstract(Abstract::new(func, input).into())
+    Val::Optimize(Optimize::new(func, input).into())
 }
 
-fn assign_ask(mut ctx: MutFnCtx, pattern: Ask<Pattern, Pattern>, val: Val) -> Val {
-    let Val::Ask(val) = val else {
+fn assign_solve(mut ctx: MutFnCtx, pattern: Solve<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Solve(val) = val else {
         return Val::default();
     };
-    let val = Ask::from(val);
+    let val = Solve::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let output = assign_pattern(ctx, pattern.output, val.output);
-    Val::Ask(Ask::new(func, output).into())
+    Val::Solve(Solve::new(func, output).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

@@ -32,12 +32,12 @@ pub enum CtxError {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Ctx {
     variables: CtxMap,
-    solver: Option<FuncVal>,
+    advisor: Option<FuncVal>,
 }
 
 pub(crate) struct PubCtx {
     pub(crate) variables: CtxMap,
-    pub(crate) solver: Option<FuncVal>,
+    pub(crate) advisor: Option<FuncVal>,
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -61,30 +61,30 @@ impl<'l> CtxRef<'l> for &'l mut Ctx {
         Ok(DynRef::new(&mut self.variables, false))
     }
 
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
-        let Some(solver) = &self.solver else {
+    fn get_advisor(self) -> Result<&'l FuncVal, CtxError> {
+        let Some(advisor) = &self.advisor else {
             return Err(CtxError::NotFound);
         };
-        Ok(solver)
+        Ok(advisor)
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
-        let Some(solver) = &mut self.solver else {
+    fn get_advisor_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+        let Some(advisor) = &mut self.advisor else {
             return Err(CtxError::NotFound);
         };
-        Ok(solver)
+        Ok(advisor)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
-        let Some(solver) = &mut self.solver else {
+    fn get_advisor_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+        let Some(advisor) = &mut self.advisor else {
             return Err(CtxError::NotFound);
         };
-        Ok(DynRef::new(solver, false))
+        Ok(DynRef::new(advisor, false))
     }
 
-    fn set_solver(self, mut solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
-        swap(&mut self.solver, &mut solver);
-        Ok(solver)
+    fn set_advisor(self, mut advisor: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
+        swap(&mut self.advisor, &mut advisor);
+        Ok(advisor)
     }
 }
 
@@ -101,33 +101,33 @@ impl<'l> CtxRef<'l> for &'l Ctx {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
-        let Some(solver) = &self.solver else {
+    fn get_advisor(self) -> Result<&'l FuncVal, CtxError> {
+        let Some(advisor) = &self.advisor else {
             return Err(CtxError::NotFound);
         };
-        Ok(solver)
+        Ok(advisor)
     }
 
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+    fn get_advisor_mut(self) -> Result<&'l mut FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+    fn get_advisor_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
+    fn set_advisor(self, _advisor: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }
 
 impl Ctx {
-    pub(crate) fn new(variables: CtxMap, solver: Option<FuncVal>) -> Self {
-        Self { variables, solver }
+    pub(crate) fn new(variables: CtxMap, advisor: Option<FuncVal>) -> Self {
+        Self { variables, advisor }
     }
 
     pub(crate) fn destruct(self) -> PubCtx {
-        PubCtx { variables: self.variables, solver: self.solver }
+        PubCtx { variables: self.variables, advisor: self.advisor }
     }
 
     pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
@@ -145,7 +145,7 @@ impl Ctx {
 
 impl Default for Ctx {
     fn default() -> Self {
-        Self { variables: CtxMap::new(Map::default(), false), solver: None }
+        Self { variables: CtxMap::new(Map::default(), false), advisor: None }
     }
 }
 

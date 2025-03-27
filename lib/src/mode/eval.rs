@@ -1,9 +1,9 @@
 use crate::{
-    AbstractVal,
-    AskVal,
     CallVal,
     ChangeVal,
+    OptimizeVal,
     PairVal,
+    SolveVal,
     SymbolMode,
     core::{
         EvalCore,
@@ -64,14 +64,14 @@ impl ByVal<Val> for Eval {
         EvalCore::transform_call(self, self, ctx, call)
     }
 
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        EvalCore::transform_abstract(self, self, ctx, abstract1)
+        EvalCore::transform_optimize(self, self, ctx, optimize)
     }
 
-    fn transform_ask<'a, Ctx>(&self, ctx: Ctx, ask: AskVal) -> Val
+    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
-        EvalCore::transform_ask(self, self, ctx, ask)
+        EvalCore::transform_solve(self, self, ctx, solve)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val

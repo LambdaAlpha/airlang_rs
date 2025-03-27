@@ -212,13 +212,13 @@ do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-= destruct abstract
+= destruct optimize
 -----
 do [(f ! a) = id ; 1 ! 2, [f, a]]
 -----
 [1, 2]
 =====
-= destruct ask
+= destruct solve
 -----
 do [(f ? b) = 1 ? 2, [f, b]]
 -----
@@ -476,7 +476,7 @@ do [a = context ; {}, a | access ; .]
 -----
 mutable
 =====
-set_solver
+set_advisor
 -----
 do [
     s1 = function ; {
@@ -485,16 +485,16 @@ do [
         call : _ -> do ; [.a = .a + 1, .a],
         context : context ; {variables : {a : 0}},
     },
-    set_solver ^s1,
-    s2 = solver ; .,
+    set_advisor ^s1,
+    s2 = advisor ; .,
     [.s2 ; ., .s2 ; ., .s2 ; .]
 ]
 -----
 [1, 2, 3]
 =====
-set_solver .
+set_advisor .
 -----
-do [set_solver ., s = solver ; ., s == .]
+do [set_advisor ., s = advisor ; ., s == .]
 -----
 true
 =====

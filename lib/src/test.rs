@@ -113,13 +113,13 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_abstract() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/abstract.air"), "test/abstract.air")
+fn test_optimize() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/optimize.air"), "test/optimize.air")
 }
 
 #[test]
-fn test_ask() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ask.air"), "test/ask.air")
+fn test_solve() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/solve.air"), "test/solve.air")
 }
 
 #[test]
