@@ -73,12 +73,14 @@ use crate::{
         CALL,
         CHANGE,
         FALSE,
+        INLINE_COMMENT,
         INT,
         LEFT,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
+        MULTILINE_COMMENT,
         NUMBER,
         PAIR,
         RIGHT,
@@ -218,11 +220,15 @@ fn top<T: ParseRepr>(src: &mut &str) -> ModalResult<T> {
 
 fn trim<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
 where F: Parser<&'a str, O, E> {
-    delimited(multispace0, f, multispace0)
+    delimited(space(0 ..), f, space(0 ..))
 }
 
-fn space1<'a>(src: &mut &'a str) -> ModalResult<&'a str> {
-    take_while(1 .., is_spaces).context(label("spaces")).parse_next(src)
+fn space<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
+    let spaces = take_while(1 .., is_spaces).context(label("spaces")).void();
+    let inline_comment = preceded(INLINE_COMMENT, text).context(label("inline comment")).void();
+    let multiline_comment =
+        preceded(MULTILINE_COMMENT, raw_text).context(label("multiline comment")).void();
+    repeat(occurrences, alt((spaces, inline_comment, multiline_comment)))
 }
 
 fn is_spaces(c: char) -> bool {
@@ -261,8 +267,8 @@ fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
         SCOPE_RIGHT => fail.parse_next(i),
         SEPARATOR => fail.parse_next(i),
         SPACE => fail.parse_next(i),
-        TEXT_QUOTE => text.map(Token::Default).parse_next(i),
-        SYMBOL_QUOTE => symbol.map(Token::Default).parse_next(i),
+        TEXT_QUOTE => text.map(T::from).map(Token::Default).parse_next(i),
+        SYMBOL_QUOTE => symbol.map(T::from).map(Token::Default).parse_next(i),
 
         _ => cut_err(ext(ctx)).parse_next(i),
     })
@@ -272,7 +278,7 @@ fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
 fn tokens<T: ParseRepr>(
     ctx: ParseCtx, occurrences: impl Into<Range>,
 ) -> impl Parser<&str, Vec<Token<T>>, E> {
-    separated(occurrences, token(ctx), space1)
+    separated(occurrences, token(ctx), space(1 ..))
 }
 
 fn full_symbol<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
@@ -338,15 +344,15 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
         let i: &mut &str = i;
         match prefix {
             UNIT => match i.chars().next().unwrap() {
-                TEXT_QUOTE => raw_text.parse_next(i),
-                SYMBOL_QUOTE => raw_symbol.parse_next(i),
+                TEXT_QUOTE => raw_text.map(T::from).parse_next(i),
+                SYMBOL_QUOTE => raw_symbol.map(T::from).parse_next(i),
                 LIST_LEFT => raw_list(ctx).parse_next(i),
                 MAP_LEFT => raw_map(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),
             },
-            INT => int.parse_next(i),
-            NUMBER => number.parse_next(i),
-            BYTE => byte.parse_next(i),
+            INT => int.map(T::from).parse_next(i),
+            NUMBER => number.map(T::from).parse_next(i),
+            BYTE => byte.map(T::from).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
@@ -541,12 +547,12 @@ fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> + Clon
     move |i: &mut _| {
         let key = token(ctx).parse_next(i)?;
         let key = compose_one(ctx, key);
-        let pair = opt(preceded(space1, PAIR.void())).parse_next(i).unwrap();
+        let pair = opt(preceded(space(1 ..), PAIR.void())).parse_next(i).unwrap();
         if pair.is_none() {
             return Ok((key, T::from(Unit)));
         }
         let value = cut_err(preceded(
-            space1.context(expect_desc("space")),
+            space(1 ..).context(expect_desc("space")),
             compose(ctx).context(expect_desc("value")),
         ))
         .parse_next(i)?;
@@ -571,7 +577,7 @@ fn raw_map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     delimited_trim(MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
 }
 
-fn symbol<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn symbol(i: &mut &str) -> ModalResult<Symbol> {
     let literal = take_while(1 .., |c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
     let fragment = alt((literal, symbol_escaped, symbol_space));
     let symbol = repeat(0 .., fragment).fold(String::new, |mut string, fragment| {
@@ -579,7 +585,7 @@ fn symbol<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
         string
     });
     delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
-        .map(|s| T::from(Symbol::from_string(s)))
+        .map(Symbol::from_string)
         .context(label("symbol"))
         .parse_next(i)
 }
@@ -608,12 +614,12 @@ fn symbol_space<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     .parse_next(i)
 }
 
-fn raw_symbol<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn raw_symbol(i: &mut &str) -> ModalResult<Symbol> {
     let literal = take_while(0 .., is_symbol);
     let symbol = separated(1 .., terminated(literal, raw_symbol_newline), ' ')
         .map(|fragments: Vec<_>| fragments.join(""));
     delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
-        .map(|s| T::from(Symbol::from_string(s)))
+        .map(Symbol::from_string)
         .context(label("raw symbol"))
         .parse_next(i)
 }
@@ -625,7 +631,7 @@ fn raw_symbol_newline(i: &mut &str) -> ModalResult<()> {
         .parse_next(i)
 }
 
-fn text<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn text(i: &mut &str) -> ModalResult<Text> {
     let literal = take_while(1 .., |c| !matches!(c, '"' | '\\' | '\n'));
     let space = terminated('\n', multispace0);
     let fragment = alt((literal.map(StrFragment::Str), text_escaped, space.map(StrFragment::Char)));
@@ -633,10 +639,7 @@ fn text<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
         fragment.push(&mut string);
         string
     });
-    delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE)
-        .map(|s| T::from(Text::from(s)))
-        .context(label("text"))
-        .parse_next(i)
+    delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).map(Text::from).context(label("text")).parse_next(i)
 }
 
 fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
@@ -664,7 +667,7 @@ fn unicode(i: &mut &str) -> ModalResult<char> {
         .parse_next(i)
 }
 
-fn raw_text<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn raw_text(i: &mut &str) -> ModalResult<Text> {
     let fragment = separated(1 .., (till_line_ending, raw_text_newline), ' ');
     let text = fragment.map(|fragments: Vec<_>| {
         let mut s = String::new();
@@ -675,7 +678,7 @@ fn raw_text<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
         s
     });
     delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE)
-        .map(|s| T::from(Text::from(s)))
+        .map(Text::from)
         .context(label("raw text"))
         .parse_next(i)
 }
@@ -714,12 +717,12 @@ fn int_or_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
         .parse_next(i)
 }
 
-fn int<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn int(i: &mut &str) -> ModalResult<Int> {
     let int = (sign, integral).map(|(sign, i)| build_int(sign, i));
     scoped(int).context(label("int")).parse_next(i)
 }
 
-fn number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn number(i: &mut &str) -> ModalResult<Number> {
     let number = (sign, significand, opt(exponent))
         .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
     scoped(number).context(label("number")).parse_next(i)
@@ -803,54 +806,52 @@ fn build_exponent(sign: bool, exp: String) -> BigInt {
     if sign { i } else { i.neg() }
 }
 
-fn build_int<T: ParseRepr>(sign: bool, i: BigInt) -> T {
-    let i = Int::new(if sign { i } else { i.neg() });
-    T::from(i)
+fn build_int(sign: bool, i: BigInt) -> Int {
+    Int::new(if sign { i } else { i.neg() })
 }
 
-fn build_number<T: ParseRepr>(sign: bool, significand: Significand, exp: Option<BigInt>) -> T {
+fn build_number(sign: bool, significand: Significand, exp: Option<BigInt>) -> Number {
     let int = significand.int;
     let int = if sign { int } else { int.neg() };
     let shift = significand.shift.unwrap_or(0);
     let exp = exp.unwrap_or_default() - shift;
-    let n = Number::new(int, significand.radix, exp);
-    T::from(n)
+    Number::new(int, significand.radix, exp)
 }
 
 fn build_int_or_number<T: ParseRepr>(
     sign: bool, significand: Significand, exp: Option<BigInt>,
 ) -> T {
     if significand.shift.is_some() || exp.is_some() {
-        build_number(sign, significand, exp)
+        T::from(build_number(sign, significand, exp))
     } else {
-        build_int(sign, significand.int)
+        T::from(build_int(sign, significand.int))
     }
 }
 
-fn byte<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn byte(i: &mut &str) -> ModalResult<Byte> {
     let hex = preceded('X', cut_err(hexadecimal_byte));
     let bin = preceded('B', cut_err(binary_byte));
     let byte = alt((hex, bin, hexadecimal_byte));
     scoped(byte).context(label("byte")).parse_next(i)
 }
 
-fn hexadecimal_byte<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
     let digits = hexadecimal1.verify(|s: &str| s.len() % 2 == 0);
     trim_num0(digits)
         .map(|s| {
             let byte = utils::conversion::hex_str_to_vec_u8(&s).unwrap();
-            T::from(Byte::from(byte))
+            Byte::from(byte)
         })
         .context(expect_desc("hexadecimal"))
         .parse_next(i)
 }
 
-fn binary_byte<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+fn binary_byte(i: &mut &str) -> ModalResult<Byte> {
     let digits = binary1.verify(|s: &str| s.len() % 8 == 0);
     trim_num0(digits)
         .map(|s| {
             let byte = utils::conversion::bin_str_to_vec_u8(&s).unwrap();
-            T::from(Byte::from(byte))
+            Byte::from(byte)
         })
         .context(expect_desc("binary"))
         .parse_next(i)

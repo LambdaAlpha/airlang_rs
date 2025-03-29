@@ -1,0 +1,95 @@
+leading space
+-----
+ a
+=====
+trailing space
+-----
+a
+
+=====
+leading and trailing space
+-----
+ a
+
+=====
+space between tokens
+-----
+a b
+=====
+leading inline comment
+-----
+_"" a
+=====
+leading inline comment no space
+-----
+_""a
+=====
+leading space inline comment
+-----
+ _"" a
+=====
+trailing inline comment
+-----
+a _""
+=====
+trailing inline comment space
+-----
+a _""
+
+=====
+leading and trailing inline comment
+-----
+_"" a _""
+=====
+sequence inline comment
+-----
+_"" _"" a _"" _""
+=====
+inline comment between tokens
+-----
+a _"" b
+=====
+leading multiline comment
+-----
+__"
+|" a
+=====
+leading multiline comment no space
+-----
+__"
+|"a
+=====
+leading space multiline comment
+-----
+ __"
+ |" a
+=====
+trailing multiline comment
+-----
+a __"
+  |"
+=====
+trailing multiline comment space
+-----
+a __"
+  |"
+
+=====
+leading and trailing multiline comment
+-----
+__"
+|" a __"
+     |"
+=====
+sequence inline comment
+-----
+__"
+|" __"
+|" a __"
+|" __"
+|"
+=====
+multiline comment between tokens
+-----
+a __"
+  |" b

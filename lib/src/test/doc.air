@@ -1,6 +1,8 @@
 readme demo
 -----
-"A demo of implementing a C-like for function" ! do ; [
+_"A demo of implementing a C-like for function"
+
+do ; [
     c_for = function ; {
         context_access : mutable,
         call_mode : id,

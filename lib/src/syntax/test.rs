@@ -59,6 +59,8 @@ mod list;
 
 mod map;
 
+mod space;
+
 mod scope;
 
 fn unit() -> Repr {
@@ -239,6 +241,11 @@ fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
         assert_eq!(i1, i2, "file {file_name} case ({title}): expect({i2}) != real({i1})");
     }
     Ok(())
+}
+
+#[test]
+fn test_space() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/space.air"), "test/space.air", space::expected)
 }
 
 #[test]
