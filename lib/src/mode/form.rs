@@ -1,4 +1,5 @@
 use crate::{
+    AbstractVal,
     CallVal,
     ChangeVal,
     OptimizeVal,
@@ -70,6 +71,11 @@ impl ByVal<Val> for Form {
     fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
         FormCore::transform_solve(self, self, ctx, solve)
+    }
+
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        FormCore::transform_abstract(self, ctx, abstract1)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val

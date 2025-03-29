@@ -7,6 +7,7 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
+    abstract1::Abstract,
     bit::Bit,
     int::Int,
     map::Map,
@@ -54,6 +55,8 @@ mod call;
 mod optimize;
 
 mod solve;
+
+mod abstract1;
 
 mod list;
 
@@ -113,6 +116,10 @@ fn optimize(func: Repr, value: Repr) -> Repr {
 
 fn solve(func: Repr, output: Repr) -> Repr {
     Repr::Solve(Box::new(SolveRepr::new(func, output)))
+}
+
+fn abstract1(value: Repr) -> Repr {
+    Repr::Abstract(Box::new(Abstract::new(value)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -366,6 +373,16 @@ fn test_parse_solve() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_solve() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/solve.air"), "test/solve.air")
+}
+
+#[test]
+fn test_parse_abstract() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/abstract.air"), "test/abstract.air", abstract1::expected)
+}
+
+#[test]
+fn test_generate_abstract() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/abstract.air"), "test/abstract.air")
 }
 
 #[test]

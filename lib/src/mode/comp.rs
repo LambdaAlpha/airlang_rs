@@ -1,4 +1,6 @@
 use crate::{
+    AbstractMode,
+    AbstractVal,
     CallVal,
     ChangeVal,
     ListMode,
@@ -36,6 +38,7 @@ pub struct CompMode {
     pub call: Option<CallMode>,
     pub optimize: Option<OptimizeMode>,
     pub solve: Option<SolveMode>,
+    pub abstract1: Option<AbstractMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
 }
@@ -101,6 +104,14 @@ impl ByVal<Val> for CompMode {
         }
     }
 
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match &self.abstract1 {
+            None => Id.transform_abstract(ctx, abstract1),
+            Some(mode) => mode.transform(ctx, abstract1),
+        }
+    }
+
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where Ctx: CtxMeta<'a> {
         match &self.list {
@@ -127,6 +138,7 @@ impl From<Option<UniMode>> for CompMode {
                 call: None,
                 optimize: None,
                 solve: None,
+                abstract1: None,
                 change: None,
                 list: None,
                 map: None,
@@ -137,6 +149,7 @@ impl From<Option<UniMode>> for CompMode {
                 call: Some(CallMode::from(mode)),
                 optimize: Some(OptimizeMode::from(mode)),
                 solve: Some(SolveMode::from(mode)),
+                abstract1: Some(AbstractMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),
                 list: Some(ListMode::from(mode)),
                 map: Some(MapMode::from(mode)),

@@ -1,4 +1,5 @@
 use crate::{
+    AbstractVal,
     CallVal,
     ChangeVal,
     OptimizeVal,
@@ -63,6 +64,11 @@ impl ByVal<Val> for Id {
     fn transform_solve<'a, Ctx>(&self, _ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Solve(solve)
+    }
+
+    fn transform_abstract<'a, Ctx>(&self, _ctx: Ctx, abstract1: AbstractVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        Val::Abstract(abstract1)
     }
 
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val

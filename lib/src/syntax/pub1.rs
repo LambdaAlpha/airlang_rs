@@ -5,6 +5,7 @@ pub use crate::syntax::{
     },
     repr::{
         Repr,
+        abstract1::AbstractRepr,
         call::CallRepr,
         change::ChangeRepr,
         list::ListRepr,

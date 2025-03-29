@@ -1,0 +1,42 @@
+new
+-----
+do [
+    v = any ; .,
+    a1 = @ ; v,
+    a2 = @(v),
+    a1 == a2
+]
+-----
+true
+=====
+new get
+-----
+do [
+    v = any ; .,
+    a = @ ; v,
+    v == a abstract.value .
+]
+-----
+true
+=====
+set get
+-----
+do [
+    a = any ; abstract,
+    v = any ; .,
+    a abstract.set_value v,
+    v == a abstract.value .
+]
+-----
+true
+=====
+set return
+-----
+do [
+    v1 = any ; .,
+    a = @(v1),
+    v2 = a abstract.set_value any ; .,
+    v1 == v2
+]
+-----
+true

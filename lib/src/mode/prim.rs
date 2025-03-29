@@ -1,4 +1,5 @@
 use crate::{
+    AbstractVal,
     CallVal,
     ChangeVal,
     ListVal,
@@ -30,6 +31,7 @@ pub struct PrimMode {
     pub call: Option<CodeMode>,
     pub optimize: Option<CodeMode>,
     pub solve: Option<CodeMode>,
+    pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
 }
@@ -113,6 +115,14 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.abstract1 {
+            None => Id.transform_abstract(ctx, abstract1),
+            Some(_) => FormCore::transform_abstract(self, ctx, abstract1),
+        }
+    }
+
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.list {
@@ -139,6 +149,7 @@ impl From<Option<UniMode>> for PrimMode {
                 call: None,
                 optimize: None,
                 solve: None,
+                abstract1: None,
                 change: None,
                 list: None,
                 map: None,
@@ -149,6 +160,7 @@ impl From<Option<UniMode>> for PrimMode {
                 call: Some(CodeMode::from(mode)),
                 optimize: Some(CodeMode::from(mode)),
                 solve: Some(CodeMode::from(mode)),
+                abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),
                 map: Some(DataMode::from(mode)),

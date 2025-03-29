@@ -1,4 +1,6 @@
 use crate::{
+    Abstract,
+    AbstractMode,
     Bit,
     Call,
     Change,
@@ -50,6 +52,7 @@ use crate::{
         symbol,
     },
     val::{
+        ABSTRACT,
         CALL,
         CHANGE,
         LIST,
@@ -279,9 +282,10 @@ impl ParseMode<MapVal> for CompMode {
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
         let optimize = ParseMode::parse(map_remove(&mut map, OPTIMIZE), default)?;
         let solve = ParseMode::parse(map_remove(&mut map, SOLVE), default)?;
+        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode { symbol, pair, change, call, optimize, solve, list, map })
+        Some(CompMode { symbol, pair, change, call, optimize, solve, abstract1, list, map })
     }
 }
 
@@ -306,6 +310,9 @@ impl GenerateMode<MapVal> for CompMode {
         if default.map(Into::into) != self.solve {
             map.insert(symbol(SOLVE), self.solve.generate(default));
         }
+        if default.map(Into::into) != self.abstract1 {
+            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
+        }
         if default.map(Into::into) != self.list {
             map.insert(symbol(LIST), self.list.generate(default));
         }
@@ -325,9 +332,10 @@ impl ParseMode<MapVal> for PrimMode {
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
         let optimize = ParseMode::parse(map_remove(&mut map, OPTIMIZE), default)?;
         let solve = ParseMode::parse(map_remove(&mut map, SOLVE), default)?;
+        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode { symbol, pair, change, call, optimize, solve, list, map })
+        Some(PrimMode { symbol, pair, change, call, optimize, solve, abstract1, list, map })
     }
 }
 
@@ -351,6 +359,9 @@ impl GenerateMode<MapVal> for PrimMode {
         }
         if default.map(Into::into) != self.solve {
             map.insert(symbol(SOLVE), self.solve.generate(default));
+        }
+        if default.map(Into::into) != self.abstract1 {
+            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
         }
         if default.map(Into::into) != self.list {
             map.insert(symbol(LIST), self.list.generate(default));
@@ -539,6 +550,27 @@ impl GenerateMode<Val> for SolveMode {
             CodeMode::Form => Val::Pair(Pair::new(func, output).into()),
             CodeMode::Eval => Val::Solve(Solve::new(func, output).into()),
         }
+    }
+}
+
+impl ParseMode<Val> for AbstractMode {
+    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
+        match mode {
+            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
+            Val::Abstract(abstract1) => {
+                let abstract1 = Abstract::from(abstract1);
+                let value = ParseMode::parse(abstract1.value, default)?;
+                Some(AbstractMode { abstract1: Abstract::new(value) })
+            }
+            _ => None,
+        }
+    }
+}
+
+impl GenerateMode<Val> for AbstractMode {
+    fn generate(&self, default: Option<UniMode>) -> Val {
+        let value = GenerateMode::generate(&self.abstract1.value, default);
+        Val::Abstract(Abstract::new(value).into())
     }
 }
 

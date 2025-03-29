@@ -52,6 +52,7 @@ use winnow::{
 };
 
 use crate::{
+    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     call::Call,
@@ -65,6 +66,7 @@ use crate::{
     solve::Solve,
     symbol::Symbol,
     syntax::{
+        ABSTRACT,
         ARITY_2,
         ARITY_3,
         BYTE,
@@ -114,6 +116,7 @@ pub(crate) trait ParseRepr:
     + From<Call<Self, Self>>
     + From<Optimize<Self, Self>>
     + From<Solve<Self, Self>>
+    + From<Abstract<Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -353,6 +356,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
+            ABSTRACT => abstract1(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
@@ -507,6 +511,10 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let pair = Pair::new(left, right);
     let pair = T::from(pair);
     compose_two(ctx, middle, pair)
+}
+
+fn abstract1<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Abstract::new(t)))
 }
 
 fn items<'a, O1, O2, S, F>(item: F, separator: S) -> impl Parser<&'a str, Vec<O2>, E>

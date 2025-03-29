@@ -69,6 +69,8 @@ pub(crate) mod optimize;
 
 pub(crate) mod solve;
 
+pub(crate) mod abstract1;
+
 pub(crate) mod list;
 
 pub(crate) mod map;

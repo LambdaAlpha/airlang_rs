@@ -1,4 +1,5 @@
 pub use crate::{
+    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     call::Call,
@@ -61,6 +62,7 @@ pub use crate::{
     map::Map,
     mode::{
         Mode,
+        abstract1::AbstractMode,
         call::CallMode,
         change::ChangeMode,
         comp::CompMode,
@@ -86,6 +88,7 @@ pub use crate::{
     unit::Unit,
     val::{
         Val,
+        abstract1::AbstractVal,
         byte::ByteVal,
         call::CallVal,
         change::ChangeVal,

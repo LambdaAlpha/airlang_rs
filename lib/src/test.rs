@@ -123,6 +123,11 @@ fn test_solve() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_abstract() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/abstract.air"), "test/abstract.air")
+}
+
+#[test]
 fn test_list() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/list.air"), "test/list.air")
 }

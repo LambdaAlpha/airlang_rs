@@ -13,6 +13,7 @@ use crate::{
     Map,
     Pair,
     Solve,
+    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     change::Change,
@@ -29,6 +30,7 @@ use crate::{
     text::Text,
     unit::Unit,
     val::{
+        abstract1::AbstractVal,
         byte::ByteVal,
         call::CallVal,
         change::ChangeVal,
@@ -63,6 +65,7 @@ pub enum Val {
     Call(CallVal),
     Optimize(OptimizeVal),
     Solve(SolveVal),
+    Abstract(AbstractVal),
 
     List(ListVal),
     Map(MapVal),
@@ -85,6 +88,7 @@ pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
 pub(crate) const OPTIMIZE: &str = "optimize";
 pub(crate) const SOLVE: &str = "solve";
+pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
@@ -229,6 +233,18 @@ impl From<SolveVal> for Val {
     }
 }
 
+impl From<Abstract<Val>> for Val {
+    fn from(value: Abstract<Val>) -> Self {
+        Val::Abstract(AbstractVal::from(value))
+    }
+}
+
+impl From<AbstractVal> for Val {
+    fn from(value: AbstractVal) -> Self {
+        Val::Abstract(value)
+    }
+}
+
 impl From<List<Val>> for Val {
     fn from(value: List<Val>) -> Self {
         Val::List(ListVal::from(value))
@@ -286,6 +302,7 @@ impl From<&Repr> for Val {
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(&**optimize)),
             Repr::Solve(solve) => Val::Solve(SolveVal::from(&**solve)),
+            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -307,6 +324,7 @@ impl From<Repr> for Val {
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(*optimize)),
             Repr::Solve(solve) => Val::Solve(SolveVal::from(*solve)),
+            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -329,6 +347,7 @@ impl TryInto<Repr> for &Val {
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
             Val::Solve(solve) => Ok(Repr::Solve(Box::new(solve.try_into()?))),
+            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -352,6 +371,7 @@ impl TryInto<Repr> for Val {
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
             Val::Solve(solve) => Ok(Repr::Solve(Box::new(solve.try_into()?))),
+            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -398,6 +418,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let output = (&solve.output).try_into()?;
                 GenRepr::Solve(Box::new(Solve::new(func, output)))
             }
+            Val::Abstract(abstract1) => {
+                let value = (&abstract1.value).try_into()?;
+                GenRepr::Abstract(Box::new(Abstract::new(value)))
+            }
             Val::List(list) => {
                 let list: List<GenRepr> =
                     list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
@@ -435,6 +459,7 @@ impl Debug for Val {
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Optimize(optimize) => <_ as Debug>::fmt(optimize, f),
             Val::Solve(solve) => <_ as Debug>::fmt(solve, f),
+            Val::Abstract(abstrac1) => <_ as Debug>::fmt(abstrac1, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
@@ -461,6 +486,8 @@ pub(crate) mod call;
 pub(crate) mod optimize;
 
 pub(crate) mod solve;
+
+pub(crate) mod abstract1;
 
 pub(crate) mod list;
 

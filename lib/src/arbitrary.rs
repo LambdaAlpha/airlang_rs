@@ -17,6 +17,8 @@ use rand::{
 };
 
 use crate::{
+    Abstract,
+    AbstractMode,
     Call,
     CallMode,
     Change,
@@ -106,6 +108,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // call
         1,      // optimize
         1,      // solve
+        1,      // abstract
         1,      // list
         1,      // map
         1,      // ctx
@@ -128,11 +131,12 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         9 => Val::Call(any_call(rng, new_depth).into()),
         10 => Val::Optimize(any_optimize(rng, new_depth).into()),
         11 => Val::Solve(any_solve(rng, new_depth).into()),
-        12 => Val::List(any_list(rng, new_depth).into()),
-        13 => Val::Map(any_map(rng, new_depth).into()),
-        14 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        15 => Val::Func(any_func(rng, new_depth)),
-        16 => Val::Ext(any_extension(rng, new_depth)),
+        12 => Val::Abstract(any_abstract(rng, new_depth).into()),
+        13 => Val::List(any_list(rng, new_depth).into()),
+        14 => Val::Map(any_map(rng, new_depth).into()),
+        15 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        16 => Val::Func(any_func(rng, new_depth)),
+        17 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -212,6 +216,10 @@ pub(crate) fn any_optimize(rng: &mut SmallRng, depth: usize) -> Optimize<Val, Va
 
 pub(crate) fn any_solve(rng: &mut SmallRng, depth: usize) -> Solve<Val, Val> {
     Solve::new(any_val(rng, depth), any_val(rng, depth))
+}
+
+pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val> {
+    Abstract::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_list(rng: &mut SmallRng, depth: usize) -> List<Val> {
@@ -300,9 +308,10 @@ impl Arbitrary for CompMode {
         let call = Arbitrary::any(rng, depth);
         let optimize = Arbitrary::any(rng, depth);
         let solve = Arbitrary::any(rng, depth);
+        let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, optimize, solve, list, map }
+        CompMode { symbol, pair, change, call, optimize, solve, abstract1, list, map }
     }
 }
 
@@ -359,6 +368,15 @@ impl Arbitrary for SolveMode {
     }
 }
 
+impl Arbitrary for AbstractMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let value = Arbitrary::any(rng, new_depth);
+        let abstract1 = Abstract::new(value);
+        AbstractMode { abstract1 }
+    }
+}
+
 impl Arbitrary for ListMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
@@ -396,9 +414,10 @@ impl Arbitrary for PrimMode {
         let call = Arbitrary::any(rng, depth);
         let optimize = Arbitrary::any(rng, depth);
         let solve = Arbitrary::any(rng, depth);
+        let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, optimize, solve, list, map }
+        PrimMode { symbol, pair, change, call, optimize, solve, abstract1, list, map }
     }
 }
 

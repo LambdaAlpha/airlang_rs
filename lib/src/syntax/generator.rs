@@ -7,6 +7,7 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
+    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     call::Call,
@@ -20,6 +21,7 @@ use crate::{
     solve::Solve,
     symbol::Symbol,
     syntax::{
+        ABSTRACT,
         BYTE,
         CALL,
         CHANGE,
@@ -60,6 +62,7 @@ pub(crate) enum GenRepr<'a> {
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     Optimize(Box<Optimize<GenRepr<'a>, GenRepr<'a>>>),
     Solve(Box<Solve<GenRepr<'a>, GenRepr<'a>>>),
+    Abstract(Box<Abstract<GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -134,6 +137,7 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Call(call) => gen_call(ctx, *call, s),
         GenRepr::Optimize(optimize) => gen_optimize(ctx, *optimize, s),
         GenRepr::Solve(solve) => gen_solve(ctx, *solve, s),
+        GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
     }
@@ -308,6 +312,13 @@ fn gen_solve(ctx: GenCtx, solve: Solve<GenRepr, GenRepr>, s: &mut String) {
     s.push_str(SOLVE);
     s.push(' ');
     gen1(ctx, solve.output, s);
+}
+
+fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr>, s: &mut String) {
+    s.push_str(ABSTRACT);
+    s.push(SCOPE_LEFT);
+    gen1(ctx, abstract1.value, s);
+    s.push(SCOPE_RIGHT);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, repr: GenRepr, s: &mut String) {

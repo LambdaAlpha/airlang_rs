@@ -13,6 +13,7 @@ use crate::{
     SymbolMode,
     Val,
     arbitrary::{
+        any_abstract,
         any_bit,
         any_byte,
         any_call,
@@ -52,6 +53,7 @@ use crate::{
     symbol::Symbol,
     types::either::Either,
     val::{
+        ABSTRACT,
         BIT,
         BYTE,
         CALL,
@@ -124,6 +126,7 @@ fn fn_any(input: Val) -> Val {
             CALL => Val::Call(any_call(rng, DEPTH).into()),
             OPTIMIZE => Val::Optimize(any_optimize(rng, DEPTH).into()),
             SOLVE => Val::Solve(any_solve(rng, DEPTH).into()),
+            ABSTRACT => Val::Abstract(any_abstract(rng, DEPTH).into()),
             LIST => Val::List(any_list(rng, DEPTH).into()),
             MAP => Val::Map(any_map(rng, DEPTH).into()),
             CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
@@ -165,6 +168,7 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Call(_) => CALL,
             Val::Optimize(_) => OPTIMIZE,
             Val::Solve(_) => SOLVE,
+            Val::Abstract(_) => ABSTRACT,
             Val::List(_) => LIST,
             Val::Map(_) => MAP,
             Val::Ctx(_) => CTX,

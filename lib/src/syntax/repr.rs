@@ -19,6 +19,7 @@ use crate::{
     Symbol,
     Text,
     Unit,
+    abstract1::Abstract,
     change::Change,
     syntax::{
         ParseError,
@@ -27,6 +28,7 @@ use crate::{
         parse,
         parser::ParseRepr,
         repr::{
+            abstract1::AbstractRepr,
             call::CallRepr,
             change::ChangeRepr,
             list::ListRepr,
@@ -56,6 +58,7 @@ pub enum Repr {
     Call(Box<CallRepr>),
     Optimize(Box<OptimizeRepr>),
     Solve(Box<SolveRepr>),
+    Abstract(Box<AbstractRepr>),
 
     List(ListRepr),
     Map(MapRepr),
@@ -169,6 +172,18 @@ impl From<Box<SolveRepr>> for Repr {
     }
 }
 
+impl From<AbstractRepr> for Repr {
+    fn from(a: AbstractRepr) -> Self {
+        Repr::Abstract(Box::new(a))
+    }
+}
+
+impl From<Box<AbstractRepr>> for Repr {
+    fn from(a: Box<AbstractRepr>) -> Self {
+        Repr::Abstract(a)
+    }
+}
+
 impl From<ListRepr> for Repr {
     fn from(l: ListRepr) -> Self {
         Repr::List(l)
@@ -258,6 +273,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let output = (&solve.output).try_into()?;
                 GenRepr::Solve(Box::new(Solve::new(func, output)))
             }
+            Repr::Abstract(abstract1) => {
+                let value = (&abstract1.value).try_into()?;
+                GenRepr::Abstract(Box::new(Abstract::new(value)))
+            }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
                 GenRepr::List(list)
@@ -287,6 +306,8 @@ pub(crate) mod call;
 pub(crate) mod optimize;
 
 pub(crate) mod solve;
+
+pub(crate) mod abstract1;
 
 pub(crate) mod list;
 

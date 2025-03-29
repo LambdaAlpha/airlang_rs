@@ -36,6 +36,7 @@ use crate::{
         mut_static_prim::MutStaticFn,
     },
     prelude::{
+        abstract1::AbstractPrelude,
         bit::BitPrelude,
         byte::BytePrelude,
         call::CallPrelude,
@@ -86,6 +87,7 @@ pub(crate) struct AllPrelude {
     pub(crate) call: CallPrelude,
     pub(crate) optimize: OptimizePrelude,
     pub(crate) solve: SolvePrelude,
+    pub(crate) abstract1: AbstractPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) ctx: CtxPrelude,
@@ -111,6 +113,7 @@ impl Prelude for AllPrelude {
         self.call.put(m);
         self.optimize.put(m);
         self.solve.put(m);
+        self.abstract1.put(m);
         self.list.put(m);
         self.map.put(m);
         self.ctx.put(m);
@@ -296,6 +299,8 @@ mod call;
 mod optimize;
 
 mod solve;
+
+mod abstract1;
 
 mod list;
 

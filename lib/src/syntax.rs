@@ -44,6 +44,8 @@ pub(crate) const OPTIMIZE: &str = concatcp!(OPTIMIZE_CHAR);
 pub(crate) const SOLVE_CHAR: char = '?';
 pub(crate) const SOLVE: &str = concatcp!(SOLVE_CHAR);
 
+pub(crate) const ABSTRACT: &str = "@";
+
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";

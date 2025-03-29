@@ -25,6 +25,7 @@ use crate::{
     SolveVal,
     Symbol,
     Val,
+    abstract1::Abstract,
     advisor::{
         optimize,
         solve,
@@ -47,6 +48,7 @@ use crate::{
         ByVal,
         Transformer,
     },
+    val::abstract1::AbstractVal,
 };
 
 pub(crate) struct FormCore;
@@ -59,10 +61,11 @@ impl FormCore {
         match input {
             Val::Symbol(s) => t.transform_symbol(ctx, s),
             Val::Pair(p) => t.transform_pair(ctx, p),
-            Val::Call(c) => t.transform_call(ctx, c),
-            Val::Optimize(a) => t.transform_optimize(ctx, a),
-            Val::Solve(a) => t.transform_solve(ctx, a),
             Val::Change(c) => t.transform_change(ctx, c),
+            Val::Call(c) => t.transform_call(ctx, c),
+            Val::Optimize(o) => t.transform_optimize(ctx, o),
+            Val::Solve(s) => t.transform_solve(ctx, s),
+            Val::Abstract(a) => t.transform_abstract(ctx, a),
             Val::List(l) => t.transform_list(ctx, l),
             Val::Map(m) => t.transform_map(ctx, m),
             v => t.transform_default(ctx, v),
@@ -148,6 +151,17 @@ impl FormCore {
         let func = func.transform(ctx.reborrow(), solve.func);
         let output = output.transform(ctx, solve.output);
         Val::Solve(Solve::new(func, output).into())
+    }
+
+    pub(crate) fn transform_abstract<'a, Ctx, Value>(
+        value: &Value, mut ctx: Ctx, abstract1: AbstractVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Value: Transformer<Val, Val>, {
+        let abstract1 = Abstract::from(abstract1);
+        let value = value.transform(ctx.reborrow(), abstract1.value);
+        Val::Abstract(Abstract::new(value).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val

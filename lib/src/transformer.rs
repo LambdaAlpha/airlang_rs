@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use crate::{
+    AbstractVal,
     CallVal,
     ChangeVal,
     ListVal,
@@ -59,6 +60,9 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where Ctx: CtxMeta<'a>;
 
     fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Output
+    where Ctx: CtxMeta<'a>;
+
+    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Output

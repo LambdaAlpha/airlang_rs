@@ -401,6 +401,26 @@ do [
 -----
 [a ? 1]
 =====
+mode primitive abstract form
+-----
+do [
+    b = 1,
+    f = mode ; {abstract : id, default : eval*, primitive : true},
+    f [@(*a)]
+]
+-----
+[@(*a)]
+=====
+mode primitive abstract form
+-----
+do [
+    b = 1,
+    f = mode ; {abstract : form, default : eval*, primitive : true},
+    f [@(.a)]
+]
+-----
+[@(a)]
+=====
 mode primitive list id
 -----
 do [
@@ -549,6 +569,7 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
+    abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
 }
@@ -556,6 +577,7 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
+    abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,
 }
@@ -566,6 +588,7 @@ function.represent ; mode ; {
     symbol : .^,
     pair : form,
     call : eval,
+    abstract : form,
     map : form,
     primitive : true,
 }
@@ -574,6 +597,7 @@ function.represent ; mode ; {
     symbol : ^,
     pair : form,
     call : eval,
+    abstract : form,
     map : form,
     primitive : true,
 }
