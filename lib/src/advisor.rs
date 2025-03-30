@@ -4,9 +4,9 @@ use crate::{
     ctx::ref1::CtxMeta,
 };
 
-pub(crate) fn optimize<'a, Ctx>(_ctx: Ctx, _func: FuncVal, input: Val) -> Val
+pub(crate) fn optimize<'a, Ctx>(_ctx: Ctx, _func: FuncVal, _input: Val) -> Val
 where Ctx: CtxMeta<'a> {
-    input
+    Val::default()
 }
 
 pub(crate) fn solve<'a, Ctx>(_ctx: Ctx, _func: FuncVal, _output: Val) -> Val

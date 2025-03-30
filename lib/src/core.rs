@@ -345,7 +345,7 @@ impl EvalCore {
         output
     }
 
-    // f ! v evaluates to any i that (f ; i) == (f ; v)
+    // f ! v evaluates to . or any i that (f ; i) and (f ; v) always evaluates to the same output
     pub(crate) fn transform_optimize<'a, Ctx, Func, Input>(
         func_trans: &Func, input_trans: &Input, mut ctx: Ctx, optimize: OptimizeVal,
     ) -> Val
@@ -403,7 +403,7 @@ impl EvalCore {
         optimize(ctx, func, input)
     }
 
-    // f ? v evaluates to . or any i that (f ; i) == v
+    // f ? v evaluates to . or any i that (f ; i) always evaluates to v
     pub(crate) fn transform_solve<'a, Ctx, Func, Output>(
         func_trans: &Func, output_trans: &Output, mut ctx: Ctx, solve: SolveVal,
     ) -> Val
