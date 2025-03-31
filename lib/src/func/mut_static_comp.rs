@@ -19,7 +19,6 @@ pub struct MutStaticCompFunc {
     pub(crate) comp: Composite,
     pub(crate) ctx_name: Symbol,
     pub(crate) mode: FuncMode,
-    pub(crate) cacheable: bool,
 }
 
 impl Transformer<Val, Val> for MutStaticCompFunc {
@@ -38,10 +37,6 @@ impl FuncTrait for MutStaticCompFunc {
         &self.mode
     }
 
-    fn cacheable(&self) -> bool {
-        self.cacheable
-    }
-
     fn call(&self) -> Val {
         let ctx = self.ctx_name.clone();
         let input = self.comp.input_name.clone();
@@ -51,7 +46,7 @@ impl FuncTrait for MutStaticCompFunc {
 }
 
 impl MutStaticCompFunc {
-    pub(crate) fn new(comp: Composite, ctx_name: Symbol, mode: FuncMode, cacheable: bool) -> Self {
-        Self { comp, mode, cacheable, ctx_name }
+    pub(crate) fn new(comp: Composite, ctx_name: Symbol, mode: FuncMode) -> Self {
+        Self { comp, mode, ctx_name }
     }
 }

@@ -24,8 +24,7 @@ fn ref_mode() -> FuncVal {
     let id = "mode.reference";
     let f = fn_ref_mode;
     let mode = FuncMode::id_func_mode();
-    let cacheable = true;
-    mut_fn(id, f, mode, cacheable)
+    mut_fn(id, f, mode)
 }
 
 fn fn_ref_mode(ctx: MutFnCtx, input: Val) -> Val {

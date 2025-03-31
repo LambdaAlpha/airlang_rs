@@ -38,8 +38,7 @@ fn parse() -> Named<FuncVal> {
     let id = "parse";
     let f = fn_parse;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -53,8 +52,7 @@ fn generate() -> Named<FuncVal> {
     let id = "generate";
     let f = fn_generate;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_generate(input: Val) -> Val {

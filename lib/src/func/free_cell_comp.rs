@@ -13,7 +13,6 @@ use crate::{
 pub struct FreeCellCompFunc {
     pub(crate) comp: Composite,
     pub(crate) mode: FuncMode,
-    pub(crate) cacheable: bool,
 }
 
 impl Transformer<Val, Val> for FreeCellCompFunc {
@@ -32,10 +31,6 @@ impl FuncTrait for FreeCellCompFunc {
         &self.mode
     }
 
-    fn cacheable(&self) -> bool {
-        self.cacheable
-    }
-
     fn call(&self) -> Val {
         self.comp.func_call()
     }
@@ -51,7 +46,7 @@ impl FuncTrait for FreeCellCompFunc {
 }
 
 impl FreeCellCompFunc {
-    pub(crate) fn new(comp: Composite, mode: FuncMode, cacheable: bool) -> Self {
-        Self { comp, mode, cacheable }
+    pub(crate) fn new(comp: Composite, mode: FuncMode) -> Self {
+        Self { comp, mode }
     }
 }

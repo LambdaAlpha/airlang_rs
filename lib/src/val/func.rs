@@ -91,24 +91,6 @@ impl FuncTrait for FuncVal {
         }
     }
 
-    fn cacheable(&self) -> bool {
-        match self {
-            FuncVal::Mode(f) => f.cacheable(),
-            FuncVal::FreeCellPrim(f) => f.cacheable(),
-            FuncVal::FreeCellComp(f) => f.cacheable(),
-            FuncVal::FreeStaticPrim(f) => f.cacheable(),
-            FuncVal::FreeStaticComp(f) => f.cacheable(),
-            FuncVal::ConstCellPrim(f) => f.cacheable(),
-            FuncVal::ConstCellComp(f) => f.cacheable(),
-            FuncVal::ConstStaticPrim(f) => f.cacheable(),
-            FuncVal::ConstStaticComp(f) => f.cacheable(),
-            FuncVal::MutCellPrim(f) => f.cacheable(),
-            FuncVal::MutCellComp(f) => f.cacheable(),
-            FuncVal::MutStaticPrim(f) => f.cacheable(),
-            FuncVal::MutStaticComp(f) => f.cacheable(),
-        }
-    }
-
     fn call(&self) -> Val {
         match self {
             FuncVal::Mode(f) => f.call(),
@@ -273,10 +255,6 @@ macro_rules! impl_const_func_trait {
         impl $crate::func::FuncTrait for $type1 {
             fn mode(&self) -> &$crate::func::func_mode::FuncMode {
                 self.0.mode()
-            }
-
-            fn cacheable(&self) -> bool {
-                self.0.cacheable()
             }
 
             fn call(&self) -> $crate::val::Val {

@@ -849,7 +849,6 @@ do [
         optimize_mode : ^optimize_mode,
         solve_mode : ^solve_mode,
         context_access : constant,
-        cacheable : true,
         cell : true,
     },
     new_repr = function.represent ; function ; repr,
@@ -954,18 +953,6 @@ do [
 ]
 -----
 {map : {a : form.} : eval* : id}
-=====
-cacheable
------
-do [f = function ; {cacheable : false}, f function.is_cacheable .]
------
-false
-=====
-cacheable primitive
------
-not function.is_cacheable .
------
-true
 =====
 is_primitive primitive
 -----

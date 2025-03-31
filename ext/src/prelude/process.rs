@@ -51,8 +51,7 @@ fn call() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_call(input: Val) -> Val {

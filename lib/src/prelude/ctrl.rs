@@ -92,8 +92,7 @@ fn do1() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_do<'a, Ctx>(ctx: Ctx, input: Val) -> Val
@@ -112,8 +111,7 @@ fn if1() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_if<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -145,8 +143,7 @@ fn match1() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -184,8 +181,7 @@ fn loop1() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_loop<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
@@ -244,8 +240,7 @@ fn for1() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_for<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val

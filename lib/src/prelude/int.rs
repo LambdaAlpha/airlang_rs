@@ -69,8 +69,7 @@ fn add() -> Named<FuncVal> {
     let id = "+";
     let f = fn_add;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_add(input: Val) -> Val {
@@ -93,8 +92,7 @@ fn subtract() -> Named<FuncVal> {
     let id = "-";
     let f = fn_subtract;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -117,8 +115,7 @@ fn multiply() -> Named<FuncVal> {
     let id = "*";
     let f = fn_multiply;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -141,8 +138,7 @@ fn divide() -> Named<FuncVal> {
     let id = "/";
     let f = fn_divide;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -168,8 +164,7 @@ fn remainder() -> Named<FuncVal> {
     let id = "%";
     let f = fn_remainder;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -195,8 +190,7 @@ fn divide_remainder() -> Named<FuncVal> {
     let id = "/%";
     let f = fn_divide_remainder;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -222,8 +216,7 @@ fn less_than() -> Named<FuncVal> {
     let id = "<";
     let f = fn_less_than;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -244,8 +237,7 @@ fn less_equal() -> Named<FuncVal> {
     let id = "<=";
     let f = fn_less_equal;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -266,8 +258,7 @@ fn greater_than() -> Named<FuncVal> {
     let id = ">";
     let f = fn_greater_than;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -288,8 +279,7 @@ fn greater_equal() -> Named<FuncVal> {
     let id = ">=";
     let f = fn_greater_equal;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -310,8 +300,7 @@ fn less_greater() -> Named<FuncVal> {
     let id = "<>";
     let f = fn_less_greater;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_less_greater(input: Val) -> Val {

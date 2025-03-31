@@ -13,7 +13,6 @@ use crate::{
 pub struct FreeStaticCompFunc {
     pub(crate) comp: Composite,
     pub(crate) mode: FuncMode,
-    pub(crate) cacheable: bool,
 }
 
 impl Transformer<Val, Val> for FreeStaticCompFunc {
@@ -32,17 +31,13 @@ impl FuncTrait for FreeStaticCompFunc {
         &self.mode
     }
 
-    fn cacheable(&self) -> bool {
-        self.cacheable
-    }
-
     fn call(&self) -> Val {
         self.comp.func_call()
     }
 }
 
 impl FreeStaticCompFunc {
-    pub(crate) fn new(comp: Composite, mode: FuncMode, cacheable: bool) -> Self {
-        Self { comp, mode, cacheable }
+    pub(crate) fn new(comp: Composite, mode: FuncMode) -> Self {
+        Self { comp, mode }
     }
 }

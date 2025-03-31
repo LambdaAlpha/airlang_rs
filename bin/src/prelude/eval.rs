@@ -36,8 +36,7 @@ fn reset() -> Named<FuncVal> {
     let id = "repl.reset";
     let f = fn_reset;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {

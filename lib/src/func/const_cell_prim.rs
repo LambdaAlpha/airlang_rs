@@ -34,7 +34,6 @@ pub struct ConstCellPrimFunc {
     pub(crate) prim: Primitive,
     pub(crate) fn1: Box<dyn ConstCellFnExt>,
     pub(crate) mode: FuncMode,
-    pub(crate) cacheable: bool,
 }
 
 impl Transformer<Val, Val> for ConstCellPrimFunc {
@@ -49,10 +48,6 @@ impl FuncTrait for ConstCellPrimFunc {
         &self.mode
     }
 
-    fn cacheable(&self) -> bool {
-        self.cacheable
-    }
-
     fn call(&self) -> Val {
         Val::default()
     }
@@ -64,16 +59,12 @@ impl FuncTrait for ConstCellPrimFunc {
 }
 
 impl ConstCellPrimFunc {
-    pub fn new_extension(
-        id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode, cacheable: bool,
-    ) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
+    pub fn new_extension(id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode) -> Self {
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode }
     }
 
-    pub(crate) fn new(
-        id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode, cacheable: bool,
-    ) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
+    pub(crate) fn new(id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode) -> Self {
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
     }
 }
 

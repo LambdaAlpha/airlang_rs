@@ -7,7 +7,6 @@ use crate::{
 
 pub(crate) trait FuncTrait: Transformer<Val, Val> {
     fn mode(&self) -> &FuncMode;
-    fn cacheable(&self) -> bool;
 
     fn call(&self) -> Val;
 

@@ -53,8 +53,7 @@ fn from_text() -> Named<FuncVal> {
     let id = "symbol.from_text";
     let f = fn_from_text;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_from_text(input: Val) -> Val {
@@ -73,8 +72,7 @@ fn into_text() -> Named<FuncVal> {
     let id = "symbol.into_text";
     let f = fn_into_text;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_into_text(input: Val) -> Val {
@@ -91,8 +89,7 @@ fn length() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -113,8 +110,7 @@ fn join() -> Named<FuncVal> {
     let id = "symbol.join";
     let f = fn_join;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_join(input: Val) -> Val {

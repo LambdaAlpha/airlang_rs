@@ -19,7 +19,6 @@ pub struct ConstCellCompFunc {
     pub(crate) comp: Composite,
     pub(crate) ctx_name: Symbol,
     pub(crate) mode: FuncMode,
-    pub(crate) cacheable: bool,
 }
 
 impl Transformer<Val, Val> for ConstCellCompFunc {
@@ -36,10 +35,6 @@ impl Transformer<Val, Val> for ConstCellCompFunc {
 impl FuncTrait for ConstCellCompFunc {
     fn mode(&self) -> &FuncMode {
         &self.mode
-    }
-
-    fn cacheable(&self) -> bool {
-        self.cacheable
     }
 
     fn call(&self) -> Val {
@@ -60,7 +55,7 @@ impl FuncTrait for ConstCellCompFunc {
 }
 
 impl ConstCellCompFunc {
-    pub(crate) fn new(comp: Composite, ctx_name: Symbol, mode: FuncMode, cacheable: bool) -> Self {
-        Self { comp, ctx_name, mode, cacheable }
+    pub(crate) fn new(comp: Composite, ctx_name: Symbol, mode: FuncMode) -> Self {
+        Self { comp, ctx_name, mode }
     }
 }

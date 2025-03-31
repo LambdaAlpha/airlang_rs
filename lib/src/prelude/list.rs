@@ -82,8 +82,7 @@ fn length() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
@@ -107,8 +106,7 @@ fn set() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
@@ -145,8 +143,7 @@ fn set_many() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -187,8 +184,7 @@ fn get() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
@@ -236,8 +232,7 @@ fn insert() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
@@ -273,8 +268,7 @@ fn insert_many() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -313,8 +307,7 @@ fn remove() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
@@ -363,8 +356,7 @@ fn push() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
@@ -389,8 +381,7 @@ fn push_many() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
@@ -418,8 +409,7 @@ fn pop() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
@@ -465,8 +455,7 @@ fn clear() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {

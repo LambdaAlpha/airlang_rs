@@ -33,8 +33,7 @@ fn read_to_text() -> Named<FuncVal> {
     let id = "file.read_to_text";
     let f = fn_read_to_text;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_read_to_text(ctx: ConstFnCtx, input: Val) -> Val {

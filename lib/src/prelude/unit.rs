@@ -34,8 +34,7 @@ fn unit() -> Named<FuncVal> {
     let id = "unit";
     let f = fn_unit;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_unit(_input: Val) -> Val {

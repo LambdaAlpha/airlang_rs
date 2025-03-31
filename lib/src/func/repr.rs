@@ -57,7 +57,6 @@ pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
 pub(crate) const OPTIMIZE_MODE: &str = "optimize_mode";
 pub(crate) const SOLVE_MODE: &str = "solve_mode";
-pub(crate) const CACHEABLE: &str = "cacheable";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
 
@@ -144,11 +143,6 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         _ => return None,
     };
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = match map_remove(&mut map, CACHEABLE) {
-        Val::Unit(_) => false,
-        Val::Bit(b) => b.bool(),
-        _ => return None,
-    };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
@@ -164,30 +158,30 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let func = match ctx_access {
         FREE => {
             if cell {
-                let func = FreeCellCompFunc::new(comp, mode, cacheable);
+                let func = FreeCellCompFunc::new(comp, mode);
                 FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
             } else {
-                let func = FreeStaticCompFunc::new(comp, mode, cacheable);
+                let func = FreeStaticCompFunc::new(comp, mode);
                 FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
             }
         }
         CONST => {
             let ctx_name = ctx_name?;
             if cell {
-                let func = ConstCellCompFunc::new(comp, ctx_name, mode, cacheable);
+                let func = ConstCellCompFunc::new(comp, ctx_name, mode);
                 FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
             } else {
-                let func = ConstStaticCompFunc::new(comp, ctx_name, mode, cacheable);
+                let func = ConstStaticCompFunc::new(comp, ctx_name, mode);
                 FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
             }
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             if cell {
-                let func = MutCellCompFunc::new(comp, ctx_name, mode, cacheable);
+                let func = MutCellCompFunc::new(comp, ctx_name, mode);
                 FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
             } else {
-                let func = MutStaticCompFunc::new(comp, ctx_name, mode, cacheable);
+                let func = MutStaticCompFunc::new(comp, ctx_name, mode);
                 FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
             }
         }
@@ -217,7 +211,7 @@ pub(crate) fn generate_func(f: FuncVal) -> Val {
 fn generate_free_cell_prim(f: FreeCellPrimFuncVal) -> Val {
     let f = FreeCellPrimFunc::from(f);
     if f.prim.is_extension {
-        let common = FuncCommon { access: FREE, cell: true, mode: f.mode, cacheable: f.cacheable };
+        let common = FuncCommon { access: FREE, cell: true, mode: f.mode };
         generate_primitive_extension(f.prim.id, common)
     } else {
         generate_primitive_prelude(f.prim.id)
@@ -228,7 +222,7 @@ fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
     let f = FreeCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     generate_call(&mut repr, &f);
-    let common = FuncCommon { access: FREE, cell: true, mode: f.mode, cacheable: f.cacheable };
+    let common = FuncCommon { access: FREE, cell: true, mode: f.mode };
     generate_func_common(&mut repr, common);
     generate_ctx(&mut repr, f.comp.ctx);
     Val::Map(repr.into())
@@ -236,8 +230,7 @@ fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
 
 fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
     if f.prim.is_extension {
-        let common =
-            FuncCommon { access: FREE, cell: false, mode: f.mode.clone(), cacheable: f.cacheable };
+        let common = FuncCommon { access: FREE, cell: false, mode: f.mode.clone() };
         generate_primitive_extension(f.prim.id.clone(), common)
     } else {
         generate_primitive_prelude(f.prim.id.clone())
@@ -247,8 +240,7 @@ fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
 fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     generate_call(&mut repr, &f);
-    let common =
-        FuncCommon { access: FREE, cell: false, mode: f.mode.clone(), cacheable: f.cacheable };
+    let common = FuncCommon { access: FREE, cell: false, mode: f.mode.clone() };
     generate_func_common(&mut repr, common);
     generate_ctx(&mut repr, f.comp.ctx.clone());
     Val::Map(repr.into())
@@ -257,7 +249,7 @@ fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
 fn generate_const_cell_prim(f: ConstCellPrimFuncVal) -> Val {
     let f = ConstCellPrimFunc::from(f);
     if f.prim.is_extension {
-        let common = FuncCommon { access: CONST, cell: true, mode: f.mode, cacheable: f.cacheable };
+        let common = FuncCommon { access: CONST, cell: true, mode: f.mode };
         generate_primitive_extension(f.prim.id, common)
     } else {
         generate_primitive_prelude(f.prim.id)
@@ -268,7 +260,7 @@ fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
     let f = ConstCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     generate_call(&mut repr, &f);
-    let common = FuncCommon { access: CONST, cell: true, mode: f.mode, cacheable: f.cacheable };
+    let common = FuncCommon { access: CONST, cell: true, mode: f.mode };
     generate_func_common(&mut repr, common);
     generate_ctx(&mut repr, f.comp.ctx);
     Val::Map(repr.into())
@@ -276,8 +268,7 @@ fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
 
 fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
     if f.prim.is_extension {
-        let common =
-            FuncCommon { access: CONST, cell: false, mode: f.mode.clone(), cacheable: f.cacheable };
+        let common = FuncCommon { access: CONST, cell: false, mode: f.mode.clone() };
         generate_primitive_extension(f.prim.id.clone(), common)
     } else {
         generate_primitive_prelude(f.prim.id.clone())
@@ -287,8 +278,7 @@ fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
 fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     generate_call(&mut repr, &f);
-    let common =
-        FuncCommon { access: CONST, cell: false, mode: f.mode.clone(), cacheable: f.cacheable };
+    let common = FuncCommon { access: CONST, cell: false, mode: f.mode.clone() };
     generate_func_common(&mut repr, common);
     generate_ctx(&mut repr, f.comp.ctx.clone());
     Val::Map(repr.into())
@@ -297,8 +287,7 @@ fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
 fn generate_mut_cell_prim(f: MutCellPrimFuncVal) -> Val {
     let f = MutCellPrimFunc::from(f);
     if f.prim.is_extension {
-        let common =
-            FuncCommon { access: MUTABLE, cell: true, mode: f.mode, cacheable: f.cacheable };
+        let common = FuncCommon { access: MUTABLE, cell: true, mode: f.mode };
         generate_primitive_extension(f.prim.id, common)
     } else {
         generate_primitive_prelude(f.prim.id)
@@ -309,7 +298,7 @@ fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
     let f = MutCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     generate_call(&mut repr, &f);
-    let common = FuncCommon { access: MUTABLE, cell: true, mode: f.mode, cacheable: f.cacheable };
+    let common = FuncCommon { access: MUTABLE, cell: true, mode: f.mode };
     generate_func_common(&mut repr, common);
     generate_ctx(&mut repr, f.comp.ctx);
     Val::Map(repr.into())
@@ -317,12 +306,7 @@ fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
 
 fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
     if f.prim.is_extension {
-        let common = FuncCommon {
-            access: MUTABLE,
-            cell: false,
-            mode: f.mode.clone(),
-            cacheable: f.cacheable,
-        };
+        let common = FuncCommon { access: MUTABLE, cell: false, mode: f.mode.clone() };
         generate_primitive_extension(f.prim.id.clone(), common)
     } else {
         generate_primitive_prelude(f.prim.id.clone())
@@ -332,8 +316,7 @@ fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
 fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     generate_call(&mut repr, &f);
-    let common =
-        FuncCommon { access: MUTABLE, cell: false, mode: f.mode.clone(), cacheable: f.cacheable };
+    let common = FuncCommon { access: MUTABLE, cell: false, mode: f.mode.clone() };
     generate_func_common(&mut repr, common);
     generate_ctx(&mut repr, f.comp.ctx.clone());
     Val::Map(repr.into())
@@ -370,7 +353,6 @@ struct FuncCommon {
     access: &'static str,
     cell: bool,
     mode: FuncMode,
-    cacheable: bool,
 }
 
 fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
@@ -379,9 +361,6 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
     }
     if common.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(common.access));
-    }
-    if common.cacheable {
-        repr.insert(symbol(CACHEABLE), Val::Bit(Bit::new(true)));
     }
     if common.mode.call != FuncMode::default_mode() {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.call).into()));

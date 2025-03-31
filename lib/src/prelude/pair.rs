@@ -62,8 +62,7 @@ fn new() -> Named<FuncVal> {
     let id = PAIR;
     let f = fn_new;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -80,8 +79,7 @@ fn get_first() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
@@ -108,8 +106,7 @@ fn set_first() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
@@ -138,8 +135,7 @@ fn get_second() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
@@ -166,8 +162,7 @@ fn set_second() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set_second(ctx: MutFnCtx, input: Val) -> Val {

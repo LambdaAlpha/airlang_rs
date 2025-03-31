@@ -63,8 +63,7 @@ fn new() -> Named<FuncVal> {
     let id = CHANGE;
     let f = fn_new;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -84,8 +83,7 @@ fn get_from() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_get_from(ctx: ConstFnCtx, input: Val) -> Val {
@@ -112,8 +110,7 @@ fn set_from() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set_from(ctx: MutFnCtx, input: Val) -> Val {
@@ -142,8 +139,7 @@ fn get_to() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_get_to(ctx: ConstFnCtx, input: Val) -> Val {
@@ -170,8 +166,7 @@ fn set_to() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set_to(ctx: MutFnCtx, input: Val) -> Val {

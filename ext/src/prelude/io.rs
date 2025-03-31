@@ -60,8 +60,7 @@ fn read_line() -> Named<FuncVal> {
     let id = "io.read_line";
     let f = fn_read_line;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
@@ -82,8 +81,7 @@ fn print() -> Named<FuncVal> {
     let id = "io.print";
     let f = fn_print;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_print(input: Val) -> Val {
@@ -98,8 +96,7 @@ fn print_line() -> Named<FuncVal> {
     let id = "io.print_line";
     let f = fn_print_line;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_print_line(input: Val) -> Val {
@@ -114,8 +111,7 @@ fn flush() -> Named<FuncVal> {
     let id = "io.flush";
     let f = fn_flush;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_flush(_input: Val) -> Val {
@@ -127,8 +123,7 @@ fn error_print() -> Named<FuncVal> {
     let id = "io.error_print";
     let f = fn_error_print;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_error_print(input: Val) -> Val {
@@ -143,8 +138,7 @@ fn error_print_line() -> Named<FuncVal> {
     let id = "io.error_print_line";
     let f = fn_error_print_line;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_error_print_line(input: Val) -> Val {
@@ -159,8 +153,7 @@ fn error_flush() -> Named<FuncVal> {
     let id = "io.error_flush";
     let f = fn_error_flush;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_error_flush(_input: Val) -> Val {

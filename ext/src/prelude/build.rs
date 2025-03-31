@@ -46,8 +46,7 @@ fn import() -> Named<FuncVal> {
     let id = "build.import";
     let f = fn_import;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

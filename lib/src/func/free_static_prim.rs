@@ -31,7 +31,6 @@ pub struct FreeStaticPrimFunc {
     pub(crate) prim: Primitive,
     pub(crate) fn1: Rc<dyn FreeStaticFn>,
     pub(crate) mode: FuncMode,
-    pub(crate) cacheable: bool,
 }
 
 impl Transformer<Val, Val> for FreeStaticPrimFunc {
@@ -46,26 +45,18 @@ impl FuncTrait for FreeStaticPrimFunc {
         &self.mode
     }
 
-    fn cacheable(&self) -> bool {
-        self.cacheable
-    }
-
     fn call(&self) -> Val {
         Val::default()
     }
 }
 
 impl FreeStaticPrimFunc {
-    pub fn new_extension(
-        id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode, cacheable: bool,
-    ) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode, cacheable }
+    pub fn new_extension(id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode) -> Self {
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode }
     }
 
-    pub(crate) fn new(
-        id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode, cacheable: bool,
-    ) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode, cacheable }
+    pub(crate) fn new(id: Symbol, fn1: Rc<dyn FreeStaticFn>, mode: FuncMode) -> Self {
+        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
     }
 }
 

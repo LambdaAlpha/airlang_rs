@@ -31,8 +31,7 @@ fn help() -> Named<FuncVal> {
     let id = "help";
     let f = fn_help;
     let mode = FuncMode::default();
-    let cacheable = false;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 const HELP_DOC: &str = "\

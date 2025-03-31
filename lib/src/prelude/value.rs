@@ -103,8 +103,7 @@ fn any() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_any(input: Val) -> Val {
@@ -145,8 +144,7 @@ fn type1() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::symbol_mode(SymbolMode::Literal);
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
@@ -186,8 +184,7 @@ fn equal() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {

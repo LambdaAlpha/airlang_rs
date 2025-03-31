@@ -51,8 +51,7 @@ fn new() -> Named<FuncVal> {
     let id = ABSTRACT;
     let f = fn_new;
     let mode = FuncMode::default();
-    let cacheable = true;
-    named_free_fn(id, f, mode, cacheable)
+    named_free_fn(id, f, mode)
 }
 
 fn fn_new(input: Val) -> Val {
@@ -66,8 +65,7 @@ fn get_value() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_const_fn(id, f, mode, cacheable)
+    named_const_fn(id, f, mode)
 }
 
 fn fn_get_value(ctx: ConstFnCtx, input: Val) -> Val {
@@ -94,8 +92,7 @@ fn set_value() -> Named<FuncVal> {
     let optimize = call.clone();
     let solve = FuncMode::default_mode();
     let mode = FuncMode { call, optimize, solve };
-    let cacheable = true;
-    named_mut_fn(id, f, mode, cacheable)
+    named_mut_fn(id, f, mode)
 }
 
 fn fn_set_value(ctx: MutFnCtx, input: Val) -> Val {

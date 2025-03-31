@@ -160,108 +160,98 @@ impl<T: Into<Val> + Clone> Named<T> {
     }
 }
 
-fn free_cell_fn(
-    name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode, cacheable: bool,
-) -> FuncVal {
+fn free_cell_fn(name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Box::new(func);
-    let func = FreeCellPrimFunc::new(id, fn1, mode, cacheable);
+    let func = FreeCellPrimFunc::new(id, fn1, mode);
     let func_val = FreeCellPrimFuncVal::from(func);
     FuncVal::FreeCellPrim(func_val)
 }
 
 #[expect(dead_code)]
 fn named_free_cell_fn(
-    name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
-    let f = free_cell_fn(name, func, mode, cacheable);
+    let f = free_cell_fn(name, func, mode);
     Named::new(name, f)
 }
 
 fn const_cell_fn(
-    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode,
 ) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Box::new(func);
-    let func = ConstCellPrimFunc::new(id, fn1, mode, cacheable);
+    let func = ConstCellPrimFunc::new(id, fn1, mode);
     let func_val = ConstCellPrimFuncVal::from(func);
     FuncVal::ConstCellPrim(func_val)
 }
 
 #[expect(dead_code)]
 fn named_const_cell_fn(
-    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
-    let f = const_cell_fn(name, func, mode, cacheable);
+    let f = const_cell_fn(name, func, mode);
     Named::new(name, f)
 }
 
-fn mut_cell_fn(
-    name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, cacheable: bool,
-) -> FuncVal {
+fn mut_cell_fn(name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Box::new(func);
-    let func = MutCellPrimFunc::new(id, fn1, mode, cacheable);
+    let func = MutCellPrimFunc::new(id, fn1, mode);
     let func_val = MutCellPrimFuncVal::from(func);
     FuncVal::MutCellPrim(func_val)
 }
 
 #[expect(dead_code)]
 fn named_mut_cell_fn(
-    name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
-    let f = mut_cell_fn(name, func, mode, cacheable);
+    let f = mut_cell_fn(name, func, mode);
     Named::new(name, f)
 }
 
-fn free_fn(
-    name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode, cacheable: bool,
-) -> FuncVal {
+fn free_fn(name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
-    let func = FreeStaticPrimFunc::new(id, fn1, mode, cacheable);
+    let func = FreeStaticPrimFunc::new(id, fn1, mode);
     let func_val = FreeStaticPrimFuncVal::from(func);
     FuncVal::FreeStaticPrim(func_val)
 }
 
 fn named_free_fn(
-    name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
-    let f = free_fn(name, func, mode, cacheable);
+    let f = free_fn(name, func, mode);
     Named::new(name, f)
 }
 
-fn const_fn(
-    name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode, cacheable: bool,
-) -> FuncVal {
+fn const_fn(name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
-    let func = ConstStaticPrimFunc::new(id, fn1, mode, cacheable);
+    let func = ConstStaticPrimFunc::new(id, fn1, mode);
     let func_val = ConstStaticPrimFuncVal::from(func);
     FuncVal::ConstStaticPrim(func_val)
 }
 
 fn named_const_fn(
-    name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
-    let f = const_fn(name, func, mode, cacheable);
+    let f = const_fn(name, func, mode);
     Named::new(name, f)
 }
 
-fn mut_fn(
-    name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode, cacheable: bool,
-) -> FuncVal {
+fn mut_fn(name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
-    let func = MutStaticPrimFunc::new_inner(id, fn1, mode, cacheable);
+    let func = MutStaticPrimFunc::new(id, fn1, mode);
     let func_val = MutStaticPrimFuncVal::from(func);
     FuncVal::MutStaticPrim(func_val)
 }
 
 fn named_mut_fn(
-    name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode, cacheable: bool,
+    name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
-    let f = mut_fn(name, func, mode, cacheable);
+    let f = mut_fn(name, func, mode);
     Named::new(name, f)
 }
 

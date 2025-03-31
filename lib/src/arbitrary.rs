@@ -502,16 +502,14 @@ fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {
 pub(crate) fn any_free_cell_comp_func(rng: &mut SmallRng, depth: usize) -> FreeCellCompFuncVal {
     let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.random();
-    let func = FreeCellCompFunc::new(composite, mode, cacheable);
+    let func = FreeCellCompFunc::new(composite, mode);
     FreeCellCompFuncVal::from(func)
 }
 
 pub(crate) fn any_free_static_comp_func(rng: &mut SmallRng, depth: usize) -> FreeStaticCompFuncVal {
     let composite = any_composite(rng, depth);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.random();
-    let func = FreeStaticCompFunc::new(composite, mode, cacheable);
+    let func = FreeStaticCompFunc::new(composite, mode);
     FreeStaticCompFuncVal::from(func)
 }
 
@@ -519,8 +517,7 @@ pub(crate) fn any_const_cell_comp_func(rng: &mut SmallRng, depth: usize) -> Cons
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.random();
-    let func = ConstCellCompFunc::new(composite, ctx_name, mode, cacheable);
+    let func = ConstCellCompFunc::new(composite, ctx_name, mode);
     ConstCellCompFuncVal::from(func)
 }
 
@@ -530,8 +527,7 @@ pub(crate) fn any_const_static_comp_func(
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.random();
-    let func = ConstStaticCompFunc::new(composite, ctx_name, mode, cacheable);
+    let func = ConstStaticCompFunc::new(composite, ctx_name, mode);
     ConstStaticCompFuncVal::from(func)
 }
 
@@ -539,8 +535,7 @@ pub(crate) fn any_mut_cell_comp_func(rng: &mut SmallRng, depth: usize) -> MutCel
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.random();
-    let func = MutCellCompFunc::new(composite, ctx_name, mode, cacheable);
+    let func = MutCellCompFunc::new(composite, ctx_name, mode);
     MutCellCompFuncVal::from(func)
 }
 
@@ -548,8 +543,7 @@ pub(crate) fn any_mut_static_comp_func(rng: &mut SmallRng, depth: usize) -> MutS
     let composite = any_composite(rng, depth);
     let ctx_name = any_symbol(rng);
     let mode = any_func_mode(rng, depth);
-    let cacheable = rng.random();
-    let func = MutStaticCompFunc::new(composite, ctx_name, mode, cacheable);
+    let func = MutStaticCompFunc::new(composite, ctx_name, mode);
     MutStaticCompFuncVal::from(func)
 }
 

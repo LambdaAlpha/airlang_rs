@@ -155,7 +155,6 @@ fn test_extension() -> Result<(), Box<dyn Error>> {
         func_ext_name.clone(),
         Rc::new(FuncExt),
         FuncMode::default(),
-        false,
     );
     let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
     air.ctx_mut().put(func_ext_name, VarAccess::Const, func)?;
