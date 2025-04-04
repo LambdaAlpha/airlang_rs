@@ -53,9 +53,7 @@ impl Composite {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
-        let old_val =
-            inner.variables_mut().put_unchecked(name, CtxValue { val, access, static1: true });
-        assert!(old_val.is_none(), "keep_ctx variable already present");
+        let _ = inner.variables_mut().put_unchecked(name, CtxValue { val, access, static1: true });
     }
 
     fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {
