@@ -1,4 +1,6 @@
-"bench parse" ! do ; [
+_"bench parse"
+
+do ; [
   x = 42,
   y = 24,
   (x <> y) loop (x > y) if (

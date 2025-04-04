@@ -1,4 +1,6 @@
-"bench interpret" ! do ; [
+_"bench interpret"
+
+do ; [
   f = function ; {
     call : n -> do ; [
       .sum = 0,
