@@ -110,7 +110,5 @@ pub fn expected() -> Vec<Repr> {
             symbol("e"),
         )]),
         tag_call("t", vec![infix_solve(symbol("a"), symbol("b"), symbol("c"))]),
-        infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
-        call(symbol("a"), call(symbol("b"), call(symbol("c"), call(symbol("d"), symbol("e"))))),
     ]
 }

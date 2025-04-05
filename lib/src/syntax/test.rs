@@ -190,8 +190,12 @@ fn test_parse(
     src: &str, file_name: &str, expected: impl FnOnce() -> Vec<Repr>,
 ) -> Result<(), Box<dyn Error>> {
     let mut expected = expected().into_iter();
-    for [title, s] in parse_test_file::<2>(src, file_name) {
-        let expected_repr = expected.next().expect("expected result should exist");
+    let cases = parse_test_file::<2>(src, file_name);
+    if expected.len() != cases.len() {
+        return Err(format!("file {file_name} length not equal").into());
+    }
+    for [title, s] in cases {
+        let expected_repr = expected.next().unwrap();
         let real_repr = parse(s).map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
