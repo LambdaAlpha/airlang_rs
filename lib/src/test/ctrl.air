@@ -82,51 +82,51 @@ do [[]]
 -----
 []
 =====
-if true
+? true
 -----
-true if 1 : 2
------
-1
-=====
-if false
------
-false if 1 : 2
------
-2
-=====
-if else .
------
-true if 1 : .
+true ? 1 : 2
 -----
 1
 =====
-if conditional eval
+? false
 -----
-do [a = 1, true if 1 : a = 2, a]
+false ? 1 : 2
+-----
+2
+=====
+? else .
+-----
+true ? 1 : .
 -----
 1
 =====
-if recursive
+? conditional eval
 -----
-true if (false if 1 : 2) : 3
+do [a = 1, true ? 1 : a = 2, a]
+-----
+1
+=====
+? recursive
+-----
+true ? (false ? 1 : 2) : 3
 -----
 2
 =====
-if break
+? break
 -----
-true if [1, true break 2, 3] : 4
------
-2
-=====
-if continue
------
-true if [1, true continue 2, 3] : 4
+true ? [1, true break 2, 3] : 4
 -----
 2
 =====
-if list
+? continue
 -----
-true if [[]] : .
+true ? [1, true continue 2, 3] : 4
+-----
+2
+=====
+? list
+-----
+true ? [[]] : .
 -----
 []
 =====
@@ -216,12 +216,12 @@ do [
 -----
 6
 =====
-loop if
+loop ?
 -----
 do [
     a = 42,
     b = 24,
-    (a <> b) loop (a > b) if (
+    (a <> b) loop (a > b) ? (
         a = a - b
     ) : (
         b = b - a

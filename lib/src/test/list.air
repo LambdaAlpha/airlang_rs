@@ -65,7 +65,7 @@ do [
     b = any ; list,
     lb = b list.length .,
     (lb == 0) break true,
-    (la < lb) if [
+    (la < lb) ? [
         t = a,
         a = b,
         b = t,
@@ -75,7 +75,7 @@ do [
     ] : .,
     a1 = a,
     d = la - lb,
-    i = (d == 0) if 0 : (d + (any ; integer) % d) % d,
+    i = (d == 0) ? 0 : (d + (any ; integer) % d) % d,
     c1 = a list.get i : i + lb,
     c2 = a list.set_many i : b,
     b1 = a list.get i : i + lb,

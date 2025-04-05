@@ -2,8 +2,8 @@ new
 -----
 do [
     f = any ; .,
-    i1 = '?' ; f,
-    i2 = ?(f),
+    i1 = '!' ; f,
+    i2 = !(f),
     i1 == i2
 ]
 -----
@@ -13,7 +13,7 @@ new get
 -----
 do [
     f = any ; .,
-    i = '?' ; f,
+    i = '!' ; f,
     f == i inverse.function .
 ]
 -----
@@ -34,7 +34,7 @@ set return
 -----
 do [
     f1 = any ; .,
-    i = ?(f1),
+    i = !(f1),
     f2 = i inverse.set_function any ; .,
     f1 == f2
 ]

@@ -5,13 +5,13 @@ do [
     composite = [':', ';', '!', '?'],
     i = 3 + (any ; integer) % 4,
     a = atom list.get i,
-    (any ; bit) loop (any ; bit) if [
+    (any ; bit) loop (any ; bit) ? [
         i = 3 + (any ; integer) % 4,
         b = atom list.get i,
         i = (4 + (any ; integer) % 4) % 4,
         c = composite list.get i,
         a = call.apply ; c ';' a : b,
-    ] : (any ; bit) if [
+    ] : (any ; bit) ? [
         i = 3 + (any ; integer) % 4,
         b = atom list.get i,
         a = [a, b],
@@ -46,9 +46,9 @@ parse "\"1\""
 =====
 parse class
 -----
-parse "!(1)"
+parse "~(1)"
 -----
-!(1)
+~(1)
 =====
 generate text
 -----
@@ -58,6 +58,6 @@ generate "1"
 =====
 generate class
 -----
-generate ; !(1)
+generate ; ~(1)
 -----
-"!(1)"
+"~(1)"

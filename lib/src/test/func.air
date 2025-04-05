@@ -120,15 +120,15 @@ a ; b
 =====
 form !
 -----
-form. ; !(a)
+form. ; ~(a)
 -----
-!(a)
+~(a)
 =====
 form ?
 -----
-form. ; ?(a)
+form. ; !(a)
 -----
-?(a)
+!(a)
 =====
 form primitive
 -----
@@ -357,39 +357,39 @@ mode primitive class id
 -----
 do [
     f = mode ; {class : id, default : eval*, primitive : true},
-    f [!(.a)]
+    f [~(.a)]
 ]
 -----
-[!(.a)]
+[~(.a)]
 =====
 mode primitive class form
 -----
 do [
     b = 1,
     f = mode ; {class : form, default : eval*, primitive : true},
-    f [!(^b)]
+    f [~(^b)]
 ]
 -----
-[!(1)]
+[~(1)]
 =====
 mode primitive inverse id
 -----
 do [
     f = mode ; {inverse : id, default : eval*, primitive : true},
-    f [?(.a)]
+    f [!(.a)]
 ]
 -----
-[?(.a)]
+[!(.a)]
 =====
 mode primitive inverse form
 -----
 do [
     b = 1,
     f = mode ; {inverse : form, default : eval*, primitive : true},
-    f [?(b)]
+    f [!(b)]
 ]
 -----
-[?(1)]
+[!(1)]
 =====
 mode primitive abstract form
 -----
@@ -559,8 +559,8 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
-    class : !(form.),
-    inverse : ?(form.),
+    class : ~(form.),
+    inverse : !(form.),
     abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
@@ -569,8 +569,8 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
-    class : !(form.),
-    inverse : ?(form.),
+    class : ~(form.),
+    inverse : !(form.),
     abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,

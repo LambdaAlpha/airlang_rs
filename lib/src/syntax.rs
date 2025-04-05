@@ -34,16 +34,12 @@ pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
 
-pub(crate) const PAIR_CHAR: char = ':';
-pub(crate) const PAIR: &str = concatcp!(PAIR_CHAR);
+pub(crate) const PAIR: &str = ":";
 pub(crate) const CHANGE: &str = "->";
-pub(crate) const CALL_CHAR: char = ';';
-pub(crate) const CALL: &str = concatcp!(CALL_CHAR);
+pub(crate) const CALL: &str = ";";
 
-pub(crate) const CLASS_CHAR: char = '!';
-pub(crate) const CLASS: &str = concatcp!(CLASS_CHAR);
-pub(crate) const INVERSE_CHAR: char = '?';
-pub(crate) const INVERSE: &str = concatcp!(INVERSE_CHAR);
+pub(crate) const CLASS: &str = "~";
+pub(crate) const INVERSE: &str = "!";
 pub(crate) const ABSTRACT: &str = "@";
 
 pub(crate) const INT: &str = "integer";

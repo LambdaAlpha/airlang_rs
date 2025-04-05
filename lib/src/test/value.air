@@ -168,13 +168,13 @@ call
 =====
 type class
 -----
-do [a = id ; !(f), a type .]
+do [a = id ; ~(f), a type .]
 -----
 class
 =====
 type inverse
 -----
-do [a = id ; ?(f), a type .]
+do [a = id ; !(f), a type .]
 -----
 inverse
 =====
@@ -264,13 +264,13 @@ true
 =====
 == class
 -----
-do [a = id ; !(f), b = id ; !(f), (a == b) and not ; a == .]
+do [a = id ; ~(f), b = id ; ~(f), (a == b) and not ; a == .]
 -----
 true
 =====
 == inverse
 -----
-do [a = id ; ?(f), b = id ; ?(f), (a == b) and not ; a == .]
+do [a = id ; !(f), b = id ; !(f), (a == b) and not ; a == .]
 -----
 true
 =====

@@ -101,7 +101,7 @@ where Ctx: CtxMeta<'a> {
 }
 
 fn if1() -> Named<FuncVal> {
-    let id = "if";
+    let id = "?";
     let f = MutDispatcher::new(
         fn_if::<FreeCtx>,
         |ctx, val| fn_if(ctx, val),

@@ -1,23 +1,23 @@
 atomic
 -----
-?(a)
+!(a)
 =====
 recursive
 -----
-?(?(a))
+!(!(a))
 =====
 non-atomic
 -----
-?(.[a b])
+!(.[a b])
 =====
 list item
 -----
-[?(a)]
+[!(a)]
 =====
 map key
 -----
-{?(a) : b}
+{!(a) : b}
 =====
 map value
 -----
-{a : ?(b)}
+{a : !(b)}
