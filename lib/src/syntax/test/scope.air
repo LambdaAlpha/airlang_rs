@@ -70,22 +70,6 @@ call ctx two
 -----
 ;(a b)
 =====
-optimize ctx
------
-!(a b c d e)
-=====
-optimize ctx two
------
-!(a b)
-=====
-solve ctx
------
-?(a b c d e)
-=====
-solve ctx two
------
-?(a b)
-=====
 change ctx
 -----
 ->(a b c d e)
@@ -150,14 +134,6 @@ tag struct pair
 -----
 :(#t(a))
 =====
-tag struct optimize
------
-!(#t(a))
-=====
-tag struct solve
------
-?(#t(a))
-=====
 tag struct change
 -----
 ->(#t(a))
@@ -184,4 +160,4 @@ tag escape by direction ctx
 =====
 tag escape by struct ctx
 -----
-#t(?(a b c))
+#t(:(a b c))

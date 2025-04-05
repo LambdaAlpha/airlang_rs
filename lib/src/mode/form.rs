@@ -65,12 +65,12 @@ impl ByVal<Val> for Form {
 
     fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_optimize(self, self, ctx, optimize)
+        FormCore::transform_optimize(self, ctx, optimize)
     }
 
     fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_solve(self, self, ctx, solve)
+        FormCore::transform_solve(self, ctx, solve)
     }
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val

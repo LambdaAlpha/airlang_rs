@@ -1,47 +1,23 @@
-optimize
+atomic
 -----
-a ! b
+!(a)
 =====
-optimize ctx
+recursive
 -----
-!(a b)
+!(!(a))
 =====
-optimize optimize
+non-atomic
 -----
-a ! b ! c
-=====
-optimize other
------
-a ! b : c
-=====
-other optimize
------
-a : b ! c
-=====
-optimize infix
------
-a ! b c d
-=====
-infix optimize
------
-a b c ! d
-=====
-non-atomic first
------
-{a : b} ! c
-=====
-non-atomic second
------
-a ! {b : c}
+!(.[a b])
 =====
 list item
 -----
-[a ! b]
+[!(a)]
 =====
 map key
 -----
-{(a ! b) : c}
+{!(a) : b}
 =====
 map value
 -----
-{a : b ! c}
+{a : !(b)}

@@ -12,11 +12,11 @@ a -> b -> c
 =====
 change other
 -----
-a -> b ? c
+a -> b ; c
 =====
 other change
 -----
-a ? b -> c
+a ; b -> c
 =====
 change infix
 -----

@@ -29,8 +29,8 @@ pub struct PrimMode {
     pub pair: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
-    pub optimize: Option<CodeMode>,
-    pub solve: Option<CodeMode>,
+    pub optimize: Option<DataMode>,
+    pub solve: Option<DataMode>,
     pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
@@ -97,10 +97,7 @@ impl ByVal<Val> for PrimMode {
     where Ctx: CtxMeta<'a> {
         match self.optimize {
             None => Id.transform_optimize(ctx, optimize),
-            Some(mode) => match mode {
-                CodeMode::Form => FormCore::transform_optimize(self, self, ctx, optimize),
-                CodeMode::Eval => EvalCore::transform_optimize(self, self, ctx, optimize),
-            },
+            Some(_) => FormCore::transform_optimize(self, ctx, optimize),
         }
     }
 
@@ -108,10 +105,7 @@ impl ByVal<Val> for PrimMode {
     where Ctx: CtxMeta<'a> {
         match self.solve {
             None => Id.transform_solve(ctx, solve),
-            Some(mode) => match mode {
-                CodeMode::Form => FormCore::transform_solve(self, self, ctx, solve),
-                CodeMode::Eval => EvalCore::transform_solve(self, self, ctx, solve),
-            },
+            Some(_) => FormCore::transform_solve(self, ctx, solve),
         }
     }
 
@@ -158,8 +152,8 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
-                optimize: Some(CodeMode::from(mode)),
-                solve: Some(CodeMode::from(mode)),
+                optimize: Some(DataMode::from(mode)),
+                solve: Some(DataMode::from(mode)),
                 abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),

@@ -493,17 +493,10 @@ impl ParseMode<Val> for OptimizeMode {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Pair(pair) => {
-                let pair = Pair::from(pair);
-                let func = ParseMode::parse(pair.first, default)?;
-                let input = ParseMode::parse(pair.second, default)?;
-                Some(OptimizeMode { code: CodeMode::Form, optimize: Optimize::new(func, input) })
-            }
             Val::Optimize(optimize) => {
                 let optimize = Optimize::from(optimize);
                 let func = ParseMode::parse(optimize.func, default)?;
-                let input = ParseMode::parse(optimize.input, default)?;
-                Some(OptimizeMode { code: CodeMode::Eval, optimize: Optimize::new(func, input) })
+                Some(OptimizeMode { optimize: Optimize::new(func) })
             }
             _ => None,
         }
@@ -513,11 +506,7 @@ impl ParseMode<Val> for OptimizeMode {
 impl GenerateMode<Val> for OptimizeMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
         let func = GenerateMode::generate(&self.optimize.func, default);
-        let input = GenerateMode::generate(&self.optimize.input, default);
-        match self.code {
-            CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
-            CodeMode::Eval => Val::Optimize(Optimize::new(func, input).into()),
-        }
+        Val::Optimize(Optimize::new(func).into())
     }
 }
 
@@ -525,17 +514,10 @@ impl ParseMode<Val> for SolveMode {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Pair(pair) => {
-                let pair = Pair::from(pair);
-                let func = ParseMode::parse(pair.first, default)?;
-                let output = ParseMode::parse(pair.second, default)?;
-                Some(SolveMode { code: CodeMode::Form, solve: Solve::new(func, output) })
-            }
             Val::Solve(solve) => {
                 let solve = Solve::from(solve);
                 let func = ParseMode::parse(solve.func, default)?;
-                let output = ParseMode::parse(solve.output, default)?;
-                Some(SolveMode { code: CodeMode::Eval, solve: Solve::new(func, output) })
+                Some(SolveMode { solve: Solve::new(func) })
             }
             _ => None,
         }
@@ -545,11 +527,7 @@ impl ParseMode<Val> for SolveMode {
 impl GenerateMode<Val> for SolveMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
         let func = GenerateMode::generate(&self.solve.func, default);
-        let output = GenerateMode::generate(&self.solve.output, default);
-        match self.code {
-            CodeMode::Form => Val::Pair(Pair::new(func, output).into()),
-            CodeMode::Eval => Val::Solve(Solve::new(func, output).into()),
-        }
+        Val::Solve(Solve::new(func).into())
     }
 }
 

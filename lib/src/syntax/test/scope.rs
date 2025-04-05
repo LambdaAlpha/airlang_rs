@@ -5,20 +5,14 @@ use crate::syntax::{
         change,
         infix_call,
         infix_change,
-        infix_optimize,
         infix_pair,
-        infix_solve,
         list,
         map,
-        optimize,
         pair,
-        solve,
         symbol,
         tag_call,
         tag_change,
-        tag_optimize,
         tag_pair,
-        tag_solve,
     },
 };
 
@@ -60,14 +54,6 @@ pub fn expected() -> Vec<Repr> {
         pair(symbol("a"), symbol("b")),
         infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         call(symbol("a"), symbol("b")),
-        infix_optimize(
-            symbol("a"),
-            symbol("b"),
-            infix_optimize(symbol("c"), symbol("d"), symbol("e")),
-        ),
-        optimize(symbol("a"), symbol("b")),
-        infix_solve(symbol("a"), symbol("b"), infix_solve(symbol("c"), symbol("d"), symbol("e"))),
-        solve(symbol("a"), symbol("b")),
         infix_change(symbol("a"), symbol("b"), infix_change(symbol("c"), symbol("d"), symbol("e"))),
         change(symbol("a"), symbol("b")),
         call(symbol("a"), call(symbol("b"), symbol("c"))),
@@ -88,8 +74,6 @@ pub fn expected() -> Vec<Repr> {
             symbol("e"),
         ]),
         tag_pair("t", vec![symbol("a")]),
-        tag_optimize("t", vec![symbol("a")]),
-        tag_solve("t", vec![symbol("a")]),
         tag_change("t", vec![symbol("a")]),
         tag_call("t", vec![
             list(vec![tag_call("t", vec![symbol("a")]), tag_call("t", vec![symbol("b")])]),
@@ -109,6 +93,6 @@ pub fn expected() -> Vec<Repr> {
             symbol("d"),
             symbol("e"),
         )]),
-        tag_call("t", vec![infix_solve(symbol("a"), symbol("b"), symbol("c"))]),
+        tag_call("t", vec![infix_pair(symbol("a"), symbol("b"), symbol("c"))]),
     ]
 }

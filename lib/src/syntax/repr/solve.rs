@@ -3,4 +3,4 @@ use crate::{
     syntax::Repr,
 };
 
-pub type SolveRepr = Solve<Repr, Repr>;
+pub type SolveRepr = Solve<Repr>;

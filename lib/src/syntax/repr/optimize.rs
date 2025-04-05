@@ -3,4 +3,4 @@ use crate::{
     syntax::Repr,
 };
 
-pub type OptimizeRepr = Optimize<Repr, Repr>;
+pub type OptimizeRepr = Optimize<Repr>;

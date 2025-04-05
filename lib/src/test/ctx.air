@@ -214,15 +214,15 @@ do [(a b c) = 1 2 3, [a, b, c]]
 =====
 = destruct optimize
 -----
-do [(f ! a) = id ; 1 ! 2, [f, a]]
+do [!(f) = !(1), f]
 -----
-[1, 2]
+1
 =====
 = destruct solve
 -----
-do [(f ? b) = 1 ? 2, [f, b]]
+do [?(f) = ?(1), f]
 -----
-[1, 2]
+1
 =====
 = destruct list equal length
 -----

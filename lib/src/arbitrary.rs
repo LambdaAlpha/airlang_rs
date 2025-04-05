@@ -210,12 +210,12 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_optimize(rng: &mut SmallRng, depth: usize) -> Optimize<Val, Val> {
-    Optimize::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_optimize(rng: &mut SmallRng, depth: usize) -> Optimize<Val> {
+    Optimize::new(any_val(rng, depth))
 }
 
-pub(crate) fn any_solve(rng: &mut SmallRng, depth: usize) -> Solve<Val, Val> {
-    Solve::new(any_val(rng, depth), any_val(rng, depth))
+pub(crate) fn any_solve(rng: &mut SmallRng, depth: usize) -> Solve<Val> {
+    Solve::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val> {
@@ -348,23 +348,19 @@ impl Arbitrary for CallMode {
 
 impl Arbitrary for OptimizeMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let input = Arbitrary::any(rng, new_depth);
-        let optimize = Optimize::new(func, input);
-        OptimizeMode { code, optimize }
+        let optimize = Optimize::new(func);
+        OptimizeMode { optimize }
     }
 }
 
 impl Arbitrary for SolveMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let output = Arbitrary::any(rng, new_depth);
-        let solve = Solve::new(func, output);
-        SolveMode { code, solve }
+        let solve = Solve::new(func);
+        SolveMode { solve }
     }
 }
 

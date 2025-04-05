@@ -1,4 +1,6 @@
 use crate::{
+    Abstract,
+    AbstractMode,
     Call,
     CallMode,
     Change,
@@ -62,6 +64,14 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
+    pub fn change_mode(from: Option<Mode>, to: Option<Mode>) -> Option<Mode> {
+        let mode = CompMode {
+            change: Some(ChangeMode { change: Change::new(from, to) }),
+            ..CompMode::from(Self::default_uni_mode())
+        };
+        Some(Mode::Comp(Box::new(mode)))
+    }
+
     pub fn call_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
             call: Some(CallMode { code, call: Call::new(func, input) }),
@@ -70,25 +80,25 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn optimize_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
+    pub fn optimize_mode(func: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            optimize: Some(OptimizeMode { code, optimize: Optimize::new(func, input) }),
+            optimize: Some(OptimizeMode { optimize: Optimize::new(func) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn solve_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
+    pub fn solve_mode(func: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            solve: Some(SolveMode { code, solve: Solve::new(func, input) }),
+            solve: Some(SolveMode { solve: Solve::new(func) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn change_mode(from: Option<Mode>, to: Option<Mode>) -> Option<Mode> {
+    pub fn abstract_mode(value: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            change: Some(ChangeMode { change: Change::new(from, to) }),
+            abstract1: Some(AbstractMode { abstract1: Abstract::new(value) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))

@@ -2,10 +2,9 @@ new
 -----
 do [
     f = any ; .,
-    o = any ; .,
-    a1 = f '?' o,
-    a2 = form* ; f ? o,
-    a1 == a2
+    i1 = '?' ; f,
+    i2 = ?(f),
+    i1 == i2
 ]
 -----
 true
@@ -14,9 +13,8 @@ new get
 -----
 do [
     f = any ; .,
-    o = any ; .,
-    a = f '?' o,
-    (f == a solve.function .) and (o == a solve.output .)
+    i = '?' ; f,
+    f == i solve.function .
 ]
 -----
 true
@@ -24,12 +22,10 @@ true
 set get
 -----
 do [
-    a = any ; solve,
+    i = any ; solve,
     f = any ; .,
-    o = any ; .,
-    a solve.set_function f,
-    a solve.set_output o,
-    (f == a solve.function .) and (o == a solve.output .)
+    i solve.set_function f,
+    f == i solve.function .
 ]
 -----
 true
@@ -38,11 +34,9 @@ set return
 -----
 do [
     f1 = any ; .,
-    o1 = any ; .,
-    a = f1 '?' o1,
-    f2 = a solve.set_function any ; .,
-    o2 = a solve.set_output any ; .,
-    (f1 == f2) and o1 == o2
+    i = ?(f1),
+    f2 = i solve.set_function any ; .,
+    f1 == f2
 ]
 -----
 true

@@ -120,15 +120,15 @@ a ; b
 =====
 form !
 -----
-form. ; a ! b
+form. ; !(a)
 -----
-a ! b
+!(a)
 =====
 form ?
 -----
-form. ; a ? b
+form. ; ?(a)
 -----
-a ? b
+?(a)
 =====
 form primitive
 -----
@@ -357,49 +357,39 @@ mode primitive optimize id
 -----
 do [
     f = mode ; {optimize : id, default : eval*, primitive : true},
-    f [.a ! ^b]
+    f [!(.a)]
 ]
 -----
-[.a ! ^b]
+[!(.a)]
 =====
 mode primitive optimize form
 -----
 do [
     b = 1,
     f = mode ; {optimize : form, default : eval*, primitive : true},
-    f [.a ! ^b]
+    f [!(^b)]
 ]
 -----
-[a ! 1]
-=====
-mode primitive optimize eval
------
-do [
-    b = 1,
-    f = mode ; {optimize : eval, default : form*, primitive : true},
-    f [.a ! b]
-]
------
-[1]
+[!(1)]
 =====
 mode primitive solve id
 -----
 do [
     f = mode ; {solve : id, default : eval*, primitive : true},
-    f [.a ? ^b]
+    f [?(.a)]
 ]
 -----
-[.a ? ^b]
+[?(.a)]
 =====
 mode primitive solve form
 -----
 do [
     b = 1,
     f = mode ; {solve : form, default : eval*, primitive : true},
-    f [.a ? b]
+    f [?(b)]
 ]
 -----
-[a ? 1]
+[?(1)]
 =====
 mode primitive abstract form
 -----
@@ -569,6 +559,8 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
+    optimize : !(form.),
+    solve : ?(form.),
     abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
@@ -577,6 +569,8 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
+    optimize : !(form.),
+    solve : ?(form.),
     abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,
@@ -588,6 +582,8 @@ function.represent ; mode ; {
     symbol : .^,
     pair : form,
     call : eval,
+    optimize : form,
+    solve : form,
     abstract : form,
     map : form,
     primitive : true,
@@ -597,6 +593,8 @@ function.represent ; mode ; {
     symbol : ^,
     pair : form,
     call : eval,
+    optimize : form,
+    solve : form,
     abstract : form,
     map : form,
     primitive : true,

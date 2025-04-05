@@ -46,9 +46,9 @@ parse "\"1\""
 =====
 parse optimize
 -----
-parse "1 ! 2"
+parse "!(1)"
 -----
-1 ! 2
+!(1)
 =====
 generate text
 -----
@@ -58,6 +58,6 @@ generate "1"
 =====
 generate optimize
 -----
-generate ; id ; 1 ! 2
+generate ; !(1)
 -----
-"1 ! 2"
+"!(1)"

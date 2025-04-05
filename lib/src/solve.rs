@@ -1,13 +1,12 @@
 use std::hash::Hash;
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Solve<A, B> {
+pub struct Solve<A> {
     pub func: A,
-    pub output: B,
 }
 
-impl<A, B> Solve<A, B> {
-    pub fn new(func: A, output: B) -> Self {
-        Self { func, output }
+impl<A> Solve<A> {
+    pub fn new(func: A) -> Self {
+        Self { func }
     }
 }

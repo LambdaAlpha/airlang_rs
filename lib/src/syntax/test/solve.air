@@ -1,47 +1,23 @@
-solve
+atomic
 -----
-a ? b
+?(a)
 =====
-solve ctx
+recursive
 -----
-?(a b)
+?(?(a))
 =====
-solve solve
+non-atomic
 -----
-a ? b ? c
-=====
-solve other
------
-a ? b : c
-=====
-other solve
------
-a : b ? c
-=====
-solve infix
------
-a ? b c d
-=====
-infix solve
------
-a b c ? d
-=====
-non-atomic first
------
-.[a b] ? c
-=====
-non-atomic second
------
-a ? .[b c]
+?(.[a b])
 =====
 list item
 -----
-[a ? b]
+[?(a)]
 =====
 map key
 -----
-{(a ? b) : c}
+{?(a) : b}
 =====
 map value
 -----
-{a : b ? c}
+{a : ?(b)}

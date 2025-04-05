@@ -183,19 +183,13 @@ impl GetCtxAccess for CallMode {
 
 impl GetCtxAccess for OptimizeMode {
     fn ctx_access(&self) -> CtxAccess {
-        if matches!(self.code, CodeMode::Eval) {
-            return CtxAccess::Mut;
-        }
-        self.optimize.func.ctx_access() & self.optimize.input.ctx_access()
+        self.optimize.func.ctx_access()
     }
 }
 
 impl GetCtxAccess for SolveMode {
     fn ctx_access(&self) -> CtxAccess {
-        if matches!(self.code, CodeMode::Eval) {
-            return CtxAccess::Mut;
-        }
-        self.solve.func.ctx_access() & self.solve.output.ctx_access()
+        self.solve.func.ctx_access()
     }
 }
 

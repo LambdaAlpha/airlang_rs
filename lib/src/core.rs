@@ -26,10 +26,6 @@ use crate::{
     Symbol,
     Val,
     abstract1::Abstract,
-    advisor::{
-        optimize,
-        solve,
-    },
     ctx::{
         default::DefaultCtx,
         map::CtxValue,
@@ -127,30 +123,26 @@ impl FormCore {
         Val::Call(Call::new(func, input).into())
     }
 
-    pub(crate) fn transform_optimize<'a, Ctx, Func, Input>(
-        func: &Func, input: &Input, mut ctx: Ctx, optimize: OptimizeVal,
+    pub(crate) fn transform_optimize<'a, Ctx, Func>(
+        func: &Func, mut ctx: Ctx, optimize: OptimizeVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Input: Transformer<Val, Val>, {
+        Func: Transformer<Val, Val>, {
         let optimize = Optimize::from(optimize);
         let func = func.transform(ctx.reborrow(), optimize.func);
-        let input = input.transform(ctx, optimize.input);
-        Val::Optimize(Optimize::new(func, input).into())
+        Val::Optimize(Optimize::new(func).into())
     }
 
-    pub(crate) fn transform_solve<'a, Ctx, Func, Output>(
-        func: &Func, output: &Output, mut ctx: Ctx, solve: SolveVal,
+    pub(crate) fn transform_solve<'a, Ctx, Func>(
+        func: &Func, mut ctx: Ctx, solve: SolveVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Output: Transformer<Val, Val>, {
+        Func: Transformer<Val, Val>, {
         let solve = Solve::from(solve);
         let func = func.transform(ctx.reborrow(), solve.func);
-        let output = output.transform(ctx, solve.output);
-        Val::Solve(Solve::new(func, output).into())
+        Val::Solve(Solve::new(func).into())
     }
 
     pub(crate) fn transform_abstract<'a, Ctx, Value>(
@@ -265,6 +257,8 @@ impl EvalCore {
                 let input = func.mode().call.transform(ctx.reborrow(), input);
                 func.transform(ctx, input)
             }
+            Val::Optimize(optimize) => Self::transform_optimize(input_trans, ctx, optimize, input),
+            Val::Solve(solve) => Self::transform_solve(input_trans, ctx, solve, input),
             Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
                 let input = Self::call_ref_eval_input(func, ctx, is_const, input);
                 Self::call_ref(func, ctx, is_const, input)
@@ -345,17 +339,16 @@ impl EvalCore {
         output
     }
 
-    // f ! v evaluates to . or any i that (f ; i) and (f ; v) always evaluates to the same output
-    pub(crate) fn transform_optimize<'a, Ctx, Func, Input>(
-        func_trans: &Func, input_trans: &Input, mut ctx: Ctx, optimize: OptimizeVal,
+    // !(f) ; v evaluates to . or any i that (f ; i) and (f ; v) always evaluates to the same output
+    pub(crate) fn transform_optimize<'a, Ctx, Input>(
+        input_trans: &Input, ctx: Ctx, optimize: OptimizeVal, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
         Input: Transformer<Val, Val>, {
         let optimize = Optimize::from(optimize);
-        let func = func_trans.transform(ctx.reborrow(), optimize.func);
-        Self::eval_input_then_optimize(input_trans, ctx, func, optimize.input)
+        let func = optimize.func;
+        Self::eval_input_then_optimize(input_trans, ctx, func, input)
     }
 
     pub(crate) fn eval_input_then_optimize<'a, Ctx, Input>(
@@ -364,11 +357,16 @@ impl EvalCore {
     where
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>, {
-        if let Val::Func(func) = func {
-            let input = func.mode().optimize.transform(ctx.reborrow(), input);
-            Self::optimize_func(ctx, func, input)
-        } else {
-            input_trans.transform(ctx, input)
+        match func {
+            Val::Func(func) => {
+                let input = func.mode().optimize.transform(ctx.reborrow(), input);
+                Self::optimize_func(ctx, func, input)
+            }
+            func => {
+                let input = input_trans.transform(ctx, input);
+                let func = Val::Optimize(Optimize::new(func).into());
+                Val::Call(Call::new(func, input).into())
+            }
         }
     }
 
@@ -386,84 +384,73 @@ impl EvalCore {
         }
     }
 
-    pub(crate) fn optimize<'a, Ctx>(ctx: Ctx, func: Val, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        if let Val::Func(func) = func { Self::optimize_func(ctx, func, input) } else { input }
-    }
-
     pub(crate) fn optimize_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
-        let question = Optimize::new(Val::Func(func.clone()), input.clone());
-        let question = Val::Optimize(question.into());
+        let optimize = Val::Optimize(Optimize::new(Val::Func(func.clone())).into());
+        let question = Val::Call(Call::new(optimize, input.clone()).into());
         if let Some(answer) = Self::call_advisor(ctx.reborrow(), question) {
             if answer != input {
                 return answer;
             }
         }
-        optimize(ctx, func, input)
+        crate::advisor::optimize(ctx, func, input)
     }
 
-    // f ? v evaluates to . or any i that (f ; i) always evaluates to v
-    pub(crate) fn transform_solve<'a, Ctx, Func, Output>(
-        func_trans: &Func, output_trans: &Output, mut ctx: Ctx, solve: SolveVal,
+    // ?(f) ; v evaluates to . or any i that (f ; i) always evaluates to v
+    pub(crate) fn transform_solve<'a, Ctx, Input>(
+        input_trans: &Input, ctx: Ctx, solve: SolveVal, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Output: Transformer<Val, Val>, {
+        Input: Transformer<Val, Val>, {
         let solve = Solve::from(solve);
-        let func = func_trans.transform(ctx.reborrow(), solve.func);
-        Self::eval_output_then_solve(output_trans, ctx, func, solve.output)
+        let func = solve.func;
+        Self::eval_input_then_solve(input_trans, ctx, func, input)
     }
 
-    pub(crate) fn eval_output_then_solve<'a, Ctx, Output>(
-        output_trans: &Output, mut ctx: Ctx, func: Val, output: Val,
+    pub(crate) fn eval_input_then_solve<'a, Ctx, Input>(
+        input_trans: &Input, mut ctx: Ctx, func: Val, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Output: Transformer<Val, Val>, {
-        if let Val::Func(func) = func {
-            let output = func.mode().solve.transform(ctx.reborrow(), output);
-            Self::solve_func(ctx, func, output)
-        } else {
-            let output = output_trans.transform(ctx, output);
-            Val::Solve(Solve::new(func, output).into())
+        Input: Transformer<Val, Val>, {
+        match func {
+            Val::Func(func) => {
+                let input = func.mode().solve.transform(ctx.reborrow(), input);
+                Self::solve_func(ctx, func, input)
+            }
+            func => {
+                let input = input_trans.transform(ctx, input);
+                let func = Val::Solve(Solve::new(func).into());
+                Val::Call(Call::new(func, input).into())
+            }
         }
     }
 
     #[allow(dead_code)]
-    pub(crate) fn solve_eval_output<'a, Ctx, Output>(
-        output_trans: &Output, ctx: Ctx, func: &Val, output: Val,
+    pub(crate) fn solve_eval_input<'a, Ctx, Input>(
+        input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
-        Output: Transformer<Val, Val>, {
+        Input: Transformer<Val, Val>, {
         if let Val::Func(f) = func {
-            f.mode().solve.transform(ctx, output)
+            f.mode().solve.transform(ctx, input)
         } else {
-            output_trans.transform(ctx, output)
+            input_trans.transform(ctx, input)
         }
     }
 
-    pub(crate) fn solve<'a, Ctx>(ctx: Ctx, func: Val, output: Val) -> Val
+    pub(crate) fn solve_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
-        if let Val::Func(func) = func {
-            Self::solve_func(ctx, func, output)
-        } else {
-            Val::Solve(Solve::new(func, output).into())
-        }
-    }
-
-    pub(crate) fn solve_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, output: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        let question = Solve::new(Val::Func(func.clone()), output.clone());
-        let question = Val::Solve(question.into());
+        let solve = Val::Solve(Solve::new(Val::Func(func.clone())).into());
+        let question = Val::Call(Call::new(solve, input.clone()).into());
         if let Some(answer) = Self::call_advisor(ctx.reborrow(), question) {
             if !answer.is_unit() {
                 return answer;
             }
         }
-        solve(ctx, func, output)
+        crate::advisor::solve(ctx, func, input)
     }
 
     pub(crate) fn call_advisor<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>

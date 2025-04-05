@@ -110,12 +110,12 @@ fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn optimize(func: Repr, value: Repr) -> Repr {
-    Repr::Optimize(Box::new(OptimizeRepr::new(func, value)))
+fn optimize(func: Repr) -> Repr {
+    Repr::Optimize(Box::new(OptimizeRepr::new(func)))
 }
 
-fn solve(func: Repr, output: Repr) -> Repr {
-    Repr::Solve(Box::new(SolveRepr::new(func, output)))
+fn solve(func: Repr) -> Repr {
+    Repr::Solve(Box::new(SolveRepr::new(func)))
 }
 
 fn abstract1(value: Repr) -> Repr {
@@ -148,18 +148,6 @@ fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn tag_optimize(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
-    let input = Repr::List(v.into());
-    Repr::Optimize(Box::new(OptimizeRepr::new(func, input)))
-}
-
-fn tag_solve(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
-    let output = Repr::List(v.into());
-    Repr::Solve(Box::new(SolveRepr::new(func, output)))
-}
-
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
@@ -173,17 +161,6 @@ fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
-}
-
-fn infix_optimize(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Optimize(Box::new(OptimizeRepr::new(
-        middle,
-        Repr::Pair(Box::new(PairRepr::new(left, right))),
-    )))
-}
-
-fn infix_solve(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Solve(Box::new(SolveRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
 }
 
 fn test_parse(

@@ -60,8 +60,8 @@ pub(crate) enum GenRepr<'a> {
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
     Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
-    Optimize(Box<Optimize<GenRepr<'a>, GenRepr<'a>>>),
-    Solve(Box<Solve<GenRepr<'a>, GenRepr<'a>>>),
+    Optimize(Box<Optimize<GenRepr<'a>>>),
+    Solve(Box<Solve<GenRepr<'a>>>),
     Abstract(Box<Abstract<GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
@@ -298,20 +298,18 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
     }
 }
 
-fn gen_optimize(ctx: GenCtx, optimize: Optimize<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, optimize.func, s);
-    s.push(' ');
+fn gen_optimize(ctx: GenCtx, optimize: Optimize<GenRepr>, s: &mut String) {
     s.push_str(OPTIMIZE);
-    s.push(' ');
-    gen1(ctx, optimize.input, s);
+    s.push(SCOPE_LEFT);
+    gen1(ctx, optimize.func, s);
+    s.push(SCOPE_RIGHT);
 }
 
-fn gen_solve(ctx: GenCtx, solve: Solve<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, solve.func, s);
-    s.push(' ');
+fn gen_solve(ctx: GenCtx, solve: Solve<GenRepr>, s: &mut String) {
     s.push_str(SOLVE);
-    s.push(' ');
-    gen1(ctx, solve.output, s);
+    s.push(SCOPE_LEFT);
+    gen1(ctx, solve.func, s);
+    s.push(SCOPE_RIGHT);
 }
 
 fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr>, s: &mut String) {
@@ -338,14 +336,7 @@ fn gen_scope(ctx: GenCtx, repr: GenRepr, s: &mut String) {
 }
 
 fn is_composite(repr: &GenRepr) -> bool {
-    matches!(
-        repr,
-        GenRepr::Pair(_)
-            | GenRepr::Call(_)
-            | GenRepr::Optimize(_)
-            | GenRepr::Solve(_)
-            | GenRepr::Change(_)
-    )
+    matches!(repr, GenRepr::Pair(_) | GenRepr::Change(_) | GenRepr::Call(_))
 }
 
 fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {

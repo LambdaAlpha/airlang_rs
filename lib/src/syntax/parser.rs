@@ -114,8 +114,8 @@ pub(crate) trait ParseRepr:
     + From<Pair<Self, Self>>
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
-    + From<Optimize<Self, Self>>
-    + From<Solve<Self, Self>>
+    + From<Optimize<Self>>
+    + From<Solve<Self>>
     + From<Abstract<Self>>
     + From<List<Self>>
     + Eq
@@ -187,8 +187,6 @@ enum Struct {
     Pair,
     Change,
     Call,
-    Optimize,
-    Solve,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -356,12 +354,12 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
+            OPTIMIZE => optimize(ctx).parse_next(i),
+            SOLVE => solve(ctx).parse_next(i),
             ABSTRACT => abstract1(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
-            OPTIMIZE => scope(ctx.esc_struct(Struct::Optimize)).parse_next(i),
-            SOLVE => scope(ctx.esc_struct(Struct::Solve)).parse_next(i),
             LEFT => scope(ctx.esc_direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.esc_direction(Direction::Right)).parse_next(i),
             ARITY_2 => scope(ctx.esc_arity(Arity::Two)).parse_next(i),
@@ -451,8 +449,6 @@ fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
         Struct::Pair => T::from(Pair::new(left, right)),
         Struct::Change => T::from(Change::new(left, right)),
         Struct::Call => T::from(Call::new(left, right)),
-        Struct::Optimize => T::from(Optimize::new(left, right)),
-        Struct::Solve => T::from(Solve::new(left, right)),
     }
 }
 
@@ -502,8 +498,6 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
             PAIR => return T::from(Pair::new(left, right)),
             CHANGE => return T::from(Change::new(left, right)),
             CALL => return T::from(Call::new(left, right)),
-            OPTIMIZE => return T::from(Optimize::new(left, right)),
-            SOLVE => return T::from(Solve::new(left, right)),
             _ => T::from(s),
         },
         Token::Default(middle) => middle,
@@ -511,6 +505,14 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let pair = Pair::new(left, right);
     let pair = T::from(pair);
     compose_two(ctx, middle, pair)
+}
+
+fn optimize<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Optimize::new(t)))
+}
+
+fn solve<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Solve::new(t)))
 }
 
 fn abstract1<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {

@@ -12,15 +12,13 @@ box_wrap!(pub AbstractVal(Abstract<Val>));
 
 impl From<&AbstractRepr> for AbstractVal {
     fn from(value: &AbstractRepr) -> Self {
-        let abstract1 = Abstract::new(Val::from(&value.value));
-        Self(Box::new(abstract1))
+        Self(Box::new(Abstract::new(Val::from(&value.value))))
     }
 }
 
 impl From<AbstractRepr> for AbstractVal {
     fn from(value: AbstractRepr) -> Self {
-        let abstract1 = Abstract::new(Val::from(value.value));
-        Self(Box::new(abstract1))
+        Self(Box::new(Abstract::new(Val::from(value.value))))
     }
 }
 
@@ -34,7 +32,6 @@ impl TryInto<AbstractRepr> for &AbstractVal {
 impl TryInto<AbstractRepr> for AbstractVal {
     type Error = ReprError;
     fn try_into(self) -> Result<AbstractRepr, Self::Error> {
-        let abstract1 = AbstractRepr::new(self.0.value.try_into()?);
-        Ok(abstract1)
+        Ok(AbstractRepr::new(self.0.value.try_into()?))
     }
 }

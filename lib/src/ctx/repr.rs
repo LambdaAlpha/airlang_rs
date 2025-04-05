@@ -252,8 +252,8 @@ pub(crate) enum Pattern {
     Pair(Box<Pair<Pattern, Pattern>>),
     Change(Box<Change<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
-    Optimize(Box<Optimize<Pattern, Pattern>>),
-    Solve(Box<Solve<Pattern, Pattern>>),
+    Optimize(Box<Optimize<Pattern>>),
+    Solve(Box<Solve<Pattern>>),
     Abstract(Box<Abstract<Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
@@ -312,16 +312,14 @@ fn parse_pattern_optimize(optimize: OptimizeVal, mut ctx: PatternCtx) -> Option<
     ctx.allow_extra = true;
     let optimize = Optimize::from(optimize);
     let func = parse_pattern(optimize.func, ctx)?;
-    let input = parse_pattern(optimize.input, ctx)?;
-    Some(Pattern::Optimize(Box::new(Optimize::new(func, input))))
+    Some(Pattern::Optimize(Box::new(Optimize::new(func))))
 }
 
 fn parse_pattern_solve(solve: SolveVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
     let solve = Solve::from(solve);
     let func = parse_pattern(solve.func, ctx)?;
-    let output = parse_pattern(solve.output, ctx)?;
-    Some(Pattern::Solve(Box::new(Solve::new(func, output))))
+    Some(Pattern::Solve(Box::new(Solve::new(func))))
 }
 
 fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -421,24 +419,22 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     Val::Call(Call::new(func, input).into())
 }
 
-fn assign_optimize(mut ctx: MutFnCtx, pattern: Optimize<Pattern, Pattern>, val: Val) -> Val {
+fn assign_optimize(mut ctx: MutFnCtx, pattern: Optimize<Pattern>, val: Val) -> Val {
     let Val::Optimize(val) = val else {
         return Val::default();
     };
     let val = Optimize::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    let input = assign_pattern(ctx, pattern.input, val.input);
-    Val::Optimize(Optimize::new(func, input).into())
+    Val::Optimize(Optimize::new(func).into())
 }
 
-fn assign_solve(mut ctx: MutFnCtx, pattern: Solve<Pattern, Pattern>, val: Val) -> Val {
+fn assign_solve(mut ctx: MutFnCtx, pattern: Solve<Pattern>, val: Val) -> Val {
     let Val::Solve(val) = val else {
         return Val::default();
     };
     let val = Solve::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    let output = assign_pattern(ctx, pattern.output, val.output);
-    Val::Solve(Solve::new(func, output).into())
+    Val::Solve(Solve::new(func).into())
 }
 
 fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern>, val: Val) -> Val {

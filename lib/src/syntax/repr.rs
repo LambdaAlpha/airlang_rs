@@ -265,13 +265,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
             }
             Repr::Optimize(optimize) => {
                 let func = (&optimize.func).try_into()?;
-                let input = (&optimize.input).try_into()?;
-                GenRepr::Optimize(Box::new(Optimize::new(func, input)))
+                GenRepr::Optimize(Box::new(Optimize::new(func)))
             }
             Repr::Solve(solve) => {
                 let func = (&solve.func).try_into()?;
-                let output = (&solve.output).try_into()?;
-                GenRepr::Solve(Box::new(Solve::new(func, output)))
+                GenRepr::Solve(Box::new(Solve::new(func)))
             }
             Repr::Abstract(abstract1) => {
                 let value = (&abstract1.value).try_into()?;

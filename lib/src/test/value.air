@@ -168,13 +168,13 @@ call
 =====
 type optimize
 -----
-do [c = id ; n ! v, c type .]
+do [a = id ; !(f), a type .]
 -----
 optimize
 =====
 type solve
 -----
-do [a = id ; f ? a, a type .]
+do [a = id ; ?(f), a type .]
 -----
 solve
 =====
@@ -264,13 +264,13 @@ true
 =====
 == optimize
 -----
-do [a = id ; f ! i, b = id ; f ! i, (a == b) and not ; a == .]
+do [a = id ; !(f), b = id ; !(f), (a == b) and not ; a == .]
 -----
 true
 =====
 == solve
 -----
-(1 ? 2) == (1 ? 2)
+do [a = id ; ?(f), b = id ; ?(f), (a == b) and not ; a == .]
 -----
 true
 =====

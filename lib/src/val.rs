@@ -209,8 +209,8 @@ impl From<CallVal> for Val {
     }
 }
 
-impl From<Optimize<Val, Val>> for Val {
-    fn from(value: Optimize<Val, Val>) -> Self {
+impl From<Optimize<Val>> for Val {
+    fn from(value: Optimize<Val>) -> Self {
         Val::Optimize(OptimizeVal::from(value))
     }
 }
@@ -221,8 +221,8 @@ impl From<OptimizeVal> for Val {
     }
 }
 
-impl From<Solve<Val, Val>> for Val {
-    fn from(value: Solve<Val, Val>) -> Self {
+impl From<Solve<Val>> for Val {
+    fn from(value: Solve<Val>) -> Self {
         Val::Solve(SolveVal::from(value))
     }
 }
@@ -410,13 +410,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
             }
             Val::Optimize(optimize) => {
                 let func = (&optimize.func).try_into()?;
-                let input = (&optimize.input).try_into()?;
-                GenRepr::Optimize(Box::new(Optimize::new(func, input)))
+                GenRepr::Optimize(Box::new(Optimize::new(func)))
             }
             Val::Solve(solve) => {
                 let func = (&solve.func).try_into()?;
-                let output = (&solve.output).try_into()?;
-                GenRepr::Solve(Box::new(Solve::new(func, output)))
+                GenRepr::Solve(Box::new(Solve::new(func)))
             }
             Val::Abstract(abstract1) => {
                 let value = (&abstract1.value).try_into()?;

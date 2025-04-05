@@ -39,11 +39,11 @@ pub(crate) const PAIR: &str = concatcp!(PAIR_CHAR);
 pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL_CHAR: char = ';';
 pub(crate) const CALL: &str = concatcp!(CALL_CHAR);
+
 pub(crate) const OPTIMIZE_CHAR: char = '!';
 pub(crate) const OPTIMIZE: &str = concatcp!(OPTIMIZE_CHAR);
 pub(crate) const SOLVE_CHAR: char = '?';
 pub(crate) const SOLVE: &str = concatcp!(SOLVE_CHAR);
-
 pub(crate) const ABSTRACT: &str = "@";
 
 pub(crate) const INT: &str = "integer";
@@ -67,7 +67,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn ambiguous(s: &str) -> bool {
-    matches!(s, UNIT | TRUE | FALSE | PAIR | CHANGE | CALL | OPTIMIZE | SOLVE)
+    matches!(s, UNIT | TRUE | FALSE | PAIR | CHANGE | CALL)
 }
 
 pub(crate) mod pub1;
