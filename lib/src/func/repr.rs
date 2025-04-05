@@ -55,7 +55,7 @@ pub(crate) const CTX: &str = "context";
 pub(crate) const ID: &str = "id";
 pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
-pub(crate) const OPTIMIZE_MODE: &str = "optimize_mode";
+pub(crate) const CLASS_MODE: &str = "class_mode";
 pub(crate) const INVERSE_MODE: &str = "inverse_mode";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
@@ -132,9 +132,9 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Func(FuncVal::Mode(call_mode)) => call_mode.inner().clone(),
         _ => return None,
     };
-    let optimize = match map_remove(&mut map, OPTIMIZE_MODE) {
+    let class = match map_remove(&mut map, CLASS_MODE) {
         Val::Unit(_) => FuncMode::default_mode(),
-        Val::Func(FuncVal::Mode(optimize_mode)) => optimize_mode.inner().clone(),
+        Val::Func(FuncVal::Mode(class_mode)) => class_mode.inner().clone(),
         _ => return None,
     };
     let inverse = match map_remove(&mut map, INVERSE_MODE) {
@@ -142,7 +142,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Func(FuncVal::Mode(inverse_mode)) => inverse_mode.inner().clone(),
         _ => return None,
     };
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
@@ -366,9 +366,9 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.call).into()));
         repr.insert(symbol(CALL_MODE), call_mode);
     }
-    if common.mode.optimize != FuncMode::default_mode() {
-        let optimize_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.optimize).into()));
-        repr.insert(symbol(OPTIMIZE_MODE), optimize_mode);
+    if common.mode.class != FuncMode::default_mode() {
+        let class_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.class).into()));
+        repr.insert(symbol(CLASS_MODE), class_mode);
     }
     if common.mode.inverse != FuncMode::default_mode() {
         let inverse_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.inverse).into()));

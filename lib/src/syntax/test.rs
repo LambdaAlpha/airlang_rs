@@ -22,8 +22,8 @@ use crate::{
         repr::{
             Repr,
             call::CallRepr,
+            class::ClassRepr,
             inverse::InverseRepr,
-            optimize::OptimizeRepr,
             pair::PairRepr,
         },
     },
@@ -52,7 +52,7 @@ mod change;
 
 mod call;
 
-mod optimize;
+mod class;
 
 mod inverse;
 
@@ -110,8 +110,8 @@ fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn optimize(func: Repr) -> Repr {
-    Repr::Optimize(Box::new(OptimizeRepr::new(func)))
+fn class(func: Repr) -> Repr {
+    Repr::Class(Box::new(ClassRepr::new(func)))
 }
 
 fn inverse(func: Repr) -> Repr {
@@ -337,13 +337,13 @@ fn test_generate_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_optimize() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/optimize.air"), "test/optimize.air", optimize::expected)
+fn test_parse_class() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/class.air"), "test/class.air", class::expected)
 }
 
 #[test]
-fn test_generate_optimize() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/optimize.air"), "test/optimize.air")
+fn test_generate_class() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/class.air"), "test/class.air")
 }
 
 #[test]

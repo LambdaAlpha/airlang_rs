@@ -113,8 +113,8 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_optimize() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/optimize.air"), "test/optimize.air")
+fn test_class() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/class.air"), "test/class.air")
 }
 
 #[test]

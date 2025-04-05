@@ -44,7 +44,7 @@ parse "\"1\""
 -----
 "1"
 =====
-parse optimize
+parse class
 -----
 parse "!(1)"
 -----
@@ -56,7 +56,7 @@ generate "1"
 -----
 "\"1\""
 =====
-generate optimize
+generate class
 -----
 generate ; !(1)
 -----

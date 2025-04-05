@@ -64,11 +64,11 @@ do [c = any ; call, c type .]
 -----
 call
 =====
-any optimize
+any class
 -----
-do [a = any ; optimize, a type .]
+do [a = any ; class, a type .]
 -----
-optimize
+class
 =====
 any inverse
 -----
@@ -166,11 +166,11 @@ do [a = id ; f ; a, a type .]
 -----
 call
 =====
-type optimize
+type class
 -----
 do [a = id ; !(f), a type .]
 -----
-optimize
+class
 =====
 type inverse
 -----
@@ -262,7 +262,7 @@ true
 -----
 true
 =====
-== optimize
+== class
 -----
 do [a = id ; !(f), b = id ; !(f), (a == b) and not ; a == .]
 -----

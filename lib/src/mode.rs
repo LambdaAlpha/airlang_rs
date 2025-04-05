@@ -65,7 +65,7 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod optimize;
+pub(crate) mod class;
 
 pub(crate) mod inverse;
 

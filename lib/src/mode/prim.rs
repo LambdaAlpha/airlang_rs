@@ -2,10 +2,10 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    ClassVal,
     InverseVal,
     ListVal,
     MapVal,
-    OptimizeVal,
     PairVal,
     Symbol,
     SymbolMode,
@@ -29,7 +29,7 @@ pub struct PrimMode {
     pub pair: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
-    pub optimize: Option<DataMode>,
+    pub class: Option<DataMode>,
     pub inverse: Option<DataMode>,
     pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
@@ -93,11 +93,11 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
-    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
+    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match self.optimize {
-            None => Id.transform_optimize(ctx, optimize),
-            Some(_) => FormCore::transform_optimize(self, ctx, optimize),
+        match self.class {
+            None => Id.transform_class(ctx, class),
+            Some(_) => FormCore::transform_class(self, ctx, class),
         }
     }
 
@@ -141,7 +141,7 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: None,
                 pair: None,
                 call: None,
-                optimize: None,
+                class: None,
                 inverse: None,
                 abstract1: None,
                 change: None,
@@ -152,7 +152,7 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
-                optimize: Some(DataMode::from(mode)),
+                class: Some(DataMode::from(mode)),
                 inverse: Some(DataMode::from(mode)),
                 abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),

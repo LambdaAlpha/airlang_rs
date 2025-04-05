@@ -103,9 +103,9 @@ fn get_func() -> Named<FuncVal> {
     let id = "call.function";
     let f = fn_get_func;
     let call = ref_pair_mode();
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -130,9 +130,9 @@ fn set_func() -> Named<FuncVal> {
     let id = "call.set_function";
     let f = fn_set_func;
     let call = ref_pair_mode();
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -159,9 +159,9 @@ fn get_input() -> Named<FuncVal> {
     let id = "call.input";
     let f = fn_get_input;
     let call = ref_pair_mode();
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -186,9 +186,9 @@ fn set_input() -> Named<FuncVal> {
     let id = "call.set_input";
     let f = fn_set_input;
     let call = ref_pair_mode();
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_mut_fn(id, f, mode)
 }
 

@@ -11,10 +11,10 @@ use crate::{
     Bit,
     Byte,
     Call,
+    Class,
     Int,
     Inverse,
     Number,
-    Optimize,
     Pair,
     Symbol,
     Text,
@@ -31,10 +31,10 @@ use crate::{
             abstract1::AbstractRepr,
             call::CallRepr,
             change::ChangeRepr,
+            class::ClassRepr,
             inverse::InverseRepr,
             list::ListRepr,
             map::MapRepr,
-            optimize::OptimizeRepr,
             pair::PairRepr,
         },
     },
@@ -56,7 +56,7 @@ pub enum Repr {
     Change(Box<ChangeRepr>),
 
     Call(Box<CallRepr>),
-    Optimize(Box<OptimizeRepr>),
+    Class(Box<ClassRepr>),
     Inverse(Box<InverseRepr>),
     Abstract(Box<AbstractRepr>),
 
@@ -148,15 +148,15 @@ impl From<Box<CallRepr>> for Repr {
     }
 }
 
-impl From<OptimizeRepr> for Repr {
-    fn from(a: OptimizeRepr) -> Self {
-        Repr::Optimize(Box::new(a))
+impl From<ClassRepr> for Repr {
+    fn from(a: ClassRepr) -> Self {
+        Repr::Class(Box::new(a))
     }
 }
 
-impl From<Box<OptimizeRepr>> for Repr {
-    fn from(a: Box<OptimizeRepr>) -> Self {
-        Repr::Optimize(a)
+impl From<Box<ClassRepr>> for Repr {
+    fn from(a: Box<ClassRepr>) -> Self {
+        Repr::Class(a)
     }
 }
 
@@ -263,9 +263,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Repr::Optimize(optimize) => {
-                let func = (&optimize.func).try_into()?;
-                GenRepr::Optimize(Box::new(Optimize::new(func)))
+            Repr::Class(class) => {
+                let func = (&class.func).try_into()?;
+                GenRepr::Class(Box::new(Class::new(func)))
             }
             Repr::Inverse(inverse) => {
                 let func = (&inverse.func).try_into()?;
@@ -301,7 +301,7 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod optimize;
+pub(crate) mod class;
 
 pub(crate) mod inverse;
 

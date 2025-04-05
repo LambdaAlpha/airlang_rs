@@ -48,9 +48,9 @@ fn call() -> Named<FuncVal> {
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
         FuncMode::default_mode(),
     );
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_free_fn(id, f, mode)
 }
 

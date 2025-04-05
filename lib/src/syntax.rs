@@ -40,8 +40,8 @@ pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL_CHAR: char = ';';
 pub(crate) const CALL: &str = concatcp!(CALL_CHAR);
 
-pub(crate) const OPTIMIZE_CHAR: char = '!';
-pub(crate) const OPTIMIZE: &str = concatcp!(OPTIMIZE_CHAR);
+pub(crate) const CLASS_CHAR: char = '!';
+pub(crate) const CLASS: &str = concatcp!(CLASS_CHAR);
 pub(crate) const INVERSE_CHAR: char = '?';
 pub(crate) const INVERSE: &str = concatcp!(INVERSE_CHAR);
 pub(crate) const ABSTRACT: &str = "@";

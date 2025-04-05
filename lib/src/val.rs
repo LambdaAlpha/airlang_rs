@@ -17,9 +17,9 @@ use crate::{
     bit::Bit,
     byte::Byte,
     change::Change,
+    class::Class,
     extension::ValExt,
     number::Number,
-    optimize::Optimize,
     symbol::Symbol,
     syntax::{
         ReprError,
@@ -34,6 +34,7 @@ use crate::{
         byte::ByteVal,
         call::CallVal,
         change::ChangeVal,
+        class::ClassVal,
         ctx::CtxVal,
         func::FuncVal,
         int::IntVal,
@@ -41,7 +42,6 @@ use crate::{
         list::ListVal,
         map::MapVal,
         number::NumberVal,
-        optimize::OptimizeVal,
         pair::PairVal,
         text::TextVal,
     },
@@ -63,7 +63,7 @@ pub enum Val {
     Change(ChangeVal),
 
     Call(CallVal),
-    Optimize(OptimizeVal),
+    Class(ClassVal),
     Inverse(InverseVal),
     Abstract(AbstractVal),
 
@@ -86,7 +86,7 @@ pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
-pub(crate) const OPTIMIZE: &str = "optimize";
+pub(crate) const CLASS: &str = "class";
 pub(crate) const INVERSE: &str = "inverse";
 pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const LIST: &str = "list";
@@ -209,15 +209,15 @@ impl From<CallVal> for Val {
     }
 }
 
-impl From<Optimize<Val>> for Val {
-    fn from(value: Optimize<Val>) -> Self {
-        Val::Optimize(OptimizeVal::from(value))
+impl From<Class<Val>> for Val {
+    fn from(value: Class<Val>) -> Self {
+        Val::Class(ClassVal::from(value))
     }
 }
 
-impl From<OptimizeVal> for Val {
-    fn from(value: OptimizeVal) -> Self {
-        Val::Optimize(value)
+impl From<ClassVal> for Val {
+    fn from(value: ClassVal) -> Self {
+        Val::Class(value)
     }
 }
 
@@ -300,7 +300,7 @@ impl From<&Repr> for Val {
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
             Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
-            Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(&**optimize)),
+            Repr::Class(class) => Val::Class(ClassVal::from(&**class)),
             Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(&**inverse)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
@@ -322,7 +322,7 @@ impl From<Repr> for Val {
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
             Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
-            Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(*optimize)),
+            Repr::Class(class) => Val::Class(ClassVal::from(*class)),
             Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(*inverse)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
@@ -345,7 +345,7 @@ impl TryInto<Repr> for &Val {
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
+            Val::Class(class) => Ok(Repr::Class(Box::new(class.try_into()?))),
             Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
@@ -369,7 +369,7 @@ impl TryInto<Repr> for Val {
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
+            Val::Class(class) => Ok(Repr::Class(Box::new(class.try_into()?))),
             Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
@@ -408,9 +408,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Val::Optimize(optimize) => {
-                let func = (&optimize.func).try_into()?;
-                GenRepr::Optimize(Box::new(Optimize::new(func)))
+            Val::Class(class) => {
+                let func = (&class.func).try_into()?;
+                GenRepr::Class(Box::new(Class::new(func)))
             }
             Val::Inverse(inverse) => {
                 let func = (&inverse.func).try_into()?;
@@ -455,7 +455,7 @@ impl Debug for Val {
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
             Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
-            Val::Optimize(optimize) => <_ as Debug>::fmt(optimize, f),
+            Val::Class(class) => <_ as Debug>::fmt(class, f),
             Val::Inverse(inverse) => <_ as Debug>::fmt(inverse, f),
             Val::Abstract(abstrac1) => <_ as Debug>::fmt(abstrac1, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
@@ -481,7 +481,7 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod optimize;
+pub(crate) mod class;
 
 pub(crate) mod inverse;
 

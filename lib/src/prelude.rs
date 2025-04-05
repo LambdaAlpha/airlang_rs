@@ -41,6 +41,7 @@ use crate::{
         byte::BytePrelude,
         call::CallPrelude,
         change::ChangePrelude,
+        class::ClassPrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
         extension::ExtPrelude,
@@ -52,7 +53,6 @@ use crate::{
         meta::MetaPrelude,
         mode::MODE_PRELUDE,
         number::NumberPrelude,
-        optimize::OptimizePrelude,
         pair::PairPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
@@ -85,7 +85,7 @@ pub(crate) struct AllPrelude {
     pub(crate) pair: PairPrelude,
     pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
-    pub(crate) optimize: OptimizePrelude,
+    pub(crate) class: ClassPrelude,
     pub(crate) inverse: InversePrelude,
     pub(crate) abstract1: AbstractPrelude,
     pub(crate) list: ListPrelude,
@@ -111,7 +111,7 @@ impl Prelude for AllPrelude {
         self.pair.put(m);
         self.change.put(m);
         self.call.put(m);
-        self.optimize.put(m);
+        self.class.put(m);
         self.inverse.put(m);
         self.abstract1.put(m);
         self.list.put(m);
@@ -286,7 +286,7 @@ mod change;
 
 mod call;
 
-mod optimize;
+mod class;
 
 mod inverse;
 

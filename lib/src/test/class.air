@@ -1,0 +1,42 @@
+new
+-----
+do [
+    f = any ; .,
+    c1 = '!' ; f,
+    c2 = !(f),
+    c1 == c2
+]
+-----
+true
+=====
+new get
+-----
+do [
+    f = any ; .,
+    c = '!' ; f,
+    f == c class.function .
+]
+-----
+true
+=====
+set get
+-----
+do [
+    c = any ; class,
+    f = any ; .,
+    c class.set_function f,
+    f == c class.function .
+]
+-----
+true
+=====
+set return
+-----
+do [
+    f1 = any ; .,
+    c = !(f1),
+    f2 = c class.set_function any ; .,
+    f1 == f2
+]
+-----
+true

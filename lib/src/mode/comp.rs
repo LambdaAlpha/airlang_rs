@@ -3,12 +3,12 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    ClassVal,
     InverseVal,
     ListMode,
     ListVal,
     MapMode,
     MapVal,
-    OptimizeVal,
     PairMode,
     PairVal,
     Symbol,
@@ -19,9 +19,9 @@ use crate::{
     mode::{
         call::CallMode,
         change::ChangeMode,
+        class::ClassMode,
         id::Id,
         inverse::InverseMode,
-        optimize::OptimizeMode,
         symbol::SymbolMode,
     },
     transformer::{
@@ -36,7 +36,7 @@ pub struct CompMode {
     pub pair: Option<PairMode>,
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
-    pub optimize: Option<OptimizeMode>,
+    pub class: Option<ClassMode>,
     pub inverse: Option<InverseMode>,
     pub abstract1: Option<AbstractMode>,
     pub list: Option<ListMode>,
@@ -88,11 +88,11 @@ impl ByVal<Val> for CompMode {
         }
     }
 
-    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
+    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.optimize {
-            None => Id.transform_optimize(ctx, optimize),
-            Some(mode) => mode.transform(ctx, optimize),
+        match &self.class {
+            None => Id.transform_class(ctx, class),
+            Some(mode) => mode.transform(ctx, class),
         }
     }
 
@@ -136,7 +136,7 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: None,
                 pair: None,
                 call: None,
-                optimize: None,
+                class: None,
                 inverse: None,
                 abstract1: None,
                 change: None,
@@ -147,7 +147,7 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(PairMode::from(mode)),
                 call: Some(CallMode::from(mode)),
-                optimize: Some(OptimizeMode::from(mode)),
+                class: Some(ClassMode::from(mode)),
                 inverse: Some(InverseMode::from(mode)),
                 abstract1: Some(AbstractMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),

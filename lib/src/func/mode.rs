@@ -5,13 +5,13 @@ use std::fmt::{
 
 use crate::{
     CallMode,
+    ClassMode,
     CompMode,
     CtxAccess,
     FuncMode,
     InverseMode,
     ListMode,
     MapMode,
-    OptimizeMode,
     PairMode,
     PrimMode,
     SymbolMode,
@@ -46,7 +46,7 @@ impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
         &FuncMode {
             call: None,
-            optimize: None,
+            class: None,
             inverse: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
         }
     }
@@ -126,7 +126,7 @@ impl GetCtxAccess for PrimMode {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
             & self.call.ctx_access()
-            & self.optimize.ctx_access()
+            & self.class.ctx_access()
             & self.inverse.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
@@ -153,7 +153,7 @@ impl GetCtxAccess for CompMode {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
             & self.call.ctx_access()
-            & self.optimize.ctx_access()
+            & self.class.ctx_access()
             & self.inverse.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
@@ -181,9 +181,9 @@ impl GetCtxAccess for CallMode {
     }
 }
 
-impl GetCtxAccess for OptimizeMode {
+impl GetCtxAccess for ClassMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.optimize.func.ctx_access()
+        self.class.func.ctx_access()
     }
 }
 

@@ -22,6 +22,8 @@ use crate::{
     Call,
     CallMode,
     Change,
+    Class,
+    ClassMode,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
     FreeCellCompFunc,
@@ -35,8 +37,6 @@ use crate::{
     ModeFuncVal,
     MutStaticCompFunc,
     MutStaticCompFuncVal,
-    Optimize,
-    OptimizeMode,
     SymbolMode,
     Val,
     ValExt,
@@ -106,7 +106,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // pair
         1,      // change
         1,      // call
-        1,      // optimize
+        1,      // class
         1,      // inverse
         1,      // abstract
         1,      // list
@@ -129,7 +129,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Change(any_change(rng, new_depth).into()),
         9 => Val::Call(any_call(rng, new_depth).into()),
-        10 => Val::Optimize(any_optimize(rng, new_depth).into()),
+        10 => Val::Class(any_class(rng, new_depth).into()),
         11 => Val::Inverse(any_inverse(rng, new_depth).into()),
         12 => Val::Abstract(any_abstract(rng, new_depth).into()),
         13 => Val::List(any_list(rng, new_depth).into()),
@@ -210,8 +210,8 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_optimize(rng: &mut SmallRng, depth: usize) -> Optimize<Val> {
-    Optimize::new(any_val(rng, depth))
+pub(crate) fn any_class(rng: &mut SmallRng, depth: usize) -> Class<Val> {
+    Class::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_inverse(rng: &mut SmallRng, depth: usize) -> Inverse<Val> {
@@ -306,12 +306,12 @@ impl Arbitrary for CompMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        let optimize = Arbitrary::any(rng, depth);
+        let class = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, optimize, inverse, abstract1, list, map }
+        CompMode { symbol, pair, change, call, class, inverse, abstract1, list, map }
     }
 }
 
@@ -346,12 +346,12 @@ impl Arbitrary for CallMode {
     }
 }
 
-impl Arbitrary for OptimizeMode {
+impl Arbitrary for ClassMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let optimize = Optimize::new(func);
-        OptimizeMode { optimize }
+        let class = Class::new(func);
+        ClassMode { class }
     }
 }
 
@@ -408,12 +408,12 @@ impl Arbitrary for PrimMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        let optimize = Arbitrary::any(rng, depth);
+        let class = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, optimize, inverse, abstract1, list, map }
+        PrimMode { symbol, pair, change, call, class, inverse, abstract1, list, map }
     }
 }
 
@@ -486,9 +486,9 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 
 fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     let call = Arbitrary::any(rng, depth);
-    let optimize = Arbitrary::any(rng, depth);
+    let class = Arbitrary::any(rng, depth);
     let inverse = Arbitrary::any(rng, depth);
-    FuncMode { call, optimize, inverse }
+    FuncMode { call, class, inverse }
 }
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {

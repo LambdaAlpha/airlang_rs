@@ -4,10 +4,10 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    ClassVal,
     InverseVal,
     ListVal,
     MapVal,
-    OptimizeVal,
     PairVal,
     Symbol,
     Val,
@@ -56,7 +56,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
     where Ctx: CtxMeta<'a>;
 
-    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Output
+    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Output

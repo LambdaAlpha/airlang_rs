@@ -2,8 +2,8 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    ClassVal,
     InverseVal,
-    OptimizeVal,
     PairVal,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
@@ -56,9 +56,9 @@ impl ByVal<Val> for Id {
         Val::Call(call)
     }
 
-    fn transform_optimize<'a, Ctx>(&self, _ctx: Ctx, optimize: OptimizeVal) -> Val
+    fn transform_class<'a, Ctx>(&self, _ctx: Ctx, class: ClassVal) -> Val
     where Ctx: CtxMeta<'a> {
-        Val::Optimize(optimize)
+        Val::Class(class)
     }
 
     fn transform_inverse<'a, Ctx>(&self, _ctx: Ctx, inverse: InverseVal) -> Val

@@ -18,6 +18,7 @@ use crate::{
         any_byte,
         any_call,
         any_change,
+        any_class,
         any_ctx,
         any_extension,
         any_func,
@@ -26,7 +27,6 @@ use crate::{
         any_list,
         any_map,
         any_number,
-        any_optimize,
         any_pair,
         any_symbol,
         any_text,
@@ -58,6 +58,7 @@ use crate::{
         BYTE,
         CALL,
         CHANGE,
+        CLASS,
         CTX,
         EXT,
         FUNC,
@@ -66,7 +67,6 @@ use crate::{
         LIST,
         MAP,
         NUMBER,
-        OPTIMIZE,
         PAIR,
         SYMBOL,
         TEXT,
@@ -100,9 +100,9 @@ fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
     let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_free_fn(id, f, mode)
 }
 
@@ -123,7 +123,7 @@ fn fn_any(input: Val) -> Val {
             PAIR => Val::Pair(any_pair(rng, DEPTH).into()),
             CHANGE => Val::Change(any_change(rng, DEPTH).into()),
             CALL => Val::Call(any_call(rng, DEPTH).into()),
-            OPTIMIZE => Val::Optimize(any_optimize(rng, DEPTH).into()),
+            CLASS => Val::Class(any_class(rng, DEPTH).into()),
             INVERSE => Val::Inverse(any_inverse(rng, DEPTH).into()),
             ABSTRACT => Val::Abstract(any_abstract(rng, DEPTH).into()),
             LIST => Val::List(any_list(rng, DEPTH).into()),
@@ -141,9 +141,9 @@ fn type1() -> Named<FuncVal> {
     let id = "type";
     let f = fn_type1;
     let call = ref_pair_mode();
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -164,7 +164,7 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Pair(_) => PAIR,
             Val::Change(_) => CHANGE,
             Val::Call(_) => CALL,
-            Val::Optimize(_) => OPTIMIZE,
+            Val::Class(_) => CLASS,
             Val::Inverse(_) => INVERSE,
             Val::Abstract(_) => ABSTRACT,
             Val::List(_) => LIST,
@@ -181,9 +181,9 @@ fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
     let call = FuncMode::pair_mode(ref_mode(), ref_mode());
-    let optimize = call.clone();
+    let class = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, inverse };
+    let mode = FuncMode { call, class, inverse };
     named_const_fn(id, f, mode)
 }
 

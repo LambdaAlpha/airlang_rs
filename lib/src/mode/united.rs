@@ -4,11 +4,11 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    ClassVal,
     CodeMode,
     InverseVal,
     ListVal,
     MapVal,
-    OptimizeVal,
     PairVal,
     Symbol,
     SymbolMode,
@@ -96,11 +96,11 @@ impl ByVal<Val> for UniMode {
         }
     }
 
-    fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Val
+    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_optimize(ctx, optimize),
-            CodeMode::Eval => Eval::new(self.symbol).transform_optimize(ctx, optimize),
+            CodeMode::Form => Form::new(self.symbol).transform_class(ctx, class),
+            CodeMode::Eval => Eval::new(self.symbol).transform_class(ctx, class),
         }
     }
 
