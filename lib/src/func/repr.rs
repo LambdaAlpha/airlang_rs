@@ -56,7 +56,7 @@ pub(crate) const ID: &str = "id";
 pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
 pub(crate) const OPTIMIZE_MODE: &str = "optimize_mode";
-pub(crate) const SOLVE_MODE: &str = "solve_mode";
+pub(crate) const INVERSE_MODE: &str = "inverse_mode";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
 
@@ -137,12 +137,12 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Func(FuncVal::Mode(optimize_mode)) => optimize_mode.inner().clone(),
         _ => return None,
     };
-    let solve = match map_remove(&mut map, SOLVE_MODE) {
+    let inverse = match map_remove(&mut map, INVERSE_MODE) {
         Val::Unit(_) => FuncMode::default_mode(),
-        Val::Func(FuncVal::Mode(solve_mode)) => solve_mode.inner().clone(),
+        Val::Func(FuncVal::Mode(inverse_mode)) => inverse_mode.inner().clone(),
         _ => return None,
     };
-    let mode = FuncMode { call, optimize, solve };
+    let mode = FuncMode { call, optimize, inverse };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
@@ -370,8 +370,8 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
         let optimize_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.optimize).into()));
         repr.insert(symbol(OPTIMIZE_MODE), optimize_mode);
     }
-    if common.mode.solve != FuncMode::default_mode() {
-        let solve_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.solve).into()));
-        repr.insert(symbol(SOLVE_MODE), solve_mode);
+    if common.mode.inverse != FuncMode::default_mode() {
+        let inverse_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.inverse).into()));
+        repr.insert(symbol(INVERSE_MODE), inverse_mode);
     }
 }

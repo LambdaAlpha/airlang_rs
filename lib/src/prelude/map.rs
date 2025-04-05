@@ -109,8 +109,8 @@ fn length() -> Named<FuncVal> {
     let f = fn_length;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -133,8 +133,8 @@ fn items() -> Named<FuncVal> {
     let f = fn_items;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -158,8 +158,8 @@ fn into_items() -> Named<FuncVal> {
     let f = fn_into_items;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -185,8 +185,8 @@ fn keys() -> Named<FuncVal> {
     let f = fn_keys;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -209,8 +209,8 @@ fn into_keys() -> Named<FuncVal> {
     let f = fn_into_keys;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -235,8 +235,8 @@ fn values() -> Named<FuncVal> {
     let f = fn_values;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -259,8 +259,8 @@ fn into_values() -> Named<FuncVal> {
     let f = fn_into_values;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -285,8 +285,8 @@ fn contains() -> Named<FuncVal> {
     let f = fn_contains;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -310,8 +310,8 @@ fn contains_all() -> Named<FuncVal> {
     let f = fn_contains_all;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -339,8 +339,8 @@ fn contains_any() -> Named<FuncVal> {
     let f = fn_contains_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -368,8 +368,8 @@ fn set() -> Named<FuncVal> {
     let f = fn_set;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -398,8 +398,8 @@ fn set_many() -> Named<FuncVal> {
     let f = fn_set_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -430,8 +430,8 @@ fn get() -> Named<FuncVal> {
     let f = fn_get;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -455,8 +455,8 @@ fn get_many() -> Named<FuncVal> {
     let f = fn_get_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -485,8 +485,8 @@ fn remove() -> Named<FuncVal> {
     let f = fn_remove;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -510,8 +510,8 @@ fn remove_many() -> Named<FuncVal> {
     let f = fn_remove_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -541,8 +541,8 @@ fn clear() -> Named<FuncVal> {
     let f = fn_clear;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 

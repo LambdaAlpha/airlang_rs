@@ -22,9 +22,9 @@ use crate::{
         repr::{
             Repr,
             call::CallRepr,
+            inverse::InverseRepr,
             optimize::OptimizeRepr,
             pair::PairRepr,
-            solve::SolveRepr,
         },
     },
     test::parse_test_file,
@@ -54,7 +54,7 @@ mod call;
 
 mod optimize;
 
-mod solve;
+mod inverse;
 
 mod abstract1;
 
@@ -114,8 +114,8 @@ fn optimize(func: Repr) -> Repr {
     Repr::Optimize(Box::new(OptimizeRepr::new(func)))
 }
 
-fn solve(func: Repr) -> Repr {
-    Repr::Solve(Box::new(SolveRepr::new(func)))
+fn inverse(func: Repr) -> Repr {
+    Repr::Inverse(Box::new(InverseRepr::new(func)))
 }
 
 fn abstract1(value: Repr) -> Repr {
@@ -347,13 +347,13 @@ fn test_generate_optimize() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_solve() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/solve.air"), "test/solve.air", solve::expected)
+fn test_parse_inverse() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/inverse.air"), "test/inverse.air", inverse::expected)
 }
 
 #[test]
-fn test_generate_solve() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/solve.air"), "test/solve.air")
+fn test_generate_inverse() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/inverse.air"), "test/inverse.air")
 }
 
 #[test]

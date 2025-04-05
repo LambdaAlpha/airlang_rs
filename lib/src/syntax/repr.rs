@@ -12,10 +12,10 @@ use crate::{
     Byte,
     Call,
     Int,
+    Inverse,
     Number,
     Optimize,
     Pair,
-    Solve,
     Symbol,
     Text,
     Unit,
@@ -31,11 +31,11 @@ use crate::{
             abstract1::AbstractRepr,
             call::CallRepr,
             change::ChangeRepr,
+            inverse::InverseRepr,
             list::ListRepr,
             map::MapRepr,
             optimize::OptimizeRepr,
             pair::PairRepr,
-            solve::SolveRepr,
         },
     },
 };
@@ -57,7 +57,7 @@ pub enum Repr {
 
     Call(Box<CallRepr>),
     Optimize(Box<OptimizeRepr>),
-    Solve(Box<SolveRepr>),
+    Inverse(Box<InverseRepr>),
     Abstract(Box<AbstractRepr>),
 
     List(ListRepr),
@@ -160,15 +160,15 @@ impl From<Box<OptimizeRepr>> for Repr {
     }
 }
 
-impl From<SolveRepr> for Repr {
-    fn from(a: SolveRepr) -> Self {
-        Repr::Solve(Box::new(a))
+impl From<InverseRepr> for Repr {
+    fn from(a: InverseRepr) -> Self {
+        Repr::Inverse(Box::new(a))
     }
 }
 
-impl From<Box<SolveRepr>> for Repr {
-    fn from(a: Box<SolveRepr>) -> Self {
-        Repr::Solve(a)
+impl From<Box<InverseRepr>> for Repr {
+    fn from(a: Box<InverseRepr>) -> Self {
+        Repr::Inverse(a)
     }
 }
 
@@ -267,9 +267,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let func = (&optimize.func).try_into()?;
                 GenRepr::Optimize(Box::new(Optimize::new(func)))
             }
-            Repr::Solve(solve) => {
-                let func = (&solve.func).try_into()?;
-                GenRepr::Solve(Box::new(Solve::new(func)))
+            Repr::Inverse(inverse) => {
+                let func = (&inverse.func).try_into()?;
+                GenRepr::Inverse(Box::new(Inverse::new(func)))
             }
             Repr::Abstract(abstract1) => {
                 let value = (&abstract1.value).try_into()?;
@@ -303,7 +303,7 @@ pub(crate) mod call;
 
 pub(crate) mod optimize;
 
-pub(crate) mod solve;
+pub(crate) mod inverse;
 
 pub(crate) mod abstract1;
 

@@ -2,11 +2,11 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    InverseVal,
     ListVal,
     MapVal,
     OptimizeVal,
     PairVal,
-    SolveVal,
     Symbol,
     SymbolMode,
     UniMode,
@@ -30,7 +30,7 @@ pub struct PrimMode {
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
     pub optimize: Option<DataMode>,
-    pub solve: Option<DataMode>,
+    pub inverse: Option<DataMode>,
     pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
@@ -101,11 +101,11 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
-    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
+    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match self.solve {
-            None => Id.transform_solve(ctx, solve),
-            Some(_) => FormCore::transform_solve(self, ctx, solve),
+        match self.inverse {
+            None => Id.transform_inverse(ctx, inverse),
+            Some(_) => FormCore::transform_inverse(self, ctx, inverse),
         }
     }
 
@@ -142,7 +142,7 @@ impl From<Option<UniMode>> for PrimMode {
                 pair: None,
                 call: None,
                 optimize: None,
-                solve: None,
+                inverse: None,
                 abstract1: None,
                 change: None,
                 list: None,
@@ -153,7 +153,7 @@ impl From<Option<UniMode>> for PrimMode {
                 pair: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
                 optimize: Some(DataMode::from(mode)),
-                solve: Some(DataMode::from(mode)),
+                inverse: Some(DataMode::from(mode)),
                 abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),

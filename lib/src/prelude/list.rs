@@ -80,8 +80,8 @@ fn length() -> Named<FuncVal> {
     let f = fn_length;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -104,8 +104,8 @@ fn set() -> Named<FuncVal> {
     let f = fn_set;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -141,8 +141,8 @@ fn set_many() -> Named<FuncVal> {
     let f = fn_set_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -182,8 +182,8 @@ fn get() -> Named<FuncVal> {
     let f = fn_get;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -230,8 +230,8 @@ fn insert() -> Named<FuncVal> {
     let f = fn_insert;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -266,8 +266,8 @@ fn insert_many() -> Named<FuncVal> {
     let f = fn_insert_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -305,8 +305,8 @@ fn remove() -> Named<FuncVal> {
     let f = fn_remove;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -354,8 +354,8 @@ fn push() -> Named<FuncVal> {
     let f = fn_push;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -379,8 +379,8 @@ fn push_many() -> Named<FuncVal> {
     let f = fn_push_many;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -407,8 +407,8 @@ fn pop() -> Named<FuncVal> {
     let f = fn_pop;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -453,8 +453,8 @@ fn clear() -> Named<FuncVal> {
     let f = fn_clear;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 

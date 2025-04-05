@@ -87,8 +87,8 @@ fn length() -> Named<FuncVal> {
     let f = fn_length;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 

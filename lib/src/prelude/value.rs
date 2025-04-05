@@ -22,12 +22,12 @@ use crate::{
         any_extension,
         any_func,
         any_int,
+        any_inverse,
         any_list,
         any_map,
         any_number,
         any_optimize,
         any_pair,
-        any_solve,
         any_symbol,
         any_text,
         any_unit,
@@ -62,12 +62,12 @@ use crate::{
         EXT,
         FUNC,
         INT,
+        INVERSE,
         LIST,
         MAP,
         NUMBER,
         OPTIMIZE,
         PAIR,
-        SOLVE,
         SYMBOL,
         TEXT,
         UNIT,
@@ -101,8 +101,8 @@ fn any() -> Named<FuncVal> {
     let f = fn_any;
     let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_free_fn(id, f, mode)
 }
 
@@ -124,7 +124,7 @@ fn fn_any(input: Val) -> Val {
             CHANGE => Val::Change(any_change(rng, DEPTH).into()),
             CALL => Val::Call(any_call(rng, DEPTH).into()),
             OPTIMIZE => Val::Optimize(any_optimize(rng, DEPTH).into()),
-            SOLVE => Val::Solve(any_solve(rng, DEPTH).into()),
+            INVERSE => Val::Inverse(any_inverse(rng, DEPTH).into()),
             ABSTRACT => Val::Abstract(any_abstract(rng, DEPTH).into()),
             LIST => Val::List(any_list(rng, DEPTH).into()),
             MAP => Val::Map(any_map(rng, DEPTH).into()),
@@ -142,8 +142,8 @@ fn type1() -> Named<FuncVal> {
     let f = fn_type1;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -165,7 +165,7 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Change(_) => CHANGE,
             Val::Call(_) => CALL,
             Val::Optimize(_) => OPTIMIZE,
-            Val::Solve(_) => SOLVE,
+            Val::Inverse(_) => INVERSE,
             Val::Abstract(_) => ABSTRACT,
             Val::List(_) => LIST,
             Val::Map(_) => MAP,
@@ -182,8 +182,8 @@ fn equal() -> Named<FuncVal> {
     let f = fn_equal;
     let call = FuncMode::pair_mode(ref_mode(), ref_mode());
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 

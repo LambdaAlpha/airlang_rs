@@ -3,6 +3,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    InverseVal,
     ListMode,
     ListVal,
     MapMode,
@@ -10,7 +11,6 @@ use crate::{
     OptimizeVal,
     PairMode,
     PairVal,
-    SolveVal,
     Symbol,
     UniMode,
     Val,
@@ -20,8 +20,8 @@ use crate::{
         call::CallMode,
         change::ChangeMode,
         id::Id,
+        inverse::InverseMode,
         optimize::OptimizeMode,
-        solve::SolveMode,
         symbol::SymbolMode,
     },
     transformer::{
@@ -37,7 +37,7 @@ pub struct CompMode {
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
     pub optimize: Option<OptimizeMode>,
-    pub solve: Option<SolveMode>,
+    pub inverse: Option<InverseMode>,
     pub abstract1: Option<AbstractMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
@@ -96,11 +96,11 @@ impl ByVal<Val> for CompMode {
         }
     }
 
-    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
+    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.solve {
-            None => Id.transform_solve(ctx, solve),
-            Some(mode) => mode.transform(ctx, solve),
+        match &self.inverse {
+            None => Id.transform_inverse(ctx, inverse),
+            Some(mode) => mode.transform(ctx, inverse),
         }
     }
 
@@ -137,7 +137,7 @@ impl From<Option<UniMode>> for CompMode {
                 pair: None,
                 call: None,
                 optimize: None,
-                solve: None,
+                inverse: None,
                 abstract1: None,
                 change: None,
                 list: None,
@@ -148,7 +148,7 @@ impl From<Option<UniMode>> for CompMode {
                 pair: Some(PairMode::from(mode)),
                 call: Some(CallMode::from(mode)),
                 optimize: Some(OptimizeMode::from(mode)),
-                solve: Some(SolveMode::from(mode)),
+                inverse: Some(InverseMode::from(mode)),
                 abstract1: Some(AbstractMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),
                 list: Some(ListMode::from(mode)),

@@ -8,10 +8,10 @@ pub use crate::syntax::{
         abstract1::AbstractRepr,
         call::CallRepr,
         change::ChangeRepr,
+        inverse::InverseRepr,
         list::ListRepr,
         map::MapRepr,
         pair::PairRepr,
-        solve::SolveRepr,
     },
 };
 use crate::syntax::{

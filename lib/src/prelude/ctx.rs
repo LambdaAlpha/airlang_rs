@@ -130,8 +130,8 @@ fn read() -> Named<FuncVal> {
     let f = fn_read;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -147,8 +147,8 @@ fn move1() -> Named<FuncVal> {
     let f = fn_move;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -170,8 +170,8 @@ fn assign() -> Named<FuncVal> {
         FuncMode::default_mode(),
     );
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -196,8 +196,8 @@ fn set_variable_access() -> Named<FuncVal> {
         FuncMode::symbol_mode(SymbolMode::Literal),
     );
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -227,8 +227,8 @@ fn get_variable_access() -> Named<FuncVal> {
     let f = fn_get_variable_access;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let optimize = call.clone();
-    let solve = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -250,8 +250,8 @@ fn is_null() -> Named<FuncVal> {
     let f = fn_is_null;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -270,8 +270,8 @@ fn is_static() -> Named<FuncVal> {
     let f = fn_is_static;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -329,8 +329,8 @@ fn get_ctx_access() -> Named<FuncVal> {
     let f = fn_get_ctx_access;
     let call = FuncMode::default_mode();
     let optimize = call.clone();
-    let solve = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -352,8 +352,8 @@ fn get_advisor() -> Named<FuncVal> {
     let f = fn_get_advisor;
     let call = FuncMode::default_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -392,8 +392,8 @@ fn with_ctx() -> Named<FuncVal> {
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -434,8 +434,8 @@ fn ctx_in_ctx_out() -> Named<FuncVal> {
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_free_fn(id, f, mode)
 }
 
@@ -459,8 +459,8 @@ fn ctx_new() -> Named<FuncVal> {
     let f = fn_ctx_new;
     let call = parse_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_free_fn(id, f, mode)
 }
 
@@ -476,8 +476,8 @@ fn ctx_repr() -> Named<FuncVal> {
     let f = fn_ctx_repr;
     let call = FuncMode::default_mode();
     let optimize = call.clone();
-    let solve = generate_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = generate_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_free_fn(id, f, mode)
 }
 

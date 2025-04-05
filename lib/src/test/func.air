@@ -372,20 +372,20 @@ do [
 -----
 [!(1)]
 =====
-mode primitive solve id
+mode primitive inverse id
 -----
 do [
-    f = mode ; {solve : id, default : eval*, primitive : true},
+    f = mode ; {inverse : id, default : eval*, primitive : true},
     f [?(.a)]
 ]
 -----
 [?(.a)]
 =====
-mode primitive solve form
+mode primitive inverse form
 -----
 do [
     b = 1,
-    f = mode ; {solve : form, default : eval*, primitive : true},
+    f = mode ; {inverse : form, default : eval*, primitive : true},
     f [?(b)]
 ]
 -----
@@ -560,7 +560,7 @@ function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
     optimize : !(form.),
-    solve : ?(form.),
+    inverse : ?(form.),
     abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
@@ -570,7 +570,7 @@ function.represent ; mode ; {
     symbol : *,
     pair : form. : eval*,
     optimize : !(form.),
-    solve : ?(form.),
+    inverse : ?(form.),
     abstract : @(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,
@@ -583,7 +583,7 @@ function.represent ; mode ; {
     pair : form,
     call : eval,
     optimize : form,
-    solve : form,
+    inverse : form,
     abstract : form,
     map : form,
     primitive : true,
@@ -594,7 +594,7 @@ function.represent ; mode ; {
     pair : form,
     call : eval,
     optimize : form,
-    solve : form,
+    inverse : form,
     abstract : form,
     map : form,
     primitive : true,
@@ -840,12 +840,12 @@ repr composite
 do [
     call_mode = mode ; {pair : eval* : id},
     optimize_mode = mode ; {pair : id : form.},
-    solve_mode = mode ; {pair : form. : form.},
+    inverse_mode = mode ; {pair : form. : form.},
     repr = form. ; {
         call : ctx : in -> in,
         call_mode : ^call_mode,
         optimize_mode : ^optimize_mode,
-        solve_mode : ^solve_mode,
+        inverse_mode : ^inverse_mode,
         context_access : constant,
         cell : true,
     },
@@ -941,13 +941,13 @@ do [
 -----
 {map : {a : form.} : eval* : id}
 =====
-solve mode
+inverse mode
 -----
 do [
     f = function ; {
-        solve_mode : mode ; {map : {a : form.} : eval* : id},
+        inverse_mode : mode ; {map : {a : form.} : eval* : id},
     },
-    function.represent ; f function.solve_mode .
+    function.represent ; f function.inverse_mode .
 ]
 -----
 {map : {a : form.} : eval* : id}

@@ -7,6 +7,8 @@ use crate::{
     ChangeMode,
     CodeMode,
     CompMode,
+    Inverse,
+    InverseMode,
     List,
     ListMode,
     Map,
@@ -16,8 +18,6 @@ use crate::{
     OptimizeMode,
     Pair,
     PairMode,
-    Solve,
-    SolveMode,
     SymbolMode,
     UniMode,
     Val,
@@ -27,7 +27,7 @@ use crate::{
 pub struct FuncMode {
     pub call: Option<Mode>,
     pub optimize: Option<Mode>,
-    pub solve: Option<Mode>,
+    pub inverse: Option<Mode>,
 }
 
 impl FuncMode {
@@ -40,7 +40,7 @@ impl FuncMode {
     }
 
     pub fn id_func_mode() -> FuncMode {
-        FuncMode { call: None, optimize: None, solve: None }
+        FuncMode { call: None, optimize: None, inverse: None }
     }
 
     pub const fn id_mode() -> Option<Mode> {
@@ -88,9 +88,9 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn solve_mode(func: Option<Mode>) -> Option<Mode> {
+    pub fn inverse_mode(func: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            solve: Some(SolveMode { solve: Solve::new(func) }),
+            inverse: Some(InverseMode { inverse: Inverse::new(func) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
@@ -129,7 +129,7 @@ impl Default for FuncMode {
         Self {
             call: Self::default_mode(),
             optimize: Self::default_mode(),
-            solve: Self::default_mode(),
+            inverse: Self::default_mode(),
         }
     }
 }

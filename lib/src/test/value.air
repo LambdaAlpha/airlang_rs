@@ -70,11 +70,11 @@ do [a = any ; optimize, a type .]
 -----
 optimize
 =====
-any solve
+any inverse
 -----
-do [a = any ; solve, a type .]
+do [a = any ; inverse, a type .]
 -----
-solve
+inverse
 =====
 any list
 -----
@@ -172,11 +172,11 @@ do [a = id ; !(f), a type .]
 -----
 optimize
 =====
-type solve
+type inverse
 -----
 do [a = id ; ?(f), a type .]
 -----
-solve
+inverse
 =====
 type list
 -----
@@ -268,7 +268,7 @@ do [a = id ; !(f), b = id ; !(f), (a == b) and not ; a == .]
 -----
 true
 =====
-== solve
+== inverse
 -----
 do [a = id ; ?(f), b = id ; ?(f), (a == b) and not ; a == .]
 -----

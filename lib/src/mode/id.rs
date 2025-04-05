@@ -2,9 +2,9 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    InverseVal,
     OptimizeVal,
     PairVal,
-    SolveVal,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
     transformer::{
@@ -61,9 +61,9 @@ impl ByVal<Val> for Id {
         Val::Optimize(optimize)
     }
 
-    fn transform_solve<'a, Ctx>(&self, _ctx: Ctx, solve: SolveVal) -> Val
+    fn transform_inverse<'a, Ctx>(&self, _ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
-        Val::Solve(solve)
+        Val::Inverse(inverse)
     }
 
     fn transform_abstract<'a, Ctx>(&self, _ctx: Ctx, abstract1: AbstractVal) -> Val

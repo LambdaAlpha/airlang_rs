@@ -13,12 +13,12 @@ use crate::{
     call::Call,
     change::Change,
     int::Int,
+    inverse::Inverse,
     list::List,
     map::Map,
     number::Number,
     optimize::Optimize,
     pair::Pair,
-    solve::Solve,
     symbol::Symbol,
     syntax::{
         ABSTRACT,
@@ -26,6 +26,7 @@ use crate::{
         CALL,
         CHANGE,
         FALSE,
+        INVERSE,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
@@ -35,7 +36,6 @@ use crate::{
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
-        SOLVE,
         SYMBOL_QUOTE,
         TEXT_QUOTE,
         TRUE,
@@ -61,7 +61,7 @@ pub(crate) enum GenRepr<'a> {
     Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     Optimize(Box<Optimize<GenRepr<'a>>>),
-    Solve(Box<Solve<GenRepr<'a>>>),
+    Inverse(Box<Inverse<GenRepr<'a>>>),
     Abstract(Box<Abstract<GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
@@ -136,7 +136,7 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
         GenRepr::Optimize(optimize) => gen_optimize(ctx, *optimize, s),
-        GenRepr::Solve(solve) => gen_solve(ctx, *solve, s),
+        GenRepr::Inverse(inverse) => gen_inverse(ctx, *inverse, s),
         GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
@@ -305,10 +305,10 @@ fn gen_optimize(ctx: GenCtx, optimize: Optimize<GenRepr>, s: &mut String) {
     s.push(SCOPE_RIGHT);
 }
 
-fn gen_solve(ctx: GenCtx, solve: Solve<GenRepr>, s: &mut String) {
-    s.push_str(SOLVE);
+fn gen_inverse(ctx: GenCtx, inverse: Inverse<GenRepr>, s: &mut String) {
+    s.push_str(INVERSE);
     s.push(SCOPE_LEFT);
-    gen1(ctx, solve.func, s);
+    gen1(ctx, inverse.func, s);
     s.push(SCOPE_RIGHT);
 }
 

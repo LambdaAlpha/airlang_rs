@@ -46,6 +46,7 @@ use crate::{
         extension::ExtPrelude,
         func::FuncPrelude,
         int::IntPrelude,
+        inverse::InversePrelude,
         list::ListPrelude,
         map::MapPrelude,
         meta::MetaPrelude,
@@ -53,7 +54,6 @@ use crate::{
         number::NumberPrelude,
         optimize::OptimizePrelude,
         pair::PairPrelude,
-        solve::SolvePrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
         text::TextPrelude,
@@ -86,7 +86,7 @@ pub(crate) struct AllPrelude {
     pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
     pub(crate) optimize: OptimizePrelude,
-    pub(crate) solve: SolvePrelude,
+    pub(crate) inverse: InversePrelude,
     pub(crate) abstract1: AbstractPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
@@ -112,7 +112,7 @@ impl Prelude for AllPrelude {
         self.change.put(m);
         self.call.put(m);
         self.optimize.put(m);
-        self.solve.put(m);
+        self.inverse.put(m);
         self.abstract1.put(m);
         self.list.put(m);
         self.map.put(m);
@@ -288,7 +288,7 @@ mod call;
 
 mod optimize;
 
-mod solve;
+mod inverse;
 
 mod abstract1;
 

@@ -2,9 +2,9 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    InverseVal,
     OptimizeVal,
     PairVal,
-    SolveVal,
     SymbolMode,
     core::{
         EvalCore,
@@ -70,9 +70,9 @@ impl ByVal<Val> for Eval {
         FormCore::transform_optimize(self, ctx, optimize)
     }
 
-    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
+    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_solve(self, ctx, solve)
+        FormCore::transform_inverse(self, ctx, inverse)
     }
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val

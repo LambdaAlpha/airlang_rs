@@ -8,12 +8,12 @@ use crate::{
     CompMode,
     CtxAccess,
     FuncMode,
+    InverseMode,
     ListMode,
     MapMode,
     OptimizeMode,
     PairMode,
     PrimMode,
-    SolveMode,
     SymbolMode,
     UniMode,
     Val,
@@ -47,7 +47,7 @@ impl FuncTrait for ModeFunc {
         &FuncMode {
             call: None,
             optimize: None,
-            solve: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
+            inverse: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
         }
     }
 
@@ -127,7 +127,7 @@ impl GetCtxAccess for PrimMode {
             & self.pair.ctx_access()
             & self.call.ctx_access()
             & self.optimize.ctx_access()
-            & self.solve.ctx_access()
+            & self.inverse.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -154,7 +154,7 @@ impl GetCtxAccess for CompMode {
             & self.pair.ctx_access()
             & self.call.ctx_access()
             & self.optimize.ctx_access()
-            & self.solve.ctx_access()
+            & self.inverse.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -187,9 +187,9 @@ impl GetCtxAccess for OptimizeMode {
     }
 }
 
-impl GetCtxAccess for SolveMode {
+impl GetCtxAccess for InverseMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.solve.func.ctx_access()
+        self.inverse.func.ctx_access()
     }
 }
 

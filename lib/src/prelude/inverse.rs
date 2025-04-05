@@ -3,9 +3,9 @@ use std::mem::swap;
 use crate::{
     ConstFnCtx,
     FuncMode,
+    Inverse,
     Map,
     Pair,
-    Solve,
     Symbol,
     Val,
     ctx::{
@@ -21,25 +21,25 @@ use crate::{
         named_mut_fn,
         ref_pair_mode,
     },
-    syntax::SOLVE,
+    syntax::INVERSE,
     types::either::Either,
     val::func::FuncVal,
 };
 
 #[derive(Clone)]
-pub(crate) struct SolvePrelude {
+pub(crate) struct InversePrelude {
     pub(crate) new: Named<FuncVal>,
     pub(crate) get_func: Named<FuncVal>,
     pub(crate) set_func: Named<FuncVal>,
 }
 
-impl Default for SolvePrelude {
+impl Default for InversePrelude {
     fn default() -> Self {
-        SolvePrelude { new: new(), get_func: get_func(), set_func: set_func() }
+        InversePrelude { new: new(), get_func: get_func(), set_func: set_func() }
     }
 }
 
-impl Prelude for SolvePrelude {
+impl Prelude for InversePrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         self.new.put(m);
         self.get_func.put(m);
@@ -48,23 +48,23 @@ impl Prelude for SolvePrelude {
 }
 
 fn new() -> Named<FuncVal> {
-    let id = SOLVE;
+    let id = INVERSE;
     let f = fn_new;
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
 
 fn fn_new(input: Val) -> Val {
-    Val::Solve(Solve::new(input).into())
+    Val::Inverse(Inverse::new(input).into())
 }
 
 fn get_func() -> Named<FuncVal> {
-    let id = "solve.function";
+    let id = "inverse.function";
     let f = fn_get_func;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -75,23 +75,23 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
     let pair = Pair::from(pair);
     DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
-            Val::Solve(solve) => solve.func.clone(),
+            Val::Inverse(inverse) => inverse.func.clone(),
             _ => Val::default(),
         },
         Either::That(val) => match val {
-            Val::Solve(solve) => Solve::from(solve).func,
+            Val::Inverse(inverse) => Inverse::from(inverse).func,
             _ => Val::default(),
         },
     })
 }
 
 fn set_func() -> Named<FuncVal> {
-    let id = "solve.set_function";
+    let id = "inverse.set_function";
     let f = fn_set_func;
     let call = ref_pair_mode();
     let optimize = call.clone();
-    let solve = FuncMode::default_mode();
-    let mode = FuncMode { call, optimize, solve };
+    let inverse = FuncMode::default_mode();
+    let mode = FuncMode { call, optimize, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -103,11 +103,11 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let name = name_val.first;
     let mut val = name_val.second;
     DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(mut solve) => {
-            let Some(Val::Solve(solve)) = solve.as_mut() else {
+        Either::This(mut inverse) => {
+            let Some(Val::Inverse(inverse)) = inverse.as_mut() else {
                 return Val::default();
             };
-            swap(&mut solve.func, &mut val);
+            swap(&mut inverse.func, &mut val);
             val
         }
         Either::That(_) => Val::default(),

@@ -58,12 +58,12 @@ use crate::{
     call::Call,
     change::Change,
     int::Int,
+    inverse::Inverse,
     list::List,
     map::Map,
     number::Number,
     optimize::Optimize,
     pair::Pair,
-    solve::Solve,
     symbol::Symbol,
     syntax::{
         ABSTRACT,
@@ -75,6 +75,7 @@ use crate::{
         FALSE,
         INLINE_COMMENT,
         INT,
+        INVERSE,
         LEFT,
         LIST_LEFT,
         LIST_RIGHT,
@@ -88,7 +89,6 @@ use crate::{
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
-        SOLVE,
         SPACE,
         SYMBOL_QUOTE,
         TAG,
@@ -115,7 +115,7 @@ pub(crate) trait ParseRepr:
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
     + From<Optimize<Self>>
-    + From<Solve<Self>>
+    + From<Inverse<Self>>
     + From<Abstract<Self>>
     + From<List<Self>>
     + Eq
@@ -355,7 +355,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
             OPTIMIZE => optimize(ctx).parse_next(i),
-            SOLVE => solve(ctx).parse_next(i),
+            INVERSE => inverse(ctx).parse_next(i),
             ABSTRACT => abstract1(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
@@ -511,8 +511,8 @@ fn optimize<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     scope(ctx).map(|t| T::from(Optimize::new(t)))
 }
 
-fn solve<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Solve::new(t)))
+fn inverse<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Inverse::new(t)))
 }
 
 fn abstract1<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {

@@ -118,8 +118,8 @@ fn test_optimize() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_solve() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/solve.air"), "test/solve.air")
+fn test_inverse() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/inverse.air"), "test/inverse.air")
 }
 
 #[test]

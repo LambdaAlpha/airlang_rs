@@ -4,11 +4,11 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    InverseVal,
     ListVal,
     MapVal,
     OptimizeVal,
     PairVal,
-    SolveVal,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
@@ -59,7 +59,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     fn transform_optimize<'a, Ctx>(&self, ctx: Ctx, optimize: OptimizeVal) -> Output
     where Ctx: CtxMeta<'a>;
 
-    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Output
+    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Output

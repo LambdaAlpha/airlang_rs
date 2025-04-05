@@ -14,7 +14,7 @@ new get
 do [
     f = any ; .,
     i = '?' ; f,
-    f == i solve.function .
+    f == i inverse.function .
 ]
 -----
 true
@@ -22,10 +22,10 @@ true
 set get
 -----
 do [
-    i = any ; solve,
+    i = any ; inverse,
     f = any ; .,
-    i solve.set_function f,
-    f == i solve.function .
+    i inverse.set_function f,
+    f == i inverse.function .
 ]
 -----
 true
@@ -35,7 +35,7 @@ set return
 do [
     f1 = any ; .,
     i = ?(f1),
-    f2 = i solve.set_function any ; .,
+    f2 = i inverse.set_function any ; .,
     f1 == f2
 ]
 -----

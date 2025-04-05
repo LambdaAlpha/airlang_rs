@@ -28,6 +28,8 @@ use crate::{
     FreeCellCompFuncVal,
     FreeStaticCompFunc,
     FreeStaticCompFuncVal,
+    Inverse,
+    InverseMode,
     Mode,
     ModeFunc,
     ModeFuncVal,
@@ -35,8 +37,6 @@ use crate::{
     MutStaticCompFuncVal,
     Optimize,
     OptimizeMode,
-    Solve,
-    SolveMode,
     SymbolMode,
     Val,
     ValExt,
@@ -107,7 +107,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // change
         1,      // call
         1,      // optimize
-        1,      // solve
+        1,      // inverse
         1,      // abstract
         1,      // list
         1,      // map
@@ -130,7 +130,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         8 => Val::Change(any_change(rng, new_depth).into()),
         9 => Val::Call(any_call(rng, new_depth).into()),
         10 => Val::Optimize(any_optimize(rng, new_depth).into()),
-        11 => Val::Solve(any_solve(rng, new_depth).into()),
+        11 => Val::Inverse(any_inverse(rng, new_depth).into()),
         12 => Val::Abstract(any_abstract(rng, new_depth).into()),
         13 => Val::List(any_list(rng, new_depth).into()),
         14 => Val::Map(any_map(rng, new_depth).into()),
@@ -214,8 +214,8 @@ pub(crate) fn any_optimize(rng: &mut SmallRng, depth: usize) -> Optimize<Val> {
     Optimize::new(any_val(rng, depth))
 }
 
-pub(crate) fn any_solve(rng: &mut SmallRng, depth: usize) -> Solve<Val> {
-    Solve::new(any_val(rng, depth))
+pub(crate) fn any_inverse(rng: &mut SmallRng, depth: usize) -> Inverse<Val> {
+    Inverse::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val> {
@@ -307,11 +307,11 @@ impl Arbitrary for CompMode {
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let optimize = Arbitrary::any(rng, depth);
-        let solve = Arbitrary::any(rng, depth);
+        let inverse = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, optimize, solve, abstract1, list, map }
+        CompMode { symbol, pair, change, call, optimize, inverse, abstract1, list, map }
     }
 }
 
@@ -355,12 +355,12 @@ impl Arbitrary for OptimizeMode {
     }
 }
 
-impl Arbitrary for SolveMode {
+impl Arbitrary for InverseMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let solve = Solve::new(func);
-        SolveMode { solve }
+        let inverse = Inverse::new(func);
+        InverseMode { inverse }
     }
 }
 
@@ -409,11 +409,11 @@ impl Arbitrary for PrimMode {
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let optimize = Arbitrary::any(rng, depth);
-        let solve = Arbitrary::any(rng, depth);
+        let inverse = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, optimize, solve, abstract1, list, map }
+        PrimMode { symbol, pair, change, call, optimize, inverse, abstract1, list, map }
     }
 }
 
@@ -487,8 +487,8 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     let call = Arbitrary::any(rng, depth);
     let optimize = Arbitrary::any(rng, depth);
-    let solve = Arbitrary::any(rng, depth);
-    FuncMode { call, optimize, solve }
+    let inverse = Arbitrary::any(rng, depth);
+    FuncMode { call, optimize, inverse }
 }
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {

@@ -42,8 +42,8 @@ pub(crate) const CALL: &str = concatcp!(CALL_CHAR);
 
 pub(crate) const OPTIMIZE_CHAR: char = '!';
 pub(crate) const OPTIMIZE: &str = concatcp!(OPTIMIZE_CHAR);
-pub(crate) const SOLVE_CHAR: char = '?';
-pub(crate) const SOLVE: &str = concatcp!(SOLVE_CHAR);
+pub(crate) const INVERSE_CHAR: char = '?';
+pub(crate) const INVERSE: &str = concatcp!(INVERSE_CHAR);
 pub(crate) const ABSTRACT: &str = "@";
 
 pub(crate) const INT: &str = "integer";

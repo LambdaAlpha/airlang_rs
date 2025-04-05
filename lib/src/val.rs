@@ -9,10 +9,10 @@ use std::{
 use crate::{
     Call,
     Int,
+    Inverse,
     List,
     Map,
     Pair,
-    Solve,
     abstract1::Abstract,
     bit::Bit,
     byte::Byte,
@@ -37,12 +37,12 @@ use crate::{
         ctx::CtxVal,
         func::FuncVal,
         int::IntVal,
+        inverse::InverseVal,
         list::ListVal,
         map::MapVal,
         number::NumberVal,
         optimize::OptimizeVal,
         pair::PairVal,
-        solve::SolveVal,
         text::TextVal,
     },
 };
@@ -64,7 +64,7 @@ pub enum Val {
 
     Call(CallVal),
     Optimize(OptimizeVal),
-    Solve(SolveVal),
+    Inverse(InverseVal),
     Abstract(AbstractVal),
 
     List(ListVal),
@@ -87,7 +87,7 @@ pub(crate) const PAIR: &str = "pair";
 pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
 pub(crate) const OPTIMIZE: &str = "optimize";
-pub(crate) const SOLVE: &str = "solve";
+pub(crate) const INVERSE: &str = "inverse";
 pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
@@ -221,15 +221,15 @@ impl From<OptimizeVal> for Val {
     }
 }
 
-impl From<Solve<Val>> for Val {
-    fn from(value: Solve<Val>) -> Self {
-        Val::Solve(SolveVal::from(value))
+impl From<Inverse<Val>> for Val {
+    fn from(value: Inverse<Val>) -> Self {
+        Val::Inverse(InverseVal::from(value))
     }
 }
 
-impl From<SolveVal> for Val {
-    fn from(value: SolveVal) -> Self {
-        Val::Solve(value)
+impl From<InverseVal> for Val {
+    fn from(value: InverseVal) -> Self {
+        Val::Inverse(value)
     }
 }
 
@@ -301,7 +301,7 @@ impl From<&Repr> for Val {
             Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(&**optimize)),
-            Repr::Solve(solve) => Val::Solve(SolveVal::from(&**solve)),
+            Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(&**inverse)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -323,7 +323,7 @@ impl From<Repr> for Val {
             Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::Optimize(optimize) => Val::Optimize(OptimizeVal::from(*optimize)),
-            Repr::Solve(solve) => Val::Solve(SolveVal::from(*solve)),
+            Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(*inverse)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -346,7 +346,7 @@ impl TryInto<Repr> for &Val {
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
-            Val::Solve(solve) => Ok(Repr::Solve(Box::new(solve.try_into()?))),
+            Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -370,7 +370,7 @@ impl TryInto<Repr> for Val {
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Optimize(optimize) => Ok(Repr::Optimize(Box::new(optimize.try_into()?))),
-            Val::Solve(solve) => Ok(Repr::Solve(Box::new(solve.try_into()?))),
+            Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -412,9 +412,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let func = (&optimize.func).try_into()?;
                 GenRepr::Optimize(Box::new(Optimize::new(func)))
             }
-            Val::Solve(solve) => {
-                let func = (&solve.func).try_into()?;
-                GenRepr::Solve(Box::new(Solve::new(func)))
+            Val::Inverse(inverse) => {
+                let func = (&inverse.func).try_into()?;
+                GenRepr::Inverse(Box::new(Inverse::new(func)))
             }
             Val::Abstract(abstract1) => {
                 let value = (&abstract1.value).try_into()?;
@@ -456,7 +456,7 @@ impl Debug for Val {
             Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Optimize(optimize) => <_ as Debug>::fmt(optimize, f),
-            Val::Solve(solve) => <_ as Debug>::fmt(solve, f),
+            Val::Inverse(inverse) => <_ as Debug>::fmt(inverse, f),
             Val::Abstract(abstrac1) => <_ as Debug>::fmt(abstrac1, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
@@ -483,7 +483,7 @@ pub(crate) mod call;
 
 pub(crate) mod optimize;
 
-pub(crate) mod solve;
+pub(crate) mod inverse;
 
 pub(crate) mod abstract1;
 

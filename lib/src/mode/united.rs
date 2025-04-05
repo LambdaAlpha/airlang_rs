@@ -5,11 +5,11 @@ use crate::{
     CallVal,
     ChangeVal,
     CodeMode,
+    InverseVal,
     ListVal,
     MapVal,
     OptimizeVal,
     PairVal,
-    SolveVal,
     Symbol,
     SymbolMode,
     Val,
@@ -104,11 +104,11 @@ impl ByVal<Val> for UniMode {
         }
     }
 
-    fn transform_solve<'a, Ctx>(&self, ctx: Ctx, solve: SolveVal) -> Val
+    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_solve(ctx, solve),
-            CodeMode::Eval => Eval::new(self.symbol).transform_solve(ctx, solve),
+            CodeMode::Form => Form::new(self.symbol).transform_inverse(ctx, inverse),
+            CodeMode::Eval => Eval::new(self.symbol).transform_inverse(ctx, inverse),
         }
     }
 

@@ -218,7 +218,7 @@ do [!(f) = !(1), f]
 -----
 1
 =====
-= destruct solve
+= destruct inverse
 -----
 do [?(f) = ?(1), f]
 -----

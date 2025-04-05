@@ -67,7 +67,7 @@ pub(crate) mod call;
 
 pub(crate) mod optimize;
 
-pub(crate) mod solve;
+pub(crate) mod inverse;
 
 pub(crate) mod abstract1;
 
