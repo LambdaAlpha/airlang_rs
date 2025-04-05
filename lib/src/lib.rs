@@ -42,7 +42,7 @@ pub(crate) mod val;
 
 pub(crate) mod core;
 
-pub(crate) mod advisor;
+pub(crate) mod solver;
 
 pub(crate) mod transformer;
 

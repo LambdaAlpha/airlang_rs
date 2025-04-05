@@ -476,7 +476,7 @@ do [a = context ; {}, a | access ; .]
 -----
 mutable
 =====
-set_advisor
+set_solver
 -----
 do [
     s1 = function ; {
@@ -485,16 +485,16 @@ do [
         call : _ -> do ; [.a = .a + 1, .a],
         context : context ; {variables : {a : 0}},
     },
-    set_advisor ^s1,
-    s2 = advisor ; .,
+    set_solver ^s1,
+    s2 = solver ; .,
     [.s2 ; ., .s2 ; ., .s2 ; .]
 ]
 -----
 [1, 2, 3]
 =====
-set_advisor .
+set_solver .
 -----
-do [set_advisor ., s = advisor ; ., s == .]
+do [set_solver ., s = solver ; ., s == .]
 -----
 true
 =====

@@ -388,12 +388,12 @@ impl EvalCore {
     where Ctx: CtxMeta<'a> {
         let optimize = Val::Optimize(Optimize::new(Val::Func(func.clone())).into());
         let question = Val::Call(Call::new(optimize, input.clone()).into());
-        if let Some(answer) = Self::call_advisor(ctx.reborrow(), question) {
+        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
             if answer != input {
                 return answer;
             }
         }
-        crate::advisor::optimize(ctx, func, input)
+        crate::solver::optimize(ctx, func, input)
     }
 
     // ?(f) ; v evaluates to . or any i that (f ; i) always evaluates to v
@@ -445,32 +445,32 @@ impl EvalCore {
     where Ctx: CtxMeta<'a> {
         let inverse = Val::Inverse(Inverse::new(Val::Func(func.clone())).into());
         let question = Val::Call(Call::new(inverse, input.clone()).into());
-        if let Some(answer) = Self::call_advisor(ctx.reborrow(), question) {
+        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
             if !answer.is_unit() {
                 return answer;
             }
         }
-        crate::advisor::inverse(ctx, func, input)
+        crate::solver::inverse(ctx, func, input)
     }
 
-    pub(crate) fn call_advisor<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>
+    pub(crate) fn call_solver<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>
     where Ctx: CtxMeta<'a> {
         let (ctx, is_const) = match ctx.for_mut_fn() {
             MutFnCtx::Free(_) => return None,
             MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
             MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
         };
-        let mut advisor = ctx.set_advisor(None).unwrap()?;
-        let answer = if advisor.is_cell() {
-            let answer = Self::call_ref(&mut advisor, ctx, is_const, question);
-            let _ = ctx.set_advisor(Some(advisor));
+        let mut solver = ctx.set_solver(None).unwrap()?;
+        let answer = if solver.is_cell() {
+            let answer = Self::call_ref(&mut solver, ctx, is_const, question);
+            let _ = ctx.set_solver(Some(solver));
             answer
         } else {
-            let _ = ctx.set_advisor(Some(advisor.clone()));
+            let _ = ctx.set_solver(Some(solver.clone()));
             if is_const {
-                advisor.transform(ConstCtx::new(ctx), question)
+                solver.transform(ConstCtx::new(ctx), question)
             } else {
-                advisor.transform(MutCtx::new(ctx), question)
+                solver.transform(MutCtx::new(ctx), question)
             }
         };
         Some(answer)

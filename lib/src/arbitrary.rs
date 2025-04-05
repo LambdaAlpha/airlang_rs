@@ -262,8 +262,8 @@ pub(crate) fn any_ctx_map(rng: &mut SmallRng, depth: usize) -> Map<Symbol, CtxVa
 pub(crate) fn any_ctx(rng: &mut SmallRng, depth: usize) -> Ctx {
     let variables = any_ctx_map(rng, depth);
     let variables = CtxMap::new(variables, rng.random());
-    let advisor = if rng.random() { Some(any_func(rng, depth)) } else { None };
-    Ctx::new(variables, advisor)
+    let solver = if rng.random() { Some(any_func(rng, depth)) } else { None };
+    Ctx::new(variables, solver)
 }
 
 impl<T: Arbitrary> Arbitrary for Option<T> {

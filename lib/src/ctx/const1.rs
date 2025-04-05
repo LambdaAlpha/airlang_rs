@@ -48,21 +48,21 @@ impl<'l> CtxRef<'l> for ConstCtx<'l> {
         Ok(dyn_ref)
     }
 
-    fn get_advisor(self) -> Result<&'l FuncVal, CtxError> {
-        self.0.get_advisor()
+    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
+        self.0.get_solver()
     }
 
-    fn get_advisor_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
         Err(CtxError::AccessDenied)
     }
 
-    fn get_advisor_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
-        let mut dyn_ref = self.0.get_advisor_dyn()?;
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+        let mut dyn_ref = self.0.get_solver_dyn()?;
         dyn_ref.is_const = true;
         Ok(dyn_ref)
     }
 
-    fn set_advisor(self, _advisor: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
+    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         Err(CtxError::AccessDenied)
     }
 }
@@ -119,31 +119,31 @@ impl<'l> CtxRef<'l> for ConstFnCtx<'l> {
         }
     }
 
-    fn get_advisor(self) -> Result<&'l FuncVal, CtxError> {
+    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.get_advisor(),
-            ConstFnCtx::Const(ctx) => ctx.get_advisor(),
+            ConstFnCtx::Free(ctx) => ctx.get_solver(),
+            ConstFnCtx::Const(ctx) => ctx.get_solver(),
         }
     }
 
-    fn get_advisor_mut(self) -> Result<&'l mut FuncVal, CtxError> {
+    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.get_advisor_mut(),
-            ConstFnCtx::Const(ctx) => ctx.get_advisor_mut(),
+            ConstFnCtx::Free(ctx) => ctx.get_solver_mut(),
+            ConstFnCtx::Const(ctx) => ctx.get_solver_mut(),
         }
     }
 
-    fn get_advisor_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
+    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.get_advisor_dyn(),
-            ConstFnCtx::Const(ctx) => ctx.get_advisor_dyn(),
+            ConstFnCtx::Free(ctx) => ctx.get_solver_dyn(),
+            ConstFnCtx::Const(ctx) => ctx.get_solver_dyn(),
         }
     }
 
-    fn set_advisor(self, advisor: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
+    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
         match self {
-            ConstFnCtx::Free(ctx) => ctx.set_advisor(advisor),
-            ConstFnCtx::Const(ctx) => ctx.set_advisor(advisor),
+            ConstFnCtx::Free(ctx) => ctx.set_solver(solver),
+            ConstFnCtx::Const(ctx) => ctx.set_solver(solver),
         }
     }
 }

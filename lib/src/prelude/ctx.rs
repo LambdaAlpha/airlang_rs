@@ -67,8 +67,8 @@ pub(crate) struct CtxPrelude {
     pub(crate) is_reverse: Named<FuncVal>,
     pub(crate) set_reverse: Named<FuncVal>,
     pub(crate) get_ctx_access: Named<FuncVal>,
-    pub(crate) get_advisor: Named<FuncVal>,
-    pub(crate) set_advisor: Named<FuncVal>,
+    pub(crate) get_solver: Named<FuncVal>,
+    pub(crate) set_solver: Named<FuncVal>,
     pub(crate) with_ctx: Named<FuncVal>,
     pub(crate) ctx_in_ctx_out: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
@@ -90,8 +90,8 @@ impl Default for CtxPrelude {
             is_reverse: is_reverse(),
             set_reverse: set_reverse(),
             get_ctx_access: get_ctx_access(),
-            get_advisor: get_advisor(),
-            set_advisor: set_advisor(),
+            get_solver: get_solver(),
+            set_solver: set_solver(),
             with_ctx: with_ctx(),
             ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
@@ -114,8 +114,8 @@ impl Prelude for CtxPrelude {
         self.is_reverse.put(m);
         self.set_reverse.put(m);
         self.get_ctx_access.put(m);
-        self.get_advisor.put(m);
-        self.set_advisor.put(m);
+        self.get_solver.put(m);
+        self.set_solver.put(m);
         self.with_ctx.put(m);
         self.ctx_in_ctx_out.put(m);
         self.ctx_new.put(m);
@@ -347,9 +347,9 @@ fn fn_get_ctx_access(ctx: MutFnCtx, _input: Val) -> Val {
     symbol(access)
 }
 
-fn get_advisor() -> Named<FuncVal> {
-    let id = "advisor";
-    let f = fn_get_advisor;
+fn get_solver() -> Named<FuncVal> {
+    let id = "solver";
+    let f = fn_get_solver;
     let call = FuncMode::default_mode();
     let optimize = call.clone();
     let inverse = FuncMode::default_mode();
@@ -357,27 +357,27 @@ fn get_advisor() -> Named<FuncVal> {
     named_const_fn(id, f, mode)
 }
 
-fn fn_get_advisor(ctx: ConstFnCtx, _input: Val) -> Val {
-    match ctx.get_advisor() {
-        Ok(advisor) => Val::Func(advisor.clone()),
+fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
+    match ctx.get_solver() {
+        Ok(solver) => Val::Func(solver.clone()),
         _ => Val::default(),
     }
 }
 
-fn set_advisor() -> Named<FuncVal> {
-    let id = "set_advisor";
-    let f = fn_set_advisor;
+fn set_solver() -> Named<FuncVal> {
+    let id = "set_solver";
+    let f = fn_set_solver;
     let mode = FuncMode::default();
     named_mut_fn(id, f, mode)
 }
 
-fn fn_set_advisor(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
     match input {
         Val::Unit(_) => {
-            let _ = ctx.set_advisor(None);
+            let _ = ctx.set_solver(None);
         }
-        Val::Func(advisor) => {
-            let _ = ctx.set_advisor(Some(advisor));
+        Val::Func(solver) => {
+            let _ = ctx.set_solver(Some(solver));
         }
         _ => {}
     }

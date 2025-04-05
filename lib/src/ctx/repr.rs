@@ -49,7 +49,7 @@ pub(crate) const CONST: &str = "constant";
 
 pub(crate) const VARIABLES: &str = "variables";
 pub(crate) const REVERSE: &str = "reverse";
-pub(crate) const ADVISOR: &str = "advisor";
+pub(crate) const SOLVER: &str = "solver";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
@@ -80,12 +80,12 @@ pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
         _ => return None,
     };
     let variables = CtxMap::new(variables, reverse);
-    let advisor = match map_remove(&mut map, ADVISOR) {
+    let solver = match map_remove(&mut map, SOLVER) {
         Val::Unit(_) => None,
-        Val::Func(advisor) => Some(advisor),
+        Val::Func(solver) => Some(solver),
         _ => return None,
     };
-    let ctx = Ctx::new(variables, advisor);
+    let ctx = Ctx::new(variables, solver);
     Some(ctx.into())
 }
 
@@ -180,8 +180,8 @@ pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     if let Some(variables) = generate_ctx_map(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);
     }
-    if let Some(advisor) = ctx.advisor {
-        map.insert(symbol(ADVISOR), Val::Func(advisor));
+    if let Some(solver) = ctx.solver {
+        map.insert(symbol(SOLVER), Val::Func(solver));
     }
     Val::Map(map.into())
 }
