@@ -1,5 +1,9 @@
-use const_format::concatcp;
 pub use pub1::*;
+
+// https://github.com/rust-lang/rustfmt/issues/4070
+mod __ {}
+
+use const_format::concatcp;
 
 // delimiters
 
