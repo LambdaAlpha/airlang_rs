@@ -5,10 +5,10 @@ use crate::{
     CallMode,
     Change,
     ChangeMode,
-    Class,
-    ClassMode,
     CodeMode,
     CompMode,
+    Equiv,
+    EquivMode,
     Inverse,
     InverseMode,
     List,
@@ -26,7 +26,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FuncMode {
     pub call: Option<Mode>,
-    pub class: Option<Mode>,
+    pub equiv: Option<Mode>,
     pub inverse: Option<Mode>,
 }
 
@@ -40,7 +40,7 @@ impl FuncMode {
     }
 
     pub fn id_func_mode() -> FuncMode {
-        FuncMode { call: None, class: None, inverse: None }
+        FuncMode { call: None, equiv: None, inverse: None }
     }
 
     pub const fn id_mode() -> Option<Mode> {
@@ -80,9 +80,9 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn class_mode(func: Option<Mode>) -> Option<Mode> {
+    pub fn equiv_mode(func: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
-            class: Some(ClassMode { class: Class::new(func) }),
+            equiv: Some(EquivMode { equiv: Equiv::new(func) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
@@ -128,7 +128,7 @@ impl Default for FuncMode {
     fn default() -> Self {
         Self {
             call: Self::default_mode(),
-            class: Self::default_mode(),
+            equiv: Self::default_mode(),
             inverse: Self::default_mode(),
         }
     }

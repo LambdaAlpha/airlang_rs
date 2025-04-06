@@ -4,7 +4,7 @@ use crate::{
     Bit,
     Call,
     Change,
-    Class,
+    Equiv,
     Inverse,
     List,
     ListVal,
@@ -21,8 +21,8 @@ use crate::{
     mode::{
         call::CallMode,
         change::ChangeMode,
-        class::ClassMode,
         comp::CompMode,
+        equiv::EquivMode,
         id::ID,
         inverse::InverseMode,
         list::ListMode,
@@ -55,7 +55,7 @@ use crate::{
         ABSTRACT,
         CALL,
         CHANGE,
-        CLASS,
+        EQUIV,
         INVERSE,
         LIST,
         MAP,
@@ -280,12 +280,12 @@ impl ParseMode<MapVal> for CompMode {
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let class = ParseMode::parse(map_remove(&mut map, CLASS), default)?;
+        let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
         let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
         let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode { symbol, pair, change, call, class, inverse, abstract1, list, map })
+        Some(CompMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map })
     }
 }
 
@@ -304,8 +304,8 @@ impl GenerateMode<MapVal> for CompMode {
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
         }
-        if default.map(Into::into) != self.class {
-            map.insert(symbol(CLASS), self.class.generate(default));
+        if default.map(Into::into) != self.equiv {
+            map.insert(symbol(EQUIV), self.equiv.generate(default));
         }
         if default.map(Into::into) != self.inverse {
             map.insert(symbol(INVERSE), self.inverse.generate(default));
@@ -330,12 +330,12 @@ impl ParseMode<MapVal> for PrimMode {
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let class = ParseMode::parse(map_remove(&mut map, CLASS), default)?;
+        let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
         let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
         let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode { symbol, pair, change, call, class, inverse, abstract1, list, map })
+        Some(PrimMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map })
     }
 }
 
@@ -354,8 +354,8 @@ impl GenerateMode<MapVal> for PrimMode {
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
         }
-        if default.map(Into::into) != self.class {
-            map.insert(symbol(CLASS), self.class.generate(default));
+        if default.map(Into::into) != self.equiv {
+            map.insert(symbol(EQUIV), self.equiv.generate(default));
         }
         if default.map(Into::into) != self.inverse {
             map.insert(symbol(INVERSE), self.inverse.generate(default));
@@ -489,24 +489,24 @@ impl GenerateMode<Val> for CallMode {
     }
 }
 
-impl ParseMode<Val> for ClassMode {
+impl ParseMode<Val> for EquivMode {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Class(class) => {
-                let class = Class::from(class);
-                let func = ParseMode::parse(class.func, default)?;
-                Some(ClassMode { class: Class::new(func) })
+            Val::Equiv(equiv) => {
+                let equiv = Equiv::from(equiv);
+                let func = ParseMode::parse(equiv.func, default)?;
+                Some(EquivMode { equiv: Equiv::new(func) })
             }
             _ => None,
         }
     }
 }
 
-impl GenerateMode<Val> for ClassMode {
+impl GenerateMode<Val> for EquivMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.class.func, default);
-        Val::Class(Class::new(func).into())
+        let func = GenerateMode::generate(&self.equiv.func, default);
+        Val::Equiv(Equiv::new(func).into())
     }
 }
 

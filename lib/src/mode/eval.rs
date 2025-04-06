@@ -2,7 +2,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
-    ClassVal,
+    EquivVal,
     InverseVal,
     PairVal,
     SymbolMode,
@@ -65,9 +65,9 @@ impl ByVal<Val> for Eval {
         EvalCore::transform_call(self, self, ctx, call)
     }
 
-    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
+    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_class(self, ctx, class)
+        FormCore::transform_equiv(self, ctx, equiv)
     }
 
     fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val

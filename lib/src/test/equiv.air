@@ -14,7 +14,7 @@ new get
 do [
     f = any ; .,
     c = '~' ; f,
-    f == c class.function .
+    f == c equiv.function .
 ]
 -----
 true
@@ -22,10 +22,10 @@ true
 set get
 -----
 do [
-    c = any ; class,
+    c = any ; equiv,
     f = any ; .,
-    c class.set_function f,
-    f == c class.function .
+    c equiv.set_function f,
+    f == c equiv.function .
 ]
 -----
 true
@@ -35,7 +35,7 @@ set return
 do [
     f1 = any ; .,
     c = ~(f1),
-    f2 = c class.set_function any ; .,
+    f2 = c equiv.set_function any ; .,
     f1 == f2
 ]
 -----

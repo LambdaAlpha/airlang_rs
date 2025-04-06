@@ -4,7 +4,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
-    ClassVal,
+    EquivVal,
     InverseVal,
     ListVal,
     MapVal,
@@ -56,7 +56,7 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
     where Ctx: CtxMeta<'a>;
 
-    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Output
+    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Output

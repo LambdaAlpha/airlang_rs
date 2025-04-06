@@ -2,7 +2,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
-    ClassVal,
+    EquivVal,
     InverseVal,
     ListVal,
     MapVal,
@@ -29,7 +29,7 @@ pub struct PrimMode {
     pub pair: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
-    pub class: Option<DataMode>,
+    pub equiv: Option<DataMode>,
     pub inverse: Option<DataMode>,
     pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
@@ -93,11 +93,11 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
-    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
+    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match self.class {
-            None => Id.transform_class(ctx, class),
-            Some(_) => FormCore::transform_class(self, ctx, class),
+        match self.equiv {
+            None => Id.transform_equiv(ctx, equiv),
+            Some(_) => FormCore::transform_equiv(self, ctx, equiv),
         }
     }
 
@@ -141,7 +141,7 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: None,
                 pair: None,
                 call: None,
-                class: None,
+                equiv: None,
                 inverse: None,
                 abstract1: None,
                 change: None,
@@ -152,7 +152,7 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
-                class: Some(DataMode::from(mode)),
+                equiv: Some(DataMode::from(mode)),
                 inverse: Some(DataMode::from(mode)),
                 abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),

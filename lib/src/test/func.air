@@ -353,20 +353,20 @@ do [
 -----
 [false]
 =====
-mode primitive class id
+mode primitive equiv id
 -----
 do [
-    f = mode ; {class : id, default : eval*, primitive : true},
+    f = mode ; {equiv : id, default : eval*, primitive : true},
     f [~(.a)]
 ]
 -----
 [~(.a)]
 =====
-mode primitive class form
+mode primitive equiv form
 -----
 do [
     b = 1,
-    f = mode ; {class : form, default : eval*, primitive : true},
+    f = mode ; {equiv : form, default : eval*, primitive : true},
     f [~(^b)]
 ]
 -----
@@ -559,7 +559,7 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
-    class : ~(form.),
+    equiv : ~(form.),
     inverse : !(form.),
     abstract : @(form.),
     list : [eval*, id],
@@ -569,7 +569,7 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
-    class : ~(form.),
+    equiv : ~(form.),
     inverse : !(form.),
     abstract : @(form.),
     list : [eval*, id],
@@ -582,7 +582,7 @@ function.represent ; mode ; {
     symbol : .^,
     pair : form,
     call : eval,
-    class : form,
+    equiv : form,
     inverse : form,
     abstract : form,
     map : form,
@@ -593,7 +593,7 @@ function.represent ; mode ; {
     symbol : ^,
     pair : form,
     call : eval,
-    class : form,
+    equiv : form,
     inverse : form,
     abstract : form,
     map : form,
@@ -839,12 +839,12 @@ repr composite
 -----
 do [
     call_mode = mode ; {pair : eval* : id},
-    class_mode = mode ; {pair : id : form.},
+    equiv_mode = mode ; {pair : id : form.},
     inverse_mode = mode ; {pair : form. : form.},
     repr = form. ; {
         call : ctx : in -> in,
         call_mode : ^call_mode,
-        class_mode : ^class_mode,
+        equiv_mode : ^equiv_mode,
         inverse_mode : ^inverse_mode,
         context_access : constant,
         cell : true,
@@ -930,13 +930,13 @@ do [
 -----
 {map : {a : eval*, b : id} : id : form.}
 =====
-class mode
+equiv mode
 -----
 do [
     f = function ; {
-        class_mode : mode ; {map : {a : form.} : eval* : id},
+        equiv_mode : mode ; {map : {a : form.} : eval* : id},
     },
-    function.represent ; f function.class_mode .
+    function.represent ; f function.equiv_mode .
 ]
 -----
 {map : {a : form.} : eval* : id}

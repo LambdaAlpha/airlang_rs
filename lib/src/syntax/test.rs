@@ -22,7 +22,7 @@ use crate::{
         repr::{
             Repr,
             call::CallRepr,
-            class::ClassRepr,
+            equiv::EquivRepr,
             inverse::InverseRepr,
             pair::PairRepr,
         },
@@ -52,7 +52,7 @@ mod change;
 
 mod call;
 
-mod class;
+mod equiv;
 
 mod inverse;
 
@@ -110,8 +110,8 @@ fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
 
-fn class(func: Repr) -> Repr {
-    Repr::Class(Box::new(ClassRepr::new(func)))
+fn equiv(func: Repr) -> Repr {
+    Repr::Equiv(Box::new(EquivRepr::new(func)))
 }
 
 fn inverse(func: Repr) -> Repr {
@@ -337,13 +337,13 @@ fn test_generate_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_class() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/class.air"), "test/class.air", class::expected)
+fn test_parse_equiv() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/equiv.air"), "test/equiv.air", equiv::expected)
 }
 
 #[test]
-fn test_generate_class() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/class.air"), "test/class.air")
+fn test_generate_equiv() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/equiv.air"), "test/equiv.air")
 }
 
 #[test]

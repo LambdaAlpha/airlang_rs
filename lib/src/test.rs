@@ -113,8 +113,8 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_class() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/class.air"), "test/class.air")
+fn test_equiv() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/equiv.air"), "test/equiv.air")
 }
 
 #[test]

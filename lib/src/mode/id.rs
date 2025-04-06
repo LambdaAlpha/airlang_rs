@@ -2,7 +2,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
-    ClassVal,
+    EquivVal,
     InverseVal,
     PairVal,
     ctx::ref1::CtxMeta,
@@ -56,9 +56,9 @@ impl ByVal<Val> for Id {
         Val::Call(call)
     }
 
-    fn transform_class<'a, Ctx>(&self, _ctx: Ctx, class: ClassVal) -> Val
+    fn transform_equiv<'a, Ctx>(&self, _ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
-        Val::Class(class)
+        Val::Equiv(equiv)
     }
 
     fn transform_inverse<'a, Ctx>(&self, _ctx: Ctx, inverse: InverseVal) -> Val

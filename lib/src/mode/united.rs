@@ -4,8 +4,8 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
-    ClassVal,
     CodeMode,
+    EquivVal,
     InverseVal,
     ListVal,
     MapVal,
@@ -96,11 +96,11 @@ impl ByVal<Val> for UniMode {
         }
     }
 
-    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
+    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_class(ctx, class),
-            CodeMode::Eval => Eval::new(self.symbol).transform_class(ctx, class),
+            CodeMode::Form => Form::new(self.symbol).transform_equiv(ctx, equiv),
+            CodeMode::Eval => Eval::new(self.symbol).transform_equiv(ctx, equiv),
         }
     }
 

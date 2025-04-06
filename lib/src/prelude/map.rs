@@ -108,9 +108,9 @@ fn length() -> Named<FuncVal> {
     let id = "map.length";
     let f = fn_length;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -132,9 +132,9 @@ fn items() -> Named<FuncVal> {
     let id = "map.items";
     let f = fn_items;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -157,9 +157,9 @@ fn into_items() -> Named<FuncVal> {
     let id = "map.into_items";
     let f = fn_into_items;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -184,9 +184,9 @@ fn keys() -> Named<FuncVal> {
     let id = "map.keys";
     let f = fn_keys;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -208,9 +208,9 @@ fn into_keys() -> Named<FuncVal> {
     let id = "map.into_keys";
     let f = fn_into_keys;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -234,9 +234,9 @@ fn values() -> Named<FuncVal> {
     let id = "map.values";
     let f = fn_values;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -258,9 +258,9 @@ fn into_values() -> Named<FuncVal> {
     let id = "map.into_values";
     let f = fn_into_values;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -284,9 +284,9 @@ fn contains() -> Named<FuncVal> {
     let id = "map.contains";
     let f = fn_contains;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -309,9 +309,9 @@ fn contains_all() -> Named<FuncVal> {
     let id = "map.contains_all";
     let f = fn_contains_all;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -338,9 +338,9 @@ fn contains_any() -> Named<FuncVal> {
     let id = "map.contains_any";
     let f = fn_contains_many;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -367,9 +367,9 @@ fn set() -> Named<FuncVal> {
     let id = "map.set";
     let f = fn_set;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -397,9 +397,9 @@ fn set_many() -> Named<FuncVal> {
     let id = "map.set_many";
     let f = fn_set_many;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -429,9 +429,9 @@ fn get() -> Named<FuncVal> {
     let id = "map.get";
     let f = fn_get;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -454,9 +454,9 @@ fn get_many() -> Named<FuncVal> {
     let id = "map.get_many";
     let f = fn_get_many;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_const_fn(id, f, mode)
 }
 
@@ -484,9 +484,9 @@ fn remove() -> Named<FuncVal> {
     let id = "map.remove";
     let f = fn_remove;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -509,9 +509,9 @@ fn remove_many() -> Named<FuncVal> {
     let id = "map.remove_many";
     let f = fn_remove_many;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -540,9 +540,9 @@ fn clear() -> Named<FuncVal> {
     let id = "map.clear";
     let f = fn_clear;
     let call = ref_pair_mode();
-    let class = call.clone();
+    let equiv = call.clone();
     let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, class, inverse };
+    let mode = FuncMode { call, equiv, inverse };
     named_mut_fn(id, f, mode)
 }
 

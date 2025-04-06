@@ -22,10 +22,10 @@ use crate::{
     Call,
     CallMode,
     Change,
-    Class,
-    ClassMode,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
+    Equiv,
+    EquivMode,
     FreeCellCompFunc,
     FreeCellCompFuncVal,
     FreeStaticCompFunc,
@@ -106,7 +106,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // pair
         1,      // change
         1,      // call
-        1,      // class
+        1,      // equiv
         1,      // inverse
         1,      // abstract
         1,      // list
@@ -129,7 +129,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Change(any_change(rng, new_depth).into()),
         9 => Val::Call(any_call(rng, new_depth).into()),
-        10 => Val::Class(any_class(rng, new_depth).into()),
+        10 => Val::Equiv(any_equiv(rng, new_depth).into()),
         11 => Val::Inverse(any_inverse(rng, new_depth).into()),
         12 => Val::Abstract(any_abstract(rng, new_depth).into()),
         13 => Val::List(any_list(rng, new_depth).into()),
@@ -210,8 +210,8 @@ pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
 }
 
-pub(crate) fn any_class(rng: &mut SmallRng, depth: usize) -> Class<Val> {
-    Class::new(any_val(rng, depth))
+pub(crate) fn any_equiv(rng: &mut SmallRng, depth: usize) -> Equiv<Val> {
+    Equiv::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_inverse(rng: &mut SmallRng, depth: usize) -> Inverse<Val> {
@@ -306,12 +306,12 @@ impl Arbitrary for CompMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        let class = Arbitrary::any(rng, depth);
+        let equiv = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, class, inverse, abstract1, list, map }
+        CompMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map }
     }
 }
 
@@ -346,12 +346,12 @@ impl Arbitrary for CallMode {
     }
 }
 
-impl Arbitrary for ClassMode {
+impl Arbitrary for EquivMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let class = Class::new(func);
-        ClassMode { class }
+        let equiv = Equiv::new(func);
+        EquivMode { equiv }
     }
 }
 
@@ -408,12 +408,12 @@ impl Arbitrary for PrimMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        let class = Arbitrary::any(rng, depth);
+        let equiv = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, class, inverse, abstract1, list, map }
+        PrimMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map }
     }
 }
 
@@ -486,9 +486,9 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 
 fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     let call = Arbitrary::any(rng, depth);
-    let class = Arbitrary::any(rng, depth);
+    let equiv = Arbitrary::any(rng, depth);
     let inverse = Arbitrary::any(rng, depth);
-    FuncMode { call, class, inverse }
+    FuncMode { call, equiv, inverse }
 }
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {

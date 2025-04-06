@@ -212,7 +212,7 @@ do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-= destruct class
+= destruct equiv
 -----
 do [~(f) = ~(1), f]
 -----

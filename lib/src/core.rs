@@ -8,10 +8,10 @@ use crate::{
     CallVal,
     Change,
     ChangeVal,
-    Class,
-    ClassVal,
     ConstCtx,
     Ctx,
+    Equiv,
+    EquivVal,
     FuncVal,
     Inverse,
     InverseVal,
@@ -59,7 +59,7 @@ impl FormCore {
             Val::Pair(p) => t.transform_pair(ctx, p),
             Val::Change(c) => t.transform_change(ctx, c),
             Val::Call(c) => t.transform_call(ctx, c),
-            Val::Class(o) => t.transform_class(ctx, o),
+            Val::Equiv(o) => t.transform_equiv(ctx, o),
             Val::Inverse(s) => t.transform_inverse(ctx, s),
             Val::Abstract(a) => t.transform_abstract(ctx, a),
             Val::List(l) => t.transform_list(ctx, l),
@@ -123,15 +123,15 @@ impl FormCore {
         Val::Call(Call::new(func, input).into())
     }
 
-    pub(crate) fn transform_class<'a, Ctx, Func>(
-        func: &Func, mut ctx: Ctx, class: ClassVal,
+    pub(crate) fn transform_equiv<'a, Ctx, Func>(
+        func: &Func, mut ctx: Ctx, equiv: EquivVal,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
         Func: Transformer<Val, Val>, {
-        let class = Class::from(class);
-        let func = func.transform(ctx.reborrow(), class.func);
-        Val::Class(Class::new(func).into())
+        let equiv = Equiv::from(equiv);
+        let func = func.transform(ctx.reborrow(), equiv.func);
+        Val::Equiv(Equiv::new(func).into())
     }
 
     pub(crate) fn transform_inverse<'a, Ctx, Func>(
@@ -257,7 +257,7 @@ impl EvalCore {
                 let input = func.mode().call.transform(ctx.reborrow(), input);
                 func.transform(ctx, input)
             }
-            Val::Class(class) => Self::transform_class(input_trans, ctx, class, input),
+            Val::Equiv(equiv) => Self::transform_equiv(input_trans, ctx, equiv, input),
             Val::Inverse(inverse) => Self::transform_inverse(input_trans, ctx, inverse, input),
             Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
                 let input = Self::call_ref_eval_input(func, ctx, is_const, input);
@@ -340,18 +340,18 @@ impl EvalCore {
     }
 
     // ~(f) ; v evaluates to . or any i that (f ; i) and (f ; v) always evaluates to the same output
-    pub(crate) fn transform_class<'a, Ctx, Input>(
-        input_trans: &Input, ctx: Ctx, class: ClassVal, input: Val,
+    pub(crate) fn transform_equiv<'a, Ctx, Input>(
+        input_trans: &Input, ctx: Ctx, equiv: EquivVal, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>, {
-        let class = Class::from(class);
-        let func = class.func;
-        Self::eval_input_then_class(input_trans, ctx, func, input)
+        let equiv = Equiv::from(equiv);
+        let func = equiv.func;
+        Self::eval_input_then_equiv(input_trans, ctx, func, input)
     }
 
-    pub(crate) fn eval_input_then_class<'a, Ctx, Input>(
+    pub(crate) fn eval_input_then_equiv<'a, Ctx, Input>(
         input_trans: &Input, mut ctx: Ctx, func: Val, input: Val,
     ) -> Val
     where
@@ -359,35 +359,35 @@ impl EvalCore {
         Input: Transformer<Val, Val>, {
         match func {
             Val::Func(func) => {
-                let input = func.mode().class.transform(ctx.reborrow(), input);
-                Self::class_func(ctx, func, input)
+                let input = func.mode().equiv.transform(ctx.reborrow(), input);
+                Self::equiv_func(ctx, func, input)
             }
             func => {
                 let input = input_trans.transform(ctx, input);
-                let func = Val::Class(Class::new(func).into());
+                let func = Val::Equiv(Equiv::new(func).into());
                 Val::Call(Call::new(func, input).into())
             }
         }
     }
 
     #[allow(dead_code)]
-    pub(crate) fn class_eval_input<'a, Ctx, Input>(
+    pub(crate) fn equiv_eval_input<'a, Ctx, Input>(
         input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>, {
         if let Val::Func(func) = func {
-            func.mode().class.transform(ctx, input)
+            func.mode().equiv.transform(ctx, input)
         } else {
             input_trans.transform(ctx, input)
         }
     }
 
-    pub(crate) fn class_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
+    pub(crate) fn equiv_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
-        let class = Val::Class(Class::new(Val::Func(func.clone())).into());
-        let question = Val::Call(Call::new(class, input.clone()).into());
+        let equiv = Val::Equiv(Equiv::new(Val::Func(func.clone())).into());
+        let question = Val::Call(Call::new(equiv, input.clone()).into());
         if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
             if answer != input {
                 return answer;

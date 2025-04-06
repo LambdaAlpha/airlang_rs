@@ -41,9 +41,9 @@ use crate::{
         byte::BytePrelude,
         call::CallPrelude,
         change::ChangePrelude,
-        class::ClassPrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
+        equiv::EquivPrelude,
         extension::ExtPrelude,
         func::FuncPrelude,
         int::IntPrelude,
@@ -85,7 +85,7 @@ pub(crate) struct AllPrelude {
     pub(crate) pair: PairPrelude,
     pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
-    pub(crate) class: ClassPrelude,
+    pub(crate) equiv: EquivPrelude,
     pub(crate) inverse: InversePrelude,
     pub(crate) abstract1: AbstractPrelude,
     pub(crate) list: ListPrelude,
@@ -111,7 +111,7 @@ impl Prelude for AllPrelude {
         self.pair.put(m);
         self.change.put(m);
         self.call.put(m);
-        self.class.put(m);
+        self.equiv.put(m);
         self.inverse.put(m);
         self.abstract1.put(m);
         self.list.put(m);
@@ -286,7 +286,7 @@ mod change;
 
 mod call;
 
-mod class;
+mod equiv;
 
 mod inverse;
 

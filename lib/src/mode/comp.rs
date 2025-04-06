@@ -3,7 +3,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
-    ClassVal,
+    EquivVal,
     InverseVal,
     ListMode,
     ListVal,
@@ -19,7 +19,7 @@ use crate::{
     mode::{
         call::CallMode,
         change::ChangeMode,
-        class::ClassMode,
+        equiv::EquivMode,
         id::Id,
         inverse::InverseMode,
         symbol::SymbolMode,
@@ -36,7 +36,7 @@ pub struct CompMode {
     pub pair: Option<PairMode>,
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
-    pub class: Option<ClassMode>,
+    pub equiv: Option<EquivMode>,
     pub inverse: Option<InverseMode>,
     pub abstract1: Option<AbstractMode>,
     pub list: Option<ListMode>,
@@ -88,11 +88,11 @@ impl ByVal<Val> for CompMode {
         }
     }
 
-    fn transform_class<'a, Ctx>(&self, ctx: Ctx, class: ClassVal) -> Val
+    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.class {
-            None => Id.transform_class(ctx, class),
-            Some(mode) => mode.transform(ctx, class),
+        match &self.equiv {
+            None => Id.transform_equiv(ctx, equiv),
+            Some(mode) => mode.transform(ctx, equiv),
         }
     }
 
@@ -136,7 +136,7 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: None,
                 pair: None,
                 call: None,
-                class: None,
+                equiv: None,
                 inverse: None,
                 abstract1: None,
                 change: None,
@@ -147,7 +147,7 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(PairMode::from(mode)),
                 call: Some(CallMode::from(mode)),
-                class: Some(ClassMode::from(mode)),
+                equiv: Some(EquivMode::from(mode)),
                 inverse: Some(InverseMode::from(mode)),
                 abstract1: Some(AbstractMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),

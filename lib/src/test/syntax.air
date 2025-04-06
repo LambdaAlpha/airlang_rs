@@ -44,7 +44,7 @@ parse "\"1\""
 -----
 "1"
 =====
-parse class
+parse equiv
 -----
 parse "~(1)"
 -----
@@ -56,7 +56,7 @@ generate "1"
 -----
 "\"1\""
 =====
-generate class
+generate equiv
 -----
 generate ; ~(1)
 -----

@@ -64,11 +64,11 @@ do [c = any ; call, c type .]
 -----
 call
 =====
-any class
+any equiv
 -----
-do [a = any ; class, a type .]
+do [a = any ; equiv, a type .]
 -----
-class
+equiv
 =====
 any inverse
 -----
@@ -166,11 +166,11 @@ do [a = id ; f ; a, a type .]
 -----
 call
 =====
-type class
+type equiv
 -----
 do [a = id ; ~(f), a type .]
 -----
-class
+equiv
 =====
 type inverse
 -----
@@ -262,7 +262,7 @@ true
 -----
 true
 =====
-== class
+== equiv
 -----
 do [a = id ; ~(f), b = id ; ~(f), (a == b) and not ; a == .]
 -----

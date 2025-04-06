@@ -57,7 +57,7 @@ use crate::{
     byte::Byte,
     call::Call,
     change::Change,
-    class::Class,
+    equiv::Equiv,
     int::Int,
     inverse::Inverse,
     list::List,
@@ -72,7 +72,7 @@ use crate::{
         BYTE,
         CALL,
         CHANGE,
-        CLASS,
+        EQUIV,
         FALSE,
         INLINE_COMMENT,
         INT,
@@ -114,7 +114,7 @@ pub(crate) trait ParseRepr:
     + From<Pair<Self, Self>>
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
-    + From<Class<Self>>
+    + From<Equiv<Self>>
     + From<Inverse<Self>>
     + From<Abstract<Self>>
     + From<List<Self>>
@@ -354,7 +354,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
-            CLASS => class(ctx).parse_next(i),
+            EQUIV => equiv(ctx).parse_next(i),
             INVERSE => inverse(ctx).parse_next(i),
             ABSTRACT => abstract1(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
@@ -507,8 +507,8 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     compose_two(ctx, middle, pair)
 }
 
-fn class<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Class::new(t)))
+fn equiv<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Equiv::new(t)))
 }
 
 fn inverse<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {

@@ -4,7 +4,6 @@ pub use crate::{
     byte::Byte,
     call::Call,
     change::Change,
-    class::Class,
     ctx::{
         Ctx,
         CtxAccess,
@@ -20,6 +19,7 @@ pub use crate::{
             MutFnCtx,
         },
     },
+    equiv::Equiv,
     extension::ValExt,
     func::{
         const_cell_comp::ConstCellCompFunc,
@@ -67,8 +67,8 @@ pub use crate::{
         abstract1::AbstractMode,
         call::CallMode,
         change::ChangeMode,
-        class::ClassMode,
         comp::CompMode,
+        equiv::EquivMode,
         inverse::InverseMode,
         list::ListMode,
         map::MapMode,
@@ -92,8 +92,8 @@ pub use crate::{
         byte::ByteVal,
         call::CallVal,
         change::ChangeVal,
-        class::ClassVal,
         ctx::CtxVal,
+        equiv::EquivVal,
         func::{
             FuncVal,
             const_cell_comp::ConstCellCompFuncVal,

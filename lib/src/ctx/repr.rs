@@ -6,10 +6,10 @@ use crate::{
     CallVal,
     Change,
     ChangeVal,
-    Class,
-    ClassVal,
     Ctx,
     CtxVal,
+    Equiv,
+    EquivVal,
     FuncMode,
     Inverse,
     InverseVal,
@@ -252,7 +252,7 @@ pub(crate) enum Pattern {
     Pair(Box<Pair<Pattern, Pattern>>),
     Change(Box<Change<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
-    Class(Box<Class<Pattern>>),
+    Equiv(Box<Equiv<Pattern>>),
     Inverse(Box<Inverse<Pattern>>),
     Abstract(Box<Abstract<Pattern>>),
     List(List<Pattern>),
@@ -271,7 +271,7 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
                 parse_pattern_call(call, ctx)
             }
         }
-        Val::Class(class) => parse_pattern_class(class, ctx),
+        Val::Equiv(equiv) => parse_pattern_equiv(equiv, ctx),
         Val::Inverse(inverse) => parse_pattern_inverse(inverse, ctx),
         Val::Abstract(abstract1) => parse_pattern_abstract(abstract1, ctx),
         Val::List(list) => parse_pattern_list(list, ctx),
@@ -308,11 +308,11 @@ fn parse_pattern_call(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
     Some(Pattern::Call(Box::new(Call::new(func, input))))
 }
 
-fn parse_pattern_class(class: ClassVal, mut ctx: PatternCtx) -> Option<Pattern> {
+fn parse_pattern_equiv(equiv: EquivVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
-    let class = Class::from(class);
-    let func = parse_pattern(class.func, ctx)?;
-    Some(Pattern::Class(Box::new(Class::new(func))))
+    let equiv = Equiv::from(equiv);
+    let func = parse_pattern(equiv.func, ctx)?;
+    Some(Pattern::Equiv(Box::new(Equiv::new(func))))
 }
 
 fn parse_pattern_inverse(inverse: InverseVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -370,7 +370,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
         Pattern::Change(change) => assign_change(ctx, *change, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
-        Pattern::Class(class) => assign_class(ctx, *class, val),
+        Pattern::Equiv(equiv) => assign_equiv(ctx, *equiv, val),
         Pattern::Inverse(inverse) => assign_inverse(ctx, *inverse, val),
         Pattern::Abstract(abstract1) => assign_abstract(ctx, *abstract1, val),
         Pattern::List(list) => assign_list(ctx, list, val),
@@ -419,13 +419,13 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     Val::Call(Call::new(func, input).into())
 }
 
-fn assign_class(mut ctx: MutFnCtx, pattern: Class<Pattern>, val: Val) -> Val {
-    let Val::Class(val) = val else {
+fn assign_equiv(mut ctx: MutFnCtx, pattern: Equiv<Pattern>, val: Val) -> Val {
+    let Val::Equiv(val) = val else {
         return Val::default();
     };
-    let val = Class::from(val);
+    let val = Equiv::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    Val::Class(Class::new(func).into())
+    Val::Equiv(Equiv::new(func).into())
 }
 
 fn assign_inverse(mut ctx: MutFnCtx, pattern: Inverse<Pattern>, val: Val) -> Val {
