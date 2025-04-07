@@ -2,8 +2,8 @@ new
 -----
 do [
     v = any ; .,
-    a1 = @ ; v,
-    a2 = @(v),
+    a1 = abstract ; v,
+    a2 = abstract(v),
     a1 == a2
 ]
 -----
@@ -13,8 +13,8 @@ new get
 -----
 do [
     v = any ; .,
-    a = @ ; v,
-    v == a abstract.value .
+    a = abstract ; v,
+    v == a abstract.function .
 ]
 -----
 true
@@ -24,8 +24,8 @@ set get
 do [
     a = any ; abstract,
     v = any ; .,
-    a abstract.set_value v,
-    v == a abstract.value .
+    a abstract.set_function v,
+    v == a abstract.function .
 ]
 -----
 true
@@ -34,8 +34,8 @@ set return
 -----
 do [
     v1 = any ; .,
-    a = @(v1),
-    v2 = a abstract.set_value any ; .,
+    a = abstract(v1),
+    v2 = a abstract.set_function any ; .,
     v1 == v2
 ]
 -----

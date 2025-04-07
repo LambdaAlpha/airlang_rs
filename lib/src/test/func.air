@@ -118,17 +118,17 @@ form. ; a ; b
 -----
 a ; b
 =====
-form !
+form equiv
 -----
-form. ; ~(a)
+form. ; equiv(a)
 -----
-~(a)
+equiv(a)
 =====
-form ?
+form inverse
 -----
-form. ; !(a)
+form. ; inverse(a)
 -----
-!(a)
+inverse(a)
 =====
 form primitive
 -----
@@ -357,59 +357,59 @@ mode primitive equiv id
 -----
 do [
     f = mode ; {equiv : id, default : eval*, primitive : true},
-    f [~(.a)]
+    f [equiv(.a)]
 ]
 -----
-[~(.a)]
+[equiv(.a)]
 =====
 mode primitive equiv form
 -----
 do [
     b = 1,
     f = mode ; {equiv : form, default : eval*, primitive : true},
-    f [~(^b)]
+    f [equiv(^b)]
 ]
 -----
-[~(1)]
+[equiv(1)]
 =====
 mode primitive inverse id
 -----
 do [
     f = mode ; {inverse : id, default : eval*, primitive : true},
-    f [!(.a)]
+    f [inverse(.a)]
 ]
 -----
-[!(.a)]
+[inverse(.a)]
 =====
 mode primitive inverse form
 -----
 do [
     b = 1,
     f = mode ; {inverse : form, default : eval*, primitive : true},
-    f [!(b)]
+    f [inverse(b)]
 ]
 -----
-[!(1)]
+[inverse(1)]
 =====
 mode primitive abstract form
 -----
 do [
     b = 1,
     f = mode ; {abstract : id, default : eval*, primitive : true},
-    f [@(*a)]
+    f [abstract(*a)]
 ]
 -----
-[@(*a)]
+[abstract(*a)]
 =====
 mode primitive abstract form
 -----
 do [
     b = 1,
     f = mode ; {abstract : form, default : eval*, primitive : true},
-    f [@(.a)]
+    f [abstract(.a)]
 ]
 -----
-[@(a)]
+[abstract(a)]
 =====
 mode primitive list id
 -----
@@ -559,9 +559,9 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
-    equiv : ~(form.),
-    inverse : !(form.),
-    abstract : @(form.),
+    equiv : equiv(form.),
+    inverse : inverse(form.),
+    abstract : abstract(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
 }
@@ -569,9 +569,9 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
-    equiv : ~(form.),
-    inverse : !(form.),
-    abstract : @(form.),
+    equiv : equiv(form.),
+    inverse : inverse(form.),
+    abstract : abstract(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,
 }

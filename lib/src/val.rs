@@ -417,8 +417,8 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 GenRepr::Inverse(Box::new(Inverse::new(func)))
             }
             Val::Abstract(abstract1) => {
-                let value = (&abstract1.value).try_into()?;
-                GenRepr::Abstract(Box::new(Abstract::new(value)))
+                let func = (&abstract1.func).try_into()?;
+                GenRepr::Abstract(Box::new(Abstract::new(func)))
             }
             Val::List(list) => {
                 let list: List<GenRepr> =
@@ -457,7 +457,7 @@ impl Debug for Val {
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Equiv(equiv) => <_ as Debug>::fmt(equiv, f),
             Val::Inverse(inverse) => <_ as Debug>::fmt(inverse, f),
-            Val::Abstract(abstrac1) => <_ as Debug>::fmt(abstrac1, f),
+            Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),

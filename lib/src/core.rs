@@ -152,8 +152,8 @@ impl FormCore {
         Ctx: CtxMeta<'a>,
         Value: Transformer<Val, Val>, {
         let abstract1 = Abstract::from(abstract1);
-        let value = value.transform(ctx.reborrow(), abstract1.value);
-        Val::Abstract(Abstract::new(value).into())
+        let func = value.transform(ctx.reborrow(), abstract1.func);
+        Val::Abstract(Abstract::new(func).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val
@@ -339,7 +339,7 @@ impl EvalCore {
         output
     }
 
-    // ~(f) ; v evaluates to . or any i that (f ; i) and (f ; v) always evaluates to the same output
+    // equiv(f) ; x evaluates to . or any y that (f ; x) and (f ; y) always evaluates to the same output
     pub(crate) fn transform_equiv<'a, Ctx, Input>(
         input_trans: &Input, ctx: Ctx, equiv: EquivVal, input: Val,
     ) -> Val
@@ -396,7 +396,7 @@ impl EvalCore {
         crate::solver::optimize(ctx, func, input)
     }
 
-    // !(f) ; v evaluates to . or any i that (f ; i) always evaluates to v
+    // inverse(f) ; v evaluates to . or any i that (f ; i) always evaluates to v
     pub(crate) fn transform_inverse<'a, Ctx, Input>(
         input_trans: &Input, ctx: Ctx, inverse: InverseVal, input: Val,
     ) -> Val

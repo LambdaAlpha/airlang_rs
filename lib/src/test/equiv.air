@@ -2,9 +2,9 @@ new
 -----
 do [
     f = any ; .,
-    c1 = '~' ; f,
-    c2 = ~(f),
-    c1 == c2
+    e1 = equiv ; f,
+    e2 = equiv(f),
+    e1 == e2
 ]
 -----
 true
@@ -13,8 +13,8 @@ new get
 -----
 do [
     f = any ; .,
-    c = '~' ; f,
-    f == c equiv.function .
+    e = equiv ; f,
+    f == e equiv.function .
 ]
 -----
 true
@@ -22,10 +22,10 @@ true
 set get
 -----
 do [
-    c = any ; equiv,
+    e = any ; equiv,
     f = any ; .,
-    c equiv.set_function f,
-    f == c equiv.function .
+    e equiv.set_function f,
+    f == e equiv.function .
 ]
 -----
 true
@@ -34,8 +34,8 @@ set return
 -----
 do [
     f1 = any ; .,
-    c = ~(f1),
-    f2 = c equiv.set_function any ; .,
+    e = equiv(f1),
+    f2 = e equiv.set_function any ; .,
     f1 == f2
 ]
 -----

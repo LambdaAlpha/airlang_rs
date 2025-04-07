@@ -42,9 +42,9 @@ pub(crate) const PAIR: &str = ":";
 pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL: &str = ";";
 
-pub(crate) const EQUIV: &str = "~";
-pub(crate) const INVERSE: &str = "!";
-pub(crate) const ABSTRACT: &str = "@";
+pub(crate) const EQUIV: &str = "equiv";
+pub(crate) const INVERSE: &str = "inverse";
+pub(crate) const ABSTRACT: &str = "abstract";
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";

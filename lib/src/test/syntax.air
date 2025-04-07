@@ -46,9 +46,9 @@ parse "\"1\""
 =====
 parse equiv
 -----
-parse "~(1)"
+parse "equiv(1)"
 -----
-~(1)
+equiv(1)
 =====
 generate text
 -----
@@ -58,6 +58,6 @@ generate "1"
 =====
 generate equiv
 -----
-generate ; ~(1)
+generate ; equiv(1)
 -----
-"~(1)"
+"equiv(1)"

@@ -1,23 +1,23 @@
 atomic
 -----
-~(a)
+equiv(a)
 =====
 recursive
 -----
-~(~(a))
+equiv(equiv(a))
 =====
 non-atomic
 -----
-~(.[a b])
+equiv(.[a b])
 =====
 list item
 -----
-[~(a)]
+[equiv(a)]
 =====
 map key
 -----
-{~(a) : b}
+{equiv(a) : b}
 =====
 map value
 -----
-{a : ~(b)}
+{a : equiv(b)}

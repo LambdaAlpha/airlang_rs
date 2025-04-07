@@ -325,8 +325,8 @@ fn parse_pattern_inverse(inverse: InverseVal, mut ctx: PatternCtx) -> Option<Pat
 fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
     let abstract1 = Abstract::from(abstract1);
-    let value = parse_pattern(abstract1.value, ctx)?;
-    Some(Pattern::Abstract(Box::new(Abstract::new(value))))
+    let func = parse_pattern(abstract1.func, ctx)?;
+    Some(Pattern::Abstract(Box::new(Abstract::new(func))))
 }
 
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -442,8 +442,8 @@ fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern>, val: Val) -> V
         return Val::default();
     };
     let val = Abstract::from(val);
-    let value = assign_pattern(ctx.reborrow(), pattern.value, val.value);
-    Val::Abstract(Abstract::new(value).into())
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    Val::Abstract(Abstract::new(func).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

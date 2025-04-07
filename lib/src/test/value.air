@@ -168,13 +168,13 @@ call
 =====
 type equiv
 -----
-do [a = id ; ~(f), a type .]
+do [a = id ; equiv(f), a type .]
 -----
 equiv
 =====
 type inverse
 -----
-do [a = id ; !(f), a type .]
+do [a = id ; inverse(f), a type .]
 -----
 inverse
 =====
@@ -264,13 +264,13 @@ true
 =====
 == equiv
 -----
-do [a = id ; ~(f), b = id ; ~(f), (a == b) and not ; a == .]
+do [a = id ; equiv(f), b = id ; equiv(f), (a == b) and not ; a == .]
 -----
 true
 =====
 == inverse
 -----
-do [a = id ; !(f), b = id ; !(f), (a == b) and not ; a == .]
+do [a = id ; inverse(f), b = id ; inverse(f), (a == b) and not ; a == .]
 -----
 true
 =====

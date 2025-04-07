@@ -272,8 +272,8 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 GenRepr::Inverse(Box::new(Inverse::new(func)))
             }
             Repr::Abstract(abstract1) => {
-                let value = (&abstract1.value).try_into()?;
-                GenRepr::Abstract(Box::new(Abstract::new(value)))
+                let func = (&abstract1.func).try_into()?;
+                GenRepr::Abstract(Box::new(Abstract::new(func)))
             }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;

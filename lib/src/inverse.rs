@@ -1,6 +1,5 @@
-use std::hash::Hash;
-
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
+/// inverse(f) represents the inverse of function f
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Inverse<A> {
     pub func: A,
 }

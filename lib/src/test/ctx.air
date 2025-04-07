@@ -214,13 +214,13 @@ do [(a b c) = 1 2 3, [a, b, c]]
 =====
 = destruct equiv
 -----
-do [~(f) = ~(1), f]
+do [equiv(f) = equiv(1), f]
 -----
 1
 =====
 = destruct inverse
 -----
-do [!(f) = !(1), f]
+do [inverse(f) = inverse(1), f]
 -----
 1
 =====

@@ -537,8 +537,8 @@ impl ParseMode<Val> for AbstractMode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
             Val::Abstract(abstract1) => {
                 let abstract1 = Abstract::from(abstract1);
-                let value = ParseMode::parse(abstract1.value, default)?;
-                Some(AbstractMode { abstract1: Abstract::new(value) })
+                let func = ParseMode::parse(abstract1.func, default)?;
+                Some(AbstractMode { abstract1: Abstract::new(func) })
             }
             _ => None,
         }
@@ -547,8 +547,8 @@ impl ParseMode<Val> for AbstractMode {
 
 impl GenerateMode<Val> for AbstractMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let value = GenerateMode::generate(&self.abstract1.value, default);
-        Val::Abstract(Abstract::new(value).into())
+        let func = GenerateMode::generate(&self.abstract1.func, default);
+        Val::Abstract(Abstract::new(func).into())
     }
 }
 

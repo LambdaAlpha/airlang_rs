@@ -315,7 +315,7 @@ fn gen_inverse(ctx: GenCtx, inverse: Inverse<GenRepr>, s: &mut String) {
 fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr>, s: &mut String) {
     s.push_str(ABSTRACT);
     s.push(SCOPE_LEFT);
-    gen1(ctx, abstract1.value, s);
+    gen1(ctx, abstract1.func, s);
     s.push(SCOPE_RIGHT);
 }
 

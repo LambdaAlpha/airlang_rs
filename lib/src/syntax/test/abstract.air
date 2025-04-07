@@ -1,7 +1,7 @@
 atom
 -----
-@(a)
+abstract(a)
 =====
 compose
 -----
-@(a : b)
+abstract(a : b)

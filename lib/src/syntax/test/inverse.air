@@ -1,23 +1,23 @@
 atomic
 -----
-!(a)
+inverse(a)
 =====
 recursive
 -----
-!(!(a))
+inverse(inverse(a))
 =====
 non-atomic
 -----
-!(.[a b])
+inverse(.[a b])
 =====
 list item
 -----
-[!(a)]
+[inverse(a)]
 =====
 map key
 -----
-{!(a) : b}
+{inverse(a) : b}
 =====
 map value
 -----
-{a : !(b)}
+{a : inverse(b)}

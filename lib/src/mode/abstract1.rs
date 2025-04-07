@@ -17,7 +17,7 @@ pub struct AbstractMode {
 impl Transformer<AbstractVal, Val> for AbstractMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_abstract(&self.abstract1.value, ctx, abstract1)
+        FormCore::transform_abstract(&self.abstract1.func, ctx, abstract1)
     }
 }
 
