@@ -52,6 +52,7 @@ use winnow::{
 };
 
 use crate::{
+    Generate,
     abstract1::Abstract,
     bit::Bit,
     byte::Byte,
@@ -74,6 +75,7 @@ use crate::{
         CHANGE,
         EQUIV,
         FALSE,
+        GENERATE,
         INLINE_COMMENT,
         INT,
         INVERSE,
@@ -116,6 +118,7 @@ pub(crate) trait ParseRepr:
     + From<Call<Self, Self>>
     + From<Equiv<Self>>
     + From<Inverse<Self>>
+    + From<Generate<Self>>
     + From<Abstract<Self>>
     + From<List<Self>>
     + Eq
@@ -356,6 +359,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             BYTE => byte.map(T::from).parse_next(i),
             EQUIV => equiv(ctx).parse_next(i),
             INVERSE => inverse(ctx).parse_next(i),
+            GENERATE => generate(ctx).parse_next(i),
             ABSTRACT => abstract1(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
@@ -513,6 +517,10 @@ fn equiv<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
 
 fn inverse<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     scope(ctx).map(|t| T::from(Inverse::new(t)))
+}
+
+fn generate<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Generate::new(t)))
 }
 
 fn abstract1<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {

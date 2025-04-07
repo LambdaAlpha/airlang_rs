@@ -8,6 +8,7 @@ pub use crate::syntax::{
         abstract1::AbstractRepr,
         call::CallRepr,
         change::ChangeRepr,
+        generate::GenerateRepr,
         inverse::InverseRepr,
         list::ListRepr,
         map::MapRepr,

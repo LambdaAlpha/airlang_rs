@@ -11,6 +11,8 @@ use crate::{
     Equiv,
     EquivVal,
     FuncMode,
+    Generate,
+    GenerateVal,
     Inverse,
     InverseVal,
     List,
@@ -254,6 +256,7 @@ pub(crate) enum Pattern {
     Call(Box<Call<Pattern, Pattern>>),
     Equiv(Box<Equiv<Pattern>>),
     Inverse(Box<Inverse<Pattern>>),
+    Generate(Box<Generate<Pattern>>),
     Abstract(Box<Abstract<Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
@@ -273,6 +276,7 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
         }
         Val::Equiv(equiv) => parse_pattern_equiv(equiv, ctx),
         Val::Inverse(inverse) => parse_pattern_inverse(inverse, ctx),
+        Val::Generate(generate) => parse_pattern_generate(generate, ctx),
         Val::Abstract(abstract1) => parse_pattern_abstract(abstract1, ctx),
         Val::List(list) => parse_pattern_list(list, ctx),
         Val::Map(map) => parse_pattern_map(map, ctx),
@@ -320,6 +324,13 @@ fn parse_pattern_inverse(inverse: InverseVal, mut ctx: PatternCtx) -> Option<Pat
     let inverse = Inverse::from(inverse);
     let func = parse_pattern(inverse.func, ctx)?;
     Some(Pattern::Inverse(Box::new(Inverse::new(func))))
+}
+
+fn parse_pattern_generate(generate: GenerateVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let generate = Generate::from(generate);
+    let func = parse_pattern(generate.func, ctx)?;
+    Some(Pattern::Generate(Box::new(Generate::new(func))))
 }
 
 fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -372,6 +383,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Call(call) => assign_call(ctx, *call, val),
         Pattern::Equiv(equiv) => assign_equiv(ctx, *equiv, val),
         Pattern::Inverse(inverse) => assign_inverse(ctx, *inverse, val),
+        Pattern::Generate(generate) => assign_generate(ctx, *generate, val),
         Pattern::Abstract(abstract1) => assign_abstract(ctx, *abstract1, val),
         Pattern::List(list) => assign_list(ctx, list, val),
         Pattern::Map(map) => assign_map(ctx, map, val),
@@ -435,6 +447,15 @@ fn assign_inverse(mut ctx: MutFnCtx, pattern: Inverse<Pattern>, val: Val) -> Val
     let val = Inverse::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     Val::Inverse(Inverse::new(func).into())
+}
+
+fn assign_generate(mut ctx: MutFnCtx, pattern: Generate<Pattern>, val: Val) -> Val {
+    let Val::Generate(val) = val else {
+        return Val::default();
+    };
+    let val = Generate::from(val);
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    Val::Generate(Generate::new(func).into())
 }
 
 fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern>, val: Val) -> Val {

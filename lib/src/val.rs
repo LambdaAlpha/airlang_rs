@@ -8,6 +8,7 @@ use std::{
 
 use crate::{
     Call,
+    Generate,
     Int,
     Inverse,
     List,
@@ -37,6 +38,7 @@ use crate::{
         ctx::CtxVal,
         equiv::EquivVal,
         func::FuncVal,
+        generate::GenerateVal,
         int::IntVal,
         inverse::InverseVal,
         list::ListVal,
@@ -65,6 +67,7 @@ pub enum Val {
     Call(CallVal),
     Equiv(EquivVal),
     Inverse(InverseVal),
+    Generate(GenerateVal),
     Abstract(AbstractVal),
 
     List(ListVal),
@@ -88,6 +91,7 @@ pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
 pub(crate) const EQUIV: &str = "equiv";
 pub(crate) const INVERSE: &str = "inverse";
+pub(crate) const GENERATE: &str = "generate";
 pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
@@ -233,6 +237,18 @@ impl From<InverseVal> for Val {
     }
 }
 
+impl From<Generate<Val>> for Val {
+    fn from(value: Generate<Val>) -> Self {
+        Val::Generate(GenerateVal::from(value))
+    }
+}
+
+impl From<GenerateVal> for Val {
+    fn from(value: GenerateVal) -> Self {
+        Val::Generate(value)
+    }
+}
+
 impl From<Abstract<Val>> for Val {
     fn from(value: Abstract<Val>) -> Self {
         Val::Abstract(AbstractVal::from(value))
@@ -302,6 +318,7 @@ impl From<&Repr> for Val {
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::Equiv(equiv) => Val::Equiv(EquivVal::from(&**equiv)),
             Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(&**inverse)),
+            Repr::Generate(generate) => Val::Generate(GenerateVal::from(&**generate)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -324,6 +341,7 @@ impl From<Repr> for Val {
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::Equiv(equiv) => Val::Equiv(EquivVal::from(*equiv)),
             Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(*inverse)),
+            Repr::Generate(generate) => Val::Generate(GenerateVal::from(*generate)),
             Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -347,6 +365,7 @@ impl TryInto<Repr> for &Val {
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Equiv(equiv) => Ok(Repr::Equiv(Box::new(equiv.try_into()?))),
             Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
+            Val::Generate(generate) => Ok(Repr::Generate(Box::new(generate.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -371,6 +390,7 @@ impl TryInto<Repr> for Val {
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Equiv(equiv) => Ok(Repr::Equiv(Box::new(equiv.try_into()?))),
             Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
+            Val::Generate(generate) => Ok(Repr::Generate(Box::new(generate.try_into()?))),
             Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -416,6 +436,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let func = (&inverse.func).try_into()?;
                 GenRepr::Inverse(Box::new(Inverse::new(func)))
             }
+            Val::Generate(generate) => {
+                let func = (&generate.func).try_into()?;
+                GenRepr::Generate(Box::new(Generate::new(func)))
+            }
             Val::Abstract(abstract1) => {
                 let func = (&abstract1.func).try_into()?;
                 GenRepr::Abstract(Box::new(Abstract::new(func)))
@@ -457,6 +481,7 @@ impl Debug for Val {
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Equiv(equiv) => <_ as Debug>::fmt(equiv, f),
             Val::Inverse(inverse) => <_ as Debug>::fmt(inverse, f),
+            Val::Generate(generate) => <_ as Debug>::fmt(generate, f),
             Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
@@ -484,6 +509,8 @@ pub(crate) mod call;
 pub(crate) mod equiv;
 
 pub(crate) mod inverse;
+
+pub(crate) mod generate;
 
 pub(crate) mod abstract1;
 

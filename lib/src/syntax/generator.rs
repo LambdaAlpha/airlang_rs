@@ -7,6 +7,7 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
+    Generate,
     abstract1::Abstract,
     bit::Bit,
     byte::Byte,
@@ -27,6 +28,7 @@ use crate::{
         CHANGE,
         EQUIV,
         FALSE,
+        GENERATE,
         INVERSE,
         LIST_LEFT,
         LIST_RIGHT,
@@ -62,6 +64,7 @@ pub(crate) enum GenRepr<'a> {
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     Equiv(Box<Equiv<GenRepr<'a>>>),
     Inverse(Box<Inverse<GenRepr<'a>>>),
+    Generate(Box<Generate<GenRepr<'a>>>),
     Abstract(Box<Abstract<GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
@@ -137,6 +140,7 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Call(call) => gen_call(ctx, *call, s),
         GenRepr::Equiv(equiv) => gen_equiv(ctx, *equiv, s),
         GenRepr::Inverse(inverse) => gen_inverse(ctx, *inverse, s),
+        GenRepr::Generate(generate) => gen_generate(ctx, *generate, s),
         GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
         GenRepr::List(list) => gen_list(ctx, list, s),
         GenRepr::Map(map) => gen_map(ctx, map, s),
@@ -309,6 +313,13 @@ fn gen_inverse(ctx: GenCtx, inverse: Inverse<GenRepr>, s: &mut String) {
     s.push_str(INVERSE);
     s.push(SCOPE_LEFT);
     gen1(ctx, inverse.func, s);
+    s.push(SCOPE_RIGHT);
+}
+
+fn gen_generate(ctx: GenCtx, generate: Generate<GenRepr>, s: &mut String) {
+    s.push_str(GENERATE);
+    s.push(SCOPE_LEFT);
+    gen1(ctx, generate.func, s);
     s.push(SCOPE_RIGHT);
 }
 

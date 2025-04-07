@@ -6,6 +6,7 @@ use crate::{
     ChangeVal,
     CodeMode,
     EquivVal,
+    GenerateVal,
     InverseVal,
     ListVal,
     MapVal,
@@ -109,6 +110,14 @@ impl ByVal<Val> for UniMode {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_inverse(ctx, inverse),
             CodeMode::Eval => Eval::new(self.symbol).transform_inverse(ctx, inverse),
+        }
+    }
+
+    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_generate(ctx, generate),
+            CodeMode::Eval => Eval::new(self.symbol).transform_generate(ctx, generate),
         }
     }
 

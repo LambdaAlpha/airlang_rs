@@ -3,6 +3,7 @@ use crate::{
     CallVal,
     ChangeVal,
     EquivVal,
+    GenerateVal,
     InverseVal,
     PairVal,
     ctx::ref1::CtxMeta,
@@ -64,6 +65,11 @@ impl ByVal<Val> for Id {
     fn transform_inverse<'a, Ctx>(&self, _ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Inverse(inverse)
+    }
+
+    fn transform_generate<'a, Ctx>(&self, _ctx: Ctx, generate: GenerateVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        Val::Generate(generate)
     }
 
     fn transform_abstract<'a, Ctx>(&self, _ctx: Ctx, abstract1: AbstractVal) -> Val

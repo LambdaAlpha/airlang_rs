@@ -130,6 +130,18 @@ form. ; inverse(a)
 -----
 inverse(a)
 =====
+form generate
+-----
+form. ; generate(a)
+-----
+generate(a)
+=====
+form abstract
+-----
+form. ; abstract(a)
+-----
+abstract(a)
+=====
 form primitive
 -----
 form. [a, b c]
@@ -391,6 +403,25 @@ do [
 -----
 [inverse(1)]
 =====
+mode primitive generate id
+-----
+do [
+    f = mode ; {generate : id, default : eval*, primitive : true},
+    f [generate(.a)]
+]
+-----
+[generate(.a)]
+=====
+mode primitive generate form
+-----
+do [
+    b = 1,
+    f = mode ; {generate : form, default : eval*, primitive : true},
+    f [generate(b)]
+]
+-----
+[generate(1)]
+=====
 mode primitive abstract form
 -----
 do [
@@ -561,6 +592,7 @@ function.represent ; mode ; {
     pair : form. : eval*,
     equiv : equiv(form.),
     inverse : inverse(form.),
+    generate : generate(form.),
     abstract : abstract(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
@@ -571,6 +603,7 @@ function.represent ; mode ; {
     pair : form. : eval*,
     equiv : equiv(form.),
     inverse : inverse(form.),
+    generate : generate(form.),
     abstract : abstract(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,
@@ -584,6 +617,7 @@ function.represent ; mode ; {
     call : eval,
     equiv : form,
     inverse : form,
+    generate : form,
     abstract : form,
     map : form,
     primitive : true,
@@ -595,6 +629,7 @@ function.represent ; mode ; {
     call : eval,
     equiv : form,
     inverse : form,
+    generate : form,
     abstract : form,
     map : form,
     primitive : true,

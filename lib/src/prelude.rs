@@ -46,6 +46,7 @@ use crate::{
         equiv::EquivPrelude,
         extension::ExtPrelude,
         func::FuncPrelude,
+        generate::GeneratePrelude,
         int::IntPrelude,
         inverse::InversePrelude,
         list::ListPrelude,
@@ -87,6 +88,7 @@ pub(crate) struct AllPrelude {
     pub(crate) call: CallPrelude,
     pub(crate) equiv: EquivPrelude,
     pub(crate) inverse: InversePrelude,
+    pub(crate) generate: GeneratePrelude,
     pub(crate) abstract1: AbstractPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
@@ -113,6 +115,7 @@ impl Prelude for AllPrelude {
         self.call.put(m);
         self.equiv.put(m);
         self.inverse.put(m);
+        self.generate.put(m);
         self.abstract1.put(m);
         self.list.put(m);
         self.map.put(m);
@@ -289,6 +292,8 @@ mod call;
 mod equiv;
 
 mod inverse;
+
+mod generate;
 
 mod abstract1;
 

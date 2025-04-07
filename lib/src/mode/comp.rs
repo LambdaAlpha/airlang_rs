@@ -4,6 +4,8 @@ use crate::{
     CallVal,
     ChangeVal,
     EquivVal,
+    GenerateMode,
+    GenerateVal,
     InverseVal,
     ListMode,
     ListVal,
@@ -38,6 +40,7 @@ pub struct CompMode {
     pub call: Option<CallMode>,
     pub equiv: Option<EquivMode>,
     pub inverse: Option<InverseMode>,
+    pub generate: Option<GenerateMode>,
     pub abstract1: Option<AbstractMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
@@ -104,6 +107,14 @@ impl ByVal<Val> for CompMode {
         }
     }
 
+    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match &self.generate {
+            None => Id.transform_generate(ctx, generate),
+            Some(mode) => mode.transform(ctx, generate),
+        }
+    }
+
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where Ctx: CtxMeta<'a> {
         match &self.abstract1 {
@@ -138,6 +149,7 @@ impl From<Option<UniMode>> for CompMode {
                 call: None,
                 equiv: None,
                 inverse: None,
+                generate: None,
                 abstract1: None,
                 change: None,
                 list: None,
@@ -149,6 +161,7 @@ impl From<Option<UniMode>> for CompMode {
                 call: Some(CallMode::from(mode)),
                 equiv: Some(EquivMode::from(mode)),
                 inverse: Some(InverseMode::from(mode)),
+                generate: Some(GenerateMode::from(mode)),
                 abstract1: Some(AbstractMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),
                 list: Some(ListMode::from(mode)),

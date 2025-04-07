@@ -44,6 +44,7 @@ pub(crate) const CALL: &str = ";";
 
 pub(crate) const EQUIV: &str = "equiv";
 pub(crate) const INVERSE: &str = "inverse";
+pub(crate) const GENERATE: &str = "generate";
 pub(crate) const ABSTRACT: &str = "abstract";
 
 pub(crate) const INT: &str = "integer";

@@ -12,6 +12,7 @@ use crate::{
     Byte,
     Call,
     Equiv,
+    Generate,
     Int,
     Inverse,
     Number,
@@ -32,6 +33,7 @@ use crate::{
             call::CallRepr,
             change::ChangeRepr,
             equiv::EquivRepr,
+            generate::GenerateRepr,
             inverse::InverseRepr,
             list::ListRepr,
             map::MapRepr,
@@ -58,6 +60,7 @@ pub enum Repr {
     Call(Box<CallRepr>),
     Equiv(Box<EquivRepr>),
     Inverse(Box<InverseRepr>),
+    Generate(Box<GenerateRepr>),
     Abstract(Box<AbstractRepr>),
 
     List(ListRepr),
@@ -172,6 +175,18 @@ impl From<Box<InverseRepr>> for Repr {
     }
 }
 
+impl From<GenerateRepr> for Repr {
+    fn from(a: GenerateRepr) -> Self {
+        Repr::Generate(Box::new(a))
+    }
+}
+
+impl From<Box<GenerateRepr>> for Repr {
+    fn from(a: Box<GenerateRepr>) -> Self {
+        Repr::Generate(a)
+    }
+}
+
 impl From<AbstractRepr> for Repr {
     fn from(a: AbstractRepr) -> Self {
         Repr::Abstract(Box::new(a))
@@ -271,6 +286,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let func = (&inverse.func).try_into()?;
                 GenRepr::Inverse(Box::new(Inverse::new(func)))
             }
+            Repr::Generate(generate) => {
+                let func = (&generate.func).try_into()?;
+                GenRepr::Generate(Box::new(Generate::new(func)))
+            }
             Repr::Abstract(abstract1) => {
                 let func = (&abstract1.func).try_into()?;
                 GenRepr::Abstract(Box::new(Abstract::new(func)))
@@ -304,6 +323,8 @@ pub(crate) mod call;
 pub(crate) mod equiv;
 
 pub(crate) mod inverse;
+
+pub(crate) mod generate;
 
 pub(crate) mod abstract1;
 

@@ -15,6 +15,7 @@ use crate::{
     symbol::Symbol,
     syntax::{
         ChangeRepr,
+        GenerateRepr,
         generate_compact,
         generate_pretty,
         generate_symbol,
@@ -55,6 +56,8 @@ mod call;
 mod equiv;
 
 mod inverse;
+
+mod generate;
 
 mod abstract1;
 
@@ -116,6 +119,10 @@ fn equiv(func: Repr) -> Repr {
 
 fn inverse(func: Repr) -> Repr {
     Repr::Inverse(Box::new(InverseRepr::new(func)))
+}
+
+fn generate(func: Repr) -> Repr {
+    Repr::Generate(Box::new(GenerateRepr::new(func)))
 }
 
 fn abstract1(value: Repr) -> Repr {
@@ -354,6 +361,16 @@ fn test_parse_inverse() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_inverse() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/inverse.air"), "test/inverse.air")
+}
+
+#[test]
+fn test_parse_generate() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/generate.air"), "test/generate.air", generate::expected)
+}
+
+#[test]
+fn test_generate_generate() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/generate.air"), "test/generate.air")
 }
 
 #[test]

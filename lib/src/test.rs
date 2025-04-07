@@ -123,6 +123,11 @@ fn test_inverse() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_generate() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/generate.air"), "test/generate.air")
+}
+
+#[test]
 fn test_abstract() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/abstract.air"), "test/abstract.air")
 }

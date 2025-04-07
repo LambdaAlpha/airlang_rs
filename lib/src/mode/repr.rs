@@ -5,6 +5,7 @@ use crate::{
     Call,
     Change,
     Equiv,
+    Generate,
     Inverse,
     List,
     ListVal,
@@ -56,6 +57,7 @@ use crate::{
         CALL,
         CHANGE,
         EQUIV,
+        GENERATE,
         INVERSE,
         LIST,
         MAP,
@@ -282,10 +284,22 @@ impl ParseMode<MapVal> for CompMode {
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
         let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
         let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
+        let generate = ParseMode::parse(map_remove(&mut map, GENERATE), default)?;
         let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map })
+        Some(CompMode {
+            symbol,
+            pair,
+            change,
+            call,
+            equiv,
+            inverse,
+            generate,
+            abstract1,
+            list,
+            map,
+        })
     }
 }
 
@@ -310,6 +324,9 @@ impl GenerateMode<MapVal> for CompMode {
         if default.map(Into::into) != self.inverse {
             map.insert(symbol(INVERSE), self.inverse.generate(default));
         }
+        if default.map(Into::into) != self.generate {
+            map.insert(symbol(GENERATE), self.generate.generate(default));
+        }
         if default.map(Into::into) != self.abstract1 {
             map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
         }
@@ -332,10 +349,22 @@ impl ParseMode<MapVal> for PrimMode {
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
         let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
         let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
+        let generate = ParseMode::parse(map_remove(&mut map, GENERATE), default)?;
         let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map })
+        Some(PrimMode {
+            symbol,
+            pair,
+            change,
+            call,
+            equiv,
+            inverse,
+            generate,
+            abstract1,
+            list,
+            map,
+        })
     }
 }
 
@@ -359,6 +388,9 @@ impl GenerateMode<MapVal> for PrimMode {
         }
         if default.map(Into::into) != self.inverse {
             map.insert(symbol(INVERSE), self.inverse.generate(default));
+        }
+        if default.map(Into::into) != self.generate {
+            map.insert(symbol(GENERATE), self.generate.generate(default));
         }
         if default.map(Into::into) != self.abstract1 {
             map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
@@ -528,6 +560,27 @@ impl GenerateMode<Val> for InverseMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
         let func = GenerateMode::generate(&self.inverse.func, default);
         Val::Inverse(Inverse::new(func).into())
+    }
+}
+
+impl ParseMode<Val> for crate::mode::generate::GenerateMode {
+    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
+        match mode {
+            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
+            Val::Generate(inverse) => {
+                let generate = Generate::from(inverse);
+                let func = ParseMode::parse(generate.func, default)?;
+                Some(crate::mode::generate::GenerateMode { generate: Generate::new(func) })
+            }
+            _ => None,
+        }
+    }
+}
+
+impl GenerateMode<Val> for crate::mode::generate::GenerateMode {
+    fn generate(&self, default: Option<UniMode>) -> Val {
+        let func = GenerateMode::generate(&self.generate.func, default);
+        Val::Generate(Generate::new(func).into())
     }
 }
 

@@ -20,7 +20,7 @@ do [
         b = atom list.get i,
         a = {a : b},
     ],
-    a1 = parse ; generate ; a,
+    a1 = syntax.parse ; syntax.generate ; a,
     a == a1
 ]
 -----
@@ -28,36 +28,36 @@ true
 =====
 parse
 -----
-parse "[1, 2]"
+syntax.parse "[1, 2]"
 -----
 [1, 2]
 =====
 parse no eval
 -----
-do [a = 1, parse "a"]
+do [a = 1, syntax.parse "a"]
 -----
 a
 =====
 parse text
 -----
-parse "\"1\""
+syntax.parse "\"1\""
 -----
 "1"
 =====
-parse equiv
+syntax.parse equiv
 -----
-parse "equiv(1)"
+syntax.parse "equiv(1)"
 -----
 equiv(1)
 =====
 generate text
 -----
-generate "1"
+syntax.generate "1"
 -----
 "\"1\""
 =====
 generate equiv
 -----
-generate ; equiv(1)
+syntax.generate ; equiv(1)
 -----
 "equiv(1)"

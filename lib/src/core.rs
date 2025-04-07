@@ -13,6 +13,8 @@ use crate::{
     Equiv,
     EquivVal,
     FuncVal,
+    Generate,
+    GenerateVal,
     Inverse,
     InverseVal,
     List,
@@ -55,15 +57,16 @@ impl FormCore {
         Ctx: CtxMeta<'a>,
         T: ByVal<Val>, {
         match input {
-            Val::Symbol(s) => t.transform_symbol(ctx, s),
-            Val::Pair(p) => t.transform_pair(ctx, p),
-            Val::Change(c) => t.transform_change(ctx, c),
-            Val::Call(c) => t.transform_call(ctx, c),
-            Val::Equiv(o) => t.transform_equiv(ctx, o),
-            Val::Inverse(s) => t.transform_inverse(ctx, s),
-            Val::Abstract(a) => t.transform_abstract(ctx, a),
-            Val::List(l) => t.transform_list(ctx, l),
-            Val::Map(m) => t.transform_map(ctx, m),
+            Val::Symbol(symbol) => t.transform_symbol(ctx, symbol),
+            Val::Pair(pair) => t.transform_pair(ctx, pair),
+            Val::Change(change) => t.transform_change(ctx, change),
+            Val::Call(call) => t.transform_call(ctx, call),
+            Val::Equiv(equiv) => t.transform_equiv(ctx, equiv),
+            Val::Inverse(inverse) => t.transform_inverse(ctx, inverse),
+            Val::Generate(generate) => t.transform_generate(ctx, generate),
+            Val::Abstract(abstract1) => t.transform_abstract(ctx, abstract1),
+            Val::List(list) => t.transform_list(ctx, list),
+            Val::Map(map) => t.transform_map(ctx, map),
             v => t.transform_default(ctx, v),
         }
     }
@@ -143,6 +146,17 @@ impl FormCore {
         let inverse = Inverse::from(inverse);
         let func = func.transform(ctx.reborrow(), inverse.func);
         Val::Inverse(Inverse::new(func).into())
+    }
+
+    pub(crate) fn transform_generate<'a, Ctx, Func>(
+        func: &Func, mut ctx: Ctx, generate: GenerateVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Func: Transformer<Val, Val>, {
+        let generate = Generate::from(generate);
+        let func = func.transform(ctx.reborrow(), generate.func);
+        Val::Generate(Generate::new(func).into())
     }
 
     pub(crate) fn transform_abstract<'a, Ctx, Value>(

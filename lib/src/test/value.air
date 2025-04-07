@@ -76,6 +76,18 @@ do [a = any ; inverse, a type .]
 -----
 inverse
 =====
+any generate
+-----
+do [a = any ; generate, a type .]
+-----
+generate
+=====
+any abstract
+-----
+do [a = any ; abstract, a type .]
+-----
+abstract
+=====
 any list
 -----
 do [a = any ; list, a type .]
@@ -178,6 +190,18 @@ do [a = id ; inverse(f), a type .]
 -----
 inverse
 =====
+type generate
+-----
+do [a = id ; generate(f), a type .]
+-----
+generate
+=====
+type abstract
+-----
+do [a = id ; abstract(f), a type .]
+-----
+abstract
+=====
 type list
 -----
 do [a = [], a type .]
@@ -271,6 +295,18 @@ true
 == inverse
 -----
 do [a = id ; inverse(f), b = id ; inverse(f), (a == b) and not ; a == .]
+-----
+true
+=====
+== generate
+-----
+do [a = id ; generate(f), b = id ; generate(f), (a == b) and not ; a == .]
+-----
+true
+=====
+== abstract
+-----
+do [a = id ; abstract(f), b = id ; abstract(f), (a == b) and not ; a == .]
 -----
 true
 =====

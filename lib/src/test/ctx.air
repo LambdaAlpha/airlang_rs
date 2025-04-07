@@ -224,6 +224,18 @@ do [inverse(f) = inverse(1), f]
 -----
 1
 =====
+= destruct generate
+-----
+do [generate(f) = generate(1), f]
+-----
+1
+=====
+= destruct abstract
+-----
+do [abstract(f) = abstract(1), f]
+-----
+1
+=====
 = destruct list equal length
 -----
 do [[a, b, c] = [1, 2, 3], [a, b, c]]

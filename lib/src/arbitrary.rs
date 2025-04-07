@@ -30,6 +30,8 @@ use crate::{
     FreeCellCompFuncVal,
     FreeStaticCompFunc,
     FreeStaticCompFuncVal,
+    Generate,
+    GenerateMode,
     Inverse,
     InverseMode,
     Mode,
@@ -108,6 +110,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // call
         1,      // equiv
         1,      // inverse
+        1,      // generate
         1,      // abstract
         1,      // list
         1,      // map
@@ -131,12 +134,13 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         9 => Val::Call(any_call(rng, new_depth).into()),
         10 => Val::Equiv(any_equiv(rng, new_depth).into()),
         11 => Val::Inverse(any_inverse(rng, new_depth).into()),
-        12 => Val::Abstract(any_abstract(rng, new_depth).into()),
-        13 => Val::List(any_list(rng, new_depth).into()),
-        14 => Val::Map(any_map(rng, new_depth).into()),
-        15 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        16 => Val::Func(any_func(rng, new_depth)),
-        17 => Val::Ext(any_extension(rng, new_depth)),
+        12 => Val::Generate(any_generate(rng, new_depth).into()),
+        13 => Val::Abstract(any_abstract(rng, new_depth).into()),
+        14 => Val::List(any_list(rng, new_depth).into()),
+        15 => Val::Map(any_map(rng, new_depth).into()),
+        16 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        17 => Val::Func(any_func(rng, new_depth)),
+        18 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -216,6 +220,10 @@ pub(crate) fn any_equiv(rng: &mut SmallRng, depth: usize) -> Equiv<Val> {
 
 pub(crate) fn any_inverse(rng: &mut SmallRng, depth: usize) -> Inverse<Val> {
     Inverse::new(any_val(rng, depth))
+}
+
+pub(crate) fn any_generate(rng: &mut SmallRng, depth: usize) -> Generate<Val> {
+    Generate::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_abstract(rng: &mut SmallRng, depth: usize) -> Abstract<Val> {
@@ -308,10 +316,11 @@ impl Arbitrary for CompMode {
         let call = Arbitrary::any(rng, depth);
         let equiv = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
+        let generate = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map }
+        CompMode { symbol, pair, change, call, equiv, inverse, generate, abstract1, list, map }
     }
 }
 
@@ -364,6 +373,15 @@ impl Arbitrary for InverseMode {
     }
 }
 
+impl Arbitrary for GenerateMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let func = Arbitrary::any(rng, new_depth);
+        let generate = Generate::new(func);
+        GenerateMode { generate }
+    }
+}
+
 impl Arbitrary for AbstractMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
@@ -410,10 +428,11 @@ impl Arbitrary for PrimMode {
         let call = Arbitrary::any(rng, depth);
         let equiv = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
+        let generate = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, equiv, inverse, abstract1, list, map }
+        PrimMode { symbol, pair, change, call, equiv, inverse, generate, abstract1, list, map }
     }
 }
 

@@ -3,6 +3,7 @@ use crate::{
     CallVal,
     ChangeVal,
     EquivVal,
+    GenerateVal,
     InverseVal,
     PairVal,
     SymbolMode,
@@ -73,6 +74,11 @@ impl ByVal<Val> for Eval {
     fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
         FormCore::transform_inverse(self, ctx, inverse)
+    }
+
+    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        FormCore::transform_generate(self, ctx, generate)
     }
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val

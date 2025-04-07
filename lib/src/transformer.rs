@@ -5,6 +5,7 @@ use crate::{
     CallVal,
     ChangeVal,
     EquivVal,
+    GenerateVal,
     InverseVal,
     ListVal,
     MapVal,
@@ -60,6 +61,9 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where Ctx: CtxMeta<'a>;
 
     fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Output
+    where Ctx: CtxMeta<'a>;
+
+    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Output

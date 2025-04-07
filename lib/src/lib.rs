@@ -26,6 +26,8 @@ pub(crate) mod equiv;
 
 pub(crate) mod inverse;
 
+pub(crate) mod generate;
+
 pub(crate) mod abstract1;
 
 pub(crate) mod list;

@@ -3,6 +3,7 @@ use crate::{
     CallVal,
     ChangeVal,
     EquivVal,
+    GenerateVal,
     InverseVal,
     ListVal,
     MapVal,
@@ -31,6 +32,7 @@ pub struct PrimMode {
     pub call: Option<CodeMode>,
     pub equiv: Option<DataMode>,
     pub inverse: Option<DataMode>,
+    pub generate: Option<DataMode>,
     pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
@@ -109,6 +111,14 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
+    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.generate {
+            None => Id.transform_generate(ctx, generate),
+            Some(_) => FormCore::transform_generate(self, ctx, generate),
+        }
+    }
+
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.abstract1 {
@@ -143,6 +153,7 @@ impl From<Option<UniMode>> for PrimMode {
                 call: None,
                 equiv: None,
                 inverse: None,
+                generate: None,
                 abstract1: None,
                 change: None,
                 list: None,
@@ -154,6 +165,7 @@ impl From<Option<UniMode>> for PrimMode {
                 call: Some(CodeMode::from(mode)),
                 equiv: Some(DataMode::from(mode)),
                 inverse: Some(DataMode::from(mode)),
+                generate: Some(DataMode::from(mode)),
                 abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),
