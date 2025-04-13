@@ -1,6 +1,6 @@
 do [
-    major = generate ; air.version_major,
-    minor = generate ; air.version_minor,
-    patch = generate ; air.version_patch,
+    major = syntax.generate ; air.version_major,
+    minor = syntax.generate ; air.version_minor,
+    patch = syntax.generate ; air.version_patch,
     "." text.join [^major, ^minor, ^patch]
 ]
