@@ -527,36 +527,42 @@ fn abstract1<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     scope(ctx).map(|t| T::from(Abstract::new(t)))
 }
 
-fn items<'a, O1, O2, S, F>(item: F, separator: S) -> impl Parser<&'a str, Vec<O2>, E>
-where
-    S: Parser<&'a str, O1, E>,
-    F: Parser<&'a str, O2, E> + Clone, {
-    let items = repeat(0 .., terminated(item.clone(), trim(separator)));
-    (items, opt(item)).map(|(mut items, last): (Vec<O2>, _)| {
-        if let Some(last) = last {
-            items.push(last);
+fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>
+where F: Parser<&'a str, O, E> {
+    move |i: &mut _| {
+        let i: &mut &str = i;
+        let mut items = Vec::new();
+        loop {
+            let Some(item) = opt(item.by_ref()).parse_next(i)? else {
+                break;
+            };
+            items.push(item);
+            let sep = opt(trim(SEPARATOR.context(expect_char(SEPARATOR)))).parse_next(i)?;
+            if sep.is_none() {
+                break;
+            }
         }
-        items
-    })
+        Ok(items)
+    }
 }
 
 fn list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    let items = items(compose(ctx), SEPARATOR.context(expect_char(SEPARATOR)))
-        .map(|list| T::from(List::from(list)));
-    delimited_trim(LIST_LEFT, items, LIST_RIGHT).context(label("list"))
+    delimited_trim(LIST_LEFT, items(compose(ctx)), LIST_RIGHT)
+        .map(|list| T::from(List::from(list)))
+        .context(label("list"))
 }
 
 fn raw_list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    let items = tokens(ctx, 0 ..).map(|tokens| {
-        let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
-        T::from(list)
-    });
-    delimited_trim(LIST_LEFT, items, LIST_RIGHT).context(label("raw list"))
+    delimited_trim(LIST_LEFT, tokens(ctx, 0 ..), LIST_RIGHT)
+        .map(|tokens| {
+            let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
+            T::from(list)
+        })
+        .context(label("raw list"))
 }
 
 fn map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    let items = items(key_value(ctx), SEPARATOR.context(expect_char(SEPARATOR)));
-    delimited_trim(MAP_LEFT, items, MAP_RIGHT)
+    delimited_trim(MAP_LEFT, items(key_value(ctx)), MAP_RIGHT)
         .map(|pairs| T::from(Map::from_iter(pairs)))
         .context(label("map"))
 }
