@@ -8,6 +8,7 @@ use crate::{
     ListVal,
     MapVal,
     PairVal,
+    ReifyVal,
     Symbol,
     SymbolMode,
     UniMode,
@@ -30,6 +31,7 @@ pub struct PrimMode {
     pub pair: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
+    pub reify: Option<DataMode>,
     pub equiv: Option<DataMode>,
     pub inverse: Option<DataMode>,
     pub generate: Option<DataMode>,
@@ -95,6 +97,14 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
+    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.reify {
+            None => Id.transform_reify(ctx, reify),
+            Some(_) => FormCore::transform_reify(self, ctx, reify),
+        }
+    }
+
     fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.equiv {
@@ -151,6 +161,7 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: None,
                 pair: None,
                 call: None,
+                reify: None,
                 equiv: None,
                 inverse: None,
                 generate: None,
@@ -163,6 +174,7 @@ impl From<Option<UniMode>> for PrimMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
+                reify: Some(DataMode::from(mode)),
                 equiv: Some(DataMode::from(mode)),
                 inverse: Some(DataMode::from(mode)),
                 generate: Some(DataMode::from(mode)),

@@ -9,6 +9,8 @@ use crate::{
     CompMode,
     Equiv,
     EquivMode,
+    Generate,
+    GenerateMode,
     Inverse,
     InverseMode,
     List,
@@ -18,6 +20,8 @@ use crate::{
     Mode,
     Pair,
     PairMode,
+    Reify,
+    ReifyMode,
     SymbolMode,
     UniMode,
     Val,
@@ -78,6 +82,14 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
+    pub fn reify_mode(func: Option<Mode>) -> Option<Mode> {
+        let mode = CompMode {
+            reify: Some(ReifyMode { reify: Reify::new(func) }),
+            ..CompMode::from(Self::default_uni_mode())
+        };
+        Some(Mode::Comp(Box::new(mode)))
+    }
+
     pub fn equiv_mode(func: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
             equiv: Some(EquivMode { equiv: Equiv::new(func) }),
@@ -97,6 +109,14 @@ impl FuncMode {
     pub fn abstract_mode(value: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
             abstract1: Some(AbstractMode { abstract1: Abstract::new(value) }),
+            ..CompMode::from(Self::default_uni_mode())
+        };
+        Some(Mode::Comp(Box::new(mode)))
+    }
+
+    pub fn generate_mode(value: Option<Mode>) -> Option<Mode> {
+        let mode = CompMode {
+            generate: Some(GenerateMode { generate: Generate::new(value) }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))

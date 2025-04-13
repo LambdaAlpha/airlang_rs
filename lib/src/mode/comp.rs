@@ -13,6 +13,8 @@ use crate::{
     MapVal,
     PairMode,
     PairVal,
+    ReifyMode,
+    ReifyVal,
     Symbol,
     UniMode,
     Val,
@@ -38,6 +40,7 @@ pub struct CompMode {
     pub pair: Option<PairMode>,
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
+    pub reify: Option<ReifyMode>,
     pub equiv: Option<EquivMode>,
     pub inverse: Option<InverseMode>,
     pub generate: Option<GenerateMode>,
@@ -88,6 +91,14 @@ impl ByVal<Val> for CompMode {
         match &self.call {
             None => Id.transform_call(ctx, call),
             Some(mode) => mode.transform(ctx, call),
+        }
+    }
+
+    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match &self.reify {
+            None => Id.transform_reify(ctx, reify),
+            Some(mode) => mode.transform(ctx, reify),
         }
     }
 
@@ -147,6 +158,7 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: None,
                 pair: None,
                 call: None,
+                reify: None,
                 equiv: None,
                 inverse: None,
                 generate: None,
@@ -159,6 +171,7 @@ impl From<Option<UniMode>> for CompMode {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(PairMode::from(mode)),
                 call: Some(CallMode::from(mode)),
+                reify: Some(ReifyMode::from(mode)),
                 equiv: Some(EquivMode::from(mode)),
                 inverse: Some(InverseMode::from(mode)),
                 generate: Some(GenerateMode::from(mode)),

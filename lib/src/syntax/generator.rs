@@ -20,6 +20,7 @@ use crate::{
     map::Map,
     number::Number,
     pair::Pair,
+    reify::Reify,
     symbol::Symbol,
     syntax::{
         ABSTRACT,
@@ -35,6 +36,7 @@ use crate::{
         MAP_LEFT,
         MAP_RIGHT,
         PAIR,
+        REIFY,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -62,6 +64,7 @@ pub(crate) enum GenRepr<'a> {
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
     Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
+    Reify(Box<Reify<GenRepr<'a>>>),
     Equiv(Box<Equiv<GenRepr<'a>>>),
     Inverse(Box<Inverse<GenRepr<'a>>>),
     Generate(Box<Generate<GenRepr<'a>>>),
@@ -138,6 +141,7 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
         GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
+        GenRepr::Reify(reify) => gen_reify(ctx, *reify, s),
         GenRepr::Equiv(equiv) => gen_equiv(ctx, *equiv, s),
         GenRepr::Inverse(inverse) => gen_inverse(ctx, *inverse, s),
         GenRepr::Generate(generate) => gen_generate(ctx, *generate, s),
@@ -300,6 +304,13 @@ fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
         s.push(' ');
         gen1(ctx, call.input, s);
     }
+}
+
+fn gen_reify(ctx: GenCtx, reify: Reify<GenRepr>, s: &mut String) {
+    s.push_str(REIFY);
+    s.push(SCOPE_LEFT);
+    gen1(ctx, reify.func, s);
+    s.push(SCOPE_RIGHT);
 }
 
 fn gen_equiv(ctx: GenCtx, equiv: Equiv<GenRepr>, s: &mut String) {

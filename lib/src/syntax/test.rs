@@ -26,6 +26,7 @@ use crate::{
             equiv::EquivRepr,
             inverse::InverseRepr,
             pair::PairRepr,
+            reify::ReifyRepr,
         },
     },
     test::parse_test_file,
@@ -52,6 +53,8 @@ mod pair;
 mod change;
 
 mod call;
+
+mod reify;
 
 mod equiv;
 
@@ -111,6 +114,10 @@ fn change(from: Repr, to: Repr) -> Repr {
 
 fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
+}
+
+fn reify(func: Repr) -> Repr {
+    Repr::Reify(Box::new(ReifyRepr::new(func)))
 }
 
 fn equiv(func: Repr) -> Repr {
@@ -341,6 +348,16 @@ fn test_parse_call() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_call() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/call.air"), "test/call.air")
+}
+
+#[test]
+fn test_parse_reify() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/reify.air"), "test/reify.air", reify::expected)
+}
+
+#[test]
+fn test_generate_reify() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/reify.air"), "test/reify.air")
 }
 
 #[test]

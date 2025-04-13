@@ -55,6 +55,7 @@ use crate::{
         mode::MODE_PRELUDE,
         number::NumberPrelude,
         pair::PairPrelude,
+        reify::ReifyPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
         text::TextPrelude,
@@ -86,6 +87,7 @@ pub(crate) struct AllPrelude {
     pub(crate) pair: PairPrelude,
     pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
+    pub(crate) reify: ReifyPrelude,
     pub(crate) equiv: EquivPrelude,
     pub(crate) inverse: InversePrelude,
     pub(crate) generate: GeneratePrelude,
@@ -113,6 +115,7 @@ impl Prelude for AllPrelude {
         self.pair.put(m);
         self.change.put(m);
         self.call.put(m);
+        self.reify.put(m);
         self.equiv.put(m);
         self.inverse.put(m);
         self.generate.put(m);
@@ -288,6 +291,8 @@ mod pair;
 mod change;
 
 mod call;
+
+mod reify;
 
 mod equiv;
 

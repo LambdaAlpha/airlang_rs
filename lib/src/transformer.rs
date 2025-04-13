@@ -10,6 +10,7 @@ use crate::{
     ListVal,
     MapVal,
     PairVal,
+    ReifyVal,
     Symbol,
     Val,
     ctx::ref1::CtxMeta,
@@ -55,6 +56,9 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where Ctx: CtxMeta<'a>;
 
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output
+    where Ctx: CtxMeta<'a>;
+
+    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Output

@@ -118,6 +118,12 @@ form. ; a ; b
 -----
 a ; b
 =====
+form reify
+-----
+form. ; reify(a)
+-----
+reify(a)
+=====
 form equiv
 -----
 form. ; equiv(a)
@@ -365,6 +371,25 @@ do [
 -----
 [false]
 =====
+mode primitive reify id
+-----
+do [
+    f = mode ; {reify : id, default : eval*, primitive : true},
+    f [reify(.a)]
+]
+-----
+[reify(.a)]
+=====
+mode primitive reify form
+-----
+do [
+    b = 1,
+    f = mode ; {reify : form, default : eval*, primitive : true},
+    f [reify(^b)]
+]
+-----
+[reify(1)]
+=====
 mode primitive equiv id
 -----
 do [
@@ -590,6 +615,7 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
+    reify : reify(form.),
     equiv : equiv(form.),
     inverse : inverse(form.),
     generate : generate(form.),
@@ -601,6 +627,7 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
+    reify : reify(form.),
     equiv : equiv(form.),
     inverse : inverse(form.),
     generate : generate(form.),
@@ -615,6 +642,7 @@ function.represent ; mode ; {
     symbol : .^,
     pair : form,
     call : eval,
+    reify : form,
     equiv : form,
     inverse : form,
     generate : form,
@@ -627,6 +655,7 @@ function.represent ; mode ; {
     symbol : ^,
     pair : form,
     call : eval,
+    reify : form,
     equiv : form,
     inverse : form,
     generate : form,

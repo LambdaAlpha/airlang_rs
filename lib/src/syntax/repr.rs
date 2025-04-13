@@ -22,6 +22,7 @@ use crate::{
     Unit,
     abstract1::Abstract,
     change::Change,
+    reify::Reify,
     syntax::{
         ParseError,
         generate_pretty,
@@ -38,6 +39,7 @@ use crate::{
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
+            reify::ReifyRepr,
         },
     },
 };
@@ -58,6 +60,8 @@ pub enum Repr {
     Change(Box<ChangeRepr>),
 
     Call(Box<CallRepr>),
+
+    Reify(Box<ReifyRepr>),
     Equiv(Box<EquivRepr>),
     Inverse(Box<InverseRepr>),
     Generate(Box<GenerateRepr>),
@@ -148,6 +152,18 @@ impl From<CallRepr> for Repr {
 impl From<Box<CallRepr>> for Repr {
     fn from(c: Box<CallRepr>) -> Self {
         Repr::Call(c)
+    }
+}
+
+impl From<ReifyRepr> for Repr {
+    fn from(a: ReifyRepr) -> Self {
+        Repr::Reify(Box::new(a))
+    }
+}
+
+impl From<Box<ReifyRepr>> for Repr {
+    fn from(a: Box<ReifyRepr>) -> Self {
+        Repr::Reify(a)
     }
 }
 
@@ -278,6 +294,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
+            Repr::Reify(reify) => {
+                let func = (&reify.func).try_into()?;
+                GenRepr::Reify(Box::new(Reify::new(func)))
+            }
             Repr::Equiv(equiv) => {
                 let func = (&equiv.func).try_into()?;
                 GenRepr::Equiv(Box::new(Equiv::new(func)))
@@ -319,6 +339,8 @@ pub(crate) mod pair;
 pub(crate) mod change;
 
 pub(crate) mod call;
+
+pub(crate) mod reify;
 
 pub(crate) mod equiv;
 

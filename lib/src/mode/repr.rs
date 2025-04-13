@@ -15,6 +15,8 @@ use crate::{
     Pair,
     PairMode,
     PrimMode,
+    Reify,
+    ReifyMode,
     Symbol,
     SymbolMode,
     UniMode,
@@ -62,6 +64,7 @@ use crate::{
         LIST,
         MAP,
         PAIR,
+        REIFY,
         SYMBOL,
     },
 };
@@ -282,6 +285,7 @@ impl ParseMode<MapVal> for CompMode {
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
+        let reify = ParseMode::parse(map_remove(&mut map, REIFY), default)?;
         let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
         let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
         let generate = ParseMode::parse(map_remove(&mut map, GENERATE), default)?;
@@ -293,6 +297,7 @@ impl ParseMode<MapVal> for CompMode {
             pair,
             change,
             call,
+            reify,
             equiv,
             inverse,
             generate,
@@ -317,6 +322,9 @@ impl GenerateMode<MapVal> for CompMode {
         }
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
+        }
+        if default.map(Into::into) != self.reify {
+            map.insert(symbol(REIFY), self.reify.generate(default));
         }
         if default.map(Into::into) != self.equiv {
             map.insert(symbol(EQUIV), self.equiv.generate(default));
@@ -347,6 +355,7 @@ impl ParseMode<MapVal> for PrimMode {
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
+        let reify = ParseMode::parse(map_remove(&mut map, REIFY), default)?;
         let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
         let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
         let generate = ParseMode::parse(map_remove(&mut map, GENERATE), default)?;
@@ -358,6 +367,7 @@ impl ParseMode<MapVal> for PrimMode {
             pair,
             change,
             call,
+            reify,
             equiv,
             inverse,
             generate,
@@ -382,6 +392,9 @@ impl GenerateMode<MapVal> for PrimMode {
         }
         if default.map(Into::into) != self.call {
             map.insert(symbol(CALL), self.call.generate(default));
+        }
+        if default.map(Into::into) != self.reify {
+            map.insert(symbol(REIFY), self.reify.generate(default));
         }
         if default.map(Into::into) != self.equiv {
             map.insert(symbol(EQUIV), self.equiv.generate(default));
@@ -518,6 +531,27 @@ impl GenerateMode<Val> for CallMode {
             CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
             CodeMode::Eval => Val::Call(Call::new(func, input).into()),
         }
+    }
+}
+
+impl ParseMode<Val> for ReifyMode {
+    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
+        match mode {
+            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
+            Val::Reify(reify) => {
+                let reify = Reify::from(reify);
+                let func = ParseMode::parse(reify.func, default)?;
+                Some(ReifyMode { reify: Reify::new(func) })
+            }
+            _ => None,
+        }
+    }
+}
+
+impl GenerateMode<Val> for ReifyMode {
+    fn generate(&self, default: Option<UniMode>) -> Val {
+        let func = GenerateMode::generate(&self.reify.func, default);
+        Val::Reify(Reify::new(func).into())
     }
 }
 

@@ -65,6 +65,7 @@ use crate::{
     map::Map,
     number::Number,
     pair::Pair,
+    reify::Reify,
     symbol::Symbol,
     syntax::{
         ABSTRACT,
@@ -87,6 +88,7 @@ use crate::{
         MULTILINE_COMMENT,
         NUMBER,
         PAIR,
+        REIFY,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
@@ -116,6 +118,7 @@ pub(crate) trait ParseRepr:
     + From<Pair<Self, Self>>
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
+    + From<Reify<Self>>
     + From<Equiv<Self>>
     + From<Inverse<Self>>
     + From<Generate<Self>>
@@ -357,6 +360,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
+            REIFY => reify(ctx).parse_next(i),
             EQUIV => equiv(ctx).parse_next(i),
             INVERSE => inverse(ctx).parse_next(i),
             GENERATE => generate(ctx).parse_next(i),
@@ -509,6 +513,10 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let pair = Pair::new(left, right);
     let pair = T::from(pair);
     compose_two(ctx, middle, pair)
+}
+
+fn reify<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Reify::new(t)))
 }
 
 fn equiv<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {

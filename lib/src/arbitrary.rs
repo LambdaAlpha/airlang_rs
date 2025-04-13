@@ -39,6 +39,8 @@ use crate::{
     ModeFuncVal,
     MutStaticCompFunc,
     MutStaticCompFuncVal,
+    Reify,
+    ReifyMode,
     SymbolMode,
     Val,
     ValExt,
@@ -108,6 +110,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         1,      // pair
         1,      // change
         1,      // call
+        1,      // reify
         1,      // equiv
         1,      // inverse
         1,      // generate
@@ -132,15 +135,16 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         7 => Val::Pair(any_pair(rng, new_depth).into()),
         8 => Val::Change(any_change(rng, new_depth).into()),
         9 => Val::Call(any_call(rng, new_depth).into()),
-        10 => Val::Equiv(any_equiv(rng, new_depth).into()),
-        11 => Val::Inverse(any_inverse(rng, new_depth).into()),
-        12 => Val::Generate(any_generate(rng, new_depth).into()),
-        13 => Val::Abstract(any_abstract(rng, new_depth).into()),
-        14 => Val::List(any_list(rng, new_depth).into()),
-        15 => Val::Map(any_map(rng, new_depth).into()),
-        16 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        17 => Val::Func(any_func(rng, new_depth)),
-        18 => Val::Ext(any_extension(rng, new_depth)),
+        10 => Val::Reify(any_reify(rng, new_depth).into()),
+        11 => Val::Equiv(any_equiv(rng, new_depth).into()),
+        12 => Val::Inverse(any_inverse(rng, new_depth).into()),
+        13 => Val::Generate(any_generate(rng, new_depth).into()),
+        14 => Val::Abstract(any_abstract(rng, new_depth).into()),
+        15 => Val::List(any_list(rng, new_depth).into()),
+        16 => Val::Map(any_map(rng, new_depth).into()),
+        17 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        18 => Val::Func(any_func(rng, new_depth)),
+        19 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -212,6 +216,10 @@ pub(crate) fn any_change(rng: &mut SmallRng, depth: usize) -> Change<Val, Val> {
 
 pub(crate) fn any_call(rng: &mut SmallRng, depth: usize) -> Call<Val, Val> {
     Call::new(any_val(rng, depth), any_val(rng, depth))
+}
+
+pub(crate) fn any_reify(rng: &mut SmallRng, depth: usize) -> Reify<Val> {
+    Reify::new(any_val(rng, depth))
 }
 
 pub(crate) fn any_equiv(rng: &mut SmallRng, depth: usize) -> Equiv<Val> {
@@ -314,13 +322,26 @@ impl Arbitrary for CompMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
+        let reify = Arbitrary::any(rng, depth);
         let equiv = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
         let generate = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, change, call, equiv, inverse, generate, abstract1, list, map }
+        CompMode {
+            symbol,
+            pair,
+            change,
+            call,
+            reify,
+            equiv,
+            inverse,
+            generate,
+            abstract1,
+            list,
+            map,
+        }
     }
 }
 
@@ -352,6 +373,15 @@ impl Arbitrary for CallMode {
         let input = Arbitrary::any(rng, new_depth);
         let call = Call::new(func, input);
         CallMode { code, call }
+    }
+}
+
+impl Arbitrary for ReifyMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let func = Arbitrary::any(rng, new_depth);
+        let reify = Reify::new(func);
+        ReifyMode { reify }
     }
 }
 
@@ -426,13 +456,26 @@ impl Arbitrary for PrimMode {
         let pair = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
+        let reify = Arbitrary::any(rng, depth);
         let equiv = Arbitrary::any(rng, depth);
         let inverse = Arbitrary::any(rng, depth);
         let generate = Arbitrary::any(rng, depth);
         let abstract1 = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, change, call, equiv, inverse, generate, abstract1, list, map }
+        PrimMode {
+            symbol,
+            pair,
+            change,
+            call,
+            reify,
+            equiv,
+            inverse,
+            generate,
+            abstract1,
+            list,
+            map,
+        }
     }
 }
 

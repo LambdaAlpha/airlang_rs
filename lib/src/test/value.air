@@ -64,6 +64,12 @@ do [c = any ; call, c type .]
 -----
 call
 =====
+any reify
+-----
+do [a = any ; reify, a type .]
+-----
+reify
+=====
 any equiv
 -----
 do [a = any ; equiv, a type .]
@@ -178,6 +184,12 @@ do [a = id ; f ; a, a type .]
 -----
 call
 =====
+type reify
+-----
+do [a = id ; reify(f), a type .]
+-----
+reify
+=====
 type equiv
 -----
 do [a = id ; equiv(f), a type .]
@@ -283,6 +295,12 @@ true
 == call
 -----
 (1 ; 2) == (1 ; 2)
+-----
+true
+=====
+== reify
+-----
+do [a = id ; reify(f), b = id ; reify(f), (a == b) and not ; a == .]
 -----
 true
 =====

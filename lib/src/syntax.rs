@@ -42,6 +42,7 @@ pub(crate) const PAIR: &str = ":";
 pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL: &str = ";";
 
+pub(crate) const REIFY: &str = "reify";
 pub(crate) const EQUIV: &str = "equiv";
 pub(crate) const INVERSE: &str = "inverse";
 pub(crate) const GENERATE: &str = "generate";

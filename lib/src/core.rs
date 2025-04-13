@@ -25,6 +25,8 @@ use crate::{
     MutFnCtx,
     Pair,
     PairVal,
+    Reify,
+    ReifyVal,
     Symbol,
     Val,
     abstract1::Abstract,
@@ -61,6 +63,7 @@ impl FormCore {
             Val::Pair(pair) => t.transform_pair(ctx, pair),
             Val::Change(change) => t.transform_change(ctx, change),
             Val::Call(call) => t.transform_call(ctx, call),
+            Val::Reify(reify) => t.transform_reify(ctx, reify),
             Val::Equiv(equiv) => t.transform_equiv(ctx, equiv),
             Val::Inverse(inverse) => t.transform_inverse(ctx, inverse),
             Val::Generate(generate) => t.transform_generate(ctx, generate),
@@ -124,6 +127,17 @@ impl FormCore {
         let func = func.transform(ctx.reborrow(), call.func);
         let input = input.transform(ctx, call.input);
         Val::Call(Call::new(func, input).into())
+    }
+
+    pub(crate) fn transform_reify<'a, Ctx, Value>(
+        value: &Value, mut ctx: Ctx, reify: ReifyVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        Value: Transformer<Val, Val>, {
+        let reify = Reify::from(reify);
+        let func = value.transform(ctx.reborrow(), reify.func);
+        Val::Reify(Reify::new(func).into())
     }
 
     pub(crate) fn transform_equiv<'a, Ctx, Func>(

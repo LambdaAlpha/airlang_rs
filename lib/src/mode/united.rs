@@ -11,6 +11,7 @@ use crate::{
     ListVal,
     MapVal,
     PairVal,
+    ReifyVal,
     Symbol,
     SymbolMode,
     Val,
@@ -94,6 +95,14 @@ impl ByVal<Val> for UniMode {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_call(ctx, call),
             CodeMode::Eval => Eval::new(self.symbol).transform_call(ctx, call),
+        }
+    }
+
+    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.code {
+            CodeMode::Form => Form::new(self.symbol).transform_reify(ctx, reify),
+            CodeMode::Eval => Eval::new(self.symbol).transform_reify(ctx, reify),
         }
     }
 

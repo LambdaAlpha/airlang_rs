@@ -1,0 +1,42 @@
+new
+-----
+do [
+    f = any ; .,
+    r1 = reify ; f,
+    r2 = reify(f),
+    r1 == r2
+]
+-----
+true
+=====
+new get
+-----
+do [
+    f = any ; .,
+    r = reify ; f,
+    f == r reify.function .
+]
+-----
+true
+=====
+set get
+-----
+do [
+    r = any ; reify,
+    f = any ; .,
+    r reify.set_function f,
+    f == r reify.function .
+]
+-----
+true
+=====
+set return
+-----
+do [
+    f1 = any ; .,
+    r = reify(f1),
+    f2 = r reify.set_function any ; .,
+    f1 == f2
+]
+-----
+true

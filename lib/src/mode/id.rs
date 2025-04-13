@@ -6,6 +6,7 @@ use crate::{
     GenerateVal,
     InverseVal,
     PairVal,
+    ReifyVal,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
     transformer::{
@@ -55,6 +56,11 @@ impl ByVal<Val> for Id {
     fn transform_call<'a, Ctx>(&self, _ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Call(call)
+    }
+
+    fn transform_reify<'a, Ctx>(&self, _ctx: Ctx, reify: ReifyVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        Val::Reify(reify)
     }
 
     fn transform_equiv<'a, Ctx>(&self, _ctx: Ctx, equiv: EquivVal) -> Val

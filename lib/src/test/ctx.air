@@ -212,6 +212,12 @@ do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
+= destruct reify
+-----
+do [reify(f) = reify(1), f]
+-----
+1
+=====
 = destruct equiv
 -----
 do [equiv(f) = equiv(1), f]

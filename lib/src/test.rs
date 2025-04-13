@@ -113,6 +113,11 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_reify() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/reify.air"), "test/reify.air")
+}
+
+#[test]
 fn test_equiv() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/equiv.air"), "test/equiv.air")
 }

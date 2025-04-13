@@ -21,6 +21,7 @@ use crate::{
     equiv::Equiv,
     extension::ValExt,
     number::Number,
+    reify::Reify,
     symbol::Symbol,
     syntax::{
         ReprError,
@@ -45,6 +46,7 @@ use crate::{
         map::MapVal,
         number::NumberVal,
         pair::PairVal,
+        reify::ReifyVal,
         text::TextVal,
     },
 };
@@ -63,8 +65,9 @@ pub enum Val {
 
     Pair(PairVal),
     Change(ChangeVal),
-
     Call(CallVal),
+
+    Reify(ReifyVal),
     Equiv(EquivVal),
     Inverse(InverseVal),
     Generate(GenerateVal),
@@ -89,6 +92,7 @@ pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
+pub(crate) const REIFY: &str = "reify";
 pub(crate) const EQUIV: &str = "equiv";
 pub(crate) const INVERSE: &str = "inverse";
 pub(crate) const GENERATE: &str = "generate";
@@ -213,6 +217,18 @@ impl From<CallVal> for Val {
     }
 }
 
+impl From<Reify<Val>> for Val {
+    fn from(value: Reify<Val>) -> Self {
+        Val::Reify(ReifyVal::from(value))
+    }
+}
+
+impl From<ReifyVal> for Val {
+    fn from(value: ReifyVal) -> Self {
+        Val::Reify(value)
+    }
+}
+
 impl From<Equiv<Val>> for Val {
     fn from(value: Equiv<Val>) -> Self {
         Val::Equiv(EquivVal::from(value))
@@ -316,6 +332,7 @@ impl From<&Repr> for Val {
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
             Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
+            Repr::Reify(reify) => Val::Reify(ReifyVal::from(&**reify)),
             Repr::Equiv(equiv) => Val::Equiv(EquivVal::from(&**equiv)),
             Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(&**inverse)),
             Repr::Generate(generate) => Val::Generate(GenerateVal::from(&**generate)),
@@ -339,6 +356,7 @@ impl From<Repr> for Val {
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
             Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
+            Repr::Reify(reify) => Val::Reify(ReifyVal::from(*reify)),
             Repr::Equiv(equiv) => Val::Equiv(EquivVal::from(*equiv)),
             Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(*inverse)),
             Repr::Generate(generate) => Val::Generate(GenerateVal::from(*generate)),
@@ -363,6 +381,7 @@ impl TryInto<Repr> for &Val {
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
+            Val::Reify(reify) => Ok(Repr::Reify(Box::new(reify.try_into()?))),
             Val::Equiv(equiv) => Ok(Repr::Equiv(Box::new(equiv.try_into()?))),
             Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
             Val::Generate(generate) => Ok(Repr::Generate(Box::new(generate.try_into()?))),
@@ -388,6 +407,7 @@ impl TryInto<Repr> for Val {
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
+            Val::Reify(reify) => Ok(Repr::Reify(Box::new(reify.try_into()?))),
             Val::Equiv(equiv) => Ok(Repr::Equiv(Box::new(equiv.try_into()?))),
             Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
             Val::Generate(generate) => Ok(Repr::Generate(Box::new(generate.try_into()?))),
@@ -427,6 +447,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let func = (&call.func).try_into()?;
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
+            }
+            Val::Reify(reify) => {
+                let func = (&reify.func).try_into()?;
+                GenRepr::Reify(Box::new(Reify::new(func)))
             }
             Val::Equiv(equiv) => {
                 let func = (&equiv.func).try_into()?;
@@ -479,6 +503,7 @@ impl Debug for Val {
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
             Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
+            Val::Reify(reify) => <_ as Debug>::fmt(reify, f),
             Val::Equiv(equiv) => <_ as Debug>::fmt(equiv, f),
             Val::Inverse(inverse) => <_ as Debug>::fmt(inverse, f),
             Val::Generate(generate) => <_ as Debug>::fmt(generate, f),
@@ -505,6 +530,8 @@ pub(crate) mod pair;
 pub(crate) mod change;
 
 pub(crate) mod call;
+
+pub(crate) mod reify;
 
 pub(crate) mod equiv;
 

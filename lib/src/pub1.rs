@@ -80,11 +80,13 @@ pub use crate::{
             DataMode,
             PrimMode,
         },
+        reify::ReifyMode,
         symbol::SymbolMode,
         united::UniMode,
     },
     number::Number,
     pair::Pair,
+    reify::Reify,
     symbol::Symbol,
     text::Text,
     unit::Unit,
@@ -119,9 +121,14 @@ pub use crate::{
         map::MapVal,
         number::NumberVal,
         pair::PairVal,
+        reify::ReifyVal,
         text::TextVal,
     },
 };
+
+// https://github.com/rust-lang/rustfmt/issues/4070
+mod __ {}
+
 use crate::{
     prelude,
     syntax,

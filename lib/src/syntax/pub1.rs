@@ -13,8 +13,13 @@ pub use crate::syntax::{
         list::ListRepr,
         map::MapRepr,
         pair::PairRepr,
+        reify::ReifyRepr,
     },
 };
+
+// https://github.com/rust-lang/rustfmt/issues/4070
+mod __ {}
+
 use crate::syntax::{
     generator,
     generator::{

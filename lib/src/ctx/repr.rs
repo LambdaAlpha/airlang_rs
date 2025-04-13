@@ -23,6 +23,8 @@ use crate::{
     MutFnCtx,
     Pair,
     PairVal,
+    Reify,
+    ReifyVal,
     Symbol,
     SymbolMode,
     Unit,
@@ -241,6 +243,7 @@ pub(crate) enum Pattern {
     Pair(Box<Pair<Pattern, Pattern>>),
     Change(Box<Change<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
+    Reify(Box<Reify<Pattern>>),
     Equiv(Box<Equiv<Pattern>>),
     Inverse(Box<Inverse<Pattern>>),
     Generate(Box<Generate<Pattern>>),
@@ -261,6 +264,7 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
                 parse_pattern_call(call, ctx)
             }
         }
+        Val::Reify(reify) => parse_pattern_reify(reify, ctx),
         Val::Equiv(equiv) => parse_pattern_equiv(equiv, ctx),
         Val::Inverse(inverse) => parse_pattern_inverse(inverse, ctx),
         Val::Generate(generate) => parse_pattern_generate(generate, ctx),
@@ -297,6 +301,13 @@ fn parse_pattern_call(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
     let func = parse_pattern(call.func, ctx)?;
     let input = parse_pattern(call.input, ctx)?;
     Some(Pattern::Call(Box::new(Call::new(func, input))))
+}
+
+fn parse_pattern_reify(reify: ReifyVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let reify = Reify::from(reify);
+    let func = parse_pattern(reify.func, ctx)?;
+    Some(Pattern::Reify(Box::new(Reify::new(func))))
 }
 
 fn parse_pattern_equiv(equiv: EquivVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -368,6 +379,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
         Pattern::Change(change) => assign_change(ctx, *change, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
+        Pattern::Reify(reify) => assign_reify(ctx, *reify, val),
         Pattern::Equiv(equiv) => assign_equiv(ctx, *equiv, val),
         Pattern::Inverse(inverse) => assign_inverse(ctx, *inverse, val),
         Pattern::Generate(generate) => assign_generate(ctx, *generate, val),
@@ -416,6 +428,15 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let input = assign_pattern(ctx, pattern.input, val.input);
     Val::Call(Call::new(func, input).into())
+}
+
+fn assign_reify(mut ctx: MutFnCtx, pattern: Reify<Pattern>, val: Val) -> Val {
+    let Val::Reify(val) = val else {
+        return Val::default();
+    };
+    let val = Reify::from(val);
+    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    Val::Reify(Reify::new(func).into())
 }
 
 fn assign_equiv(mut ctx: MutFnCtx, pattern: Equiv<Pattern>, val: Val) -> Val {
