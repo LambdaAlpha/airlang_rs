@@ -390,7 +390,7 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn compose<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> + Clone {
+fn compose<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     move |i: &mut _| {
         let tokens = tokens(ctx, 1 ..).parse_next(i)?;
         compose_tokens(ctx, i, tokens.into_iter())
@@ -567,7 +567,7 @@ fn map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
         .context(label("map"))
 }
 
-fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> + Clone {
+fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> {
     move |i: &mut _| {
         let key = token(ctx).parse_next(i)?;
         let key = compose_one(ctx, key);
@@ -798,14 +798,17 @@ fn significand(i: &mut &str) -> ModalResult<Significand> {
 }
 
 fn significand_radix<'a, F>(
-    radix: u8, f: F, desc: &'static str,
+    radix: u8, mut f: F, desc: &'static str,
 ) -> impl Parser<&'a str, Significand, E>
-where F: Parser<&'a str, &'a str, E> + Clone {
-    let int = trim_num1(f.clone());
-    let fraction = opt(preceded('.', cut_err(trim_num0(f).context(expect_desc("fraction")))));
-    (int, fraction)
-        .map(move |(int, fraction)| build_significand(radix, int, fraction))
-        .context(expect_desc(desc))
+where F: Parser<&'a str, &'a str, E> {
+    (move |i: &mut _| {
+        let int = trim_num1(f.by_ref()).parse_next(i)?;
+        let fraction =
+            opt(preceded('.', cut_err(trim_num0(f.by_ref()).context(expect_desc("fraction")))))
+                .parse_next(i)?;
+        Ok(build_significand(radix, int, fraction))
+    })
+    .context(expect_desc(desc))
 }
 
 fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Significand {
