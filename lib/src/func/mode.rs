@@ -44,11 +44,7 @@ impl Transformer<Val, Val> for ModeFunc {
 
 impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
-        &FuncMode {
-            call: None,
-            equiv: None,
-            inverse: Some(Mode::Uni(UniMode { code: CodeMode::Eval, symbol: SymbolMode::Ref })),
-        }
+        &FuncMode { call: None }
     }
 
     fn call(&self) -> Val {

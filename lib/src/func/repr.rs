@@ -55,8 +55,6 @@ pub(crate) const CTX: &str = "context";
 pub(crate) const ID: &str = "id";
 pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
-pub(crate) const EQUIV_MODE: &str = "equiv_mode";
-pub(crate) const INVERSE_MODE: &str = "inverse_mode";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
 
@@ -65,13 +63,6 @@ pub(crate) const CONST: &str = "constant";
 pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
-    let mut map = Map::default();
-    map.insert(symbol(CALL), func_call_mode());
-    map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
-    FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
-}
-
-pub(crate) fn generate_mode() -> Option<Mode> {
     let mut map = Map::default();
     map.insert(symbol(CALL), func_call_mode());
     map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
@@ -132,17 +123,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Func(FuncVal::Mode(call_mode)) => call_mode.inner().clone(),
         _ => return None,
     };
-    let equiv = match map_remove(&mut map, EQUIV_MODE) {
-        Val::Unit(_) => FuncMode::default_mode(),
-        Val::Func(FuncVal::Mode(equiv_mode)) => equiv_mode.inner().clone(),
-        _ => return None,
-    };
-    let inverse = match map_remove(&mut map, INVERSE_MODE) {
-        Val::Unit(_) => FuncMode::default_mode(),
-        Val::Func(FuncVal::Mode(inverse_mode)) => inverse_mode.inner().clone(),
-        _ => return None,
-    };
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
@@ -365,13 +346,5 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
     if common.mode.call != FuncMode::default_mode() {
         let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.call).into()));
         repr.insert(symbol(CALL_MODE), call_mode);
-    }
-    if common.mode.equiv != FuncMode::default_mode() {
-        let equiv_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.equiv).into()));
-        repr.insert(symbol(EQUIV_MODE), equiv_mode);
-    }
-    if common.mode.inverse != FuncMode::default_mode() {
-        let inverse_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.inverse).into()));
-        repr.insert(symbol(INVERSE_MODE), inverse_mode);
     }
 }

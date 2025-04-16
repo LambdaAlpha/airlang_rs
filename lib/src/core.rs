@@ -371,30 +371,13 @@ impl EvalCore {
     where
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>, {
+        let input = input_trans.transform(ctx.reborrow(), input);
         match func {
-            Val::Func(func) => {
-                let input = func.mode().equiv.transform(ctx.reborrow(), input);
-                Self::equiv_func(ctx, func, input)
-            }
+            Val::Func(func) => Self::equiv_func(ctx, func, input),
             func => {
-                let input = input_trans.transform(ctx, input);
                 let func = Val::Equiv(Equiv::new(func).into());
                 Val::Call(Call::new(func, input).into())
             }
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn equiv_eval_input<'a, Ctx, Input>(
-        input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        if let Val::Func(func) = func {
-            func.mode().equiv.transform(ctx, input)
-        } else {
-            input_trans.transform(ctx, input)
         }
     }
 
@@ -428,30 +411,13 @@ impl EvalCore {
     where
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>, {
+        let input = input_trans.transform(ctx.reborrow(), input);
         match func {
-            Val::Func(func) => {
-                let input = func.mode().inverse.transform(ctx.reborrow(), input);
-                Self::inverse_func(ctx, func, input)
-            }
+            Val::Func(func) => Self::inverse_func(ctx, func, input),
             func => {
-                let input = input_trans.transform(ctx, input);
                 let func = Val::Inverse(Inverse::new(func).into());
                 Val::Call(Call::new(func, input).into())
             }
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn inverse_eval_input<'a, Ctx, Input>(
-        input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        if let Val::Func(f) = func {
-            f.mode().inverse.transform(ctx, input)
-        } else {
-            input_trans.transform(ctx, input)
         }
     }
 

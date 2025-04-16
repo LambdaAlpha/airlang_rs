@@ -76,9 +76,7 @@ fn get_first() -> Named<FuncVal> {
     let id = "pair.first";
     let f = fn_get_first;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -103,9 +101,7 @@ fn set_first() -> Named<FuncVal> {
     let id = "pair.set_first";
     let f = fn_set_first;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -132,9 +128,7 @@ fn get_second() -> Named<FuncVal> {
     let id = "pair.second";
     let f = fn_get_second;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -159,9 +153,7 @@ fn set_second() -> Named<FuncVal> {
     let id = "pair.set_second";
     let f = fn_set_second;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 

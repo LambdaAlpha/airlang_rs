@@ -62,9 +62,7 @@ fn get_function() -> Named<FuncVal> {
     let id = "abstract.function";
     let f = fn_get_function;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -89,9 +87,7 @@ fn set_function() -> Named<FuncVal> {
     let id = "abstract.set_function";
     let f = fn_set_function;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 

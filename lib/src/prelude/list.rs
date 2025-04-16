@@ -79,9 +79,7 @@ fn length() -> Named<FuncVal> {
     let id = "list.length";
     let f = fn_length;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -103,9 +101,7 @@ fn set() -> Named<FuncVal> {
     let id = "list.set";
     let f = fn_set;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -140,9 +136,7 @@ fn set_many() -> Named<FuncVal> {
     let id = "list.set_many";
     let f = fn_set_many;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -181,9 +175,7 @@ fn get() -> Named<FuncVal> {
     let id = "list.get";
     let f = fn_get;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -229,9 +221,7 @@ fn insert() -> Named<FuncVal> {
     let id = "list.insert";
     let f = fn_insert;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -265,9 +255,7 @@ fn insert_many() -> Named<FuncVal> {
     let id = "list.insert_many";
     let f = fn_insert_many;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -304,9 +292,7 @@ fn remove() -> Named<FuncVal> {
     let id = "list.remove";
     let f = fn_remove;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -353,9 +339,7 @@ fn push() -> Named<FuncVal> {
     let id = "list.push";
     let f = fn_push;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -378,9 +362,7 @@ fn push_many() -> Named<FuncVal> {
     let id = "list.push_many";
     let f = fn_push_many;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -406,9 +388,7 @@ fn pop() -> Named<FuncVal> {
     let id = "list.pop";
     let f = fn_pop;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -452,9 +432,7 @@ fn clear() -> Named<FuncVal> {
     let id = "list.clear";
     let f = fn_clear;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 

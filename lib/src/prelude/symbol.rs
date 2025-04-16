@@ -86,9 +86,7 @@ fn length() -> Named<FuncVal> {
     let id = "symbol.length";
     let f = fn_length;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 

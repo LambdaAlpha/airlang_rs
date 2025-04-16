@@ -80,9 +80,7 @@ fn get_from() -> Named<FuncVal> {
     let id = "change.from";
     let f = fn_get_from;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -107,9 +105,7 @@ fn set_from() -> Named<FuncVal> {
     let id = "change.set_from";
     let f = fn_set_from;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -136,9 +132,7 @@ fn get_to() -> Named<FuncVal> {
     let id = "change.to";
     let f = fn_get_to;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -163,9 +157,7 @@ fn set_to() -> Named<FuncVal> {
     let id = "change.set_to";
     let f = fn_set_to;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 

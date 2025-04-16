@@ -89,9 +89,7 @@ fn do1() -> Named<FuncVal> {
         |ctx, val| fn_do(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -108,9 +106,7 @@ fn if1() -> Named<FuncVal> {
         |ctx, val| fn_if(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -140,9 +136,7 @@ fn match1() -> Named<FuncVal> {
         |ctx, val| fn_match(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -178,9 +172,7 @@ fn loop1() -> Named<FuncVal> {
         |ctx, val| fn_loop(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -237,9 +229,7 @@ fn for1() -> Named<FuncVal> {
         |ctx, val| fn_for(ctx, val),
     );
     let call = FuncMode::id_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 

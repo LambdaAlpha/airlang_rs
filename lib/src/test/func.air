@@ -874,13 +874,9 @@ repr composite
 -----
 do [
     call_mode = mode ; {pair : eval* : id},
-    equiv_mode = mode ; {pair : id : form.},
-    inverse_mode = mode ; {pair : form. : form.},
     repr = form. ; {
         call : ctx : in -> in,
         call_mode : ^call_mode,
-        equiv_mode : ^equiv_mode,
-        inverse_mode : ^inverse_mode,
         context_access : constant,
         cell : true,
     },
@@ -964,28 +960,6 @@ do [
 ]
 -----
 {map : {a : eval*, b : id} : id : form.}
-=====
-equiv mode
------
-do [
-    f = function ; {
-        equiv_mode : mode ; {map : {a : form.} : eval* : id},
-    },
-    function.represent ; f function.equiv_mode .
-]
------
-{map : {a : form.} : eval* : id}
-=====
-inverse mode
------
-do [
-    f = function ; {
-        inverse_mode : mode ; {map : {a : form.} : eval* : id},
-    },
-    function.represent ; f function.inverse_mode .
-]
------
-{map : {a : form.} : eval* : id}
 =====
 is_primitive primitive
 -----

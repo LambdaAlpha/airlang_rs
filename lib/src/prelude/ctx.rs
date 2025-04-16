@@ -26,7 +26,6 @@ use crate::{
             PatternCtx,
             assign_pattern,
             generate_ctx,
-            generate_mode,
             generate_var_access,
             parse_ctx,
             parse_mode,
@@ -129,9 +128,7 @@ fn read() -> Named<FuncVal> {
     let id = "read";
     let f = fn_read;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -146,9 +143,7 @@ fn move1() -> Named<FuncVal> {
     let id = "move";
     let f = fn_move;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -169,9 +164,7 @@ fn assign() -> Named<FuncVal> {
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
         FuncMode::default_mode(),
     );
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -195,9 +188,7 @@ fn set_variable_access() -> Named<FuncVal> {
         FuncMode::symbol_mode(SymbolMode::Literal),
         FuncMode::symbol_mode(SymbolMode::Literal),
     );
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -226,9 +217,7 @@ fn get_variable_access() -> Named<FuncVal> {
     let id = "variable_access";
     let f = fn_get_variable_access;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let equiv = call.clone();
-    let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -249,9 +238,7 @@ fn is_null() -> Named<FuncVal> {
     let id = "is_null";
     let f = fn_is_null;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -269,9 +256,7 @@ fn is_static() -> Named<FuncVal> {
     let id = "is_static";
     let f = fn_is_static;
     let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -328,9 +313,7 @@ fn get_ctx_access() -> Named<FuncVal> {
     let id = "access";
     let f = fn_get_ctx_access;
     let call = FuncMode::default_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -351,9 +334,7 @@ fn get_solver() -> Named<FuncVal> {
     let id = "solver";
     let f = fn_get_solver;
     let call = FuncMode::default_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -391,9 +372,7 @@ fn with_ctx() -> Named<FuncVal> {
         FuncMode::id_mode(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_mut_fn(id, f, mode)
 }
 
@@ -433,9 +412,7 @@ fn ctx_in_ctx_out() -> Named<FuncVal> {
         FuncMode::default_mode(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_free_fn(id, f, mode)
 }
 
@@ -458,9 +435,7 @@ fn ctx_new() -> Named<FuncVal> {
     let id = "context";
     let f = fn_ctx_new;
     let call = parse_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_free_fn(id, f, mode)
 }
 
@@ -475,9 +450,7 @@ fn ctx_repr() -> Named<FuncVal> {
     let id = "context.represent";
     let f = fn_ctx_repr;
     let call = FuncMode::default_mode();
-    let equiv = call.clone();
-    let inverse = generate_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_free_fn(id, f, mode)
 }
 

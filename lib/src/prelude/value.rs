@@ -102,9 +102,7 @@ fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
     let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_free_fn(id, f, mode)
 }
 
@@ -144,9 +142,7 @@ fn type1() -> Named<FuncVal> {
     let id = "type";
     let f = fn_type1;
     let call = ref_pair_mode();
-    let equiv = call.clone();
-    let inverse = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 
@@ -185,9 +181,7 @@ fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
     let call = FuncMode::pair_mode(ref_mode(), ref_mode());
-    let equiv = call.clone();
-    let inverse = FuncMode::default_mode();
-    let mode = FuncMode { call, equiv, inverse };
+    let mode = FuncMode { call };
     named_const_fn(id, f, mode)
 }
 

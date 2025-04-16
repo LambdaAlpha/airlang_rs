@@ -505,9 +505,7 @@ pub(crate) fn any_func(rng: &mut SmallRng, depth: usize) -> FuncVal {
 
 fn any_func_mode(rng: &mut SmallRng, depth: usize) -> FuncMode {
     let call = Arbitrary::any(rng, depth);
-    let equiv = Arbitrary::any(rng, depth);
-    let inverse = Arbitrary::any(rng, depth);
-    FuncMode { call, equiv, inverse }
+    FuncMode { call }
 }
 
 fn any_composite(rng: &mut SmallRng, depth: usize) -> Composite {

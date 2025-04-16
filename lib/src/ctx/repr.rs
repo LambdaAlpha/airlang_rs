@@ -159,19 +159,6 @@ pub(crate) fn parse_var_access(access: &str) -> Option<VarAccess> {
     Some(access)
 }
 
-pub(crate) fn generate_mode() -> Option<Mode> {
-    let mut map = Map::default();
-    map.insert(
-        symbol(VARIABLES),
-        FuncMode::map_mode(
-            Map::default(),
-            FuncMode::symbol_mode(SymbolMode::Literal),
-            FuncMode::default_mode(),
-        ),
-    );
-    FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
-}
-
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     let ctx = Ctx::from(ctx).destruct();
     let mut map = Map::default();
