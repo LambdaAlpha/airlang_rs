@@ -164,7 +164,7 @@ impl GetCtxAccess for SymbolMode {
 
 impl GetCtxAccess for PairMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.pair.first.ctx_access() & self.pair.second.ctx_access()
+        self.first.ctx_access() & self.second.ctx_access()
     }
 }
 
@@ -173,19 +173,19 @@ impl GetCtxAccess for CallMode {
         if matches!(self.code, CodeMode::Eval) {
             return CtxAccess::Mut;
         }
-        self.call.func.ctx_access() & self.call.input.ctx_access()
+        self.func.ctx_access() & self.input.ctx_access()
     }
 }
 
 impl GetCtxAccess for EquivMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.equiv.func.ctx_access()
+        self.func.ctx_access()
     }
 }
 
 impl GetCtxAccess for InverseMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.inverse.func.ctx_access()
+        self.func.ctx_access()
     }
 }
 

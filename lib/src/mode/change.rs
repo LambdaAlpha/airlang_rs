@@ -1,5 +1,4 @@
 use crate::{
-    Change,
     ChangeVal,
     UniMode,
     Val,
@@ -11,19 +10,20 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ChangeMode {
-    pub change: Change<Option<Mode>, Option<Mode>>,
+    pub from: Option<Mode>,
+    pub to: Option<Mode>,
 }
 
 impl Transformer<ChangeVal, Val> for ChangeMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        FormCore::transform_change(&self.change.from, &self.change.to, ctx, change)
+        FormCore::transform_change(&self.from, &self.to, ctx, change)
     }
 }
 
 impl From<UniMode> for ChangeMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        ChangeMode { change: Change::new(m.clone(), m) }
+        Self { from: m.clone(), to: m }
     }
 }

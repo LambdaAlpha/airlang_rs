@@ -74,12 +74,10 @@ fn func_call_mode() -> Option<Mode> {
     let form_ref = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref);
     Some(Mode::Comp(Box::new(CompMode {
         pair: Some(PairMode {
-            pair: Pair::new(
-                symbol_literal.clone(),
-                FuncMode::change_mode(symbol_literal.clone(), form_ref.clone()),
-            ),
+            first: symbol_literal.clone(),
+            second: FuncMode::change_mode(symbol_literal.clone(), form_ref.clone()),
         }),
-        change: Some(ChangeMode { change: Change::new(symbol_literal, form_ref) }),
+        change: Some(ChangeMode { from: symbol_literal, to: form_ref }),
         ..CompMode::from(FuncMode::default_uni_mode())
     })))
 }

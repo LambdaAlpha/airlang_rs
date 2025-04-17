@@ -350,8 +350,7 @@ impl Arbitrary for PairMode {
         let new_depth = depth + 1;
         let first = Arbitrary::any(rng, new_depth);
         let second = Arbitrary::any(rng, new_depth);
-        let pair = Pair::new(first, second);
-        PairMode { pair }
+        PairMode { first, second }
     }
 }
 
@@ -360,8 +359,7 @@ impl Arbitrary for ChangeMode {
         let new_depth = depth + 1;
         let from = Arbitrary::any(rng, new_depth);
         let to = Arbitrary::any(rng, new_depth);
-        let change = Change::new(from, to);
-        ChangeMode { change }
+        ChangeMode { from, to }
     }
 }
 
@@ -371,8 +369,7 @@ impl Arbitrary for CallMode {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
-        let call = Call::new(func, input);
-        CallMode { code, call }
+        CallMode { code, func, input }
     }
 }
 
@@ -389,8 +386,7 @@ impl Arbitrary for EquivMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let equiv = Equiv::new(func);
-        EquivMode { equiv }
+        EquivMode { func }
     }
 }
 
@@ -398,8 +394,7 @@ impl Arbitrary for InverseMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let inverse = Inverse::new(func);
-        InverseMode { inverse }
+        InverseMode { func }
     }
 }
 
@@ -407,17 +402,15 @@ impl Arbitrary for GenerateMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
-        let generate = Generate::new(func);
-        GenerateMode { generate }
+        GenerateMode { func }
     }
 }
 
 impl Arbitrary for AbstractMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let new_depth = depth + 1;
-        let value = Arbitrary::any(rng, new_depth);
-        let abstract1 = Abstract::new(value);
-        AbstractMode { abstract1 }
+        let func = Arbitrary::any(rng, new_depth);
+        AbstractMode { func }
     }
 }
 

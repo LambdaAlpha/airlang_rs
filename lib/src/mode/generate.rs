@@ -1,5 +1,4 @@
 use crate::{
-    Generate,
     GenerateVal,
     UniMode,
     Val,
@@ -11,20 +10,18 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GenerateMode {
-    pub generate: Generate<Option<Mode>>,
+    pub func: Option<Mode>,
 }
 
 impl Transformer<GenerateVal, Val> for GenerateMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
     where Ctx: CtxMeta<'a> {
-        let func = &self.generate.func;
-        FormCore::transform_generate(func, ctx, generate)
+        FormCore::transform_generate(&self.func, ctx, generate)
     }
 }
 
 impl From<UniMode> for GenerateMode {
     fn from(mode: UniMode) -> Self {
-        let m = Some(Mode::Uni(mode));
-        Self { generate: Generate::new(m) }
+        Self { func: Some(Mode::Uni(mode)) }
     }
 }

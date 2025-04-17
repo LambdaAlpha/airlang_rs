@@ -3,7 +3,6 @@ use crate::{
     AbstractMode,
     Bit,
     Call,
-    Change,
     Equiv,
     Generate,
     Inverse,
@@ -464,7 +463,7 @@ impl ParseMode<Val> for PairMode {
                 let pair = Pair::from(pair);
                 let first = ParseMode::parse(pair.first, default)?;
                 let second = ParseMode::parse(pair.second, default)?;
-                Some(PairMode { pair: Pair::new(first, second) })
+                Some(PairMode { first, second })
             }
             _ => None,
         }
@@ -473,8 +472,8 @@ impl ParseMode<Val> for PairMode {
 
 impl GenerateMode<Val> for PairMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let first = GenerateMode::generate(&self.pair.first, default);
-        let second = GenerateMode::generate(&self.pair.second, default);
+        let first = GenerateMode::generate(&self.first, default);
+        let second = GenerateMode::generate(&self.second, default);
         Val::Pair(Pair::new(first, second).into())
     }
 }
@@ -487,7 +486,7 @@ impl ParseMode<Val> for ChangeMode {
                 let pair = Pair::from(pair);
                 let from = ParseMode::parse(pair.first, default)?;
                 let to = ParseMode::parse(pair.second, default)?;
-                Some(ChangeMode { change: Change::new(from, to) })
+                Some(ChangeMode { from, to })
             }
             _ => None,
         }
@@ -496,8 +495,8 @@ impl ParseMode<Val> for ChangeMode {
 
 impl GenerateMode<Val> for ChangeMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let from = GenerateMode::generate(&self.change.from, default);
-        let to = GenerateMode::generate(&self.change.to, default);
+        let from = GenerateMode::generate(&self.from, default);
+        let to = GenerateMode::generate(&self.to, default);
         Val::Pair(Pair::new(from, to).into())
     }
 }
@@ -510,13 +509,13 @@ impl ParseMode<Val> for CallMode {
                 let pair = Pair::from(pair);
                 let func = ParseMode::parse(pair.first, default)?;
                 let input = ParseMode::parse(pair.second, default)?;
-                Some(CallMode { code: CodeMode::Form, call: Call::new(func, input) })
+                Some(CallMode { code: CodeMode::Form, func, input })
             }
             Val::Call(call) => {
                 let call = Call::from(call);
                 let func = ParseMode::parse(call.func, default)?;
                 let input = ParseMode::parse(call.input, default)?;
-                Some(CallMode { code: CodeMode::Eval, call: Call::new(func, input) })
+                Some(CallMode { code: CodeMode::Eval, func, input })
             }
             _ => None,
         }
@@ -525,8 +524,8 @@ impl ParseMode<Val> for CallMode {
 
 impl GenerateMode<Val> for CallMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.call.func, default);
-        let input = GenerateMode::generate(&self.call.input, default);
+        let func = GenerateMode::generate(&self.func, default);
+        let input = GenerateMode::generate(&self.input, default);
         match self.code {
             CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
             CodeMode::Eval => Val::Call(Call::new(func, input).into()),
@@ -562,7 +561,7 @@ impl ParseMode<Val> for EquivMode {
             Val::Equiv(equiv) => {
                 let equiv = Equiv::from(equiv);
                 let func = ParseMode::parse(equiv.func, default)?;
-                Some(EquivMode { equiv: Equiv::new(func) })
+                Some(EquivMode { func })
             }
             _ => None,
         }
@@ -571,7 +570,7 @@ impl ParseMode<Val> for EquivMode {
 
 impl GenerateMode<Val> for EquivMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.equiv.func, default);
+        let func = GenerateMode::generate(&self.func, default);
         Val::Equiv(Equiv::new(func).into())
     }
 }
@@ -583,7 +582,7 @@ impl ParseMode<Val> for InverseMode {
             Val::Inverse(inverse) => {
                 let inverse = Inverse::from(inverse);
                 let func = ParseMode::parse(inverse.func, default)?;
-                Some(InverseMode { inverse: Inverse::new(func) })
+                Some(InverseMode { func })
             }
             _ => None,
         }
@@ -592,7 +591,7 @@ impl ParseMode<Val> for InverseMode {
 
 impl GenerateMode<Val> for InverseMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.inverse.func, default);
+        let func = GenerateMode::generate(&self.func, default);
         Val::Inverse(Inverse::new(func).into())
     }
 }
@@ -604,7 +603,7 @@ impl ParseMode<Val> for crate::mode::generate::GenerateMode {
             Val::Generate(inverse) => {
                 let generate = Generate::from(inverse);
                 let func = ParseMode::parse(generate.func, default)?;
-                Some(crate::mode::generate::GenerateMode { generate: Generate::new(func) })
+                Some(crate::mode::generate::GenerateMode { func })
             }
             _ => None,
         }
@@ -613,7 +612,7 @@ impl ParseMode<Val> for crate::mode::generate::GenerateMode {
 
 impl GenerateMode<Val> for crate::mode::generate::GenerateMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.generate.func, default);
+        let func = GenerateMode::generate(&self.func, default);
         Val::Generate(Generate::new(func).into())
     }
 }
@@ -625,7 +624,7 @@ impl ParseMode<Val> for AbstractMode {
             Val::Abstract(abstract1) => {
                 let abstract1 = Abstract::from(abstract1);
                 let func = ParseMode::parse(abstract1.func, default)?;
-                Some(AbstractMode { abstract1: Abstract::new(func) })
+                Some(AbstractMode { func })
             }
             _ => None,
         }
@@ -634,7 +633,7 @@ impl ParseMode<Val> for AbstractMode {
 
 impl GenerateMode<Val> for AbstractMode {
     fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.abstract1.func, default);
+        let func = GenerateMode::generate(&self.func, default);
         Val::Abstract(Abstract::new(func).into())
     }
 }

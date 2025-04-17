@@ -1,5 +1,4 @@
 use crate::{
-    Call,
     CallVal,
     CodeMode,
     UniMode,
@@ -16,17 +15,16 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CallMode {
     pub code: CodeMode,
-    pub call: Call<Option<Mode>, Option<Mode>>,
+    pub func: Option<Mode>,
+    pub input: Option<Mode>,
 }
 
 impl Transformer<CallVal, Val> for CallMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
-        let func = &self.call.func;
-        let input = &self.call.input;
         match self.code {
-            CodeMode::Form => FormCore::transform_call(func, input, ctx, call),
-            CodeMode::Eval => EvalCore::transform_call(func, input, ctx, call),
+            CodeMode::Form => FormCore::transform_call(&self.func, &self.input, ctx, call),
+            CodeMode::Eval => EvalCore::transform_call(&self.func, &self.input, ctx, call),
         }
     }
 }
@@ -34,6 +32,6 @@ impl Transformer<CallVal, Val> for CallMode {
 impl From<UniMode> for CallMode {
     fn from(mode: UniMode) -> Self {
         let m = Some(Mode::Uni(mode));
-        Self { code: mode.code, call: Call::new(m.clone(), m) }
+        Self { code: mode.code, func: m.clone(), input: m }
     }
 }

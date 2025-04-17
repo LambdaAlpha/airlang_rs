@@ -1,5 +1,4 @@
 use crate::{
-    Inverse,
     InverseVal,
     UniMode,
     Val,
@@ -11,20 +10,18 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct InverseMode {
-    pub inverse: Inverse<Option<Mode>>,
+    pub func: Option<Mode>,
 }
 
 impl Transformer<InverseVal, Val> for InverseMode {
     fn transform<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
-        let func = &self.inverse.func;
-        FormCore::transform_inverse(func, ctx, inverse)
+        FormCore::transform_inverse(&self.func, ctx, inverse)
     }
 }
 
 impl From<UniMode> for InverseMode {
     fn from(mode: UniMode) -> Self {
-        let m = Some(Mode::Uni(mode));
-        Self { inverse: Inverse::new(m) }
+        Self { func: Some(Mode::Uni(mode)) }
     }
 }
