@@ -19,6 +19,7 @@ pub use crate::{
             MutFnCtx,
         },
     },
+    either::Either,
     equiv::Equiv,
     extension::ValExt,
     func::{
@@ -69,6 +70,7 @@ pub use crate::{
         call::CallMode,
         change::ChangeMode,
         comp::CompMode,
+        either::EitherMode,
         equiv::EquivMode,
         generate::GenerateMode,
         inverse::InverseMode,
@@ -97,6 +99,7 @@ pub use crate::{
         call::CallVal,
         change::ChangeVal,
         ctx::CtxVal,
+        either::EitherVal,
         equiv::EquivVal,
         func::{
             FuncVal,

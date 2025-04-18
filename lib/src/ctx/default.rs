@@ -14,6 +14,7 @@ use crate::{
             CtxRef,
         },
     },
+    either::Either,
     mode::{
         eval::EVAL,
         symbol::{
@@ -23,7 +24,6 @@ use crate::{
         },
     },
     transformer::Transformer,
-    types::either::Either,
 };
 
 pub(crate) struct DefaultCtx;
@@ -83,7 +83,6 @@ impl DefaultCtx {
         }
     }
 
-    #[expect(dead_code)]
     pub(crate) fn with_ref<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,

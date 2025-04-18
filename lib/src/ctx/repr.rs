@@ -8,6 +8,8 @@ use crate::{
     ChangeVal,
     Ctx,
     CtxVal,
+    Either,
+    EitherVal,
     Equiv,
     EquivVal,
     FuncMode,
@@ -241,6 +243,7 @@ pub(crate) struct PatternCtx {
 pub(crate) enum Pattern {
     Any(Binding<Symbol>),
     Pair(Box<Pair<Pattern, Pattern>>),
+    Either(Box<Either<Pattern, Pattern>>),
     Change(Box<Change<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
     Reify(Box<Reify<Pattern>>),
@@ -256,6 +259,7 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
     match pattern {
         Val::Symbol(name) => Some(parse_pattern_any(name, ctx)),
         Val::Pair(pair) => parse_pattern_pair(pair, ctx),
+        Val::Either(either) => parse_pattern_either(either, ctx),
         Val::Change(change) => parse_pattern_change(change, ctx),
         Val::Call(call) => {
             if ctx.allow_extra && call.func.is_unit() {
@@ -285,6 +289,16 @@ fn parse_pattern_pair(pair: PairVal, mut ctx: PatternCtx) -> Option<Pattern> {
     let first = parse_pattern(pair.first, ctx)?;
     let second = parse_pattern(pair.second, ctx)?;
     Some(Pattern::Pair(Box::new(Pair::new(first, second))))
+}
+
+fn parse_pattern_either(either: EitherVal, mut ctx: PatternCtx) -> Option<Pattern> {
+    ctx.allow_extra = true;
+    let either = Either::from(either);
+    let either = match either {
+        Either::This(this) => Either::This(parse_pattern(this, ctx)?),
+        Either::That(that) => Either::That(parse_pattern(that, ctx)?),
+    };
+    Some(Pattern::Either(Box::new(either)))
 }
 
 fn parse_pattern_change(change: ChangeVal, mut ctx: PatternCtx) -> Option<Pattern> {
@@ -377,6 +391,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
     match pattern {
         Pattern::Any(binding) => assign_any(ctx, binding, val),
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
+        Pattern::Either(either) => assign_either(ctx, *either, val),
         Pattern::Change(change) => assign_change(ctx, *change, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
         Pattern::Reify(reify) => assign_reify(ctx, *reify, val),
@@ -408,6 +423,23 @@ fn assign_pair(mut ctx: MutFnCtx, pattern: Pair<Pattern, Pattern>, val: Val) -> 
     let first = assign_pattern(ctx.reborrow(), pattern.first, val.first);
     let second = assign_pattern(ctx, pattern.second, val.second);
     Val::Pair(Pair::new(first, second).into())
+}
+
+fn assign_either(ctx: MutFnCtx, pattern: Either<Pattern, Pattern>, val: Val) -> Val {
+    let Val::Either(val) = val else {
+        return Val::default();
+    };
+    let val = Either::from(val);
+    match val {
+        Either::This(this_val) => match pattern {
+            Either::This(this_pattern) => assign_pattern(ctx, this_pattern, this_val),
+            Either::That(_) => Val::default(),
+        },
+        Either::That(that_val) => match pattern {
+            Either::This(_) => Val::default(),
+            Either::That(that_pattern) => assign_pattern(ctx, that_pattern, that_val),
+        },
+    }
 }
 
 fn assign_change(mut ctx: MutFnCtx, pattern: Change<Pattern, Pattern>, val: Val) -> Val {

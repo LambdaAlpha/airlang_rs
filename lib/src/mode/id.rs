@@ -2,6 +2,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    EitherVal,
     EquivVal,
     GenerateVal,
     InverseVal,
@@ -46,6 +47,11 @@ impl ByVal<Val> for Id {
     fn transform_pair<'a, Ctx>(&self, _ctx: Ctx, pair: PairVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Pair(pair)
+    }
+
+    fn transform_either<'a, Ctx>(&self, _ctx: Ctx, either: EitherVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        Val::Either(either)
     }
 
     fn transform_change<'a, Ctx>(&self, _ctx: Ctx, change: ChangeVal) -> Val

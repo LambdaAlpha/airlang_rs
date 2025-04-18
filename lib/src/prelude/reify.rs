@@ -14,6 +14,7 @@ use crate::{
         default::DefaultCtx,
         map::CtxValue,
     },
+    either::Either,
     prelude::{
         Named,
         Prelude,
@@ -23,7 +24,6 @@ use crate::{
         ref_pair_mode,
     },
     syntax::REIFY,
-    types::either::Either,
 };
 
 #[derive(Clone)]

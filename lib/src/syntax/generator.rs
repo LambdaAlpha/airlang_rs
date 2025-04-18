@@ -7,6 +7,7 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
+    Either,
     Generate,
     abstract1::Abstract,
     bit::Bit,
@@ -27,6 +28,8 @@ use crate::{
         BYTE,
         CALL,
         CHANGE,
+        EITHER_THAT,
+        EITHER_THIS,
         EQUIV,
         FALSE,
         GENERATE,
@@ -62,6 +65,7 @@ pub(crate) enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
+    Either(Box<Either<GenRepr<'a>, GenRepr<'a>>>),
     Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     Reify(Box<Reify<GenRepr<'a>>>),
@@ -139,6 +143,7 @@ fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
         GenRepr::Number(number) => gen_number(number, s),
         GenRepr::Byte(byte) => gen_byte(byte, s),
         GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
+        GenRepr::Either(either) => gen_either(ctx, *either, s),
         GenRepr::Change(change) => gen_change(ctx, *change, s),
         GenRepr::Call(call) => gen_call(ctx, *call, s),
         GenRepr::Reify(reify) => gen_reify(ctx, *reify, s),
@@ -280,6 +285,23 @@ fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
     s.push_str(PAIR);
     s.push(' ');
     gen1(ctx, pair.second, s);
+}
+
+fn gen_either(ctx: GenCtx, either: Either<GenRepr, GenRepr>, s: &mut String) {
+    match either {
+        Either::This(this) => {
+            s.push_str(EITHER_THIS);
+            s.push(SCOPE_LEFT);
+            gen1(ctx, this, s);
+            s.push(SCOPE_RIGHT);
+        }
+        Either::That(that) => {
+            s.push_str(EITHER_THAT);
+            s.push(SCOPE_LEFT);
+            gen1(ctx, that, s);
+            s.push(SCOPE_RIGHT);
+        }
+    }
 }
 
 fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {

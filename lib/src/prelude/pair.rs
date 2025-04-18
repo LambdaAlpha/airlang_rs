@@ -11,6 +11,7 @@ use crate::{
         map::CtxValue,
         mut1::MutFnCtx,
     },
+    either::Either,
     prelude::{
         Named,
         Prelude,
@@ -20,7 +21,6 @@ use crate::{
         ref_pair_mode,
     },
     syntax::PAIR,
-    types::either::Either,
     val::{
         Val,
         func::FuncVal,

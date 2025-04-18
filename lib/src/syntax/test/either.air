@@ -1,0 +1,15 @@
+this
+-----
+this(a)
+=====
+that
+-----
+that(a)
+=====
+this that
+-----
+this(that(a))
+=====
+that this
+-----
+that(this(a))

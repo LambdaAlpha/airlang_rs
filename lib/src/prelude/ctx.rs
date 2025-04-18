@@ -33,6 +33,7 @@ use crate::{
             parse_var_access,
         },
     },
+    either::Either,
     mode::eval::EVAL,
     pair::Pair,
     prelude::{
@@ -45,7 +46,6 @@ use crate::{
     },
     symbol::Symbol,
     transformer::Transformer,
-    types::either::Either,
     utils::val::symbol,
     val::{
         Val,

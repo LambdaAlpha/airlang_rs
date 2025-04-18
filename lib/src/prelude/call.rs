@@ -16,6 +16,7 @@ use crate::{
         mut1::MutFnCtx,
         ref1::CtxMeta,
     },
+    either::Either,
     func::mut_static_prim::MutDispatcher,
     prelude::{
         Named,
@@ -26,7 +27,6 @@ use crate::{
         ref_pair_mode,
     },
     syntax::CALL,
-    types::either::Either,
     val::func::FuncVal,
 };
 

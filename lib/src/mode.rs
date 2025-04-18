@@ -61,6 +61,8 @@ pub(crate) mod symbol;
 
 pub(crate) mod pair;
 
+pub(crate) mod either;
+
 pub(crate) mod change;
 
 pub(crate) mod call;

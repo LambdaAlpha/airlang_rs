@@ -2,6 +2,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    EitherVal,
     EquivVal,
     GenerateVal,
     InverseVal,
@@ -29,6 +30,7 @@ use crate::{
 pub struct PrimMode {
     pub symbol: Option<SymbolMode>,
     pub pair: Option<DataMode>,
+    pub either: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
     pub reify: Option<DataMode>,
@@ -75,6 +77,14 @@ impl ByVal<Val> for PrimMode {
         match self.pair {
             None => Id.transform_pair(ctx, pair),
             Some(_) => FormCore::transform_pair(self, self, ctx, pair),
+        }
+    }
+
+    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match self.either {
+            None => Id.transform_either(ctx, either),
+            Some(_) => FormCore::transform_either(self, self, ctx, either),
         }
     }
 
@@ -160,6 +170,7 @@ impl From<Option<UniMode>> for PrimMode {
             None => Self {
                 symbol: None,
                 pair: None,
+                either: None,
                 call: None,
                 reify: None,
                 equiv: None,
@@ -173,6 +184,7 @@ impl From<Option<UniMode>> for PrimMode {
             Some(mode) => Self {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
+                either: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
                 reify: Some(DataMode::from(mode)),
                 equiv: Some(DataMode::from(mode)),

@@ -3,6 +3,7 @@ use crate::{
     AbstractVal,
     CallVal,
     ChangeVal,
+    EitherVal,
     EquivVal,
     GenerateMode,
     GenerateVal,
@@ -23,6 +24,7 @@ use crate::{
     mode::{
         call::CallMode,
         change::ChangeMode,
+        either::EitherMode,
         equiv::EquivMode,
         id::Id,
         inverse::InverseMode,
@@ -38,6 +40,7 @@ use crate::{
 pub struct CompMode {
     pub symbol: Option<SymbolMode>,
     pub pair: Option<PairMode>,
+    pub either: Option<EitherMode>,
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
     pub reify: Option<ReifyMode>,
@@ -75,6 +78,14 @@ impl ByVal<Val> for CompMode {
         match &self.pair {
             None => Id.transform_pair(ctx, pair),
             Some(mode) => mode.transform(ctx, pair),
+        }
+    }
+
+    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
+    where Ctx: CtxMeta<'a> {
+        match &self.either {
+            None => Id.transform_either(ctx, either),
+            Some(mode) => mode.transform(ctx, either),
         }
     }
 
@@ -157,6 +168,7 @@ impl From<Option<UniMode>> for CompMode {
             None => Self {
                 symbol: None,
                 pair: None,
+                either: None,
                 call: None,
                 reify: None,
                 equiv: None,
@@ -170,6 +182,7 @@ impl From<Option<UniMode>> for CompMode {
             Some(mode) => Self {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(PairMode::from(mode)),
+                either: Some(EitherMode::from(mode)),
                 call: Some(CallMode::from(mode)),
                 reify: Some(ReifyMode::from(mode)),
                 equiv: Some(EquivMode::from(mode)),

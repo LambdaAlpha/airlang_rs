@@ -39,6 +39,8 @@ pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
 
 pub(crate) const PAIR: &str = ":";
+pub(crate) const EITHER_THIS: &str = "this";
+pub(crate) const EITHER_THAT: &str = "that";
 pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL: &str = ";";
 

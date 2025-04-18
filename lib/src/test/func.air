@@ -112,6 +112,24 @@ do [a = 1, [form^ ^a, is_null a]]
 -----
 [1, true]
 =====
+form either this
+-----
+form. this(a)
+-----
+this(a)
+=====
+form either that
+-----
+form. that(a)
+-----
+that(a)
+=====
+form change
+-----
+form. ; a -> b
+-----
+a -> b
+=====
 form ;
 -----
 form. ; a ; b
@@ -323,6 +341,26 @@ do [
 ]
 -----
 [a : 1]
+=====
+mode primitive either id
+-----
+do [
+    b = 1,
+    f = mode ; {either : id, default : eval*, primitive : true},
+    f [this(.a), that(b)]
+]
+-----
+[this(.a), that(b)]
+=====
+mode primitive either form
+-----
+do [
+    b = 1,
+    f = mode ; {pair : form, default : eval*, primitive : true},
+    f [this(.a), that(b)]
+]
+-----
+[this(a), that(1)]
 =====
 mode primitive change id
 -----
@@ -615,6 +653,8 @@ mode repr composite
 function.represent ; mode ; {
     symbol : .*,
     pair : form. : eval*,
+    either : form. : eval*,
+    change : form. : eval*,
     reify : reify(form.),
     equiv : equiv(form.),
     inverse : inverse(form.),
@@ -627,6 +667,8 @@ function.represent ; mode ; {
 {
     symbol : *,
     pair : form. : eval*,
+    either : form. : eval*,
+    change : form. : eval*,
     reify : reify(form.),
     equiv : equiv(form.),
     inverse : inverse(form.),
@@ -641,6 +683,8 @@ mode repr primitive
 function.represent ; mode ; {
     symbol : .^,
     pair : form,
+    either : form,
+    change : form,
     call : eval,
     reify : form,
     equiv : form,
@@ -654,6 +698,8 @@ function.represent ; mode ; {
 {
     symbol : ^,
     pair : form,
+    either : form,
+    change : form,
     call : eval,
     reify : form,
     equiv : form,

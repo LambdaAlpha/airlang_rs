@@ -1,18 +1,19 @@
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum Either<This, That> {
+pub enum Either<This, That> {
     This(This),
     That(That),
 }
 
-#[expect(dead_code)]
 impl<This, That> Either<This, That> {
-    pub(crate) fn is_this(&self) -> bool {
+    pub fn is_this(&self) -> bool {
         matches!(self, Either::This(_))
     }
-    pub(crate) fn is_that(&self) -> bool {
+
+    pub fn is_that(&self) -> bool {
         matches!(self, Either::That(_))
     }
-    pub(crate) fn unwrap_this(self) -> This {
+
+    pub fn unwrap_this(self) -> This {
         match self {
             Either::This(l) => l,
             Either::That(_) => {
@@ -20,7 +21,8 @@ impl<This, That> Either<This, That> {
             }
         }
     }
-    pub(crate) fn unwrap_that(self) -> That {
+
+    pub fn unwrap_that(self) -> That {
         match self {
             Either::That(r) => r,
             Either::This(_) => {

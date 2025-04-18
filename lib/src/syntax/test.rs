@@ -7,6 +7,7 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
+    Either,
     abstract1::Abstract,
     bit::Bit,
     int::Int,
@@ -49,6 +50,8 @@ mod number;
 mod byte;
 
 mod pair;
+
+mod either;
 
 mod change;
 
@@ -106,6 +109,14 @@ fn byte(b: Vec<u8>) -> Repr {
 
 fn pair(first: Repr, second: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
+}
+
+fn this(repr: Repr) -> Repr {
+    Repr::Either(Box::new(Either::This(repr)))
+}
+
+fn that(repr: Repr) -> Repr {
+    Repr::Either(Box::new(Either::That(repr)))
 }
 
 fn change(from: Repr, to: Repr) -> Repr {
@@ -328,6 +339,16 @@ fn test_parse_pair() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_pair() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/pair.air"), "test/pair.air")
+}
+
+#[test]
+fn test_parse_either() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/either.air"), "test/either.air", either::expected)
+}
+
+#[test]
+fn test_generate_either() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/either.air"), "test/either.air")
 }
 
 #[test]

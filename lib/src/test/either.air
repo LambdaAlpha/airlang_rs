@@ -1,0 +1,64 @@
+this
+-----
+do [
+    v = any ; .,
+    this(v) == this ; v
+]
+-----
+true
+=====
+that
+-----
+do [
+    v = any ; .,
+    that(v) == that ; v
+]
+-----
+true
+=====
+is_this
+-----
+do [
+    a = this(any ; .) either.is_this .,
+    b = that(any ; .) either.is_this .,
+    a and not ; b
+]
+-----
+true
+=====
+is_that
+-----
+do [
+    a = that(any ; .) either.is_that .,
+    b = this(any ; .) either.is_that .,
+    a and not ; b
+]
+-----
+true
+=====
+get
+-----
+do [
+    v = any ; .,
+    e1 = this(v),
+    e2 = that(v),
+    v1 = e1 either.get .,
+    v2 = e2 either.get .,
+    (v1 == v) and (v2 == v)
+]
+-----
+true
+=====
+set
+-----
+do [
+    v1 = any ; .,
+    v2 = any ; .,
+    e1 = this(v1),
+    v3 = e1 either.set v2,
+    e2 = that(v1),
+    v4 = e2 either.set v2,
+    (v3 == v1) and (v4 == v1) and (e1 == this(v2)) and (e2 == that(v2))
+]
+-----
+true

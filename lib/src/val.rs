@@ -8,6 +8,7 @@ use std::{
 
 use crate::{
     Call,
+    Either,
     Generate,
     Int,
     Inverse,
@@ -37,6 +38,7 @@ use crate::{
         call::CallVal,
         change::ChangeVal,
         ctx::CtxVal,
+        either::EitherVal,
         equiv::EquivVal,
         func::FuncVal,
         generate::GenerateVal,
@@ -64,6 +66,7 @@ pub enum Val {
     Byte(ByteVal),
 
     Pair(PairVal),
+    Either(EitherVal),
     Change(ChangeVal),
     Call(CallVal),
 
@@ -90,6 +93,7 @@ pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
+pub(crate) const EITHER: &str = "either";
 pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
 pub(crate) const REIFY: &str = "reify";
@@ -190,6 +194,18 @@ impl From<Pair<Val, Val>> for Val {
 impl From<PairVal> for Val {
     fn from(value: PairVal) -> Self {
         Val::Pair(value)
+    }
+}
+
+impl From<Either<Val, Val>> for Val {
+    fn from(value: Either<Val, Val>) -> Self {
+        Val::Either(EitherVal::from(value))
+    }
+}
+
+impl From<EitherVal> for Val {
+    fn from(value: EitherVal) -> Self {
+        Val::Either(value)
     }
 }
 
@@ -330,6 +346,7 @@ impl From<&Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number.clone())),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte.clone())),
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
+            Repr::Either(either) => Val::Either(EitherVal::from(&**either)),
             Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::Reify(reify) => Val::Reify(ReifyVal::from(&**reify)),
@@ -354,6 +371,7 @@ impl From<Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number)),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte)),
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
+            Repr::Either(either) => Val::Either(EitherVal::from(*either)),
             Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::Reify(reify) => Val::Reify(ReifyVal::from(*reify)),
@@ -379,6 +397,7 @@ impl TryInto<Repr> for &Val {
             Val::Number(number) => Ok(Repr::Number(Number::clone(number))),
             Val::Byte(byte) => Ok(Repr::Byte(Byte::clone(byte))),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
+            Val::Either(either) => Ok(Repr::Either(Box::new(either.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Reify(reify) => Ok(Repr::Reify(Box::new(reify.try_into()?))),
@@ -405,6 +424,7 @@ impl TryInto<Repr> for Val {
             Val::Number(number) => Ok(Repr::Number(number.into())),
             Val::Byte(byte) => Ok(Repr::Byte(byte.into())),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
+            Val::Either(either) => Ok(Repr::Either(Box::new(either.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::Reify(reify) => Ok(Repr::Reify(Box::new(reify.try_into()?))),
@@ -437,6 +457,13 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let first = (&pair.first).try_into()?;
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
+            }
+            Val::Either(either) => {
+                let either = match &**either {
+                    Either::This(this) => Either::This(this.try_into()?),
+                    Either::That(that) => Either::That(that.try_into()?),
+                };
+                GenRepr::Either(Box::new(either))
             }
             Val::Change(change) => {
                 let from = (&change.from).try_into()?;
@@ -501,6 +528,7 @@ impl Debug for Val {
             Val::Number(number) => <_ as Debug>::fmt(number, f),
             Val::Byte(byte) => <_ as Debug>::fmt(byte, f),
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
+            Val::Either(either) => <_ as Debug>::fmt(either, f),
             Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::Reify(reify) => <_ as Debug>::fmt(reify, f),
@@ -526,6 +554,8 @@ pub(crate) mod number;
 pub(crate) mod byte;
 
 pub(crate) mod pair;
+
+pub(crate) mod either;
 
 pub(crate) mod change;
 

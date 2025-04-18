@@ -3,6 +3,7 @@ use crate::{
     AbstractMode,
     Bit,
     Call,
+    EitherMode,
     Equiv,
     Generate,
     Inverse,
@@ -57,6 +58,7 @@ use crate::{
         ABSTRACT,
         CALL,
         CHANGE,
+        EITHER,
         EQUIV,
         GENERATE,
         INVERSE,
@@ -282,6 +284,7 @@ impl ParseMode<MapVal> for CompMode {
         let default = ParseMode::parse(map_remove(&mut map, DEFAULT), default)?;
         let symbol = ParseMode::parse(map_remove(&mut map, SYMBOL), default)?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
+        let either = ParseMode::parse(map_remove(&mut map, EITHER), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
         let reify = ParseMode::parse(map_remove(&mut map, REIFY), default)?;
@@ -294,6 +297,7 @@ impl ParseMode<MapVal> for CompMode {
         Some(CompMode {
             symbol,
             pair,
+            either,
             change,
             call,
             reify,
@@ -315,6 +319,9 @@ impl GenerateMode<MapVal> for CompMode {
         }
         if default.map(Into::into) != self.pair {
             map.insert(symbol(PAIR), self.pair.generate(default));
+        }
+        if default.map(Into::into) != self.either {
+            map.insert(symbol(EITHER), self.either.generate(default));
         }
         if default.map(Into::into) != self.change {
             map.insert(symbol(CHANGE), self.change.generate(default));
@@ -352,6 +359,7 @@ impl ParseMode<MapVal> for PrimMode {
         let default = ParseMode::parse(map_remove(&mut map, DEFAULT), default)?;
         let symbol = ParseMode::parse(map_remove(&mut map, SYMBOL), default)?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR), default)?;
+        let either = ParseMode::parse(map_remove(&mut map, EITHER), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
         let reify = ParseMode::parse(map_remove(&mut map, REIFY), default)?;
@@ -364,6 +372,7 @@ impl ParseMode<MapVal> for PrimMode {
         Some(PrimMode {
             symbol,
             pair,
+            either,
             change,
             call,
             reify,
@@ -385,6 +394,9 @@ impl GenerateMode<MapVal> for PrimMode {
         }
         if default.map(Into::into) != self.pair {
             map.insert(symbol(PAIR), self.pair.generate(default));
+        }
+        if default.map(Into::into) != self.either {
+            map.insert(symbol(EITHER), self.either.generate(default));
         }
         if default.map(Into::into) != self.change {
             map.insert(symbol(CHANGE), self.change.generate(default));
@@ -475,6 +487,29 @@ impl GenerateMode<Val> for PairMode {
         let first = GenerateMode::generate(&self.first, default);
         let second = GenerateMode::generate(&self.second, default);
         Val::Pair(Pair::new(first, second).into())
+    }
+}
+
+impl ParseMode<Val> for EitherMode {
+    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
+        match mode {
+            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
+            Val::Pair(pair) => {
+                let pair = Pair::from(pair);
+                let this = ParseMode::parse(pair.first, default)?;
+                let that = ParseMode::parse(pair.second, default)?;
+                Some(EitherMode { this, that })
+            }
+            _ => None,
+        }
+    }
+}
+
+impl GenerateMode<Val> for EitherMode {
+    fn generate(&self, default: Option<UniMode>) -> Val {
+        let this = GenerateMode::generate(&self.this, default);
+        let that = GenerateMode::generate(&self.that, default);
+        Val::Pair(Pair::new(this, that).into())
     }
 }
 

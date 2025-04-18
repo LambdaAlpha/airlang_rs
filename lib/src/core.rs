@@ -10,6 +10,8 @@ use crate::{
     ChangeVal,
     ConstCtx,
     Ctx,
+    Either,
+    EitherVal,
     Equiv,
     EquivVal,
     FuncVal,
@@ -61,6 +63,7 @@ impl FormCore {
         match input {
             Val::Symbol(symbol) => t.transform_symbol(ctx, symbol),
             Val::Pair(pair) => t.transform_pair(ctx, pair),
+            Val::Either(either) => t.transform_either(ctx, either),
             Val::Change(change) => t.transform_change(ctx, change),
             Val::Call(call) => t.transform_call(ctx, call),
             Val::Reify(reify) => t.transform_reify(ctx, reify),
@@ -101,6 +104,21 @@ impl FormCore {
         let first = first.transform(ctx.reborrow(), pair.first);
         let second = second.transform(ctx, pair.second);
         Val::Pair(Pair::new(first, second).into())
+    }
+
+    pub(crate) fn transform_either<'a, Ctx, This, That>(
+        this: &This, that: &That, ctx: Ctx, either: EitherVal,
+    ) -> Val
+    where
+        Ctx: CtxMeta<'a>,
+        This: Transformer<Val, Val>,
+        That: Transformer<Val, Val>, {
+        let either = Either::from(either);
+        let either = match either {
+            Either::This(v) => Either::This(this.transform(ctx, v)),
+            Either::That(v) => Either::That(that.transform(ctx, v)),
+        };
+        Val::Either(either.into())
     }
 
     pub(crate) fn transform_change<'a, Ctx, From, To>(

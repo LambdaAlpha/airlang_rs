@@ -24,6 +24,8 @@ use crate::{
     Change,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
+    Either,
+    EitherMode,
     Equiv,
     EquivMode,
     FreeCellCompFunc,
@@ -108,6 +110,7 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         weight, // number
         weight, // byte
         1,      // pair
+        1,      // either
         1,      // change
         1,      // call
         1,      // reify
@@ -133,18 +136,19 @@ pub(crate) fn any_val(rng: &mut SmallRng, depth: usize) -> Val {
         5 => Val::Number(any_number(rng).into()),
         6 => Val::Byte(any_byte(rng).into()),
         7 => Val::Pair(any_pair(rng, new_depth).into()),
-        8 => Val::Change(any_change(rng, new_depth).into()),
-        9 => Val::Call(any_call(rng, new_depth).into()),
-        10 => Val::Reify(any_reify(rng, new_depth).into()),
-        11 => Val::Equiv(any_equiv(rng, new_depth).into()),
-        12 => Val::Inverse(any_inverse(rng, new_depth).into()),
-        13 => Val::Generate(any_generate(rng, new_depth).into()),
-        14 => Val::Abstract(any_abstract(rng, new_depth).into()),
-        15 => Val::List(any_list(rng, new_depth).into()),
-        16 => Val::Map(any_map(rng, new_depth).into()),
-        17 => Val::Ctx(any_ctx(rng, new_depth).into()),
-        18 => Val::Func(any_func(rng, new_depth)),
-        19 => Val::Ext(any_extension(rng, new_depth)),
+        8 => Val::Either(any_either(rng, new_depth).into()),
+        9 => Val::Change(any_change(rng, new_depth).into()),
+        10 => Val::Call(any_call(rng, new_depth).into()),
+        11 => Val::Reify(any_reify(rng, new_depth).into()),
+        12 => Val::Equiv(any_equiv(rng, new_depth).into()),
+        13 => Val::Inverse(any_inverse(rng, new_depth).into()),
+        14 => Val::Generate(any_generate(rng, new_depth).into()),
+        15 => Val::Abstract(any_abstract(rng, new_depth).into()),
+        16 => Val::List(any_list(rng, new_depth).into()),
+        17 => Val::Map(any_map(rng, new_depth).into()),
+        18 => Val::Ctx(any_ctx(rng, new_depth).into()),
+        19 => Val::Func(any_func(rng, new_depth)),
+        20 => Val::Ext(any_extension(rng, new_depth)),
         _ => unreachable!(),
     }
 }
@@ -208,6 +212,10 @@ pub(crate) fn any_byte(rng: &mut SmallRng) -> Byte {
 
 pub(crate) fn any_pair(rng: &mut SmallRng, depth: usize) -> Pair<Val, Val> {
     Pair::new(any_val(rng, depth), any_val(rng, depth))
+}
+
+pub(crate) fn any_either(rng: &mut SmallRng, depth: usize) -> Either<Val, Val> {
+    if rng.random() { Either::This(any_val(rng, depth)) } else { Either::That(any_val(rng, depth)) }
 }
 
 pub(crate) fn any_change(rng: &mut SmallRng, depth: usize) -> Change<Val, Val> {
@@ -320,6 +328,7 @@ impl Arbitrary for CompMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
+        let either = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let reify = Arbitrary::any(rng, depth);
@@ -332,6 +341,7 @@ impl Arbitrary for CompMode {
         CompMode {
             symbol,
             pair,
+            either,
             change,
             call,
             reify,
@@ -351,6 +361,15 @@ impl Arbitrary for PairMode {
         let first = Arbitrary::any(rng, new_depth);
         let second = Arbitrary::any(rng, new_depth);
         PairMode { first, second }
+    }
+}
+
+impl Arbitrary for EitherMode {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let this = Arbitrary::any(rng, new_depth);
+        let that = Arbitrary::any(rng, new_depth);
+        EitherMode { this, that }
     }
 }
 
@@ -447,6 +466,7 @@ impl Arbitrary for PrimMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
+        let either = Arbitrary::any(rng, depth);
         let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let reify = Arbitrary::any(rng, depth);
@@ -459,6 +479,7 @@ impl Arbitrary for PrimMode {
         PrimMode {
             symbol,
             pair,
+            either,
             change,
             call,
             reify,

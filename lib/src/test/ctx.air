@@ -194,6 +194,18 @@ do [((a : (b . mutable)) . constant) = (any ; .) : (any ; .), [variable_access a
 -----
 [constant, mutable]
 =====
+= destruct either this
+-----
+do [this(a) = this(1), a]
+-----
+1
+=====
+= destruct either that
+-----
+do [that(a) = that(1), a]
+-----
+1
+=====
 = destruct change
 -----
 do [(f -> b) = 1 -> 2, [f, b]]

@@ -52,6 +52,12 @@ do [p = any ; pair, p type .]
 -----
 pair
 =====
+any either
+-----
+do [e = any ; either, e type .]
+-----
+either
+=====
 any change
 -----
 do [a = any ; change, a type .]
@@ -172,6 +178,12 @@ do [a = 1 : 2, a type .]
 -----
 pair
 =====
+type pair
+-----
+do [a = this(1), a type .]
+-----
+either
+=====
 type change
 -----
 do [a = 1 -> 2, a type .]
@@ -283,6 +295,12 @@ true
 == pair
 -----
 (1 : 2) == (1 : 2)
+-----
+true
+=====
+== either
+-----
+this(1) == this(1)
 -----
 true
 =====

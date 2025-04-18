@@ -52,6 +52,7 @@ use winnow::{
 };
 
 use crate::{
+    Either,
     Generate,
     abstract1::Abstract,
     bit::Bit,
@@ -74,6 +75,8 @@ use crate::{
         BYTE,
         CALL,
         CHANGE,
+        EITHER_THAT,
+        EITHER_THIS,
         EQUIV,
         FALSE,
         GENERATE,
@@ -116,6 +119,7 @@ pub(crate) trait ParseRepr:
     + From<Number>
     + From<Byte>
     + From<Pair<Self, Self>>
+    + From<Either<Self, Self>>
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
     + From<Reify<Self>>
@@ -360,6 +364,8 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
+            EITHER_THIS => either_this(ctx).parse_next(i),
+            EITHER_THAT => either_that(ctx).parse_next(i),
             REIFY => reify(ctx).parse_next(i),
             EQUIV => equiv(ctx).parse_next(i),
             INVERSE => inverse(ctx).parse_next(i),
@@ -513,6 +519,14 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let pair = Pair::new(left, right);
     let pair = T::from(pair);
     compose_two(ctx, middle, pair)
+}
+
+fn either_this<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Either::This(t)))
+}
+
+fn either_that<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+    scope(ctx).map(|t| T::from(Either::That(t)))
 }
 
 fn reify<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {

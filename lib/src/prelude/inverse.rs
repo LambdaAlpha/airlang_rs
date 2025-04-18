@@ -13,6 +13,7 @@ use crate::{
         map::CtxValue,
         mut1::MutFnCtx,
     },
+    either::Either,
     prelude::{
         Named,
         Prelude,
@@ -22,7 +23,6 @@ use crate::{
         ref_pair_mode,
     },
     syntax::INVERSE,
-    types::either::Either,
     val::func::FuncVal,
 };
 
