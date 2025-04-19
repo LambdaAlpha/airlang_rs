@@ -313,43 +313,19 @@ impl ParseMode<MapVal> for CompMode {
 
 impl GenerateMode<MapVal> for CompMode {
     fn generate(&self, default: Option<UniMode>) -> MapVal {
-        let mut map = Map::<Val, Val>::default();
-        if default.map(Into::into) != self.symbol {
-            map.insert(symbol(SYMBOL), self.symbol.generate(default));
-        }
-        if default.map(Into::into) != self.pair {
-            map.insert(symbol(PAIR), self.pair.generate(default));
-        }
-        if default.map(Into::into) != self.either {
-            map.insert(symbol(EITHER), self.either.generate(default));
-        }
-        if default.map(Into::into) != self.change {
-            map.insert(symbol(CHANGE), self.change.generate(default));
-        }
-        if default.map(Into::into) != self.call {
-            map.insert(symbol(CALL), self.call.generate(default));
-        }
-        if default.map(Into::into) != self.reify {
-            map.insert(symbol(REIFY), self.reify.generate(default));
-        }
-        if default.map(Into::into) != self.equiv {
-            map.insert(symbol(EQUIV), self.equiv.generate(default));
-        }
-        if default.map(Into::into) != self.inverse {
-            map.insert(symbol(INVERSE), self.inverse.generate(default));
-        }
-        if default.map(Into::into) != self.generate {
-            map.insert(symbol(GENERATE), self.generate.generate(default));
-        }
-        if default.map(Into::into) != self.abstract1 {
-            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
-        }
-        if default.map(Into::into) != self.list {
-            map.insert(symbol(LIST), self.list.generate(default));
-        }
-        if default.map(Into::into) != self.map {
-            map.insert(symbol(MAP), self.map.generate(default));
-        }
+        let mut map = Map::default();
+        put_non_default(&mut map, default, &self.symbol, SYMBOL);
+        put_non_default(&mut map, default, &self.pair, PAIR);
+        put_non_default(&mut map, default, &self.either, EITHER);
+        put_non_default(&mut map, default, &self.change, CHANGE);
+        put_non_default(&mut map, default, &self.call, CALL);
+        put_non_default(&mut map, default, &self.reify, REIFY);
+        put_non_default(&mut map, default, &self.equiv, EQUIV);
+        put_non_default(&mut map, default, &self.inverse, INVERSE);
+        put_non_default(&mut map, default, &self.generate, GENERATE);
+        put_non_default(&mut map, default, &self.abstract1, ABSTRACT);
+        put_non_default(&mut map, default, &self.list, LIST);
+        put_non_default(&mut map, default, &self.map, MAP);
         map.into()
     }
 }
@@ -388,44 +364,28 @@ impl ParseMode<MapVal> for PrimMode {
 
 impl GenerateMode<MapVal> for PrimMode {
     fn generate(&self, default: Option<UniMode>) -> MapVal {
-        let mut map = Map::<Val, Val>::default();
-        if default.map(Into::into) != self.symbol {
-            map.insert(symbol(SYMBOL), self.symbol.generate(default));
-        }
-        if default.map(Into::into) != self.pair {
-            map.insert(symbol(PAIR), self.pair.generate(default));
-        }
-        if default.map(Into::into) != self.either {
-            map.insert(symbol(EITHER), self.either.generate(default));
-        }
-        if default.map(Into::into) != self.change {
-            map.insert(symbol(CHANGE), self.change.generate(default));
-        }
-        if default.map(Into::into) != self.call {
-            map.insert(symbol(CALL), self.call.generate(default));
-        }
-        if default.map(Into::into) != self.reify {
-            map.insert(symbol(REIFY), self.reify.generate(default));
-        }
-        if default.map(Into::into) != self.equiv {
-            map.insert(symbol(EQUIV), self.equiv.generate(default));
-        }
-        if default.map(Into::into) != self.inverse {
-            map.insert(symbol(INVERSE), self.inverse.generate(default));
-        }
-        if default.map(Into::into) != self.generate {
-            map.insert(symbol(GENERATE), self.generate.generate(default));
-        }
-        if default.map(Into::into) != self.abstract1 {
-            map.insert(symbol(ABSTRACT), self.abstract1.generate(default));
-        }
-        if default.map(Into::into) != self.list {
-            map.insert(symbol(LIST), self.list.generate(default));
-        }
-        if default.map(Into::into) != self.map {
-            map.insert(symbol(MAP), self.map.generate(default));
-        }
+        let mut map = Map::default();
+        put_non_default(&mut map, default, &self.symbol, SYMBOL);
+        put_non_default(&mut map, default, &self.pair, PAIR);
+        put_non_default(&mut map, default, &self.either, EITHER);
+        put_non_default(&mut map, default, &self.change, CHANGE);
+        put_non_default(&mut map, default, &self.call, CALL);
+        put_non_default(&mut map, default, &self.reify, REIFY);
+        put_non_default(&mut map, default, &self.equiv, EQUIV);
+        put_non_default(&mut map, default, &self.inverse, INVERSE);
+        put_non_default(&mut map, default, &self.generate, GENERATE);
+        put_non_default(&mut map, default, &self.abstract1, ABSTRACT);
+        put_non_default(&mut map, default, &self.list, LIST);
+        put_non_default(&mut map, default, &self.map, MAP);
         map.into()
+    }
+}
+
+fn put_non_default<M>(
+    map: &mut Map<Val, Val>, default: Option<UniMode>, mode: &Option<M>, key: &'static str,
+) where M: GenerateMode<Val> + Eq + From<UniMode> {
+    if default.map(Into::into) != *mode {
+        map.insert(symbol(key), mode.generate(default));
     }
 }
 
@@ -635,8 +595,8 @@ impl ParseMode<Val> for crate::mode::generate::GenerateMode {
     fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Generate(inverse) => {
-                let generate = Generate::from(inverse);
+            Val::Generate(generate) => {
+                let generate = Generate::from(generate);
                 let func = ParseMode::parse(generate.func, default)?;
                 Some(crate::mode::generate::GenerateMode { func })
             }

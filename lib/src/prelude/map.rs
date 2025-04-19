@@ -8,7 +8,7 @@ use crate::{
     Symbol,
     bit::Bit,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
         mut1::MutFnCtx,
     },
@@ -117,7 +117,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -139,7 +139,7 @@ fn fn_items(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -162,7 +162,7 @@ fn fn_into_items(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -187,7 +187,7 @@ fn fn_keys(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -209,7 +209,7 @@ fn fn_into_keys(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -233,7 +233,7 @@ fn fn_values(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -255,7 +255,7 @@ fn fn_into_values(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -281,7 +281,7 @@ fn fn_contains(ctx: ConstFnCtx, input: Val) -> Val {
     let name_key = Pair::from(name_key);
     let name = name_key.first;
     let key = &name_key.second;
-    DefaultCtx::with_ref_lossless(ctx, name, |val| {
+    MainCtx::with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -307,7 +307,7 @@ fn fn_contains_all(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let keys = List::from(keys);
-    DefaultCtx::with_ref_lossless(ctx, name, |val| {
+    MainCtx::with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -334,7 +334,7 @@ fn fn_contains_many(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let keys = List::from(keys);
-    DefaultCtx::with_ref_lossless(ctx, name, |val| {
+    MainCtx::with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -363,7 +363,7 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
     let key_value = Pair::from(key_value);
     let key = key_value.first;
     let value = key_value.second;
-    DefaultCtx::with_ref_mut_lossless(ctx, name, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -389,7 +389,7 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let update = Map::from(update);
-    DefaultCtx::with_ref_mut_lossless(ctx, name, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -416,7 +416,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
     let name_key = Pair::from(name_key);
     let name = name_key.first;
     let key = &name_key.second;
-    DefaultCtx::with_ref_lossless(ctx, name, |val| {
+    MainCtx::with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -442,7 +442,7 @@ fn fn_get_many(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let keys = List::from(keys);
-    DefaultCtx::with_ref_lossless(ctx, name, |val| {
+    MainCtx::with_ref_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -467,7 +467,7 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
     let name_key = Pair::from(name_key);
     let name = name_key.first;
     let key = name_key.second;
-    DefaultCtx::with_ref_mut_lossless(ctx, name, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -494,7 +494,7 @@ fn fn_remove_many(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let keys = List::from(keys);
-    DefaultCtx::with_ref_mut_lossless(ctx, name, |val| {
+    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
         let Val::Map(map) = val else {
             return Val::default();
         };
@@ -517,7 +517,7 @@ fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
+    MainCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
         let Val::Map(map) = val else {
             return;
         };

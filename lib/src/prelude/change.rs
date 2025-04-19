@@ -8,7 +8,7 @@ use crate::{
     Pair,
     Symbol,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
         mut1::MutFnCtx,
     },
@@ -89,7 +89,7 @@ fn fn_get_from(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Change(change) => change.from.clone(),
             _ => Val::default(),
@@ -116,7 +116,7 @@ fn fn_set_from(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut change) => {
             let Some(Val::Change(change)) = change.as_mut() else {
                 return Val::default();
@@ -141,7 +141,7 @@ fn fn_get_to(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Change(change) => change.to.clone(),
             _ => Val::default(),
@@ -168,7 +168,7 @@ fn fn_set_to(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut change) => {
             let Some(Val::Change(change)) = change.as_mut() else {
                 return Val::default();

@@ -9,7 +9,7 @@ use crate::{
     Text,
     Val,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
     },
     prelude::{
@@ -95,7 +95,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Symbol(symbol) = val else {
             return Val::default();
         };

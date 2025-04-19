@@ -4,41 +4,31 @@ use rand::{
 };
 
 use crate::{
+    Abstract,
+    Byte,
+    Call,
+    Change,
     CodeMode,
     ConstFnCtx,
     Ctx,
+    Equiv,
     FuncMode,
+    Generate,
+    Int,
+    Inverse,
+    List,
     Map,
+    Number,
     Pair,
+    Reify,
     SymbolMode,
+    Text,
+    Unit,
     Val,
-    arbitrary::{
-        any_abstract,
-        any_bit,
-        any_byte,
-        any_call,
-        any_change,
-        any_ctx,
-        any_either,
-        any_equiv,
-        any_extension,
-        any_func,
-        any_generate,
-        any_int,
-        any_inverse,
-        any_list,
-        any_map,
-        any_number,
-        any_pair,
-        any_reify,
-        any_symbol,
-        any_text,
-        any_unit,
-        any_val,
-    },
+    arbitrary::Arbitrary,
     bit::Bit,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::{
             CtxMapRef,
             CtxValue,
@@ -115,29 +105,29 @@ fn fn_any(input: Val) -> Val {
     let mut rng = SmallRng::from_os_rng();
     let rng = &mut rng;
     match input {
-        Val::Unit(_) => any_val(rng, DEPTH),
+        Val::Unit(_) => Val::any(rng, DEPTH),
         Val::Symbol(s) => match &*s {
-            UNIT => Val::Unit(any_unit(rng)),
-            BIT => Val::Bit(any_bit(rng)),
-            SYMBOL => Val::Symbol(any_symbol(rng)),
-            TEXT => Val::Text(any_text(rng).into()),
-            INT => Val::Int(any_int(rng).into()),
-            NUMBER => Val::Number(any_number(rng).into()),
-            BYTE => Val::Byte(any_byte(rng).into()),
-            PAIR => Val::Pair(any_pair(rng, DEPTH).into()),
-            EITHER => Val::Either(any_either(rng, DEPTH).into()),
-            CHANGE => Val::Change(any_change(rng, DEPTH).into()),
-            CALL => Val::Call(any_call(rng, DEPTH).into()),
-            REIFY => Val::Reify(any_reify(rng, DEPTH).into()),
-            EQUIV => Val::Equiv(any_equiv(rng, DEPTH).into()),
-            INVERSE => Val::Inverse(any_inverse(rng, DEPTH).into()),
-            GENERATE => Val::Generate(any_generate(rng, DEPTH).into()),
-            ABSTRACT => Val::Abstract(any_abstract(rng, DEPTH).into()),
-            LIST => Val::List(any_list(rng, DEPTH).into()),
-            MAP => Val::Map(any_map(rng, DEPTH).into()),
-            CTX => Val::Ctx(any_ctx(rng, DEPTH).into()),
-            FUNC => Val::Func(any_func(rng, DEPTH)),
-            EXT => Val::Ext(any_extension(rng, DEPTH)),
+            UNIT => Val::Unit(Unit::any(rng, DEPTH)),
+            BIT => Val::Bit(Bit::any(rng, DEPTH)),
+            SYMBOL => Val::Symbol(Symbol::any(rng, DEPTH)),
+            TEXT => Val::Text(Text::any(rng, DEPTH).into()),
+            INT => Val::Int(Int::any(rng, DEPTH).into()),
+            NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
+            BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
+            PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
+            EITHER => Val::Either(Either::<Val, Val>::any(rng, DEPTH).into()),
+            CHANGE => Val::Change(Change::<Val, Val>::any(rng, DEPTH).into()),
+            CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
+            REIFY => Val::Reify(Reify::<Val>::any(rng, DEPTH).into()),
+            EQUIV => Val::Equiv(Equiv::<Val>::any(rng, DEPTH).into()),
+            INVERSE => Val::Inverse(Inverse::<Val>::any(rng, DEPTH).into()),
+            GENERATE => Val::Generate(Generate::<Val>::any(rng, DEPTH).into()),
+            ABSTRACT => Val::Abstract(Abstract::<Val>::any(rng, DEPTH).into()),
+            LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
+            MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
+            CTX => Val::Ctx(Ctx::any(rng, DEPTH).into()),
+            FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
+            EXT => Val::Ext(Arbitrary::any(rng, DEPTH)),
             _ => Val::default(),
         },
         _ => Val::default(),
@@ -157,7 +147,7 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
             Val::Bit(_) => BIT,
@@ -198,8 +188,8 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let left = DefaultCtx::ref_or_val(pair.first);
-    let right = DefaultCtx::ref_or_val(pair.second);
+    let left = MainCtx::ref_or_val(pair.first);
+    let right = MainCtx::ref_or_val(pair.second);
     let ctx = ctx.borrow();
     get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {

@@ -11,7 +11,7 @@ use crate::{
     Val,
     core::EvalCore,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
         mut1::MutFnCtx,
         ref1::CtxMeta,
@@ -112,7 +112,7 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Call(call) => call.func.clone(),
             _ => Val::default(),
@@ -139,7 +139,7 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut call) => {
             let Some(Val::Call(call)) = call.as_mut() else {
                 return Val::default();
@@ -164,7 +164,7 @@ fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
         Either::This(val) => match val.as_const() {
             Val::Call(call) => call.input.clone(),
             _ => Val::default(),
@@ -191,7 +191,7 @@ fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut call) => {
             let Some(Val::Call(call)) = call.as_mut() else {
                 return Val::default();

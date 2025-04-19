@@ -10,8 +10,8 @@ use crate::{
             ConstCtx,
             ConstFnCtx,
         },
-        default::DefaultCtx,
         free::FreeCtx,
+        main::MainCtx,
         map::{
             CtxMapRef,
             CtxValue,
@@ -136,7 +136,7 @@ fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    DefaultCtx::get_or_default(ctx, s)
+    MainCtx::get_or_default(ctx, s)
 }
 
 fn move1() -> Named<FuncVal> {
@@ -246,7 +246,7 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match DefaultCtx::is_null(ctx, s) {
+    match MainCtx::is_null(ctx, s) {
         Ok(b) => Val::Bit(Bit::new(b)),
         Err(_) => Val::default(),
     }
@@ -382,7 +382,7 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     let val = pair.second;
-    DefaultCtx::with_dyn(ctx, pair.first, |ref_or_val| {
+    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| {
         let target_ctx = match ref_or_val {
             Either::This(dyn_ref) => {
                 let Val::Ctx(target_ctx) = dyn_ref.ref1 else {

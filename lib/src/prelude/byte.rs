@@ -10,7 +10,7 @@ use crate::{
     Symbol,
     Val,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
     },
     prelude::{
@@ -57,7 +57,7 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Byte(t) = val else {
             return Val::default();
         };
@@ -82,7 +82,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
     let Val::Byte(b) = pair.second else {
         return Val::default();
     };
-    DefaultCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
+    MainCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
         let Val::Byte(byte) = val else {
             return;
         };

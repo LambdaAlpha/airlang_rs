@@ -26,7 +26,6 @@ use crate::{
         change::ChangeMode,
         either::EitherMode,
         equiv::EquivMode,
-        id::Id,
         inverse::InverseMode,
         symbol::SymbolMode,
     },
@@ -60,105 +59,69 @@ impl Transformer<Val, Val> for CompMode {
 }
 
 impl ByVal<Val> for CompMode {
-    fn transform_default<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
+    fn transform_default<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
-        Id.transform(ctx, input)
+        input
     }
 
     fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.symbol {
-            None => Id.transform_symbol(ctx, symbol),
-            Some(mode) => mode.transform(ctx, symbol),
-        }
+        self.symbol.transform(ctx, symbol)
     }
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.pair {
-            None => Id.transform_pair(ctx, pair),
-            Some(mode) => mode.transform(ctx, pair),
-        }
+        self.pair.transform(ctx, pair)
     }
 
     fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.either {
-            None => Id.transform_either(ctx, either),
-            Some(mode) => mode.transform(ctx, either),
-        }
+        self.either.transform(ctx, either)
     }
 
     fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.change {
-            None => Id.transform_change(ctx, change),
-            Some(mode) => mode.transform(ctx, change),
-        }
+        self.change.transform(ctx, change)
     }
 
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.call {
-            None => Id.transform_call(ctx, call),
-            Some(mode) => mode.transform(ctx, call),
-        }
+        self.call.transform(ctx, call)
     }
 
     fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.reify {
-            None => Id.transform_reify(ctx, reify),
-            Some(mode) => mode.transform(ctx, reify),
-        }
+        self.reify.transform(ctx, reify)
     }
 
     fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.equiv {
-            None => Id.transform_equiv(ctx, equiv),
-            Some(mode) => mode.transform(ctx, equiv),
-        }
+        self.equiv.transform(ctx, equiv)
     }
 
     fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.inverse {
-            None => Id.transform_inverse(ctx, inverse),
-            Some(mode) => mode.transform(ctx, inverse),
-        }
+        self.inverse.transform(ctx, inverse)
     }
 
     fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.generate {
-            None => Id.transform_generate(ctx, generate),
-            Some(mode) => mode.transform(ctx, generate),
-        }
+        self.generate.transform(ctx, generate)
     }
 
     fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.abstract1 {
-            None => Id.transform_abstract(ctx, abstract1),
-            Some(mode) => mode.transform(ctx, abstract1),
-        }
+        self.abstract1.transform(ctx, abstract1)
     }
 
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.list {
-            None => Id.transform_list(ctx, list),
-            Some(mode) => mode.transform(ctx, list),
-        }
+        self.list.transform(ctx, list)
     }
 
     fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
     where Ctx: CtxMeta<'a> {
-        match &self.map {
-            None => Id.transform_map(ctx, map),
-            Some(mode) => mode.transform(ctx, map),
-        }
+        self.map.transform(ctx, map)
     }
 }
 

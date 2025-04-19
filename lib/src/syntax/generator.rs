@@ -123,7 +123,7 @@ const INDENT: &str = "  ";
 pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
     let ctx = GenCtx { fmt, indent: 0 };
     let mut str = String::new();
-    gen1(ctx, repr, &mut str);
+    gen1(ctx, &mut str, repr);
     str
 }
 
@@ -133,47 +133,47 @@ struct GenCtx {
     indent: u8,
 }
 
-fn gen1(ctx: GenCtx, repr: GenRepr, s: &mut String) {
+fn gen1(ctx: GenCtx, s: &mut String, repr: GenRepr) {
     match repr {
-        GenRepr::Unit(_) => gen_unit(s),
-        GenRepr::Bit(bit) => gen_bit(bit.bool(), s),
-        GenRepr::Symbol(symbol) => gen_symbol(symbol, s),
-        GenRepr::Text(text) => gen_text(ctx, text, s),
-        GenRepr::Int(int) => gen_int(int, s),
-        GenRepr::Number(number) => gen_number(number, s),
-        GenRepr::Byte(byte) => gen_byte(byte, s),
-        GenRepr::Pair(pair) => gen_pair(ctx, *pair, s),
-        GenRepr::Either(either) => gen_either(ctx, *either, s),
-        GenRepr::Change(change) => gen_change(ctx, *change, s),
-        GenRepr::Call(call) => gen_call(ctx, *call, s),
-        GenRepr::Reify(reify) => gen_reify(ctx, *reify, s),
-        GenRepr::Equiv(equiv) => gen_equiv(ctx, *equiv, s),
-        GenRepr::Inverse(inverse) => gen_inverse(ctx, *inverse, s),
-        GenRepr::Generate(generate) => gen_generate(ctx, *generate, s),
-        GenRepr::Abstract(abstract1) => gen_abstract(ctx, *abstract1, s),
-        GenRepr::List(list) => gen_list(ctx, list, s),
-        GenRepr::Map(map) => gen_map(ctx, map, s),
+        GenRepr::Unit(_) => gen_unit(ctx, s),
+        GenRepr::Bit(bit) => gen_bit(ctx, s, bit.bool()),
+        GenRepr::Symbol(symbol) => gen_symbol(ctx, s, symbol),
+        GenRepr::Text(text) => gen_text(ctx, s, text),
+        GenRepr::Int(int) => gen_int(ctx, s, int),
+        GenRepr::Number(number) => gen_number(ctx, s, number),
+        GenRepr::Byte(byte) => gen_byte(ctx, s, byte),
+        GenRepr::Pair(pair) => gen_pair(ctx, s, *pair),
+        GenRepr::Either(either) => gen_either(ctx, s, *either),
+        GenRepr::Change(change) => gen_change(ctx, s, *change),
+        GenRepr::Call(call) => gen_call(ctx, s, *call),
+        GenRepr::Reify(reify) => gen_reify(ctx, s, *reify),
+        GenRepr::Equiv(equiv) => gen_equiv(ctx, s, *equiv),
+        GenRepr::Inverse(inverse) => gen_inverse(ctx, s, *inverse),
+        GenRepr::Generate(generate) => gen_generate(ctx, s, *generate),
+        GenRepr::Abstract(abstract1) => gen_abstract(ctx, s, *abstract1),
+        GenRepr::List(list) => gen_list(ctx, s, list),
+        GenRepr::Map(map) => gen_map(ctx, s, map),
     }
 }
 
-fn gen_unit(s: &mut String) {
+fn gen_unit(_ctx: GenCtx, s: &mut String) {
     s.push_str(UNIT);
 }
 
-fn gen_bit(bool: bool, s: &mut String) {
+fn gen_bit(_ctx: GenCtx, s: &mut String, bool: bool) {
     s.push_str(if bool { TRUE } else { FALSE });
 }
 
-fn gen_symbol(symbol: &Symbol, s: &mut String) {
+fn gen_symbol(_ctx: GenCtx, s: &mut String, symbol: &Symbol) {
     if !should_quote(symbol) {
         return s.push_str(symbol);
     }
     s.push(SYMBOL_QUOTE);
-    escape_symbol(symbol, s);
+    escape_symbol(s, symbol);
     s.push(SYMBOL_QUOTE);
 }
 
-pub(crate) fn escape_symbol(symbol: &str, s: &mut String) {
+pub(crate) fn escape_symbol(s: &mut String, symbol: &str) {
     for c in symbol.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -201,17 +201,17 @@ fn should_quote(str: &str) -> bool {
     str.chars().any(is_delimiter)
 }
 
-fn gen_text(ctx: GenCtx, text: &Text, s: &mut String) {
+fn gen_text(ctx: GenCtx, s: &mut String, text: &Text) {
     s.push(TEXT_QUOTE);
     if ctx.fmt.symbol_encoding {
-        escape_text_symbol(text, s);
+        escape_text_symbol(s, text);
     } else {
-        escape_text(text, s);
+        escape_text(s, text);
     }
     s.push(TEXT_QUOTE);
 }
 
-pub(crate) fn escape_text(str: &str, s: &mut String) {
+pub(crate) fn escape_text(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -228,7 +228,7 @@ pub(crate) fn escape_text(str: &str, s: &mut String) {
     }
 }
 
-pub(crate) fn escape_text_symbol(str: &str, s: &mut String) {
+pub(crate) fn escape_text_symbol(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -243,14 +243,14 @@ pub(crate) fn escape_text_symbol(str: &str, s: &mut String) {
     }
 }
 
-fn gen_int(int: &Int, s: &mut String) {
+fn gen_int(_ctx: GenCtx, s: &mut String, int: &Int) {
     if int.is_negative() {
         s.push('0');
     }
     write!(s, "{int:?}").unwrap();
 }
 
-fn gen_number(number: &Number, s: &mut String) {
+fn gen_number(_ctx: GenCtx, s: &mut String, number: &Number) {
     let int = number.int();
     let radix = number.radix();
     if int.is_negative() || radix != 10 {
@@ -270,120 +270,90 @@ fn gen_number(number: &Number, s: &mut String) {
     write!(s, "{}", number.exp()).unwrap();
 }
 
-fn gen_byte(byte: &Byte, s: &mut String) {
-    s.push_str(BYTE);
-    s.push(SCOPE_LEFT);
-    if !byte.is_empty() {
-        utils::conversion::u8_array_to_hex_string_mut(byte, s);
-    }
-    s.push(SCOPE_RIGHT);
+fn gen_byte(ctx: GenCtx, s: &mut String, byte: &Byte) {
+    prefixed(ctx, s, BYTE, |_ctx, s| {
+        if !byte.is_empty() {
+            utils::conversion::u8_array_to_hex_string_mut(byte, s);
+        }
+    });
 }
 
-fn gen_pair(ctx: GenCtx, pair: Pair<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, pair.first, s);
+fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
+    gen_scope_if_need(ctx, s, pair.first);
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen1(ctx, pair.second, s);
+    gen1(ctx, s, pair.second);
 }
 
-fn gen_either(ctx: GenCtx, either: Either<GenRepr, GenRepr>, s: &mut String) {
+fn gen_either(ctx: GenCtx, s: &mut String, either: Either<GenRepr, GenRepr>) {
     match either {
-        Either::This(this) => {
-            s.push_str(EITHER_THIS);
-            s.push(SCOPE_LEFT);
-            gen1(ctx, this, s);
-            s.push(SCOPE_RIGHT);
-        }
-        Either::That(that) => {
-            s.push_str(EITHER_THAT);
-            s.push(SCOPE_LEFT);
-            gen1(ctx, that, s);
-            s.push(SCOPE_RIGHT);
-        }
+        Either::This(this) => prefixed(ctx, s, EITHER_THIS, |ctx, s| gen1(ctx, s, this)),
+        Either::That(that) => prefixed(ctx, s, EITHER_THAT, |ctx, s| gen1(ctx, s, that)),
     }
 }
 
-fn gen_change(ctx: GenCtx, change: Change<GenRepr, GenRepr>, s: &mut String) {
-    gen_scope_if_need(ctx, change.from, s);
+fn gen_change(ctx: GenCtx, s: &mut String, change: Change<GenRepr, GenRepr>) {
+    gen_scope_if_need(ctx, s, change.from);
     s.push(' ');
     s.push_str(CHANGE);
     s.push(' ');
-    gen1(ctx, change.to, s);
+    gen1(ctx, s, change.to);
 }
 
-fn gen_call(ctx: GenCtx, call: Call<GenRepr, GenRepr>, s: &mut String) {
+fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
     if let GenRepr::Pair(pair) = call.input {
-        gen_scope_if_need(ctx, pair.first, s);
+        gen_scope_if_need(ctx, s, pair.first);
         s.push(' ');
-        gen_scope_if_need(ctx, call.func, s);
+        gen_scope_if_need(ctx, s, call.func);
         s.push(' ');
-        gen1(ctx, pair.second, s);
+        gen1(ctx, s, pair.second);
     } else {
-        gen_scope_if_need(ctx, call.func, s);
+        gen_scope_if_need(ctx, s, call.func);
         s.push(' ');
         s.push_str(CALL);
         s.push(' ');
-        gen1(ctx, call.input, s);
+        gen1(ctx, s, call.input);
     }
 }
 
-fn gen_reify(ctx: GenCtx, reify: Reify<GenRepr>, s: &mut String) {
-    s.push_str(REIFY);
-    s.push(SCOPE_LEFT);
-    gen1(ctx, reify.func, s);
-    s.push(SCOPE_RIGHT);
+fn gen_reify(ctx: GenCtx, s: &mut String, reify: Reify<GenRepr>) {
+    prefixed(ctx, s, REIFY, |ctx, s| gen1(ctx, s, reify.func));
 }
 
-fn gen_equiv(ctx: GenCtx, equiv: Equiv<GenRepr>, s: &mut String) {
-    s.push_str(EQUIV);
-    s.push(SCOPE_LEFT);
-    gen1(ctx, equiv.func, s);
-    s.push(SCOPE_RIGHT);
+fn gen_equiv(ctx: GenCtx, s: &mut String, equiv: Equiv<GenRepr>) {
+    prefixed(ctx, s, EQUIV, |ctx, s| gen1(ctx, s, equiv.func));
 }
 
-fn gen_inverse(ctx: GenCtx, inverse: Inverse<GenRepr>, s: &mut String) {
-    s.push_str(INVERSE);
-    s.push(SCOPE_LEFT);
-    gen1(ctx, inverse.func, s);
-    s.push(SCOPE_RIGHT);
+fn gen_inverse(ctx: GenCtx, s: &mut String, inverse: Inverse<GenRepr>) {
+    prefixed(ctx, s, INVERSE, |ctx, s| gen1(ctx, s, inverse.func));
 }
 
-fn gen_generate(ctx: GenCtx, generate: Generate<GenRepr>, s: &mut String) {
-    s.push_str(GENERATE);
-    s.push(SCOPE_LEFT);
-    gen1(ctx, generate.func, s);
-    s.push(SCOPE_RIGHT);
+fn gen_generate(ctx: GenCtx, s: &mut String, generate: Generate<GenRepr>) {
+    prefixed(ctx, s, GENERATE, |ctx, s| gen1(ctx, s, generate.func));
 }
 
-fn gen_abstract(ctx: GenCtx, abstract1: Abstract<GenRepr>, s: &mut String) {
-    s.push_str(ABSTRACT);
-    s.push(SCOPE_LEFT);
-    gen1(ctx, abstract1.func, s);
-    s.push(SCOPE_RIGHT);
+fn gen_abstract(ctx: GenCtx, s: &mut String, abstract1: Abstract<GenRepr>) {
+    prefixed(ctx, s, ABSTRACT, |ctx, s| gen1(ctx, s, abstract1.func));
 }
 
-fn gen_scope_if_need(ctx: GenCtx, repr: GenRepr, s: &mut String) {
+fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
     if is_composite(&repr) {
-        gen_scope(ctx, repr, s);
+        gen_scope(ctx, s, repr);
     } else {
-        gen1(ctx, repr, s);
+        gen1(ctx, s, repr);
     }
 }
 
-fn gen_scope(ctx: GenCtx, repr: GenRepr, s: &mut String) {
-    s.push(SCOPE_LEFT);
-    s.push_str(ctx.fmt.left_padding);
-    gen1(ctx, repr, s);
-    s.push_str(ctx.fmt.right_padding);
-    s.push(SCOPE_RIGHT);
+fn gen_scope(ctx: GenCtx, s: &mut String, repr: GenRepr) {
+    scoped(ctx, s, |ctx, s| gen1(ctx, s, repr));
 }
 
 fn is_composite(repr: &GenRepr) -> bool {
     matches!(repr, GenRepr::Pair(_) | GenRepr::Change(_) | GenRepr::Call(_))
 }
 
-fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
+fn gen_list(mut ctx: GenCtx, s: &mut String, mut list: List<GenRepr>) {
     if list.is_empty() {
         s.push(LIST_LEFT);
         s.push(LIST_RIGHT);
@@ -393,7 +363,7 @@ fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
     if list.len() == 1 {
         s.push(LIST_LEFT);
         s.push_str(ctx.fmt.left_padding);
-        gen1(ctx, list.pop().unwrap(), s);
+        gen1(ctx, s, list.pop().unwrap());
         s.push_str(ctx.fmt.right_padding);
         s.push(LIST_RIGHT);
         return;
@@ -405,7 +375,7 @@ fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
 
     for repr in list {
         s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-        gen1(ctx, repr, s);
+        gen1(ctx, s, repr);
         s.push_str(ctx.fmt.separator);
     }
     s.truncate(s.len() - ctx.fmt.separator.len());
@@ -416,7 +386,7 @@ fn gen_list(mut ctx: GenCtx, mut list: List<GenRepr>, s: &mut String) {
     s.push(LIST_RIGHT);
 }
 
-fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
+fn gen_map(mut ctx: GenCtx, s: &mut String, map: Map<GenRepr, GenRepr>) {
     if map.is_empty() {
         s.push(MAP_LEFT);
         s.push(MAP_RIGHT);
@@ -427,7 +397,7 @@ fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
         s.push(MAP_LEFT);
         let pair = map.into_iter().next().unwrap();
         s.push_str(ctx.fmt.left_padding);
-        gen_kv(ctx, pair.0, pair.1, s);
+        gen_kv(ctx, s, pair.0, pair.1);
         s.push_str(ctx.fmt.right_padding);
         s.push(MAP_RIGHT);
         return;
@@ -439,7 +409,7 @@ fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
 
     for pair in map {
         s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-        gen_kv(ctx, pair.0, pair.1, s);
+        gen_kv(ctx, s, pair.0, pair.1);
         s.push_str(ctx.fmt.separator);
     }
     s.truncate(s.len() - ctx.fmt.separator.len());
@@ -450,10 +420,23 @@ fn gen_map(mut ctx: GenCtx, map: Map<GenRepr, GenRepr>, s: &mut String) {
     s.push(MAP_RIGHT);
 }
 
-fn gen_kv(ctx: GenCtx, key: GenRepr, value: GenRepr, s: &mut String) {
-    gen_scope_if_need(ctx, key, s);
+fn gen_kv(ctx: GenCtx, s: &mut String, key: GenRepr, value: GenRepr) {
+    gen_scope_if_need(ctx, s, key);
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen1(ctx, value, s);
+    gen1(ctx, s, value);
+}
+
+fn prefixed(ctx: GenCtx, s: &mut String, tag: &str, f: impl FnOnce(GenCtx, &mut String)) {
+    s.push_str(tag);
+    scoped(ctx, s, f);
+}
+
+fn scoped(ctx: GenCtx, s: &mut String, f: impl FnOnce(GenCtx, &mut String)) {
+    s.push(SCOPE_LEFT);
+    s.push_str(ctx.fmt.left_padding);
+    f(ctx, s);
+    s.push_str(ctx.fmt.right_padding);
+    s.push(SCOPE_RIGHT);
 }

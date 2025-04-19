@@ -22,7 +22,7 @@ impl Text {
     }
 
     pub fn push_str_escaped(&mut self, s: &str) {
-        escape_text(s, self);
+        escape_text(self, s);
     }
 }
 

@@ -9,7 +9,7 @@ use crate::{
     Pair,
     Symbol,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
         mut1::MutFnCtx,
     },
@@ -100,7 +100,7 @@ fn fn_is_this(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref(ctx, pair.first, |v| {
+    MainCtx::with_ref(ctx, pair.first, |v| {
         let Val::Either(either) = v else {
             return Val::default();
         };
@@ -121,7 +121,7 @@ fn fn_is_that(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref(ctx, pair.first, |v| {
+    MainCtx::with_ref(ctx, pair.first, |v| {
         let Val::Either(either) = v else {
             return Val::default();
         };
@@ -142,7 +142,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref(ctx, pair.first, |v| {
+    MainCtx::with_ref(ctx, pair.first, |v| {
         let Val::Either(either) = v else {
             return Val::default();
         };
@@ -168,7 +168,7 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    DefaultCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
+    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
         Either::This(mut either) => {
             let Some(Val::Either(either)) = either.as_mut() else {
                 return Val::default();

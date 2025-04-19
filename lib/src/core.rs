@@ -33,7 +33,7 @@ use crate::{
     Val,
     abstract1::Abstract,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
         ref1::{
             CtxMeta,
@@ -87,8 +87,8 @@ impl FormCore {
         };
         match mode {
             LITERAL_CHAR => Val::Symbol(s),
-            REF_CHAR => DefaultCtx::get_or_default(ctx, s),
-            MOVE_CHAR => DefaultCtx::remove_or_default(ctx, s),
+            REF_CHAR => MainCtx::get_or_default(ctx, s),
+            MOVE_CHAR => MainCtx::remove_or_default(ctx, s),
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }

@@ -152,12 +152,8 @@ impl Default for Ctx {
 impl Display for CtxError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            CtxError::NotFound => {
-                write!(f, "not found")
-            }
-            CtxError::AccessDenied => {
-                write!(f, "access denied")
-            }
+            CtxError::NotFound => write!(f, "not found"),
+            CtxError::AccessDenied => write!(f, "access denied"),
         }
     }
 }
@@ -187,6 +183,6 @@ pub(crate) mod const1;
 
 pub(crate) mod mut1;
 
-pub(crate) mod default;
+pub(crate) mod main;
 
 pub(crate) mod repr;

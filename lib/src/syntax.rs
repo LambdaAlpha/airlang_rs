@@ -38,6 +38,10 @@ pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
 
+pub(crate) const INT: &str = "integer";
+pub(crate) const NUMBER: &str = "number";
+pub(crate) const BYTE: &str = "byte";
+
 pub(crate) const PAIR: &str = ":";
 pub(crate) const EITHER_THIS: &str = "this";
 pub(crate) const EITHER_THAT: &str = "that";
@@ -49,10 +53,6 @@ pub(crate) const EQUIV: &str = "equiv";
 pub(crate) const INVERSE: &str = "inverse";
 pub(crate) const GENERATE: &str = "generate";
 pub(crate) const ABSTRACT: &str = "abstract";
-
-pub(crate) const INT: &str = "integer";
-pub(crate) const NUMBER: &str = "number";
-pub(crate) const BYTE: &str = "byte";
 
 pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(

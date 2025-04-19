@@ -107,7 +107,10 @@ use crate::{
     },
     text::Text,
     unit::Unit,
-    utils,
+    utils::conversion::{
+        bin_str_to_vec_u8,
+        hex_str_to_vec_u8,
+    },
 };
 
 pub(crate) trait ParseRepr:
@@ -887,10 +890,7 @@ fn byte(i: &mut &str) -> ModalResult<Byte> {
 fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
     let digits = hexadecimal1.verify(|s: &str| s.len() % 2 == 0);
     trim_num0(digits)
-        .map(|s| {
-            let byte = utils::conversion::hex_str_to_vec_u8(&s).unwrap();
-            Byte::from(byte)
-        })
+        .map(|s| Byte::from(hex_str_to_vec_u8(&s).unwrap()))
         .context(expect_desc("hexadecimal"))
         .parse_next(i)
 }
@@ -898,10 +898,7 @@ fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
 fn binary_byte(i: &mut &str) -> ModalResult<Byte> {
     let digits = binary1.verify(|s: &str| s.len() % 8 == 0);
     trim_num0(digits)
-        .map(|s| {
-            let byte = utils::conversion::bin_str_to_vec_u8(&s).unwrap();
-            Byte::from(byte)
-        })
+        .map(|s| Byte::from(bin_str_to_vec_u8(&s).unwrap()))
         .context(expect_desc("binary"))
         .parse_next(i)
 }

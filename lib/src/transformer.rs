@@ -31,13 +31,15 @@ where T: Transformer<I, O>
     }
 }
 
-impl<I, T> Transformer<I, I> for Option<T>
-where T: Transformer<I, I>
+impl<I, O, T> Transformer<I, O> for Option<T>
+where
+    I: Into<O>,
+    T: Transformer<I, O>,
 {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: I) -> I
+    fn transform<'a, Ctx>(&self, ctx: Ctx, input: I) -> O
     where Ctx: CtxMeta<'a> {
         match self {
-            None => input,
+            None => input.into(),
             Some(t) => t.transform(ctx, input),
         }
     }

@@ -3,7 +3,7 @@ use crate::{
     FuncVal,
     MutFnCtx,
     Val,
-    ctx::default::DefaultCtx,
+    ctx::main::MainCtx,
     prelude::mut_fn,
 };
 
@@ -28,5 +28,5 @@ fn ref_mode() -> FuncVal {
 }
 
 fn fn_ref_mode(ctx: MutFnCtx, input: Val) -> Val {
-    DefaultCtx::eval_escape_symbol(ctx, input)
+    MainCtx::eval_escape_symbol(ctx, input)
 }

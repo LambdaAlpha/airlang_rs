@@ -7,7 +7,7 @@ use crate::{
     SymbolMode,
     bit::Bit,
     ctx::{
-        default::DefaultCtx,
+        main::MainCtx,
         map::CtxValue,
     },
     func::{
@@ -237,7 +237,7 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -263,7 +263,7 @@ fn fn_call_mode(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -285,7 +285,7 @@ fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -307,7 +307,7 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -331,7 +331,7 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -352,7 +352,7 @@ fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -373,7 +373,7 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -397,7 +397,7 @@ fn fn_call(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -418,7 +418,7 @@ fn fn_ctx(ctx: ConstFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    DefaultCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };

@@ -26,9 +26,9 @@ use crate::{
     transformer::Transformer,
 };
 
-pub(crate) struct DefaultCtx;
+pub(crate) struct MainCtx;
 
-impl DefaultCtx {
+impl MainCtx {
     pub(crate) fn get_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
     where Ctx: CtxRef<'a> {
         let Ok(ctx) = ctx.get_variables() else {
@@ -198,7 +198,7 @@ impl DefaultCtx {
         };
         let prefix = s.chars().next();
         if let Some(MOVE_CHAR) = prefix {
-            let val = DefaultCtx::remove_or_default(ctx, Symbol::from_str(&s[1 ..]));
+            let val = MainCtx::remove_or_default(ctx, Symbol::from_str(&s[1 ..]));
             return Self::escape_symbol(val);
         }
         input
