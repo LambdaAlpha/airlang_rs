@@ -118,31 +118,6 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_reify() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/reify.air"), "test/reify.air")
-}
-
-#[test]
-fn test_equiv() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/equiv.air"), "test/equiv.air")
-}
-
-#[test]
-fn test_inverse() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/inverse.air"), "test/inverse.air")
-}
-
-#[test]
-fn test_generate() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/generate.air"), "test/generate.air")
-}
-
-#[test]
-fn test_abstract() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/abstract.air"), "test/abstract.air")
-}
-
-#[test]
 fn test_list() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/list.air"), "test/list.air")
 }

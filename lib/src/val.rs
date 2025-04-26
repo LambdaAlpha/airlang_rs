@@ -9,20 +9,15 @@ use std::{
 use crate::{
     Call,
     Either,
-    Generate,
     Int,
-    Inverse,
     List,
     Map,
     Pair,
-    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     change::Change,
-    equiv::Equiv,
     extension::ValExt,
     number::Number,
-    reify::Reify,
     symbol::Symbol,
     syntax::{
         ReprError,
@@ -33,22 +28,17 @@ use crate::{
     text::Text,
     unit::Unit,
     val::{
-        abstract1::AbstractVal,
         byte::ByteVal,
         call::CallVal,
         change::ChangeVal,
         ctx::CtxVal,
         either::EitherVal,
-        equiv::EquivVal,
         func::FuncVal,
-        generate::GenerateVal,
         int::IntVal,
-        inverse::InverseVal,
         list::ListVal,
         map::MapVal,
         number::NumberVal,
         pair::PairVal,
-        reify::ReifyVal,
         text::TextVal,
     },
 };
@@ -70,12 +60,6 @@ pub enum Val {
     Change(ChangeVal),
     Call(CallVal),
 
-    Reify(ReifyVal),
-    Equiv(EquivVal),
-    Inverse(InverseVal),
-    Generate(GenerateVal),
-    Abstract(AbstractVal),
-
     List(ListVal),
     Map(MapVal),
 
@@ -96,11 +80,6 @@ pub(crate) const PAIR: &str = "pair";
 pub(crate) const EITHER: &str = "either";
 pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
-pub(crate) const REIFY: &str = "reify";
-pub(crate) const EQUIV: &str = "equiv";
-pub(crate) const INVERSE: &str = "inverse";
-pub(crate) const GENERATE: &str = "generate";
-pub(crate) const ABSTRACT: &str = "abstract";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
@@ -233,66 +212,6 @@ impl From<CallVal> for Val {
     }
 }
 
-impl From<Reify<Val>> for Val {
-    fn from(value: Reify<Val>) -> Self {
-        Val::Reify(ReifyVal::from(value))
-    }
-}
-
-impl From<ReifyVal> for Val {
-    fn from(value: ReifyVal) -> Self {
-        Val::Reify(value)
-    }
-}
-
-impl From<Equiv<Val>> for Val {
-    fn from(value: Equiv<Val>) -> Self {
-        Val::Equiv(EquivVal::from(value))
-    }
-}
-
-impl From<EquivVal> for Val {
-    fn from(value: EquivVal) -> Self {
-        Val::Equiv(value)
-    }
-}
-
-impl From<Inverse<Val>> for Val {
-    fn from(value: Inverse<Val>) -> Self {
-        Val::Inverse(InverseVal::from(value))
-    }
-}
-
-impl From<InverseVal> for Val {
-    fn from(value: InverseVal) -> Self {
-        Val::Inverse(value)
-    }
-}
-
-impl From<Generate<Val>> for Val {
-    fn from(value: Generate<Val>) -> Self {
-        Val::Generate(GenerateVal::from(value))
-    }
-}
-
-impl From<GenerateVal> for Val {
-    fn from(value: GenerateVal) -> Self {
-        Val::Generate(value)
-    }
-}
-
-impl From<Abstract<Val>> for Val {
-    fn from(value: Abstract<Val>) -> Self {
-        Val::Abstract(AbstractVal::from(value))
-    }
-}
-
-impl From<AbstractVal> for Val {
-    fn from(value: AbstractVal) -> Self {
-        Val::Abstract(value)
-    }
-}
-
 impl From<List<Val>> for Val {
     fn from(value: List<Val>) -> Self {
         Val::List(ListVal::from(value))
@@ -349,11 +268,6 @@ impl From<&Repr> for Val {
             Repr::Either(either) => Val::Either(EitherVal::from(&**either)),
             Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
-            Repr::Reify(reify) => Val::Reify(ReifyVal::from(&**reify)),
-            Repr::Equiv(equiv) => Val::Equiv(EquivVal::from(&**equiv)),
-            Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(&**inverse)),
-            Repr::Generate(generate) => Val::Generate(GenerateVal::from(&**generate)),
-            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(&**abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -374,11 +288,6 @@ impl From<Repr> for Val {
             Repr::Either(either) => Val::Either(EitherVal::from(*either)),
             Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
-            Repr::Reify(reify) => Val::Reify(ReifyVal::from(*reify)),
-            Repr::Equiv(equiv) => Val::Equiv(EquivVal::from(*equiv)),
-            Repr::Inverse(inverse) => Val::Inverse(InverseVal::from(*inverse)),
-            Repr::Generate(generate) => Val::Generate(GenerateVal::from(*generate)),
-            Repr::Abstract(abstract1) => Val::Abstract(AbstractVal::from(*abstract1)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -400,11 +309,6 @@ impl TryInto<Repr> for &Val {
             Val::Either(either) => Ok(Repr::Either(Box::new(either.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Reify(reify) => Ok(Repr::Reify(Box::new(reify.try_into()?))),
-            Val::Equiv(equiv) => Ok(Repr::Equiv(Box::new(equiv.try_into()?))),
-            Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
-            Val::Generate(generate) => Ok(Repr::Generate(Box::new(generate.try_into()?))),
-            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -427,11 +331,6 @@ impl TryInto<Repr> for Val {
             Val::Either(either) => Ok(Repr::Either(Box::new(either.try_into()?))),
             Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
-            Val::Reify(reify) => Ok(Repr::Reify(Box::new(reify.try_into()?))),
-            Val::Equiv(equiv) => Ok(Repr::Equiv(Box::new(equiv.try_into()?))),
-            Val::Inverse(inverse) => Ok(Repr::Inverse(Box::new(inverse.try_into()?))),
-            Val::Generate(generate) => Ok(Repr::Generate(Box::new(generate.try_into()?))),
-            Val::Abstract(abstract1) => Ok(Repr::Abstract(Box::new(abstract1.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -475,26 +374,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Val::Reify(reify) => {
-                let func = (&reify.func).try_into()?;
-                GenRepr::Reify(Box::new(Reify::new(func)))
-            }
-            Val::Equiv(equiv) => {
-                let func = (&equiv.func).try_into()?;
-                GenRepr::Equiv(Box::new(Equiv::new(func)))
-            }
-            Val::Inverse(inverse) => {
-                let func = (&inverse.func).try_into()?;
-                GenRepr::Inverse(Box::new(Inverse::new(func)))
-            }
-            Val::Generate(generate) => {
-                let func = (&generate.func).try_into()?;
-                GenRepr::Generate(Box::new(Generate::new(func)))
-            }
-            Val::Abstract(abstract1) => {
-                let func = (&abstract1.func).try_into()?;
-                GenRepr::Abstract(Box::new(Abstract::new(func)))
-            }
             Val::List(list) => {
                 let list: List<GenRepr> =
                     list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
@@ -531,11 +410,6 @@ impl Debug for Val {
             Val::Either(either) => <_ as Debug>::fmt(either, f),
             Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
-            Val::Reify(reify) => <_ as Debug>::fmt(reify, f),
-            Val::Equiv(equiv) => <_ as Debug>::fmt(equiv, f),
-            Val::Inverse(inverse) => <_ as Debug>::fmt(inverse, f),
-            Val::Generate(generate) => <_ as Debug>::fmt(generate, f),
-            Val::Abstract(abstract1) => <_ as Debug>::fmt(abstract1, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
@@ -560,16 +434,6 @@ pub(crate) mod either;
 pub(crate) mod change;
 
 pub(crate) mod call;
-
-pub(crate) mod reify;
-
-pub(crate) mod equiv;
-
-pub(crate) mod inverse;
-
-pub(crate) mod generate;
-
-pub(crate) mod abstract1;
 
 pub(crate) mod list;
 

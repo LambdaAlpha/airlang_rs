@@ -136,36 +136,6 @@ form. ; a ; b
 -----
 a ; b
 =====
-form reify
------
-form. ; reify(a)
------
-reify(a)
-=====
-form equiv
------
-form. ; equiv(a)
------
-equiv(a)
-=====
-form inverse
------
-form. ; inverse(a)
------
-inverse(a)
-=====
-form generate
------
-form. ; generate(a)
------
-generate(a)
-=====
-form abstract
------
-form. ; abstract(a)
------
-abstract(a)
-=====
 form primitive
 -----
 form. [a, b c]
@@ -409,102 +379,6 @@ do [
 -----
 [false]
 =====
-mode primitive reify id
------
-do [
-    f = mode ; {reify : id, default : eval*, primitive : true},
-    f [reify(.a)]
-]
------
-[reify(.a)]
-=====
-mode primitive reify form
------
-do [
-    b = 1,
-    f = mode ; {reify : form, default : eval*, primitive : true},
-    f [reify(^b)]
-]
------
-[reify(1)]
-=====
-mode primitive equiv id
------
-do [
-    f = mode ; {equiv : id, default : eval*, primitive : true},
-    f [equiv(.a)]
-]
------
-[equiv(.a)]
-=====
-mode primitive equiv form
------
-do [
-    b = 1,
-    f = mode ; {equiv : form, default : eval*, primitive : true},
-    f [equiv(^b)]
-]
------
-[equiv(1)]
-=====
-mode primitive inverse id
------
-do [
-    f = mode ; {inverse : id, default : eval*, primitive : true},
-    f [inverse(.a)]
-]
------
-[inverse(.a)]
-=====
-mode primitive inverse form
------
-do [
-    b = 1,
-    f = mode ; {inverse : form, default : eval*, primitive : true},
-    f [inverse(b)]
-]
------
-[inverse(1)]
-=====
-mode primitive generate id
------
-do [
-    f = mode ; {generate : id, default : eval*, primitive : true},
-    f [generate(.a)]
-]
------
-[generate(.a)]
-=====
-mode primitive generate form
------
-do [
-    b = 1,
-    f = mode ; {generate : form, default : eval*, primitive : true},
-    f [generate(b)]
-]
------
-[generate(1)]
-=====
-mode primitive abstract form
------
-do [
-    b = 1,
-    f = mode ; {abstract : id, default : eval*, primitive : true},
-    f [abstract(*a)]
-]
------
-[abstract(*a)]
-=====
-mode primitive abstract form
------
-do [
-    b = 1,
-    f = mode ; {abstract : form, default : eval*, primitive : true},
-    f [abstract(.a)]
-]
------
-[abstract(a)]
-=====
 mode primitive list id
 -----
 do [
@@ -655,11 +529,6 @@ function.represent ; mode ; {
     pair : form. : eval*,
     either : form. : eval*,
     change : form. : eval*,
-    reify : reify(form.),
-    equiv : equiv(form.),
-    inverse : inverse(form.),
-    generate : generate(form.),
-    abstract : abstract(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form*,
 }
@@ -669,11 +538,6 @@ function.represent ; mode ; {
     pair : form. : eval*,
     either : form. : eval*,
     change : form. : eval*,
-    reify : reify(form.),
-    equiv : equiv(form.),
-    inverse : inverse(form.),
-    generate : generate(form.),
-    abstract : abstract(form.),
     list : [eval*, id],
     map : {a : eval*, b : form.} : form* : form*,
 }
@@ -686,11 +550,6 @@ function.represent ; mode ; {
     either : form,
     change : form,
     call : eval,
-    reify : form,
-    equiv : form,
-    inverse : form,
-    generate : form,
-    abstract : form,
     map : form,
     primitive : true,
 }
@@ -701,11 +560,6 @@ function.represent ; mode ; {
     either : form,
     change : form,
     call : eval,
-    reify : form,
-    equiv : form,
-    inverse : form,
-    generate : form,
-    abstract : form,
     map : form,
     primitive : true,
 }

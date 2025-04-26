@@ -48,12 +48,6 @@ pub(crate) const EITHER_THAT: &str = "that";
 pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL: &str = ";";
 
-pub(crate) const REIFY: &str = "reify";
-pub(crate) const EQUIV: &str = "equiv";
-pub(crate) const INVERSE: &str = "inverse";
-pub(crate) const GENERATE: &str = "generate";
-pub(crate) const ABSTRACT: &str = "abstract";
-
 pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(
         c,

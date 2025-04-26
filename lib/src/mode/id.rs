@@ -1,13 +1,8 @@
 use crate::{
-    AbstractVal,
     CallVal,
     ChangeVal,
     EitherVal,
-    EquivVal,
-    GenerateVal,
-    InverseVal,
     PairVal,
-    ReifyVal,
     ctx::ref1::CtxMeta,
     symbol::Symbol,
     transformer::{
@@ -62,31 +57,6 @@ impl ByVal<Val> for Id {
     fn transform_call<'a, Ctx>(&self, _ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         Val::Call(call)
-    }
-
-    fn transform_reify<'a, Ctx>(&self, _ctx: Ctx, reify: ReifyVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        Val::Reify(reify)
-    }
-
-    fn transform_equiv<'a, Ctx>(&self, _ctx: Ctx, equiv: EquivVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        Val::Equiv(equiv)
-    }
-
-    fn transform_inverse<'a, Ctx>(&self, _ctx: Ctx, inverse: InverseVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        Val::Inverse(inverse)
-    }
-
-    fn transform_generate<'a, Ctx>(&self, _ctx: Ctx, generate: GenerateVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        Val::Generate(generate)
-    }
-
-    fn transform_abstract<'a, Ctx>(&self, _ctx: Ctx, abstract1: AbstractVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        Val::Abstract(abstract1)
     }
 
     fn transform_list<'a, Ctx>(&self, _ctx: Ctx, list: ListVal) -> Val

@@ -5,16 +5,12 @@ pub use crate::syntax::{
     },
     repr::{
         Repr,
-        abstract1::AbstractRepr,
         call::CallRepr,
         change::ChangeRepr,
         either::EitherRepr,
-        generate::GenerateRepr,
-        inverse::InverseRepr,
         list::ListRepr,
         map::MapRepr,
         pair::PairRepr,
-        reify::ReifyRepr,
     },
 };
 

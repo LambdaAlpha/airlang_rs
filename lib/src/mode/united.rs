@@ -1,18 +1,13 @@
 use const_format::concatcp;
 
 use crate::{
-    AbstractVal,
     CallVal,
     ChangeVal,
     CodeMode,
     EitherVal,
-    EquivVal,
-    GenerateVal,
-    InverseVal,
     ListVal,
     MapVal,
     PairVal,
-    ReifyVal,
     Symbol,
     SymbolMode,
     Val,
@@ -104,46 +99,6 @@ impl ByVal<Val> for UniMode {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_call(ctx, call),
             CodeMode::Eval => Eval::new(self.symbol).transform_call(ctx, call),
-        }
-    }
-
-    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_reify(ctx, reify),
-            CodeMode::Eval => Eval::new(self.symbol).transform_reify(ctx, reify),
-        }
-    }
-
-    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_equiv(ctx, equiv),
-            CodeMode::Eval => Eval::new(self.symbol).transform_equiv(ctx, equiv),
-        }
-    }
-
-    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_inverse(ctx, inverse),
-            CodeMode::Eval => Eval::new(self.symbol).transform_inverse(ctx, inverse),
-        }
-    }
-
-    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_generate(ctx, generate),
-            CodeMode::Eval => Eval::new(self.symbol).transform_generate(ctx, generate),
-        }
-    }
-
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_abstract(ctx, abstract1),
-            CodeMode::Eval => Eval::new(self.symbol).transform_abstract(ctx, abstract1),
         }
     }
 

@@ -70,36 +70,6 @@ do [c = any ; call, c type .]
 -----
 call
 =====
-any reify
------
-do [a = any ; reify, a type .]
------
-reify
-=====
-any equiv
------
-do [a = any ; equiv, a type .]
------
-equiv
-=====
-any inverse
------
-do [a = any ; inverse, a type .]
------
-inverse
-=====
-any generate
------
-do [a = any ; generate, a type .]
------
-generate
-=====
-any abstract
------
-do [a = any ; abstract, a type .]
------
-abstract
-=====
 any list
 -----
 do [a = any ; list, a type .]
@@ -196,36 +166,6 @@ do [a = id ; f ; a, a type .]
 -----
 call
 =====
-type reify
------
-do [a = id ; reify(f), a type .]
------
-reify
-=====
-type equiv
------
-do [a = id ; equiv(f), a type .]
------
-equiv
-=====
-type inverse
------
-do [a = id ; inverse(f), a type .]
------
-inverse
-=====
-type generate
------
-do [a = id ; generate(f), a type .]
------
-generate
-=====
-type abstract
------
-do [a = id ; abstract(f), a type .]
------
-abstract
-=====
 type list
 -----
 do [a = [], a type .]
@@ -313,36 +253,6 @@ true
 == call
 -----
 (1 ; 2) == (1 ; 2)
------
-true
-=====
-== reify
------
-do [a = id ; reify(f), b = id ; reify(f), (a == b) and not ; a == .]
------
-true
-=====
-== equiv
------
-do [a = id ; equiv(f), b = id ; equiv(f), (a == b) and not ; a == .]
------
-true
-=====
-== inverse
------
-do [a = id ; inverse(f), b = id ; inverse(f), (a == b) and not ; a == .]
------
-true
-=====
-== generate
------
-do [a = id ; generate(f), b = id ; generate(f), (a == b) and not ; a == .]
------
-true
-=====
-== abstract
------
-do [a = id ; abstract(f), b = id ; abstract(f), (a == b) and not ; a == .]
 -----
 true
 =====

@@ -24,16 +24,6 @@ pub(crate) mod change;
 
 pub(crate) mod call;
 
-pub(crate) mod reify;
-
-pub(crate) mod equiv;
-
-pub(crate) mod inverse;
-
-pub(crate) mod generate;
-
-pub(crate) mod abstract1;
-
 pub(crate) mod list;
 
 pub(crate) mod map;

@@ -8,38 +8,28 @@ use num_traits::Signed;
 
 use crate::{
     Either,
-    Generate,
-    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     call::Call,
     change::Change,
-    equiv::Equiv,
     int::Int,
-    inverse::Inverse,
     list::List,
     map::Map,
     number::Number,
     pair::Pair,
-    reify::Reify,
     symbol::Symbol,
     syntax::{
-        ABSTRACT,
         BYTE,
         CALL,
         CHANGE,
         EITHER_THAT,
         EITHER_THIS,
-        EQUIV,
         FALSE,
-        GENERATE,
-        INVERSE,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
         PAIR,
-        REIFY,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -68,11 +58,6 @@ pub(crate) enum GenRepr<'a> {
     Either(Box<Either<GenRepr<'a>, GenRepr<'a>>>),
     Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
-    Reify(Box<Reify<GenRepr<'a>>>),
-    Equiv(Box<Equiv<GenRepr<'a>>>),
-    Inverse(Box<Inverse<GenRepr<'a>>>),
-    Generate(Box<Generate<GenRepr<'a>>>),
-    Abstract(Box<Abstract<GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -146,11 +131,6 @@ fn gen1(ctx: GenCtx, s: &mut String, repr: GenRepr) {
         GenRepr::Either(either) => gen_either(ctx, s, *either),
         GenRepr::Change(change) => gen_change(ctx, s, *change),
         GenRepr::Call(call) => gen_call(ctx, s, *call),
-        GenRepr::Reify(reify) => gen_reify(ctx, s, *reify),
-        GenRepr::Equiv(equiv) => gen_equiv(ctx, s, *equiv),
-        GenRepr::Inverse(inverse) => gen_inverse(ctx, s, *inverse),
-        GenRepr::Generate(generate) => gen_generate(ctx, s, *generate),
-        GenRepr::Abstract(abstract1) => gen_abstract(ctx, s, *abstract1),
         GenRepr::List(list) => gen_list(ctx, s, list),
         GenRepr::Map(map) => gen_map(ctx, s, map),
     }
@@ -315,26 +295,6 @@ fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
         s.push(' ');
         gen1(ctx, s, call.input);
     }
-}
-
-fn gen_reify(ctx: GenCtx, s: &mut String, reify: Reify<GenRepr>) {
-    prefixed(ctx, s, REIFY, |ctx, s| gen1(ctx, s, reify.func));
-}
-
-fn gen_equiv(ctx: GenCtx, s: &mut String, equiv: Equiv<GenRepr>) {
-    prefixed(ctx, s, EQUIV, |ctx, s| gen1(ctx, s, equiv.func));
-}
-
-fn gen_inverse(ctx: GenCtx, s: &mut String, inverse: Inverse<GenRepr>) {
-    prefixed(ctx, s, INVERSE, |ctx, s| gen1(ctx, s, inverse.func));
-}
-
-fn gen_generate(ctx: GenCtx, s: &mut String, generate: Generate<GenRepr>) {
-    prefixed(ctx, s, GENERATE, |ctx, s| gen1(ctx, s, generate.func));
-}
-
-fn gen_abstract(ctx: GenCtx, s: &mut String, abstract1: Abstract<GenRepr>) {
-    prefixed(ctx, s, ABSTRACT, |ctx, s| gen1(ctx, s, abstract1.func));
 }
 
 fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {

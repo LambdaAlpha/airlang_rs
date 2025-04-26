@@ -12,18 +12,13 @@ use crate::{
     Byte,
     Call,
     Either,
-    Equiv,
-    Generate,
     Int,
-    Inverse,
     Number,
     Pair,
     Symbol,
     Text,
     Unit,
-    abstract1::Abstract,
     change::Change,
-    reify::Reify,
     syntax::{
         ParseError,
         generate_pretty,
@@ -31,17 +26,12 @@ use crate::{
         parse,
         parser::ParseRepr,
         repr::{
-            abstract1::AbstractRepr,
             call::CallRepr,
             change::ChangeRepr,
             either::EitherRepr,
-            equiv::EquivRepr,
-            generate::GenerateRepr,
-            inverse::InverseRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
-            reify::ReifyRepr,
         },
     },
 };
@@ -61,14 +51,7 @@ pub enum Repr {
     Pair(Box<PairRepr>),
     Either(Box<EitherRepr>),
     Change(Box<ChangeRepr>),
-
     Call(Box<CallRepr>),
-
-    Reify(Box<ReifyRepr>),
-    Equiv(Box<EquivRepr>),
-    Inverse(Box<InverseRepr>),
-    Generate(Box<GenerateRepr>),
-    Abstract(Box<AbstractRepr>),
 
     List(ListRepr),
     Map(MapRepr),
@@ -170,66 +153,6 @@ impl From<Box<CallRepr>> for Repr {
     }
 }
 
-impl From<ReifyRepr> for Repr {
-    fn from(a: ReifyRepr) -> Self {
-        Repr::Reify(Box::new(a))
-    }
-}
-
-impl From<Box<ReifyRepr>> for Repr {
-    fn from(a: Box<ReifyRepr>) -> Self {
-        Repr::Reify(a)
-    }
-}
-
-impl From<EquivRepr> for Repr {
-    fn from(a: EquivRepr) -> Self {
-        Repr::Equiv(Box::new(a))
-    }
-}
-
-impl From<Box<EquivRepr>> for Repr {
-    fn from(a: Box<EquivRepr>) -> Self {
-        Repr::Equiv(a)
-    }
-}
-
-impl From<InverseRepr> for Repr {
-    fn from(a: InverseRepr) -> Self {
-        Repr::Inverse(Box::new(a))
-    }
-}
-
-impl From<Box<InverseRepr>> for Repr {
-    fn from(a: Box<InverseRepr>) -> Self {
-        Repr::Inverse(a)
-    }
-}
-
-impl From<GenerateRepr> for Repr {
-    fn from(a: GenerateRepr) -> Self {
-        Repr::Generate(Box::new(a))
-    }
-}
-
-impl From<Box<GenerateRepr>> for Repr {
-    fn from(a: Box<GenerateRepr>) -> Self {
-        Repr::Generate(a)
-    }
-}
-
-impl From<AbstractRepr> for Repr {
-    fn from(a: AbstractRepr) -> Self {
-        Repr::Abstract(Box::new(a))
-    }
-}
-
-impl From<Box<AbstractRepr>> for Repr {
-    fn from(a: Box<AbstractRepr>) -> Self {
-        Repr::Abstract(a)
-    }
-}
-
 impl From<ListRepr> for Repr {
     fn from(l: ListRepr) -> Self {
         Repr::List(l)
@@ -313,26 +236,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let input = (&call.input).try_into()?;
                 GenRepr::Call(Box::new(Call::new(func, input)))
             }
-            Repr::Reify(reify) => {
-                let func = (&reify.func).try_into()?;
-                GenRepr::Reify(Box::new(Reify::new(func)))
-            }
-            Repr::Equiv(equiv) => {
-                let func = (&equiv.func).try_into()?;
-                GenRepr::Equiv(Box::new(Equiv::new(func)))
-            }
-            Repr::Inverse(inverse) => {
-                let func = (&inverse.func).try_into()?;
-                GenRepr::Inverse(Box::new(Inverse::new(func)))
-            }
-            Repr::Generate(generate) => {
-                let func = (&generate.func).try_into()?;
-                GenRepr::Generate(Box::new(Generate::new(func)))
-            }
-            Repr::Abstract(abstract1) => {
-                let func = (&abstract1.func).try_into()?;
-                GenRepr::Abstract(Box::new(Abstract::new(func)))
-            }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
                 GenRepr::List(list)
@@ -360,16 +263,6 @@ pub(crate) mod either;
 pub(crate) mod change;
 
 pub(crate) mod call;
-
-pub(crate) mod reify;
-
-pub(crate) mod equiv;
-
-pub(crate) mod inverse;
-
-pub(crate) mod generate;
-
-pub(crate) mod abstract1;
 
 pub(crate) mod list;
 

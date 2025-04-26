@@ -1,15 +1,10 @@
 use crate::{
-    AbstractVal,
     CallVal,
     ChangeVal,
     EitherVal,
-    EquivVal,
-    GenerateVal,
-    InverseVal,
     ListVal,
     MapVal,
     PairVal,
-    ReifyVal,
     Symbol,
     SymbolMode,
     UniMode,
@@ -33,11 +28,6 @@ pub struct PrimMode {
     pub either: Option<DataMode>,
     pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
-    pub reify: Option<DataMode>,
-    pub equiv: Option<DataMode>,
-    pub inverse: Option<DataMode>,
-    pub generate: Option<DataMode>,
-    pub abstract1: Option<DataMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
 }
@@ -107,46 +97,6 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
-    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.reify {
-            None => Id.transform_reify(ctx, reify),
-            Some(_) => FormCore::transform_reify(self, ctx, reify),
-        }
-    }
-
-    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.equiv {
-            None => Id.transform_equiv(ctx, equiv),
-            Some(_) => FormCore::transform_equiv(self, ctx, equiv),
-        }
-    }
-
-    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.inverse {
-            None => Id.transform_inverse(ctx, inverse),
-            Some(_) => FormCore::transform_inverse(self, ctx, inverse),
-        }
-    }
-
-    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.generate {
-            None => Id.transform_generate(ctx, generate),
-            Some(_) => FormCore::transform_generate(self, ctx, generate),
-        }
-    }
-
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.abstract1 {
-            None => Id.transform_abstract(ctx, abstract1),
-            Some(_) => FormCore::transform_abstract(self, ctx, abstract1),
-        }
-    }
-
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.list {
@@ -172,11 +122,6 @@ impl From<Option<UniMode>> for PrimMode {
                 pair: None,
                 either: None,
                 call: None,
-                reify: None,
-                equiv: None,
-                inverse: None,
-                generate: None,
-                abstract1: None,
                 change: None,
                 list: None,
                 map: None,
@@ -186,11 +131,6 @@ impl From<Option<UniMode>> for PrimMode {
                 pair: Some(DataMode::from(mode)),
                 either: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
-                reify: Some(DataMode::from(mode)),
-                equiv: Some(DataMode::from(mode)),
-                inverse: Some(DataMode::from(mode)),
-                generate: Some(DataMode::from(mode)),
-                abstract1: Some(DataMode::from(mode)),
                 change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),
                 map: Some(DataMode::from(mode)),

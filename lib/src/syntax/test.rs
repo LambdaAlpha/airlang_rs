@@ -8,7 +8,6 @@ use num_traits::Num;
 
 use crate::{
     Either,
-    abstract1::Abstract,
     bit::Bit,
     int::Int,
     map::Map,
@@ -16,7 +15,6 @@ use crate::{
     symbol::Symbol,
     syntax::{
         ChangeRepr,
-        GenerateRepr,
         generate_compact,
         generate_pretty,
         generate_symbol,
@@ -24,10 +22,7 @@ use crate::{
         repr::{
             Repr,
             call::CallRepr,
-            equiv::EquivRepr,
-            inverse::InverseRepr,
             pair::PairRepr,
-            reify::ReifyRepr,
         },
     },
     test::parse_test_file,
@@ -56,16 +51,6 @@ mod either;
 mod change;
 
 mod call;
-
-mod reify;
-
-mod equiv;
-
-mod inverse;
-
-mod generate;
-
-mod abstract1;
 
 mod list;
 
@@ -125,26 +110,6 @@ fn change(from: Repr, to: Repr) -> Repr {
 
 fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
-}
-
-fn reify(func: Repr) -> Repr {
-    Repr::Reify(Box::new(ReifyRepr::new(func)))
-}
-
-fn equiv(func: Repr) -> Repr {
-    Repr::Equiv(Box::new(EquivRepr::new(func)))
-}
-
-fn inverse(func: Repr) -> Repr {
-    Repr::Inverse(Box::new(InverseRepr::new(func)))
-}
-
-fn generate(func: Repr) -> Repr {
-    Repr::Generate(Box::new(GenerateRepr::new(func)))
-}
-
-fn abstract1(value: Repr) -> Repr {
-    Repr::Abstract(Box::new(Abstract::new(value)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -369,56 +334,6 @@ fn test_parse_call() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_call() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/call.air"), "test/call.air")
-}
-
-#[test]
-fn test_parse_reify() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/reify.air"), "test/reify.air", reify::expected)
-}
-
-#[test]
-fn test_generate_reify() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/reify.air"), "test/reify.air")
-}
-
-#[test]
-fn test_parse_equiv() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/equiv.air"), "test/equiv.air", equiv::expected)
-}
-
-#[test]
-fn test_generate_equiv() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/equiv.air"), "test/equiv.air")
-}
-
-#[test]
-fn test_parse_inverse() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/inverse.air"), "test/inverse.air", inverse::expected)
-}
-
-#[test]
-fn test_generate_inverse() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/inverse.air"), "test/inverse.air")
-}
-
-#[test]
-fn test_parse_generate() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/generate.air"), "test/generate.air", generate::expected)
-}
-
-#[test]
-fn test_generate_generate() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/generate.air"), "test/generate.air")
-}
-
-#[test]
-fn test_parse_abstract() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/abstract.air"), "test/abstract.air", abstract1::expected)
-}
-
-#[test]
-fn test_generate_abstract() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/abstract.air"), "test/abstract.air")
 }
 
 #[test]

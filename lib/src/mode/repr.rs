@@ -1,12 +1,7 @@
 use crate::{
-    Abstract,
-    AbstractMode,
     Bit,
     Call,
     EitherMode,
-    Equiv,
-    Generate,
-    Inverse,
     List,
     ListVal,
     Map,
@@ -15,8 +10,6 @@ use crate::{
     Pair,
     PairMode,
     PrimMode,
-    Reify,
-    ReifyMode,
     Symbol,
     SymbolMode,
     UniMode,
@@ -25,9 +18,7 @@ use crate::{
         call::CallMode,
         change::ChangeMode,
         comp::CompMode,
-        equiv::EquivMode,
         id::ID,
-        inverse::InverseMode,
         list::ListMode,
         map::MapMode,
         prim::{
@@ -55,17 +46,12 @@ use crate::{
         symbol,
     },
     val::{
-        ABSTRACT,
         CALL,
         CHANGE,
         EITHER,
-        EQUIV,
-        GENERATE,
-        INVERSE,
         LIST,
         MAP,
         PAIR,
-        REIFY,
         SYMBOL,
     },
 };
@@ -287,27 +273,9 @@ impl ParseMode<MapVal> for CompMode {
         let either = ParseMode::parse(map_remove(&mut map, EITHER), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let reify = ParseMode::parse(map_remove(&mut map, REIFY), default)?;
-        let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
-        let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
-        let generate = ParseMode::parse(map_remove(&mut map, GENERATE), default)?;
-        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(CompMode {
-            symbol,
-            pair,
-            either,
-            change,
-            call,
-            reify,
-            equiv,
-            inverse,
-            generate,
-            abstract1,
-            list,
-            map,
-        })
+        Some(CompMode { symbol, pair, either, change, call, list, map })
     }
 }
 
@@ -319,11 +287,6 @@ impl GenerateMode<MapVal> for CompMode {
         put_non_default(&mut map, default, &self.either, EITHER);
         put_non_default(&mut map, default, &self.change, CHANGE);
         put_non_default(&mut map, default, &self.call, CALL);
-        put_non_default(&mut map, default, &self.reify, REIFY);
-        put_non_default(&mut map, default, &self.equiv, EQUIV);
-        put_non_default(&mut map, default, &self.inverse, INVERSE);
-        put_non_default(&mut map, default, &self.generate, GENERATE);
-        put_non_default(&mut map, default, &self.abstract1, ABSTRACT);
         put_non_default(&mut map, default, &self.list, LIST);
         put_non_default(&mut map, default, &self.map, MAP);
         map.into()
@@ -338,27 +301,9 @@ impl ParseMode<MapVal> for PrimMode {
         let either = ParseMode::parse(map_remove(&mut map, EITHER), default)?;
         let change = ParseMode::parse(map_remove(&mut map, CHANGE), default)?;
         let call = ParseMode::parse(map_remove(&mut map, CALL), default)?;
-        let reify = ParseMode::parse(map_remove(&mut map, REIFY), default)?;
-        let equiv = ParseMode::parse(map_remove(&mut map, EQUIV), default)?;
-        let inverse = ParseMode::parse(map_remove(&mut map, INVERSE), default)?;
-        let generate = ParseMode::parse(map_remove(&mut map, GENERATE), default)?;
-        let abstract1 = ParseMode::parse(map_remove(&mut map, ABSTRACT), default)?;
         let list = ParseMode::parse(map_remove(&mut map, LIST), default)?;
         let map = ParseMode::parse(map_remove(&mut map, MAP), default)?;
-        Some(PrimMode {
-            symbol,
-            pair,
-            either,
-            change,
-            call,
-            reify,
-            equiv,
-            inverse,
-            generate,
-            abstract1,
-            list,
-            map,
-        })
+        Some(PrimMode { symbol, pair, either, change, call, list, map })
     }
 }
 
@@ -370,11 +315,6 @@ impl GenerateMode<MapVal> for PrimMode {
         put_non_default(&mut map, default, &self.either, EITHER);
         put_non_default(&mut map, default, &self.change, CHANGE);
         put_non_default(&mut map, default, &self.call, CALL);
-        put_non_default(&mut map, default, &self.reify, REIFY);
-        put_non_default(&mut map, default, &self.equiv, EQUIV);
-        put_non_default(&mut map, default, &self.inverse, INVERSE);
-        put_non_default(&mut map, default, &self.generate, GENERATE);
-        put_non_default(&mut map, default, &self.abstract1, ABSTRACT);
         put_non_default(&mut map, default, &self.list, LIST);
         put_non_default(&mut map, default, &self.map, MAP);
         map.into()
@@ -525,111 +465,6 @@ impl GenerateMode<Val> for CallMode {
             CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
             CodeMode::Eval => Val::Call(Call::new(func, input).into()),
         }
-    }
-}
-
-impl ParseMode<Val> for ReifyMode {
-    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
-        match mode {
-            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Reify(reify) => {
-                let reify = Reify::from(reify);
-                let func = ParseMode::parse(reify.func, default)?;
-                Some(ReifyMode { reify: Reify::new(func) })
-            }
-            _ => None,
-        }
-    }
-}
-
-impl GenerateMode<Val> for ReifyMode {
-    fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.reify.func, default);
-        Val::Reify(Reify::new(func).into())
-    }
-}
-
-impl ParseMode<Val> for EquivMode {
-    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
-        match mode {
-            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Equiv(equiv) => {
-                let equiv = Equiv::from(equiv);
-                let func = ParseMode::parse(equiv.func, default)?;
-                Some(EquivMode { func })
-            }
-            _ => None,
-        }
-    }
-}
-
-impl GenerateMode<Val> for EquivMode {
-    fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.func, default);
-        Val::Equiv(Equiv::new(func).into())
-    }
-}
-
-impl ParseMode<Val> for InverseMode {
-    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
-        match mode {
-            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Inverse(inverse) => {
-                let inverse = Inverse::from(inverse);
-                let func = ParseMode::parse(inverse.func, default)?;
-                Some(InverseMode { func })
-            }
-            _ => None,
-        }
-    }
-}
-
-impl GenerateMode<Val> for InverseMode {
-    fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.func, default);
-        Val::Inverse(Inverse::new(func).into())
-    }
-}
-
-impl ParseMode<Val> for crate::mode::generate::GenerateMode {
-    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
-        match mode {
-            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Generate(generate) => {
-                let generate = Generate::from(generate);
-                let func = ParseMode::parse(generate.func, default)?;
-                Some(crate::mode::generate::GenerateMode { func })
-            }
-            _ => None,
-        }
-    }
-}
-
-impl GenerateMode<Val> for crate::mode::generate::GenerateMode {
-    fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.func, default);
-        Val::Generate(Generate::new(func).into())
-    }
-}
-
-impl ParseMode<Val> for AbstractMode {
-    fn parse(mode: Val, default: Option<UniMode>) -> Option<Self> {
-        match mode {
-            Val::Symbol(s) => Some(Self::from(UniMode::parse(s, default)?)),
-            Val::Abstract(abstract1) => {
-                let abstract1 = Abstract::from(abstract1);
-                let func = ParseMode::parse(abstract1.func, default)?;
-                Some(AbstractMode { func })
-            }
-            _ => None,
-        }
-    }
-}
-
-impl GenerateMode<Val> for AbstractMode {
-    fn generate(&self, default: Option<UniMode>) -> Val {
-        let func = GenerateMode::generate(&self.func, default);
-        Val::Abstract(Abstract::new(func).into())
     }
 }
 

@@ -1,13 +1,9 @@
 use crate::{
-    AbstractMode,
     CallMode,
     ChangeMode,
     CodeMode,
     CompMode,
     EitherMode,
-    EquivMode,
-    GenerateMode,
-    InverseMode,
     List,
     ListMode,
     Map,
@@ -15,8 +11,6 @@ use crate::{
     Mode,
     Pair,
     PairMode,
-    Reify,
-    ReifyMode,
     SymbolMode,
     UniMode,
     Val,
@@ -80,46 +74,6 @@ impl FuncMode {
     pub fn call_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
             call: Some(CallMode { code, func, input }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn reify_mode(func: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            reify: Some(ReifyMode { reify: Reify::new(func) }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn equiv_mode(func: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            equiv: Some(EquivMode { func }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn inverse_mode(func: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            inverse: Some(InverseMode { func }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn abstract_mode(func: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            abstract1: Some(AbstractMode { func }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn generate_mode(func: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            generate: Some(GenerateMode { func }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))

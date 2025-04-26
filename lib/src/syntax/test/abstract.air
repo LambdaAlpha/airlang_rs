@@ -1,7 +1,0 @@
-atom
------
-abstract(a)
-=====
-compose
------
-abstract(a : b)

@@ -1,6 +1,4 @@
 use crate::{
-    Abstract,
-    AbstractVal,
     Bit,
     Call,
     CallVal,
@@ -10,13 +8,7 @@ use crate::{
     CtxVal,
     Either,
     EitherVal,
-    Equiv,
-    EquivVal,
     FuncMode,
-    Generate,
-    GenerateVal,
-    Inverse,
-    InverseVal,
     List,
     ListVal,
     Map,
@@ -25,8 +17,6 @@ use crate::{
     MutFnCtx,
     Pair,
     PairVal,
-    Reify,
-    ReifyVal,
     Symbol,
     SymbolMode,
     Unit,
@@ -246,11 +236,6 @@ pub(crate) enum Pattern {
     Either(Box<Either<Pattern, Pattern>>),
     Change(Box<Change<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
-    Reify(Box<Reify<Pattern>>),
-    Equiv(Box<Equiv<Pattern>>),
-    Inverse(Box<Inverse<Pattern>>),
-    Generate(Box<Generate<Pattern>>),
-    Abstract(Box<Abstract<Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -268,11 +253,6 @@ pub(crate) fn parse_pattern(pattern: Val, ctx: PatternCtx) -> Option<Pattern> {
                 parse_pattern_call(call, ctx)
             }
         }
-        Val::Reify(reify) => parse_pattern_reify(reify, ctx),
-        Val::Equiv(equiv) => parse_pattern_equiv(equiv, ctx),
-        Val::Inverse(inverse) => parse_pattern_inverse(inverse, ctx),
-        Val::Generate(generate) => parse_pattern_generate(generate, ctx),
-        Val::Abstract(abstract1) => parse_pattern_abstract(abstract1, ctx),
         Val::List(list) => parse_pattern_list(list, ctx),
         Val::Map(map) => parse_pattern_map(map, ctx),
         _ => None,
@@ -317,41 +297,6 @@ fn parse_pattern_call(call: CallVal, mut ctx: PatternCtx) -> Option<Pattern> {
     Some(Pattern::Call(Box::new(Call::new(func, input))))
 }
 
-fn parse_pattern_reify(reify: ReifyVal, mut ctx: PatternCtx) -> Option<Pattern> {
-    ctx.allow_extra = true;
-    let reify = Reify::from(reify);
-    let func = parse_pattern(reify.func, ctx)?;
-    Some(Pattern::Reify(Box::new(Reify::new(func))))
-}
-
-fn parse_pattern_equiv(equiv: EquivVal, mut ctx: PatternCtx) -> Option<Pattern> {
-    ctx.allow_extra = true;
-    let equiv = Equiv::from(equiv);
-    let func = parse_pattern(equiv.func, ctx)?;
-    Some(Pattern::Equiv(Box::new(Equiv::new(func))))
-}
-
-fn parse_pattern_inverse(inverse: InverseVal, mut ctx: PatternCtx) -> Option<Pattern> {
-    ctx.allow_extra = true;
-    let inverse = Inverse::from(inverse);
-    let func = parse_pattern(inverse.func, ctx)?;
-    Some(Pattern::Inverse(Box::new(Inverse::new(func))))
-}
-
-fn parse_pattern_generate(generate: GenerateVal, mut ctx: PatternCtx) -> Option<Pattern> {
-    ctx.allow_extra = true;
-    let generate = Generate::from(generate);
-    let func = parse_pattern(generate.func, ctx)?;
-    Some(Pattern::Generate(Box::new(Generate::new(func))))
-}
-
-fn parse_pattern_abstract(abstract1: AbstractVal, mut ctx: PatternCtx) -> Option<Pattern> {
-    ctx.allow_extra = true;
-    let abstract1 = Abstract::from(abstract1);
-    let func = parse_pattern(abstract1.func, ctx)?;
-    Some(Pattern::Abstract(Box::new(Abstract::new(func))))
-}
-
 fn parse_pattern_list(list: ListVal, mut ctx: PatternCtx) -> Option<Pattern> {
     ctx.allow_extra = true;
     let list = List::from(list);
@@ -394,11 +339,6 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
         Pattern::Either(either) => assign_either(ctx, *either, val),
         Pattern::Change(change) => assign_change(ctx, *change, val),
         Pattern::Call(call) => assign_call(ctx, *call, val),
-        Pattern::Reify(reify) => assign_reify(ctx, *reify, val),
-        Pattern::Equiv(equiv) => assign_equiv(ctx, *equiv, val),
-        Pattern::Inverse(inverse) => assign_inverse(ctx, *inverse, val),
-        Pattern::Generate(generate) => assign_generate(ctx, *generate, val),
-        Pattern::Abstract(abstract1) => assign_abstract(ctx, *abstract1, val),
         Pattern::List(list) => assign_list(ctx, list, val),
         Pattern::Map(map) => assign_map(ctx, map, val),
     }
@@ -460,51 +400,6 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let input = assign_pattern(ctx, pattern.input, val.input);
     Val::Call(Call::new(func, input).into())
-}
-
-fn assign_reify(mut ctx: MutFnCtx, pattern: Reify<Pattern>, val: Val) -> Val {
-    let Val::Reify(val) = val else {
-        return Val::default();
-    };
-    let val = Reify::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    Val::Reify(Reify::new(func).into())
-}
-
-fn assign_equiv(mut ctx: MutFnCtx, pattern: Equiv<Pattern>, val: Val) -> Val {
-    let Val::Equiv(val) = val else {
-        return Val::default();
-    };
-    let val = Equiv::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    Val::Equiv(Equiv::new(func).into())
-}
-
-fn assign_inverse(mut ctx: MutFnCtx, pattern: Inverse<Pattern>, val: Val) -> Val {
-    let Val::Inverse(val) = val else {
-        return Val::default();
-    };
-    let val = Inverse::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    Val::Inverse(Inverse::new(func).into())
-}
-
-fn assign_generate(mut ctx: MutFnCtx, pattern: Generate<Pattern>, val: Val) -> Val {
-    let Val::Generate(val) = val else {
-        return Val::default();
-    };
-    let val = Generate::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    Val::Generate(Generate::new(func).into())
-}
-
-fn assign_abstract(mut ctx: MutFnCtx, pattern: Abstract<Pattern>, val: Val) -> Val {
-    let Val::Abstract(val) = val else {
-        return Val::default();
-    };
-    let val = Abstract::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
-    Val::Abstract(Abstract::new(func).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

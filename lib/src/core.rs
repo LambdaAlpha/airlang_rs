@@ -12,13 +12,7 @@ use crate::{
     Ctx,
     Either,
     EitherVal,
-    Equiv,
-    EquivVal,
     FuncVal,
-    Generate,
-    GenerateVal,
-    Inverse,
-    InverseVal,
     List,
     ListVal,
     Map,
@@ -27,11 +21,8 @@ use crate::{
     MutFnCtx,
     Pair,
     PairVal,
-    Reify,
-    ReifyVal,
     Symbol,
     Val,
-    abstract1::Abstract,
     ctx::{
         main::MainCtx,
         map::CtxValue,
@@ -50,7 +41,6 @@ use crate::{
         ByVal,
         Transformer,
     },
-    val::abstract1::AbstractVal,
 };
 
 pub(crate) struct FormCore;
@@ -66,11 +56,6 @@ impl FormCore {
             Val::Either(either) => t.transform_either(ctx, either),
             Val::Change(change) => t.transform_change(ctx, change),
             Val::Call(call) => t.transform_call(ctx, call),
-            Val::Reify(reify) => t.transform_reify(ctx, reify),
-            Val::Equiv(equiv) => t.transform_equiv(ctx, equiv),
-            Val::Inverse(inverse) => t.transform_inverse(ctx, inverse),
-            Val::Generate(generate) => t.transform_generate(ctx, generate),
-            Val::Abstract(abstract1) => t.transform_abstract(ctx, abstract1),
             Val::List(list) => t.transform_list(ctx, list),
             Val::Map(map) => t.transform_map(ctx, map),
             v => t.transform_default(ctx, v),
@@ -145,61 +130,6 @@ impl FormCore {
         let func = func.transform(ctx.reborrow(), call.func);
         let input = input.transform(ctx, call.input);
         Val::Call(Call::new(func, input).into())
-    }
-
-    pub(crate) fn transform_reify<'a, Ctx, Value>(
-        value: &Value, mut ctx: Ctx, reify: ReifyVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Value: Transformer<Val, Val>, {
-        let reify = Reify::from(reify);
-        let func = value.transform(ctx.reborrow(), reify.func);
-        Val::Reify(Reify::new(func).into())
-    }
-
-    pub(crate) fn transform_equiv<'a, Ctx, Func>(
-        func: &Func, mut ctx: Ctx, equiv: EquivVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>, {
-        let equiv = Equiv::from(equiv);
-        let func = func.transform(ctx.reborrow(), equiv.func);
-        Val::Equiv(Equiv::new(func).into())
-    }
-
-    pub(crate) fn transform_inverse<'a, Ctx, Func>(
-        func: &Func, mut ctx: Ctx, inverse: InverseVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>, {
-        let inverse = Inverse::from(inverse);
-        let func = func.transform(ctx.reborrow(), inverse.func);
-        Val::Inverse(Inverse::new(func).into())
-    }
-
-    pub(crate) fn transform_generate<'a, Ctx, Func>(
-        func: &Func, mut ctx: Ctx, generate: GenerateVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>, {
-        let generate = Generate::from(generate);
-        let func = func.transform(ctx.reborrow(), generate.func);
-        Val::Generate(Generate::new(func).into())
-    }
-
-    pub(crate) fn transform_abstract<'a, Ctx, Value>(
-        value: &Value, mut ctx: Ctx, abstract1: AbstractVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Value: Transformer<Val, Val>, {
-        let abstract1 = Abstract::from(abstract1);
-        let func = value.transform(ctx.reborrow(), abstract1.func);
-        Val::Abstract(Abstract::new(func).into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val
@@ -303,8 +233,6 @@ impl EvalCore {
                 let input = func.mode().call.transform(ctx.reborrow(), input);
                 func.transform(ctx, input)
             }
-            Val::Equiv(equiv) => Self::transform_equiv(input_trans, ctx, equiv, input),
-            Val::Inverse(inverse) => Self::transform_inverse(input_trans, ctx, inverse, input),
             Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
                 let input = Self::call_ref_eval_input(func, ctx, is_const, input);
                 Self::call_ref(func, ctx, is_const, input)
@@ -385,86 +313,7 @@ impl EvalCore {
         output
     }
 
-    // equiv(f) ; x evaluates to . or any y that (f ; x) and (f ; y) always evaluates to the same output
-    pub(crate) fn transform_equiv<'a, Ctx, Input>(
-        input_trans: &Input, ctx: Ctx, equiv: EquivVal, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        let equiv = Equiv::from(equiv);
-        let func = equiv.func;
-        Self::eval_input_then_equiv(input_trans, ctx, func, input)
-    }
-
-    pub(crate) fn eval_input_then_equiv<'a, Ctx, Input>(
-        input_trans: &Input, mut ctx: Ctx, func: Val, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        let input = input_trans.transform(ctx.reborrow(), input);
-        match func {
-            Val::Func(func) => Self::equiv_func(ctx, func, input),
-            func => {
-                let func = Val::Equiv(Equiv::new(func).into());
-                Val::Call(Call::new(func, input).into())
-            }
-        }
-    }
-
-    pub(crate) fn equiv_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        let equiv = Val::Equiv(Equiv::new(Val::Func(func.clone())).into());
-        let question = Val::Call(Call::new(equiv, input.clone()).into());
-        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
-            if answer != input {
-                return answer;
-            }
-        }
-        crate::solver::optimize(ctx, func, input)
-    }
-
-    // inverse(f) ; v evaluates to . or any i that (f ; i) always evaluates to v
-    pub(crate) fn transform_inverse<'a, Ctx, Input>(
-        input_trans: &Input, ctx: Ctx, inverse: InverseVal, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        let inverse = Inverse::from(inverse);
-        let func = inverse.func;
-        Self::eval_input_then_inverse(input_trans, ctx, func, input)
-    }
-
-    pub(crate) fn eval_input_then_inverse<'a, Ctx, Input>(
-        input_trans: &Input, mut ctx: Ctx, func: Val, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        let input = input_trans.transform(ctx.reborrow(), input);
-        match func {
-            Val::Func(func) => Self::inverse_func(ctx, func, input),
-            func => {
-                let func = Val::Inverse(Inverse::new(func).into());
-                Val::Call(Call::new(func, input).into())
-            }
-        }
-    }
-
-    pub(crate) fn inverse_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        let inverse = Val::Inverse(Inverse::new(Val::Func(func.clone())).into());
-        let question = Val::Call(Call::new(inverse, input.clone()).into());
-        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
-            if !answer.is_unit() {
-                return answer;
-            }
-        }
-        crate::solver::inverse(ctx, func, input)
-    }
-
+    #[expect(unused)]
     pub(crate) fn call_solver<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>
     where Ctx: CtxMeta<'a> {
         let (ctx, is_const) = match ctx.for_mut_fn() {

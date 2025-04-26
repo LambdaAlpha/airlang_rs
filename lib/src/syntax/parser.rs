@@ -53,23 +53,17 @@ use winnow::{
 
 use crate::{
     Either,
-    Generate,
-    abstract1::Abstract,
     bit::Bit,
     byte::Byte,
     call::Call,
     change::Change,
-    equiv::Equiv,
     int::Int,
-    inverse::Inverse,
     list::List,
     map::Map,
     number::Number,
     pair::Pair,
-    reify::Reify,
     symbol::Symbol,
     syntax::{
-        ABSTRACT,
         ARITY_2,
         ARITY_3,
         BYTE,
@@ -77,12 +71,9 @@ use crate::{
         CHANGE,
         EITHER_THAT,
         EITHER_THIS,
-        EQUIV,
         FALSE,
-        GENERATE,
         INLINE_COMMENT,
         INT,
-        INVERSE,
         LEFT,
         LIST_LEFT,
         LIST_RIGHT,
@@ -91,7 +82,6 @@ use crate::{
         MULTILINE_COMMENT,
         NUMBER,
         PAIR,
-        REIFY,
         RIGHT,
         SCOPE_LEFT,
         SCOPE_RIGHT,
@@ -125,11 +115,6 @@ pub(crate) trait ParseRepr:
     + From<Either<Self, Self>>
     + From<Change<Self, Self>>
     + From<Call<Self, Self>>
-    + From<Reify<Self>>
-    + From<Equiv<Self>>
-    + From<Inverse<Self>>
-    + From<Generate<Self>>
-    + From<Abstract<Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -369,11 +354,6 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             BYTE => byte.map(T::from).parse_next(i),
             EITHER_THIS => either_this(ctx).parse_next(i),
             EITHER_THAT => either_that(ctx).parse_next(i),
-            REIFY => reify(ctx).parse_next(i),
-            EQUIV => equiv(ctx).parse_next(i),
-            INVERSE => inverse(ctx).parse_next(i),
-            GENERATE => generate(ctx).parse_next(i),
-            ABSTRACT => abstract1(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
             CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
@@ -530,26 +510,6 @@ fn either_this<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
 
 fn either_that<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     scope(ctx).map(|t| T::from(Either::That(t)))
-}
-
-fn reify<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Reify::new(t)))
-}
-
-fn equiv<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Equiv::new(t)))
-}
-
-fn inverse<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Inverse::new(t)))
-}
-
-fn generate<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Generate::new(t)))
-}
-
-fn abstract1<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Abstract::new(t)))
 }
 
 fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>

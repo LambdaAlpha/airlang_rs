@@ -224,36 +224,6 @@ do [(a b c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-= destruct reify
------
-do [reify(f) = reify(1), f]
------
-1
-=====
-= destruct equiv
------
-do [equiv(f) = equiv(1), f]
------
-1
-=====
-= destruct inverse
------
-do [inverse(f) = inverse(1), f]
------
-1
-=====
-= destruct generate
------
-do [generate(f) = generate(1), f]
------
-1
-=====
-= destruct abstract
------
-do [abstract(f) = abstract(1), f]
------
-1
-=====
 = destruct list equal length
 -----
 do [[a, b, c] = [1, 2, 3], [a, b, c]]

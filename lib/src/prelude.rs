@@ -36,7 +36,6 @@ use crate::{
         mut_static_prim::MutStaticFn,
     },
     prelude::{
-        abstract1::AbstractPrelude,
         bit::BitPrelude,
         byte::BytePrelude,
         call::CallPrelude,
@@ -44,19 +43,15 @@ use crate::{
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
         either::EitherPrelude,
-        equiv::EquivPrelude,
         extension::ExtPrelude,
         func::FuncPrelude,
-        generate::GeneratePrelude,
         int::IntPrelude,
-        inverse::InversePrelude,
         list::ListPrelude,
         map::MapPrelude,
         meta::MetaPrelude,
         mode::MODE_PRELUDE,
         number::NumberPrelude,
         pair::PairPrelude,
-        reify::ReifyPrelude,
         symbol::SymbolPrelude,
         syntax::SyntaxPrelude,
         text::TextPrelude,
@@ -89,11 +84,6 @@ pub(crate) struct AllPrelude {
     pub(crate) either: EitherPrelude,
     pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
-    pub(crate) reify: ReifyPrelude,
-    pub(crate) equiv: EquivPrelude,
-    pub(crate) inverse: InversePrelude,
-    pub(crate) generate: GeneratePrelude,
-    pub(crate) abstract1: AbstractPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
     pub(crate) ctx: CtxPrelude,
@@ -118,11 +108,6 @@ impl Prelude for AllPrelude {
         self.either.put(m);
         self.change.put(m);
         self.call.put(m);
-        self.reify.put(m);
-        self.equiv.put(m);
-        self.inverse.put(m);
-        self.generate.put(m);
-        self.abstract1.put(m);
         self.list.put(m);
         self.map.put(m);
         self.ctx.put(m);
@@ -296,16 +281,6 @@ mod either;
 mod change;
 
 mod call;
-
-mod reify;
-
-mod equiv;
-
-mod inverse;
-
-mod generate;
-
-mod abstract1;
 
 mod list;
 

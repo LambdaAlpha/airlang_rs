@@ -1,21 +1,13 @@
 use crate::{
-    AbstractMode,
-    AbstractVal,
     CallVal,
     ChangeVal,
     EitherVal,
-    EquivVal,
-    GenerateMode,
-    GenerateVal,
-    InverseVal,
     ListMode,
     ListVal,
     MapMode,
     MapVal,
     PairMode,
     PairVal,
-    ReifyMode,
-    ReifyVal,
     Symbol,
     UniMode,
     Val,
@@ -25,8 +17,6 @@ use crate::{
         call::CallMode,
         change::ChangeMode,
         either::EitherMode,
-        equiv::EquivMode,
-        inverse::InverseMode,
         symbol::SymbolMode,
     },
     transformer::{
@@ -42,11 +32,6 @@ pub struct CompMode {
     pub either: Option<EitherMode>,
     pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
-    pub reify: Option<ReifyMode>,
-    pub equiv: Option<EquivMode>,
-    pub inverse: Option<InverseMode>,
-    pub generate: Option<GenerateMode>,
-    pub abstract1: Option<AbstractMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
 }
@@ -89,31 +74,6 @@ impl ByVal<Val> for CompMode {
         self.call.transform(ctx, call)
     }
 
-    fn transform_reify<'a, Ctx>(&self, ctx: Ctx, reify: ReifyVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.reify.transform(ctx, reify)
-    }
-
-    fn transform_equiv<'a, Ctx>(&self, ctx: Ctx, equiv: EquivVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.equiv.transform(ctx, equiv)
-    }
-
-    fn transform_inverse<'a, Ctx>(&self, ctx: Ctx, inverse: InverseVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.inverse.transform(ctx, inverse)
-    }
-
-    fn transform_generate<'a, Ctx>(&self, ctx: Ctx, generate: GenerateVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.generate.transform(ctx, generate)
-    }
-
-    fn transform_abstract<'a, Ctx>(&self, ctx: Ctx, abstract1: AbstractVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.abstract1.transform(ctx, abstract1)
-    }
-
     fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
     where Ctx: CtxMeta<'a> {
         self.list.transform(ctx, list)
@@ -133,11 +93,6 @@ impl From<Option<UniMode>> for CompMode {
                 pair: None,
                 either: None,
                 call: None,
-                reify: None,
-                equiv: None,
-                inverse: None,
-                generate: None,
-                abstract1: None,
                 change: None,
                 list: None,
                 map: None,
@@ -147,11 +102,6 @@ impl From<Option<UniMode>> for CompMode {
                 pair: Some(PairMode::from(mode)),
                 either: Some(EitherMode::from(mode)),
                 call: Some(CallMode::from(mode)),
-                reify: Some(ReifyMode::from(mode)),
-                equiv: Some(EquivMode::from(mode)),
-                inverse: Some(InverseMode::from(mode)),
-                generate: Some(GenerateMode::from(mode)),
-                abstract1: Some(AbstractMode::from(mode)),
                 change: Some(ChangeMode::from(mode)),
                 list: Some(ListMode::from(mode)),
                 map: Some(MapMode::from(mode)),

@@ -5,11 +5,10 @@ use std::fmt::{
 
 use crate::{
     CallMode,
+    ChangeMode,
     CompMode,
     CtxAccess,
-    EquivMode,
     FuncMode,
-    InverseMode,
     ListMode,
     MapMode,
     PairMode,
@@ -121,9 +120,8 @@ impl GetCtxAccess for PrimMode {
     fn ctx_access(&self) -> CtxAccess {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
+            & self.change.ctx_access()
             & self.call.ctx_access()
-            & self.equiv.ctx_access()
-            & self.inverse.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -148,9 +146,8 @@ impl GetCtxAccess for CompMode {
     fn ctx_access(&self) -> CtxAccess {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
+            & self.change.ctx_access()
             & self.call.ctx_access()
-            & self.equiv.ctx_access()
-            & self.inverse.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -168,24 +165,18 @@ impl GetCtxAccess for PairMode {
     }
 }
 
+impl GetCtxAccess for ChangeMode {
+    fn ctx_access(&self) -> CtxAccess {
+        self.from.ctx_access() & self.to.ctx_access()
+    }
+}
+
 impl GetCtxAccess for CallMode {
     fn ctx_access(&self) -> CtxAccess {
         if matches!(self.code, CodeMode::Eval) {
             return CtxAccess::Mut;
         }
         self.func.ctx_access() & self.input.ctx_access()
-    }
-}
-
-impl GetCtxAccess for EquivMode {
-    fn ctx_access(&self) -> CtxAccess {
-        self.func.ctx_access()
-    }
-}
-
-impl GetCtxAccess for InverseMode {
-    fn ctx_access(&self) -> CtxAccess {
-        self.func.ctx_access()
     }
 }
 
