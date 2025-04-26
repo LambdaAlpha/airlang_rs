@@ -8,6 +8,7 @@ use crate::{
     ChangeMode,
     CompMode,
     CtxAccess,
+    EitherMode,
     FuncMode,
     ListMode,
     MapMode,
@@ -120,6 +121,7 @@ impl GetCtxAccess for PrimMode {
     fn ctx_access(&self) -> CtxAccess {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
+            & self.either.ctx_access()
             & self.change.ctx_access()
             & self.call.ctx_access()
             & self.list.ctx_access()
@@ -146,6 +148,7 @@ impl GetCtxAccess for CompMode {
     fn ctx_access(&self) -> CtxAccess {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
+            & self.either.ctx_access()
             & self.change.ctx_access()
             & self.call.ctx_access()
             & self.list.ctx_access()
@@ -162,6 +165,12 @@ impl GetCtxAccess for SymbolMode {
 impl GetCtxAccess for PairMode {
     fn ctx_access(&self) -> CtxAccess {
         self.first.ctx_access() & self.second.ctx_access()
+    }
+}
+
+impl GetCtxAccess for EitherMode {
+    fn ctx_access(&self) -> CtxAccess {
+        self.this.ctx_access() & self.that.ctx_access()
     }
 }
 
