@@ -11,14 +11,12 @@ use crate::{
     Bit,
     Byte,
     Call,
-    Either,
     Int,
     Number,
     Pair,
     Symbol,
     Text,
     Unit,
-    change::Change,
     syntax::{
         ParseError,
         generate_pretty,
@@ -27,8 +25,6 @@ use crate::{
         parser::ParseRepr,
         repr::{
             call::CallRepr,
-            change::ChangeRepr,
-            either::EitherRepr,
             list::ListRepr,
             map::MapRepr,
             pair::PairRepr,
@@ -49,8 +45,6 @@ pub enum Repr {
     Byte(Byte),
 
     Pair(Box<PairRepr>),
-    Either(Box<EitherRepr>),
-    Change(Box<ChangeRepr>),
     Call(Box<CallRepr>),
 
     List(ListRepr),
@@ -114,30 +108,6 @@ impl From<PairRepr> for Repr {
 impl From<Box<PairRepr>> for Repr {
     fn from(p: Box<PairRepr>) -> Self {
         Repr::Pair(p)
-    }
-}
-
-impl From<EitherRepr> for Repr {
-    fn from(e: EitherRepr) -> Self {
-        Repr::Either(Box::new(e))
-    }
-}
-
-impl From<Box<EitherRepr>> for Repr {
-    fn from(e: Box<EitherRepr>) -> Self {
-        Repr::Either(e)
-    }
-}
-
-impl From<ChangeRepr> for Repr {
-    fn from(c: ChangeRepr) -> Self {
-        Repr::Change(Box::new(c))
-    }
-}
-
-impl From<Box<ChangeRepr>> for Repr {
-    fn from(c: Box<ChangeRepr>) -> Self {
-        Repr::Change(c)
     }
 }
 
@@ -222,15 +192,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
-            Repr::Either(either) => match &**either {
-                Either::This(this) => GenRepr::Either(Box::new(Either::This(this.try_into()?))),
-                Either::That(that) => GenRepr::Either(Box::new(Either::That(that.try_into()?))),
-            },
-            Repr::Change(change) => {
-                let from = (&change.from).try_into()?;
-                let to = (&change.to).try_into()?;
-                GenRepr::Change(Box::new(Change::new(from, to)))
-            }
             Repr::Call(call) => {
                 let func = (&call.func).try_into()?;
                 let input = (&call.input).try_into()?;
@@ -257,10 +218,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
 }
 
 pub(crate) mod pair;
-
-pub(crate) mod either;
-
-pub(crate) mod change;
 
 pub(crate) mod call;
 

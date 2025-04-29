@@ -6,8 +6,6 @@ pub use crate::syntax::{
     repr::{
         Repr,
         call::CallRepr,
-        change::ChangeRepr,
-        either::EitherRepr,
         list::ListRepr,
         map::MapRepr,
         pair::PairRepr,

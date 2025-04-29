@@ -23,7 +23,7 @@ do ; [
     c_for = function ; {
         context_access : mutable,
         call_mode : id,
-        call : ctx : args -> do ; [
+        call : (.ctx : .args) : do ; [
             [.init, .condition, .next, .body] = .args,
             .ctx | do ; [
                 .init,

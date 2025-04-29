@@ -2,7 +2,6 @@ pub use crate::{
     bit::Bit,
     byte::Byte,
     call::Call,
-    change::Change,
     ctx::{
         Ctx,
         CtxAccess,
@@ -18,7 +17,6 @@ pub use crate::{
             MutFnCtx,
         },
     },
-    either::Either,
     extension::ValExt,
     func::{
         const_cell_comp::ConstCellCompFunc,
@@ -63,9 +61,7 @@ pub use crate::{
     mode::{
         Mode,
         call::CallMode,
-        change::ChangeMode,
         comp::CompMode,
-        either::EitherMode,
         list::ListMode,
         map::MapMode,
         pair::PairMode,
@@ -86,9 +82,7 @@ pub use crate::{
         Val,
         byte::ByteVal,
         call::CallVal,
-        change::ChangeVal,
         ctx::CtxVal,
-        either::EitherVal,
         func::{
             FuncVal,
             const_cell_comp::ConstCellCompFuncVal,

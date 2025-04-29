@@ -83,6 +83,7 @@ impl MainCtx {
         }
     }
 
+    #[expect(unused)]
     pub(crate) fn with_ref<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
     where
         Ctx: CtxMeta<'a>,

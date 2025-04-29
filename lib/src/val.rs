@@ -8,14 +8,12 @@ use std::{
 
 use crate::{
     Call,
-    Either,
     Int,
     List,
     Map,
     Pair,
     bit::Bit,
     byte::Byte,
-    change::Change,
     extension::ValExt,
     number::Number,
     symbol::Symbol,
@@ -30,9 +28,7 @@ use crate::{
     val::{
         byte::ByteVal,
         call::CallVal,
-        change::ChangeVal,
         ctx::CtxVal,
-        either::EitherVal,
         func::FuncVal,
         int::IntVal,
         list::ListVal,
@@ -56,8 +52,6 @@ pub enum Val {
     Byte(ByteVal),
 
     Pair(PairVal),
-    Either(EitherVal),
-    Change(ChangeVal),
     Call(CallVal),
 
     List(ListVal),
@@ -77,8 +71,6 @@ pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
-pub(crate) const EITHER: &str = "either";
-pub(crate) const CHANGE: &str = "change";
 pub(crate) const CALL: &str = "call";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
@@ -176,30 +168,6 @@ impl From<PairVal> for Val {
     }
 }
 
-impl From<Either<Val, Val>> for Val {
-    fn from(value: Either<Val, Val>) -> Self {
-        Val::Either(EitherVal::from(value))
-    }
-}
-
-impl From<EitherVal> for Val {
-    fn from(value: EitherVal) -> Self {
-        Val::Either(value)
-    }
-}
-
-impl From<Change<Val, Val>> for Val {
-    fn from(value: Change<Val, Val>) -> Self {
-        Val::Change(ChangeVal::from(value))
-    }
-}
-
-impl From<ChangeVal> for Val {
-    fn from(value: ChangeVal) -> Self {
-        Val::Change(value)
-    }
-}
-
 impl From<Call<Val, Val>> for Val {
     fn from(value: Call<Val, Val>) -> Self {
         Val::Call(CallVal::from(value))
@@ -265,8 +233,6 @@ impl From<&Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number.clone())),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte.clone())),
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
-            Repr::Either(either) => Val::Either(EitherVal::from(&**either)),
-            Repr::Change(change) => Val::Change(ChangeVal::from(&**change)),
             Repr::Call(call) => Val::Call(CallVal::from(&**call)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -285,8 +251,6 @@ impl From<Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number)),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte)),
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
-            Repr::Either(either) => Val::Either(EitherVal::from(*either)),
-            Repr::Change(change) => Val::Change(ChangeVal::from(*change)),
             Repr::Call(call) => Val::Call(CallVal::from(*call)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
@@ -306,8 +270,6 @@ impl TryInto<Repr> for &Val {
             Val::Number(number) => Ok(Repr::Number(Number::clone(number))),
             Val::Byte(byte) => Ok(Repr::Byte(Byte::clone(byte))),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
-            Val::Either(either) => Ok(Repr::Either(Box::new(either.try_into()?))),
-            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -328,8 +290,6 @@ impl TryInto<Repr> for Val {
             Val::Number(number) => Ok(Repr::Number(number.into())),
             Val::Byte(byte) => Ok(Repr::Byte(byte.into())),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
-            Val::Either(either) => Ok(Repr::Either(Box::new(either.try_into()?))),
-            Val::Change(change) => Ok(Repr::Change(Box::new(change.try_into()?))),
             Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
@@ -356,18 +316,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let first = (&pair.first).try_into()?;
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
-            }
-            Val::Either(either) => {
-                let either = match &**either {
-                    Either::This(this) => Either::This(this.try_into()?),
-                    Either::That(that) => Either::That(that.try_into()?),
-                };
-                GenRepr::Either(Box::new(either))
-            }
-            Val::Change(change) => {
-                let from = (&change.from).try_into()?;
-                let to = (&change.to).try_into()?;
-                GenRepr::Change(Box::new(Change::new(from, to)))
             }
             Val::Call(call) => {
                 let func = (&call.func).try_into()?;
@@ -407,8 +355,6 @@ impl Debug for Val {
             Val::Number(number) => <_ as Debug>::fmt(number, f),
             Val::Byte(byte) => <_ as Debug>::fmt(byte, f),
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
-            Val::Either(either) => <_ as Debug>::fmt(either, f),
-            Val::Change(change) => <_ as Debug>::fmt(change, f),
             Val::Call(call) => <_ as Debug>::fmt(call, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
@@ -428,10 +374,6 @@ pub(crate) mod number;
 pub(crate) mod byte;
 
 pub(crate) mod pair;
-
-pub(crate) mod either;
-
-pub(crate) mod change;
 
 pub(crate) mod call;
 

@@ -103,16 +103,6 @@ fn test_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_either() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/either.air"), "test/either.air")
-}
-
-#[test]
-fn test_change() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/change.air"), "test/change.air")
-}
-
-#[test]
 fn test_call() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/call.air"), "test/call.air")
 }

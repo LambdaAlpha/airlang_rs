@@ -2,16 +2,13 @@ use crate::syntax::{
     repr::Repr,
     test::{
         call,
-        change,
         infix_call,
-        infix_change,
         infix_pair,
         list,
         map,
         pair,
         symbol,
         tag_call,
-        tag_change,
         tag_pair,
     },
 };
@@ -54,8 +51,6 @@ pub fn expected() -> Vec<Repr> {
         pair(symbol("a"), symbol("b")),
         infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         call(symbol("a"), symbol("b")),
-        infix_change(symbol("a"), symbol("b"), infix_change(symbol("c"), symbol("d"), symbol("e"))),
-        change(symbol("a"), symbol("b")),
         call(symbol("a"), call(symbol("b"), symbol("c"))),
         call(symbol("a"), call(symbol("b"), call(symbol("c"), symbol("d")))),
         call(call(symbol("a"), symbol("b")), symbol("c")),
@@ -74,7 +69,6 @@ pub fn expected() -> Vec<Repr> {
             symbol("e"),
         ]),
         tag_pair("t", vec![symbol("a")]),
-        tag_change("t", vec![symbol("a")]),
         tag_call("t", vec![
             list(vec![tag_call("t", vec![symbol("a")]), tag_call("t", vec![symbol("b")])]),
             list(vec![]),

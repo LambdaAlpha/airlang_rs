@@ -194,24 +194,6 @@ do [((a : (b . mutable)) . constant) = (any ; .) : (any ; .), [variable_access a
 -----
 [constant, mutable]
 =====
-= destruct either this
------
-do [this(a) = this(1), a]
------
-1
-=====
-= destruct either that
------
-do [that(a) = that(1), a]
------
-1
-=====
-= destruct change
------
-do [(f -> b) = 1 -> 2, [f, b]]
------
-[1, 2]
-=====
 = destruct call
 -----
 do [(f ; a) = 1 ; 2, [f, a]]
@@ -482,7 +464,7 @@ do [
     s1 = function ; {
         cell : true,
         context_access : .free,
-        call : _ -> do ; [.a = .a + 1, .a],
+        call : ._ : do ; [.a = .a + 1, .a],
         context : context ; {variables : {a : 0}},
     },
     set_solver ^s1,

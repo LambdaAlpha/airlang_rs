@@ -1,7 +1,5 @@
 use crate::{
     CallVal,
-    ChangeVal,
-    EitherVal,
     ListVal,
     MapVal,
     PairVal,
@@ -25,8 +23,6 @@ use crate::{
 pub struct PrimMode {
     pub symbol: Option<SymbolMode>,
     pub pair: Option<DataMode>,
-    pub either: Option<DataMode>,
-    pub change: Option<DataMode>,
     pub call: Option<CodeMode>,
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
@@ -70,22 +66,6 @@ impl ByVal<Val> for PrimMode {
         }
     }
 
-    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.either {
-            None => Id.transform_either(ctx, either),
-            Some(_) => FormCore::transform_either(self, self, ctx, either),
-        }
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.change {
-            None => Id.transform_change(ctx, change),
-            Some(_) => FormCore::transform_change(self, self, ctx, change),
-        }
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         match self.call {
@@ -117,21 +97,11 @@ impl ByVal<Val> for PrimMode {
 impl From<Option<UniMode>> for PrimMode {
     fn from(mode: Option<UniMode>) -> Self {
         match mode {
-            None => Self {
-                symbol: None,
-                pair: None,
-                either: None,
-                call: None,
-                change: None,
-                list: None,
-                map: None,
-            },
+            None => Self { symbol: None, pair: None, call: None, list: None, map: None },
             Some(mode) => Self {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(DataMode::from(mode)),
-                either: Some(DataMode::from(mode)),
                 call: Some(CodeMode::from(mode)),
-                change: Some(DataMode::from(mode)),
                 list: Some(DataMode::from(mode)),
                 map: Some(DataMode::from(mode)),
             },

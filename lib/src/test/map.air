@@ -78,7 +78,7 @@ do [
     b1 = multiset ; a1 map.values .,
     a2 = {},
     i = 0,
-    a1 for kv -> [
+    a1 for kv : [
         a2 map.set i : kv pair.second .,
         i = i + 1,
     ],

@@ -1,9 +1,6 @@
 use crate::{
     Bit,
-    Change,
-    ChangeMode,
     CodeMode,
-    CompMode,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
     ConstStaticPrimFuncVal,
@@ -24,7 +21,6 @@ use crate::{
     MutStaticCompFuncVal,
     MutStaticPrimFuncVal,
     Pair,
-    PairMode,
     Symbol,
     SymbolMode,
     Val,
@@ -64,22 +60,9 @@ pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
-    map.insert(symbol(CALL), func_call_mode());
+    map.insert(symbol(CALL), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref));
     map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
     FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
-}
-
-fn func_call_mode() -> Option<Mode> {
-    let symbol_literal = FuncMode::symbol_mode(SymbolMode::Literal);
-    let form_ref = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref);
-    Some(Mode::Comp(Box::new(CompMode {
-        pair: Some(PairMode {
-            first: symbol_literal.clone(),
-            second: FuncMode::change_mode(symbol_literal.clone(), form_ref.clone()),
-        }),
-        change: Some(ChangeMode { from: symbol_literal, to: form_ref }),
-        ..CompMode::from(FuncMode::default_uni_mode())
-    })))
 }
 
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
@@ -88,26 +71,21 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     };
     let (ctx_name, input_name, body) = match map_remove(&mut map, CALL) {
         Val::Unit(_) => (Some(Symbol::default()), Symbol::default(), Val::default()),
-        Val::Pair(ctx_change) => {
-            let ctx_change = Pair::from(ctx_change);
-            let Val::Symbol(ctx) = ctx_change.first else {
-                return None;
-            };
-            let Val::Change(change) = ctx_change.second else {
-                return None;
-            };
-            let change = Change::from(change);
-            let Val::Symbol(input) = change.from else {
-                return None;
-            };
-            (Some(ctx), input, change.to)
-        }
-        Val::Change(change) => {
-            let change = Change::from(change);
-            let Val::Symbol(input) = change.from else {
-                return None;
-            };
-            (None, input, change.to)
+        Val::Pair(names_body) => {
+            let names_body = Pair::from(names_body);
+            match names_body.first {
+                Val::Pair(ctx_input) => {
+                    let Val::Symbol(ctx) = &ctx_input.first else {
+                        return None;
+                    };
+                    let Val::Symbol(input) = &ctx_input.second else {
+                        return None;
+                    };
+                    (Some(ctx.clone()), input.clone(), names_body.second)
+                }
+                Val::Symbol(input) => (None, input, names_body.second),
+                _ => return None,
+            }
         }
         _ => return None,
     };

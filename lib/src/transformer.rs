@@ -2,8 +2,6 @@ use std::ops::Deref;
 
 use crate::{
     CallVal,
-    ChangeVal,
-    EitherVal,
     ListVal,
     MapVal,
     PairVal,
@@ -48,12 +46,6 @@ pub(crate) trait ByVal<Output>: Transformer<Val, Output> {
     where Ctx: CtxMeta<'a>;
 
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Output
-    where Ctx: CtxMeta<'a>;
-
-    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Output
-    where Ctx: CtxMeta<'a>;
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Output
     where Ctx: CtxMeta<'a>;
 
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Output

@@ -1,7 +1,6 @@
 use crate::{
     Byte,
     Call,
-    Change,
     FuncMode,
     Int,
     List,
@@ -240,14 +239,14 @@ where Ctx: CtxMeta<'a> {
     };
     let pair = Pair::from(pair);
     let iterable = EVAL.transform(ctx.reborrow(), pair.first);
-    let Val::Change(name_body) = pair.second else {
+    let Val::Pair(name_body) = pair.second else {
         return Val::default();
     };
-    let name_body = Change::from(name_body);
-    let Val::Symbol(name) = name_body.from else {
+    let name_body = Pair::from(name_body);
+    let Val::Symbol(name) = name_body.first else {
         return Val::default();
     };
-    let body = name_body.to;
+    let body = name_body.second;
     match iterable {
         Val::Int(i) => {
             let i = Int::from(i);

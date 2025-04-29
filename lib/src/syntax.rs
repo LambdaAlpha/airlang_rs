@@ -43,9 +43,6 @@ pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 
 pub(crate) const PAIR: &str = ":";
-pub(crate) const EITHER_THIS: &str = "this";
-pub(crate) const EITHER_THAT: &str = "that";
-pub(crate) const CHANGE: &str = "->";
 pub(crate) const CALL: &str = ";";
 
 pub(crate) fn is_delimiter(c: char) -> bool {
@@ -65,7 +62,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn ambiguous(s: &str) -> bool {
-    matches!(s, UNIT | TRUE | FALSE | PAIR | CHANGE | CALL)
+    matches!(s, UNIT | TRUE | FALSE | PAIR | CALL)
 }
 
 pub(crate) mod pub1;

@@ -70,14 +70,6 @@ call ctx two
 -----
 ;(a b)
 =====
-change ctx
------
-->(a b c d e)
-=====
-change ctx two
------
-->(a b)
-=====
 2 ctx
 -----
 2(a b c)
@@ -133,10 +125,6 @@ tag empty ctx
 tag struct pair
 -----
 :(#t(a))
-=====
-tag struct change
------
-->(#t(a))
 =====
 tag list
 -----

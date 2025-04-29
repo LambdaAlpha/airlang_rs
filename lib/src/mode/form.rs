@@ -1,7 +1,5 @@
 use crate::{
     CallVal,
-    ChangeVal,
-    EitherVal,
     PairVal,
     SymbolMode,
     core::FormCore,
@@ -49,16 +47,6 @@ impl ByVal<Val> for Form {
     fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
     where Ctx: CtxMeta<'a> {
         FormCore::transform_pair(self, self, ctx, pair)
-    }
-
-    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        FormCore::transform_either(self, self, ctx, either)
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        FormCore::transform_change(self, self, ctx, change)
     }
 
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val

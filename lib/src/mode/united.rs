@@ -2,9 +2,7 @@ use const_format::concatcp;
 
 use crate::{
     CallVal,
-    ChangeVal,
     CodeMode,
-    EitherVal,
     ListVal,
     MapVal,
     PairVal,
@@ -75,22 +73,6 @@ impl ByVal<Val> for UniMode {
         match self.code {
             CodeMode::Form => Form::new(self.symbol).transform_pair(ctx, pair),
             CodeMode::Eval => Eval::new(self.symbol).transform_pair(ctx, pair),
-        }
-    }
-
-    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_either(ctx, either),
-            CodeMode::Eval => Eval::new(self.symbol).transform_either(ctx, either),
-        }
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self.code {
-            CodeMode::Form => Form::new(self.symbol).transform_change(ctx, change),
-            CodeMode::Eval => Eval::new(self.symbol).transform_change(ctx, change),
         }
     }
 

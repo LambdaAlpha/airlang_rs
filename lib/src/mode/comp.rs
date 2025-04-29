@@ -1,7 +1,5 @@
 use crate::{
     CallVal,
-    ChangeVal,
-    EitherVal,
     ListMode,
     ListVal,
     MapMode,
@@ -15,8 +13,6 @@ use crate::{
     ctx::ref1::CtxMeta,
     mode::{
         call::CallMode,
-        change::ChangeMode,
-        either::EitherMode,
         symbol::SymbolMode,
     },
     transformer::{
@@ -29,8 +25,6 @@ use crate::{
 pub struct CompMode {
     pub symbol: Option<SymbolMode>,
     pub pair: Option<PairMode>,
-    pub either: Option<EitherMode>,
-    pub change: Option<ChangeMode>,
     pub call: Option<CallMode>,
     pub list: Option<ListMode>,
     pub map: Option<MapMode>,
@@ -59,16 +53,6 @@ impl ByVal<Val> for CompMode {
         self.pair.transform(ctx, pair)
     }
 
-    fn transform_either<'a, Ctx>(&self, ctx: Ctx, either: EitherVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.either.transform(ctx, either)
-    }
-
-    fn transform_change<'a, Ctx>(&self, ctx: Ctx, change: ChangeVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.change.transform(ctx, change)
-    }
-
     fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
     where Ctx: CtxMeta<'a> {
         self.call.transform(ctx, call)
@@ -88,21 +72,11 @@ impl ByVal<Val> for CompMode {
 impl From<Option<UniMode>> for CompMode {
     fn from(mode: Option<UniMode>) -> Self {
         match mode {
-            None => Self {
-                symbol: None,
-                pair: None,
-                either: None,
-                call: None,
-                change: None,
-                list: None,
-                map: None,
-            },
+            None => Self { symbol: None, pair: None, call: None, list: None, map: None },
             Some(mode) => Self {
                 symbol: Some(SymbolMode::from(mode)),
                 pair: Some(PairMode::from(mode)),
-                either: Some(EitherMode::from(mode)),
                 call: Some(CallMode::from(mode)),
-                change: Some(ChangeMode::from(mode)),
                 list: Some(ListMode::from(mode)),
                 map: Some(MapMode::from(mode)),
             },

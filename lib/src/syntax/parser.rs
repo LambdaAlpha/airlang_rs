@@ -52,11 +52,9 @@ use winnow::{
 };
 
 use crate::{
-    Either,
     bit::Bit,
     byte::Byte,
     call::Call,
-    change::Change,
     int::Int,
     list::List,
     map::Map,
@@ -68,9 +66,6 @@ use crate::{
         ARITY_3,
         BYTE,
         CALL,
-        CHANGE,
-        EITHER_THAT,
-        EITHER_THIS,
         FALSE,
         INLINE_COMMENT,
         INT,
@@ -112,8 +107,6 @@ pub(crate) trait ParseRepr:
     + From<Number>
     + From<Byte>
     + From<Pair<Self, Self>>
-    + From<Either<Self, Self>>
-    + From<Change<Self, Self>>
     + From<Call<Self, Self>>
     + From<List<Self>>
     + Eq
@@ -183,7 +176,6 @@ enum Arity {
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Struct {
     Pair,
-    Change,
     Call,
 }
 
@@ -352,10 +344,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
-            EITHER_THIS => either_this(ctx).parse_next(i),
-            EITHER_THAT => either_that(ctx).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
-            CHANGE => scope(ctx.esc_struct(Struct::Change)).parse_next(i),
             CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
             LEFT => scope(ctx.esc_direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.esc_direction(Direction::Right)).parse_next(i),
@@ -444,7 +433,6 @@ fn compose_one<T: ParseRepr>(ctx: ParseCtx, token: Token<T>) -> T {
 fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
     match ctx.struct1 {
         Struct::Pair => T::from(Pair::new(left, right)),
-        Struct::Change => T::from(Change::new(left, right)),
         Struct::Call => T::from(Call::new(left, right)),
     }
 }
@@ -493,7 +481,6 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let middle = match middle {
         Token::Unquote(s) => match &*s {
             PAIR => return T::from(Pair::new(left, right)),
-            CHANGE => return T::from(Change::new(left, right)),
             CALL => return T::from(Call::new(left, right)),
             _ => T::from(s),
         },
@@ -502,14 +489,6 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let pair = Pair::new(left, right);
     let pair = T::from(pair);
     compose_two(ctx, middle, pair)
-}
-
-fn either_this<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Either::This(t)))
-}
-
-fn either_that<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scope(ctx).map(|t| T::from(Either::That(t)))
 }
 
 fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>

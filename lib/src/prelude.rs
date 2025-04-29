@@ -39,10 +39,8 @@ use crate::{
         bit::BitPrelude,
         byte::BytePrelude,
         call::CallPrelude,
-        change::ChangePrelude,
         ctrl::CtrlPrelude,
         ctx::CtxPrelude,
-        either::EitherPrelude,
         extension::ExtPrelude,
         func::FuncPrelude,
         int::IntPrelude,
@@ -81,8 +79,6 @@ pub(crate) struct AllPrelude {
     pub(crate) number: NumberPrelude,
     pub(crate) byte: BytePrelude,
     pub(crate) pair: PairPrelude,
-    pub(crate) either: EitherPrelude,
-    pub(crate) change: ChangePrelude,
     pub(crate) call: CallPrelude,
     pub(crate) list: ListPrelude,
     pub(crate) map: MapPrelude,
@@ -105,8 +101,6 @@ impl Prelude for AllPrelude {
         self.number.put(m);
         self.byte.put(m);
         self.pair.put(m);
-        self.either.put(m);
-        self.change.put(m);
         self.call.put(m);
         self.list.put(m);
         self.map.put(m);
@@ -275,10 +269,6 @@ mod number;
 mod byte;
 
 mod pair;
-
-mod either;
-
-mod change;
 
 mod call;
 

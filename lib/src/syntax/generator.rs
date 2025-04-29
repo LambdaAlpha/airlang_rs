@@ -7,11 +7,9 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use crate::{
-    Either,
     bit::Bit,
     byte::Byte,
     call::Call,
-    change::Change,
     int::Int,
     list::List,
     map::Map,
@@ -21,9 +19,6 @@ use crate::{
     syntax::{
         BYTE,
         CALL,
-        CHANGE,
-        EITHER_THAT,
-        EITHER_THIS,
         FALSE,
         LIST_LEFT,
         LIST_RIGHT,
@@ -55,8 +50,6 @@ pub(crate) enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
-    Either(Box<Either<GenRepr<'a>, GenRepr<'a>>>),
-    Change(Box<Change<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
@@ -128,8 +121,6 @@ fn gen1(ctx: GenCtx, s: &mut String, repr: GenRepr) {
         GenRepr::Number(number) => gen_number(ctx, s, number),
         GenRepr::Byte(byte) => gen_byte(ctx, s, byte),
         GenRepr::Pair(pair) => gen_pair(ctx, s, *pair),
-        GenRepr::Either(either) => gen_either(ctx, s, *either),
-        GenRepr::Change(change) => gen_change(ctx, s, *change),
         GenRepr::Call(call) => gen_call(ctx, s, *call),
         GenRepr::List(list) => gen_list(ctx, s, list),
         GenRepr::Map(map) => gen_map(ctx, s, map),
@@ -266,21 +257,6 @@ fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
     gen1(ctx, s, pair.second);
 }
 
-fn gen_either(ctx: GenCtx, s: &mut String, either: Either<GenRepr, GenRepr>) {
-    match either {
-        Either::This(this) => prefixed(ctx, s, EITHER_THIS, |ctx, s| gen1(ctx, s, this)),
-        Either::That(that) => prefixed(ctx, s, EITHER_THAT, |ctx, s| gen1(ctx, s, that)),
-    }
-}
-
-fn gen_change(ctx: GenCtx, s: &mut String, change: Change<GenRepr, GenRepr>) {
-    gen_scope_if_need(ctx, s, change.from);
-    s.push(' ');
-    s.push_str(CHANGE);
-    s.push(' ');
-    gen1(ctx, s, change.to);
-}
-
 fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
     if let GenRepr::Pair(pair) = call.input {
         gen_scope_if_need(ctx, s, pair.first);
@@ -310,7 +286,7 @@ fn gen_scope(ctx: GenCtx, s: &mut String, repr: GenRepr) {
 }
 
 fn is_composite(repr: &GenRepr) -> bool {
-    matches!(repr, GenRepr::Pair(_) | GenRepr::Change(_) | GenRepr::Call(_))
+    matches!(repr, GenRepr::Pair(_) | GenRepr::Call(_))
 }
 
 fn gen_list(mut ctx: GenCtx, s: &mut String, mut list: List<GenRepr>) {

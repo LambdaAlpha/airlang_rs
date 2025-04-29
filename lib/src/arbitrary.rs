@@ -22,11 +22,8 @@ use rand::{
 use crate::{
     Call,
     CallMode,
-    Change,
     ConstStaticCompFunc,
     ConstStaticCompFuncVal,
-    Either,
-    EitherMode,
     FreeCellCompFunc,
     FreeCellCompFuncVal,
     FreeStaticCompFunc,
@@ -41,6 +38,7 @@ use crate::{
     ValExt,
     bit::Bit,
     byte::Byte,
+    change::Change,
     ctx::{
         Ctx,
         map::{
@@ -49,6 +47,7 @@ use crate::{
             VarAccess,
         },
     },
+    either::Either,
     extension::UnitExt,
     func::{
         comp::Composite,
@@ -60,7 +59,6 @@ use crate::{
     list::List,
     map::Map,
     mode::{
-        change::ChangeMode,
         comp::CompMode,
         list::ListMode,
         map::MapMode,
@@ -104,8 +102,6 @@ impl Arbitrary for Val {
             weight, // number
             weight, // byte
             1,      // pair
-            1,      // either
-            1,      // change
             1,      // call
             1,      // list
             1,      // map
@@ -125,14 +121,12 @@ impl Arbitrary for Val {
             5 => Val::Number(Number::any(rng, new_depth).into()),
             6 => Val::Byte(Byte::any(rng, new_depth).into()),
             7 => Val::Pair(Pair::<Val, Val>::any(rng, new_depth).into()),
-            8 => Val::Either(Either::<Val, Val>::any(rng, new_depth).into()),
-            9 => Val::Change(Change::<Val, Val>::any(rng, new_depth).into()),
-            10 => Val::Call(Call::<Val, Val>::any(rng, new_depth).into()),
-            11 => Val::List(List::<Val>::any(rng, new_depth).into()),
-            12 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
-            13 => Val::Ctx(Ctx::any(rng, new_depth).into()),
-            14 => Val::Func(FuncVal::any(rng, new_depth)),
-            15 => Val::Ext(Arbitrary::any(rng, new_depth)),
+            8 => Val::Call(Call::<Val, Val>::any(rng, new_depth).into()),
+            9 => Val::List(List::<Val>::any(rng, new_depth).into()),
+            10 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
+            11 => Val::Ctx(Ctx::any(rng, new_depth).into()),
+            12 => Val::Func(FuncVal::any(rng, new_depth)),
+            13 => Val::Ext(Arbitrary::any(rng, new_depth)),
             _ => unreachable!(),
         }
     }
@@ -345,12 +339,10 @@ impl Arbitrary for CompMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
-        let either = Arbitrary::any(rng, depth);
-        let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, either, change, call, list, map }
+        CompMode { symbol, pair, call, list, map }
     }
 }
 
@@ -360,24 +352,6 @@ impl Arbitrary for PairMode {
         let first = Arbitrary::any(rng, new_depth);
         let second = Arbitrary::any(rng, new_depth);
         PairMode { first, second }
-    }
-}
-
-impl Arbitrary for EitherMode {
-    fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let this = Arbitrary::any(rng, new_depth);
-        let that = Arbitrary::any(rng, new_depth);
-        EitherMode { this, that }
-    }
-}
-
-impl Arbitrary for ChangeMode {
-    fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let from = Arbitrary::any(rng, new_depth);
-        let to = Arbitrary::any(rng, new_depth);
-        ChangeMode { from, to }
     }
 }
 
@@ -415,12 +389,10 @@ impl Arbitrary for PrimMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
-        let either = Arbitrary::any(rng, depth);
-        let change = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, either, change, call, list, map }
+        PrimMode { symbol, pair, call, list, map }
     }
 }
 

@@ -6,12 +6,8 @@ use std::{
 use crate::{
     Call,
     CallVal,
-    Change,
-    ChangeVal,
     ConstCtx,
     Ctx,
-    Either,
-    EitherVal,
     FuncVal,
     List,
     ListVal,
@@ -53,8 +49,6 @@ impl FormCore {
         match input {
             Val::Symbol(symbol) => t.transform_symbol(ctx, symbol),
             Val::Pair(pair) => t.transform_pair(ctx, pair),
-            Val::Either(either) => t.transform_either(ctx, either),
-            Val::Change(change) => t.transform_change(ctx, change),
             Val::Call(call) => t.transform_call(ctx, call),
             Val::List(list) => t.transform_list(ctx, list),
             Val::Map(map) => t.transform_map(ctx, map),
@@ -89,34 +83,6 @@ impl FormCore {
         let first = first.transform(ctx.reborrow(), pair.first);
         let second = second.transform(ctx, pair.second);
         Val::Pair(Pair::new(first, second).into())
-    }
-
-    pub(crate) fn transform_either<'a, Ctx, This, That>(
-        this: &This, that: &That, ctx: Ctx, either: EitherVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        This: Transformer<Val, Val>,
-        That: Transformer<Val, Val>, {
-        let either = Either::from(either);
-        let either = match either {
-            Either::This(v) => Either::This(this.transform(ctx, v)),
-            Either::That(v) => Either::That(that.transform(ctx, v)),
-        };
-        Val::Either(either.into())
-    }
-
-    pub(crate) fn transform_change<'a, Ctx, From, To>(
-        from: &From, to: &To, mut ctx: Ctx, change: ChangeVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        From: Transformer<Val, Val>,
-        To: Transformer<Val, Val>, {
-        let change = Change::from(change);
-        let from = from.transform(ctx.reborrow(), change.from);
-        let to = to.transform(ctx, change.to);
-        Val::Change(Change::new(from, to).into())
     }
 
     pub(crate) fn transform_call<'a, Ctx, Func, Input>(

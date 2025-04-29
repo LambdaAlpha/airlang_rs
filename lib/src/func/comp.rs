@@ -1,11 +1,11 @@
 use std::mem::take;
 
 use crate::{
-    Change,
     Ctx,
     CtxError,
     CtxVal,
     MutCtx,
+    Pair,
     Symbol,
     Val,
     ctx::map::{
@@ -67,6 +67,6 @@ impl Composite {
     pub(crate) fn func_call(&self) -> Val {
         let input = Val::Symbol(self.input_name.clone());
         let output = self.body.clone();
-        Val::Change(Change::new(input, output).into())
+        Val::Pair(Pair::new(input, output).into())
     }
 }

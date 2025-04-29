@@ -7,14 +7,12 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use crate::{
-    Either,
     bit::Bit,
     int::Int,
     map::Map,
     number::Number,
     symbol::Symbol,
     syntax::{
-        ChangeRepr,
         generate_compact,
         generate_pretty,
         generate_symbol,
@@ -45,10 +43,6 @@ mod number;
 mod byte;
 
 mod pair;
-
-mod either;
-
-mod change;
 
 mod call;
 
@@ -96,18 +90,6 @@ fn pair(first: Repr, second: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
 }
 
-fn this(repr: Repr) -> Repr {
-    Repr::Either(Box::new(Either::This(repr)))
-}
-
-fn that(repr: Repr) -> Repr {
-    Repr::Either(Box::new(Either::That(repr)))
-}
-
-fn change(from: Repr, to: Repr) -> Repr {
-    Repr::Change(Box::new(ChangeRepr::new(from, to)))
-}
-
 fn call(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(CallRepr::new(func, input)))
 }
@@ -126,12 +108,6 @@ fn tag_pair(tag: &str, v: Vec<Repr>) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(first, second)))
 }
 
-fn tag_change(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
-    let output = Repr::List(v.into());
-    Repr::Change(Box::new(ChangeRepr::new(func, output)))
-}
-
 fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
@@ -140,13 +116,6 @@ fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
 
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
-}
-
-fn infix_change(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Change(Box::new(ChangeRepr::new(
-        middle,
-        Repr::Pair(Box::new(PairRepr::new(left, right))),
-    )))
 }
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
@@ -304,26 +273,6 @@ fn test_parse_pair() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_pair() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/pair.air"), "test/pair.air")
-}
-
-#[test]
-fn test_parse_either() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/either.air"), "test/either.air", either::expected)
-}
-
-#[test]
-fn test_generate_either() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/either.air"), "test/either.air")
-}
-
-#[test]
-fn test_parse_change() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/change.air"), "test/change.air", change::expected)
-}
-
-#[test]
-fn test_generate_change() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/change.air"), "test/change.air")
 }
 
 #[test]

@@ -1,9 +1,7 @@
 use crate::{
     CallMode,
-    ChangeMode,
     CodeMode,
     CompMode,
-    EitherMode,
     List,
     ListMode,
     Map,
@@ -50,22 +48,6 @@ impl FuncMode {
     pub fn pair_mode(first: Option<Mode>, second: Option<Mode>) -> Option<Mode> {
         let mode = CompMode {
             pair: Some(PairMode { first, second }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn either_mode(this: Option<Mode>, that: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            either: Some(EitherMode { this, that }),
-            ..CompMode::from(Self::default_uni_mode())
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn change_mode(from: Option<Mode>, to: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode {
-            change: Some(ChangeMode { from, to }),
             ..CompMode::from(Self::default_uni_mode())
         };
         Some(Mode::Comp(Box::new(mode)))
