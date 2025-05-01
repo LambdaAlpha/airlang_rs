@@ -3,8 +3,11 @@ use std::str::FromStr;
 use num_bigint::BigInt;
 
 use crate::{
+    List,
+    ListVal,
     Map,
     Symbol,
+    Val,
     ctx::map::CtxValue,
     int::Int,
     prelude::{
@@ -15,46 +18,30 @@ use crate::{
 
 #[derive(Clone)]
 pub(crate) struct MetaPrelude {
-    pub(crate) version_major: Named<Int>,
-    pub(crate) version_minor: Named<Int>,
-    pub(crate) version_patch: Named<Int>,
+    pub(crate) version: Named<ListVal>,
 }
 
 impl Default for MetaPrelude {
     fn default() -> Self {
-        MetaPrelude {
-            version_major: version_major(),
-            version_minor: version_minor(),
-            version_patch: version_patch(),
-        }
+        MetaPrelude { version: version() }
     }
 }
 
 impl Prelude for MetaPrelude {
     fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.version_major.put(m);
-        self.version_minor.put(m);
-        self.version_patch.put(m);
+        self.version.put(m);
     }
 }
 
-fn version_major() -> Named<Int> {
+fn version() -> Named<ListVal> {
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
-    let id = "air.version_major";
-    let v = Int::new(BigInt::from_str(MAJOR).unwrap());
-    Named::new(id, v)
-}
-
-fn version_minor() -> Named<Int> {
     const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
-    let id = "air.version_minor";
-    let v = Int::new(BigInt::from_str(MINOR).unwrap());
-    Named::new(id, v)
-}
-
-fn version_patch() -> Named<Int> {
     const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
-    let id = "air.version_patch";
-    let v = Int::new(BigInt::from_str(PATCH).unwrap());
-    Named::new(id, v)
+    let id = "air.version";
+    let major = Val::Int(Int::new(BigInt::from_str(MAJOR).unwrap()).into());
+    let minor = Val::Int(Int::new(BigInt::from_str(MINOR).unwrap()).into());
+    let patch = Val::Int(Int::new(BigInt::from_str(PATCH).unwrap()).into());
+    let list = vec![major, minor, patch];
+    let list = List::from(list).into();
+    Named::new(id, list)
 }
