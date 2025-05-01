@@ -73,7 +73,8 @@ impl<T: Into<Val> + Clone> Named<T> {
     pub(crate) fn put(&self, ctx: MutCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
         let val = self.value.clone().into();
-        ctx.put(name, VarAccess::Assign, val).expect("the name of preludes should be unique");
+        let v = ctx.put(name, VarAccess::Assign, val).expect("names of preludes should be unique");
+        assert!(v.is_none(), "names of preludes should be unique");
     }
 }
 

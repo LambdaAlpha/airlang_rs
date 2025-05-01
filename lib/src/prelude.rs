@@ -144,7 +144,8 @@ impl<T: Into<Val> + Clone> Named<T> {
     pub(crate) fn put(&self, m: &mut Map<Symbol, CtxValue>) {
         let name = Symbol::from_str(self.name);
         let value = CtxValue::new(self.value.clone().into());
-        m.insert(name, value);
+        let v = m.insert(name, value);
+        assert!(v.is_none(), "names of preludes should be unique");
     }
 }
 
