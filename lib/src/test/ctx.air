@@ -26,7 +26,7 @@ read static
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {b : v . .static}},
+    a = context ; {variables : {(b . static) : v}},
     v == a | read ; .b
 ]
 -----
@@ -60,7 +60,7 @@ move static
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {b : v . .static}},
+    a = context ; {variables : {(b . static) : v}},
     (. == a | move ; .b) and (not ; a | is_null ; .b)
 ]
 -----
@@ -70,7 +70,7 @@ move static mutable
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {b : v . {.static, .access : .mutable}}},
+    a = context ; {variables : {(b . {static, access : mutable}) : v}},
     (. == a | move ; .b) and (not ; a | is_null ; .b)
 ]
 -----
@@ -80,7 +80,7 @@ move static const
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {b : v . {.static, .access : .constant}}},
+    a = context ; {variables : {(b . {static, access : constant}) : v}},
     (. == a | move ; .b) and (not ; a | is_null ; .b)
 ]
 -----
@@ -340,43 +340,43 @@ false
 =====
 is_static true
 -----
-do [c = context ; {variables : {a : (any ; .) . .static}}, c | is_static ; .a]
+do [c = context ; {variables : {(a . static) : any ; .}}, c | is_static ; .a]
 -----
 true
 =====
 is_static false
 -----
-do [c = context ; {variables : {a : (any ; .) . {}}}, c | is_static ; .a]
+do [c = context ; {variables : {(a . {}) : any ; .}}, c | is_static ; .a]
 -----
 false
 =====
 static init true
 -----
-do [c = context ; {variables : {a : (any ; .) . {.static : true}}}, c | is_static ; .a]
+do [c = context ; {variables : {(a . {static : true}) : any ; .}}, c | is_static ; .a]
 -----
 true
 =====
 static init false
 -----
-do [c = context ; {variables : {a : (any ; .) . {.static : false}}}, c | is_static ; .a]
+do [c = context ; {variables : {(a . {static : false}) : any ; .}}, c | is_static ; .a]
 -----
 false
 =====
 static move
 -----
-do [c = context ; {variables : {a : 1 . .static}}, c | .^a, c | .a]
+do [c = context ; {variables : {(a . static) : 1}}, c | .^a, c | .a]
 -----
 1
 =====
 static move reverse
 -----
-do [c = context ; {reverse : true, variables : {a : 1 . .static}}, c | .^a, c | .a]
+do [c = context ; {reverse : true, variables : {(a . static) : 1}}, c | .^a, c | .a]
 -----
 1
 =====
 static = to static
 -----
-do [c = context ; {variables : {a : 1 . .static}}, c | .a = 2, c | .a]
+do [c = context ; {variables : {(a . static) : 1}}, c | .a = 2, c | .a]
 -----
 2
 =====
@@ -400,19 +400,19 @@ true
 =====
 reverse set_variable_access constant mutable
 -----
-do [c = context ; {reverse : true, variables : {a : (any ; .) . .constant}}, c | do ; [.a set_variable_access .mutable, variable_access .a]]
+do [c = context ; {reverse : true, variables : {(a . constant) : any ; .}}, c | do ; [.a set_variable_access .mutable, variable_access .a]]
 -----
 mutable
 =====
 reverse set_variable_access mutable constant
 -----
-do [c = context ; {reverse : true, variables : {a : (any ; .) . .mutable}}, c | do ; [.a set_variable_access .constant, variable_access .a]]
+do [c = context ; {reverse : true, variables : {(a . mutable) : any ; .}}, c | do ; [.a set_variable_access .constant, variable_access .a]]
 -----
 mutable
 =====
 reverse move constant
 -----
-do [c = context ; {reverse : true, variables : {a : 1 . .constant}}, c | .^a]
+do [c = context ; {reverse : true, variables : {(a . constant) : 1}}, c | .^a]
 -----
 1
 =====
@@ -559,9 +559,9 @@ context.represent ; context ; {}
 =====
 represent else
 -----
-context.represent ; context ; {variables : {a : 1 . .mutable}}
+context.represent ; context ; {variables : {(a . mutable) : 1}}
 -----
-{variables : {a : 1 . mutable}}
+{variables : {(a . mutable) : 1}}
 =====
 represent non-recursive
 -----

@@ -2,6 +2,7 @@ use crate::{
     Bit,
     Call,
     CallVal,
+    CodeMode,
     Ctx,
     CtxVal,
     FuncMode,
@@ -15,7 +16,6 @@ use crate::{
     PairVal,
     Symbol,
     SymbolMode,
-    Unit,
     Val,
     ctx::{
         map::{
@@ -49,7 +49,7 @@ pub(crate) fn parse_mode() -> Option<Mode> {
         symbol(VARIABLES),
         FuncMode::map_mode(
             Map::default(),
-            FuncMode::symbol_mode(SymbolMode::Literal),
+            FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
             FuncMode::default_mode(),
         ),
     );
@@ -65,7 +65,7 @@ pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
         Val::Map(map) => Map::from(map),
         _ => return None,
     };
-    let variables = parse_ctx_map(variables)?;
+    let variables = parse_variables(variables)?;
     let reverse = match map_remove(&mut map, REVERSE) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
@@ -81,32 +81,37 @@ pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
     Some(ctx.into())
 }
 
-fn parse_ctx_map(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
+fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
     map.into_iter()
-        .map(|(key, val)| {
-            let Val::Symbol(name) = key else {
-                return None;
-            };
-            let ctx_value = parse_ctx_value(val)?;
-            Some((name, ctx_value))
+        .map(|(binding, val)| {
+            let binding = parse_binding(binding)?;
+            let ctx_value =
+                CtxValue { access: binding.extra.access, static1: binding.extra.static1, val };
+            Some((binding.name, ctx_value))
         })
         .collect()
 }
 
-fn parse_ctx_value(val: Val) -> Option<CtxValue> {
-    let Val::Call(call) = val else {
-        return Some(CtxValue::new(val));
-    };
-    if !call.func.is_unit() {
-        return Some(CtxValue::new(Val::Call(call)));
+fn parse_binding(val: Val) -> Option<Binding> {
+    match val {
+        Val::Symbol(name) => Some(Binding { name, extra: Extra::default() }),
+        Val::Call(call) => {
+            if !call.func.is_unit() {
+                return None;
+            }
+            let call = Call::from(call);
+            let Val::Pair(pair) = call.input else {
+                return None;
+            };
+            let pair = Pair::from(pair);
+            let Val::Symbol(name) = pair.first else {
+                return None;
+            };
+            let extra = parse_extra(pair.second, Extra::default())?;
+            Some(Binding { name, extra })
+        }
+        _ => None,
     }
-    let call = Call::from(call);
-    let Val::Pair(pair) = call.input else {
-        return None;
-    };
-    let pair = Pair::from(pair);
-    let extra = parse_extra(pair.second, Extra::default())?;
-    Some(CtxValue { val: pair.first, access: extra.access, static1: extra.static1 })
 }
 
 fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
@@ -173,31 +178,35 @@ fn generate_ctx_map(ctx_map: CtxMap) -> Option<Val> {
         .unwrap()
         .into_iter()
         .map(|(k, v)| {
-            let k = Val::Symbol(k);
-            let v = generate_ctx_value(v);
+            let extra = Extra { access: v.access, static1: v.static1 };
+            let k = generate_binding(k, extra);
+            let v = v.val;
             (k, v)
         })
         .collect();
     Some(Val::Map(map.into()))
 }
 
-fn generate_ctx_value(ctx_value: CtxValue) -> Val {
-    let use_normal_form = 'a: {
-        if let Val::Call(call) = &ctx_value.val {
-            if let Val::Unit(_) = &call.func {
-                break 'a true;
-            }
-        }
-        !matches!(ctx_value.access, VarAccess::Assign)
-    };
-    if use_normal_form {
-        let func = Val::Unit(Unit);
-        let access = generate_var_access(ctx_value.access);
-        let pair = Val::Pair(Pair::new(ctx_value.val, Val::Symbol(access)).into());
-        Val::Call(Call::new(func, pair).into())
-    } else {
-        ctx_value.val
+fn generate_binding(name: Symbol, extra: Extra) -> Val {
+    if extra == Extra::default() {
+        return Val::Symbol(name);
     }
+    let extra = generate_extra(extra);
+    let pair = Pair::new(Val::Symbol(name), extra);
+    Val::Call(Call::new(Val::default(), Val::Pair(pair.into())).into())
+}
+
+fn generate_extra(extra: Extra) -> Val {
+    if !extra.static1 {
+        return Val::Symbol(generate_var_access(extra.access));
+    }
+    if extra.access == VarAccess::default() {
+        return symbol(STATIC);
+    }
+    let mut map = Map::default();
+    map.insert(symbol(STATIC), Val::default());
+    map.insert(symbol(ACCESS), Val::Symbol(generate_var_access(extra.access)));
+    Val::Map(map.into())
 }
 
 pub(crate) fn generate_var_access(access: VarAccess) -> Symbol {
@@ -209,12 +218,12 @@ pub(crate) fn generate_var_access(access: VarAccess) -> Symbol {
     Symbol::from_str(access)
 }
 
-pub(crate) struct Binding<T> {
-    name: T,
+pub(crate) struct Binding {
+    name: Symbol,
     extra: Extra,
 }
 
-#[derive(Default, Copy, Clone)]
+#[derive(Default, Copy, Clone, PartialEq, Eq)]
 pub(crate) struct Extra {
     pub(crate) access: VarAccess,
     pub(crate) static1: bool,
@@ -227,7 +236,7 @@ pub(crate) struct PatternCtx {
 }
 
 pub(crate) enum Pattern {
-    Any(Binding<Symbol>),
+    Any(Binding),
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
     List(List<Pattern>),
@@ -316,7 +325,7 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
     }
 }
 
-fn assign_any(ctx: MutFnCtx, binding: Binding<Symbol>, val: Val) -> Val {
+fn assign_any(ctx: MutFnCtx, binding: Binding, val: Val) -> Val {
     let ctx_value = CtxValue { val, access: binding.extra.access, static1: false };
     let Ok(ctx) = ctx.get_variables_mut() else {
         return Val::default();
