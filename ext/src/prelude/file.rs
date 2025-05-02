@@ -2,7 +2,7 @@ use airlang::{
     ConstFnCtx,
     FuncMode,
     FuncVal,
-    MutCtx,
+    PreludeCtx,
     Text,
     Val,
 };
@@ -24,8 +24,8 @@ impl Default for FilePrelude {
 }
 
 impl Prelude for FilePrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.read_to_text.put(ctx.reborrow());
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.read_to_text.put(ctx);
     }
 }
 

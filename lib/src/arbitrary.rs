@@ -420,17 +420,14 @@ impl Arbitrary for Mode {
 impl Arbitrary for FuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         if rng.random() {
-            let prelude = PRELUDE.with(|prelude| {
-                let mut m = Map::default();
-                prelude.put(&mut m);
-                m
+            let prelude: Map<Symbol, Val> = PRELUDE.with(|prelude| {
+                let mut ctx = Map::default();
+                prelude.put(&mut ctx);
+                ctx
             });
-            let func = prelude
-                .into_values()
-                .filter(|v| matches!(v.val, Val::Func(_)))
-                .choose(rng)
-                .unwrap();
-            let Val::Func(func) = func.val else { unreachable!() };
+            let func =
+                prelude.into_values().filter(|v| matches!(v, Val::Func(_))).choose(rng).unwrap();
+            let Val::Func(func) = func else { unreachable!() };
             func
         } else {
             match rng.random_range(0 .. 7) {

@@ -4,18 +4,14 @@ use crate::{
     FuncMode,
     FuncVal,
     Int,
-    Map,
     MutFnCtx,
     Pair,
-    Symbol,
     Val,
-    ctx::{
-        main::MainCtx,
-        map::CtxValue,
-    },
+    ctx::main::MainCtx,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
@@ -37,10 +33,10 @@ impl Default for BytePrelude {
 }
 
 impl Prelude for BytePrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.length.put(m);
-        self.push.put(m);
-        self.join.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.length.put(ctx);
+        self.push.put(ctx);
+        self.join.put(ctx);
     }
 }
 

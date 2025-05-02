@@ -4,7 +4,7 @@ use airlang::{
     CodeMode,
     FuncMode,
     FuncVal,
-    MutCtx,
+    PreludeCtx,
     SymbolMode,
     Val,
 };
@@ -26,8 +26,8 @@ impl Default for ProcessPrelude {
 }
 
 impl Prelude for ProcessPrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.call.put(ctx.reborrow());
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.call.put(ctx);
     }
 }
 

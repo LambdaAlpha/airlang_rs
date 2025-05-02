@@ -4,18 +4,16 @@ use crate::{
     ConstFnCtx,
     FuncMode,
     Int,
-    Map,
     Pair,
-    Symbol,
     ctx::{
         main::MainCtx,
-        map::CtxValue,
         mut1::MutFnCtx,
     },
     list::List,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_mut_fn,
         ref_pair_mode,
@@ -60,18 +58,18 @@ impl Default for ListPrelude {
 }
 
 impl Prelude for ListPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.length.put(m);
-        self.set.put(m);
-        self.set_many.put(m);
-        self.get.put(m);
-        self.insert.put(m);
-        self.insert_many.put(m);
-        self.remove.put(m);
-        self.push.put(m);
-        self.push_many.put(m);
-        self.pop.put(m);
-        self.clear.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.length.put(ctx);
+        self.set.put(ctx);
+        self.set_many.put(ctx);
+        self.get.put(ctx);
+        self.insert.put(ctx);
+        self.insert_many.put(ctx);
+        self.remove.put(ctx);
+        self.push.put(ctx);
+        self.push_many.put(ctx);
+        self.pop.put(ctx);
+        self.clear.put(ctx);
     }
 }
 

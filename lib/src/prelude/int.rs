@@ -1,13 +1,11 @@
 use crate::{
     FuncMode,
     Int,
-    Map,
-    Symbol,
-    ctx::map::CtxValue,
     pair::Pair,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_free_fn,
     },
     val::{
@@ -50,18 +48,18 @@ impl Default for IntPrelude {
 }
 
 impl Prelude for IntPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.add.put(m);
-        self.subtract.put(m);
-        self.multiply.put(m);
-        self.divide.put(m);
-        self.remainder.put(m);
-        self.divide_remainder.put(m);
-        self.less_than.put(m);
-        self.less_equal.put(m);
-        self.greater_than.put(m);
-        self.greater_equal.put(m);
-        self.less_greater.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.add.put(ctx);
+        self.subtract.put(ctx);
+        self.multiply.put(ctx);
+        self.divide.put(ctx);
+        self.remainder.put(ctx);
+        self.divide_remainder.put(ctx);
+        self.less_than.put(ctx);
+        self.less_equal.put(ctx);
+        self.greater_than.put(ctx);
+        self.greater_equal.put(ctx);
+        self.less_greater.put(ctx);
     }
 }
 

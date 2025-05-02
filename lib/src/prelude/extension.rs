@@ -1,12 +1,10 @@
 use crate::{
-    Map,
-    Symbol,
     ValExt,
-    ctx::map::CtxValue,
     extension::UnitExt,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
     },
 };
 
@@ -22,8 +20,8 @@ impl Default for ExtPrelude {
 }
 
 impl Prelude for ExtPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.unit.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.unit.put(ctx);
     }
 }
 

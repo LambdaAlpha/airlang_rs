@@ -7,7 +7,6 @@ use airlang::{
     VarAccess,
     parse,
 };
-use airlang_ext::init_ctx;
 
 const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";
@@ -49,7 +48,6 @@ fn generate_air_with_main() -> Result<AirCell, Box<dyn Error>> {
     let src = generate_import("/main/main.air");
     let src = parse(&src)?;
     let mut air = AirCell::default();
-    init_ctx(air.ctx_mut());
     let main = air.interpret(src);
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
     air.ctx_mut().put(main_name, VarAccess::Const, main)?;

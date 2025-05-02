@@ -1,7 +1,6 @@
 use crate::{
     CodeMode,
     FuncMode,
-    Map,
     SymbolMode,
     bit::Bit,
     ctx::{
@@ -12,10 +11,7 @@ use crate::{
         },
         free::FreeCtx,
         main::MainCtx,
-        map::{
-            CtxMapRef,
-            CtxValue,
-        },
+        map::CtxMapRef,
         mut1::{
             MutCtx,
             MutFnCtx,
@@ -39,12 +35,12 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         initial_ctx,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
     },
-    symbol::Symbol,
     transformer::Transformer,
     utils::val::symbol,
     val::{
@@ -102,25 +98,25 @@ impl Default for CtxPrelude {
 }
 
 impl Prelude for CtxPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.read.put(m);
-        self.move1.put(m);
-        self.assign.put(m);
-        self.set_variable_access.put(m);
-        self.get_variable_access.put(m);
-        self.is_null.put(m);
-        self.is_static.put(m);
-        self.is_reverse.put(m);
-        self.set_reverse.put(m);
-        self.get_ctx_access.put(m);
-        self.get_solver.put(m);
-        self.set_solver.put(m);
-        self.with_ctx.put(m);
-        self.ctx_in_ctx_out.put(m);
-        self.ctx_new.put(m);
-        self.ctx_repr.put(m);
-        self.ctx_prelude.put(m);
-        self.ctx_self.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.read.put(ctx);
+        self.move1.put(ctx);
+        self.assign.put(ctx);
+        self.set_variable_access.put(ctx);
+        self.get_variable_access.put(ctx);
+        self.is_null.put(ctx);
+        self.is_static.put(ctx);
+        self.is_reverse.put(ctx);
+        self.set_reverse.put(ctx);
+        self.get_ctx_access.put(ctx);
+        self.get_solver.put(ctx);
+        self.set_solver.put(ctx);
+        self.with_ctx.put(ctx);
+        self.ctx_in_ctx_out.put(ctx);
+        self.ctx_new.put(ctx);
+        self.ctx_repr.put(ctx);
+        self.ctx_prelude.put(ctx);
+        self.ctx_self.put(ctx);
     }
 }
 

@@ -2,18 +2,15 @@ use airlang::{
     AirCell,
     FuncMode,
     FuncVal,
-    MutCtx,
     MutFnCtx,
+    PreludeCtx,
     Val,
 };
 
-use crate::{
-    init_ctx,
-    prelude::{
-        Named,
-        Prelude,
-        named_mut_fn,
-    },
+use crate::prelude::{
+    Named,
+    Prelude,
+    named_mut_fn,
 };
 
 pub(crate) struct EvalPrelude {
@@ -27,8 +24,8 @@ impl Default for EvalPrelude {
 }
 
 impl Prelude for EvalPrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.reset.put(ctx.reborrow());
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.reset.put(ctx);
     }
 }
 
@@ -44,8 +41,6 @@ fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {
         eprintln!("Unable to reset context, context is immutable.");
         return Val::default();
     };
-    let mut initial_ctx = AirCell::initial_ctx();
-    init_ctx(MutCtx::new(&mut initial_ctx));
-    ctx.set(initial_ctx);
+    ctx.set(AirCell::initial_ctx());
     Val::default()
 }

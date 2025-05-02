@@ -5,11 +5,9 @@ use crate::{
     FuncMode,
     List,
     Map,
-    Symbol,
     bit::Bit,
     ctx::{
         main::MainCtx,
-        map::CtxValue,
         mut1::MutFnCtx,
     },
     int::Int,
@@ -17,6 +15,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
@@ -80,27 +79,27 @@ impl Default for MapPrelude {
 }
 
 impl Prelude for MapPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.length.put(m);
-        self.items.put(m);
-        self.into_items.put(m);
-        self.keys.put(m);
-        self.into_keys.put(m);
-        self.values.put(m);
-        self.into_values.put(m);
-        self.contains.put(m);
-        self.contains_all.put(m);
-        self.contains_any.put(m);
-        self.set.put(m);
-        self.set_many.put(m);
-        self.get.put(m);
-        self.get_many.put(m);
-        self.remove.put(m);
-        self.remove_many.put(m);
-        self.clear.put(m);
-        self.new_map.put(m);
-        self.new_set.put(m);
-        self.new_multiset.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.length.put(ctx);
+        self.items.put(ctx);
+        self.into_items.put(ctx);
+        self.keys.put(ctx);
+        self.into_keys.put(ctx);
+        self.values.put(ctx);
+        self.into_values.put(ctx);
+        self.contains.put(ctx);
+        self.contains_all.put(ctx);
+        self.contains_any.put(ctx);
+        self.set.put(ctx);
+        self.set_many.put(ctx);
+        self.get.put(ctx);
+        self.get_many.put(ctx);
+        self.remove.put(ctx);
+        self.remove_many.put(ctx);
+        self.clear.put(ctx);
+        self.new_map.put(ctx);
+        self.new_set.put(ctx);
+        self.new_multiset.put(ctx);
     }
 }
 

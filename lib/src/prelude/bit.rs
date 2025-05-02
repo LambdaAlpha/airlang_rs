@@ -1,11 +1,9 @@
 use crate::{
     FuncMode,
-    Map,
-    Symbol,
-    ctx::map::CtxValue,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_free_fn,
     },
     val::{
@@ -30,12 +28,12 @@ impl Default for BitPrelude {
 }
 
 impl Prelude for BitPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.not.put(m);
-        self.and.put(m);
-        self.or.put(m);
-        self.xor.put(m);
-        self.imply.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.not.put(ctx);
+        self.and.put(ctx);
+        self.or.put(ctx);
+        self.xor.put(ctx);
+        self.imply.put(ctx);
     }
 }
 

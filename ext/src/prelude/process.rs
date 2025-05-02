@@ -8,7 +8,7 @@ use airlang::{
     Int,
     List,
     Map,
-    MutCtx,
+    PreludeCtx,
     Symbol,
     SymbolMode,
     Text,
@@ -32,8 +32,8 @@ impl Default for ProcessPrelude {
 }
 
 impl Prelude for ProcessPrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.call.put(ctx.reborrow());
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.call.put(ctx);
     }
 }
 

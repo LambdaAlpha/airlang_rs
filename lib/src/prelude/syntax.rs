@@ -1,11 +1,9 @@
 use crate::{
     FuncMode,
-    Map,
-    Symbol,
-    ctx::map::CtxValue,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_free_fn,
     },
     text::Text,
@@ -28,9 +26,9 @@ impl Default for SyntaxPrelude {
 }
 
 impl Prelude for SyntaxPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.parse.put(m);
-        self.generate.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.parse.put(ctx);
+        self.generate.put(ctx);
     }
 }
 

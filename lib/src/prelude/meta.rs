@@ -5,14 +5,12 @@ use num_bigint::BigInt;
 use crate::{
     List,
     ListVal,
-    Map,
-    Symbol,
     Val,
-    ctx::map::CtxValue,
     int::Int,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
     },
 };
 
@@ -28,8 +26,8 @@ impl Default for MetaPrelude {
 }
 
 impl Prelude for MetaPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.version.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.version.put(ctx);
     }
 }
 

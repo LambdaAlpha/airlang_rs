@@ -1,8 +1,6 @@
-use crate::{
-    Map,
-    Symbol,
-    ctx::map::CtxValue,
-    prelude::Prelude,
+use crate::prelude::{
+    Prelude,
+    PreludeCtx,
 };
 
 #[derive(Clone)]
@@ -16,5 +14,5 @@ impl Default for NumberPrelude {
 }
 
 impl Prelude for NumberPrelude {
-    fn put(&self, _m: &mut Map<Symbol, CtxValue>) {}
+    fn put(&self, _ctx: &mut dyn PreludeCtx) {}
 }

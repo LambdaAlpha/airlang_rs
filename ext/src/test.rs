@@ -8,14 +8,14 @@ use airlang::{
     parse,
 };
 
-use crate::init_ctx;
+use crate::ExtPrelude;
 
 #[test]
 fn test_build_import() -> Result<(), Box<dyn Error>> {
     let src = generate_import("/src/test/build_import/case_1/main.air");
     let src = parse(&src)?;
+    AirCell::set_prelude_provider(Box::new(ExtPrelude::default()));
     let mut air = AirCell::default();
-    init_ctx(air.ctx_mut());
     let output = air.interpret(src);
     assert_eq!(output, Val::Int(Int::from(5).into()));
     Ok(())

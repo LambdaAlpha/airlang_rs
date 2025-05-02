@@ -75,6 +75,10 @@ pub use crate::{
     },
     number::Number,
     pair::Pair,
+    prelude::{
+        Prelude,
+        PreludeCtx,
+    },
     symbol::Symbol,
     text::Text,
     unit::Unit,
@@ -113,6 +117,7 @@ mod __ {}
 
 use crate::{
     prelude,
+    prelude::set_prelude_ext,
     syntax,
     syntax::{
         ParseError,
@@ -141,6 +146,11 @@ pub struct AirCell {
 impl AirCell {
     pub fn new(mode: Option<Mode>, ctx: Ctx) -> Self {
         Self { mode, ctx }
+    }
+
+    /// this method should be called before instantiating `AirCell` or calling `initial_ctx`
+    pub fn set_prelude_provider(prelude_provider: Box<dyn Prelude>) {
+        set_prelude_ext(prelude_provider);
     }
 
     pub fn initial_ctx() -> Ctx {

@@ -18,13 +18,13 @@ use airlang::{
     MutCellFnExt,
     MutCellPrimFunc,
     MutCellPrimFuncVal,
-    MutCtx,
     MutStaticFn,
     MutStaticPrimFunc,
     MutStaticPrimFuncVal,
+    Prelude,
+    PreludeCtx,
     Symbol,
     Val,
-    VarAccess,
 };
 
 use crate::prelude::{
@@ -34,27 +34,21 @@ use crate::prelude::{
     process::ProcessPrelude,
 };
 
-thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
-
 #[derive(Default)]
-pub(crate) struct AllPrelude {
+pub struct ExtPrelude {
     pub(crate) io: IoPrelude,
     pub(crate) file: FilePrelude,
     pub(crate) process: ProcessPrelude,
     pub(crate) build: BuildPrelude,
 }
 
-impl Prelude for AllPrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.io.put(ctx.reborrow());
-        self.file.put(ctx.reborrow());
-        self.process.put(ctx.reborrow());
-        self.build.put(ctx.reborrow());
+impl Prelude for ExtPrelude {
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.io.put(ctx);
+        self.file.put(ctx);
+        self.process.put(ctx);
+        self.build.put(ctx);
     }
-}
-
-pub(crate) trait Prelude {
-    fn put(&self, ctx: MutCtx);
 }
 
 #[derive(Clone)]
@@ -70,11 +64,10 @@ impl<T> Named<T> {
 }
 
 impl<T: Into<Val> + Clone> Named<T> {
-    pub(crate) fn put(&self, ctx: MutCtx) {
+    pub(crate) fn put(&self, ctx: &mut dyn PreludeCtx) {
         let name = unsafe { Symbol::from_str_unchecked(self.name) };
         let val = self.value.clone().into();
-        let v = ctx.put(name, VarAccess::Assign, val).expect("names of preludes should be unique");
-        assert!(v.is_none(), "names of preludes should be unique");
+        ctx.put(name, val);
     }
 }
 

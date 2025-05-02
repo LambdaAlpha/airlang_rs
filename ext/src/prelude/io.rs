@@ -8,8 +8,8 @@ use std::io::{
 use airlang::{
     FuncMode,
     FuncVal,
-    MutCtx,
     MutFnCtx,
+    PreludeCtx,
     Val,
 };
 
@@ -45,14 +45,14 @@ impl Default for IoPrelude {
 }
 
 impl Prelude for IoPrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.read_line.put(ctx.reborrow());
-        self.print.put(ctx.reborrow());
-        self.print_line.put(ctx.reborrow());
-        self.flush.put(ctx.reborrow());
-        self.error_print.put(ctx.reborrow());
-        self.error_print_line.put(ctx.reborrow());
-        self.error_flush.put(ctx.reborrow());
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.read_line.put(ctx);
+        self.print.put(ctx);
+        self.print_line.put(ctx);
+        self.flush.put(ctx);
+        self.error_print.put(ctx);
+        self.error_print_line.put(ctx);
+        self.error_flush.put(ctx);
     }
 }
 

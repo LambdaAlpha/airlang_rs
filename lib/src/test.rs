@@ -9,8 +9,9 @@ use crate::{
     FreeStaticPrimFuncVal,
     FuncMode,
     FuncVal,
+    Prelude,
+    PreludeCtx,
     Symbol,
-    ctx::map::VarAccess,
     func::free_static_prim::FreeStaticFn,
     parse,
     val::Val,
@@ -129,16 +130,24 @@ fn test_func() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
-    let mut air = AirCell::default();
-    let func_ext_name = Symbol::from_str("func_ext");
-    let func = FreeStaticPrimFunc::new_extension(
-        func_ext_name.clone(),
-        Rc::new(FuncExt),
-        FuncMode::default(),
-    );
-    let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
-    air.ctx_mut().put(func_ext_name, VarAccess::Const, func)?;
+    AirCell::set_prelude_provider(Box::new(TestExtPrelude));
+    let air = AirCell::default();
     test_interpret(air, include_str!("test/extension.air"), "test/extension.air")
+}
+
+struct TestExtPrelude;
+
+impl Prelude for TestExtPrelude {
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        let func_ext_name = Symbol::from_str("func_ext");
+        let func = FreeStaticPrimFunc::new_extension(
+            func_ext_name.clone(),
+            Rc::new(FuncExt),
+            FuncMode::default(),
+        );
+        let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
+        ctx.put(func_ext_name, func);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -23,16 +23,14 @@ use crate::{
     bit::Bit,
     ctx::{
         main::MainCtx,
-        map::{
-            CtxMapRef,
-            CtxValue,
-        },
+        map::CtxMapRef,
         ref1::CtxRef,
     },
     either::Either,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_free_fn,
         ref_mode,
@@ -72,10 +70,10 @@ impl Default for ValuePrelude {
 }
 
 impl Prelude for ValuePrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.any.put(m);
-        self.type1.put(m);
-        self.equal.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.any.put(ctx);
+        self.type1.put(ctx);
+        self.equal.put(ctx);
     }
 }
 

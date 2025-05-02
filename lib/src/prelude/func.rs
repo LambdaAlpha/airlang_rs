@@ -6,10 +6,7 @@ use crate::{
     Pair,
     SymbolMode,
     bit::Bit,
-    ctx::{
-        main::MainCtx,
-        map::CtxValue,
-    },
+    ctx::main::MainCtx,
     func::{
         FuncTrait,
         mode::ModeFunc,
@@ -22,7 +19,6 @@ use crate::{
             parse_mode,
         },
     },
-    map::Map,
     mode::{
         id::ID,
         repr::parse,
@@ -38,6 +34,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_free_fn,
         ref_pair_mode,
@@ -100,26 +97,26 @@ impl Default for FuncPrelude {
 }
 
 impl Prelude for FuncPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.mode_id.put(m);
-        self.mode_form_literal.put(m);
-        self.mode_form_ref.put(m);
-        self.mode_form_move.put(m);
-        self.mode_eval_literal.put(m);
-        self.mode_eval_ref.put(m);
-        self.mode_eval_move.put(m);
-        self.mode.put(m);
-        self.new.put(m);
-        self.repr.put(m);
-        self.ctx_access.put(m);
-        self.call_mode.put(m);
-        self.is_primitive.put(m);
-        self.is_extension.put(m);
-        self.is_cell.put(m);
-        self.is_mode.put(m);
-        self.id.put(m);
-        self.call.put(m);
-        self.ctx.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.mode_id.put(ctx);
+        self.mode_form_literal.put(ctx);
+        self.mode_form_ref.put(ctx);
+        self.mode_form_move.put(ctx);
+        self.mode_eval_literal.put(ctx);
+        self.mode_eval_ref.put(ctx);
+        self.mode_eval_move.put(ctx);
+        self.mode.put(ctx);
+        self.new.put(ctx);
+        self.repr.put(ctx);
+        self.ctx_access.put(ctx);
+        self.call_mode.put(ctx);
+        self.is_primitive.put(ctx);
+        self.is_extension.put(ctx);
+        self.is_cell.put(ctx);
+        self.is_mode.put(ctx);
+        self.id.put(ctx);
+        self.call.put(ctx);
+        self.ctx.put(ctx);
     }
 }
 

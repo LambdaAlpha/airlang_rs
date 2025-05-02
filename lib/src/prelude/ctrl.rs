@@ -24,6 +24,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_mut_fn,
     },
     transformer::Transformer,
@@ -49,12 +50,12 @@ impl Default for CtrlPrelude {
 }
 
 impl Prelude for CtrlPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.do1.put(m);
-        self.if1.put(m);
-        self.match1.put(m);
-        self.loop1.put(m);
-        self.for1.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.do1.put(ctx);
+        self.if1.put(ctx);
+        self.match1.put(ctx);
+        self.loop1.put(ctx);
+        self.for1.put(ctx);
     }
 }
 

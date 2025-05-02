@@ -1,4 +1,7 @@
-use std::rc::Rc;
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 
 use crate::{
     ConstStaticPrimFuncVal,
@@ -69,6 +72,8 @@ use crate::{
 
 thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
+thread_local!(pub(crate) static PRELUDE_EXT: RefCell<Box<dyn Prelude>> = RefCell::new(Box::new(PreludeExtUnit)));
+
 #[derive(Default, Clone)]
 pub(crate) struct AllPrelude {
     pub(crate) unit: UnitPrelude,
@@ -92,40 +97,64 @@ pub(crate) struct AllPrelude {
 }
 
 impl Prelude for AllPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.unit.put(m);
-        self.bool.put(m);
-        self.symbol.put(m);
-        self.text.put(m);
-        self.int.put(m);
-        self.number.put(m);
-        self.byte.put(m);
-        self.pair.put(m);
-        self.call.put(m);
-        self.list.put(m);
-        self.map.put(m);
-        self.ctx.put(m);
-        self.func.put(m);
-        self.extension.put(m);
-        self.meta.put(m);
-        self.syntax.put(m);
-        self.value.put(m);
-        self.ctrl.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.unit.put(ctx);
+        self.bool.put(ctx);
+        self.symbol.put(ctx);
+        self.text.put(ctx);
+        self.int.put(ctx);
+        self.number.put(ctx);
+        self.byte.put(ctx);
+        self.pair.put(ctx);
+        self.call.put(ctx);
+        self.list.put(ctx);
+        self.map.put(ctx);
+        self.ctx.put(ctx);
+        self.func.put(ctx);
+        self.extension.put(ctx);
+        self.meta.put(ctx);
+        self.syntax.put(ctx);
+        self.value.put(ctx);
+        self.ctrl.put(ctx);
     }
 }
 
+pub trait Prelude {
+    fn put(&self, ctx: &mut dyn PreludeCtx);
+}
+
+pub trait PreludeCtx {
+    fn put(&mut self, name: Symbol, val: Val);
+}
+
+pub(crate) fn set_prelude_ext(prelude: Box<dyn Prelude>) {
+    PRELUDE_EXT.replace(prelude);
+}
+
 pub(crate) fn initial_ctx() -> Ctx {
-    let variables = PRELUDE.with(|prelude| {
-        let mut m = Map::default();
-        prelude.put(&mut m);
-        m
+    let mut variables: Map<Symbol, CtxValue> = Map::default();
+    PRELUDE.with(|prelude| {
+        prelude.put(&mut variables);
+    });
+    PRELUDE_EXT.with_borrow(|prelude| {
+        prelude.put(&mut variables);
     });
     let variables = CtxMap::new(variables, false);
     Ctx::new(variables, None)
 }
 
-pub(crate) trait Prelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>);
+impl PreludeCtx for Map<Symbol, CtxValue> {
+    fn put(&mut self, name: Symbol, val: Val) {
+        let v = self.insert(name, CtxValue::new(val));
+        assert!(v.is_none(), "names of preludes should be unique");
+    }
+}
+
+impl PreludeCtx for Map<Symbol, Val> {
+    fn put(&mut self, name: Symbol, val: Val) {
+        let v = self.insert(name, val);
+        assert!(v.is_none(), "names of preludes should be unique");
+    }
 }
 
 #[derive(Clone)]
@@ -141,11 +170,10 @@ impl<T> Named<T> {
 }
 
 impl<T: Into<Val> + Clone> Named<T> {
-    pub(crate) fn put(&self, m: &mut Map<Symbol, CtxValue>) {
+    pub(crate) fn put(&self, m: &mut dyn PreludeCtx) {
         let name = Symbol::from_str(self.name);
-        let value = CtxValue::new(self.value.clone().into());
-        let v = m.insert(name, value);
-        assert!(v.is_none(), "names of preludes should be unique");
+        let value = self.value.clone().into();
+        m.put(name, value);
     }
 }
 
@@ -251,6 +279,12 @@ pub(crate) fn ref_pair_mode() -> Option<Mode> {
 pub(crate) fn ref_mode() -> Option<Mode> {
     let ref1 = MODE_PRELUDE.with(|p| p.ref_mode.clone());
     Some(Mode::Func(ref1))
+}
+
+struct PreludeExtUnit;
+
+impl Prelude for PreludeExtUnit {
+    fn put(&self, _m: &mut dyn PreludeCtx) {}
 }
 
 mod mode;

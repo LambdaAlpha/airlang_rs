@@ -1,12 +1,10 @@
 use crate::{
     FuncMode,
-    Map,
-    Symbol,
     Val,
-    ctx::map::CtxValue,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_free_fn,
     },
     unit::Unit,
@@ -25,8 +23,8 @@ impl Default for UnitPrelude {
 }
 
 impl Prelude for UnitPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.unit.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.unit.put(ctx);
     }
 }
 

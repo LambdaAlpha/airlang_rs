@@ -10,6 +10,7 @@ use airlang::{
     FuncMode,
     FuncVal,
     MutCtx,
+    PreludeCtx,
     Symbol,
     Text,
     Val,
@@ -17,13 +18,10 @@ use airlang::{
     parse,
 };
 
-use crate::{
-    init_ctx,
-    prelude::{
-        Named,
-        Prelude,
-        named_const_fn,
-    },
+use crate::prelude::{
+    Named,
+    Prelude,
+    named_const_fn,
 };
 
 pub(crate) struct BuildPrelude {
@@ -37,8 +35,8 @@ impl Default for BuildPrelude {
 }
 
 impl Prelude for BuildPrelude {
-    fn put(&self, mut ctx: MutCtx) {
-        self.import.put(ctx.reborrow());
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.import.put(ctx);
     }
 }
 
@@ -73,7 +71,6 @@ fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
     };
 
     let mut mod_air = AirCell::default();
-    init_ctx(mod_air.ctx_mut());
     if !set_cur_url(mod_air.ctx_mut(), cur_url_key, new_url) {
         return Val::default();
     }

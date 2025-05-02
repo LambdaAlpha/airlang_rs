@@ -5,14 +5,11 @@ use crate::{
     ConstFnCtx,
     FreeCtx,
     FuncMode,
-    Map,
     Pair,
-    Symbol,
     Val,
     core::EvalCore,
     ctx::{
         main::MainCtx,
-        map::CtxValue,
         mut1::MutFnCtx,
         ref1::CtxMeta,
     },
@@ -21,6 +18,7 @@ use crate::{
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_free_fn,
         named_mut_fn,
@@ -54,13 +52,13 @@ impl Default for CallPrelude {
 }
 
 impl Prelude for CallPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.new.put(m);
-        self.apply.put(m);
-        self.get_func.put(m);
-        self.set_func.put(m);
-        self.get_input.put(m);
-        self.set_input.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.new.put(ctx);
+        self.apply.put(ctx);
+        self.get_func.put(ctx);
+        self.set_func.put(ctx);
+        self.get_input.put(ctx);
+        self.set_input.put(ctx);
     }
 }
 

@@ -3,18 +3,15 @@ use crate::{
     FuncMode,
     FuncVal,
     Int,
-    Map,
     Pair,
     Symbol,
     Text,
     Val,
-    ctx::{
-        main::MainCtx,
-        map::CtxValue,
-    },
+    ctx::main::MainCtx,
     prelude::{
         Named,
         Prelude,
+        PreludeCtx,
         named_const_fn,
         named_free_fn,
         ref_pair_mode,
@@ -41,11 +38,11 @@ impl Default for SymbolPrelude {
 }
 
 impl Prelude for SymbolPrelude {
-    fn put(&self, m: &mut Map<Symbol, CtxValue>) {
-        self.from_text.put(m);
-        self.into_text.put(m);
-        self.length.put(m);
-        self.join.put(m);
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.from_text.put(ctx);
+        self.into_text.put(ctx);
+        self.length.put(ctx);
+        self.join.put(ctx);
     }
 }
 
