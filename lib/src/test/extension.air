@@ -34,11 +34,17 @@ func_ext function.is_extension .
 -----
 true
 =====
+construct
+-----
+func_ext == function ; {id : func_ext}
+-----
+true
+=====
 represent
 -----
 function.represent func_ext
 -----
-{id : func_ext, is_extension : true, context_access : free}
+{id : func_ext}
 =====
 func ==
 -----

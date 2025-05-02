@@ -499,6 +499,12 @@ function.represent ; mode ; {
     primitive : true,
 }
 =====
+primitive
+-----
+not == function ; {id : not}
+-----
+true
+=====
 recursive call
 -----
 do [

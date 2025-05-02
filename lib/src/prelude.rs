@@ -143,6 +143,20 @@ pub(crate) fn initial_ctx() -> Ctx {
     Ctx::new(variables, None)
 }
 
+pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {
+    let mut find = Find { name: id, val: None };
+    PRELUDE.with(|prelude| {
+        prelude.put(&mut find);
+    });
+    if find.val.is_some() {
+        return find.val;
+    }
+    PRELUDE_EXT.with_borrow(|prelude| {
+        prelude.put(&mut find);
+    });
+    find.val
+}
+
 impl PreludeCtx for Map<Symbol, CtxValue> {
     fn put(&mut self, name: Symbol, val: Val) {
         let v = self.insert(name, CtxValue::new(val));
@@ -154,6 +168,19 @@ impl PreludeCtx for Map<Symbol, Val> {
     fn put(&mut self, name: Symbol, val: Val) {
         let v = self.insert(name, val);
         assert!(v.is_none(), "names of preludes should be unique");
+    }
+}
+
+struct Find {
+    name: Symbol,
+    val: Option<Val>,
+}
+
+impl PreludeCtx for Find {
+    fn put(&mut self, name: Symbol, val: Val) {
+        if name == self.name {
+            self.val = Some(val);
+        }
     }
 }
 

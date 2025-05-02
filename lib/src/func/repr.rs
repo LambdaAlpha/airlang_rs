@@ -34,6 +34,7 @@ use crate::{
         mut_cell_prim::MutCellPrimFunc,
     },
     mode::repr::generate,
+    prelude::find_prelude,
     utils::val::{
         map_remove,
         symbol,
@@ -49,7 +50,6 @@ use crate::{
 pub(crate) const CALL: &str = "call";
 pub(crate) const CTX: &str = "context";
 pub(crate) const ID: &str = "id";
-pub(crate) const IS_EXTENSION: &str = "is_extension";
 pub(crate) const CALL_MODE: &str = "call_mode";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
@@ -60,6 +60,7 @@ pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
+    map.insert(symbol(ID), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal));
     map.insert(symbol(CALL), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref));
     map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
     FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
@@ -69,6 +70,13 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
         return None;
     };
+
+    match map_remove(&mut map, ID) {
+        Val::Symbol(id) => return find_prelude_func(id),
+        Val::Unit(_) => {}
+        _ => return None,
+    }
+
     let (ctx_name, input_name, body) = match map_remove(&mut map, CALL) {
         Val::Unit(_) => (Some(Symbol::default()), Symbol::default(), Val::default()),
         Val::Pair(names_body) => {
@@ -147,6 +155,13 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     Some(func)
 }
 
+fn find_prelude_func(id: Symbol) -> Option<FuncVal> {
+    let Val::Func(func) = find_prelude(id)? else {
+        return None;
+    };
+    Some(func)
+}
+
 pub(crate) fn generate_func(f: FuncVal) -> Val {
     match f {
         FuncVal::Mode(f) => generate(f.inner()),
@@ -167,12 +182,7 @@ pub(crate) fn generate_func(f: FuncVal) -> Val {
 
 fn generate_free_cell_prim(f: FreeCellPrimFuncVal) -> Val {
     let f = FreeCellPrimFunc::from(f);
-    if f.prim.is_extension {
-        let common = FuncCommon { access: FREE, cell: true, mode: f.mode };
-        generate_primitive_extension(f.prim.id, common)
-    } else {
-        generate_primitive_prelude(f.prim.id)
-    }
+    generate_primitive_prelude(f.prim.id)
 }
 
 fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
@@ -186,12 +196,7 @@ fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
 }
 
 fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
-    if f.prim.is_extension {
-        let common = FuncCommon { access: FREE, cell: false, mode: f.mode.clone() };
-        generate_primitive_extension(f.prim.id.clone(), common)
-    } else {
-        generate_primitive_prelude(f.prim.id.clone())
-    }
+    generate_primitive_prelude(f.prim.id.clone())
 }
 
 fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
@@ -205,12 +210,7 @@ fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
 
 fn generate_const_cell_prim(f: ConstCellPrimFuncVal) -> Val {
     let f = ConstCellPrimFunc::from(f);
-    if f.prim.is_extension {
-        let common = FuncCommon { access: CONST, cell: true, mode: f.mode };
-        generate_primitive_extension(f.prim.id, common)
-    } else {
-        generate_primitive_prelude(f.prim.id)
-    }
+    generate_primitive_prelude(f.prim.id)
 }
 
 fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
@@ -224,12 +224,7 @@ fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
 }
 
 fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
-    if f.prim.is_extension {
-        let common = FuncCommon { access: CONST, cell: false, mode: f.mode.clone() };
-        generate_primitive_extension(f.prim.id.clone(), common)
-    } else {
-        generate_primitive_prelude(f.prim.id.clone())
-    }
+    generate_primitive_prelude(f.prim.id.clone())
 }
 
 fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
@@ -243,12 +238,7 @@ fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
 
 fn generate_mut_cell_prim(f: MutCellPrimFuncVal) -> Val {
     let f = MutCellPrimFunc::from(f);
-    if f.prim.is_extension {
-        let common = FuncCommon { access: MUTABLE, cell: true, mode: f.mode };
-        generate_primitive_extension(f.prim.id, common)
-    } else {
-        generate_primitive_prelude(f.prim.id)
-    }
+    generate_primitive_prelude(f.prim.id)
 }
 
 fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
@@ -262,12 +252,7 @@ fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
 }
 
 fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
-    if f.prim.is_extension {
-        let common = FuncCommon { access: MUTABLE, cell: false, mode: f.mode.clone() };
-        generate_primitive_extension(f.prim.id.clone(), common)
-    } else {
-        generate_primitive_prelude(f.prim.id.clone())
-    }
+    generate_primitive_prelude(f.prim.id.clone())
 }
 
 fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
@@ -282,14 +267,6 @@ fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
 fn generate_primitive_prelude(id: Symbol) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(ID), Val::Symbol(id));
-    Val::Map(repr.into())
-}
-
-fn generate_primitive_extension(id: Symbol, common: FuncCommon) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(ID), Val::Symbol(id));
-    repr.insert(symbol(IS_EXTENSION), Val::Bit(Bit::true1()));
-    generate_func_common(&mut repr, common);
     Val::Map(repr.into())
 }
 
