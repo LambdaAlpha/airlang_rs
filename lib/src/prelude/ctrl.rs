@@ -7,6 +7,7 @@ use crate::{
     Map,
     Pair,
     Symbol,
+    SymbolMode,
     Text,
     ctx::{
         free::FreeCtx,
@@ -14,13 +15,22 @@ use crate::{
             CtxMapRef,
             CtxValue,
         },
+        pattern::{
+            PatternCtx,
+            assign_pattern,
+            match_pattern,
+            parse_pattern,
+        },
         ref1::{
             CtxMeta,
             CtxRef,
         },
     },
     func::mut_static_prim::MutDispatcher,
-    mode::eval::EVAL,
+    mode::{
+        eval::EVAL,
+        form::Form,
+    },
     prelude::{
         Named,
         Prelude,
@@ -147,21 +157,24 @@ where Ctx: CtxMeta<'a> {
     };
     let pair = Pair::from(pair);
     let val = EVAL.transform(ctx.reborrow(), pair.first);
-    let Val::Pair(pair) = pair.second else {
+    let Val::List(list) = pair.second else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Map(map) = pair.first else {
-        return Val::default();
-    };
-    let eval = Map::from(map)
-        .into_iter()
-        .find_map(|(k, v)| {
-            let k = EVAL.transform(ctx.reborrow(), k);
-            if k == val { Some(v) } else { None }
-        })
-        .unwrap_or(pair.second);
-    eval_block(ctx, eval).0
+    for item in List::from(list) {
+        let Val::Pair(pair) = item else {
+            return Val::default();
+        };
+        let pair = Pair::from(pair);
+        let pattern = Form::new(SymbolMode::Literal).transform(ctx.reborrow(), pair.first);
+        let Some(pattern) = parse_pattern(PatternCtx::default(), pattern) else {
+            return Val::default();
+        };
+        if match_pattern(&pattern, &val) {
+            assign_pattern(ctx.reborrow().for_mut_fn(), pattern, val);
+            return eval_block(ctx, pair.second).0;
+        }
+    }
+    Val::default()
 }
 
 fn loop1() -> Named<FuncVal> {

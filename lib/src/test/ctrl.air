@@ -130,69 +130,94 @@ true ? [[]] : .
 -----
 []
 =====
+match pattern
+-----
+[1, 2, 3] match [[a, b, c] : a + b + c]
+-----
+6
+=====
+match pattern extra
+-----
+[1, 2, 3] match [[a . constant, 2, c . {}] : a + c]
+-----
+4
+=====
+match order
+-----
+do [
+    [1, 2, 3] match [
+        [2, a, b] : x = 1,
+        [1, c, d] : y = 1,
+        [e, 2, f] : z = 1,
+    ],
+    [is_null a, is_null b, c, d, is_null e, is_null f, is_null x, y, is_null z]
+]
+-----
+[true, true, 2, 3, true, true, true, 1, true]
+=====
 match eval
 -----
-do [a = 1, a match {1 : 1 + 2, 2 : 2 + 3} : .]
+do [a = 1, a match [1 : 1 + 2, 2 : 2 + 3]]
 -----
 3
 =====
 match exist
 -----
-1 match {1 : 2, 2 : 3} : .
+1 match [1 : 2, 2 : 3]
 -----
 2
 =====
 match default
 -----
-3 match {1 : 2, 2 : 3} : 4
+3 match [1 : 2, 2 : 3, _ : 4]
 -----
 4
 =====
 match conditional eval exist
 -----
-do [1 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
+do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, is_null b, is_null c]]
 -----
-[1, ., .]
+[1, true, true]
 =====
 match conditional eval default
 -----
-do [3 match {1 : a = 1, 2 : b = 2} : c = 3, [a, b, c]]
+do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [is_null a, is_null b, c]]
 -----
-[., ., 3]
+[true, true, 3]
 =====
 match symbol
 -----
-do [a = id ; a, a match {a : 1, b : 2} : .]
+do [a = id ; a, a match [..a : 1, ..b : 2]]
 -----
 1
 =====
 match break
 -----
-1 match {1 : [2, true break 3, 4]} : 5
+1 match [1 : [2, true break 3, 4]]
 -----
 3
 =====
 match continue
 -----
-1 match {1 : [2, true continue 3, 4]} : 5
+1 match [1 : [2, true continue 3, 4]]
 -----
 3
 =====
 match do
 -----
-1 match {1 : [1, 2]} : 3
+1 match [1 : [1, 2]]
 -----
 2
 =====
 match list
 -----
-1 match {1 : [[]]} : 2
+1 match [1 : [[]]]
 -----
 []
 =====
 match bit
 -----
-true match {true : 1, false : 2} : 3
+true match [true : 1, false : 2]
 -----
 1
 =====
