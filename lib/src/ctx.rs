@@ -186,3 +186,5 @@ pub(crate) mod mut1;
 pub(crate) mod main;
 
 pub(crate) mod repr;
+
+pub(crate) mod pattern;

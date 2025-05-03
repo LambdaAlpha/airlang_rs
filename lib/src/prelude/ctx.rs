@@ -16,16 +16,18 @@ use crate::{
             MutCtx,
             MutFnCtx,
         },
+        pattern::{
+            PatternCtx,
+            assign_pattern,
+            parse_pattern,
+        },
         ref1::CtxRef,
         repr::{
             Extra,
-            PatternCtx,
-            assign_pattern,
             generate_ctx,
             generate_var_access,
             parse_ctx,
             parse_mode,
-            parse_pattern,
             parse_var_access,
         },
     },
@@ -170,7 +172,7 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
     };
     let pair = pair.unwrap();
     let pattern_ctx = PatternCtx { extra: Extra::default(), allow_extra: true };
-    let Some(pattern) = parse_pattern(pair.first, pattern_ctx) else {
+    let Some(pattern) = parse_pattern(pattern_ctx, pair.first) else {
         return Val::default();
     };
     let val = pair.second;
