@@ -48,7 +48,7 @@ do [a = 1, [form. *a, a]]
 =====
 form. * special
 -----
-do [..a = 1, [form. *.a, *.a]]
+do [.*.a = 1, [form. *.a, *.a]]
 -----
 [1, 1]
 =====
@@ -60,7 +60,7 @@ do [a = 1, [form. ^a, is_null a]]
 =====
 form. ^ special
 -----
-do [.*a = 1, [form. ^*a, is_null .*a]]
+do [.**a = 1, [form. ^*a, is_null .*a]]
 -----
 [1, true]
 =====

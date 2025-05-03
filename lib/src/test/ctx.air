@@ -118,13 +118,13 @@ do [a = .b, *a = 1, b]
 =====
 = special key 1
 -----
-do [..a = 1, *.a]
+do [.*.a = 1, *.a]
 -----
 1
 =====
 = special key 2
 -----
-do [..p = 1 : 2, *.p pair.first .]
+do [.*.p = 1 : 2, *.p pair.first .]
 -----
 1
 =====
@@ -196,13 +196,13 @@ do [((a : (b . mutable)) . constant) = (any ; .) : (any ; .), [variable_access a
 =====
 = destruct call
 -----
-do [(f ; a) = 1 ; 2, [f, a]]
+do [(f ';' a) = 1 ; 2, [f, a]]
 -----
 [1, 2]
 =====
 = destruct infix
 -----
-do [(a b c) = 1 2 3, [a, b, c]]
+do [(b ';' a : c) = 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
@@ -247,6 +247,18 @@ do [{1 : a, 3 : b} = {1 : 2, 3 : 4}, [a, b]]
 do [a = 1, b = 2, {3 : a, 4 : b} = {3 : 5, 6 : 7}]
 -----
 {3 : 1, 4 : 2}
+=====
+= destruct match
+-----
+do [[a, 2, c] = [1, 2, 3], [a, c]]
+-----
+[1, 3]
+=====
+= destruct not match
+-----
+do [a = 1, c = 3, [a, 2, c] = [2, 3, 4], [a, c]]
+-----
+[1, 3]
 =====
 mutable = return .
 -----

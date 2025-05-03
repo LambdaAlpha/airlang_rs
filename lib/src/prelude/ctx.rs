@@ -19,11 +19,11 @@ use crate::{
         pattern::{
             PatternCtx,
             assign_pattern,
+            match_pattern,
             parse_pattern,
         },
         ref1::CtxRef,
         repr::{
-            Extra,
             generate_ctx,
             generate_var_access,
             parse_ctx,
@@ -171,12 +171,12 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
         return Val::default();
     };
     let pair = pair.unwrap();
-    let pattern_ctx = PatternCtx { extra: Extra::default(), allow_extra: true };
+    let pattern_ctx = PatternCtx::default();
     let Some(pattern) = parse_pattern(pattern_ctx, pair.first) else {
         return Val::default();
     };
     let val = pair.second;
-    assign_pattern(ctx, pattern, val)
+    if match_pattern(&pattern, &val) { assign_pattern(ctx, pattern, val) } else { Val::default() }
 }
 
 fn set_variable_access() -> Named<FuncVal> {
