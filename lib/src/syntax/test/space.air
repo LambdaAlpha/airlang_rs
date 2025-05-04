@@ -16,80 +16,44 @@ space between tokens
 -----
 a b
 =====
-leading inline comment
+leading comment
 -----
-_"" a
+_("") a
 =====
-leading inline comment no space
+leading comment no space
 -----
-_""a
+_("")a
 =====
-leading space inline comment
+leading space comment
 -----
- _"" a
+ _("") a
 =====
-trailing inline comment
+trailing comment
 -----
-a _""
+a _("")
 =====
-trailing inline comment space
+trailing comment space
 -----
-a _""
+a _("")
 
 =====
-leading and trailing inline comment
+leading and trailing comment
 -----
-_"" a _""
+_("") a _("")
 =====
-sequence inline comment
+sequence comment
 -----
-_"" _"" a _"" _""
+_("") _("") a _("") _("")
 =====
-inline comment between tokens
+comment between tokens
 -----
-a _"" b
+a _("") b
 =====
-leading multiline comment
+multiline comment
 -----
-__"
-|" a
+_(."
+|") a
 =====
-leading multiline comment no space
+complex comment
 -----
-__"
-|"a
-=====
-leading space multiline comment
------
- __"
- |" a
-=====
-trailing multiline comment
------
-a __"
-  |"
-=====
-trailing multiline comment space
------
-a __"
-  |"
-
-=====
-leading and trailing multiline comment
------
-__"
-|" a __"
-     |"
-=====
-sequence inline comment
------
-__"
-|" __"
-|" a __"
-|" __"
-|"
-=====
-multiline comment between tokens
------
-a __"
-  |" b
+_(f ; [1, 2, 3]) a

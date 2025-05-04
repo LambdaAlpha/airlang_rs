@@ -1,4 +1,4 @@
-_"bench interpret"
+_("bench interpret")
 
 do ; [
   f = function ; {

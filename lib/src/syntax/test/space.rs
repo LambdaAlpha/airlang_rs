@@ -22,11 +22,5 @@ pub(crate) fn expected() -> Vec<Repr> {
         call(symbol("a"), symbol("b")),
         symbol("a"),
         symbol("a"),
-        symbol("a"),
-        symbol("a"),
-        symbol("a"),
-        symbol("a"),
-        symbol("a"),
-        call(symbol("a"), symbol("b")),
     ]
 }

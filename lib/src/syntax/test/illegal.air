@@ -407,3 +407,23 @@ empty
 illegal unicode
 -----
 中
+=====
+comment in unicode
+-----
+"\u(_(a) 123)"
+=====
+comment in int
+-----
+integer(_(1) 2)
+=====
+comment in number
+-----
+number(1 _(2))
+=====
+comment in byte
+-----
+byte(_('a') 11)
+=====
+comment parse fail
+-----
+_([) a

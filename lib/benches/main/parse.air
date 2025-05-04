@@ -1,4 +1,4 @@
-_"bench parse"
+_("bench parse")
 
 do ; [
   x = 42,

@@ -1,4 +1,4 @@
-_"bench generate"
+_("bench generate")
 
 do ; [
   x = 42,

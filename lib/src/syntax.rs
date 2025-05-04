@@ -22,8 +22,7 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // keywords
 
-pub(crate) const INLINE_COMMENT: &str = "_";
-pub(crate) const MULTILINE_COMMENT: &str = "__";
+pub(crate) const COMMENT: &str = "_";
 
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";

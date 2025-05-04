@@ -66,18 +66,18 @@ use crate::{
         ARITY_3,
         BYTE,
         CALL,
+        COMMENT,
         FALSE,
-        INLINE_COMMENT,
         INT,
         LEFT,
         LIST_LEFT,
         LIST_RIGHT,
         MAP_LEFT,
         MAP_RIGHT,
-        MULTILINE_COMMENT,
         NUMBER,
         PAIR,
         RIGHT,
+        Repr,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -206,24 +206,34 @@ fn expect_char(c: char) -> StrContext {
 }
 
 fn top<T: ParseRepr>(src: &mut &str) -> ModalResult<T> {
-    trim(compose(ParseCtx::default())).parse_next(src)
+    trim_comment(compose(ParseCtx::default())).parse_next(src)
 }
 
 fn trim<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
 where F: Parser<&'a str, O, E> {
-    delimited(space(0 ..), f, space(0 ..))
+    delimited(spaces(0 ..), f, spaces(0 ..))
 }
 
-fn space<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
-    let spaces = take_while(1 .., is_spaces).context(label("spaces")).void();
-    let inline_comment = preceded(INLINE_COMMENT, text).context(label("inline comment")).void();
-    let multiline_comment =
-        preceded(MULTILINE_COMMENT, raw_text).context(label("multiline comment")).void();
-    repeat(occurrences, alt((spaces, inline_comment, multiline_comment)))
+fn trim_comment<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
+where F: Parser<&'a str, O, E> {
+    delimited(spaces_comment(0 ..), f, spaces_comment(0 ..))
+}
+
+fn spaces<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
+    take_while(occurrences, is_spaces).context(label("spaces")).void()
+}
+
+fn spaces_comment<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
+    repeat(occurrences, alt((spaces(1 ..), comment)))
 }
 
 fn is_spaces(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\r' | '\n')
+}
+
+fn comment(i: &mut &str) -> ModalResult<()> {
+    let comment = scope::<Repr>(ParseCtx::default()).void();
+    preceded(COMMENT, comment).context(label("comment")).parse_next(i)
 }
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
@@ -238,13 +248,23 @@ where F: Parser<&'a str, T, E> {
     delimited_cut(left, trim(f), right)
 }
 
+fn delimited_trim_comment<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
+where F: Parser<&'a str, T, E> {
+    delimited_cut(left, trim_comment(f), right)
+}
+
 fn scoped<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
 where F: Parser<&'a str, T, E> {
     delimited_trim(SCOPE_LEFT, f, SCOPE_RIGHT)
 }
 
+fn scoped_trim_comment<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
+where F: Parser<&'a str, T, E> {
+    delimited_trim_comment(SCOPE_LEFT, f, SCOPE_RIGHT)
+}
+
 fn scope<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    scoped(compose(ctx)).context(label("scope"))
+    scoped_trim_comment(compose(ctx)).context(label("scope"))
 }
 
 fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
@@ -269,7 +289,7 @@ fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
 fn tokens<T: ParseRepr>(
     ctx: ParseCtx, occurrences: impl Into<Range>,
 ) -> impl Parser<&str, Vec<Token<T>>, E> {
-    separated(occurrences, token(ctx), space(1 ..))
+    separated(occurrences, token(ctx), spaces_comment(1 ..))
 }
 
 fn full_symbol<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
@@ -501,7 +521,7 @@ where F: Parser<&'a str, O, E> {
                 break;
             };
             items.push(item);
-            let sep = opt(trim(SEPARATOR.context(expect_char(SEPARATOR)))).parse_next(i)?;
+            let sep = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR)))).parse_next(i)?;
             if sep.is_none() {
                 break;
             }
@@ -511,13 +531,13 @@ where F: Parser<&'a str, O, E> {
 }
 
 fn list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    delimited_trim(LIST_LEFT, items(compose(ctx)), LIST_RIGHT)
+    delimited_trim_comment(LIST_LEFT, items(compose(ctx)), LIST_RIGHT)
         .map(|list| T::from(List::from(list)))
         .context(label("list"))
 }
 
 fn raw_list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    delimited_trim(LIST_LEFT, tokens(ctx, 0 ..), LIST_RIGHT)
+    delimited_trim_comment(LIST_LEFT, tokens(ctx, 0 ..), LIST_RIGHT)
         .map(|tokens| {
             let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
             T::from(list)
@@ -526,7 +546,7 @@ fn raw_list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
 }
 
 fn map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
-    delimited_trim(MAP_LEFT, items(key_value(ctx)), MAP_RIGHT)
+    delimited_trim_comment(MAP_LEFT, items(key_value(ctx)), MAP_RIGHT)
         .map(|pairs| T::from(Map::from_iter(pairs)))
         .context(label("map"))
 }
@@ -535,12 +555,12 @@ fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> {
     move |i: &mut _| {
         let key = token(ctx).parse_next(i)?;
         let key = compose_one(ctx, key);
-        let pair = opt(preceded(space(1 ..), PAIR.void())).parse_next(i).unwrap();
+        let pair = opt(preceded(spaces_comment(1 ..), PAIR.void())).parse_next(i).unwrap();
         if pair.is_none() {
             return Ok((key, T::from(Unit)));
         }
         let value = cut_err(preceded(
-            space(1 ..).context(expect_desc("space")),
+            spaces_comment(1 ..).context(expect_desc("space")),
             compose(ctx).context(expect_desc("value")),
         ))
         .parse_next(i)?;
@@ -562,7 +582,7 @@ fn raw_map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
         }
         Ok(T::from(map))
     };
-    delimited_trim(MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
+    delimited_trim_comment(MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
 }
 
 fn symbol(i: &mut &str) -> ModalResult<Symbol> {

@@ -1,6 +1,6 @@
 readme demo
 -----
-_"A demo of implementing a C-like for function"
+_("A demo of implementing a C-like for function")
 
 do ; [
     c_for = function ; {
