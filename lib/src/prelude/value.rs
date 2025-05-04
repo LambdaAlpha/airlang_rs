@@ -19,7 +19,6 @@ use crate::{
     Text,
     Unit,
     Val,
-    arbitrary::Arbitrary,
     bit::Bit,
     ctx::{
         main::MainCtx,
@@ -37,12 +36,15 @@ use crate::{
         ref_pair_mode,
     },
     symbol::Symbol,
+    type1::arbitrary::{
+        Arbitrary,
+        arbitrary_ext_type,
+    },
     val::{
         BIT,
         BYTE,
         CALL,
         CTX,
-        EXT,
         FUNC,
         INT,
         LIST,
@@ -105,8 +107,7 @@ fn fn_any(input: Val) -> Val {
             MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
             CTX => Val::Ctx(Ctx::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
-            EXT => Val::Ext(Arbitrary::any(rng, DEPTH)),
-            _ => Val::default(),
+            _ => arbitrary_ext_type(s),
         },
         _ => Val::default(),
     }
@@ -140,7 +141,7 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
             Val::Map(_) => MAP,
             Val::Ctx(_) => CTX,
             Val::Func(_) => FUNC,
-            Val::Ext(_) => EXT,
+            Val::Ext(ext) => return Val::Symbol(ext.type_name()),
         };
         Val::Symbol(Symbol::from_str(s))
     })

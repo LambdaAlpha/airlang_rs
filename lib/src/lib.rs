@@ -2,6 +2,8 @@ pub use pub1::*;
 
 pub(crate) mod pub1;
 
+// -----------
+
 pub(crate) mod unit;
 
 pub(crate) mod bit;
@@ -34,6 +36,8 @@ pub(crate) mod func;
 
 pub(crate) mod extension;
 
+// -----------
+
 pub(crate) mod val;
 
 pub(crate) mod core;
@@ -42,13 +46,15 @@ pub(crate) mod solver;
 
 pub(crate) mod transformer;
 
+pub mod syntax;
+
 pub(crate) mod mode;
 
-pub(crate) mod arbitrary;
+pub(crate) mod type1;
 
 pub(crate) mod prelude;
 
-pub mod syntax;
+// -----------
 
 pub(crate) mod types;
 

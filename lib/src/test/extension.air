@@ -1,14 +1,26 @@
 ==
 -----
-do [a = extension.unit, b = extension.unit, a == b]
+do [a = v_ext, b = v_ext, a == b]
 -----
 true
 =====
 type
 -----
-extension.unit type .
+v_ext type .
 -----
-extension
+v_ext
+=====
+any v_ext
+-----
+v_ext == any ; v_ext
+-----
+true
+=====
+is_extension
+-----
+v_ext is_extension .
+-----
+true
 =====
 call 1
 -----

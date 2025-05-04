@@ -35,14 +35,14 @@ use crate::prelude::{
 };
 
 #[derive(Default)]
-pub struct ExtPrelude {
+pub(crate) struct AllPrelude {
     pub(crate) io: IoPrelude,
     pub(crate) file: FilePrelude,
     pub(crate) process: ProcessPrelude,
     pub(crate) build: BuildPrelude,
 }
 
-impl Prelude for ExtPrelude {
+impl Prelude for AllPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
         self.io.put(ctx);
         self.file.put(ctx);

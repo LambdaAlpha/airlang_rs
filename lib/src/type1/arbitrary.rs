@@ -35,7 +35,6 @@ use crate::{
     MutStaticCompFuncVal,
     SymbolMode,
     Val,
-    ValExt,
     bit::Bit,
     byte::Byte,
     change::Change,
@@ -48,7 +47,7 @@ use crate::{
         },
     },
     either::Either,
-    extension::UnitExt,
+    extension::AIR_EXT,
     func::{
         comp::Composite,
         const_cell_comp::ConstCellCompFunc,
@@ -123,7 +122,7 @@ impl Arbitrary for Val {
             10 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
             11 => Val::Ctx(Ctx::any(rng, new_depth).into()),
             12 => Val::Func(FuncVal::any(rng, new_depth)),
-            13 => Val::Ext(Arbitrary::any(rng, new_depth)),
+            13 => arbitrary_ext(),
             _ => unreachable!(),
         }
     }
@@ -541,10 +540,12 @@ impl Arbitrary for ModeFuncVal {
     }
 }
 
-impl Arbitrary for Box<dyn ValExt> {
-    fn any(_rng: &mut SmallRng, _depth: usize) -> Self {
-        Box::new(UnitExt)
-    }
+pub(crate) fn arbitrary_ext() -> Val {
+    AIR_EXT.with_borrow(|ext| ext.arbitrary())
+}
+
+pub(crate) fn arbitrary_ext_type(type1: Symbol) -> Val {
+    AIR_EXT.with_borrow(|ext| ext.arbitrary_type(type1))
 }
 
 fn sample<const N: usize>(rng: &mut SmallRng, weights: [usize; N]) -> usize {

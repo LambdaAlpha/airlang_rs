@@ -8,13 +8,13 @@ use airlang::{
     parse,
 };
 
-use crate::ExtPrelude;
+use crate::AirStdExt;
 
 #[test]
 fn test_build_import() -> Result<(), Box<dyn Error>> {
     let src = generate_import("/src/test/build_import/case_1/main.air");
     let src = parse(&src)?;
-    AirCell::set_prelude_provider(Box::new(ExtPrelude::default()));
+    AirCell::set_ext(Box::new(AirStdExt::default()));
     let mut air = AirCell::default();
     let output = air.interpret(src);
     assert_eq!(output, Val::Int(Int::from(5).into()));

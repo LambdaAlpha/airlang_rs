@@ -1,7 +1,4 @@
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use std::rc::Rc;
 
 use crate::{
     ConstStaticPrimFuncVal,
@@ -20,6 +17,7 @@ use crate::{
             CtxValue,
         },
     },
+    extension::AIR_EXT,
     func::{
         const_cell_prim::{
             ConstCellFnExt,
@@ -70,9 +68,15 @@ use crate::{
     },
 };
 
-thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
+pub trait Prelude {
+    fn put(&self, ctx: &mut dyn PreludeCtx);
+}
 
-thread_local!(pub(crate) static PRELUDE_EXT: RefCell<Box<dyn Prelude>> = RefCell::new(Box::new(PreludeExtUnit)));
+pub trait PreludeCtx {
+    fn put(&mut self, name: Symbol, val: Val);
+}
+
+thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
 
 #[derive(Default, Clone)]
 pub(crate) struct AllPrelude {
@@ -119,18 +123,6 @@ impl Prelude for AllPrelude {
     }
 }
 
-pub trait Prelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx);
-}
-
-pub trait PreludeCtx {
-    fn put(&mut self, name: Symbol, val: Val);
-}
-
-pub(crate) fn set_prelude_ext(prelude: Box<dyn Prelude>) {
-    PRELUDE_EXT.replace(prelude);
-}
-
 pub(crate) fn initial_ctx() -> Ctx {
     let mut variables: Map<Symbol, CtxValue> = Map::default();
     put_preludes(&mut variables);
@@ -142,7 +134,7 @@ pub(crate) fn put_preludes(ctx: &mut dyn PreludeCtx) {
     PRELUDE.with(|prelude| {
         prelude.put(ctx);
     });
-    PRELUDE_EXT.with_borrow(|prelude| {
+    AIR_EXT.with_borrow(|prelude| {
         prelude.put(ctx);
     });
 }
@@ -155,7 +147,7 @@ pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {
     if find.val.is_some() {
         return find.val;
     }
-    PRELUDE_EXT.with_borrow(|prelude| {
+    AIR_EXT.with_borrow(|prelude| {
         prelude.put(&mut find);
     });
     find.val
@@ -310,12 +302,6 @@ pub(crate) fn ref_pair_mode() -> Option<Mode> {
 pub(crate) fn ref_mode() -> Option<Mode> {
     let ref1 = MODE_PRELUDE.with(|p| p.ref_mode.clone());
     Some(Mode::Func(ref1))
-}
-
-struct PreludeExtUnit;
-
-impl Prelude for PreludeExtUnit {
-    fn put(&self, _m: &mut dyn PreludeCtx) {}
 }
 
 mod mode;

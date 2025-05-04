@@ -76,7 +76,6 @@ pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
-pub(crate) const EXT: &str = "extension";
 
 impl Val {
     pub(crate) fn is_unit(&self) -> bool {

@@ -1,19 +1,9 @@
-use std::{
-    error::Error,
-    rc::Rc,
-};
+use std::error::Error;
 
 use crate::{
     AirCell,
-    FreeStaticPrimFunc,
-    FreeStaticPrimFuncVal,
-    FuncMode,
-    FuncVal,
-    Prelude,
-    PreludeCtx,
-    Symbol,
-    func::free_static_prim::FreeStaticFn,
     parse,
+    test::ext::TestAirExt,
     val::Val,
 };
 
@@ -130,33 +120,9 @@ fn test_func() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_extension() -> Result<(), Box<dyn Error>> {
-    AirCell::set_prelude_provider(Box::new(TestExtPrelude));
+    AirCell::set_ext(Box::new(TestAirExt));
     let air = AirCell::default();
     test_interpret(air, include_str!("test/extension.air"), "test/extension.air")
-}
-
-struct TestExtPrelude;
-
-impl Prelude for TestExtPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
-        let func_ext_name = Symbol::from_str("func_ext");
-        let func = FreeStaticPrimFunc::new_extension(
-            func_ext_name.clone(),
-            Rc::new(FuncExt),
-            FuncMode::default(),
-        );
-        let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
-        ctx.put(func_ext_name, func);
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct FuncExt;
-
-impl FreeStaticFn for FuncExt {
-    fn call(&self, input: Val) -> Val {
-        input
-    }
 }
 
 #[test]
@@ -194,3 +160,5 @@ fn test_value() -> Result<(), Box<dyn Error>> {
 fn test_ctrl() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/ctrl.air"), "test/ctrl.air")
 }
+
+mod ext;

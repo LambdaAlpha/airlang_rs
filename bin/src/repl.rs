@@ -60,8 +60,6 @@ use crossterm::{
     },
 };
 
-use crate::prelude::AllPrelude;
-
 pub(crate) trait ReplTerminal: Write + IsTerminal {}
 
 impl<T: Write + IsTerminal> ReplTerminal for T {}
@@ -97,7 +95,6 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub(crate) fn new(out: T) -> Self {
-        AirCell::set_prelude_provider(Box::new(AllPrelude::default()));
         let air = AirCell::default();
         let terminal = Terminal(out);
         Self {

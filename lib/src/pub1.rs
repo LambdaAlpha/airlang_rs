@@ -17,7 +17,10 @@ pub use crate::{
             MutFnCtx,
         },
     },
-    extension::ValExt,
+    extension::{
+        AirExt,
+        ValExt,
+    },
     func::{
         const_cell_comp::ConstCellCompFunc,
         const_cell_prim::{
@@ -81,6 +84,10 @@ pub use crate::{
     },
     symbol::Symbol,
     text::Text,
+    type1::{
+        Type,
+        TypeMeta,
+    },
     unit::Unit,
     val::{
         Val,
@@ -116,9 +123,7 @@ pub use crate::{
 mod __ {}
 
 use crate::{
-    prelude,
-    prelude::set_prelude_ext,
-    syntax,
+    extension::set_air_ext,
     syntax::{
         ParseError,
         ReprError,
@@ -128,12 +133,12 @@ use crate::{
 };
 
 pub fn parse(src: &str) -> Result<Val, ParseError> {
-    syntax::parser::parse(src)
+    crate::syntax::parser::parse(src)
 }
 
 pub fn generate(src: &Val) -> Result<String, ReprError> {
     let repr = src.try_into()?;
-    let repr = syntax::generator::generate(repr, PRETTY_FMT);
+    let repr = crate::syntax::generator::generate(repr, PRETTY_FMT);
     Ok(repr)
 }
 
@@ -144,17 +149,17 @@ pub struct AirCell {
 }
 
 impl AirCell {
+    /// this method should be called before instantiating `AirCell` or calling `initial_ctx`
+    pub fn set_ext(provider: Box<dyn AirExt>) {
+        set_air_ext(provider);
+    }
+
     pub fn new(mode: Option<Mode>, ctx: Ctx) -> Self {
         Self { mode, ctx }
     }
 
-    /// this method should be called before instantiating `AirCell` or calling `initial_ctx`
-    pub fn set_prelude_provider(prelude_provider: Box<dyn Prelude>) {
-        set_prelude_ext(prelude_provider);
-    }
-
     pub fn initial_ctx() -> Ctx {
-        prelude::initial_ctx()
+        crate::prelude::initial_ctx()
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {

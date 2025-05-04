@@ -26,7 +26,6 @@ use airlang::{
     Symbol,
     Val,
 };
-use airlang_ext::ExtPrelude;
 
 use crate::prelude::{
     eval::EvalPrelude,
@@ -36,7 +35,6 @@ use crate::prelude::{
 
 #[derive(Default)]
 pub(crate) struct AllPrelude {
-    pub(crate) ext: ExtPrelude,
     pub(crate) repl: ReplPrelude,
     pub(crate) eval: EvalPrelude,
     pub(crate) process: ProcessPrelude,
@@ -44,7 +42,6 @@ pub(crate) struct AllPrelude {
 
 impl Prelude for AllPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
-        self.ext.put(ctx);
         self.repl.put(ctx);
         self.eval.put(ctx);
         self.process.put(ctx);
