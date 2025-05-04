@@ -133,14 +133,18 @@ pub(crate) fn set_prelude_ext(prelude: Box<dyn Prelude>) {
 
 pub(crate) fn initial_ctx() -> Ctx {
     let mut variables: Map<Symbol, CtxValue> = Map::default();
-    PRELUDE.with(|prelude| {
-        prelude.put(&mut variables);
-    });
-    PRELUDE_EXT.with_borrow(|prelude| {
-        prelude.put(&mut variables);
-    });
+    put_preludes(&mut variables);
     let variables = CtxMap::new(variables, false);
     Ctx::new(variables, None)
+}
+
+pub(crate) fn put_preludes(ctx: &mut dyn PreludeCtx) {
+    PRELUDE.with(|prelude| {
+        prelude.put(ctx);
+    });
+    PRELUDE_EXT.with_borrow(|prelude| {
+        prelude.put(ctx);
+    });
 }
 
 pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {

@@ -72,10 +72,7 @@ use crate::{
     },
     number::Number,
     pair::Pair,
-    prelude::{
-        PRELUDE,
-        Prelude,
-    },
+    prelude::put_preludes,
     symbol::Symbol,
     text::Text,
     unit::Unit,
@@ -420,11 +417,8 @@ impl Arbitrary for Mode {
 impl Arbitrary for FuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         if rng.random() {
-            let prelude: Map<Symbol, Val> = PRELUDE.with(|prelude| {
-                let mut ctx = Map::default();
-                prelude.put(&mut ctx);
-                ctx
-            });
+            let mut prelude: Map<Symbol, Val> = Map::with_capacity(128);
+            put_preludes(&mut prelude);
             let func =
                 prelude.into_values().filter(|v| matches!(v, Val::Func(_))).choose(rng).unwrap();
             let Val::Func(func) = func else { unreachable!() };
