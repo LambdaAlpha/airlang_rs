@@ -77,7 +77,6 @@ use crate::{
         NUMBER,
         PAIR,
         RIGHT,
-        Repr,
         SCOPE_LEFT,
         SCOPE_RIGHT,
         SEPARATOR,
@@ -232,8 +231,42 @@ fn is_spaces(c: char) -> bool {
 }
 
 fn comment(i: &mut &str) -> ModalResult<()> {
-    let comment = scope::<Repr>(ParseCtx::default()).void();
+    let comment = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
     preceded(COMMENT, comment).context(label("comment")).parse_next(i)
+}
+
+fn comment_tokens(i: &mut &str) -> ModalResult<()> {
+    repeat(0 .., comment_token).parse_next(i)
+}
+
+fn comment_token(i: &mut &str) -> ModalResult<()> {
+    match peek(any).parse_next(i)? {
+        // delimiters
+        LIST_LEFT => delimited_cut(LIST_LEFT, comment_tokens, LIST_RIGHT).parse_next(i),
+        LIST_RIGHT => fail.parse_next(i),
+        MAP_LEFT => delimited_cut(MAP_LEFT, comment_tokens, MAP_RIGHT).parse_next(i),
+        MAP_RIGHT => fail.parse_next(i),
+        SCOPE_LEFT => delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT).parse_next(i),
+        SCOPE_RIGHT => fail.parse_next(i),
+        SEPARATOR => any.void().parse_next(i),
+        c if is_spaces(c) => spaces(1 ..).parse_next(i),
+        TEXT_QUOTE => text.void().parse_next(i),
+        SYMBOL_QUOTE => symbol.void().parse_next(i),
+
+        _ => {
+            let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
+            if symbol != UNIT {
+                return empty.parse_next(i);
+            }
+            if i.starts_with(TEXT_QUOTE) {
+                raw_text.void().parse_next(i)
+            } else if i.starts_with(SYMBOL_QUOTE) {
+                raw_symbol.void().parse_next(i)
+            } else {
+                empty.parse_next(i)
+            }
+        }
+    }
 }
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
