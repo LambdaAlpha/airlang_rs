@@ -267,7 +267,6 @@ impl EvalCore {
         output
     }
 
-    #[expect(unused)]
     pub(crate) fn call_solver<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>
     where Ctx: CtxMeta<'a> {
         let (ctx, is_const) = match ctx.for_mut_fn() {

@@ -37,6 +37,7 @@ use crate::prelude::meta::MetaPrelude;
 use crate::prelude::mode::MODE_PRELUDE;
 use crate::prelude::number::NumberPrelude;
 use crate::prelude::pair::PairPrelude;
+use crate::prelude::solve::SolvePrelude;
 use crate::prelude::symbol::SymbolPrelude;
 use crate::prelude::syntax::SyntaxPrelude;
 use crate::prelude::text::TextPrelude;
@@ -74,6 +75,7 @@ pub(crate) struct AllPrelude {
     pub(crate) ctx: CtxPrelude,
     pub(crate) func: FuncPrelude,
     pub(crate) extension: ExtPrelude,
+    pub(crate) solve: SolvePrelude,
     pub(crate) meta: MetaPrelude,
     pub(crate) syntax: SyntaxPrelude,
     pub(crate) value: ValuePrelude,
@@ -96,6 +98,7 @@ impl Prelude for AllPrelude {
         self.ctx.put(ctx);
         self.func.put(ctx);
         self.extension.put(ctx);
+        self.solve.put(ctx);
         self.meta.put(ctx);
         self.syntax.put(ctx);
         self.value.put(ctx);
@@ -286,6 +289,8 @@ pub(crate) fn ref_mode() -> Option<Mode> {
 
 mod mode;
 
+// -----
+
 mod unit;
 
 mod bit;
@@ -313,6 +318,10 @@ mod ctx;
 mod func;
 
 mod extension;
+
+// -----
+
+mod solve;
 
 mod meta;
 
