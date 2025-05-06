@@ -1,11 +1,7 @@
-use crate::syntax::{
-    repr::Repr,
-    test::{
-        call,
-        list,
-        symbol,
-    },
-};
+use crate::syntax::repr::Repr;
+use crate::syntax::test::call;
+use crate::syntax::test::list;
+use crate::syntax::test::symbol;
 
 pub(crate) fn expected() -> Vec<Repr> {
     vec![

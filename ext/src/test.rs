@@ -1,12 +1,10 @@
 use std::error::Error;
 
-use airlang::{
-    AirCell,
-    Int,
-    Text,
-    Val,
-    parse,
-};
+use airlang::AirCell;
+use airlang::Int;
+use airlang::Text;
+use airlang::Val;
+use airlang::parse;
 
 use crate::AirStdExt;
 

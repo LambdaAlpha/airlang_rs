@@ -1,7 +1,5 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Bit(bool);

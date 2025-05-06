@@ -1,31 +1,21 @@
-use std::{
-    matches,
-    mem::swap,
-};
+use std::matches;
+use std::mem::swap;
 
-use crate::{
-    ConstCtx,
-    ConstFnCtx,
-    Ctx,
-    CtxError,
-    FreeCtx,
-    FuncVal,
-    Symbol,
-    Val,
-    ctx::{
-        map::{
-            CtxMap,
-            CtxMapRef,
-            CtxValue,
-            DynRef,
-            VarAccess,
-        },
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-    },
-};
+use crate::ConstCtx;
+use crate::ConstFnCtx;
+use crate::Ctx;
+use crate::CtxError;
+use crate::FreeCtx;
+use crate::FuncVal;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::map::CtxMap;
+use crate::ctx::map::CtxMapRef;
+use crate::ctx::map::CtxValue;
+use crate::ctx::map::DynRef;
+use crate::ctx::map::VarAccess;
+use crate::ctx::ref1::CtxMeta;
+use crate::ctx::ref1::CtxRef;
 
 pub struct MutCtx<'a>(&'a mut Ctx);
 

@@ -1,7 +1,5 @@
-use crate::{
-    func::free_static_prim::FreeStaticPrimFunc,
-    types::wrap::rc_wrap,
-};
+use crate::func::free_static_prim::FreeStaticPrimFunc;
+use crate::types::wrap::rc_wrap;
 
 rc_wrap!(pub FreeStaticPrimFuncVal(FreeStaticPrimFunc));
 

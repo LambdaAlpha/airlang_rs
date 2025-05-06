@@ -1,12 +1,8 @@
-use crate::{
-    Val,
-    call::Call,
-    syntax::{
-        ReprError,
-        repr::call::CallRepr,
-    },
-    types::wrap::box_wrap,
-};
+use crate::Val;
+use crate::call::Call;
+use crate::syntax::ReprError;
+use crate::syntax::repr::call::CallRepr;
+use crate::types::wrap::box_wrap;
 
 box_wrap!(pub CallVal(Call<Val, Val>));
 

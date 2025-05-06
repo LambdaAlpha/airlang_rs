@@ -1,9 +1,7 @@
-use crate::{
-    ctx::ref1::CtxMeta,
-    func::func_mode::FuncMode,
-    transformer::Transformer,
-    val::Val,
-};
+use crate::ctx::ref1::CtxMeta;
+use crate::func::func_mode::FuncMode;
+use crate::transformer::Transformer;
+use crate::val::Val;
 
 pub(crate) trait FuncTrait: Transformer<Val, Val> {
     fn mode(&self) -> &FuncMode;

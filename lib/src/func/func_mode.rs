@@ -1,18 +1,16 @@
-use crate::{
-    CallMode,
-    CodeMode,
-    CompMode,
-    List,
-    ListMode,
-    Map,
-    MapMode,
-    Mode,
-    Pair,
-    PairMode,
-    SymbolMode,
-    UniMode,
-    Val,
-};
+use crate::CallMode;
+use crate::CodeMode;
+use crate::CompMode;
+use crate::List;
+use crate::ListMode;
+use crate::Map;
+use crate::MapMode;
+use crate::Mode;
+use crate::Pair;
+use crate::PairMode;
+use crate::SymbolMode;
+use crate::UniMode;
+use crate::Val;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FuncMode {

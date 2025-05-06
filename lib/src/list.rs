@@ -1,18 +1,10 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    ops::{
-        Deref,
-        DerefMut,
-    },
-    slice::{
-        Iter,
-        IterMut,
-    },
-    vec::IntoIter,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::ops::Deref;
+use std::ops::DerefMut;
+use std::slice::Iter;
+use std::slice::IterMut;
+use std::vec::IntoIter;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct List<T>(Vec<T>);

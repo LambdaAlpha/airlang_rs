@@ -1,32 +1,24 @@
-use std::{
-    error::Error,
-    str::FromStr,
-};
+use std::error::Error;
+use std::str::FromStr;
 
 use num_bigint::BigInt;
 use num_traits::Num;
 
-use crate::{
-    bit::Bit,
-    int::Int,
-    map::Map,
-    number::Number,
-    symbol::Symbol,
-    syntax::{
-        generate_compact,
-        generate_pretty,
-        generate_symbol,
-        parse,
-        repr::{
-            Repr,
-            call::CallRepr,
-            pair::PairRepr,
-        },
-    },
-    test::parse_test_file,
-    text::Text,
-    unit::Unit,
-};
+use crate::bit::Bit;
+use crate::int::Int;
+use crate::map::Map;
+use crate::number::Number;
+use crate::symbol::Symbol;
+use crate::syntax::generate_compact;
+use crate::syntax::generate_pretty;
+use crate::syntax::generate_symbol;
+use crate::syntax::parse;
+use crate::syntax::repr::Repr;
+use crate::syntax::repr::call::CallRepr;
+use crate::syntax::repr::pair::PairRepr;
+use crate::test::parse_test_file;
+use crate::text::Text;
+use crate::unit::Unit;
 
 mod unit;
 

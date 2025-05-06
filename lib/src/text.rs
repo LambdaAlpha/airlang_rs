@@ -1,15 +1,9 @@
-use std::{
-    borrow::Borrow,
-    fmt::{
-        Debug,
-        Display,
-        Formatter,
-    },
-    ops::{
-        Deref,
-        DerefMut,
-    },
-};
+use std::borrow::Borrow;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 use crate::syntax::generator::escape_text;
 

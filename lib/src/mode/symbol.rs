@@ -1,13 +1,11 @@
 use const_format::concatcp;
 
-use crate::{
-    Symbol,
-    UniMode,
-    Val,
-    core::FormCore,
-    ctx::ref1::CtxMeta,
-    transformer::Transformer,
-};
+use crate::Symbol;
+use crate::UniMode;
+use crate::Val;
+use crate::core::FormCore;
+use crate::ctx::ref1::CtxMeta;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SymbolMode {

@@ -2,17 +2,13 @@ use std::str::FromStr;
 
 use num_bigint::BigInt;
 
-use crate::{
-    List,
-    ListVal,
-    Val,
-    int::Int,
-    prelude::{
-        Named,
-        Prelude,
-        PreludeCtx,
-    },
-};
+use crate::List;
+use crate::ListVal;
+use crate::Val;
+use crate::int::Int;
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::PreludeCtx;
 
 #[derive(Clone)]
 pub(crate) struct MetaPrelude {

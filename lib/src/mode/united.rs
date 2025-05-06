@@ -1,29 +1,21 @@
 use const_format::concatcp;
 
-use crate::{
-    CallVal,
-    CodeMode,
-    ListVal,
-    MapVal,
-    PairVal,
-    Symbol,
-    SymbolMode,
-    Val,
-    ctx::ref1::CtxMeta,
-    mode::{
-        eval::Eval,
-        form::Form,
-        symbol::{
-            LITERAL_CHAR,
-            MOVE_CHAR,
-            REF_CHAR,
-        },
-    },
-    transformer::{
-        ByVal,
-        Transformer,
-    },
-};
+use crate::CallVal;
+use crate::CodeMode;
+use crate::ListVal;
+use crate::MapVal;
+use crate::PairVal;
+use crate::Symbol;
+use crate::SymbolMode;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::eval::Eval;
+use crate::mode::form::Form;
+use crate::mode::symbol::LITERAL_CHAR;
+use crate::mode::symbol::MOVE_CHAR;
+use crate::mode::symbol::REF_CHAR;
+use crate::transformer::ByVal;
+use crate::transformer::Transformer;
 
 pub(crate) const FORM: &str = "form";
 pub(crate) const EVAL: &str = "eval";

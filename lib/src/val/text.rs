@@ -1,7 +1,5 @@
-use crate::{
-    Text,
-    types::wrap::box_wrap,
-};
+use crate::Text;
+use crate::types::wrap::box_wrap;
 
 box_wrap!(pub TextVal(Text));
 

@@ -1,9 +1,7 @@
 use std::error::Error;
 
-use airlang::syntax::{
-    generate_compact,
-    parse,
-};
+use airlang::syntax::generate_compact;
+use airlang::syntax::parse;
 
 #[test]
 fn test_parse() -> Result<(), Box<dyn Error>> {

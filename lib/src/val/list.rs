@@ -1,12 +1,8 @@
-use crate::{
-    Val,
-    list::List,
-    syntax::{
-        ReprError,
-        repr::list::ListRepr,
-    },
-    types::wrap::box_wrap,
-};
+use crate::Val;
+use crate::list::List;
+use crate::syntax::ReprError;
+use crate::syntax::repr::list::ListRepr;
+use crate::types::wrap::box_wrap;
 
 box_wrap!(pub ListVal(List<Val>));
 

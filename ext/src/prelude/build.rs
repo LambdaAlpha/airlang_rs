@@ -1,28 +1,22 @@
-use std::{
-    env::current_dir,
-    fs::read_to_string,
-    path::Path,
-};
+use std::env::current_dir;
+use std::fs::read_to_string;
+use std::path::Path;
 
-use airlang::{
-    AirCell,
-    ConstFnCtx,
-    FuncMode,
-    FuncVal,
-    MutCtx,
-    PreludeCtx,
-    Symbol,
-    Text,
-    Val,
-    VarAccess,
-    parse,
-};
+use airlang::AirCell;
+use airlang::ConstFnCtx;
+use airlang::FuncMode;
+use airlang::FuncVal;
+use airlang::MutCtx;
+use airlang::PreludeCtx;
+use airlang::Symbol;
+use airlang::Text;
+use airlang::Val;
+use airlang::VarAccess;
+use airlang::parse;
 
-use crate::prelude::{
-    Named,
-    Prelude,
-    named_const_fn,
-};
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::named_const_fn;
 
 pub(crate) struct BuildPrelude {
     pub(crate) import: Named<FuncVal>,

@@ -1,11 +1,9 @@
 use std::error::Error;
 
-use crate::{
-    AirCell,
-    parse,
-    test::ext::TestAirExt,
-    val::Val,
-};
+use crate::AirCell;
+use crate::parse;
+use crate::test::ext::TestAirExt;
+use crate::val::Val;
 
 const MAIN_DELIMITER: &str = "\n=====\n";
 const SUB_DELIMITER: &str = "\n-----\n";

@@ -1,11 +1,7 @@
-use airlang::syntax::{
-    generate_compact,
-    parse,
-};
-use criterion::{
-    Criterion,
-    black_box,
-};
+use airlang::syntax::generate_compact;
+use airlang::syntax::parse;
+use criterion::Criterion;
+use criterion::black_box;
 
 pub fn bench_syntax(c: &mut Criterion) {
     bench_parse(c);

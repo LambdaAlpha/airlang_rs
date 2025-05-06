@@ -1,29 +1,19 @@
-pub use crate::syntax::{
-    error::{
-        ParseError,
-        ReprError,
-    },
-    repr::{
-        Repr,
-        call::CallRepr,
-        list::ListRepr,
-        map::MapRepr,
-        pair::PairRepr,
-    },
-};
+pub use crate::syntax::error::ParseError;
+pub use crate::syntax::error::ReprError;
+pub use crate::syntax::repr::Repr;
+pub use crate::syntax::repr::call::CallRepr;
+pub use crate::syntax::repr::list::ListRepr;
+pub use crate::syntax::repr::map::MapRepr;
+pub use crate::syntax::repr::pair::PairRepr;
 
 // https://github.com/rust-lang/rustfmt/issues/4070
 mod __ {}
 
-use crate::syntax::{
-    generator,
-    generator::{
-        COMPACT_FMT,
-        PRETTY_FMT,
-        SYMBOL_FMT,
-    },
-    parser,
-};
+use crate::syntax::generator;
+use crate::syntax::generator::COMPACT_FMT;
+use crate::syntax::generator::PRETTY_FMT;
+use crate::syntax::generator::SYMBOL_FMT;
+use crate::syntax::parser;
 
 pub fn parse(src: &str) -> Result<Repr, ParseError> {
     parser::parse(src)

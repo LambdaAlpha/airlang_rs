@@ -1,17 +1,13 @@
-use airlang::{
-    AirCell,
-    FuncMode,
-    FuncVal,
-    MutFnCtx,
-    PreludeCtx,
-    Val,
-};
+use airlang::AirCell;
+use airlang::FuncMode;
+use airlang::FuncVal;
+use airlang::MutFnCtx;
+use airlang::PreludeCtx;
+use airlang::Val;
 
-use crate::prelude::{
-    Named,
-    Prelude,
-    named_mut_fn,
-};
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::named_mut_fn;
 
 pub(crate) struct EvalPrelude {
     pub(crate) reset: Named<FuncVal>,

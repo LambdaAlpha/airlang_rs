@@ -1,14 +1,10 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
 
-use crate::{
-    CtxError,
-    Map,
-    Symbol,
-    Val,
-};
+use crate::CtxError;
+use crate::Map;
+use crate::Symbol;
+use crate::Val;
 
 #[expect(clippy::wrong_self_convention)]
 pub(crate) trait CtxMapRef<'a>: Sized {

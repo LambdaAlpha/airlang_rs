@@ -1,11 +1,9 @@
-use airlang::{
-    AirExt,
-    Prelude,
-    PreludeCtx,
-    Symbol,
-    TypeMeta,
-    Val,
-};
+use airlang::AirExt;
+use airlang::Prelude;
+use airlang::PreludeCtx;
+use airlang::Symbol;
+use airlang::TypeMeta;
+use airlang::Val;
 use airlang_ext::AirStdExt;
 
 use crate::prelude::AllPrelude;

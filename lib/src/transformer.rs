@@ -1,14 +1,12 @@
 use std::ops::Deref;
 
-use crate::{
-    CallVal,
-    ListVal,
-    MapVal,
-    PairVal,
-    Symbol,
-    Val,
-    ctx::ref1::CtxMeta,
-};
+use crate::CallVal;
+use crate::ListVal;
+use crate::MapVal;
+use crate::PairVal;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
 
 pub(crate) trait Transformer<Input, Output> {
     fn transform<'a, Ctx>(&self, ctx: Ctx, input: Input) -> Output

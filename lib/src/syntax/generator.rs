@@ -1,44 +1,38 @@
-use std::{
-    fmt::Write,
-    hash::Hash,
-};
+use std::fmt::Write;
+use std::hash::Hash;
 
 use const_format::concatcp;
 use num_traits::Signed;
 
-use crate::{
-    bit::Bit,
-    byte::Byte,
-    call::Call,
-    int::Int,
-    list::List,
-    map::Map,
-    number::Number,
-    pair::Pair,
-    symbol::Symbol,
-    syntax::{
-        BYTE,
-        CALL,
-        FALSE,
-        LIST_LEFT,
-        LIST_RIGHT,
-        MAP_LEFT,
-        MAP_RIGHT,
-        PAIR,
-        SCOPE_LEFT,
-        SCOPE_RIGHT,
-        SEPARATOR,
-        SYMBOL_QUOTE,
-        TEXT_QUOTE,
-        TRUE,
-        UNIT,
-        ambiguous,
-        is_delimiter,
-    },
-    text::Text,
-    unit::Unit,
-    utils,
-};
+use crate::bit::Bit;
+use crate::byte::Byte;
+use crate::call::Call;
+use crate::int::Int;
+use crate::list::List;
+use crate::map::Map;
+use crate::number::Number;
+use crate::pair::Pair;
+use crate::symbol::Symbol;
+use crate::syntax::BYTE;
+use crate::syntax::CALL;
+use crate::syntax::FALSE;
+use crate::syntax::LIST_LEFT;
+use crate::syntax::LIST_RIGHT;
+use crate::syntax::MAP_LEFT;
+use crate::syntax::MAP_RIGHT;
+use crate::syntax::PAIR;
+use crate::syntax::SCOPE_LEFT;
+use crate::syntax::SCOPE_RIGHT;
+use crate::syntax::SEPARATOR;
+use crate::syntax::SYMBOL_QUOTE;
+use crate::syntax::TEXT_QUOTE;
+use crate::syntax::TRUE;
+use crate::syntax::UNIT;
+use crate::syntax::ambiguous;
+use crate::syntax::is_delimiter;
+use crate::text::Text;
+use crate::unit::Unit;
+use crate::utils;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GenRepr<'a> {

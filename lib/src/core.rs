@@ -1,43 +1,31 @@
-use std::{
-    borrow::Borrow,
-    hash::Hash,
-};
+use std::borrow::Borrow;
+use std::hash::Hash;
 
-use crate::{
-    Call,
-    CallVal,
-    ConstCtx,
-    Ctx,
-    FuncVal,
-    List,
-    ListVal,
-    Map,
-    MapVal,
-    MutCtx,
-    MutFnCtx,
-    Pair,
-    PairVal,
-    Symbol,
-    Val,
-    ctx::{
-        main::MainCtx,
-        map::CtxValue,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-    },
-    func::FuncTrait,
-    mode::symbol::{
-        LITERAL_CHAR,
-        MOVE_CHAR,
-        REF_CHAR,
-    },
-    transformer::{
-        ByVal,
-        Transformer,
-    },
-};
+use crate::Call;
+use crate::CallVal;
+use crate::ConstCtx;
+use crate::Ctx;
+use crate::FuncVal;
+use crate::List;
+use crate::ListVal;
+use crate::Map;
+use crate::MapVal;
+use crate::MutCtx;
+use crate::MutFnCtx;
+use crate::Pair;
+use crate::PairVal;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::main::MainCtx;
+use crate::ctx::map::CtxValue;
+use crate::ctx::ref1::CtxMeta;
+use crate::ctx::ref1::CtxRef;
+use crate::func::FuncTrait;
+use crate::mode::symbol::LITERAL_CHAR;
+use crate::mode::symbol::MOVE_CHAR;
+use crate::mode::symbol::REF_CHAR;
+use crate::transformer::ByVal;
+use crate::transformer::Transformer;
 
 pub(crate) struct FormCore;
 

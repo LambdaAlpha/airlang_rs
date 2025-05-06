@@ -1,38 +1,28 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    hash::Hash,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::hash::Hash;
 
-use crate::{
-    CtxAccess,
-    FuncMode,
-    Val,
-    ctx::ref1::CtxMeta,
-    func::{
-        FuncTrait,
-        comp::Composite,
-        prim::Primitive,
-    },
-    transformer::Transformer,
-    val::func::{
-        const_cell_comp::ConstCellCompFuncVal,
-        const_cell_prim::ConstCellPrimFuncVal,
-        const_static_comp::ConstStaticCompFuncVal,
-        const_static_prim::ConstStaticPrimFuncVal,
-        free_cell_comp::FreeCellCompFuncVal,
-        free_cell_prim::FreeCellPrimFuncVal,
-        free_static_comp::FreeStaticCompFuncVal,
-        free_static_prim::FreeStaticPrimFuncVal,
-        mode::ModeFuncVal,
-        mut_cell_comp::MutCellCompFuncVal,
-        mut_cell_prim::MutCellPrimFuncVal,
-        mut_static_comp::MutStaticCompFuncVal,
-        mut_static_prim::MutStaticPrimFuncVal,
-    },
-};
+use crate::CtxAccess;
+use crate::FuncMode;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::FuncTrait;
+use crate::func::comp::Composite;
+use crate::func::prim::Primitive;
+use crate::transformer::Transformer;
+use crate::val::func::const_cell_comp::ConstCellCompFuncVal;
+use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
+use crate::val::func::const_static_comp::ConstStaticCompFuncVal;
+use crate::val::func::const_static_prim::ConstStaticPrimFuncVal;
+use crate::val::func::free_cell_comp::FreeCellCompFuncVal;
+use crate::val::func::free_cell_prim::FreeCellPrimFuncVal;
+use crate::val::func::free_static_comp::FreeStaticCompFuncVal;
+use crate::val::func::free_static_prim::FreeStaticPrimFuncVal;
+use crate::val::func::mode::ModeFuncVal;
+use crate::val::func::mut_cell_comp::MutCellCompFuncVal;
+use crate::val::func::mut_cell_prim::MutCellPrimFuncVal;
+use crate::val::func::mut_static_comp::MutStaticCompFuncVal;
+use crate::val::func::mut_static_prim::MutStaticPrimFuncVal;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum FuncVal {

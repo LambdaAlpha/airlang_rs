@@ -1,36 +1,26 @@
-use std::{
-    convert::Infallible,
-    fmt::{
-        Debug,
-        Display,
-    },
-    str::FromStr,
-};
+use std::convert::Infallible;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::str::FromStr;
 
-use crate::{
-    Bit,
-    Byte,
-    Call,
-    Int,
-    Number,
-    Pair,
-    Symbol,
-    Text,
-    Unit,
-    syntax::{
-        ParseError,
-        generate_pretty,
-        generator::GenRepr,
-        parse,
-        parser::ParseRepr,
-        repr::{
-            call::CallRepr,
-            list::ListRepr,
-            map::MapRepr,
-            pair::PairRepr,
-        },
-    },
-};
+use crate::Bit;
+use crate::Byte;
+use crate::Call;
+use crate::Int;
+use crate::Number;
+use crate::Pair;
+use crate::Symbol;
+use crate::Text;
+use crate::Unit;
+use crate::syntax::ParseError;
+use crate::syntax::generate_pretty;
+use crate::syntax::generator::GenRepr;
+use crate::syntax::parse;
+use crate::syntax::parser::ParseRepr;
+use crate::syntax::repr::call::CallRepr;
+use crate::syntax::repr::list::ListRepr;
+use crate::syntax::repr::map::MapRepr;
+use crate::syntax::repr::pair::PairRepr;
 
 #[derive(PartialEq, Eq, Clone, Hash)]
 pub enum Repr {

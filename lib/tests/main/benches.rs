@@ -1,12 +1,10 @@
 use std::error::Error;
 
-use airlang::{
-    AirCell,
-    Int,
-    Val,
-    generate,
-    parse,
-};
+use airlang::AirCell;
+use airlang::Int;
+use airlang::Val;
+use airlang::generate;
+use airlang::parse;
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {

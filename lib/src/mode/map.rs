@@ -1,14 +1,12 @@
-use crate::{
-    Map,
-    MapVal,
-    Pair,
-    UniMode,
-    Val,
-    core::FormCore,
-    ctx::ref1::CtxMeta,
-    mode::Mode,
-    transformer::Transformer,
-};
+use crate::Map;
+use crate::MapVal;
+use crate::Pair;
+use crate::UniMode;
+use crate::Val;
+use crate::core::FormCore;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::Mode;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MapMode {

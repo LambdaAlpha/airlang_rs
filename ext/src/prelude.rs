@@ -1,38 +1,34 @@
 use std::rc::Rc;
 
-use airlang::{
-    ConstCellFnExt,
-    ConstCellPrimFunc,
-    ConstCellPrimFuncVal,
-    ConstStaticFn,
-    ConstStaticPrimFunc,
-    ConstStaticPrimFuncVal,
-    FreeCellFnExt,
-    FreeCellPrimFunc,
-    FreeCellPrimFuncVal,
-    FreeStaticFn,
-    FreeStaticPrimFunc,
-    FreeStaticPrimFuncVal,
-    FuncMode,
-    FuncVal,
-    MutCellFnExt,
-    MutCellPrimFunc,
-    MutCellPrimFuncVal,
-    MutStaticFn,
-    MutStaticPrimFunc,
-    MutStaticPrimFuncVal,
-    Prelude,
-    PreludeCtx,
-    Symbol,
-    Val,
-};
+use airlang::ConstCellFnExt;
+use airlang::ConstCellPrimFunc;
+use airlang::ConstCellPrimFuncVal;
+use airlang::ConstStaticFn;
+use airlang::ConstStaticPrimFunc;
+use airlang::ConstStaticPrimFuncVal;
+use airlang::FreeCellFnExt;
+use airlang::FreeCellPrimFunc;
+use airlang::FreeCellPrimFuncVal;
+use airlang::FreeStaticFn;
+use airlang::FreeStaticPrimFunc;
+use airlang::FreeStaticPrimFuncVal;
+use airlang::FuncMode;
+use airlang::FuncVal;
+use airlang::MutCellFnExt;
+use airlang::MutCellPrimFunc;
+use airlang::MutCellPrimFuncVal;
+use airlang::MutStaticFn;
+use airlang::MutStaticPrimFunc;
+use airlang::MutStaticPrimFuncVal;
+use airlang::Prelude;
+use airlang::PreludeCtx;
+use airlang::Symbol;
+use airlang::Val;
 
-use crate::prelude::{
-    build::BuildPrelude,
-    file::FilePrelude,
-    io::IoPrelude,
-    process::ProcessPrelude,
-};
+use crate::prelude::build::BuildPrelude;
+use crate::prelude::file::FilePrelude;
+use crate::prelude::io::IoPrelude;
+use crate::prelude::process::ProcessPrelude;
 
 #[derive(Default)]
 pub(crate) struct AllPrelude {

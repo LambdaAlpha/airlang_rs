@@ -1,27 +1,19 @@
-use std::{
-    error::Error,
-    fmt::{
-        Debug,
-        Display,
-        Formatter,
-    },
-    hash::Hash,
-    mem::swap,
-    ops::BitAnd,
-};
+use std::error::Error;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::hash::Hash;
+use std::mem::swap;
+use std::ops::BitAnd;
 
-use map::{
-    CtxValue,
-    DynRef,
-};
+use map::CtxValue;
+use map::DynRef;
 use ref1::CtxRef;
 
-use crate::{
-    FuncVal,
-    Map,
-    ctx::map::CtxMap,
-    symbol::Symbol,
-};
+use crate::FuncVal;
+use crate::Map;
+use crate::ctx::map::CtxMap;
+use crate::symbol::Symbol;
 
 #[derive(Copy, Clone, Debug)]
 pub enum CtxError {

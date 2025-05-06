@@ -1,16 +1,12 @@
 use std::cell::RefCell;
 
-use crate::{
-    Prelude,
-    PreludeCtx,
-    Symbol,
-    Val,
-    traits::dyn_safe::dyn_any_clone_eq_hash,
-    type1::{
-        Type,
-        TypeMeta,
-    },
-};
+use crate::Prelude;
+use crate::PreludeCtx;
+use crate::Symbol;
+use crate::Val;
+use crate::traits::dyn_safe::dyn_any_clone_eq_hash;
+use crate::type1::Type;
+use crate::type1::TypeMeta;
 
 pub trait AirExt: Prelude + TypeMeta {}
 

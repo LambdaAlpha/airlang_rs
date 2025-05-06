@@ -1,17 +1,13 @@
-use airlang::{
-    ConstFnCtx,
-    FuncMode,
-    FuncVal,
-    PreludeCtx,
-    Text,
-    Val,
-};
+use airlang::ConstFnCtx;
+use airlang::FuncMode;
+use airlang::FuncVal;
+use airlang::PreludeCtx;
+use airlang::Text;
+use airlang::Val;
 
-use crate::prelude::{
-    Named,
-    Prelude,
-    named_const_fn,
-};
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::named_const_fn;
 
 pub(crate) struct FilePrelude {
     pub(crate) read_to_text: Named<FuncVal>,

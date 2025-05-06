@@ -1,24 +1,16 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    ops::{
-        Add,
-        Div,
-        Mul,
-        Rem,
-        Sub,
-    },
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::ops::Add;
+use std::ops::Div;
+use std::ops::Mul;
+use std::ops::Rem;
+use std::ops::Sub;
 
 use num_bigint::BigInt;
 use num_integer::Integer;
-use num_traits::{
-    Signed,
-    ToPrimitive,
-    Zero,
-};
+use num_traits::Signed;
+use num_traits::ToPrimitive;
+use num_traits::Zero;
 
 use crate::bit::Bit;
 

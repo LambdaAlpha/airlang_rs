@@ -1,11 +1,7 @@
-use std::{
-    error::Error,
-    fmt::{
-        Debug,
-        Display,
-        Formatter,
-    },
-};
+use std::error::Error;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::fmt::Formatter;
 
 pub struct ParseError {
     pub(crate) msg: String,

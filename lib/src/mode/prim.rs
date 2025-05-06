@@ -1,23 +1,17 @@
-use crate::{
-    CallVal,
-    ListVal,
-    MapVal,
-    PairVal,
-    Symbol,
-    SymbolMode,
-    UniMode,
-    Val,
-    core::{
-        EvalCore,
-        FormCore,
-    },
-    ctx::ref1::CtxMeta,
-    mode::id::Id,
-    transformer::{
-        ByVal,
-        Transformer,
-    },
-};
+use crate::CallVal;
+use crate::ListVal;
+use crate::MapVal;
+use crate::PairVal;
+use crate::Symbol;
+use crate::SymbolMode;
+use crate::UniMode;
+use crate::Val;
+use crate::core::EvalCore;
+use crate::core::FormCore;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::id::Id;
+use crate::transformer::ByVal;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct PrimMode {

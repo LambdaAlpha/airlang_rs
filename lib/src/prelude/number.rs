@@ -1,7 +1,5 @@
-use crate::prelude::{
-    Prelude,
-    PreludeCtx,
-};
+use crate::prelude::Prelude;
+use crate::prelude::PreludeCtx;
 
 #[derive(Clone)]
 pub(crate) struct NumberPrelude {}

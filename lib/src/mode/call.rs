@@ -1,16 +1,12 @@
-use crate::{
-    CallVal,
-    CodeMode,
-    UniMode,
-    Val,
-    core::{
-        EvalCore,
-        FormCore,
-    },
-    ctx::ref1::CtxMeta,
-    mode::Mode,
-    transformer::Transformer,
-};
+use crate::CallVal;
+use crate::CodeMode;
+use crate::UniMode;
+use crate::Val;
+use crate::core::EvalCore;
+use crate::core::FormCore;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::Mode;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CallMode {

@@ -1,10 +1,6 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    hash::Hash,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::hash::Hash;
 
 use num_bigint::BigInt;
 

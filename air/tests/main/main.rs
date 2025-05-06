@@ -1,12 +1,10 @@
 use std::error::Error;
 
-use airlang::{
-    AirCell,
-    Symbol,
-    Text,
-    VarAccess,
-    parse,
-};
+use airlang::AirCell;
+use airlang::Symbol;
+use airlang::Text;
+use airlang::VarAccess;
+use airlang::parse;
 
 const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";

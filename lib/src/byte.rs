@@ -1,13 +1,7 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    ops::{
-        Deref,
-        DerefMut,
-    },
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Byte(Vec<u8>);

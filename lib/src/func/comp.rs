@@ -1,21 +1,17 @@
 use std::mem::take;
 
-use crate::{
-    Ctx,
-    CtxError,
-    CtxVal,
-    MutCtx,
-    Pair,
-    Symbol,
-    Val,
-    ctx::map::{
-        CtxMapRef,
-        CtxValue,
-        VarAccess,
-    },
-    mode::eval::EVAL,
-    transformer::Transformer,
-};
+use crate::Ctx;
+use crate::CtxError;
+use crate::CtxVal;
+use crate::MutCtx;
+use crate::Pair;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::map::CtxMapRef;
+use crate::ctx::map::CtxValue;
+use crate::ctx::map::VarAccess;
+use crate::mode::eval::EVAL;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composite {

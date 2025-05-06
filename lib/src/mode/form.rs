@@ -1,21 +1,15 @@
-use crate::{
-    CallVal,
-    PairVal,
-    SymbolMode,
-    core::FormCore,
-    ctx::ref1::CtxMeta,
-    mode::id::Id,
-    symbol::Symbol,
-    transformer::{
-        ByVal,
-        Transformer,
-    },
-    val::{
-        Val,
-        list::ListVal,
-        map::MapVal,
-    },
-};
+use crate::CallVal;
+use crate::PairVal;
+use crate::SymbolMode;
+use crate::core::FormCore;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::id::Id;
+use crate::symbol::Symbol;
+use crate::transformer::ByVal;
+use crate::transformer::Transformer;
+use crate::val::Val;
+use crate::val::list::ListVal;
+use crate::val::map::MapVal;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct Form {

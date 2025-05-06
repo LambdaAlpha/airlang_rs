@@ -1,12 +1,8 @@
-use crate::{
-    Val,
-    pair::Pair,
-    syntax::{
-        ReprError,
-        repr::pair::PairRepr,
-    },
-    types::wrap::box_wrap,
-};
+use crate::Val;
+use crate::pair::Pair;
+use crate::syntax::ReprError;
+use crate::syntax::repr::pair::PairRepr;
+use crate::types::wrap::box_wrap;
 
 box_wrap!(pub PairVal(Pair<Val, Val>));
 

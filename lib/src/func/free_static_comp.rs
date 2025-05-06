@@ -1,13 +1,9 @@
-use crate::{
-    FuncMode,
-    Val,
-    ctx::ref1::CtxMeta,
-    func::{
-        FuncTrait,
-        comp::Composite,
-    },
-    transformer::Transformer,
-};
+use crate::FuncMode;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::FuncTrait;
+use crate::func::comp::Composite;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FreeStaticCompFunc {

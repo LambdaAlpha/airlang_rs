@@ -1,25 +1,19 @@
-use crate::{
-    CallVal,
-    ListMode,
-    ListVal,
-    MapMode,
-    MapVal,
-    PairMode,
-    PairVal,
-    Symbol,
-    UniMode,
-    Val,
-    core::FormCore,
-    ctx::ref1::CtxMeta,
-    mode::{
-        call::CallMode,
-        symbol::SymbolMode,
-    },
-    transformer::{
-        ByVal,
-        Transformer,
-    },
-};
+use crate::CallVal;
+use crate::ListMode;
+use crate::ListVal;
+use crate::MapMode;
+use crate::MapVal;
+use crate::PairMode;
+use crate::PairVal;
+use crate::Symbol;
+use crate::UniMode;
+use crate::Val;
+use crate::core::FormCore;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::call::CallMode;
+use crate::mode::symbol::SymbolMode;
+use crate::transformer::ByVal;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CompMode {

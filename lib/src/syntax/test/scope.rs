@@ -1,17 +1,13 @@
-use crate::syntax::{
-    repr::Repr,
-    test::{
-        call,
-        infix_call,
-        infix_pair,
-        list,
-        map,
-        pair,
-        symbol,
-        tag_call,
-        tag_pair,
-    },
-};
+use crate::syntax::repr::Repr;
+use crate::syntax::test::call;
+use crate::syntax::test::infix_call;
+use crate::syntax::test::infix_pair;
+use crate::syntax::test::list;
+use crate::syntax::test::map;
+use crate::syntax::test::pair;
+use crate::syntax::test::symbol;
+use crate::syntax::test::tag_call;
+use crate::syntax::test::tag_pair;
 
 pub fn expected() -> Vec<Repr> {
     vec![

@@ -1,7 +1,5 @@
-use crate::{
-    func::mut_static_prim::MutStaticPrimFunc,
-    types::wrap::rc_wrap,
-};
+use crate::func::mut_static_prim::MutStaticPrimFunc;
+use crate::types::wrap::rc_wrap;
 
 rc_wrap!(pub MutStaticPrimFuncVal(MutStaticPrimFunc));
 

@@ -1,19 +1,17 @@
 use std::rc::Rc;
 
-use crate::{
-    AirExt,
-    FreeStaticFn,
-    FreeStaticPrimFunc,
-    FreeStaticPrimFuncVal,
-    FuncMode,
-    FuncVal,
-    Prelude,
-    PreludeCtx,
-    Symbol,
-    Type,
-    TypeMeta,
-    Val,
-};
+use crate::AirExt;
+use crate::FreeStaticFn;
+use crate::FreeStaticPrimFunc;
+use crate::FreeStaticPrimFuncVal;
+use crate::FuncMode;
+use crate::FuncVal;
+use crate::Prelude;
+use crate::PreludeCtx;
+use crate::Symbol;
+use crate::Type;
+use crate::TypeMeta;
+use crate::Val;
 
 pub(super) struct TestAirExt;
 

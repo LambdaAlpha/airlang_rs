@@ -1,17 +1,11 @@
-use crate::{
-    FuncVal,
-    Val,
-    ctx::{
-        mut1::MutFnCtx,
-        ref1::CtxMeta,
-    },
-    mode::{
-        comp::CompMode,
-        prim::PrimMode,
-        united::UniMode,
-    },
-    transformer::Transformer,
-};
+use crate::FuncVal;
+use crate::Val;
+use crate::ctx::mut1::MutFnCtx;
+use crate::ctx::ref1::CtxMeta;
+use crate::mode::comp::CompMode;
+use crate::mode::prim::PrimMode;
+use crate::mode::united::UniMode;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Mode {

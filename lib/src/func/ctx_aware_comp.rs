@@ -1,15 +1,11 @@
-use crate::{
-    ConstFnCtx,
-    MutFnCtx,
-    Pair,
-    Symbol,
-    Val,
-    ctx::{
-        map::VarAccess,
-        ref1::CtxMeta,
-    },
-    func::comp::Composite,
-};
+use crate::ConstFnCtx;
+use crate::MutFnCtx;
+use crate::Pair;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::map::VarAccess;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::comp::Composite;
 
 pub(crate) fn const_func_transform<'a, Ctx>(
     inner: &mut crate::Ctx, ctx_name: Symbol, outer: Ctx, input_name: Symbol, input: Val, body: Val,

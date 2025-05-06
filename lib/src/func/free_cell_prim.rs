@@ -1,26 +1,16 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    hash::{
-        Hash,
-        Hasher,
-    },
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::hash::Hash;
+use std::hash::Hasher;
 
-use crate::{
-    FuncMode,
-    Symbol,
-    Val,
-    ctx::ref1::CtxMeta,
-    func::{
-        FuncTrait,
-        prim::Primitive,
-    },
-    traits::dyn_safe::dyn_any_clone_eq_hash,
-    transformer::Transformer,
-};
+use crate::FuncMode;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::FuncTrait;
+use crate::func::prim::Primitive;
+use crate::traits::dyn_safe::dyn_any_clone_eq_hash;
+use crate::transformer::Transformer;
 
 pub trait FreeCellFn {
     fn call(&mut self, input: Val) -> Val;

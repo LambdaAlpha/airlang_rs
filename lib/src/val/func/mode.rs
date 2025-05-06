@@ -1,7 +1,5 @@
-use crate::{
-    func::mode::ModeFunc,
-    types::wrap::rc_wrap,
-};
+use crate::func::mode::ModeFunc;
+use crate::types::wrap::rc_wrap;
 
 rc_wrap!(pub ModeFuncVal(ModeFunc));
 

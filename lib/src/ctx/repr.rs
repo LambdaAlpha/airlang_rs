@@ -1,27 +1,21 @@
-use crate::{
-    Bit,
-    Call,
-    CodeMode,
-    Ctx,
-    CtxVal,
-    FuncMode,
-    Map,
-    Mode,
-    Pair,
-    Symbol,
-    SymbolMode,
-    Val,
-    ctx::map::{
-        CtxMap,
-        CtxMapRef,
-        CtxValue,
-        VarAccess,
-    },
-    utils::val::{
-        map_remove,
-        symbol,
-    },
-};
+use crate::Bit;
+use crate::Call;
+use crate::CodeMode;
+use crate::Ctx;
+use crate::CtxVal;
+use crate::FuncMode;
+use crate::Map;
+use crate::Mode;
+use crate::Pair;
+use crate::Symbol;
+use crate::SymbolMode;
+use crate::Val;
+use crate::ctx::map::CtxMap;
+use crate::ctx::map::CtxMapRef;
+use crate::ctx::map::CtxValue;
+use crate::ctx::map::VarAccess;
+use crate::utils::val::map_remove;
+use crate::utils::val::symbol;
 
 const ACCESS: &str = "access";
 const STATIC: &str = "static";

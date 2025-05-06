@@ -1,16 +1,10 @@
-use crate::{
-    Ctx,
-    CtxError,
-    FuncVal,
-    ctx::{
-        const1::ConstFnCtx,
-        map::{
-            CtxMap,
-            DynRef,
-        },
-        mut1::MutFnCtx,
-    },
-};
+use crate::Ctx;
+use crate::CtxError;
+use crate::FuncVal;
+use crate::ctx::const1::ConstFnCtx;
+use crate::ctx::map::CtxMap;
+use crate::ctx::map::DynRef;
+use crate::ctx::mut1::MutFnCtx;
 
 pub(crate) trait CtxRef<'a> {
     fn get_variables(self) -> Result<&'a CtxMap, CtxError>;

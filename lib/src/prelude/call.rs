@@ -1,32 +1,26 @@
 use std::mem::swap;
 
-use crate::{
-    Call,
-    ConstFnCtx,
-    FreeCtx,
-    FuncMode,
-    Pair,
-    Val,
-    core::EvalCore,
-    ctx::{
-        main::MainCtx,
-        mut1::MutFnCtx,
-        ref1::CtxMeta,
-    },
-    either::Either,
-    func::mut_static_prim::MutDispatcher,
-    prelude::{
-        Named,
-        Prelude,
-        PreludeCtx,
-        named_const_fn,
-        named_free_fn,
-        named_mut_fn,
-        ref_pair_mode,
-    },
-    syntax::CALL,
-    val::func::FuncVal,
-};
+use crate::Call;
+use crate::ConstFnCtx;
+use crate::FreeCtx;
+use crate::FuncMode;
+use crate::Pair;
+use crate::Val;
+use crate::core::EvalCore;
+use crate::ctx::main::MainCtx;
+use crate::ctx::mut1::MutFnCtx;
+use crate::ctx::ref1::CtxMeta;
+use crate::either::Either;
+use crate::func::mut_static_prim::MutDispatcher;
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::PreludeCtx;
+use crate::prelude::named_const_fn;
+use crate::prelude::named_free_fn;
+use crate::prelude::named_mut_fn;
+use crate::prelude::ref_pair_mode;
+use crate::syntax::CALL;
+use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct CallPrelude {

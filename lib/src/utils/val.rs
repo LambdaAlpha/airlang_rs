@@ -1,8 +1,6 @@
-use crate::{
-    MapVal,
-    Symbol,
-    Val,
-};
+use crate::MapVal;
+use crate::Symbol;
+use crate::Val;
 
 pub(crate) fn map_remove(map: &mut MapVal, name: &str) -> Val {
     let name = Val::Symbol(Symbol::from_str(name));

@@ -1,43 +1,33 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    hash::Hash,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::hash::Hash;
 
-use crate::{
-    Call,
-    Int,
-    List,
-    Map,
-    Pair,
-    bit::Bit,
-    byte::Byte,
-    extension::ValExt,
-    number::Number,
-    symbol::Symbol,
-    syntax::{
-        ReprError,
-        generator::GenRepr,
-        parser::ParseRepr,
-        repr::Repr,
-    },
-    text::Text,
-    unit::Unit,
-    val::{
-        byte::ByteVal,
-        call::CallVal,
-        ctx::CtxVal,
-        func::FuncVal,
-        int::IntVal,
-        list::ListVal,
-        map::MapVal,
-        number::NumberVal,
-        pair::PairVal,
-        text::TextVal,
-    },
-};
+use crate::Call;
+use crate::Int;
+use crate::List;
+use crate::Map;
+use crate::Pair;
+use crate::bit::Bit;
+use crate::byte::Byte;
+use crate::extension::ValExt;
+use crate::number::Number;
+use crate::symbol::Symbol;
+use crate::syntax::ReprError;
+use crate::syntax::generator::GenRepr;
+use crate::syntax::parser::ParseRepr;
+use crate::syntax::repr::Repr;
+use crate::text::Text;
+use crate::unit::Unit;
+use crate::val::byte::ByteVal;
+use crate::val::call::CallVal;
+use crate::val::ctx::CtxVal;
+use crate::val::func::FuncVal;
+use crate::val::int::IntVal;
+use crate::val::list::ListVal;
+use crate::val::map::MapVal;
+use crate::val::number::NumberVal;
+use crate::val::pair::PairVal;
+use crate::val::text::TextVal;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Val {

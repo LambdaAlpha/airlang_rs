@@ -1,18 +1,12 @@
-use crate::{
-    FuncMode,
-    Symbol,
-    Val,
-    ctx::ref1::CtxMeta,
-    func::{
-        FuncTrait,
-        comp::Composite,
-        ctx_aware_comp::{
-            const_func_transform,
-            func_call,
-        },
-    },
-    transformer::Transformer,
-};
+use crate::FuncMode;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::FuncTrait;
+use crate::func::comp::Composite;
+use crate::func::ctx_aware_comp::const_func_transform;
+use crate::func::ctx_aware_comp::func_call;
+use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ConstCellCompFunc {

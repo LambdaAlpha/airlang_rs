@@ -1,9 +1,7 @@
 use std::any::Any;
 
-use crate::{
-    Symbol,
-    Val,
-};
+use crate::Symbol;
+use crate::Val;
 
 pub trait Type: Any {
     fn type_name(&self) -> Symbol;

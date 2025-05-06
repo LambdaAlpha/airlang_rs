@@ -1,19 +1,15 @@
 use std::process::Command;
 
-use airlang::{
-    CodeMode,
-    FuncMode,
-    FuncVal,
-    PreludeCtx,
-    SymbolMode,
-    Val,
-};
+use airlang::CodeMode;
+use airlang::FuncMode;
+use airlang::FuncVal;
+use airlang::PreludeCtx;
+use airlang::SymbolMode;
+use airlang::Val;
 
-use crate::prelude::{
-    Named,
-    Prelude,
-    named_free_fn,
-};
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::named_free_fn;
 
 pub(crate) struct ProcessPrelude {
     pub(crate) call: Named<FuncVal>,

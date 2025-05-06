@@ -1,31 +1,23 @@
-use std::fmt::{
-    Debug,
-    Formatter,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
 
-use crate::{
-    CallMode,
-    CompMode,
-    CtxAccess,
-    FuncMode,
-    ListMode,
-    MapMode,
-    PairMode,
-    PrimMode,
-    SymbolMode,
-    UniMode,
-    Val,
-    ctx::ref1::CtxMeta,
-    func::FuncTrait,
-    mode::{
-        Mode,
-        prim::{
-            CodeMode,
-            DataMode,
-        },
-    },
-    transformer::Transformer,
-};
+use crate::CallMode;
+use crate::CompMode;
+use crate::CtxAccess;
+use crate::FuncMode;
+use crate::ListMode;
+use crate::MapMode;
+use crate::PairMode;
+use crate::PrimMode;
+use crate::SymbolMode;
+use crate::UniMode;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::FuncTrait;
+use crate::mode::Mode;
+use crate::mode::prim::CodeMode;
+use crate::mode::prim::DataMode;
+use crate::transformer::Transformer;
 
 #[derive(Default, Clone, PartialEq, Eq, Hash)]
 pub struct ModeFunc {

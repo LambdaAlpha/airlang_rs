@@ -1,6 +1,4 @@
-use crate::{
-    func::free_cell_prim::FreeCellPrimFunc,
-    types::wrap::box_wrap,
-};
+use crate::func::free_cell_prim::FreeCellPrimFunc;
+use crate::types::wrap::box_wrap;
 
 box_wrap!(pub FreeCellPrimFuncVal(FreeCellPrimFunc));

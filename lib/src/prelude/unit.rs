@@ -1,15 +1,11 @@
-use crate::{
-    FuncMode,
-    Val,
-    prelude::{
-        Named,
-        Prelude,
-        PreludeCtx,
-        named_free_fn,
-    },
-    unit::Unit,
-    val::func::FuncVal,
-};
+use crate::FuncMode;
+use crate::Val;
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::PreludeCtx;
+use crate::prelude::named_free_fn;
+use crate::unit::Unit;
+use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct UnitPrelude {

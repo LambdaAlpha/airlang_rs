@@ -1,24 +1,18 @@
-use std::io::{
-    Write,
-    stderr,
-    stdin,
-    stdout,
-};
+use std::io::Write;
+use std::io::stderr;
+use std::io::stdin;
+use std::io::stdout;
 
-use airlang::{
-    FuncMode,
-    FuncVal,
-    MutFnCtx,
-    PreludeCtx,
-    Val,
-};
+use airlang::FuncMode;
+use airlang::FuncVal;
+use airlang::MutFnCtx;
+use airlang::PreludeCtx;
+use airlang::Val;
 
-use crate::prelude::{
-    Named,
-    Prelude,
-    named_free_fn,
-    named_mut_fn,
-};
+use crate::prelude::Named;
+use crate::prelude::Prelude;
+use crate::prelude::named_free_fn;
+use crate::prelude::named_mut_fn;
 
 pub(crate) struct IoPrelude {
     pub(crate) read_line: Named<FuncVal>,

@@ -1,7 +1,5 @@
-use std::{
-    fmt::Write,
-    num::ParseIntError,
-};
+use std::fmt::Write;
+use std::num::ParseIntError;
 
 pub(crate) fn bin_str_to_vec_u8(s: &str) -> Result<Vec<u8>, ParseIntError> {
     (0 .. s.len()).step_by(8).map(|i| u8::from_str_radix(&s[i .. i + 8], 2)).collect()

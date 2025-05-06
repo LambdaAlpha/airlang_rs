@@ -1,35 +1,25 @@
-use crate::{
-    Call,
-    CallVal,
-    List,
-    ListVal,
-    Map,
-    MapVal,
-    MutFnCtx,
-    Pair,
-    PairVal,
-    Symbol,
-    Unit,
-    Val,
-    ctx::{
-        map::{
-            CtxMapRef,
-            CtxValue,
-        },
-        ref1::CtxRef,
-        repr::{
-            Binding,
-            Extra,
-            parse_extra,
-        },
-    },
-    mode::symbol::{
-        LITERAL_CHAR,
-        REF_CHAR,
-    },
-    syntax::CALL,
-    utils::val::symbol,
-};
+use crate::Call;
+use crate::CallVal;
+use crate::List;
+use crate::ListVal;
+use crate::Map;
+use crate::MapVal;
+use crate::MutFnCtx;
+use crate::Pair;
+use crate::PairVal;
+use crate::Symbol;
+use crate::Unit;
+use crate::Val;
+use crate::ctx::map::CtxMapRef;
+use crate::ctx::map::CtxValue;
+use crate::ctx::ref1::CtxRef;
+use crate::ctx::repr::Binding;
+use crate::ctx::repr::Extra;
+use crate::ctx::repr::parse_extra;
+use crate::mode::symbol::LITERAL_CHAR;
+use crate::mode::symbol::REF_CHAR;
+use crate::syntax::CALL;
+use crate::utils::val::symbol;
 
 pub(crate) enum Pattern {
     Any(Binding),

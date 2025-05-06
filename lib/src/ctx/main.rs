@@ -1,30 +1,18 @@
-use crate::{
-    CtxError,
-    MutFnCtx,
-    Pair,
-    Symbol,
-    Val,
-    ctx::{
-        map::{
-            CtxMapRef,
-            DynRef,
-        },
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-    },
-    either::Either,
-    mode::{
-        eval::EVAL,
-        symbol::{
-            LITERAL_CHAR,
-            MOVE_CHAR,
-            REF_CHAR,
-        },
-    },
-    transformer::Transformer,
-};
+use crate::CtxError;
+use crate::MutFnCtx;
+use crate::Pair;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::map::CtxMapRef;
+use crate::ctx::map::DynRef;
+use crate::ctx::ref1::CtxMeta;
+use crate::ctx::ref1::CtxRef;
+use crate::either::Either;
+use crate::mode::eval::EVAL;
+use crate::mode::symbol::LITERAL_CHAR;
+use crate::mode::symbol::MOVE_CHAR;
+use crate::mode::symbol::REF_CHAR;
+use crate::transformer::Transformer;
 
 pub(crate) struct MainCtx;
 

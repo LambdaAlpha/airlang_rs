@@ -1,12 +1,8 @@
-use crate::{
-    Val,
-    map::Map,
-    syntax::{
-        ReprError,
-        repr::map::MapRepr,
-    },
-    types::wrap::box_wrap,
-};
+use crate::Val;
+use crate::map::Map;
+use crate::syntax::ReprError;
+use crate::syntax::repr::map::MapRepr;
+use crate::types::wrap::box_wrap;
 
 box_wrap!(pub MapVal(Map<Val, Val>));
 

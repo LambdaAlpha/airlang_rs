@@ -1,20 +1,12 @@
-use crate::{
-    Ctx,
-    CtxError,
-    FuncVal,
-    ctx::{
-        const1::ConstFnCtx,
-        map::{
-            CtxMap,
-            DynRef,
-        },
-        mut1::MutFnCtx,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-    },
-};
+use crate::Ctx;
+use crate::CtxError;
+use crate::FuncVal;
+use crate::ctx::const1::ConstFnCtx;
+use crate::ctx::map::CtxMap;
+use crate::ctx::map::DynRef;
+use crate::ctx::mut1::MutFnCtx;
+use crate::ctx::ref1::CtxMeta;
+use crate::ctx::ref1::CtxRef;
 
 pub struct FreeCtx;
 

@@ -1,29 +1,19 @@
-use std::{
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    hash::{
-        Hash,
-        Hasher,
-    },
-    rc::Rc,
-};
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::rc::Rc;
 
-use crate::{
-    ConstCtx,
-    ConstFnCtx,
-    FreeCtx,
-    FuncMode,
-    Symbol,
-    Val,
-    ctx::ref1::CtxMeta,
-    func::{
-        FuncTrait,
-        prim::Primitive,
-    },
-    transformer::Transformer,
-};
+use crate::ConstCtx;
+use crate::ConstFnCtx;
+use crate::FreeCtx;
+use crate::FuncMode;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::ref1::CtxMeta;
+use crate::func::FuncTrait;
+use crate::func::prim::Primitive;
+use crate::transformer::Transformer;
 
 pub trait ConstStaticFn {
     fn call(&self, ctx: ConstFnCtx, input: Val) -> Val;

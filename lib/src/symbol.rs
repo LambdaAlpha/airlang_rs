@@ -1,16 +1,10 @@
-use std::{
-    borrow::Borrow,
-    fmt::{
-        Debug,
-        Formatter,
-    },
-    ops::Deref,
-};
+use std::borrow::Borrow;
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::ops::Deref;
 
-use string_cache::{
-    Atom,
-    EmptyStaticAtomSet,
-};
+use string_cache::Atom;
+use string_cache::EmptyStaticAtomSet;
 
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
 pub struct Symbol(Atom<EmptyStaticAtomSet>);

@@ -1,25 +1,17 @@
 use std::matches;
 
-use crate::{
-    Ctx,
-    CtxError,
-    FreeCtx,
-    FuncVal,
-    Symbol,
-    Val,
-    ctx::{
-        map::{
-            CtxMap,
-            CtxMapRef,
-            DynRef,
-        },
-        mut1::MutFnCtx,
-        ref1::{
-            CtxMeta,
-            CtxRef,
-        },
-    },
-};
+use crate::Ctx;
+use crate::CtxError;
+use crate::FreeCtx;
+use crate::FuncVal;
+use crate::Symbol;
+use crate::Val;
+use crate::ctx::map::CtxMap;
+use crate::ctx::map::CtxMapRef;
+use crate::ctx::map::DynRef;
+use crate::ctx::mut1::MutFnCtx;
+use crate::ctx::ref1::CtxMeta;
+use crate::ctx::ref1::CtxRef;
 /*
 Why `&mut Ctx`? What we actually need is an owned `Ctx`, because we need to store the ctx when
 evaluating a ctx-aware function. But a `&mut Ctx` is more compact and convenient, and we can
