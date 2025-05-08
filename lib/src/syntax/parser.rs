@@ -60,6 +60,7 @@ use crate::syntax::MAP_LEFT;
 use crate::syntax::MAP_RIGHT;
 use crate::syntax::NUMBER;
 use crate::syntax::PAIR;
+use crate::syntax::QUOTE;
 use crate::syntax::RIGHT;
 use crate::syntax::SCOPE_LEFT;
 use crate::syntax::SCOPE_RIGHT;
@@ -230,8 +231,14 @@ fn comment_token(i: &mut &str) -> ModalResult<()> {
         SCOPE_RIGHT => fail.parse_next(i),
         SEPARATOR => any.void().parse_next(i),
         c if is_spaces(c) => spaces(1 ..).parse_next(i),
-        TEXT_QUOTE => text.void().parse_next(i),
-        SYMBOL_QUOTE => symbol.void().parse_next(i),
+        TEXT_QUOTE => {
+            let text = take_while(0 .., |c| c != TEXT_QUOTE).void();
+            delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).parse_next(i)
+        }
+        SYMBOL_QUOTE => {
+            let symbol = take_while(0 .., |c| c != SYMBOL_QUOTE).void();
+            delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE).parse_next(i)
+        }
 
         _ => {
             let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
@@ -615,7 +622,7 @@ fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     preceded('\\', move |i: &mut _| match any.parse_next(i)? {
         '\\' => empty.value("\\").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
-        SYMBOL_QUOTE => empty.value(concatcp!(SYMBOL_QUOTE)).parse_next(i),
+        QUOTE => empty.value(concatcp!(SYMBOL_QUOTE)).parse_next(i),
         ' ' | '\t' | '\r' | '\n' => multispace0.value("").parse_next(i),
         _ => fail.parse_next(i),
     })
@@ -671,7 +678,7 @@ fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
         't' => empty.value(StrFragment::Char('\t')).parse_next(i),
         '\\' => empty.value(StrFragment::Char('\\')).parse_next(i),
         '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
-        TEXT_QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
+        QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
         ' ' | '\t' | '\r' | '\n' => multispace0.value(StrFragment::Str("")).parse_next(i),
         _ => fail.parse_next(i),
     })

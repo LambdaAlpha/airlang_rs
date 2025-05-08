@@ -40,7 +40,7 @@ a
 =====
 parse text
 -----
-syntax.parse "\"1\""
+syntax.parse "\`1\`"
 -----
 "1"
 =====
@@ -48,4 +48,4 @@ generate text
 -----
 syntax.generate "1"
 -----
-"\"1\""
+"\`1\`"

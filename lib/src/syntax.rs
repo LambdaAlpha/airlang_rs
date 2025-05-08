@@ -44,6 +44,8 @@ pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = ":";
 pub(crate) const CALL: &str = ";";
 
+pub(crate) const QUOTE: char = '`';
+
 pub(crate) fn is_delimiter(c: char) -> bool {
     matches!(
         c,

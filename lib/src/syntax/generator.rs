@@ -21,6 +21,7 @@ use crate::syntax::LIST_RIGHT;
 use crate::syntax::MAP_LEFT;
 use crate::syntax::MAP_RIGHT;
 use crate::syntax::PAIR;
+use crate::syntax::QUOTE;
 use crate::syntax::SCOPE_LEFT;
 use crate::syntax::SCOPE_RIGHT;
 use crate::syntax::SEPARATOR;
@@ -142,7 +143,7 @@ pub(crate) fn escape_symbol(s: &mut String, symbol: &str) {
     for c in symbol.chars() {
         let escaped = match c {
             '\\' => "\\\\",
-            SYMBOL_QUOTE => concatcp!('\\', SYMBOL_QUOTE),
+            SYMBOL_QUOTE => concatcp!('\\', QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -183,7 +184,7 @@ pub(crate) fn escape_text(s: &mut String, str: &str) {
             '\n' => "\\n",
             '\r' => "\\r",
             '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', TEXT_QUOTE),
+            TEXT_QUOTE => concatcp!('\\', QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -200,7 +201,7 @@ pub(crate) fn escape_text_symbol(s: &mut String, str: &str) {
             '\n' => "\\n",
             '\r' => "\\r",
             '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', TEXT_QUOTE),
+            TEXT_QUOTE => concatcp!('\\', QUOTE),
             c if Symbol::is_symbol(c) => &format!("{}", c),
             c => &format!("\\u({:x})", c as u32),
         };
