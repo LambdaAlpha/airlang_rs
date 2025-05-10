@@ -45,3 +45,7 @@ map key
 map value
 -----
 {a : b ; c}
+=====
+reverse
+-----
+a ! b

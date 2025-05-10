@@ -49,7 +49,8 @@ use crate::symbol::Symbol;
 use crate::syntax::ARITY_2;
 use crate::syntax::ARITY_3;
 use crate::syntax::BYTE;
-use crate::syntax::CALL;
+use crate::syntax::CALL_FORWARD;
+use crate::syntax::CALL_REVERSE;
 use crate::syntax::COMMENT;
 use crate::syntax::FALSE;
 use crate::syntax::INT;
@@ -110,7 +111,7 @@ impl Default for ParseCtx<'_> {
             is_tag: false,
             tag: "",
             arity: Arity::Three,
-            struct1: Struct::Call,
+            struct1: Struct::CallForward,
             direction: Direction::Right,
         }
     }
@@ -156,7 +157,8 @@ enum Arity {
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Struct {
     Pair,
-    Call,
+    CallForward,
+    CallReverse,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -385,7 +387,8 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
             PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
-            CALL => scope(ctx.esc_struct(Struct::Call)).parse_next(i),
+            CALL_FORWARD => scope(ctx.esc_struct(Struct::CallForward)).parse_next(i),
+            CALL_REVERSE => scope(ctx.esc_struct(Struct::CallReverse)).parse_next(i),
             LEFT => scope(ctx.esc_direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.esc_direction(Direction::Right)).parse_next(i),
             ARITY_2 => scope(ctx.esc_arity(Arity::Two)).parse_next(i),
@@ -473,7 +476,8 @@ fn compose_one<T: ParseRepr>(ctx: ParseCtx, token: Token<T>) -> T {
 fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
     match ctx.struct1 {
         Struct::Pair => T::from(Pair::new(left, right)),
-        Struct::Call => T::from(Call::new(left, right)),
+        Struct::CallForward => T::from(Call::new(false, left, right)),
+        Struct::CallReverse => T::from(Call::new(true, left, right)),
     }
 }
 
@@ -521,7 +525,8 @@ fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: 
     let middle = match middle {
         Token::Unquote(s) => match &*s {
             PAIR => return T::from(Pair::new(left, right)),
-            CALL => return T::from(Call::new(left, right)),
+            CALL_FORWARD => return T::from(Call::new(false, left, right)),
+            CALL_REVERSE => return T::from(Call::new(true, left, right)),
             _ => T::from(s),
         },
         Token::Default(middle) => middle,

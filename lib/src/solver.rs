@@ -1,11 +1,8 @@
 use crate::FuncVal;
-use crate::MutFnCtx;
 use crate::Val;
+use crate::ctx::ref1::CtxMeta;
 
-pub(crate) fn inverse(_ctx: MutFnCtx, _func: FuncVal, _output: Val) -> Val {
-    Val::default()
-}
-
-pub(crate) fn imply(_ctx: MutFnCtx, _first: Val, _second: Val) -> Val {
+pub(crate) fn reverse<'a, Ctx>(_ctx: Ctx, _func: FuncVal, _output: Val) -> Val
+where Ctx: CtxMeta<'a> {
     Val::default()
 }

@@ -185,7 +185,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
             Repr::Call(call) => {
                 let func = (&call.func).try_into()?;
                 let input = (&call.input).try_into()?;
-                GenRepr::Call(Box::new(Call::new(func, input)))
+                GenRepr::Call(Box::new(Call::new(call.reverse, func, input)))
             }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;

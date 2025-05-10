@@ -14,7 +14,8 @@ use crate::number::Number;
 use crate::pair::Pair;
 use crate::symbol::Symbol;
 use crate::syntax::BYTE;
-use crate::syntax::CALL;
+use crate::syntax::CALL_FORWARD;
+use crate::syntax::CALL_REVERSE;
 use crate::syntax::FALSE;
 use crate::syntax::LIST_LEFT;
 use crate::syntax::LIST_RIGHT;
@@ -253,19 +254,22 @@ fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
 }
 
 fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
-    if let GenRepr::Pair(pair) = call.input {
-        gen_scope_if_need(ctx, s, pair.first);
-        s.push(' ');
-        gen_scope_if_need(ctx, s, call.func);
-        s.push(' ');
-        gen1(ctx, s, pair.second);
-    } else {
-        gen_scope_if_need(ctx, s, call.func);
-        s.push(' ');
-        s.push_str(CALL);
-        s.push(' ');
-        gen1(ctx, s, call.input);
+    if !call.reverse {
+        if let GenRepr::Pair(pair) = call.input {
+            gen_scope_if_need(ctx, s, pair.first);
+            s.push(' ');
+            gen_scope_if_need(ctx, s, call.func);
+            s.push(' ');
+            gen1(ctx, s, pair.second);
+            return;
+        }
     }
+    gen_scope_if_need(ctx, s, call.func);
+    s.push(' ');
+    let infix = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
+    s.push_str(infix);
+    s.push(' ');
+    gen1(ctx, s, call.input);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {

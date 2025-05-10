@@ -391,7 +391,7 @@ impl GenerateMode<Val> for CallMode {
         let input = GenerateMode::generate(&self.input, default);
         match self.code {
             CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
-            CodeMode::Eval => Val::Call(Call::new(func, input).into()),
+            CodeMode::Eval => Val::Call(Call::new(false, func, input).into()),
         }
     }
 }

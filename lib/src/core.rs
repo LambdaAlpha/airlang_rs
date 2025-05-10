@@ -83,7 +83,7 @@ impl FormCore {
         let call = Call::from(call);
         let func = func.transform(ctx.reborrow(), call.func);
         let input = input.transform(ctx, call.input);
-        Val::Call(Call::new(func, input).into())
+        Val::Call(Call { reverse: call.reverse, func, input }.into())
     }
 
     pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val
@@ -173,64 +173,74 @@ impl EvalCore {
         Input: Transformer<Val, Val>, {
         let call = Call::from(call);
         let func = func_trans.transform(ctx.reborrow(), call.func);
-        Self::eval_input_then_call(input_trans, ctx, func, call.input)
+        Self::eval_input_then_call(input_trans, ctx, call.reverse, func, call.input)
     }
 
     pub(crate) fn eval_input_then_call<'a, Ctx, Input>(
-        input_trans: &Input, mut ctx: Ctx, func: Val, input: Val,
+        input_trans: &Input, mut ctx: Ctx, reverse: bool, func: Val, input: Val,
     ) -> Val
     where
         Ctx: CtxMeta<'a>,
         Input: Transformer<Val, Val>, {
         match func {
             Val::Func(func) => {
-                let input = func.mode().call.transform(ctx.reborrow(), input);
-                func.transform(ctx, input)
+                let input = if reverse {
+                    func.mode().reverse.transform(ctx.reborrow(), input)
+                } else {
+                    func.mode().forward.transform(ctx.reborrow(), input)
+                };
+                Self::call_func(ctx, reverse, func, input)
             }
-            Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
-                let input = Self::call_ref_eval_input(func, ctx, is_const, input);
-                Self::call_ref(func, ctx, is_const, input)
-            }),
+            Val::Symbol(func) => {
+                if reverse {
+                    let input = input_trans.transform(ctx, input);
+                    return Val::Call(Call::new(true, Val::Symbol(func), input).into());
+                }
+                Self::with_ref(ctx, func, |func, ctx, is_const| {
+                    let input = Self::call_ref_eval_input(func, ctx, is_const, input);
+                    Self::call_ref(func, ctx, is_const, input)
+                })
+            }
             _ => {
                 let input = input_trans.transform(ctx, input);
-                Val::Call(Call::new(func, input).into())
+                Val::Call(Call::new(reverse, func, input).into())
             }
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn call_eval_input<'a, Ctx, Input>(
-        input_trans: &Input, ctx: Ctx, func: &Val, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        match func {
-            Val::Func(func) => func.mode().call.transform(ctx, input),
-            Val::Symbol(func) => Self::with_ref(ctx, func.clone(), |func, ctx, is_const| {
-                Self::call_ref_eval_input(func, ctx, is_const, input)
-            }),
-            _ => input_trans.transform(ctx, input),
         }
     }
 
     fn call_ref_eval_input(func: &FuncVal, ctx: &mut Ctx, is_const: bool, input: Val) -> Val {
         if is_const {
-            func.mode().call.transform(ConstCtx::new(ctx), input)
+            func.mode().forward.transform(ConstCtx::new(ctx), input)
         } else {
-            func.mode().call.transform(MutCtx::new(ctx), input)
+            func.mode().forward.transform(MutCtx::new(ctx), input)
         }
     }
 
-    pub(crate) fn call<'a, Ctx>(ctx: Ctx, func: Val, input: Val) -> Val
+    pub(crate) fn call<'a, Ctx>(ctx: Ctx, reverse: bool, func: Val, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
         match func {
-            Val::Func(func) => func.transform(ctx, input),
+            Val::Func(func) => Self::call_func(ctx, reverse, func, input),
             Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
                 Self::call_ref(func, ctx, is_const, input)
             }),
-            _ => Val::Call(Call::new(func, input).into()),
+            _ => Val::Call(Call::new(reverse, func, input).into()),
         }
+    }
+
+    fn call_func<'a, Ctx>(ctx: Ctx, reverse: bool, func: FuncVal, input: Val) -> Val
+    where Ctx: CtxMeta<'a> {
+        if reverse { Self::reverse_func(ctx, func, input) } else { func.transform(ctx, input) }
+    }
+
+    fn reverse_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
+    where Ctx: CtxMeta<'a> {
+        let question = Val::Call(Call::new(true, Val::Func(func.clone()), input.clone()).into());
+        if let Some(answer) = EvalCore::call_solver(ctx.reborrow(), question) {
+            if !answer.is_unit() {
+                return answer;
+            }
+        }
+        crate::solver::reverse(ctx, func, input)
     }
 
     fn call_ref(func: &mut FuncVal, ctx: &mut Ctx, is_const: bool, input: Val) -> Val {

@@ -431,11 +431,11 @@ do [
 -----
 false
 =====
-mode func call mode
+mode func forward mode
 -----
 do [
     m = mode ; *not,
-    f = function ; {call_mode : ^m, call : (._ : .i) : .i},
+    f = function ; {forward_mode : ^m, code : (._ : .i) : .i},
     f true
 ]
 -----
@@ -509,7 +509,7 @@ recursive call
 -----
 do [
     f = function ; {
-        call : (._ : .i) : .i,
+        code : (._ : .i) : .i,
     },
     f ; not ; true
 ]
@@ -520,7 +520,7 @@ call external func
 -----
 do [
     f = function ; {
-        call : (._ : .i) : not ; .i
+        code : (._ : .i) : not ; .i
     },
     f ; not ; true
 ]
@@ -531,7 +531,7 @@ call internal func
 -----
 do [
     f = function ; {
-        call : (._ : .i) : .not ; .i,
+        code : (._ : .i) : .not ; .i,
         context : context ; {variables :  {not : not}},
     },
     f ; not ; true
@@ -543,7 +543,7 @@ call rename
 -----
 do [
     f = function ; {
-        call : (._ : .a) : .n ; .a,
+        code : (._ : .a) : .n ; .a,
         context : context ; {variables :  {n : not}},
     },
     f ; not ; true
@@ -555,7 +555,7 @@ cell free
 -----
 do [
     f = function ; {
-        call : ._ : do ; [.a = .a + 1, .a],
+        code : ._ : do ; [.a = .a + 1, .a],
         context_access : free,
         cell : true,
         context : context ; {variables : {a : 0}},
@@ -570,7 +570,7 @@ cell const
 do [
     a = 1,
     f = function ; {
-        call : (.c : ._) : do ; [.b = .b + .c | ..a, .b],
+        code : (.c : ._) : do ; [.b = .b + .c | ..a, .b],
         context_access : constant,
         cell : true,
         context : context ; {variables : {
@@ -587,7 +587,7 @@ cell mutable
 do [
     a = 1,
     f = function ; {
-        call : (.c : ._) : do ; [
+        code : (.c : ._) : do ; [
             .b = .b + .c | ..a,
             .c | ..a = ..a + 1,
             .b,
@@ -608,7 +608,7 @@ const const
 do [
     a = 1,
     f = function ; {
-        call : (.c : ._) : .c | ..a,
+        code : (.c : ._) : .c | ..a,
         context_access : constant,
     },
     f .
@@ -621,7 +621,7 @@ mutable const
 do [
     a = 1,
     f = function ; {
-        call : (.c : ._) : .c | ..a,
+        code : (.c : ._) : .c | ..a,
         context_access : mutable,
     },
     f .
@@ -633,8 +633,8 @@ mutable mutate
 -----
 do [
     f = function ; {
-        call : (.c : .i) : .c | .i = 2,
-        call_mode : id,
+        code : (.c : .i) : .c | .i = 2,
+        forward_mode : id,
         context_access : mutable,
     },
     a = 1,
@@ -648,8 +648,8 @@ mutable mutate fail
 -----
 do [
     f = function ; {
-        call : (.c : .i) : .c | .i = 2,
-        call_mode : id,
+        code : (.c : .i) : .c | .i = 2,
+        forward_mode : id,
         context_access : mutable,
     },
     (a . mutable) = 1,
@@ -663,8 +663,8 @@ const mutate fail
 -----
 do [
     f = function ; {
-        call : (.c : .i) : .c | .i = 2,
-        call_mode : id,
+        code : (.c : .i) : .c | .i = 2,
+        forward_mode : id,
         context_access : constant,
     },
     a = 1,
@@ -678,7 +678,7 @@ const free
 -----
 do [
     f = function ; {
-        call : (._c : ._) : 1,
+        code : (._c : ._) : 1,
         context_access : constant,
     },
     . | f ; .
@@ -691,7 +691,7 @@ ctx name occupied
 do [
     a = 1,
     f = function ; {
-        call : (.ctx : ._) : 2,
+        code : (.ctx : ._) : 2,
         context_access : constant,
         context : context ; {variables : {ctx : 3 . .constant}},
     },
@@ -706,7 +706,7 @@ reverse ctx
 do [
     a = 1,
     f = function ; {
-        call : (.ctx : ._) : .ctx = 2,
+        code : (.ctx : ._) : .ctx = 2,
         context_access : constant,
         context : context ; {reverse : true},
     },
@@ -718,9 +718,9 @@ do [
 =====
 repr
 -----
-function.represent ; function ; {call : (._ : .i) : .i}
+function.represent ; function ; {code : (._ : .i) : .i}
 -----
-{call : (_ : i) : i}
+{code : (_ : i) : i}
 =====
 repr primitive free
 -----
@@ -730,9 +730,9 @@ function.represent not
 =====
 repr const
 -----
-function.represent ; function ; {call : (._ : .i) : .i, context_access : constant}
+function.represent ; function ; {code : (._ : .i) : .i, context_access : constant}
 -----
-{call : (_ : i) : i, context_access : constant}
+{code : (_ : i) : i, context_access : constant}
 =====
 repr primitive const
 -----
@@ -743,10 +743,12 @@ function.represent ==
 repr composite
 -----
 do [
-    call_mode = mode ; {pair : eval* : id},
+    forward_mode = mode ; {pair : eval* : id},
+    reverse_mode = mode ; {pair : eval* : id},
     repr = form. ; {
-        call : (.ctx : .in) : in,
-        call_mode : ^call_mode,
+        code : (.ctx : .in) : in,
+        forward_mode : ^forward_mode,
+        reverse_mode : ^reverse_mode,
         context_access : constant,
         cell : true,
     },
@@ -780,56 +782,62 @@ do [f = function ; {}, f function.context_access .]
 -----
 mutable
 =====
-call mode primitive
+forward mode primitive
 -----
-function.represent ; not function.call_mode .
+function.represent ; not function.forward_mode .
 -----
 eval*
 =====
-call mode mode
+forward mode mode
 -----
-function.represent ; eval* function.call_mode .
+function.represent ; eval* function.forward_mode .
 -----
 id
 =====
-call mode default
+forward mode default
 -----
-do [f = function ; {}, function.represent ; f function.call_mode .]
+do [f = function ; {}, function.represent ; f function.forward_mode .]
 -----
 eval*
 =====
-call mode 1
+forward mode 1
 -----
 do [
     f = function ; {
-        call_mode : mode ; {pair : eval* : form.},
+        forward_mode : mode ; {pair : eval* : form.},
     },
-    function.represent ; f function.call_mode .
+    function.represent ; f function.forward_mode .
 ]
 -----
 {pair : eval* : form.}
 =====
-call mode 2
+forward mode 2
 -----
 do [
     f = function ; {
-        call_mode : mode ; {list : [eval*, form., id] : form.},
+        forward_mode : mode ; {list : [eval*, form., id] : form.},
     },
-    function.represent ; f function.call_mode .
+    function.represent ; f function.forward_mode .
 ]
 -----
 {list : [eval*, form., id] : form.}
 =====
-call mode 3
+forward mode 3
 -----
 do [
     f = function ; {
-        call_mode : mode ; {map : {a : eval*, b : id} : id : form.},
+        forward_mode : mode ; {map : {a : eval*, b : id} : id : form.},
     },
-    function.represent ; f function.call_mode .
+    function.represent ; f function.forward_mode .
 ]
 -----
 {map : {a : eval*, b : id} : id : form.}
+=====
+reverse mode
+-----
+function.represent ; not function.reverse_mode .
+-----
+eval*
 =====
 is_primitive primitive
 -----
@@ -873,9 +881,9 @@ do [neg = not, neg function.id .]
 -----
 not
 =====
-call
+code
 -----
-do [f = function ; {call : (.ctx : .i) : .i}, f function.call .]
+do [f = function ; {code : (.ctx : .i) : .i}, f function.code .]
 -----
 (ctx : i) : i
 =====

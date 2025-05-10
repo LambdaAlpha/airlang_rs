@@ -78,8 +78,9 @@ fn fn_into_text(input: Val) -> Val {
 fn length() -> Named<FuncVal> {
     let id = "symbol.length";
     let f = fn_length;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 

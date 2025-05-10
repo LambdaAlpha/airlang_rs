@@ -81,7 +81,7 @@ fn parse_binding(val: Val) -> Option<Binding> {
     match val {
         Val::Symbol(name) => Some(Binding { name, extra: Extra::default() }),
         Val::Call(call) => {
-            if !call.func.is_unit() {
+            if call.reverse || !call.func.is_unit() {
                 return None;
             }
             let call = Call::from(call);
@@ -178,7 +178,7 @@ fn generate_binding(binding: Binding) -> Val {
     }
     let extra = generate_extra(binding.extra);
     let pair = Pair::new(Val::Symbol(binding.name), extra);
-    Val::Call(Call::new(Val::default(), Val::Pair(pair.into())).into())
+    Val::Call(Call::new(false, Val::default(), Val::Pair(pair.into())).into())
 }
 
 fn generate_extra(extra: Extra) -> Val {

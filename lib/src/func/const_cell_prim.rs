@@ -38,7 +38,7 @@ impl FuncTrait for ConstCellPrimFunc {
         &self.mode
     }
 
-    fn call(&self) -> Val {
+    fn code(&self) -> Val {
         Val::default()
     }
 

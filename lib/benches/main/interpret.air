@@ -2,7 +2,7 @@ _("bench interpret")
 
 do ; [
   f = function ; {
-    call : .n : do ; [
+    code : .n : do ; [
       .sum = 0,
       .n for .i : [
         (0 == .i % 3) .continue .,

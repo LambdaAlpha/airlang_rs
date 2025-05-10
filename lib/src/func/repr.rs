@@ -39,10 +39,11 @@ use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
 use crate::val::func::mut_cell_comp::MutCellCompFuncVal;
 use crate::val::func::mut_cell_prim::MutCellPrimFuncVal;
 
-pub(crate) const CALL: &str = "call";
+pub(crate) const CODE: &str = "code";
 pub(crate) const CTX: &str = "context";
 pub(crate) const ID: &str = "id";
-pub(crate) const CALL_MODE: &str = "call_mode";
+pub(crate) const FORWARD_MODE: &str = "forward_mode";
+pub(crate) const REVERSE_MODE: &str = "reverse_mode";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
 
@@ -53,7 +54,7 @@ pub(crate) const MUTABLE: &str = "mutable";
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
     map.insert(symbol(ID), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal));
-    map.insert(symbol(CALL), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref));
+    map.insert(symbol(CODE), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref));
     map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
     FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
 }
@@ -69,7 +70,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         _ => return None,
     }
 
-    let (ctx_name, input_name, body) = match map_remove(&mut map, CALL) {
+    let (ctx_name, input_name, body) = match map_remove(&mut map, CODE) {
         Val::Unit(_) => (Some(Symbol::default()), Symbol::default(), Val::default()),
         Val::Pair(names_body) => {
             let names_body = Pair::from(names_body);
@@ -94,12 +95,17 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Unit(_) => Ctx::default(),
         _ => return None,
     };
-    let call = match map_remove(&mut map, CALL_MODE) {
+    let forward = match map_remove(&mut map, FORWARD_MODE) {
         Val::Unit(_) => FuncMode::default_mode(),
         Val::Func(FuncVal::Mode(call_mode)) => call_mode.inner().clone(),
         _ => return None,
     };
-    let mode = FuncMode { call };
+    let reverse = match map_remove(&mut map, REVERSE_MODE) {
+        Val::Unit(_) => FuncMode::default_mode(),
+        Val::Func(FuncVal::Mode(call_mode)) => call_mode.inner().clone(),
+        _ => return None,
+    };
+    let mode = FuncMode { forward, reverse };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
@@ -263,9 +269,9 @@ fn generate_primitive_prelude(id: Symbol) -> Val {
 }
 
 fn generate_call<F: FuncTrait>(repr: &mut Map<Val, Val>, func: &F) {
-    let call = func.call();
-    if !call.is_unit() {
-        repr.insert(symbol(CALL), call);
+    let code = func.code();
+    if !code.is_unit() {
+        repr.insert(symbol(CODE), code);
     }
 }
 
@@ -288,8 +294,12 @@ fn generate_func_common(repr: &mut Map<Val, Val>, common: FuncCommon) {
     if common.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(common.access));
     }
-    if common.mode.call != FuncMode::default_mode() {
-        let call_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.call).into()));
-        repr.insert(symbol(CALL_MODE), call_mode);
+    if common.mode.forward != FuncMode::default_mode() {
+        let forward_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.forward).into()));
+        repr.insert(symbol(FORWARD_MODE), forward_mode);
+    }
+    if common.mode.reverse != FuncMode::default_mode() {
+        let reverse_mode = Val::Func(FuncVal::Mode(ModeFunc::new(common.mode.reverse).into()));
+        repr.insert(symbol(REVERSE_MODE), reverse_mode);
     }
 }

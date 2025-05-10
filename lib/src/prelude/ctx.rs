@@ -109,8 +109,9 @@ impl Prelude for CtxPrelude {
 fn read() -> Named<FuncVal> {
     let id = "read";
     let f = fn_read;
-    let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -124,8 +125,9 @@ fn fn_read(ctx: ConstFnCtx, input: Val) -> Val {
 fn move1() -> Named<FuncVal> {
     let id = "move";
     let f = fn_move;
-    let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -142,11 +144,12 @@ fn fn_move(ctx: MutFnCtx, input: Val) -> Val {
 fn assign() -> Named<FuncVal> {
     let id = "=";
     let f = fn_assign;
-    let call = FuncMode::pair_mode(
+    let forward = FuncMode::pair_mode(
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
         FuncMode::default_mode(),
     );
-    let mode = FuncMode { call };
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -166,11 +169,12 @@ fn fn_assign(ctx: MutFnCtx, input: Val) -> Val {
 fn set_variable_access() -> Named<FuncVal> {
     let id = "set_variable_access";
     let f = fn_set_variable_access;
-    let call = FuncMode::pair_mode(
+    let forward = FuncMode::pair_mode(
         FuncMode::symbol_mode(SymbolMode::Literal),
         FuncMode::symbol_mode(SymbolMode::Literal),
     );
-    let mode = FuncMode { call };
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -198,8 +202,9 @@ fn fn_set_variable_access(ctx: MutFnCtx, input: Val) -> Val {
 fn get_variable_access() -> Named<FuncVal> {
     let id = "variable_access";
     let f = fn_get_variable_access;
-    let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -219,8 +224,9 @@ fn fn_get_variable_access(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_null() -> Named<FuncVal> {
     let id = "is_null";
     let f = fn_is_null;
-    let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -237,8 +243,9 @@ fn fn_is_null(ctx: ConstFnCtx, input: Val) -> Val {
 fn is_static() -> Named<FuncVal> {
     let id = "is_static";
     let f = fn_is_static;
-    let call = FuncMode::symbol_mode(SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -294,8 +301,9 @@ fn fn_set_reverse(input: Val) -> Val {
 fn get_ctx_access() -> Named<FuncVal> {
     let id = "access";
     let f = fn_get_ctx_access;
-    let call = FuncMode::default_mode();
-    let mode = FuncMode { call };
+    let forward = FuncMode::default_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -315,8 +323,9 @@ fn fn_get_ctx_access(ctx: MutFnCtx, _input: Val) -> Val {
 fn get_solver() -> Named<FuncVal> {
     let id = "solver";
     let f = fn_get_solver;
-    let call = FuncMode::default_mode();
-    let mode = FuncMode { call };
+    let forward = FuncMode::default_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -350,11 +359,12 @@ fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
 fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = fn_with_ctx;
-    let call = FuncMode::pair_mode(
+    let forward = FuncMode::pair_mode(
         FuncMode::id_mode(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
-    let mode = FuncMode { call };
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -390,11 +400,12 @@ fn fn_with_ctx(ctx: MutFnCtx, input: Val) -> Val {
 fn ctx_in_ctx_out() -> Named<FuncVal> {
     let id = "|:";
     let f = fn_ctx_in_ctx_out;
-    let call = FuncMode::pair_mode(
+    let forward = FuncMode::pair_mode(
         FuncMode::default_mode(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
     );
-    let mode = FuncMode { call };
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_free_fn(id, f, mode)
 }
 
@@ -416,8 +427,9 @@ fn fn_ctx_in_ctx_out(input: Val) -> Val {
 fn ctx_new() -> Named<FuncVal> {
     let id = "context";
     let f = fn_ctx_new;
-    let call = parse_mode();
-    let mode = FuncMode { call };
+    let forward = parse_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_free_fn(id, f, mode)
 }
 
@@ -431,8 +443,9 @@ fn fn_ctx_new(input: Val) -> Val {
 fn ctx_repr() -> Named<FuncVal> {
     let id = "context.represent";
     let f = fn_ctx_repr;
-    let call = FuncMode::default_mode();
-    let mode = FuncMode { call };
+    let forward = FuncMode::default_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_free_fn(id, f, mode)
 }
 

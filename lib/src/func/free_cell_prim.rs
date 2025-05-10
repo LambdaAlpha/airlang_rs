@@ -37,7 +37,7 @@ impl FuncTrait for FreeCellPrimFunc {
         &self.mode
     }
 
-    fn call(&self) -> Val {
+    fn code(&self) -> Val {
         Val::default()
     }
 

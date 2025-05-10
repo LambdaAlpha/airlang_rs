@@ -65,8 +65,9 @@ fn fn_new(input: Val) -> Val {
 fn get_first() -> Named<FuncVal> {
     let id = "pair.first";
     let f = fn_get_first;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -90,8 +91,9 @@ fn fn_get_first(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_first() -> Named<FuncVal> {
     let id = "pair.set_first";
     let f = fn_set_first;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
@@ -117,8 +119,9 @@ fn fn_set_first(ctx: MutFnCtx, input: Val) -> Val {
 fn get_second() -> Named<FuncVal> {
     let id = "pair.second";
     let f = fn_get_second;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -142,8 +145,9 @@ fn fn_get_second(ctx: ConstFnCtx, input: Val) -> Val {
 fn set_second() -> Named<FuncVal> {
     let id = "pair.set_second";
     let f = fn_set_second;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 

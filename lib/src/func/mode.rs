@@ -34,10 +34,10 @@ impl Transformer<Val, Val> for ModeFunc {
 
 impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
-        &FuncMode { call: None }
+        &FuncMode { forward: None, reverse: None }
     }
 
-    fn call(&self) -> Val {
+    fn code(&self) -> Val {
         Val::default()
     }
 }

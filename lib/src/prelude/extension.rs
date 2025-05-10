@@ -31,8 +31,9 @@ impl Prelude for ExtPrelude {
 fn is_ext() -> Named<FuncVal> {
     let id = "is_extension";
     let f = fn_is_ext;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 

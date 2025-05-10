@@ -81,21 +81,21 @@ impl FuncTrait for FuncVal {
         }
     }
 
-    fn call(&self) -> Val {
+    fn code(&self) -> Val {
         match self {
-            FuncVal::Mode(f) => f.call(),
-            FuncVal::FreeCellPrim(f) => f.call(),
-            FuncVal::FreeCellComp(f) => f.call(),
-            FuncVal::FreeStaticPrim(f) => f.call(),
-            FuncVal::FreeStaticComp(f) => f.call(),
-            FuncVal::ConstCellPrim(f) => f.call(),
-            FuncVal::ConstCellComp(f) => f.call(),
-            FuncVal::ConstStaticPrim(f) => f.call(),
-            FuncVal::ConstStaticComp(f) => f.call(),
-            FuncVal::MutCellPrim(f) => f.call(),
-            FuncVal::MutCellComp(f) => f.call(),
-            FuncVal::MutStaticPrim(f) => f.call(),
-            FuncVal::MutStaticComp(f) => f.call(),
+            FuncVal::Mode(f) => f.code(),
+            FuncVal::FreeCellPrim(f) => f.code(),
+            FuncVal::FreeCellComp(f) => f.code(),
+            FuncVal::FreeStaticPrim(f) => f.code(),
+            FuncVal::FreeStaticComp(f) => f.code(),
+            FuncVal::ConstCellPrim(f) => f.code(),
+            FuncVal::ConstCellComp(f) => f.code(),
+            FuncVal::ConstStaticPrim(f) => f.code(),
+            FuncVal::ConstStaticComp(f) => f.code(),
+            FuncVal::MutCellPrim(f) => f.code(),
+            FuncVal::MutCellComp(f) => f.code(),
+            FuncVal::MutStaticPrim(f) => f.code(),
+            FuncVal::MutStaticComp(f) => f.code(),
         }
     }
 
@@ -247,8 +247,8 @@ macro_rules! impl_const_func_trait {
                 self.0.mode()
             }
 
-            fn call(&self) -> $crate::val::Val {
-                self.0.call()
+            fn code(&self) -> $crate::val::Val {
+                self.0.code()
             }
 
             fn transform_mut<'a, Ctx>(

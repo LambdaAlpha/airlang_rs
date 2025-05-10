@@ -6,7 +6,7 @@ use crate::val::Val;
 pub(crate) trait FuncTrait: Transformer<Val, Val> {
     fn mode(&self) -> &FuncMode;
 
-    fn call(&self) -> Val;
+    fn code(&self) -> Val;
 
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
     where Ctx: CtxMeta<'a> {

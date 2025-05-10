@@ -14,7 +14,8 @@ use crate::Val;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FuncMode {
-    pub call: Option<Mode>,
+    pub forward: Option<Mode>,
+    pub reverse: Option<Mode>,
 }
 
 impl FuncMode {
@@ -27,7 +28,7 @@ impl FuncMode {
     }
 
     pub fn id_func_mode() -> FuncMode {
-        FuncMode { call: None }
+        FuncMode { forward: None, reverse: None }
     }
 
     pub const fn id_mode() -> Option<Mode> {
@@ -81,6 +82,6 @@ impl FuncMode {
 
 impl Default for FuncMode {
     fn default() -> Self {
-        Self { call: Self::default_mode() }
+        Self { forward: Self::default_mode(), reverse: Self::default_mode() }
     }
 }

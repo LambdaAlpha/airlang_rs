@@ -18,7 +18,8 @@ use crate::ctx::repr::Extra;
 use crate::ctx::repr::parse_extra;
 use crate::mode::symbol::LITERAL_CHAR;
 use crate::mode::symbol::REF_CHAR;
-use crate::syntax::CALL;
+use crate::syntax::CALL_FORWARD;
+use crate::syntax::CALL_REVERSE;
 use crate::utils::val::symbol;
 
 pub(crate) enum Pattern {
@@ -67,26 +68,29 @@ fn parse_pair(ctx: PatternCtx, pair: PairVal) -> Option<Pattern> {
 
 fn parse_call(ctx: PatternCtx, call: CallVal) -> Option<Pattern> {
     let call = Call::from(call);
+    if call.reverse {
+        return parse_call1(ctx, call.reverse, call.func, call.input);
+    }
     match call.func {
         Val::Unit(_) => parse_with_extra(ctx, call.input),
         Val::Symbol(symbol) => match &*symbol {
-            CALL => {
+            CALL_FORWARD | CALL_REVERSE => {
                 let Val::Pair(pair) = call.input else {
                     return None;
                 };
                 let pair = Pair::from(pair);
-                parse_call1(ctx, pair.first, pair.second)
+                parse_call1(ctx, &*symbol == CALL_REVERSE, pair.first, pair.second)
             }
             _ => None,
         },
-        func => parse_call1(ctx, func, call.input),
+        func => parse_call1(ctx, false, func, call.input),
     }
 }
 
-fn parse_call1(ctx: PatternCtx, func: Val, input: Val) -> Option<Pattern> {
+fn parse_call1(ctx: PatternCtx, reverse: bool, func: Val, input: Val) -> Option<Pattern> {
     let func = parse_pattern(ctx, func)?;
     let input = parse_pattern(ctx, input)?;
-    Some(Pattern::Call(Box::new(Call::new(func, input))))
+    Some(Pattern::Call(Box::new(Call::new(reverse, func, input))))
 }
 
 fn parse_list(ctx: PatternCtx, list: ListVal) -> Option<Pattern> {
@@ -218,10 +222,13 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
     let Val::Call(val) = val else {
         return Val::default();
     };
+    if pattern.reverse != val.reverse {
+        return Val::default();
+    }
     let val = Call::from(val);
     let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
     let input = assign_pattern(ctx, pattern.input, val.input);
-    Val::Call(Call::new(func, input).into())
+    Val::Call(Call::new(val.reverse, func, input).into())
 }
 
 fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {

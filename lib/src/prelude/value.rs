@@ -70,8 +70,9 @@ impl Prelude for ValuePrelude {
 fn any() -> Named<FuncVal> {
     let id = "any";
     let f = fn_any;
-    let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_free_fn(id, f, mode)
 }
 
@@ -104,8 +105,9 @@ fn fn_any(input: Val) -> Val {
 fn type1() -> Named<FuncVal> {
     let id = "type";
     let f = fn_type1;
-    let call = ref_pair_mode();
-    let mode = FuncMode { call };
+    let forward = ref_pair_mode();
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
@@ -138,8 +140,9 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
 fn equal() -> Named<FuncVal> {
     let id = "==";
     let f = fn_equal;
-    let call = FuncMode::pair_mode(ref_mode(), ref_mode());
-    let mode = FuncMode { call };
+    let forward = FuncMode::pair_mode(ref_mode(), ref_mode());
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 

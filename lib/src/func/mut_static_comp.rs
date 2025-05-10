@@ -31,7 +31,7 @@ impl FuncTrait for MutStaticCompFunc {
         &self.mode
     }
 
-    fn call(&self) -> Val {
+    fn code(&self) -> Val {
         let ctx = self.ctx_name.clone();
         let input = self.comp.input_name.clone();
         let output = self.comp.body.clone();

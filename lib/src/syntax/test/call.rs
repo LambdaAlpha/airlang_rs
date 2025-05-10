@@ -4,6 +4,7 @@ use crate::syntax::test::infix_call;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
+use crate::syntax::test::reverse;
 use crate::syntax::test::symbol;
 
 pub(crate) fn expected() -> Vec<Repr> {
@@ -20,5 +21,6 @@ pub(crate) fn expected() -> Vec<Repr> {
         list(vec![call(symbol("a"), symbol("b"))]),
         map(vec![(call(symbol("a"), symbol("b")), symbol("c"))]),
         map(vec![(symbol("a"), call(symbol("b"), symbol("c")))]),
+        reverse(symbol("a"), symbol("b")),
     ]
 }

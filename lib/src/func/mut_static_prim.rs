@@ -39,7 +39,7 @@ impl FuncTrait for MutStaticPrimFunc {
         &self.mode
     }
 
-    fn call(&self) -> Val {
+    fn code(&self) -> Val {
         Val::default()
     }
 }

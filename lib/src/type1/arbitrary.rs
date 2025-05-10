@@ -217,7 +217,7 @@ where
     Input: Arbitrary,
 {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        Call::new(Func::any(rng, depth), Input::any(rng, depth))
+        Call::new(rng.random(), Func::any(rng, depth), Input::any(rng, depth))
     }
 }
 
@@ -438,8 +438,9 @@ impl Arbitrary for FuncVal {
 
 impl Arbitrary for FuncMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let call = Arbitrary::any(rng, depth);
-        FuncMode { call }
+        let forward = Arbitrary::any(rng, depth);
+        let reverse = Arbitrary::any(rng, depth);
+        FuncMode { forward, reverse }
     }
 }
 

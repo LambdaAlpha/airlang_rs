@@ -4,6 +4,8 @@ use std::str::FromStr;
 use num_bigint::BigInt;
 use num_traits::Num;
 
+use crate::Call;
+use crate::Pair;
 use crate::bit::Bit;
 use crate::int::Int;
 use crate::map::Map;
@@ -83,7 +85,11 @@ fn pair(first: Repr, second: Repr) -> Repr {
 }
 
 fn call(func: Repr, input: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(func, input)))
+    Repr::Call(Box::new(CallRepr::new(false, func, input)))
+}
+
+fn reverse(func: Repr, input: Repr) -> Repr {
+    Repr::Call(Box::new(CallRepr::new(true, func, input)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -97,21 +103,31 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
 fn tag_pair(tag: &str, v: Vec<Repr>) -> Repr {
     let first = Repr::Symbol(Symbol::from_str(tag));
     let second = Repr::List(v.into());
-    Repr::Pair(Box::new(PairRepr::new(first, second)))
+    Repr::Pair(Box::new(Pair::new(first, second)))
 }
 
 fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
-    Repr::Call(Box::new(CallRepr::new(func, input)))
+    Repr::Call(Box::new(Call::new(false, func, input)))
+}
+
+fn tag_reverse(tag: &str, v: Vec<Repr>) -> Repr {
+    let func = Repr::Symbol(Symbol::from_str(tag));
+    let input = Repr::List(v.into());
+    Repr::Call(Box::new(Call::new(true, func, input)))
 }
 
 fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Pair(Box::new(PairRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
+    Repr::Pair(Box::new(Pair::new(middle, Repr::Pair(Box::new(Pair::new(left, right))))))
 }
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(middle, Repr::Pair(Box::new(PairRepr::new(left, right))))))
+    Repr::Call(Box::new(Call::new(false, middle, Repr::Pair(Box::new(Pair::new(left, right))))))
+}
+
+fn infix_reverse(left: Repr, middle: Repr, right: Repr) -> Repr {
+    Repr::Call(Box::new(Call::new(true, middle, Repr::Pair(Box::new(Pair::new(left, right))))))
 }
 
 fn test_parse(

@@ -30,8 +30,9 @@ impl Prelude for ProcessPrelude {
 fn call() -> Named<FuncVal> {
     let id = "$";
     let f = fn_call;
-    let call = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
-    let mode = FuncMode { call };
+    let forward = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_free_fn(id, f, mode)
 }
 
