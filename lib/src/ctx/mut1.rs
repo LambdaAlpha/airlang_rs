@@ -6,7 +6,6 @@ use crate::ConstFnCtx;
 use crate::Ctx;
 use crate::CtxError;
 use crate::FreeCtx;
-use crate::FuncVal;
 use crate::Symbol;
 use crate::Val;
 use crate::ctx::map::CtxMap;
@@ -36,22 +35,6 @@ impl<'l> CtxRef<'l> for MutCtx<'l> {
 
     fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
         self.0.get_variables_dyn()
-    }
-
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
-        self.0.get_solver()
-    }
-
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
-        self.0.get_solver_mut()
-    }
-
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
-        self.0.get_solver_dyn()
-    }
-
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
-        self.0.set_solver(solver)
     }
 }
 
@@ -103,38 +86,6 @@ impl<'l> CtxRef<'l> for MutFnCtx<'l> {
             MutFnCtx::Free(ctx) => ctx.get_variables_dyn(),
             MutFnCtx::Const(ctx) => ctx.get_variables_dyn(),
             MutFnCtx::Mut(ctx) => ctx.get_variables_dyn(),
-        }
-    }
-
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.get_solver(),
-            MutFnCtx::Const(ctx) => ctx.get_solver(),
-            MutFnCtx::Mut(ctx) => ctx.get_solver(),
-        }
-    }
-
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.get_solver_mut(),
-            MutFnCtx::Const(ctx) => ctx.get_solver_mut(),
-            MutFnCtx::Mut(ctx) => ctx.get_solver_mut(),
-        }
-    }
-
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.get_solver_dyn(),
-            MutFnCtx::Const(ctx) => ctx.get_solver_dyn(),
-            MutFnCtx::Mut(ctx) => ctx.get_solver_dyn(),
-        }
-    }
-
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
-        match self {
-            MutFnCtx::Free(ctx) => ctx.set_solver(solver),
-            MutFnCtx::Const(ctx) => ctx.set_solver(solver),
-            MutFnCtx::Mut(ctx) => ctx.set_solver(solver),
         }
     }
 }

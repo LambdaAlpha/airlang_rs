@@ -470,28 +470,6 @@ do [a = context ; {}, a | access ; .]
 -----
 mutable
 =====
-set_solver
------
-do [
-    s1 = function ; {
-        cell : true,
-        context_access : .free,
-        code : ._ : do ; [.a = .a + 1, .a],
-        context : context ; {variables : {a : 0}},
-    },
-    set_solver ^s1,
-    s2 = solver ; .,
-    [.s2 ; ., .s2 ; ., .s2 ; .]
-]
------
-[1, 2, 3]
-=====
-set_solver .
------
-do [set_solver ., s = solver ; ., s == .]
------
-true
-=====
 | 1
 -----
 do [

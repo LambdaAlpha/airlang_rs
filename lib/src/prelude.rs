@@ -110,7 +110,7 @@ pub(crate) fn initial_ctx() -> Ctx {
     let mut variables: Map<Symbol, CtxValue> = Map::default();
     put_preludes(&mut variables);
     let variables = CtxMap::new(variables, false);
-    Ctx::new(variables, None)
+    Ctx::new(variables)
 }
 
 pub(crate) fn put_preludes(ctx: &mut dyn PreludeCtx) {

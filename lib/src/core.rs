@@ -19,11 +19,11 @@ use crate::Val;
 use crate::ctx::main::MainCtx;
 use crate::ctx::map::CtxValue;
 use crate::ctx::ref1::CtxMeta;
-use crate::ctx::ref1::CtxRef;
 use crate::func::FuncTrait;
 use crate::mode::symbol::LITERAL_CHAR;
 use crate::mode::symbol::MOVE_CHAR;
 use crate::mode::symbol::REF_CHAR;
+use crate::solver::SOLVER;
 use crate::transformer::ByVal;
 use crate::transformer::Transformer;
 
@@ -284,19 +284,17 @@ impl EvalCore {
             MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
             MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
         };
-        let mut solver = ctx.set_solver(None).unwrap()?;
-        let answer = if solver.is_cell() {
-            let answer = Self::call_ref(&mut solver, ctx, is_const, question);
-            let _ = ctx.set_solver(Some(solver));
-            answer
-        } else {
-            let _ = ctx.set_solver(Some(solver.clone()));
-            if is_const {
+        SOLVER.with(|solver| {
+            let mut solver = solver.try_borrow_mut().ok()?;
+            let solver = solver.as_mut()?;
+            let answer = if solver.is_cell() {
+                Self::call_ref(solver, ctx, is_const, question)
+            } else if is_const {
                 solver.transform(ConstCtx::new(ctx), question)
             } else {
                 solver.transform(MutCtx::new(ctx), question)
-            }
-        };
-        Some(answer)
+            };
+            Some(answer)
+        })
     }
 }

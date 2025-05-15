@@ -3,14 +3,12 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::hash::Hash;
-use std::mem::swap;
 use std::ops::BitAnd;
 
 use map::CtxValue;
 use map::DynRef;
 use ref1::CtxRef;
 
-use crate::FuncVal;
 use crate::Map;
 use crate::ctx::map::CtxMap;
 use crate::symbol::Symbol;
@@ -24,12 +22,10 @@ pub enum CtxError {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Ctx {
     variables: CtxMap,
-    solver: Option<FuncVal>,
 }
 
 pub(crate) struct PubCtx {
     pub(crate) variables: CtxMap,
-    pub(crate) solver: Option<FuncVal>,
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -52,32 +48,6 @@ impl<'l> CtxRef<'l> for &'l mut Ctx {
     fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
         Ok(DynRef::new(&mut self.variables, false))
     }
-
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
-        let Some(solver) = &self.solver else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(solver)
-    }
-
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
-        let Some(solver) = &mut self.solver else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(solver)
-    }
-
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
-        let Some(solver) = &mut self.solver else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(DynRef::new(solver, false))
-    }
-
-    fn set_solver(self, mut solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
-        swap(&mut self.solver, &mut solver);
-        Ok(solver)
-    }
 }
 
 impl<'l> CtxRef<'l> for &'l Ctx {
@@ -92,34 +62,15 @@ impl<'l> CtxRef<'l> for &'l Ctx {
     fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
         Err(CtxError::AccessDenied)
     }
-
-    fn get_solver(self) -> Result<&'l FuncVal, CtxError> {
-        let Some(solver) = &self.solver else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(solver)
-    }
-
-    fn get_solver_mut(self) -> Result<&'l mut FuncVal, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn get_solver_dyn(self) -> Result<DynRef<'l, FuncVal>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn set_solver(self, _solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
 }
 
 impl Ctx {
-    pub(crate) fn new(variables: CtxMap, solver: Option<FuncVal>) -> Self {
-        Self { variables, solver }
+    pub(crate) fn new(variables: CtxMap) -> Self {
+        Self { variables }
     }
 
     pub(crate) fn destruct(self) -> PubCtx {
-        PubCtx { variables: self.variables, solver: self.solver }
+        PubCtx { variables: self.variables }
     }
 
     pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
@@ -137,7 +88,7 @@ impl Ctx {
 
 impl Default for Ctx {
     fn default() -> Self {
-        Self { variables: CtxMap::new(Map::default(), false), solver: None }
+        Self { variables: CtxMap::new(Map::default(), false) }
     }
 }
 

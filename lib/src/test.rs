@@ -145,6 +145,11 @@ fn test_core() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_solve() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/solve.air"), "test/solve.air")
+}
+
+#[test]
 fn test_syntax() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/syntax.air"), "test/syntax.air")
 }

@@ -48,8 +48,6 @@ pub(crate) struct CtxPrelude {
     pub(crate) is_reverse: Named<FuncVal>,
     pub(crate) set_reverse: Named<FuncVal>,
     pub(crate) get_ctx_access: Named<FuncVal>,
-    pub(crate) get_solver: Named<FuncVal>,
-    pub(crate) set_solver: Named<FuncVal>,
     pub(crate) with_ctx: Named<FuncVal>,
     pub(crate) ctx_in_ctx_out: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
@@ -71,8 +69,6 @@ impl Default for CtxPrelude {
             is_reverse: is_reverse(),
             set_reverse: set_reverse(),
             get_ctx_access: get_ctx_access(),
-            get_solver: get_solver(),
-            set_solver: set_solver(),
             with_ctx: with_ctx(),
             ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
@@ -95,8 +91,6 @@ impl Prelude for CtxPrelude {
         self.is_reverse.put(ctx);
         self.set_reverse.put(ctx);
         self.get_ctx_access.put(ctx);
-        self.get_solver.put(ctx);
-        self.set_solver.put(ctx);
         self.with_ctx.put(ctx);
         self.ctx_in_ctx_out.put(ctx);
         self.ctx_new.put(ctx);
@@ -318,42 +312,6 @@ fn fn_get_ctx_access(ctx: MutFnCtx, _input: Val) -> Val {
         MutFnCtx::Mut(_) => ACCESS_MUTABLE,
     };
     symbol(access)
-}
-
-fn get_solver() -> Named<FuncVal> {
-    let id = "solver";
-    let f = fn_get_solver;
-    let forward = FuncMode::default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
-}
-
-fn fn_get_solver(ctx: ConstFnCtx, _input: Val) -> Val {
-    match ctx.get_solver() {
-        Ok(solver) => Val::Func(solver.clone()),
-        _ => Val::default(),
-    }
-}
-
-fn set_solver() -> Named<FuncVal> {
-    let id = "set_solver";
-    let f = fn_set_solver;
-    let mode = FuncMode::default();
-    named_mut_fn(id, f, mode)
-}
-
-fn fn_set_solver(ctx: MutFnCtx, input: Val) -> Val {
-    match input {
-        Val::Unit(_) => {
-            let _ = ctx.set_solver(None);
-        }
-        Val::Func(solver) => {
-            let _ = ctx.set_solver(Some(solver));
-        }
-        _ => {}
-    }
-    Val::default()
 }
 
 fn with_ctx() -> Named<FuncVal> {

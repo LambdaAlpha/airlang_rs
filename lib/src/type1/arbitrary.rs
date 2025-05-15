@@ -270,8 +270,7 @@ impl Arbitrary for Ctx {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let variables = Map::any(rng, depth);
         let variables = CtxMap::new(variables, rng.random());
-        let solver = if rng.random() { Some(Arbitrary::any(rng, depth)) } else { None };
-        Ctx::new(variables, solver)
+        Ctx::new(variables)
     }
 }
 

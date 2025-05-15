@@ -1,6 +1,5 @@
 use crate::Ctx;
 use crate::CtxError;
-use crate::FuncVal;
 use crate::ctx::const1::ConstFnCtx;
 use crate::ctx::map::CtxMap;
 use crate::ctx::map::DynRef;
@@ -12,16 +11,6 @@ pub(crate) trait CtxRef<'a> {
     fn get_variables_mut(self) -> Result<&'a mut CtxMap, CtxError>;
 
     fn get_variables_dyn(self) -> Result<DynRef<'a, CtxMap>, CtxError>;
-
-    fn get_solver(self) -> Result<&'a FuncVal, CtxError>;
-
-    #[allow(dead_code)]
-    fn get_solver_mut(self) -> Result<&'a mut FuncVal, CtxError>;
-
-    #[allow(dead_code)]
-    fn get_solver_dyn(self) -> Result<DynRef<'a, FuncVal>, CtxError>;
-
-    fn set_solver(self, solver: Option<FuncVal>) -> Result<Option<FuncVal>, CtxError>;
 }
 
 #[expect(clippy::wrong_self_convention)]
