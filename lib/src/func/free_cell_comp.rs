@@ -28,7 +28,7 @@ impl FuncTrait for FreeCellCompFunc {
     }
 
     fn code(&self) -> Val {
-        self.comp.func_call()
+        self.comp.func_code()
     }
 
     fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val

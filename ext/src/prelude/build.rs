@@ -56,7 +56,7 @@ fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
     let content = match read_to_string(&new_url) {
         Ok(content) => content,
         Err(err) => {
-            eprintln!("failed to read {}: {}", new_url, err);
+            eprintln!("failed to read {new_url}: {err}");
             return Val::default();
         }
     };

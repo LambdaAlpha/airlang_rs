@@ -60,7 +60,7 @@ impl Composite {
         *outer = outer_val;
     }
 
-    pub(crate) fn func_call(&self) -> Val {
+    pub(crate) fn func_code(&self) -> Val {
         let input = Val::Symbol(self.input_name.clone());
         let output = self.body.clone();
         Val::Pair(Pair::new(input, output).into())

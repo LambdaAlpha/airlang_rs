@@ -28,7 +28,7 @@ impl FuncTrait for FreeStaticCompFunc {
     }
 
     fn code(&self) -> Val {
-        self.comp.func_call()
+        self.comp.func_code()
     }
 }
 

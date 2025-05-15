@@ -49,7 +49,7 @@ fn fn_read_to_text(ctx: ConstFnCtx, input: Val) -> Val {
     match result {
         Ok(content) => Val::Text(Text::from(content).into()),
         Err(err) => {
-            eprintln!("{}", err);
+            eprintln!("{err}");
             Val::default()
         }
     }

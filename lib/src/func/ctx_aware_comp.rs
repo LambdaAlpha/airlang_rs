@@ -45,7 +45,7 @@ where Ctx: CtxMeta<'a> {
     }
 }
 
-pub(crate) fn func_call(ctx: Symbol, input: Symbol, output: Val) -> Val {
+pub(crate) fn func_code(ctx: Symbol, input: Symbol, output: Val) -> Val {
     let ctx = Val::Symbol(ctx);
     let input = Val::Symbol(input);
     let names = Val::Pair(Pair::new(ctx, input).into());

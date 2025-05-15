@@ -5,7 +5,7 @@ use crate::ctx::ref1::CtxMeta;
 use crate::func::FuncTrait;
 use crate::func::comp::Composite;
 use crate::func::ctx_aware_comp::const_func_transform;
-use crate::func::ctx_aware_comp::func_call;
+use crate::func::ctx_aware_comp::func_code;
 use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -35,7 +35,7 @@ impl FuncTrait for ConstCellCompFunc {
         let ctx = self.ctx_name.clone();
         let input = self.comp.input_name.clone();
         let output = self.comp.body.clone();
-        func_call(ctx, input, output)
+        func_code(ctx, input, output)
     }
 
     fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val

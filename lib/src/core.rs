@@ -235,7 +235,7 @@ impl EvalCore {
     fn reverse_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
     where Ctx: CtxMeta<'a> {
         let question = Val::Call(Call::new(true, Val::Func(func.clone()), input.clone()).into());
-        if let Some(answer) = EvalCore::call_solver(ctx.reborrow(), question) {
+        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
             if !answer.is_unit() {
                 return answer;
             }

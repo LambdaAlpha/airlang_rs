@@ -203,7 +203,7 @@ pub(crate) fn escape_text_symbol(s: &mut String, str: &str) {
             '\r' => "\\r",
             '\t' => "\\t",
             TEXT_QUOTE => concatcp!('\\', QUOTE),
-            c if Symbol::is_symbol(c) => &format!("{}", c),
+            c if Symbol::is_symbol(c) => &format!("{c}"),
             c => &format!("\\u({:x})", c as u32),
         };
         s.push_str(escaped);
