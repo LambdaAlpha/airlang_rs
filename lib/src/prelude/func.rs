@@ -1,5 +1,6 @@
 use crate::CodeMode;
-use crate::ConstFnCtx;
+use crate::ConstRef;
+use crate::Ctx;
 use crate::CtxAccess;
 use crate::FuncMode;
 use crate::Pair;
@@ -14,7 +15,7 @@ use crate::func::repr::MUTABLE;
 use crate::func::repr::generate_func;
 use crate::func::repr::parse_func;
 use crate::func::repr::parse_mode;
-use crate::mode::id::ID;
+use crate::mode::ID;
 use crate::mode::repr::parse;
 use crate::mode::united::EVAL_LITERAL;
 use crate::mode::united::EVAL_MOVE;
@@ -25,6 +26,8 @@ use crate::mode::united::FORM_REF;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::const_impl;
+use crate::prelude::free_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::ref_pair_mode;
@@ -166,7 +169,7 @@ fn mode_eval_move() -> Named<FuncVal> {
 
 fn mode() -> Named<FuncVal> {
     let id = "mode";
-    let f = fn_mode;
+    let f = free_impl(fn_mode);
     let forward = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
@@ -183,7 +186,7 @@ fn fn_mode(input: Val) -> Val {
 
 fn new() -> Named<FuncVal> {
     let id = "function";
-    let f = fn_new;
+    let f = free_impl(fn_new);
     let forward = parse_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
@@ -199,7 +202,7 @@ fn fn_new(input: Val) -> Val {
 
 fn repr() -> Named<FuncVal> {
     let id = "function.represent";
-    let f = fn_repr;
+    let f = free_impl(fn_repr);
     let forward = FuncMode::default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
@@ -215,19 +218,19 @@ fn fn_repr(input: Val) -> Val {
 
 fn ctx_access() -> Named<FuncVal> {
     let id = "function.context_access";
-    let f = fn_ctx_access;
+    let f = const_impl(fn_ctx_access);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_ctx_access(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -242,19 +245,19 @@ fn fn_ctx_access(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn forward_mode() -> Named<FuncVal> {
     let id = "function.forward_mode";
-    let f = fn_forward_mode;
+    let f = const_impl(fn_forward_mode);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_forward_mode(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_forward_mode(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -265,19 +268,19 @@ fn fn_forward_mode(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn reverse_mode() -> Named<FuncVal> {
     let id = "function.reverse_mode";
-    let f = fn_reverse_mode;
+    let f = const_impl(fn_reverse_mode);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_reverse_mode(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_reverse_mode(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -288,19 +291,19 @@ fn fn_reverse_mode(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_primitive() -> Named<FuncVal> {
     let id = "function.is_primitive";
-    let f = fn_is_primitive;
+    let f = const_impl(fn_is_primitive);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_primitive(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -311,19 +314,19 @@ fn fn_is_primitive(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_extension() -> Named<FuncVal> {
     let id = "function.is_extension";
-    let f = fn_is_extension;
+    let f = const_impl(fn_is_extension);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_extension(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -336,19 +339,19 @@ fn fn_is_extension(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_cell() -> Named<FuncVal> {
     let id = "function.is_cell";
-    let f = fn_is_cell;
+    let f = const_impl(fn_is_cell);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_cell(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -358,19 +361,19 @@ fn fn_is_cell(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn is_mode() -> Named<FuncVal> {
     let id = "function.is_mode";
-    let f = fn_is_mode;
+    let f = const_impl(fn_is_mode);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_mode(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -380,19 +383,19 @@ fn fn_is_mode(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn id() -> Named<FuncVal> {
     let id = "function.id";
-    let f = fn_id;
+    let f = const_impl(fn_id);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_id(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -405,19 +408,19 @@ fn fn_id(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn code() -> Named<FuncVal> {
     let id = "function.code";
-    let f = fn_code;
+    let f = const_impl(fn_code);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_code(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_code(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };
@@ -427,19 +430,19 @@ fn fn_code(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn ctx() -> Named<FuncVal> {
     let id = "function.context";
-    let f = fn_ctx;
+    let f = const_impl(fn_ctx);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_ctx(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_ctx(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Func(func) = val else {
             return Val::default();
         };

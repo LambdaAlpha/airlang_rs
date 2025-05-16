@@ -6,10 +6,10 @@ use std::hash::Hash;
 use std::ops::BitAnd;
 
 use map::CtxValue;
-use map::DynRef;
-use ref1::CtxRef;
 
 use crate::Map;
+use crate::Val;
+use crate::VarAccess;
 use crate::ctx::map::CtxMap;
 use crate::symbol::Symbol;
 
@@ -36,34 +36,6 @@ pub enum CtxAccess {
     Mut,
 }
 
-impl<'l> CtxRef<'l> for &'l mut Ctx {
-    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
-        Ok(&self.variables)
-    }
-
-    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
-        Ok(&mut self.variables)
-    }
-
-    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
-        Ok(DynRef::new(&mut self.variables, false))
-    }
-}
-
-impl<'l> CtxRef<'l> for &'l Ctx {
-    fn get_variables(self) -> Result<&'l CtxMap, CtxError> {
-        Ok(&self.variables)
-    }
-
-    fn get_variables_mut(self) -> Result<&'l mut CtxMap, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn get_variables_dyn(self) -> Result<DynRef<'l, CtxMap>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-}
-
 impl Ctx {
     pub(crate) fn new(variables: CtxMap) -> Self {
         Self { variables }
@@ -83,6 +55,21 @@ impl Ctx {
 
     pub(crate) fn variables_mut(&mut self) -> &mut CtxMap {
         &mut self.variables
+    }
+
+    pub fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError> {
+        self.variables.get_ref(name)
+    }
+
+    pub fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError> {
+        self.variables.get_ref_mut(name)
+    }
+
+    pub fn put(
+        &mut self, name: Symbol, access: VarAccess, val: Val,
+    ) -> Result<Option<Val>, CtxError> {
+        let ctx_value = CtxValue { access, static1: false, val };
+        self.variables.put_value(name, ctx_value)
     }
 }
 
@@ -117,14 +104,6 @@ impl BitAnd for CtxAccess {
 impl Error for CtxError {}
 
 pub(crate) mod map;
-
-pub(crate) mod ref1;
-
-pub(crate) mod free;
-
-pub(crate) mod const1;
-
-pub(crate) mod mut1;
 
 pub(crate) mod main;
 

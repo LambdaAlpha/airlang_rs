@@ -4,7 +4,7 @@ use rand::prelude::SmallRng;
 use crate::Byte;
 use crate::Call;
 use crate::CodeMode;
-use crate::ConstFnCtx;
+use crate::ConstRef;
 use crate::Ctx;
 use crate::FuncMode;
 use crate::Int;
@@ -18,12 +18,12 @@ use crate::Unit;
 use crate::Val;
 use crate::bit::Bit;
 use crate::ctx::main::MainCtx;
-use crate::ctx::map::CtxMapRef;
-use crate::ctx::ref1::CtxRef;
 use crate::either::Either;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::const_impl;
+use crate::prelude::free_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::ref_mode;
@@ -69,7 +69,7 @@ impl Prelude for ValuePrelude {
 
 fn any() -> Named<FuncVal> {
     let id = "any";
-    let f = fn_any;
+    let f = free_impl(fn_any);
     let forward = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
@@ -104,19 +104,19 @@ fn fn_any(input: Val) -> Val {
 
 fn type1() -> Named<FuncVal> {
     let id = "type";
-    let f = fn_type1;
+    let f = const_impl(fn_type1);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_type1(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let s = match val {
             Val::Unit(_) => UNIT,
             Val::Bit(_) => BIT,
@@ -139,26 +139,25 @@ fn fn_type1(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn equal() -> Named<FuncVal> {
     let id = "==";
-    let f = fn_equal;
+    let f = const_impl(fn_equal);
     let forward = FuncMode::pair_mode(ref_mode(), ref_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_equal(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
     let left = MainCtx::ref_or_val(pair.first);
     let right = MainCtx::ref_or_val(pair.second);
-    let ctx = ctx.borrow();
-    get_by_ref(ctx, left, |v1| {
+    get_by_ref(&ctx, left, |v1| {
         let Some(v1) = v1 else {
             return Val::default();
         };
-        get_by_ref(ctx, right, |v2| {
+        get_by_ref(&ctx, right, |v2| {
             let Some(v2) = v2 else {
                 return Val::default();
             };
@@ -167,17 +166,11 @@ fn fn_equal(ctx: ConstFnCtx, input: Val) -> Val {
     })
 }
 
-fn get_by_ref<T, F>(ctx: Option<&Ctx>, v: Either<Symbol, Val>, f: F) -> T
+fn get_by_ref<T, F>(ctx: &Ctx, v: Either<Symbol, Val>, f: F) -> T
 where F: FnOnce(Option<&Val>) -> T {
     match v {
         Either::This(s) => {
-            let Some(ctx) = ctx else {
-                return f(None);
-            };
-            let Ok(ctx) = ctx.get_variables() else {
-                return f(None);
-            };
-            let Ok(val) = ctx.get_ref(s) else {
+            let Ok(val) = ctx.variables().get_ref(s) else {
                 return f(None);
             };
             f(Some(val))

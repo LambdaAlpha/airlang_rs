@@ -1,11 +1,15 @@
 use const_format::concatcp;
 
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeStaticFn;
+use crate::MutStaticFn;
 use crate::Symbol;
 use crate::UniMode;
 use crate::Val;
-use crate::core::FormCore;
-use crate::ctx::ref1::CtxMeta;
-use crate::transformer::Transformer;
+use crate::core::SymbolForm;
+use crate::mode::ModeFn;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SymbolMode {
@@ -21,13 +25,34 @@ pub(crate) const REF: &str = concatcp!(REF_CHAR);
 pub(crate) const MOVE_CHAR: char = '^';
 pub(crate) const MOVE: &str = concatcp!(MOVE_CHAR);
 
-impl Transformer<Symbol, Val> for SymbolMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
-    where Ctx: CtxMeta<'a> {
+impl ModeFn for SymbolMode {}
+
+impl FreeStaticFn<Symbol, Val> for SymbolMode {
+    fn free_static_call(&self, input: Symbol) -> Val {
         match self {
-            SymbolMode::Literal => FormCore::transform_symbol::<LITERAL_CHAR, _>(ctx, symbol),
-            SymbolMode::Ref => FormCore::transform_symbol::<REF_CHAR, _>(ctx, symbol),
-            SymbolMode::Move => FormCore::transform_symbol::<MOVE_CHAR, _>(ctx, symbol),
+            SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.free_static_call(input),
+            SymbolMode::Ref => SymbolForm::<REF_CHAR>.free_static_call(input),
+            SymbolMode::Move => SymbolForm::<MOVE_CHAR>.free_static_call(input),
+        }
+    }
+}
+
+impl ConstStaticFn<Ctx, Symbol, Val> for SymbolMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Symbol) -> Val {
+        match self {
+            SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.const_static_call(ctx, input),
+            SymbolMode::Ref => SymbolForm::<REF_CHAR>.const_static_call(ctx, input),
+            SymbolMode::Move => SymbolForm::<MOVE_CHAR>.const_static_call(ctx, input),
+        }
+    }
+}
+
+impl MutStaticFn<Ctx, Symbol, Val> for SymbolMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Symbol) -> Val {
+        match self {
+            SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.mut_static_call(ctx, input),
+            SymbolMode::Ref => SymbolForm::<REF_CHAR>.mut_static_call(ctx, input),
+            SymbolMode::Move => SymbolForm::<MOVE_CHAR>.mut_static_call(ctx, input),
         }
     }
 }

@@ -1,15 +1,18 @@
 use crate::Byte;
-use crate::ConstFnCtx;
+use crate::ConstRef;
+use crate::Ctx;
 use crate::FuncMode;
 use crate::FuncVal;
 use crate::Int;
-use crate::MutFnCtx;
 use crate::Pair;
 use crate::Val;
 use crate::ctx::main::MainCtx;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::const_impl;
+use crate::prelude::free_impl;
+use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
@@ -38,19 +41,19 @@ impl Prelude for BytePrelude {
 
 fn length() -> Named<FuncVal> {
     let id = "byte.length";
-    let f = fn_length;
+    let f = const_impl(fn_length);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_length(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::Byte(t) = val else {
             return Val::default();
         };
@@ -61,14 +64,14 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn push() -> Named<FuncVal> {
     let id = "byte.push";
-    let f = fn_push;
+    let f = mut_impl(fn_push);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -86,7 +89,7 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 
 fn join() -> Named<FuncVal> {
     let id = "byte.join";
-    let f = fn_join;
+    let f = free_impl(fn_join);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

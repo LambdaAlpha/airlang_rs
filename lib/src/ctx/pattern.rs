@@ -1,18 +1,16 @@
 use crate::Call;
 use crate::CallVal;
+use crate::Ctx;
 use crate::List;
 use crate::ListVal;
 use crate::Map;
 use crate::MapVal;
-use crate::MutFnCtx;
 use crate::Pair;
 use crate::PairVal;
 use crate::Symbol;
 use crate::Unit;
 use crate::Val;
-use crate::ctx::map::CtxMapRef;
 use crate::ctx::map::CtxValue;
-use crate::ctx::ref1::CtxRef;
 use crate::ctx::repr::Binding;
 use crate::ctx::repr::Extra;
 use crate::ctx::repr::parse_extra;
@@ -182,7 +180,7 @@ fn match_map(pattern: &Map<Val, Pattern>, val: &Val) -> bool {
     })
 }
 
-pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
+pub(crate) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: Val) -> Val {
     match pattern {
         Pattern::Any(binding) => assign_any(ctx, binding, val),
         Pattern::Val(expected) => assign_val(ctx, expected, val),
@@ -193,32 +191,29 @@ pub(crate) fn assign_pattern(ctx: MutFnCtx, pattern: Pattern, val: Val) -> Val {
     }
 }
 
-fn assign_any(ctx: MutFnCtx, binding: Binding, val: Val) -> Val {
+fn assign_any(ctx: &mut Ctx, binding: Binding, val: Val) -> Val {
     let ctx_value = CtxValue { val, access: binding.extra.access, static1: false };
-    let Ok(ctx) = ctx.get_variables_mut() else {
-        return Val::default();
-    };
-    let Ok(last) = ctx.put_value(binding.name, ctx_value) else {
+    let Ok(last) = ctx.variables_mut().put_value(binding.name, ctx_value) else {
         return Val::default();
     };
     last.unwrap_or_default()
 }
 
-fn assign_val(_ctx: MutFnCtx, _expected: Val, _val: Val) -> Val {
+fn assign_val(_ctx: &mut Ctx, _expected: Val, _val: Val) -> Val {
     Val::default()
 }
 
-fn assign_pair(mut ctx: MutFnCtx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val {
+fn assign_pair(ctx: &mut Ctx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val {
     let Val::Pair(val) = val else {
         return Val::default();
     };
     let val = Pair::from(val);
-    let first = assign_pattern(ctx.reborrow(), pattern.first, val.first);
+    let first = assign_pattern(ctx, pattern.first, val.first);
     let second = assign_pattern(ctx, pattern.second, val.second);
     Val::Pair(Pair::new(first, second).into())
 }
 
-fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
+fn assign_call(ctx: &mut Ctx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
     let Val::Call(val) = val else {
         return Val::default();
     };
@@ -226,12 +221,12 @@ fn assign_call(mut ctx: MutFnCtx, pattern: Call<Pattern, Pattern>, val: Val) -> 
         return Val::default();
     }
     let val = Call::from(val);
-    let func = assign_pattern(ctx.reborrow(), pattern.func, val.func);
+    let func = assign_pattern(ctx, pattern.func, val.func);
     let input = assign_pattern(ctx, pattern.input, val.input);
     Val::Call(Call::new(val.reverse, func, input).into())
 }
 
-fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {
+fn assign_list(ctx: &mut Ctx, pattern: List<Pattern>, val: Val) -> Val {
     let Val::List(val) = val else {
         return Val::default();
     };
@@ -239,13 +234,13 @@ fn assign_list(mut ctx: MutFnCtx, pattern: List<Pattern>, val: Val) -> Val {
     let mut val_iter = List::from(val).into_iter();
     for p in pattern {
         let val = val_iter.next().unwrap_or_default();
-        let last_val = assign_pattern(ctx.reborrow(), p, val);
+        let last_val = assign_pattern(ctx, p, val);
         list.push(last_val);
     }
     Val::List(list.into())
 }
 
-fn assign_map(mut ctx: MutFnCtx, pattern: Map<Val, Pattern>, val: Val) -> Val {
+fn assign_map(ctx: &mut Ctx, pattern: Map<Val, Pattern>, val: Val) -> Val {
     let Val::Map(mut val) = val else {
         return Val::default();
     };
@@ -253,7 +248,7 @@ fn assign_map(mut ctx: MutFnCtx, pattern: Map<Val, Pattern>, val: Val) -> Val {
         .into_iter()
         .map(|(k, pattern)| {
             let val = val.remove(&k).unwrap_or_default();
-            let last_val = assign_pattern(ctx.reborrow(), pattern, val);
+            let last_val = assign_pattern(ctx, pattern, val);
             (k, last_val)
         })
         .collect();

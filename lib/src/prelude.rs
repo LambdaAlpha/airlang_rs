@@ -1,12 +1,16 @@
 use std::rc::Rc;
 
+use crate::ConstRef;
+use crate::ConstStaticImpl;
 use crate::ConstStaticPrimFuncVal;
 use crate::FreeCellPrimFunc;
 use crate::FreeCellPrimFuncVal;
+use crate::FreeStaticImpl;
 use crate::FreeStaticPrimFunc;
 use crate::FreeStaticPrimFuncVal;
 use crate::Map;
 use crate::Mode;
+use crate::MutStaticImpl;
 use crate::MutStaticPrimFunc;
 use crate::MutStaticPrimFuncVal;
 use crate::ctx::Ctx;
@@ -233,7 +237,13 @@ fn named_mut_cell_fn(
     Named::new(name, f)
 }
 
-fn free_fn(name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode) -> FuncVal {
+fn free_impl(func: fn(Val) -> Val) -> FreeStaticImpl<Val, Val> {
+    FreeStaticImpl::new(func)
+}
+
+fn free_fn(
+    name: &'static str, func: impl FreeStaticFn<Val, Val> + 'static, mode: FuncMode,
+) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
     let func = FreeStaticPrimFunc::new(id, fn1, mode);
@@ -242,13 +252,19 @@ fn free_fn(name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode
 }
 
 fn named_free_fn(
-    name: &'static str, func: impl FreeStaticFn + 'static, mode: FuncMode,
+    name: &'static str, func: impl FreeStaticFn<Val, Val> + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
     let f = free_fn(name, func, mode);
     Named::new(name, f)
 }
 
-fn const_fn(name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode) -> FuncVal {
+fn const_impl(func: fn(ConstRef<Ctx>, Val) -> Val) -> ConstStaticImpl<Ctx, Val, Val> {
+    ConstStaticImpl::new(FreeStaticImpl::default, func)
+}
+
+fn const_fn(
+    name: &'static str, func: impl ConstStaticFn<Ctx, Val, Val> + 'static, mode: FuncMode,
+) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
     let func = ConstStaticPrimFunc::new(id, fn1, mode);
@@ -257,13 +273,19 @@ fn const_fn(name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMo
 }
 
 fn named_const_fn(
-    name: &'static str, func: impl ConstStaticFn + 'static, mode: FuncMode,
+    name: &'static str, func: impl ConstStaticFn<Ctx, Val, Val> + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
     let f = const_fn(name, func, mode);
     Named::new(name, f)
 }
 
-fn mut_fn(name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode) -> FuncVal {
+fn mut_impl(func: fn(&mut Ctx, Val) -> Val) -> MutStaticImpl<Ctx, Val, Val> {
+    MutStaticImpl::new(FreeStaticImpl::default, ConstStaticImpl::default, func)
+}
+
+fn mut_fn(
+    name: &'static str, func: impl MutStaticFn<Ctx, Val, Val> + 'static, mode: FuncMode,
+) -> FuncVal {
     let id = Symbol::from_str(name);
     let fn1 = Rc::new(func);
     let func = MutStaticPrimFunc::new(id, fn1, mode);
@@ -272,7 +294,7 @@ fn mut_fn(name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode) 
 }
 
 fn named_mut_fn(
-    name: &'static str, func: impl MutStaticFn + 'static, mode: FuncMode,
+    name: &'static str, func: impl MutStaticFn<Ctx, Val, Val> + 'static, mode: FuncMode,
 ) -> Named<FuncVal> {
     let f = mut_fn(name, func, mode);
     Named::new(name, f)

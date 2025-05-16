@@ -535,12 +535,6 @@ do [a = 1, . | move ; .a, a]
 -----
 1
 =====
-free const func
------
-. | (1 : 2) pair.first .
------
-1
-=====
 represent default
 -----
 context.represent ; context ; {}

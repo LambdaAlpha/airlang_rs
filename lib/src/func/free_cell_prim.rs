@@ -3,20 +3,28 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use std::hash::Hasher;
 
+use crate::ConstCellFn;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::DynRef;
+use crate::FreeStaticFn;
 use crate::FuncMode;
+use crate::MutCellFn;
+use crate::MutStaticFn;
 use crate::Symbol;
 use crate::Val;
-use crate::ctx::ref1::CtxMeta;
 use crate::func::FuncTrait;
 use crate::func::prim::Primitive;
 use crate::traits::dyn_safe::dyn_any_clone_eq_hash;
-use crate::transformer::Transformer;
 
-pub trait FreeCellFn {
-    fn call(&mut self, input: Val) -> Val;
+pub trait FreeCellFn<I, O>: FreeStaticFn<I, O> {
+    fn free_cell_call(&mut self, input: I) -> O {
+        self.free_static_call(input)
+    }
 }
 
-dyn_any_clone_eq_hash!(pub FreeCellFnExt : FreeCellFn);
+dyn_any_clone_eq_hash!(pub FreeCellFnExt : FreeCellFn<Val, Val>);
 
 #[derive(Clone)]
 pub struct FreeCellPrimFunc {
@@ -25,10 +33,55 @@ pub struct FreeCellPrimFunc {
     pub(crate) mode: FuncMode,
 }
 
-impl Transformer<Val, Val> for FreeCellPrimFunc {
-    fn transform<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.fn1.dyn_clone().call(input)
+impl FreeStaticFn<Val, Val> for FreeCellPrimFunc {
+    fn free_static_call(&self, input: Val) -> Val {
+        self.fn1.free_static_call(input)
+    }
+}
+
+impl FreeCellFn<Val, Val> for FreeCellPrimFunc {
+    fn free_cell_call(&mut self, input: Val) -> Val {
+        self.fn1.free_cell_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, Val, Val> for FreeCellPrimFunc {
+    fn opt_const_static_call(&self, _ctx: Option<ConstRef<Ctx>>, input: Val) -> Val {
+        self.free_static_call(input)
+    }
+}
+
+impl ConstCellFn<Ctx, Val, Val> for FreeCellPrimFunc {
+    fn const_cell_call(&mut self, _ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.free_cell_call(input)
+    }
+
+    fn opt_const_cell_call(&mut self, _ctx: Option<ConstRef<Ctx>>, input: Val) -> Val {
+        self.free_cell_call(input)
+    }
+}
+
+impl MutStaticFn<Ctx, Val, Val> for FreeCellPrimFunc {
+    fn dyn_static_call(&self, _ctx: DynRef<Ctx>, input: Val) -> Val {
+        self.free_static_call(input)
+    }
+
+    fn opt_dyn_static_call(&self, _ctx: Option<DynRef<Ctx>>, input: Val) -> Val {
+        self.free_static_call(input)
+    }
+}
+
+impl MutCellFn<Ctx, Val, Val> for FreeCellPrimFunc {
+    fn mut_cell_call(&mut self, _ctx: &mut Ctx, input: Val) -> Val {
+        self.free_cell_call(input)
+    }
+
+    fn dyn_cell_call(&mut self, _ctx: DynRef<Ctx>, input: Val) -> Val {
+        self.free_cell_call(input)
+    }
+
+    fn opt_dyn_cell_call(&mut self, _ctx: Option<DynRef<Ctx>>, input: Val) -> Val {
+        self.free_cell_call(input)
     }
 }
 
@@ -39,11 +92,6 @@ impl FuncTrait for FreeCellPrimFunc {
 
     fn code(&self) -> Val {
         Val::default()
-    }
-
-    fn transform_mut<'a, Ctx>(&mut self, _ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.fn1.call(input)
     }
 }
 

@@ -2,6 +2,7 @@ use crate::FuncMode;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::free_impl;
 use crate::prelude::named_free_fn;
 use crate::text::Text;
 use crate::val::Val;
@@ -28,7 +29,7 @@ impl Prelude for SyntaxPrelude {
 
 fn parse() -> Named<FuncVal> {
     let id = "syntax.parse";
-    let f = fn_parse;
+    let f = free_impl(fn_parse);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -42,7 +43,7 @@ fn fn_parse(input: Val) -> Val {
 
 fn generate() -> Named<FuncVal> {
     let id = "syntax.generate";
-    let f = fn_generate;
+    let f = free_impl(fn_generate);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

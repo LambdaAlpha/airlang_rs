@@ -3,6 +3,7 @@ use crate::Val;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::free_impl;
 use crate::prelude::named_free_fn;
 use crate::unit::Unit;
 use crate::val::func::FuncVal;
@@ -26,7 +27,7 @@ impl Prelude for UnitPrelude {
 
 fn unit() -> Named<FuncVal> {
     let id = "unit";
-    let f = fn_unit;
+    let f = free_impl(fn_unit);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

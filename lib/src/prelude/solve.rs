@@ -4,6 +4,7 @@ use crate::Val;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::free_impl;
 use crate::prelude::named_free_fn;
 use crate::solver::SOLVER;
 
@@ -28,7 +29,7 @@ impl Prelude for SolvePrelude {
 
 fn get_solver() -> Named<FuncVal> {
     let id = "solver";
-    let f = fn_get_solver;
+    let f = free_impl(fn_get_solver);
     let forward = FuncMode::default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
@@ -49,7 +50,7 @@ fn fn_get_solver(_input: Val) -> Val {
 
 fn set_solver() -> Named<FuncVal> {
     let id = "set_solver";
-    let f = fn_set_solver;
+    let f = free_impl(fn_set_solver);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

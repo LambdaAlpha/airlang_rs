@@ -3,21 +3,41 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use std::hash::Hasher;
 
+use crate::ConstCellFn;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeCellFn;
+use crate::FreeStaticFn;
 use crate::FuncMode;
-use crate::MutFnCtx;
+use crate::MutStaticFn;
 use crate::Symbol;
 use crate::Val;
-use crate::ctx::ref1::CtxMeta;
+use crate::either::Either;
 use crate::func::FuncTrait;
 use crate::func::prim::Primitive;
 use crate::traits::dyn_safe::dyn_any_clone_eq_hash;
-use crate::transformer::Transformer;
+use crate::types::ref1::DynRef;
 
-pub trait MutCellFn {
-    fn call(&mut self, ctx: MutFnCtx, input: Val) -> Val;
+pub trait MutCellFn<Ctx, I, O>: ConstCellFn<Ctx, I, O> + MutStaticFn<Ctx, I, O> {
+    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: I) -> O;
+
+    fn dyn_cell_call(&mut self, ctx: DynRef<Ctx>, input: I) -> O {
+        match ctx.into_either() {
+            Either::This(ctx) => self.const_cell_call(ctx, input),
+            Either::That(ctx) => self.mut_cell_call(ctx, input),
+        }
+    }
+
+    fn opt_dyn_cell_call(&mut self, ctx: Option<DynRef<Ctx>>, input: I) -> O {
+        match ctx {
+            Some(ctx) => self.dyn_cell_call(ctx, input),
+            None => self.free_cell_call(input),
+        }
+    }
 }
 
-dyn_any_clone_eq_hash!(pub MutCellFnExt : MutCellFn);
+dyn_any_clone_eq_hash!(pub MutCellFnExt : MutCellFn<Ctx, Val, Val>);
 
 #[derive(Clone)]
 pub struct MutCellPrimFunc {
@@ -26,10 +46,39 @@ pub struct MutCellPrimFunc {
     pub(crate) mode: FuncMode,
 }
 
-impl Transformer<Val, Val> for MutCellPrimFunc {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.fn1.dyn_clone().call(ctx.for_mut_fn(), input)
+impl FreeStaticFn<Val, Val> for MutCellPrimFunc {
+    fn free_static_call(&self, input: Val) -> Val {
+        self.fn1.free_static_call(input)
+    }
+}
+
+impl FreeCellFn<Val, Val> for MutCellPrimFunc {
+    fn free_cell_call(&mut self, input: Val) -> Val {
+        self.fn1.free_cell_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, Val, Val> for MutCellPrimFunc {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.fn1.const_static_call(ctx, input)
+    }
+}
+
+impl ConstCellFn<Ctx, Val, Val> for MutCellPrimFunc {
+    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.fn1.const_cell_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, Val, Val> for MutCellPrimFunc {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.fn1.mut_static_call(ctx, input)
+    }
+}
+
+impl MutCellFn<Ctx, Val, Val> for MutCellPrimFunc {
+    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
+        self.fn1.mut_cell_call(ctx, input)
     }
 }
 
@@ -40,11 +89,6 @@ impl FuncTrait for MutCellPrimFunc {
 
     fn code(&self) -> Val {
         Val::default()
-    }
-
-    fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.fn1.call(ctx.for_mut_fn(), input)
     }
 }
 

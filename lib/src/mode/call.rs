@@ -1,12 +1,16 @@
 use crate::CallVal;
 use crate::CodeMode;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeStaticFn;
+use crate::MutStaticFn;
 use crate::UniMode;
 use crate::Val;
-use crate::core::EvalCore;
-use crate::core::FormCore;
-use crate::ctx::ref1::CtxMeta;
+use crate::core::CallEval;
+use crate::core::CallForm;
 use crate::mode::Mode;
-use crate::transformer::Transformer;
+use crate::mode::ModeFn;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CallMode {
@@ -15,12 +19,43 @@ pub struct CallMode {
     pub input: Option<Mode>,
 }
 
-impl Transformer<CallVal, Val> for CallMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
-    where Ctx: CtxMeta<'a> {
+impl ModeFn for CallMode {}
+
+impl FreeStaticFn<CallVal, Val> for CallMode {
+    fn free_static_call(&self, input: CallVal) -> Val {
         match self.code {
-            CodeMode::Form => FormCore::transform_call(&self.func, &self.input, ctx, call),
-            CodeMode::Eval => EvalCore::transform_call(&self.func, &self.input, ctx, call),
+            CodeMode::Form => {
+                CallForm { func: &self.func, input: &self.input }.free_static_call(input)
+            }
+            CodeMode::Eval => {
+                CallEval { func: &self.func, input: &self.input }.free_static_call(input)
+            }
+        }
+    }
+}
+
+impl ConstStaticFn<Ctx, CallVal, Val> for CallMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+        match self.code {
+            CodeMode::Form => {
+                CallForm { func: &self.func, input: &self.input }.const_static_call(ctx, input)
+            }
+            CodeMode::Eval => {
+                CallEval { func: &self.func, input: &self.input }.const_static_call(ctx, input)
+            }
+        }
+    }
+}
+
+impl MutStaticFn<Ctx, CallVal, Val> for CallMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+        match self.code {
+            CodeMode::Form => {
+                CallForm { func: &self.func, input: &self.input }.mut_static_call(ctx, input)
+            }
+            CodeMode::Eval => {
+                CallEval { func: &self.func, input: &self.input }.mut_static_call(ctx, input)
+            }
         }
     }
 }

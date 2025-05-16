@@ -2,20 +2,24 @@ use std::mem::swap;
 
 use crate::Bit;
 use crate::Call;
-use crate::ConstFnCtx;
-use crate::FreeCtx;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeStaticFn;
 use crate::FuncMode;
+use crate::MutStaticFn;
+use crate::MutStaticImpl;
 use crate::Pair;
 use crate::Val;
-use crate::core::EvalCore;
+use crate::core::CallApply;
 use crate::ctx::main::MainCtx;
-use crate::ctx::mut1::MutFnCtx;
-use crate::ctx::ref1::CtxMeta;
 use crate::either::Either;
-use crate::func::mut_static_prim::MutDispatcher;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::const_impl;
+use crate::prelude::free_impl;
+use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
@@ -66,7 +70,7 @@ impl Prelude for CallPrelude {
 
 fn new_forward() -> Named<FuncVal> {
     let id = CALL_FORWARD;
-    let f = fn_new_forward;
+    let f = free_impl(fn_new_forward);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -81,7 +85,7 @@ fn fn_new_forward(input: Val) -> Val {
 
 fn new_reverse() -> Named<FuncVal> {
     let id = CALL_REVERSE;
-    let f = fn_new_reverse;
+    let f = free_impl(fn_new_reverse);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -96,39 +100,47 @@ fn fn_new_reverse(input: Val) -> Val {
 
 fn apply() -> Named<FuncVal> {
     let id = "call.apply";
-    let f = MutDispatcher::new(
-        fn_apply::<FreeCtx>,
-        |ctx, val| fn_apply(ctx, val),
-        |ctx, val| fn_apply(ctx, val),
-    );
+    let f = MutStaticImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut);
     let mode = FuncMode::default();
     named_mut_fn(id, f, mode)
 }
 
-fn fn_apply<'a, Ctx>(ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
+fn fn_apply_free(input: Val) -> Val {
     let Val::Call(call) = input else {
         return Val::default();
     };
-    let call = Call::from(call);
-    EvalCore::call(ctx, call.reverse, call.func, call.input)
+    CallApply.free_static_call(call)
+}
+
+fn fn_apply_const(ctx: ConstRef<Ctx>, input: Val) -> Val {
+    let Val::Call(call) = input else {
+        return Val::default();
+    };
+    CallApply.const_static_call(ctx, call)
+}
+
+fn fn_apply_mut(ctx: &mut Ctx, input: Val) -> Val {
+    let Val::Call(call) = input else {
+        return Val::default();
+    };
+    CallApply.mut_static_call(ctx, call)
 }
 
 fn is_reverse() -> Named<FuncVal> {
     let id = "call.is_reverse";
-    let f = fn_is_reverse;
+    let f = const_impl(fn_is_reverse);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_is_reverse(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_is_reverse(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| match val {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| match val {
         Val::Call(call) => Val::Bit(Bit::new(call.reverse)),
         _ => Val::default(),
     })
@@ -136,20 +148,20 @@ fn fn_is_reverse(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn get_func() -> Named<FuncVal> {
     let id = "call.function";
-    let f = fn_get_func;
+    let f = const_impl(fn_get_func);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_func(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
-        Either::This(val) => match val.as_const() {
+    MainCtx::with_ref_or_val(&ctx, pair.first, |ref_or_val| match ref_or_val {
+        Either::This(val) => match &val {
             Val::Call(call) => call.func.clone(),
             _ => Val::default(),
         },
@@ -162,23 +174,23 @@ fn fn_get_func(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn set_func() -> Named<FuncVal> {
     let id = "call.set_function";
-    let f = fn_set_func;
+    let f = mut_impl(fn_set_func);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_func(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(mut call) => {
-            let Some(Val::Call(call)) = call.as_mut() else {
+    MainCtx::with_ref_mut_or_val(ctx, name, |ref_or_val| match ref_or_val {
+        Either::This(call) => {
+            let Val::Call(call) = call else {
                 return Val::default();
             };
             swap(&mut call.func, &mut val);
@@ -190,20 +202,20 @@ fn fn_set_func(ctx: MutFnCtx, input: Val) -> Val {
 
 fn get_input() -> Named<FuncVal> {
     let id = "call.input";
-    let f = fn_get_input;
+    let f = const_impl(fn_get_input);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get_input(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_dyn(ctx, pair.first, |ref_or_val| match ref_or_val {
-        Either::This(val) => match val.as_const() {
+    MainCtx::with_ref_or_val(&ctx, pair.first, |ref_or_val| match ref_or_val {
+        Either::This(val) => match &val {
             Val::Call(call) => call.input.clone(),
             _ => Val::default(),
         },
@@ -216,23 +228,23 @@ fn fn_get_input(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn set_input() -> Named<FuncVal> {
     let id = "call.set_input";
-    let f = fn_set_input;
+    let f = mut_impl(fn_set_input);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_set_input(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_input(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_val) = input else {
         return Val::default();
     };
     let name_val = Pair::from(name_val);
     let name = name_val.first;
     let mut val = name_val.second;
-    MainCtx::with_dyn(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(mut call) => {
-            let Some(Val::Call(call)) = call.as_mut() else {
+    MainCtx::with_ref_mut_or_val(ctx, name, |ref_or_val| match ref_or_val {
+        Either::This(call) => {
+            let Val::Call(call) = call else {
                 return Val::default();
             };
             swap(&mut call.input, &mut val);

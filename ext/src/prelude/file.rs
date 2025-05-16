@@ -1,4 +1,5 @@
-use airlang::ConstFnCtx;
+use airlang::ConstRef;
+use airlang::Ctx;
 use airlang::FuncMode;
 use airlang::FuncVal;
 use airlang::PreludeCtx;
@@ -7,6 +8,7 @@ use airlang::Val;
 
 use crate::prelude::Named;
 use crate::prelude::Prelude;
+use crate::prelude::const_impl;
 use crate::prelude::named_const_fn;
 
 pub(crate) struct FilePrelude {
@@ -27,12 +29,12 @@ impl Prelude for FilePrelude {
 
 fn read_to_text() -> Named<FuncVal> {
     let id = "file.read_to_text";
-    let f = fn_read_to_text;
+    let f = const_impl(fn_read_to_text);
     let mode = FuncMode::default();
     named_const_fn(id, f, mode)
 }
 
-fn fn_read_to_text(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_read_to_text(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let result = match input {
         Val::Text(path) => std::fs::read_to_string(&**path),
         Val::Symbol(s) => {

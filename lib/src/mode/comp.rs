@@ -1,19 +1,21 @@
 use crate::CallVal;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeStaticFn;
 use crate::ListMode;
 use crate::ListVal;
 use crate::MapMode;
 use crate::MapVal;
+use crate::MutStaticFn;
 use crate::PairMode;
 use crate::PairVal;
 use crate::Symbol;
 use crate::UniMode;
 use crate::Val;
-use crate::core::FormCore;
-use crate::ctx::ref1::CtxMeta;
+use crate::mode::ModeFn;
 use crate::mode::call::CallMode;
 use crate::mode::symbol::SymbolMode;
-use crate::transformer::ByVal;
-use crate::transformer::Transformer;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CompMode {
@@ -24,42 +26,134 @@ pub struct CompMode {
     pub map: Option<MapMode>,
 }
 
-impl Transformer<Val, Val> for CompMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        FormCore::transform_val(self, ctx, input)
+impl ModeFn for CompMode {}
+
+impl FreeStaticFn<Val, Val> for CompMode {
+    fn free_static_call(&self, input: Val) -> Val {
+        match input {
+            Val::Symbol(symbol) => self.free_static_call(symbol),
+            Val::Pair(pair) => self.free_static_call(pair),
+            Val::Call(call) => self.free_static_call(call),
+            Val::List(list) => self.free_static_call(list),
+            Val::Map(map) => self.free_static_call(map),
+            v => v,
+        }
     }
 }
 
-impl ByVal<Val> for CompMode {
-    fn transform_default<'a, Ctx>(&self, _ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        input
+impl ConstStaticFn<Ctx, Val, Val> for CompMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        match input {
+            Val::Symbol(symbol) => self.const_static_call(ctx, symbol),
+            Val::Pair(pair) => self.const_static_call(ctx, pair),
+            Val::Call(call) => self.const_static_call(ctx, call),
+            Val::List(list) => self.const_static_call(ctx, list),
+            Val::Map(map) => self.const_static_call(ctx, map),
+            v => v,
+        }
     }
+}
 
-    fn transform_symbol<'a, Ctx>(&self, ctx: Ctx, symbol: Symbol) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.symbol.transform(ctx, symbol)
+impl MutStaticFn<Ctx, Val, Val> for CompMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match input {
+            Val::Symbol(symbol) => self.mut_static_call(ctx, symbol),
+            Val::Pair(pair) => self.mut_static_call(ctx, pair),
+            Val::Call(call) => self.mut_static_call(ctx, call),
+            Val::List(list) => self.mut_static_call(ctx, list),
+            Val::Map(map) => self.mut_static_call(ctx, map),
+            v => v,
+        }
     }
+}
 
-    fn transform_pair<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.pair.transform(ctx, pair)
+impl FreeStaticFn<Symbol, Val> for CompMode {
+    fn free_static_call(&self, input: Symbol) -> Val {
+        self.symbol.free_static_call(input)
     }
+}
 
-    fn transform_call<'a, Ctx>(&self, ctx: Ctx, call: CallVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.call.transform(ctx, call)
+impl ConstStaticFn<Ctx, Symbol, Val> for CompMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Symbol) -> Val {
+        self.symbol.const_static_call(ctx, input)
     }
+}
 
-    fn transform_list<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.list.transform(ctx, list)
+impl MutStaticFn<Ctx, Symbol, Val> for CompMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Symbol) -> Val {
+        self.symbol.mut_static_call(ctx, input)
     }
+}
 
-    fn transform_map<'a, Ctx>(&self, ctx: Ctx, map: MapVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.map.transform(ctx, map)
+impl FreeStaticFn<PairVal, Val> for CompMode {
+    fn free_static_call(&self, input: PairVal) -> Val {
+        self.pair.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, PairVal, Val> for CompMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: PairVal) -> Val {
+        self.pair.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, PairVal, Val> for CompMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: PairVal) -> Val {
+        self.pair.mut_static_call(ctx, input)
+    }
+}
+
+impl FreeStaticFn<CallVal, Val> for CompMode {
+    fn free_static_call(&self, input: CallVal) -> Val {
+        self.call.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, CallVal, Val> for CompMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+        self.call.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, CallVal, Val> for CompMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+        self.call.mut_static_call(ctx, input)
+    }
+}
+
+impl FreeStaticFn<ListVal, Val> for CompMode {
+    fn free_static_call(&self, input: ListVal) -> Val {
+        self.list.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, ListVal, Val> for CompMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+        self.list.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, ListVal, Val> for CompMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+        self.list.mut_static_call(ctx, input)
+    }
+}
+
+impl FreeStaticFn<MapVal, Val> for CompMode {
+    fn free_static_call(&self, input: MapVal) -> Val {
+        self.map.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, MapVal, Val> for CompMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: MapVal) -> Val {
+        self.map.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, MapVal, Val> for CompMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
+        self.map.mut_static_call(ctx, input)
     }
 }
 

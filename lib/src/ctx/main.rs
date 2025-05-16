@@ -1,45 +1,26 @@
+use crate::Ctx;
 use crate::CtxError;
-use crate::MutFnCtx;
+use crate::DynRef;
 use crate::Pair;
 use crate::Symbol;
 use crate::Val;
-use crate::ctx::map::CtxMapRef;
-use crate::ctx::map::DynRef;
-use crate::ctx::ref1::CtxMeta;
-use crate::ctx::ref1::CtxRef;
 use crate::either::Either;
-use crate::mode::eval::EVAL;
 use crate::mode::symbol::LITERAL_CHAR;
-use crate::mode::symbol::MOVE_CHAR;
 use crate::mode::symbol::REF_CHAR;
-use crate::transformer::Transformer;
 
 pub(crate) struct MainCtx;
 
 impl MainCtx {
-    pub(crate) fn get_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
-    where Ctx: CtxRef<'a> {
-        let Ok(ctx) = ctx.get_variables() else {
-            return Val::default();
-        };
-        let Ok(val) = ctx.get_ref(name) else {
-            return Val::default();
-        };
-        val.clone()
+    pub(crate) fn get_or_default(ctx: &Ctx, name: Symbol) -> Val {
+        ctx.variables().get_ref(name).cloned().unwrap_or_default()
     }
 
-    pub(crate) fn remove_or_default<'a, Ctx>(ctx: Ctx, name: Symbol) -> Val
-    where Ctx: CtxRef<'a> {
-        let Ok(variables) = ctx.get_variables_mut() else {
-            return Val::default();
-        };
-        variables.remove(name).unwrap_or_default()
+    pub(crate) fn remove_or_default(ctx: &mut Ctx, name: Symbol) -> Val {
+        ctx.variables_mut().remove(name).unwrap_or_default()
     }
 
-    pub(crate) fn is_null<'a, Ctx>(ctx: Ctx, name: Symbol) -> Result<bool, CtxError>
-    where Ctx: CtxRef<'a> {
-        let ctx = ctx.get_variables()?;
-        match ctx.get_ref(name) {
+    pub(crate) fn is_null(ctx: &Ctx, name: Symbol) -> Result<bool, CtxError> {
+        match ctx.variables().get_ref(name) {
             Ok(_) => Ok(false),
             Err(err) => {
                 if let CtxError::NotFound = err {
@@ -51,38 +32,51 @@ impl MainCtx {
         }
     }
 
-    pub(crate) fn with_dyn<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
-    where
-        Ctx: CtxMeta<'a>,
-        F: FnOnce(Either<DynRef<Val>, Val>) -> T, {
-        let val = Self::ref_or_val(name);
-        match val {
+    pub(crate) fn with_ref_or_val<T, F>(ctx: &Ctx, name: Val, f: F) -> T
+    where F: FnOnce(Either<&Val, Val>) -> T {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(ref1) = ctx.variables().get_ref(name) else {
+                    return f(Either::That(Val::default()));
+                };
+                f(Either::This(ref1))
+            }
+            Either::That(val) => f(Either::That(val)),
+        }
+    }
+
+    pub(crate) fn with_ref_mut_or_val<T, F>(ctx: &mut Ctx, name: Val, f: F) -> T
+    where F: FnOnce(Either<&mut Val, Val>) -> T {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(ref1) = ctx.variables_mut().get_ref_mut(name) else {
+                    return f(Either::That(Val::default()));
+                };
+                f(Either::This(ref1))
+            }
+            Either::That(val) => f(Either::That(val)),
+        }
+    }
+
+    pub(crate) fn with_ref_dyn_or_val<T, F>(mut ctx: DynRef<Ctx>, name: Val, f: F) -> T
+    where F: FnOnce(Either<DynRef<Val>, Val>) -> T {
+        match Self::ref_or_val(name) {
             Either::This(s) => {
-                let Ok(ctx) = ctx.get_variables_dyn() else {
+                let Ok(ref1) = ctx.map_res(|ctx| ctx.variables_mut().get_ref_dyn(s)) else {
                     return f(Either::That(Val::default()));
                 };
-                let Ok(mut dyn_ref) = ctx.ref1.get_ref_dyn(s) else {
-                    return f(Either::That(Val::default()));
-                };
-                dyn_ref.is_const |= ctx.is_const;
-                f(Either::This(dyn_ref))
+                f(Either::This(ref1))
             }
             Either::That(val) => f(Either::That(val)),
         }
     }
 
     #[expect(unused)]
-    pub(crate) fn with_ref<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
-    where
-        Ctx: CtxMeta<'a>,
-        F: FnOnce(&Val) -> T, {
-        let val = Self::ref_or_val(name);
-        match val {
-            Either::This(s) => {
-                let Ok(ctx) = ctx.get_variables() else {
-                    return f(&Val::default());
-                };
-                let Ok(val) = ctx.get_ref(s) else {
+    pub(crate) fn with_ref<T, F>(ctx: &Ctx, name: Val, f: F) -> T
+    where F: FnOnce(&Val) -> T {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(val) = ctx.variables().get_ref(name) else {
                     return f(&Val::default());
                 };
                 f(val)
@@ -91,17 +85,11 @@ impl MainCtx {
         }
     }
 
-    pub(crate) fn with_ref_lossless<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        F: FnOnce(&Val) -> Val, {
-        let val = Self::ref_or_val(name);
-        match val {
-            Either::This(s) => {
-                let Ok(ctx) = ctx.get_variables() else {
-                    return f(&Val::default());
-                };
-                let Ok(val) = ctx.get_ref(s) else {
+    pub(crate) fn with_ref_lossless<F>(ctx: &Ctx, name: Val, f: F) -> Val
+    where F: FnOnce(&Val) -> Val {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(val) = ctx.variables().get_ref(name) else {
                     return f(&Val::default());
                 };
                 f(val)
@@ -114,17 +102,11 @@ impl MainCtx {
     }
 
     #[expect(dead_code)]
-    pub(crate) fn with_ref_mut<'a, Ctx, T, F>(ctx: Ctx, name: Val, f: F) -> T
-    where
-        Ctx: CtxMeta<'a>,
-        F: FnOnce(&mut Val) -> T, {
-        let val = Self::ref_or_val(name);
-        match val {
-            Either::This(s) => {
-                let Ok(ctx) = ctx.get_variables_mut() else {
-                    return f(&mut Val::default());
-                };
-                let Ok(val) = ctx.get_ref_mut(s) else {
+    pub(crate) fn with_ref_mut<T, F>(ctx: &mut Ctx, name: Val, f: F) -> T
+    where F: FnOnce(&mut Val) -> T {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(val) = ctx.variables_mut().get_ref_mut(name) else {
                     return f(&mut Val::default());
                 };
                 f(val)
@@ -133,17 +115,11 @@ impl MainCtx {
         }
     }
 
-    pub(crate) fn with_ref_mut_lossless<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        F: FnOnce(&mut Val) -> Val, {
-        let val = Self::ref_or_val(name);
-        match val {
-            Either::This(s) => {
-                let Ok(ctx) = ctx.get_variables_mut() else {
-                    return f(&mut Val::default());
-                };
-                let Ok(val) = ctx.get_ref_mut(s) else {
+    pub(crate) fn with_ref_mut_lossless<F>(ctx: &mut Ctx, name: Val, f: F) -> Val
+    where F: FnOnce(&mut Val) -> Val {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(val) = ctx.variables_mut().get_ref_mut(name) else {
                     return f(&mut Val::default());
                 };
                 f(val)
@@ -155,18 +131,11 @@ impl MainCtx {
         }
     }
 
-    pub(crate) fn with_ref_mut_no_ret<'a, Ctx, F>(ctx: Ctx, name: Val, f: F) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        F: FnOnce(&mut Val), {
-        let val = Self::ref_or_val(name);
-        match val {
-            Either::This(s) => {
-                let Ok(ctx) = ctx.get_variables_mut() else {
-                    f(&mut Val::default());
-                    return Val::default();
-                };
-                let Ok(val) = ctx.get_ref_mut(s) else {
+    pub(crate) fn with_ref_mut_no_ret<F>(ctx: &mut Ctx, name: Val, f: F) -> Val
+    where F: FnOnce(&mut Val) {
+        match Self::ref_or_val(name) {
+            Either::This(name) => {
+                let Ok(val) = ctx.variables_mut().get_ref_mut(name) else {
                     f(&mut Val::default());
                     return Val::default();
                 };
@@ -180,20 +149,7 @@ impl MainCtx {
         }
     }
 
-    pub(crate) fn eval_escape_symbol(ctx: MutFnCtx, input: Val) -> Val {
-        let Val::Symbol(s) = &input else {
-            let val = EVAL.transform(ctx, input);
-            return Self::escape_symbol(val);
-        };
-        let prefix = s.chars().next();
-        if let Some(MOVE_CHAR) = prefix {
-            let val = MainCtx::remove_or_default(ctx, Symbol::from_str(&s[1 ..]));
-            return Self::escape_symbol(val);
-        }
-        input
-    }
-
-    fn escape_symbol(val: Val) -> Val {
+    pub(crate) fn escape_symbol(val: Val) -> Val {
         if let Val::Symbol(s) = val {
             Val::Symbol(Symbol::from_string(format!("{}{}", LITERAL_CHAR, &*s)))
         } else {

@@ -4,7 +4,6 @@ pub enum Either<This, That> {
     That(That),
 }
 
-#[expect(unused)]
 impl<This, That> Either<This, That> {
     pub fn is_this(&self) -> bool {
         matches!(self, Either::This(_))

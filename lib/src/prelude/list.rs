@@ -1,15 +1,17 @@
 use std::mem::swap;
 
-use crate::ConstFnCtx;
+use crate::ConstRef;
+use crate::Ctx;
 use crate::FuncMode;
 use crate::Int;
 use crate::Pair;
 use crate::ctx::main::MainCtx;
-use crate::ctx::mut1::MutFnCtx;
 use crate::list::List;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::const_impl;
+use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_mut_fn;
 use crate::prelude::ref_pair_mode;
@@ -67,19 +69,19 @@ impl Prelude for ListPrelude {
 
 fn length() -> Named<FuncVal> {
     let id = "list.length";
-    let f = fn_length;
+    let f = const_impl(fn_length);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_length(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(ctx, pair.first, |val| {
+    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
         let Val::List(list) = val else {
             return Val::default();
         };
@@ -90,14 +92,14 @@ fn fn_length(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn set() -> Named<FuncVal> {
     let id = "list.set";
-    let f = fn_set;
+    let f = mut_impl(fn_set);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -126,14 +128,14 @@ fn fn_set(ctx: MutFnCtx, input: Val) -> Val {
 
 fn set_many() -> Named<FuncVal> {
     let id = "list.set_many";
-    let f = fn_set_many;
+    let f = mut_impl(fn_set_many);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(list_pair) = input else {
         return Val::default();
     };
@@ -166,14 +168,14 @@ fn fn_set_many(ctx: MutFnCtx, input: Val) -> Val {
 
 fn get() -> Named<FuncVal> {
     let id = "list.get";
-    let f = fn_get;
+    let f = const_impl(fn_get);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_get(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -184,7 +186,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
         let Some((from, to)) = to_range(range) else {
             return Val::default();
         };
-        MainCtx::with_ref_lossless(ctx, name, |val| {
+        MainCtx::with_ref_lossless(&ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -199,7 +201,7 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
         let Some(i) = to_index(name_index.second) else {
             return Val::default();
         };
-        MainCtx::with_ref_lossless(ctx, name, |val| {
+        MainCtx::with_ref_lossless(&ctx, name, |val| {
             let Val::List(list) = val else {
                 return Val::default();
             };
@@ -213,14 +215,14 @@ fn fn_get(ctx: ConstFnCtx, input: Val) -> Val {
 
 fn insert() -> Named<FuncVal> {
     let id = "list.insert";
-    let f = fn_insert;
+    let f = mut_impl(fn_insert);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_insert(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -248,14 +250,14 @@ fn fn_insert(ctx: MutFnCtx, input: Val) -> Val {
 
 fn insert_many() -> Named<FuncVal> {
     let id = "list.insert_many";
-    let f = fn_insert_many;
+    let f = mut_impl(fn_insert_many);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_insert_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_pair) = input else {
         return Val::default();
     };
@@ -286,14 +288,14 @@ fn fn_insert_many(ctx: MutFnCtx, input: Val) -> Val {
 
 fn remove() -> Named<FuncVal> {
     let id = "list.remove";
-    let f = fn_remove;
+    let f = mut_impl(fn_remove);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_index) = input else {
         return Val::default();
     };
@@ -334,14 +336,14 @@ fn fn_remove(ctx: MutFnCtx, input: Val) -> Val {
 
 fn push() -> Named<FuncVal> {
     let id = "list.push";
-    let f = fn_push;
+    let f = mut_impl(fn_push);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_value) = input else {
         return Val::default();
     };
@@ -358,14 +360,14 @@ fn fn_push(ctx: MutFnCtx, input: Val) -> Val {
 
 fn push_many() -> Named<FuncVal> {
     let id = "list.push_many";
-    let f = fn_push_many;
+    let f = mut_impl(fn_push_many);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_push_many(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_values) = input else {
         return Val::default();
     };
@@ -385,14 +387,14 @@ fn fn_push_many(ctx: MutFnCtx, input: Val) -> Val {
 
 fn pop() -> Named<FuncVal> {
     let id = "list.pop";
-    let f = fn_pop;
+    let f = mut_impl(fn_pop);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_pop(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(name_count) = input else {
         return Val::default();
     };
@@ -430,14 +432,14 @@ fn fn_pop(ctx: MutFnCtx, input: Val) -> Val {
 
 fn clear() -> Named<FuncVal> {
     let id = "list.clear";
-    let f = fn_clear;
+    let f = mut_impl(fn_clear);
     let forward = ref_pair_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_clear(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

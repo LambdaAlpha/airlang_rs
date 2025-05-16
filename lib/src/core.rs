@@ -3,55 +3,69 @@ use std::hash::Hash;
 
 use crate::Call;
 use crate::CallVal;
-use crate::ConstCtx;
+use crate::ConstCellFn;
+use crate::ConstRef;
+use crate::ConstStaticFn;
 use crate::Ctx;
-use crate::FuncVal;
+use crate::FreeStaticFn;
 use crate::List;
 use crate::ListVal;
 use crate::Map;
 use crate::MapVal;
-use crate::MutCtx;
-use crate::MutFnCtx;
+use crate::MutCellFn;
+use crate::MutStaticFn;
 use crate::Pair;
 use crate::PairVal;
 use crate::Symbol;
 use crate::Val;
 use crate::ctx::main::MainCtx;
 use crate::ctx::map::CtxValue;
-use crate::ctx::ref1::CtxMeta;
 use crate::func::FuncTrait;
 use crate::mode::symbol::LITERAL_CHAR;
 use crate::mode::symbol::MOVE_CHAR;
 use crate::mode::symbol::REF_CHAR;
-use crate::solver::SOLVER;
-use crate::transformer::ByVal;
-use crate::transformer::Transformer;
+use crate::solver::Solver;
 
-pub(crate) struct FormCore;
+pub(crate) struct SymbolForm<const DEFAULT: char>;
 
-impl FormCore {
-    pub(crate) fn transform_val<'a, Ctx, T>(t: &T, ctx: Ctx, input: Val) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        T: ByVal<Val>, {
-        match input {
-            Val::Symbol(symbol) => t.transform_symbol(ctx, symbol),
-            Val::Pair(pair) => t.transform_pair(ctx, pair),
-            Val::Call(call) => t.transform_call(ctx, call),
-            Val::List(list) => t.transform_list(ctx, list),
-            Val::Map(map) => t.transform_map(ctx, map),
-            v => t.transform_default(ctx, v),
+impl<const DEFAULT: char> SymbolForm<DEFAULT> {
+    fn recognize(&self, input: Symbol) -> (char, Symbol) {
+        match input.chars().next() {
+            Some(LITERAL_CHAR) => (LITERAL_CHAR, Symbol::from_str(&input[1 ..])),
+            Some(REF_CHAR) => (REF_CHAR, Symbol::from_str(&input[1 ..])),
+            Some(MOVE_CHAR) => (MOVE_CHAR, Symbol::from_str(&input[1 ..])),
+            _ => (DEFAULT, input),
         }
     }
+}
 
-    pub(crate) fn transform_symbol<'a, const DEFAULT: char, Ctx>(ctx: Ctx, s: Symbol) -> Val
-    where Ctx: CtxMeta<'a> {
-        let (mode, s) = match s.chars().next() {
-            Some(LITERAL_CHAR) => (LITERAL_CHAR, Symbol::from_str(&s[1 ..])),
-            Some(REF_CHAR) => (REF_CHAR, Symbol::from_str(&s[1 ..])),
-            Some(MOVE_CHAR) => (MOVE_CHAR, Symbol::from_str(&s[1 ..])),
-            _ => (DEFAULT, s),
-        };
+impl<const DEFAULT: char> FreeStaticFn<Symbol, Val> for SymbolForm<DEFAULT> {
+    fn free_static_call(&self, input: Symbol) -> Val {
+        let (mode, s) = self.recognize(input);
+        match mode {
+            LITERAL_CHAR => Val::Symbol(s),
+            REF_CHAR => Val::default(),
+            MOVE_CHAR => Val::default(),
+            _ => unreachable!("DEFAULT should be predefined character"),
+        }
+    }
+}
+
+impl<const DEFAULT: char> ConstStaticFn<Ctx, Symbol, Val> for SymbolForm<DEFAULT> {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Symbol) -> Val {
+        let (mode, s) = self.recognize(input);
+        match mode {
+            LITERAL_CHAR => Val::Symbol(s),
+            REF_CHAR => MainCtx::get_or_default(&ctx, s),
+            MOVE_CHAR => Val::default(),
+            _ => unreachable!("DEFAULT should be predefined character"),
+        }
+    }
+}
+
+impl<const DEFAULT: char> MutStaticFn<Ctx, Symbol, Val> for SymbolForm<DEFAULT> {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Symbol) -> Val {
+        let (mode, s) = self.recognize(input);
         match mode {
             LITERAL_CHAR => Val::Symbol(s),
             REF_CHAR => MainCtx::get_or_default(ctx, s),
@@ -59,100 +73,287 @@ impl FormCore {
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }
+}
 
-    pub(crate) fn transform_pair<'a, Ctx, First, Second>(
-        first: &First, second: &Second, mut ctx: Ctx, pair: PairVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        First: Transformer<Val, Val>,
-        Second: Transformer<Val, Val>, {
-        let pair = Pair::from(pair);
-        let first = first.transform(ctx.reborrow(), pair.first);
-        let second = second.transform(ctx, pair.second);
+pub(crate) struct PairForm<'a, First, Second> {
+    pub(crate) first: &'a First,
+    pub(crate) second: &'a Second,
+}
+
+impl<'a, First, Second> FreeStaticFn<PairVal, Val> for PairForm<'a, First, Second>
+where
+    First: FreeStaticFn<Val, Val>,
+    Second: FreeStaticFn<Val, Val>,
+{
+    fn free_static_call(&self, input: PairVal) -> Val {
+        let pair = Pair::from(input);
+        let first = self.first.free_static_call(pair.first);
+        let second = self.second.free_static_call(pair.second);
         Val::Pair(Pair::new(first, second).into())
     }
+}
 
-    pub(crate) fn transform_call<'a, Ctx, Func, Input>(
-        func: &Func, input: &Input, mut ctx: Ctx, call: CallVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Input: Transformer<Val, Val>, {
-        let call = Call::from(call);
-        let func = func.transform(ctx.reborrow(), call.func);
-        let input = input.transform(ctx, call.input);
-        Val::Call(Call { reverse: call.reverse, func, input }.into())
+impl<'a, First, Second, Ctx> ConstStaticFn<Ctx, PairVal, Val> for PairForm<'a, First, Second>
+where
+    First: ConstStaticFn<Ctx, Val, Val>,
+    Second: ConstStaticFn<Ctx, Val, Val>,
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: PairVal) -> Val {
+        let pair = Pair::from(input);
+        let first = self.first.const_static_call(ctx.reborrow(), pair.first);
+        let second = self.second.const_static_call(ctx, pair.second);
+        Val::Pair(Pair::new(first, second).into())
     }
+}
 
-    pub(crate) fn transform_list<'a, Ctx, Item>(item: &Item, mut ctx: Ctx, list: ListVal) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Item: Transformer<Val, Val>, {
+impl<'a, First, Second, Ctx> MutStaticFn<Ctx, PairVal, Val> for PairForm<'a, First, Second>
+where
+    First: MutStaticFn<Ctx, Val, Val>,
+    Second: MutStaticFn<Ctx, Val, Val>,
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: PairVal) -> Val {
+        let pair = Pair::from(input);
+        let first = self.first.mut_static_call(ctx, pair.first);
+        let second = self.second.mut_static_call(ctx, pair.second);
+        Val::Pair(Pair::new(first, second).into())
+    }
+}
+
+pub(crate) struct CallForm<'a, Func, Input> {
+    pub(crate) func: &'a Func,
+    pub(crate) input: &'a Input,
+}
+
+impl<'a, Func, Input> FreeStaticFn<CallVal, Val> for CallForm<'a, Func, Input>
+where
+    Func: FreeStaticFn<Val, Val>,
+    Input: FreeStaticFn<Val, Val>,
+{
+    fn free_static_call(&self, input: CallVal) -> Val {
+        let call = Call::from(input);
+        let func = self.func.free_static_call(call.func);
+        let input = self.input.free_static_call(call.input);
+        Val::Call(Call::new(call.reverse, func, input).into())
+    }
+}
+
+impl<'a, Func, Input, Ctx> ConstStaticFn<Ctx, CallVal, Val> for CallForm<'a, Func, Input>
+where
+    Func: ConstStaticFn<Ctx, Val, Val>,
+    Input: ConstStaticFn<Ctx, Val, Val>,
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+        let call = Call::from(input);
+        let func = self.func.const_static_call(ctx.reborrow(), call.func);
+        let input = self.input.const_static_call(ctx, call.input);
+        Val::Call(Call::new(call.reverse, func, input).into())
+    }
+}
+
+impl<'a, Func, Input, Ctx> MutStaticFn<Ctx, CallVal, Val> for CallForm<'a, Func, Input>
+where
+    Func: MutStaticFn<Ctx, Val, Val>,
+    Input: MutStaticFn<Ctx, Val, Val>,
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+        let call = Call::from(input);
+        let func = self.func.mut_static_call(ctx, call.func);
+        let input = self.input.mut_static_call(ctx, call.input);
+        Val::Call(Call::new(call.reverse, func, input).into())
+    }
+}
+
+pub(crate) struct ListUniForm<'a, Item> {
+    pub(crate) item: &'a Item,
+}
+
+impl<'a, Item> FreeStaticFn<ListVal, Val> for ListUniForm<'a, Item>
+where Item: FreeStaticFn<Val, Val>
+{
+    fn free_static_call(&self, input: ListVal) -> Val {
         let list: List<Val> =
-            List::from(list).into_iter().map(|v| item.transform(ctx.reborrow(), v)).collect();
+            List::from(input).into_iter().map(|v| self.item.free_static_call(v)).collect();
         Val::List(list.into())
     }
+}
 
-    pub(crate) fn transform_list_head_tail<'a, Ctx, Head, Tail>(
-        head: &List<Head>, tail: &Tail, mut ctx: Ctx, list: ListVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Head: Transformer<Val, Val>,
-        Tail: Transformer<Val, Val>, {
-        let mut iter = List::from(list).into_iter();
+impl<'a, Item, Ctx> ConstStaticFn<Ctx, ListVal, Val> for ListUniForm<'a, Item>
+where Item: ConstStaticFn<Ctx, Val, Val>
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+        let list: List<Val> = List::from(input)
+            .into_iter()
+            .map(|v| self.item.const_static_call(ctx.reborrow(), v))
+            .collect();
+        Val::List(list.into())
+    }
+}
+
+impl<'a, Item, Ctx> MutStaticFn<Ctx, ListVal, Val> for ListUniForm<'a, Item>
+where Item: MutStaticFn<Ctx, Val, Val>
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+        let list: List<Val> =
+            List::from(input).into_iter().map(|v| self.item.mut_static_call(ctx, v)).collect();
+        Val::List(list.into())
+    }
+}
+
+pub(crate) struct ListForm<'a, Head, Tail> {
+    pub(crate) head: &'a List<Head>,
+    pub(crate) tail: &'a Tail,
+}
+
+impl<'a, Head, Tail> FreeStaticFn<ListVal, Val> for ListForm<'a, Head, Tail>
+where
+    Head: FreeStaticFn<Val, Val>,
+    Tail: FreeStaticFn<Val, Val>,
+{
+    fn free_static_call(&self, input: ListVal) -> Val {
+        let mut iter = List::from(input).into_iter();
         let mut list = Vec::with_capacity(iter.len());
-        for mode in head {
+        for mode in self.head {
             let Some(val) = iter.next() else {
                 break;
             };
-            let val = mode.transform(ctx.reborrow(), val);
+            let val = mode.free_static_call(val);
             list.push(val);
         }
         for val in iter {
-            list.push(tail.transform(ctx.reborrow(), val));
+            list.push(self.tail.free_static_call(val));
         }
         Val::List(List::from(list).into())
     }
+}
 
-    pub(crate) fn transform_map<'a, Ctx, K, V>(
-        key: &K, value: &V, mut ctx: Ctx, map: MapVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        K: Transformer<Val, Val>,
-        V: Transformer<Val, Val>, {
-        let map: Map<Val, Val> = Map::from(map)
+impl<'a, Head, Tail, Ctx> ConstStaticFn<Ctx, ListVal, Val> for ListForm<'a, Head, Tail>
+where
+    Head: ConstStaticFn<Ctx, Val, Val>,
+    Tail: ConstStaticFn<Ctx, Val, Val>,
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+        let mut iter = List::from(input).into_iter();
+        let mut list = Vec::with_capacity(iter.len());
+        for mode in self.head {
+            let Some(val) = iter.next() else {
+                break;
+            };
+            let val = mode.const_static_call(ctx.reborrow(), val);
+            list.push(val);
+        }
+        for val in iter {
+            list.push(self.tail.const_static_call(ctx.reborrow(), val));
+        }
+        Val::List(List::from(list).into())
+    }
+}
+
+impl<'a, Head, Tail, Ctx> MutStaticFn<Ctx, ListVal, Val> for ListForm<'a, Head, Tail>
+where
+    Head: MutStaticFn<Ctx, Val, Val>,
+    Tail: MutStaticFn<Ctx, Val, Val>,
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+        let mut iter = List::from(input).into_iter();
+        let mut list = Vec::with_capacity(iter.len());
+        for mode in self.head {
+            let Some(val) = iter.next() else {
+                break;
+            };
+            let val = mode.mut_static_call(ctx, val);
+            list.push(val);
+        }
+        for val in iter {
+            list.push(self.tail.mut_static_call(ctx, val));
+        }
+        Val::List(List::from(list).into())
+    }
+}
+
+pub(crate) struct MapUniForm<'a, Key, Value> {
+    pub(crate) key: &'a Key,
+    pub(crate) value: &'a Value,
+}
+
+impl<'a, Key, Value> FreeStaticFn<MapVal, Val> for MapUniForm<'a, Key, Value>
+where
+    Key: FreeStaticFn<Val, Val>,
+    Value: FreeStaticFn<Val, Val>,
+{
+    fn free_static_call(&self, input: MapVal) -> Val {
+        let map: Map<Val, Val> = Map::from(input)
             .into_iter()
             .map(|(k, v)| {
-                let key = key.transform(ctx.reborrow(), k);
-                let value = value.transform(ctx.reborrow(), v);
+                let key = self.key.free_static_call(k);
+                let value = self.value.free_static_call(v);
                 (key, value)
             })
             .collect();
         Val::Map(map.into())
     }
+}
 
-    pub(crate) fn transform_map_some_else<'a, Ctx, SomeK, SomeV, ElseK, ElseV>(
-        some: &Map<SomeK, SomeV>, key: &ElseK, value: &ElseV, mut ctx: Ctx, map: MapVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        SomeK: Borrow<Val> + Eq + Hash,
-        SomeV: Transformer<Val, Val>,
-        ElseK: Transformer<Val, Val>,
-        ElseV: Transformer<Val, Val>, {
-        let map: Map<Val, Val> = Map::from(map)
+impl<'a, Key, Value, Ctx> ConstStaticFn<Ctx, MapVal, Val> for MapUniForm<'a, Key, Value>
+where
+    Key: ConstStaticFn<Ctx, Val, Val>,
+    Value: ConstStaticFn<Ctx, Val, Val>,
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: MapVal) -> Val {
+        let map: Map<Val, Val> = Map::from(input)
             .into_iter()
             .map(|(k, v)| {
-                if let Some(mode) = some.get(&k) {
-                    let v = mode.transform(ctx.reborrow(), v);
+                let key = self.key.const_static_call(ctx.reborrow(), k);
+                let value = self.value.const_static_call(ctx.reborrow(), v);
+                (key, value)
+            })
+            .collect();
+        Val::Map(map.into())
+    }
+}
+
+impl<'a, Key, Value, Ctx> MutStaticFn<Ctx, MapVal, Val> for MapUniForm<'a, Key, Value>
+where
+    Key: MutStaticFn<Ctx, Val, Val>,
+    Value: MutStaticFn<Ctx, Val, Val>,
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
+        let map: Map<Val, Val> = Map::from(input)
+            .into_iter()
+            .map(|(k, v)| {
+                let key = self.key.mut_static_call(ctx, k);
+                let value = self.value.mut_static_call(ctx, v);
+                (key, value)
+            })
+            .collect();
+        Val::Map(map.into())
+    }
+}
+
+pub(crate) struct MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+where SomeKey: Eq + Hash {
+    pub(crate) some: &'a Map<SomeKey, SomeValue>,
+    pub(crate) key: &'a ElseKey,
+    pub(crate) value: &'a ElseValue,
+}
+
+impl<'a, SomeKey, SomeValue, ElseKey, ElseValue> FreeStaticFn<MapVal, Val>
+    for MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+where
+    SomeKey: Borrow<Val> + Eq + Hash,
+    SomeValue: FreeStaticFn<Val, Val>,
+    ElseKey: FreeStaticFn<Val, Val>,
+    ElseValue: FreeStaticFn<Val, Val>,
+{
+    fn free_static_call(&self, input: MapVal) -> Val {
+        let map: Map<Val, Val> = Map::from(input)
+            .into_iter()
+            .map(|(k, v)| {
+                if let Some(mode) = self.some.get(&k) {
+                    let v = mode.free_static_call(v);
                     (k, v)
                 } else {
-                    let k = key.transform(ctx.reborrow(), k);
-                    let v = value.transform(ctx.reborrow(), v);
+                    let k = self.key.free_static_call(k);
+                    let v = self.value.free_static_call(v);
                     (k, v)
                 }
             })
@@ -161,140 +362,318 @@ impl FormCore {
     }
 }
 
-pub(crate) struct EvalCore;
-
-impl EvalCore {
-    pub(crate) fn transform_call<'a, Ctx, Func, Input>(
-        func_trans: &Func, input_trans: &Input, mut ctx: Ctx, call: CallVal,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Func: Transformer<Val, Val>,
-        Input: Transformer<Val, Val>, {
-        let call = Call::from(call);
-        let func = func_trans.transform(ctx.reborrow(), call.func);
-        Self::eval_input_then_call(input_trans, ctx, call.reverse, func, call.input)
-    }
-
-    pub(crate) fn eval_input_then_call<'a, Ctx, Input>(
-        input_trans: &Input, mut ctx: Ctx, reverse: bool, func: Val, input: Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-        Input: Transformer<Val, Val>, {
-        match func {
-            Val::Func(func) => {
-                let input = if reverse {
-                    func.mode().reverse.transform(ctx.reborrow(), input)
+impl<'a, SomeKey, SomeValue, ElseKey, ElseValue, Ctx> ConstStaticFn<Ctx, MapVal, Val>
+    for MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+where
+    SomeKey: Borrow<Val> + Eq + Hash,
+    SomeValue: ConstStaticFn<Ctx, Val, Val>,
+    ElseKey: ConstStaticFn<Ctx, Val, Val>,
+    ElseValue: ConstStaticFn<Ctx, Val, Val>,
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: MapVal) -> Val {
+        let map: Map<Val, Val> = Map::from(input)
+            .into_iter()
+            .map(|(k, v)| {
+                if let Some(mode) = self.some.get(&k) {
+                    let v = mode.const_static_call(ctx.reborrow(), v);
+                    (k, v)
                 } else {
-                    func.mode().forward.transform(ctx.reborrow(), input)
-                };
-                Self::call_func(ctx, reverse, func, input)
+                    let k = self.key.const_static_call(ctx.reborrow(), k);
+                    let v = self.value.const_static_call(ctx.reborrow(), v);
+                    (k, v)
+                }
+            })
+            .collect();
+        Val::Map(map.into())
+    }
+}
+
+impl<'a, SomeKey, SomeValue, ElseKey, ElseValue, Ctx> MutStaticFn<Ctx, MapVal, Val>
+    for MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+where
+    SomeKey: Borrow<Val> + Eq + Hash,
+    SomeValue: MutStaticFn<Ctx, Val, Val>,
+    ElseKey: MutStaticFn<Ctx, Val, Val>,
+    ElseValue: MutStaticFn<Ctx, Val, Val>,
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
+        let map: Map<Val, Val> = Map::from(input)
+            .into_iter()
+            .map(|(k, v)| {
+                if let Some(mode) = self.some.get(&k) {
+                    let v = mode.mut_static_call(ctx, v);
+                    (k, v)
+                } else {
+                    let k = self.key.mut_static_call(ctx, k);
+                    let v = self.value.mut_static_call(ctx, v);
+                    (k, v)
+                }
+            })
+            .collect();
+        Val::Map(map.into())
+    }
+}
+
+pub(crate) struct CallEval<'a, Func, Input> {
+    pub(crate) func: &'a Func,
+    pub(crate) input: &'a Input,
+}
+
+impl<'a, Func, Input> FreeStaticFn<CallVal, Val> for CallEval<'a, Func, Input>
+where
+    Func: FreeStaticFn<Val, Val>,
+    Input: FreeStaticFn<Val, Val>,
+{
+    fn free_static_call(&self, input: CallVal) -> Val {
+        let call = Call::from(input);
+        match self.func.free_static_call(call.func) {
+            Val::Func(func) => {
+                if call.reverse {
+                    let input = func.mode().reverse.free_static_call(call.input);
+                    let question = Val::Call(Call::new(true, Val::Func(func), input).into());
+                    Solver.free_static_call(question)
+                } else {
+                    let input = func.mode().forward.free_static_call(call.input);
+                    func.free_static_call(input)
+                }
             }
             Val::Symbol(func) => {
-                if reverse {
-                    let input = input_trans.transform(ctx, input);
-                    return Val::Call(Call::new(true, Val::Symbol(func), input).into());
+                CallRefEval.free_static_call(Call::new(call.reverse, func, call.input))
+            }
+            func => {
+                let input = self.input.free_static_call(call.input);
+                Val::Call(Call::new(call.reverse, func, input).into())
+            }
+        }
+    }
+}
+
+impl<'a, Func, Input> ConstStaticFn<Ctx, CallVal, Val> for CallEval<'a, Func, Input>
+where
+    Func: ConstStaticFn<Ctx, Val, Val>,
+    Input: ConstStaticFn<Ctx, Val, Val>,
+{
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+        let call = Call::from(input);
+        match self.func.const_static_call(ctx.reborrow(), call.func) {
+            Val::Func(func) => {
+                if call.reverse {
+                    let input = func.mode().reverse.const_static_call(ctx.reborrow(), call.input);
+                    let question = Val::Call(Call::new(true, Val::Func(func), input).into());
+                    Solver.const_static_call(ctx, question)
+                } else {
+                    let input = func.mode().forward.const_static_call(ctx.reborrow(), call.input);
+                    func.const_static_call(ctx, input)
                 }
-                Self::with_ref(ctx, func, |func, ctx, is_const| {
-                    let input = Self::call_ref_eval_input(func, ctx, is_const, input);
-                    Self::call_ref(func, ctx, is_const, input)
-                })
             }
-            _ => {
-                let input = input_trans.transform(ctx, input);
-                Val::Call(Call::new(reverse, func, input).into())
+            Val::Symbol(func) => {
+                CallRefEval.const_static_call(ctx, Call::new(call.reverse, func, call.input))
             }
-        }
-    }
-
-    fn call_ref_eval_input(func: &FuncVal, ctx: &mut Ctx, is_const: bool, input: Val) -> Val {
-        if is_const {
-            func.mode().forward.transform(ConstCtx::new(ctx), input)
-        } else {
-            func.mode().forward.transform(MutCtx::new(ctx), input)
-        }
-    }
-
-    pub(crate) fn call<'a, Ctx>(ctx: Ctx, reverse: bool, func: Val, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        match func {
-            Val::Func(func) => Self::call_func(ctx, reverse, func, input),
-            Val::Symbol(func) => Self::with_ref(ctx, func, |func, ctx, is_const| {
-                Self::call_ref(func, ctx, is_const, input)
-            }),
-            _ => Val::Call(Call::new(reverse, func, input).into()),
-        }
-    }
-
-    fn call_func<'a, Ctx>(ctx: Ctx, reverse: bool, func: FuncVal, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        if reverse { Self::reverse_func(ctx, func, input) } else { func.transform(ctx, input) }
-    }
-
-    fn reverse_func<'a, Ctx>(mut ctx: Ctx, func: FuncVal, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        let question = Val::Call(Call::new(true, Val::Func(func.clone()), input.clone()).into());
-        if let Some(answer) = Self::call_solver(ctx.reborrow(), question) {
-            if !answer.is_unit() {
-                return answer;
+            func => {
+                let input = self.input.const_static_call(ctx, call.input);
+                Val::Call(Call::new(call.reverse, func, input).into())
             }
         }
-        crate::solver::reverse(ctx, func, input)
     }
+}
 
-    fn call_ref(func: &mut FuncVal, ctx: &mut Ctx, is_const: bool, input: Val) -> Val {
-        if is_const {
-            func.transform(ConstCtx::new(ctx), input)
-        } else {
-            func.transform_mut(MutCtx::new(ctx), input)
+impl<'a, Func, Input> MutStaticFn<Ctx, CallVal, Val> for CallEval<'a, Func, Input>
+where
+    Func: MutStaticFn<Ctx, Val, Val>,
+    Input: MutStaticFn<Ctx, Val, Val>,
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+        let call = Call::from(input);
+        match self.func.mut_static_call(ctx, call.func) {
+            Val::Func(func) => {
+                if call.reverse {
+                    let input = func.mode().reverse.mut_static_call(ctx, call.input);
+                    let question = Val::Call(Call::new(true, Val::Func(func), input).into());
+                    Solver.mut_static_call(ctx, question)
+                } else {
+                    let input = func.mode().forward.mut_static_call(ctx, call.input);
+                    func.mut_static_call(ctx, input)
+                }
+            }
+            Val::Symbol(func) => {
+                CallRefEval.mut_static_call(ctx, Call::new(call.reverse, func, call.input))
+            }
+            func => {
+                let input = self.input.mut_static_call(ctx, call.input);
+                Val::Call(Call::new(call.reverse, func, input).into())
+            }
         }
     }
+}
 
-    pub(crate) fn with_ref<'a, Ctx>(
-        ctx: Ctx, func_name: Symbol,
-        f: impl FnOnce(&mut FuncVal, &mut crate::Ctx, bool /*is_const*/) -> Val,
-    ) -> Val
-    where
-        Ctx: CtxMeta<'a>,
-    {
-        let (ctx, is_const) = match ctx.for_mut_fn() {
-            MutFnCtx::Free(_) => return Val::default(),
-            MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
-            MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
-        };
+pub(crate) struct CallRefEval;
+
+impl FreeStaticFn<Call<Symbol, Val>, Val> for CallRefEval {
+    fn free_static_call(&self, _input: Call<Symbol, Val>) -> Val {
+        Val::default()
+    }
+}
+
+impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, call: Call<Symbol, Val>) -> Val {
+        let ctx = ctx.unwrap();
         let variables = ctx.variables_mut();
-        let Some(ctx_value) = variables.remove_unchecked(&func_name) else {
+        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
-            variables.put_unchecked(func_name, ctx_value);
+            variables.put_unchecked(call.func, ctx_value);
             return Val::default();
         };
-        let output = f(&mut func, ctx, is_const);
+        let output = if call.reverse {
+            let input = func.mode().reverse.const_static_call(ConstRef::new(ctx), call.input);
+            let question = Val::Call(Call::new(true, Val::Func(func.clone()), input).into());
+            Solver.const_static_call(ConstRef::new(ctx), question)
+        } else {
+            let input = func.mode().forward.const_static_call(ConstRef::new(ctx), call.input);
+            func.const_cell_call(ConstRef::new(ctx), input)
+        };
         let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
-        ctx.variables_mut().put_unchecked(func_name, ctx_value);
+        ctx.variables_mut().put_unchecked(call.func, ctx_value);
         output
     }
+}
 
-    pub(crate) fn call_solver<'a, Ctx>(ctx: Ctx, question: Val) -> Option<Val>
-    where Ctx: CtxMeta<'a> {
-        let (ctx, is_const) = match ctx.for_mut_fn() {
-            MutFnCtx::Free(_) => return None,
-            MutFnCtx::Const(ctx) => (ctx.unwrap(), true),
-            MutFnCtx::Mut(ctx) => (ctx.unwrap(), false),
+impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
+    fn mut_static_call(&self, ctx: &mut Ctx, call: Call<Symbol, Val>) -> Val {
+        let variables = ctx.variables_mut();
+        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
+            return Val::default();
         };
-        SOLVER.with(|solver| {
-            let mut solver = solver.try_borrow_mut().ok()?;
-            let solver = solver.as_mut()?;
-            let answer = if solver.is_cell() {
-                Self::call_ref(solver, ctx, is_const, question)
-            } else if is_const {
-                solver.transform(ConstCtx::new(ctx), question)
-            } else {
-                solver.transform(MutCtx::new(ctx), question)
-            };
-            Some(answer)
-        })
+        let Val::Func(mut func) = ctx_value.val else {
+            variables.put_unchecked(call.func, ctx_value);
+            return Val::default();
+        };
+        let output = if call.reverse {
+            let input = func.mode().reverse.mut_static_call(ctx, call.input);
+            let question = Val::Call(Call::new(true, Val::Func(func.clone()), input).into());
+            Solver.mut_static_call(ctx, question)
+        } else {
+            let input = func.mode().forward.mut_static_call(ctx, call.input);
+            func.mut_cell_call(ctx, input)
+        };
+        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+        ctx.variables_mut().put_unchecked(call.func, ctx_value);
+        output
+    }
+}
+
+pub(crate) struct CallApply;
+
+impl FreeStaticFn<CallVal, Val> for CallApply {
+    fn free_static_call(&self, input: CallVal) -> Val {
+        let call = Call::from(input);
+        match call.func {
+            Val::Func(func) => {
+                if call.reverse {
+                    let question = Val::Call(Call::new(true, Val::Func(func), call.input).into());
+                    Solver.free_static_call(question)
+                } else {
+                    func.free_static_call(call.input)
+                }
+            }
+            Val::Symbol(func) => {
+                CallRefApply.free_static_call(Call::new(call.reverse, func, call.input))
+            }
+            func => Val::Call(Call::new(call.reverse, func, call.input).into()),
+        }
+    }
+}
+
+impl ConstStaticFn<Ctx, CallVal, Val> for CallApply {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+        let call = Call::from(input);
+        match call.func {
+            Val::Func(func) => {
+                if call.reverse {
+                    let question = Val::Call(Call::new(true, Val::Func(func), call.input).into());
+                    Solver.const_static_call(ctx, question)
+                } else {
+                    func.const_static_call(ctx, call.input)
+                }
+            }
+            Val::Symbol(func) => {
+                CallRefApply.const_static_call(ctx, Call::new(call.reverse, func, call.input))
+            }
+            func => Val::Call(Call::new(call.reverse, func, call.input).into()),
+        }
+    }
+}
+
+impl MutStaticFn<Ctx, CallVal, Val> for CallApply {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+        let call = Call::from(input);
+        match call.func {
+            Val::Func(func) => {
+                if call.reverse {
+                    let question = Val::Call(Call::new(true, Val::Func(func), call.input).into());
+                    Solver.mut_static_call(ctx, question)
+                } else {
+                    func.mut_static_call(ctx, call.input)
+                }
+            }
+            Val::Symbol(func_name) => {
+                CallRefApply.mut_static_call(ctx, Call::new(call.reverse, func_name, call.input))
+            }
+            func => Val::Call(Call::new(call.reverse, func, call.input).into()),
+        }
+    }
+}
+
+pub(crate) struct CallRefApply;
+
+impl FreeStaticFn<Call<Symbol, Val>, Val> for CallRefApply {
+    fn free_static_call(&self, _input: Call<Symbol, Val>) -> Val {
+        Val::default()
+    }
+}
+
+impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, call: Call<Symbol, Val>) -> Val {
+        let ctx = ctx.unwrap();
+        let variables = ctx.variables_mut();
+        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
+            return Val::default();
+        };
+        let Val::Func(mut func) = ctx_value.val else {
+            variables.put_unchecked(call.func, ctx_value);
+            return Val::default();
+        };
+        let output = if call.reverse {
+            let question = Val::Call(Call::new(true, Val::Func(func.clone()), call.input).into());
+            Solver.const_static_call(ConstRef::new(ctx), question)
+        } else {
+            func.const_cell_call(ConstRef::new(ctx), call.input)
+        };
+        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+        ctx.variables_mut().put_unchecked(call.func, ctx_value);
+        output
+    }
+}
+
+impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
+    fn mut_static_call(&self, ctx: &mut Ctx, call: Call<Symbol, Val>) -> Val {
+        let variables = ctx.variables_mut();
+        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
+            return Val::default();
+        };
+        let Val::Func(mut func) = ctx_value.val else {
+            variables.put_unchecked(call.func, ctx_value);
+            return Val::default();
+        };
+        let output = if call.reverse {
+            let question = Val::Call(Call::new(true, Val::Func(func.clone()), call.input).into());
+            Solver.mut_static_call(ctx, question)
+        } else {
+            func.mut_cell_call(ctx, call.input)
+        };
+        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+        ctx.variables_mut().put_unchecked(call.func, ctx_value);
+        output
     }
 }

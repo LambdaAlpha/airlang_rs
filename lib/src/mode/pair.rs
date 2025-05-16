@@ -1,10 +1,14 @@
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeStaticFn;
+use crate::MutStaticFn;
 use crate::PairVal;
 use crate::UniMode;
 use crate::Val;
-use crate::core::FormCore;
-use crate::ctx::ref1::CtxMeta;
+use crate::core::PairForm;
 use crate::mode::Mode;
-use crate::transformer::Transformer;
+use crate::mode::ModeFn;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PairMode {
@@ -12,10 +16,23 @@ pub struct PairMode {
     pub second: Option<Mode>,
 }
 
-impl Transformer<PairVal, Val> for PairMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, pair: PairVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        FormCore::transform_pair(&self.first, &self.second, ctx, pair)
+impl ModeFn for PairMode {}
+
+impl FreeStaticFn<PairVal, Val> for PairMode {
+    fn free_static_call(&self, input: PairVal) -> Val {
+        PairForm { first: &self.first, second: &self.second }.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, PairVal, Val> for PairMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: PairVal) -> Val {
+        PairForm { first: &self.first, second: &self.second }.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, PairVal, Val> for PairMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: PairVal) -> Val {
+        PairForm { first: &self.first, second: &self.second }.mut_static_call(ctx, input)
     }
 }
 

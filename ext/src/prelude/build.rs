@@ -3,10 +3,11 @@ use std::fs::read_to_string;
 use std::path::Path;
 
 use airlang::AirCell;
-use airlang::ConstFnCtx;
+use airlang::ConstRef;
+use airlang::ConstStaticImpl;
+use airlang::Ctx;
 use airlang::FuncMode;
 use airlang::FuncVal;
-use airlang::MutCtx;
 use airlang::PreludeCtx;
 use airlang::Symbol;
 use airlang::Text;
@@ -36,27 +37,38 @@ impl Prelude for BuildPrelude {
 
 fn import() -> Named<FuncVal> {
     let id = "build.import";
-    let f = fn_import;
+    let f = ConstStaticImpl::new(fn_import_free, fn_import_const);
     let mode = FuncMode::default();
     named_const_fn(id, f, mode)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";
 
-fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
+fn fn_import_free(input: Val) -> Val {
+    let Val::Text(url) = input else {
+        return Val::default();
+    };
+    let new_url = String::from(Text::from(url));
+    import_from_url(new_url)
+}
+
+fn fn_import_const(mut ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Text(url) = input else {
         return Val::default();
     };
     let url = Text::from(url);
     let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
-    let cur_url = get_cur_url(ctx.reborrow(), cur_url_key.clone());
+    let cur_url = get_cur_url(ctx.reborrow(), cur_url_key);
     let new_url =
         cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
+    import_from_url(new_url)
+}
 
-    let content = match read_to_string(&new_url) {
+fn import_from_url(url: String) -> Val {
+    let content = match read_to_string(&url) {
         Ok(content) => content,
         Err(err) => {
-            eprintln!("failed to read {new_url}: {err}");
+            eprintln!("failed to read {url}: {err}");
             return Val::default();
         }
     };
@@ -65,13 +77,14 @@ fn fn_import(mut ctx: ConstFnCtx, input: Val) -> Val {
     };
 
     let mut mod_air = AirCell::default();
-    if !set_cur_url(mod_air.ctx_mut(), cur_url_key, new_url) {
+    let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
+    if !set_cur_url(mod_air.ctx_mut(), cur_url_key, url) {
         return Val::default();
     }
     mod_air.interpret(val)
 }
 
-fn get_cur_url(ctx: ConstFnCtx, key: Symbol) -> Option<String> {
+fn get_cur_url(ctx: ConstRef<Ctx>, key: Symbol) -> Option<String> {
     if let Ok(val) = ctx.get_ref(key) {
         return if let Val::Text(url) = val { Some((***url).clone()) } else { None };
     }
@@ -84,7 +97,7 @@ fn get_cur_url(ctx: ConstFnCtx, key: Symbol) -> Option<String> {
     Some(cur_dir)
 }
 
-fn set_cur_url(ctx: MutCtx, key: Symbol, new_url: String) -> bool {
+fn set_cur_url(ctx: &mut Ctx, key: Symbol, new_url: String) -> bool {
     ctx.put(key, VarAccess::Assign, Val::Text(Text::from(new_url).into())).is_ok()
 }
 

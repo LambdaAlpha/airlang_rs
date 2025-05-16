@@ -2,6 +2,7 @@ use crate::FuncMode;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::free_impl;
 use crate::prelude::named_free_fn;
 use crate::val::Val;
 use crate::val::func::FuncVal;
@@ -33,7 +34,7 @@ impl Prelude for BitPrelude {
 
 fn not() -> Named<FuncVal> {
     let id = "not";
-    let f = fn_not;
+    let f = free_impl(fn_not);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -47,7 +48,7 @@ fn fn_not(input: Val) -> Val {
 
 fn and() -> Named<FuncVal> {
     let id = "and";
-    let f = fn_and;
+    let f = free_impl(fn_and);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -67,7 +68,7 @@ fn fn_and(input: Val) -> Val {
 
 fn or() -> Named<FuncVal> {
     let id = "or";
-    let f = fn_or;
+    let f = free_impl(fn_or);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -87,7 +88,7 @@ fn fn_or(input: Val) -> Val {
 
 fn xor() -> Named<FuncVal> {
     let id = "xor";
-    let f = fn_xor;
+    let f = free_impl(fn_xor);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -107,7 +108,7 @@ fn fn_xor(input: Val) -> Val {
 
 fn imply() -> Named<FuncVal> {
     let id = "imply";
-    let f = fn_imply;
+    let f = free_impl(fn_imply);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

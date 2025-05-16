@@ -3,21 +3,27 @@ use std::fmt::Formatter;
 
 use crate::CallMode;
 use crate::CompMode;
+use crate::ConstCellFn;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
 use crate::CtxAccess;
+use crate::FreeCellFn;
+use crate::FreeStaticFn;
 use crate::FuncMode;
 use crate::ListMode;
 use crate::MapMode;
+use crate::MutCellFn;
+use crate::MutStaticFn;
 use crate::PairMode;
 use crate::PrimMode;
 use crate::SymbolMode;
 use crate::UniMode;
 use crate::Val;
-use crate::ctx::ref1::CtxMeta;
 use crate::func::FuncTrait;
 use crate::mode::Mode;
 use crate::mode::prim::CodeMode;
 use crate::mode::prim::DataMode;
-use crate::transformer::Transformer;
 
 #[derive(Default, Clone, PartialEq, Eq, Hash)]
 pub struct ModeFunc {
@@ -25,10 +31,39 @@ pub struct ModeFunc {
     ctx_access: CtxAccess,
 }
 
-impl Transformer<Val, Val> for ModeFunc {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.mode.transform(ctx, input)
+impl FreeStaticFn<Val, Val> for ModeFunc {
+    fn free_static_call(&self, input: Val) -> Val {
+        self.mode.free_static_call(input)
+    }
+}
+
+impl FreeCellFn<Val, Val> for ModeFunc {
+    fn free_cell_call(&mut self, input: Val) -> Val {
+        self.mode.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, Val, Val> for ModeFunc {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.mode.const_static_call(ctx, input)
+    }
+}
+
+impl ConstCellFn<Ctx, Val, Val> for ModeFunc {
+    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.mode.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, Val, Val> for ModeFunc {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+        self.mode.mut_static_call(ctx, input)
+    }
+}
+
+impl MutCellFn<Ctx, Val, Val> for ModeFunc {
+    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
+        self.mode.mut_static_call(ctx, input)
     }
 }
 

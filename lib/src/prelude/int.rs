@@ -4,6 +4,7 @@ use crate::pair::Pair;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::free_impl;
 use crate::prelude::named_free_fn;
 use crate::val::Val;
 use crate::val::func::FuncVal;
@@ -59,7 +60,7 @@ impl Prelude for IntPrelude {
 
 fn add() -> Named<FuncVal> {
     let id = "+";
-    let f = fn_add;
+    let f = free_impl(fn_add);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -82,7 +83,7 @@ fn fn_add(input: Val) -> Val {
 
 fn subtract() -> Named<FuncVal> {
     let id = "-";
-    let f = fn_subtract;
+    let f = free_impl(fn_subtract);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -105,7 +106,7 @@ fn fn_subtract(input: Val) -> Val {
 
 fn multiply() -> Named<FuncVal> {
     let id = "*";
-    let f = fn_multiply;
+    let f = free_impl(fn_multiply);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -128,7 +129,7 @@ fn fn_multiply(input: Val) -> Val {
 
 fn divide() -> Named<FuncVal> {
     let id = "/";
-    let f = fn_divide;
+    let f = free_impl(fn_divide);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -154,7 +155,7 @@ fn fn_divide(input: Val) -> Val {
 
 fn remainder() -> Named<FuncVal> {
     let id = "%";
-    let f = fn_remainder;
+    let f = free_impl(fn_remainder);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -180,7 +181,7 @@ fn fn_remainder(input: Val) -> Val {
 
 fn divide_remainder() -> Named<FuncVal> {
     let id = "/%";
-    let f = fn_divide_remainder;
+    let f = free_impl(fn_divide_remainder);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -206,7 +207,7 @@ fn fn_divide_remainder(input: Val) -> Val {
 
 fn less_than() -> Named<FuncVal> {
     let id = "<";
-    let f = fn_less_than;
+    let f = free_impl(fn_less_than);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -227,7 +228,7 @@ fn fn_less_than(input: Val) -> Val {
 
 fn less_equal() -> Named<FuncVal> {
     let id = "<=";
-    let f = fn_less_equal;
+    let f = free_impl(fn_less_equal);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -248,7 +249,7 @@ fn fn_less_equal(input: Val) -> Val {
 
 fn greater_than() -> Named<FuncVal> {
     let id = ">";
-    let f = fn_greater_than;
+    let f = free_impl(fn_greater_than);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -269,7 +270,7 @@ fn fn_greater_than(input: Val) -> Val {
 
 fn greater_equal() -> Named<FuncVal> {
     let id = ">=";
-    let f = fn_greater_equal;
+    let f = free_impl(fn_greater_equal);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -290,7 +291,7 @@ fn fn_greater_equal(input: Val) -> Val {
 
 fn less_greater() -> Named<FuncVal> {
     let id = "<>";
-    let f = fn_less_greater;
+    let f = free_impl(fn_less_greater);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

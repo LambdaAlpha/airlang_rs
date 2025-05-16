@@ -1,12 +1,13 @@
 use airlang::AirCell;
+use airlang::Ctx;
 use airlang::FuncMode;
 use airlang::FuncVal;
-use airlang::MutFnCtx;
 use airlang::PreludeCtx;
 use airlang::Val;
 
 use crate::prelude::Named;
 use crate::prelude::Prelude;
+use crate::prelude::mut_impl;
 use crate::prelude::named_mut_fn;
 
 pub(crate) struct EvalPrelude {
@@ -27,16 +28,12 @@ impl Prelude for EvalPrelude {
 
 fn reset() -> Named<FuncVal> {
     let id = "repl.reset";
-    let f = fn_reset;
+    let f = mut_impl(fn_reset);
     let mode = FuncMode::default();
     named_mut_fn(id, f, mode)
 }
 
-fn fn_reset(ctx: MutFnCtx, _input: Val) -> Val {
-    let MutFnCtx::Mut(mut ctx) = ctx else {
-        eprintln!("Unable to reset context, context is immutable.");
-        return Val::default();
-    };
-    ctx.set(AirCell::initial_ctx());
+fn fn_reset(ctx: &mut Ctx, _input: Val) -> Val {
+    *ctx = AirCell::initial_ctx();
     Val::default()
 }

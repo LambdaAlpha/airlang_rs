@@ -15,6 +15,7 @@ use airlang::Val;
 
 use crate::prelude::Named;
 use crate::prelude::Prelude;
+use crate::prelude::free_impl;
 use crate::prelude::named_free_fn;
 
 pub(crate) struct ProcessPrelude {
@@ -38,7 +39,7 @@ const ARGUMENTS: &str = "arguments";
 
 fn call() -> Named<FuncVal> {
     let id = "process.call";
-    let f = fn_call;
+    let f = free_impl(fn_call);
     let forward = FuncMode::map_mode(
         Map::default(),
         FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),

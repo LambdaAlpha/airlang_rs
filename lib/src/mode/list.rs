@@ -1,11 +1,15 @@
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
+use crate::FreeStaticFn;
 use crate::List;
 use crate::ListVal;
+use crate::MutStaticFn;
 use crate::UniMode;
 use crate::Val;
-use crate::core::FormCore;
-use crate::ctx::ref1::CtxMeta;
+use crate::core::ListForm;
 use crate::mode::Mode;
-use crate::transformer::Transformer;
+use crate::mode::ModeFn;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ListMode {
@@ -13,10 +17,23 @@ pub struct ListMode {
     pub tail: Option<Mode>,
 }
 
-impl Transformer<ListVal, Val> for ListMode {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, list: ListVal) -> Val
-    where Ctx: CtxMeta<'a> {
-        FormCore::transform_list_head_tail(&self.head, &self.tail, ctx, list)
+impl ModeFn for ListMode {}
+
+impl FreeStaticFn<ListVal, Val> for ListMode {
+    fn free_static_call(&self, input: ListVal) -> Val {
+        ListForm { head: &self.head, tail: &self.tail }.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, ListVal, Val> for ListMode {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+        ListForm { head: &self.head, tail: &self.tail }.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, ListVal, Val> for ListMode {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+        ListForm { head: &self.head, tail: &self.tail }.mut_static_call(ctx, input)
     }
 }
 

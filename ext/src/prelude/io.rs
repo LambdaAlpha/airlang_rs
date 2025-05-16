@@ -3,14 +3,16 @@ use std::io::stderr;
 use std::io::stdin;
 use std::io::stdout;
 
+use airlang::Ctx;
 use airlang::FuncMode;
 use airlang::FuncVal;
-use airlang::MutFnCtx;
 use airlang::PreludeCtx;
 use airlang::Val;
 
 use crate::prelude::Named;
 use crate::prelude::Prelude;
+use crate::prelude::free_impl;
+use crate::prelude::mut_impl;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
 
@@ -52,12 +54,12 @@ impl Prelude for IoPrelude {
 
 fn read_line() -> Named<FuncVal> {
     let id = "io.read_line";
-    let f = fn_read_line;
+    let f = mut_impl(fn_read_line);
     let mode = FuncMode::default();
     named_mut_fn(id, f, mode)
 }
 
-fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
+fn fn_read_line(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
@@ -73,7 +75,7 @@ fn fn_read_line(ctx: MutFnCtx, input: Val) -> Val {
 
 fn print() -> Named<FuncVal> {
     let id = "io.print";
-    let f = fn_print;
+    let f = free_impl(fn_print);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -88,7 +90,7 @@ fn fn_print(input: Val) -> Val {
 
 fn print_line() -> Named<FuncVal> {
     let id = "io.print_line";
-    let f = fn_print_line;
+    let f = free_impl(fn_print_line);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -103,7 +105,7 @@ fn fn_print_line(input: Val) -> Val {
 
 fn flush() -> Named<FuncVal> {
     let id = "io.flush";
-    let f = fn_flush;
+    let f = free_impl(fn_flush);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -115,7 +117,7 @@ fn fn_flush(_input: Val) -> Val {
 
 fn error_print() -> Named<FuncVal> {
     let id = "io.error_print";
-    let f = fn_error_print;
+    let f = free_impl(fn_error_print);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -130,7 +132,7 @@ fn fn_error_print(input: Val) -> Val {
 
 fn error_print_line() -> Named<FuncVal> {
     let id = "io.error_print_line";
-    let f = fn_error_print_line;
+    let f = free_impl(fn_error_print_line);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }
@@ -145,7 +147,7 @@ fn fn_error_print_line(input: Val) -> Val {
 
 fn error_flush() -> Named<FuncVal> {
     let id = "io.error_flush";
-    let f = fn_error_flush;
+    let f = free_impl(fn_error_flush);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
 }

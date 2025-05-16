@@ -4,32 +4,83 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::rc::Rc;
 
-use crate::ConstCtx;
-use crate::ConstFnCtx;
-use crate::FreeCtx;
+use crate::ConstCellFn;
+use crate::Ctx;
+use crate::DynRef;
+use crate::FreeCellFn;
+use crate::FreeStaticFn;
 use crate::FuncMode;
+use crate::MutCellFn;
+use crate::MutStaticFn;
 use crate::Symbol;
 use crate::Val;
-use crate::ctx::ref1::CtxMeta;
 use crate::func::FuncTrait;
 use crate::func::prim::Primitive;
-use crate::transformer::Transformer;
+use crate::types::ref1::ConstRef;
 
-pub trait ConstStaticFn {
-    fn call(&self, ctx: ConstFnCtx, input: Val) -> Val;
+pub trait ConstStaticFn<Ctx, I, O>: FreeStaticFn<I, O> {
+    #[allow(unused_variables)]
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+        self.free_static_call(input)
+    }
+
+    fn opt_const_static_call(&self, ctx: Option<ConstRef<Ctx>>, input: I) -> O {
+        match ctx {
+            Some(ctx) => self.const_static_call(ctx, input),
+            None => self.free_static_call(input),
+        }
+    }
+}
+
+pub struct ConstStaticImpl<Ctx, I, O> {
+    pub free: fn(I) -> O,
+    pub const1: fn(ConstRef<Ctx>, I) -> O,
 }
 
 #[derive(Clone)]
 pub struct ConstStaticPrimFunc {
     pub(crate) prim: Primitive,
-    pub(crate) fn1: Rc<dyn ConstStaticFn>,
+    pub(crate) fn1: Rc<dyn ConstStaticFn<Ctx, Val, Val>>,
     pub(crate) mode: FuncMode,
 }
 
-impl Transformer<Val, Val> for ConstStaticPrimFunc {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        self.fn1.call(ctx.for_const_fn(), input)
+impl FreeStaticFn<Val, Val> for ConstStaticPrimFunc {
+    fn free_static_call(&self, input: Val) -> Val {
+        self.fn1.free_static_call(input)
+    }
+}
+
+impl FreeCellFn<Val, Val> for ConstStaticPrimFunc {
+    fn free_cell_call(&mut self, input: Val) -> Val {
+        self.fn1.free_static_call(input)
+    }
+}
+
+impl ConstStaticFn<Ctx, Val, Val> for ConstStaticPrimFunc {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.fn1.const_static_call(ctx, input)
+    }
+}
+
+impl ConstCellFn<Ctx, Val, Val> for ConstStaticPrimFunc {
+    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        self.fn1.const_static_call(ctx, input)
+    }
+}
+
+impl MutStaticFn<Ctx, Val, Val> for ConstStaticPrimFunc {
+    fn dyn_static_call(&self, ctx: DynRef<Ctx>, input: Val) -> Val {
+        self.fn1.const_static_call(ctx.into_const(), input)
+    }
+}
+
+impl MutCellFn<Ctx, Val, Val> for ConstStaticPrimFunc {
+    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
+        self.fn1.const_static_call(ConstRef::new(ctx), input)
+    }
+
+    fn dyn_cell_call(&mut self, ctx: DynRef<Ctx>, input: Val) -> Val {
+        self.fn1.const_static_call(ctx.into_const(), input)
     }
 }
 
@@ -44,11 +95,15 @@ impl FuncTrait for ConstStaticPrimFunc {
 }
 
 impl ConstStaticPrimFunc {
-    pub fn new_extension(id: Symbol, fn1: Rc<dyn ConstStaticFn>, mode: FuncMode) -> Self {
+    pub fn new_extension(
+        id: Symbol, fn1: Rc<dyn ConstStaticFn<Ctx, Val, Val>>, mode: FuncMode,
+    ) -> Self {
         Self { prim: Primitive { id, is_extension: true }, fn1, mode }
     }
 
-    pub(crate) fn new(id: Symbol, fn1: Rc<dyn ConstStaticFn>, mode: FuncMode) -> Self {
+    pub(crate) fn new(
+        id: Symbol, fn1: Rc<dyn ConstStaticFn<Ctx, Val, Val>>, mode: FuncMode,
+    ) -> Self {
         Self { prim: Primitive { id, is_extension: false }, fn1, mode }
     }
 }
@@ -73,39 +128,25 @@ impl Hash for ConstStaticPrimFunc {
     }
 }
 
-pub(crate) struct ConstDispatcher<Free, Const> {
-    free_fn: Free,
-    const_fn: Const,
-}
-
-impl<Free, Const> ConstDispatcher<Free, Const>
-where
-    Free: Fn(FreeCtx, Val) -> Val + 'static,
-    Const: Fn(ConstCtx, Val) -> Val + 'static,
-{
-    #[expect(dead_code)]
-    pub(crate) fn new(free_fn: Free, const_fn: Const) -> Self {
-        Self { free_fn, const_fn }
+impl<Ctx, I, O> FreeStaticFn<I, O> for ConstStaticImpl<Ctx, I, O> {
+    fn free_static_call(&self, input: I) -> O {
+        (self.free)(input)
     }
 }
 
-impl<Free, Const> ConstStaticFn for ConstDispatcher<Free, Const>
-where
-    Free: Fn(FreeCtx, Val) -> Val + 'static,
-    Const: Fn(ConstCtx, Val) -> Val + 'static,
-{
-    fn call(&self, ctx: ConstFnCtx, input: Val) -> Val {
-        match ctx {
-            ConstFnCtx::Free(ctx) => (self.free_fn)(ctx, input),
-            ConstFnCtx::Const(ctx) => (self.const_fn)(ctx, input),
-        }
+impl<Ctx, I, O> ConstStaticFn<Ctx, I, O> for ConstStaticImpl<Ctx, I, O> {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+        (self.const1)(ctx, input)
     }
 }
 
-impl<T> ConstStaticFn for T
-where T: Fn(ConstFnCtx, Val) -> Val
-{
-    fn call(&self, ctx: ConstFnCtx, input: Val) -> Val {
-        self(ctx, input)
+impl<Ctx, I, O> ConstStaticImpl<Ctx, I, O> {
+    pub fn new(free: fn(I) -> O, const1: fn(ConstRef<Ctx>, I) -> O) -> Self {
+        Self { free, const1 }
+    }
+
+    pub fn default(_ctx: ConstRef<Ctx>, _input: I) -> O
+    where O: Default {
+        O::default()
     }
 }

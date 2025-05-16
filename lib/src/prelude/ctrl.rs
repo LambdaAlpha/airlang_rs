@@ -1,30 +1,28 @@
 use crate::Byte;
 use crate::Call;
+use crate::CodeMode;
+use crate::Ctx;
 use crate::FuncMode;
 use crate::Int;
 use crate::List;
 use crate::Map;
+use crate::MutStaticFn;
 use crate::Pair;
 use crate::Symbol;
 use crate::SymbolMode;
 use crate::Text;
-use crate::ctx::free::FreeCtx;
-use crate::ctx::map::CtxMapRef;
+use crate::UniMode;
 use crate::ctx::map::CtxValue;
 use crate::ctx::pattern::PatternCtx;
 use crate::ctx::pattern::assign_pattern;
 use crate::ctx::pattern::match_pattern;
 use crate::ctx::pattern::parse_pattern;
-use crate::ctx::ref1::CtxMeta;
-use crate::ctx::ref1::CtxRef;
-use crate::func::mut_static_prim::MutDispatcher;
-use crate::mode::eval::EVAL;
-use crate::mode::form::Form;
+use crate::mode::united::DEFAULT_MODE;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
+use crate::prelude::mut_impl;
 use crate::prelude::named_mut_fn;
-use crate::transformer::Transformer;
 use crate::val::Val;
 use crate::val::func::FuncVal;
 
@@ -77,37 +75,27 @@ enum BlockItem {
 
 fn do1() -> Named<FuncVal> {
     let id = "do";
-    let f = MutDispatcher::new(
-        fn_do::<FreeCtx>,
-        |ctx, val| fn_do(ctx, val),
-        |ctx, val| fn_do(ctx, val),
-    );
+    let f = mut_impl(fn_do);
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_do<'a, Ctx>(ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
+fn fn_do(ctx: &mut Ctx, input: Val) -> Val {
     eval_block(ctx, input).0
 }
 
 fn if1() -> Named<FuncVal> {
     let id = "?";
-    let f = MutDispatcher::new(
-        fn_if::<FreeCtx>,
-        |ctx, val| fn_if(ctx, val),
-        |ctx, val| fn_if(ctx, val),
-    );
+    let f = mut_impl(fn_if);
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_if<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
+fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -115,7 +103,7 @@ where Ctx: CtxMeta<'a> {
     let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
-    let condition = EVAL.transform(ctx.reborrow(), pair.first);
+    let condition = DEFAULT_MODE.mut_static_call(ctx, pair.first);
     let Val::Bit(b) = condition else {
         return Val::default();
     };
@@ -126,24 +114,19 @@ where Ctx: CtxMeta<'a> {
 
 fn match1() -> Named<FuncVal> {
     let id = "match";
-    let f = MutDispatcher::new(
-        fn_match::<FreeCtx>,
-        |ctx, val| fn_match(ctx, val),
-        |ctx, val| fn_match(ctx, val),
-    );
+    let f = mut_impl(fn_match);
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_match<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
+fn fn_match(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let val = EVAL.transform(ctx.reborrow(), pair.first);
+    let val = DEFAULT_MODE.mut_static_call(ctx, pair.first);
     let Val::List(list) = pair.second else {
         return Val::default();
     };
@@ -152,12 +135,13 @@ where Ctx: CtxMeta<'a> {
             return Val::default();
         };
         let pair = Pair::from(pair);
-        let pattern = Form::new(SymbolMode::Literal).transform(ctx.reborrow(), pair.first);
+        let mode = UniMode::new(CodeMode::Form, SymbolMode::Literal);
+        let pattern = mode.mut_static_call(ctx, pair.first);
         let Some(pattern) = parse_pattern(PatternCtx::default(), pattern) else {
             return Val::default();
         };
         if match_pattern(&pattern, &val) {
-            assign_pattern(ctx.reborrow().for_mut_fn(), pattern, val);
+            assign_pattern(ctx, pattern, val);
             return eval_block(ctx, pair.second).0;
         }
     }
@@ -166,19 +150,14 @@ where Ctx: CtxMeta<'a> {
 
 fn loop1() -> Named<FuncVal> {
     let id = "loop";
-    let f = MutDispatcher::new(
-        fn_loop::<FreeCtx>,
-        |ctx, val| fn_loop(ctx, val),
-        |ctx, val| fn_loop(ctx, val),
-    );
+    let f = mut_impl(fn_loop);
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_loop<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
+fn fn_loop(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -192,13 +171,13 @@ where Ctx: CtxMeta<'a> {
             return Val::default();
         };
         loop {
-            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = DEFAULT_MODE.mut_static_call(ctx, condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
                 break;
             }
-            let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
+            let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
                 CtrlFlow::None => {}
                 CtrlFlow::Error => return Val::default(),
@@ -210,13 +189,13 @@ where Ctx: CtxMeta<'a> {
         }
     } else {
         loop {
-            let Val::Bit(b) = EVAL.transform(ctx.reborrow(), condition.clone()) else {
+            let Val::Bit(b) = DEFAULT_MODE.mut_static_call(ctx, condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
                 break;
             }
-            EVAL.transform(ctx.reborrow(), body.clone());
+            DEFAULT_MODE.mut_static_call(ctx, body.clone());
         }
     }
     Val::default()
@@ -224,24 +203,19 @@ where Ctx: CtxMeta<'a> {
 
 fn for1() -> Named<FuncVal> {
     let id = "for";
-    let f = MutDispatcher::new(
-        fn_for::<FreeCtx>,
-        |ctx, val| fn_for(ctx, val),
-        |ctx, val| fn_for(ctx, val),
-    );
+    let f = mut_impl(fn_for);
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_for<'a, Ctx>(mut ctx: Ctx, input: Val) -> Val
-where Ctx: CtxMeta<'a> {
+fn fn_for(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let iterable = EVAL.transform(ctx.reborrow(), pair.first);
+    let iterable = DEFAULT_MODE.mut_static_call(ctx, pair.first);
     let Val::Pair(name_body) = pair.second else {
         return Val::default();
     };
@@ -301,14 +275,9 @@ where Ctx: CtxMeta<'a> {
     }
 }
 
-fn for_iter<'a, Ctx, ValIter>(mut ctx: Ctx, body: Val, name: Symbol, values: ValIter) -> Val
-where
-    Ctx: CtxMeta<'a>,
-    ValIter: Iterator<Item = Val>, {
-    let Ok(variables) = ctx.reborrow().get_variables() else {
-        return Val::default();
-    };
-    if !variables.is_assignable(name.clone()) {
+fn for_iter<ValIter>(ctx: &mut Ctx, body: Val, name: Symbol, values: ValIter) -> Val
+where ValIter: Iterator<Item = Val> {
+    if !ctx.variables().is_assignable(name.clone()) {
         return Val::default();
     }
     if let Val::List(body) = body {
@@ -318,13 +287,10 @@ where
             return Val::default();
         };
         for val in values {
-            let Ok(variables) = ctx.reborrow().get_variables_mut() else {
-                return Val::default();
-            };
-            variables
+            ctx.variables_mut()
                 .put_value(name.clone(), CtxValue::new(val))
                 .expect("name should be assignable");
-            let (output, ctrl_flow) = eval_block_items(ctx.reborrow(), block_items.clone());
+            let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
                 CtrlFlow::None => {}
                 CtrlFlow::Error => return Val::default(),
@@ -336,22 +302,18 @@ where
         }
     } else {
         for val in values {
-            let Ok(variables) = ctx.reborrow().get_variables_mut() else {
-                return Val::default();
-            };
-            variables
+            ctx.variables_mut()
                 .put_value(name.clone(), CtxValue::new(val))
                 .expect("name should be assignable");
-            EVAL.transform(ctx.reborrow(), body.clone());
+            DEFAULT_MODE.mut_static_call(ctx, body.clone());
         }
     }
     Val::default()
 }
 
-fn eval_block<'a, Ctx>(ctx: Ctx, input: Val) -> (Val, CtrlFlow)
-where Ctx: CtxMeta<'a> {
+fn eval_block(ctx: &mut Ctx, input: Val) -> (Val, CtrlFlow) {
     let Val::List(list) = input else {
-        return (EVAL.transform(ctx, input), CtrlFlow::None);
+        return (DEFAULT_MODE.mut_static_call(ctx, input), CtrlFlow::None);
     };
     let list = List::from(list);
     let block_items: Option<List<BlockItem>> = list.into_iter().map(parse_block_item).collect();
@@ -361,21 +323,20 @@ where Ctx: CtxMeta<'a> {
     eval_block_items(ctx, block_items)
 }
 
-fn eval_block_items<'a, Ctx>(mut ctx: Ctx, block_items: List<BlockItem>) -> (Val, CtrlFlow)
-where Ctx: CtxMeta<'a> {
+fn eval_block_items(ctx: &mut Ctx, block_items: List<BlockItem>) -> (Val, CtrlFlow) {
     let mut output = Val::default();
     for block_item in block_items {
         match block_item {
             BlockItem::Normal(val) => {
-                output = EVAL.transform(ctx.reborrow(), val);
+                output = DEFAULT_MODE.mut_static_call(ctx, val);
             }
             BlockItem::Exit { exit, condition, body } => {
-                let condition = EVAL.transform(ctx.reborrow(), condition);
+                let condition = DEFAULT_MODE.mut_static_call(ctx, condition);
                 let Val::Bit(condition) = condition else {
                     return (Val::default(), CtrlFlow::Error);
                 };
                 if condition.bool() {
-                    let output = EVAL.transform(ctx, body);
+                    let output = DEFAULT_MODE.mut_static_call(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }
                 output = Val::default();

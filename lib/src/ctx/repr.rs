@@ -11,7 +11,6 @@ use crate::Symbol;
 use crate::SymbolMode;
 use crate::Val;
 use crate::ctx::map::CtxMap;
-use crate::ctx::map::CtxMapRef;
 use crate::ctx::map::CtxValue;
 use crate::ctx::map::VarAccess;
 use crate::utils::val::map_remove;

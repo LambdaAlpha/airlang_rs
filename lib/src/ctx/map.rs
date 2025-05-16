@@ -5,34 +5,7 @@ use crate::CtxError;
 use crate::Map;
 use crate::Symbol;
 use crate::Val;
-
-#[expect(clippy::wrong_self_convention)]
-pub(crate) trait CtxMapRef<'a>: Sized {
-    fn is_reverse(self) -> bool;
-
-    fn get_ref(self, name: Symbol) -> Result<&'a Val, CtxError>;
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'a mut Val, CtxError>;
-
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'a, Val>, CtxError>;
-
-    fn remove(self, name: Symbol) -> Result<Val, CtxError>;
-
-    fn put_value(self, name: Symbol, value: CtxValue) -> Result<Option<Val>, CtxError>;
-
-    fn set_access(self, name: Symbol, access: VarAccess) -> Result<(), CtxError>;
-
-    fn get_access(self, name: Symbol) -> Option<VarAccess>;
-
-    fn is_static(self, name: Symbol) -> Option<bool>;
-
-    fn is_assignable(self, name: Symbol) -> bool {
-        let Some(access) = self.get_access(name) else {
-            return true;
-        };
-        access == VarAccess::Assign
-    }
-}
+use crate::types::ref1::DynRef;
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMap {
@@ -61,12 +34,6 @@ pub(crate) struct CtxValue {
     pub(crate) val: Val,
 }
 
-#[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) struct DynRef<'a, T> {
-    pub(crate) ref1: &'a mut T,
-    pub(crate) is_const: bool,
-}
-
 impl CtxMap {
     pub(crate) fn new(map: Map<Symbol, CtxValue>, reverse: bool) -> Self {
         Self { map, reverse }
@@ -80,29 +47,22 @@ impl CtxMap {
         self.map.is_empty()
     }
 
+    pub(crate) fn is_reverse(&self) -> bool {
+        self.reverse
+    }
+
     pub(crate) fn set_reverse(&mut self, reverse: bool) {
         self.reverse = reverse;
     }
 
-    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
-        self.map.insert(name, val).map(|ctx_value| ctx_value.val)
+    pub(crate) fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError> {
+        let Some(tagged_val) = self.map.get(&name) else {
+            return Err(CtxError::NotFound);
+        };
+        Ok(&tagged_val.val)
     }
 
-    pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
-        self.map.remove(name)
-    }
-}
-
-impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
-    fn is_reverse(self) -> bool {
-        (&*self).is_reverse()
-    }
-
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        (&*self).get_ref(name)
-    }
-
-    fn get_ref_mut(self, name: Symbol) -> Result<&'l mut Val, CtxError> {
+    pub(crate) fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError> {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
@@ -112,7 +72,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         Ok(&mut value.val)
     }
 
-    fn get_ref_dyn(self, name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
+    pub(crate) fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<Val>, CtxError> {
         if self.map.get(&name).is_none() {
             return Err(CtxError::NotFound);
         }
@@ -121,7 +81,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         Ok(DynRef::new(&mut ctx_value.val, is_const))
     }
 
-    fn remove(self, name: Symbol) -> Result<Val, CtxError> {
+    pub(crate) fn remove(&mut self, name: Symbol) -> Result<Val, CtxError> {
         let Some(value) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
         };
@@ -135,7 +95,9 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
     }
 
     // ignore static field of CtxValue
-    fn put_value(self, name: Symbol, mut new: CtxValue) -> Result<Option<Val>, CtxError> {
+    pub(crate) fn put_value(
+        &mut self, name: Symbol, mut new: CtxValue,
+    ) -> Result<Option<Val>, CtxError> {
         debug_assert!(!new.static1, "should be non-static");
         let Some(old) = self.map.get(&name) else {
             if self.reverse && new.access != VarAccess::Assign {
@@ -165,7 +127,7 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         Ok(self.put_unchecked(name, new))
     }
 
-    fn set_access(self, name: Symbol, new: VarAccess) -> Result<(), CtxError> {
+    pub(crate) fn set_access(&mut self, name: Symbol, new: VarAccess) -> Result<(), CtxError> {
         let Some(old) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
@@ -193,55 +155,29 @@ impl<'l> CtxMapRef<'l> for &'l mut CtxMap {
         Ok(())
     }
 
-    fn get_access(self, name: Symbol) -> Option<VarAccess> {
-        (&*self).get_access(name)
-    }
-
-    fn is_static(self, name: Symbol) -> Option<bool> {
-        (&*self).is_static(name)
-    }
-}
-
-impl<'l> CtxMapRef<'l> for &'l CtxMap {
-    fn is_reverse(self) -> bool {
-        self.reverse
-    }
-
-    fn get_ref(self, name: Symbol) -> Result<&'l Val, CtxError> {
-        let Some(tagged_val) = self.map.get(&name) else {
-            return Err(CtxError::NotFound);
-        };
-        Ok(&tagged_val.val)
-    }
-
-    fn get_ref_mut(self, _name: Symbol) -> Result<&'l mut Val, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn get_ref_dyn(self, _name: Symbol) -> Result<DynRef<'l, Val>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn remove(self, _name: Symbol) -> Result<Val, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn put_value(self, _name: Symbol, _val: CtxValue) -> Result<Option<Val>, CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn set_access(self, _name: Symbol, _access: VarAccess) -> Result<(), CtxError> {
-        Err(CtxError::AccessDenied)
-    }
-
-    fn get_access(self, name: Symbol) -> Option<VarAccess> {
+    pub(crate) fn get_access(&self, name: Symbol) -> Option<VarAccess> {
         let value = self.map.get(&name)?;
         Some(value.access)
     }
 
-    fn is_static(self, name: Symbol) -> Option<bool> {
+    pub(crate) fn is_static(&self, name: Symbol) -> Option<bool> {
         let value = self.map.get(&name)?;
         Some(value.static1)
+    }
+
+    pub(crate) fn is_assignable(&self, name: Symbol) -> bool {
+        let Some(access) = self.get_access(name) else {
+            return true;
+        };
+        access == VarAccess::Assign
+    }
+
+    pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
+        self.map.insert(name, val).map(|ctx_value| ctx_value.val)
+    }
+
+    pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
+        self.map.remove(name)
     }
 }
 
@@ -263,19 +199,5 @@ impl CtxValue {
 impl Debug for CtxValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("").field(&self.access).field(&self.val).finish()
-    }
-}
-
-impl<'a, T> DynRef<'a, T> {
-    pub(crate) fn new(ref1: &'a mut T, is_const: bool) -> Self {
-        DynRef { ref1, is_const }
-    }
-
-    pub(crate) fn as_const(&'a self) -> &'a T {
-        self.ref1
-    }
-
-    pub(crate) fn as_mut(&'a mut self) -> Option<&'a mut T> {
-        if self.is_const { None } else { Some(&mut self.ref1) }
     }
 }

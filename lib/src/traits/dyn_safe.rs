@@ -1,5 +1,5 @@
 macro_rules! dyn_any_clone_eq_hash {
-    ($visibility:vis $trait_name:ident : $super_trait:ident) => {
+    ($visibility:vis $trait_name:ident : $super_trait:path) => {
         $visibility trait $trait_name: ::std::fmt::Debug + $super_trait {
             fn as_any(&self) -> &dyn ::std::any::Any;
 

@@ -2,14 +2,21 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::hash::Hash;
 
+use crate::ConstCellFn;
+use crate::ConstRef;
+use crate::ConstStaticFn;
+use crate::Ctx;
 use crate::CtxAccess;
+use crate::FreeCellFn;
+use crate::FreeStaticFn;
 use crate::FuncMode;
+use crate::MutCellFn;
+use crate::MutStaticFn;
 use crate::Val;
-use crate::ctx::ref1::CtxMeta;
 use crate::func::FuncTrait;
 use crate::func::comp::Composite;
 use crate::func::prim::Primitive;
-use crate::transformer::Transformer;
+use crate::mode::ModeFn;
 use crate::val::func::const_cell_comp::ConstCellCompFuncVal;
 use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
 use crate::val::func::const_static_comp::ConstStaticCompFuncVal;
@@ -41,23 +48,124 @@ pub enum FuncVal {
     MutStaticComp(MutStaticCompFuncVal),
 }
 
-impl Transformer<Val, Val> for FuncVal {
-    fn transform<'a, Ctx>(&self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
+impl ModeFn for FuncVal {}
+
+impl FreeStaticFn<Val, Val> for FuncVal {
+    fn free_static_call(&self, input: Val) -> Val {
         match self {
-            FuncVal::Mode(f) => f.transform(ctx, input),
-            FuncVal::FreeCellPrim(f) => f.transform(ctx, input),
-            FuncVal::FreeCellComp(f) => f.transform(ctx, input),
-            FuncVal::FreeStaticPrim(f) => f.transform(ctx, input),
-            FuncVal::FreeStaticComp(f) => f.transform(ctx, input),
-            FuncVal::ConstCellPrim(f) => f.transform(ctx, input),
-            FuncVal::ConstCellComp(f) => f.transform(ctx, input),
-            FuncVal::ConstStaticPrim(f) => f.transform(ctx, input),
-            FuncVal::ConstStaticComp(f) => f.transform(ctx, input),
-            FuncVal::MutCellPrim(f) => f.transform(ctx, input),
-            FuncVal::MutCellComp(f) => f.transform(ctx, input),
-            FuncVal::MutStaticPrim(f) => f.transform(ctx, input),
-            FuncVal::MutStaticComp(f) => f.transform(ctx, input),
+            FuncVal::Mode(f) => f.free_static_call(input),
+            FuncVal::FreeCellPrim(f) => f.free_static_call(input),
+            FuncVal::FreeCellComp(f) => f.free_static_call(input),
+            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
+            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
+            FuncVal::ConstCellPrim(f) => f.free_static_call(input),
+            FuncVal::ConstCellComp(f) => f.free_static_call(input),
+            FuncVal::ConstStaticPrim(f) => f.free_static_call(input),
+            FuncVal::ConstStaticComp(f) => f.free_static_call(input),
+            FuncVal::MutCellPrim(f) => f.free_static_call(input),
+            FuncVal::MutCellComp(f) => f.free_static_call(input),
+            FuncVal::MutStaticPrim(f) => f.free_static_call(input),
+            FuncVal::MutStaticComp(f) => f.free_static_call(input),
+        }
+    }
+}
+
+impl FreeCellFn<Val, Val> for FuncVal {
+    fn free_cell_call(&mut self, input: Val) -> Val {
+        match self {
+            FuncVal::Mode(f) => f.free_cell_call(input),
+            FuncVal::FreeCellPrim(f) => f.free_cell_call(input),
+            FuncVal::FreeCellComp(f) => f.free_cell_call(input),
+            FuncVal::FreeStaticPrim(f) => f.free_cell_call(input),
+            FuncVal::FreeStaticComp(f) => f.free_cell_call(input),
+            FuncVal::ConstCellPrim(f) => f.free_cell_call(input),
+            FuncVal::ConstCellComp(f) => f.free_cell_call(input),
+            FuncVal::ConstStaticPrim(f) => f.free_cell_call(input),
+            FuncVal::ConstStaticComp(f) => f.free_cell_call(input),
+            FuncVal::MutCellPrim(f) => f.free_cell_call(input),
+            FuncVal::MutCellComp(f) => f.free_cell_call(input),
+            FuncVal::MutStaticPrim(f) => f.free_cell_call(input),
+            FuncVal::MutStaticComp(f) => f.free_cell_call(input),
+        }
+    }
+}
+
+impl ConstStaticFn<Ctx, Val, Val> for FuncVal {
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        match self {
+            FuncVal::Mode(f) => f.const_static_call(ctx, input),
+            FuncVal::FreeCellPrim(f) => f.const_static_call(ctx, input),
+            FuncVal::FreeCellComp(f) => f.const_static_call(ctx, input),
+            FuncVal::FreeStaticPrim(f) => f.const_static_call(ctx, input),
+            FuncVal::FreeStaticComp(f) => f.const_static_call(ctx, input),
+            FuncVal::ConstCellPrim(f) => f.const_static_call(ctx, input),
+            FuncVal::ConstCellComp(f) => f.const_static_call(ctx, input),
+            FuncVal::ConstStaticPrim(f) => f.const_static_call(ctx, input),
+            FuncVal::ConstStaticComp(f) => f.const_static_call(ctx, input),
+            FuncVal::MutCellPrim(f) => f.const_static_call(ctx, input),
+            FuncVal::MutCellComp(f) => f.const_static_call(ctx, input),
+            FuncVal::MutStaticPrim(f) => f.const_static_call(ctx, input),
+            FuncVal::MutStaticComp(f) => f.const_static_call(ctx, input),
+        }
+    }
+}
+
+impl ConstCellFn<Ctx, Val, Val> for FuncVal {
+    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+        match self {
+            FuncVal::Mode(f) => f.const_cell_call(ctx, input),
+            FuncVal::FreeCellPrim(f) => f.const_cell_call(ctx, input),
+            FuncVal::FreeCellComp(f) => f.const_cell_call(ctx, input),
+            FuncVal::FreeStaticPrim(f) => f.const_cell_call(ctx, input),
+            FuncVal::FreeStaticComp(f) => f.const_cell_call(ctx, input),
+            FuncVal::ConstCellPrim(f) => f.const_cell_call(ctx, input),
+            FuncVal::ConstCellComp(f) => f.const_cell_call(ctx, input),
+            FuncVal::ConstStaticPrim(f) => f.const_cell_call(ctx, input),
+            FuncVal::ConstStaticComp(f) => f.const_cell_call(ctx, input),
+            FuncVal::MutCellPrim(f) => f.const_cell_call(ctx, input),
+            FuncVal::MutCellComp(f) => f.const_cell_call(ctx, input),
+            FuncVal::MutStaticPrim(f) => f.const_cell_call(ctx, input),
+            FuncVal::MutStaticComp(f) => f.const_cell_call(ctx, input),
+        }
+    }
+}
+
+impl MutStaticFn<Ctx, Val, Val> for FuncVal {
+    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+        match self {
+            FuncVal::Mode(f) => f.mut_static_call(ctx, input),
+            FuncVal::FreeCellPrim(f) => f.mut_static_call(ctx, input),
+            FuncVal::FreeCellComp(f) => f.mut_static_call(ctx, input),
+            FuncVal::FreeStaticPrim(f) => f.mut_static_call(ctx, input),
+            FuncVal::FreeStaticComp(f) => f.mut_static_call(ctx, input),
+            FuncVal::ConstCellPrim(f) => f.mut_static_call(ctx, input),
+            FuncVal::ConstCellComp(f) => f.mut_static_call(ctx, input),
+            FuncVal::ConstStaticPrim(f) => f.mut_static_call(ctx, input),
+            FuncVal::ConstStaticComp(f) => f.mut_static_call(ctx, input),
+            FuncVal::MutCellPrim(f) => f.mut_static_call(ctx, input),
+            FuncVal::MutCellComp(f) => f.mut_static_call(ctx, input),
+            FuncVal::MutStaticPrim(f) => f.mut_static_call(ctx, input),
+            FuncVal::MutStaticComp(f) => f.mut_static_call(ctx, input),
+        }
+    }
+}
+
+impl MutCellFn<Ctx, Val, Val> for FuncVal {
+    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
+        match self {
+            FuncVal::Mode(f) => f.mut_cell_call(ctx, input),
+            FuncVal::FreeCellPrim(f) => f.mut_cell_call(ctx, input),
+            FuncVal::FreeCellComp(f) => f.mut_cell_call(ctx, input),
+            FuncVal::FreeStaticPrim(f) => f.mut_cell_call(ctx, input),
+            FuncVal::FreeStaticComp(f) => f.mut_cell_call(ctx, input),
+            FuncVal::ConstCellPrim(f) => f.mut_cell_call(ctx, input),
+            FuncVal::ConstCellComp(f) => f.mut_cell_call(ctx, input),
+            FuncVal::ConstStaticPrim(f) => f.mut_cell_call(ctx, input),
+            FuncVal::ConstStaticComp(f) => f.mut_cell_call(ctx, input),
+            FuncVal::MutCellPrim(f) => f.mut_cell_call(ctx, input),
+            FuncVal::MutCellComp(f) => f.mut_cell_call(ctx, input),
+            FuncVal::MutStaticPrim(f) => f.mut_cell_call(ctx, input),
+            FuncVal::MutStaticComp(f) => f.mut_cell_call(ctx, input),
         }
     }
 }
@@ -96,25 +204,6 @@ impl FuncTrait for FuncVal {
             FuncVal::MutCellComp(f) => f.code(),
             FuncVal::MutStaticPrim(f) => f.code(),
             FuncVal::MutStaticComp(f) => f.code(),
-        }
-    }
-
-    fn transform_mut<'a, Ctx>(&mut self, ctx: Ctx, input: Val) -> Val
-    where Ctx: CtxMeta<'a> {
-        match self {
-            FuncVal::Mode(f) => f.transform_mut(ctx, input),
-            FuncVal::FreeCellPrim(f) => f.transform_mut(ctx, input),
-            FuncVal::FreeCellComp(f) => f.transform_mut(ctx, input),
-            FuncVal::FreeStaticPrim(f) => f.transform_mut(ctx, input),
-            FuncVal::FreeStaticComp(f) => f.transform_mut(ctx, input),
-            FuncVal::ConstCellPrim(f) => f.transform_mut(ctx, input),
-            FuncVal::ConstCellComp(f) => f.transform_mut(ctx, input),
-            FuncVal::ConstStaticPrim(f) => f.transform_mut(ctx, input),
-            FuncVal::ConstStaticComp(f) => f.transform_mut(ctx, input),
-            FuncVal::MutCellPrim(f) => f.transform_mut(ctx, input),
-            FuncVal::MutCellComp(f) => f.transform_mut(ctx, input),
-            FuncVal::MutStaticPrim(f) => f.transform_mut(ctx, input),
-            FuncVal::MutStaticComp(f) => f.transform_mut(ctx, input),
         }
     }
 }
@@ -235,10 +324,50 @@ impl Debug for FuncVal {
 // to avoid calling deref_mut, which calls Rc::make_mut
 macro_rules! impl_const_func_trait {
     ($type1:ty) => {
-        impl $crate::transformer::Transformer<$crate::val::Val, $crate::val::Val> for $type1 {
-            fn transform<'a, Ctx>(&self, ctx: Ctx, input: $crate::val::Val) -> $crate::val::Val
-            where Ctx: $crate::ctx::ref1::CtxMeta<'a> {
-                self.0.transform(ctx, input)
+        impl $crate::FreeStaticFn<$crate::val::Val, $crate::val::Val> for $type1 {
+            fn free_static_call(&self, input: $crate::val::Val) -> $crate::val::Val {
+                self.0.free_static_call(input)
+            }
+        }
+
+        impl $crate::FreeCellFn<$crate::val::Val, $crate::val::Val> for $type1 {
+            fn free_cell_call(&mut self, input: $crate::val::Val) -> $crate::val::Val {
+                use $crate::FreeStaticFn;
+                self.0.free_static_call(input)
+            }
+        }
+
+        impl $crate::ConstStaticFn<$crate::Ctx, $crate::val::Val, $crate::val::Val> for $type1 {
+            fn const_static_call(
+                &self, ctx: $crate::ConstRef<$crate::Ctx>, input: $crate::val::Val,
+            ) -> $crate::val::Val {
+                self.0.const_static_call(ctx, input)
+            }
+        }
+
+        impl $crate::ConstCellFn<$crate::Ctx, $crate::val::Val, $crate::val::Val> for $type1 {
+            fn const_cell_call(
+                &mut self, ctx: $crate::ConstRef<$crate::Ctx>, input: $crate::val::Val,
+            ) -> $crate::val::Val {
+                use $crate::ConstStaticFn;
+                self.0.const_static_call(ctx, input)
+            }
+        }
+
+        impl $crate::MutStaticFn<$crate::Ctx, $crate::val::Val, $crate::val::Val> for $type1 {
+            fn mut_static_call(
+                &self, ctx: &mut $crate::Ctx, input: $crate::val::Val,
+            ) -> $crate::val::Val {
+                self.0.mut_static_call(ctx, input)
+            }
+        }
+
+        impl $crate::MutCellFn<$crate::Ctx, $crate::val::Val, $crate::val::Val> for $type1 {
+            fn mut_cell_call(
+                &mut self, ctx: &mut $crate::Ctx, input: $crate::val::Val,
+            ) -> $crate::val::Val {
+                use $crate::MutStaticFn;
+                self.0.mut_static_call(ctx, input)
             }
         }
 
@@ -249,14 +378,6 @@ macro_rules! impl_const_func_trait {
 
             fn code(&self) -> $crate::val::Val {
                 self.0.code()
-            }
-
-            fn transform_mut<'a, Ctx>(
-                &mut self, ctx: Ctx, input: $crate::val::Val,
-            ) -> $crate::val::Val
-            where Ctx: $crate::ctx::ref1::CtxMeta<'a> {
-                use $crate::transformer::Transformer;
-                self.0.transform(ctx, input)
             }
         }
     };

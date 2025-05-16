@@ -44,8 +44,6 @@ pub(crate) mod core;
 
 pub(crate) mod solver;
 
-pub(crate) mod transformer;
-
 pub mod syntax;
 
 pub(crate) mod mode;

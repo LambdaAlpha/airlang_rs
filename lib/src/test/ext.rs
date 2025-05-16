@@ -58,8 +58,8 @@ impl Type for VExt {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FuncExt;
 
-impl FreeStaticFn for FuncExt {
-    fn call(&self, input: Val) -> Val {
+impl FreeStaticFn<Val, Val> for FuncExt {
+    fn free_static_call(&self, input: Val) -> Val {
         input
     }
 }

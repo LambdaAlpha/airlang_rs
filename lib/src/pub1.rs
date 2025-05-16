@@ -4,12 +4,8 @@ pub use crate::call::Call;
 pub use crate::ctx::Ctx;
 pub use crate::ctx::CtxAccess;
 pub use crate::ctx::CtxError;
-pub use crate::ctx::const1::ConstCtx;
-pub use crate::ctx::const1::ConstFnCtx;
-pub use crate::ctx::free::FreeCtx;
 pub use crate::ctx::map::VarAccess;
-pub use crate::ctx::mut1::MutCtx;
-pub use crate::ctx::mut1::MutFnCtx;
+pub use crate::either::Either;
 pub use crate::extension::AirExt;
 pub use crate::extension::ValExt;
 pub use crate::func::const_cell_comp::ConstCellCompFunc;
@@ -18,6 +14,7 @@ pub use crate::func::const_cell_prim::ConstCellFnExt;
 pub use crate::func::const_cell_prim::ConstCellPrimFunc;
 pub use crate::func::const_static_comp::ConstStaticCompFunc;
 pub use crate::func::const_static_prim::ConstStaticFn;
+pub use crate::func::const_static_prim::ConstStaticImpl;
 pub use crate::func::const_static_prim::ConstStaticPrimFunc;
 pub use crate::func::free_cell_comp::FreeCellCompFunc;
 pub use crate::func::free_cell_prim::FreeCellFn;
@@ -25,6 +22,7 @@ pub use crate::func::free_cell_prim::FreeCellFnExt;
 pub use crate::func::free_cell_prim::FreeCellPrimFunc;
 pub use crate::func::free_static_comp::FreeStaticCompFunc;
 pub use crate::func::free_static_prim::FreeStaticFn;
+pub use crate::func::free_static_prim::FreeStaticImpl;
 pub use crate::func::free_static_prim::FreeStaticPrimFunc;
 pub use crate::func::func_mode::FuncMode;
 pub use crate::func::mode::ModeFunc;
@@ -34,6 +32,7 @@ pub use crate::func::mut_cell_prim::MutCellFnExt;
 pub use crate::func::mut_cell_prim::MutCellPrimFunc;
 pub use crate::func::mut_static_comp::MutStaticCompFunc;
 pub use crate::func::mut_static_prim::MutStaticFn;
+pub use crate::func::mut_static_prim::MutStaticImpl;
 pub use crate::func::mut_static_prim::MutStaticPrimFunc;
 pub use crate::int::Int;
 pub use crate::list::List;
@@ -57,6 +56,8 @@ pub use crate::symbol::Symbol;
 pub use crate::text::Text;
 pub use crate::type1::Type;
 pub use crate::type1::TypeMeta;
+pub use crate::types::ref1::ConstRef;
+pub use crate::types::ref1::DynRef;
 pub use crate::unit::Unit;
 pub use crate::val::Val;
 pub use crate::val::byte::ByteVal;
@@ -90,7 +91,6 @@ use crate::extension::set_air_ext;
 use crate::syntax::ParseError;
 use crate::syntax::ReprError;
 use crate::syntax::generator::PRETTY_FMT;
-use crate::transformer::Transformer;
 
 pub fn parse(src: &str) -> Result<Val, ParseError> {
     crate::syntax::parser::parse(src)
@@ -123,11 +123,11 @@ impl AirCell {
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
-        self.mode.transform(MutCtx::new(&mut self.ctx), input)
+        self.mode.mut_static_call(&mut self.ctx, input)
     }
 
-    pub fn ctx_mut(&mut self) -> MutCtx {
-        MutCtx::new(&mut self.ctx)
+    pub fn ctx_mut(&mut self) -> &mut Ctx {
+        &mut self.ctx
     }
 }
 
