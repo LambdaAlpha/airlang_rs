@@ -18,7 +18,6 @@ use crate::MutStaticFn;
 use crate::PairMode;
 use crate::PrimMode;
 use crate::SymbolMode;
-use crate::UniMode;
 use crate::Val;
 use crate::func::FuncTrait;
 use crate::mode::Mode;
@@ -91,7 +90,6 @@ impl ModeFunc {
         match &self.mode {
             None => true,
             Some(mode) => match mode {
-                Mode::Uni(_) => true,
                 Mode::Prim(_) => true,
                 Mode::Comp(_) => false,
                 Mode::Func(_) => false,
@@ -128,17 +126,10 @@ impl<T: GetCtxAccess> GetCtxAccess for Option<T> {
 impl GetCtxAccess for Mode {
     fn ctx_access(&self) -> CtxAccess {
         match self {
-            Mode::Uni(mode) => mode.ctx_access(),
             Mode::Prim(mode) => mode.ctx_access(),
             Mode::Comp(mode) => mode.ctx_access(),
             Mode::Func(mode) => mode.ctx_access(),
         }
-    }
-}
-
-impl GetCtxAccess for UniMode {
-    fn ctx_access(&self) -> CtxAccess {
-        CtxAccess::Mut
     }
 }
 

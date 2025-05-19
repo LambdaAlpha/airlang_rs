@@ -1,3 +1,5 @@
+use const_format::concatcp;
+
 use crate::CallVal;
 use crate::ConstRef;
 use crate::ConstStaticFn;
@@ -9,7 +11,6 @@ use crate::MutStaticFn;
 use crate::PairVal;
 use crate::Symbol;
 use crate::SymbolMode;
-use crate::UniMode;
 use crate::Val;
 use crate::core::CallEval;
 use crate::core::CallForm;
@@ -17,6 +18,9 @@ use crate::core::ListUniForm;
 use crate::core::MapUniForm;
 use crate::core::PairForm;
 use crate::mode::ModeFn;
+use crate::mode::symbol::LITERAL_CHAR;
+use crate::mode::symbol::MOVE_CHAR;
+use crate::mode::symbol::REF_CHAR;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct PrimMode {
@@ -26,6 +30,16 @@ pub struct PrimMode {
     pub list: Option<DataMode>,
     pub map: Option<DataMode>,
 }
+
+pub(crate) const FORM: &str = "form";
+pub(crate) const EVAL: &str = "eval";
+
+pub(crate) const FORM_LITERAL: &str = concatcp!(FORM, LITERAL_CHAR);
+pub(crate) const FORM_REF: &str = concatcp!(FORM, REF_CHAR);
+pub(crate) const FORM_MOVE: &str = concatcp!(FORM, MOVE_CHAR);
+pub(crate) const EVAL_LITERAL: &str = concatcp!(EVAL, LITERAL_CHAR);
+pub(crate) const EVAL_REF: &str = concatcp!(EVAL, REF_CHAR);
+pub(crate) const EVAL_MOVE: &str = concatcp!(EVAL, MOVE_CHAR);
 
 impl ModeFn for PrimMode {}
 
@@ -225,29 +239,14 @@ impl MutStaticFn<Ctx, MapVal, Val> for PrimMode {
     }
 }
 
-impl From<Option<UniMode>> for PrimMode {
-    fn from(mode: Option<UniMode>) -> Self {
-        match mode {
-            None => Self { symbol: None, pair: None, call: None, list: None, map: None },
-            Some(mode) => Self {
-                symbol: Some(SymbolMode::from(mode)),
-                pair: Some(DataMode::from(mode)),
-                call: Some(CodeMode::from(mode)),
-                list: Some(DataMode::from(mode)),
-                map: Some(DataMode::from(mode)),
-            },
+impl PrimMode {
+    pub(crate) const fn symbol_call(symbol: SymbolMode, call: CodeMode) -> PrimMode {
+        PrimMode {
+            symbol: Some(symbol),
+            call: Some(call),
+            pair: Some(DataMode),
+            list: Some(DataMode),
+            map: Some(DataMode),
         }
-    }
-}
-
-impl From<UniMode> for DataMode {
-    fn from(_mode: UniMode) -> Self {
-        DataMode
-    }
-}
-
-impl From<UniMode> for CodeMode {
-    fn from(mode: UniMode) -> Self {
-        mode.code
     }
 }

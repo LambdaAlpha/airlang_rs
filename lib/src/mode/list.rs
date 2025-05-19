@@ -5,7 +5,7 @@ use crate::FreeStaticFn;
 use crate::List;
 use crate::ListVal;
 use crate::MutStaticFn;
-use crate::UniMode;
+use crate::PrimMode;
 use crate::Val;
 use crate::core::ListForm;
 use crate::mode::Mode;
@@ -37,9 +37,8 @@ impl MutStaticFn<Ctx, ListVal, Val> for ListMode {
     }
 }
 
-impl From<UniMode> for ListMode {
-    fn from(mode: UniMode) -> Self {
-        let m = Some(Mode::Uni(mode));
-        ListMode { head: List::default(), tail: m }
+impl From<PrimMode> for ListMode {
+    fn from(mode: PrimMode) -> Self {
+        Self { head: List::default(), tail: Some(mode.into()) }
     }
 }

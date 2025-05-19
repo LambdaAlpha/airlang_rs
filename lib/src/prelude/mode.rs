@@ -9,8 +9,8 @@ use crate::MutStaticImpl;
 use crate::Symbol;
 use crate::Val;
 use crate::ctx::main::MainCtx;
+use crate::func::func_mode::DEFAULT_MODE;
 use crate::mode::symbol::MOVE_CHAR;
-use crate::mode::united::DEFAULT_MODE;
 use crate::prelude::mut_fn;
 
 thread_local!(pub(crate) static MODE_PRELUDE: ModePrelude = ModePrelude::default());

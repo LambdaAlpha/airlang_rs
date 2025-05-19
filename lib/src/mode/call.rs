@@ -5,7 +5,7 @@ use crate::ConstStaticFn;
 use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::MutStaticFn;
-use crate::UniMode;
+use crate::PrimMode;
 use crate::Val;
 use crate::core::CallEval;
 use crate::core::CallForm;
@@ -60,9 +60,13 @@ impl MutStaticFn<Ctx, CallVal, Val> for CallMode {
     }
 }
 
-impl From<UniMode> for CallMode {
-    fn from(mode: UniMode) -> Self {
-        let m = Some(Mode::Uni(mode));
-        Self { code: mode.code, func: m.clone(), input: m }
+impl TryFrom<PrimMode> for CallMode {
+    type Error = ();
+
+    fn try_from(mode: PrimMode) -> Result<Self, Self::Error> {
+        let Some(code) = mode.call else {
+            return Err(());
+        };
+        Ok(Self { code, func: Some(mode.into()), input: Some(mode.into()) })
     }
 }

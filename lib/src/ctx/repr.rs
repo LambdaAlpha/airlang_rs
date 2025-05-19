@@ -32,7 +32,7 @@ pub(crate) fn parse_mode() -> Option<Mode> {
         symbol(VARIABLES),
         FuncMode::map_mode(
             Map::default(),
-            FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
+            FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
             FuncMode::default_mode(),
         ),
     );

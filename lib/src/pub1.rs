@@ -47,7 +47,6 @@ pub use crate::mode::prim::CodeMode;
 pub use crate::mode::prim::DataMode;
 pub use crate::mode::prim::PrimMode;
 pub use crate::mode::symbol::SymbolMode;
-pub use crate::mode::united::UniMode;
 pub use crate::number::Number;
 pub use crate::pair::Pair;
 pub use crate::prelude::Prelude;

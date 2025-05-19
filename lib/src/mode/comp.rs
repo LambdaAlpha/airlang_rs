@@ -10,8 +10,8 @@ use crate::MapVal;
 use crate::MutStaticFn;
 use crate::PairMode;
 use crate::PairVal;
+use crate::PrimMode;
 use crate::Symbol;
-use crate::UniMode;
 use crate::Val;
 use crate::mode::ModeFn;
 use crate::mode::call::CallMode;
@@ -157,17 +157,13 @@ impl MutStaticFn<Ctx, MapVal, Val> for CompMode {
     }
 }
 
-impl From<Option<UniMode>> for CompMode {
-    fn from(mode: Option<UniMode>) -> Self {
-        match mode {
-            None => Self { symbol: None, pair: None, call: None, list: None, map: None },
-            Some(mode) => Self {
-                symbol: Some(SymbolMode::from(mode)),
-                pair: Some(PairMode::from(mode)),
-                call: Some(CallMode::from(mode)),
-                list: Some(ListMode::from(mode)),
-                map: Some(MapMode::from(mode)),
-            },
-        }
+impl From<PrimMode> for CompMode {
+    fn from(mode: PrimMode) -> Self {
+        let symbol = mode.symbol;
+        let pair = mode.pair.map(|_| mode.into());
+        let call = mode.call.map(|_| mode.try_into().unwrap());
+        let list = mode.list.map(|_| mode.into());
+        let map = mode.map.map(|_| mode.into());
+        Self { symbol, pair, call, list, map }
     }
 }

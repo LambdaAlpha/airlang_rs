@@ -6,7 +6,6 @@ use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::MutStaticFn;
 use crate::Symbol;
-use crate::UniMode;
 use crate::Val;
 use crate::core::SymbolForm;
 use crate::mode::ModeFn;
@@ -54,11 +53,5 @@ impl MutStaticFn<Ctx, Symbol, Val> for SymbolMode {
             SymbolMode::Ref => SymbolForm::<REF_CHAR>.mut_static_call(ctx, input),
             SymbolMode::Move => SymbolForm::<MOVE_CHAR>.mut_static_call(ctx, input),
         }
-    }
-}
-
-impl From<UniMode> for SymbolMode {
-    fn from(mode: UniMode) -> Self {
-        mode.symbol
     }
 }

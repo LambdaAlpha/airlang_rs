@@ -49,7 +49,6 @@ use crate::mode::pair::PairMode;
 use crate::mode::prim::CodeMode;
 use crate::mode::prim::DataMode;
 use crate::mode::prim::PrimMode;
-use crate::mode::united::UniMode;
 use crate::number::Number;
 use crate::pair::Pair;
 use crate::prelude::put_preludes;
@@ -300,14 +299,6 @@ impl Arbitrary for SymbolMode {
     }
 }
 
-impl Arbitrary for UniMode {
-    fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let code = CodeMode::any(rng, depth);
-        let symbol = SymbolMode::any(rng, depth);
-        UniMode::new(code, symbol)
-    }
-}
-
 impl Arbitrary for CompMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
@@ -373,7 +364,6 @@ impl Arbitrary for Mode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
         let weight: usize = 1 << min(depth, 32);
         let weights = [
-            weight, // united
             weight, // primitive
             1,      // composite
             1,      // function
@@ -381,10 +371,9 @@ impl Arbitrary for Mode {
         let i = sample(rng, weights);
         let new_depth = depth + 1;
         match i {
-            0 => Mode::Uni(Arbitrary::any(rng, depth)),
-            1 => Mode::Prim(Arbitrary::any(rng, depth)),
-            2 => Mode::Comp(Box::new(Arbitrary::any(rng, depth))),
-            3 => Mode::Func(FuncVal::any(rng, new_depth)),
+            0 => Mode::Prim(Arbitrary::any(rng, depth)),
+            1 => Mode::Comp(Box::new(Arbitrary::any(rng, depth))),
+            2 => Mode::Func(FuncVal::any(rng, new_depth)),
             _ => unreachable!(),
         }
     }

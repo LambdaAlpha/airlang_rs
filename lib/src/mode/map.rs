@@ -6,7 +6,7 @@ use crate::Map;
 use crate::MapVal;
 use crate::MutStaticFn;
 use crate::Pair;
-use crate::UniMode;
+use crate::PrimMode;
 use crate::Val;
 use crate::core::MapForm;
 use crate::mode::Mode;
@@ -47,9 +47,8 @@ impl MutStaticFn<Ctx, MapVal, Val> for MapMode {
     }
 }
 
-impl From<UniMode> for MapMode {
-    fn from(mode: UniMode) -> Self {
-        let m = Some(Mode::Uni(mode));
-        MapMode { some: Map::default(), else1: Pair::new(m.clone(), m) }
+impl From<PrimMode> for MapMode {
+    fn from(mode: PrimMode) -> Self {
+        Self { some: Map::default(), else1: Pair::new(Some(mode.into()), Some(mode.into())) }
     }
 }

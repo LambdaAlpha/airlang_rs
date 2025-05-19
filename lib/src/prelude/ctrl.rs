@@ -8,16 +8,16 @@ use crate::List;
 use crate::Map;
 use crate::MutStaticFn;
 use crate::Pair;
+use crate::PrimMode;
 use crate::Symbol;
 use crate::SymbolMode;
 use crate::Text;
-use crate::UniMode;
 use crate::ctx::map::CtxValue;
 use crate::ctx::pattern::PatternCtx;
 use crate::ctx::pattern::assign_pattern;
 use crate::ctx::pattern::match_pattern;
 use crate::ctx::pattern::parse_pattern;
-use crate::mode::united::DEFAULT_MODE;
+use crate::func::func_mode::DEFAULT_MODE;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
@@ -135,7 +135,7 @@ fn fn_match(ctx: &mut Ctx, input: Val) -> Val {
             return Val::default();
         };
         let pair = Pair::from(pair);
-        let mode = UniMode::new(CodeMode::Form, SymbolMode::Literal);
+        let mode = PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form);
         let pattern = mode.mut_static_call(ctx, pair.first);
         let Some(pattern) = parse_pattern(PatternCtx::default(), pattern) else {
             return Val::default();

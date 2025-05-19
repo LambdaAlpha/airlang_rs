@@ -20,7 +20,7 @@ use crate::ctx::repr::parse_ctx;
 use crate::ctx::repr::parse_mode;
 use crate::ctx::repr::parse_var_access;
 use crate::either::Either;
-use crate::mode::united::DEFAULT_MODE;
+use crate::func::func_mode::DEFAULT_MODE;
 use crate::pair::Pair;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
@@ -137,7 +137,7 @@ fn assign() -> Named<FuncVal> {
     let id = "=";
     let f = mut_impl(fn_assign);
     let forward = FuncMode::pair_mode(
-        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
+        FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
         FuncMode::default_mode(),
     );
     let reverse = FuncMode::default_mode();
@@ -308,7 +308,7 @@ fn with_ctx() -> Named<FuncVal> {
     let f = MutStaticImpl::new(fn_with_ctx_free, fn_with_ctx_const, fn_with_ctx_mut);
     let forward = FuncMode::pair_mode(
         FuncMode::id_mode(),
-        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
+        FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form),
     );
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
@@ -383,7 +383,7 @@ fn ctx_in_ctx_out() -> Named<FuncVal> {
     let f = free_impl(fn_ctx_in_ctx_out);
     let forward = FuncMode::pair_mode(
         FuncMode::default_mode(),
-        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref),
+        FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form),
     );
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };

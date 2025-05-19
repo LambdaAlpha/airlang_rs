@@ -10,7 +10,7 @@ use crate::Symbol;
 use crate::Val;
 use crate::ctx::map::CtxValue;
 use crate::ctx::map::VarAccess;
-use crate::mode::united::DEFAULT_MODE;
+use crate::func::func_mode::DEFAULT_MODE;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct Composite {

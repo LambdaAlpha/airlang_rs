@@ -10,11 +10,9 @@ use crate::MutStaticFn;
 use crate::Val;
 use crate::mode::comp::CompMode;
 use crate::mode::prim::PrimMode;
-use crate::mode::united::UniMode;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Mode {
-    Uni(UniMode),
     Prim(PrimMode),
     Comp(Box<CompMode>),
     Func(FuncVal),
@@ -29,7 +27,6 @@ impl ModeFn for Mode {}
 impl FreeStaticFn<Val, Val> for Mode {
     fn free_static_call(&self, input: Val) -> Val {
         match self {
-            Mode::Uni(uni) => uni.free_static_call(input),
             Mode::Prim(prim) => prim.free_static_call(input),
             Mode::Comp(comp) => comp.free_static_call(input),
             Mode::Func(func) => func.free_static_call(input),
@@ -40,7 +37,6 @@ impl FreeStaticFn<Val, Val> for Mode {
 impl ConstStaticFn<Ctx, Val, Val> for Mode {
     fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
         match self {
-            Mode::Uni(uni) => uni.const_static_call(ctx, input),
             Mode::Prim(prim) => prim.const_static_call(ctx, input),
             Mode::Comp(comp) => comp.const_static_call(ctx, input),
             Mode::Func(func) => func.const_static_call(ctx, input),
@@ -51,7 +47,6 @@ impl ConstStaticFn<Ctx, Val, Val> for Mode {
 impl MutStaticFn<Ctx, Val, Val> for Mode {
     fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
         match self {
-            Mode::Uni(uni) => uni.mut_static_call(ctx, input),
             Mode::Prim(prim) => prim.mut_static_call(ctx, input),
             Mode::Comp(comp) => comp.mut_static_call(ctx, input),
             Mode::Func(func) => func.mut_static_call(ctx, input),
@@ -141,13 +136,11 @@ where
     }
 }
 
-impl From<UniMode> for Mode {
-    fn from(mode: UniMode) -> Self {
-        Mode::Uni(mode)
+impl From<PrimMode> for Mode {
+    fn from(mode: PrimMode) -> Self {
+        Mode::Prim(mode)
     }
 }
-
-pub(crate) mod united;
 
 pub(crate) mod prim;
 

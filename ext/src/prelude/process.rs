@@ -42,7 +42,7 @@ fn call() -> Named<FuncVal> {
     let f = free_impl(fn_call);
     let forward = FuncMode::map_mode(
         Map::default(),
-        FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal),
+        FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
         FuncMode::default_mode(),
     );
     let reverse = FuncMode::default_mode();

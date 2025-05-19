@@ -53,8 +53,8 @@ pub(crate) const MUTABLE: &str = "mutable";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
-    map.insert(symbol(ID), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal));
-    map.insert(symbol(CODE), FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref));
+    map.insert(symbol(ID), FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form));
+    map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form));
     map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
     FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
 }

@@ -16,13 +16,13 @@ use crate::func::repr::generate_func;
 use crate::func::repr::parse_func;
 use crate::func::repr::parse_mode;
 use crate::mode::ID;
+use crate::mode::prim::EVAL_LITERAL;
+use crate::mode::prim::EVAL_MOVE;
+use crate::mode::prim::EVAL_REF;
+use crate::mode::prim::FORM_LITERAL;
+use crate::mode::prim::FORM_MOVE;
+use crate::mode::prim::FORM_REF;
 use crate::mode::repr::parse;
-use crate::mode::united::EVAL_LITERAL;
-use crate::mode::united::EVAL_MOVE;
-use crate::mode::united::EVAL_REF;
-use crate::mode::united::FORM_LITERAL;
-use crate::mode::united::FORM_MOVE;
-use crate::mode::united::FORM_REF;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
@@ -121,7 +121,7 @@ fn mode_id() -> Named<FuncVal> {
 
 fn mode_form_literal() -> Named<FuncVal> {
     let id = FORM_LITERAL;
-    let mode = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
+    let mode = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form);
     let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
@@ -129,7 +129,7 @@ fn mode_form_literal() -> Named<FuncVal> {
 
 fn mode_form_ref() -> Named<FuncVal> {
     let id = FORM_REF;
-    let mode = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Ref);
+    let mode = FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form);
     let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
@@ -137,7 +137,7 @@ fn mode_form_ref() -> Named<FuncVal> {
 
 fn mode_form_move() -> Named<FuncVal> {
     let id = FORM_MOVE;
-    let mode = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Move);
+    let mode = FuncMode::prim_mode(SymbolMode::Move, CodeMode::Form);
     let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
@@ -145,7 +145,7 @@ fn mode_form_move() -> Named<FuncVal> {
 
 fn mode_eval_literal() -> Named<FuncVal> {
     let id = EVAL_LITERAL;
-    let mode = FuncMode::uni_mode(CodeMode::Eval, SymbolMode::Literal);
+    let mode = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Eval);
     let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
@@ -153,7 +153,7 @@ fn mode_eval_literal() -> Named<FuncVal> {
 
 fn mode_eval_ref() -> Named<FuncVal> {
     let id = EVAL_REF;
-    let mode = FuncMode::uni_mode(CodeMode::Eval, SymbolMode::Ref);
+    let mode = FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Eval);
     let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
@@ -161,7 +161,7 @@ fn mode_eval_ref() -> Named<FuncVal> {
 
 fn mode_eval_move() -> Named<FuncVal> {
     let id = EVAL_MOVE;
-    let mode = FuncMode::uni_mode(CodeMode::Eval, SymbolMode::Move);
+    let mode = FuncMode::prim_mode(SymbolMode::Move, CodeMode::Eval);
     let func = ModeFunc::new(mode);
     let f = FuncVal::Mode(func.into());
     Named::new(id, f)
@@ -170,7 +170,7 @@ fn mode_eval_move() -> Named<FuncVal> {
 fn mode() -> Named<FuncVal> {
     let id = "mode";
     let f = free_impl(fn_mode);
-    let forward = FuncMode::uni_mode(CodeMode::Form, SymbolMode::Literal);
+    let forward = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form);
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_free_fn(id, f, mode)

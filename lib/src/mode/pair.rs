@@ -4,7 +4,7 @@ use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::MutStaticFn;
 use crate::PairVal;
-use crate::UniMode;
+use crate::PrimMode;
 use crate::Val;
 use crate::core::PairForm;
 use crate::mode::Mode;
@@ -36,9 +36,8 @@ impl MutStaticFn<Ctx, PairVal, Val> for PairMode {
     }
 }
 
-impl From<UniMode> for PairMode {
-    fn from(mode: UniMode) -> Self {
-        let m = Some(Mode::Uni(mode));
-        Self { first: m.clone(), second: m }
+impl From<PrimMode> for PairMode {
+    fn from(mode: PrimMode) -> Self {
+        Self { first: Some(mode.into()), second: Some(mode.into()) }
     }
 }
