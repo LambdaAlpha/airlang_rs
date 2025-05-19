@@ -517,49 +517,51 @@ impl FreeStaticFn<Call<Symbol, Val>, Val> for CallRefEval {
 impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
     fn const_static_call(&self, ctx: ConstRef<Ctx>, call: Call<Symbol, Val>) -> Val {
         let ctx = ctx.unwrap();
-        let variables = ctx.variables_mut();
-        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
+        let Some(ctx_value) = ctx.variables_mut().remove_unchecked(&call.func) else {
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
-            variables.put_unchecked(call.func, ctx_value);
+            ctx.variables_mut().put_unchecked(call.func, ctx_value);
             return Val::default();
         };
-        let output = if call.reverse {
+        if call.reverse {
             let input = func.mode().reverse.const_static_call(ConstRef::new(ctx), call.input);
-            let question = Val::Call(Call::new(true, Val::Func(func.clone()), input).into());
+            let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+            ctx.variables_mut().put_unchecked(call.func.clone(), ctx_value);
+            let question = Val::Call(Call::new(true, Val::Symbol(call.func), input).into());
             Solver.const_static_call(ConstRef::new(ctx), question)
         } else {
             let input = func.mode().forward.const_static_call(ConstRef::new(ctx), call.input);
-            func.const_cell_call(ConstRef::new(ctx), input)
-        };
-        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
-        ctx.variables_mut().put_unchecked(call.func, ctx_value);
-        output
+            let output = func.const_cell_call(ConstRef::new(ctx), input);
+            let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+            ctx.variables_mut().put_unchecked(call.func, ctx_value);
+            output
+        }
     }
 }
 
 impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
     fn mut_static_call(&self, ctx: &mut Ctx, call: Call<Symbol, Val>) -> Val {
-        let variables = ctx.variables_mut();
-        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
+        let Some(ctx_value) = ctx.variables_mut().remove_unchecked(&call.func) else {
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
-            variables.put_unchecked(call.func, ctx_value);
+            ctx.variables_mut().put_unchecked(call.func, ctx_value);
             return Val::default();
         };
-        let output = if call.reverse {
+        if call.reverse {
             let input = func.mode().reverse.mut_static_call(ctx, call.input);
-            let question = Val::Call(Call::new(true, Val::Func(func.clone()), input).into());
+            let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+            ctx.variables_mut().put_unchecked(call.func.clone(), ctx_value);
+            let question = Val::Call(Call::new(true, Val::Symbol(call.func), input).into());
             Solver.mut_static_call(ctx, question)
         } else {
             let input = func.mode().forward.mut_static_call(ctx, call.input);
-            func.mut_cell_call(ctx, input)
-        };
-        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
-        ctx.variables_mut().put_unchecked(call.func, ctx_value);
-        output
+            let output = func.mut_cell_call(ctx, input);
+            let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+            ctx.variables_mut().put_unchecked(call.func, ctx_value);
+            output
+        }
     }
 }
 
@@ -635,45 +637,56 @@ impl FreeStaticFn<Call<Symbol, Val>, Val> for CallRefApply {
 
 impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
     fn const_static_call(&self, ctx: ConstRef<Ctx>, call: Call<Symbol, Val>) -> Val {
-        let ctx = ctx.unwrap();
-        let variables = ctx.variables_mut();
-        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
-            return Val::default();
-        };
-        let Val::Func(mut func) = ctx_value.val else {
-            variables.put_unchecked(call.func, ctx_value);
-            return Val::default();
-        };
-        let output = if call.reverse {
-            let question = Val::Call(Call::new(true, Val::Func(func.clone()), call.input).into());
-            Solver.const_static_call(ConstRef::new(ctx), question)
+        if call.reverse {
+            let Ok(val) = ctx.variables().get_ref(call.func.clone()) else {
+                return Val::default();
+            };
+            let Val::Func(_) = val else {
+                return Val::default();
+            };
+            let question = Val::Call(Call::new(true, Val::Symbol(call.func), call.input).into());
+            Solver.const_static_call(ctx, question)
         } else {
-            func.const_cell_call(ConstRef::new(ctx), call.input)
-        };
-        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
-        ctx.variables_mut().put_unchecked(call.func, ctx_value);
-        output
+            let ctx = ctx.unwrap();
+            let variables = ctx.variables_mut();
+            let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
+                return Val::default();
+            };
+            let Val::Func(mut func) = ctx_value.val else {
+                variables.put_unchecked(call.func, ctx_value);
+                return Val::default();
+            };
+            let output = func.const_cell_call(ConstRef::new(ctx), call.input);
+            let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+            ctx.variables_mut().put_unchecked(call.func, ctx_value);
+            output
+        }
     }
 }
 
 impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
     fn mut_static_call(&self, ctx: &mut Ctx, call: Call<Symbol, Val>) -> Val {
-        let variables = ctx.variables_mut();
-        let Some(ctx_value) = variables.remove_unchecked(&call.func) else {
-            return Val::default();
-        };
-        let Val::Func(mut func) = ctx_value.val else {
-            variables.put_unchecked(call.func, ctx_value);
-            return Val::default();
-        };
-        let output = if call.reverse {
-            let question = Val::Call(Call::new(true, Val::Func(func.clone()), call.input).into());
+        if call.reverse {
+            let Ok(val) = ctx.variables().get_ref(call.func.clone()) else {
+                return Val::default();
+            };
+            let Val::Func(_) = val else {
+                return Val::default();
+            };
+            let question = Val::Call(Call::new(true, Val::Symbol(call.func), call.input).into());
             Solver.mut_static_call(ctx, question)
         } else {
-            func.mut_cell_call(ctx, call.input)
-        };
-        let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
-        ctx.variables_mut().put_unchecked(call.func, ctx_value);
-        output
+            let Some(ctx_value) = ctx.variables_mut().remove_unchecked(&call.func) else {
+                return Val::default();
+            };
+            let Val::Func(mut func) = ctx_value.val else {
+                ctx.variables_mut().put_unchecked(call.func, ctx_value);
+                return Val::default();
+            };
+            let output = func.mut_cell_call(ctx, call.input);
+            let ctx_value = CtxValue { val: Val::Func(func), ..ctx_value };
+            ctx.variables_mut().put_unchecked(call.func, ctx_value);
+            output
+        }
     }
 }
