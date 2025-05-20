@@ -12,7 +12,7 @@ use crate::PrimMode;
 use crate::Symbol;
 use crate::SymbolMode;
 use crate::Text;
-use crate::ctx::map::CtxValue;
+use crate::VarAccess;
 use crate::ctx::pattern::PatternCtx;
 use crate::ctx::pattern::assign_pattern;
 use crate::ctx::pattern::match_pattern;
@@ -277,7 +277,7 @@ fn fn_for(ctx: &mut Ctx, input: Val) -> Val {
 
 fn for_iter<ValIter>(ctx: &mut Ctx, body: Val, name: Symbol, values: ValIter) -> Val
 where ValIter: Iterator<Item = Val> {
-    if !ctx.variables().is_assignable(name.clone()) {
+    if !ctx.variables().is_assignable(name.clone(), VarAccess::Assign) {
         return Val::default();
     }
     if let Val::List(body) = body {
@@ -288,7 +288,7 @@ where ValIter: Iterator<Item = Val> {
         };
         for val in values {
             ctx.variables_mut()
-                .put_value(name.clone(), CtxValue::new(val))
+                .put_value(name.clone(), VarAccess::Assign, val)
                 .expect("name should be assignable");
             let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
@@ -303,7 +303,7 @@ where ValIter: Iterator<Item = Val> {
     } else {
         for val in values {
             ctx.variables_mut()
-                .put_value(name.clone(), CtxValue::new(val))
+                .put_value(name.clone(), VarAccess::Assign, val)
                 .expect("name should be assignable");
             DEFAULT_MODE.mut_static_call(ctx, body.clone());
         }

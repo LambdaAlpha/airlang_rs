@@ -142,7 +142,7 @@ pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {
 
 impl PreludeCtx for Map<Symbol, CtxValue> {
     fn put(&mut self, name: Symbol, val: Val) {
-        let v = self.insert(name, CtxValue::new(val));
+        let v = self.insert(name, CtxValue::new_assign(val));
         assert!(v.is_none(), "names of preludes should be unique");
     }
 }

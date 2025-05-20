@@ -18,6 +18,7 @@ use crate::utils::val::symbol;
 
 const ACCESS: &str = "access";
 const STATIC: &str = "static";
+const INACCESSIBLE: &str = "inaccessible";
 
 pub(crate) const ASSIGNABLE: &str = "assignable";
 pub(crate) const MUTABLE: &str = "mutable";
@@ -63,8 +64,12 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
     map.into_iter()
         .map(|(binding, val)| {
             let binding = parse_binding(binding)?;
-            let ctx_value =
-                CtxValue { access: binding.extra.access, static1: binding.extra.static1, val };
+            let ctx_value = CtxValue {
+                val,
+                access: binding.extra.access,
+                static1: binding.extra.static1,
+                free: false,
+            };
             Some((binding.name, ctx_value))
         })
         .collect()
@@ -99,6 +104,7 @@ pub(crate) fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
             MUTABLE => default.access = VarAccess::Mut,
             CONST => default.access = VarAccess::Const,
             STATIC => default.static1 = true,
+            INACCESSIBLE => default.free = true,
             _ => return None,
         },
         Val::Map(mut map) => {
@@ -116,6 +122,13 @@ pub(crate) fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
                 _ => return None,
             };
             default.static1 = static1;
+            let inaccessible = match map.remove(&symbol(INACCESSIBLE)) {
+                Some(Val::Unit(_)) => true,
+                Some(Val::Bit(bit)) => bit.bool(),
+                None => false,
+                _ => return None,
+            };
+            default.free = inaccessible;
         }
         _ => return None,
     }
@@ -153,7 +166,7 @@ fn generate_variables(ctx_map: CtxMap) -> Option<Val> {
         .unwrap()
         .into_iter()
         .map(|(name, v)| {
-            let extra = Extra { access: v.access, static1: v.static1 };
+            let extra = Extra { access: v.access, static1: v.static1, free: v.free };
             let k = generate_binding(Binding { name, extra });
             let v = v.val;
             (k, v)
@@ -172,15 +185,25 @@ fn generate_binding(binding: Binding) -> Val {
 }
 
 fn generate_extra(extra: Extra) -> Val {
-    if !extra.static1 {
+    if !extra.static1 && !extra.free {
         return Val::Symbol(generate_var_access(extra.access));
     }
-    if extra.access == VarAccess::default() {
+    if extra.access == VarAccess::default() && !extra.free {
         return symbol(STATIC);
     }
+    if !extra.static1 && extra.access == VarAccess::default() {
+        return symbol(INACCESSIBLE);
+    }
     let mut map = Map::default();
-    map.insert(symbol(STATIC), Val::default());
-    map.insert(symbol(ACCESS), Val::Symbol(generate_var_access(extra.access)));
+    if extra.static1 {
+        map.insert(symbol(STATIC), Val::default());
+    }
+    if extra.access != VarAccess::default() {
+        map.insert(symbol(ACCESS), Val::Symbol(generate_var_access(extra.access)));
+    }
+    if extra.free {
+        map.insert(symbol(INACCESSIBLE), Val::default());
+    }
     Val::Map(map.into())
 }
 
@@ -202,4 +225,5 @@ pub(crate) struct Binding {
 pub(crate) struct Extra {
     pub(crate) access: VarAccess,
     pub(crate) static1: bool,
+    pub(crate) free: bool,
 }

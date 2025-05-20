@@ -10,7 +10,6 @@ use crate::PairVal;
 use crate::Symbol;
 use crate::Unit;
 use crate::Val;
-use crate::ctx::map::CtxValue;
 use crate::ctx::repr::Binding;
 use crate::ctx::repr::Extra;
 use crate::ctx::repr::parse_extra;
@@ -192,8 +191,7 @@ pub(crate) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: Val) -> Val {
 }
 
 fn assign_any(ctx: &mut Ctx, binding: Binding, val: Val) -> Val {
-    let ctx_value = CtxValue { val, access: binding.extra.access, static1: false };
-    let Ok(last) = ctx.variables_mut().put_value(binding.name, ctx_value) else {
+    let Ok(last) = ctx.variables_mut().put_value(binding.name, binding.extra.access, val) else {
         return Val::default();
     };
     last.unwrap_or_default()

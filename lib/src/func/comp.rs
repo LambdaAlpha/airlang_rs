@@ -54,7 +54,7 @@ impl Composite {
     pub(crate) fn put_input(
         inner: &mut Ctx, input_name: Symbol, input: Val,
     ) -> Result<(), CtxError> {
-        let _ = inner.variables_mut().put_value(input_name, CtxValue::new(input))?;
+        let _ = inner.variables_mut().put_value(input_name, VarAccess::Assign, input)?;
         Ok(())
     }
 
@@ -66,7 +66,7 @@ impl Composite {
         inner: &mut Ctx, outer: &mut Ctx, name: Symbol, access: VarAccess,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
-        if !inner.variables().is_assignable(name.clone()) {
+        if !inner.variables().is_assignable(name.clone(), access) {
             return Val::default();
         }
         Self::keep_ctx(inner, outer, name.clone(), access);
@@ -79,7 +79,8 @@ impl Composite {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
-        let _ = inner.variables_mut().put_unchecked(name, CtxValue { val, access, static1: true });
+        let ctx_value = CtxValue { val, access, static1: true, free: false };
+        let _ = inner.variables_mut().put_unchecked(name, ctx_value);
     }
 
     fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {

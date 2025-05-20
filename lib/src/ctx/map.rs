@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::fmt::Formatter;
+use std::mem::take;
 
 use crate::CtxError;
 use crate::Map;
@@ -31,6 +32,8 @@ pub(crate) struct CtxValue {
     // - static binding either always exists or never exists
     // - the invariant of static binding is constant
     pub(crate) static1: bool,
+    // make val inaccessible
+    pub(crate) free: bool,
     pub(crate) val: Val,
 }
 
@@ -56,17 +59,20 @@ impl CtxMap {
     }
 
     pub(crate) fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError> {
-        let Some(tagged_val) = self.map.get(&name) else {
+        let Some(ctx_value) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
         };
-        Ok(&tagged_val.val)
+        if ctx_value.free {
+            return Err(CtxError::AccessDenied);
+        }
+        Ok(&ctx_value.val)
     }
 
     pub(crate) fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError> {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.access == VarAccess::Const {
+        if value.free || value.access == VarAccess::Const {
             return Err(CtxError::AccessDenied);
         }
         Ok(&mut value.val)
@@ -77,6 +83,9 @@ impl CtxMap {
             return Err(CtxError::NotFound);
         }
         let ctx_value = self.map.get_mut(&name).unwrap();
+        if ctx_value.free {
+            return Err(CtxError::AccessDenied);
+        }
         let is_const = ctx_value.access == VarAccess::Const;
         Ok(DynRef::new(&mut ctx_value.val, is_const))
     }
@@ -94,28 +103,28 @@ impl CtxMap {
         Ok(self.map.remove(&name).unwrap().val)
     }
 
-    // ignore static field of CtxValue
     pub(crate) fn put_value(
-        &mut self, name: Symbol, mut new: CtxValue,
+        &mut self, name: Symbol, access: VarAccess, val: Val,
     ) -> Result<Option<Val>, CtxError> {
-        debug_assert!(!new.static1, "should be non-static");
         let Some(old) = self.map.get(&name) else {
-            if self.reverse && new.access != VarAccess::Assign {
+            if self.reverse && access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
-            new.static1 = false;
-            return Ok(self.put_unchecked(name, new));
+            let ctx_value = CtxValue { access, val, static1: false, free: false };
+            return Ok(self.put_unchecked(name, ctx_value));
         };
+        if old.free {
+            return Err(CtxError::AccessDenied);
+        }
         if old.static1 {
-            if old.access != VarAccess::Assign || new.access != VarAccess::Assign {
+            if old.access != VarAccess::Assign || access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
-            new.static1 = true;
-            return Ok(self.put_unchecked(name, new));
+            let ctx_value = CtxValue { access, val, static1: true, free: false };
+            return Ok(self.put_unchecked(name, ctx_value));
         }
-        #[expect(clippy::collapsible_else_if)]
         if self.reverse {
-            if new.access != VarAccess::Assign {
+            if access != VarAccess::Assign {
                 return Err(CtxError::AccessDenied);
             }
         } else {
@@ -123,8 +132,8 @@ impl CtxMap {
                 return Err(CtxError::AccessDenied);
             }
         }
-        new.static1 = false;
-        Ok(self.put_unchecked(name, new))
+        let ctx_value = CtxValue { access, val, static1: false, free: false };
+        Ok(self.put_unchecked(name, ctx_value))
     }
 
     pub(crate) fn set_access(&mut self, name: Symbol, new: VarAccess) -> Result<(), CtxError> {
@@ -132,12 +141,8 @@ impl CtxMap {
             return Err(CtxError::NotFound);
         };
         if old.static1 {
-            if old.access != new {
-                return Err(CtxError::AccessDenied);
-            }
-            return Ok(());
+            return if old.access == new { Ok(()) } else { Err(CtxError::AccessDenied) };
         }
-        #[expect(clippy::collapsible_else_if)]
         if self.reverse {
             if new != VarAccess::Assign && old.access == VarAccess::Assign
                 || new == VarAccess::Const && old.access != VarAccess::Const
@@ -160,16 +165,41 @@ impl CtxMap {
         Some(value.access)
     }
 
+    pub(crate) fn is_accessible(&self, name: Symbol) -> Option<bool> {
+        let ctx_value = self.map.get(&name)?;
+        Some(!ctx_value.free)
+    }
+
+    pub(crate) fn set_inaccessible(&mut self, name: Symbol) -> Option<CtxValue> {
+        let ctx_value = self.map.get_mut(&name)?;
+        if ctx_value.free {
+            return None;
+        }
+        ctx_value.free = true;
+        let val = take(&mut ctx_value.val);
+        Some(CtxValue { val, ..*ctx_value })
+    }
+
+    pub(crate) fn set_accessible(&mut self, name: Symbol, val: Val) -> Option<()> {
+        let ctx_value = self.map.get_mut(&name)?;
+        ctx_value.free = false;
+        ctx_value.val = val;
+        Some(())
+    }
+
     pub(crate) fn is_static(&self, name: Symbol) -> Option<bool> {
         let value = self.map.get(&name)?;
         Some(value.static1)
     }
 
-    pub(crate) fn is_assignable(&self, name: Symbol) -> bool {
-        let Some(access) = self.get_access(name) else {
+    pub(crate) fn is_assignable(&self, name: Symbol, new_access: VarAccess) -> bool {
+        let Some(old) = self.map.get(&name) else {
             return true;
         };
-        access == VarAccess::Assign
+        if old.free {
+            return false;
+        }
+        if self.reverse { new_access == VarAccess::Assign } else { old.access == VarAccess::Assign }
     }
 
     pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
@@ -183,16 +213,16 @@ impl CtxMap {
 
 #[expect(dead_code)]
 impl CtxValue {
-    pub(crate) fn new(val: Val) -> CtxValue {
-        CtxValue { access: VarAccess::Assign, static1: false, val }
+    pub(crate) fn new_assign(val: Val) -> CtxValue {
+        CtxValue { val, access: VarAccess::Assign, static1: false, free: false }
     }
 
-    pub(crate) fn new_final(val: Val) -> CtxValue {
-        CtxValue { access: VarAccess::Mut, static1: false, val }
+    pub(crate) fn new_mut(val: Val) -> CtxValue {
+        CtxValue { val, access: VarAccess::Mut, static1: false, free: false }
     }
 
     pub(crate) fn new_const(val: Val) -> CtxValue {
-        CtxValue { access: VarAccess::Const, static1: false, val }
+        CtxValue { val, access: VarAccess::Const, static1: false, free: false }
     }
 }
 

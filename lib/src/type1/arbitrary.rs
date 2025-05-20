@@ -261,6 +261,7 @@ impl Arbitrary for CtxValue {
             val: Val::any(rng, depth),
             access: VarAccess::any(rng, depth),
             static1: rng.random(),
+            free: false,
         }
     }
 }

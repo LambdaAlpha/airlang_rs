@@ -39,7 +39,7 @@ unit_bindings = "warn"
 [workspace.lints.clippy]
 
 # lint groups
-perf = "warn"
+perf = { level = "warn", priority = -1 }
 
 # buggy
 todo = "warn"
@@ -102,6 +102,7 @@ explicit_into_iter_loop = "warn"
 assertions_on_result_states = "warn"
 as_underscore = "warn"
 as_pointer_underscore = "warn"
+collapsible_else_if = "allow"
 
 # perf
 redundant_clone = "warn"

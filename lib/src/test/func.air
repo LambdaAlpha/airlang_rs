@@ -593,6 +593,27 @@ do [
 -----
 [1, 3, 6]
 =====
+cell mutable var access const
+-----
+do [
+    a = 1,
+    (f . constant) = function ; {
+        code : (.c : ._) : do ; [
+            .b = .b + .c | ..a,
+            .c | ..a = ..a + 1,
+            .b,
+        ],
+        context_access : mutable,
+        cell : true,
+        context : context ; {variables : {
+            b : 0,
+        }},
+    },
+    [.f ., .f ., .f .]
+]
+-----
+[1, 2, 3]
+=====
 const const
 -----
 do [

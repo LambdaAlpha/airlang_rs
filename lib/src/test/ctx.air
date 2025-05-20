@@ -338,6 +338,43 @@ do [(a . mutable) = any ; ., a set_variable_access constant, variable_access a]
 -----
 constant
 =====
+is_variable_accessible true
+-----
+is_variable_accessible not
+-----
+true
+=====
+is_variable_accessible false
+-----
+do [
+    f = function ; {
+        cell : true,
+        context_access : mutable,
+        code : (.ctx : .i) : .ctx | is_variable_accessible ; .i
+    },
+    .f .f
+]
+-----
+false
+=====
+is_variable_accessible false multiple
+-----
+do [
+    f = function ; {
+        cell : true,
+        context_access : mutable,
+        code : (.ctx : ._) : .ctx | ...g ; .
+    },
+    g = function ; {
+        cell : true,
+        context_access : mutable,
+        code : (.ctx : ._) : .ctx | (is_variable_accessible ; ..f) or (is_variable_accessible ; ..g)
+    },
+    .f .
+]
+-----
+false
+=====
 is_null true
 -----
 is_null a
@@ -546,6 +583,12 @@ represent else
 context.represent ; context ; {variables : {(a . mutable) : 1}}
 -----
 {variables : {(a . mutable) : 1}}
+=====
+represent binding map
+-----
+context.represent ; context ; {variables : {(a . {static, access : constant}) : 1}}
+-----
+{variables : {(a . {static, access : constant}) : 1}}
 =====
 represent non-recursive
 -----

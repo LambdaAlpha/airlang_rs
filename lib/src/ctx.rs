@@ -68,8 +68,7 @@ impl Ctx {
     pub fn put(
         &mut self, name: Symbol, access: VarAccess, val: Val,
     ) -> Result<Option<Val>, CtxError> {
-        let ctx_value = CtxValue { access, static1: false, val };
-        self.variables.put_value(name, ctx_value)
+        self.variables.put_value(name, access, val)
     }
 }
 
