@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::mem::take;
@@ -79,10 +80,9 @@ impl CtxMap {
     }
 
     pub(crate) fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<Val>, CtxError> {
-        if self.map.get(&name).is_none() {
+        let Some(ctx_value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
-        }
-        let ctx_value = self.map.get_mut(&name).unwrap();
+        };
         if ctx_value.free {
             return Err(CtxError::AccessDenied);
         }
@@ -91,49 +91,54 @@ impl CtxMap {
     }
 
     pub(crate) fn remove(&mut self, name: Symbol) -> Result<Val, CtxError> {
-        let Some(value) = self.map.get(&name) else {
+        let Entry::Occupied(entry) = self.map.entry(name) else {
             return Err(CtxError::NotFound);
         };
-        if value.static1 {
+        if entry.get().static1 {
             return Err(CtxError::AccessDenied);
         }
-        if !self.reverse && value.access != VarAccess::Assign {
+        if !self.reverse && entry.get().access != VarAccess::Assign {
             return Err(CtxError::AccessDenied);
         }
-        Ok(self.map.remove(&name).unwrap().val)
+        Ok(entry.remove().val)
     }
 
     pub(crate) fn put_value(
         &mut self, name: Symbol, access: VarAccess, val: Val,
     ) -> Result<Option<Val>, CtxError> {
-        let Some(old) = self.map.get(&name) else {
-            if self.reverse && access != VarAccess::Assign {
-                return Err(CtxError::AccessDenied);
+        match self.map.entry(name) {
+            Entry::Occupied(mut entry) => {
+                if entry.get().free {
+                    return Err(CtxError::AccessDenied);
+                }
+                if entry.get().static1 {
+                    if entry.get().access != VarAccess::Assign || access != VarAccess::Assign {
+                        return Err(CtxError::AccessDenied);
+                    }
+                    let ctx_value = CtxValue { access, val, static1: true, free: false };
+                    return Ok(Some(entry.insert(ctx_value).val));
+                }
+                if self.reverse {
+                    if access != VarAccess::Assign {
+                        return Err(CtxError::AccessDenied);
+                    }
+                } else {
+                    if entry.get().access != VarAccess::Assign {
+                        return Err(CtxError::AccessDenied);
+                    }
+                }
+                let ctx_value = CtxValue { access, val, static1: false, free: false };
+                Ok(Some(entry.insert(ctx_value).val))
             }
-            let ctx_value = CtxValue { access, val, static1: false, free: false };
-            return Ok(self.put_unchecked(name, ctx_value));
-        };
-        if old.free {
-            return Err(CtxError::AccessDenied);
+            Entry::Vacant(entry) => {
+                if self.reverse && access != VarAccess::Assign {
+                    return Err(CtxError::AccessDenied);
+                }
+                let ctx_value = CtxValue { access, val, static1: false, free: false };
+                entry.insert(ctx_value);
+                Ok(None)
+            }
         }
-        if old.static1 {
-            if old.access != VarAccess::Assign || access != VarAccess::Assign {
-                return Err(CtxError::AccessDenied);
-            }
-            let ctx_value = CtxValue { access, val, static1: true, free: false };
-            return Ok(self.put_unchecked(name, ctx_value));
-        }
-        if self.reverse {
-            if access != VarAccess::Assign {
-                return Err(CtxError::AccessDenied);
-            }
-        } else {
-            if old.access != VarAccess::Assign {
-                return Err(CtxError::AccessDenied);
-            }
-        }
-        let ctx_value = CtxValue { access, val, static1: false, free: false };
-        Ok(self.put_unchecked(name, ctx_value))
     }
 
     pub(crate) fn set_access(&mut self, name: Symbol, new: VarAccess) -> Result<(), CtxError> {

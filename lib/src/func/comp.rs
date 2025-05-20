@@ -84,7 +84,9 @@ impl Composite {
     }
 
     fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {
-        let Some(CtxValue { val: Val::Ctx(outer_val), .. }) = inner.remove_unchecked(&name) else {
+        let Some(CtxValue { val: Val::Ctx(outer_val), .. }) =
+            inner.variables_mut().remove_unchecked(&name)
+        else {
             unreachable!("restore_ctx ctx invariant is broken!!!");
         };
         let outer_val = Ctx::from(outer_val);

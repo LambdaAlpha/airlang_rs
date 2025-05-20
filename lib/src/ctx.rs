@@ -5,8 +5,6 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use std::ops::BitAnd;
 
-use map::CtxValue;
-
 use crate::Map;
 use crate::Val;
 use crate::VarAccess;
@@ -43,10 +41,6 @@ impl Ctx {
 
     pub(crate) fn destruct(self) -> PubCtx {
         PubCtx { variables: self.variables }
-    }
-
-    pub(crate) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
-        self.variables.remove_unchecked(name)
     }
 
     pub(crate) fn variables(&self) -> &CtxMap {
