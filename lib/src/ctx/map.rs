@@ -12,30 +12,25 @@ use crate::types::ref1::DynRef;
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub(crate) struct CtxMap {
     map: Map<Symbol, CtxValue>,
-    // the invariants of normal map are hold in the future
-    // the invariants of reverse map are hold in the past
+    // `const` values in `forward` map are constant in the future
+    // `const` values in `reverse` map are constant in the past
     reverse: bool,
 }
 
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum VarAccess {
-    #[default]
-    Assign,
-    Mut,
-    Const,
+#[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub(crate) struct CtxGuard {
+    pub(crate) const1: bool,
+    // `static` key-value binding is constant in the past and in the future
+    // `static` `const` value is constant in the past and in the future
+    pub(crate) static1: bool,
+    // lock access to the value for a period of time in the future
+    pub(crate) lock: bool,
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub(crate) struct CtxValue {
-    pub(crate) access: VarAccess,
-    // the invariant of static binding is hold both in the past and in the future
-    // corollaries
-    // - static binding either always exists or never exists
-    // - the invariant of static binding is constant
-    pub(crate) static1: bool,
-    // make val inaccessible
-    pub(crate) free: bool,
     pub(crate) val: Val,
+    pub(crate) guard: CtxGuard,
 }
 
 impl CtxMap {
@@ -60,151 +55,138 @@ impl CtxMap {
     }
 
     pub(crate) fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError> {
-        let Some(ctx_value) = self.map.get(&name) else {
+        let Some(value) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
         };
-        if ctx_value.free {
+        if value.guard.lock {
             return Err(CtxError::AccessDenied);
         }
-        Ok(&ctx_value.val)
+        Ok(&value.val)
     }
 
     pub(crate) fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError> {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.free || value.access == VarAccess::Const {
+        if value.guard.lock || value.guard.const1 {
             return Err(CtxError::AccessDenied);
         }
         Ok(&mut value.val)
     }
 
     pub(crate) fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<Val>, CtxError> {
-        let Some(ctx_value) = self.map.get_mut(&name) else {
+        let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if ctx_value.free {
+        if value.guard.lock {
             return Err(CtxError::AccessDenied);
         }
-        let is_const = ctx_value.access == VarAccess::Const;
-        Ok(DynRef::new(&mut ctx_value.val, is_const))
+        Ok(DynRef::new(&mut value.val, value.guard.const1))
     }
 
     pub(crate) fn remove(&mut self, name: Symbol) -> Result<Val, CtxError> {
         let Entry::Occupied(entry) = self.map.entry(name) else {
             return Err(CtxError::NotFound);
         };
-        if entry.get().static1 {
+        if entry.get().guard.lock || entry.get().guard.static1 {
             return Err(CtxError::AccessDenied);
         }
-        if !self.reverse && entry.get().access != VarAccess::Assign {
+        if !self.reverse && entry.get().guard.const1 {
             return Err(CtxError::AccessDenied);
         }
         Ok(entry.remove().val)
     }
 
     pub(crate) fn put_value(
-        &mut self, name: Symbol, access: VarAccess, val: Val,
+        &mut self, name: Symbol, val: Val, const1: bool,
     ) -> Result<Option<Val>, CtxError> {
         match self.map.entry(name) {
             Entry::Occupied(mut entry) => {
-                if entry.get().free {
+                if entry.get().guard.lock || entry.get().guard.static1 {
                     return Err(CtxError::AccessDenied);
                 }
-                if entry.get().static1 {
-                    if entry.get().access != VarAccess::Assign || access != VarAccess::Assign {
-                        return Err(CtxError::AccessDenied);
-                    }
-                    let ctx_value = CtxValue { access, val, static1: true, free: false };
-                    return Ok(Some(entry.insert(ctx_value).val));
-                }
                 if self.reverse {
-                    if access != VarAccess::Assign {
+                    if const1 {
                         return Err(CtxError::AccessDenied);
                     }
                 } else {
-                    if entry.get().access != VarAccess::Assign {
+                    if entry.get().guard.const1 {
                         return Err(CtxError::AccessDenied);
                     }
                 }
-                let ctx_value = CtxValue { access, val, static1: false, free: false };
-                Ok(Some(entry.insert(ctx_value).val))
+                let guard = CtxGuard { const1, static1: false, lock: false };
+                Ok(Some(entry.insert(CtxValue::new(val, guard)).val))
             }
             Entry::Vacant(entry) => {
-                if self.reverse && access != VarAccess::Assign {
+                if self.reverse && const1 {
                     return Err(CtxError::AccessDenied);
                 }
-                let ctx_value = CtxValue { access, val, static1: false, free: false };
-                entry.insert(ctx_value);
+                let guard = CtxGuard { const1, static1: false, lock: false };
+                entry.insert(CtxValue::new(val, guard));
                 Ok(None)
             }
         }
     }
 
-    pub(crate) fn set_access(&mut self, name: Symbol, new: VarAccess) -> Result<(), CtxError> {
+    pub(crate) fn set_const(&mut self, name: Symbol, const1: bool) -> Result<(), CtxError> {
         let Some(old) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if old.static1 {
-            return if old.access == new { Ok(()) } else { Err(CtxError::AccessDenied) };
+        if old.guard.static1 {
+            return if old.guard.const1 == const1 { Ok(()) } else { Err(CtxError::AccessDenied) };
         }
         if self.reverse {
-            if new != VarAccess::Assign && old.access == VarAccess::Assign
-                || new == VarAccess::Const && old.access != VarAccess::Const
-            {
+            if const1 && !old.guard.const1 {
                 return Err(CtxError::AccessDenied);
             }
         } else {
-            if new == VarAccess::Assign && old.access != VarAccess::Assign
-                || new != VarAccess::Const && old.access == VarAccess::Const
-            {
+            if !const1 && old.guard.const1 {
                 return Err(CtxError::AccessDenied);
             }
         }
-        old.access = new;
+        old.guard.const1 = const1;
         Ok(())
     }
 
-    pub(crate) fn get_access(&self, name: Symbol) -> Option<VarAccess> {
+    pub(crate) fn is_const(&self, name: Symbol) -> Option<bool> {
         let value = self.map.get(&name)?;
-        Some(value.access)
+        Some(value.guard.const1)
     }
 
-    pub(crate) fn is_accessible(&self, name: Symbol) -> Option<bool> {
-        let ctx_value = self.map.get(&name)?;
-        Some(!ctx_value.free)
+    pub(crate) fn is_locked(&self, name: Symbol) -> Option<bool> {
+        let value = self.map.get(&name)?;
+        Some(value.guard.lock)
     }
 
-    pub(crate) fn set_inaccessible(&mut self, name: Symbol) -> Option<CtxValue> {
-        let ctx_value = self.map.get_mut(&name)?;
-        if ctx_value.free {
+    pub(crate) fn lock(&mut self, name: Symbol) -> Option<CtxValue> {
+        let value = self.map.get_mut(&name)?;
+        if value.guard.lock {
             return None;
         }
-        ctx_value.free = true;
-        let val = take(&mut ctx_value.val);
-        Some(CtxValue { val, ..*ctx_value })
+        value.guard.lock = true;
+        Some(CtxValue::new(take(&mut value.val), value.guard))
     }
 
-    pub(crate) fn set_accessible(&mut self, name: Symbol, val: Val) -> Option<()> {
-        let ctx_value = self.map.get_mut(&name)?;
-        ctx_value.free = false;
-        ctx_value.val = val;
+    pub(crate) fn unlock(&mut self, name: Symbol, val: Val) -> Option<()> {
+        let value = self.map.get_mut(&name)?;
+        value.guard.lock = false;
+        value.val = val;
         Some(())
     }
 
     pub(crate) fn is_static(&self, name: Symbol) -> Option<bool> {
         let value = self.map.get(&name)?;
-        Some(value.static1)
+        Some(value.guard.static1)
     }
 
-    pub(crate) fn is_assignable(&self, name: Symbol, new_access: VarAccess) -> bool {
+    pub(crate) fn is_assignable(&self, name: Symbol, new_const: bool) -> bool {
         let Some(old) = self.map.get(&name) else {
             return true;
         };
-        if old.free {
+        if old.guard.lock || old.guard.static1 {
             return false;
         }
-        if self.reverse { new_access == VarAccess::Assign } else { old.access == VarAccess::Assign }
+        if self.reverse { !new_const } else { !old.guard.const1 }
     }
 
     pub(crate) fn put_unchecked(&mut self, name: Symbol, val: CtxValue) -> Option<Val> {
@@ -216,23 +198,25 @@ impl CtxMap {
     }
 }
 
-#[expect(dead_code)]
 impl CtxValue {
-    pub(crate) fn new_assign(val: Val) -> CtxValue {
-        CtxValue { val, access: VarAccess::Assign, static1: false, free: false }
-    }
-
-    pub(crate) fn new_mut(val: Val) -> CtxValue {
-        CtxValue { val, access: VarAccess::Mut, static1: false, free: false }
-    }
-
-    pub(crate) fn new_const(val: Val) -> CtxValue {
-        CtxValue { val, access: VarAccess::Const, static1: false, free: false }
+    pub(crate) fn new(val: Val, guard: CtxGuard) -> Self {
+        Self { val, guard }
     }
 }
 
 impl Debug for CtxValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("").field(&self.access).field(&self.val).finish()
+        let mut tuple = f.debug_tuple("");
+        tuple.field(&self.val);
+        if self.guard.static1 {
+            tuple.field(&"static");
+        }
+        if self.guard.const1 {
+            tuple.field(&"const");
+        }
+        if self.guard.lock {
+            tuple.field(&"lock");
+        }
+        tuple.finish()
     }
 }

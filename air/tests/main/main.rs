@@ -3,7 +3,6 @@ use std::error::Error;
 use airlang::AirCell;
 use airlang::Symbol;
 use airlang::Text;
-use airlang::VarAccess;
 use airlang::parse;
 
 const MAIN_DELIMITER: &str = "=====";
@@ -48,7 +47,7 @@ fn generate_air_with_main() -> Result<AirCell, Box<dyn Error>> {
     let mut air = AirCell::default();
     let main = air.interpret(src);
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
-    air.ctx_mut().put(main_name, VarAccess::Const, main)?;
+    air.ctx_mut().put(main_name, main, true)?;
     Ok(air)
 }
 

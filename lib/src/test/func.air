@@ -655,21 +655,6 @@ do [
 -----
 2
 =====
-mutable mutate fail
------
-do [
-    f = function ; {
-        code : (.c : .i) : .c | .i = 2,
-        forward_mode : id,
-        context_access : mutable,
-    },
-    (a . mutable) = 1,
-    f a,
-    a
-]
------
-1
-=====
 const mutate fail
 -----
 do [

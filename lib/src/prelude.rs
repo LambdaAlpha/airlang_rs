@@ -14,6 +14,7 @@ use crate::MutStaticImpl;
 use crate::MutStaticPrimFunc;
 use crate::MutStaticPrimFuncVal;
 use crate::ctx::Ctx;
+use crate::ctx::map::CtxGuard;
 use crate::ctx::map::CtxMap;
 use crate::ctx::map::CtxValue;
 use crate::extension::AIR_EXT;
@@ -142,7 +143,8 @@ pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {
 
 impl PreludeCtx for Map<Symbol, CtxValue> {
     fn put(&mut self, name: Symbol, val: Val) {
-        let v = self.insert(name, CtxValue::new_assign(val));
+        let guard = CtxGuard { const1: false, static1: false, lock: false };
+        let v = self.insert(name, CtxValue::new(val, guard));
         assert!(v.is_none(), "names of preludes should be unique");
     }
 }

@@ -10,19 +10,15 @@ use crate::Pair;
 use crate::Symbol;
 use crate::SymbolMode;
 use crate::Val;
+use crate::ctx::map::CtxGuard;
 use crate::ctx::map::CtxMap;
 use crate::ctx::map::CtxValue;
-use crate::ctx::map::VarAccess;
 use crate::utils::val::map_remove;
 use crate::utils::val::symbol;
 
-const ACCESS: &str = "access";
+const CONST: &str = "constant";
 const STATIC: &str = "static";
-const INACCESSIBLE: &str = "inaccessible";
-
-pub(crate) const ASSIGNABLE: &str = "assignable";
-pub(crate) const MUTABLE: &str = "mutable";
-pub(crate) const CONST: &str = "constant";
+const LOCK: &str = "lock";
 
 pub(crate) const VARIABLES: &str = "variables";
 pub(crate) const REVERSE: &str = "reverse";
@@ -64,12 +60,7 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
     map.into_iter()
         .map(|(binding, val)| {
             let binding = parse_binding(binding)?;
-            let ctx_value = CtxValue {
-                val,
-                access: binding.extra.access,
-                static1: binding.extra.static1,
-                free: false,
-            };
+            let ctx_value = CtxValue::new(val, binding.guard);
             Some((binding.name, ctx_value))
         })
         .collect()
@@ -77,7 +68,7 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
 
 fn parse_binding(val: Val) -> Option<Binding> {
     match val {
-        Val::Symbol(name) => Some(Binding { name, extra: Extra::default() }),
+        Val::Symbol(name) => Some(Binding { name, guard: CtxGuard::default() }),
         Val::Call(call) => {
             if call.reverse || !call.func.is_unit() {
                 return None;
@@ -90,59 +81,39 @@ fn parse_binding(val: Val) -> Option<Binding> {
             let Val::Symbol(name) = pair.first else {
                 return None;
             };
-            let extra = parse_extra(pair.second, Extra::default())?;
-            Some(Binding { name, extra })
+            let guard = parse_guard(pair.second, CtxGuard::default())?;
+            Some(Binding { name, guard })
         }
         _ => None,
     }
 }
 
-pub(crate) fn parse_extra(extra: Val, mut default: Extra) -> Option<Extra> {
-    match extra {
+pub(crate) fn parse_guard(guard: Val, mut default: CtxGuard) -> Option<CtxGuard> {
+    match guard {
         Val::Symbol(s) => match &*s {
-            ASSIGNABLE => default.access = VarAccess::Assign,
-            MUTABLE => default.access = VarAccess::Mut,
-            CONST => default.access = VarAccess::Const,
+            CONST => default.const1 = true,
             STATIC => default.static1 = true,
-            INACCESSIBLE => default.free = true,
+            LOCK => default.lock = true,
             _ => return None,
         },
         Val::Map(mut map) => {
-            match map_remove(&mut map, ACCESS) {
-                Val::Symbol(access) => {
-                    default.access = parse_var_access(&access)?;
-                }
-                Val::Unit(_) => {}
-                _ => return None,
-            }
-            let static1 = match map.remove(&symbol(STATIC)) {
-                Some(Val::Unit(_)) => true,
-                Some(Val::Bit(bit)) => bit.bool(),
-                None => false,
-                _ => return None,
-            };
-            default.static1 = static1;
-            let inaccessible = match map.remove(&symbol(INACCESSIBLE)) {
-                Some(Val::Unit(_)) => true,
-                Some(Val::Bit(bit)) => bit.bool(),
-                None => false,
-                _ => return None,
-            };
-            default.free = inaccessible;
+            default.const1 = parse_bool(&mut map, CONST)?;
+            default.static1 = parse_bool(&mut map, STATIC)?;
+            default.lock = parse_bool(&mut map, LOCK)?;
         }
         _ => return None,
     }
     Some(default)
 }
 
-pub(crate) fn parse_var_access(access: &str) -> Option<VarAccess> {
-    let access = match access {
-        ASSIGNABLE => VarAccess::Assign,
-        MUTABLE => VarAccess::Mut,
-        CONST => VarAccess::Const,
+fn parse_bool(map: &mut Map<Val, Val>, key: &str) -> Option<bool> {
+    let b = match map.remove(&symbol(key)) {
+        Some(Val::Unit(_)) => true,
+        Some(Val::Bit(bit)) => bit.bool(),
+        None => false,
         _ => return None,
     };
-    Some(access)
+    Some(b)
 }
 
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
@@ -166,8 +137,7 @@ fn generate_variables(ctx_map: CtxMap) -> Option<Val> {
         .unwrap()
         .into_iter()
         .map(|(name, v)| {
-            let extra = Extra { access: v.access, static1: v.static1, free: v.free };
-            let k = generate_binding(Binding { name, extra });
+            let k = generate_binding(Binding { name, guard: v.guard });
             let v = v.val;
             (k, v)
         })
@@ -176,54 +146,38 @@ fn generate_variables(ctx_map: CtxMap) -> Option<Val> {
 }
 
 fn generate_binding(binding: Binding) -> Val {
-    if binding.extra == Extra::default() {
+    if binding.guard == CtxGuard::default() {
         return Val::Symbol(binding.name);
     }
-    let extra = generate_extra(binding.extra);
-    let pair = Pair::new(Val::Symbol(binding.name), extra);
+    let guard = generate_guard(binding.guard);
+    let pair = Pair::new(Val::Symbol(binding.name), guard);
     Val::Call(Call::new(false, Val::default(), Val::Pair(pair.into())).into())
 }
 
-fn generate_extra(extra: Extra) -> Val {
-    if !extra.static1 && !extra.free {
-        return Val::Symbol(generate_var_access(extra.access));
+fn generate_guard(guard: CtxGuard) -> Val {
+    if guard.const1 && !guard.static1 && !guard.lock {
+        return symbol(CONST);
     }
-    if extra.access == VarAccess::default() && !extra.free {
+    if guard.static1 && !guard.const1 && !guard.lock {
         return symbol(STATIC);
     }
-    if !extra.static1 && extra.access == VarAccess::default() {
-        return symbol(INACCESSIBLE);
+    if guard.lock && !guard.static1 && !guard.const1 {
+        return symbol(LOCK);
     }
     let mut map = Map::default();
-    if extra.static1 {
+    if guard.static1 {
         map.insert(symbol(STATIC), Val::default());
     }
-    if extra.access != VarAccess::default() {
-        map.insert(symbol(ACCESS), Val::Symbol(generate_var_access(extra.access)));
+    if guard.const1 {
+        map.insert(symbol(CONST), Val::default());
     }
-    if extra.free {
-        map.insert(symbol(INACCESSIBLE), Val::default());
+    if guard.lock {
+        map.insert(symbol(LOCK), Val::default());
     }
     Val::Map(map.into())
 }
 
-pub(crate) fn generate_var_access(access: VarAccess) -> Symbol {
-    let access = match access {
-        VarAccess::Assign => ASSIGNABLE,
-        VarAccess::Mut => MUTABLE,
-        VarAccess::Const => CONST,
-    };
-    Symbol::from_str(access)
-}
-
 pub(crate) struct Binding {
     pub(crate) name: Symbol,
-    pub(crate) extra: Extra,
-}
-
-#[derive(Default, Copy, Clone, PartialEq, Eq)]
-pub(crate) struct Extra {
-    pub(crate) access: VarAccess,
-    pub(crate) static1: bool,
-    pub(crate) free: bool,
+    pub(crate) guard: CtxGuard,
 }

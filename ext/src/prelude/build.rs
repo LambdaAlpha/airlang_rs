@@ -12,7 +12,6 @@ use airlang::PreludeCtx;
 use airlang::Symbol;
 use airlang::Text;
 use airlang::Val;
-use airlang::VarAccess;
 use airlang::parse;
 
 use crate::prelude::Named;
@@ -98,7 +97,7 @@ fn get_cur_url(ctx: ConstRef<Ctx>, key: Symbol) -> Option<String> {
 }
 
 fn set_cur_url(ctx: &mut Ctx, key: Symbol, new_url: String) -> bool {
-    ctx.put(key, VarAccess::Assign, Val::Text(Text::from(new_url).into())).is_ok()
+    ctx.put(key, Val::Text(Text::from(new_url).into()), false).is_ok()
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {

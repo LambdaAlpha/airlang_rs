@@ -30,9 +30,9 @@ use crate::bit::Bit;
 use crate::byte::Byte;
 use crate::change::Change;
 use crate::ctx::Ctx;
+use crate::ctx::map::CtxGuard;
 use crate::ctx::map::CtxMap;
 use crate::ctx::map::CtxValue;
-use crate::ctx::map::VarAccess;
 use crate::either::Either;
 use crate::extension::AIR_EXT;
 use crate::func::comp::Composite;
@@ -248,21 +248,15 @@ where
     }
 }
 
-impl Arbitrary for VarAccess {
+impl Arbitrary for CtxGuard {
     fn any(rng: &mut SmallRng, _depth: usize) -> Self {
-        const ACCESSES: [VarAccess; 3] = [VarAccess::Assign, VarAccess::Mut, VarAccess::Const];
-        *(ACCESSES.choose(rng).unwrap())
+        CtxGuard { const1: rng.random(), static1: rng.random(), lock: false }
     }
 }
 
 impl Arbitrary for CtxValue {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        CtxValue {
-            val: Val::any(rng, depth),
-            access: VarAccess::any(rng, depth),
-            static1: rng.random(),
-            free: false,
-        }
+        CtxValue { val: Val::any(rng, depth), guard: CtxGuard::any(rng, depth) }
     }
 }
 

@@ -3,6 +3,7 @@ use crate::ConstRef;
 use crate::ConstStaticFn;
 use crate::DynRef;
 use crate::FreeStaticFn;
+use crate::FreeStaticImpl;
 use crate::FuncMode;
 use crate::MutStaticFn;
 use crate::MutStaticImpl;
@@ -15,10 +16,8 @@ use crate::ctx::pattern::assign_pattern;
 use crate::ctx::pattern::match_pattern;
 use crate::ctx::pattern::parse_pattern;
 use crate::ctx::repr::generate_ctx;
-use crate::ctx::repr::generate_var_access;
 use crate::ctx::repr::parse_ctx;
 use crate::ctx::repr::parse_mode;
-use crate::ctx::repr::parse_var_access;
 use crate::either::Either;
 use crate::func::func_mode::DEFAULT_MODE;
 use crate::pair::Pair;
@@ -32,7 +31,6 @@ use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
-use crate::utils::val::symbol;
 use crate::val::Val;
 use crate::val::ctx::CtxVal;
 use crate::val::func::FuncVal;
@@ -42,14 +40,14 @@ pub(crate) struct CtxPrelude {
     pub(crate) read: Named<FuncVal>,
     pub(crate) move1: Named<FuncVal>,
     pub(crate) assign: Named<FuncVal>,
-    pub(crate) set_var_access: Named<FuncVal>,
-    pub(crate) var_access: Named<FuncVal>,
-    pub(crate) is_var_accessible: Named<FuncVal>,
+    pub(crate) is_const: Named<FuncVal>,
+    pub(crate) set_const: Named<FuncVal>,
+    pub(crate) is_locked: Named<FuncVal>,
     pub(crate) is_null: Named<FuncVal>,
     pub(crate) is_static: Named<FuncVal>,
     pub(crate) is_reverse: Named<FuncVal>,
     pub(crate) set_reverse: Named<FuncVal>,
-    pub(crate) ctx_access: Named<FuncVal>,
+    pub(crate) ctx_is_const: Named<FuncVal>,
     pub(crate) with_ctx: Named<FuncVal>,
     pub(crate) ctx_in_ctx_out: Named<FuncVal>,
     pub(crate) ctx_new: Named<FuncVal>,
@@ -64,14 +62,14 @@ impl Default for CtxPrelude {
             read: read(),
             move1: move1(),
             assign: assign(),
-            set_var_access: set_var_access(),
-            var_access: var_access(),
-            is_var_accessible: is_var_accessible(),
+            is_const: is_const(),
+            set_const: set_const(),
+            is_locked: is_locked(),
             is_null: is_null(),
             is_static: is_static(),
             is_reverse: is_reverse(),
             set_reverse: set_reverse(),
-            ctx_access: ctx_access(),
+            ctx_is_const: ctx_is_const(),
             with_ctx: with_ctx(),
             ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
@@ -87,14 +85,14 @@ impl Prelude for CtxPrelude {
         self.read.put(ctx);
         self.move1.put(ctx);
         self.assign.put(ctx);
-        self.set_var_access.put(ctx);
-        self.var_access.put(ctx);
-        self.is_var_accessible.put(ctx);
+        self.is_const.put(ctx);
+        self.set_const.put(ctx);
+        self.is_locked.put(ctx);
         self.is_null.put(ctx);
         self.is_static.put(ctx);
         self.is_reverse.put(ctx);
         self.set_reverse.put(ctx);
-        self.ctx_access.put(ctx);
+        self.ctx_is_const.put(ctx);
         self.with_ctx.put(ctx);
         self.ctx_in_ctx_out.put(ctx);
         self.ctx_new.put(ctx);
@@ -161,19 +159,36 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
     if match_pattern(&pattern, &val) { assign_pattern(ctx, pattern, val) } else { Val::default() }
 }
 
-fn set_var_access() -> Named<FuncVal> {
-    let id = "set_variable_access";
-    let f = mut_impl(fn_set_var_access);
-    let forward = FuncMode::pair_mode(
-        FuncMode::symbol_mode(SymbolMode::Literal),
-        FuncMode::symbol_mode(SymbolMode::Literal),
-    );
+fn is_const() -> Named<FuncVal> {
+    let id = "is_constant";
+    let f = const_impl(fn_is_const);
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
+    named_const_fn(id, f, mode)
+}
+
+fn fn_is_const(ctx: ConstRef<Ctx>, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    let Some(const1) = ctx.variables().is_const(s) else {
+        return Val::default();
+    };
+    Val::Bit(Bit::new(const1))
+}
+
+fn set_const() -> Named<FuncVal> {
+    let id = "set_constant";
+    let f = mut_impl(fn_set_constant);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_set_var_access(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_set_constant(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -181,52 +196,30 @@ fn fn_set_var_access(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
-    let Val::Symbol(access) = pair.second else {
+    let Val::Bit(const1) = pair.second else {
         return Val::default();
     };
-    let Some(access) = parse_var_access(&access) else {
-        return Val::default();
-    };
-    let _ = ctx.variables_mut().set_access(s, access);
+    let _ = ctx.variables_mut().set_const(s, const1.bool());
     Val::default()
 }
 
-fn var_access() -> Named<FuncVal> {
-    let id = "variable_access";
-    let f = const_impl(fn_var_access);
+fn is_locked() -> Named<FuncVal> {
+    let id = "is_locked";
+    let f = const_impl(fn_is_locked);
     let forward = FuncMode::symbol_mode(SymbolMode::Literal);
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_var_access(ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_is_locked(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    let Some(access) = ctx.variables().get_access(s) else {
+    let Some(locked) = ctx.variables().is_locked(s) else {
         return Val::default();
     };
-    Val::Symbol(generate_var_access(access))
-}
-
-fn is_var_accessible() -> Named<FuncVal> {
-    let id = "is_variable_accessible";
-    let f = const_impl(fn_is_var_accessible);
-    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
-}
-
-fn fn_is_var_accessible(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    let Some(accessible) = ctx.variables().is_accessible(s) else {
-        return Val::default();
-    };
-    Val::Bit(Bit::new(accessible))
+    Val::Bit(Bit::new(locked))
 }
 
 fn is_null() -> Named<FuncVal> {
@@ -300,29 +293,21 @@ fn fn_set_reverse(input: Val) -> Val {
     Val::Ctx(ctx)
 }
 
-fn ctx_access() -> Named<FuncVal> {
-    let id = "access";
-    let f = MutStaticImpl::new(fn_access_free, fn_access_const, fn_access_mut);
+fn ctx_is_const() -> Named<FuncVal> {
+    let id = "context.is_constant";
+    let f = MutStaticImpl::new(FreeStaticImpl::default, fn_access_const, fn_access_mut);
     let forward = FuncMode::default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-const ACCESS_FREE: &str = "free";
-const ACCESS_CONSTANT: &str = "constant";
-const ACCESS_MUTABLE: &str = "mutable";
-
-fn fn_access_free(_input: Val) -> Val {
-    symbol(ACCESS_FREE)
-}
-
 fn fn_access_const(_ctx: ConstRef<Ctx>, _input: Val) -> Val {
-    symbol(ACCESS_CONSTANT)
+    Val::Bit(Bit::true1())
 }
 
 fn fn_access_mut(_ctx: &mut Ctx, _input: Val) -> Val {
-    symbol(ACCESS_MUTABLE)
+    Val::Bit(Bit::false1())
 }
 
 fn with_ctx() -> Named<FuncVal> {

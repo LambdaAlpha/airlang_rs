@@ -7,7 +7,6 @@ use std::ops::BitAnd;
 
 use crate::Map;
 use crate::Val;
-use crate::VarAccess;
 use crate::ctx::map::CtxMap;
 use crate::symbol::Symbol;
 
@@ -59,10 +58,8 @@ impl Ctx {
         self.variables.get_ref_mut(name)
     }
 
-    pub fn put(
-        &mut self, name: Symbol, access: VarAccess, val: Val,
-    ) -> Result<Option<Val>, CtxError> {
-        self.variables.put_value(name, access, val)
+    pub fn put(&mut self, name: Symbol, val: Val, const1: bool) -> Result<Option<Val>, CtxError> {
+        self.variables.put_value(name, val, const1)
     }
 }
 

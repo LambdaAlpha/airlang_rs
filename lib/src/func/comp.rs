@@ -8,8 +8,8 @@ use crate::MutStaticFn;
 use crate::Pair;
 use crate::Symbol;
 use crate::Val;
+use crate::ctx::map::CtxGuard;
 use crate::ctx::map::CtxValue;
-use crate::ctx::map::VarAccess;
 use crate::func::func_mode::DEFAULT_MODE;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -37,7 +37,7 @@ impl Composite {
             return Val::default();
         }
         let eval = |inner: &mut Ctx| Self::transform(inner, body);
-        Self::with_ctx(inner, outer.unwrap(), ctx_name, VarAccess::Const, eval)
+        Self::with_ctx(inner, outer.unwrap(), ctx_name, true, eval)
     }
 
     pub fn mut_transform(
@@ -48,13 +48,13 @@ impl Composite {
             return Val::default();
         }
         let eval = |inner: &mut Ctx| Self::transform(inner, body);
-        Self::with_ctx(inner, outer, ctx_name, VarAccess::Mut, eval)
+        Self::with_ctx(inner, outer, ctx_name, false, eval)
     }
 
     pub(crate) fn put_input(
         inner: &mut Ctx, input_name: Symbol, input: Val,
     ) -> Result<(), CtxError> {
-        let _ = inner.variables_mut().put_value(input_name, VarAccess::Assign, input)?;
+        let _ = inner.variables_mut().put_value(input_name, input, false)?;
         Ok(())
     }
 
@@ -63,24 +63,24 @@ impl Composite {
     }
 
     pub(crate) fn with_ctx(
-        inner: &mut Ctx, outer: &mut Ctx, name: Symbol, access: VarAccess,
+        inner: &mut Ctx, outer: &mut Ctx, name: Symbol, const1: bool,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
-        if !inner.variables().is_assignable(name.clone(), access) {
+        if !inner.variables().is_assignable(name.clone(), const1) {
             return Val::default();
         }
-        Self::keep_ctx(inner, outer, name.clone(), access);
+        Self::keep_ctx(inner, outer, name.clone(), const1);
         let output = f(inner);
         Self::restore_ctx(inner, outer, name);
         output
     }
 
-    fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, access: VarAccess) {
+    fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, const1: bool) {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
-        let ctx_value = CtxValue { val, access, static1: true, free: false };
-        let _ = inner.variables_mut().put_unchecked(name, ctx_value);
+        let guard = CtxGuard { const1, static1: true, lock: false };
+        let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(val, guard));
     }
 
     fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {

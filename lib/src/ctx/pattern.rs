@@ -10,9 +10,9 @@ use crate::PairVal;
 use crate::Symbol;
 use crate::Unit;
 use crate::Val;
+use crate::ctx::map::CtxGuard;
 use crate::ctx::repr::Binding;
-use crate::ctx::repr::Extra;
-use crate::ctx::repr::parse_extra;
+use crate::ctx::repr::parse_guard;
 use crate::mode::symbol::LITERAL_CHAR;
 use crate::mode::symbol::REF_CHAR;
 use crate::syntax::CALL_FORWARD;
@@ -30,7 +30,7 @@ pub(crate) enum Pattern {
 
 #[derive(Default, Copy, Clone)]
 pub(crate) struct PatternCtx {
-    pub(crate) extra: Extra,
+    pub(crate) guard: CtxGuard,
 }
 
 pub(crate) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option<Pattern> {
@@ -49,9 +49,9 @@ fn parse_symbol(ctx: PatternCtx, s: Symbol) -> Option<Pattern> {
         Some(LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),
         Some(REF_CHAR) => {
             let name = Symbol::from_str(&s[1 ..]);
-            Pattern::Any(Binding { name, extra: ctx.extra })
+            Pattern::Any(Binding { name, guard: ctx.guard })
         }
-        _ => Pattern::Any(Binding { name: s, extra: ctx.extra }),
+        _ => Pattern::Any(Binding { name: s, guard: ctx.guard }),
     };
     Some(pattern)
 }
@@ -69,7 +69,7 @@ fn parse_call(ctx: PatternCtx, call: CallVal) -> Option<Pattern> {
         return parse_call1(ctx, call.reverse, call.func, call.input);
     }
     match call.func {
-        Val::Unit(_) => parse_with_extra(ctx, call.input),
+        Val::Unit(_) => parse_with_guard(ctx, call.input),
         Val::Symbol(symbol) => match &*symbol {
             CALL_FORWARD | CALL_REVERSE => {
                 let Val::Pair(pair) = call.input else {
@@ -109,13 +109,13 @@ fn parse_map(ctx: PatternCtx, map: MapVal) -> Option<Pattern> {
     Some(Pattern::Map(map))
 }
 
-fn parse_with_extra(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
+fn parse_with_guard(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
     let Val::Pair(pair) = val else {
         return None;
     };
     let pair = Pair::from(pair);
-    ctx.extra = parse_extra(pair.second, ctx.extra)?;
-    if ctx.extra.static1 {
+    ctx.guard = parse_guard(pair.second, ctx.guard)?;
+    if ctx.guard.static1 {
         return None;
     }
     parse_pattern(ctx, pair.first)
@@ -191,7 +191,7 @@ pub(crate) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: Val) -> Val {
 }
 
 fn assign_any(ctx: &mut Ctx, binding: Binding, val: Val) -> Val {
-    let Ok(last) = ctx.variables_mut().put_value(binding.name, binding.extra.access, val) else {
+    let Ok(last) = ctx.variables_mut().put_value(binding.name, val, binding.guard.const1) else {
         return Val::default();
     };
     last.unwrap_or_default()
