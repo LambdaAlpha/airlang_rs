@@ -1,4 +1,3 @@
-use crate::Bit;
 use crate::Call;
 use crate::CodeMode;
 use crate::Ctx;
@@ -13,15 +12,15 @@ use crate::Val;
 use crate::ctx::map::CtxGuard;
 use crate::ctx::map::CtxMap;
 use crate::ctx::map::CtxValue;
+use crate::ctx::map::OptCtxGuard;
 use crate::utils::val::map_remove;
 use crate::utils::val::symbol;
 
 const CONST: &str = "constant";
 const STATIC: &str = "static";
-const LOCK: &str = "lock";
+const REVERSE: &str = "reverse";
 
 pub(crate) const VARIABLES: &str = "variables";
-pub(crate) const REVERSE: &str = "reverse";
 
 pub(crate) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
@@ -46,12 +45,7 @@ pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
         _ => return None,
     };
     let variables = parse_variables(variables)?;
-    let reverse = match map_remove(&mut map, REVERSE) {
-        Val::Unit(_) => false,
-        Val::Bit(b) => b.bool(),
-        _ => return None,
-    };
-    let variables = CtxMap::new(variables, reverse);
+    let variables = CtxMap::new(variables);
     let ctx = Ctx::new(variables);
     Some(ctx.into())
 }
@@ -60,15 +54,15 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
     map.into_iter()
         .map(|(binding, val)| {
             let binding = parse_binding(binding)?;
-            let ctx_value = CtxValue::new(val, binding.guard);
+            let ctx_value = CtxValue::new(val, binding.guard.unwrap_or_default());
             Some((binding.name, ctx_value))
         })
         .collect()
 }
 
-fn parse_binding(val: Val) -> Option<Binding> {
+fn parse_binding(val: Val) -> Option<OptBinding> {
     match val {
-        Val::Symbol(name) => Some(Binding { name, guard: CtxGuard::default() }),
+        Val::Symbol(name) => Some(OptBinding { name, guard: OptCtxGuard::default() }),
         Val::Call(call) => {
             if call.reverse || !call.func.is_unit() {
                 return None;
@@ -81,36 +75,36 @@ fn parse_binding(val: Val) -> Option<Binding> {
             let Val::Symbol(name) = pair.first else {
                 return None;
             };
-            let guard = parse_guard(pair.second, CtxGuard::default())?;
-            Some(Binding { name, guard })
+            let guard = parse_guard(pair.second, OptCtxGuard::default())?;
+            Some(OptBinding { name, guard })
         }
         _ => None,
     }
 }
 
-pub(crate) fn parse_guard(guard: Val, mut default: CtxGuard) -> Option<CtxGuard> {
+pub(crate) fn parse_guard(guard: Val, mut default: OptCtxGuard) -> Option<OptCtxGuard> {
     match guard {
         Val::Symbol(s) => match &*s {
-            CONST => default.const1 = true,
-            STATIC => default.static1 = true,
-            LOCK => default.lock = true,
+            CONST => default.const1 = Some(true),
+            STATIC => default.static1 = Some(true),
+            REVERSE => default.reverse = Some(true),
             _ => return None,
         },
         Val::Map(mut map) => {
             default.const1 = parse_bool(&mut map, CONST)?;
             default.static1 = parse_bool(&mut map, STATIC)?;
-            default.lock = parse_bool(&mut map, LOCK)?;
+            default.reverse = parse_bool(&mut map, REVERSE)?;
         }
         _ => return None,
     }
     Some(default)
 }
 
-fn parse_bool(map: &mut Map<Val, Val>, key: &str) -> Option<bool> {
+fn parse_bool(map: &mut Map<Val, Val>, key: &str) -> Option<Option<bool>> {
     let b = match map.remove(&symbol(key)) {
-        Some(Val::Unit(_)) => true,
-        Some(Val::Bit(bit)) => bit.bool(),
-        None => false,
+        Some(Val::Unit(_)) => Some(true),
+        Some(Val::Bit(bit)) => Some(bit.bool()),
+        None => None,
         _ => return None,
     };
     Some(b)
@@ -119,10 +113,6 @@ fn parse_bool(map: &mut Map<Val, Val>, key: &str) -> Option<bool> {
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     let ctx = Ctx::from(ctx).destruct();
     let mut map = Map::default();
-    let reverse = ctx.variables.is_reverse();
-    if reverse {
-        map.insert(symbol(REVERSE), Val::Bit(Bit::true1()));
-    }
     if let Some(variables) = generate_variables(ctx.variables) {
         map.insert(symbol(VARIABLES), variables);
     }
@@ -155,24 +145,24 @@ fn generate_binding(binding: Binding) -> Val {
 }
 
 fn generate_guard(guard: CtxGuard) -> Val {
-    if guard.const1 && !guard.static1 && !guard.lock {
+    if guard.const1 && !guard.static1 && !guard.reverse {
         return symbol(CONST);
     }
-    if guard.static1 && !guard.const1 && !guard.lock {
+    if guard.static1 && !guard.const1 && !guard.reverse {
         return symbol(STATIC);
     }
-    if guard.lock && !guard.static1 && !guard.const1 {
-        return symbol(LOCK);
+    if guard.reverse && !guard.const1 && !guard.static1 {
+        return symbol(REVERSE);
     }
     let mut map = Map::default();
-    if guard.static1 {
-        map.insert(symbol(STATIC), Val::default());
-    }
     if guard.const1 {
         map.insert(symbol(CONST), Val::default());
     }
-    if guard.lock {
-        map.insert(symbol(LOCK), Val::default());
+    if guard.static1 {
+        map.insert(symbol(STATIC), Val::default());
+    }
+    if guard.reverse {
+        map.insert(symbol(REVERSE), Val::default());
     }
     Val::Map(map.into())
 }
@@ -180,4 +170,9 @@ fn generate_guard(guard: CtxGuard) -> Val {
 pub(crate) struct Binding {
     pub(crate) name: Symbol,
     pub(crate) guard: CtxGuard,
+}
+
+pub(crate) struct OptBinding {
+    pub(crate) name: Symbol,
+    pub(crate) guard: OptCtxGuard,
 }

@@ -10,6 +10,7 @@ use crate::Symbol;
 use crate::Val;
 use crate::ctx::map::CtxGuard;
 use crate::ctx::map::CtxValue;
+use crate::ctx::map::OptCtxGuard;
 use crate::func::func_mode::DEFAULT_MODE;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -54,7 +55,7 @@ impl Composite {
     pub(crate) fn put_input(
         inner: &mut Ctx, input_name: Symbol, input: Val,
     ) -> Result<(), CtxError> {
-        let _ = inner.variables_mut().put_value(input_name, input, false)?;
+        let _ = inner.variables_mut().put(input_name, input, OptCtxGuard::default())?;
         Ok(())
     }
 
@@ -66,7 +67,7 @@ impl Composite {
         inner: &mut Ctx, outer: &mut Ctx, name: Symbol, const1: bool,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
-        if !inner.variables().is_assignable(name.clone(), const1) {
+        if !inner.variables().is_null(name.clone()) {
             return Val::default();
         }
         Self::keep_ctx(inner, outer, name.clone(), const1);
@@ -79,7 +80,7 @@ impl Composite {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
-        let guard = CtxGuard { const1, static1: true, lock: false };
+        let guard = CtxGuard::new_static(const1);
         let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(val, guard));
     }
 

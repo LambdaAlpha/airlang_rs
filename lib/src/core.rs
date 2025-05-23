@@ -516,7 +516,7 @@ impl FreeStaticFn<Call<Symbol, Val>, Val> for CallRefEval {
 impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
     fn const_static_call(&self, ctx: ConstRef<Ctx>, call: Call<Symbol, Val>) -> Val {
         let ctx = ctx.unwrap();
-        let Some(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
+        let Ok(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
@@ -539,7 +539,7 @@ impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
 
 impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
     fn mut_static_call(&self, ctx: &mut Ctx, call: Call<Symbol, Val>) -> Val {
-        let Some(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
+        let Ok(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
@@ -647,7 +647,7 @@ impl ConstStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
             Solver.const_static_call(ctx, question)
         } else {
             let ctx = ctx.unwrap();
-            let Some(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
+            let Ok(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
                 return Val::default();
             };
             let Val::Func(mut func) = ctx_value.val else {
@@ -673,7 +673,7 @@ impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
             let question = Val::Call(Call::new(true, Val::Symbol(call.func), call.input).into());
             Solver.mut_static_call(ctx, question)
         } else {
-            let Some(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
+            let Ok(ctx_value) = ctx.variables_mut().lock(call.func.clone()) else {
                 return Val::default();
             };
             let Val::Func(mut func) = ctx_value.val else {

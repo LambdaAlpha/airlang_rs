@@ -1,5 +1,4 @@
 use crate::Ctx;
-use crate::CtxError;
 use crate::DynRef;
 use crate::Pair;
 use crate::Symbol;
@@ -17,19 +16,6 @@ impl MainCtx {
 
     pub(crate) fn remove_or_default(ctx: &mut Ctx, name: Symbol) -> Val {
         ctx.variables_mut().remove(name).unwrap_or_default()
-    }
-
-    pub(crate) fn is_null(ctx: &Ctx, name: Symbol) -> Result<bool, CtxError> {
-        match ctx.variables().get_ref(name) {
-            Ok(_) => Ok(false),
-            Err(err) => {
-                if let CtxError::NotFound = err {
-                    Ok(true)
-                } else {
-                    Err(err)
-                }
-            }
-        }
     }
 
     pub(crate) fn with_ref_or_val<T, F>(ctx: &Ctx, name: Val, f: F) -> T

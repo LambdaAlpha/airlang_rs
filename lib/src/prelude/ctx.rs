@@ -235,10 +235,7 @@ fn fn_is_null(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         return Val::default();
     };
-    match MainCtx::is_null(&ctx, s) {
-        Ok(b) => Val::Bit(Bit::new(b)),
-        Err(_) => Val::default(),
-    }
+    Val::Bit(Bit::new(ctx.variables().is_null(s)))
 }
 
 fn is_static() -> Named<FuncVal> {
@@ -263,34 +260,45 @@ fn fn_is_static(ctx: ConstRef<Ctx>, input: Val) -> Val {
 fn is_reverse() -> Named<FuncVal> {
     let id = "is_reverse";
     let f = const_impl(fn_is_reverse);
-    let mode = FuncMode::default();
+    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
-fn fn_is_reverse(ctx: ConstRef<Ctx>, _input: Val) -> Val {
-    Val::Bit(Bit::new(ctx.variables().is_reverse()))
+fn fn_is_reverse(ctx: ConstRef<Ctx>, input: Val) -> Val {
+    let Val::Symbol(s) = input else {
+        return Val::default();
+    };
+    let Some(is_reverse) = ctx.variables().is_reverse(s) else {
+        return Val::default();
+    };
+    Val::Bit(Bit::new(is_reverse))
 }
 
 fn set_reverse() -> Named<FuncVal> {
     let id = "set_reverse";
-    let f = free_impl(fn_set_reverse);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+    let f = mut_impl(fn_set_reverse);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
+    named_mut_fn(id, f, mode)
 }
 
-fn fn_set_reverse(input: Val) -> Val {
+fn fn_set_reverse(ctx: &mut Ctx, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let Val::Ctx(mut ctx) = pair.first else {
+    let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
-    let Val::Bit(bit) = pair.second else {
+    let Val::Bit(reverse) = pair.second else {
         return Val::default();
     };
-    ctx.variables_mut().set_reverse(bit.bool());
-    Val::Ctx(ctx)
+    let _ = ctx.variables_mut().set_reverse(s, reverse.bool());
+    Val::default()
 }
 
 fn ctx_is_const() -> Named<FuncVal> {

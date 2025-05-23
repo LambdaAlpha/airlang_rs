@@ -114,7 +114,7 @@ impl Prelude for AllPrelude {
 pub(crate) fn initial_ctx() -> Ctx {
     let mut variables: Map<Symbol, CtxValue> = Map::default();
     put_preludes(&mut variables);
-    let variables = CtxMap::new(variables, false);
+    let variables = CtxMap::new(variables);
     Ctx::new(variables)
 }
 
@@ -143,8 +143,7 @@ pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {
 
 impl PreludeCtx for Map<Symbol, CtxValue> {
     fn put(&mut self, name: Symbol, val: Val) {
-        let guard = CtxGuard { const1: false, static1: false, lock: false };
-        let v = self.insert(name, CtxValue::new(val, guard));
+        let v = self.insert(name, CtxValue::new(val, CtxGuard::default()));
         assert!(v.is_none(), "names of preludes should be unique");
     }
 }

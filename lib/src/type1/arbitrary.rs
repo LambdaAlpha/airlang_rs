@@ -250,20 +250,19 @@ where
 
 impl Arbitrary for CtxGuard {
     fn any(rng: &mut SmallRng, _depth: usize) -> Self {
-        CtxGuard { const1: rng.random(), static1: rng.random(), lock: false }
+        CtxGuard { const1: rng.random(), static1: rng.random(), reverse: rng.random() }
     }
 }
 
 impl Arbitrary for CtxValue {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        CtxValue { val: Val::any(rng, depth), guard: CtxGuard::any(rng, depth) }
+        CtxValue { val: Val::any(rng, depth), guard: CtxGuard::any(rng, depth), lock: false }
     }
 }
 
 impl Arbitrary for Ctx {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let variables = Map::any(rng, depth);
-        let variables = CtxMap::new(variables, rng.random());
+        let variables = CtxMap::new(Map::any(rng, depth));
         Ctx::new(variables)
     }
 }

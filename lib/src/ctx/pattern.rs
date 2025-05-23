@@ -10,8 +10,8 @@ use crate::PairVal;
 use crate::Symbol;
 use crate::Unit;
 use crate::Val;
-use crate::ctx::map::CtxGuard;
-use crate::ctx::repr::Binding;
+use crate::ctx::map::OptCtxGuard;
+use crate::ctx::repr::OptBinding;
 use crate::ctx::repr::parse_guard;
 use crate::mode::symbol::LITERAL_CHAR;
 use crate::mode::symbol::REF_CHAR;
@@ -20,7 +20,7 @@ use crate::syntax::CALL_REVERSE;
 use crate::utils::val::symbol;
 
 pub(crate) enum Pattern {
-    Any(Binding),
+    Any(OptBinding),
     Val(Val),
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
@@ -30,7 +30,7 @@ pub(crate) enum Pattern {
 
 #[derive(Default, Copy, Clone)]
 pub(crate) struct PatternCtx {
-    pub(crate) guard: CtxGuard,
+    pub(crate) guard: OptCtxGuard,
 }
 
 pub(crate) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option<Pattern> {
@@ -49,9 +49,9 @@ fn parse_symbol(ctx: PatternCtx, s: Symbol) -> Option<Pattern> {
         Some(LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),
         Some(REF_CHAR) => {
             let name = Symbol::from_str(&s[1 ..]);
-            Pattern::Any(Binding { name, guard: ctx.guard })
+            Pattern::Any(OptBinding { name, guard: ctx.guard })
         }
-        _ => Pattern::Any(Binding { name: s, guard: ctx.guard }),
+        _ => Pattern::Any(OptBinding { name: s, guard: ctx.guard }),
     };
     Some(pattern)
 }
@@ -115,9 +115,6 @@ fn parse_with_guard(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
     };
     let pair = Pair::from(pair);
     ctx.guard = parse_guard(pair.second, ctx.guard)?;
-    if ctx.guard.static1 {
-        return None;
-    }
     parse_pattern(ctx, pair.first)
 }
 
@@ -132,7 +129,7 @@ pub(crate) fn match_pattern(pattern: &Pattern, val: &Val) -> bool {
     }
 }
 
-fn match_any(_binding: &Binding, _val: &Val) -> bool {
+fn match_any(_binding: &OptBinding, _val: &Val) -> bool {
     true
 }
 
@@ -190,8 +187,8 @@ pub(crate) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: Val) -> Val {
     }
 }
 
-fn assign_any(ctx: &mut Ctx, binding: Binding, val: Val) -> Val {
-    let Ok(last) = ctx.variables_mut().put_value(binding.name, val, binding.guard.const1) else {
+fn assign_any(ctx: &mut Ctx, binding: OptBinding, val: Val) -> Val {
+    let Ok(last) = ctx.variables_mut().put(binding.name, val, binding.guard) else {
         return Val::default();
     };
     last.unwrap_or_default()

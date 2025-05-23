@@ -323,6 +323,19 @@ do [
 -----
 true
 =====
+lock is_null
+-----
+do [
+    f = function ; {
+        cell : true,
+        context_access : mutable,
+        code : (.ctx : .i) : .ctx | is_null ; .i
+    },
+    .f .f
+]
+-----
+false
+=====
 is_null true
 -----
 is_null a
@@ -365,9 +378,9 @@ do [c = context ; {variables : {(a . static) : 1}}, c | .^a, c | .a]
 -----
 1
 =====
-static move reverse
+static reverse move
 -----
-do [c = context ; {reverse : true, variables : {(a . static) : 1}}, c | .^a, c | .a]
+do [c = context ; {variables : {(a . {static, reverse}) : 1}}, c | .^a, c | .a]
 -----
 1
 =====
@@ -385,55 +398,67 @@ true
 =====
 static set_constant
 -----
-do [c = context ; {variables : {(a . static) : 1}}, c | set_constant ; .a, c | is_constant ; .a]
+do [c = context ; {variables : {(a . static) : 1}}, c | .a set_constant true, c | is_constant ; .a]
 -----
 false
 =====
 is_reverse false
 -----
-is_reverse .
+do [a = 1, is_reverse a]
 -----
 false
 =====
 is_reverse true
 -----
-do [c = context ; {reverse : true}, c | is_reverse ; .]
+do [(a . reverse) = 1, is_reverse a]
 -----
 true
 =====
 reverse set_constant constant mutable
 -----
-do [c = context ; {reverse : true, variables : {(a . constant) : any ; .}}, c | do ; [.a set_constant false, is_constant .a]]
+do [c = context ; {variables : {(a . {constant, reverse}) : any ; .}}, c | do ; [.a set_constant false, is_constant .a]]
 -----
 false
 =====
 reverse set_constant mutable constant
 -----
-do [c = context ; {reverse : true, variables : {a : any ; .}}, c | do ; [.a set_constant true, is_constant .a]]
+do [c = context ; {variables : {(a . reverse) : any ; .}}, c | do ; [.a set_constant true, is_constant .a]]
 -----
 false
 =====
 reverse move constant
 -----
-do [c = context ; {reverse : true, variables : {(a . constant) : 1}}, c | .^a]
+do [c = context ; {variables : {(a . {constant, reverse}) : 1}}, c | .^a]
 -----
 1
 =====
-reverse = mutable
------
-do [c = context ; {reverse : true}, c | .a = 1, c | is_null ; .a]
------
-false
-=====
 set_reverse false
 -----
-do [c = context ; {reverse : true}, c = ^c set_reverse false, c | is_reverse ; .]
+do [(a . reverse) = 1, a set_reverse false, is_reverse a]
 -----
 false
 =====
 set_reverse true
 -----
-do [c = context ; {reverse : false}, c = ^c set_reverse true, c | is_reverse ; .]
+do [a = 1, a set_reverse true, is_reverse a]
+-----
+true
+=====
+constant set_reverse false
+-----
+do [c = context ; {variables : {(a . {reverse, constant}) : 1}}, c | .a set_reverse false, c | is_reverse ; .a]
+-----
+false
+=====
+constant set_reverse true
+-----
+do [(a . constant) = 1, a set_reverse true, is_reverse a]
+-----
+false
+=====
+static set_reverse
+-----
+do [c = context ; {variables : {(a . {static, constant}) : 1}}, c | .a set_reverse true, c | is_reverse ; .a]
 -----
 true
 =====
