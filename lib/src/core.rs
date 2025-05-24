@@ -553,10 +553,10 @@ impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefEval {
             Solver.mut_static_call(ctx, question)
         } else {
             let input = func.mode().forward.mut_static_call(ctx, call.input);
-            let output = if ctx_value.guard.const1 {
-                func.mut_static_call(ctx, input)
-            } else {
+            let output = if ctx_value.contract.is_mutable() {
                 func.mut_cell_call(ctx, input)
+            } else {
+                func.mut_static_call(ctx, input)
             };
             ctx.variables_mut().unlock(call.func, Val::Func(func));
             output
@@ -680,10 +680,10 @@ impl MutStaticFn<Ctx, Call<Symbol, Val>, Val> for CallRefApply {
                 ctx.variables_mut().unlock(call.func, ctx_value.val);
                 return Val::default();
             };
-            let output = if ctx_value.guard.const1 {
-                func.mut_static_call(ctx, call.input)
-            } else {
+            let output = if ctx_value.contract.is_mutable() {
                 func.mut_cell_call(ctx, call.input)
+            } else {
+                func.mut_static_call(ctx, call.input)
             };
             ctx.variables_mut().unlock(call.func, Val::Func(func));
             output

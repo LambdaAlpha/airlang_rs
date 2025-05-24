@@ -572,7 +572,7 @@ do [
 -----
 [1, 2, 3]
 =====
-cell mutable
+cell none
 -----
 do [
     a = 1,
@@ -593,11 +593,11 @@ do [
 -----
 [1, 3, 6]
 =====
-cell mutable var access const
+cell mutable contract final
 -----
 do [
     a = 1,
-    (f . constant) = function ; {
+    (f . final) = function ; {
         code : (.c : ._) : do ; [
             .b = .b + .c | ..a,
             .c | ..a = ..a + 1,
@@ -696,21 +696,6 @@ do [
 ]
 -----
 true
-=====
-reverse ctx
------
-do [
-    a = 1,
-    f = function ; {
-        code : (.ctx : ._) : .ctx = 2,
-        context_access : constant,
-        context : context ; {reverse : true},
-    },
-    f .,
-    a
-]
------
-1
 =====
 repr
 -----

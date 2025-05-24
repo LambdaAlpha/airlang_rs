@@ -30,7 +30,7 @@ use crate::bit::Bit;
 use crate::byte::Byte;
 use crate::change::Change;
 use crate::ctx::Ctx;
-use crate::ctx::map::CtxGuard;
+use crate::ctx::map::Contract;
 use crate::ctx::map::CtxMap;
 use crate::ctx::map::CtxValue;
 use crate::either::Either;
@@ -248,15 +248,17 @@ where
     }
 }
 
-impl Arbitrary for CtxGuard {
+impl Arbitrary for Contract {
     fn any(rng: &mut SmallRng, _depth: usize) -> Self {
-        CtxGuard { const1: rng.random(), static1: rng.random(), reverse: rng.random() }
+        const CONTRACT: [Contract; 5] =
+            [Contract::None, Contract::Static, Contract::Still, Contract::Final, Contract::Const];
+        *(CONTRACT.choose(rng).unwrap())
     }
 }
 
 impl Arbitrary for CtxValue {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        CtxValue { val: Val::any(rng, depth), guard: CtxGuard::any(rng, depth), lock: false }
+        CtxValue { val: Val::any(rng, depth), contract: Contract::any(rng, depth), lock: false }
     }
 }
 

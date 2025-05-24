@@ -1,6 +1,7 @@
 use crate::Byte;
 use crate::Call;
 use crate::CodeMode;
+use crate::Contract;
 use crate::Ctx;
 use crate::FuncMode;
 use crate::Int;
@@ -12,7 +13,6 @@ use crate::PrimMode;
 use crate::Symbol;
 use crate::SymbolMode;
 use crate::Text;
-use crate::ctx::map::OptCtxGuard;
 use crate::ctx::pattern::PatternCtx;
 use crate::ctx::pattern::assign_pattern;
 use crate::ctx::pattern::match_pattern;
@@ -277,8 +277,7 @@ fn fn_for(ctx: &mut Ctx, input: Val) -> Val {
 
 fn for_iter<ValIter>(ctx: &mut Ctx, body: Val, name: Symbol, values: ValIter) -> Val
 where ValIter: Iterator<Item = Val> {
-    let guard = OptCtxGuard::default();
-    if !ctx.variables().is_assignable(name.clone(), guard) {
+    if !ctx.variables().is_assignable(name.clone(), Contract::None) {
         return Val::default();
     }
     if let Val::List(body) = body {
@@ -288,7 +287,9 @@ where ValIter: Iterator<Item = Val> {
             return Val::default();
         };
         for val in values {
-            ctx.variables_mut().put(name.clone(), val, guard).expect("name should be assignable");
+            ctx.variables_mut()
+                .put(name.clone(), val, Contract::None)
+                .expect("name should be assignable");
             let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
                 CtrlFlow::None => {}
@@ -301,7 +302,9 @@ where ValIter: Iterator<Item = Val> {
         }
     } else {
         for val in values {
-            ctx.variables_mut().put(name.clone(), val, guard).expect("name should be assignable");
+            ctx.variables_mut()
+                .put(name.clone(), val, Contract::None)
+                .expect("name should be assignable");
             DEFAULT_MODE.mut_static_call(ctx, body.clone());
         }
     }

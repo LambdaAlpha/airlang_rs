@@ -10,9 +10,9 @@ use crate::PairVal;
 use crate::Symbol;
 use crate::Unit;
 use crate::Val;
-use crate::ctx::map::OptCtxGuard;
+use crate::ctx::map::Contract;
 use crate::ctx::repr::OptBinding;
-use crate::ctx::repr::parse_guard;
+use crate::ctx::repr::parse_contract;
 use crate::mode::symbol::LITERAL_CHAR;
 use crate::mode::symbol::REF_CHAR;
 use crate::syntax::CALL_FORWARD;
@@ -30,7 +30,7 @@ pub(crate) enum Pattern {
 
 #[derive(Default, Copy, Clone)]
 pub(crate) struct PatternCtx {
-    pub(crate) guard: OptCtxGuard,
+    pub(crate) contract: Option<Contract>,
 }
 
 pub(crate) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option<Pattern> {
@@ -49,9 +49,9 @@ fn parse_symbol(ctx: PatternCtx, s: Symbol) -> Option<Pattern> {
         Some(LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),
         Some(REF_CHAR) => {
             let name = Symbol::from_str(&s[1 ..]);
-            Pattern::Any(OptBinding { name, guard: ctx.guard })
+            Pattern::Any(OptBinding { name, contract: ctx.contract })
         }
-        _ => Pattern::Any(OptBinding { name: s, guard: ctx.guard }),
+        _ => Pattern::Any(OptBinding { name: s, contract: ctx.contract }),
     };
     Some(pattern)
 }
@@ -114,7 +114,7 @@ fn parse_with_guard(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
         return None;
     };
     let pair = Pair::from(pair);
-    ctx.guard = parse_guard(pair.second, ctx.guard)?;
+    ctx.contract = parse_contract(pair.second);
     parse_pattern(ctx, pair.first)
 }
 
@@ -188,7 +188,8 @@ pub(crate) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: Val) -> Val {
 }
 
 fn assign_any(ctx: &mut Ctx, binding: OptBinding, val: Val) -> Val {
-    let Ok(last) = ctx.variables_mut().put(binding.name, val, binding.guard) else {
+    let Ok(last) = ctx.variables_mut().put(binding.name, val, binding.contract.unwrap_or_default())
+    else {
         return Val::default();
     };
     last.unwrap_or_default()

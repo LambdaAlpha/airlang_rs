@@ -10,15 +10,25 @@ do [a = any ; ., b = .a, a == read ; *b]
 -----
 true
 =====
-read mutable
+read none
 -----
 do [a = any ; ., a == read ; a]
 -----
 true
 =====
-read const
+read final
 -----
-do [(a . constant) = any ; ., a == read ; a]
+do [(a . final) = any ; ., a == read ; a]
+-----
+true
+=====
+read still
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {(b . still) : v}},
+    v == a | read ; .b
+]
 -----
 true
 =====
@@ -27,6 +37,16 @@ read static
 do [
     v = any ; .,
     a = context ; {variables : {(b . static) : v}},
+    v == a | read ; .b
+]
+-----
+true
+=====
+read const
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {(b . constant) : v}},
     v == a | read ; .b
 ]
 -----
@@ -44,9 +64,19 @@ do [a = any ; ., b = .a, c = a, (c == move ; *b) and (is_null ; a)]
 -----
 true
 =====
-move const
+move final
 -----
-do [(a . constant) = any ; ., (. == move ; a) and (not ; is_null ; a)]
+do [(a . final) = any ; ., (. == move ; a) and (not ; is_null ; a)]
+-----
+true
+=====
+move still
+-----
+do [
+    v = any ; .,
+    a = context ; {variables : {(b . still) : v}},
+    (v == a | move ; .b) and (a | is_null ; .b)
+]
 -----
 true
 =====
@@ -60,11 +90,11 @@ do [
 -----
 true
 =====
-move static const
+move const
 -----
 do [
     v = any ; .,
-    a = context ; {variables : {(b . {static, constant}) : v}},
+    a = context ; {variables : {(b . constant) : v}},
     (. == a | move ; .b) and (not ; a | is_null ; .b)
 ]
 -----
@@ -112,29 +142,17 @@ do [.*.p = 1 : 2, *.p pair.first .]
 -----
 1
 =====
-= mutable
+= none
 -----
-do [a = 1, [a, is_constant a]]
+do [a = 1, [a, contract a]]
 -----
-[1, false]
+[1, none]
 =====
-= constant
+= final
 -----
-do [(a . constant) = 1, [a, is_constant a]]
+do [(a . final) = 1, [a, contract a]]
 -----
-[1, true]
-=====
-= map
------
-do [(a . {constant : false}) = 1, [a, is_constant a]]
------
-[1, false]
-=====
-= default map
------
-do [(a . {}) = 1, [a, is_constant a]]
------
-[1, false]
+[1, final]
 =====
 = destruct pair
 -----
@@ -154,23 +172,23 @@ do [(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-= destruct is_constant default
+= destruct contract default
 -----
-do [((a : b) . constant) = (any ; .) : (any ; .), [is_constant a, is_constant b]]
+do [((a : b) . final) = (any ; .) : (any ; .), [contract a, contract b]]
 -----
-[true, true]
+[final, final]
 =====
-= destruct is_constant one by one
+= destruct contract one by one
 -----
-do [(a : (b . constant)) = (any ; .) : (any ; .), [is_constant a, is_constant b]]
+do [(a : (b . final)) = (any ; .) : (any ; .), [contract a, contract b]]
 -----
-[false, true]
+[none, final]
 =====
-= destruct is_constant mix
+= destruct contract mix
 -----
-do [((a : (b . {constant : false})) . constant) = (any ; .) : (any ; .), [is_constant a, is_constant b]]
+do [((a : (b . none)) . final) = (any ; .) : (any ; .), [contract a, contract b]]
 -----
-[true, false]
+[final, none]
 =====
 = destruct call
 -----
@@ -238,53 +256,101 @@ do [a = 1, c = 3, [a, 2, c] = [2, 3, 4], [a, c]]
 -----
 [1, 3]
 =====
-mutable = return
+none = return
 -----
 do [a = 1, 1 == a = any ; .]
 -----
 true
 =====
-mutable mutate
+none mutate
 -----
 do [a = 1 : 2, a pair.set_first 3, a]
 -----
 3 : 2
 =====
-constant mutate
+final mutate
 -----
-do [(a . constant) = 1 : 2, a pair.set_first any ; ., a]
+do [(a . final) = 1 : 2, a pair.set_first any ; ., a]
 -----
 1 : 2
 =====
-constant =
+final =
 -----
-do [(a . constant) = 1, a = any ; ., a]
------
-1
-=====
-constant = mutable
------
-do [(a . constant) = 1, a = any ; ., a]
+do [(a . final) = 1, a = any ; ., a]
 -----
 1
 =====
-constant = constant
+final = none
 -----
-do [(a . constant) = 1, (a . constant) = any ; ., a]
+do [(a . final) = 1, a = any ; ., a]
 -----
 1
 =====
-set_constant constant mutable
+final = final
 -----
-do [(a . constant) = any ; ., a set_constant false, is_constant a]
+do [(a . final) = 1, (a . final) = any ; ., a]
 -----
-true
+1
 =====
-set_constant mutable constant
+set_contract still none
 -----
-do [a = any ; ., a set_constant true, is_constant a]
+do [c = context ; {variables : {(a . still) : any ; .}}, c | .a set_contract .none, c | contract ; .a]
 -----
-true
+none
+=====
+set_contract still none
+-----
+do [c = context ; {variables : {(a . still) : any ; .}}, c | .a set_contract .final, c | contract ; .a]
+-----
+final
+=====
+set_contract none final
+-----
+do [a = any ; ., a set_contract final, contract a]
+-----
+final
+=====
+set_contract none still
+-----
+do [a = any ; ., a set_contract still, contract a]
+-----
+none
+=====
+set_contract final still
+-----
+do [(a . final) = any ; ., a set_contract still, contract a]
+-----
+final
+=====
+set_contract final none
+-----
+do [(a . final) = any ; ., a set_contract none, contract a]
+-----
+final
+=====
+set_contract static const
+-----
+do [c = context ; {variables : {(a . static) : any ; .}}, c | .a set_contract .constant, c | contract ; .a]
+-----
+static
+=====
+set_contract static still
+-----
+do [c = context ; {variables : {(a . static) : any ; .}}, c | .a set_contract .still, c | contract ; .a]
+-----
+static
+=====
+set_contract static final
+-----
+do [c = context ; {variables : {(a . static) : any ; .}}, c | .a set_contract .final, c | contract ; .a]
+-----
+static
+=====
+set_contract static none
+-----
+do [c = context ; {variables : {(a . static) : any ; .}}, c | .a set_contract .none, c | contract ; .a]
+-----
+static
 =====
 is_locked false
 -----
@@ -348,39 +414,9 @@ do [a = any ; ., is_null a]
 -----
 false
 =====
-is_static true
------
-do [c = context ; {variables : {(a . static) : any ; .}}, c | is_static ; .a]
------
-true
-=====
-is_static false
------
-do [c = context ; {variables : {(a . {}) : any ; .}}, c | is_static ; .a]
------
-false
-=====
-static init true
------
-do [c = context ; {variables : {(a . {static : true}) : any ; .}}, c | is_static ; .a]
------
-true
-=====
-static init false
------
-do [c = context ; {variables : {(a . {static : false}) : any ; .}}, c | is_static ; .a]
------
-false
-=====
 static move
 -----
 do [c = context ; {variables : {(a . static) : 1}}, c | .^a, c | .a]
------
-1
-=====
-static reverse move
------
-do [c = context ; {variables : {(a . {static, reverse}) : 1}}, c | .^a, c | .a]
 -----
 1
 =====
@@ -392,97 +428,31 @@ do [c = context ; {variables : {(a . static) : 1}}, c | .a = 2, c | .a]
 =====
 static = from static
 -----
-do [c = context ; {}, c | (.a . {.static}) = 1, c | is_null ; .a]
+do [c = context ; {}, c | (.a . .static) = 1, c | is_null ; .a]
 -----
 true
 =====
-static set_constant
+is_constant default
 -----
-do [c = context ; {variables : {(a . static) : 1}}, c | .a set_constant true, c | is_constant ; .a]
------
-false
-=====
-is_reverse false
------
-do [a = 1, is_reverse a]
+is_constant .
 -----
 false
 =====
-is_reverse true
+is_constant free
 -----
-do [(a . reverse) = 1, is_reverse a]
------
-true
-=====
-reverse set_constant constant mutable
------
-do [c = context ; {variables : {(a . {constant, reverse}) : any ; .}}, c | do ; [.a set_constant false, is_constant .a]]
------
-false
-=====
-reverse set_constant mutable constant
------
-do [c = context ; {variables : {(a . reverse) : any ; .}}, c | do ; [.a set_constant true, is_constant .a]]
------
-false
-=====
-reverse move constant
------
-do [c = context ; {variables : {(a . {constant, reverse}) : 1}}, c | .^a]
------
-1
-=====
-set_reverse false
------
-do [(a . reverse) = 1, a set_reverse false, is_reverse a]
------
-false
-=====
-set_reverse true
------
-do [a = 1, a set_reverse true, is_reverse a]
------
-true
-=====
-constant set_reverse false
------
-do [c = context ; {variables : {(a . {reverse, constant}) : 1}}, c | .a set_reverse false, c | is_reverse ; .a]
------
-false
-=====
-constant set_reverse true
------
-do [(a . constant) = 1, a set_reverse true, is_reverse a]
------
-false
-=====
-static set_reverse
------
-do [c = context ; {variables : {(a . {static, constant}) : 1}}, c | .a set_reverse true, c | is_reverse ; .a]
------
-true
-=====
-ctx is_constant default
------
-context.is_constant .
------
-false
-=====
-ctx is_constant free
------
-. | context.is_constant ; .
+. | is_constant ; .
 -----
 .
 =====
-ctx is_constant constant
+is_constant true
 -----
-do [(a . constant) = context ; {}, a | context.is_constant ; .]
+do [(a . final) = context ; {}, a | is_constant ; .]
 -----
 true
 =====
-ctx is_constant mutable
+is_constant false
 -----
-do [a = context ; {}, a | context.is_constant ; .]
+do [a = context ; {}, a | is_constant ; .]
 -----
 false
 =====
@@ -562,12 +532,6 @@ represent else
 context.represent ; context ; {variables : {(a . constant) : 1}}
 -----
 {variables : {(a . constant) : 1}}
-=====
-represent binding map
------
-context.represent ; context ; {variables : {(a . {static, constant}) : 1}}
------
-{variables : {(a . {static, constant}) : 1}}
 =====
 represent non-recursive
 -----

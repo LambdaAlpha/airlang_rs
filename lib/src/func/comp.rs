@@ -8,9 +8,8 @@ use crate::MutStaticFn;
 use crate::Pair;
 use crate::Symbol;
 use crate::Val;
-use crate::ctx::map::CtxGuard;
+use crate::ctx::map::Contract;
 use crate::ctx::map::CtxValue;
-use crate::ctx::map::OptCtxGuard;
 use crate::func::func_mode::DEFAULT_MODE;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -55,7 +54,7 @@ impl Composite {
     pub(crate) fn put_input(
         inner: &mut Ctx, input_name: Symbol, input: Val,
     ) -> Result<(), CtxError> {
-        let _ = inner.variables_mut().put(input_name, input, OptCtxGuard::default())?;
+        let _ = inner.variables_mut().put(input_name, input, Contract::None)?;
         Ok(())
     }
 
@@ -80,8 +79,8 @@ impl Composite {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
         let val = Val::Ctx(CtxVal::from(outer));
-        let guard = CtxGuard::new_static(const1);
-        let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(val, guard));
+        let contract = if const1 { Contract::Const } else { Contract::Static };
+        let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(val, contract));
     }
 
     fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {

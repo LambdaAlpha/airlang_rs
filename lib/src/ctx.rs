@@ -7,8 +7,8 @@ use std::ops::BitAnd;
 
 use crate::Map;
 use crate::Val;
+use crate::ctx::map::Contract;
 use crate::ctx::map::CtxMap;
-use crate::ctx::map::OptCtxGuard;
 use crate::symbol::Symbol;
 
 #[derive(Copy, Clone, Debug)]
@@ -59,9 +59,10 @@ impl Ctx {
         self.variables.get_ref_mut(name)
     }
 
-    pub fn put(&mut self, name: Symbol, val: Val, const1: bool) -> Result<Option<Val>, CtxError> {
-        let guard = OptCtxGuard { const1: Some(const1), ..Default::default() };
-        self.variables.put(name, val, guard)
+    pub fn put(
+        &mut self, name: Symbol, val: Val, contract: Contract,
+    ) -> Result<Option<Val>, CtxError> {
+        self.variables.put(name, val, contract)
     }
 }
 

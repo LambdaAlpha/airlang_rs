@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use airlang::AirCell;
+use airlang::Contract;
 use airlang::Symbol;
 use airlang::Text;
 use airlang::parse;
@@ -47,7 +48,7 @@ fn generate_air_with_main() -> Result<AirCell, Box<dyn Error>> {
     let mut air = AirCell::default();
     let main = air.interpret(src);
     let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
-    air.ctx_mut().put(main_name, main, true)?;
+    air.ctx_mut().put(main_name, main, Contract::Final)?;
     Ok(air)
 }
 

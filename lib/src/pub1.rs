@@ -4,6 +4,7 @@ pub use crate::call::Call;
 pub use crate::ctx::Ctx;
 pub use crate::ctx::CtxAccess;
 pub use crate::ctx::CtxError;
+pub use crate::ctx::map::Contract;
 pub use crate::either::Either;
 pub use crate::extension::AirExt;
 pub use crate::extension::ValExt;
