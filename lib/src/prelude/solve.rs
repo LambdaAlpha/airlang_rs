@@ -28,7 +28,7 @@ impl Prelude for SolvePrelude {
 }
 
 fn get_solver() -> Named<FuncVal> {
-    let id = "solver";
+    let id = "solver!";
     let f = free_impl(fn_get_solver);
     let forward = FuncMode::default_mode();
     let reverse = FuncMode::default_mode();
@@ -49,7 +49,7 @@ fn fn_get_solver(_input: Val) -> Val {
 }
 
 fn set_solver() -> Named<FuncVal> {
-    let id = "set_solver";
+    let id = "set_solver!";
     let f = free_impl(fn_set_solver);
     let mode = FuncMode::default();
     named_free_fn(id, f, mode)
