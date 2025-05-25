@@ -4,6 +4,7 @@ use crate::ConstRef;
 use crate::ConstStaticFn;
 use crate::Ctx;
 use crate::FreeStaticFn;
+use crate::Map;
 use crate::MutStaticFn;
 use crate::PrimMode;
 use crate::Val;
@@ -14,48 +15,41 @@ use crate::mode::ModeFn;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CallMode {
-    pub code: CodeMode,
     pub func: Option<Mode>,
     pub input: Option<Mode>,
+    pub some: Option<Map<Val, Option<Mode>>>,
 }
 
 impl ModeFn for CallMode {}
 
 impl FreeStaticFn<CallVal, Val> for CallMode {
     fn free_static_call(&self, input: CallVal) -> Val {
-        match self.code {
-            CodeMode::Form => {
-                CallForm { func: &self.func, input: &self.input }.free_static_call(input)
+        match &self.some {
+            Some(some) => {
+                CallForm { func: &self.func, input: &self.input, some }.free_static_call(input)
             }
-            CodeMode::Eval => {
-                CallEval { func: &self.func, input: &self.input }.free_static_call(input)
-            }
+            None => CallEval { func: &self.func, input: &self.input }.free_static_call(input),
         }
     }
 }
 
 impl ConstStaticFn<Ctx, CallVal, Val> for CallMode {
     fn const_static_call(&self, ctx: ConstRef<Ctx>, input: CallVal) -> Val {
-        match self.code {
-            CodeMode::Form => {
-                CallForm { func: &self.func, input: &self.input }.const_static_call(ctx, input)
-            }
-            CodeMode::Eval => {
-                CallEval { func: &self.func, input: &self.input }.const_static_call(ctx, input)
-            }
+        match &self.some {
+            Some(some) => CallForm { func: &self.func, input: &self.input, some }
+                .const_static_call(ctx, input),
+            None => CallEval { func: &self.func, input: &self.input }.const_static_call(ctx, input),
         }
     }
 }
 
 impl MutStaticFn<Ctx, CallVal, Val> for CallMode {
     fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
-        match self.code {
-            CodeMode::Form => {
-                CallForm { func: &self.func, input: &self.input }.mut_static_call(ctx, input)
+        match &self.some {
+            Some(some) => {
+                CallForm { func: &self.func, input: &self.input, some }.mut_static_call(ctx, input)
             }
-            CodeMode::Eval => {
-                CallEval { func: &self.func, input: &self.input }.mut_static_call(ctx, input)
-            }
+            None => CallEval { func: &self.func, input: &self.input }.mut_static_call(ctx, input),
         }
     }
 }
@@ -67,6 +61,10 @@ impl TryFrom<PrimMode> for CallMode {
         let Some(code) = mode.call else {
             return Err(());
         };
-        Ok(Self { code, func: Some(mode.into()), input: Some(mode.into()) })
+        let some = match code {
+            CodeMode::Form => Some(Map::default()),
+            CodeMode::Eval => None,
+        };
+        Ok(Self { some, func: Some(mode.into()), input: Some(mode.into()) })
     }
 }

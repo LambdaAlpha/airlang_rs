@@ -336,17 +336,20 @@ impl ParseMode<Val> for CallMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::try_from(PrimMode::parse(s)?).unwrap()),
-            Val::Pair(pair) => {
-                let pair = Pair::from(pair);
-                let func = ParseMode::parse(pair.first)?;
-                let input = ParseMode::parse(pair.second)?;
-                Some(CallMode { code: CodeMode::Form, func, input })
+            Val::Pair(some_else) => {
+                let some_else = Pair::from(some_else);
+                let Val::Map(some) = some_else.first else {
+                    return None;
+                };
+                let some = parse_map_some(some)?;
+                let else1 = parse_map_else(some_else.second)?;
+                Some(CallMode { func: else1.first, input: else1.second, some: Some(some) })
             }
             Val::Call(call) => {
                 let call = Call::from(call);
                 let func = ParseMode::parse(call.func)?;
                 let input = ParseMode::parse(call.input)?;
-                Some(CallMode { code: CodeMode::Eval, func, input })
+                Some(CallMode { some: None, func, input })
             }
             _ => None,
         }
@@ -357,9 +360,13 @@ impl GenerateMode<Val> for CallMode {
     fn generate(&self) -> Val {
         let func = GenerateMode::generate(&self.func);
         let input = GenerateMode::generate(&self.input);
-        match self.code {
-            CodeMode::Form => Val::Pair(Pair::new(func, input).into()),
-            CodeMode::Eval => Val::Call(Call::new(false, func, input).into()),
+        match &self.some {
+            Some(some) => {
+                let some = generate_map_some(some);
+                let else1 = Val::Pair(Pair::new(func, input).into());
+                Val::Pair(Pair::new(some, else1).into())
+            }
+            None => Val::Call(Call::new(false, func, input).into()),
         }
     }
 }

@@ -412,6 +412,15 @@ do [
 -----
 a : b : 1 ; 2
 =====
+mode call form
+-----
+do [
+    f = mode ; {call : {this : {}, that : {symbol : ..}} : eval* : eval*},
+    [f ; this ; .a, f ; that ; .a, f ; .other ; not ; true]
+]
+-----
+[this ; .a, that ; a, other ; false]
+=====
 mode func
 -----
 do [

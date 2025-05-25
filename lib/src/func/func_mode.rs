@@ -62,9 +62,11 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn call_mode(code: CodeMode, func: Option<Mode>, input: Option<Mode>) -> Option<Mode> {
+    pub fn call_mode(
+        func: Option<Mode>, input: Option<Mode>, some: Option<Map<Val, Option<Mode>>>,
+    ) -> Option<Mode> {
         let mode =
-            CompMode { call: Some(CallMode { code, func, input }), ..Self::default_comp_mode() };
+            CompMode { call: Some(CallMode { func, input, some }), ..Self::default_comp_mode() };
         Some(Mode::Comp(Box::new(mode)))
     }
 

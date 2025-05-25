@@ -118,44 +118,67 @@ where
     }
 }
 
-pub(crate) struct CallForm<'a, Func, Input> {
+pub(crate) struct CallForm<'a, Func, Input, SomeFunc, SomeInput>
+where SomeFunc: Eq + Hash {
     pub(crate) func: &'a Func,
     pub(crate) input: &'a Input,
+    pub(crate) some: &'a Map<SomeFunc, SomeInput>,
 }
 
-impl<'a, Func, Input> FreeStaticFn<CallVal, Val> for CallForm<'a, Func, Input>
+impl<'a, Func, Input, SomeFunc, SomeInput> FreeStaticFn<CallVal, Val>
+    for CallForm<'a, Func, Input, SomeFunc, SomeInput>
 where
     Func: FreeStaticFn<Val, Val>,
     Input: FreeStaticFn<Val, Val>,
+    SomeFunc: Borrow<Val> + Eq + Hash,
+    SomeInput: FreeStaticFn<Val, Val>,
 {
     fn free_static_call(&self, input: CallVal) -> Val {
         let call = Call::from(input);
+        if let Some(input) = self.some.get(&call.func) {
+            let input = input.free_static_call(call.input);
+            return Val::Call(Call::new(call.reverse, call.func, input).into());
+        }
         let func = self.func.free_static_call(call.func);
         let input = self.input.free_static_call(call.input);
         Val::Call(Call::new(call.reverse, func, input).into())
     }
 }
 
-impl<'a, Func, Input, Ctx> ConstStaticFn<Ctx, CallVal, Val> for CallForm<'a, Func, Input>
+impl<'a, Func, Input, SomeFunc, SomeInput, Ctx> ConstStaticFn<Ctx, CallVal, Val>
+    for CallForm<'a, Func, Input, SomeFunc, SomeInput>
 where
     Func: ConstStaticFn<Ctx, Val, Val>,
     Input: ConstStaticFn<Ctx, Val, Val>,
+    SomeFunc: Borrow<Val> + Eq + Hash,
+    SomeInput: ConstStaticFn<Ctx, Val, Val>,
 {
     fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: CallVal) -> Val {
         let call = Call::from(input);
+        if let Some(input) = self.some.get(&call.func) {
+            let input = input.const_static_call(ctx, call.input);
+            return Val::Call(Call::new(call.reverse, call.func, input).into());
+        }
         let func = self.func.const_static_call(ctx.reborrow(), call.func);
         let input = self.input.const_static_call(ctx, call.input);
         Val::Call(Call::new(call.reverse, func, input).into())
     }
 }
 
-impl<'a, Func, Input, Ctx> MutStaticFn<Ctx, CallVal, Val> for CallForm<'a, Func, Input>
+impl<'a, Func, Input, SomeFunc, SomeInput, Ctx> MutStaticFn<Ctx, CallVal, Val>
+    for CallForm<'a, Func, Input, SomeFunc, SomeInput>
 where
     Func: MutStaticFn<Ctx, Val, Val>,
     Input: MutStaticFn<Ctx, Val, Val>,
+    SomeFunc: Borrow<Val> + Eq + Hash,
+    SomeInput: MutStaticFn<Ctx, Val, Val>,
 {
     fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
         let call = Call::from(input);
+        if let Some(input) = self.some.get(&call.func) {
+            let input = input.mut_static_call(ctx, call.input);
+            return Val::Call(Call::new(call.reverse, call.func, input).into());
+        }
         let func = self.func.mut_static_call(ctx, call.func);
         let input = self.input.mut_static_call(ctx, call.input);
         Val::Call(Call::new(call.reverse, func, input).into())

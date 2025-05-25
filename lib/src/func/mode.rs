@@ -182,10 +182,15 @@ impl GetCtxAccess for PairMode {
 
 impl GetCtxAccess for CallMode {
     fn ctx_access(&self) -> CtxAccess {
-        if matches!(self.code, CodeMode::Eval) {
-            return CtxAccess::Mut;
+        match &self.some {
+            None => CtxAccess::Mut,
+            Some(some) => {
+                let some =
+                    some.values().fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
+                let else1 = self.func.ctx_access() & self.input.ctx_access();
+                some & else1
+            }
         }
-        self.func.ctx_access() & self.input.ctx_access()
     }
 }
 

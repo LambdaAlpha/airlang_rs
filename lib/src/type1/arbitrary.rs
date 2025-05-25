@@ -317,11 +317,11 @@ impl Arbitrary for PairMode {
 
 impl Arbitrary for CallMode {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let code = CodeMode::any(rng, depth);
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
-        CallMode { code, func, input }
+        let some = if rng.random() { Some(Arbitrary::any(rng, new_depth)) } else { None };
+        CallMode { func, input, some }
     }
 }
 

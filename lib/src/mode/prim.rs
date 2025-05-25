@@ -6,7 +6,9 @@ use crate::ConstStaticFn;
 use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::ListVal;
+use crate::Map;
 use crate::MapVal;
+use crate::Mode;
 use crate::MutStaticFn;
 use crate::PairVal;
 use crate::Symbol;
@@ -150,7 +152,10 @@ impl FreeStaticFn<CallVal, Val> for PrimMode {
         match self.call {
             None => Val::Call(input),
             Some(mode) => match mode {
-                CodeMode::Form => CallForm { func: self, input: self }.free_static_call(input),
+                CodeMode::Form => {
+                    CallForm { func: self, input: self, some: &Map::<Val, Option<Mode>>::default() }
+                        .free_static_call(input)
+                }
                 CodeMode::Eval => CallEval { func: self, input: self }.free_static_call(input),
             },
         }
@@ -163,7 +168,8 @@ impl ConstStaticFn<Ctx, CallVal, Val> for PrimMode {
             None => Val::Call(input),
             Some(mode) => match mode {
                 CodeMode::Form => {
-                    CallForm { func: self, input: self }.const_static_call(ctx, input)
+                    CallForm { func: self, input: self, some: &Map::<Val, Option<Mode>>::default() }
+                        .const_static_call(ctx, input)
                 }
                 CodeMode::Eval => {
                     CallEval { func: self, input: self }.const_static_call(ctx, input)
@@ -178,7 +184,10 @@ impl MutStaticFn<Ctx, CallVal, Val> for PrimMode {
         match self.call {
             None => Val::Call(input),
             Some(mode) => match mode {
-                CodeMode::Form => CallForm { func: self, input: self }.mut_static_call(ctx, input),
+                CodeMode::Form => {
+                    CallForm { func: self, input: self, some: &Map::<Val, Option<Mode>>::default() }
+                        .mut_static_call(ctx, input)
+                }
                 CodeMode::Eval => CallEval { func: self, input: self }.mut_static_call(ctx, input),
             },
         }
