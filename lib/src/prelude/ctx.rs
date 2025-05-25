@@ -98,14 +98,19 @@ impl Prelude for CtxPrelude {
 fn read() -> Named<FuncVal> {
     let id = "read";
     let f = const_impl(fn_read);
-    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
 fn fn_read(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
     MainCtx::get_or_default(&ctx, s)
@@ -114,14 +119,19 @@ fn fn_read(ctx: ConstRef<Ctx>, input: Val) -> Val {
 fn move1() -> Named<FuncVal> {
     let id = "move";
     let f = mut_impl(fn_move);
-    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
 fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
     ctx.variables_mut().remove(s).unwrap_or_default()
@@ -155,14 +165,19 @@ fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
 fn contract() -> Named<FuncVal> {
     let id = "contract";
     let f = const_impl(fn_contract);
-    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
 fn fn_contract(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
     let Some(contract) = ctx.variables().get_contract(s) else {
@@ -201,14 +216,19 @@ fn fn_set_contract(ctx: &mut Ctx, input: Val) -> Val {
 fn is_locked() -> Named<FuncVal> {
     let id = "is_locked";
     let f = const_impl(fn_is_locked);
-    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
 fn fn_is_locked(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
     let Some(locked) = ctx.variables().is_locked(s) else {
@@ -220,14 +240,19 @@ fn fn_is_locked(ctx: ConstRef<Ctx>, input: Val) -> Val {
 fn is_null() -> Named<FuncVal> {
     let id = "is_null";
     let f = const_impl(fn_is_null);
-    let forward = FuncMode::symbol_mode(SymbolMode::Literal);
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_const_fn(id, f, mode)
 }
 
 fn fn_is_null(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
     Val::Bit(Bit::new(ctx.variables().is_null(s)))
@@ -235,18 +260,18 @@ fn fn_is_null(ctx: ConstRef<Ctx>, input: Val) -> Val {
 
 fn is_const() -> Named<FuncVal> {
     let id = "is_constant";
-    let f = MutStaticImpl::new(FreeStaticImpl::default, fn_access_const, fn_access_mut);
+    let f = MutStaticImpl::new(FreeStaticImpl::default, fn_const, fn_mut);
     let forward = FuncMode::default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
     named_mut_fn(id, f, mode)
 }
 
-fn fn_access_const(_ctx: ConstRef<Ctx>, _input: Val) -> Val {
+fn fn_const(_ctx: ConstRef<Ctx>, _input: Val) -> Val {
     Val::Bit(Bit::true1())
 }
 
-fn fn_access_mut(_ctx: &mut Ctx, _input: Val) -> Val {
+fn fn_mut(_ctx: &mut Ctx, _input: Val) -> Val {
     Val::Bit(Bit::false1())
 }
 

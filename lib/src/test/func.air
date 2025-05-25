@@ -54,13 +54,13 @@ do [.*.a = 1, [form. *.a, *.a]]
 =====
 form. ^
 -----
-do [a = 1, [form. ^a, is_null a]]
+do [a = 1, [form. ^a, a is_null .]]
 -----
 [1, true]
 =====
 form. ^ special
 -----
-do [.**a = 1, [form. ^*a, is_null .*a]]
+do [.**a = 1, [form. ^*a, .*a is_null .]]
 -----
 [1, true]
 =====
@@ -84,13 +84,13 @@ do [a = 1, [form* *a, a]]
 =====
 form* ^
 -----
-do [a = 1, [form* ^a, is_null a]]
+do [a = 1, [form* ^a, a is_null .]]
 -----
 [1, true]
 =====
 form^ trivial
 -----
-do [a = 1, [form^ a, is_null a]]
+do [a = 1, [form^ a, a is_null .]]
 -----
 [1, true]
 =====
@@ -108,7 +108,7 @@ do [a = 1, [form^ *a, a]]
 =====
 form^ ^
 -----
-do [a = 1, [form^ ^a, is_null a]]
+do [a = 1, [form^ ^a, a is_null .]]
 -----
 [1, true]
 =====
@@ -144,7 +144,7 @@ do [a = 1, [eval. *a, a]]
 =====
 eval. ^
 -----
-do [a = 1, [eval. ^a, is_null a]]
+do [a = 1, [eval. ^a, a is_null .]]
 -----
 [1, true]
 =====
@@ -168,13 +168,13 @@ do [a = 1, [eval* *a, a]]
 =====
 eval* ^
 -----
-do [a = 1, [eval* ^a, is_null a]]
+do [a = 1, [eval* ^a, a is_null .]]
 -----
 [1, true]
 =====
 eval^ trivial
 -----
-do [a = 1, [eval^ a, is_null a]]
+do [a = 1, [eval^ a, a is_null .]]
 -----
 [1, true]
 =====
@@ -192,7 +192,7 @@ do [a = 1, [eval^ *a, a]]
 =====
 eval^ ^
 -----
-do [a = 1, [eval^ ^a, is_null a]]
+do [a = 1, [eval^ ^a, a is_null .]]
 -----
 [1, true]
 =====
@@ -216,7 +216,7 @@ false
 =====
 mode primitive from symbol 3
 -----
-do [a = 1, f = mode ; form^, [f ; a ; .b, is_null a]]
+do [a = 1, f = mode ; form^, [f ; a ; .b, a is_null .]]
 -----
 [1 ; b, true]
 =====
@@ -259,7 +259,7 @@ mode primitive symbol ^
 do [
     a = 1,
     f = mode ; {symbol : .^, list : form, primitive : true},
-    [f [a], is_null a]
+    [f [a], a is_null .]
 ]
 -----
 [[1], true]

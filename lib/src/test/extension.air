@@ -78,6 +78,6 @@ call.apply ; func_ext ';' 1
 =====
 prelude
 -----
-do [a = prelude ; ., a | is_null ; .func_ext]
+do [a = prelude ; ., a | .func_ext is_null .]
 -----
 false

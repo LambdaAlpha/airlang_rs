@@ -150,7 +150,7 @@ do [
         [1, c, d] : y = 1,
         [e, 2, f] : z = 1,
     ],
-    [is_null a, is_null b, c, d, is_null e, is_null f, is_null x, y, is_null z]
+    [a is_null ., b is_null ., c, d, e is_null ., f is_null ., x is_null ., y, z is_null .]
 ]
 -----
 [true, true, 2, 3, true, true, true, 1, true]
@@ -175,13 +175,13 @@ match default
 =====
 match conditional eval exist
 -----
-do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, is_null b, is_null c]]
+do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, b is_null ., c is_null .]]
 -----
 [1, true, true]
 =====
 match conditional eval default
 -----
-do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [is_null a, is_null b, c]]
+do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a is_null ., b is_null ., c]]
 -----
 [true, true, 3]
 =====
