@@ -3,4 +3,4 @@ use crate::types::wrap::rc_wrap;
 
 rc_wrap!(pub ConstStaticPrimFuncVal(ConstStaticPrimFunc));
 
-impl_const_func_trait!(ConstStaticPrimFuncVal);
+impl_func_trait!(ConstStaticPrimFuncVal);

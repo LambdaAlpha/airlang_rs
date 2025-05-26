@@ -2,12 +2,9 @@ use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
 use crate::Ctx;
-use crate::DynRef;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
-use crate::MutCellFn;
-use crate::MutStaticFn;
 use crate::Symbol;
 use crate::Val;
 use crate::func::FuncTrait;
@@ -55,26 +52,6 @@ impl ConstCellFn<Ctx, Val, Val> for ConstCellCompFunc {
         let input_name = self.comp.input_name.clone();
         let body = self.comp.body.clone();
         Composite::const_transform(inner, ctx_name, ctx, input_name, input, body)
-    }
-}
-
-impl MutStaticFn<Ctx, Val, Val> for ConstCellCompFunc {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.const_static_call(ConstRef::new(ctx), input)
-    }
-
-    fn dyn_static_call(&self, ctx: DynRef<Ctx>, input: Val) -> Val {
-        self.const_static_call(ctx.into_const(), input)
-    }
-}
-
-impl MutCellFn<Ctx, Val, Val> for ConstCellCompFunc {
-    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
-        self.const_cell_call(ConstRef::new(ctx), input)
-    }
-
-    fn dyn_cell_call(&mut self, ctx: DynRef<Ctx>, input: Val) -> Val {
-        self.const_cell_call(ctx.into_const(), input)
     }
 }
 

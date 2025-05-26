@@ -4,14 +4,11 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::rc::Rc;
 
-use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
 use crate::Ctx;
-use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
-use crate::MutCellFn;
 use crate::Symbol;
 use crate::Val;
 use crate::either::Either;
@@ -58,32 +55,14 @@ impl FreeStaticFn<Val, Val> for MutStaticPrimFunc {
     }
 }
 
-impl FreeCellFn<Val, Val> for MutStaticPrimFunc {
-    fn free_cell_call(&mut self, input: Val) -> Val {
-        self.fn1.free_static_call(input)
-    }
-}
-
 impl ConstStaticFn<Ctx, Val, Val> for MutStaticPrimFunc {
     fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
         self.fn1.const_static_call(ctx, input)
     }
 }
 
-impl ConstCellFn<Ctx, Val, Val> for MutStaticPrimFunc {
-    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
-        self.fn1.const_static_call(ctx, input)
-    }
-}
-
 impl MutStaticFn<Ctx, Val, Val> for MutStaticPrimFunc {
     fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
-        self.fn1.mut_static_call(ctx, input)
-    }
-}
-
-impl MutCellFn<Ctx, Val, Val> for MutStaticPrimFunc {
-    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
         self.fn1.mut_static_call(ctx, input)
     }
 }

@@ -5,12 +5,9 @@ use std::hash::Hasher;
 
 use crate::ConstStaticFn;
 use crate::Ctx;
-use crate::DynRef;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
-use crate::MutCellFn;
-use crate::MutStaticFn;
 use crate::Symbol;
 use crate::Val;
 use crate::func::FuncTrait;
@@ -59,22 +56,6 @@ impl ConstStaticFn<Ctx, Val, Val> for ConstCellPrimFunc {
 impl ConstCellFn<Ctx, Val, Val> for ConstCellPrimFunc {
     fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
         self.fn1.const_cell_call(ctx, input)
-    }
-}
-
-impl MutStaticFn<Ctx, Val, Val> for ConstCellPrimFunc {
-    fn dyn_static_call(&self, ctx: DynRef<Ctx>, input: Val) -> Val {
-        self.fn1.const_static_call(ctx.into_const(), input)
-    }
-}
-
-impl MutCellFn<Ctx, Val, Val> for ConstCellPrimFunc {
-    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
-        self.fn1.const_cell_call(ConstRef::new(ctx), input)
-    }
-
-    fn dyn_cell_call(&mut self, ctx: DynRef<Ctx>, input: Val) -> Val {
-        self.fn1.const_cell_call(ctx.into_const(), input)
     }
 }
 

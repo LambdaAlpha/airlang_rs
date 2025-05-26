@@ -3,4 +3,4 @@ use crate::types::wrap::rc_wrap;
 
 rc_wrap!(pub FreeStaticPrimFuncVal(FreeStaticPrimFunc));
 
-impl_const_func_trait!(FreeStaticPrimFuncVal);
+impl_func_trait!(FreeStaticPrimFuncVal);

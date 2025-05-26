@@ -3,15 +3,8 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use crate::ConstCellFn;
-use crate::ConstRef;
-use crate::ConstStaticFn;
-use crate::Ctx;
-use crate::DynRef;
 use crate::FreeStaticFn;
 use crate::FuncMode;
-use crate::MutCellFn;
-use crate::MutStaticFn;
 use crate::Symbol;
 use crate::Val;
 use crate::func::FuncTrait;
@@ -42,46 +35,6 @@ impl FreeStaticFn<Val, Val> for FreeCellPrimFunc {
 impl FreeCellFn<Val, Val> for FreeCellPrimFunc {
     fn free_cell_call(&mut self, input: Val) -> Val {
         self.fn1.free_cell_call(input)
-    }
-}
-
-impl ConstStaticFn<Ctx, Val, Val> for FreeCellPrimFunc {
-    fn opt_const_static_call(&self, _ctx: Option<ConstRef<Ctx>>, input: Val) -> Val {
-        self.free_static_call(input)
-    }
-}
-
-impl ConstCellFn<Ctx, Val, Val> for FreeCellPrimFunc {
-    fn const_cell_call(&mut self, _ctx: ConstRef<Ctx>, input: Val) -> Val {
-        self.free_cell_call(input)
-    }
-
-    fn opt_const_cell_call(&mut self, _ctx: Option<ConstRef<Ctx>>, input: Val) -> Val {
-        self.free_cell_call(input)
-    }
-}
-
-impl MutStaticFn<Ctx, Val, Val> for FreeCellPrimFunc {
-    fn dyn_static_call(&self, _ctx: DynRef<Ctx>, input: Val) -> Val {
-        self.free_static_call(input)
-    }
-
-    fn opt_dyn_static_call(&self, _ctx: Option<DynRef<Ctx>>, input: Val) -> Val {
-        self.free_static_call(input)
-    }
-}
-
-impl MutCellFn<Ctx, Val, Val> for FreeCellPrimFunc {
-    fn mut_cell_call(&mut self, _ctx: &mut Ctx, input: Val) -> Val {
-        self.free_cell_call(input)
-    }
-
-    fn dyn_cell_call(&mut self, _ctx: DynRef<Ctx>, input: Val) -> Val {
-        self.free_cell_call(input)
-    }
-
-    fn opt_dyn_cell_call(&mut self, _ctx: Option<DynRef<Ctx>>, input: Val) -> Val {
-        self.free_cell_call(input)
     }
 }
 
