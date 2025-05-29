@@ -3,8 +3,6 @@ pub use pub1::*;
 // https://github.com/rust-lang/rustfmt/issues/4070
 mod __ {}
 
-use const_format::concatcp;
-
 // delimiters
 
 pub(crate) const LIST_LEFT: char = '[';
@@ -29,9 +27,6 @@ pub(crate) const RIGHT: &str = ">";
 
 pub(crate) const ARITY_2: &str = "2";
 pub(crate) const ARITY_3: &str = "3";
-
-pub(crate) const TAG_CHAR: char = '#';
-pub(crate) const TAG: &str = concatcp!(TAG_CHAR);
 
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";

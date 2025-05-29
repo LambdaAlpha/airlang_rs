@@ -61,7 +61,6 @@ pub fn expected() -> Vec<Repr> {
         tag_call("t", vec![tag_call("t", vec![symbol("a")])]),
         tag_call("t", vec![tag_call("t", vec![symbol("a")])]),
         tag_call("a", vec![symbol("b")]),
-        tag_call("1", vec![symbol("a")]),
         tag_call("t", vec![symbol("a"), symbol("b")]),
         tag_call("t", vec![symbol(":"), symbol(";"), symbol("!"), symbol("?")]),
         tag_call("t", vec![
@@ -82,7 +81,6 @@ pub fn expected() -> Vec<Repr> {
             tag_call("t", vec![symbol("a")]),
             tag_call("t", vec![symbol("b"), symbol("c"), symbol("d")]),
         )])]),
-        tag_call("t", vec![symbol("a"), call(symbol("b"), symbol("c")), symbol("d")]),
         tag_call("t", vec![infix_call(
             infix_call(symbol("a"), symbol("b"), symbol("c")),
             symbol("d"),

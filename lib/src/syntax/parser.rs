@@ -68,8 +68,6 @@ use crate::syntax::SCOPE_RIGHT;
 use crate::syntax::SEPARATOR;
 use crate::syntax::SPACE;
 use crate::syntax::SYMBOL_QUOTE;
-use crate::syntax::TAG;
-use crate::syntax::TAG_CHAR;
 use crate::syntax::TEXT_QUOTE;
 use crate::syntax::TRUE;
 use crate::syntax::UNIT;
@@ -374,8 +372,12 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             RIGHT => scope(ctx.untag().direction(Direction::Right)).parse_next(i),
             ARITY_2 => scope(ctx.untag().arity(Arity::Two)).parse_next(i),
             ARITY_3 => scope(ctx.untag().arity(Arity::Three)).parse_next(i),
-            TAG => scope(ctx.untag()).parse_next(i),
-            s if s.starts_with(TAG_CHAR) => scope(ctx.tag(&s[1 ..])).parse_next(i),
+            s if s.ends_with(CALL_FORWARD) => {
+                scope(ctx.reverse(false).tag(&s[.. s.len() - 1])).parse_next(i)
+            }
+            s if s.ends_with(CALL_REVERSE) => {
+                scope(ctx.reverse(true).tag(&s[.. s.len() - 1])).parse_next(i)
+            }
             _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
         }
     }
