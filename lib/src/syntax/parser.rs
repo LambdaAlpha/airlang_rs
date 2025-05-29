@@ -98,52 +98,41 @@ pub(crate) trait ParseRepr:
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 struct ParseCtx<'a> {
-    is_tag: bool,
     tag: &'a str,
-    arity: Arity,
-    struct1: Struct,
     direction: Direction,
+    arity: Arity,
+    reverse: bool,
 }
 
 impl Default for ParseCtx<'_> {
     fn default() -> Self {
-        Self {
-            is_tag: false,
-            tag: "",
-            arity: Arity::Three,
-            struct1: Struct::CallForward,
-            direction: Direction::Right,
-        }
+        Self { tag: "", direction: Direction::Right, arity: Arity::Three, reverse: false }
     }
 }
 
 impl<'a> ParseCtx<'a> {
     fn tag(mut self, tag: &'a str) -> Self {
-        self.is_tag = true;
         self.tag = tag;
         self
     }
 
-    fn escape(mut self) -> Self {
-        self.is_tag = false;
+    fn untag(mut self) -> Self {
+        self.tag = "";
         self
     }
 
-    fn esc_struct(mut self, struct1: Struct) -> Self {
-        self.is_tag = false;
-        self.struct1 = struct1;
-        self
-    }
-
-    fn esc_direction(mut self, direction: Direction) -> Self {
-        self.is_tag = false;
+    fn direction(mut self, direction: Direction) -> Self {
         self.direction = direction;
         self
     }
 
-    fn esc_arity(mut self, arity: Arity) -> Self {
-        self.is_tag = false;
+    fn arity(mut self, arity: Arity) -> Self {
         self.arity = arity;
+        self
+    }
+
+    fn reverse(mut self, reverse: bool) -> Self {
+        self.reverse = reverse;
         self
     }
 }
@@ -152,13 +141,6 @@ impl<'a> ParseCtx<'a> {
 enum Arity {
     Two,
     Three,
-}
-
-#[derive(Copy, Clone, PartialEq, Eq)]
-enum Struct {
-    Pair,
-    CallForward,
-    CallReverse,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -289,6 +271,26 @@ fn scope<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
     scoped_trim_comment(compose(ctx)).context(label("scope"))
 }
 
+fn full_symbol<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
+where F: Parser<&'a str, T, E> {
+    terminated(f, not(one_of(is_trivial_symbol)).context(expect_desc("no symbols")))
+}
+
+fn trivial_symbol1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
+    take_while(1 .., is_trivial_symbol).parse_next(i)
+}
+
+fn is_trivial_symbol(c: char) -> bool {
+    if is_delimiter(c) {
+        return false;
+    }
+    Symbol::is_symbol(c)
+}
+
+fn is_symbol(c: char) -> bool {
+    Symbol::is_symbol(c)
+}
+
 fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
     (move |i: &mut _| match peek(any).parse_next(i)? {
         // delimiters
@@ -312,26 +314,6 @@ fn tokens<T: ParseRepr>(
     ctx: ParseCtx, occurrences: impl Into<Range>,
 ) -> impl Parser<&str, Vec<Token<T>>, E> {
     separated(occurrences, token(ctx), spaces_comment(1 ..))
-}
-
-fn full_symbol<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
-where F: Parser<&'a str, T, E> {
-    terminated(f, not(one_of(is_trivial_symbol)).context(expect_desc("no symbols")))
-}
-
-fn trivial_symbol1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    take_while(1 .., is_trivial_symbol).parse_next(i)
-}
-
-fn is_trivial_symbol(c: char) -> bool {
-    if is_delimiter(c) {
-        return false;
-    }
-    Symbol::is_symbol(c)
-}
-
-fn is_symbol(c: char) -> bool {
-    Symbol::is_symbol(c)
 }
 
 fn ext<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
@@ -386,14 +368,13 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
-            PAIR => scope(ctx.esc_struct(Struct::Pair)).parse_next(i),
-            CALL_FORWARD => scope(ctx.esc_struct(Struct::CallForward)).parse_next(i),
-            CALL_REVERSE => scope(ctx.esc_struct(Struct::CallReverse)).parse_next(i),
-            LEFT => scope(ctx.esc_direction(Direction::Left)).parse_next(i),
-            RIGHT => scope(ctx.esc_direction(Direction::Right)).parse_next(i),
-            ARITY_2 => scope(ctx.esc_arity(Arity::Two)).parse_next(i),
-            ARITY_3 => scope(ctx.esc_arity(Arity::Three)).parse_next(i),
-            TAG => scope(ctx.escape()).parse_next(i),
+            CALL_FORWARD => scope(ctx.untag().reverse(false)).parse_next(i),
+            CALL_REVERSE => scope(ctx.untag().reverse(true)).parse_next(i),
+            LEFT => scope(ctx.untag().direction(Direction::Left)).parse_next(i),
+            RIGHT => scope(ctx.untag().direction(Direction::Right)).parse_next(i),
+            ARITY_2 => scope(ctx.untag().arity(Arity::Two)).parse_next(i),
+            ARITY_3 => scope(ctx.untag().arity(Arity::Three)).parse_next(i),
+            TAG => scope(ctx.untag()).parse_next(i),
             s if s.starts_with(TAG_CHAR) => scope(ctx.tag(&s[1 ..])).parse_next(i),
             _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
         }
@@ -430,7 +411,7 @@ where
     if len == 0 {
         return fail.parse_next(i);
     }
-    if ctx.is_tag {
+    if !ctx.tag.is_empty() {
         return Ok(compose_tag(ctx, tokens, ctx.tag));
     }
     if len == 1 {
@@ -470,15 +451,15 @@ where
 }
 
 fn compose_one<T: ParseRepr>(ctx: ParseCtx, token: Token<T>) -> T {
-    if ctx.is_tag { compose_tag(ctx, [token].into_iter(), ctx.tag) } else { token.into_repr() }
+    if ctx.tag.is_empty() {
+        token.into_repr()
+    } else {
+        compose_tag(ctx, [token].into_iter(), ctx.tag)
+    }
 }
 
 fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
-    match ctx.struct1 {
-        Struct::Pair => T::from(Pair::new(left, right)),
-        Struct::CallForward => T::from(Call::new(false, left, right)),
-        Struct::CallReverse => T::from(Call::new(true, left, right)),
-    }
+    T::from(Call::new(ctx.reverse, left, right))
 }
 
 fn compose_many2<T, I>(ctx: ParseCtx, mut iter: I) -> T

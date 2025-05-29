@@ -2,10 +2,6 @@ pair
 -----
 a : b
 =====
-pair ctx
------
-:(a b)
-=====
 pair pair
 -----
 a : b : c

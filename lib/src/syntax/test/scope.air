@@ -54,19 +54,11 @@ right ctx + map
 -----
 >({(a b c d e) : f g h i j})
 =====
-pair ctx
------
-:(a b c d e)
-=====
-pair ctx two
------
-:(a b)
-=====
-call ctx
+forward ctx
 -----
 ;(a b c d e)
 =====
-call ctx two
+forward ctx two
 -----
 ;(a b)
 =====
@@ -130,11 +122,7 @@ tag empty ctx
 -----
 #t((a b c) d e)
 =====
-tag struct pair
------
-:(#t(a))
-=====
-tag struct reverse
+tag reverse
 -----
 !(#t(a))
 =====
@@ -150,14 +138,14 @@ tag map value
 -----
 #t({a : b c d})
 =====
-tag escape
+untag
 -----
 #t(a #(b c) d)
 =====
-tag escape by direction ctx
+untag by direction ctx
 -----
 #t(<(a b c d e))
 =====
-tag escape by struct ctx
+untag by call ctx
 -----
-#t(:(a b c))
+#t(!(a b c))

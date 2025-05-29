@@ -1,7 +1,6 @@
 use crate::syntax::repr::Repr;
 use crate::syntax::test::call;
 use crate::syntax::test::infix_call;
-use crate::syntax::test::infix_pair;
 use crate::syntax::test::infix_reverse;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
@@ -9,7 +8,6 @@ use crate::syntax::test::pair;
 use crate::syntax::test::reverse;
 use crate::syntax::test::symbol;
 use crate::syntax::test::tag_call;
-use crate::syntax::test::tag_pair;
 use crate::syntax::test::tag_reverse;
 
 pub fn expected() -> Vec<Repr> {
@@ -46,8 +44,6 @@ pub fn expected() -> Vec<Repr> {
             infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
             infix_call(symbol("f"), symbol("g"), infix_call(symbol("h"), symbol("i"), symbol("j"))),
         )]),
-        infix_pair(symbol("a"), symbol("b"), infix_pair(symbol("c"), symbol("d"), symbol("e"))),
-        pair(symbol("a"), symbol("b")),
         infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         call(symbol("a"), symbol("b")),
         infix_reverse(
@@ -73,7 +69,6 @@ pub fn expected() -> Vec<Repr> {
             symbol("d"),
             symbol("e"),
         ]),
-        tag_pair("t", vec![symbol("a")]),
         tag_reverse("t", vec![symbol("a")]),
         tag_call("t", vec![
             list(vec![tag_call("t", vec![symbol("a")]), tag_call("t", vec![symbol("b")])]),
@@ -93,6 +88,6 @@ pub fn expected() -> Vec<Repr> {
             symbol("d"),
             symbol("e"),
         )]),
-        tag_call("t", vec![infix_pair(symbol("a"), symbol("b"), symbol("c"))]),
+        tag_call("t", vec![infix_reverse(symbol("a"), symbol("b"), symbol("c"))]),
     ]
 }

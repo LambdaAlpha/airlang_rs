@@ -100,12 +100,6 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
 }
 
-fn tag_pair(tag: &str, v: Vec<Repr>) -> Repr {
-    let first = Repr::Symbol(Symbol::from_str(tag));
-    let second = Repr::List(v.into());
-    Repr::Pair(Box::new(Pair::new(first, second)))
-}
-
 fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
@@ -116,10 +110,6 @@ fn tag_reverse(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str(tag));
     let input = Repr::List(v.into());
     Repr::Call(Box::new(Call::new(true, func, input)))
-}
-
-fn infix_pair(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Pair(Box::new(Pair::new(middle, Repr::Pair(Box::new(Pair::new(left, right))))))
 }
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
