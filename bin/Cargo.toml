@@ -20,4 +20,4 @@ path = "../ext"
 version = "0.15.0"
 
 [dependencies]
-crossterm = "0.28"
+crossterm = "0.29"

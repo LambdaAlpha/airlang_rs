@@ -36,4 +36,4 @@ default-features = false
 features = ["small_rng", "alloc", "os_rng"]
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.6"
