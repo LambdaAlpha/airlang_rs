@@ -1,4 +1,4 @@
-do [
-    b = (build.import "b/b.air"),
+; do [
+    b = ; build.import "b/b.air",
     b + 1
 ]

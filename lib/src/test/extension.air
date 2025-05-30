@@ -1,6 +1,6 @@
 ==
 -----
-do [a = v_ext, b = v_ext, a == b]
+; do [a = v_ext, b = v_ext, a == b]
 -----
 true
 =====
@@ -12,7 +12,7 @@ v_ext
 =====
 any v_ext
 -----
-v_ext == any ; v_ext
+v_ext == ; any v_ext
 -----
 true
 =====
@@ -24,13 +24,13 @@ true
 =====
 call 1
 -----
-func_ext 1
+; func_ext 1
 -----
 1
 =====
 call 2
 -----
-func_ext 2
+; func_ext 2
 -----
 2
 =====
@@ -48,36 +48,36 @@ true
 =====
 construct
 -----
-func_ext == function ; {id : func_ext}
+func_ext == ; function {id : func_ext}
 -----
 true
 =====
 represent
 -----
-function.represent func_ext
+; function.represent func_ext
 -----
 {id : func_ext}
 =====
 func ==
 -----
-do [a = func_ext, b = func_ext, a == b]
+; do [a = func_ext, b = func_ext, a == b]
 -----
 true
 =====
 func |
 -----
-. | func_ext ; 1
+. | ; func_ext 1
 -----
 1
 =====
 func call.apply
 -----
-call.apply ; func_ext ';' 1
+; call.apply func_ext ';' 1
 -----
 1
 =====
 prelude
 -----
-do [a = prelude ; ., a | .func_ext is_null .]
+; do [a = ; prelude ., a | .func_ext is_null .]
 -----
 false

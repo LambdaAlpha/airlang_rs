@@ -1,7 +1,7 @@
 length push
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     l1 = a list.length .,
     a list.push .,
     l2 = a list.length .,
@@ -12,10 +12,10 @@ true
 =====
 length push_many
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     la = a list.length .,
-    b = any ; list,
+    b = ; any list,
     lb = b list.length .,
     a list.push_many b,
     lab = a list.length .,
@@ -26,11 +26,11 @@ true
 =====
 length pop
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     l1 = a list.length .,
     (l1 == 0) break true,
-    i = (l1 + (any ; integer) % l1) % l1,
+    i = (l1 + (; any integer) % l1) % l1,
     a list.pop i,
     l2 = a list.length .,
     l2 == l1 - i
@@ -40,14 +40,14 @@ true
 =====
 set get
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     b = a,
     l = a list.length .,
     (l == 0) break true,
-    i = (l + (any ; integer) % l) % l,
+    i = (l + (; any integer) % l) % l,
     v1 = a list.get i,
-    v2 = any ; .,
+    v2 = ; any .,
     v3 = a list.set i : v2,
     v4 = a list.get i,
     a list.set i : v1,
@@ -58,11 +58,11 @@ true
 =====
 set_many get
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     la = a list.length .,
     (la == 0) break true,
-    b = any ; list,
+    b = ; any list,
     lb = b list.length .,
     (lb == 0) break true,
     (la < lb) ? [
@@ -75,7 +75,7 @@ do [
     ] : .,
     a1 = a,
     d = la - lb,
-    i = (d == 0) ? 0 : (d + (any ; integer) % d) % d,
+    i = (d == 0) ? 0 : (d + (; any integer) % d) % d,
     c1 = a list.get i : i + lb,
     c2 = a list.set_many i : b,
     b1 = a list.get i : i + lb,
@@ -87,11 +87,11 @@ true
 =====
 insert get length
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     l = 1 + a list.length .,
-    i = (l + (any ; integer) % l) % l,
-    v = any ; .,
+    i = (l + (; any integer) % l) % l,
+    v = ; any .,
     a list.insert i : v,
     v1 = a list.get i,
     l1 = a list.length .,
@@ -102,12 +102,12 @@ true
 =====
 insert remove
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     b = a,
     l = 1 + a list.length .,
-    i = (l + (any ; integer) % l) % l,
-    v1 = any ; .,
+    i = (l + (; any integer) % l) % l,
+    v1 = ; any .,
     a list.insert i : v1,
     v2 = a list.remove i,
     (v1 == v2) and a == b
@@ -117,11 +117,11 @@ true
 =====
 insert_many get length
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     l1 = 1 + a list.length .,
-    i = (l1 + (any ; integer) % l1) % l1,
-    v1 = any ; list,
+    i = (l1 + (; any integer) % l1) % l1,
+    v1 = ; any list,
     vl = v1 list.length .,
     a list.insert_many i : v1,
     v2 = a list.get i : i + vl,
@@ -133,12 +133,12 @@ true
 =====
 insert_many remove
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     b = a,
     l = 1 + a list.length .,
-    i = (l + (any ; integer) % l) % l,
-    v1 = any ; list,
+    i = (l + (; any integer) % l) % l,
+    v1 = ; any list,
     v1l = v1 list.length .,
     a list.insert_many i : v1,
     v2 = a list.remove i : i + v1l,
@@ -149,10 +149,10 @@ true
 =====
 push pop
 -----
-do [
-    a1 = any ; list,
+; do [
+    a1 = ; any list,
     a2 = a1,
-    v1 = any ; .,
+    v1 = ; any .,
     a1 list.push v1,
     v2 = a1 list.pop .,
     (v1 == v2) and (a1 == a2)
@@ -162,10 +162,10 @@ true
 =====
 push_many pop
 -----
-do [
-    a1 = any ; list,
+; do [
+    a1 = ; any list,
     a2 = a1,
-    b1 = any ; list,
+    b1 = ; any list,
     lb = b1 list.length .,
     a1 list.push_many b1,
     b2 = a1 list.pop lb,
@@ -176,8 +176,8 @@ true
 =====
 clear
 -----
-do [
-    a = any ; list,
+; do [
+    a = ; any list,
     a list.clear .,
     a == []
 ]
@@ -198,49 +198,49 @@ length else
 =====
 length ref
 -----
-do [a = [1, 2], a list.length .]
+; do [a = [1, 2], a list.length .]
 -----
 2
 =====
 set 1
 -----
-do [a = [1], a list.set 0 : 2, ^a]
+; do [a = [1], a list.set 0 : 2, ^a]
 -----
 [2]
 =====
 set 2
 -----
-do [a = [1, 2], a list.set 1 : 3, ^a]
+; do [a = [1, 2], a list.set 1 : 3, ^a]
 -----
 [1, 3]
 =====
 set length
 -----
-do [a = [], a list.set 1 : 1, ^a]
+; do [a = [], a list.set 1 : 1, ^a]
 -----
 []
 =====
 set_many empty
 -----
-do [a = [0, 1, 2], a list.set_many 0 : []]
+; do [a = [0, 1, 2], a list.set_many 0 : []]
 -----
 []
 =====
 set_many 1
 -----
-do [a = [0, 1, 2], a list.set_many 0 : [3, 4], ^a]
+; do [a = [0, 1, 2], a list.set_many 0 : [3, 4], ^a]
 -----
 [3, 4, 2]
 =====
 set_many 2
 -----
-do [a = [0, 1, 2], a list.set_many 1 : [3, 4], ^a]
+; do [a = [0, 1, 2], a list.set_many 1 : [3, 4], ^a]
 -----
 [0, 3, 4]
 =====
 set_many last
 -----
-do [a = [0, 1, 2], a list.set_many 2 : [], ^a]
+; do [a = [0, 1, 2], a list.set_many 2 : [], ^a]
 -----
 [0, 1, 2]
 =====
@@ -306,7 +306,7 @@ insert
 =====
 insert length
 -----
-do [a = [], a list.insert 0 : 1, ^a]
+; do [a = [], a list.insert 0 : 1, ^a]
 -----
 [1]
 =====

@@ -8,11 +8,11 @@ a : b : c
 =====
 pair other
 -----
-a : b ; c
+a : ; b c
 =====
 other pair
 -----
-a ; b : c
+; a b : c
 =====
 pair infix
 -----

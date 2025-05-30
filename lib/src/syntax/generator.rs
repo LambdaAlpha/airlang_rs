@@ -264,10 +264,10 @@ fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
             return;
         }
     }
-    gen_scope_if_need(ctx, s, call.func);
+    let prefix = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
+    s.push_str(prefix);
     s.push(' ');
-    let infix = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
-    s.push_str(infix);
+    gen_scope_if_need(ctx, s, call.func);
     s.push(' ');
     gen1(ctx, s, call.input);
 }

@@ -1,9 +1,9 @@
 length join
 -----
-do [
-    a = any ; symbol,
+; do [
+    a = ; any symbol,
     la = a symbol.length .,
-    b = any ; symbol,
+    b = ; any symbol,
     lb = b symbol.length .,
     ab = . symbol.join [^a, ^b],
     lab = ab symbol.length .,
@@ -26,7 +26,7 @@ a : 1
 =====
 length ref
 -----
-do [a = .abc, a symbol.length .]
+; do [a = .abc, a symbol.length .]
 -----
 3
 =====
@@ -38,7 +38,7 @@ ab
 =====
 join unit
 -----
-do [a = .a1, b = .b1, c = .c1, . symbol.join [^a, ^b, ^c]]
+; do [a = .a1, b = .b1, c = .c1, . symbol.join [^a, ^b, ^c]]
 -----
 a1b1c1
 =====
@@ -56,36 +56,36 @@ a.b
 =====
 into_text from_text
 -----
-do [s = any ; symbol, s == symbol.from_text ; symbol.into_text ; s]
+; do [s = ; any symbol, s == ; symbol.from_text ; symbol.into_text s]
 -----
 true
 =====
 from_text empty
 -----
-symbol.from_text ""
+; symbol.from_text ""
 -----
 ''
 =====
 from_text trivial
 -----
-symbol.from_text "hello_world!"
+; symbol.from_text "hello_world!"
 -----
 hello_world!
 =====
 from_text special
 -----
-symbol.from_text "{}"
+; symbol.from_text "{}"
 -----
 '{}'
 =====
 into_text empty
 -----
-symbol.into_text ; id ; ''
+; symbol.into_text ; id ''
 -----
 ""
 =====
 into_text trivial
 -----
-symbol.into_text ; .hello_world!
+; symbol.into_text .hello_world!
 -----
 "hello_world!"

@@ -10,7 +10,6 @@ use crate::syntax::test::symbol;
 pub(crate) fn expected() -> Vec<Repr> {
     vec![
         call(symbol("a"), symbol("b")),
-        call(symbol("a"), symbol("b")),
         call(symbol("a"), call(symbol("b"), symbol("c"))),
         call(symbol("a"), pair(symbol("b"), symbol("c"))),
         pair(symbol("a"), call(symbol("b"), symbol("c"))),

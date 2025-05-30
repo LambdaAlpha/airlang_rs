@@ -1,5 +1,5 @@
 use crate::syntax::Repr;
-use crate::syntax::test::call;
+use crate::syntax::test::infix_call;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::symbol;
@@ -9,7 +9,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("a"),
         symbol("a"),
         symbol("a"),
-        call(symbol("a"), symbol("b")),
+        infix_call(symbol("a"), symbol("b"), symbol("c")),
         symbol("a"),
         symbol("a"),
         symbol("a"),
@@ -17,7 +17,7 @@ pub(crate) fn expected() -> Vec<Repr> {
         symbol("a"),
         symbol("a"),
         symbol("a"),
-        call(symbol("a"), symbol("b")),
+        infix_call(symbol("a"), symbol("b"), symbol("c")),
         symbol("a"),
         symbol("a"),
         list(vec![symbol("a"), symbol("d")]),

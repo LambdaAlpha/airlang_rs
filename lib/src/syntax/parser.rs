@@ -46,8 +46,6 @@ use crate::map::Map;
 use crate::number::Number;
 use crate::pair::Pair;
 use crate::symbol::Symbol;
-use crate::syntax::ARITY_2;
-use crate::syntax::ARITY_3;
 use crate::syntax::BYTE;
 use crate::syntax::CALL_FORWARD;
 use crate::syntax::CALL_REVERSE;
@@ -98,13 +96,12 @@ pub(crate) trait ParseRepr:
 struct ParseCtx<'a> {
     tag: &'a str,
     direction: Direction,
-    arity: Arity,
     reverse: bool,
 }
 
 impl Default for ParseCtx<'_> {
     fn default() -> Self {
-        Self { tag: "", direction: Direction::Right, arity: Arity::Three, reverse: false }
+        Self { tag: "", direction: Direction::Right, reverse: false }
     }
 }
 
@@ -124,21 +121,10 @@ impl<'a> ParseCtx<'a> {
         self
     }
 
-    fn arity(mut self, arity: Arity) -> Self {
-        self.arity = arity;
-        self
-    }
-
     fn reverse(mut self, reverse: bool) -> Self {
         self.reverse = reverse;
         self
     }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq)]
-enum Arity {
-    Two,
-    Three,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -370,13 +356,11 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             CALL_REVERSE => scope(ctx.untag().reverse(true)).parse_next(i),
             LEFT => scope(ctx.untag().direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.untag().direction(Direction::Right)).parse_next(i),
-            ARITY_2 => scope(ctx.untag().arity(Arity::Two)).parse_next(i),
-            ARITY_3 => scope(ctx.untag().arity(Arity::Three)).parse_next(i),
-            s if s.ends_with(CALL_FORWARD) => {
-                scope(ctx.reverse(false).tag(&s[.. s.len() - 1])).parse_next(i)
+            s if s.starts_with(CALL_FORWARD) => {
+                scope(ctx.reverse(false).tag(&s[1 ..])).parse_next(i)
             }
-            s if s.ends_with(CALL_REVERSE) => {
-                scope(ctx.reverse(true).tag(&s[.. s.len() - 1])).parse_next(i)
+            s if s.starts_with(CALL_REVERSE) => {
+                scope(ctx.reverse(true).tag(&s[1 ..])).parse_next(i)
             }
             _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
         }
@@ -420,25 +404,20 @@ where
         let repr = tokens.next().unwrap().into_repr();
         return Ok(repr);
     }
-    if len == 2 {
-        let func = tokens.next().unwrap().into_repr();
-        let input = tokens.next().unwrap().into_repr();
-        return Ok(compose_two(ctx, func, input));
+    if len % 2 == 0 {
+        return cut_err(fail.context(expect_desc("odd number of tokens"))).parse_next(i);
     }
-    match ctx.arity {
-        Arity::Two => match ctx.direction {
-            Direction::Left => Ok(compose_many2(ctx, tokens)),
-            Direction::Right => Ok(compose_many2(ctx, tokens.rev())),
-        },
-        Arity::Three => {
-            if len % 2 == 0 {
-                return cut_err(fail.context(expect_desc("odd number of tokens"))).parse_next(i);
-            }
-            match ctx.direction {
-                Direction::Left => Ok(compose_many3(ctx, tokens)),
-                Direction::Right => Ok(compose_many3(ctx, tokens.rev())),
-            }
-        }
+    match ctx.direction {
+        Direction::Left => Ok(compose_many(ctx, tokens)),
+        Direction::Right => Ok(compose_many(ctx, tokens.rev())),
+    }
+}
+
+fn compose_tokens_one<T: ParseRepr>(ctx: ParseCtx, token: Token<T>) -> T {
+    if ctx.tag.is_empty() {
+        token.into_repr()
+    } else {
+        compose_tag(ctx, [token].into_iter(), ctx.tag)
     }
 }
 
@@ -452,39 +431,7 @@ where
     compose_two(ctx, tag, list)
 }
 
-fn compose_one<T: ParseRepr>(ctx: ParseCtx, token: Token<T>) -> T {
-    if ctx.tag.is_empty() {
-        token.into_repr()
-    } else {
-        compose_tag(ctx, [token].into_iter(), ctx.tag)
-    }
-}
-
-fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
-    T::from(Call::new(ctx.reverse, left, right))
-}
-
-fn compose_many2<T, I>(ctx: ParseCtx, mut iter: I) -> T
-where
-    T: ParseRepr,
-    I: Iterator<Item = Token<T>>, {
-    let mut first = iter.next().unwrap();
-    loop {
-        let Some(second) = iter.next() else {
-            break;
-        };
-        let first1 = first.into_repr();
-        let second = second.into_repr();
-        let (left, right) = match ctx.direction {
-            Direction::Left => (first1, second),
-            Direction::Right => (second, first1),
-        };
-        first = Token::Default(compose_two(ctx, left, right));
-    }
-    first.into_repr()
-}
-
-fn compose_many3<T, I>(ctx: ParseCtx, mut iter: I) -> T
+fn compose_many<T, I>(ctx: ParseCtx, mut iter: I) -> T
 where
     T: ParseRepr,
     I: Iterator<Item = Token<T>>, {
@@ -493,27 +440,42 @@ where
         let Some(middle) = iter.next() else {
             break;
         };
-        let first1 = first.into_repr();
-        let last = iter.next().unwrap().into_repr();
+        let first1 = first;
+        let last = iter.next().unwrap();
         let (left, right) = match ctx.direction {
             Direction::Left => (first1, last),
             Direction::Right => (last, first1),
         };
-        first = Token::Default(compose_infix(ctx, left, middle, right));
+        first = Token::Default(compose_three(ctx, left, middle, right));
     }
     first.into_repr()
 }
 
-fn compose_infix<T: ParseRepr>(ctx: ParseCtx, left: T, middle: Token<T>, right: T) -> T {
+fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
+    T::from(Call::new(ctx.reverse, left, right))
+}
+
+fn compose_three<T: ParseRepr>(
+    ctx: ParseCtx, left: Token<T>, middle: Token<T>, right: Token<T>,
+) -> T {
+    let left = match left {
+        Token::Unquote(s) => match &*s {
+            CALL_FORWARD => {
+                return T::from(Call::new(false, middle.into_repr(), right.into_repr()));
+            }
+            CALL_REVERSE => return T::from(Call::new(true, middle.into_repr(), right.into_repr())),
+            _ => T::from(s),
+        },
+        Token::Default(left) => left,
+    };
     let middle = match middle {
         Token::Unquote(s) => match &*s {
-            PAIR => return T::from(Pair::new(left, right)),
-            CALL_FORWARD => return T::from(Call::new(false, left, right)),
-            CALL_REVERSE => return T::from(Call::new(true, left, right)),
+            PAIR => return T::from(Pair::new(left, right.into_repr())),
             _ => T::from(s),
         },
         Token::Default(middle) => middle,
     };
+    let right = right.into_repr();
     let pair = Pair::new(left, right);
     let pair = T::from(pair);
     compose_two(ctx, middle, pair)
@@ -562,7 +524,7 @@ fn map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
 fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> {
     move |i: &mut _| {
         let key = token(ctx).parse_next(i)?;
-        let key = compose_one(ctx, key);
+        let key = compose_tokens_one(ctx, key);
         let pair = opt(preceded(spaces_comment(1 ..), PAIR.void())).parse_next(i).unwrap();
         if pair.is_none() {
             return Ok((key, T::from(Unit)));

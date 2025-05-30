@@ -25,9 +25,6 @@ pub(crate) const COMMENT: &str = "_";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 
-pub(crate) const ARITY_2: &str = "2";
-pub(crate) const ARITY_3: &str = "3";
-
 pub(crate) const UNIT: &str = ".";
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";

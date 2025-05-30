@@ -14,7 +14,7 @@ leading and trailing space
 =====
 space between tokens
 -----
-a b
+a b c
 =====
 leading comment
 -----
@@ -47,7 +47,7 @@ _("") _("") a _("") _("")
 =====
 comment between tokens
 -----
-a _("") b
+a _("") b _("") c
 =====
 multiline comment
 -----
@@ -56,7 +56,7 @@ _(."
 =====
 complex comment
 -----
-_(f ; [1, 2, 3]) a
+_(; f [1, 2, 3]) a
 =====
 list item comment
 -----

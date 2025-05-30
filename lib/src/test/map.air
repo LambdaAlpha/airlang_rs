@@ -1,10 +1,10 @@
 length set
 -----
-do [
-    a = any ; map,
+; do [
+    a = ; any map,
     l1 = a map.length .,
-    k = any ; .,
-    v = any ; .,
+    k = ; any .,
+    v = ; any .,
     i = (a map.contains k) ? 0 : 1,
     a map.set k : v,
     l2 = a map.length .,
@@ -15,10 +15,10 @@ true
 =====
 length set_many
 -----
-do [
-    a = any ; map,
+; do [
+    a = ; any map,
     la = a map.length .,
-    b = any ; map,
+    b = ; any map,
     lb = b map.length .,
     c = a map.set_many b,
     lc = c map.length .,
@@ -30,9 +30,9 @@ true
 =====
 items map
 -----
-do [
-    a1 = any ; map,
-    a2 = map ; a1 map.items .,
+; do [
+    a1 = ; any map,
+    a2 = ; map a1 map.items .,
     a1 == a2
 ]
 -----
@@ -40,10 +40,10 @@ true
 =====
 into_items map
 -----
-do [
-    a1 = any ; map,
+; do [
+    a1 = ; any map,
     a2 = a1,
-    a3 = map ; a1 map.into_items .,
+    a3 = ; map a1 map.into_items .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -51,9 +51,9 @@ true
 =====
 keys set
 -----
-do [
-    a1 = any ; map,
-    a2 = set ; a1 map.keys .,
+; do [
+    a1 = ; any map,
+    a2 = ; set a1 map.keys .,
     a1 map.set_many a2,
     a1 == a2
 ]
@@ -62,10 +62,10 @@ true
 =====
 into_keys set
 -----
-do [
-    a1 = any ; map,
-    a2 = set ; a1 map.keys .,
-    a3 = set ; a1 map.into_keys .,
+; do [
+    a1 = ; any map,
+    a2 = ; set a1 map.keys .,
+    a3 = ; set a1 map.into_keys .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -73,16 +73,16 @@ true
 =====
 values multiset
 -----
-do [
-    a1 = any ; map,
-    b1 = multiset ; a1 map.values .,
+; do [
+    a1 = ; any map,
+    b1 = ; multiset a1 map.values .,
     a2 = {},
     i = 0,
     a1 for kv : [
         a2 map.set i : kv pair.second .,
         i = i + 1,
     ],
-    b2 = multiset ; a2 map.values .,
+    b2 = ; multiset a2 map.values .,
     b1 == b2
 ]
 -----
@@ -90,10 +90,10 @@ true
 =====
 into_values multiset
 -----
-do [
-    a1 = any ; map,
-    a2 = multiset ; a1 map.values .,
-    a3 = multiset ; a1 map.into_values .,
+; do [
+    a1 = ; any map,
+    a2 = ; multiset a1 map.values .,
+    a3 = ; multiset a1 map.into_values .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -101,10 +101,10 @@ true
 =====
 set contains
 -----
-do [
-    a = any ; map,
-    k = any ; .,
-    v = any ; .,
+; do [
+    a = ; any map,
+    k = ; any .,
+    v = ; any .,
     a map.set k : v,
     a map.contains k
 ]
@@ -113,10 +113,10 @@ true
 =====
 set get
 -----
-do [
-    a = any ; map,
-    k = any ; .,
-    v = any ; .,
+; do [
+    a = ; any map,
+    k = ; any .,
+    v = ; any .,
     a map.set k : v,
     v1 = a map.get k,
     v1 == v
@@ -126,9 +126,9 @@ true
 =====
 set_many contains_all
 -----
-do [
-    a = any ; map,
-    b = any ; map,
+; do [
+    a = ; any map,
+    b = ; any map,
     a map.set_many b,
     a map.contains_all b map.keys .
 ]
@@ -137,20 +137,20 @@ true
 =====
 remove_many contains_any
 -----
-do [
-    a = any ; map,
-    b = any ; list,
+; do [
+    a = ; any map,
+    b = ; any list,
     a map.remove_many b,
-    not ; a map.contains_any b
+    ; not a map.contains_any b
 ]
 -----
 true
 =====
 set_many get_many
 -----
-do [
-    a = any ; map,
-    b = any ; map,
+; do [
+    a = ; any map,
+    b = ; any map,
     a map.set_many b,
     b1 = a map.get_many b map.keys .,
     b == b1
@@ -160,34 +160,34 @@ true
 =====
 get remove
 -----
-do [
-    a = any ; map,
-    k = any ; .,
+; do [
+    a = ; any map,
+    k = ; any .,
     v1 = a map.get k,
     v2 = a map.remove k,
     c = a map.contains k,
-    (not c) and (v1 == v2)
+    (; not c) and (v1 == v2)
 ]
 -----
 true
 =====
 get_many remove_many
 -----
-do [
-    a = any ; map,
-    ks = any ; list,
+; do [
+    a = ; any map,
+    ks = ; any list,
     vs1 = a map.get_many ks,
     vs2 = a map.remove_many ks,
     c = a map.contains_any ks,
-    (not c) and (vs1 == vs2)
+    (; not c) and (vs1 == vs2)
 ]
 -----
 true
 =====
 clear
 -----
-do [
-    a = any ; map,
+; do [
+    a = ; any map,
     a map.clear .,
     a == {}
 ]
@@ -202,19 +202,19 @@ length
 =====
 items map 1
 -----
-do [(m : i) = {1 : 2, 3 : 3} map.items ., map ^i]
+; do [(m : i) = {1 : 2, 3 : 3} map.items ., ; map ^i]
 -----
 {1 : 2, 3 : 3}
 =====
 keys set 1
 -----
-do [(m : k) = {1 : 2, 3 : 3} map.keys ., set ^k]
+; do [(m : k) = {1 : 2, 3 : 3} map.keys ., ; set ^k]
 -----
 {1, 3}
 =====
 values multiset 1
 -----
-do [(m : v) = {1 : 2, 3 : 2} map.values ., multiset ^v]
+; do [(m : v) = {1 : 2, 3 : 2} map.values ., ; multiset ^v]
 -----
 {2 : 2}
 =====
@@ -316,30 +316,30 @@ clear 1
 =====
 map 1
 -----
-map [1 : 2, 3 : 4]
+; map [1 : 2, 3 : 4]
 -----
 {1 : 2, 3 : 4}
 =====
 map duplicate keys
 -----
-map [1 : 2, 1 : 3]
+; map [1 : 2, 1 : 3]
 -----
 {1 : 3}
 =====
 set duplicate keys 1
 -----
-set [1, 2, 2, 3]
+; set [1, 2, 2, 3]
 -----
 {1, 2, 3}
 =====
 set duplicate keys 2
 -----
-set [1, 2, 1]
+; set [1, 2, 1]
 -----
 {1, 2}
 =====
 multiset 1
 -----
-multiset ["a", "b", "c", "c", "c", "b"]
+; multiset ["a", "b", "c", "c", "c", "b"]
 -----
 {"a" : 1, "b" : 2, "c" : 3}

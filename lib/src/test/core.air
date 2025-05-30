@@ -6,7 +6,7 @@ true
 =====
 assign and read
 -----
-do [a = 1, a]
+; do [a = 1, a]
 -----
 1
 =====
@@ -42,90 +42,90 @@ symbol literal special 4
 =====
 ref
 -----
-do [a = 1, *a]
+; do [a = 1, *a]
 -----
 1
 =====
 ref will not remove
 -----
-do [a = 1, *a, a]
+; do [a = 1, *a, a]
 -----
 1
 =====
 ref special
 -----
-do [.*.a = 1, *.a]
+; do [.*.a = 1, *.a]
 -----
 1
 =====
 move
 -----
-do [a = 1, ^a]
+; do [a = 1, ^a]
 -----
 1
 =====
 move will remove
 -----
-do [a = 1, ^a, a]
+; do [a = 1, ^a, a]
 -----
 .
 =====
 move special
 -----
-do [.**a = 1, ^*a]
+; do [.**a = 1, ^*a]
 -----
 1
 =====
 pair eval
 -----
-(not false) : "1"
+(; not false) : "1"
 -----
 true : "1"
 =====
 list eval
 -----
-[not true, 1, "2"]
+[; not true, 1, "2"]
 -----
 [false, 1, "2"]
 =====
 map eval
 -----
-{(not true) : (not true)}
+{(; not true) : (; not true)}
 -----
 {false : false}
 =====
 call recursive
 -----
-not ; not ; true
+; not ; not true
 -----
 true
 =====
 non-func call .
 -----
-. 1
+; . 1
 -----
-. 1
+; . 1
 =====
 non-func call true
 -----
-true 1
+; true 1
 -----
-true 1
+; true 1
 =====
 non-func call false
 -----
-false 1
+; false 1
 -----
-false 1
+; false 1
 =====
 non-func call other
 -----
-"a" "b"
+; "a" "b"
 -----
-"a" "b"
+; "a" "b"
 =====
 non-func call recursive
 -----
-"a" ; not ; true
+; "a" ; not true
 -----
-"a" false
+; "a" false
