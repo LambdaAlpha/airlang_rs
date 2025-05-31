@@ -1,6 +1,5 @@
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::MutStaticFn;
 use crate::PairVal;
@@ -24,14 +23,14 @@ impl FreeStaticFn<PairVal, Val> for PairMode {
     }
 }
 
-impl ConstStaticFn<Ctx, PairVal, Val> for PairMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: PairVal) -> Val {
+impl ConstStaticFn<Val, PairVal, Val> for PairMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: PairVal) -> Val {
         PairForm { first: &self.first, second: &self.second }.const_static_call(ctx, input)
     }
 }
 
-impl MutStaticFn<Ctx, PairVal, Val> for PairMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: PairVal) -> Val {
+impl MutStaticFn<Val, PairVal, Val> for PairMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: PairVal) -> Val {
         PairForm { first: &self.first, second: &self.second }.mut_static_call(ctx, input)
     }
 }

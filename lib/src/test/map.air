@@ -196,123 +196,123 @@ true
 =====
 length
 -----
-{1 : 2, 3 : 3} map.length .
+; do [m = {1 : 2, 3 : 3}, m map.length .]
 -----
-{1 : 2, 3 : 3} : 2
+2
 =====
 items map 1
 -----
-; do [(m : i) = {1 : 2, 3 : 3} map.items ., ; map ^i]
+; do [m = {1 : 2, 3 : 3}, i = m map.items ., ; map ^i]
 -----
 {1 : 2, 3 : 3}
 =====
 keys set 1
 -----
-; do [(m : k) = {1 : 2, 3 : 3} map.keys ., ; set ^k]
+; do [m = {1 : 2, 3 : 3}, k = m map.keys ., ; set ^k]
 -----
 {1, 3}
 =====
 values multiset 1
 -----
-; do [(m : v) = {1 : 2, 3 : 2} map.values ., ; multiset ^v]
+; do [m = {1 : 2, 3 : 2}, v = m map.values ., ; multiset ^v]
 -----
 {2 : 2}
 =====
 contains 1
 -----
-{1 : 2} map.contains 1
+; do [m = {1 : 2}, m map.contains 1]
 -----
-{1 : 2} : true
+true
 =====
 contains 2
 -----
-{1 : 2} map.contains 2
+; do [m = {1 : 2}, m map.contains 2]
 -----
-{1 : 2} : false
+false
 =====
 contains_all 1
 -----
-{1 : 2, 3 : 4} map.contains_all [1, 3]
+; do [m = {1 : 2, 3 : 4}, m map.contains_all [1, 3]]
 -----
-{1 : 2, 3 : 4} : true
+true
 =====
 contains_all 2
 -----
-{1 : 2, 3 : 4} map.contains_all [1, 2]
+; do [m = {1 : 2, 3 : 4}, m map.contains_all [1, 2]]
 -----
-{1 : 2, 3 : 4} : false
+false
 =====
 contains_any 1
 -----
-{1 : 2, 3 : 4} map.contains_any [1, 2]
+; do [m = {1 : 2, 3 : 4}, m map.contains_any [1, 2]]
 -----
-{1 : 2, 3 : 4} : true
+true
 =====
 contains_any 2
 -----
-{1 : 2, 3 : 4} map.contains_any [2, 4]
+; do [m = {1 : 2, 3 : 4}, m map.contains_any [2, 4]]
 -----
-{1 : 2, 3 : 4} : false
+false
 =====
 set 1
 -----
-{1 : 2, 3 : 4} map.set 1 : 3
+; do [m = {1 : 2, 3 : 4}, [m map.set 1 : 3, m]]
 -----
-{1 : 3, 3 : 4} : 2
+[2, {1 : 3, 3 : 4}]
 =====
 set 2
 -----
-{1 : 2} map.set 2 : 3
+; do [m = {1 : 2}, [m map.set 2 : 3, m]]
 -----
-{1 : 2, 2 : 3} : .
+[., {1 : 2, 2 : 3}]
 =====
 set_many 1
 -----
-{1 : 2, 2 : 3} map.set_many {1 : 3, 3 : 4}
+; do [m = {1 : 2, 2 : 3}, [m map.set_many {1 : 3, 3 : 4}, m]]
 -----
-{1 : 3, 2 : 3, 3 : 4} : {1 : 2}
+[{1 : 2}, {1 : 3, 2 : 3, 3 : 4}]
 =====
 get 1
 -----
-{1 : 2} map.get 1
+; do [m = {1 : 2}, m map.get 1]
 -----
-{1 : 2} : 2
+2
 =====
 get 2
 -----
-{1 : 2} map.get 2
+; do [m = {1 : 2}, m map.get 2]
 -----
-{1 : 2} : .
+.
 =====
 get_many duplicate keys
 -----
-{1 : 2, 2 : 3, 3 : 4} map.get_many [1, 2, 1, 4]
+; do [m = {1 : 2, 2 : 3, 3 : 4}, m map.get_many [1, 2, 1, 4]]
 -----
-{1 : 2, 2 : 3, 3 : 4} : {1 : 2, 2 : 3}
+{1 : 2, 2 : 3}
 =====
 remove 1
 -----
-{1 : 2, 3 : 4} map.remove 1
+; do [m = {1 : 2, 3 : 4}, [m map.remove 1, m]]
 -----
-{3 : 4} : 2
+[2, {3 : 4}]
 =====
 remove 2
 -----
-{1 : 2} map.remove 2
+; do [m = {1 : 2}, [m map.remove 2, m]]
 -----
-{1 : 2} : .
+[., {1 : 2}]
 =====
 remove_many 1
 -----
-{1 : 2, 2 : 3, 3 : 4} map.remove_many [1, 3, 5]
+; do [m = {1 : 2, 2 : 3, 3 : 4}, [m map.remove_many [1, 3, 5], m]]
 -----
-{2 : 3} : {1 : 2, 3 : 4}
+[{1 : 2, 3 : 4}, {2 : 3}] 
 =====
 clear 1
 -----
-{1 : 2, 2 : 3} map.clear .
+; do [m = {1 : 2, 2 : 3}, m map.clear ., m]
 -----
-{} : .
+{}
 =====
 map 1
 -----

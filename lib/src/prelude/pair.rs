@@ -1,21 +1,17 @@
 use std::mem::swap;
 
 use crate::ConstRef;
-use crate::Ctx;
 use crate::FuncMode;
-use crate::Pair;
-use crate::ctx::main::MainCtx;
-use crate::either::Either;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
+use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
-use crate::prelude::ref_pair_mode;
 use crate::syntax::PAIR;
 use crate::val::Val;
 use crate::val::func::FuncVal;
@@ -68,107 +64,69 @@ fn fn_new(input: Val) -> Val {
 fn get_first() -> Named<FuncVal> {
     let id = "pair.first";
     let f = const_impl(fn_get_first);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_get_first(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_get_first(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Pair(pair) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_or_val(&ctx, pair.first, |ref_or_val| match ref_or_val {
-        Either::This(val) => match &val {
-            Val::Pair(pair) => pair.first.clone(),
-            _ => Val::default(),
-        },
-        Either::That(val) => match val {
-            Val::Pair(pair) => Pair::from(pair).first,
-            _ => Val::default(),
-        },
-    })
+    pair.first.clone()
 }
 
 fn set_first() -> Named<FuncVal> {
     let id = "pair.set_first";
     let f = mut_impl(fn_set_first);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_set_first(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(name_val) = input else {
+fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
+    let Val::Pair(pair) = ctx else {
         return Val::default();
     };
-    let name_val = Pair::from(name_val);
-    let name = name_val.first;
-    let mut val = name_val.second;
-    MainCtx::with_ref_mut_or_val(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(pair) => {
-            let Val::Pair(pair) = pair else {
-                return Val::default();
-            };
-            swap(&mut pair.first, &mut val);
-            val
-        }
-        Either::That(_) => Val::default(),
-    })
+    swap(&mut pair.first, &mut input);
+    input
 }
 
 fn get_second() -> Named<FuncVal> {
     let id = "pair.second";
     let f = const_impl(fn_get_second);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_get_second(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_get_second(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Pair(pair) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_or_val(&ctx, pair.first, |ref_or_val| match ref_or_val {
-        Either::This(val) => match &val {
-            Val::Pair(pair) => pair.second.clone(),
-            _ => Val::default(),
-        },
-        Either::That(val) => match val {
-            Val::Pair(pair) => Pair::from(pair).second,
-            _ => Val::default(),
-        },
-    })
+    pair.second.clone()
 }
 
 fn set_second() -> Named<FuncVal> {
     let id = "pair.set_second";
     let f = mut_impl(fn_set_second);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_set_second(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(name_val) = input else {
+fn fn_set_second(ctx: &mut Val, mut input: Val) -> Val {
+    let Val::Pair(pair) = ctx else {
         return Val::default();
     };
-    let name_val = Pair::from(name_val);
-    let name = name_val.first;
-    let mut val = name_val.second;
-    MainCtx::with_ref_mut_or_val(ctx, name, |ref_or_val| match ref_or_val {
-        Either::This(pair) => {
-            let Val::Pair(pair) = pair else {
-                return Val::default();
-            };
-            swap(&mut pair.second, &mut val);
-            val
-        }
-        Either::That(_) => Val::default(),
-    })
+    swap(&mut pair.second, &mut input);
+    input
 }

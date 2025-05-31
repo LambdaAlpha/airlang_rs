@@ -127,6 +127,7 @@ impl CtxMap {
         }
     }
 
+    #[expect(dead_code)]
     pub(crate) fn is_assignable(&self, name: Symbol, contract: Contract) -> bool {
         let Some(old) = self.map.get(&name) else {
             return contract.is_insertable();

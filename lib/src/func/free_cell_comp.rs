@@ -16,7 +16,7 @@ impl FreeStaticFn<Val, Val> for FreeCellCompFunc {
         let inner = &mut self.comp.ctx.clone();
         let input_name = self.comp.input_name.clone();
         let body = self.comp.body.clone();
-        Composite::free_transform(inner, input_name, input, body)
+        Composite::free_call(inner, input_name, input, body)
     }
 }
 
@@ -25,7 +25,7 @@ impl FreeCellFn<Val, Val> for FreeCellCompFunc {
         let inner = &mut self.comp.ctx;
         let input_name = self.comp.input_name.clone();
         let body = self.comp.body.clone();
-        Composite::free_transform(inner, input_name, input, body)
+        Composite::free_call(inner, input_name, input, body)
     }
 }
 
@@ -34,13 +34,11 @@ impl FuncTrait for FreeCellCompFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        false
+    }
+
     fn code(&self) -> Val {
         self.comp.func_code()
-    }
-}
-
-impl FreeCellCompFunc {
-    pub(crate) fn new(comp: Composite, mode: FuncMode) -> Self {
-        Self { comp, mode }
     }
 }

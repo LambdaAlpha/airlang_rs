@@ -2,7 +2,6 @@ use crate::CallVal;
 use crate::CodeMode;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::Map;
 use crate::MutStaticFn;
@@ -33,8 +32,8 @@ impl FreeStaticFn<CallVal, Val> for CallMode {
     }
 }
 
-impl ConstStaticFn<Ctx, CallVal, Val> for CallMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+impl ConstStaticFn<Val, CallVal, Val> for CallMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: CallVal) -> Val {
         match &self.some {
             Some(some) => CallForm { func: &self.func, input: &self.input, some }
                 .const_static_call(ctx, input),
@@ -43,8 +42,8 @@ impl ConstStaticFn<Ctx, CallVal, Val> for CallMode {
     }
 }
 
-impl MutStaticFn<Ctx, CallVal, Val> for CallMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+impl MutStaticFn<Val, CallVal, Val> for CallMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: CallVal) -> Val {
         match &self.some {
             Some(some) => {
                 CallForm { func: &self.func, input: &self.input, some }.mut_static_call(ctx, input)

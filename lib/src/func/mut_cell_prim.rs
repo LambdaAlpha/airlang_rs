@@ -6,7 +6,6 @@ use std::hash::Hasher;
 use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
@@ -37,13 +36,14 @@ pub trait MutCellFn<Ctx, I, O>: ConstCellFn<Ctx, I, O> + MutStaticFn<Ctx, I, O> 
     }
 }
 
-dyn_any_clone_eq_hash!(pub MutCellFnExt : MutCellFn<Ctx, Val, Val>);
+dyn_any_clone_eq_hash!(pub MutCellFnExt : MutCellFn<Val, Val, Val>);
 
 #[derive(Clone)]
 pub struct MutCellPrimFunc {
     pub(crate) prim: Primitive,
     pub(crate) fn1: Box<dyn MutCellFnExt>,
     pub(crate) mode: FuncMode,
+    pub(crate) ctx_explicit: bool,
 }
 
 impl FreeStaticFn<Val, Val> for MutCellPrimFunc {
@@ -58,26 +58,26 @@ impl FreeCellFn<Val, Val> for MutCellPrimFunc {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for MutCellPrimFunc {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for MutCellPrimFunc {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.fn1.const_static_call(ctx, input)
     }
 }
 
-impl ConstCellFn<Ctx, Val, Val> for MutCellPrimFunc {
-    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstCellFn<Val, Val, Val> for MutCellPrimFunc {
+    fn const_cell_call(&mut self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.fn1.const_cell_call(ctx, input)
     }
 }
 
-impl MutStaticFn<Ctx, Val, Val> for MutCellPrimFunc {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutStaticFn<Val, Val, Val> for MutCellPrimFunc {
+    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
         self.fn1.mut_static_call(ctx, input)
     }
 }
 
-impl MutCellFn<Ctx, Val, Val> for MutCellPrimFunc {
-    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutCellFn<Val, Val, Val> for MutCellPrimFunc {
+    fn mut_cell_call(&mut self, ctx: &mut Val, input: Val) -> Val {
         self.fn1.mut_cell_call(ctx, input)
     }
 }
@@ -87,18 +87,18 @@ impl FuncTrait for MutCellPrimFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        self.ctx_explicit
+    }
+
     fn code(&self) -> Val {
         Val::default()
     }
 }
 
 impl MutCellPrimFunc {
-    pub fn new_extension(id: Symbol, fn1: Box<dyn MutCellFnExt>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode }
-    }
-
-    pub(crate) fn new(id: Symbol, fn1: Box<dyn MutCellFnExt>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
+    pub fn new(id: Symbol, fn1: Box<dyn MutCellFnExt>, mode: FuncMode, ctx_explicit: bool) -> Self {
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, ctx_explicit }
     }
 }
 

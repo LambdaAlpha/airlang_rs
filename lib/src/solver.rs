@@ -3,7 +3,6 @@ use std::cell::RefCell;
 use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncVal;
@@ -36,8 +35,8 @@ impl FreeStaticFn<Val, Val> for Solver {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for Solver {
-    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, question: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for Solver {
+    fn const_static_call(&self, mut ctx: ConstRef<Val>, question: Val) -> Val {
         let answer = SOLVER.with(|solver| {
             let mut solver = solver.try_borrow_mut().ok()?;
             let solver = solver.as_mut()?;
@@ -57,8 +56,8 @@ impl ConstStaticFn<Ctx, Val, Val> for Solver {
     }
 }
 
-impl MutStaticFn<Ctx, Val, Val> for Solver {
-    fn mut_static_call(&self, ctx: &mut Ctx, question: Val) -> Val {
+impl MutStaticFn<Val, Val, Val> for Solver {
+    fn mut_static_call(&self, ctx: &mut Val, question: Val) -> Val {
         let answer = SOLVER.with(|solver| {
             let mut solver = solver.try_borrow_mut().ok()?;
             let solver = solver.as_mut()?;

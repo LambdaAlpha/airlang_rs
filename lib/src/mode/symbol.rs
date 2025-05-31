@@ -2,7 +2,6 @@ use const_format::concatcp;
 
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::MutStaticFn;
 use crate::Symbol;
@@ -36,8 +35,8 @@ impl FreeStaticFn<Symbol, Val> for SymbolMode {
     }
 }
 
-impl ConstStaticFn<Ctx, Symbol, Val> for SymbolMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Symbol) -> Val {
+impl ConstStaticFn<Val, Symbol, Val> for SymbolMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
         match self {
             SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.const_static_call(ctx, input),
             SymbolMode::Ref => SymbolForm::<REF_CHAR>.const_static_call(ctx, input),
@@ -46,8 +45,8 @@ impl ConstStaticFn<Ctx, Symbol, Val> for SymbolMode {
     }
 }
 
-impl MutStaticFn<Ctx, Symbol, Val> for SymbolMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Symbol) -> Val {
+impl MutStaticFn<Val, Symbol, Val> for SymbolMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
         match self {
             SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.mut_static_call(ctx, input),
             SymbolMode::Ref => SymbolForm::<REF_CHAR>.mut_static_call(ctx, input),

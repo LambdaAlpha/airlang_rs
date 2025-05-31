@@ -52,6 +52,7 @@ impl<'a, T> DynRef<'a, T> {
         DynRef { ref1, const1 }
     }
 
+    #[expect(dead_code)]
     pub(crate) fn unwrap(self) -> &'a mut T {
         self.ref1
     }

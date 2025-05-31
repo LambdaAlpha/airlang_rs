@@ -46,6 +46,7 @@ pub(crate) const FORWARD_MODE: &str = "forward_mode";
 pub(crate) const REVERSE_MODE: &str = "reverse_mode";
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
+pub(crate) const CTX_EXPLICIT: &str = "context_explicit";
 
 pub(crate) const FREE: &str = "free";
 pub(crate) const CONST: &str = "constant";
@@ -112,6 +113,11 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         Val::Unit(_) => MUTABLE,
         _ => return None,
     };
+    let ctx_explicit = match map_remove(&mut map, CTX_EXPLICIT) {
+        Val::Unit(_) => false,
+        Val::Bit(b) => b.bool(),
+        _ => return None,
+    };
     let cell = match map_remove(&mut map, CELL) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
@@ -121,30 +127,30 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let func = match ctx_access {
         FREE => {
             if cell {
-                let func = FreeCellCompFunc::new(comp, mode);
+                let func = FreeCellCompFunc { comp, mode };
                 FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
             } else {
-                let func = FreeStaticCompFunc::new(comp, mode);
+                let func = FreeStaticCompFunc { comp, mode };
                 FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
             }
         }
         CONST => {
             let ctx_name = ctx_name?;
             if cell {
-                let func = ConstCellCompFunc::new(comp, ctx_name, mode);
+                let func = ConstCellCompFunc { comp, ctx_name, mode, ctx_explicit };
                 FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
             } else {
-                let func = ConstStaticCompFunc::new(comp, ctx_name, mode);
+                let func = ConstStaticCompFunc { comp, ctx_name, mode, ctx_explicit };
                 FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
             }
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             if cell {
-                let func = MutCellCompFunc::new(comp, ctx_name, mode);
+                let func = MutCellCompFunc { comp, ctx_name, mode, ctx_explicit };
                 FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
             } else {
-                let func = MutStaticCompFunc::new(comp, ctx_name, mode);
+                let func = MutStaticCompFunc { comp, ctx_name, mode, ctx_explicit };
                 FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
             }
         }

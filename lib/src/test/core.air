@@ -129,3 +129,21 @@ non-func call recursive
 ; "a" ; not true
 -----
 ; "a" false
+=====
+explicit ctx unit
+-----
+; do [a = 1, . | .a]
+-----
+1
+=====
+explicit ctx symbol
+-----
+; do [p = 1 : 2, p pair.first .]
+-----
+1
+=====
+explicit ctx do
+-----
+; do [p = 1 : 2, p | ; do [. pair.set_first 3, . pair.set_second 4], p]
+-----
+3 : 4

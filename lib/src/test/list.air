@@ -186,19 +186,13 @@ true
 =====
 length empty
 -----
-[] list.length .
+; do [l = [], l list.length .]
 -----
-[] : 0
+0
 =====
 length else
 -----
-[1, 2] list.length .
------
-[1, 2] : 2
-=====
-length ref
------
-; do [a = [1, 2], a list.length .]
+; do [l = [1, 2], l list.length .]
 -----
 2
 =====
@@ -246,63 +240,63 @@ set_many last
 =====
 get out of bound
 -----
-[] list.get 0
+; do [l = [], l list.get 0]
 -----
-[] : .
+.
 =====
 get 0
 -----
-[1] list.get 0
+; do [l = [1], l list.get 0]
 -----
-[1] : 1
+1
 =====
 get else
 -----
-[1, 2] list.get 1
+; do [l = [1, 2], l list.get 1]
 -----
-[1, 2] : 2
+2
 =====
 get range 1
 -----
-[1, 2] list.get 0 : 1
+; do [l = [1, 2], l list.get 0 : 1]
 -----
-[1, 2] : [1]
+[1]
 =====
 get range 2
 -----
-[1, 2] list.get 1 : 2
+; do [l = [1, 2], l list.get 1 : 2]
 -----
-[1, 2] : [2]
+[2]
 =====
 get range . 1
 -----
-[1, 2] list.get . : .
+; do [l = [1, 2], l list.get . : .]
 -----
-[1, 2] : [1, 2]
+[1, 2]
 =====
 get range . 2
 -----
-[1, 2] list.get 1 : .
+; do [l = [1, 2], l list.get 1 : .]
 -----
-[1, 2] : [2]
+[2]
 =====
 get range . 3
 -----
-[1, 2] list.get . : 1
+; do [l = [1, 2], l list.get . : 1]
 -----
-[1, 2] : [1]
+[1]
 =====
 insert out of bound
 -----
-[] list.insert 1 : 1
+; do [l = [], l list.insert 1 : 1, l]
 -----
-[] : .
+[]
 =====
 insert
 -----
-[1, 2] list.insert 1 : 3
+; do [l = [1, 2], l list.insert 1 : 3, l]
 -----
-[1, 3, 2] : .
+[1, 3, 2]
 =====
 insert length
 -----
@@ -312,90 +306,90 @@ insert length
 =====
 insert_many
 -----
-[1, 2] list.insert_many 1 : [3, 4]
+; do [l = [1, 2], l list.insert_many 1 : [3, 4], l]
 -----
-[1, 3, 4, 2] : .
+[1, 3, 4, 2]
 =====
 remove
 -----
-[1, 2, 3] list.remove 1
+; do [l = [1, 2, 3], [l list.remove 1, l]]
 -----
-[1, 3] : 2
+[2, [1, 3]]
 =====
 remove range
 -----
-[1, 2, 3] list.remove 1 : 3
+; do [l = [1, 2, 3], [l list.remove 1 : 3, l]]
 -----
-[1] : [2, 3]
+[[2, 3], [1]]
 =====
 remove range .
 -----
-[1, 2, 3] list.remove . : .
+; do [l = [1, 2, 3], l list.remove . : ., l]
 -----
-[] : [1, 2, 3]
+[]
 =====
 push
 -----
-[1] list.push 2
+; do [l = [1], l list.push 2, l]
 -----
-[1, 2] : .
+[1, 2]
 =====
 push_many
 -----
-[1] list.push_many [2, 3]
+; do [l = [1], l list.push_many [2, 3], l]
 -----
-[1, 2, 3] : .
+[1, 2, 3]
 =====
 push_many empty
 -----
-[1] list.push_many []
+; do [l = [1], l list.push_many [], l]
 -----
-[1] : .
+[1]
 =====
 pop . empty
 -----
-[] list.pop .
+; do [l = [], [l list.pop ., l]]
 -----
-[] : .
+[., []]
 =====
 pop . 1
 -----
-[1] list.pop .
+; do [l = [1], [l list.pop ., l]]
 -----
-[] : 1
+[1, []]
 =====
 pop . 2
 -----
-[1, 2] list.pop .
+; do [l = [1, 2], [l list.pop ., l]]
 -----
-[1] : 2
+[2, [1]]
 =====
 pop 0
 -----
-[1, 2] list.pop 0
+; do [l = [1, 2], [l list.pop 0, l]]
 -----
-[1, 2] : []
+[[], [1, 2]]
 =====
 pop 1
 -----
-[1, 2] list.pop 1
+; do [l = [1, 2], [l list.pop 1, l]]
 -----
-[1] : [2]
+[[2], [1]]
 =====
 pop else
 -----
-[1, 2] list.pop 2
+; do [l = [1, 2], [l list.pop 2, l]]
 -----
-[] : [1, 2]
+[[1, 2], []]
 =====
 pop out of bound
 -----
-[1, 2] list.pop 3
+; do [l = [1, 2], l list.pop 3, l]
 -----
-[1, 2] : .
+[1, 2]
 =====
 clear
 -----
-[1, 2] list.clear .
+; do [l = [1, 2], l list.clear ., l]
 -----
-[] : .
+[]

@@ -39,7 +39,8 @@ fn import() -> Named<FuncVal> {
     let id = "build.import";
     let f = ConstStaticImpl::new(fn_import_free, fn_import_const);
     let mode = FuncMode::default();
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
 const CUR_URL_KEY: &str = "build.this_url";
@@ -52,13 +53,16 @@ fn fn_import_free(input: Val) -> Val {
     import_from_url(new_url)
 }
 
-fn fn_import_const(mut ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_import_const(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Ctx(ctx) = &*ctx else {
+        return Val::default();
+    };
     let Val::Text(url) = input else {
         return Val::default();
     };
     let url = Text::from(url);
     let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
-    let cur_url = get_cur_url(ctx.reborrow(), cur_url_key);
+    let cur_url = get_cur_url(ctx, cur_url_key);
     let new_url =
         cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
     import_from_url(new_url)
@@ -84,7 +88,7 @@ fn import_from_url(url: String) -> Val {
     mod_air.interpret(val)
 }
 
-fn get_cur_url(ctx: ConstRef<Ctx>, key: Symbol) -> Option<String> {
+fn get_cur_url(ctx: &Ctx, key: Symbol) -> Option<String> {
     if let Ok(val) = ctx.get_ref(key) {
         return if let Val::Text(url) = val { Some((***url).clone()) } else { None };
     }

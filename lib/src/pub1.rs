@@ -87,6 +87,7 @@ pub use crate::val::text::TextVal;
 mod __ {}
 
 use crate::extension::set_air_ext;
+use crate::func::comp::Composite;
 use crate::syntax::ParseError;
 use crate::syntax::ReprError;
 use crate::syntax::generator::PRETTY_FMT;
@@ -122,7 +123,7 @@ impl AirCell {
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
-        self.mode.mut_static_call(&mut self.ctx, input)
+        Composite::ctx_call(&self.mode, &mut self.ctx, input)
     }
 
     pub fn ctx_mut(&mut self) -> &mut Ctx {

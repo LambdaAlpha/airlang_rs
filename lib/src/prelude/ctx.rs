@@ -1,7 +1,6 @@
 use crate::CodeMode;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::DynRef;
 use crate::FreeStaticFn;
 use crate::FreeStaticImpl;
 use crate::FuncMode;
@@ -9,7 +8,6 @@ use crate::MutStaticFn;
 use crate::MutStaticImpl;
 use crate::SymbolMode;
 use crate::bit::Bit;
-use crate::ctx::Ctx;
 use crate::ctx::main::MainCtx;
 use crate::ctx::pattern::PatternCtx;
 use crate::ctx::pattern::assign_pattern;
@@ -20,7 +18,6 @@ use crate::ctx::repr::generate_ctx;
 use crate::ctx::repr::parse_contract;
 use crate::ctx::repr::parse_ctx;
 use crate::ctx::repr::parse_mode;
-use crate::either::Either;
 use crate::func::func_mode::DEFAULT_MODE;
 use crate::pair::Pair;
 use crate::prelude::Named;
@@ -102,10 +99,14 @@ fn read() -> Named<FuncVal> {
         FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_read(ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Ctx(ctx) = &*ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -113,7 +114,7 @@ fn fn_read(ctx: ConstRef<Ctx>, input: Val) -> Val {
     let Val::Symbol(s) = pair.first else {
         return Val::default();
     };
-    MainCtx::get_or_default(&ctx, s)
+    MainCtx::get_or_default(ctx, s)
 }
 
 fn move1() -> Named<FuncVal> {
@@ -123,10 +124,14 @@ fn move1() -> Named<FuncVal> {
         FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_move(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_move(ctx: &mut Val, input: Val) -> Val {
+    let Val::Ctx(ctx) = ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -146,10 +151,14 @@ fn assign() -> Named<FuncVal> {
     );
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_assign(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_assign(ctx: &mut Val, input: Val) -> Val {
+    let Val::Ctx(ctx) = ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -169,10 +178,14 @@ fn contract() -> Named<FuncVal> {
         FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_contract(ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Ctx(ctx) = &*ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -195,10 +208,14 @@ fn set_contract() -> Named<FuncVal> {
     );
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_set_contract(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
+    let Val::Ctx(ctx) = ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -220,10 +237,14 @@ fn is_locked() -> Named<FuncVal> {
         FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_is_locked(ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Ctx(ctx) = &*ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -244,10 +265,14 @@ fn is_null() -> Named<FuncVal> {
         FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_is_null(ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Ctx(ctx) = &*ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -264,14 +289,15 @@ fn is_const() -> Named<FuncVal> {
     let forward = FuncMode::default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_const(_ctx: ConstRef<Ctx>, _input: Val) -> Val {
+fn fn_const(_ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::true1())
 }
 
-fn fn_mut(_ctx: &mut Ctx, _input: Val) -> Val {
+fn fn_mut(_ctx: &mut Val, _input: Val) -> Val {
     Val::Bit(Bit::false1())
 }
 
@@ -279,75 +305,25 @@ fn with_ctx() -> Named<FuncVal> {
     let id = "|";
     let f = MutStaticImpl::new(fn_with_ctx_free, fn_with_ctx_const, fn_with_ctx_mut);
     let forward = FuncMode::pair_mode(
-        FuncMode::id_mode(),
+        FuncMode::symbol_mode(SymbolMode::Literal),
         FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form),
     );
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
 fn fn_with_ctx_free(input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    match MainCtx::ref_or_val(pair.first) {
-        Either::This(_) => Val::default(),
-        Either::That(tag) => {
-            if !tag.is_unit() {
-                return Val::default();
-            }
-            DEFAULT_MODE.free_static_call(pair.second)
-        }
-    }
+    DEFAULT_MODE.free_static_call(input)
 }
 
-fn fn_with_ctx_const(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let code = pair.second;
-    MainCtx::with_ref_dyn_or_val(ctx.into_dyn(), pair.first, |ref_or_val| match ref_or_val {
-        Either::This(dyn_ref) => {
-            let Val::Ctx(target_ctx) = dyn_ref.unwrap() else {
-                return Val::default();
-            };
-            DEFAULT_MODE.const_static_call(ConstRef::new(&mut **target_ctx), code)
-        }
-        Either::That(tag) => {
-            if !tag.is_unit() {
-                return Val::default();
-            }
-            DEFAULT_MODE.free_static_call(code)
-        }
-    })
+fn fn_with_ctx_const(ctx: ConstRef<Val>, input: Val) -> Val {
+    DEFAULT_MODE.const_static_call(ctx, input)
 }
 
-fn fn_with_ctx_mut(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let code = pair.second;
-    MainCtx::with_ref_dyn_or_val(DynRef::new(ctx, false), pair.first, |ref_or_val| match ref_or_val
-    {
-        Either::This(dyn_ref) => {
-            let is_const = dyn_ref.is_const();
-            let val_ref = dyn_ref.unwrap();
-            let Val::Ctx(target_ctx) = val_ref else {
-                return Val::default();
-            };
-            DEFAULT_MODE.dyn_static_call(DynRef::new(&mut **target_ctx, is_const), code)
-        }
-        Either::That(tag) => {
-            if !tag.is_unit() {
-                return Val::default();
-            }
-            DEFAULT_MODE.free_static_call(code)
-        }
-    })
+fn fn_with_ctx_mut(ctx: &mut Val, input: Val) -> Val {
+    DEFAULT_MODE.mut_static_call(ctx, input)
 }
 
 fn ctx_in_ctx_out() -> Named<FuncVal> {
@@ -367,13 +343,10 @@ fn fn_ctx_in_ctx_out(input: Val) -> Val {
         return Val::default();
     };
     let ctx_input = Pair::from(pair);
-    let Val::Ctx(ctx) = ctx_input.first else {
-        return Val::default();
-    };
-    let mut ctx = Ctx::from(ctx);
+    let mut ctx = ctx_input.first;
     let input = ctx_input.second;
     let output = DEFAULT_MODE.mut_static_call(&mut ctx, input);
-    let pair = Pair::new(Val::Ctx(ctx.into()), output);
+    let pair = Pair::new(ctx, output);
     Val::Pair(pair.into())
 }
 
@@ -424,10 +397,10 @@ fn ctx_self() -> Named<FuncVal> {
     let id = "self";
     let f = const_impl(fn_ctx_self);
     let mode = FuncMode::default();
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_ctx_self(ctx: ConstRef<Ctx>, _input: Val) -> Val {
-    let ctx = ctx.unwrap().clone();
-    Val::Ctx(CtxVal::from(ctx))
+fn fn_ctx_self(ctx: ConstRef<Val>, _input: Val) -> Val {
+    ctx.unwrap().clone()
 }

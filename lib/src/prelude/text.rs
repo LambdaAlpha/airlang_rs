@@ -1,20 +1,17 @@
 use crate::Byte;
 use crate::ConstRef;
-use crate::Ctx;
 use crate::FuncMode;
 use crate::Int;
-use crate::Pair;
-use crate::ctx::main::MainCtx;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
+use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
-use crate::prelude::ref_pair_mode;
 use crate::text::Text;
 use crate::val::Val;
 use crate::val::func::FuncVal;
@@ -88,49 +85,40 @@ fn fn_into_utf8(input: Val) -> Val {
 fn length() -> Named<FuncVal> {
     let id = "text.length";
     let f = const_impl(fn_length);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_length(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Text(t) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
-        let Val::Text(t) = val else {
-            return Val::default();
-        };
-        let len: Int = t.len().into();
-        Val::Int(len.into())
-    })
+    let len: Int = t.len().into();
+    Val::Int(len.into())
 }
 
 fn push() -> Named<FuncVal> {
     let id = "text.push";
     let f = mut_impl(fn_push);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_push(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_push(ctx: &mut Val, input: Val) -> Val {
+    let Val::Text(text) = ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Text(t) = pair.second else {
+    let Val::Text(t) = input else {
         return Val::default();
     };
-    MainCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
-        let Val::Text(text) = val else {
-            return;
-        };
-        text.push_str(&t);
-    })
+    text.push_str(&t);
+    Val::default()
 }
 
 fn join() -> Named<FuncVal> {

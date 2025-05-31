@@ -4,6 +4,8 @@ use crate::val::Val;
 pub(crate) trait FuncTrait {
     fn mode(&self) -> &FuncMode;
 
+    fn ctx_explicit(&self) -> bool;
+
     fn code(&self) -> Val;
 }
 

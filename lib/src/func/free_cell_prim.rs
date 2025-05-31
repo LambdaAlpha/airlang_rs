@@ -43,18 +43,18 @@ impl FuncTrait for FreeCellPrimFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        false
+    }
+
     fn code(&self) -> Val {
         Val::default()
     }
 }
 
 impl FreeCellPrimFunc {
-    pub fn new_extension(id: Symbol, fn1: Box<dyn FreeCellFnExt>, mode: FuncMode) -> Self {
+    pub fn new(id: Symbol, fn1: Box<dyn FreeCellFnExt>, mode: FuncMode) -> Self {
         Self { prim: Primitive { id, is_extension: true }, fn1, mode }
-    }
-
-    pub(crate) fn new(id: Symbol, fn1: Box<dyn FreeCellFnExt>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
     }
 }
 

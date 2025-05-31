@@ -3,7 +3,6 @@ use std::mem::take;
 use crate::ConstRef;
 use crate::Ctx;
 use crate::CtxError;
-use crate::CtxVal;
 use crate::MutStaticFn;
 use crate::Pair;
 use crate::Symbol;
@@ -20,34 +19,32 @@ pub(crate) struct Composite {
 }
 
 impl Composite {
-    pub(crate) fn free_transform(
-        inner: &mut Ctx, input_name: Symbol, input: Val, body: Val,
-    ) -> Val {
+    pub(crate) fn free_call(inner: &mut Ctx, input_name: Symbol, input: Val, body: Val) -> Val {
         if Self::put_input(inner, input_name, input).is_err() {
             return Val::default();
         }
-        Self::transform(inner, body)
+        Self::call(inner, body)
     }
 
-    pub(crate) fn const_transform(
-        inner: &mut Ctx, ctx_name: Symbol, outer: ConstRef<Ctx>, input_name: Symbol, input: Val,
+    pub(crate) fn const_call(
+        inner: &mut Ctx, ctx_name: Symbol, outer: ConstRef<Val>, input_name: Symbol, input: Val,
         body: Val,
     ) -> Val {
         if Self::put_input(inner, input_name, input).is_err() {
             return Val::default();
         }
-        let eval = |inner: &mut Ctx| Self::transform(inner, body);
+        let eval = |inner: &mut Ctx| Self::call(inner, body);
         Self::with_ctx(inner, outer.unwrap(), ctx_name, true, eval)
     }
 
-    pub fn mut_transform(
-        inner: &mut Ctx, ctx_name: Symbol, outer: &mut Ctx, input_name: Symbol, input: Val,
+    pub fn mut_call(
+        inner: &mut Ctx, ctx_name: Symbol, outer: &mut Val, input_name: Symbol, input: Val,
         body: Val,
     ) -> Val {
         if Self::put_input(inner, input_name, input).is_err() {
             return Val::default();
         }
-        let eval = |inner: &mut Ctx| Self::transform(inner, body);
+        let eval = |inner: &mut Ctx| Self::call(inner, body);
         Self::with_ctx(inner, outer, ctx_name, false, eval)
     }
 
@@ -58,12 +55,23 @@ impl Composite {
         Ok(())
     }
 
-    pub(crate) fn transform(ctx: &mut Ctx, body: Val) -> Val {
-        DEFAULT_MODE.mut_static_call(ctx, body)
+    pub(crate) fn call(ctx: &mut Ctx, body: Val) -> Val {
+        Self::ctx_call(&DEFAULT_MODE, ctx, body)
+    }
+
+    pub(crate) fn ctx_call<Fn>(f: &Fn, ctx: &mut Ctx, body: Val) -> Val
+    where Fn: MutStaticFn<Val, Val, Val> {
+        let mut ctx_val = Val::Ctx(take(ctx).into());
+        let output = f.mut_static_call(&mut ctx_val, body);
+        let Val::Ctx(ctx_val) = ctx_val else {
+            unreachable!("ctx_call ctx invariant is broken!!!")
+        };
+        *ctx = ctx_val.into();
+        output
     }
 
     pub(crate) fn with_ctx(
-        inner: &mut Ctx, outer: &mut Ctx, name: Symbol, const1: bool,
+        inner: &mut Ctx, outer: &mut Val, name: Symbol, const1: bool,
         f: impl FnOnce(&mut Ctx) -> Val,
     ) -> Val {
         if !inner.variables().is_null(name.clone()) {
@@ -75,22 +83,18 @@ impl Composite {
         output
     }
 
-    fn keep_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol, const1: bool) {
+    fn keep_ctx(inner: &mut Ctx, outer: &mut Val, name: Symbol, const1: bool) {
         // here is why we need a `&mut Ctx` for a const func
         let outer = take(outer);
-        let val = Val::Ctx(CtxVal::from(outer));
         let contract = if const1 { Contract::Const } else { Contract::Static };
-        let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(val, contract));
+        let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(outer, contract));
     }
 
-    fn restore_ctx(inner: &mut Ctx, outer: &mut Ctx, name: Symbol) {
-        let Some(CtxValue { val: Val::Ctx(outer_val), .. }) =
-            inner.variables_mut().remove_unchecked(&name)
-        else {
+    fn restore_ctx(inner: &mut Ctx, outer: &mut Val, name: Symbol) {
+        let Some(ctx_val) = inner.variables_mut().remove_unchecked(&name) else {
             unreachable!("restore_ctx ctx invariant is broken!!!");
         };
-        let outer_val = Ctx::from(outer_val);
-        *outer = outer_val;
+        *outer = ctx_val.val;
     }
 
     pub(crate) fn func_code(&self) -> Val {

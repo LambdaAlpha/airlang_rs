@@ -3,10 +3,10 @@ use std::io::stderr;
 use std::io::stdin;
 use std::io::stdout;
 
-use airlang::Ctx;
 use airlang::FuncMode;
 use airlang::FuncVal;
 use airlang::PreludeCtx;
+use airlang::SymbolMode;
 use airlang::Val;
 
 use crate::prelude::Named;
@@ -55,18 +55,16 @@ impl Prelude for IoPrelude {
 fn read_line() -> Named<FuncVal> {
     let id = "io.read_line";
     let f = mut_impl(fn_read_line);
-    let mode = FuncMode::default();
-    named_mut_fn(id, f, mode)
+    let forward =
+        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
+    let reverse = FuncMode::default_mode();
+    let mode = FuncMode { forward, reverse };
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_read_line(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        return Val::default();
-    };
-    let Ok(str) = ctx.get_ref_mut(s) else {
-        return Val::default();
-    };
-    let Val::Text(t) = str else {
+fn fn_read_line(ctx: &mut Val, _input: Val) -> Val {
+    let Val::Text(t) = ctx else {
         return Val::default();
     };
     let _ = stdin().read_line(t);

@@ -706,6 +706,21 @@ ctx name occupied
 -----
 true
 =====
+ctx explicit
+-----
+; do [
+    a = 1 : 2,
+    f = ; function {
+        context_explicit : true,
+        forward_mode : ; mode {pair : {symbol : ..} : eval*},
+        code : (.p : .i) : .p pair.set_first .i,
+    },
+    a f 3,
+    a
+]
+-----
+3 : 2
+=====
 repr
 -----
 ; function.represent ; function {code : (._ : .i) : .i}
@@ -771,6 +786,18 @@ access default
 ; do [f = ; function {}, f function.context_access .]
 -----
 mutable
+=====
+is_context_explicit true
+-----
+pair.first function.is_context_explicit .
+-----
+true
+=====
+is_context_explicit false
+-----
+eval* function.is_context_explicit .
+-----
+false
 =====
 forward mode primitive
 -----

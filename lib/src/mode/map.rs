@@ -1,6 +1,5 @@
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::Map;
 use crate::MapVal;
@@ -29,8 +28,8 @@ impl FreeStaticFn<MapVal, Val> for MapMode {
     }
 }
 
-impl ConstStaticFn<Ctx, MapVal, Val> for MapMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: MapVal) -> Val {
+impl ConstStaticFn<Val, MapVal, Val> for MapMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
         let some = &self.some;
         let key = &self.else1.first;
         let value = &self.else1.second;
@@ -38,8 +37,8 @@ impl ConstStaticFn<Ctx, MapVal, Val> for MapMode {
     }
 }
 
-impl MutStaticFn<Ctx, MapVal, Val> for MapMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
+impl MutStaticFn<Val, MapVal, Val> for MapMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: MapVal) -> Val {
         let some = &self.some;
         let key = &self.else1.first;
         let value = &self.else1.second;

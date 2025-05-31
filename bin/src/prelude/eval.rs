@@ -1,5 +1,4 @@
 use airlang::AirCell;
-use airlang::Ctx;
 use airlang::FuncMode;
 use airlang::FuncVal;
 use airlang::PreludeCtx;
@@ -30,10 +29,14 @@ fn reset() -> Named<FuncVal> {
     let id = "repl.reset";
     let f = mut_impl(fn_reset);
     let mode = FuncMode::default();
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_reset(ctx: &mut Ctx, _input: Val) -> Val {
-    *ctx = AirCell::initial_ctx();
+fn fn_reset(ctx: &mut Val, _input: Val) -> Val {
+    let Val::Ctx(ctx) = ctx else {
+        return Val::default();
+    };
+    **ctx = AirCell::initial_ctx();
     Val::default()
 }

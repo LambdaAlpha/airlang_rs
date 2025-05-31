@@ -15,7 +15,7 @@ impl FreeStaticFn<Val, Val> for FreeStaticCompFunc {
         let inner = &mut self.comp.ctx.clone();
         let input_name = self.comp.input_name.clone();
         let body = self.comp.body.clone();
-        Composite::free_transform(inner, input_name, input, body)
+        Composite::free_call(inner, input_name, input, body)
     }
 }
 
@@ -24,13 +24,11 @@ impl FuncTrait for FreeStaticCompFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        false
+    }
+
     fn code(&self) -> Val {
         self.comp.func_code()
-    }
-}
-
-impl FreeStaticCompFunc {
-    pub(crate) fn new(comp: Composite, mode: FuncMode) -> Self {
-        Self { comp, mode }
     }
 }

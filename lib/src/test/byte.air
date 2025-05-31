@@ -20,21 +20,15 @@ true
 =====
 length empty
 -----
-byte() byte.length .
+; do [b = byte(), b byte.length .]
 -----
-byte() : 0
+0
 =====
 length else
 -----
-byte(ff) byte.length .
+; do [b = byte(ff), b byte.length .]
 -----
-byte(ff) : 1
-=====
-length ref
------
-; do [a = byte(aa00), a byte.length .]
------
-2
+1
 =====
 push join
 -----

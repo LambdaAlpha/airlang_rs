@@ -1,6 +1,5 @@
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::List;
 use crate::ListVal;
@@ -25,14 +24,14 @@ impl FreeStaticFn<ListVal, Val> for ListMode {
     }
 }
 
-impl ConstStaticFn<Ctx, ListVal, Val> for ListMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+impl ConstStaticFn<Val, ListVal, Val> for ListMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: ListVal) -> Val {
         ListForm { head: &self.head, tail: &self.tail }.const_static_call(ctx, input)
     }
 }
 
-impl MutStaticFn<Ctx, ListVal, Val> for ListMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+impl MutStaticFn<Val, ListVal, Val> for ListMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: ListVal) -> Val {
         ListForm { head: &self.head, tail: &self.tail }.mut_static_call(ctx, input)
     }
 }

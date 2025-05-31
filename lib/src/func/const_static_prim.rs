@@ -4,7 +4,6 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::rc::Rc;
 
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::FuncMode;
 use crate::Symbol;
@@ -35,8 +34,9 @@ pub struct ConstStaticImpl<Ctx, I, O> {
 #[derive(Clone)]
 pub struct ConstStaticPrimFunc {
     pub(crate) prim: Primitive,
-    pub(crate) fn1: Rc<dyn ConstStaticFn<Ctx, Val, Val>>,
+    pub(crate) fn1: Rc<dyn ConstStaticFn<Val, Val, Val>>,
     pub(crate) mode: FuncMode,
+    pub(crate) ctx_explicit: bool,
 }
 
 impl FreeStaticFn<Val, Val> for ConstStaticPrimFunc {
@@ -45,8 +45,8 @@ impl FreeStaticFn<Val, Val> for ConstStaticPrimFunc {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for ConstStaticPrimFunc {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for ConstStaticPrimFunc {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.fn1.const_static_call(ctx, input)
     }
 }
@@ -56,22 +56,20 @@ impl FuncTrait for ConstStaticPrimFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        self.ctx_explicit
+    }
+
     fn code(&self) -> Val {
         Val::default()
     }
 }
 
 impl ConstStaticPrimFunc {
-    pub fn new_extension(
-        id: Symbol, fn1: Rc<dyn ConstStaticFn<Ctx, Val, Val>>, mode: FuncMode,
+    pub fn new(
+        id: Symbol, fn1: Rc<dyn ConstStaticFn<Val, Val, Val>>, mode: FuncMode, ctx_explicit: bool,
     ) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode }
-    }
-
-    pub(crate) fn new(
-        id: Symbol, fn1: Rc<dyn ConstStaticFn<Ctx, Val, Val>>, mode: FuncMode,
-    ) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, ctx_explicit }
     }
 }
 

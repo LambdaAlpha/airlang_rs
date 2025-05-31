@@ -23,11 +23,11 @@ use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
+use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::ref_mode;
-use crate::prelude::ref_pair_mode;
 use crate::symbol::Symbol;
 use crate::type1::arbitrary::Arbitrary;
 use crate::type1::arbitrary::arbitrary_ext_type;
@@ -105,36 +105,31 @@ fn fn_any(input: Val) -> Val {
 fn type1() -> Named<FuncVal> {
     let id = "type";
     let f = const_impl(fn_type1);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_type1(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
+fn fn_type1(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let s = match &*ctx {
+        Val::Unit(_) => UNIT,
+        Val::Bit(_) => BIT,
+        Val::Symbol(_) => SYMBOL,
+        Val::Text(_) => TEXT,
+        Val::Int(_) => INT,
+        Val::Number(_) => NUMBER,
+        Val::Byte(_) => BYTE,
+        Val::Pair(_) => PAIR,
+        Val::Call(_) => CALL,
+        Val::List(_) => LIST,
+        Val::Map(_) => MAP,
+        Val::Ctx(_) => CTX,
+        Val::Func(_) => FUNC,
+        Val::Ext(ext) => return Val::Symbol(ext.type_name()),
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
-        let s = match val {
-            Val::Unit(_) => UNIT,
-            Val::Bit(_) => BIT,
-            Val::Symbol(_) => SYMBOL,
-            Val::Text(_) => TEXT,
-            Val::Int(_) => INT,
-            Val::Number(_) => NUMBER,
-            Val::Byte(_) => BYTE,
-            Val::Pair(_) => PAIR,
-            Val::Call(_) => CALL,
-            Val::List(_) => LIST,
-            Val::Map(_) => MAP,
-            Val::Ctx(_) => CTX,
-            Val::Func(_) => FUNC,
-            Val::Ext(ext) => return Val::Symbol(ext.type_name()),
-        };
-        Val::Symbol(Symbol::from_str(s))
-    })
+    Val::Symbol(Symbol::from_str(s))
 }
 
 fn equal() -> Named<FuncVal> {
@@ -143,21 +138,25 @@ fn equal() -> Named<FuncVal> {
     let forward = FuncMode::pair_mode(ref_mode(), ref_mode());
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_equal(ctx: ConstRef<Ctx>, input: Val) -> Val {
+fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Ctx(ctx) = &*ctx else {
+        return Val::default();
+    };
     let Val::Pair(pair) = input else {
         return Val::default();
     };
     let pair = Pair::from(pair);
     let left = MainCtx::ref_or_val(pair.first);
     let right = MainCtx::ref_or_val(pair.second);
-    get_by_ref(&ctx, left, |v1| {
+    get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {
             return Val::default();
         };
-        get_by_ref(&ctx, right, |v2| {
+        get_by_ref(ctx, right, |v2| {
             let Some(v2) = v2 else {
                 return Val::default();
             };

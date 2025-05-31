@@ -138,7 +138,7 @@ true
 =====
 = special key 2
 -----
-; do [.*.p = 1 : 2, *.p pair.first .]
+; do [.*.p = 1 : 2, ..p pair.first .]
 -----
 1
 =====
@@ -438,12 +438,6 @@ is_constant default
 -----
 false
 =====
-is_constant free
------
-. | ; is_constant .
------
-.
-=====
 is_constant true
 -----
 ; do [(a . final) = ; context {}, a | ; is_constant .]
@@ -503,21 +497,21 @@ false
 -----
 1
 =====
-free self
+| self
 -----
-. | ; self .
+; do [u = 1, u | ; self .]
 -----
-.
+1
 =====
-free free
+| free free
 -----
-. | 1 + 1
+; do [u = ., u | 1 + 1]
 -----
 2
 =====
-free mutate
+| free mutate
 -----
-; do [a = 1, . | .a move ., a]
+; do [u = ., a = 1, u | .a move ., a]
 -----
 1
 =====

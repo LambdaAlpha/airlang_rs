@@ -5,7 +5,6 @@ use std::hash::Hash;
 use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::CtxAccess;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
@@ -90,8 +89,8 @@ impl FreeCellFn<Val, Val> for FuncVal {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for FuncVal {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for FuncVal {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
             FuncVal::Mode(f) => f.const_static_call(ctx, input),
             FuncVal::FreeCellPrim(f) => f.free_static_call(input),
@@ -110,8 +109,8 @@ impl ConstStaticFn<Ctx, Val, Val> for FuncVal {
     }
 }
 
-impl ConstCellFn<Ctx, Val, Val> for FuncVal {
-    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstCellFn<Val, Val, Val> for FuncVal {
+    fn const_cell_call(&mut self, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
             FuncVal::Mode(f) => f.const_static_call(ctx, input),
             FuncVal::FreeCellPrim(f) => f.free_cell_call(input),
@@ -130,8 +129,8 @@ impl ConstCellFn<Ctx, Val, Val> for FuncVal {
     }
 }
 
-impl MutStaticFn<Ctx, Val, Val> for FuncVal {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutStaticFn<Val, Val, Val> for FuncVal {
+    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
         match self {
             FuncVal::Mode(f) => f.mut_static_call(ctx, input),
             FuncVal::FreeCellPrim(f) => f.free_static_call(input),
@@ -150,8 +149,8 @@ impl MutStaticFn<Ctx, Val, Val> for FuncVal {
     }
 }
 
-impl MutCellFn<Ctx, Val, Val> for FuncVal {
-    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutCellFn<Val, Val, Val> for FuncVal {
+    fn mut_cell_call(&mut self, ctx: &mut Val, input: Val) -> Val {
         match self {
             FuncVal::Mode(f) => f.mut_static_call(ctx, input),
             FuncVal::FreeCellPrim(f) => f.free_cell_call(input),
@@ -186,6 +185,24 @@ impl FuncTrait for FuncVal {
             FuncVal::MutCellComp(f) => f.mode(),
             FuncVal::MutStaticPrim(f) => f.mode(),
             FuncVal::MutStaticComp(f) => f.mode(),
+        }
+    }
+
+    fn ctx_explicit(&self) -> bool {
+        match self {
+            FuncVal::Mode(f) => f.ctx_explicit(),
+            FuncVal::FreeCellPrim(f) => f.ctx_explicit(),
+            FuncVal::FreeCellComp(f) => f.ctx_explicit(),
+            FuncVal::FreeStaticPrim(f) => f.ctx_explicit(),
+            FuncVal::FreeStaticComp(f) => f.ctx_explicit(),
+            FuncVal::ConstCellPrim(f) => f.ctx_explicit(),
+            FuncVal::ConstCellComp(f) => f.ctx_explicit(),
+            FuncVal::ConstStaticPrim(f) => f.ctx_explicit(),
+            FuncVal::ConstStaticComp(f) => f.ctx_explicit(),
+            FuncVal::MutCellPrim(f) => f.ctx_explicit(),
+            FuncVal::MutCellComp(f) => f.ctx_explicit(),
+            FuncVal::MutStaticPrim(f) => f.ctx_explicit(),
+            FuncVal::MutStaticComp(f) => f.ctx_explicit(),
         }
     }
 
@@ -325,6 +342,10 @@ macro_rules! impl_func_trait {
         impl $crate::func::FuncTrait for $type1 {
             fn mode(&self) -> &$crate::func::func_mode::FuncMode {
                 self.0.mode()
+            }
+
+            fn ctx_explicit(&self) -> bool {
+                self.0.ctx_explicit()
             }
 
             fn code(&self) -> $crate::val::Val {

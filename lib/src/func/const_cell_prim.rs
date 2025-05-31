@@ -4,7 +4,6 @@ use std::hash::Hash;
 use std::hash::Hasher;
 
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
@@ -26,13 +25,14 @@ pub trait ConstCellFn<Ctx, I, O>: FreeCellFn<I, O> + ConstStaticFn<Ctx, I, O> {
     }
 }
 
-dyn_any_clone_eq_hash!(pub ConstCellFnExt : ConstCellFn<Ctx, Val, Val>);
+dyn_any_clone_eq_hash!(pub ConstCellFnExt : ConstCellFn<Val, Val, Val>);
 
 #[derive(Clone)]
 pub struct ConstCellPrimFunc {
     pub(crate) prim: Primitive,
     pub(crate) fn1: Box<dyn ConstCellFnExt>,
     pub(crate) mode: FuncMode,
+    pub(crate) ctx_explicit: bool,
 }
 
 impl FreeStaticFn<Val, Val> for ConstCellPrimFunc {
@@ -47,14 +47,14 @@ impl FreeCellFn<Val, Val> for ConstCellPrimFunc {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for ConstCellPrimFunc {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for ConstCellPrimFunc {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.fn1.const_static_call(ctx, input)
     }
 }
 
-impl ConstCellFn<Ctx, Val, Val> for ConstCellPrimFunc {
-    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstCellFn<Val, Val, Val> for ConstCellPrimFunc {
+    fn const_cell_call(&mut self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.fn1.const_cell_call(ctx, input)
     }
 }
@@ -64,18 +64,20 @@ impl FuncTrait for ConstCellPrimFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        self.ctx_explicit
+    }
+
     fn code(&self) -> Val {
         Val::default()
     }
 }
 
 impl ConstCellPrimFunc {
-    pub fn new_extension(id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode }
-    }
-
-    pub(crate) fn new(id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
+    pub fn new(
+        id: Symbol, fn1: Box<dyn ConstCellFnExt>, mode: FuncMode, ctx_explicit: bool,
+    ) -> Self {
+        Self { prim: Primitive { id, is_extension: true }, fn1, mode, ctx_explicit }
     }
 }
 

@@ -5,7 +5,6 @@ use crate::CallMode;
 use crate::CompMode;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::CtxAccess;
 use crate::FreeStaticFn;
 use crate::FuncMode;
@@ -33,14 +32,14 @@ impl FreeStaticFn<Val, Val> for ModeFunc {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for ModeFunc {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for ModeFunc {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.mode.const_static_call(ctx, input)
     }
 }
 
-impl MutStaticFn<Ctx, Val, Val> for ModeFunc {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutStaticFn<Val, Val, Val> for ModeFunc {
+    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
         self.mode.mut_static_call(ctx, input)
     }
 }
@@ -48,6 +47,10 @@ impl MutStaticFn<Ctx, Val, Val> for ModeFunc {
 impl FuncTrait for ModeFunc {
     fn mode(&self) -> &FuncMode {
         &FuncMode { forward: None, reverse: None }
+    }
+
+    fn ctx_explicit(&self) -> bool {
+        false
     }
 
     fn code(&self) -> Val {

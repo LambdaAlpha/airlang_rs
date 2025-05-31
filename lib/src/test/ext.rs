@@ -21,11 +21,8 @@ impl Prelude for TestAirExt {
         ctx.put(v_ext_name, Val::Ext(Box::new(VExt)));
 
         let func_ext_name = Symbol::from_str("func_ext");
-        let func = FreeStaticPrimFunc::new_extension(
-            func_ext_name.clone(),
-            Rc::new(FuncExt),
-            FuncMode::default(),
-        );
+        let func =
+            FreeStaticPrimFunc::new(func_ext_name.clone(), Rc::new(FuncExt), FuncMode::default());
         let func = Val::Func(FuncVal::FreeStaticPrim(FreeStaticPrimFuncVal::from(func)));
         ctx.put(func_ext_name, func);
     }

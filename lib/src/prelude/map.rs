@@ -1,24 +1,22 @@
 use std::mem::swap;
 
 use crate::ConstRef;
-use crate::Ctx;
 use crate::FuncMode;
 use crate::List;
 use crate::Map;
 use crate::bit::Bit;
-use crate::ctx::main::MainCtx;
 use crate::int::Int;
 use crate::pair::Pair;
 use crate::prelude::Named;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
+use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
 use crate::prelude::named_const_fn;
 use crate::prelude::named_free_fn;
 use crate::prelude::named_mut_fn;
-use crate::prelude::ref_pair_mode;
 use crate::val::Val;
 use crate::val::func::FuncVal;
 
@@ -101,439 +99,340 @@ impl Prelude for MapPrelude {
 fn length() -> Named<FuncVal> {
     let id = "map.length";
     let f = const_impl(fn_length);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_length(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let len: Int = map.len().into();
-        Val::Int(len.into())
-    })
+    let len: Int = map.len().into();
+    Val::Int(len.into())
 }
 
 fn items() -> Named<FuncVal> {
     let id = "map.items";
     let f = const_impl(fn_items);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_items(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_items(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let items: List<Val> =
-            map.iter().map(|(k, v)| Val::Pair(Pair::new(k.clone(), v.clone()).into())).collect();
-        Val::List(items.into())
-    })
+    let items: List<Val> =
+        map.iter().map(|(k, v)| Val::Pair(Pair::new(k.clone(), v.clone()).into())).collect();
+    Val::List(items.into())
 }
 
 fn into_items() -> Named<FuncVal> {
     let id = "map.into_items";
     let f = mut_impl(fn_into_items);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_into_items(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_into_items(ctx: &mut Val, _input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let mut origin = Map::default();
-        swap(&mut **map, &mut origin);
-        let items: List<Val> =
-            origin.into_iter().map(|(k, v)| Val::Pair(Pair::new(k, v).into())).collect();
-        Val::List(items.into())
-    })
+    let mut origin = Map::default();
+    swap(&mut **map, &mut origin);
+    let items: List<Val> =
+        origin.into_iter().map(|(k, v)| Val::Pair(Pair::new(k, v).into())).collect();
+    Val::List(items.into())
 }
 
 fn keys() -> Named<FuncVal> {
     let id = "map.keys";
     let f = const_impl(fn_keys);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_keys(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_keys(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let keys: List<Val> = map.keys().cloned().collect();
-        Val::List(keys.into())
-    })
+    let keys: List<Val> = map.keys().cloned().collect();
+    Val::List(keys.into())
 }
 
 fn into_keys() -> Named<FuncVal> {
     let id = "map.into_keys";
     let f = mut_impl(fn_into_keys);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_into_keys(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_into_keys(ctx: &mut Val, _input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let mut origin = Map::default();
-        swap(&mut **map, &mut origin);
-        let keys: List<Val> = origin.into_keys().collect();
-        Val::List(keys.into())
-    })
+    let mut origin = Map::default();
+    swap(&mut **map, &mut origin);
+    let keys: List<Val> = origin.into_keys().collect();
+    Val::List(keys.into())
 }
 
 fn values() -> Named<FuncVal> {
     let id = "map.values";
     let f = const_impl(fn_values);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_values(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_values(ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_lossless(&ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let values: List<Val> = map.values().cloned().collect();
-        Val::List(values.into())
-    })
+    let values: List<Val> = map.values().cloned().collect();
+    Val::List(values.into())
 }
 
 fn into_values() -> Named<FuncVal> {
     let id = "map.into_values";
     let f = mut_impl(fn_into_values);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_into_values(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_into_values(ctx: &mut Val, _input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_mut_lossless(ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let mut origin = Map::default();
-        swap(&mut **map, &mut origin);
-        let values: List<Val> = origin.into_values().collect();
-        Val::List(values.into())
-    })
+    let mut origin = Map::default();
+    swap(&mut **map, &mut origin);
+    let values: List<Val> = origin.into_values().collect();
+    Val::List(values.into())
 }
 
 fn contains() -> Named<FuncVal> {
     let id = "map.contains";
     let f = const_impl(fn_contains);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_contains(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(name_key) = input else {
+fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let name_key = Pair::from(name_key);
-    let name = name_key.first;
-    let key = &name_key.second;
-    MainCtx::with_ref_lossless(&ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        Val::Bit(Bit::new(map.contains_key(key)))
-    })
+    Val::Bit(Bit::new(map.contains_key(&input)))
 }
 
 fn contains_all() -> Named<FuncVal> {
     let id = "map.contains_all";
     let f = const_impl(fn_contains_all);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_contains_all(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(name_keys) = input else {
+fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let name_keys = Pair::from(name_keys);
-    let name = name_keys.first;
-    let Val::List(keys) = name_keys.second else {
+    let Val::List(keys) = input else {
         return Val::default();
     };
     let keys = List::from(keys);
-    MainCtx::with_ref_lossless(&ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let b = keys.into_iter().all(|k| map.contains_key(&k));
-        Val::Bit(Bit::new(b))
-    })
+    let b = keys.into_iter().all(|k| map.contains_key(&k));
+    Val::Bit(Bit::new(b))
 }
 
 fn contains_any() -> Named<FuncVal> {
     let id = "map.contains_any";
     let f = const_impl(fn_contains_many);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_contains_many(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(name_keys) = input else {
+fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let name_keys = Pair::from(name_keys);
-    let name = name_keys.first;
-    let Val::List(keys) = name_keys.second else {
+    let Val::List(keys) = input else {
         return Val::default();
     };
     let keys = List::from(keys);
-    MainCtx::with_ref_lossless(&ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let b = keys.into_iter().any(|k| map.contains_key(&k));
-        Val::Bit(Bit::new(b))
-    })
+    let b = keys.into_iter().any(|k| map.contains_key(&k));
+    Val::Bit(Bit::new(b))
 }
 
 fn set() -> Named<FuncVal> {
     let id = "map.set";
     let f = mut_impl(fn_set);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_set(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(name_pair) = input else {
+fn fn_set(ctx: &mut Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let name_pair = Pair::from(name_pair);
-    let name = name_pair.first;
-    let Val::Pair(key_value) = name_pair.second else {
+    let Val::Pair(key_value) = input else {
         return Val::default();
     };
     let key_value = Pair::from(key_value);
     let key = key_value.first;
     let value = key_value.second;
-    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        map.insert(key, value).unwrap_or_default()
-    })
+    map.insert(key, value).unwrap_or_default()
 }
 
 fn set_many() -> Named<FuncVal> {
     let id = "map.set_many";
     let f = mut_impl(fn_set_many);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_set_many(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(name_pair) = input else {
+fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let name_pair = Pair::from(name_pair);
-    let name = name_pair.first;
-    let Val::Map(update) = name_pair.second else {
+    let Val::Map(update) = input else {
         return Val::default();
     };
     let update = Map::from(update);
-    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let map: Map<Val, Val> = update
-            .into_iter()
-            .filter_map(|(k, v)| map.insert(k.clone(), v).map(|v| (k, v)))
-            .collect();
-        Val::Map(map.into())
-    })
+    let map: Map<Val, Val> =
+        update.into_iter().filter_map(|(k, v)| map.insert(k.clone(), v).map(|v| (k, v))).collect();
+    Val::Map(map.into())
 }
 
 fn get() -> Named<FuncVal> {
     let id = "map.get";
     let f = const_impl(fn_get);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_get(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(name_key) = input else {
+fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let name_key = Pair::from(name_key);
-    let name = name_key.first;
-    let key = &name_key.second;
-    MainCtx::with_ref_lossless(&ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        map.get(key).cloned().unwrap_or_default()
-    })
+    map.get(&input).cloned().unwrap_or_default()
 }
 
 fn get_many() -> Named<FuncVal> {
     let id = "map.get_many";
     let f = const_impl(fn_get_many);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_const_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_const_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_get_many(ctx: ConstRef<Ctx>, input: Val) -> Val {
-    let Val::Pair(name_keys) = input else {
+fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Map(map) = &*ctx else {
         return Val::default();
     };
-    let name_keys = Pair::from(name_keys);
-    let name = name_keys.first;
-    let Val::List(keys) = name_keys.second else {
+    let Val::List(keys) = input else {
         return Val::default();
     };
     let keys = List::from(keys);
-    MainCtx::with_ref_lossless(&ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let map: Map<Val, Val> =
-            keys.into_iter().filter_map(|k| map.get(&k).map(|v| (k, v.clone()))).collect();
-        Val::Map(map.into())
-    })
+    let map: Map<Val, Val> =
+        keys.into_iter().filter_map(|k| map.get(&k).map(|v| (k, v.clone()))).collect();
+    Val::Map(map.into())
 }
 
 fn remove() -> Named<FuncVal> {
     let id = "map.remove";
     let f = mut_impl(fn_remove);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_remove(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(name_key) = input else {
+fn fn_remove(ctx: &mut Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let name_key = Pair::from(name_key);
-    let name = name_key.first;
-    let key = name_key.second;
-    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        map.remove(&key).unwrap_or_default()
-    })
+    map.remove(&input).unwrap_or_default()
 }
 
 fn remove_many() -> Named<FuncVal> {
     let id = "map.remove_many";
     let f = mut_impl(fn_remove_many);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_remove_many(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(name_keys) = input else {
+fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let name_keys = Pair::from(name_keys);
-    let name = name_keys.first;
-    let keys = name_keys.second;
-    let Val::List(keys) = keys else {
+    let Val::List(keys) = input else {
         return Val::default();
     };
     let keys = List::from(keys);
-    MainCtx::with_ref_mut_lossless(ctx, name, |val| {
-        let Val::Map(map) = val else {
-            return Val::default();
-        };
-        let map: Map<Val, Val> =
-            keys.into_iter().filter_map(|k| map.remove(&k).map(|v| (k, v))).collect();
-        Val::Map(map.into())
-    })
+    let map: Map<Val, Val> =
+        keys.into_iter().filter_map(|k| map.remove(&k).map(|v| (k, v))).collect();
+    Val::Map(map.into())
 }
 
 fn clear() -> Named<FuncVal> {
     let id = "map.clear";
     let f = mut_impl(fn_clear);
-    let forward = ref_pair_mode();
+    let forward = ctx_default_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = true;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_clear(ctx: &mut Ctx, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
+fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
+    let Val::Map(map) = ctx else {
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    MainCtx::with_ref_mut_no_ret(ctx, pair.first, |val| {
-        let Val::Map(map) = val else {
-            return;
-        };
-        map.clear();
-    })
+    map.clear();
+    Val::default()
 }
 
 fn new_map() -> Named<FuncVal> {

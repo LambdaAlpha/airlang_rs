@@ -2,7 +2,6 @@ use crate::Byte;
 use crate::Call;
 use crate::CodeMode;
 use crate::Contract;
-use crate::Ctx;
 use crate::FuncMode;
 use crate::Int;
 use crate::List;
@@ -79,10 +78,11 @@ fn do1() -> Named<FuncVal> {
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_do(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_do(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, input).0
 }
 
@@ -92,10 +92,11 @@ fn if1() -> Named<FuncVal> {
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_if(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_if(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -118,10 +119,11 @@ fn match1() -> Named<FuncVal> {
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_match(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_match(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -130,18 +132,20 @@ fn fn_match(ctx: &mut Ctx, input: Val) -> Val {
     let Val::List(list) = pair.second else {
         return Val::default();
     };
+    let mode = PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form);
     for item in List::from(list) {
         let Val::Pair(pair) = item else {
             return Val::default();
         };
         let pair = Pair::from(pair);
-        let mode = PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form);
         let pattern = mode.mut_static_call(ctx, pair.first);
         let Some(pattern) = parse_pattern(PatternCtx::default(), pattern) else {
             return Val::default();
         };
         if match_pattern(&pattern, &val) {
-            assign_pattern(ctx, pattern, val);
+            if let Val::Ctx(ctx_val) = ctx {
+                assign_pattern(ctx_val, pattern, val);
+            }
             return eval_block(ctx, pair.second).0;
         }
     }
@@ -154,10 +158,11 @@ fn loop1() -> Named<FuncVal> {
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_loop(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_loop(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -207,10 +212,11 @@ fn for1() -> Named<FuncVal> {
     let forward = FuncMode::id_mode();
     let reverse = FuncMode::default_mode();
     let mode = FuncMode { forward, reverse };
-    named_mut_fn(id, f, mode)
+    let ctx_explicit = false;
+    named_mut_fn(id, f, mode, ctx_explicit)
 }
 
-fn fn_for(ctx: &mut Ctx, input: Val) -> Val {
+fn fn_for(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -275,11 +281,8 @@ fn fn_for(ctx: &mut Ctx, input: Val) -> Val {
     }
 }
 
-fn for_iter<ValIter>(ctx: &mut Ctx, body: Val, name: Symbol, values: ValIter) -> Val
+fn for_iter<ValIter>(ctx: &mut Val, body: Val, name: Symbol, values: ValIter) -> Val
 where ValIter: Iterator<Item = Val> {
-    if !ctx.variables().is_assignable(name.clone(), Contract::None) {
-        return Val::default();
-    }
     if let Val::List(body) = body {
         let body = List::from(body);
         let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
@@ -287,9 +290,9 @@ where ValIter: Iterator<Item = Val> {
             return Val::default();
         };
         for val in values {
-            ctx.variables_mut()
-                .put(name.clone(), val, Contract::None)
-                .expect("name should be assignable");
+            if let Val::Ctx(ctx_val) = ctx {
+                let _ = ctx_val.variables_mut().put(name.clone(), val, Contract::None);
+            }
             let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
                 CtrlFlow::None => {}
@@ -302,16 +305,16 @@ where ValIter: Iterator<Item = Val> {
         }
     } else {
         for val in values {
-            ctx.variables_mut()
-                .put(name.clone(), val, Contract::None)
-                .expect("name should be assignable");
+            if let Val::Ctx(ctx_val) = ctx {
+                let _ = ctx_val.variables_mut().put(name.clone(), val, Contract::None);
+            }
             DEFAULT_MODE.mut_static_call(ctx, body.clone());
         }
     }
     Val::default()
 }
 
-fn eval_block(ctx: &mut Ctx, input: Val) -> (Val, CtrlFlow) {
+fn eval_block(ctx: &mut Val, input: Val) -> (Val, CtrlFlow) {
     let Val::List(list) = input else {
         return (DEFAULT_MODE.mut_static_call(ctx, input), CtrlFlow::None);
     };
@@ -323,7 +326,7 @@ fn eval_block(ctx: &mut Ctx, input: Val) -> (Val, CtrlFlow) {
     eval_block_items(ctx, block_items)
 }
 
-fn eval_block_items(ctx: &mut Ctx, block_items: List<BlockItem>) -> (Val, CtrlFlow) {
+fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFlow) {
     let mut output = Val::default();
     for block_item in block_items {
         match block_item {

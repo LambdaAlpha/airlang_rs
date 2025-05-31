@@ -20,21 +20,15 @@ true
 =====
 length empty
 -----
-"" text.length .
+; do [t = "", t text.length .]
 -----
-"" : 0
+0
 =====
 length else
 -----
-"1" text.length .
+; do [t = "1", t text.length .]
 -----
-"1" : 1
-=====
-length ref
------
-; do [a = "12", a text.length .]
------
-2
+1
 =====
 push join
 -----

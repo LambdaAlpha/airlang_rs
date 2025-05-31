@@ -3,7 +3,6 @@ use const_format::concatcp;
 use crate::CallVal;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeStaticFn;
 use crate::ListVal;
 use crate::Map;
@@ -67,8 +66,8 @@ impl FreeStaticFn<Val, Val> for PrimMode {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for PrimMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for PrimMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         match input {
             Val::Symbol(symbol) => self.const_static_call(ctx, symbol),
             Val::Pair(pair) => self.const_static_call(ctx, pair),
@@ -80,8 +79,8 @@ impl ConstStaticFn<Ctx, Val, Val> for PrimMode {
     }
 }
 
-impl MutStaticFn<Ctx, Val, Val> for PrimMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutStaticFn<Val, Val, Val> for PrimMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
         match input {
             Val::Symbol(symbol) => self.mut_static_call(ctx, symbol),
             Val::Pair(pair) => self.mut_static_call(ctx, pair),
@@ -102,8 +101,8 @@ impl FreeStaticFn<Symbol, Val> for PrimMode {
     }
 }
 
-impl ConstStaticFn<Ctx, Symbol, Val> for PrimMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Symbol) -> Val {
+impl ConstStaticFn<Val, Symbol, Val> for PrimMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
         match self.symbol {
             None => Val::Symbol(input),
             Some(mode) => mode.const_static_call(ctx, input),
@@ -111,8 +110,8 @@ impl ConstStaticFn<Ctx, Symbol, Val> for PrimMode {
     }
 }
 
-impl MutStaticFn<Ctx, Symbol, Val> for PrimMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Symbol) -> Val {
+impl MutStaticFn<Val, Symbol, Val> for PrimMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
         match self.symbol {
             None => Val::Symbol(input),
             Some(mode) => mode.mut_static_call(ctx, input),
@@ -129,8 +128,8 @@ impl FreeStaticFn<PairVal, Val> for PrimMode {
     }
 }
 
-impl ConstStaticFn<Ctx, PairVal, Val> for PrimMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: PairVal) -> Val {
+impl ConstStaticFn<Val, PairVal, Val> for PrimMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: PairVal) -> Val {
         match self.pair {
             None => Val::Pair(input),
             Some(_) => PairForm { first: self, second: self }.const_static_call(ctx, input),
@@ -138,8 +137,8 @@ impl ConstStaticFn<Ctx, PairVal, Val> for PrimMode {
     }
 }
 
-impl MutStaticFn<Ctx, PairVal, Val> for PrimMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: PairVal) -> Val {
+impl MutStaticFn<Val, PairVal, Val> for PrimMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: PairVal) -> Val {
         match self.pair {
             None => Val::Pair(input),
             Some(_) => PairForm { first: self, second: self }.mut_static_call(ctx, input),
@@ -162,8 +161,8 @@ impl FreeStaticFn<CallVal, Val> for PrimMode {
     }
 }
 
-impl ConstStaticFn<Ctx, CallVal, Val> for PrimMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: CallVal) -> Val {
+impl ConstStaticFn<Val, CallVal, Val> for PrimMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: CallVal) -> Val {
         match self.call {
             None => Val::Call(input),
             Some(mode) => match mode {
@@ -179,8 +178,8 @@ impl ConstStaticFn<Ctx, CallVal, Val> for PrimMode {
     }
 }
 
-impl MutStaticFn<Ctx, CallVal, Val> for PrimMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: CallVal) -> Val {
+impl MutStaticFn<Val, CallVal, Val> for PrimMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: CallVal) -> Val {
         match self.call {
             None => Val::Call(input),
             Some(mode) => match mode {
@@ -203,8 +202,8 @@ impl FreeStaticFn<ListVal, Val> for PrimMode {
     }
 }
 
-impl ConstStaticFn<Ctx, ListVal, Val> for PrimMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+impl ConstStaticFn<Val, ListVal, Val> for PrimMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: ListVal) -> Val {
         match self.list {
             None => Val::List(input),
             Some(_) => ListUniForm { item: self }.const_static_call(ctx, input),
@@ -212,8 +211,8 @@ impl ConstStaticFn<Ctx, ListVal, Val> for PrimMode {
     }
 }
 
-impl MutStaticFn<Ctx, ListVal, Val> for PrimMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+impl MutStaticFn<Val, ListVal, Val> for PrimMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: ListVal) -> Val {
         match self.list {
             None => Val::List(input),
             Some(_) => ListUniForm { item: self }.mut_static_call(ctx, input),
@@ -230,8 +229,8 @@ impl FreeStaticFn<MapVal, Val> for PrimMode {
     }
 }
 
-impl ConstStaticFn<Ctx, MapVal, Val> for PrimMode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: MapVal) -> Val {
+impl ConstStaticFn<Val, MapVal, Val> for PrimMode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
         match self.map {
             None => Val::Map(input),
             Some(_) => MapUniForm { key: self, value: self }.const_static_call(ctx, input),
@@ -239,8 +238,8 @@ impl ConstStaticFn<Ctx, MapVal, Val> for PrimMode {
     }
 }
 
-impl MutStaticFn<Ctx, MapVal, Val> for PrimMode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
+impl MutStaticFn<Val, MapVal, Val> for PrimMode {
+    fn mut_static_call(&self, ctx: &mut Val, input: MapVal) -> Val {
         match self.map {
             None => Val::Map(input),
             Some(_) => MapUniForm { key: self, value: self }.mut_static_call(ctx, input),

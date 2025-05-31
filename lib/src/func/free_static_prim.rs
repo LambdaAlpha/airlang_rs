@@ -36,18 +36,18 @@ impl FuncTrait for FreeStaticPrimFunc {
         &self.mode
     }
 
+    fn ctx_explicit(&self) -> bool {
+        false
+    }
+
     fn code(&self) -> Val {
         Val::default()
     }
 }
 
 impl FreeStaticPrimFunc {
-    pub fn new_extension(id: Symbol, fn1: Rc<dyn FreeStaticFn<Val, Val>>, mode: FuncMode) -> Self {
+    pub fn new(id: Symbol, fn1: Rc<dyn FreeStaticFn<Val, Val>>, mode: FuncMode) -> Self {
         Self { prim: Primitive { id, is_extension: true }, fn1, mode }
-    }
-
-    pub(crate) fn new(id: Symbol, fn1: Rc<dyn FreeStaticFn<Val, Val>>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: false }, fn1, mode }
     }
 }
 

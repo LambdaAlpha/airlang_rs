@@ -1,7 +1,6 @@
 use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
-use crate::Ctx;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncVal;
@@ -34,8 +33,8 @@ impl FreeStaticFn<Val, Val> for Mode {
     }
 }
 
-impl ConstStaticFn<Ctx, Val, Val> for Mode {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: Val) -> Val {
+impl ConstStaticFn<Val, Val, Val> for Mode {
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
             Mode::Prim(prim) => prim.const_static_call(ctx, input),
             Mode::Comp(comp) => comp.const_static_call(ctx, input),
@@ -44,8 +43,8 @@ impl ConstStaticFn<Ctx, Val, Val> for Mode {
     }
 }
 
-impl MutStaticFn<Ctx, Val, Val> for Mode {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: Val) -> Val {
+impl MutStaticFn<Val, Val, Val> for Mode {
+    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
         match self {
             Mode::Prim(prim) => prim.mut_static_call(ctx, input),
             Mode::Comp(comp) => comp.mut_static_call(ctx, input),

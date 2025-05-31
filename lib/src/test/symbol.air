@@ -14,21 +14,15 @@ true
 =====
 length empty
 -----
-'.' symbol.length .
+; do [s = ; id '', s symbol.length .]
 -----
-'' : 0
+0
 =====
 length else
 -----
-.a symbol.length .
+; do [s = .a, s symbol.length .]
 -----
-a : 1
-=====
-length ref
------
-; do [a = .abc, a symbol.length .]
------
-3
+1
 =====
 join empty
 -----
