@@ -1,19 +1,18 @@
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct BitPrelude {
-    pub(crate) not: Named<FuncVal>,
-    pub(crate) and: Named<FuncVal>,
-    pub(crate) or: Named<FuncVal>,
-    pub(crate) xor: Named<FuncVal>,
-    pub(crate) imply: Named<FuncVal>,
+    pub(crate) not: FreeStaticPrimFuncVal,
+    pub(crate) and: FreeStaticPrimFuncVal,
+    pub(crate) or: FreeStaticPrimFuncVal,
+    pub(crate) xor: FreeStaticPrimFuncVal,
+    pub(crate) imply: FreeStaticPrimFuncVal,
 }
 
 impl Default for BitPrelude {
@@ -32,11 +31,8 @@ impl Prelude for BitPrelude {
     }
 }
 
-fn not() -> Named<FuncVal> {
-    let id = "not";
-    let f = free_impl(fn_not);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn not() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "not", f: free_impl(fn_not), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_not(input: Val) -> Val {
@@ -46,11 +42,8 @@ fn fn_not(input: Val) -> Val {
     Val::Bit(b.not())
 }
 
-fn and() -> Named<FuncVal> {
-    let id = "and";
-    let f = free_impl(fn_and);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn and() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "and", f: free_impl(fn_and), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_and(input: Val) -> Val {
@@ -66,11 +59,8 @@ fn fn_and(input: Val) -> Val {
     Val::Bit(left.and(right))
 }
 
-fn or() -> Named<FuncVal> {
-    let id = "or";
-    let f = free_impl(fn_or);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn or() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "or", f: free_impl(fn_or), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_or(input: Val) -> Val {
@@ -86,11 +76,8 @@ fn fn_or(input: Val) -> Val {
     Val::Bit(left.or(right))
 }
 
-fn xor() -> Named<FuncVal> {
-    let id = "xor";
-    let f = free_impl(fn_xor);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn xor() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "xor", f: free_impl(fn_xor), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -106,11 +93,8 @@ fn fn_xor(input: Val) -> Val {
     Val::Bit(left.xor(right))
 }
 
-fn imply() -> Named<FuncVal> {
-    let id = "imply";
-    let f = free_impl(fn_imply);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn imply() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "imply", f: free_impl(fn_imply), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_imply(input: Val) -> Val {

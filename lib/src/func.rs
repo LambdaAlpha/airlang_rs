@@ -11,8 +11,6 @@ pub(crate) trait FuncTrait {
 
 pub(crate) mod func_mode;
 
-pub(crate) mod prim;
-
 pub(crate) mod comp;
 
 pub(crate) mod mode;

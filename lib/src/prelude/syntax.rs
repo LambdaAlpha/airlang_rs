@@ -1,17 +1,16 @@
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 use crate::text::Text;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct SyntaxPrelude {
-    pub(crate) parse: Named<FuncVal>,
-    pub(crate) generate: Named<FuncVal>,
+    pub(crate) parse: FreeStaticPrimFuncVal,
+    pub(crate) generate: FreeStaticPrimFuncVal,
 }
 
 impl Default for SyntaxPrelude {
@@ -27,11 +26,8 @@ impl Prelude for SyntaxPrelude {
     }
 }
 
-fn parse() -> Named<FuncVal> {
-    let id = "syntax.parse";
-    let f = free_impl(fn_parse);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn parse() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "syntax.parse", f: free_impl(fn_parse), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -41,11 +37,9 @@ fn fn_parse(input: Val) -> Val {
     crate::parse(&input).unwrap_or_default()
 }
 
-fn generate() -> Named<FuncVal> {
-    let id = "syntax.generate";
-    let f = free_impl(fn_generate);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn generate() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "syntax.generate", f: free_impl(fn_generate), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_generate(input: Val) -> Val {

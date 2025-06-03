@@ -4,37 +4,37 @@ use crate::Bit;
 use crate::Call;
 use crate::ConstRef;
 use crate::ConstStaticFn;
+use crate::ConstStaticPrimFuncVal;
 use crate::FreeStaticFn;
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::MutStaticFn;
 use crate::MutStaticImpl;
+use crate::MutStaticPrimFuncVal;
 use crate::Pair;
 use crate::Val;
 use crate::core::CallApply;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_free_fn;
-use crate::prelude::named_mut_fn;
 use crate::syntax::CALL_FORWARD;
 use crate::syntax::CALL_REVERSE;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct CallPrelude {
-    pub(crate) new_forward: Named<FuncVal>,
-    pub(crate) new_reverse: Named<FuncVal>,
-    pub(crate) apply: Named<FuncVal>,
-    pub(crate) is_reverse: Named<FuncVal>,
-    pub(crate) get_func: Named<FuncVal>,
-    pub(crate) set_func: Named<FuncVal>,
-    pub(crate) get_input: Named<FuncVal>,
-    pub(crate) set_input: Named<FuncVal>,
+    pub(crate) new_forward: FreeStaticPrimFuncVal,
+    pub(crate) new_reverse: FreeStaticPrimFuncVal,
+    pub(crate) apply: MutStaticPrimFuncVal,
+    pub(crate) is_reverse: ConstStaticPrimFuncVal,
+    pub(crate) get_func: ConstStaticPrimFuncVal,
+    pub(crate) set_func: MutStaticPrimFuncVal,
+    pub(crate) get_input: ConstStaticPrimFuncVal,
+    pub(crate) set_input: MutStaticPrimFuncVal,
 }
 
 impl Default for CallPrelude {
@@ -65,11 +65,9 @@ impl Prelude for CallPrelude {
     }
 }
 
-fn new_forward() -> Named<FuncVal> {
-    let id = CALL_FORWARD;
-    let f = free_impl(fn_new_forward);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn new_forward() -> FreeStaticPrimFuncVal {
+    FreeFn { id: CALL_FORWARD, f: free_impl(fn_new_forward), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_new_forward(input: Val) -> Val {
@@ -80,11 +78,9 @@ fn fn_new_forward(input: Val) -> Val {
     Val::Call(Call::new(false, pair.first, pair.second).into())
 }
 
-fn new_reverse() -> Named<FuncVal> {
-    let id = CALL_REVERSE;
-    let f = free_impl(fn_new_reverse);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn new_reverse() -> FreeStaticPrimFuncVal {
+    FreeFn { id: CALL_REVERSE, f: free_impl(fn_new_reverse), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_new_reverse(input: Val) -> Val {
@@ -95,12 +91,14 @@ fn fn_new_reverse(input: Val) -> Val {
     Val::Call(Call::new(true, pair.first, pair.second).into())
 }
 
-fn apply() -> Named<FuncVal> {
-    let id = "call.apply";
-    let f = MutStaticImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut);
-    let mode = FuncMode::default();
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn apply() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "call.apply",
+        f: MutStaticImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut),
+        mode: FuncMode::default(),
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_apply_free(input: Val) -> Val {
@@ -124,14 +122,14 @@ fn fn_apply_mut(ctx: &mut Val, input: Val) -> Val {
     CallApply.mut_static_call(ctx, call)
 }
 
-fn is_reverse() -> Named<FuncVal> {
-    let id = "call.is_reverse";
-    let f = const_impl(fn_is_reverse);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn is_reverse() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "call.is_reverse",
+        f: const_impl(fn_is_reverse),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_is_reverse(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -141,14 +139,14 @@ fn fn_is_reverse(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::new(call.reverse))
 }
 
-fn get_func() -> Named<FuncVal> {
-    let id = "call.function";
-    let f = const_impl(fn_get_func);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get_func() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "call.function",
+        f: const_impl(fn_get_func),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get_func(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -158,14 +156,14 @@ fn fn_get_func(ctx: ConstRef<Val>, _input: Val) -> Val {
     call.func.clone()
 }
 
-fn set_func() -> Named<FuncVal> {
-    let id = "call.set_function";
-    let f = mut_impl(fn_set_func);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set_func() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "call.set_function",
+        f: mut_impl(fn_set_func),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set_func(ctx: &mut Val, mut input: Val) -> Val {
@@ -176,14 +174,14 @@ fn fn_set_func(ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-fn get_input() -> Named<FuncVal> {
-    let id = "call.input";
-    let f = const_impl(fn_get_input);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get_input() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "call.input",
+        f: const_impl(fn_get_input),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get_input(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -193,14 +191,14 @@ fn fn_get_input(ctx: ConstRef<Val>, _input: Val) -> Val {
     call.input.clone()
 }
 
-fn set_input() -> Named<FuncVal> {
-    let id = "call.set_input";
-    let f = mut_impl(fn_set_input);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set_input() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "call.set_input",
+        f: mut_impl(fn_set_input),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set_input(ctx: &mut Val, mut input: Val) -> Val {

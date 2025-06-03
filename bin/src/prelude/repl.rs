@@ -1,15 +1,14 @@
+use airlang::FreeStaticPrimFuncVal;
 use airlang::FuncMode;
-use airlang::FuncVal;
 use airlang::PreludeCtx;
 use airlang::Val;
 
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 
 pub(crate) struct ReplPrelude {
-    pub(crate) help: Named<FuncVal>,
+    pub(crate) help: FreeStaticPrimFuncVal,
 }
 
 impl Default for ReplPrelude {
@@ -24,11 +23,8 @@ impl Prelude for ReplPrelude {
     }
 }
 
-fn help() -> Named<FuncVal> {
-    let id = "help";
-    let f = free_impl(fn_help);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn help() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "help", f: free_impl(fn_help), mode: FuncMode::default() }.free_static()
 }
 
 const HELP_DOC: &str = "\

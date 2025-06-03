@@ -12,7 +12,6 @@ use crate::Symbol;
 use crate::Val;
 use crate::either::Either;
 use crate::func::FuncTrait;
-use crate::func::prim::Primitive;
 use crate::types::ref1::DynRef;
 
 pub trait MutStaticFn<Ctx, I, O>: ConstStaticFn<Ctx, I, O> {
@@ -43,7 +42,8 @@ pub struct MutStaticImpl<Ctx, I, O> {
 
 #[derive(Clone)]
 pub struct MutStaticPrimFunc {
-    pub(crate) prim: Primitive,
+    pub(crate) id: Symbol,
+    pub(crate) extension: bool,
     pub(crate) fn1: Rc<dyn MutStaticFn<Val, Val, Val>>,
     pub(crate) mode: FuncMode,
     pub(crate) ctx_explicit: bool,
@@ -85,19 +85,19 @@ impl MutStaticPrimFunc {
     pub fn new(
         id: Symbol, fn1: Rc<dyn MutStaticFn<Val, Val, Val>>, mode: FuncMode, ctx_explicit: bool,
     ) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode, ctx_explicit }
+        Self { id, extension: true, fn1, mode, ctx_explicit }
     }
 }
 
 impl Debug for MutStaticPrimFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.prim.fmt(f)
+        self.id.fmt(f)
     }
 }
 
 impl PartialEq for MutStaticPrimFunc {
     fn eq(&self, other: &MutStaticPrimFunc) -> bool {
-        self.prim == other.prim
+        self.id == other.id
     }
 }
 
@@ -105,7 +105,7 @@ impl Eq for MutStaticPrimFunc {}
 
 impl Hash for MutStaticPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.prim.hash(state);
+        self.id.hash(state);
     }
 }
 

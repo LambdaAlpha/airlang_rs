@@ -8,7 +8,6 @@ use crate::FuncMode;
 use crate::Symbol;
 use crate::Val;
 use crate::func::FuncTrait;
-use crate::func::prim::Primitive;
 
 pub trait FreeStaticFn<I, O> {
     fn free_static_call(&self, input: I) -> O;
@@ -20,7 +19,8 @@ pub struct FreeStaticImpl<I, O> {
 
 #[derive(Clone)]
 pub struct FreeStaticPrimFunc {
-    pub(crate) prim: Primitive,
+    pub(crate) id: Symbol,
+    pub(crate) extension: bool,
     pub(crate) fn1: Rc<dyn FreeStaticFn<Val, Val>>,
     pub(crate) mode: FuncMode,
 }
@@ -47,19 +47,19 @@ impl FuncTrait for FreeStaticPrimFunc {
 
 impl FreeStaticPrimFunc {
     pub fn new(id: Symbol, fn1: Rc<dyn FreeStaticFn<Val, Val>>, mode: FuncMode) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode }
+        Self { id, extension: true, fn1, mode }
     }
 }
 
 impl Debug for FreeStaticPrimFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.prim.fmt(f)
+        self.id.fmt(f)
     }
 }
 
 impl PartialEq for FreeStaticPrimFunc {
     fn eq(&self, other: &FreeStaticPrimFunc) -> bool {
-        self.prim == other.prim
+        self.id == other.id
     }
 }
 
@@ -67,7 +67,7 @@ impl Eq for FreeStaticPrimFunc {}
 
 impl Hash for FreeStaticPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.prim.hash(state);
+        self.id.hash(state);
     }
 }
 

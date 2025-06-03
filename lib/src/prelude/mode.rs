@@ -2,21 +2,21 @@ use crate::ConstRef;
 use crate::ConstStaticFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
-use crate::FuncVal;
 use crate::MutStaticFn;
 use crate::MutStaticImpl;
+use crate::MutStaticPrimFuncVal;
 use crate::Symbol;
 use crate::Val;
 use crate::ctx::main::MainCtx;
 use crate::func::func_mode::DEFAULT_MODE;
 use crate::mode::symbol::MOVE_CHAR;
-use crate::prelude::mut_fn;
+use crate::prelude::DynFn;
 
 thread_local!(pub(crate) static MODE_PRELUDE: ModePrelude = ModePrelude::default());
 
 #[derive(Clone)]
 pub(crate) struct ModePrelude {
-    pub(crate) ref_mode: FuncVal,
+    pub(crate) ref_mode: MutStaticPrimFuncVal,
 }
 
 impl Default for ModePrelude {
@@ -25,12 +25,14 @@ impl Default for ModePrelude {
     }
 }
 
-fn ref_mode() -> FuncVal {
-    let id = "mode.reference";
-    let f = MutStaticImpl::new(fn_ref_mode_free, fn_ref_mode_const, fn_ref_mode_mut);
-    let mode = FuncMode::id_func_mode();
-    let ctx_explicit = false;
-    mut_fn(id, f, mode, ctx_explicit)
+fn ref_mode() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "mode.reference",
+        f: MutStaticImpl::new(fn_ref_mode_free, fn_ref_mode_const, fn_ref_mode_mut),
+        mode: FuncMode::id_func_mode(),
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_ref_mode_free(input: Val) -> Val {

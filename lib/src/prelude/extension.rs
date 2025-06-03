@@ -1,18 +1,17 @@
 use crate::Bit;
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
 use crate::FuncMode;
-use crate::FuncVal;
 use crate::Val;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
-use crate::prelude::named_const_fn;
 
 #[derive(Clone)]
 pub(crate) struct ExtPrelude {
-    pub(crate) is_ext: Named<FuncVal>,
+    pub(crate) is_ext: ConstStaticPrimFuncVal,
 }
 
 impl Default for ExtPrelude {
@@ -27,14 +26,14 @@ impl Prelude for ExtPrelude {
     }
 }
 
-fn is_ext() -> Named<FuncVal> {
-    let id = "is_extension";
-    let f = const_impl(fn_is_ext);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn is_ext() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "is_extension",
+        f: const_impl(fn_is_ext),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_is_ext(ctx: ConstRef<Val>, _input: Val) -> Val {

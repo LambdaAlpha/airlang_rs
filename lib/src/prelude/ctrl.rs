@@ -7,6 +7,7 @@ use crate::Int;
 use crate::List;
 use crate::Map;
 use crate::MutStaticFn;
+use crate::MutStaticPrimFuncVal;
 use crate::Pair;
 use crate::PrimMode;
 use crate::Symbol;
@@ -17,21 +18,19 @@ use crate::ctx::pattern::assign_pattern;
 use crate::ctx::pattern::match_pattern;
 use crate::ctx::pattern::parse_pattern;
 use crate::func::func_mode::DEFAULT_MODE;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::mut_impl;
-use crate::prelude::named_mut_fn;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct CtrlPrelude {
-    pub(crate) do1: Named<FuncVal>,
-    pub(crate) if1: Named<FuncVal>,
-    pub(crate) match1: Named<FuncVal>,
-    pub(crate) loop1: Named<FuncVal>,
-    pub(crate) for1: Named<FuncVal>,
+    pub(crate) do1: MutStaticPrimFuncVal,
+    pub(crate) if1: MutStaticPrimFuncVal,
+    pub(crate) match1: MutStaticPrimFuncVal,
+    pub(crate) loop1: MutStaticPrimFuncVal,
+    pub(crate) for1: MutStaticPrimFuncVal,
 }
 
 impl Default for CtrlPrelude {
@@ -72,28 +71,28 @@ enum BlockItem {
     Exit { exit: Exit, condition: Val, body: Val },
 }
 
-fn do1() -> Named<FuncVal> {
-    let id = "do";
-    let f = mut_impl(fn_do);
-    let forward = FuncMode::id_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn do1() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "do",
+        f: mut_impl(fn_do),
+        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_do(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, input).0
 }
 
-fn if1() -> Named<FuncVal> {
-    let id = "?";
-    let f = mut_impl(fn_if);
-    let forward = FuncMode::id_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn if1() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "?",
+        f: mut_impl(fn_if),
+        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_if(ctx: &mut Val, input: Val) -> Val {
@@ -113,14 +112,14 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, branch).0
 }
 
-fn match1() -> Named<FuncVal> {
-    let id = "match";
-    let f = mut_impl(fn_match);
-    let forward = FuncMode::id_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn match1() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "match",
+        f: mut_impl(fn_match),
+        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_match(ctx: &mut Val, input: Val) -> Val {
@@ -152,14 +151,14 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn loop1() -> Named<FuncVal> {
-    let id = "loop";
-    let f = mut_impl(fn_loop);
-    let forward = FuncMode::id_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn loop1() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "loop",
+        f: mut_impl(fn_loop),
+        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_loop(ctx: &mut Val, input: Val) -> Val {
@@ -206,14 +205,14 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn for1() -> Named<FuncVal> {
-    let id = "for";
-    let f = mut_impl(fn_for);
-    let forward = FuncMode::id_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn for1() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "for",
+        f: mut_impl(fn_for),
+        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_for(ctx: &mut Val, input: Val) -> Val {

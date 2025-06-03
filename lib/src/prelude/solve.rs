@@ -1,17 +1,16 @@
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
-use crate::FuncVal;
 use crate::Val;
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 use crate::solver::SOLVER;
 
 #[derive(Clone)]
 pub(crate) struct SolvePrelude {
-    pub(crate) get_solver: Named<FuncVal>,
-    pub(crate) set_solver: Named<FuncVal>,
+    pub(crate) get_solver: FreeStaticPrimFuncVal,
+    pub(crate) set_solver: FreeStaticPrimFuncVal,
 }
 
 impl Default for SolvePrelude {
@@ -27,13 +26,8 @@ impl Prelude for SolvePrelude {
     }
 }
 
-fn get_solver() -> Named<FuncVal> {
-    let id = "solver!";
-    let f = free_impl(fn_get_solver);
-    let forward = FuncMode::default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    named_free_fn(id, f, mode)
+fn get_solver() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "solver!", f: free_impl(fn_get_solver), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_get_solver(_input: Val) -> Val {
@@ -48,11 +42,9 @@ fn fn_get_solver(_input: Val) -> Val {
     })
 }
 
-fn set_solver() -> Named<FuncVal> {
-    let id = "set_solver!";
-    let f = free_impl(fn_set_solver);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn set_solver() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_set_solver(input: Val) -> Val {

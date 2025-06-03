@@ -35,7 +35,8 @@ use crate::ctx::map::CtxMap;
 use crate::ctx::map::CtxValue;
 use crate::either::Either;
 use crate::extension::AIR_EXT;
-use crate::func::comp::Composite;
+use crate::func::comp::DynComposite;
+use crate::func::comp::FreeComposite;
 use crate::func::const_cell_comp::ConstCellCompFunc;
 use crate::func::func_mode::FuncMode;
 use crate::func::mut_cell_comp::MutCellCompFunc;
@@ -428,74 +429,84 @@ impl Arbitrary for FuncMode {
     }
 }
 
-impl Arbitrary for Composite {
+impl Arbitrary for FreeComposite {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        Composite {
-            body: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
-            input_name: Arbitrary::any(rng, depth),
-        }
+        FreeComposite { body: Arbitrary::any(rng, depth), input_name: Arbitrary::any(rng, depth) }
+    }
+}
+
+impl Arbitrary for DynComposite {
+    fn any(rng: &mut SmallRng, depth: usize) -> Self {
+        DynComposite { free: Arbitrary::any(rng, depth), ctx_name: Arbitrary::any(rng, depth) }
     }
 }
 
 impl Arbitrary for FreeCellCompFuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let comp = Arbitrary::any(rng, depth);
-        let mode = Arbitrary::any(rng, depth);
-        let func = FreeCellCompFunc { comp, mode };
+        let func = FreeCellCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+        };
         FreeCellCompFuncVal::from(func)
     }
 }
 
 impl Arbitrary for FreeStaticCompFuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let comp = Arbitrary::any(rng, depth);
-        let mode = Arbitrary::any(rng, depth);
-        let func = FreeStaticCompFunc { comp, mode };
+        let func = FreeStaticCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+        };
         FreeStaticCompFuncVal::from(func)
     }
 }
 
 impl Arbitrary for ConstCellCompFuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let comp = Arbitrary::any(rng, depth);
-        let ctx_name = Arbitrary::any(rng, depth);
-        let mode = Arbitrary::any(rng, depth);
-        let ctx_explicit = rng.random();
-        let func = ConstCellCompFunc { comp, ctx_name, mode, ctx_explicit };
+        let func = ConstCellCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
         ConstCellCompFuncVal::from(func)
     }
 }
 
 impl Arbitrary for ConstStaticCompFuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let comp = Arbitrary::any(rng, depth);
-        let ctx_name = Arbitrary::any(rng, depth);
-        let mode = Arbitrary::any(rng, depth);
-        let ctx_explicit = rng.random();
-        let func = ConstStaticCompFunc { comp, ctx_name, mode, ctx_explicit };
+        let func = ConstStaticCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
         ConstStaticCompFuncVal::from(func)
     }
 }
 
 impl Arbitrary for MutCellCompFuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let comp = Arbitrary::any(rng, depth);
-        let ctx_name = Arbitrary::any(rng, depth);
-        let mode = Arbitrary::any(rng, depth);
-        let ctx_explicit = rng.random();
-        let func = MutCellCompFunc { comp, ctx_name, mode, ctx_explicit };
+        let func = MutCellCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
         MutCellCompFuncVal::from(func)
     }
 }
 
 impl Arbitrary for MutStaticCompFuncVal {
     fn any(rng: &mut SmallRng, depth: usize) -> Self {
-        let comp = Arbitrary::any(rng, depth);
-        let ctx_name = Arbitrary::any(rng, depth);
-        let mode = Arbitrary::any(rng, depth);
-        let ctx_explicit = rng.random();
-        let func = MutStaticCompFunc { comp, ctx_name, mode, ctx_explicit };
+        let func = MutStaticCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
         MutStaticCompFuncVal::from(func)
     }
 }

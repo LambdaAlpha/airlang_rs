@@ -1,27 +1,26 @@
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::Int;
 use crate::pair::Pair;
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct IntPrelude {
-    pub(crate) add: Named<FuncVal>,
-    pub(crate) subtract: Named<FuncVal>,
-    pub(crate) multiply: Named<FuncVal>,
-    pub(crate) divide: Named<FuncVal>,
-    pub(crate) remainder: Named<FuncVal>,
-    pub(crate) divide_remainder: Named<FuncVal>,
-    pub(crate) less_than: Named<FuncVal>,
-    pub(crate) less_equal: Named<FuncVal>,
-    pub(crate) greater_than: Named<FuncVal>,
-    pub(crate) greater_equal: Named<FuncVal>,
-    pub(crate) less_greater: Named<FuncVal>,
+    pub(crate) add: FreeStaticPrimFuncVal,
+    pub(crate) subtract: FreeStaticPrimFuncVal,
+    pub(crate) multiply: FreeStaticPrimFuncVal,
+    pub(crate) divide: FreeStaticPrimFuncVal,
+    pub(crate) remainder: FreeStaticPrimFuncVal,
+    pub(crate) divide_remainder: FreeStaticPrimFuncVal,
+    pub(crate) less_than: FreeStaticPrimFuncVal,
+    pub(crate) less_equal: FreeStaticPrimFuncVal,
+    pub(crate) greater_than: FreeStaticPrimFuncVal,
+    pub(crate) greater_equal: FreeStaticPrimFuncVal,
+    pub(crate) less_greater: FreeStaticPrimFuncVal,
 }
 
 impl Default for IntPrelude {
@@ -58,11 +57,8 @@ impl Prelude for IntPrelude {
     }
 }
 
-fn add() -> Named<FuncVal> {
-    let id = "+";
-    let f = free_impl(fn_add);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn add() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "+", f: free_impl(fn_add), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_add(input: Val) -> Val {
@@ -81,11 +77,8 @@ fn fn_add(input: Val) -> Val {
     Val::Int(i1.add(i2).into())
 }
 
-fn subtract() -> Named<FuncVal> {
-    let id = "-";
-    let f = free_impl(fn_subtract);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn subtract() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "-", f: free_impl(fn_subtract), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -104,11 +97,8 @@ fn fn_subtract(input: Val) -> Val {
     Val::Int(i1.subtract(i2).into())
 }
 
-fn multiply() -> Named<FuncVal> {
-    let id = "*";
-    let f = free_impl(fn_multiply);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn multiply() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "*", f: free_impl(fn_multiply), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -127,11 +117,8 @@ fn fn_multiply(input: Val) -> Val {
     Val::Int(i1.multiply(i2).into())
 }
 
-fn divide() -> Named<FuncVal> {
-    let id = "/";
-    let f = free_impl(fn_divide);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn divide() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "/", f: free_impl(fn_divide), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -153,11 +140,8 @@ fn fn_divide(input: Val) -> Val {
     Val::Int(i.into())
 }
 
-fn remainder() -> Named<FuncVal> {
-    let id = "%";
-    let f = free_impl(fn_remainder);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn remainder() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "%", f: free_impl(fn_remainder), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -179,11 +163,8 @@ fn fn_remainder(input: Val) -> Val {
     Val::Int(i.into())
 }
 
-fn divide_remainder() -> Named<FuncVal> {
-    let id = "/%";
-    let f = free_impl(fn_divide_remainder);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn divide_remainder() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "/%", f: free_impl(fn_divide_remainder), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -205,11 +186,8 @@ fn fn_divide_remainder(input: Val) -> Val {
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 
-fn less_than() -> Named<FuncVal> {
-    let id = "<";
-    let f = free_impl(fn_less_than);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn less_than() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "<", f: free_impl(fn_less_than), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -226,11 +204,8 @@ fn fn_less_than(input: Val) -> Val {
     Val::Bit(i1.less_than(&i2))
 }
 
-fn less_equal() -> Named<FuncVal> {
-    let id = "<=";
-    let f = free_impl(fn_less_equal);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn less_equal() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "<=", f: free_impl(fn_less_equal), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -247,11 +222,8 @@ fn fn_less_equal(input: Val) -> Val {
     Val::Bit(i1.less_equal(&i2))
 }
 
-fn greater_than() -> Named<FuncVal> {
-    let id = ">";
-    let f = free_impl(fn_greater_than);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn greater_than() -> FreeStaticPrimFuncVal {
+    FreeFn { id: ">", f: free_impl(fn_greater_than), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -268,11 +240,8 @@ fn fn_greater_than(input: Val) -> Val {
     Val::Bit(i1.greater_than(&i2))
 }
 
-fn greater_equal() -> Named<FuncVal> {
-    let id = ">=";
-    let f = free_impl(fn_greater_equal);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn greater_equal() -> FreeStaticPrimFuncVal {
+    FreeFn { id: ">=", f: free_impl(fn_greater_equal), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -289,11 +258,8 @@ fn fn_greater_equal(input: Val) -> Val {
     Val::Bit(i1.greater_equal(&i2))
 }
 
-fn less_greater() -> Named<FuncVal> {
-    let id = "<>";
-    let f = free_impl(fn_less_greater);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn less_greater() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "<>", f: free_impl(fn_less_greater), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_less_greater(input: Val) -> Val {

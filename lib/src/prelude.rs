@@ -8,6 +8,7 @@ use crate::FreeCellPrimFuncVal;
 use crate::FreeStaticImpl;
 use crate::FreeStaticPrimFunc;
 use crate::FreeStaticPrimFuncVal;
+use crate::FuncVal;
 use crate::Map;
 use crate::Mode;
 use crate::MutStaticImpl;
@@ -29,7 +30,6 @@ use crate::func::func_mode::FuncMode;
 use crate::func::mut_cell_prim::MutCellFnExt;
 use crate::func::mut_cell_prim::MutCellPrimFunc;
 use crate::func::mut_static_prim::MutStaticFn;
-use crate::func::prim::Primitive;
 use crate::prelude::bit::BitPrelude;
 use crate::prelude::byte::BytePrelude;
 use crate::prelude::call::CallPrelude;
@@ -52,7 +52,6 @@ use crate::prelude::unit::UnitPrelude;
 use crate::prelude::value::ValuePrelude;
 use crate::symbol::Symbol;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
 use crate::val::func::mut_cell_prim::MutCellPrimFuncVal;
 
@@ -170,151 +169,160 @@ impl PreludeCtx for Find {
     }
 }
 
-#[derive(Clone)]
-pub(crate) struct Named<T> {
-    pub(crate) name: &'static str,
-    pub(crate) value: T,
+pub(crate) trait Named {
+    fn name(&self) -> Symbol;
 }
 
-impl<T> Named<T> {
-    pub(crate) fn new(name: &'static str, value: T) -> Named<T> {
-        Named { name, value }
+impl<T: Named + Clone + Into<FuncVal>> Prelude for T {
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        ctx.put(self.name(), Val::Func(self.clone().into()));
     }
 }
 
-impl<T: Into<Val> + Clone> Named<T> {
-    pub(crate) fn put(&self, m: &mut dyn PreludeCtx) {
-        let name = Symbol::from_str(self.name);
-        let value = self.value.clone().into();
-        m.put(name, value);
+impl Named for FreeCellPrimFuncVal {
+    fn name(&self) -> Symbol {
+        self.id.clone()
     }
 }
 
-fn free_cell_fn(name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode) -> FuncVal {
-    let id = Symbol::from_str(name);
-    let fn1 = Box::new(func);
-    let func = FreeCellPrimFunc { prim: Primitive { id, is_extension: false }, fn1, mode };
-    let func_val = FreeCellPrimFuncVal::from(func);
-    FuncVal::FreeCellPrim(func_val)
+impl Named for FreeStaticPrimFuncVal {
+    fn name(&self) -> Symbol {
+        self.id.clone()
+    }
 }
 
-#[expect(dead_code)]
-fn named_free_cell_fn(
-    name: &'static str, func: impl FreeCellFnExt + 'static, mode: FuncMode,
-) -> Named<FuncVal> {
-    let f = free_cell_fn(name, func, mode);
-    Named::new(name, f)
+impl Named for ConstCellPrimFuncVal {
+    fn name(&self) -> Symbol {
+        self.id.clone()
+    }
 }
 
-fn const_cell_fn(
-    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, ctx_explicit: bool,
-) -> FuncVal {
-    let id = Symbol::from_str(name);
-    let fn1 = Box::new(func);
-    let func =
-        ConstCellPrimFunc { prim: Primitive { id, is_extension: false }, fn1, mode, ctx_explicit };
-    let func_val = ConstCellPrimFuncVal::from(func);
-    FuncVal::ConstCellPrim(func_val)
+impl Named for ConstStaticPrimFuncVal {
+    fn name(&self) -> Symbol {
+        self.id.clone()
+    }
 }
 
-#[expect(dead_code)]
-fn named_const_cell_fn(
-    name: &'static str, func: impl ConstCellFnExt + 'static, mode: FuncMode, ctx_explicit: bool,
-) -> Named<FuncVal> {
-    let f = const_cell_fn(name, func, mode, ctx_explicit);
-    Named::new(name, f)
+impl Named for MutCellPrimFuncVal {
+    fn name(&self) -> Symbol {
+        self.id.clone()
+    }
 }
 
-fn mut_cell_fn(
-    name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, ctx_explicit: bool,
-) -> FuncVal {
-    let id = Symbol::from_str(name);
-    let fn1 = Box::new(func);
-    let func =
-        MutCellPrimFunc { prim: Primitive { id, is_extension: false }, fn1, mode, ctx_explicit };
-    let func_val = MutCellPrimFuncVal::from(func);
-    FuncVal::MutCellPrim(func_val)
+impl Named for MutStaticPrimFuncVal {
+    fn name(&self) -> Symbol {
+        self.id.clone()
+    }
 }
 
-#[expect(dead_code)]
-fn named_mut_cell_fn(
-    name: &'static str, func: impl MutCellFnExt + 'static, mode: FuncMode, ctx_explicit: bool,
-) -> Named<FuncVal> {
-    let f = mut_cell_fn(name, func, mode, ctx_explicit);
-    Named::new(name, f)
+pub(crate) struct FreeFn<F> {
+    pub(crate) id: &'static str,
+    pub(crate) f: F,
+    pub(crate) mode: FuncMode,
+}
+
+pub(crate) struct DynFn<F> {
+    pub(crate) id: &'static str,
+    pub(crate) f: F,
+    pub(crate) mode: FuncMode,
+    pub(crate) ctx_explicit: bool,
+}
+
+impl<F: FreeCellFnExt + 'static> FreeFn<F> {
+    #[expect(dead_code)]
+    pub(crate) fn free_cell(self) -> FreeCellPrimFuncVal {
+        let func = FreeCellPrimFunc {
+            id: Symbol::from_str(self.id),
+            extension: false,
+            fn1: Box::new(self.f),
+            mode: self.mode,
+        };
+        FreeCellPrimFuncVal::from(func)
+    }
+}
+
+impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
+    pub(crate) fn free_static(self) -> FreeStaticPrimFuncVal {
+        let func = FreeStaticPrimFunc {
+            id: Symbol::from_str(self.id),
+            extension: false,
+            fn1: Rc::new(self.f),
+            mode: self.mode,
+        };
+        FreeStaticPrimFuncVal::from(func)
+    }
+}
+
+impl<F: ConstCellFnExt + 'static> DynFn<F> {
+    #[expect(dead_code)]
+    pub(crate) fn const_cell(self) -> ConstCellPrimFuncVal {
+        let func = ConstCellPrimFunc {
+            id: Symbol::from_str(self.id),
+            extension: false,
+            fn1: Box::new(self.f),
+            mode: self.mode,
+            ctx_explicit: self.ctx_explicit,
+        };
+        ConstCellPrimFuncVal::from(func)
+    }
+}
+
+impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
+    pub(crate) fn const_static(self) -> ConstStaticPrimFuncVal {
+        let func = ConstStaticPrimFunc {
+            id: Symbol::from_str(self.id),
+            extension: false,
+            fn1: Rc::new(self.f),
+            mode: self.mode,
+            ctx_explicit: self.ctx_explicit,
+        };
+        ConstStaticPrimFuncVal::from(func)
+    }
+}
+
+impl<F: MutCellFnExt + 'static> DynFn<F> {
+    #[expect(dead_code)]
+    pub(crate) fn mut_cell(self) -> MutCellPrimFuncVal {
+        let func = MutCellPrimFunc {
+            id: Symbol::from_str(self.id),
+            extension: false,
+            fn1: Box::new(self.f),
+            mode: self.mode,
+            ctx_explicit: self.ctx_explicit,
+        };
+        MutCellPrimFuncVal::from(func)
+    }
+}
+
+impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
+    pub(crate) fn mut_static(self) -> MutStaticPrimFuncVal {
+        let func = MutStaticPrimFunc {
+            id: Symbol::from_str(self.id),
+            extension: false,
+            fn1: Rc::new(self.f),
+            mode: self.mode,
+            ctx_explicit: self.ctx_explicit,
+        };
+        MutStaticPrimFuncVal::from(func)
+    }
+}
+
+fn ctx_put<V: Clone + Into<Val>>(ctx: &mut dyn PreludeCtx, name: &'static str, val: &V) {
+    let name = Symbol::from_str(name);
+    let val = val.clone().into();
+    ctx.put(name, val);
 }
 
 fn free_impl(func: fn(Val) -> Val) -> FreeStaticImpl<Val, Val> {
     FreeStaticImpl::new(func)
 }
 
-fn free_fn(
-    name: &'static str, func: impl FreeStaticFn<Val, Val> + 'static, mode: FuncMode,
-) -> FuncVal {
-    let id = Symbol::from_str(name);
-    let fn1 = Rc::new(func);
-    let func = FreeStaticPrimFunc { prim: Primitive { id, is_extension: false }, fn1, mode };
-    let func_val = FreeStaticPrimFuncVal::from(func);
-    FuncVal::FreeStaticPrim(func_val)
-}
-
-fn named_free_fn(
-    name: &'static str, func: impl FreeStaticFn<Val, Val> + 'static, mode: FuncMode,
-) -> Named<FuncVal> {
-    let f = free_fn(name, func, mode);
-    Named::new(name, f)
-}
-
 fn const_impl(func: fn(ConstRef<Val>, Val) -> Val) -> ConstStaticImpl<Val, Val, Val> {
     ConstStaticImpl::new(FreeStaticImpl::default, func)
 }
 
-fn const_fn(
-    name: &'static str, func: impl ConstStaticFn<Val, Val, Val> + 'static, mode: FuncMode,
-    ctx_explicit: bool,
-) -> FuncVal {
-    let id = Symbol::from_str(name);
-    let fn1 = Rc::new(func);
-    let func = ConstStaticPrimFunc {
-        prim: Primitive { id, is_extension: false },
-        fn1,
-        mode,
-        ctx_explicit,
-    };
-    let func_val = ConstStaticPrimFuncVal::from(func);
-    FuncVal::ConstStaticPrim(func_val)
-}
-
-fn named_const_fn(
-    name: &'static str, func: impl ConstStaticFn<Val, Val, Val> + 'static, mode: FuncMode,
-    ctx_explicit: bool,
-) -> Named<FuncVal> {
-    let f = const_fn(name, func, mode, ctx_explicit);
-    Named::new(name, f)
-}
-
 fn mut_impl(func: fn(&mut Val, Val) -> Val) -> MutStaticImpl<Val, Val, Val> {
     MutStaticImpl::new(FreeStaticImpl::default, ConstStaticImpl::default, func)
-}
-
-fn mut_fn(
-    name: &'static str, func: impl MutStaticFn<Val, Val, Val> + 'static, mode: FuncMode,
-    ctx_explicit: bool,
-) -> FuncVal {
-    let id = Symbol::from_str(name);
-    let fn1 = Rc::new(func);
-    let func =
-        MutStaticPrimFunc { prim: Primitive { id, is_extension: false }, fn1, mode, ctx_explicit };
-    let func_val = MutStaticPrimFuncVal::from(func);
-    FuncVal::MutStaticPrim(func_val)
-}
-
-fn named_mut_fn(
-    name: &'static str, func: impl MutStaticFn<Val, Val, Val> + 'static, mode: FuncMode,
-    ctx_explicit: bool,
-) -> Named<FuncVal> {
-    let f = mut_fn(name, func, mode, ctx_explicit);
-    Named::new(name, f)
 }
 
 pub(crate) fn ctx_default_mode() -> Option<Mode> {
@@ -323,7 +331,7 @@ pub(crate) fn ctx_default_mode() -> Option<Mode> {
 
 pub(crate) fn ref_mode() -> Option<Mode> {
     let ref1 = MODE_PRELUDE.with(|p| p.ref_mode.clone());
-    Some(Mode::Func(ref1))
+    Some(Mode::Func(ref1.into()))
 }
 
 mod mode;

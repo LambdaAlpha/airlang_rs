@@ -1,28 +1,28 @@
 use std::mem::swap;
 
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
-use crate::prelude::Named;
+use crate::MutStaticPrimFuncVal;
+use crate::prelude::DynFn;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_free_fn;
-use crate::prelude::named_mut_fn;
 use crate::syntax::PAIR;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct PairPrelude {
-    pub(crate) new: Named<FuncVal>,
-    pub(crate) get_first: Named<FuncVal>,
-    pub(crate) set_first: Named<FuncVal>,
-    pub(crate) get_second: Named<FuncVal>,
-    pub(crate) set_second: Named<FuncVal>,
+    pub(crate) new: FreeStaticPrimFuncVal,
+    pub(crate) get_first: ConstStaticPrimFuncVal,
+    pub(crate) set_first: MutStaticPrimFuncVal,
+    pub(crate) get_second: ConstStaticPrimFuncVal,
+    pub(crate) set_second: MutStaticPrimFuncVal,
 }
 
 impl Default for PairPrelude {
@@ -47,11 +47,8 @@ impl Prelude for PairPrelude {
     }
 }
 
-fn new() -> Named<FuncVal> {
-    let id = PAIR;
-    let f = free_impl(fn_new);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn new() -> FreeStaticPrimFuncVal {
+    FreeFn { id: PAIR, f: free_impl(fn_new), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_new(input: Val) -> Val {
@@ -61,14 +58,14 @@ fn fn_new(input: Val) -> Val {
     input
 }
 
-fn get_first() -> Named<FuncVal> {
-    let id = "pair.first";
-    let f = const_impl(fn_get_first);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get_first() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "pair.first",
+        f: const_impl(fn_get_first),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get_first(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -78,14 +75,14 @@ fn fn_get_first(ctx: ConstRef<Val>, _input: Val) -> Val {
     pair.first.clone()
 }
 
-fn set_first() -> Named<FuncVal> {
-    let id = "pair.set_first";
-    let f = mut_impl(fn_set_first);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set_first() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "pair.set_first",
+        f: mut_impl(fn_set_first),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
@@ -96,14 +93,14 @@ fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-fn get_second() -> Named<FuncVal> {
-    let id = "pair.second";
-    let f = const_impl(fn_get_second);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get_second() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "pair.second",
+        f: const_impl(fn_get_second),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get_second(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -113,14 +110,14 @@ fn fn_get_second(ctx: ConstRef<Val>, _input: Val) -> Val {
     pair.second.clone()
 }
 
-fn set_second() -> Named<FuncVal> {
-    let id = "pair.set_second";
-    let f = mut_impl(fn_set_second);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set_second() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "pair.set_second",
+        f: mut_impl(fn_set_second),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set_second(ctx: &mut Val, mut input: Val) -> Val {

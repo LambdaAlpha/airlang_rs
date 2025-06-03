@@ -1,16 +1,15 @@
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::Val;
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 use crate::unit::Unit;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct UnitPrelude {
-    pub(crate) unit: Named<FuncVal>,
+    pub(crate) unit: FreeStaticPrimFuncVal,
 }
 
 impl Default for UnitPrelude {
@@ -25,11 +24,8 @@ impl Prelude for UnitPrelude {
     }
 }
 
-fn unit() -> Named<FuncVal> {
-    let id = "unit";
-    let f = free_impl(fn_unit);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn unit() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "unit", f: free_impl(fn_unit), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_unit(_input: Val) -> Val {

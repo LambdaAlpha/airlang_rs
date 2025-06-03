@@ -1,16 +1,15 @@
 use airlang::AirCell;
 use airlang::FuncMode;
-use airlang::FuncVal;
+use airlang::MutStaticPrimFuncVal;
 use airlang::PreludeCtx;
 use airlang::Val;
 
-use crate::prelude::Named;
+use crate::prelude::DynFn;
 use crate::prelude::Prelude;
 use crate::prelude::mut_impl;
-use crate::prelude::named_mut_fn;
 
 pub(crate) struct EvalPrelude {
-    pub(crate) reset: Named<FuncVal>,
+    pub(crate) reset: MutStaticPrimFuncVal,
 }
 
 impl Default for EvalPrelude {
@@ -25,12 +24,14 @@ impl Prelude for EvalPrelude {
     }
 }
 
-fn reset() -> Named<FuncVal> {
-    let id = "repl.reset";
-    let f = mut_impl(fn_reset);
-    let mode = FuncMode::default();
-    let ctx_explicit = false;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn reset() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "repl.reset",
+        f: mut_impl(fn_reset),
+        mode: FuncMode::default(),
+        ctx_explicit: false,
+    }
+    .mut_static()
 }
 
 fn fn_reset(ctx: &mut Val, _input: Val) -> Val {

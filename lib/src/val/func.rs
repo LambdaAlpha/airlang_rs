@@ -5,16 +5,16 @@ use std::hash::Hash;
 use crate::ConstCellFn;
 use crate::ConstRef;
 use crate::ConstStaticFn;
+use crate::Ctx;
 use crate::CtxAccess;
 use crate::FreeCellFn;
 use crate::FreeStaticFn;
 use crate::FuncMode;
 use crate::MutCellFn;
 use crate::MutStaticFn;
+use crate::Symbol;
 use crate::Val;
 use crate::func::FuncTrait;
-use crate::func::comp::Composite;
-use crate::func::prim::Primitive;
 use crate::mode::ModeFn;
 use crate::val::func::const_cell_comp::ConstCellCompFuncVal;
 use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
@@ -226,39 +226,57 @@ impl FuncTrait for FuncVal {
 }
 
 impl FuncVal {
-    pub(crate) fn primitive(&self) -> Option<&Primitive> {
+    pub(crate) fn id(&self) -> Option<&Symbol> {
         match self {
             FuncVal::Mode(_) => None,
-            FuncVal::FreeCellPrim(f) => Some(&f.prim),
+            FuncVal::FreeCellPrim(f) => Some(&f.id),
             FuncVal::FreeCellComp(_) => None,
-            FuncVal::FreeStaticPrim(f) => Some(&f.prim),
+            FuncVal::FreeStaticPrim(f) => Some(&f.id),
             FuncVal::FreeStaticComp(_) => None,
-            FuncVal::ConstCellPrim(f) => Some(&f.prim),
+            FuncVal::ConstCellPrim(f) => Some(&f.id),
             FuncVal::ConstCellComp(_) => None,
-            FuncVal::ConstStaticPrim(f) => Some(&f.prim),
+            FuncVal::ConstStaticPrim(f) => Some(&f.id),
             FuncVal::ConstStaticComp(_) => None,
-            FuncVal::MutCellPrim(f) => Some(&f.prim),
+            FuncVal::MutCellPrim(f) => Some(&f.id),
             FuncVal::MutCellComp(_) => None,
-            FuncVal::MutStaticPrim(f) => Some(&f.prim),
+            FuncVal::MutStaticPrim(f) => Some(&f.id),
             FuncVal::MutStaticComp(_) => None,
         }
     }
 
-    pub(crate) fn composite(&self) -> Option<&Composite> {
+    pub(crate) fn extension(&self) -> Option<bool> {
+        match self {
+            FuncVal::Mode(_) => None,
+            FuncVal::FreeCellPrim(f) => Some(f.extension),
+            FuncVal::FreeCellComp(_) => None,
+            FuncVal::FreeStaticPrim(f) => Some(f.extension),
+            FuncVal::FreeStaticComp(_) => None,
+            FuncVal::ConstCellPrim(f) => Some(f.extension),
+            FuncVal::ConstCellComp(_) => None,
+            FuncVal::ConstStaticPrim(f) => Some(f.extension),
+            FuncVal::ConstStaticComp(_) => None,
+            FuncVal::MutCellPrim(f) => Some(f.extension),
+            FuncVal::MutCellComp(_) => None,
+            FuncVal::MutStaticPrim(f) => Some(f.extension),
+            FuncVal::MutStaticComp(_) => None,
+        }
+    }
+
+    pub(crate) fn ctx(&self) -> Option<&Ctx> {
         match self {
             FuncVal::Mode(_) => None,
             FuncVal::FreeCellPrim(_) => None,
-            FuncVal::FreeCellComp(f) => Some(&f.comp),
+            FuncVal::FreeCellComp(f) => Some(&f.ctx),
             FuncVal::FreeStaticPrim(_) => None,
-            FuncVal::FreeStaticComp(f) => Some(&f.comp),
+            FuncVal::FreeStaticComp(f) => Some(&f.ctx),
             FuncVal::ConstCellPrim(_) => None,
-            FuncVal::ConstCellComp(f) => Some(&f.comp),
+            FuncVal::ConstCellComp(f) => Some(&f.ctx),
             FuncVal::ConstStaticPrim(_) => None,
-            FuncVal::ConstStaticComp(f) => Some(&f.comp),
+            FuncVal::ConstStaticComp(f) => Some(&f.ctx),
             FuncVal::MutCellPrim(_) => None,
-            FuncVal::MutCellComp(f) => Some(&f.comp),
+            FuncVal::MutCellComp(f) => Some(&f.ctx),
             FuncVal::MutStaticPrim(_) => None,
-            FuncVal::MutStaticComp(f) => Some(&f.comp),
+            FuncVal::MutStaticComp(f) => Some(&f.ctx),
         }
     }
 
@@ -314,6 +332,84 @@ impl FuncVal {
             FuncVal::MutStaticPrim(_) => CtxAccess::Mut,
             FuncVal::MutStaticComp(_) => CtxAccess::Mut,
         }
+    }
+}
+
+impl From<ModeFuncVal> for FuncVal {
+    fn from(value: ModeFuncVal) -> Self {
+        Self::Mode(value)
+    }
+}
+
+impl From<FreeCellPrimFuncVal> for FuncVal {
+    fn from(value: FreeCellPrimFuncVal) -> Self {
+        Self::FreeCellPrim(value)
+    }
+}
+
+impl From<FreeCellCompFuncVal> for FuncVal {
+    fn from(value: FreeCellCompFuncVal) -> Self {
+        Self::FreeCellComp(value)
+    }
+}
+
+impl From<FreeStaticPrimFuncVal> for FuncVal {
+    fn from(value: FreeStaticPrimFuncVal) -> Self {
+        Self::FreeStaticPrim(value)
+    }
+}
+
+impl From<FreeStaticCompFuncVal> for FuncVal {
+    fn from(value: FreeStaticCompFuncVal) -> Self {
+        Self::FreeStaticComp(value)
+    }
+}
+
+impl From<ConstCellPrimFuncVal> for FuncVal {
+    fn from(value: ConstCellPrimFuncVal) -> Self {
+        Self::ConstCellPrim(value)
+    }
+}
+
+impl From<ConstCellCompFuncVal> for FuncVal {
+    fn from(value: ConstCellCompFuncVal) -> Self {
+        Self::ConstCellComp(value)
+    }
+}
+
+impl From<ConstStaticPrimFuncVal> for FuncVal {
+    fn from(value: ConstStaticPrimFuncVal) -> Self {
+        Self::ConstStaticPrim(value)
+    }
+}
+
+impl From<ConstStaticCompFuncVal> for FuncVal {
+    fn from(value: ConstStaticCompFuncVal) -> Self {
+        Self::ConstStaticComp(value)
+    }
+}
+
+impl From<MutCellPrimFuncVal> for FuncVal {
+    fn from(value: MutCellPrimFuncVal) -> Self {
+        Self::MutCellPrim(value)
+    }
+}
+
+impl From<MutCellCompFuncVal> for FuncVal {
+    fn from(value: MutCellCompFuncVal) -> Self {
+        Self::MutCellComp(value)
+    }
+}
+
+impl From<MutStaticPrimFuncVal> for FuncVal {
+    fn from(value: MutStaticPrimFuncVal) -> Self {
+        Self::MutStaticPrim(value)
+    }
+}
+
+impl From<MutStaticCompFuncVal> for FuncVal {
+    fn from(value: MutStaticCompFuncVal) -> Self {
+        Self::MutStaticComp(value)
     }
 }
 

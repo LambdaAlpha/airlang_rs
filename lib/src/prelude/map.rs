@@ -1,47 +1,47 @@
 use std::mem::swap;
 
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::List;
 use crate::Map;
+use crate::MutStaticPrimFuncVal;
 use crate::bit::Bit;
 use crate::int::Int;
 use crate::pair::Pair;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_free_fn;
-use crate::prelude::named_mut_fn;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct MapPrelude {
-    pub(crate) length: Named<FuncVal>,
-    pub(crate) items: Named<FuncVal>,
-    pub(crate) into_items: Named<FuncVal>,
-    pub(crate) keys: Named<FuncVal>,
-    pub(crate) into_keys: Named<FuncVal>,
-    pub(crate) values: Named<FuncVal>,
-    pub(crate) into_values: Named<FuncVal>,
-    pub(crate) contains: Named<FuncVal>,
-    pub(crate) contains_all: Named<FuncVal>,
-    pub(crate) contains_any: Named<FuncVal>,
-    pub(crate) set: Named<FuncVal>,
-    pub(crate) set_many: Named<FuncVal>,
-    pub(crate) get: Named<FuncVal>,
-    pub(crate) get_many: Named<FuncVal>,
-    pub(crate) remove: Named<FuncVal>,
-    pub(crate) remove_many: Named<FuncVal>,
-    pub(crate) clear: Named<FuncVal>,
-    pub(crate) new_map: Named<FuncVal>,
-    pub(crate) new_set: Named<FuncVal>,
-    pub(crate) new_multiset: Named<FuncVal>,
+    pub(crate) length: ConstStaticPrimFuncVal,
+    pub(crate) items: ConstStaticPrimFuncVal,
+    pub(crate) into_items: MutStaticPrimFuncVal,
+    pub(crate) keys: ConstStaticPrimFuncVal,
+    pub(crate) into_keys: MutStaticPrimFuncVal,
+    pub(crate) values: ConstStaticPrimFuncVal,
+    pub(crate) into_values: MutStaticPrimFuncVal,
+    pub(crate) contains: ConstStaticPrimFuncVal,
+    pub(crate) contains_all: ConstStaticPrimFuncVal,
+    pub(crate) contains_any: ConstStaticPrimFuncVal,
+    pub(crate) set: MutStaticPrimFuncVal,
+    pub(crate) set_many: MutStaticPrimFuncVal,
+    pub(crate) get: ConstStaticPrimFuncVal,
+    pub(crate) get_many: ConstStaticPrimFuncVal,
+    pub(crate) remove: MutStaticPrimFuncVal,
+    pub(crate) remove_many: MutStaticPrimFuncVal,
+    pub(crate) clear: MutStaticPrimFuncVal,
+    pub(crate) new_map: FreeStaticPrimFuncVal,
+    pub(crate) new_set: FreeStaticPrimFuncVal,
+    pub(crate) new_multiset: FreeStaticPrimFuncVal,
 }
 
 impl Default for MapPrelude {
@@ -96,14 +96,14 @@ impl Prelude for MapPrelude {
     }
 }
 
-fn length() -> Named<FuncVal> {
-    let id = "map.length";
-    let f = const_impl(fn_length);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn length() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.length",
+        f: const_impl(fn_length),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -114,14 +114,14 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn items() -> Named<FuncVal> {
-    let id = "map.items";
-    let f = const_impl(fn_items);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn items() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.items",
+        f: const_impl(fn_items),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_items(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -133,14 +133,14 @@ fn fn_items(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::List(items.into())
 }
 
-fn into_items() -> Named<FuncVal> {
-    let id = "map.into_items";
-    let f = mut_impl(fn_into_items);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn into_items() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.into_items",
+        f: mut_impl(fn_into_items),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_into_items(ctx: &mut Val, _input: Val) -> Val {
@@ -154,14 +154,14 @@ fn fn_into_items(ctx: &mut Val, _input: Val) -> Val {
     Val::List(items.into())
 }
 
-fn keys() -> Named<FuncVal> {
-    let id = "map.keys";
-    let f = const_impl(fn_keys);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn keys() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.keys",
+        f: const_impl(fn_keys),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_keys(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -172,14 +172,14 @@ fn fn_keys(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::List(keys.into())
 }
 
-fn into_keys() -> Named<FuncVal> {
-    let id = "map.into_keys";
-    let f = mut_impl(fn_into_keys);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn into_keys() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.into_keys",
+        f: mut_impl(fn_into_keys),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_into_keys(ctx: &mut Val, _input: Val) -> Val {
@@ -192,14 +192,14 @@ fn fn_into_keys(ctx: &mut Val, _input: Val) -> Val {
     Val::List(keys.into())
 }
 
-fn values() -> Named<FuncVal> {
-    let id = "map.values";
-    let f = const_impl(fn_values);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn values() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.values",
+        f: const_impl(fn_values),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_values(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -210,14 +210,14 @@ fn fn_values(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::List(values.into())
 }
 
-fn into_values() -> Named<FuncVal> {
-    let id = "map.into_values";
-    let f = mut_impl(fn_into_values);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn into_values() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.into_values",
+        f: mut_impl(fn_into_values),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_into_values(ctx: &mut Val, _input: Val) -> Val {
@@ -230,14 +230,14 @@ fn fn_into_values(ctx: &mut Val, _input: Val) -> Val {
     Val::List(values.into())
 }
 
-fn contains() -> Named<FuncVal> {
-    let id = "map.contains";
-    let f = const_impl(fn_contains);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn contains() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.contains",
+        f: const_impl(fn_contains),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -247,14 +247,14 @@ fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::new(map.contains_key(&input)))
 }
 
-fn contains_all() -> Named<FuncVal> {
-    let id = "map.contains_all";
-    let f = const_impl(fn_contains_all);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn contains_all() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.contains_all",
+        f: const_impl(fn_contains_all),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -269,14 +269,14 @@ fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::new(b))
 }
 
-fn contains_any() -> Named<FuncVal> {
-    let id = "map.contains_any";
-    let f = const_impl(fn_contains_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn contains_any() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.contains_any",
+        f: const_impl(fn_contains_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -291,14 +291,14 @@ fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::new(b))
 }
 
-fn set() -> Named<FuncVal> {
-    let id = "map.set";
-    let f = mut_impl(fn_set);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.set",
+        f: mut_impl(fn_set),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set(ctx: &mut Val, input: Val) -> Val {
@@ -314,14 +314,14 @@ fn fn_set(ctx: &mut Val, input: Val) -> Val {
     map.insert(key, value).unwrap_or_default()
 }
 
-fn set_many() -> Named<FuncVal> {
-    let id = "map.set_many";
-    let f = mut_impl(fn_set_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set_many() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.set_many",
+        f: mut_impl(fn_set_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
@@ -337,14 +337,14 @@ fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn get() -> Named<FuncVal> {
-    let id = "map.get";
-    let f = const_impl(fn_get);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.get",
+        f: const_impl(fn_get),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -354,14 +354,14 @@ fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
     map.get(&input).cloned().unwrap_or_default()
 }
 
-fn get_many() -> Named<FuncVal> {
-    let id = "map.get_many";
-    let f = const_impl(fn_get_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get_many() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "map.get_many",
+        f: const_impl(fn_get_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -377,14 +377,14 @@ fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn remove() -> Named<FuncVal> {
-    let id = "map.remove";
-    let f = mut_impl(fn_remove);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn remove() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.remove",
+        f: mut_impl(fn_remove),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_remove(ctx: &mut Val, input: Val) -> Val {
@@ -394,14 +394,14 @@ fn fn_remove(ctx: &mut Val, input: Val) -> Val {
     map.remove(&input).unwrap_or_default()
 }
 
-fn remove_many() -> Named<FuncVal> {
-    let id = "map.remove_many";
-    let f = mut_impl(fn_remove_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn remove_many() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.remove_many",
+        f: mut_impl(fn_remove_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
@@ -417,14 +417,14 @@ fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn clear() -> Named<FuncVal> {
-    let id = "map.clear";
-    let f = mut_impl(fn_clear);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn clear() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "map.clear",
+        f: mut_impl(fn_clear),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
@@ -435,11 +435,8 @@ fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
     Val::default()
 }
 
-fn new_map() -> Named<FuncVal> {
-    let id = "map";
-    let f = free_impl(fn_new_map);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn new_map() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "map", f: free_impl(fn_new_map), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_new_map(input: Val) -> Val {
@@ -463,11 +460,8 @@ fn fn_new_map(input: Val) -> Val {
     }
 }
 
-fn new_set() -> Named<FuncVal> {
-    let id = "set";
-    let f = free_impl(fn_new_set);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn new_set() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "set", f: free_impl(fn_new_set), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_new_set(input: Val) -> Val {
@@ -479,11 +473,9 @@ fn fn_new_set(input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn new_multiset() -> Named<FuncVal> {
-    let id = "multiset";
-    let f = free_impl(fn_new_multiset);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn new_multiset() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "multiset", f: free_impl(fn_new_multiset), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_new_multiset(input: Val) -> Val {

@@ -5,22 +5,21 @@ use std::path::Path;
 use airlang::AirCell;
 use airlang::ConstRef;
 use airlang::ConstStaticImpl;
+use airlang::ConstStaticPrimFuncVal;
 use airlang::Contract;
 use airlang::Ctx;
 use airlang::FuncMode;
-use airlang::FuncVal;
 use airlang::PreludeCtx;
 use airlang::Symbol;
 use airlang::Text;
 use airlang::Val;
 use airlang::parse;
 
-use crate::prelude::Named;
+use crate::prelude::DynFn;
 use crate::prelude::Prelude;
-use crate::prelude::named_const_fn;
 
 pub(crate) struct BuildPrelude {
-    pub(crate) import: Named<FuncVal>,
+    pub(crate) import: ConstStaticPrimFuncVal,
 }
 
 impl Default for BuildPrelude {
@@ -35,12 +34,14 @@ impl Prelude for BuildPrelude {
     }
 }
 
-fn import() -> Named<FuncVal> {
-    let id = "build.import";
-    let f = ConstStaticImpl::new(fn_import_free, fn_import_const);
-    let mode = FuncMode::default();
-    let ctx_explicit = false;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn import() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "build.import",
+        f: ConstStaticImpl::new(fn_import_free, fn_import_const),
+        mode: FuncMode::default(),
+        ctx_explicit: false,
+    }
+    .const_static()
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

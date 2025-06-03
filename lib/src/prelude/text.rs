@@ -1,28 +1,28 @@
 use crate::Byte;
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::Int;
-use crate::prelude::Named;
+use crate::MutStaticPrimFuncVal;
+use crate::prelude::DynFn;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_free_fn;
-use crate::prelude::named_mut_fn;
 use crate::text::Text;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct TextPrelude {
-    pub(crate) from_utf8: Named<FuncVal>,
-    pub(crate) into_utf8: Named<FuncVal>,
-    pub(crate) length: Named<FuncVal>,
-    pub(crate) push: Named<FuncVal>,
-    pub(crate) join: Named<FuncVal>,
+    pub(crate) from_utf8: FreeStaticPrimFuncVal,
+    pub(crate) into_utf8: FreeStaticPrimFuncVal,
+    pub(crate) length: ConstStaticPrimFuncVal,
+    pub(crate) push: MutStaticPrimFuncVal,
+    pub(crate) join: FreeStaticPrimFuncVal,
 }
 
 impl Default for TextPrelude {
@@ -47,11 +47,9 @@ impl Prelude for TextPrelude {
     }
 }
 
-fn from_utf8() -> Named<FuncVal> {
-    let id = "text.from_utf8";
-    let f = free_impl(fn_from_utf8);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn from_utf8() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "text.from_utf8", f: free_impl(fn_from_utf8), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_from_utf8(input: Val) -> Val {
@@ -66,11 +64,9 @@ fn fn_from_utf8(input: Val) -> Val {
     }
 }
 
-fn into_utf8() -> Named<FuncVal> {
-    let id = "text.into_utf8";
-    let f = free_impl(fn_into_utf8);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn into_utf8() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "text.into_utf8", f: free_impl(fn_into_utf8), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_into_utf8(input: Val) -> Val {
@@ -82,14 +78,14 @@ fn fn_into_utf8(input: Val) -> Val {
     Val::Byte(byte.into())
 }
 
-fn length() -> Named<FuncVal> {
-    let id = "text.length";
-    let f = const_impl(fn_length);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn length() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "text.length",
+        f: const_impl(fn_length),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -100,14 +96,14 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn push() -> Named<FuncVal> {
-    let id = "text.push";
-    let f = mut_impl(fn_push);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn push() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "text.push",
+        f: mut_impl(fn_push),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_push(ctx: &mut Val, input: Val) -> Val {
@@ -121,11 +117,8 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn join() -> Named<FuncVal> {
-    let id = "text.join";
-    let f = free_impl(fn_join);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn join() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "text.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_join(input: Val) -> Val {

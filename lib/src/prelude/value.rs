@@ -5,7 +5,9 @@ use crate::Byte;
 use crate::Call;
 use crate::CodeMode;
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
 use crate::Ctx;
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::Int;
 use crate::List;
@@ -19,14 +21,13 @@ use crate::Val;
 use crate::bit::Bit;
 use crate::ctx::main::MainCtx;
 use crate::either::Either;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_free_fn;
 use crate::prelude::ref_mode;
 use crate::symbol::Symbol;
 use crate::type1::arbitrary::Arbitrary;
@@ -48,9 +49,9 @@ use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct ValuePrelude {
-    pub(crate) any: Named<FuncVal>,
-    pub(crate) type1: Named<FuncVal>,
-    pub(crate) equal: Named<FuncVal>,
+    pub(crate) any: FreeStaticPrimFuncVal,
+    pub(crate) type1: ConstStaticPrimFuncVal,
+    pub(crate) equal: ConstStaticPrimFuncVal,
 }
 
 impl Default for ValuePrelude {
@@ -67,13 +68,16 @@ impl Prelude for ValuePrelude {
     }
 }
 
-fn any() -> Named<FuncVal> {
-    let id = "any";
-    let f = free_impl(fn_any);
-    let forward = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form);
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    named_free_fn(id, f, mode)
+fn any() -> FreeStaticPrimFuncVal {
+    FreeFn {
+        id: "any",
+        f: free_impl(fn_any),
+        mode: FuncMode {
+            forward: FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
+            reverse: FuncMode::default_mode(),
+        },
+    }
+    .free_static()
 }
 
 fn fn_any(input: Val) -> Val {
@@ -102,14 +106,14 @@ fn fn_any(input: Val) -> Val {
     }
 }
 
-fn type1() -> Named<FuncVal> {
-    let id = "type";
-    let f = const_impl(fn_type1);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn type1() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "type",
+        f: const_impl(fn_type1),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_type1(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -132,14 +136,17 @@ fn fn_type1(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(Symbol::from_str(s))
 }
 
-fn equal() -> Named<FuncVal> {
-    let id = "==";
-    let f = const_impl(fn_equal);
-    let forward = FuncMode::pair_mode(ref_mode(), ref_mode());
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = false;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn equal() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "==",
+        f: const_impl(fn_equal),
+        mode: FuncMode {
+            forward: FuncMode::pair_mode(ref_mode(), ref_mode()),
+            reverse: FuncMode::default_mode(),
+        },
+        ctx_explicit: false,
+    }
+    .const_static()
 }
 
 fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {

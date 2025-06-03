@@ -1,34 +1,33 @@
 use std::mem::swap;
 
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
 use crate::FuncMode;
 use crate::Int;
+use crate::MutStaticPrimFuncVal;
 use crate::Pair;
 use crate::list::List;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::mut_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_mut_fn;
 use crate::val::Val;
-use crate::val::func::FuncVal;
 
 #[derive(Clone)]
 pub(crate) struct ListPrelude {
-    pub(crate) length: Named<FuncVal>,
-    pub(crate) set: Named<FuncVal>,
-    pub(crate) set_many: Named<FuncVal>,
-    pub(crate) get: Named<FuncVal>,
-    pub(crate) insert: Named<FuncVal>,
-    pub(crate) insert_many: Named<FuncVal>,
-    pub(crate) remove: Named<FuncVal>,
-    pub(crate) push: Named<FuncVal>,
-    pub(crate) push_many: Named<FuncVal>,
-    pub(crate) pop: Named<FuncVal>,
-    pub(crate) clear: Named<FuncVal>,
+    pub(crate) length: ConstStaticPrimFuncVal,
+    pub(crate) set: MutStaticPrimFuncVal,
+    pub(crate) set_many: MutStaticPrimFuncVal,
+    pub(crate) get: ConstStaticPrimFuncVal,
+    pub(crate) insert: MutStaticPrimFuncVal,
+    pub(crate) insert_many: MutStaticPrimFuncVal,
+    pub(crate) remove: MutStaticPrimFuncVal,
+    pub(crate) push: MutStaticPrimFuncVal,
+    pub(crate) push_many: MutStaticPrimFuncVal,
+    pub(crate) pop: MutStaticPrimFuncVal,
+    pub(crate) clear: MutStaticPrimFuncVal,
 }
 
 impl Default for ListPrelude {
@@ -65,14 +64,14 @@ impl Prelude for ListPrelude {
     }
 }
 
-fn length() -> Named<FuncVal> {
-    let id = "list.length";
-    let f = const_impl(fn_length);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn length() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "list.length",
+        f: const_impl(fn_length),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -83,14 +82,14 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn set() -> Named<FuncVal> {
-    let id = "list.set";
-    let f = mut_impl(fn_set);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.set",
+        f: mut_impl(fn_set),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set(ctx: &mut Val, input: Val) -> Val {
@@ -113,14 +112,14 @@ fn fn_set(ctx: &mut Val, input: Val) -> Val {
     value
 }
 
-fn set_many() -> Named<FuncVal> {
-    let id = "list.set_many";
-    let f = mut_impl(fn_set_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn set_many() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.set_many",
+        f: mut_impl(fn_set_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
@@ -147,14 +146,14 @@ fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
     Val::List(ret.into())
 }
 
-fn get() -> Named<FuncVal> {
-    let id = "list.get";
-    let f = const_impl(fn_get);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn get() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "list.get",
+        f: const_impl(fn_get),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -183,14 +182,14 @@ fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
     }
 }
 
-fn insert() -> Named<FuncVal> {
-    let id = "list.insert";
-    let f = mut_impl(fn_insert);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn insert() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.insert",
+        f: mut_impl(fn_insert),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_insert(ctx: &mut Val, input: Val) -> Val {
@@ -213,14 +212,14 @@ fn fn_insert(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn insert_many() -> Named<FuncVal> {
-    let id = "list.insert_many";
-    let f = mut_impl(fn_insert_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn insert_many() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.insert_many",
+        f: mut_impl(fn_insert_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_insert_many(ctx: &mut Val, input: Val) -> Val {
@@ -246,14 +245,14 @@ fn fn_insert_many(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn remove() -> Named<FuncVal> {
-    let id = "list.remove";
-    let f = mut_impl(fn_remove);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn remove() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.remove",
+        f: mut_impl(fn_remove),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_remove(ctx: &mut Val, input: Val) -> Val {
@@ -283,14 +282,14 @@ fn fn_remove(ctx: &mut Val, input: Val) -> Val {
     }
 }
 
-fn push() -> Named<FuncVal> {
-    let id = "list.push";
-    let f = mut_impl(fn_push);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn push() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.push",
+        f: mut_impl(fn_push),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_push(ctx: &mut Val, input: Val) -> Val {
@@ -301,14 +300,14 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn push_many() -> Named<FuncVal> {
-    let id = "list.push_many";
-    let f = mut_impl(fn_push_many);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn push_many() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.push_many",
+        f: mut_impl(fn_push_many),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_push_many(ctx: &mut Val, input: Val) -> Val {
@@ -322,14 +321,14 @@ fn fn_push_many(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn pop() -> Named<FuncVal> {
-    let id = "list.pop";
-    let f = mut_impl(fn_pop);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn pop() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.pop",
+        f: mut_impl(fn_pop),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_pop(ctx: &mut Val, input: Val) -> Val {
@@ -355,14 +354,14 @@ fn fn_pop(ctx: &mut Val, input: Val) -> Val {
     }
 }
 
-fn clear() -> Named<FuncVal> {
-    let id = "list.clear";
-    let f = mut_impl(fn_clear);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_mut_fn(id, f, mode, ctx_explicit)
+fn clear() -> MutStaticPrimFuncVal {
+    DynFn {
+        id: "list.clear",
+        f: mut_impl(fn_clear),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .mut_static()
 }
 
 fn fn_clear(ctx: &mut Val, _input: Val) -> Val {

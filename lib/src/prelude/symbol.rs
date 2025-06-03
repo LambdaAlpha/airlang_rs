@@ -1,25 +1,25 @@
 use crate::ConstRef;
+use crate::ConstStaticPrimFuncVal;
+use crate::FreeStaticPrimFuncVal;
 use crate::FuncMode;
-use crate::FuncVal;
 use crate::Int;
 use crate::Symbol;
 use crate::Text;
 use crate::Val;
-use crate::prelude::Named;
+use crate::prelude::DynFn;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::PreludeCtx;
 use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
-use crate::prelude::named_const_fn;
-use crate::prelude::named_free_fn;
 
 #[derive(Clone)]
 pub(crate) struct SymbolPrelude {
-    pub(crate) from_text: Named<FuncVal>,
-    pub(crate) into_text: Named<FuncVal>,
-    pub(crate) length: Named<FuncVal>,
-    pub(crate) join: Named<FuncVal>,
+    pub(crate) from_text: FreeStaticPrimFuncVal,
+    pub(crate) into_text: FreeStaticPrimFuncVal,
+    pub(crate) length: ConstStaticPrimFuncVal,
+    pub(crate) join: FreeStaticPrimFuncVal,
 }
 
 impl Default for SymbolPrelude {
@@ -42,11 +42,9 @@ impl Prelude for SymbolPrelude {
     }
 }
 
-fn from_text() -> Named<FuncVal> {
-    let id = "symbol.from_text";
-    let f = free_impl(fn_from_text);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn from_text() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_from_text(input: Val) -> Val {
@@ -61,11 +59,9 @@ fn fn_from_text(input: Val) -> Val {
     Val::Symbol(symbol)
 }
 
-fn into_text() -> Named<FuncVal> {
-    let id = "symbol.into_text";
-    let f = free_impl(fn_into_text);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn into_text() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: FuncMode::default() }
+        .free_static()
 }
 
 fn fn_into_text(input: Val) -> Val {
@@ -75,14 +71,14 @@ fn fn_into_text(input: Val) -> Val {
     Val::Text(Text::from(String::from(s)).into())
 }
 
-fn length() -> Named<FuncVal> {
-    let id = "symbol.length";
-    let f = const_impl(fn_length);
-    let forward = ctx_default_mode();
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    let ctx_explicit = true;
-    named_const_fn(id, f, mode, ctx_explicit)
+fn length() -> ConstStaticPrimFuncVal {
+    DynFn {
+        id: "symbol.length",
+        f: const_impl(fn_length),
+        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
+        ctx_explicit: true,
+    }
+    .const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -93,11 +89,8 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn join() -> Named<FuncVal> {
-    let id = "symbol.join";
-    let f = free_impl(fn_join);
-    let mode = FuncMode::default();
-    named_free_fn(id, f, mode)
+fn join() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "symbol.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }
 
 fn fn_join(input: Val) -> Val {

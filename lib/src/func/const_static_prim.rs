@@ -9,7 +9,6 @@ use crate::FuncMode;
 use crate::Symbol;
 use crate::Val;
 use crate::func::FuncTrait;
-use crate::func::prim::Primitive;
 use crate::types::ref1::ConstRef;
 
 pub trait ConstStaticFn<Ctx, I, O>: FreeStaticFn<I, O> {
@@ -33,7 +32,8 @@ pub struct ConstStaticImpl<Ctx, I, O> {
 
 #[derive(Clone)]
 pub struct ConstStaticPrimFunc {
-    pub(crate) prim: Primitive,
+    pub(crate) id: Symbol,
+    pub(crate) extension: bool,
     pub(crate) fn1: Rc<dyn ConstStaticFn<Val, Val, Val>>,
     pub(crate) mode: FuncMode,
     pub(crate) ctx_explicit: bool,
@@ -69,19 +69,19 @@ impl ConstStaticPrimFunc {
     pub fn new(
         id: Symbol, fn1: Rc<dyn ConstStaticFn<Val, Val, Val>>, mode: FuncMode, ctx_explicit: bool,
     ) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode, ctx_explicit }
+        Self { id, extension: true, fn1, mode, ctx_explicit }
     }
 }
 
 impl Debug for ConstStaticPrimFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.prim.fmt(f)
+        self.id.fmt(f)
     }
 }
 
 impl PartialEq for ConstStaticPrimFunc {
     fn eq(&self, other: &ConstStaticPrimFunc) -> bool {
-        self.prim == other.prim
+        self.id == other.id
     }
 }
 
@@ -89,7 +89,7 @@ impl Eq for ConstStaticPrimFunc {}
 
 impl Hash for ConstStaticPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.prim.hash(state);
+        self.id.hash(state);
     }
 }
 

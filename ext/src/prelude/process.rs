@@ -2,8 +2,8 @@ use std::process::Command;
 
 use airlang::Byte;
 use airlang::CodeMode;
+use airlang::FreeStaticPrimFuncVal;
 use airlang::FuncMode;
-use airlang::FuncVal;
 use airlang::Int;
 use airlang::List;
 use airlang::Map;
@@ -13,13 +13,12 @@ use airlang::SymbolMode;
 use airlang::Text;
 use airlang::Val;
 
-use crate::prelude::Named;
+use crate::prelude::FreeFn;
 use crate::prelude::Prelude;
 use crate::prelude::free_impl;
-use crate::prelude::named_free_fn;
 
 pub(crate) struct ProcessPrelude {
-    pub(crate) call: Named<FuncVal>,
+    pub(crate) call: FreeStaticPrimFuncVal,
 }
 
 impl Default for ProcessPrelude {
@@ -37,17 +36,18 @@ impl Prelude for ProcessPrelude {
 const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
-fn call() -> Named<FuncVal> {
-    let id = "process.call";
-    let f = free_impl(fn_call);
+fn call() -> FreeStaticPrimFuncVal {
     let forward = FuncMode::map_mode(
         Map::default(),
         FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
         FuncMode::default_mode(),
     );
-    let reverse = FuncMode::default_mode();
-    let mode = FuncMode { forward, reverse };
-    named_free_fn(id, f, mode)
+    FreeFn {
+        id: "process.call",
+        f: free_impl(fn_call),
+        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
+    }
+    .free_static()
 }
 
 fn fn_call(input: Val) -> Val {

@@ -14,7 +14,6 @@ use crate::Symbol;
 use crate::Val;
 use crate::either::Either;
 use crate::func::FuncTrait;
-use crate::func::prim::Primitive;
 use crate::traits::dyn_safe::dyn_any_clone_eq_hash;
 use crate::types::ref1::DynRef;
 
@@ -40,7 +39,8 @@ dyn_any_clone_eq_hash!(pub MutCellFnExt : MutCellFn<Val, Val, Val>);
 
 #[derive(Clone)]
 pub struct MutCellPrimFunc {
-    pub(crate) prim: Primitive,
+    pub(crate) id: Symbol,
+    pub(crate) extension: bool,
     pub(crate) fn1: Box<dyn MutCellFnExt>,
     pub(crate) mode: FuncMode,
     pub(crate) ctx_explicit: bool,
@@ -98,19 +98,19 @@ impl FuncTrait for MutCellPrimFunc {
 
 impl MutCellPrimFunc {
     pub fn new(id: Symbol, fn1: Box<dyn MutCellFnExt>, mode: FuncMode, ctx_explicit: bool) -> Self {
-        Self { prim: Primitive { id, is_extension: true }, fn1, mode, ctx_explicit }
+        Self { id, extension: true, fn1, mode, ctx_explicit }
     }
 }
 
 impl Debug for MutCellPrimFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.prim.fmt(f)
+        self.id.fmt(f)
     }
 }
 
 impl PartialEq for MutCellPrimFunc {
     fn eq(&self, other: &MutCellPrimFunc) -> bool {
-        self.prim == other.prim
+        self.id == other.id
     }
 }
 
@@ -118,6 +118,6 @@ impl Eq for MutCellPrimFunc {}
 
 impl Hash for MutCellPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.prim.hash(state);
+        self.id.hash(state);
     }
 }
