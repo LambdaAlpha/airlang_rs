@@ -23,6 +23,7 @@ impl Prelude for ReplPrelude {
     }
 }
 
+// todo design
 fn help() -> FreeStaticPrimFuncVal {
     FreeFn { id: "help", f: free_impl(fn_help), mode: FuncMode::default() }.free_static()
 }

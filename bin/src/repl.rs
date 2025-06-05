@@ -48,6 +48,7 @@ pub(crate) trait ReplTerminal: Write + IsTerminal {}
 
 impl<T: Write + IsTerminal> ReplTerminal for T {}
 
+// todo impl soft wrap
 pub(crate) struct Repl<T: ReplTerminal> {
     air: AirCell,
     terminal: Terminal<T>,
@@ -95,6 +96,7 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     pub(crate) fn run(&mut self) -> Result<()> {
+        // todo impl better support for pipe
         if !stdin().is_terminal() || !self.terminal.is_terminal() {
             return self.run_once();
         }

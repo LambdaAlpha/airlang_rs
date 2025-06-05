@@ -36,6 +36,8 @@ impl Prelude for ProcessPrelude {
 const PROGRAM: &str = "program";
 const ARGUMENTS: &str = "arguments";
 
+// todo design
+// todo impl
 fn call() -> FreeStaticPrimFuncVal {
     let forward = FuncMode::map_mode(
         Map::default(),

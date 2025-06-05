@@ -15,6 +15,7 @@ use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 use crate::prelude::mut_impl;
 
+// todo design add more
 #[derive(Clone)]
 pub(crate) struct BytePrelude {
     pub(crate) length: ConstStaticPrimFuncVal,
@@ -75,6 +76,7 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
+// todo design
 fn join() -> FreeStaticPrimFuncVal {
     FreeFn { id: "byte.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }

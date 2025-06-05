@@ -25,6 +25,8 @@ impl Default for ModePrelude {
     }
 }
 
+// todo design
+// todo rename
 fn ref_mode() -> MutStaticPrimFuncVal {
     DynFn {
         id: "mode.reference",

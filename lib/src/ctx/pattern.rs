@@ -44,6 +44,7 @@ pub(crate) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option<Pattern> {
     }
 }
 
+// todo design
 fn parse_symbol(ctx: PatternCtx, s: Symbol) -> Option<Pattern> {
     let pattern = match s.chars().next() {
         Some(LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),

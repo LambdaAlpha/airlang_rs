@@ -68,6 +68,7 @@ impl Prelude for ValuePrelude {
     }
 }
 
+// todo design
 fn any() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "any",
@@ -136,6 +137,7 @@ fn fn_type1(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(Symbol::from_str(s))
 }
 
+// todo design mode and ref
 fn equal() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "==",

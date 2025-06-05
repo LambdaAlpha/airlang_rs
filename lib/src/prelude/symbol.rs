@@ -14,6 +14,7 @@ use crate::prelude::const_impl;
 use crate::prelude::ctx_default_mode;
 use crate::prelude::free_impl;
 
+// todo design add more
 #[derive(Clone)]
 pub(crate) struct SymbolPrelude {
     pub(crate) from_text: FreeStaticPrimFuncVal,
@@ -89,6 +90,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
+// todo design
 fn join() -> FreeStaticPrimFuncVal {
     FreeFn { id: "symbol.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }

@@ -16,6 +16,7 @@ use crate::prelude::mut_impl;
 use crate::text::Text;
 use crate::val::Val;
 
+// todo design add more
 #[derive(Clone)]
 pub(crate) struct TextPrelude {
     pub(crate) from_utf8: FreeStaticPrimFuncVal,
@@ -117,6 +118,7 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
+// todo design
 fn join() -> FreeStaticPrimFuncVal {
     FreeFn { id: "text.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }

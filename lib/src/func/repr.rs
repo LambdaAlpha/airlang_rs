@@ -40,13 +40,18 @@ use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
 use crate::val::func::mut_cell_comp::MutCellCompFuncVal;
 use crate::val::func::mut_cell_prim::MutCellPrimFuncVal;
 
+// todo rename
 pub(crate) const CODE: &str = "code";
 pub(crate) const CTX: &str = "context";
 pub(crate) const ID: &str = "id";
+// todo rename
 pub(crate) const FORWARD_MODE: &str = "forward_mode";
+// todo rename
 pub(crate) const REVERSE_MODE: &str = "reverse_mode";
+// todo rename
 pub(crate) const CTX_ACCESS: &str = "context_access";
 pub(crate) const CELL: &str = "cell";
+// todo rename
 pub(crate) const CTX_EXPLICIT: &str = "context_explicit";
 
 pub(crate) const FREE: &str = "free";
@@ -61,6 +66,7 @@ pub(crate) fn parse_mode() -> Option<Mode> {
     FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
 }
 
+// todo design defaults
 pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
         return None;
@@ -72,6 +78,7 @@ pub(crate) fn parse_func(input: Val) -> Option<FuncVal> {
         _ => return None,
     }
 
+    // todo design
     let (ctx_name, input_name, body) = match map_remove(&mut map, CODE) {
         Val::Unit(_) => (Some(Symbol::default()), Symbol::default(), Val::default()),
         Val::Pair(names_body) => {

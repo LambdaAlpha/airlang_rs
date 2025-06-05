@@ -3,10 +3,12 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
+// todo api better error info
 pub struct ParseError {
     pub(crate) msg: String,
 }
 
+// todo api better error info
 #[derive(Debug)]
 pub struct ReprError {}
 

@@ -32,6 +32,7 @@ pub struct PrimMode {
     pub map: Option<DataMode>,
 }
 
+// todo rename
 pub(crate) const FORM: &str = "form";
 pub(crate) const EVAL: &str = "eval";
 

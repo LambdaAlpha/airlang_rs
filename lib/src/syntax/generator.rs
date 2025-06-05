@@ -107,6 +107,7 @@ struct GenCtx {
     indent: u8,
 }
 
+// todo impl shortest repr
 fn gen1(ctx: GenCtx, s: &mut String, repr: GenRepr) {
     match repr {
         GenRepr::Unit(_) => gen_unit(ctx, s),

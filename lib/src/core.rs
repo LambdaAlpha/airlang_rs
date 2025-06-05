@@ -482,6 +482,7 @@ where
             Val::Symbol(func) => {
                 CallRefEval.free_static_call(Call::new(call.reverse, func, call.input))
             }
+            // todo design
             func => {
                 let input = self.input.free_static_call(call.input);
                 Val::Call(Call::new(call.reverse, func, input).into())
@@ -529,6 +530,7 @@ where
             Val::Symbol(func) => {
                 CallRefEval.const_static_call(ctx, Call::new(call.reverse, func, call.input))
             }
+            // todo design
             func => {
                 let input = self.input.const_static_call(ctx, call.input);
                 Val::Call(Call::new(call.reverse, func, input).into())
@@ -576,6 +578,7 @@ where
             Val::Symbol(func) => {
                 CallRefEval.mut_static_call(ctx, Call::new(call.reverse, func, call.input))
             }
+            // todo design
             func => {
                 let input = self.input.mut_static_call(ctx, call.input);
                 Val::Call(Call::new(call.reverse, func, input).into())
@@ -684,6 +687,7 @@ impl FreeStaticFn<CallVal, Val> for CallApply {
             Val::Symbol(func) => {
                 CallRefApply.free_static_call(Call::new(call.reverse, func, call.input))
             }
+            // todo design
             func => Val::Call(Call::new(call.reverse, func, call.input).into()),
         }
     }
@@ -722,6 +726,7 @@ impl ConstStaticFn<Val, CallVal, Val> for CallApply {
             Val::Symbol(func) => {
                 CallRefApply.const_static_call(ctx, Call::new(call.reverse, func, call.input))
             }
+            // todo design
             func => Val::Call(Call::new(call.reverse, func, call.input).into()),
         }
     }
@@ -760,6 +765,7 @@ impl MutStaticFn<Val, CallVal, Val> for CallApply {
             Val::Symbol(func_name) => {
                 CallRefApply.mut_static_call(ctx, Call::new(call.reverse, func_name, call.input))
             }
+            // todo design
             func => Val::Call(Call::new(call.reverse, func, call.input).into()),
         }
     }

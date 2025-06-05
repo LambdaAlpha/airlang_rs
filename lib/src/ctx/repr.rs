@@ -36,6 +36,7 @@ pub(crate) fn parse_mode() -> Option<Mode> {
     FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
 }
 
+// todo design
 pub(crate) fn parse_ctx(input: Val) -> Option<CtxVal> {
     let Val::Map(mut map) = input else {
         return None;
@@ -61,6 +62,7 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
         .collect()
 }
 
+// todo design
 fn parse_binding(val: Val) -> Option<OptBinding> {
     match val {
         Val::Symbol(name) => Some(OptBinding { name, contract: None }),
@@ -98,6 +100,7 @@ pub(crate) fn parse_contract(contract: Val) -> Option<Contract> {
     Some(contract)
 }
 
+// todo design
 pub(crate) fn generate_ctx(ctx: CtxVal) -> Val {
     let ctx = Ctx::from(ctx).destruct();
     let mut map = Map::default();
@@ -123,6 +126,7 @@ fn generate_variables(ctx_map: CtxMap) -> Option<Val> {
     Some(Val::Map(map.into()))
 }
 
+// todo design
 fn generate_binding(binding: Binding) -> Val {
     if binding.contract == Contract::default() {
         return Val::Symbol(binding.name);

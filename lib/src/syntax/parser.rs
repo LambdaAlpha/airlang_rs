@@ -695,11 +695,13 @@ fn int_or_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
         .parse_next(i)
 }
 
+// todo design support spaces
 fn int(i: &mut &str) -> ModalResult<Int> {
     let int = (sign, integral).map(|(sign, i)| build_int(sign, i));
     scoped(int).context(label("int")).parse_next(i)
 }
 
+// todo design support spaces
 fn number(i: &mut &str) -> ModalResult<Number> {
     let number = (sign, significand, opt(exponent))
         .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
@@ -809,6 +811,7 @@ fn build_int_or_number<T: ParseRepr>(
     }
 }
 
+// todo design support spaces
 fn byte(i: &mut &str) -> ModalResult<Byte> {
     let hex = preceded('X', cut_err(hexadecimal_byte));
     let bin = preceded('B', cut_err(binary_byte));

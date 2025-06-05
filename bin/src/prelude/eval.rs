@@ -24,6 +24,7 @@ impl Prelude for EvalPrelude {
     }
 }
 
+// todo rename
 fn reset() -> MutStaticPrimFuncVal {
     DynFn {
         id: "repl.reset",

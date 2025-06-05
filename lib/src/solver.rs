@@ -12,6 +12,10 @@ use crate::Val;
 
 thread_local!(pub(crate) static SOLVER: RefCell<Option<FuncVal>> = RefCell::default());
 
+// todo design knowledge base
+
+// todo design default solve
+
 pub(crate) struct Solver;
 
 impl FreeStaticFn<Val, Val> for Solver {

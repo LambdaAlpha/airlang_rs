@@ -27,6 +27,8 @@ impl Prelude for ProcessPrelude {
     }
 }
 
+// todo design
+// todo impl
 fn call() -> FreeStaticPrimFuncVal {
     let forward = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form);
     FreeFn {

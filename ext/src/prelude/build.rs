@@ -34,6 +34,8 @@ impl Prelude for BuildPrelude {
     }
 }
 
+// todo rename
+// todo design
 fn import() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "build.import",

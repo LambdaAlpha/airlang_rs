@@ -332,6 +332,7 @@ impl GenerateMode<Val> for PairMode {
     }
 }
 
+// todo design
 impl ParseMode<Val> for CallMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
@@ -356,6 +357,7 @@ impl ParseMode<Val> for CallMode {
     }
 }
 
+// todo design
 impl GenerateMode<Val> for CallMode {
     fn generate(&self) -> Val {
         let func = GenerateMode::generate(&self.func);

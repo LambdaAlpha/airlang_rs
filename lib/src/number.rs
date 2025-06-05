@@ -4,6 +4,7 @@ use std::hash::Hash;
 
 use num_bigint::BigInt;
 
+// todo design
 // temporary representation
 // int * radix^exp
 #[derive(Clone, PartialEq, Hash)]

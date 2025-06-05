@@ -24,6 +24,7 @@ impl MainCtx {
         }
     }
 
+    // todo design
     pub(crate) fn ref_or_val(val: Val) -> Either<Symbol, Val> {
         let Val::Symbol(s) = val else {
             return Either::That(val);

@@ -314,6 +314,7 @@ where ValIter: Iterator<Item = Val> {
 }
 
 fn eval_block(ctx: &mut Val, input: Val) -> (Val, CtrlFlow) {
+    // todo design
     let Val::List(list) = input else {
         return (DEFAULT_MODE.mut_static_call(ctx, input), CtrlFlow::None);
     };
