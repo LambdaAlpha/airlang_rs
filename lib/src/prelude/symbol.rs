@@ -1,26 +1,26 @@
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Int;
-use crate::Symbol;
-use crate::Text;
-use crate::Val;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::free_impl;
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx_default_mode;
+use super::free_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::ConstRef;
+use crate::type_::Int;
+use crate::type_::Symbol;
+use crate::type_::Text;
 
 // todo design add more
 #[derive(Clone)]
-pub(crate) struct SymbolPrelude {
-    pub(crate) from_text: FreeStaticPrimFuncVal,
-    pub(crate) into_text: FreeStaticPrimFuncVal,
-    pub(crate) length: ConstStaticPrimFuncVal,
-    pub(crate) join: FreeStaticPrimFuncVal,
+pub struct SymbolPrelude {
+    pub from_text: FreeStaticPrimFuncVal,
+    pub into_text: FreeStaticPrimFuncVal,
+    pub length: ConstStaticPrimFuncVal,
+    pub join: FreeStaticPrimFuncVal,
 }
 
 impl Default for SymbolPrelude {
@@ -43,7 +43,7 @@ impl Prelude for SymbolPrelude {
     }
 }
 
-fn from_text() -> FreeStaticPrimFuncVal {
+pub fn from_text() -> FreeStaticPrimFuncVal {
     FreeFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: FuncMode::default() }
         .free_static()
 }
@@ -56,11 +56,11 @@ fn fn_from_text(input: Val) -> Val {
     if !is_symbol {
         return Val::default();
     }
-    let symbol = Symbol::from_string(t.to_string());
+    let symbol = Symbol::from_string_unchecked(t.to_string());
     Val::Symbol(symbol)
 }
 
-fn into_text() -> FreeStaticPrimFuncVal {
+pub fn into_text() -> FreeStaticPrimFuncVal {
     FreeFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: FuncMode::default() }
         .free_static()
 }
@@ -72,7 +72,7 @@ fn fn_into_text(input: Val) -> Val {
     Val::Text(Text::from(String::from(s)).into())
 }
 
-fn length() -> ConstStaticPrimFuncVal {
+pub fn length() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "symbol.length",
         f: const_impl(fn_length),
@@ -91,7 +91,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 // todo design
-fn join() -> FreeStaticPrimFuncVal {
+pub fn join() -> FreeStaticPrimFuncVal {
     FreeFn { id: "symbol.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }
 
@@ -121,5 +121,5 @@ fn fn_join(input: Val) -> Val {
         return Val::default();
     };
     let symbol = symbols.join(separator);
-    Val::Symbol(Symbol::from_string(symbol))
+    Val::Symbol(Symbol::from_string_unchecked(symbol))
 }

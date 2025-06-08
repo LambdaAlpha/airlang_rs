@@ -3,27 +3,26 @@ use std::io::stderr;
 use std::io::stdin;
 use std::io::stdout;
 
-use airlang::FreeStaticPrimFuncVal;
-use airlang::FuncMode;
-use airlang::MutStaticPrimFuncVal;
-use airlang::PreludeCtx;
-use airlang::SymbolMode;
-use airlang::Val;
+use airlang::prelude::DynFn;
+use airlang::prelude::FreeFn;
+use airlang::prelude::Prelude;
+use airlang::prelude::PreludeCtx;
+use airlang::prelude::free_impl;
+use airlang::prelude::mut_impl;
+use airlang::semantics::func::FuncMode;
+use airlang::semantics::mode::SymbolMode;
+use airlang::semantics::val::FreeStaticPrimFuncVal;
+use airlang::semantics::val::MutStaticPrimFuncVal;
+use airlang::semantics::val::Val;
 
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::free_impl;
-use crate::prelude::mut_impl;
-
-pub(crate) struct IoPrelude {
-    pub(crate) read_line: MutStaticPrimFuncVal,
-    pub(crate) print: FreeStaticPrimFuncVal,
-    pub(crate) print_line: FreeStaticPrimFuncVal,
-    pub(crate) flush: FreeStaticPrimFuncVal,
-    pub(crate) error_print: FreeStaticPrimFuncVal,
-    pub(crate) error_print_line: FreeStaticPrimFuncVal,
-    pub(crate) error_flush: FreeStaticPrimFuncVal,
+pub struct IoPrelude {
+    pub read_line: MutStaticPrimFuncVal,
+    pub print: FreeStaticPrimFuncVal,
+    pub print_line: FreeStaticPrimFuncVal,
+    pub flush: FreeStaticPrimFuncVal,
+    pub error_print: FreeStaticPrimFuncVal,
+    pub error_print_line: FreeStaticPrimFuncVal,
+    pub error_flush: FreeStaticPrimFuncVal,
 }
 
 impl Default for IoPrelude {
@@ -52,7 +51,7 @@ impl Prelude for IoPrelude {
     }
 }
 
-fn read_line() -> MutStaticPrimFuncVal {
+pub fn read_line() -> MutStaticPrimFuncVal {
     let forward =
         FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     DynFn {
@@ -72,7 +71,7 @@ fn fn_read_line(ctx: &mut Val, _input: Val) -> Val {
     Val::default()
 }
 
-fn print() -> FreeStaticPrimFuncVal {
+pub fn print() -> FreeStaticPrimFuncVal {
     FreeFn { id: "io.print", f: free_impl(fn_print), mode: FuncMode::default() }.free_static()
 }
 
@@ -84,7 +83,7 @@ fn fn_print(input: Val) -> Val {
     Val::default()
 }
 
-fn print_line() -> FreeStaticPrimFuncVal {
+pub fn print_line() -> FreeStaticPrimFuncVal {
     FreeFn { id: "io.print_line", f: free_impl(fn_print_line), mode: FuncMode::default() }
         .free_static()
 }
@@ -97,7 +96,7 @@ fn fn_print_line(input: Val) -> Val {
     Val::default()
 }
 
-fn flush() -> FreeStaticPrimFuncVal {
+pub fn flush() -> FreeStaticPrimFuncVal {
     FreeFn { id: "io.flush", f: free_impl(fn_flush), mode: FuncMode::default() }.free_static()
 }
 
@@ -106,7 +105,7 @@ fn fn_flush(_input: Val) -> Val {
     Val::default()
 }
 
-fn error_print() -> FreeStaticPrimFuncVal {
+pub fn error_print() -> FreeStaticPrimFuncVal {
     FreeFn { id: "io.error_print", f: free_impl(fn_error_print), mode: FuncMode::default() }
         .free_static()
 }
@@ -119,7 +118,7 @@ fn fn_error_print(input: Val) -> Val {
     Val::default()
 }
 
-fn error_print_line() -> FreeStaticPrimFuncVal {
+pub fn error_print_line() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "io.error_print_line",
         f: free_impl(fn_error_print_line),
@@ -136,7 +135,7 @@ fn fn_error_print_line(input: Val) -> Val {
     Val::default()
 }
 
-fn error_flush() -> FreeStaticPrimFuncVal {
+pub fn error_flush() -> FreeStaticPrimFuncVal {
     FreeFn { id: "io.error_flush", f: free_impl(fn_error_flush), mode: FuncMode::default() }
         .free_static()
 }

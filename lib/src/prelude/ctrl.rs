@@ -1,51 +1,51 @@
-use crate::Byte;
-use crate::Call;
-use crate::CodeMode;
-use crate::Contract;
-use crate::FuncMode;
-use crate::Int;
-use crate::List;
-use crate::Map;
-use crate::MutStaticFn;
-use crate::MutStaticPrimFuncVal;
-use crate::Pair;
-use crate::PrimMode;
-use crate::Symbol;
-use crate::SymbolMode;
-use crate::Text;
-use crate::ctx::pattern::PatternCtx;
-use crate::ctx::pattern::assign_pattern;
-use crate::ctx::pattern::match_pattern;
-use crate::ctx::pattern::parse_pattern;
-use crate::func::func_mode::DEFAULT_MODE;
-use crate::prelude::DynFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::mut_impl;
-use crate::val::Val;
+use super::DynFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::ctx::pattern::PatternCtx;
+use super::ctx::pattern::assign_pattern;
+use super::ctx::pattern::match_pattern;
+use super::ctx::pattern::parse_pattern;
+use super::mut_impl;
+use crate::semantics::ctx::Contract;
+use crate::semantics::func::DEFAULT_MODE;
+use crate::semantics::func::FuncMode;
+use crate::semantics::func::MutStaticFn;
+use crate::semantics::mode::CodeMode;
+use crate::semantics::mode::PrimMode;
+use crate::semantics::mode::SymbolMode;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Byte;
+use crate::type_::Call;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
 
 #[derive(Clone)]
-pub(crate) struct CtrlPrelude {
-    pub(crate) do1: MutStaticPrimFuncVal,
-    pub(crate) if1: MutStaticPrimFuncVal,
-    pub(crate) match1: MutStaticPrimFuncVal,
-    pub(crate) loop1: MutStaticPrimFuncVal,
-    pub(crate) for1: MutStaticPrimFuncVal,
+pub struct CtrlPrelude {
+    pub do_: MutStaticPrimFuncVal,
+    pub if_: MutStaticPrimFuncVal,
+    pub match_: MutStaticPrimFuncVal,
+    pub loop_: MutStaticPrimFuncVal,
+    pub for_: MutStaticPrimFuncVal,
 }
 
 impl Default for CtrlPrelude {
     fn default() -> Self {
-        CtrlPrelude { do1: do1(), if1: if1(), match1: match1(), loop1: loop1(), for1: for1() }
+        CtrlPrelude { do_: do_(), if_: if_(), match_: match_(), loop_: loop_(), for_: for_() }
     }
 }
 
 impl Prelude for CtrlPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
-        self.do1.put(ctx);
-        self.if1.put(ctx);
-        self.match1.put(ctx);
-        self.loop1.put(ctx);
-        self.for1.put(ctx);
+        self.do_.put(ctx);
+        self.if_.put(ctx);
+        self.match_.put(ctx);
+        self.loop_.put(ctx);
+        self.for_.put(ctx);
     }
 }
 
@@ -71,7 +71,7 @@ enum BlockItem {
     Exit { exit: Exit, condition: Val, body: Val },
 }
 
-fn do1() -> MutStaticPrimFuncVal {
+pub fn do_() -> MutStaticPrimFuncVal {
     DynFn {
         id: "do",
         f: mut_impl(fn_do),
@@ -85,7 +85,7 @@ fn fn_do(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, input).0
 }
 
-fn if1() -> MutStaticPrimFuncVal {
+pub fn if_() -> MutStaticPrimFuncVal {
     DynFn {
         id: "?",
         f: mut_impl(fn_if),
@@ -112,7 +112,7 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, branch).0
 }
 
-fn match1() -> MutStaticPrimFuncVal {
+pub fn match_() -> MutStaticPrimFuncVal {
     DynFn {
         id: "match",
         f: mut_impl(fn_match),
@@ -151,7 +151,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn loop1() -> MutStaticPrimFuncVal {
+pub fn loop_() -> MutStaticPrimFuncVal {
     DynFn {
         id: "loop",
         f: mut_impl(fn_loop),
@@ -205,7 +205,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-fn for1() -> MutStaticPrimFuncVal {
+pub fn for_() -> MutStaticPrimFuncVal {
     DynFn {
         id: "for",
         f: mut_impl(fn_for),
@@ -251,7 +251,7 @@ fn fn_for(ctx: &mut Val, input: Val) -> Val {
         }
         Val::Symbol(s) => {
             let iter = s.char_indices().map(|(start, c)| {
-                let symbol = Symbol::from_str(&s[start .. start + c.len_utf8()]);
+                let symbol = Symbol::from_str_unchecked(&s[start .. start + c.len_utf8()]);
                 Val::Symbol(symbol)
             });
             for_iter(ctx, body, name, iter)

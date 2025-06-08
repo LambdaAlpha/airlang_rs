@@ -6,7 +6,7 @@ use crate::syntax::test::map;
 use crate::syntax::test::pair;
 use crate::syntax::test::symbol;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         pair(symbol("a"), symbol("b")),
         pair(symbol("a"), pair(symbol("b"), symbol("c"))),

@@ -1,7 +1,29 @@
-pub use pub1::*;
+pub use error::ParseError;
+pub use error::ReprError;
+pub use generator::GenRepr;
+pub use generator::escape_symbol;
+pub use generator::escape_text;
+pub use generator::escape_text_symbol;
+pub use parser::ParseRepr;
+pub use parser::parse;
 
-// https://github.com/rust-lang/rustfmt/issues/4070
-mod __ {}
+_____!();
+
+use crate::syntax::generator::COMPACT_FMT;
+use crate::syntax::generator::PRETTY_FMT;
+use crate::syntax::generator::SYMBOL_FMT;
+
+pub fn generate_pretty(src: GenRepr) -> String {
+    generator::generate(src, PRETTY_FMT)
+}
+
+pub fn generate_compact(src: GenRepr) -> String {
+    generator::generate(src, COMPACT_FMT)
+}
+
+pub fn generate_symbol(src: GenRepr) -> String {
+    generator::generate(src, SYMBOL_FMT)
+}
 
 // delimiters
 
@@ -59,15 +81,13 @@ pub(crate) fn ambiguous(s: &str) -> bool {
     matches!(s, UNIT | TRUE | FALSE | PAIR | CALL_FORWARD | CALL_REVERSE)
 }
 
-pub(crate) mod pub1;
+pub mod repr;
 
-pub(crate) mod repr;
+mod parser;
 
-pub(crate) mod parser;
+mod generator;
 
-pub(crate) mod generator;
-
-pub(crate) mod error;
+mod error;
 
 #[cfg(test)]
 mod test;

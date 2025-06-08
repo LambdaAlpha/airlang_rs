@@ -1,10 +1,13 @@
 use std::error::Error;
 
-use airlang::AirCell;
-use airlang::Contract;
-use airlang::Symbol;
-use airlang::Text;
-use airlang::parse;
+use airlang::Air;
+use airlang::prelude::CorePrelude;
+use airlang::semantics::ctx::Contract;
+use airlang::solver::core_solver;
+use airlang::syntax::escape_text;
+use airlang::syntax::parse;
+use airlang::type_::Symbol;
+use airlang::type_::Text;
 
 const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";
@@ -42,19 +45,21 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn generate_air_with_main() -> Result<AirCell, Box<dyn Error>> {
+fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
     let src = generate_import("/main/main.air");
     let src = parse(&src)?;
-    let mut air = AirCell::default();
+    Air::init_prelude(Box::new(CorePrelude::default()));
+    Air::init_solver(core_solver());
+    let mut air = Air::default();
     let main = air.interpret(src);
-    let main_name = unsafe { Symbol::from_str_unchecked(MAIN_NAME) };
-    air.ctx_mut().put(main_name, main, Contract::Final)?;
+    let main_name = Symbol::from_str_unchecked(MAIN_NAME);
+    air.ctx_mut().variables_mut().put(main_name, main, Contract::Final)?;
     Ok(air)
 }
 
 fn generate_import(path: &str) -> String {
     let mut src = Text::from("build.import \"");
-    src.push_str_escaped(env!("CARGO_MANIFEST_DIR"));
+    escape_text(&mut src, env!("CARGO_MANIFEST_DIR"));
     src.push_str(path);
     src.push('"');
     src.into()

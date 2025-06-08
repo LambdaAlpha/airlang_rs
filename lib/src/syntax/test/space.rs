@@ -1,10 +1,10 @@
-use crate::syntax::Repr;
+use crate::syntax::repr::Repr;
 use crate::syntax::test::infix_call;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::symbol;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         symbol("a"),
         symbol("a"),

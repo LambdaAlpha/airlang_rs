@@ -1,0 +1,564 @@
+use std::cell::RefCell;
+use std::cmp::min;
+use std::hash::Hash;
+
+use num_bigint::BigInt;
+use rand::Rng;
+use rand::distr::SampleString;
+use rand::distr::StandardUniform;
+use rand::distr::weighted::WeightedIndex;
+use rand::prelude::Distribution;
+use rand::prelude::IndexedRandom;
+use rand::prelude::IteratorRandom;
+
+use crate::prelude::put_preludes;
+use crate::semantics::ctx::Contract;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::ctx::CtxMap;
+use crate::semantics::ctx::CtxValue;
+use crate::semantics::func::ConstCellCompFunc;
+use crate::semantics::func::ConstStaticCompFunc;
+use crate::semantics::func::DynComposite;
+use crate::semantics::func::FreeCellCompFunc;
+use crate::semantics::func::FreeComposite;
+use crate::semantics::func::FreeStaticCompFunc;
+use crate::semantics::func::FuncMode;
+use crate::semantics::func::ModeFunc;
+use crate::semantics::func::MutCellCompFunc;
+use crate::semantics::func::MutStaticCompFunc;
+use crate::semantics::mode::CallMode;
+use crate::semantics::mode::CodeMode;
+use crate::semantics::mode::CompMode;
+use crate::semantics::mode::DataMode;
+use crate::semantics::mode::ListMode;
+use crate::semantics::mode::MapMode;
+use crate::semantics::mode::Mode;
+use crate::semantics::mode::PairMode;
+use crate::semantics::mode::PrimMode;
+use crate::semantics::mode::SymbolMode;
+use crate::semantics::val::ConstCellCompFuncVal;
+use crate::semantics::val::ConstStaticCompFuncVal;
+use crate::semantics::val::FreeCellCompFuncVal;
+use crate::semantics::val::FreeStaticCompFuncVal;
+use crate::semantics::val::FuncVal;
+use crate::semantics::val::ModeFuncVal;
+use crate::semantics::val::MutCellCompFuncVal;
+use crate::semantics::val::MutStaticCompFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Bit;
+use crate::type_::Byte;
+use crate::type_::Call;
+use crate::type_::Change;
+use crate::type_::Either;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Number;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
+use crate::type_::Unit;
+
+thread_local!(pub(in crate::prelude) static ARBITRARY: RefCell<Box<dyn ArbitraryVal >> = RefCell::new(Box::new(ArbitraryValUnit)));
+
+pub trait ArbitraryVal {
+    fn arbitrary(&self) -> Val;
+
+    fn arbitrary_type(&self, type_: Symbol) -> Val;
+}
+
+pub trait Arbitrary {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self;
+}
+
+impl Arbitrary for Val {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let weight: usize = 1 << min(depth, 32);
+        let weights = [
+            weight, // unit
+            weight, // bit
+            weight, // symbol
+            weight, // text
+            weight, // int
+            weight, // number
+            weight, // byte
+            1,      // pair
+            1,      // call
+            1,      // list
+            1,      // map
+            1,      // ctx
+            1,      // func
+            1,      // extension
+        ];
+        let i = sample(rng, weights);
+        let new_depth = depth + 1;
+
+        match i {
+            0 => Val::Unit(Unit::any(rng, new_depth)),
+            1 => Val::Bit(Bit::any(rng, new_depth)),
+            2 => Val::Symbol(Symbol::any(rng, new_depth)),
+            3 => Val::Text(Text::any(rng, new_depth).into()),
+            4 => Val::Int(Int::any(rng, new_depth).into()),
+            5 => Val::Number(Number::any(rng, new_depth).into()),
+            6 => Val::Byte(Byte::any(rng, new_depth).into()),
+            7 => Val::Pair(Pair::<Val, Val>::any(rng, new_depth).into()),
+            8 => Val::Call(Call::<Val, Val>::any(rng, new_depth).into()),
+            9 => Val::List(List::<Val>::any(rng, new_depth).into()),
+            10 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
+            11 => Val::Ctx(Ctx::any(rng, new_depth).into()),
+            12 => Val::Func(FuncVal::any(rng, new_depth)),
+            13 => arbitrary_ext(),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Arbitrary for Unit {
+    fn any<R: Rng + ?Sized>(_rng: &mut R, _depth: usize) -> Self {
+        Unit
+    }
+}
+
+impl Arbitrary for Bit {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        Bit::new(rng.random())
+    }
+}
+
+struct DistSymbol;
+
+impl Distribution<u8> for DistSymbol {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u8 {
+        rng.random_range(Symbol::MIN ..= Symbol::MAX) as u8
+    }
+}
+
+impl SampleString for DistSymbol {
+    fn append_string<R: Rng + ?Sized>(&self, rng: &mut R, string: &mut String, len: usize) {
+        // safety: symbols are valid utf-8
+        unsafe {
+            let v = string.as_mut_vec();
+            v.extend(self.sample_iter(rng).take(len));
+        }
+    }
+}
+
+impl Arbitrary for Symbol {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        let len = any_len(rng);
+        let s = DistSymbol.sample_string(rng, len);
+        Symbol::from_string_unchecked(s)
+    }
+}
+
+impl Arbitrary for Text {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        let len = any_len(rng);
+        let s: String = rng.sample_iter::<char, _>(StandardUniform).take(len).collect();
+        Text::from(s)
+    }
+}
+
+impl Arbitrary for Int {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        Int::from(rng.random::<i128>())
+    }
+}
+
+impl Arbitrary for Number {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        let int: i64 = rng.random();
+        let int = BigInt::from(int);
+        let exp: i8 = rng.random();
+        let exp = BigInt::from(exp);
+        Number::new(int, 10, exp)
+    }
+}
+
+impl Arbitrary for Byte {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        let len = any_len(rng);
+        let mut byte = vec![0u8; len];
+        rng.fill(&mut *byte);
+        Byte::from(byte)
+    }
+}
+
+impl<First, Second> Arbitrary for Pair<First, Second>
+where
+    First: Arbitrary,
+    Second: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        Pair::new(First::any(rng, depth), Second::any(rng, depth))
+    }
+}
+
+impl<This, That> Arbitrary for Either<This, That>
+where
+    This: Arbitrary,
+    That: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        if rng.random() {
+            Either::This(This::any(rng, depth))
+        } else {
+            Either::That(That::any(rng, depth))
+        }
+    }
+}
+
+impl<From, To> Arbitrary for Change<From, To>
+where
+    From: Arbitrary,
+    To: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        Change::new(From::any(rng, depth), To::any(rng, depth))
+    }
+}
+
+impl<Func, Input> Arbitrary for Call<Func, Input>
+where
+    Func: Arbitrary,
+    Input: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        Call::new(rng.random(), Func::any(rng, depth), Input::any(rng, depth))
+    }
+}
+
+impl<T> Arbitrary for List<T>
+where T: Arbitrary
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let len = any_len_weighted(rng, depth);
+        let mut list = Vec::with_capacity(len);
+        for _ in 0 .. len {
+            list.push(T::any(rng, depth));
+        }
+        List::from(list)
+    }
+}
+
+impl<K, V> Arbitrary for Map<K, V>
+where
+    K: Eq + Hash + Arbitrary,
+    V: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let len = any_len_weighted(rng, depth);
+        let mut map = Map::with_capacity(len);
+        for _ in 0 .. len {
+            map.insert(K::any(rng, depth), V::any(rng, depth));
+        }
+        map
+    }
+}
+
+impl Arbitrary for Contract {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        const CONTRACT: [Contract; 5] =
+            [Contract::None, Contract::Static, Contract::Still, Contract::Final, Contract::Const];
+        *(CONTRACT.choose(rng).unwrap())
+    }
+}
+
+impl Arbitrary for CtxValue {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        CtxValue::new(Val::any(rng, depth), Contract::any(rng, depth))
+    }
+}
+
+impl Arbitrary for Ctx {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let variables = CtxMap::new(Map::any(rng, depth));
+        Ctx::new(variables)
+    }
+}
+
+impl<T: Arbitrary> Arbitrary for Option<T> {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        if rng.random() { None } else { Some(T::any(rng, depth)) }
+    }
+}
+
+impl Arbitrary for DataMode {
+    fn any<R: Rng + ?Sized>(_rng: &mut R, _depth: usize) -> Self {
+        DataMode
+    }
+}
+
+impl Arbitrary for CodeMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        const MODES: [CodeMode; 2] = [CodeMode::Form, CodeMode::Eval];
+        *(MODES.choose(rng).unwrap())
+    }
+}
+
+impl Arbitrary for SymbolMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        const MODES: [SymbolMode; 3] = [SymbolMode::Literal, SymbolMode::Ref, SymbolMode::Move];
+        *(MODES.choose(rng).unwrap())
+    }
+}
+
+impl Arbitrary for CompMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let symbol = Arbitrary::any(rng, depth);
+        let pair = Arbitrary::any(rng, depth);
+        let call = Arbitrary::any(rng, depth);
+        let list = Arbitrary::any(rng, depth);
+        let map = Arbitrary::any(rng, depth);
+        CompMode { symbol, pair, call, list, map }
+    }
+}
+
+impl Arbitrary for PairMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let first = Arbitrary::any(rng, new_depth);
+        let second = Arbitrary::any(rng, new_depth);
+        PairMode { first, second }
+    }
+}
+
+impl Arbitrary for CallMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let func = Arbitrary::any(rng, new_depth);
+        let input = Arbitrary::any(rng, new_depth);
+        let some = if rng.random() { Some(Arbitrary::any(rng, new_depth)) } else { None };
+        CallMode { func, input, some }
+    }
+}
+
+impl Arbitrary for ListMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let head = Arbitrary::any(rng, new_depth);
+        let tail = Arbitrary::any(rng, new_depth);
+        ListMode { head, tail }
+    }
+}
+
+impl Arbitrary for MapMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let new_depth = depth + 1;
+        let some = Arbitrary::any(rng, new_depth);
+        let key = Arbitrary::any(rng, new_depth);
+        let value = Arbitrary::any(rng, new_depth);
+        let else_ = Pair::new(key, value);
+        MapMode { some, else_ }
+    }
+}
+
+impl Arbitrary for PrimMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let symbol = Arbitrary::any(rng, depth);
+        let pair = Arbitrary::any(rng, depth);
+        let call = Arbitrary::any(rng, depth);
+        let list = Arbitrary::any(rng, depth);
+        let map = Arbitrary::any(rng, depth);
+        PrimMode { symbol, pair, call, list, map }
+    }
+}
+
+impl Arbitrary for Mode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let weight: usize = 1 << min(depth, 32);
+        let weights = [
+            weight, // primitive
+            1,      // composite
+            1,      // function
+        ];
+        let i = sample(rng, weights);
+        let new_depth = depth + 1;
+        match i {
+            0 => Mode::Prim(Arbitrary::any(rng, depth)),
+            1 => Mode::Comp(Box::new(Arbitrary::any(rng, depth))),
+            2 => Mode::Func(FuncVal::any(rng, new_depth)),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Arbitrary for FuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        if rng.random() {
+            let mut prelude: Map<Symbol, Val> = Map::with_capacity(128);
+            put_preludes(&mut prelude);
+            let func =
+                prelude.into_values().filter(|v| matches!(v, Val::Func(_))).choose(rng).unwrap();
+            let Val::Func(func) = func else { unreachable!() };
+            func
+        } else {
+            match rng.random_range(0 .. 7) {
+                0 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::Mode(func)
+                }
+                1 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::FreeStaticComp(func)
+                }
+                2 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::ConstStaticComp(func)
+                }
+                3 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::MutStaticComp(func)
+                }
+                4 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::FreeCellComp(func)
+                }
+                5 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::ConstCellComp(func)
+                }
+                6 => {
+                    let func = Arbitrary::any(rng, depth);
+                    FuncVal::MutCellComp(func)
+                }
+                _ => unreachable!(),
+            }
+        }
+    }
+}
+
+impl Arbitrary for FuncMode {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let forward = Arbitrary::any(rng, depth);
+        let reverse = Arbitrary::any(rng, depth);
+        FuncMode { forward, reverse }
+    }
+}
+
+impl Arbitrary for FreeComposite {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        FreeComposite { body: Arbitrary::any(rng, depth), input_name: Arbitrary::any(rng, depth) }
+    }
+}
+
+impl Arbitrary for DynComposite {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        DynComposite { free: Arbitrary::any(rng, depth), ctx_name: Arbitrary::any(rng, depth) }
+    }
+}
+
+impl Arbitrary for FreeCellCompFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let func = FreeCellCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+        };
+        FreeCellCompFuncVal::from(func)
+    }
+}
+
+impl Arbitrary for FreeStaticCompFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let func = FreeStaticCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+        };
+        FreeStaticCompFuncVal::from(func)
+    }
+}
+
+impl Arbitrary for ConstCellCompFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let func = ConstCellCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
+        ConstCellCompFuncVal::from(func)
+    }
+}
+
+impl Arbitrary for ConstStaticCompFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let func = ConstStaticCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
+        ConstStaticCompFuncVal::from(func)
+    }
+}
+
+impl Arbitrary for MutCellCompFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let func = MutCellCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
+        MutCellCompFuncVal::from(func)
+    }
+}
+
+impl Arbitrary for MutStaticCompFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let func = MutStaticCompFunc {
+            comp: Arbitrary::any(rng, depth),
+            ctx: Arbitrary::any(rng, depth),
+            mode: Arbitrary::any(rng, depth),
+            ctx_explicit: rng.random(),
+        };
+        MutStaticCompFuncVal::from(func)
+    }
+}
+
+impl Arbitrary for ModeFuncVal {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let mode = Arbitrary::any(rng, depth);
+        ModeFuncVal::from(ModeFunc::new(mode))
+    }
+}
+
+pub(in crate::prelude) fn arbitrary_ext() -> Val {
+    ARBITRARY.with_borrow(|ext| ext.arbitrary())
+}
+
+pub(in crate::prelude) fn arbitrary_ext_type(type_: Symbol) -> Val {
+    ARBITRARY.with_borrow(|ext| ext.arbitrary_type(type_))
+}
+
+fn sample<const N: usize, R: Rng + ?Sized>(rng: &mut R, weights: [usize; N]) -> usize {
+    let dist = WeightedIndex::new(weights).unwrap();
+    dist.sample(rng)
+}
+
+fn any_len_weighted<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> usize {
+    const WEIGHTS: [usize; 16] = [16, 16, 16, 16, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1];
+    let dist = WeightedIndex::new(WEIGHTS).unwrap();
+    let limit = 16usize.saturating_sub(depth);
+    let len = dist.sample(rng);
+    min(len, limit)
+}
+
+fn any_len<R: Rng + ?Sized>(rng: &mut R) -> usize {
+    let len: u8 = rng.random();
+    len as usize
+}
+
+struct ArbitraryValUnit;
+
+impl ArbitraryVal for ArbitraryValUnit {
+    fn arbitrary(&self) -> Val {
+        Val::default()
+    }
+
+    fn arbitrary_type(&self, _type: Symbol) -> Val {
+        Val::default()
+    }
+}

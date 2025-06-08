@@ -1,15 +1,14 @@
-use airlang::AirCell;
-use airlang::FuncMode;
-use airlang::MutStaticPrimFuncVal;
-use airlang::PreludeCtx;
-use airlang::Val;
+use airlang::Air;
+use airlang::prelude::DynFn;
+use airlang::prelude::Prelude;
+use airlang::prelude::PreludeCtx;
+use airlang::prelude::mut_impl;
+use airlang::semantics::func::FuncMode;
+use airlang::semantics::val::MutStaticPrimFuncVal;
+use airlang::semantics::val::Val;
 
-use crate::prelude::DynFn;
-use crate::prelude::Prelude;
-use crate::prelude::mut_impl;
-
-pub(crate) struct EvalPrelude {
-    pub(crate) reset: MutStaticPrimFuncVal,
+pub struct EvalPrelude {
+    pub reset: MutStaticPrimFuncVal,
 }
 
 impl Default for EvalPrelude {
@@ -25,7 +24,7 @@ impl Prelude for EvalPrelude {
 }
 
 // todo rename
-fn reset() -> MutStaticPrimFuncVal {
+pub fn reset() -> MutStaticPrimFuncVal {
     DynFn {
         id: "repl.reset",
         f: mut_impl(fn_reset),
@@ -39,6 +38,6 @@ fn fn_reset(ctx: &mut Val, _input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
         return Val::default();
     };
-    **ctx = AirCell::initial_ctx();
+    **ctx = Air::initial_ctx();
     Val::default()
 }

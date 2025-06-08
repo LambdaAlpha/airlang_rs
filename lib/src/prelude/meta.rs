@@ -2,17 +2,17 @@ use std::str::FromStr;
 
 use num_bigint::BigInt;
 
-use crate::List;
-use crate::ListVal;
-use crate::Val;
-use crate::int::Int;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::ctx_put;
+use super::Prelude;
+use super::PreludeCtx;
+use super::ctx_put;
+use crate::semantics::val::ListVal;
+use crate::semantics::val::Val;
+use crate::type_::Int;
+use crate::type_::List;
 
 #[derive(Clone)]
-pub(crate) struct MetaPrelude {
-    pub(crate) version: ListVal,
+pub struct MetaPrelude {
+    pub version: ListVal,
 }
 
 impl Default for MetaPrelude {
@@ -27,7 +27,7 @@ impl Prelude for MetaPrelude {
     }
 }
 
-fn version() -> ListVal {
+pub fn version() -> ListVal {
     const MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
     const MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
     const PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");

@@ -868,12 +868,6 @@ is_primitive composite
 -----
 false
 =====
-is_extension prelude
------
-not function.is_extension .
------
-false
-=====
 is_cell false
 -----
 not function.is_cell .

@@ -1,18 +1,18 @@
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::free_impl;
-use crate::val::Val;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::free_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::Val;
 
 #[derive(Clone)]
-pub(crate) struct BitPrelude {
-    pub(crate) not: FreeStaticPrimFuncVal,
-    pub(crate) and: FreeStaticPrimFuncVal,
-    pub(crate) or: FreeStaticPrimFuncVal,
-    pub(crate) xor: FreeStaticPrimFuncVal,
-    pub(crate) imply: FreeStaticPrimFuncVal,
+pub struct BitPrelude {
+    pub not: FreeStaticPrimFuncVal,
+    pub and: FreeStaticPrimFuncVal,
+    pub or: FreeStaticPrimFuncVal,
+    pub xor: FreeStaticPrimFuncVal,
+    pub imply: FreeStaticPrimFuncVal,
 }
 
 impl Default for BitPrelude {
@@ -31,7 +31,7 @@ impl Prelude for BitPrelude {
     }
 }
 
-fn not() -> FreeStaticPrimFuncVal {
+pub fn not() -> FreeStaticPrimFuncVal {
     FreeFn { id: "not", f: free_impl(fn_not), mode: FuncMode::default() }.free_static()
 }
 
@@ -42,7 +42,7 @@ fn fn_not(input: Val) -> Val {
     Val::Bit(b.not())
 }
 
-fn and() -> FreeStaticPrimFuncVal {
+pub fn and() -> FreeStaticPrimFuncVal {
     FreeFn { id: "and", f: free_impl(fn_and), mode: FuncMode::default() }.free_static()
 }
 
@@ -59,7 +59,7 @@ fn fn_and(input: Val) -> Val {
     Val::Bit(left.and(right))
 }
 
-fn or() -> FreeStaticPrimFuncVal {
+pub fn or() -> FreeStaticPrimFuncVal {
     FreeFn { id: "or", f: free_impl(fn_or), mode: FuncMode::default() }.free_static()
 }
 
@@ -76,7 +76,7 @@ fn fn_or(input: Val) -> Val {
     Val::Bit(left.or(right))
 }
 
-fn xor() -> FreeStaticPrimFuncVal {
+pub fn xor() -> FreeStaticPrimFuncVal {
     FreeFn { id: "xor", f: free_impl(fn_xor), mode: FuncMode::default() }.free_static()
 }
 
@@ -93,7 +93,7 @@ fn fn_xor(input: Val) -> Val {
     Val::Bit(left.xor(right))
 }
 
-fn imply() -> FreeStaticPrimFuncVal {
+pub fn imply() -> FreeStaticPrimFuncVal {
     FreeFn { id: "imply", f: free_impl(fn_imply), mode: FuncMode::default() }.free_static()
 }
 

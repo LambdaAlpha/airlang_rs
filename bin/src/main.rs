@@ -1,18 +1,20 @@
 use std::io::stdout;
 
-use airlang::AirCell;
+use airlang::Air;
 
-use crate::ext::BinExt;
+use crate::prelude::BinPrelude;
 use crate::repl::Repl;
+use crate::solver::bin_solver;
 
 fn main() -> std::io::Result<()> {
-    AirCell::set_ext(Box::new(BinExt::default()));
+    Air::init_prelude(Box::new(BinPrelude::default()));
+    Air::init_solver(bin_solver());
     let mut repl = Repl::new(stdout());
     repl.run()
 }
 
-mod ext;
-
 mod repl;
 
 mod prelude;
+
+mod solver;

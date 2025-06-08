@@ -3,24 +3,22 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::str::FromStr;
 
-use crate::Bit;
-use crate::Byte;
-use crate::Call;
-use crate::Int;
-use crate::Number;
-use crate::Pair;
-use crate::Symbol;
-use crate::Text;
-use crate::Unit;
-use crate::syntax::ParseError;
-use crate::syntax::generate_pretty;
-use crate::syntax::generator::GenRepr;
-use crate::syntax::parse;
-use crate::syntax::parser::ParseRepr;
-use crate::syntax::repr::call::CallRepr;
-use crate::syntax::repr::list::ListRepr;
-use crate::syntax::repr::map::MapRepr;
-use crate::syntax::repr::pair::PairRepr;
+use super::ParseError;
+use super::generate_pretty;
+use super::generator::GenRepr;
+use super::parse;
+use super::parser::ParseRepr;
+use crate::type_::Bit;
+use crate::type_::Byte;
+use crate::type_::Call;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Number;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
+use crate::type_::Unit;
 
 #[derive(PartialEq, Eq, Clone, Hash)]
 pub enum Repr {
@@ -40,6 +38,14 @@ pub enum Repr {
     List(ListRepr),
     Map(MapRepr),
 }
+
+pub type PairRepr = Pair<Repr, Repr>;
+
+pub type CallRepr = Call<Repr, Repr>;
+
+pub type ListRepr = List<Repr>;
+
+pub type MapRepr = Map<Repr, Repr>;
 
 impl Repr {
     pub fn is_unit(&self) -> bool {
@@ -127,13 +133,13 @@ impl From<MapRepr> for Repr {
 
 impl Display for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_pretty(self))
+        write!(f, "{}", generate_pretty(self.try_into().unwrap()))
     }
 }
 
 impl Debug for Repr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_pretty(self))
+        write!(f, "{}", generate_pretty(self.try_into().unwrap()))
     }
 }
 
@@ -153,7 +159,7 @@ impl FromStr for Repr {
 
 impl From<&Repr> for String {
     fn from(value: &Repr) -> Self {
-        generate_pretty(value)
+        generate_pretty(value.try_into().unwrap())
     }
 }
 
@@ -206,11 +212,3 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
         Ok(r)
     }
 }
-
-pub(crate) mod pair;
-
-pub(crate) mod call;
-
-pub(crate) mod list;
-
-pub(crate) mod map;

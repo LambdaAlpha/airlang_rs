@@ -4,40 +4,40 @@ use std::hash::Hash;
 use const_format::concatcp;
 use num_traits::Signed;
 
-use crate::bit::Bit;
-use crate::byte::Byte;
-use crate::call::Call;
-use crate::int::Int;
-use crate::list::List;
-use crate::map::Map;
-use crate::number::Number;
-use crate::pair::Pair;
-use crate::symbol::Symbol;
-use crate::syntax::BYTE;
-use crate::syntax::CALL_FORWARD;
-use crate::syntax::CALL_REVERSE;
-use crate::syntax::FALSE;
-use crate::syntax::LIST_LEFT;
-use crate::syntax::LIST_RIGHT;
-use crate::syntax::MAP_LEFT;
-use crate::syntax::MAP_RIGHT;
-use crate::syntax::PAIR;
-use crate::syntax::QUOTE;
-use crate::syntax::SCOPE_LEFT;
-use crate::syntax::SCOPE_RIGHT;
-use crate::syntax::SEPARATOR;
-use crate::syntax::SYMBOL_QUOTE;
-use crate::syntax::TEXT_QUOTE;
-use crate::syntax::TRUE;
-use crate::syntax::UNIT;
-use crate::syntax::ambiguous;
-use crate::syntax::is_delimiter;
-use crate::text::Text;
-use crate::unit::Unit;
+use super::BYTE;
+use super::CALL_FORWARD;
+use super::CALL_REVERSE;
+use super::FALSE;
+use super::LIST_LEFT;
+use super::LIST_RIGHT;
+use super::MAP_LEFT;
+use super::MAP_RIGHT;
+use super::PAIR;
+use super::QUOTE;
+use super::SCOPE_LEFT;
+use super::SCOPE_RIGHT;
+use super::SEPARATOR;
+use super::SYMBOL_QUOTE;
+use super::TEXT_QUOTE;
+use super::TRUE;
+use super::UNIT;
+use super::ambiguous;
+use super::is_delimiter;
+use crate::type_::Bit;
+use crate::type_::Byte;
+use crate::type_::Call;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Number;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
+use crate::type_::Unit;
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub(crate) enum GenRepr<'a> {
+pub enum GenRepr<'a> {
     Unit(&'a Unit),
     Bit(&'a Bit),
     Symbol(&'a Symbol),
@@ -97,7 +97,7 @@ const INDENT: &str = "  ";
 pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
     let ctx = GenCtx { fmt, indent: 0 };
     let mut str = String::new();
-    gen1(ctx, &mut str, repr);
+    gen_(ctx, &mut str, repr);
     str
 }
 
@@ -108,7 +108,7 @@ struct GenCtx {
 }
 
 // todo impl shortest repr
-fn gen1(ctx: GenCtx, s: &mut String, repr: GenRepr) {
+fn gen_(ctx: GenCtx, s: &mut String, repr: GenRepr) {
     match repr {
         GenRepr::Unit(_) => gen_unit(ctx, s),
         GenRepr::Bit(bit) => gen_bit(ctx, s, bit.bool()),
@@ -141,7 +141,7 @@ fn gen_symbol(_ctx: GenCtx, s: &mut String, symbol: &Symbol) {
     s.push(SYMBOL_QUOTE);
 }
 
-pub(crate) fn escape_symbol(s: &mut String, symbol: &str) {
+pub fn escape_symbol(s: &mut String, symbol: &str) {
     for c in symbol.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -179,7 +179,7 @@ fn gen_text(ctx: GenCtx, s: &mut String, text: &Text) {
     s.push(TEXT_QUOTE);
 }
 
-pub(crate) fn escape_text(s: &mut String, str: &str) {
+pub fn escape_text(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -196,7 +196,7 @@ pub(crate) fn escape_text(s: &mut String, str: &str) {
     }
 }
 
-pub(crate) fn escape_text_symbol(s: &mut String, str: &str) {
+pub fn escape_text_symbol(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -251,7 +251,7 @@ fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen1(ctx, s, pair.second);
+    gen_(ctx, s, pair.second);
 }
 
 fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
@@ -261,7 +261,7 @@ fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
             s.push(' ');
             gen_scope_if_need(ctx, s, call.func);
             s.push(' ');
-            gen1(ctx, s, pair.second);
+            gen_(ctx, s, pair.second);
             return;
         }
     }
@@ -270,19 +270,19 @@ fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
     s.push(' ');
     gen_scope_if_need(ctx, s, call.func);
     s.push(' ');
-    gen1(ctx, s, call.input);
+    gen_(ctx, s, call.input);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
     if is_composite(&repr) {
         gen_scope(ctx, s, repr);
     } else {
-        gen1(ctx, s, repr);
+        gen_(ctx, s, repr);
     }
 }
 
 fn gen_scope(ctx: GenCtx, s: &mut String, repr: GenRepr) {
-    scoped(ctx, s, |ctx, s| gen1(ctx, s, repr));
+    scoped(ctx, s, |ctx, s| gen_(ctx, s, repr));
 }
 
 fn is_composite(repr: &GenRepr) -> bool {
@@ -299,7 +299,7 @@ fn gen_list(mut ctx: GenCtx, s: &mut String, mut list: List<GenRepr>) {
     if list.len() == 1 {
         s.push(LIST_LEFT);
         s.push_str(ctx.fmt.left_padding);
-        gen1(ctx, s, list.pop().unwrap());
+        gen_(ctx, s, list.pop().unwrap());
         s.push_str(ctx.fmt.right_padding);
         s.push(LIST_RIGHT);
         return;
@@ -311,7 +311,7 @@ fn gen_list(mut ctx: GenCtx, s: &mut String, mut list: List<GenRepr>) {
 
     for repr in list {
         s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-        gen1(ctx, s, repr);
+        gen_(ctx, s, repr);
         s.push_str(ctx.fmt.separator);
     }
     s.truncate(s.len() - ctx.fmt.separator.len());
@@ -361,7 +361,7 @@ fn gen_kv(ctx: GenCtx, s: &mut String, key: GenRepr, value: GenRepr) {
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen1(ctx, s, value);
+    gen_(ctx, s, value);
 }
 
 fn prefixed(ctx: GenCtx, s: &mut String, tag: &str, f: impl FnOnce(GenCtx, &mut String)) {

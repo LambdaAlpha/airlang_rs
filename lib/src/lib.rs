@@ -1,62 +1,29 @@
-pub use pub1::*;
+pub use pub_::*;
 
-pub(crate) mod pub1;
+// https://github.com/rust-lang/rustfmt/issues/4070
+#[macro_export]
+macro_rules! _____ {
+    () => {};
+}
 
-// -----------
+// use solver, prelude, semantics, syntax, type, trait
+pub mod pub_;
 
-pub(crate) mod unit;
+// use prelude, semantics, type, trait
+pub mod solver;
 
-pub(crate) mod bit;
+// use semantics, syntax, type, trait
+pub mod prelude;
 
-pub(crate) mod symbol;
+// use type, trait
+pub mod semantics;
 
-pub(crate) mod text;
-
-pub(crate) mod int;
-
-pub(crate) mod number;
-
-pub(crate) mod byte;
-
-pub(crate) mod pair;
-
-pub(crate) mod either;
-
-pub(crate) mod change;
-
-pub(crate) mod call;
-
-pub(crate) mod list;
-
-pub(crate) mod map;
-
-pub(crate) mod ctx;
-
-pub(crate) mod func;
-
-pub(crate) mod extension;
-
-// -----------
-
-pub(crate) mod val;
-
-pub(crate) mod core;
-
-pub(crate) mod solver;
-
+// use type, trait
 pub mod syntax;
 
-pub(crate) mod mode;
+pub mod type_;
 
-pub(crate) mod type1;
-
-pub(crate) mod prelude;
-
-// -----------
-
-pub(crate) mod types;
-
-pub(crate) mod traits;
+pub mod trait_;
 
 #[expect(dead_code)]
 pub(crate) mod utils;

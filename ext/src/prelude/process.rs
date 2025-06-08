@@ -1,24 +1,23 @@
 use std::process::Command;
 
-use airlang::Byte;
-use airlang::CodeMode;
-use airlang::FreeStaticPrimFuncVal;
-use airlang::FuncMode;
-use airlang::Int;
-use airlang::List;
-use airlang::Map;
-use airlang::PreludeCtx;
-use airlang::Symbol;
-use airlang::SymbolMode;
-use airlang::Text;
-use airlang::Val;
+use airlang::prelude::FreeFn;
+use airlang::prelude::Prelude;
+use airlang::prelude::PreludeCtx;
+use airlang::prelude::free_impl;
+use airlang::semantics::func::FuncMode;
+use airlang::semantics::mode::CodeMode;
+use airlang::semantics::mode::SymbolMode;
+use airlang::semantics::val::FreeStaticPrimFuncVal;
+use airlang::semantics::val::Val;
+use airlang::type_::Byte;
+use airlang::type_::Int;
+use airlang::type_::List;
+use airlang::type_::Map;
+use airlang::type_::Symbol;
+use airlang::type_::Text;
 
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::free_impl;
-
-pub(crate) struct ProcessPrelude {
-    pub(crate) call: FreeStaticPrimFuncVal,
+pub struct ProcessPrelude {
+    pub call: FreeStaticPrimFuncVal,
 }
 
 impl Default for ProcessPrelude {
@@ -38,7 +37,7 @@ const ARGUMENTS: &str = "arguments";
 
 // todo design
 // todo impl
-fn call() -> FreeStaticPrimFuncVal {
+pub fn call() -> FreeStaticPrimFuncVal {
     let forward = FuncMode::map_mode(
         Map::default(),
         FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
@@ -56,11 +55,11 @@ fn fn_call(input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return Val::default();
     };
-    let program_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(PROGRAM) });
+    let program_key = Val::Symbol(Symbol::from_str_unchecked(PROGRAM));
     let Some(Val::Text(program)) = map.remove(&program_key) else {
         return Val::default();
     };
-    let arguments_key = Val::Symbol(unsafe { Symbol::from_str_unchecked(ARGUMENTS) });
+    let arguments_key = Val::Symbol(Symbol::from_str_unchecked(ARGUMENTS));
     let Some(Val::List(arguments)) = map.remove(&arguments_key) else {
         return Val::default();
     };
@@ -93,11 +92,11 @@ fn fn_call(input: Val) -> Val {
     };
 
     let mut map = Map::default();
-    let output_key = Val::Symbol(unsafe { Symbol::from_str_unchecked("output") });
+    let output_key = Val::Symbol(Symbol::from_str_unchecked("output"));
     map.insert(output_key, stdout);
-    let error_key = Val::Symbol(unsafe { Symbol::from_str_unchecked("error") });
+    let error_key = Val::Symbol(Symbol::from_str_unchecked("error"));
     map.insert(error_key, stderr);
-    let status_key = Val::Symbol(unsafe { Symbol::from_str_unchecked("status") });
+    let status_key = Val::Symbol(Symbol::from_str_unchecked("status"));
     map.insert(status_key, status);
     Val::Map(map.into())
 }

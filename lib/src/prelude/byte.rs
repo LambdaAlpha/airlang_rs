@@ -1,26 +1,26 @@
-use crate::Byte;
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Int;
-use crate::MutStaticPrimFuncVal;
-use crate::Val;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::free_impl;
-use crate::prelude::mut_impl;
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx_default_mode;
+use super::free_impl;
+use super::mut_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Byte;
+use crate::type_::ConstRef;
+use crate::type_::Int;
 
 // todo design add more
 #[derive(Clone)]
-pub(crate) struct BytePrelude {
-    pub(crate) length: ConstStaticPrimFuncVal,
-    pub(crate) push: MutStaticPrimFuncVal,
-    pub(crate) join: FreeStaticPrimFuncVal,
+pub struct BytePrelude {
+    pub length: ConstStaticPrimFuncVal,
+    pub push: MutStaticPrimFuncVal,
+    pub join: FreeStaticPrimFuncVal,
 }
 
 impl Default for BytePrelude {
@@ -37,7 +37,7 @@ impl Prelude for BytePrelude {
     }
 }
 
-fn length() -> ConstStaticPrimFuncVal {
+pub fn length() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "byte.length",
         f: const_impl(fn_length),
@@ -55,7 +55,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn push() -> MutStaticPrimFuncVal {
+pub fn push() -> MutStaticPrimFuncVal {
     DynFn {
         id: "byte.push",
         f: mut_impl(fn_push),
@@ -77,7 +77,7 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
 }
 
 // todo design
-fn join() -> FreeStaticPrimFuncVal {
+pub fn join() -> FreeStaticPrimFuncVal {
     FreeFn { id: "byte.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }
 

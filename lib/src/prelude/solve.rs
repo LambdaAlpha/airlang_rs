@@ -1,16 +1,16 @@
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Val;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::free_impl;
-use crate::solver::SOLVER;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::free_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::solver::SOLVER;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::Val;
 
 #[derive(Clone)]
-pub(crate) struct SolvePrelude {
-    pub(crate) get_solver: FreeStaticPrimFuncVal,
-    pub(crate) set_solver: FreeStaticPrimFuncVal,
+pub struct SolvePrelude {
+    pub get_solver: FreeStaticPrimFuncVal,
+    pub set_solver: FreeStaticPrimFuncVal,
 }
 
 impl Default for SolvePrelude {
@@ -26,7 +26,7 @@ impl Prelude for SolvePrelude {
     }
 }
 
-fn get_solver() -> FreeStaticPrimFuncVal {
+pub fn get_solver() -> FreeStaticPrimFuncVal {
     FreeFn { id: "solver!", f: free_impl(fn_get_solver), mode: FuncMode::default() }.free_static()
 }
 
@@ -35,23 +35,18 @@ fn fn_get_solver(_input: Val) -> Val {
         let Ok(solver) = solver.try_borrow() else {
             return Val::default();
         };
-        match &*solver {
-            Some(solver) => Val::Func(solver.clone()),
-            _ => Val::default(),
-        }
+        Val::Func(solver.clone())
     })
 }
 
-fn set_solver() -> FreeStaticPrimFuncVal {
+pub fn set_solver() -> FreeStaticPrimFuncVal {
     FreeFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: FuncMode::default() }
         .free_static()
 }
 
 fn fn_set_solver(input: Val) -> Val {
-    let new_solver = match input {
-        Val::Unit(_) => None,
-        Val::Func(solver) => Some(solver),
-        _ => return Val::default(),
+    let Val::Func(new_solver) = input else {
+        return Val::default();
     };
     SOLVER.with(|solver| {
         let Ok(mut solver) = solver.try_borrow_mut() else {

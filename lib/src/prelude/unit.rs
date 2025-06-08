@@ -1,15 +1,15 @@
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Val;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::free_impl;
-use crate::unit::Unit;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::free_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Unit;
 
 #[derive(Clone)]
-pub(crate) struct UnitPrelude {
-    pub(crate) unit: FreeStaticPrimFuncVal,
+pub struct UnitPrelude {
+    pub unit: FreeStaticPrimFuncVal,
 }
 
 impl Default for UnitPrelude {
@@ -24,7 +24,7 @@ impl Prelude for UnitPrelude {
     }
 }
 
-fn unit() -> FreeStaticPrimFuncVal {
+pub fn unit() -> FreeStaticPrimFuncVal {
     FreeFn { id: "unit", f: free_impl(fn_unit), mode: FuncMode::default() }.free_static()
 }
 

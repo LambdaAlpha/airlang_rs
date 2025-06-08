@@ -1,48 +1,48 @@
 use std::mem::swap;
 
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::List;
-use crate::Map;
-use crate::MutStaticPrimFuncVal;
-use crate::bit::Bit;
-use crate::int::Int;
-use crate::pair::Pair;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::free_impl;
-use crate::prelude::mut_impl;
-use crate::val::Val;
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx_default_mode;
+use super::free_impl;
+use super::mut_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Bit;
+use crate::type_::ConstRef;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Pair;
 
 // todo design
 #[derive(Clone)]
-pub(crate) struct MapPrelude {
-    pub(crate) length: ConstStaticPrimFuncVal,
-    pub(crate) items: ConstStaticPrimFuncVal,
-    pub(crate) into_items: MutStaticPrimFuncVal,
-    pub(crate) keys: ConstStaticPrimFuncVal,
-    pub(crate) into_keys: MutStaticPrimFuncVal,
-    pub(crate) values: ConstStaticPrimFuncVal,
-    pub(crate) into_values: MutStaticPrimFuncVal,
-    pub(crate) contains: ConstStaticPrimFuncVal,
-    pub(crate) contains_all: ConstStaticPrimFuncVal,
-    pub(crate) contains_any: ConstStaticPrimFuncVal,
-    pub(crate) set: MutStaticPrimFuncVal,
-    pub(crate) set_many: MutStaticPrimFuncVal,
-    pub(crate) get: ConstStaticPrimFuncVal,
-    pub(crate) get_many: ConstStaticPrimFuncVal,
-    pub(crate) remove: MutStaticPrimFuncVal,
-    pub(crate) remove_many: MutStaticPrimFuncVal,
-    pub(crate) clear: MutStaticPrimFuncVal,
-    pub(crate) new_map: FreeStaticPrimFuncVal,
-    pub(crate) new_set: FreeStaticPrimFuncVal,
-    pub(crate) new_multiset: FreeStaticPrimFuncVal,
+pub struct MapPrelude {
+    pub length: ConstStaticPrimFuncVal,
+    pub items: ConstStaticPrimFuncVal,
+    pub into_items: MutStaticPrimFuncVal,
+    pub keys: ConstStaticPrimFuncVal,
+    pub into_keys: MutStaticPrimFuncVal,
+    pub values: ConstStaticPrimFuncVal,
+    pub into_values: MutStaticPrimFuncVal,
+    pub contains: ConstStaticPrimFuncVal,
+    pub contains_all: ConstStaticPrimFuncVal,
+    pub contains_any: ConstStaticPrimFuncVal,
+    pub set: MutStaticPrimFuncVal,
+    pub set_many: MutStaticPrimFuncVal,
+    pub get: ConstStaticPrimFuncVal,
+    pub get_many: ConstStaticPrimFuncVal,
+    pub remove: MutStaticPrimFuncVal,
+    pub remove_many: MutStaticPrimFuncVal,
+    pub clear: MutStaticPrimFuncVal,
+    pub new_map: FreeStaticPrimFuncVal,
+    pub new_set: FreeStaticPrimFuncVal,
+    pub new_multiset: FreeStaticPrimFuncVal,
 }
 
 impl Default for MapPrelude {
@@ -97,7 +97,7 @@ impl Prelude for MapPrelude {
     }
 }
 
-fn length() -> ConstStaticPrimFuncVal {
+pub fn length() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.length",
         f: const_impl(fn_length),
@@ -115,7 +115,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn items() -> ConstStaticPrimFuncVal {
+pub fn items() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.items",
         f: const_impl(fn_items),
@@ -134,7 +134,7 @@ fn fn_items(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::List(items.into())
 }
 
-fn into_items() -> MutStaticPrimFuncVal {
+pub fn into_items() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.into_items",
         f: mut_impl(fn_into_items),
@@ -155,7 +155,7 @@ fn fn_into_items(ctx: &mut Val, _input: Val) -> Val {
     Val::List(items.into())
 }
 
-fn keys() -> ConstStaticPrimFuncVal {
+pub fn keys() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.keys",
         f: const_impl(fn_keys),
@@ -173,7 +173,7 @@ fn fn_keys(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::List(keys.into())
 }
 
-fn into_keys() -> MutStaticPrimFuncVal {
+pub fn into_keys() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.into_keys",
         f: mut_impl(fn_into_keys),
@@ -193,7 +193,7 @@ fn fn_into_keys(ctx: &mut Val, _input: Val) -> Val {
     Val::List(keys.into())
 }
 
-fn values() -> ConstStaticPrimFuncVal {
+pub fn values() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.values",
         f: const_impl(fn_values),
@@ -211,7 +211,7 @@ fn fn_values(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::List(values.into())
 }
 
-fn into_values() -> MutStaticPrimFuncVal {
+pub fn into_values() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.into_values",
         f: mut_impl(fn_into_values),
@@ -231,7 +231,7 @@ fn fn_into_values(ctx: &mut Val, _input: Val) -> Val {
     Val::List(values.into())
 }
 
-fn contains() -> ConstStaticPrimFuncVal {
+pub fn contains() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.contains",
         f: const_impl(fn_contains),
@@ -248,7 +248,7 @@ fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::new(map.contains_key(&input)))
 }
 
-fn contains_all() -> ConstStaticPrimFuncVal {
+pub fn contains_all() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.contains_all",
         f: const_impl(fn_contains_all),
@@ -270,7 +270,7 @@ fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::new(b))
 }
 
-fn contains_any() -> ConstStaticPrimFuncVal {
+pub fn contains_any() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.contains_any",
         f: const_impl(fn_contains_many),
@@ -292,7 +292,7 @@ fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::new(b))
 }
 
-fn set() -> MutStaticPrimFuncVal {
+pub fn set() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.set",
         f: mut_impl(fn_set),
@@ -315,7 +315,7 @@ fn fn_set(ctx: &mut Val, input: Val) -> Val {
     map.insert(key, value).unwrap_or_default()
 }
 
-fn set_many() -> MutStaticPrimFuncVal {
+pub fn set_many() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.set_many",
         f: mut_impl(fn_set_many),
@@ -338,7 +338,7 @@ fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn get() -> ConstStaticPrimFuncVal {
+pub fn get() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.get",
         f: const_impl(fn_get),
@@ -355,7 +355,7 @@ fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
     map.get(&input).cloned().unwrap_or_default()
 }
 
-fn get_many() -> ConstStaticPrimFuncVal {
+pub fn get_many() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "map.get_many",
         f: const_impl(fn_get_many),
@@ -378,7 +378,7 @@ fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn remove() -> MutStaticPrimFuncVal {
+pub fn remove() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.remove",
         f: mut_impl(fn_remove),
@@ -395,7 +395,7 @@ fn fn_remove(ctx: &mut Val, input: Val) -> Val {
     map.remove(&input).unwrap_or_default()
 }
 
-fn remove_many() -> MutStaticPrimFuncVal {
+pub fn remove_many() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.remove_many",
         f: mut_impl(fn_remove_many),
@@ -418,7 +418,7 @@ fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn clear() -> MutStaticPrimFuncVal {
+pub fn clear() -> MutStaticPrimFuncVal {
     DynFn {
         id: "map.clear",
         f: mut_impl(fn_clear),
@@ -436,7 +436,7 @@ fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
     Val::default()
 }
 
-fn new_map() -> FreeStaticPrimFuncVal {
+pub fn new_map() -> FreeStaticPrimFuncVal {
     FreeFn { id: "map", f: free_impl(fn_new_map), mode: FuncMode::default() }.free_static()
 }
 
@@ -461,7 +461,7 @@ fn fn_new_map(input: Val) -> Val {
     }
 }
 
-fn new_set() -> FreeStaticPrimFuncVal {
+pub fn new_set() -> FreeStaticPrimFuncVal {
     FreeFn { id: "set", f: free_impl(fn_new_set), mode: FuncMode::default() }.free_static()
 }
 
@@ -474,7 +474,7 @@ fn fn_new_set(input: Val) -> Val {
     Val::Map(map.into())
 }
 
-fn new_multiset() -> FreeStaticPrimFuncVal {
+pub fn new_multiset() -> FreeStaticPrimFuncVal {
     FreeFn { id: "multiset", f: free_impl(fn_new_multiset), mode: FuncMode::default() }
         .free_static()
 }

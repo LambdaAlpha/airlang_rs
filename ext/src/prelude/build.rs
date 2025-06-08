@@ -2,24 +2,23 @@ use std::env::current_dir;
 use std::fs::read_to_string;
 use std::path::Path;
 
-use airlang::AirCell;
-use airlang::ConstRef;
-use airlang::ConstStaticImpl;
-use airlang::ConstStaticPrimFuncVal;
-use airlang::Contract;
-use airlang::Ctx;
-use airlang::FuncMode;
-use airlang::PreludeCtx;
-use airlang::Symbol;
-use airlang::Text;
-use airlang::Val;
-use airlang::parse;
+use airlang::Air;
+use airlang::prelude::DynFn;
+use airlang::prelude::Prelude;
+use airlang::prelude::PreludeCtx;
+use airlang::semantics::ctx::Contract;
+use airlang::semantics::ctx::Ctx;
+use airlang::semantics::func::ConstStaticImpl;
+use airlang::semantics::func::FuncMode;
+use airlang::semantics::val::ConstStaticPrimFuncVal;
+use airlang::semantics::val::Val;
+use airlang::syntax::parse;
+use airlang::type_::ConstRef;
+use airlang::type_::Symbol;
+use airlang::type_::Text;
 
-use crate::prelude::DynFn;
-use crate::prelude::Prelude;
-
-pub(crate) struct BuildPrelude {
-    pub(crate) import: ConstStaticPrimFuncVal,
+pub struct BuildPrelude {
+    pub import: ConstStaticPrimFuncVal,
 }
 
 impl Default for BuildPrelude {
@@ -36,7 +35,7 @@ impl Prelude for BuildPrelude {
 
 // todo rename
 // todo design
-fn import() -> ConstStaticPrimFuncVal {
+pub fn import() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "build.import",
         f: ConstStaticImpl::new(fn_import_free, fn_import_const),
@@ -64,7 +63,7 @@ fn fn_import_const(ctx: ConstRef<Val>, input: Val) -> Val {
         return Val::default();
     };
     let url = Text::from(url);
-    let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
+    let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     let cur_url = get_cur_url(ctx, cur_url_key);
     let new_url =
         cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
@@ -83,8 +82,8 @@ fn import_from_url(url: String) -> Val {
         return Val::default();
     };
 
-    let mut mod_air = AirCell::default();
-    let cur_url_key = unsafe { Symbol::from_str_unchecked(CUR_URL_KEY) };
+    let mut mod_air = Air::default();
+    let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     if !set_cur_url(mod_air.ctx_mut(), cur_url_key, url) {
         return Val::default();
     }
@@ -92,7 +91,7 @@ fn import_from_url(url: String) -> Val {
 }
 
 fn get_cur_url(ctx: &Ctx, key: Symbol) -> Option<String> {
-    if let Ok(val) = ctx.get_ref(key) {
+    if let Ok(val) = ctx.variables().get_ref(key) {
         return if let Val::Text(url) = val { Some((***url).clone()) } else { None };
     }
     let Ok(cur_dir) = current_dir() else {
@@ -105,7 +104,7 @@ fn get_cur_url(ctx: &Ctx, key: Symbol) -> Option<String> {
 }
 
 fn set_cur_url(ctx: &mut Ctx, key: Symbol, new_url: String) -> bool {
-    ctx.put(key, Val::Text(Text::from(new_url).into()), Contract::None).is_ok()
+    ctx.variables_mut().put(key, Val::Text(Text::from(new_url).into()), Contract::None).is_ok()
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {

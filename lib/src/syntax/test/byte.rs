@@ -1,7 +1,7 @@
 use crate::syntax::repr::Repr;
 use crate::syntax::test::byte;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         byte(vec![]),
         byte(vec![]),

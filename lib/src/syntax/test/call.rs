@@ -7,7 +7,7 @@ use crate::syntax::test::pair;
 use crate::syntax::test::reverse;
 use crate::syntax::test::symbol;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         call(symbol("a"), symbol("b")),
         call(symbol("a"), call(symbol("b"), symbol("c"))),

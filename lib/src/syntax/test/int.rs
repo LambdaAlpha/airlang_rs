@@ -1,7 +1,7 @@
 use crate::syntax::repr::Repr;
 use crate::syntax::test::int;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         int("0", 10),
         int("00", 10),

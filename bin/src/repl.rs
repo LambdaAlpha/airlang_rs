@@ -6,11 +6,11 @@ use std::io::Write;
 use std::io::stdin;
 use std::mem::take;
 
-use airlang::AirCell;
-use airlang::Text;
-use airlang::Val;
-use airlang::generate;
-use airlang::parse;
+use airlang::Air;
+use airlang::semantics::val::Val;
+use airlang::syntax::generate_pretty;
+use airlang::syntax::parse;
+use airlang::type_::Text;
 use crossterm::Command;
 use crossterm::ExecutableCommand;
 use crossterm::QueueableCommand;
@@ -44,13 +44,13 @@ use crossterm::terminal::enable_raw_mode;
 use crossterm::terminal::is_raw_mode_enabled;
 use crossterm::terminal::size;
 
-pub(crate) trait ReplTerminal: Write + IsTerminal {}
+pub trait ReplTerminal: Write + IsTerminal {}
 
 impl<T: Write + IsTerminal> ReplTerminal for T {}
 
 // todo impl soft wrap
-pub(crate) struct Repl<T: ReplTerminal> {
-    air: AirCell,
+pub struct Repl<T: ReplTerminal> {
+    air: Air,
     terminal: Terminal<T>,
     is_raw_mode_enabled: bool,
 
@@ -79,8 +79,8 @@ enum CtrlFlow {
 }
 
 impl<T: ReplTerminal> Repl<T> {
-    pub(crate) fn new(out: T) -> Self {
-        let air = AirCell::default();
+    pub fn new(out: T) -> Self {
+        let air = Air::default();
         let terminal = Terminal(out);
         Self {
             air,
@@ -95,7 +95,7 @@ impl<T: ReplTerminal> Repl<T> {
         }
     }
 
-    pub(crate) fn run(&mut self) -> Result<()> {
+    pub fn run(&mut self) -> Result<()> {
         // todo impl better support for pipe
         if !stdin().is_terminal() || !self.terminal.is_terminal() {
             return self.run_once();
@@ -403,11 +403,11 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn eval(&mut self, input: &str) -> Result<()> {
-        match parse(input) {
+        match parse::<Val>(input) {
             Ok(input) => {
                 let output = self.air.interpret(input);
-                match generate(&output) {
-                    Ok(o) => self.terminal.print(o),
+                match (&output).try_into() {
+                    Ok(o) => self.terminal.print(generate_pretty(o)),
                     Err(e) => self.terminal.eprint(e.to_string()),
                 }
             }

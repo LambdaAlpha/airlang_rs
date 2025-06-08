@@ -37,45 +37,45 @@ use winnow::token::any;
 use winnow::token::one_of;
 use winnow::token::take_while;
 
-use crate::bit::Bit;
-use crate::byte::Byte;
-use crate::call::Call;
-use crate::int::Int;
-use crate::list::List;
-use crate::map::Map;
-use crate::number::Number;
-use crate::pair::Pair;
-use crate::symbol::Symbol;
-use crate::syntax::BYTE;
-use crate::syntax::CALL_FORWARD;
-use crate::syntax::CALL_REVERSE;
-use crate::syntax::COMMENT;
-use crate::syntax::FALSE;
-use crate::syntax::INT;
-use crate::syntax::LEFT;
-use crate::syntax::LIST_LEFT;
-use crate::syntax::LIST_RIGHT;
-use crate::syntax::MAP_LEFT;
-use crate::syntax::MAP_RIGHT;
-use crate::syntax::NUMBER;
-use crate::syntax::PAIR;
-use crate::syntax::QUOTE;
-use crate::syntax::RIGHT;
-use crate::syntax::SCOPE_LEFT;
-use crate::syntax::SCOPE_RIGHT;
-use crate::syntax::SEPARATOR;
-use crate::syntax::SPACE;
-use crate::syntax::SYMBOL_QUOTE;
-use crate::syntax::TEXT_QUOTE;
-use crate::syntax::TRUE;
-use crate::syntax::UNIT;
-use crate::syntax::is_delimiter;
-use crate::text::Text;
-use crate::unit::Unit;
+use super::BYTE;
+use super::CALL_FORWARD;
+use super::CALL_REVERSE;
+use super::COMMENT;
+use super::FALSE;
+use super::INT;
+use super::LEFT;
+use super::LIST_LEFT;
+use super::LIST_RIGHT;
+use super::MAP_LEFT;
+use super::MAP_RIGHT;
+use super::NUMBER;
+use super::PAIR;
+use super::QUOTE;
+use super::RIGHT;
+use super::SCOPE_LEFT;
+use super::SCOPE_RIGHT;
+use super::SEPARATOR;
+use super::SPACE;
+use super::SYMBOL_QUOTE;
+use super::TEXT_QUOTE;
+use super::TRUE;
+use super::UNIT;
+use super::is_delimiter;
+use crate::type_::Bit;
+use crate::type_::Byte;
+use crate::type_::Call;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Number;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
+use crate::type_::Unit;
 use crate::utils::conversion::bin_str_to_vec_u8;
 use crate::utils::conversion::hex_str_to_vec_u8;
 
-pub(crate) trait ParseRepr:
+pub trait ParseRepr:
     From<Unit>
     + From<Bit>
     + From<Symbol>
@@ -135,10 +135,10 @@ enum Direction {
 
 type E = ErrMode<ContextError>;
 
-pub(crate) fn parse<T: ParseRepr>(src: &str) -> Result<T, crate::syntax::ParseError> {
+pub fn parse<T: ParseRepr>(src: &str) -> Result<T, super::ParseError> {
     terminated(top::<T>, eof.context(expect_desc("end")))
         .parse(src)
-        .map_err(|e| crate::syntax::ParseError { msg: e.to_string() })
+        .map_err(|e| super::ParseError { msg: e.to_string() })
 }
 
 fn label(label: &'static str) -> StrContext {
@@ -310,7 +310,7 @@ fn ext<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
         } else {
             alt((
                 keyword(symbol, checkpoint).map(Token::Default),
-                empty.value(Token::Unquote(Symbol::from_str(symbol))),
+                empty.value(Token::Unquote(Symbol::from_str_unchecked(symbol))),
             ))
             .parse_next(i)
         }
@@ -326,8 +326,8 @@ fn keyword<'a, T: ParseRepr>(
         let i: &mut &str = i;
         match s {
             UNIT => Ok(T::from(Unit)),
-            TRUE => Ok(T::from(Bit::true1())),
-            FALSE => Ok(T::from(Bit::false1())),
+            TRUE => Ok(T::from(Bit::true_())),
+            FALSE => Ok(T::from(Bit::false_())),
             s if matches!(s.chars().next(), Some('0' ..= '9')) => {
                 i.reset(&checkpoint);
                 return cut_err(full_symbol(int_or_number).context(label("int or number")))
@@ -427,7 +427,7 @@ where
     I: Iterator<Item = Token<T>>, {
     let list = tokens.map(Token::into_repr).collect::<List<_>>();
     let list = T::from(list);
-    let tag = T::from(Symbol::from_str(tag));
+    let tag = T::from(Symbol::from_str_unchecked(tag));
     compose_two(ctx, tag, list)
 }
 
@@ -563,7 +563,7 @@ fn symbol(i: &mut &str) -> ModalResult<Symbol> {
         string
     });
     delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
-        .map(Symbol::from_string)
+        .map(Symbol::from_string_unchecked)
         .context(label("symbol"))
         .parse_next(i)
 }
@@ -597,7 +597,7 @@ fn raw_symbol(i: &mut &str) -> ModalResult<Symbol> {
     let symbol = separated(1 .., terminated(literal, raw_symbol_newline), ' ')
         .map(|fragments: Vec<_>| fragments.join(""));
     delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
-        .map(Symbol::from_string)
+        .map(Symbol::from_string_unchecked)
         .context(label("raw symbol"))
         .parse_next(i)
 }

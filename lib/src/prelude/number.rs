@@ -1,9 +1,9 @@
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
+use super::Prelude;
+use super::PreludeCtx;
 
 // todo design
 #[derive(Clone)]
-pub(crate) struct NumberPrelude {}
+pub struct NumberPrelude {}
 
 #[expect(clippy::derivable_impls)]
 impl Default for NumberPrelude {

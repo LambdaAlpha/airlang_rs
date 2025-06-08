@@ -1,18 +1,17 @@
 use std::process::Command;
 
-use airlang::CodeMode;
-use airlang::FreeStaticPrimFuncVal;
-use airlang::FuncMode;
-use airlang::PreludeCtx;
-use airlang::SymbolMode;
-use airlang::Val;
+use airlang::prelude::FreeFn;
+use airlang::prelude::Prelude;
+use airlang::prelude::PreludeCtx;
+use airlang::prelude::free_impl;
+use airlang::semantics::func::FuncMode;
+use airlang::semantics::mode::CodeMode;
+use airlang::semantics::mode::SymbolMode;
+use airlang::semantics::val::FreeStaticPrimFuncVal;
+use airlang::semantics::val::Val;
 
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::free_impl;
-
-pub(crate) struct ProcessPrelude {
-    pub(crate) call: FreeStaticPrimFuncVal,
+pub struct ProcessPrelude {
+    pub call: FreeStaticPrimFuncVal,
 }
 
 impl Default for ProcessPrelude {
@@ -29,7 +28,7 @@ impl Prelude for ProcessPrelude {
 
 // todo design
 // todo impl
-fn call() -> FreeStaticPrimFuncVal {
+pub fn call() -> FreeStaticPrimFuncVal {
     let forward = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form);
     FreeFn {
         id: "$",

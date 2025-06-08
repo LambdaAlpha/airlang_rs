@@ -1,59 +1,66 @@
+pub use bit::BitPrelude;
+pub use byte::BytePrelude;
+pub use call::CallPrelude;
+pub use ctrl::CtrlPrelude;
+pub use ctx::CtxPrelude;
+pub use func::FuncPrelude;
+pub use int::IntPrelude;
+pub use list::ListPrelude;
+pub use map::MapPrelude;
+pub use meta::MetaPrelude;
+pub use mode::ModePrelude;
+pub use number::NumberPrelude;
+pub use pair::PairPrelude;
+pub use solve::SolvePrelude;
+pub use symbol::SymbolPrelude;
+pub use syntax::SyntaxPrelude;
+pub use text::TextPrelude;
+pub use unit::UnitPrelude;
+pub use value::Arbitrary;
+pub use value::ArbitraryVal;
+pub use value::ValuePrelude;
+
+_____!();
+
+use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::ConstRef;
-use crate::ConstStaticImpl;
-use crate::ConstStaticPrimFuncVal;
-use crate::FreeCellPrimFunc;
-use crate::FreeCellPrimFuncVal;
-use crate::FreeStaticImpl;
-use crate::FreeStaticPrimFunc;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncVal;
-use crate::Map;
-use crate::Mode;
-use crate::MutStaticImpl;
-use crate::MutStaticPrimFunc;
-use crate::MutStaticPrimFuncVal;
-use crate::SymbolMode;
-use crate::ctx::Ctx;
-use crate::ctx::map::Contract;
-use crate::ctx::map::CtxMap;
-use crate::ctx::map::CtxValue;
-use crate::extension::AIR_EXT;
-use crate::func::const_cell_prim::ConstCellFnExt;
-use crate::func::const_cell_prim::ConstCellPrimFunc;
-use crate::func::const_static_prim::ConstStaticFn;
-use crate::func::const_static_prim::ConstStaticPrimFunc;
-use crate::func::free_cell_prim::FreeCellFnExt;
-use crate::func::free_static_prim::FreeStaticFn;
-use crate::func::func_mode::FuncMode;
-use crate::func::mut_cell_prim::MutCellFnExt;
-use crate::func::mut_cell_prim::MutCellPrimFunc;
-use crate::func::mut_static_prim::MutStaticFn;
-use crate::prelude::bit::BitPrelude;
-use crate::prelude::byte::BytePrelude;
-use crate::prelude::call::CallPrelude;
-use crate::prelude::ctrl::CtrlPrelude;
-use crate::prelude::ctx::CtxPrelude;
-use crate::prelude::extension::ExtPrelude;
-use crate::prelude::func::FuncPrelude;
-use crate::prelude::int::IntPrelude;
-use crate::prelude::list::ListPrelude;
-use crate::prelude::map::MapPrelude;
-use crate::prelude::meta::MetaPrelude;
 use crate::prelude::mode::MODE_PRELUDE;
-use crate::prelude::number::NumberPrelude;
-use crate::prelude::pair::PairPrelude;
-use crate::prelude::solve::SolvePrelude;
-use crate::prelude::symbol::SymbolPrelude;
-use crate::prelude::syntax::SyntaxPrelude;
-use crate::prelude::text::TextPrelude;
-use crate::prelude::unit::UnitPrelude;
-use crate::prelude::value::ValuePrelude;
-use crate::symbol::Symbol;
-use crate::val::Val;
-use crate::val::func::const_cell_prim::ConstCellPrimFuncVal;
-use crate::val::func::mut_cell_prim::MutCellPrimFuncVal;
+use crate::semantics::ctx::Contract;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::ctx::CtxMap;
+use crate::semantics::ctx::CtxValue;
+use crate::semantics::func::ConstCellFnExt;
+use crate::semantics::func::ConstCellPrimFunc;
+use crate::semantics::func::ConstStaticFn;
+use crate::semantics::func::ConstStaticImpl;
+use crate::semantics::func::ConstStaticPrimFunc;
+use crate::semantics::func::FreeCellFnExt;
+use crate::semantics::func::FreeCellPrimFunc;
+use crate::semantics::func::FreeStaticFn;
+use crate::semantics::func::FreeStaticImpl;
+use crate::semantics::func::FreeStaticPrimFunc;
+use crate::semantics::func::FuncMode;
+use crate::semantics::func::MutCellFnExt;
+use crate::semantics::func::MutCellPrimFunc;
+use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::MutStaticImpl;
+use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::mode::Mode;
+use crate::semantics::mode::SymbolMode;
+use crate::semantics::val::ConstCellPrimFuncVal;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FreeCellPrimFuncVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FuncVal;
+use crate::semantics::val::MutCellPrimFuncVal;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::ConstRef;
+use crate::type_::Map;
+use crate::type_::Symbol;
+
+thread_local!(pub(crate) static PRELUDE: RefCell<Box<dyn Prelude>> = RefCell::new(Box::new(EmptyPrelude)));
 
 pub trait Prelude {
     fn put(&self, ctx: &mut dyn PreludeCtx);
@@ -63,53 +70,19 @@ pub trait PreludeCtx {
     fn put(&mut self, name: Symbol, val: Val);
 }
 
-thread_local!(pub(crate) static PRELUDE: AllPrelude = AllPrelude::default());
+struct EmptyPrelude;
 
-#[derive(Default, Clone)]
-pub(crate) struct AllPrelude {
-    pub(crate) unit: UnitPrelude,
-    pub(crate) bool: BitPrelude,
-    pub(crate) symbol: SymbolPrelude,
-    pub(crate) text: TextPrelude,
-    pub(crate) int: IntPrelude,
-    pub(crate) number: NumberPrelude,
-    pub(crate) byte: BytePrelude,
-    pub(crate) pair: PairPrelude,
-    pub(crate) call: CallPrelude,
-    pub(crate) list: ListPrelude,
-    pub(crate) map: MapPrelude,
-    pub(crate) ctx: CtxPrelude,
-    pub(crate) func: FuncPrelude,
-    pub(crate) extension: ExtPrelude,
-    pub(crate) solve: SolvePrelude,
-    pub(crate) meta: MetaPrelude,
-    pub(crate) syntax: SyntaxPrelude,
-    pub(crate) value: ValuePrelude,
-    pub(crate) ctrl: CtrlPrelude,
+impl Prelude for EmptyPrelude {
+    fn put(&self, _ctx: &mut dyn PreludeCtx) {}
 }
 
-impl Prelude for AllPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
-        self.unit.put(ctx);
-        self.bool.put(ctx);
-        self.symbol.put(ctx);
-        self.text.put(ctx);
-        self.int.put(ctx);
-        self.number.put(ctx);
-        self.byte.put(ctx);
-        self.pair.put(ctx);
-        self.call.put(ctx);
-        self.list.put(ctx);
-        self.map.put(ctx);
-        self.ctx.put(ctx);
-        self.func.put(ctx);
-        self.extension.put(ctx);
-        self.solve.put(ctx);
-        self.meta.put(ctx);
-        self.syntax.put(ctx);
-        self.value.put(ctx);
-        self.ctrl.put(ctx);
-    }
+pub(crate) fn set_prelude(prelude: Box<dyn Prelude>) {
+    PRELUDE.with(|p| {
+        let Ok(mut p) = p.try_borrow_mut() else {
+            return;
+        };
+        *p = prelude;
+    });
 }
 
 pub(crate) fn initial_ctx() -> Ctx {
@@ -120,25 +93,19 @@ pub(crate) fn initial_ctx() -> Ctx {
 }
 
 pub(crate) fn put_preludes(ctx: &mut dyn PreludeCtx) {
-    PRELUDE.with(|prelude| {
-        prelude.put(ctx);
-    });
-    AIR_EXT.with_borrow(|prelude| {
+    PRELUDE.with_borrow(|prelude| {
         prelude.put(ctx);
     });
 }
 
 pub(crate) fn find_prelude(id: Symbol) -> Option<Val> {
     let mut find = Find { name: id, val: None };
-    PRELUDE.with(|prelude| {
+    PRELUDE.with_borrow(|prelude| {
         prelude.put(&mut find);
     });
     if find.val.is_some() {
         return find.val;
     }
-    AIR_EXT.with_borrow(|prelude| {
-        prelude.put(&mut find);
-    });
     find.val
 }
 
@@ -166,6 +133,51 @@ impl PreludeCtx for Find {
         if name == self.name {
             self.val = Some(val);
         }
+    }
+}
+
+#[derive(Default, Clone)]
+pub struct CorePrelude {
+    pub unit: UnitPrelude,
+    pub bool: BitPrelude,
+    pub symbol: SymbolPrelude,
+    pub text: TextPrelude,
+    pub int: IntPrelude,
+    pub number: NumberPrelude,
+    pub byte: BytePrelude,
+    pub pair: PairPrelude,
+    pub call: CallPrelude,
+    pub list: ListPrelude,
+    pub map: MapPrelude,
+    pub ctx: CtxPrelude,
+    pub func: FuncPrelude,
+    pub solve: SolvePrelude,
+    pub meta: MetaPrelude,
+    pub syntax: SyntaxPrelude,
+    pub value: ValuePrelude,
+    pub ctrl: CtrlPrelude,
+}
+
+impl Prelude for CorePrelude {
+    fn put(&self, ctx: &mut dyn PreludeCtx) {
+        self.unit.put(ctx);
+        self.bool.put(ctx);
+        self.symbol.put(ctx);
+        self.text.put(ctx);
+        self.int.put(ctx);
+        self.number.put(ctx);
+        self.byte.put(ctx);
+        self.pair.put(ctx);
+        self.call.put(ctx);
+        self.list.put(ctx);
+        self.map.put(ctx);
+        self.ctx.put(ctx);
+        self.func.put(ctx);
+        self.solve.put(ctx);
+        self.meta.put(ctx);
+        self.syntax.put(ctx);
+        self.value.put(ctx);
+        self.ctrl.put(ctx);
     }
 }
 
@@ -215,26 +227,24 @@ impl Named for MutStaticPrimFuncVal {
     }
 }
 
-pub(crate) struct FreeFn<F> {
-    pub(crate) id: &'static str,
-    pub(crate) f: F,
-    pub(crate) mode: FuncMode,
+pub struct FreeFn<F> {
+    pub id: &'static str,
+    pub f: F,
+    pub mode: FuncMode,
 }
 
-pub(crate) struct DynFn<F> {
-    pub(crate) id: &'static str,
-    pub(crate) f: F,
-    pub(crate) mode: FuncMode,
-    pub(crate) ctx_explicit: bool,
+pub struct DynFn<F> {
+    pub id: &'static str,
+    pub f: F,
+    pub mode: FuncMode,
+    pub ctx_explicit: bool,
 }
 
 impl<F: FreeCellFnExt + 'static> FreeFn<F> {
-    #[expect(dead_code)]
-    pub(crate) fn free_cell(self) -> FreeCellPrimFuncVal {
+    pub fn free_cell(self) -> FreeCellPrimFuncVal {
         let func = FreeCellPrimFunc {
-            id: Symbol::from_str(self.id),
-            extension: false,
-            fn1: Box::new(self.f),
+            id: Symbol::from_str_unchecked(self.id),
+            fn_: Box::new(self.f),
             mode: self.mode,
         };
         FreeCellPrimFuncVal::from(func)
@@ -242,11 +252,10 @@ impl<F: FreeCellFnExt + 'static> FreeFn<F> {
 }
 
 impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
-    pub(crate) fn free_static(self) -> FreeStaticPrimFuncVal {
+    pub fn free_static(self) -> FreeStaticPrimFuncVal {
         let func = FreeStaticPrimFunc {
-            id: Symbol::from_str(self.id),
-            extension: false,
-            fn1: Rc::new(self.f),
+            id: Symbol::from_str_unchecked(self.id),
+            fn_: Rc::new(self.f),
             mode: self.mode,
         };
         FreeStaticPrimFuncVal::from(func)
@@ -254,12 +263,10 @@ impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
 }
 
 impl<F: ConstCellFnExt + 'static> DynFn<F> {
-    #[expect(dead_code)]
-    pub(crate) fn const_cell(self) -> ConstCellPrimFuncVal {
+    pub fn const_cell(self) -> ConstCellPrimFuncVal {
         let func = ConstCellPrimFunc {
-            id: Symbol::from_str(self.id),
-            extension: false,
-            fn1: Box::new(self.f),
+            id: Symbol::from_str_unchecked(self.id),
+            fn_: Box::new(self.f),
             mode: self.mode,
             ctx_explicit: self.ctx_explicit,
         };
@@ -268,11 +275,10 @@ impl<F: ConstCellFnExt + 'static> DynFn<F> {
 }
 
 impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
-    pub(crate) fn const_static(self) -> ConstStaticPrimFuncVal {
+    pub fn const_static(self) -> ConstStaticPrimFuncVal {
         let func = ConstStaticPrimFunc {
-            id: Symbol::from_str(self.id),
-            extension: false,
-            fn1: Rc::new(self.f),
+            id: Symbol::from_str_unchecked(self.id),
+            fn_: Rc::new(self.f),
             mode: self.mode,
             ctx_explicit: self.ctx_explicit,
         };
@@ -281,12 +287,10 @@ impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
 }
 
 impl<F: MutCellFnExt + 'static> DynFn<F> {
-    #[expect(dead_code)]
-    pub(crate) fn mut_cell(self) -> MutCellPrimFuncVal {
+    pub fn mut_cell(self) -> MutCellPrimFuncVal {
         let func = MutCellPrimFunc {
-            id: Symbol::from_str(self.id),
-            extension: false,
-            fn1: Box::new(self.f),
+            id: Symbol::from_str_unchecked(self.id),
+            fn_: Box::new(self.f),
             mode: self.mode,
             ctx_explicit: self.ctx_explicit,
         };
@@ -295,11 +299,10 @@ impl<F: MutCellFnExt + 'static> DynFn<F> {
 }
 
 impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
-    pub(crate) fn mut_static(self) -> MutStaticPrimFuncVal {
+    pub fn mut_static(self) -> MutStaticPrimFuncVal {
         let func = MutStaticPrimFunc {
-            id: Symbol::from_str(self.id),
-            extension: false,
-            fn1: Rc::new(self.f),
+            id: Symbol::from_str_unchecked(self.id),
+            fn_: Rc::new(self.f),
             mode: self.mode,
             ctx_explicit: self.ctx_explicit,
         };
@@ -308,20 +311,20 @@ impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
 }
 
 fn ctx_put<V: Clone + Into<Val>>(ctx: &mut dyn PreludeCtx, name: &'static str, val: &V) {
-    let name = Symbol::from_str(name);
+    let name = Symbol::from_str_unchecked(name);
     let val = val.clone().into();
     ctx.put(name, val);
 }
 
-fn free_impl(func: fn(Val) -> Val) -> FreeStaticImpl<Val, Val> {
+pub fn free_impl(func: fn(Val) -> Val) -> FreeStaticImpl<Val, Val> {
     FreeStaticImpl::new(func)
 }
 
-fn const_impl(func: fn(ConstRef<Val>, Val) -> Val) -> ConstStaticImpl<Val, Val, Val> {
+pub fn const_impl(func: fn(ConstRef<Val>, Val) -> Val) -> ConstStaticImpl<Val, Val, Val> {
     ConstStaticImpl::new(FreeStaticImpl::default, func)
 }
 
-fn mut_impl(func: fn(&mut Val, Val) -> Val) -> MutStaticImpl<Val, Val, Val> {
+pub fn mut_impl(func: fn(&mut Val, Val) -> Val) -> MutStaticImpl<Val, Val, Val> {
     MutStaticImpl::new(FreeStaticImpl::default, ConstStaticImpl::default, func)
 }
 
@@ -330,8 +333,8 @@ pub(crate) fn ctx_default_mode() -> Option<Mode> {
 }
 
 pub(crate) fn ref_mode() -> Option<Mode> {
-    let ref1 = MODE_PRELUDE.with(|p| p.ref_mode.clone());
-    Some(Mode::Func(ref1.into()))
+    let ref_ = MODE_PRELUDE.with(|p| p.ref_mode.clone());
+    Some(Mode::Func(ref_.into()))
 }
 
 mod mode;
@@ -363,8 +366,6 @@ mod map;
 mod ctx;
 
 mod func;
-
-mod extension;
 
 // -----
 

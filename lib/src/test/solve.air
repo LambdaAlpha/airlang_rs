@@ -14,18 +14,12 @@ set_solver
 -----
 [1, 2, 3]
 =====
-set_solver .
------
-; do [; set_solver! ., s = ; solver! ., s == .]
------
-true
-=====
 solver calls set_solver or solver, no panic
 -----
 ; do [
     s1 = ; function {
         context_access : .free,
-        code : ._ : ; do [; set_solver! ., ; solver! .],
+        code : ._ : ; do [; set_solver! not, ; solver! .],
     },
     ; set_solver! ^s1,
     not ! true,

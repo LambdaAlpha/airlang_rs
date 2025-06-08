@@ -1,29 +1,29 @@
-use crate::Byte;
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Int;
-use crate::MutStaticPrimFuncVal;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::free_impl;
-use crate::prelude::mut_impl;
-use crate::text::Text;
-use crate::val::Val;
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx_default_mode;
+use super::free_impl;
+use super::mut_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Byte;
+use crate::type_::ConstRef;
+use crate::type_::Int;
+use crate::type_::Text;
 
 // todo design add more
 #[derive(Clone)]
-pub(crate) struct TextPrelude {
-    pub(crate) from_utf8: FreeStaticPrimFuncVal,
-    pub(crate) into_utf8: FreeStaticPrimFuncVal,
-    pub(crate) length: ConstStaticPrimFuncVal,
-    pub(crate) push: MutStaticPrimFuncVal,
-    pub(crate) join: FreeStaticPrimFuncVal,
+pub struct TextPrelude {
+    pub from_utf8: FreeStaticPrimFuncVal,
+    pub into_utf8: FreeStaticPrimFuncVal,
+    pub length: ConstStaticPrimFuncVal,
+    pub push: MutStaticPrimFuncVal,
+    pub join: FreeStaticPrimFuncVal,
 }
 
 impl Default for TextPrelude {
@@ -48,7 +48,7 @@ impl Prelude for TextPrelude {
     }
 }
 
-fn from_utf8() -> FreeStaticPrimFuncVal {
+pub fn from_utf8() -> FreeStaticPrimFuncVal {
     FreeFn { id: "text.from_utf8", f: free_impl(fn_from_utf8), mode: FuncMode::default() }
         .free_static()
 }
@@ -65,7 +65,7 @@ fn fn_from_utf8(input: Val) -> Val {
     }
 }
 
-fn into_utf8() -> FreeStaticPrimFuncVal {
+pub fn into_utf8() -> FreeStaticPrimFuncVal {
     FreeFn { id: "text.into_utf8", f: free_impl(fn_into_utf8), mode: FuncMode::default() }
         .free_static()
 }
@@ -79,7 +79,7 @@ fn fn_into_utf8(input: Val) -> Val {
     Val::Byte(byte.into())
 }
 
-fn length() -> ConstStaticPrimFuncVal {
+pub fn length() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "text.length",
         f: const_impl(fn_length),
@@ -97,7 +97,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-fn push() -> MutStaticPrimFuncVal {
+pub fn push() -> MutStaticPrimFuncVal {
     DynFn {
         id: "text.push",
         f: mut_impl(fn_push),
@@ -119,7 +119,7 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
 }
 
 // todo design
-fn join() -> FreeStaticPrimFuncVal {
+pub fn join() -> FreeStaticPrimFuncVal {
     FreeFn { id: "text.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
 }
 

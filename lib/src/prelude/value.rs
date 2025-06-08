@@ -1,75 +1,79 @@
+pub use arbitrary::Arbitrary;
+pub use arbitrary::ArbitraryVal;
+
+_____!();
+
+use arbitrary::arbitrary_ext_type;
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
-use crate::Byte;
-use crate::Call;
-use crate::CodeMode;
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::Ctx;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Int;
-use crate::List;
-use crate::Map;
-use crate::Number;
-use crate::Pair;
-use crate::SymbolMode;
-use crate::Text;
-use crate::Unit;
-use crate::Val;
-use crate::bit::Bit;
-use crate::ctx::main::MainCtx;
-use crate::either::Either;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::free_impl;
-use crate::prelude::ref_mode;
-use crate::symbol::Symbol;
-use crate::type1::arbitrary::Arbitrary;
-use crate::type1::arbitrary::arbitrary_ext_type;
-use crate::val::BIT;
-use crate::val::BYTE;
-use crate::val::CALL;
-use crate::val::CTX;
-use crate::val::FUNC;
-use crate::val::INT;
-use crate::val::LIST;
-use crate::val::MAP;
-use crate::val::NUMBER;
-use crate::val::PAIR;
-use crate::val::SYMBOL;
-use crate::val::TEXT;
-use crate::val::UNIT;
-use crate::val::func::FuncVal;
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx::ref_::RefCtx;
+use super::ctx_default_mode;
+use super::free_impl;
+use super::ref_mode;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::func::FuncMode;
+use crate::semantics::mode::CodeMode;
+use crate::semantics::mode::SymbolMode;
+use crate::semantics::val::BIT;
+use crate::semantics::val::BYTE;
+use crate::semantics::val::CALL;
+use crate::semantics::val::CTX;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FUNC;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FuncVal;
+use crate::semantics::val::INT;
+use crate::semantics::val::LIST;
+use crate::semantics::val::MAP;
+use crate::semantics::val::NUMBER;
+use crate::semantics::val::PAIR;
+use crate::semantics::val::SYMBOL;
+use crate::semantics::val::TEXT;
+use crate::semantics::val::UNIT;
+use crate::semantics::val::Val;
+use crate::type_::Bit;
+use crate::type_::Byte;
+use crate::type_::Call;
+use crate::type_::ConstRef;
+use crate::type_::Either;
+use crate::type_::Int;
+use crate::type_::List;
+use crate::type_::Map;
+use crate::type_::Number;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
+use crate::type_::Unit;
 
 #[derive(Clone)]
-pub(crate) struct ValuePrelude {
-    pub(crate) any: FreeStaticPrimFuncVal,
-    pub(crate) type1: ConstStaticPrimFuncVal,
-    pub(crate) equal: ConstStaticPrimFuncVal,
+pub struct ValuePrelude {
+    pub any: FreeStaticPrimFuncVal,
+    pub type_: ConstStaticPrimFuncVal,
+    pub equal: ConstStaticPrimFuncVal,
 }
 
 impl Default for ValuePrelude {
     fn default() -> Self {
-        ValuePrelude { any: any(), type1: type1(), equal: equal() }
+        ValuePrelude { any: any(), type_: type_(), equal: equal() }
     }
 }
 
 impl Prelude for ValuePrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
         self.any.put(ctx);
-        self.type1.put(ctx);
+        self.type_.put(ctx);
         self.equal.put(ctx);
     }
 }
 
 // todo design
-fn any() -> FreeStaticPrimFuncVal {
+pub fn any() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "any",
         f: free_impl(fn_any),
@@ -107,17 +111,17 @@ fn fn_any(input: Val) -> Val {
     }
 }
 
-fn type1() -> ConstStaticPrimFuncVal {
+pub fn type_() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "type",
-        f: const_impl(fn_type1),
+        f: const_impl(fn_type),
         mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
         ctx_explicit: true,
     }
     .const_static()
 }
 
-fn fn_type1(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
     let s = match &*ctx {
         Val::Unit(_) => UNIT,
         Val::Bit(_) => BIT,
@@ -134,11 +138,11 @@ fn fn_type1(ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Func(_) => FUNC,
         Val::Ext(ext) => return Val::Symbol(ext.type_name()),
     };
-    Val::Symbol(Symbol::from_str(s))
+    Val::Symbol(Symbol::from_str_unchecked(s))
 }
 
 // todo design mode and ref
-fn equal() -> ConstStaticPrimFuncVal {
+pub fn equal() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "==",
         f: const_impl(fn_equal),
@@ -159,8 +163,8 @@ fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let left = MainCtx::ref_or_val(pair.first);
-    let right = MainCtx::ref_or_val(pair.second);
+    let left = RefCtx::ref_or_val(pair.first);
+    let right = RefCtx::ref_or_val(pair.second);
     get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {
             return Val::default();
@@ -186,3 +190,5 @@ where F: FnOnce(Option<&Val>) -> T {
         Either::That(val) => f(Some(&val)),
     }
 }
+
+mod arbitrary;

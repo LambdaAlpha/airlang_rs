@@ -1,9 +1,10 @@
 use std::error::Error;
 
-use crate::AirCell;
-use crate::parse;
-use crate::test::ext::TestAirExt;
-use crate::val::Val;
+use crate::Air;
+use crate::prelude::CorePrelude;
+use crate::semantics::val::Val;
+use crate::solver::core_solver;
+use crate::syntax::parse;
 
 const MAIN_DELIMITER: &str = "\n=====\n";
 const SUB_DELIMITER: &str = "\n-----\n";
@@ -26,10 +27,12 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 }
 
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    test_interpret(AirCell::default(), input, file_name)
+    Air::init_prelude(Box::new(CorePrelude::default()));
+    Air::init_solver(core_solver());
+    test_interpret(Air::default(), input, file_name)
 }
 
-fn test_interpret(air: AirCell, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
+fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     let backup = air;
     for [title, i, o] in parse_test_file::<3>(input, file_name) {
         let mut air = backup.clone();
@@ -117,13 +120,6 @@ fn test_func() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_extension() -> Result<(), Box<dyn Error>> {
-    AirCell::set_ext(Box::new(TestAirExt));
-    let air = AirCell::default();
-    test_interpret(air, include_str!("test/extension.air"), "test/extension.air")
-}
-
-#[test]
 fn test_debug() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/debug.air"), "test/debug.air")
 }
@@ -163,5 +159,3 @@ fn test_value() -> Result<(), Box<dyn Error>> {
 fn test_ctrl() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/ctrl.air"), "test/ctrl.air")
 }
-
-mod ext;

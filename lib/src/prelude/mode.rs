@@ -1,22 +1,22 @@
-use crate::ConstRef;
-use crate::ConstStaticFn;
-use crate::FreeStaticFn;
-use crate::FuncMode;
-use crate::MutStaticFn;
-use crate::MutStaticImpl;
-use crate::MutStaticPrimFuncVal;
-use crate::Symbol;
-use crate::Val;
-use crate::ctx::main::MainCtx;
-use crate::func::func_mode::DEFAULT_MODE;
-use crate::mode::symbol::MOVE_CHAR;
-use crate::prelude::DynFn;
+use super::DynFn;
+use super::ctx::ref_::RefCtx;
+use crate::semantics::func::ConstStaticFn;
+use crate::semantics::func::DEFAULT_MODE;
+use crate::semantics::func::FreeStaticFn;
+use crate::semantics::func::FuncMode;
+use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::MutStaticImpl;
+use crate::semantics::mode::MOVE_CHAR;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::ConstRef;
+use crate::type_::Symbol;
 
-thread_local!(pub(crate) static MODE_PRELUDE: ModePrelude = ModePrelude::default());
+thread_local!(pub(in crate::prelude) static MODE_PRELUDE: ModePrelude = ModePrelude::default());
 
 #[derive(Clone)]
-pub(crate) struct ModePrelude {
-    pub(crate) ref_mode: MutStaticPrimFuncVal,
+pub struct ModePrelude {
+    pub ref_mode: MutStaticPrimFuncVal,
 }
 
 impl Default for ModePrelude {
@@ -27,7 +27,7 @@ impl Default for ModePrelude {
 
 // todo design
 // todo rename
-fn ref_mode() -> MutStaticPrimFuncVal {
+pub fn ref_mode() -> MutStaticPrimFuncVal {
     DynFn {
         id: "mode.reference",
         f: MutStaticImpl::new(fn_ref_mode_free, fn_ref_mode_const, fn_ref_mode_mut),
@@ -40,7 +40,7 @@ fn ref_mode() -> MutStaticPrimFuncVal {
 fn fn_ref_mode_free(input: Val) -> Val {
     let Val::Symbol(s) = &input else {
         let val = DEFAULT_MODE.free_static_call(input);
-        return MainCtx::escape_symbol(val);
+        return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
     if let Some(MOVE_CHAR) = prefix {
@@ -52,7 +52,7 @@ fn fn_ref_mode_free(input: Val) -> Val {
 fn fn_ref_mode_const(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Symbol(s) = &input else {
         let val = DEFAULT_MODE.const_static_call(ctx, input);
-        return MainCtx::escape_symbol(val);
+        return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
     if let Some(MOVE_CHAR) = prefix {
@@ -64,15 +64,16 @@ fn fn_ref_mode_const(ctx: ConstRef<Val>, input: Val) -> Val {
 fn fn_ref_mode_mut(ctx: &mut Val, input: Val) -> Val {
     let Val::Symbol(s) = &input else {
         let val = DEFAULT_MODE.mut_static_call(ctx, input);
-        return MainCtx::escape_symbol(val);
+        return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
     if let Some(MOVE_CHAR) = prefix {
         let Val::Ctx(ctx) = ctx else {
             return Val::default();
         };
-        let val = MainCtx::remove_or_default(ctx, Symbol::from_str(&s[1 ..]));
-        return MainCtx::escape_symbol(val);
+        let val =
+            ctx.variables_mut().remove(Symbol::from_str_unchecked(&s[1 ..])).unwrap_or_default();
+        return RefCtx::escape_symbol(val);
     }
     input
 }

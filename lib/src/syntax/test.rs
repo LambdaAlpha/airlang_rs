@@ -4,23 +4,23 @@ use std::str::FromStr;
 use num_bigint::BigInt;
 use num_traits::Num;
 
-use crate::Call;
-use crate::Pair;
-use crate::bit::Bit;
-use crate::int::Int;
-use crate::map::Map;
-use crate::number::Number;
-use crate::symbol::Symbol;
-use crate::syntax::generate_compact;
-use crate::syntax::generate_pretty;
-use crate::syntax::generate_symbol;
-use crate::syntax::parse;
-use crate::syntax::repr::Repr;
-use crate::syntax::repr::call::CallRepr;
-use crate::syntax::repr::pair::PairRepr;
+use super::generate_compact;
+use super::generate_pretty;
+use super::generate_symbol;
+use super::parse;
+use super::repr::CallRepr;
+use super::repr::PairRepr;
+use super::repr::Repr;
 use crate::test::parse_test_file;
-use crate::text::Text;
-use crate::unit::Unit;
+use crate::type_::Bit;
+use crate::type_::Call;
+use crate::type_::Int;
+use crate::type_::Map;
+use crate::type_::Number;
+use crate::type_::Pair;
+use crate::type_::Symbol;
+use crate::type_::Text;
+use crate::type_::Unit;
 
 mod unit;
 
@@ -57,7 +57,7 @@ fn bit(b: bool) -> Repr {
 }
 
 fn symbol(s: &str) -> Repr {
-    Repr::Symbol(Symbol::from_str(s))
+    Repr::Symbol(Symbol::from_str_unchecked(s))
 }
 
 fn text(s: &str) -> Repr {
@@ -101,13 +101,13 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
 }
 
 fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
+    let func = Repr::Symbol(Symbol::from_str_unchecked(tag));
     let input = Repr::List(v.into());
     Repr::Call(Box::new(Call::new(false, func, input)))
 }
 
 fn tag_reverse(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str(tag));
+    let func = Repr::Symbol(Symbol::from_str_unchecked(tag));
     let input = Repr::List(v.into());
     Repr::Call(Box::new(Call::new(true, func, input)))
 }
@@ -130,7 +130,7 @@ fn test_parse(
     }
     for [title, s] in cases {
         let expected_repr = expected.next().unwrap();
-        let real_repr = parse(s).map_err(|e| {
+        let real_repr: Repr = parse(s).map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
@@ -145,12 +145,12 @@ fn test_parse(
 fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     let gen_fmt_list = [generate_compact, generate_pretty, generate_symbol];
     for [title, s] in parse_test_file::<2>(src, file_name) {
-        let repr = parse(s).map_err(|e| {
+        let repr: Repr = parse(s).map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
-        for gen1 in gen_fmt_list {
-            let string = gen1(&repr);
+        for gen_ in gen_fmt_list {
+            let string = gen_((&repr).try_into().unwrap());
             let new_repr = parse(&string).map_err(|e| {
                 eprintln!(
                     "file {file_name} case ({title}) src({s}): parse error with generated string ({string})!\n{e}"
@@ -168,18 +168,21 @@ fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 
 fn test_parse_illegal(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     for [title, s] in parse_test_file::<2>(src, file_name) {
-        assert!(parse(s).is_err(), "file {file_name} case ({title}) src({s}): shouldn't parse");
+        assert!(
+            parse::<Repr>(s).is_err(),
+            "file {file_name} case ({title}) src({s}): shouldn't parse"
+        );
     }
     Ok(())
 }
 
 fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     for [title, i1, i2] in parse_test_file::<3>(src, file_name) {
-        let i1 = parse(i1).map_err(|e| {
+        let i1 = parse::<Repr>(i1).map_err(|e| {
             eprintln!("file {file_name} case ({title}): ({i1}) parse failed\n{e}");
             e
         })?;
-        let i2 = parse(i2).map_err(|e| {
+        let i2 = parse::<Repr>(i2).map_err(|e| {
             eprintln!("file {file_name} case ({title}): ({i2}) parse failed\n{e}");
             e
         })?;

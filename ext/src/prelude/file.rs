@@ -1,15 +1,14 @@
-use airlang::FreeStaticPrimFuncVal;
-use airlang::FuncMode;
-use airlang::PreludeCtx;
-use airlang::Text;
-use airlang::Val;
+use airlang::prelude::FreeFn;
+use airlang::prelude::Prelude;
+use airlang::prelude::PreludeCtx;
+use airlang::prelude::free_impl;
+use airlang::semantics::func::FuncMode;
+use airlang::semantics::val::FreeStaticPrimFuncVal;
+use airlang::semantics::val::Val;
+use airlang::type_::Text;
 
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::free_impl;
-
-pub(crate) struct FilePrelude {
-    pub(crate) read_to_text: FreeStaticPrimFuncVal,
+pub struct FilePrelude {
+    pub read_to_text: FreeStaticPrimFuncVal,
 }
 
 impl Default for FilePrelude {
@@ -24,7 +23,7 @@ impl Prelude for FilePrelude {
     }
 }
 
-fn read_to_text() -> FreeStaticPrimFuncVal {
+pub fn read_to_text() -> FreeStaticPrimFuncVal {
     FreeFn { id: "file.read_to_text", f: free_impl(fn_read_to_text), mode: FuncMode::default() }
         .free_static()
 }

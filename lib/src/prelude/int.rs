@@ -1,26 +1,26 @@
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::Int;
-use crate::pair::Pair;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::free_impl;
-use crate::val::Val;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::free_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Int;
+use crate::type_::Pair;
 
 #[derive(Clone)]
-pub(crate) struct IntPrelude {
-    pub(crate) add: FreeStaticPrimFuncVal,
-    pub(crate) subtract: FreeStaticPrimFuncVal,
-    pub(crate) multiply: FreeStaticPrimFuncVal,
-    pub(crate) divide: FreeStaticPrimFuncVal,
-    pub(crate) remainder: FreeStaticPrimFuncVal,
-    pub(crate) divide_remainder: FreeStaticPrimFuncVal,
-    pub(crate) less_than: FreeStaticPrimFuncVal,
-    pub(crate) less_equal: FreeStaticPrimFuncVal,
-    pub(crate) greater_than: FreeStaticPrimFuncVal,
-    pub(crate) greater_equal: FreeStaticPrimFuncVal,
-    pub(crate) less_greater: FreeStaticPrimFuncVal,
+pub struct IntPrelude {
+    pub add: FreeStaticPrimFuncVal,
+    pub subtract: FreeStaticPrimFuncVal,
+    pub multiply: FreeStaticPrimFuncVal,
+    pub divide: FreeStaticPrimFuncVal,
+    pub remainder: FreeStaticPrimFuncVal,
+    pub divide_remainder: FreeStaticPrimFuncVal,
+    pub less_than: FreeStaticPrimFuncVal,
+    pub less_equal: FreeStaticPrimFuncVal,
+    pub greater_than: FreeStaticPrimFuncVal,
+    pub greater_equal: FreeStaticPrimFuncVal,
+    pub less_greater: FreeStaticPrimFuncVal,
 }
 
 impl Default for IntPrelude {
@@ -57,7 +57,7 @@ impl Prelude for IntPrelude {
     }
 }
 
-fn add() -> FreeStaticPrimFuncVal {
+pub fn add() -> FreeStaticPrimFuncVal {
     FreeFn { id: "+", f: free_impl(fn_add), mode: FuncMode::default() }.free_static()
 }
 
@@ -77,7 +77,7 @@ fn fn_add(input: Val) -> Val {
     Val::Int(i1.add(i2).into())
 }
 
-fn subtract() -> FreeStaticPrimFuncVal {
+pub fn subtract() -> FreeStaticPrimFuncVal {
     FreeFn { id: "-", f: free_impl(fn_subtract), mode: FuncMode::default() }.free_static()
 }
 
@@ -97,7 +97,7 @@ fn fn_subtract(input: Val) -> Val {
     Val::Int(i1.subtract(i2).into())
 }
 
-fn multiply() -> FreeStaticPrimFuncVal {
+pub fn multiply() -> FreeStaticPrimFuncVal {
     FreeFn { id: "*", f: free_impl(fn_multiply), mode: FuncMode::default() }.free_static()
 }
 
@@ -117,7 +117,7 @@ fn fn_multiply(input: Val) -> Val {
     Val::Int(i1.multiply(i2).into())
 }
 
-fn divide() -> FreeStaticPrimFuncVal {
+pub fn divide() -> FreeStaticPrimFuncVal {
     FreeFn { id: "/", f: free_impl(fn_divide), mode: FuncMode::default() }.free_static()
 }
 
@@ -140,7 +140,7 @@ fn fn_divide(input: Val) -> Val {
     Val::Int(i.into())
 }
 
-fn remainder() -> FreeStaticPrimFuncVal {
+pub fn remainder() -> FreeStaticPrimFuncVal {
     FreeFn { id: "%", f: free_impl(fn_remainder), mode: FuncMode::default() }.free_static()
 }
 
@@ -163,7 +163,7 @@ fn fn_remainder(input: Val) -> Val {
     Val::Int(i.into())
 }
 
-fn divide_remainder() -> FreeStaticPrimFuncVal {
+pub fn divide_remainder() -> FreeStaticPrimFuncVal {
     FreeFn { id: "/%", f: free_impl(fn_divide_remainder), mode: FuncMode::default() }.free_static()
 }
 
@@ -186,7 +186,7 @@ fn fn_divide_remainder(input: Val) -> Val {
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 
-fn less_than() -> FreeStaticPrimFuncVal {
+pub fn less_than() -> FreeStaticPrimFuncVal {
     FreeFn { id: "<", f: free_impl(fn_less_than), mode: FuncMode::default() }.free_static()
 }
 
@@ -204,7 +204,7 @@ fn fn_less_than(input: Val) -> Val {
     Val::Bit(i1.less_than(&i2))
 }
 
-fn less_equal() -> FreeStaticPrimFuncVal {
+pub fn less_equal() -> FreeStaticPrimFuncVal {
     FreeFn { id: "<=", f: free_impl(fn_less_equal), mode: FuncMode::default() }.free_static()
 }
 
@@ -222,7 +222,7 @@ fn fn_less_equal(input: Val) -> Val {
     Val::Bit(i1.less_equal(&i2))
 }
 
-fn greater_than() -> FreeStaticPrimFuncVal {
+pub fn greater_than() -> FreeStaticPrimFuncVal {
     FreeFn { id: ">", f: free_impl(fn_greater_than), mode: FuncMode::default() }.free_static()
 }
 
@@ -240,7 +240,7 @@ fn fn_greater_than(input: Val) -> Val {
     Val::Bit(i1.greater_than(&i2))
 }
 
-fn greater_equal() -> FreeStaticPrimFuncVal {
+pub fn greater_equal() -> FreeStaticPrimFuncVal {
     FreeFn { id: ">=", f: free_impl(fn_greater_equal), mode: FuncMode::default() }.free_static()
 }
 
@@ -258,7 +258,7 @@ fn fn_greater_equal(input: Val) -> Val {
     Val::Bit(i1.greater_equal(&i2))
 }
 
-fn less_greater() -> FreeStaticPrimFuncVal {
+pub fn less_greater() -> FreeStaticPrimFuncVal {
     FreeFn { id: "<>", f: free_impl(fn_less_greater), mode: FuncMode::default() }.free_static()
 }
 

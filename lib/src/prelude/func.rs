@@ -1,63 +1,59 @@
-use crate::CodeMode;
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::CtxAccess;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::SymbolMode;
-use crate::bit::Bit;
-use crate::func::FuncTrait;
-use crate::func::mode::ModeFunc;
-use crate::func::repr::CONST;
-use crate::func::repr::FREE;
-use crate::func::repr::MUTABLE;
-use crate::func::repr::generate_func;
-use crate::func::repr::parse_func;
-use crate::func::repr::parse_mode;
-use crate::mode::ID;
-use crate::mode::prim::EVAL_LITERAL;
-use crate::mode::prim::EVAL_MOVE;
-use crate::mode::prim::EVAL_REF;
-use crate::mode::prim::FORM_LITERAL;
-use crate::mode::prim::FORM_MOVE;
-use crate::mode::prim::FORM_REF;
-use crate::mode::repr::parse;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::ctx_put;
-use crate::prelude::free_impl;
-use crate::symbol::Symbol;
-use crate::val::Val;
-use crate::val::ctx::CtxVal;
-use crate::val::func::FuncVal;
+use repr::generate_func;
+use repr::mode::EVAL_LITERAL;
+use repr::mode::EVAL_MOVE;
+use repr::mode::EVAL_REF;
+use repr::mode::FORM_LITERAL;
+use repr::mode::FORM_MOVE;
+use repr::mode::FORM_REF;
+use repr::mode::parse;
+use repr::parse_func;
+use repr::parse_mode;
+
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx_default_mode;
+use super::ctx_put;
+use super::free_impl;
+use super::func::repr::generate_ctx_access;
+use crate::semantics::func::FuncMode;
+use crate::semantics::func::FuncTrait;
+use crate::semantics::func::ModeFunc;
+use crate::semantics::mode::CodeMode;
+use crate::semantics::mode::SymbolMode;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::CtxVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Bit;
+use crate::type_::ConstRef;
+use crate::type_::Symbol;
 
 #[derive(Clone)]
-pub(crate) struct FuncPrelude {
-    pub(crate) mode_id: FuncVal,
-    pub(crate) mode_form_literal: FuncVal,
-    pub(crate) mode_form_ref: FuncVal,
-    pub(crate) mode_form_move: FuncVal,
-    pub(crate) mode_eval_literal: FuncVal,
-    pub(crate) mode_eval_ref: FuncVal,
-    pub(crate) mode_eval_move: FuncVal,
-    pub(crate) mode: FreeStaticPrimFuncVal,
-    pub(crate) new: FreeStaticPrimFuncVal,
-    pub(crate) repr: FreeStaticPrimFuncVal,
-    pub(crate) ctx_access: ConstStaticPrimFuncVal,
-    pub(crate) ctx_explicit: ConstStaticPrimFuncVal,
-    pub(crate) forward_mode: ConstStaticPrimFuncVal,
-    pub(crate) reverse_mode: ConstStaticPrimFuncVal,
-    pub(crate) is_primitive: ConstStaticPrimFuncVal,
-    pub(crate) is_extension: ConstStaticPrimFuncVal,
-    pub(crate) is_cell: ConstStaticPrimFuncVal,
-    pub(crate) is_mode: ConstStaticPrimFuncVal,
-    pub(crate) id: ConstStaticPrimFuncVal,
-    pub(crate) code: ConstStaticPrimFuncVal,
-    pub(crate) ctx: ConstStaticPrimFuncVal,
+pub struct FuncPrelude {
+    pub mode_id: FuncVal,
+    pub mode_form_literal: FuncVal,
+    pub mode_form_ref: FuncVal,
+    pub mode_form_move: FuncVal,
+    pub mode_eval_literal: FuncVal,
+    pub mode_eval_ref: FuncVal,
+    pub mode_eval_move: FuncVal,
+    pub mode: FreeStaticPrimFuncVal,
+    pub new: FreeStaticPrimFuncVal,
+    pub repr: FreeStaticPrimFuncVal,
+    pub ctx_access: ConstStaticPrimFuncVal,
+    pub ctx_explicit: ConstStaticPrimFuncVal,
+    pub forward_mode: ConstStaticPrimFuncVal,
+    pub reverse_mode: ConstStaticPrimFuncVal,
+    pub is_primitive: ConstStaticPrimFuncVal,
+    pub is_cell: ConstStaticPrimFuncVal,
+    pub is_mode: ConstStaticPrimFuncVal,
+    pub id: ConstStaticPrimFuncVal,
+    pub code: ConstStaticPrimFuncVal,
+    pub ctx: ConstStaticPrimFuncVal,
 }
 
 impl Default for FuncPrelude {
@@ -78,7 +74,6 @@ impl Default for FuncPrelude {
             forward_mode: forward_mode(),
             reverse_mode: reverse_mode(),
             is_primitive: is_primitive(),
-            is_extension: is_extension(),
             is_cell: is_cell(),
             is_mode: is_mode(),
             id: id(),
@@ -90,7 +85,7 @@ impl Default for FuncPrelude {
 
 impl Prelude for FuncPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
-        ctx_put(ctx, ID, &self.mode_id);
+        ctx_put(ctx, "id", &self.mode_id);
         ctx_put(ctx, FORM_LITERAL, &self.mode_form_literal);
         ctx_put(ctx, FORM_REF, &self.mode_form_ref);
         ctx_put(ctx, FORM_MOVE, &self.mode_form_move);
@@ -105,7 +100,6 @@ impl Prelude for FuncPrelude {
         self.forward_mode.put(ctx);
         self.reverse_mode.put(ctx);
         self.is_primitive.put(ctx);
-        self.is_extension.put(ctx);
         self.is_cell.put(ctx);
         self.is_mode.put(ctx);
         self.id.put(ctx);
@@ -114,48 +108,48 @@ impl Prelude for FuncPrelude {
     }
 }
 
-fn mode_id() -> FuncVal {
+pub fn mode_id() -> FuncVal {
     let func = ModeFunc::new(None);
     FuncVal::Mode(func.into())
 }
 
-fn mode_form_literal() -> FuncVal {
+pub fn mode_form_literal() -> FuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form);
     let func = ModeFunc::new(mode);
     FuncVal::Mode(func.into())
 }
 
-fn mode_form_ref() -> FuncVal {
+pub fn mode_form_ref() -> FuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form);
     let func = ModeFunc::new(mode);
     FuncVal::Mode(func.into())
 }
 
-fn mode_form_move() -> FuncVal {
+pub fn mode_form_move() -> FuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Move, CodeMode::Form);
     let func = ModeFunc::new(mode);
     FuncVal::Mode(func.into())
 }
 
-fn mode_eval_literal() -> FuncVal {
+pub fn mode_eval_literal() -> FuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Eval);
     let func = ModeFunc::new(mode);
     FuncVal::Mode(func.into())
 }
 
-fn mode_eval_ref() -> FuncVal {
+pub fn mode_eval_ref() -> FuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Eval);
     let func = ModeFunc::new(mode);
     FuncVal::Mode(func.into())
 }
 
-fn mode_eval_move() -> FuncVal {
+pub fn mode_eval_move() -> FuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Move, CodeMode::Eval);
     let func = ModeFunc::new(mode);
     FuncVal::Mode(func.into())
 }
 
-fn mode() -> FreeStaticPrimFuncVal {
+pub fn mode() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "mode",
         f: free_impl(fn_mode),
@@ -175,7 +169,7 @@ fn fn_mode(input: Val) -> Val {
     Val::Func(FuncVal::Mode(func.into()))
 }
 
-fn new() -> FreeStaticPrimFuncVal {
+pub fn new() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "function",
         f: free_impl(fn_new),
@@ -191,7 +185,7 @@ fn fn_new(input: Val) -> Val {
     }
 }
 
-fn repr() -> FreeStaticPrimFuncVal {
+pub fn repr() -> FreeStaticPrimFuncVal {
     FreeFn { id: "function.represent", f: free_impl(fn_repr), mode: FuncMode::default() }
         .free_static()
 }
@@ -203,7 +197,7 @@ fn fn_repr(input: Val) -> Val {
     generate_func(func)
 }
 
-fn ctx_access() -> ConstStaticPrimFuncVal {
+pub fn ctx_access() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.context_access",
         f: const_impl(fn_ctx_access),
@@ -217,15 +211,11 @@ fn fn_ctx_access(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         return Val::default();
     };
-    let access = match func.ctx_access() {
-        CtxAccess::Free => FREE,
-        CtxAccess::Const => CONST,
-        CtxAccess::Mut => MUTABLE,
-    };
-    Val::Symbol(Symbol::from_str(access))
+    let access = generate_ctx_access(func.ctx_access());
+    Val::Symbol(Symbol::from_str_unchecked(access))
 }
 
-fn ctx_explicit() -> ConstStaticPrimFuncVal {
+pub fn ctx_explicit() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.is_context_explicit",
         f: const_impl(fn_ctx_explicit),
@@ -242,7 +232,7 @@ fn fn_ctx_explicit(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::new(func.ctx_explicit()))
 }
 
-fn forward_mode() -> ConstStaticPrimFuncVal {
+pub fn forward_mode() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.forward_mode",
         f: const_impl(fn_forward_mode),
@@ -260,7 +250,7 @@ fn fn_forward_mode(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Func(FuncVal::Mode(ModeFunc::new(mode).into()))
 }
 
-fn reverse_mode() -> ConstStaticPrimFuncVal {
+pub fn reverse_mode() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.reverse_mode",
         f: const_impl(fn_reverse_mode),
@@ -278,7 +268,7 @@ fn fn_reverse_mode(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Func(FuncVal::Mode(ModeFunc::new(mode).into()))
 }
 
-fn is_primitive() -> ConstStaticPrimFuncVal {
+pub fn is_primitive() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.is_primitive",
         f: const_impl(fn_is_primitive),
@@ -296,27 +286,7 @@ fn fn_is_primitive(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::new(is_primitive))
 }
 
-fn is_extension() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "function.is_extension",
-        f: const_impl(fn_is_extension),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
-}
-
-fn fn_is_extension(ctx: ConstRef<Val>, _input: Val) -> Val {
-    let Val::Func(func) = &*ctx else {
-        return Val::default();
-    };
-    let Some(extension) = func.extension() else {
-        return Val::default();
-    };
-    Val::Bit(Bit::new(extension))
-}
-
-fn is_cell() -> ConstStaticPrimFuncVal {
+pub fn is_cell() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.is_cell",
         f: const_impl(fn_is_cell),
@@ -333,7 +303,7 @@ fn fn_is_cell(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::new(func.is_cell()))
 }
 
-fn is_mode() -> ConstStaticPrimFuncVal {
+pub fn is_mode() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.is_mode",
         f: const_impl(fn_is_mode),
@@ -350,7 +320,7 @@ fn fn_is_mode(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::new(matches!(func, FuncVal::Mode(_))))
 }
 
-fn id() -> ConstStaticPrimFuncVal {
+pub fn id() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.id",
         f: const_impl(fn_id),
@@ -367,10 +337,10 @@ fn fn_id(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Some(id) = func.id() else {
         return Val::default();
     };
-    Val::Symbol(id.clone())
+    Val::Symbol(id)
 }
 
-fn code() -> ConstStaticPrimFuncVal {
+pub fn code() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.code",
         f: const_impl(fn_code),
@@ -387,7 +357,7 @@ fn fn_code(ctx: ConstRef<Val>, _input: Val) -> Val {
     func.code()
 }
 
-fn ctx() -> ConstStaticPrimFuncVal {
+pub fn ctx() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "function.context",
         f: const_impl(fn_ctx),
@@ -406,3 +376,5 @@ fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {
     };
     Val::Ctx(CtxVal::from(ctx.clone()))
 }
+
+mod repr;

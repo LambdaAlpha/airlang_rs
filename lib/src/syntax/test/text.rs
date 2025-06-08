@@ -1,7 +1,7 @@
 use crate::syntax::repr::Repr;
 use crate::syntax::test::text;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         text(""),
         text(" ()[]{}<>\\|/'\":;!?,.`~@#$%^&*-+_="),

@@ -1,8 +1,6 @@
-pub use pub1::*;
+pub mod prelude;
 
-pub(crate) mod pub1;
-
-pub(crate) mod prelude;
+pub mod solver;
 
 #[cfg(test)]
 mod test;

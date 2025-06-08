@@ -3,7 +3,7 @@ use crate::syntax::test::list;
 use crate::syntax::test::pair;
 use crate::syntax::test::symbol;
 
-pub(crate) fn expected() -> Vec<Repr> {
+pub(super) fn expected() -> Vec<Repr> {
     vec![
         list(vec![]),
         list(vec![]),

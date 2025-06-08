@@ -1,37 +1,37 @@
 use std::mem::swap;
 
-use crate::ConstRef;
-use crate::ConstStaticPrimFuncVal;
-use crate::FreeStaticPrimFuncVal;
-use crate::FuncMode;
-use crate::MutStaticPrimFuncVal;
-use crate::prelude::DynFn;
-use crate::prelude::FreeFn;
-use crate::prelude::Prelude;
-use crate::prelude::PreludeCtx;
-use crate::prelude::const_impl;
-use crate::prelude::ctx_default_mode;
-use crate::prelude::free_impl;
-use crate::prelude::mut_impl;
+use super::DynFn;
+use super::FreeFn;
+use super::Prelude;
+use super::PreludeCtx;
+use super::const_impl;
+use super::ctx_default_mode;
+use super::free_impl;
+use super::mut_impl;
+use crate::semantics::func::FuncMode;
+use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::Val;
 use crate::syntax::PAIR;
-use crate::val::Val;
+use crate::type_::ConstRef;
 
 #[derive(Clone)]
-pub(crate) struct PairPrelude {
-    pub(crate) new: FreeStaticPrimFuncVal,
-    pub(crate) get_first: ConstStaticPrimFuncVal,
-    pub(crate) set_first: MutStaticPrimFuncVal,
-    pub(crate) get_second: ConstStaticPrimFuncVal,
-    pub(crate) set_second: MutStaticPrimFuncVal,
+pub struct PairPrelude {
+    pub new: FreeStaticPrimFuncVal,
+    pub first: ConstStaticPrimFuncVal,
+    pub set_first: MutStaticPrimFuncVal,
+    pub second: ConstStaticPrimFuncVal,
+    pub set_second: MutStaticPrimFuncVal,
 }
 
 impl Default for PairPrelude {
     fn default() -> Self {
         PairPrelude {
             new: new(),
-            get_first: get_first(),
+            first: first(),
             set_first: set_first(),
-            get_second: get_second(),
+            second: second(),
             set_second: set_second(),
         }
     }
@@ -40,14 +40,14 @@ impl Default for PairPrelude {
 impl Prelude for PairPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
         self.new.put(ctx);
-        self.get_first.put(ctx);
+        self.first.put(ctx);
         self.set_first.put(ctx);
-        self.get_second.put(ctx);
+        self.second.put(ctx);
         self.set_second.put(ctx);
     }
 }
 
-fn new() -> FreeStaticPrimFuncVal {
+pub fn new() -> FreeStaticPrimFuncVal {
     FreeFn { id: PAIR, f: free_impl(fn_new), mode: FuncMode::default() }.free_static()
 }
 
@@ -58,24 +58,24 @@ fn fn_new(input: Val) -> Val {
     input
 }
 
-fn get_first() -> ConstStaticPrimFuncVal {
+pub fn first() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "pair.first",
-        f: const_impl(fn_get_first),
+        f: const_impl(fn_first),
         mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
         ctx_explicit: true,
     }
     .const_static()
 }
 
-fn fn_get_first(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         return Val::default();
     };
     pair.first.clone()
 }
 
-fn set_first() -> MutStaticPrimFuncVal {
+pub fn set_first() -> MutStaticPrimFuncVal {
     DynFn {
         id: "pair.set_first",
         f: mut_impl(fn_set_first),
@@ -93,24 +93,24 @@ fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-fn get_second() -> ConstStaticPrimFuncVal {
+pub fn second() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "pair.second",
-        f: const_impl(fn_get_second),
+        f: const_impl(fn_second),
         mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
         ctx_explicit: true,
     }
     .const_static()
 }
 
-fn fn_get_second(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         return Val::default();
     };
     pair.second.clone()
 }
 
-fn set_second() -> MutStaticPrimFuncVal {
+pub fn set_second() -> MutStaticPrimFuncVal {
     DynFn {
         id: "pair.set_second",
         f: mut_impl(fn_set_second),
