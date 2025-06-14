@@ -1,4 +1,4 @@
-pub use pub_::*;
+pub use self::pub_::*;
 
 // https://github.com/rust-lang/rustfmt/issues/4070
 #[macro_export]

@@ -1,6 +1,5 @@
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::hash::Hash;
 
 use num_bigint::BigInt;
 

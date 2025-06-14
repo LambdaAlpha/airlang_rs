@@ -1,6 +1,6 @@
-pub use map::Contract;
-pub use map::CtxMap;
-pub use map::CtxValue;
+pub use self::map::Contract;
+pub use self::map::CtxMap;
+pub use self::map::CtxValue;
 
 _____!();
 

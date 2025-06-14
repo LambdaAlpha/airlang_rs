@@ -118,7 +118,7 @@ cognitive_complexity = "warn"
 decimal_literal_representation = "warn"
 
 # safety
-# undocumented_unsafe_blocks = "warn"
+undocumented_unsafe_blocks = "warn"
 multiple_unsafe_ops_per_block = "warn"
 
 [profile.release]

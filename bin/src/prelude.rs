@@ -2,9 +2,9 @@ use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang_ext::prelude::StdPrelude;
 
-use crate::prelude::eval::EvalPrelude;
-use crate::prelude::process::ProcessPrelude;
-use crate::prelude::repl::ReplPrelude;
+use self::eval::EvalPrelude;
+use self::process::ProcessPrelude;
+use self::repl::ReplPrelude;
 
 #[derive(Default)]
 pub struct BinPrelude {

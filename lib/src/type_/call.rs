@@ -1,5 +1,3 @@
-use std::hash::Hash;
-
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Call<A, B> {
     pub reverse: bool,

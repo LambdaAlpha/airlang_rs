@@ -1,21 +1,21 @@
-pub use call::CallMode;
-pub use comp::CompMode;
-pub use list::ListMode;
-pub use map::MapMode;
-pub use pair::PairMode;
-pub use prim::CodeMode;
-pub use prim::DataMode;
-pub use prim::PrimMode;
-pub use symbol::SymbolMode;
+pub use self::call::CallMode;
+pub use self::comp::CompMode;
+pub use self::list::ListMode;
+pub use self::map::MapMode;
+pub use self::pair::PairMode;
+pub use self::prim::CodeMode;
+pub use self::prim::DataMode;
+pub use self::prim::PrimMode;
+pub use self::symbol::SymbolMode;
 
 _____!();
 
-pub(crate) use symbol::LITERAL;
-pub(crate) use symbol::LITERAL_CHAR;
-pub(crate) use symbol::MOVE;
-pub(crate) use symbol::MOVE_CHAR;
-pub(crate) use symbol::REF;
-pub(crate) use symbol::REF_CHAR;
+pub(crate) use self::symbol::LITERAL;
+pub(crate) use self::symbol::LITERAL_CHAR;
+pub(crate) use self::symbol::MOVE;
+pub(crate) use self::symbol::MOVE_CHAR;
+pub(crate) use self::symbol::REF;
+pub(crate) use self::symbol::REF_CHAR;
 
 _____!();
 

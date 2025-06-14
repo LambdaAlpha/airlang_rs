@@ -1,14 +1,13 @@
-use repr::generate_func;
-use repr::mode::EVAL_LITERAL;
-use repr::mode::EVAL_MOVE;
-use repr::mode::EVAL_REF;
-use repr::mode::FORM_LITERAL;
-use repr::mode::FORM_MOVE;
-use repr::mode::FORM_REF;
-use repr::mode::parse;
-use repr::parse_func;
-use repr::parse_mode;
-
+use self::repr::generate_func;
+use self::repr::mode::EVAL_LITERAL;
+use self::repr::mode::EVAL_MOVE;
+use self::repr::mode::EVAL_REF;
+use self::repr::mode::FORM_LITERAL;
+use self::repr::mode::FORM_MOVE;
+use self::repr::mode::FORM_REF;
+use self::repr::mode::parse;
+use self::repr::parse_func;
+use self::repr::parse_mode;
 use super::DynFn;
 use super::FreeFn;
 use super::Prelude;

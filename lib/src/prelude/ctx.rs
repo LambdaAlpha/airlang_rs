@@ -1,13 +1,12 @@
-use pattern::PatternCtx;
-use pattern::assign_pattern;
-use pattern::match_pattern;
-use pattern::parse_pattern;
-use repr::generate_contract;
-use repr::generate_ctx;
-use repr::parse_contract;
-use repr::parse_ctx;
-use repr::parse_mode;
-
+use self::pattern::PatternCtx;
+use self::pattern::assign_pattern;
+use self::pattern::match_pattern;
+use self::pattern::parse_pattern;
+use self::repr::generate_contract;
+use self::repr::generate_ctx;
+use self::repr::parse_contract;
+use self::repr::parse_ctx;
+use self::repr::parse_mode;
 use super::DynFn;
 use super::FreeFn;
 use super::Prelude;

@@ -1,7 +1,7 @@
-pub use build::BuildPrelude;
-pub use file::FilePrelude;
-pub use io::IoPrelude;
-pub use process::ProcessPrelude;
+pub use self::build::BuildPrelude;
+pub use self::file::FilePrelude;
+pub use self::io::IoPrelude;
+pub use self::process::ProcessPrelude;
 
 airlang::_____!();
 

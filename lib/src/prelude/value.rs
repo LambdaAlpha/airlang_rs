@@ -1,12 +1,12 @@
-pub use arbitrary::Arbitrary;
-pub use arbitrary::ArbitraryVal;
+pub use self::arbitrary::Arbitrary;
+pub use self::arbitrary::ArbitraryVal;
 
 _____!();
 
-use arbitrary::arbitrary_ext_type;
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
+use self::arbitrary::arbitrary_ext_type;
 use super::DynFn;
 use super::FreeFn;
 use super::Prelude;

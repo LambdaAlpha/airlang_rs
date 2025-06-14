@@ -1,17 +1,17 @@
-pub use error::ParseError;
-pub use error::ReprError;
-pub use generator::GenRepr;
-pub use generator::escape_symbol;
-pub use generator::escape_text;
-pub use generator::escape_text_symbol;
-pub use parser::ParseRepr;
-pub use parser::parse;
+pub use self::error::ParseError;
+pub use self::error::ReprError;
+pub use self::generator::GenRepr;
+pub use self::generator::escape_symbol;
+pub use self::generator::escape_text;
+pub use self::generator::escape_text_symbol;
+pub use self::parser::ParseRepr;
+pub use self::parser::parse;
 
 _____!();
 
-use crate::syntax::generator::COMPACT_FMT;
-use crate::syntax::generator::PRETTY_FMT;
-use crate::syntax::generator::SYMBOL_FMT;
+use self::generator::COMPACT_FMT;
+use self::generator::PRETTY_FMT;
+use self::generator::SYMBOL_FMT;
 
 pub fn generate_pretty(src: GenRepr) -> String {
     generator::generate(src, PRETTY_FMT)

@@ -1,5 +1,4 @@
-use mode::generate;
-
+use self::mode::generate;
 use crate::prelude::find_prelude;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
