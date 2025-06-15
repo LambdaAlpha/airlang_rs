@@ -38,6 +38,10 @@ text escape unpaired
 -----
 "\"
 =====
+text wrong quote
+-----
+"\""
+=====
 text concat
 -----
 "a""b"
@@ -95,6 +99,10 @@ symbol extra unpaired
 symbol escape unpaired
 -----
 '\'
+=====
+symbol wrong quote
+-----
+'\''
 =====
 symbol unknown escape
 -----
@@ -386,11 +394,11 @@ scope concat
 =====
 empty tag
 -----
-#t()
+;t()
 =====
 tag list
 -----
-#t([1, ,])
+;t([1, ,])
 =====
 even number composition
 -----
@@ -424,6 +432,6 @@ comment in byte
 -----
 byte(_('a') 11)
 =====
-comment parse fail
+comment unpaired
 -----
 _([) a
