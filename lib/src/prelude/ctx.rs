@@ -44,7 +44,6 @@ pub struct CtxPrelude {
     pub is_null: ConstStaticPrimFuncVal,
     pub is_const: MutStaticPrimFuncVal,
     pub with_ctx: MutStaticPrimFuncVal,
-    pub ctx_in_ctx_out: FreeStaticPrimFuncVal,
     pub ctx_new: FreeStaticPrimFuncVal,
     pub ctx_repr: FreeStaticPrimFuncVal,
     pub ctx_prelude: FreeStaticPrimFuncVal,
@@ -63,7 +62,6 @@ impl Default for CtxPrelude {
             is_null: is_null(),
             is_const: is_const(),
             with_ctx: with_ctx(),
-            ctx_in_ctx_out: ctx_in_ctx_out(),
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
             ctx_prelude: ctx_prelude(),
@@ -83,7 +81,6 @@ impl Prelude for CtxPrelude {
         self.is_null.put(ctx);
         self.is_const.put(ctx);
         self.with_ctx.put(ctx);
-        self.ctx_in_ctx_out.put(ctx);
         self.ctx_new.put(ctx);
         self.ctx_repr.put(ctx);
         self.ctx_prelude.put(ctx);
@@ -337,33 +334,6 @@ fn fn_with_ctx_const(ctx: ConstRef<Val>, input: Val) -> Val {
 
 fn fn_with_ctx_mut(ctx: &mut Val, input: Val) -> Val {
     DEFAULT_MODE.mut_static_call(ctx, input)
-}
-
-pub fn ctx_in_ctx_out() -> FreeStaticPrimFuncVal {
-    FreeFn {
-        id: "|:",
-        f: free_impl(fn_ctx_in_ctx_out),
-        mode: FuncMode {
-            forward: FuncMode::pair_mode(
-                FuncMode::default_mode(),
-                FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form),
-            ),
-            reverse: FuncMode::default_mode(),
-        },
-    }
-    .free_static()
-}
-
-fn fn_ctx_in_ctx_out(input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return Val::default();
-    };
-    let ctx_input = Pair::from(pair);
-    let mut ctx = ctx_input.first;
-    let input = ctx_input.second;
-    let output = DEFAULT_MODE.mut_static_call(&mut ctx, input);
-    let pair = Pair::new(ctx, output);
-    Val::Pair(pair.into())
 }
 
 pub fn ctx_new() -> FreeStaticPrimFuncVal {
