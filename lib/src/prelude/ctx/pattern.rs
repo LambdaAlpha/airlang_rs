@@ -1,10 +1,10 @@
 use super::repr::OptBinding;
 use super::repr::parse_contract;
+use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::mode::LITERAL_CHAR;
 use crate::semantics::mode::REF_CHAR;
-use crate::semantics::utils::symbol;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;

@@ -1,13 +1,11 @@
-pub use self::build::BuildPrelude;
-pub use self::file::FilePrelude;
-pub use self::io::IoPrelude;
-pub use self::process::ProcessPrelude;
-
-airlang::_____!();
-
 use airlang::prelude::CorePrelude;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
+
+use self::build::BuildPrelude;
+use self::file::FilePrelude;
+use self::io::IoPrelude;
+use self::process::ProcessPrelude;
 
 #[derive(Default)]
 pub struct StdPrelude {
@@ -28,10 +26,10 @@ impl Prelude for StdPrelude {
     }
 }
 
-mod io;
+pub mod io;
 
-mod file;
+pub mod file;
 
-mod process;
+pub mod process;
 
-mod build;
+pub mod build;

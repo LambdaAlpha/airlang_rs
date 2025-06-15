@@ -1,31 +1,25 @@
-pub use self::bit::BitPrelude;
-pub use self::byte::BytePrelude;
-pub use self::call::CallPrelude;
-pub use self::ctrl::CtrlPrelude;
-pub use self::ctx::CtxPrelude;
-pub use self::func::FuncPrelude;
-pub use self::int::IntPrelude;
-pub use self::list::ListPrelude;
-pub use self::map::MapPrelude;
-pub use self::meta::MetaPrelude;
-pub use self::mode::ModePrelude;
-pub use self::number::NumberPrelude;
-pub use self::pair::PairPrelude;
-pub use self::solve::SolvePrelude;
-pub use self::symbol::SymbolPrelude;
-pub use self::syntax::SyntaxPrelude;
-pub use self::text::TextPrelude;
-pub use self::unit::UnitPrelude;
-pub use self::value::Arbitrary;
-pub use self::value::ArbitraryVal;
-pub use self::value::ValuePrelude;
-
-_____!();
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use self::bit::BitPrelude;
+use self::byte::BytePrelude;
+use self::call::CallPrelude;
+use self::ctrl::CtrlPrelude;
+use self::ctx::CtxPrelude;
+use self::func::FuncPrelude;
+use self::int::IntPrelude;
+use self::list::ListPrelude;
+use self::map::MapPrelude;
+use self::meta::MetaPrelude;
 use self::mode::MODE_PRELUDE;
+use self::number::NumberPrelude;
+use self::pair::PairPrelude;
+use self::solve::SolvePrelude;
+use self::symbol::SymbolPrelude;
+use self::syntax::SyntaxPrelude;
+use self::text::TextPrelude;
+use self::unit::UnitPrelude;
+use self::value::ValuePrelude;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;
@@ -337,44 +331,48 @@ pub(crate) fn ref_mode() -> Option<Mode> {
     Some(Mode::Func(ref_.into()))
 }
 
-mod mode;
+pub mod mode;
 
 // -----
 
-mod unit;
+pub mod unit;
 
-mod bit;
+pub mod bit;
 
-mod symbol;
+pub mod symbol;
 
-mod text;
+pub mod text;
 
-mod int;
+pub mod int;
 
-mod number;
+pub mod number;
 
-mod byte;
+pub mod byte;
 
-mod pair;
+pub mod pair;
 
-mod call;
+pub mod call;
 
-mod list;
+pub mod list;
 
-mod map;
+pub mod map;
 
-mod ctx;
+pub mod ctx;
 
-mod func;
+pub mod func;
 
 // -----
 
-mod solve;
+pub mod solve;
 
-mod meta;
+pub mod meta;
 
-mod syntax;
+pub mod syntax;
 
-mod value;
+pub mod value;
 
-mod ctrl;
+pub mod ctrl;
+
+// -----
+
+mod utils;

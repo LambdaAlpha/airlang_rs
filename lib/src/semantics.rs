@@ -9,5 +9,3 @@ pub mod func;
 pub mod mode;
 
 pub mod ctx;
-
-pub(crate) mod utils;

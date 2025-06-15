@@ -1,5 +1,5 @@
-use super::val::MapVal;
-use super::val::Val;
+use crate::semantics::val::MapVal;
+use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
 pub(crate) fn map_remove(map: &mut MapVal, name: &str) -> Val {

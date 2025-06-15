@@ -1,5 +1,7 @@
 use self::mode::generate;
 use crate::prelude::find_prelude;
+use crate::prelude::utils::map_remove;
+use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCellCompFunc;
@@ -19,8 +21,6 @@ use crate::semantics::func::MutStaticCompFunc;
 use crate::semantics::mode::CodeMode;
 use crate::semantics::mode::Mode;
 use crate::semantics::mode::SymbolMode;
-use crate::semantics::utils::map_remove;
-use crate::semantics::utils::symbol;
 use crate::semantics::val::ConstCellCompFuncVal;
 use crate::semantics::val::ConstCellPrimFuncVal;
 use crate::semantics::val::ConstStaticCompFuncVal;

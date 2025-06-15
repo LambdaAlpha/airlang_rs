@@ -1,3 +1,5 @@
+use crate::prelude::utils::map_remove;
+use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;
@@ -6,8 +8,6 @@ use crate::semantics::func::FuncMode;
 use crate::semantics::mode::CodeMode;
 use crate::semantics::mode::Mode;
 use crate::semantics::mode::SymbolMode;
-use crate::semantics::utils::map_remove;
-use crate::semantics::utils::symbol;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;

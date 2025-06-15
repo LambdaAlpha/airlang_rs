@@ -23,8 +23,8 @@ impl Prelude for BinPrelude {
     }
 }
 
-mod repl;
+pub mod repl;
 
-mod eval;
+pub mod eval;
 
-mod process;
+pub mod process;

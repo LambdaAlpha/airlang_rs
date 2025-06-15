@@ -1,5 +1,7 @@
 use const_format::concatcp;
 
+use crate::prelude::utils::map_remove;
+use crate::prelude::utils::symbol;
 use crate::semantics::mode::CallMode;
 use crate::semantics::mode::CodeMode;
 use crate::semantics::mode::CompMode;
@@ -16,8 +18,6 @@ use crate::semantics::mode::PrimMode;
 use crate::semantics::mode::REF;
 use crate::semantics::mode::REF_CHAR;
 use crate::semantics::mode::SymbolMode;
-use crate::semantics::utils::map_remove;
-use crate::semantics::utils::symbol;
 use crate::semantics::val::CALL;
 use crate::semantics::val::LIST;
 use crate::semantics::val::ListVal;
