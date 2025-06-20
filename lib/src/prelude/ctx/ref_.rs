@@ -1,5 +1,5 @@
-use crate::semantics::mode::LITERAL_CHAR;
-use crate::semantics::mode::REF_CHAR;
+use crate::semantics::core::LITERAL_CHAR;
+use crate::semantics::core::REF_CHAR;
 use crate::semantics::val::Val;
 use crate::type_::Either;
 use crate::type_::Symbol;

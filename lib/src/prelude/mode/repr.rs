@@ -1,23 +1,23 @@
 use const_format::concatcp;
 
+use super::CallMode;
+use super::CodeMode;
+use super::CompMode;
+use super::DataMode;
+use super::ListMode;
+use super::MapMode;
+use super::Mode;
+use super::PairMode;
+use super::PrimMode;
+use super::SymbolMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
-use crate::semantics::mode::CallMode;
-use crate::semantics::mode::CodeMode;
-use crate::semantics::mode::CompMode;
-use crate::semantics::mode::DataMode;
-use crate::semantics::mode::LITERAL;
-use crate::semantics::mode::LITERAL_CHAR;
-use crate::semantics::mode::ListMode;
-use crate::semantics::mode::MOVE;
-use crate::semantics::mode::MOVE_CHAR;
-use crate::semantics::mode::MapMode;
-use crate::semantics::mode::Mode;
-use crate::semantics::mode::PairMode;
-use crate::semantics::mode::PrimMode;
-use crate::semantics::mode::REF;
-use crate::semantics::mode::REF_CHAR;
-use crate::semantics::mode::SymbolMode;
+use crate::semantics::core::LITERAL;
+use crate::semantics::core::LITERAL_CHAR;
+use crate::semantics::core::MOVE;
+use crate::semantics::core::MOVE_CHAR;
+use crate::semantics::core::REF;
+use crate::semantics::core::REF_CHAR;
 use crate::semantics::val::CALL;
 use crate::semantics::val::LIST;
 use crate::semantics::val::ListVal;
@@ -45,6 +45,8 @@ pub(in crate::prelude) fn parse(mode: Val) -> Option<Option<Mode>> {
     Option::<Mode>::parse(mode)
 }
 
+// todo design
+#[expect(dead_code)]
 pub(in crate::prelude) fn generate(mode: &Option<Mode>) -> Val {
     mode.generate()
 }

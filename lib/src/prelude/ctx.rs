@@ -9,21 +9,21 @@ use self::repr::parse_ctx;
 use self::repr::parse_mode;
 use super::DynFn;
 use super::FreeFn;
+use super::FreeStaticImpl;
+use super::FuncMode;
+use super::MutStaticImpl;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::initial_ctx;
+use super::mode::CodeMode;
+use super::mode::SymbolMode;
 use super::mut_impl;
+use crate::semantics::core::Eval;
 use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::DEFAULT_MODE;
 use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FreeStaticImpl;
-use crate::semantics::func::FuncMode;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::func::MutStaticImpl;
-use crate::semantics::mode::CodeMode;
-use crate::semantics::mode::SymbolMode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
@@ -325,15 +325,15 @@ pub fn with_ctx() -> MutStaticPrimFuncVal {
 }
 
 fn fn_with_ctx_free(input: Val) -> Val {
-    DEFAULT_MODE.free_static_call(input)
+    Eval.free_static_call(input)
 }
 
 fn fn_with_ctx_const(ctx: ConstRef<Val>, input: Val) -> Val {
-    DEFAULT_MODE.const_static_call(ctx, input)
+    Eval.const_static_call(ctx, input)
 }
 
 fn fn_with_ctx_mut(ctx: &mut Val, input: Val) -> Val {
-    DEFAULT_MODE.mut_static_call(ctx, input)
+    Eval.mut_static_call(ctx, input)
 }
 
 pub fn ctx_new() -> FreeStaticPrimFuncVal {

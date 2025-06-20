@@ -3,13 +3,13 @@ use std::fs::read_to_string;
 use std::path::Path;
 
 use airlang::Air;
+use airlang::prelude::ConstStaticImpl;
 use airlang::prelude::DynFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
+use airlang::prelude::mode::FuncMode;
 use airlang::semantics::ctx::Contract;
 use airlang::semantics::ctx::Ctx;
-use airlang::semantics::func::ConstStaticImpl;
-use airlang::semantics::func::FuncMode;
 use airlang::semantics::val::ConstStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;

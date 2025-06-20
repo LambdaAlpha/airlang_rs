@@ -1,18 +1,18 @@
 use super::DynFn;
+use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::ctx::pattern::PatternCtx;
 use super::ctx::pattern::assign_pattern;
 use super::ctx::pattern::match_pattern;
 use super::ctx::pattern::parse_pattern;
+use super::mode::CodeMode;
+use super::mode::PrimMode;
+use super::mode::SymbolMode;
 use super::mut_impl;
+use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
-use crate::semantics::func::DEFAULT_MODE;
-use crate::semantics::func::FuncMode;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::mode::CodeMode;
-use crate::semantics::mode::PrimMode;
-use crate::semantics::mode::SymbolMode;
 use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
@@ -103,7 +103,7 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(branches) = pair.second else {
         return Val::default();
     };
-    let condition = DEFAULT_MODE.mut_static_call(ctx, pair.first);
+    let condition = Eval.mut_static_call(ctx, pair.first);
     let Val::Bit(b) = condition else {
         return Val::default();
     };
@@ -127,7 +127,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let val = DEFAULT_MODE.mut_static_call(ctx, pair.first);
+    let val = Eval.mut_static_call(ctx, pair.first);
     let Val::List(list) = pair.second else {
         return Val::default();
     };
@@ -175,7 +175,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
             return Val::default();
         };
         loop {
-            let Val::Bit(b) = DEFAULT_MODE.mut_static_call(ctx, condition.clone()) else {
+            let Val::Bit(b) = Eval.mut_static_call(ctx, condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
@@ -193,13 +193,13 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
         }
     } else {
         loop {
-            let Val::Bit(b) = DEFAULT_MODE.mut_static_call(ctx, condition.clone()) else {
+            let Val::Bit(b) = Eval.mut_static_call(ctx, condition.clone()) else {
                 return Val::default();
             };
             if !b.bool() {
                 break;
             }
-            DEFAULT_MODE.mut_static_call(ctx, body.clone());
+            Eval.mut_static_call(ctx, body.clone());
         }
     }
     Val::default()
@@ -220,7 +220,7 @@ fn fn_for(ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let iterable = DEFAULT_MODE.mut_static_call(ctx, pair.first);
+    let iterable = Eval.mut_static_call(ctx, pair.first);
     let Val::Pair(name_body) = pair.second else {
         return Val::default();
     };
@@ -307,7 +307,7 @@ where ValIter: Iterator<Item = Val> {
             if let Val::Ctx(ctx_val) = ctx {
                 let _ = ctx_val.variables_mut().put(name.clone(), val, Contract::None);
             }
-            DEFAULT_MODE.mut_static_call(ctx, body.clone());
+            Eval.mut_static_call(ctx, body.clone());
         }
     }
     Val::default()
@@ -316,7 +316,7 @@ where ValIter: Iterator<Item = Val> {
 fn eval_block(ctx: &mut Val, input: Val) -> (Val, CtrlFlow) {
     // todo design
     let Val::List(list) = input else {
-        return (DEFAULT_MODE.mut_static_call(ctx, input), CtrlFlow::None);
+        return (Eval.mut_static_call(ctx, input), CtrlFlow::None);
     };
     let list = List::from(list);
     let block_items: Option<List<BlockItem>> = list.into_iter().map(parse_block_item).collect();
@@ -331,15 +331,15 @@ fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFl
     for block_item in block_items {
         match block_item {
             BlockItem::Normal(val) => {
-                output = DEFAULT_MODE.mut_static_call(ctx, val);
+                output = Eval.mut_static_call(ctx, val);
             }
             BlockItem::Exit { exit, condition, body } => {
-                let condition = DEFAULT_MODE.mut_static_call(ctx, condition);
+                let condition = Eval.mut_static_call(ctx, condition);
                 let Val::Bit(condition) = condition else {
                     return (Val::default(), CtrlFlow::Error);
                 };
                 if condition.bool() {
-                    let output = DEFAULT_MODE.mut_static_call(ctx, body);
+                    let output = Eval.mut_static_call(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }
                 output = Val::default();

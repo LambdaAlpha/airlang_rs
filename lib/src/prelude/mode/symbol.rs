@@ -1,10 +1,11 @@
-use const_format::concatcp;
-
+use super::ModeFn;
+use crate::semantics::core::LITERAL_CHAR;
+use crate::semantics::core::MOVE_CHAR;
+use crate::semantics::core::REF_CHAR;
 use crate::semantics::core::SymbolForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::mode::ModeFn;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
@@ -15,13 +16,6 @@ pub enum SymbolMode {
     Ref,
     Move,
 }
-
-pub(crate) const LITERAL_CHAR: char = '.';
-pub(crate) const LITERAL: &str = concatcp!(LITERAL_CHAR);
-pub(crate) const REF_CHAR: char = '*';
-pub(crate) const REF: &str = concatcp!(REF_CHAR);
-pub(crate) const MOVE_CHAR: char = '^';
-pub(crate) const MOVE: &str = concatcp!(MOVE_CHAR);
 
 impl ModeFn for SymbolMode {}
 

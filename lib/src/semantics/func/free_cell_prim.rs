@@ -4,10 +4,10 @@ use std::hash::Hash;
 use std::hash::Hasher;
 
 use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FuncMode;
-use crate::semantics::func::FuncTrait;
+use crate::semantics::func::Func;
+use crate::semantics::func::Setup;
 use crate::semantics::val::Val;
-use crate::trait_::dyn_safe::dyn_any_clone_eq_hash;
+use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Symbol;
 
 pub trait FreeCellFn<I, O>: FreeStaticFn<I, O> {
@@ -16,13 +16,21 @@ pub trait FreeCellFn<I, O>: FreeStaticFn<I, O> {
     }
 }
 
-dyn_any_clone_eq_hash!(pub FreeCellFnExt : FreeCellFn<Val, Val>);
+dyn_any_debug_clone_eq_hash!(pub FreeCellFnVal : FreeCellFn<Val, Val>);
+
+impl<I, O, T> FreeCellFn<I, O> for &mut T
+where T: FreeCellFn<I, O>
+{
+    fn free_cell_call(&mut self, input: I) -> O {
+        (**self).free_cell_call(input)
+    }
+}
 
 #[derive(Clone)]
 pub struct FreeCellPrimFunc {
     pub(crate) id: Symbol,
-    pub(crate) fn_: Box<dyn FreeCellFnExt>,
-    pub(crate) mode: FuncMode,
+    pub(crate) fn_: Box<dyn FreeCellFnVal>,
+    pub(crate) setup: Option<Setup>,
 }
 
 impl FreeStaticFn<Val, Val> for FreeCellPrimFunc {
@@ -37,23 +45,13 @@ impl FreeCellFn<Val, Val> for FreeCellPrimFunc {
     }
 }
 
-impl FuncTrait for FreeCellPrimFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for FreeCellPrimFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         false
-    }
-
-    fn code(&self) -> Val {
-        Val::default()
-    }
-}
-
-impl FreeCellPrimFunc {
-    pub fn new(id: Symbol, fn_: Box<dyn FreeCellFnExt>, mode: FuncMode) -> Self {
-        Self { id, fn_, mode }
     }
 }
 

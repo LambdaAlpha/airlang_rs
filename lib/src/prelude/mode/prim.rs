@@ -1,3 +1,6 @@
+use super::Mode;
+use super::ModeFn;
+use super::SymbolMode;
 use crate::semantics::core::CallEval;
 use crate::semantics::core::CallForm;
 use crate::semantics::core::ListUniForm;
@@ -6,9 +9,6 @@ use crate::semantics::core::PairForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::mode::Mode;
-use crate::semantics::mode::ModeFn;
-use crate::semantics::mode::SymbolMode;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;

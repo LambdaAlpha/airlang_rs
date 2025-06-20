@@ -1,4 +1,4 @@
-macro_rules! dyn_any_clone_eq_hash {
+macro_rules! dyn_any_debug_clone_eq_hash {
     ($visibility:vis $trait_name:ident : $super_trait:path) => {
         $visibility trait $trait_name: ::std::any::Any + ::std::fmt::Debug + $super_trait {
             fn dyn_eq(&self, other: &dyn $trait_name) -> bool;
@@ -61,4 +61,4 @@ macro_rules! dyn_any_clone_eq_hash {
     };
 }
 
-pub(crate) use dyn_any_clone_eq_hash;
+pub(crate) use dyn_any_debug_clone_eq_hash;

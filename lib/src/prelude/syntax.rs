@@ -1,8 +1,8 @@
 use super::FreeFn;
+use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
-use crate::semantics::func::FuncMode;
 use crate::semantics::val::ByteVal;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;

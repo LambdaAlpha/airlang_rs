@@ -7,7 +7,7 @@ macro_rules! _____ {
 }
 
 // use solver, prelude, semantics, syntax, type, trait
-pub mod pub_;
+mod pub_;
 
 // use prelude, semantics, type, trait
 pub mod solver;

@@ -21,7 +21,6 @@ _("A demo of implementing a C-like for function")
 
 ; do [
     c_for = ; function {
-        forward_mode : id,
         code : (.ctx : .args) : ; do [
             [.init, .condition, .next, .body] = .args,
             .ctx | ; do [

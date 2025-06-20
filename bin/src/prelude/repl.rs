@@ -2,7 +2,7 @@ use airlang::prelude::FreeFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
-use airlang::semantics::func::FuncMode;
+use airlang::prelude::mode::FuncMode;
 use airlang::semantics::val::FreeStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 

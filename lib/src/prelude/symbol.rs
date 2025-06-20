@@ -1,11 +1,11 @@
 use super::DynFn;
 use super::FreeFn;
+use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
-use super::ctx_default_mode;
 use super::free_impl;
-use crate::semantics::func::FuncMode;
+use super::setup::ctx_default_mode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::Val;

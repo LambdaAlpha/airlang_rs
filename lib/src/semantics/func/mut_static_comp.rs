@@ -1,8 +1,8 @@
 use super::ConstStaticFn;
 use super::FreeStaticFn;
-use super::FuncMode;
-use super::FuncTrait;
+use super::Func;
 use super::MutStaticFn;
+use super::Setup;
 use super::comp::DynComposite;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
@@ -13,7 +13,7 @@ use crate::type_::DynRef;
 pub struct MutStaticCompFunc {
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) mode: FuncMode,
+    pub(crate) setup: Option<Setup>,
     pub(crate) ctx_explicit: bool,
 }
 
@@ -35,16 +35,12 @@ impl MutStaticFn<Val, Val, Val> for MutStaticCompFunc {
     }
 }
 
-impl FuncTrait for MutStaticCompFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for MutStaticCompFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         self.ctx_explicit
-    }
-
-    fn code(&self) -> Val {
-        self.comp.code()
     }
 }

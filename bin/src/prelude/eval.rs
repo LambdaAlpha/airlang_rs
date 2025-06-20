@@ -2,8 +2,8 @@ use airlang::Air;
 use airlang::prelude::DynFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
+use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mut_impl;
-use airlang::semantics::func::FuncMode;
 use airlang::semantics::val::MutStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 

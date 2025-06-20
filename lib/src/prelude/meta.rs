@@ -4,7 +4,7 @@ use num_bigint::BigInt;
 
 use super::Prelude;
 use super::PreludeCtx;
-use super::ctx_put;
+use super::ctx_put_val;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -23,7 +23,7 @@ impl Default for MetaPrelude {
 
 impl Prelude for MetaPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
-        ctx_put(ctx, "air.version", &self.version);
+        ctx_put_val(ctx, "air.version", &self.version);
     }
 }
 

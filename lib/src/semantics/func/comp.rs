@@ -1,14 +1,13 @@
 use std::mem::take;
 
 use super::MutStaticFn;
-use super::func_mode::DEFAULT_MODE;
+use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxError;
 use crate::semantics::ctx::CtxValue;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
-use crate::type_::Pair;
 use crate::type_::Symbol;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -28,13 +27,7 @@ impl FreeComposite {
         if put_input(inner, self.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        composite_call(&DEFAULT_MODE, inner, self.body.clone())
-    }
-
-    pub(super) fn code(&self) -> Val {
-        let input = Val::Symbol(self.input_name.clone());
-        let output = self.body.clone();
-        Val::Pair(Pair::new(input, output).into())
+        composite_call(&Eval, inner, self.body.clone())
     }
 }
 
@@ -43,15 +36,8 @@ impl DynComposite {
         if put_input(inner, self.free.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        let eval = |inner: &mut Ctx| composite_call(&DEFAULT_MODE, inner, self.free.body.clone());
+        let eval = |inner: &mut Ctx| composite_call(&Eval, inner, self.free.body.clone());
         with_ctx(inner, outer, self.ctx_name.clone(), eval)
-    }
-
-    pub(super) fn code(&self) -> Val {
-        let ctx = Val::Symbol(self.ctx_name.clone());
-        let input = Val::Symbol(self.free.input_name.clone());
-        let names = Val::Pair(Pair::new(ctx, input).into());
-        Val::Pair(Pair::new(names, self.free.body.clone()).into())
     }
 }
 

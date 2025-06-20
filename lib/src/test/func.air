@@ -430,11 +430,11 @@ mode func
 -----
 false
 =====
-mode func forward mode
+mode func setup forward
 -----
 ; do [
     m = ; mode *not,
-    f = ; function {forward_mode : ^m, code : (._ : .i) : .i},
+    f = ; function {setup : ^m : ., code : (._ : .i) : .i},
     ; f true
 ]
 -----
@@ -458,56 +458,11 @@ eval* function.context_access .
 -----
 mutable
 =====
-mode repr
------
-; function.represent eval*
------
-eval*
-=====
-mode repr composite
------
-; function.represent ; mode {
-    symbol : .*,
-    pair : form. : eval*,
-    list : [eval*, .],
-    map : {a : eval*, b : form.} : form*,
-}
------
-{
-    symbol : *,
-    pair : form. : eval*,
-    list : [eval*, .],
-    map : {a : eval*, b : form.} : form* : form*,
-}
-=====
-mode repr primitive
------
-; function.represent ; mode {
-    symbol : .^,
-    pair : form,
-    call : eval,
-    map : form,
-    primitive : true,
-}
------
-{
-    symbol : ^,
-    pair : form,
-    call : eval,
-    map : form,
-    primitive : true,
-}
-=====
-primitive
------
-not == ; function {id : not}
------
-true
-=====
 recursive call
 -----
 ; do [
     f = ; function {
+        setup : eval* : .,
         code : (._ : .i) : .i,
     },
     ; f ; not true
@@ -519,6 +474,7 @@ call external func
 -----
 ; do [
     f = ; function {
+        setup : eval* : .,
         code : (._ : .i) : ; not .i
     },
     ; f ; not true
@@ -530,6 +486,7 @@ call internal func
 -----
 ; do [
     f = ; function {
+        setup : eval* : .,
         code : (._ : .i) : ; .not .i,
         context : ; context {variables :  {not : not}},
     },
@@ -542,6 +499,7 @@ call rename
 -----
 ; do [
     f = ; function {
+        setup : eval* : .,
         code : (._ : .a) : ; .n .a,
         context : ; context {variables :  {n : not}},
     },
@@ -654,7 +612,6 @@ mutable mutate
 ; do [
     f = ; function {
         code : (.c : .i) : .c | .i = 2,
-        forward_mode : id,
         context_access : mutable,
     },
     a = 1,
@@ -669,7 +626,6 @@ const mutate fail
 ; do [
     f = ; function {
         code : (.c : .i) : .c | .i = 2,
-        forward_mode : id,
         context_access : constant,
     },
     a = 1,
@@ -712,7 +668,7 @@ ctx explicit
     a = 1 : 2,
     f = ; function {
         context_explicit : true,
-        forward_mode : ; mode {pair : {symbol : ..} : eval*},
+        setup : (; mode {pair : {symbol : ..} : eval*}) : .,
         code : (.p : .i) : .p pair.set_first .i,
     },
     a f 3,
@@ -748,12 +704,11 @@ repr primitive const
 repr composite
 -----
 ; do [
-    forward_mode = ; mode {pair : eval* : .},
-    reverse_mode = ; mode {pair : eval* : .},
+    forward = ; mode {pair : eval* : .},
+    reverse = ; mode {pair : eval* : .},
     repr = ; form. {
         code : (.ctx : .in) : in,
-        forward_mode : ^forward_mode,
-        reverse_mode : ^reverse_mode,
+        setup : ^forward : ^reverse,
         context_access : constant,
         cell : true,
     },
@@ -799,62 +754,62 @@ eval* function.is_context_explicit .
 -----
 false
 =====
-forward mode primitive
+forward setup primitive
 -----
-; function.represent not function.forward_mode .
+eval* == not function.forward_setup .
 -----
-eval*
+true
 =====
-forward mode mode
+forward setup mode
 -----
-; function.represent eval* function.forward_mode .
+. == eval* function.forward_setup .
 -----
-.
+true
 =====
-forward mode default
------
-; do [f = ; function {}, ; function.represent f function.forward_mode .]
------
-eval*
-=====
-forward mode 1
+forward setup 1
 -----
 ; do [
     f = ; function {
-        forward_mode : ; mode {pair : eval* : form.},
+        setup : (; mode {pair : eval* : form.}) : .,
     },
-    ; function.represent f function.forward_mode .
+    p1 = f function.forward_setup .,
+    p2 = ; mode {pair : eval* : form.},
+    p1 == p2
 ]
 -----
-{pair : eval* : form.}
+true
 =====
-forward mode 2
+forward setup 2
 -----
 ; do [
     f = ; function {
-        forward_mode : ; mode {list : [eval*, form., .] : form.},
+        setup : (; mode {list : [eval*, form., .] : form.}) : .,
     },
-    ; function.represent f function.forward_mode .
+    p1 = f function.forward_setup .,
+    p2 = ; mode {list : [eval*, form., .] : form.},
+    p1 == p2
 ]
 -----
-{list : [eval*, form., .] : form.}
+true
 =====
-forward mode 3
+forward setup 3
 -----
 ; do [
     f = ; function {
-        forward_mode : ; mode {map : {a : eval*, b : .} : . : form.},
+        setup : (; mode {map : {a : eval*, b : .} : . : form.}) : .,
     },
-    ; function.represent f function.forward_mode .
+    p1 = f function.forward_setup .,
+    p2 = ; mode {map : {a : eval*, b : .} : . : form.},
+    p1 == p2
 ]
 -----
-{map : {a : eval*, b : .} : . : form.}
+true
 =====
-reverse mode
+reverse setup
 -----
-; function.represent not function.reverse_mode .
+eval* == not function.reverse_setup .
 -----
-eval*
+true
 =====
 is_primitive primitive
 -----

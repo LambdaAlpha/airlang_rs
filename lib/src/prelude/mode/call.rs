@@ -1,12 +1,12 @@
+use super::CodeMode;
+use super::Mode;
+use super::ModeFn;
+use super::PrimMode;
 use crate::semantics::core::CallEval;
 use crate::semantics::core::CallForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::mode::CodeMode;
-use crate::semantics::mode::Mode;
-use crate::semantics::mode::ModeFn;
-use crate::semantics::mode::PrimMode;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;

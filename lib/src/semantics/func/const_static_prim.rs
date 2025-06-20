@@ -5,8 +5,8 @@ use std::hash::Hasher;
 use std::rc::Rc;
 
 use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FuncMode;
-use crate::semantics::func::FuncTrait;
+use crate::semantics::func::Func;
+use crate::semantics::func::Setup;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 use crate::type_::ref_::ConstRef;
@@ -25,16 +25,27 @@ pub trait ConstStaticFn<Ctx, I, O>: FreeStaticFn<I, O> {
     }
 }
 
-pub struct ConstStaticImpl<Ctx, I, O> {
-    pub free: fn(I) -> O,
-    pub const_: fn(ConstRef<Ctx>, I) -> O,
+impl<Ctx, I, O, T> ConstStaticFn<Ctx, I, O> for &T
+where T: ConstStaticFn<Ctx, I, O>
+{
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+        (**self).const_static_call(ctx, input)
+    }
+}
+
+impl<Ctx, I, O, T> ConstStaticFn<Ctx, I, O> for &mut T
+where T: ConstStaticFn<Ctx, I, O>
+{
+    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+        (**self).const_static_call(ctx, input)
+    }
 }
 
 #[derive(Clone)]
 pub struct ConstStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn ConstStaticFn<Val, Val, Val>>,
-    pub(crate) mode: FuncMode,
+    pub(crate) setup: Option<Setup>,
     pub(crate) ctx_explicit: bool,
 }
 
@@ -50,25 +61,13 @@ impl ConstStaticFn<Val, Val, Val> for ConstStaticPrimFunc {
     }
 }
 
-impl FuncTrait for ConstStaticPrimFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for ConstStaticPrimFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         self.ctx_explicit
-    }
-
-    fn code(&self) -> Val {
-        Val::default()
-    }
-}
-
-impl ConstStaticPrimFunc {
-    pub fn new(
-        id: Symbol, fn_: Rc<dyn ConstStaticFn<Val, Val, Val>>, mode: FuncMode, ctx_explicit: bool,
-    ) -> Self {
-        Self { id, fn_, mode, ctx_explicit }
     }
 }
 
@@ -89,28 +88,5 @@ impl Eq for ConstStaticPrimFunc {}
 impl Hash for ConstStaticPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
-    }
-}
-
-impl<Ctx, I, O> FreeStaticFn<I, O> for ConstStaticImpl<Ctx, I, O> {
-    fn free_static_call(&self, input: I) -> O {
-        (self.free)(input)
-    }
-}
-
-impl<Ctx, I, O> ConstStaticFn<Ctx, I, O> for ConstStaticImpl<Ctx, I, O> {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
-        (self.const_)(ctx, input)
-    }
-}
-
-impl<Ctx, I, O> ConstStaticImpl<Ctx, I, O> {
-    pub fn new(free: fn(I) -> O, const_: fn(ConstRef<Ctx>, I) -> O) -> Self {
-        Self { free, const_ }
-    }
-
-    pub fn default(_ctx: ConstRef<Ctx>, _input: I) -> O
-    where O: Default {
-        O::default()
     }
 }

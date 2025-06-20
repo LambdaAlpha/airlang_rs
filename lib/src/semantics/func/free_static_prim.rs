@@ -4,8 +4,8 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::rc::Rc;
 
-use super::FuncMode;
-use crate::semantics::func::FuncTrait;
+use super::Setup;
+use crate::semantics::func::Func;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
@@ -13,15 +13,27 @@ pub trait FreeStaticFn<I, O> {
     fn free_static_call(&self, input: I) -> O;
 }
 
-pub struct FreeStaticImpl<I, O> {
-    pub free: fn(I) -> O,
+impl<I, O, T> FreeStaticFn<I, O> for &T
+where T: FreeStaticFn<I, O>
+{
+    fn free_static_call(&self, input: I) -> O {
+        (**self).free_static_call(input)
+    }
+}
+
+impl<I, O, T> FreeStaticFn<I, O> for &mut T
+where T: FreeStaticFn<I, O>
+{
+    fn free_static_call(&self, input: I) -> O {
+        (**self).free_static_call(input)
+    }
 }
 
 #[derive(Clone)]
 pub struct FreeStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn FreeStaticFn<Val, Val>>,
-    pub(crate) mode: FuncMode,
+    pub(crate) setup: Option<Setup>,
 }
 
 impl FreeStaticFn<Val, Val> for FreeStaticPrimFunc {
@@ -30,23 +42,13 @@ impl FreeStaticFn<Val, Val> for FreeStaticPrimFunc {
     }
 }
 
-impl FuncTrait for FreeStaticPrimFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for FreeStaticPrimFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         false
-    }
-
-    fn code(&self) -> Val {
-        Val::default()
-    }
-}
-
-impl FreeStaticPrimFunc {
-    pub fn new(id: Symbol, fn_: Rc<dyn FreeStaticFn<Val, Val>>, mode: FuncMode) -> Self {
-        Self { id, fn_, mode }
     }
 }
 
@@ -67,22 +69,5 @@ impl Eq for FreeStaticPrimFunc {}
 impl Hash for FreeStaticPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
-    }
-}
-
-impl<I, O> FreeStaticFn<I, O> for FreeStaticImpl<I, O> {
-    fn free_static_call(&self, input: I) -> O {
-        (self.free)(input)
-    }
-}
-
-impl<I, O> FreeStaticImpl<I, O> {
-    pub fn new(free: fn(I) -> O) -> Self {
-        Self { free }
-    }
-
-    pub fn default(_input: I) -> O
-    where O: Default {
-        O::default()
     }
 }

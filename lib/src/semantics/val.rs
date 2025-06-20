@@ -10,7 +10,6 @@ pub use self::func::FreeCellPrimFuncVal;
 pub use self::func::FreeStaticCompFuncVal;
 pub use self::func::FreeStaticPrimFuncVal;
 pub use self::func::FuncVal;
-pub use self::func::ModeFuncVal;
 pub use self::func::MutCellCompFuncVal;
 pub use self::func::MutCellPrimFuncVal;
 pub use self::func::MutStaticCompFuncVal;
@@ -28,7 +27,7 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::hash::Hash;
 
-use crate::trait_::dyn_safe::dyn_any_clone_eq_hash;
+use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -45,7 +44,7 @@ pub trait Type {
     fn type_name(&self) -> Symbol;
 }
 
-dyn_any_clone_eq_hash!(pub ValExt : Type);
+dyn_any_debug_clone_eq_hash!(pub ValExt : Type);
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Val {

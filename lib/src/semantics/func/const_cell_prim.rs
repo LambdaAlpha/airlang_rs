@@ -6,10 +6,10 @@ use std::hash::Hasher;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeCellFn;
 use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FuncMode;
-use crate::semantics::func::FuncTrait;
+use crate::semantics::func::Func;
+use crate::semantics::func::Setup;
 use crate::semantics::val::Val;
-use crate::trait_::dyn_safe::dyn_any_clone_eq_hash;
+use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Symbol;
 use crate::type_::ref_::ConstRef;
 
@@ -24,13 +24,21 @@ pub trait ConstCellFn<Ctx, I, O>: FreeCellFn<I, O> + ConstStaticFn<Ctx, I, O> {
     }
 }
 
-dyn_any_clone_eq_hash!(pub ConstCellFnExt : ConstCellFn<Val, Val, Val>);
+dyn_any_debug_clone_eq_hash!(pub ConstCellFnVal : ConstCellFn<Val, Val, Val>);
+
+impl<Ctx, I, O, T> ConstCellFn<Ctx, I, O> for &mut T
+where T: ConstCellFn<Ctx, I, O>
+{
+    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: I) -> O {
+        (**self).const_cell_call(ctx, input)
+    }
+}
 
 #[derive(Clone)]
 pub struct ConstCellPrimFunc {
     pub(crate) id: Symbol,
-    pub(crate) fn_: Box<dyn ConstCellFnExt>,
-    pub(crate) mode: FuncMode,
+    pub(crate) fn_: Box<dyn ConstCellFnVal>,
+    pub(crate) setup: Option<Setup>,
     pub(crate) ctx_explicit: bool,
 }
 
@@ -58,25 +66,13 @@ impl ConstCellFn<Val, Val, Val> for ConstCellPrimFunc {
     }
 }
 
-impl FuncTrait for ConstCellPrimFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for ConstCellPrimFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         self.ctx_explicit
-    }
-
-    fn code(&self) -> Val {
-        Val::default()
-    }
-}
-
-impl ConstCellPrimFunc {
-    pub fn new(
-        id: Symbol, fn_: Box<dyn ConstCellFnExt>, mode: FuncMode, ctx_explicit: bool,
-    ) -> Self {
-        Self { id, fn_, mode, ctx_explicit }
     }
 }
 

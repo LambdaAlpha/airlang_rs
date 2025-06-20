@@ -7,11 +7,11 @@ use crate::semantics::func::ConstCellFn;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeCellFn;
 use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FuncMode;
-use crate::semantics::func::FuncTrait;
+use crate::semantics::func::Func;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::Setup;
 use crate::semantics::val::Val;
-use crate::trait_::dyn_safe::dyn_any_clone_eq_hash;
+use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::ConstRef;
 use crate::type_::Either;
 use crate::type_::Symbol;
@@ -35,13 +35,21 @@ pub trait MutCellFn<Ctx, I, O>: ConstCellFn<Ctx, I, O> + MutStaticFn<Ctx, I, O> 
     }
 }
 
-dyn_any_clone_eq_hash!(pub MutCellFnExt : MutCellFn<Val, Val, Val>);
+dyn_any_debug_clone_eq_hash!(pub MutCellFnVal : MutCellFn<Val, Val, Val>);
+
+impl<Ctx, I, O, T> MutCellFn<Ctx, I, O> for &mut T
+where T: MutCellFn<Ctx, I, O>
+{
+    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: I) -> O {
+        (**self).mut_cell_call(ctx, input)
+    }
+}
 
 #[derive(Clone)]
 pub struct MutCellPrimFunc {
     pub(crate) id: Symbol,
-    pub(crate) fn_: Box<dyn MutCellFnExt>,
-    pub(crate) mode: FuncMode,
+    pub(crate) fn_: Box<dyn MutCellFnVal>,
+    pub(crate) setup: Option<Setup>,
     pub(crate) ctx_explicit: bool,
 }
 
@@ -81,23 +89,13 @@ impl MutCellFn<Val, Val, Val> for MutCellPrimFunc {
     }
 }
 
-impl FuncTrait for MutCellPrimFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for MutCellPrimFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         self.ctx_explicit
-    }
-
-    fn code(&self) -> Val {
-        Val::default()
-    }
-}
-
-impl MutCellPrimFunc {
-    pub fn new(id: Symbol, fn_: Box<dyn MutCellFnExt>, mode: FuncMode, ctx_explicit: bool) -> Self {
-        Self { id, fn_, mode, ctx_explicit }
     }
 }
 

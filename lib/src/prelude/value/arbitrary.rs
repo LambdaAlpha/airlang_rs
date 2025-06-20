@@ -11,6 +11,16 @@ use rand::prelude::Distribution;
 use rand::prelude::IndexedRandom;
 use rand::prelude::IteratorRandom;
 
+use crate::prelude::mode::CallMode;
+use crate::prelude::mode::CodeMode;
+use crate::prelude::mode::CompMode;
+use crate::prelude::mode::DataMode;
+use crate::prelude::mode::ListMode;
+use crate::prelude::mode::MapMode;
+use crate::prelude::mode::Mode;
+use crate::prelude::mode::PairMode;
+use crate::prelude::mode::PrimMode;
+use crate::prelude::mode::SymbolMode;
 use crate::prelude::put_preludes;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -22,26 +32,14 @@ use crate::semantics::func::DynComposite;
 use crate::semantics::func::FreeCellCompFunc;
 use crate::semantics::func::FreeComposite;
 use crate::semantics::func::FreeStaticCompFunc;
-use crate::semantics::func::FuncMode;
-use crate::semantics::func::ModeFunc;
 use crate::semantics::func::MutCellCompFunc;
 use crate::semantics::func::MutStaticCompFunc;
-use crate::semantics::mode::CallMode;
-use crate::semantics::mode::CodeMode;
-use crate::semantics::mode::CompMode;
-use crate::semantics::mode::DataMode;
-use crate::semantics::mode::ListMode;
-use crate::semantics::mode::MapMode;
-use crate::semantics::mode::Mode;
-use crate::semantics::mode::PairMode;
-use crate::semantics::mode::PrimMode;
-use crate::semantics::mode::SymbolMode;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCellCompFuncVal;
 use crate::semantics::val::ConstStaticCompFuncVal;
 use crate::semantics::val::FreeCellCompFuncVal;
 use crate::semantics::val::FreeStaticCompFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::ModeFuncVal;
 use crate::semantics::val::MutCellCompFuncVal;
 use crate::semantics::val::MutStaticCompFuncVal;
 use crate::semantics::val::Val;
@@ -393,32 +391,28 @@ impl Arbitrary for FuncVal {
             let Val::Func(func) = func else { unreachable!() };
             func
         } else {
-            match rng.random_range(0 .. 7) {
+            match rng.random_range(0 .. 6) {
                 0 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::Mode(func)
-                }
-                1 => {
                     let func = Arbitrary::any(rng, depth);
                     FuncVal::FreeStaticComp(func)
                 }
-                2 => {
+                1 => {
                     let func = Arbitrary::any(rng, depth);
                     FuncVal::ConstStaticComp(func)
                 }
-                3 => {
+                2 => {
                     let func = Arbitrary::any(rng, depth);
                     FuncVal::MutStaticComp(func)
                 }
-                4 => {
+                3 => {
                     let func = Arbitrary::any(rng, depth);
                     FuncVal::FreeCellComp(func)
                 }
-                5 => {
+                4 => {
                     let func = Arbitrary::any(rng, depth);
                     FuncVal::ConstCellComp(func)
                 }
-                6 => {
+                5 => {
                     let func = Arbitrary::any(rng, depth);
                     FuncVal::MutCellComp(func)
                 }
@@ -428,11 +422,11 @@ impl Arbitrary for FuncVal {
     }
 }
 
-impl Arbitrary for FuncMode {
+impl Arbitrary for Setup {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let forward = Arbitrary::any(rng, depth);
         let reverse = Arbitrary::any(rng, depth);
-        FuncMode { forward, reverse }
+        Setup { forward, reverse }
     }
 }
 
@@ -453,7 +447,7 @@ impl Arbitrary for FreeCellCompFuncVal {
         let func = FreeCellCompFunc {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
-            mode: Arbitrary::any(rng, depth),
+            setup: Arbitrary::any(rng, depth),
         };
         FreeCellCompFuncVal::from(func)
     }
@@ -464,7 +458,7 @@ impl Arbitrary for FreeStaticCompFuncVal {
         let func = FreeStaticCompFunc {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
-            mode: Arbitrary::any(rng, depth),
+            setup: Arbitrary::any(rng, depth),
         };
         FreeStaticCompFuncVal::from(func)
     }
@@ -475,7 +469,7 @@ impl Arbitrary for ConstCellCompFuncVal {
         let func = ConstCellCompFunc {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
-            mode: Arbitrary::any(rng, depth),
+            setup: Arbitrary::any(rng, depth),
             ctx_explicit: rng.random(),
         };
         ConstCellCompFuncVal::from(func)
@@ -487,7 +481,7 @@ impl Arbitrary for ConstStaticCompFuncVal {
         let func = ConstStaticCompFunc {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
-            mode: Arbitrary::any(rng, depth),
+            setup: Arbitrary::any(rng, depth),
             ctx_explicit: rng.random(),
         };
         ConstStaticCompFuncVal::from(func)
@@ -499,7 +493,7 @@ impl Arbitrary for MutCellCompFuncVal {
         let func = MutCellCompFunc {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
-            mode: Arbitrary::any(rng, depth),
+            setup: Arbitrary::any(rng, depth),
             ctx_explicit: rng.random(),
         };
         MutCellCompFuncVal::from(func)
@@ -511,17 +505,10 @@ impl Arbitrary for MutStaticCompFuncVal {
         let func = MutStaticCompFunc {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
-            mode: Arbitrary::any(rng, depth),
+            setup: Arbitrary::any(rng, depth),
             ctx_explicit: rng.random(),
         };
         MutStaticCompFuncVal::from(func)
-    }
-}
-
-impl Arbitrary for ModeFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let mode = Arbitrary::any(rng, depth);
-        ModeFuncVal::from(ModeFunc::new(mode))
     }
 }
 

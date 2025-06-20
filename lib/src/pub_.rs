@@ -1,10 +1,10 @@
 use crate::prelude::Prelude;
 use crate::prelude::initial_ctx;
+use crate::prelude::mode::FuncMode;
+use crate::prelude::mode::Mode;
 use crate::prelude::set_prelude;
 use crate::semantics::ctx::Ctx;
-use crate::semantics::func::FuncMode;
 use crate::semantics::func::composite_call;
-use crate::semantics::mode::Mode;
 use crate::semantics::solver::set_solver;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;

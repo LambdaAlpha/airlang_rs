@@ -6,6 +6,4 @@ pub mod val;
 
 pub mod func;
 
-pub mod mode;
-
 pub mod ctx;

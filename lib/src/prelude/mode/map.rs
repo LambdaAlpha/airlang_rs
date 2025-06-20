@@ -1,10 +1,10 @@
+use super::Mode;
+use super::ModeFn;
+use super::PrimMode;
 use crate::semantics::core::MapForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::mode::Mode;
-use crate::semantics::mode::ModeFn;
-use crate::semantics::mode::PrimMode;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;

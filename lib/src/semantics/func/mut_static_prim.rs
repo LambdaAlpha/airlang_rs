@@ -6,8 +6,8 @@ use std::rc::Rc;
 
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FuncMode;
-use crate::semantics::func::FuncTrait;
+use crate::semantics::func::Func;
+use crate::semantics::func::Setup;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Either;
@@ -34,17 +34,27 @@ pub trait MutStaticFn<Ctx, I, O>: ConstStaticFn<Ctx, I, O> {
     }
 }
 
-pub struct MutStaticImpl<Ctx, I, O> {
-    pub free: fn(I) -> O,
-    pub const_: fn(ConstRef<Ctx>, I) -> O,
-    pub mut_: fn(&mut Ctx, I) -> O,
+impl<Ctx, I, O, T> MutStaticFn<Ctx, I, O> for &T
+where T: MutStaticFn<Ctx, I, O>
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: I) -> O {
+        (**self).mut_static_call(ctx, input)
+    }
+}
+
+impl<Ctx, I, O, T> MutStaticFn<Ctx, I, O> for &mut T
+where T: MutStaticFn<Ctx, I, O>
+{
+    fn mut_static_call(&self, ctx: &mut Ctx, input: I) -> O {
+        (**self).mut_static_call(ctx, input)
+    }
 }
 
 #[derive(Clone)]
 pub struct MutStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn MutStaticFn<Val, Val, Val>>,
-    pub(crate) mode: FuncMode,
+    pub(crate) setup: Option<Setup>,
     pub(crate) ctx_explicit: bool,
 }
 
@@ -66,25 +76,13 @@ impl MutStaticFn<Val, Val, Val> for MutStaticPrimFunc {
     }
 }
 
-impl FuncTrait for MutStaticPrimFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for MutStaticPrimFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         self.ctx_explicit
-    }
-
-    fn code(&self) -> Val {
-        Val::default()
-    }
-}
-
-impl MutStaticPrimFunc {
-    pub fn new(
-        id: Symbol, fn_: Rc<dyn MutStaticFn<Val, Val, Val>>, mode: FuncMode, ctx_explicit: bool,
-    ) -> Self {
-        Self { id, fn_, mode, ctx_explicit }
     }
 }
 
@@ -105,36 +103,5 @@ impl Eq for MutStaticPrimFunc {}
 impl Hash for MutStaticPrimFunc {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
-    }
-}
-
-impl<Ctx, I, O> FreeStaticFn<I, O> for MutStaticImpl<Ctx, I, O> {
-    fn free_static_call(&self, input: I) -> O {
-        (self.free)(input)
-    }
-}
-
-impl<Ctx, I, O> ConstStaticFn<Ctx, I, O> for MutStaticImpl<Ctx, I, O> {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
-        (self.const_)(ctx, input)
-    }
-}
-
-impl<Ctx, I, O> MutStaticFn<Ctx, I, O> for MutStaticImpl<Ctx, I, O> {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: I) -> O {
-        (self.mut_)(ctx, input)
-    }
-}
-
-impl<Ctx, I, O> MutStaticImpl<Ctx, I, O> {
-    pub fn new(
-        free: fn(I) -> O, const_: fn(ConstRef<Ctx>, I) -> O, mut_: fn(&mut Ctx, I) -> O,
-    ) -> Self {
-        Self { free, const_, mut_ }
-    }
-
-    pub fn default(_ctx: DynRef<Ctx>, _input: I) -> O
-    where O: Default {
-        O::default()
     }
 }

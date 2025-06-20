@@ -1,6 +1,6 @@
 use super::FreeStaticFn;
-use super::FuncMode;
-use super::FuncTrait;
+use super::Func;
+use super::Setup;
 use super::comp::FreeComposite;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
@@ -9,7 +9,7 @@ use crate::semantics::val::Val;
 pub struct FreeStaticCompFunc {
     pub(crate) comp: FreeComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) mode: FuncMode,
+    pub(crate) setup: Option<Setup>,
 }
 
 impl FreeStaticFn<Val, Val> for FreeStaticCompFunc {
@@ -18,16 +18,12 @@ impl FreeStaticFn<Val, Val> for FreeStaticCompFunc {
     }
 }
 
-impl FuncTrait for FreeStaticCompFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for FreeStaticCompFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         false
-    }
-
-    fn code(&self) -> Val {
-        self.comp.code()
     }
 }

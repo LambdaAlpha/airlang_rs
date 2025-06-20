@@ -6,9 +6,10 @@ use super::func::ConstStaticFn;
 use super::func::FreeCellFn;
 use super::func::FreeStaticFn;
 use super::func::FreeStaticPrimFunc;
-use super::func::FuncMode;
 use super::func::MutCellFn;
 use super::func::MutStaticFn;
+use super::func::Setup;
+use super::func::default_setup;
 use super::val::FuncVal;
 use super::val::Val;
 use crate::type_::ConstRef;
@@ -27,11 +28,12 @@ pub(crate) fn set_solver(solver: FuncVal) {
 }
 
 pub(crate) fn unit_solver() -> FuncVal {
+    let default_setup = default_setup();
     FuncVal::FreeStaticPrim(
         FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked("unit_solver"),
             fn_: Rc::new(UnitSolver),
-            mode: FuncMode::default(),
+            setup: Some(Setup { forward: default_setup.clone(), reverse: default_setup }),
         }
         .into(),
     )

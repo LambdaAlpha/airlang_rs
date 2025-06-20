@@ -2,8 +2,8 @@ use super::ConstCellFn;
 use super::ConstStaticFn;
 use super::FreeCellFn;
 use super::FreeStaticFn;
-use super::FuncMode;
-use super::FuncTrait;
+use super::Func;
+use super::Setup;
 use super::comp::DynComposite;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
@@ -13,7 +13,7 @@ use crate::type_::ConstRef;
 pub struct ConstCellCompFunc {
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) mode: FuncMode,
+    pub(crate) setup: Option<Setup>,
     pub(crate) ctx_explicit: bool,
 }
 
@@ -41,16 +41,12 @@ impl ConstCellFn<Val, Val, Val> for ConstCellCompFunc {
     }
 }
 
-impl FuncTrait for ConstCellCompFunc {
-    fn mode(&self) -> &FuncMode {
-        &self.mode
+impl Func for ConstCellCompFunc {
+    fn setup(&self) -> Option<&Setup> {
+        self.setup.as_ref()
     }
 
     fn ctx_explicit(&self) -> bool {
         self.ctx_explicit
-    }
-
-    fn code(&self) -> Val {
-        self.comp.code()
     }
 }
