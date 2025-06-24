@@ -28,6 +28,7 @@ const_format = "0.2"
 
 [dependencies.string_cache]
 version = "0.8"
+default-features = false
 features = []
 
 [dependencies.rand]
