@@ -210,16 +210,13 @@ fn comment_token(i: &mut &str) -> ModalResult<()> {
 
         _ => {
             let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
-            if symbol != UNIT {
+            if symbol != UNIT || !i.starts_with([TEXT_QUOTE, SYMBOL_QUOTE]) {
                 return empty.parse_next(i);
             }
-            if i.starts_with(TEXT_QUOTE) {
-                raw_text.void().parse_next(i)
-            } else if i.starts_with(SYMBOL_QUOTE) {
-                raw_symbol.void().parse_next(i)
-            } else {
-                empty.parse_next(i)
-            }
+            let quote = i.chars().next().unwrap();
+            let line = (till_line_ending, line_ending, space0, one_of(is_symbol));
+            let content = separated(1 .., line, ' ');
+            delimited_cut(quote, content, quote).parse_next(i)
         }
     }
 }
