@@ -12,12 +12,12 @@ use super::PrimMode;
 use super::SymbolMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
-use crate::semantics::core::LITERAL;
-use crate::semantics::core::LITERAL_CHAR;
-use crate::semantics::core::MOVE;
-use crate::semantics::core::MOVE_CHAR;
-use crate::semantics::core::REF;
-use crate::semantics::core::REF_CHAR;
+use crate::semantics::core::SYMBOL_LITERAL;
+use crate::semantics::core::SYMBOL_LITERAL_CHAR;
+use crate::semantics::core::SYMBOL_MOVE;
+use crate::semantics::core::SYMBOL_MOVE_CHAR;
+use crate::semantics::core::SYMBOL_REF;
+use crate::semantics::core::SYMBOL_REF_CHAR;
 use crate::semantics::val::CALL;
 use crate::semantics::val::LIST;
 use crate::semantics::val::ListVal;
@@ -118,12 +118,12 @@ impl ParseMode<MapVal> for PrimMode {
 // todo rename
 pub(in crate::prelude) const FORM: &str = "form";
 pub(in crate::prelude) const EVAL: &str = "eval";
-pub(in crate::prelude) const FORM_LITERAL: &str = concatcp!(FORM, LITERAL_CHAR);
-pub(in crate::prelude) const FORM_REF: &str = concatcp!(FORM, REF_CHAR);
-pub(in crate::prelude) const FORM_MOVE: &str = concatcp!(FORM, MOVE_CHAR);
-pub(in crate::prelude) const EVAL_LITERAL: &str = concatcp!(EVAL, LITERAL_CHAR);
-pub(in crate::prelude) const EVAL_REF: &str = concatcp!(EVAL, REF_CHAR);
-pub(in crate::prelude) const EVAL_MOVE: &str = concatcp!(EVAL, MOVE_CHAR);
+pub(in crate::prelude) const FORM_LITERAL: &str = concatcp!(FORM, SYMBOL_LITERAL_CHAR);
+pub(in crate::prelude) const FORM_REF: &str = concatcp!(FORM, SYMBOL_REF_CHAR);
+pub(in crate::prelude) const FORM_MOVE: &str = concatcp!(FORM, SYMBOL_MOVE_CHAR);
+pub(in crate::prelude) const EVAL_LITERAL: &str = concatcp!(EVAL, SYMBOL_LITERAL_CHAR);
+pub(in crate::prelude) const EVAL_REF: &str = concatcp!(EVAL, SYMBOL_REF_CHAR);
+pub(in crate::prelude) const EVAL_MOVE: &str = concatcp!(EVAL, SYMBOL_MOVE_CHAR);
 
 impl ParseMode<Symbol> for PrimMode {
     fn parse(mode: Symbol) -> Option<Self> {
@@ -262,9 +262,9 @@ impl ParseMode<Val> for SymbolMode {
 impl ParseMode<Symbol> for SymbolMode {
     fn parse(mode: Symbol) -> Option<Self> {
         let mode = match &*mode {
-            LITERAL => SymbolMode::Literal,
-            REF => SymbolMode::Ref,
-            MOVE => SymbolMode::Move,
+            SYMBOL_LITERAL => SymbolMode::Literal,
+            SYMBOL_REF => SymbolMode::Ref,
+            SYMBOL_MOVE => SymbolMode::Move,
             _ => return None,
         };
         Some(mode)
@@ -280,9 +280,9 @@ impl GenerateMode<Val> for SymbolMode {
 impl GenerateMode<Symbol> for SymbolMode {
     fn generate(&self) -> Symbol {
         let s = match self {
-            SymbolMode::Literal => LITERAL,
-            SymbolMode::Ref => REF,
-            SymbolMode::Move => MOVE,
+            SymbolMode::Literal => SYMBOL_LITERAL,
+            SymbolMode::Ref => SYMBOL_REF,
+            SymbolMode::Move => SYMBOL_MOVE,
         };
         Symbol::from_str_unchecked(s)
     }

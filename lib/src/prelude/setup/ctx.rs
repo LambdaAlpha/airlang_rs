@@ -2,7 +2,7 @@ use crate::prelude::MutStaticImpl;
 use crate::prelude::ctx::ref_::RefCtx;
 use crate::prelude::setup::DynFn;
 use crate::semantics::core::Eval;
-use crate::semantics::core::MOVE_CHAR;
+use crate::semantics::core::SYMBOL_MOVE_CHAR;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
@@ -35,7 +35,7 @@ fn fn_ref_free(input: Val) -> Val {
         return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
-    if let Some(MOVE_CHAR) = prefix {
+    if let Some(SYMBOL_MOVE_CHAR) = prefix {
         return Val::default();
     }
     input
@@ -47,7 +47,7 @@ fn fn_ref_const(ctx: ConstRef<Val>, input: Val) -> Val {
         return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
-    if let Some(MOVE_CHAR) = prefix {
+    if let Some(SYMBOL_MOVE_CHAR) = prefix {
         return Val::default();
     }
     input
@@ -59,7 +59,7 @@ fn fn_ref_mut(ctx: &mut Val, input: Val) -> Val {
         return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
-    if let Some(MOVE_CHAR) = prefix {
+    if let Some(SYMBOL_MOVE_CHAR) = prefix {
         let Val::Ctx(ctx) = ctx else {
             return Val::default();
         };

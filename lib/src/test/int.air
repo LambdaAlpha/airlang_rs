@@ -36,19 +36,19 @@ true
 =====
 * 0
 -----
-; do [a = ; any integer, 0 == a ** 0]
+; do [a = ; any integer, 0 == a * 0]
 -----
 true
 =====
 * 1
 -----
-; do [a = ; any integer, a == a ** 1]
+; do [a = ; any integer, a == a * 1]
 -----
 true
 =====
 * -1
 -----
-; do [a = ; any integer, 0 == a + a ** 0-1]
+; do [a = ; any integer, 0 == a + a * 0-1]
 -----
 true
 =====
@@ -96,7 +96,7 @@ true
 =====
 % exact
 -----
-; do [a = ; any integer, b = ; any integer, (b == 0) break true, 0 == (a ** b) % b]
+; do [a = ; any integer, b = ; any integer, (b == 0) break true, 0 == (a * b) % b]
 -----
 true
 =====
@@ -114,31 +114,31 @@ true
 =====
 * /
 -----
-; do [a = ; any integer, b = ; any integer, (b == 0) break true, a == <(a ** b / b)]
+; do [a = ; any integer, b = ; any integer, (b == 0) break true, a == <(a * b / b)]
 -----
 true
 =====
 exact / *
 -----
-; do [a = ; any integer, b = ; any integer, (b == 0) break true, c = a ** b, c == <(c / b ** b)]
+; do [a = ; any integer, b = ; any integer, (b == 0) break true, c = a * b, c == <(c / b * b)]
 -----
 true
 =====
 inexact / abs(a) > abs(a / b * b)
 -----
-; do [a = ; any integer, b = ; any integer, (b == 0) break true, (0 <= a) == 0 <= a - a / b ** b]
+; do [a = ; any integer, b = ; any integer, (b == 0) break true, (0 <= a) == 0 <= a - a / b * b]
 -----
 true
 =====
 a == b * a / b + a % b
 -----
-; do [a = ; any integer, b = ; any integer, (b == 0) break true, a == (b ** a / b) + a % b]
+; do [a = ; any integer, b = ; any integer, (b == 0) break true, a == (b * a / b) + a % b]
 -----
 true
 =====
 * trivial
 -----
-2 ** 3
+2 * 3
 -----
 6
 =====

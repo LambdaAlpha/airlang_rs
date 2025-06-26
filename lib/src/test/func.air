@@ -2,7 +2,7 @@ recursive call
 -----
 ; do [
     f = ; function {
-        setup : eval* : .,
+        setup : eval@ : .,
         code : (._ : .i) : .i,
     },
     ; f ; not true
@@ -14,7 +14,7 @@ call external func
 -----
 ; do [
     f = ; function {
-        setup : eval* : .,
+        setup : eval@ : .,
         code : (._ : .i) : ; not .i
     },
     ; f ; not true
@@ -26,7 +26,7 @@ call internal func
 -----
 ; do [
     f = ; function {
-        setup : eval* : .,
+        setup : eval@ : .,
         code : (._ : .i) : ; .not .i,
         context : ; context {variables :  {not : not}},
     },
@@ -39,7 +39,7 @@ call rename
 -----
 ; do [
     f = ; function {
-        setup : eval* : .,
+        setup : eval@ : .,
         code : (._ : .a) : ; .n .a,
         context : ; context {variables :  {n : not}},
     },
@@ -208,7 +208,7 @@ ctx explicit
     a = 1 : 2,
     f = ; function {
         context_explicit : true,
-        setup : (; mode {pair : {symbol : ..} : eval*}) : .,
+        setup : (; mode {pair : {symbol : ..} : eval@}) : .,
         code : (.p : .i) : .p pair.set_first .i,
     },
     a f 3,
@@ -244,11 +244,11 @@ repr primitive const
 repr composite
 -----
 ; do [
-    forward = ; mode {pair : eval* : .},
-    reverse = ; mode {pair : eval* : .},
+    forward = ; mode {pair : eval@ : .},
+    reverse = ; mode {pair : eval@ : .},
     repr = ; form. {
         code : (.ctx : .in) : in,
-        setup : ^forward : ^reverse,
+        setup : #forward : #reverse,
         context_access : constant,
         cell : true,
     },
@@ -272,7 +272,7 @@ constant
 =====
 access mutable
 -----
-eval* function.context_access .
+eval@ function.context_access .
 -----
 mutable
 =====
@@ -290,19 +290,19 @@ true
 =====
 is_context_explicit false
 -----
-eval* function.is_context_explicit .
+eval@ function.is_context_explicit .
 -----
 false
 =====
 forward setup primitive
 -----
-eval* == not function.forward_setup .
+eval@ == not function.forward_setup .
 -----
 true
 =====
 forward setup mode
 -----
-. == eval* function.forward_setup .
+. == eval@ function.forward_setup .
 -----
 true
 =====
@@ -310,10 +310,10 @@ forward setup 1
 -----
 ; do [
     f = ; function {
-        setup : (; mode {pair : eval* : form.}) : .,
+        setup : (; mode {pair : eval@ : form.}) : .,
     },
     p1 = f function.forward_setup .,
-    p2 = ; mode {pair : eval* : form.},
+    p2 = ; mode {pair : eval@ : form.},
     p1 == p2
 ]
 -----
@@ -323,10 +323,10 @@ forward setup 2
 -----
 ; do [
     f = ; function {
-        setup : (; mode {list : [eval*, form., .] : form.}) : .,
+        setup : (; mode {list : [eval@, form., .] : form.}) : .,
     },
     p1 = f function.forward_setup .,
-    p2 = ; mode {list : [eval*, form., .] : form.},
+    p2 = ; mode {list : [eval@, form., .] : form.},
     p1 == p2
 ]
 -----
@@ -336,10 +336,10 @@ forward setup 3
 -----
 ; do [
     f = ; function {
-        setup : (; mode {map : {a : eval*, b : .} : . : form.}) : .,
+        setup : (; mode {map : {a : eval@, b : .} : . : form.}) : .,
     },
     p1 = f function.forward_setup .,
-    p2 = ; mode {map : {a : eval*, b : .} : . : form.},
+    p2 = ; mode {map : {a : eval@, b : .} : . : form.},
     p1 == p2
 ]
 -----
@@ -347,7 +347,7 @@ true
 =====
 reverse setup
 -----
-eval* == not function.reverse_setup .
+eval@ == not function.reverse_setup .
 -----
 true
 =====

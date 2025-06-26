@@ -5,7 +5,7 @@ length join
     la = a symbol.length .,
     b = ; any symbol,
     lb = b symbol.length .,
-    ab = . symbol.join [^a, ^b],
+    ab = . symbol.join [#a, #b],
     lab = ab symbol.length .,
     lab == la + lb
 ]
@@ -32,7 +32,7 @@ ab
 =====
 join unit
 -----
-; do [a = .a1, b = .b1, c = .c1, . symbol.join [^a, ^b, ^c]]
+; do [a = .a1, b = .b1, c = .c1, . symbol.join [#a, #b, #c]]
 -----
 a1b1c1
 =====

@@ -1,7 +1,7 @@
 use super::ModeFn;
-use crate::semantics::core::LITERAL_CHAR;
-use crate::semantics::core::MOVE_CHAR;
-use crate::semantics::core::REF_CHAR;
+use crate::semantics::core::SYMBOL_LITERAL_CHAR;
+use crate::semantics::core::SYMBOL_MOVE_CHAR;
+use crate::semantics::core::SYMBOL_REF_CHAR;
 use crate::semantics::core::SymbolForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
@@ -19,32 +19,30 @@ pub enum SymbolMode {
 
 impl ModeFn for SymbolMode {}
 
+impl SymbolMode {
+    pub(crate) fn into_char(self) -> char {
+        match self {
+            SymbolMode::Literal => SYMBOL_LITERAL_CHAR,
+            SymbolMode::Ref => SYMBOL_REF_CHAR,
+            SymbolMode::Move => SYMBOL_MOVE_CHAR,
+        }
+    }
+}
+
 impl FreeStaticFn<Symbol, Val> for SymbolMode {
     fn free_static_call(&self, input: Symbol) -> Val {
-        match self {
-            SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.free_static_call(input),
-            SymbolMode::Ref => SymbolForm::<REF_CHAR>.free_static_call(input),
-            SymbolMode::Move => SymbolForm::<MOVE_CHAR>.free_static_call(input),
-        }
+        SymbolForm { default: self.into_char() }.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, Symbol, Val> for SymbolMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        match self {
-            SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.const_static_call(ctx, input),
-            SymbolMode::Ref => SymbolForm::<REF_CHAR>.const_static_call(ctx, input),
-            SymbolMode::Move => SymbolForm::<MOVE_CHAR>.const_static_call(ctx, input),
-        }
+        SymbolForm { default: self.into_char() }.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, Symbol, Val> for SymbolMode {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        match self {
-            SymbolMode::Literal => SymbolForm::<LITERAL_CHAR>.mut_static_call(ctx, input),
-            SymbolMode::Ref => SymbolForm::<REF_CHAR>.mut_static_call(ctx, input),
-            SymbolMode::Move => SymbolForm::<MOVE_CHAR>.mut_static_call(ctx, input),
-        }
+        SymbolForm { default: self.into_char() }.mut_static_call(ctx, input)
     }
 }

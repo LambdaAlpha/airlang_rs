@@ -11,7 +11,7 @@ length join
     la = a byte.length .,
     b = ; any byte,
     lb = b byte.length .,
-    ab = . byte.join [^a, ^b],
+    ab = . byte.join [#a, #b],
     lab = ab byte.length .,
     lab == la + lb
 ]
@@ -32,13 +32,13 @@ length else
 =====
 push join
 -----
-; do [a = ; any byte, b = ; any byte, ab = a, ab byte.push b, ab == . byte.join [^a, ^b]]
+; do [a = ; any byte, b = ; any byte, ab = a, ab byte.push b, ab == . byte.join [#a, #b]]
 -----
 true
 =====
 push
 -----
-; do [a = byte(00), b = byte(1122), a byte.push ^b, ^a]
+; do [a = byte(00), b = byte(1122), a byte.push #b, #a]
 -----
 byte(001122)
 =====
@@ -50,7 +50,7 @@ byte(123456)
 =====
 join unit
 -----
-; do [a = byte(1234), b = byte(5678), c = byte(9abc), . byte.join [^a, ^b, ^c]]
+; do [a = byte(1234), b = byte(5678), c = byte(9abc), . byte.join [#a, #b, #c]]
 -----
 byte(123456789abc)
 =====

@@ -11,7 +11,7 @@ length join
     la = a text.length .,
     b = ; any text,
     lb = b text.length .,
-    ab = . text.join [^a, ^b],
+    ab = . text.join [#a, #b],
     lab = ab text.length .,
     lab == la + lb
 ]
@@ -32,13 +32,13 @@ length else
 =====
 push join
 -----
-; do [a = ; any text, b = ; any text, t = a, t text.push b, t == . text.join [^a, ^b]]
+; do [a = ; any text, b = ; any text, t = a, t text.push b, t == . text.join [#a, #b]]
 -----
 true
 =====
 push
 -----
-; do [a = "hello", b = "world", a text.push " ", a text.push ^b, ^a]
+; do [a = "hello", b = "world", a text.push " ", a text.push #b, #a]
 -----
 "hello world"
 =====
@@ -50,7 +50,7 @@ join empty
 =====
 join unit
 -----
-; do [a = "1", b = "2", c = "3", . text.join [^a, ^b, ^c]]
+; do [a = "1", b = "2", c = "3", . text.join [#a, #b, #c]]
 -----
 "123"
 =====

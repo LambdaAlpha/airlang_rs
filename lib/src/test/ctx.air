@@ -6,7 +6,7 @@ true
 =====
 read indirect
 -----
-; do [a = ; any ., b = .a, a == *b read .]
+; do [a = ; any ., b = .a, a == @b read .]
 -----
 true
 =====
@@ -60,7 +60,7 @@ true
 =====
 move indirect
 -----
-; do [a = ; any ., b = .a, c = a, (c == *b move .) and (a is_null .)]
+; do [a = ; any ., b = .a, c = a, (c == @b move .) and (a is_null .)]
 -----
 true
 =====
@@ -126,19 +126,19 @@ true
 =====
 = indirect
 -----
-; do [a = .b, *a = 1, b]
+; do [a = .b, @a = 1, b]
 -----
 1
 =====
 = special key 1
 -----
-; do [.*.a = 1, *.a]
+; do [.@.a = 1, @.a]
 -----
 1
 =====
 = special key 2
 -----
-; do [.*.p = 1 : 2, ..p pair.first .]
+; do [.@.p = 1 : 2, ..p pair.first .]
 -----
 1
 =====
@@ -416,7 +416,7 @@ false
 =====
 static move
 -----
-; do [c = ; context {variables : {(a . static) : 1}}, c | .^a, c | .a]
+; do [c = ; context {variables : {(a . static) : 1}}, c | .#a, c | .a]
 -----
 1
 =====
@@ -456,7 +456,7 @@ false
     a = ; context {variables : {p : 1 : 2}},
     b = 3,
     a | .p pair.set_first b,
-    a | .^p,
+    a | .#p,
 ]
 -----
 3 : 2
@@ -466,7 +466,7 @@ false
 ; do [
     a = ; context {variables : {p : 1 : 2, b : 3}},
     a | .p pair.set_first .b,
-    a | .^p,
+    a | .#p,
 ]
 -----
 3 : 2
@@ -475,9 +475,9 @@ false
 -----
 ; do [
     set_first = pair.set_first,
-    a = ; context {variables : {set_first : ^set_first, p : 1 : 2, b : 3}},
+    a = ; context {variables : {set_first : #set_first, p : 1 : 2, b : 3}},
     a | .p .set_first .b,
-    a | .^p,
+    a | .#p,
 ]
 -----
 3 : 2

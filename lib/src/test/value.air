@@ -156,7 +156,7 @@ context
 =====
 type function
 -----
-; do [a = ; function {body : *input}, a type .]
+; do [a = ; function {body : @input}, a type .]
 -----
 function
 =====
@@ -234,7 +234,7 @@ true
 =====
 == function
 -----
-; do [a = ; function {body : *input}, b = ; function {body : *input}, (a == b) and ; not a == .]
+; do [a = ; function {body : @input}, b = ; function {body : @input}, (a == b) and ; not a == .]
 -----
 true
 =====
@@ -282,12 +282,12 @@ a == b
 =====
 == special ref
 -----
-; do [.*.a = 1, *.a == 1]
+; do [.@.a = 1, @.a == 1]
 -----
 true
 =====
-== ^a
+== #a
 -----
-; do [a = 1, ^a == 1]
+; do [a = 1, #a == 1]
 -----
 true

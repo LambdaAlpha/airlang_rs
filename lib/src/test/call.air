@@ -4,9 +4,9 @@ new
     f = ; any .,
     i = ; any .,
     c1 = f ; i,
-    c2 = ; form* ; f i,
+    c2 = ; form@ ; f i,
     c3 = f ! i,
-    c4 = ; form* ! f i,
+    c4 = ; form@ ! f i,
     (c1 == c2) and (c3 == c4)
 ]
 -----
@@ -65,12 +65,12 @@ true
 =====
 apply const
 -----
-; call.apply ; form* 1 + 1
+; call.apply ; form@ 1 + 1
 -----
 2
 =====
 apply mut
 -----
-; do [; call.apply ; form* .a = 1, ^a]
+; do [; call.apply ; form@ .a = 1, #a]
 -----
 1

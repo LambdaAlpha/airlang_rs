@@ -7,7 +7,7 @@ set_solver
         code : ._ : ; do [.a = .a + 1, .a],
         context : ; context {variables : {a : 0}},
     },
-    ; set_solver! ^s1,
+    ; set_solver! #s1,
     s2 = ; solver! .,
     [; .s2 ., ; .s2 ., ; .s2 .]
 ]
@@ -21,7 +21,7 @@ solver calls set_solver or solver, no panic
         context_access : .free,
         code : ._ : ; do [; set_solver! not, ; solver! .],
     },
-    ; set_solver! ^s1,
+    ; set_solver! #s1,
     not ! true,
     .
 ]

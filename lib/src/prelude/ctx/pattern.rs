@@ -1,8 +1,8 @@
 use super::repr::OptBinding;
 use super::repr::parse_contract;
 use crate::prelude::utils::symbol;
-use crate::semantics::core::LITERAL_CHAR;
-use crate::semantics::core::REF_CHAR;
+use crate::semantics::core::SYMBOL_LITERAL_CHAR;
+use crate::semantics::core::SYMBOL_REF_CHAR;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::CallVal;
@@ -47,8 +47,8 @@ pub(in crate::prelude) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option
 // todo design
 fn parse_symbol(ctx: PatternCtx, s: Symbol) -> Option<Pattern> {
     let pattern = match s.chars().next() {
-        Some(LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),
-        Some(REF_CHAR) => {
+        Some(SYMBOL_LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),
+        Some(SYMBOL_REF_CHAR) => {
             let name = Symbol::from_str_unchecked(&s[1 ..]);
             Pattern::Any(OptBinding { name, contract: ctx.contract })
         }

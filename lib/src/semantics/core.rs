@@ -22,67 +22,71 @@ use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
 
-pub(crate) struct SymbolForm<const DEFAULT: char>;
+pub(crate) struct SymbolForm {
+    pub(crate) default: char,
+}
 
-pub(crate) const LITERAL_CHAR: char = '.';
-pub(crate) const LITERAL: &str = concatcp!(LITERAL_CHAR);
-pub(crate) const REF_CHAR: char = '*';
-pub(crate) const REF: &str = concatcp!(REF_CHAR);
-pub(crate) const MOVE_CHAR: char = '^';
-pub(crate) const MOVE: &str = concatcp!(MOVE_CHAR);
+pub(crate) const SYMBOL_LITERAL_CHAR: char = '.';
+pub(crate) const SYMBOL_LITERAL: &str = concatcp!(SYMBOL_LITERAL_CHAR);
+pub(crate) const SYMBOL_REF_CHAR: char = '@';
+pub(crate) const SYMBOL_REF: &str = concatcp!(SYMBOL_REF_CHAR);
+pub(crate) const SYMBOL_MOVE_CHAR: char = '#';
+pub(crate) const SYMBOL_MOVE: &str = concatcp!(SYMBOL_MOVE_CHAR);
 
-impl<const DEFAULT: char> SymbolForm<DEFAULT> {
+impl SymbolForm {
     fn recognize(&self, input: Symbol) -> (char, Symbol) {
         match input.chars().next() {
-            Some(LITERAL_CHAR) => (LITERAL_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            Some(REF_CHAR) => (REF_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            Some(MOVE_CHAR) => (MOVE_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            _ => (DEFAULT, input),
+            Some(SYMBOL_LITERAL_CHAR) => {
+                (SYMBOL_LITERAL_CHAR, Symbol::from_str_unchecked(&input[1 ..]))
+            }
+            Some(SYMBOL_REF_CHAR) => (SYMBOL_REF_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
+            Some(SYMBOL_MOVE_CHAR) => (SYMBOL_MOVE_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
+            _ => (self.default, input),
         }
     }
 }
 
-impl<const DEFAULT: char> FreeStaticFn<Symbol, Val> for SymbolForm<DEFAULT> {
+impl FreeStaticFn<Symbol, Val> for SymbolForm {
     fn free_static_call(&self, input: Symbol) -> Val {
         let (prefix, s) = self.recognize(input);
         match prefix {
-            LITERAL_CHAR => Val::Symbol(s),
-            REF_CHAR => Val::default(),
-            MOVE_CHAR => Val::default(),
+            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
+            SYMBOL_REF_CHAR => Val::default(),
+            SYMBOL_MOVE_CHAR => Val::default(),
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }
 }
 
-impl<const DEFAULT: char> ConstStaticFn<Val, Symbol, Val> for SymbolForm<DEFAULT> {
+impl ConstStaticFn<Val, Symbol, Val> for SymbolForm {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
         let (prefix, s) = self.recognize(input);
         match prefix {
-            LITERAL_CHAR => Val::Symbol(s),
-            REF_CHAR => {
+            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
+            SYMBOL_REF_CHAR => {
                 let Val::Ctx(ctx) = &*ctx else {
                     return Val::default();
                 };
                 ctx.variables().get_ref(s).cloned().unwrap_or_default()
             }
-            MOVE_CHAR => Val::default(),
+            SYMBOL_MOVE_CHAR => Val::default(),
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }
 }
 
-impl<const DEFAULT: char> MutStaticFn<Val, Symbol, Val> for SymbolForm<DEFAULT> {
+impl MutStaticFn<Val, Symbol, Val> for SymbolForm {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
         let (prefix, s) = self.recognize(input);
         match prefix {
-            LITERAL_CHAR => Val::Symbol(s),
-            REF_CHAR => {
+            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
+            SYMBOL_REF_CHAR => {
                 let Val::Ctx(ctx) = &*ctx else {
                     return Val::default();
                 };
                 ctx.variables().get_ref(s).cloned().unwrap_or_default()
             }
-            MOVE_CHAR => {
+            SYMBOL_MOVE_CHAR => {
                 let Val::Ctx(ctx) = ctx else {
                     return Val::default();
                 };
@@ -901,19 +905,19 @@ impl MutStaticFn<Val, Val, Val> for Eval {
 
 impl FreeStaticFn<Symbol, Val> for Eval {
     fn free_static_call(&self, input: Symbol) -> Val {
-        SymbolForm::<REF_CHAR>.free_static_call(input)
+        SymbolForm { default: SYMBOL_REF_CHAR }.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, Symbol, Val> for Eval {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        SymbolForm::<REF_CHAR>.const_static_call(ctx, input)
+        SymbolForm { default: SYMBOL_REF_CHAR }.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, Symbol, Val> for Eval {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        SymbolForm::<REF_CHAR>.mut_static_call(ctx, input)
+        SymbolForm { default: SYMBOL_REF_CHAR }.mut_static_call(ctx, input)
     }
 }
 

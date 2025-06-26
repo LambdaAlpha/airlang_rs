@@ -30,49 +30,49 @@ symbol literal special 2
 =====
 symbol literal special 3
 -----
-.*a
+.@a
 -----
-*a
+@a
 =====
 symbol literal special 4
 -----
-.^a
+.#a
 -----
-^a
+#a
 =====
 ref
 -----
-; do [a = 1, *a]
+; do [a = 1, @a]
 -----
 1
 =====
 ref will not remove
 -----
-; do [a = 1, *a, a]
+; do [a = 1, @a, a]
 -----
 1
 =====
 ref special
 -----
-; do [.*.a = 1, *.a]
+; do [.@.a = 1, @.a]
 -----
 1
 =====
 move
 -----
-; do [a = 1, ^a]
+; do [a = 1, #a]
 -----
 1
 =====
 move will remove
 -----
-; do [a = 1, ^a, a]
+; do [a = 1, #a, a]
 -----
 .
 =====
 move special
 -----
-; do [.**a = 1, ^*a]
+; do [.@@a = 1, #@a]
 -----
 1
 =====

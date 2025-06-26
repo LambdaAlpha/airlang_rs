@@ -1,7 +1,7 @@
 ; do [
     [major, minor, patch] = air.version,
-    major = ; syntax.generate ^major,
-    minor = ; syntax.generate ^minor,
-    patch = ; syntax.generate ^patch,
-    "." text.join [^major, ^minor, ^patch]
+    major = ; syntax.generate #major,
+    minor = ; syntax.generate #minor,
+    patch = ; syntax.generate #patch,
+    "." text.join [#major, #minor, #patch]
 ]
