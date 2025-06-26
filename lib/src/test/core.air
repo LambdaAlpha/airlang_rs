@@ -76,6 +76,12 @@ move special
 -----
 1
 =====
+eval
+-----
+; do [a = ; id ; not true, $a]
+-----
+false
+=====
 pair eval
 -----
 (; not false) : "1"

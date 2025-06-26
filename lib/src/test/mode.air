@@ -64,6 +64,12 @@ form. # special
 -----
 [1, true]
 =====
+form. $
+-----
+; do [a = ; id ; not true, ; form. $a]
+-----
+false
+=====
 form@ trivial
 -----
 ; do [a = 1, [; form@ a, a]]
@@ -88,6 +94,12 @@ form@ #
 -----
 [1, true]
 =====
+form@ $
+-----
+; do [a = ; id ; not true, ; form@ $a]
+-----
+false
+=====
 form# trivial
 -----
 ; do [a = 1, [; form# a, a is_null .]]
@@ -111,6 +123,42 @@ form# #
 ; do [a = 1, [; form# #a, a is_null .]]
 -----
 [1, true]
+=====
+form# $
+-----
+; do [a = ; id ; not true, ; form# $a]
+-----
+false
+=====
+form$ trivial
+-----
+; do [a = ; id ; not true, ; form$ a]
+-----
+false
+=====
+form$ .
+-----
+; form$ .a
+-----
+a
+=====
+form$ @
+-----
+; do [a = 1, [; form$ @a, a]]
+-----
+[1, 1]
+=====
+form$ #
+-----
+; do [a = 1, [; form$ #a, a is_null .]]
+-----
+[1, true]
+=====
+form$ $
+-----
+; do [a = ; id ; not true, ; form$ $a]
+-----
+false
 =====
 ; form
 -----
@@ -148,6 +196,12 @@ eval. #
 -----
 [1, true]
 =====
+eval. $
+-----
+; do [a = ; id ; not true, ; eval. $a]
+-----
+false
+=====
 eval@ trivial
 -----
 ; do [a = 1, [; eval@ a, a]]
@@ -172,6 +226,12 @@ eval@ #
 -----
 [1, true]
 =====
+eval@ $
+-----
+; do [a = ; id ; not true, ; eval@ $a]
+-----
+false
+=====
 eval# trivial
 -----
 ; do [a = 1, [; eval# a, a is_null .]]
@@ -195,6 +255,42 @@ eval# #
 ; do [a = 1, [; eval# #a, a is_null .]]
 -----
 [1, true]
+=====
+eval# $
+-----
+; do [a = ; id ; not true, ; eval# $a]
+-----
+false
+=====
+eval$ trivial
+-----
+; do [a = ; id ; not true, ; eval$ a]
+-----
+false
+=====
+eval$ .
+-----
+; eval$ .a
+-----
+a
+=====
+eval$ @
+-----
+; do [a = 1, [; eval$ @a, a]]
+-----
+[1, 1]
+=====
+eval$ #
+-----
+; do [a = 1, [; eval$ #a, a is_null .]]
+-----
+[1, true]
+=====
+eval$ $
+-----
+; do [a = ; id ; not true, ; eval$ $a]
+-----
+false
 =====
 mode id
 -----
@@ -263,6 +359,16 @@ mode primitive symbol #
 ]
 -----
 [[1], true]
+=====
+mode primitive symbol $
+-----
+; do [
+    a = ; id ; not true,
+    f = ; mode {symbol : .$, list : form, primitive : true},
+    ; f [a]
+]
+-----
+[false]
 =====
 mode primitive pair id
 -----

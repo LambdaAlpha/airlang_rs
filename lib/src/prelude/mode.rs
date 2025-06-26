@@ -17,9 +17,11 @@ use super::PreludeCtx;
 use super::ctx_put_func;
 use super::free_impl;
 use super::mode::opt::ModeFn;
+use super::mode::repr::EVAL_EVAL;
 use super::mode::repr::EVAL_LITERAL;
 use super::mode::repr::EVAL_MOVE;
 use super::mode::repr::EVAL_REF;
+use super::mode::repr::FORM_EVAL;
 use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_MOVE;
 use super::mode::repr::FORM_REF;
@@ -40,9 +42,11 @@ pub struct ModePrelude {
     pub form_literal: MutStaticPrimFuncVal,
     pub form_ref: MutStaticPrimFuncVal,
     pub form_move: MutStaticPrimFuncVal,
+    pub form_eval: MutStaticPrimFuncVal,
     pub eval_literal: MutStaticPrimFuncVal,
     pub eval_ref: MutStaticPrimFuncVal,
     pub eval_move: MutStaticPrimFuncVal,
+    pub eval_eval: MutStaticPrimFuncVal,
 }
 
 impl Default for ModePrelude {
@@ -53,9 +57,11 @@ impl Default for ModePrelude {
             form_literal: form_literal(),
             form_ref: form_ref(),
             form_move: form_move(),
+            form_eval: form_eval(),
             eval_literal: eval_literal(),
             eval_ref: eval_ref(),
             eval_move: eval_move(),
+            eval_eval: eval_eval(),
         }
     }
 }
@@ -67,9 +73,11 @@ impl Prelude for ModePrelude {
         ctx_put_func(ctx, FORM_LITERAL, &self.form_literal);
         ctx_put_func(ctx, FORM_REF, &self.form_ref);
         ctx_put_func(ctx, FORM_MOVE, &self.form_move);
+        ctx_put_func(ctx, FORM_EVAL, &self.form_eval);
         ctx_put_func(ctx, EVAL_LITERAL, &self.eval_literal);
         ctx_put_func(ctx, EVAL_REF, &self.eval_ref);
         ctx_put_func(ctx, EVAL_MOVE, &self.eval_move);
+        ctx_put_func(ctx, EVAL_EVAL, &self.eval_eval);
     }
 }
 
@@ -112,6 +120,11 @@ pub fn form_move() -> MutStaticPrimFuncVal {
     FuncMode::mode_into_mut_func(mode)
 }
 
+pub fn form_eval() -> MutStaticPrimFuncVal {
+    let mode = FuncMode::prim_mode(SymbolMode::Eval, CodeMode::Form);
+    FuncMode::mode_into_mut_func(mode)
+}
+
 pub fn eval_literal() -> MutStaticPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Eval);
     FuncMode::mode_into_mut_func(mode)
@@ -124,6 +137,11 @@ pub fn eval_ref() -> MutStaticPrimFuncVal {
 
 pub fn eval_move() -> MutStaticPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Move, CodeMode::Eval);
+    FuncMode::mode_into_mut_func(mode)
+}
+
+pub fn eval_eval() -> MutStaticPrimFuncVal {
+    let mode = FuncMode::prim_mode(SymbolMode::Eval, CodeMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 

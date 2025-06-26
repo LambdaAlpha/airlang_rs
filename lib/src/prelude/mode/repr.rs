@@ -12,6 +12,8 @@ use super::PrimMode;
 use super::SymbolMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
+use crate::semantics::core::SYMBOL_EVAL;
+use crate::semantics::core::SYMBOL_EVAL_CHAR;
 use crate::semantics::core::SYMBOL_LITERAL;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::core::SYMBOL_MOVE;
@@ -121,9 +123,11 @@ pub(in crate::prelude) const EVAL: &str = "eval";
 pub(in crate::prelude) const FORM_LITERAL: &str = concatcp!(FORM, SYMBOL_LITERAL_CHAR);
 pub(in crate::prelude) const FORM_REF: &str = concatcp!(FORM, SYMBOL_REF_CHAR);
 pub(in crate::prelude) const FORM_MOVE: &str = concatcp!(FORM, SYMBOL_MOVE_CHAR);
+pub(in crate::prelude) const FORM_EVAL: &str = concatcp!(FORM, SYMBOL_EVAL_CHAR);
 pub(in crate::prelude) const EVAL_LITERAL: &str = concatcp!(EVAL, SYMBOL_LITERAL_CHAR);
 pub(in crate::prelude) const EVAL_REF: &str = concatcp!(EVAL, SYMBOL_REF_CHAR);
 pub(in crate::prelude) const EVAL_MOVE: &str = concatcp!(EVAL, SYMBOL_MOVE_CHAR);
+pub(in crate::prelude) const EVAL_EVAL: &str = concatcp!(EVAL, SYMBOL_EVAL_CHAR);
 
 impl ParseMode<Symbol> for PrimMode {
     fn parse(mode: Symbol) -> Option<Self> {
@@ -131,9 +135,11 @@ impl ParseMode<Symbol> for PrimMode {
             FORM_LITERAL => PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form),
             FORM_REF => PrimMode::symbol_call(SymbolMode::Ref, CodeMode::Form),
             FORM_MOVE => PrimMode::symbol_call(SymbolMode::Move, CodeMode::Form),
+            FORM_EVAL => PrimMode::symbol_call(SymbolMode::Eval, CodeMode::Form),
             EVAL_LITERAL => PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Eval),
             EVAL_REF => PrimMode::symbol_call(SymbolMode::Ref, CodeMode::Eval),
             EVAL_MOVE => PrimMode::symbol_call(SymbolMode::Move, CodeMode::Eval),
+            EVAL_EVAL => PrimMode::symbol_call(SymbolMode::Eval, CodeMode::Eval),
             _ => return None,
         };
         Some(mode)
@@ -161,9 +167,11 @@ impl GenerateMode<Val> for PrimMode {
                 (CodeMode::Form, SymbolMode::Literal) => FORM_LITERAL,
                 (CodeMode::Form, SymbolMode::Ref) => FORM_REF,
                 (CodeMode::Form, SymbolMode::Move) => FORM_MOVE,
+                (CodeMode::Form, SymbolMode::Eval) => FORM_EVAL,
                 (CodeMode::Eval, SymbolMode::Literal) => EVAL_LITERAL,
                 (CodeMode::Eval, SymbolMode::Ref) => EVAL_REF,
                 (CodeMode::Eval, SymbolMode::Move) => EVAL_MOVE,
+                (CodeMode::Eval, SymbolMode::Eval) => EVAL_EVAL,
             };
             return symbol(s);
         }
@@ -265,6 +273,7 @@ impl ParseMode<Symbol> for SymbolMode {
             SYMBOL_LITERAL => SymbolMode::Literal,
             SYMBOL_REF => SymbolMode::Ref,
             SYMBOL_MOVE => SymbolMode::Move,
+            SYMBOL_EVAL => SymbolMode::Eval,
             _ => return None,
         };
         Some(mode)
@@ -283,6 +292,7 @@ impl GenerateMode<Symbol> for SymbolMode {
             SymbolMode::Literal => SYMBOL_LITERAL,
             SymbolMode::Ref => SYMBOL_REF,
             SymbolMode::Move => SYMBOL_MOVE,
+            SymbolMode::Eval => SYMBOL_EVAL,
         };
         Symbol::from_str_unchecked(s)
     }

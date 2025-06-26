@@ -1,4 +1,6 @@
 use super::ModeFn;
+use crate::semantics::core::Eval;
+use crate::semantics::core::SYMBOL_EVAL_CHAR;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::core::SYMBOL_MOVE_CHAR;
 use crate::semantics::core::SYMBOL_REF_CHAR;
@@ -15,6 +17,7 @@ pub enum SymbolMode {
     Literal,
     Ref,
     Move,
+    Eval,
 }
 
 impl ModeFn for SymbolMode {}
@@ -25,24 +28,25 @@ impl SymbolMode {
             SymbolMode::Literal => SYMBOL_LITERAL_CHAR,
             SymbolMode::Ref => SYMBOL_REF_CHAR,
             SymbolMode::Move => SYMBOL_MOVE_CHAR,
+            SymbolMode::Eval => SYMBOL_EVAL_CHAR,
         }
     }
 }
 
 impl FreeStaticFn<Symbol, Val> for SymbolMode {
     fn free_static_call(&self, input: Symbol) -> Val {
-        SymbolForm { default: self.into_char() }.free_static_call(input)
+        SymbolForm { default: self.into_char(), f: &Eval }.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, Symbol, Val> for SymbolMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        SymbolForm { default: self.into_char() }.const_static_call(ctx, input)
+        SymbolForm { default: self.into_char(), f: &Eval }.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, Symbol, Val> for SymbolMode {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        SymbolForm { default: self.into_char() }.mut_static_call(ctx, input)
+        SymbolForm { default: self.into_char(), f: &Eval }.mut_static_call(ctx, input)
     }
 }
