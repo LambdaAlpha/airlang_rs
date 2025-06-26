@@ -159,3 +159,8 @@ fn test_value() -> Result<(), Box<dyn Error>> {
 fn test_ctrl() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/ctrl.air"), "test/ctrl.air")
 }
+
+#[test]
+fn test_mode() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/mode.air"), "test/mode.air")
+}
