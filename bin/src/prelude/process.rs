@@ -74,10 +74,10 @@ fn fn_call(input: Val) -> Val {
         return Val::default();
     };
 
-    if let Some(status) = status.code() {
-        if status != 0 {
-            println!("program exit with code: {status}");
-        }
+    if let Some(status) = status.code()
+        && status != 0
+    {
+        println!("program exit with code: {status}");
     }
     Val::default()
 }

@@ -255,15 +255,15 @@ fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
 }
 
 fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
-    if !call.reverse {
-        if let GenRepr::Pair(pair) = call.input {
-            gen_scope_if_need(ctx, s, pair.first);
-            s.push(' ');
-            gen_scope_if_need(ctx, s, call.func);
-            s.push(' ');
-            gen_(ctx, s, pair.second);
-            return;
-        }
+    if !call.reverse
+        && let GenRepr::Pair(pair) = call.input
+    {
+        gen_scope_if_need(ctx, s, pair.first);
+        s.push(' ');
+        gen_scope_if_need(ctx, s, call.func);
+        s.push(' ');
+        gen_(ctx, s, pair.second);
+        return;
     }
     let prefix = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
     s.push_str(prefix);

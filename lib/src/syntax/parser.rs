@@ -248,7 +248,7 @@ where F: Parser<&'a str, T, E> {
     delimited_trim_comment(SCOPE_LEFT, f, SCOPE_RIGHT)
 }
 
-fn scope<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+fn scope<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     scoped_trim_comment(compose(ctx)).context(label("scope"))
 }
 
@@ -272,7 +272,7 @@ fn is_symbol(c: char) -> bool {
     Symbol::is_symbol(c)
 }
 
-fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
+fn token<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
     (move |i: &mut _| match peek(any).parse_next(i)? {
         // delimiters
         LIST_LEFT => list(ctx).map(Token::Default).parse_next(i),
@@ -292,12 +292,12 @@ fn token<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
 }
 
 fn tokens<T: ParseRepr>(
-    ctx: ParseCtx, occurrences: impl Into<Range>,
+    ctx: ParseCtx<'_>, occurrences: impl Into<Range>,
 ) -> impl Parser<&str, Vec<Token<T>>, E> {
     separated(occurrences, token(ctx), spaces_comment(1 ..))
 }
 
-fn ext<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, Token<T>, E> {
+fn ext<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
         let checkpoint = i.checkpoint();
@@ -379,7 +379,7 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn compose<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+fn compose<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     move |i: &mut _| {
         let tokens = tokens(ctx, 1 ..).parse_next(i)?;
         compose_tokens(ctx, i, tokens.into_iter())
@@ -497,13 +497,13 @@ where F: Parser<&'a str, O, E> {
     }
 }
 
-fn list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+fn list<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     delimited_trim_comment(LIST_LEFT, items(compose(ctx)), LIST_RIGHT)
         .map(|list| T::from(List::from(list)))
         .context(label("list"))
 }
 
-fn raw_list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+fn raw_list<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     delimited_trim_comment(LIST_LEFT, tokens(ctx, 0 ..), LIST_RIGHT)
         .map(|tokens| {
             let list: List<T> = tokens.into_iter().map(Token::into_repr).collect();
@@ -512,13 +512,13 @@ fn raw_list<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
         .context(label("raw list"))
 }
 
-fn map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+fn map<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     delimited_trim_comment(MAP_LEFT, items(key_value(ctx)), MAP_RIGHT)
         .map(|pairs| T::from(Map::from_iter(pairs)))
         .context(label("map"))
 }
 
-fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> {
+fn key_value<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, (T, T), E> {
     move |i: &mut _| {
         let key = token(ctx).parse_next(i)?;
         let key = compose_tokens_one(ctx, key);
@@ -535,7 +535,7 @@ fn key_value<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, (T, T), E> {
     }
 }
 
-fn raw_map<T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&str, T, E> {
+fn raw_map<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     let items = move |i: &mut _| {
         let tokens = tokens(ctx, 0 ..).parse_next(i)?;
         if tokens.len() % 2 != 0 {

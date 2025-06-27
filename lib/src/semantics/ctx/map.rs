@@ -80,7 +80,7 @@ impl CtxMap {
         Ok(&mut value.val)
     }
 
-    pub fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<Val>, CtxError> {
+    pub fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<'_, Val>, CtxError> {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };

@@ -34,7 +34,7 @@ impl<'a, T> ConstRef<'a, T> {
         self.0
     }
 
-    pub fn reborrow(&mut self) -> ConstRef<T> {
+    pub fn reborrow(&mut self) -> ConstRef<'_, T> {
         ConstRef(self.0)
     }
 
@@ -64,7 +64,7 @@ impl<'a, T> DynRef<'a, T> {
         self.ref_
     }
 
-    pub fn reborrow(&mut self) -> DynRef<T> {
+    pub fn reborrow(&mut self) -> DynRef<'_, T> {
         DynRef { ref_: self.ref_, const_: self.const_ }
     }
 
@@ -88,14 +88,14 @@ impl<'a, T> DynRef<'a, T> {
         if self.const_ { Either::This(ConstRef(self.ref_)) } else { Either::That(self.ref_) }
     }
 
-    pub fn map<S, F>(&mut self, f: F) -> DynRef<S>
+    pub fn map<S, F>(&mut self, f: F) -> DynRef<'_, S>
     where F: FnOnce(&mut T) -> DynRef<S> {
         let mut ref_ = f(self.ref_);
         ref_.or_const(self.const_);
         ref_
     }
 
-    pub fn map_opt<S, F>(&mut self, f: F) -> Option<DynRef<S>>
+    pub fn map_opt<S, F>(&mut self, f: F) -> Option<DynRef<'_, S>>
     where F: FnOnce(&mut T) -> Option<DynRef<S>> {
         match f(self.ref_) {
             Some(mut ref_) => {
@@ -106,7 +106,7 @@ impl<'a, T> DynRef<'a, T> {
         }
     }
 
-    pub fn map_res<S, F, E>(&mut self, f: F) -> Result<DynRef<S>, E>
+    pub fn map_res<S, F, E>(&mut self, f: F) -> Result<DynRef<'_, S>, E>
     where F: FnOnce(&mut T) -> Result<DynRef<S>, E> {
         match f(self.ref_) {
             Ok(mut ref_) => {

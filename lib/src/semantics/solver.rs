@@ -64,10 +64,10 @@ impl FreeStaticFn<Val, Val> for Solve {
             };
             Some(answer)
         });
-        if let Some(answer) = answer {
-            if !answer.is_unit() {
-                return answer;
-            }
+        if let Some(answer) = answer
+            && !answer.is_unit()
+        {
+            return answer;
         }
         Val::default()
     }
@@ -84,10 +84,10 @@ impl ConstStaticFn<Val, Val, Val> for Solve {
             };
             Some(answer)
         });
-        if let Some(answer) = answer {
-            if !answer.is_unit() {
-                return answer;
-            }
+        if let Some(answer) = answer
+            && !answer.is_unit()
+        {
+            return answer;
         }
         Val::default()
     }
@@ -104,10 +104,10 @@ impl MutStaticFn<Val, Val, Val> for Solve {
             };
             Some(answer)
         });
-        if let Some(answer) = answer {
-            if !answer.is_unit() {
-                return answer;
-            }
+        if let Some(answer) = answer
+            && !answer.is_unit()
+        {
+            return answer;
         }
         Val::default()
     }
