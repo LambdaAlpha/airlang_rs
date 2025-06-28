@@ -3,7 +3,6 @@ use std::hash::Hash;
 
 use const_format::concatcp;
 
-use super::func::ConstCellFn;
 use super::func::ConstStaticFn;
 use super::func::FreeStaticFn;
 use super::func::Func;
@@ -11,6 +10,7 @@ use super::func::MutCellFn;
 use super::func::MutStaticFn;
 use super::solver::Solve;
 use super::val::CallVal;
+use super::val::FuncVal;
 use super::val::ListVal;
 use super::val::MapVal;
 use super::val::PairVal;
@@ -505,14 +505,7 @@ where
                     return Solve.free_static_call(question);
                 }
                 let input = func.setup().map(|p| &p.forward).free_static_call(call.input);
-                if !func.ctx_explicit() {
-                    return func.free_static_call(input);
-                }
-                let Val::Pair(pair) = input else {
-                    return Val::default();
-                };
-                let pair = Pair::from(pair);
-                func.free_static_call(pair.second)
+                free_static_func_call(&func, input)
             }
             Val::Symbol(func) => {
                 CallRefEval.free_static_call(Call::new(call.reverse, func, call.input))
@@ -545,26 +538,7 @@ where
                 }
                 let input =
                     func.setup().map(|p| &p.forward).const_static_call(ctx.reborrow(), call.input);
-                if !func.ctx_explicit() {
-                    return func.const_static_call(ctx, input);
-                }
-                let Val::Pair(pair) = input else {
-                    return Val::default();
-                };
-                let pair = Pair::from(pair);
-                if pair.first.is_unit() {
-                    return func.const_static_call(ctx, pair.second);
-                }
-                let Val::Ctx(ctx_val) = ctx.unwrap() else {
-                    return Val::default();
-                };
-                let Val::Symbol(name) = pair.first else {
-                    return Val::default();
-                };
-                let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
-                    return Val::default();
-                };
-                func.const_static_call(val_ref.into_const(), pair.second)
+                const_static_func_call(ctx, &func, input)
             }
             Val::Symbol(func) => {
                 CallRefEval.const_static_call(ctx, Call::new(call.reverse, func, call.input))
@@ -593,26 +567,7 @@ where
                     return Solve.mut_static_call(ctx, question);
                 }
                 let input = func.setup().map(|p| &p.forward).mut_static_call(ctx, call.input);
-                if !func.ctx_explicit() {
-                    return func.mut_static_call(ctx, input);
-                }
-                let Val::Pair(pair) = input else {
-                    return Val::default();
-                };
-                let pair = Pair::from(pair);
-                if pair.first.is_unit() {
-                    return func.mut_static_call(ctx, pair.second);
-                }
-                let Val::Ctx(ctx_val) = ctx else {
-                    return Val::default();
-                };
-                let Val::Symbol(name) = pair.first else {
-                    return Val::default();
-                };
-                let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
-                    return Val::default();
-                };
-                func.dyn_static_call(val_ref, pair.second)
+                mut_static_func_call(ctx, &func, input)
             }
             Val::Symbol(func) => {
                 CallRefEval.mut_static_call(ctx, Call::new(call.reverse, func, call.input))
@@ -643,7 +598,7 @@ impl ConstStaticFn<Val, Call<Symbol, Val>, Val> for CallRefEval {
         let Ok(ctx_value) = ctx_val.variables_mut().lock(call.func.clone()) else {
             return Val::default();
         };
-        let Val::Func(mut func) = ctx_value.val else {
+        let Val::Func(func) = ctx_value.val else {
             ctx_val.variables_mut().unlock(call.func, ctx_value.val);
             return Val::default();
         };
@@ -659,7 +614,7 @@ impl ConstStaticFn<Val, Call<Symbol, Val>, Val> for CallRefEval {
         } else {
             let input =
                 func.setup().map(|p| &p.forward).const_static_call(ConstRef::new(ctx), call.input);
-            let output = func.const_cell_call(ConstRef::new(ctx), input);
+            let output = const_static_func_call(ConstRef::new(ctx), &func, input);
             let Val::Ctx(ctx_val) = ctx else {
                 unreachable!("CallRefEval forward ctx invariant is broken!!!");
             };
@@ -692,9 +647,9 @@ impl MutStaticFn<Val, Call<Symbol, Val>, Val> for CallRefEval {
         } else {
             let input = func.setup().map(|p| &p.forward).mut_static_call(ctx, call.input);
             let output = if ctx_value.contract.is_mutable() {
-                func.mut_cell_call(ctx, input)
+                mut_cell_func_call(ctx, &mut func, input)
             } else {
-                func.mut_static_call(ctx, input)
+                mut_static_func_call(ctx, &func, input)
             };
             let Val::Ctx(ctx_val) = ctx else {
                 unreachable!("CallRefEval forward ctx invariant is broken!!!");
@@ -716,14 +671,7 @@ impl FreeStaticFn<CallVal, Val> for CallApply {
                     let question = Val::Call(Call::new(true, Val::Func(func), call.input).into());
                     return Solve.free_static_call(question);
                 }
-                if !func.ctx_explicit() {
-                    return func.free_static_call(call.input);
-                }
-                let Val::Pair(pair) = call.input else {
-                    return Val::default();
-                };
-                let pair = Pair::from(pair);
-                func.free_static_call(pair.second)
+                free_static_func_call(&func, call.input)
             }
             Val::Symbol(func) => {
                 CallRefApply.free_static_call(Call::new(call.reverse, func, call.input))
@@ -743,26 +691,7 @@ impl ConstStaticFn<Val, CallVal, Val> for CallApply {
                     let question = Val::Call(Call::new(true, Val::Func(func), call.input).into());
                     return Solve.const_static_call(ctx, question);
                 }
-                if !func.ctx_explicit() {
-                    return func.const_static_call(ctx, call.input);
-                }
-                let Val::Pair(pair) = call.input else {
-                    return Val::default();
-                };
-                let pair = Pair::from(pair);
-                if pair.first.is_unit() {
-                    return func.const_static_call(ctx, pair.second);
-                }
-                let Val::Ctx(ctx_val) = ctx.unwrap() else {
-                    return Val::default();
-                };
-                let Val::Symbol(name) = pair.first else {
-                    return Val::default();
-                };
-                let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
-                    return Val::default();
-                };
-                func.const_static_call(val_ref.into_const(), pair.second)
+                const_static_func_call(ctx, &func, call.input)
             }
             Val::Symbol(func) => {
                 CallRefApply.const_static_call(ctx, Call::new(call.reverse, func, call.input))
@@ -782,26 +711,7 @@ impl MutStaticFn<Val, CallVal, Val> for CallApply {
                     let question = Val::Call(Call::new(true, Val::Func(func), call.input).into());
                     return Solve.mut_static_call(ctx, question);
                 }
-                if !func.ctx_explicit() {
-                    return func.mut_static_call(ctx, call.input);
-                }
-                let Val::Pair(pair) = call.input else {
-                    return Val::default();
-                };
-                let pair = Pair::from(pair);
-                if pair.first.is_unit() {
-                    return func.mut_static_call(ctx, pair.second);
-                }
-                let Val::Ctx(ctx_val) = ctx else {
-                    return Val::default();
-                };
-                let Val::Symbol(name) = pair.first else {
-                    return Val::default();
-                };
-                let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
-                    return Val::default();
-                };
-                func.dyn_static_call(val_ref, pair.second)
+                mut_static_func_call(ctx, &func, call.input)
             }
             Val::Symbol(func_name) => {
                 CallRefApply.mut_static_call(ctx, Call::new(call.reverse, func_name, call.input))
@@ -839,11 +749,11 @@ impl ConstStaticFn<Val, Call<Symbol, Val>, Val> for CallRefApply {
             let Ok(ctx_value) = ctx_val.variables_mut().lock(call.func.clone()) else {
                 return Val::default();
             };
-            let Val::Func(mut func) = ctx_value.val else {
+            let Val::Func(func) = ctx_value.val else {
                 ctx_val.variables_mut().unlock(call.func, ctx_value.val);
                 return Val::default();
             };
-            let output = func.const_cell_call(ConstRef::new(ctx), call.input);
+            let output = const_static_func_call(ConstRef::new(ctx), &func, call.input);
             let Val::Ctx(ctx_val) = ctx else {
                 unreachable!("CallRefApply ctx invariant is broken!!!");
             };
@@ -876,9 +786,9 @@ impl MutStaticFn<Val, Call<Symbol, Val>, Val> for CallRefApply {
                 return Val::default();
             };
             let output = if ctx_value.contract.is_mutable() {
-                func.mut_cell_call(ctx, call.input)
+                mut_cell_func_call(ctx, &mut func, call.input)
             } else {
-                func.mut_static_call(ctx, call.input)
+                mut_static_func_call(ctx, &func, call.input)
             };
             let Val::Ctx(ctx_val) = ctx else {
                 unreachable!("CallRefApply ctx invariant is broken!!!");
@@ -887,6 +797,86 @@ impl MutStaticFn<Val, Call<Symbol, Val>, Val> for CallRefApply {
             output
         }
     }
+}
+
+fn free_static_func_call(func: &FuncVal, input: Val) -> Val {
+    if !func.ctx_explicit() {
+        return func.free_static_call(input);
+    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    func.free_static_call(pair.second)
+}
+
+fn const_static_func_call(ctx: ConstRef<Val>, func: &FuncVal, input: Val) -> Val {
+    if !func.ctx_explicit() {
+        return func.const_static_call(ctx, input);
+    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    if pair.first.is_unit() {
+        return func.const_static_call(ctx, pair.second);
+    }
+    let Val::Ctx(ctx_val) = ctx.unwrap() else {
+        return Val::default();
+    };
+    let Val::Symbol(name) = pair.first else {
+        return Val::default();
+    };
+    let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
+        return Val::default();
+    };
+    func.const_static_call(val_ref.into_const(), pair.second)
+}
+
+fn mut_static_func_call(ctx: &mut Val, func: &FuncVal, input: Val) -> Val {
+    if !func.ctx_explicit() {
+        return func.mut_static_call(ctx, input);
+    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    if pair.first.is_unit() {
+        return func.mut_static_call(ctx, pair.second);
+    }
+    let Val::Ctx(ctx_val) = ctx else {
+        return Val::default();
+    };
+    let Val::Symbol(name) = pair.first else {
+        return Val::default();
+    };
+    let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
+        return Val::default();
+    };
+    func.dyn_static_call(val_ref, pair.second)
+}
+
+fn mut_cell_func_call(ctx: &mut Val, func: &mut FuncVal, input: Val) -> Val {
+    if !func.ctx_explicit() {
+        return func.mut_cell_call(ctx, input);
+    }
+    let Val::Pair(pair) = input else {
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    if pair.first.is_unit() {
+        return func.mut_cell_call(ctx, pair.second);
+    }
+    let Val::Ctx(ctx_val) = ctx else {
+        return Val::default();
+    };
+    let Val::Symbol(name) = pair.first else {
+        return Val::default();
+    };
+    let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
+        return Val::default();
+    };
+    func.dyn_cell_call(val_ref, pair.second)
 }
 
 #[derive(Debug, Copy, Clone)]
