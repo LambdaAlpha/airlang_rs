@@ -401,7 +401,7 @@ where
         let repr = tokens.next().unwrap().into_repr();
         return Ok(repr);
     }
-    if len % 2 == 0 {
+    if len.is_multiple_of(2) {
         return cut_err(fail.context(expect_desc("odd number of tokens"))).parse_next(i);
     }
     match ctx.direction {
@@ -538,7 +538,7 @@ fn key_value<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, (T, T), E> {
 fn raw_map<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
     let items = move |i: &mut _| {
         let tokens = tokens(ctx, 0 ..).parse_next(i)?;
-        if tokens.len() % 2 != 0 {
+        if !tokens.len().is_multiple_of(2) {
             return cut_err(fail.context(expect_desc("even number of tokens"))).parse_next(i);
         }
         let mut map = Map::with_capacity(tokens.len() / 2);
@@ -817,7 +817,7 @@ fn byte(i: &mut &str) -> ModalResult<Byte> {
 }
 
 fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
-    let digits = hexadecimal1.verify(|s: &str| s.len() % 2 == 0);
+    let digits = hexadecimal1.verify(|s: &str| s.len().is_multiple_of(2));
     trim_num0(digits)
         .map(|s| Byte::from(hex_str_to_vec_u8(&s).unwrap()))
         .context(expect_desc("hexadecimal"))
@@ -825,7 +825,7 @@ fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
 }
 
 fn binary_byte(i: &mut &str) -> ModalResult<Byte> {
-    let digits = binary1.verify(|s: &str| s.len() % 8 == 0);
+    let digits = binary1.verify(|s: &str| s.len().is_multiple_of(8));
     trim_num0(digits)
         .map(|s| Byte::from(bin_str_to_vec_u8(&s).unwrap()))
         .context(expect_desc("binary"))
