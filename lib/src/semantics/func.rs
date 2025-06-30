@@ -58,6 +58,8 @@ pub fn default_setup() -> FuncVal {
     )
 }
 
+// todo rename cell/static
+
 mod comp;
 
 mod free_static_prim;

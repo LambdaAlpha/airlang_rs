@@ -20,6 +20,7 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
+// todo impl derive from
 #[derive(PartialEq, Eq, Clone, Hash)]
 pub enum Repr {
     Unit(Unit),

@@ -40,12 +40,15 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
+// todo rename
 pub trait Type {
     fn type_name(&self) -> Symbol;
 }
 
+// todo rename
 dyn_any_debug_clone_eq_hash!(pub ValExt : Type);
 
+// todo impl derive from
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Val {
     Unit(Unit),

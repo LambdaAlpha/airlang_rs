@@ -57,7 +57,7 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-thread_local!(pub(in crate::prelude) static ARBITRARY: RefCell<Box<dyn ArbitraryVal >> = RefCell::new(Box::new(ArbitraryValUnit)));
+thread_local!(pub(in crate::prelude) static ARBITRARY: RefCell<Box<dyn ArbitraryVal>> = RefCell::new(Box::new(ArbitraryValUnit)));
 
 pub trait ArbitraryVal {
     fn arbitrary(&self) -> Val;

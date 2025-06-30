@@ -30,6 +30,7 @@ use crate::type_::Symbol;
 use crate::type_::wrap::box_wrap;
 use crate::type_::wrap::rc_wrap;
 
+// todo impl derive from
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum FuncVal {
     FreeCellPrim(FreeCellPrimFuncVal),

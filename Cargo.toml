@@ -2,10 +2,10 @@
 resolver = "3"
 
 members = [
-    "lib",
-    "ext",
+    "lib", # core
+    "ext", # std
     "bin",
-    "air"
+    "air" # core and std library
 ]
 
 [workspace.lints.rust]
@@ -28,7 +28,7 @@ redundant_lifetimes = "warn"
 
 # import
 redundant_imports = "warn"
-# request feature
+# todo request feature
 # unqualified_local_imports = "warn"
 unused_qualifications = "warn"
 

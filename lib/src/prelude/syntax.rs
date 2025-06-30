@@ -73,6 +73,7 @@ fn fn_generate(input: Val) -> Val {
     Val::Text(Text::from(str).into())
 }
 
+// todo impl derive from
 impl From<&Repr> for Val {
     fn from(value: &Repr) -> Self {
         match value {

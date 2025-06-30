@@ -22,32 +22,6 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-mod unit;
-
-mod bit;
-
-mod symbol;
-
-mod text;
-
-mod int;
-
-mod number;
-
-mod byte;
-
-mod pair;
-
-mod call;
-
-mod list;
-
-mod map;
-
-mod space;
-
-mod scope;
-
 fn unit() -> Repr {
     Repr::Unit(Unit)
 }
@@ -325,3 +299,29 @@ fn test_parse_illegal_example() -> Result<(), Box<dyn Error>> {
 fn test_parse_bad_example() -> Result<(), Box<dyn Error>> {
     test_parse_bad(include_str!("test/bad.air"), "test/bad.air")
 }
+
+mod unit;
+
+mod bit;
+
+mod symbol;
+
+mod text;
+
+mod int;
+
+mod number;
+
+mod byte;
+
+mod pair;
+
+mod call;
+
+mod list;
+
+mod map;
+
+mod space;
+
+mod scope;
