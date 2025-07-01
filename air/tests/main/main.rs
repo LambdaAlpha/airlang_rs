@@ -10,6 +10,7 @@ use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Symbol;
 use airlang::type_::Text;
+use airlang_dev::init_logger;
 
 const MAIN_DELIMITER: &str = "=====";
 const SUB_DELIMITER: &str = "-----";
@@ -18,6 +19,7 @@ const MAIN_NAME: &str = "main";
 
 #[expect(dead_code)]
 fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
+    init_logger();
     if input.is_empty() {
         return Ok(());
     }

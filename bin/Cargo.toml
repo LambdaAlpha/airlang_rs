@@ -21,3 +21,11 @@ version = "0.16.0"
 
 [dependencies]
 crossterm = "0.29"
+
+[dependencies.log]
+version = "0.4"
+default-features = false
+features = ["release_max_level_off"]
+
+[dev-dependencies.airlang_dev]
+path = "../dev"

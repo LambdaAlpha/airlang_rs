@@ -5,7 +5,8 @@ members = [
     "lib", # core
     "ext", # std
     "bin",
-    "air" # core and std library
+    "air", # core and std library
+    "dev"
 ]
 
 [workspace.lints.rust]

@@ -26,6 +26,11 @@ num-traits = "0.2"
 num-integer = "0.1"
 const_format = "0.2"
 
+[dependencies.log]
+version = "0.4"
+default-features = false
+features = ["release_max_level_off"]
+
 [dependencies.string_cache]
 version = "0.8"
 default-features = false
@@ -38,3 +43,6 @@ features = ["small_rng", "alloc", "os_rng"]
 
 [dev-dependencies]
 criterion = "0.6"
+
+[dev-dependencies.airlang_dev]
+path = "../dev"

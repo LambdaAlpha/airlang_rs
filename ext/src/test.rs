@@ -8,12 +8,14 @@ use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Int;
 use airlang::type_::Text;
+use airlang_dev::init_logger;
 
 use crate::prelude::StdPrelude;
 use crate::solver::std_solver;
 
 #[test]
 fn test_build_import() -> Result<(), Box<dyn Error>> {
+    init_logger();
     let src = generate_import("/src/test/build_import/case_1/main.air");
     let src = parse(&src)?;
     init_prelude(Box::new(StdPrelude::default()));

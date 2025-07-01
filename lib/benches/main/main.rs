@@ -1,3 +1,4 @@
+use airlang_dev::init_logger;
 use criterion::Criterion;
 use criterion::criterion_group;
 use criterion::criterion_main;
@@ -9,6 +10,7 @@ criterion_group!(benches, bench_all);
 criterion_main!(benches);
 
 pub fn bench_all(c: &mut Criterion) {
+    init_logger();
     bench_syntax(c);
     bench_semantics(c);
 }
