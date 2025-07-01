@@ -1,6 +1,8 @@
 use std::error::Error;
 
 use airlang::Air;
+use airlang::init_prelude;
+use airlang::init_solver;
 use airlang::semantics::val::Val;
 use airlang::syntax::escape_text;
 use airlang::syntax::parse;
@@ -14,8 +16,8 @@ use crate::solver::std_solver;
 fn test_build_import() -> Result<(), Box<dyn Error>> {
     let src = generate_import("/src/test/build_import/case_1/main.air");
     let src = parse(&src)?;
-    Air::init_prelude(Box::new(StdPrelude::default()));
-    Air::init_solver(std_solver());
+    init_prelude(Box::new(StdPrelude::default()));
+    init_solver(std_solver());
     let mut air = Air::default();
     let output = air.interpret(src);
     assert_eq!(output, Val::Int(Int::from(5).into()));

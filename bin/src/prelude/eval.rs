@@ -1,4 +1,4 @@
-use airlang::Air;
+use airlang::initial_ctx;
 use airlang::prelude::DynFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
@@ -38,6 +38,6 @@ fn fn_reset(ctx: &mut Val, _input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
         return Val::default();
     };
-    **ctx = Air::initial_ctx();
+    **ctx = initial_ctx();
     Val::default()
 }

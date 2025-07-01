@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::OnceCell;
 use std::rc::Rc;
 
 use self::bit::BitPrelude;
@@ -50,7 +50,7 @@ use crate::type_::DynRef;
 use crate::type_::Map;
 use crate::type_::Symbol;
 
-thread_local!(pub(crate) static PRELUDE: RefCell<Box<dyn Prelude>> = RefCell::new(Box::new(EmptyPrelude)));
+thread_local!(pub(crate) static PRELUDE: OnceCell<Box<dyn Prelude>> = OnceCell::new());
 
 pub trait Prelude {
     fn put(&self, ctx: &mut dyn PreludeCtx);
@@ -60,22 +60,13 @@ pub trait PreludeCtx {
     fn put(&mut self, name: Symbol, val: Val);
 }
 
-struct EmptyPrelude;
-
-impl Prelude for EmptyPrelude {
-    fn put(&self, _ctx: &mut dyn PreludeCtx) {}
-}
-
 pub(crate) fn set_prelude(prelude: Box<dyn Prelude>) {
     PRELUDE.with(|p| {
-        let Ok(mut p) = p.try_borrow_mut() else {
-            return;
-        };
-        *p = prelude;
+        let _ = p.set(prelude);
     });
 }
 
-pub(crate) fn initial_ctx() -> Ctx {
+pub fn initial_ctx() -> Ctx {
     let mut variables: Map<Symbol, CtxValue> = Map::default();
     put_preludes(&mut variables);
     let variables = CtxMap::new(variables);
@@ -83,7 +74,10 @@ pub(crate) fn initial_ctx() -> Ctx {
 }
 
 pub(crate) fn put_preludes(ctx: &mut dyn PreludeCtx) {
-    PRELUDE.with_borrow(|prelude| {
+    PRELUDE.with(|prelude| {
+        let Some(prelude) = prelude.get() else {
+            return;
+        };
         prelude.put(ctx);
     });
 }

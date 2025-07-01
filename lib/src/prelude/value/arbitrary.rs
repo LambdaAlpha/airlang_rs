@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::OnceCell;
 use std::cmp::min;
 use std::hash::Hash;
 
@@ -57,12 +57,18 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-thread_local!(pub(in crate::prelude) static ARBITRARY: RefCell<Box<dyn ArbitraryVal>> = RefCell::new(Box::new(ArbitraryValUnit)));
+thread_local!(pub(in crate::prelude) static ARBITRARY: OnceCell<Box<dyn ArbitraryVal>> = OnceCell::new());
 
 pub trait ArbitraryVal {
     fn arbitrary(&self) -> Val;
 
     fn arbitrary_type(&self, type_: Symbol) -> Val;
+}
+
+pub(crate) fn set_arbitrary_val(arbitrary: Box<dyn ArbitraryVal>) {
+    ARBITRARY.with(|arb| {
+        let _ = arb.set(arbitrary);
+    });
 }
 
 pub trait Arbitrary {
@@ -513,11 +519,21 @@ impl Arbitrary for MutStaticCompFuncVal {
 }
 
 pub(in crate::prelude) fn arbitrary_ext() -> Val {
-    ARBITRARY.with_borrow(|ext| ext.arbitrary())
+    ARBITRARY.with(|ext| {
+        let Some(ext) = ext.get() else {
+            return Val::default();
+        };
+        ext.arbitrary()
+    })
 }
 
 pub(in crate::prelude) fn arbitrary_ext_type(type_: Symbol) -> Val {
-    ARBITRARY.with_borrow(|ext| ext.arbitrary_type(type_))
+    ARBITRARY.with(|ext| {
+        let Some(ext) = ext.get() else {
+            return Val::default();
+        };
+        ext.arbitrary_type(type_)
+    })
 }
 
 fn sample<const N: usize, R: Rng + ?Sized>(rng: &mut R, weights: [usize; N]) -> usize {
@@ -536,16 +552,4 @@ fn any_len_weighted<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> usize {
 fn any_len<R: Rng + ?Sized>(rng: &mut R) -> usize {
     let len: u8 = rng.random();
     len as usize
-}
-
-struct ArbitraryValUnit;
-
-impl ArbitraryVal for ArbitraryValUnit {
-    fn arbitrary(&self) -> Val {
-        Val::default()
-    }
-
-    fn arbitrary_type(&self, _type: Symbol) -> Val {
-        Val::default()
-    }
 }

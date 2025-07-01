@@ -1,6 +1,8 @@
 use std::hint::black_box;
 
 use airlang::Air;
+use airlang::init_prelude;
+use airlang::init_solver;
 use airlang::prelude::CorePrelude;
 use airlang::semantics::val::Val;
 use airlang::solver::core_solver;
@@ -18,8 +20,8 @@ pub fn bench_semantics(c: &mut Criterion) {
 
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
-        Air::init_prelude(Box::new(CorePrelude::default()));
-        Air::init_solver(core_solver());
+        init_prelude(Box::new(CorePrelude::default()));
+        init_solver(core_solver());
         let mut air = Air::default();
         let s = include_str!("interpret.air");
         let src_val: Val = parse(s).expect("parse failed");

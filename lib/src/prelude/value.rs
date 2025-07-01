@@ -7,6 +7,7 @@ use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
 use self::arbitrary::arbitrary_ext_type;
+use self::arbitrary::set_arbitrary_val;
 use super::DynFn;
 use super::FreeFn;
 use super::FuncMode;
@@ -50,6 +51,10 @@ use crate::type_::Pair;
 use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
+
+pub fn init_arbitrary(arbitrary_val: Box<dyn ArbitraryVal>) {
+    set_arbitrary_val(arbitrary_val);
+}
 
 #[derive(Clone)]
 pub struct ValuePrelude {

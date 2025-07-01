@@ -1,6 +1,8 @@
 use std::error::Error;
 
 use crate::Air;
+use crate::init_prelude;
+use crate::init_solver;
 use crate::prelude::CorePrelude;
 use crate::semantics::val::Val;
 use crate::solver::core_solver;
@@ -27,8 +29,8 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 }
 
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    Air::init_prelude(Box::new(CorePrelude::default()));
-    Air::init_solver(core_solver());
+    init_prelude(Box::new(CorePrelude::default()));
+    init_solver(core_solver());
     test_interpret(Air::default(), input, file_name)
 }
 

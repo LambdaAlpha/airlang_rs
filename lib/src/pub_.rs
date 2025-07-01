@@ -1,5 +1,8 @@
+pub use crate::prelude::initial_ctx;
+
+_____!();
+
 use crate::prelude::Prelude;
-use crate::prelude::initial_ctx;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
 use crate::prelude::set_prelude;
@@ -9,6 +12,18 @@ use crate::semantics::solver::set_solver;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 
+/// init thread local prelude
+/// this method should be called before instantiating [`Air`] or calling [`initial_ctx`]
+pub fn init_prelude(prelude: Box<dyn Prelude>) {
+    set_prelude(prelude);
+}
+
+/// init thread local solver
+/// this method should be called before calling [`Air::interpret`]
+pub fn init_solver(solver: FuncVal) {
+    set_solver(solver);
+}
+
 #[derive(Debug, Clone)]
 pub struct Air {
     mode: Option<Mode>,
@@ -16,24 +31,8 @@ pub struct Air {
 }
 
 impl Air {
-    /// init thread local prelude
-    /// this method should be called before instantiating `Air` or calling `initial_ctx`
-    pub fn init_prelude(prelude: Box<dyn Prelude>) {
-        set_prelude(prelude);
-    }
-
-    /// init thread local solver
-    /// this method should be called before calling `interpret`
-    pub fn init_solver(solver: FuncVal) {
-        set_solver(solver);
-    }
-
     pub fn new(mode: Option<Mode>, ctx: Ctx) -> Self {
         Self { mode, ctx }
-    }
-
-    pub fn initial_ctx() -> Ctx {
-        initial_ctx()
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
@@ -47,6 +46,6 @@ impl Air {
 
 impl Default for Air {
     fn default() -> Self {
-        Self { mode: FuncMode::default_mode(), ctx: Self::initial_ctx() }
+        Self { mode: FuncMode::default_mode(), ctx: initial_ctx() }
     }
 }
