@@ -6,6 +6,7 @@ use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mut_impl;
 use airlang::semantics::val::MutStaticPrimFuncVal;
 use airlang::semantics::val::Val;
+use log::error;
 
 pub struct EvalPrelude {
     pub reset: MutStaticPrimFuncVal,
@@ -36,6 +37,7 @@ pub fn reset() -> MutStaticPrimFuncVal {
 
 fn fn_reset(ctx: &mut Val, _input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     **ctx = initial_ctx();

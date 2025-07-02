@@ -1,3 +1,5 @@
+use log::error;
+
 use crate::prelude::FuncMode;
 use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::Mode;
@@ -64,6 +66,7 @@ pub(super) fn parse_mode() -> Option<Mode> {
 // todo design defaults
 pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
+        error!("{input:?} should be a map");
         return None;
     };
 
@@ -75,23 +78,34 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
             match names_body.first {
                 Val::Pair(ctx_input) => {
                     let Val::Symbol(ctx) = &ctx_input.first else {
+                        error!("ctx {:?} should be a symbol", ctx_input.first);
                         return None;
                     };
                     let Val::Symbol(input) = &ctx_input.second else {
+                        error!("input {:?} should be a symbol", ctx_input.second);
                         return None;
                     };
                     (Some(ctx.clone()), input.clone(), names_body.second)
                 }
                 Val::Symbol(input) => (None, input, names_body.second),
-                _ => return None,
+                v => {
+                    error!("name {v:?} should be a symbol or a pair of symbol");
+                    return None;
+                }
             }
         }
-        _ => return None,
+        v => {
+            error!("code {v:?} should be a pair or a unit");
+            return None;
+        }
     };
     let ctx = match map_remove(&mut map, CTX) {
         Val::Ctx(ctx) => Ctx::from(ctx),
         Val::Unit(_) => Ctx::default(),
-        _ => return None,
+        v => {
+            error!("ctx {v:?} should be a ctx or a unit");
+            return None;
+        }
     };
     let setup = match map_remove(&mut map, SETUP) {
         Val::Unit(_) => None,
@@ -102,34 +116,52 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
                     FuncVal::MutStaticPrim(FuncMode::mode_into_mut_func(FuncMode::default_mode()))
                 }
                 Val::Func(func) => func,
-                _ => return None,
+                v => {
+                    error!("setup.first {v:?} should be a function or a unit");
+                    return None;
+                }
             };
             let reverse = match pair.second {
                 Val::Unit(_) => {
                     FuncVal::MutStaticPrim(FuncMode::mode_into_mut_func(FuncMode::default_mode()))
                 }
                 Val::Func(func) => func,
-                _ => return None,
+                v => {
+                    error!("setup.second {v:?} should be a function or a unit");
+                    return None;
+                }
             };
             Some(Setup { forward, reverse })
         }
-        _ => return None,
+        v => {
+            error!("setup {v:?} should be a pair or a unit");
+            return None;
+        }
     };
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = match &ctx_access {
         Val::Symbol(s) => &**s,
         Val::Unit(_) => MUTABLE,
-        _ => return None,
+        v => {
+            error!("ctx access {v:?} should be a symbol or a unit");
+            return None;
+        }
     };
     let ctx_explicit = match map_remove(&mut map, CTX_EXPLICIT) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
-        _ => return None,
+        v => {
+            error!("ctx explicit {v:?} should be a bit or a unit");
+            return None;
+        }
     };
     let cell = match map_remove(&mut map, CELL) {
         Val::Unit(_) => false,
         Val::Bit(b) => b.bool(),
-        _ => return None,
+        v => {
+            error!("cell {v:?} should be a bit or a unit");
+            return None;
+        }
     };
     let free_comp = FreeComposite { body, input_name };
     let func = match ctx_access {
@@ -164,7 +196,10 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
                 FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
             }
         }
-        _ => return None,
+        s => {
+            error!("ctx access {s} should be one of {FREE}, {CONST}, or {MUTABLE}");
+            return None;
+        }
     };
     Some(func)
 }

@@ -1,3 +1,5 @@
+use log::error;
+
 use crate::prelude::MutStaticImpl;
 use crate::prelude::ctx::ref_::RefCtx;
 use crate::prelude::setup::DynFn;
@@ -61,6 +63,7 @@ fn fn_ref_mut(ctx: &mut Val, input: Val) -> Val {
     let prefix = s.chars().next();
     if let Some(SYMBOL_MOVE_CHAR) = prefix {
         let Val::Ctx(ctx) = ctx else {
+            error!("ctx {ctx:?} should be a ctx");
             return Val::default();
         };
         let val =

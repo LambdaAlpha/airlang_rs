@@ -1,3 +1,5 @@
+use log::error;
+
 use super::FreeFn;
 use super::FuncMode;
 use super::Prelude;
@@ -63,13 +65,16 @@ pub fn add() -> FreeStaticPrimFuncVal {
 
 fn fn_add(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     let i1 = Int::from(i1);
@@ -83,13 +88,16 @@ pub fn subtract() -> FreeStaticPrimFuncVal {
 
 fn fn_subtract(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     let i1 = Int::from(i1);
@@ -103,13 +111,16 @@ pub fn multiply() -> FreeStaticPrimFuncVal {
 
 fn fn_multiply(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     let i1 = Int::from(i1);
@@ -123,13 +134,16 @@ pub fn divide() -> FreeStaticPrimFuncVal {
 
 fn fn_divide(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     let i1 = Int::from(i1);
@@ -146,13 +160,16 @@ pub fn remainder() -> FreeStaticPrimFuncVal {
 
 fn fn_remainder(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     let i1 = Int::from(i1);
@@ -169,13 +186,16 @@ pub fn divide_remainder() -> FreeStaticPrimFuncVal {
 
 fn fn_divide_remainder(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     let i1 = Int::from(i1);
@@ -192,13 +212,16 @@ pub fn less_than() -> FreeStaticPrimFuncVal {
 
 fn fn_less_than(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     Val::Bit(i1.less_than(&i2))
@@ -210,13 +233,16 @@ pub fn less_equal() -> FreeStaticPrimFuncVal {
 
 fn fn_less_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     Val::Bit(i1.less_equal(&i2))
@@ -228,13 +254,16 @@ pub fn greater_than() -> FreeStaticPrimFuncVal {
 
 fn fn_greater_than(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     Val::Bit(i1.greater_than(&i2))
@@ -246,13 +275,16 @@ pub fn greater_equal() -> FreeStaticPrimFuncVal {
 
 fn fn_greater_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     Val::Bit(i1.greater_equal(&i2))
@@ -264,13 +296,16 @@ pub fn less_greater() -> FreeStaticPrimFuncVal {
 
 fn fn_less_greater(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
+        error!("input.first {:?} should be a int", pair.first);
         return Val::default();
     };
     let Val::Int(i2) = pair.second else {
+        error!("input.second {:?} should be a int", pair.second);
         return Val::default();
     };
     Val::Bit(i1.less_greater(&i2))

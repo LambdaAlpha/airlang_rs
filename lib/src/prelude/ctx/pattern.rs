@@ -1,3 +1,5 @@
+use log::error;
+
 use super::repr::OptBinding;
 use super::repr::parse_contract;
 use crate::prelude::utils::symbol;
@@ -74,12 +76,16 @@ fn parse_call(ctx: PatternCtx, call: CallVal) -> Option<Pattern> {
         Val::Symbol(symbol) => match &*symbol {
             CALL_FORWARD | CALL_REVERSE => {
                 let Val::Pair(pair) = call.input else {
+                    error!("{:?} should be a pair", call.input);
                     return None;
                 };
                 let pair = Pair::from(pair);
                 parse_call1(ctx, &*symbol == CALL_REVERSE, pair.first, pair.second)
             }
-            _ => None,
+            s => {
+                error!("{s} should be one of {CALL_FORWARD} or {CALL_REVERSE}");
+                None
+            }
         },
         func => parse_call1(ctx, false, func, call.input),
     }
@@ -112,6 +118,7 @@ fn parse_map(ctx: PatternCtx, map: MapVal) -> Option<Pattern> {
 
 fn parse_with_guard(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
     let Val::Pair(pair) = val else {
+        error!("{val:?} should be a pair");
         return None;
     };
     let pair = Pair::from(pair);
@@ -140,6 +147,7 @@ fn match_val(expected: &Val, val: &Val) -> bool {
 
 fn match_pair(pattern: &Pair<Pattern, Pattern>, val: &Val) -> bool {
     let Val::Pair(val) = val else {
+        error!("{val:?} should be a pair");
         return false;
     };
     let first = match_pattern(&pattern.first, &val.first);
@@ -149,6 +157,7 @@ fn match_pair(pattern: &Pair<Pattern, Pattern>, val: &Val) -> bool {
 
 fn match_call(pattern: &Call<Pattern, Pattern>, val: &Val) -> bool {
     let Val::Call(val) = val else {
+        error!("{val:?} should be a call");
         return false;
     };
     let func = match_pattern(&pattern.func, &val.func);
@@ -158,6 +167,7 @@ fn match_call(pattern: &Call<Pattern, Pattern>, val: &Val) -> bool {
 
 fn match_list(pattern: &List<Pattern>, val: &Val) -> bool {
     let Val::List(val) = val else {
+        error!("{val:?} should be a list");
         return false;
     };
     let mut val_iter = val.iter();
@@ -169,6 +179,7 @@ fn match_list(pattern: &List<Pattern>, val: &Val) -> bool {
 
 fn match_map(pattern: &Map<Val, Pattern>, val: &Val) -> bool {
     let Val::Map(val) = val else {
+        error!("{val:?} should be a map");
         return false;
     };
     pattern.iter().all(|(k, pattern)| {
@@ -189,8 +200,10 @@ pub(in crate::prelude) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: V
 }
 
 fn assign_any(ctx: &mut Ctx, binding: OptBinding, val: Val) -> Val {
-    let Ok(last) = ctx.variables_mut().put(binding.name, val, binding.contract.unwrap_or_default())
+    let Ok(last) =
+        ctx.variables_mut().put(binding.name.clone(), val, binding.contract.unwrap_or_default())
     else {
+        error!("variable {:?} is not assignable", binding.name);
         return Val::default();
     };
     last.unwrap_or_default()
@@ -202,6 +215,7 @@ fn assign_val(_ctx: &mut Ctx, _expected: Val, _val: Val) -> Val {
 
 fn assign_pair(ctx: &mut Ctx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val {
     let Val::Pair(val) = val else {
+        error!("{val:?} should be a pair");
         return Val::default();
     };
     let val = Pair::from(val);
@@ -212,9 +226,11 @@ fn assign_pair(ctx: &mut Ctx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val 
 
 fn assign_call(ctx: &mut Ctx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
     let Val::Call(val) = val else {
+        error!("{val:?} should be a call");
         return Val::default();
     };
     if pattern.reverse != val.reverse {
+        error!("reverse should be equal");
         return Val::default();
     }
     let val = Call::from(val);
@@ -225,6 +241,7 @@ fn assign_call(ctx: &mut Ctx, pattern: Call<Pattern, Pattern>, val: Val) -> Val 
 
 fn assign_list(ctx: &mut Ctx, pattern: List<Pattern>, val: Val) -> Val {
     let Val::List(val) = val else {
+        error!("{val:?} should be a list");
         return Val::default();
     };
     let mut list = List::from(Vec::with_capacity(pattern.len()));
@@ -239,6 +256,7 @@ fn assign_list(ctx: &mut Ctx, pattern: List<Pattern>, val: Val) -> Val {
 
 fn assign_map(ctx: &mut Ctx, pattern: Map<Val, Pattern>, val: Val) -> Val {
     let Val::Map(mut val) = val else {
+        error!("{val:?} should be a map");
         return Val::default();
     };
     let map: Map<Val, Val> = pattern

@@ -1,3 +1,5 @@
+use log::error;
+
 use self::pattern::PatternCtx;
 use self::pattern::assign_pattern;
 use self::pattern::match_pattern;
@@ -102,13 +104,16 @@ pub fn read() -> ConstStaticPrimFuncVal {
 
 fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
+        error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
     ctx.variables().get_ref(s).cloned().unwrap_or_default()
@@ -128,13 +133,16 @@ pub fn move_() -> MutStaticPrimFuncVal {
 
 fn fn_move(ctx: &mut Val, input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
+        error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
     ctx.variables_mut().remove(s).unwrap_or_default()
@@ -158,14 +166,17 @@ pub fn assign() -> MutStaticPrimFuncVal {
 
 fn fn_assign(ctx: &mut Val, input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let pattern_ctx = PatternCtx::default();
     let Some(pattern) = parse_pattern(pattern_ctx, pair.first) else {
+        error!("parse pattern failed");
         return Val::default();
     };
     let val = pair.second;
@@ -186,16 +197,20 @@ pub fn contract() -> ConstStaticPrimFuncVal {
 
 fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
+        error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    let Some(contract) = ctx.variables().get_contract(s) else {
+    let Some(contract) = ctx.variables().get_contract(s.clone()) else {
+        error!("variable {s:?} should exist");
         return Val::default();
     };
     generate_contract(contract)
@@ -219,16 +234,20 @@ pub fn set_contract() -> MutStaticPrimFuncVal {
 
 fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
+        error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
     let Some(contract) = parse_contract(pair.second) else {
+        error!("parse contract failed");
         return Val::default();
     };
     let _ = ctx.variables_mut().set_contract(s, contract);
@@ -249,16 +268,20 @@ pub fn is_locked() -> ConstStaticPrimFuncVal {
 
 fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
+        error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    let Some(locked) = ctx.variables().is_locked(s) else {
+    let Some(locked) = ctx.variables().is_locked(s.clone()) else {
+        error!("variable {s:?} should exist");
         return Val::default();
     };
     Val::Bit(Bit::new(locked))
@@ -278,13 +301,16 @@ pub fn is_null() -> ConstStaticPrimFuncVal {
 
 fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
+        error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
     Val::Bit(Bit::new(ctx.variables().is_null(s)))
@@ -346,10 +372,11 @@ pub fn ctx_new() -> FreeStaticPrimFuncVal {
 }
 
 fn fn_ctx_new(input: Val) -> Val {
-    match parse_ctx(input) {
-        Some(ctx) => Val::Ctx(ctx),
-        None => Val::default(),
-    }
+    let Some(ctx) = parse_ctx(input) else {
+        error!("parse_ctx failed");
+        return Val::default();
+    };
+    Val::Ctx(ctx)
 }
 
 pub fn ctx_repr() -> FreeStaticPrimFuncVal {
@@ -359,6 +386,7 @@ pub fn ctx_repr() -> FreeStaticPrimFuncVal {
 
 fn fn_ctx_repr(input: Val) -> Val {
     let Val::Ctx(ctx) = input else {
+        error!("input {input:?} should be a ctx");
         return Val::default();
     };
     generate_ctx(ctx)

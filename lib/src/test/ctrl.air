@@ -138,7 +138,7 @@ match pattern
 =====
 match pattern contract
 -----
-[1, 2, 3] match [[a . final, 2, c . {}] : a + c]
+[1, 2, 3] match [[a . final, 2, c . none] : a + c]
 -----
 4
 =====

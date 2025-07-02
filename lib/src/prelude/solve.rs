@@ -1,3 +1,5 @@
+use log::error;
+
 use super::FreeFn;
 use super::FuncMode;
 use super::Prelude;
@@ -46,10 +48,12 @@ pub fn set_solver() -> FreeStaticPrimFuncVal {
 
 fn fn_set_solver(input: Val) -> Val {
     let Val::Func(new_solver) = input else {
+        error!("input {input:?} should be a function");
         return Val::default();
     };
     SOLVER.with(|solver| {
         let Ok(mut solver) = solver.try_borrow_mut() else {
+            error!("should not call this function inside a solver");
             return;
         };
         *solver = new_solver;

@@ -9,6 +9,7 @@ use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mode::SymbolMode;
 use airlang::semantics::val::FreeStaticPrimFuncVal;
 use airlang::semantics::val::Val;
+use log::error;
 
 pub struct ProcessPrelude {
     pub call: FreeStaticPrimFuncVal,
@@ -41,14 +42,19 @@ pub fn call() -> FreeStaticPrimFuncVal {
 
 fn fn_call(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let program: &str = match &pair.first {
         Val::Text(program) => program,
         Val::Symbol(symbol) => symbol,
-        _ => return Val::default(),
+        v => {
+            error!("program {v:?} should be a text or a symbol");
+            return Val::default();
+        }
     };
     let Val::List(arguments) = &pair.second else {
+        error!("arguments {:?} should be a list", pair.second);
         return Val::default();
     };
     let arguments = arguments
@@ -57,7 +63,10 @@ fn fn_call(input: Val) -> Val {
             let arg: &str = match val {
                 Val::Text(text) => text,
                 Val::Symbol(symbol) => symbol,
-                _ => return None,
+                v => {
+                    error!("argument {v:?} should be a text or a symbol");
+                    return None;
+                }
             };
             Some(arg)
         })

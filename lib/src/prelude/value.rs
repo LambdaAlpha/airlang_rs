@@ -1,3 +1,5 @@
+use log::error;
+
 pub use self::arbitrary::Arbitrary;
 pub use self::arbitrary::ArbitraryVal;
 
@@ -112,7 +114,10 @@ fn fn_any(input: Val) -> Val {
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             _ => arbitrary_ext_type(s),
         },
-        _ => Val::default(),
+        v => {
+            error!("input {v:?} should be a symbol or a unit");
+            Val::default()
+        }
     }
 }
 
@@ -162,9 +167,11 @@ pub fn equal() -> ConstStaticPrimFuncVal {
 
 fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
@@ -172,10 +179,12 @@ fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {
     let right = RefCtx::ref_or_val(pair.second);
     get_by_ref(ctx, left, |v1| {
         let Some(v1) = v1 else {
+            error!("input.first should exist");
             return Val::default();
         };
         get_by_ref(ctx, right, |v2| {
             let Some(v2) = v2 else {
+                error!("input.second should exist");
                 return Val::default();
             };
             Val::Bit(Bit::new(*v1 == *v2))
@@ -187,7 +196,8 @@ fn get_by_ref<T, F>(ctx: &Ctx, v: Either<Symbol, Val>, f: F) -> T
 where F: FnOnce(Option<&Val>) -> T {
     match v {
         Either::This(s) => {
-            let Ok(val) = ctx.variables().get_ref(s) else {
+            let Ok(val) = ctx.variables().get_ref(s.clone()) else {
+                error!("variable {s:?} should exist");
                 return f(None);
             };
             f(Some(val))

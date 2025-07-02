@@ -1,3 +1,5 @@
+use log::error;
+
 use super::DynFn;
 use super::FreeFn;
 use super::FuncMode;
@@ -50,10 +52,12 @@ pub fn from_text() -> FreeStaticPrimFuncVal {
 
 fn fn_from_text(input: Val) -> Val {
     let Val::Text(t) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     let is_symbol = t.chars().all(Symbol::is_symbol);
     if !is_symbol {
+        error!("every character of input {t:?} text should be a symbol");
         return Val::default();
     }
     let symbol = Symbol::from_string_unchecked(t.to_string());
@@ -67,6 +71,7 @@ pub fn into_text() -> FreeStaticPrimFuncVal {
 
 fn fn_into_text(input: Val) -> Val {
     let Val::Symbol(s) = input else {
+        error!("input {input:?} should be a symbol");
         return Val::default();
     };
     Val::Text(Text::from(String::from(s)).into())
@@ -84,6 +89,7 @@ pub fn length() -> ConstStaticPrimFuncVal {
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Symbol(symbol) = &*ctx else {
+        error!("ctx {ctx:?} should be a symbol");
         return Val::default();
     };
     let len: Int = symbol.len().into();
@@ -97,20 +103,26 @@ pub fn join() -> FreeStaticPrimFuncVal {
 
 fn fn_join(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let separator = match &pair.first {
         Val::Unit(_) => "",
         Val::Symbol(s) => s,
-        _ => return Val::default(),
+        s => {
+            error!("separator {s:?} should be a unit or a symbol");
+            return Val::default();
+        }
     };
     let Val::List(symbols) = &pair.second else {
+        error!("input.second {:?} should be a list", pair.second);
         return Val::default();
     };
     let symbols: Option<Vec<&str>> = symbols
         .iter()
         .map(|v| {
             let Val::Symbol(s) = v else {
+                error!("item {v:?} should be a symbol");
                 return None;
             };
             let symbol: &str = s;

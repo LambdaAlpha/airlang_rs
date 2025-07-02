@@ -1,5 +1,7 @@
 use std::mem::swap;
 
+use log::error;
+
 use super::DynFn;
 use super::FreeFn;
 use super::FuncMode;
@@ -109,6 +111,7 @@ pub fn length() -> ConstStaticPrimFuncVal {
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let len: Int = map.len().into();
@@ -127,6 +130,7 @@ pub fn items() -> ConstStaticPrimFuncVal {
 
 fn fn_items(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let items: List<Val> =
@@ -146,6 +150,7 @@ pub fn into_items() -> MutStaticPrimFuncVal {
 
 fn fn_into_items(ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let mut origin = Map::default();
@@ -167,6 +172,7 @@ pub fn keys() -> ConstStaticPrimFuncVal {
 
 fn fn_keys(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let keys: List<Val> = map.keys().cloned().collect();
@@ -185,6 +191,7 @@ pub fn into_keys() -> MutStaticPrimFuncVal {
 
 fn fn_into_keys(ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let mut origin = Map::default();
@@ -205,6 +212,7 @@ pub fn values() -> ConstStaticPrimFuncVal {
 
 fn fn_values(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let values: List<Val> = map.values().cloned().collect();
@@ -223,6 +231,7 @@ pub fn into_values() -> MutStaticPrimFuncVal {
 
 fn fn_into_values(ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let mut origin = Map::default();
@@ -243,6 +252,7 @@ pub fn contains() -> ConstStaticPrimFuncVal {
 
 fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     Val::Bit(Bit::new(map.contains_key(&input)))
@@ -260,9 +270,11 @@ pub fn contains_all() -> ConstStaticPrimFuncVal {
 
 fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let Val::List(keys) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let keys = List::from(keys);
@@ -282,9 +294,11 @@ pub fn contains_any() -> ConstStaticPrimFuncVal {
 
 fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let Val::List(keys) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let keys = List::from(keys);
@@ -304,9 +318,11 @@ pub fn set() -> MutStaticPrimFuncVal {
 
 fn fn_set(ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let Val::Pair(key_value) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let key_value = Pair::from(key_value);
@@ -327,9 +343,11 @@ pub fn set_many() -> MutStaticPrimFuncVal {
 
 fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let Val::Map(update) = input else {
+        error!("input {input:?} should be a map");
         return Val::default();
     };
     let update = Map::from(update);
@@ -350,6 +368,7 @@ pub fn get() -> ConstStaticPrimFuncVal {
 
 fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     map.get(&input).cloned().unwrap_or_default()
@@ -367,9 +386,11 @@ pub fn get_many() -> ConstStaticPrimFuncVal {
 
 fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let Val::List(keys) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let keys = List::from(keys);
@@ -390,6 +411,7 @@ pub fn remove() -> MutStaticPrimFuncVal {
 
 fn fn_remove(ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     map.remove(&input).unwrap_or_default()
@@ -407,9 +429,11 @@ pub fn remove_many() -> MutStaticPrimFuncVal {
 
 fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     let Val::List(keys) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let keys = List::from(keys);
@@ -430,6 +454,7 @@ pub fn clear() -> MutStaticPrimFuncVal {
 
 fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
     map.clear();
@@ -442,6 +467,7 @@ pub fn new_map() -> FreeStaticPrimFuncVal {
 
 fn fn_new_map(input: Val) -> Val {
     let Val::List(list) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let list = List::from(list);
@@ -467,6 +493,7 @@ pub fn new_set() -> FreeStaticPrimFuncVal {
 
 fn fn_new_set(input: Val) -> Val {
     let Val::List(list) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let list = List::from(list);
@@ -481,6 +508,7 @@ pub fn new_multiset() -> FreeStaticPrimFuncVal {
 
 fn fn_new_multiset(input: Val) -> Val {
     let Val::List(list) = input else {
+        error!("input {input:?} should be a list");
         return Val::default();
     };
     let list = List::from(list);

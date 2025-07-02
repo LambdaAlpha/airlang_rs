@@ -15,6 +15,7 @@ use airlang::type_::List;
 use airlang::type_::Map;
 use airlang::type_::Symbol;
 use airlang::type_::Text;
+use log::error;
 
 pub struct ProcessPrelude {
     pub call: FreeStaticPrimFuncVal,
@@ -53,14 +54,25 @@ pub fn call() -> FreeStaticPrimFuncVal {
 
 fn fn_call(input: Val) -> Val {
     let Val::Map(mut map) = input else {
+        error!("input {input:?} should be a map");
         return Val::default();
     };
     let program_key = Val::Symbol(Symbol::from_str_unchecked(PROGRAM));
-    let Some(Val::Text(program)) = map.remove(&program_key) else {
+    let Some(program) = map.remove(&program_key) else {
+        error!("program name should be provided");
+        return Val::default();
+    };
+    let Val::Text(program) = program else {
+        error!("program {program:?} should be a text");
         return Val::default();
     };
     let arguments_key = Val::Symbol(Symbol::from_str_unchecked(ARGUMENTS));
-    let Some(Val::List(arguments)) = map.remove(&arguments_key) else {
+    let Some(arguments) = map.remove(&arguments_key) else {
+        error!("arguments should be provided");
+        return Val::default();
+    };
+    let Val::List(arguments) = arguments else {
+        error!("arguments {arguments:?} should be a list");
         return Val::default();
     };
     let arguments = List::from(arguments);
@@ -68,6 +80,7 @@ fn fn_call(input: Val) -> Val {
         .into_iter()
         .map(|val| {
             let Val::Text(arg) = val else {
+                error!("argument {val:?} should be a text");
                 return None;
             };
             let arg = Text::from(arg);
@@ -79,8 +92,12 @@ fn fn_call(input: Val) -> Val {
     };
 
     let output = Command::new(&**program).args(arguments).output();
-    let Ok(output) = output else {
-        return Val::default();
+    let output = match output {
+        Ok(output) => output,
+        Err(e) => {
+            error!("call program failed: {e}");
+            return Val::default();
+        }
     };
 
     let stdout = Val::Byte(Byte::from(output.stdout).into());

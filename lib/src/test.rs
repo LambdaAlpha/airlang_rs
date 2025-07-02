@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use airlang_dev::init_logger;
+use log::trace;
 
 use crate::Air;
 use crate::init_prelude;
@@ -45,6 +46,7 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
             eprintln!("file {file_name} case ({title}): input ({i}) parse failed\n{e}");
             e
         })?;
+        trace!("file {file_name} case ({title})");
         let ret = air.interpret(src);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");

@@ -1,3 +1,5 @@
+use log::error;
+
 use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
@@ -39,12 +41,16 @@ pub(super) fn parse_mode() -> Option<Mode> {
 // todo design
 pub(super) fn parse_ctx(input: Val) -> Option<CtxVal> {
     let Val::Map(mut map) = input else {
+        error!("input {input:?} should be a map");
         return None;
     };
     let variables = match map_remove(&mut map, VARIABLES) {
         Val::Unit(_) => Map::default(),
         Val::Map(map) => Map::from(map),
-        _ => return None,
+        v => {
+            error!("variables {v:?} should be a map or a unit");
+            return None;
+        }
     };
     let variables = parse_variables(variables)?;
     let variables = CtxMap::new(variables);
@@ -68,14 +74,17 @@ fn parse_binding(val: Val) -> Option<OptBinding> {
         Val::Symbol(name) => Some(OptBinding { name, contract: None }),
         Val::Call(call) => {
             if call.reverse || !call.func.is_unit() {
+                error!("call {call:?} should be forward and call.func should be a unit");
                 return None;
             }
             let call = Call::from(call);
             let Val::Pair(pair) = call.input else {
+                error!("call.input {:?} should be a pair", call.input);
                 return None;
             };
             let pair = Pair::from(pair);
             let Val::Symbol(name) = pair.first else {
+                error!("name {:?} should be a symbol", pair.first);
                 return None;
             };
             let contract = parse_contract(pair.second)?;
@@ -87,6 +96,7 @@ fn parse_binding(val: Val) -> Option<OptBinding> {
 
 pub(in crate::prelude) fn parse_contract(contract: Val) -> Option<Contract> {
     let Val::Symbol(s) = contract else {
+        error!("contract {contract:?} should be a symbol");
         return None;
     };
     let contract = match &*s {
@@ -95,7 +105,10 @@ pub(in crate::prelude) fn parse_contract(contract: Val) -> Option<Contract> {
         STILL => Contract::Still,
         FINAL => Contract::Final,
         CONST => Contract::Const,
-        _ => return None,
+        s => {
+            error!("contract {s:?} should be one of {NONE}, {STATIC}, {STILL}, {FINAL} or {CONST}");
+            return None;
+        }
     };
     Some(contract)
 }

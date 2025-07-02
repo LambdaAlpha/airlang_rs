@@ -1,5 +1,7 @@
 use std::mem::swap;
 
+use log::error;
+
 use super::DynFn;
 use super::FreeFn;
 use super::FuncMode;
@@ -53,6 +55,7 @@ pub fn new() -> FreeStaticPrimFuncVal {
 
 fn fn_new(input: Val) -> Val {
     let Val::Pair(_) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     input
@@ -70,6 +73,7 @@ pub fn first() -> ConstStaticPrimFuncVal {
 
 fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
+        error!("ctx {ctx:?} should be a pair");
         return Val::default();
     };
     pair.first.clone()
@@ -87,6 +91,7 @@ pub fn set_first() -> MutStaticPrimFuncVal {
 
 fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
+        error!("ctx {ctx:?} should be a pair");
         return Val::default();
     };
     swap(&mut pair.first, &mut input);
@@ -105,6 +110,7 @@ pub fn second() -> ConstStaticPrimFuncVal {
 
 fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
+        error!("ctx {ctx:?} should be a pair");
         return Val::default();
     };
     pair.second.clone()
@@ -122,6 +128,7 @@ pub fn set_second() -> MutStaticPrimFuncVal {
 
 fn fn_set_second(ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
+        error!("ctx {ctx:?} should be a pair");
         return Val::default();
     };
     swap(&mut pair.second, &mut input);

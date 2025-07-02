@@ -1,3 +1,5 @@
+use log::error;
+
 use super::DynFn;
 use super::FuncMode;
 use super::Prelude;
@@ -97,14 +99,17 @@ pub fn if_() -> MutStaticPrimFuncVal {
 
 fn fn_if(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let Val::Pair(branches) = pair.second else {
+        error!("input.second {:?} should be a pair", pair.second);
         return Val::default();
     };
     let condition = Eval.mut_static_call(ctx, pair.first);
     let Val::Bit(b) = condition else {
+        error!("condition {condition:?} should be a bit");
         return Val::default();
     };
     let branches = Pair::from(branches);
@@ -124,21 +129,25 @@ pub fn match_() -> MutStaticPrimFuncVal {
 
 fn fn_match(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let val = Eval.mut_static_call(ctx, pair.first);
     let Val::List(list) = pair.second else {
+        error!("input.second {:?} should be a list", pair.second);
         return Val::default();
     };
     let mode = PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form);
     for item in List::from(list) {
         let Val::Pair(pair) = item else {
+            error!("match arm {item:?} should be a pair");
             return Val::default();
         };
         let pair = Pair::from(pair);
         let pattern = mode.mut_static_call(ctx, pair.first);
         let Some(pattern) = parse_pattern(PatternCtx::default(), pattern) else {
+            error!("parse pattern failed");
             return Val::default();
         };
         if match_pattern(&pattern, &val) {
@@ -163,6 +172,7 @@ pub fn loop_() -> MutStaticPrimFuncVal {
 
 fn fn_loop(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
@@ -172,10 +182,13 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
         let body = List::from(body);
         let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
         let Some(block_items) = block_items else {
+            error!("parse block failed");
             return Val::default();
         };
         loop {
-            let Val::Bit(b) = Eval.mut_static_call(ctx, condition.clone()) else {
+            let cond = Eval.mut_static_call(ctx, condition.clone());
+            let Val::Bit(b) = cond else {
+                error!("condition {cond:?} should be a bit");
                 return Val::default();
             };
             if !b.bool() {
@@ -193,7 +206,9 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
         }
     } else {
         loop {
-            let Val::Bit(b) = Eval.mut_static_call(ctx, condition.clone()) else {
+            let cond = Eval.mut_static_call(ctx, condition.clone());
+            let Val::Bit(b) = cond else {
+                error!("condition {cond:?} should be a bit");
                 return Val::default();
             };
             if !b.bool() {
@@ -217,15 +232,18 @@ pub fn for_() -> MutStaticPrimFuncVal {
 
 fn fn_for(ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
     let iterable = Eval.mut_static_call(ctx, pair.first);
     let Val::Pair(name_body) = pair.second else {
+        error!("input.second {:?} should be a pair", pair.second);
         return Val::default();
     };
     let name_body = Pair::from(name_body);
     let Val::Symbol(name) = name_body.first else {
+        error!("input.first {:?} should be a symbol", name_body.first);
         return Val::default();
     };
     let body = name_body.second;
@@ -233,6 +251,7 @@ fn fn_for(ctx: &mut Val, input: Val) -> Val {
         Val::Int(i) => {
             let i = Int::from(i);
             if i.is_negative() {
+                error!("{i:?} should be positive");
                 return Val::default();
             }
             let Some(i) = i.to_u128() else { panic!("iterate on super big int {i:?}!!!") };
@@ -286,6 +305,7 @@ where ValIter: Iterator<Item = Val> {
         let body = List::from(body);
         let block_items: Option<List<BlockItem>> = body.into_iter().map(parse_block_item).collect();
         let Some(block_items) = block_items else {
+            error!("parse block failed");
             return Val::default();
         };
         for val in values {
@@ -336,6 +356,7 @@ fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFl
             BlockItem::Exit { exit, condition, body } => {
                 let condition = Eval.mut_static_call(ctx, condition);
                 let Val::Bit(condition) = condition else {
+                    error!("condition {condition:?} should be a bit");
                     return (Val::default(), CtrlFlow::Error);
                 };
                 if condition.bool() {
@@ -361,6 +382,7 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
     };
     let call = Call::from(call);
     let Val::Pair(pair) = call.input else {
+        error!("call.input {:?} should be a pair", call.input);
         return None;
     };
     let pair = Pair::from(pair);

@@ -1,4 +1,5 @@
 use const_format::concatcp;
+use log::error;
 
 use super::CallMode;
 use super::CodeMode;
@@ -81,7 +82,10 @@ impl ParseMode<Val> for Mode {
                 let primitive = match map_remove(&mut map, PRIMITIVE) {
                     Val::Unit(_) => false,
                     Val::Bit(b) => b.bool(),
-                    _ => return None,
+                    v => {
+                        error!("primitive {v:?} should be a bit or a unit");
+                        return None;
+                    }
                 };
                 let mode = if primitive {
                     Mode::Prim(PrimMode::parse(map)?)
@@ -140,7 +144,10 @@ impl ParseMode<Symbol> for PrimMode {
             EVAL_REF => PrimMode::symbol_call(SymbolMode::Ref, CodeMode::Eval),
             EVAL_MOVE => PrimMode::symbol_call(SymbolMode::Move, CodeMode::Eval),
             EVAL_EVAL => PrimMode::symbol_call(SymbolMode::Eval, CodeMode::Eval),
-            _ => return None,
+            s => {
+                error!("{s} should be a symbol representing a primitive mode");
+                return None;
+            }
         };
         Some(mode)
     }
@@ -197,7 +204,10 @@ impl ParseMode<Val> for DataMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Self::parse(s),
-            _ => None,
+            v => {
+                error!("{v:?} should be a symbol");
+                None
+            }
         }
     }
 }
@@ -206,7 +216,10 @@ impl ParseMode<Symbol> for DataMode {
     fn parse(mode: Symbol) -> Option<Self> {
         match &*mode {
             FORM => Some(DataMode),
-            _ => None,
+            s => {
+                error!("{s} should be a symbol representing a data mode");
+                None
+            }
         }
     }
 }
@@ -227,7 +240,10 @@ impl ParseMode<Val> for CodeMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Self::parse(s),
-            _ => None,
+            v => {
+                error!("{v:?} should be a symbol");
+                None
+            }
         }
     }
 }
@@ -237,7 +253,10 @@ impl ParseMode<Symbol> for CodeMode {
         match &*mode {
             FORM => Some(CodeMode::Form),
             EVAL => Some(CodeMode::Eval),
-            _ => None,
+            s => {
+                error!("{s} should be a symbol representing a code mode");
+                None
+            }
         }
     }
 }
@@ -262,7 +281,10 @@ impl ParseMode<Val> for SymbolMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Self::parse(s),
-            _ => None,
+            v => {
+                error!("{v:?} should be a symbol");
+                None
+            }
         }
     }
 }
@@ -274,7 +296,10 @@ impl ParseMode<Symbol> for SymbolMode {
             SYMBOL_REF => SymbolMode::Ref,
             SYMBOL_MOVE => SymbolMode::Move,
             SYMBOL_EVAL => SymbolMode::Eval,
-            _ => return None,
+            s => {
+                error!("{s} should be a symbol representing a symbol mode");
+                return None;
+            }
         };
         Some(mode)
     }
@@ -338,7 +363,10 @@ impl ParseMode<Val> for PairMode {
                 let second = ParseMode::parse(pair.second)?;
                 Some(PairMode { first, second })
             }
-            _ => None,
+            v => {
+                error!("{v:?} should be a pair or a symbol");
+                None
+            }
         }
     }
 }
@@ -359,6 +387,7 @@ impl ParseMode<Val> for CallMode {
             Val::Pair(some_else) => {
                 let some_else = Pair::from(some_else);
                 let Val::Map(some) = some_else.first else {
+                    error!("first {:?} should be a map", some_else.first);
                     return None;
                 };
                 let some = parse_map_some(some)?;
@@ -371,7 +400,10 @@ impl ParseMode<Val> for CallMode {
                 let input = ParseMode::parse(call.input)?;
                 Some(CallMode { some: None, func, input })
             }
-            _ => None,
+            v => {
+                error!("{v:?} should be a call, a pair or a symbol");
+                None
+            }
         }
     }
 }
@@ -404,13 +436,17 @@ impl ParseMode<Val> for ListMode {
             Val::Pair(head_tail) => {
                 let head_tail = Pair::from(head_tail);
                 let Val::List(head) = head_tail.first else {
+                    error!("first {:?} should be a list", head_tail.first);
                     return None;
                 };
                 let head = parse_list_head(head)?;
                 let tail = ParseMode::parse(head_tail.second)?;
                 Some(ListMode { head, tail })
             }
-            _ => None,
+            v => {
+                error!("{v:?} should be a list, a pair or a symbol");
+                None
+            }
         }
     }
 }
@@ -447,6 +483,7 @@ impl ParseMode<Val> for MapMode {
             Val::Pair(some_else) => {
                 let some_else = Pair::from(some_else);
                 let Val::Map(some) = some_else.first else {
+                    error!("first {:?} should be a map", some_else.first);
                     return None;
                 };
                 let some = parse_map_some(some)?;
@@ -481,7 +518,10 @@ fn parse_map_else(mode: Val) -> Option<Pair<Option<Mode>, Option<Mode>>> {
             let value = ParseMode::parse(else_.second)?;
             Pair::new(key, value)
         }
-        _ => return None,
+        v => {
+            error!("{v:?} should be a pair, a symbol or a unit");
+            return None;
+        }
     };
     Some(mode)
 }

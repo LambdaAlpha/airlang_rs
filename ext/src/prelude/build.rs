@@ -16,6 +16,7 @@ use airlang::syntax::parse;
 use airlang::type_::ConstRef;
 use airlang::type_::Symbol;
 use airlang::type_::Text;
+use log::error;
 
 pub struct BuildPrelude {
     pub import: ConstStaticPrimFuncVal,
@@ -49,6 +50,7 @@ const CUR_URL_KEY: &str = "build.this_url";
 
 fn fn_import_free(input: Val) -> Val {
     let Val::Text(url) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     let new_url = String::from(Text::from(url));
@@ -57,9 +59,11 @@ fn fn_import_free(input: Val) -> Val {
 
 fn fn_import_const(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
+        error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
     let Val::Text(url) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     let url = Text::from(url);
@@ -79,12 +83,14 @@ fn import_from_url(url: String) -> Val {
         }
     };
     let Ok(val) = parse(&content) else {
+        error!("{content} should be a valid air source code");
         return Val::default();
     };
 
     let mut mod_air = Air::default();
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     if !set_cur_url(mod_air.ctx_mut(), cur_url_key, url) {
+        error!("set_cur_url {CUR_URL_KEY} should succeed");
         return Val::default();
     }
     mod_air.interpret(val)

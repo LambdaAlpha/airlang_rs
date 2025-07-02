@@ -14,6 +14,7 @@ use airlang::prelude::mut_impl;
 use airlang::semantics::val::FreeStaticPrimFuncVal;
 use airlang::semantics::val::MutStaticPrimFuncVal;
 use airlang::semantics::val::Val;
+use log::error;
 
 pub struct IoPrelude {
     pub read_line: MutStaticPrimFuncVal,
@@ -65,6 +66,7 @@ pub fn read_line() -> MutStaticPrimFuncVal {
 
 fn fn_read_line(ctx: &mut Val, _input: Val) -> Val {
     let Val::Text(t) = ctx else {
+        error!("ctx {ctx:?} should be a text");
         return Val::default();
     };
     let _ = stdin().read_line(t);
@@ -77,6 +79,7 @@ pub fn print() -> FreeStaticPrimFuncVal {
 
 fn fn_print(input: Val) -> Val {
     let Val::Text(t) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     print!("{}", &**t);
@@ -90,6 +93,7 @@ pub fn print_line() -> FreeStaticPrimFuncVal {
 
 fn fn_print_line(input: Val) -> Val {
     let Val::Text(t) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     println!("{}", &**t);
@@ -112,6 +116,7 @@ pub fn error_print() -> FreeStaticPrimFuncVal {
 
 fn fn_error_print(input: Val) -> Val {
     let Val::Text(t) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     eprint!("{}", &**t);
@@ -129,6 +134,7 @@ pub fn error_print_line() -> FreeStaticPrimFuncVal {
 
 fn fn_error_print_line(input: Val) -> Val {
     let Val::Text(t) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
     eprintln!("{}", &**t);

@@ -1,3 +1,5 @@
+use log::error;
+
 use self::repr::generate_func;
 use self::repr::parse_func;
 use self::repr::parse_mode;
@@ -79,10 +81,11 @@ pub fn new() -> FreeStaticPrimFuncVal {
 }
 
 fn fn_new(input: Val) -> Val {
-    match parse_func(input) {
-        Some(func) => Val::Func(func),
-        None => Val::default(),
-    }
+    let Some(func) = parse_func(input) else {
+        error!("parse func failed");
+        return Val::default();
+    };
+    Val::Func(func)
 }
 
 pub fn repr() -> FreeStaticPrimFuncVal {
@@ -92,6 +95,7 @@ pub fn repr() -> FreeStaticPrimFuncVal {
 
 fn fn_repr(input: Val) -> Val {
     let Val::Func(func) = input else {
+        error!("input {input:?} should be a function");
         return Val::default();
     };
     generate_func(func)
@@ -109,6 +113,7 @@ pub fn ctx_access() -> ConstStaticPrimFuncVal {
 
 fn fn_ctx_access(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     let access = generate_ctx_access(func.ctx_access());
@@ -127,6 +132,7 @@ pub fn ctx_explicit() -> ConstStaticPrimFuncVal {
 
 fn fn_ctx_explicit(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     Val::Bit(Bit::new(func.ctx_explicit()))
@@ -144,6 +150,7 @@ pub fn forward_setup() -> ConstStaticPrimFuncVal {
 
 fn fn_forward_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     let Some(pre) = func.setup() else {
@@ -164,6 +171,7 @@ pub fn reverse_setup() -> ConstStaticPrimFuncVal {
 
 fn fn_reverse_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     let Some(pre) = func.setup() else {
@@ -184,6 +192,7 @@ pub fn is_primitive() -> ConstStaticPrimFuncVal {
 
 fn fn_is_primitive(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     let is_primitive = func.is_primitive();
@@ -202,6 +211,7 @@ pub fn is_cell() -> ConstStaticPrimFuncVal {
 
 fn fn_is_cell(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     Val::Bit(Bit::new(func.is_cell()))
@@ -219,6 +229,7 @@ pub fn id() -> ConstStaticPrimFuncVal {
 
 fn fn_id(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     let Some(id) = func.id() else {
@@ -239,6 +250,7 @@ pub fn code() -> ConstStaticPrimFuncVal {
 
 fn fn_code(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     generate_code(func)
@@ -256,9 +268,11 @@ pub fn ctx() -> ConstStaticPrimFuncVal {
 
 fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
     let Some(ctx) = func.ctx() else {
+        error!("func {func:?} should have an inner ctx");
         return Val::default();
     };
     Val::Ctx(CtxVal::from(ctx.clone()))

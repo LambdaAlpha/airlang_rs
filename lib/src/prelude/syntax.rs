@@ -1,3 +1,5 @@
+use log::error;
+
 use super::FreeFn;
 use super::FuncMode;
 use super::Prelude;
@@ -55,9 +57,14 @@ pub fn parse() -> FreeStaticPrimFuncVal {
 
 fn fn_parse(input: Val) -> Val {
     let Val::Text(input) = input else {
+        error!("input {input:?} should be a text");
         return Val::default();
     };
-    crate::syntax::parse(&input).unwrap_or_default()
+    let Ok(val) = crate::syntax::parse(&input) else {
+        error!("parse {input:?} failed");
+        return Val::default();
+    };
+    val
 }
 
 pub fn generate() -> FreeStaticPrimFuncVal {
@@ -67,6 +74,7 @@ pub fn generate() -> FreeStaticPrimFuncVal {
 
 fn fn_generate(input: Val) -> Val {
     let Ok(repr) = (&input).try_into() else {
+        error!("generate {input:?} failed");
         return Val::default();
     };
     let str = generate_pretty(repr);

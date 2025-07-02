@@ -1,3 +1,5 @@
+use log::error;
+
 use super::DynFn;
 use super::FreeFn;
 use super::FuncMode;
@@ -49,6 +51,7 @@ pub fn length() -> ConstStaticPrimFuncVal {
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Byte(byte) = &*ctx else {
+        error!("ctx {ctx:?} should be a byte");
         return Val::default();
     };
     let len: Int = byte.len().into();
@@ -67,9 +70,11 @@ pub fn push() -> MutStaticPrimFuncVal {
 
 fn fn_push(ctx: &mut Val, input: Val) -> Val {
     let Val::Byte(byte) = ctx else {
+        error!("ctx {ctx:?} should be a byte");
         return Val::default();
     };
     let Val::Byte(b) = input else {
+        error!("input {input:?} should be a byte");
         return Val::default();
     };
     byte.push(&b);
@@ -83,20 +88,26 @@ pub fn join() -> FreeStaticPrimFuncVal {
 
 fn fn_join(input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return Val::default();
     };
     let separator: &[u8] = match &pair.first {
         Val::Unit(_) => &[],
         Val::Byte(b) => b,
-        _ => return Val::default(),
+        s => {
+            error!("separator {s:?} should be a unit or a byte");
+            return Val::default();
+        }
     };
     let Val::List(bytes) = &pair.second else {
+        error!("input.second {:?} should be a list", pair.second);
         return Val::default();
     };
     let bytes: Option<Vec<&[u8]>> = bytes
         .iter()
         .map(|v| {
             let Val::Byte(b) = v else {
+                error!("item {v:?} should be a byte");
                 return None;
             };
             let byte: &[u8] = b;

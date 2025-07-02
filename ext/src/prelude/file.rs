@@ -6,6 +6,7 @@ use airlang::prelude::mode::FuncMode;
 use airlang::semantics::val::FreeStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
+use log::error;
 
 pub struct FilePrelude {
     pub read_to_text: FreeStaticPrimFuncVal,
@@ -31,7 +32,10 @@ pub fn read_to_text() -> FreeStaticPrimFuncVal {
 fn fn_read_to_text(input: Val) -> Val {
     let result = match input {
         Val::Text(path) => std::fs::read_to_string(&**path),
-        _ => return Val::default(),
+        v => {
+            error!("input {v:?} should be a text");
+            return Val::default();
+        }
     };
     match result {
         Ok(content) => Val::Text(Text::from(content).into()),
