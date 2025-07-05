@@ -1,84 +1,84 @@
 do non-list
 -----
-; do 1
+_ do 1
 -----
 1
 =====
 do empty list
 -----
-; do []
+_ do []
 -----
 .
 =====
 do single
 -----
-; do [1]
+_ do [1]
 -----
 1
 =====
 do multiple
 -----
-; do [1, 2]
+_ do [1, 2]
 -----
 2
 =====
 do recursive 1
 -----
-; do [; do [1, 2], 3]
+_ do [_ do [1, 2], 3]
 -----
 3
 =====
 do recursive 2
 -----
-; do [1, ; do [2, 3]]
+_ do [1, _ do [2, 3]]
 -----
 3
 =====
 do break true
 -----
-; do [1, 2, true break 3, 4]
+_ do [1, 2, true break 3, 4]
 -----
 3
 =====
 do break false
 -----
-; do [1, 2, false break 3, 4]
+_ do [1, 2, false break 3, 4]
 -----
 4
 =====
 do break scope 1
 -----
-; do [1, ; do [2, true break 3, 4], 5]
+_ do [1, _ do [2, true break 3, 4], 5]
 -----
 5
 =====
 do break scope 2
 -----
-; do [1, a = ; do [2, true break 3, 4], a + 2]
+_ do [1, a = _ do [2, true break 3, 4], a + 2]
 -----
 5
 =====
 do break eval
 -----
-; do [b = 2, (b > 0) break b - 1, b + 1]
+_ do [b = 2, (b > 0) break b - 1, b + 1]
 -----
 1
 =====
 do continue true
 -----
-; do [1, true continue 2, 3]
+_ do [1, true continue 2, 3]
 -----
 2
 =====
 do continue false
 -----
-; do [1, false continue 2, 3]
+_ do [1, false continue 2, 3]
 -----
 3
 =====
 do list
 -----
-; do [[]]
+_ do [[]]
 -----
 []
 =====
@@ -102,7 +102,7 @@ true ? 1 : .
 =====
 ? conditional eval
 -----
-; do [a = 1, true ? 1 : a = 2, a]
+_ do [a = 1, true ? 1 : a = 2, a]
 -----
 1
 =====
@@ -144,7 +144,7 @@ match pattern contract
 =====
 match order
 -----
-; do [
+_ do [
     [1, 2, 3] match [
         [2, a, b] : x = 1,
         [1, c, d] : y = 1,
@@ -157,7 +157,7 @@ match order
 =====
 match eval
 -----
-; do [a = 1, a match [1 : 1 + 2, 2 : 2 + 3]]
+_ do [a = 1, a match [1 : 1 + 2, 2 : 2 + 3]]
 -----
 3
 =====
@@ -175,19 +175,19 @@ match default
 =====
 match conditional eval exist
 -----
-; do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, b is_null ., c is_null .]]
+_ do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, b is_null ., c is_null .]]
 -----
 [1, true, true]
 =====
 match conditional eval default
 -----
-; do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a is_null ., b is_null ., c]]
+_ do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a is_null ., b is_null ., c]]
 -----
 [true, true, 3]
 =====
 match symbol
 -----
-; do [a = ; id a, a match [..a : 1, ..b : 2]]
+_ do [a = _ id a, a match [..a : 1, ..b : 2]]
 -----
 1
 =====
@@ -223,13 +223,13 @@ true match [true : 1, false : 2]
 =====
 loop false
 -----
-; do [a = 1, false loop a = 2, a]
+_ do [a = 1, false loop a = 2, a]
 -----
 1
 =====
 loop multiple
 -----
-; do [
+_ do [
     a = 0,
     b = 0,
     (a < 100) loop [
@@ -243,7 +243,7 @@ loop multiple
 =====
 loop ?
 -----
-; do [
+_ do [
     a = 42,
     b = 24,
     (a <> b) loop (a > b) ? (
@@ -258,7 +258,7 @@ loop ?
 =====
 loop continue
 -----
-; do [
+_ do [
     a = 0,
     b = 0,
     (b < 5) loop [
@@ -273,7 +273,7 @@ loop continue
 =====
 loop break
 -----
-; do [
+_ do [
     a = 0,
     b = 0,
     (b < 5) loop [
@@ -287,13 +287,13 @@ loop break
 =====
 for list
 -----
-; do [sum = 0, [1, 2, 3, 4, 5] for i : sum = sum + i, sum]
+_ do [sum = 0, [1, 2, 3, 4, 5] for i : sum = sum + i, sum]
 -----
 15
 =====
 for empty list
 -----
-; do [sum = 0, [] for i : sum = sum + i, sum]
+_ do [sum = 0, [] for i : sum = sum + i, sum]
 -----
 0
 =====
@@ -305,13 +305,13 @@ true
 =====
 for break 2
 -----
-; do [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
+_ do [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
 -----
 2
 =====
 for continue
 -----
-; do [
+_ do [
     a = 0,
     b = 0,
     [1, 2, 3, 4, 5] for i : [
@@ -326,19 +326,19 @@ for continue
 =====
 for list map
 -----
-; do [a = [], [1, 2, 3, 4, 5] for i : a list.push i + 1, a]
+_ do [a = [], [1, 2, 3, 4, 5] for i : a list.push i + 1, a]
 -----
 [2, 3, 4, 5, 6]
 =====
 for integer
 -----
-; do [sum = 0, 10 for i : sum = sum + i, sum]
+_ do [sum = 0, 10 for i : sum = sum + i, sum]
 -----
 45
 =====
 for integer 0
 -----
-; do [sum = 0, 0 for i : sum = sum + i, sum]
+_ do [sum = 0, 0 for i : sum = sum + i, sum]
 -----
 0
 =====
@@ -350,24 +350,24 @@ for integer negative
 =====
 for byte
 -----
-; do [b = [], byte(1122334455) for i : b list.push i, b]
+_ do [b = [], byte(1122334455) for i : b list.push i, b]
 -----
 [byte(11), byte(22), byte(33), byte(44), byte(55)]
 =====
 for symbol
 -----
-; do [s = [], .abc for i : s list.push i, s]
+_ do [s = [], .abc for i : s list.push i, s]
 -----
 [a, b, c]
 =====
 for text
 -----
-; do [t = [], "hello" for i : t list.push i, t]
+_ do [t = [], "hello" for i : t list.push i, t]
 -----
 ["h", "e", "l", "l", "o"]
 =====
 for map
 -----
-; do [kv = [], {1 : 2, 3 : 4} for i : kv list.push i, ; map kv]
+_ do [kv = [], {1 : 2, 3 : 4} for i : kv list.push i, _ map kv]
 -----
 {1 : 2, 3 : 4}

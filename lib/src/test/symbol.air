@@ -1,9 +1,9 @@
 length join
 -----
-; do [
-    a = ; any symbol,
+_ do [
+    a = _ any symbol,
     la = a symbol.length .,
-    b = ; any symbol,
+    b = _ any symbol,
     lb = b symbol.length .,
     ab = . symbol.join [#a, #b],
     lab = ab symbol.length .,
@@ -14,13 +14,13 @@ true
 =====
 length empty
 -----
-; do [s = ; id '', s symbol.length .]
+_ do [s = _ id '', s symbol.length .]
 -----
 0
 =====
 length else
 -----
-; do [s = .a, s symbol.length .]
+_ do [s = .a, s symbol.length .]
 -----
 1
 =====
@@ -32,7 +32,7 @@ ab
 =====
 join unit
 -----
-; do [a = .a1, b = .b1, c = .c1, . symbol.join [#a, #b, #c]]
+_ do [a = .a1, b = .b1, c = .c1, . symbol.join [#a, #b, #c]]
 -----
 a1b1c1
 =====
@@ -50,36 +50,36 @@ a.b
 =====
 into_text from_text
 -----
-; do [s = ; any symbol, s == ; symbol.from_text ; symbol.into_text s]
+_ do [s = _ any symbol, s == _ symbol.from_text _ symbol.into_text s]
 -----
 true
 =====
 from_text empty
 -----
-; symbol.from_text ""
+_ symbol.from_text ""
 -----
 ''
 =====
 from_text trivial
 -----
-; symbol.from_text "hello_world!"
+_ symbol.from_text "hello_world!"
 -----
 hello_world!
 =====
 from_text special
 -----
-; symbol.from_text "{}"
+_ symbol.from_text "{}"
 -----
 '{}'
 =====
 into_text empty
 -----
-; symbol.into_text ; id ''
+_ symbol.into_text _ id ''
 -----
 ""
 =====
 into_text trivial
 -----
-; symbol.into_text .hello_world!
+_ symbol.into_text .hello_world!
 -----
 "hello_world!"

@@ -1,15 +1,15 @@
 length push
 -----
-; do [t = ; any text, l = t text.length ., t text.push "a", (t text.length .) == l + 1]
+_ do [t = _ any text, l = t text.length ., t text.push "a", (t text.length .) == l + 1]
 -----
 true
 =====
 length join
 -----
-; do [
-    a = ; any text,
+_ do [
+    a = _ any text,
     la = a text.length .,
-    b = ; any text,
+    b = _ any text,
     lb = b text.length .,
     ab = . text.join [#a, #b],
     lab = ab text.length .,
@@ -20,25 +20,25 @@ true
 =====
 length empty
 -----
-; do [t = "", t text.length .]
+_ do [t = "", t text.length .]
 -----
 0
 =====
 length else
 -----
-; do [t = "1", t text.length .]
+_ do [t = "1", t text.length .]
 -----
 1
 =====
 push join
 -----
-; do [a = ; any text, b = ; any text, t = a, t text.push b, t == . text.join [#a, #b]]
+_ do [a = _ any text, b = _ any text, t = a, t text.push b, t == . text.join [#a, #b]]
 -----
 true
 =====
 push
 -----
-; do [a = "hello", b = "world", a text.push " ", a text.push #b, #a]
+_ do [a = "hello", b = "world", a text.push " ", a text.push #b, #a]
 -----
 "hello world"
 =====
@@ -50,7 +50,7 @@ join empty
 =====
 join unit
 -----
-; do [a = "1", b = "2", c = "3", . text.join [#a, #b, #c]]
+_ do [a = "1", b = "2", c = "3", . text.join [#a, #b, #c]]
 -----
 "123"
 =====
@@ -68,18 +68,18 @@ join else
 =====
 into_utf8 from_utf8
 -----
-; do [t = ; any text, t == ; text.from_utf8 ; text.into_utf8 t]
+_ do [t = _ any text, t == _ text.from_utf8 _ text.into_utf8 t]
 -----
 true
 =====
 into_utf8
 -----
-; text.into_utf8 "abc"
+_ text.into_utf8 "abc"
 -----
 byte(616263)
 =====
 from_utf8
 -----
-; text.from_utf8 byte(616263)
+_ text.from_utf8 byte(616263)
 -----
 "abc"

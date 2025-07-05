@@ -21,5 +21,8 @@ pub(super) fn expected() -> Vec<Repr> {
         map(vec![(call(symbol("a"), symbol("b")), symbol("c"))]),
         map(vec![(symbol("a"), call(symbol("b"), symbol("c")))]),
         reverse(symbol("a"), symbol("b")),
+        call(symbol("f"), symbol("a")),
+        call(symbol("f"), symbol("a")),
+        symbol("f"),
     ]
 }

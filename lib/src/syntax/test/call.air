@@ -1,47 +1,59 @@
 call
 -----
-; a b
+a ; b
 =====
 call call
 -----
-; a ; b c
+a ; b ; c
 =====
 call other
 -----
-; a b : c
+a ; b : c
 =====
 other call
 -----
-a : ; b c
+a : b ; c
 =====
 call infix
 -----
-; a b c d
+a ; b c d
 =====
 infix call
 -----
-a b ; c d
+a b c ; d
 =====
 non-atomic first
 -----
-; [a, b] c
+[a, b] ; c
 =====
 non-atomic second
 -----
-; a [b, c]
+a ; [b, c]
 =====
 list item
 -----
-[; a b]
+[a ; b]
 =====
 map key
 -----
-{(; a b) : c}
+{(a ; b) : c}
 =====
 map value
 -----
-{a : ; b c}
+{a : b ; c}
 =====
 reverse
 -----
-! a b
+a ! b
+=====
+omit left
+-----
+_ f a
+=====
+omit right
+-----
+a f _
+=====
+omit both
+-----
+_ f _

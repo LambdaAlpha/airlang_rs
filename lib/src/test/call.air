@@ -1,12 +1,12 @@
 new
 -----
-; do [
-    f = ; any .,
-    i = ; any .,
-    c1 = f ; i,
-    c2 = ; form@ ; f i,
-    c3 = f ! i,
-    c4 = ; form@ ! f i,
+_ do [
+    f = _ any .,
+    i = _ any .,
+    c1 = f ';' i,
+    c2 = _ form@ f ; i,
+    c3 = f '!' i,
+    c4 = _ form@ f ! i,
     (c1 == c2) and (c3 == c4)
 ]
 -----
@@ -14,11 +14,11 @@ true
 =====
 new get
 -----
-; do [
-    f = ; any .,
-    i = ; any .,
-    c1 = f ; i,
-    c2 = f ! i,
+_ do [
+    f = _ any .,
+    i = _ any .,
+    c1 = f ';' i,
+    c2 = f '!' i,
     (f == c1 call.function .) and (f == c2 call.function .) and (i == c1 call.input .) and (i == c2 call.input .)
 ]
 -----
@@ -26,10 +26,10 @@ true
 =====
 set get
 -----
-; do [
-    c = ; any call,
-    f = ; any .,
-    i = ; any .,
+_ do [
+    c = _ any call,
+    f = _ any .,
+    i = _ any .,
     c call.set_function f,
     c call.set_input i,
     (f == c call.function .) and (i == c call.input .)
@@ -39,15 +39,15 @@ true
 =====
 set return
 -----
-; do [
-    f1 = ; any .,
-    i1 = ; any .,
-    c1 = f1 ; i1,
-    c2 = f1 ! i1,
-    f2 = c1 call.set_function ; any .,
-    i2 = c1 call.set_input ; any .,
-    f3 = c2 call.set_function ; any .,
-    i3 = c2 call.set_input ; any .,
+_ do [
+    f1 = _ any .,
+    i1 = _ any .,
+    c1 = f1 ';' i1,
+    c2 = f1 '!' i1,
+    f2 = c1 call.set_function _ any .,
+    i2 = c1 call.set_input _ any .,
+    f3 = c2 call.set_function _ any .,
+    i3 = c2 call.set_input _ any .,
     (f1 == f2) and (f1 == f3) and (i1 == i2) and (i1 == i3)
 ]
 -----
@@ -55,22 +55,22 @@ true
 =====
 is_reverse
 -----
-; do [
-    c1 = (; any .) ; (; any .),
-    c2 = (; any .) ! (; any .),
-    (; not c1 call.is_reverse .) and (c2 call.is_reverse .)
+_ do [
+    c1 = (_ any .) ';' (_ any .),
+    c2 = (_ any .) '!' (_ any .),
+    (_ not c1 call.is_reverse .) and (c2 call.is_reverse .)
 ]
 -----
 true
 =====
 apply const
 -----
-; call.apply ; form@ 1 + 1
+_ call.apply _ form@ 1 + 1
 -----
 2
 =====
 apply mut
 -----
-; do [; call.apply ; form@ .a = 1, #a]
+_ do [_ call.apply _ form@ .a = 1, #a]
 -----
 1

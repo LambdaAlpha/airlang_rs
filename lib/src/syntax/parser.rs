@@ -353,11 +353,11 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             CALL_REVERSE => scope(ctx.untag().reverse(true)).parse_next(i),
             LEFT => scope(ctx.untag().direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.untag().direction(Direction::Right)).parse_next(i),
-            s if s.starts_with(CALL_FORWARD) => {
-                scope(ctx.reverse(false).tag(&s[1 ..])).parse_next(i)
+            s if s.ends_with(CALL_FORWARD) => {
+                scope(ctx.reverse(false).tag(&s[.. s.len() - 1])).parse_next(i)
             }
-            s if s.starts_with(CALL_REVERSE) => {
-                scope(ctx.reverse(true).tag(&s[1 ..])).parse_next(i)
+            s if s.ends_with(CALL_REVERSE) => {
+                scope(ctx.reverse(true).tag(&s[.. s.len() - 1])).parse_next(i)
             }
             _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
         }
@@ -455,27 +455,29 @@ fn compose_two<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
 fn compose_three<T: ParseRepr>(
     ctx: ParseCtx, left: Token<T>, middle: Token<T>, right: Token<T>,
 ) -> T {
-    let left = match left {
-        Token::Unquote(s) => match &*s {
-            CALL_FORWARD => {
-                return T::from(Call::new(false, middle.into_repr(), right.into_repr()));
-            }
-            CALL_REVERSE => return T::from(Call::new(true, middle.into_repr(), right.into_repr())),
-            _ => T::from(s),
-        },
-        Token::Default(left) => left,
-    };
     let middle = match middle {
         Token::Unquote(s) => match &*s {
-            PAIR => return T::from(Pair::new(left, right.into_repr())),
+            PAIR => return T::from(Pair::new(left.into_repr(), right.into_repr())),
+            CALL_FORWARD => return T::from(Call::new(false, left.into_repr(), right.into_repr())),
+            CALL_REVERSE => return T::from(Call::new(true, left.into_repr(), right.into_repr())),
             _ => T::from(s),
         },
         Token::Default(middle) => middle,
     };
-    let right = right.into_repr();
-    let pair = Pair::new(left, right);
-    let pair = T::from(pair);
-    compose_two(ctx, middle, pair)
+    let left = match left {
+        Token::Unquote(s) if *s == *COMMENT => None,
+        left => Some(left.into_repr()),
+    };
+    let right = match right {
+        Token::Unquote(s) if *s == *COMMENT => None,
+        right => Some(right.into_repr()),
+    };
+    match (left, right) {
+        (Some(left), Some(right)) => compose_two(ctx, middle, T::from(Pair::new(left, right))),
+        (Some(left), None) => compose_two(ctx, middle, left),
+        (None, Some(right)) => compose_two(ctx, middle, right),
+        (None, None) => middle,
+    }
 }
 
 fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>

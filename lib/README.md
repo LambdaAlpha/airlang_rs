@@ -19,11 +19,11 @@ It is an experimental proof-of-concept project and is still in the very early st
 ```air
 _("A demo of implementing a C-like for function")
 
-; do [
-    c_for = ; function {
-        code : (.ctx : .args) : ; do [
+_ do [
+    c_for = _ function {
+        code : (.ctx : .args) : _ do [
             [.init, .condition, .next, .body] = .args,
-            .ctx | ; do [
+            .ctx | _ do [
                 .init,
                 .condition loop [
                     .body,
@@ -32,7 +32,7 @@ _("A demo of implementing a C-like for function")
             ],
         ],
     },
-    ; c_for [[i = 1, sum = 0], i <= 10, i = i + 1, sum = sum + i],
+    _ c_for [[i = 1, sum = 0], i <= 10, i = i + 1, sum = sum + i],
     sum
 ]
 ```

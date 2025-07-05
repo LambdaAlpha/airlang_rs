@@ -64,56 +64,56 @@ reverse ctx
 =====
 tag one
 -----
-;t(a)
+t;(a)
 =====
 tag trailing space
 -----
-;t(a )
+t;(a )
 =====
 tag recursive
 -----
-;t(;t(a))
+t;(t;(a))
 =====
 tag recursive implicit
 -----
-;t((a))
+t;((a))
 =====
 tag any tag
 -----
-;a(b)
+a;(b)
 =====
 tag multiple
 -----
-;t(a b)
+t;(a b)
 =====
 tag soft keyword
 -----
-;t(: ; ! ?)
+t;(: ; ! ?)
 =====
 tag empty ctx
 -----
-;t((a b c) d e)
+t;((a b c) d e)
 =====
 tag reverse
 -----
-!t(a)
+t!(a)
 =====
 tag list
 -----
-;t([a, b,] [])
+t;([a, b,] [])
 =====
 tag map
 -----
-;t({a : b} {})
+t;({a : b} {})
 =====
 tag map value
 -----
-;t({a : b c d})
+t;({a : b c d})
 =====
 untag by direction ctx
 -----
-;t(<(a b c d e))
+t;(<(a b c d e))
 =====
 untag by call ctx
 -----
-;t(!(a b c))
+t;(!(a b c))

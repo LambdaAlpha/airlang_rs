@@ -1,8 +1,8 @@
 _("bench interpret")
 
-; do [
-  f = ; function {
-    code : .n : ; do [
+_ do [
+  f = _ function {
+    code : .n : _ do [
       .sum = 0,
       .n for .i : [
         (0 == .i % 3) .continue .,
@@ -12,5 +12,5 @@ _("bench interpret")
     ],
     context_access : free,
   },
-  ; f 100
+  _ f 100
 ]

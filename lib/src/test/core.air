@@ -6,7 +6,7 @@ true
 =====
 assign and read
 -----
-; do [a = 1, a]
+_ do [a = 1, a]
 -----
 1
 =====
@@ -42,114 +42,114 @@ symbol literal special 4
 =====
 ref
 -----
-; do [a = 1, @a]
+_ do [a = 1, @a]
 -----
 1
 =====
 ref will not remove
 -----
-; do [a = 1, @a, a]
+_ do [a = 1, @a, a]
 -----
 1
 =====
 ref special
 -----
-; do [.@.a = 1, @.a]
+_ do [.@.a = 1, @.a]
 -----
 1
 =====
 move
 -----
-; do [a = 1, #a]
+_ do [a = 1, #a]
 -----
 1
 =====
 move will remove
 -----
-; do [a = 1, #a, a]
+_ do [a = 1, #a, a]
 -----
 .
 =====
 move special
 -----
-; do [.@@a = 1, #@a]
+_ do [.@@a = 1, #@a]
 -----
 1
 =====
 eval
 -----
-; do [a = ; id ; not true, $a]
+_ do [a = _ id _ not true, $a]
 -----
 false
 =====
 pair eval
 -----
-(; not false) : "1"
+(_ not false) : "1"
 -----
 true : "1"
 =====
 list eval
 -----
-[; not true, 1, "2"]
+[_ not true, 1, "2"]
 -----
 [false, 1, "2"]
 =====
 map eval
 -----
-{(; not true) : (; not true)}
+{(_ not true) : (_ not true)}
 -----
 {false : false}
 =====
 call recursive
 -----
-; not ; not true
+_ not _ not true
 -----
 true
 =====
 non-func call .
 -----
-; . 1
+_ . 1
 -----
-; . 1
+_ . 1
 =====
 non-func call true
 -----
-; true 1
+_ true 1
 -----
-; true 1
+_ true 1
 =====
 non-func call false
 -----
-; false 1
+_ false 1
 -----
-; false 1
+_ false 1
 =====
 non-func call other
 -----
-; "a" "b"
+_ "a" "b"
 -----
-; "a" "b"
+_ "a" "b"
 =====
 non-func call recursive
 -----
-; "a" ; not true
+_ "a" _ not true
 -----
-; "a" false
+_ "a" false
 =====
 explicit ctx unit
 -----
-; do [a = 1, . | .a]
+_ do [a = 1, . | .a]
 -----
 1
 =====
 explicit ctx symbol
 -----
-; do [p = 1 : 2, p pair.first .]
+_ do [p = 1 : 2, p pair.first .]
 -----
 1
 =====
 explicit ctx do
 -----
-; do [p = 1 : 2, p | ; do [. pair.set_first 3, . pair.set_second 4], p]
+_ do [p = 1 : 2, p | _ do [. pair.set_first 3, . pair.set_second 4], p]
 -----
 3 : 4

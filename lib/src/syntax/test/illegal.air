@@ -394,11 +394,11 @@ scope concat
 =====
 empty tag
 -----
-;t()
+t;()
 =====
 tag list
 -----
-;t([1, ,])
+t;([1, ,])
 =====
 even number composition
 -----

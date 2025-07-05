@@ -1,27 +1,27 @@
 set_solver
 -----
-; do [
-    s1 = ; function {
+_ do [
+    s1 = _ function {
         cell : true,
         context_access : .free,
-        code : ._ : ; do [.a = .a + 1, .a],
-        context : ; context {variables : {a : 0}},
+        code : ._ : _ do [.a = .a + 1, .a],
+        context : _ context {variables : {a : 0}},
     },
-    ; set_solver! #s1,
-    s2 = ; solver! .,
-    [; .s2 ., ; .s2 ., ; .s2 .]
+    _ set_solver! #s1,
+    s2 = _ solver! .,
+    [_ .s2 ., _ .s2 ., _ .s2 .]
 ]
 -----
 [1, 2, 3]
 =====
 solver calls set_solver or solver, no panic
 -----
-; do [
-    s1 = ; function {
+_ do [
+    s1 = _ function {
         context_access : .free,
-        code : ._ : ; do [; set_solver! not, ; solver! .],
+        code : ._ : _ do [_ set_solver! not, _ solver! .],
     },
-    ; set_solver! #s1,
+    _ set_solver! #s1,
     not ! true,
     .
 ]

@@ -260,4 +260,4 @@ raw special symbol
 =====
 self delimited
 -----
-[%,; [] :,]
+[%,[] ; :,]

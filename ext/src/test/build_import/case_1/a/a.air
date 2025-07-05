@@ -1,4 +1,4 @@
-; do [
-    b = ; build.import "b/b.air",
+_ do [
+    b = _ build.import "b/b.air",
     b + 1
 ]

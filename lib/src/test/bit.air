@@ -1,12 +1,12 @@
 not true
 -----
-; not true
+_ not true
 -----
 false
 =====
 not false
 -----
-; not false
+_ not false
 -----
 true
 =====
@@ -30,7 +30,7 @@ false
 =====
 and not short-circuit
 -----
-; do [false and ; do [a = 1, true], a]
+_ do [false and _ do [a = 1, true], a]
 -----
 1
 =====
@@ -54,7 +54,7 @@ true
 =====
 or not short-circuit
 -----
-; do [true or ; do [a = 1, false], a]
+_ do [true or _ do [a = 1, false], a]
 -----
 1
 =====
