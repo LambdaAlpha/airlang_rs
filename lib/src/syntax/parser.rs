@@ -472,12 +472,13 @@ fn compose_three<T: ParseRepr>(
         Token::Unquote(s) if *s == *COMMENT => None,
         right => Some(right.into_repr()),
     };
-    match (left, right) {
-        (Some(left), Some(right)) => compose_two(ctx, middle, T::from(Pair::new(left, right))),
-        (Some(left), None) => compose_two(ctx, middle, left),
-        (None, Some(right)) => compose_two(ctx, middle, right),
-        (None, None) => middle,
-    }
+    let input = match (left, right) {
+        (Some(left), Some(right)) => T::from(Pair::new(left, right)),
+        (Some(left), None) => left,
+        (None, Some(right)) => right,
+        (None, None) => T::from(Unit),
+    };
+    compose_two(ctx, middle, input)
 }
 
 fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>

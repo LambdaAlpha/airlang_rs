@@ -6,6 +6,7 @@ use crate::syntax::test::map;
 use crate::syntax::test::pair;
 use crate::syntax::test::reverse;
 use crate::syntax::test::symbol;
+use crate::syntax::test::unit;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
@@ -23,6 +24,6 @@ pub(super) fn expected() -> Vec<Repr> {
         reverse(symbol("a"), symbol("b")),
         call(symbol("f"), symbol("a")),
         call(symbol("f"), symbol("a")),
-        symbol("f"),
+        call(symbol("f"), unit()),
     ]
 }
