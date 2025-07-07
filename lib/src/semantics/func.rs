@@ -58,7 +58,10 @@ pub fn default_setup() -> FuncVal {
     )
 }
 
+// todo design self free/const/mut
 // todo rename cell/static
+
+mod prim;
 
 mod comp;
 

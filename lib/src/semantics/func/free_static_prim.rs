@@ -1,11 +1,8 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
-use std::hash::Hash;
-use std::hash::Hasher;
 use std::rc::Rc;
 
 use super::Setup;
 use crate::semantics::func::Func;
+use crate::semantics::func::prim::impl_prim_func;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
@@ -52,22 +49,4 @@ impl Func for FreeStaticPrimFunc {
     }
 }
 
-impl Debug for FreeStaticPrimFunc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.id.fmt(f)
-    }
-}
-
-impl PartialEq for FreeStaticPrimFunc {
-    fn eq(&self, other: &FreeStaticPrimFunc) -> bool {
-        self.id == other.id
-    }
-}
-
-impl Eq for FreeStaticPrimFunc {}
-
-impl Hash for FreeStaticPrimFunc {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
+impl_prim_func!(FreeStaticPrimFunc);

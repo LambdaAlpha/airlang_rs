@@ -1,8 +1,3 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
-use std::hash::Hash;
-use std::hash::Hasher;
-
 use crate::semantics::func::ConstCellFn;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeCellFn;
@@ -10,6 +5,7 @@ use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::Func;
 use crate::semantics::func::MutStaticFn;
 use crate::semantics::func::Setup;
+use crate::semantics::func::prim::impl_prim_func;
 use crate::semantics::val::Val;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::ConstRef;
@@ -99,22 +95,4 @@ impl Func for MutCellPrimFunc {
     }
 }
 
-impl Debug for MutCellPrimFunc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.id.fmt(f)
-    }
-}
-
-impl PartialEq for MutCellPrimFunc {
-    fn eq(&self, other: &MutCellPrimFunc) -> bool {
-        self.id == other.id
-    }
-}
-
-impl Eq for MutCellPrimFunc {}
-
-impl Hash for MutCellPrimFunc {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
+impl_prim_func!(MutCellPrimFunc);

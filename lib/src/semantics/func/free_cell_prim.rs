@@ -1,11 +1,7 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
-use std::hash::Hash;
-use std::hash::Hasher;
-
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::Func;
 use crate::semantics::func::Setup;
+use crate::semantics::func::prim::impl_prim_func;
 use crate::semantics::val::Val;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Symbol;
@@ -55,22 +51,4 @@ impl Func for FreeCellPrimFunc {
     }
 }
 
-impl Debug for FreeCellPrimFunc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.id.fmt(f)
-    }
-}
-
-impl PartialEq for FreeCellPrimFunc {
-    fn eq(&self, other: &FreeCellPrimFunc) -> bool {
-        self.id == other.id
-    }
-}
-
-impl Eq for FreeCellPrimFunc {}
-
-impl Hash for FreeCellPrimFunc {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
+impl_prim_func!(FreeCellPrimFunc);
