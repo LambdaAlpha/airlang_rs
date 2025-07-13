@@ -2,12 +2,12 @@ use log::error;
 
 use super::DynFn;
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
-use super::setup::ctx_default_mode;
+use super::setup::default_dyn_mode;
+use super::setup::default_free_mode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::Val;
@@ -46,7 +46,7 @@ impl Prelude for SymbolPrelude {
 }
 
 pub fn from_text() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: FuncMode::default() }
+    FreeFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: default_free_mode() }
         .free_static()
 }
 
@@ -65,7 +65,7 @@ fn fn_from_text(input: Val) -> Val {
 }
 
 pub fn into_text() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: FuncMode::default() }
+    FreeFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: default_free_mode() }
         .free_static()
 }
 
@@ -78,13 +78,7 @@ fn fn_into_text(input: Val) -> Val {
 }
 
 pub fn length() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "symbol.length",
-        f: const_impl(fn_length),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "symbol.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -98,7 +92,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "symbol.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "symbol.join", f: free_impl(fn_join), mode: default_free_mode() }.free_static()
 }
 
 fn fn_join(input: Val) -> Val {

@@ -1,10 +1,10 @@
 use log::error;
 
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
+use crate::prelude::setup::default_free_mode;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -60,7 +60,7 @@ impl Prelude for IntPrelude {
 }
 
 pub fn add() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "+", f: free_impl(fn_add), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "+", f: free_impl(fn_add), mode: default_free_mode() }.free_static()
 }
 
 fn fn_add(input: Val) -> Val {
@@ -83,7 +83,7 @@ fn fn_add(input: Val) -> Val {
 }
 
 pub fn subtract() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "-", f: free_impl(fn_subtract), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "-", f: free_impl(fn_subtract), mode: default_free_mode() }.free_static()
 }
 
 fn fn_subtract(input: Val) -> Val {
@@ -106,7 +106,7 @@ fn fn_subtract(input: Val) -> Val {
 }
 
 pub fn multiply() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "*", f: free_impl(fn_multiply), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "*", f: free_impl(fn_multiply), mode: default_free_mode() }.free_static()
 }
 
 fn fn_multiply(input: Val) -> Val {
@@ -129,7 +129,7 @@ fn fn_multiply(input: Val) -> Val {
 }
 
 pub fn divide() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "/", f: free_impl(fn_divide), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "/", f: free_impl(fn_divide), mode: default_free_mode() }.free_static()
 }
 
 fn fn_divide(input: Val) -> Val {
@@ -155,7 +155,7 @@ fn fn_divide(input: Val) -> Val {
 }
 
 pub fn remainder() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "%", f: free_impl(fn_remainder), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "%", f: free_impl(fn_remainder), mode: default_free_mode() }.free_static()
 }
 
 fn fn_remainder(input: Val) -> Val {
@@ -181,7 +181,7 @@ fn fn_remainder(input: Val) -> Val {
 }
 
 pub fn divide_remainder() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "/%", f: free_impl(fn_divide_remainder), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "/%", f: free_impl(fn_divide_remainder), mode: default_free_mode() }.free_static()
 }
 
 fn fn_divide_remainder(input: Val) -> Val {
@@ -207,7 +207,7 @@ fn fn_divide_remainder(input: Val) -> Val {
 }
 
 pub fn less_than() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "<", f: free_impl(fn_less_than), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "<", f: free_impl(fn_less_than), mode: default_free_mode() }.free_static()
 }
 
 fn fn_less_than(input: Val) -> Val {
@@ -228,7 +228,7 @@ fn fn_less_than(input: Val) -> Val {
 }
 
 pub fn less_equal() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "<=", f: free_impl(fn_less_equal), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "<=", f: free_impl(fn_less_equal), mode: default_free_mode() }.free_static()
 }
 
 fn fn_less_equal(input: Val) -> Val {
@@ -249,7 +249,7 @@ fn fn_less_equal(input: Val) -> Val {
 }
 
 pub fn greater_than() -> FreeStaticPrimFuncVal {
-    FreeFn { id: ">", f: free_impl(fn_greater_than), mode: FuncMode::default() }.free_static()
+    FreeFn { id: ">", f: free_impl(fn_greater_than), mode: default_free_mode() }.free_static()
 }
 
 fn fn_greater_than(input: Val) -> Val {
@@ -270,7 +270,7 @@ fn fn_greater_than(input: Val) -> Val {
 }
 
 pub fn greater_equal() -> FreeStaticPrimFuncVal {
-    FreeFn { id: ">=", f: free_impl(fn_greater_equal), mode: FuncMode::default() }.free_static()
+    FreeFn { id: ">=", f: free_impl(fn_greater_equal), mode: default_free_mode() }.free_static()
 }
 
 fn fn_greater_equal(input: Val) -> Val {
@@ -291,7 +291,7 @@ fn fn_greater_equal(input: Val) -> Val {
 }
 
 pub fn less_greater() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "<>", f: free_impl(fn_less_greater), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "<>", f: free_impl(fn_less_greater), mode: default_free_mode() }.free_static()
 }
 
 fn fn_less_greater(input: Val) -> Val {

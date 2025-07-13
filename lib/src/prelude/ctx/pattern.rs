@@ -25,7 +25,7 @@ pub(in crate::prelude) enum Pattern {
     Any(OptBinding),
     Val(Val),
     Pair(Box<Pair<Pattern, Pattern>>),
-    Call(Box<Call<Pattern, Pattern>>),
+    Call(Box<Call<Pattern, Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -69,7 +69,7 @@ fn parse_pair(ctx: PatternCtx, pair: PairVal) -> Option<Pattern> {
 fn parse_call(ctx: PatternCtx, call: CallVal) -> Option<Pattern> {
     let call = Call::from(call);
     if call.reverse {
-        return parse_call1(ctx, call.reverse, call.func, call.input);
+        return parse_call_struct(ctx, call.reverse, call.func, call.ctx, call.input);
     }
     match call.func {
         Val::Unit(_) => parse_with_guard(ctx, call.input),
@@ -80,21 +80,24 @@ fn parse_call(ctx: PatternCtx, call: CallVal) -> Option<Pattern> {
                     return None;
                 };
                 let pair = Pair::from(pair);
-                parse_call1(ctx, &*symbol == CALL_REVERSE, pair.first, pair.second)
+                parse_call_struct(ctx, &*symbol == CALL_REVERSE, pair.first, call.ctx, pair.second)
             }
             s => {
                 error!("{s} should be one of {CALL_FORWARD} or {CALL_REVERSE}");
                 None
             }
         },
-        func => parse_call1(ctx, false, func, call.input),
+        func => parse_call_struct(ctx, false, func, call.ctx, call.input),
     }
 }
 
-fn parse_call1(ctx: PatternCtx, reverse: bool, func: Val, input: Val) -> Option<Pattern> {
-    let func = parse_pattern(ctx, func)?;
-    let input = parse_pattern(ctx, input)?;
-    Some(Pattern::Call(Box::new(Call::new(reverse, func, input))))
+fn parse_call_struct(
+    c: PatternCtx, reverse: bool, func: Val, ctx: Val, input: Val,
+) -> Option<Pattern> {
+    let func = parse_pattern(c, func)?;
+    let ctx = parse_pattern(c, ctx)?;
+    let input = parse_pattern(c, input)?;
+    Some(Pattern::Call(Box::new(Call::new(reverse, func, ctx, input))))
 }
 
 fn parse_list(ctx: PatternCtx, list: ListVal) -> Option<Pattern> {
@@ -155,14 +158,15 @@ fn match_pair(pattern: &Pair<Pattern, Pattern>, val: &Val) -> bool {
     first && second
 }
 
-fn match_call(pattern: &Call<Pattern, Pattern>, val: &Val) -> bool {
+fn match_call(pattern: &Call<Pattern, Pattern, Pattern>, val: &Val) -> bool {
     let Val::Call(val) = val else {
         error!("{val:?} should be a call");
         return false;
     };
     let func = match_pattern(&pattern.func, &val.func);
+    let ctx = match_pattern(&pattern.ctx, &val.ctx);
     let input = match_pattern(&pattern.input, &val.input);
-    func && input
+    func && ctx && input
 }
 
 fn match_list(pattern: &List<Pattern>, val: &Val) -> bool {
@@ -224,7 +228,7 @@ fn assign_pair(ctx: &mut Ctx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val 
     Val::Pair(Pair::new(first, second).into())
 }
 
-fn assign_call(ctx: &mut Ctx, pattern: Call<Pattern, Pattern>, val: Val) -> Val {
+fn assign_call(c: &mut Ctx, pattern: Call<Pattern, Pattern, Pattern>, val: Val) -> Val {
     let Val::Call(val) = val else {
         error!("{val:?} should be a call");
         return Val::default();
@@ -234,9 +238,10 @@ fn assign_call(ctx: &mut Ctx, pattern: Call<Pattern, Pattern>, val: Val) -> Val 
         return Val::default();
     }
     let val = Call::from(val);
-    let func = assign_pattern(ctx, pattern.func, val.func);
-    let input = assign_pattern(ctx, pattern.input, val.input);
-    Val::Call(Call::new(val.reverse, func, input).into())
+    let func = assign_pattern(c, pattern.func, val.func);
+    let ctx = assign_pattern(c, pattern.ctx, val.ctx);
+    let input = assign_pattern(c, pattern.input, val.input);
+    Val::Call(Call::new(val.reverse, func, ctx, input).into())
 }
 
 fn assign_list(ctx: &mut Ctx, pattern: List<Pattern>, val: Val) -> Val {

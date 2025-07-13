@@ -20,7 +20,9 @@ use super::ctx::ref_::RefCtx;
 use super::free_impl;
 use super::mode::CodeMode;
 use super::mode::SymbolMode;
-use super::setup::ctx_default_mode;
+use super::setup::default_dyn_mode;
+use super::setup::dyn_mode;
+use super::setup::free_mode;
 use super::setup::ref_mode;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::BIT;
@@ -84,10 +86,7 @@ pub fn any() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "any",
         f: free_impl(fn_any),
-        mode: FuncMode {
-            forward: FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
-            reverse: FuncMode::default_mode(),
-        },
+        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form)),
     }
     .free_static()
 }
@@ -107,7 +106,7 @@ fn fn_any(input: Val) -> Val {
             NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
             BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
             PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
-            CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
+            CALL => Val::Call(Call::<Val, Val, Val>::any(rng, DEPTH).into()),
             LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
             MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
             CTX => Val::Ctx(Ctx::any(rng, DEPTH).into()),
@@ -122,13 +121,7 @@ fn fn_any(input: Val) -> Val {
 }
 
 pub fn type_() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "type",
-        f: const_impl(fn_type),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "type", f: const_impl(fn_type), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -156,11 +149,7 @@ pub fn equal() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "==",
         f: const_impl(fn_equal),
-        mode: FuncMode {
-            forward: FuncMode::pair_mode(ref_mode(), ref_mode()),
-            reverse: FuncMode::default_mode(),
-        },
-        ctx_explicit: false,
+        mode: dyn_mode(FuncMode::pair_mode(ref_mode(), ref_mode())),
     }
     .const_static()
 }

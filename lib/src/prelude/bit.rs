@@ -1,8 +1,8 @@
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
+use crate::prelude::setup::default_free_mode;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::Val;
 
@@ -32,7 +32,7 @@ impl Prelude for BitPrelude {
 }
 
 pub fn not() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "not", f: free_impl(fn_not), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "not", f: free_impl(fn_not), mode: default_free_mode() }.free_static()
 }
 
 fn fn_not(input: Val) -> Val {
@@ -43,7 +43,7 @@ fn fn_not(input: Val) -> Val {
 }
 
 pub fn and() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "and", f: free_impl(fn_and), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "and", f: free_impl(fn_and), mode: default_free_mode() }.free_static()
 }
 
 fn fn_and(input: Val) -> Val {
@@ -60,7 +60,7 @@ fn fn_and(input: Val) -> Val {
 }
 
 pub fn or() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "or", f: free_impl(fn_or), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "or", f: free_impl(fn_or), mode: default_free_mode() }.free_static()
 }
 
 fn fn_or(input: Val) -> Val {
@@ -77,7 +77,7 @@ fn fn_or(input: Val) -> Val {
 }
 
 pub fn xor() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "xor", f: free_impl(fn_xor), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "xor", f: free_impl(fn_xor), mode: default_free_mode() }.free_static()
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -94,7 +94,7 @@ fn fn_xor(input: Val) -> Val {
 }
 
 pub fn imply() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "imply", f: free_impl(fn_imply), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "imply", f: free_impl(fn_imply), mode: default_free_mode() }.free_static()
 }
 
 fn fn_imply(input: Val) -> Val {

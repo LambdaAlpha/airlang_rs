@@ -2,8 +2,8 @@ use airlang::initial_ctx;
 use airlang::prelude::DynFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
-use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mut_impl;
+use airlang::prelude::setup::default_dyn_mode;
 use airlang::semantics::val::MutStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 use log::error;
@@ -26,13 +26,7 @@ impl Prelude for EvalPrelude {
 
 // todo rename
 pub fn reset() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "repl.reset",
-        f: mut_impl(fn_reset),
-        mode: FuncMode::default(),
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "repl.reset", f: mut_impl(fn_reset), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_reset(ctx: &mut Val, _input: Val) -> Val {

@@ -1,6 +1,6 @@
 length push
 -----
-_ do [b = _ any byte, l = b byte.length ., b byte.push byte(00), (b byte.length .) == l + 1]
+_ do [b = _ any byte, l = b | byte.length ., b | byte.push byte(00), (b | byte.length .) == l + 1]
 -----
 true
 =====
@@ -8,11 +8,11 @@ length join
 -----
 _ do [
     a = _ any byte,
-    la = a byte.length .,
+    la = a | byte.length .,
     b = _ any byte,
-    lb = b byte.length .,
+    lb = b | byte.length .,
     ab = . byte.join [#a, #b],
-    lab = ab byte.length .,
+    lab = ab | byte.length .,
     lab == la + lb
 ]
 -----
@@ -20,25 +20,25 @@ true
 =====
 length empty
 -----
-_ do [b = byte(), b byte.length .]
+_ do [b = byte(), b | byte.length .]
 -----
 0
 =====
 length else
 -----
-_ do [b = byte(ff), b byte.length .]
+_ do [b = byte(ff), b | byte.length .]
 -----
 1
 =====
 push join
 -----
-_ do [a = _ any byte, b = _ any byte, ab = a, ab byte.push b, ab == . byte.join [#a, #b]]
+_ do [a = _ any byte, b = _ any byte, ab = a, ab | byte.push b, ab == . byte.join [#a, #b]]
 -----
 true
 =====
 push
 -----
-_ do [a = byte(00), b = byte(1122), a byte.push #b, #a]
+_ do [a = byte(00), b = byte(1122), a | byte.push #b, #a]
 -----
 byte(001122)
 =====

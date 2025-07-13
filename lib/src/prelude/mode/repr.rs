@@ -1,6 +1,7 @@
 use const_format::concatcp;
 use log::error;
 
+use super::CallMapMode;
 use super::CallMode;
 use super::CodeMode;
 use super::CompMode;
@@ -31,6 +32,7 @@ use crate::semantics::val::SYMBOL;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Call;
+use crate::type_::CtxInput;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -390,15 +392,23 @@ impl ParseMode<Val> for CallMode {
                     error!("first {:?} should be a map", some_else.first);
                     return None;
                 };
-                let some = parse_map_some(some)?;
-                let else_ = parse_map_else(some_else.second)?;
-                Some(CallMode { func: else_.first, input: else_.second, some: Some(some) })
+                let some = parse_call_map_some(some)?;
+                let Val::Call(call) = some_else.second else {
+                    error!("second {:?} should be a call", some_else.second);
+                    return None;
+                };
+                let call = Call::from(call);
+                let func = ParseMode::parse(call.func)?;
+                let ctx = ParseMode::parse(call.ctx)?;
+                let input = ParseMode::parse(call.input)?;
+                Some(CallMode { func, ctx, input, some: Some(some) })
             }
             Val::Call(call) => {
                 let call = Call::from(call);
                 let func = ParseMode::parse(call.func)?;
+                let ctx = ParseMode::parse(call.ctx)?;
                 let input = ParseMode::parse(call.input)?;
-                Some(CallMode { some: None, func, input })
+                Some(CallMode { some: None, func, ctx, input })
             }
             v => {
                 error!("{v:?} should be a call, a pair or a symbol");
@@ -408,20 +418,49 @@ impl ParseMode<Val> for CallMode {
     }
 }
 
+fn parse_call_map_some(some: MapVal) -> Option<CallMapMode> {
+    Map::from(some)
+        .into_iter()
+        .map(|(k, v)| {
+            let Val::Pair(ctx_input) = v else {
+                return None;
+            };
+            let ctx_input = Pair::from(ctx_input);
+            let ctx = ParseMode::parse(ctx_input.first)?;
+            let input = ParseMode::parse(ctx_input.second)?;
+            Some((k, CtxInput { ctx, input }))
+        })
+        .collect()
+}
+
 // todo design
 impl GenerateMode<Val> for CallMode {
     fn generate(&self) -> Val {
         let func = GenerateMode::generate(&self.func);
+        let ctx = GenerateMode::generate(&self.ctx);
         let input = GenerateMode::generate(&self.input);
         match &self.some {
             Some(some) => {
-                let some = generate_map_some(some);
-                let else_ = Val::Pair(Pair::new(func, input).into());
+                let some = generate_call_map_some(some);
+                let else_ = Val::Call(Call::new(false, func, ctx, input).into());
                 Val::Pair(Pair::new(some, else_).into())
             }
-            None => Val::Call(Call::new(false, func, input).into()),
+            None => Val::Call(Call::new(false, func, ctx, input).into()),
         }
     }
+}
+
+fn generate_call_map_some(some: &Map<Val, CtxInput<Option<Mode>, Option<Mode>>>) -> Val {
+    let some: Map<Val, Val> = some
+        .iter()
+        .map(|(k, v)| {
+            let ctx = v.ctx.generate();
+            let input = v.input.generate();
+            let pair = Val::Pair(Pair::new(ctx, input).into());
+            (k.clone(), pair)
+        })
+        .collect();
+    Val::Map(some.into())
 }
 
 impl ParseMode<Val> for ListMode {

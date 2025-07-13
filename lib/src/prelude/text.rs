@@ -2,13 +2,13 @@ use log::error;
 
 use super::DynFn;
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
-use super::setup::ctx_default_mode;
+use super::setup::default_dyn_mode;
+use super::setup::default_free_mode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::MutStaticPrimFuncVal;
@@ -51,7 +51,7 @@ impl Prelude for TextPrelude {
 }
 
 pub fn from_utf8() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "text.from_utf8", f: free_impl(fn_from_utf8), mode: FuncMode::default() }
+    FreeFn { id: "text.from_utf8", f: free_impl(fn_from_utf8), mode: default_free_mode() }
         .free_static()
 }
 
@@ -69,7 +69,7 @@ fn fn_from_utf8(input: Val) -> Val {
 }
 
 pub fn into_utf8() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "text.into_utf8", f: free_impl(fn_into_utf8), mode: FuncMode::default() }
+    FreeFn { id: "text.into_utf8", f: free_impl(fn_into_utf8), mode: default_free_mode() }
         .free_static()
 }
 
@@ -84,13 +84,7 @@ fn fn_into_utf8(input: Val) -> Val {
 }
 
 pub fn length() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "text.length",
-        f: const_impl(fn_length),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "text.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -103,13 +97,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn push() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "text.push",
-        f: mut_impl(fn_push),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "text.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_push(ctx: &mut Val, input: Val) -> Val {
@@ -127,7 +115,7 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "text.join", f: free_impl(fn_join), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "text.join", f: free_impl(fn_join), mode: default_free_mode() }.free_static()
 }
 
 fn fn_join(input: Val) -> Val {

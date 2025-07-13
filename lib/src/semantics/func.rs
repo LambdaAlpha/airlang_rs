@@ -25,6 +25,8 @@ _____!();
 pub(crate) use self::comp::DynComposite;
 pub(crate) use self::comp::FreeComposite;
 pub(crate) use self::comp::composite_call;
+pub(crate) use self::setup::DynSetup;
+pub(crate) use self::setup::FreeSetup;
 
 _____!();
 
@@ -34,16 +36,11 @@ use super::val::FuncVal;
 use crate::semantics::core::Eval;
 use crate::type_::Symbol;
 
-pub(crate) trait Func {
-    fn setup(&self) -> Option<&Setup>;
-
-    fn ctx_explicit(&self) -> bool;
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Setup {
-    pub forward: FuncVal,
-    pub reverse: FuncVal,
+pub(crate) trait FuncSetup {
+    fn forward_ctx(&self) -> Option<&FuncVal>;
+    fn forward_input(&self) -> Option<&FuncVal>;
+    fn reverse_ctx(&self) -> Option<&FuncVal>;
+    fn reverse_input(&self) -> Option<&FuncVal>;
 }
 
 pub fn default_setup() -> FuncVal {
@@ -51,8 +48,7 @@ pub fn default_setup() -> FuncVal {
         MutStaticPrimFunc {
             id: Symbol::from_str_unchecked("setup.default"),
             fn_: Rc::new(Eval),
-            setup: None,
-            ctx_explicit: false,
+            setup: DynSetup::none(),
         }
         .into(),
     )
@@ -64,6 +60,8 @@ pub fn default_setup() -> FuncVal {
 mod prim;
 
 mod comp;
+
+mod setup;
 
 mod free_static_prim;
 

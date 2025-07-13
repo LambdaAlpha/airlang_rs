@@ -1,10 +1,10 @@
 use log::error;
 
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
+use crate::prelude::setup::default_free_mode;
 use crate::semantics::val::ByteVal;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
@@ -52,7 +52,7 @@ impl Prelude for SyntaxPrelude {
 }
 
 pub fn parse() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "syntax.parse", f: free_impl(fn_parse), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "syntax.parse", f: free_impl(fn_parse), mode: default_free_mode() }.free_static()
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -68,7 +68,7 @@ fn fn_parse(input: Val) -> Val {
 }
 
 pub fn generate() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "syntax.generate", f: free_impl(fn_generate), mode: FuncMode::default() }
+    FreeFn { id: "syntax.generate", f: free_impl(fn_generate), mode: default_free_mode() }
         .free_static()
 }
 
@@ -179,8 +179,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
             }
             Val::Call(call) => {
                 let func = (&call.func).try_into()?;
+                let ctx = (&call.ctx).try_into()?;
                 let input = (&call.input).try_into()?;
-                GenRepr::Call(Box::new(Call::new(call.reverse, func, input)))
+                GenRepr::Call(Box::new(Call::new(call.reverse, func, ctx, input)))
             }
             Val::List(list) => {
                 let list: List<GenRepr> =
@@ -239,6 +240,7 @@ impl From<&CallRepr> for CallVal {
         Self::new(Box::new(Call {
             reverse: value.reverse,
             func: Val::from(&value.func),
+            ctx: Val::from(&value.ctx),
             input: Val::from(&value.input),
         }))
     }
@@ -249,6 +251,7 @@ impl From<CallRepr> for CallVal {
         Self::new(Box::new(Call {
             reverse: value.reverse,
             func: Val::from(value.func),
+            ctx: Val::from(value.ctx),
             input: Val::from(value.input),
         }))
     }
@@ -260,6 +263,7 @@ impl TryInto<CallRepr> for &CallVal {
         Ok(Call {
             reverse: self.reverse,
             func: (&self.func).try_into()?,
+            ctx: (&self.ctx).try_into()?,
             input: (&self.input).try_into()?,
         })
     }
@@ -272,6 +276,7 @@ impl TryInto<CallRepr> for CallVal {
         Ok(Call {
             reverse: call.reverse,
             func: call.func.try_into()?,
+            ctx: call.ctx.try_into()?,
             input: call.input.try_into()?,
         })
     }

@@ -7,6 +7,7 @@ use airlang::prelude::free_impl;
 use airlang::prelude::mode::CodeMode;
 use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mode::SymbolMode;
+use airlang::prelude::setup::free_mode;
 use airlang::semantics::val::FreeStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
@@ -39,15 +40,14 @@ const ARGUMENTS: &str = "arguments";
 // todo design
 // todo impl
 pub fn call() -> FreeStaticPrimFuncVal {
-    let forward = FuncMode::map_mode(
-        Map::default(),
-        FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
-        FuncMode::default_mode(),
-    );
     FreeFn {
         id: "process.call",
         f: free_impl(fn_call),
-        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
+        mode: free_mode(FuncMode::map_mode(
+            Map::default(),
+            FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
+            FuncMode::default_mode(),
+        )),
     }
     .free_static()
 }

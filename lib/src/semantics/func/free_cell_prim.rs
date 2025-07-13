@@ -1,7 +1,7 @@
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::Func;
-use crate::semantics::func::Setup;
-use crate::semantics::func::prim::impl_prim_func;
+use super::FreeStaticFn;
+use super::prim::impl_prim_func;
+use super::setup::FreeSetup;
+use super::setup::impl_free_setup;
 use crate::semantics::val::Val;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Symbol;
@@ -26,7 +26,7 @@ where T: FreeCellFn<I, O>
 pub struct FreeCellPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Box<dyn FreeCellFnVal>,
-    pub(crate) setup: Option<Setup>,
+    pub(crate) setup: FreeSetup,
 }
 
 impl FreeStaticFn<Val, Val> for FreeCellPrimFunc {
@@ -41,14 +41,6 @@ impl FreeCellFn<Val, Val> for FreeCellPrimFunc {
     }
 }
 
-impl Func for FreeCellPrimFunc {
-    fn setup(&self) -> Option<&Setup> {
-        self.setup.as_ref()
-    }
-
-    fn ctx_explicit(&self) -> bool {
-        false
-    }
-}
+impl_free_setup!(FreeCellPrimFunc);
 
 impl_prim_func!(FreeCellPrimFunc);

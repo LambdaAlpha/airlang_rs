@@ -2,11 +2,11 @@ length join
 -----
 _ do [
     a = _ any symbol,
-    la = a symbol.length .,
+    la = a | symbol.length .,
     b = _ any symbol,
-    lb = b symbol.length .,
+    lb = b | symbol.length .,
     ab = . symbol.join [#a, #b],
-    lab = ab symbol.length .,
+    lab = ab | symbol.length .,
     lab == la + lb
 ]
 -----
@@ -14,13 +14,13 @@ true
 =====
 length empty
 -----
-_ do [s = _ id '', s symbol.length .]
+_ do [s = _ id '', s | symbol.length .]
 -----
 0
 =====
 length else
 -----
-_ do [s = .a, s symbol.length .]
+_ do [s = .a, s | symbol.length .]
 -----
 1
 =====

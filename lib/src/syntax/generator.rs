@@ -5,6 +5,7 @@ use const_format::concatcp;
 use num_traits::Signed;
 
 use super::BYTE;
+use super::CALL_CTX;
 use super::CALL_FORWARD;
 use super::CALL_REVERSE;
 use super::FALSE;
@@ -46,7 +47,7 @@ pub enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
-    Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
+    Call(Box<Call<GenRepr<'a>, GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -254,35 +255,60 @@ fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
     gen_(ctx, s, pair.second);
 }
 
-fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr>) {
-    if !call.reverse
-        && let GenRepr::Pair(pair) = call.input
-    {
-        gen_scope_if_need(ctx, s, pair.first);
-        s.push(' ');
-        gen_scope_if_need(ctx, s, call.func);
-        s.push(' ');
-        gen_(ctx, s, pair.second);
-        return;
+fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+    if matches!(call.ctx, GenRepr::Unit(_)) {
+        if !call.reverse
+            && let GenRepr::Pair(pair) = call.input
+        {
+            gen_call_infix(ctx, s, call.func, *pair);
+        } else {
+            gen_call_default(ctx, s, call);
+        }
+    } else {
+        if call.reverse {
+            s.push_str(CALL_REVERSE);
+            s.push(SCOPE_LEFT);
+            gen_call_ctx(ctx, s, call);
+            s.push(SCOPE_RIGHT);
+        } else {
+            gen_call_ctx(ctx, s, call);
+        }
     }
-    let prefix = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
+}
+
+fn gen_call_infix(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+    gen_scope_if_need(ctx, s, pair.first);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, func);
+    s.push(' ');
+    gen_(ctx, s, pair.second);
+}
+
+fn gen_call_default(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+    let direction = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
     gen_scope_if_need(ctx, s, call.func);
     s.push(' ');
-    s.push_str(prefix);
+    s.push_str(direction);
+    s.push(' ');
+    gen_(ctx, s, call.input);
+}
+
+fn gen_call_ctx(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+    gen_scope_if_need(ctx, s, call.ctx);
+    s.push(' ');
+    s.push_str(CALL_CTX);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, call.func);
     s.push(' ');
     gen_(ctx, s, call.input);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
     if is_composite(&repr) {
-        gen_scope(ctx, s, repr);
+        scoped(ctx, s, |ctx, s| gen_(ctx, s, repr));
     } else {
         gen_(ctx, s, repr);
     }
-}
-
-fn gen_scope(ctx: GenCtx, s: &mut String, repr: GenRepr) {
-    scoped(ctx, s, |ctx, s| gen_(ctx, s, repr));
 }
 
 fn is_composite(repr: &GenRepr) -> bool {

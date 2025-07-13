@@ -20,12 +20,14 @@ use super::const_impl;
 use super::free_impl;
 use super::initial_ctx;
 use super::mode::CodeMode;
+use super::mode::DynFuncMode;
+use super::mode::Mode;
 use super::mode::SymbolMode;
 use super::mut_impl;
-use crate::semantics::core::Eval;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::MutStaticFn;
+use crate::prelude::setup::default_dyn_mode;
+use crate::prelude::setup::default_free_mode;
+use crate::prelude::setup::dyn_mode;
+use crate::prelude::setup::free_mode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
@@ -45,7 +47,6 @@ pub struct CtxPrelude {
     pub is_locked: ConstStaticPrimFuncVal,
     pub is_null: ConstStaticPrimFuncVal,
     pub is_const: MutStaticPrimFuncVal,
-    pub with_ctx: MutStaticPrimFuncVal,
     pub ctx_new: FreeStaticPrimFuncVal,
     pub ctx_repr: FreeStaticPrimFuncVal,
     pub ctx_prelude: FreeStaticPrimFuncVal,
@@ -63,7 +64,6 @@ impl Default for CtxPrelude {
             is_locked: is_locked(),
             is_null: is_null(),
             is_const: is_const(),
-            with_ctx: with_ctx(),
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
             ctx_prelude: ctx_prelude(),
@@ -82,7 +82,6 @@ impl Prelude for CtxPrelude {
         self.is_locked.put(ctx);
         self.is_null.put(ctx);
         self.is_const.put(ctx);
-        self.with_ctx.put(ctx);
         self.ctx_new.put(ctx);
         self.ctx_repr.put(ctx);
         self.ctx_prelude.put(ctx);
@@ -90,16 +89,13 @@ impl Prelude for CtxPrelude {
     }
 }
 
+fn ctx_var_mode(mode: Option<Mode>) -> DynFuncMode {
+    dyn_mode(FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), mode))
+}
+
 pub fn read() -> ConstStaticPrimFuncVal {
-    let forward =
-        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
-    DynFn {
-        id: "read",
-        f: const_impl(fn_read),
-        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .const_static()
+    DynFn { id: "read", f: const_impl(fn_read), mode: ctx_var_mode(FuncMode::default_mode()) }
+        .const_static()
 }
 
 fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -120,15 +116,8 @@ fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn move_() -> MutStaticPrimFuncVal {
-    let forward =
-        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
-    DynFn {
-        id: "move",
-        f: mut_impl(fn_move),
-        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "move", f: mut_impl(fn_move), mode: ctx_var_mode(FuncMode::default_mode()) }
+        .mut_static()
 }
 
 fn fn_move(ctx: &mut Val, input: Val) -> Val {
@@ -152,14 +141,10 @@ pub fn assign() -> MutStaticPrimFuncVal {
     DynFn {
         id: "=",
         f: mut_impl(fn_assign),
-        mode: FuncMode {
-            forward: FuncMode::pair_mode(
-                FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
-                FuncMode::default_mode(),
-            ),
-            reverse: FuncMode::default_mode(),
-        },
-        ctx_explicit: false,
+        mode: dyn_mode(FuncMode::pair_mode(
+            FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
+            FuncMode::default_mode(),
+        )),
     }
     .mut_static()
 }
@@ -184,13 +169,10 @@ fn fn_assign(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn contract() -> ConstStaticPrimFuncVal {
-    let forward =
-        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     DynFn {
         id: "contract",
         f: const_impl(fn_contract),
-        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
+        mode: ctx_var_mode(FuncMode::default_mode()),
     }
     .const_static()
 }
@@ -220,14 +202,7 @@ pub fn set_contract() -> MutStaticPrimFuncVal {
     DynFn {
         id: "set_contract",
         f: mut_impl(fn_set_contract),
-        mode: FuncMode {
-            forward: FuncMode::pair_mode(
-                FuncMode::symbol_mode(SymbolMode::Literal),
-                FuncMode::symbol_mode(SymbolMode::Literal),
-            ),
-            reverse: FuncMode::default_mode(),
-        },
-        ctx_explicit: false,
+        mode: ctx_var_mode(FuncMode::symbol_mode(SymbolMode::Literal)),
     }
     .mut_static()
 }
@@ -255,13 +230,10 @@ fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_locked() -> ConstStaticPrimFuncVal {
-    let forward =
-        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
     DynFn {
         id: "is_locked",
         f: const_impl(fn_is_locked),
-        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
+        mode: ctx_var_mode(FuncMode::default_mode()),
     }
     .const_static()
 }
@@ -288,15 +260,8 @@ fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn is_null() -> ConstStaticPrimFuncVal {
-    let forward =
-        FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode());
-    DynFn {
-        id: "is_null",
-        f: const_impl(fn_is_null),
-        mode: FuncMode { forward, reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .const_static()
+    DynFn { id: "is_null", f: const_impl(fn_is_null), mode: ctx_var_mode(FuncMode::default_mode()) }
+        .const_static()
 }
 
 fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -320,8 +285,7 @@ pub fn is_const() -> MutStaticPrimFuncVal {
     DynFn {
         id: "is_constant",
         f: MutStaticImpl::new(FreeStaticImpl::default, fn_const, fn_mut),
-        mode: FuncMode::default(),
-        ctx_explicit: false,
+        mode: default_dyn_mode(),
     }
     .mut_static()
 }
@@ -334,41 +298,8 @@ fn fn_mut(_ctx: &mut Val, _input: Val) -> Val {
     Val::Bit(Bit::false_())
 }
 
-pub fn with_ctx() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "|",
-        f: MutStaticImpl::new(fn_with_ctx_free, fn_with_ctx_const, fn_with_ctx_mut),
-        mode: FuncMode {
-            forward: FuncMode::pair_mode(
-                FuncMode::symbol_mode(SymbolMode::Literal),
-                FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form),
-            ),
-            reverse: FuncMode::default_mode(),
-        },
-        ctx_explicit: true,
-    }
-    .mut_static()
-}
-
-fn fn_with_ctx_free(input: Val) -> Val {
-    Eval.free_static_call(input)
-}
-
-fn fn_with_ctx_const(ctx: ConstRef<Val>, input: Val) -> Val {
-    Eval.const_static_call(ctx, input)
-}
-
-fn fn_with_ctx_mut(ctx: &mut Val, input: Val) -> Val {
-    Eval.mut_static_call(ctx, input)
-}
-
 pub fn ctx_new() -> FreeStaticPrimFuncVal {
-    FreeFn {
-        id: "context",
-        f: free_impl(fn_ctx_new),
-        mode: FuncMode { forward: parse_mode(), reverse: FuncMode::default_mode() },
-    }
-    .free_static()
+    FreeFn { id: "context", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free_static()
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -380,7 +311,7 @@ fn fn_ctx_new(input: Val) -> Val {
 }
 
 pub fn ctx_repr() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "context.represent", f: free_impl(fn_ctx_repr), mode: FuncMode::default() }
+    FreeFn { id: "context.represent", f: free_impl(fn_ctx_repr), mode: default_free_mode() }
         .free_static()
 }
 
@@ -393,7 +324,7 @@ fn fn_ctx_repr(input: Val) -> Val {
 }
 
 pub fn ctx_prelude() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "prelude", f: free_impl(fn_ctx_prelude), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "prelude", f: free_impl(fn_ctx_prelude), mode: default_free_mode() }.free_static()
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {
@@ -401,8 +332,7 @@ fn fn_ctx_prelude(_input: Val) -> Val {
 }
 
 pub fn ctx_self() -> ConstStaticPrimFuncVal {
-    DynFn { id: "self", f: const_impl(fn_ctx_self), mode: FuncMode::default(), ctx_explicit: false }
-        .const_static()
+    DynFn { id: "self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_ctx_self(ctx: ConstRef<Val>, _input: Val) -> Val {

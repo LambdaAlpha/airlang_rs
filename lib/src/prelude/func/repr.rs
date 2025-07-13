@@ -12,6 +12,7 @@ use crate::semantics::func::ConstCellCompFunc;
 use crate::semantics::func::ConstCellPrimFunc;
 use crate::semantics::func::ConstStaticCompFunc;
 use crate::semantics::func::DynComposite;
+use crate::semantics::func::DynSetup;
 use crate::semantics::func::FreeCellCompFunc;
 use crate::semantics::func::FreeCellPrimFunc;
 use crate::semantics::func::FreeComposite;
@@ -19,7 +20,6 @@ use crate::semantics::func::FreeStaticCompFunc;
 use crate::semantics::func::MutCellCompFunc;
 use crate::semantics::func::MutCellPrimFunc;
 use crate::semantics::func::MutStaticCompFunc;
-use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCellCompFuncVal;
 use crate::semantics::val::ConstCellPrimFuncVal;
 use crate::semantics::val::ConstStaticCompFuncVal;
@@ -36,6 +36,7 @@ use crate::semantics::val::MutStaticCompFuncVal;
 use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::CtxInput;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
@@ -44,12 +45,11 @@ use crate::type_::Symbol;
 const CODE: &str = "code";
 const CTX: &str = "context";
 const ID: &str = "id";
-const SETUP: &str = "setup";
+const FORWARD_SETUP: &str = "forward_setup";
+const REVERSE_SETUP: &str = "reverse_setup";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
 const CELL: &str = "cell";
-// todo rename
-const CTX_EXPLICIT: &str = "context_explicit";
 
 const FREE: &str = "free";
 const CONST: &str = "constant";
@@ -71,8 +71,67 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
     };
 
     // todo design
-    let (ctx_name, input_name, body) = match map_remove(&mut map, CODE) {
-        Val::Unit(_) => (Some(Symbol::default()), Symbol::default(), Val::default()),
+    let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
+    let ctx = parse_ctx(map_remove(&mut map, CTX))?;
+    let setup =
+        parse_dyn_setup(map_remove(&mut map, FORWARD_SETUP), map_remove(&mut map, REVERSE_SETUP))?;
+    let ctx_access = map_remove(&mut map, CTX_ACCESS);
+    let ctx_access = parse_ctx_access(&ctx_access)?;
+    let cell = parse_cell(map_remove(&mut map, CELL))?;
+    let free_comp = FreeComposite { body, input_name };
+    let func = match ctx_access {
+        FREE => {
+            if cell {
+                let func = FreeCellCompFunc { comp: free_comp, ctx, setup: setup.into() };
+                FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
+            } else {
+                let func = FreeStaticCompFunc { comp: free_comp, ctx, setup: setup.into() };
+                FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
+            }
+        }
+        CONST => {
+            let ctx_name = ctx_name?;
+            let comp = DynComposite { free: free_comp, ctx_name };
+            if cell {
+                let func = ConstCellCompFunc { comp, ctx, setup };
+                FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
+            } else {
+                let func = ConstStaticCompFunc { comp, ctx, setup };
+                FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
+            }
+        }
+        MUTABLE => {
+            let ctx_name = ctx_name?;
+            let comp = DynComposite { free: free_comp, ctx_name };
+            if cell {
+                let func = MutCellCompFunc { comp, ctx, setup };
+                FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
+            } else {
+                let func = MutStaticCompFunc { comp, ctx, setup };
+                FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
+            }
+        }
+        s => {
+            error!("ctx access {s} should be one of {FREE}, {CONST}, or {MUTABLE}");
+            return None;
+        }
+    };
+    Some(func)
+}
+
+struct FuncCode {
+    ctx_name: Option<Symbol>,
+    input_name: Symbol,
+    body: Val,
+}
+
+fn parse_code(code: Val) -> Option<FuncCode> {
+    let code = match code {
+        Val::Unit(_) => FuncCode {
+            ctx_name: Some(Symbol::default()),
+            input_name: Symbol::default(),
+            body: Val::default(),
+        },
         Val::Pair(names_body) => {
             let names_body = Pair::from(names_body);
             match names_body.first {
@@ -85,9 +144,15 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
                         error!("input {:?} should be a symbol", ctx_input.second);
                         return None;
                     };
-                    (Some(ctx.clone()), input.clone(), names_body.second)
+                    FuncCode {
+                        ctx_name: Some(ctx.clone()),
+                        input_name: input.clone(),
+                        body: names_body.second,
+                    }
                 }
-                Val::Symbol(input) => (None, input, names_body.second),
+                Val::Symbol(input) => {
+                    FuncCode { ctx_name: None, input_name: input, body: names_body.second }
+                }
                 v => {
                     error!("name {v:?} should be a symbol or a pair of symbol");
                     return None;
@@ -99,109 +164,79 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
             return None;
         }
     };
-    let ctx = match map_remove(&mut map, CTX) {
-        Val::Ctx(ctx) => Ctx::from(ctx),
-        Val::Unit(_) => Ctx::default(),
+    Some(code)
+}
+
+fn parse_ctx(ctx: Val) -> Option<Ctx> {
+    match ctx {
+        Val::Ctx(ctx) => Some(Ctx::from(ctx)),
+        Val::Unit(_) => Some(Ctx::default()),
         v => {
             error!("ctx {v:?} should be a ctx or a unit");
-            return None;
+            None
         }
-    };
-    let setup = match map_remove(&mut map, SETUP) {
-        Val::Unit(_) => None,
+    }
+}
+
+fn parse_dyn_setup(forward: Val, reverse: Val) -> Option<DynSetup> {
+    let forward_setup = parse_ctx_input_setup(forward)?;
+    let reverse_setup = parse_ctx_input_setup(reverse)?;
+    Some(DynSetup {
+        forward_ctx: forward_setup.ctx,
+        forward_input: forward_setup.input,
+        reverse_ctx: reverse_setup.ctx,
+        reverse_input: reverse_setup.input,
+    })
+}
+
+fn parse_ctx_input_setup(setup: Val) -> Option<CtxInput<Option<FuncVal>, Option<FuncVal>>> {
+    match setup {
+        Val::Unit(_) => Some(CtxInput::new(None, None)),
+        Val::Func(func) => Some(CtxInput::new(None, Some(func))),
         Val::Pair(pair) => {
             let pair = Pair::from(pair);
-            let forward = match pair.first {
-                Val::Unit(_) => {
-                    FuncVal::MutStaticPrim(FuncMode::mode_into_mut_func(FuncMode::default_mode()))
-                }
-                Val::Func(func) => func,
-                v => {
-                    error!("setup.first {v:?} should be a function or a unit");
-                    return None;
-                }
-            };
-            let reverse = match pair.second {
-                Val::Unit(_) => {
-                    FuncVal::MutStaticPrim(FuncMode::mode_into_mut_func(FuncMode::default_mode()))
-                }
-                Val::Func(func) => func,
-                v => {
-                    error!("setup.second {v:?} should be a function or a unit");
-                    return None;
-                }
-            };
-            Some(Setup { forward, reverse })
+            let ctx = parse_setup(pair.first)?;
+            let input = parse_setup(pair.second)?;
+            Some(CtxInput { ctx, input })
         }
         v => {
-            error!("setup {v:?} should be a pair or a unit");
-            return None;
+            error!("setup {v:?} should be a func, a pair or a unit");
+            None
         }
-    };
-    let ctx_access = map_remove(&mut map, CTX_ACCESS);
-    let ctx_access = match &ctx_access {
-        Val::Symbol(s) => &**s,
-        Val::Unit(_) => MUTABLE,
+    }
+}
+
+fn parse_setup(setup: Val) -> Option<Option<FuncVal>> {
+    match setup {
+        Val::Unit(_) => Some(None),
+        Val::Func(func) => Some(Some(func)),
+        v => {
+            error!("setup {v:?} should be a function or a unit");
+            None
+        }
+    }
+}
+
+fn parse_ctx_access(access: &Val) -> Option<&str> {
+    match &access {
+        Val::Symbol(s) => Some(&**s),
+        Val::Unit(_) => Some(MUTABLE),
         v => {
             error!("ctx access {v:?} should be a symbol or a unit");
-            return None;
+            None
         }
-    };
-    let ctx_explicit = match map_remove(&mut map, CTX_EXPLICIT) {
-        Val::Unit(_) => false,
-        Val::Bit(b) => b.bool(),
-        v => {
-            error!("ctx explicit {v:?} should be a bit or a unit");
-            return None;
-        }
-    };
-    let cell = match map_remove(&mut map, CELL) {
-        Val::Unit(_) => false,
-        Val::Bit(b) => b.bool(),
+    }
+}
+
+fn parse_cell(cell: Val) -> Option<bool> {
+    match cell {
+        Val::Unit(_) => Some(false),
+        Val::Bit(b) => Some(b.bool()),
         v => {
             error!("cell {v:?} should be a bit or a unit");
-            return None;
+            None
         }
-    };
-    let free_comp = FreeComposite { body, input_name };
-    let func = match ctx_access {
-        FREE => {
-            if cell {
-                let func = FreeCellCompFunc { comp: free_comp, ctx, setup };
-                FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
-            } else {
-                let func = FreeStaticCompFunc { comp: free_comp, ctx, setup };
-                FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
-            }
-        }
-        CONST => {
-            let ctx_name = ctx_name?;
-            let comp = DynComposite { free: free_comp, ctx_name };
-            if cell {
-                let func = ConstCellCompFunc { comp, ctx, setup, ctx_explicit };
-                FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
-            } else {
-                let func = ConstStaticCompFunc { comp, ctx, setup, ctx_explicit };
-                FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
-            }
-        }
-        MUTABLE => {
-            let ctx_name = ctx_name?;
-            let comp = DynComposite { free: free_comp, ctx_name };
-            if cell {
-                let func = MutCellCompFunc { comp, ctx, setup, ctx_explicit };
-                FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
-            } else {
-                let func = MutStaticCompFunc { comp, ctx, setup, ctx_explicit };
-                FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
-            }
-        }
-        s => {
-            error!("ctx access {s} should be one of {FREE}, {CONST}, or {MUTABLE}");
-            return None;
-        }
-    };
-    Some(func)
+    }
 }
 
 pub(super) fn generate_func(f: FuncVal) -> Val {
@@ -230,8 +265,7 @@ fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
     let f = FreeCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp =
-        CompRepr { access: FREE, cell: true, setup: f.setup, ctx: f.ctx, ctx_explicit: false };
+    let comp = CompRepr { access: FREE, cell: true, setup: f.setup.into(), ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -243,13 +277,8 @@ fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
 fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp = CompRepr {
-        access: FREE,
-        cell: false,
-        setup: f.setup.clone(),
-        ctx: f.ctx.clone(),
-        ctx_explicit: false,
-    };
+    let comp =
+        CompRepr { access: FREE, cell: false, setup: f.setup.clone().into(), ctx: f.ctx.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -263,13 +292,7 @@ fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
     let f = ConstCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        access: CONST,
-        cell: true,
-        setup: f.setup,
-        ctx: f.ctx,
-        ctx_explicit: f.ctx_explicit,
-    };
+    let comp = CompRepr { access: CONST, cell: true, setup: f.setup, ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -281,13 +304,7 @@ fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
 fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        access: CONST,
-        cell: false,
-        setup: f.setup.clone(),
-        ctx: f.ctx.clone(),
-        ctx_explicit: f.ctx_explicit,
-    };
+    let comp = CompRepr { access: CONST, cell: false, setup: f.setup.clone(), ctx: f.ctx.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -301,13 +318,7 @@ fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
     let f = MutCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        access: MUTABLE,
-        cell: true,
-        setup: f.setup,
-        ctx: f.ctx,
-        ctx_explicit: f.ctx_explicit,
-    };
+    let comp = CompRepr { access: MUTABLE, cell: true, setup: f.setup, ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -319,13 +330,8 @@ fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
 fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        access: MUTABLE,
-        cell: false,
-        setup: f.setup.clone(),
-        ctx: f.ctx.clone(),
-        ctx_explicit: f.ctx_explicit,
-    };
+    let comp =
+        CompRepr { access: MUTABLE, cell: false, setup: f.setup.clone(), ctx: f.ctx.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -367,31 +373,52 @@ fn dyn_code(comp: &DynComposite) -> Val {
 }
 
 struct CompRepr {
-    ctx_explicit: bool,
     access: &'static str,
     cell: bool,
-    setup: Option<Setup>,
+    setup: DynSetup,
     ctx: Ctx,
 }
 
 fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
-    if comp.ctx_explicit {
-        repr.insert(symbol(CTX_EXPLICIT), Val::Bit(Bit::true_()));
-    }
     if comp.cell {
         repr.insert(symbol(CELL), Val::Bit(Bit::true_()));
     }
     if comp.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(comp.access));
     }
-    if let Some(setup) = comp.setup {
-        let forward = Val::Func(setup.forward);
-        let reverse = Val::Func(setup.reverse);
-        let pair = Val::Pair(Pair::new(forward, reverse).into());
-        repr.insert(symbol(SETUP), pair);
+    if let Some(setup) = generate_ctx_input_setup(comp.setup.forward_ctx, comp.setup.forward_input)
+    {
+        repr.insert(symbol(FORWARD_SETUP), setup);
+    }
+    if let Some(setup) = generate_ctx_input_setup(comp.setup.reverse_ctx, comp.setup.reverse_input)
+    {
+        repr.insert(symbol(REVERSE_SETUP), setup);
     }
     if comp.ctx != Ctx::default() {
         repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(comp.ctx)));
+    }
+}
+
+pub(crate) fn generate_ctx_input_setup(
+    ctx: Option<FuncVal>, input: Option<FuncVal>,
+) -> Option<Val> {
+    if ctx.is_none() && input.is_none() {
+        return None;
+    }
+    let setup = if ctx.is_none() {
+        generate_setup(input)
+    } else {
+        let ctx = generate_setup(ctx);
+        let input = generate_setup(input);
+        Val::Pair(Pair::new(ctx, input).into())
+    };
+    Some(setup)
+}
+
+fn generate_setup(setup: Option<FuncVal>) -> Val {
+    match setup {
+        Some(func) => Val::Func(func),
+        None => Val::default(),
     }
 }
 

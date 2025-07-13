@@ -29,12 +29,13 @@ use crate::semantics::ctx::CtxValue;
 use crate::semantics::func::ConstCellCompFunc;
 use crate::semantics::func::ConstStaticCompFunc;
 use crate::semantics::func::DynComposite;
+use crate::semantics::func::DynSetup;
 use crate::semantics::func::FreeCellCompFunc;
 use crate::semantics::func::FreeComposite;
+use crate::semantics::func::FreeSetup;
 use crate::semantics::func::FreeStaticCompFunc;
 use crate::semantics::func::MutCellCompFunc;
 use crate::semantics::func::MutStaticCompFunc;
-use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCellCompFuncVal;
 use crate::semantics::val::ConstStaticCompFuncVal;
 use crate::semantics::val::FreeCellCompFuncVal;
@@ -47,7 +48,11 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Change;
+use crate::type_::CtxInput;
 use crate::type_::Either;
+use crate::type_::FuncCtx;
+use crate::type_::FuncCtxInput;
+use crate::type_::FuncInput;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
@@ -106,7 +111,7 @@ impl Arbitrary for Val {
             5 => Val::Number(Number::any(rng, new_depth).into()),
             6 => Val::Byte(Byte::any(rng, new_depth).into()),
             7 => Val::Pair(Pair::<Val, Val>::any(rng, new_depth).into()),
-            8 => Val::Call(Call::<Val, Val>::any(rng, new_depth).into()),
+            8 => Val::Call(Call::<Val, Val, Val>::any(rng, new_depth).into()),
             9 => Val::List(List::<Val>::any(rng, new_depth).into()),
             10 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
             11 => Val::Ctx(Ctx::any(rng, new_depth).into()),
@@ -222,13 +227,59 @@ where
     }
 }
 
-impl<Func, Input> Arbitrary for Call<Func, Input>
+impl<Func, Ctx, Input> Arbitrary for Call<Func, Ctx, Input>
+where
+    Func: Arbitrary,
+    Ctx: Arbitrary,
+    Input: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        Call::new(rng.random(), Func::any(rng, depth), Ctx::any(rng, depth), Input::any(rng, depth))
+    }
+}
+
+impl<Func, Ctx> Arbitrary for FuncCtx<Func, Ctx>
+where
+    Func: Arbitrary,
+    Ctx: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        FuncCtx { func: Func::any(rng, depth), ctx: Ctx::any(rng, depth) }
+    }
+}
+
+impl<Func, Input> Arbitrary for FuncInput<Func, Input>
 where
     Func: Arbitrary,
     Input: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        Call::new(rng.random(), Func::any(rng, depth), Input::any(rng, depth))
+        FuncInput { func: Func::any(rng, depth), input: Input::any(rng, depth) }
+    }
+}
+
+impl<Ctx, Input> Arbitrary for CtxInput<Ctx, Input>
+where
+    Ctx: Arbitrary,
+    Input: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        CtxInput { ctx: Ctx::any(rng, depth), input: Input::any(rng, depth) }
+    }
+}
+
+impl<Func, Ctx, Input> Arbitrary for FuncCtxInput<Func, Ctx, Input>
+where
+    Func: Arbitrary,
+    Ctx: Arbitrary,
+    Input: Arbitrary,
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        FuncCtxInput {
+            func: Func::any(rng, depth),
+            ctx: Ctx::any(rng, depth),
+            input: Input::any(rng, depth),
+        }
     }
 }
 
@@ -331,9 +382,10 @@ impl Arbitrary for CallMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
+        let ctx = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
         let some = if rng.random() { Some(Arbitrary::any(rng, new_depth)) } else { None };
-        CallMode { func, input, some }
+        CallMode { func, ctx, input, some }
     }
 }
 
@@ -428,11 +480,21 @@ impl Arbitrary for FuncVal {
     }
 }
 
-impl Arbitrary for Setup {
+impl Arbitrary for FreeSetup {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let forward = Arbitrary::any(rng, depth);
-        let reverse = Arbitrary::any(rng, depth);
-        Setup { forward, reverse }
+        let forward_input = Arbitrary::any(rng, depth);
+        let reverse_input = Arbitrary::any(rng, depth);
+        FreeSetup { forward_input, reverse_input }
+    }
+}
+
+impl Arbitrary for DynSetup {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let forward_ctx = Arbitrary::any(rng, depth);
+        let forward_input = Arbitrary::any(rng, depth);
+        let reverse_ctx = Arbitrary::any(rng, depth);
+        let reverse_input = Arbitrary::any(rng, depth);
+        DynSetup { forward_ctx, forward_input, reverse_ctx, reverse_input }
     }
 }
 
@@ -476,7 +538,6 @@ impl Arbitrary for ConstCellCompFuncVal {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
-            ctx_explicit: rng.random(),
         };
         ConstCellCompFuncVal::from(func)
     }
@@ -488,7 +549,6 @@ impl Arbitrary for ConstStaticCompFuncVal {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
-            ctx_explicit: rng.random(),
         };
         ConstStaticCompFuncVal::from(func)
     }
@@ -500,7 +560,6 @@ impl Arbitrary for MutCellCompFuncVal {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
-            ctx_explicit: rng.random(),
         };
         MutCellCompFuncVal::from(func)
     }
@@ -512,7 +571,6 @@ impl Arbitrary for MutStaticCompFuncVal {
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
-            ctx_explicit: rng.random(),
         };
         MutStaticCompFuncVal::from(func)
     }

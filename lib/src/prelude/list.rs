@@ -3,12 +3,11 @@ use std::mem::swap;
 use log::error;
 
 use super::DynFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
 use super::mut_impl;
-use super::setup::ctx_default_mode;
+use super::setup::default_dyn_mode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
@@ -68,13 +67,7 @@ impl Prelude for ListPrelude {
 }
 
 pub fn length() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "list.length",
-        f: const_impl(fn_length),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "list.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -87,13 +80,7 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.set",
-        f: mut_impl(fn_set),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.set", f: mut_impl(fn_set), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_set(ctx: &mut Val, input: Val) -> Val {
@@ -121,13 +108,7 @@ fn fn_set(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn set_many() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.set_many",
-        f: mut_impl(fn_set_many),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.set_many", f: mut_impl(fn_set_many), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
@@ -160,13 +141,7 @@ fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn get() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "list.get",
-        f: const_impl(fn_get),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "list.get", f: const_impl(fn_get), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -201,13 +176,7 @@ fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn insert() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.insert",
-        f: mut_impl(fn_insert),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.insert", f: mut_impl(fn_insert), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_insert(ctx: &mut Val, input: Val) -> Val {
@@ -235,13 +204,8 @@ fn fn_insert(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn insert_many() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.insert_many",
-        f: mut_impl(fn_insert_many),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.insert_many", f: mut_impl(fn_insert_many), mode: default_dyn_mode() }
+        .mut_static()
 }
 
 fn fn_insert_many(ctx: &mut Val, input: Val) -> Val {
@@ -273,13 +237,7 @@ fn fn_insert_many(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.remove",
-        f: mut_impl(fn_remove),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.remove", f: mut_impl(fn_remove), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_remove(ctx: &mut Val, input: Val) -> Val {
@@ -315,13 +273,7 @@ fn fn_remove(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.push",
-        f: mut_impl(fn_push),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_push(ctx: &mut Val, input: Val) -> Val {
@@ -334,13 +286,7 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push_many() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.push_many",
-        f: mut_impl(fn_push_many),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.push_many", f: mut_impl(fn_push_many), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_push_many(ctx: &mut Val, input: Val) -> Val {
@@ -357,13 +303,7 @@ fn fn_push_many(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.pop",
-        f: mut_impl(fn_pop),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.pop", f: mut_impl(fn_pop), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_pop(ctx: &mut Val, input: Val) -> Val {
@@ -396,13 +336,7 @@ fn fn_pop(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn clear() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "list.clear",
-        f: mut_impl(fn_clear),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "list.clear", f: mut_impl(fn_clear), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_clear(ctx: &mut Val, _input: Val) -> Val {

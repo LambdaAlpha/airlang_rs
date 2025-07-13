@@ -177,8 +177,8 @@ impl From<PairVal> for Val {
     }
 }
 
-impl From<Call<Val, Val>> for Val {
-    fn from(value: Call<Val, Val>) -> Self {
+impl From<Call<Val, Val, Val>> for Val {
+    fn from(value: Call<Val, Val, Val>) -> Self {
         Val::Call(CallVal::from(value))
     }
 }

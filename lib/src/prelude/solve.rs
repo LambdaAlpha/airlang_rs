@@ -1,10 +1,10 @@
 use log::error;
 
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
+use crate::prelude::setup::default_free_mode;
 use crate::semantics::solver::SOLVER;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::Val;
@@ -29,7 +29,7 @@ impl Prelude for SolvePrelude {
 }
 
 pub fn get_solver() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "solver!", f: free_impl(fn_get_solver), mode: FuncMode::default() }.free_static()
+    FreeFn { id: "solver!", f: free_impl(fn_get_solver), mode: default_free_mode() }.free_static()
 }
 
 fn fn_get_solver(_input: Val) -> Val {
@@ -42,7 +42,7 @@ fn fn_get_solver(_input: Val) -> Val {
 }
 
 pub fn set_solver() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: FuncMode::default() }
+    FreeFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: default_free_mode() }
         .free_static()
 }
 

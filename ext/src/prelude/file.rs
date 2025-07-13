@@ -2,7 +2,7 @@ use airlang::prelude::FreeFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
-use airlang::prelude::mode::FuncMode;
+use airlang::prelude::setup::default_free_mode;
 use airlang::semantics::val::FreeStaticPrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
@@ -25,7 +25,7 @@ impl Prelude for FilePrelude {
 }
 
 pub fn read_to_text() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "file.read_to_text", f: free_impl(fn_read_to_text), mode: FuncMode::default() }
+    FreeFn { id: "file.read_to_text", f: free_impl(fn_read_to_text), mode: default_free_mode() }
         .free_static()
 }
 

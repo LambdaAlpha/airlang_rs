@@ -146,7 +146,7 @@ fn generate_binding(binding: Binding) -> Val {
     }
     let contract = generate_contract(binding.contract);
     let pair = Pair::new(Val::Symbol(binding.name), contract);
-    Val::Call(Call::new(false, Val::default(), Val::Pair(pair.into())).into())
+    Val::Call(Call::new(false, Val::default(), Val::default(), Val::Pair(pair.into())).into())
 }
 
 pub(in crate::prelude) fn generate_contract(contract: Contract) -> Val {

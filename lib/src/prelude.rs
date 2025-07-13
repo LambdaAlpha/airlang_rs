@@ -11,6 +11,8 @@ use self::int::IntPrelude;
 use self::list::ListPrelude;
 use self::map::MapPrelude;
 use self::meta::MetaPrelude;
+use self::mode::DynFuncMode;
+use self::mode::FreeFuncMode;
 use self::mode::FuncMode;
 use self::mode::ModePrelude;
 use self::number::NumberPrelude;
@@ -192,14 +194,13 @@ impl Named for MutStaticPrimFuncVal {
 pub struct FreeFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: FuncMode,
+    pub mode: FreeFuncMode,
 }
 
 pub struct DynFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: FuncMode,
-    pub ctx_explicit: bool,
+    pub mode: DynFuncMode,
 }
 
 impl<F: FreeCellFnVal + 'static> FreeFn<F> {
@@ -207,7 +208,7 @@ impl<F: FreeCellFnVal + 'static> FreeFn<F> {
         let func = FreeCellPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Box::new(self.f),
-            setup: Some(self.mode.into_setup()),
+            setup: self.mode.into_setup(),
         };
         FreeCellPrimFuncVal::from(func)
     }
@@ -218,7 +219,7 @@ impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
         let func = FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: Some(self.mode.into_setup()),
+            setup: self.mode.into_setup(),
         };
         FreeStaticPrimFuncVal::from(func)
     }
@@ -229,8 +230,7 @@ impl<F: ConstCellFnVal + 'static> DynFn<F> {
         let func = ConstCellPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Box::new(self.f),
-            setup: Some(self.mode.into_setup()),
-            ctx_explicit: self.ctx_explicit,
+            setup: self.mode.into_setup(),
         };
         ConstCellPrimFuncVal::from(func)
     }
@@ -241,8 +241,7 @@ impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
         let func = ConstStaticPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: Some(self.mode.into_setup()),
-            ctx_explicit: self.ctx_explicit,
+            setup: self.mode.into_setup(),
         };
         ConstStaticPrimFuncVal::from(func)
     }
@@ -253,8 +252,7 @@ impl<F: MutCellFnVal + 'static> DynFn<F> {
         let func = MutCellPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Box::new(self.f),
-            setup: Some(self.mode.into_setup()),
-            ctx_explicit: self.ctx_explicit,
+            setup: self.mode.into_setup(),
         };
         MutCellPrimFuncVal::from(func)
     }
@@ -265,8 +263,7 @@ impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
         let func = MutStaticPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: Some(self.mode.into_setup()),
-            ctx_explicit: self.ctx_explicit,
+            setup: self.mode.into_setup(),
         };
         MutStaticPrimFuncVal::from(func)
     }

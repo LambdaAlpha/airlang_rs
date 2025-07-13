@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
+use super::CallMapMode;
 use super::CallMode;
 use super::CodeMode;
 use super::CompMode;
@@ -14,9 +15,10 @@ use super::SymbolMode;
 use super::opt::ModeFn;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstStaticPrimFunc;
+use crate::semantics::func::DynSetup;
+use crate::semantics::func::FreeSetup;
 use crate::semantics::func::FreeStaticPrimFunc;
 use crate::semantics::func::MutStaticPrimFunc;
-use crate::semantics::func::Setup;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -29,10 +31,20 @@ use crate::type_::Symbol;
 
 impl ModeFn for FuncVal {}
 
+pub struct FuncMode;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FuncMode {
-    pub forward: Option<Mode>,
-    pub reverse: Option<Mode>,
+pub struct FreeFuncMode {
+    pub forward_input: Option<Mode>,
+    pub reverse_input: Option<Mode>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct DynFuncMode {
+    pub forward_input: Option<Mode>,
+    pub forward_ctx: Option<Mode>,
+    pub reverse_input: Option<Mode>,
+    pub reverse_ctx: Option<Mode>,
 }
 
 const DEFAULT_MODE: PrimMode = PrimMode {
@@ -46,13 +58,6 @@ const DEFAULT_MODE: PrimMode = PrimMode {
 const MODE_FUNC_ID: &str = "mode.object";
 
 impl FuncMode {
-    pub fn into_setup(self) -> Setup {
-        Setup {
-            forward: Self::mode_into_func(self.forward),
-            reverse: Self::mode_into_func(self.reverse),
-        }
-    }
-
     pub fn mode_into_func(mode: Option<Mode>) -> FuncVal {
         match mode.ctx_access() {
             CtxAccess::Free => FuncVal::FreeStaticPrim(Self::mode_into_free_func(mode)),
@@ -65,7 +70,7 @@ impl FuncMode {
         FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: None,
+            setup: FreeSetup::none(),
         }
         .into()
     }
@@ -74,8 +79,7 @@ impl FuncMode {
         ConstStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: None,
-            ctx_explicit: false,
+            setup: DynSetup::none(),
         }
         .into()
     }
@@ -84,8 +88,7 @@ impl FuncMode {
         MutStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: None,
-            ctx_explicit: false,
+            setup: DynSetup::none(),
         }
         .into()
     }
@@ -121,10 +124,12 @@ impl FuncMode {
     }
 
     pub fn call_mode(
-        func: Option<Mode>, input: Option<Mode>, some: Option<Map<Val, Option<Mode>>>,
+        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>, some: Option<CallMapMode>,
     ) -> Option<Mode> {
-        let mode =
-            CompMode { call: Some(CallMode { func, input, some }), ..Self::default_comp_mode() };
+        let mode = CompMode {
+            call: Some(CallMode { func, ctx, input, some }),
+            ..Self::default_comp_mode()
+        };
         Some(Mode::Comp(Box::new(mode)))
     }
 
@@ -142,9 +147,40 @@ impl FuncMode {
     }
 }
 
-impl Default for FuncMode {
+impl FreeFuncMode {
+    pub(crate) fn into_setup(self) -> FreeSetup {
+        FreeSetup {
+            forward_input: Some(FuncMode::mode_into_func(self.forward_input)),
+            reverse_input: Some(FuncMode::mode_into_func(self.reverse_input)),
+        }
+    }
+}
+
+impl DynFuncMode {
+    pub(crate) fn into_setup(self) -> DynSetup {
+        DynSetup {
+            forward_ctx: Some(FuncMode::mode_into_func(self.forward_ctx)),
+            forward_input: Some(FuncMode::mode_into_func(self.forward_input)),
+            reverse_ctx: Some(FuncMode::mode_into_func(self.reverse_ctx)),
+            reverse_input: Some(FuncMode::mode_into_func(self.reverse_input)),
+        }
+    }
+}
+
+impl Default for FreeFuncMode {
     fn default() -> Self {
-        Self { forward: Self::default_mode(), reverse: Self::default_mode() }
+        Self { forward_input: FuncMode::default_mode(), reverse_input: FuncMode::default_mode() }
+    }
+}
+
+impl Default for DynFuncMode {
+    fn default() -> Self {
+        Self {
+            forward_ctx: FuncMode::default_mode(),
+            forward_input: FuncMode::default_mode(),
+            reverse_ctx: FuncMode::default_mode(),
+            reverse_input: FuncMode::default_mode(),
+        }
     }
 }
 
@@ -223,9 +259,11 @@ impl GetCtxAccess for CallMode {
         match &self.some {
             None => CtxAccess::Mut,
             Some(some) => {
-                let some =
-                    some.values().fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
-                let else_ = self.func.ctx_access() & self.input.ctx_access();
+                let some = some.values().fold(CtxAccess::Free, |access, mode| {
+                    access & mode.ctx.ctx_access() & mode.input.ctx_access()
+                });
+                let else_ =
+                    self.func.ctx_access() & self.ctx.ctx_access() & self.input.ctx_access();
                 some & else_
             }
         }

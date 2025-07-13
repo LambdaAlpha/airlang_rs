@@ -2,11 +2,11 @@ use super::ConstCellFn;
 use super::ConstStaticFn;
 use super::FreeCellFn;
 use super::FreeStaticFn;
-use super::Func;
 use super::MutCellFn;
 use super::MutStaticFn;
-use super::Setup;
 use super::comp::DynComposite;
+use super::setup::DynSetup;
+use super::setup::impl_dyn_setup;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -16,8 +16,7 @@ use crate::type_::DynRef;
 pub struct MutCellCompFunc {
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: Option<Setup>,
-    pub(crate) ctx_explicit: bool,
+    pub(crate) setup: DynSetup,
 }
 
 impl FreeStaticFn<Val, Val> for MutCellCompFunc {
@@ -56,12 +55,4 @@ impl MutCellFn<Val, Val, Val> for MutCellCompFunc {
     }
 }
 
-impl Func for MutCellCompFunc {
-    fn setup(&self) -> Option<&Setup> {
-        self.setup.as_ref()
-    }
-
-    fn ctx_explicit(&self) -> bool {
-        self.ctx_explicit
-    }
-}
+impl_dyn_setup!(MutCellCompFunc);

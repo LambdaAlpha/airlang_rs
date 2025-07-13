@@ -16,7 +16,7 @@ _ do [
     f = _ any .,
     s = _ any .,
     p = f ':' s,
-    (f == p pair.first .) and (s == p pair.second .)
+    (f == p | pair.first .) and (s == p | pair.second .)
 ]
 -----
 true
@@ -27,9 +27,9 @@ _ do [
     p = _ any pair,
     f = _ any .,
     s = _ any .,
-    p pair.set_first f,
-    p pair.set_second s,
-    (f == p pair.first .) and (s == p pair.second .)
+    p | pair.set_first f,
+    p | pair.set_second s,
+    (f == p | pair.first .) and (s == p | pair.second .)
 ]
 -----
 true
@@ -40,8 +40,8 @@ _ do [
     f1 = _ any .,
     s1 = _ any .,
     p = f1 : s1,
-    f2 = p pair.set_first _ any .,
-    s2 = p pair.set_second _ any .,
+    f2 = p | pair.set_first _ any .,
+    s2 = p | pair.set_second _ any .,
     (f1 == f2) and s1 == s2
 ]
 -----

@@ -1,5 +1,8 @@
+pub use self::call::CallMapMode;
 pub use self::call::CallMode;
 pub use self::comp::CompMode;
+pub use self::func::DynFuncMode;
+pub use self::func::FreeFuncMode;
 pub use self::func::FuncMode;
 pub use self::list::ListMode;
 pub use self::map::MapMode;
@@ -26,6 +29,7 @@ use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_MOVE;
 use super::mode::repr::FORM_REF;
 use super::mode::repr::parse;
+use crate::prelude::setup::free_mode;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
@@ -85,10 +89,7 @@ pub fn new() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "mode",
         f: free_impl(fn_new),
-        mode: FuncMode {
-            forward: FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
-            reverse: FuncMode::default_mode(),
-        },
+        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form)),
     }
     .free_static()
 }

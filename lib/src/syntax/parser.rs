@@ -38,6 +38,7 @@ use winnow::token::one_of;
 use winnow::token::take_while;
 
 use super::BYTE;
+use super::CALL_CTX;
 use super::CALL_FORWARD;
 use super::CALL_REVERSE;
 use super::COMMENT;
@@ -84,7 +85,7 @@ pub trait ParseRepr:
     + From<Number>
     + From<Byte>
     + From<Pair<Self, Self>>
-    + From<Call<Self, Self>>
+    + From<Call<Self, Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -406,11 +407,26 @@ fn compose_left<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, 
                     }
                     CALL_FORWARD => {
                         let right = next_token.by_ref().parse_next(i)?;
-                        T::from(Call::new(false, left.into_repr(), right.into_repr()))
+                        T::from(Call::new(
+                            false,
+                            left.into_repr(),
+                            T::from(Unit),
+                            right.into_repr(),
+                        ))
                     }
                     CALL_REVERSE => {
                         let right = next_token.by_ref().parse_next(i)?;
-                        T::from(Call::new(true, left.into_repr(), right.into_repr()))
+                        T::from(Call::new(true, left.into_repr(), T::from(Unit), right.into_repr()))
+                    }
+                    CALL_CTX => {
+                        let func = next_token.by_ref().parse_next(i)?;
+                        let input = next_token.by_ref().parse_next(i)?;
+                        T::from(Call::new(
+                            ctx.reverse,
+                            func.into_repr(),
+                            left.into_repr(),
+                            input.into_repr(),
+                        ))
                     }
                     _ => {
                         let right = next_token.by_ref().parse_next(i)?;
@@ -431,7 +447,8 @@ fn compose_left<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, 
 fn compose_right<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
     move |i: &mut _| {
         let left = token(ctx).parse_next(i)?;
-        let Ok(func) = preceded(spaces_comment(1 ..), token(ctx)).parse_next(i) else {
+        let mut next_token = preceded(spaces_comment(1 ..), token(ctx));
+        let Ok(func) = next_token.by_ref().parse_next(i) else {
             return Ok(left);
         };
         let mut tail = preceded(spaces_comment(1 ..), compose_token(ctx));
@@ -443,11 +460,21 @@ fn compose_right<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>,
                 }
                 CALL_FORWARD => {
                     let right = tail.parse_next(i)?;
-                    T::from(Call::new(false, left.into_repr(), right.into_repr()))
+                    T::from(Call::new(false, left.into_repr(), T::from(Unit), right.into_repr()))
                 }
                 CALL_REVERSE => {
                     let right = tail.parse_next(i)?;
-                    T::from(Call::new(true, left.into_repr(), right.into_repr()))
+                    T::from(Call::new(true, left.into_repr(), T::from(Unit), right.into_repr()))
+                }
+                CALL_CTX => {
+                    let func = next_token.by_ref().parse_next(i)?;
+                    let input = tail.parse_next(i)?;
+                    T::from(Call::new(
+                        ctx.reverse,
+                        func.into_repr(),
+                        left.into_repr(),
+                        input.into_repr(),
+                    ))
                 }
                 _ => {
                     let right = tail.parse_next(i)?;
@@ -491,7 +518,7 @@ fn tag<T: ParseRepr>(ctx: ParseCtx, tokens: Vec<T>, tag: &str) -> T {
 }
 
 fn call<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
-    T::from(Call::new(ctx.reverse, left, right))
+    T::from(Call::new(ctx.reverse, left, T::from(Unit), right))
 }
 
 fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>

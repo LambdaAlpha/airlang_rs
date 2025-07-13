@@ -4,13 +4,13 @@ use log::error;
 
 use super::DynFn;
 use super::FreeFn;
-use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
-use super::setup::ctx_default_mode;
+use super::setup::default_dyn_mode;
+use super::setup::default_free_mode;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::MutStaticPrimFuncVal;
@@ -50,7 +50,7 @@ impl Prelude for PairPrelude {
 }
 
 pub fn new() -> FreeStaticPrimFuncVal {
-    FreeFn { id: PAIR, f: free_impl(fn_new), mode: FuncMode::default() }.free_static()
+    FreeFn { id: PAIR, f: free_impl(fn_new), mode: default_free_mode() }.free_static()
 }
 
 fn fn_new(input: Val) -> Val {
@@ -62,13 +62,7 @@ fn fn_new(input: Val) -> Val {
 }
 
 pub fn first() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "pair.first",
-        f: const_impl(fn_first),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "pair.first", f: const_impl(fn_first), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -80,13 +74,7 @@ fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_first() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "pair.set_first",
-        f: mut_impl(fn_set_first),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "pair.set_first", f: mut_impl(fn_set_first), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
@@ -99,13 +87,7 @@ fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn second() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "pair.second",
-        f: const_impl(fn_second),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .const_static()
+    DynFn { id: "pair.second", f: const_impl(fn_second), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -117,13 +99,8 @@ fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_second() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "pair.set_second",
-        f: mut_impl(fn_set_second),
-        mode: FuncMode { forward: ctx_default_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: true,
-    }
-    .mut_static()
+    DynFn { id: "pair.set_second", f: mut_impl(fn_set_second), mode: default_dyn_mode() }
+        .mut_static()
 }
 
 fn fn_set_second(ctx: &mut Val, mut input: Val) -> Val {

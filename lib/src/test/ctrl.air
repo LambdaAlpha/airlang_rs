@@ -326,7 +326,7 @@ _ do [
 =====
 for list map
 -----
-_ do [a = [], [1, 2, 3, 4, 5] for i : a list.push i + 1, a]
+_ do [a = [], [1, 2, 3, 4, 5] for i : a | list.push i + 1, a]
 -----
 [2, 3, 4, 5, 6]
 =====
@@ -350,24 +350,24 @@ for integer negative
 =====
 for byte
 -----
-_ do [b = [], byte(1122334455) for i : b list.push i, b]
+_ do [b = [], byte(1122334455) for i : b | list.push i, b]
 -----
 [byte(11), byte(22), byte(33), byte(44), byte(55)]
 =====
 for symbol
 -----
-_ do [s = [], .abc for i : s list.push i, s]
+_ do [s = [], .abc for i : s | list.push i, s]
 -----
 [a, b, c]
 =====
 for text
 -----
-_ do [t = [], "hello" for i : t list.push i, t]
+_ do [t = [], "hello" for i : t | list.push i, t]
 -----
 ["h", "e", "l", "l", "o"]
 =====
 for map
 -----
-_ do [kv = [], {1 : 2, 3 : 4} for i : kv list.push i, _ map kv]
+_ do [kv = [], {1 : 2, 3 : 4} for i : kv | list.push i, _ map kv]
 -----
 {1 : 2, 3 : 4}

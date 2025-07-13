@@ -1,11 +1,11 @@
-use crate::semantics::func::ConstCellFn;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeCellFn;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::Func;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::func::Setup;
-use crate::semantics::func::prim::impl_prim_func;
+use super::ConstCellFn;
+use super::ConstStaticFn;
+use super::FreeCellFn;
+use super::FreeStaticFn;
+use super::MutStaticFn;
+use super::prim::impl_prim_func;
+use super::setup::DynSetup;
+use super::setup::impl_dyn_setup;
 use crate::semantics::val::Val;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::ConstRef;
@@ -45,8 +45,7 @@ where T: MutCellFn<Ctx, I, O>
 pub struct MutCellPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Box<dyn MutCellFnVal>,
-    pub(crate) setup: Option<Setup>,
-    pub(crate) ctx_explicit: bool,
+    pub(crate) setup: DynSetup,
 }
 
 impl FreeStaticFn<Val, Val> for MutCellPrimFunc {
@@ -85,14 +84,6 @@ impl MutCellFn<Val, Val, Val> for MutCellPrimFunc {
     }
 }
 
-impl Func for MutCellPrimFunc {
-    fn setup(&self) -> Option<&Setup> {
-        self.setup.as_ref()
-    }
-
-    fn ctx_explicit(&self) -> bool {
-        self.ctx_explicit
-    }
-}
+impl_dyn_setup!(MutCellPrimFunc);
 
 impl_prim_func!(MutCellPrimFunc);

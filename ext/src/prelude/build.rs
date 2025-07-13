@@ -7,7 +7,7 @@ use airlang::prelude::ConstStaticImpl;
 use airlang::prelude::DynFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
-use airlang::prelude::mode::FuncMode;
+use airlang::prelude::setup::default_dyn_mode;
 use airlang::semantics::ctx::Contract;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::ConstStaticPrimFuncVal;
@@ -40,8 +40,7 @@ pub fn import() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "build.import",
         f: ConstStaticImpl::new(fn_import_free, fn_import_const),
-        mode: FuncMode::default(),
-        ctx_explicit: false,
+        mode: default_dyn_mode(),
     }
     .const_static()
 }

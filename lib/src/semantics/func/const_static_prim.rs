@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::Func;
-use crate::semantics::func::Setup;
-use crate::semantics::func::prim::impl_prim_func;
+use super::FreeStaticFn;
+use super::prim::impl_prim_func;
+use super::setup::DynSetup;
+use super::setup::impl_dyn_setup;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 use crate::type_::ref_::ConstRef;
@@ -42,8 +42,7 @@ where T: ConstStaticFn<Ctx, I, O>
 pub struct ConstStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn ConstStaticFn<Val, Val, Val>>,
-    pub(crate) setup: Option<Setup>,
-    pub(crate) ctx_explicit: bool,
+    pub(crate) setup: DynSetup,
 }
 
 impl FreeStaticFn<Val, Val> for ConstStaticPrimFunc {
@@ -58,14 +57,6 @@ impl ConstStaticFn<Val, Val, Val> for ConstStaticPrimFunc {
     }
 }
 
-impl Func for ConstStaticPrimFunc {
-    fn setup(&self) -> Option<&Setup> {
-        self.setup.as_ref()
-    }
-
-    fn ctx_explicit(&self) -> bool {
-        self.ctx_explicit
-    }
-}
+impl_dyn_setup!(ConstStaticPrimFunc);
 
 impl_prim_func!(ConstStaticPrimFunc);

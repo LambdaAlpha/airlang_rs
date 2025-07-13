@@ -1,4 +1,4 @@
-use super::Mode;
+use super::CallMapMode;
 use super::ModeFn;
 use super::SymbolMode;
 use crate::semantics::core::CallEval;
@@ -15,7 +15,6 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
-use crate::type_::Map;
 use crate::type_::Symbol;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -137,10 +136,12 @@ impl FreeStaticFn<CallVal, Val> for PrimMode {
             None => Val::Call(input),
             Some(mode) => match mode {
                 CodeMode::Form => {
-                    CallForm { func: self, input: self, some: &Map::<Val, Option<Mode>>::default() }
+                    CallForm { func: self, ctx: self, input: self, some: &CallMapMode::default() }
                         .free_static_call(input)
                 }
-                CodeMode::Eval => CallEval { func: self, input: self }.free_static_call(input),
+                CodeMode::Eval => {
+                    CallEval { func: self, ctx: self, input: self }.free_static_call(input)
+                }
             },
         }
     }
@@ -152,11 +153,11 @@ impl ConstStaticFn<Val, CallVal, Val> for PrimMode {
             None => Val::Call(input),
             Some(mode) => match mode {
                 CodeMode::Form => {
-                    CallForm { func: self, input: self, some: &Map::<Val, Option<Mode>>::default() }
+                    CallForm { func: self, ctx: self, input: self, some: &CallMapMode::default() }
                         .const_static_call(ctx, input)
                 }
                 CodeMode::Eval => {
-                    CallEval { func: self, input: self }.const_static_call(ctx, input)
+                    CallEval { func: self, ctx: self, input: self }.const_static_call(ctx, input)
                 }
             },
         }
@@ -169,10 +170,12 @@ impl MutStaticFn<Val, CallVal, Val> for PrimMode {
             None => Val::Call(input),
             Some(mode) => match mode {
                 CodeMode::Form => {
-                    CallForm { func: self, input: self, some: &Map::<Val, Option<Mode>>::default() }
+                    CallForm { func: self, ctx: self, input: self, some: &CallMapMode::default() }
                         .mut_static_call(ctx, input)
                 }
-                CodeMode::Eval => CallEval { func: self, input: self }.mut_static_call(ctx, input),
+                CodeMode::Eval => {
+                    CallEval { func: self, ctx: self, input: self }.mut_static_call(ctx, input)
+                }
             },
         }
     }

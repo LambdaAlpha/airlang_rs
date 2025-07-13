@@ -12,6 +12,7 @@ use super::mode::CodeMode;
 use super::mode::PrimMode;
 use super::mode::SymbolMode;
 use super::mut_impl;
+use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
 use crate::semantics::func::MutStaticFn;
@@ -74,13 +75,7 @@ enum BlockItem {
 }
 
 pub fn do_() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "do",
-        f: mut_impl(fn_do),
-        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
 }
 
 fn fn_do(ctx: &mut Val, input: Val) -> Val {
@@ -88,13 +83,7 @@ fn fn_do(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn if_() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "?",
-        f: mut_impl(fn_if),
-        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "?", f: mut_impl(fn_if), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
 }
 
 fn fn_if(ctx: &mut Val, input: Val) -> Val {
@@ -118,13 +107,7 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn match_() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "match",
-        f: mut_impl(fn_match),
-        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
 }
 
 fn fn_match(ctx: &mut Val, input: Val) -> Val {
@@ -161,13 +144,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn loop_() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "loop",
-        f: mut_impl(fn_loop),
-        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
 }
 
 fn fn_loop(ctx: &mut Val, input: Val) -> Val {
@@ -221,13 +198,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn for_() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "for",
-        f: mut_impl(fn_for),
-        mode: FuncMode { forward: FuncMode::id_mode(), reverse: FuncMode::default_mode() },
-        ctx_explicit: false,
-    }
-    .mut_static()
+    DynFn { id: "for", f: mut_impl(fn_for), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
 }
 
 fn fn_for(ctx: &mut Val, input: Val) -> Val {

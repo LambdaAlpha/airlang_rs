@@ -8,7 +8,6 @@ use super::generate_compact;
 use super::generate_pretty;
 use super::generate_symbol;
 use super::parse;
-use super::repr::CallRepr;
 use super::repr::PairRepr;
 use super::repr::Repr;
 use crate::test::parse_test_file;
@@ -59,11 +58,11 @@ fn pair(first: Repr, second: Repr) -> Repr {
 }
 
 fn call(func: Repr, input: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(false, func, input)))
+    Repr::Call(Box::new(Call::new(false, func, Repr::default(), input)))
 }
 
 fn reverse(func: Repr, input: Repr) -> Repr {
-    Repr::Call(Box::new(CallRepr::new(true, func, input)))
+    Repr::Call(Box::new(Call::new(true, func, Repr::default(), input)))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -77,21 +76,31 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
 fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str_unchecked(tag));
     let input = Repr::List(v.into());
-    Repr::Call(Box::new(Call::new(false, func, input)))
+    Repr::Call(Box::new(Call::new(false, func, Repr::default(), input)))
 }
 
 fn tag_reverse(tag: &str, v: Vec<Repr>) -> Repr {
     let func = Repr::Symbol(Symbol::from_str_unchecked(tag));
     let input = Repr::List(v.into());
-    Repr::Call(Box::new(Call::new(true, func, input)))
+    Repr::Call(Box::new(Call::new(true, func, Repr::default(), input)))
 }
 
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Call(Box::new(Call::new(false, middle, Repr::Pair(Box::new(Pair::new(left, right))))))
+    Repr::Call(Box::new(Call::new(
+        false,
+        middle,
+        Repr::default(),
+        Repr::Pair(Box::new(Pair::new(left, right))),
+    )))
 }
 
 fn infix_reverse(left: Repr, middle: Repr, right: Repr) -> Repr {
-    Repr::Call(Box::new(Call::new(true, middle, Repr::Pair(Box::new(Pair::new(left, right))))))
+    Repr::Call(Box::new(Call::new(
+        true,
+        middle,
+        Repr::default(),
+        Repr::Pair(Box::new(Pair::new(left, right))),
+    )))
 }
 
 fn test_parse(

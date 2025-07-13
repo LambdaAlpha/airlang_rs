@@ -1,6 +1,10 @@
 pub use self::bit::Bit;
 pub use self::byte::Byte;
 pub use self::call::Call;
+pub use self::call::CtxInput;
+pub use self::call::FuncCtx;
+pub use self::call::FuncCtxInput;
+pub use self::call::FuncInput;
 pub use self::change::Change;
 pub use self::either::Either;
 pub use self::int::Int;
