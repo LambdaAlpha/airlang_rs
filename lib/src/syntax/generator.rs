@@ -54,42 +54,42 @@ pub enum GenRepr<'a> {
 
 #[derive(Copy, Clone)]
 pub(crate) struct GenFmt {
-    pub(crate) indent: &'static str,
     pub(crate) before_first: &'static str,
     pub(crate) after_last: &'static str,
-    pub(crate) separator: &'static str,
     pub(crate) left_padding: &'static str,
     pub(crate) right_padding: &'static str,
+    pub(crate) before_item: &'static str,
+    pub(crate) after_item: &'static str,
     pub(crate) symbol_encoding: bool,
 }
 
 pub(crate) const COMPACT_FMT: GenFmt = GenFmt {
-    indent: "",
     before_first: "",
     after_last: "",
-    separator: concatcp!(SEPARATOR),
     left_padding: "",
     right_padding: "",
+    before_item: "",
+    after_item: concatcp!(SEPARATOR),
     symbol_encoding: false,
 };
 
 pub(crate) const SYMBOL_FMT: GenFmt = GenFmt {
-    indent: "",
     before_first: "",
     after_last: "",
-    separator: concatcp!(SEPARATOR),
     left_padding: "",
     right_padding: "",
+    before_item: "",
+    after_item: concatcp!(SEPARATOR),
     symbol_encoding: true,
 };
 
 pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
-    indent: INDENT,
     before_first: "\n",
     after_last: concatcp!(SEPARATOR, '\n'),
-    separator: concatcp!(SEPARATOR, '\n'),
     left_padding: "",
     right_padding: "",
+    after_item: concatcp!(SEPARATOR, '\n'),
+    before_item: INDENT,
     symbol_encoding: false,
 };
 
@@ -98,7 +98,7 @@ const INDENT: &str = "  ";
 pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
     let ctx = GenCtx { fmt, indent: 0 };
     let mut str = String::new();
-    gen_(ctx, &mut str, repr);
+    repr.gen_(ctx, &mut str);
     str
 }
 
@@ -108,38 +108,50 @@ struct GenCtx {
     indent: u8,
 }
 
+trait Gen {
+    fn gen_(self, ctx: GenCtx, s: &mut String);
+}
+
 // todo impl shortest repr
-fn gen_(ctx: GenCtx, s: &mut String, repr: GenRepr) {
-    match repr {
-        GenRepr::Unit(_) => gen_unit(ctx, s),
-        GenRepr::Bit(bit) => gen_bit(ctx, s, bit.bool()),
-        GenRepr::Symbol(symbol) => gen_symbol(ctx, s, symbol),
-        GenRepr::Text(text) => gen_text(ctx, s, text),
-        GenRepr::Int(int) => gen_int(ctx, s, int),
-        GenRepr::Number(number) => gen_number(ctx, s, number),
-        GenRepr::Byte(byte) => gen_byte(ctx, s, byte),
-        GenRepr::Pair(pair) => gen_pair(ctx, s, *pair),
-        GenRepr::Call(call) => gen_call(ctx, s, *call),
-        GenRepr::List(list) => gen_list(ctx, s, list),
-        GenRepr::Map(map) => gen_map(ctx, s, map),
+impl Gen for GenRepr<'_> {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        match self {
+            GenRepr::Unit(unit) => unit.gen_(ctx, s),
+            GenRepr::Bit(bit) => bit.gen_(ctx, s),
+            GenRepr::Symbol(symbol) => symbol.gen_(ctx, s),
+            GenRepr::Text(text) => text.gen_(ctx, s),
+            GenRepr::Int(int) => int.gen_(ctx, s),
+            GenRepr::Number(number) => number.gen_(ctx, s),
+            GenRepr::Byte(byte) => byte.gen_(ctx, s),
+            GenRepr::Pair(pair) => pair.gen_(ctx, s),
+            GenRepr::Call(call) => call.gen_(ctx, s),
+            GenRepr::List(list) => list.gen_(ctx, s),
+            GenRepr::Map(map) => map.gen_(ctx, s),
+        }
     }
 }
 
-fn gen_unit(_ctx: GenCtx, s: &mut String) {
-    s.push_str(UNIT);
-}
-
-fn gen_bit(_ctx: GenCtx, s: &mut String, bool: bool) {
-    s.push_str(if bool { TRUE } else { FALSE });
-}
-
-fn gen_symbol(_ctx: GenCtx, s: &mut String, symbol: &Symbol) {
-    if !should_quote(symbol) {
-        return s.push_str(symbol);
+impl Gen for &Unit {
+    fn gen_(self, _ctx: GenCtx, s: &mut String) {
+        s.push_str(UNIT);
     }
-    s.push(SYMBOL_QUOTE);
-    escape_symbol(s, symbol);
-    s.push(SYMBOL_QUOTE);
+}
+
+impl Gen for &Bit {
+    fn gen_(self, _ctx: GenCtx, s: &mut String) {
+        s.push_str(if self.bool() { TRUE } else { FALSE });
+    }
+}
+
+impl Gen for &Symbol {
+    fn gen_(self, _ctx: GenCtx, s: &mut String) {
+        if !should_quote(self) {
+            return s.push_str(self);
+        }
+        s.push(SYMBOL_QUOTE);
+        escape_symbol(s, self);
+        s.push(SYMBOL_QUOTE);
+    }
 }
 
 pub fn escape_symbol(s: &mut String, symbol: &str) {
@@ -170,14 +182,16 @@ fn should_quote(str: &str) -> bool {
     str.chars().any(is_delimiter)
 }
 
-fn gen_text(ctx: GenCtx, s: &mut String, text: &Text) {
-    s.push(TEXT_QUOTE);
-    if ctx.fmt.symbol_encoding {
-        escape_text_symbol(s, text);
-    } else {
-        escape_text(s, text);
+impl Gen for &Text {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        s.push(TEXT_QUOTE);
+        if ctx.fmt.symbol_encoding {
+            escape_text_symbol(s, self);
+        } else {
+            escape_text(s, self);
+        }
+        s.push(TEXT_QUOTE);
     }
-    s.push(TEXT_QUOTE);
 }
 
 pub fn escape_text(s: &mut String, str: &str) {
@@ -212,66 +226,76 @@ pub fn escape_text_symbol(s: &mut String, str: &str) {
     }
 }
 
-fn gen_int(_ctx: GenCtx, s: &mut String, int: &Int) {
-    if int.is_negative() {
-        s.push('0');
-    }
-    write!(s, "{int:?}").unwrap();
-}
-
-fn gen_number(_ctx: GenCtx, s: &mut String, number: &Number) {
-    let int = number.int();
-    let radix = number.radix();
-    if int.is_negative() || radix != 10 {
-        s.push('0');
-    }
-    if int.is_negative() {
-        s.push('-');
-    }
-    match radix {
-        16 => s.push('X'),
-        2 => s.push('B'),
-        10 => {}
-        _ => unreachable!(),
-    }
-    s.push_str(&int.abs().to_str_radix(radix as u32));
-    s.push('E');
-    write!(s, "{}", number.exp()).unwrap();
-}
-
-fn gen_byte(ctx: GenCtx, s: &mut String, byte: &Byte) {
-    prefixed(ctx, s, BYTE, |_ctx, s| {
-        if !byte.is_empty() {
-            utils::conversion::u8_array_to_hex_string_mut(byte, s);
+impl Gen for &Int {
+    fn gen_(self, _ctx: GenCtx, s: &mut String) {
+        if self.is_negative() {
+            s.push('0');
         }
-    });
+        write!(s, "{self:?}").unwrap();
+    }
 }
 
-fn gen_pair(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
-    gen_scope_if_need(ctx, s, pair.first);
-    s.push(' ');
-    s.push_str(PAIR);
-    s.push(' ');
-    gen_(ctx, s, pair.second);
-}
-
-fn gen_call(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
-    if matches!(call.ctx, GenRepr::Unit(_)) {
-        if !call.reverse
-            && let GenRepr::Pair(pair) = call.input
-        {
-            gen_call_infix(ctx, s, call.func, *pair);
-        } else {
-            gen_call_default(ctx, s, call);
+impl Gen for &Number {
+    fn gen_(self, _ctx: GenCtx, s: &mut String) {
+        let int = self.int();
+        let radix = self.radix();
+        if int.is_negative() || radix != 10 {
+            s.push('0');
         }
-    } else {
-        if call.reverse {
-            s.push_str(CALL_REVERSE);
-            s.push(SCOPE_LEFT);
-            gen_call_ctx(ctx, s, call);
-            s.push(SCOPE_RIGHT);
+        if int.is_negative() {
+            s.push('-');
+        }
+        match radix {
+            16 => s.push('X'),
+            2 => s.push('B'),
+            10 => {}
+            _ => unreachable!(),
+        }
+        s.push_str(&int.abs().to_str_radix(radix as u32));
+        s.push('E');
+        write!(s, "{}", self.exp()).unwrap();
+    }
+}
+
+impl Gen for &Byte {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        prefixed(ctx, s, BYTE, |_ctx, s| {
+            if !self.is_empty() {
+                utils::conversion::u8_array_to_hex_string_mut(self, s);
+            }
+        });
+    }
+}
+
+impl<'a> Gen for Pair<GenRepr<'a>, GenRepr<'a>> {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        gen_scope_if_need(ctx, s, self.first);
+        s.push(' ');
+        s.push_str(PAIR);
+        s.push(' ');
+        self.second.gen_(ctx, s);
+    }
+}
+
+impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>, GenRepr<'a>> {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        if matches!(self.ctx, GenRepr::Unit(_)) {
+            if !self.reverse
+                && let GenRepr::Pair(pair) = self.input
+            {
+                gen_call_infix(ctx, s, self.func, *pair);
+            } else {
+                gen_call_default(ctx, s, self);
+            }
         } else {
-            gen_call_ctx(ctx, s, call);
+            if self.reverse {
+                s.push_str(CALL_REVERSE);
+                s.push(SCOPE_LEFT);
+                gen_call_ctx(ctx, s, self);
+                s.push(SCOPE_RIGHT);
+            } else {
+                gen_call_ctx(ctx, s, self);
+            }
         }
     }
 }
@@ -281,7 +305,7 @@ fn gen_call_infix(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
     s.push(' ');
-    gen_(ctx, s, pair.second);
+    pair.second.gen_(ctx, s);
 }
 
 fn gen_call_default(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
@@ -290,7 +314,7 @@ fn gen_call_default(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, Ge
     s.push(' ');
     s.push_str(direction);
     s.push(' ');
-    gen_(ctx, s, call.input);
+    call.input.gen_(ctx, s);
 }
 
 fn gen_call_ctx(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
@@ -300,86 +324,90 @@ fn gen_call_ctx(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRep
     s.push(' ');
     gen_scope_if_need(ctx, s, call.func);
     s.push(' ');
-    gen_(ctx, s, call.input);
+    call.input.gen_(ctx, s);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
-    if is_composite(&repr) {
-        scoped(ctx, s, |ctx, s| gen_(ctx, s, repr));
+    if is_open(&repr) {
+        scoped(ctx, s, |ctx, s| repr.gen_(ctx, s));
     } else {
-        gen_(ctx, s, repr);
+        repr.gen_(ctx, s);
     }
 }
 
-fn is_composite(repr: &GenRepr) -> bool {
+fn is_open(repr: &GenRepr) -> bool {
     matches!(repr, GenRepr::Pair(_) | GenRepr::Call(_))
 }
 
-fn gen_list(mut ctx: GenCtx, s: &mut String, mut list: List<GenRepr>) {
-    if list.is_empty() {
+impl<'a> Gen for List<GenRepr<'a>> {
+    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+        if self.is_empty() {
+            s.push(LIST_LEFT);
+            s.push(LIST_RIGHT);
+            return;
+        }
+
+        if self.len() == 1 {
+            s.push(LIST_LEFT);
+            s.push_str(ctx.fmt.left_padding);
+            self.into_iter().next().unwrap().gen_(ctx, s);
+            s.push_str(ctx.fmt.right_padding);
+            s.push(LIST_RIGHT);
+            return;
+        }
+
         s.push(LIST_LEFT);
+        ctx.indent += 1;
+        s.push_str(ctx.fmt.before_first);
+
+        for repr in self {
+            indent(ctx, s);
+            repr.gen_(ctx, s);
+            s.push_str(ctx.fmt.after_item);
+        }
+        s.truncate(s.len() - ctx.fmt.after_item.len());
+
+        s.push_str(ctx.fmt.after_last);
+        ctx.indent -= 1;
+        indent(ctx, s);
         s.push(LIST_RIGHT);
-        return;
     }
-
-    if list.len() == 1 {
-        s.push(LIST_LEFT);
-        s.push_str(ctx.fmt.left_padding);
-        gen_(ctx, s, list.pop().unwrap());
-        s.push_str(ctx.fmt.right_padding);
-        s.push(LIST_RIGHT);
-        return;
-    }
-
-    s.push(LIST_LEFT);
-    ctx.indent += 1;
-    s.push_str(ctx.fmt.before_first);
-
-    for repr in list {
-        s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-        gen_(ctx, s, repr);
-        s.push_str(ctx.fmt.separator);
-    }
-    s.truncate(s.len() - ctx.fmt.separator.len());
-
-    s.push_str(ctx.fmt.after_last);
-    ctx.indent -= 1;
-    s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-    s.push(LIST_RIGHT);
 }
 
-fn gen_map(mut ctx: GenCtx, s: &mut String, map: Map<GenRepr, GenRepr>) {
-    if map.is_empty() {
+impl<'a> Gen for Map<GenRepr<'a>, GenRepr<'a>> {
+    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+        if self.is_empty() {
+            s.push(MAP_LEFT);
+            s.push(MAP_RIGHT);
+            return;
+        }
+
+        if self.len() == 1 {
+            s.push(MAP_LEFT);
+            let pair = self.into_iter().next().unwrap();
+            s.push_str(ctx.fmt.left_padding);
+            gen_kv(ctx, s, pair.0, pair.1);
+            s.push_str(ctx.fmt.right_padding);
+            s.push(MAP_RIGHT);
+            return;
+        }
+
         s.push(MAP_LEFT);
+        ctx.indent += 1;
+        s.push_str(ctx.fmt.before_first);
+
+        for pair in self {
+            indent(ctx, s);
+            gen_kv(ctx, s, pair.0, pair.1);
+            s.push_str(ctx.fmt.after_item);
+        }
+        s.truncate(s.len() - ctx.fmt.after_item.len());
+
+        s.push_str(ctx.fmt.after_last);
+        ctx.indent -= 1;
+        indent(ctx, s);
         s.push(MAP_RIGHT);
-        return;
     }
-
-    if map.len() == 1 {
-        s.push(MAP_LEFT);
-        let pair = map.into_iter().next().unwrap();
-        s.push_str(ctx.fmt.left_padding);
-        gen_kv(ctx, s, pair.0, pair.1);
-        s.push_str(ctx.fmt.right_padding);
-        s.push(MAP_RIGHT);
-        return;
-    }
-
-    s.push(MAP_LEFT);
-    ctx.indent += 1;
-    s.push_str(ctx.fmt.before_first);
-
-    for pair in map {
-        s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-        gen_kv(ctx, s, pair.0, pair.1);
-        s.push_str(ctx.fmt.separator);
-    }
-    s.truncate(s.len() - ctx.fmt.separator.len());
-
-    s.push_str(ctx.fmt.after_last);
-    ctx.indent -= 1;
-    s.push_str(&ctx.fmt.indent.repeat(ctx.indent as usize));
-    s.push(MAP_RIGHT);
 }
 
 fn gen_kv(ctx: GenCtx, s: &mut String, key: GenRepr, value: GenRepr) {
@@ -387,7 +415,7 @@ fn gen_kv(ctx: GenCtx, s: &mut String, key: GenRepr, value: GenRepr) {
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen_(ctx, s, value);
+    value.gen_(ctx, s);
 }
 
 fn prefixed(ctx: GenCtx, s: &mut String, tag: &str, f: impl FnOnce(GenCtx, &mut String)) {
@@ -401,4 +429,10 @@ fn scoped(ctx: GenCtx, s: &mut String, f: impl FnOnce(GenCtx, &mut String)) {
     f(ctx, s);
     s.push_str(ctx.fmt.right_padding);
     s.push(SCOPE_RIGHT);
+}
+
+fn indent(ctx: GenCtx, s: &mut String) {
+    for _ in 0 .. ctx.indent {
+        s.push_str(ctx.fmt.before_item);
+    }
 }
