@@ -73,18 +73,6 @@ fn map(v: Vec<(Repr, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
 }
 
-fn tag_call(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str_unchecked(tag));
-    let input = Repr::List(v.into());
-    Repr::Call(Box::new(Call::new(false, func, Repr::default(), input)))
-}
-
-fn tag_reverse(tag: &str, v: Vec<Repr>) -> Repr {
-    let func = Repr::Symbol(Symbol::from_str_unchecked(tag));
-    let input = Repr::List(v.into());
-    Repr::Call(Box::new(Call::new(true, func, Repr::default(), input)))
-}
-
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
     Repr::Call(Box::new(Call::new(
         false,

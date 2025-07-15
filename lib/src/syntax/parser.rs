@@ -94,29 +94,18 @@ pub trait ParseRepr:
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-struct ParseCtx<'a> {
-    tag: &'a str,
+struct ParseCtx {
     direction: Direction,
     reverse: bool,
 }
 
-impl Default for ParseCtx<'_> {
+impl Default for ParseCtx {
     fn default() -> Self {
-        Self { tag: "", direction: Direction::Right, reverse: false }
+        Self { direction: Direction::Right, reverse: false }
     }
 }
 
-impl<'a> ParseCtx<'a> {
-    fn tag(mut self, tag: &'a str) -> Self {
-        self.tag = tag;
-        self
-    }
-
-    fn untag(mut self) -> Self {
-        self.tag = "";
-        self
-    }
-
+impl ParseCtx {
     fn direction(mut self, direction: Direction) -> Self {
         self.direction = direction;
         self
@@ -249,7 +238,7 @@ where F: Parser<&'a str, T, E> {
     delimited_trim_comment(SCOPE_LEFT, f, SCOPE_RIGHT)
 }
 
-fn scope<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn scope<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     scoped_trim_comment(compose(ctx)).context(label("scope"))
 }
 
@@ -273,7 +262,7 @@ fn is_symbol(c: char) -> bool {
     Symbol::is_symbol(c)
 }
 
-fn token<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
+fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     (move |i: &mut _| match peek(any).parse_next(i)? {
         // delimiters
         LIST_LEFT => list(ctx).map(Token::Default).parse_next(i),
@@ -292,7 +281,7 @@ fn token<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
     .context(label("token"))
 }
 
-fn ext<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
+fn ext<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
         let checkpoint = i.checkpoint();
@@ -330,7 +319,7 @@ fn keyword<'a, T: ParseRepr>(
     }
 }
 
-fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&'a str, T, E> {
+fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
         match prefix {
@@ -344,16 +333,10 @@ fn prefix<'a, T: ParseRepr>(prefix: &'a str, ctx: ParseCtx<'a>) -> impl Parser<&
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
-            CALL_FORWARD => scope(ctx.untag().reverse(false)).parse_next(i),
-            CALL_REVERSE => scope(ctx.untag().reverse(true)).parse_next(i),
-            LEFT => scope(ctx.untag().direction(Direction::Left)).parse_next(i),
-            RIGHT => scope(ctx.untag().direction(Direction::Right)).parse_next(i),
-            s if s.ends_with(CALL_FORWARD) => {
-                scope(ctx.reverse(false).tag(&s[.. s.len() - 1])).parse_next(i)
-            }
-            s if s.ends_with(CALL_REVERSE) => {
-                scope(ctx.reverse(true).tag(&s[.. s.len() - 1])).parse_next(i)
-            }
+            CALL_FORWARD => scope(ctx.reverse(false)).parse_next(i),
+            CALL_REVERSE => scope(ctx.reverse(true)).parse_next(i),
+            LEFT => scope(ctx.direction(Direction::Left)).parse_next(i),
+            RIGHT => scope(ctx.direction(Direction::Right)).parse_next(i),
             _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
         }
     }
@@ -374,24 +357,18 @@ impl<T: ParseRepr> Token<T> {
     }
 }
 
-fn repr<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn repr<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     token(ctx).map(Token::into_repr)
 }
 
-fn compose_token<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
-    move |i: &mut _| {
-        if !ctx.tag.is_empty() {
-            let tokens = separated(1 .., repr::<T>(ctx), spaces_comment(1 ..)).parse_next(i)?;
-            return Ok(Token::Default(tag(ctx, tokens, ctx.tag)));
-        }
-        match ctx.direction {
-            Direction::Left => compose_left(ctx).parse_next(i),
-            Direction::Right => compose_right(ctx).parse_next(i),
-        }
+fn compose_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
+    move |i: &mut _| match ctx.direction {
+        Direction::Left => compose_left(ctx).parse_next(i),
+        Direction::Right => compose_right(ctx).parse_next(i),
     }
 }
 
-fn compose_left<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
+fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let mut left = token(ctx).parse_next(i)?;
         let mut next_token = preceded(spaces_comment(1 ..), token(ctx));
@@ -444,7 +421,7 @@ fn compose_left<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, 
     }
 }
 
-fn compose_right<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, Token<T>, E> {
+fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let left = token(ctx).parse_next(i)?;
         let mut next_token = preceded(spaces_comment(1 ..), token(ctx));
@@ -507,14 +484,8 @@ fn left_right<T: ParseRepr>(left: Token<T>, right: Token<T>) -> T {
     }
 }
 
-fn compose<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn compose<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     compose_token(ctx).map(Token::into_repr)
-}
-
-fn tag<T: ParseRepr>(ctx: ParseCtx, tokens: Vec<T>, tag: &str) -> T {
-    let list = T::from(List::from(tokens));
-    let tag = T::from(Symbol::from_str_unchecked(tag));
-    call(ctx, tag, list)
 }
 
 fn call<T: ParseRepr>(ctx: ParseCtx, left: T, right: T) -> T {
@@ -540,29 +511,28 @@ where F: Parser<&'a str, O, E> {
     }
 }
 
-fn list<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     delimited_trim_comment(LIST_LEFT, items(compose(ctx)), LIST_RIGHT)
         .map(|list| T::from(List::from(list)))
         .context(label("list"))
 }
 
-fn raw_list<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment(1 ..));
     delimited_trim_comment(LIST_LEFT, repr_list, LIST_RIGHT)
         .map(|tokens: Vec<_>| T::from(List::from(tokens)))
         .context(label("raw list"))
 }
 
-fn map<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     delimited_trim_comment(MAP_LEFT, items(key_value(ctx)), MAP_RIGHT)
         .map(|pairs| T::from(Map::from_iter(pairs)))
         .context(label("map"))
 }
 
-fn key_value<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, (T, T), E> {
+fn key_value<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, (T, T), E> {
     move |i: &mut _| {
         let key = repr(ctx).parse_next(i)?;
-        let key = if ctx.tag.is_empty() { key } else { tag(ctx, vec![key], ctx.tag) };
         let pair = opt(preceded(spaces_comment(1 ..), PAIR.void())).parse_next(i).unwrap();
         if pair.is_none() {
             return Ok((key, T::from(Unit)));
@@ -576,7 +546,7 @@ fn key_value<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, (T, T), E> {
     }
 }
 
-fn raw_map<T: ParseRepr>(ctx: ParseCtx<'_>) -> impl Parser<&str, T, E> {
+fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let tokens: Vec<_> = separated(0 .., repr::<T>(ctx), spaces_comment(1 ..)).parse_next(i)?;
         if !tokens.len().is_multiple_of(2) {
