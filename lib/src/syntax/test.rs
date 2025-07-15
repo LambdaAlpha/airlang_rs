@@ -65,6 +65,14 @@ fn reverse(func: Repr, input: Repr) -> Repr {
     Repr::Call(Box::new(Call::new(true, func, Repr::default(), input)))
 }
 
+fn ctx_call(ctx: Repr, func: Repr, input: Repr) -> Repr {
+    Repr::Call(Box::new(Call::new(false, func, ctx, input)))
+}
+
+fn ctx_reverse(ctx: Repr, func: Repr, input: Repr) -> Repr {
+    Repr::Call(Box::new(Call::new(true, func, ctx, input)))
+}
+
 fn list(v: Vec<Repr>) -> Repr {
     Repr::List(v.into())
 }

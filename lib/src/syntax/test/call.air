@@ -57,3 +57,19 @@ a f _
 omit both
 -----
 _ f _
+=====
+ctx
+-----
+a | f b
+=====
+ctx infix
+-----
+a | f b : c
+=====
+ctx reverse
+-----
+!(a | f b)
+=====
+ctx reverse infix
+-----
+!(a | f b : c)
