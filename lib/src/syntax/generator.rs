@@ -8,13 +8,17 @@ use super::BYTE;
 use super::CALL_CTX;
 use super::CALL_FORWARD;
 use super::CALL_REVERSE;
+use super::COMMENT;
+use super::Direction;
 use super::FALSE;
+use super::LEFT;
 use super::LIST_LEFT;
 use super::LIST_RIGHT;
 use super::MAP_LEFT;
 use super::MAP_RIGHT;
 use super::PAIR;
 use super::QUOTE;
+use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
@@ -96,7 +100,7 @@ pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
 const INDENT: &str = "  ";
 
 pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
-    let ctx = GenCtx { fmt, indent: 0 };
+    let ctx = GenCtx { fmt, indent: 0, direction: Direction::default(), reverse: false };
     let mut str = String::new();
     repr.gen_(ctx, &mut str);
     str
@@ -106,6 +110,8 @@ pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
 struct GenCtx {
     fmt: GenFmt,
     indent: u8,
+    direction: Direction,
+    reverse: bool,
 }
 
 trait Gen {
@@ -268,39 +274,100 @@ impl Gen for &Byte {
 }
 
 impl<'a> Gen for Pair<GenRepr<'a>, GenRepr<'a>> {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        gen_scope_if_need(ctx, s, self.first);
-        s.push(' ');
-        s.push_str(PAIR);
-        s.push(' ');
-        self.second.gen_(ctx, s);
-    }
-}
-
-impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>, GenRepr<'a>> {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        if matches!(self.ctx, GenRepr::Unit(_)) {
-            if !self.reverse
-                && let GenRepr::Pair(pair) = self.input
-            {
-                gen_call_infix(ctx, s, self.func, *pair);
-            } else {
-                gen_call_default(ctx, s, self);
+    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+        match ctx.direction {
+            Direction::Left => {
+                if is_open(&self.first) || !is_open(&self.second) {
+                    return gen_pair_left(ctx, s, self);
+                }
+                ctx.direction = Direction::Right;
+                prefixed(ctx, s, RIGHT, |ctx, s| {
+                    gen_pair_right(ctx, s, self);
+                });
             }
-        } else {
-            if self.reverse {
-                s.push_str(CALL_REVERSE);
-                s.push(SCOPE_LEFT);
-                gen_call_ctx(ctx, s, self);
-                s.push(SCOPE_RIGHT);
-            } else {
-                gen_call_ctx(ctx, s, self);
+            Direction::Right => {
+                if !is_open(&self.first) || is_open(&self.second) {
+                    return gen_pair_right(ctx, s, self);
+                }
+                ctx.direction = Direction::Left;
+                prefixed(ctx, s, LEFT, |ctx, s| {
+                    gen_pair_left(ctx, s, self);
+                });
             }
         }
     }
 }
 
-fn gen_call_infix(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+fn gen_pair_left(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
+    pair.first.gen_(ctx, s);
+    s.push(' ');
+    s.push_str(PAIR);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, pair.second);
+}
+
+fn gen_pair_right(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
+    gen_scope_if_need(ctx, s, pair.first);
+    s.push(' ');
+    s.push_str(PAIR);
+    s.push(' ');
+    pair.second.gen_(ctx, s);
+}
+
+impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>, GenRepr<'a>> {
+    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+        if ctx.reverse == self.reverse {
+            return gen_call_elements(ctx, s, self);
+        }
+        ctx.reverse = self.reverse;
+        let tag = if self.reverse { CALL_REVERSE } else { CALL_FORWARD };
+        prefixed(ctx, s, tag, |ctx, s| gen_call_elements(ctx, s, self));
+    }
+}
+
+fn gen_call_elements(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+    if !call.ctx.is_unit() {
+        return gen_call_ctx(ctx, s, call);
+    }
+    if let GenRepr::Pair(pair) = call.input {
+        gen_call_infix(ctx, s, call.func, *pair);
+    } else {
+        gen_call(ctx, s, call.func, call.input);
+    }
+}
+
+fn gen_call_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+    match ctx.direction {
+        Direction::Left => {
+            if is_open(&pair.first) || !is_open(&pair.second) {
+                return gen_call_infix_left(ctx, s, func, pair);
+            }
+            ctx.direction = Direction::Right;
+            prefixed(ctx, s, RIGHT, |ctx, s| {
+                gen_call_infix_right(ctx, s, func, pair);
+            });
+        }
+        Direction::Right => {
+            if !is_open(&pair.first) || is_open(&pair.second) {
+                return gen_call_infix_right(ctx, s, func, pair);
+            }
+            ctx.direction = Direction::Left;
+            prefixed(ctx, s, LEFT, |ctx, s| {
+                gen_call_infix_left(ctx, s, func, pair);
+            });
+        }
+    }
+}
+
+fn gen_call_infix_left(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+    pair.first.gen_(ctx, s);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, func);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, pair.second);
+}
+
+fn gen_call_infix_right(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
     gen_scope_if_need(ctx, s, pair.first);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
@@ -308,16 +375,59 @@ fn gen_call_infix(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr
     pair.second.gen_(ctx, s);
 }
 
-fn gen_call_default(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
-    let direction = if call.reverse { CALL_REVERSE } else { CALL_FORWARD };
-    gen_scope_if_need(ctx, s, call.func);
-    s.push(' ');
-    s.push_str(direction);
-    s.push(' ');
-    call.input.gen_(ctx, s);
+fn gen_call(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+    match ctx.direction {
+        Direction::Left => gen_call_left(ctx, s, func, input),
+        Direction::Right => gen_call_right(ctx, s, func, input),
+    }
 }
 
-fn gen_call_ctx(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+fn gen_call_left(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+    input.gen_(ctx, s);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, func);
+    s.push(' ');
+    s.push_str(COMMENT);
+}
+
+fn gen_call_right(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+    s.push_str(COMMENT);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, func);
+    s.push(' ');
+    input.gen_(ctx, s);
+}
+
+fn gen_call_ctx(mut ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+    match ctx.direction {
+        Direction::Left => {
+            if is_open(&call.ctx) || !is_open(&call.input) {
+                return gen_call_ctx_left(ctx, s, call);
+            }
+            ctx.direction = Direction::Right;
+            prefixed(ctx, s, RIGHT, |ctx, s| gen_call_ctx_right(ctx, s, call));
+        }
+        Direction::Right => {
+            if !is_open(&call.ctx) || is_open(&call.input) {
+                return gen_call_ctx_right(ctx, s, call);
+            }
+            ctx.direction = Direction::Left;
+            prefixed(ctx, s, LEFT, |ctx, s| gen_call_ctx_left(ctx, s, call));
+        }
+    }
+}
+
+fn gen_call_ctx_left(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
+    call.ctx.gen_(ctx, s);
+    s.push(' ');
+    s.push_str(CALL_CTX);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, call.func);
+    s.push(' ');
+    gen_scope_if_need(ctx, s, call.input);
+}
+
+fn gen_call_ctx_right(ctx: GenCtx, s: &mut String, call: Call<GenRepr, GenRepr, GenRepr>) {
     gen_scope_if_need(ctx, s, call.ctx);
     s.push(' ');
     s.push_str(CALL_CTX);
@@ -434,5 +544,11 @@ fn scoped(ctx: GenCtx, s: &mut String, f: impl FnOnce(GenCtx, &mut String)) {
 fn indent(ctx: GenCtx, s: &mut String) {
     for _ in 0 .. ctx.indent {
         s.push_str(ctx.fmt.before_item);
+    }
+}
+
+impl<'a> GenRepr<'a> {
+    fn is_unit(&self) -> bool {
+        matches!(self, GenRepr::Unit(_))
     }
 }

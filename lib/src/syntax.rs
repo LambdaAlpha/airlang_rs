@@ -82,6 +82,13 @@ pub(crate) fn ambiguous(s: &str) -> bool {
     matches!(s, UNIT | TRUE | FALSE | PAIR | CALL_FORWARD | CALL_REVERSE | CALL_CTX)
 }
 
+#[derive(Default, Copy, Clone, PartialEq, Eq)]
+enum Direction {
+    Left,
+    #[default]
+    Right,
+}
+
 pub mod repr;
 
 mod parser;

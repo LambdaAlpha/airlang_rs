@@ -38,6 +38,10 @@ left ctx + map
 -----
 <({(a b c d e) : f g h i j})
 =====
+left ctx pair
+-----
+<(>(a : b c d) e f)
+=====
 right ctx
 -----
 >(a b c d e)
@@ -61,3 +65,11 @@ forward ctx
 reverse ctx
 -----
 !(a b c d e)
+=====
+reverse forward
+-----
+!(a b ;(c d e))
+=====
+ctx reverse forward
+-----
+!(a | f ;(b c d))

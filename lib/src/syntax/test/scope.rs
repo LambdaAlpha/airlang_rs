@@ -1,4 +1,5 @@
 use crate::syntax::repr::Repr;
+use crate::syntax::test::ctx_reverse;
 use crate::syntax::test::infix_call;
 use crate::syntax::test::infix_reverse;
 use crate::syntax::test::list;
@@ -29,6 +30,11 @@ pub fn expected() -> Vec<Repr> {
             infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
             infix_call(infix_call(symbol("f"), symbol("g"), symbol("h")), symbol("i"), symbol("j")),
         )]),
+        infix_call(
+            pair(symbol("a"), infix_call(symbol("b"), symbol("c"), symbol("d"))),
+            symbol("e"),
+            symbol("f"),
+        ),
         infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
         list(vec![infix_call(
@@ -46,5 +52,7 @@ pub fn expected() -> Vec<Repr> {
             symbol("b"),
             infix_reverse(symbol("c"), symbol("d"), symbol("e")),
         ),
+        infix_reverse(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
+        ctx_reverse(symbol("a"), symbol("f"), infix_call(symbol("b"), symbol("c"), symbol("d"))),
     ]
 }

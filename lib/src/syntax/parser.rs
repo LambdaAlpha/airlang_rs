@@ -42,6 +42,7 @@ use super::CALL_CTX;
 use super::CALL_FORWARD;
 use super::CALL_REVERSE;
 use super::COMMENT;
+use super::Direction;
 use super::FALSE;
 use super::INT;
 use super::LEFT;
@@ -93,16 +94,10 @@ pub trait ParseRepr:
     + Clone {
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Default, Copy, Clone, PartialEq, Eq)]
 struct ParseCtx {
     direction: Direction,
     reverse: bool,
-}
-
-impl Default for ParseCtx {
-    fn default() -> Self {
-        Self { direction: Direction::Right, reverse: false }
-    }
 }
 
 impl ParseCtx {
@@ -115,12 +110,6 @@ impl ParseCtx {
         self.reverse = reverse;
         self
     }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq)]
-enum Direction {
-    Left,
-    Right,
 }
 
 type E = ErrMode<ContextError>;
