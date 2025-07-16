@@ -45,8 +45,8 @@ use crate::type_::Symbol;
 const CODE: &str = "code";
 const CTX: &str = "context";
 const ID: &str = "id";
-const FORWARD_SETUP: &str = "forward_setup";
-const REVERSE_SETUP: &str = "reverse_setup";
+const CALL_SETUP: &str = "call_setup";
+const SOLVE_SETUP: &str = "solve_setup";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
 const CELL: &str = "cell";
@@ -74,7 +74,7 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let ctx = parse_ctx(map_remove(&mut map, CTX))?;
     let setup =
-        parse_dyn_setup(map_remove(&mut map, FORWARD_SETUP), map_remove(&mut map, REVERSE_SETUP))?;
+        parse_dyn_setup(map_remove(&mut map, CALL_SETUP), map_remove(&mut map, SOLVE_SETUP))?;
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let cell = parse_cell(map_remove(&mut map, CELL))?;
@@ -178,14 +178,14 @@ fn parse_ctx(ctx: Val) -> Option<Ctx> {
     }
 }
 
-fn parse_dyn_setup(forward: Val, reverse: Val) -> Option<DynSetup> {
-    let forward_setup = parse_ctx_input_setup(forward)?;
-    let reverse_setup = parse_ctx_input_setup(reverse)?;
+fn parse_dyn_setup(call: Val, solve: Val) -> Option<DynSetup> {
+    let call_setup = parse_ctx_input_setup(call)?;
+    let solve_setup = parse_ctx_input_setup(solve)?;
     Some(DynSetup {
-        forward_ctx: forward_setup.ctx,
-        forward_input: forward_setup.input,
-        reverse_ctx: reverse_setup.ctx,
-        reverse_input: reverse_setup.input,
+        call_ctx: call_setup.ctx,
+        call_input: call_setup.input,
+        solve_ctx: solve_setup.ctx,
+        solve_input: solve_setup.input,
     })
 }
 
@@ -386,13 +386,11 @@ fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     if comp.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(comp.access));
     }
-    if let Some(setup) = generate_ctx_input_setup(comp.setup.forward_ctx, comp.setup.forward_input)
-    {
-        repr.insert(symbol(FORWARD_SETUP), setup);
+    if let Some(setup) = generate_ctx_input_setup(comp.setup.call_ctx, comp.setup.call_input) {
+        repr.insert(symbol(CALL_SETUP), setup);
     }
-    if let Some(setup) = generate_ctx_input_setup(comp.setup.reverse_ctx, comp.setup.reverse_input)
-    {
-        repr.insert(symbol(REVERSE_SETUP), setup);
+    if let Some(setup) = generate_ctx_input_setup(comp.setup.solve_ctx, comp.setup.solve_input) {
+        repr.insert(symbol(SOLVE_SETUP), setup);
     }
     if comp.ctx != Ctx::default() {
         repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(comp.ctx)));

@@ -11,7 +11,6 @@ use rand::prelude::Distribution;
 use rand::prelude::IndexedRandom;
 use rand::prelude::IteratorRandom;
 
-use crate::prelude::mode::CallMode;
 use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::CompMode;
 use crate::prelude::mode::DataMode;
@@ -21,6 +20,7 @@ use crate::prelude::mode::Mode;
 use crate::prelude::mode::PairMode;
 use crate::prelude::mode::PrimMode;
 use crate::prelude::mode::SymbolMode;
+use crate::prelude::mode::TaskMode;
 use crate::prelude::put_preludes;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -44,9 +44,9 @@ use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutCellCompFuncVal;
 use crate::semantics::val::MutStaticCompFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Action;
 use crate::type_::Bit;
 use crate::type_::Byte;
-use crate::type_::Call;
 use crate::type_::Change;
 use crate::type_::CtxInput;
 use crate::type_::Either;
@@ -59,6 +59,7 @@ use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -111,7 +112,7 @@ impl Arbitrary for Val {
             5 => Val::Number(Number::any(rng, new_depth).into()),
             6 => Val::Byte(Byte::any(rng, new_depth).into()),
             7 => Val::Pair(Pair::<Val, Val>::any(rng, new_depth).into()),
-            8 => Val::Call(Call::<Val, Val, Val>::any(rng, new_depth).into()),
+            8 => Val::Task(Task::<Val, Val, Val>::any(rng, new_depth).into()),
             9 => Val::List(List::<Val>::any(rng, new_depth).into()),
             10 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
             11 => Val::Ctx(Ctx::any(rng, new_depth).into()),
@@ -227,14 +228,25 @@ where
     }
 }
 
-impl<Func, Ctx, Input> Arbitrary for Call<Func, Ctx, Input>
+impl<Func, Ctx, Input> Arbitrary for Task<Func, Ctx, Input>
 where
     Func: Arbitrary,
     Ctx: Arbitrary,
     Input: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        Call::new(rng.random(), Func::any(rng, depth), Ctx::any(rng, depth), Input::any(rng, depth))
+        Task {
+            action: Action::any(rng, depth),
+            func: Func::any(rng, depth),
+            ctx: Ctx::any(rng, depth),
+            input: Input::any(rng, depth),
+        }
+    }
+}
+
+impl Arbitrary for Action {
+    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
+        if rng.random() { Action::Call } else { Action::Solve }
     }
 }
 
@@ -362,10 +374,10 @@ impl Arbitrary for CompMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
-        let call = Arbitrary::any(rng, depth);
+        let task = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, call, list, map }
+        CompMode { symbol, pair, task, list, map }
     }
 }
 
@@ -378,14 +390,14 @@ impl Arbitrary for PairMode {
     }
 }
 
-impl Arbitrary for CallMode {
+impl Arbitrary for TaskMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let new_depth = depth + 1;
         let func = Arbitrary::any(rng, new_depth);
         let ctx = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
         let some = if rng.random() { Some(Arbitrary::any(rng, new_depth)) } else { None };
-        CallMode { func, ctx, input, some }
+        TaskMode { func, ctx, input, some }
     }
 }
 
@@ -413,10 +425,10 @@ impl Arbitrary for PrimMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
-        let call = Arbitrary::any(rng, depth);
+        let task = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, call, list, map }
+        PrimMode { symbol, pair, task, list, map }
     }
 }
 
@@ -482,19 +494,19 @@ impl Arbitrary for FuncVal {
 
 impl Arbitrary for FreeSetup {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let forward_input = Arbitrary::any(rng, depth);
-        let reverse_input = Arbitrary::any(rng, depth);
-        FreeSetup { forward_input, reverse_input }
+        let call_input = Arbitrary::any(rng, depth);
+        let solve_input = Arbitrary::any(rng, depth);
+        FreeSetup { call_input, solve_input }
     }
 }
 
 impl Arbitrary for DynSetup {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let forward_ctx = Arbitrary::any(rng, depth);
-        let forward_input = Arbitrary::any(rng, depth);
-        let reverse_ctx = Arbitrary::any(rng, depth);
-        let reverse_input = Arbitrary::any(rng, depth);
-        DynSetup { forward_ctx, forward_input, reverse_ctx, reverse_input }
+        let call_ctx = Arbitrary::any(rng, depth);
+        let call_input = Arbitrary::any(rng, depth);
+        let solve_ctx = Arbitrary::any(rng, depth);
+        let solve_input = Arbitrary::any(rng, depth);
+        DynSetup { call_ctx, call_input, solve_ctx, solve_input }
     }
 }
 

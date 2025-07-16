@@ -102,8 +102,8 @@ fn test_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_call() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/call.air"), "test/call.air")
+fn test_task() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/task.air"), "test/task.air")
 }
 
 #[test]

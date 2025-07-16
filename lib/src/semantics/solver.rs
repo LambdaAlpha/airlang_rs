@@ -34,8 +34,8 @@ pub(crate) fn unit_solver() -> FuncVal {
             id: Symbol::from_str_unchecked("unit_solver"),
             fn_: Rc::new(UnitSolver),
             setup: FreeSetup {
-                forward_input: Some(default_setup.clone()),
-                reverse_input: Some(default_setup),
+                call_input: Some(default_setup.clone()),
+                solve_input: Some(default_setup),
             },
         }
         .into(),

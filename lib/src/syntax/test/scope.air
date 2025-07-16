@@ -58,18 +58,18 @@ right ctx + map
 -----
 >({(a b c d e) : f g h i j})
 =====
-forward ctx
+call ctx
 -----
-;(a b c d e)
+call(a b c d e)
 =====
-reverse ctx
+solve ctx
 -----
-!(a b c d e)
+solve(a b c d e)
 =====
-reverse forward
+solve call
 -----
-!(a b ;(c d e))
+solve(a b call(c d e))
 =====
-ctx reverse forward
+ctx solve call
 -----
-!(a | f ;(b c d))
+solve(a | f call(b c d))

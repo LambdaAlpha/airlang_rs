@@ -6,30 +6,30 @@ use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
 use crate::semantics::val::ByteVal;
-use crate::semantics::val::CallVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::IntVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::NumberVal;
 use crate::semantics::val::PairVal;
+use crate::semantics::val::TaskVal;
 use crate::semantics::val::TextVal;
 use crate::semantics::val::Val;
 use crate::syntax::GenRepr;
 use crate::syntax::ParseRepr;
 use crate::syntax::ReprError;
 use crate::syntax::generate_pretty;
-use crate::syntax::repr::CallRepr;
 use crate::syntax::repr::ListRepr;
 use crate::syntax::repr::MapRepr;
 use crate::syntax::repr::PairRepr;
 use crate::syntax::repr::Repr;
+use crate::syntax::repr::TaskRepr;
 use crate::type_::Byte;
-use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Number;
 use crate::type_::Pair;
+use crate::type_::Task;
 use crate::type_::Text;
 
 #[derive(Clone)]
@@ -93,7 +93,7 @@ impl From<&Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number.clone())),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte.clone())),
             Repr::Pair(pair) => Val::Pair(PairVal::from(&**pair)),
-            Repr::Call(call) => Val::Call(CallVal::from(&**call)),
+            Repr::Task(task) => Val::Task(TaskVal::from(&**task)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -111,7 +111,7 @@ impl From<Repr> for Val {
             Repr::Number(number) => Val::Number(NumberVal::from(number)),
             Repr::Byte(byte) => Val::Byte(ByteVal::from(byte)),
             Repr::Pair(pair) => Val::Pair(PairVal::from(*pair)),
-            Repr::Call(call) => Val::Call(CallVal::from(*call)),
+            Repr::Task(task) => Val::Task(TaskVal::from(*task)),
             Repr::List(list) => Val::List(ListVal::from(list)),
             Repr::Map(map) => Val::Map(MapVal::from(map)),
         }
@@ -130,7 +130,7 @@ impl TryInto<Repr> for &Val {
             Val::Number(number) => Ok(Repr::Number(Number::clone(number))),
             Val::Byte(byte) => Ok(Repr::Byte(Byte::clone(byte))),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
-            Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
+            Val::Task(task) => Ok(Repr::Task(Box::new(task.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -150,7 +150,7 @@ impl TryInto<Repr> for Val {
             Val::Number(number) => Ok(Repr::Number(number.into())),
             Val::Byte(byte) => Ok(Repr::Byte(byte.into())),
             Val::Pair(pair) => Ok(Repr::Pair(Box::new(pair.try_into()?))),
-            Val::Call(call) => Ok(Repr::Call(Box::new(call.try_into()?))),
+            Val::Task(task) => Ok(Repr::Task(Box::new(task.try_into()?))),
             Val::List(list) => Ok(Repr::List(list.try_into()?)),
             Val::Map(map) => Ok(Repr::Map(map.try_into()?)),
             _ => Err(ReprError {}),
@@ -177,11 +177,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
-            Val::Call(call) => {
-                let func = (&call.func).try_into()?;
-                let ctx = (&call.ctx).try_into()?;
-                let input = (&call.input).try_into()?;
-                GenRepr::Call(Box::new(Call::new(call.reverse, func, ctx, input)))
+            Val::Task(task) => {
+                let func = (&task.func).try_into()?;
+                let ctx = (&task.ctx).try_into()?;
+                let input = (&task.input).try_into()?;
+                GenRepr::Task(Box::new(Task { action: task.action, func, ctx, input }))
             }
             Val::List(list) => {
                 let list: List<GenRepr> =
@@ -235,10 +235,10 @@ impl TryInto<PairRepr> for PairVal {
     }
 }
 
-impl From<&CallRepr> for CallVal {
-    fn from(value: &CallRepr) -> Self {
-        Self::new(Box::new(Call {
-            reverse: value.reverse,
+impl From<&TaskRepr> for TaskVal {
+    fn from(value: &TaskRepr) -> Self {
+        Self::new(Box::new(Task {
+            action: value.action,
             func: Val::from(&value.func),
             ctx: Val::from(&value.ctx),
             input: Val::from(&value.input),
@@ -246,10 +246,10 @@ impl From<&CallRepr> for CallVal {
     }
 }
 
-impl From<CallRepr> for CallVal {
-    fn from(value: CallRepr) -> Self {
-        Self::new(Box::new(Call {
-            reverse: value.reverse,
+impl From<TaskRepr> for TaskVal {
+    fn from(value: TaskRepr) -> Self {
+        Self::new(Box::new(Task {
+            action: value.action,
             func: Val::from(value.func),
             ctx: Val::from(value.ctx),
             input: Val::from(value.input),
@@ -257,11 +257,11 @@ impl From<CallRepr> for CallVal {
     }
 }
 
-impl TryInto<CallRepr> for &CallVal {
+impl TryInto<TaskRepr> for &TaskVal {
     type Error = ReprError;
-    fn try_into(self) -> Result<CallRepr, Self::Error> {
-        Ok(Call {
-            reverse: self.reverse,
+    fn try_into(self) -> Result<TaskRepr, Self::Error> {
+        Ok(Task {
+            action: self.action,
             func: (&self.func).try_into()?,
             ctx: (&self.ctx).try_into()?,
             input: (&self.input).try_into()?,
@@ -269,15 +269,15 @@ impl TryInto<CallRepr> for &CallVal {
     }
 }
 
-impl TryInto<CallRepr> for CallVal {
+impl TryInto<TaskRepr> for TaskVal {
     type Error = ReprError;
-    fn try_into(self) -> Result<CallRepr, Self::Error> {
-        let call = self.unwrap();
-        Ok(Call {
-            reverse: call.reverse,
-            func: call.func.try_into()?,
-            ctx: call.ctx.try_into()?,
-            input: call.input.try_into()?,
+    fn try_into(self) -> Result<TaskRepr, Self::Error> {
+        let task = self.unwrap();
+        Ok(Task {
+            action: task.action,
+            func: task.func.try_into()?,
+            ctx: task.ctx.try_into()?,
+            input: task.input.try_into()?,
         })
     }
 }

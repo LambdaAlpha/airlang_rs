@@ -1,8 +1,6 @@
 use const_format::concatcp;
 use log::error;
 
-use super::CallMapMode;
-use super::CallMode;
 use super::CodeMode;
 use super::CompMode;
 use super::DataMode;
@@ -12,6 +10,8 @@ use super::Mode;
 use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
+use super::TaskMapMode;
+use super::TaskMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
 use crate::semantics::core::SYMBOL_EVAL;
@@ -22,21 +22,22 @@ use crate::semantics::core::SYMBOL_MOVE;
 use crate::semantics::core::SYMBOL_MOVE_CHAR;
 use crate::semantics::core::SYMBOL_REF;
 use crate::semantics::core::SYMBOL_REF_CHAR;
-use crate::semantics::val::CALL;
 use crate::semantics::val::LIST;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MAP;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::SYMBOL;
+use crate::semantics::val::TASK;
 use crate::semantics::val::Val;
+use crate::type_::Action;
 use crate::type_::Bit;
-use crate::type_::Call;
 use crate::type_::CtxInput;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 
 pub(in crate::prelude) trait ParseMode<T>: Sized + Clone {
     fn parse(mode: T) -> Option<Self>;
@@ -116,10 +117,10 @@ impl ParseMode<MapVal> for PrimMode {
     fn parse(mut map: MapVal) -> Option<Self> {
         let symbol = ParseMode::parse(map_remove(&mut map, SYMBOL))?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR))?;
-        let call = ParseMode::parse(map_remove(&mut map, CALL))?;
+        let task = ParseMode::parse(map_remove(&mut map, TASK))?;
         let list = ParseMode::parse(map_remove(&mut map, LIST))?;
         let map = ParseMode::parse(map_remove(&mut map, MAP))?;
-        Some(PrimMode { symbol, pair, call, list, map })
+        Some(PrimMode { symbol, pair, task, list, map })
     }
 }
 
@@ -138,14 +139,14 @@ pub(in crate::prelude) const EVAL_EVAL: &str = concatcp!(EVAL, SYMBOL_EVAL_CHAR)
 impl ParseMode<Symbol> for PrimMode {
     fn parse(mode: Symbol) -> Option<Self> {
         let mode = match &*mode {
-            FORM_LITERAL => PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form),
-            FORM_REF => PrimMode::symbol_call(SymbolMode::Ref, CodeMode::Form),
-            FORM_MOVE => PrimMode::symbol_call(SymbolMode::Move, CodeMode::Form),
-            FORM_EVAL => PrimMode::symbol_call(SymbolMode::Eval, CodeMode::Form),
-            EVAL_LITERAL => PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Eval),
-            EVAL_REF => PrimMode::symbol_call(SymbolMode::Ref, CodeMode::Eval),
-            EVAL_MOVE => PrimMode::symbol_call(SymbolMode::Move, CodeMode::Eval),
-            EVAL_EVAL => PrimMode::symbol_call(SymbolMode::Eval, CodeMode::Eval),
+            FORM_LITERAL => PrimMode::symbol_task(SymbolMode::Literal, CodeMode::Form),
+            FORM_REF => PrimMode::symbol_task(SymbolMode::Ref, CodeMode::Form),
+            FORM_MOVE => PrimMode::symbol_task(SymbolMode::Move, CodeMode::Form),
+            FORM_EVAL => PrimMode::symbol_task(SymbolMode::Eval, CodeMode::Form),
+            EVAL_LITERAL => PrimMode::symbol_task(SymbolMode::Literal, CodeMode::Eval),
+            EVAL_REF => PrimMode::symbol_task(SymbolMode::Ref, CodeMode::Eval),
+            EVAL_MOVE => PrimMode::symbol_task(SymbolMode::Move, CodeMode::Eval),
+            EVAL_EVAL => PrimMode::symbol_task(SymbolMode::Eval, CodeMode::Eval),
             s => {
                 error!("{s} should be a symbol representing a primitive mode");
                 return None;
@@ -159,7 +160,7 @@ impl GenerateMode<Val> for PrimMode {
     fn generate(&self) -> Val {
         if self.symbol.is_none()
             && self.pair.is_none()
-            && self.call.is_none()
+            && self.task.is_none()
             && self.list.is_none()
             && self.map.is_none()
         {
@@ -168,11 +169,11 @@ impl GenerateMode<Val> for PrimMode {
 
         if self.symbol.is_some()
             && self.pair.is_some()
-            && self.call.is_some()
+            && self.task.is_some()
             && self.list.is_some()
             && self.map.is_some()
         {
-            let s = match (self.call.unwrap(), self.symbol.unwrap()) {
+            let s = match (self.task.unwrap(), self.symbol.unwrap()) {
                 (CodeMode::Form, SymbolMode::Literal) => FORM_LITERAL,
                 (CodeMode::Form, SymbolMode::Ref) => FORM_REF,
                 (CodeMode::Form, SymbolMode::Move) => FORM_MOVE,
@@ -194,7 +195,7 @@ impl GenerateMode<MapVal> for PrimMode {
         let mut map = Map::default();
         put_some(&mut map, SYMBOL, &self.symbol);
         put_some(&mut map, PAIR, &self.pair);
-        put_some(&mut map, CALL, &self.call);
+        put_some(&mut map, TASK, &self.task);
         put_some(&mut map, LIST, &self.list);
         put_some(&mut map, MAP, &self.map);
         map.insert(symbol(PRIMITIVE), Val::Bit(Bit::true_()));
@@ -329,10 +330,10 @@ impl ParseMode<MapVal> for CompMode {
     fn parse(mut map: MapVal) -> Option<Self> {
         let symbol = ParseMode::parse(map_remove(&mut map, SYMBOL))?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR))?;
-        let call = ParseMode::parse(map_remove(&mut map, CALL))?;
+        let task = ParseMode::parse(map_remove(&mut map, TASK))?;
         let list = ParseMode::parse(map_remove(&mut map, LIST))?;
         let map = ParseMode::parse(map_remove(&mut map, MAP))?;
-        Some(CompMode { symbol, pair, call, list, map })
+        Some(CompMode { symbol, pair, task, list, map })
     }
 }
 
@@ -341,7 +342,7 @@ impl GenerateMode<MapVal> for CompMode {
         let mut map = Map::default();
         put_some(&mut map, SYMBOL, &self.symbol);
         put_some(&mut map, PAIR, &self.pair);
-        put_some(&mut map, CALL, &self.call);
+        put_some(&mut map, TASK, &self.task);
         put_some(&mut map, LIST, &self.list);
         put_some(&mut map, MAP, &self.map);
         map.into()
@@ -382,7 +383,7 @@ impl GenerateMode<Val> for PairMode {
 }
 
 // todo design
-impl ParseMode<Val> for CallMode {
+impl ParseMode<Val> for TaskMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::try_from(PrimMode::parse(s)?).unwrap()),
@@ -392,33 +393,33 @@ impl ParseMode<Val> for CallMode {
                     error!("first {:?} should be a map", some_else.first);
                     return None;
                 };
-                let some = parse_call_map_some(some)?;
-                let Val::Call(call) = some_else.second else {
-                    error!("second {:?} should be a call", some_else.second);
+                let some = parse_task_map_some(some)?;
+                let Val::Task(task) = some_else.second else {
+                    error!("second {:?} should be a task", some_else.second);
                     return None;
                 };
-                let call = Call::from(call);
-                let func = ParseMode::parse(call.func)?;
-                let ctx = ParseMode::parse(call.ctx)?;
-                let input = ParseMode::parse(call.input)?;
-                Some(CallMode { func, ctx, input, some: Some(some) })
+                let task = Task::from(task);
+                let func = ParseMode::parse(task.func)?;
+                let ctx = ParseMode::parse(task.ctx)?;
+                let input = ParseMode::parse(task.input)?;
+                Some(TaskMode { func, ctx, input, some: Some(some) })
             }
-            Val::Call(call) => {
-                let call = Call::from(call);
-                let func = ParseMode::parse(call.func)?;
-                let ctx = ParseMode::parse(call.ctx)?;
-                let input = ParseMode::parse(call.input)?;
-                Some(CallMode { some: None, func, ctx, input })
+            Val::Task(task) => {
+                let task = Task::from(task);
+                let func = ParseMode::parse(task.func)?;
+                let ctx = ParseMode::parse(task.ctx)?;
+                let input = ParseMode::parse(task.input)?;
+                Some(TaskMode { some: None, func, ctx, input })
             }
             v => {
-                error!("{v:?} should be a call, a pair or a symbol");
+                error!("{v:?} should be a task, a pair or a symbol");
                 None
             }
         }
     }
 }
 
-fn parse_call_map_some(some: MapVal) -> Option<CallMapMode> {
+fn parse_task_map_some(some: MapVal) -> Option<TaskMapMode> {
     Map::from(some)
         .into_iter()
         .map(|(k, v)| {
@@ -434,23 +435,23 @@ fn parse_call_map_some(some: MapVal) -> Option<CallMapMode> {
 }
 
 // todo design
-impl GenerateMode<Val> for CallMode {
+impl GenerateMode<Val> for TaskMode {
     fn generate(&self) -> Val {
         let func = GenerateMode::generate(&self.func);
         let ctx = GenerateMode::generate(&self.ctx);
         let input = GenerateMode::generate(&self.input);
         match &self.some {
             Some(some) => {
-                let some = generate_call_map_some(some);
-                let else_ = Val::Call(Call::new(false, func, ctx, input).into());
+                let some = generate_task_map_some(some);
+                let else_ = Val::Task(Task { action: Action::Call, func, ctx, input }.into());
                 Val::Pair(Pair::new(some, else_).into())
             }
-            None => Val::Call(Call::new(false, func, ctx, input).into()),
+            None => Val::Task(Task { action: Action::Call, func, ctx, input }.into()),
         }
     }
 }
 
-fn generate_call_map_some(some: &Map<Val, CtxInput<Option<Mode>, Option<Mode>>>) -> Val {
+fn generate_task_map_some(some: &Map<Val, CtxInput<Option<Mode>, Option<Mode>>>) -> Val {
     let some: Map<Val, Val> = some
         .iter()
         .map(|(k, v)| {

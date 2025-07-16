@@ -204,20 +204,20 @@ impl MutCellFn<Val, Val, Val> for FuncVal {
 }
 
 impl FuncSetup for FuncVal {
-    fn forward_ctx(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.forward_ctx())
+    fn call_ctx(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.call_ctx())
     }
 
-    fn forward_input(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.forward_input())
+    fn call_input(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.call_input())
     }
 
-    fn reverse_ctx(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.reverse_ctx())
+    fn solve_ctx(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.solve_ctx())
     }
 
-    fn reverse_input(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.reverse_input())
+    fn solve_input(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.solve_input())
     }
 }
 

@@ -1,6 +1,4 @@
 use crate::syntax::repr::Repr;
-use crate::syntax::test::call;
-use crate::syntax::test::list;
 use crate::syntax::test::symbol;
 
 pub(super) fn expected() -> Vec<Repr> {
@@ -68,6 +66,5 @@ pub(super) fn expected() -> Vec<Repr> {
         symbol(" ab cd"),
         symbol("\\_\\''"),
         symbol("-|/\\:;!?"),
-        list(vec![symbol("%"), call(list(vec![]), symbol(":"))]),
     ]
 }

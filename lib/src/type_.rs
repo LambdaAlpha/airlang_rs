@@ -1,10 +1,5 @@
 pub use self::bit::Bit;
 pub use self::byte::Byte;
-pub use self::call::Call;
-pub use self::call::CtxInput;
-pub use self::call::FuncCtx;
-pub use self::call::FuncCtxInput;
-pub use self::call::FuncInput;
 pub use self::change::Change;
 pub use self::either::Either;
 pub use self::int::Int;
@@ -15,6 +10,12 @@ pub use self::pair::Pair;
 pub use self::ref_::ConstRef;
 pub use self::ref_::DynRef;
 pub use self::symbol::Symbol;
+pub use self::task::Action;
+pub use self::task::CtxInput;
+pub use self::task::FuncCtx;
+pub use self::task::FuncCtxInput;
+pub use self::task::FuncInput;
+pub use self::task::Task;
 pub use self::text::Text;
 pub use self::unit::Unit;
 
@@ -42,7 +43,7 @@ mod either;
 
 mod change;
 
-mod call;
+mod task;
 
 mod list;
 

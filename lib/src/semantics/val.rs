@@ -1,5 +1,4 @@
 pub use self::byte::ByteVal;
-pub use self::call::CallVal;
 pub use self::ctx::CtxVal;
 pub use self::func::ConstCellCompFuncVal;
 pub use self::func::ConstCellPrimFuncVal;
@@ -19,6 +18,7 @@ pub use self::list::ListVal;
 pub use self::map::MapVal;
 pub use self::number::NumberVal;
 pub use self::pair::PairVal;
+pub use self::task::TaskVal;
 pub use self::text::TextVal;
 
 _____!();
@@ -30,13 +30,13 @@ use std::hash::Hash;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
-use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -62,7 +62,7 @@ pub enum Val {
     Byte(ByteVal),
 
     Pair(PairVal),
-    Call(CallVal),
+    Task(TaskVal),
 
     List(ListVal),
     Map(MapVal),
@@ -81,7 +81,7 @@ pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
-pub(crate) const CALL: &str = "call";
+pub(crate) const TASK: &str = "task";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
@@ -177,15 +177,15 @@ impl From<PairVal> for Val {
     }
 }
 
-impl From<Call<Val, Val, Val>> for Val {
-    fn from(value: Call<Val, Val, Val>) -> Self {
-        Val::Call(CallVal::from(value))
+impl From<Task<Val, Val, Val>> for Val {
+    fn from(value: Task<Val, Val, Val>) -> Self {
+        Val::Task(TaskVal::from(value))
     }
 }
 
-impl From<CallVal> for Val {
-    fn from(value: CallVal) -> Self {
-        Val::Call(value)
+impl From<TaskVal> for Val {
+    fn from(value: TaskVal) -> Self {
+        Val::Task(value)
     }
 }
 
@@ -242,7 +242,7 @@ impl Debug for Val {
             Val::Number(number) => <_ as Debug>::fmt(number, f),
             Val::Byte(byte) => <_ as Debug>::fmt(byte, f),
             Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
-            Val::Call(call) => <_ as Debug>::fmt(call, f),
+            Val::Task(task) => <_ as Debug>::fmt(task, f),
             Val::List(list) => <_ as Debug>::fmt(list, f),
             Val::Map(map) => <_ as Debug>::fmt(map, f),
             Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
@@ -262,7 +262,7 @@ mod byte;
 
 mod pair;
 
-mod call;
+mod task;
 
 mod list;
 

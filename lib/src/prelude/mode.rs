@@ -1,5 +1,3 @@
-pub use self::call::CallMapMode;
-pub use self::call::CallMode;
 pub use self::comp::CompMode;
 pub use self::func::DynFuncMode;
 pub use self::func::FreeFuncMode;
@@ -11,6 +9,8 @@ pub use self::prim::CodeMode;
 pub use self::prim::DataMode;
 pub use self::prim::PrimMode;
 pub use self::symbol::SymbolMode;
+pub use self::task::TaskMapMode;
+pub use self::task::TaskMode;
 
 _____!();
 
@@ -205,7 +205,7 @@ mod symbol;
 
 mod pair;
 
-mod call;
+mod task;
 
 mod list;
 

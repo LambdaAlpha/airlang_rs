@@ -12,10 +12,11 @@ use crate::semantics::ctx::CtxMap;
 use crate::semantics::ctx::CtxValue;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::Val;
-use crate::type_::Call;
+use crate::type_::Action;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 
 const NONE: &str = "none";
 const STATIC: &str = "static";
@@ -72,14 +73,14 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
 fn parse_binding(val: Val) -> Option<OptBinding> {
     match val {
         Val::Symbol(name) => Some(OptBinding { name, contract: None }),
-        Val::Call(call) => {
-            if call.reverse || !call.func.is_unit() {
-                error!("call {call:?} should be forward and call.func should be a unit");
+        Val::Task(task) => {
+            if task.action != Action::Call || !task.func.is_unit() {
+                error!("task {task:?} should be call and task.func should be a unit");
                 return None;
             }
-            let call = Call::from(call);
-            let Val::Pair(pair) = call.input else {
-                error!("call.input {:?} should be a pair", call.input);
+            let task = Task::from(task);
+            let Val::Pair(pair) = task.input else {
+                error!("task.input {:?} should be a pair", task.input);
                 return None;
             };
             let pair = Pair::from(pair);
@@ -146,7 +147,13 @@ fn generate_binding(binding: Binding) -> Val {
     }
     let contract = generate_contract(binding.contract);
     let pair = Pair::new(Val::Symbol(binding.name), contract);
-    Val::Call(Call::new(false, Val::default(), Val::default(), Val::Pair(pair.into())).into())
+    let task = Task {
+        action: Action::Call,
+        func: Val::default(),
+        ctx: Val::default(),
+        input: Val::Pair(pair.into()),
+    };
+    Val::Task(task.into())
 }
 
 pub(in crate::prelude) fn generate_contract(contract: Contract) -> Val {

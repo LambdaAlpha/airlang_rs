@@ -10,13 +10,13 @@ use super::parse;
 use super::parser::ParseRepr;
 use crate::type_::Bit;
 use crate::type_::Byte;
-use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -34,7 +34,7 @@ pub enum Repr {
     Byte(Byte),
 
     Pair(Box<PairRepr>),
-    Call(Box<CallRepr>),
+    Task(Box<TaskRepr>),
 
     List(ListRepr),
     Map(MapRepr),
@@ -42,7 +42,7 @@ pub enum Repr {
 
 pub type PairRepr = Pair<Repr, Repr>;
 
-pub type CallRepr = Call<Repr, Repr, Repr>;
+pub type TaskRepr = Task<Repr, Repr, Repr>;
 
 pub type ListRepr = List<Repr>;
 
@@ -108,15 +108,15 @@ impl From<Box<PairRepr>> for Repr {
     }
 }
 
-impl From<CallRepr> for Repr {
-    fn from(c: CallRepr) -> Self {
-        Repr::Call(Box::new(c))
+impl From<TaskRepr> for Repr {
+    fn from(t: TaskRepr) -> Self {
+        Repr::Task(Box::new(t))
     }
 }
 
-impl From<Box<CallRepr>> for Repr {
-    fn from(c: Box<CallRepr>) -> Self {
-        Repr::Call(c)
+impl From<Box<TaskRepr>> for Repr {
+    fn from(t: Box<TaskRepr>) -> Self {
+        Repr::Task(t)
     }
 }
 
@@ -189,11 +189,11 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
-            Repr::Call(call) => {
-                let func = (&call.func).try_into()?;
-                let ctx = (&call.ctx).try_into()?;
-                let input = (&call.input).try_into()?;
-                GenRepr::Call(Box::new(Call::new(call.reverse, func, ctx, input)))
+            Repr::Task(task) => {
+                let func = (&task.func).try_into()?;
+                let ctx = (&task.ctx).try_into()?;
+                let input = (&task.input).try_into()?;
+                GenRepr::Task(Box::new(Task { action: task.action, func, ctx, input }))
             }
             Repr::List(list) => {
                 let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;

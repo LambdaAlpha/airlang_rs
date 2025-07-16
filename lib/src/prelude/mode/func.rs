@@ -1,8 +1,6 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use super::CallMapMode;
-use super::CallMode;
 use super::CodeMode;
 use super::CompMode;
 use super::DataMode;
@@ -12,6 +10,8 @@ use super::Mode;
 use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
+use super::TaskMapMode;
+use super::TaskMode;
 use super::opt::ModeFn;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstStaticPrimFunc;
@@ -35,22 +35,22 @@ pub struct FuncMode;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FreeFuncMode {
-    pub forward_input: Option<Mode>,
-    pub reverse_input: Option<Mode>,
+    pub call_input: Option<Mode>,
+    pub solve_input: Option<Mode>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct DynFuncMode {
-    pub forward_input: Option<Mode>,
-    pub forward_ctx: Option<Mode>,
-    pub reverse_input: Option<Mode>,
-    pub reverse_ctx: Option<Mode>,
+    pub call_input: Option<Mode>,
+    pub call_ctx: Option<Mode>,
+    pub solve_input: Option<Mode>,
+    pub solve_ctx: Option<Mode>,
 }
 
 const DEFAULT_MODE: PrimMode = PrimMode {
     symbol: Some(SymbolMode::Ref),
     pair: Some(DataMode),
-    call: Some(CodeMode::Eval),
+    task: Some(CodeMode::Eval),
     list: Some(DataMode),
     map: Some(DataMode),
 };
@@ -109,8 +109,8 @@ impl FuncMode {
         None
     }
 
-    pub const fn prim_mode(symbol: SymbolMode, call: CodeMode) -> Option<Mode> {
-        Some(Mode::Prim(PrimMode::symbol_call(symbol, call)))
+    pub const fn prim_mode(symbol: SymbolMode, task: CodeMode) -> Option<Mode> {
+        Some(Mode::Prim(PrimMode::symbol_task(symbol, task)))
     }
 
     pub fn symbol_mode(symbol: SymbolMode) -> Option<Mode> {
@@ -123,11 +123,11 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn call_mode(
-        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>, some: Option<CallMapMode>,
+    pub fn task_mode(
+        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>, some: Option<TaskMapMode>,
     ) -> Option<Mode> {
         let mode = CompMode {
-            call: Some(CallMode { func, ctx, input, some }),
+            task: Some(TaskMode { func, ctx, input, some }),
             ..Self::default_comp_mode()
         };
         Some(Mode::Comp(Box::new(mode)))
@@ -150,8 +150,8 @@ impl FuncMode {
 impl FreeFuncMode {
     pub(crate) fn into_setup(self) -> FreeSetup {
         FreeSetup {
-            forward_input: Some(FuncMode::mode_into_func(self.forward_input)),
-            reverse_input: Some(FuncMode::mode_into_func(self.reverse_input)),
+            call_input: Some(FuncMode::mode_into_func(self.call_input)),
+            solve_input: Some(FuncMode::mode_into_func(self.solve_input)),
         }
     }
 }
@@ -159,27 +159,27 @@ impl FreeFuncMode {
 impl DynFuncMode {
     pub(crate) fn into_setup(self) -> DynSetup {
         DynSetup {
-            forward_ctx: Some(FuncMode::mode_into_func(self.forward_ctx)),
-            forward_input: Some(FuncMode::mode_into_func(self.forward_input)),
-            reverse_ctx: Some(FuncMode::mode_into_func(self.reverse_ctx)),
-            reverse_input: Some(FuncMode::mode_into_func(self.reverse_input)),
+            call_ctx: Some(FuncMode::mode_into_func(self.call_ctx)),
+            call_input: Some(FuncMode::mode_into_func(self.call_input)),
+            solve_ctx: Some(FuncMode::mode_into_func(self.solve_ctx)),
+            solve_input: Some(FuncMode::mode_into_func(self.solve_input)),
         }
     }
 }
 
 impl Default for FreeFuncMode {
     fn default() -> Self {
-        Self { forward_input: FuncMode::default_mode(), reverse_input: FuncMode::default_mode() }
+        Self { call_input: FuncMode::default_mode(), solve_input: FuncMode::default_mode() }
     }
 }
 
 impl Default for DynFuncMode {
     fn default() -> Self {
         Self {
-            forward_ctx: FuncMode::default_mode(),
-            forward_input: FuncMode::default_mode(),
-            reverse_ctx: FuncMode::default_mode(),
-            reverse_input: FuncMode::default_mode(),
+            call_ctx: FuncMode::default_mode(),
+            call_input: FuncMode::default_mode(),
+            solve_ctx: FuncMode::default_mode(),
+            solve_input: FuncMode::default_mode(),
         }
     }
 }
@@ -211,7 +211,7 @@ impl GetCtxAccess for PrimMode {
     fn ctx_access(&self) -> CtxAccess {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
-            & self.call.ctx_access()
+            & self.task.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -236,7 +236,7 @@ impl GetCtxAccess for CompMode {
     fn ctx_access(&self) -> CtxAccess {
         self.symbol.ctx_access()
             & self.pair.ctx_access()
-            & self.call.ctx_access()
+            & self.task.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -254,7 +254,7 @@ impl GetCtxAccess for PairMode {
     }
 }
 
-impl GetCtxAccess for CallMode {
+impl GetCtxAccess for TaskMode {
     fn ctx_access(&self) -> CtxAccess {
         match &self.some {
             None => CtxAccess::Mut,

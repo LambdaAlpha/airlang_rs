@@ -45,7 +45,9 @@ pub(crate) fn composite_call<Fn>(f: &Fn, ctx: &mut Ctx, body: Val) -> Val
 where Fn: MutStaticFn<Val, Val, Val> {
     let mut ctx_val = Val::Ctx(take(ctx).into());
     let output = f.mut_static_call(&mut ctx_val, body);
-    let Val::Ctx(ctx_val) = ctx_val else { unreachable!("ctx_call ctx invariant is broken!!!") };
+    let Val::Ctx(ctx_val) = ctx_val else {
+        unreachable!("composite_call ctx invariant is broken!!!")
+    };
     *ctx = ctx_val.into();
     output
 }

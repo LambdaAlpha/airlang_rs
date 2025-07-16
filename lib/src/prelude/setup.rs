@@ -113,7 +113,7 @@ impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
 }
 
 pub fn free_mode(mode: Option<Mode>) -> FreeFuncMode {
-    FreeFuncMode { forward_input: mode, reverse_input: FuncMode::default_mode() }
+    FreeFuncMode { call_input: mode, solve_input: FuncMode::default_mode() }
 }
 
 pub fn default_free_mode() -> FreeFuncMode {
@@ -126,10 +126,10 @@ pub fn ctx_mode() -> Option<Mode> {
 
 pub fn dyn_mode(mode: Option<Mode>) -> DynFuncMode {
     DynFuncMode {
-        forward_ctx: FuncMode::symbol_mode(SymbolMode::Literal),
-        forward_input: mode,
-        reverse_ctx: FuncMode::symbol_mode(SymbolMode::Literal),
-        reverse_input: FuncMode::default_mode(),
+        call_ctx: FuncMode::symbol_mode(SymbolMode::Literal),
+        call_input: mode,
+        solve_ctx: FuncMode::symbol_mode(SymbolMode::Literal),
+        solve_input: FuncMode::default_mode(),
     }
 }
 

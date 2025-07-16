@@ -6,13 +6,13 @@ pair pair
 -----
 a : b : c
 =====
-pair other
+pair call
 -----
-a : b ; c
+a : _ b c
 =====
-other pair
+call pair
 -----
-a ; b : c
+_ a b : c
 =====
 pair infix
 -----
@@ -21,6 +21,14 @@ a : b c d
 infix pair
 -----
 a b c : d
+=====
+pair ctx call
+-----
+a : b | c d
+=====
+ctx call pair
+-----
+a | b c : d
 =====
 non-atomic first
 -----

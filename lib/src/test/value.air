@@ -52,11 +52,11 @@ _ do [p = _ any pair, p | type .]
 -----
 pair
 =====
-any call
+any task
 -----
-_ do [c = _ any call, c | type .]
+_ do [c = _ any task, c | type .]
 -----
-call
+task
 =====
 any list
 -----
@@ -130,11 +130,11 @@ _ do [a = 1 : 2, a | type .]
 -----
 pair
 =====
-type call
+type task
 -----
 _ do [a = _ id _ f a, a | type .]
 -----
-call
+task
 =====
 type list
 -----
@@ -208,7 +208,7 @@ true
 -----
 true
 =====
-== call
+== task
 -----
 (_ 1 2) == (_ 1 2)
 -----

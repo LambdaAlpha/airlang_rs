@@ -40,8 +40,8 @@ pub struct FuncPrelude {
     pub repr: FreeStaticPrimFuncVal,
     pub eval: MutStaticPrimFuncVal,
     pub ctx_access: ConstStaticPrimFuncVal,
-    pub forward_setup: ConstStaticPrimFuncVal,
-    pub reverse_setup: ConstStaticPrimFuncVal,
+    pub call_setup: ConstStaticPrimFuncVal,
+    pub solve_setup: ConstStaticPrimFuncVal,
     pub is_primitive: ConstStaticPrimFuncVal,
     pub is_cell: ConstStaticPrimFuncVal,
     pub id: ConstStaticPrimFuncVal,
@@ -56,8 +56,8 @@ impl Default for FuncPrelude {
             repr: repr(),
             eval: eval(),
             ctx_access: ctx_access(),
-            forward_setup: forward_setup(),
-            reverse_setup: reverse_setup(),
+            call_setup: call_setup(),
+            solve_setup: solve_setup(),
             is_primitive: is_primitive(),
             is_cell: is_cell(),
             id: id(),
@@ -73,8 +73,8 @@ impl Prelude for FuncPrelude {
         self.repr.put(ctx);
         self.eval.put(ctx);
         self.ctx_access.put(ctx);
-        self.forward_setup.put(ctx);
-        self.reverse_setup.put(ctx);
+        self.call_setup.put(ctx);
+        self.solve_setup.put(ctx);
         self.is_primitive.put(ctx);
         self.is_cell.put(ctx);
         self.id.put(ctx);
@@ -143,39 +143,31 @@ fn fn_ctx_access(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(Symbol::from_str_unchecked(access))
 }
 
-pub fn forward_setup() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "function.forward_setup",
-        f: const_impl(fn_forward_setup),
-        mode: default_dyn_mode(),
-    }
-    .const_static()
+pub fn call_setup() -> ConstStaticPrimFuncVal {
+    DynFn { id: "function.call_setup", f: const_impl(fn_call_setup), mode: default_dyn_mode() }
+        .const_static()
 }
 
-fn fn_forward_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_call_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    generate_ctx_input_setup(func.forward_ctx().cloned(), func.forward_input().cloned())
+    generate_ctx_input_setup(func.call_ctx().cloned(), func.call_input().cloned())
         .unwrap_or_default()
 }
 
-pub fn reverse_setup() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "function.reverse_setup",
-        f: const_impl(fn_reverse_setup),
-        mode: default_dyn_mode(),
-    }
-    .const_static()
+pub fn solve_setup() -> ConstStaticPrimFuncVal {
+    DynFn { id: "function.solve_setup", f: const_impl(fn_solve_setup), mode: default_dyn_mode() }
+        .const_static()
 }
 
-fn fn_reverse_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_solve_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    generate_ctx_input_setup(func.reverse_ctx().cloned(), func.reverse_input().cloned())
+    generate_ctx_input_setup(func.solve_ctx().cloned(), func.solve_input().cloned())
         .unwrap_or_default()
 }
 

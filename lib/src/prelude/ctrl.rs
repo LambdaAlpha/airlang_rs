@@ -19,12 +19,12 @@ use crate::semantics::func::MutStaticFn;
 use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
-use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 use crate::type_::Text;
 
 #[derive(Clone)]
@@ -121,7 +121,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         error!("input.second {:?} should be a list", pair.second);
         return Val::default();
     };
-    let mode = PrimMode::symbol_call(SymbolMode::Literal, CodeMode::Form);
+    let mode = PrimMode::symbol_task(SymbolMode::Literal, CodeMode::Form);
     for item in List::from(list) {
         let Val::Pair(pair) = item else {
             error!("match arm {item:?} should be a pair");
@@ -342,18 +342,18 @@ fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFl
 }
 
 fn parse_block_item(val: Val) -> Option<BlockItem> {
-    let Val::Call(call) = val else {
+    let Val::Task(task) = val else {
         return Some(BlockItem::Normal(val));
     };
-    let Val::Symbol(s) = &call.func else {
-        return Some(BlockItem::Normal(Val::Call(call)));
+    let Val::Symbol(s) = &task.func else {
+        return Some(BlockItem::Normal(Val::Task(task)));
     };
     let Some(exit) = parse_exit(s) else {
-        return Some(BlockItem::Normal(Val::Call(call)));
+        return Some(BlockItem::Normal(Val::Task(task)));
     };
-    let call = Call::from(call);
-    let Val::Pair(pair) = call.input else {
-        error!("call.input {:?} should be a pair", call.input);
+    let task = Task::from(task);
+    let Val::Pair(pair) = task.input else {
+        error!("task.input {:?} should be a pair", task.input);
         return None;
     };
     let pair = Pair::from(pair);

@@ -1,9 +1,16 @@
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Call<Func, Ctx, Input> {
-    pub reverse: bool,
+pub struct Task<Func, Ctx, Input> {
+    pub action: Action,
     pub func: Func,
     pub ctx: Ctx,
     pub input: Input,
+}
+
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
+pub enum Action {
+    #[default]
+    Call,
+    Solve,
 }
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
@@ -29,12 +36,6 @@ pub struct FuncCtxInput<Func, Ctx, Input> {
     pub func: Func,
     pub ctx: Ctx,
     pub input: Input,
-}
-
-impl<Func, Ctx, Input> Call<Func, Ctx, Input> {
-    pub const fn new(reverse: bool, func: Func, ctx: Ctx, input: Input) -> Self {
-        Self { reverse, func, ctx, input }
-    }
 }
 
 impl<Func, Input> FuncInput<Func, Input> {

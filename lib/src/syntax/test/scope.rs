@@ -1,7 +1,7 @@
 use crate::syntax::repr::Repr;
-use crate::syntax::test::ctx_reverse;
+use crate::syntax::test::ctx_solve;
 use crate::syntax::test::infix_call;
-use crate::syntax::test::infix_reverse;
+use crate::syntax::test::infix_solve;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
@@ -47,12 +47,8 @@ pub fn expected() -> Vec<Repr> {
             infix_call(symbol("f"), symbol("g"), infix_call(symbol("h"), symbol("i"), symbol("j"))),
         )]),
         infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
-        infix_reverse(
-            symbol("a"),
-            symbol("b"),
-            infix_reverse(symbol("c"), symbol("d"), symbol("e")),
-        ),
-        infix_reverse(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
-        ctx_reverse(symbol("a"), symbol("f"), infix_call(symbol("b"), symbol("c"), symbol("d"))),
+        infix_solve(symbol("a"), symbol("b"), infix_solve(symbol("c"), symbol("d"), symbol("e"))),
+        infix_solve(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
+        ctx_solve(symbol("a"), symbol("f"), infix_call(symbol("b"), symbol("c"), symbol("d"))),
     ]
 }

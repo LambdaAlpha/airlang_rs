@@ -7,25 +7,26 @@ use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::core::SYMBOL_REF_CHAR;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
-use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
+use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
-use crate::syntax::CALL_FORWARD;
-use crate::syntax::CALL_REVERSE;
-use crate::type_::Call;
+use crate::syntax::CALL;
+use crate::syntax::SOLVE;
+use crate::type_::Action;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
+use crate::type_::Task;
 use crate::type_::Unit;
 
 pub(in crate::prelude) enum Pattern {
     Any(OptBinding),
     Val(Val),
     Pair(Box<Pair<Pattern, Pattern>>),
-    Call(Box<Call<Pattern, Pattern, Pattern>>),
+    Task(Box<Task<Pattern, Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -41,7 +42,7 @@ pub(in crate::prelude) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option
         Val::Pair(pair) => parse_pair(ctx, pair),
         Val::List(list) => parse_list(ctx, list),
         Val::Map(map) => parse_map(ctx, map),
-        Val::Call(call) => parse_call(ctx, call),
+        Val::Task(task) => parse_task(ctx, task),
         val => Some(Pattern::Val(val)),
     }
 }
@@ -66,38 +67,39 @@ fn parse_pair(ctx: PatternCtx, pair: PairVal) -> Option<Pattern> {
     Some(Pattern::Pair(Box::new(Pair::new(first, second))))
 }
 
-fn parse_call(ctx: PatternCtx, call: CallVal) -> Option<Pattern> {
-    let call = Call::from(call);
-    if call.reverse {
-        return parse_call_struct(ctx, call.reverse, call.func, call.ctx, call.input);
+fn parse_task(ctx: PatternCtx, task: TaskVal) -> Option<Pattern> {
+    let task = Task::from(task);
+    if task.action != Action::Call {
+        return parse_task_struct(ctx, task.action, task.func, task.ctx, task.input);
     }
-    match call.func {
-        Val::Unit(_) => parse_with_guard(ctx, call.input),
+    match task.func {
+        Val::Unit(_) => parse_with_guard(ctx, task.input),
         Val::Symbol(symbol) => match &*symbol {
-            CALL_FORWARD | CALL_REVERSE => {
-                let Val::Pair(pair) = call.input else {
-                    error!("{:?} should be a pair", call.input);
+            CALL | SOLVE => {
+                let Val::Pair(pair) = task.input else {
+                    error!("{:?} should be a pair", task.input);
                     return None;
                 };
                 let pair = Pair::from(pair);
-                parse_call_struct(ctx, &*symbol == CALL_REVERSE, pair.first, call.ctx, pair.second)
+                let action = if &*symbol == SOLVE { Action::Solve } else { Action::Call };
+                parse_task_struct(ctx, action, pair.first, task.ctx, pair.second)
             }
             s => {
-                error!("{s} should be one of {CALL_FORWARD} or {CALL_REVERSE}");
+                error!("{s} should be one of {CALL} or {SOLVE}");
                 None
             }
         },
-        func => parse_call_struct(ctx, false, func, call.ctx, call.input),
+        func => parse_task_struct(ctx, Action::Call, func, task.ctx, task.input),
     }
 }
 
-fn parse_call_struct(
-    c: PatternCtx, reverse: bool, func: Val, ctx: Val, input: Val,
+fn parse_task_struct(
+    c: PatternCtx, action: Action, func: Val, ctx: Val, input: Val,
 ) -> Option<Pattern> {
     let func = parse_pattern(c, func)?;
     let ctx = parse_pattern(c, ctx)?;
     let input = parse_pattern(c, input)?;
-    Some(Pattern::Call(Box::new(Call::new(reverse, func, ctx, input))))
+    Some(Pattern::Task(Box::new(Task { action, func, ctx, input })))
 }
 
 fn parse_list(ctx: PatternCtx, list: ListVal) -> Option<Pattern> {
@@ -134,7 +136,7 @@ pub(in crate::prelude) fn match_pattern(pattern: &Pattern, val: &Val) -> bool {
         Pattern::Any(binding) => match_any(binding, val),
         Pattern::Val(expected) => match_val(expected, val),
         Pattern::Pair(pair) => match_pair(pair, val),
-        Pattern::Call(call) => match_call(call, val),
+        Pattern::Task(task) => match_task(task, val),
         Pattern::List(list) => match_list(list, val),
         Pattern::Map(map) => match_map(map, val),
     }
@@ -158,9 +160,9 @@ fn match_pair(pattern: &Pair<Pattern, Pattern>, val: &Val) -> bool {
     first && second
 }
 
-fn match_call(pattern: &Call<Pattern, Pattern, Pattern>, val: &Val) -> bool {
-    let Val::Call(val) = val else {
-        error!("{val:?} should be a call");
+fn match_task(pattern: &Task<Pattern, Pattern, Pattern>, val: &Val) -> bool {
+    let Val::Task(val) = val else {
+        error!("{val:?} should be a task");
         return false;
     };
     let func = match_pattern(&pattern.func, &val.func);
@@ -197,7 +199,7 @@ pub(in crate::prelude) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: V
         Pattern::Any(binding) => assign_any(ctx, binding, val),
         Pattern::Val(expected) => assign_val(ctx, expected, val),
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
-        Pattern::Call(call) => assign_call(ctx, *call, val),
+        Pattern::Task(task) => assign_task(ctx, *task, val),
         Pattern::List(list) => assign_list(ctx, list, val),
         Pattern::Map(map) => assign_map(ctx, map, val),
     }
@@ -228,20 +230,20 @@ fn assign_pair(ctx: &mut Ctx, pattern: Pair<Pattern, Pattern>, val: Val) -> Val 
     Val::Pair(Pair::new(first, second).into())
 }
 
-fn assign_call(c: &mut Ctx, pattern: Call<Pattern, Pattern, Pattern>, val: Val) -> Val {
-    let Val::Call(val) = val else {
-        error!("{val:?} should be a call");
+fn assign_task(c: &mut Ctx, pattern: Task<Pattern, Pattern, Pattern>, val: Val) -> Val {
+    let Val::Task(val) = val else {
+        error!("{val:?} should be a task");
         return Val::default();
     };
-    if pattern.reverse != val.reverse {
-        error!("reverse should be equal");
+    if pattern.action != val.action {
+        error!("action should be equal");
         return Val::default();
     }
-    let val = Call::from(val);
+    let val = Task::from(val);
     let func = assign_pattern(c, pattern.func, val.func);
     let ctx = assign_pattern(c, pattern.ctx, val.ctx);
     let input = assign_pattern(c, pattern.input, val.input);
-    Val::Call(Call::new(val.reverse, func, ctx, input).into())
+    Val::Task(Task { action: val.action, func, ctx, input }.into())
 }
 
 fn assign_list(ctx: &mut Ctx, pattern: List<Pattern>, val: Val) -> Val {

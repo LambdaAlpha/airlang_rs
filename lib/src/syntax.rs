@@ -54,11 +54,11 @@ pub(crate) const FALSE: &str = "false";
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
+pub(crate) const CALL: &str = "call";
+pub(crate) const SOLVE: &str = "solve";
 
 pub(crate) const PAIR: &str = ":";
-pub(crate) const CALL_FORWARD: &str = ";";
-pub(crate) const CALL_REVERSE: &str = "!";
-pub(crate) const CALL_CTX: &str = "|";
+pub(crate) const CTX: &str = "|";
 
 pub(crate) const QUOTE: char = '`';
 
@@ -79,7 +79,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn ambiguous(s: &str) -> bool {
-    matches!(s, UNIT | TRUE | FALSE | PAIR | CALL_FORWARD | CALL_REVERSE | CALL_CTX)
+    matches!(s, UNIT | TRUE | FALSE | PAIR | CTX)
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq)]

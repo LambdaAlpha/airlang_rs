@@ -10,7 +10,7 @@ _ do [
         b = atom | list.get i,
         i = (4 + (_ any integer) % 4) % 4,
         c = composite | list.get i,
-        a = _ call.apply c ';' a : b,
+        a = _ task.apply _ form@ a b c,
     ] : (_ any bit) ? [
         i = 3 + (_ any integer) % 4,
         b = atom | list.get i,

@@ -1,0 +1,231 @@
+infix
+-----
+a b c
+=====
+omit left
+-----
+_ a b
+=====
+omit right
+-----
+a b _
+=====
+omit both
+-----
+_ a _
+=====
+< omit none
+-----
+<(a b c d e)
+=====
+< omit none left pair
+-----
+<(a : c d e)
+=====
+< omit none right pair
+-----
+<(a b c : e)
+=====
+< left omit left
+-----
+<(_ a b c d)
+=====
+< left omit left pair
+-----
+<(_ a b : d)
+=====
+< left omit right
+-----
+<(a b _ c d)
+=====
+< left omit right pair
+-----
+<(a b _ : d)
+=====
+< left omit both
+-----
+<(_ a _ b c)
+=====
+< left omit both pair
+-----
+<(_ a _ : c)
+=====
+< right omit right
+-----
+<(a b c d _)
+=====
+< right omit right pair
+-----
+<(a : c d _)
+=====
+< left omit left right omit right
+-----
+<(_ a b c _)
+=====
+< both omit right
+-----
+<(a b _ c _)
+=====
+< omit all
+-----
+<(_ a _ b _)
+=====
+> omit none
+-----
+>(a b c d e)
+=====
+> omit none left pair
+-----
+>(a : c d e)
+=====
+> omit none right pair
+-----
+>(a b c : e)
+=====
+> left omit left
+-----
+>(_ a b c d)
+=====
+> left omit left pair
+-----
+>(_ a b : d)
+=====
+> right omit left
+-----
+>(a b _ c d)
+=====
+> right omit left pair
+-----
+>(a : _ c d)
+=====
+> right omit right
+-----
+>(a b c d _)
+=====
+> right omit right pair
+-----
+>(a : c d _)
+=====
+> right omit both
+-----
+>(a b _ c _)
+=====
+> right omit both pair
+-----
+>(a : _ c _)
+=====
+> left omit left right omit right
+-----
+>(_ a b c _)
+=====
+> both omit left
+-----
+>(_ a _ b c)
+=====
+> omit all
+-----
+>(_ a _ b _)
+=====
+ctx
+-----
+a | b c
+=====
+ctx input pair
+-----
+a | b c : d
+=====
+ctx infix
+-----
+a | b c d e
+=====
+ctx omit left
+-----
+a | b _ c d
+=====
+ctx omit right
+-----
+a | b c d _
+=====
+ctx omit both
+-----
+a | b _ c _
+=====
+< infix ctx
+-----
+<(a b c | d e)
+=====
+> infix ctx
+-----
+>(a b c | d e)
+=====
+< omit left ctx
+-----
+<(_ a b | c d)
+=====
+> omit left ctx
+-----
+>(_ a b | c d)
+=====
+omit right ctx
+-----
+<(a b _ | c d)
+=====
+omit both ctx
+-----
+<(_ a _ | c d)
+=====
+call()
+-----
+call(a b c d e)
+=====
+call() pair
+-----
+call(a : c d e)
+=====
+call() ctx
+-----
+call(a | b c)
+=====
+solve() omit left
+-----
+solve(_ a b)
+=====
+solve() omit right
+-----
+solve(a b _)
+=====
+solve() omit both
+-----
+solve(_ a _)
+=====
+solve()
+-----
+solve(a b c d e)
+=====
+solve() pair
+-----
+solve(a : c d e)
+=====
+solve() ctx
+-----
+solve(a | b c)
+=====
+non-atomic func
+-----
+_ [a, b] c
+=====
+non-atomic input
+-----
+_ a [b, c]
+=====
+list item
+-----
+[_ a b]
+=====
+map key
+-----
+{(_ a b) : c}
+=====
+map value
+-----
+{a : _ b c}

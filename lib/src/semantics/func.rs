@@ -37,10 +37,10 @@ use crate::semantics::core::Eval;
 use crate::type_::Symbol;
 
 pub(crate) trait FuncSetup {
-    fn forward_ctx(&self) -> Option<&FuncVal>;
-    fn forward_input(&self) -> Option<&FuncVal>;
-    fn reverse_ctx(&self) -> Option<&FuncVal>;
-    fn reverse_input(&self) -> Option<&FuncVal>;
+    fn call_ctx(&self) -> Option<&FuncVal>;
+    fn call_input(&self) -> Option<&FuncVal>;
+    fn solve_ctx(&self) -> Option<&FuncVal>;
+    fn solve_input(&self) -> Option<&FuncVal>;
 }
 
 pub fn default_setup() -> FuncVal {

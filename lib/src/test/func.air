@@ -2,7 +2,7 @@ recursive call
 -----
 _ do [
     f = _ function {
-        forward_setup : eval@,
+        call_setup : eval@,
         code : (._ : .i) : .i,
     },
     _ f _ not true
@@ -14,7 +14,7 @@ call external func
 -----
 _ do [
     f = _ function {
-        forward_setup : eval@,
+        call_setup : eval@,
         code : (._ : .i) : _ not .i
     },
     _ f _ not true
@@ -26,7 +26,7 @@ call internal func
 -----
 _ do [
     f = _ function {
-        forward_setup : eval@,
+        call_setup : eval@,
         code : (._ : .i) : _ .not .i,
         context : _ context {variables :  {not : not}},
     },
@@ -39,7 +39,7 @@ call rename
 -----
 _ do [
     f = _ function {
-        forward_setup : eval@,
+        call_setup : eval@,
         code : (._ : .a) : _ .n .a,
         context : _ context {variables :  {n : not}},
     },
@@ -255,7 +255,7 @@ ctx explicit
 _ do [
     a = 1 : 2,
     f = _ function {
-        forward_setup : _ mode {pair : {symbol : ..} : eval@},
+        call_setup : _ mode {pair : {symbol : ..} : eval@},
         code : (.p : .i) : .p | pair.set_first .i,
     },
     a | f 3,
@@ -294,8 +294,8 @@ _ do [
     m = _ mode {pair : eval@ : .},
     repr = _ form. {
         code : (.ctx : .in) : .in,
-        forward_setup : @m : @m,
-        reverse_setup : @m : @m,
+        call_setup : @m : @m,
+        solve_setup : @m : @m,
         context_access : constant,
         cell : true,
     },
@@ -329,60 +329,60 @@ _ do [f = _ function {}, f | function.context_access .]
 -----
 mutable
 =====
-forward setup primitive
+call setup primitive
 -----
-eval@ == not | function.forward_setup .
------
-true
-=====
-forward setup mode
------
-. == eval@ | function.forward_setup .
+eval@ == not | function.call_setup .
 -----
 true
 =====
-forward setup 1
+call setup mode
+-----
+. == eval@ | function.call_setup .
+-----
+true
+=====
+call setup 1
 -----
 _ do [
     f = _ function {
-        forward_setup : _ mode {pair : eval@ : form.},
+        call_setup : _ mode {pair : eval@ : form.},
     },
-    p1 = f | function.forward_setup .,
+    p1 = f | function.call_setup .,
     p2 = _ mode {pair : eval@ : form.},
     p1 == p2
 ]
 -----
 true
 =====
-forward setup 2
+call setup 2
 -----
 _ do [
     f = _ function {
-        forward_setup : _ mode {list : [eval@, form., .] : form.},
+        call_setup : _ mode {list : [eval@, form., .] : form.},
     },
-    p1 = f | function.forward_setup .,
+    p1 = f | function.call_setup .,
     p2 = _ mode {list : [eval@, form., .] : form.},
     p1 == p2
 ]
 -----
 true
 =====
-forward setup 3
+call setup 3
 -----
 _ do [
     f = _ function {
-        forward_setup : _ mode {map : {a : eval@, b : .} : . : form.},
+        call_setup : _ mode {map : {a : eval@, b : .} : . : form.},
     },
-    p1 = f | function.forward_setup .,
+    p1 = f | function.call_setup .,
     p2 = _ mode {map : {a : eval@, b : .} : . : form.},
     p1 == p2
 ]
 -----
 true
 =====
-reverse setup
+solve setup
 -----
-eval@ == not | function.reverse_setup .
+eval@ == not | function.solve_setup .
 -----
 true
 =====

@@ -390,29 +390,29 @@ _ do [
 -----
 [a : 1]
 =====
-mode primitive call id
+mode primitive task id
 -----
 _ do [
-    f = _ mode {call : ., list : form, primitive : true},
+    f = _ mode {task : ., list : form, primitive : true},
     _ f [_ .a #b]
 ]
 -----
 [_ .a #b]
 =====
-mode primitive call form
+mode primitive task form
 -----
 _ do [
     b = 1,
-    f = _ mode {call : form, list : form, symbol : .@, primitive : true},
+    f = _ mode {task : form, list : form, symbol : .@, primitive : true},
     _ f [_ .a b]
 ]
 -----
 [_ a 1]
 =====
-mode primitive call eval
+mode primitive task eval
 -----
 _ do [
-    f = _ mode {call : eval, list : form, primitive : true},
+    f = _ mode {task : eval, list : form, primitive : true},
     _ f [_ not true]
 ]
 -----
@@ -463,7 +463,7 @@ _ do [
 mode primitive multiple
 -----
 _ do [
-    f = _ mode {symbol : ., call : form, list : form, primitive : true},
+    f = _ mode {symbol : ., task : form, list : form, primitive : true},
     _ f [.a, _ .b .c]
 ]
 -----
@@ -518,10 +518,10 @@ _ do [
 -----
 a : b : _ 1 2
 =====
-mode call form
+mode task form
 -----
 _ do [
-    f = _ mode {call : {this : . : {}, that : . : {symbol : ..}} : . | eval@ eval@},
+    f = _ mode {task : {this : . : {}, that : . : {symbol : ..}} : . | eval@ eval@},
     [_ f _ this .a, _ f _ that .a, _ f _ .other _ not true]
 ]
 -----
@@ -536,11 +536,11 @@ _ do [
 -----
 false
 =====
-mode func setup forward
+mode func setup call
 -----
 _ do [
     m = _ mode @not,
-    f = _ function {forward_setup : #m, code : (._ : .i) : .i},
+    f = _ function {call_setup : #m, code : (._ : .i) : .i},
     _ f true
 ]
 -----

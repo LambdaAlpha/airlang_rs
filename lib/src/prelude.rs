@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use self::bit::BitPrelude;
 use self::byte::BytePrelude;
-use self::call::CallPrelude;
 use self::ctrl::CtrlPrelude;
 use self::ctx::CtxPrelude;
 use self::func::FuncPrelude;
@@ -20,6 +19,7 @@ use self::pair::PairPrelude;
 use self::solve::SolvePrelude;
 use self::symbol::SymbolPrelude;
 use self::syntax::SyntaxPrelude;
+use self::task::TaskPrelude;
 use self::text::TextPrelude;
 use self::unit::UnitPrelude;
 use self::value::ValuePrelude;
@@ -108,7 +108,7 @@ pub struct CorePrelude {
     pub number: NumberPrelude,
     pub byte: BytePrelude,
     pub pair: PairPrelude,
-    pub call: CallPrelude,
+    pub task: TaskPrelude,
     pub list: ListPrelude,
     pub map: MapPrelude,
     pub ctx: CtxPrelude,
@@ -131,7 +131,7 @@ impl Prelude for CorePrelude {
         self.number.put(ctx);
         self.byte.put(ctx);
         self.pair.put(ctx);
-        self.call.put(ctx);
+        self.task.put(ctx);
         self.list.put(ctx);
         self.map.put(ctx);
         self.ctx.put(ctx);
@@ -399,7 +399,7 @@ pub mod byte;
 
 pub mod pair;
 
-pub mod call;
+pub mod task;
 
 pub mod list;
 
