@@ -84,7 +84,7 @@ impl ParseMode<Val> for Mode {
             Val::Map(mut map) => {
                 let primitive = match map_remove(&mut map, PRIMITIVE) {
                     Val::Unit(_) => false,
-                    Val::Bit(b) => b.bool(),
+                    Val::Bit(b) => *b,
                     v => {
                         error!("primitive {v:?} should be a bit or a unit");
                         return None;

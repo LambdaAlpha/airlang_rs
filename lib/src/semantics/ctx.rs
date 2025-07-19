@@ -11,6 +11,8 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use std::ops::BitAnd;
 
+use derive_more::IsVariant;
+
 use crate::type_::Map;
 
 #[derive(Copy, Clone, Debug)]
@@ -28,7 +30,7 @@ pub(crate) struct PubCtx {
     pub(crate) variables: CtxMap,
 }
 
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, IsVariant)]
 pub enum CtxAccess {
     Free,
     Const,

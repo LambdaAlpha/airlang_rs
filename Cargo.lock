@@ -28,6 +28,7 @@ dependencies = [
  "airlang_dev",
  "const_format",
  "criterion",
+ "derive_more",
  "log",
  "num-bigint",
  "num-integer",
@@ -349,6 +350,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+ "unicode-xid",
 ]
 
 [[package]]

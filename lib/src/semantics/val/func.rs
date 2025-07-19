@@ -2,6 +2,8 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::hash::Hash;
 
+use derive_more::From;
+
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCellCompFunc;
@@ -29,8 +31,7 @@ use crate::type_::Symbol;
 use crate::type_::wrap::box_wrap;
 use crate::type_::wrap::rc_wrap;
 
-// todo impl derive from
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, From)]
 pub enum FuncVal {
     FreeCellPrim(FreeCellPrimFuncVal),
     FreeCellComp(FreeCellCompFuncVal),
@@ -305,78 +306,6 @@ impl FuncVal {
             FuncVal::MutStaticPrim(_) => CtxAccess::Mut,
             FuncVal::MutStaticComp(_) => CtxAccess::Mut,
         }
-    }
-}
-
-impl From<FreeCellPrimFuncVal> for FuncVal {
-    fn from(value: FreeCellPrimFuncVal) -> Self {
-        Self::FreeCellPrim(value)
-    }
-}
-
-impl From<FreeCellCompFuncVal> for FuncVal {
-    fn from(value: FreeCellCompFuncVal) -> Self {
-        Self::FreeCellComp(value)
-    }
-}
-
-impl From<FreeStaticPrimFuncVal> for FuncVal {
-    fn from(value: FreeStaticPrimFuncVal) -> Self {
-        Self::FreeStaticPrim(value)
-    }
-}
-
-impl From<FreeStaticCompFuncVal> for FuncVal {
-    fn from(value: FreeStaticCompFuncVal) -> Self {
-        Self::FreeStaticComp(value)
-    }
-}
-
-impl From<ConstCellPrimFuncVal> for FuncVal {
-    fn from(value: ConstCellPrimFuncVal) -> Self {
-        Self::ConstCellPrim(value)
-    }
-}
-
-impl From<ConstCellCompFuncVal> for FuncVal {
-    fn from(value: ConstCellCompFuncVal) -> Self {
-        Self::ConstCellComp(value)
-    }
-}
-
-impl From<ConstStaticPrimFuncVal> for FuncVal {
-    fn from(value: ConstStaticPrimFuncVal) -> Self {
-        Self::ConstStaticPrim(value)
-    }
-}
-
-impl From<ConstStaticCompFuncVal> for FuncVal {
-    fn from(value: ConstStaticCompFuncVal) -> Self {
-        Self::ConstStaticComp(value)
-    }
-}
-
-impl From<MutCellPrimFuncVal> for FuncVal {
-    fn from(value: MutCellPrimFuncVal) -> Self {
-        Self::MutCellPrim(value)
-    }
-}
-
-impl From<MutCellCompFuncVal> for FuncVal {
-    fn from(value: MutCellCompFuncVal) -> Self {
-        Self::MutCellComp(value)
-    }
-}
-
-impl From<MutStaticPrimFuncVal> for FuncVal {
-    fn from(value: MutStaticPrimFuncVal) -> Self {
-        Self::MutStaticPrim(value)
-    }
-}
-
-impl From<MutStaticCompFuncVal> for FuncVal {
-    fn from(value: MutStaticCompFuncVal) -> Self {
-        Self::MutStaticComp(value)
     }
 }
 

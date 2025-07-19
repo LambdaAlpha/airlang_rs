@@ -231,7 +231,7 @@ fn parse_ctx_access(access: &Val) -> Option<&str> {
 fn parse_cell(cell: Val) -> Option<bool> {
     match cell {
         Val::Unit(_) => Some(false),
-        Val::Bit(b) => Some(b.bool()),
+        Val::Bit(b) => Some(*b),
         v => {
             error!("cell {v:?} should be a bit or a unit");
             None

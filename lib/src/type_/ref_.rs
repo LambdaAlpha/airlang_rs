@@ -1,35 +1,19 @@
-use std::ops::Deref;
+use derive_more::Constructor;
+use derive_more::Deref;
 
 use crate::type_::either::Either;
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Constructor, Deref)]
 pub struct ConstRef<'a, T>(&'a mut T);
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Constructor, Deref)]
 pub struct DynRef<'a, T> {
+    #[deref]
     ref_: &'a mut T,
     const_: bool,
 }
 
-impl<'a, T> Deref for ConstRef<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &T {
-        self.0
-    }
-}
-
-impl<'a, T> Deref for DynRef<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &T {
-        self.ref_
-    }
-}
-
 impl<'a, T> ConstRef<'a, T> {
-    pub fn new(ref_: &'a mut T) -> Self {
-        ConstRef(ref_)
-    }
-
     pub(crate) fn unwrap(self) -> &'a mut T {
         self.0
     }
@@ -48,10 +32,6 @@ impl<'a, T> ConstRef<'a, T> {
 }
 
 impl<'a, T> DynRef<'a, T> {
-    pub fn new(ref_: &'a mut T, const_: bool) -> Self {
-        DynRef { ref_, const_ }
-    }
-
     pub fn new_mut(ref_: &'a mut T) -> Self {
         DynRef { ref_, const_: false }
     }

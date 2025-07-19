@@ -176,7 +176,7 @@ fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {
                 error!("input.second should exist");
                 return Val::default();
             };
-            Val::Bit(Bit::new(*v1 == *v2))
+            Val::Bit(Bit::from(*v1 == *v2))
         })
     })
 }

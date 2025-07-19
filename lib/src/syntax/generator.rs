@@ -2,6 +2,7 @@ use std::fmt::Write;
 use std::hash::Hash;
 
 use const_format::concatcp;
+use derive_more::IsVariant;
 use num_traits::Signed;
 
 use super::BYTE;
@@ -42,7 +43,7 @@ use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, IsVariant)]
 pub enum GenRepr<'a> {
     Unit(&'a Unit),
     Bit(&'a Bit),
@@ -146,7 +147,7 @@ impl Gen for &Unit {
 
 impl Gen for &Bit {
     fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        s.push_str(if self.bool() { TRUE } else { FALSE });
+        s.push_str(if **self { TRUE } else { FALSE });
     }
 }
 
@@ -548,11 +549,5 @@ fn scoped(ctx: GenCtx, s: &mut String, f: impl FnOnce(GenCtx, &mut String)) {
 fn indent(ctx: GenCtx, s: &mut String) {
     for _ in 0 .. ctx.indent {
         s.push_str(ctx.fmt.before_item);
-    }
-}
-
-impl<'a> GenRepr<'a> {
-    fn is_unit(&self) -> bool {
-        matches!(self, GenRepr::Unit(_))
     }
 }

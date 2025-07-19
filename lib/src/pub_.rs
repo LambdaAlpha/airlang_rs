@@ -2,6 +2,8 @@ pub use crate::prelude::initial_ctx;
 
 _____!();
 
+use derive_more::Constructor;
+
 use crate::prelude::Prelude;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
@@ -19,22 +21,17 @@ pub fn init_prelude(prelude: Box<dyn Prelude>) {
 }
 
 /// init thread local solver
-/// this method should be called before calling [`Air::interpret`]
 pub fn init_solver(solver: FuncVal) {
     set_solver(solver);
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Constructor)]
 pub struct Air {
     mode: Option<Mode>,
     ctx: Ctx,
 }
 
 impl Air {
-    pub fn new(mode: Option<Mode>, ctx: Ctx) -> Self {
-        Self { mode, ctx }
-    }
-
     pub fn interpret(&mut self, input: Val) -> Val {
         composite_call(&self.mode, &mut self.ctx, input)
     }

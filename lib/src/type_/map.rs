@@ -1,19 +1,17 @@
-use std::collections::hash_map::IntoIter;
 use std::collections::hash_map::IntoKeys;
 use std::collections::hash_map::IntoValues;
-use std::collections::hash_map::Iter;
-use std::collections::hash_map::IterMut;
-use std::fmt::Debug;
-use std::fmt::Formatter;
 use std::hash::Hash;
 use std::hash::Hasher;
-use std::ops::Deref;
-use std::ops::DerefMut;
 
+use derive_more::Deref;
+use derive_more::DerefMut;
+use derive_more::IntoIterator;
 use rustc_hash::FxHashMap;
 use rustc_hash::FxHasher;
 
-#[derive(Clone)]
+#[derive(Clone, IntoIterator, Deref, DerefMut, derive_more::Debug)]
+#[into_iterator(owned, ref, ref_mut)]
+#[debug("{_0:?}")]
 pub struct Map<K, V>(FxHashMap<K, V>);
 
 impl<K, V> Map<K, V> {
@@ -33,45 +31,6 @@ impl<K, V> Map<K, V> {
 impl<K: Eq + Hash, V> FromIterator<(K, V)> for Map<K, V> {
     fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
         Map(FxHashMap::from_iter(iter))
-    }
-}
-
-impl<K, V> IntoIterator for Map<K, V> {
-    type Item = (K, V);
-    type IntoIter = IntoIter<K, V>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
-
-impl<'a, K, V> IntoIterator for &'a Map<K, V> {
-    type Item = (&'a K, &'a V);
-    type IntoIter = Iter<'a, K, V>;
-    #[expect(clippy::into_iter_on_ref)]
-    fn into_iter(self) -> Self::IntoIter {
-        (&self.0).into_iter()
-    }
-}
-
-impl<'a, K, V> IntoIterator for &'a mut Map<K, V> {
-    type Item = (&'a K, &'a mut V);
-    type IntoIter = IterMut<'a, K, V>;
-    #[expect(clippy::into_iter_on_ref)]
-    fn into_iter(self) -> Self::IntoIter {
-        (&mut self.0).into_iter()
-    }
-}
-
-impl<K, V> Deref for Map<K, V> {
-    type Target = FxHashMap<K, V>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<K, V> DerefMut for Map<K, V> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 
@@ -101,11 +60,5 @@ impl<K: Hash, V: Hash> Hash for Map<K, V> {
 impl<K, V> Default for Map<K, V> {
     fn default() -> Self {
         Map(Default::default())
-    }
-}
-
-impl<K: Debug, V: Debug> Debug for Map<K, V> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Debug>::fmt(&self.0, f)
     }
 }

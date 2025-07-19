@@ -3,19 +3,22 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::mem::take;
 
+use derive_more::IsVariant;
+
 use super::CtxError;
 use crate::semantics::val::Val;
 use crate::type_::Map;
 use crate::type_::Symbol;
 use crate::type_::ref_::DynRef;
 
+// todo impl arena
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct CtxMap {
     map: Map<Symbol, CtxValue>,
 }
 
 // still -> (none <-> null) -> final
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, IsVariant)]
 pub enum Contract {
     #[default]
     None,

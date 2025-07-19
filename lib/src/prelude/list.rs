@@ -1,6 +1,7 @@
 use std::mem::swap;
 
 use log::error;
+use num_traits::ToPrimitive;
 
 use super::DynFn;
 use super::Prelude;

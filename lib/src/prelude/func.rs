@@ -182,7 +182,7 @@ fn fn_is_primitive(ctx: ConstRef<Val>, _input: Val) -> Val {
         return Val::default();
     };
     let is_primitive = func.is_primitive();
-    Val::Bit(Bit::new(is_primitive))
+    Val::Bit(Bit::from(is_primitive))
 }
 
 pub fn is_cell() -> ConstStaticPrimFuncVal {
@@ -195,7 +195,7 @@ fn fn_is_cell(ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    Val::Bit(Bit::new(func.is_cell()))
+    Val::Bit(Bit::from(func.is_cell()))
 }
 
 pub fn id() -> ConstStaticPrimFuncVal {

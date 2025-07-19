@@ -131,7 +131,7 @@ impl Arbitrary for Unit {
 
 impl Arbitrary for Bit {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        Bit::new(rng.random())
+        Bit::from(rng.random::<bool>())
     }
 }
 

@@ -27,6 +27,9 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::hash::Hash;
 
+use derive_more::From;
+use derive_more::IsVariant;
+
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
@@ -48,8 +51,7 @@ pub trait Type {
 // todo rename
 dyn_any_debug_clone_eq_hash!(pub ValExt : Type);
 
-// todo impl derive from
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, From, IsVariant)]
 pub enum Val {
     Unit(Unit),
     Bit(Bit),
@@ -87,33 +89,9 @@ pub(crate) const MAP: &str = "map";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 
-impl Val {
-    pub fn is_unit(&self) -> bool {
-        matches!(self, Val::Unit(_))
-    }
-}
-
 impl Default for Val {
     fn default() -> Self {
         Val::Unit(Unit)
-    }
-}
-
-impl From<Unit> for Val {
-    fn from(value: Unit) -> Self {
-        Val::Unit(value)
-    }
-}
-
-impl From<Bit> for Val {
-    fn from(value: Bit) -> Self {
-        Val::Bit(value)
-    }
-}
-
-impl From<Symbol> for Val {
-    fn from(value: Symbol) -> Self {
-        Val::Symbol(value)
     }
 }
 
@@ -123,21 +101,9 @@ impl From<Text> for Val {
     }
 }
 
-impl From<TextVal> for Val {
-    fn from(value: TextVal) -> Self {
-        Val::Text(value)
-    }
-}
-
 impl From<Int> for Val {
     fn from(value: Int) -> Self {
         Val::Int(IntVal::from(value))
-    }
-}
-
-impl From<IntVal> for Val {
-    fn from(value: IntVal) -> Self {
-        Val::Int(value)
     }
 }
 
@@ -147,21 +113,9 @@ impl From<Number> for Val {
     }
 }
 
-impl From<NumberVal> for Val {
-    fn from(value: NumberVal) -> Self {
-        Val::Number(value)
-    }
-}
-
 impl From<Byte> for Val {
     fn from(value: Byte) -> Self {
         Val::Byte(ByteVal::from(value))
-    }
-}
-
-impl From<ByteVal> for Val {
-    fn from(value: ByteVal) -> Self {
-        Val::Byte(value)
     }
 }
 
@@ -171,21 +125,9 @@ impl From<Pair<Val, Val>> for Val {
     }
 }
 
-impl From<PairVal> for Val {
-    fn from(value: PairVal) -> Self {
-        Val::Pair(value)
-    }
-}
-
 impl From<Task<Val, Val, Val>> for Val {
     fn from(value: Task<Val, Val, Val>) -> Self {
         Val::Task(TaskVal::from(value))
-    }
-}
-
-impl From<TaskVal> for Val {
-    fn from(value: TaskVal) -> Self {
-        Val::Task(value)
     }
 }
 
@@ -195,60 +137,41 @@ impl From<List<Val>> for Val {
     }
 }
 
-impl From<ListVal> for Val {
-    fn from(value: ListVal) -> Self {
-        Val::List(value)
-    }
-}
-
 impl From<Map<Val, Val>> for Val {
     fn from(value: Map<Val, Val>) -> Self {
         Val::Map(MapVal::from(value))
     }
 }
 
-impl From<MapVal> for Val {
-    fn from(value: MapVal) -> Self {
-        Val::Map(value)
-    }
+macro_rules! match_val {
+    ($self:ident, $name:ident => $body:expr) => {
+        match $self {
+            $crate::semantics::val::Val::Unit($name) => $body,
+            $crate::semantics::val::Val::Bit($name) => $body,
+            $crate::semantics::val::Val::Symbol($name) => $body,
+            $crate::semantics::val::Val::Text($name) => $body,
+            $crate::semantics::val::Val::Int($name) => $body,
+            $crate::semantics::val::Val::Number($name) => $body,
+            $crate::semantics::val::Val::Byte($name) => $body,
+            $crate::semantics::val::Val::Pair($name) => $body,
+            $crate::semantics::val::Val::Task($name) => $body,
+            $crate::semantics::val::Val::List($name) => $body,
+            $crate::semantics::val::Val::Map($name) => $body,
+            $crate::semantics::val::Val::Ctx($name) => $body,
+            $crate::semantics::val::Val::Func($name) => $body,
+            $crate::semantics::val::Val::Ext($name) => $body,
+        }
+    };
 }
 
-impl From<CtxVal> for Val {
-    fn from(value: CtxVal) -> Self {
-        Val::Ctx(value)
-    }
-}
-
-impl From<FuncVal> for Val {
-    fn from(value: FuncVal) -> Self {
-        Val::Func(value)
-    }
-}
-
-impl From<Box<dyn ValExt>> for Val {
-    fn from(value: Box<dyn ValExt>) -> Self {
-        Val::Ext(value)
-    }
-}
+// https://github.com/rust-lang/rust-clippy/issues/15316
+#[allow(clippy::useless_attribute)]
+#[expect(redundant_imports)]
+pub(crate) use match_val;
 
 impl Debug for Val {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Val::Unit(unit) => <_ as Debug>::fmt(unit, f),
-            Val::Bit(bool) => <_ as Debug>::fmt(bool, f),
-            Val::Symbol(symbol) => <_ as Debug>::fmt(symbol, f),
-            Val::Text(text) => <_ as Debug>::fmt(text, f),
-            Val::Int(int) => <_ as Debug>::fmt(int, f),
-            Val::Number(number) => <_ as Debug>::fmt(number, f),
-            Val::Byte(byte) => <_ as Debug>::fmt(byte, f),
-            Val::Pair(pair) => <_ as Debug>::fmt(pair, f),
-            Val::Task(task) => <_ as Debug>::fmt(task, f),
-            Val::List(list) => <_ as Debug>::fmt(list, f),
-            Val::Map(map) => <_ as Debug>::fmt(map, f),
-            Val::Ctx(ctx) => <_ as Debug>::fmt(ctx, f),
-            Val::Func(func) => <_ as Debug>::fmt(func, f),
-            Val::Ext(ext) => <_ as Debug>::fmt(ext, f),
-        }
+        match_val!(self, v => <_ as Debug>::fmt(v, f))
     }
 }
 

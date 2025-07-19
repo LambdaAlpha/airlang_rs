@@ -27,7 +27,7 @@ fn unit() -> Repr {
 }
 
 fn bit(b: bool) -> Repr {
-    Repr::Bit(Bit::new(b))
+    Repr::Bit(Bit::from(b))
 }
 
 fn symbol(s: &str) -> Repr {

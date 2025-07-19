@@ -3,6 +3,9 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::str::FromStr;
 
+use derive_more::From;
+use derive_more::IsVariant;
+
 use super::ParseError;
 use super::generate_pretty;
 use super::generator::GenRepr;
@@ -20,8 +23,7 @@ use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-// todo impl derive from
-#[derive(PartialEq, Eq, Clone, Hash)]
+#[derive(PartialEq, Eq, Clone, Hash, From, IsVariant)]
 pub enum Repr {
     Unit(Unit),
     Bit(Bit),
@@ -48,87 +50,15 @@ pub type ListRepr = List<Repr>;
 
 pub type MapRepr = Map<Repr, Repr>;
 
-impl Repr {
-    pub fn is_unit(&self) -> bool {
-        matches!(self, Repr::Unit(_))
-    }
-}
-
-impl From<Unit> for Repr {
-    fn from(u: Unit) -> Self {
-        Repr::Unit(u)
-    }
-}
-
-impl From<Bit> for Repr {
-    fn from(b: Bit) -> Self {
-        Repr::Bit(b)
-    }
-}
-
-impl From<Symbol> for Repr {
-    fn from(s: Symbol) -> Self {
-        Repr::Symbol(s)
-    }
-}
-
-impl From<Text> for Repr {
-    fn from(t: Text) -> Self {
-        Repr::Text(t)
-    }
-}
-
-impl From<Int> for Repr {
-    fn from(i: Int) -> Self {
-        Repr::Int(i)
-    }
-}
-
-impl From<Number> for Repr {
-    fn from(n: Number) -> Self {
-        Repr::Number(n)
-    }
-}
-
-impl From<Byte> for Repr {
-    fn from(b: Byte) -> Self {
-        Repr::Byte(b)
-    }
-}
-
 impl From<PairRepr> for Repr {
     fn from(p: PairRepr) -> Self {
         Repr::Pair(Box::new(p))
     }
 }
 
-impl From<Box<PairRepr>> for Repr {
-    fn from(p: Box<PairRepr>) -> Self {
-        Repr::Pair(p)
-    }
-}
-
 impl From<TaskRepr> for Repr {
     fn from(t: TaskRepr) -> Self {
         Repr::Task(Box::new(t))
-    }
-}
-
-impl From<Box<TaskRepr>> for Repr {
-    fn from(t: Box<TaskRepr>) -> Self {
-        Repr::Task(t)
-    }
-}
-
-impl From<ListRepr> for Repr {
-    fn from(l: ListRepr) -> Self {
-        Repr::List(l)
-    }
-}
-
-impl From<MapRepr> for Repr {
-    fn from(m: MapRepr) -> Self {
-        Repr::Map(m)
     }
 }
 

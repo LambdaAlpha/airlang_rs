@@ -9,6 +9,8 @@ pub use self::parser::parse;
 
 _____!();
 
+use derive_more::IsVariant;
+
 use self::generator::COMPACT_FMT;
 use self::generator::PRETTY_FMT;
 use self::generator::SYMBOL_FMT;
@@ -82,7 +84,7 @@ pub(crate) fn ambiguous(s: &str) -> bool {
     matches!(s, UNIT | TRUE | FALSE | PAIR | CTX)
 }
 
-#[derive(Default, Copy, Clone, PartialEq, Eq)]
+#[derive(Default, Copy, Clone, PartialEq, Eq, IsVariant)]
 enum Direction {
     Left,
     #[default]

@@ -1,12 +1,12 @@
 use std::borrow::Borrow;
-use std::fmt::Debug;
-use std::fmt::Formatter;
-use std::ops::Deref;
 
+use derive_more::Deref;
 use string_cache::Atom;
 use string_cache::EmptyStaticAtomSet;
 
-#[derive(Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash, Deref, derive_more::Debug)]
+#[deref(forward)]
+#[debug("'{_0}'")]
 pub struct Symbol(Atom<EmptyStaticAtomSet>);
 
 impl Symbol {
@@ -26,13 +26,6 @@ impl Symbol {
     }
 }
 
-impl Deref for Symbol {
-    type Target = str;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 #[expect(clippy::to_string_trait_impl)]
 impl ToString for Symbol {
     fn to_string(&self) -> String {
@@ -49,11 +42,5 @@ impl From<Symbol> for String {
 impl Borrow<str> for Symbol {
     fn borrow(&self) -> &str {
         self
-    }
-}
-
-impl Debug for Symbol {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "'{}'", &self.0)
     }
 }

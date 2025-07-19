@@ -1,86 +1,26 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
 use std::ops::Add;
 use std::ops::Div;
 use std::ops::Mul;
 use std::ops::Rem;
 use std::ops::Sub;
 
+use derive_more::Deref;
+use derive_more::DerefMut;
+use derive_more::From;
 use num_bigint::BigInt;
 use num_integer::Integer;
-use num_traits::Signed;
-use num_traits::ToPrimitive;
 use num_traits::Zero;
 
 use crate::type_::bit::Bit;
 
-#[derive(Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash, derive_more::Debug, From, Deref, DerefMut)]
+#[from(forward)]
+#[debug("{_0:?}")]
 pub struct Int(BigInt);
 
-#[expect(dead_code)]
 impl Int {
     pub(crate) fn new(int: BigInt) -> Self {
         Self(int)
-    }
-
-    pub(crate) fn is_zero(&self) -> bool {
-        self.0.is_zero()
-    }
-
-    pub(crate) fn is_positive(&self) -> bool {
-        self.0.is_positive()
-    }
-
-    pub(crate) fn is_negative(&self) -> bool {
-        self.0.is_negative()
-    }
-
-    pub(crate) fn to_i8(&self) -> Option<i8> {
-        self.0.to_i8()
-    }
-
-    pub(crate) fn to_i16(&self) -> Option<i16> {
-        self.0.to_i16()
-    }
-
-    pub(crate) fn to_i32(&self) -> Option<i32> {
-        self.0.to_i32()
-    }
-
-    pub(crate) fn to_i64(&self) -> Option<i64> {
-        self.0.to_i64()
-    }
-
-    pub(crate) fn to_i128(&self) -> Option<i128> {
-        self.0.to_i128()
-    }
-
-    pub(crate) fn to_isize(&self) -> Option<isize> {
-        self.0.to_isize()
-    }
-
-    pub(crate) fn to_u8(&self) -> Option<u8> {
-        self.0.to_u8()
-    }
-
-    pub(crate) fn to_u16(&self) -> Option<u16> {
-        self.0.to_u16()
-    }
-
-    pub(crate) fn to_u32(&self) -> Option<u32> {
-        self.0.to_u32()
-    }
-
-    pub(crate) fn to_u64(&self) -> Option<u64> {
-        self.0.to_u64()
-    }
-
-    pub(crate) fn to_u128(&self) -> Option<u128> {
-        self.0.to_u128()
-    }
-
-    pub(crate) fn to_usize(&self) -> Option<usize> {
-        self.0.to_usize()
     }
 
     pub(crate) fn add(self, other: Int) -> Int {
@@ -112,109 +52,23 @@ impl Int {
         }
     }
 
-    pub(crate) fn increase(&mut self) {
-        self.0 += 1;
-    }
-
-    pub(crate) fn decrease(&mut self) {
-        self.0 -= 1;
-    }
-
     pub(crate) fn less_than(&self, other: &Int) -> Bit {
-        Bit::new(self.0.lt(&other.0))
+        Bit::from(self.0.lt(&other.0))
     }
 
     pub(crate) fn less_equal(&self, other: &Int) -> Bit {
-        Bit::new(self.0.le(&other.0))
+        Bit::from(self.0.le(&other.0))
     }
 
     pub(crate) fn greater_than(&self, other: &Int) -> Bit {
-        Bit::new(self.0.gt(&other.0))
+        Bit::from(self.0.gt(&other.0))
     }
 
     pub(crate) fn greater_equal(&self, other: &Int) -> Bit {
-        Bit::new(self.0.ge(&other.0))
+        Bit::from(self.0.ge(&other.0))
     }
 
     pub(crate) fn less_greater(&self, other: &Int) -> Bit {
-        Bit::new(self.0.ne(&other.0))
-    }
-}
-
-impl Debug for Int {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        <_ as Debug>::fmt(&self.0, f)
-    }
-}
-
-impl From<i8> for Int {
-    fn from(value: i8) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<i16> for Int {
-    fn from(value: i16) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<i32> for Int {
-    fn from(value: i32) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<i64> for Int {
-    fn from(value: i64) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<i128> for Int {
-    fn from(value: i128) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<isize> for Int {
-    fn from(value: isize) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<u8> for Int {
-    fn from(value: u8) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<u16> for Int {
-    fn from(value: u16) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<u32> for Int {
-    fn from(value: u32) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<u64> for Int {
-    fn from(value: u64) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<u128> for Int {
-    fn from(value: u128) -> Self {
-        Int(value.into())
-    }
-}
-
-impl From<usize> for Int {
-    fn from(value: usize) -> Self {
-        Int(value.into())
+        Bit::from(self.0.ne(&other.0))
     }
 }

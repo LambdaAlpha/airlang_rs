@@ -1,4 +1,6 @@
 use log::error;
+use num_traits::Signed;
+use num_traits::ToPrimitive;
 
 use super::DynFn;
 use super::FuncMode;
@@ -102,7 +104,7 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let branches = Pair::from(branches);
-    let branch = if b.bool() { branches.first } else { branches.second };
+    let branch = if *b { branches.first } else { branches.second };
     eval_block(ctx, branch).0
 }
 
@@ -168,7 +170,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
                 error!("condition {cond:?} should be a bit");
                 return Val::default();
             };
-            if !b.bool() {
+            if !*b {
                 break;
             }
             let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
@@ -188,7 +190,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
                 error!("condition {cond:?} should be a bit");
                 return Val::default();
             };
-            if !b.bool() {
+            if !*b {
                 break;
             }
             Eval.mut_static_call(ctx, body.clone());
@@ -330,7 +332,7 @@ fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFl
                     error!("condition {condition:?} should be a bit");
                     return (Val::default(), CtrlFlow::Error);
                 };
-                if condition.bool() {
+                if *condition {
                     let output = Eval.mut_static_call(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }

@@ -161,7 +161,7 @@ fn fn_is_solve(ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Task(task) = &*ctx else {
         return Val::default();
     };
-    Val::Bit(Bit::new(matches!(task.action, Action::Solve)))
+    Val::Bit(Bit::from(matches!(task.action, Action::Solve)))
 }
 
 pub fn func() -> ConstStaticPrimFuncVal {

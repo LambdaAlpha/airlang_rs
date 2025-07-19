@@ -1,11 +1,7 @@
-#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
+use derive_more::Constructor;
+
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash, Constructor)]
 pub struct Change<F, T> {
     pub from: F,
     pub to: T,
-}
-
-impl<F, T> Change<F, T> {
-    pub fn new(from: F, to: T) -> Change<F, T> {
-        Change { from, to }
-    }
 }

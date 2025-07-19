@@ -1,11 +1,7 @@
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
+use derive_more::Constructor;
+
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash, Constructor)]
 pub struct Pair<A, B> {
     pub first: A,
     pub second: B,
-}
-
-impl<A, B> Pair<A, B> {
-    pub fn new(first: A, second: B) -> Self {
-        Self { first, second }
-    }
 }

@@ -384,12 +384,12 @@ fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T
                     }
                     _ => {
                         let right = next_token.by_ref().parse_next(i)?;
-                        task(ctx, T::from(s), left_right(left, right))
+                        infix(ctx, left, T::from(s), right)
                     }
                 },
                 Token::Default(func) => {
                     let right = next_token.by_ref().parse_next(i)?;
-                    task(ctx, func, left_right(left, right))
+                    infix(ctx, left, func, right)
                 }
             };
             left = Token::Default(repr);
@@ -424,16 +424,21 @@ fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<
                 }
                 _ => {
                     let right = tail.parse_next(i)?;
-                    task(ctx, T::from(s), left_right(left, right))
+                    infix(ctx, left, T::from(s), right)
                 }
             },
             Token::Default(func) => {
                 let right = tail.parse_next(i)?;
-                task(ctx, func, left_right(left, right))
+                infix(ctx, left, func, right)
             }
         };
         Ok(Token::Default(repr))
     }
+}
+
+fn infix<T: ParseRepr>(ctx: ParseCtx, left: Token<T>, func: T, right: Token<T>) -> T {
+    let input = left_right(left, right);
+    T::from(Task { action: ctx.action, func, ctx: T::from(Unit), input })
 }
 
 fn left_right<T: ParseRepr>(left: Token<T>, right: Token<T>) -> T {
@@ -455,10 +460,6 @@ fn left_right<T: ParseRepr>(left: Token<T>, right: Token<T>) -> T {
 
 fn compose<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     compose_token(ctx).map(Token::into_repr)
-}
-
-fn task<T: ParseRepr>(ctx: ParseCtx, func: T, input: T) -> T {
-    T::from(Task { action: ctx.action, func, ctx: T::from(Unit), input })
 }
 
 fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>
@@ -648,7 +649,7 @@ fn raw_text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
         .parse_next(i)
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone)]
 enum StrFragment<'a> {
     Str(&'a str),
     Char(char),

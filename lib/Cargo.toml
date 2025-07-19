@@ -41,6 +41,27 @@ version = "0.9"
 default-features = false
 features = ["small_rng", "alloc", "os_rng"]
 
+[dependencies.derive_more]
+version = "2"
+default-features = false
+features = [
+    "std",
+    "from",
+    "try_from",
+    "into",
+    "try_into",
+    "as_ref",
+    "deref",
+    "deref_mut",
+    "is_variant",
+    "unwrap",
+    "try_unwrap",
+    "constructor",
+    "into_iterator",
+    "debug",
+    "display",
+]
+
 [dev-dependencies]
 criterion = "0.6"
 

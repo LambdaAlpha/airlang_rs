@@ -210,7 +210,7 @@ fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
     };
-    Val::Bit(Bit::new(map.contains_key(&input)))
+    Val::Bit(Bit::from(map.contains_key(&input)))
 }
 
 pub fn contains_all() -> ConstStaticPrimFuncVal {
@@ -229,7 +229,7 @@ fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
     };
     let keys = List::from(keys);
     let b = keys.into_iter().all(|k| map.contains_key(&k));
-    Val::Bit(Bit::new(b))
+    Val::Bit(Bit::from(b))
 }
 
 pub fn contains_any() -> ConstStaticPrimFuncVal {
@@ -248,7 +248,7 @@ fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
     };
     let keys = List::from(keys);
     let b = keys.into_iter().any(|k| map.contains_key(&k));
-    Val::Bit(Bit::new(b))
+    Val::Bit(Bit::from(b))
 }
 
 pub fn set() -> MutStaticPrimFuncVal {
@@ -421,7 +421,7 @@ fn fn_new_multiset(input: Val) -> Val {
     for item in list {
         let count = multiset.entry(item).or_insert(Val::Int(Int::from(0).into()));
         let Val::Int(count) = count else { unreachable!() };
-        count.increase();
+        ***count += 1;
     }
     Val::Map(multiset.into())
 }

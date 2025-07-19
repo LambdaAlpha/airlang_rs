@@ -256,7 +256,7 @@ fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("variable {s:?} should exist");
         return Val::default();
     };
-    Val::Bit(Bit::new(locked))
+    Val::Bit(Bit::from(locked))
 }
 
 pub fn is_null() -> ConstStaticPrimFuncVal {
@@ -278,7 +278,7 @@ fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    Val::Bit(Bit::new(ctx.variables().is_null(s)))
+    Val::Bit(Bit::from(ctx.variables().is_null(s)))
 }
 
 pub fn is_const() -> MutStaticPrimFuncVal {
