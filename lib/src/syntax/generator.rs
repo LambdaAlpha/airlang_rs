@@ -8,7 +8,6 @@ use num_traits::Signed;
 use super::BYTE;
 use super::CALL;
 use super::COMMENT;
-use super::CTX;
 use super::Direction;
 use super::FALSE;
 use super::LEFT;
@@ -24,6 +23,7 @@ use super::SCOPE_RIGHT;
 use super::SEPARATOR;
 use super::SOLVE;
 use super::SYMBOL_QUOTE;
+use super::TASK;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
@@ -425,7 +425,7 @@ fn gen_task_ctx(mut c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, inpu
 fn gen_task_ctx_left(c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, input: GenRepr) {
     ctx.gen_(c, s);
     s.push(' ');
-    s.push_str(CTX);
+    s.push_str(TASK);
     s.push(' ');
     gen_scope_if_need(c, s, func);
     s.push(' ');
@@ -435,7 +435,7 @@ fn gen_task_ctx_left(c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, inp
 fn gen_task_ctx_right(c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, input: GenRepr) {
     gen_scope_if_need(c, s, ctx);
     s.push(' ');
-    s.push_str(CTX);
+    s.push_str(TASK);
     s.push(' ');
     gen_scope_if_need(c, s, func);
     s.push(' ');

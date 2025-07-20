@@ -1,6 +1,6 @@
 length push
 -----
-_ do [t = _ any text, l = t | text.length ., t | text.push "a", (t | text.length .) == l + 1]
+_ do [t = _ any text, l = t ; text.length ., t ; text.push "a", (t ; text.length .) == l + 1]
 -----
 true
 =====
@@ -8,11 +8,11 @@ length join
 -----
 _ do [
     a = _ any text,
-    la = a | text.length .,
+    la = a ; text.length .,
     b = _ any text,
-    lb = b | text.length .,
+    lb = b ; text.length .,
     ab = . text.join [#a, #b],
-    lab = ab | text.length .,
+    lab = ab ; text.length .,
     lab == la + lb
 ]
 -----
@@ -20,25 +20,25 @@ true
 =====
 length empty
 -----
-_ do [t = "", t | text.length .]
+_ do [t = "", t ; text.length .]
 -----
 0
 =====
 length else
 -----
-_ do [t = "1", t | text.length .]
+_ do [t = "1", t ; text.length .]
 -----
 1
 =====
 push join
 -----
-_ do [a = _ any text, b = _ any text, t = a, t | text.push b, t == . text.join [#a, #b]]
+_ do [a = _ any text, b = _ any text, t = a, t ; text.push b, t == . text.join [#a, #b]]
 -----
 true
 =====
 push
 -----
-_ do [a = "hello", b = "world", a | text.push " ", a | text.push #b, #a]
+_ do [a = "hello", b = "world", a ; text.push " ", a ; text.push #b, #a]
 -----
 "hello world"
 =====

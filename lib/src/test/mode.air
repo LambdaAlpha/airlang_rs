@@ -521,7 +521,7 @@ a : b : _ 1 2
 mode task form
 -----
 _ do [
-    f = _ mode {task : {this : . : {}, that : . : {symbol : ..}} : . | eval@ eval@},
+    f = _ mode {task : {this : . : {}, that : . : {symbol : ..}} : . ; eval@ eval@},
     [_ f _ this .a, _ f _ that .a, _ f _ .other _ not true]
 ]
 -----
@@ -548,18 +548,18 @@ false
 =====
 mode access free
 -----
-id | function.context_access .
+id ; function.context_access .
 -----
 free
 =====
 mode access const
 -----
-_ do [f = _ mode @read, f | function.context_access .]
+_ do [f = _ mode @read, f ; function.context_access .]
 -----
 constant
 =====
 mode access mutable
 -----
-eval@ | function.context_access .
+eval@ ; function.context_access .
 -----
 mutable

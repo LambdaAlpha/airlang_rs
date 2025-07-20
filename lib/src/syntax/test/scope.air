@@ -72,4 +72,4 @@ solve(a b call(c d e))
 =====
 ctx solve call
 -----
-solve(a | f call(b c d))
+solve(a ; f call(b c d))

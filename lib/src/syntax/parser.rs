@@ -40,7 +40,6 @@ use winnow::token::take_while;
 use super::BYTE;
 use super::CALL;
 use super::COMMENT;
-use super::CTX;
 use super::Direction;
 use super::FALSE;
 use super::INT;
@@ -59,6 +58,7 @@ use super::SEPARATOR;
 use super::SOLVE;
 use super::SPACE;
 use super::SYMBOL_QUOTE;
+use super::TASK;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
@@ -372,7 +372,7 @@ fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T
                         let right = next_token.by_ref().parse_next(i)?;
                         T::from(Pair::new(left.into_repr(), right.into_repr()))
                     }
-                    CTX => {
+                    TASK => {
                         let func = next_token.by_ref().parse_next(i)?;
                         let input = next_token.by_ref().parse_next(i)?;
                         T::from(Task {
@@ -412,7 +412,7 @@ fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<
                     let right = tail.parse_next(i)?;
                     T::from(Pair::new(left.into_repr(), right.into_repr()))
                 }
-                CTX => {
+                TASK => {
                     let func = next_token.by_ref().parse_next(i)?;
                     let input = tail.parse_next(i)?;
                     T::from(Task {

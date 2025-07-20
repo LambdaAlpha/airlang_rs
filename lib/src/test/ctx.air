@@ -27,7 +27,7 @@ read still
 _ do [
     v = _ any .,
     a = _ context {variables : {(b . still) : v}},
-    v == a | read b : .
+    v == a ; read b : .
 ]
 -----
 true
@@ -37,7 +37,7 @@ read static
 _ do [
     v = _ any .,
     a = _ context {variables : {(b . static) : v}},
-    v == a | read b : .
+    v == a ; read b : .
 ]
 -----
 true
@@ -47,7 +47,7 @@ read const
 _ do [
     v = _ any .,
     a = _ context {variables : {(b . constant) : v}},
-    v == a | read b : .
+    v == a ; read b : .
 ]
 -----
 true
@@ -75,7 +75,7 @@ move still
 _ do [
     v = _ any .,
     a = _ context {variables : {(b . still) : v}},
-    (v == a | move b : .) and (a | is_null b : .)
+    (v == a ; move b : .) and (a ; is_null b : .)
 ]
 -----
 true
@@ -85,7 +85,7 @@ move static
 _ do [
     v = _ any .,
     a = _ context {variables : {(b . static) : v}},
-    (. == a | move b : .) and (_ not a | is_null b : .)
+    (. == a ; move b : .) and (_ not a ; is_null b : .)
 ]
 -----
 true
@@ -95,7 +95,7 @@ move const
 _ do [
     v = _ any .,
     a = _ context {variables : {(b . constant) : v}},
-    (. == a | move b : .) and (_ not a | is_null b : .)
+    (. == a ; move b : .) and (_ not a ; is_null b : .)
 ]
 -----
 true
@@ -138,7 +138,7 @@ _ do [.@.a = 1, @.a]
 =====
 = special key 2
 -----
-_ do [.@.p = 1 : 2, ..p | pair.first .]
+_ do [.@.p = 1 : 2, ..p ; pair.first .]
 -----
 1
 =====
@@ -264,13 +264,13 @@ true
 =====
 none mutate
 -----
-_ do [a = 1 : 2, a | pair.set_first 3, a]
+_ do [a = 1 : 2, a ; pair.set_first 3, a]
 -----
 3 : 2
 =====
 final mutate
 -----
-_ do [(a . final) = 1 : 2, a | pair.set_first _ any ., a]
+_ do [(a . final) = 1 : 2, a ; pair.set_first _ any ., a]
 -----
 1 : 2
 =====
@@ -294,13 +294,13 @@ _ do [(a . final) = 1, (a . final) = _ any ., a]
 =====
 set_contract still none
 -----
-_ do [c = _ context {variables : {(a . still) : _ any .}}, c | set_contract a : none, c | contract a : .]
+_ do [c = _ context {variables : {(a . still) : _ any .}}, c ; set_contract a : none, c ; contract a : .]
 -----
 none
 =====
 set_contract still none
 -----
-_ do [c = _ context {variables : {(a . still) : _ any .}}, c | set_contract a : final, c | contract a : .]
+_ do [c = _ context {variables : {(a . still) : _ any .}}, c ; set_contract a : final, c ; contract a : .]
 -----
 final
 =====
@@ -330,25 +330,25 @@ final
 =====
 set_contract static const
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c | set_contract a : constant, c | contract a : .]
+_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : constant, c ; contract a : .]
 -----
 static
 =====
 set_contract static still
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c | set_contract a : still, c | contract a : .]
+_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : still, c ; contract a : .]
 -----
 static
 =====
 set_contract static final
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c | set_contract a : final, c | contract a : .]
+_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : final, c ; contract a : .]
 -----
 static
 =====
 set_contract static none
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c | set_contract a : none, c | contract a : .]
+_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : none, c ; contract a : .]
 -----
 static
 =====
@@ -364,7 +364,7 @@ _ do [
     f = _ function {
         cell : true,
         context_access : mutable,
-        code : (.ctx : .i) : .ctx | is_locked .@i : .
+        code : (.ctx : .i) : .ctx ; is_locked .@i : .
     },
     _ .f f
 ]
@@ -377,12 +377,12 @@ _ do [
     f = _ function {
         cell : true,
         context_access : mutable,
-        code : (.ctx : ._) : .ctx | eval _ ...g .
+        code : (.ctx : ._) : .ctx ; eval _ ...g .
     },
     g = _ function {
         cell : true,
         context_access : mutable,
-        code : (.ctx : ._) : .ctx | eval (..f is_locked .) and (..g is_locked .)
+        code : (.ctx : ._) : .ctx ; eval (..f is_locked .) and (..g is_locked .)
     },
     _ .f .
 ]
@@ -395,7 +395,7 @@ _ do [
     f = _ function {
         cell : true,
         context_access : mutable,
-        code : (.ctx : .i) : .ctx | is_null .@i : .
+        code : (.ctx : .i) : .ctx ; is_null .@i : .
     },
     _ .f f
 ]
@@ -416,19 +416,19 @@ false
 =====
 static move
 -----
-_ do [c = _ context {variables : {(a . static) : 1}}, c | move a : ., c | read a : .]
+_ do [c = _ context {variables : {(a . static) : 1}}, c ; move a : ., c ; read a : .]
 -----
 1
 =====
 static = to static
 -----
-_ do [c = _ context {variables : {(a . static) : 1}}, c | = a : 2, c | read a : .]
+_ do [c = _ context {variables : {(a . static) : 1}}, c ; = a : 2, c ; read a : .]
 -----
 1
 =====
 static = from static
 -----
-_ do [c = _ context {}, c | = (a . static) : 1, c | is_null a : .]
+_ do [c = _ context {}, c ; = (a . static) : 1, c ; is_null a : .]
 -----
 true
 =====
@@ -440,72 +440,72 @@ false
 =====
 is_constant true
 -----
-_ do [(a . final) = _ context {}, a | is_constant .]
+_ do [(a . final) = _ context {}, a ; is_constant .]
 -----
 true
 =====
 is_constant false
 -----
-_ do [a = _ context {}, a | is_constant .]
+_ do [a = _ context {}, a ; is_constant .]
 -----
 false
 =====
-| 1
+; 1
 -----
 _ do [
     a = _ context {variables : {p : 1 : 2}},
     b = 3,
-    a | eval .p | pair.set_first b,
-    a | move p : .,
+    a ; eval .p ; pair.set_first b,
+    a ; move p : .,
 ]
 -----
 3 : 2
 =====
-| 2
+; 2
 -----
 _ do [
     a = _ context {variables : {p : 1 : 2, b : 3}},
-    a | eval .p | pair.set_first .b,
-    a | move p : .,
+    a ; eval .p ; pair.set_first .b,
+    a ; move p : .,
 ]
 -----
 3 : 2
 =====
-| 3
+; 3
 -----
 _ do [
     set_first = pair.set_first,
     a = _ context {variables : {set_first : #set_first, p : 1 : 2, b : 3}},
-    a | eval .p | .set_first .b,
-    a | move p : .,
+    a ; eval .p ; .set_first .b,
+    a ; move p : .,
 ]
 -----
 3 : 2
 =====
-| recursive
+; recursive
 -----
 _ do [
     a = _ context {variables : {b : _ context {variables : {c : 1}}}},
-    a | eval .b | eval ..c
+    a ; eval .b ; eval ..c
 ]
 -----
 1
 =====
-| self
+; self
 -----
-_ do [u = 1, u | self .]
+_ do [u = 1, u ; self .]
 -----
 1
 =====
-| free free
+; free free
 -----
-_ do [u = ., u | + 1 : 1]
+_ do [u = ., u ; + 1 : 1]
 -----
 2
 =====
-| free mutate
+; free mutate
 -----
-_ do [u = ., a = 1, u | move a : ., a]
+_ do [u = ., a = 1, u ; move a : ., a]
 -----
 1
 =====
@@ -523,36 +523,36 @@ _ context.represent _ context {variables : {(a . constant) : 1}}
 =====
 represent non-recursive
 -----
-_ do [{variables : m} = _ context.represent _ context {variables : {b : _ context {}}}, b = m | map.remove .b, b | type .]
+_ do [{variables : m} = _ context.represent _ context {variables : {b : _ context {}}}, b = m ; map.remove .b, b ; type .]
 -----
 context
 =====
 prelude
 -----
-_ do [a = _ prelude ., a | eval _ .not true]
+_ do [a = _ prelude ., a ; eval _ .not true]
 -----
 false
 =====
 prelude self
 -----
-_ do [a = _ prelude ., a | is_null prelude : .]
+_ do [a = _ prelude ., a ; is_null prelude : .]
 -----
 false
 =====
 prelude current
 -----
-_ do [a = _ any ., b = _ prelude ., b | is_null a : .]
+_ do [a = _ any ., b = _ prelude ., b ; is_null a : .]
 -----
 true
 =====
 self
 -----
-_ do [a = 1, b = _ self ., b | eval .a]
+_ do [a = 1, b = _ self ., b ; eval .a]
 -----
 1
 =====
 self non-sync
 -----
-_ do [a = _ self ., b = _ any ., a | is_null b : .]
+_ do [a = _ self ., b = _ any ., a ; is_null b : .]
 -----
 true

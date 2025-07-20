@@ -60,7 +60,7 @@ pub(crate) const CALL: &str = "call";
 pub(crate) const SOLVE: &str = "solve";
 
 pub(crate) const PAIR: &str = ":";
-pub(crate) const CTX: &str = "|";
+pub(crate) const TASK: &str = ";";
 
 pub(crate) const QUOTE: char = '`';
 
@@ -81,7 +81,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn ambiguous(s: &str) -> bool {
-    matches!(s, UNIT | TRUE | FALSE | PAIR | CTX)
+    matches!(s, UNIT | TRUE | FALSE | PAIR | TASK)
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, IsVariant)]

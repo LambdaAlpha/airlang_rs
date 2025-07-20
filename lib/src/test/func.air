@@ -67,7 +67,7 @@ cell const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : _ do [.b = .b + .c | read .a : ., .b],
+        code : (.c : ._) : _ do [.b = .b + .c ; read .a : ., .b],
         context_access : constant,
         cell : true,
         context : _ context {variables : {
@@ -85,8 +85,8 @@ _ do [
     a = 1,
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c | read .a : .,
-            .c | eval ..a = ..a + 1,
+            .b = .b + .c ; read .a : .,
+            .c ; eval ..a = ..a + 1,
             .b,
         ],
         context_access : mutable,
@@ -106,8 +106,8 @@ _ do [
     a = 1,
     (f . final) = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c | read .a : .,
-            .c | eval ..a = ..a + 1,
+            .b = .b + .c ; read .a : .,
+            .c ; eval ..a = ..a + 1,
             .b,
         ],
         context_access : mutable,
@@ -126,8 +126,8 @@ const cell
 _ do [
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c | read .a : .,
-            .c | eval ..a = ..a + 1,
+            .b = .b + .c ; read .a : .,
+            .c ; eval ..a = ..a + 1,
             .b,
         ],
         context_access : mutable,
@@ -140,7 +140,7 @@ _ do [
         a : 1,
         f : #f,
     }},
-    ctx | eval [_ ..f ., _ ..f ., _ ..f .]
+    ctx ; eval [_ ..f ., _ ..f ., _ ..f .]
 ]
 -----
 [1, 1, 1]
@@ -153,8 +153,8 @@ _ do [
     }},
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c | read .a : .,
-            .c | eval ..a = ..a + 1,
+            .b = .b + .c ; read .a : .,
+            .c ; eval ..a = ..a + 1,
             .b,
         ],
         context_access : mutable,
@@ -163,7 +163,7 @@ _ do [
             b : 0,
         }},
     },
-    [c | .f ., c | .f ., c | .f .]
+    [c ; .f ., c ; .f ., c ; .f .]
 ]
 -----
 [1, 3, 6]
@@ -173,7 +173,7 @@ const const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c | read .a : .,
+        code : (.c : ._) : .c ; read .a : .,
         context_access : constant,
     },
     _ f .
@@ -186,7 +186,7 @@ mutable const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c | read .a : .,
+        code : (.c : ._) : .c ; read .a : .,
         context_access : mutable,
     },
     _ f .
@@ -198,7 +198,7 @@ mutable mutate
 -----
 _ do [
     f = _ function {
-        code : (.c : .i) : .c | = .@i : 2,
+        code : (.c : .i) : .c ; = .@i : 2,
         context_access : mutable,
     },
     a = 1,
@@ -212,7 +212,7 @@ const mutate fail
 -----
 _ do [
     f = _ function {
-        code : (.c : .i) : .c | = .@i : 2,
+        code : (.c : .i) : .c ; = .@i : 2,
         context_access : constant,
     },
     a = 1,
@@ -230,7 +230,7 @@ _ do [
         code : (._c : ._) : 1,
         context_access : constant,
     },
-    a | f .
+    a ; f .
 ]
 -----
 1
@@ -256,9 +256,9 @@ _ do [
     a = 1 : 2,
     f = _ function {
         call_setup : _ mode {pair : {symbol : ..} : eval@},
-        code : (.p : .i) : .p | pair.set_first .i,
+        code : (.p : .i) : .p ; pair.set_first .i,
     },
-    a | f 3,
+    a ; f 3,
     a
 ]
 -----
@@ -307,37 +307,37 @@ true
 =====
 access free
 -----
-function | function.context_access .
+function ; function.context_access .
 -----
 free
 =====
 access const
 -----
-read | function.context_access .
+read ; function.context_access .
 -----
 constant
 =====
 access mutable
 -----
-eval@ | function.context_access .
+eval@ ; function.context_access .
 -----
 mutable
 =====
 access default
 -----
-_ do [f = _ function {}, f | function.context_access .]
+_ do [f = _ function {}, f ; function.context_access .]
 -----
 mutable
 =====
 call setup primitive
 -----
-eval@ == not | function.call_setup .
+eval@ == not ; function.call_setup .
 -----
 true
 =====
 call setup mode
 -----
-. == eval@ | function.call_setup .
+. == eval@ ; function.call_setup .
 -----
 true
 =====
@@ -347,7 +347,7 @@ _ do [
     f = _ function {
         call_setup : _ mode {pair : eval@ : form.},
     },
-    p1 = f | function.call_setup .,
+    p1 = f ; function.call_setup .,
     p2 = _ mode {pair : eval@ : form.},
     p1 == p2
 ]
@@ -360,7 +360,7 @@ _ do [
     f = _ function {
         call_setup : _ mode {list : [eval@, form., .] : form.},
     },
-    p1 = f | function.call_setup .,
+    p1 = f ; function.call_setup .,
     p2 = _ mode {list : [eval@, form., .] : form.},
     p1 == p2
 ]
@@ -373,7 +373,7 @@ _ do [
     f = _ function {
         call_setup : _ mode {map : {a : eval@, b : .} : . : form.},
     },
-    p1 = f | function.call_setup .,
+    p1 = f ; function.call_setup .,
     p2 = _ mode {map : {a : eval@, b : .} : . : form.},
     p1 == p2
 ]
@@ -382,49 +382,49 @@ true
 =====
 solve setup
 -----
-eval@ == not | function.solve_setup .
+eval@ == not ; function.solve_setup .
 -----
 true
 =====
 is_primitive primitive
 -----
-not | function.is_primitive .
+not ; function.is_primitive .
 -----
 true
 =====
 is_primitive composite
 -----
-_ do [f = _ function {}, f | function.is_primitive .]
+_ do [f = _ function {}, f ; function.is_primitive .]
 -----
 false
 =====
 is_cell false
 -----
-not | function.is_cell .
+not ; function.is_cell .
 -----
 false
 =====
 is_cell true
 -----
-_ do [f = _ function {cell : true}, f | function.is_cell .]
+_ do [f = _ function {cell : true}, f ; function.is_cell .]
 -----
 true
 =====
 id primitive
 -----
-not | function.id .
+not ; function.id .
 -----
 not
 =====
 id rename
 -----
-_ do [neg = not, neg | function.id .]
+_ do [neg = not, neg ; function.id .]
 -----
 not
 =====
 code
 -----
-_ do [f = _ function {code : (.ctx : .i) : .i}, f | function.code .]
+_ do [f = _ function {code : (.ctx : .i) : .i}, f ; function.code .]
 -----
 (ctx : i) : i
 =====
@@ -433,7 +433,7 @@ ctx
 _ do [
     ctx = _ context {variables : {a : 1}},
     f = _ function {context : ctx},
-    (f | function.context .) == ctx
+    (f ; function.context .) == ctx
 ]
 -----
 true

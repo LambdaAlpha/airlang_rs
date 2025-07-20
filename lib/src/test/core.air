@@ -138,18 +138,18 @@ _ "a" false
 =====
 explicit ctx unit
 -----
-_ do [a = 1, . | eval .a]
+_ do [a = 1, . ; eval .a]
 -----
 1
 =====
 explicit ctx symbol
 -----
-_ do [p = 1 : 2, p | pair.first .]
+_ do [p = 1 : 2, p ; pair.first .]
 -----
 1
 =====
 explicit ctx do
 -----
-_ do [p = 1 : 2, p | eval _ do [_ pair.set_first 3, _ pair.set_second 4], p]
+_ do [p = 1 : 2, p ; eval _ do [_ pair.set_first 3, _ pair.set_second 4], p]
 -----
 3 : 4

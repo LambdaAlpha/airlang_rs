@@ -24,11 +24,11 @@ a b c : d
 =====
 pair ctx call
 -----
-a : b | c d
+a : b ; c d
 =====
 ctx call pair
 -----
-a | b c : d
+a ; b c : d
 =====
 non-atomic first
 -----
