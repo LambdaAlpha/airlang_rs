@@ -361,79 +361,60 @@ fn compose_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<
 fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let mut left = token(ctx).parse_next(i)?;
-        let mut next_token = preceded(spaces_comment(1 ..), token(ctx));
+        let next = &mut preceded(spaces_comment(1 ..), token(ctx));
+        let last = &mut preceded(spaces_comment(1 ..), token(ctx));
         loop {
-            let Ok(func) = next_token.by_ref().parse_next(i) else {
-                break;
+            let Ok(func) = next.parse_next(i) else {
+                return Ok(left);
             };
-            let repr = match func {
-                Token::Unquote(s) => match &*s {
-                    PAIR => {
-                        let right = next_token.by_ref().parse_next(i)?;
-                        T::from(Pair::new(left.into_repr(), right.into_repr()))
-                    }
-                    TASK => {
-                        let func = next_token.by_ref().parse_next(i)?;
-                        let input = next_token.by_ref().parse_next(i)?;
-                        T::from(Task {
-                            action: ctx.action,
-                            func: func.into_repr(),
-                            ctx: left.into_repr(),
-                            input: input.into_repr(),
-                        })
-                    }
-                    _ => {
-                        let right = next_token.by_ref().parse_next(i)?;
-                        infix(ctx, left, T::from(s), right)
-                    }
-                },
-                Token::Default(func) => {
-                    let right = next_token.by_ref().parse_next(i)?;
-                    infix(ctx, left, func, right)
-                }
-            };
-            left = Token::Default(repr);
+            left = compose_one(ctx, i, next, last, left, func)?;
         }
-        Ok(left)
     }
 }
 
 fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let left = token(ctx).parse_next(i)?;
-        let mut next_token = preceded(spaces_comment(1 ..), token(ctx));
-        let Ok(func) = next_token.by_ref().parse_next(i) else {
+        let next = &mut preceded(spaces_comment(1 ..), token(ctx));
+        let last = &mut preceded(spaces_comment(1 ..), compose_right(ctx));
+        let Ok(func) = next.parse_next(i) else {
             return Ok(left);
         };
-        let mut tail = preceded(spaces_comment(1 ..), compose_token(ctx));
-        let repr = match func {
-            Token::Unquote(s) => match &*s {
-                PAIR => {
-                    let right = tail.parse_next(i)?;
-                    T::from(Pair::new(left.into_repr(), right.into_repr()))
-                }
-                TASK => {
-                    let func = next_token.by_ref().parse_next(i)?;
-                    let input = tail.parse_next(i)?;
-                    T::from(Task {
-                        action: ctx.action,
-                        func: func.into_repr(),
-                        ctx: left.into_repr(),
-                        input: input.into_repr(),
-                    })
-                }
-                _ => {
-                    let right = tail.parse_next(i)?;
-                    infix(ctx, left, T::from(s), right)
-                }
-            },
-            Token::Default(func) => {
-                let right = tail.parse_next(i)?;
-                infix(ctx, left, func, right)
-            }
-        };
-        Ok(Token::Default(repr))
+        compose_one(ctx, i, next, last, left, func)
     }
+}
+
+fn compose_one<'a, T: ParseRepr>(
+    ctx: ParseCtx, i: &mut &'a str, next: &mut dyn Parser<&'a str, Token<T>, E>,
+    last: &mut dyn Parser<&'a str, Token<T>, E>, left: Token<T>, func: Token<T>,
+) -> ModalResult<Token<T>> {
+    let repr = match func {
+        Token::Unquote(s) => match &*s {
+            PAIR => {
+                let right = last.parse_next(i)?;
+                T::from(Pair::new(left.into_repr(), right.into_repr()))
+            }
+            TASK => {
+                let func = next.parse_next(i)?;
+                let input = last.parse_next(i)?;
+                T::from(Task {
+                    action: ctx.action,
+                    func: func.into_repr(),
+                    ctx: left.into_repr(),
+                    input: input.into_repr(),
+                })
+            }
+            _ => {
+                let right = last.parse_next(i)?;
+                infix(ctx, left, T::from(s), right)
+            }
+        },
+        Token::Default(func) => {
+            let right = last.parse_next(i)?;
+            infix(ctx, left, func, right)
+        }
+    };
+    Ok(Token::Default(repr))
 }
 
 fn infix<T: ParseRepr>(ctx: ParseCtx, left: Token<T>, func: T, right: Token<T>) -> T {
