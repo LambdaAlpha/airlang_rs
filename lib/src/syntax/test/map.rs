@@ -23,7 +23,6 @@ pub(super) fn expected() -> Vec<Repr> {
         list(vec![map(vec![]), map(vec![])]),
         map(vec![(symbol("a"), unit())]),
         map(vec![(symbol("a"), unit()), (symbol("b"), symbol("c"))]),
-        map(vec![(symbol("a"), symbol("c"))]),
         map(vec![(pair(symbol("a"), symbol("b")), symbol("c"))]),
         map(vec![(symbol("a"), pair(symbol("b"), symbol("c")))]),
     ]

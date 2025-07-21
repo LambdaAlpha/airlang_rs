@@ -53,10 +53,6 @@ mix omit and normal
 -----
 {a, b : c}
 =====
-duplicate key
------
-{a : b, a : c}
-=====
 non-atomic key
 -----
 {(a : b) : c}

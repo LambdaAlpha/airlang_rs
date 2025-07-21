@@ -443,29 +443,23 @@ fn compose<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     compose_token(ctx).map(Token::into_repr)
 }
 
-fn items<'a, O, F>(mut item: F) -> impl Parser<&'a str, Vec<O>, E>
-where F: Parser<&'a str, O, E> {
-    move |i: &mut _| {
-        let i: &mut &str = i;
-        let mut items = Vec::new();
+fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
+    let items = move |i: &mut _| {
+        let mut list = Vec::new();
+        let mut repr = opt(compose(ctx));
+        let mut separator = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR))));
         loop {
-            let Some(item) = opt(item.by_ref()).parse_next(i)? else {
+            let Some(item) = repr.parse_next(i)? else {
                 break;
             };
-            items.push(item);
-            let sep = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR)))).parse_next(i)?;
-            if sep.is_none() {
+            list.push(item);
+            if separator.parse_next(i)?.is_none() {
                 break;
             }
         }
-        Ok(items)
-    }
-}
-
-fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    delimited_trim_comment(LIST_LEFT, items(compose(ctx)), LIST_RIGHT)
-        .map(|list| T::from(List::from(list)))
-        .context(label("list"))
+        Ok(T::from(List::from(list)))
+    };
+    delimited_trim_comment(LIST_LEFT, items, LIST_RIGHT).context(label("list"))
 }
 
 fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
@@ -476,25 +470,36 @@ fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
 }
 
 fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    delimited_trim_comment(MAP_LEFT, items(key_value(ctx)), MAP_RIGHT)
-        .map(|pairs| T::from(Map::from_iter(pairs)))
-        .context(label("map"))
-}
-
-fn key_value<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, (T, T), E> {
-    move |i: &mut _| {
-        let key = repr(ctx).parse_next(i)?;
-        let pair = opt(preceded(spaces_comment(1 ..), PAIR.void())).parse_next(i).unwrap();
-        if pair.is_none() {
-            return Ok((key, T::from(Unit)));
-        }
-        let value = cut_err(preceded(
+    let items = move |i: &mut _| {
+        let mut map = Map::default();
+        let mut key = opt(repr(ctx));
+        let mut pair = opt(preceded(spaces_comment(1 ..), PAIR.void()));
+        let mut value = cut_err(preceded(
             spaces_comment(1 ..).context(expect_desc("space")),
             compose(ctx).context(expect_desc("value")),
-        ))
-        .parse_next(i)?;
-        Ok((key, value))
-    }
+        ));
+        let mut separator = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR))));
+        let mut duplicate = fail.context(expect_desc("no duplicate keys"));
+        loop {
+            let Some(k) = key.parse_next(i)? else {
+                break;
+            };
+            if map.contains_key(&k) {
+                return duplicate.parse_next(i);
+            }
+            let v = if pair.parse_next(i).unwrap().is_none() {
+                T::from(Unit)
+            } else {
+                value.parse_next(i)?
+            };
+            map.insert(k, v);
+            if separator.parse_next(i)?.is_none() {
+                break;
+            }
+        }
+        Ok(T::from(map))
+    };
+    delimited_trim_comment(MAP_LEFT, items, MAP_RIGHT).context(label("map"))
 }
 
 fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
