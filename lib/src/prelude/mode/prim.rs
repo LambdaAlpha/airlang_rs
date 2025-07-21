@@ -216,7 +216,7 @@ impl FreeStaticFn<MapVal, Val> for PrimMode {
     fn free_static_call(&self, input: MapVal) -> Val {
         match self.map {
             None => Val::Map(input),
-            Some(_) => MapUniForm { key: self, value: self }.free_static_call(input),
+            Some(_) => MapUniForm { value: self }.free_static_call(input),
         }
     }
 }
@@ -225,7 +225,7 @@ impl ConstStaticFn<Val, MapVal, Val> for PrimMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
         match self.map {
             None => Val::Map(input),
-            Some(_) => MapUniForm { key: self, value: self }.const_static_call(ctx, input),
+            Some(_) => MapUniForm { value: self }.const_static_call(ctx, input),
         }
     }
 }
@@ -234,7 +234,7 @@ impl MutStaticFn<Val, MapVal, Val> for PrimMode {
     fn mut_static_call(&self, ctx: &mut Val, input: MapVal) -> Val {
         match self.map {
             None => Val::Map(input),
-            Some(_) => MapUniForm { key: self, value: self }.mut_static_call(ctx, input),
+            Some(_) => MapUniForm { value: self }.mut_static_call(ctx, input),
         }
     }
 }

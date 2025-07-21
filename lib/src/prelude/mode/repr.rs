@@ -517,8 +517,7 @@ impl ParseMode<Val> for MapMode {
             Val::Symbol(s) => Some(Self::from(PrimMode::parse(s)?)),
             Val::Map(some) => {
                 let some = parse_map_some(some)?;
-                let else_ = Pair::new(None, None);
-                Some(MapMode { some, else_ })
+                Some(MapMode { some, else_: None })
             }
             Val::Pair(some_else) => {
                 let some_else = Pair::from(some_else);
@@ -527,7 +526,7 @@ impl ParseMode<Val> for MapMode {
                     return None;
                 };
                 let some = parse_map_some(some)?;
-                let else_ = parse_map_else(some_else.second)?;
+                let else_ = ParseMode::parse(some_else.second)?;
                 Some(MapMode { some, else_ })
             }
             _ => None,
@@ -545,34 +544,13 @@ fn parse_map_some(some: MapVal) -> Option<Map<Val, Option<Mode>>> {
         .collect()
 }
 
-fn parse_map_else(mode: Val) -> Option<Pair<Option<Mode>, Option<Mode>>> {
-    let mode = match mode {
-        Val::Unit(_) => Pair::new(None, None),
-        Val::Symbol(s) => {
-            let mode = Some(Mode::from(PrimMode::parse(s)?));
-            Pair::new(mode.clone(), mode)
-        }
-        Val::Pair(else_) => {
-            let else_ = Pair::from(else_);
-            let key = ParseMode::parse(else_.first)?;
-            let value = ParseMode::parse(else_.second)?;
-            Pair::new(key, value)
-        }
-        v => {
-            error!("{v:?} should be a pair, a symbol or a unit");
-            return None;
-        }
-    };
-    Some(mode)
-}
-
 impl GenerateMode<Val> for MapMode {
     fn generate(&self) -> Val {
         let some = generate_map_some(&self.some);
-        if self.else_.first.is_none() && self.else_.second.is_none() {
+        if self.else_.is_none() {
             return some;
         }
-        let else_ = generate_map_else(&self.else_.first, &self.else_.second);
+        let else_ = self.else_.generate();
         Val::Pair(Pair::new(some, else_).into())
     }
 }
@@ -586,10 +564,4 @@ fn generate_map_some<M: GenerateMode<Val>>(some: &Map<Val, M>) -> Val {
         })
         .collect();
     Val::Map(some.into())
-}
-
-fn generate_map_else<M: GenerateMode<Val>>(k: &M, v: &M) -> Val {
-    let k = M::generate(k);
-    let v = M::generate(v);
-    Val::Pair(Pair::new(k, v).into())
 }

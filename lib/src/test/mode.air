@@ -458,7 +458,7 @@ _ do [
     _ f {.a : a, b : .a, @c : .d}
 ]
 -----
-{a : 1, 2 : a, 3 : d}
+{.a : 1, b : a, @c : d}
 =====
 mode primitive multiple
 -----

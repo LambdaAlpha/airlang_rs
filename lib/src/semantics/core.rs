@@ -1,5 +1,6 @@
 use std::borrow::Borrow;
 use std::hash::Hash;
+use std::mem::take;
 
 use const_format::concatcp;
 
@@ -262,32 +263,33 @@ pub(crate) struct ListUniForm<'a, Item> {
 impl<'a, Item> FreeStaticFn<ListVal, Val> for ListUniForm<'a, Item>
 where Item: FreeStaticFn<Val, Val>
 {
-    fn free_static_call(&self, input: ListVal) -> Val {
-        let list: List<Val> =
-            List::from(input).into_iter().map(|v| self.item.free_static_call(v)).collect();
-        Val::List(list.into())
+    fn free_static_call(&self, mut input: ListVal) -> Val {
+        for v in input.iter_mut() {
+            *v = self.item.free_static_call(take(v));
+        }
+        Val::List(input)
     }
 }
 
 impl<'a, Item, Ctx> ConstStaticFn<Ctx, ListVal, Val> for ListUniForm<'a, Item>
 where Item: ConstStaticFn<Ctx, Val, Val>
 {
-    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: ListVal) -> Val {
-        let list: List<Val> = List::from(input)
-            .into_iter()
-            .map(|v| self.item.const_static_call(ctx.reborrow(), v))
-            .collect();
-        Val::List(list.into())
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, mut input: ListVal) -> Val {
+        for v in input.iter_mut() {
+            *v = self.item.const_static_call(ctx.reborrow(), take(v));
+        }
+        Val::List(input)
     }
 }
 
 impl<'a, Item, Ctx> MutStaticFn<Ctx, ListVal, Val> for ListUniForm<'a, Item>
 where Item: MutStaticFn<Ctx, Val, Val>
 {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
-        let list: List<Val> =
-            List::from(input).into_iter().map(|v| self.item.mut_static_call(ctx, v)).collect();
-        Val::List(list.into())
+    fn mut_static_call(&self, ctx: &mut Ctx, mut input: ListVal) -> Val {
+        for v in input.iter_mut() {
+            *v = self.item.mut_static_call(ctx, take(v));
+        }
+        Val::List(input)
     }
 }
 
@@ -301,7 +303,13 @@ where
     Head: FreeStaticFn<Val, Val>,
     Tail: FreeStaticFn<Val, Val>,
 {
-    fn free_static_call(&self, input: ListVal) -> Val {
+    fn free_static_call(&self, mut input: ListVal) -> Val {
+        if self.head.is_empty() {
+            for v in input.iter_mut() {
+                *v = self.tail.free_static_call(take(v));
+            }
+            return Val::List(input);
+        }
         let mut iter = List::from(input).into_iter();
         let mut list = Vec::with_capacity(iter.len());
         for f in self.head {
@@ -323,7 +331,13 @@ where
     Head: ConstStaticFn<Ctx, Val, Val>,
     Tail: ConstStaticFn<Ctx, Val, Val>,
 {
-    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: ListVal) -> Val {
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, mut input: ListVal) -> Val {
+        if self.head.is_empty() {
+            for v in input.iter_mut() {
+                *v = self.tail.const_static_call(ctx.reborrow(), take(v));
+            }
+            return Val::List(input);
+        }
         let mut iter = List::from(input).into_iter();
         let mut list = Vec::with_capacity(iter.len());
         for f in self.head {
@@ -345,7 +359,13 @@ where
     Head: MutStaticFn<Ctx, Val, Val>,
     Tail: MutStaticFn<Ctx, Val, Val>,
 {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: ListVal) -> Val {
+    fn mut_static_call(&self, ctx: &mut Ctx, mut input: ListVal) -> Val {
+        if self.head.is_empty() {
+            for v in input.iter_mut() {
+                *v = self.tail.mut_static_call(ctx, take(v));
+            }
+            return Val::List(input);
+        }
         let mut iter = List::from(input).into_iter();
         let mut list = Vec::with_capacity(iter.len());
         for f in self.head {
@@ -362,146 +382,102 @@ where
     }
 }
 
-pub(crate) struct MapUniForm<'a, Key, Value> {
-    pub(crate) key: &'a Key,
+pub(crate) struct MapUniForm<'a, Value> {
     pub(crate) value: &'a Value,
 }
 
-impl<'a, Key, Value> FreeStaticFn<MapVal, Val> for MapUniForm<'a, Key, Value>
-where
-    Key: FreeStaticFn<Val, Val>,
-    Value: FreeStaticFn<Val, Val>,
+impl<'a, Value> FreeStaticFn<MapVal, Val> for MapUniForm<'a, Value>
+where Value: FreeStaticFn<Val, Val>
 {
-    fn free_static_call(&self, input: MapVal) -> Val {
-        let map: Map<Val, Val> = Map::from(input)
-            .into_iter()
-            .map(|(k, v)| {
-                let key = self.key.free_static_call(k);
-                let value = self.value.free_static_call(v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map.into())
+    fn free_static_call(&self, mut input: MapVal) -> Val {
+        for v in input.values_mut() {
+            *v = self.value.free_static_call(take(v));
+        }
+        Val::Map(input)
     }
 }
 
-impl<'a, Key, Value, Ctx> ConstStaticFn<Ctx, MapVal, Val> for MapUniForm<'a, Key, Value>
-where
-    Key: ConstStaticFn<Ctx, Val, Val>,
-    Value: ConstStaticFn<Ctx, Val, Val>,
+impl<'a, Value, Ctx> ConstStaticFn<Ctx, MapVal, Val> for MapUniForm<'a, Value>
+where Value: ConstStaticFn<Ctx, Val, Val>
 {
-    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: MapVal) -> Val {
-        let map: Map<Val, Val> = Map::from(input)
-            .into_iter()
-            .map(|(k, v)| {
-                let key = self.key.const_static_call(ctx.reborrow(), k);
-                let value = self.value.const_static_call(ctx.reborrow(), v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map.into())
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, mut input: MapVal) -> Val {
+        for v in input.values_mut() {
+            *v = self.value.const_static_call(ctx.reborrow(), take(v));
+        }
+        Val::Map(input)
     }
 }
 
-impl<'a, Key, Value, Ctx> MutStaticFn<Ctx, MapVal, Val> for MapUniForm<'a, Key, Value>
-where
-    Key: MutStaticFn<Ctx, Val, Val>,
-    Value: MutStaticFn<Ctx, Val, Val>,
+impl<'a, Value, Ctx> MutStaticFn<Ctx, MapVal, Val> for MapUniForm<'a, Value>
+where Value: MutStaticFn<Ctx, Val, Val>
 {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
-        let map: Map<Val, Val> = Map::from(input)
-            .into_iter()
-            .map(|(k, v)| {
-                let key = self.key.mut_static_call(ctx, k);
-                let value = self.value.mut_static_call(ctx, v);
-                (key, value)
-            })
-            .collect();
-        Val::Map(map.into())
+    fn mut_static_call(&self, ctx: &mut Ctx, mut input: MapVal) -> Val {
+        for v in input.values_mut() {
+            *v = self.value.mut_static_call(ctx, take(v));
+        }
+        Val::Map(input)
     }
 }
 
-pub(crate) struct MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue> {
+pub(crate) struct MapForm<'a, SomeKey, SomeValue, ElseValue> {
     pub(crate) some: &'a Map<SomeKey, SomeValue>,
-    pub(crate) key: &'a ElseKey,
-    pub(crate) value: &'a ElseValue,
+    pub(crate) else_: &'a ElseValue,
 }
 
-impl<'a, SomeKey, SomeValue, ElseKey, ElseValue> FreeStaticFn<MapVal, Val>
-    for MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+impl<'a, SomeKey, SomeValue, ElseValue> FreeStaticFn<MapVal, Val>
+    for MapForm<'a, SomeKey, SomeValue, ElseValue>
 where
     SomeKey: Borrow<Val> + Eq + Hash,
     SomeValue: FreeStaticFn<Val, Val>,
-    ElseKey: FreeStaticFn<Val, Val>,
     ElseValue: FreeStaticFn<Val, Val>,
 {
-    fn free_static_call(&self, input: MapVal) -> Val {
-        let map: Map<Val, Val> = Map::from(input)
-            .into_iter()
-            .map(|(k, v)| {
-                if let Some(f) = self.some.get(&k) {
-                    let v = f.free_static_call(v);
-                    (k, v)
-                } else {
-                    let k = self.key.free_static_call(k);
-                    let v = self.value.free_static_call(v);
-                    (k, v)
-                }
-            })
-            .collect();
-        Val::Map(map.into())
+    fn free_static_call(&self, mut input: MapVal) -> Val {
+        for (k, v) in input.iter_mut() {
+            if let Some(f) = self.some.get(k) {
+                *v = f.free_static_call(take(v));
+            } else {
+                *v = self.else_.free_static_call(take(v));
+            }
+        }
+        Val::Map(input)
     }
 }
 
-impl<'a, SomeKey, SomeValue, ElseKey, ElseValue, Ctx> ConstStaticFn<Ctx, MapVal, Val>
-    for MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+impl<'a, SomeKey, SomeValue, ElseValue, Ctx> ConstStaticFn<Ctx, MapVal, Val>
+    for MapForm<'a, SomeKey, SomeValue, ElseValue>
 where
     SomeKey: Borrow<Val> + Eq + Hash,
     SomeValue: ConstStaticFn<Ctx, Val, Val>,
-    ElseKey: ConstStaticFn<Ctx, Val, Val>,
     ElseValue: ConstStaticFn<Ctx, Val, Val>,
 {
-    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, input: MapVal) -> Val {
-        let map: Map<Val, Val> = Map::from(input)
-            .into_iter()
-            .map(|(k, v)| {
-                if let Some(f) = self.some.get(&k) {
-                    let v = f.const_static_call(ctx.reborrow(), v);
-                    (k, v)
-                } else {
-                    let k = self.key.const_static_call(ctx.reborrow(), k);
-                    let v = self.value.const_static_call(ctx.reborrow(), v);
-                    (k, v)
-                }
-            })
-            .collect();
-        Val::Map(map.into())
+    fn const_static_call(&self, mut ctx: ConstRef<Ctx>, mut input: MapVal) -> Val {
+        for (k, v) in input.iter_mut() {
+            if let Some(f) = self.some.get(k) {
+                *v = f.const_static_call(ctx.reborrow(), take(v));
+            } else {
+                *v = self.else_.const_static_call(ctx.reborrow(), take(v));
+            }
+        }
+        Val::Map(input)
     }
 }
 
-impl<'a, SomeKey, SomeValue, ElseKey, ElseValue, Ctx> MutStaticFn<Ctx, MapVal, Val>
-    for MapForm<'a, SomeKey, SomeValue, ElseKey, ElseValue>
+impl<'a, SomeKey, SomeValue, ElseValue, Ctx> MutStaticFn<Ctx, MapVal, Val>
+    for MapForm<'a, SomeKey, SomeValue, ElseValue>
 where
     SomeKey: Borrow<Val> + Eq + Hash,
     SomeValue: MutStaticFn<Ctx, Val, Val>,
-    ElseKey: MutStaticFn<Ctx, Val, Val>,
     ElseValue: MutStaticFn<Ctx, Val, Val>,
 {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: MapVal) -> Val {
-        let map: Map<Val, Val> = Map::from(input)
-            .into_iter()
-            .map(|(k, v)| {
-                if let Some(f) = self.some.get(&k) {
-                    let v = f.mut_static_call(ctx, v);
-                    (k, v)
-                } else {
-                    let k = self.key.mut_static_call(ctx, k);
-                    let v = self.value.mut_static_call(ctx, v);
-                    (k, v)
-                }
-            })
-            .collect();
-        Val::Map(map.into())
+    fn mut_static_call(&self, ctx: &mut Ctx, mut input: MapVal) -> Val {
+        for (k, v) in input.iter_mut() {
+            if let Some(f) = self.some.get(k) {
+                *v = f.mut_static_call(ctx, take(v));
+            } else {
+                *v = self.else_.mut_static_call(ctx, take(v));
+            }
+        }
+        Val::Map(input)
     }
 }
 
@@ -1056,18 +1032,18 @@ impl MutStaticFn<Val, ListVal, Val> for Eval {
 
 impl FreeStaticFn<MapVal, Val> for Eval {
     fn free_static_call(&self, input: MapVal) -> Val {
-        MapUniForm { key: self, value: self }.free_static_call(input)
+        MapUniForm { value: self }.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, MapVal, Val> for Eval {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
-        MapUniForm { key: self, value: self }.const_static_call(ctx, input)
+        MapUniForm { value: self }.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, MapVal, Val> for Eval {
     fn mut_static_call(&self, ctx: &mut Val, input: MapVal) -> Val {
-        MapUniForm { key: self, value: self }.mut_static_call(ctx, input)
+        MapUniForm { value: self }.mut_static_call(ctx, input)
     }
 }

@@ -60,7 +60,7 @@ pub(super) fn parse_mode() -> Option<Mode> {
     map.insert(symbol(ID), FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form));
     map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form));
     map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
-    FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
+    FuncMode::map_mode(map, FuncMode::default_mode())
 }
 
 // todo design defaults

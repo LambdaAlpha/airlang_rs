@@ -98,7 +98,7 @@ map eval
 -----
 {(_ not true) : (_ not true)}
 -----
-{false : false}
+{(_ not true) : false}
 =====
 call recursive
 -----

@@ -26,7 +26,6 @@ use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Pair;
 use crate::type_::Symbol;
 
 impl ModeFn for FuncVal {}
@@ -138,10 +137,7 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn map_mode(
-        some: Map<Val, Option<Mode>>, key: Option<Mode>, value: Option<Mode>,
-    ) -> Option<Mode> {
-        let else_ = Pair::new(key, value);
+    pub fn map_mode(some: Map<Val, Option<Mode>>, else_: Option<Mode>) -> Option<Mode> {
         let mode = CompMode { map: Some(MapMode { some, else_ }), ..Self::default_comp_mode() };
         Some(Mode::Comp(Box::new(mode)))
     }
@@ -283,7 +279,7 @@ impl GetCtxAccess for MapMode {
     fn ctx_access(&self) -> CtxAccess {
         let some =
             self.some.values().fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
-        let else_ = self.else_.first.ctx_access() & self.else_.second.ctx_access();
+        let else_ = self.else_.ctx_access();
         some & else_
     }
 }

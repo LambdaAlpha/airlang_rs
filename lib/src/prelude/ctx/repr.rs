@@ -1,9 +1,7 @@
 use log::error;
 
-use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
-use crate::prelude::mode::SymbolMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Contract;
@@ -28,15 +26,8 @@ const VARIABLES: &str = "variables";
 
 pub(super) fn parse_mode() -> Option<Mode> {
     let mut map = Map::default();
-    map.insert(
-        symbol(VARIABLES),
-        FuncMode::map_mode(
-            Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
-            FuncMode::default_mode(),
-        ),
-    );
-    FuncMode::map_mode(map, FuncMode::symbol_mode(SymbolMode::Literal), FuncMode::default_mode())
+    map.insert(symbol(VARIABLES), FuncMode::map_mode(Map::default(), FuncMode::default_mode()));
+    FuncMode::map_mode(map, FuncMode::default_mode())
 }
 
 // todo design

@@ -14,7 +14,6 @@ use super::setup::default_dyn_mode;
 use super::setup::free_mode;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
-use crate::prelude::mode::SymbolMode;
 use crate::prelude::utils::map_remove;
 use crate::semantics::core::TaskApply;
 use crate::semantics::func::ConstStaticFn;
@@ -83,11 +82,7 @@ const CTX: &str = "context";
 const INPUT: &str = "input";
 
 fn parse_mode() -> Option<Mode> {
-    FuncMode::map_mode(
-        Map::default(),
-        FuncMode::symbol_mode(SymbolMode::Literal),
-        FuncMode::default_mode(),
-    )
+    FuncMode::map_mode(Map::default(), FuncMode::default_mode())
 }
 
 pub fn new_call() -> FreeStaticPrimFuncVal {

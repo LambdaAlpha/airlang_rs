@@ -228,7 +228,7 @@ _ do [a = 1, b = 2, [a, b] = [3]]
 =====
 = destruct map symbol key
 -----
-_ do [{a : a, b : b} = {.a : 1, .b : 2, .c : 3}, [a, b]]
+_ do [{a : a, b : b} = {a : 1, b : 2, c : 3}, [a, b]]
 -----
 [1, 2]
 =====

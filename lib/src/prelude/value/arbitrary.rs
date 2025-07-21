@@ -414,9 +414,7 @@ impl Arbitrary for MapMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let new_depth = depth + 1;
         let some = Arbitrary::any(rng, new_depth);
-        let key = Arbitrary::any(rng, new_depth);
-        let value = Arbitrary::any(rng, new_depth);
-        let else_ = Pair::new(key, value);
+        let else_ = Arbitrary::any(rng, new_depth);
         MapMode { some, else_ }
     }
 }
