@@ -9,7 +9,6 @@ pub use self::prim::CodeMode;
 pub use self::prim::DataMode;
 pub use self::prim::PrimMode;
 pub use self::symbol::SymbolMode;
-pub use self::task::TaskMapMode;
 pub use self::task::TaskMode;
 
 _____!();

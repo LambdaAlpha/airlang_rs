@@ -498,21 +498,21 @@ _ do [
 -----
 a : b
 =====
-mode composite
+mode pair some
 -----
 _ do [
-    f = _ mode {pair : form. : {pair : .}},
-    _ f a : .b : _ @c #d
+    f = _ mode {pair : {this : {}, that : {symbol : ..}} : eval@ : {pair : .}},
+    [_ f this : _ not true, _ f that : a, _ f (_ not true) : @a : #b] 
 ]
 -----
-a : .b : _ @c #d
+[this : _ not true, that : a, false : @a : #b]
 =====
 mode multiple
 -----
 _ do [
     c = 1,
     d = 2,
-    f = _ mode {pair : form. : {pair : form.}},
+    f = _ mode {pair : {} : form. : {pair : form.}},
     _ f a : .b : _ @c #d
 ]
 -----
@@ -521,11 +521,20 @@ a : b : _ 1 2
 mode task form
 -----
 _ do [
-    f = _ mode {task : {this : . : {}, that : . : {symbol : ..}} : . ; eval@ eval@},
-    [_ f _ this .a, _ f _ that .a, _ f _ .other _ not true]
+    f = _ mode {task : solve(. ; eval@ eval@)},
+    _ f _ .g _ not true
 ]
 -----
-[_ this .a, _ that a, _ other false]
+_ g false
+=====
+mode task eval
+-----
+_ do [
+    f = _ mode {task : . ; eval@ eval@},
+    _ f _ not true
+]
+-----
+false
 =====
 mode func
 -----

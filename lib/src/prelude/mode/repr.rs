@@ -10,7 +10,6 @@ use super::Mode;
 use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
-use super::TaskMapMode;
 use super::TaskMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
@@ -32,7 +31,6 @@ use crate::semantics::val::TASK;
 use crate::semantics::val::Val;
 use crate::type_::Action;
 use crate::type_::Bit;
-use crate::type_::CtxInput;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -360,11 +358,21 @@ impl ParseMode<Val> for PairMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::from(PrimMode::parse(s)?)),
-            Val::Pair(pair) => {
+            Val::Pair(some_else) => {
+                let some_else = Pair::from(some_else);
+                let Val::Map(some) = some_else.first else {
+                    error!("first {:?} should be a map", some_else.first);
+                    return None;
+                };
+                let some = parse_map_some(some)?;
+                let Val::Pair(pair) = some_else.second else {
+                    error!("second {:?} should be a pair", some_else.second);
+                    return None;
+                };
                 let pair = Pair::from(pair);
                 let first = ParseMode::parse(pair.first)?;
                 let second = ParseMode::parse(pair.second)?;
-                Some(PairMode { first, second })
+                Some(PairMode { some, first, second })
             }
             v => {
                 error!("{v:?} should be a pair or a symbol");
@@ -376,9 +384,11 @@ impl ParseMode<Val> for PairMode {
 
 impl GenerateMode<Val> for PairMode {
     fn generate(&self) -> Val {
+        let some = generate_map_some(&self.some);
         let first = GenerateMode::generate(&self.first);
         let second = GenerateMode::generate(&self.second);
-        Val::Pair(Pair::new(first, second).into())
+        let else_ = Val::Pair(Pair::new(first, second).into());
+        Val::Pair(Pair::new(some, else_).into())
     }
 }
 
@@ -387,29 +397,17 @@ impl ParseMode<Val> for TaskMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(s) => Some(Self::try_from(PrimMode::parse(s)?).unwrap()),
-            Val::Pair(some_else) => {
-                let some_else = Pair::from(some_else);
-                let Val::Map(some) = some_else.first else {
-                    error!("first {:?} should be a map", some_else.first);
-                    return None;
-                };
-                let some = parse_task_map_some(some)?;
-                let Val::Task(task) = some_else.second else {
-                    error!("second {:?} should be a task", some_else.second);
-                    return None;
-                };
-                let task = Task::from(task);
-                let func = ParseMode::parse(task.func)?;
-                let ctx = ParseMode::parse(task.ctx)?;
-                let input = ParseMode::parse(task.input)?;
-                Some(TaskMode { func, ctx, input, some: Some(some) })
-            }
             Val::Task(task) => {
                 let task = Task::from(task);
+                // todo design
+                let code = match task.action {
+                    Action::Call => CodeMode::Eval,
+                    Action::Solve => CodeMode::Form,
+                };
                 let func = ParseMode::parse(task.func)?;
                 let ctx = ParseMode::parse(task.ctx)?;
                 let input = ParseMode::parse(task.input)?;
-                Some(TaskMode { some: None, func, ctx, input })
+                Some(TaskMode { code, func, ctx, input })
             }
             v => {
                 error!("{v:?} should be a task, a pair or a symbol");
@@ -419,49 +417,19 @@ impl ParseMode<Val> for TaskMode {
     }
 }
 
-fn parse_task_map_some(some: MapVal) -> Option<TaskMapMode> {
-    Map::from(some)
-        .into_iter()
-        .map(|(k, v)| {
-            let Val::Pair(ctx_input) = v else {
-                return None;
-            };
-            let ctx_input = Pair::from(ctx_input);
-            let ctx = ParseMode::parse(ctx_input.first)?;
-            let input = ParseMode::parse(ctx_input.second)?;
-            Some((k, CtxInput { ctx, input }))
-        })
-        .collect()
-}
-
 // todo design
 impl GenerateMode<Val> for TaskMode {
     fn generate(&self) -> Val {
         let func = GenerateMode::generate(&self.func);
         let ctx = GenerateMode::generate(&self.ctx);
         let input = GenerateMode::generate(&self.input);
-        match &self.some {
-            Some(some) => {
-                let some = generate_task_map_some(some);
-                let else_ = Val::Task(Task { action: Action::Call, func, ctx, input }.into());
-                Val::Pair(Pair::new(some, else_).into())
-            }
-            None => Val::Task(Task { action: Action::Call, func, ctx, input }.into()),
-        }
+        // todo design
+        let action = match self.code {
+            CodeMode::Form => Action::Solve,
+            CodeMode::Eval => Action::Call,
+        };
+        Val::Task(Task { action, func, ctx, input }.into())
     }
-}
-
-fn generate_task_map_some(some: &Map<Val, CtxInput<Option<Mode>, Option<Mode>>>) -> Val {
-    let some: Map<Val, Val> = some
-        .iter()
-        .map(|(k, v)| {
-            let ctx = v.ctx.generate();
-            let input = v.input.generate();
-            let pair = Val::Pair(Pair::new(ctx, input).into());
-            (k.clone(), pair)
-        })
-        .collect();
-    Val::Map(some.into())
 }
 
 impl ParseMode<Val> for ListMode {

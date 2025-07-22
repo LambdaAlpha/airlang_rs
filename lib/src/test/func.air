@@ -291,7 +291,7 @@ _ function.represent ==
 repr composite
 -----
 _ do [
-    m = _ mode {pair : eval@ : .},
+    m = _ mode {pair : {} : eval@ : .},
     repr = _ form. {
         code : (.ctx : .in) : .in,
         call_setup : @m : @m,

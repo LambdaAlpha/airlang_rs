@@ -106,36 +106,6 @@ _ not _ not true
 -----
 true
 =====
-non-func call .
------
-_ . 1
------
-_ . 1
-=====
-non-func call true
------
-_ true 1
------
-_ true 1
-=====
-non-func call false
------
-_ false 1
------
-_ false 1
-=====
-non-func call other
------
-_ "a" "b"
------
-_ "a" "b"
-=====
-non-func call recursive
------
-_ "a" _ not true
------
-_ "a" false
-=====
 explicit ctx unit
 -----
 _ do [a = 1, . ; eval .a]

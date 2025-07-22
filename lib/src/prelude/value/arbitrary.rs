@@ -384,20 +384,21 @@ impl Arbitrary for CompMode {
 impl Arbitrary for PairMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let new_depth = depth + 1;
+        let some = Arbitrary::any(rng, new_depth);
         let first = Arbitrary::any(rng, new_depth);
         let second = Arbitrary::any(rng, new_depth);
-        PairMode { first, second }
+        PairMode { some, first, second }
     }
 }
 
 impl Arbitrary for TaskMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let new_depth = depth + 1;
+        let code = Arbitrary::any(rng, new_depth);
         let func = Arbitrary::any(rng, new_depth);
         let ctx = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
-        let some = if rng.random() { Some(Arbitrary::any(rng, new_depth)) } else { None };
-        TaskMode { func, ctx, input, some }
+        TaskMode { code, func, ctx, input }
     }
 }
 

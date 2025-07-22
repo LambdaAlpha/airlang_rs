@@ -149,7 +149,7 @@ pub fn equal() -> ConstStaticPrimFuncVal {
     DynFn {
         id: "==",
         f: const_impl(fn_equal),
-        mode: dyn_mode(FuncMode::pair_mode(ref_mode(), ref_mode())),
+        mode: dyn_mode(FuncMode::pair_mode(Map::default(), ref_mode(), ref_mode())),
     }
     .const_static()
 }

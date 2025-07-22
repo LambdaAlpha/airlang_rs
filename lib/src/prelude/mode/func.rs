@@ -10,7 +10,6 @@ use super::Mode;
 use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
-use super::TaskMapMode;
 use super::TaskMode;
 use super::opt::ModeFn;
 use crate::semantics::ctx::CtxAccess;
@@ -117,16 +116,29 @@ impl FuncMode {
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn pair_mode(first: Option<Mode>, second: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode { pair: Some(PairMode { first, second }), ..Self::default_comp_mode() };
+    pub fn pair_mode(
+        some: Map<Val, Option<Mode>>, first: Option<Mode>, second: Option<Mode>,
+    ) -> Option<Mode> {
+        let mode =
+            CompMode { pair: Some(PairMode { some, first, second }), ..Self::default_comp_mode() };
         Some(Mode::Comp(Box::new(mode)))
     }
 
-    pub fn task_mode(
-        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>, some: Option<TaskMapMode>,
+    pub fn task_form_mode(
+        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>,
     ) -> Option<Mode> {
         let mode = CompMode {
-            task: Some(TaskMode { func, ctx, input, some }),
+            task: Some(TaskMode { code: CodeMode::Form, func, ctx, input }),
+            ..Self::default_comp_mode()
+        };
+        Some(Mode::Comp(Box::new(mode)))
+    }
+
+    pub fn task_eval_mode(
+        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>,
+    ) -> Option<Mode> {
+        let mode = CompMode {
+            task: Some(TaskMode { code: CodeMode::Eval, func, ctx, input }),
             ..Self::default_comp_mode()
         };
         Some(Mode::Comp(Box::new(mode)))
@@ -246,21 +258,18 @@ impl GetCtxAccess for SymbolMode {
 
 impl GetCtxAccess for PairMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.first.ctx_access() & self.second.ctx_access()
+        let some =
+            self.some.values().fold(CtxAccess::Free, |access, mode| access & mode.ctx_access());
+        some & self.first.ctx_access() & self.second.ctx_access()
     }
 }
 
 impl GetCtxAccess for TaskMode {
     fn ctx_access(&self) -> CtxAccess {
-        match &self.some {
-            None => CtxAccess::Mut,
-            Some(some) => {
-                let some = some.values().fold(CtxAccess::Free, |access, mode| {
-                    access & mode.ctx.ctx_access() & mode.input.ctx_access()
-                });
-                let else_ =
-                    self.func.ctx_access() & self.ctx.ctx_access() & self.input.ctx_access();
-                some & else_
+        match self.code {
+            CodeMode::Eval => CtxAccess::Mut,
+            CodeMode::Form => {
+                self.func.ctx_access() & self.ctx.ctx_access() & self.input.ctx_access()
             }
         }
     }

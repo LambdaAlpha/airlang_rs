@@ -192,13 +192,13 @@ _ do [((a : (b . none)) . final) = (_ any .) : (_ any .), [a contract ., b contr
 =====
 = destruct call
 -----
-_ do [(f call a) = _ 1 2, [f, a]]
+_ do [(f call a) = _ id _ 1 2, [f, a]]
 -----
 [1, 2]
 =====
 = destruct infix
 -----
-_ do [(b call a : c) = 1 2 3, [a, b, c]]
+_ do [(b call a : c) = _ id 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====

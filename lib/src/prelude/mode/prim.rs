@@ -1,8 +1,8 @@
+use super::Mode;
 use super::ModeFn;
 use super::SymbolMode;
-use super::TaskMapMode;
-use crate::semantics::core::ListUniForm;
-use crate::semantics::core::MapUniForm;
+use crate::semantics::core::ListForm;
+use crate::semantics::core::MapForm;
 use crate::semantics::core::PairForm;
 use crate::semantics::core::TaskEval;
 use crate::semantics::core::TaskForm;
@@ -15,7 +15,8 @@ use crate::semantics::val::PairVal;
 use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
-use crate::type_::FuncCtxInput;
+use crate::type_::List;
+use crate::type_::Map;
 use crate::type_::Symbol;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -106,27 +107,33 @@ impl MutStaticFn<Val, Symbol, Val> for PrimMode {
 
 impl FreeStaticFn<PairVal, Val> for PrimMode {
     fn free_static_call(&self, input: PairVal) -> Val {
-        match self.pair {
-            None => Val::Pair(input),
-            Some(_) => PairForm { first: self, second: self }.free_static_call(input),
+        if self.pair.is_none() {
+            Val::Pair(input)
+        } else {
+            let some = &Map::<Val, Option<Mode>>::default();
+            PairForm { some, first: self, second: self }.free_static_call(input)
         }
     }
 }
 
 impl ConstStaticFn<Val, PairVal, Val> for PrimMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: PairVal) -> Val {
-        match self.pair {
-            None => Val::Pair(input),
-            Some(_) => PairForm { first: self, second: self }.const_static_call(ctx, input),
+        if self.pair.is_none() {
+            Val::Pair(input)
+        } else {
+            let some = &Map::<Val, Option<Mode>>::default();
+            PairForm { some, first: self, second: self }.const_static_call(ctx, input)
         }
     }
 }
 
 impl MutStaticFn<Val, PairVal, Val> for PrimMode {
     fn mut_static_call(&self, ctx: &mut Val, input: PairVal) -> Val {
-        match self.pair {
-            None => Val::Pair(input),
-            Some(_) => PairForm { first: self, second: self }.mut_static_call(ctx, input),
+        if self.pair.is_none() {
+            Val::Pair(input)
+        } else {
+            let some = &Map::<Val, Option<Mode>>::default();
+            PairForm { some, first: self, second: self }.mut_static_call(ctx, input)
         }
     }
 }
@@ -135,15 +142,11 @@ impl FreeStaticFn<TaskVal, Val> for PrimMode {
     fn free_static_call(&self, input: TaskVal) -> Val {
         match self.task {
             None => Val::Task(input),
-            Some(mode) => match mode {
+            Some(code) => match code {
                 CodeMode::Form => {
-                    let some = &TaskMapMode::default();
-                    let else_ = FuncCtxInput { func: self, ctx: self, input: self };
-                    TaskForm { some, else_ }.free_static_call(input)
+                    TaskForm { func: self, ctx: self, input: self }.free_static_call(input)
                 }
-                CodeMode::Eval => {
-                    TaskEval { func: self, ctx: self, input: self }.free_static_call(input)
-                }
+                CodeMode::Eval => TaskEval { func: self }.free_static_call(input),
             },
         }
     }
@@ -153,15 +156,11 @@ impl ConstStaticFn<Val, TaskVal, Val> for PrimMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: TaskVal) -> Val {
         match self.task {
             None => Val::Task(input),
-            Some(mode) => match mode {
+            Some(code) => match code {
                 CodeMode::Form => {
-                    let some = &TaskMapMode::default();
-                    let else_ = FuncCtxInput { func: self, ctx: self, input: self };
-                    TaskForm { some, else_ }.const_static_call(ctx, input)
+                    TaskForm { func: self, ctx: self, input: self }.const_static_call(ctx, input)
                 }
-                CodeMode::Eval => {
-                    TaskEval { func: self, ctx: self, input: self }.const_static_call(ctx, input)
-                }
+                CodeMode::Eval => TaskEval { func: self }.const_static_call(ctx, input),
             },
         }
     }
@@ -171,15 +170,11 @@ impl MutStaticFn<Val, TaskVal, Val> for PrimMode {
     fn mut_static_call(&self, ctx: &mut Val, input: TaskVal) -> Val {
         match self.task {
             None => Val::Task(input),
-            Some(mode) => match mode {
+            Some(code) => match code {
                 CodeMode::Form => {
-                    let some = &TaskMapMode::default();
-                    let else_ = FuncCtxInput { func: self, ctx: self, input: self };
-                    TaskForm { some, else_ }.mut_static_call(ctx, input)
+                    TaskForm { func: self, ctx: self, input: self }.mut_static_call(ctx, input)
                 }
-                CodeMode::Eval => {
-                    TaskEval { func: self, ctx: self, input: self }.mut_static_call(ctx, input)
-                }
+                CodeMode::Eval => TaskEval { func: self }.mut_static_call(ctx, input),
             },
         }
     }
@@ -187,54 +182,66 @@ impl MutStaticFn<Val, TaskVal, Val> for PrimMode {
 
 impl FreeStaticFn<ListVal, Val> for PrimMode {
     fn free_static_call(&self, input: ListVal) -> Val {
-        match self.list {
-            None => Val::List(input),
-            Some(_) => ListUniForm { item: self }.free_static_call(input),
+        if self.list.is_none() {
+            Val::List(input)
+        } else {
+            let head = &List::<Option<Mode>>::default();
+            ListForm { head, tail: self }.free_static_call(input)
         }
     }
 }
 
 impl ConstStaticFn<Val, ListVal, Val> for PrimMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: ListVal) -> Val {
-        match self.list {
-            None => Val::List(input),
-            Some(_) => ListUniForm { item: self }.const_static_call(ctx, input),
+        if self.list.is_none() {
+            Val::List(input)
+        } else {
+            let head = &List::<Option<Mode>>::default();
+            ListForm { head, tail: self }.const_static_call(ctx, input)
         }
     }
 }
 
 impl MutStaticFn<Val, ListVal, Val> for PrimMode {
     fn mut_static_call(&self, ctx: &mut Val, input: ListVal) -> Val {
-        match self.list {
-            None => Val::List(input),
-            Some(_) => ListUniForm { item: self }.mut_static_call(ctx, input),
+        if self.list.is_none() {
+            Val::List(input)
+        } else {
+            let head = &List::<Option<Mode>>::default();
+            ListForm { head, tail: self }.mut_static_call(ctx, input)
         }
     }
 }
 
 impl FreeStaticFn<MapVal, Val> for PrimMode {
     fn free_static_call(&self, input: MapVal) -> Val {
-        match self.map {
-            None => Val::Map(input),
-            Some(_) => MapUniForm { value: self }.free_static_call(input),
+        if self.map.is_none() {
+            Val::Map(input)
+        } else {
+            let some = &Map::<Val, Option<Mode>>::default();
+            MapForm { some, else_: self }.free_static_call(input)
         }
     }
 }
 
 impl ConstStaticFn<Val, MapVal, Val> for PrimMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
-        match self.map {
-            None => Val::Map(input),
-            Some(_) => MapUniForm { value: self }.const_static_call(ctx, input),
+        if self.map.is_none() {
+            Val::Map(input)
+        } else {
+            let some = &Map::<Val, Option<Mode>>::default();
+            MapForm { some, else_: self }.const_static_call(ctx, input)
         }
     }
 }
 
 impl MutStaticFn<Val, MapVal, Val> for PrimMode {
     fn mut_static_call(&self, ctx: &mut Val, input: MapVal) -> Val {
-        match self.map {
-            None => Val::Map(input),
-            Some(_) => MapUniForm { value: self }.mut_static_call(ctx, input),
+        if self.map.is_none() {
+            Val::Map(input)
+        } else {
+            let some = &Map::<Val, Option<Mode>>::default();
+            MapForm { some, else_: self }.mut_static_call(ctx, input)
         }
     }
 }

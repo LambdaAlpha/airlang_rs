@@ -35,6 +35,7 @@ use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Clone)]
@@ -90,7 +91,7 @@ impl Prelude for CtxPrelude {
 }
 
 fn ctx_var_mode(mode: Option<Mode>) -> DynFuncMode {
-    dyn_mode(FuncMode::pair_mode(FuncMode::symbol_mode(SymbolMode::Literal), mode))
+    dyn_mode(FuncMode::pair_mode(Map::default(), FuncMode::symbol_mode(SymbolMode::Literal), mode))
 }
 
 pub fn read() -> ConstStaticPrimFuncVal {
@@ -142,6 +143,7 @@ pub fn assign() -> MutStaticPrimFuncVal {
         id: "=",
         f: mut_impl(fn_assign),
         mode: dyn_mode(FuncMode::pair_mode(
+            Map::default(),
             FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
             FuncMode::default_mode(),
         )),
