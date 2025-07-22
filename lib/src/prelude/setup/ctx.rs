@@ -66,8 +66,7 @@ fn fn_ref_mut(ctx: &mut Val, input: Val) -> Val {
             error!("ctx {ctx:?} should be a ctx");
             return Val::default();
         };
-        let val =
-            ctx.variables_mut().remove(Symbol::from_str_unchecked(&s[1 ..])).unwrap_or_default();
+        let val = ctx.remove(Symbol::from_str_unchecked(&s[1 ..])).unwrap_or_default();
         return RefCtx::escape_symbol(val);
     }
     input

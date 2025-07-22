@@ -11,6 +11,8 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use std::ops::BitAnd;
 
+use derive_more::Deref;
+use derive_more::DerefMut;
 use derive_more::IsVariant;
 
 use crate::type_::Map;
@@ -21,7 +23,7 @@ pub enum CtxError {
     AccessDenied,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deref, DerefMut)]
 pub struct Ctx {
     variables: CtxMap,
 }
@@ -45,14 +47,6 @@ impl Ctx {
 
     pub(crate) fn destruct(self) -> PubCtx {
         PubCtx { variables: self.variables }
-    }
-
-    pub fn variables(&self) -> &CtxMap {
-        &self.variables
-    }
-
-    pub fn variables_mut(&mut self) -> &mut CtxMap {
-        &mut self.variables
     }
 }
 

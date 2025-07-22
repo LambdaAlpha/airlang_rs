@@ -22,15 +22,15 @@ pub struct CtxMap {
 pub enum Contract {
     #[default]
     None,
-    // the reference is `static` in the past and in the future
-    // but the value may change in the past or in the future
-    Static,
     // the reference and the value are `still` unchanged in the past
     // but the reference and the value may change in the future
     Still,
     // the reference and the value are `final` in the future
     // but the reference and the value may change in the past
     Final,
+    // the reference is `static` in the past and in the future
+    // but the value may change in the past or in the future
+    Static,
     // the reference and the value are `constant` in the past and in the future
     Const,
 }

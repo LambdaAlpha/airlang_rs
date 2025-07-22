@@ -28,7 +28,7 @@ _ do [
     f = _ function {
         call_setup : eval@,
         code : (._ : .i) : _ .not .i,
-        context : _ context {variables :  {not : not}},
+        context : _ context {not : not},
     },
     _ f _ not true
 ]
@@ -41,7 +41,7 @@ _ do [
     f = _ function {
         call_setup : eval@,
         code : (._ : .a) : _ .n .a,
-        context : _ context {variables :  {n : not}},
+        context : _ context {n : not},
     },
     _ f _ not true
 ]
@@ -55,7 +55,7 @@ _ do [
         code : ._ : _ do [.a = .a + 1, .a],
         context_access : free,
         cell : true,
-        context : _ context {variables : {a : 0}},
+        context : _ context {a : 0},
     },
     [_ .f ., _ .f ., _ .f .]
 ]
@@ -70,9 +70,9 @@ _ do [
         code : (.c : ._) : _ do [.b = .b + .c ; read .a : ., .b],
         context_access : constant,
         cell : true,
-        context : _ context {variables : {
+        context : _ context {
             b : 0,
-        }},
+        },
     },
     [_ .f ., _ .f ., _ .f .]
 ]
@@ -91,9 +91,9 @@ _ do [
         ],
         context_access : mutable,
         cell : true,
-        context : _ context {variables : {
+        context : _ context {
             b : 0,
-        }},
+        },
     },
     [_ .f ., _ .f ., _ .f .]
 ]
@@ -112,9 +112,9 @@ _ do [
         ],
         context_access : mutable,
         cell : true,
-        context : _ context {variables : {
+        context : _ context {
             b : 0,
-        }},
+        },
     },
     [_ .f ., _ .f ., _ .f .]
 ]
@@ -132,14 +132,14 @@ _ do [
         ],
         context_access : mutable,
         cell : true,
-        context : _ context {variables : {
+        context : _ context {
             b : 0,
-        }},
+        },
     },
-    (ctx . final) = _ context {variables : {
+    (ctx . final) = _ context {
         a : 1,
         f : #f,
-    }},
+    },
     ctx ; eval [_ ..f ., _ ..f ., _ ..f .]
 ]
 -----
@@ -148,9 +148,9 @@ _ do [
 cell ctx explicit
 -----
 _ do [
-    c = _ context {variables : {
+    c = _ context {
         a : 1,
-    }},
+    },
     f = _ function {
         code : (.c : ._) : _ do [
             .b = .b + .c ; read .a : .,
@@ -159,9 +159,9 @@ _ do [
         ],
         context_access : mutable,
         cell : true,
-        context : _ context {variables : {
+        context : _ context {
             b : 0,
-        }},
+        },
     },
     [c ; .f ., c ; .f ., c ; .f .]
 ]
@@ -242,7 +242,7 @@ _ do [
     f = _ function {
         code : (.ctx : ._) : 2,
         context_access : constant,
-        context : _ context {variables : {ctx : 3 . .constant}},
+        context : _ context {ctx : constant : 3},
     },
     _ f .,
     a == 1
@@ -431,7 +431,7 @@ _ do [f = _ function {code : (.ctx : .i) : .i}, f ; function.code .]
 ctx
 -----
 _ do [
-    ctx = _ context {variables : {a : 1}},
+    ctx = _ context {a : 1},
     f = _ function {context : ctx},
     (f ; function.context .) == ctx
 ]

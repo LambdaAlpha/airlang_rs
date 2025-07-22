@@ -75,14 +75,14 @@ where Fn: ConstStaticFn<Val, Val, Val>
                 let Val::Ctx(ctx) = &*ctx else {
                     return Val::default();
                 };
-                ctx.variables().get_ref(s).cloned().unwrap_or_default()
+                ctx.get_ref(s).cloned().unwrap_or_default()
             }
             SYMBOL_MOVE_CHAR => Val::default(),
             SYMBOL_EVAL_CHAR => {
                 let Val::Ctx(ctx1) = &*ctx else {
                     return Val::default();
                 };
-                let Ok(val) = ctx1.variables().get_ref(s) else {
+                let Ok(val) = ctx1.get_ref(s) else {
                     return Val::default();
                 };
                 let val = val.clone();
@@ -104,19 +104,19 @@ where Fn: MutStaticFn<Val, Val, Val>
                 let Val::Ctx(ctx) = &*ctx else {
                     return Val::default();
                 };
-                ctx.variables().get_ref(s).cloned().unwrap_or_default()
+                ctx.get_ref(s).cloned().unwrap_or_default()
             }
             SYMBOL_MOVE_CHAR => {
                 let Val::Ctx(ctx) = ctx else {
                     return Val::default();
                 };
-                ctx.variables_mut().remove(s).unwrap_or_default()
+                ctx.remove(s).unwrap_or_default()
             }
             SYMBOL_EVAL_CHAR => {
                 let Val::Ctx(ctx1) = &*ctx else {
                     return Val::default();
                 };
-                let Ok(val) = ctx1.variables().get_ref(s) else {
+                let Ok(val) = ctx1.get_ref(s) else {
                     return Val::default();
                 };
                 self.f.mut_static_call(ctx, val.clone())
@@ -486,11 +486,11 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
         let Val::Ctx(ctx_val) = c else {
             return Val::default();
         };
-        let Ok(ctx_value) = ctx_val.variables_mut().lock(task.func.clone()) else {
+        let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
             return Val::default();
         };
         let Val::Func(func) = ctx_value.val else {
-            ctx_val.variables_mut().unlock(task.func, ctx_value.val);
+            ctx_val.unlock(task.func, ctx_value.val);
             return Val::default();
         };
         match task.action {
@@ -501,7 +501,7 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
                 let Val::Ctx(ctx_val) = c else {
                     unreachable!("TaskRefEval call ctx invariant is broken!!!");
                 };
-                ctx_val.variables_mut().unlock(task.func, Val::Func(func));
+                ctx_val.unlock(task.func, Val::Func(func));
                 output
             }
             Action::Solve => {
@@ -510,7 +510,7 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
                 let Val::Ctx(ctx_val) = c else {
                     unreachable!("TaskRefEval solve ctx invariant is broken!!!");
                 };
-                ctx_val.variables_mut().unlock(task.func.clone(), Val::Func(func));
+                ctx_val.unlock(task.func.clone(), Val::Func(func));
                 let task = Task { action: Action::Solve, func: Val::Symbol(task.func), ctx, input };
                 Solve.const_static_call(ConstRef::new(c), Val::Task(task.into()))
             }
@@ -523,11 +523,11 @@ impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
         let Val::Ctx(ctx_val) = c else {
             return Val::default();
         };
-        let Ok(ctx_value) = ctx_val.variables_mut().lock(task.func.clone()) else {
+        let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
-            ctx_val.variables_mut().unlock(task.func, ctx_value.val);
+            ctx_val.unlock(task.func, ctx_value.val);
             return Val::default();
         };
         match task.action {
@@ -542,7 +542,7 @@ impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
                 let Val::Ctx(ctx_val) = c else {
                     unreachable!("TaskRefEval call ctx invariant is broken!!!");
                 };
-                ctx_val.variables_mut().unlock(task.func, Val::Func(func));
+                ctx_val.unlock(task.func, Val::Func(func));
                 output
             }
             Action::Solve => {
@@ -551,7 +551,7 @@ impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
                 let Val::Ctx(ctx_val) = c else {
                     unreachable!("TaskRefEval solve ctx invariant is broken!!!");
                 };
-                ctx_val.variables_mut().unlock(task.func.clone(), Val::Func(func));
+                ctx_val.unlock(task.func.clone(), Val::Func(func));
                 let task = Task { action: Action::Solve, func: Val::Symbol(task.func), ctx, input };
                 Solve.mut_static_call(c, Val::Task(task.into()))
             }
@@ -652,11 +652,11 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefApply {
         };
         match task.action {
             Action::Call => {
-                let Ok(ctx_value) = ctx_val.variables_mut().lock(task.func.clone()) else {
+                let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
                     return Val::default();
                 };
                 let Val::Func(func) = ctx_value.val else {
-                    ctx_val.variables_mut().unlock(task.func, ctx_value.val);
+                    ctx_val.unlock(task.func, ctx_value.val);
                     return Val::default();
                 };
                 let output =
@@ -664,11 +664,11 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefApply {
                 let Val::Ctx(ctx_val) = ctx else {
                     unreachable!("TaskRefApply ctx invariant is broken!!!");
                 };
-                ctx_val.variables_mut().unlock(task.func, Val::Func(func));
+                ctx_val.unlock(task.func, Val::Func(func));
                 output
             }
             Action::Solve => {
-                let Ok(val) = ctx_val.variables().get_ref(task.func.clone()) else {
+                let Ok(val) = ctx_val.get_ref(task.func.clone()) else {
                     return Val::default();
                 };
                 let Val::Func(_) = val else {
@@ -693,11 +693,11 @@ impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefApply {
         };
         match task.action {
             Action::Call => {
-                let Ok(ctx_value) = ctx_val.variables_mut().lock(task.func.clone()) else {
+                let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
                     return Val::default();
                 };
                 let Val::Func(mut func) = ctx_value.val else {
-                    ctx_val.variables_mut().unlock(task.func, ctx_value.val);
+                    ctx_val.unlock(task.func, ctx_value.val);
                     return Val::default();
                 };
                 let output = if ctx_value.contract.is_mutable() {
@@ -708,11 +708,11 @@ impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefApply {
                 let Val::Ctx(ctx_val) = ctx else {
                     unreachable!("TaskRefApply ctx invariant is broken!!!");
                 };
-                ctx_val.variables_mut().unlock(task.func, Val::Func(func));
+                ctx_val.unlock(task.func, Val::Func(func));
                 output
             }
             Action::Solve => {
-                let Ok(val) = ctx_val.variables().get_ref(task.func.clone()) else {
+                let Ok(val) = ctx_val.get_ref(task.func.clone()) else {
                     return Val::default();
                 };
                 let Val::Func(_) = val else {
@@ -740,7 +740,7 @@ fn const_static_func_call(c: ConstRef<Val>, func: &FuncVal, ctx: Val, input: Val
     let Val::Symbol(name) = ctx else {
         return Val::default();
     };
-    let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
+    let Ok(val_ref) = ctx_val.get_ref_dyn(name) else {
         return Val::default();
     };
     func.const_static_call(val_ref.into_const(), input)
@@ -756,7 +756,7 @@ fn mut_static_func_call(c: &mut Val, func: &FuncVal, ctx: Val, input: Val) -> Va
     let Val::Symbol(name) = ctx else {
         return Val::default();
     };
-    let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
+    let Ok(val_ref) = ctx_val.get_ref_dyn(name) else {
         return Val::default();
     };
     func.dyn_static_call(val_ref, input)
@@ -772,7 +772,7 @@ fn mut_cell_func_call(c: &mut Val, func: &mut FuncVal, ctx: Val, input: Val) -> 
     let Val::Symbol(name) = ctx else {
         return Val::default();
     };
-    let Ok(val_ref) = ctx_val.variables_mut().get_ref_dyn(name) else {
+    let Ok(val_ref) = ctx_val.get_ref_dyn(name) else {
         return Val::default();
     };
     func.dyn_cell_call(val_ref, input)

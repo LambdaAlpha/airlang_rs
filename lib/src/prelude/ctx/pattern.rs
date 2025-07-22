@@ -127,7 +127,7 @@ fn parse_with_guard(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
         return None;
     };
     let pair = Pair::from(pair);
-    ctx.contract = parse_contract(pair.second);
+    ctx.contract = parse_contract(&pair.second);
     parse_pattern(ctx, pair.first)
 }
 
@@ -206,9 +206,7 @@ pub(in crate::prelude) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: V
 }
 
 fn assign_any(ctx: &mut Ctx, binding: OptBinding, val: Val) -> Val {
-    let Ok(last) =
-        ctx.variables_mut().put(binding.name.clone(), val, binding.contract.unwrap_or_default())
-    else {
+    let Ok(last) = ctx.put(binding.name.clone(), val, binding.contract.unwrap_or_default()) else {
         error!("variable {:?} is not assignable", binding.name);
         return Val::default();
     };

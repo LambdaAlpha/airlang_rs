@@ -185,7 +185,7 @@ fn get_by_ref<T, F>(ctx: &Ctx, v: Either<Symbol, Val>, f: F) -> T
 where F: FnOnce(Option<&Val>) -> T {
     match v {
         Either::This(s) => {
-            let Ok(val) = ctx.variables().get_ref(s.clone()) else {
+            let Ok(val) = ctx.get_ref(s.clone()) else {
                 error!("variable {s:?} should exist");
                 return f(None);
             };

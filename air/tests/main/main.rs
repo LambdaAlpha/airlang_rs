@@ -57,7 +57,7 @@ fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
     let mut air = Air::default();
     let main = air.interpret(src);
     let main_name = Symbol::from_str_unchecked(MAIN_NAME);
-    air.ctx_mut().variables_mut().put(main_name, main, Contract::Final)?;
+    air.ctx_mut().put(main_name, main, Contract::Final)?;
     Ok(air)
 }
 

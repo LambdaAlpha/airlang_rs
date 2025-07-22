@@ -113,7 +113,7 @@ fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    ctx.variables().get_ref(s).cloned().unwrap_or_default()
+    ctx.get_ref(s).cloned().unwrap_or_default()
 }
 
 pub fn move_() -> MutStaticPrimFuncVal {
@@ -135,7 +135,7 @@ fn fn_move(ctx: &mut Val, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    ctx.variables_mut().remove(s).unwrap_or_default()
+    ctx.remove(s).unwrap_or_default()
 }
 
 pub fn assign() -> MutStaticPrimFuncVal {
@@ -193,7 +193,7 @@ fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    let Some(contract) = ctx.variables().get_contract(s.clone()) else {
+    let Some(contract) = ctx.get_contract(s.clone()) else {
         error!("variable {s:?} should exist");
         return Val::default();
     };
@@ -223,11 +223,11 @@ fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    let Some(contract) = parse_contract(pair.second) else {
+    let Some(contract) = parse_contract(&pair.second) else {
         error!("parse contract failed");
         return Val::default();
     };
-    let _ = ctx.variables_mut().set_contract(s, contract);
+    let _ = ctx.set_contract(s, contract);
     Val::default()
 }
 
@@ -254,7 +254,7 @@ fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    let Some(locked) = ctx.variables().is_locked(s.clone()) else {
+    let Some(locked) = ctx.is_locked(s.clone()) else {
         error!("variable {s:?} should exist");
         return Val::default();
     };
@@ -280,7 +280,7 @@ fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input.first {:?} should be a symbol", pair.first);
         return Val::default();
     };
-    Val::Bit(Bit::from(ctx.variables().is_null(s)))
+    Val::Bit(Bit::from(ctx.is_null(s)))
 }
 
 pub fn is_const() -> MutStaticPrimFuncVal {

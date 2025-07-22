@@ -5,7 +5,7 @@ _ do [
         cell : true,
         context_access : .free,
         code : ._ : _ do [.a = .a + 1, .a],
-        context : _ context {variables : {a : 0}},
+        context : _ context {a : 0},
     },
     _ set_solver! #s1,
     s2 = _ solver! .,

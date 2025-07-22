@@ -53,14 +53,14 @@ where Fn: MutStaticFn<Val, Val, Val> {
 }
 
 fn put_input(inner: &mut Ctx, input_name: Symbol, input: Val) -> Result<(), CtxError> {
-    let _ = inner.variables_mut().put(input_name, input, Contract::None)?;
+    let _ = inner.put(input_name, input, Contract::None)?;
     Ok(())
 }
 
 fn with_ctx(
     inner: &mut Ctx, mut outer: DynRef<Val>, name: Symbol, f: impl FnOnce(&mut Ctx) -> Val,
 ) -> Val {
-    if !inner.variables().is_null(name.clone()) {
+    if !inner.is_null(name.clone()) {
         return Val::default();
     }
     keep_ctx(inner, outer.reborrow(), name.clone());
@@ -74,11 +74,11 @@ fn keep_ctx(inner: &mut Ctx, outer: DynRef<Val>, name: Symbol) {
     // here is why we need a `&mut Ctx` for a const func
     let outer = take(outer.unwrap());
     let contract = if const_ { Contract::Const } else { Contract::Static };
-    let _ = inner.variables_mut().put_unchecked(name, CtxValue::new(outer, contract));
+    let _ = inner.put_unchecked(name, CtxValue::new(outer, contract));
 }
 
 fn restore_ctx(inner: &mut Ctx, outer: &mut Val, name: Symbol) {
-    let Some(ctx_val) = inner.variables_mut().remove_unchecked(&name) else {
+    let Some(ctx_val) = inner.remove_unchecked(&name) else {
         unreachable!("restore_ctx ctx invariant is broken!!!");
     };
     *outer = ctx_val.val;

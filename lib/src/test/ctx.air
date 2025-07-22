@@ -26,7 +26,7 @@ read still
 -----
 _ do [
     v = _ any .,
-    a = _ context {variables : {(b . still) : v}},
+    a = _ context {b : still : v},
     v == a ; read b : .
 ]
 -----
@@ -36,7 +36,7 @@ read static
 -----
 _ do [
     v = _ any .,
-    a = _ context {variables : {(b . static) : v}},
+    a = _ context {b : static : v},
     v == a ; read b : .
 ]
 -----
@@ -46,7 +46,7 @@ read const
 -----
 _ do [
     v = _ any .,
-    a = _ context {variables : {(b . constant) : v}},
+    a = _ context {b : constant : v},
     v == a ; read b : .
 ]
 -----
@@ -74,7 +74,7 @@ move still
 -----
 _ do [
     v = _ any .,
-    a = _ context {variables : {(b . still) : v}},
+    a = _ context {b : still : v},
     (v == a ; move b : .) and (a ; is_null b : .)
 ]
 -----
@@ -84,7 +84,7 @@ move static
 -----
 _ do [
     v = _ any .,
-    a = _ context {variables : {(b . static) : v}},
+    a = _ context {b : static : v},
     (. == a ; move b : .) and (_ not a ; is_null b : .)
 ]
 -----
@@ -94,7 +94,7 @@ move const
 -----
 _ do [
     v = _ any .,
-    a = _ context {variables : {(b . constant) : v}},
+    a = _ context {b : constant : v},
     (. == a ; move b : .) and (_ not a ; is_null b : .)
 ]
 -----
@@ -294,13 +294,13 @@ _ do [(a . final) = 1, (a . final) = _ any ., a]
 =====
 set_contract still none
 -----
-_ do [c = _ context {variables : {(a . still) : _ any .}}, c ; set_contract a : none, c ; contract a : .]
+_ do [c = _ context {a : still : _ any .}, c ; set_contract a : none, c ; contract a : .]
 -----
 none
 =====
 set_contract still none
 -----
-_ do [c = _ context {variables : {(a . still) : _ any .}}, c ; set_contract a : final, c ; contract a : .]
+_ do [c = _ context {a : still : _ any .}, c ; set_contract a : final, c ; contract a : .]
 -----
 final
 =====
@@ -330,25 +330,25 @@ final
 =====
 set_contract static const
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : constant, c ; contract a : .]
+_ do [c = _ context {a : static : _ any .}, c ; set_contract a : constant, c ; contract a : .]
 -----
 static
 =====
 set_contract static still
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : still, c ; contract a : .]
+_ do [c = _ context {a : static : _ any .}, c ; set_contract a : still, c ; contract a : .]
 -----
 static
 =====
 set_contract static final
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : final, c ; contract a : .]
+_ do [c = _ context {a : static : _ any .}, c ; set_contract a : final, c ; contract a : .]
 -----
 static
 =====
 set_contract static none
 -----
-_ do [c = _ context {variables : {(a . static) : _ any .}}, c ; set_contract a : none, c ; contract a : .]
+_ do [c = _ context {a : static : _ any .}, c ; set_contract a : none, c ; contract a : .]
 -----
 static
 =====
@@ -416,13 +416,13 @@ false
 =====
 static move
 -----
-_ do [c = _ context {variables : {(a . static) : 1}}, c ; move a : ., c ; read a : .]
+_ do [c = _ context {a : static : 1}, c ; move a : ., c ; read a : .]
 -----
 1
 =====
 static = to static
 -----
-_ do [c = _ context {variables : {(a . static) : 1}}, c ; = a : 2, c ; read a : .]
+_ do [c = _ context {a : static : 1}, c ; = a : 2, c ; read a : .]
 -----
 1
 =====
@@ -453,7 +453,7 @@ false
 ; 1
 -----
 _ do [
-    a = _ context {variables : {p : 1 : 2}},
+    a = _ context {p : 1 : 2},
     b = 3,
     a ; eval .p ; pair.set_first b,
     a ; move p : .,
@@ -464,7 +464,7 @@ _ do [
 ; 2
 -----
 _ do [
-    a = _ context {variables : {p : 1 : 2, b : 3}},
+    a = _ context {p : 1 : 2, b : 3},
     a ; eval .p ; pair.set_first .b,
     a ; move p : .,
 ]
@@ -475,7 +475,7 @@ _ do [
 -----
 _ do [
     set_first = pair.set_first,
-    a = _ context {variables : {set_first : #set_first, p : 1 : 2, b : 3}},
+    a = _ context {set_first : #set_first, p : 1 : 2, b : 3},
     a ; eval .p ; .set_first .b,
     a ; move p : .,
 ]
@@ -485,7 +485,7 @@ _ do [
 ; recursive
 -----
 _ do [
-    a = _ context {variables : {b : _ context {variables : {c : 1}}}},
+    a = _ context {b : _ context {c : 1}},
     a ; eval .b ; eval ..c
 ]
 -----
@@ -517,13 +517,18 @@ _ context.represent _ context {}
 =====
 represent else
 -----
-_ context.represent _ context {variables : {(a . constant) : 1}}
+_ context.represent _ context {a : constant : 1}
 -----
-{variables : {(a . constant) : 1}}
+{a : constant : 1}
 =====
 represent non-recursive
 -----
-_ do [{variables : m} = _ context.represent _ context {variables : {b : _ context {}}}, b = m ; map.remove .b, b ; type .]
+_ do [
+    m = _ context.represent _ context {b : _ context {}},
+    b = m ; map.remove .b,
+    b = b ; pair.second .,
+    b ; type .
+]
 -----
 context
 =====

@@ -283,7 +283,7 @@ where ValIter: Iterator<Item = Val> {
         };
         for val in values {
             if let Val::Ctx(ctx_val) = ctx {
-                let _ = ctx_val.variables_mut().put(name.clone(), val, Contract::None);
+                let _ = ctx_val.put(name.clone(), val, Contract::None);
             }
             let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
@@ -298,7 +298,7 @@ where ValIter: Iterator<Item = Val> {
     } else {
         for val in values {
             if let Val::Ctx(ctx_val) = ctx {
-                let _ = ctx_val.variables_mut().put(name.clone(), val, Contract::None);
+                let _ = ctx_val.put(name.clone(), val, Contract::None);
             }
             Eval.mut_static_call(ctx, body.clone());
         }

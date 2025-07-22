@@ -96,7 +96,7 @@ fn import_from_url(url: String) -> Val {
 }
 
 fn get_cur_url(ctx: &Ctx, key: Symbol) -> Option<String> {
-    if let Ok(val) = ctx.variables().get_ref(key) {
+    if let Ok(val) = ctx.get_ref(key) {
         return if let Val::Text(url) = val { Some((***url).clone()) } else { None };
     }
     let Ok(cur_dir) = current_dir() else {
@@ -109,7 +109,7 @@ fn get_cur_url(ctx: &Ctx, key: Symbol) -> Option<String> {
 }
 
 fn set_cur_url(ctx: &mut Ctx, key: Symbol, new_url: String) -> bool {
-    ctx.variables_mut().put(key, Val::Text(Text::from(new_url).into()), Contract::None).is_ok()
+    ctx.put(key, Val::Text(Text::from(new_url).into()), Contract::None).is_ok()
 }
 
 fn join_url(cur_url: &str, url: &str) -> Option<String> {
