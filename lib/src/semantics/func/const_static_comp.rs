@@ -6,9 +6,11 @@ use super::setup::impl_dyn_setup;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
+use crate::type_::Symbol;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct ConstStaticCompFunc {
+    pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
     pub(crate) setup: DynSetup,

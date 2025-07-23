@@ -223,21 +223,8 @@ impl FuncSetup for FuncVal {
 }
 
 impl FuncVal {
-    pub fn id(&self) -> Option<Symbol> {
-        match self {
-            FuncVal::FreeCellPrim(f) => Some(f.id.clone()),
-            FuncVal::FreeCellComp(_) => None,
-            FuncVal::FreeStaticPrim(f) => Some(f.id.clone()),
-            FuncVal::FreeStaticComp(_) => None,
-            FuncVal::ConstCellPrim(f) => Some(f.id.clone()),
-            FuncVal::ConstCellComp(_) => None,
-            FuncVal::ConstStaticPrim(f) => Some(f.id.clone()),
-            FuncVal::ConstStaticComp(_) => None,
-            FuncVal::MutCellPrim(f) => Some(f.id.clone()),
-            FuncVal::MutCellComp(_) => None,
-            FuncVal::MutStaticPrim(f) => Some(f.id.clone()),
-            FuncVal::MutStaticComp(_) => None,
-        }
+    pub fn id(&self) -> Symbol {
+        match_func_val!(self, f => f.id.clone())
     }
 
     pub fn ctx(&self) -> Option<&Ctx> {

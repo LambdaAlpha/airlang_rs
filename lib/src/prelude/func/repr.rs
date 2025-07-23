@@ -70,6 +70,7 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
         return None;
     };
 
+    let id = parse_id(map_remove(&mut map, ID))?;
     // todo design
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let ctx = parse_ctx(map_remove(&mut map, CTX))?;
@@ -82,10 +83,10 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
     let func = match ctx_access {
         FREE => {
             if cell {
-                let func = FreeCellCompFunc { comp: free_comp, ctx, setup: setup.into() };
+                let func = FreeCellCompFunc { id, comp: free_comp, ctx, setup: setup.into() };
                 FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
             } else {
-                let func = FreeStaticCompFunc { comp: free_comp, ctx, setup: setup.into() };
+                let func = FreeStaticCompFunc { id, comp: free_comp, ctx, setup: setup.into() };
                 FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
             }
         }
@@ -93,10 +94,10 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
             if cell {
-                let func = ConstCellCompFunc { comp, ctx, setup };
+                let func = ConstCellCompFunc { id, comp, ctx, setup };
                 FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
             } else {
-                let func = ConstStaticCompFunc { comp, ctx, setup };
+                let func = ConstStaticCompFunc { id, comp, ctx, setup };
                 FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
             }
         }
@@ -104,10 +105,10 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
             if cell {
-                let func = MutCellCompFunc { comp, ctx, setup };
+                let func = MutCellCompFunc { id, comp, ctx, setup };
                 FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
             } else {
-                let func = MutStaticCompFunc { comp, ctx, setup };
+                let func = MutStaticCompFunc { id, comp, ctx, setup };
                 FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
             }
         }
@@ -117,6 +118,14 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
         }
     };
     Some(func)
+}
+
+fn parse_id(id: Val) -> Option<Symbol> {
+    match id {
+        Val::Unit(_) => Some(Symbol::default()),
+        Val::Symbol(id) => Some(id),
+        _ => None,
+    }
 }
 
 struct FuncCode {
@@ -265,7 +274,7 @@ fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
     let f = FreeCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp = CompRepr { access: FREE, cell: true, setup: f.setup.into(), ctx: f.ctx };
+    let comp = CompRepr { id: f.id, access: FREE, cell: true, setup: f.setup.into(), ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -277,8 +286,13 @@ fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
 fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp =
-        CompRepr { access: FREE, cell: false, setup: f.setup.clone().into(), ctx: f.ctx.clone() };
+    let comp = CompRepr {
+        id: f.id.clone(),
+        access: FREE,
+        cell: false,
+        setup: f.setup.clone().into(),
+        ctx: f.ctx.clone(),
+    };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -292,7 +306,7 @@ fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
     let f = ConstCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { access: CONST, cell: true, setup: f.setup, ctx: f.ctx };
+    let comp = CompRepr { id: f.id, access: CONST, cell: true, setup: f.setup, ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -304,7 +318,13 @@ fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
 fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { access: CONST, cell: false, setup: f.setup.clone(), ctx: f.ctx.clone() };
+    let comp = CompRepr {
+        id: f.id.clone(),
+        access: CONST,
+        cell: false,
+        setup: f.setup.clone(),
+        ctx: f.ctx.clone(),
+    };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -318,7 +338,7 @@ fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
     let f = MutCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { access: MUTABLE, cell: true, setup: f.setup, ctx: f.ctx };
+    let comp = CompRepr { id: f.id, access: MUTABLE, cell: true, setup: f.setup, ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -330,8 +350,13 @@ fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
 fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp =
-        CompRepr { access: MUTABLE, cell: false, setup: f.setup.clone(), ctx: f.ctx.clone() };
+    let comp = CompRepr {
+        id: f.id.clone(),
+        access: MUTABLE,
+        cell: false,
+        setup: f.setup.clone(),
+        ctx: f.ctx.clone(),
+    };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -373,6 +398,7 @@ fn dyn_code(comp: &DynComposite) -> Val {
 }
 
 struct CompRepr {
+    id: Symbol,
     access: &'static str,
     cell: bool,
     setup: DynSetup,
@@ -380,6 +406,9 @@ struct CompRepr {
 }
 
 fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
+    if !comp.id.is_empty() {
+        repr.insert(symbol(ID), Val::Symbol(comp.id));
+    }
     if comp.cell {
         repr.insert(symbol(CELL), Val::Bit(Bit::true_()));
     }

@@ -207,10 +207,7 @@ fn fn_id(ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    let Some(id) = func.id() else {
-        return Val::default();
-    };
-    Val::Symbol(id)
+    Val::Symbol(func.id())
 }
 
 pub fn code() -> ConstStaticPrimFuncVal {

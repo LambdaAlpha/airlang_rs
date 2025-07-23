@@ -293,7 +293,8 @@ repr composite
 _ do [
     m = _ mode {pair : {} : eval@ : .},
     repr = _ form. {
-        code : (.ctx : .in) : .in,
+        id : f,
+        code : (ctx : in) : in,
         call_setup : @m : @m,
         solve_setup : @m : @m,
         context_access : constant,

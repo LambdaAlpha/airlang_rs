@@ -11,9 +11,11 @@ use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
+use crate::type_::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MutCellCompFunc {
+    pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
     pub(crate) setup: DynSetup,

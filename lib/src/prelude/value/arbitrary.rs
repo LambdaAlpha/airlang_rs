@@ -524,6 +524,7 @@ impl Arbitrary for DynComposite {
 impl Arbitrary for FreeCellCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let func = FreeCellCompFunc {
+            id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
@@ -535,6 +536,7 @@ impl Arbitrary for FreeCellCompFuncVal {
 impl Arbitrary for FreeStaticCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let func = FreeStaticCompFunc {
+            id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
@@ -546,6 +548,7 @@ impl Arbitrary for FreeStaticCompFuncVal {
 impl Arbitrary for ConstCellCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let func = ConstCellCompFunc {
+            id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
@@ -557,6 +560,7 @@ impl Arbitrary for ConstCellCompFuncVal {
 impl Arbitrary for ConstStaticCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let func = ConstStaticCompFunc {
+            id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
@@ -568,6 +572,7 @@ impl Arbitrary for ConstStaticCompFuncVal {
 impl Arbitrary for MutCellCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let func = MutCellCompFunc {
+            id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
@@ -579,6 +584,7 @@ impl Arbitrary for MutCellCompFuncVal {
 impl Arbitrary for MutStaticCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let func = MutStaticCompFunc {
+            id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),

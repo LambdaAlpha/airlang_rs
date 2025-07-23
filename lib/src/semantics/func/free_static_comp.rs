@@ -4,9 +4,11 @@ use super::setup::FreeSetup;
 use super::setup::impl_free_setup;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
+use crate::type_::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FreeStaticCompFunc {
+    pub(crate) id: Symbol,
     pub(crate) comp: FreeComposite,
     pub(crate) ctx: Ctx,
     pub(crate) setup: FreeSetup,
