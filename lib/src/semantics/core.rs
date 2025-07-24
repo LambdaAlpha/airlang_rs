@@ -3,6 +3,7 @@ use std::hash::Hash;
 use std::mem::take;
 
 use const_format::concatcp;
+use log::error;
 
 use super::func::ConstStaticFn;
 use super::func::FreeStaticFn;
@@ -10,7 +11,6 @@ use super::func::FuncSetup;
 use super::func::MutCellFn;
 use super::func::MutStaticFn;
 use super::solver::Solve;
-use super::val::FuncVal;
 use super::val::ListVal;
 use super::val::MapVal;
 use super::val::PairVal;
@@ -18,6 +18,7 @@ use super::val::TaskVal;
 use super::val::Val;
 use crate::type_::Action;
 use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Symbol;
@@ -53,12 +54,21 @@ impl<'a, Fn> SymbolForm<'a, Fn> {
 
 impl<'a, Fn> FreeStaticFn<Symbol, Val> for SymbolForm<'a, Fn> {
     fn free_static_call(&self, input: Symbol) -> Val {
-        let (prefix, s) = self.recognize(input);
+        let (prefix, s) = self.recognize(input.clone());
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
-            SYMBOL_REF_CHAR => Val::default(),
-            SYMBOL_MOVE_CHAR => Val::default(),
-            SYMBOL_EVAL_CHAR => Val::default(),
+            SYMBOL_REF_CHAR => {
+                error!("symbol {input:?} should be evaluated in a ctx");
+                Val::default()
+            }
+            SYMBOL_MOVE_CHAR => {
+                error!("symbol {input:?} should be evaluated in a ctx");
+                Val::default()
+            }
+            SYMBOL_EVAL_CHAR => {
+                error!("symbol {input:?} should be evaluated in a ctx");
+                Val::default()
+            }
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }
@@ -68,21 +78,31 @@ impl<'a, Fn> ConstStaticFn<Val, Symbol, Val> for SymbolForm<'a, Fn>
 where Fn: ConstStaticFn<Val, Val, Val>
 {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        let (prefix, s) = self.recognize(input);
+        let (prefix, s) = self.recognize(input.clone());
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
                 let Val::Ctx(ctx) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
                     return Val::default();
                 };
-                ctx.get_ref(s).cloned().unwrap_or_default()
+                let Ok(val) = ctx.get_ref(s.clone()) else {
+                    error!("name {s:?} should exist");
+                    return Val::default();
+                };
+                val.clone()
             }
-            SYMBOL_MOVE_CHAR => Val::default(),
+            SYMBOL_MOVE_CHAR => {
+                error!("symbol {input:?} should be evaluated in a mutable ctx");
+                Val::default()
+            }
             SYMBOL_EVAL_CHAR => {
                 let Val::Ctx(ctx1) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
                     return Val::default();
                 };
-                let Ok(val) = ctx1.get_ref(s) else {
+                let Ok(val) = ctx1.get_ref(s.clone()) else {
+                    error!("name {s:?} should exist");
                     return Val::default();
                 };
                 let val = val.clone();
@@ -102,21 +122,29 @@ where Fn: MutStaticFn<Val, Val, Val>
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
                 let Val::Ctx(ctx) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
                     return Val::default();
                 };
                 ctx.get_ref(s).cloned().unwrap_or_default()
             }
             SYMBOL_MOVE_CHAR => {
                 let Val::Ctx(ctx) = ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
                     return Val::default();
                 };
-                ctx.remove(s).unwrap_or_default()
+                let Ok(val) = ctx.remove(s.clone()) else {
+                    error!("name {s:?} should exist");
+                    return Val::default();
+                };
+                val
             }
             SYMBOL_EVAL_CHAR => {
                 let Val::Ctx(ctx1) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
                     return Val::default();
                 };
-                let Ok(val) = ctx1.get_ref(s) else {
+                let Ok(val) = ctx1.get_ref(s.clone()) else {
+                    error!("name {s:?} should exist");
                     return Val::default();
                 };
                 self.f.mut_static_call(ctx, val.clone())
@@ -401,17 +429,19 @@ where Func: FreeStaticFn<Val, Val>
                     func.free_static_call(input)
                 }
                 Action::Solve => {
-                    let ctx = func.solve_ctx().free_static_call(task.ctx);
+                    let _ = func.solve_ctx().free_static_call(task.ctx);
                     let input = func.solve_input().free_static_call(task.input);
-                    let task = Task { action: Action::Solve, func: Val::Func(func), ctx, input };
-                    Solve.free_static_call(Val::Task(task.into()))
+                    Solve { func }.free_static_call(input)
                 }
             },
             Val::Symbol(func) => {
                 let task = Task { action: task.action, func, ctx: task.ctx, input: task.input };
                 TaskRefEval.free_static_call(task)
             }
-            _ => Val::default(),
+            func => {
+                error!("func {func:?} should be a func or a symbol");
+                Val::default()
+            }
         }
     }
 }
@@ -426,20 +456,28 @@ where Func: ConstStaticFn<Val, Val, Val>
                 Action::Call => {
                     let ctx = func.call_ctx().const_static_call(c.reborrow(), task.ctx);
                     let input = func.call_input().const_static_call(c.reborrow(), task.input);
-                    const_static_func_call(c, &func, ctx, input)
+                    let Some(c) = eval_const_ctx(c, ctx) else {
+                        return Val::default();
+                    };
+                    func.const_static_call(c, input)
                 }
                 Action::Solve => {
                     let ctx = func.solve_ctx().const_static_call(c.reborrow(), task.ctx);
                     let input = func.solve_input().const_static_call(c.reborrow(), task.input);
-                    let task = Task { action: Action::Solve, func: Val::Func(func), ctx, input };
-                    Solve.const_static_call(c, Val::Task(task.into()))
+                    let Some(c) = eval_const_ctx(c, ctx) else {
+                        return Val::default();
+                    };
+                    Solve { func }.const_static_call(c, input)
                 }
             },
             Val::Symbol(func) => {
                 let task = Task { action: task.action, func, ctx: task.ctx, input: task.input };
                 TaskRefEval.const_static_call(c, task)
             }
-            _ => Val::default(),
+            func => {
+                error!("func {func:?} should be a func or a symbol");
+                Val::default()
+            }
         }
     }
 }
@@ -454,20 +492,28 @@ where Func: MutStaticFn<Val, Val, Val>
                 Action::Call => {
                     let ctx = func.call_ctx().mut_static_call(c, task.ctx);
                     let input = func.call_input().mut_static_call(c, task.input);
-                    mut_static_func_call(c, &func, ctx, input)
+                    let Some(c) = eval_mut_ctx(c, ctx) else {
+                        return Val::default();
+                    };
+                    func.dyn_static_call(c, input)
                 }
                 Action::Solve => {
                     let ctx = func.solve_ctx().mut_static_call(c, task.ctx);
                     let input = func.solve_input().mut_static_call(c, task.input);
-                    let task = Task { action: Action::Solve, func: Val::Func(func), ctx, input };
-                    Solve.mut_static_call(c, Val::Task(task.into()))
+                    let Some(c) = eval_mut_ctx(c, ctx) else {
+                        return Val::default();
+                    };
+                    Solve { func }.dyn_static_call(c, input)
                 }
             },
             Val::Symbol(func) => {
                 let task = Task { action: task.action, func, ctx: task.ctx, input: task.input };
                 TaskRefEval.mut_static_call(c, task)
             }
-            _ => Val::default(),
+            func => {
+                error!("func {func:?} should be a func or a symbol");
+                Val::default()
+            }
         }
     }
 }
@@ -475,7 +521,8 @@ where Func: MutStaticFn<Val, Val, Val>
 pub(crate) struct TaskRefEval;
 
 impl FreeStaticFn<Task<Symbol, Val, Val>, Val> for TaskRefEval {
-    fn free_static_call(&self, _input: Task<Symbol, Val, Val>) -> Val {
+    fn free_static_call(&self, input: Task<Symbol, Val, Val>) -> Val {
+        error!("func ref {:?} should be evaluated in a ctx", input.func);
         Val::default()
     }
 }
@@ -484,78 +531,97 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
     fn const_static_call(&self, c: ConstRef<Val>, task: Task<Symbol, Val, Val>) -> Val {
         let c = c.unwrap();
         let Val::Ctx(ctx_val) = c else {
+            error!("ctx {c:?} should be a ctx");
             return Val::default();
         };
         let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
+            error!("func ref {:?} should be lockable", task.func);
             return Val::default();
         };
-        let Val::Func(func) = ctx_value.val else {
+        let Val::Func(mut func) = ctx_value.val else {
+            error!("func ref {:?} should be a func", ctx_value.val);
             ctx_val.unlock(task.func, ctx_value.val);
             return Val::default();
         };
-        match task.action {
-            Action::Call => {
-                let ctx = func.call_ctx().const_static_call(ConstRef::new(c), task.ctx);
-                let input = func.call_input().const_static_call(ConstRef::new(c), task.input);
-                let output = const_static_func_call(ConstRef::new(c), &func, ctx, input);
-                let Val::Ctx(ctx_val) = c else {
-                    unreachable!("TaskRefEval call ctx invariant is broken!!!");
-                };
-                ctx_val.unlock(task.func, Val::Func(func));
-                output
+        let output = 'output: {
+            match task.action {
+                Action::Call => {
+                    let ctx = func.call_ctx().const_static_call(ConstRef::new(c), task.ctx);
+                    let input = func.call_input().const_static_call(ConstRef::new(c), task.input);
+                    let Some(c1) = eval_const_ctx(ConstRef::new(c), ctx) else {
+                        break 'output Val::default();
+                    };
+                    func.const_static_call(c1, input)
+                }
+                Action::Solve => {
+                    let ctx = func.solve_ctx().const_static_call(ConstRef::new(c), task.ctx);
+                    let input = func.solve_input().const_static_call(ConstRef::new(c), task.input);
+                    let Some(c1) = eval_const_ctx(ConstRef::new(c), ctx) else {
+                        break 'output Val::default();
+                    };
+                    let solve_ref = Solve { func };
+                    let output = solve_ref.const_static_call(c1, input);
+                    func = solve_ref.func;
+                    output
+                }
             }
-            Action::Solve => {
-                let ctx = func.solve_ctx().const_static_call(ConstRef::new(c), task.ctx);
-                let input = func.solve_input().const_static_call(ConstRef::new(c), task.input);
-                let Val::Ctx(ctx_val) = c else {
-                    unreachable!("TaskRefEval solve ctx invariant is broken!!!");
-                };
-                ctx_val.unlock(task.func.clone(), Val::Func(func));
-                let task = Task { action: Action::Solve, func: Val::Symbol(task.func), ctx, input };
-                Solve.const_static_call(ConstRef::new(c), Val::Task(task.into()))
-            }
-        }
+        };
+        let Val::Ctx(ctx_val) = c else {
+            unreachable!("TaskRefEval ctx invariant is broken!!!");
+        };
+        ctx_val.unlock(task.func, Val::Func(func));
+        output
     }
 }
 
 impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefEval {
     fn mut_static_call(&self, c: &mut Val, task: Task<Symbol, Val, Val>) -> Val {
         let Val::Ctx(ctx_val) = c else {
+            error!("ctx {c:?} should be a ctx");
             return Val::default();
         };
         let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
+            error!("func ref {:?} should be lockable", task.func);
             return Val::default();
         };
         let Val::Func(mut func) = ctx_value.val else {
+            error!("func ref {:?} should be a func", ctx_value.val);
             ctx_val.unlock(task.func, ctx_value.val);
             return Val::default();
         };
-        match task.action {
-            Action::Call => {
-                let ctx = func.call_ctx().mut_static_call(c, task.ctx);
-                let input = func.call_input().mut_static_call(c, task.input);
-                let output = if ctx_value.contract.is_mutable() {
-                    mut_cell_func_call(c, &mut func, ctx, input)
-                } else {
-                    mut_static_func_call(c, &func, ctx, input)
-                };
-                let Val::Ctx(ctx_val) = c else {
-                    unreachable!("TaskRefEval call ctx invariant is broken!!!");
-                };
-                ctx_val.unlock(task.func, Val::Func(func));
-                output
+        let mutable = ctx_value.contract.is_mutable();
+        let output = 'output: {
+            match task.action {
+                Action::Call => {
+                    let ctx = func.call_ctx().mut_static_call(c, task.ctx);
+                    let input = func.call_input().mut_static_call(c, task.input);
+                    let Some(c1) = eval_mut_ctx(c, ctx) else {
+                        break 'output Val::default();
+                    };
+                    if mutable {
+                        func.dyn_cell_call(c1, input)
+                    } else {
+                        func.dyn_static_call(c1, input)
+                    }
+                }
+                Action::Solve => {
+                    let ctx = func.solve_ctx().mut_static_call(c, task.ctx);
+                    let input = func.solve_input().mut_static_call(c, task.input);
+                    let Some(c) = eval_mut_ctx(c, ctx) else {
+                        break 'output Val::default();
+                    };
+                    let solve_ref = Solve { func };
+                    let output = solve_ref.dyn_static_call(c, input);
+                    func = solve_ref.func;
+                    output
+                }
             }
-            Action::Solve => {
-                let ctx = func.solve_ctx().mut_static_call(c, task.ctx);
-                let input = func.solve_input().mut_static_call(c, task.input);
-                let Val::Ctx(ctx_val) = c else {
-                    unreachable!("TaskRefEval solve ctx invariant is broken!!!");
-                };
-                ctx_val.unlock(task.func.clone(), Val::Func(func));
-                let task = Task { action: Action::Solve, func: Val::Symbol(task.func), ctx, input };
-                Solve.mut_static_call(c, Val::Task(task.into()))
-            }
-        }
+        };
+        let Val::Ctx(ctx_val) = c else {
+            unreachable!("TaskRefEval ctx invariant is broken!!!");
+        };
+        ctx_val.unlock(task.func, Val::Func(func));
+        output
     }
 }
 
@@ -567,21 +633,16 @@ impl FreeStaticFn<TaskVal, Val> for TaskApply {
         match task.func {
             Val::Func(func) => match task.action {
                 Action::Call => func.free_static_call(task.input),
-                Action::Solve => {
-                    let task = Task {
-                        action: Action::Solve,
-                        func: Val::Func(func),
-                        ctx: task.ctx,
-                        input: task.input,
-                    };
-                    Solve.free_static_call(Val::Task(task.into()))
-                }
+                Action::Solve => Solve { func }.free_static_call(task.input),
             },
             Val::Symbol(func) => {
                 let task = Task { action: task.action, func, ctx: task.ctx, input: task.input };
                 TaskRefApply.free_static_call(task)
             }
-            _ => Val::default(),
+            func => {
+                error!("func {func:?} should be a func or a symbol");
+                Val::default()
+            }
         }
     }
 }
@@ -590,23 +651,23 @@ impl ConstStaticFn<Val, TaskVal, Val> for TaskApply {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: TaskVal) -> Val {
         let task = Task::from(input);
         match task.func {
-            Val::Func(func) => match task.action {
-                Action::Call => const_static_func_call(ctx, &func, task.ctx, task.input),
-                Action::Solve => {
-                    let task = Task {
-                        action: Action::Solve,
-                        func: Val::Func(func),
-                        ctx: task.ctx,
-                        input: task.input,
-                    };
-                    Solve.const_static_call(ctx, Val::Task(task.into()))
+            Val::Func(func) => {
+                let Some(ctx) = eval_const_ctx(ctx, task.ctx) else {
+                    return Val::default();
+                };
+                match task.action {
+                    Action::Call => func.const_static_call(ctx, task.input),
+                    Action::Solve => Solve { func }.const_static_call(ctx, task.input),
                 }
-            },
+            }
             Val::Symbol(func) => {
                 let task = Task { action: task.action, func, ctx: task.ctx, input: task.input };
                 TaskRefApply.const_static_call(ctx, task)
             }
-            _ => Val::default(),
+            func => {
+                error!("func {func:?} should be a func or a symbol");
+                Val::default()
+            }
         }
     }
 }
@@ -615,23 +676,23 @@ impl MutStaticFn<Val, TaskVal, Val> for TaskApply {
     fn mut_static_call(&self, ctx: &mut Val, input: TaskVal) -> Val {
         let task = Task::from(input);
         match task.func {
-            Val::Func(func) => match task.action {
-                Action::Call => mut_static_func_call(ctx, &func, task.ctx, task.input),
-                Action::Solve => {
-                    let task = Task {
-                        action: Action::Solve,
-                        func: Val::Func(func),
-                        ctx: task.ctx,
-                        input: task.input,
-                    };
-                    Solve.mut_static_call(ctx, Val::Task(task.into()))
+            Val::Func(func) => {
+                let Some(ctx) = eval_mut_ctx(ctx, task.ctx) else {
+                    return Val::default();
+                };
+                match task.action {
+                    Action::Call => func.dyn_static_call(ctx, task.input),
+                    Action::Solve => Solve { func }.dyn_static_call(ctx, task.input),
                 }
-            },
+            }
             Val::Symbol(func) => {
                 let task = Task { action: task.action, func, ctx: task.ctx, input: task.input };
                 TaskRefApply.mut_static_call(ctx, task)
             }
-            _ => Val::default(),
+            func => {
+                error!("func {func:?} should be a func or a symbol");
+                Val::default()
+            }
         }
     }
 }
@@ -639,7 +700,8 @@ impl MutStaticFn<Val, TaskVal, Val> for TaskApply {
 pub(crate) struct TaskRefApply;
 
 impl FreeStaticFn<Task<Symbol, Val, Val>, Val> for TaskRefApply {
-    fn free_static_call(&self, _input: Task<Symbol, Val, Val>) -> Val {
+    fn free_static_call(&self, input: Task<Symbol, Val, Val>) -> Val {
+        error!("func ref {:?} should be evaluated in a ctx", input.func);
         Val::default()
     }
 }
@@ -648,134 +710,121 @@ impl ConstStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefApply {
     fn const_static_call(&self, ctx: ConstRef<Val>, task: Task<Symbol, Val, Val>) -> Val {
         let ctx = ctx.unwrap();
         let Val::Ctx(ctx_val) = ctx else {
+            error!("ctx {ctx:?} should be a ctx");
             return Val::default();
         };
-        match task.action {
-            Action::Call => {
-                let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
-                    return Val::default();
-                };
-                let Val::Func(func) = ctx_value.val else {
-                    ctx_val.unlock(task.func, ctx_value.val);
-                    return Val::default();
-                };
-                let output =
-                    const_static_func_call(ConstRef::new(ctx), &func, task.ctx, task.input);
-                let Val::Ctx(ctx_val) = ctx else {
-                    unreachable!("TaskRefApply ctx invariant is broken!!!");
-                };
-                ctx_val.unlock(task.func, Val::Func(func));
-                output
+        let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
+            error!("func ref {:?} should be lockable", task.func);
+            return Val::default();
+        };
+        let Val::Func(mut func) = ctx_value.val else {
+            error!("func ref {:?} should be a func", ctx_value.val);
+            ctx_val.unlock(task.func, ctx_value.val);
+            return Val::default();
+        };
+        let output = 'output: {
+            let Some(ctx1) = eval_const_ctx(ConstRef::new(ctx), task.ctx) else {
+                break 'output Val::default();
+            };
+            match task.action {
+                Action::Call => func.const_static_call(ctx1, task.input),
+                Action::Solve => {
+                    let solve_ref = Solve { func };
+                    let output = solve_ref.const_static_call(ctx1, task.input);
+                    func = solve_ref.func;
+                    output
+                }
             }
-            Action::Solve => {
-                let Ok(val) = ctx_val.get_ref(task.func.clone()) else {
-                    return Val::default();
-                };
-                let Val::Func(_) = val else {
-                    return Val::default();
-                };
-                let task = Task {
-                    action: task.action,
-                    func: Val::Symbol(task.func),
-                    ctx: task.ctx,
-                    input: task.input,
-                };
-                Solve.const_static_call(ConstRef::new(ctx), Val::Task(task.into()))
-            }
-        }
+        };
+        let Val::Ctx(ctx_val) = ctx else {
+            unreachable!("TaskRefApply ctx invariant is broken!!!");
+        };
+        ctx_val.unlock(task.func, Val::Func(func));
+        output
     }
 }
 
 impl MutStaticFn<Val, Task<Symbol, Val, Val>, Val> for TaskRefApply {
     fn mut_static_call(&self, ctx: &mut Val, task: Task<Symbol, Val, Val>) -> Val {
         let Val::Ctx(ctx_val) = ctx else {
+            error!("ctx {ctx:?} should be a ctx");
             return Val::default();
         };
-        match task.action {
-            Action::Call => {
-                let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
-                    return Val::default();
-                };
-                let Val::Func(mut func) = ctx_value.val else {
-                    ctx_val.unlock(task.func, ctx_value.val);
-                    return Val::default();
-                };
-                let output = if ctx_value.contract.is_mutable() {
-                    mut_cell_func_call(ctx, &mut func, task.ctx, task.input)
-                } else {
-                    mut_static_func_call(ctx, &func, task.ctx, task.input)
-                };
-                let Val::Ctx(ctx_val) = ctx else {
-                    unreachable!("TaskRefApply ctx invariant is broken!!!");
-                };
-                ctx_val.unlock(task.func, Val::Func(func));
-                output
+        let Ok(ctx_value) = ctx_val.lock(task.func.clone()) else {
+            error!("func ref {:?} should be lockable", task.func);
+            return Val::default();
+        };
+        let Val::Func(mut func) = ctx_value.val else {
+            error!("func ref {:?} should be a func", ctx_value.val);
+            ctx_val.unlock(task.func, ctx_value.val);
+            return Val::default();
+        };
+        let output = 'output: {
+            let Some(ctx1) = eval_mut_ctx(ctx, task.ctx) else {
+                break 'output Val::default();
+            };
+            let mutable = ctx_value.contract.is_mutable();
+            match task.action {
+                Action::Call => {
+                    if mutable {
+                        func.dyn_cell_call(ctx1, task.input)
+                    } else {
+                        func.dyn_static_call(ctx1, task.input)
+                    }
+                }
+                Action::Solve => {
+                    let solve_ref = Solve { func };
+                    let output = solve_ref.dyn_static_call(ctx1, task.input);
+                    func = solve_ref.func;
+                    output
+                }
             }
-            Action::Solve => {
-                let Ok(val) = ctx_val.get_ref(task.func.clone()) else {
-                    return Val::default();
-                };
-                let Val::Func(_) = val else {
-                    return Val::default();
-                };
-                let task = Task {
-                    action: task.action,
-                    func: Val::Symbol(task.func),
-                    ctx: task.ctx,
-                    input: task.input,
-                };
-                Solve.mut_static_call(ctx, Val::Task(task.into()))
-            }
-        }
+        };
+        let Val::Ctx(ctx_val) = ctx else {
+            unreachable!("TaskRefApply ctx invariant is broken!!!");
+        };
+        ctx_val.unlock(task.func, Val::Func(func));
+        output
     }
 }
 
-fn const_static_func_call(c: ConstRef<Val>, func: &FuncVal, ctx: Val, input: Val) -> Val {
+fn eval_const_ctx(c: ConstRef<Val>, ctx: Val) -> Option<ConstRef<Val>> {
     if ctx.is_unit() {
-        return func.const_static_call(c, input);
+        return Some(c);
     }
-    let Val::Ctx(ctx_val) = c.unwrap() else {
-        return Val::default();
+    let c = c.unwrap();
+    let Val::Ctx(ctx_val) = c else {
+        error!("ctx {c:?} should be a ctx");
+        return None;
     };
     let Val::Symbol(name) = ctx else {
-        return Val::default();
+        error!("ctx {ctx:?} should be a symbol");
+        return None;
     };
-    let Ok(val_ref) = ctx_val.get_ref_dyn(name) else {
-        return Val::default();
+    let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
+        error!("name {name:?} should exist");
+        return None;
     };
-    func.const_static_call(val_ref.into_const(), input)
+    Some(val_ref.into_const())
 }
 
-fn mut_static_func_call(c: &mut Val, func: &FuncVal, ctx: Val, input: Val) -> Val {
+fn eval_mut_ctx(c: &mut Val, ctx: Val) -> Option<DynRef<'_, Val>> {
     if ctx.is_unit() {
-        return func.mut_static_call(c, input);
+        return Some(DynRef::new_mut(c));
     }
     let Val::Ctx(ctx_val) = c else {
-        return Val::default();
+        error!("ctx {c:?} should be a ctx");
+        return None;
     };
     let Val::Symbol(name) = ctx else {
-        return Val::default();
+        error!("ctx {ctx:?} should be a symbol");
+        return None;
     };
-    let Ok(val_ref) = ctx_val.get_ref_dyn(name) else {
-        return Val::default();
+    let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
+        error!("name {name:?} should exist");
+        return None;
     };
-    func.dyn_static_call(val_ref, input)
-}
-
-fn mut_cell_func_call(c: &mut Val, func: &mut FuncVal, ctx: Val, input: Val) -> Val {
-    if ctx.is_unit() {
-        return func.mut_cell_call(c, input);
-    }
-    let Val::Ctx(ctx_val) = c else {
-        return Val::default();
-    };
-    let Val::Symbol(name) = ctx else {
-        return Val::default();
-    };
-    let Ok(val_ref) = ctx_val.get_ref_dyn(name) else {
-        return Val::default();
-    };
-    func.dyn_cell_call(val_ref, input)
+    Some(val_ref)
 }
 
 #[derive(Debug, Default, Copy, Clone)]
