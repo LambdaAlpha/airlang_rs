@@ -22,7 +22,7 @@ _ do [
         code : ._ : _ do [_ set_solver! not, _ solver! .],
     },
     _ set_solver! #s1,
-    not ! true,
+    solve(_ not true),
     .
 ]
 -----

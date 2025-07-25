@@ -255,7 +255,7 @@ ctx explicit
 _ do [
     a = 1 : 2,
     f = _ function {
-        call_setup : _ mode {pair : {symbol : ..} : eval@},
+        call_setup : _ mode {pair : {} : {symbol : ..} : eval@},
         code : (.p : .i) : .p ; pair.set_first .i,
     },
     a ; f 3,
@@ -346,10 +346,10 @@ call setup 1
 -----
 _ do [
     f = _ function {
-        call_setup : _ mode {pair : eval@ : form.},
+        call_setup : _ mode {pair : {} : eval@ : form.},
     },
     p1 = f ; function.call_setup .,
-    p2 = _ mode {pair : eval@ : form.},
+    p2 = _ mode {pair : {} : eval@ : form.},
     p1 == p2
 ]
 -----
