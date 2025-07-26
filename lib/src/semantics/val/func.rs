@@ -92,20 +92,7 @@ macro_rules! match_func_val {
 
 impl FreeStaticFn<Val, Val> for FuncVal {
     fn free_static_call(&self, input: Val) -> Val {
-        match self {
-            FuncVal::FreeCellPrim(f) => f.free_static_call(input),
-            FuncVal::FreeCellComp(f) => f.free_static_call(input),
-            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
-            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
-            FuncVal::ConstCellPrim(f) => f.free_static_call(input),
-            FuncVal::ConstCellComp(f) => f.free_static_call(input),
-            FuncVal::ConstStaticPrim(f) => f.free_static_call(input),
-            FuncVal::ConstStaticComp(f) => f.free_static_call(input),
-            FuncVal::MutCellPrim(f) => f.free_static_call(input),
-            FuncVal::MutCellComp(f) => f.free_static_call(input),
-            FuncVal::MutStaticPrim(f) => f.free_static_call(input),
-            FuncVal::MutStaticComp(f) => f.free_static_call(input),
-        }
+        match_func_val!(self, f => f.free_static_call(input))
     }
 }
 
