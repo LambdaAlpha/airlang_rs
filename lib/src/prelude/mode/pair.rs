@@ -1,10 +1,10 @@
 use super::Mode;
-use super::ModeFn;
 use super::PrimMode;
 use crate::semantics::core::PairForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -17,7 +17,7 @@ pub struct PairMode {
     pub second: Option<Mode>,
 }
 
-impl ModeFn for PairMode {}
+impl SetupFn for PairMode {}
 
 impl FreeStaticFn<PairVal, Val> for PairMode {
     fn free_static_call(&self, input: PairVal) -> Val {

@@ -11,7 +11,6 @@ use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
 use super::TaskMode;
-use super::opt::ModeFn;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstStaticPrimFunc;
 use crate::semantics::func::DynSetup;
@@ -26,8 +25,6 @@ use crate::semantics::val::Val;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Symbol;
-
-impl ModeFn for FuncVal {}
 
 pub struct FuncMode;
 

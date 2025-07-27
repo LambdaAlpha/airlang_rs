@@ -25,6 +25,7 @@ use crate::semantics::func::MutCellPrimFunc;
 use crate::semantics::func::MutStaticCompFunc;
 use crate::semantics::func::MutStaticFn;
 use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
@@ -208,6 +209,8 @@ impl FuncSetup for FuncVal {
         match_func_val!(self, f => f.solve_input())
     }
 }
+
+impl SetupFn for FuncVal {}
 
 impl FuncVal {
     pub fn id(&self) -> Symbol {

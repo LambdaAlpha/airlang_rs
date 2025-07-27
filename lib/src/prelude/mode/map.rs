@@ -1,10 +1,10 @@
 use super::Mode;
-use super::ModeFn;
 use super::PrimMode;
 use crate::semantics::core::MapForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -16,7 +16,7 @@ pub struct MapMode {
     pub else_: Option<Mode>,
 }
 
-impl ModeFn for MapMode {}
+impl SetupFn for MapMode {}
 
 impl FreeStaticFn<MapVal, Val> for MapMode {
     fn free_static_call(&self, input: MapVal) -> Val {

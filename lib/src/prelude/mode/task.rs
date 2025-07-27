@@ -1,12 +1,12 @@
 use super::CodeMode;
 use super::Mode;
-use super::ModeFn;
 use super::PrimMode;
 use crate::semantics::core::TaskEval;
 use crate::semantics::core::TaskForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -19,7 +19,7 @@ pub struct TaskMode {
     pub input: Option<Mode>,
 }
 
-impl ModeFn for TaskMode {}
+impl SetupFn for TaskMode {}
 
 impl FreeStaticFn<TaskVal, Val> for TaskMode {
     fn free_static_call(&self, input: TaskVal) -> Val {

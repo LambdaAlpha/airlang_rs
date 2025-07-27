@@ -1,5 +1,4 @@
 use super::Mode;
-use super::ModeFn;
 use super::SymbolMode;
 use crate::semantics::core::ListForm;
 use crate::semantics::core::MapForm;
@@ -9,6 +8,7 @@ use crate::semantics::core::TaskForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
@@ -28,7 +28,7 @@ pub struct PrimMode {
     pub map: Option<DataMode>,
 }
 
-impl ModeFn for PrimMode {}
+impl SetupFn for PrimMode {}
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct DataMode;

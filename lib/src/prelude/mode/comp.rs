@@ -1,6 +1,5 @@
 use super::ListMode;
 use super::MapMode;
-use super::ModeFn;
 use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
@@ -8,6 +7,7 @@ use super::TaskMode;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
@@ -25,7 +25,7 @@ pub struct CompMode {
     pub map: Option<MapMode>,
 }
 
-impl ModeFn for CompMode {}
+impl SetupFn for CompMode {}
 
 impl FreeStaticFn<Val, Val> for CompMode {
     fn free_static_call(&self, input: Val) -> Val {

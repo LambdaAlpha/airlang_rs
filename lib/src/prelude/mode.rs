@@ -18,7 +18,6 @@ use super::Prelude;
 use super::PreludeCtx;
 use super::ctx_put_func;
 use super::free_impl;
-use super::mode::opt::ModeFn;
 use super::mode::repr::EVAL_EVAL;
 use super::mode::repr::EVAL_LITERAL;
 use super::mode::repr::EVAL_MOVE;
@@ -32,6 +31,7 @@ use crate::prelude::setup::free_mode;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutStaticPrimFuncVal;
@@ -182,7 +182,7 @@ impl MutStaticFn<Val, Val, Val> for Mode {
     }
 }
 
-impl ModeFn for Mode {}
+impl SetupFn for Mode {}
 
 impl From<PrimMode> for Mode {
     fn from(mode: PrimMode) -> Self {
@@ -195,8 +195,6 @@ mod prim;
 mod comp;
 
 mod func;
-
-mod opt;
 
 mod repr;
 

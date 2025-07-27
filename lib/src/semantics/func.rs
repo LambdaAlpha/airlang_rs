@@ -27,6 +27,7 @@ pub(crate) use self::comp::FreeComposite;
 pub(crate) use self::comp::composite_call;
 pub(crate) use self::setup::DynSetup;
 pub(crate) use self::setup::FreeSetup;
+pub(crate) use self::setup::SetupFn;
 
 _____!();
 

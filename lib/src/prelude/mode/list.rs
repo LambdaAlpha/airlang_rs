@@ -1,10 +1,10 @@
 use super::Mode;
-use super::ModeFn;
 use super::PrimMode;
 use crate::semantics::core::ListForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -16,7 +16,7 @@ pub struct ListMode {
     pub tail: Option<Mode>,
 }
 
-impl ModeFn for ListMode {}
+impl SetupFn for ListMode {}
 
 impl FreeStaticFn<ListVal, Val> for ListMode {
     fn free_static_call(&self, input: ListVal) -> Val {

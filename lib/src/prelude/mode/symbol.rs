@@ -1,4 +1,3 @@
-use super::ModeFn;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_EVAL_CHAR;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
@@ -8,6 +7,7 @@ use crate::semantics::core::SymbolForm;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
+use crate::semantics::func::SetupFn;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
@@ -20,7 +20,7 @@ pub enum SymbolMode {
     Eval,
 }
 
-impl ModeFn for SymbolMode {}
+impl SetupFn for SymbolMode {}
 
 impl SymbolMode {
     pub(crate) fn into_char(self) -> char {
