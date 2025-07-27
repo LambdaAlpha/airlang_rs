@@ -136,12 +136,6 @@ match pattern
 -----
 6
 =====
-match pattern contract
------
-[1, 2, 3] match [[a . final, 2, c . none] : a + c]
------
-4
-=====
 match order
 -----
 _ do [
@@ -187,7 +181,7 @@ _ do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a is_null ., b is_null ., c]]
 =====
 match symbol
 -----
-_ do [a = _ id a, a match [..a : 1, ..b : 2]]
+_ do [a = _ id a, a match [*a : 1, *b : 2]]
 -----
 1
 =====

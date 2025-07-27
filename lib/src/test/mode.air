@@ -48,7 +48,7 @@ _ do [a = 1, [_ form. @a, a]]
 =====
 form. @ special
 -----
-_ do [.@.a = 1, [_ form. @.a, @.a]]
+_ do [..a = 1, [_ form. @.a, @.a]]
 -----
 [1, 1]
 =====
@@ -60,7 +60,7 @@ _ do [a = 1, [_ form. #a, a is_null .]]
 =====
 form. # special
 -----
-_ do [.@@a = 1, [_ form. #@a, .@a is_null .]]
+_ do [.@a = 1, [_ form. #@a, .@a is_null .]]
 -----
 [1, true]
 =====

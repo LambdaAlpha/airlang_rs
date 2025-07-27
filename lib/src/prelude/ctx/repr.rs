@@ -2,6 +2,7 @@ use log::error;
 
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
+use crate::prelude::mode::SymbolMode;
 use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -19,25 +20,17 @@ const FINAL: &str = "final";
 const STATIC: &str = "static";
 const CONST: &str = "constant";
 
-pub(in crate::prelude) struct OptBinding {
-    pub(super) name: Symbol,
-    pub(super) contract: Option<Contract>,
-}
-
 pub(super) fn parse_mode() -> Option<Mode> {
-    let mut map = Map::default();
-    map.insert(symbol(NONE), FuncMode::default_mode());
-    map.insert(symbol(STILL), FuncMode::default_mode());
-    map.insert(symbol(FINAL), FuncMode::default_mode());
-    map.insert(symbol(STATIC), FuncMode::default_mode());
-    map.insert(symbol(CONST), FuncMode::default_mode());
     FuncMode::map_mode(
         Map::default(),
-        FuncMode::pair_mode(map, FuncMode::default_mode(), FuncMode::default_mode()),
+        FuncMode::pair_mode(
+            Map::default(),
+            FuncMode::symbol_mode(SymbolMode::Literal),
+            FuncMode::default_mode(),
+        ),
     )
 }
 
-// todo design
 pub(super) fn parse_ctx(input: Val) -> Option<CtxVal> {
     let Val::Map(map) = input else {
         error!("input {input:?} should be a map");
@@ -55,40 +48,42 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
             let Val::Symbol(name) = name else {
                 return None;
             };
-            // todo design
             let Val::Pair(pair) = val else {
-                return Some((name, CtxValue::new(val, Contract::None)));
+                return None;
             };
             let pair = Pair::from(pair);
-            if let Some(contract) = parse_contract(&pair.first) {
-                Some((name, CtxValue::new(pair.second, contract)))
-            } else {
-                Some((name, CtxValue::new(Val::Pair(pair.into()), Contract::None)))
-            }
+            let contract = parse_contract(&pair.first)?;
+            Some((name, CtxValue::new(pair.second, contract)))
         })
         .collect()
 }
 
 pub(in crate::prelude) fn parse_contract(contract: &Val) -> Option<Contract> {
-    let Val::Symbol(s) = contract else {
-        error!("contract {contract:?} should be a symbol");
-        return None;
-    };
-    let contract = match &**s {
-        NONE => Contract::None,
-        STILL => Contract::Still,
-        FINAL => Contract::Final,
-        STATIC => Contract::Static,
-        CONST => Contract::Const,
-        s => {
-            error!("contract {s:?} should be one of {NONE}, {STILL}, {FINAL}, {STATIC} or {CONST}");
-            return None;
+    match contract {
+        Val::Unit(_) => Some(Contract::None),
+        Val::Symbol(s) => {
+            let contract = match &**s {
+                NONE => Contract::None,
+                STILL => Contract::Still,
+                FINAL => Contract::Final,
+                STATIC => Contract::Static,
+                CONST => Contract::Const,
+                s => {
+                    error!(
+                        "contract {s:?} should be one of {NONE}, {STILL}, {FINAL}, {STATIC} or {CONST}"
+                    );
+                    return None;
+                }
+            };
+            Some(contract)
         }
-    };
-    Some(contract)
+        contract => {
+            error!("contract {contract:?} should be a symbol");
+            None
+        }
+    }
 }
 
-// todo design
 pub(super) fn generate_ctx(ctx: CtxVal) -> Val {
     let ctx = Ctx::from(ctx).destruct();
     generate_variables(ctx.variables)

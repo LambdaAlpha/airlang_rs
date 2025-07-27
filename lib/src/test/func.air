@@ -28,7 +28,7 @@ _ do [
     f = _ function {
         call_setup : eval@,
         code : (._ : .i) : _ .not .i,
-        context : _ context {not : not},
+        context : _ context {not : . : not},
     },
     _ f _ not true
 ]
@@ -41,7 +41,7 @@ _ do [
     f = _ function {
         call_setup : eval@,
         code : (._ : .a) : _ .n .a,
-        context : _ context {n : not},
+        context : _ context {n : . : not},
     },
     _ f _ not true
 ]
@@ -55,7 +55,7 @@ _ do [
         code : ._ : _ do [.a = .a + 1, .a],
         context_access : free,
         cell : true,
-        context : _ context {a : 0},
+        context : _ context {a : . : 0},
     },
     [_ .f ., _ .f ., _ .f .]
 ]
@@ -71,7 +71,7 @@ _ do [
         context_access : constant,
         cell : true,
         context : _ context {
-            b : 0,
+            b : . : 0,
         },
     },
     [_ .f ., _ .f ., _ .f .]
@@ -92,7 +92,7 @@ _ do [
         context_access : mutable,
         cell : true,
         context : _ context {
-            b : 0,
+            b : . : 0,
         },
     },
     [_ .f ., _ .f ., _ .f .]
@@ -104,7 +104,7 @@ cell mutable contract final
 -----
 _ do [
     a = 1,
-    (f . final) = _ function {
+    f = _ function {
         code : (.c : ._) : _ do [
             .b = .b + .c ; read .a : .,
             .c ; eval ..a = ..a + 1,
@@ -113,9 +113,10 @@ _ do [
         context_access : mutable,
         cell : true,
         context : _ context {
-            b : 0,
+            b : . : 0,
         },
     },
+    f set_contract final,
     [_ .f ., _ .f ., _ .f .]
 ]
 -----
@@ -133,13 +134,14 @@ _ do [
         context_access : mutable,
         cell : true,
         context : _ context {
-            b : 0,
+            b : . : 0,
         },
     },
-    (ctx . final) = _ context {
-        a : 1,
-        f : #f,
+    ctx = _ context {
+        a : . : 1,
+        f : . : #f,
     },
+    ctx set_contract final,
     ctx ; eval [_ ..f ., _ ..f ., _ ..f .]
 ]
 -----
@@ -149,7 +151,7 @@ cell ctx explicit
 -----
 _ do [
     c = _ context {
-        a : 1,
+        a : . : 1,
     },
     f = _ function {
         code : (.c : ._) : _ do [
@@ -160,7 +162,7 @@ _ do [
         context_access : mutable,
         cell : true,
         context : _ context {
-            b : 0,
+            b : . : 0,
         },
     },
     [c ; .f ., c ; .f ., c ; .f .]
@@ -432,7 +434,7 @@ _ do [f = _ function {code : (.ctx : .i) : .i}, f ; function.code .]
 ctx
 -----
 _ do [
-    ctx = _ context {a : 1},
+    ctx = _ context {a : . : 1},
     f = _ function {context : ctx},
     (f ; function.context .) == ctx
 ]

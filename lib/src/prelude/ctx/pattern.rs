@@ -1,10 +1,6 @@
 use log::error;
 
-use super::repr::OptBinding;
-use super::repr::parse_contract;
 use crate::prelude::utils::symbol;
-use crate::semantics::core::SYMBOL_LITERAL_CHAR;
-use crate::semantics::core::SYMBOL_REF_CHAR;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ListVal;
@@ -12,9 +8,6 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
-use crate::syntax::CALL;
-use crate::syntax::SOLVE;
-use crate::type_::Action;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -23,7 +16,7 @@ use crate::type_::Task;
 use crate::type_::Unit;
 
 pub(in crate::prelude) enum Pattern {
-    Any(OptBinding),
+    Any(Symbol),
     Val(Val),
     Pair(Box<Pair<Pattern, Pattern>>),
     Task(Box<Task<Pattern, Pattern, Pattern>>),
@@ -31,109 +24,65 @@ pub(in crate::prelude) enum Pattern {
     Map(Map<Val, Pattern>),
 }
 
-#[derive(Default, Copy, Clone)]
-pub(in crate::prelude) struct PatternCtx {
-    pub(in crate::prelude) contract: Option<Contract>,
-}
-
-pub(in crate::prelude) fn parse_pattern(ctx: PatternCtx, pattern: Val) -> Option<Pattern> {
+pub(in crate::prelude) fn parse_pattern(pattern: Val) -> Option<Pattern> {
     match pattern {
-        Val::Symbol(symbol) => parse_symbol(ctx, symbol),
-        Val::Pair(pair) => parse_pair(ctx, pair),
-        Val::List(list) => parse_list(ctx, list),
-        Val::Map(map) => parse_map(ctx, map),
-        Val::Task(task) => parse_task(ctx, task),
+        Val::Symbol(symbol) => parse_symbol(symbol),
+        Val::Pair(pair) => parse_pair(pair),
+        Val::List(list) => parse_list(list),
+        Val::Map(map) => parse_map(map),
+        Val::Task(task) => parse_task(task),
         val => Some(Pattern::Val(val)),
     }
 }
 
-// todo design
-fn parse_symbol(ctx: PatternCtx, s: Symbol) -> Option<Pattern> {
+const SYMBOL_LITERAL_CHAR: char = '*';
+const SYMBOL_REF_CHAR: char = '%';
+
+fn parse_symbol(s: Symbol) -> Option<Pattern> {
     let pattern = match s.chars().next() {
         Some(SYMBOL_LITERAL_CHAR) => Pattern::Val(symbol(&s[1 ..])),
-        Some(SYMBOL_REF_CHAR) => {
-            let name = Symbol::from_str_unchecked(&s[1 ..]);
-            Pattern::Any(OptBinding { name, contract: ctx.contract })
-        }
-        _ => Pattern::Any(OptBinding { name: s, contract: ctx.contract }),
+        Some(SYMBOL_REF_CHAR) => Pattern::Any(Symbol::from_str_unchecked(&s[1 ..])),
+        _ => Pattern::Any(s),
     };
     Some(pattern)
 }
 
-fn parse_pair(ctx: PatternCtx, pair: PairVal) -> Option<Pattern> {
+fn parse_pair(pair: PairVal) -> Option<Pattern> {
     let pair = Pair::from(pair);
-    let first = parse_pattern(ctx, pair.first)?;
-    let second = parse_pattern(ctx, pair.second)?;
+    let first = parse_pattern(pair.first)?;
+    let second = parse_pattern(pair.second)?;
     Some(Pattern::Pair(Box::new(Pair::new(first, second))))
 }
 
-fn parse_task(ctx: PatternCtx, task: TaskVal) -> Option<Pattern> {
+fn parse_task(task: TaskVal) -> Option<Pattern> {
     let task = Task::from(task);
-    if task.action != Action::Call {
-        return parse_task_struct(ctx, task.action, task.func, task.ctx, task.input);
-    }
-    match task.func {
-        Val::Unit(_) => parse_with_guard(ctx, task.input),
-        Val::Symbol(symbol) => match &*symbol {
-            CALL | SOLVE => {
-                let Val::Pair(pair) = task.input else {
-                    error!("{:?} should be a pair", task.input);
-                    return None;
-                };
-                let pair = Pair::from(pair);
-                let action = if &*symbol == SOLVE { Action::Solve } else { Action::Call };
-                parse_task_struct(ctx, action, pair.first, task.ctx, pair.second)
-            }
-            s => {
-                error!("{s} should be one of {CALL} or {SOLVE}");
-                None
-            }
-        },
-        func => parse_task_struct(ctx, Action::Call, func, task.ctx, task.input),
-    }
+    let func = parse_pattern(task.func)?;
+    let ctx = parse_pattern(task.ctx)?;
+    let input = parse_pattern(task.input)?;
+    Some(Pattern::Task(Box::new(Task { action: task.action, func, ctx, input })))
 }
 
-fn parse_task_struct(
-    c: PatternCtx, action: Action, func: Val, ctx: Val, input: Val,
-) -> Option<Pattern> {
-    let func = parse_pattern(c, func)?;
-    let ctx = parse_pattern(c, ctx)?;
-    let input = parse_pattern(c, input)?;
-    Some(Pattern::Task(Box::new(Task { action, func, ctx, input })))
-}
-
-fn parse_list(ctx: PatternCtx, list: ListVal) -> Option<Pattern> {
+fn parse_list(list: ListVal) -> Option<Pattern> {
     let list = List::from(list);
-    let list =
-        list.into_iter().map(|item| parse_pattern(ctx, item)).collect::<Option<List<_>>>()?;
+    let list = list.into_iter().map(parse_pattern).collect::<Option<List<_>>>()?;
     Some(Pattern::List(list))
 }
 
-fn parse_map(ctx: PatternCtx, map: MapVal) -> Option<Pattern> {
+fn parse_map(map: MapVal) -> Option<Pattern> {
     let map = Map::from(map);
     let map = map
         .into_iter()
         .map(|(k, v)| {
-            let v = parse_pattern(ctx, v)?;
+            let v = parse_pattern(v)?;
             Some((k, v))
         })
         .collect::<Option<Map<_, _>>>()?;
     Some(Pattern::Map(map))
 }
 
-fn parse_with_guard(mut ctx: PatternCtx, val: Val) -> Option<Pattern> {
-    let Val::Pair(pair) = val else {
-        error!("{val:?} should be a pair");
-        return None;
-    };
-    let pair = Pair::from(pair);
-    ctx.contract = parse_contract(&pair.second);
-    parse_pattern(ctx, pair.first)
-}
-
 pub(in crate::prelude) fn match_pattern(pattern: &Pattern, val: &Val) -> bool {
     match pattern {
-        Pattern::Any(binding) => match_any(binding, val),
+        Pattern::Any(name) => match_any(name, val),
         Pattern::Val(expected) => match_val(expected, val),
         Pattern::Pair(pair) => match_pair(pair, val),
         Pattern::Task(task) => match_task(task, val),
@@ -142,7 +91,7 @@ pub(in crate::prelude) fn match_pattern(pattern: &Pattern, val: &Val) -> bool {
     }
 }
 
-fn match_any(_binding: &OptBinding, _val: &Val) -> bool {
+fn match_any(_name: &Symbol, _val: &Val) -> bool {
     true
 }
 
@@ -196,7 +145,7 @@ fn match_map(pattern: &Map<Val, Pattern>, val: &Val) -> bool {
 
 pub(in crate::prelude) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: Val) -> Val {
     match pattern {
-        Pattern::Any(binding) => assign_any(ctx, binding, val),
+        Pattern::Any(name) => assign_any(ctx, name, val),
         Pattern::Val(expected) => assign_val(ctx, expected, val),
         Pattern::Pair(pair) => assign_pair(ctx, *pair, val),
         Pattern::Task(task) => assign_task(ctx, *task, val),
@@ -205,9 +154,9 @@ pub(in crate::prelude) fn assign_pattern(ctx: &mut Ctx, pattern: Pattern, val: V
     }
 }
 
-fn assign_any(ctx: &mut Ctx, binding: OptBinding, val: Val) -> Val {
-    let Ok(last) = ctx.put(binding.name.clone(), val, binding.contract.unwrap_or_default()) else {
-        error!("variable {:?} is not assignable", binding.name);
+fn assign_any(ctx: &mut Ctx, name: Symbol, val: Val) -> Val {
+    let Ok(last) = ctx.put(name.clone(), val, Contract::None) else {
+        error!("variable {name:?} is not assignable");
         return Val::default();
     };
     last.unwrap_or_default()

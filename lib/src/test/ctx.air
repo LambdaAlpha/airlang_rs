@@ -18,7 +18,11 @@ true
 =====
 read final
 -----
-_ do [(a . final) = _ any ., a == a read .]
+_ do [
+    v = _ any .,
+    a = _ context {b : final : v},
+    v == a ; read b : .
+]
 -----
 true
 =====
@@ -66,7 +70,11 @@ true
 =====
 move final
 -----
-_ do [(a . final) = _ any ., (. == a move .) and (_ not a is_null .)]
+_ do [
+    v = _ any .,
+    a = _ context {b : final : v},
+    (. == a ; move b : .) and (_ not a ; is_null b : .)
+]
 -----
 true
 =====
@@ -132,13 +140,25 @@ _ do [a = .b, @a = 1, b]
 =====
 = special key 1
 -----
-_ do [.@.a = 1, @.a]
+_ do [..a = 1, @.a]
 -----
 1
 =====
 = special key 2
 -----
-_ do [.@.p = 1 : 2, ..p ; pair.first .]
+_ do [..p = 1 : 2, ..p ; pair.first .]
+-----
+1
+=====
+= special key 3
+-----
+_ do [%*a = 1, *a]
+-----
+1
+=====
+= special key 4
+-----
+_ do [%%a = 1, %a]
 -----
 1
 =====
@@ -147,12 +167,6 @@ _ do [.@.p = 1 : 2, ..p ; pair.first .]
 _ do [a = 1, [a, a contract .]]
 -----
 [1, none]
-=====
-= final
------
-_ do [(a . final) = 1, [a, a contract .]]
------
-[1, final]
 =====
 = destruct pair
 -----
@@ -172,33 +186,15 @@ _ do [(a : b : c) = 1 : 2 : 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
-= destruct contract default
------
-_ do [((a : b) . final) = (_ any .) : (_ any .), [a contract ., b contract .]]
------
-[final, final]
-=====
-= destruct contract one by one
------
-_ do [(a : (b . final)) = (_ any .) : (_ any .), [a contract ., b contract .]]
------
-[none, final]
-=====
-= destruct contract mix
------
-_ do [((a : (b . none)) . final) = (_ any .) : (_ any .), [a contract ., b contract .]]
------
-[final, none]
-=====
 = destruct call
 -----
-_ do [(f call a) = _ id _ 1 2, [f, a]]
+_ do [(_ f a) = _ id _ 1 2, [f, a]]
 -----
 [1, 2]
 =====
 = destruct infix
 -----
-_ do [(b call a : c) = _ id 1 2 3, [a, b, c]]
+_ do [(a b c) = _ id 1 2 3, [a, b, c]]
 -----
 [1, 2, 3]
 =====
@@ -270,25 +266,13 @@ _ do [a = 1 : 2, a ; pair.set_first 3, a]
 =====
 final mutate
 -----
-_ do [(a . final) = 1 : 2, a ; pair.set_first _ any ., a]
+_ do [a = 1 : 2, a set_contract final, a ; pair.set_first _ any ., a]
 -----
 1 : 2
 =====
 final =
 -----
-_ do [(a . final) = 1, a = _ any ., a]
------
-1
-=====
-final = none
------
-_ do [(a . final) = 1, a = _ any ., a]
------
-1
-=====
-final = final
------
-_ do [(a . final) = 1, (a . final) = _ any ., a]
+_ do [a = 1, a set_contract final, a = _ any ., a]
 -----
 1
 =====
@@ -318,13 +302,13 @@ none
 =====
 set_contract final still
 -----
-_ do [(a . final) = _ any ., a set_contract still, a contract .]
+_ do [c = _ context {a : final : _ any .}, c ; set_contract a : still, c ; contract a : .]
 -----
 final
 =====
 set_contract final none
 -----
-_ do [(a . final) = _ any ., a set_contract none, a contract .]
+_ do [c = _ context {a : final : _ any .}, c ; set_contract a : none, c ; contract a : .]
 -----
 final
 =====
@@ -440,7 +424,7 @@ false
 =====
 is_constant true
 -----
-_ do [(a . final) = _ context {}, a ; is_constant .]
+_ do [a = _ context {}, a set_contract final, a ; is_constant .]
 -----
 true
 =====
@@ -453,7 +437,7 @@ false
 ; 1
 -----
 _ do [
-    a = _ context {p : 1 : 2},
+    a = _ context {p : . : 1 : 2},
     b = 3,
     a ; eval .p ; pair.set_first b,
     a ; move p : .,
@@ -464,7 +448,7 @@ _ do [
 ; 2
 -----
 _ do [
-    a = _ context {p : 1 : 2, b : 3},
+    a = _ context {p : . : 1 : 2, b : . : 3},
     a ; eval .p ; pair.set_first .b,
     a ; move p : .,
 ]
@@ -475,7 +459,7 @@ _ do [
 -----
 _ do [
     set_first = pair.set_first,
-    a = _ context {set_first : #set_first, p : 1 : 2, b : 3},
+    a = _ context {set_first : . : #set_first, p : . : 1 : 2, b : . : 3},
     a ; eval .p ; .set_first .b,
     a ; move p : .,
 ]
@@ -485,7 +469,7 @@ _ do [
 ; recursive
 -----
 _ do [
-    a = _ context {b : _ context {c : 1}},
+    a = _ context {b : . : _ context {c : . : 1}},
     a ; eval .b ; eval ..c
 ]
 -----
@@ -524,7 +508,7 @@ _ context.represent _ context {a : constant : 1}
 represent non-recursive
 -----
 _ do [
-    m = _ context.represent _ context {b : _ context {}},
+    m = _ context.represent _ context {b : . : _ context {}},
     b = m ; map.remove .b,
     b = b ; pair.second .,
     b ; type .

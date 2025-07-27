@@ -6,7 +6,6 @@ use super::DynFn;
 use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
-use super::ctx::pattern::PatternCtx;
 use super::ctx::pattern::assign_pattern;
 use super::ctx::pattern::match_pattern;
 use super::ctx::pattern::parse_pattern;
@@ -131,7 +130,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         };
         let pair = Pair::from(pair);
         let pattern = mode.mut_static_call(ctx, pair.first);
-        let Some(pattern) = parse_pattern(PatternCtx::default(), pattern) else {
+        let Some(pattern) = parse_pattern(pattern) else {
             error!("parse pattern failed");
             return Val::default();
         };

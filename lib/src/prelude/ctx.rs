@@ -1,6 +1,5 @@
 use log::error;
 
-use self::pattern::PatternCtx;
 use self::pattern::assign_pattern;
 use self::pattern::match_pattern;
 use self::pattern::parse_pattern;
@@ -161,8 +160,7 @@ fn fn_assign(ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let pattern_ctx = PatternCtx::default();
-    let Some(pattern) = parse_pattern(pattern_ctx, pair.first) else {
+    let Some(pattern) = parse_pattern(pair.first) else {
         error!("parse pattern failed");
         return Val::default();
     };
