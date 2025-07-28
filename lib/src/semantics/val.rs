@@ -164,8 +164,6 @@ macro_rules! match_val {
     };
 }
 
-// https://github.com/rust-lang/rust-clippy/issues/15316
-#[allow(clippy::useless_attribute)]
 #[expect(redundant_imports)]
 pub(crate) use match_val;
 
