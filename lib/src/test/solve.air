@@ -27,3 +27,20 @@ _ do [
 ]
 -----
 .
+=====
+set_reverse solve
+-----
+_ do [not set_reverse! not, solve(_ not true)]
+-----
+false
+=====
+set_reverse reverse
+-----
+_ do [
+    func_id = _ any symbol,
+    reverse_func = _ any function,
+    @func_id set_reverse! reverse_func,
+    reverse_func == _ reverse! @func_id
+]
+-----
+true
