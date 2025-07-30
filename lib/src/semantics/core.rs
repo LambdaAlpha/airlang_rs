@@ -4,6 +4,7 @@ use std::mem::take;
 
 use const_format::concatcp;
 use log::error;
+use num_traits::ToPrimitive;
 
 use super::func::ConstStaticFn;
 use super::func::FreeStaticFn;
@@ -698,42 +699,76 @@ where F: FnOnce(&mut Val, FuncVal, Contract) -> (FuncVal, Val) {
 }
 
 fn eval_const_ctx(c: ConstRef<Val>, ctx: Val) -> Option<ConstRef<Val>> {
-    if ctx.is_unit() {
-        return Some(c);
-    }
-    let c = c.unwrap();
-    let Val::Ctx(ctx_val) = c else {
-        error!("ctx {c:?} should be a ctx");
-        return None;
-    };
-    let Val::Symbol(name) = ctx else {
-        error!("ctx {ctx:?} should be a symbol");
-        return None;
-    };
-    let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
-        error!("name {name:?} should exist");
-        return None;
-    };
-    Some(val_ref.into_const())
+    eval_mut_ctx(c.unwrap(), ctx).map(DynRef::into_const)
 }
 
 fn eval_mut_ctx(c: &mut Val, ctx: Val) -> Option<DynRef<'_, Val>> {
     if ctx.is_unit() {
         return Some(DynRef::new_mut(c));
     }
-    let Val::Ctx(ctx_val) = c else {
-        error!("ctx {c:?} should be a ctx");
-        return None;
-    };
-    let Val::Symbol(name) = ctx else {
-        error!("ctx {ctx:?} should be a symbol");
-        return None;
-    };
-    let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
-        error!("name {name:?} should exist");
-        return None;
-    };
-    Some(val_ref)
+    match c {
+        Val::Pair(pair_val) => {
+            let Val::Symbol(name) = ctx else {
+                error!("ctx {ctx:?} should be a symbol");
+                return None;
+            };
+            match &*name {
+                "first" => Some(DynRef::new_mut(&mut pair_val.first)),
+                "second" => Some(DynRef::new_mut(&mut pair_val.second)),
+                _ => None,
+            }
+        }
+        Val::Task(task_val) => {
+            let Val::Symbol(name) = ctx else {
+                error!("ctx {ctx:?} should be a symbol");
+                return None;
+            };
+            match &*name {
+                "function" => Some(DynRef::new_mut(&mut task_val.func)),
+                "context" => Some(DynRef::new_mut(&mut task_val.ctx)),
+                "input" => Some(DynRef::new_mut(&mut task_val.input)),
+                _ => None,
+            }
+        }
+        Val::List(list_val) => {
+            let Val::Int(index) = ctx else {
+                error!("ctx {ctx:?} should be a int");
+                return None;
+            };
+            let len = list_val.len();
+            let Some(index) = index.to_usize() else {
+                error!("index {index:?} should >= 0 and < list.len {len}");
+                return None;
+            };
+            let Some(val) = list_val.get_mut(index) else {
+                error!("index {index} should < list.len {len}");
+                return None;
+            };
+            Some(DynRef::new_mut(val))
+        }
+        Val::Map(map_val) => {
+            let Some(val) = map_val.get_mut(&ctx) else {
+                error!("ctx {ctx:?} should exist in the map");
+                return None;
+            };
+            Some(DynRef::new_mut(val))
+        }
+        Val::Ctx(ctx_val) => {
+            let Val::Symbol(name) = ctx else {
+                error!("ctx {ctx:?} should be a symbol");
+                return None;
+            };
+            let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
+                error!("name {name:?} should exist");
+                return None;
+            };
+            Some(val_ref)
+        }
+        _ => {
+            error!("ctx {c:?} should be a pair, a task, a list, a map or a ctx");
+            None
+        }
+    }
 }
 
 #[derive(Debug, Default, Copy, Clone)]

@@ -106,20 +106,62 @@ _ not _ not true
 -----
 true
 =====
-explicit ctx unit
+ctx unit
 -----
 _ do [a = 1, . ; eval .a]
 -----
 1
 =====
-explicit ctx symbol
+ctx ctx name
 -----
 _ do [p = 1 : 2, p ; pair.first .]
 -----
 1
 =====
-explicit ctx do
+pair ctx first
 -----
-_ do [p = 1 : 2, p ; eval _ do [_ pair.set_first 3, _ pair.set_second 4], p]
+_ do [p = 1 : 2, p ; eval ..first ; self .]
 -----
-3 : 4
+1
+=====
+pair ctx first
+-----
+_ do [p = 1 : 2, p ; eval ..second ; self .]
+-----
+2
+=====
+task ctx func
+-----
+_ do [t = _ id ctx ; func input, t ; eval ..function ; self .]
+-----
+func
+=====
+task ctx ctx
+-----
+_ do [t = _ id ctx ; func input, t ; eval ..context ; self .]
+-----
+ctx
+=====
+task ctx input
+-----
+_ do [t = _ id ctx ; func input, t ; eval ..input ; self .]
+-----
+input
+=====
+list ctx index
+-----
+_ do [l = [0, 2, 4], l ; eval 1 ; self .]
+-----
+2
+=====
+map ctx key
+-----
+_ do [m = {a : 1, b : 2}, m ; eval ..a ; self .]
+-----
+1
+=====
+map ctx key .
+-----
+_ do [m = {a : 1, b : 2}, m ; eval . ; self .]
+-----
+{a : 1, b : 2}
