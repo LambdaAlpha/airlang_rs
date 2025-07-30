@@ -1,7 +1,7 @@
 use super::FreeStaticFn;
 use super::comp::FreeComposite;
-use super::setup::FreeSetup;
-use super::setup::impl_free_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
@@ -11,7 +11,7 @@ pub struct FreeStaticCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: FreeComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: FreeSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for FreeStaticCompFunc {
@@ -20,4 +20,4 @@ impl FreeStaticFn<Val, Val> for FreeStaticCompFunc {
     }
 }
 
-impl_free_setup!(FreeStaticCompFunc);
+impl_setup!(FreeStaticCompFunc);

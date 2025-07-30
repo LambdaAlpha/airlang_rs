@@ -3,8 +3,8 @@ use std::rc::Rc;
 use super::ConstStaticFn;
 use super::FreeStaticFn;
 use super::prim::impl_prim_func;
-use super::setup::DynSetup;
-use super::setup::impl_dyn_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Either;
@@ -51,7 +51,7 @@ where T: MutStaticFn<Ctx, I, O>
 pub struct MutStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn MutStaticFn<Val, Val, Val>>,
-    pub(crate) setup: DynSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for MutStaticPrimFunc {
@@ -72,6 +72,6 @@ impl MutStaticFn<Val, Val, Val> for MutStaticPrimFunc {
     }
 }
 
-impl_dyn_setup!(MutStaticPrimFunc);
+impl_setup!(MutStaticPrimFunc);
 
 impl_prim_func!(MutStaticPrimFunc);

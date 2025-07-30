@@ -193,20 +193,12 @@ impl MutCellFn<Val, Val, Val> for FuncVal {
 }
 
 impl FuncSetup for FuncVal {
-    fn call_ctx(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.call_ctx())
+    fn call(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.call())
     }
 
-    fn call_input(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.call_input())
-    }
-
-    fn solve_ctx(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.solve_ctx())
-    }
-
-    fn solve_input(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.solve_input())
+    fn solve(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.solve())
     }
 }
 

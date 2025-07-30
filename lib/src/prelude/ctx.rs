@@ -19,7 +19,6 @@ use super::const_impl;
 use super::free_impl;
 use super::initial_ctx;
 use super::mode::CodeMode;
-use super::mode::DynFuncMode;
 use super::mode::Mode;
 use super::mode::SymbolMode;
 use super::mut_impl;
@@ -93,7 +92,7 @@ impl Prelude for CtxPrelude {
     }
 }
 
-fn ctx_var_mode(mode: Option<Mode>) -> DynFuncMode {
+fn ctx_var_mode(mode: Option<Mode>) -> FuncMode {
     dyn_mode(FuncMode::pair_mode(Map::default(), FuncMode::symbol_mode(SymbolMode::Literal), mode))
 }
 

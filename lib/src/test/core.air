@@ -120,31 +120,31 @@ _ do [p = 1 : 2, p ; pair.first .]
 =====
 pair ctx first
 -----
-_ do [p = 1 : 2, p ; eval ..first ; self .]
+_ do [p = 1 : 2, p ; eval .first ; self .]
 -----
 1
 =====
 pair ctx first
 -----
-_ do [p = 1 : 2, p ; eval ..second ; self .]
+_ do [p = 1 : 2, p ; eval .second ; self .]
 -----
 2
 =====
 task ctx func
 -----
-_ do [t = _ id ctx ; func input, t ; eval ..function ; self .]
+_ do [t = _ id ctx ; func input, t ; eval .function ; self .]
 -----
 func
 =====
 task ctx ctx
 -----
-_ do [t = _ id ctx ; func input, t ; eval ..context ; self .]
+_ do [t = _ id ctx ; func input, t ; eval .context ; self .]
 -----
 ctx
 =====
 task ctx input
 -----
-_ do [t = _ id ctx ; func input, t ; eval ..input ; self .]
+_ do [t = _ id ctx ; func input, t ; eval .input ; self .]
 -----
 input
 =====
@@ -156,13 +156,13 @@ _ do [l = [0, 2, 4], l ; eval 1 ; self .]
 =====
 list ctx index symbol
 -----
-_ do [l = [0, 2, 4], l ; eval ..1 ; self .]
+_ do [l = [0, 2, 4], l ; eval .1 ; self .]
 -----
 2
 =====
 map ctx key
 -----
-_ do [m = {a : 1, b : 2}, m ; eval ..a ; self .]
+_ do [m = {a : 1, b : 2}, m ; eval .a ; self .]
 -----
 1
 =====

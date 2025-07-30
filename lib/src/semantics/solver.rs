@@ -7,11 +7,11 @@ use rustc_hash::FxHashMap;
 use super::func::ConstCellFn;
 use super::func::ConstStaticFn;
 use super::func::FreeCellFn;
-use super::func::FreeSetup;
 use super::func::FreeStaticFn;
 use super::func::FreeStaticPrimFunc;
 use super::func::MutCellFn;
 use super::func::MutStaticFn;
+use super::func::Setup;
 use super::func::default_setup;
 use super::val::FuncVal;
 use super::val::Val;
@@ -41,10 +41,7 @@ pub(crate) fn unit_solver() -> FuncVal {
         FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked("unit_solver"),
             fn_: Rc::new(UnitSolver),
-            setup: FreeSetup {
-                call_input: Some(default_setup.clone()),
-                solve_input: Some(default_setup),
-            },
+            setup: Setup { call: Some(default_setup.clone()), solve: Some(default_setup) },
         }
         .into(),
     )

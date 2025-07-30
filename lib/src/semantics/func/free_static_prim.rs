@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use super::prim::impl_prim_func;
-use super::setup::FreeSetup;
-use super::setup::impl_free_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
@@ -30,7 +30,7 @@ where T: FreeStaticFn<I, O>
 pub struct FreeStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn FreeStaticFn<Val, Val>>,
-    pub(crate) setup: FreeSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for FreeStaticPrimFunc {
@@ -39,6 +39,6 @@ impl FreeStaticFn<Val, Val> for FreeStaticPrimFunc {
     }
 }
 
-impl_free_setup!(FreeStaticPrimFunc);
+impl_setup!(FreeStaticPrimFunc);
 
 impl_prim_func!(FreeStaticPrimFunc);

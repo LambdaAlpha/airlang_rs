@@ -1,6 +1,4 @@
 pub use self::comp::CompMode;
-pub use self::func::DynFuncMode;
-pub use self::func::FreeFuncMode;
 pub use self::func::FuncMode;
 pub use self::list::ListMode;
 pub use self::map::MapMode;

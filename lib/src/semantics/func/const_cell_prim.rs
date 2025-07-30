@@ -2,8 +2,8 @@ use super::ConstStaticFn;
 use super::FreeCellFn;
 use super::FreeStaticFn;
 use super::prim::impl_prim_func;
-use super::setup::DynSetup;
-use super::setup::impl_dyn_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::val::Val;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Symbol;
@@ -34,7 +34,7 @@ where T: ConstCellFn<Ctx, I, O>
 pub struct ConstCellPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Box<dyn ConstCellFnVal>,
-    pub(crate) setup: DynSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for ConstCellPrimFunc {
@@ -61,6 +61,6 @@ impl ConstCellFn<Val, Val, Val> for ConstCellPrimFunc {
     }
 }
 
-impl_dyn_setup!(ConstCellPrimFunc);
+impl_setup!(ConstCellPrimFunc);
 
 impl_prim_func!(ConstCellPrimFunc);

@@ -13,10 +13,9 @@ use super::SymbolMode;
 use super::TaskMode;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstStaticPrimFunc;
-use crate::semantics::func::DynSetup;
-use crate::semantics::func::FreeSetup;
 use crate::semantics::func::FreeStaticPrimFunc;
 use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -26,20 +25,10 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Symbol;
 
-pub struct FuncMode;
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FreeFuncMode {
-    pub call_input: Option<Mode>,
-    pub solve_input: Option<Mode>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct DynFuncMode {
-    pub call_input: Option<Mode>,
-    pub call_ctx: Option<Mode>,
-    pub solve_input: Option<Mode>,
-    pub solve_ctx: Option<Mode>,
+pub struct FuncMode {
+    pub call: Option<Mode>,
+    pub solve: Option<Mode>,
 }
 
 const DEFAULT_MODE: PrimMode = PrimMode {
@@ -65,7 +54,7 @@ impl FuncMode {
         FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: FreeSetup::none(),
+            setup: Setup::none(),
         }
         .into()
     }
@@ -74,7 +63,7 @@ impl FuncMode {
         ConstStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         }
         .into()
     }
@@ -83,7 +72,7 @@ impl FuncMode {
         MutStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         }
         .into()
     }
@@ -150,42 +139,18 @@ impl FuncMode {
         let mode = CompMode { map: Some(MapMode { some, else_ }), ..Self::default_comp_mode() };
         Some(Mode::Comp(Box::new(mode)))
     }
-}
 
-impl FreeFuncMode {
-    pub(crate) fn into_setup(self) -> FreeSetup {
-        FreeSetup {
-            call_input: Some(FuncMode::mode_into_func(self.call_input)),
-            solve_input: Some(FuncMode::mode_into_func(self.solve_input)),
+    pub(crate) fn into_setup(self) -> Setup {
+        Setup {
+            call: Some(FuncMode::mode_into_func(self.call)),
+            solve: Some(FuncMode::mode_into_func(self.solve)),
         }
     }
 }
 
-impl DynFuncMode {
-    pub(crate) fn into_setup(self) -> DynSetup {
-        DynSetup {
-            call_ctx: Some(FuncMode::mode_into_func(self.call_ctx)),
-            call_input: Some(FuncMode::mode_into_func(self.call_input)),
-            solve_ctx: Some(FuncMode::mode_into_func(self.solve_ctx)),
-            solve_input: Some(FuncMode::mode_into_func(self.solve_input)),
-        }
-    }
-}
-
-impl Default for FreeFuncMode {
+impl Default for FuncMode {
     fn default() -> Self {
-        Self { call_input: FuncMode::default_mode(), solve_input: FuncMode::default_mode() }
-    }
-}
-
-impl Default for DynFuncMode {
-    fn default() -> Self {
-        Self {
-            call_ctx: FuncMode::default_mode(),
-            call_input: FuncMode::default_mode(),
-            solve_ctx: FuncMode::default_mode(),
-            solve_input: FuncMode::default_mode(),
-        }
+        Self { call: FuncMode::default_mode(), solve: FuncMode::default_mode() }
     }
 }
 

@@ -1,8 +1,8 @@
 use super::FreeCellFn;
-use super::FreeSetup;
 use super::FreeStaticFn;
+use super::Setup;
 use super::comp::FreeComposite;
-use super::setup::impl_free_setup;
+use super::setup::impl_setup;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
@@ -12,7 +12,7 @@ pub struct FreeCellCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: FreeComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: FreeSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for FreeCellCompFunc {
@@ -27,4 +27,4 @@ impl FreeCellFn<Val, Val> for FreeCellCompFunc {
     }
 }
 
-impl_free_setup!(FreeCellCompFunc);
+impl_setup!(FreeCellCompFunc);

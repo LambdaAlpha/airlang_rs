@@ -29,13 +29,12 @@ use crate::semantics::ctx::CtxValue;
 use crate::semantics::func::ConstCellCompFunc;
 use crate::semantics::func::ConstStaticCompFunc;
 use crate::semantics::func::DynComposite;
-use crate::semantics::func::DynSetup;
 use crate::semantics::func::FreeCellCompFunc;
 use crate::semantics::func::FreeComposite;
-use crate::semantics::func::FreeSetup;
 use crate::semantics::func::FreeStaticCompFunc;
 use crate::semantics::func::MutCellCompFunc;
 use crate::semantics::func::MutStaticCompFunc;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCellCompFuncVal;
 use crate::semantics::val::ConstStaticCompFuncVal;
 use crate::semantics::val::FreeCellCompFuncVal;
@@ -491,21 +490,11 @@ impl Arbitrary for FuncVal {
     }
 }
 
-impl Arbitrary for FreeSetup {
+impl Arbitrary for Setup {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let call_input = Arbitrary::any(rng, depth);
         let solve_input = Arbitrary::any(rng, depth);
-        FreeSetup { call_input, solve_input }
-    }
-}
-
-impl Arbitrary for DynSetup {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let call_ctx = Arbitrary::any(rng, depth);
-        let call_input = Arbitrary::any(rng, depth);
-        let solve_ctx = Arbitrary::any(rng, depth);
-        let solve_input = Arbitrary::any(rng, depth);
-        DynSetup { call_ctx, call_input, solve_ctx, solve_input }
+        Setup { call: call_input, solve: solve_input }
     }
 }
 

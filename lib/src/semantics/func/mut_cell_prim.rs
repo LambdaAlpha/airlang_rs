@@ -4,8 +4,8 @@ use super::FreeCellFn;
 use super::FreeStaticFn;
 use super::MutStaticFn;
 use super::prim::impl_prim_func;
-use super::setup::DynSetup;
-use super::setup::impl_dyn_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::val::Val;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::ConstRef;
@@ -45,7 +45,7 @@ where T: MutCellFn<Ctx, I, O>
 pub struct MutCellPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Box<dyn MutCellFnVal>,
-    pub(crate) setup: DynSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for MutCellPrimFunc {
@@ -84,6 +84,6 @@ impl MutCellFn<Val, Val, Val> for MutCellPrimFunc {
     }
 }
 
-impl_dyn_setup!(MutCellPrimFunc);
+impl_setup!(MutCellPrimFunc);
 
 impl_prim_func!(MutCellPrimFunc);

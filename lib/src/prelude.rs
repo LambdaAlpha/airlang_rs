@@ -10,8 +10,6 @@ use self::int::IntPrelude;
 use self::list::ListPrelude;
 use self::map::MapPrelude;
 use self::meta::MetaPrelude;
-use self::mode::DynFuncMode;
-use self::mode::FreeFuncMode;
 use self::mode::FuncMode;
 use self::mode::ModePrelude;
 use self::number::NumberPrelude;
@@ -194,13 +192,13 @@ impl Named for MutStaticPrimFuncVal {
 pub struct FreeFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: FreeFuncMode,
+    pub mode: FuncMode,
 }
 
 pub struct DynFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: DynFuncMode,
+    pub mode: FuncMode,
 }
 
 impl<F: FreeCellFnVal + 'static> FreeFn<F> {

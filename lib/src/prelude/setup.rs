@@ -1,25 +1,21 @@
 use std::rc::Rc;
 
-use super::mode::DynFuncMode;
-use super::mode::FreeFuncMode;
 use super::mode::FuncMode;
 use super::mode::Mode;
-use super::mode::SymbolMode;
 use super::setup::ctx::CtxSetup;
 use crate::semantics::func::ConstCellFnVal;
 use crate::semantics::func::ConstCellPrimFunc;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::ConstStaticPrimFunc;
-use crate::semantics::func::DynSetup;
 use crate::semantics::func::FreeCellFnVal;
 use crate::semantics::func::FreeCellPrimFunc;
-use crate::semantics::func::FreeSetup;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::FreeStaticPrimFunc;
 use crate::semantics::func::MutCellFnVal;
 use crate::semantics::func::MutCellPrimFunc;
 use crate::semantics::func::MutStaticFn;
 use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCellPrimFuncVal;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::FreeCellPrimFuncVal;
@@ -51,7 +47,7 @@ impl<F: FreeCellFnVal + 'static> FreeFn<F> {
         let func = FreeCellPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Box::new(self.f),
-            setup: FreeSetup::none(),
+            setup: Setup::none(),
         };
         FreeCellPrimFuncVal::from(func)
     }
@@ -62,7 +58,7 @@ impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
         let func = FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: FreeSetup::none(),
+            setup: Setup::none(),
         };
         FreeStaticPrimFuncVal::from(func)
     }
@@ -73,7 +69,7 @@ impl<F: ConstCellFnVal + 'static> DynFn<F> {
         let func = ConstCellPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Box::new(self.f),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         };
         ConstCellPrimFuncVal::from(func)
     }
@@ -84,7 +80,7 @@ impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
         let func = ConstStaticPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         };
         ConstStaticPrimFuncVal::from(func)
     }
@@ -95,7 +91,7 @@ impl<F: MutCellFnVal + 'static> DynFn<F> {
         let func = MutCellPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Box::new(self.f),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         };
         MutCellPrimFuncVal::from(func)
     }
@@ -106,34 +102,25 @@ impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
         let func = MutStaticPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         };
         MutStaticPrimFuncVal::from(func)
     }
 }
 
-pub fn free_mode(mode: Option<Mode>) -> FreeFuncMode {
-    FreeFuncMode { call_input: mode, solve_input: FuncMode::default_mode() }
+pub fn free_mode(mode: Option<Mode>) -> FuncMode {
+    FuncMode { call: mode, solve: FuncMode::default_mode() }
 }
 
-pub fn default_free_mode() -> FreeFuncMode {
+pub fn default_free_mode() -> FuncMode {
     free_mode(FuncMode::default_mode())
 }
 
-pub fn ctx_mode() -> Option<Mode> {
-    FuncMode::symbol_mode(SymbolMode::Literal)
+pub fn dyn_mode(mode: Option<Mode>) -> FuncMode {
+    FuncMode { call: mode, solve: FuncMode::default_mode() }
 }
 
-pub fn dyn_mode(mode: Option<Mode>) -> DynFuncMode {
-    DynFuncMode {
-        call_ctx: FuncMode::symbol_mode(SymbolMode::Literal),
-        call_input: mode,
-        solve_ctx: FuncMode::symbol_mode(SymbolMode::Literal),
-        solve_input: FuncMode::default_mode(),
-    }
-}
-
-pub fn default_dyn_mode() -> DynFuncMode {
+pub fn default_dyn_mode() -> FuncMode {
     dyn_mode(FuncMode::default_mode())
 }
 

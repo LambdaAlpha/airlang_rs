@@ -297,8 +297,8 @@ _ do [
     repr = _ form. {
         id : f,
         code : (ctx : in) : in,
-        call_setup : @m : @m,
-        solve_setup : @m : @m,
+        call_setup : @m,
+        solve_setup : @m,
         context_access : constant,
         cell : true,
     },

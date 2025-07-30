@@ -1,8 +1,8 @@
 use super::ConstStaticFn;
 use super::FreeStaticFn;
 use super::comp::DynComposite;
-use super::setup::DynSetup;
-use super::setup::impl_dyn_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -13,7 +13,7 @@ pub struct ConstStaticCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: DynSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for ConstStaticCompFunc {
@@ -28,4 +28,4 @@ impl ConstStaticFn<Val, Val, Val> for ConstStaticCompFunc {
     }
 }
 
-impl_dyn_setup!(ConstStaticCompFunc);
+impl_setup!(ConstStaticCompFunc);

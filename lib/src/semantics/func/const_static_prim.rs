@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use super::FreeStaticFn;
 use super::prim::impl_prim_func;
-use super::setup::DynSetup;
-use super::setup::impl_dyn_setup;
+use super::setup::Setup;
+use super::setup::impl_setup;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 use crate::type_::ref_::ConstRef;
@@ -42,7 +42,7 @@ where T: ConstStaticFn<Ctx, I, O>
 pub struct ConstStaticPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn ConstStaticFn<Val, Val, Val>>,
-    pub(crate) setup: DynSetup,
+    pub(crate) setup: Setup,
 }
 
 impl FreeStaticFn<Val, Val> for ConstStaticPrimFunc {
@@ -57,6 +57,6 @@ impl ConstStaticFn<Val, Val, Val> for ConstStaticPrimFunc {
     }
 }
 
-impl_dyn_setup!(ConstStaticPrimFunc);
+impl_setup!(ConstStaticPrimFunc);
 
 impl_prim_func!(ConstStaticPrimFunc);

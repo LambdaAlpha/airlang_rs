@@ -25,8 +25,7 @@ _____!();
 pub(crate) use self::comp::DynComposite;
 pub(crate) use self::comp::FreeComposite;
 pub(crate) use self::comp::composite_call;
-pub(crate) use self::setup::DynSetup;
-pub(crate) use self::setup::FreeSetup;
+pub(crate) use self::setup::Setup;
 pub(crate) use self::setup::SetupFn;
 
 _____!();
@@ -38,10 +37,8 @@ use crate::semantics::core::Eval;
 use crate::type_::Symbol;
 
 pub(crate) trait FuncSetup {
-    fn call_ctx(&self) -> Option<&FuncVal>;
-    fn call_input(&self) -> Option<&FuncVal>;
-    fn solve_ctx(&self) -> Option<&FuncVal>;
-    fn solve_input(&self) -> Option<&FuncVal>;
+    fn call(&self) -> Option<&FuncVal>;
+    fn solve(&self) -> Option<&FuncVal>;
 }
 
 pub fn default_setup() -> FuncVal {
@@ -49,7 +46,7 @@ pub fn default_setup() -> FuncVal {
         MutStaticPrimFunc {
             id: Symbol::from_str_unchecked("setup.default"),
             fn_: Rc::new(Eval),
-            setup: DynSetup::none(),
+            setup: Setup::none(),
         }
         .into(),
     )

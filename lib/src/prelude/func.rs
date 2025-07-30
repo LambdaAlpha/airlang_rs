@@ -12,7 +12,7 @@ use super::const_impl;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
-use super::func::repr::generate_ctx_input_setup;
+use super::func::repr::generate_setup;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use super::setup::dyn_mode;
@@ -153,8 +153,7 @@ fn fn_call_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    generate_ctx_input_setup(func.call_ctx().cloned(), func.call_input().cloned())
-        .unwrap_or_default()
+    generate_setup(func.call().cloned())
 }
 
 pub fn solve_setup() -> ConstStaticPrimFuncVal {
@@ -167,8 +166,7 @@ fn fn_solve_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    generate_ctx_input_setup(func.solve_ctx().cloned(), func.solve_input().cloned())
-        .unwrap_or_default()
+    generate_setup(func.solve().cloned())
 }
 
 pub fn is_primitive() -> ConstStaticPrimFuncVal {

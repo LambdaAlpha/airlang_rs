@@ -1,45 +1,21 @@
+use super::ConstCellFn;
+use super::ConstStaticFn;
+use super::FreeCellFn;
+use super::FreeStaticFn;
+use super::MutCellFn;
+use super::MutStaticFn;
 use crate::semantics::val::FuncVal;
+use crate::type_::ConstRef;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct FreeSetup {
-    pub(crate) call_input: Option<FuncVal>,
-    pub(crate) solve_input: Option<FuncVal>,
+pub(crate) struct Setup {
+    pub(crate) call: Option<FuncVal>,
+    pub(crate) solve: Option<FuncVal>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct DynSetup {
-    pub(crate) call_ctx: Option<FuncVal>,
-    pub(crate) call_input: Option<FuncVal>,
-    pub(crate) solve_ctx: Option<FuncVal>,
-    pub(crate) solve_input: Option<FuncVal>,
-}
-
-impl FreeSetup {
+impl Setup {
     pub(crate) fn none() -> Self {
-        Self { call_input: None, solve_input: None }
-    }
-}
-
-impl DynSetup {
-    pub(crate) fn none() -> Self {
-        Self { call_ctx: None, call_input: None, solve_ctx: None, solve_input: None }
-    }
-}
-
-impl From<DynSetup> for FreeSetup {
-    fn from(value: DynSetup) -> Self {
-        Self { call_input: value.call_input, solve_input: value.solve_input }
-    }
-}
-
-impl From<FreeSetup> for DynSetup {
-    fn from(value: FreeSetup) -> Self {
-        Self {
-            call_ctx: None,
-            call_input: value.call_input,
-            solve_ctx: None,
-            solve_input: value.solve_input,
-        }
+        Self { call: None, solve: None }
     }
 }
 
@@ -129,58 +105,18 @@ where
     }
 }
 
-macro_rules! impl_free_setup {
+macro_rules! impl_setup {
     ($func:ty) => {
         impl $crate::semantics::func::FuncSetup for $func {
-            fn call_ctx(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                None
+            fn call(&self) -> Option<&$crate::semantics::val::FuncVal> {
+                self.setup.call.as_ref()
             }
 
-            fn call_input(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.call_input.as_ref()
-            }
-
-            fn solve_ctx(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                None
-            }
-
-            fn solve_input(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.solve_input.as_ref()
+            fn solve(&self) -> Option<&$crate::semantics::val::FuncVal> {
+                self.setup.solve.as_ref()
             }
         }
     };
 }
 
-pub(crate) use impl_free_setup;
-
-macro_rules! impl_dyn_setup {
-    ($func:ty) => {
-        impl $crate::semantics::func::FuncSetup for $func {
-            fn call_ctx(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.call_ctx.as_ref()
-            }
-
-            fn call_input(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.call_input.as_ref()
-            }
-
-            fn solve_ctx(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.solve_ctx.as_ref()
-            }
-
-            fn solve_input(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.solve_input.as_ref()
-            }
-        }
-    };
-}
-
-pub(crate) use impl_dyn_setup;
-
-use crate::semantics::func::ConstCellFn;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeCellFn;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::MutCellFn;
-use crate::semantics::func::MutStaticFn;
-use crate::type_::ConstRef;
+pub(crate) use impl_setup;

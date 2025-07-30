@@ -146,7 +146,7 @@ _ do [..a = 1, @.a]
 =====
 = special key 2
 -----
-_ do [..p = 1 : 2, ..p ; pair.first .]
+_ do [..p = 1 : 2, .p ; pair.first .]
 -----
 1
 =====

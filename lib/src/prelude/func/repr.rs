@@ -12,7 +12,6 @@ use crate::semantics::func::ConstCellCompFunc;
 use crate::semantics::func::ConstCellPrimFunc;
 use crate::semantics::func::ConstStaticCompFunc;
 use crate::semantics::func::DynComposite;
-use crate::semantics::func::DynSetup;
 use crate::semantics::func::FreeCellCompFunc;
 use crate::semantics::func::FreeCellPrimFunc;
 use crate::semantics::func::FreeComposite;
@@ -20,6 +19,7 @@ use crate::semantics::func::FreeStaticCompFunc;
 use crate::semantics::func::MutCellCompFunc;
 use crate::semantics::func::MutCellPrimFunc;
 use crate::semantics::func::MutStaticCompFunc;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCellCompFuncVal;
 use crate::semantics::val::ConstCellPrimFuncVal;
 use crate::semantics::val::ConstStaticCompFuncVal;
@@ -36,7 +36,6 @@ use crate::semantics::val::MutStaticCompFuncVal;
 use crate::semantics::val::MutStaticPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
-use crate::type_::CtxInput;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
@@ -75,7 +74,7 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let ctx = parse_ctx(map_remove(&mut map, CTX))?;
     let setup =
-        parse_dyn_setup(map_remove(&mut map, CALL_SETUP), map_remove(&mut map, SOLVE_SETUP))?;
+        parse_task_setup(map_remove(&mut map, CALL_SETUP), map_remove(&mut map, SOLVE_SETUP))?;
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let cell = parse_cell(map_remove(&mut map, CELL))?;
@@ -83,10 +82,10 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
     let func = match ctx_access {
         FREE => {
             if cell {
-                let func = FreeCellCompFunc { id, comp: free_comp, ctx, setup: setup.into() };
+                let func = FreeCellCompFunc { id, comp: free_comp, ctx, setup };
                 FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
             } else {
-                let func = FreeStaticCompFunc { id, comp: free_comp, ctx, setup: setup.into() };
+                let func = FreeStaticCompFunc { id, comp: free_comp, ctx, setup };
                 FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
             }
         }
@@ -187,32 +186,10 @@ fn parse_ctx(ctx: Val) -> Option<Ctx> {
     }
 }
 
-fn parse_dyn_setup(call: Val, solve: Val) -> Option<DynSetup> {
-    let call_setup = parse_ctx_input_setup(call)?;
-    let solve_setup = parse_ctx_input_setup(solve)?;
-    Some(DynSetup {
-        call_ctx: call_setup.ctx,
-        call_input: call_setup.input,
-        solve_ctx: solve_setup.ctx,
-        solve_input: solve_setup.input,
-    })
-}
-
-fn parse_ctx_input_setup(setup: Val) -> Option<CtxInput<Option<FuncVal>, Option<FuncVal>>> {
-    match setup {
-        Val::Unit(_) => Some(CtxInput::new(None, None)),
-        Val::Func(func) => Some(CtxInput::new(None, Some(func))),
-        Val::Pair(pair) => {
-            let pair = Pair::from(pair);
-            let ctx = parse_setup(pair.first)?;
-            let input = parse_setup(pair.second)?;
-            Some(CtxInput { ctx, input })
-        }
-        v => {
-            error!("setup {v:?} should be a func, a pair or a unit");
-            None
-        }
-    }
+fn parse_task_setup(call: Val, solve: Val) -> Option<Setup> {
+    let call = parse_setup(call)?;
+    let solve = parse_setup(solve)?;
+    Some(Setup { call, solve })
 }
 
 fn parse_setup(setup: Val) -> Option<Option<FuncVal>> {
@@ -274,7 +251,7 @@ fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
     let f = FreeCellCompFunc::from(f);
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp = CompRepr { id: f.id, access: FREE, cell: true, setup: f.setup.into(), ctx: f.ctx };
+    let comp = CompRepr { id: f.id, access: FREE, cell: true, setup: f.setup, ctx: f.ctx };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -290,7 +267,7 @@ fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
         id: f.id.clone(),
         access: FREE,
         cell: false,
-        setup: f.setup.clone().into(),
+        setup: f.setup.clone(),
         ctx: f.ctx.clone(),
     };
     generate_comp(&mut repr, comp);
@@ -401,7 +378,7 @@ struct CompRepr {
     id: Symbol,
     access: &'static str,
     cell: bool,
-    setup: DynSetup,
+    setup: Setup,
     ctx: Ctx,
 }
 
@@ -415,34 +392,20 @@ fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     if comp.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(comp.access));
     }
-    if let Some(setup) = generate_ctx_input_setup(comp.setup.call_ctx, comp.setup.call_input) {
-        repr.insert(symbol(CALL_SETUP), setup);
+    let call_setup = generate_setup(comp.setup.call);
+    if !call_setup.is_unit() {
+        repr.insert(symbol(CALL_SETUP), call_setup);
     }
-    if let Some(setup) = generate_ctx_input_setup(comp.setup.solve_ctx, comp.setup.solve_input) {
-        repr.insert(symbol(SOLVE_SETUP), setup);
+    let solve_setup = generate_setup(comp.setup.solve);
+    if !solve_setup.is_unit() {
+        repr.insert(symbol(SOLVE_SETUP), solve_setup);
     }
     if comp.ctx != Ctx::default() {
         repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(comp.ctx)));
     }
 }
 
-pub(crate) fn generate_ctx_input_setup(
-    ctx: Option<FuncVal>, input: Option<FuncVal>,
-) -> Option<Val> {
-    if ctx.is_none() && input.is_none() {
-        return None;
-    }
-    let setup = if ctx.is_none() {
-        generate_setup(input)
-    } else {
-        let ctx = generate_setup(ctx);
-        let input = generate_setup(input);
-        Val::Pair(Pair::new(ctx, input).into())
-    };
-    Some(setup)
-}
-
-fn generate_setup(setup: Option<FuncVal>) -> Val {
+pub(super) fn generate_setup(setup: Option<FuncVal>) -> Val {
     match setup {
         Some(func) => Val::Func(func),
         None => Val::default(),
