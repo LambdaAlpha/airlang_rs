@@ -27,6 +27,7 @@ use crate::prelude::setup::default_dyn_mode;
 use crate::prelude::setup::default_free_mode;
 use crate::prelude::setup::dyn_mode;
 use crate::prelude::setup::free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstStaticPrimFuncVal;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreeStaticPrimFuncVal;
@@ -49,6 +50,7 @@ pub struct CtxPrelude {
     pub is_const: MutStaticPrimFuncVal,
     pub ctx_new: FreeStaticPrimFuncVal,
     pub ctx_repr: FreeStaticPrimFuncVal,
+    pub ctx_reverse: FreeStaticPrimFuncVal,
     pub ctx_prelude: FreeStaticPrimFuncVal,
     pub ctx_self: ConstStaticPrimFuncVal,
 }
@@ -66,6 +68,7 @@ impl Default for CtxPrelude {
             is_const: is_const(),
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
+            ctx_reverse: ctx_reverse(),
             ctx_prelude: ctx_prelude(),
             ctx_self: ctx_self(),
         }
@@ -84,6 +87,7 @@ impl Prelude for CtxPrelude {
         self.is_const.put(ctx);
         self.ctx_new.put(ctx);
         self.ctx_repr.put(ctx);
+        self.ctx_reverse.put(ctx);
         self.ctx_prelude.put(ctx);
         self.ctx_self.put(ctx);
     }
@@ -321,6 +325,21 @@ fn fn_ctx_repr(input: Val) -> Val {
         return Val::default();
     };
     generate_ctx(ctx)
+}
+
+pub fn ctx_reverse() -> FreeStaticPrimFuncVal {
+    FreeFn { id: "context.reverse", f: free_impl(fn_ctx_reverse), mode: default_free_mode() }
+        .free_static()
+}
+
+fn fn_ctx_reverse(input: Val) -> Val {
+    let Val::Ctx(ctx) = input else {
+        error!("input {input:?} should be a ctx");
+        return Val::default();
+    };
+    let ctx = Ctx::from(ctx);
+    let reverse = ctx.reverse();
+    Val::Ctx(reverse.into())
 }
 
 pub fn ctx_prelude() -> FreeStaticPrimFuncVal {

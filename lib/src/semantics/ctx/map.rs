@@ -156,6 +156,13 @@ impl CtxMap {
         Ok(())
     }
 
+    pub fn reverse(mut self) -> Self {
+        for v in self.map.values_mut() {
+            v.contract = v.contract.reverse();
+        }
+        self
+    }
+
     pub fn is_locked(&self, name: Symbol) -> Option<bool> {
         let value = self.map.get(&name)?;
         Some(value.lock)
@@ -217,6 +224,16 @@ impl Contract {
             Self::Still => matches!(new, Self::None | Self::Final),
             Self::Final => false,
             Self::Const => false,
+        }
+    }
+
+    pub(in crate::semantics) fn reverse(self) -> Self {
+        match self {
+            Contract::None => Contract::None,
+            Contract::Still => Contract::Final,
+            Contract::Final => Contract::Still,
+            Contract::Static => Contract::Static,
+            Contract::Const => Contract::Const,
         }
     }
 }

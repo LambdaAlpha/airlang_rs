@@ -516,6 +516,28 @@ _ do [
 -----
 context
 =====
+reverse
+-----
+_ do [
+    c1 = _ context {
+        a : none : 1,
+        b : still : 2,
+        c : final : 3,
+        d : static : 4,
+        e : constant : 5,
+    },
+    c2 = _ context {
+        a : none : 1,
+        b : final : 2,
+        c : still : 3,
+        d : static : 4,
+        e : constant : 5,
+    },
+    (c1 == _ context.reverse c2) and (c2 == _ context.reverse c1)
+]
+-----
+true
+=====
 prelude
 -----
 _ do [a = _ prelude ., a ; eval _ .not true]

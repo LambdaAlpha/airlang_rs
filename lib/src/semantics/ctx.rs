@@ -48,6 +48,10 @@ impl Ctx {
     pub(crate) fn destruct(self) -> PubCtx {
         PubCtx { variables: self.variables }
     }
+
+    pub(crate) fn reverse(self) -> Self {
+        Self { variables: self.variables.reverse() }
+    }
 }
 
 impl Default for Ctx {
