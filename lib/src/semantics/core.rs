@@ -27,136 +27,6 @@ use crate::type_::Map;
 use crate::type_::Symbol;
 use crate::type_::Task;
 
-pub(crate) struct SymbolForm<'a, Fn> {
-    pub(crate) default: char,
-    pub(crate) f: &'a Fn,
-}
-
-pub(crate) const SYMBOL_LITERAL_CHAR: char = '.';
-pub(crate) const SYMBOL_LITERAL: &str = concatcp!(SYMBOL_LITERAL_CHAR);
-pub(crate) const SYMBOL_REF_CHAR: char = '@';
-pub(crate) const SYMBOL_REF: &str = concatcp!(SYMBOL_REF_CHAR);
-pub(crate) const SYMBOL_MOVE_CHAR: char = '#';
-pub(crate) const SYMBOL_MOVE: &str = concatcp!(SYMBOL_MOVE_CHAR);
-pub(crate) const SYMBOL_EVAL_CHAR: char = '$';
-pub(crate) const SYMBOL_EVAL: &str = concatcp!(SYMBOL_EVAL_CHAR);
-
-impl<'a, Fn> SymbolForm<'a, Fn> {
-    fn recognize(&self, input: Symbol) -> (char, Symbol) {
-        match input.chars().next() {
-            Some(SYMBOL_LITERAL_CHAR) => {
-                (SYMBOL_LITERAL_CHAR, Symbol::from_str_unchecked(&input[1 ..]))
-            }
-            Some(SYMBOL_REF_CHAR) => (SYMBOL_REF_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            Some(SYMBOL_MOVE_CHAR) => (SYMBOL_MOVE_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            Some(SYMBOL_EVAL_CHAR) => (SYMBOL_EVAL_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            _ => (self.default, input),
-        }
-    }
-}
-
-impl<'a, Fn> FreeStaticFn<Symbol, Val> for SymbolForm<'a, Fn> {
-    fn free_static_call(&self, input: Symbol) -> Val {
-        let (prefix, s) = self.recognize(input.clone());
-        match prefix {
-            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
-            SYMBOL_REF_CHAR => {
-                error!("symbol {input:?} should be evaluated in a ctx");
-                Val::default()
-            }
-            SYMBOL_MOVE_CHAR => {
-                error!("symbol {input:?} should be evaluated in a ctx");
-                Val::default()
-            }
-            SYMBOL_EVAL_CHAR => {
-                error!("symbol {input:?} should be evaluated in a ctx");
-                Val::default()
-            }
-            _ => unreachable!("DEFAULT should be predefined character"),
-        }
-    }
-}
-
-impl<'a, Fn> ConstStaticFn<Val, Symbol, Val> for SymbolForm<'a, Fn>
-where Fn: ConstStaticFn<Val, Val, Val>
-{
-    fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        let (prefix, s) = self.recognize(input.clone());
-        match prefix {
-            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
-            SYMBOL_REF_CHAR => {
-                let Val::Ctx(ctx) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx.get_ref(s.clone()) else {
-                    error!("name {s:?} should exist");
-                    return Val::default();
-                };
-                val.clone()
-            }
-            SYMBOL_MOVE_CHAR => {
-                error!("symbol {input:?} should be evaluated in a mutable ctx");
-                Val::default()
-            }
-            SYMBOL_EVAL_CHAR => {
-                let Val::Ctx(ctx1) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx1.get_ref(s.clone()) else {
-                    error!("name {s:?} should exist");
-                    return Val::default();
-                };
-                let val = val.clone();
-                self.f.const_static_call(ctx, val)
-            }
-            _ => unreachable!("DEFAULT should be predefined character"),
-        }
-    }
-}
-
-impl<'a, Fn> MutStaticFn<Val, Symbol, Val> for SymbolForm<'a, Fn>
-where Fn: MutStaticFn<Val, Val, Val>
-{
-    fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        let (prefix, s) = self.recognize(input);
-        match prefix {
-            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
-            SYMBOL_REF_CHAR => {
-                let Val::Ctx(ctx) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                ctx.get_ref(s).cloned().unwrap_or_default()
-            }
-            SYMBOL_MOVE_CHAR => {
-                let Val::Ctx(ctx) = ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx.remove(s.clone()) else {
-                    error!("name {s:?} should exist");
-                    return Val::default();
-                };
-                val
-            }
-            SYMBOL_EVAL_CHAR => {
-                let Val::Ctx(ctx1) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx1.get_ref(s.clone()) else {
-                    error!("name {s:?} should exist");
-                    return Val::default();
-                };
-                self.f.mut_static_call(ctx, val.clone())
-            }
-            _ => unreachable!("DEFAULT should be predefined character"),
-        }
-    }
-}
-
 pub(crate) struct PairForm<'a, Some, First, Second> {
     pub(crate) some: &'a Map<Val, Some>,
     pub(crate) first: &'a First,
@@ -427,6 +297,136 @@ where
             }
         }
         Val::Map(input)
+    }
+}
+
+pub(crate) struct SymbolEval<'a, Fn> {
+    pub(crate) default: char,
+    pub(crate) f: &'a Fn,
+}
+
+pub(crate) const SYMBOL_LITERAL_CHAR: char = '.';
+pub(crate) const SYMBOL_LITERAL: &str = concatcp!(SYMBOL_LITERAL_CHAR);
+pub(crate) const SYMBOL_REF_CHAR: char = '@';
+pub(crate) const SYMBOL_REF: &str = concatcp!(SYMBOL_REF_CHAR);
+pub(crate) const SYMBOL_MOVE_CHAR: char = '#';
+pub(crate) const SYMBOL_MOVE: &str = concatcp!(SYMBOL_MOVE_CHAR);
+pub(crate) const SYMBOL_EVAL_CHAR: char = '$';
+pub(crate) const SYMBOL_EVAL: &str = concatcp!(SYMBOL_EVAL_CHAR);
+
+impl<'a, Fn> SymbolEval<'a, Fn> {
+    fn recognize(&self, input: Symbol) -> (char, Symbol) {
+        match input.chars().next() {
+            Some(SYMBOL_LITERAL_CHAR) => {
+                (SYMBOL_LITERAL_CHAR, Symbol::from_str_unchecked(&input[1 ..]))
+            }
+            Some(SYMBOL_REF_CHAR) => (SYMBOL_REF_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
+            Some(SYMBOL_MOVE_CHAR) => (SYMBOL_MOVE_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
+            Some(SYMBOL_EVAL_CHAR) => (SYMBOL_EVAL_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
+            _ => (self.default, input),
+        }
+    }
+}
+
+impl<'a, Fn> FreeStaticFn<Symbol, Val> for SymbolEval<'a, Fn> {
+    fn free_static_call(&self, input: Symbol) -> Val {
+        let (prefix, s) = self.recognize(input.clone());
+        match prefix {
+            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
+            SYMBOL_REF_CHAR => {
+                error!("symbol {input:?} should be evaluated in a ctx");
+                Val::default()
+            }
+            SYMBOL_MOVE_CHAR => {
+                error!("symbol {input:?} should be evaluated in a ctx");
+                Val::default()
+            }
+            SYMBOL_EVAL_CHAR => {
+                error!("symbol {input:?} should be evaluated in a ctx");
+                Val::default()
+            }
+            _ => unreachable!("DEFAULT should be predefined character"),
+        }
+    }
+}
+
+impl<'a, Fn> ConstStaticFn<Val, Symbol, Val> for SymbolEval<'a, Fn>
+where Fn: ConstStaticFn<Val, Val, Val>
+{
+    fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
+        let (prefix, s) = self.recognize(input.clone());
+        match prefix {
+            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
+            SYMBOL_REF_CHAR => {
+                let Val::Ctx(ctx) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
+                    return Val::default();
+                };
+                let Ok(val) = ctx.get_ref(s.clone()) else {
+                    error!("name {s:?} should exist");
+                    return Val::default();
+                };
+                val.clone()
+            }
+            SYMBOL_MOVE_CHAR => {
+                error!("symbol {input:?} should be evaluated in a mutable ctx");
+                Val::default()
+            }
+            SYMBOL_EVAL_CHAR => {
+                let Val::Ctx(ctx1) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
+                    return Val::default();
+                };
+                let Ok(val) = ctx1.get_ref(s.clone()) else {
+                    error!("name {s:?} should exist");
+                    return Val::default();
+                };
+                let val = val.clone();
+                self.f.const_static_call(ctx, val)
+            }
+            _ => unreachable!("DEFAULT should be predefined character"),
+        }
+    }
+}
+
+impl<'a, Fn> MutStaticFn<Val, Symbol, Val> for SymbolEval<'a, Fn>
+where Fn: MutStaticFn<Val, Val, Val>
+{
+    fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
+        let (prefix, s) = self.recognize(input);
+        match prefix {
+            SYMBOL_LITERAL_CHAR => Val::Symbol(s),
+            SYMBOL_REF_CHAR => {
+                let Val::Ctx(ctx) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
+                    return Val::default();
+                };
+                ctx.get_ref(s).cloned().unwrap_or_default()
+            }
+            SYMBOL_MOVE_CHAR => {
+                let Val::Ctx(ctx) = ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
+                    return Val::default();
+                };
+                let Ok(val) = ctx.remove(s.clone()) else {
+                    error!("name {s:?} should exist");
+                    return Val::default();
+                };
+                val
+            }
+            SYMBOL_EVAL_CHAR => {
+                let Val::Ctx(ctx1) = &*ctx else {
+                    error!("ctx {ctx:?} should be a ctx");
+                    return Val::default();
+                };
+                let Ok(val) = ctx1.get_ref(s.clone()) else {
+                    error!("name {s:?} should exist");
+                    return Val::default();
+                };
+                self.f.mut_static_call(ctx, val.clone())
+            }
+            _ => unreachable!("DEFAULT should be predefined character"),
+        }
     }
 }
 
@@ -815,19 +815,19 @@ impl MutStaticFn<Val, Val, Val> for Eval {
 
 impl FreeStaticFn<Symbol, Val> for Eval {
     fn free_static_call(&self, input: Symbol) -> Val {
-        SymbolForm { default: SYMBOL_REF_CHAR, f: self }.free_static_call(input)
+        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, Symbol, Val> for Eval {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        SymbolForm { default: SYMBOL_REF_CHAR, f: self }.const_static_call(ctx, input)
+        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, Symbol, Val> for Eval {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        SymbolForm { default: SYMBOL_REF_CHAR, f: self }.mut_static_call(ctx, input)
+        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.mut_static_call(ctx, input)
     }
 }
 
