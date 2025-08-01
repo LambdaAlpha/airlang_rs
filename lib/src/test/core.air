@@ -34,7 +34,7 @@ symbol literal special 3
 -----
 @a
 =====
-ref
+ctx ref
 -----
 _ do [a = 1, @a]
 -----
@@ -51,6 +51,30 @@ ref special
 _ do [..a = 1, @.a]
 -----
 1
+=====
+pair ref
+-----
+_ do [p = 1 : 2, p ; do [first : second]]
+-----
+1 : 2
+=====
+task ref func
+-----
+_ do [t = _ id ctx ; func input, t ; do [context : function : input]]
+-----
+ctx : func : input
+=====
+list ref
+-----
+_ do [l = [0, 3, 6], l ; do [@0 : @1 : @2]]
+-----
+0 : 3 : 6
+=====
+map ref
+-----
+_ do [m = {a : 1, b : 2}, m ; do [a : b]]
+-----
+1 : 2
 =====
 eval
 -----
@@ -124,9 +148,15 @@ _ do [t = _ id ctx ; func input, t ; eval ..input ; self .]
 -----
 input
 =====
-list ctx index
+list ctx index int
 -----
 _ do [l = [0, 2, 4], l ; eval 1 ; self .]
+-----
+2
+=====
+list ctx index symbol
+-----
+_ do [l = [0, 2, 4], l ; eval ..1 ; self .]
 -----
 2
 =====
@@ -141,3 +171,9 @@ map ctx key .
 _ do [m = {a : 1, b : 2}, m ; eval . ; self .]
 -----
 {a : 1, b : 2}
+=====
+map ctx key other
+-----
+_ do [m = {1 : 2, 2 : 4}, m ; eval 1 ; self .]
+-----
+2
