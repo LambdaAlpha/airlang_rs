@@ -365,7 +365,7 @@ impl Arbitrary for CodeMode {
 
 impl Arbitrary for SymbolMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const MODES: [SymbolMode; 3] = [SymbolMode::Literal, SymbolMode::Ref, SymbolMode::Move];
+        const MODES: [SymbolMode; 3] = [SymbolMode::Literal, SymbolMode::Ref, SymbolMode::Eval];
         *(MODES.choose(rng).unwrap())
     }
 }

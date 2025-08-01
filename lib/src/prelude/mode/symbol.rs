@@ -1,7 +1,6 @@
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_EVAL_CHAR;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
-use crate::semantics::core::SYMBOL_MOVE_CHAR;
 use crate::semantics::core::SYMBOL_REF_CHAR;
 use crate::semantics::core::SymbolEval;
 use crate::semantics::func::ConstStaticFn;
@@ -16,7 +15,6 @@ use crate::type_::Symbol;
 pub enum SymbolMode {
     Literal,
     Ref,
-    Move,
     Eval,
 }
 
@@ -27,7 +25,6 @@ impl SymbolMode {
         match self {
             SymbolMode::Literal => SYMBOL_LITERAL_CHAR,
             SymbolMode::Ref => SYMBOL_REF_CHAR,
-            SymbolMode::Move => SYMBOL_MOVE_CHAR,
             SymbolMode::Eval => SYMBOL_EVAL_CHAR,
         }
     }

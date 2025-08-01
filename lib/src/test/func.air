@@ -139,7 +139,7 @@ _ do [
     },
     ctx = _ context {
         a : . : 1,
-        f : . : #f,
+        f : . : f,
     },
     ctx set_contract final,
     ctx ; eval [_ ..f ., _ ..f ., _ ..f .]

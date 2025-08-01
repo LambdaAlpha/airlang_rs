@@ -34,12 +34,6 @@ symbol literal special 3
 -----
 @a
 =====
-symbol literal special 4
------
-.#a
------
-#a
-=====
 ref
 -----
 _ do [a = 1, @a]
@@ -55,24 +49,6 @@ _ do [a = 1, @a, a]
 ref special
 -----
 _ do [..a = 1, @.a]
------
-1
-=====
-move
------
-_ do [a = 1, #a]
------
-1
-=====
-move will remove
------
-_ do [a = 1, #a, a]
------
-.
-=====
-move special
------
-_ do [.@a = 1, #@a]
 -----
 1
 =====

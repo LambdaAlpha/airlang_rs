@@ -36,7 +36,7 @@ pub(in crate::prelude) fn parse_pattern(pattern: Val) -> Option<Pattern> {
 }
 
 const SYMBOL_LITERAL_CHAR: char = '*';
-const SYMBOL_REF_CHAR: char = '%';
+const SYMBOL_REF_CHAR: char = '#';
 
 fn parse_symbol(s: Symbol) -> Option<Pattern> {
     let pattern = match s.chars().next() {

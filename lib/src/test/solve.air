@@ -7,7 +7,7 @@ _ do [
         code : ._ : _ do [.a = .a + 1, .a],
         context : _ context {a : . : 0},
     },
-    _ set_solver! #s1,
+    _ set_solver! s1,
     s2 = _ solver! .,
     [_ .s2 ., _ .s2 ., _ .s2 .]
 ]
@@ -21,7 +21,7 @@ _ do [
         context_access : .free,
         code : ._ : _ do [_ set_solver! not, _ solver! .],
     },
-    _ set_solver! #s1,
+    _ set_solver! s1,
     solve(_ not true),
     .
 ]

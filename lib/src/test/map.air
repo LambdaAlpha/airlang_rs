@@ -202,19 +202,19 @@ _ do [m = {1 : 2, 3 : 3}, m ; map.length .]
 =====
 items map 1
 -----
-_ do [m = {1 : 2, 3 : 3}, i = m ; map.items ., _ map #i]
+_ do [m = {1 : 2, 3 : 3}, i = m ; map.items ., _ map i]
 -----
 {1 : 2, 3 : 3}
 =====
 keys set 1
 -----
-_ do [m = {1 : 2, 3 : 3}, k = m ; map.keys ., _ set #k]
+_ do [m = {1 : 2, 3 : 3}, k = m ; map.keys ., _ set k]
 -----
 {1, 3}
 =====
 values multiset 1
 -----
-_ do [m = {1 : 2, 3 : 2}, v = m ; map.values ., _ multiset #v]
+_ do [m = {1 : 2, 3 : 2}, v = m ; map.values ., _ multiset v]
 -----
 {2 : 2}
 =====

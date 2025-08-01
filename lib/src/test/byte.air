@@ -11,7 +11,7 @@ _ do [
     la = a ; byte.length .,
     b = _ any byte,
     lb = b ; byte.length .,
-    ab = . byte.join [#a, #b],
+    ab = . byte.join [a, b],
     lab = ab ; byte.length .,
     lab == la + lb
 ]
@@ -32,13 +32,13 @@ _ do [b = byte(ff), b ; byte.length .]
 =====
 push join
 -----
-_ do [a = _ any byte, b = _ any byte, ab = a, ab ; byte.push b, ab == . byte.join [#a, #b]]
+_ do [a = _ any byte, b = _ any byte, ab = a, ab ; byte.push b, ab == . byte.join [a, b]]
 -----
 true
 =====
 push
 -----
-_ do [a = byte(00), b = byte(1122), a ; byte.push #b, #a]
+_ do [a = byte(00), b = byte(1122), a ; byte.push b, a]
 -----
 byte(001122)
 =====
@@ -50,7 +50,7 @@ byte(123456)
 =====
 join unit
 -----
-_ do [a = byte(1234), b = byte(5678), c = byte(9abc), . byte.join [#a, #b, #c]]
+_ do [a = byte(1234), b = byte(5678), c = byte(9abc), . byte.join [a, b, c]]
 -----
 byte(123456789abc)
 =====

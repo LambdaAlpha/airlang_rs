@@ -152,13 +152,13 @@ _ do [..p = 1 : 2, ..p ; pair.first .]
 =====
 = special key 3
 -----
-_ do [%*a = 1, *a]
+_ do [#*a = 1, *a]
 -----
 1
 =====
 = special key 4
 -----
-_ do [%%a = 1, %a]
+_ do [##a = 1, #a]
 -----
 1
 =====
@@ -459,7 +459,7 @@ _ do [
 -----
 _ do [
     set_first = pair.set_first,
-    a = _ context {set_first : . : #set_first, p : . : 1 : 2, b : . : 3},
+    a = _ context {set_first : . : set_first, p : . : 1 : 2, b : . : 3},
     a ; eval .p ; .set_first .b,
     a ; move p : .,
 ]

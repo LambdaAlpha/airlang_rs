@@ -309,8 +309,6 @@ pub(crate) const SYMBOL_LITERAL_CHAR: char = '.';
 pub(crate) const SYMBOL_LITERAL: &str = concatcp!(SYMBOL_LITERAL_CHAR);
 pub(crate) const SYMBOL_REF_CHAR: char = '@';
 pub(crate) const SYMBOL_REF: &str = concatcp!(SYMBOL_REF_CHAR);
-pub(crate) const SYMBOL_MOVE_CHAR: char = '#';
-pub(crate) const SYMBOL_MOVE: &str = concatcp!(SYMBOL_MOVE_CHAR);
 pub(crate) const SYMBOL_EVAL_CHAR: char = '$';
 pub(crate) const SYMBOL_EVAL: &str = concatcp!(SYMBOL_EVAL_CHAR);
 
@@ -321,7 +319,6 @@ impl<'a, Fn> SymbolEval<'a, Fn> {
                 (SYMBOL_LITERAL_CHAR, Symbol::from_str_unchecked(&input[1 ..]))
             }
             Some(SYMBOL_REF_CHAR) => (SYMBOL_REF_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
-            Some(SYMBOL_MOVE_CHAR) => (SYMBOL_MOVE_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
             Some(SYMBOL_EVAL_CHAR) => (SYMBOL_EVAL_CHAR, Symbol::from_str_unchecked(&input[1 ..])),
             _ => (self.default, input),
         }
@@ -334,10 +331,6 @@ impl<'a, Fn> FreeStaticFn<Symbol, Val> for SymbolEval<'a, Fn> {
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
-                error!("symbol {input:?} should be evaluated in a ctx");
-                Val::default()
-            }
-            SYMBOL_MOVE_CHAR => {
                 error!("symbol {input:?} should be evaluated in a ctx");
                 Val::default()
             }
@@ -354,31 +347,17 @@ impl<'a, Fn> ConstStaticFn<Val, Symbol, Val> for SymbolEval<'a, Fn>
 where Fn: ConstStaticFn<Val, Val, Val>
 {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        let (prefix, s) = self.recognize(input.clone());
+        let (prefix, s) = self.recognize(input);
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
-                let Val::Ctx(ctx) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx.get_ref(s.clone()) else {
-                    error!("name {s:?} should exist");
+                let Some(val) = get_ref(&ctx, s) else {
                     return Val::default();
                 };
                 val.clone()
             }
-            SYMBOL_MOVE_CHAR => {
-                error!("symbol {input:?} should be evaluated in a mutable ctx");
-                Val::default()
-            }
             SYMBOL_EVAL_CHAR => {
-                let Val::Ctx(ctx1) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx1.get_ref(s.clone()) else {
-                    error!("name {s:?} should exist");
+                let Some(val) = get_ref(&ctx, s) else {
                     return Val::default();
                 };
                 let val = val.clone();
@@ -397,35 +376,103 @@ where Fn: MutStaticFn<Val, Val, Val>
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
-                let Val::Ctx(ctx) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
+                let Some(val) = get_ref(ctx, s) else {
                     return Val::default();
                 };
-                ctx.get_ref(s).cloned().unwrap_or_default()
-            }
-            SYMBOL_MOVE_CHAR => {
-                let Val::Ctx(ctx) = ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx.remove(s.clone()) else {
-                    error!("name {s:?} should exist");
-                    return Val::default();
-                };
-                val
+                val.clone()
             }
             SYMBOL_EVAL_CHAR => {
-                let Val::Ctx(ctx1) = &*ctx else {
-                    error!("ctx {ctx:?} should be a ctx");
-                    return Val::default();
-                };
-                let Ok(val) = ctx1.get_ref(s.clone()) else {
-                    error!("name {s:?} should exist");
+                let Some(val) = get_ref(ctx, s) else {
                     return Val::default();
                 };
                 self.f.mut_static_call(ctx, val.clone())
             }
             _ => unreachable!("DEFAULT should be predefined character"),
+        }
+    }
+}
+
+fn get_ref(ctx: &Val, name: Symbol) -> Option<&Val> {
+    let Val::Ctx(ctx) = ctx else {
+        error!("ctx {ctx:?} should be a ctx");
+        return None;
+    };
+    let Ok(val) = ctx.get_ref(name.clone()) else {
+        error!("name {name:?} should exist");
+        return None;
+    };
+    Some(val)
+}
+
+fn eval_const_ctx(c: ConstRef<Val>, ctx: Val) -> Option<ConstRef<Val>> {
+    eval_mut_ctx(c.unwrap(), ctx).map(DynRef::into_const)
+}
+
+fn eval_mut_ctx(c: &mut Val, ctx: Val) -> Option<DynRef<'_, Val>> {
+    if ctx.is_unit() {
+        return Some(DynRef::new_mut(c));
+    }
+    match c {
+        Val::Pair(pair_val) => {
+            let Val::Symbol(name) = ctx else {
+                error!("ctx {ctx:?} should be a symbol");
+                return None;
+            };
+            match &*name {
+                "first" => Some(DynRef::new_mut(&mut pair_val.first)),
+                "second" => Some(DynRef::new_mut(&mut pair_val.second)),
+                _ => None,
+            }
+        }
+        Val::Task(task_val) => {
+            let Val::Symbol(name) = ctx else {
+                error!("ctx {ctx:?} should be a symbol");
+                return None;
+            };
+            match &*name {
+                "function" => Some(DynRef::new_mut(&mut task_val.func)),
+                "context" => Some(DynRef::new_mut(&mut task_val.ctx)),
+                "input" => Some(DynRef::new_mut(&mut task_val.input)),
+                _ => None,
+            }
+        }
+        Val::List(list_val) => {
+            let Val::Int(index) = ctx else {
+                error!("ctx {ctx:?} should be a int");
+                return None;
+            };
+            let len = list_val.len();
+            let Some(index) = index.to_usize() else {
+                error!("index {index:?} should >= 0 and < list.len {len}");
+                return None;
+            };
+            let Some(val) = list_val.get_mut(index) else {
+                error!("index {index} should < list.len {len}");
+                return None;
+            };
+            Some(DynRef::new_mut(val))
+        }
+        Val::Map(map_val) => {
+            let Some(val) = map_val.get_mut(&ctx) else {
+                error!("ctx {ctx:?} should exist in the map");
+                return None;
+            };
+            Some(DynRef::new_mut(val))
+        }
+        Val::Ctx(ctx_val) => {
+            let Val::Symbol(name) = ctx else {
+                error!("ctx {ctx:?} should be a symbol");
+                return None;
+            };
+            let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
+                error!("name {name:?} should exist");
+                return None;
+            };
+            Some(val_ref)
+        }
+        _ => {
+            error!("ctx {c:?} should be a pair, a task, a list, a map or a ctx");
+            None
         }
     }
 }
@@ -696,79 +743,6 @@ where F: FnOnce(&mut Val, FuncVal, Contract) -> (FuncVal, Val) {
     };
     ctx_val.unlock(func_name, Val::Func(func));
     output
-}
-
-fn eval_const_ctx(c: ConstRef<Val>, ctx: Val) -> Option<ConstRef<Val>> {
-    eval_mut_ctx(c.unwrap(), ctx).map(DynRef::into_const)
-}
-
-fn eval_mut_ctx(c: &mut Val, ctx: Val) -> Option<DynRef<'_, Val>> {
-    if ctx.is_unit() {
-        return Some(DynRef::new_mut(c));
-    }
-    match c {
-        Val::Pair(pair_val) => {
-            let Val::Symbol(name) = ctx else {
-                error!("ctx {ctx:?} should be a symbol");
-                return None;
-            };
-            match &*name {
-                "first" => Some(DynRef::new_mut(&mut pair_val.first)),
-                "second" => Some(DynRef::new_mut(&mut pair_val.second)),
-                _ => None,
-            }
-        }
-        Val::Task(task_val) => {
-            let Val::Symbol(name) = ctx else {
-                error!("ctx {ctx:?} should be a symbol");
-                return None;
-            };
-            match &*name {
-                "function" => Some(DynRef::new_mut(&mut task_val.func)),
-                "context" => Some(DynRef::new_mut(&mut task_val.ctx)),
-                "input" => Some(DynRef::new_mut(&mut task_val.input)),
-                _ => None,
-            }
-        }
-        Val::List(list_val) => {
-            let Val::Int(index) = ctx else {
-                error!("ctx {ctx:?} should be a int");
-                return None;
-            };
-            let len = list_val.len();
-            let Some(index) = index.to_usize() else {
-                error!("index {index:?} should >= 0 and < list.len {len}");
-                return None;
-            };
-            let Some(val) = list_val.get_mut(index) else {
-                error!("index {index} should < list.len {len}");
-                return None;
-            };
-            Some(DynRef::new_mut(val))
-        }
-        Val::Map(map_val) => {
-            let Some(val) = map_val.get_mut(&ctx) else {
-                error!("ctx {ctx:?} should exist in the map");
-                return None;
-            };
-            Some(DynRef::new_mut(val))
-        }
-        Val::Ctx(ctx_val) => {
-            let Val::Symbol(name) = ctx else {
-                error!("ctx {ctx:?} should be a symbol");
-                return None;
-            };
-            let Ok(val_ref) = ctx_val.get_ref_dyn(name.clone()) else {
-                error!("name {name:?} should exist");
-                return None;
-            };
-            Some(val_ref)
-        }
-        _ => {
-            error!("ctx {c:?} should be a pair, a task, a list, a map or a ctx");
-            None
-        }
-    }
 }
 
 #[derive(Debug, Default, Copy, Clone)]
