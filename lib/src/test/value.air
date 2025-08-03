@@ -132,7 +132,7 @@ pair
 =====
 type task
 -----
-_ do [a = _ id _ f a, a ; type .]
+_ do [a = _ form _ f a, a ; type .]
 -----
 task
 =====
@@ -210,7 +210,7 @@ true
 =====
 == task
 -----
-(_ id _ 1 2) == (_ id _ 1 2)
+(_ form _ 1 2) == (_ form _ 1 2)
 -----
 true
 =====

@@ -1,18 +1,18 @@
-id trivial
+form trivial
 -----
-_ id a
+_ form a
 -----
 a
 =====
-id .
+form .
 -----
-_ id .a
+_ form .a
 -----
 .a
 =====
-id @
+form @
 -----
-_ id @a
+_ form @a
 -----
 @a
 =====
@@ -48,7 +48,7 @@ _ do [..a = 1, [_ form. @.a, @.a]]
 =====
 form. $
 -----
-_ do [a = _ id _ not true, _ form. $a]
+_ do [a = _ form _ not true, _ form. $a]
 -----
 false
 =====
@@ -72,13 +72,13 @@ _ do [a = 1, [_ form@ @a, a]]
 =====
 form@ $
 -----
-_ do [a = _ id _ not true, _ form@ $a]
+_ do [a = _ form _ not true, _ form@ $a]
 -----
 false
 =====
 form$ trivial
 -----
-_ do [a = _ id _ not true, _ form$ a]
+_ do [a = _ form _ not true, _ form$ a]
 -----
 false
 =====
@@ -96,21 +96,21 @@ _ do [a = 1, [_ form$ @a, a]]
 =====
 form$ $
 -----
-_ do [a = _ id _ not true, _ form$ $a]
+_ do [a = _ form _ not true, _ form$ $a]
 -----
 false
 =====
-_ form
+eval task
 -----
-_ form. _ a b
+_ do [a = _ form _ eval _ not true, $a]
 -----
-_ a b
+false
 =====
-form primitive
+eval symbol
 -----
-_ form. [a, _ b c]
+_ eval $a
 -----
-[a, _ b c]
+$a
 =====
 eval. trivial
 -----
@@ -132,7 +132,7 @@ _ do [a = 1, [_ eval. @a, a]]
 =====
 eval. $
 -----
-_ do [a = _ id _ not true, _ eval. $a]
+_ do [a = _ form _ not true, _ eval. $a]
 -----
 false
 =====
@@ -156,13 +156,13 @@ _ do [a = 1, [_ eval@ @a, a]]
 =====
 eval@ $
 -----
-_ do [a = _ id _ not true, _ eval@ $a]
+_ do [a = _ form _ not true, _ eval@ $a]
 -----
 false
 =====
 eval$ trivial
 -----
-_ do [a = _ id _ not true, _ eval$ a]
+_ do [a = _ form _ not true, _ eval$ a]
 -----
 false
 =====
@@ -180,11 +180,11 @@ _ do [a = 1, [_ eval$ @a, a]]
 =====
 eval$ $
 -----
-_ do [a = _ id _ not true, _ eval$ $a]
+_ do [a = _ form _ not true, _ eval$ $a]
 -----
 false
 =====
-mode id
+mode form
 -----
 _ do [f = _ mode ., _ f .a]
 -----
@@ -208,176 +208,87 @@ _ do [f = _ mode ., _ f _ not true]
 -----
 _ not true
 =====
-mode primitive symbol id
+mode primitive form
 -----
 _ do [
-    f = _ mode {symbol : ., primitive : true},
-    _ f [@a]
+    f = _ mode {default : form},
+    _ f [@a, _ f a]
 ]
 -----
-[@a]
+[@a, _ f a]
 =====
-mode primitive symbol .
+mode primitive form.
 -----
 _ do [
-    f = _ mode {symbol : .., list : form, primitive : true},
-    _ f [.a]
+    f = _ mode {default : form.},
+    _ f [.a, _ f a]
 ]
 -----
-[a]
+[a, _ f a]
 =====
-mode primitive symbol @
+mode primitive form@
 -----
 _ do [
     a = 1,
-    f = _ mode {symbol : .@, list : form, primitive : true},
-    _ f [a]
+    f = _ mode {default : form@},
+    _ f [a, _ .a a]
 ]
 -----
-[1]
+[1, _ a 1]
 =====
-mode primitive symbol $
+mode primitive form$
 -----
 _ do [
-    a = _ id _ not true,
-    f = _ mode {symbol : .$, list : form, primitive : true},
-    _ f [a]
+    a = _ form _ not true,
+    f = _ mode {default : form$},
+    _ f [a, _ .a a]
 ]
 -----
-[false]
+[false, _ a false]
 =====
-mode primitive pair id
+mode primitive eval
 -----
 _ do [
-    b = 1,
-    f = _ mode {pair : ., list : form, primitive : true},
-    _ f [.a : b]
+    f = _ mode {default : eval},
+    b = _ form@ _ f [.a, _ not true],
+    $b
 ]
 -----
-[.a : b]
+[a, false]
 =====
-mode primitive pair form
+mode primitive eval.
 -----
 _ do [
-    b = 1,
-    f = _ mode {pair : form, list : form, symbol : .@, primitive : true},
-    _ f [.a : b]
+    f = _ mode {default : eval.},
+    _ f [a, _ @not true]
 ]
 -----
-[a : 1]
+[a, false]
 =====
-mode primitive task id
------
-_ do [
-    f = _ mode {task : ., list : form, primitive : true},
-    _ f [_ .a @b]
-]
------
-[_ .a @b]
-=====
-mode primitive task form
------
-_ do [
-    b = 1,
-    f = _ mode {task : form, list : form, symbol : .@, primitive : true},
-    _ f [_ .a b]
-]
------
-[_ a 1]
-=====
-mode primitive task eval
------
-_ do [
-    f = _ mode {task : eval, list : form, primitive : true},
-    _ f [_ not true]
-]
------
-[false]
-=====
-mode primitive list id
------
-_ do [
-    f = _ mode {list : ., symbol : .@, primitive : true},
-    _ f [a, .a, @a, $a]
-]
------
-[a, .a, @a, $a]
-=====
-mode primitive list form
+mode primitive eval@
 -----
 _ do [
     a = 1,
-    f = _ mode {list : form, symbol : .@, primitive : true},
-    _ f [a, .a, @a, $a]
+    f = _ mode {default : eval@},
+    _ f [a, _ not true]
 ]
 -----
-[1, a, 1, 1]
+[1, false]
 =====
-mode primitive map id
+mode primitive eval$
 -----
 _ do [
-    a = 1,
-    c = 2,
-    f = _ mode {map : ., symbol : .@, primitive : true},
-    _ f {.a : @a, $b : .a, c : d}
+    a = _ form _ not true,
+    f = _ mode {default : eval$},
+    _ f [a, _ @not true]
 ]
 -----
-{.a : @a, $b : .a, c : d}
-=====
-mode primitive map form
------
-_ do [
-    a = 1,
-    b = 2,
-    c = 3,
-    f = _ mode {map : form, symbol : .@, primitive : true},
-    _ f {.a : a, b : .a, @c : .d}
-]
------
-{.a : 1, b : a, @c : d}
-=====
-mode primitive multiple
------
-_ do [
-    f = _ mode {symbol : ., task : form, list : form, primitive : true},
-    _ f [.a, _ .b .c]
-]
------
-[.a, _ .b .c]
-=====
-mode symbol .
------
-_ do [
-    a = 1,
-    f = _ mode {symbol : .., list : form@},
-    [_ f a, _ f [a]]
-]
------
-[a, [1]]
-=====
-mode symbol @
------
-_ do [
-    a = 1,
-    f = _ mode {symbol : .@, list : form.},
-    [_ f a, _ f [a]]
-]
------
-[1, [a]]
-=====
-mode pair primitive
------
-_ do [
-    f = _ mode {pair : form.},
-    a f .b
-]
------
-a : b
+[false, false]
 =====
 mode pair some
 -----
 _ do [
-    f = _ mode {pair : {this : {}, that : {symbol : ..}} : eval@ : {pair : .}},
+    f = _ mode {pair : {this : {}, that : form.} : eval@ : {pair : .}},
     [_ f this : _ not true, _ f that : a, _ f (_ not true) : @a : $b] 
 ]
 -----
@@ -394,23 +305,50 @@ _ do [
 -----
 a : b : _ 1 2
 =====
-mode task form
+mode task
 -----
 _ do [
-    f = _ mode {task : solve(. ; eval@ eval@)},
+    f = _ mode {task : . ; eval@ eval@},
     _ f _ .g _ not true
 ]
 -----
 _ g false
 =====
-mode task eval
+mode list list
 -----
 _ do [
-    f = _ mode {task : . ; eval@ eval@},
-    _ f _ not true
+    f = _ mode {list : [form, eval.]},
+    _ f [_ not true, _ @not true, _ .not true]
 ]
 -----
-false
+[_ not true, false, _ .not true]
+=====
+mode list head tail
+-----
+_ do [
+    f = _ mode {list : [form, eval.] : form.},
+    _ f [_ not true, _ @not true, _ .not true]
+]
+-----
+[_ not true, false, _ not true]
+=====
+mode map map
+-----
+_ do [
+    f = _ mode {map : {a : form, b : eval.}},
+    _ f {a : _ not true, b : _ @not true, c : _ .not true}
+]
+-----
+{a : _ not true, b : false, c : _ .not true}
+=====
+mode map some else
+-----
+_ do [
+    f = _ mode {map : {a : form, b : eval.} : form.},
+    _ f {a : _ not true, b : _ @not true, c : _ .not true}
+]
+-----
+{a : _ not true, b : false, c : _ not true}
 =====
 mode func
 -----
@@ -432,7 +370,7 @@ false
 =====
 mode access free
 -----
-id ; function.context_access .
+form ; function.context_access .
 -----
 free
 =====

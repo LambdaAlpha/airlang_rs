@@ -14,7 +14,7 @@ true
 =====
 length empty
 -----
-_ do [s = _ id '', s ; symbol.length .]
+_ do [s = _ form '', s ; symbol.length .]
 -----
 0
 =====
@@ -74,7 +74,7 @@ _ symbol.from_text "{}"
 =====
 into_text empty
 -----
-_ symbol.into_text _ id ''
+_ symbol.into_text _ form ''
 -----
 ""
 =====

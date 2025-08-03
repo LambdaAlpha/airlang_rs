@@ -27,7 +27,7 @@ pub fn init_solver(solver: FuncVal) {
 
 #[derive(Debug, Clone, Constructor)]
 pub struct Air {
-    mode: Option<Mode>,
+    mode: Mode,
     ctx: Ctx,
 }
 

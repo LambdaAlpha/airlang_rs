@@ -60,7 +60,7 @@ _ do [p = 1 : 2, p ; do [first : second]]
 =====
 task ref func
 -----
-_ do [t = _ id ctx ; func input, t ; do [context : function : input]]
+_ do [t = _ form ctx ; func input, t ; do [context : function : input]]
 -----
 ctx : func : input
 =====
@@ -78,7 +78,7 @@ _ do [m = {a : 1, b : 2}, m ; do [a : b]]
 =====
 eval
 -----
-_ do [a = _ id _ not true, $a]
+_ do [a = _ form _ not true, $a]
 -----
 false
 =====
@@ -108,7 +108,7 @@ true
 =====
 ctx unit
 -----
-_ do [a = 1, . ; eval .a]
+_ do [a = 1, . ; apply .a]
 -----
 1
 =====
@@ -120,60 +120,60 @@ _ do [p = 1 : 2, p ; pair.first .]
 =====
 pair ctx first
 -----
-_ do [p = 1 : 2, p ; eval .first ; self .]
+_ do [p = 1 : 2, p ; apply .first ; self .]
 -----
 1
 =====
 pair ctx first
 -----
-_ do [p = 1 : 2, p ; eval .second ; self .]
+_ do [p = 1 : 2, p ; apply .second ; self .]
 -----
 2
 =====
 task ctx func
 -----
-_ do [t = _ id ctx ; func input, t ; eval .function ; self .]
+_ do [t = _ form ctx ; func input, t ; apply .function ; self .]
 -----
 func
 =====
 task ctx ctx
 -----
-_ do [t = _ id ctx ; func input, t ; eval .context ; self .]
+_ do [t = _ form ctx ; func input, t ; apply .context ; self .]
 -----
 ctx
 =====
 task ctx input
 -----
-_ do [t = _ id ctx ; func input, t ; eval .input ; self .]
+_ do [t = _ form ctx ; func input, t ; apply .input ; self .]
 -----
 input
 =====
 list ctx index int
 -----
-_ do [l = [0, 2, 4], l ; eval 1 ; self .]
+_ do [l = [0, 2, 4], l ; apply 1 ; self .]
 -----
 2
 =====
 list ctx index symbol
 -----
-_ do [l = [0, 2, 4], l ; eval .1 ; self .]
+_ do [l = [0, 2, 4], l ; apply .1 ; self .]
 -----
 2
 =====
 map ctx key
 -----
-_ do [m = {a : 1, b : 2}, m ; eval .a ; self .]
+_ do [m = {a : 1, b : 2}, m ; apply .a ; self .]
 -----
 1
 =====
 map ctx key .
 -----
-_ do [m = {a : 1, b : 2}, m ; eval . ; self .]
+_ do [m = {a : 1, b : 2}, m ; apply . ; self .]
 -----
 {a : 1, b : 2}
 =====
 map ctx key other
 -----
-_ do [m = {1 : 2, 2 : 4}, m ; eval 1 ; self .]
+_ do [m = {1 : 2, 2 : 4}, m ; apply 1 ; self .]
 -----
 2

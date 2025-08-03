@@ -9,9 +9,9 @@ use super::PreludeCtx;
 use super::ctx::pattern::assign_pattern;
 use super::ctx::pattern::match_pattern;
 use super::ctx::pattern::parse_pattern;
-use super::mode::CodeMode;
 use super::mode::PrimMode;
 use super::mode::SymbolMode;
+use super::mode::TaskPrimMode;
 use super::mut_impl;
 use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
@@ -122,7 +122,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         error!("input.second {:?} should be a list", pair.second);
         return Val::default();
     };
-    let mode = PrimMode::symbol_task(SymbolMode::Literal, CodeMode::Form);
+    let mode = PrimMode::new(SymbolMode::Literal, TaskPrimMode::Form);
     for item in List::from(list) {
         let Val::Pair(pair) = item else {
             error!("match arm {item:?} should be a pair");

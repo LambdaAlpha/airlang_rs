@@ -11,9 +11,7 @@ use rand::prelude::Distribution;
 use rand::prelude::IndexedRandom;
 use rand::prelude::IteratorRandom;
 
-use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::CompMode;
-use crate::prelude::mode::DataMode;
 use crate::prelude::mode::ListMode;
 use crate::prelude::mode::MapMode;
 use crate::prelude::mode::Mode;
@@ -21,6 +19,7 @@ use crate::prelude::mode::PairMode;
 use crate::prelude::mode::PrimMode;
 use crate::prelude::mode::SymbolMode;
 use crate::prelude::mode::TaskMode;
+use crate::prelude::mode::TaskPrimMode;
 use crate::prelude::put_preludes;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -349,15 +348,15 @@ impl<T: Arbitrary> Arbitrary for Option<T> {
     }
 }
 
-impl Arbitrary for DataMode {
-    fn any<R: Rng + ?Sized>(_rng: &mut R, _depth: usize) -> Self {
-        DataMode
+impl<T: Arbitrary> Arbitrary for Box<T> {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        Box::new(T::any(rng, depth))
     }
 }
 
-impl Arbitrary for CodeMode {
+impl Arbitrary for TaskPrimMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const MODES: [CodeMode; 2] = [CodeMode::Form, CodeMode::Eval];
+        const MODES: [TaskPrimMode; 2] = [TaskPrimMode::Form, TaskPrimMode::Eval];
         *(MODES.choose(rng).unwrap())
     }
 }
@@ -371,12 +370,12 @@ impl Arbitrary for SymbolMode {
 
 impl Arbitrary for CompMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let symbol = Arbitrary::any(rng, depth);
+        let default = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
         let task = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { symbol, pair, task, list, map }
+        CompMode { default, pair, task, list, map }
     }
 }
 
@@ -393,11 +392,10 @@ impl Arbitrary for PairMode {
 impl Arbitrary for TaskMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let new_depth = depth + 1;
-        let code = Arbitrary::any(rng, new_depth);
         let func = Arbitrary::any(rng, new_depth);
         let ctx = Arbitrary::any(rng, new_depth);
         let input = Arbitrary::any(rng, new_depth);
-        TaskMode { code, func, ctx, input }
+        TaskMode { func, ctx, input }
     }
 }
 
@@ -422,29 +420,18 @@ impl Arbitrary for MapMode {
 impl Arbitrary for PrimMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let symbol = Arbitrary::any(rng, depth);
-        let pair = Arbitrary::any(rng, depth);
         let task = Arbitrary::any(rng, depth);
-        let list = Arbitrary::any(rng, depth);
-        let map = Arbitrary::any(rng, depth);
-        PrimMode { symbol, pair, task, list, map }
+        PrimMode { symbol, task }
     }
 }
 
 impl Arbitrary for Mode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let weight: usize = 1 << min(depth, 32);
-        let weights = [
-            weight, // primitive
-            1,      // composite
-            1,      // function
-        ];
-        let i = sample(rng, weights);
         let new_depth = depth + 1;
-        match i {
-            0 => Mode::Prim(Arbitrary::any(rng, depth)),
-            1 => Mode::Comp(Box::new(Arbitrary::any(rng, depth))),
-            2 => Mode::Func(FuncVal::any(rng, new_depth)),
-            _ => unreachable!(),
+        if rng.random() {
+            Mode::Comp(Arbitrary::any(rng, new_depth))
+        } else {
+            Mode::Func(FuncVal::any(rng, new_depth))
         }
     }
 }

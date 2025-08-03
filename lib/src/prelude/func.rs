@@ -17,9 +17,9 @@ use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use super::setup::dyn_mode;
 use super::setup::free_mode;
-use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::SymbolMode;
+use crate::prelude::mode::TaskPrimMode;
 use crate::semantics::core::Eval;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
@@ -38,7 +38,7 @@ use crate::type_::Symbol;
 pub struct FuncPrelude {
     pub new: FreeStaticPrimFuncVal,
     pub repr: FreeStaticPrimFuncVal,
-    pub eval: MutStaticPrimFuncVal,
+    pub apply: MutStaticPrimFuncVal,
     pub ctx_access: ConstStaticPrimFuncVal,
     pub call_setup: ConstStaticPrimFuncVal,
     pub solve_setup: ConstStaticPrimFuncVal,
@@ -54,7 +54,7 @@ impl Default for FuncPrelude {
         FuncPrelude {
             new: new(),
             repr: repr(),
-            eval: eval(),
+            apply: apply(),
             ctx_access: ctx_access(),
             call_setup: call_setup(),
             solve_setup: solve_setup(),
@@ -71,7 +71,7 @@ impl Prelude for FuncPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
         self.new.put(ctx);
         self.repr.put(ctx);
-        self.eval.put(ctx);
+        self.apply.put(ctx);
         self.ctx_access.put(ctx);
         self.call_setup.put(ctx);
         self.solve_setup.put(ctx);
@@ -108,11 +108,11 @@ fn fn_repr(input: Val) -> Val {
     generate_func(func)
 }
 
-pub fn eval() -> MutStaticPrimFuncVal {
+pub fn apply() -> MutStaticPrimFuncVal {
     DynFn {
-        id: "eval",
+        id: "apply",
         f: MutStaticImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
-        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form)),
+        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
     }
     .mut_static()
 }

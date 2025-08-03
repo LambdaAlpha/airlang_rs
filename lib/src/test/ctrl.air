@@ -144,7 +144,7 @@ _ do [
         [1, c, d] : y = 1,
         [e, 2, f] : z = 1,
     ],
-    [a is_null ., b is_null ., c, d, e is_null ., f is_null ., x is_null ., y, z is_null .]
+    [.a is_null ., .b is_null ., c, d, .e is_null ., .f is_null ., .x is_null ., y, .z is_null .]
 ]
 -----
 [true, true, 2, 3, true, true, true, 1, true]
@@ -169,19 +169,19 @@ match default
 =====
 match conditional eval exist
 -----
-_ do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, b is_null ., c is_null .]]
+_ do [1 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a, .b is_null ., .c is_null .]]
 -----
 [1, true, true]
 =====
 match conditional eval default
 -----
-_ do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [a is_null ., b is_null ., c]]
+_ do [3 match [1 : a = 1, 2 : b = 2, _ : c = 3], [.a is_null ., .b is_null ., c]]
 -----
 [true, true, 3]
 =====
 match symbol
 -----
-_ do [a = _ id a, a match [*a : 1, *b : 2]]
+_ do [a = _ form a, a match [*a : 1, *b : 2]]
 -----
 1
 =====

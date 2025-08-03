@@ -11,9 +11,7 @@ use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
-use super::setup::free_mode;
-use crate::prelude::mode::FuncMode;
-use crate::prelude::mode::Mode;
+use super::setup::default_free_mode;
 use crate::prelude::utils::map_remove;
 use crate::semantics::core::TaskApply;
 use crate::semantics::func::ConstStaticFn;
@@ -28,7 +26,6 @@ use crate::syntax::SOLVE;
 use crate::type_::Action;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
-use crate::type_::Map;
 use crate::type_::Task;
 
 #[derive(Clone)]
@@ -81,12 +78,8 @@ const FUNC: &str = "function";
 const CTX: &str = "context";
 const INPUT: &str = "input";
 
-fn parse_mode() -> Option<Mode> {
-    FuncMode::map_mode(Map::default(), FuncMode::default_mode())
-}
-
 pub fn new_call() -> FreeStaticPrimFuncVal {
-    FreeFn { id: CALL, f: free_impl(fn_new_call), mode: free_mode(parse_mode()) }.free_static()
+    FreeFn { id: CALL, f: free_impl(fn_new_call), mode: default_free_mode() }.free_static()
 }
 
 fn fn_new_call(input: Val) -> Val {
@@ -102,7 +95,7 @@ fn fn_new_call(input: Val) -> Val {
 }
 
 pub fn new_solve() -> FreeStaticPrimFuncVal {
-    FreeFn { id: SOLVE, f: free_impl(fn_new_solve), mode: free_mode(parse_mode()) }.free_static()
+    FreeFn { id: SOLVE, f: free_impl(fn_new_solve), mode: default_free_mode() }.free_static()
 }
 
 fn fn_new_solve(input: Val) -> Val {

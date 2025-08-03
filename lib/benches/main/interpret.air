@@ -10,7 +10,7 @@ _ do [
       ],
       .sum
     ],
-    context_access : free,
+    context_access : .free,
   },
   _ f 100
 ]

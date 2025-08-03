@@ -1,9 +1,9 @@
 use log::error;
 
 use crate::prelude::FuncMode;
-use crate::prelude::mode::CodeMode;
 use crate::prelude::mode::Mode;
 use crate::prelude::mode::SymbolMode;
+use crate::prelude::mode::TaskPrimMode;
 use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Ctx;
@@ -54,11 +54,9 @@ const FREE: &str = "free";
 const CONST: &str = "constant";
 const MUTABLE: &str = "mutable";
 
-pub(super) fn parse_mode() -> Option<Mode> {
+pub(super) fn parse_mode() -> Mode {
     let mut map = Map::default();
-    map.insert(symbol(ID), FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form));
-    map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, CodeMode::Form));
-    map.insert(symbol(CTX_ACCESS), FuncMode::symbol_mode(SymbolMode::Literal));
+    map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form));
     FuncMode::map_mode(map, FuncMode::default_mode())
 }
 

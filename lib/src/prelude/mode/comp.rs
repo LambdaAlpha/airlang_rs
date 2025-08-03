@@ -2,12 +2,11 @@ use super::ListMode;
 use super::MapMode;
 use super::PairMode;
 use super::PrimMode;
-use super::SymbolMode;
 use super::TaskMode;
+use super::TaskPrimMode;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::MutStaticFn;
-use crate::semantics::func::SetupFn;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
@@ -18,14 +17,12 @@ use crate::type_::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CompMode {
-    pub symbol: Option<SymbolMode>,
-    pub pair: Option<PairMode>,
-    pub task: Option<TaskMode>,
-    pub list: Option<ListMode>,
-    pub map: Option<MapMode>,
+    pub default: PrimMode,
+    pub pair: Option<Box<PairMode>>,
+    pub task: Option<Box<TaskMode>>,
+    pub list: Option<Box<ListMode>>,
+    pub map: Option<Box<MapMode>>,
 }
-
-impl SetupFn for CompMode {}
 
 impl FreeStaticFn<Val, Val> for CompMode {
     fn free_static_call(&self, input: Val) -> Val {
@@ -68,101 +65,155 @@ impl MutStaticFn<Val, Val, Val> for CompMode {
 
 impl FreeStaticFn<Symbol, Val> for CompMode {
     fn free_static_call(&self, input: Symbol) -> Val {
-        self.symbol.free_static_call(input)
+        self.default.symbol.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, Symbol, Val> for CompMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        self.symbol.const_static_call(ctx, input)
+        self.default.symbol.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, Symbol, Val> for CompMode {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        self.symbol.mut_static_call(ctx, input)
+        self.default.symbol.mut_static_call(ctx, input)
     }
 }
 
 impl FreeStaticFn<PairVal, Val> for CompMode {
     fn free_static_call(&self, input: PairVal) -> Val {
-        self.pair.free_static_call(input)
+        let Some(pair) = &self.pair else {
+            return self.default.free_static_call(input);
+        };
+        pair.form().free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, PairVal, Val> for CompMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: PairVal) -> Val {
-        self.pair.const_static_call(ctx, input)
+        let Some(pair) = &self.pair else {
+            return self.default.const_static_call(ctx, input);
+        };
+        pair.form().const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, PairVal, Val> for CompMode {
     fn mut_static_call(&self, ctx: &mut Val, input: PairVal) -> Val {
-        self.pair.mut_static_call(ctx, input)
+        let Some(pair) = &self.pair else {
+            return self.default.mut_static_call(ctx, input);
+        };
+        pair.form().mut_static_call(ctx, input)
     }
 }
 
 impl FreeStaticFn<TaskVal, Val> for CompMode {
     fn free_static_call(&self, input: TaskVal) -> Val {
-        self.task.free_static_call(input)
+        let Some(task) = &self.task else {
+            return self.default.free_static_call(input);
+        };
+        match self.default.task {
+            TaskPrimMode::Form => task.form().free_static_call(input),
+            TaskPrimMode::Eval => task.eval().free_static_call(input),
+        }
     }
 }
 
 impl ConstStaticFn<Val, TaskVal, Val> for CompMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: TaskVal) -> Val {
-        self.task.const_static_call(ctx, input)
+        let Some(task) = &self.task else {
+            return self.default.const_static_call(ctx, input);
+        };
+        match self.default.task {
+            TaskPrimMode::Form => task.form().const_static_call(ctx, input),
+            TaskPrimMode::Eval => task.eval().const_static_call(ctx, input),
+        }
     }
 }
 
 impl MutStaticFn<Val, TaskVal, Val> for CompMode {
     fn mut_static_call(&self, ctx: &mut Val, input: TaskVal) -> Val {
-        self.task.mut_static_call(ctx, input)
+        let Some(task) = &self.task else {
+            return self.default.mut_static_call(ctx, input);
+        };
+        match self.default.task {
+            TaskPrimMode::Form => task.form().mut_static_call(ctx, input),
+            TaskPrimMode::Eval => task.eval().mut_static_call(ctx, input),
+        }
     }
 }
 
 impl FreeStaticFn<ListVal, Val> for CompMode {
     fn free_static_call(&self, input: ListVal) -> Val {
-        self.list.free_static_call(input)
+        let Some(list) = &self.list else {
+            return self.default.free_static_call(input);
+        };
+        list.form().free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, ListVal, Val> for CompMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: ListVal) -> Val {
-        self.list.const_static_call(ctx, input)
+        let Some(list) = &self.list else {
+            return self.default.const_static_call(ctx, input);
+        };
+        list.form().const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, ListVal, Val> for CompMode {
     fn mut_static_call(&self, ctx: &mut Val, input: ListVal) -> Val {
-        self.list.mut_static_call(ctx, input)
+        let Some(list) = &self.list else {
+            return self.default.mut_static_call(ctx, input);
+        };
+        list.form().mut_static_call(ctx, input)
     }
 }
 
 impl FreeStaticFn<MapVal, Val> for CompMode {
     fn free_static_call(&self, input: MapVal) -> Val {
-        self.map.free_static_call(input)
+        let Some(map) = &self.map else {
+            return self.default.free_static_call(input);
+        };
+        map.form().free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, MapVal, Val> for CompMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
-        self.map.const_static_call(ctx, input)
+        let Some(map) = &self.map else {
+            return self.default.const_static_call(ctx, input);
+        };
+        map.form().const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, MapVal, Val> for CompMode {
     fn mut_static_call(&self, ctx: &mut Val, input: MapVal) -> Val {
-        self.map.mut_static_call(ctx, input)
+        let Some(map) = &self.map else {
+            return self.default.mut_static_call(ctx, input);
+        };
+        map.form().mut_static_call(ctx, input)
+    }
+}
+
+impl CompMode {
+    pub const fn id() -> Self {
+        Self { default: PrimMode::id(), pair: None, task: None, list: None, map: None }
+    }
+
+    pub const fn is_id(&self) -> bool {
+        self.default.is_id()
+            && self.pair.is_none()
+            && self.task.is_none()
+            && self.list.is_none()
+            && self.map.is_none()
     }
 }
 
 impl From<PrimMode> for CompMode {
-    fn from(mode: PrimMode) -> Self {
-        let symbol = mode.symbol;
-        let pair = mode.pair.map(|_| mode.into());
-        let task = mode.task.map(|_| mode.try_into().unwrap());
-        let list = mode.list.map(|_| mode.into());
-        let map = mode.map.map(|_| mode.into());
-        Self { symbol, pair, task, list, map }
+    fn from(default: PrimMode) -> Self {
+        Self { default, pair: None, task: None, list: None, map: None }
     }
 }

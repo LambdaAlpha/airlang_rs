@@ -18,9 +18,8 @@ use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::initial_ctx;
-use super::mode::CodeMode;
-use super::mode::Mode;
 use super::mode::SymbolMode;
+use super::mode::TaskPrimMode;
 use super::mut_impl;
 use crate::prelude::setup::default_dyn_mode;
 use crate::prelude::setup::default_free_mode;
@@ -92,13 +91,8 @@ impl Prelude for CtxPrelude {
     }
 }
 
-fn ctx_var_mode(mode: Option<Mode>) -> FuncMode {
-    dyn_mode(FuncMode::pair_mode(Map::default(), FuncMode::symbol_mode(SymbolMode::Literal), mode))
-}
-
 pub fn read() -> ConstStaticPrimFuncVal {
-    DynFn { id: "read", f: const_impl(fn_read), mode: ctx_var_mode(FuncMode::default_mode()) }
-        .const_static()
+    DynFn { id: "read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -119,8 +113,7 @@ fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn move_() -> MutStaticPrimFuncVal {
-    DynFn { id: "move", f: mut_impl(fn_move), mode: ctx_var_mode(FuncMode::default_mode()) }
-        .mut_static()
+    DynFn { id: "move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_static()
 }
 
 fn fn_move(ctx: &mut Val, input: Val) -> Val {
@@ -146,7 +139,7 @@ pub fn assign() -> MutStaticPrimFuncVal {
         f: mut_impl(fn_assign),
         mode: dyn_mode(FuncMode::pair_mode(
             Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form),
+            FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form),
             FuncMode::default_mode(),
         )),
     }
@@ -172,12 +165,7 @@ fn fn_assign(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn contract() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "contract",
-        f: const_impl(fn_contract),
-        mode: ctx_var_mode(FuncMode::default_mode()),
-    }
-    .const_static()
+    DynFn { id: "contract", f: const_impl(fn_contract), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -202,12 +190,8 @@ fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_contract() -> MutStaticPrimFuncVal {
-    DynFn {
-        id: "set_contract",
-        f: mut_impl(fn_set_contract),
-        mode: ctx_var_mode(FuncMode::symbol_mode(SymbolMode::Literal)),
-    }
-    .mut_static()
+    DynFn { id: "set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }
+        .mut_static()
 }
 
 fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
@@ -233,12 +217,7 @@ fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_locked() -> ConstStaticPrimFuncVal {
-    DynFn {
-        id: "is_locked",
-        f: const_impl(fn_is_locked),
-        mode: ctx_var_mode(FuncMode::default_mode()),
-    }
-    .const_static()
+    DynFn { id: "is_locked", f: const_impl(fn_is_locked), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -263,8 +242,7 @@ fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn is_null() -> ConstStaticPrimFuncVal {
-    DynFn { id: "is_null", f: const_impl(fn_is_null), mode: ctx_var_mode(FuncMode::default_mode()) }
-        .const_static()
+    DynFn { id: "is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }.const_static()
 }
 
 fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {

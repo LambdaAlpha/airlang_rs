@@ -4,15 +4,11 @@ use super::FreeFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
-use crate::prelude::mode::FuncMode;
-use crate::prelude::mode::SymbolMode;
 use crate::prelude::setup::default_free_mode;
-use crate::prelude::setup::free_mode;
 use crate::semantics::solver::REVERSE_MAP;
 use crate::semantics::solver::SOLVER;
 use crate::semantics::val::FreeStaticPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Clone)]
@@ -77,12 +73,7 @@ fn fn_set_solver(input: Val) -> Val {
 }
 
 pub fn reverse() -> FreeStaticPrimFuncVal {
-    FreeFn {
-        id: "reverse!",
-        f: free_impl(fn_reverse),
-        mode: free_mode(FuncMode::symbol_mode(SymbolMode::Literal)),
-    }
-    .free_static()
+    FreeFn { id: "reverse!", f: free_impl(fn_reverse), mode: default_free_mode() }.free_static()
 }
 
 fn fn_reverse(input: Val) -> Val {
@@ -104,16 +95,8 @@ fn fn_reverse(input: Val) -> Val {
 }
 
 pub fn set_reverse() -> FreeStaticPrimFuncVal {
-    FreeFn {
-        id: "set_reverse!",
-        f: free_impl(fn_set_reverse),
-        mode: free_mode(FuncMode::pair_mode(
-            Map::default(),
-            FuncMode::symbol_mode(SymbolMode::Literal),
-            FuncMode::default_mode(),
-        )),
-    }
-    .free_static()
+    FreeFn { id: "set_reverse!", f: free_impl(fn_set_reverse), mode: default_free_mode() }
+        .free_static()
 }
 
 fn fn_set_reverse(input: Val) -> Val {

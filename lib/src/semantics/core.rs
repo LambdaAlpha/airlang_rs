@@ -2,7 +2,6 @@ use std::borrow::Borrow;
 use std::hash::Hash;
 use std::mem::take;
 
-use const_format::concatcp;
 use log::error;
 use num_traits::ToPrimitive;
 
@@ -306,11 +305,8 @@ pub(crate) struct SymbolEval<'a, Fn> {
 }
 
 pub(crate) const SYMBOL_LITERAL_CHAR: char = '.';
-pub(crate) const SYMBOL_LITERAL: &str = concatcp!(SYMBOL_LITERAL_CHAR);
 pub(crate) const SYMBOL_REF_CHAR: char = '@';
-pub(crate) const SYMBOL_REF: &str = concatcp!(SYMBOL_REF_CHAR);
 pub(crate) const SYMBOL_EVAL_CHAR: char = '$';
-pub(crate) const SYMBOL_EVAL: &str = concatcp!(SYMBOL_EVAL_CHAR);
 
 impl<'a, Fn> SymbolEval<'a, Fn> {
     fn recognize(&self, input: Symbol) -> (char, Symbol) {

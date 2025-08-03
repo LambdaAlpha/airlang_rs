@@ -1,9 +1,7 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use super::CodeMode;
 use super::CompMode;
-use super::DataMode;
 use super::ListMode;
 use super::MapMode;
 use super::Mode;
@@ -11,6 +9,7 @@ use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
 use super::TaskMode;
+use super::TaskPrimMode;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstStaticPrimFunc;
 use crate::semantics::func::FreeStaticPrimFunc;
@@ -27,22 +26,16 @@ use crate::type_::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FuncMode {
-    pub call: Option<Mode>,
-    pub solve: Option<Mode>,
+    pub call: Mode,
+    pub solve: Mode,
 }
 
-const DEFAULT_MODE: PrimMode = PrimMode {
-    symbol: Some(SymbolMode::Ref),
-    pair: Some(DataMode),
-    task: Some(CodeMode::Eval),
-    list: Some(DataMode),
-    map: Some(DataMode),
-};
+const DEFAULT_MODE: PrimMode = PrimMode { symbol: SymbolMode::Ref, task: TaskPrimMode::Eval };
 
 const MODE_FUNC_ID: &str = "mode.object";
 
 impl FuncMode {
-    pub fn mode_into_func(mode: Option<Mode>) -> FuncVal {
+    pub fn mode_into_func(mode: Mode) -> FuncVal {
         match mode.ctx_access() {
             CtxAccess::Free => FuncVal::FreeStaticPrim(Self::mode_into_free_func(mode)),
             CtxAccess::Const => FuncVal::ConstStaticPrim(Self::mode_into_const_func(mode)),
@@ -50,7 +43,7 @@ impl FuncMode {
         }
     }
 
-    pub fn mode_into_free_func(mode: Option<Mode>) -> FreeStaticPrimFuncVal {
+    pub fn mode_into_free_func(mode: Mode) -> FreeStaticPrimFuncVal {
         FreeStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
@@ -59,7 +52,7 @@ impl FuncMode {
         .into()
     }
 
-    pub fn mode_into_const_func(mode: Option<Mode>) -> ConstStaticPrimFuncVal {
+    pub fn mode_into_const_func(mode: Mode) -> ConstStaticPrimFuncVal {
         ConstStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
@@ -68,7 +61,7 @@ impl FuncMode {
         .into()
     }
 
-    pub fn mode_into_mut_func(mode: Option<Mode>) -> MutStaticPrimFuncVal {
+    pub fn mode_into_mut_func(mode: Mode) -> MutStaticPrimFuncVal {
         MutStaticPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
@@ -77,8 +70,9 @@ impl FuncMode {
         .into()
     }
 
-    pub const fn default_mode() -> Option<Mode> {
-        Some(Mode::Prim(DEFAULT_MODE))
+    pub const fn default_mode() -> Mode {
+        let default = DEFAULT_MODE;
+        Mode::Comp(CompMode { default, pair: None, task: None, list: None, map: None })
     }
 
     pub const fn default_prim_mode() -> PrimMode {
@@ -89,55 +83,41 @@ impl FuncMode {
         CompMode::from(DEFAULT_MODE)
     }
 
-    pub const fn id_mode() -> Option<Mode> {
-        None
+    pub const fn id_mode() -> Mode {
+        Mode::id()
     }
 
-    pub const fn prim_mode(symbol: SymbolMode, task: CodeMode) -> Option<Mode> {
-        Some(Mode::Prim(PrimMode::symbol_task(symbol, task)))
+    pub const fn prim_mode(symbol: SymbolMode, task: TaskPrimMode) -> Mode {
+        let default = PrimMode::new(symbol, task);
+        Mode::Comp(CompMode { default, pair: None, task: None, list: None, map: None })
     }
 
-    pub fn symbol_mode(symbol: SymbolMode) -> Option<Mode> {
-        let mode = CompMode { symbol: Some(symbol), ..Self::default_comp_mode() };
-        Some(Mode::Comp(Box::new(mode)))
+    pub fn pair_mode(some: Map<Val, Mode>, first: Mode, second: Mode) -> Mode {
+        let mode = CompMode {
+            pair: Some(Box::new(PairMode { some, first, second })),
+            ..Self::default_comp_mode()
+        };
+        Mode::Comp(mode)
     }
 
-    pub fn pair_mode(
-        some: Map<Val, Option<Mode>>, first: Option<Mode>, second: Option<Mode>,
-    ) -> Option<Mode> {
+    pub fn task_mode(func: Mode, ctx: Mode, input: Mode) -> Mode {
+        let mode = CompMode {
+            task: Some(Box::new(TaskMode { func, ctx, input })),
+            ..Self::default_comp_mode()
+        };
+        Mode::Comp(mode)
+    }
+
+    pub fn list_mode(head: List<Mode>, tail: Mode) -> Mode {
         let mode =
-            CompMode { pair: Some(PairMode { some, first, second }), ..Self::default_comp_mode() };
-        Some(Mode::Comp(Box::new(mode)))
+            CompMode { list: Some(Box::new(ListMode { head, tail })), ..Self::default_comp_mode() };
+        Mode::Comp(mode)
     }
 
-    pub fn task_form_mode(
-        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>,
-    ) -> Option<Mode> {
-        let mode = CompMode {
-            task: Some(TaskMode { code: CodeMode::Form, func, ctx, input }),
-            ..Self::default_comp_mode()
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn task_eval_mode(
-        func: Option<Mode>, ctx: Option<Mode>, input: Option<Mode>,
-    ) -> Option<Mode> {
-        let mode = CompMode {
-            task: Some(TaskMode { code: CodeMode::Eval, func, ctx, input }),
-            ..Self::default_comp_mode()
-        };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn list_mode(head: List<Option<Mode>>, tail: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode { list: Some(ListMode { head, tail }), ..Self::default_comp_mode() };
-        Some(Mode::Comp(Box::new(mode)))
-    }
-
-    pub fn map_mode(some: Map<Val, Option<Mode>>, else_: Option<Mode>) -> Option<Mode> {
-        let mode = CompMode { map: Some(MapMode { some, else_ }), ..Self::default_comp_mode() };
-        Some(Mode::Comp(Box::new(mode)))
+    pub fn map_mode(some: Map<Val, Mode>, else_: Mode) -> Mode {
+        let mode =
+            CompMode { map: Some(Box::new(MapMode { some, else_ })), ..Self::default_comp_mode() };
+        Mode::Comp(mode)
     }
 
     pub(crate) fn into_setup(self) -> Setup {
@@ -158,6 +138,12 @@ trait GetCtxAccess {
     fn ctx_access(&self) -> CtxAccess;
 }
 
+impl<T: GetCtxAccess> GetCtxAccess for Box<T> {
+    fn ctx_access(&self) -> CtxAccess {
+        (**self).ctx_access()
+    }
+}
+
 impl<T: GetCtxAccess> GetCtxAccess for Option<T> {
     fn ctx_access(&self) -> CtxAccess {
         match self {
@@ -170,7 +156,6 @@ impl<T: GetCtxAccess> GetCtxAccess for Option<T> {
 impl GetCtxAccess for Mode {
     fn ctx_access(&self) -> CtxAccess {
         match self {
-            Mode::Prim(mode) => mode.ctx_access(),
             Mode::Comp(mode) => mode.ctx_access(),
             Mode::Func(mode) => mode.ctx_access(),
         }
@@ -179,42 +164,32 @@ impl GetCtxAccess for Mode {
 
 impl GetCtxAccess for PrimMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.symbol.ctx_access()
-            & self.pair.ctx_access()
-            & self.task.ctx_access()
-            & self.list.ctx_access()
-            & self.map.ctx_access()
+        self.symbol.ctx_access() & self.task.ctx_access()
     }
 }
 
-impl GetCtxAccess for DataMode {
+impl GetCtxAccess for SymbolMode {
     fn ctx_access(&self) -> CtxAccess {
-        CtxAccess::Free
+        if matches!(self, SymbolMode::Id) { CtxAccess::Free } else { CtxAccess::Mut }
     }
 }
 
-impl GetCtxAccess for CodeMode {
+impl GetCtxAccess for TaskPrimMode {
     fn ctx_access(&self) -> CtxAccess {
         match self {
-            CodeMode::Form => CtxAccess::Free,
-            CodeMode::Eval => CtxAccess::Mut,
+            TaskPrimMode::Form => CtxAccess::Free,
+            TaskPrimMode::Eval => CtxAccess::Mut,
         }
     }
 }
 
 impl GetCtxAccess for CompMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.symbol.ctx_access()
+        self.default.ctx_access()
             & self.pair.ctx_access()
             & self.task.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
-    }
-}
-
-impl GetCtxAccess for SymbolMode {
-    fn ctx_access(&self) -> CtxAccess {
-        CtxAccess::Mut
     }
 }
 
@@ -228,12 +203,7 @@ impl GetCtxAccess for PairMode {
 
 impl GetCtxAccess for TaskMode {
     fn ctx_access(&self) -> CtxAccess {
-        match self.code {
-            CodeMode::Eval => CtxAccess::Mut,
-            CodeMode::Form => {
-                self.func.ctx_access() & self.ctx.ctx_access() & self.input.ctx_access()
-            }
-        }
+        self.func.ctx_access() & self.ctx.ctx_access() & self.input.ctx_access()
     }
 }
 

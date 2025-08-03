@@ -108,7 +108,7 @@ impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
     }
 }
 
-pub fn free_mode(mode: Option<Mode>) -> FuncMode {
+pub fn free_mode(mode: Mode) -> FuncMode {
     FuncMode { call: mode, solve: FuncMode::default_mode() }
 }
 
@@ -116,7 +116,7 @@ pub fn default_free_mode() -> FuncMode {
     free_mode(FuncMode::default_mode())
 }
 
-pub fn dyn_mode(mode: Option<Mode>) -> FuncMode {
+pub fn dyn_mode(mode: Mode) -> FuncMode {
     FuncMode { call: mode, solve: FuncMode::default_mode() }
 }
 
@@ -124,9 +124,9 @@ pub fn default_dyn_mode() -> FuncMode {
     dyn_mode(FuncMode::default_mode())
 }
 
-pub fn ref_mode() -> Option<Mode> {
+pub fn ref_mode() -> Mode {
     let ref_ = CORE_SETUP.with(|p| p.ctx.ref_.clone());
-    Some(Mode::Func(ref_.into()))
+    Mode::Func(ref_.into())
 }
 
 mod ctx;

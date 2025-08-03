@@ -3,6 +3,7 @@ use log::error;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::Mode;
 use crate::prelude::mode::SymbolMode;
+use crate::prelude::mode::TaskPrimMode;
 use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -20,12 +21,12 @@ const FINAL: &str = "final";
 const STATIC: &str = "static";
 const CONST: &str = "constant";
 
-pub(super) fn parse_mode() -> Option<Mode> {
+pub(super) fn parse_mode() -> Mode {
     FuncMode::map_mode(
         Map::default(),
         FuncMode::pair_mode(
             Map::default(),
-            FuncMode::symbol_mode(SymbolMode::Literal),
+            FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Eval),
             FuncMode::default_mode(),
         ),
     )

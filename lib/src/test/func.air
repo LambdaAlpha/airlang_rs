@@ -53,7 +53,7 @@ cell free
 _ do [
     f = _ function {
         code : ._ : _ do [.a = .a + 1, .a],
-        context_access : free,
+        context_access : .free,
         cell : true,
         context : _ context {a : . : 0},
     },
@@ -67,8 +67,8 @@ cell const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : _ do [.b = .b + .c ; read .a : ., .b],
-        context_access : constant,
+        code : (.c : ._) : _ do [.b = .b + .c ; read ..a : ., .b],
+        context_access : .constant,
         cell : true,
         context : _ context {
             b : . : 0,
@@ -85,11 +85,11 @@ _ do [
     a = 1,
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read .a : .,
-            .c ; eval ..a = ..a + 1,
+            .b = .b + .c ; read ..a : .,
+            .c ; apply ..a = ..a + 1,
             .b,
         ],
-        context_access : mutable,
+        context_access : .mutable,
         cell : true,
         context : _ context {
             b : . : 0,
@@ -106,17 +106,17 @@ _ do [
     a = 1,
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read .a : .,
-            .c ; eval ..a = ..a + 1,
+            .b = .b + .c ; read ..a : .,
+            .c ; apply ..a = ..a + 1,
             .b,
         ],
-        context_access : mutable,
+        context_access : .mutable,
         cell : true,
         context : _ context {
             b : . : 0,
         },
     },
-    f set_contract final,
+    .f set_contract .final,
     [_ .f ., _ .f ., _ .f .]
 ]
 -----
@@ -127,11 +127,11 @@ const cell
 _ do [
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read .a : .,
-            .c ; eval ..a = ..a + 1,
+            .b = .b + .c ; read ..a : .,
+            .c ; apply ..a = ..a + 1,
             .b,
         ],
-        context_access : mutable,
+        context_access : .mutable,
         cell : true,
         context : _ context {
             b : . : 0,
@@ -141,8 +141,8 @@ _ do [
         a : . : 1,
         f : . : f,
     },
-    ctx set_contract final,
-    ctx ; eval [_ ..f ., _ ..f ., _ ..f .]
+    .ctx set_contract .final,
+    ctx ; apply [_ ..f ., _ ..f ., _ ..f .]
 ]
 -----
 [1, 1, 1]
@@ -155,11 +155,11 @@ _ do [
     },
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read .a : .,
-            .c ; eval ..a = ..a + 1,
+            .b = .b + .c ; read ..a : .,
+            .c ; apply ..a = ..a + 1,
             .b,
         ],
-        context_access : mutable,
+        context_access : .mutable,
         cell : true,
         context : _ context {
             b : . : 0,
@@ -175,8 +175,8 @@ const const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c ; read .a : .,
-        context_access : constant,
+        code : (.c : ._) : .c ; read ..a : .,
+        context_access : .constant,
     },
     _ f .
 ]
@@ -188,8 +188,8 @@ mutable const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c ; read .a : .,
-        context_access : mutable,
+        code : (.c : ._) : .c ; read ..a : .,
+        context_access : .mutable,
     },
     _ f .
 ]
@@ -201,7 +201,7 @@ mutable mutate
 _ do [
     f = _ function {
         code : (.c : .i) : .c ; = .@i : 2,
-        context_access : mutable,
+        context_access : .mutable,
     },
     a = 1,
     _ f a,
@@ -215,7 +215,7 @@ const mutate fail
 _ do [
     f = _ function {
         code : (.c : .i) : .c ; = .@i : 2,
-        context_access : constant,
+        context_access : .constant,
     },
     a = 1,
     _ f a,
@@ -230,7 +230,7 @@ _ do [
     a = .,
     f = _ function {
         code : (._c : ._) : 1,
-        context_access : constant,
+        context_access : .constant,
     },
     a ; f .
 ]
@@ -243,7 +243,7 @@ _ do [
     a = 1,
     f = _ function {
         code : (.ctx : ._) : 2,
-        context_access : constant,
+        context_access : .constant,
         context : _ context {ctx : constant : 3},
     },
     _ f .,
@@ -280,7 +280,7 @@ _ function.represent not
 =====
 repr const
 -----
-_ function.represent _ function {code : (._ : .i) : .i, context_access : constant}
+_ function.represent _ function {code : (._ : .i) : .i, context_access : .constant}
 -----
 {code : (_ : i) : i, context_access : constant}
 =====

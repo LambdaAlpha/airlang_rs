@@ -18,8 +18,8 @@ use super::PreludeCtx;
 use super::const_impl;
 use super::ctx::ref_::RefCtx;
 use super::free_impl;
-use super::mode::CodeMode;
 use super::mode::SymbolMode;
+use super::mode::TaskPrimMode;
 use super::setup::default_dyn_mode;
 use super::setup::dyn_mode;
 use super::setup::free_mode;
@@ -86,7 +86,7 @@ pub fn any() -> FreeStaticPrimFuncVal {
     FreeFn {
         id: "any",
         f: free_impl(fn_any),
-        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, CodeMode::Form)),
+        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form)),
     }
     .free_static()
 }
