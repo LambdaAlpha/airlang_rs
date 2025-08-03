@@ -429,6 +429,7 @@ fn get_dyn_ref(ctx: &mut Val, name: Symbol) -> Option<DynRef<'_, Val>> {
             };
             Some(val)
         }
+        Val::Dyn(val) => val.ref_(&Val::Symbol(name)),
         v => {
             error!("symbol {name:?} should exist in {v:?}");
             None
@@ -436,20 +437,20 @@ fn get_dyn_ref(ctx: &mut Val, name: Symbol) -> Option<DynRef<'_, Val>> {
     }
 }
 
-fn eval_const_ctx(ctx: ConstRef<Val>, ref_: Val) -> Option<ConstRef<Val>> {
-    eval_mut_ctx(ctx.unwrap(), ref_).map(DynRef::into_const)
+fn eval_const_ctx(ctx: ConstRef<Val>, input: Val) -> Option<ConstRef<Val>> {
+    eval_mut_ctx(ctx.unwrap(), input).map(DynRef::into_const)
 }
 
-fn eval_mut_ctx(ctx: &mut Val, ref_: Val) -> Option<DynRef<'_, Val>> {
-    match &ref_ {
+fn eval_mut_ctx(ctx: &mut Val, input: Val) -> Option<DynRef<'_, Val>> {
+    match &input {
         Val::Unit(_) => return Some(DynRef::new_mut(ctx)),
         Val::Symbol(name) => return get_dyn_ref(ctx, name.clone()),
         _ => {}
     }
     match ctx {
         Val::List(list) => {
-            let Val::Int(index) = ref_ else {
-                error!("ref {ref_:?} should be a int");
+            let Val::Int(index) = input else {
+                error!("ref {input:?} should be a int");
                 return None;
             };
             let len = list.len();
@@ -464,12 +465,13 @@ fn eval_mut_ctx(ctx: &mut Val, ref_: Val) -> Option<DynRef<'_, Val>> {
             Some(DynRef::new_mut(val))
         }
         Val::Map(map) => {
-            let Some(val) = map.get_mut(&ref_) else {
-                error!("ref {ref_:?} should exist in the map");
+            let Some(val) = map.get_mut(&input) else {
+                error!("ref {input:?} should exist in the map");
                 return None;
             };
             Some(DynRef::new_mut(val))
         }
+        Val::Dyn(val) => val.ref_(&input),
         _ => {
             error!("ctx {ctx:?} should be a pair, a task, a list, a map or a ctx");
             None

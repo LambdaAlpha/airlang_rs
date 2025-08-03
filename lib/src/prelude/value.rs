@@ -139,7 +139,7 @@ fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Map(_) => MAP,
         Val::Ctx(_) => CTX,
         Val::Func(_) => FUNC,
-        Val::Ext(ext) => return Val::Symbol(ext.type_name()),
+        Val::Dyn(val) => return Val::Symbol(val.type_name()),
     };
     Val::Symbol(Symbol::from_str_unchecked(s))
 }

@@ -33,6 +33,7 @@ use derive_more::IsVariant;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
+use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
@@ -43,13 +44,12 @@ use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-// todo rename
-pub trait Type {
+pub trait Value {
     fn type_name(&self) -> Symbol;
+    fn ref_(&mut self, name: &Val) -> Option<DynRef<'_, Val>>;
 }
 
-// todo rename
-dyn_any_debug_clone_eq_hash!(pub ValExt : Type);
+dyn_any_debug_clone_eq_hash!(pub DynVal : Value);
 
 #[derive(Clone, PartialEq, Eq, Hash, From, IsVariant)]
 pub enum Val {
@@ -72,7 +72,7 @@ pub enum Val {
     Ctx(CtxVal),
     Func(FuncVal),
 
-    Ext(Box<dyn ValExt>),
+    Dyn(Box<dyn DynVal>),
 }
 
 pub(crate) const UNIT: &str = "unit";
@@ -159,7 +159,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Map($name) => $body,
             $crate::semantics::val::Val::Ctx($name) => $body,
             $crate::semantics::val::Val::Func($name) => $body,
-            $crate::semantics::val::Val::Ext($name) => $body,
+            $crate::semantics::val::Val::Dyn($name) => $body,
         }
     };
 }
