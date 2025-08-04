@@ -18,38 +18,35 @@ pub enum SymbolMode {
     Eval,
 }
 
-impl FreeStaticFn<Symbol, Val> for SymbolMode {
-    fn free_static_call(&self, input: Symbol) -> Val {
-        let default = match self {
-            SymbolMode::Id => return Val::Symbol(input),
+impl SymbolMode {
+    fn try_into_char(self) -> Option<char> {
+        let c = match self {
+            SymbolMode::Id => return None,
             SymbolMode::Literal => SYMBOL_LITERAL_CHAR,
             SymbolMode::Ref => SYMBOL_REF_CHAR,
             SymbolMode::Eval => SYMBOL_EVAL_CHAR,
         };
+        Some(c)
+    }
+}
+
+impl FreeStaticFn<Symbol, Val> for SymbolMode {
+    fn free_static_call(&self, input: Symbol) -> Val {
+        let Some(default) = self.try_into_char() else { return Val::Symbol(input) };
         SymbolEval { default, f: &Eval }.free_static_call(input)
     }
 }
 
 impl ConstStaticFn<Val, Symbol, Val> for SymbolMode {
     fn const_static_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        let default = match self {
-            SymbolMode::Id => return Val::Symbol(input),
-            SymbolMode::Literal => SYMBOL_LITERAL_CHAR,
-            SymbolMode::Ref => SYMBOL_REF_CHAR,
-            SymbolMode::Eval => SYMBOL_EVAL_CHAR,
-        };
+        let Some(default) = self.try_into_char() else { return Val::Symbol(input) };
         SymbolEval { default, f: &Eval }.const_static_call(ctx, input)
     }
 }
 
 impl MutStaticFn<Val, Symbol, Val> for SymbolMode {
     fn mut_static_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        let default = match self {
-            SymbolMode::Id => return Val::Symbol(input),
-            SymbolMode::Literal => SYMBOL_LITERAL_CHAR,
-            SymbolMode::Ref => SYMBOL_REF_CHAR,
-            SymbolMode::Eval => SYMBOL_EVAL_CHAR,
-        };
+        let Some(default) = self.try_into_char() else { return Val::Symbol(input) };
         SymbolEval { default, f: &Eval }.mut_static_call(ctx, input)
     }
 }
