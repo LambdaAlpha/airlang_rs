@@ -1,6 +1,5 @@
 pub(crate) use ctx::const_ctx_ref;
 pub(crate) use ctx::mut_ctx_ref;
-pub(crate) use ctx::symbol_ref;
 pub(crate) use ctx::with_lock;
 pub(crate) use eval::Eval;
 pub(crate) use eval::SYMBOL_EVAL_CHAR;

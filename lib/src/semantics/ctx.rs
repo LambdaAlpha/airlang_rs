@@ -15,7 +15,12 @@ use derive_more::Deref;
 use derive_more::DerefMut;
 use derive_more::IsVariant;
 
+use crate::type_::DynRef;
 use crate::type_::Map;
+
+pub trait DynCtx<Input, Output> {
+    fn ref_(&mut self, input: Input) -> Option<DynRef<'_, Output>>;
+}
 
 #[derive(Copy, Clone, Debug)]
 pub enum CtxError {

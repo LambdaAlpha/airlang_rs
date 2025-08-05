@@ -30,10 +30,10 @@ use std::hash::Hash;
 use derive_more::From;
 use derive_more::IsVariant;
 
+use crate::semantics::ctx::DynCtx;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
-use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
@@ -44,9 +44,8 @@ use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-pub trait Value {
+pub trait Value: DynCtx<Val, Val> {
     fn type_name(&self) -> Symbol;
-    fn ref_(&mut self, name: &Val) -> Option<DynRef<'_, Val>>;
 }
 
 dyn_any_debug_clone_eq_hash!(pub DynVal : Value);

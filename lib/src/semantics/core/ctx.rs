@@ -2,105 +2,154 @@ use log::error;
 use num_traits::ToPrimitive;
 
 use crate::semantics::ctx::Contract;
+use crate::semantics::ctx::DynCtx;
+use crate::semantics::val::CtxVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::IntVal;
+use crate::semantics::val::ListVal;
+use crate::semantics::val::MapVal;
+use crate::semantics::val::PairVal;
+use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Symbol;
 
-pub(crate) fn symbol_ref(ctx: &mut Val, name: Symbol) -> Option<DynRef<'_, Val>> {
-    match ctx {
-        Val::Pair(pair) => match &*name {
-            "first" => Some(DynRef::new_mut(&mut pair.first)),
-            "second" => Some(DynRef::new_mut(&mut pair.second)),
+impl DynCtx<Symbol, Val> for PairVal {
+    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+        match &*input {
+            "first" => Some(DynRef::new_mut(&mut self.first)),
+            "second" => Some(DynRef::new_mut(&mut self.second)),
             _ => {
-                error!("symbol {name:?} should be first or second");
+                error!("symbol {input:?} should be first or second");
                 None
             }
-        },
-        Val::Task(task) => match &*name {
-            "function" => Some(DynRef::new_mut(&mut task.func)),
-            "context" => Some(DynRef::new_mut(&mut task.ctx)),
-            "input" => Some(DynRef::new_mut(&mut task.input)),
+        }
+    }
+}
+
+impl DynCtx<Symbol, Val> for TaskVal {
+    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+        match &*input {
+            "function" => Some(DynRef::new_mut(&mut self.func)),
+            "context" => Some(DynRef::new_mut(&mut self.ctx)),
+            "input" => Some(DynRef::new_mut(&mut self.input)),
             _ => {
-                error!("symbol {name:?} should be function, context or input");
+                error!("symbol {input:?} should be function, context or input");
                 None
             }
-        },
-        Val::List(list) => {
-            let len = list.len();
-            let Ok(index) = name.parse::<usize>() else {
-                error!("symbol {name:?} should be a int and >= 0 and < list.len {len}");
-                return None;
-            };
-            let Some(val) = list.get_mut(index) else {
-                error!("index {index} should < list.len {len}");
-                return None;
-            };
-            Some(DynRef::new_mut(val))
         }
-        Val::Map(map) => {
-            let Some(val) = map.get_mut(&Val::Symbol(name.clone())) else {
-                error!("name {name:?} should exist in the map");
-                return None;
-            };
-            Some(DynRef::new_mut(val))
+    }
+}
+
+impl DynCtx<Symbol, Val> for ListVal {
+    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+        let len = self.len();
+        let Ok(index) = input.parse::<usize>() else {
+            error!("symbol {input:?} should be a int and >= 0 and < list.len {len}");
+            return None;
+        };
+        let Some(val) = self.get_mut(index) else {
+            error!("index {index} should < list.len {len}");
+            return None;
+        };
+        Some(DynRef::new_mut(val))
+    }
+}
+
+impl DynCtx<Symbol, Val> for MapVal {
+    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+        let Some(val) = self.get_mut(&Val::Symbol(input.clone())) else {
+            error!("name {input:?} should exist in the map");
+            return None;
+        };
+        Some(DynRef::new_mut(val))
+    }
+}
+
+impl DynCtx<Symbol, Val> for CtxVal {
+    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+        let Ok(val) = self.get_ref_dyn(input.clone()) else {
+            error!("name {input:?} should exist");
+            return None;
+        };
+        Some(val)
+    }
+}
+
+impl DynCtx<Symbol, Val> for Val {
+    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+        match self {
+            Val::Pair(pair) => pair.ref_(input),
+            Val::Task(task) => task.ref_(input),
+            Val::List(list) => list.ref_(input),
+            Val::Map(map) => map.ref_(input),
+            Val::Ctx(ctx) => ctx.ref_(input),
+            Val::Dyn(val) => val.ref_(Val::Symbol(input)),
+            v => {
+                error!("symbol {input:?} should exist in {v:?}");
+                None
+            }
         }
-        Val::Ctx(ctx) => {
-            let Ok(val) = ctx.get_ref_dyn(name.clone()) else {
-                error!("name {name:?} should exist");
-                return None;
-            };
-            Some(val)
+    }
+}
+
+impl DynCtx<IntVal, Val> for ListVal {
+    fn ref_(&mut self, input: IntVal) -> Option<DynRef<'_, Val>> {
+        let len = self.len();
+        let Some(index) = input.to_usize() else {
+            error!("index {input:?} should >= 0 and < list.len {len}");
+            return None;
+        };
+        let Some(val) = self.get_mut(index) else {
+            error!("index {index} should < list.len {len}");
+            return None;
+        };
+        Some(DynRef::new_mut(val))
+    }
+}
+
+impl DynCtx<Val, Val> for MapVal {
+    fn ref_(&mut self, input: Val) -> Option<DynRef<'_, Val>> {
+        let Some(val) = self.get_mut(&input) else {
+            error!("ref {input:?} should exist in the map");
+            return None;
+        };
+        Some(DynRef::new_mut(val))
+    }
+}
+
+impl DynCtx<Val, Val> for Val {
+    fn ref_(&mut self, input: Val) -> Option<DynRef<'_, Val>> {
+        match &input {
+            Val::Unit(_) => return Some(DynRef::new_mut(self)),
+            Val::Symbol(name) => return self.ref_(name.clone()),
+            _ => {}
         }
-        Val::Dyn(val) => val.ref_(&Val::Symbol(name)),
-        v => {
-            error!("symbol {name:?} should exist in {v:?}");
-            None
+        match self {
+            Val::List(list) => {
+                let Val::Int(index) = input else {
+                    error!("ref {input:?} should be a int");
+                    return None;
+                };
+                list.ref_(index)
+            }
+            Val::Map(map) => map.ref_(input),
+            Val::Dyn(val) => val.ref_(input),
+            _ => {
+                error!("ctx {self:?} should be a pair, a task, a list, a map or a ctx");
+                None
+            }
         }
     }
 }
 
 pub(crate) fn const_ctx_ref(ctx: ConstRef<Val>, input: Val) -> Option<ConstRef<Val>> {
-    mut_ctx_ref(ctx.unwrap(), input).map(DynRef::into_const)
+    ctx.unwrap().ref_(input).map(DynRef::into_const)
 }
 
 pub(crate) fn mut_ctx_ref(ctx: &mut Val, input: Val) -> Option<DynRef<'_, Val>> {
-    match &input {
-        Val::Unit(_) => return Some(DynRef::new_mut(ctx)),
-        Val::Symbol(name) => return symbol_ref(ctx, name.clone()),
-        _ => {}
-    }
-    match ctx {
-        Val::List(list) => {
-            let Val::Int(index) = input else {
-                error!("ref {input:?} should be a int");
-                return None;
-            };
-            let len = list.len();
-            let Some(index) = index.to_usize() else {
-                error!("index {index:?} should >= 0 and < list.len {len}");
-                return None;
-            };
-            let Some(val) = list.get_mut(index) else {
-                error!("index {index} should < list.len {len}");
-                return None;
-            };
-            Some(DynRef::new_mut(val))
-        }
-        Val::Map(map) => {
-            let Some(val) = map.get_mut(&input) else {
-                error!("ref {input:?} should exist in the map");
-                return None;
-            };
-            Some(DynRef::new_mut(val))
-        }
-        Val::Dyn(val) => val.ref_(&input),
-        _ => {
-            error!("ctx {ctx:?} should be a pair, a task, a list, a map or a ctx");
-            None
-        }
-    }
+    ctx.ref_(input)
 }
 
 pub(crate) fn with_lock<F>(ctx: &mut Val, func_name: Symbol, f: F) -> Val

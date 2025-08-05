@@ -5,8 +5,8 @@ use super::MapForm;
 use super::PairForm;
 use super::const_ctx_ref;
 use super::mut_ctx_ref;
-use super::symbol_ref;
 use super::with_lock;
+use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
 use crate::semantics::func::FuncSetup;
@@ -73,14 +73,14 @@ where Fn: ConstStaticFn<Val, Val, Val>
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
-                let Some(val) = symbol_ref(ctx.unwrap(), s) else {
+                let Some(val) = ctx.unwrap().ref_(s) else {
                     return Val::default();
                 };
                 val.clone()
             }
             SYMBOL_EVAL_CHAR => {
                 let ctx = ctx.unwrap();
-                let Some(val) = symbol_ref(ctx, s) else {
+                let Some(val) = ctx.ref_(s) else {
                     return Val::default();
                 };
                 let val = val.clone();
@@ -99,13 +99,13 @@ where Fn: MutStaticFn<Val, Val, Val>
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
             SYMBOL_REF_CHAR => {
-                let Some(val) = symbol_ref(ctx, s) else {
+                let Some(val) = ctx.ref_(s) else {
                     return Val::default();
                 };
                 val.clone()
             }
             SYMBOL_EVAL_CHAR => {
-                let Some(val) = symbol_ref(ctx, s) else {
+                let Some(val) = ctx.ref_(s) else {
                     return Val::default();
                 };
                 let val = val.clone();
