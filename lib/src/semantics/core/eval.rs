@@ -1,3 +1,5 @@
+use std::mem::take;
+
 use log::error;
 
 use super::ListForm;
@@ -174,19 +176,19 @@ where Func: ConstStaticFn<Val, Val, Val>
                 Action::Call => {
                     let input = func.call().const_static_call(ConstRef::new(c), task.input);
                     let Some(c) = const_ctx_ref(ConstRef::new(c), task.ctx) else {
-                        return (func, Val::default());
+                        return Val::default();
                     };
-                    let output = func.const_static_call(c, input);
-                    (func, output)
+                    func.const_static_call(c, input)
                 }
                 Action::Solve => {
                     let input = func.solve().const_static_call(ConstRef::new(c), task.input);
                     let Some(c) = const_ctx_ref(ConstRef::new(c), task.ctx) else {
-                        return (func, Val::default());
+                        return Val::default();
                     };
-                    let solve = Solve { func };
+                    let solve = Solve { func: take(func) };
                     let output = solve.const_static_call(c, input);
-                    (solve.func, output)
+                    *func = solve.func;
+                    output
                 }
             }),
             func => {
@@ -219,27 +221,27 @@ where Func: MutStaticFn<Val, Val, Val>
                     Solve { func }.dyn_static_call(c, input)
                 }
             },
-            Val::Symbol(func) => with_lock(c, func, |c, mut func, contract| match task.action {
+            Val::Symbol(func) => with_lock(c, func, |c, func, contract| match task.action {
                 Action::Call => {
                     let input = func.call().mut_static_call(c, task.input);
                     let Some(c) = mut_ctx_ref(c, task.ctx) else {
-                        return (func, Val::default());
+                        return Val::default();
                     };
-                    let output = if contract.is_mutable() {
+                    if contract.is_mutable() {
                         func.dyn_cell_call(c, input)
                     } else {
                         func.dyn_static_call(c, input)
-                    };
-                    (func, output)
+                    }
                 }
                 Action::Solve => {
                     let input = func.solve().mut_static_call(c, task.input);
                     let Some(c) = mut_ctx_ref(c, task.ctx) else {
-                        return (func, Val::default());
+                        return Val::default();
                     };
-                    let solve = Solve { func };
+                    let solve = Solve { func: take(func) };
                     let output = solve.dyn_static_call(c, input);
-                    (solve.func, output)
+                    *func = solve.func;
+                    output
                 }
             }),
 
@@ -288,17 +290,15 @@ impl ConstStaticFn<Val, TaskVal, Val> for TaskApply {
             }
             Val::Symbol(func) => with_lock(ctx.unwrap(), func, |ctx, func, _| {
                 let Some(ctx) = const_ctx_ref(ConstRef::new(ctx), task.ctx) else {
-                    return (func, Val::default());
+                    return Val::default();
                 };
                 match task.action {
-                    Action::Call => {
-                        let output = func.const_static_call(ctx, task.input);
-                        (func, output)
-                    }
+                    Action::Call => func.const_static_call(ctx, task.input),
                     Action::Solve => {
-                        let solve = Solve { func };
+                        let solve = Solve { func: take(func) };
                         let output = solve.const_static_call(ctx, task.input);
-                        (solve.func, output)
+                        *func = solve.func;
+                        output
                     }
                 }
             }),
@@ -323,23 +323,23 @@ impl MutStaticFn<Val, TaskVal, Val> for TaskApply {
                     Action::Solve => Solve { func }.dyn_static_call(ctx, task.input),
                 }
             }
-            Val::Symbol(func) => with_lock(ctx, func, |ctx, mut func, contract| {
+            Val::Symbol(func) => with_lock(ctx, func, |ctx, func, contract| {
                 let Some(ctx) = mut_ctx_ref(ctx, task.ctx) else {
-                    return (func, Val::default());
+                    return Val::default();
                 };
                 match task.action {
                     Action::Call => {
-                        let output = if contract.is_mutable() {
+                        if contract.is_mutable() {
                             func.dyn_cell_call(ctx, task.input)
                         } else {
                             func.dyn_static_call(ctx, task.input)
-                        };
-                        (func, output)
+                        }
                     }
                     Action::Solve => {
-                        let solve = Solve { func };
+                        let solve = Solve { func: take(func) };
                         let output = solve.dyn_static_call(ctx, task.input);
-                        (solve.func, output)
+                        *func = solve.func;
+                        output
                     }
                 }
             }),

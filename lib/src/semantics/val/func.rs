@@ -283,3 +283,15 @@ impl Debug for FuncVal {
         match_func_val!(self, f => f.fmt(formatter))
     }
 }
+
+impl Default for FreeStaticPrimFuncVal {
+    fn default() -> Self {
+        Self::from(FreeStaticPrimFunc::default())
+    }
+}
+
+impl Default for FuncVal {
+    fn default() -> Self {
+        Self::FreeStaticPrim(FreeStaticPrimFuncVal::default())
+    }
+}

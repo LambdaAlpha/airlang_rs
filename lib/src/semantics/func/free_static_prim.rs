@@ -39,6 +39,18 @@ impl FreeStaticFn<Val, Val> for FreeStaticPrimFunc {
     }
 }
 
+impl Default for FreeStaticPrimFunc {
+    fn default() -> Self {
+        struct F;
+        impl FreeStaticFn<Val, Val> for F {
+            fn free_static_call(&self, _input: Val) -> Val {
+                Val::default()
+            }
+        }
+        Self { id: Symbol::default(), fn_: Rc::new(F), setup: Setup::none() }
+    }
+}
+
 impl_setup!(FreeStaticPrimFunc);
 
 impl_prim_func!(FreeStaticPrimFunc);

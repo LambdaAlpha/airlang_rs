@@ -153,7 +153,7 @@ pub(crate) fn mut_ctx_ref(ctx: &mut Val, input: Val) -> Option<DynRef<'_, Val>> 
 }
 
 pub(crate) fn with_lock<F>(ctx: &mut Val, func_name: Symbol, f: F) -> Val
-where F: FnOnce(&mut Val, FuncVal, Contract) -> (FuncVal, Val) {
+where F: FnOnce(&mut Val, &mut FuncVal, Contract) -> Val {
     // todo design support lock in other type ctx
     let Val::Ctx(ctx_val) = ctx else {
         error!("ctx {ctx:?} should be a ctx");
@@ -163,12 +163,12 @@ where F: FnOnce(&mut Val, FuncVal, Contract) -> (FuncVal, Val) {
         error!("func ref {func_name:?} should be lockable");
         return Val::default();
     };
-    let Val::Func(func) = ctx_value.val else {
+    let Val::Func(mut func) = ctx_value.val else {
         error!("func ref {:?} should be a func", ctx_value.val);
         ctx_val.unlock(func_name, ctx_value.val);
         return Val::default();
     };
-    let (func, output) = f(ctx, func, ctx_value.contract);
+    let output = f(ctx, &mut func, ctx_value.contract);
     let Val::Ctx(ctx_val) = ctx else {
         unreachable!("lock_unlock ctx invariant is broken!!!");
     };

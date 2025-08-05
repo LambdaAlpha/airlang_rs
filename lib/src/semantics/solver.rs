@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::rc::Rc;
 
 use log::error;
 use rustc_hash::FxHashMap;
@@ -8,19 +7,15 @@ use super::func::ConstCellFn;
 use super::func::ConstStaticFn;
 use super::func::FreeCellFn;
 use super::func::FreeStaticFn;
-use super::func::FreeStaticPrimFunc;
 use super::func::MutCellFn;
 use super::func::MutStaticFn;
-use super::func::Setup;
-use super::func::default_setup;
 use super::val::FuncVal;
 use super::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Unit;
 
-thread_local!(pub(crate) static SOLVER: RefCell<FuncVal> = RefCell::new(unit_solver()));
+thread_local!(pub(crate) static SOLVER: RefCell<FuncVal> = RefCell::default());
 
 // todo design knowledge base
 thread_local!(pub(crate) static REVERSE_MAP: RefCell<FxHashMap<Symbol, FuncVal>> = RefCell::new(FxHashMap::default()));
@@ -33,27 +28,6 @@ pub(crate) fn set_solver(solver: FuncVal) {
         };
         *s = solver;
     });
-}
-
-pub(crate) fn unit_solver() -> FuncVal {
-    let default_setup = default_setup();
-    FuncVal::FreeStaticPrim(
-        FreeStaticPrimFunc {
-            id: Symbol::from_str_unchecked("unit_solver"),
-            fn_: Rc::new(UnitSolver),
-            setup: Setup { call: Some(default_setup.clone()), solve: Some(default_setup) },
-        }
-        .into(),
-    )
-}
-
-struct UnitSolver;
-
-impl FreeStaticFn<Val, Val> for UnitSolver {
-    fn free_static_call(&self, _input: Val) -> Val {
-        error!("should set solver first");
-        Val::Unit(Unit)
-    }
 }
 
 // todo design default solve
