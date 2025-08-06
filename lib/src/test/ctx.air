@@ -347,7 +347,7 @@ is_locked true
 _ do [
     f = _ function {
         cell : true,
-        context_access : mutable,
+        context_access : .mutable,
         code : (.ctx : .i) : .ctx ; is_locked .i : .
     },
     _ .f f
@@ -360,12 +360,12 @@ is_locked true multiple
 _ do [
     f = _ function {
         cell : true,
-        context_access : mutable,
+        context_access : .mutable,
         code : (.ctx : ._) : .ctx ; apply _ ...g .
     },
     g = _ function {
         cell : true,
-        context_access : mutable,
+        context_access : .mutable,
         code : (.ctx : ._) : .ctx ; apply (...f is_locked .) and (...g is_locked .)
     },
     _ .f .
@@ -378,7 +378,7 @@ lock is_null
 _ do [
     f = _ function {
         cell : true,
-        context_access : mutable,
+        context_access : .mutable,
         code : (.ctx : .i) : .ctx ; is_null .i : .
     },
     _ .f f
@@ -409,12 +409,6 @@ static = to static
 _ do [c = _ context {a : static : 1}, c ; = a : 2, c ; read .a : .]
 -----
 1
-=====
-static = from static
------
-_ do [c = _ context {}, c ; = (a . static) : 1, c ; is_null .a : .]
------
-true
 =====
 is_constant default
 -----

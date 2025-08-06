@@ -338,7 +338,7 @@ _ do [sum = 0, 0 for i : sum = sum + i, sum]
 =====
 for integer negative
 -----
--1 for i : .
+0-1 for i : .
 -----
 .
 =====
