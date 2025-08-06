@@ -177,3 +177,74 @@ map ctx key other
 _ do [m = {1 : 2, 2 : 4}, m ; apply 1 ; self .]
 -----
 2
+=====
+cell ctx
+-----
+_ do [
+    f = _ function {
+        code : ._ : _ do [.a = .a + 1, .a],
+        context_access : .free,
+        cell : true,
+        context : _ context {a : . : 0},
+    },
+    [_ .f ., _ .f ., _ .f .]
+]
+-----
+[1, 2, 3]
+=====
+cell pair
+-----
+_ do [
+    p = . : _ function {
+        code : ._ : _ do [.a = .a + 1, .a],
+        cell : true,
+        context_access : .free,
+        context : _ context {a : . : 0},
+    },
+    [p ; do [_ .second .], p ; do [_ .second .], p ; do [_ .second .]]
+]
+-----
+[1, 2, 3]
+=====
+cell task
+-----
+_ do [
+    f = _ function {
+        code : ._ : _ do [.a = .a + 1, .a],
+        cell : true,
+        context_access : .free,
+        context : _ context {a : . : 0},
+    },
+    t = _ form. ctx ; func @f, 
+    [t ; do [_ .input .], t ; do [_ .input .], t ; do [_ .input .]]
+]
+-----
+[1, 2, 3]
+=====
+cell list
+-----
+_ do [
+    l = [1, _ function {
+        code : ._ : _ do [.a = .a + 1, .a],
+        cell : true,
+        context_access : .free,
+        context : _ context {a : . : 0},
+    }],
+    [l ; do [_ .1 .], l ; do [_ .1 .], l ; do [_ .1 .]]
+]
+-----
+[1, 2, 3]
+=====
+cell map
+-----
+_ do [
+    m = {a, b : _ function {
+        code : ._ : _ do [.a = .a + 1, .a],
+        cell : true,
+        context_access : .free,
+        context : _ context {a : . : 0},
+    }},
+    [m ; do [_ .b .], m ; do [_ .b .], m ; do [_ .b .]]
+]
+-----
+[1, 2, 3]

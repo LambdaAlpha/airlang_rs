@@ -6,8 +6,8 @@ use super::ListForm;
 use super::MapForm;
 use super::PairForm;
 use super::const_ctx_ref;
+use super::func_ref;
 use super::mut_ctx_ref;
-use super::with_lock;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::ConstStaticFn;
 use crate::semantics::func::FreeStaticFn;
@@ -172,7 +172,7 @@ where Func: ConstStaticFn<Val, Val, Val>
                     Solve { func }.const_static_call(c, input)
                 }
             },
-            Val::Symbol(func) => with_lock(c.unwrap(), func, |c, func, _| match task.action {
+            Val::Symbol(func) => func_ref(c.unwrap(), func, |c, func| match task.action {
                 Action::Call => {
                     let input = func.call().const_static_call(ConstRef::new(c), task.input);
                     let Some(c) = const_ctx_ref(ConstRef::new(c), task.ctx) else {
@@ -185,6 +185,7 @@ where Func: ConstStaticFn<Val, Val, Val>
                     let Some(c) = const_ctx_ref(ConstRef::new(c), task.ctx) else {
                         return Val::default();
                     };
+                    let func = func.unwrap();
                     let solve = Solve { func: take(func) };
                     let output = solve.const_static_call(c, input);
                     *func = solve.func;
@@ -221,16 +222,16 @@ where Func: MutStaticFn<Val, Val, Val>
                     Solve { func }.dyn_static_call(c, input)
                 }
             },
-            Val::Symbol(func) => with_lock(c, func, |c, func, contract| match task.action {
+            Val::Symbol(func) => func_ref(c, func, |c, func| match task.action {
                 Action::Call => {
                     let input = func.call().mut_static_call(c, task.input);
                     let Some(c) = mut_ctx_ref(c, task.ctx) else {
                         return Val::default();
                     };
-                    if contract.is_mutable() {
-                        func.dyn_cell_call(c, input)
-                    } else {
+                    if func.is_const() {
                         func.dyn_static_call(c, input)
+                    } else {
+                        func.unwrap().dyn_cell_call(c, input)
                     }
                 }
                 Action::Solve => {
@@ -238,6 +239,7 @@ where Func: MutStaticFn<Val, Val, Val>
                     let Some(c) = mut_ctx_ref(c, task.ctx) else {
                         return Val::default();
                     };
+                    let func = func.unwrap();
                     let solve = Solve { func: take(func) };
                     let output = solve.dyn_static_call(c, input);
                     *func = solve.func;
@@ -288,13 +290,14 @@ impl ConstStaticFn<Val, TaskVal, Val> for TaskApply {
                     Action::Solve => Solve { func }.const_static_call(ctx, task.input),
                 }
             }
-            Val::Symbol(func) => with_lock(ctx.unwrap(), func, |ctx, func, _| {
+            Val::Symbol(func) => func_ref(ctx.unwrap(), func, |ctx, func| {
                 let Some(ctx) = const_ctx_ref(ConstRef::new(ctx), task.ctx) else {
                     return Val::default();
                 };
                 match task.action {
                     Action::Call => func.const_static_call(ctx, task.input),
                     Action::Solve => {
+                        let func = func.unwrap();
                         let solve = Solve { func: take(func) };
                         let output = solve.const_static_call(ctx, task.input);
                         *func = solve.func;
@@ -323,19 +326,20 @@ impl MutStaticFn<Val, TaskVal, Val> for TaskApply {
                     Action::Solve => Solve { func }.dyn_static_call(ctx, task.input),
                 }
             }
-            Val::Symbol(func) => with_lock(ctx, func, |ctx, func, contract| {
+            Val::Symbol(func) => func_ref(ctx, func, |ctx, func| {
                 let Some(ctx) = mut_ctx_ref(ctx, task.ctx) else {
                     return Val::default();
                 };
                 match task.action {
                     Action::Call => {
-                        if contract.is_mutable() {
-                            func.dyn_cell_call(ctx, task.input)
-                        } else {
+                        if func.is_const() {
                             func.dyn_static_call(ctx, task.input)
+                        } else {
+                            func.unwrap().dyn_cell_call(ctx, task.input)
                         }
                     }
                     Action::Solve => {
+                        let func = func.unwrap();
                         let solve = Solve { func: take(func) };
                         let output = solve.dyn_static_call(ctx, task.input);
                         *func = solve.func;
