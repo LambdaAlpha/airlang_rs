@@ -252,6 +252,36 @@ _ do [a = 1, c = 3, [a, 2, c] = [2, 3, 4], [a, c]]
 -----
 [1, 3]
 =====
+= pair ctx
+-----
+_ do [p = 1 : 2, p ; = first : 3, p ; pair.first .]
+-----
+3
+=====
+= task ctx
+-----
+_ do [t = _ form ctx ; func input, t ; = context : .c, t ; task.context .]
+-----
+c
+=====
+= list ctx
+-----
+_ do [l = [1, 2, 3], l ; = .1 : 4, l ; list.get 1]
+-----
+4
+=====
+= map ctx
+-----
+_ do [m = {a : 1, b : 2}, m ; = a : 3, m ; map.get .a]
+-----
+3
+=====
+= const
+-----
+_ do [p = 1 : 2, .p set_contract .final, p ; = first : 3, p ; pair.first .]
+-----
+1
+=====
 none = return
 -----
 _ do [a = 1, 1 == a = _ any .]

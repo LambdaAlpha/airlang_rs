@@ -1,8 +1,5 @@
 use log::error;
 
-use self::pattern::assign_pattern;
-use self::pattern::match_pattern;
-use self::pattern::parse_pattern;
 use self::repr::generate_contract;
 use self::repr::generate_ctx;
 use self::repr::parse_contract;
@@ -21,6 +18,9 @@ use super::initial_ctx;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
 use super::mut_impl;
+use crate::prelude::ctx::pattern::PatternAssign;
+use crate::prelude::ctx::pattern::PatternMatch;
+use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::default_dyn_mode;
 use crate::prelude::setup::default_free_mode;
 use crate::prelude::setup::dyn_mode;
@@ -147,21 +147,17 @@ pub fn assign() -> MutStaticPrimFuncVal {
 }
 
 fn fn_assign(ctx: &mut Val, input: Val) -> Val {
-    let Val::Ctx(ctx) = ctx else {
-        error!("ctx {ctx:?} should be a ctx");
-        return Val::default();
-    };
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let Some(pattern) = parse_pattern(pair.first) else {
+    let Some(pattern) = pair.first.parse() else {
         error!("parse pattern failed");
         return Val::default();
     };
     let val = pair.second;
-    if match_pattern(&pattern, &val) { assign_pattern(ctx, pattern, val) } else { Val::default() }
+    if pattern.match_(&val) { pattern.assign(ctx, val) } else { Val::default() }
 }
 
 pub fn contract() -> ConstStaticPrimFuncVal {

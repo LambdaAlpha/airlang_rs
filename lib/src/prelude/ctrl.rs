@@ -6,13 +6,13 @@ use super::DynFn;
 use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
-use super::ctx::pattern::assign_pattern;
-use super::ctx::pattern::match_pattern;
-use super::ctx::pattern::parse_pattern;
 use super::mode::PrimMode;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
 use super::mut_impl;
+use crate::prelude::ctx::pattern::PatternAssign;
+use crate::prelude::ctx::pattern::PatternMatch;
+use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
@@ -130,14 +130,12 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         };
         let pair = Pair::from(pair);
         let pattern = mode.mut_static_call(ctx, pair.first);
-        let Some(pattern) = parse_pattern(pattern) else {
+        let Some(pattern) = pattern.parse() else {
             error!("parse pattern failed");
             return Val::default();
         };
-        if match_pattern(&pattern, &val) {
-            if let Val::Ctx(ctx_val) = ctx {
-                assign_pattern(ctx_val, pattern, val);
-            }
+        if pattern.match_(&val) {
+            pattern.assign(ctx, val);
             return eval_block(ctx, pair.second).0;
         }
     }
