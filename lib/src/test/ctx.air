@@ -276,6 +276,12 @@ _ do [m = {a : 1, b : 2}, m ; = a : 3, m ; map.get .a]
 -----
 3
 =====
+= map ctx not exist
+-----
+_ do [m = {}, m ; = a : 3, m ; map.get .a]
+-----
+3
+=====
 = const
 -----
 _ do [p = 1 : 2, .p set_contract .final, p ; = first : 3, p ; pair.first .]

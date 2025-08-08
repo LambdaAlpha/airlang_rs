@@ -20,6 +20,7 @@ use crate::type_::Map;
 
 pub trait DynCtx<Input, Output> {
     fn ref_(&mut self, input: Input) -> Option<DynRef<'_, Output>>;
+    fn set(&mut self, input: Input, value: Output) -> Option<Output>;
 }
 
 #[derive(Copy, Clone, Debug)]

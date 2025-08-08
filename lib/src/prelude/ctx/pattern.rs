@@ -1,9 +1,6 @@
-use std::mem::swap;
-
 use log::error;
 
 use crate::prelude::utils::symbol;
-use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
@@ -192,28 +189,8 @@ impl PatternAssign<Val, Val> for Pattern {
 }
 
 impl PatternAssign<Val, Val> for Symbol {
-    fn assign(self, ctx: &mut Val, mut val: Val) -> Val {
-        match ctx {
-            Val::Ctx(ctx) => {
-                let Ok(last) = ctx.put(self.clone(), val, Contract::None) else {
-                    error!("variable {self:?} is not assignable");
-                    return Val::default();
-                };
-                last.unwrap_or_default()
-            }
-            ctx => {
-                let Some(cur_val) = ctx.ref_(self.clone()) else {
-                    error!("variable {self:?} doesn't exist");
-                    return Val::default();
-                };
-                if cur_val.is_const() {
-                    error!("variable {self:?} should be mutable");
-                    return Val::default();
-                }
-                swap(cur_val.unwrap(), &mut val);
-                val
-            }
-        }
+    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+        ctx.set(self, val).unwrap_or_default()
     }
 }
 
