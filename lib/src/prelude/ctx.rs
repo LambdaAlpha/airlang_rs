@@ -100,13 +100,8 @@ fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
-    let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Symbol(s) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Symbol(s) = input else {
+        error!("input {input:?} should be a symbol");
         return Val::default();
     };
     ctx.get_ref(s).cloned().unwrap_or_default()
@@ -121,13 +116,8 @@ fn fn_move(ctx: &mut Val, input: Val) -> Val {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
-    let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Symbol(s) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Symbol(s) = input else {
+        error!("input {input:?} should be a symbol");
         return Val::default();
     };
     ctx.remove(s).unwrap_or_default()
@@ -169,13 +159,8 @@ fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
-    let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Symbol(s) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Symbol(s) = input else {
+        error!("input {input:?} should be a symbol");
         return Val::default();
     };
     let Some(contract) = ctx.get_contract(s.clone()) else {
@@ -221,13 +206,8 @@ fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
-    let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Symbol(s) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Symbol(s) = input else {
+        error!("input {input:?} should be a symbol");
         return Val::default();
     };
     let Some(locked) = ctx.is_locked(s.clone()) else {
@@ -246,13 +226,8 @@ fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
-    let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return Val::default();
-    };
-    let pair = Pair::from(pair);
-    let Val::Symbol(s) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Symbol(s) = input else {
+        error!("input {input:?} should be a symbol");
         return Val::default();
     };
     Val::Bit(Bit::from(ctx.is_null(s)))

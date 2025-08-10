@@ -67,7 +67,7 @@ cell const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : _ do [.b = .b + .c ; read ..a : ., .b],
+        code : (.c : ._) : _ do [.b = .b + .c ; read ..a, .b],
         context_access : .constant,
         cell : true,
         context : _ context {
@@ -85,7 +85,7 @@ _ do [
     a = 1,
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read ..a : .,
+            .b = .b + .c ; read ..a,
             .c ; apply ..a = ..a + 1,
             .b,
         ],
@@ -106,7 +106,7 @@ _ do [
     a = 1,
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read ..a : .,
+            .b = .b + .c ; read ..a,
             .c ; apply ..a = ..a + 1,
             .b,
         ],
@@ -127,7 +127,7 @@ const cell
 _ do [
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read ..a : .,
+            .b = .b + .c ; read ..a,
             .c ; apply ..a = ..a + 1,
             .b,
         ],
@@ -155,7 +155,7 @@ _ do [
     },
     f = _ function {
         code : (.c : ._) : _ do [
-            .b = .b + .c ; read ..a : .,
+            .b = .b + .c ; read ..a,
             .c ; apply ..a = ..a + 1,
             .b,
         ],
@@ -175,7 +175,7 @@ const const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c ; read ..a : .,
+        code : (.c : ._) : .c ; read ..a,
         context_access : .constant,
     },
     _ f .
@@ -188,7 +188,7 @@ mutable const
 _ do [
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c ; read ..a : .,
+        code : (.c : ._) : .c ; read ..a,
         context_access : .mutable,
     },
     _ f .
