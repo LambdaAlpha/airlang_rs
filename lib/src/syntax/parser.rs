@@ -393,14 +393,22 @@ fn compose_one<'a, T: ParseRepr>(
                 T::from(Pair::new(left.into_repr(), right.into_repr()))
             }
             TASK => {
-                let func = next.parse_next(i)?;
-                let input = last.parse_next(i)?;
-                T::from(Task {
-                    action: ctx.action,
-                    func: func.into_repr(),
-                    ctx: left.into_repr(),
-                    input: input.into_repr(),
-                })
+                let next_token = next.parse_next(i)?;
+                let (func, input) = match next_token {
+                    Token::Unquote(s) if *s == *COMMENT => {
+                        let left = next.parse_next(i)?;
+                        let func = next.parse_next(i)?;
+                        let right = last.parse_next(i)?;
+                        (func.into_repr(), left_right(left, right))
+                    }
+                    func => {
+                        let input = last.parse_next(i)?;
+                        (func.into_repr(), input.into_repr())
+                    }
+                };
+                let action = ctx.action;
+                let ctx = left.into_repr();
+                T::from(Task { action, func, ctx, input })
             }
             _ => {
                 let right = last.parse_next(i)?;

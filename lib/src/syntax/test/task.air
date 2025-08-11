@@ -138,6 +138,10 @@ ctx infix
 -----
 a ; b c d e
 =====
+ctx omit infix
+-----
+a ; _ b c d
+=====
 ctx omit left
 -----
 a ; b _ c d

@@ -48,6 +48,7 @@ pub(super) fn expected() -> Vec<Repr> {
         ctx_call(symbol("a"), symbol("b"), symbol("c")),
         ctx_call(symbol("a"), symbol("b"), pair(symbol("c"), symbol("d"))),
         ctx_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
+        ctx_call(symbol("a"), symbol("c"), pair(symbol("b"), symbol("d"))),
         ctx_call(symbol("a"), symbol("b"), call(symbol("c"), symbol("d"))),
         ctx_call(symbol("a"), symbol("b"), call(symbol("d"), symbol("c"))),
         ctx_call(symbol("a"), symbol("b"), call(symbol("c"), unit())),
