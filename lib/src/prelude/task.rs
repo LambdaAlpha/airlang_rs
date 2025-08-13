@@ -2,9 +2,9 @@ use std::mem::swap;
 
 use log::error;
 
-use super::DynFn;
-use super::FreeFn;
-use super::MutStaticImpl;
+use super::DynPrimFn;
+use super::FreePrimFn;
+use super::MutImpl;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
@@ -14,12 +14,12 @@ use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use crate::prelude::utils::map_remove;
 use crate::semantics::core::TaskApply;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::MutFn;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::syntax::CALL;
 use crate::syntax::SOLVE;
@@ -30,16 +30,16 @@ use crate::type_::Task;
 
 #[derive(Clone)]
 pub struct TaskPrelude {
-    pub new_call: FreeStaticPrimFuncVal,
-    pub new_solve: FreeStaticPrimFuncVal,
-    pub apply: MutStaticPrimFuncVal,
-    pub is_solve: ConstStaticPrimFuncVal,
-    pub func: ConstStaticPrimFuncVal,
-    pub set_func: MutStaticPrimFuncVal,
-    pub ctx: ConstStaticPrimFuncVal,
-    pub set_ctx: MutStaticPrimFuncVal,
-    pub input: ConstStaticPrimFuncVal,
-    pub set_input: MutStaticPrimFuncVal,
+    pub new_call: FreePrimFuncVal,
+    pub new_solve: FreePrimFuncVal,
+    pub apply: MutPrimFuncVal,
+    pub is_solve: ConstPrimFuncVal,
+    pub func: ConstPrimFuncVal,
+    pub set_func: MutPrimFuncVal,
+    pub ctx: ConstPrimFuncVal,
+    pub set_ctx: MutPrimFuncVal,
+    pub input: ConstPrimFuncVal,
+    pub set_input: MutPrimFuncVal,
 }
 
 impl Default for TaskPrelude {
@@ -78,8 +78,8 @@ const FUNC: &str = "function";
 const CTX: &str = "context";
 const INPUT: &str = "input";
 
-pub fn new_call() -> FreeStaticPrimFuncVal {
-    FreeFn { id: CALL, f: free_impl(fn_new_call), mode: default_free_mode() }.free_static()
+pub fn new_call() -> FreePrimFuncVal {
+    FreePrimFn { id: CALL, f: free_impl(fn_new_call), mode: default_free_mode() }.free()
 }
 
 fn fn_new_call(input: Val) -> Val {
@@ -94,8 +94,8 @@ fn fn_new_call(input: Val) -> Val {
     Val::Task(task.into())
 }
 
-pub fn new_solve() -> FreeStaticPrimFuncVal {
-    FreeFn { id: SOLVE, f: free_impl(fn_new_solve), mode: default_free_mode() }.free_static()
+pub fn new_solve() -> FreePrimFuncVal {
+    FreePrimFn { id: SOLVE, f: free_impl(fn_new_solve), mode: default_free_mode() }.free()
 }
 
 fn fn_new_solve(input: Val) -> Val {
@@ -110,39 +110,38 @@ fn fn_new_solve(input: Val) -> Val {
     Val::Task(task.into())
 }
 
-pub fn apply() -> MutStaticPrimFuncVal {
-    DynFn {
+pub fn apply() -> MutPrimFuncVal {
+    DynPrimFn {
         id: "task.apply",
-        f: MutStaticImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut),
+        f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut),
         mode: default_dyn_mode(),
     }
-    .mut_static()
+    .mut_()
 }
 
 fn fn_apply_free(input: Val) -> Val {
     let Val::Task(task) = input else {
         return Val::default();
     };
-    TaskApply.free_static_call(task)
+    TaskApply.free_call(task)
 }
 
 fn fn_apply_const(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Task(task) = input else {
         return Val::default();
     };
-    TaskApply.const_static_call(ctx, task)
+    TaskApply.const_call(ctx, task)
 }
 
 fn fn_apply_mut(ctx: &mut Val, input: Val) -> Val {
     let Val::Task(task) = input else {
         return Val::default();
     };
-    TaskApply.mut_static_call(ctx, task)
+    TaskApply.mut_call(ctx, task)
 }
 
-pub fn is_solve() -> ConstStaticPrimFuncVal {
-    DynFn { id: "task.is_solve", f: const_impl(fn_is_solve), mode: default_dyn_mode() }
-        .const_static()
+pub fn is_solve() -> ConstPrimFuncVal {
+    DynPrimFn { id: "task.is_solve", f: const_impl(fn_is_solve), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_is_solve(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -152,8 +151,8 @@ fn fn_is_solve(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::from(matches!(task.action, Action::Solve)))
 }
 
-pub fn func() -> ConstStaticPrimFuncVal {
-    DynFn { id: "task.function", f: const_impl(fn_func), mode: default_dyn_mode() }.const_static()
+pub fn func() -> ConstPrimFuncVal {
+    DynPrimFn { id: "task.function", f: const_impl(fn_func), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_func(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -163,9 +162,8 @@ fn fn_func(ctx: ConstRef<Val>, _input: Val) -> Val {
     task.func.clone()
 }
 
-pub fn set_func() -> MutStaticPrimFuncVal {
-    DynFn { id: "task.set_function", f: mut_impl(fn_set_func), mode: default_dyn_mode() }
-        .mut_static()
+pub fn set_func() -> MutPrimFuncVal {
+    DynPrimFn { id: "task.set_function", f: mut_impl(fn_set_func), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_set_func(ctx: &mut Val, mut input: Val) -> Val {
@@ -176,8 +174,8 @@ fn fn_set_func(ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn ctx() -> ConstStaticPrimFuncVal {
-    DynFn { id: "task.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_static()
+pub fn ctx() -> ConstPrimFuncVal {
+    DynPrimFn { id: "task.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -187,8 +185,8 @@ fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {
     task.ctx.clone()
 }
 
-pub fn set_ctx() -> MutStaticPrimFuncVal {
-    DynFn { id: "task.set_context", f: mut_impl(fn_set_ctx), mode: default_dyn_mode() }.mut_static()
+pub fn set_ctx() -> MutPrimFuncVal {
+    DynPrimFn { id: "task.set_context", f: mut_impl(fn_set_ctx), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_set_ctx(ctx: &mut Val, mut input: Val) -> Val {
@@ -199,8 +197,8 @@ fn fn_set_ctx(ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn input() -> ConstStaticPrimFuncVal {
-    DynFn { id: "task.input", f: const_impl(fn_input), mode: default_dyn_mode() }.const_static()
+pub fn input() -> ConstPrimFuncVal {
+    DynPrimFn { id: "task.input", f: const_impl(fn_input), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_input(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -210,8 +208,8 @@ fn fn_input(ctx: ConstRef<Val>, _input: Val) -> Val {
     task.input.clone()
 }
 
-pub fn set_input() -> MutStaticPrimFuncVal {
-    DynFn { id: "task.set_input", f: mut_impl(fn_set_input), mode: default_dyn_mode() }.mut_static()
+pub fn set_input() -> MutPrimFuncVal {
+    DynPrimFn { id: "task.set_input", f: mut_impl(fn_set_input), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_set_input(ctx: &mut Val, mut input: Val) -> Val {

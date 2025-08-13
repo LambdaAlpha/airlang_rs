@@ -11,14 +11,14 @@ use super::SymbolMode;
 use super::TaskMode;
 use super::TaskPrimMode;
 use crate::semantics::ctx::CtxAccess;
-use crate::semantics::func::ConstStaticPrimFunc;
-use crate::semantics::func::FreeStaticPrimFunc;
-use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::func::ConstPrimFunc;
+use crate::semantics::func::FreePrimFunc;
+use crate::semantics::func::MutPrimFunc;
 use crate::semantics::func::Setup;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::List;
 use crate::type_::Map;
@@ -37,14 +37,14 @@ const MODE_FUNC_ID: &str = "mode.object";
 impl FuncMode {
     pub fn mode_into_func(mode: Mode) -> FuncVal {
         match mode.ctx_access() {
-            CtxAccess::Free => FuncVal::FreeStaticPrim(Self::mode_into_free_func(mode)),
-            CtxAccess::Const => FuncVal::ConstStaticPrim(Self::mode_into_const_func(mode)),
-            CtxAccess::Mut => FuncVal::MutStaticPrim(Self::mode_into_mut_func(mode)),
+            CtxAccess::Free => FuncVal::FreePrim(Self::mode_into_free_func(mode)),
+            CtxAccess::Const => FuncVal::ConstPrim(Self::mode_into_const_func(mode)),
+            CtxAccess::Mut => FuncVal::MutPrim(Self::mode_into_mut_func(mode)),
         }
     }
 
-    pub fn mode_into_free_func(mode: Mode) -> FreeStaticPrimFuncVal {
-        FreeStaticPrimFunc {
+    pub fn mode_into_free_func(mode: Mode) -> FreePrimFuncVal {
+        FreePrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
             setup: Setup::none(),
@@ -52,8 +52,8 @@ impl FuncMode {
         .into()
     }
 
-    pub fn mode_into_const_func(mode: Mode) -> ConstStaticPrimFuncVal {
-        ConstStaticPrimFunc {
+    pub fn mode_into_const_func(mode: Mode) -> ConstPrimFuncVal {
+        ConstPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
             setup: Setup::none(),
@@ -61,8 +61,8 @@ impl FuncMode {
         .into()
     }
 
-    pub fn mode_into_mut_func(mode: Mode) -> MutStaticPrimFuncVal {
-        MutStaticPrimFunc {
+    pub fn mode_into_mut_func(mode: Mode) -> MutPrimFuncVal {
+        MutPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
             setup: Setup::none(),

@@ -1,19 +1,19 @@
-use crate::prelude::MutStaticImpl;
+use crate::prelude::MutImpl;
 use crate::prelude::ctx::ref_::RefCtx;
-use crate::prelude::setup::DynFn;
+use crate::prelude::setup::DynSetupFn;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_EVAL_CHAR;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::MutFn;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
 
 #[derive(Clone)]
 pub struct CtxSetup {
-    pub ref_: MutStaticPrimFuncVal,
+    pub ref_: MutPrimFuncVal,
 }
 
 impl Default for CtxSetup {
@@ -24,19 +24,18 @@ impl Default for CtxSetup {
 
 // todo design
 // todo rename
-pub fn ref_() -> MutStaticPrimFuncVal {
-    DynFn { id: "reference", f: MutStaticImpl::new(fn_ref_free, fn_ref_const, fn_ref_mut) }
-        .mut_static()
+pub fn ref_() -> MutPrimFuncVal {
+    DynSetupFn { id: "reference", f: MutImpl::new(fn_ref_free, fn_ref_const, fn_ref_mut) }.mut_()
 }
 
 fn fn_ref_free(input: Val) -> Val {
     let Val::Symbol(s) = &input else {
-        let val = Eval.free_static_call(input);
+        let val = Eval.free_call(input);
         return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
     if let Some(SYMBOL_EVAL_CHAR) = prefix {
-        let val = Eval.free_static_call(Symbol::from_str_unchecked(&s[1 ..]));
+        let val = Eval.free_call(Symbol::from_str_unchecked(&s[1 ..]));
         return RefCtx::escape_symbol(val);
     }
     input
@@ -44,12 +43,12 @@ fn fn_ref_free(input: Val) -> Val {
 
 fn fn_ref_const(ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Symbol(s) = &input else {
-        let val = Eval.const_static_call(ctx, input);
+        let val = Eval.const_call(ctx, input);
         return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
     if let Some(SYMBOL_EVAL_CHAR) = prefix {
-        let val = Eval.const_static_call(ctx, Symbol::from_str_unchecked(&s[1 ..]));
+        let val = Eval.const_call(ctx, Symbol::from_str_unchecked(&s[1 ..]));
         return RefCtx::escape_symbol(val);
     }
     input
@@ -57,12 +56,12 @@ fn fn_ref_const(ctx: ConstRef<Val>, input: Val) -> Val {
 
 fn fn_ref_mut(ctx: &mut Val, input: Val) -> Val {
     let Val::Symbol(s) = &input else {
-        let val = Eval.mut_static_call(ctx, input);
+        let val = Eval.mut_call(ctx, input);
         return RefCtx::escape_symbol(val);
     };
     let prefix = s.chars().next();
     if let Some(SYMBOL_EVAL_CHAR) = prefix {
-        let val = Eval.mut_static_call(ctx, Symbol::from_str_unchecked(&s[1 ..]));
+        let val = Eval.mut_call(ctx, Symbol::from_str_unchecked(&s[1 ..]));
         return RefCtx::escape_symbol(val);
     }
     input

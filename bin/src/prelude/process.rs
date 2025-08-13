@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use airlang::prelude::FreeFn;
+use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
@@ -8,12 +8,12 @@ use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mode::SymbolMode;
 use airlang::prelude::mode::TaskPrimMode;
 use airlang::prelude::setup::free_mode;
-use airlang::semantics::val::FreeStaticPrimFuncVal;
+use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use log::error;
 
 pub struct ProcessPrelude {
-    pub call: FreeStaticPrimFuncVal,
+    pub call: FreePrimFuncVal,
 }
 
 impl Default for ProcessPrelude {
@@ -31,13 +31,13 @@ impl Prelude for ProcessPrelude {
 // todo rename
 // todo design
 // todo impl
-pub fn call() -> FreeStaticPrimFuncVal {
-    FreeFn {
+pub fn call() -> FreePrimFuncVal {
+    FreePrimFn {
         id: "$",
         f: free_impl(fn_call),
         mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Eval)),
     }
-    .free_static()
+    .free()
 }
 
 fn fn_call(input: Val) -> Val {

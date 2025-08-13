@@ -1,7 +1,6 @@
 use std::collections::hash_map::Entry;
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::mem::take;
 
 use derive_more::IsVariant;
 
@@ -39,8 +38,6 @@ pub enum Contract {
 pub struct CtxValue {
     pub(crate) val: Val,
     pub(crate) contract: Contract,
-    // lock access to the value for a period of time in the future
-    pub(in crate::semantics) lock: bool,
 }
 
 impl CtxMap {
@@ -64,9 +61,6 @@ impl CtxMap {
         let Some(value) = self.map.get(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.lock {
-            return Err(CtxError::AccessDenied);
-        }
         Ok(&value.val)
     }
 
@@ -74,9 +68,6 @@ impl CtxMap {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.lock {
-            return Err(CtxError::AccessDenied);
-        }
         if !value.contract.is_mutable() {
             return Err(CtxError::AccessDenied);
         }
@@ -87,9 +78,6 @@ impl CtxMap {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(CtxError::NotFound);
         };
-        if value.lock {
-            return Err(CtxError::AccessDenied);
-        }
         Ok(DynRef::new(&mut value.val, !value.contract.is_mutable()))
     }
 
@@ -97,9 +85,6 @@ impl CtxMap {
         let Entry::Occupied(entry) = self.map.entry(name) else {
             return Err(CtxError::NotFound);
         };
-        if entry.get().lock {
-            return Err(CtxError::AccessDenied);
-        }
         if !entry.get().contract.is_removable() {
             return Err(CtxError::AccessDenied);
         }
@@ -111,9 +96,6 @@ impl CtxMap {
     ) -> Result<Option<Val>, CtxError> {
         match self.map.entry(name) {
             Entry::Occupied(mut entry) => {
-                if entry.get().lock {
-                    return Err(CtxError::AccessDenied);
-                }
                 let old = entry.get().contract;
                 if !old.is_replaceable(contract) {
                     return Err(CtxError::AccessDenied);
@@ -134,9 +116,6 @@ impl CtxMap {
         let Some(old) = self.map.get(&name) else {
             return contract.is_insertable();
         };
-        if old.lock {
-            return false;
-        }
         old.contract.is_replaceable(contract)
     }
 
@@ -161,29 +140,6 @@ impl CtxMap {
             v.contract = v.contract.reverse();
         }
         self
-    }
-
-    pub fn is_locked(&self, name: Symbol) -> Option<bool> {
-        let value = self.map.get(&name)?;
-        Some(value.lock)
-    }
-
-    pub(in crate::semantics) fn lock(&mut self, name: Symbol) -> Result<CtxValue, CtxError> {
-        let Some(value) = self.map.get_mut(&name) else {
-            return Err(CtxError::NotFound);
-        };
-        if value.lock {
-            return Err(CtxError::AccessDenied);
-        }
-        value.lock = true;
-        Ok(CtxValue::new(take(&mut value.val), value.contract))
-    }
-
-    pub(in crate::semantics) fn unlock(&mut self, name: Symbol, val: Val) -> Option<()> {
-        let value = self.map.get_mut(&name)?;
-        value.lock = false;
-        value.val = val;
-        Some(())
     }
 
     pub(in crate::semantics) fn put_unchecked(
@@ -240,7 +196,7 @@ impl Contract {
 
 impl CtxValue {
     pub(crate) fn new(val: Val, contract: Contract) -> Self {
-        Self { val, contract, lock: false }
+        Self { val, contract }
     }
 }
 
@@ -250,9 +206,6 @@ impl Debug for CtxValue {
         tuple.field(&self.val);
         if self.contract != Contract::None {
             tuple.field(&self.contract);
-        }
-        if self.lock {
-            tuple.field(&"lock");
         }
         tuple.finish()
     }

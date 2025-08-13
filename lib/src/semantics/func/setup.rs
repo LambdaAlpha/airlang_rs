@@ -1,9 +1,6 @@
-use super::ConstCellFn;
-use super::ConstStaticFn;
-use super::FreeCellFn;
-use super::FreeStaticFn;
-use super::MutCellFn;
-use super::MutStaticFn;
+use super::ConstFn;
+use super::FreeFn;
+use super::MutFn;
 use crate::semantics::val::FuncVal;
 use crate::type_::ConstRef;
 
@@ -23,83 +20,42 @@ pub(crate) trait SetupFn {}
 
 impl<T> SetupFn for &T where T: SetupFn {}
 
-impl<I, O, T> FreeStaticFn<I, O> for Option<T>
+impl<I, O, T> FreeFn<I, O> for Option<T>
 where
-    T: FreeStaticFn<I, O> + SetupFn,
+    T: FreeFn<I, O> + SetupFn,
     I: Into<O>,
 {
-    fn free_static_call(&self, input: I) -> O {
+    fn free_call(&self, input: I) -> O {
         match self {
-            Some(t) => t.free_static_call(input),
+            Some(t) => t.free_call(input),
             None => input.into(),
         }
     }
 }
 
-impl<I, O, T> FreeCellFn<I, O> for Option<T>
+impl<Ctx, I, O, T> ConstFn<Ctx, I, O> for Option<T>
 where
-    T: FreeCellFn<I, O> + SetupFn,
+    T: ConstFn<Ctx, I, O> + SetupFn,
+    Option<T>: FreeFn<I, O>,
     I: Into<O>,
 {
-    fn free_cell_call(&mut self, input: I) -> O {
+    fn const_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
         match self {
-            Some(t) => t.free_cell_call(input),
+            Some(t) => t.const_call(ctx, input),
             None => input.into(),
         }
     }
 }
 
-impl<Ctx, I, O, T> ConstStaticFn<Ctx, I, O> for Option<T>
+impl<Ctx, I, O, T> MutFn<Ctx, I, O> for Option<T>
 where
-    T: ConstStaticFn<Ctx, I, O> + SetupFn,
-    Option<T>: FreeStaticFn<I, O>,
+    T: MutFn<Ctx, I, O> + SetupFn,
+    Option<T>: ConstFn<Ctx, I, O>,
     I: Into<O>,
 {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+    fn mut_call(&self, ctx: &mut Ctx, input: I) -> O {
         match self {
-            Some(t) => t.const_static_call(ctx, input),
-            None => input.into(),
-        }
-    }
-}
-
-impl<Ctx, I, O, T> ConstCellFn<Ctx, I, O> for Option<T>
-where
-    T: ConstCellFn<Ctx, I, O> + SetupFn,
-    Option<T>: FreeCellFn<I, O>,
-    I: Into<O>,
-{
-    fn const_cell_call(&mut self, ctx: ConstRef<Ctx>, input: I) -> O {
-        match self {
-            Some(t) => t.const_cell_call(ctx, input),
-            None => input.into(),
-        }
-    }
-}
-
-impl<Ctx, I, O, T> MutStaticFn<Ctx, I, O> for Option<T>
-where
-    T: MutStaticFn<Ctx, I, O> + SetupFn,
-    Option<T>: ConstStaticFn<Ctx, I, O>,
-    I: Into<O>,
-{
-    fn mut_static_call(&self, ctx: &mut Ctx, input: I) -> O {
-        match self {
-            Some(t) => t.mut_static_call(ctx, input),
-            None => input.into(),
-        }
-    }
-}
-
-impl<Ctx, I, O, T> MutCellFn<Ctx, I, O> for Option<T>
-where
-    T: MutCellFn<Ctx, I, O> + SetupFn,
-    Option<T>: ConstCellFn<Ctx, I, O>,
-    I: Into<O>,
-{
-    fn mut_cell_call(&mut self, ctx: &mut Ctx, input: I) -> O {
-        match self {
-            Some(t) => t.mut_cell_call(ctx, input),
+            Some(t) => t.mut_call(ctx, input),
             None => input.into(),
         }
     }

@@ -3,9 +3,9 @@ use log::error;
 use self::repr::generate_func;
 use self::repr::parse_func;
 use self::repr::parse_mode;
-use super::DynFn;
-use super::FreeFn;
-use super::MutStaticImpl;
+use super::DynPrimFn;
+use super::FreePrimFn;
+use super::MutImpl;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
@@ -21,14 +21,14 @@ use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::SymbolMode;
 use crate::prelude::mode::TaskPrimMode;
 use crate::semantics::core::Eval;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeStaticFn;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::FreeFn;
 use crate::semantics::func::FuncSetup;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::func::MutFn;
+use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::CtxVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
@@ -36,17 +36,16 @@ use crate::type_::Symbol;
 
 #[derive(Clone)]
 pub struct FuncPrelude {
-    pub new: FreeStaticPrimFuncVal,
-    pub repr: FreeStaticPrimFuncVal,
-    pub apply: MutStaticPrimFuncVal,
-    pub ctx_access: ConstStaticPrimFuncVal,
-    pub call_setup: ConstStaticPrimFuncVal,
-    pub solve_setup: ConstStaticPrimFuncVal,
-    pub is_primitive: ConstStaticPrimFuncVal,
-    pub is_cell: ConstStaticPrimFuncVal,
-    pub id: ConstStaticPrimFuncVal,
-    pub code: ConstStaticPrimFuncVal,
-    pub ctx: ConstStaticPrimFuncVal,
+    pub new: FreePrimFuncVal,
+    pub repr: FreePrimFuncVal,
+    pub apply: MutPrimFuncVal,
+    pub ctx_access: ConstPrimFuncVal,
+    pub call_setup: ConstPrimFuncVal,
+    pub solve_setup: ConstPrimFuncVal,
+    pub is_primitive: ConstPrimFuncVal,
+    pub id: ConstPrimFuncVal,
+    pub code: ConstPrimFuncVal,
+    pub ctx: ConstPrimFuncVal,
 }
 
 impl Default for FuncPrelude {
@@ -59,7 +58,6 @@ impl Default for FuncPrelude {
             call_setup: call_setup(),
             solve_setup: solve_setup(),
             is_primitive: is_primitive(),
-            is_cell: is_cell(),
             id: id(),
             code: code(),
             ctx: ctx(),
@@ -76,15 +74,14 @@ impl Prelude for FuncPrelude {
         self.call_setup.put(ctx);
         self.solve_setup.put(ctx);
         self.is_primitive.put(ctx);
-        self.is_cell.put(ctx);
         self.id.put(ctx);
         self.code.put(ctx);
         self.ctx.put(ctx);
     }
 }
 
-pub fn new() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "function", f: free_impl(fn_new), mode: free_mode(parse_mode()) }.free_static()
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn { id: "function", f: free_impl(fn_new), mode: free_mode(parse_mode()) }.free()
 }
 
 fn fn_new(input: Val) -> Val {
@@ -95,9 +92,8 @@ fn fn_new(input: Val) -> Val {
     Val::Func(func)
 }
 
-pub fn repr() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "function.represent", f: free_impl(fn_repr), mode: default_free_mode() }
-        .free_static()
+pub fn repr() -> FreePrimFuncVal {
+    FreePrimFn { id: "function.represent", f: free_impl(fn_repr), mode: default_free_mode() }.free()
 }
 
 fn fn_repr(input: Val) -> Val {
@@ -108,30 +104,34 @@ fn fn_repr(input: Val) -> Val {
     generate_func(func)
 }
 
-pub fn apply() -> MutStaticPrimFuncVal {
-    DynFn {
+pub fn apply() -> MutPrimFuncVal {
+    DynPrimFn {
         id: "apply",
-        f: MutStaticImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
+        f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
         mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
     }
-    .mut_static()
+    .mut_()
 }
 
 fn fn_eval_free(input: Val) -> Val {
-    Eval.free_static_call(input)
+    Eval.free_call(input)
 }
 
 fn fn_eval_const(ctx: ConstRef<Val>, input: Val) -> Val {
-    Eval.const_static_call(ctx, input)
+    Eval.const_call(ctx, input)
 }
 
 fn fn_eval_mut(ctx: &mut Val, input: Val) -> Val {
-    Eval.mut_static_call(ctx, input)
+    Eval.mut_call(ctx, input)
 }
 
-pub fn ctx_access() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.context_access", f: const_impl(fn_ctx_access), mode: default_dyn_mode() }
-        .const_static()
+pub fn ctx_access() -> ConstPrimFuncVal {
+    DynPrimFn {
+        id: "function.context_access",
+        f: const_impl(fn_ctx_access),
+        mode: default_dyn_mode(),
+    }
+    .const_()
 }
 
 fn fn_ctx_access(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -143,9 +143,9 @@ fn fn_ctx_access(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(Symbol::from_str_unchecked(access))
 }
 
-pub fn call_setup() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.call_setup", f: const_impl(fn_call_setup), mode: default_dyn_mode() }
-        .const_static()
+pub fn call_setup() -> ConstPrimFuncVal {
+    DynPrimFn { id: "function.call_setup", f: const_impl(fn_call_setup), mode: default_dyn_mode() }
+        .const_()
 }
 
 fn fn_call_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -156,9 +156,13 @@ fn fn_call_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
     generate_setup(func.call().cloned())
 }
 
-pub fn solve_setup() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.solve_setup", f: const_impl(fn_solve_setup), mode: default_dyn_mode() }
-        .const_static()
+pub fn solve_setup() -> ConstPrimFuncVal {
+    DynPrimFn {
+        id: "function.solve_setup",
+        f: const_impl(fn_solve_setup),
+        mode: default_dyn_mode(),
+    }
+    .const_()
 }
 
 fn fn_solve_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -169,9 +173,13 @@ fn fn_solve_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
     generate_setup(func.solve().cloned())
 }
 
-pub fn is_primitive() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.is_primitive", f: const_impl(fn_is_primitive), mode: default_dyn_mode() }
-        .const_static()
+pub fn is_primitive() -> ConstPrimFuncVal {
+    DynPrimFn {
+        id: "function.is_primitive",
+        f: const_impl(fn_is_primitive),
+        mode: default_dyn_mode(),
+    }
+    .const_()
 }
 
 fn fn_is_primitive(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -183,21 +191,8 @@ fn fn_is_primitive(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::from(is_primitive))
 }
 
-pub fn is_cell() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.is_cell", f: const_impl(fn_is_cell), mode: default_dyn_mode() }
-        .const_static()
-}
-
-fn fn_is_cell(ctx: ConstRef<Val>, _input: Val) -> Val {
-    let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
-        return Val::default();
-    };
-    Val::Bit(Bit::from(func.is_cell()))
-}
-
-pub fn id() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.id", f: const_impl(fn_id), mode: default_dyn_mode() }.const_static()
+pub fn id() -> ConstPrimFuncVal {
+    DynPrimFn { id: "function.id", f: const_impl(fn_id), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_id(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -208,8 +203,8 @@ fn fn_id(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(func.id())
 }
 
-pub fn code() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.code", f: const_impl(fn_code), mode: default_dyn_mode() }.const_static()
+pub fn code() -> ConstPrimFuncVal {
+    DynPrimFn { id: "function.code", f: const_impl(fn_code), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_code(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -220,8 +215,8 @@ fn fn_code(ctx: ConstRef<Val>, _input: Val) -> Val {
     generate_code(func)
 }
 
-pub fn ctx() -> ConstStaticPrimFuncVal {
-    DynFn { id: "function.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_static()
+pub fn ctx() -> ConstPrimFuncVal {
+    DynPrimFn { id: "function.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {

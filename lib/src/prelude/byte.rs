@@ -1,7 +1,7 @@
 use log::error;
 
-use super::DynFn;
-use super::FreeFn;
+use super::DynPrimFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
@@ -9,9 +9,9 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::ConstRef;
@@ -20,9 +20,9 @@ use crate::type_::Int;
 // todo design add more
 #[derive(Clone)]
 pub struct BytePrelude {
-    pub length: ConstStaticPrimFuncVal,
-    pub push: MutStaticPrimFuncVal,
-    pub join: FreeStaticPrimFuncVal,
+    pub length: ConstPrimFuncVal,
+    pub push: MutPrimFuncVal,
+    pub join: FreePrimFuncVal,
 }
 
 impl Default for BytePrelude {
@@ -39,8 +39,8 @@ impl Prelude for BytePrelude {
     }
 }
 
-pub fn length() -> ConstStaticPrimFuncVal {
-    DynFn { id: "byte.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_static()
+pub fn length() -> ConstPrimFuncVal {
+    DynPrimFn { id: "byte.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -52,8 +52,8 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn push() -> MutStaticPrimFuncVal {
-    DynFn { id: "byte.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_static()
+pub fn push() -> MutPrimFuncVal {
+    DynPrimFn { id: "byte.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_push(ctx: &mut Val, input: Val) -> Val {
@@ -70,8 +70,8 @@ fn fn_push(ctx: &mut Val, input: Val) -> Val {
 }
 
 // todo design
-pub fn join() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "byte.join", f: free_impl(fn_join), mode: default_free_mode() }.free_static()
+pub fn join() -> FreePrimFuncVal {
+    FreePrimFn { id: "byte.join", f: free_impl(fn_join), mode: default_free_mode() }.free()
 }
 
 fn fn_join(input: Val) -> Val {

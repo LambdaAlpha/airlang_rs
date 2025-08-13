@@ -1,17 +1,16 @@
-use log::error;
-
 pub use self::arbitrary::Arbitrary;
 pub use self::arbitrary::ArbitraryVal;
 
 _____!();
 
+use log::error;
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
 use self::arbitrary::arbitrary_ext_type;
 use self::arbitrary::set_arbitrary_val;
-use super::DynFn;
-use super::FreeFn;
+use super::DynPrimFn;
+use super::FreePrimFn;
 use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
@@ -28,11 +27,12 @@ use crate::semantics::ctx::Ctx;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CTX;
-use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FUNC;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::INT;
+use crate::semantics::val::LINK;
 use crate::semantics::val::LIST;
 use crate::semantics::val::MAP;
 use crate::semantics::val::NUMBER;
@@ -47,6 +47,7 @@ use crate::type_::Byte;
 use crate::type_::ConstRef;
 use crate::type_::Either;
 use crate::type_::Int;
+use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
@@ -62,9 +63,9 @@ pub fn init_arbitrary(arbitrary_val: Box<dyn ArbitraryVal>) {
 
 #[derive(Clone)]
 pub struct ValuePrelude {
-    pub any: FreeStaticPrimFuncVal,
-    pub type_: ConstStaticPrimFuncVal,
-    pub equal: ConstStaticPrimFuncVal,
+    pub any: FreePrimFuncVal,
+    pub type_: ConstPrimFuncVal,
+    pub equal: ConstPrimFuncVal,
 }
 
 impl Default for ValuePrelude {
@@ -82,13 +83,13 @@ impl Prelude for ValuePrelude {
 }
 
 // todo design
-pub fn any() -> FreeStaticPrimFuncVal {
-    FreeFn {
+pub fn any() -> FreePrimFuncVal {
+    FreePrimFn {
         id: "any",
         f: free_impl(fn_any),
         mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form)),
     }
-    .free_static()
+    .free()
 }
 
 fn fn_any(input: Val) -> Val {
@@ -109,6 +110,7 @@ fn fn_any(input: Val) -> Val {
             TASK => Val::Task(Task::<Val, Val, Val>::any(rng, DEPTH).into()),
             LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
             MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
+            LINK => Val::Link(Link::any(rng, DEPTH)),
             CTX => Val::Ctx(Ctx::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             _ => arbitrary_ext_type(s),
@@ -120,8 +122,8 @@ fn fn_any(input: Val) -> Val {
     }
 }
 
-pub fn type_() -> ConstStaticPrimFuncVal {
-    DynFn { id: "type", f: const_impl(fn_type), mode: default_dyn_mode() }.const_static()
+pub fn type_() -> ConstPrimFuncVal {
+    DynPrimFn { id: "type", f: const_impl(fn_type), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -137,6 +139,7 @@ fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Task(_) => TASK,
         Val::List(_) => LIST,
         Val::Map(_) => MAP,
+        Val::Link(_) => LINK,
         Val::Ctx(_) => CTX,
         Val::Func(_) => FUNC,
         Val::Dyn(val) => return Val::Symbol(val.type_name()),
@@ -145,13 +148,13 @@ fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 // todo design mode and ref
-pub fn equal() -> ConstStaticPrimFuncVal {
-    DynFn {
+pub fn equal() -> ConstPrimFuncVal {
+    DynPrimFn {
         id: "==",
         f: const_impl(fn_equal),
         mode: dyn_mode(FuncMode::pair_mode(Map::default(), ref_mode(), ref_mode())),
     }
-    .const_static()
+    .const_()
 }
 
 fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {

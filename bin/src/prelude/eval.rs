@@ -1,15 +1,15 @@
 use airlang::initial_ctx;
-use airlang::prelude::DynFn;
+use airlang::prelude::DynPrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang::prelude::mut_impl;
 use airlang::prelude::setup::default_dyn_mode;
-use airlang::semantics::val::MutStaticPrimFuncVal;
+use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
 use log::error;
 
 pub struct EvalPrelude {
-    pub reset: MutStaticPrimFuncVal,
+    pub reset: MutPrimFuncVal,
 }
 
 impl Default for EvalPrelude {
@@ -25,8 +25,8 @@ impl Prelude for EvalPrelude {
 }
 
 // todo rename
-pub fn reset() -> MutStaticPrimFuncVal {
-    DynFn { id: "repl.reset", f: mut_impl(fn_reset), mode: default_dyn_mode() }.mut_static()
+pub fn reset() -> MutPrimFuncVal {
+    DynPrimFn { id: "repl.reset", f: mut_impl(fn_reset), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_reset(ctx: &mut Val, _input: Val) -> Val {

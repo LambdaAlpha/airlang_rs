@@ -1,6 +1,6 @@
 use std::mem::take;
 
-use super::MutStaticFn;
+use super::MutFn;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -42,9 +42,9 @@ impl DynComposite {
 }
 
 pub(crate) fn composite_call<Fn>(f: &Fn, ctx: &mut Ctx, body: Val) -> Val
-where Fn: MutStaticFn<Val, Val, Val> {
+where Fn: MutFn<Val, Val, Val> {
     let mut ctx_val = Val::Ctx(take(ctx).into());
-    let output = f.mut_static_call(&mut ctx_val, body);
+    let output = f.mut_call(&mut ctx_val, body);
     let Val::Ctx(ctx_val) = ctx_val else {
         unreachable!("composite_call ctx invariant is broken!!!")
     };

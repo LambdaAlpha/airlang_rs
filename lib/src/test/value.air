@@ -70,6 +70,12 @@ _ do [a = _ any map, a ; type .]
 -----
 map
 =====
+any link
+-----
+_ do [a = _ any link, a ; type .]
+-----
+link
+=====
 any context
 -----
 _ do [c = _ any context, c ; type .]
@@ -148,6 +154,12 @@ _ do [a = {}, a ; type .]
 -----
 map
 =====
+type link
+-----
+_ do [a = _ link ., a ; type .]
+-----
+link
+=====
 type context
 -----
 _ do [a = _ context {}, a ; type .]
@@ -223,6 +235,12 @@ true
 == map
 -----
 {} == {}
+-----
+true
+=====
+== link
+-----
+_ do [a = _ link ., b = a, a == b]
 -----
 true
 =====

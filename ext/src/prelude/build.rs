@@ -3,14 +3,14 @@ use std::fs::read_to_string;
 use std::path::Path;
 
 use airlang::Air;
-use airlang::prelude::ConstStaticImpl;
-use airlang::prelude::DynFn;
+use airlang::prelude::ConstImpl;
+use airlang::prelude::DynPrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang::prelude::setup::default_dyn_mode;
 use airlang::semantics::ctx::Contract;
 use airlang::semantics::ctx::Ctx;
-use airlang::semantics::val::ConstStaticPrimFuncVal;
+use airlang::semantics::val::ConstPrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
 use airlang::type_::ConstRef;
@@ -19,7 +19,7 @@ use airlang::type_::Text;
 use log::error;
 
 pub struct BuildPrelude {
-    pub import: ConstStaticPrimFuncVal,
+    pub import: ConstPrimFuncVal,
 }
 
 impl Default for BuildPrelude {
@@ -36,13 +36,13 @@ impl Prelude for BuildPrelude {
 
 // todo rename
 // todo design
-pub fn import() -> ConstStaticPrimFuncVal {
-    DynFn {
+pub fn import() -> ConstPrimFuncVal {
+    DynPrimFn {
         id: "build.import",
-        f: ConstStaticImpl::new(fn_import_free, fn_import_const),
+        f: ConstImpl::new(fn_import_free, fn_import_const),
         mode: default_dyn_mode(),
     }
-    .const_static()
+    .const_()
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

@@ -1,18 +1,18 @@
-use super::FreeFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 
 #[derive(Clone)]
 pub struct BitPrelude {
-    pub not: FreeStaticPrimFuncVal,
-    pub and: FreeStaticPrimFuncVal,
-    pub or: FreeStaticPrimFuncVal,
-    pub xor: FreeStaticPrimFuncVal,
-    pub imply: FreeStaticPrimFuncVal,
+    pub not: FreePrimFuncVal,
+    pub and: FreePrimFuncVal,
+    pub or: FreePrimFuncVal,
+    pub xor: FreePrimFuncVal,
+    pub imply: FreePrimFuncVal,
 }
 
 impl Default for BitPrelude {
@@ -31,8 +31,8 @@ impl Prelude for BitPrelude {
     }
 }
 
-pub fn not() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "not", f: free_impl(fn_not), mode: default_free_mode() }.free_static()
+pub fn not() -> FreePrimFuncVal {
+    FreePrimFn { id: "not", f: free_impl(fn_not), mode: default_free_mode() }.free()
 }
 
 fn fn_not(input: Val) -> Val {
@@ -42,8 +42,8 @@ fn fn_not(input: Val) -> Val {
     Val::Bit(b.not())
 }
 
-pub fn and() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "and", f: free_impl(fn_and), mode: default_free_mode() }.free_static()
+pub fn and() -> FreePrimFuncVal {
+    FreePrimFn { id: "and", f: free_impl(fn_and), mode: default_free_mode() }.free()
 }
 
 fn fn_and(input: Val) -> Val {
@@ -59,8 +59,8 @@ fn fn_and(input: Val) -> Val {
     Val::Bit(left.and(right))
 }
 
-pub fn or() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "or", f: free_impl(fn_or), mode: default_free_mode() }.free_static()
+pub fn or() -> FreePrimFuncVal {
+    FreePrimFn { id: "or", f: free_impl(fn_or), mode: default_free_mode() }.free()
 }
 
 fn fn_or(input: Val) -> Val {
@@ -76,8 +76,8 @@ fn fn_or(input: Val) -> Val {
     Val::Bit(left.or(right))
 }
 
-pub fn xor() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "xor", f: free_impl(fn_xor), mode: default_free_mode() }.free_static()
+pub fn xor() -> FreePrimFuncVal {
+    FreePrimFn { id: "xor", f: free_impl(fn_xor), mode: default_free_mode() }.free()
 }
 
 fn fn_xor(input: Val) -> Val {
@@ -93,8 +93,8 @@ fn fn_xor(input: Val) -> Val {
     Val::Bit(left.xor(right))
 }
 
-pub fn imply() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "imply", f: free_impl(fn_imply), mode: default_free_mode() }.free_static()
+pub fn imply() -> FreePrimFuncVal {
+    FreePrimFn { id: "imply", f: free_impl(fn_imply), mode: default_free_mode() }.free()
 }
 
 fn fn_imply(input: Val) -> Val {

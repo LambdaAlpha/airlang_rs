@@ -117,6 +117,11 @@ fn test_map() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_link() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/link.air"), "test/link.air")
+}
+
+#[test]
 fn test_ctx() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/ctx.air"), "test/ctx.air")
 }

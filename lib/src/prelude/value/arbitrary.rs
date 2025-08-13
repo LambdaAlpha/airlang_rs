@@ -25,22 +25,16 @@ use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;
 use crate::semantics::ctx::CtxValue;
-use crate::semantics::func::ConstCellCompFunc;
-use crate::semantics::func::ConstStaticCompFunc;
+use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
-use crate::semantics::func::FreeCellCompFunc;
+use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
-use crate::semantics::func::FreeStaticCompFunc;
-use crate::semantics::func::MutCellCompFunc;
-use crate::semantics::func::MutStaticCompFunc;
+use crate::semantics::func::MutCompFunc;
 use crate::semantics::func::Setup;
-use crate::semantics::val::ConstCellCompFuncVal;
-use crate::semantics::val::ConstStaticCompFuncVal;
-use crate::semantics::val::FreeCellCompFuncVal;
-use crate::semantics::val::FreeStaticCompFuncVal;
+use crate::semantics::val::ConstCompFuncVal;
+use crate::semantics::val::FreeCompFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::MutCellCompFuncVal;
-use crate::semantics::val::MutStaticCompFuncVal;
+use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Action;
 use crate::type_::Bit;
@@ -52,6 +46,7 @@ use crate::type_::FuncCtx;
 use crate::type_::FuncCtxInput;
 use crate::type_::FuncInput;
 use crate::type_::Int;
+use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
@@ -321,6 +316,12 @@ where
     }
 }
 
+impl<T: Arbitrary> Arbitrary for Link<T> {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        Link::new(T::any(rng, depth))
+    }
+}
+
 impl Arbitrary for Contract {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
         const CONTRACT: [Contract; 5] =
@@ -446,30 +447,18 @@ impl Arbitrary for FuncVal {
             let Val::Func(func) = func else { unreachable!() };
             func
         } else {
-            match rng.random_range(0 .. 6) {
+            match rng.random_range(0 .. 3) {
                 0 => {
                     let func = Arbitrary::any(rng, depth);
-                    FuncVal::FreeStaticComp(func)
+                    FuncVal::FreeComp(func)
                 }
                 1 => {
                     let func = Arbitrary::any(rng, depth);
-                    FuncVal::ConstStaticComp(func)
+                    FuncVal::ConstComp(func)
                 }
                 2 => {
                     let func = Arbitrary::any(rng, depth);
-                    FuncVal::MutStaticComp(func)
-                }
-                3 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::FreeCellComp(func)
-                }
-                4 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::ConstCellComp(func)
-                }
-                5 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::MutCellComp(func)
+                    FuncVal::MutComp(func)
                 }
                 _ => unreachable!(),
             }
@@ -497,75 +486,39 @@ impl Arbitrary for DynComposite {
     }
 }
 
-impl Arbitrary for FreeCellCompFuncVal {
+impl Arbitrary for FreeCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let func = FreeCellCompFunc {
+        let func = FreeCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
         };
-        FreeCellCompFuncVal::from(func)
+        FreeCompFuncVal::from(func)
     }
 }
 
-impl Arbitrary for FreeStaticCompFuncVal {
+impl Arbitrary for ConstCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let func = FreeStaticCompFunc {
+        let func = ConstCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
         };
-        FreeStaticCompFuncVal::from(func)
+        ConstCompFuncVal::from(func)
     }
 }
 
-impl Arbitrary for ConstCellCompFuncVal {
+impl Arbitrary for MutCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let func = ConstCellCompFunc {
+        let func = MutCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             ctx: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
         };
-        ConstCellCompFuncVal::from(func)
-    }
-}
-
-impl Arbitrary for ConstStaticCompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let func = ConstStaticCompFunc {
-            id: Arbitrary::any(rng, depth),
-            comp: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
-            setup: Arbitrary::any(rng, depth),
-        };
-        ConstStaticCompFuncVal::from(func)
-    }
-}
-
-impl Arbitrary for MutCellCompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let func = MutCellCompFunc {
-            id: Arbitrary::any(rng, depth),
-            comp: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
-            setup: Arbitrary::any(rng, depth),
-        };
-        MutCellCompFuncVal::from(func)
-    }
-}
-
-impl Arbitrary for MutStaticCompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let func = MutStaticCompFunc {
-            id: Arbitrary::any(rng, depth),
-            comp: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
-            setup: Arbitrary::any(rng, depth),
-        };
-        MutStaticCompFuncVal::from(func)
+        MutCompFuncVal::from(func)
     }
 }
 

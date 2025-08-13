@@ -3,6 +3,7 @@ pub use self::byte::Byte;
 pub use self::change::Change;
 pub use self::either::Either;
 pub use self::int::Int;
+pub use self::link::Link;
 pub use self::list::List;
 pub use self::map::Map;
 pub use self::number::Number;
@@ -48,3 +49,5 @@ mod task;
 mod list;
 
 mod map;
+
+mod link;

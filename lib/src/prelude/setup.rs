@@ -3,25 +3,16 @@ use std::rc::Rc;
 use super::mode::FuncMode;
 use super::mode::Mode;
 use super::setup::ctx::CtxSetup;
-use crate::semantics::func::ConstCellFnVal;
-use crate::semantics::func::ConstCellPrimFunc;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::ConstStaticPrimFunc;
-use crate::semantics::func::FreeCellFnVal;
-use crate::semantics::func::FreeCellPrimFunc;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FreeStaticPrimFunc;
-use crate::semantics::func::MutCellFnVal;
-use crate::semantics::func::MutCellPrimFunc;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::ConstPrimFunc;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::FreePrimFunc;
+use crate::semantics::func::MutFn;
+use crate::semantics::func::MutPrimFunc;
 use crate::semantics::func::Setup;
-use crate::semantics::val::ConstCellPrimFuncVal;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeCellPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
-use crate::semantics::val::MutCellPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
@@ -32,79 +23,46 @@ pub struct CoreSetup {
     pub ctx: CtxSetup,
 }
 
-pub struct FreeFn<F> {
+pub struct FreeSetupFn<F> {
     pub id: &'static str,
     pub f: F,
 }
 
-pub struct DynFn<F> {
+pub struct DynSetupFn<F> {
     pub id: &'static str,
     pub f: F,
 }
 
-impl<F: FreeCellFnVal + 'static> FreeFn<F> {
-    pub fn free_cell(self) -> FreeCellPrimFuncVal {
-        let func = FreeCellPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Box::new(self.f),
-            setup: Setup::none(),
-        };
-        FreeCellPrimFuncVal::from(func)
-    }
-}
-
-impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
-    pub fn free_static(self) -> FreeStaticPrimFuncVal {
-        let func = FreeStaticPrimFunc {
+impl<F: FreeFn<Val, Val> + 'static> FreeSetupFn<F> {
+    pub fn free(self) -> FreePrimFuncVal {
+        let func = FreePrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
             setup: Setup::none(),
         };
-        FreeStaticPrimFuncVal::from(func)
+        FreePrimFuncVal::from(func)
     }
 }
 
-impl<F: ConstCellFnVal + 'static> DynFn<F> {
-    pub fn const_cell(self) -> ConstCellPrimFuncVal {
-        let func = ConstCellPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Box::new(self.f),
-            setup: Setup::none(),
-        };
-        ConstCellPrimFuncVal::from(func)
-    }
-}
-
-impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
-    pub fn const_static(self) -> ConstStaticPrimFuncVal {
-        let func = ConstStaticPrimFunc {
+impl<F: ConstFn<Val, Val, Val> + 'static> DynSetupFn<F> {
+    pub fn const_(self) -> ConstPrimFuncVal {
+        let func = ConstPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
             setup: Setup::none(),
         };
-        ConstStaticPrimFuncVal::from(func)
+        ConstPrimFuncVal::from(func)
     }
 }
 
-impl<F: MutCellFnVal + 'static> DynFn<F> {
-    pub fn mut_cell(self) -> MutCellPrimFuncVal {
-        let func = MutCellPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Box::new(self.f),
-            setup: Setup::none(),
-        };
-        MutCellPrimFuncVal::from(func)
-    }
-}
-
-impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
-    pub fn mut_static(self) -> MutStaticPrimFuncVal {
-        let func = MutStaticPrimFunc {
+impl<F: MutFn<Val, Val, Val> + 'static> DynSetupFn<F> {
+    pub fn mut_(self) -> MutPrimFuncVal {
+        let func = MutPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
             setup: Setup::none(),
         };
-        MutStaticPrimFuncVal::from(func)
+        MutPrimFuncVal::from(func)
     }
 }
 

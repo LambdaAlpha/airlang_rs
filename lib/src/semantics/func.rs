@@ -1,24 +1,12 @@
-pub use self::const_cell_comp::ConstCellCompFunc;
-pub use self::const_cell_prim::ConstCellFn;
-pub use self::const_cell_prim::ConstCellFnVal;
-pub use self::const_cell_prim::ConstCellPrimFunc;
-pub use self::const_static_comp::ConstStaticCompFunc;
-pub use self::const_static_prim::ConstStaticFn;
-pub use self::const_static_prim::ConstStaticPrimFunc;
-pub use self::free_cell_comp::FreeCellCompFunc;
-pub use self::free_cell_prim::FreeCellFn;
-pub use self::free_cell_prim::FreeCellFnVal;
-pub use self::free_cell_prim::FreeCellPrimFunc;
-pub use self::free_static_comp::FreeStaticCompFunc;
-pub use self::free_static_prim::FreeStaticFn;
-pub use self::free_static_prim::FreeStaticPrimFunc;
-pub use self::mut_cell_comp::MutCellCompFunc;
-pub use self::mut_cell_prim::MutCellFn;
-pub use self::mut_cell_prim::MutCellFnVal;
-pub use self::mut_cell_prim::MutCellPrimFunc;
-pub use self::mut_static_comp::MutStaticCompFunc;
-pub use self::mut_static_prim::MutStaticFn;
-pub use self::mut_static_prim::MutStaticPrimFunc;
+pub use self::const_comp::ConstCompFunc;
+pub use self::const_prim::ConstFn;
+pub use self::const_prim::ConstPrimFunc;
+pub use self::free_comp::FreeCompFunc;
+pub use self::free_prim::FreeFn;
+pub use self::free_prim::FreePrimFunc;
+pub use self::mut_comp::MutCompFunc;
+pub use self::mut_prim::MutFn;
+pub use self::mut_prim::MutPrimFunc;
 
 _____!();
 
@@ -42,8 +30,8 @@ pub(crate) trait FuncSetup {
 }
 
 pub fn default_setup() -> FuncVal {
-    FuncVal::MutStaticPrim(
-        MutStaticPrimFunc {
+    FuncVal::MutPrim(
+        MutPrimFunc {
             id: Symbol::from_str_unchecked("setup.default"),
             fn_: Rc::new(Eval),
             setup: Setup::none(),
@@ -61,26 +49,14 @@ mod comp;
 
 mod setup;
 
-mod free_static_prim;
+mod free_prim;
 
-mod free_static_comp;
+mod free_comp;
 
-mod free_cell_prim;
+mod const_prim;
 
-mod free_cell_comp;
+mod const_comp;
 
-mod const_static_prim;
+mod mut_prim;
 
-mod const_static_comp;
-
-mod const_cell_prim;
-
-mod const_cell_comp;
-
-mod mut_static_prim;
-
-mod mut_static_comp;
-
-mod mut_cell_prim;
-
-mod mut_cell_comp;
+mod mut_comp;

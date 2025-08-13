@@ -1,0 +1,29 @@
+new get
+-----
+_ do [a = _ any ., l = _ link a, a1 = l link.get _, a == a1]
+-----
+true
+=====
+set get
+-----
+_ do [l = _ link _ any ., a = _ any ., l link.set a, a1 = l link.get _, a == a1]
+-----
+true
+=====
+sync
+-----
+_ do [l = _ link _ any ., l1 = l, a = _ any ., l link.set a, a1 = l1 link.get _, a == a1]
+-----
+true
+=====
+leak no panic
+-----
+_ do [l = _ link _ any ., l link.set l, .l move _, .]
+-----
+.
+=====
+cycle recover
+-----
+_ do [l = _ link _ any ., l link.set l, l1 = l link.set _ any ., l == l1]
+-----
+true

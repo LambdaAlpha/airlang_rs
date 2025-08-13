@@ -7,6 +7,7 @@ use self::ctrl::CtrlPrelude;
 use self::ctx::CtxPrelude;
 use self::func::FuncPrelude;
 use self::int::IntPrelude;
+use self::link::LinkPrelude;
 use self::list::ListPrelude;
 use self::map::MapPrelude;
 use self::meta::MetaPrelude;
@@ -25,25 +26,16 @@ use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;
 use crate::semantics::ctx::CtxValue;
-use crate::semantics::func::ConstCellFnVal;
-use crate::semantics::func::ConstCellPrimFunc;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::ConstStaticPrimFunc;
-use crate::semantics::func::FreeCellFnVal;
-use crate::semantics::func::FreeCellPrimFunc;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FreeStaticPrimFunc;
-use crate::semantics::func::MutCellFnVal;
-use crate::semantics::func::MutCellPrimFunc;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::func::MutStaticPrimFunc;
-use crate::semantics::val::ConstCellPrimFuncVal;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeCellPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::ConstPrimFunc;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::FreePrimFunc;
+use crate::semantics::func::MutFn;
+use crate::semantics::func::MutPrimFunc;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::MutCellPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
@@ -109,6 +101,7 @@ pub struct CorePrelude {
     pub task: TaskPrelude,
     pub list: ListPrelude,
     pub map: MapPrelude,
+    pub link: LinkPrelude,
     pub ctx: CtxPrelude,
     pub func: FuncPrelude,
     pub solve: SolvePrelude,
@@ -132,6 +125,7 @@ impl Prelude for CorePrelude {
         self.task.put(ctx);
         self.list.put(ctx);
         self.map.put(ctx);
+        self.link.put(ctx);
         self.ctx.put(ctx);
         self.func.put(ctx);
         self.solve.put(ctx);
@@ -153,117 +147,66 @@ impl<T: Named + Clone + Into<FuncVal>> Prelude for T {
     }
 }
 
-impl Named for FreeCellPrimFuncVal {
+impl Named for FreePrimFuncVal {
     fn name(&self) -> Symbol {
         self.id.clone()
     }
 }
 
-impl Named for FreeStaticPrimFuncVal {
+impl Named for ConstPrimFuncVal {
     fn name(&self) -> Symbol {
         self.id.clone()
     }
 }
 
-impl Named for ConstCellPrimFuncVal {
+impl Named for MutPrimFuncVal {
     fn name(&self) -> Symbol {
         self.id.clone()
     }
 }
 
-impl Named for ConstStaticPrimFuncVal {
-    fn name(&self) -> Symbol {
-        self.id.clone()
-    }
-}
-
-impl Named for MutCellPrimFuncVal {
-    fn name(&self) -> Symbol {
-        self.id.clone()
-    }
-}
-
-impl Named for MutStaticPrimFuncVal {
-    fn name(&self) -> Symbol {
-        self.id.clone()
-    }
-}
-
-pub struct FreeFn<F> {
+pub struct FreePrimFn<F> {
     pub id: &'static str,
     pub f: F,
     pub mode: FuncMode,
 }
 
-pub struct DynFn<F> {
+pub struct DynPrimFn<F> {
     pub id: &'static str,
     pub f: F,
     pub mode: FuncMode,
 }
 
-impl<F: FreeCellFnVal + 'static> FreeFn<F> {
-    pub fn free_cell(self) -> FreeCellPrimFuncVal {
-        let func = FreeCellPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Box::new(self.f),
-            setup: self.mode.into_setup(),
-        };
-        FreeCellPrimFuncVal::from(func)
-    }
-}
-
-impl<F: FreeStaticFn<Val, Val> + 'static> FreeFn<F> {
-    pub fn free_static(self) -> FreeStaticPrimFuncVal {
-        let func = FreeStaticPrimFunc {
+impl<F: FreeFn<Val, Val> + 'static> FreePrimFn<F> {
+    pub fn free(self) -> FreePrimFuncVal {
+        let func = FreePrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
             setup: self.mode.into_setup(),
         };
-        FreeStaticPrimFuncVal::from(func)
+        FreePrimFuncVal::from(func)
     }
 }
 
-impl<F: ConstCellFnVal + 'static> DynFn<F> {
-    pub fn const_cell(self) -> ConstCellPrimFuncVal {
-        let func = ConstCellPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Box::new(self.f),
-            setup: self.mode.into_setup(),
-        };
-        ConstCellPrimFuncVal::from(func)
-    }
-}
-
-impl<F: ConstStaticFn<Val, Val, Val> + 'static> DynFn<F> {
-    pub fn const_static(self) -> ConstStaticPrimFuncVal {
-        let func = ConstStaticPrimFunc {
+impl<F: ConstFn<Val, Val, Val> + 'static> DynPrimFn<F> {
+    pub fn const_(self) -> ConstPrimFuncVal {
+        let func = ConstPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
             setup: self.mode.into_setup(),
         };
-        ConstStaticPrimFuncVal::from(func)
+        ConstPrimFuncVal::from(func)
     }
 }
 
-impl<F: MutCellFnVal + 'static> DynFn<F> {
-    pub fn mut_cell(self) -> MutCellPrimFuncVal {
-        let func = MutCellPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Box::new(self.f),
-            setup: self.mode.into_setup(),
-        };
-        MutCellPrimFuncVal::from(func)
-    }
-}
-
-impl<F: MutStaticFn<Val, Val, Val> + 'static> DynFn<F> {
-    pub fn mut_static(self) -> MutStaticPrimFuncVal {
-        let func = MutStaticPrimFunc {
+impl<F: MutFn<Val, Val, Val> + 'static> DynPrimFn<F> {
+    pub fn mut_(self) -> MutPrimFuncVal {
+        let func = MutPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
             setup: self.mode.into_setup(),
         };
-        MutStaticPrimFuncVal::from(func)
+        MutPrimFuncVal::from(func)
     }
 }
 
@@ -279,17 +222,17 @@ fn ctx_put_func<V: Clone + Into<FuncVal>>(ctx: &mut dyn PreludeCtx, name: &'stat
     ctx.put(name, Val::Func(func));
 }
 
-pub struct FreeStaticImpl<I, O> {
+pub struct FreeImpl<I, O> {
     pub free: fn(I) -> O,
 }
 
-impl<I, O> FreeStaticFn<I, O> for FreeStaticImpl<I, O> {
-    fn free_static_call(&self, input: I) -> O {
+impl<I, O> FreeFn<I, O> for FreeImpl<I, O> {
+    fn free_call(&self, input: I) -> O {
         (self.free)(input)
     }
 }
 
-impl<I, O> FreeStaticImpl<I, O> {
+impl<I, O> FreeImpl<I, O> {
     pub fn new(free: fn(I) -> O) -> Self {
         Self { free }
     }
@@ -300,24 +243,24 @@ impl<I, O> FreeStaticImpl<I, O> {
     }
 }
 
-pub struct ConstStaticImpl<Ctx, I, O> {
+pub struct ConstImpl<Ctx, I, O> {
     pub free: fn(I) -> O,
     pub const_: fn(ConstRef<Ctx>, I) -> O,
 }
 
-impl<Ctx, I, O> FreeStaticFn<I, O> for ConstStaticImpl<Ctx, I, O> {
-    fn free_static_call(&self, input: I) -> O {
+impl<Ctx, I, O> FreeFn<I, O> for ConstImpl<Ctx, I, O> {
+    fn free_call(&self, input: I) -> O {
         (self.free)(input)
     }
 }
 
-impl<Ctx, I, O> ConstStaticFn<Ctx, I, O> for ConstStaticImpl<Ctx, I, O> {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+impl<Ctx, I, O> ConstFn<Ctx, I, O> for ConstImpl<Ctx, I, O> {
+    fn const_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
         (self.const_)(ctx, input)
     }
 }
 
-impl<Ctx, I, O> ConstStaticImpl<Ctx, I, O> {
+impl<Ctx, I, O> ConstImpl<Ctx, I, O> {
     pub fn new(free: fn(I) -> O, const_: fn(ConstRef<Ctx>, I) -> O) -> Self {
         Self { free, const_ }
     }
@@ -328,31 +271,31 @@ impl<Ctx, I, O> ConstStaticImpl<Ctx, I, O> {
     }
 }
 
-pub struct MutStaticImpl<Ctx, I, O> {
+pub struct MutImpl<Ctx, I, O> {
     pub free: fn(I) -> O,
     pub const_: fn(ConstRef<Ctx>, I) -> O,
     pub mut_: fn(&mut Ctx, I) -> O,
 }
 
-impl<Ctx, I, O> FreeStaticFn<I, O> for MutStaticImpl<Ctx, I, O> {
-    fn free_static_call(&self, input: I) -> O {
+impl<Ctx, I, O> FreeFn<I, O> for MutImpl<Ctx, I, O> {
+    fn free_call(&self, input: I) -> O {
         (self.free)(input)
     }
 }
 
-impl<Ctx, I, O> ConstStaticFn<Ctx, I, O> for MutStaticImpl<Ctx, I, O> {
-    fn const_static_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+impl<Ctx, I, O> ConstFn<Ctx, I, O> for MutImpl<Ctx, I, O> {
+    fn const_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
         (self.const_)(ctx, input)
     }
 }
 
-impl<Ctx, I, O> MutStaticFn<Ctx, I, O> for MutStaticImpl<Ctx, I, O> {
-    fn mut_static_call(&self, ctx: &mut Ctx, input: I) -> O {
+impl<Ctx, I, O> MutFn<Ctx, I, O> for MutImpl<Ctx, I, O> {
+    fn mut_call(&self, ctx: &mut Ctx, input: I) -> O {
         (self.mut_)(ctx, input)
     }
 }
 
-impl<Ctx, I, O> MutStaticImpl<Ctx, I, O> {
+impl<Ctx, I, O> MutImpl<Ctx, I, O> {
     pub fn new(
         free: fn(I) -> O, const_: fn(ConstRef<Ctx>, I) -> O, mut_: fn(&mut Ctx, I) -> O,
     ) -> Self {
@@ -365,16 +308,16 @@ impl<Ctx, I, O> MutStaticImpl<Ctx, I, O> {
     }
 }
 
-pub fn free_impl(func: fn(Val) -> Val) -> FreeStaticImpl<Val, Val> {
-    FreeStaticImpl::new(func)
+pub fn free_impl(func: fn(Val) -> Val) -> FreeImpl<Val, Val> {
+    FreeImpl::new(func)
 }
 
-pub fn const_impl(func: fn(ConstRef<Val>, Val) -> Val) -> ConstStaticImpl<Val, Val, Val> {
-    ConstStaticImpl::new(FreeStaticImpl::default, func)
+pub fn const_impl(func: fn(ConstRef<Val>, Val) -> Val) -> ConstImpl<Val, Val, Val> {
+    ConstImpl::new(FreeImpl::default, func)
 }
 
-pub fn mut_impl(func: fn(&mut Val, Val) -> Val) -> MutStaticImpl<Val, Val, Val> {
-    MutStaticImpl::new(FreeStaticImpl::default, ConstStaticImpl::default, func)
+pub fn mut_impl(func: fn(&mut Val, Val) -> Val) -> MutImpl<Val, Val, Val> {
+    MutImpl::new(FreeImpl::default, ConstImpl::default, func)
 }
 
 pub mod setup;
@@ -402,6 +345,8 @@ pub mod task;
 pub mod list;
 
 pub mod map;
+
+pub mod link;
 
 pub mod ctx;
 

@@ -2,7 +2,7 @@ use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
-use super::DynFn;
+use super::DynPrimFn;
 use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
@@ -16,8 +16,8 @@ use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::func::MutFn;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Int;
@@ -30,11 +30,11 @@ use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct CtrlPrelude {
-    pub do_: MutStaticPrimFuncVal,
-    pub if_: MutStaticPrimFuncVal,
-    pub match_: MutStaticPrimFuncVal,
-    pub loop_: MutStaticPrimFuncVal,
-    pub for_: MutStaticPrimFuncVal,
+    pub do_: MutPrimFuncVal,
+    pub if_: MutPrimFuncVal,
+    pub match_: MutPrimFuncVal,
+    pub loop_: MutPrimFuncVal,
+    pub for_: MutPrimFuncVal,
 }
 
 impl Default for CtrlPrelude {
@@ -75,16 +75,16 @@ enum BlockItem {
     Exit { exit: Exit, condition: Val, body: Val },
 }
 
-pub fn do_() -> MutStaticPrimFuncVal {
-    DynFn { id: "do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
+pub fn do_() -> MutPrimFuncVal {
+    DynPrimFn { id: "do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
 fn fn_do(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, input).0
 }
 
-pub fn if_() -> MutStaticPrimFuncVal {
-    DynFn { id: "?", f: mut_impl(fn_if), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
+pub fn if_() -> MutPrimFuncVal {
+    DynPrimFn { id: "?", f: mut_impl(fn_if), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
 fn fn_if(ctx: &mut Val, input: Val) -> Val {
@@ -97,7 +97,7 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
         error!("input.second {:?} should be a pair", pair.second);
         return Val::default();
     };
-    let condition = Eval.mut_static_call(ctx, pair.first);
+    let condition = Eval.mut_call(ctx, pair.first);
     let Val::Bit(b) = condition else {
         error!("condition {condition:?} should be a bit");
         return Val::default();
@@ -107,8 +107,8 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
     eval_block(ctx, branch).0
 }
 
-pub fn match_() -> MutStaticPrimFuncVal {
-    DynFn { id: "match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
+pub fn match_() -> MutPrimFuncVal {
+    DynPrimFn { id: "match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
 fn fn_match(ctx: &mut Val, input: Val) -> Val {
@@ -117,7 +117,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let val = Eval.mut_static_call(ctx, pair.first);
+    let val = Eval.mut_call(ctx, pair.first);
     let Val::List(list) = pair.second else {
         error!("input.second {:?} should be a list", pair.second);
         return Val::default();
@@ -129,7 +129,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
             return Val::default();
         };
         let pair = Pair::from(pair);
-        let pattern = mode.mut_static_call(ctx, pair.first);
+        let pattern = mode.mut_call(ctx, pair.first);
         let Some(pattern) = pattern.parse() else {
             error!("parse pattern failed");
             return Val::default();
@@ -142,8 +142,8 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn loop_() -> MutStaticPrimFuncVal {
-    DynFn { id: "loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
+pub fn loop_() -> MutPrimFuncVal {
+    DynPrimFn { id: "loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
 fn fn_loop(ctx: &mut Val, input: Val) -> Val {
@@ -162,7 +162,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
             return Val::default();
         };
         loop {
-            let cond = Eval.mut_static_call(ctx, condition.clone());
+            let cond = Eval.mut_call(ctx, condition.clone());
             let Val::Bit(b) = cond else {
                 error!("condition {cond:?} should be a bit");
                 return Val::default();
@@ -182,7 +182,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
         }
     } else {
         loop {
-            let cond = Eval.mut_static_call(ctx, condition.clone());
+            let cond = Eval.mut_call(ctx, condition.clone());
             let Val::Bit(b) = cond else {
                 error!("condition {cond:?} should be a bit");
                 return Val::default();
@@ -190,14 +190,14 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
             if !*b {
                 break;
             }
-            Eval.mut_static_call(ctx, body.clone());
+            Eval.mut_call(ctx, body.clone());
         }
     }
     Val::default()
 }
 
-pub fn for_() -> MutStaticPrimFuncVal {
-    DynFn { id: "for", f: mut_impl(fn_for), mode: dyn_mode(FuncMode::id_mode()) }.mut_static()
+pub fn for_() -> MutPrimFuncVal {
+    DynPrimFn { id: "for", f: mut_impl(fn_for), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
 fn fn_for(ctx: &mut Val, input: Val) -> Val {
@@ -206,7 +206,7 @@ fn fn_for(ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let pair = Pair::from(pair);
-    let iterable = Eval.mut_static_call(ctx, pair.first);
+    let iterable = Eval.mut_call(ctx, pair.first);
     let Val::Pair(name_body) = pair.second else {
         error!("input.second {:?} should be a pair", pair.second);
         return Val::default();
@@ -297,7 +297,7 @@ where ValIter: Iterator<Item = Val> {
             if let Val::Ctx(ctx_val) = ctx {
                 let _ = ctx_val.put(name.clone(), val, Contract::None);
             }
-            Eval.mut_static_call(ctx, body.clone());
+            Eval.mut_call(ctx, body.clone());
         }
     }
     Val::default()
@@ -306,7 +306,7 @@ where ValIter: Iterator<Item = Val> {
 fn eval_block(ctx: &mut Val, input: Val) -> (Val, CtrlFlow) {
     // todo design
     let Val::List(list) = input else {
-        return (Eval.mut_static_call(ctx, input), CtrlFlow::None);
+        return (Eval.mut_call(ctx, input), CtrlFlow::None);
     };
     let list = List::from(list);
     let block_items: Option<List<BlockItem>> = list.into_iter().map(parse_block_item).collect();
@@ -321,16 +321,16 @@ fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFl
     for block_item in block_items {
         match block_item {
             BlockItem::Normal(val) => {
-                output = Eval.mut_static_call(ctx, val);
+                output = Eval.mut_call(ctx, val);
             }
             BlockItem::Exit { exit, condition, body } => {
-                let condition = Eval.mut_static_call(ctx, condition);
+                let condition = Eval.mut_call(ctx, condition);
                 let Val::Bit(condition) = condition else {
                     error!("condition {condition:?} should be a bit");
                     return (Val::default(), CtrlFlow::Error);
                 };
                 if *condition {
-                    let output = Eval.mut_static_call(ctx, body);
+                    let output = Eval.mut_call(ctx, body);
                     return (output, CtrlFlow::from(exit));
                 }
                 output = Val::default();

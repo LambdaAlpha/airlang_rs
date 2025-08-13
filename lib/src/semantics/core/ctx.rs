@@ -1,5 +1,4 @@
 use std::mem::swap;
-use std::mem::take;
 
 use log::error;
 use num_traits::ToPrimitive;
@@ -7,7 +6,6 @@ use num_traits::ToPrimitive;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CtxVal;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::IntVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
@@ -271,44 +269,4 @@ pub(crate) fn const_ctx_ref(ctx: ConstRef<Val>, input: Val) -> Option<ConstRef<V
 
 pub(crate) fn mut_ctx_ref(ctx: &mut Val, input: Val) -> Option<DynRef<'_, Val>> {
     ctx.ref_(input)
-}
-
-pub(crate) fn func_ref<F>(ctx: &mut Val, func_name: Symbol, f: F) -> Val
-where F: FnOnce(&mut Val, DynRef<FuncVal>) -> Val {
-    match ctx {
-        Val::Ctx(ctx_val) => {
-            let Ok(ctx_value) = ctx_val.lock(func_name.clone()) else {
-                error!("func ref {func_name:?} should be lockable");
-                return Val::default();
-            };
-            let Val::Func(mut func) = ctx_value.val else {
-                error!("func ref {:?} should be a func", ctx_value.val);
-                ctx_val.unlock(func_name, ctx_value.val);
-                return Val::default();
-            };
-            let output = f(ctx, DynRef::new(&mut func, !ctx_value.contract.is_mutable()));
-            let Val::Ctx(ctx_val) = ctx else {
-                unreachable!("func_ref ctx invariant is broken!!!");
-            };
-            ctx_val.unlock(func_name, Val::Func(func));
-            output
-        }
-        ctx => {
-            let Some(v) = ctx.ref_(func_name.clone()) else {
-                return Val::default();
-            };
-            let v = v.unwrap();
-            let Val::Func(func) = v else {
-                error!("func ref {v:?} should be a func");
-                return Val::default();
-            };
-            let mut func_ref = take(func);
-            let output = f(ctx, DynRef::new_mut(&mut func_ref));
-            let Some(v) = ctx.ref_(func_name) else {
-                unreachable!("func_ref ctx invariant is broken!!!");
-            };
-            *v.unwrap() = Val::Func(func_ref);
-            output
-        }
-    }
 }

@@ -2,8 +2,8 @@ use std::mem::swap;
 
 use log::error;
 
-use super::DynFn;
-use super::FreeFn;
+use super::DynPrimFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
@@ -11,20 +11,20 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::syntax::PAIR;
 use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct PairPrelude {
-    pub new: FreeStaticPrimFuncVal,
-    pub first: ConstStaticPrimFuncVal,
-    pub set_first: MutStaticPrimFuncVal,
-    pub second: ConstStaticPrimFuncVal,
-    pub set_second: MutStaticPrimFuncVal,
+    pub new: FreePrimFuncVal,
+    pub first: ConstPrimFuncVal,
+    pub set_first: MutPrimFuncVal,
+    pub second: ConstPrimFuncVal,
+    pub set_second: MutPrimFuncVal,
 }
 
 impl Default for PairPrelude {
@@ -49,8 +49,8 @@ impl Prelude for PairPrelude {
     }
 }
 
-pub fn new() -> FreeStaticPrimFuncVal {
-    FreeFn { id: PAIR, f: free_impl(fn_new), mode: default_free_mode() }.free_static()
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn { id: PAIR, f: free_impl(fn_new), mode: default_free_mode() }.free()
 }
 
 fn fn_new(input: Val) -> Val {
@@ -61,8 +61,8 @@ fn fn_new(input: Val) -> Val {
     input
 }
 
-pub fn first() -> ConstStaticPrimFuncVal {
-    DynFn { id: "pair.first", f: const_impl(fn_first), mode: default_dyn_mode() }.const_static()
+pub fn first() -> ConstPrimFuncVal {
+    DynPrimFn { id: "pair.first", f: const_impl(fn_first), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -73,8 +73,8 @@ fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
     pair.first.clone()
 }
 
-pub fn set_first() -> MutStaticPrimFuncVal {
-    DynFn { id: "pair.set_first", f: mut_impl(fn_set_first), mode: default_dyn_mode() }.mut_static()
+pub fn set_first() -> MutPrimFuncVal {
+    DynPrimFn { id: "pair.set_first", f: mut_impl(fn_set_first), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
@@ -86,8 +86,8 @@ fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn second() -> ConstStaticPrimFuncVal {
-    DynFn { id: "pair.second", f: const_impl(fn_second), mode: default_dyn_mode() }.const_static()
+pub fn second() -> ConstPrimFuncVal {
+    DynPrimFn { id: "pair.second", f: const_impl(fn_second), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -98,9 +98,8 @@ fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
     pair.second.clone()
 }
 
-pub fn set_second() -> MutStaticPrimFuncVal {
-    DynFn { id: "pair.set_second", f: mut_impl(fn_set_second), mode: default_dyn_mode() }
-        .mut_static()
+pub fn set_second() -> MutPrimFuncVal {
+    DynPrimFn { id: "pair.set_second", f: mut_impl(fn_set_second), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_set_second(ctx: &mut Val, mut input: Val) -> Val {

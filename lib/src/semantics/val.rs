@@ -1,18 +1,12 @@
 pub use self::byte::ByteVal;
 pub use self::ctx::CtxVal;
-pub use self::func::ConstCellCompFuncVal;
-pub use self::func::ConstCellPrimFuncVal;
-pub use self::func::ConstStaticCompFuncVal;
-pub use self::func::ConstStaticPrimFuncVal;
-pub use self::func::FreeCellCompFuncVal;
-pub use self::func::FreeCellPrimFuncVal;
-pub use self::func::FreeStaticCompFuncVal;
-pub use self::func::FreeStaticPrimFuncVal;
+pub use self::func::ConstCompFuncVal;
+pub use self::func::ConstPrimFuncVal;
+pub use self::func::FreeCompFuncVal;
+pub use self::func::FreePrimFuncVal;
 pub use self::func::FuncVal;
-pub use self::func::MutCellCompFuncVal;
-pub use self::func::MutCellPrimFuncVal;
-pub use self::func::MutStaticCompFuncVal;
-pub use self::func::MutStaticPrimFuncVal;
+pub use self::func::MutCompFuncVal;
+pub use self::func::MutPrimFuncVal;
 pub use self::int::IntVal;
 pub use self::list::ListVal;
 pub use self::map::MapVal;
@@ -35,6 +29,7 @@ use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Int;
+use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
@@ -68,11 +63,14 @@ pub enum Val {
     List(ListVal),
     Map(MapVal),
 
+    Link(LinkVal),
     Ctx(CtxVal),
     Func(FuncVal),
 
     Dyn(Box<dyn DynVal>),
 }
+
+pub type LinkVal = Link<Val>;
 
 pub(crate) const UNIT: &str = "unit";
 pub(crate) const BIT: &str = "bit";
@@ -85,6 +83,7 @@ pub(crate) const PAIR: &str = "pair";
 pub(crate) const TASK: &str = "task";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
+pub(crate) const LINK: &str = "link";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 
@@ -156,6 +155,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Task($name) => $body,
             $crate::semantics::val::Val::List($name) => $body,
             $crate::semantics::val::Val::Map($name) => $body,
+            $crate::semantics::val::Val::Link($name) => $body,
             $crate::semantics::val::Val::Ctx($name) => $body,
             $crate::semantics::val::Val::Func($name) => $body,
             $crate::semantics::val::Val::Dyn($name) => $body,

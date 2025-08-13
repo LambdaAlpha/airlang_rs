@@ -10,7 +10,7 @@ pub use self::task::TaskPrimMode;
 
 _____!();
 
-use super::FreeFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::ctx_put_func;
@@ -25,26 +25,26 @@ use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_REF;
 use super::mode::repr::parse;
 use crate::prelude::setup::free_mode;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::MutFn;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct ModePrelude {
-    pub new: FreeStaticPrimFuncVal,
-    pub form_id: FreeStaticPrimFuncVal,
-    pub form_literal: MutStaticPrimFuncVal,
-    pub form_ref: MutStaticPrimFuncVal,
-    pub form_eval: MutStaticPrimFuncVal,
-    pub eval_id: MutStaticPrimFuncVal,
-    pub eval_literal: MutStaticPrimFuncVal,
-    pub eval_ref: MutStaticPrimFuncVal,
-    pub eval_eval: MutStaticPrimFuncVal,
+    pub new: FreePrimFuncVal,
+    pub form_id: FreePrimFuncVal,
+    pub form_literal: MutPrimFuncVal,
+    pub form_ref: MutPrimFuncVal,
+    pub form_eval: MutPrimFuncVal,
+    pub eval_id: MutPrimFuncVal,
+    pub eval_literal: MutPrimFuncVal,
+    pub eval_ref: MutPrimFuncVal,
+    pub eval_eval: MutPrimFuncVal,
 }
 
 impl Default for ModePrelude {
@@ -77,13 +77,13 @@ impl Prelude for ModePrelude {
     }
 }
 
-pub fn new() -> FreeStaticPrimFuncVal {
-    FreeFn {
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn {
         id: "mode",
         f: free_impl(fn_new),
         mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form)),
     }
-    .free_static()
+    .free()
 }
 
 fn fn_new(input: Val) -> Val {
@@ -94,42 +94,42 @@ fn fn_new(input: Val) -> Val {
     Val::Func(func)
 }
 
-pub fn form_id() -> FreeStaticPrimFuncVal {
+pub fn form_id() -> FreePrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Id, TaskPrimMode::Form);
     FuncMode::mode_into_free_func(mode)
 }
 
-pub fn form_literal() -> MutStaticPrimFuncVal {
+pub fn form_literal() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form);
     FuncMode::mode_into_mut_func(mode)
 }
 
-pub fn form_ref() -> MutStaticPrimFuncVal {
+pub fn form_ref() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form);
     FuncMode::mode_into_mut_func(mode)
 }
 
-pub fn form_eval() -> MutStaticPrimFuncVal {
+pub fn form_eval() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Eval, TaskPrimMode::Form);
     FuncMode::mode_into_mut_func(mode)
 }
 
-pub fn eval_id() -> MutStaticPrimFuncVal {
+pub fn eval_id() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Id, TaskPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
-pub fn eval_literal() -> MutStaticPrimFuncVal {
+pub fn eval_literal() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
-pub fn eval_ref() -> MutStaticPrimFuncVal {
+pub fn eval_ref() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
-pub fn eval_eval() -> MutStaticPrimFuncVal {
+pub fn eval_eval() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Eval, TaskPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
@@ -140,29 +140,29 @@ pub enum Mode {
     Func(FuncVal),
 }
 
-impl FreeStaticFn<Val, Val> for Mode {
-    fn free_static_call(&self, input: Val) -> Val {
+impl FreeFn<Val, Val> for Mode {
+    fn free_call(&self, input: Val) -> Val {
         match self {
-            Mode::Comp(comp) => comp.free_static_call(input),
-            Mode::Func(func) => func.free_static_call(input),
+            Mode::Comp(comp) => comp.free_call(input),
+            Mode::Func(func) => func.free_call(input),
         }
     }
 }
 
-impl ConstStaticFn<Val, Val, Val> for Mode {
-    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
+impl ConstFn<Val, Val, Val> for Mode {
+    fn const_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
-            Mode::Comp(comp) => comp.const_static_call(ctx, input),
-            Mode::Func(func) => func.const_static_call(ctx, input),
+            Mode::Comp(comp) => comp.const_call(ctx, input),
+            Mode::Func(func) => func.const_call(ctx, input),
         }
     }
 }
 
-impl MutStaticFn<Val, Val, Val> for Mode {
-    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
+impl MutFn<Val, Val, Val> for Mode {
+    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
         match self {
-            Mode::Comp(comp) => comp.mut_static_call(ctx, input),
-            Mode::Func(func) => func.mut_static_call(ctx, input),
+            Mode::Comp(comp) => comp.mut_call(ctx, input),
+            Mode::Func(func) => func.mut_call(ctx, input),
         }
     }
 }

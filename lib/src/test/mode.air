@@ -102,7 +102,7 @@ false
 =====
 eval task
 -----
-_ do [a = _ form _ eval _ not true, $a]
+_ do [a = _ form@ _ eval _ not true, $a]
 -----
 false
 =====

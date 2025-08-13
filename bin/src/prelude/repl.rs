@@ -1,13 +1,13 @@
-use airlang::prelude::FreeFn;
+use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
 use airlang::prelude::setup::default_free_mode;
-use airlang::semantics::val::FreeStaticPrimFuncVal;
+use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 
 pub struct ReplPrelude {
-    pub help: FreeStaticPrimFuncVal,
+    pub help: FreePrimFuncVal,
 }
 
 impl Default for ReplPrelude {
@@ -23,8 +23,8 @@ impl Prelude for ReplPrelude {
 }
 
 // todo design
-pub fn help() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "help", f: free_impl(fn_help), mode: default_free_mode() }.free_static()
+pub fn help() -> FreePrimFuncVal {
+    FreePrimFn { id: "help", f: free_impl(fn_help), mode: default_free_mode() }.free()
 }
 
 const HELP_DOC: &str = "\

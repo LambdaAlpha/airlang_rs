@@ -6,188 +6,85 @@ use derive_more::From;
 
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
-use crate::semantics::func::ConstCellCompFunc;
-use crate::semantics::func::ConstCellFn;
-use crate::semantics::func::ConstCellPrimFunc;
-use crate::semantics::func::ConstStaticCompFunc;
-use crate::semantics::func::ConstStaticFn;
-use crate::semantics::func::ConstStaticPrimFunc;
-use crate::semantics::func::FreeCellCompFunc;
-use crate::semantics::func::FreeCellFn;
-use crate::semantics::func::FreeCellPrimFunc;
-use crate::semantics::func::FreeStaticCompFunc;
-use crate::semantics::func::FreeStaticFn;
-use crate::semantics::func::FreeStaticPrimFunc;
+use crate::semantics::func::ConstCompFunc;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::ConstPrimFunc;
+use crate::semantics::func::FreeCompFunc;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::FuncSetup;
-use crate::semantics::func::MutCellCompFunc;
-use crate::semantics::func::MutCellFn;
-use crate::semantics::func::MutCellPrimFunc;
-use crate::semantics::func::MutStaticCompFunc;
-use crate::semantics::func::MutStaticFn;
-use crate::semantics::func::MutStaticPrimFunc;
+use crate::semantics::func::MutCompFunc;
+use crate::semantics::func::MutFn;
+use crate::semantics::func::MutPrimFunc;
 use crate::semantics::func::SetupFn;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
-use crate::type_::wrap::box_wrap;
 use crate::type_::wrap::rc_wrap;
 
 #[derive(Clone, PartialEq, Eq, Hash, From)]
 pub enum FuncVal {
-    FreeCellPrim(FreeCellPrimFuncVal),
-    FreeCellComp(FreeCellCompFuncVal),
-    FreeStaticPrim(FreeStaticPrimFuncVal),
-    FreeStaticComp(FreeStaticCompFuncVal),
-    ConstCellPrim(ConstCellPrimFuncVal),
-    ConstCellComp(ConstCellCompFuncVal),
-    ConstStaticPrim(ConstStaticPrimFuncVal),
-    ConstStaticComp(ConstStaticCompFuncVal),
-    MutCellPrim(MutCellPrimFuncVal),
-    MutCellComp(MutCellCompFuncVal),
-    MutStaticPrim(MutStaticPrimFuncVal),
-    MutStaticComp(MutStaticCompFuncVal),
+    FreePrim(FreePrimFuncVal),
+    FreeComp(FreeCompFuncVal),
+    ConstPrim(ConstPrimFuncVal),
+    ConstComp(ConstCompFuncVal),
+    MutPrim(MutPrimFuncVal),
+    MutComp(MutCompFuncVal),
 }
 
-box_wrap!(pub FreeCellPrimFuncVal(FreeCellPrimFunc));
+rc_wrap!(pub FreePrimFuncVal(FreePrimFunc));
 
-box_wrap!(pub FreeCellCompFuncVal(FreeCellCompFunc));
+rc_wrap!(pub FreeCompFuncVal(FreeCompFunc));
 
-rc_wrap!(pub FreeStaticPrimFuncVal(FreeStaticPrimFunc));
+rc_wrap!(pub ConstPrimFuncVal(ConstPrimFunc));
 
-rc_wrap!(pub FreeStaticCompFuncVal(FreeStaticCompFunc));
+rc_wrap!(pub ConstCompFuncVal(ConstCompFunc));
 
-box_wrap!(pub ConstCellPrimFuncVal(ConstCellPrimFunc));
+rc_wrap!(pub MutPrimFuncVal(MutPrimFunc));
 
-box_wrap!(pub ConstCellCompFuncVal(ConstCellCompFunc));
-
-rc_wrap!(pub ConstStaticPrimFuncVal(ConstStaticPrimFunc));
-
-rc_wrap!(pub ConstStaticCompFuncVal(ConstStaticCompFunc));
-
-box_wrap!(pub MutCellPrimFuncVal(MutCellPrimFunc));
-
-box_wrap!(pub MutCellCompFuncVal(MutCellCompFunc));
-
-rc_wrap!(pub MutStaticPrimFuncVal(MutStaticPrimFunc));
-
-rc_wrap!(pub MutStaticCompFuncVal(MutStaticCompFunc));
+rc_wrap!(pub MutCompFuncVal(MutCompFunc));
 
 macro_rules! match_func_val {
     ($self:ident, $name:ident => $body:expr) => {
         match $self {
-            FuncVal::FreeCellPrim($name) => $body,
-            FuncVal::FreeCellComp($name) => $body,
-            FuncVal::FreeStaticPrim($name) => $body,
-            FuncVal::FreeStaticComp($name) => $body,
-            FuncVal::ConstCellPrim($name) => $body,
-            FuncVal::ConstCellComp($name) => $body,
-            FuncVal::ConstStaticPrim($name) => $body,
-            FuncVal::ConstStaticComp($name) => $body,
-            FuncVal::MutCellPrim($name) => $body,
-            FuncVal::MutCellComp($name) => $body,
-            FuncVal::MutStaticPrim($name) => $body,
-            FuncVal::MutStaticComp($name) => $body,
+            FuncVal::FreePrim($name) => $body,
+            FuncVal::FreeComp($name) => $body,
+            FuncVal::ConstPrim($name) => $body,
+            FuncVal::ConstComp($name) => $body,
+            FuncVal::MutPrim($name) => $body,
+            FuncVal::MutComp($name) => $body,
         }
     };
 }
 
-impl FreeStaticFn<Val, Val> for FuncVal {
-    fn free_static_call(&self, input: Val) -> Val {
-        match_func_val!(self, f => f.free_static_call(input))
+impl FreeFn<Val, Val> for FuncVal {
+    fn free_call(&self, input: Val) -> Val {
+        match_func_val!(self, f => f.free_call(input))
     }
 }
 
-impl FreeCellFn<Val, Val> for FuncVal {
-    fn free_cell_call(&mut self, input: Val) -> Val {
+impl ConstFn<Val, Val, Val> for FuncVal {
+    fn const_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
-            FuncVal::FreeCellPrim(f) => f.free_cell_call(input),
-            FuncVal::FreeCellComp(f) => f.free_cell_call(input),
-            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
-            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
-            FuncVal::ConstCellPrim(f) => f.free_cell_call(input),
-            FuncVal::ConstCellComp(f) => f.free_cell_call(input),
-            FuncVal::ConstStaticPrim(f) => f.free_static_call(input),
-            FuncVal::ConstStaticComp(f) => f.free_static_call(input),
-            FuncVal::MutCellPrim(f) => f.free_cell_call(input),
-            FuncVal::MutCellComp(f) => f.free_cell_call(input),
-            FuncVal::MutStaticPrim(f) => f.free_static_call(input),
-            FuncVal::MutStaticComp(f) => f.free_static_call(input),
+            FuncVal::FreePrim(f) => f.free_call(input),
+            FuncVal::FreeComp(f) => f.free_call(input),
+            FuncVal::ConstPrim(f) => f.const_call(ctx, input),
+            FuncVal::ConstComp(f) => f.const_call(ctx, input),
+            FuncVal::MutPrim(f) => f.const_call(ctx, input),
+            FuncVal::MutComp(f) => f.const_call(ctx, input),
         }
     }
 }
 
-impl ConstStaticFn<Val, Val, Val> for FuncVal {
-    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
+impl MutFn<Val, Val, Val> for FuncVal {
+    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
         match self {
-            FuncVal::FreeCellPrim(f) => f.free_static_call(input),
-            FuncVal::FreeCellComp(f) => f.free_static_call(input),
-            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
-            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
-            FuncVal::ConstCellPrim(f) => f.const_static_call(ctx, input),
-            FuncVal::ConstCellComp(f) => f.const_static_call(ctx, input),
-            FuncVal::ConstStaticPrim(f) => f.const_static_call(ctx, input),
-            FuncVal::ConstStaticComp(f) => f.const_static_call(ctx, input),
-            FuncVal::MutCellPrim(f) => f.const_static_call(ctx, input),
-            FuncVal::MutCellComp(f) => f.const_static_call(ctx, input),
-            FuncVal::MutStaticPrim(f) => f.const_static_call(ctx, input),
-            FuncVal::MutStaticComp(f) => f.const_static_call(ctx, input),
-        }
-    }
-}
-
-impl ConstCellFn<Val, Val, Val> for FuncVal {
-    fn const_cell_call(&mut self, ctx: ConstRef<Val>, input: Val) -> Val {
-        match self {
-            FuncVal::FreeCellPrim(f) => f.free_cell_call(input),
-            FuncVal::FreeCellComp(f) => f.free_cell_call(input),
-            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
-            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
-            FuncVal::ConstCellPrim(f) => f.const_cell_call(ctx, input),
-            FuncVal::ConstCellComp(f) => f.const_cell_call(ctx, input),
-            FuncVal::ConstStaticPrim(f) => f.const_static_call(ctx, input),
-            FuncVal::ConstStaticComp(f) => f.const_static_call(ctx, input),
-            FuncVal::MutCellPrim(f) => f.const_cell_call(ctx, input),
-            FuncVal::MutCellComp(f) => f.const_cell_call(ctx, input),
-            FuncVal::MutStaticPrim(f) => f.const_static_call(ctx, input),
-            FuncVal::MutStaticComp(f) => f.const_static_call(ctx, input),
-        }
-    }
-}
-
-impl MutStaticFn<Val, Val, Val> for FuncVal {
-    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
-        match self {
-            FuncVal::FreeCellPrim(f) => f.free_static_call(input),
-            FuncVal::FreeCellComp(f) => f.free_static_call(input),
-            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
-            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
-            FuncVal::ConstCellPrim(f) => f.const_static_call(ConstRef::new(ctx), input),
-            FuncVal::ConstCellComp(f) => f.const_static_call(ConstRef::new(ctx), input),
-            FuncVal::ConstStaticPrim(f) => f.const_static_call(ConstRef::new(ctx), input),
-            FuncVal::ConstStaticComp(f) => f.const_static_call(ConstRef::new(ctx), input),
-            FuncVal::MutCellPrim(f) => f.mut_static_call(ctx, input),
-            FuncVal::MutCellComp(f) => f.mut_static_call(ctx, input),
-            FuncVal::MutStaticPrim(f) => f.mut_static_call(ctx, input),
-            FuncVal::MutStaticComp(f) => f.mut_static_call(ctx, input),
-        }
-    }
-}
-
-impl MutCellFn<Val, Val, Val> for FuncVal {
-    fn mut_cell_call(&mut self, ctx: &mut Val, input: Val) -> Val {
-        match self {
-            FuncVal::FreeCellPrim(f) => f.free_cell_call(input),
-            FuncVal::FreeCellComp(f) => f.free_cell_call(input),
-            FuncVal::FreeStaticPrim(f) => f.free_static_call(input),
-            FuncVal::FreeStaticComp(f) => f.free_static_call(input),
-            FuncVal::ConstCellPrim(f) => f.const_cell_call(ConstRef::new(ctx), input),
-            FuncVal::ConstCellComp(f) => f.const_cell_call(ConstRef::new(ctx), input),
-            FuncVal::ConstStaticPrim(f) => f.const_static_call(ConstRef::new(ctx), input),
-            FuncVal::ConstStaticComp(f) => f.const_static_call(ConstRef::new(ctx), input),
-            FuncVal::MutCellPrim(f) => f.mut_cell_call(ctx, input),
-            FuncVal::MutCellComp(f) => f.mut_cell_call(ctx, input),
-            FuncVal::MutStaticPrim(f) => f.mut_static_call(ctx, input),
-            FuncVal::MutStaticComp(f) => f.mut_static_call(ctx, input),
+            FuncVal::FreePrim(f) => f.free_call(input),
+            FuncVal::FreeComp(f) => f.free_call(input),
+            FuncVal::ConstPrim(f) => f.const_call(ConstRef::new(ctx), input),
+            FuncVal::ConstComp(f) => f.const_call(ConstRef::new(ctx), input),
+            FuncVal::MutPrim(f) => f.mut_call(ctx, input),
+            FuncVal::MutComp(f) => f.mut_call(ctx, input),
         }
     }
 }
@@ -211,69 +108,34 @@ impl FuncVal {
 
     pub fn ctx(&self) -> Option<&Ctx> {
         match self {
-            FuncVal::FreeCellPrim(_) => None,
-            FuncVal::FreeCellComp(f) => Some(&f.ctx),
-            FuncVal::FreeStaticPrim(_) => None,
-            FuncVal::FreeStaticComp(f) => Some(&f.ctx),
-            FuncVal::ConstCellPrim(_) => None,
-            FuncVal::ConstCellComp(f) => Some(&f.ctx),
-            FuncVal::ConstStaticPrim(_) => None,
-            FuncVal::ConstStaticComp(f) => Some(&f.ctx),
-            FuncVal::MutCellPrim(_) => None,
-            FuncVal::MutCellComp(f) => Some(&f.ctx),
-            FuncVal::MutStaticPrim(_) => None,
-            FuncVal::MutStaticComp(f) => Some(&f.ctx),
+            FuncVal::FreePrim(_) => None,
+            FuncVal::FreeComp(f) => Some(&f.ctx),
+            FuncVal::ConstPrim(_) => None,
+            FuncVal::ConstComp(f) => Some(&f.ctx),
+            FuncVal::MutPrim(_) => None,
+            FuncVal::MutComp(f) => Some(&f.ctx),
         }
     }
 
     pub fn is_primitive(&self) -> bool {
         match self {
-            FuncVal::FreeCellPrim(_) => true,
-            FuncVal::FreeCellComp(_) => false,
-            FuncVal::FreeStaticPrim(_) => true,
-            FuncVal::FreeStaticComp(_) => false,
-            FuncVal::ConstCellPrim(_) => true,
-            FuncVal::ConstCellComp(_) => false,
-            FuncVal::ConstStaticPrim(_) => true,
-            FuncVal::ConstStaticComp(_) => false,
-            FuncVal::MutCellPrim(_) => true,
-            FuncVal::MutCellComp(_) => false,
-            FuncVal::MutStaticPrim(_) => true,
-            FuncVal::MutStaticComp(_) => false,
-        }
-    }
-
-    pub fn is_cell(&self) -> bool {
-        match self {
-            FuncVal::FreeCellPrim(_) => true,
-            FuncVal::FreeCellComp(_) => true,
-            FuncVal::FreeStaticPrim(_) => false,
-            FuncVal::FreeStaticComp(_) => false,
-            FuncVal::ConstCellPrim(_) => true,
-            FuncVal::ConstCellComp(_) => true,
-            FuncVal::ConstStaticPrim(_) => false,
-            FuncVal::ConstStaticComp(_) => false,
-            FuncVal::MutCellPrim(_) => true,
-            FuncVal::MutCellComp(_) => true,
-            FuncVal::MutStaticPrim(_) => false,
-            FuncVal::MutStaticComp(_) => false,
+            FuncVal::FreePrim(_) => true,
+            FuncVal::FreeComp(_) => false,
+            FuncVal::ConstPrim(_) => true,
+            FuncVal::ConstComp(_) => false,
+            FuncVal::MutPrim(_) => true,
+            FuncVal::MutComp(_) => false,
         }
     }
 
     pub fn ctx_access(&self) -> CtxAccess {
         match self {
-            FuncVal::FreeCellPrim(_) => CtxAccess::Free,
-            FuncVal::FreeCellComp(_) => CtxAccess::Free,
-            FuncVal::FreeStaticPrim(_) => CtxAccess::Free,
-            FuncVal::FreeStaticComp(_) => CtxAccess::Free,
-            FuncVal::ConstCellPrim(_) => CtxAccess::Const,
-            FuncVal::ConstCellComp(_) => CtxAccess::Const,
-            FuncVal::ConstStaticPrim(_) => CtxAccess::Const,
-            FuncVal::ConstStaticComp(_) => CtxAccess::Const,
-            FuncVal::MutCellPrim(_) => CtxAccess::Mut,
-            FuncVal::MutCellComp(_) => CtxAccess::Mut,
-            FuncVal::MutStaticPrim(_) => CtxAccess::Mut,
-            FuncVal::MutStaticComp(_) => CtxAccess::Mut,
+            FuncVal::FreePrim(_) => CtxAccess::Free,
+            FuncVal::FreeComp(_) => CtxAccess::Free,
+            FuncVal::ConstPrim(_) => CtxAccess::Const,
+            FuncVal::ConstComp(_) => CtxAccess::Const,
+            FuncVal::MutPrim(_) => CtxAccess::Mut,
+            FuncVal::MutComp(_) => CtxAccess::Mut,
         }
     }
 }
@@ -284,14 +146,14 @@ impl Debug for FuncVal {
     }
 }
 
-impl Default for FreeStaticPrimFuncVal {
+impl Default for FreePrimFuncVal {
     fn default() -> Self {
-        Self::from(FreeStaticPrimFunc::default())
+        Self::from(FreePrimFunc::default())
     }
 }
 
 impl Default for FuncVal {
     fn default() -> Self {
-        Self::FreeStaticPrim(FreeStaticPrimFuncVal::default())
+        Self::FreePrim(FreePrimFuncVal::default())
     }
 }

@@ -8,34 +8,21 @@ use crate::prelude::utils::map_remove;
 use crate::prelude::utils::symbol;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
-use crate::semantics::func::ConstCellCompFunc;
-use crate::semantics::func::ConstCellPrimFunc;
-use crate::semantics::func::ConstStaticCompFunc;
+use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
-use crate::semantics::func::FreeCellCompFunc;
-use crate::semantics::func::FreeCellPrimFunc;
+use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
-use crate::semantics::func::FreeStaticCompFunc;
-use crate::semantics::func::MutCellCompFunc;
-use crate::semantics::func::MutCellPrimFunc;
-use crate::semantics::func::MutStaticCompFunc;
+use crate::semantics::func::MutCompFunc;
 use crate::semantics::func::Setup;
-use crate::semantics::val::ConstCellCompFuncVal;
-use crate::semantics::val::ConstCellPrimFuncVal;
-use crate::semantics::val::ConstStaticCompFuncVal;
-use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::ConstCompFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::CtxVal;
-use crate::semantics::val::FreeCellCompFuncVal;
-use crate::semantics::val::FreeCellPrimFuncVal;
-use crate::semantics::val::FreeStaticCompFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FreeCompFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::MutCellCompFuncVal;
-use crate::semantics::val::MutCellPrimFuncVal;
-use crate::semantics::val::MutStaticCompFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::MutCompFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Bit;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
@@ -48,7 +35,6 @@ const CALL_SETUP: &str = "call_setup";
 const SOLVE_SETUP: &str = "solve_setup";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
-const CELL: &str = "cell";
 
 const FREE: &str = "free";
 const CONST: &str = "constant";
@@ -75,39 +61,23 @@ pub(super) fn parse_func(input: Val) -> Option<FuncVal> {
         parse_task_setup(map_remove(&mut map, CALL_SETUP), map_remove(&mut map, SOLVE_SETUP))?;
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
-    let cell = parse_cell(map_remove(&mut map, CELL))?;
     let free_comp = FreeComposite { body, input_name };
     let func = match ctx_access {
         FREE => {
-            if cell {
-                let func = FreeCellCompFunc { id, comp: free_comp, ctx, setup };
-                FuncVal::FreeCellComp(FreeCellCompFuncVal::from(func))
-            } else {
-                let func = FreeStaticCompFunc { id, comp: free_comp, ctx, setup };
-                FuncVal::FreeStaticComp(FreeStaticCompFuncVal::from(func))
-            }
+            let func = FreeCompFunc { id, comp: free_comp, ctx, setup };
+            FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
         CONST => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            if cell {
-                let func = ConstCellCompFunc { id, comp, ctx, setup };
-                FuncVal::ConstCellComp(ConstCellCompFuncVal::from(func))
-            } else {
-                let func = ConstStaticCompFunc { id, comp, ctx, setup };
-                FuncVal::ConstStaticComp(ConstStaticCompFuncVal::from(func))
-            }
+            let func = ConstCompFunc { id, comp, ctx, setup };
+            FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            if cell {
-                let func = MutCellCompFunc { id, comp, ctx, setup };
-                FuncVal::MutCellComp(MutCellCompFuncVal::from(func))
-            } else {
-                let func = MutStaticCompFunc { id, comp, ctx, setup };
-                FuncVal::MutStaticComp(MutStaticCompFuncVal::from(func))
-            }
+            let func = MutCompFunc { id, comp, ctx, setup };
+            FuncVal::MutComp(MutCompFuncVal::from(func))
         }
         s => {
             error!("ctx access {s} should be one of {FREE}, {CONST}, or {MUTABLE}");
@@ -212,126 +182,52 @@ fn parse_ctx_access(access: &Val) -> Option<&str> {
     }
 }
 
-fn parse_cell(cell: Val) -> Option<bool> {
-    match cell {
-        Val::Unit(_) => Some(false),
-        Val::Bit(b) => Some(*b),
-        v => {
-            error!("cell {v:?} should be a bit or a unit");
-            None
-        }
-    }
-}
-
 pub(super) fn generate_func(f: FuncVal) -> Val {
     match f {
-        FuncVal::FreeCellPrim(f) => generate_free_cell_prim(f),
-        FuncVal::FreeCellComp(f) => generate_free_cell_comp(f),
-        FuncVal::FreeStaticPrim(f) => generate_free_static_prim(f),
-        FuncVal::FreeStaticComp(f) => generate_free_static_comp(f),
-        FuncVal::ConstCellPrim(f) => generate_const_cell_prim(f),
-        FuncVal::ConstCellComp(f) => generate_const_cell_comp(f),
-        FuncVal::ConstStaticPrim(f) => generate_const_static_prim(f),
-        FuncVal::ConstStaticComp(f) => generate_const_static_comp(f),
-        FuncVal::MutCellPrim(f) => generate_mut_cell_prim(f),
-        FuncVal::MutCellComp(f) => generate_mut_cell_comp(f),
-        FuncVal::MutStaticPrim(f) => generate_mut_static_prim(f),
-        FuncVal::MutStaticComp(f) => generate_mut_static_comp(f),
+        FuncVal::FreePrim(f) => generate_free_prim(f),
+        FuncVal::FreeComp(f) => generate_free_comp(f),
+        FuncVal::ConstPrim(f) => generate_const_prim(f),
+        FuncVal::ConstComp(f) => generate_const_comp(f),
+        FuncVal::MutPrim(f) => generate_mut_prim(f),
+        FuncVal::MutComp(f) => generate_mut_comp(f),
     }
 }
 
-fn generate_free_cell_prim(f: FreeCellPrimFuncVal) -> Val {
-    let f = FreeCellPrimFunc::from(f);
-    generate_prim(f.id)
+fn generate_free_prim(f: FreePrimFuncVal) -> Val {
+    generate_prim(f.id.clone())
 }
 
-fn generate_free_cell_comp(f: FreeCellCompFuncVal) -> Val {
-    let f = FreeCellCompFunc::from(f);
+fn generate_free_comp(f: FreeCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp = CompRepr { id: f.id, access: FREE, cell: true, setup: f.setup, ctx: f.ctx };
+    let comp =
+        CompRepr { id: f.id.clone(), access: FREE, setup: f.setup.clone(), ctx: f.ctx.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
 
-fn generate_free_static_prim(f: FreeStaticPrimFuncVal) -> Val {
+fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
     generate_prim(f.id.clone())
 }
 
-fn generate_free_static_comp(f: FreeStaticCompFuncVal) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: FREE,
-        cell: false,
-        setup: f.setup.clone(),
-        ctx: f.ctx.clone(),
-    };
-    generate_comp(&mut repr, comp);
-    Val::Map(repr.into())
-}
-
-fn generate_const_cell_prim(f: ConstCellPrimFuncVal) -> Val {
-    let f = ConstCellPrimFunc::from(f);
-    generate_prim(f.id)
-}
-
-fn generate_const_cell_comp(f: ConstCellCompFuncVal) -> Val {
-    let f = ConstCellCompFunc::from(f);
+fn generate_const_comp(f: ConstCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { id: f.id, access: CONST, cell: true, setup: f.setup, ctx: f.ctx };
+    let comp =
+        CompRepr { id: f.id.clone(), access: CONST, setup: f.setup.clone(), ctx: f.ctx.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
 
-fn generate_const_static_prim(f: ConstStaticPrimFuncVal) -> Val {
+fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
     generate_prim(f.id.clone())
 }
 
-fn generate_const_static_comp(f: ConstStaticCompFuncVal) -> Val {
+fn generate_mut_comp(f: MutCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: CONST,
-        cell: false,
-        setup: f.setup.clone(),
-        ctx: f.ctx.clone(),
-    };
-    generate_comp(&mut repr, comp);
-    Val::Map(repr.into())
-}
-
-fn generate_mut_cell_prim(f: MutCellPrimFuncVal) -> Val {
-    let f = MutCellPrimFunc::from(f);
-    generate_prim(f.id)
-}
-
-fn generate_mut_cell_comp(f: MutCellCompFuncVal) -> Val {
-    let f = MutCellCompFunc::from(f);
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { id: f.id, access: MUTABLE, cell: true, setup: f.setup, ctx: f.ctx };
-    generate_comp(&mut repr, comp);
-    Val::Map(repr.into())
-}
-
-fn generate_mut_static_prim(f: MutStaticPrimFuncVal) -> Val {
-    generate_prim(f.id.clone())
-}
-
-fn generate_mut_static_comp(f: MutStaticCompFuncVal) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: MUTABLE,
-        cell: false,
-        setup: f.setup.clone(),
-        ctx: f.ctx.clone(),
-    };
+    let comp =
+        CompRepr { id: f.id.clone(), access: MUTABLE, setup: f.setup.clone(), ctx: f.ctx.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -344,18 +240,12 @@ fn generate_prim(id: Symbol) -> Val {
 
 pub(in crate::prelude) fn generate_code(func: &FuncVal) -> Val {
     match func {
-        FuncVal::FreeCellPrim(_) => Val::default(),
-        FuncVal::FreeCellComp(f) => free_code(&f.comp),
-        FuncVal::FreeStaticPrim(_) => Val::default(),
-        FuncVal::FreeStaticComp(f) => free_code(&f.comp),
-        FuncVal::ConstCellPrim(_) => Val::default(),
-        FuncVal::ConstCellComp(f) => dyn_code(&f.comp),
-        FuncVal::ConstStaticPrim(_) => Val::default(),
-        FuncVal::ConstStaticComp(f) => dyn_code(&f.comp),
-        FuncVal::MutCellPrim(_) => Val::default(),
-        FuncVal::MutCellComp(f) => dyn_code(&f.comp),
-        FuncVal::MutStaticPrim(_) => Val::default(),
-        FuncVal::MutStaticComp(f) => dyn_code(&f.comp),
+        FuncVal::FreePrim(_) => Val::default(),
+        FuncVal::FreeComp(f) => free_code(&f.comp),
+        FuncVal::ConstPrim(_) => Val::default(),
+        FuncVal::ConstComp(f) => dyn_code(&f.comp),
+        FuncVal::MutPrim(_) => Val::default(),
+        FuncVal::MutComp(f) => dyn_code(&f.comp),
     }
 }
 
@@ -375,7 +265,6 @@ fn dyn_code(comp: &DynComposite) -> Val {
 struct CompRepr {
     id: Symbol,
     access: &'static str,
-    cell: bool,
     setup: Setup,
     ctx: Ctx,
 }
@@ -383,9 +272,6 @@ struct CompRepr {
 fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     if !comp.id.is_empty() {
         repr.insert(symbol(ID), Val::Symbol(comp.id));
-    }
-    if comp.cell {
-        repr.insert(symbol(CELL), Val::Bit(Bit::true_()));
     }
     if comp.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(comp.access));

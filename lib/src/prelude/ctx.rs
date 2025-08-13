@@ -5,11 +5,11 @@ use self::repr::generate_ctx;
 use self::repr::parse_contract;
 use self::repr::parse_ctx;
 use self::repr::parse_mode;
-use super::DynFn;
-use super::FreeFn;
-use super::FreeStaticImpl;
+use super::DynPrimFn;
+use super::FreeImpl;
+use super::FreePrimFn;
 use super::FuncMode;
-use super::MutStaticImpl;
+use super::MutImpl;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
@@ -26,10 +26,10 @@ use crate::prelude::setup::default_free_mode;
 use crate::prelude::setup::dyn_mode;
 use crate::prelude::setup::free_mode;
 use crate::semantics::ctx::Ctx;
-use crate::semantics::val::ConstStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::CtxVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
-use crate::semantics::val::MutStaticPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
@@ -38,19 +38,18 @@ use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct CtxPrelude {
-    pub read: ConstStaticPrimFuncVal,
-    pub move_: MutStaticPrimFuncVal,
-    pub assign: MutStaticPrimFuncVal,
-    pub contract: ConstStaticPrimFuncVal,
-    pub set_contract: MutStaticPrimFuncVal,
-    pub is_locked: ConstStaticPrimFuncVal,
-    pub is_null: ConstStaticPrimFuncVal,
-    pub is_const: MutStaticPrimFuncVal,
-    pub ctx_new: FreeStaticPrimFuncVal,
-    pub ctx_repr: FreeStaticPrimFuncVal,
-    pub ctx_reverse: FreeStaticPrimFuncVal,
-    pub ctx_prelude: FreeStaticPrimFuncVal,
-    pub ctx_self: ConstStaticPrimFuncVal,
+    pub read: ConstPrimFuncVal,
+    pub move_: MutPrimFuncVal,
+    pub assign: MutPrimFuncVal,
+    pub contract: ConstPrimFuncVal,
+    pub set_contract: MutPrimFuncVal,
+    pub is_null: ConstPrimFuncVal,
+    pub is_const: MutPrimFuncVal,
+    pub ctx_new: FreePrimFuncVal,
+    pub ctx_repr: FreePrimFuncVal,
+    pub ctx_reverse: FreePrimFuncVal,
+    pub ctx_prelude: FreePrimFuncVal,
+    pub ctx_self: ConstPrimFuncVal,
 }
 
 impl Default for CtxPrelude {
@@ -61,7 +60,6 @@ impl Default for CtxPrelude {
             assign: assign(),
             contract: contract(),
             set_contract: set_contract(),
-            is_locked: is_locked(),
             is_null: is_null(),
             is_const: is_const(),
             ctx_new: ctx_new(),
@@ -80,7 +78,6 @@ impl Prelude for CtxPrelude {
         self.assign.put(ctx);
         self.contract.put(ctx);
         self.set_contract.put(ctx);
-        self.is_locked.put(ctx);
         self.is_null.put(ctx);
         self.is_const.put(ctx);
         self.ctx_new.put(ctx);
@@ -91,8 +88,8 @@ impl Prelude for CtxPrelude {
     }
 }
 
-pub fn read() -> ConstStaticPrimFuncVal {
-    DynFn { id: "read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_static()
+pub fn read() -> ConstPrimFuncVal {
+    DynPrimFn { id: "read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -107,8 +104,8 @@ fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
     ctx.get_ref(s).cloned().unwrap_or_default()
 }
 
-pub fn move_() -> MutStaticPrimFuncVal {
-    DynFn { id: "move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_static()
+pub fn move_() -> MutPrimFuncVal {
+    DynPrimFn { id: "move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_move(ctx: &mut Val, input: Val) -> Val {
@@ -123,8 +120,8 @@ fn fn_move(ctx: &mut Val, input: Val) -> Val {
     ctx.remove(s).unwrap_or_default()
 }
 
-pub fn assign() -> MutStaticPrimFuncVal {
-    DynFn {
+pub fn assign() -> MutPrimFuncVal {
+    DynPrimFn {
         id: "=",
         f: mut_impl(fn_assign),
         mode: dyn_mode(FuncMode::pair_mode(
@@ -133,7 +130,7 @@ pub fn assign() -> MutStaticPrimFuncVal {
             FuncMode::default_mode(),
         )),
     }
-    .mut_static()
+    .mut_()
 }
 
 fn fn_assign(ctx: &mut Val, input: Val) -> Val {
@@ -150,8 +147,8 @@ fn fn_assign(ctx: &mut Val, input: Val) -> Val {
     if pattern.match_(&val) { pattern.assign(ctx, val) } else { Val::default() }
 }
 
-pub fn contract() -> ConstStaticPrimFuncVal {
-    DynFn { id: "contract", f: const_impl(fn_contract), mode: default_dyn_mode() }.const_static()
+pub fn contract() -> ConstPrimFuncVal {
+    DynPrimFn { id: "contract", f: const_impl(fn_contract), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -170,9 +167,8 @@ fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
     generate_contract(contract)
 }
 
-pub fn set_contract() -> MutStaticPrimFuncVal {
-    DynFn { id: "set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }
-        .mut_static()
+pub fn set_contract() -> MutPrimFuncVal {
+    DynPrimFn { id: "set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
@@ -197,28 +193,8 @@ fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn is_locked() -> ConstStaticPrimFuncVal {
-    DynFn { id: "is_locked", f: const_impl(fn_is_locked), mode: default_dyn_mode() }.const_static()
-}
-
-fn fn_is_locked(ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Ctx(ctx) = &*ctx else {
-        error!("ctx {ctx:?} should be a ctx");
-        return Val::default();
-    };
-    let Val::Symbol(s) = input else {
-        error!("input {input:?} should be a symbol");
-        return Val::default();
-    };
-    let Some(locked) = ctx.is_locked(s.clone()) else {
-        error!("variable {s:?} should exist");
-        return Val::default();
-    };
-    Val::Bit(Bit::from(locked))
-}
-
-pub fn is_null() -> ConstStaticPrimFuncVal {
-    DynFn { id: "is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }.const_static()
+pub fn is_null() -> ConstPrimFuncVal {
+    DynPrimFn { id: "is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
@@ -233,13 +209,13 @@ fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::from(ctx.is_null(s)))
 }
 
-pub fn is_const() -> MutStaticPrimFuncVal {
-    DynFn {
+pub fn is_const() -> MutPrimFuncVal {
+    DynPrimFn {
         id: "is_constant",
-        f: MutStaticImpl::new(FreeStaticImpl::default, fn_const, fn_mut),
+        f: MutImpl::new(FreeImpl::default, fn_const, fn_mut),
         mode: default_dyn_mode(),
     }
-    .mut_static()
+    .mut_()
 }
 
 fn fn_const(_ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -250,8 +226,8 @@ fn fn_mut(_ctx: &mut Val, _input: Val) -> Val {
     Val::Bit(Bit::false_())
 }
 
-pub fn ctx_new() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "context", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free_static()
+pub fn ctx_new() -> FreePrimFuncVal {
+    FreePrimFn { id: "context", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free()
 }
 
 fn fn_ctx_new(input: Val) -> Val {
@@ -262,9 +238,9 @@ fn fn_ctx_new(input: Val) -> Val {
     Val::Ctx(ctx)
 }
 
-pub fn ctx_repr() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "context.represent", f: free_impl(fn_ctx_repr), mode: default_free_mode() }
-        .free_static()
+pub fn ctx_repr() -> FreePrimFuncVal {
+    FreePrimFn { id: "context.represent", f: free_impl(fn_ctx_repr), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_ctx_repr(input: Val) -> Val {
@@ -275,9 +251,9 @@ fn fn_ctx_repr(input: Val) -> Val {
     generate_ctx(ctx)
 }
 
-pub fn ctx_reverse() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "context.reverse", f: free_impl(fn_ctx_reverse), mode: default_free_mode() }
-        .free_static()
+pub fn ctx_reverse() -> FreePrimFuncVal {
+    FreePrimFn { id: "context.reverse", f: free_impl(fn_ctx_reverse), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_ctx_reverse(input: Val) -> Val {
@@ -290,16 +266,16 @@ fn fn_ctx_reverse(input: Val) -> Val {
     Val::Ctx(reverse.into())
 }
 
-pub fn ctx_prelude() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "prelude", f: free_impl(fn_ctx_prelude), mode: default_free_mode() }.free_static()
+pub fn ctx_prelude() -> FreePrimFuncVal {
+    FreePrimFn { id: "prelude", f: free_impl(fn_ctx_prelude), mode: default_free_mode() }.free()
 }
 
 fn fn_ctx_prelude(_input: Val) -> Val {
     Val::Ctx(CtxVal::from(initial_ctx()))
 }
 
-pub fn ctx_self() -> ConstStaticPrimFuncVal {
-    DynFn { id: "self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_static()
+pub fn ctx_self() -> ConstPrimFuncVal {
+    DynPrimFn { id: "self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_ctx_self(ctx: ConstRef<Val>, _input: Val) -> Val {

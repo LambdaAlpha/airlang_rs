@@ -1,6 +1,6 @@
-use super::ConstStaticFn;
-use super::FreeStaticFn;
-use super::MutStaticFn;
+use super::ConstFn;
+use super::FreeFn;
+use super::MutFn;
 use super::comp::DynComposite;
 use super::setup::Setup;
 use super::setup::impl_setup;
@@ -11,29 +11,29 @@ use crate::type_::DynRef;
 use crate::type_::Symbol;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MutStaticCompFunc {
+pub struct MutCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
     pub(crate) setup: Setup,
 }
 
-impl FreeStaticFn<Val, Val> for MutStaticCompFunc {
-    fn free_static_call(&self, input: Val) -> Val {
+impl FreeFn<Val, Val> for MutCompFunc {
+    fn free_call(&self, input: Val) -> Val {
         self.comp.free.call(&mut self.ctx.clone(), input)
     }
 }
 
-impl ConstStaticFn<Val, Val, Val> for MutStaticCompFunc {
-    fn const_static_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
+impl ConstFn<Val, Val, Val> for MutCompFunc {
+    fn const_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
         self.comp.call(&mut self.ctx.clone(), ctx.into_dyn(), input)
     }
 }
 
-impl MutStaticFn<Val, Val, Val> for MutStaticCompFunc {
-    fn mut_static_call(&self, ctx: &mut Val, input: Val) -> Val {
+impl MutFn<Val, Val, Val> for MutCompFunc {
+    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
         self.comp.call(&mut self.ctx.clone(), DynRef::new_mut(ctx), input)
     }
 }
 
-impl_setup!(MutStaticCompFunc);
+impl_setup!(MutCompFunc);

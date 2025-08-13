@@ -1,15 +1,15 @@
 use log::error;
 
-use super::DynFn;
-use super::FreeFn;
+use super::DynPrimFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
-use crate::semantics::val::ConstStaticPrimFuncVal;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Int;
@@ -19,10 +19,10 @@ use crate::type_::Text;
 // todo design add more
 #[derive(Clone)]
 pub struct SymbolPrelude {
-    pub from_text: FreeStaticPrimFuncVal,
-    pub into_text: FreeStaticPrimFuncVal,
-    pub length: ConstStaticPrimFuncVal,
-    pub join: FreeStaticPrimFuncVal,
+    pub from_text: FreePrimFuncVal,
+    pub into_text: FreePrimFuncVal,
+    pub length: ConstPrimFuncVal,
+    pub join: FreePrimFuncVal,
 }
 
 impl Default for SymbolPrelude {
@@ -45,9 +45,9 @@ impl Prelude for SymbolPrelude {
     }
 }
 
-pub fn from_text() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: default_free_mode() }
-        .free_static()
+pub fn from_text() -> FreePrimFuncVal {
+    FreePrimFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_from_text(input: Val) -> Val {
@@ -64,9 +64,9 @@ fn fn_from_text(input: Val) -> Val {
     Val::Symbol(symbol)
 }
 
-pub fn into_text() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: default_free_mode() }
-        .free_static()
+pub fn into_text() -> FreePrimFuncVal {
+    FreePrimFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_into_text(input: Val) -> Val {
@@ -77,8 +77,8 @@ fn fn_into_text(input: Val) -> Val {
     Val::Text(Text::from(String::from(s)).into())
 }
 
-pub fn length() -> ConstStaticPrimFuncVal {
-    DynFn { id: "symbol.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_static()
+pub fn length() -> ConstPrimFuncVal {
+    DynPrimFn { id: "symbol.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -91,8 +91,8 @@ fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 // todo design
-pub fn join() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "symbol.join", f: free_impl(fn_join), mode: default_free_mode() }.free_static()
+pub fn join() -> FreePrimFuncVal {
+    FreePrimFn { id: "symbol.join", f: free_impl(fn_join), mode: default_free_mode() }.free()
 }
 
 fn fn_join(input: Val) -> Val {

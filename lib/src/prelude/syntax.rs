@@ -1,11 +1,11 @@
 use log::error;
 
-use super::FreeFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::syntax::GenRepr;
 use crate::syntax::ParseRepr;
@@ -18,8 +18,8 @@ use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct SyntaxPrelude {
-    pub parse: FreeStaticPrimFuncVal,
-    pub generate: FreeStaticPrimFuncVal,
+    pub parse: FreePrimFuncVal,
+    pub generate: FreePrimFuncVal,
 }
 
 impl Default for SyntaxPrelude {
@@ -35,8 +35,8 @@ impl Prelude for SyntaxPrelude {
     }
 }
 
-pub fn parse() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "syntax.parse", f: free_impl(fn_parse), mode: default_free_mode() }.free_static()
+pub fn parse() -> FreePrimFuncVal {
+    FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse), mode: default_free_mode() }.free()
 }
 
 fn fn_parse(input: Val) -> Val {
@@ -51,9 +51,9 @@ fn fn_parse(input: Val) -> Val {
     val
 }
 
-pub fn generate() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "syntax.generate", f: free_impl(fn_generate), mode: default_free_mode() }
-        .free_static()
+pub fn generate() -> FreePrimFuncVal {
+    FreePrimFn { id: "syntax.generate", f: free_impl(fn_generate), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_generate(input: Val) -> Val {

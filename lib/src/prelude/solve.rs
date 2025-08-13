@@ -1,22 +1,22 @@
 use log::error;
 
-use super::FreeFn;
+use super::FreePrimFn;
 use super::Prelude;
 use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
 use crate::semantics::solver::REVERSE_MAP;
 use crate::semantics::solver::SOLVER;
-use crate::semantics::val::FreeStaticPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct SolvePrelude {
-    pub solver: FreeStaticPrimFuncVal,
-    pub set_solver: FreeStaticPrimFuncVal,
-    pub reverse: FreeStaticPrimFuncVal,
-    pub set_reverse: FreeStaticPrimFuncVal,
+    pub solver: FreePrimFuncVal,
+    pub set_solver: FreePrimFuncVal,
+    pub reverse: FreePrimFuncVal,
+    pub set_reverse: FreePrimFuncVal,
 }
 
 impl Default for SolvePrelude {
@@ -39,22 +39,16 @@ impl Prelude for SolvePrelude {
     }
 }
 
-pub fn solver() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "solver!", f: free_impl(fn_solver), mode: default_free_mode() }.free_static()
+pub fn solver() -> FreePrimFuncVal {
+    FreePrimFn { id: "solver!", f: free_impl(fn_solver), mode: default_free_mode() }.free()
 }
 
 fn fn_solver(_input: Val) -> Val {
-    SOLVER.with(|solver| {
-        let Ok(solver) = solver.try_borrow() else {
-            return Val::default();
-        };
-        Val::Func(solver.clone())
-    })
+    SOLVER.with(|solver| Val::Func(solver.borrow().clone()))
 }
 
-pub fn set_solver() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: default_free_mode() }
-        .free_static()
+pub fn set_solver() -> FreePrimFuncVal {
+    FreePrimFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: default_free_mode() }.free()
 }
 
 fn fn_set_solver(input: Val) -> Val {
@@ -63,17 +57,13 @@ fn fn_set_solver(input: Val) -> Val {
         return Val::default();
     };
     SOLVER.with(|solver| {
-        let Ok(mut solver) = solver.try_borrow_mut() else {
-            error!("should not call this function inside a solver");
-            return;
-        };
-        *solver = new_solver;
+        *solver.borrow_mut() = new_solver;
     });
     Val::default()
 }
 
-pub fn reverse() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "reverse!", f: free_impl(fn_reverse), mode: default_free_mode() }.free_static()
+pub fn reverse() -> FreePrimFuncVal {
+    FreePrimFn { id: "reverse!", f: free_impl(fn_reverse), mode: default_free_mode() }.free()
 }
 
 fn fn_reverse(input: Val) -> Val {
@@ -82,10 +72,7 @@ fn fn_reverse(input: Val) -> Val {
         return Val::default();
     };
     REVERSE_MAP.with(|map| {
-        let Ok(map) = map.try_borrow() else {
-            error!("reverse map should be readable");
-            return Val::default();
-        };
+        let map = map.borrow();
         let Some(func) = map.get(&id) else {
             error!("reverse func of {id:?} should exist");
             return Val::default();
@@ -94,9 +81,9 @@ fn fn_reverse(input: Val) -> Val {
     })
 }
 
-pub fn set_reverse() -> FreeStaticPrimFuncVal {
-    FreeFn { id: "set_reverse!", f: free_impl(fn_set_reverse), mode: default_free_mode() }
-        .free_static()
+pub fn set_reverse() -> FreePrimFuncVal {
+    FreePrimFn { id: "set_reverse!", f: free_impl(fn_set_reverse), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_set_reverse(input: Val) -> Val {
@@ -114,11 +101,7 @@ fn fn_set_reverse(input: Val) -> Val {
         return Val::default();
     };
     REVERSE_MAP.with(|map| {
-        let Ok(mut map) = map.try_borrow_mut() else {
-            error!("reverse map should be mutable");
-            return;
-        };
-        map.insert(id, reverse);
+        map.borrow_mut().insert(id, reverse);
     });
     Val::default()
 }
