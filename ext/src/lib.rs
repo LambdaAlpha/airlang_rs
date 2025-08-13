@@ -1,6 +1,6 @@
 pub mod prelude;
 
-pub mod solver;
+pub mod solve;
 
 #[cfg(test)]
 mod test;

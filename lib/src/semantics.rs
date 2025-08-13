@@ -1,6 +1,6 @@
 pub(crate) mod core;
 
-pub(crate) mod solver;
+pub(crate) mod solve;
 
 pub mod val;
 

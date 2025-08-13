@@ -8,7 +8,7 @@ use crate::init_prelude;
 use crate::init_solver;
 use crate::prelude::CorePrelude;
 use crate::semantics::val::Val;
-use crate::solver::core_solver;
+use crate::solve::core_solver;
 use crate::syntax::parse;
 
 const MAIN_DELIMITER: &str = "\n=====\n";

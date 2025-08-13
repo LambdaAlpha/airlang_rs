@@ -5,7 +5,7 @@ use airlang::init_prelude;
 use airlang::init_solver;
 use airlang::prelude::CorePrelude;
 use airlang::semantics::val::Val;
-use airlang::solver::core_solver;
+use airlang::solve::core_solver;
 use airlang::syntax::ReprError;
 use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;

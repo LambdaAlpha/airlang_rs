@@ -10,7 +10,7 @@ use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::FuncSetup;
 use crate::semantics::func::MutFn;
-use crate::semantics::solver::Solve;
+use crate::semantics::solve::Solve;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;

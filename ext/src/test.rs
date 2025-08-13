@@ -11,7 +11,7 @@ use airlang::type_::Text;
 use airlang_dev::init_logger;
 
 use crate::prelude::StdPrelude;
-use crate::solver::std_solver;
+use crate::solve::std_solver;
 
 #[test]
 fn test_build_import() -> Result<(), Box<dyn Error>> {

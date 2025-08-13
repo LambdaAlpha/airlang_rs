@@ -5,7 +5,7 @@ use airlang::init_solver;
 
 use crate::prelude::BinPrelude;
 use crate::repl::Repl;
-use crate::solver::bin_solver;
+use crate::solve::bin_solver;
 
 fn main() -> std::io::Result<()> {
     init_prelude(Box::new(BinPrelude::default()));
@@ -18,4 +18,4 @@ mod repl;
 
 mod prelude;
 
-mod solver;
+mod solve;

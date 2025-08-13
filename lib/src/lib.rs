@@ -6,11 +6,11 @@ macro_rules! _____ {
     () => {};
 }
 
-// use solver, prelude, semantics, syntax, type, trait
+// use solve, prelude, semantics, syntax, type, trait
 mod pub_;
 
 // use prelude, semantics, type, trait
-pub mod solver;
+pub mod solve;
 
 // use semantics, syntax, type, trait
 pub mod prelude;
