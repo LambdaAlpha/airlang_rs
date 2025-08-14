@@ -15,7 +15,7 @@ use crate::prelude::ctx::pattern::PatternMatch;
 use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
-use crate::semantics::ctx::Contract;
+use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -279,9 +279,7 @@ where ValIter: Iterator<Item = Val> {
             return Val::default();
         };
         for val in values {
-            if let Val::Ctx(ctx_val) = ctx {
-                let _ = ctx_val.put(name.clone(), val, Contract::None);
-            }
+            let _ = ctx.set(name.clone(), val);
             let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
             match ctrl_flow {
                 CtrlFlow::None => {}
@@ -294,9 +292,7 @@ where ValIter: Iterator<Item = Val> {
         }
     } else {
         for val in values {
-            if let Val::Ctx(ctx_val) = ctx {
-                let _ = ctx_val.put(name.clone(), val, Contract::None);
-            }
+            let _ = ctx.set(name.clone(), val);
             Eval.mut_call(ctx, body.clone());
         }
     }
