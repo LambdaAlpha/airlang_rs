@@ -32,6 +32,7 @@ use crate::type_::Text;
 pub struct CtrlPrelude {
     pub do_: MutPrimFuncVal,
     pub if_: MutPrimFuncVal,
+    pub switch: MutPrimFuncVal,
     pub match_: MutPrimFuncVal,
     pub loop_: MutPrimFuncVal,
     pub for_: MutPrimFuncVal,
@@ -39,7 +40,14 @@ pub struct CtrlPrelude {
 
 impl Default for CtrlPrelude {
     fn default() -> Self {
-        CtrlPrelude { do_: do_(), if_: if_(), match_: match_(), loop_: loop_(), for_: for_() }
+        CtrlPrelude {
+            do_: do_(),
+            if_: if_(),
+            switch: switch(),
+            match_: match_(),
+            loop_: loop_(),
+            for_: for_(),
+        }
     }
 }
 
@@ -47,6 +55,7 @@ impl Prelude for CtrlPrelude {
     fn put(&self, ctx: &mut dyn PreludeCtx) {
         self.do_.put(ctx);
         self.if_.put(ctx);
+        self.switch.put(ctx);
         self.match_.put(ctx);
         self.loop_.put(ctx);
         self.for_.put(ctx);
@@ -105,6 +114,39 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
     let branches = Pair::from(branches);
     let branch = if *b { branches.first } else { branches.second };
     eval_block(ctx, branch).0
+}
+
+pub fn switch() -> MutPrimFuncVal {
+    DynPrimFn { id: "switch", f: mut_impl(fn_switch), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+}
+
+fn fn_switch(ctx: &mut Val, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let val = Eval.mut_call(ctx, pair.first);
+    match pair.second {
+        Val::Map(mut map) => {
+            let Some(body) = map.remove(&val) else {
+                return Val::default();
+            };
+            eval_block(ctx, body).0
+        }
+        Val::Pair(mut pair) => {
+            let Val::Map(map) = &mut pair.first else {
+                error!("input.second.first {:?} should be a map", pair.first);
+                return Val::default();
+            };
+            let body = map.remove(&val).unwrap_or_else(|| Pair::from(pair).second);
+            eval_block(ctx, body).0
+        }
+        v => {
+            error!("input.second {v:?} should be a map or a pair");
+            Val::default()
+        }
+    }
 }
 
 pub fn match_() -> MutPrimFuncVal {
