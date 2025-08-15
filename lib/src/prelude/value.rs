@@ -15,14 +15,12 @@ use super::FuncMode;
 use super::Prelude;
 use super::PreludeCtx;
 use super::const_impl;
-use super::ctx::ref_::RefCtx;
 use super::free_impl;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
 use super::setup::default_dyn_mode;
-use super::setup::dyn_mode;
+use super::setup::default_free_mode;
 use super::setup::free_mode;
-use super::setup::ref_mode;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
@@ -45,7 +43,6 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::ConstRef;
-use crate::type_::Either;
 use crate::type_::Int;
 use crate::type_::Link;
 use crate::type_::List;
@@ -65,7 +62,7 @@ pub fn init_arbitrary(arbitrary_val: Box<dyn ArbitraryVal>) {
 pub struct ValuePrelude {
     pub any: FreePrimFuncVal,
     pub type_: ConstPrimFuncVal,
-    pub equal: ConstPrimFuncVal,
+    pub equal: FreePrimFuncVal,
 }
 
 impl Default for ValuePrelude {
@@ -147,55 +144,17 @@ fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(Symbol::from_str_unchecked(s))
 }
 
-// todo design mode and ref
-pub fn equal() -> ConstPrimFuncVal {
-    DynPrimFn {
-        id: "==",
-        f: const_impl(fn_equal),
-        mode: dyn_mode(FuncMode::pair_mode(Map::default(), ref_mode(), ref_mode())),
-    }
-    .const_()
+// todo design
+pub fn equal() -> FreePrimFuncVal {
+    FreePrimFn { id: "==", f: free_impl(fn_equal), mode: default_free_mode() }.free()
 }
 
-fn fn_equal(ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Ctx(ctx) = &*ctx else {
-        error!("ctx {ctx:?} should be a ctx");
-        return Val::default();
-    };
+fn fn_equal(input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
     };
-    let pair = Pair::from(pair);
-    let left = RefCtx::ref_or_val(pair.first);
-    let right = RefCtx::ref_or_val(pair.second);
-    get_by_ref(ctx, left, |v1| {
-        let Some(v1) = v1 else {
-            error!("input.first should exist");
-            return Val::default();
-        };
-        get_by_ref(ctx, right, |v2| {
-            let Some(v2) = v2 else {
-                error!("input.second should exist");
-                return Val::default();
-            };
-            Val::Bit(Bit::from(*v1 == *v2))
-        })
-    })
-}
-
-fn get_by_ref<T, F>(ctx: &Ctx, v: Either<Symbol, Val>, f: F) -> T
-where F: FnOnce(Option<&Val>) -> T {
-    match v {
-        Either::This(s) => {
-            let Ok(val) = ctx.get_ref(s.clone()) else {
-                error!("variable {s:?} should exist");
-                return f(None);
-            };
-            f(Some(val))
-        }
-        Either::That(val) => f(Some(&val)),
-    }
+    Val::Bit(Bit::from(pair.first == pair.second))
 }
 
 mod arbitrary;

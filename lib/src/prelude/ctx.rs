@@ -285,5 +285,3 @@ fn fn_ctx_self(ctx: ConstRef<Val>, _input: Val) -> Val {
 pub(super) mod pattern;
 
 pub(super) mod repr;
-
-pub(super) mod ref_;

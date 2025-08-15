@@ -2,7 +2,6 @@ use std::rc::Rc;
 
 use super::mode::FuncMode;
 use super::mode::Mode;
-use super::setup::ctx::CtxSetup;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreeFn;
@@ -19,9 +18,7 @@ use crate::type_::Symbol;
 thread_local!(pub(in super) static CORE_SETUP: CoreSetup = CoreSetup::default());
 
 #[derive(Default, Clone)]
-pub struct CoreSetup {
-    pub ctx: CtxSetup,
-}
+pub struct CoreSetup {}
 
 pub struct FreeSetupFn<F> {
     pub id: &'static str,
@@ -81,10 +78,3 @@ pub fn dyn_mode(mode: Mode) -> FuncMode {
 pub fn default_dyn_mode() -> FuncMode {
     dyn_mode(FuncMode::default_mode())
 }
-
-pub fn ref_mode() -> Mode {
-    let ref_ = CORE_SETUP.with(|p| p.ctx.ref_.clone());
-    Mode::Func(ref_.into())
-}
-
-mod ctx;

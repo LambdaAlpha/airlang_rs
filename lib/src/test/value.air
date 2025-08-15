@@ -296,7 +296,7 @@ true
 -----
 a == b
 -----
-.
+true
 =====
 == special ref
 -----
