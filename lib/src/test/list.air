@@ -24,14 +24,14 @@ _ do [
 -----
 true
 =====
-length pop
+length pop_many
 -----
 _ do [
     a = _ any list,
     l1 = a ; list.length .,
     (l1 == 0) break true,
     i = (l1 + (_ any integer) % l1) % l1,
-    a ; list.pop i,
+    a ; list.pop_many i,
     l2 = a ; list.length .,
     l2 == l1 - i
 ]
@@ -56,7 +56,7 @@ _ do [
 -----
 true
 =====
-set_many get
+set_many get_many
 -----
 _ do [
     a = _ any list,
@@ -76,9 +76,9 @@ _ do [
     a1 = a,
     d = la - lb,
     i = (d == 0) ? 0 : (d + (_ any integer) % d) % d,
-    c1 = a ; list.get i : i + lb,
+    c1 = a ; list.get_many i : i + lb,
     c2 = a ; list.set_many i : b,
-    b1 = a ; list.get i : i + lb,
+    b1 = a ; list.get_many i : i + lb,
     a ; list.set_many i : c1,
     (b == b1) and (c1 == c2) and (a == a1)
 ]
@@ -115,7 +115,7 @@ _ do [
 -----
 true
 =====
-insert_many get length
+insert_many get_many length
 -----
 _ do [
     a = _ any list,
@@ -124,14 +124,14 @@ _ do [
     v1 = _ any list,
     vl = v1 ; list.length .,
     a ; list.insert_many i : v1,
-    v2 = a ; list.get i : i + vl,
+    v2 = a ; list.get_many i : i + vl,
     l2 = a ; list.length .,
     (v1 == v2) and l2 == l1 + vl - 1,
 ]
 -----
 true
 =====
-insert_many remove
+insert_many remove_many
 -----
 _ do [
     a = _ any list,
@@ -141,7 +141,7 @@ _ do [
     v1 = _ any list,
     v1l = v1 ; list.length .,
     a ; list.insert_many i : v1,
-    v2 = a ; list.remove i : i + v1l,
+    v2 = a ; list.remove_many i : i + v1l,
     (v1 == v2) and a == b
 ]
 -----
@@ -160,7 +160,7 @@ _ do [
 -----
 true
 =====
-push_many pop
+push_many pop_many
 -----
 _ do [
     a1 = _ any list,
@@ -168,7 +168,7 @@ _ do [
     b1 = _ any list,
     lb = b1 ; list.length .,
     a1 ; list.push_many b1,
-    b2 = a1 ; list.pop lb,
+    b2 = a1 ; list.pop_many lb,
     (b1 == b2) and a1 == a2
 ]
 -----
@@ -256,33 +256,33 @@ _ do [l = [1, 2], l ; list.get 1]
 -----
 2
 =====
-get range 1
+get_many 1
 -----
-_ do [l = [1, 2], l ; list.get 0 : 1]
+_ do [l = [1, 2], l ; list.get_many 0 : 1]
 -----
 [1]
 =====
-get range 2
+get_many 2
 -----
-_ do [l = [1, 2], l ; list.get 1 : 2]
+_ do [l = [1, 2], l ; list.get_many 1 : 2]
 -----
 [2]
 =====
-get range . 1
+get_many . 1
 -----
-_ do [l = [1, 2], l ; list.get . : .]
+_ do [l = [1, 2], l ; list.get_many . : .]
 -----
 [1, 2]
 =====
-get range . 2
+get_many . 2
 -----
-_ do [l = [1, 2], l ; list.get 1 : .]
+_ do [l = [1, 2], l ; list.get_many 1 : .]
 -----
 [2]
 =====
-get range . 3
+get_many . 3
 -----
-_ do [l = [1, 2], l ; list.get . : 1]
+_ do [l = [1, 2], l ; list.get_many . : 1]
 -----
 [1]
 =====
@@ -316,15 +316,15 @@ _ do [l = [1, 2, 3], [l ; list.remove 1, l]]
 -----
 [2, [1, 3]]
 =====
-remove range
+remove_many
 -----
-_ do [l = [1, 2, 3], [l ; list.remove 1 : 3, l]]
+_ do [l = [1, 2, 3], [l ; list.remove_many 1 : 3, l]]
 -----
 [[2, 3], [1]]
 =====
-remove range .
+remove_many .
 -----
-_ do [l = [1, 2, 3], l ; list.remove . : ., l]
+_ do [l = [1, 2, 3], l ; list.remove_many . : ., l]
 -----
 []
 =====
@@ -346,45 +346,45 @@ _ do [l = [1], l ; list.push_many [], l]
 -----
 [1]
 =====
-pop . empty
+pop empty
 -----
 _ do [l = [], [l ; list.pop ., l]]
 -----
 [., []]
 =====
-pop . 1
+pop 1
 -----
 _ do [l = [1], [l ; list.pop ., l]]
 -----
 [1, []]
 =====
-pop . 2
+pop 2
 -----
 _ do [l = [1, 2], [l ; list.pop ., l]]
 -----
 [2, [1]]
 =====
-pop 0
+pop_many 0
 -----
-_ do [l = [1, 2], [l ; list.pop 0, l]]
+_ do [l = [1, 2], [l ; list.pop_many 0, l]]
 -----
 [[], [1, 2]]
 =====
-pop 1
+pop_many 1
 -----
-_ do [l = [1, 2], [l ; list.pop 1, l]]
+_ do [l = [1, 2], [l ; list.pop_many 1, l]]
 -----
 [[2], [1]]
 =====
-pop else
+pop_many else
 -----
-_ do [l = [1, 2], [l ; list.pop 2, l]]
+_ do [l = [1, 2], [l ; list.pop_many 2, l]]
 -----
 [[1, 2], []]
 =====
-pop out of bound
+pop_many out of bound
 -----
-_ do [l = [1, 2], l ; list.pop 3, l]
+_ do [l = [1, 2], l ; list.pop_many 3, l]
 -----
 [1, 2]
 =====

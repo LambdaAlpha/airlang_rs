@@ -24,12 +24,15 @@ pub struct ListPrelude {
     pub set: MutPrimFuncVal,
     pub set_many: MutPrimFuncVal,
     pub get: ConstPrimFuncVal,
+    pub get_many: ConstPrimFuncVal,
     pub insert: MutPrimFuncVal,
     pub insert_many: MutPrimFuncVal,
     pub remove: MutPrimFuncVal,
+    pub remove_many: MutPrimFuncVal,
     pub push: MutPrimFuncVal,
     pub push_many: MutPrimFuncVal,
     pub pop: MutPrimFuncVal,
+    pub pop_many: MutPrimFuncVal,
     pub clear: MutPrimFuncVal,
 }
 
@@ -40,12 +43,15 @@ impl Default for ListPrelude {
             set: set(),
             set_many: set_many(),
             get: get(),
+            get_many: get_many(),
             insert: insert(),
             insert_many: insert_many(),
             remove: remove(),
+            remove_many: remove_many(),
             push: push(),
             push_many: push_many(),
             pop: pop(),
+            pop_many: pop_many(),
             clear: clear(),
         }
     }
@@ -57,12 +63,15 @@ impl Prelude for ListPrelude {
         self.set.put(ctx);
         self.set_many.put(ctx);
         self.get.put(ctx);
+        self.get_many.put(ctx);
         self.insert.put(ctx);
         self.insert_many.put(ctx);
         self.remove.put(ctx);
+        self.remove_many.put(ctx);
         self.push.put(ctx);
         self.push_many.put(ctx);
         self.pop.put(ctx);
+        self.pop_many.put(ctx);
         self.clear.put(ctx);
     }
 }
@@ -150,30 +159,42 @@ fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
     };
-    if let Val::Pair(range) = input {
-        let range = Pair::from(range);
-        let Some((from, to)) = to_range(range) else {
-            error!("input should be a valid range");
-            return Val::default();
-        };
-        let from = from.unwrap_or_default();
-        let to = to.unwrap_or(list.len());
-        let Some(slice) = list.get(from .. to) else {
-            error!("range {from} : {to} should be in 0 : {}", list.len());
-            return Val::default();
-        };
-        Val::List(List::from(slice.to_owned()).into())
-    } else {
-        let Some(i) = to_index(input) else {
-            error!("input should be a valid index");
-            return Val::default();
-        };
-        let Some(val) = list.get(i) else {
-            error!("index {i} should < list.len {}", list.len());
-            return Val::default();
-        };
-        val.clone()
-    }
+    let Some(i) = to_index(input) else {
+        error!("input should be a valid index");
+        return Val::default();
+    };
+    let Some(val) = list.get(i) else {
+        error!("index {i} should < list.len {}", list.len());
+        return Val::default();
+    };
+    val.clone()
+}
+
+pub fn get_many() -> ConstPrimFuncVal {
+    DynPrimFn { id: "list.get_many", f: const_impl(fn_get_many), mode: default_dyn_mode() }.const_()
+}
+
+fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::List(list) = &*ctx else {
+        error!("ctx {ctx:?} should be a list");
+        return Val::default();
+    };
+    let Val::Pair(range) = input else {
+        error!("input {input:?} should be a pair");
+        return Val::default();
+    };
+    let range = Pair::from(range);
+    let Some((from, to)) = to_range(range) else {
+        error!("input should be a valid range");
+        return Val::default();
+    };
+    let from = from.unwrap_or_default();
+    let to = to.unwrap_or(list.len());
+    let Some(slice) = list.get(from .. to) else {
+        error!("range {from} : {to} should be in 0 : {}", list.len());
+        return Val::default();
+    };
+    Val::List(List::from(slice.to_owned()).into())
 }
 
 pub fn insert() -> MutPrimFuncVal {
@@ -246,31 +267,44 @@ fn fn_remove(ctx: &mut Val, input: Val) -> Val {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
     };
-    if let Val::Pair(range) = input {
-        let range = Pair::from(range);
-        let Some((from, to)) = to_range(range) else {
-            error!("input should be a valid range");
-            return Val::default();
-        };
-        let from = from.unwrap_or_default();
-        let to = to.unwrap_or(list.len());
-        if from > to || to > list.len() {
-            error!("range {from} : {to} should be in 0 : {}", list.len());
-            return Val::default();
-        }
-        let ret: List<Val> = list.splice(from .. to, Vec::new()).collect();
-        Val::List(ret.into())
-    } else {
-        let Some(i) = to_index(input) else {
-            error!("input should be a valid index");
-            return Val::default();
-        };
-        if i >= list.len() {
-            error!("index {i} should < list.len {}", list.len());
-            return Val::default();
-        }
-        list.remove(i)
+    let Some(i) = to_index(input) else {
+        error!("input should be a valid index");
+        return Val::default();
+    };
+    if i >= list.len() {
+        error!("index {i} should < list.len {}", list.len());
+        return Val::default();
     }
+    list.remove(i)
+}
+
+pub fn remove_many() -> MutPrimFuncVal {
+    DynPrimFn { id: "list.remove_many", f: mut_impl(fn_remove_many), mode: default_dyn_mode() }
+        .mut_()
+}
+
+fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
+    let Val::List(list) = ctx else {
+        error!("ctx {ctx:?} should be a list");
+        return Val::default();
+    };
+    let Val::Pair(range) = input else {
+        error!("input {input:?} should be a pair");
+        return Val::default();
+    };
+    let range = Pair::from(range);
+    let Some((from, to)) = to_range(range) else {
+        error!("input should be a valid range");
+        return Val::default();
+    };
+    let from = from.unwrap_or_default();
+    let to = to.unwrap_or(list.len());
+    if from > to || to > list.len() {
+        error!("range {from} : {to} should be in 0 : {}", list.len());
+        return Val::default();
+    }
+    let ret: List<Val> = list.splice(from .. to, Vec::new()).collect();
+    Val::List(ret.into())
 }
 
 pub fn push() -> MutPrimFuncVal {
@@ -312,28 +346,39 @@ fn fn_pop(ctx: &mut Val, input: Val) -> Val {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
     };
-    match input {
-        Val::Unit(_) => list.pop().unwrap_or_default(),
-        Val::Int(i) => {
-            let Some(i) = i.to_usize() else {
-                error!("index {i:?} should <= list.len {}", list.len());
-                return Val::default();
-            };
-            let list = &mut **list;
-            if i > list.len() {
-                error!("index {i} should <= list.len {}", list.len());
-                return Val::default();
-            }
-            let start = list.len() - i;
-            let list = list.split_off(start);
-            let list: List<Val> = list.into();
-            Val::List(list.into())
-        }
-        _ => {
-            error!("input should be an int or a unit");
-            Val::default()
-        }
+    let Val::Unit(_) = input else {
+        error!("input {input:?} should be a unit");
+        return Val::default();
+    };
+    list.pop().unwrap_or_default()
+}
+
+pub fn pop_many() -> MutPrimFuncVal {
+    DynPrimFn { id: "list.pop_many", f: mut_impl(fn_pop_many), mode: default_dyn_mode() }.mut_()
+}
+
+fn fn_pop_many(ctx: &mut Val, input: Val) -> Val {
+    let Val::List(list) = ctx else {
+        error!("ctx {ctx:?} should be a list");
+        return Val::default();
+    };
+    let Val::Int(i) = input else {
+        error!("input {input:?} should be an int");
+        return Val::default();
+    };
+    let Some(i) = i.to_usize() else {
+        error!("index {i:?} should <= list.len {}", list.len());
+        return Val::default();
+    };
+    let list = &mut **list;
+    if i > list.len() {
+        error!("index {i} should <= list.len {}", list.len());
+        return Val::default();
     }
+    let start = list.len() - i;
+    let list = list.split_off(start);
+    let list: List<Val> = list.into();
+    Val::List(list.into())
 }
 
 pub fn clear() -> MutPrimFuncVal {
