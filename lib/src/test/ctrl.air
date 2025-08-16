@@ -36,43 +36,43 @@ _ do [1, _ do [2, 3]]
 =====
 do break true
 -----
-_ do [1, 2, true break 3, 4]
+_ do [1, 2, true .break 3, 4]
 -----
 3
 =====
 do break false
 -----
-_ do [1, 2, false break 3, 4]
+_ do [1, 2, false .break 3, 4]
 -----
 4
 =====
 do break scope 1
 -----
-_ do [1, _ do [2, true break 3, 4], 5]
+_ do [1, _ do [2, true .break 3, 4], 5]
 -----
 5
 =====
 do break scope 2
 -----
-_ do [1, a = _ do [2, true break 3, 4], a + 2]
+_ do [1, a = _ do [2, true .break 3, 4], a + 2]
 -----
 5
 =====
 do break eval
 -----
-_ do [b = 2, (b > 0) break b - 1, b + 1]
+_ do [b = 2, (b > 0) .break b - 1, b + 1]
 -----
 1
 =====
 do continue true
 -----
-_ do [1, true continue 2, 3]
+_ do [1, true .continue 2, 3]
 -----
 2
 =====
 do continue false
 -----
-_ do [1, false continue 2, 3]
+_ do [1, false .continue 2, 3]
 -----
 3
 =====
@@ -114,13 +114,13 @@ true ? (false ? 1 : 2) : 3
 =====
 ? break
 -----
-true ? [1, true break 2, 3] : 4
+true ? [1, true .break 2, 3] : 4
 -----
 2
 =====
 ? continue
 -----
-true ? [1, true continue 2, 3] : 4
+true ? [1, true .continue 2, 3] : 4
 -----
 2
 =====
@@ -229,13 +229,13 @@ _ do [a = _ form a, a match [*a : 1, *b : 2]]
 =====
 match break
 -----
-1 match [1 : [2, true break 3, 4]]
+1 match [1 : [2, true .break 3, 4]]
 -----
 3
 =====
 match continue
 -----
-1 match [1 : [2, true continue 3, 4]]
+1 match [1 : [2, true .continue 3, 4]]
 -----
 3
 =====
@@ -299,7 +299,7 @@ _ do [
     b = 0,
     (b < 5) loop [
         b = b + 1,
-        (b == 2) continue .,
+        (b == 2) .continue .,
         a = a + b,
     ],
     a
@@ -313,7 +313,7 @@ _ do [
     a = 0,
     b = 0,
     (b < 5) loop [
-        (a > 5) break a,
+        (a > 5) .break a,
         b = b + 1,
         a = a + b,
     ]
@@ -335,13 +335,13 @@ _ do [sum = 0, [] for i : sum = sum + i, sum]
 =====
 for break 1
 -----
-[1, 2, 3, 4, 5] for i : [(i == 3) break true]
+[1, 2, 3, 4, 5] for i : [(i == 3) .break true]
 -----
 true
 =====
 for break 2
 -----
-_ do [[1, 2, 3, 4, 5] for i : [(i == 3) break ., a = i], a]
+_ do [[1, 2, 3, 4, 5] for i : [(i == 3) .break ., a = i], a]
 -----
 2
 =====
@@ -352,7 +352,7 @@ _ do [
     b = 0,
     [1, 2, 3, 4, 5] for i : [
         a = a + i,
-        (i == 3) continue .,
+        (i == 3) .continue .,
         b = b + i
     ],
     a : b

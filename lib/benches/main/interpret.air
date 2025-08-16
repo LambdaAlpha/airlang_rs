@@ -5,7 +5,7 @@ _ do [
     code : .n : _ do [
       .sum = 0,
       .n for .i : [
-        (0 == .i % 3) .continue .,
+        (0 == .i % 3) ..continue .,
         .sum = .sum + .i,
       ],
       .sum

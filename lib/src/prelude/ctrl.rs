@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
@@ -15,6 +16,7 @@ use crate::prelude::ctx::pattern::PatternMatch;
 use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
+use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::MutPrimFuncVal;
@@ -62,8 +64,8 @@ impl Prelude for CtrlPrelude {
     }
 }
 
-const BREAK: &str = "break";
-const CONTINUE: &str = "continue";
+const BREAK: &str = concatcp!(SYMBOL_LITERAL_CHAR, "break");
+const CONTINUE: &str = concatcp!(SYMBOL_LITERAL_CHAR, "continue");
 
 #[derive(Copy, Clone)]
 enum Exit {
