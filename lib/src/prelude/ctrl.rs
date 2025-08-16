@@ -91,7 +91,7 @@ pub fn do_() -> MutPrimFuncVal {
 }
 
 fn fn_do(ctx: &mut Val, input: Val) -> Val {
-    eval_block(ctx, input).0
+    eval_block(ctx, input, false).0
 }
 
 pub fn if_() -> MutPrimFuncVal {
@@ -115,7 +115,7 @@ fn fn_if(ctx: &mut Val, input: Val) -> Val {
     };
     let branches = Pair::from(branches);
     let branch = if *b { branches.first } else { branches.second };
-    eval_block(ctx, branch).0
+    eval_block(ctx, branch, false).0
 }
 
 pub fn switch() -> MutPrimFuncVal {
@@ -134,7 +134,7 @@ fn fn_switch(ctx: &mut Val, input: Val) -> Val {
             let Some(body) = map.remove(&val) else {
                 return Val::default();
             };
-            eval_block(ctx, body).0
+            eval_block(ctx, body, false).0
         }
         Val::Pair(mut pair) => {
             let Val::Map(map) = &mut pair.first else {
@@ -142,7 +142,7 @@ fn fn_switch(ctx: &mut Val, input: Val) -> Val {
                 return Val::default();
             };
             let body = map.remove(&val).unwrap_or_else(|| Pair::from(pair).second);
-            eval_block(ctx, body).0
+            eval_block(ctx, body, false).0
         }
         v => {
             error!("input.second {v:?} should be a map or a pair");
@@ -180,7 +180,7 @@ fn fn_match(ctx: &mut Val, input: Val) -> Val {
         };
         if pattern.match_(&val) {
             pattern.assign(ctx, val);
-            return eval_block(ctx, pair.second).0;
+            return eval_block(ctx, pair.second, false).0;
         }
     }
     Val::default()
@@ -214,7 +214,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
             if !*b {
                 break;
             }
-            let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
+            let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone(), true);
             match ctrl_flow {
                 CtrlFlow::None => {}
                 CtrlFlow::Error => return Val::default(),
@@ -324,7 +324,7 @@ where ValIter: Iterator<Item = Val> {
         };
         for val in values {
             let _ = ctx.set(name.clone(), val);
-            let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone());
+            let (output, ctrl_flow) = eval_block_items(ctx, block_items.clone(), true);
             match ctrl_flow {
                 CtrlFlow::None => {}
                 CtrlFlow::Error => return Val::default(),
@@ -343,7 +343,7 @@ where ValIter: Iterator<Item = Val> {
     Val::default()
 }
 
-fn eval_block(ctx: &mut Val, input: Val) -> (Val, CtrlFlow) {
+fn eval_block(ctx: &mut Val, input: Val, breakable: bool) -> (Val, CtrlFlow) {
     // todo design
     let Val::List(list) = input else {
         return (Eval.mut_call(ctx, input), CtrlFlow::None);
@@ -353,10 +353,12 @@ fn eval_block(ctx: &mut Val, input: Val) -> (Val, CtrlFlow) {
     let Some(block_items) = block_items else {
         return (Val::default(), CtrlFlow::Error);
     };
-    eval_block_items(ctx, block_items)
+    eval_block_items(ctx, block_items, breakable)
 }
 
-fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFlow) {
+fn eval_block_items(
+    ctx: &mut Val, block_items: List<BlockItem>, breakable: bool,
+) -> (Val, CtrlFlow) {
     let mut output = Val::default();
     for block_item in block_items {
         match block_item {
@@ -364,6 +366,10 @@ fn eval_block_items(ctx: &mut Val, block_items: List<BlockItem>) -> (Val, CtrlFl
                 output = Eval.mut_call(ctx, val);
             }
             BlockItem::Exit { exit, condition, body } => {
+                if matches!(exit, Exit::Break) && !breakable {
+                    error!("break should be used in breakable ctrl blocks");
+                    return (Val::default(), CtrlFlow::Error);
+                }
                 let condition = Eval.mut_call(ctx, condition);
                 let Val::Bit(condition) = condition else {
                     error!("condition {condition:?} should be a bit");
