@@ -65,11 +65,11 @@ impl Prelude for CtrlPrelude {
 }
 
 const BREAK: &str = concatcp!(SYMBOL_LITERAL_CHAR, "break");
-const CONTINUE: &str = concatcp!(SYMBOL_LITERAL_CHAR, "continue");
+const RETURN: &str = concatcp!(SYMBOL_LITERAL_CHAR, "return");
 
 #[derive(Copy, Clone)]
 enum Exit {
-    Continue,
+    Return,
     Break,
 }
 
@@ -219,7 +219,7 @@ fn fn_loop(ctx: &mut Val, input: Val) -> Val {
                 CtrlFlow::None => {}
                 CtrlFlow::Error => return Val::default(),
                 CtrlFlow::Exit(exit) => match exit {
-                    Exit::Continue => {}
+                    Exit::Return => {}
                     Exit::Break => return output,
                 },
             }
@@ -329,7 +329,7 @@ where ValIter: Iterator<Item = Val> {
                 CtrlFlow::None => {}
                 CtrlFlow::Error => return Val::default(),
                 CtrlFlow::Exit(exit) => match exit {
-                    Exit::Continue => {}
+                    Exit::Return => {}
                     Exit::Break => return output,
                 },
             }
@@ -405,7 +405,7 @@ fn parse_block_item(val: Val) -> Option<BlockItem> {
 fn parse_exit(str: &str) -> Option<Exit> {
     let exit = match str {
         BREAK => Exit::Break,
-        CONTINUE => Exit::Continue,
+        RETURN => Exit::Return,
         _ => return None,
     };
     Some(exit)
