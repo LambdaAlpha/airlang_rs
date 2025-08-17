@@ -29,7 +29,7 @@ length pop_many
 _ do [
     a = _ any list,
     l1 = a ; list.length .,
-    (l1 == 0) break true,
+    (l1 == 0) .return true,
     i = (l1 + (_ any integer) % l1) % l1,
     a ; list.pop_many i,
     l2 = a ; list.length .,
@@ -44,7 +44,7 @@ _ do [
     a = _ any list,
     b = a,
     l = a ; list.length .,
-    (l == 0) break true,
+    (l == 0) .return true,
     i = (l + (_ any integer) % l) % l,
     v1 = a ; list.get i,
     v2 = _ any .,
@@ -61,10 +61,10 @@ set_many get_many
 _ do [
     a = _ any list,
     la = a ; list.length .,
-    (la == 0) break true,
+    (la == 0) .return true,
     b = _ any list,
     lb = b ; list.length .,
-    (lb == 0) break true,
+    (lb == 0) .return true,
     (la < lb) ? [
         t = a,
         a = b,

@@ -72,13 +72,13 @@ true
 =====
 0 /
 -----
-_ do [a = _ any integer, (a == 0) break true, 0 == 0 / a]
+_ do [a = _ any integer, (a == 0) .return true, 0 == 0 / a]
 -----
 true
 =====
 0 %
 -----
-_ do [a = _ any integer, (a == 0) break true, 0 == 0 % a]
+_ do [a = _ any integer, (a == 0) .return true, 0 == 0 % a]
 -----
 true
 =====
@@ -96,43 +96,43 @@ true
 =====
 % exact
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, 0 == (a * b) % b]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, 0 == (a * b) % b]
 -----
 true
 =====
 sign(a % b) == sign(a)
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, (0 <= a) == 0 <= a % b]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (0 <= a) == 0 <= a % b]
 -----
 true
 =====
 abs(a % b) < abs(b)
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, (0 <= b) == 0 <= b + a % b]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (0 <= b) == 0 <= b + a % b]
 -----
 true
 =====
 * /
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, a == <(a * b / b)]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, a == <(a * b / b)]
 -----
 true
 =====
 exact / *
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, c = a * b, c == <(c / b * b)]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, c = a * b, c == <(c / b * b)]
 -----
 true
 =====
 inexact / abs(a) > abs(a / b * b)
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, (0 <= a) == 0 <= a - a / b * b]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (0 <= a) == 0 <= a - a / b * b]
 -----
 true
 =====
 a == b * a / b + a % b
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, a == (b * a / b) + a % b]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, a == (b * a / b) + a % b]
 -----
 true
 =====
@@ -216,7 +216,7 @@ true
 =====
 a /% b == (a / b) : (a % b)
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) break true, (a /% b) == (a / b) : (a % b)]
+_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (a /% b) == (a / b) : (a % b)]
 -----
 true
 =====
