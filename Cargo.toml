@@ -64,6 +64,8 @@ items_after_statements = "warn"
 infinite_loop = "warn"
 error_impl_error = "warn"
 debug_assert_with_mut_call = "warn"
+# false positive
+mutable_key_type = "allow"
 
 # style
 semicolon_if_nothing_returned = "warn"

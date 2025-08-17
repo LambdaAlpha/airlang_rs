@@ -3,10 +3,10 @@ _("bench generate")
 _ do [
   x = 42,
   y = 24,
-  (x <> y) loop (x > y) ? (
+  (x <> y) loop [(x > y) ? [
     x = x - y
-  ) : (
+  ] : [
     y = y - x
-  ),
+  ]],
   x
 ]

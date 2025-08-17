@@ -5,7 +5,7 @@ _ do [
     l1 = a ; map.length .,
     k = _ any .,
     v = _ any .,
-    i = (a ; map.contains k) ? 0 : 1,
+    i = (a ; map.contains k) ? [0] : [1],
     a ; map.set k : v,
     l2 = a ; map.length .,
     l2 == l1 + i
