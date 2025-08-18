@@ -90,13 +90,6 @@ enum CtrlFlow {
     Return,
 }
 
-#[derive(Copy, Clone)]
-enum ResultCtrlFlow {
-    None,
-    Error,
-    Return,
-}
-
 impl Block {
     fn parse(val: Val) -> Option<Self> {
         let Val::List(list) = val else {
@@ -108,7 +101,7 @@ impl Block {
         Some(Block { statements: items })
     }
 
-    fn flow(self, ctx: &mut Val) -> (Val, ResultCtrlFlow) {
+    fn flow(self, ctx: &mut Val) -> (Val, Result<CtrlFlow, ()>) {
         let mut output = Val::default();
         for statement in self.statements {
             match statement {
@@ -119,21 +112,17 @@ impl Block {
                     let condition = Eval.mut_call(ctx, condition);
                     let Val::Bit(condition) = condition else {
                         error!("condition {condition:?} should be a bit");
-                        return (Val::default(), ResultCtrlFlow::Error);
+                        return (Val::default(), Err(()));
                     };
                     if *condition {
                         let output = Eval.mut_call(ctx, body);
-                        let ctrl_flow = match ctrl_flow {
-                            CtrlFlow::Continue => ResultCtrlFlow::None,
-                            CtrlFlow::Return => ResultCtrlFlow::Return,
-                        };
-                        return (output, ctrl_flow);
+                        return (output, Ok(ctrl_flow));
                     }
                     output = Val::default();
                 }
             }
         }
-        (output, ResultCtrlFlow::None)
+        (output, Ok(CtrlFlow::Continue))
     }
 
     fn eval(self, ctx: &mut Val) -> Val {
@@ -398,9 +387,9 @@ impl Loop {
             }
             let (output, ctrl_flow) = self.body.clone().flow(ctx);
             match ctrl_flow {
-                ResultCtrlFlow::None => {}
-                ResultCtrlFlow::Error => return Val::default(),
-                ResultCtrlFlow::Return => return output,
+                Ok(CtrlFlow::Continue) => {}
+                Ok(CtrlFlow::Return) => return output,
+                Err(()) => return Val::default(),
             }
         }
         Val::default()
@@ -506,9 +495,9 @@ where ValIter: Iterator<Item = Val> {
         let _ = ctx.set(name.clone(), val);
         let (output, ctrl_flow) = body.clone().flow(ctx);
         match ctrl_flow {
-            ResultCtrlFlow::None => {}
-            ResultCtrlFlow::Error => return Val::default(),
-            ResultCtrlFlow::Return => return output,
+            Ok(CtrlFlow::Continue) => {}
+            Ok(CtrlFlow::Return) => return output,
+            Err(()) => return Val::default(),
         }
     }
     Val::default()
