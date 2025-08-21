@@ -2,9 +2,9 @@ use std::process::Command;
 
 use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
@@ -26,7 +26,7 @@ impl Default for ProcessPrelude {
 }
 
 impl Prelude for ProcessPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.call.put(ctx);
     }
 }

@@ -2,9 +2,9 @@ use log::error;
 
 use super::FreePrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -44,7 +44,7 @@ impl Default for IntPrelude {
 }
 
 impl Prelude for IntPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.add.put(ctx);
         self.subtract.put(ctx);
         self.multiply.put(ctx);

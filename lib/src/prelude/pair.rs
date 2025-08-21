@@ -5,12 +5,12 @@ use log::error;
 use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -40,7 +40,7 @@ impl Default for PairPrelude {
 }
 
 impl Prelude for PairPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.new.put(ctx);
         self.first.put(ctx);
         self.set_first.put(ctx);

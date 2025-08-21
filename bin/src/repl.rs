@@ -44,6 +44,8 @@ use crossterm::terminal::enable_raw_mode;
 use crossterm::terminal::is_raw_mode_enabled;
 use crossterm::terminal::size;
 
+use crate::prelude::BinPrelude;
+
 pub trait ReplTerminal: Write + IsTerminal {}
 
 impl<T: Write + IsTerminal> ReplTerminal for T {}
@@ -80,7 +82,7 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub fn new(out: T) -> Self {
-        let air = Air::default();
+        let air = Air::new(BinPrelude::default().into());
         let terminal = Terminal(out);
         Self {
             air,

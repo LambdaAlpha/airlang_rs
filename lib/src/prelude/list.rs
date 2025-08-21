@@ -5,10 +5,10 @@ use num_traits::ToPrimitive;
 
 use super::DynPrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::const_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -58,7 +58,7 @@ impl Default for ListPrelude {
 }
 
 impl Prelude for ListPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.length.put(ctx);
         self.set.put(ctx);
         self.set_many.put(ctx);

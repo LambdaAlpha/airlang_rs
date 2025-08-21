@@ -7,7 +7,6 @@ use super::DynPrimFn;
 use super::FreePrimFn;
 use super::MutImpl;
 use super::Prelude;
-use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::func::repr::generate_code;
@@ -21,6 +20,7 @@ use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::SymbolMode;
 use crate::prelude::mode::TaskPrimMode;
 use crate::semantics::core::Eval;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::FuncSetup;
@@ -66,7 +66,7 @@ impl Default for FuncPrelude {
 }
 
 impl Prelude for FuncPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.new.put(ctx);
         self.repr.put(ctx);
         self.apply.put(ctx);

@@ -1,5 +1,5 @@
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
+use airlang::semantics::ctx::Ctx;
 use airlang_ext::prelude::StdPrelude;
 
 use self::eval::EvalPrelude;
@@ -15,7 +15,7 @@ pub struct BinPrelude {
 }
 
 impl Prelude for BinPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.std.put(ctx);
         self.repl.put(ctx);
         self.eval.put(ctx);

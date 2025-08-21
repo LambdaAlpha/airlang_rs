@@ -1,6 +1,6 @@
 use airlang::prelude::CorePrelude;
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
+use airlang::semantics::ctx::Ctx;
 
 use self::build::BuildPrelude;
 use self::file::FilePrelude;
@@ -17,7 +17,7 @@ pub struct StdPrelude {
 }
 
 impl Prelude for StdPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.core.put(ctx);
         self.io.put(ctx);
         self.file.put(ctx);

@@ -6,7 +6,6 @@ use airlang::Air;
 use airlang::prelude::ConstImpl;
 use airlang::prelude::DynPrimFn;
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
 use airlang::prelude::setup::default_dyn_mode;
 use airlang::semantics::ctx::Contract;
 use airlang::semantics::ctx::Ctx;
@@ -17,6 +16,8 @@ use airlang::type_::ConstRef;
 use airlang::type_::Symbol;
 use airlang::type_::Text;
 use log::error;
+
+use crate::prelude::StdPrelude;
 
 pub struct BuildPrelude {
     pub import: ConstPrimFuncVal,
@@ -29,7 +30,7 @@ impl Default for BuildPrelude {
 }
 
 impl Prelude for BuildPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.import.put(ctx);
     }
 }
@@ -86,7 +87,8 @@ fn import_from_url(url: String) -> Val {
         return Val::default();
     };
 
-    let mut mod_air = Air::default();
+    // todo design ctx for import evaluation
+    let mut mod_air = Air::new(StdPrelude::default().into());
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     if !set_cur_url(mod_air.ctx_mut(), cur_url_key, url) {
         error!("set_cur_url {CUR_URL_KEY} should succeed");

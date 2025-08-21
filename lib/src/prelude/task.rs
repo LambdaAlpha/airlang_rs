@@ -6,7 +6,6 @@ use super::DynPrimFn;
 use super::FreePrimFn;
 use super::MutImpl;
 use super::Prelude;
-use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
@@ -14,6 +13,7 @@ use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use crate::prelude::utils::map_remove;
 use crate::semantics::core::TaskApply;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
@@ -60,7 +60,7 @@ impl Default for TaskPrelude {
 }
 
 impl Prelude for TaskPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.new_call.put(ctx);
         self.new_solve.put(ctx);
         self.apply.put(ctx);

@@ -1,5 +1,5 @@
 use super::Prelude;
-use super::PreludeCtx;
+use crate::semantics::ctx::Ctx;
 
 // todo design
 #[derive(Clone)]
@@ -13,5 +13,5 @@ impl Default for NumberPrelude {
 }
 
 impl Prelude for NumberPrelude {
-    fn put(&self, _ctx: &mut dyn PreludeCtx) {}
+    fn put(self, _ctx: &mut Ctx) {}
 }

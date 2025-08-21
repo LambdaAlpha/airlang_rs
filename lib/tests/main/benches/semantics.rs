@@ -1,7 +1,6 @@
 use std::error::Error;
 
 use airlang::Air;
-use airlang::init_prelude;
 use airlang::init_solver;
 use airlang::prelude::CorePrelude;
 use airlang::semantics::val::Val;
@@ -12,9 +11,8 @@ use airlang::type_::Int;
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
-    init_prelude(Box::new(CorePrelude::default()));
     init_solver(core_solver());
-    let mut air = Air::default();
+    let mut air = Air::new(CorePrelude::default().into());
     let s = include_str!("../../../benches/main/interpret.air");
     let src_val = parse(s)?;
     let output = air.interpret(src_val);

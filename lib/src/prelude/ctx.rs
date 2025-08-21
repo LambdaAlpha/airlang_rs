@@ -11,10 +11,8 @@ use super::FreePrimFn;
 use super::FuncMode;
 use super::MutImpl;
 use super::Prelude;
-use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
-use super::initial_ctx;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
 use super::mut_impl;
@@ -27,7 +25,6 @@ use crate::prelude::setup::dyn_mode;
 use crate::prelude::setup::free_mode;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
-use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -48,7 +45,6 @@ pub struct CtxPrelude {
     pub ctx_new: FreePrimFuncVal,
     pub ctx_repr: FreePrimFuncVal,
     pub ctx_reverse: FreePrimFuncVal,
-    pub ctx_prelude: FreePrimFuncVal,
     pub ctx_self: ConstPrimFuncVal,
 }
 
@@ -65,14 +61,13 @@ impl Default for CtxPrelude {
             ctx_new: ctx_new(),
             ctx_repr: ctx_repr(),
             ctx_reverse: ctx_reverse(),
-            ctx_prelude: ctx_prelude(),
             ctx_self: ctx_self(),
         }
     }
 }
 
 impl Prelude for CtxPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.read.put(ctx);
         self.move_.put(ctx);
         self.assign.put(ctx);
@@ -83,7 +78,6 @@ impl Prelude for CtxPrelude {
         self.ctx_new.put(ctx);
         self.ctx_repr.put(ctx);
         self.ctx_reverse.put(ctx);
-        self.ctx_prelude.put(ctx);
         self.ctx_self.put(ctx);
     }
 }
@@ -264,14 +258,6 @@ fn fn_ctx_reverse(input: Val) -> Val {
     let ctx = Ctx::from(ctx);
     let reverse = ctx.reverse();
     Val::Ctx(reverse.into())
-}
-
-pub fn ctx_prelude() -> FreePrimFuncVal {
-    FreePrimFn { id: "prelude", f: free_impl(fn_ctx_prelude), mode: default_free_mode() }.free()
-}
-
-fn fn_ctx_prelude(_input: Val) -> Val {
-    Val::Ctx(CtxVal::from(initial_ctx()))
 }
 
 pub fn ctx_self() -> ConstPrimFuncVal {

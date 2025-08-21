@@ -13,7 +13,6 @@ use super::DynPrimFn;
 use super::FreePrimFn;
 use super::FuncMode;
 use super::Prelude;
-use super::PreludeCtx;
 use super::const_impl;
 use super::free_impl;
 use super::mode::SymbolMode;
@@ -72,14 +71,14 @@ impl Default for ValuePrelude {
 }
 
 impl Prelude for ValuePrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.any.put(ctx);
         self.type_.put(ctx);
         self.equal.put(ctx);
     }
 }
 
-// todo design
+// todo design pick value from ctx
 pub fn any() -> FreePrimFuncVal {
     FreePrimFn {
         id: "any",

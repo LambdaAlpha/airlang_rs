@@ -2,9 +2,9 @@ use log::error;
 
 use super::FreePrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::syntax::GenRepr;
@@ -29,7 +29,7 @@ impl Default for SyntaxPrelude {
 }
 
 impl Prelude for SyntaxPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.parse.put(ctx);
         self.generate.put(ctx);
     }

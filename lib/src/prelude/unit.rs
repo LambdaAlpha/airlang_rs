@@ -1,8 +1,8 @@
 use super::FreePrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Unit;
@@ -19,7 +19,7 @@ impl Default for UnitPrelude {
 }
 
 impl Prelude for UnitPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.unit.put(ctx);
     }
 }

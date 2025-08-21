@@ -2,9 +2,9 @@ use log::error;
 
 use super::FreePrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Link;
@@ -25,7 +25,7 @@ impl Default for LinkPrelude {
 }
 
 impl Prelude for LinkPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.new.put(ctx);
         self.get.put(ctx);
         self.set.put(ctx);

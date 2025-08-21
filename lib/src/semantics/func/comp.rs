@@ -27,7 +27,7 @@ impl FreeComposite {
         if put_input(inner, self.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        composite_call(&Eval, inner, self.body.clone())
+        composite_call(inner, self.body.clone())
     }
 }
 
@@ -36,15 +36,14 @@ impl DynComposite {
         if put_input(inner, self.free.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        let eval = |inner: &mut Ctx| composite_call(&Eval, inner, self.free.body.clone());
+        let eval = |inner: &mut Ctx| composite_call(inner, self.free.body.clone());
         with_ctx(inner, outer, self.ctx_name.clone(), eval)
     }
 }
 
-pub(crate) fn composite_call<Fn>(f: &Fn, ctx: &mut Ctx, body: Val) -> Val
-where Fn: MutFn<Val, Val, Val> {
+pub(crate) fn composite_call(ctx: &mut Ctx, body: Val) -> Val {
     let mut ctx_val = Val::Ctx(take(ctx).into());
-    let output = f.mut_call(&mut ctx_val, body);
+    let output = Eval.mut_call(&mut ctx_val, body);
     let Val::Ctx(ctx_val) = ctx_val else {
         unreachable!("composite_call ctx invariant is broken!!!")
     };

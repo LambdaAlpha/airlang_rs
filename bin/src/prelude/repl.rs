@@ -1,8 +1,8 @@
 use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 
@@ -17,7 +17,7 @@ impl Default for ReplPrelude {
 }
 
 impl Prelude for ReplPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.help.put(ctx);
     }
 }

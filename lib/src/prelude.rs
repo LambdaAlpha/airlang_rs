@@ -1,4 +1,3 @@
-use std::cell::OnceCell;
 use std::rc::Rc;
 
 use self::bit::BitPrelude;
@@ -24,8 +23,6 @@ use self::unit::UnitPrelude;
 use self::value::ValuePrelude;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
-use crate::semantics::ctx::CtxMap;
-use crate::semantics::ctx::CtxValue;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreeFn;
@@ -39,53 +36,10 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
-use crate::type_::Map;
 use crate::type_::Symbol;
 
-thread_local!(pub(crate) static PRELUDE: OnceCell<Box<dyn Prelude>> = OnceCell::new());
-
 pub trait Prelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx);
-}
-
-pub trait PreludeCtx {
-    fn put(&mut self, name: Symbol, val: Val);
-}
-
-pub(crate) fn set_prelude(prelude: Box<dyn Prelude>) {
-    PRELUDE.with(|p| {
-        let _ = p.set(prelude);
-    });
-}
-
-pub fn initial_ctx() -> Ctx {
-    let mut variables: Map<Symbol, CtxValue> = Map::default();
-    put_preludes(&mut variables);
-    let variables = CtxMap::new(variables);
-    Ctx::new(variables)
-}
-
-pub(crate) fn put_preludes(ctx: &mut dyn PreludeCtx) {
-    PRELUDE.with(|prelude| {
-        let Some(prelude) = prelude.get() else {
-            return;
-        };
-        prelude.put(ctx);
-    });
-}
-
-impl PreludeCtx for Map<Symbol, CtxValue> {
-    fn put(&mut self, name: Symbol, val: Val) {
-        let v = self.insert(name, CtxValue::new(val, Contract::default()));
-        assert!(v.is_none(), "names of preludes should be unique");
-    }
-}
-
-impl PreludeCtx for Map<Symbol, Val> {
-    fn put(&mut self, name: Symbol, val: Val) {
-        let v = self.insert(name, val);
-        assert!(v.is_none(), "names of preludes should be unique");
-    }
+    fn put(self, ctx: &mut Ctx);
 }
 
 #[derive(Default, Clone)]
@@ -113,7 +67,7 @@ pub struct CorePrelude {
 }
 
 impl Prelude for CorePrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.unit.put(ctx);
         self.bool.put(ctx);
         self.symbol.put(ctx);
@@ -137,13 +91,22 @@ impl Prelude for CorePrelude {
     }
 }
 
+impl<T: Prelude> From<T> for Ctx {
+    fn from(value: T) -> Self {
+        let mut ctx = Ctx::default();
+        value.put(&mut ctx);
+        ctx
+    }
+}
+
 pub(crate) trait Named {
     fn name(&self) -> Symbol;
 }
 
 impl<T: Named + Clone + Into<FuncVal>> Prelude for T {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
-        ctx.put(self.name(), Val::Func(self.clone().into()));
+    fn put(self, ctx: &mut Ctx) {
+        let v = ctx.put(self.name(), Val::Func(self.into()), Contract::None);
+        assert!(matches!(v, Ok(None)), "names of preludes should be unique");
     }
 }
 
@@ -210,16 +173,16 @@ impl<F: MutFn<Val, Val, Val> + 'static> DynPrimFn<F> {
     }
 }
 
-fn ctx_put_val<V: Clone + Into<Val>>(ctx: &mut dyn PreludeCtx, name: &'static str, val: &V) {
+fn ctx_put_val<V: Into<Val>>(ctx: &mut Ctx, name: &'static str, val: V) {
     let name = Symbol::from_str_unchecked(name);
-    let val = val.clone().into();
-    ctx.put(name, val);
+    let v = ctx.put(name, val.into(), Contract::None);
+    assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }
 
-fn ctx_put_func<V: Clone + Into<FuncVal>>(ctx: &mut dyn PreludeCtx, name: &'static str, val: &V) {
+fn ctx_put_func<V: Into<FuncVal>>(ctx: &mut Ctx, name: &'static str, val: V) {
     let name = Symbol::from_str_unchecked(name);
-    let func = val.clone().into();
-    ctx.put(name, Val::Func(func));
+    let v = ctx.put(name, Val::Func(val.into()), Contract::None);
+    assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }
 
 pub struct FreeImpl<I, O> {

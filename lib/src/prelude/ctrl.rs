@@ -8,7 +8,6 @@ use num_traits::ToPrimitive;
 use super::DynPrimFn;
 use super::FuncMode;
 use super::Prelude;
-use super::PreludeCtx;
 use super::mode::PrimMode;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
@@ -19,6 +18,7 @@ use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::dyn_mode;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ListVal;
@@ -58,7 +58,7 @@ impl Default for CtrlPrelude {
 }
 
 impl Prelude for CtrlPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.do_.put(ctx);
         self.if_.put(ctx);
         self.switch.put(ctx);

@@ -1,12 +1,13 @@
-use airlang::initial_ctx;
 use airlang::prelude::DynPrimFn;
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
 use airlang::prelude::mut_impl;
 use airlang::prelude::setup::default_dyn_mode;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
 use log::error;
+
+use crate::prelude::BinPrelude;
 
 pub struct EvalPrelude {
     pub reset: MutPrimFuncVal,
@@ -19,7 +20,7 @@ impl Default for EvalPrelude {
 }
 
 impl Prelude for EvalPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.reset.put(ctx);
     }
 }
@@ -34,6 +35,6 @@ fn fn_reset(ctx: &mut Val, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
     };
-    **ctx = initial_ctx();
+    **ctx = BinPrelude::default().into();
     Val::default()
 }

@@ -12,7 +12,6 @@ _____!();
 
 use super::FreePrimFn;
 use super::Prelude;
-use super::PreludeCtx;
 use super::ctx_put_func;
 use super::free_impl;
 use super::mode::repr::EVAL_EVAL;
@@ -25,6 +24,7 @@ use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_REF;
 use super::mode::repr::parse;
 use crate::prelude::setup::free_mode;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
@@ -64,16 +64,16 @@ impl Default for ModePrelude {
 }
 
 impl Prelude for ModePrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.new.put(ctx);
-        ctx_put_func(ctx, FORM_ID, &self.form_id);
-        ctx_put_func(ctx, FORM_LITERAL, &self.form_literal);
-        ctx_put_func(ctx, FORM_REF, &self.form_ref);
-        ctx_put_func(ctx, FORM_EVAL, &self.form_eval);
-        ctx_put_func(ctx, EVAL_ID, &self.eval_id);
-        ctx_put_func(ctx, EVAL_LITERAL, &self.eval_literal);
-        ctx_put_func(ctx, EVAL_REF, &self.eval_ref);
-        ctx_put_func(ctx, EVAL_EVAL, &self.eval_eval);
+        ctx_put_func(ctx, FORM_ID, self.form_id);
+        ctx_put_func(ctx, FORM_LITERAL, self.form_literal);
+        ctx_put_func(ctx, FORM_REF, self.form_ref);
+        ctx_put_func(ctx, FORM_EVAL, self.form_eval);
+        ctx_put_func(ctx, EVAL_ID, self.eval_id);
+        ctx_put_func(ctx, EVAL_LITERAL, self.eval_literal);
+        ctx_put_func(ctx, EVAL_REF, self.eval_ref);
+        ctx_put_func(ctx, EVAL_EVAL, self.eval_eval);
     }
 }
 

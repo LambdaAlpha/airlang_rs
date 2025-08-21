@@ -9,7 +9,6 @@ use rand::distr::StandardUniform;
 use rand::distr::weighted::WeightedIndex;
 use rand::prelude::Distribution;
 use rand::prelude::IndexedRandom;
-use rand::prelude::IteratorRandom;
 
 use crate::prelude::mode::CompMode;
 use crate::prelude::mode::ListMode;
@@ -20,7 +19,6 @@ use crate::prelude::mode::PrimMode;
 use crate::prelude::mode::SymbolMode;
 use crate::prelude::mode::TaskMode;
 use crate::prelude::mode::TaskPrimMode;
-use crate::prelude::put_preludes;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;
@@ -440,28 +438,22 @@ impl Arbitrary for Mode {
 impl Arbitrary for FuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         if rng.random() {
-            let mut prelude: Map<Symbol, Val> = Map::with_capacity(128);
-            put_preludes(&mut prelude);
-            let func =
-                prelude.into_values().filter(|v| matches!(v, Val::Func(_))).choose(rng).unwrap();
-            let Val::Func(func) = func else { unreachable!() };
-            func
-        } else {
-            match rng.random_range(0 .. 3) {
-                0 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::FreeComp(func)
-                }
-                1 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::ConstComp(func)
-                }
-                2 => {
-                    let func = Arbitrary::any(rng, depth);
-                    FuncVal::MutComp(func)
-                }
-                _ => unreachable!(),
+            return FuncVal::default();
+        }
+        match rng.random_range(0 .. 3) {
+            0 => {
+                let func = Arbitrary::any(rng, depth);
+                FuncVal::FreeComp(func)
             }
+            1 => {
+                let func = Arbitrary::any(rng, depth);
+                FuncVal::ConstComp(func)
+            }
+            2 => {
+                let func = Arbitrary::any(rng, depth);
+                FuncVal::MutComp(func)
+            }
+            _ => unreachable!(),
         }
     }
 }

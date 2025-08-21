@@ -518,24 +518,6 @@ _ do [
 -----
 true
 =====
-prelude
------
-_ do [a = _ prelude ., a ; apply _ .not true]
------
-false
-=====
-prelude self
------
-_ do [a = _ prelude ., a ; is_null .prelude]
------
-false
-=====
-prelude current
------
-_ do [a = _ any ., b = _ prelude ., b ; is_null .a]
------
-true
-=====
 self
 -----
 _ do [a = 1, b = _ self ., b ; apply .a]

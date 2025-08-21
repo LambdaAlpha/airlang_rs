@@ -34,6 +34,12 @@ impl<K: Eq + Hash, V> FromIterator<(K, V)> for Map<K, V> {
     }
 }
 
+impl<K: Eq + Hash, V> Extend<(K, V)> for Map<K, V> {
+    fn extend<T: IntoIterator<Item = (K, V)>>(&mut self, iter: T) {
+        self.0.extend(iter);
+    }
+}
+
 impl<K: Eq + Hash, V: PartialEq> PartialEq for Map<K, V> {
     fn eq(&self, other: &Self) -> bool {
         self.0.eq(&other.0)

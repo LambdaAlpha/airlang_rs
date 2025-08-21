@@ -6,11 +6,11 @@ use std::io::stdout;
 use airlang::prelude::DynPrimFn;
 use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
-use airlang::prelude::PreludeCtx;
 use airlang::prelude::free_impl;
 use airlang::prelude::mut_impl;
 use airlang::prelude::setup::default_dyn_mode;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
@@ -41,7 +41,7 @@ impl Default for IoPrelude {
 }
 
 impl Prelude for IoPrelude {
-    fn put(&self, ctx: &mut dyn PreludeCtx) {
+    fn put(self, ctx: &mut Ctx) {
         self.read_line.put(ctx);
         self.print.put(ctx);
         self.print_line.put(ctx);
