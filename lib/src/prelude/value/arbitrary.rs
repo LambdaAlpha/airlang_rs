@@ -87,28 +87,30 @@ impl Arbitrary for Val {
             1,      // call
             1,      // list
             1,      // map
+            1,      // link
             1,      // ctx
             1,      // func
             1,      // extension
         ];
         let i = sample(rng, weights);
-        let new_depth = depth + 1;
+        let depth = depth + 1;
 
         match i {
-            0 => Val::Unit(Unit::any(rng, new_depth)),
-            1 => Val::Bit(Bit::any(rng, new_depth)),
-            2 => Val::Symbol(Symbol::any(rng, new_depth)),
-            3 => Val::Text(Text::any(rng, new_depth).into()),
-            4 => Val::Int(Int::any(rng, new_depth).into()),
-            5 => Val::Number(Number::any(rng, new_depth).into()),
-            6 => Val::Byte(Byte::any(rng, new_depth).into()),
-            7 => Val::Pair(Pair::<Val, Val>::any(rng, new_depth).into()),
-            8 => Val::Task(Task::<Val, Val, Val>::any(rng, new_depth).into()),
-            9 => Val::List(List::<Val>::any(rng, new_depth).into()),
-            10 => Val::Map(Map::<Val, Val>::any(rng, new_depth).into()),
-            11 => Val::Ctx(Ctx::any(rng, new_depth).into()),
-            12 => Val::Func(FuncVal::any(rng, new_depth)),
-            13 => arbitrary_ext(),
+            0 => Val::Unit(Unit::any(rng, depth)),
+            1 => Val::Bit(Bit::any(rng, depth)),
+            2 => Val::Symbol(Symbol::any(rng, depth)),
+            3 => Val::Text(Text::any(rng, depth).into()),
+            4 => Val::Int(Int::any(rng, depth).into()),
+            5 => Val::Number(Number::any(rng, depth).into()),
+            6 => Val::Byte(Byte::any(rng, depth).into()),
+            7 => Val::Pair(Pair::<Val, Val>::any(rng, depth).into()),
+            8 => Val::Task(Task::<Val, Val, Val>::any(rng, depth).into()),
+            9 => Val::List(List::<Val>::any(rng, depth).into()),
+            10 => Val::Map(Map::<Val, Val>::any(rng, depth).into()),
+            11 => Val::Link(Link::any(rng, depth)),
+            12 => Val::Ctx(Ctx::any(rng, depth).into()),
+            13 => Val::Func(FuncVal::any(rng, depth)),
+            14 => arbitrary_ext(),
             _ => unreachable!(),
         }
     }
@@ -191,6 +193,7 @@ where
     Second: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         Pair::new(First::any(rng, depth), Second::any(rng, depth))
     }
 }
@@ -201,6 +204,7 @@ where
     That: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         if rng.random() {
             Either::This(This::any(rng, depth))
         } else {
@@ -215,6 +219,7 @@ where
     To: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         Change::new(From::any(rng, depth), To::any(rng, depth))
     }
 }
@@ -226,6 +231,7 @@ where
     Input: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         Task {
             action: Action::any(rng, depth),
             func: Func::any(rng, depth),
@@ -247,6 +253,7 @@ where
     Ctx: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         FuncCtx { func: Func::any(rng, depth), ctx: Ctx::any(rng, depth) }
     }
 }
@@ -257,6 +264,7 @@ where
     Input: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         FuncInput { func: Func::any(rng, depth), input: Input::any(rng, depth) }
     }
 }
@@ -267,6 +275,7 @@ where
     Input: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         CtxInput { ctx: Ctx::any(rng, depth), input: Input::any(rng, depth) }
     }
 }
@@ -278,6 +287,7 @@ where
     Input: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         FuncCtxInput {
             func: Func::any(rng, depth),
             ctx: Ctx::any(rng, depth),
@@ -291,6 +301,7 @@ where T: Arbitrary
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let len = any_len_weighted(rng, depth);
+        let depth = depth + 1;
         let mut list = Vec::with_capacity(len);
         for _ in 0 .. len {
             list.push(T::any(rng, depth));
@@ -306,6 +317,7 @@ where
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let len = any_len_weighted(rng, depth);
+        let depth = depth + 1;
         let mut map = Map::with_capacity(len);
         for _ in 0 .. len {
             map.insert(K::any(rng, depth), V::any(rng, depth));
@@ -316,6 +328,7 @@ where
 
 impl<T: Arbitrary> Arbitrary for Link<T> {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         Link::new(T::any(rng, depth))
     }
 }
@@ -330,12 +343,14 @@ impl Arbitrary for Contract {
 
 impl Arbitrary for CtxValue {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         CtxValue::new(Val::any(rng, depth), Contract::any(rng, depth))
     }
 }
 
 impl Arbitrary for Ctx {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let variables = CtxMap::new(Map::any(rng, depth));
         Ctx::new(variables)
     }
@@ -343,12 +358,14 @@ impl Arbitrary for Ctx {
 
 impl<T: Arbitrary> Arbitrary for Option<T> {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         if rng.random() { None } else { Some(T::any(rng, depth)) }
     }
 }
 
 impl<T: Arbitrary> Arbitrary for Box<T> {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         Box::new(T::any(rng, depth))
     }
 }
@@ -369,6 +386,7 @@ impl Arbitrary for SymbolMode {
 
 impl Arbitrary for CompMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let default = Arbitrary::any(rng, depth);
         let pair = Arbitrary::any(rng, depth);
         let task = Arbitrary::any(rng, depth);
@@ -380,44 +398,45 @@ impl Arbitrary for CompMode {
 
 impl Arbitrary for PairMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let some = Arbitrary::any(rng, new_depth);
-        let first = Arbitrary::any(rng, new_depth);
-        let second = Arbitrary::any(rng, new_depth);
+        let depth = depth + 1;
+        let some = Arbitrary::any(rng, depth);
+        let first = Arbitrary::any(rng, depth);
+        let second = Arbitrary::any(rng, depth);
         PairMode { some, first, second }
     }
 }
 
 impl Arbitrary for TaskMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let func = Arbitrary::any(rng, new_depth);
-        let ctx = Arbitrary::any(rng, new_depth);
-        let input = Arbitrary::any(rng, new_depth);
+        let depth = depth + 1;
+        let func = Arbitrary::any(rng, depth);
+        let ctx = Arbitrary::any(rng, depth);
+        let input = Arbitrary::any(rng, depth);
         TaskMode { func, ctx, input }
     }
 }
 
 impl Arbitrary for ListMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let head = Arbitrary::any(rng, new_depth);
-        let tail = Arbitrary::any(rng, new_depth);
+        let depth = depth + 1;
+        let head = Arbitrary::any(rng, depth);
+        let tail = Arbitrary::any(rng, depth);
         ListMode { head, tail }
     }
 }
 
 impl Arbitrary for MapMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let new_depth = depth + 1;
-        let some = Arbitrary::any(rng, new_depth);
-        let else_ = Arbitrary::any(rng, new_depth);
+        let depth = depth + 1;
+        let some = Arbitrary::any(rng, depth);
+        let else_ = Arbitrary::any(rng, depth);
         MapMode { some, else_ }
     }
 }
 
 impl Arbitrary for PrimMode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let symbol = Arbitrary::any(rng, depth);
         let task = Arbitrary::any(rng, depth);
         PrimMode { symbol, task }
@@ -426,17 +445,18 @@ impl Arbitrary for PrimMode {
 
 impl Arbitrary for Mode {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let new_depth = depth + 1;
+        let depth = depth + 1;
         if rng.random() {
-            Mode::Comp(Arbitrary::any(rng, new_depth))
+            Mode::Comp(Arbitrary::any(rng, depth))
         } else {
-            Mode::Func(FuncVal::any(rng, new_depth))
+            Mode::Func(FuncVal::any(rng, depth))
         }
     }
 }
 
 impl Arbitrary for FuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         if rng.random() {
             return FuncVal::default();
         }
@@ -460,6 +480,7 @@ impl Arbitrary for FuncVal {
 
 impl Arbitrary for Setup {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let call_input = Arbitrary::any(rng, depth);
         let solve_input = Arbitrary::any(rng, depth);
         Setup { call: call_input, solve: solve_input }
@@ -468,18 +489,21 @@ impl Arbitrary for Setup {
 
 impl Arbitrary for FreeComposite {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         FreeComposite { body: Arbitrary::any(rng, depth), input_name: Arbitrary::any(rng, depth) }
     }
 }
 
 impl Arbitrary for DynComposite {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         DynComposite { free: Arbitrary::any(rng, depth), ctx_name: Arbitrary::any(rng, depth) }
     }
 }
 
 impl Arbitrary for FreeCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let func = FreeCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
@@ -492,6 +516,7 @@ impl Arbitrary for FreeCompFuncVal {
 
 impl Arbitrary for ConstCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let func = ConstCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
@@ -504,6 +529,7 @@ impl Arbitrary for ConstCompFuncVal {
 
 impl Arbitrary for MutCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
         let func = MutCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
