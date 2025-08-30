@@ -19,6 +19,7 @@ use crate::prelude::mode::PrimMode;
 use crate::prelude::mode::SymbolMode;
 use crate::prelude::mode::TaskMode;
 use crate::prelude::mode::TaskPrimMode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;
@@ -88,6 +89,7 @@ impl Arbitrary for Val {
             1,      // list
             1,      // map
             1,      // link
+            1,      // cfg
             1,      // ctx
             1,      // func
             1,      // extension
@@ -108,9 +110,10 @@ impl Arbitrary for Val {
             9 => Val::List(List::<Val>::any(rng, depth).into()),
             10 => Val::Map(Map::<Val, Val>::any(rng, depth).into()),
             11 => Val::Link(Link::any(rng, depth)),
-            12 => Val::Ctx(Ctx::any(rng, depth).into()),
-            13 => Val::Func(FuncVal::any(rng, depth)),
-            14 => arbitrary_ext(),
+            12 => Val::Cfg(Cfg::any(rng, depth).into()),
+            13 => Val::Ctx(Ctx::any(rng, depth).into()),
+            14 => Val::Func(FuncVal::any(rng, depth)),
+            15 => arbitrary_ext(),
             _ => unreachable!(),
         }
     }
@@ -330,6 +333,18 @@ impl<T: Arbitrary> Arbitrary for Link<T> {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         Link::new(T::any(rng, depth))
+    }
+}
+
+impl Arbitrary for Cfg {
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let len = any_len_weighted(rng, depth);
+        let depth = depth + 1;
+        let cfg = Cfg::default();
+        for _ in 0 .. len {
+            cfg.extend_scope(Symbol::any(rng, depth), Val::any(rng, depth));
+        }
+        cfg
     }
 }
 

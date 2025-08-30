@@ -20,9 +20,11 @@ use super::mode::TaskPrimMode;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use super::setup::free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
+use crate::semantics::val::CFG;
 use crate::semantics::val::CTX;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FUNC;
@@ -107,6 +109,7 @@ fn fn_any(input: Val) -> Val {
             LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
             MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
             LINK => Val::Link(Link::any(rng, DEPTH)),
+            CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             CTX => Val::Ctx(Ctx::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             _ => arbitrary_ext_type(s),
@@ -136,6 +139,7 @@ fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::List(_) => LIST,
         Val::Map(_) => MAP,
         Val::Link(_) => LINK,
+        Val::Cfg(_) => CFG,
         Val::Ctx(_) => CTX,
         Val::Func(_) => FUNC,
         Val::Dyn(val) => return Val::Symbol(val.type_name()),

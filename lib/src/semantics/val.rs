@@ -1,4 +1,5 @@
 pub use self::byte::ByteVal;
+pub use self::cfg::CfgVal;
 pub use self::ctx::CtxVal;
 pub use self::func::ConstCompFuncVal;
 pub use self::func::ConstPrimFuncVal;
@@ -64,6 +65,7 @@ pub enum Val {
     Map(MapVal),
 
     Link(LinkVal),
+    Cfg(CfgVal),
     Ctx(CtxVal),
     Func(FuncVal),
 
@@ -84,6 +86,7 @@ pub(crate) const TASK: &str = "task";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const LINK: &str = "link";
+pub(crate) const CFG: &str = "configuration";
 pub(crate) const CTX: &str = "context";
 pub(crate) const FUNC: &str = "function";
 
@@ -156,6 +159,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::List($name) => $body,
             $crate::semantics::val::Val::Map($name) => $body,
             $crate::semantics::val::Val::Link($name) => $body,
+            $crate::semantics::val::Val::Cfg($name) => $body,
             $crate::semantics::val::Val::Ctx($name) => $body,
             $crate::semantics::val::Val::Func($name) => $body,
             $crate::semantics::val::Val::Dyn($name) => $body,
@@ -187,6 +191,8 @@ mod task;
 mod list;
 
 mod map;
+
+mod cfg;
 
 mod ctx;
 

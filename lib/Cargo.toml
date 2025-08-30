@@ -25,6 +25,8 @@ num-bigint = "0.4"
 num-traits = "0.2"
 num-integer = "0.1"
 const_format = "0.2"
+# for once_map
+stable_deref_trait = "1.2"
 
 [dependencies.log]
 version = "0.4"
@@ -61,6 +63,11 @@ features = [
     "debug",
     "display",
 ]
+
+[dependencies.once_map]
+version = "0.4"
+default-features = false
+features = ["std"]
 
 [dev-dependencies]
 criterion = "0.7"
