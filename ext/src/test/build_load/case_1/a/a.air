@@ -1,0 +1,4 @@
+_ do [
+    b = _ build.load "b/b.air",
+    b + 1
+]

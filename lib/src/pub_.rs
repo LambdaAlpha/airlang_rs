@@ -36,4 +36,8 @@ impl Air {
     pub fn ctx_mut(&mut self) -> &mut Ctx {
         &mut self.ctx
     }
+
+    pub fn cfg_mut(&mut self) -> &mut Cfg {
+        &mut self.cfg
+    }
 }

@@ -1,4 +1,0 @@
-_ do [
-    b = _ build.import "b/b.air",
-    b + 1
-]

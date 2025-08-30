@@ -49,7 +49,7 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
-    let src = generate_import("/main/main.air");
+    let src = generate_load("/main/main.air");
     let src = parse(&src)?;
     init_solver(core_solver());
     let mut air = Air::new(CoreCfg::default().into());
@@ -59,8 +59,8 @@ fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
     Ok(air)
 }
 
-fn generate_import(path: &str) -> String {
-    let mut src = Text::from("build.import \"");
+fn generate_load(path: &str) -> String {
+    let mut src = Text::from("build.load \"");
     escape_text(&mut src, env!("CARGO_MANIFEST_DIR"));
     src.push_str(path);
     src.push('"');

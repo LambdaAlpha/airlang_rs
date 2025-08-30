@@ -1,0 +1,5 @@
+_ do [
+  a = _ build.load "a/a.air",
+  b = _ build.load "a/b/b.air",
+  a + b
+]
