@@ -16,7 +16,6 @@ use derive_more::DerefMut;
 use derive_more::IsVariant;
 
 use crate::type_::DynRef;
-use crate::type_::Map;
 
 pub trait DynCtx<Input, Output> {
     fn ref_(&mut self, input: Input) -> Option<DynRef<'_, Output>>;
@@ -29,7 +28,7 @@ pub enum CtxError {
     AccessDenied,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Deref, DerefMut)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Hash, Deref, DerefMut)]
 pub struct Ctx {
     variables: CtxMap,
 }
@@ -57,12 +56,6 @@ impl Ctx {
 
     pub(crate) fn reverse(self) -> Self {
         Self { variables: self.variables.reverse() }
-    }
-}
-
-impl Default for Ctx {
-    fn default() -> Self {
-        Self { variables: CtxMap::new(Map::default()) }
     }
 }
 
