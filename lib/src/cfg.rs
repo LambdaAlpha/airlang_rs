@@ -1,4 +1,8 @@
+use self::prelude::CorePrelude;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::val::Val;
+use crate::type_::Symbol;
 
 pub trait CfgModule {
     fn extend(self, cfg: &Cfg);
@@ -13,8 +17,19 @@ impl<T: CfgModule> From<T> for Cfg {
 }
 
 #[derive(Default, Clone)]
-pub struct CoreCfg {}
+pub struct CoreCfg {
+    pub prelude: CorePrelude,
+}
 
 impl CfgModule for CoreCfg {
-    fn extend(self, _cfg: &Cfg) {}
+    fn extend(self, cfg: &Cfg) {
+        let prelude: Ctx = self.prelude.into();
+        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Ctx(prelude.into()));
+    }
 }
+
+impl CoreCfg {
+    pub const PRELUDE: &'static str = "prelude";
+}
+
+pub mod prelude;

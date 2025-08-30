@@ -15,9 +15,6 @@ pub mod cfg;
 // use prelude, semantics, type, trait
 pub mod solve;
 
-// use semantics, syntax, type, trait
-pub mod prelude;
-
 // use type, trait
 pub mod semantics;
 

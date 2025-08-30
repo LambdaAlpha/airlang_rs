@@ -7,7 +7,6 @@ use std::io::stdin;
 use std::mem::take;
 
 use airlang::Air;
-use airlang::cfg::CoreCfg;
 use airlang::semantics::val::Val;
 use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
@@ -45,7 +44,7 @@ use crossterm::terminal::enable_raw_mode;
 use crossterm::terminal::is_raw_mode_enabled;
 use crossterm::terminal::size;
 
-use crate::prelude::BinPrelude;
+use crate::cfg::BinCfg;
 
 pub trait ReplTerminal: Write + IsTerminal {}
 
@@ -83,7 +82,7 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub fn new(out: T) -> Self {
-        let air = Air::new(CoreCfg::default().into(), BinPrelude::default().into());
+        let air = Air::new(BinCfg::default().into());
         let terminal = Terminal(out);
         Self {
             air,

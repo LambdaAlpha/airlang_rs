@@ -1,4 +1,4 @@
-pub mod prelude;
+pub mod cfg;
 
 pub mod solve;
 

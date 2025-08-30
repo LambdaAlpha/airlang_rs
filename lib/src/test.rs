@@ -6,7 +6,6 @@ use log::trace;
 use crate::Air;
 use crate::cfg::CoreCfg;
 use crate::init_solver;
-use crate::prelude::CorePrelude;
 use crate::semantics::val::Val;
 use crate::solve::core_solver;
 use crate::syntax::parse;
@@ -34,7 +33,7 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
     init_solver(core_solver());
-    let air = Air::new(CoreCfg::default().into(), CorePrelude::default().into());
+    let air = Air::new(CoreCfg::default().into());
     test_interpret(air, input, file_name)
 }
 

@@ -3,7 +3,6 @@ use std::error::Error;
 use airlang::Air;
 use airlang::cfg::CoreCfg;
 use airlang::init_solver;
-use airlang::prelude::CorePrelude;
 use airlang::semantics::ctx::Contract;
 use airlang::solve::core_solver;
 use airlang::syntax::escape_text;
@@ -53,7 +52,7 @@ fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
     let src = generate_import("/main/main.air");
     let src = parse(&src)?;
     init_solver(core_solver());
-    let mut air = Air::new(CoreCfg::default().into(), CorePrelude::default().into());
+    let mut air = Air::new(CoreCfg::default().into());
     let main = air.interpret(src);
     let main_name = Symbol::from_str_unchecked(MAIN_NAME);
     air.ctx_mut().put(main_name, main, Contract::Final)?;

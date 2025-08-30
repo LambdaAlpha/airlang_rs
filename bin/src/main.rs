@@ -13,6 +13,6 @@ fn main() -> std::io::Result<()> {
 
 mod repl;
 
-mod prelude;
+mod cfg;
 
 mod solve;
