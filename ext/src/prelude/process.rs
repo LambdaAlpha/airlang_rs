@@ -4,6 +4,7 @@ use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::free_impl;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
@@ -40,7 +41,7 @@ pub fn call() -> FreePrimFuncVal {
     FreePrimFn { id: "process.call", f: free_impl(fn_call), mode: default_free_mode() }.free()
 }
 
-fn fn_call(input: Val) -> Val {
+fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         error!("input {input:?} should be a map");
         return Val::default();

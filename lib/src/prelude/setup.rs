@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use super::mode::FuncMode;
 use super::mode::Mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreeFn;
@@ -30,7 +31,7 @@ pub struct DynSetupFn<F> {
     pub f: F,
 }
 
-impl<F: FreeFn<Val, Val> + 'static> FreeSetupFn<F> {
+impl<F: FreeFn<Cfg, Val, Val> + 'static> FreeSetupFn<F> {
     pub fn free(self) -> FreePrimFuncVal {
         let func = FreePrimFunc {
             id: Symbol::from_str_unchecked(self.id),
@@ -41,7 +42,7 @@ impl<F: FreeFn<Val, Val> + 'static> FreeSetupFn<F> {
     }
 }
 
-impl<F: ConstFn<Val, Val, Val> + 'static> DynSetupFn<F> {
+impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynSetupFn<F> {
     pub fn const_(self) -> ConstPrimFuncVal {
         let func = ConstPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
@@ -52,7 +53,7 @@ impl<F: ConstFn<Val, Val, Val> + 'static> DynSetupFn<F> {
     }
 }
 
-impl<F: MutFn<Val, Val, Val> + 'static> DynSetupFn<F> {
+impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynSetupFn<F> {
     pub fn mut_(self) -> MutPrimFuncVal {
         let func = MutPrimFunc {
             id: Symbol::from_str_unchecked(self.id),

@@ -90,7 +90,7 @@ pub fn any() -> FreePrimFuncVal {
     .free()
 }
 
-fn fn_any(input: Val) -> Val {
+fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
     const DEPTH: usize = 0;
     let mut rng = SmallRng::from_os_rng();
     let rng = &mut rng;
@@ -125,7 +125,7 @@ pub fn type_() -> ConstPrimFuncVal {
     DynPrimFn { id: "type", f: const_impl(fn_type), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_type(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let s = match &*ctx {
         Val::Unit(_) => UNIT,
         Val::Bit(_) => BIT,
@@ -152,7 +152,7 @@ pub fn equal() -> FreePrimFuncVal {
     FreePrimFn { id: "==", f: free_impl(fn_equal), mode: default_free_mode() }.free()
 }
 
-fn fn_equal(input: Val) -> Val {
+fn fn_equal(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();

@@ -23,6 +23,7 @@ use crate::prelude::setup::default_dyn_mode;
 use crate::prelude::setup::default_free_mode;
 use crate::prelude::setup::dyn_mode;
 use crate::prelude::setup::free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -86,7 +87,7 @@ pub fn read() -> ConstPrimFuncVal {
     DynPrimFn { id: "read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_read(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
@@ -102,7 +103,7 @@ pub fn move_() -> MutPrimFuncVal {
     DynPrimFn { id: "move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_move(ctx: &mut Val, input: Val) -> Val {
+fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
@@ -127,7 +128,7 @@ pub fn assign() -> MutPrimFuncVal {
     .mut_()
 }
 
-fn fn_assign(ctx: &mut Val, input: Val) -> Val {
+fn fn_assign(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -145,7 +146,7 @@ pub fn contract() -> ConstPrimFuncVal {
     DynPrimFn { id: "contract", f: const_impl(fn_contract), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_contract(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
@@ -165,7 +166,7 @@ pub fn set_contract() -> MutPrimFuncVal {
     DynPrimFn { id: "set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_contract(ctx: &mut Val, input: Val) -> Val {
+fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
@@ -191,7 +192,7 @@ pub fn is_null() -> ConstPrimFuncVal {
     DynPrimFn { id: "is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_is_null(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
@@ -212,11 +213,11 @@ pub fn is_const() -> MutPrimFuncVal {
     .mut_()
 }
 
-fn fn_const(_ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_const(_cfg: &mut Cfg, _ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::true_())
 }
 
-fn fn_mut(_ctx: &mut Val, _input: Val) -> Val {
+fn fn_mut(_cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
     Val::Bit(Bit::false_())
 }
 
@@ -224,7 +225,7 @@ pub fn ctx_new() -> FreePrimFuncVal {
     FreePrimFn { id: "context", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free()
 }
 
-fn fn_ctx_new(input: Val) -> Val {
+fn fn_ctx_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(ctx) = parse_ctx(input) else {
         error!("parse_ctx failed");
         return Val::default();
@@ -237,7 +238,7 @@ pub fn ctx_repr() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_ctx_repr(input: Val) -> Val {
+fn fn_ctx_repr(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Ctx(ctx) = input else {
         error!("input {input:?} should be a ctx");
         return Val::default();
@@ -250,7 +251,7 @@ pub fn ctx_reverse() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_ctx_reverse(input: Val) -> Val {
+fn fn_ctx_reverse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Ctx(ctx) = input else {
         error!("input {input:?} should be a ctx");
         return Val::default();
@@ -264,7 +265,7 @@ pub fn ctx_self() -> ConstPrimFuncVal {
     DynPrimFn { id: "self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_ctx_self(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_ctx_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     ctx.unwrap().clone()
 }
 

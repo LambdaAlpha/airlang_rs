@@ -2,6 +2,7 @@ use airlang::prelude::DynPrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::mut_impl;
 use airlang::prelude::setup::default_dyn_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
@@ -30,7 +31,7 @@ pub fn reset() -> MutPrimFuncVal {
     DynPrimFn { id: "repl.reset", f: mut_impl(fn_reset), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_reset(ctx: &mut Val, _input: Val) -> Val {
+fn fn_reset(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Ctx(ctx) = ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();

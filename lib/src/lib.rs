@@ -9,6 +9,9 @@ macro_rules! _____ {
 // use solve, prelude, semantics, syntax, type, trait
 mod pub_;
 
+// use semantics, syntax, type, trait
+pub mod cfg;
+
 // use prelude, semantics, type, trait
 pub mod solve;
 

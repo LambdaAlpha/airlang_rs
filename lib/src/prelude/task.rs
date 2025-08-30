@@ -12,6 +12,7 @@ use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use crate::prelude::utils::map_remove;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::TaskApply;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
@@ -82,7 +83,7 @@ pub fn new_call() -> FreePrimFuncVal {
     FreePrimFn { id: CALL, f: free_impl(fn_new_call), mode: default_free_mode() }.free()
 }
 
-fn fn_new_call(input: Val) -> Val {
+fn fn_new_call(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         error!("input {input:?} should be a map");
         return Val::default();
@@ -98,7 +99,7 @@ pub fn new_solve() -> FreePrimFuncVal {
     FreePrimFn { id: SOLVE, f: free_impl(fn_new_solve), mode: default_free_mode() }.free()
 }
 
-fn fn_new_solve(input: Val) -> Val {
+fn fn_new_solve(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         error!("input {input:?} should be a map");
         return Val::default();
@@ -119,32 +120,32 @@ pub fn apply() -> MutPrimFuncVal {
     .mut_()
 }
 
-fn fn_apply_free(input: Val) -> Val {
+fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Task(task) = input else {
         return Val::default();
     };
-    TaskApply.free_call(task)
+    TaskApply.free_call(cfg, task)
 }
 
-fn fn_apply_const(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_apply_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Task(task) = input else {
         return Val::default();
     };
-    TaskApply.const_call(ctx, task)
+    TaskApply.const_call(cfg, ctx, task)
 }
 
-fn fn_apply_mut(ctx: &mut Val, input: Val) -> Val {
+fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Task(task) = input else {
         return Val::default();
     };
-    TaskApply.mut_call(ctx, task)
+    TaskApply.mut_call(cfg, ctx, task)
 }
 
 pub fn is_solve() -> ConstPrimFuncVal {
     DynPrimFn { id: "task.is_solve", f: const_impl(fn_is_solve), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_is_solve(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_is_solve(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Task(task) = &*ctx else {
         return Val::default();
     };
@@ -155,7 +156,7 @@ pub fn func() -> ConstPrimFuncVal {
     DynPrimFn { id: "task.function", f: const_impl(fn_func), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_func(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_func(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Task(task) = &*ctx else {
         return Val::default();
     };
@@ -166,7 +167,7 @@ pub fn set_func() -> MutPrimFuncVal {
     DynPrimFn { id: "task.set_function", f: mut_impl(fn_set_func), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_func(ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_func(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Task(task) = ctx else {
         return Val::default();
     };
@@ -178,7 +179,7 @@ pub fn ctx() -> ConstPrimFuncVal {
     DynPrimFn { id: "task.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_ctx(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Task(task) = &*ctx else {
         return Val::default();
     };
@@ -189,7 +190,7 @@ pub fn set_ctx() -> MutPrimFuncVal {
     DynPrimFn { id: "task.set_context", f: mut_impl(fn_set_ctx), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_ctx(ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_ctx(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Task(task) = ctx else {
         return Val::default();
     };
@@ -201,7 +202,7 @@ pub fn input() -> ConstPrimFuncVal {
     DynPrimFn { id: "task.input", f: const_impl(fn_input), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_input(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_input(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Task(task) = &*ctx else {
         return Val::default();
     };
@@ -212,7 +213,7 @@ pub fn set_input() -> MutPrimFuncVal {
     DynPrimFn { id: "task.set_input", f: mut_impl(fn_set_input), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_input(ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_input(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Task(task) = ctx else {
         return Val::default();
     };

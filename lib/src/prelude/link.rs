@@ -4,6 +4,7 @@ use super::FreePrimFn;
 use super::Prelude;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -36,7 +37,7 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn { id: "link", f: free_impl(fn_new), mode: default_free_mode() }.free()
 }
 
-fn fn_new(input: Val) -> Val {
+fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(Link::new(input))
 }
 
@@ -44,7 +45,7 @@ pub fn get() -> FreePrimFuncVal {
     FreePrimFn { id: "link.get", f: free_impl(fn_get), mode: default_free_mode() }.free()
 }
 
-fn fn_get(input: Val) -> Val {
+fn fn_get(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Link(link) = input else {
         error!("input {input:?} should be a link");
         return Val::default();
@@ -56,7 +57,7 @@ pub fn set() -> FreePrimFuncVal {
     FreePrimFn { id: "link.set", f: free_impl(fn_set), mode: default_free_mode() }.free()
 }
 
-fn fn_set(input: Val) -> Val {
+fn fn_set(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();

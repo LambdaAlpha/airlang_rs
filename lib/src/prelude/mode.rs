@@ -24,6 +24,7 @@ use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_REF;
 use super::mode::repr::parse;
 use crate::prelude::setup::free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -86,7 +87,7 @@ pub fn new() -> FreePrimFuncVal {
     .free()
 }
 
-fn fn_new(input: Val) -> Val {
+fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(mode) = parse(input) else {
         return Val::default();
     };
@@ -140,29 +141,29 @@ pub enum Mode {
     Func(FuncVal),
 }
 
-impl FreeFn<Val, Val> for Mode {
-    fn free_call(&self, input: Val) -> Val {
+impl FreeFn<Cfg, Val, Val> for Mode {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
         match self {
-            Mode::Comp(comp) => comp.free_call(input),
-            Mode::Func(func) => func.free_call(input),
+            Mode::Comp(comp) => comp.free_call(cfg, input),
+            Mode::Func(func) => func.free_call(cfg, input),
         }
     }
 }
 
-impl ConstFn<Val, Val, Val> for Mode {
-    fn const_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
+impl ConstFn<Cfg, Val, Val, Val> for Mode {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
-            Mode::Comp(comp) => comp.const_call(ctx, input),
-            Mode::Func(func) => func.const_call(ctx, input),
+            Mode::Comp(comp) => comp.const_call(cfg, ctx, input),
+            Mode::Func(func) => func.const_call(cfg, ctx, input),
         }
     }
 }
 
-impl MutFn<Val, Val, Val> for Mode {
-    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
+impl MutFn<Cfg, Val, Val, Val> for Mode {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         match self {
-            Mode::Comp(comp) => comp.mut_call(ctx, input),
-            Mode::Func(func) => func.mut_call(ctx, input),
+            Mode::Comp(comp) => comp.mut_call(cfg, ctx, input),
+            Mode::Func(func) => func.mut_call(cfg, ctx, input),
         }
     }
 }

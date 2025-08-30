@@ -2,6 +2,7 @@ use super::FreePrimFn;
 use super::Prelude;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -35,7 +36,7 @@ pub fn not() -> FreePrimFuncVal {
     FreePrimFn { id: "not", f: free_impl(fn_not), mode: default_free_mode() }.free()
 }
 
-fn fn_not(input: Val) -> Val {
+fn fn_not(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Bit(b) = input else {
         return Val::default();
     };
@@ -46,7 +47,7 @@ pub fn and() -> FreePrimFuncVal {
     FreePrimFn { id: "and", f: free_impl(fn_and), mode: default_free_mode() }.free()
 }
 
-fn fn_and(input: Val) -> Val {
+fn fn_and(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -63,7 +64,7 @@ pub fn or() -> FreePrimFuncVal {
     FreePrimFn { id: "or", f: free_impl(fn_or), mode: default_free_mode() }.free()
 }
 
-fn fn_or(input: Val) -> Val {
+fn fn_or(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -80,7 +81,7 @@ pub fn xor() -> FreePrimFuncVal {
     FreePrimFn { id: "xor", f: free_impl(fn_xor), mode: default_free_mode() }.free()
 }
 
-fn fn_xor(input: Val) -> Val {
+fn fn_xor(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };
@@ -97,7 +98,7 @@ pub fn imply() -> FreePrimFuncVal {
     FreePrimFn { id: "imply", f: free_impl(fn_imply), mode: default_free_mode() }.free()
 }
 
-fn fn_imply(input: Val) -> Val {
+fn fn_imply(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return Val::default();
     };

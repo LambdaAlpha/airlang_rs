@@ -2,6 +2,7 @@ use super::FreePrimFn;
 use super::Prelude;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -28,6 +29,6 @@ pub fn unit() -> FreePrimFuncVal {
     FreePrimFn { id: "unit", f: free_impl(fn_unit), mode: default_free_mode() }.free()
 }
 
-fn fn_unit(_input: Val) -> Val {
+fn fn_unit(_cfg: &mut Cfg, _input: Val) -> Val {
     Val::Unit(Unit)
 }

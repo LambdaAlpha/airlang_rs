@@ -7,6 +7,7 @@ use super::const_impl;
 use super::free_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -50,7 +51,7 @@ pub fn from_text() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_from_text(input: Val) -> Val {
+fn fn_from_text(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -69,7 +70,7 @@ pub fn into_text() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_into_text(input: Val) -> Val {
+fn fn_into_text(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         error!("input {input:?} should be a symbol");
         return Val::default();
@@ -81,7 +82,7 @@ pub fn length() -> ConstPrimFuncVal {
     DynPrimFn { id: "symbol.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Symbol(symbol) = &*ctx else {
         error!("ctx {ctx:?} should be a symbol");
         return Val::default();
@@ -95,7 +96,7 @@ pub fn join() -> FreePrimFuncVal {
     FreePrimFn { id: "symbol.join", f: free_impl(fn_join), mode: default_free_mode() }.free()
 }
 
-fn fn_join(input: Val) -> Val {
+fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();

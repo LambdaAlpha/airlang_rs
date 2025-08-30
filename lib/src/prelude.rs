@@ -21,6 +21,7 @@ use self::task::TaskPrelude;
 use self::text::TextPrelude;
 use self::unit::UnitPrelude;
 use self::value::ValuePrelude;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
@@ -140,7 +141,7 @@ pub struct DynPrimFn<F> {
     pub mode: FuncMode,
 }
 
-impl<F: FreeFn<Val, Val> + 'static> FreePrimFn<F> {
+impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
     pub fn free(self) -> FreePrimFuncVal {
         let func = FreePrimFunc {
             id: Symbol::from_str_unchecked(self.id),
@@ -151,7 +152,7 @@ impl<F: FreeFn<Val, Val> + 'static> FreePrimFn<F> {
     }
 }
 
-impl<F: ConstFn<Val, Val, Val> + 'static> DynPrimFn<F> {
+impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn const_(self) -> ConstPrimFuncVal {
         let func = ConstPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
@@ -162,7 +163,7 @@ impl<F: ConstFn<Val, Val, Val> + 'static> DynPrimFn<F> {
     }
 }
 
-impl<F: MutFn<Val, Val, Val> + 'static> DynPrimFn<F> {
+impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn mut_(self) -> MutPrimFuncVal {
         let func = MutPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
@@ -185,101 +186,102 @@ fn ctx_put_func<V: Into<FuncVal>>(ctx: &mut Ctx, name: &'static str, val: V) {
     assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }
 
-pub struct FreeImpl<I, O> {
-    pub free: fn(I) -> O,
+pub struct FreeImpl<Cfg, I, O> {
+    pub free: fn(&mut Cfg, I) -> O,
 }
 
-impl<I, O> FreeFn<I, O> for FreeImpl<I, O> {
-    fn free_call(&self, input: I) -> O {
-        (self.free)(input)
+impl<Cfg, I, O> FreeFn<Cfg, I, O> for FreeImpl<Cfg, I, O> {
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
+        (self.free)(cfg, input)
     }
 }
 
-impl<I, O> FreeImpl<I, O> {
-    pub fn new(free: fn(I) -> O) -> Self {
+impl<Cfg, I, O> FreeImpl<Cfg, I, O> {
+    pub fn new(free: fn(&mut Cfg, I) -> O) -> Self {
         Self { free }
     }
 
-    pub fn default(_input: I) -> O
+    pub fn default(_cfg: &mut Cfg, _input: I) -> O
     where O: Default {
         O::default()
     }
 }
 
-pub struct ConstImpl<Ctx, I, O> {
-    pub free: fn(I) -> O,
-    pub const_: fn(ConstRef<Ctx>, I) -> O,
+pub struct ConstImpl<Cfg, Ctx, I, O> {
+    pub free: fn(&mut Cfg, I) -> O,
+    pub const_: fn(&mut Cfg, ConstRef<Ctx>, I) -> O,
 }
 
-impl<Ctx, I, O> FreeFn<I, O> for ConstImpl<Ctx, I, O> {
-    fn free_call(&self, input: I) -> O {
-        (self.free)(input)
+impl<Cfg, Ctx, I, O> FreeFn<Cfg, I, O> for ConstImpl<Cfg, Ctx, I, O> {
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
+        (self.free)(cfg, input)
     }
 }
 
-impl<Ctx, I, O> ConstFn<Ctx, I, O> for ConstImpl<Ctx, I, O> {
-    fn const_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
-        (self.const_)(ctx, input)
+impl<Cfg, Ctx, I, O> ConstFn<Cfg, Ctx, I, O> for ConstImpl<Cfg, Ctx, I, O> {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, input: I) -> O {
+        (self.const_)(cfg, ctx, input)
     }
 }
 
-impl<Ctx, I, O> ConstImpl<Ctx, I, O> {
-    pub fn new(free: fn(I) -> O, const_: fn(ConstRef<Ctx>, I) -> O) -> Self {
+impl<Cfg, Ctx, I, O> ConstImpl<Cfg, Ctx, I, O> {
+    pub fn new(free: fn(&mut Cfg, I) -> O, const_: fn(&mut Cfg, ConstRef<Ctx>, I) -> O) -> Self {
         Self { free, const_ }
     }
 
-    pub fn default(_ctx: ConstRef<Ctx>, _input: I) -> O
+    pub fn default(_cfg: &mut Cfg, _ctx: ConstRef<Ctx>, _input: I) -> O
     where O: Default {
         O::default()
     }
 }
 
-pub struct MutImpl<Ctx, I, O> {
-    pub free: fn(I) -> O,
-    pub const_: fn(ConstRef<Ctx>, I) -> O,
-    pub mut_: fn(&mut Ctx, I) -> O,
+pub struct MutImpl<Cfg, Ctx, I, O> {
+    pub free: fn(&mut Cfg, I) -> O,
+    pub const_: fn(&mut Cfg, ConstRef<Ctx>, I) -> O,
+    pub mut_: fn(&mut Cfg, &mut Ctx, I) -> O,
 }
 
-impl<Ctx, I, O> FreeFn<I, O> for MutImpl<Ctx, I, O> {
-    fn free_call(&self, input: I) -> O {
-        (self.free)(input)
+impl<Cfg, Ctx, I, O> FreeFn<Cfg, I, O> for MutImpl<Cfg, Ctx, I, O> {
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
+        (self.free)(cfg, input)
     }
 }
 
-impl<Ctx, I, O> ConstFn<Ctx, I, O> for MutImpl<Ctx, I, O> {
-    fn const_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
-        (self.const_)(ctx, input)
+impl<Cfg, Ctx, I, O> ConstFn<Cfg, Ctx, I, O> for MutImpl<Cfg, Ctx, I, O> {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, input: I) -> O {
+        (self.const_)(cfg, ctx, input)
     }
 }
 
-impl<Ctx, I, O> MutFn<Ctx, I, O> for MutImpl<Ctx, I, O> {
-    fn mut_call(&self, ctx: &mut Ctx, input: I) -> O {
-        (self.mut_)(ctx, input)
+impl<Cfg, Ctx, I, O> MutFn<Cfg, Ctx, I, O> for MutImpl<Cfg, Ctx, I, O> {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
+        (self.mut_)(cfg, ctx, input)
     }
 }
 
-impl<Ctx, I, O> MutImpl<Ctx, I, O> {
+impl<Cfg, Ctx, I, O> MutImpl<Cfg, Ctx, I, O> {
     pub fn new(
-        free: fn(I) -> O, const_: fn(ConstRef<Ctx>, I) -> O, mut_: fn(&mut Ctx, I) -> O,
+        free: fn(&mut Cfg, I) -> O, const_: fn(&mut Cfg, ConstRef<Ctx>, I) -> O,
+        mut_: fn(&mut Cfg, &mut Ctx, I) -> O,
     ) -> Self {
         Self { free, const_, mut_ }
     }
 
-    pub fn default(_ctx: DynRef<Ctx>, _input: I) -> O
+    pub fn default(_cfg: &mut Cfg, _ctx: DynRef<Ctx>, _input: I) -> O
     where O: Default {
         O::default()
     }
 }
 
-pub fn free_impl(func: fn(Val) -> Val) -> FreeImpl<Val, Val> {
+pub fn free_impl(func: fn(&mut Cfg, Val) -> Val) -> FreeImpl<Cfg, Val, Val> {
     FreeImpl::new(func)
 }
 
-pub fn const_impl(func: fn(ConstRef<Val>, Val) -> Val) -> ConstImpl<Val, Val, Val> {
+pub fn const_impl(func: fn(&mut Cfg, ConstRef<Val>, Val) -> Val) -> ConstImpl<Cfg, Val, Val, Val> {
     ConstImpl::new(FreeImpl::default, func)
 }
 
-pub fn mut_impl(func: fn(&mut Val, Val) -> Val) -> MutImpl<Val, Val, Val> {
+pub fn mut_impl(func: fn(&mut Cfg, &mut Val, Val) -> Val) -> MutImpl<Cfg, Val, Val, Val> {
     MutImpl::new(FreeImpl::default, ConstImpl::default, func)
 }
 

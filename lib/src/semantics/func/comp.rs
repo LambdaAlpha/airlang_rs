@@ -1,6 +1,7 @@
 use std::mem::take;
 
 use super::MutFn;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -23,27 +24,29 @@ pub(crate) struct DynComposite {
 }
 
 impl FreeComposite {
-    pub(super) fn call(&self, inner: &mut Ctx, input: Val) -> Val {
+    pub(super) fn call(&self, cfg: &mut Cfg, inner: &mut Ctx, input: Val) -> Val {
         if put_input(inner, self.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        composite_call(inner, self.body.clone())
+        composite_call(cfg, inner, self.body.clone())
     }
 }
 
 impl DynComposite {
-    pub(super) fn call(&self, inner: &mut Ctx, outer: DynRef<Val>, input: Val) -> Val {
+    pub(super) fn call(
+        &self, cfg: &mut Cfg, inner: &mut Ctx, outer: DynRef<Val>, input: Val,
+    ) -> Val {
         if put_input(inner, self.free.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        let eval = |inner: &mut Ctx| composite_call(inner, self.free.body.clone());
+        let eval = |inner: &mut Ctx| composite_call(cfg, inner, self.free.body.clone());
         with_ctx(inner, outer, self.ctx_name.clone(), eval)
     }
 }
 
-pub(crate) fn composite_call(ctx: &mut Ctx, body: Val) -> Val {
+pub(crate) fn composite_call(cfg: &mut Cfg, ctx: &mut Ctx, body: Val) -> Val {
     let mut ctx_val = Val::Ctx(take(ctx).into());
-    let output = Eval.mut_call(&mut ctx_val, body);
+    let output = Eval.mut_call(cfg, &mut ctx_val, body);
     let Val::Ctx(ctx_val) = ctx_val else {
         unreachable!("composite_call ctx invariant is broken!!!")
     };

@@ -4,6 +4,7 @@ use airlang_dev::init_logger;
 use log::trace;
 
 use crate::Air;
+use crate::cfg::CoreCfg;
 use crate::init_solver;
 use crate::prelude::CorePrelude;
 use crate::semantics::val::Val;
@@ -33,7 +34,8 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
     init_solver(core_solver());
-    test_interpret(Air::new(CorePrelude::default().into()), input, file_name)
+    let air = Air::new(CoreCfg::default().into(), CorePrelude::default().into());
+    test_interpret(air, input, file_name)
 }
 
 fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {

@@ -4,6 +4,7 @@ use super::FreePrimFn;
 use super::Prelude;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -63,7 +64,7 @@ pub fn add() -> FreePrimFuncVal {
     FreePrimFn { id: "+", f: free_impl(fn_add), mode: default_free_mode() }.free()
 }
 
-fn fn_add(input: Val) -> Val {
+fn fn_add(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -86,7 +87,7 @@ pub fn subtract() -> FreePrimFuncVal {
     FreePrimFn { id: "-", f: free_impl(fn_subtract), mode: default_free_mode() }.free()
 }
 
-fn fn_subtract(input: Val) -> Val {
+fn fn_subtract(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -109,7 +110,7 @@ pub fn multiply() -> FreePrimFuncVal {
     FreePrimFn { id: "*", f: free_impl(fn_multiply), mode: default_free_mode() }.free()
 }
 
-fn fn_multiply(input: Val) -> Val {
+fn fn_multiply(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -132,7 +133,7 @@ pub fn divide() -> FreePrimFuncVal {
     FreePrimFn { id: "/", f: free_impl(fn_divide), mode: default_free_mode() }.free()
 }
 
-fn fn_divide(input: Val) -> Val {
+fn fn_divide(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -158,7 +159,7 @@ pub fn remainder() -> FreePrimFuncVal {
     FreePrimFn { id: "%", f: free_impl(fn_remainder), mode: default_free_mode() }.free()
 }
 
-fn fn_remainder(input: Val) -> Val {
+fn fn_remainder(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -184,7 +185,7 @@ pub fn divide_remainder() -> FreePrimFuncVal {
     FreePrimFn { id: "/%", f: free_impl(fn_divide_remainder), mode: default_free_mode() }.free()
 }
 
-fn fn_divide_remainder(input: Val) -> Val {
+fn fn_divide_remainder(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -210,7 +211,7 @@ pub fn less_than() -> FreePrimFuncVal {
     FreePrimFn { id: "<", f: free_impl(fn_less_than), mode: default_free_mode() }.free()
 }
 
-fn fn_less_than(input: Val) -> Val {
+fn fn_less_than(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -231,7 +232,7 @@ pub fn less_equal() -> FreePrimFuncVal {
     FreePrimFn { id: "<=", f: free_impl(fn_less_equal), mode: default_free_mode() }.free()
 }
 
-fn fn_less_equal(input: Val) -> Val {
+fn fn_less_equal(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -252,7 +253,7 @@ pub fn greater_than() -> FreePrimFuncVal {
     FreePrimFn { id: ">", f: free_impl(fn_greater_than), mode: default_free_mode() }.free()
 }
 
-fn fn_greater_than(input: Val) -> Val {
+fn fn_greater_than(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -273,7 +274,7 @@ pub fn greater_equal() -> FreePrimFuncVal {
     FreePrimFn { id: ">=", f: free_impl(fn_greater_equal), mode: default_free_mode() }.free()
 }
 
-fn fn_greater_equal(input: Val) -> Val {
+fn fn_greater_equal(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -294,7 +295,7 @@ pub fn less_greater() -> FreePrimFuncVal {
     FreePrimFn { id: "<>", f: free_impl(fn_less_greater), mode: default_free_mode() }.free()
 }
 
-fn fn_less_greater(input: Val) -> Val {
+fn fn_less_greater(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();

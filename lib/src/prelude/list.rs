@@ -8,6 +8,7 @@ use super::Prelude;
 use super::const_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -80,7 +81,7 @@ pub fn length() -> ConstPrimFuncVal {
     DynPrimFn { id: "list.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -93,7 +94,7 @@ pub fn set() -> MutPrimFuncVal {
     DynPrimFn { id: "list.set", f: mut_impl(fn_set), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set(ctx: &mut Val, input: Val) -> Val {
+fn fn_set(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -121,7 +122,7 @@ pub fn set_many() -> MutPrimFuncVal {
     DynPrimFn { id: "list.set_many", f: mut_impl(fn_set_many), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_set_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -154,7 +155,7 @@ pub fn get() -> ConstPrimFuncVal {
     DynPrimFn { id: "list.get", f: const_impl(fn_get), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -174,7 +175,7 @@ pub fn get_many() -> ConstPrimFuncVal {
     DynPrimFn { id: "list.get_many", f: const_impl(fn_get_many), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -201,7 +202,7 @@ pub fn insert() -> MutPrimFuncVal {
     DynPrimFn { id: "list.insert", f: mut_impl(fn_insert), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_insert(ctx: &mut Val, input: Val) -> Val {
+fn fn_insert(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -230,7 +231,7 @@ pub fn insert_many() -> MutPrimFuncVal {
         .mut_()
 }
 
-fn fn_insert_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_insert_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -262,7 +263,7 @@ pub fn remove() -> MutPrimFuncVal {
     DynPrimFn { id: "list.remove", f: mut_impl(fn_remove), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_remove(ctx: &mut Val, input: Val) -> Val {
+fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -283,7 +284,7 @@ pub fn remove_many() -> MutPrimFuncVal {
         .mut_()
 }
 
-fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_remove_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -311,7 +312,7 @@ pub fn push() -> MutPrimFuncVal {
     DynPrimFn { id: "list.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_push(ctx: &mut Val, input: Val) -> Val {
+fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -324,7 +325,7 @@ pub fn push_many() -> MutPrimFuncVal {
     DynPrimFn { id: "list.push_many", f: mut_impl(fn_push_many), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_push_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_push_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -341,7 +342,7 @@ pub fn pop() -> MutPrimFuncVal {
     DynPrimFn { id: "list.pop", f: mut_impl(fn_pop), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_pop(ctx: &mut Val, input: Val) -> Val {
+fn fn_pop(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -357,7 +358,7 @@ pub fn pop_many() -> MutPrimFuncVal {
     DynPrimFn { id: "list.pop_many", f: mut_impl(fn_pop_many), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_pop_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_pop_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();
@@ -385,7 +386,7 @@ pub fn clear() -> MutPrimFuncVal {
     DynPrimFn { id: "list.clear", f: mut_impl(fn_clear), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
+fn fn_clear(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return Val::default();

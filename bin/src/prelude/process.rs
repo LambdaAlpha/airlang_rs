@@ -7,6 +7,7 @@ use airlang::prelude::mode::FuncMode;
 use airlang::prelude::mode::SymbolMode;
 use airlang::prelude::mode::TaskPrimMode;
 use airlang::prelude::setup::free_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
@@ -40,7 +41,7 @@ pub fn call() -> FreePrimFuncVal {
     .free()
 }
 
-fn fn_call(input: Val) -> Val {
+fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();

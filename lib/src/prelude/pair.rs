@@ -10,6 +10,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -53,7 +54,7 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn { id: PAIR, f: free_impl(fn_new), mode: default_free_mode() }.free()
 }
 
-fn fn_new(input: Val) -> Val {
+fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(_) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
@@ -65,7 +66,7 @@ pub fn first() -> ConstPrimFuncVal {
     DynPrimFn { id: "pair.first", f: const_impl(fn_first), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_first(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_first(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return Val::default();
@@ -77,7 +78,7 @@ pub fn set_first() -> MutPrimFuncVal {
     DynPrimFn { id: "pair.set_first", f: mut_impl(fn_set_first), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_first(ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_first(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
         return Val::default();
@@ -90,7 +91,7 @@ pub fn second() -> ConstPrimFuncVal {
     DynPrimFn { id: "pair.second", f: const_impl(fn_second), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_second(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_second(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return Val::default();
@@ -102,7 +103,7 @@ pub fn set_second() -> MutPrimFuncVal {
     DynPrimFn { id: "pair.set_second", f: mut_impl(fn_set_second), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_second(ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_second(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
         return Val::default();

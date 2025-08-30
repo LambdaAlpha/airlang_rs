@@ -10,6 +10,7 @@ use airlang::prelude::free_impl;
 use airlang::prelude::mut_impl;
 use airlang::prelude::setup::default_dyn_mode;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::MutPrimFuncVal;
@@ -56,7 +57,7 @@ pub fn read_line() -> MutPrimFuncVal {
     DynPrimFn { id: "io.read_line", f: mut_impl(fn_read_line), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_read_line(ctx: &mut Val, _input: Val) -> Val {
+fn fn_read_line(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Text(t) = ctx else {
         error!("ctx {ctx:?} should be a text");
         return Val::default();
@@ -69,7 +70,7 @@ pub fn print() -> FreePrimFuncVal {
     FreePrimFn { id: "io.print", f: free_impl(fn_print), mode: default_free_mode() }.free()
 }
 
-fn fn_print(input: Val) -> Val {
+fn fn_print(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -83,7 +84,7 @@ pub fn print_line() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_print_line(input: Val) -> Val {
+fn fn_print_line(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -96,7 +97,7 @@ pub fn flush() -> FreePrimFuncVal {
     FreePrimFn { id: "io.flush", f: free_impl(fn_flush), mode: default_free_mode() }.free()
 }
 
-fn fn_flush(_input: Val) -> Val {
+fn fn_flush(_cfg: &mut Cfg, _input: Val) -> Val {
     let _ = stdout().flush();
     Val::default()
 }
@@ -106,7 +107,7 @@ pub fn error_print() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_error_print(input: Val) -> Val {
+fn fn_error_print(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -124,7 +125,7 @@ pub fn error_print_line() -> FreePrimFuncVal {
     .free()
 }
 
-fn fn_error_print_line(input: Val) -> Val {
+fn fn_error_print_line(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -138,7 +139,7 @@ pub fn error_flush() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_error_flush(_input: Val) -> Val {
+fn fn_error_flush(_cfg: &mut Cfg, _input: Val) -> Val {
     let _ = stderr().flush();
     Val::default()
 }

@@ -16,6 +16,7 @@ use crate::prelude::ctx::pattern::PatternAssign;
 use crate::prelude::ctx::pattern::PatternMatch;
 use crate::prelude::ctx::pattern::PatternParse;
 use crate::prelude::setup::dyn_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::ctx::Ctx;
@@ -101,21 +102,21 @@ impl Block {
         Some(Block { statements: items })
     }
 
-    fn flow(self, ctx: &mut Val) -> (Val, Result<CtrlFlow, ()>) {
+    fn flow(self, cfg: &mut Cfg, ctx: &mut Val) -> (Val, Result<CtrlFlow, ()>) {
         let mut output = Val::default();
         for statement in self.statements {
             match statement {
                 Statement::Normal(val) => {
-                    output = Eval.mut_call(ctx, val);
+                    output = Eval.mut_call(cfg, ctx, val);
                 }
                 Statement::Condition { ctrl_flow, condition, body } => {
-                    let condition = Eval.mut_call(ctx, condition);
+                    let condition = Eval.mut_call(cfg, ctx, condition);
                     let Val::Bit(condition) = condition else {
                         error!("condition {condition:?} should be a bit");
                         return (Val::default(), Err(()));
                     };
                     if *condition {
-                        let output = Eval.mut_call(ctx, body);
+                        let output = Eval.mut_call(cfg, ctx, body);
                         return (output, Ok(ctrl_flow));
                     }
                     output = Val::default();
@@ -125,8 +126,8 @@ impl Block {
         (output, Ok(CtrlFlow::Continue))
     }
 
-    fn eval(self, ctx: &mut Val) -> Val {
-        self.flow(ctx).0
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        self.flow(cfg, ctx).0
     }
 }
 
@@ -169,22 +170,22 @@ pub fn do_() -> MutPrimFuncVal {
     DynPrimFn { id: "do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
-fn fn_do(ctx: &mut Val, input: Val) -> Val {
+fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(block) = Block::parse(input) else {
         return Val::default();
     };
-    block.eval(ctx)
+    block.eval(cfg, ctx)
 }
 
 pub fn if_() -> MutPrimFuncVal {
     DynPrimFn { id: "?", f: mut_impl(fn_if), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
-fn fn_if(ctx: &mut Val, input: Val) -> Val {
+fn fn_if(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(if_) = If::parse(input) else {
         return Val::default();
     };
-    if_.eval(ctx)
+    if_.eval(cfg, ctx)
 }
 
 struct If {
@@ -211,14 +212,14 @@ impl If {
         Some(If { condition, branch_then, branch_else })
     }
 
-    fn eval(self, ctx: &mut Val) -> Val {
-        let condition = Eval.mut_call(ctx, self.condition);
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let condition = Eval.mut_call(cfg, ctx, self.condition);
         let Val::Bit(b) = condition else {
             error!("condition {condition:?} should be a bit");
             return Val::default();
         };
         let branch = if *b { self.branch_then } else { self.branch_else };
-        branch.eval(ctx)
+        branch.eval(cfg, ctx)
     }
 }
 
@@ -226,11 +227,11 @@ pub fn switch() -> MutPrimFuncVal {
     DynPrimFn { id: "switch", f: mut_impl(fn_switch), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
-fn fn_switch(ctx: &mut Val, input: Val) -> Val {
+fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(switch) = Switch::parse(input) else {
         return Val::default();
     };
-    switch.eval(ctx)
+    switch.eval(cfg, ctx)
 }
 
 struct Switch {
@@ -273,12 +274,12 @@ impl Switch {
         Map::from(map).into_iter().map(|(k, v)| Some((k, Block::parse(v)?))).collect()
     }
 
-    fn eval(mut self, ctx: &mut Val) -> Val {
-        let val = Eval.mut_call(ctx, self.val);
+    fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let val = Eval.mut_call(cfg, ctx, self.val);
         let Some(body) = self.map.remove(&val).or(self.default) else {
             return Val::default();
         };
-        body.eval(ctx)
+        body.eval(cfg, ctx)
     }
 }
 
@@ -286,11 +287,11 @@ pub fn match_() -> MutPrimFuncVal {
     DynPrimFn { id: "match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
-fn fn_match(ctx: &mut Val, input: Val) -> Val {
+fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(match_) = Match::parse(input) else {
         return Val::default();
     };
-    match_.eval(ctx)
+    match_.eval(cfg, ctx)
 }
 
 struct Match {
@@ -329,18 +330,18 @@ impl Match {
             .collect()
     }
 
-    fn eval(self, ctx: &mut Val) -> Val {
-        let val = Eval.mut_call(ctx, self.val);
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let val = Eval.mut_call(cfg, ctx, self.val);
         let mode = PrimMode::new(SymbolMode::Literal, TaskPrimMode::Form);
         for (pattern, block) in self.arms {
-            let pattern = mode.mut_call(ctx, pattern);
+            let pattern = mode.mut_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
                 return Val::default();
             };
             if pattern.match_(&val) {
                 pattern.assign(ctx, val);
-                return block.eval(ctx);
+                return block.eval(cfg, ctx);
             }
         }
         Val::default()
@@ -351,11 +352,11 @@ pub fn loop_() -> MutPrimFuncVal {
     DynPrimFn { id: "loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
-fn fn_loop(ctx: &mut Val, input: Val) -> Val {
+fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(loop_) = Loop::parse(input) else {
         return Val::default();
     };
-    loop_.eval(ctx)
+    loop_.eval(cfg, ctx)
 }
 
 struct Loop {
@@ -375,9 +376,9 @@ impl Loop {
         Some(Self { condition, body })
     }
 
-    fn eval(self, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         loop {
-            let cond = Eval.mut_call(ctx, self.condition.clone());
+            let cond = Eval.mut_call(cfg, ctx, self.condition.clone());
             let Val::Bit(bit) = cond else {
                 error!("condition {cond:?} should be a bit");
                 return Val::default();
@@ -385,7 +386,7 @@ impl Loop {
             if !*bit {
                 break;
             }
-            let (output, ctrl_flow) = self.body.clone().flow(ctx);
+            let (output, ctrl_flow) = self.body.clone().flow(cfg, ctx);
             match ctrl_flow {
                 Ok(CtrlFlow::Continue) => {}
                 Ok(CtrlFlow::Return) => return output,
@@ -400,11 +401,11 @@ pub fn for_() -> MutPrimFuncVal {
     DynPrimFn { id: "for", f: mut_impl(fn_for), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
-fn fn_for(ctx: &mut Val, input: Val) -> Val {
+fn fn_for(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(for_) = For::parse(input) else {
         return Val::default();
     };
-    for_.eval(ctx)
+    for_.eval(cfg, ctx)
 }
 
 struct For {
@@ -434,8 +435,8 @@ impl For {
         Some(Self { val, name, body })
     }
 
-    fn eval(self, ctx: &mut Val) -> Val {
-        let val = Eval.mut_call(ctx, self.val);
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let val = Eval.mut_call(cfg, ctx, self.val);
         match val {
             Val::Int(i) => {
                 let i = Int::from(i);
@@ -448,33 +449,33 @@ impl For {
                     let i = Int::from(i);
                     Val::Int(i.into())
                 });
-                for_iter(ctx, self.body, self.name, iter)
+                for_iter(cfg, ctx, self.body, self.name, iter)
             }
             Val::Byte(byte) => {
                 let iter = byte.iter().map(|byte| {
                     let byte = Byte::from(vec![*byte]);
                     Val::Byte(byte.into())
                 });
-                for_iter(ctx, self.body, self.name, iter)
+                for_iter(cfg, ctx, self.body, self.name, iter)
             }
             Val::Symbol(s) => {
                 let iter = s.char_indices().map(|(start, c)| {
                     let symbol = Symbol::from_str_unchecked(&s[start .. start + c.len_utf8()]);
                     Val::Symbol(symbol)
                 });
-                for_iter(ctx, self.body, self.name, iter)
+                for_iter(cfg, ctx, self.body, self.name, iter)
             }
             Val::Text(t) => {
                 let iter = t.chars().map(|c| {
                     let text = Text::from(c.to_string());
                     Val::Text(text.into())
                 });
-                for_iter(ctx, self.body, self.name, iter)
+                for_iter(cfg, ctx, self.body, self.name, iter)
             }
             Val::List(list) => {
                 let list = List::from(list);
                 let iter = list.into_iter();
-                for_iter(ctx, self.body, self.name, iter)
+                for_iter(cfg, ctx, self.body, self.name, iter)
             }
             Val::Map(map) => {
                 let map = Map::from(map);
@@ -482,18 +483,20 @@ impl For {
                     let pair = Pair::new(pair.0, pair.1);
                     Val::Pair(pair.into())
                 });
-                for_iter(ctx, self.body, self.name, iter)
+                for_iter(cfg, ctx, self.body, self.name, iter)
             }
             _ => Val::default(),
         }
     }
 }
 
-fn for_iter<ValIter>(ctx: &mut Val, body: Block, name: Symbol, values: ValIter) -> Val
+fn for_iter<ValIter>(
+    cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Symbol, values: ValIter,
+) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
         let _ = ctx.set(name.clone(), val);
-        let (output, ctrl_flow) = body.clone().flow(ctx);
+        let (output, ctrl_flow) = body.clone().flow(cfg, ctx);
         match ctrl_flow {
             Ok(CtrlFlow::Continue) => {}
             Ok(CtrlFlow::Return) => return output,

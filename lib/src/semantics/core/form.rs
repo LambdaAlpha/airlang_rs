@@ -20,52 +20,54 @@ pub(crate) struct PairForm<'a, Some, First, Second> {
     pub(crate) second: &'a Second,
 }
 
-impl<'a, Some, First, Second> FreeFn<PairVal, Val> for PairForm<'a, Some, First, Second>
+impl<'a, Some, First, Second, Cfg> FreeFn<Cfg, PairVal, Val> for PairForm<'a, Some, First, Second>
 where
-    Some: FreeFn<Val, Val>,
-    First: FreeFn<Val, Val>,
-    Second: FreeFn<Val, Val>,
+    Some: FreeFn<Cfg, Val, Val>,
+    First: FreeFn<Cfg, Val, Val>,
+    Second: FreeFn<Cfg, Val, Val>,
 {
-    fn free_call(&self, mut input: PairVal) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, mut input: PairVal) -> Val {
         if let Some(second) = self.some.get(&input.first) {
-            input.second = second.free_call(take(&mut input.second));
+            input.second = second.free_call(cfg, take(&mut input.second));
         } else {
-            input.first = self.first.free_call(take(&mut input.first));
-            input.second = self.second.free_call(take(&mut input.second));
+            input.first = self.first.free_call(cfg, take(&mut input.first));
+            input.second = self.second.free_call(cfg, take(&mut input.second));
         }
         Val::Pair(input)
     }
 }
 
-impl<'a, Some, First, Second, Ctx> ConstFn<Ctx, PairVal, Val> for PairForm<'a, Some, First, Second>
+impl<'a, Some, First, Second, Cfg, Ctx> ConstFn<Cfg, Ctx, PairVal, Val>
+    for PairForm<'a, Some, First, Second>
 where
-    Some: ConstFn<Ctx, Val, Val>,
-    First: ConstFn<Ctx, Val, Val>,
-    Second: ConstFn<Ctx, Val, Val>,
+    Some: ConstFn<Cfg, Ctx, Val, Val>,
+    First: ConstFn<Cfg, Ctx, Val, Val>,
+    Second: ConstFn<Cfg, Ctx, Val, Val>,
 {
-    fn const_call(&self, mut ctx: ConstRef<Ctx>, mut input: PairVal) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut input: PairVal) -> Val {
         if let Some(second) = self.some.get(&input.first) {
-            input.second = second.const_call(ctx, take(&mut input.second));
+            input.second = second.const_call(cfg, ctx, take(&mut input.second));
         } else {
-            input.first = self.first.const_call(ctx.reborrow(), take(&mut input.first));
-            input.second = self.second.const_call(ctx, take(&mut input.second));
+            input.first = self.first.const_call(cfg, ctx.reborrow(), take(&mut input.first));
+            input.second = self.second.const_call(cfg, ctx, take(&mut input.second));
         }
         Val::Pair(input)
     }
 }
 
-impl<'a, Some, First, Second, Ctx> MutFn<Ctx, PairVal, Val> for PairForm<'a, Some, First, Second>
+impl<'a, Some, First, Second, Cfg, Ctx> MutFn<Cfg, Ctx, PairVal, Val>
+    for PairForm<'a, Some, First, Second>
 where
-    Some: MutFn<Ctx, Val, Val>,
-    First: MutFn<Ctx, Val, Val>,
-    Second: MutFn<Ctx, Val, Val>,
+    Some: MutFn<Cfg, Ctx, Val, Val>,
+    First: MutFn<Cfg, Ctx, Val, Val>,
+    Second: MutFn<Cfg, Ctx, Val, Val>,
 {
-    fn mut_call(&self, ctx: &mut Ctx, mut input: PairVal) -> Val {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut input: PairVal) -> Val {
         if let Some(second) = self.some.get(&input.first) {
-            input.second = second.mut_call(ctx, take(&mut input.second));
+            input.second = second.mut_call(cfg, ctx, take(&mut input.second));
         } else {
-            input.first = self.first.mut_call(ctx, take(&mut input.first));
-            input.second = self.second.mut_call(ctx, take(&mut input.second));
+            input.first = self.first.mut_call(cfg, ctx, take(&mut input.first));
+            input.second = self.second.mut_call(cfg, ctx, take(&mut input.second));
         }
         Val::Pair(input)
     }
@@ -77,44 +79,44 @@ pub(crate) struct TaskForm<'a, Func, Ctx, Input> {
     pub(crate) input: &'a Input,
 }
 
-impl<'a, Func, Ctx, Input> FreeFn<TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
+impl<'a, Func, Ctx, Input, Cfg> FreeFn<Cfg, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
 where
-    Func: FreeFn<Val, Val>,
-    Ctx: FreeFn<Val, Val>,
-    Input: FreeFn<Val, Val>,
+    Func: FreeFn<Cfg, Val, Val>,
+    Ctx: FreeFn<Cfg, Val, Val>,
+    Input: FreeFn<Cfg, Val, Val>,
 {
-    fn free_call(&self, mut task: TaskVal) -> Val {
-        task.func = self.func.free_call(take(&mut task.func));
-        task.ctx = self.ctx.free_call(take(&mut task.ctx));
-        task.input = self.input.free_call(take(&mut task.input));
+    fn free_call(&self, cfg: &mut Cfg, mut task: TaskVal) -> Val {
+        task.func = self.func.free_call(cfg, take(&mut task.func));
+        task.ctx = self.ctx.free_call(cfg, take(&mut task.ctx));
+        task.input = self.input.free_call(cfg, take(&mut task.input));
         Val::Task(task)
     }
 }
 
-impl<'a, Func, Ctx, Input, C> ConstFn<C, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
+impl<'a, Func, Ctx, Input, Cfg, C> ConstFn<Cfg, C, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
 where
-    Func: ConstFn<C, Val, Val>,
-    Ctx: ConstFn<C, Val, Val>,
-    Input: ConstFn<C, Val, Val>,
+    Func: ConstFn<Cfg, C, Val, Val>,
+    Ctx: ConstFn<Cfg, C, Val, Val>,
+    Input: ConstFn<Cfg, C, Val, Val>,
 {
-    fn const_call(&self, mut ctx: ConstRef<C>, mut task: TaskVal) -> Val {
-        task.func = self.func.const_call(ctx.reborrow(), take(&mut task.func));
-        task.ctx = self.ctx.const_call(ctx.reborrow(), take(&mut task.ctx));
-        task.input = self.input.const_call(ctx, take(&mut task.input));
+    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<C>, mut task: TaskVal) -> Val {
+        task.func = self.func.const_call(cfg, ctx.reborrow(), take(&mut task.func));
+        task.ctx = self.ctx.const_call(cfg, ctx.reborrow(), take(&mut task.ctx));
+        task.input = self.input.const_call(cfg, ctx, take(&mut task.input));
         Val::Task(task)
     }
 }
 
-impl<'a, Func, Ctx, Input, C> MutFn<C, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
+impl<'a, Func, Ctx, Input, Cfg, C> MutFn<Cfg, C, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
 where
-    Func: MutFn<C, Val, Val>,
-    Ctx: MutFn<C, Val, Val>,
-    Input: MutFn<C, Val, Val>,
+    Func: MutFn<Cfg, C, Val, Val>,
+    Ctx: MutFn<Cfg, C, Val, Val>,
+    Input: MutFn<Cfg, C, Val, Val>,
 {
-    fn mut_call(&self, ctx: &mut C, mut task: TaskVal) -> Val {
-        task.func = self.func.mut_call(ctx, take(&mut task.func));
-        task.ctx = self.ctx.mut_call(ctx, take(&mut task.ctx));
-        task.input = self.input.mut_call(ctx, take(&mut task.input));
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut C, mut task: TaskVal) -> Val {
+        task.func = self.func.mut_call(cfg, ctx, take(&mut task.func));
+        task.ctx = self.ctx.mut_call(cfg, ctx, take(&mut task.ctx));
+        task.input = self.input.mut_call(cfg, ctx, take(&mut task.input));
         Val::Task(task)
     }
 }
@@ -124,15 +126,15 @@ pub(crate) struct ListForm<'a, Head, Tail> {
     pub(crate) tail: &'a Tail,
 }
 
-impl<'a, Head, Tail> FreeFn<ListVal, Val> for ListForm<'a, Head, Tail>
+impl<'a, Head, Tail, Cfg> FreeFn<Cfg, ListVal, Val> for ListForm<'a, Head, Tail>
 where
-    Head: FreeFn<Val, Val>,
-    Tail: FreeFn<Val, Val>,
+    Head: FreeFn<Cfg, Val, Val>,
+    Tail: FreeFn<Cfg, Val, Val>,
 {
-    fn free_call(&self, mut input: ListVal) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, mut input: ListVal) -> Val {
         if self.head.is_empty() {
             for v in input.iter_mut() {
-                *v = self.tail.free_call(take(v));
+                *v = self.tail.free_call(cfg, take(v));
             }
             return Val::List(input);
         }
@@ -142,24 +144,24 @@ where
             let Some(val) = iter.next() else {
                 break;
             };
-            list.push(f.free_call(val));
+            list.push(f.free_call(cfg, val));
         }
         for val in iter {
-            list.push(self.tail.free_call(val));
+            list.push(self.tail.free_call(cfg, val));
         }
         Val::List(List::from(list).into())
     }
 }
 
-impl<'a, Head, Tail, Ctx> ConstFn<Ctx, ListVal, Val> for ListForm<'a, Head, Tail>
+impl<'a, Head, Tail, Cfg, Ctx> ConstFn<Cfg, Ctx, ListVal, Val> for ListForm<'a, Head, Tail>
 where
-    Head: ConstFn<Ctx, Val, Val>,
-    Tail: ConstFn<Ctx, Val, Val>,
+    Head: ConstFn<Cfg, Ctx, Val, Val>,
+    Tail: ConstFn<Cfg, Ctx, Val, Val>,
 {
-    fn const_call(&self, mut ctx: ConstRef<Ctx>, mut input: ListVal) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut input: ListVal) -> Val {
         if self.head.is_empty() {
             for v in input.iter_mut() {
-                *v = self.tail.const_call(ctx.reborrow(), take(v));
+                *v = self.tail.const_call(cfg, ctx.reborrow(), take(v));
             }
             return Val::List(input);
         }
@@ -169,24 +171,24 @@ where
             let Some(val) = iter.next() else {
                 break;
             };
-            list.push(f.const_call(ctx.reborrow(), val));
+            list.push(f.const_call(cfg, ctx.reborrow(), val));
         }
         for val in iter {
-            list.push(self.tail.const_call(ctx.reborrow(), val));
+            list.push(self.tail.const_call(cfg, ctx.reborrow(), val));
         }
         Val::List(List::from(list).into())
     }
 }
 
-impl<'a, Head, Tail, Ctx> MutFn<Ctx, ListVal, Val> for ListForm<'a, Head, Tail>
+impl<'a, Head, Tail, Cfg, Ctx> MutFn<Cfg, Ctx, ListVal, Val> for ListForm<'a, Head, Tail>
 where
-    Head: MutFn<Ctx, Val, Val>,
-    Tail: MutFn<Ctx, Val, Val>,
+    Head: MutFn<Cfg, Ctx, Val, Val>,
+    Tail: MutFn<Cfg, Ctx, Val, Val>,
 {
-    fn mut_call(&self, ctx: &mut Ctx, mut input: ListVal) -> Val {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut input: ListVal) -> Val {
         if self.head.is_empty() {
             for v in input.iter_mut() {
-                *v = self.tail.mut_call(ctx, take(v));
+                *v = self.tail.mut_call(cfg, ctx, take(v));
             }
             return Val::List(input);
         }
@@ -196,10 +198,10 @@ where
             let Some(val) = iter.next() else {
                 break;
             };
-            list.push(f.mut_call(ctx, val));
+            list.push(f.mut_call(cfg, ctx, val));
         }
         for val in iter {
-            list.push(self.tail.mut_call(ctx, val));
+            list.push(self.tail.mut_call(cfg, ctx, val));
         }
         Val::List(List::from(list).into())
     }
@@ -210,24 +212,24 @@ pub(crate) struct MapForm<'a, SomeKey, SomeValue, ElseValue> {
     pub(crate) else_: &'a ElseValue,
 }
 
-impl<'a, SomeKey, SomeValue, ElseValue> FreeFn<MapVal, Val>
+impl<'a, SomeKey, SomeValue, ElseValue, Cfg> FreeFn<Cfg, MapVal, Val>
     for MapForm<'a, SomeKey, SomeValue, ElseValue>
 where
     SomeKey: Borrow<Val> + Eq + Hash,
-    SomeValue: FreeFn<Val, Val>,
-    ElseValue: FreeFn<Val, Val>,
+    SomeValue: FreeFn<Cfg, Val, Val>,
+    ElseValue: FreeFn<Cfg, Val, Val>,
 {
-    fn free_call(&self, mut input: MapVal) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, mut input: MapVal) -> Val {
         if self.some.is_empty() {
             for v in input.values_mut() {
-                *v = self.else_.free_call(take(v));
+                *v = self.else_.free_call(cfg, take(v));
             }
         } else {
             for (k, v) in input.iter_mut() {
                 if let Some(f) = self.some.get(k) {
-                    *v = f.free_call(take(v));
+                    *v = f.free_call(cfg, take(v));
                 } else {
-                    *v = self.else_.free_call(take(v));
+                    *v = self.else_.free_call(cfg, take(v));
                 }
             }
         }
@@ -235,24 +237,24 @@ where
     }
 }
 
-impl<'a, SomeKey, SomeValue, ElseValue, Ctx> ConstFn<Ctx, MapVal, Val>
+impl<'a, SomeKey, SomeValue, ElseValue, Cfg, Ctx> ConstFn<Cfg, Ctx, MapVal, Val>
     for MapForm<'a, SomeKey, SomeValue, ElseValue>
 where
     SomeKey: Borrow<Val> + Eq + Hash,
-    SomeValue: ConstFn<Ctx, Val, Val>,
-    ElseValue: ConstFn<Ctx, Val, Val>,
+    SomeValue: ConstFn<Cfg, Ctx, Val, Val>,
+    ElseValue: ConstFn<Cfg, Ctx, Val, Val>,
 {
-    fn const_call(&self, mut ctx: ConstRef<Ctx>, mut input: MapVal) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut input: MapVal) -> Val {
         if self.some.is_empty() {
             for v in input.values_mut() {
-                *v = self.else_.const_call(ctx.reborrow(), take(v));
+                *v = self.else_.const_call(cfg, ctx.reborrow(), take(v));
             }
         } else {
             for (k, v) in input.iter_mut() {
                 if let Some(f) = self.some.get(k) {
-                    *v = f.const_call(ctx.reborrow(), take(v));
+                    *v = f.const_call(cfg, ctx.reborrow(), take(v));
                 } else {
-                    *v = self.else_.const_call(ctx.reborrow(), take(v));
+                    *v = self.else_.const_call(cfg, ctx.reborrow(), take(v));
                 }
             }
         }
@@ -260,24 +262,24 @@ where
     }
 }
 
-impl<'a, SomeKey, SomeValue, ElseValue, Ctx> MutFn<Ctx, MapVal, Val>
+impl<'a, SomeKey, SomeValue, ElseValue, Cfg, Ctx> MutFn<Cfg, Ctx, MapVal, Val>
     for MapForm<'a, SomeKey, SomeValue, ElseValue>
 where
     SomeKey: Borrow<Val> + Eq + Hash,
-    SomeValue: MutFn<Ctx, Val, Val>,
-    ElseValue: MutFn<Ctx, Val, Val>,
+    SomeValue: MutFn<Cfg, Ctx, Val, Val>,
+    ElseValue: MutFn<Cfg, Ctx, Val, Val>,
 {
-    fn mut_call(&self, ctx: &mut Ctx, mut input: MapVal) -> Val {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut input: MapVal) -> Val {
         if self.some.is_empty() {
             for v in input.values_mut() {
-                *v = self.else_.mut_call(ctx, take(v));
+                *v = self.else_.mut_call(cfg, ctx, take(v));
             }
         } else {
             for (k, v) in input.iter_mut() {
                 if let Some(f) = self.some.get(k) {
-                    *v = f.mut_call(ctx, take(v));
+                    *v = f.mut_call(cfg, ctx, take(v));
                 } else {
-                    *v = self.else_.mut_call(ctx, take(v));
+                    *v = self.else_.mut_call(cfg, ctx, take(v));
                 }
             }
         }

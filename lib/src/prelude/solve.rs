@@ -4,6 +4,7 @@ use super::FreePrimFn;
 use super::Prelude;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::solve::REVERSE_MAP;
 use crate::semantics::solve::SOLVER;
@@ -43,7 +44,7 @@ pub fn solver() -> FreePrimFuncVal {
     FreePrimFn { id: "solver!", f: free_impl(fn_solver), mode: default_free_mode() }.free()
 }
 
-fn fn_solver(_input: Val) -> Val {
+fn fn_solver(_cfg: &mut Cfg, _input: Val) -> Val {
     SOLVER.with(|solver| Val::Func(solver.borrow().clone()))
 }
 
@@ -51,7 +52,7 @@ pub fn set_solver() -> FreePrimFuncVal {
     FreePrimFn { id: "set_solver!", f: free_impl(fn_set_solver), mode: default_free_mode() }.free()
 }
 
-fn fn_set_solver(input: Val) -> Val {
+fn fn_set_solver(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(new_solver) = input else {
         error!("input {input:?} should be a function");
         return Val::default();
@@ -66,7 +67,7 @@ pub fn reverse() -> FreePrimFuncVal {
     FreePrimFn { id: "reverse!", f: free_impl(fn_reverse), mode: default_free_mode() }.free()
 }
 
-fn fn_reverse(input: Val) -> Val {
+fn fn_reverse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Symbol(id) = input else {
         error!("input {input:?} should be a symbol");
         return Val::default();
@@ -86,7 +87,7 @@ pub fn set_reverse() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_set_reverse(input: Val) -> Val {
+fn fn_set_reverse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();

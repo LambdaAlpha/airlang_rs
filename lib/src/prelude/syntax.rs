@@ -4,6 +4,7 @@ use super::FreePrimFn;
 use super::Prelude;
 use super::free_impl;
 use crate::prelude::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -39,7 +40,7 @@ pub fn parse() -> FreePrimFuncVal {
     FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse), mode: default_free_mode() }.free()
 }
 
-fn fn_parse(input: Val) -> Val {
+fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(input) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -56,7 +57,7 @@ pub fn generate() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_generate(input: Val) -> Val {
+fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {
     let Ok(repr) = (&input).try_into() else {
         error!("generate {input:?} failed");
         return Val::default();

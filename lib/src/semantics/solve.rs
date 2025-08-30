@@ -8,6 +8,7 @@ use super::func::FreeFn;
 use super::func::MutFn;
 use super::val::FuncVal;
 use super::val::Val;
+use crate::semantics::cfg::Cfg;
 use crate::type_::ConstRef;
 use crate::type_::Pair;
 use crate::type_::Symbol;
@@ -33,11 +34,11 @@ pub(super) struct Solve {
     pub(super) func: FuncVal,
 }
 
-impl FreeFn<Val, Val> for Solve {
-    fn free_call(&self, input: Val) -> Val {
+impl FreeFn<Cfg, Val, Val> for Solve {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
         let answer = REVERSE_MAP.with(|map| {
             let reverse = map.borrow().get(&self.func.id())?.clone();
-            let output = reverse.free_call(input.clone());
+            let output = reverse.free_call(cfg, input.clone());
             Some(output)
         });
         if let Some(answer) = answer {
@@ -46,16 +47,16 @@ impl FreeFn<Val, Val> for Solve {
         SOLVER.with(|solver| {
             let solver = solver.borrow().clone();
             let func_input = Val::Pair(Pair::new(Val::Func(self.func.clone()), input).into());
-            solver.free_call(func_input)
+            solver.free_call(cfg, func_input)
         })
     }
 }
 
-impl ConstFn<Val, Val, Val> for Solve {
-    fn const_call(&self, mut ctx: ConstRef<Val>, input: Val) -> Val {
+impl ConstFn<Cfg, Val, Val, Val> for Solve {
+    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Val>, input: Val) -> Val {
         let answer = REVERSE_MAP.with(|map| {
             let reverse = map.borrow().get(&self.func.id())?.clone();
-            let output = reverse.const_call(ctx.reborrow(), input.clone());
+            let output = reverse.const_call(cfg, ctx.reborrow(), input.clone());
             Some(output)
         });
         if let Some(answer) = answer {
@@ -64,16 +65,16 @@ impl ConstFn<Val, Val, Val> for Solve {
         SOLVER.with(|solver| {
             let solver = solver.borrow().clone();
             let func_input = Val::Pair(Pair::new(Val::Func(self.func.clone()), input).into());
-            solver.const_call(ctx, func_input)
+            solver.const_call(cfg, ctx, func_input)
         })
     }
 }
 
-impl MutFn<Val, Val, Val> for Solve {
-    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
+impl MutFn<Cfg, Val, Val, Val> for Solve {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         let answer = REVERSE_MAP.with(|map| {
             let reverse = map.borrow().get(&self.func.id())?.clone();
-            let output = reverse.mut_call(ctx, input.clone());
+            let output = reverse.mut_call(cfg, ctx, input.clone());
             Some(output)
         });
         if let Some(answer) = answer {
@@ -82,7 +83,7 @@ impl MutFn<Val, Val, Val> for Solve {
         SOLVER.with(|solver| {
             let solver = solver.borrow().clone();
             let func_input = Val::Pair(Pair::new(Val::Func(self.func.clone()), input).into());
-            solver.mut_call(ctx, func_input)
+            solver.mut_call(cfg, ctx, func_input)
         })
     }
 }

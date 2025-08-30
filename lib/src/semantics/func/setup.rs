@@ -20,42 +20,42 @@ pub(crate) trait SetupFn {}
 
 impl<T> SetupFn for &T where T: SetupFn {}
 
-impl<I, O, T> FreeFn<I, O> for Option<T>
+impl<Cfg, I, O, T> FreeFn<Cfg, I, O> for Option<T>
 where
-    T: FreeFn<I, O> + SetupFn,
+    T: FreeFn<Cfg, I, O> + SetupFn,
     I: Into<O>,
 {
-    fn free_call(&self, input: I) -> O {
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
         match self {
-            Some(t) => t.free_call(input),
+            Some(t) => t.free_call(cfg, input),
             None => input.into(),
         }
     }
 }
 
-impl<Ctx, I, O, T> ConstFn<Ctx, I, O> for Option<T>
+impl<Cfg, Ctx, I, O, T> ConstFn<Cfg, Ctx, I, O> for Option<T>
 where
-    T: ConstFn<Ctx, I, O> + SetupFn,
-    Option<T>: FreeFn<I, O>,
+    T: ConstFn<Cfg, Ctx, I, O> + SetupFn,
+    Option<T>: FreeFn<Cfg, I, O>,
     I: Into<O>,
 {
-    fn const_call(&self, ctx: ConstRef<Ctx>, input: I) -> O {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, input: I) -> O {
         match self {
-            Some(t) => t.const_call(ctx, input),
+            Some(t) => t.const_call(cfg, ctx, input),
             None => input.into(),
         }
     }
 }
 
-impl<Ctx, I, O, T> MutFn<Ctx, I, O> for Option<T>
+impl<Cfg, Ctx, I, O, T> MutFn<Cfg, Ctx, I, O> for Option<T>
 where
-    T: MutFn<Ctx, I, O> + SetupFn,
-    Option<T>: ConstFn<Ctx, I, O>,
+    T: MutFn<Cfg, Ctx, I, O> + SetupFn,
+    Option<T>: ConstFn<Cfg, Ctx, I, O>,
     I: Into<O>,
 {
-    fn mut_call(&self, ctx: &mut Ctx, input: I) -> O {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
         match self {
-            Some(t) => t.mut_call(ctx, input),
+            Some(t) => t.mut_call(cfg, ctx, input),
             None => input.into(),
         }
     }

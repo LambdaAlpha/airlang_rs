@@ -1,5 +1,6 @@
 use derive_more::Constructor;
 
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::composite_call;
 use crate::semantics::solve::set_solver;
@@ -13,12 +14,13 @@ pub fn init_solver(solver: FuncVal) {
 
 #[derive(Debug, Clone, Constructor)]
 pub struct Air {
+    cfg: Cfg,
     ctx: Ctx,
 }
 
 impl Air {
     pub fn interpret(&mut self, input: Val) -> Val {
-        composite_call(&mut self.ctx, input)
+        composite_call(&mut self.cfg, &mut self.ctx, input)
     }
 
     pub fn ctx_mut(&mut self) -> &mut Ctx {

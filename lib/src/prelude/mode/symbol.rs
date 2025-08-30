@@ -1,3 +1,4 @@
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_EVAL_CHAR;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
@@ -30,23 +31,23 @@ impl SymbolMode {
     }
 }
 
-impl FreeFn<Symbol, Val> for SymbolMode {
-    fn free_call(&self, input: Symbol) -> Val {
+impl FreeFn<Cfg, Symbol, Val> for SymbolMode {
+    fn free_call(&self, cfg: &mut Cfg, input: Symbol) -> Val {
         let Some(default) = self.try_into_char() else { return Val::Symbol(input) };
-        SymbolEval { default, f: &Eval }.free_call(input)
+        SymbolEval { default, f: &Eval }.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Val, Symbol, Val> for SymbolMode {
-    fn const_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
+impl ConstFn<Cfg, Val, Symbol, Val> for SymbolMode {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Symbol) -> Val {
         let Some(default) = self.try_into_char() else { return Val::Symbol(input) };
-        SymbolEval { default, f: &Eval }.const_call(ctx, input)
+        SymbolEval { default, f: &Eval }.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Val, Symbol, Val> for SymbolMode {
-    fn mut_call(&self, ctx: &mut Val, input: Symbol) -> Val {
+impl MutFn<Cfg, Val, Symbol, Val> for SymbolMode {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Symbol) -> Val {
         let Some(default) = self.try_into_char() else { return Val::Symbol(input) };
-        SymbolEval { default, f: &Eval }.mut_call(ctx, input)
+        SymbolEval { default, f: &Eval }.mut_call(cfg, ctx, input)
     }
 }

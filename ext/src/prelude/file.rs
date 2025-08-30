@@ -2,6 +2,7 @@ use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::free_impl;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
@@ -29,7 +30,7 @@ pub fn read_to_text() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_read_to_text(input: Val) -> Val {
+fn fn_read_to_text(_cfg: &mut Cfg, input: Val) -> Val {
     let result = match input {
         Val::Text(path) => std::fs::read_to_string(&**path),
         v => {

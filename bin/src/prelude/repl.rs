@@ -2,6 +2,7 @@ use airlang::prelude::FreePrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::free_impl;
 use airlang::prelude::setup::default_free_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
@@ -39,7 +40,7 @@ keyboard shortcuts:
     Alt + M: switch multiline mode
 ";
 
-fn fn_help(_input: Val) -> Val {
+fn fn_help(_cfg: &mut Cfg, _input: Val) -> Val {
     print!("{HELP_DOC}");
     Val::default()
 }

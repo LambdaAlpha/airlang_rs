@@ -4,6 +4,7 @@ use std::hash::Hash;
 
 use derive_more::From;
 
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCompFunc;
@@ -57,34 +58,34 @@ macro_rules! match_func_val {
     };
 }
 
-impl FreeFn<Val, Val> for FuncVal {
-    fn free_call(&self, input: Val) -> Val {
-        match_func_val!(self, f => f.free_call(input))
+impl FreeFn<Cfg, Val, Val> for FuncVal {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+        match_func_val!(self, f => f.free_call(cfg,input))
     }
 }
 
-impl ConstFn<Val, Val, Val> for FuncVal {
-    fn const_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
+impl ConstFn<Cfg, Val, Val, Val> for FuncVal {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         match self {
-            FuncVal::FreePrim(f) => f.free_call(input),
-            FuncVal::FreeComp(f) => f.free_call(input),
-            FuncVal::ConstPrim(f) => f.const_call(ctx, input),
-            FuncVal::ConstComp(f) => f.const_call(ctx, input),
-            FuncVal::MutPrim(f) => f.const_call(ctx, input),
-            FuncVal::MutComp(f) => f.const_call(ctx, input),
+            FuncVal::FreePrim(f) => f.free_call(cfg, input),
+            FuncVal::FreeComp(f) => f.free_call(cfg, input),
+            FuncVal::ConstPrim(f) => f.const_call(cfg, ctx, input),
+            FuncVal::ConstComp(f) => f.const_call(cfg, ctx, input),
+            FuncVal::MutPrim(f) => f.const_call(cfg, ctx, input),
+            FuncVal::MutComp(f) => f.const_call(cfg, ctx, input),
         }
     }
 }
 
-impl MutFn<Val, Val, Val> for FuncVal {
-    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
+impl MutFn<Cfg, Val, Val, Val> for FuncVal {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         match self {
-            FuncVal::FreePrim(f) => f.free_call(input),
-            FuncVal::FreeComp(f) => f.free_call(input),
-            FuncVal::ConstPrim(f) => f.const_call(ConstRef::new(ctx), input),
-            FuncVal::ConstComp(f) => f.const_call(ConstRef::new(ctx), input),
-            FuncVal::MutPrim(f) => f.mut_call(ctx, input),
-            FuncVal::MutComp(f) => f.mut_call(ctx, input),
+            FuncVal::FreePrim(f) => f.free_call(cfg, input),
+            FuncVal::FreeComp(f) => f.free_call(cfg, input),
+            FuncVal::ConstPrim(f) => f.const_call(cfg, ConstRef::new(ctx), input),
+            FuncVal::ConstComp(f) => f.const_call(cfg, ConstRef::new(ctx), input),
+            FuncVal::MutPrim(f) => f.mut_call(cfg, ctx, input),
+            FuncVal::MutComp(f) => f.mut_call(cfg, ctx, input),
         }
     }
 }

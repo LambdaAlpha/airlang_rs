@@ -10,6 +10,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -103,7 +104,7 @@ pub fn length() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -116,7 +117,7 @@ pub fn items() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.items", f: const_impl(fn_items), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_items(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_items(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -130,7 +131,7 @@ pub fn into_items() -> MutPrimFuncVal {
     DynPrimFn { id: "map.into_items", f: mut_impl(fn_into_items), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_into_items(ctx: &mut Val, _input: Val) -> Val {
+fn fn_into_items(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -146,7 +147,7 @@ pub fn keys() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.keys", f: const_impl(fn_keys), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_keys(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_keys(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -159,7 +160,7 @@ pub fn into_keys() -> MutPrimFuncVal {
     DynPrimFn { id: "map.into_keys", f: mut_impl(fn_into_keys), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_into_keys(ctx: &mut Val, _input: Val) -> Val {
+fn fn_into_keys(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -174,7 +175,7 @@ pub fn values() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.values", f: const_impl(fn_values), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_values(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_values(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -188,7 +189,7 @@ pub fn into_values() -> MutPrimFuncVal {
         .mut_()
 }
 
-fn fn_into_values(ctx: &mut Val, _input: Val) -> Val {
+fn fn_into_values(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -203,7 +204,7 @@ pub fn contains() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.contains", f: const_impl(fn_contains), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_contains(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contains(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -216,7 +217,7 @@ pub fn contains_all() -> ConstPrimFuncVal {
         .const_()
 }
 
-fn fn_contains_all(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contains_all(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -235,7 +236,7 @@ pub fn contains_any() -> ConstPrimFuncVal {
         .const_()
 }
 
-fn fn_contains_many(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contains_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -253,7 +254,7 @@ pub fn set() -> MutPrimFuncVal {
     DynPrimFn { id: "map.set", f: mut_impl(fn_set), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set(ctx: &mut Val, input: Val) -> Val {
+fn fn_set(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -272,7 +273,7 @@ pub fn set_many() -> MutPrimFuncVal {
     DynPrimFn { id: "map.set_many", f: mut_impl(fn_set_many), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_set_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_set_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -291,7 +292,7 @@ pub fn get() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.get", f: const_impl(fn_get), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_get(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -303,7 +304,7 @@ pub fn get_many() -> ConstPrimFuncVal {
     DynPrimFn { id: "map.get_many", f: const_impl(fn_get_many), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_get_many(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -322,7 +323,7 @@ pub fn remove() -> MutPrimFuncVal {
     DynPrimFn { id: "map.remove", f: mut_impl(fn_remove), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_remove(ctx: &mut Val, input: Val) -> Val {
+fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -335,7 +336,7 @@ pub fn remove_many() -> MutPrimFuncVal {
         .mut_()
 }
 
-fn fn_remove_many(ctx: &mut Val, input: Val) -> Val {
+fn fn_remove_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -354,7 +355,7 @@ pub fn clear() -> MutPrimFuncVal {
     DynPrimFn { id: "map.clear", f: mut_impl(fn_clear), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_clear(ctx: &mut Val, _input: Val) -> Val {
+fn fn_clear(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -367,7 +368,7 @@ pub fn new_map() -> FreePrimFuncVal {
     FreePrimFn { id: "map", f: free_impl(fn_new_map), mode: default_free_mode() }.free()
 }
 
-fn fn_new_map(input: Val) -> Val {
+fn fn_new_map(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
         return Val::default();
@@ -393,7 +394,7 @@ pub fn new_set() -> FreePrimFuncVal {
     FreePrimFn { id: "set", f: free_impl(fn_new_set), mode: default_free_mode() }.free()
 }
 
-fn fn_new_set(input: Val) -> Val {
+fn fn_new_set(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
         return Val::default();
@@ -407,7 +408,7 @@ pub fn new_multiset() -> FreePrimFuncVal {
     FreePrimFn { id: "multiset", f: free_impl(fn_new_multiset), mode: default_free_mode() }.free()
 }
 
-fn fn_new_multiset(input: Val) -> Val {
+fn fn_new_multiset(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
         return Val::default();

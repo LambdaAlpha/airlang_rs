@@ -3,47 +3,48 @@ use std::rc::Rc;
 use super::prim::impl_prim_func;
 use super::setup::Setup;
 use super::setup::impl_setup;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
-pub trait FreeFn<I, O> {
-    fn free_call(&self, input: I) -> O;
+pub trait FreeFn<Cfg, I, O> {
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O;
 }
 
-impl<I, O, T> FreeFn<I, O> for &T
-where T: FreeFn<I, O>
+impl<Cfg, I, O, T> FreeFn<Cfg, I, O> for &T
+where T: FreeFn<Cfg, I, O>
 {
-    fn free_call(&self, input: I) -> O {
-        (**self).free_call(input)
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
+        (**self).free_call(cfg, input)
     }
 }
 
-impl<I, O, T> FreeFn<I, O> for &mut T
-where T: FreeFn<I, O>
+impl<Cfg, I, O, T> FreeFn<Cfg, I, O> for &mut T
+where T: FreeFn<Cfg, I, O>
 {
-    fn free_call(&self, input: I) -> O {
-        (**self).free_call(input)
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
+        (**self).free_call(cfg, input)
     }
 }
 
 #[derive(Clone)]
 pub struct FreePrimFunc {
     pub(crate) id: Symbol,
-    pub(crate) fn_: Rc<dyn FreeFn<Val, Val>>,
+    pub(crate) fn_: Rc<dyn FreeFn<Cfg, Val, Val>>,
     pub(crate) setup: Setup,
 }
 
-impl FreeFn<Val, Val> for FreePrimFunc {
-    fn free_call(&self, input: Val) -> Val {
-        self.fn_.free_call(input)
+impl FreeFn<Cfg, Val, Val> for FreePrimFunc {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+        self.fn_.free_call(cfg, input)
     }
 }
 
 impl Default for FreePrimFunc {
     fn default() -> Self {
         struct F;
-        impl FreeFn<Val, Val> for F {
-            fn free_call(&self, _input: Val) -> Val {
+        impl FreeFn<Cfg, Val, Val> for F {
+            fn free_call(&self, _cfg: &mut Cfg, _input: Val) -> Val {
                 Val::default()
             }
         }

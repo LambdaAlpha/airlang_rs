@@ -5,6 +5,7 @@ use super::MapForm;
 use super::PairForm;
 use super::const_ctx_ref;
 use super::mut_ctx_ref;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -45,8 +46,8 @@ impl<'a, Fn> SymbolEval<'a, Fn> {
     }
 }
 
-impl<'a, Fn> FreeFn<Symbol, Val> for SymbolEval<'a, Fn> {
-    fn free_call(&self, input: Symbol) -> Val {
+impl<'a, Fn> FreeFn<Cfg, Symbol, Val> for SymbolEval<'a, Fn> {
+    fn free_call(&self, _cfg: &mut Cfg, input: Symbol) -> Val {
         let (prefix, s) = self.recognize(input.clone());
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
@@ -63,10 +64,10 @@ impl<'a, Fn> FreeFn<Symbol, Val> for SymbolEval<'a, Fn> {
     }
 }
 
-impl<'a, Fn> ConstFn<Val, Symbol, Val> for SymbolEval<'a, Fn>
-where Fn: ConstFn<Val, Val, Val>
+impl<'a, Fn> ConstFn<Cfg, Val, Symbol, Val> for SymbolEval<'a, Fn>
+where Fn: ConstFn<Cfg, Val, Val, Val>
 {
-    fn const_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Symbol) -> Val {
         let (prefix, s) = self.recognize(input);
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
@@ -82,17 +83,17 @@ where Fn: ConstFn<Val, Val, Val>
                     return Val::default();
                 };
                 let val = val.clone();
-                self.f.const_call(ConstRef::new(ctx), val)
+                self.f.const_call(cfg, ConstRef::new(ctx), val)
             }
             _ => unreachable!("DEFAULT should be predefined character"),
         }
     }
 }
 
-impl<'a, Fn> MutFn<Val, Symbol, Val> for SymbolEval<'a, Fn>
-where Fn: MutFn<Val, Val, Val>
+impl<'a, Fn> MutFn<Cfg, Val, Symbol, Val> for SymbolEval<'a, Fn>
+where Fn: MutFn<Cfg, Val, Val, Val>
 {
-    fn mut_call(&self, ctx: &mut Val, input: Symbol) -> Val {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Symbol) -> Val {
         let (prefix, s) = self.recognize(input);
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
@@ -107,7 +108,7 @@ where Fn: MutFn<Val, Val, Val>
                     return Val::default();
                 };
                 let val = val.clone();
-                self.f.mut_call(ctx, val)
+                self.f.mut_call(cfg, ctx, val)
             }
             _ => unreachable!("DEFAULT should be predefined character"),
         }
@@ -118,82 +119,82 @@ pub(crate) struct TaskEval<'a, Func> {
     pub(crate) func: &'a Func,
 }
 
-impl<'a, Func> FreeFn<TaskVal, Val> for TaskEval<'a, Func>
-where Func: FreeFn<Val, Val>
+impl<'a, Func> FreeFn<Cfg, TaskVal, Val> for TaskEval<'a, Func>
+where Func: FreeFn<Cfg, Val, Val>
 {
-    fn free_call(&self, task: TaskVal) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, task: TaskVal) -> Val {
         let task = Task::from(task);
-        let func = self.func.free_call(task.func);
+        let func = self.func.free_call(cfg, task.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
             return Val::default();
         };
         match task.action {
             Action::Call => {
-                let input = func.call().free_call(task.input);
-                func.free_call(input)
+                let input = func.call().free_call(cfg, task.input);
+                func.free_call(cfg, input)
             }
             Action::Solve => {
-                let input = func.solve().free_call(task.input);
-                Solve { func }.free_call(input)
+                let input = func.solve().free_call(cfg, task.input);
+                Solve { func }.free_call(cfg, input)
             }
         }
     }
 }
 
-impl<'a, Func> ConstFn<Val, TaskVal, Val> for TaskEval<'a, Func>
-where Func: ConstFn<Val, Val, Val>
+impl<'a, Func> ConstFn<Cfg, Val, TaskVal, Val> for TaskEval<'a, Func>
+where Func: ConstFn<Cfg, Val, Val, Val>
 {
-    fn const_call(&self, mut c: ConstRef<Val>, task: TaskVal) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, mut c: ConstRef<Val>, task: TaskVal) -> Val {
         let task = Task::from(task);
-        let func = self.func.const_call(c.reborrow(), task.func);
+        let func = self.func.const_call(cfg, c.reborrow(), task.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
             return Val::default();
         };
         match task.action {
             Action::Call => {
-                let input = func.call().const_call(c.reborrow(), task.input);
+                let input = func.call().const_call(cfg, c.reborrow(), task.input);
                 let Some(c) = const_ctx_ref(c, task.ctx) else {
                     return Val::default();
                 };
-                func.const_call(c, input)
+                func.const_call(cfg, c, input)
             }
             Action::Solve => {
-                let input = func.solve().const_call(c.reborrow(), task.input);
+                let input = func.solve().const_call(cfg, c.reborrow(), task.input);
                 let Some(c) = const_ctx_ref(c, task.ctx) else {
                     return Val::default();
                 };
-                Solve { func }.const_call(c, input)
+                Solve { func }.const_call(cfg, c, input)
             }
         }
     }
 }
 
-impl<'a, Func> MutFn<Val, TaskVal, Val> for TaskEval<'a, Func>
-where Func: MutFn<Val, Val, Val>
+impl<'a, Func> MutFn<Cfg, Val, TaskVal, Val> for TaskEval<'a, Func>
+where Func: MutFn<Cfg, Val, Val, Val>
 {
-    fn mut_call(&self, c: &mut Val, task: TaskVal) -> Val {
+    fn mut_call(&self, cfg: &mut Cfg, c: &mut Val, task: TaskVal) -> Val {
         let task = Task::from(task);
-        let func = self.func.mut_call(c, task.func);
+        let func = self.func.mut_call(cfg, c, task.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
             return Val::default();
         };
         match task.action {
             Action::Call => {
-                let input = func.call().mut_call(c, task.input);
+                let input = func.call().mut_call(cfg, c, task.input);
                 let Some(c) = mut_ctx_ref(c, task.ctx) else {
                     return Val::default();
                 };
-                func.dyn_call(c, input)
+                func.dyn_call(cfg, c, input)
             }
             Action::Solve => {
-                let input = func.solve().mut_call(c, task.input);
+                let input = func.solve().mut_call(cfg, c, task.input);
                 let Some(c) = mut_ctx_ref(c, task.ctx) else {
                     return Val::default();
                 };
-                Solve { func }.dyn_call(c, input)
+                Solve { func }.dyn_call(cfg, c, input)
             }
         }
     }
@@ -201,22 +202,22 @@ where Func: MutFn<Val, Val, Val>
 
 pub(crate) struct TaskApply;
 
-impl FreeFn<TaskVal, Val> for TaskApply {
-    fn free_call(&self, task: TaskVal) -> Val {
+impl FreeFn<Cfg, TaskVal, Val> for TaskApply {
+    fn free_call(&self, cfg: &mut Cfg, task: TaskVal) -> Val {
         let task = Task::from(task);
         let Val::Func(func) = task.func else {
             error!("func {:?} should be a func", task.func);
             return Val::default();
         };
         match task.action {
-            Action::Call => func.free_call(task.input),
-            Action::Solve => Solve { func }.free_call(task.input),
+            Action::Call => func.free_call(cfg, task.input),
+            Action::Solve => Solve { func }.free_call(cfg, task.input),
         }
     }
 }
 
-impl ConstFn<Val, TaskVal, Val> for TaskApply {
-    fn const_call(&self, ctx: ConstRef<Val>, task: TaskVal) -> Val {
+impl ConstFn<Cfg, Val, TaskVal, Val> for TaskApply {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, task: TaskVal) -> Val {
         let task = Task::from(task);
         let Val::Func(func) = task.func else {
             error!("func {:?} should be a func", task.func);
@@ -226,14 +227,14 @@ impl ConstFn<Val, TaskVal, Val> for TaskApply {
             return Val::default();
         };
         match task.action {
-            Action::Call => func.const_call(ctx, task.input),
-            Action::Solve => Solve { func }.const_call(ctx, task.input),
+            Action::Call => func.const_call(cfg, ctx, task.input),
+            Action::Solve => Solve { func }.const_call(cfg, ctx, task.input),
         }
     }
 }
 
-impl MutFn<Val, TaskVal, Val> for TaskApply {
-    fn mut_call(&self, ctx: &mut Val, task: TaskVal) -> Val {
+impl MutFn<Cfg, Val, TaskVal, Val> for TaskApply {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, task: TaskVal) -> Val {
         let task = Task::from(task);
         let Val::Func(func) = task.func else {
             error!("func {:?} should be a func", task.func);
@@ -243,8 +244,8 @@ impl MutFn<Val, TaskVal, Val> for TaskApply {
             return Val::default();
         };
         match task.action {
-            Action::Call => func.dyn_call(ctx, task.input),
-            Action::Solve => Solve { func }.dyn_call(ctx, task.input),
+            Action::Call => func.dyn_call(cfg, ctx, task.input),
+            Action::Solve => Solve { func }.dyn_call(cfg, ctx, task.input),
         }
     }
 }
@@ -252,140 +253,140 @@ impl MutFn<Val, TaskVal, Val> for TaskApply {
 #[derive(Debug, Default, Copy, Clone)]
 pub(crate) struct Eval;
 
-impl FreeFn<Val, Val> for Eval {
-    fn free_call(&self, input: Val) -> Val {
+impl FreeFn<Cfg, Val, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
         match input {
-            Val::Symbol(symbol) => self.free_call(symbol),
-            Val::Pair(pair) => self.free_call(pair),
-            Val::Task(task) => self.free_call(task),
-            Val::List(list) => self.free_call(list),
-            Val::Map(map) => self.free_call(map),
+            Val::Symbol(symbol) => self.free_call(cfg, symbol),
+            Val::Pair(pair) => self.free_call(cfg, pair),
+            Val::Task(task) => self.free_call(cfg, task),
+            Val::List(list) => self.free_call(cfg, list),
+            Val::Map(map) => self.free_call(cfg, map),
             v => v,
         }
     }
 }
 
-impl ConstFn<Val, Val, Val> for Eval {
-    fn const_call(&self, ctx: ConstRef<Val>, input: Val) -> Val {
+impl ConstFn<Cfg, Val, Val, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         match input {
-            Val::Symbol(symbol) => self.const_call(ctx, symbol),
-            Val::Pair(pair) => self.const_call(ctx, pair),
-            Val::Task(task) => self.const_call(ctx, task),
-            Val::List(list) => self.const_call(ctx, list),
-            Val::Map(map) => self.const_call(ctx, map),
+            Val::Symbol(symbol) => self.const_call(cfg, ctx, symbol),
+            Val::Pair(pair) => self.const_call(cfg, ctx, pair),
+            Val::Task(task) => self.const_call(cfg, ctx, task),
+            Val::List(list) => self.const_call(cfg, ctx, list),
+            Val::Map(map) => self.const_call(cfg, ctx, map),
             v => v,
         }
     }
 }
 
-impl MutFn<Val, Val, Val> for Eval {
-    fn mut_call(&self, ctx: &mut Val, input: Val) -> Val {
+impl MutFn<Cfg, Val, Val, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         match input {
-            Val::Symbol(symbol) => self.mut_call(ctx, symbol),
-            Val::Pair(pair) => self.mut_call(ctx, pair),
-            Val::Task(task) => self.mut_call(ctx, task),
-            Val::List(list) => self.mut_call(ctx, list),
-            Val::Map(map) => self.mut_call(ctx, map),
+            Val::Symbol(symbol) => self.mut_call(cfg, ctx, symbol),
+            Val::Pair(pair) => self.mut_call(cfg, ctx, pair),
+            Val::Task(task) => self.mut_call(cfg, ctx, task),
+            Val::List(list) => self.mut_call(cfg, ctx, list),
+            Val::Map(map) => self.mut_call(cfg, ctx, map),
             v => v,
         }
     }
 }
 
-impl FreeFn<Symbol, Val> for Eval {
-    fn free_call(&self, input: Symbol) -> Val {
-        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.free_call(input)
+impl FreeFn<Cfg, Symbol, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, input: Symbol) -> Val {
+        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Val, Symbol, Val> for Eval {
-    fn const_call(&self, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.const_call(ctx, input)
+impl ConstFn<Cfg, Val, Symbol, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Symbol) -> Val {
+        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Val, Symbol, Val> for Eval {
-    fn mut_call(&self, ctx: &mut Val, input: Symbol) -> Val {
-        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.mut_call(ctx, input)
+impl MutFn<Cfg, Val, Symbol, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Symbol) -> Val {
+        SymbolEval { default: SYMBOL_REF_CHAR, f: self }.mut_call(cfg, ctx, input)
     }
 }
 
-impl FreeFn<PairVal, Val> for Eval {
-    fn free_call(&self, input: PairVal) -> Val {
+impl FreeFn<Cfg, PairVal, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, input: PairVal) -> Val {
         let some = &Map::<Val, Eval>::default();
-        PairForm { some, first: self, second: self }.free_call(input)
+        PairForm { some, first: self, second: self }.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Val, PairVal, Val> for Eval {
-    fn const_call(&self, ctx: ConstRef<Val>, input: PairVal) -> Val {
+impl ConstFn<Cfg, Val, PairVal, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: PairVal) -> Val {
         let some = &Map::<Val, Eval>::default();
-        PairForm { some, first: self, second: self }.const_call(ctx, input)
+        PairForm { some, first: self, second: self }.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Val, PairVal, Val> for Eval {
-    fn mut_call(&self, ctx: &mut Val, input: PairVal) -> Val {
+impl MutFn<Cfg, Val, PairVal, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: PairVal) -> Val {
         let some = &Map::<Val, Eval>::default();
-        PairForm { some, first: self, second: self }.mut_call(ctx, input)
+        PairForm { some, first: self, second: self }.mut_call(cfg, ctx, input)
     }
 }
 
-impl FreeFn<TaskVal, Val> for Eval {
-    fn free_call(&self, input: TaskVal) -> Val {
-        TaskEval { func: self }.free_call(input)
+impl FreeFn<Cfg, TaskVal, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, input: TaskVal) -> Val {
+        TaskEval { func: self }.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Val, TaskVal, Val> for Eval {
-    fn const_call(&self, ctx: ConstRef<Val>, input: TaskVal) -> Val {
-        TaskEval { func: self }.const_call(ctx, input)
+impl ConstFn<Cfg, Val, TaskVal, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: TaskVal) -> Val {
+        TaskEval { func: self }.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Val, TaskVal, Val> for Eval {
-    fn mut_call(&self, ctx: &mut Val, input: TaskVal) -> Val {
-        TaskEval { func: self }.mut_call(ctx, input)
+impl MutFn<Cfg, Val, TaskVal, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: TaskVal) -> Val {
+        TaskEval { func: self }.mut_call(cfg, ctx, input)
     }
 }
 
-impl FreeFn<ListVal, Val> for Eval {
-    fn free_call(&self, input: ListVal) -> Val {
+impl FreeFn<Cfg, ListVal, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, input: ListVal) -> Val {
         let head = &List::<Eval>::default();
-        ListForm { head, tail: self }.free_call(input)
+        ListForm { head, tail: self }.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Val, ListVal, Val> for Eval {
-    fn const_call(&self, ctx: ConstRef<Val>, input: ListVal) -> Val {
+impl ConstFn<Cfg, Val, ListVal, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: ListVal) -> Val {
         let head = &List::<Eval>::default();
-        ListForm { head, tail: self }.const_call(ctx, input)
+        ListForm { head, tail: self }.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Val, ListVal, Val> for Eval {
-    fn mut_call(&self, ctx: &mut Val, input: ListVal) -> Val {
+impl MutFn<Cfg, Val, ListVal, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: ListVal) -> Val {
         let head = &List::<Eval>::default();
-        ListForm { head, tail: self }.mut_call(ctx, input)
+        ListForm { head, tail: self }.mut_call(cfg, ctx, input)
     }
 }
 
-impl FreeFn<MapVal, Val> for Eval {
-    fn free_call(&self, input: MapVal) -> Val {
+impl FreeFn<Cfg, MapVal, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, input: MapVal) -> Val {
         let some = &Map::<Val, Eval>::default();
-        MapForm { some, else_: self }.free_call(input)
+        MapForm { some, else_: self }.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Val, MapVal, Val> for Eval {
-    fn const_call(&self, ctx: ConstRef<Val>, input: MapVal) -> Val {
+impl ConstFn<Cfg, Val, MapVal, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: MapVal) -> Val {
         let some = &Map::<Val, Eval>::default();
-        MapForm { some, else_: self }.const_call(ctx, input)
+        MapForm { some, else_: self }.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Val, MapVal, Val> for Eval {
-    fn mut_call(&self, ctx: &mut Val, input: MapVal) -> Val {
+impl MutFn<Cfg, Val, MapVal, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: MapVal) -> Val {
         let some = &Map::<Val, Eval>::default();
-        MapForm { some, else_: self }.mut_call(ctx, input)
+        MapForm { some, else_: self }.mut_call(cfg, ctx, input)
     }
 }

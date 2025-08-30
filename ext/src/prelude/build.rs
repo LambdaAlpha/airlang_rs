@@ -3,10 +3,12 @@ use std::fs::read_to_string;
 use std::path::Path;
 
 use airlang::Air;
+use airlang::cfg::CoreCfg;
 use airlang::prelude::ConstImpl;
 use airlang::prelude::DynPrimFn;
 use airlang::prelude::Prelude;
 use airlang::prelude::setup::default_dyn_mode;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Contract;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::ConstPrimFuncVal;
@@ -48,7 +50,7 @@ pub fn import() -> ConstPrimFuncVal {
 
 const CUR_URL_KEY: &str = "build.this_url";
 
-fn fn_import_free(input: Val) -> Val {
+fn fn_import_free(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(url) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -57,7 +59,7 @@ fn fn_import_free(input: Val) -> Val {
     import_from_url(new_url)
 }
 
-fn fn_import_const(ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_import_const(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Ctx(ctx) = &*ctx else {
         error!("ctx {ctx:?} should be a ctx");
         return Val::default();
@@ -88,7 +90,7 @@ fn import_from_url(url: String) -> Val {
     };
 
     // todo design ctx for import evaluation
-    let mut mod_air = Air::new(StdPrelude::default().into());
+    let mut mod_air = Air::new(CoreCfg::default().into(), StdPrelude::default().into());
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     if !set_cur_url(mod_air.ctx_mut(), cur_url_key, url) {
         error!("set_cur_url {CUR_URL_KEY} should succeed");

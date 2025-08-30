@@ -19,6 +19,7 @@ use super::setup::free_mode;
 use crate::prelude::mode::FuncMode;
 use crate::prelude::mode::SymbolMode;
 use crate::prelude::mode::TaskPrimMode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
@@ -84,7 +85,7 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn { id: "function", f: free_impl(fn_new), mode: free_mode(parse_mode()) }.free()
 }
 
-fn fn_new(input: Val) -> Val {
+fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(func) = parse_func(input) else {
         error!("parse func failed");
         return Val::default();
@@ -96,7 +97,7 @@ pub fn repr() -> FreePrimFuncVal {
     FreePrimFn { id: "function.represent", f: free_impl(fn_repr), mode: default_free_mode() }.free()
 }
 
-fn fn_repr(input: Val) -> Val {
+fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
         error!("input {input:?} should be a function");
         return Val::default();
@@ -113,16 +114,16 @@ pub fn apply() -> MutPrimFuncVal {
     .mut_()
 }
 
-fn fn_eval_free(input: Val) -> Val {
-    Eval.free_call(input)
+fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {
+    Eval.free_call(cfg, input)
 }
 
-fn fn_eval_const(ctx: ConstRef<Val>, input: Val) -> Val {
-    Eval.const_call(ctx, input)
+fn fn_eval_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    Eval.const_call(cfg, ctx, input)
 }
 
-fn fn_eval_mut(ctx: &mut Val, input: Val) -> Val {
-    Eval.mut_call(ctx, input)
+fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    Eval.mut_call(cfg, ctx, input)
 }
 
 pub fn ctx_access() -> ConstPrimFuncVal {
@@ -134,7 +135,7 @@ pub fn ctx_access() -> ConstPrimFuncVal {
     .const_()
 }
 
-fn fn_ctx_access(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_ctx_access(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
@@ -148,7 +149,7 @@ pub fn call_setup() -> ConstPrimFuncVal {
         .const_()
 }
 
-fn fn_call_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_call_setup(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
@@ -165,7 +166,7 @@ pub fn solve_setup() -> ConstPrimFuncVal {
     .const_()
 }
 
-fn fn_solve_setup(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_solve_setup(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
@@ -182,7 +183,7 @@ pub fn is_primitive() -> ConstPrimFuncVal {
     .const_()
 }
 
-fn fn_is_primitive(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_is_primitive(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
@@ -195,7 +196,7 @@ pub fn id() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.id", f: const_impl(fn_id), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_id(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_id(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
@@ -207,7 +208,7 @@ pub fn code() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.code", f: const_impl(fn_code), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_code(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_code(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
@@ -219,7 +220,7 @@ pub fn ctx() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_ctx(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_ctx(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();

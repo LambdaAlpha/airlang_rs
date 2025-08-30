@@ -2,6 +2,7 @@ use super::FreeFn;
 use super::comp::FreeComposite;
 use super::setup::Setup;
 use super::setup::impl_setup;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
@@ -14,9 +15,9 @@ pub struct FreeCompFunc {
     pub(crate) setup: Setup,
 }
 
-impl FreeFn<Val, Val> for FreeCompFunc {
-    fn free_call(&self, input: Val) -> Val {
-        self.comp.call(&mut self.ctx.clone(), input)
+impl FreeFn<Cfg, Val, Val> for FreeCompFunc {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+        self.comp.call(cfg, &mut self.ctx.clone(), input)
     }
 }
 

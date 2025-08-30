@@ -8,6 +8,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -55,7 +56,7 @@ pub fn from_utf8() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_from_utf8(input: Val) -> Val {
+fn fn_from_utf8(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Byte(byte) = input else {
         error!("input {input:?} should be a byte");
         return Val::default();
@@ -73,7 +74,7 @@ pub fn into_utf8() -> FreePrimFuncVal {
         .free()
 }
 
-fn fn_into_utf8(input: Val) -> Val {
+fn fn_into_utf8(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(text) = input else {
         error!("input {input:?} should be a text");
         return Val::default();
@@ -87,7 +88,7 @@ pub fn length() -> ConstPrimFuncVal {
     DynPrimFn { id: "text.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_length(ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Text(t) = &*ctx else {
         error!("ctx {ctx:?} should be a text");
         return Val::default();
@@ -100,7 +101,7 @@ pub fn push() -> MutPrimFuncVal {
     DynPrimFn { id: "text.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_()
 }
 
-fn fn_push(ctx: &mut Val, input: Val) -> Val {
+fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Text(text) = ctx else {
         error!("ctx {ctx:?} should be a text");
         return Val::default();
@@ -118,7 +119,7 @@ pub fn join() -> FreePrimFuncVal {
     FreePrimFn { id: "text.join", f: free_impl(fn_join), mode: default_free_mode() }.free()
 }
 
-fn fn_join(input: Val) -> Val {
+fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return Val::default();
