@@ -1,6 +1,7 @@
 _("bench interpret")
 
 _ do [
+  % = _ import .integer.remainder,
   f = _ function {
     code : .n : _ do [
       .sum = 0,

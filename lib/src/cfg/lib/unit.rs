@@ -27,13 +27,11 @@ impl CfgMod for UnitLib {
 }
 
 impl Library for UnitLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.unit.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn unit() -> FreePrimFuncVal {
-    FreePrimFn { id: "unit", f: free_impl(fn_unit), mode: default_free_mode() }.free()
+    FreePrimFn { id: "unit.unit", f: free_impl(fn_unit), mode: default_free_mode() }.free()
 }
 
 fn fn_unit(_cfg: &mut Cfg, _input: Val) -> Val {

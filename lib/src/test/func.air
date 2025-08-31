@@ -184,7 +184,7 @@ repr primitive free
 -----
 _ function.represent not
 -----
-{id : not}
+{id : bit.not}
 =====
 repr const
 -----
@@ -312,13 +312,13 @@ id primitive
 -----
 not ; function.id .
 -----
-not
+bit.not
 =====
 id rename
 -----
 _ do [neg = not, neg ; function.id .]
 -----
-not
+bit.not
 =====
 code
 -----

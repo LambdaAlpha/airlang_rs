@@ -30,6 +30,7 @@ _ do [
     a = _ any list,
     l1 = a ; list.length .,
     (l1 == 0) .return true,
+    % = _ import .integer.remainder,
     i = (l1 + (_ any integer) % l1) % l1,
     a ; list.pop_many i,
     l2 = a ; list.length .,
@@ -45,6 +46,7 @@ _ do [
     b = a,
     l = a ; list.length .,
     (l == 0) .return true,
+    % = _ import .integer.remainder,
     i = (l + (_ any integer) % l) % l,
     v1 = a ; list.get i,
     v2 = _ any .,
@@ -65,6 +67,7 @@ _ do [
     b = _ any list,
     lb = b ; list.length .,
     (lb == 0) .return true,
+    % = _ import .integer.remainder,
     (la < lb) ? [
         t = a,
         a = b,
@@ -88,6 +91,7 @@ true
 insert get length
 -----
 _ do [
+    % = _ import .integer.remainder,
     a = _ any list,
     l = 1 + a ; list.length .,
     i = (l + (_ any integer) % l) % l,
@@ -103,6 +107,7 @@ true
 insert remove
 -----
 _ do [
+    % = _ import .integer.remainder,
     a = _ any list,
     b = a,
     l = 1 + a ; list.length .,
@@ -118,6 +123,7 @@ true
 insert_many get_many length
 -----
 _ do [
+    % = _ import .integer.remainder,
     a = _ any list,
     l1 = 1 + a ; list.length .,
     i = (l1 + (_ any integer) % l1) % l1,
@@ -134,6 +140,7 @@ true
 insert_many remove_many
 -----
 _ do [
+    % = _ import .integer.remainder,
     a = _ any list,
     b = a,
     l = 1 + a ; list.length .,

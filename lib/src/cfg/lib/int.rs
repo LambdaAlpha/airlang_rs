@@ -2,6 +2,7 @@ use log::error;
 
 use super::FreePrimFn;
 use super::Library;
+use super::ctx_put_func;
 use super::free_impl;
 use super::setup::default_free_mode;
 use crate::cfg::CfgMod;
@@ -63,22 +64,19 @@ impl CfgMod for IntLib {
 
 impl Library for IntLib {
     fn prelude(&self, ctx: &mut Ctx) {
-        self.add.prelude(ctx);
-        self.subtract.prelude(ctx);
-        self.multiply.prelude(ctx);
-        self.divide.prelude(ctx);
-        self.remainder.prelude(ctx);
-        self.divide_remainder.prelude(ctx);
-        self.less_than.prelude(ctx);
-        self.less_equal.prelude(ctx);
-        self.greater_than.prelude(ctx);
-        self.greater_equal.prelude(ctx);
-        self.less_greater.prelude(ctx);
+        ctx_put_func(ctx, "+", &self.add);
+        ctx_put_func(ctx, "-", &self.subtract);
+        ctx_put_func(ctx, "*", &self.multiply);
+        ctx_put_func(ctx, "/", &self.divide);
+        ctx_put_func(ctx, "<", &self.less_than);
+        ctx_put_func(ctx, "<=", &self.less_equal);
+        ctx_put_func(ctx, ">", &self.greater_than);
+        ctx_put_func(ctx, ">=", &self.greater_equal);
     }
 }
 
 pub fn add() -> FreePrimFuncVal {
-    FreePrimFn { id: "+", f: free_impl(fn_add), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.add", f: free_impl(fn_add), mode: default_free_mode() }.free()
 }
 
 fn fn_add(_cfg: &mut Cfg, input: Val) -> Val {
@@ -101,7 +99,8 @@ fn fn_add(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn subtract() -> FreePrimFuncVal {
-    FreePrimFn { id: "-", f: free_impl(fn_subtract), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.subtract", f: free_impl(fn_subtract), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_subtract(_cfg: &mut Cfg, input: Val) -> Val {
@@ -124,7 +123,8 @@ fn fn_subtract(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn multiply() -> FreePrimFuncVal {
-    FreePrimFn { id: "*", f: free_impl(fn_multiply), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.multiply", f: free_impl(fn_multiply), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_multiply(_cfg: &mut Cfg, input: Val) -> Val {
@@ -147,7 +147,7 @@ fn fn_multiply(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn divide() -> FreePrimFuncVal {
-    FreePrimFn { id: "/", f: free_impl(fn_divide), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.divide", f: free_impl(fn_divide), mode: default_free_mode() }.free()
 }
 
 fn fn_divide(_cfg: &mut Cfg, input: Val) -> Val {
@@ -173,7 +173,8 @@ fn fn_divide(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn remainder() -> FreePrimFuncVal {
-    FreePrimFn { id: "%", f: free_impl(fn_remainder), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.remainder", f: free_impl(fn_remainder), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_remainder(_cfg: &mut Cfg, input: Val) -> Val {
@@ -199,7 +200,12 @@ fn fn_remainder(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn divide_remainder() -> FreePrimFuncVal {
-    FreePrimFn { id: "/%", f: free_impl(fn_divide_remainder), mode: default_free_mode() }.free()
+    FreePrimFn {
+        id: "integer.divide_remainder",
+        f: free_impl(fn_divide_remainder),
+        mode: default_free_mode(),
+    }
+    .free()
 }
 
 fn fn_divide_remainder(_cfg: &mut Cfg, input: Val) -> Val {
@@ -225,7 +231,7 @@ fn fn_divide_remainder(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_than() -> FreePrimFuncVal {
-    FreePrimFn { id: "<", f: free_impl(fn_less_than), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.less", f: free_impl(fn_less_than), mode: default_free_mode() }.free()
 }
 
 fn fn_less_than(_cfg: &mut Cfg, input: Val) -> Val {
@@ -246,7 +252,8 @@ fn fn_less_than(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "<=", f: free_impl(fn_less_equal), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.less_equal", f: free_impl(fn_less_equal), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_less_equal(_cfg: &mut Cfg, input: Val) -> Val {
@@ -267,7 +274,8 @@ fn fn_less_equal(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater_than() -> FreePrimFuncVal {
-    FreePrimFn { id: ">", f: free_impl(fn_greater_than), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.greater", f: free_impl(fn_greater_than), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_greater_than(_cfg: &mut Cfg, input: Val) -> Val {
@@ -288,7 +296,12 @@ fn fn_greater_than(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater_equal() -> FreePrimFuncVal {
-    FreePrimFn { id: ">=", f: free_impl(fn_greater_equal), mode: default_free_mode() }.free()
+    FreePrimFn {
+        id: "integer.greater_equal",
+        f: free_impl(fn_greater_equal),
+        mode: default_free_mode(),
+    }
+    .free()
 }
 
 fn fn_greater_equal(_cfg: &mut Cfg, input: Val) -> Val {
@@ -309,7 +322,12 @@ fn fn_greater_equal(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_greater() -> FreePrimFuncVal {
-    FreePrimFn { id: "<>", f: free_impl(fn_less_greater), mode: default_free_mode() }.free()
+    FreePrimFn {
+        id: "integer.less_greater",
+        f: free_impl(fn_less_greater),
+        mode: default_free_mode(),
+    }
+    .free()
 }
 
 fn fn_less_greater(_cfg: &mut Cfg, input: Val) -> Val {

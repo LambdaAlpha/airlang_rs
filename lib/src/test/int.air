@@ -1,24 +1,38 @@
 + 0
 -----
-_ do [a = _ any integer, a == a + 0]
+_ do [
+    a = _ any integer,
+    a == a + 0
+]
 -----
 true
 =====
 - 0
 -----
-_ do [a = _ any integer, a == a - 0]
+_ do [
+    a = _ any integer,
+    a == a - 0
+]
 -----
 true
 =====
 + -
 -----
-_ do [a = _ any integer, b = _ any integer, a == <(a + b - b)]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    a == <(a + b - b)
+]
 -----
 true
 =====
 - +
 -----
-_ do [a = _ any integer, b = _ any integer, a == <(a - b + b)]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    a == <(a - b + b)
+]
 -----
 true
 =====
@@ -36,103 +50,178 @@ true
 =====
 * 0
 -----
-_ do [a = _ any integer, 0 == a * 0]
+_ do [
+    a = _ any integer,
+    0 == a * 0
+]
 -----
 true
 =====
 * 1
 -----
-_ do [a = _ any integer, a == a * 1]
+_ do [
+    a = _ any integer,
+    a == a * 1
+]
 -----
 true
 =====
 * -1
 -----
-_ do [a = _ any integer, 0 == a + a * 0-1]
+_ do [
+    a = _ any integer,
+    0 == a + a * 0-1
+]
 -----
 true
 =====
 / 0
 -----
-_ do [a = _ any integer, . == a / 0]
+_ do [
+    a = _ any integer,
+    . == a / 0
+]
 -----
 true
 =====
 / 1
 -----
-_ do [a = _ any integer, a == a / 1]
+_ do [
+    a = _ any integer,
+    a == a / 1
+]
 -----
 true
 =====
 / -1
 -----
-_ do [a = _ any integer, 0 == a + a / 0-1]
+_ do [
+    a = _ any integer,
+    0 == a + a / 0-1
+]
 -----
 true
 =====
 0 /
 -----
-_ do [a = _ any integer, (a == 0) .return true, 0 == 0 / a]
+_ do [
+    a = _ any integer,
+    (a == 0) .return true,
+    0 == 0 / a
+]
 -----
 true
 =====
-0 %
+0 remainder
 -----
-_ do [a = _ any integer, (a == 0) .return true, 0 == 0 % a]
------
-true
-=====
-% 0
------
-_ do [a = _ any integer, . == a % 0]
------
-true
-=====
-% 1
------
-_ do [a = _ any integer, 0 == a % 1]
+_ do [
+    a = _ any integer,
+    (a == 0) .return true,
+    % = _ import .integer.remainder,
+    0 == 0 % a
+]
 -----
 true
 =====
-% exact
+remainder 0
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, 0 == (a * b) % b]
------
-true
-=====
-sign(a % b) == sign(a)
------
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (0 <= a) == 0 <= a % b]
+_ do [
+    a = _ any integer,
+    % = _ import .integer.remainder,
+    . == a % 0
+]
 -----
 true
 =====
-abs(a % b) < abs(b)
+remainder 1
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (0 <= b) == 0 <= b + a % b]
+_ do [
+    a = _ any integer,
+    % = _ import .integer.remainder,
+    0 == a % 1
+]
+-----
+true
+=====
+remainder exact
+-----
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    % = _ import .integer.remainder,
+    0 == (a * b) % b
+]
+-----
+true
+=====
+sign(a remainder b) == sign(a)
+-----
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    % = _ import .integer.remainder,
+    (0 <= a) == 0 <= a % b
+]
+-----
+true
+=====
+abs(a remainder b) < abs(b)
+-----
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    % = _ import .integer.remainder,
+    (0 <= b) == 0 <= b + a % b
+]
 -----
 true
 =====
 * /
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, a == <(a * b / b)]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    a == <(a * b / b)
+]
 -----
 true
 =====
 exact / *
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, c = a * b, c == <(c / b * b)]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    c = a * b,
+    c == <(c / b * b)
+]
 -----
 true
 =====
 inexact / abs(a) > abs(a / b * b)
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (0 <= a) == 0 <= a - a / b * b]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    (0 <= a) == 0 <= a - a / b * b
+]
 -----
 true
 =====
-a == b * a / b + a % b
+a == b * a / b + a remainder b
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, a == (b * a / b) + a % b]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    % = _ import .integer.remainder,
+    a == (b * a / b) + a % b
+]
 -----
 true
 =====
@@ -178,69 +267,106 @@ true
 -----
 2
 =====
-% exact
+remainder exact
 -----
-6 % 3
+_ do [
+    % = _ import .integer.remainder,
+    6 % 3
+]
 -----
 0
 =====
-% inexact smaller
+remainder inexact smaller
 -----
-5 % 3
+_ do [
+    % = _ import .integer.remainder,
+    5 % 3
+]
 -----
 2
 =====
-% inexact bigger
+remainder inexact bigger
 -----
-7 % 3
------
-1
-=====
-% inexact negative 1
------
-7 % 0-3
+_ do [
+    % = _ import .integer.remainder,
+    7 % 3
+]
 -----
 1
 =====
-% inexact negative 2
+remainder inexact negative 1
 -----
-0-7 % 3
+_ do [
+    % = _ import .integer.remainder,
+    7 % 0-3
+]
+-----
+1
+=====
+remainder inexact negative 2
+-----
+_ do [
+    % = _ import .integer.remainder,
+    0-7 % 3
+]
 -----
 0-1
 =====
-% inexact negative 3
+remainder inexact negative 3
 -----
-0-7 % 0-3
+_ do [
+    % = _ import .integer.remainder,
+    0-7 % 0-3
+]
 -----
 0-1
 =====
-a /% b == (a / b) : (a % b)
+a divide_remainder b == (a / b) : (a remainder b)
 -----
-_ do [a = _ any integer, b = _ any integer, (b == 0) .return true, (a /% b) == (a / b) : (a % b)]
+_ do [
+    a = _ any integer,
+    b = _ any integer,
+    (b == 0) .return true,
+    % = _ import .integer.remainder,
+    /% = _ import .integer.divide_remainder,
+    (a /% b) == (a / b) : (a % b)
+]
 -----
 true
 =====
-/% both positive
+divide_remainder both positive
 -----
-7 /% 3
+_ do [
+    /% = _ import .integer.divide_remainder,
+    7 /% 3
+]
 -----
 2 : 1
 =====
-/% positive negative
+divide_remainder positive negative
 -----
-7 /% 0-3
+_ do [
+    /% = _ import .integer.divide_remainder,
+    7 /% 0-3
+]
 -----
 0-2 : 1
 =====
-/% negative positive
+divide_remainder negative positive
 -----
-0-7 /% 3
+_ do [
+    /% = _ import .integer.divide_remainder,
+    0-7 /% 3
+]
 -----
 0-2 : 0-1
 =====
-/% negative negative
+divide_remainder negative negative
 -----
-0-7 /% 0-3
+_ do [
+    /% = _ import .integer.divide_remainder,
+    0-7 /% 0-3
+]
 -----
 2 : 0-1
 =====
@@ -250,6 +376,7 @@ _ do [
     a = _ any integer,
     b = _ any integer,
     c = _ any integer,
+    <> = _ import .integer.less_greater,
     [
         (a > b) == (b < a),
         (a < b) == (b > a),
@@ -269,6 +396,9 @@ _ do [
 =====
 order trivial
 -----
-(0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1) and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
+_ do [
+    <> = _ import .integer.less_greater,
+    (0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1) and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
+]
 -----
 true

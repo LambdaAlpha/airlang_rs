@@ -1,12 +1,14 @@
 length join
 -----
 _ do [
+    length = _ import .symbol.length,
+    join = _ import .symbol.join,
     a = _ any symbol,
-    la = a ; symbol.length .,
+    la = a ; length .,
     b = _ any symbol,
-    lb = b ; symbol.length .,
-    ab = . symbol.join [a, b],
-    lab = ab ; symbol.length .,
+    lb = b ; length .,
+    ab = . join [a, b],
+    lab = ab ; length .,
     lab == la + lb
 ]
 -----
@@ -14,72 +16,116 @@ true
 =====
 length empty
 -----
-_ do [s = _ form '', s ; symbol.length .]
+_ do [
+    length = _ import .symbol.length,
+    s = _ form '',
+    s ; length .
+]
 -----
 0
 =====
 length else
 -----
-_ do [s = .a, s ; symbol.length .]
+_ do [
+    length = _ import .symbol.length,
+    s = .a,
+    s ; length .
+]
 -----
 1
 =====
 join empty
 -----
-'.' symbol.join [.a, .b]
+_ do [
+    join = _ import .symbol.join,
+    '.' join [.a, .b]
+]
 -----
 ab
 =====
 join unit
 -----
-_ do [a = .a1, b = .b1, c = .c1, . symbol.join [a, b, c]]
+_ do [
+    join = _ import .symbol.join,
+    a = .a1,
+    b = .b1,
+    c = .c1,
+    . join [a, b, c]
+]
 -----
 a1b1c1
 =====
 join no symbol
 -----
-. symbol.join []
+_ do [
+    join = _ import .symbol.join,
+    . join []
+]
 -----
 ''
 =====
 join else
 -----
-.. symbol.join [.a, .b]
+_ do [
+    join = _ import .symbol.join,
+    .. join [.a, .b]
+]
 -----
 a.b
 =====
 into_text from_text
 -----
-_ do [s = _ any symbol, s == _ symbol.from_text _ symbol.into_text s]
+_ do [
+    from_text = _ import .symbol.from_text,
+    into_text = _ import .symbol.into_text,
+    s = _ any symbol,
+    s1 = _ from_text _ into_text s,
+    s == s1
+]
 -----
 true
 =====
 from_text empty
 -----
-_ symbol.from_text ""
+_ do [
+    from_text = _ import .symbol.from_text,
+    _ from_text ""
+]
 -----
 ''
 =====
 from_text trivial
 -----
-_ symbol.from_text "hello_world!"
+_ do [
+    from_text = _ import .symbol.from_text,
+    _ from_text "hello_world!"
+]
 -----
 hello_world!
 =====
 from_text special
 -----
-_ symbol.from_text "{}"
+_ do [
+    from_text = _ import .symbol.from_text,
+    _ from_text "{}"
+]
 -----
 '{}'
 =====
 into_text empty
 -----
-_ symbol.into_text _ form ''
+_ do [
+    into_text = _ import .symbol.into_text,
+    _ into_text _ form ''
+]
 -----
 ""
 =====
 into_text trivial
 -----
-_ symbol.into_text .hello_world!
+_ do [
+    into_text = _ import .symbol.into_text,
+    _ into_text .hello_world!
+]
 -----
 "hello_world!"

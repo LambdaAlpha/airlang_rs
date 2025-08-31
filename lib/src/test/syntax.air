@@ -1,22 +1,27 @@
 parse generate
 -----
 _ do [
+    % = _ import .integer.remainder,
     atom = [.unit, .bit, .symbol, .text, .integer, .number, .byte],
     i = 3 + (_ any integer) % 4,
     a = atom ; list.get i,
-    (_ any bit) loop (_ any bit) ? [
-        i = 3 + (_ any integer) % 4,
-        b = atom ; list.get i,
-        i = (4 + (_ any integer) % 4) % 4,
-        a = (_ any bit) ? (a : b) : _ form@ _ a b,
-    ] : (_ any bit) ? [
-        i = 3 + (_ any integer) % 4,
-        b = atom ; list.get i,
-        a = [a, b],
-    ] : [
-        i = 3 + (_ any integer) % 4,
-        b = atom ; list.get i,
-        a = {a : b},
+    (_ any bit) loop [
+        (_ any bit) ? [
+            i = 3 + (_ any integer) % 4,
+            b = atom ; list.get i,
+            i = (4 + (_ any integer) % 4) % 4,
+            a = (_ any bit) ? [a : b] : [_ form@ _ a b],
+        ] : [
+            (_ any bit) ? [
+                i = 3 + (_ any integer) % 4,
+                b = atom ; list.get i,
+                a = [a, b],
+            ] : [
+                i = 3 + (_ any integer) % 4,
+                b = atom ; list.get i,
+                a = {a : b},
+            ]
+        ]
     ],
     a1 = _ syntax.parse _ syntax.generate a,
     a == a1

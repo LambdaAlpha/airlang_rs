@@ -53,13 +53,7 @@ impl CfgMod for TextLib {
 }
 
 impl Library for TextLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.from_utf8.prelude(ctx);
-        self.into_utf8.prelude(ctx);
-        self.length.prelude(ctx);
-        self.push.prelude(ctx);
-        self.join.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn from_utf8() -> FreePrimFuncVal {

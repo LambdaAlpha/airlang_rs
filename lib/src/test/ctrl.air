@@ -262,6 +262,7 @@ _ do [
 loop ?
 -----
 _ do [
+    <> = _ import .integer.less_greater,
     a = 42,
     b = 24,
     (a <> b) loop [(a > b) ? [

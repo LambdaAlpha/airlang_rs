@@ -43,12 +43,7 @@ impl CfgMod for SymbolLib {
 }
 
 impl Library for SymbolLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.from_text.prelude(ctx);
-        self.into_text.prelude(ctx);
-        self.length.prelude(ctx);
-        self.join.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn from_text() -> FreePrimFuncVal {

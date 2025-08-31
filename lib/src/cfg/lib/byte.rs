@@ -42,11 +42,7 @@ impl CfgMod for ByteLib {
 }
 
 impl Library for ByteLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.length.prelude(ctx);
-        self.push.prelude(ctx);
-        self.join.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn length() -> ConstPrimFuncVal {

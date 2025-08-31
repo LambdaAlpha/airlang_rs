@@ -1,18 +1,28 @@
 length push
 -----
-_ do [b = _ any byte, l = b ; byte.length ., b ; byte.push byte(00), (b ; byte.length .) == l + 1]
+_ do [
+    length = _ import .byte.length,
+    push = _ import .byte.push,
+    b = _ any byte,
+    l = b ; length .,
+    b ; push byte(00),
+    l1 = b ; length .,
+    l1 == l + 1
+]
 -----
 true
 =====
 length join
 -----
 _ do [
+    length = _ import .byte.length,
+    join = _ import .byte.join,
     a = _ any byte,
-    la = a ; byte.length .,
+    la = a ; length .,
     b = _ any byte,
-    lb = b ; byte.length .,
-    ab = . byte.join [a, b],
-    lab = ab ; byte.length .,
+    lb = b ; length .,
+    ab = . join [a, b],
+    lab = ab ; length .,
     lab == la + lb
 ]
 -----
@@ -20,48 +30,86 @@ true
 =====
 length empty
 -----
-_ do [b = byte(), b ; byte.length .]
+_ do [
+    length = _ import .byte.length,
+    b = byte(),
+    b ; length .
+]
 -----
 0
 =====
 length else
 -----
-_ do [b = byte(ff), b ; byte.length .]
+_ do [
+    length = _ import .byte.length,
+    b = byte(ff),
+    b ; length .
+]
 -----
 1
 =====
 push join
 -----
-_ do [a = _ any byte, b = _ any byte, ab = a, ab ; byte.push b, ab == . byte.join [a, b]]
+_ do [
+    push = _ import .byte.push,
+    join = _ import .byte.join,
+    a = _ any byte,
+    b = _ any byte,
+    ab = a,
+    ab ; push b,
+    ab1 = . join [a, b],
+    ab == ab1
+]
 -----
 true
 =====
 push
 -----
-_ do [a = byte(00), b = byte(1122), a ; byte.push b, a]
+_ do [
+    push = _ import .byte.push,
+    a = byte(00),
+    b = byte(1122),
+    a ; push b,
+    a
+]
 -----
 byte(001122)
 =====
 join empty
 -----
-byte() byte.join [byte(1234), byte(56)]
+_ do [
+    join = _ import .byte.join,
+    byte() join [byte(1234), byte(56)]
+]
 -----
 byte(123456)
 =====
 join unit
 -----
-_ do [a = byte(1234), b = byte(5678), c = byte(9abc), . byte.join [a, b, c]]
+_ do [
+    join = _ import .byte.join,
+    a = byte(1234),
+    b = byte(5678),
+    c = byte(9abc),
+    . join [a, b, c]
+]
 -----
 byte(123456789abc)
 =====
 join no byte
 -----
-. byte.join []
+_ do [
+    join = _ import .byte.join,
+    . join []
+]
 -----
 byte()
 =====
 join else
 -----
-byte(00) byte.join [byte(1111), byte(22)]
+_ do [
+    join = _ import .byte.join,
+    byte(00) join [byte(1111), byte(22)]
+]
 -----
 byte(11110022)

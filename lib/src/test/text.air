@@ -1,18 +1,28 @@
 length push
 -----
-_ do [t = _ any text, l = t ; text.length ., t ; text.push "a", (t ; text.length .) == l + 1]
+_ do [
+    length = _ import .text.length,
+    push = _ import .text.push,
+    t = _ any text,
+    l = t ; length .,
+    t ; push "a",
+    l1 = t ; length .,
+    l1 == l + 1
+]
 -----
 true
 =====
 length join
 -----
 _ do [
+    length = _ import .text.length,
+    join = _ import .text.join,
     a = _ any text,
-    la = a ; text.length .,
+    la = a ; length .,
     b = _ any text,
-    lb = b ; text.length .,
-    ab = . text.join [a, b],
-    lab = ab ; text.length .,
+    lb = b ; length .,
+    ab = . join [a, b],
+    lab = ab ; length .,
     lab == la + lb
 ]
 -----
@@ -20,66 +30,117 @@ true
 =====
 length empty
 -----
-_ do [t = "", t ; text.length .]
+_ do [
+    length = _ import .text.length,
+    t = "",
+    t ; length .
+]
 -----
 0
 =====
 length else
 -----
-_ do [t = "1", t ; text.length .]
+_ do [
+    length = _ import .text.length,
+    t = "1",
+    t ; length .
+]
 -----
 1
 =====
 push join
 -----
-_ do [a = _ any text, b = _ any text, t = a, t ; text.push b, t == . text.join [a, b]]
+_ do [
+    push = _ import .text.push,
+    join = _ import .text.join,
+    a = _ any text,
+    b = _ any text,
+    t = a,
+    t ; push b,
+    t1 = . join [a, b],
+    t == t1
+]
 -----
 true
 =====
 push
 -----
-_ do [a = "hello", b = "world", a ; text.push " ", a ; text.push b, a]
+_ do [
+    push = _ import .text.push,
+    a = "hello",
+    b = "world",
+    a ; push " ",
+    a ; push b,
+    a
+]
 -----
 "hello world"
 =====
 join empty
 -----
-"" text.join ["1", "2"]
+_ do [
+    join = _ import .text.join,
+    "" join ["1", "2"]
+]
 -----
 "12"
 =====
 join unit
 -----
-_ do [a = "1", b = "2", c = "3", . text.join [a, b, c]]
+_ do [
+    join = _ import .text.join,
+    a = "1",
+    b = "2",
+    c = "3",
+    . join [a, b, c]
+]
 -----
 "123"
 =====
 join no text
 -----
-. text.join []
+_ do [
+    join = _ import .text.join,
+    . join []
+]
 -----
 ""
 =====
 join else
 -----
-"." text.join ["1", "2"]
+_ do [
+    join = _ import .text.join,
+    "." join ["1", "2"]
+]
 -----
 "1.2"
 =====
 into_utf8 from_utf8
 -----
-_ do [t = _ any text, t == _ text.from_utf8 _ text.into_utf8 t]
+_ do [
+    from_utf8 = _ import .text.from_utf8,
+    into_utf8 = _ import .text.into_utf8,
+    t = _ any text,
+    t1 = _ from_utf8 _ into_utf8 t,
+    t == t1
+]
 -----
 true
 =====
 into_utf8
 -----
-_ text.into_utf8 "abc"
+_ do [
+    into_utf8 = _ import .text.into_utf8,
+    _ into_utf8 "abc"
+]
 -----
 byte(616263)
 =====
 from_utf8
 -----
-_ text.from_utf8 byte(616263)
+_ do [
+    from_utf8 = _ import .text.from_utf8,
+    _ from_utf8 byte(616263)
+]
 -----
 "abc"

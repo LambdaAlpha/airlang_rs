@@ -30,7 +30,7 @@ with
 _ do [
     a1 = _ any .,
     a2 = _ any .,
-    (a3 : a4) = {a : a1} with _ do [
+    {a : a1} with _ do [
         a4 = {a : a2} with _ import .a,
         a3 = _ import .a,
     ],
