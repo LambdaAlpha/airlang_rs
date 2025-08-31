@@ -2,15 +2,8 @@ use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::composite_call;
-use crate::semantics::solve::set_solver;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
-
-/// init thread local solver
-pub fn init_solver(solver: FuncVal) {
-    set_solver(solver);
-}
 
 #[derive(Debug, Clone)]
 pub struct Air {

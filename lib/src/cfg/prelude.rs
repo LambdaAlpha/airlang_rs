@@ -14,7 +14,6 @@ use self::mode::FuncMode;
 use self::mode::ModePrelude;
 use self::number::NumberPrelude;
 use self::pair::PairPrelude;
-use self::solve::SolvePrelude;
 use self::symbol::SymbolPrelude;
 use self::syntax::SyntaxPrelude;
 use self::task::TaskPrelude;
@@ -61,7 +60,6 @@ pub struct CorePrelude {
     pub cfg: CfgPrelude,
     pub ctx: CtxPrelude,
     pub func: FuncPrelude,
-    pub solve: SolvePrelude,
     pub meta: MetaPrelude,
     pub syntax: SyntaxPrelude,
     pub value: ValuePrelude,
@@ -86,7 +84,6 @@ impl Prelude for CorePrelude {
         self.cfg.put(ctx);
         self.ctx.put(ctx);
         self.func.put(ctx);
-        self.solve.put(ctx);
         self.meta.put(ctx);
         self.syntax.put(ctx);
         self.value.put(ctx);
@@ -323,8 +320,6 @@ pub mod ctx;
 pub mod func;
 
 // -----
-
-pub mod solve;
 
 pub mod meta;
 

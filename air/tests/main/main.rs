@@ -2,9 +2,7 @@ use std::error::Error;
 
 use airlang::Air;
 use airlang::cfg::CoreCfg;
-use airlang::init_solver;
 use airlang::semantics::ctx::Contract;
-use airlang::solve::core_solver;
 use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Symbol;
@@ -51,7 +49,6 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
     let src = generate_load("/main/main.air");
     let src = parse(&src)?;
-    init_solver(core_solver());
     let mut air = Air::new(CoreCfg::default().into());
     let main = air.interpret(src);
     let main_name = Symbol::from_str_unchecked(MAIN_NAME);
