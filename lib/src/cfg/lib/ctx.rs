@@ -16,6 +16,7 @@ use super::free_impl;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
 use super::mut_impl;
+use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
@@ -64,6 +65,22 @@ impl Default for CtxLib {
             ctx_reverse: ctx_reverse(),
             ctx_self: ctx_self(),
         }
+    }
+}
+
+impl CfgMod for CtxLib {
+    fn extend(self, cfg: &Cfg) {
+        self.read.extend(cfg);
+        self.move_.extend(cfg);
+        self.assign.extend(cfg);
+        self.contract.extend(cfg);
+        self.set_contract.extend(cfg);
+        self.is_null.extend(cfg);
+        self.is_const.extend(cfg);
+        self.ctx_new.extend(cfg);
+        self.ctx_repr.extend(cfg);
+        self.ctx_reverse.extend(cfg);
+        self.ctx_self.extend(cfg);
     }
 }
 

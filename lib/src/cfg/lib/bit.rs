@@ -1,7 +1,8 @@
 use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
-use crate::cfg::lib::setup::default_free_mode;
+use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -19,6 +20,16 @@ pub struct BitLib {
 impl Default for BitLib {
     fn default() -> Self {
         BitLib { not: not(), and: and(), or: or(), xor: xor(), imply: imply() }
+    }
+}
+
+impl CfgMod for BitLib {
+    fn extend(self, cfg: &Cfg) {
+        self.not.extend(cfg);
+        self.and.extend(cfg);
+        self.or.extend(cfg);
+        self.xor.extend(cfg);
+        self.imply.extend(cfg);
     }
 }
 

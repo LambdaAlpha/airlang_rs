@@ -41,6 +41,7 @@ impl Default for CoreCfg {
 
 impl CfgMod for CoreCfg {
     fn extend(self, cfg: &Cfg) {
+        self.lib.extend(cfg);
         cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Ctx(self.prelude.into()));
         cfg.extend_scope(Symbol::from_str_unchecked(Self::SOLVER), Val::Func(self.solver));
     }
@@ -71,6 +72,12 @@ impl Named for ConstPrimFuncVal {
 impl Named for MutPrimFuncVal {
     fn name(&self) -> Symbol {
         self.id.clone()
+    }
+}
+
+impl<F: Named + Into<FuncVal>> CfgMod for F {
+    fn extend(self, cfg: &Cfg) {
+        cfg.extend_scope(self.name(), Val::Func(self.into()));
     }
 }
 

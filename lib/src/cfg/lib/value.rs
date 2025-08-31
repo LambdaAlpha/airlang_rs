@@ -20,6 +20,7 @@ use super::mode::TaskPrimMode;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use super::setup::free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::BIT;
@@ -69,6 +70,14 @@ pub struct ValueLib {
 impl Default for ValueLib {
     fn default() -> Self {
         ValueLib { any: any(), type_: type_(), equal: equal() }
+    }
+}
+
+impl CfgMod for ValueLib {
+    fn extend(self, cfg: &Cfg) {
+        self.any.extend(cfg);
+        self.type_.extend(cfg);
+        self.equal.extend(cfg);
     }
 }
 

@@ -3,6 +3,7 @@ use log::error;
 use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
+use crate::cfg::CfgMod;
 use crate::cfg::lib::setup::default_free_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
@@ -26,6 +27,13 @@ pub struct SyntaxLib {
 impl Default for SyntaxLib {
     fn default() -> Self {
         SyntaxLib { parse: parse(), generate: generate() }
+    }
+}
+
+impl CfgMod for SyntaxLib {
+    fn extend(self, cfg: &Cfg) {
+        self.parse.extend(cfg);
+        self.generate.extend(cfg);
     }
 }
 

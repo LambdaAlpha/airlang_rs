@@ -22,6 +22,7 @@ use self::unit::UnitLib;
 use self::value::ValueLib;
 use super::Named;
 use super::lib::cfg::CfgLib;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -40,7 +41,7 @@ use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Symbol;
 
-pub trait Library {
+pub trait Library: CfgMod {
     fn prelude(&self, ctx: &mut Ctx);
 }
 
@@ -66,6 +67,31 @@ pub struct CoreLib {
     pub value: ValueLib,
     pub ctrl: CtrlLib,
     pub mode: ModeLib,
+}
+
+impl CfgMod for CoreLib {
+    fn extend(self, cfg: &Cfg) {
+        self.unit.extend(cfg);
+        self.bool.extend(cfg);
+        self.symbol.extend(cfg);
+        self.text.extend(cfg);
+        self.int.extend(cfg);
+        self.number.extend(cfg);
+        self.byte.extend(cfg);
+        self.pair.extend(cfg);
+        self.task.extend(cfg);
+        self.list.extend(cfg);
+        self.map.extend(cfg);
+        self.link.extend(cfg);
+        self.cfg.extend(cfg);
+        self.ctx.extend(cfg);
+        self.func.extend(cfg);
+        self.meta.extend(cfg);
+        self.syntax.extend(cfg);
+        self.value.extend(cfg);
+        self.ctrl.extend(cfg);
+        self.mode.extend(cfg);
+    }
 }
 
 impl Library for CoreLib {

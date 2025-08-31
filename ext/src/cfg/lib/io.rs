@@ -3,6 +3,7 @@ use std::io::stderr;
 use std::io::stdin;
 use std::io::stdout;
 
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
@@ -39,6 +40,18 @@ impl Default for IoLib {
             error_print_line: error_print_line(),
             error_flush: error_flush(),
         }
+    }
+}
+
+impl CfgMod for IoLib {
+    fn extend(self, cfg: &Cfg) {
+        self.read_line.extend(cfg);
+        self.print.extend(cfg);
+        self.print_line.extend(cfg);
+        self.flush.extend(cfg);
+        self.error_print.extend(cfg);
+        self.error_print_line.extend(cfg);
+        self.error_flush.extend(cfg);
     }
 }
 

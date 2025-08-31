@@ -8,6 +8,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -29,6 +30,14 @@ pub struct ByteLib {
 impl Default for ByteLib {
     fn default() -> Self {
         ByteLib { length: length(), push: push(), join: join() }
+    }
+}
+
+impl CfgMod for ByteLib {
+    fn extend(self, cfg: &Cfg) {
+        self.length.extend(cfg);
+        self.push.extend(cfg);
+        self.join.extend(cfg);
     }
 }
 

@@ -7,6 +7,7 @@ use super::const_impl;
 use super::free_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -29,6 +30,15 @@ pub struct SymbolLib {
 impl Default for SymbolLib {
     fn default() -> Self {
         SymbolLib { from_text: from_text(), into_text: into_text(), length: length(), join: join() }
+    }
+}
+
+impl CfgMod for SymbolLib {
+    fn extend(self, cfg: &Cfg) {
+        self.from_text.extend(cfg);
+        self.into_text.extend(cfg);
+        self.length.extend(cfg);
+        self.join.extend(cfg);
     }
 }
 

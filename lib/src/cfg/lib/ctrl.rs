@@ -12,6 +12,7 @@ use super::mode::PrimMode;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
 use super::mut_impl;
+use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
@@ -55,6 +56,17 @@ impl Default for CtrlLib {
             loop_: loop_(),
             for_: for_(),
         }
+    }
+}
+
+impl CfgMod for CtrlLib {
+    fn extend(self, cfg: &Cfg) {
+        self.do_.extend(cfg);
+        self.if_.extend(cfg);
+        self.switch.extend(cfg);
+        self.match_.extend(cfg);
+        self.loop_.extend(cfg);
+        self.for_.extend(cfg);
     }
 }
 

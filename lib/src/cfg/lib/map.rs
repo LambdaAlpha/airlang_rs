@@ -10,6 +10,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -72,6 +73,31 @@ impl Default for MapLib {
             new_set: new_set(),
             new_multiset: new_multiset(),
         }
+    }
+}
+
+impl CfgMod for MapLib {
+    fn extend(self, cfg: &Cfg) {
+        self.length.extend(cfg);
+        self.items.extend(cfg);
+        self.into_items.extend(cfg);
+        self.keys.extend(cfg);
+        self.into_keys.extend(cfg);
+        self.values.extend(cfg);
+        self.into_values.extend(cfg);
+        self.contains.extend(cfg);
+        self.contains_all.extend(cfg);
+        self.contains_any.extend(cfg);
+        self.set.extend(cfg);
+        self.set_many.extend(cfg);
+        self.get.extend(cfg);
+        self.get_many.extend(cfg);
+        self.remove.extend(cfg);
+        self.remove_many.extend(cfg);
+        self.clear.extend(cfg);
+        self.new_map.extend(cfg);
+        self.new_set.extend(cfg);
+        self.new_multiset.extend(cfg);
     }
 }
 

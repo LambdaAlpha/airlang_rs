@@ -4,11 +4,14 @@ use num_bigint::BigInt;
 
 use super::Library;
 use super::ctx_put_val;
+use crate::cfg::CfgMod;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::List;
+use crate::type_::Symbol;
 
 #[derive(Clone)]
 pub struct MetaLib {
@@ -18,6 +21,12 @@ pub struct MetaLib {
 impl Default for MetaLib {
     fn default() -> Self {
         MetaLib { version: version() }
+    }
+}
+
+impl CfgMod for MetaLib {
+    fn extend(self, cfg: &Cfg) {
+        cfg.extend_scope(Symbol::from_str_unchecked("air.version"), Val::List(self.version));
     }
 }
 

@@ -10,6 +10,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -37,6 +38,16 @@ impl Default for PairLib {
             second: second(),
             set_second: set_second(),
         }
+    }
+}
+
+impl CfgMod for PairLib {
+    fn extend(self, cfg: &Cfg) {
+        self.new.extend(cfg);
+        self.first.extend(cfg);
+        self.set_first.extend(cfg);
+        self.second.extend(cfg);
+        self.set_second.extend(cfg);
     }
 }
 

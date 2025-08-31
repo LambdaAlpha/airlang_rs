@@ -7,6 +7,7 @@ pub use self::prim::PrimMode;
 pub use self::symbol::SymbolMode;
 pub use self::task::TaskMode;
 pub use self::task::TaskPrimMode;
+use crate::cfg::CfgMod;
 
 _____!();
 
@@ -34,6 +35,7 @@ use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
+use crate::type_::Symbol;
 
 #[derive(Clone)]
 pub struct ModeLib {
@@ -61,6 +63,26 @@ impl Default for ModeLib {
             eval_ref: eval_ref(),
             eval_eval: eval_eval(),
         }
+    }
+}
+
+impl CfgMod for ModeLib {
+    fn extend(self, cfg: &Cfg) {
+        self.new.extend(cfg);
+        cfg.extend_scope(Symbol::from_str_unchecked(FORM_ID), Val::Func(self.form_id.into()));
+        cfg.extend_scope(
+            Symbol::from_str_unchecked(FORM_LITERAL),
+            Val::Func(self.form_literal.into()),
+        );
+        cfg.extend_scope(Symbol::from_str_unchecked(FORM_REF), Val::Func(self.form_ref.into()));
+        cfg.extend_scope(Symbol::from_str_unchecked(FORM_EVAL), Val::Func(self.form_eval.into()));
+        cfg.extend_scope(Symbol::from_str_unchecked(EVAL_ID), Val::Func(self.eval_id.into()));
+        cfg.extend_scope(
+            Symbol::from_str_unchecked(EVAL_LITERAL),
+            Val::Func(self.eval_literal.into()),
+        );
+        cfg.extend_scope(Symbol::from_str_unchecked(EVAL_REF), Val::Func(self.eval_ref.into()));
+        cfg.extend_scope(Symbol::from_str_unchecked(EVAL_EVAL), Val::Func(self.eval_eval.into()));
     }
 }
 

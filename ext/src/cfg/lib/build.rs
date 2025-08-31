@@ -3,6 +3,7 @@ use std::fs::read_to_string;
 use std::path::Path;
 
 use airlang::Air;
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
@@ -24,6 +25,12 @@ pub struct BuildLib {
 impl Default for BuildLib {
     fn default() -> Self {
         Self { load: load() }
+    }
+}
+
+impl CfgMod for BuildLib {
+    fn extend(self, cfg: &Cfg) {
+        self.load.extend(cfg);
     }
 }
 

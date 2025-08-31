@@ -8,6 +8,7 @@ use super::Library;
 use super::const_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -55,6 +56,25 @@ impl Default for ListLib {
             pop_many: pop_many(),
             clear: clear(),
         }
+    }
+}
+
+impl CfgMod for ListLib {
+    fn extend(self, cfg: &Cfg) {
+        self.length.extend(cfg);
+        self.set.extend(cfg);
+        self.set_many.extend(cfg);
+        self.get.extend(cfg);
+        self.get_many.extend(cfg);
+        self.insert.extend(cfg);
+        self.insert_many.extend(cfg);
+        self.remove.extend(cfg);
+        self.remove_many.extend(cfg);
+        self.push.extend(cfg);
+        self.push_many.extend(cfg);
+        self.pop.extend(cfg);
+        self.pop_many.extend(cfg);
+        self.clear.extend(cfg);
     }
 }
 

@@ -1,5 +1,7 @@
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::CoreLib;
 use airlang::cfg::lib::Library;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 
 use self::build::BuildLib;
@@ -14,6 +16,16 @@ pub struct StdLib {
     pub file: FileLib,
     pub process: ProcessLib,
     pub build: BuildLib,
+}
+
+impl CfgMod for StdLib {
+    fn extend(self, cfg: &Cfg) {
+        self.core.extend(cfg);
+        self.io.extend(cfg);
+        self.file.extend(cfg);
+        self.process.extend(cfg);
+        self.build.extend(cfg);
+    }
 }
 
 impl Library for StdLib {

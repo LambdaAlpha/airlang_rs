@@ -1,7 +1,8 @@
 use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
-use crate::cfg::lib::setup::default_free_mode;
+use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -16,6 +17,12 @@ pub struct UnitLib {
 impl Default for UnitLib {
     fn default() -> Self {
         UnitLib { unit: unit() }
+    }
+}
+
+impl CfgMod for UnitLib {
+    fn extend(self, cfg: &Cfg) {
+        self.unit.extend(cfg);
     }
 }
 

@@ -1,3 +1,4 @@
+use airlang::cfg::CfgMod;
 use airlang::cfg::CoreCfg;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::Library;
@@ -18,6 +19,12 @@ pub struct EvalLib {
 impl Default for EvalLib {
     fn default() -> Self {
         Self { reset: reset() }
+    }
+}
+
+impl CfgMod for EvalLib {
+    fn extend(self, cfg: &Cfg) {
+        self.reset.extend(cfg);
     }
 }
 

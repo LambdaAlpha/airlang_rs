@@ -1,5 +1,6 @@
 use std::process::Command;
 
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
@@ -21,6 +22,12 @@ pub struct ProcessLib {
 impl Default for ProcessLib {
     fn default() -> Self {
         Self { call: call() }
+    }
+}
+
+impl CfgMod for ProcessLib {
+    fn extend(self, cfg: &Cfg) {
+        self.call.extend(cfg);
     }
 }
 

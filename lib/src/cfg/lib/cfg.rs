@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use log::error;
 
+use crate::cfg::CfgMod;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::Library;
@@ -33,6 +34,16 @@ pub struct CfgLib {
 impl Default for CfgLib {
     fn default() -> Self {
         CfgLib { new: new(), repr: repr(), import: import(), export: export(), with: with() }
+    }
+}
+
+impl CfgMod for CfgLib {
+    fn extend(self, cfg: &Cfg) {
+        self.new.extend(cfg);
+        self.repr.extend(cfg);
+        self.import.extend(cfg);
+        self.export.extend(cfg);
+        self.with.extend(cfg);
     }
 }
 

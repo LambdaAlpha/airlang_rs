@@ -3,6 +3,7 @@ use log::error;
 use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
+use crate::cfg::CfgMod;
 use crate::cfg::lib::setup::default_free_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
@@ -22,6 +23,14 @@ pub struct LinkLib {
 impl Default for LinkLib {
     fn default() -> Self {
         LinkLib { new: new(), get: get(), set: set() }
+    }
+}
+
+impl CfgMod for LinkLib {
+    fn extend(self, cfg: &Cfg) {
+        self.new.extend(cfg);
+        self.get.extend(cfg);
+        self.set.extend(cfg);
     }
 }
 

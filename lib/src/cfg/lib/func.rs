@@ -16,6 +16,7 @@ use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
 use super::setup::dyn_mode;
 use super::setup::free_mode;
+use crate::cfg::CfgMod;
 use crate::cfg::lib::mode::FuncMode;
 use crate::cfg::lib::mode::SymbolMode;
 use crate::cfg::lib::mode::TaskPrimMode;
@@ -63,6 +64,21 @@ impl Default for FuncLib {
             code: code(),
             ctx: ctx(),
         }
+    }
+}
+
+impl CfgMod for FuncLib {
+    fn extend(self, cfg: &Cfg) {
+        self.new.extend(cfg);
+        self.repr.extend(cfg);
+        self.apply.extend(cfg);
+        self.ctx_access.extend(cfg);
+        self.call_setup.extend(cfg);
+        self.solve_setup.extend(cfg);
+        self.is_primitive.extend(cfg);
+        self.id.extend(cfg);
+        self.code.extend(cfg);
+        self.ctx.extend(cfg);
     }
 }
 

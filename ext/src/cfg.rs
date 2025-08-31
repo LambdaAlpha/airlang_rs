@@ -25,6 +25,7 @@ impl Default for StdCfg {
 
 impl CfgMod for StdCfg {
     fn extend(self, cfg: &Cfg) {
+        self.lib.extend(cfg);
         cfg.extend_scope(
             Symbol::from_str_unchecked(CoreCfg::PRELUDE),
             Val::Ctx(self.prelude.into()),

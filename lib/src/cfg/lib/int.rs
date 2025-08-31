@@ -3,7 +3,8 @@ use log::error;
 use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
-use crate::cfg::lib::setup::default_free_mode;
+use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -41,6 +42,22 @@ impl Default for IntLib {
             greater_equal: greater_equal(),
             less_greater: less_greater(),
         }
+    }
+}
+
+impl CfgMod for IntLib {
+    fn extend(self, cfg: &Cfg) {
+        self.add.extend(cfg);
+        self.subtract.extend(cfg);
+        self.multiply.extend(cfg);
+        self.divide.extend(cfg);
+        self.remainder.extend(cfg);
+        self.divide_remainder.extend(cfg);
+        self.less_than.extend(cfg);
+        self.less_equal.extend(cfg);
+        self.greater_than.extend(cfg);
+        self.greater_equal.extend(cfg);
+        self.less_greater.extend(cfg);
     }
 }
 

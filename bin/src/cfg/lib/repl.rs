@@ -1,3 +1,4 @@
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
@@ -15,6 +16,12 @@ pub struct ReplLib {
 impl Default for ReplLib {
     fn default() -> Self {
         Self { help: help() }
+    }
+}
+
+impl CfgMod for ReplLib {
+    fn extend(self, cfg: &Cfg) {
+        self.help.extend(cfg);
     }
 }
 

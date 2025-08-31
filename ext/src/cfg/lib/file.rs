@@ -1,3 +1,4 @@
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
@@ -17,6 +18,12 @@ pub struct FileLib {
 impl Default for FileLib {
     fn default() -> Self {
         Self { read_to_text: read_to_text() }
+    }
+}
+
+impl CfgMod for FileLib {
+    fn extend(self, cfg: &Cfg) {
+        self.read_to_text.extend(cfg);
     }
 }
 

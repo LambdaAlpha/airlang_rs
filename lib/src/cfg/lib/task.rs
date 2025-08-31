@@ -11,6 +11,7 @@ use super::free_impl;
 use super::mut_impl;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
+use crate::cfg::CfgMod;
 use crate::cfg::lib::utils::map_remove;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::TaskApply;
@@ -57,6 +58,21 @@ impl Default for TaskLib {
             input: input(),
             set_input: set_input(),
         }
+    }
+}
+
+impl CfgMod for TaskLib {
+    fn extend(self, cfg: &Cfg) {
+        self.new_call.extend(cfg);
+        self.new_solve.extend(cfg);
+        self.apply.extend(cfg);
+        self.is_solve.extend(cfg);
+        self.func.extend(cfg);
+        self.set_func.extend(cfg);
+        self.ctx.extend(cfg);
+        self.set_ctx.extend(cfg);
+        self.input.extend(cfg);
+        self.set_input.extend(cfg);
     }
 }
 

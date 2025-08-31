@@ -10,7 +10,6 @@ use crate::cfg::lib::BinLib;
 
 #[derive(Clone)]
 pub struct BinCfg {
-    #[expect(dead_code)]
     pub lib: BinLib,
     pub prelude: Ctx,
 }
@@ -26,6 +25,7 @@ impl Default for BinCfg {
 
 impl CfgMod for BinCfg {
     fn extend(self, cfg: &Cfg) {
+        self.lib.extend(cfg);
         cfg.extend_scope(
             Symbol::from_str_unchecked(CoreCfg::PRELUDE),
             Val::Ctx(self.prelude.into()),

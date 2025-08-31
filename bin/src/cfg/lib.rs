@@ -1,4 +1,6 @@
+use airlang::cfg::CfgMod;
 use airlang::cfg::lib::Library;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang_ext::cfg::lib::StdLib;
 
@@ -12,6 +14,15 @@ pub struct BinLib {
     pub repl: ReplLib,
     pub eval: EvalLib,
     pub process: ProcessLib,
+}
+
+impl CfgMod for BinLib {
+    fn extend(self, cfg: &Cfg) {
+        self.std.extend(cfg);
+        self.repl.extend(cfg);
+        self.eval.extend(cfg);
+        self.process.extend(cfg);
+    }
 }
 
 impl Library for BinLib {
