@@ -1,22 +1,36 @@
-use airlang::cfg::CfgModule;
+use airlang::cfg::CfgMod;
 use airlang::cfg::CoreCfg;
+use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::Val;
 use airlang::type_::Symbol;
 
-use crate::cfg::prelude::BinPrelude;
+use crate::cfg::lib::BinLib;
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct BinCfg {
-    pub prelude: BinPrelude,
+    #[expect(dead_code)]
+    pub lib: BinLib,
+    pub prelude: Ctx,
 }
 
-impl CfgModule for BinCfg {
-    fn extend(self, cfg: &Cfg) {
-        let prelude: Ctx = self.prelude.into();
-        cfg.extend_scope(Symbol::from_str_unchecked(CoreCfg::PRELUDE), Val::Ctx(prelude.into()));
+impl Default for BinCfg {
+    fn default() -> Self {
+        let lib = BinLib::default();
+        let mut prelude = Ctx::default();
+        lib.prelude(&mut prelude);
+        Self { lib, prelude }
     }
 }
 
-pub mod prelude;
+impl CfgMod for BinCfg {
+    fn extend(self, cfg: &Cfg) {
+        cfg.extend_scope(
+            Symbol::from_str_unchecked(CoreCfg::PRELUDE),
+            Val::Ctx(self.prelude.into()),
+        );
+    }
+}
+
+pub mod lib;
