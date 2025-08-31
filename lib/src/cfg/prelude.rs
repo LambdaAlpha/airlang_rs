@@ -21,6 +21,7 @@ use self::task::TaskPrelude;
 use self::text::TextPrelude;
 use self::unit::UnitPrelude;
 use self::value::ValuePrelude;
+use crate::cfg::prelude::cfg::CfgPrelude;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -57,6 +58,7 @@ pub struct CorePrelude {
     pub list: ListPrelude,
     pub map: MapPrelude,
     pub link: LinkPrelude,
+    pub cfg: CfgPrelude,
     pub ctx: CtxPrelude,
     pub func: FuncPrelude,
     pub solve: SolvePrelude,
@@ -81,6 +83,7 @@ impl Prelude for CorePrelude {
         self.list.put(ctx);
         self.map.put(ctx);
         self.link.put(ctx);
+        self.cfg.put(ctx);
         self.ctx.put(ctx);
         self.func.put(ctx);
         self.solve.put(ctx);
@@ -312,6 +315,8 @@ pub mod list;
 pub mod map;
 
 pub mod link;
+
+pub mod cfg;
 
 pub mod ctx;
 

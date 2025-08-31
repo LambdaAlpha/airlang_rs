@@ -55,6 +55,23 @@ impl Cfg {
         scopes.insert(min_scope, |_| Box::new(val));
         Some(())
     }
+
+    pub fn scope_level(&self) -> usize {
+        self.max_scope
+    }
+}
+
+impl IntoIterator for Cfg {
+    type Item = (Symbol, Box<dyn Iterator<Item = (usize, Val)>>);
+    type IntoIter = Box<dyn Iterator<Item = Self::Item>>;
+    fn into_iter(self) -> Self::IntoIter {
+        let iter = self.map.0.into_iter().map(|(k, v)| {
+            let iter = (*v).0.into_iter().map(|(k, v)| (k, *v));
+            let v: Box<dyn Iterator<Item = (usize, Val)>> = Box::new(iter);
+            (k, v)
+        });
+        Box::new(iter)
+    }
 }
 
 impl<K, V> Clone for OnceMap<K, V>
