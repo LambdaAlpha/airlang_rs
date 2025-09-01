@@ -1,6 +1,7 @@
 read ref
 -----
 _ do [
+    read = _ import .context.read,
     a = _ any .,
     a == .a read _
 ]
@@ -10,6 +11,7 @@ true
 read indirect
 -----
 _ do [
+    read = _ import .context.read,
     a = _ any .,
     b = .a,
     a == b read _
@@ -20,6 +22,7 @@ true
 read none
 -----
 _ do [
+    read = _ import .context.read,
     a = _ any .,
     a == .a read _
 ]
@@ -29,8 +32,10 @@ true
 read final
 -----
 _ do [
+    new = _ import .context.new,
+    read = _ import .context.read,
     v = _ any .,
-    a = _ context {b : final : v},
+    a = _ new {b : final : v},
     v == a ; read .b
 ]
 -----
@@ -39,8 +44,10 @@ true
 read still
 -----
 _ do [
+    new = _ import .context.new,
+    read = _ import .context.read,
     v = _ any .,
-    a = _ context {b : still : v},
+    a = _ new {b : still : v},
     v == a ; read .b
 ]
 -----
@@ -49,8 +56,10 @@ true
 read static
 -----
 _ do [
+    new = _ import .context.new,
+    read = _ import .context.read,
     v = _ any .,
-    a = _ context {b : static : v},
+    a = _ new {b : static : v},
     v == a ; read .b
 ]
 -----
@@ -59,8 +68,10 @@ true
 read const
 -----
 _ do [
+    new = _ import .context.new,
+    read = _ import .context.read,
     v = _ any .,
-    a = _ context {b : constant : v},
+    a = _ new {b : constant : v},
     v == a ; read .b
 ]
 -----
@@ -69,6 +80,8 @@ true
 move ref
 -----
 _ do [
+    move = _ import .context.move,
+    is_null = _ import .context.is_null,
     a = _ any .,
     b = a,
     (b == .a move _) and (.a is_null _)
@@ -79,6 +92,8 @@ true
 move indirect
 -----
 _ do [
+    move = _ import .context.move,
+    is_null = _ import .context.is_null,
     a = _ any .,
     b = .a,
     c = a,
@@ -90,8 +105,11 @@ true
 move final
 -----
 _ do [
+    move = _ import .context.move,
+    new = _ import .context.new,
+    is_null = _ import .context.is_null,
     v = _ any .,
-    a = _ context {b : final : v},
+    a = _ new {b : final : v},
     (. == a ; move .b) and (_ not a ; is_null .b)
 ]
 -----
@@ -100,8 +118,11 @@ true
 move still
 -----
 _ do [
+    new = _ import .context.new,
+    move = _ import .context.move,
+    is_null = _ import .context.is_null,
     v = _ any .,
-    a = _ context {b : still : v},
+    a = _ new {b : still : v},
     (v == a ; move .b) and (a ; is_null .b)
 ]
 -----
@@ -110,8 +131,11 @@ true
 move static
 -----
 _ do [
+    new = _ import .context.new,
+    move = _ import .context.move,
+    is_null = _ import .context.is_null,
     v = _ any .,
-    a = _ context {b : static : v},
+    a = _ new {b : static : v},
     (. == a ; move .b) and (_ not a ; is_null .b)
 ]
 -----
@@ -120,8 +144,11 @@ true
 move const
 -----
 _ do [
+    new = _ import .context.new,
+    move = _ import .context.move,
+    is_null = _ import .context.is_null,
     v = _ any .,
-    a = _ context {b : constant : v},
+    a = _ new {b : constant : v},
     (. == a ; move .b) and (_ not a ; is_null .b)
 ]
 -----
@@ -187,8 +214,9 @@ _ do [
 = special key 2
 -----
 _ do [
+    first = _ import .pair.first,
     ..p = 1 : 2,
-    .p ; pair.first .
+    .p ; first .
 ]
 -----
 1
@@ -214,6 +242,7 @@ _ do [
 = none
 -----
 _ do [
+    contract = _ import .context.contract,
     a = 1,
     [a, .a contract _]
 ]
@@ -356,9 +385,10 @@ _ do [
 = pair ctx
 -----
 _ do [
+    first = _ import .pair.first,
     p = 1 : 2,
     p ; _ first = 3,
-    p ; pair.first .
+    p ; first .
 ]
 -----
 3
@@ -366,9 +396,10 @@ _ do [
 = task ctx
 -----
 _ do [
+    context = _ import .task.context,
     t = _ form ctx ; func input,
     t ; _ context = .c,
-    t ; task.context .
+    t ; context .
 ]
 -----
 c
@@ -376,9 +407,10 @@ c
 = list ctx
 -----
 _ do [
+    get = _ import .list.get,
     l = [1, 2, 3],
     l ; _ .1 = 4,
-    l ; list.get 1
+    l ; get 1
 ]
 -----
 4
@@ -386,9 +418,10 @@ _ do [
 = map ctx
 -----
 _ do [
+    get = _ import .map.get,
     m = {a : 1, b : 2},
     m ; _ a = 3,
-    m ; map.get .a
+    m ; get .a
 ]
 -----
 3
@@ -396,9 +429,10 @@ _ do [
 = map ctx not exist
 -----
 _ do [
+    get = _ import .map.get,
     m = {},
     m ; _ a = 3,
-    m ; map.get .a
+    m ; get .a
 ]
 -----
 3
@@ -406,10 +440,12 @@ _ do [
 = const
 -----
 _ do [
+    set_contract = _ import .context.set_contract,
+    first = _ import .pair.first,
     p = 1 : 2,
     .p set_contract .final,
     p ; _ first = 3,
-    p ; pair.first .
+    p ; first .
 ]
 -----
 1
@@ -426,8 +462,9 @@ true
 none mutate
 -----
 _ do [
+    set_first = _ import .pair.set_first,
     a = 1 : 2,
-    a ; pair.set_first 3,
+    a ; set_first 3,
     a
 ]
 -----
@@ -436,9 +473,11 @@ _ do [
 final mutate
 -----
 _ do [
+    set_contract = _ import .context.set_contract,
+    set_first = _ import .pair.set_first,
     a = 1 : 2,
     .a set_contract .final,
-    a ; pair.set_first _ any .,
+    a ; set_first _ any .,
     a
 ]
 -----
@@ -447,6 +486,7 @@ _ do [
 final =
 -----
 _ do [
+    set_contract = _ import .context.set_contract,
     a = 1,
     .a set_contract .final,
     a = _ any ., a
@@ -457,7 +497,10 @@ _ do [
 set_contract still none
 -----
 _ do [
-    c = _ context {a : still : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : still : _ any .},
     c ; _ .a set_contract .none,
     c ; contract .a
 ]
@@ -467,7 +510,10 @@ none
 set_contract still none
 -----
 _ do [
-    c = _ context {a : still : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : still : _ any .},
     c ; _ .a set_contract .final,
     c ; contract .a
 ]
@@ -477,6 +523,8 @@ final
 set_contract none final
 -----
 _ do [
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
     a = _ any .,
     .a set_contract .final,
     .a contract _
@@ -487,6 +535,8 @@ final
 set_contract none still
 -----
 _ do [
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
     a = _ any .,
     .a set_contract .still,
     .a contract _
@@ -497,7 +547,10 @@ none
 set_contract final still
 -----
 _ do [
-    c = _ context {a : final : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : final : _ any .},
     c ; _ .a set_contract .still,
     c ; contract .a
 ]
@@ -507,7 +560,10 @@ final
 set_contract final none
 -----
 _ do [
-    c = _ context {a : final : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : final : _ any .},
     c ; _ .a set_contract .none,
     c ; contract .a
 ]
@@ -517,7 +573,10 @@ final
 set_contract static const
 -----
 _ do [
-    c = _ context {a : static : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : static : _ any .},
     c ; _ .a set_contract .constant,
     c ; contract .a
 ]
@@ -527,7 +586,10 @@ static
 set_contract static still
 -----
 _ do [
-    c = _ context {a : static : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : static : _ any .},
     c ; _ .a set_contract .still,
     c ; contract .a
 ]
@@ -537,7 +599,10 @@ static
 set_contract static final
 -----
 _ do [
-    c = _ context {a : static : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : static : _ any .},
     c ; _ .a set_contract .final,
     c ; contract .a
 ]
@@ -547,7 +612,10 @@ static
 set_contract static none
 -----
 _ do [
-    c = _ context {a : static : _ any .},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    contract = _ import .context.contract,
+    c = _ new {a : static : _ any .},
     c ; _ .a set_contract .none,
     c ; contract .a
 ]
@@ -556,13 +624,17 @@ static
 =====
 is_null true
 -----
-.a is_null _
+_ do [
+    is_null = _ import .context.is_null,
+    .a is_null _
+]
 -----
 true
 =====
 is_null false
 -----
 _ do [
+    is_null = _ import .context.is_null,
     a = _ any .,
     .a is_null _
 ]
@@ -572,7 +644,10 @@ false
 static move
 -----
 _ do [
-    c = _ context {a : static : 1},
+    new = _ import .context.new,
+    move = _ import .context.move,
+    read = _ import .context.read,
+    c = _ new {a : static : 1},
     c ; move .a,
     c ; read .a
 ]
@@ -582,7 +657,9 @@ _ do [
 static = to static
 -----
 _ do [
-    c = _ context {a : static : 1},
+    new = _ import .context.new,
+    read = _ import .context.read,
+    c = _ new {a : static : 1},
     c ; _ a = 2,
     c ; read .a
 ]
@@ -591,14 +668,20 @@ _ do [
 =====
 is_constant default
 -----
-_ is_constant .
+_ do [
+    is_constant = _ import .context.is_constant,
+    _ is_constant .
+]
 -----
 false
 =====
 is_constant true
 -----
 _ do [
-    a = _ context {},
+    new = _ import .context.new,
+    set_contract = _ import .context.set_contract,
+    is_constant = _ import .context.is_constant,
+    a = _ new {},
     .a set_contract .final,
     a ; is_constant .
 ]
@@ -608,7 +691,9 @@ true
 is_constant false
 -----
 _ do [
-    a = _ context {},
+    new = _ import .context.new,
+    is_constant = _ import .context.is_constant,
+    a = _ new {},
     a ; is_constant .
 ]
 -----
@@ -617,9 +702,12 @@ false
 ; 1
 -----
 _ do [
-    a = _ context {p : . : 1 : 2},
+    new = _ import .context.new,
+    move = _ import .context.move,
+    set_first = _ import .pair.set_first,
+    a = _ new {p : . : 1 : 2},
     b = 3,
-    a ; apply .p ; pair.set_first b,
+    a ; apply .p ; set_first b,
     a ; move .p,
 ]
 -----
@@ -628,8 +716,14 @@ _ do [
 ; 2
 -----
 _ do [
-    a = _ context {p : . : 1 : 2, b : . : 3},
-    a ; apply .p ; pair.set_first .b,
+    new = _ import .context.new,
+    move = _ import .context.move,
+    set_first = _ import .pair.set_first,
+    a = _ new {
+        p : . : 1 : 2,
+        b : . : 3,
+    },
+    a ; apply .p ; set_first .b,
     a ; move .p,
 ]
 -----
@@ -638,8 +732,14 @@ _ do [
 ; 3
 -----
 _ do [
-    set_first = pair.set_first,
-    a = _ context {set_first : . : set_first, p : . : 1 : 2, b : . : 3},
+    new = _ import .context.new,
+    move = _ import .context.move,
+    set_first = _ import .pair.set_first,
+    a = _ new {
+        set_first : . : set_first,
+        p : . : 1 : 2,
+        b : . : 3,
+    },
     a ; apply .p ; .set_first .b,
     a ; move .p,
 ]
@@ -649,7 +749,8 @@ _ do [
 ; recursive
 -----
 _ do [
-    a = _ context {b : . : _ context {c : . : 1}},
+    new = _ import .context.new,
+    a = _ new {b : . : _ new {c : . : 1}},
     a ; apply .b ; apply ..c
 ]
 -----
@@ -658,6 +759,7 @@ _ do [
 ; self
 -----
 _ do [
+    self = _ import .context.self,
     u = 1,
     u ; self .
 ]
@@ -676,6 +778,7 @@ _ do [
 ; free mutate
 -----
 _ do [
+    move = _ import .context.move,
     u = .,
     a = 1,
     u ; move .a,
@@ -686,22 +789,34 @@ _ do [
 =====
 represent default
 -----
-_ context.represent _ context {}
+_ do [
+    new = _ import .context.new,
+    represent = _ import .context.represent,
+    _ represent _ new {}
+]
 -----
 {}
 =====
 represent else
 -----
-_ context.represent _ context {a : constant : 1}
+_ do [
+    new = _ import .context.new,
+    represent = _ import .context.represent,
+    _ represent _ new {a : constant : 1}
+]
 -----
 {a : constant : 1}
 =====
 represent non-recursive
 -----
 _ do [
-    m = _ context.represent _ context {b : . : _ context {}},
-    b = m ; map.remove .b,
-    b = b ; pair.second .,
+    new = _ import .context.new,
+    represent = _ import .context.represent,
+    remove = _ import .map.remove,
+    second = _ import .pair.second,
+    m = _ represent _ new {b : . : _ new {}},
+    b = m ; remove .b,
+    b = b ; second .,
     b ; type .
 ]
 -----
@@ -710,21 +825,23 @@ context
 reverse
 -----
 _ do [
-    c1 = _ context {
+    new = _ import .context.new,
+    reverse = _ import .context.reverse,
+    c1 = _ new {
         a : none : 1,
         b : still : 2,
         c : final : 3,
         d : static : 4,
         e : constant : 5,
     },
-    c2 = _ context {
+    c2 = _ new {
         a : none : 1,
         b : final : 2,
         c : still : 3,
         d : static : 4,
         e : constant : 5,
     },
-    (c1 == _ context.reverse c2) and (c2 == _ context.reverse c1)
+    (c1 == _ reverse c2) and (c2 == _ reverse c1)
 ]
 -----
 true
@@ -732,6 +849,7 @@ true
 self
 -----
 _ do [
+    self = _ import .context.self,
     a = 1,
     b = _ self .,
     b ; apply .a
@@ -742,6 +860,8 @@ _ do [
 self non-sync
 -----
 _ do [
+    self = _ import .context.self,
+    is_null = _ import .context.is_null,
     a = _ self .,
     b = _ any .,
     a ; is_null .b

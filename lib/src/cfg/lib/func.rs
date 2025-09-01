@@ -6,31 +6,22 @@ use self::repr::parse_mode;
 use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Library;
-use super::MutImpl;
 use super::const_impl;
+use super::ctx_put_func;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
 use super::func::repr::generate_setup;
 use super::setup::default_dyn_mode;
 use super::setup::default_free_mode;
-use super::setup::dyn_mode;
 use super::setup::free_mode;
 use crate::cfg::CfgMod;
-use crate::cfg::lib::mode::FuncMode;
-use crate::cfg::lib::mode::SymbolMode;
-use crate::cfg::lib::mode::TaskPrimMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
-use crate::semantics::func::ConstFn;
-use crate::semantics::func::FreeFn;
 use crate::semantics::func::FuncSetup;
-use crate::semantics::func::MutFn;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
@@ -40,7 +31,6 @@ use crate::type_::Symbol;
 pub struct FuncLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
-    pub apply: MutPrimFuncVal,
     pub ctx_access: ConstPrimFuncVal,
     pub call_setup: ConstPrimFuncVal,
     pub solve_setup: ConstPrimFuncVal,
@@ -55,7 +45,6 @@ impl Default for FuncLib {
         FuncLib {
             new: new(),
             repr: repr(),
-            apply: apply(),
             ctx_access: ctx_access(),
             call_setup: call_setup(),
             solve_setup: solve_setup(),
@@ -71,7 +60,6 @@ impl CfgMod for FuncLib {
     fn extend(self, cfg: &Cfg) {
         self.new.extend(cfg);
         self.repr.extend(cfg);
-        self.apply.extend(cfg);
         self.ctx_access.extend(cfg);
         self.call_setup.extend(cfg);
         self.solve_setup.extend(cfg);
@@ -84,21 +72,12 @@ impl CfgMod for FuncLib {
 
 impl Library for FuncLib {
     fn prelude(&self, ctx: &mut Ctx) {
-        self.new.prelude(ctx);
-        self.repr.prelude(ctx);
-        self.apply.prelude(ctx);
-        self.ctx_access.prelude(ctx);
-        self.call_setup.prelude(ctx);
-        self.solve_setup.prelude(ctx);
-        self.is_primitive.prelude(ctx);
-        self.id.prelude(ctx);
-        self.code.prelude(ctx);
-        self.ctx.prelude(ctx);
+        ctx_put_func(ctx, "function", &self.new);
     }
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "function", f: free_impl(fn_new), mode: free_mode(parse_mode()) }.free()
+    FreePrimFn { id: "function.new", f: free_impl(fn_new), mode: free_mode(parse_mode()) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -119,27 +98,6 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
         return Val::default();
     };
     generate_func(func)
-}
-
-pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "apply",
-        f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
-        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
-    }
-    .mut_()
-}
-
-fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {
-    Eval.free_call(cfg, input)
-}
-
-fn fn_eval_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    Eval.const_call(cfg, ctx, input)
-}
-
-fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    Eval.mut_call(cfg, ctx, input)
 }
 
 pub fn ctx_access() -> ConstPrimFuncVal {

@@ -23,8 +23,6 @@ use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::syntax::CALL;
-use crate::syntax::SOLVE;
 use crate::type_::Action;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
@@ -77,18 +75,7 @@ impl CfgMod for TaskLib {
 }
 
 impl Library for TaskLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.new_call.prelude(ctx);
-        self.new_solve.prelude(ctx);
-        self.apply.prelude(ctx);
-        self.is_solve.prelude(ctx);
-        self.func.prelude(ctx);
-        self.set_func.prelude(ctx);
-        self.ctx.prelude(ctx);
-        self.set_ctx.prelude(ctx);
-        self.input.prelude(ctx);
-        self.set_input.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 const FUNC: &str = "function";
@@ -96,7 +83,7 @@ const CTX: &str = "context";
 const INPUT: &str = "input";
 
 pub fn new_call() -> FreePrimFuncVal {
-    FreePrimFn { id: CALL, f: free_impl(fn_new_call), mode: default_free_mode() }.free()
+    FreePrimFn { id: "task.call", f: free_impl(fn_new_call), mode: default_free_mode() }.free()
 }
 
 fn fn_new_call(_cfg: &mut Cfg, input: Val) -> Val {
@@ -112,7 +99,7 @@ fn fn_new_call(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_solve() -> FreePrimFuncVal {
-    FreePrimFn { id: SOLVE, f: free_impl(fn_new_solve), mode: default_free_mode() }.free()
+    FreePrimFn { id: "task.solve", f: free_impl(fn_new_solve), mode: default_free_mode() }.free()
 }
 
 fn fn_new_solve(_cfg: &mut Cfg, input: Val) -> Val {

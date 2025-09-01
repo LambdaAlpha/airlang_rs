@@ -1,7 +1,10 @@
 _ do [
-    [major, minor, patch] = air.version,
-    major = _ syntax.generate major,
-    minor = _ syntax.generate minor,
-    patch = _ syntax.generate patch,
-    "." text.join [major, minor, patch]
+    version = _ import .air.version,
+    generate = _ import .syntax.generate,
+    join = _ import .text.join,
+    [major, minor, patch] = version,
+    major = _ generate major,
+    minor = _ generate minor,
+    patch = _ generate patch,
+    "." join [major, minor, patch]
 ]

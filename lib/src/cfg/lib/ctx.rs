@@ -12,6 +12,7 @@ use super::FuncMode;
 use super::Library;
 use super::MutImpl;
 use super::const_impl;
+use super::ctx_put_func;
 use super::free_impl;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
@@ -86,22 +87,12 @@ impl CfgMod for CtxLib {
 
 impl Library for CtxLib {
     fn prelude(&self, ctx: &mut Ctx) {
-        self.read.prelude(ctx);
-        self.move_.prelude(ctx);
-        self.assign.prelude(ctx);
-        self.contract.prelude(ctx);
-        self.set_contract.prelude(ctx);
-        self.is_null.prelude(ctx);
-        self.is_const.prelude(ctx);
-        self.ctx_new.prelude(ctx);
-        self.ctx_repr.prelude(ctx);
-        self.ctx_reverse.prelude(ctx);
-        self.ctx_self.prelude(ctx);
+        ctx_put_func(ctx, "=", &self.assign);
     }
 }
 
 pub fn read() -> ConstPrimFuncVal {
-    DynPrimFn { id: "read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "context.read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -117,7 +108,7 @@ fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn move_() -> MutPrimFuncVal {
-    DynPrimFn { id: "move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "context.move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_()
 }
 
 fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -134,7 +125,7 @@ fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 pub fn assign() -> MutPrimFuncVal {
     DynPrimFn {
-        id: "=",
+        id: "context.assign",
         f: mut_impl(fn_assign),
         mode: dyn_mode(FuncMode::pair_mode(
             Map::default(),
@@ -160,7 +151,8 @@ fn fn_assign(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn contract() -> ConstPrimFuncVal {
-    DynPrimFn { id: "contract", f: const_impl(fn_contract), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "context.contract", f: const_impl(fn_contract), mode: default_dyn_mode() }
+        .const_()
 }
 
 fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -180,7 +172,8 @@ fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_contract() -> MutPrimFuncVal {
-    DynPrimFn { id: "set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "context.set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }
+        .mut_()
 }
 
 fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -206,7 +199,8 @@ fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_null() -> ConstPrimFuncVal {
-    DynPrimFn { id: "is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "context.is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }
+        .const_()
 }
 
 fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -223,7 +217,7 @@ fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 
 pub fn is_const() -> MutPrimFuncVal {
     DynPrimFn {
-        id: "is_constant",
+        id: "context.is_constant",
         f: MutImpl::new(FreeImpl::default, fn_const, fn_mut),
         mode: default_dyn_mode(),
     }
@@ -239,7 +233,7 @@ fn fn_mut(_cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn ctx_new() -> FreePrimFuncVal {
-    FreePrimFn { id: "context", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free()
+    FreePrimFn { id: "context.new", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free()
 }
 
 fn fn_ctx_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -279,7 +273,7 @@ fn fn_ctx_reverse(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn ctx_self() -> ConstPrimFuncVal {
-    DynPrimFn { id: "self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "context.self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_()
 }
 
 fn fn_ctx_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {

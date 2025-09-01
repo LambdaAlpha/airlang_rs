@@ -143,8 +143,9 @@ _ do [
 ctx ctx name
 -----
 _ do [
+    first = _ import .pair.first,
     p = 1 : 2,
-    p ; pair.first .
+    p ; first .
 ]
 -----
 1
@@ -152,6 +153,7 @@ _ do [
 pair ctx first
 -----
 _ do [
+    self = _ import .context.self,
     p = 1 : 2,
     p ; apply .first ; self .
 ]
@@ -161,6 +163,7 @@ _ do [
 pair ctx second
 -----
 _ do [
+    self = _ import .context.self,
     p = 1 : 2,
     p ; apply .second ; self .
 ]
@@ -170,6 +173,7 @@ _ do [
 task ctx func
 -----
 _ do [
+    self = _ import .context.self,
     t = _ form ctx ; func input,
     t ; apply .function ; self .
 ]
@@ -179,6 +183,7 @@ func
 task ctx ctx
 -----
 _ do [
+    self = _ import .context.self,
     t = _ form ctx ; func input,
     t ; apply .context ; self .
 ]
@@ -188,6 +193,7 @@ ctx
 task ctx input
 -----
 _ do [
+    self = _ import .context.self,
     t = _ form ctx ; func input,
     t ; apply .input ; self .
 ]
@@ -197,6 +203,7 @@ input
 list ctx index int
 -----
 _ do [
+    self = _ import .context.self,
     l = [0, 2, 4],
     l ; apply 1 ; self .
 ]
@@ -206,6 +213,7 @@ _ do [
 list ctx index symbol
 -----
 _ do [
+    self = _ import .context.self,
     l = [0, 2, 4],
     l ; apply .1 ; self .
 ]
@@ -215,6 +223,7 @@ _ do [
 map ctx key
 -----
 _ do [
+    self = _ import .context.self,
     m = {a : 1, b : 2},
     m ; apply .a ; self .
 ]
@@ -224,6 +233,7 @@ _ do [
 map ctx key .
 -----
 _ do [
+    self = _ import .context.self,
     m = {a : 1, b : 2},
     m ; apply . ; self .
 ]
@@ -233,6 +243,7 @@ _ do [
 map ctx key other
 -----
 _ do [
+    self = _ import .context.self,
     m = {1 : 2, 2 : 4},
     m ; apply 1 ; self .
 ]

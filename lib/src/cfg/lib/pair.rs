@@ -17,7 +17,6 @@ use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::syntax::PAIR;
 use crate::type_::ConstRef;
 
 #[derive(Clone)]
@@ -52,17 +51,11 @@ impl CfgMod for PairLib {
 }
 
 impl Library for PairLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.new.prelude(ctx);
-        self.first.prelude(ctx);
-        self.set_first.prelude(ctx);
-        self.second.prelude(ctx);
-        self.set_second.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: PAIR, f: free_impl(fn_new), mode: default_free_mode() }.free()
+    FreePrimFn { id: "pair.new", f: free_impl(fn_new), mode: default_free_mode() }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {

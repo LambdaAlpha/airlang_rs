@@ -8,6 +8,7 @@ use num_traits::ToPrimitive;
 use super::DynPrimFn;
 use super::FuncMode;
 use super::Library;
+use super::MutImpl;
 use super::mode::PrimMode;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
@@ -22,12 +23,15 @@ use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
+use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
@@ -44,6 +48,7 @@ pub struct CtrlLib {
     pub match_: MutPrimFuncVal,
     pub loop_: MutPrimFuncVal,
     pub for_: MutPrimFuncVal,
+    pub apply: MutPrimFuncVal,
 }
 
 impl Default for CtrlLib {
@@ -55,6 +60,7 @@ impl Default for CtrlLib {
             match_: match_(),
             loop_: loop_(),
             for_: for_(),
+            apply: apply(),
         }
     }
 }
@@ -67,6 +73,7 @@ impl CfgMod for CtrlLib {
         self.match_.extend(cfg);
         self.loop_.extend(cfg);
         self.for_.extend(cfg);
+        self.apply.extend(cfg);
     }
 }
 
@@ -78,6 +85,7 @@ impl Library for CtrlLib {
         self.match_.prelude(ctx);
         self.loop_.prelude(ctx);
         self.for_.prelude(ctx);
+        self.apply.prelude(ctx);
     }
 }
 
@@ -516,4 +524,25 @@ where ValIter: Iterator<Item = Val> {
         }
     }
     Val::default()
+}
+
+pub fn apply() -> MutPrimFuncVal {
+    DynPrimFn {
+        id: "apply",
+        f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
+        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
+    }
+    .mut_()
+}
+
+fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {
+    Eval.free_call(cfg, input)
+}
+
+fn fn_eval_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    Eval.const_call(cfg, ctx, input)
+}
+
+fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    Eval.mut_call(cfg, ctx, input)
 }

@@ -1,9 +1,11 @@
 new get
 -----
 _ do [
+    new = _ import .link.new,
+    get = _ import .link.get,
     a = _ any .,
-    l = _ link a,
-    a1 = l link.get _,
+    l = _ new a,
+    a1 = l get _,
     a == a1
 ]
 -----
@@ -12,10 +14,13 @@ true
 set get
 -----
 _ do [
-    l = _ link _ any .,
+    new = _ import .link.new,
+    set = _ import .link.set,
+    get = _ import .link.get,
+    l = _ new _ any .,
     a = _ any .,
-    l link.set a,
-    a1 = l link.get _,
+    l set a,
+    a1 = l get _,
     a == a1
 ]
 -----
@@ -24,10 +29,13 @@ true
 sync
 -----
 _ do [
-    l = _ link _ any .,
+    new = _ import .link.new,
+    set = _ import .link.set,
+    get = _ import .link.get,
+    l = _ new _ any .,
     l1 = l, a = _ any .,
-    l link.set a,
-    a1 = l1 link.get _,
+    l set a,
+    a1 = l1 get _,
     a == a1
 ]
 -----
@@ -36,8 +44,11 @@ true
 leak no panic
 -----
 _ do [
-    l = _ link _ any .,
-    l link.set l,
+    new = _ import .link.new,
+    set = _ import .link.set,
+    move = _ import .context.move,
+    l = _ new _ any .,
+    l set l,
     .l move _,
     .
 ]
@@ -47,9 +58,11 @@ _ do [
 cycle recover
 -----
 _ do [
-    l = _ link _ any .,
-    l link.set l,
-    l1 = l link.set _ any .,
+    new = _ import .link.new,
+    set = _ import .link.set,
+    l = _ new _ any .,
+    l set l,
+    l1 = l set _ any .,
     l == l1
 ]
 -----

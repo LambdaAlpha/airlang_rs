@@ -1,6 +1,8 @@
 new repr
 -----
 _ do [
+    new = _ import .configuration.new,
+    represent = _ import .configuration.represent,
     c = [
         {a : _ any ., b : _ any .},
         {a : _ any .},
@@ -8,7 +10,7 @@ _ do [
         {},
         {b : _ any .},
     ],
-    c1 = _ configuration.represent _ configuration c,
+    c1 = _ represent _ new c,
     c == c1
 ]
 -----

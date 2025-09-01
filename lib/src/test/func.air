@@ -25,6 +25,7 @@ true
 call internal func
 -----
 _ do [
+    context = _ import .context.new,
     f = _ function {
         call_setup : eval@,
         code : (._ : .i) : _ .not .i,
@@ -40,6 +41,7 @@ true
 call rename
 -----
 _ do [
+    context = _ import .context.new,
     f = _ function {
         call_setup : eval@,
         code : (._ : .a) : _ .n .a,
@@ -55,16 +57,20 @@ true
 stateful
 -----
 _ do [
+    context = _ import .context.new,
+    new_link = _ import .link.new,
+    link_get = _ import .link.get,
+    link_set = _ import .link.set,
     f = _ function {
         context_access : .free,
         call_setup : eval@,
         code : ._ : _ do [
-            .i = .a link.get _,
-            .a link.set .i + 1,
+            .i = .a link_get _,
+            .a link_set .i + 1,
             .i
         ],
         context : _ context {
-            a : . : _ link 0
+            a : . : _ new_link 0
         },
     },
     [_ f ., _ f ., _ f .]
@@ -75,16 +81,20 @@ _ do [
 multiple stateful
 -----
 _ do [
+    context = _ import .context.new,
+    new_link = _ import .link.new,
+    link_get = _ import .link.get,
+    link_set = _ import .link.set,
     f = _ form _ function {
         context_access : .free,
         call_setup : eval@,
         code : ._ : _ do [
-            .i = .a link.get _,
-            .a link.set .i + 1,
+            .i = .a link_get _,
+            .a link_set .i + 1,
             .i
         ],
         context : _ context {
-            a : . : _ link 0
+            a : . : _ new_link 0
         },
     },
     f1 = $f,
@@ -97,6 +107,7 @@ _ do [
 const const
 -----
 _ do [
+    read = _ import .context.read,
     a = 1,
     f = _ function {
         code : (.c : ._) : .c ; read ..a,
@@ -110,6 +121,7 @@ _ do [
 mutable const
 -----
 _ do [
+    read = _ import .context.read,
     a = 1,
     f = _ function {
         code : (.c : ._) : .c ; read ..a,
@@ -164,6 +176,7 @@ _ do [
 ctx name occupied
 -----
 _ do [
+    context = _ import .context.new,
     a = 1,
     f = _ function {
         code : (.ctx : ._) : 2,
@@ -181,12 +194,13 @@ true
 ctx explicit
 -----
 _ do [
+    set_first = _ import .pair.set_first,
     a = 1 : 2,
     f = _ function {
         call_setup : _ mode {
             pair : {} : {symbol : ..} : eval@
         },
-        code : (.p : .i) : .p ; pair.set_first .i,
+        code : (.p : .i) : .p ; set_first .i,
     },
     a ; f 3,
     a
@@ -196,36 +210,50 @@ _ do [
 =====
 repr
 -----
-_ function.represent _ function {
-    code : (._ : .i) : .i
-}
+_ do [
+    represent = _ import .function.represent,
+    _ represent _ function {
+        code : (._ : .i) : .i
+    }
+]
+
 -----
 {code : (_ : i) : i}
 =====
 repr primitive free
 -----
-_ function.represent not
+_ do [
+    represent = _ import .function.represent,
+    _ represent not
+]
 -----
 {id : bit.not}
 =====
 repr const
 -----
-_ function.represent _ function {
-    code : (._ : .i) : .i,
-    context_access : .constant
-}
+_ do [
+    represent = _ import .function.represent,
+    _ represent _ function {
+        code : (._ : .i) : .i,
+        context_access : .constant
+    }
+]
 -----
 {code : (_ : i) : i, context_access : constant}
 =====
 repr primitive const
 -----
-_ function.represent ==
+_ do [
+    represent = _ import .function.represent,
+    _ represent ==
+]
 -----
 {id : ==}
 =====
 repr composite
 -----
 _ do [
+    represent = _ import .function.represent,
     m = _ mode {
         pair : {} : eval@ : .
     },
@@ -236,7 +264,7 @@ _ do [
         solve_setup : @m,
         context_access : constant,
     },
-    new_repr = _ function.represent _ function repr,
+    new_repr = _ represent _ function repr,
     repr == new_repr
 ]
 -----
@@ -244,52 +272,70 @@ true
 =====
 access free
 -----
-function ; function.context_access .
+_ do [
+    context_access = _ import .function.context_access,
+    function ; context_access .
+]
 -----
 free
 =====
 access const
 -----
-read ; function.context_access .
+_ do [
+    context_access = _ import .function.context_access,
+    read = _ import .context.read,
+    read ; context_access .
+]
 -----
 constant
 =====
 access mutable
 -----
-eval@ ; function.context_access .
+_ do [
+    context_access = _ import .function.context_access,
+    eval@ ; context_access .
+]
 -----
 mutable
 =====
 access default
 -----
 _ do [
+    context_access = _ import .function.context_access,
     f = _ function {},
-    f ; function.context_access .
+    f ; context_access .
 ]
 -----
 mutable
 =====
 call setup primitive
 -----
-eval@ == not ; function.call_setup .
+_ do [
+    call_setup = _ import .function.call_setup,
+    eval@ == not ; call_setup .
+]
 -----
 true
 =====
 call setup mode
 -----
-. == eval@ ; function.call_setup .
+_ do [
+    call_setup = _ import .function.call_setup,
+    . == eval@ ; function.call_setup .
+]
 -----
 true
 =====
 call setup 1
 -----
 _ do [
+    call_setup = _ import .function.call_setup,
     f = _ function {
         call_setup : _ mode {
             pair : {} : eval@ : form.
         },
     },
-    p1 = f ; function.call_setup .,
+    p1 = f ; call_setup .,
     p2 = _ mode {
         pair : {} : eval@ : form.
     },
@@ -301,12 +347,13 @@ true
 call setup 2
 -----
 _ do [
+    call_setup = _ import .function.call_setup,
     f = _ function {
         call_setup : _ mode {
             list : [eval@, form., .] : form.
         },
     },
-    p1 = f ; function.call_setup .,
+    p1 = f ; call_setup .,
     p2 = _ mode {
         list : [eval@, form., .] : form.
     },
@@ -318,12 +365,13 @@ true
 call setup 3
 -----
 _ do [
+    call_setup = _ import .function.call_setup,
     f = _ function {
         call_setup : _ mode {
             map : {a : eval@, b : .} : . : form.
         },
     },
-    p1 = f ; function.call_setup .,
+    p1 = f ; call_setup .,
     p2 = _ mode {
         map : {a : eval@, b : .} : . : form.
     },
@@ -334,36 +382,47 @@ true
 =====
 solve setup
 -----
-eval@ == not ; function.solve_setup .
+_ do [
+    solve_setup = _ import .function.solve_setup,
+    eval@ == not ; solve_setup .
+]
 -----
 true
 =====
 is_primitive primitive
 -----
-not ; function.is_primitive .
+_ do [
+    is_primitive = _ import .function.is_primitive,
+    not ; is_primitive .
+]
 -----
 true
 =====
 is_primitive composite
 -----
 _ do [
+    is_primitive = _ import .function.is_primitive,
     f = _ function {},
-    f ; function.is_primitive .
+    f ; is_primitive .
 ]
 -----
 false
 =====
 id primitive
 -----
-not ; function.id .
+_ do [
+    id = _ import .function.id,
+    not ; id .
+]
 -----
 bit.not
 =====
 id rename
 -----
 _ do [
+    id = _ import .function.id,
     neg = not,
-    neg ; function.id .
+    neg ; id .
 ]
 -----
 bit.not
@@ -371,10 +430,11 @@ bit.not
 code
 -----
 _ do [
+    code = _ import .function.code,
     f = _ function {
         code : (.ctx : .i) : .i
     },
-    f ; function.code .
+    f ; code .
 ]
 -----
 (ctx : i) : i
@@ -382,7 +442,9 @@ _ do [
 ctx
 -----
 _ do [
-    ctx = _ context {
+    context.new = _ import .context.new,
+    function.context = _ import .function.context,
+    ctx = _ context.new {
         a : . : 1
     },
     f = _ function {

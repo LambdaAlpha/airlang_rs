@@ -79,22 +79,7 @@ impl CfgMod for ListLib {
 }
 
 impl Library for ListLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.length.prelude(ctx);
-        self.set.prelude(ctx);
-        self.set_many.prelude(ctx);
-        self.get.prelude(ctx);
-        self.get_many.prelude(ctx);
-        self.insert.prelude(ctx);
-        self.insert_many.prelude(ctx);
-        self.remove.prelude(ctx);
-        self.remove_many.prelude(ctx);
-        self.push.prelude(ctx);
-        self.push_many.prelude(ctx);
-        self.pop.prelude(ctx);
-        self.pop_many.prelude(ctx);
-        self.clear.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn length() -> ConstPrimFuncVal {

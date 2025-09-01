@@ -1,6 +1,8 @@
 new
 -----
 _ do [
+    call = _ import .task.call,
+    solve = _ import .task.solve,
     f = _ any .,
     i = _ any .,
     c1 = _ call {function : f, input : i},
@@ -15,11 +17,19 @@ true
 new get
 -----
 _ do [
+    call = _ import .task.call,
+    solve = _ import .task.solve,
+    function = _ import .task.function,
+    context = _ import .task.context,
+    input = _ import .task.input,
     f = _ any .,
+    c = _ any .,
     i = _ any .,
-    c1 = _ call {function : f, input : i},
-    c2 = _ solve {function : f, input : i},
-    (f == c1 ; task.function .) and (f == c2 ; task.function .) and (i == c1 ; task.input .) and (i == c2 ; task.input .)
+    c1 = _ call {function : f, context : c, input : i},
+    c2 = _ solve {function : f, context : c, input : i},
+    (f == c1 ; function .) and (f == c2 ; function .)
+    and (c == c1 ; context .) and (c == c2 ; context .)
+    and (i == c1 ; input .) and (i == c2 ; input .)
 ]
 -----
 true
@@ -27,14 +37,20 @@ true
 set get
 -----
 _ do [
+    function = _ import .task.function,
+    context = _ import .task.context,
+    input = _ import .task.input,
+    set_function = _ import .task.set_function,
+    set_context = _ import .task.set_context,
+    set_input = _ import .task.set_input,
     c = _ any task,
     f = _ any .,
     ctx = _ any .,
     i = _ any .,
-    c ; task.set_function f,
-    c ; task.set_context ctx,
-    c ; task.set_input i,
-    (f == c ; task.function .) and (ctx == c ; task.context .) and (i == c ; task.input .)
+    c ; set_function f,
+    c ; set_context ctx,
+    c ; set_input i,
+    (f == c ; function .) and (ctx == c ; context .) and (i == c ; input .)
 ]
 -----
 true
@@ -42,19 +58,22 @@ true
 set return
 -----
 _ do [
+    call = _ import .task.call,
+    solve = _ import .task.solve,
+    set_function = _ import .task.set_function,
+    set_context = _ import .task.set_context,
+    set_input = _ import .task.set_input,
     f1 = _ any .,
     ctx1 = _ any .,
     i1 = _ any .,
-    c1 = _ call {function : f1, input : i1},
-    c1 ; task.set_context ctx1,
-    c2 = _ solve {function : f1, input : i1},
-    c2 ; task.set_context ctx1,
-    f2 = c1 ; task.set_function _ any .,
-    ctx2 = c1 ; task.set_context _ any .,
-    i2 = c1 ; task.set_input _ any .,
-    f3 = c2 ; task.set_function _ any .,
-    ctx3 = c2 ; task.set_context _ any .,
-    i3 = c2 ; task.set_input _ any .,
+    c1 = _ call {function : f1, context : ctx1, input : i1},
+    c2 = _ solve {function : f1, context : ctx1, input : i1},
+    f2 = c1 ; set_function _ any .,
+    ctx2 = c1 ; set_context _ any .,
+    i2 = c1 ; set_input _ any .,
+    f3 = c2 ; set_function _ any .,
+    ctx3 = c2 ; set_context _ any .,
+    i3 = c2 ; set_input _ any .,
     (f1 == f2) and (f1 == f3) and (ctx1 == ctx2) and (ctx1 == ctx3) and (i1 == i2) and (i1 == i3)
 ]
 -----
@@ -63,23 +82,30 @@ true
 is_solve
 -----
 _ do [
-    c1 = _ call {function : _ any ., input : _ any .},
-    c2 = _ solve {function : _ any ., input : _ any .},
-    (_ not c1 ; task.is_solve .) and (c2 ; task.is_solve .)
+    call = _ import .task.call,
+    solve = _ import .task.solve,
+    is_solve = _ import .task.is_solve,
+    c1 = _ call {function : _ any ., context : _ any ., input : _ any .},
+    c2 = _ solve {function : _ any ., context : _ any ., input : _ any .},
+    (_ not c1 ; is_solve .) and (c2 ; is_solve .)
 ]
 -----
 true
 =====
 apply const
 -----
-_ task.apply _ form@ 1 + 1
+_ do [
+    apply = _ import .task.apply,
+    _ apply _ form@ 1 + 1
+]
 -----
 2
 =====
 apply mut
 -----
 _ do [
-    _ task.apply _ form@ .a = 1,
+    apply = _ import .task.apply,
+    _ apply _ form@ .a = 1,
     a
 ]
 -----

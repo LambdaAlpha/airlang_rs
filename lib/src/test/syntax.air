@@ -1,29 +1,32 @@
 parse generate
 -----
 _ do [
+    parse = _ import .syntax.parse,
+    generate = _ import .syntax.generate,
+    get = _ import .list.get,
     % = _ import .integer.remainder,
     atom = [.unit, .bit, .symbol, .text, .integer, .number, .byte],
     i = 3 + (_ any integer) % 4,
-    a = atom ; list.get i,
+    a = atom ; get i,
     (_ any bit) loop [
         (_ any bit) ? [
             i = 3 + (_ any integer) % 4,
-            b = atom ; list.get i,
+            b = atom ; get i,
             i = (4 + (_ any integer) % 4) % 4,
             a = (_ any bit) ? [a : b] : [_ form@ _ a b],
         ] : [
             (_ any bit) ? [
                 i = 3 + (_ any integer) % 4,
-                b = atom ; list.get i,
+                b = atom ; get i,
                 a = [a, b],
             ] : [
                 i = 3 + (_ any integer) % 4,
-                b = atom ; list.get i,
+                b = atom ; get i,
                 a = {a : b},
             ]
         ]
     ],
-    a1 = _ syntax.parse _ syntax.generate a,
+    a1 = _ parse _ generate a,
     a == a1
 ]
 -----
@@ -31,24 +34,37 @@ true
 =====
 parse
 -----
-_ syntax.parse "[1, 2]"
+_ do [
+    parse = _ import .syntax.parse,
+    _ parse "[1, 2]"
+]
 -----
 [1, 2]
 =====
 parse no eval
 -----
-_ do [a = 1, _ syntax.parse "a"]
+_ do [
+    parse = _ import .syntax.parse,
+    a = 1,
+    _ parse "a"
+]
 -----
 a
 =====
 parse text
 -----
-_ syntax.parse "\`1\`"
+_ do [
+    parse = _ import .syntax.parse,
+    _ parse "\`1\`"
+]
 -----
 "1"
 =====
 generate text
 -----
-_ syntax.generate "1"
+_ do [
+    generate = _ import .syntax.generate,
+    _ generate "1"
+]
 -----
 "\`1\`"

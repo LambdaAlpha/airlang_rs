@@ -171,12 +171,6 @@ impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     }
 }
 
-fn ctx_put_val<V: Clone + Into<Val>>(ctx: &mut Ctx, name: &'static str, val: &V) {
-    let name = Symbol::from_str_unchecked(name);
-    let v = ctx.put(name, val.clone().into(), Contract::None);
-    assert!(matches!(v, Ok(None)), "names of preludes should be unique");
-}
-
 fn ctx_put_func<V: Clone + Into<FuncVal>>(ctx: &mut Ctx, name: &'static str, val: &V) {
     let name = Symbol::from_str_unchecked(name);
     let v = ctx.put(name, Val::Func(val.clone().into()), Contract::None);

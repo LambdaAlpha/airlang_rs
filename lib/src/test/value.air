@@ -236,7 +236,8 @@ map
 type link
 -----
 _ do [
-    a = _ link .,
+    new_link = _ import .link.new,
+    a = _ new_link .,
     a ; type .
 ]
 -----
@@ -245,7 +246,8 @@ link
 type context
 -----
 _ do [
-    a = _ context {},
+    new_context = _ import .context.new,
+    a = _ new_context {},
     a ; type .
 ]
 -----
@@ -329,7 +331,8 @@ true
 == link
 -----
 _ do [
-    a = _ link .,
+    new_link = _ import .link.new,
+    a = _ new_link .,
     b = a,
     a == b
 ]
@@ -339,8 +342,9 @@ true
 == context
 -----
 _ do [
-    a = _ context {},
-    b = _ context {},
+    new_context = _ import .context.new,
+    a = _ new_context {},
+    b = _ new_context {},
     (a == b) and _ not a == .
 ]
 -----

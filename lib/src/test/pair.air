@@ -1,9 +1,10 @@
 new
 -----
 _ do [
+    new = _ import .pair.new,
     f = _ any .,
     s = _ any .,
-    p1 = f ':' s,
+    p1 = f new s,
     p2 = f : s,
     p1 == p2
 ]
@@ -13,10 +14,13 @@ true
 new get
 -----
 _ do [
+    new = _ import .pair.new,
+    first = _ import .pair.first,
+    second = _ import .pair.second,
     f = _ any .,
     s = _ any .,
-    p = f ':' s,
-    (f == p ; pair.first .) and (s == p ; pair.second .)
+    p = f new s,
+    (f == p ; first .) and (s == p ; second .)
 ]
 -----
 true
@@ -24,12 +28,18 @@ true
 set get
 -----
 _ do [
+    first = _ import .pair.first,
+    second = _ import .pair.second,
+    set_first = _ import .pair.set_first,
+    set_second = _ import .pair.set_second,
     p = _ any pair,
     f = _ any .,
     s = _ any .,
-    p ; pair.set_first f,
-    p ; pair.set_second s,
-    (f == p ; pair.first .) and (s == p ; pair.second .)
+    p ; set_first f,
+    p ; set_second s,
+    f1 = p ; first .,
+    s1 = p ; second .,
+    (f == f1) and (s == s1)
 ]
 -----
 true
@@ -37,11 +47,13 @@ true
 set return
 -----
 _ do [
+    set_first = _ import .pair.set_first,
+    set_second = _ import .pair.set_second,
     f1 = _ any .,
     s1 = _ any .,
     p = f1 : s1,
-    f2 = p ; pair.set_first _ any .,
-    s2 = p ; pair.set_second _ any .,
+    f2 = p ; set_first _ any .,
+    s2 = p ; set_second _ any .,
     (f1 == f2) and s1 == s2
 ]
 -----

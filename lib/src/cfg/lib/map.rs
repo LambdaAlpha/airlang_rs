@@ -102,28 +102,7 @@ impl CfgMod for MapLib {
 }
 
 impl Library for MapLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.length.prelude(ctx);
-        self.items.prelude(ctx);
-        self.into_items.prelude(ctx);
-        self.keys.prelude(ctx);
-        self.into_keys.prelude(ctx);
-        self.values.prelude(ctx);
-        self.into_values.prelude(ctx);
-        self.contains.prelude(ctx);
-        self.contains_all.prelude(ctx);
-        self.contains_any.prelude(ctx);
-        self.set.prelude(ctx);
-        self.set_many.prelude(ctx);
-        self.get.prelude(ctx);
-        self.get_many.prelude(ctx);
-        self.remove.prelude(ctx);
-        self.remove_many.prelude(ctx);
-        self.clear.prelude(ctx);
-        self.new_map.prelude(ctx);
-        self.new_set.prelude(ctx);
-        self.new_multiset.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn length() -> ConstPrimFuncVal {
@@ -391,7 +370,7 @@ fn fn_clear(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn new_map() -> FreePrimFuncVal {
-    FreePrimFn { id: "map", f: free_impl(fn_new_map), mode: default_free_mode() }.free()
+    FreePrimFn { id: "map.new", f: free_impl(fn_new_map), mode: default_free_mode() }.free()
 }
 
 fn fn_new_map(_cfg: &mut Cfg, input: Val) -> Val {
@@ -417,7 +396,7 @@ fn fn_new_map(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_set() -> FreePrimFuncVal {
-    FreePrimFn { id: "set", f: free_impl(fn_new_set), mode: default_free_mode() }.free()
+    FreePrimFn { id: "map.new_set", f: free_impl(fn_new_set), mode: default_free_mode() }.free()
 }
 
 fn fn_new_set(_cfg: &mut Cfg, input: Val) -> Val {
@@ -431,7 +410,8 @@ fn fn_new_set(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_multiset() -> FreePrimFuncVal {
-    FreePrimFn { id: "multiset", f: free_impl(fn_new_multiset), mode: default_free_mode() }.free()
+    FreePrimFn { id: "map.new_multiset", f: free_impl(fn_new_multiset), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_new_multiset(_cfg: &mut Cfg, input: Val) -> Val {

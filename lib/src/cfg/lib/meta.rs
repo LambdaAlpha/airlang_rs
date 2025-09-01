@@ -3,7 +3,6 @@ use std::str::FromStr;
 use num_bigint::BigInt;
 
 use super::Library;
-use super::ctx_put_val;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
@@ -31,9 +30,7 @@ impl CfgMod for MetaLib {
 }
 
 impl Library for MetaLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        ctx_put_val(ctx, "air.version", &self.version);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn version() -> ListVal {

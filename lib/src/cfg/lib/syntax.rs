@@ -38,10 +38,7 @@ impl CfgMod for SyntaxLib {
 }
 
 impl Library for SyntaxLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.parse.prelude(ctx);
-        self.generate.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn parse() -> FreePrimFuncVal {

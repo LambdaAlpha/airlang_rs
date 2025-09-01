@@ -474,21 +474,29 @@ false
 =====
 mode access free
 -----
-form ; function.context_access .
+_ do [
+    context_access = _ import .function.context_access,
+    form ; context_access .
+]
 -----
 free
 =====
 mode access const
 -----
 _ do [
+    context_access = _ import .function.context_access,
+    read = _ import .context.read,
     f = _ mode @read,
-    f ; function.context_access .
+    f ; context_access .
 ]
 -----
 constant
 =====
 mode access mutable
 -----
-eval@ ; function.context_access .
+_ do [
+    context_access = _ import .function.context_access,
+    eval@ ; context_access .
+]
 -----
 mutable

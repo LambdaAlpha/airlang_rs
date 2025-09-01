@@ -35,15 +35,11 @@ impl CfgMod for LinkLib {
 }
 
 impl Library for LinkLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.new.prelude(ctx);
-        self.get.prelude(ctx);
-        self.set.prelude(ctx);
-    }
+    fn prelude(&self, _ctx: &mut Ctx) {}
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "link", f: free_impl(fn_new), mode: default_free_mode() }.free()
+    FreePrimFn { id: "link.new", f: free_impl(fn_new), mode: default_free_mode() }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {

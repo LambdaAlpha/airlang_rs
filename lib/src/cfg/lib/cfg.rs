@@ -6,6 +6,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::Library;
+use crate::cfg::lib::ctx_put_func;
 use crate::cfg::lib::free_impl;
 use crate::cfg::lib::mode::FuncMode;
 use crate::cfg::lib::mut_impl;
@@ -49,16 +50,14 @@ impl CfgMod for CfgLib {
 
 impl Library for CfgLib {
     fn prelude(&self, ctx: &mut Ctx) {
-        self.new.prelude(ctx);
-        self.repr.prelude(ctx);
-        self.import.prelude(ctx);
-        self.export.prelude(ctx);
-        self.with.prelude(ctx);
+        ctx_put_func(ctx, "import", &self.import);
+        ctx_put_func(ctx, "export", &self.export);
+        ctx_put_func(ctx, "with", &self.with);
     }
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration", f: free_impl(fn_new), mode: default_free_mode() }.free()
+    FreePrimFn { id: "configuration.new", f: free_impl(fn_new), mode: default_free_mode() }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -115,7 +114,8 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> FreePrimFuncVal {
-    FreePrimFn { id: "import", f: free_impl(fn_import), mode: default_free_mode() }.free()
+    FreePrimFn { id: "configuration.import", f: free_impl(fn_import), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -127,7 +127,8 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> FreePrimFuncVal {
-    FreePrimFn { id: "export", f: free_impl(fn_export), mode: default_free_mode() }.free()
+    FreePrimFn { id: "configuration.export", f: free_impl(fn_export), mode: default_free_mode() }
+        .free()
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -146,7 +147,7 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 
 pub fn with() -> MutPrimFuncVal {
     DynPrimFn {
-        id: "with",
+        id: "configuration.with",
         f: mut_impl(fn_with),
         mode: dyn_mode(FuncMode::pair_mode(
             Map::default(),

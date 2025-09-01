@@ -267,6 +267,7 @@ match pattern
 match order
 -----
 _ do [
+    is_null = _ import .context.is_null,
     [1, 2, 3] match [
         [2, a, b] : [x = 1],
         [1, c, d] : [y = 1],
@@ -320,6 +321,7 @@ match default
 match conditional eval exist
 -----
 _ do [
+    is_null = _ import .context.is_null,
     1 match [
         1 : [a = 1],
         2 : [b = 2],
@@ -333,6 +335,7 @@ _ do [
 match conditional eval default
 -----
 _ do [
+    is_null = _ import .context.is_null,
     3 match [
         1 : [a = 1],
         2 : [b = 2],
@@ -539,9 +542,10 @@ _ do [
 for list map
 -----
 _ do [
+    push = _ import .list.push,
     a = [],
     [1, 2, 3, 4, 5] for i : [
-        a ; list.push i + 1
+        a ; push i + 1
     ],
     a
 ]
@@ -581,9 +585,10 @@ for integer negative
 for byte
 -----
 _ do [
+    push = _ import .list.push,
     b = [],
     byte(1122334455) for i : [
-        b ; list.push i
+        b ; push i
     ],
     b
 ]
@@ -593,9 +598,10 @@ _ do [
 for symbol
 -----
 _ do [
+    push = _ import .list.push,
     s = [],
     .abc for i : [
-        s ; list.push i
+        s ; push i
     ],
     s
 ]
@@ -605,9 +611,10 @@ _ do [
 for text
 -----
 _ do [
+    push = _ import .list.push,
     t = [],
     "hello" for i : [
-        t ; list.push i
+        t ; push i
     ],
     t
 ]
@@ -617,11 +624,13 @@ _ do [
 for map
 -----
 _ do [
+    push = _ import .list.push,
+    new_map = _ import .map.new,
     kv = [],
     {1 : 2, 3 : 4} for i : [
-        kv ; list.push i
+        kv ; push i
     ],
-    _ map kv
+    _ new_map kv
 ]
 -----
 {1 : 2, 3 : 4}
