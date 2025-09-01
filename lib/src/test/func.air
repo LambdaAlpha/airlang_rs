@@ -321,7 +321,7 @@ call setup mode
 -----
 _ do [
     call_setup = _ import .function.call_setup,
-    . == eval@ ; function.call_setup .
+    . == eval@ ; call_setup .
 ]
 -----
 true

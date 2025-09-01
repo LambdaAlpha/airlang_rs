@@ -3,12 +3,12 @@ length set
 _ do [
     length = _ import .map.length,
     set = _ import .map.set,
-    contains = _ import .map.contains,
+    contain = _ import .map.contain,
     a = _ any map,
     l1 = a ; length .,
     k = _ any .,
     v = _ any .,
-    i = (a ; contains k) ? [0] : [1],
+    i = (a ; contain k) ? [0] : [1],
     a ; set k : v,
     l2 = a ; length .,
     l2 == l1 + i
@@ -121,16 +121,16 @@ _ do [
 -----
 true
 =====
-set contains
+set contain
 -----
 _ do [
     set = _ import .map.set,
-    contains = _ import .map.contains,
+    contain = _ import .map.contain,
     a = _ any map,
     k = _ any .,
     v = _ any .,
     a ; set k : v,
-    a ; contains k
+    a ; contain k
 ]
 -----
 true
@@ -150,29 +150,29 @@ _ do [
 -----
 true
 =====
-set_many contains_all
+set_many contain_all
 -----
 _ do [
     set_many = _ import .map.set_many,
-    contains_all = _ import .map.contains_all,
+    contain_all = _ import .map.contain_all,
     keys = _ import .map.keys,
     a = _ any map,
     b = _ any map,
     a ; set_many b,
-    a ; contains_all b ; keys .
+    a ; contain_all b ; keys .
 ]
 -----
 true
 =====
-remove_many contains_any
+remove_many contain_any
 -----
 _ do [
     remove_many = _ import .map.remove_many,
-    contains_any = _ import .map.contains_any,
+    contain_any = _ import .map.contain_any,
     a = _ any map,
     b = _ any list,
     a ; remove_many b,
-    _ not a ; contains_any b
+    _ not a ; contain_any b
 ]
 -----
 true
@@ -197,12 +197,12 @@ get remove
 _ do [
     get = _ import .map.get,
     remove = _ import .map.remove,
-    contains = _ import .map.contains,
+    contain = _ import .map.contain,
     a = _ any map,
     k = _ any .,
     v1 = a ; get k,
     v2 = a ; remove k,
-    c = a ; contains k,
+    c = a ; contain k,
     (_ not c) and (v1 == v2)
 ]
 -----
@@ -213,12 +213,12 @@ get_many remove_many
 _ do [
     get_many = _ import .map.get_many,
     remove_many = _ import .map.remove_many,
-    contains_any = _ import .map.contains_any,
+    contain_any = _ import .map.contain_any,
     a = _ any map,
     ks = _ any list,
     vs1 = a ; get_many ks,
     vs2 = a ; remove_many ks,
-    c = a ; contains_any ks,
+    c = a ; contain_any ks,
     (_ not c) and (vs1 == vs2)
 ]
 -----
@@ -281,62 +281,62 @@ _ do [
 -----
 {2 : 2}
 =====
-contains 1
+contain 1
 -----
 _ do [
-    contains = _ import .map.contains,
+    contain = _ import .map.contain,
     m = {1 : 2},
-    m ; contains 1
+    m ; contain 1
 ]
 -----
 true
 =====
-contains 2
+contain 2
 -----
 _ do [
-    contains = _ import .map.contains,
+    contain = _ import .map.contain,
     m = {1 : 2},
-    m ; contains 2
+    m ; contain 2
 ]
 -----
 false
 =====
-contains_all 1
+contain_all 1
 -----
 _ do [
-    contains_all = _ import .map.contains_all,
+    contain_all = _ import .map.contain_all,
     m = {1 : 2, 3 : 4},
-    m ; contains_all [1, 3]
+    m ; contain_all [1, 3]
 ]
 -----
 true
 =====
-contains_all 2
+contain_all 2
 -----
 _ do [
-    contains_all = _ import .map.contains_all,
+    contain_all = _ import .map.contain_all,
     m = {1 : 2, 3 : 4},
-    m ; contains_all [1, 2]
+    m ; contain_all [1, 2]
 ]
 -----
 false
 =====
-contains_any 1
+contain_any 1
 -----
 _ do [
-    contains_any = _ import .map.contains_any,
+    contain_any = _ import .map.contain_any,
     m = {1 : 2, 3 : 4},
-    m ; contains_any [1, 2]
+    m ; contain_any [1, 2]
 ]
 -----
 true
 =====
-contains_any 2
+contain_any 2
 -----
 _ do [
-    contains_any = _ import .map.contains_any,
+    contain_any = _ import .map.contain_any,
     m = {1 : 2, 3 : 4},
-    m ; contains_any [2, 4]
+    m ; contain_any [2, 4]
 ]
 -----
 false

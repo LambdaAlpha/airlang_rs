@@ -34,9 +34,9 @@ pub struct MapLib {
     pub into_keys: MutPrimFuncVal,
     pub values: ConstPrimFuncVal,
     pub into_values: MutPrimFuncVal,
-    pub contains: ConstPrimFuncVal,
-    pub contains_all: ConstPrimFuncVal,
-    pub contains_any: ConstPrimFuncVal,
+    pub contain: ConstPrimFuncVal,
+    pub contain_all: ConstPrimFuncVal,
+    pub contain_any: ConstPrimFuncVal,
     pub set: MutPrimFuncVal,
     pub set_many: MutPrimFuncVal,
     pub get: ConstPrimFuncVal,
@@ -59,9 +59,9 @@ impl Default for MapLib {
             into_keys: into_keys(),
             values: values(),
             into_values: into_values(),
-            contains: contains(),
-            contains_all: contains_all(),
-            contains_any: contains_any(),
+            contain: contain(),
+            contain_all: contain_all(),
+            contain_any: contain_any(),
             set: set(),
             set_many: set_many(),
             get: get(),
@@ -85,9 +85,9 @@ impl CfgMod for MapLib {
         self.into_keys.extend(cfg);
         self.values.extend(cfg);
         self.into_values.extend(cfg);
-        self.contains.extend(cfg);
-        self.contains_all.extend(cfg);
-        self.contains_any.extend(cfg);
+        self.contain.extend(cfg);
+        self.contain_all.extend(cfg);
+        self.contain_any.extend(cfg);
         self.set.extend(cfg);
         self.set_many.extend(cfg);
         self.get.extend(cfg);
@@ -205,11 +205,11 @@ fn fn_into_values(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     Val::List(values.into())
 }
 
-pub fn contains() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.contains", f: const_impl(fn_contains), mode: default_dyn_mode() }.const_()
+pub fn contain() -> ConstPrimFuncVal {
+    DynPrimFn { id: "map.contain", f: const_impl(fn_contain), mode: default_dyn_mode() }.const_()
 }
 
-fn fn_contains(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contain(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -217,12 +217,12 @@ fn fn_contains(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::from(map.contains_key(&input)))
 }
 
-pub fn contains_all() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.contains_all", f: const_impl(fn_contains_all), mode: default_dyn_mode() }
+pub fn contain_all() -> ConstPrimFuncVal {
+    DynPrimFn { id: "map.contain_all", f: const_impl(fn_contain_all), mode: default_dyn_mode() }
         .const_()
 }
 
-fn fn_contains_all(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contain_all(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
@@ -236,12 +236,12 @@ fn fn_contains_all(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::from(b))
 }
 
-pub fn contains_any() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.contains_any", f: const_impl(fn_contains_many), mode: default_dyn_mode() }
+pub fn contain_any() -> ConstPrimFuncVal {
+    DynPrimFn { id: "map.contain_any", f: const_impl(fn_contain_many), mode: default_dyn_mode() }
         .const_()
 }
 
-fn fn_contains_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contain_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return Val::default();
