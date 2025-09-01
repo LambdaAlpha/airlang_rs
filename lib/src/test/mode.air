@@ -36,25 +36,37 @@ _ form. .@a
 =====
 form. @
 -----
-_ do [a = 1, [_ form. @a, a]]
+_ do [
+    a = 1,
+    [_ form. @a, a]
+]
 -----
 [1, 1]
 =====
 form. @ special
 -----
-_ do [..a = 1, [_ form. @.a, @.a]]
+_ do [
+    ..a = 1,
+    [_ form. @.a, @.a]
+]
 -----
 [1, 1]
 =====
 form. $
 -----
-_ do [a = _ form _ not true, _ form. $a]
+_ do [
+    a = _ form _ not true,
+    _ form. $a
+]
 -----
 false
 =====
 form@ trivial
 -----
-_ do [a = 1, [_ form@ a, a]]
+_ do [
+    a = 1,
+    [_ form@ a, a]
+]
 -----
 [1, 1]
 =====
@@ -66,19 +78,28 @@ a
 =====
 form@ @
 -----
-_ do [a = 1, [_ form@ @a, a]]
+_ do [
+    a = 1,
+    [_ form@ @a, a]
+]
 -----
 [1, 1]
 =====
 form@ $
 -----
-_ do [a = _ form _ not true, _ form@ $a]
+_ do [
+    a = _ form _ not true,
+    _ form@ $a
+]
 -----
 false
 =====
 form$ trivial
 -----
-_ do [a = _ form _ not true, _ form$ a]
+_ do [
+    a = _ form _ not true,
+    _ form$ a
+]
 -----
 false
 =====
@@ -90,19 +111,28 @@ a
 =====
 form$ @
 -----
-_ do [a = 1, [_ form$ @a, a]]
+_ do [
+    a = 1,
+    [_ form$ @a, a]
+]
 -----
 [1, 1]
 =====
 form$ $
 -----
-_ do [a = _ form _ not true, _ form$ $a]
+_ do [
+    a = _ form _ not true,
+    _ form$ $a
+]
 -----
 false
 =====
 eval task
 -----
-_ do [a = _ form@ _ eval _ not true, $a]
+_ do [
+    a = _ form@ _ eval _ not true,
+    $a
+]
 -----
 false
 =====
@@ -126,19 +156,28 @@ a
 =====
 eval. @
 -----
-_ do [a = 1, [_ eval. @a, a]]
+_ do [
+    a = 1,
+    [_ eval. @a, a]
+]
 -----
 [1, 1]
 =====
 eval. $
 -----
-_ do [a = _ form _ not true, _ eval. $a]
+_ do [
+    a = _ form _ not true,
+    _ eval. $a
+]
 -----
 false
 =====
 eval@ trivial
 -----
-_ do [a = 1, [_ eval@ a, a]]
+_ do [
+    a = 1,
+    [_ eval@ a, a]
+]
 -----
 [1, 1]
 =====
@@ -150,19 +189,28 @@ a
 =====
 eval@ @
 -----
-_ do [a = 1, [_ eval@ @a, a]]
+_ do [
+    a = 1,
+    [_ eval@ @a, a]
+]
 -----
 [1, 1]
 =====
 eval@ $
 -----
-_ do [a = _ form _ not true, _ eval@ $a]
+_ do [
+    a = _ form _ not true,
+    _ eval@ $a
+]
 -----
 false
 =====
 eval$ trivial
 -----
-_ do [a = _ form _ not true, _ eval$ a]
+_ do [
+    a = _ form _ not true,
+    _ eval$ a
+]
 -----
 false
 =====
@@ -174,37 +222,55 @@ a
 =====
 eval$ @
 -----
-_ do [a = 1, [_ eval$ @a, a]]
+_ do [
+    a = 1,
+    [_ eval$ @a, a]
+]
 -----
 [1, 1]
 =====
 eval$ $
 -----
-_ do [a = _ form _ not true, _ eval$ $a]
+_ do [
+    a = _ form _ not true,
+    _ eval$ $a
+]
 -----
 false
 =====
 mode form
 -----
-_ do [f = _ mode ., _ f .a]
+_ do [
+    f = _ mode .,
+    _ f .a
+]
 -----
 .a
 =====
 mode primitive from symbol 1
 -----
-_ do [f = _ mode form., _ f _ a .b]
+_ do [
+    f = _ mode form.,
+    _ f _ a .b
+]
 -----
 _ a b
 =====
 mode primitive from symbol 2
 -----
-_ do [f = _ mode eval@, _ f _ not true]
+_ do [
+    f = _ mode eval@,
+    _ f _ not true
+]
 -----
 false
 =====
 default mode
 -----
-_ do [f = _ mode ., _ f _ not true]
+_ do [
+    f = _ mode .,
+    _ f _ not true
+]
 -----
 _ not true
 =====
@@ -288,8 +354,17 @@ _ do [
 mode pair some
 -----
 _ do [
-    f = _ mode {pair : {this : {}, that : form.} : eval@ : {pair : .}},
-    [_ f this : _ not true, _ f that : a, _ f (_ not true) : @a : $b] 
+    f = _ mode {
+        pair : {
+            this : {},
+            that : form.,
+        } : eval@ : {pair : .}
+    },
+    [
+        _ f this : _ not true,
+        _ f that : a,
+        _ f (_ not true) : @a : $b,
+    ] 
 ]
 -----
 [this : _ not true, that : a, false : @a : $b]
@@ -299,7 +374,9 @@ mode multiple
 _ do [
     c = 1,
     d = 2,
-    f = _ mode {pair : {} : form. : {pair : form.}},
+    f = _ mode {
+        pair : {} : form. : {pair : form.}
+    },
     _ f a : .b : _ @c $d
 ]
 -----
@@ -308,7 +385,9 @@ a : b : _ 1 2
 mode task
 -----
 _ do [
-    f = _ mode {task : . ; eval@ eval@},
+    f = _ mode {
+        task : . ; eval@ eval@
+    },
     _ f _ .g _ not true
 ]
 -----
@@ -317,7 +396,9 @@ _ g false
 mode list list
 -----
 _ do [
-    f = _ mode {list : [form, eval.]},
+    f = _ mode {
+        list : [form, eval.]
+    },
     _ f [_ not true, _ @not true, _ .not true]
 ]
 -----
@@ -326,7 +407,9 @@ _ do [
 mode list head tail
 -----
 _ do [
-    f = _ mode {list : [form, eval.] : form.},
+    f = _ mode {
+        list : [form, eval.] : form.
+    },
     _ f [_ not true, _ @not true, _ .not true]
 ]
 -----
@@ -335,8 +418,17 @@ _ do [
 mode map map
 -----
 _ do [
-    f = _ mode {map : {a : form, b : eval.}},
-    _ f {a : _ not true, b : _ @not true, c : _ .not true}
+    f = _ mode {
+        map : {
+            a : form,
+            b : eval.,
+        }
+    },
+    _ f {
+        a : _ not true,
+        b : _ @not true,
+        c : _ .not true,
+    }
 ]
 -----
 {a : _ not true, b : false, c : _ .not true}
@@ -344,8 +436,17 @@ _ do [
 mode map some else
 -----
 _ do [
-    f = _ mode {map : {a : form, b : eval.} : form.},
-    _ f {a : _ not true, b : _ @not true, c : _ .not true}
+    f = _ mode {
+        map : {
+            a : form,
+            b : eval.,
+        } : form.
+    },
+    _ f {
+        a : _ not true,
+        b : _ @not true,
+        c : _ .not true,
+    }
 ]
 -----
 {a : _ not true, b : false, c : _ not true}
@@ -362,7 +463,10 @@ false
 mode func setup call
 -----
 _ do [
-    f = _ function {call_setup : _ mode @not, code : (._ : .i) : .i},
+    f = _ function {
+        call_setup : _ mode @not,
+        code : (._ : .i) : .i,
+    },
     _ f true
 ]
 -----
@@ -376,7 +480,10 @@ free
 =====
 mode access const
 -----
-_ do [f = _ mode @read, f ; function.context_access .]
+_ do [
+    f = _ mode @read,
+    f ; function.context_access .
+]
 -----
 constant
 =====

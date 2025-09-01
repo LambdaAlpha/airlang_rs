@@ -28,7 +28,9 @@ _ do [
     f = _ function {
         call_setup : eval@,
         code : (._ : .i) : _ .not .i,
-        context : _ context {not : . : not},
+        context : _ context {
+            not : . : not
+        },
     },
     _ f _ not true
 ]
@@ -41,7 +43,9 @@ _ do [
     f = _ function {
         call_setup : eval@,
         code : (._ : .a) : _ .n .a,
-        context : _ context {n : . : not},
+        context : _ context {
+            n : . : not
+        },
     },
     _ f _ not true
 ]
@@ -54,8 +58,14 @@ _ do [
     f = _ function {
         context_access : .free,
         call_setup : eval@,
-        code : ._ : _ do [.i = .a link.get _, .a link.set .i + 1, .i],
-        context : _ context {a : . : _ link 0},
+        code : ._ : _ do [
+            .i = .a link.get _,
+            .a link.set .i + 1,
+            .i
+        ],
+        context : _ context {
+            a : . : _ link 0
+        },
     },
     [_ f ., _ f ., _ f .]
 ]
@@ -68,8 +78,14 @@ _ do [
     f = _ form _ function {
         context_access : .free,
         call_setup : eval@,
-        code : ._ : _ do [.i = .a link.get _, .a link.set .i + 1, .i],
-        context : _ context {a : . : _ link 0},
+        code : ._ : _ do [
+            .i = .a link.get _,
+            .a link.set .i + 1,
+            .i
+        ],
+        context : _ context {
+            a : . : _ link 0
+        },
     },
     f1 = $f,
     f2 = $f,
@@ -152,7 +168,9 @@ _ do [
     f = _ function {
         code : (.ctx : ._) : 2,
         context_access : .constant,
-        context : _ context {ctx : constant : 3},
+        context : _ context {
+            ctx : constant : 3
+        },
     },
     _ f .,
     a == 1
@@ -165,7 +183,9 @@ ctx explicit
 _ do [
     a = 1 : 2,
     f = _ function {
-        call_setup : _ mode {pair : {} : {symbol : ..} : eval@},
+        call_setup : _ mode {
+            pair : {} : {symbol : ..} : eval@
+        },
         code : (.p : .i) : .p ; pair.set_first .i,
     },
     a ; f 3,
@@ -176,7 +196,9 @@ _ do [
 =====
 repr
 -----
-_ function.represent _ function {code : (._ : .i) : .i}
+_ function.represent _ function {
+    code : (._ : .i) : .i
+}
 -----
 {code : (_ : i) : i}
 =====
@@ -188,7 +210,10 @@ _ function.represent not
 =====
 repr const
 -----
-_ function.represent _ function {code : (._ : .i) : .i, context_access : .constant}
+_ function.represent _ function {
+    code : (._ : .i) : .i,
+    context_access : .constant
+}
 -----
 {code : (_ : i) : i, context_access : constant}
 =====
@@ -201,7 +226,9 @@ _ function.represent ==
 repr composite
 -----
 _ do [
-    m = _ mode {pair : {} : eval@ : .},
+    m = _ mode {
+        pair : {} : eval@ : .
+    },
     repr = _ form. {
         id : f,
         code : (ctx : in) : in,
@@ -235,7 +262,10 @@ mutable
 =====
 access default
 -----
-_ do [f = _ function {}, f ; function.context_access .]
+_ do [
+    f = _ function {},
+    f ; function.context_access .
+]
 -----
 mutable
 =====
@@ -255,10 +285,14 @@ call setup 1
 -----
 _ do [
     f = _ function {
-        call_setup : _ mode {pair : {} : eval@ : form.},
+        call_setup : _ mode {
+            pair : {} : eval@ : form.
+        },
     },
     p1 = f ; function.call_setup .,
-    p2 = _ mode {pair : {} : eval@ : form.},
+    p2 = _ mode {
+        pair : {} : eval@ : form.
+    },
     p1 == p2
 ]
 -----
@@ -268,10 +302,14 @@ call setup 2
 -----
 _ do [
     f = _ function {
-        call_setup : _ mode {list : [eval@, form., .] : form.},
+        call_setup : _ mode {
+            list : [eval@, form., .] : form.
+        },
     },
     p1 = f ; function.call_setup .,
-    p2 = _ mode {list : [eval@, form., .] : form.},
+    p2 = _ mode {
+        list : [eval@, form., .] : form.
+    },
     p1 == p2
 ]
 -----
@@ -281,10 +319,14 @@ call setup 3
 -----
 _ do [
     f = _ function {
-        call_setup : _ mode {map : {a : eval@, b : .} : . : form.},
+        call_setup : _ mode {
+            map : {a : eval@, b : .} : . : form.
+        },
     },
     p1 = f ; function.call_setup .,
-    p2 = _ mode {map : {a : eval@, b : .} : . : form.},
+    p2 = _ mode {
+        map : {a : eval@, b : .} : . : form.
+    },
     p1 == p2
 ]
 -----
@@ -304,7 +346,10 @@ true
 =====
 is_primitive composite
 -----
-_ do [f = _ function {}, f ; function.is_primitive .]
+_ do [
+    f = _ function {},
+    f ; function.is_primitive .
+]
 -----
 false
 =====
@@ -316,21 +361,33 @@ bit.not
 =====
 id rename
 -----
-_ do [neg = not, neg ; function.id .]
+_ do [
+    neg = not,
+    neg ; function.id .
+]
 -----
 bit.not
 =====
 code
 -----
-_ do [f = _ function {code : (.ctx : .i) : .i}, f ; function.code .]
+_ do [
+    f = _ function {
+        code : (.ctx : .i) : .i
+    },
+    f ; function.code .
+]
 -----
 (ctx : i) : i
 =====
 ctx
 -----
 _ do [
-    ctx = _ context {a : . : 1},
-    f = _ function {context : ctx},
+    ctx = _ context {
+        a : . : 1
+    },
+    f = _ function {
+        context : ctx
+    },
     (f ; function.context .) == ctx
 ]
 -----

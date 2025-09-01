@@ -1,174 +1,262 @@
 == true
 -----
-_ do [a = _ any ., b = a, a == b]
+_ do [
+    a = _ any .,
+    b = a,
+    a == b
+]
 -----
 true
 =====
 any unit
 -----
-_ do [u = _ any unit, u ; type .]
+_ do [
+    u = _ any unit,
+    u ; type .
+]
 -----
 unit
 =====
 any bit
 -----
-_ do [b = _ any bit, b ; type .]
+_ do [
+    b = _ any bit,
+    b ; type .
+]
 -----
 bit
 =====
 any symbol
 -----
-_ do [s = _ any symbol, s ; type .]
+_ do [
+    s = _ any symbol,
+    s ; type .
+]
 -----
 symbol
 =====
 any text
 -----
-_ do [t = _ any text, t ; type .]
+_ do [
+    t = _ any text,
+    t ; type .
+]
 -----
 text
 =====
 any integer
 -----
-_ do [i = _ any integer, i ; type .]
+_ do [
+    i = _ any integer,
+    i ; type .
+]
 -----
 integer
 =====
 any number
 -----
-_ do [n = _ any number, n ; type .]
+_ do [
+    n = _ any number,
+    n ; type .
+]
 -----
 number
 =====
 any byte
 -----
-_ do [b = _ any byte, b ; type .]
+_ do [
+    b = _ any byte,
+    b ; type .
+]
 -----
 byte
 =====
 any pair
 -----
-_ do [p = _ any pair, p ; type .]
+_ do [
+    p = _ any pair,
+    p ; type .
+]
 -----
 pair
 =====
 any task
 -----
-_ do [c = _ any task, c ; type .]
+_ do [
+    c = _ any task,
+    c ; type .
+]
 -----
 task
 =====
 any list
 -----
-_ do [a = _ any list, a ; type .]
+_ do [
+    a = _ any list,
+    a ; type .
+]
 -----
 list
 =====
 any map
 -----
-_ do [a = _ any map, a ; type .]
+_ do [
+    a = _ any map,
+    a ; type .
+]
 -----
 map
 =====
 any link
 -----
-_ do [a = _ any link, a ; type .]
+_ do [
+    a = _ any link,
+    a ; type .
+]
 -----
 link
 =====
 any context
 -----
-_ do [c = _ any context, c ; type .]
+_ do [
+    c = _ any context,
+    c ; type .
+]
 -----
 context
 =====
 any function
 -----
-_ do [f = _ any function, f ; type .]
+_ do [
+    f = _ any function,
+    f ; type .
+]
 -----
 function
 =====
 type unit
 -----
-_ do [a = ., a ; type .]
+_ do [
+    a = .,
+    a ; type .
+]
 -----
 unit
 =====
 type bit
 -----
-_ do [a = true, a ; type .]
+_ do [
+    a = true,
+    a ; type .
+]
 -----
 bit
 =====
 type symbol
 -----
-_ do [a = .a, a ; type .]
+_ do [
+    a = .a,
+    a ; type .
+]
 -----
 symbol
 =====
 type text
 -----
-_ do [a = "", a ; type .]
+_ do [
+    a = "",
+    a ; type .
+]
 -----
 text
 =====
 type integer
 -----
-_ do [a = 1, a ; type .]
+_ do [
+    a = 1,
+    a ; type .
+]
 -----
 integer
 =====
 type number
 -----
-_ do [a = 1.0, a ; type .]
+_ do [
+    a = 1.0,
+    a ; type .
+]
 -----
 number
 =====
 type byte
 -----
-_ do [a = byte(ff), a ; type .]
+_ do [
+    a = byte(ff),
+    a ; type .
+]
 -----
 byte
 =====
 type pair
 -----
-_ do [a = 1 : 2, a ; type .]
+_ do [
+    a = 1 : 2,
+    a ; type .
+]
 -----
 pair
 =====
 type task
 -----
-_ do [a = _ form _ f a, a ; type .]
+_ do [
+    a = _ form _ f a,
+    a ; type .
+]
 -----
 task
 =====
 type list
 -----
-_ do [a = [], a ; type .]
+_ do [
+    a = [],
+    a ; type .
+]
 -----
 list
 =====
 type map
 -----
-_ do [a = {}, a ; type .]
+_ do [
+    a = {},
+    a ; type .
+]
 -----
 map
 =====
 type link
 -----
-_ do [a = _ link ., a ; type .]
+_ do [
+    a = _ link .,
+    a ; type .
+]
 -----
 link
 =====
 type context
 -----
-_ do [a = _ context {}, a ; type .]
+_ do [
+    a = _ context {},
+    a ; type .
+]
 -----
 context
 =====
 type function
 -----
-_ do [a = _ function {}, a ; type .]
+_ do [
+    a = _ function {},
+    a ; type .
+]
 -----
 function
 =====
@@ -240,19 +328,31 @@ true
 =====
 == link
 -----
-_ do [a = _ link ., b = a, a == b]
+_ do [
+    a = _ link .,
+    b = a,
+    a == b
+]
 -----
 true
 =====
 == context
 -----
-_ do [a = _ context {}, b = _ context {}, (a == b) and _ not a == .]
+_ do [
+    a = _ context {},
+    b = _ context {},
+    (a == b) and _ not a == .
+]
 -----
 true
 =====
 == function
 -----
-_ do [a = _ function {}, b = _ function {}, (a == b) and _ not a == .]
+_ do [
+    a = _ function {},
+    b = _ function {},
+    (a == b) and _ not a == .
+]
 -----
 true
 =====
@@ -270,25 +370,38 @@ false
 =====
 == ref val
 -----
-_ do [a = 1, a == 1]
+_ do [
+    a = 1,
+    a == 1
+]
 -----
 true
 =====
 == val ref
 -----
-_ do [a = 1, 1 == a]
+_ do [
+    a = 1,
+    1 == a
+]
 -----
 true
 =====
 == ref ref
 -----
-_ do [a = 1, b = 1, a == b]
+_ do [
+    a = 1,
+    b = 1,
+    a == b
+]
 -----
 true
 =====
 == same ref
 -----
-_ do [a = 1, a == a]
+_ do [
+    a = 1,
+    a == a
+]
 -----
 true
 =====
@@ -300,6 +413,9 @@ true
 =====
 == special ref
 -----
-_ do [..a = 1, @.a == 1]
+_ do [
+    ..a = 1,
+    @.a == 1
+]
 -----
 true

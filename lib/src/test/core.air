@@ -36,49 +36,74 @@ symbol literal special 3
 =====
 ctx ref
 -----
-_ do [a = 1, @a]
+_ do [
+    a = 1,
+    @a
+]
 -----
 1
 =====
 ref will not remove
 -----
-_ do [a = 1, @a, a]
+_ do [
+    a = 1,
+    @a,
+    a
+]
 -----
 1
 =====
 ref special
 -----
-_ do [..a = 1, @.a]
+_ do [
+    ..a = 1,
+    @.a
+]
 -----
 1
 =====
 pair ref
 -----
-_ do [p = 1 : 2, p ; do [first : second]]
+_ do [
+    p = 1 : 2,
+    p ; do [first : second]
+]
 -----
 1 : 2
 =====
 task ref
 -----
-_ do [t = _ form ctx ; func input, t ; do [context : function : input]]
+_ do [
+    t = _ form ctx ; func input,
+    t ; do [context : function : input]
+]
 -----
 ctx : func : input
 =====
 list ref
 -----
-_ do [l = [0, 3, 6], l ; do [@0 : @1 : @2]]
+_ do [
+    l = [0, 3, 6],
+    l ; do [@0 : @1 : @2]
+]
 -----
 0 : 3 : 6
 =====
 map ref
 -----
-_ do [m = {a : 1, b : 2}, m ; do [a : b]]
+_ do [
+    m = {a : 1, b : 2},
+    m ; do [a : b]
+]
 -----
 1 : 2
 =====
 eval
 -----
-_ do [a = _ form _ not true, $a]
+_ do [
+    a = _ form _ not true,
+    $a
+]
 -----
 false
 =====
@@ -108,72 +133,108 @@ true
 =====
 ctx unit
 -----
-_ do [a = 1, . ; apply .a]
+_ do [
+    a = 1,
+    . ; apply .a
+]
 -----
 1
 =====
 ctx ctx name
 -----
-_ do [p = 1 : 2, p ; pair.first .]
+_ do [
+    p = 1 : 2,
+    p ; pair.first .
+]
 -----
 1
 =====
 pair ctx first
 -----
-_ do [p = 1 : 2, p ; apply .first ; self .]
+_ do [
+    p = 1 : 2,
+    p ; apply .first ; self .
+]
 -----
 1
 =====
 pair ctx second
 -----
-_ do [p = 1 : 2, p ; apply .second ; self .]
+_ do [
+    p = 1 : 2,
+    p ; apply .second ; self .
+]
 -----
 2
 =====
 task ctx func
 -----
-_ do [t = _ form ctx ; func input, t ; apply .function ; self .]
+_ do [
+    t = _ form ctx ; func input,
+    t ; apply .function ; self .
+]
 -----
 func
 =====
 task ctx ctx
 -----
-_ do [t = _ form ctx ; func input, t ; apply .context ; self .]
+_ do [
+    t = _ form ctx ; func input,
+    t ; apply .context ; self .
+]
 -----
 ctx
 =====
 task ctx input
 -----
-_ do [t = _ form ctx ; func input, t ; apply .input ; self .]
+_ do [
+    t = _ form ctx ; func input,
+    t ; apply .input ; self .
+]
 -----
 input
 =====
 list ctx index int
 -----
-_ do [l = [0, 2, 4], l ; apply 1 ; self .]
+_ do [
+    l = [0, 2, 4],
+    l ; apply 1 ; self .
+]
 -----
 2
 =====
 list ctx index symbol
 -----
-_ do [l = [0, 2, 4], l ; apply .1 ; self .]
+_ do [
+    l = [0, 2, 4],
+    l ; apply .1 ; self .
+]
 -----
 2
 =====
 map ctx key
 -----
-_ do [m = {a : 1, b : 2}, m ; apply .a ; self .]
+_ do [
+    m = {a : 1, b : 2},
+    m ; apply .a ; self .
+]
 -----
 1
 =====
 map ctx key .
 -----
-_ do [m = {a : 1, b : 2}, m ; apply . ; self .]
+_ do [
+    m = {a : 1, b : 2},
+    m ; apply . ; self .
+]
 -----
 {a : 1, b : 2}
 =====
 map ctx key other
 -----
-_ do [m = {1 : 2, 2 : 4}, m ; apply 1 ; self .]
+_ do [
+    m = {1 : 2, 2 : 4},
+    m ; apply 1 ; self .
+]
 -----
 2

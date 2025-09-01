@@ -78,6 +78,9 @@ _ task.apply _ form@ 1 + 1
 =====
 apply mut
 -----
-_ do [_ task.apply _ form@ .a = 1, a]
+_ do [
+    _ task.apply _ form@ .a = 1,
+    a
+]
 -----
 1
