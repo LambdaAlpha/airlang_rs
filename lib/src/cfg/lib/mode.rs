@@ -11,8 +11,10 @@ use crate::cfg::CfgMod;
 
 _____!();
 
+use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Library;
+use super::MutImpl;
 use super::ctx_put_func;
 use super::free_impl;
 use super::mode::repr::EVAL_EVAL;
@@ -24,8 +26,10 @@ use super::mode::repr::FORM_ID;
 use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_REF;
 use super::mode::repr::parse;
+use crate::cfg::lib::setup::dyn_mode;
 use crate::cfg::lib::setup::free_mode;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -48,6 +52,7 @@ pub struct ModeLib {
     pub eval_literal: MutPrimFuncVal,
     pub eval_ref: MutPrimFuncVal,
     pub eval_eval: MutPrimFuncVal,
+    pub apply: MutPrimFuncVal,
 }
 
 impl Default for ModeLib {
@@ -62,6 +67,7 @@ impl Default for ModeLib {
             eval_id: eval_id(),
             eval_ref: eval_ref(),
             eval_eval: eval_eval(),
+            apply: apply(),
         }
     }
 }
@@ -83,6 +89,7 @@ impl CfgMod for ModeLib {
         );
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_REF), Val::Func(self.eval_ref.into()));
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_EVAL), Val::Func(self.eval_eval.into()));
+        self.apply.extend(cfg);
     }
 }
 
@@ -97,6 +104,7 @@ impl Library for ModeLib {
         ctx_put_func(ctx, EVAL_LITERAL, &self.eval_literal);
         ctx_put_func(ctx, EVAL_REF, &self.eval_ref);
         ctx_put_func(ctx, EVAL_EVAL, &self.eval_eval);
+        self.apply.prelude(ctx);
     }
 }
 
@@ -155,6 +163,27 @@ pub fn eval_ref() -> MutPrimFuncVal {
 pub fn eval_eval() -> MutPrimFuncVal {
     let mode = FuncMode::prim_mode(SymbolMode::Eval, TaskPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
+}
+
+pub fn apply() -> MutPrimFuncVal {
+    DynPrimFn {
+        id: "apply",
+        f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
+        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
+    }
+    .mut_()
+}
+
+fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {
+    Eval.free_call(cfg, input)
+}
+
+fn fn_eval_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    Eval.const_call(cfg, ctx, input)
+}
+
+fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    Eval.mut_call(cfg, ctx, input)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

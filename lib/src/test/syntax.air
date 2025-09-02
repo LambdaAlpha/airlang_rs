@@ -9,13 +9,13 @@ _ do [
     i = 3 + (_ any integer) % 4,
     a = atom ; get i,
     (_ any bit) loop [
-        (_ any bit) ? [
+        (_ any bit) test [
             i = 3 + (_ any integer) % 4,
             b = atom ; get i,
             i = (4 + (_ any integer) % 4) % 4,
-            a = (_ any bit) ? [a : b] : [_ form@ _ a b],
+            a = (_ any bit) test [a : b] : [_ form@ _ a b],
         ] : [
-            (_ any bit) ? [
+            (_ any bit) test [
                 i = 3 + (_ any integer) % 4,
                 b = atom ; get i,
                 a = [a, b],

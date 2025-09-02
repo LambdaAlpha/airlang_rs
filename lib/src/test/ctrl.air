@@ -114,29 +114,29 @@ _ do [
 -----
 []
 =====
-? true
+test true
 -----
-true ? [1] : [2]
+true test [1] : [2]
 -----
 1
 =====
-? false
+test false
 -----
-false ? [1] : [2]
+false test [1] : [2]
 -----
 2
 =====
-? else .
+test else .
 -----
-true ? [1] : []
+true test [1] : []
 -----
 1
 =====
-? conditional eval
+test conditional eval
 -----
 _ do [
     a = 1,
-    true ? [
+    true test [
         1
     ] : [
         a = 2
@@ -146,19 +146,19 @@ _ do [
 -----
 1
 =====
-? recursive
+test recursive
 -----
-true ? [
-    false ? [1] : [2]
+true test [
+    false test [1] : [2]
 ] : [
     3
 ]
 -----
 2
 =====
-? return
+test return
 -----
-true ? [
+true test [
     1,
     true .return 2,
     3
@@ -168,9 +168,9 @@ true ? [
 -----
 2
 =====
-? return
+test return
 -----
-true ? [
+true test [
     1,
     true .return 2,
     3
@@ -180,9 +180,9 @@ true ? [
 -----
 2
 =====
-? list
+test list
 -----
-true ? [
+true test [
     []
 ] : [
 ]
@@ -433,14 +433,14 @@ _ do [
 -----
 6
 =====
-loop ?
+loop test
 -----
 _ do [
     <> = _ import .integer.less_greater,
     a = 42,
     b = 24,
     (a <> b) loop [
-        (a > b) ? [
+        (a > b) test [
             a = a - b
         ] : [
             b = b - a
@@ -480,11 +480,11 @@ _ do [
 -----
 6
 =====
-for list
+iterate list
 -----
 _ do [
     sum = 0,
-    [1, 2, 3, 4, 5] for i : [
+    [1, 2, 3, 4, 5] iterate i : [
         sum = sum + i
     ],
     sum
@@ -492,11 +492,11 @@ _ do [
 -----
 15
 =====
-for empty list
+iterate empty list
 -----
 _ do [
     sum = 0,
-    [] for i : [
+    [] iterate i : [
         sum = sum + i
     ],
     sum
@@ -504,18 +504,18 @@ _ do [
 -----
 0
 =====
-for return 1
+iterate return 1
 -----
-[1, 2, 3, 4, 5] for i : [
+[1, 2, 3, 4, 5] iterate i : [
     (i == 3) .return true
 ]
 -----
 true
 =====
-for return 2
+iterate return 2
 -----
 _ do [
-    [1, 2, 3, 4, 5] for i : [
+    [1, 2, 3, 4, 5] iterate i : [
         (i == 3) .return .,
         a = i
     ],
@@ -524,12 +524,12 @@ _ do [
 -----
 2
 =====
-for continue
+iterate continue
 -----
 _ do [
     a = 0,
     b = 0,
-    [1, 2, 3, 4, 5] for i : [
+    [1, 2, 3, 4, 5] iterate i : [
         a = a + i,
         (i == 3) .continue .,
         b = b + i
@@ -539,12 +539,12 @@ _ do [
 -----
 15 : 12
 =====
-for list map
+iterate list map
 -----
 _ do [
     push = _ import .list.push,
     a = [],
-    [1, 2, 3, 4, 5] for i : [
+    [1, 2, 3, 4, 5] iterate i : [
         a ; push i + 1
     ],
     a
@@ -552,11 +552,11 @@ _ do [
 -----
 [2, 3, 4, 5, 6]
 =====
-for integer
+iterate integer
 -----
 _ do [
     sum = 0,
-    10 for i : [
+    10 iterate i : [
         sum = sum + i
     ],
     sum
@@ -564,11 +564,11 @@ _ do [
 -----
 45
 =====
-for integer 0
+iterate integer 0
 -----
 _ do [
     sum = 0,
-    0 for i : [
+    0 iterate i : [
         sum = sum + i
     ],
     sum
@@ -576,18 +576,18 @@ _ do [
 -----
 0
 =====
-for integer negative
+iterate integer negative
 -----
-0-1 for i : []
+0-1 iterate i : []
 -----
 .
 =====
-for byte
+iterate byte
 -----
 _ do [
     push = _ import .list.push,
     b = [],
-    byte(1122334455) for i : [
+    byte(1122334455) iterate i : [
         b ; push i
     ],
     b
@@ -595,12 +595,12 @@ _ do [
 -----
 [byte(11), byte(22), byte(33), byte(44), byte(55)]
 =====
-for symbol
+iterate symbol
 -----
 _ do [
     push = _ import .list.push,
     s = [],
-    .abc for i : [
+    .abc iterate i : [
         s ; push i
     ],
     s
@@ -608,12 +608,12 @@ _ do [
 -----
 [a, b, c]
 =====
-for text
+iterate text
 -----
 _ do [
     push = _ import .list.push,
     t = [],
-    "hello" for i : [
+    "hello" iterate i : [
         t ; push i
     ],
     t
@@ -621,13 +621,13 @@ _ do [
 -----
 ["h", "e", "l", "l", "o"]
 =====
-for map
+iterate map
 -----
 _ do [
     push = _ import .list.push,
     new_map = _ import .map.new,
     kv = [],
-    {1 : 2, 3 : 4} for i : [
+    {1 : 2, 3 : 4} iterate i : [
         kv ; push i
     ],
     _ new_map kv

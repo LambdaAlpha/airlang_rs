@@ -80,7 +80,7 @@ _ do [
     b = _ any list,
     lb = b ; length .,
     (lb == 0) .return true,
-    (la < lb) ? [
+    (la < lb) test [
         t = a,
         a = b,
         b = t,
@@ -90,7 +90,7 @@ _ do [
     ] : [],
     a1 = a,
     d = la - lb,
-    i = (d == 0) ? [0] : [(d + (_ any integer) % d) % d],
+    i = (d == 0) test [0] : [(d + (_ any integer) % d) % d],
     c1 = a ; get_many i : i + lb,
     c2 = a ; set_many i : b,
     b1 = a ; get_many i : i + lb,

@@ -5,7 +5,7 @@ _ do [
     f = _ function {
         code : .n : _ do [
             .sum = 0,
-            .n for .i : [
+            .n iterate .i : [
                 (0 == .i % 3) ..continue .,
                 .sum = .sum + .i,
             ],

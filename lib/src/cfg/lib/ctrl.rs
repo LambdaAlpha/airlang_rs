@@ -8,7 +8,7 @@ use num_traits::ToPrimitive;
 use super::DynPrimFn;
 use super::FuncMode;
 use super::Library;
-use super::MutImpl;
+use super::ctx_put_func;
 use super::mode::PrimMode;
 use super::mode::SymbolMode;
 use super::mode::TaskPrimMode;
@@ -23,15 +23,12 @@ use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::ConstFn;
-use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
-use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
@@ -43,24 +40,22 @@ use crate::type_::Text;
 #[derive(Clone)]
 pub struct CtrlLib {
     pub do_: MutPrimFuncVal,
-    pub if_: MutPrimFuncVal,
+    pub test: MutPrimFuncVal,
     pub switch: MutPrimFuncVal,
     pub match_: MutPrimFuncVal,
     pub loop_: MutPrimFuncVal,
-    pub for_: MutPrimFuncVal,
-    pub apply: MutPrimFuncVal,
+    pub iterate: MutPrimFuncVal,
 }
 
 impl Default for CtrlLib {
     fn default() -> Self {
         CtrlLib {
             do_: do_(),
-            if_: if_(),
+            test: test(),
             switch: switch(),
             match_: match_(),
             loop_: loop_(),
-            for_: for_(),
-            apply: apply(),
+            iterate: iterate(),
         }
     }
 }
@@ -68,24 +63,22 @@ impl Default for CtrlLib {
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
         self.do_.extend(cfg);
-        self.if_.extend(cfg);
+        self.test.extend(cfg);
         self.switch.extend(cfg);
         self.match_.extend(cfg);
         self.loop_.extend(cfg);
-        self.for_.extend(cfg);
-        self.apply.extend(cfg);
+        self.iterate.extend(cfg);
     }
 }
 
 impl Library for CtrlLib {
     fn prelude(&self, ctx: &mut Ctx) {
-        self.do_.prelude(ctx);
-        self.if_.prelude(ctx);
-        self.switch.prelude(ctx);
-        self.match_.prelude(ctx);
-        self.loop_.prelude(ctx);
-        self.for_.prelude(ctx);
-        self.apply.prelude(ctx);
+        ctx_put_func(ctx, "do", &self.do_);
+        ctx_put_func(ctx, "test", &self.test);
+        ctx_put_func(ctx, "switch", &self.switch);
+        ctx_put_func(ctx, "match", &self.match_);
+        ctx_put_func(ctx, "loop", &self.loop_);
+        ctx_put_func(ctx, "iterate", &self.iterate);
     }
 }
 
@@ -187,7 +180,7 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { id: "do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+    DynPrimFn { id: "control.do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -197,24 +190,25 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     block.eval(cfg, ctx)
 }
 
-pub fn if_() -> MutPrimFuncVal {
-    DynPrimFn { id: "?", f: mut_impl(fn_if), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+pub fn test() -> MutPrimFuncVal {
+    DynPrimFn { id: "control.test", f: mut_impl(fn_test), mode: dyn_mode(FuncMode::id_mode()) }
+        .mut_()
 }
 
-fn fn_if(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let Some(if_) = If::parse(input) else {
+fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Some(test) = Test::parse(input) else {
         return Val::default();
     };
-    if_.eval(cfg, ctx)
+    test.eval(cfg, ctx)
 }
 
-struct If {
+struct Test {
     condition: Val,
     branch_then: Block,
     branch_else: Block,
 }
 
-impl If {
+impl Test {
     fn parse(input: Val) -> Option<Self> {
         let Val::Pair(pair) = input else {
             error!("input {input:?} should be a pair");
@@ -229,7 +223,7 @@ impl If {
         let branches = Pair::from(branches);
         let branch_then = Block::parse(branches.first)?;
         let branch_else = Block::parse(branches.second)?;
-        Some(If { condition, branch_then, branch_else })
+        Some(Test { condition, branch_then, branch_else })
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
@@ -244,7 +238,8 @@ impl If {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { id: "switch", f: mut_impl(fn_switch), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+    DynPrimFn { id: "control.switch", f: mut_impl(fn_switch), mode: dyn_mode(FuncMode::id_mode()) }
+        .mut_()
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -304,7 +299,8 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { id: "match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+    DynPrimFn { id: "control.match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }
+        .mut_()
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -369,7 +365,8 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { id: "loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+    DynPrimFn { id: "control.loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }
+        .mut_()
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -417,24 +414,29 @@ impl Loop {
     }
 }
 
-pub fn for_() -> MutPrimFuncVal {
-    DynPrimFn { id: "for", f: mut_impl(fn_for), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+pub fn iterate() -> MutPrimFuncVal {
+    DynPrimFn {
+        id: "control.iterate",
+        f: mut_impl(fn_iterate),
+        mode: dyn_mode(FuncMode::id_mode()),
+    }
+    .mut_()
 }
 
-fn fn_for(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let Some(for_) = For::parse(input) else {
+fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Some(iterate) = Iterate::parse(input) else {
         return Val::default();
     };
-    for_.eval(cfg, ctx)
+    iterate.eval(cfg, ctx)
 }
 
-struct For {
+struct Iterate {
     val: Val,
     name: Symbol,
     body: Block,
 }
 
-impl For {
+impl Iterate {
     fn parse(input: Val) -> Option<Self> {
         let Val::Pair(pair) = input else {
             error!("input {input:?} should be a pair");
@@ -469,33 +471,33 @@ impl For {
                     let i = Int::from(i);
                     Val::Int(i.into())
                 });
-                for_iter(cfg, ctx, self.body, self.name, iter)
+                iterate_val(cfg, ctx, self.body, self.name, iter)
             }
             Val::Byte(byte) => {
                 let iter = byte.iter().map(|byte| {
                     let byte = Byte::from(vec![*byte]);
                     Val::Byte(byte.into())
                 });
-                for_iter(cfg, ctx, self.body, self.name, iter)
+                iterate_val(cfg, ctx, self.body, self.name, iter)
             }
             Val::Symbol(s) => {
                 let iter = s.char_indices().map(|(start, c)| {
                     let symbol = Symbol::from_str_unchecked(&s[start .. start + c.len_utf8()]);
                     Val::Symbol(symbol)
                 });
-                for_iter(cfg, ctx, self.body, self.name, iter)
+                iterate_val(cfg, ctx, self.body, self.name, iter)
             }
             Val::Text(t) => {
                 let iter = t.chars().map(|c| {
                     let text = Text::from(c.to_string());
                     Val::Text(text.into())
                 });
-                for_iter(cfg, ctx, self.body, self.name, iter)
+                iterate_val(cfg, ctx, self.body, self.name, iter)
             }
             Val::List(list) => {
                 let list = List::from(list);
                 let iter = list.into_iter();
-                for_iter(cfg, ctx, self.body, self.name, iter)
+                iterate_val(cfg, ctx, self.body, self.name, iter)
             }
             Val::Map(map) => {
                 let map = Map::from(map);
@@ -503,14 +505,14 @@ impl For {
                     let pair = Pair::new(pair.0, pair.1);
                     Val::Pair(pair.into())
                 });
-                for_iter(cfg, ctx, self.body, self.name, iter)
+                iterate_val(cfg, ctx, self.body, self.name, iter)
             }
             _ => Val::default(),
         }
     }
 }
 
-fn for_iter<ValIter>(
+fn iterate_val<ValIter>(
     cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Symbol, values: ValIter,
 ) -> Val
 where ValIter: Iterator<Item = Val> {
@@ -524,25 +526,4 @@ where ValIter: Iterator<Item = Val> {
         }
     }
     Val::default()
-}
-
-pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "apply",
-        f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
-        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
-    }
-    .mut_()
-}
-
-fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {
-    Eval.free_call(cfg, input)
-}
-
-fn fn_eval_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    Eval.const_call(cfg, ctx, input)
-}
-
-fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    Eval.mut_call(cfg, ctx, input)
 }

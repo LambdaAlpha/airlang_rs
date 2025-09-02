@@ -4,7 +4,7 @@ _ do [
     x = 42,
     y = 24,
     (x <> y) loop [
-        (x > y) ? [
+        (x > y) test [
             x = x - y
         ] : [
             y = y - x

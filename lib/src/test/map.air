@@ -8,7 +8,7 @@ _ do [
     l1 = a ; length .,
     k = _ any .,
     v = _ any .,
-    i = (a ; contain k) ? [0] : [1],
+    i = (a ; contain k) test [0] : [1],
     a ; set k : v,
     l2 = a ; length .,
     l2 == l1 + i
@@ -97,7 +97,7 @@ _ do [
     b1 = _ multiset a1 ; values .,
     a2 = {},
     i = 0,
-    a1 for kv : [
+    a1 iterate kv : [
         a2 ; set i : kv ; second .,
         i = i + 1,
     ],
