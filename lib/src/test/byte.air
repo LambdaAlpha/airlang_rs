@@ -4,9 +4,9 @@ _ do [
     length = _ import .byte.length,
     push = _ import .byte.push,
     b = _ any byte,
-    l = b ; length .,
-    b ; push byte(00),
-    l1 = b ; length .,
+    l = b which _ length .,
+    b which _ push byte(00),
+    l1 = b which _ length .,
     l1 == l + 1
 ]
 -----
@@ -18,11 +18,11 @@ _ do [
     length = _ import .byte.length,
     join = _ import .byte.join,
     a = _ any byte,
-    la = a ; length .,
+    la = a which _ length .,
     b = _ any byte,
-    lb = b ; length .,
+    lb = b which _ length .,
     ab = . join [a, b],
-    lab = ab ; length .,
+    lab = ab which _ length .,
     lab == la + lb
 ]
 -----
@@ -33,7 +33,7 @@ length empty
 _ do [
     length = _ import .byte.length,
     b = byte(),
-    b ; length .
+    b which _ length .
 ]
 -----
 0
@@ -43,7 +43,7 @@ length else
 _ do [
     length = _ import .byte.length,
     b = byte(ff),
-    b ; length .
+    b which _ length .
 ]
 -----
 1
@@ -56,7 +56,7 @@ _ do [
     a = _ any byte,
     b = _ any byte,
     ab = a,
-    ab ; push b,
+    ab which _ push b,
     ab1 = . join [a, b],
     ab == ab1
 ]
@@ -69,7 +69,7 @@ _ do [
     push = _ import .byte.push,
     a = byte(00),
     b = byte(1122),
-    a ; push b,
+    a which _ push b,
     a
 ]
 -----

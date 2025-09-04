@@ -1,24 +1,22 @@
+use super::DynPrimFn;
+use super::FreePrimFn;
+use super::Library;
+use super::MutImpl;
+use super::ctx_put_func;
+use super::free_impl;
+use super::mode::repr::EVAL_EVAL;
+use super::mode::repr::EVAL_ID;
+use super::mode::repr::EVAL_LITERAL;
+use super::mode::repr::EVAL_REF;
+use super::mode::repr::FORM_EVAL;
+use super::mode::repr::FORM_ID;
+use super::mode::repr::FORM_LITERAL;
+use super::mode::repr::FORM_REF;
+use super::mode::repr::parse;
 use crate::cfg::CfgMod;
-use crate::cfg::lib::DynPrimFn;
-use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::Library;
-use crate::cfg::lib::MutImpl;
-use crate::cfg::lib::ctx_put_func;
-use crate::cfg::lib::free_impl;
-use crate::cfg::lib::mode::repr::EVAL_EVAL;
-use crate::cfg::lib::mode::repr::EVAL_ID;
-use crate::cfg::lib::mode::repr::EVAL_LITERAL;
-use crate::cfg::lib::mode::repr::EVAL_REF;
-use crate::cfg::lib::mode::repr::FORM_EVAL;
-use crate::cfg::lib::mode::repr::FORM_ID;
-use crate::cfg::lib::mode::repr::FORM_LITERAL;
-use crate::cfg::lib::mode::repr::FORM_REF;
-use crate::cfg::lib::mode::repr::parse;
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskPrimMode;
-use crate::cfg::mode::dyn_mode;
-use crate::cfg::mode::free_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
@@ -102,7 +100,7 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn {
         id: "mode",
         f: free_impl(fn_new),
-        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form)),
+        mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
     }
     .free()
 }
@@ -116,42 +114,42 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn form_id() -> FreePrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Id, TaskPrimMode::Form);
+    let mode = FuncMode::prim_mode(SymbolMode::Id, CallPrimMode::Form);
     FuncMode::mode_into_free_func(mode)
 }
 
 pub fn form_literal() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form);
+    let mode = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
     FuncMode::mode_into_mut_func(mode)
 }
 
 pub fn form_ref() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form);
+    let mode = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form);
     FuncMode::mode_into_mut_func(mode)
 }
 
 pub fn form_eval() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Eval, TaskPrimMode::Form);
+    let mode = FuncMode::prim_mode(SymbolMode::Eval, CallPrimMode::Form);
     FuncMode::mode_into_mut_func(mode)
 }
 
 pub fn eval_id() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Id, TaskPrimMode::Eval);
+    let mode = FuncMode::prim_mode(SymbolMode::Id, CallPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
 pub fn eval_literal() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Eval);
+    let mode = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
 pub fn eval_ref() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Eval);
+    let mode = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
 pub fn eval_eval() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Eval, TaskPrimMode::Eval);
+    let mode = FuncMode::prim_mode(SymbolMode::Eval, CallPrimMode::Eval);
     FuncMode::mode_into_mut_func(mode)
 }
 
@@ -159,7 +157,7 @@ pub fn apply() -> MutPrimFuncVal {
     DynPrimFn {
         id: "apply",
         f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
-        mode: dyn_mode(FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form)),
+        mode: FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form),
     }
     .mut_()
 }

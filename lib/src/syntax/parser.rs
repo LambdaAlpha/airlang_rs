@@ -36,7 +36,6 @@ use winnow::token::one_of;
 use winnow::token::take_while;
 
 use super::BYTE;
-use super::CALL;
 use super::COMMENT;
 use super::Direction;
 use super::FALSE;
@@ -53,24 +52,21 @@ use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
-use super::SOLVE;
 use super::SPACE;
 use super::SYMBOL_QUOTE;
-use super::TASK;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
 use super::is_delimiter;
-use crate::type_::Action;
 use crate::type_::Bit;
 use crate::type_::Byte;
+use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils::conversion::bin_str_to_vec_u8;
@@ -85,7 +81,7 @@ pub trait ParseRepr:
     + From<Number>
     + From<Byte>
     + From<Pair<Self, Self>>
-    + From<Task<Self, Self, Self>>
+    + From<Call<Self, Self>>
     + From<List<Self>>
     + Eq
     + Hash
@@ -96,17 +92,11 @@ pub trait ParseRepr:
 #[derive(Default, Copy, Clone, PartialEq, Eq)]
 struct ParseCtx {
     direction: Direction,
-    action: Action,
 }
 
 impl ParseCtx {
     fn direction(mut self, direction: Direction) -> Self {
         self.direction = direction;
-        self
-    }
-
-    fn action(mut self, action: Action) -> Self {
-        self.action = action;
         self
     }
 }
@@ -321,8 +311,6 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
             INT => int.map(T::from).parse_next(i),
             NUMBER => number.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
-            CALL => scope(ctx.action(Action::Call)).parse_next(i),
-            SOLVE => scope(ctx.action(Action::Solve)).parse_next(i),
             LEFT => scope(ctx.direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.direction(Direction::Right)).parse_next(i),
             _ => cut_err(fail.context(label("prefix token"))).parse_next(i),
@@ -382,8 +370,9 @@ fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<
     }
 }
 
+#[allow(clippy::single_match_else)]
 fn compose_one<'a, T: ParseRepr>(
-    ctx: ParseCtx, i: &mut &'a str, next: &mut dyn Parser<&'a str, Token<T>, E>,
+    ctx: ParseCtx, i: &mut &'a str, _next: &mut dyn Parser<&'a str, Token<T>, E>,
     last: &mut dyn Parser<&'a str, Token<T>, E>, left: Token<T>, func: Token<T>,
 ) -> ModalResult<Token<T>> {
     let repr = match func {
@@ -391,24 +380,6 @@ fn compose_one<'a, T: ParseRepr>(
             PAIR => {
                 let right = last.parse_next(i)?;
                 T::from(Pair::new(left.into_repr(), right.into_repr()))
-            }
-            TASK => {
-                let next_token = next.parse_next(i)?;
-                let (func, input) = match next_token {
-                    Token::Unquote(s) if *s == *COMMENT => {
-                        let left = next.parse_next(i)?;
-                        let func = next.parse_next(i)?;
-                        let right = last.parse_next(i)?;
-                        (func.into_repr(), left_right(left, right))
-                    }
-                    func => {
-                        let input = last.parse_next(i)?;
-                        (func.into_repr(), input.into_repr())
-                    }
-                };
-                let action = ctx.action;
-                let ctx = left.into_repr();
-                T::from(Task { action, func, ctx, input })
             }
             _ => {
                 let right = last.parse_next(i)?;
@@ -423,9 +394,9 @@ fn compose_one<'a, T: ParseRepr>(
     Ok(Token::Default(repr))
 }
 
-fn infix<T: ParseRepr>(ctx: ParseCtx, left: Token<T>, func: T, right: Token<T>) -> T {
+fn infix<T: ParseRepr>(_ctx: ParseCtx, left: Token<T>, func: T, right: Token<T>) -> T {
     let input = left_right(left, right);
-    T::from(Task { action: ctx.action, func, ctx: T::from(Unit), input })
+    T::from(Call { func, input })
 }
 
 fn left_right<T: ParseRepr>(left: Token<T>, right: Token<T>) -> T {

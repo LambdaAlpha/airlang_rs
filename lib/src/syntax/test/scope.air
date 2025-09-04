@@ -57,19 +57,3 @@ right ctx + list
 right ctx + map
 -----
 >({(a b c d e) : f g h i j})
-=====
-call ctx
------
-call(a b c d e)
-=====
-solve ctx
------
-solve(a b c d e)
-=====
-solve call
------
-solve(a b call(c d e))
-=====
-ctx solve call
------
-solve(a ; f call(b c d))

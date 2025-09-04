@@ -2,23 +2,23 @@ use log::error;
 
 use crate::cfg::utils::symbol;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
-use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
+use crate::type_::Call;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Unit;
 
 pub(in crate::cfg) enum Pattern {
     Any(Symbol),
     Val(Val),
     Pair(Box<Pair<Pattern, Pattern>>),
-    Task(Box<Task<Pattern, Pattern, Pattern>>),
+    Call(Box<Call<Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Val, Pattern>),
 }
@@ -34,7 +34,7 @@ impl PatternParse for Val {
             Val::Pair(pair) => pair.parse(),
             Val::List(list) => list.parse(),
             Val::Map(map) => map.parse(),
-            Val::Task(task) => task.parse(),
+            Val::Call(call) => call.parse(),
             val => Some(Pattern::Val(val)),
         }
     }
@@ -63,13 +63,12 @@ impl PatternParse for PairVal {
     }
 }
 
-impl PatternParse for TaskVal {
+impl PatternParse for CallVal {
     fn parse(self) -> Option<Pattern> {
-        let task = Task::from(self);
-        let func = task.func.parse()?;
-        let ctx = task.ctx.parse()?;
-        let input = task.input.parse()?;
-        Some(Pattern::Task(Box::new(Task { action: task.action, func, ctx, input })))
+        let call = Call::from(self);
+        let func = call.func.parse()?;
+        let input = call.input.parse()?;
+        Some(Pattern::Call(Box::new(Call { func, input })))
     }
 }
 
@@ -100,7 +99,7 @@ impl PatternMatch<Val> for Pattern {
             Pattern::Any(name) => name.match_(val),
             Pattern::Val(expected) => expected.match_(val),
             Pattern::Pair(pair) => pair.match_(val),
-            Pattern::Task(task) => task.match_(val),
+            Pattern::Call(call) => call.match_(val),
             Pattern::List(list) => list.match_(val),
             Pattern::Map(map) => map.match_(val),
         }
@@ -131,16 +130,15 @@ impl PatternMatch<Val> for Pair<Pattern, Pattern> {
     }
 }
 
-impl PatternMatch<Val> for Task<Pattern, Pattern, Pattern> {
+impl PatternMatch<Val> for Call<Pattern, Pattern> {
     fn match_(&self, val: &Val) -> bool {
-        let Val::Task(val) = val else {
-            error!("{val:?} should be a task");
+        let Val::Call(val) = val else {
+            error!("{val:?} should be a call");
             return false;
         };
         let func = self.func.match_(&val.func);
-        let ctx = self.ctx.match_(&val.ctx);
         let input = self.input.match_(&val.input);
-        func && ctx && input
+        func && input
     }
 }
 
@@ -181,7 +179,7 @@ impl PatternAssign<Val, Val> for Pattern {
             Pattern::Any(name) => name.assign(ctx, val),
             Pattern::Val(expected) => expected.assign(ctx, val),
             Pattern::Pair(pair) => pair.assign(ctx, val),
-            Pattern::Task(task) => task.assign(ctx, val),
+            Pattern::Call(call) => call.assign(ctx, val),
             Pattern::List(list) => list.assign(ctx, val),
             Pattern::Map(map) => map.assign(ctx, val),
         }
@@ -213,21 +211,16 @@ impl PatternAssign<Val, Val> for Pair<Pattern, Pattern> {
     }
 }
 
-impl PatternAssign<Val, Val> for Task<Pattern, Pattern, Pattern> {
+impl PatternAssign<Val, Val> for Call<Pattern, Pattern> {
     fn assign(self, c: &mut Val, val: Val) -> Val {
-        let Val::Task(val) = val else {
-            error!("{val:?} should be a task");
+        let Val::Call(val) = val else {
+            error!("{val:?} should be a call");
             return Val::default();
         };
-        if self.action != val.action {
-            error!("action should be equal");
-            return Val::default();
-        }
-        let val = Task::from(val);
+        let val = Call::from(val);
         let func = self.func.assign(c, val.func);
-        let ctx = self.ctx.assign(c, val.ctx);
         let input = self.input.assign(c, val.input);
-        Val::Task(Task { action: val.action, func, ctx, input }.into())
+        Val::Call(Call { func, input }.into())
     }
 }
 

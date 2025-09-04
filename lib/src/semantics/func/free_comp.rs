@@ -1,9 +1,9 @@
 use super::FreeFn;
+use super::Setup;
 use super::comp::FreeComposite;
-use super::setup::Setup;
-use super::setup::impl_setup;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
+use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
@@ -12,7 +12,7 @@ pub struct FreeCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: FreeComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: Setup,
+    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for FreeCompFunc {
@@ -21,4 +21,8 @@ impl FreeFn<Cfg, Val, Val> for FreeCompFunc {
     }
 }
 
-impl_setup!(FreeCompFunc);
+impl Setup for FreeCompFunc {
+    fn setup(&self) -> Option<&FuncVal> {
+        self.setup.as_ref()
+    }
+}

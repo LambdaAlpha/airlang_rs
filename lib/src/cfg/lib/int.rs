@@ -5,7 +5,7 @@ use super::Library;
 use super::ctx_put_func;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_free_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -76,7 +76,7 @@ impl Library for IntLib {
 }
 
 pub fn add() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.add", f: free_impl(fn_add), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.add", f: free_impl(fn_add), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_add(_cfg: &mut Cfg, input: Val) -> Val {
@@ -99,7 +99,7 @@ fn fn_add(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn subtract() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.subtract", f: free_impl(fn_subtract), mode: default_free_mode() }
+    FreePrimFn { id: "integer.subtract", f: free_impl(fn_subtract), mode: FuncMode::default_mode() }
         .free()
 }
 
@@ -123,7 +123,7 @@ fn fn_subtract(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn multiply() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.multiply", f: free_impl(fn_multiply), mode: default_free_mode() }
+    FreePrimFn { id: "integer.multiply", f: free_impl(fn_multiply), mode: FuncMode::default_mode() }
         .free()
 }
 
@@ -147,7 +147,8 @@ fn fn_multiply(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn divide() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.divide", f: free_impl(fn_divide), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.divide", f: free_impl(fn_divide), mode: FuncMode::default_mode() }
+        .free()
 }
 
 fn fn_divide(_cfg: &mut Cfg, input: Val) -> Val {
@@ -173,8 +174,12 @@ fn fn_divide(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn remainder() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.remainder", f: free_impl(fn_remainder), mode: default_free_mode() }
-        .free()
+    FreePrimFn {
+        id: "integer.remainder",
+        f: free_impl(fn_remainder),
+        mode: FuncMode::default_mode(),
+    }
+    .free()
 }
 
 fn fn_remainder(_cfg: &mut Cfg, input: Val) -> Val {
@@ -203,7 +208,7 @@ pub fn divide_remainder() -> FreePrimFuncVal {
     FreePrimFn {
         id: "integer.divide_remainder",
         f: free_impl(fn_divide_remainder),
-        mode: default_free_mode(),
+        mode: FuncMode::default_mode(),
     }
     .free()
 }
@@ -231,7 +236,8 @@ fn fn_divide_remainder(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_than() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.less", f: free_impl(fn_less_than), mode: default_free_mode() }.free()
+    FreePrimFn { id: "integer.less", f: free_impl(fn_less_than), mode: FuncMode::default_mode() }
+        .free()
 }
 
 fn fn_less_than(_cfg: &mut Cfg, input: Val) -> Val {
@@ -252,8 +258,12 @@ fn fn_less_than(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.less_equal", f: free_impl(fn_less_equal), mode: default_free_mode() }
-        .free()
+    FreePrimFn {
+        id: "integer.less_equal",
+        f: free_impl(fn_less_equal),
+        mode: FuncMode::default_mode(),
+    }
+    .free()
 }
 
 fn fn_less_equal(_cfg: &mut Cfg, input: Val) -> Val {
@@ -274,8 +284,12 @@ fn fn_less_equal(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater_than() -> FreePrimFuncVal {
-    FreePrimFn { id: "integer.greater", f: free_impl(fn_greater_than), mode: default_free_mode() }
-        .free()
+    FreePrimFn {
+        id: "integer.greater",
+        f: free_impl(fn_greater_than),
+        mode: FuncMode::default_mode(),
+    }
+    .free()
 }
 
 fn fn_greater_than(_cfg: &mut Cfg, input: Val) -> Val {
@@ -299,7 +313,7 @@ pub fn greater_equal() -> FreePrimFuncVal {
     FreePrimFn {
         id: "integer.greater_equal",
         f: free_impl(fn_greater_equal),
-        mode: default_free_mode(),
+        mode: FuncMode::default_mode(),
     }
     .free()
 }
@@ -325,7 +339,7 @@ pub fn less_greater() -> FreePrimFuncVal {
     FreePrimFn {
         id: "integer.less_greater",
         f: free_impl(fn_less_greater),
-        mode: default_free_mode(),
+        mode: FuncMode::default_mode(),
     }
     .free()
 }

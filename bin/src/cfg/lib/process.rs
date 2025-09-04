@@ -4,10 +4,9 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
+use airlang::cfg::mode::CallPrimMode;
 use airlang::cfg::mode::FuncMode;
 use airlang::cfg::mode::SymbolMode;
-use airlang::cfg::mode::TaskPrimMode;
-use airlang::cfg::mode::free_mode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -44,7 +43,7 @@ pub fn call() -> FreePrimFuncVal {
     FreePrimFn {
         id: "$",
         f: free_impl(fn_call),
-        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Eval)),
+        mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval),
     }
     .free()
 }

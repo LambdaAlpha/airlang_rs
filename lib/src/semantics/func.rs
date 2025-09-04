@@ -7,6 +7,7 @@ pub use self::free_prim::FreePrimFunc;
 pub use self::mut_comp::MutCompFunc;
 pub use self::mut_prim::MutFn;
 pub use self::mut_prim::MutPrimFunc;
+pub use self::setup::default_setup;
 
 _____!();
 
@@ -18,30 +19,7 @@ pub(crate) use self::setup::SetupFn;
 
 _____!();
 
-use std::rc::Rc;
-
-use super::val::FuncVal;
-use crate::semantics::core::Eval;
-use crate::type_::Symbol;
-
-pub(crate) trait FuncSetup {
-    fn call(&self) -> Option<&FuncVal>;
-    fn solve(&self) -> Option<&FuncVal>;
-}
-
-pub fn default_setup() -> FuncVal {
-    FuncVal::MutPrim(
-        MutPrimFunc {
-            id: Symbol::from_str_unchecked("setup.default"),
-            fn_: Rc::new(Eval),
-            setup: Setup::none(),
-        }
-        .into(),
-    )
-}
-
 // todo design self free/const/mut
-// todo rename cell/static
 
 mod prim;
 

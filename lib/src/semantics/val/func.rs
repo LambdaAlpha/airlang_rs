@@ -13,10 +13,10 @@ use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::FreePrimFunc;
-use crate::semantics::func::FuncSetup;
 use crate::semantics::func::MutCompFunc;
 use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
+use crate::semantics::func::Setup;
 use crate::semantics::func::SetupFn;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -90,13 +90,9 @@ impl MutFn<Cfg, Val, Val, Val> for FuncVal {
     }
 }
 
-impl FuncSetup for FuncVal {
-    fn call(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.call())
-    }
-
-    fn solve(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.solve())
+impl Setup for FuncVal {
+    fn setup(&self) -> Option<&FuncVal> {
+        match_func_val!(self, f => f.setup())
     }
 }
 

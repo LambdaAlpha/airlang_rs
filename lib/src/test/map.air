@@ -5,12 +5,12 @@ _ do [
     set = _ import .map.set,
     contain = _ import .map.contain,
     a = _ any map,
-    l1 = a ; length .,
+    l1 = a which _ length .,
     k = _ any .,
     v = _ any .,
-    i = (a ; contain k) test [0] : [1],
-    a ; set k : v,
-    l2 = a ; length .,
+    i = (a which _ contain k) test [0] : [1],
+    a which _ set k : v,
+    l2 = a which _ length .,
     l2 == l1 + i
 ]
 -----
@@ -22,12 +22,12 @@ _ do [
     length = _ import .map.length,
     set_many = _ import .map.set_many,
     a = _ any map,
-    la = a ; length .,
+    la = a which _ length .,
     b = _ any map,
-    lb = b ; length .,
-    c = a ; set_many b,
-    lc = c ; length .,
-    lab = a ; length .,
+    lb = b which _ length .,
+    c = a which _ set_many b,
+    lc = c which _ length .,
+    lab = a which _ length .,
     lab == la + lb - lc
 ]
 -----
@@ -39,7 +39,7 @@ _ do [
     new = _ import .map.new,
     items = _ import .map.items,
     a1 = _ any map,
-    a2 = _ new a1 ; items .,
+    a2 = _ new a1 which _ items .,
     a1 == a2
 ]
 -----
@@ -52,7 +52,7 @@ _ do [
     into_items = _ import .map.into_items,
     a1 = _ any map,
     a2 = a1,
-    a3 = _ new a1 ; into_items .,
+    a3 = _ new a1 which _ into_items .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -65,8 +65,8 @@ _ do [
     keys = _ import .map.keys,
     set_many = _ import .map.set_many,
     a1 = _ any map,
-    a2 = _ new_set a1 ; keys .,
-    a1 ; set_many a2,
+    a2 = _ new_set a1 which _ keys .,
+    a1 which _ set_many a2,
     a1 == a2
 ]
 -----
@@ -79,8 +79,8 @@ _ do [
     keys = _ import .map.keys,
     into_keys = _ import .map.into_keys,
     a1 = _ any map,
-    a2 = _ new_set a1 ; keys .,
-    a3 = _ new_set a1 ; into_keys .,
+    a2 = _ new_set a1 which _ keys .,
+    a3 = _ new_set a1 which _ into_keys .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -94,14 +94,14 @@ _ do [
     values = _ import .map.values,
     set = _ import .map.set,
     a1 = _ any map,
-    b1 = _ multiset a1 ; values .,
+    b1 = _ multiset a1 which _ values .,
     a2 = {},
     i = 0,
     a1 iterate kv : [
-        a2 ; set i : kv ; second .,
+        a2 which _ set i : kv which _ second .,
         i = i + 1,
     ],
-    b2 = _ multiset a2 ; values .,
+    b2 = _ multiset a2 which _ values .,
     b1 == b2
 ]
 -----
@@ -114,8 +114,8 @@ _ do [
     values = _ import .map.values,
     into_values = _ import .map.into_values,
     a1 = _ any map,
-    a2 = _ multiset a1 ; values .,
-    a3 = _ multiset a1 ; into_values .,
+    a2 = _ multiset a1 which _ values .,
+    a3 = _ multiset a1 which _ into_values .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -129,8 +129,8 @@ _ do [
     a = _ any map,
     k = _ any .,
     v = _ any .,
-    a ; set k : v,
-    a ; contain k
+    a which _ set k : v,
+    a which _ contain k
 ]
 -----
 true
@@ -143,8 +143,8 @@ _ do [
     a = _ any map,
     k = _ any .,
     v = _ any .,
-    a ; set k : v,
-    v1 = a ; get k,
+    a which _ set k : v,
+    v1 = a which _ get k,
     v1 == v
 ]
 -----
@@ -158,8 +158,8 @@ _ do [
     keys = _ import .map.keys,
     a = _ any map,
     b = _ any map,
-    a ; set_many b,
-    a ; contain_all b ; keys .
+    a which _ set_many b,
+    a which _ contain_all b which _ keys .
 ]
 -----
 true
@@ -171,8 +171,8 @@ _ do [
     contain_any = _ import .map.contain_any,
     a = _ any map,
     b = _ any list,
-    a ; remove_many b,
-    _ not a ; contain_any b
+    a which _ remove_many b,
+    _ not a which _ contain_any b
 ]
 -----
 true
@@ -185,8 +185,8 @@ _ do [
     keys = _ import .map.keys,
     a = _ any map,
     b = _ any map,
-    a ; set_many b,
-    b1 = a ; get_many b ; keys .,
+    a which _ set_many b,
+    b1 = a which _ get_many b which _ keys .,
     b == b1
 ]
 -----
@@ -200,9 +200,9 @@ _ do [
     contain = _ import .map.contain,
     a = _ any map,
     k = _ any .,
-    v1 = a ; get k,
-    v2 = a ; remove k,
-    c = a ; contain k,
+    v1 = a which _ get k,
+    v2 = a which _ remove k,
+    c = a which _ contain k,
     (_ not c) and (v1 == v2)
 ]
 -----
@@ -216,9 +216,9 @@ _ do [
     contain_any = _ import .map.contain_any,
     a = _ any map,
     ks = _ any list,
-    vs1 = a ; get_many ks,
-    vs2 = a ; remove_many ks,
-    c = a ; contain_any ks,
+    vs1 = a which _ get_many ks,
+    vs2 = a which _ remove_many ks,
+    c = a which _ contain_any ks,
     (_ not c) and (vs1 == vs2)
 ]
 -----
@@ -229,7 +229,7 @@ clear
 _ do [
     clear = _ import .map.clear,
     a = _ any map,
-    a ; clear .,
+    a which _ clear .,
     a == {}
 ]
 -----
@@ -240,7 +240,7 @@ length
 _ do [
     length = _ import .map.length,
     m = {1 : 2, 3 : 3},
-    m ; length .
+    m which _ length .
 ]
 -----
 2
@@ -251,7 +251,7 @@ _ do [
     items = _ import .map.items,
     new = _ import .map.new,
     m = {1 : 2, 3 : 3},
-    i = m ; items .,
+    i = m which _ items .,
     _ new i
 ]
 -----
@@ -263,7 +263,7 @@ _ do [
     keys = _ import .map.keys,
     new_set = _ import .map.new_set,
     m = {1 : 2, 3 : 3},
-    k = m ; keys .,
+    k = m which _ keys .,
     _ new_set k
 ]
 -----
@@ -275,7 +275,7 @@ _ do [
     values = _ import .map.values,
     multiset = _ import .map.new_multiset,
     m = {1 : 2, 3 : 2},
-    v = m ; values .,
+    v = m which _ values .,
     _ multiset v
 ]
 -----
@@ -286,7 +286,7 @@ contain 1
 _ do [
     contain = _ import .map.contain,
     m = {1 : 2},
-    m ; contain 1
+    m which _ contain 1
 ]
 -----
 true
@@ -296,7 +296,7 @@ contain 2
 _ do [
     contain = _ import .map.contain,
     m = {1 : 2},
-    m ; contain 2
+    m which _ contain 2
 ]
 -----
 false
@@ -306,7 +306,7 @@ contain_all 1
 _ do [
     contain_all = _ import .map.contain_all,
     m = {1 : 2, 3 : 4},
-    m ; contain_all [1, 3]
+    m which _ contain_all [1, 3]
 ]
 -----
 true
@@ -316,7 +316,7 @@ contain_all 2
 _ do [
     contain_all = _ import .map.contain_all,
     m = {1 : 2, 3 : 4},
-    m ; contain_all [1, 2]
+    m which _ contain_all [1, 2]
 ]
 -----
 false
@@ -326,7 +326,7 @@ contain_any 1
 _ do [
     contain_any = _ import .map.contain_any,
     m = {1 : 2, 3 : 4},
-    m ; contain_any [1, 2]
+    m which _ contain_any [1, 2]
 ]
 -----
 true
@@ -336,7 +336,7 @@ contain_any 2
 _ do [
     contain_any = _ import .map.contain_any,
     m = {1 : 2, 3 : 4},
-    m ; contain_any [2, 4]
+    m which _ contain_any [2, 4]
 ]
 -----
 false
@@ -346,7 +346,7 @@ set 1
 _ do [
     set = _ import .map.set,
     m = {1 : 2, 3 : 4},
-    [m ; set 1 : 3, m]
+    [m which _ set 1 : 3, m]
 ]
 -----
 [2, {1 : 3, 3 : 4}]
@@ -356,7 +356,7 @@ set 2
 _ do [
     set = _ import .map.set,
     m = {1 : 2},
-    [m ; set 2 : 3, m]
+    [m which _ set 2 : 3, m]
 ]
 -----
 [., {1 : 2, 2 : 3}]
@@ -366,7 +366,7 @@ set_many 1
 _ do [
     set_many = _ import .map.set_many,
     m = {1 : 2, 2 : 3},
-    [m ; set_many {1 : 3, 3 : 4}, m]
+    [m which _ set_many {1 : 3, 3 : 4}, m]
 ]
 -----
 [{1 : 2}, {1 : 3, 2 : 3, 3 : 4}]
@@ -376,7 +376,7 @@ get 1
 _ do [
     get = _ import .map.get,
     m = {1 : 2},
-    m ; get 1
+    m which _ get 1
 ]
 -----
 2
@@ -386,7 +386,7 @@ get 2
 _ do [
     get = _ import .map.get,
     m = {1 : 2},
-    m ; get 2
+    m which _ get 2
 ]
 -----
 .
@@ -396,7 +396,7 @@ get_many duplicate keys
 _ do [
     get_many = _ import .map.get_many,
     m = {1 : 2, 2 : 3, 3 : 4},
-    m ; get_many [1, 2, 1, 4]
+    m which _ get_many [1, 2, 1, 4]
 ]
 -----
 {1 : 2, 2 : 3}
@@ -406,7 +406,7 @@ remove 1
 _ do [
     remove = _ import .map.remove,
     m = {1 : 2, 3 : 4},
-    [m ; remove 1, m]
+    [m which _ remove 1, m]
 ]
 -----
 [2, {3 : 4}]
@@ -416,7 +416,7 @@ remove 2
 _ do [
     remove = _ import .map.remove,
     m = {1 : 2},
-    [m ; remove 2, m]
+    [m which _ remove 2, m]
 ]
 -----
 [., {1 : 2}]
@@ -426,7 +426,7 @@ remove_many 1
 _ do [
     remove_many = _ import .map.remove_many,
     m = {1 : 2, 2 : 3, 3 : 4},
-    [m ; remove_many [1, 3, 5], m]
+    [m which _ remove_many [1, 3, 5], m]
 ]
 -----
 [{1 : 2, 3 : 4}, {2 : 3}] 
@@ -436,7 +436,7 @@ clear 1
 _ do [
     clear = _ import .map.clear,
     m = {1 : 2, 2 : 3},
-    m ; clear .,
+    m which _ clear .,
     m
 ]
 -----

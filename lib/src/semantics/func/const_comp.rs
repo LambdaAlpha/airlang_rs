@@ -1,10 +1,10 @@
 use super::ConstFn;
 use super::FreeFn;
+use super::Setup;
 use super::comp::DynComposite;
-use super::setup::Setup;
-use super::setup::impl_setup;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
+use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
@@ -14,7 +14,7 @@ pub struct ConstCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: Setup,
+    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for ConstCompFunc {
@@ -29,4 +29,8 @@ impl ConstFn<Cfg, Val, Val, Val> for ConstCompFunc {
     }
 }
 
-impl_setup!(ConstCompFunc);
+impl Setup for ConstCompFunc {
+    fn setup(&self) -> Option<&FuncVal> {
+        self.setup.as_ref()
+    }
+}

@@ -2,7 +2,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
-use airlang::cfg::mode::default_free_mode;
+use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -33,7 +33,7 @@ impl Library for ReplLib {
 
 // todo design
 pub fn help() -> FreePrimFuncVal {
-    FreePrimFn { id: "help", f: free_impl(fn_help), mode: default_free_mode() }.free()
+    FreePrimFn { id: "help", f: free_impl(fn_help), mode: FuncMode::default_mode() }.free()
 }
 
 const HELP_DOC: &str = "\

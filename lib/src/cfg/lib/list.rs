@@ -8,7 +8,7 @@ use super::Library;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_dyn_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -83,7 +83,8 @@ impl Library for ListLib {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "list.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "list.length", f: const_impl(fn_length), mode: FuncMode::default_mode() }
+        .const_()
 }
 
 fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -96,7 +97,7 @@ fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.set", f: mut_impl(fn_set), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.set", f: mut_impl(fn_set), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_set(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -124,7 +125,8 @@ fn fn_set(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn set_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.set_many", f: mut_impl(fn_set_many), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.set_many", f: mut_impl(fn_set_many), mode: FuncMode::default_mode() }
+        .mut_()
 }
 
 fn fn_set_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -157,7 +159,7 @@ fn fn_set_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn get() -> ConstPrimFuncVal {
-    DynPrimFn { id: "list.get", f: const_impl(fn_get), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "list.get", f: const_impl(fn_get), mode: FuncMode::default_mode() }.const_()
 }
 
 fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -177,7 +179,8 @@ fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn get_many() -> ConstPrimFuncVal {
-    DynPrimFn { id: "list.get_many", f: const_impl(fn_get_many), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "list.get_many", f: const_impl(fn_get_many), mode: FuncMode::default_mode() }
+        .const_()
 }
 
 fn fn_get_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -204,7 +207,7 @@ fn fn_get_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn insert() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.insert", f: mut_impl(fn_insert), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.insert", f: mut_impl(fn_insert), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_insert(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -232,8 +235,12 @@ fn fn_insert(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn insert_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.insert_many", f: mut_impl(fn_insert_many), mode: default_dyn_mode() }
-        .mut_()
+    DynPrimFn {
+        id: "list.insert_many",
+        f: mut_impl(fn_insert_many),
+        mode: FuncMode::default_mode(),
+    }
+    .mut_()
 }
 
 fn fn_insert_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -265,7 +272,7 @@ fn fn_insert_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.remove", f: mut_impl(fn_remove), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.remove", f: mut_impl(fn_remove), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -285,8 +292,12 @@ fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.remove_many", f: mut_impl(fn_remove_many), mode: default_dyn_mode() }
-        .mut_()
+    DynPrimFn {
+        id: "list.remove_many",
+        f: mut_impl(fn_remove_many),
+        mode: FuncMode::default_mode(),
+    }
+    .mut_()
 }
 
 fn fn_remove_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -314,7 +325,7 @@ fn fn_remove_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.push", f: mut_impl(fn_push), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.push", f: mut_impl(fn_push), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -327,7 +338,8 @@ fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.push_many", f: mut_impl(fn_push_many), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.push_many", f: mut_impl(fn_push_many), mode: FuncMode::default_mode() }
+        .mut_()
 }
 
 fn fn_push_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -344,7 +356,7 @@ fn fn_push_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.pop", f: mut_impl(fn_pop), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.pop", f: mut_impl(fn_pop), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_pop(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -360,7 +372,8 @@ fn fn_pop(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.pop_many", f: mut_impl(fn_pop_many), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.pop_many", f: mut_impl(fn_pop_many), mode: FuncMode::default_mode() }
+        .mut_()
 }
 
 fn fn_pop_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -388,7 +401,7 @@ fn fn_pop_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn clear() -> MutPrimFuncVal {
-    DynPrimFn { id: "list.clear", f: mut_impl(fn_clear), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "list.clear", f: mut_impl(fn_clear), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_clear(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {

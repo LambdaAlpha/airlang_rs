@@ -1,0 +1,63 @@
+get
+-----
+_ do [
+    function = _ import .call.function,
+    input = _ import .call.input,
+    f = _ any .,
+    i = _ any .,
+    c = _ form@ _ f i,
+    (f == c which _ function .) and (i == c which _ input .)
+]
+-----
+true
+=====
+set get
+-----
+_ do [
+    function = _ import .call.function,
+    input = _ import .call.input,
+    set_function = _ import .call.set_function,
+    set_input = _ import .call.set_input,
+    c = _ any call,
+    f = _ any .,
+    i = _ any .,
+    c which _ set_function f,
+    c which _ set_input i,
+    (f == c which _ function .) and (i == c which _ input .)
+]
+-----
+true
+=====
+set return
+-----
+_ do [
+    set_function = _ import .call.set_function,
+    set_input = _ import .call.set_input,
+    f1 = _ any .,
+    i1 = _ any .,
+    c = _ form@ _ f1 i1,
+    f2 = c which _ set_function _ any .,
+    i2 = c which _ set_input _ any .,
+    (f1 == f2) and (i1 == i2)
+]
+-----
+true
+=====
+apply const
+-----
+_ do [
+    apply = _ import .call.apply,
+    _ apply _ form@ 1 + 1
+]
+-----
+2
+=====
+apply mut
+-----
+_ do [
+    apply = _ import .call.apply,
+    _ apply _ form@ .a = 1,
+    a
+]
+-----
+1

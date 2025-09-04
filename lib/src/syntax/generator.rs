@@ -6,7 +6,6 @@ use derive_more::IsVariant;
 use num_traits::Signed;
 
 use super::BYTE;
-use super::CALL;
 use super::COMMENT;
 use super::Direction;
 use super::FALSE;
@@ -21,24 +20,21 @@ use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
-use super::SOLVE;
 use super::SYMBOL_QUOTE;
-use super::TASK;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
 use super::ambiguous;
 use super::is_delimiter;
-use crate::type_::Action;
 use crate::type_::Bit;
 use crate::type_::Byte;
+use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils;
@@ -53,7 +49,7 @@ pub enum GenRepr<'a> {
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
-    Task(Box<Task<GenRepr<'a>, GenRepr<'a>, GenRepr<'a>>>),
+    Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
     Map(Map<GenRepr<'a>, GenRepr<'a>>),
 }
@@ -102,7 +98,7 @@ pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
 const INDENT: &str = "  ";
 
 pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
-    let ctx = GenCtx { fmt, indent: 0, direction: Direction::default(), action: Action::default() };
+    let ctx = GenCtx { fmt, indent: 0, direction: Direction::default() };
     let mut str = String::new();
     repr.gen_(ctx, &mut str);
     str
@@ -113,7 +109,6 @@ struct GenCtx {
     fmt: GenFmt,
     indent: u8,
     direction: Direction,
-    action: Action,
 }
 
 trait Gen {
@@ -132,7 +127,7 @@ impl Gen for GenRepr<'_> {
             GenRepr::Number(number) => number.gen_(ctx, s),
             GenRepr::Byte(byte) => byte.gen_(ctx, s),
             GenRepr::Pair(pair) => pair.gen_(ctx, s),
-            GenRepr::Task(task) => task.gen_(ctx, s),
+            GenRepr::Call(call) => call.gen_(ctx, s),
             GenRepr::List(list) => list.gen_(ctx, s),
             GenRepr::Map(map) => map.gen_(ctx, s),
         }
@@ -316,55 +311,40 @@ fn gen_pair_right(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
     pair.second.gen_(ctx, s);
 }
 
-impl<'a> Gen for Task<GenRepr<'a>, GenRepr<'a>, GenRepr<'a>> {
-    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
-        if ctx.action == self.action {
-            return gen_task_action(ctx, s, self.func, self.ctx, self.input);
+impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>> {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        if let GenRepr::Pair(pair) = self.input {
+            gen_call_infix(ctx, s, self.func, *pair);
+        } else {
+            gen_call(ctx, s, self.func, self.input);
         }
-        ctx.action = self.action;
-        let tag = match self.action {
-            Action::Call => CALL,
-            Action::Solve => SOLVE,
-        };
-        prefixed(ctx, s, tag, |ctx, s| gen_task_action(ctx, s, self.func, self.ctx, self.input));
     }
 }
 
-fn gen_task_action(c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, input: GenRepr) {
-    if !ctx.is_unit() {
-        return gen_task_ctx(c, s, func, ctx, input);
-    }
-    if let GenRepr::Pair(pair) = input {
-        gen_task_infix(c, s, func, *pair);
-    } else {
-        gen_task(c, s, func, input);
-    }
-}
-
-fn gen_task_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+fn gen_call_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
     match ctx.direction {
         Direction::Left => {
             if is_open(&pair.first) || !is_open(&pair.second) {
-                return gen_task_infix_left(ctx, s, func, pair);
+                return gen_call_infix_left(ctx, s, func, pair);
             }
             ctx.direction = Direction::Right;
             prefixed(ctx, s, RIGHT, |ctx, s| {
-                gen_task_infix_right(ctx, s, func, pair);
+                gen_call_infix_right(ctx, s, func, pair);
             });
         }
         Direction::Right => {
             if !is_open(&pair.first) || is_open(&pair.second) {
-                return gen_task_infix_right(ctx, s, func, pair);
+                return gen_call_infix_right(ctx, s, func, pair);
             }
             ctx.direction = Direction::Left;
             prefixed(ctx, s, LEFT, |ctx, s| {
-                gen_task_infix_left(ctx, s, func, pair);
+                gen_call_infix_left(ctx, s, func, pair);
             });
         }
     }
 }
 
-fn gen_task_infix_left(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+fn gen_call_infix_left(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
     pair.first.gen_(ctx, s);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
@@ -372,7 +352,7 @@ fn gen_task_infix_left(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<Ge
     gen_scope_if_need(ctx, s, pair.second);
 }
 
-fn gen_task_infix_right(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+fn gen_call_infix_right(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
     gen_scope_if_need(ctx, s, pair.first);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
@@ -380,14 +360,14 @@ fn gen_task_infix_right(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<G
     pair.second.gen_(ctx, s);
 }
 
-fn gen_task(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+fn gen_call(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
     match ctx.direction {
-        Direction::Left => gen_task_left(ctx, s, func, input),
-        Direction::Right => gen_task_right(ctx, s, func, input),
+        Direction::Left => gen_call_left(ctx, s, func, input),
+        Direction::Right => gen_call_right(ctx, s, func, input),
     }
 }
 
-fn gen_task_left(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+fn gen_call_left(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
     input.gen_(ctx, s);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
@@ -395,51 +375,12 @@ fn gen_task_left(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
     s.push_str(COMMENT);
 }
 
-fn gen_task_right(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+fn gen_call_right(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
     s.push_str(COMMENT);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
     s.push(' ');
     input.gen_(ctx, s);
-}
-
-fn gen_task_ctx(mut c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, input: GenRepr) {
-    match c.direction {
-        Direction::Left => {
-            if is_open(&ctx) || !is_open(&input) {
-                return gen_task_ctx_left(c, s, func, ctx, input);
-            }
-            c.direction = Direction::Right;
-            prefixed(c, s, RIGHT, |c, s| gen_task_ctx_right(c, s, func, ctx, input));
-        }
-        Direction::Right => {
-            if !is_open(&ctx) || is_open(&input) {
-                return gen_task_ctx_right(c, s, func, ctx, input);
-            }
-            c.direction = Direction::Left;
-            prefixed(c, s, LEFT, |c, s| gen_task_ctx_left(c, s, func, ctx, input));
-        }
-    }
-}
-
-fn gen_task_ctx_left(c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, input: GenRepr) {
-    ctx.gen_(c, s);
-    s.push(' ');
-    s.push_str(TASK);
-    s.push(' ');
-    gen_scope_if_need(c, s, func);
-    s.push(' ');
-    gen_scope_if_need(c, s, input);
-}
-
-fn gen_task_ctx_right(c: GenCtx, s: &mut String, func: GenRepr, ctx: GenRepr, input: GenRepr) {
-    gen_scope_if_need(c, s, ctx);
-    s.push(' ');
-    s.push_str(TASK);
-    s.push(' ');
-    gen_scope_if_need(c, s, func);
-    s.push(' ');
-    input.gen_(c, s);
 }
 
 fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
@@ -451,7 +392,7 @@ fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
 }
 
 fn is_open(repr: &GenRepr) -> bool {
-    matches!(repr, GenRepr::Pair(_) | GenRepr::Task(_))
+    matches!(repr, GenRepr::Pair(_) | GenRepr::Call(_))
 }
 
 impl<'a> Gen for List<GenRepr<'a>> {

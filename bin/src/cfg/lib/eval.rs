@@ -3,7 +3,7 @@ use airlang::cfg::CoreCfg;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::mut_impl;
-use airlang::cfg::mode::default_dyn_mode;
+use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::MutPrimFuncVal;
@@ -36,7 +36,7 @@ impl Library for EvalLib {
 
 // todo rename
 pub fn reset() -> MutPrimFuncVal {
-    DynPrimFn { id: "repl.reset", f: mut_impl(fn_reset), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "repl.reset", f: mut_impl(fn_reset), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_reset(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {

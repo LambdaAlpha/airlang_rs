@@ -127,7 +127,7 @@ _ do [
 -----
 false
 =====
-eval task
+eval call
 -----
 _ do [
     a = _ form@ _ eval _ not true,
@@ -382,11 +382,11 @@ _ do [
 -----
 a : b : _ 1 2
 =====
-mode task
+mode call
 -----
 _ do [
     f = _ mode {
-        task : . ; eval@ eval@
+        call : _ eval@ eval@
     },
     _ f _ .g _ not true
 ]
@@ -464,7 +464,7 @@ mode func setup call
 -----
 _ do [
     f = _ function {
-        call_setup : _ mode @not,
+        setup : _ mode @not,
         code : (._ : .i) : .i,
     },
     _ f true
@@ -476,7 +476,7 @@ mode access free
 -----
 _ do [
     context_access = _ import .function.context_access,
-    form ; context_access .
+    form which _ context_access .
 ]
 -----
 free
@@ -487,7 +487,7 @@ _ do [
     context_access = _ import .function.context_access,
     read = _ import .context.read,
     f = _ mode @read,
-    f ; context_access .
+    f which _ context_access .
 ]
 -----
 constant
@@ -496,7 +496,7 @@ mode access mutable
 -----
 _ do [
     context_access = _ import .function.context_access,
-    eval@ ; context_access .
+    eval@ which _ context_access .
 ]
 -----
 mutable

@@ -6,8 +6,7 @@ use super::Library;
 use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_dyn_mode;
-use crate::cfg::mode::default_free_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -47,8 +46,12 @@ impl Library for SymbolLib {
 }
 
 pub fn from_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "symbol.from_text", f: free_impl(fn_from_text), mode: default_free_mode() }
-        .free()
+    FreePrimFn {
+        id: "symbol.from_text",
+        f: free_impl(fn_from_text),
+        mode: FuncMode::default_mode(),
+    }
+    .free()
 }
 
 fn fn_from_text(_cfg: &mut Cfg, input: Val) -> Val {
@@ -66,8 +69,12 @@ fn fn_from_text(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "symbol.into_text", f: free_impl(fn_into_text), mode: default_free_mode() }
-        .free()
+    FreePrimFn {
+        id: "symbol.into_text",
+        f: free_impl(fn_into_text),
+        mode: FuncMode::default_mode(),
+    }
+    .free()
 }
 
 fn fn_into_text(_cfg: &mut Cfg, input: Val) -> Val {
@@ -79,7 +86,8 @@ fn fn_into_text(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "symbol.length", f: const_impl(fn_length), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "symbol.length", f: const_impl(fn_length), mode: FuncMode::default_mode() }
+        .const_()
 }
 
 fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -93,7 +101,7 @@ fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { id: "symbol.join", f: free_impl(fn_join), mode: default_free_mode() }.free()
+    FreePrimFn { id: "symbol.join", f: free_impl(fn_join), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {

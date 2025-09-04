@@ -5,14 +5,13 @@ use num_traits::ToPrimitive;
 
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::val::CallVal;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::IntVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
-use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Symbol;
 
@@ -46,11 +45,10 @@ impl DynCtx<Symbol, Val> for PairVal {
     }
 }
 
-impl DynCtx<Symbol, Val> for TaskVal {
+impl DynCtx<Symbol, Val> for CallVal {
     fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
         match &*input {
             "function" => Some(DynRef::new_mut(&mut self.func)),
-            "context" => Some(DynRef::new_mut(&mut self.ctx)),
             "input" => Some(DynRef::new_mut(&mut self.input)),
             _ => {
                 error!("symbol {input:?} should be function, context or input");
@@ -63,10 +61,6 @@ impl DynCtx<Symbol, Val> for TaskVal {
         match &*input {
             "function" => {
                 swap(&mut self.func, &mut value);
-                Some(value)
-            }
-            "context" => {
-                swap(&mut self.ctx, &mut value);
                 Some(value)
             }
             "input" => {
@@ -146,7 +140,7 @@ impl DynCtx<Symbol, Val> for Val {
     fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
         match self {
             Val::Pair(pair) => pair.ref_(input),
-            Val::Task(task) => task.ref_(input),
+            Val::Call(call) => call.ref_(input),
             Val::List(list) => list.ref_(input),
             Val::Map(map) => map.ref_(input),
             Val::Ctx(ctx) => ctx.ref_(input),
@@ -161,7 +155,7 @@ impl DynCtx<Symbol, Val> for Val {
     fn set(&mut self, input: Symbol, value: Val) -> Option<Val> {
         match self {
             Val::Pair(pair) => pair.set(input, value),
-            Val::Task(task) => task.set(input, value),
+            Val::Call(call) => call.set(input, value),
             Val::List(list) => list.set(input, value),
             Val::Map(map) => map.set(input, value),
             Val::Ctx(ctx) => ctx.set(input, value),
@@ -261,12 +255,4 @@ impl DynCtx<Val, Val> for Val {
             }
         }
     }
-}
-
-pub(crate) fn const_ctx_ref(ctx: ConstRef<Val>, input: Val) -> Option<ConstRef<Val>> {
-    ctx.unwrap().ref_(input).map(DynRef::into_const)
-}
-
-pub(crate) fn mut_ctx_ref(ctx: &mut Val, input: Val) -> Option<DynRef<'_, Val>> {
-    ctx.ref_(input)
 }

@@ -11,14 +11,11 @@ use super::ctx_put_func;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
-use super::func::repr::generate_setup;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_dyn_mode;
-use crate::cfg::mode::default_free_mode;
-use crate::cfg::mode::free_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
-use crate::semantics::func::FuncSetup;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -32,8 +29,7 @@ pub struct FuncLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
     pub ctx_access: ConstPrimFuncVal,
-    pub call_setup: ConstPrimFuncVal,
-    pub solve_setup: ConstPrimFuncVal,
+    pub setup: ConstPrimFuncVal,
     pub is_primitive: ConstPrimFuncVal,
     pub id: ConstPrimFuncVal,
     pub code: ConstPrimFuncVal,
@@ -46,8 +42,7 @@ impl Default for FuncLib {
             new: new(),
             repr: repr(),
             ctx_access: ctx_access(),
-            call_setup: call_setup(),
-            solve_setup: solve_setup(),
+            setup: setup(),
             is_primitive: is_primitive(),
             id: id(),
             code: code(),
@@ -61,8 +56,7 @@ impl CfgMod for FuncLib {
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.ctx_access.extend(cfg);
-        self.call_setup.extend(cfg);
-        self.solve_setup.extend(cfg);
+        self.setup.extend(cfg);
         self.is_primitive.extend(cfg);
         self.id.extend(cfg);
         self.code.extend(cfg);
@@ -77,7 +71,7 @@ impl Library for FuncLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "function.new", f: free_impl(fn_new), mode: free_mode(parse_mode()) }.free()
+    FreePrimFn { id: "function.new", f: free_impl(fn_new), mode: parse_mode() }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -89,7 +83,8 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "function.represent", f: free_impl(fn_repr), mode: default_free_mode() }.free()
+    FreePrimFn { id: "function.represent", f: free_impl(fn_repr), mode: FuncMode::default_mode() }
+        .free()
 }
 
 fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
@@ -104,7 +99,7 @@ pub fn ctx_access() -> ConstPrimFuncVal {
     DynPrimFn {
         id: "function.context_access",
         f: const_impl(fn_ctx_access),
-        mode: default_dyn_mode(),
+        mode: FuncMode::default_mode(),
     }
     .const_()
 }
@@ -118,41 +113,27 @@ fn fn_ctx_access(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Symbol(Symbol::from_str_unchecked(access))
 }
 
-pub fn call_setup() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.call_setup", f: const_impl(fn_call_setup), mode: default_dyn_mode() }
+pub fn setup() -> ConstPrimFuncVal {
+    DynPrimFn { id: "function.setup", f: const_impl(fn_setup), mode: FuncMode::default_mode() }
         .const_()
 }
 
-fn fn_call_setup(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_setup(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    generate_setup(func.call().cloned())
-}
-
-pub fn solve_setup() -> ConstPrimFuncVal {
-    DynPrimFn {
-        id: "function.solve_setup",
-        f: const_impl(fn_solve_setup),
-        mode: default_dyn_mode(),
-    }
-    .const_()
-}
-
-fn fn_solve_setup(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
-    let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
+    let Some(func) = func.setup() else {
         return Val::default();
     };
-    generate_setup(func.solve().cloned())
+    Val::Func(func.clone())
 }
 
 pub fn is_primitive() -> ConstPrimFuncVal {
     DynPrimFn {
         id: "function.is_primitive",
         f: const_impl(fn_is_primitive),
-        mode: default_dyn_mode(),
+        mode: FuncMode::default_mode(),
     }
     .const_()
 }
@@ -167,7 +148,7 @@ fn fn_is_primitive(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn id() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.id", f: const_impl(fn_id), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "function.id", f: const_impl(fn_id), mode: FuncMode::default_mode() }.const_()
 }
 
 fn fn_id(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -179,7 +160,8 @@ fn fn_id(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn code() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.code", f: const_impl(fn_code), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "function.code", f: const_impl(fn_code), mode: FuncMode::default_mode() }
+        .const_()
 }
 
 fn fn_code(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -191,7 +173,8 @@ fn fn_code(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn ctx() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.context", f: const_impl(fn_ctx), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "function.context", f: const_impl(fn_ctx), mode: FuncMode::default_mode() }
+        .const_()
 }
 
 fn fn_ctx(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {

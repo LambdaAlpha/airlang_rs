@@ -4,11 +4,11 @@ _ do [
     length = _ import .symbol.length,
     join = _ import .symbol.join,
     a = _ any symbol,
-    la = a ; length .,
+    la = a which _ length .,
     b = _ any symbol,
-    lb = b ; length .,
+    lb = b which _ length .,
     ab = . join [a, b],
-    lab = ab ; length .,
+    lab = ab which _ length .,
     lab == la + lb
 ]
 -----
@@ -19,7 +19,7 @@ length empty
 _ do [
     length = _ import .symbol.length,
     s = _ form '',
-    s ; length .
+    s which _ length .
 ]
 -----
 0
@@ -29,7 +29,7 @@ length else
 _ do [
     length = _ import .symbol.length,
     s = .a,
-    s ; length .
+    s which _ length .
 ]
 -----
 1

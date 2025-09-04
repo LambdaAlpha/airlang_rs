@@ -1,9 +1,9 @@
 use log::error;
 
 use crate::cfg::lib::FuncMode;
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::Mode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskPrimMode;
 use crate::cfg::utils::map_remove;
 use crate::cfg::utils::symbol;
 use crate::semantics::ctx::Ctx;
@@ -13,7 +13,6 @@ use crate::semantics::func::DynComposite;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
 use crate::semantics::func::MutCompFunc;
-use crate::semantics::func::Setup;
 use crate::semantics::val::ConstCompFuncVal;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::CtxVal;
@@ -31,8 +30,7 @@ use crate::type_::Symbol;
 const CODE: &str = "code";
 const CTX: &str = "context";
 const ID: &str = "id";
-const CALL_SETUP: &str = "call_setup";
-const SOLVE_SETUP: &str = "solve_setup";
+const SETUP: &str = "setup";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
 
@@ -42,7 +40,7 @@ const MUTABLE: &str = "mutable";
 
 pub(in crate::cfg) fn parse_mode() -> Mode {
     let mut map = Map::default();
-    map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, TaskPrimMode::Form));
+    map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form));
     FuncMode::map_mode(map, FuncMode::default_mode())
 }
 
@@ -57,8 +55,7 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     // todo design
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let ctx = parse_ctx(map_remove(&mut map, CTX))?;
-    let setup =
-        parse_task_setup(map_remove(&mut map, CALL_SETUP), map_remove(&mut map, SOLVE_SETUP))?;
+    let setup = parse_setup(map_remove(&mut map, SETUP))?;
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let free_comp = FreeComposite { body, input_name };
@@ -152,12 +149,6 @@ fn parse_ctx(ctx: Val) -> Option<Ctx> {
             None
         }
     }
-}
-
-fn parse_task_setup(call: Val, solve: Val) -> Option<Setup> {
-    let call = parse_setup(call)?;
-    let solve = parse_setup(solve)?;
-    Some(Setup { call, solve })
 }
 
 fn parse_setup(setup: Val) -> Option<Option<FuncVal>> {
@@ -265,7 +256,7 @@ fn dyn_code(comp: &DynComposite) -> Val {
 struct CompRepr {
     id: Symbol,
     access: &'static str,
-    setup: Setup,
+    setup: Option<FuncVal>,
     ctx: Ctx,
 }
 
@@ -276,23 +267,11 @@ fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     if comp.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(comp.access));
     }
-    let call_setup = generate_setup(comp.setup.call);
-    if !call_setup.is_unit() {
-        repr.insert(symbol(CALL_SETUP), call_setup);
-    }
-    let solve_setup = generate_setup(comp.setup.solve);
-    if !solve_setup.is_unit() {
-        repr.insert(symbol(SOLVE_SETUP), solve_setup);
+    if let Some(setup) = comp.setup {
+        repr.insert(symbol(SETUP), Val::Func(setup));
     }
     if comp.ctx != Ctx::default() {
         repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(comp.ctx)));
-    }
-}
-
-pub(in crate::cfg) fn generate_setup(setup: Option<FuncVal>) -> Val {
-    match setup {
-        Some(func) => Val::Func(func),
-        None => Val::default(),
     }
 }
 

@@ -1,3 +1,5 @@
+pub use self::call::CallMode;
+pub use self::call::CallPrimMode;
 pub use self::comp::CompMode;
 pub use self::func::FuncMode;
 pub use self::list::ListMode;
@@ -5,8 +7,6 @@ pub use self::map::MapMode;
 pub use self::pair::PairMode;
 pub use self::prim::PrimMode;
 pub use self::symbol::SymbolMode;
-pub use self::task::TaskMode;
-pub use self::task::TaskPrimMode;
 
 _____!();
 
@@ -70,22 +70,6 @@ impl From<PrimMode> for Mode {
     }
 }
 
-pub fn free_mode(mode: Mode) -> FuncMode {
-    FuncMode { call: mode, solve: FuncMode::default_mode() }
-}
-
-pub fn default_free_mode() -> FuncMode {
-    free_mode(FuncMode::default_mode())
-}
-
-pub fn dyn_mode(mode: Mode) -> FuncMode {
-    FuncMode { call: mode, solve: FuncMode::default_mode() }
-}
-
-pub fn default_dyn_mode() -> FuncMode {
-    dyn_mode(FuncMode::default_mode())
-}
-
 mod prim;
 
 mod comp;
@@ -96,7 +80,7 @@ mod symbol;
 
 mod pair;
 
-mod task;
+mod call;
 
 mod list;
 

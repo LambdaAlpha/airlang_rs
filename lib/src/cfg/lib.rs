@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use self::bit::BitLib;
 use self::byte::ByteLib;
+use self::call::CallLib;
 use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
@@ -16,13 +17,13 @@ use self::number::NumberLib;
 use self::pair::PairLib;
 use self::symbol::SymbolLib;
 use self::syntax::SyntaxLib;
-use self::task::TaskLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
 use super::Named;
 use crate::cfg::CfgMod;
 use crate::cfg::mode::FuncMode;
+use crate::cfg::mode::Mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -55,7 +56,7 @@ pub struct CoreLib {
     pub number: NumberLib,
     pub byte: ByteLib,
     pub pair: PairLib,
-    pub task: TaskLib,
+    pub call: CallLib,
     pub list: ListLib,
     pub map: MapLib,
     pub link: LinkLib,
@@ -79,7 +80,7 @@ impl CfgMod for CoreLib {
         self.number.extend(cfg);
         self.byte.extend(cfg);
         self.pair.extend(cfg);
-        self.task.extend(cfg);
+        self.call.extend(cfg);
         self.list.extend(cfg);
         self.map.extend(cfg);
         self.link.extend(cfg);
@@ -104,7 +105,7 @@ impl Library for CoreLib {
         self.number.prelude(ctx);
         self.byte.prelude(ctx);
         self.pair.prelude(ctx);
-        self.task.prelude(ctx);
+        self.call.prelude(ctx);
         self.list.prelude(ctx);
         self.map.prelude(ctx);
         self.link.prelude(ctx);
@@ -129,13 +130,13 @@ impl<T: Named + Clone + Into<FuncVal>> Library for T {
 pub struct FreePrimFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: FuncMode,
+    pub mode: Mode,
 }
 
 pub struct DynPrimFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: FuncMode,
+    pub mode: Mode,
 }
 
 impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
@@ -143,7 +144,7 @@ impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
         let func = FreePrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: self.mode.into_setup(),
+            setup: Some(FuncMode::mode_into_func(self.mode)),
         };
         FreePrimFuncVal::from(func)
     }
@@ -154,7 +155,7 @@ impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
         let func = ConstPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: self.mode.into_setup(),
+            setup: Some(FuncMode::mode_into_func(self.mode)),
         };
         ConstPrimFuncVal::from(func)
     }
@@ -165,7 +166,7 @@ impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
         let func = MutPrimFunc {
             id: Symbol::from_str_unchecked(self.id),
             fn_: Rc::new(self.f),
-            setup: self.mode.into_setup(),
+            setup: Some(FuncMode::mode_into_func(self.mode)),
         };
         MutPrimFuncVal::from(func)
     }
@@ -292,7 +293,7 @@ pub mod byte;
 
 pub mod pair;
 
-pub mod task;
+pub mod call;
 
 pub mod list;
 

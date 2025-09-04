@@ -1,11 +1,11 @@
 use super::ConstFn;
 use super::FreeFn;
 use super::MutFn;
+use super::Setup;
 use super::comp::DynComposite;
-use super::setup::Setup;
-use super::setup::impl_setup;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
+use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
@@ -16,7 +16,7 @@ pub struct MutCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) ctx: Ctx,
-    pub(crate) setup: Setup,
+    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for MutCompFunc {
@@ -37,4 +37,8 @@ impl MutFn<Cfg, Val, Val, Val> for MutCompFunc {
     }
 }
 
-impl_setup!(MutCompFunc);
+impl Setup for MutCompFunc {
+    fn setup(&self) -> Option<&FuncVal> {
+        self.setup.as_ref()
+    }
+}

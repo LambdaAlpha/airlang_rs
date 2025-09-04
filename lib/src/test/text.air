@@ -4,9 +4,9 @@ _ do [
     length = _ import .text.length,
     push = _ import .text.push,
     t = _ any text,
-    l = t ; length .,
-    t ; push "a",
-    l1 = t ; length .,
+    l = t which _ length .,
+    t which _ push "a",
+    l1 = t which _ length .,
     l1 == l + 1
 ]
 -----
@@ -18,11 +18,11 @@ _ do [
     length = _ import .text.length,
     join = _ import .text.join,
     a = _ any text,
-    la = a ; length .,
+    la = a which _ length .,
     b = _ any text,
-    lb = b ; length .,
+    lb = b which _ length .,
     ab = . join [a, b],
-    lab = ab ; length .,
+    lab = ab which _ length .,
     lab == la + lb
 ]
 -----
@@ -33,7 +33,7 @@ length empty
 _ do [
     length = _ import .text.length,
     t = "",
-    t ; length .
+    t which _ length .
 ]
 -----
 0
@@ -43,7 +43,7 @@ length else
 _ do [
     length = _ import .text.length,
     t = "1",
-    t ; length .
+    t which _ length .
 ]
 -----
 1
@@ -56,7 +56,7 @@ _ do [
     a = _ any text,
     b = _ any text,
     t = a,
-    t ; push b,
+    t which _ push b,
     t1 = . join [a, b],
     t == t1
 ]
@@ -69,8 +69,8 @@ _ do [
     push = _ import .text.push,
     a = "hello",
     b = "world",
-    a ; push " ",
-    a ; push b,
+    a which _ push " ",
+    a which _ push b,
     a
 ]
 -----

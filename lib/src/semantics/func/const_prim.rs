@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
 use super::FreeFn;
+use super::Setup;
 use super::prim::impl_prim_func;
-use super::setup::Setup;
-use super::setup::impl_setup;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 use crate::type_::ref_::ConstRef;
@@ -43,7 +43,7 @@ where T: ConstFn<Cfg, Ctx, I, O>
 pub struct ConstPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn ConstFn<Cfg, Val, Val, Val>>,
-    pub(crate) setup: Setup,
+    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for ConstPrimFunc {
@@ -58,6 +58,10 @@ impl ConstFn<Cfg, Val, Val, Val> for ConstPrimFunc {
     }
 }
 
-impl_setup!(ConstPrimFunc);
+impl Setup for ConstPrimFunc {
+    fn setup(&self) -> Option<&FuncVal> {
+        self.setup.as_ref()
+    }
+}
 
 impl_prim_func!(ConstPrimFunc);

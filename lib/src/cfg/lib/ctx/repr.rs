@@ -1,9 +1,9 @@
 use log::error;
 
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::Mode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskPrimMode;
 use crate::cfg::utils::symbol;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -26,7 +26,7 @@ pub(in crate::cfg) fn parse_mode() -> Mode {
         Map::default(),
         FuncMode::pair_mode(
             Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Eval),
+            FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval),
             FuncMode::default_mode(),
         ),
     )

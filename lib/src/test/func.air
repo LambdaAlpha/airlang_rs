@@ -2,7 +2,7 @@ recursive call
 -----
 _ do [
     f = _ function {
-        call_setup : eval@,
+        setup : eval@,
         code : (._ : .i) : .i,
     },
     _ f _ not true
@@ -14,7 +14,7 @@ call external func
 -----
 _ do [
     f = _ function {
-        call_setup : eval@,
+        setup : eval@,
         code : (._ : .i) : _ not .i
     },
     _ f _ not true
@@ -27,7 +27,7 @@ call internal func
 _ do [
     context = _ import .context.new,
     f = _ function {
-        call_setup : eval@,
+        setup : eval@,
         code : (._ : .i) : _ .not .i,
         context : _ context {
             not : . : not
@@ -43,7 +43,7 @@ call rename
 _ do [
     context = _ import .context.new,
     f = _ function {
-        call_setup : eval@,
+        setup : eval@,
         code : (._ : .a) : _ .n .a,
         context : _ context {
             n : . : not
@@ -63,7 +63,7 @@ _ do [
     link_set = _ import .link.set,
     f = _ function {
         context_access : .free,
-        call_setup : eval@,
+        setup : eval@,
         code : ._ : _ do [
             .i = .a link_get _,
             .a link_set .i + 1,
@@ -87,7 +87,7 @@ _ do [
     link_set = _ import .link.set,
     f = _ form _ function {
         context_access : .free,
-        call_setup : eval@,
+        setup : eval@,
         code : ._ : _ do [
             .i = .a link_get _,
             .a link_set .i + 1,
@@ -110,7 +110,7 @@ _ do [
     read = _ import .context.read,
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c ; read ..a,
+        code : (.c : ._) : .c which _ read ..a,
         context_access : .constant,
     },
     _ f .
@@ -124,7 +124,7 @@ _ do [
     read = _ import .context.read,
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c ; read ..a,
+        code : (.c : ._) : .c which _ read ..a,
         context_access : .mutable,
     },
     _ f .
@@ -136,7 +136,7 @@ mutable mutate
 -----
 _ do [
     f = _ function {
-        code : (.c : .i) : .c ; _ .@i = 2,
+        code : (.c : .i) : .c which .@i = 2,
         context_access : .mutable,
     },
     a = 1,
@@ -150,7 +150,7 @@ const mutate fail
 -----
 _ do [
     f = _ function {
-        code : (.c : .i) : .c ; _ .@i = 2,
+        code : (.c : .i) : .c which .@i = 2,
         context_access : .constant,
     },
     a = 1,
@@ -168,7 +168,7 @@ _ do [
         code : (._c : ._) : 1,
         context_access : .constant,
     },
-    a ; f .
+    a which _ f .
 ]
 -----
 1
@@ -197,12 +197,12 @@ _ do [
     set_first = _ import .pair.set_first,
     a = 1 : 2,
     f = _ function {
-        call_setup : _ mode {
+        setup : _ mode {
             pair : {} : {symbol : ..} : eval@
         },
-        code : (.p : .i) : .p ; set_first .i,
+        code : (.p : .i) : .p which _ set_first .i,
     },
-    a ; f 3,
+    a which _ f 3,
     a
 ]
 -----
@@ -260,8 +260,7 @@ _ do [
     repr = _ form. {
         id : f,
         code : (ctx : in) : in,
-        call_setup : @m,
-        solve_setup : @m,
+        setup : @m,
         context_access : constant,
     },
     new_repr = _ represent _ function repr,
@@ -274,7 +273,7 @@ access free
 -----
 _ do [
     context_access = _ import .function.context_access,
-    function ; context_access .
+    function which _ context_access .
 ]
 -----
 free
@@ -284,7 +283,7 @@ access const
 _ do [
     context_access = _ import .function.context_access,
     read = _ import .context.read,
-    read ; context_access .
+    read which _ context_access .
 ]
 -----
 constant
@@ -293,7 +292,7 @@ access mutable
 -----
 _ do [
     context_access = _ import .function.context_access,
-    eval@ ; context_access .
+    eval@ which _ context_access .
 ]
 -----
 mutable
@@ -303,7 +302,7 @@ access default
 _ do [
     context_access = _ import .function.context_access,
     f = _ function {},
-    f ; context_access .
+    f which _ context_access .
 ]
 -----
 mutable
@@ -311,8 +310,8 @@ mutable
 call setup primitive
 -----
 _ do [
-    call_setup = _ import .function.call_setup,
-    eval@ == not ; call_setup .
+    setup = _ import .function.setup,
+    eval@ == not which _ setup .
 ]
 -----
 true
@@ -320,8 +319,8 @@ true
 call setup mode
 -----
 _ do [
-    call_setup = _ import .function.call_setup,
-    . == eval@ ; call_setup .
+    setup = _ import .function.setup,
+    . == eval@ which _ setup .
 ]
 -----
 true
@@ -329,13 +328,13 @@ true
 call setup 1
 -----
 _ do [
-    call_setup = _ import .function.call_setup,
+    setup = _ import .function.setup,
     f = _ function {
-        call_setup : _ mode {
+        setup : _ mode {
             pair : {} : eval@ : form.
         },
     },
-    p1 = f ; call_setup .,
+    p1 = f which _ setup .,
     p2 = _ mode {
         pair : {} : eval@ : form.
     },
@@ -347,13 +346,13 @@ true
 call setup 2
 -----
 _ do [
-    call_setup = _ import .function.call_setup,
+    setup = _ import .function.setup,
     f = _ function {
-        call_setup : _ mode {
+        setup : _ mode {
             list : [eval@, form., .] : form.
         },
     },
-    p1 = f ; call_setup .,
+    p1 = f which _ setup .,
     p2 = _ mode {
         list : [eval@, form., .] : form.
     },
@@ -365,13 +364,13 @@ true
 call setup 3
 -----
 _ do [
-    call_setup = _ import .function.call_setup,
+    setup = _ import .function.setup,
     f = _ function {
-        call_setup : _ mode {
+        setup : _ mode {
             map : {a : eval@, b : .} : . : form.
         },
     },
-    p1 = f ; call_setup .,
+    p1 = f which _ setup .,
     p2 = _ mode {
         map : {a : eval@, b : .} : . : form.
     },
@@ -380,20 +379,11 @@ _ do [
 -----
 true
 =====
-solve setup
------
-_ do [
-    solve_setup = _ import .function.solve_setup,
-    eval@ == not ; solve_setup .
-]
------
-true
-=====
 is_primitive primitive
 -----
 _ do [
     is_primitive = _ import .function.is_primitive,
-    not ; is_primitive .
+    not which _ is_primitive .
 ]
 -----
 true
@@ -403,7 +393,7 @@ is_primitive composite
 _ do [
     is_primitive = _ import .function.is_primitive,
     f = _ function {},
-    f ; is_primitive .
+    f which _ is_primitive .
 ]
 -----
 false
@@ -412,7 +402,7 @@ id primitive
 -----
 _ do [
     id = _ import .function.id,
-    not ; id .
+    not which _ id .
 ]
 -----
 bit.not
@@ -422,7 +412,7 @@ id rename
 _ do [
     id = _ import .function.id,
     neg = not,
-    neg ; id .
+    neg which _ id .
 ]
 -----
 bit.not
@@ -434,7 +424,7 @@ _ do [
     f = _ function {
         code : (.ctx : .i) : .i
     },
-    f ; code .
+    f which _ code .
 ]
 -----
 (ctx : i) : i
@@ -450,7 +440,7 @@ _ do [
     f = _ function {
         context : ctx
     },
-    (f ; function.context .) == ctx
+    (f which _ function.context .) == ctx
 ]
 -----
 true

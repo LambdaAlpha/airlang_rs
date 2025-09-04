@@ -545,7 +545,7 @@ _ do [
     push = _ import .list.push,
     a = [],
     [1, 2, 3, 4, 5] iterate i : [
-        a ; push i + 1
+        a which _ push i + 1
     ],
     a
 ]
@@ -588,7 +588,7 @@ _ do [
     push = _ import .list.push,
     b = [],
     byte(1122334455) iterate i : [
-        b ; push i
+        b which _ push i
     ],
     b
 ]
@@ -601,7 +601,7 @@ _ do [
     push = _ import .list.push,
     s = [],
     .abc iterate i : [
-        s ; push i
+        s which _ push i
     ],
     s
 ]
@@ -614,7 +614,7 @@ _ do [
     push = _ import .list.push,
     t = [],
     "hello" iterate i : [
-        t ; push i
+        t which _ push i
     ],
     t
 ]
@@ -628,7 +628,7 @@ _ do [
     new_map = _ import .map.new,
     kv = [],
     {1 : 2, 3 : 4} iterate i : [
-        kv ; push i
+        kv which _ push i
     ],
     _ new_map kv
 ]

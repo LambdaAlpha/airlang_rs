@@ -16,15 +16,13 @@ use super::Library;
 use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskPrimMode;
-use crate::cfg::mode::default_dyn_mode;
-use crate::cfg::mode::default_free_mode;
-use crate::cfg::mode::free_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
+use crate::semantics::val::CALL;
 use crate::semantics::val::CFG;
 use crate::semantics::val::CTX;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -38,12 +36,12 @@ use crate::semantics::val::MAP;
 use crate::semantics::val::NUMBER;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::SYMBOL;
-use crate::semantics::val::TASK;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Byte;
+use crate::type_::Call;
 use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::Link;
@@ -52,7 +50,6 @@ use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -94,7 +91,7 @@ pub fn any() -> FreePrimFuncVal {
     FreePrimFn {
         id: "any",
         f: free_impl(fn_any),
-        mode: free_mode(FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form)),
+        mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
     }
     .free()
 }
@@ -114,7 +111,7 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
             NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
             BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
             PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
-            TASK => Val::Task(Task::<Val, Val, Val>::any(rng, DEPTH).into()),
+            CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
             LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
             MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
             LINK => Val::Link(Link::any(rng, DEPTH)),
@@ -131,7 +128,7 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn type_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "type", f: const_impl(fn_type), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "type", f: const_impl(fn_type), mode: FuncMode::default_mode() }.const_()
 }
 
 fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -144,7 +141,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Number(_) => NUMBER,
         Val::Byte(_) => BYTE,
         Val::Pair(_) => PAIR,
-        Val::Task(_) => TASK,
+        Val::Call(_) => CALL,
         Val::List(_) => LIST,
         Val::Map(_) => MAP,
         Val::Link(_) => LINK,
@@ -158,7 +155,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "==", f: free_impl(fn_equal), mode: default_free_mode() }.free()
+    FreePrimFn { id: "==", f: free_impl(fn_equal), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_equal(_cfg: &mut Cfg, input: Val) -> Val {

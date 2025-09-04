@@ -90,7 +90,6 @@ space
 -----
 ~
 =====
-
 @
 -----
 @
@@ -197,11 +196,11 @@ symbol digit
 =====
 soft keyword alphabet
 -----
-;a
+:a
 =====
 alphabet soft keyword
 -----
-a;
+a:
 =====
 soft keyword digit
 -----

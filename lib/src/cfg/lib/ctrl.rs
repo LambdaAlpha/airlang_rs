@@ -14,10 +14,9 @@ use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::PrimMode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskPrimMode;
-use crate::cfg::mode::dyn_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
@@ -29,12 +28,12 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
+use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Text;
 
 #[derive(Clone)]
@@ -146,18 +145,18 @@ impl Block {
 
 impl Statement {
     fn parse(val: Val) -> Option<Self> {
-        let Val::Task(task) = val else {
+        let Val::Call(call) = val else {
             return Some(Statement::Normal(val));
         };
-        let Val::Symbol(s) = &task.func else {
-            return Some(Statement::Normal(Val::Task(task)));
+        let Val::Symbol(s) = &call.func else {
+            return Some(Statement::Normal(Val::Call(call)));
         };
         let Some(ctrl_flow) = CtrlFlow::parse(s) else {
-            return Some(Statement::Normal(Val::Task(task)));
+            return Some(Statement::Normal(Val::Call(call)));
         };
-        let task = Task::from(task);
-        let Val::Pair(pair) = task.input else {
-            error!("task.input {:?} should be a pair", task.input);
+        let call = Call::from(call);
+        let Val::Pair(pair) = call.input else {
+            error!("call.input {:?} should be a pair", call.input);
             return None;
         };
         let pair = Pair::from(pair);
@@ -180,7 +179,7 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.do", f: mut_impl(fn_do), mode: dyn_mode(FuncMode::id_mode()) }.mut_()
+    DynPrimFn { id: "control.do", f: mut_impl(fn_do), mode: FuncMode::id_mode() }.mut_()
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -191,8 +190,7 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn test() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.test", f: mut_impl(fn_test), mode: dyn_mode(FuncMode::id_mode()) }
-        .mut_()
+    DynPrimFn { id: "control.test", f: mut_impl(fn_test), mode: FuncMode::id_mode() }.mut_()
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -238,8 +236,7 @@ impl Test {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.switch", f: mut_impl(fn_switch), mode: dyn_mode(FuncMode::id_mode()) }
-        .mut_()
+    DynPrimFn { id: "control.switch", f: mut_impl(fn_switch), mode: FuncMode::id_mode() }.mut_()
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -299,8 +296,7 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.match", f: mut_impl(fn_match), mode: dyn_mode(FuncMode::id_mode()) }
-        .mut_()
+    DynPrimFn { id: "control.match", f: mut_impl(fn_match), mode: FuncMode::id_mode() }.mut_()
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -348,7 +344,7 @@ impl Match {
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         let val = Eval.mut_call(cfg, ctx, self.val);
-        let mode = PrimMode::new(SymbolMode::Literal, TaskPrimMode::Form);
+        let mode = PrimMode::new(SymbolMode::Literal, CallPrimMode::Form);
         for (pattern, block) in self.arms {
             let pattern = mode.mut_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse() else {
@@ -365,8 +361,7 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.loop", f: mut_impl(fn_loop), mode: dyn_mode(FuncMode::id_mode()) }
-        .mut_()
+    DynPrimFn { id: "control.loop", f: mut_impl(fn_loop), mode: FuncMode::id_mode() }.mut_()
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -415,12 +410,7 @@ impl Loop {
 }
 
 pub fn iterate() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "control.iterate",
-        f: mut_impl(fn_iterate),
-        mode: dyn_mode(FuncMode::id_mode()),
-    }
-    .mut_()
+    DynPrimFn { id: "control.iterate", f: mut_impl(fn_iterate), mode: FuncMode::id_mode() }.mut_()
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

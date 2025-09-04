@@ -1,6 +1,8 @@
 use const_format::concatcp;
 use log::error;
 
+use crate::cfg::mode::CallMode;
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::CompMode;
 use crate::cfg::mode::ListMode;
 use crate::cfg::mode::MapMode;
@@ -8,26 +10,23 @@ use crate::cfg::mode::Mode;
 use crate::cfg::mode::PairMode;
 use crate::cfg::mode::PrimMode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskMode;
-use crate::cfg::mode::TaskPrimMode;
 use crate::cfg::utils::map_remove;
 use crate::cfg::utils::symbol;
 use crate::semantics::core::SYMBOL_EVAL_CHAR;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::core::SYMBOL_REF_CHAR;
+use crate::semantics::val::CALL;
 use crate::semantics::val::LIST;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MAP;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PAIR;
-use crate::semantics::val::TASK;
 use crate::semantics::val::Val;
-use crate::type_::Action;
+use crate::type_::Call;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Unit;
 
 pub(in crate::cfg) trait ParseMode<T>: Sized + Clone {
@@ -146,14 +145,14 @@ pub(in crate::cfg) const EVAL_EVAL: &str = concatcp!(EVAL, SYMBOL_EVAL_CHAR);
 impl ParseMode<Symbol> for PrimMode {
     fn parse(mode: Symbol) -> Option<Self> {
         let mode = match &*mode {
-            FORM_ID => PrimMode::new(SymbolMode::Id, TaskPrimMode::Form),
-            FORM_LITERAL => PrimMode::new(SymbolMode::Literal, TaskPrimMode::Form),
-            FORM_REF => PrimMode::new(SymbolMode::Ref, TaskPrimMode::Form),
-            FORM_EVAL => PrimMode::new(SymbolMode::Eval, TaskPrimMode::Form),
-            EVAL_ID => PrimMode::new(SymbolMode::Id, TaskPrimMode::Eval),
-            EVAL_LITERAL => PrimMode::new(SymbolMode::Literal, TaskPrimMode::Eval),
-            EVAL_REF => PrimMode::new(SymbolMode::Ref, TaskPrimMode::Eval),
-            EVAL_EVAL => PrimMode::new(SymbolMode::Eval, TaskPrimMode::Eval),
+            FORM_ID => PrimMode::new(SymbolMode::Id, CallPrimMode::Form),
+            FORM_LITERAL => PrimMode::new(SymbolMode::Literal, CallPrimMode::Form),
+            FORM_REF => PrimMode::new(SymbolMode::Ref, CallPrimMode::Form),
+            FORM_EVAL => PrimMode::new(SymbolMode::Eval, CallPrimMode::Form),
+            EVAL_ID => PrimMode::new(SymbolMode::Id, CallPrimMode::Eval),
+            EVAL_LITERAL => PrimMode::new(SymbolMode::Literal, CallPrimMode::Eval),
+            EVAL_REF => PrimMode::new(SymbolMode::Ref, CallPrimMode::Eval),
+            EVAL_EVAL => PrimMode::new(SymbolMode::Eval, CallPrimMode::Eval),
             s => {
                 error!("{s} should be a symbol representing a primitive mode");
                 return None;
@@ -168,15 +167,15 @@ impl GenerateMode<Val> for PrimMode {
         if self.is_id() {
             return Val::default();
         }
-        let s = match (self.task, self.symbol) {
-            (TaskPrimMode::Form, SymbolMode::Id) => FORM_ID,
-            (TaskPrimMode::Form, SymbolMode::Literal) => FORM_LITERAL,
-            (TaskPrimMode::Form, SymbolMode::Ref) => FORM_REF,
-            (TaskPrimMode::Form, SymbolMode::Eval) => FORM_EVAL,
-            (TaskPrimMode::Eval, SymbolMode::Id) => EVAL_ID,
-            (TaskPrimMode::Eval, SymbolMode::Literal) => EVAL_LITERAL,
-            (TaskPrimMode::Eval, SymbolMode::Ref) => EVAL_REF,
-            (TaskPrimMode::Eval, SymbolMode::Eval) => EVAL_EVAL,
+        let s = match (self.call, self.symbol) {
+            (CallPrimMode::Form, SymbolMode::Id) => FORM_ID,
+            (CallPrimMode::Form, SymbolMode::Literal) => FORM_LITERAL,
+            (CallPrimMode::Form, SymbolMode::Ref) => FORM_REF,
+            (CallPrimMode::Form, SymbolMode::Eval) => FORM_EVAL,
+            (CallPrimMode::Eval, SymbolMode::Id) => EVAL_ID,
+            (CallPrimMode::Eval, SymbolMode::Literal) => EVAL_LITERAL,
+            (CallPrimMode::Eval, SymbolMode::Ref) => EVAL_REF,
+            (CallPrimMode::Eval, SymbolMode::Eval) => EVAL_EVAL,
         };
         symbol(s)
     }
@@ -188,10 +187,10 @@ impl ParseMode<MapVal> for CompMode {
     fn parse(mut map: MapVal) -> Option<Self> {
         let default = ParseMode::parse(map_remove(&mut map, DEFAULT))?;
         let pair = ParseMode::parse(map_remove(&mut map, PAIR))?;
-        let task = ParseMode::parse(map_remove(&mut map, TASK))?;
+        let call = ParseMode::parse(map_remove(&mut map, CALL))?;
         let list = ParseMode::parse(map_remove(&mut map, LIST))?;
         let map = ParseMode::parse(map_remove(&mut map, MAP))?;
-        Some(CompMode { default, pair, task, list, map })
+        Some(CompMode { default, pair, call, list, map })
     }
 }
 
@@ -203,7 +202,7 @@ impl GenerateMode<MapVal> for CompMode {
             map.insert(symbol(DEFAULT), default);
         }
         put_some(&mut map, PAIR, &self.pair);
-        put_some(&mut map, TASK, &self.task);
+        put_some(&mut map, CALL, &self.call);
         put_some(&mut map, LIST, &self.list);
         put_some(&mut map, MAP, &self.map);
         map.into()
@@ -258,35 +257,32 @@ impl GenerateMode<Val> for PairMode {
     }
 }
 
-impl ParseMode<Val> for TaskMode {
+impl ParseMode<Val> for CallMode {
     fn parse(mode: Val) -> Option<Self> {
         match mode {
             Val::Symbol(symbol) => {
                 let mode = Mode::parse(symbol)?;
-                Some(TaskMode { func: mode.clone(), ctx: mode.clone(), input: mode })
+                Some(CallMode { func: mode.clone(), input: mode })
             }
-            Val::Task(task) => {
-                let task = Task::from(task);
-                let func = ParseMode::parse(task.func)?;
-                let ctx = ParseMode::parse(task.ctx)?;
-                let input = ParseMode::parse(task.input)?;
-                Some(TaskMode { func, ctx, input })
+            Val::Call(call) => {
+                let call = Call::from(call);
+                let func = ParseMode::parse(call.func)?;
+                let input = ParseMode::parse(call.input)?;
+                Some(CallMode { func, input })
             }
             v => {
-                error!("{v:?} should be a task, a pair or a symbol");
+                error!("{v:?} should be a call, a pair or a symbol");
                 None
             }
         }
     }
 }
 
-impl GenerateMode<Val> for TaskMode {
+impl GenerateMode<Val> for CallMode {
     fn generate(&self) -> Val {
-        let action = Action::Call;
         let func = GenerateMode::generate(&self.func);
-        let ctx = GenerateMode::generate(&self.ctx);
         let input = GenerateMode::generate(&self.input);
-        Val::Task(Task { action, func, ctx, input }.into())
+        Val::Call(Call { func, input }.into())
     }
 }
 

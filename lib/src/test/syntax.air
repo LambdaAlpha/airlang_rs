@@ -7,21 +7,21 @@ _ do [
     % = _ import .integer.remainder,
     atom = [.unit, .bit, .symbol, .text, .integer, .number, .byte],
     i = 3 + (_ any integer) % 4,
-    a = atom ; get i,
+    a = atom which _ get i,
     (_ any bit) loop [
         (_ any bit) test [
             i = 3 + (_ any integer) % 4,
-            b = atom ; get i,
+            b = atom which _ get i,
             i = (4 + (_ any integer) % 4) % 4,
             a = (_ any bit) test [a : b] : [_ form@ _ a b],
         ] : [
             (_ any bit) test [
                 i = 3 + (_ any integer) % 4,
-                b = atom ; get i,
+                b = atom which _ get i,
                 a = [a, b],
             ] : [
                 i = 3 + (_ any integer) % 4,
-                b = atom ; get i,
+                b = atom which _ get i,
                 a = {a : b},
             ]
         ]

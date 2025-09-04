@@ -1,26 +1,12 @@
-new
+get
 -----
 _ do [
-    new = _ import .pair.new,
-    f = _ any .,
-    s = _ any .,
-    p1 = f new s,
-    p2 = f : s,
-    p1 == p2
-]
------
-true
-=====
-new get
------
-_ do [
-    new = _ import .pair.new,
     first = _ import .pair.first,
     second = _ import .pair.second,
     f = _ any .,
     s = _ any .,
-    p = f new s,
-    (f == p ; first .) and (s == p ; second .)
+    p = f : s,
+    (f == p which _ first .) and (s == p which _ second .)
 ]
 -----
 true
@@ -35,10 +21,10 @@ _ do [
     p = _ any pair,
     f = _ any .,
     s = _ any .,
-    p ; set_first f,
-    p ; set_second s,
-    f1 = p ; first .,
-    s1 = p ; second .,
+    p which _ set_first f,
+    p which _ set_second s,
+    f1 = p which _ first .,
+    s1 = p which _ second .,
     (f == f1) and (s == s1)
 ]
 -----
@@ -52,8 +38,8 @@ _ do [
     f1 = _ any .,
     s1 = _ any .,
     p = f1 : s1,
-    f2 = p ; set_first _ any .,
-    s2 = p ; set_second _ any .,
+    f2 = p which _ set_first _ any .,
+    s2 = p which _ set_second _ any .,
     (f1 == f2) and s1 == s2
 ]
 -----

@@ -4,7 +4,7 @@ use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_free_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -13,9 +13,9 @@ use crate::syntax::GenRepr;
 use crate::syntax::ParseRepr;
 use crate::syntax::ReprError;
 use crate::syntax::generate_pretty;
+use crate::type_::Call;
 use crate::type_::List;
 use crate::type_::Pair;
-use crate::type_::Task;
 use crate::type_::Text;
 
 #[derive(Clone)]
@@ -42,7 +42,7 @@ impl Library for SyntaxLib {
 }
 
 pub fn parse() -> FreePrimFuncVal {
-    FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse), mode: default_free_mode() }.free()
+    FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
@@ -58,7 +58,7 @@ fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> FreePrimFuncVal {
-    FreePrimFn { id: "syntax.generate", f: free_impl(fn_generate), mode: default_free_mode() }
+    FreePrimFn { id: "syntax.generate", f: free_impl(fn_generate), mode: FuncMode::default_mode() }
         .free()
 }
 
@@ -90,11 +90,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let second = (&pair.second).try_into()?;
                 GenRepr::Pair(Box::new(Pair::new(first, second)))
             }
-            Val::Task(task) => {
-                let func = (&task.func).try_into()?;
-                let ctx = (&task.ctx).try_into()?;
-                let input = (&task.input).try_into()?;
-                GenRepr::Task(Box::new(Task { action: task.action, func, ctx, input }))
+            Val::Call(call) => {
+                let func = (&call.func).try_into()?;
+                let input = (&call.input).try_into()?;
+                GenRepr::Call(Box::new(Call { func, input }))
             }
             Val::List(list) => {
                 let list: List<GenRepr> =

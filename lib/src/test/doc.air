@@ -6,7 +6,7 @@ _ do [
     c_for = _ function {
         code : (.ctx : .args) : _ do [
             [.init, .condition, .next, .body] = .args,
-            .ctx ; apply _ do [
+            .ctx which _ apply _ do [
                 .init,
                 .condition loop [
                     .body,

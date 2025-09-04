@@ -1,22 +1,30 @@
+use std::rc::Rc;
+
 use super::ConstFn;
 use super::FreeFn;
 use super::MutFn;
+use super::MutPrimFunc;
+use crate::semantics::core::Eval;
 use crate::semantics::val::FuncVal;
 use crate::type_::ConstRef;
+use crate::type_::Symbol;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) struct Setup {
-    pub(crate) call: Option<FuncVal>,
-    pub(crate) solve: Option<FuncVal>,
-}
-
-impl Setup {
-    pub(crate) fn none() -> Self {
-        Self { call: None, solve: None }
-    }
+pub(crate) trait Setup {
+    fn setup(&self) -> Option<&FuncVal>;
 }
 
 pub(crate) trait SetupFn {}
+
+pub fn default_setup() -> FuncVal {
+    FuncVal::MutPrim(
+        MutPrimFunc {
+            id: Symbol::from_str_unchecked("setup.default"),
+            fn_: Rc::new(Eval),
+            setup: None,
+        }
+        .into(),
+    )
+}
 
 impl<T> SetupFn for &T where T: SetupFn {}
 
@@ -60,19 +68,3 @@ where
         }
     }
 }
-
-macro_rules! impl_setup {
-    ($func:ty) => {
-        impl $crate::semantics::func::FuncSetup for $func {
-            fn call(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.call.as_ref()
-            }
-
-            fn solve(&self) -> Option<&$crate::semantics::val::FuncVal> {
-                self.setup.solve.as_ref()
-            }
-        }
-    };
-}
-
-pub(crate) use impl_setup;

@@ -12,7 +12,7 @@ any unit
 -----
 _ do [
     u = _ any unit,
-    u ; type .
+    u which _ type .
 ]
 -----
 unit
@@ -21,7 +21,7 @@ any bit
 -----
 _ do [
     b = _ any bit,
-    b ; type .
+    b which _ type .
 ]
 -----
 bit
@@ -30,7 +30,7 @@ any symbol
 -----
 _ do [
     s = _ any symbol,
-    s ; type .
+    s which _ type .
 ]
 -----
 symbol
@@ -39,7 +39,7 @@ any text
 -----
 _ do [
     t = _ any text,
-    t ; type .
+    t which _ type .
 ]
 -----
 text
@@ -48,7 +48,7 @@ any integer
 -----
 _ do [
     i = _ any integer,
-    i ; type .
+    i which _ type .
 ]
 -----
 integer
@@ -57,7 +57,7 @@ any number
 -----
 _ do [
     n = _ any number,
-    n ; type .
+    n which _ type .
 ]
 -----
 number
@@ -66,7 +66,7 @@ any byte
 -----
 _ do [
     b = _ any byte,
-    b ; type .
+    b which _ type .
 ]
 -----
 byte
@@ -75,25 +75,25 @@ any pair
 -----
 _ do [
     p = _ any pair,
-    p ; type .
+    p which _ type .
 ]
 -----
 pair
 =====
-any task
+any call
 -----
 _ do [
-    c = _ any task,
-    c ; type .
+    c = _ any call,
+    c which _ type .
 ]
 -----
-task
+call
 =====
 any list
 -----
 _ do [
     a = _ any list,
-    a ; type .
+    a which _ type .
 ]
 -----
 list
@@ -102,7 +102,7 @@ any map
 -----
 _ do [
     a = _ any map,
-    a ; type .
+    a which _ type .
 ]
 -----
 map
@@ -111,7 +111,7 @@ any link
 -----
 _ do [
     a = _ any link,
-    a ; type .
+    a which _ type .
 ]
 -----
 link
@@ -120,7 +120,7 @@ any context
 -----
 _ do [
     c = _ any context,
-    c ; type .
+    c which _ type .
 ]
 -----
 context
@@ -129,7 +129,7 @@ any function
 -----
 _ do [
     f = _ any function,
-    f ; type .
+    f which _ type .
 ]
 -----
 function
@@ -138,7 +138,7 @@ type unit
 -----
 _ do [
     a = .,
-    a ; type .
+    a which _ type .
 ]
 -----
 unit
@@ -147,7 +147,7 @@ type bit
 -----
 _ do [
     a = true,
-    a ; type .
+    a which _ type .
 ]
 -----
 bit
@@ -156,7 +156,7 @@ type symbol
 -----
 _ do [
     a = .a,
-    a ; type .
+    a which _ type .
 ]
 -----
 symbol
@@ -165,7 +165,7 @@ type text
 -----
 _ do [
     a = "",
-    a ; type .
+    a which _ type .
 ]
 -----
 text
@@ -174,7 +174,7 @@ type integer
 -----
 _ do [
     a = 1,
-    a ; type .
+    a which _ type .
 ]
 -----
 integer
@@ -183,7 +183,7 @@ type number
 -----
 _ do [
     a = 1.0,
-    a ; type .
+    a which _ type .
 ]
 -----
 number
@@ -192,7 +192,7 @@ type byte
 -----
 _ do [
     a = byte(ff),
-    a ; type .
+    a which _ type .
 ]
 -----
 byte
@@ -201,25 +201,25 @@ type pair
 -----
 _ do [
     a = 1 : 2,
-    a ; type .
+    a which _ type .
 ]
 -----
 pair
 =====
-type task
+type call
 -----
 _ do [
     a = _ form _ f a,
-    a ; type .
+    a which _ type .
 ]
 -----
-task
+call
 =====
 type list
 -----
 _ do [
     a = [],
-    a ; type .
+    a which _ type .
 ]
 -----
 list
@@ -228,7 +228,7 @@ type map
 -----
 _ do [
     a = {},
-    a ; type .
+    a which _ type .
 ]
 -----
 map
@@ -238,7 +238,7 @@ type link
 _ do [
     new_link = _ import .link.new,
     a = _ new_link .,
-    a ; type .
+    a which _ type .
 ]
 -----
 link
@@ -248,7 +248,7 @@ type context
 _ do [
     new_context = _ import .context.new,
     a = _ new_context {},
-    a ; type .
+    a which _ type .
 ]
 -----
 context
@@ -257,7 +257,7 @@ type function
 -----
 _ do [
     a = _ function {},
-    a ; type .
+    a which _ type .
 ]
 -----
 function
@@ -310,7 +310,7 @@ true
 -----
 true
 =====
-== task
+== call
 -----
 (_ form _ 1 2) == (_ form _ 1 2)
 -----

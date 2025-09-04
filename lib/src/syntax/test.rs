@@ -11,14 +11,13 @@ use super::parse;
 use super::repr::PairRepr;
 use super::repr::Repr;
 use crate::test::parse_test_file;
-use crate::type_::Action;
 use crate::type_::Bit;
+use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -59,23 +58,13 @@ fn pair(first: Repr, second: Repr) -> Repr {
 }
 
 fn call(func: Repr, input: Repr) -> Repr {
-    let task = Task { action: Action::Call, func, ctx: Repr::default(), input };
-    Repr::Task(Box::new(task))
+    let call = Call { func, input };
+    Repr::Call(Box::new(call))
 }
 
-fn solve(func: Repr, input: Repr) -> Repr {
-    let task = Task { action: Action::Solve, func, ctx: Repr::default(), input };
-    Repr::Task(Box::new(task))
-}
-
-fn ctx_call(ctx: Repr, func: Repr, input: Repr) -> Repr {
-    let task = Task { action: Action::Call, func, ctx, input };
-    Repr::Task(Box::new(task))
-}
-
-fn ctx_solve(ctx: Repr, func: Repr, input: Repr) -> Repr {
-    let task = Task { action: Action::Solve, func, ctx, input };
-    Repr::Task(Box::new(task))
+fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
+    let call = Call { func: middle, input: Repr::Pair(Box::new(Pair::new(left, right))) };
+    Repr::Call(Box::new(call))
 }
 
 fn list(v: Vec<Repr>) -> Repr {
@@ -84,26 +73,6 @@ fn list(v: Vec<Repr>) -> Repr {
 
 fn map(v: Vec<(Repr, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
-}
-
-fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
-    let task = Task {
-        action: Action::Call,
-        func: middle,
-        ctx: Repr::default(),
-        input: Repr::Pair(Box::new(Pair::new(left, right))),
-    };
-    Repr::Task(Box::new(task))
-}
-
-fn infix_solve(left: Repr, middle: Repr, right: Repr) -> Repr {
-    let task = Task {
-        action: Action::Solve,
-        func: middle,
-        ctx: Repr::default(),
-        input: Repr::Pair(Box::new(Pair::new(left, right))),
-    };
-    Repr::Task(Box::new(task))
 }
 
 fn test_parse(
@@ -175,6 +144,16 @@ fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
         assert_eq!(i1, i2, "file {file_name} case ({title}): expect({i2}) != real({i1})");
     }
     Ok(())
+}
+
+#[test]
+fn test_parse_scope() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/scope.air"), "test/scope.air", scope::expected)
+}
+
+#[test]
+fn test_generate_scope() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/scope.air"), "test/scope.air")
 }
 
 #[test]
@@ -263,23 +242,13 @@ fn test_generate_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_task() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/task.air"), "test/task.air", task::expected)
+fn test_parse_call() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/call.air"), "test/call.air", call::expected)
 }
 
 #[test]
-fn test_generate_task() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/task.air"), "test/task.air")
-}
-
-#[test]
-fn test_parse_scope() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/scope.air"), "test/scope.air", scope::expected)
-}
-
-#[test]
-fn test_generate_scope() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/scope.air"), "test/scope.air")
+fn test_generate_call() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/call.air"), "test/call.air")
 }
 
 #[test]
@@ -328,7 +297,7 @@ mod byte;
 
 mod pair;
 
-mod task;
+mod call;
 
 mod list;
 

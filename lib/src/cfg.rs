@@ -25,8 +25,6 @@ impl<T: CfgMod> From<T> for Cfg {
 pub struct CoreCfg {
     pub lib: CoreLib,
     pub prelude: Ctx,
-    // todo design default solve
-    pub solver: FuncVal,
 }
 
 impl Default for CoreCfg {
@@ -34,8 +32,7 @@ impl Default for CoreCfg {
         let lib = CoreLib::default();
         let mut prelude = Ctx::default();
         lib.prelude(&mut prelude);
-        let solver = FuncVal::default();
-        Self { lib, prelude, solver }
+        Self { lib, prelude }
     }
 }
 
@@ -43,13 +40,11 @@ impl CfgMod for CoreCfg {
     fn extend(self, cfg: &Cfg) {
         self.lib.extend(cfg);
         cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Ctx(self.prelude.into()));
-        cfg.extend_scope(Symbol::from_str_unchecked(Self::SOLVER), Val::Func(self.solver));
     }
 }
 
 impl CoreCfg {
     pub const PRELUDE: &'static str = "prelude";
-    pub const SOLVER: &'static str = "solver";
     pub const REVERSE: &'static str = "reverse";
 }
 

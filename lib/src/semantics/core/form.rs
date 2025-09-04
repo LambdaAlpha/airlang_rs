@@ -5,10 +5,10 @@ use std::mem::take;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
+use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
-use crate::semantics::val::TaskVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::List;
@@ -73,51 +73,44 @@ where
     }
 }
 
-pub(crate) struct TaskForm<'a, Func, Ctx, Input> {
+pub(crate) struct CallForm<'a, Func, Input> {
     pub(crate) func: &'a Func,
-    pub(crate) ctx: &'a Ctx,
     pub(crate) input: &'a Input,
 }
 
-impl<'a, Func, Ctx, Input, Cfg> FreeFn<Cfg, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
+impl<'a, Func, Input, Cfg> FreeFn<Cfg, CallVal, Val> for CallForm<'a, Func, Input>
 where
     Func: FreeFn<Cfg, Val, Val>,
-    Ctx: FreeFn<Cfg, Val, Val>,
     Input: FreeFn<Cfg, Val, Val>,
 {
-    fn free_call(&self, cfg: &mut Cfg, mut task: TaskVal) -> Val {
-        task.func = self.func.free_call(cfg, take(&mut task.func));
-        task.ctx = self.ctx.free_call(cfg, take(&mut task.ctx));
-        task.input = self.input.free_call(cfg, take(&mut task.input));
-        Val::Task(task)
+    fn free_call(&self, cfg: &mut Cfg, mut call: CallVal) -> Val {
+        call.func = self.func.free_call(cfg, take(&mut call.func));
+        call.input = self.input.free_call(cfg, take(&mut call.input));
+        Val::Call(call)
     }
 }
 
-impl<'a, Func, Ctx, Input, Cfg, C> ConstFn<Cfg, C, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
+impl<'a, Func, Input, Cfg, C> ConstFn<Cfg, C, CallVal, Val> for CallForm<'a, Func, Input>
 where
     Func: ConstFn<Cfg, C, Val, Val>,
-    Ctx: ConstFn<Cfg, C, Val, Val>,
     Input: ConstFn<Cfg, C, Val, Val>,
 {
-    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<C>, mut task: TaskVal) -> Val {
-        task.func = self.func.const_call(cfg, ctx.reborrow(), take(&mut task.func));
-        task.ctx = self.ctx.const_call(cfg, ctx.reborrow(), take(&mut task.ctx));
-        task.input = self.input.const_call(cfg, ctx, take(&mut task.input));
-        Val::Task(task)
+    fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<C>, mut call: CallVal) -> Val {
+        call.func = self.func.const_call(cfg, ctx.reborrow(), take(&mut call.func));
+        call.input = self.input.const_call(cfg, ctx, take(&mut call.input));
+        Val::Call(call)
     }
 }
 
-impl<'a, Func, Ctx, Input, Cfg, C> MutFn<Cfg, C, TaskVal, Val> for TaskForm<'a, Func, Ctx, Input>
+impl<'a, Func, Input, Cfg, Ctx> MutFn<Cfg, Ctx, CallVal, Val> for CallForm<'a, Func, Input>
 where
-    Func: MutFn<Cfg, C, Val, Val>,
-    Ctx: MutFn<Cfg, C, Val, Val>,
-    Input: MutFn<Cfg, C, Val, Val>,
+    Func: MutFn<Cfg, Ctx, Val, Val>,
+    Input: MutFn<Cfg, Ctx, Val, Val>,
 {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut C, mut task: TaskVal) -> Val {
-        task.func = self.func.mut_call(cfg, ctx, take(&mut task.func));
-        task.ctx = self.ctx.mut_call(cfg, ctx, take(&mut task.ctx));
-        task.input = self.input.mut_call(cfg, ctx, take(&mut task.input));
-        Val::Task(task)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut call: CallVal) -> Val {
+        call.func = self.func.mut_call(cfg, ctx, take(&mut call.func));
+        call.input = self.input.mut_call(cfg, ctx, take(&mut call.input));
+        Val::Call(call)
     }
 }
 

@@ -4,7 +4,7 @@ use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_free_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -39,7 +39,7 @@ impl Library for LinkLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "link.new", f: free_impl(fn_new), mode: default_free_mode() }.free()
+    FreePrimFn { id: "link.new", f: free_impl(fn_new), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -47,7 +47,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get() -> FreePrimFuncVal {
-    FreePrimFn { id: "link.get", f: free_impl(fn_get), mode: default_free_mode() }.free()
+    FreePrimFn { id: "link.get", f: free_impl(fn_get), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_get(_cfg: &mut Cfg, input: Val) -> Val {
@@ -59,7 +59,7 @@ fn fn_get(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn set() -> FreePrimFuncVal {
-    FreePrimFn { id: "link.set", f: free_impl(fn_set), mode: default_free_mode() }.free()
+    FreePrimFn { id: "link.set", f: free_impl(fn_set), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_set(_cfg: &mut Cfg, input: Val) -> Val {

@@ -19,19 +19,20 @@ use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
+use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::SymbolMode;
-use crate::cfg::mode::TaskPrimMode;
-use crate::cfg::mode::default_dyn_mode;
-use crate::cfg::mode::default_free_mode;
-use crate::cfg::mode::dyn_mode;
-use crate::cfg::mode::free_mode;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
+use crate::semantics::ctx::DynCtx;
+use crate::semantics::func::MutFn;
+use crate::semantics::func::Setup;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Call;
 use crate::type_::ConstRef;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -45,10 +46,11 @@ pub struct CtxLib {
     pub set_contract: MutPrimFuncVal,
     pub is_null: ConstPrimFuncVal,
     pub is_const: MutPrimFuncVal,
-    pub ctx_new: FreePrimFuncVal,
-    pub ctx_repr: FreePrimFuncVal,
-    pub ctx_reverse: FreePrimFuncVal,
-    pub ctx_self: ConstPrimFuncVal,
+    pub new: FreePrimFuncVal,
+    pub repr: FreePrimFuncVal,
+    pub reverse: FreePrimFuncVal,
+    pub self_: ConstPrimFuncVal,
+    pub which: MutPrimFuncVal,
 }
 
 impl Default for CtxLib {
@@ -61,10 +63,11 @@ impl Default for CtxLib {
             set_contract: set_contract(),
             is_null: is_null(),
             is_const: is_const(),
-            ctx_new: ctx_new(),
-            ctx_repr: ctx_repr(),
-            ctx_reverse: ctx_reverse(),
-            ctx_self: ctx_self(),
+            new: new(),
+            repr: repr(),
+            reverse: reverse(),
+            self_: self_(),
+            which: which(),
         }
     }
 }
@@ -78,21 +81,24 @@ impl CfgMod for CtxLib {
         self.set_contract.extend(cfg);
         self.is_null.extend(cfg);
         self.is_const.extend(cfg);
-        self.ctx_new.extend(cfg);
-        self.ctx_repr.extend(cfg);
-        self.ctx_reverse.extend(cfg);
-        self.ctx_self.extend(cfg);
+        self.new.extend(cfg);
+        self.repr.extend(cfg);
+        self.reverse.extend(cfg);
+        self.self_.extend(cfg);
+        self.which.extend(cfg);
     }
 }
 
 impl Library for CtxLib {
     fn prelude(&self, ctx: &mut Ctx) {
         ctx_put_func(ctx, "=", &self.assign);
+        ctx_put_func(ctx, "which", &self.which);
     }
 }
 
 pub fn read() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.read", f: const_impl(fn_read), mode: default_dyn_mode() }.const_()
+    DynPrimFn { id: "context.read", f: const_impl(fn_read), mode: FuncMode::default_mode() }
+        .const_()
 }
 
 fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -108,7 +114,7 @@ fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn move_() -> MutPrimFuncVal {
-    DynPrimFn { id: "context.move", f: mut_impl(fn_move), mode: default_dyn_mode() }.mut_()
+    DynPrimFn { id: "context.move", f: mut_impl(fn_move), mode: FuncMode::default_mode() }.mut_()
 }
 
 fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -127,11 +133,11 @@ pub fn assign() -> MutPrimFuncVal {
     DynPrimFn {
         id: "context.assign",
         f: mut_impl(fn_assign),
-        mode: dyn_mode(FuncMode::pair_mode(
+        mode: FuncMode::pair_mode(
             Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, TaskPrimMode::Form),
+            FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
             FuncMode::default_mode(),
-        )),
+        ),
     }
     .mut_()
 }
@@ -151,7 +157,7 @@ fn fn_assign(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn contract() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.contract", f: const_impl(fn_contract), mode: default_dyn_mode() }
+    DynPrimFn { id: "context.contract", f: const_impl(fn_contract), mode: FuncMode::default_mode() }
         .const_()
 }
 
@@ -172,8 +178,12 @@ fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_contract() -> MutPrimFuncVal {
-    DynPrimFn { id: "context.set_contract", f: mut_impl(fn_set_contract), mode: default_dyn_mode() }
-        .mut_()
+    DynPrimFn {
+        id: "context.set_contract",
+        f: mut_impl(fn_set_contract),
+        mode: FuncMode::default_mode(),
+    }
+    .mut_()
 }
 
 fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -199,7 +209,7 @@ fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_null() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.is_null", f: const_impl(fn_is_null), mode: default_dyn_mode() }
+    DynPrimFn { id: "context.is_null", f: const_impl(fn_is_null), mode: FuncMode::default_mode() }
         .const_()
 }
 
@@ -219,7 +229,7 @@ pub fn is_const() -> MutPrimFuncVal {
     DynPrimFn {
         id: "context.is_constant",
         f: MutImpl::new(FreeImpl::default, fn_const, fn_mut),
-        mode: default_dyn_mode(),
+        mode: FuncMode::default_mode(),
     }
     .mut_()
 }
@@ -232,11 +242,11 @@ fn fn_mut(_cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
     Val::Bit(Bit::false_())
 }
 
-pub fn ctx_new() -> FreePrimFuncVal {
-    FreePrimFn { id: "context.new", f: free_impl(fn_ctx_new), mode: free_mode(parse_mode()) }.free()
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn { id: "context.new", f: free_impl(fn_new), mode: parse_mode() }.free()
 }
 
-fn fn_ctx_new(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(ctx) = parse_ctx(input) else {
         error!("parse_ctx failed");
         return Val::default();
@@ -244,12 +254,12 @@ fn fn_ctx_new(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Ctx(ctx)
 }
 
-pub fn ctx_repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "context.represent", f: free_impl(fn_ctx_repr), mode: default_free_mode() }
+pub fn repr() -> FreePrimFuncVal {
+    FreePrimFn { id: "context.represent", f: free_impl(fn_repr), mode: FuncMode::default_mode() }
         .free()
 }
 
-fn fn_ctx_repr(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Ctx(ctx) = input else {
         error!("input {input:?} should be a ctx");
         return Val::default();
@@ -257,12 +267,12 @@ fn fn_ctx_repr(_cfg: &mut Cfg, input: Val) -> Val {
     generate_ctx(ctx)
 }
 
-pub fn ctx_reverse() -> FreePrimFuncVal {
-    FreePrimFn { id: "context.reverse", f: free_impl(fn_ctx_reverse), mode: default_free_mode() }
+pub fn reverse() -> FreePrimFuncVal {
+    FreePrimFn { id: "context.reverse", f: free_impl(fn_reverse), mode: FuncMode::default_mode() }
         .free()
 }
 
-fn fn_ctx_reverse(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_reverse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Ctx(ctx) = input else {
         error!("input {input:?} should be a ctx");
         return Val::default();
@@ -272,12 +282,40 @@ fn fn_ctx_reverse(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Ctx(reverse.into())
 }
 
-pub fn ctx_self() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.self", f: const_impl(fn_ctx_self), mode: default_dyn_mode() }.const_()
+pub fn self_() -> ConstPrimFuncVal {
+    DynPrimFn { id: "context.self", f: const_impl(fn_self), mode: FuncMode::default_mode() }
+        .const_()
 }
 
-fn fn_ctx_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     ctx.unwrap().clone()
+}
+
+pub fn which() -> MutPrimFuncVal {
+    DynPrimFn { id: "context.which", f: mut_impl(fn_which), mode: FuncMode::id_mode() }.mut_()
+}
+
+fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input: {:?} should be a pair", input);
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Call(call) = pair.second else {
+        error!("input.second {:?} should be a call", pair.second);
+        return Val::default();
+    };
+    let call = Call::from(call);
+    let Val::Func(func) = Eval.mut_call(cfg, ctx, call.func) else {
+        error!("input.second.func should be a func");
+        return Val::default();
+    };
+    let input = func.setup().mut_call(cfg, ctx, call.input);
+    let Some(ctx) = ctx.ref_(pair.first) else {
+        error!("input.first should be a valid reference");
+        return Val::default();
+    };
+    func.dyn_call(cfg, ctx, input)
 }
 
 pub(in crate::cfg) mod pattern;

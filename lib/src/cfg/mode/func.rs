@@ -1,6 +1,7 @@
-use std::fmt::Debug;
 use std::rc::Rc;
 
+use super::CallMode;
+use super::CallPrimMode;
 use super::CompMode;
 use super::ListMode;
 use super::MapMode;
@@ -8,13 +9,10 @@ use super::Mode;
 use super::PairMode;
 use super::PrimMode;
 use super::SymbolMode;
-use super::TaskMode;
-use super::TaskPrimMode;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::MutPrimFunc;
-use crate::semantics::func::Setup;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -24,13 +22,9 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Symbol;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FuncMode {
-    pub call: Mode,
-    pub solve: Mode,
-}
+pub struct FuncMode;
 
-const DEFAULT_MODE: PrimMode = PrimMode { symbol: SymbolMode::Ref, task: TaskPrimMode::Eval };
+const DEFAULT_MODE: PrimMode = PrimMode { symbol: SymbolMode::Ref, call: CallPrimMode::Eval };
 
 const MODE_FUNC_ID: &str = "mode.object";
 
@@ -47,7 +41,7 @@ impl FuncMode {
         FreePrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: Setup::none(),
+            setup: None,
         }
         .into()
     }
@@ -56,7 +50,7 @@ impl FuncMode {
         ConstPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: Setup::none(),
+            setup: None,
         }
         .into()
     }
@@ -65,14 +59,14 @@ impl FuncMode {
         MutPrimFunc {
             id: Symbol::from_str_unchecked(MODE_FUNC_ID),
             fn_: Rc::new(mode),
-            setup: Setup::none(),
+            setup: None,
         }
         .into()
     }
 
     pub const fn default_mode() -> Mode {
         let default = DEFAULT_MODE;
-        Mode::Comp(CompMode { default, pair: None, task: None, list: None, map: None })
+        Mode::Comp(CompMode { default, pair: None, call: None, list: None, map: None })
     }
 
     pub const fn default_prim_mode() -> PrimMode {
@@ -87,9 +81,9 @@ impl FuncMode {
         Mode::id()
     }
 
-    pub const fn prim_mode(symbol: SymbolMode, task: TaskPrimMode) -> Mode {
-        let default = PrimMode::new(symbol, task);
-        Mode::Comp(CompMode { default, pair: None, task: None, list: None, map: None })
+    pub const fn prim_mode(symbol: SymbolMode, call: CallPrimMode) -> Mode {
+        let default = PrimMode::new(symbol, call);
+        Mode::Comp(CompMode { default, pair: None, call: None, list: None, map: None })
     }
 
     pub fn pair_mode(some: Map<Val, Mode>, first: Mode, second: Mode) -> Mode {
@@ -100,9 +94,9 @@ impl FuncMode {
         Mode::Comp(mode)
     }
 
-    pub fn task_mode(func: Mode, ctx: Mode, input: Mode) -> Mode {
+    pub fn call_mode(func: Mode, input: Mode) -> Mode {
         let mode = CompMode {
-            task: Some(Box::new(TaskMode { func, ctx, input })),
+            call: Some(Box::new(CallMode { func, input })),
             ..Self::default_comp_mode()
         };
         Mode::Comp(mode)
@@ -118,19 +112,6 @@ impl FuncMode {
         let mode =
             CompMode { map: Some(Box::new(MapMode { some, else_ })), ..Self::default_comp_mode() };
         Mode::Comp(mode)
-    }
-
-    pub(crate) fn into_setup(self) -> Setup {
-        Setup {
-            call: Some(FuncMode::mode_into_func(self.call)),
-            solve: Some(FuncMode::mode_into_func(self.solve)),
-        }
-    }
-}
-
-impl Default for FuncMode {
-    fn default() -> Self {
-        Self { call: FuncMode::default_mode(), solve: FuncMode::default_mode() }
     }
 }
 
@@ -164,7 +145,7 @@ impl GetCtxAccess for Mode {
 
 impl GetCtxAccess for PrimMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.symbol.ctx_access() & self.task.ctx_access()
+        self.symbol.ctx_access() & self.call.ctx_access()
     }
 }
 
@@ -174,11 +155,11 @@ impl GetCtxAccess for SymbolMode {
     }
 }
 
-impl GetCtxAccess for TaskPrimMode {
+impl GetCtxAccess for CallPrimMode {
     fn ctx_access(&self) -> CtxAccess {
         match self {
-            TaskPrimMode::Form => CtxAccess::Free,
-            TaskPrimMode::Eval => CtxAccess::Mut,
+            CallPrimMode::Form => CtxAccess::Free,
+            CallPrimMode::Eval => CtxAccess::Mut,
         }
     }
 }
@@ -187,7 +168,7 @@ impl GetCtxAccess for CompMode {
     fn ctx_access(&self) -> CtxAccess {
         self.default.ctx_access()
             & self.pair.ctx_access()
-            & self.task.ctx_access()
+            & self.call.ctx_access()
             & self.list.ctx_access()
             & self.map.ctx_access()
     }
@@ -201,9 +182,9 @@ impl GetCtxAccess for PairMode {
     }
 }
 
-impl GetCtxAccess for TaskMode {
+impl GetCtxAccess for CallMode {
     fn ctx_access(&self) -> CtxAccess {
-        self.func.ctx_access() & self.ctx.ctx_access() & self.input.ctx_access()
+        self.func.ctx_access() & self.input.ctx_access()
     }
 }
 

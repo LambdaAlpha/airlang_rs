@@ -3,7 +3,7 @@ use super::Library;
 use super::ctx_put_func;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::default_free_mode;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::val::FreePrimFuncVal;
@@ -45,7 +45,7 @@ impl Library for BitLib {
 }
 
 pub fn not() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.not", f: free_impl(fn_not), mode: default_free_mode() }.free()
+    FreePrimFn { id: "bit.not", f: free_impl(fn_not), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_not(_cfg: &mut Cfg, input: Val) -> Val {
@@ -56,7 +56,7 @@ fn fn_not(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn and() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.and", f: free_impl(fn_and), mode: default_free_mode() }.free()
+    FreePrimFn { id: "bit.and", f: free_impl(fn_and), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_and(_cfg: &mut Cfg, input: Val) -> Val {
@@ -73,7 +73,7 @@ fn fn_and(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn or() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.or", f: free_impl(fn_or), mode: default_free_mode() }.free()
+    FreePrimFn { id: "bit.or", f: free_impl(fn_or), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_or(_cfg: &mut Cfg, input: Val) -> Val {
@@ -90,7 +90,7 @@ fn fn_or(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn xor() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.xor", f: free_impl(fn_xor), mode: default_free_mode() }.free()
+    FreePrimFn { id: "bit.xor", f: free_impl(fn_xor), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_xor(_cfg: &mut Cfg, input: Val) -> Val {
@@ -107,7 +107,7 @@ fn fn_xor(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn imply() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.imply", f: free_impl(fn_imply), mode: default_free_mode() }.free()
+    FreePrimFn { id: "bit.imply", f: free_impl(fn_imply), mode: FuncMode::default_mode() }.free()
 }
 
 fn fn_imply(_cfg: &mut Cfg, input: Val) -> Val {

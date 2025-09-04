@@ -1,4 +1,5 @@
 pub use self::byte::ByteVal;
+pub use self::call::CallVal;
 pub use self::cfg::CfgVal;
 pub use self::ctx::CtxVal;
 pub use self::func::ConstCompFuncVal;
@@ -13,7 +14,6 @@ pub use self::list::ListVal;
 pub use self::map::MapVal;
 pub use self::number::NumberVal;
 pub use self::pair::PairVal;
-pub use self::task::TaskVal;
 pub use self::text::TextVal;
 
 _____!();
@@ -29,6 +29,7 @@ use crate::semantics::ctx::DynCtx;
 use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
+use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::Link;
 use crate::type_::List;
@@ -36,7 +37,6 @@ use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Symbol;
-use crate::type_::Task;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -59,7 +59,7 @@ pub enum Val {
     Byte(ByteVal),
 
     Pair(PairVal),
-    Task(TaskVal),
+    Call(CallVal),
 
     List(ListVal),
     Map(MapVal),
@@ -82,7 +82,7 @@ pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
-pub(crate) const TASK: &str = "task";
+pub(crate) const CALL: &str = "call";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const LINK: &str = "link";
@@ -126,9 +126,9 @@ impl From<Pair<Val, Val>> for Val {
     }
 }
 
-impl From<Task<Val, Val, Val>> for Val {
-    fn from(value: Task<Val, Val, Val>) -> Self {
-        Val::Task(TaskVal::from(value))
+impl From<Call<Val, Val>> for Val {
+    fn from(value: Call<Val, Val>) -> Self {
+        Val::Call(CallVal::from(value))
     }
 }
 
@@ -155,7 +155,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Number($name) => $body,
             $crate::semantics::val::Val::Byte($name) => $body,
             $crate::semantics::val::Val::Pair($name) => $body,
-            $crate::semantics::val::Val::Task($name) => $body,
+            $crate::semantics::val::Val::Call($name) => $body,
             $crate::semantics::val::Val::List($name) => $body,
             $crate::semantics::val::Val::Map($name) => $body,
             $crate::semantics::val::Val::Link($name) => $body,
@@ -186,7 +186,7 @@ mod byte;
 
 mod pair;
 
-mod task;
+mod call;
 
 mod list;
 
