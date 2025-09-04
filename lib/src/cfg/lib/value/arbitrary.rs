@@ -38,7 +38,6 @@ use crate::semantics::val::Val;
 use crate::type_::Action;
 use crate::type_::Bit;
 use crate::type_::Byte;
-use crate::type_::Change;
 use crate::type_::CtxInput;
 use crate::type_::Either;
 use crate::type_::FuncCtx;
@@ -213,17 +212,6 @@ where
         } else {
             Either::That(That::any(rng, depth))
         }
-    }
-}
-
-impl<From, To> Arbitrary for Change<From, To>
-where
-    From: Arbitrary,
-    To: Arbitrary,
-{
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        Change::new(From::any(rng, depth), To::any(rng, depth))
     }
 }
 

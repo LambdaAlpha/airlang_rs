@@ -1,6 +1,5 @@
 pub use self::bit::Bit;
 pub use self::byte::Byte;
-pub use self::change::Change;
 pub use self::either::Either;
 pub use self::int::Int;
 pub use self::link::Link;
@@ -41,8 +40,6 @@ mod byte;
 mod pair;
 
 mod either;
-
-mod change;
 
 mod task;
 
