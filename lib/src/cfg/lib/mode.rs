@@ -1,33 +1,24 @@
-pub use self::comp::CompMode;
-pub use self::func::FuncMode;
-pub use self::list::ListMode;
-pub use self::map::MapMode;
-pub use self::pair::PairMode;
-pub use self::prim::PrimMode;
-pub use self::symbol::SymbolMode;
-pub use self::task::TaskMode;
-pub use self::task::TaskPrimMode;
 use crate::cfg::CfgMod;
-
-_____!();
-
-use super::DynPrimFn;
-use super::FreePrimFn;
-use super::Library;
-use super::MutImpl;
-use super::ctx_put_func;
-use super::free_impl;
-use super::mode::repr::EVAL_EVAL;
-use super::mode::repr::EVAL_ID;
-use super::mode::repr::EVAL_LITERAL;
-use super::mode::repr::EVAL_REF;
-use super::mode::repr::FORM_EVAL;
-use super::mode::repr::FORM_ID;
-use super::mode::repr::FORM_LITERAL;
-use super::mode::repr::FORM_REF;
-use super::mode::repr::parse;
-use crate::cfg::lib::setup::dyn_mode;
-use crate::cfg::lib::setup::free_mode;
+use crate::cfg::lib::DynPrimFn;
+use crate::cfg::lib::FreePrimFn;
+use crate::cfg::lib::Library;
+use crate::cfg::lib::MutImpl;
+use crate::cfg::lib::ctx_put_func;
+use crate::cfg::lib::free_impl;
+use crate::cfg::lib::mode::repr::EVAL_EVAL;
+use crate::cfg::lib::mode::repr::EVAL_ID;
+use crate::cfg::lib::mode::repr::EVAL_LITERAL;
+use crate::cfg::lib::mode::repr::EVAL_REF;
+use crate::cfg::lib::mode::repr::FORM_EVAL;
+use crate::cfg::lib::mode::repr::FORM_ID;
+use crate::cfg::lib::mode::repr::FORM_LITERAL;
+use crate::cfg::lib::mode::repr::FORM_REF;
+use crate::cfg::lib::mode::repr::parse;
+use crate::cfg::mode::FuncMode;
+use crate::cfg::mode::SymbolMode;
+use crate::cfg::mode::TaskPrimMode;
+use crate::cfg::mode::dyn_mode;
+use crate::cfg::mode::free_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
@@ -35,7 +26,6 @@ use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -186,72 +176,4 @@ fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Eval.mut_call(cfg, ctx, input)
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Mode {
-    Comp(CompMode),
-    Func(FuncVal),
-}
-
-impl FreeFn<Cfg, Val, Val> for Mode {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        match self {
-            Mode::Comp(comp) => comp.free_call(cfg, input),
-            Mode::Func(func) => func.free_call(cfg, input),
-        }
-    }
-}
-
-impl ConstFn<Cfg, Val, Val, Val> for Mode {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-        match self {
-            Mode::Comp(comp) => comp.const_call(cfg, ctx, input),
-            Mode::Func(func) => func.const_call(cfg, ctx, input),
-        }
-    }
-}
-
-impl MutFn<Cfg, Val, Val, Val> for Mode {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        match self {
-            Mode::Comp(comp) => comp.mut_call(cfg, ctx, input),
-            Mode::Func(func) => func.mut_call(cfg, ctx, input),
-        }
-    }
-}
-
-impl Mode {
-    pub const fn id() -> Self {
-        Mode::Comp(CompMode::id())
-    }
-
-    pub fn is_id(&self) -> bool {
-        let Mode::Comp(mode) = self else {
-            return false;
-        };
-        mode.is_id()
-    }
-}
-
-impl From<PrimMode> for Mode {
-    fn from(mode: PrimMode) -> Self {
-        Mode::Comp(CompMode::from(mode))
-    }
-}
-
-mod prim;
-
-mod comp;
-
-mod func;
-
 mod repr;
-
-mod symbol;
-
-mod pair;
-
-mod task;
-
-mod list;
-
-mod map;

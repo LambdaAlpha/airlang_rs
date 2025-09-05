@@ -1,6 +1,6 @@
 use log::error;
 
-use crate::cfg::lib::utils::symbol;
+use crate::cfg::utils::symbol;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;

@@ -2,7 +2,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
-use airlang::cfg::lib::setup::default_free_mode;
+use airlang::cfg::mode::default_free_mode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::FreePrimFuncVal;

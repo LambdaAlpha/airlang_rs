@@ -1,10 +1,10 @@
 use log::error;
 
-use crate::cfg::lib::mode::FuncMode;
-use crate::cfg::lib::mode::Mode;
-use crate::cfg::lib::mode::SymbolMode;
-use crate::cfg::lib::mode::TaskPrimMode;
-use crate::cfg::lib::utils::symbol;
+use crate::cfg::mode::FuncMode;
+use crate::cfg::mode::Mode;
+use crate::cfg::mode::SymbolMode;
+use crate::cfg::mode::TaskPrimMode;
+use crate::cfg::utils::symbol;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxMap;

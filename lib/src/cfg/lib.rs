@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use self::bit::BitLib;
 use self::byte::ByteLib;
+use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
 use self::func::FuncLib;
@@ -10,7 +11,6 @@ use self::link::LinkLib;
 use self::list::ListLib;
 use self::map::MapLib;
 use self::meta::MetaLib;
-use self::mode::FuncMode;
 use self::mode::ModeLib;
 use self::number::NumberLib;
 use self::pair::PairLib;
@@ -21,8 +21,8 @@ use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
 use super::Named;
-use super::lib::cfg::CfgLib;
 use crate::cfg::CfgMod;
+use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::Ctx;
@@ -276,10 +276,6 @@ pub fn mut_impl(func: fn(&mut Cfg, &mut Val, Val) -> Val) -> MutImpl<Cfg, Val, V
     MutImpl::new(FreeImpl::default, ConstImpl::default, func)
 }
 
-pub mod setup;
-
-// -----
-
 pub mod unit;
 
 pub mod bit;
@@ -321,7 +317,3 @@ pub mod value;
 pub mod ctrl;
 
 pub mod mode;
-
-// -----
-
-mod utils;

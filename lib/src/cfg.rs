@@ -81,4 +81,8 @@ impl<F: Named + Into<FuncVal>> CfgMod for F {
     }
 }
 
+pub mod mode;
+
 pub mod lib;
+
+mod utils;

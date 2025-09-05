@@ -3,7 +3,7 @@ use airlang::cfg::CoreCfg;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::mut_impl;
-use airlang::cfg::lib::setup::default_dyn_mode;
+use airlang::cfg::mode::default_dyn_mode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::val::MutPrimFuncVal;
