@@ -7,18 +7,18 @@ use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Library;
 use super::const_impl;
-use super::ctx_put_func;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
+use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::func::Setup;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
-use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MemoVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
@@ -33,7 +33,7 @@ pub struct FuncLib {
     pub is_primitive: ConstPrimFuncVal,
     pub id: ConstPrimFuncVal,
     pub code: ConstPrimFuncVal,
-    pub ctx: ConstPrimFuncVal,
+    pub memo: ConstPrimFuncVal,
 }
 
 impl Default for FuncLib {
@@ -46,7 +46,7 @@ impl Default for FuncLib {
             is_primitive: is_primitive(),
             id: id(),
             code: code(),
-            ctx: ctx(),
+            memo: memo(),
         }
     }
 }
@@ -60,13 +60,13 @@ impl CfgMod for FuncLib {
         self.is_primitive.extend(cfg);
         self.id.extend(cfg);
         self.code.extend(cfg);
-        self.ctx.extend(cfg);
+        self.memo.extend(cfg);
     }
 }
 
 impl Library for FuncLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        ctx_put_func(ctx, "function", &self.new);
+    fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "function", &self.new);
     }
 }
 
@@ -172,21 +172,21 @@ fn fn_code(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     generate_code(func)
 }
 
-pub fn ctx() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.context", f: const_impl(fn_ctx), mode: FuncMode::default_mode() }
+pub fn memo() -> ConstPrimFuncVal {
+    DynPrimFn { id: "function.memory", f: const_impl(fn_memo), mode: FuncMode::default_mode() }
         .const_()
 }
 
-fn fn_ctx(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_memo(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return Val::default();
     };
-    let Some(ctx) = func.ctx() else {
-        error!("func {func:?} should have an inner ctx");
+    let Some(memo) = func.memo() else {
+        error!("func {func:?} should have an inner memory");
         return Val::default();
     };
-    Val::Ctx(CtxVal::from(ctx.clone()))
+    Val::Memo(MemoVal::from(memo.clone()))
 }
 
 mod repr;

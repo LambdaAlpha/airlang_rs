@@ -3,10 +3,10 @@ use std::mem::take;
 use super::MutFn;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::ctx::Contract;
-use crate::semantics::ctx::Ctx;
-use crate::semantics::ctx::CtxError;
-use crate::semantics::ctx::CtxValue;
+use crate::semantics::memo::Contract;
+use crate::semantics::memo::Memo;
+use crate::semantics::memo::MemoError;
+use crate::semantics::memo::MemoValue;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
 use crate::type_::Symbol;
@@ -24,64 +24,62 @@ pub(crate) struct DynComposite {
 }
 
 impl FreeComposite {
-    pub(super) fn call(&self, cfg: &mut Cfg, inner: &mut Ctx, input: Val) -> Val {
-        if put_input(inner, self.input_name.clone(), input).is_err() {
+    pub(super) fn call(&self, cfg: &mut Cfg, memo: &mut Memo, input: Val) -> Val {
+        if put_input(memo, self.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        composite_call(cfg, inner, self.body.clone())
+        composite_call(cfg, memo, self.body.clone())
     }
 }
 
 impl DynComposite {
-    pub(super) fn call(
-        &self, cfg: &mut Cfg, inner: &mut Ctx, outer: DynRef<Val>, input: Val,
-    ) -> Val {
-        if put_input(inner, self.free.input_name.clone(), input).is_err() {
+    pub(super) fn call(&self, cfg: &mut Cfg, memo: &mut Memo, ctx: DynRef<Val>, input: Val) -> Val {
+        if put_input(memo, self.free.input_name.clone(), input).is_err() {
             return Val::default();
         }
-        let eval = |inner: &mut Ctx| composite_call(cfg, inner, self.free.body.clone());
-        with_ctx(inner, outer, self.ctx_name.clone(), eval)
+        let eval = |inner: &mut Memo| composite_call(cfg, inner, self.free.body.clone());
+        with_ctx(memo, ctx, self.ctx_name.clone(), eval)
     }
 }
 
-pub(crate) fn composite_call(cfg: &mut Cfg, ctx: &mut Ctx, body: Val) -> Val {
-    let mut ctx_val = Val::Ctx(take(ctx).into());
-    let output = Eval.mut_call(cfg, &mut ctx_val, body);
-    let Val::Ctx(ctx_val) = ctx_val else {
+pub(crate) fn composite_call(cfg: &mut Cfg, memo: &mut Memo, body: Val) -> Val {
+    let mut memo_val = Val::Memo(take(memo).into());
+    let output = Eval.mut_call(cfg, &mut memo_val, body);
+    let Val::Memo(memo_val) = memo_val else {
         unreachable!("composite_call ctx invariant is broken!!!")
     };
-    *ctx = ctx_val.into();
+    *memo = memo_val.into();
     output
 }
 
-fn put_input(inner: &mut Ctx, input_name: Symbol, input: Val) -> Result<(), CtxError> {
-    let _ = inner.put(input_name, input, Contract::None)?;
+fn put_input(memo: &mut Memo, input_name: Symbol, input: Val) -> Result<(), MemoError> {
+    let _ = memo.put(input_name, input, Contract::None)?;
     Ok(())
 }
 
 fn with_ctx(
-    inner: &mut Ctx, mut outer: DynRef<Val>, name: Symbol, f: impl FnOnce(&mut Ctx) -> Val,
+    memo: &mut Memo, mut ctx: DynRef<Val>, name: Symbol, f: impl FnOnce(&mut Memo) -> Val,
 ) -> Val {
-    if !inner.is_null(name.clone()) {
+    if !memo.is_null(name.clone()) {
         return Val::default();
     }
-    keep_ctx(inner, outer.reborrow(), name.clone());
-    let output = f(inner);
-    restore_ctx(inner, outer.unwrap(), name);
+    keep_ctx(memo, ctx.reborrow(), name.clone());
+    let output = f(memo);
+    restore_ctx(memo, ctx.unwrap(), name);
     output
 }
 
-fn keep_ctx(inner: &mut Ctx, outer: DynRef<Val>, name: Symbol) {
-    let const_ = outer.is_const();
-    // here is why we need a `&mut Ctx` for a const func
-    let outer = take(outer.unwrap());
+fn keep_ctx(memo: &mut Memo, ctx: DynRef<Val>, name: Symbol) {
+    let const_ = ctx.is_const();
+    // here is why we need a `&mut Val` for a const func
+    let ctx = take(ctx.unwrap());
     let contract = if const_ { Contract::Const } else { Contract::Static };
-    let _ = inner.put_unchecked(name, CtxValue::new(outer, contract));
+    let _ = memo.put_unchecked(name, MemoValue::new(ctx, contract));
 }
 
-fn restore_ctx(inner: &mut Ctx, outer: &mut Val, name: Symbol) {
-    let Some(ctx_val) = inner.remove_unchecked(&name) else {
+fn restore_ctx(memo: &mut Memo, ctx: &mut Val, name: Symbol) {
+    let Some(ctx_val) = memo.remove_unchecked(&name) else {
         unreachable!("restore_ctx ctx invariant is broken!!!");
     };
-    *outer = ctx_val.val;
+    *ctx = ctx_val.val;
 }

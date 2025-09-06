@@ -46,7 +46,7 @@ leak no panic
 _ do [
     new = _ import .link.new,
     set = _ import .link.set,
-    move = _ import .context.move,
+    move = _ import .memory.move,
     l = _ new _ any .,
     l set l,
     .l move _,

@@ -5,7 +5,7 @@ use num_bigint::BigInt;
 use super::Library;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -30,7 +30,7 @@ impl CfgMod for MetaLib {
 }
 
 impl Library for MetaLib {
-    fn prelude(&self, _ctx: &mut Ctx) {}
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn version() -> ListVal {

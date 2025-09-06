@@ -1,33 +1,33 @@
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::func::composite_call;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
 #[derive(Debug, Clone)]
 pub struct Air {
     cfg: Cfg,
-    ctx: Ctx,
+    memo: Memo,
 }
 
 impl Air {
     pub fn new(cfg: Cfg) -> Self {
         let prelude = cfg.import(Symbol::from_str_unchecked(CoreCfg::PRELUDE));
         let prelude = prelude.expect("prelude should exist in cfg");
-        let Val::Ctx(prelude) = prelude else {
-            panic!("prelude in cfg should be a ctx");
+        let Val::Memo(prelude) = prelude else {
+            panic!("prelude in cfg should be a memo");
         };
-        let ctx = Ctx::from(prelude);
-        Self { cfg, ctx }
+        let memo = Memo::from(prelude);
+        Self { cfg, memo }
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
-        composite_call(&mut self.cfg, &mut self.ctx, input)
+        composite_call(&mut self.cfg, &mut self.memo, input)
     }
 
-    pub fn ctx_mut(&mut self) -> &mut Ctx {
-        &mut self.ctx
+    pub fn memo_mut(&mut self) -> &mut Memo {
+        &mut self.memo
     }
 
     pub fn cfg_mut(&mut self) -> &mut Cfg {

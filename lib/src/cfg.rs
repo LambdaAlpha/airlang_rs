@@ -1,7 +1,7 @@
 use self::lib::CoreLib;
 use crate::cfg::lib::Library;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -24,13 +24,13 @@ impl<T: CfgMod> From<T> for Cfg {
 #[derive(Clone)]
 pub struct CoreCfg {
     pub lib: CoreLib,
-    pub prelude: Ctx,
+    pub prelude: Memo,
 }
 
 impl Default for CoreCfg {
     fn default() -> Self {
         let lib = CoreLib::default();
-        let mut prelude = Ctx::default();
+        let mut prelude = Memo::default();
         lib.prelude(&mut prelude);
         Self { lib, prelude }
     }
@@ -39,7 +39,7 @@ impl Default for CoreCfg {
 impl CfgMod for CoreCfg {
     fn extend(self, cfg: &Cfg) {
         self.lib.extend(cfg);
-        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Ctx(self.prelude.into()));
+        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Memo(self.prelude.into()));
     }
 }
 

@@ -19,12 +19,11 @@ use crate::cfg::CfgMod;
 use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
 use crate::semantics::val::CFG;
-use crate::semantics::val::CTX;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FreePrimFuncVal;
@@ -33,6 +32,7 @@ use crate::semantics::val::INT;
 use crate::semantics::val::LINK;
 use crate::semantics::val::LIST;
 use crate::semantics::val::MAP;
+use crate::semantics::val::MEMO;
 use crate::semantics::val::NUMBER;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::SYMBOL;
@@ -79,10 +79,10 @@ impl CfgMod for ValueLib {
 }
 
 impl Library for ValueLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.any.prelude(ctx);
-        self.type_.prelude(ctx);
-        self.equal.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.any.prelude(memo);
+        self.type_.prelude(memo);
+        self.equal.prelude(memo);
     }
 }
 
@@ -116,7 +116,7 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
             MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
             LINK => Val::Link(Link::any(rng, DEPTH)),
             CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
-            CTX => Val::Ctx(Ctx::any(rng, DEPTH).into()),
+            MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             _ => arbitrary_ext_type(s),
         },
@@ -146,7 +146,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Map(_) => MAP,
         Val::Link(_) => LINK,
         Val::Cfg(_) => CFG,
-        Val::Ctx(_) => CTX,
+        Val::Memo(_) => MEMO,
         Val::Func(_) => FUNC,
         Val::Dyn(val) => return Val::Symbol(val.type_name()),
     };

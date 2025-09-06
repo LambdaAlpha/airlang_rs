@@ -9,10 +9,10 @@ use crate::cfg::CfgMod;
 use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CallApply;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -50,7 +50,7 @@ impl CfgMod for CallLib {
 }
 
 impl Library for CallLib {
-    fn prelude(&self, _ctx: &mut Ctx) {}
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn apply() -> MutPrimFuncVal {

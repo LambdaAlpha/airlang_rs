@@ -20,15 +20,15 @@ use crate::cfg::mode::PairMode;
 use crate::cfg::mode::PrimMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Contract;
-use crate::semantics::ctx::Ctx;
-use crate::semantics::ctx::CtxMap;
-use crate::semantics::ctx::CtxValue;
 use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
 use crate::semantics::func::MutCompFunc;
+use crate::semantics::memo::Contract;
+use crate::semantics::memo::Memo;
+use crate::semantics::memo::MemoMap;
+use crate::semantics::memo::MemoValue;
 use crate::semantics::val::ConstCompFuncVal;
 use crate::semantics::val::FreeCompFuncVal;
 use crate::semantics::val::FuncVal;
@@ -83,7 +83,7 @@ impl Arbitrary for Val {
             1,      // map
             1,      // link
             1,      // cfg
-            1,      // ctx
+            1,      // memo
             1,      // func
             1,      // extension
         ];
@@ -104,7 +104,7 @@ impl Arbitrary for Val {
             10 => Val::Map(Map::<Val, Val>::any(rng, depth).into()),
             11 => Val::Link(Link::any(rng, depth)),
             12 => Val::Cfg(Cfg::any(rng, depth).into()),
-            13 => Val::Ctx(Ctx::any(rng, depth).into()),
+            13 => Val::Memo(Memo::any(rng, depth).into()),
             14 => Val::Func(FuncVal::any(rng, depth)),
             15 => arbitrary_ext(),
             _ => unreachable!(),
@@ -277,18 +277,18 @@ impl Arbitrary for Contract {
     }
 }
 
-impl Arbitrary for CtxValue {
+impl Arbitrary for MemoValue {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        CtxValue::new(Val::any(rng, depth), Contract::any(rng, depth))
+        MemoValue::new(Val::any(rng, depth), Contract::any(rng, depth))
     }
 }
 
-impl Arbitrary for Ctx {
+impl Arbitrary for Memo {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        let variables = CtxMap::new(Map::any(rng, depth));
-        Ctx::new(variables)
+        let variables = MemoMap::new(Map::any(rng, depth));
+        Memo::new(variables)
     }
 }
 
@@ -433,7 +433,7 @@ impl Arbitrary for FreeCompFuncVal {
         let func = FreeCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
+            memo: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
         };
         FreeCompFuncVal::from(func)
@@ -446,7 +446,7 @@ impl Arbitrary for ConstCompFuncVal {
         let func = ConstCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
+            memo: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
         };
         ConstCompFuncVal::from(func)
@@ -459,7 +459,7 @@ impl Arbitrary for MutCompFuncVal {
         let func = MutCompFunc {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
-            ctx: Arbitrary::any(rng, depth),
+            memo: Arbitrary::any(rng, depth),
             setup: Arbitrary::any(rng, depth),
         };
         MutCompFuncVal::from(func)

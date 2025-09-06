@@ -123,8 +123,8 @@ fn test_cfg() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_ctx() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ctx.air"), "test/ctx.air")
+fn test_memo() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/memo.air"), "test/memo.air")
 }
 
 #[test]
@@ -154,13 +154,13 @@ fn test_core() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_syntax() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/syntax.air"), "test/syntax.air")
+fn test_ctx() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/ctx.air"), "test/ctx.air")
 }
 
 #[test]
-fn test_value() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/value.air"), "test/value.air")
+fn test_mode() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/mode.air"), "test/mode.air")
 }
 
 #[test]
@@ -169,6 +169,11 @@ fn test_ctrl() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_mode() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/mode.air"), "test/mode.air")
+fn test_syntax() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/syntax.air"), "test/syntax.air")
+}
+
+#[test]
+fn test_value() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/value.air"), "test/value.air")
 }

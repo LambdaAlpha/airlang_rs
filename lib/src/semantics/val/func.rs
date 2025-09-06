@@ -5,7 +5,6 @@ use std::hash::Hash;
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::ConstFn;
@@ -18,6 +17,7 @@ use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
 use crate::semantics::func::Setup;
 use crate::semantics::func::SetupFn;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Symbol;
@@ -103,14 +103,14 @@ impl FuncVal {
         match_func_val!(self, f => f.id.clone())
     }
 
-    pub fn ctx(&self) -> Option<&Ctx> {
+    pub fn memo(&self) -> Option<&Memo> {
         match self {
             FuncVal::FreePrim(_) => None,
-            FuncVal::FreeComp(f) => Some(&f.ctx),
+            FuncVal::FreeComp(f) => Some(&f.memo),
             FuncVal::ConstPrim(_) => None,
-            FuncVal::ConstComp(f) => Some(&f.ctx),
+            FuncVal::ConstComp(f) => Some(&f.memo),
             FuncVal::MutPrim(_) => None,
-            FuncVal::MutComp(f) => Some(&f.ctx),
+            FuncVal::MutComp(f) => Some(&f.memo),
         }
     }
 

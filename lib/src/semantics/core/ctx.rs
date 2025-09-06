@@ -3,13 +3,13 @@ use std::mem::swap;
 use log::error;
 use num_traits::ToPrimitive;
 
-use crate::semantics::ctx::Contract;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::memo::Contract;
 use crate::semantics::val::CallVal;
-use crate::semantics::val::CtxVal;
 use crate::semantics::val::IntVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
+use crate::semantics::val::MemoVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
@@ -118,7 +118,7 @@ impl DynCtx<Symbol, Val> for MapVal {
     }
 }
 
-impl DynCtx<Symbol, Val> for CtxVal {
+impl DynCtx<Symbol, Val> for MemoVal {
     fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
         let Ok(val) = self.get_ref_dyn(input.clone()) else {
             error!("name {input:?} should exist");
@@ -143,7 +143,7 @@ impl DynCtx<Symbol, Val> for Val {
             Val::Call(call) => call.ref_(input),
             Val::List(list) => list.ref_(input),
             Val::Map(map) => map.ref_(input),
-            Val::Ctx(ctx) => ctx.ref_(input),
+            Val::Memo(ctx) => ctx.ref_(input),
             Val::Dyn(val) => val.ref_(Val::Symbol(input)),
             v => {
                 error!("symbol {input:?} should exist in {v:?}");
@@ -158,7 +158,7 @@ impl DynCtx<Symbol, Val> for Val {
             Val::Call(call) => call.set(input, value),
             Val::List(list) => list.set(input, value),
             Val::Map(map) => map.set(input, value),
-            Val::Ctx(ctx) => ctx.set(input, value),
+            Val::Memo(ctx) => ctx.set(input, value),
             Val::Dyn(val) => val.set(Val::Symbol(input), value),
             v => {
                 error!("symbol {input:?} should exist in {v:?}");

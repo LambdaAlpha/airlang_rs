@@ -2,8 +2,8 @@ use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Library;
 use super::MutImpl;
-use super::ctx_put_func;
 use super::free_impl;
+use super::memo_put_func;
 use super::mode::repr::EVAL_EVAL;
 use super::mode::repr::EVAL_ID;
 use super::mode::repr::EVAL_LITERAL;
@@ -19,10 +19,10 @@ use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -82,17 +82,17 @@ impl CfgMod for ModeLib {
 }
 
 impl Library for ModeLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.new.prelude(ctx);
-        ctx_put_func(ctx, FORM_ID, &self.form_id);
-        ctx_put_func(ctx, FORM_LITERAL, &self.form_literal);
-        ctx_put_func(ctx, FORM_REF, &self.form_ref);
-        ctx_put_func(ctx, FORM_EVAL, &self.form_eval);
-        ctx_put_func(ctx, EVAL_ID, &self.eval_id);
-        ctx_put_func(ctx, EVAL_LITERAL, &self.eval_literal);
-        ctx_put_func(ctx, EVAL_REF, &self.eval_ref);
-        ctx_put_func(ctx, EVAL_EVAL, &self.eval_eval);
-        self.apply.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.new.prelude(memo);
+        memo_put_func(memo, FORM_ID, &self.form_id);
+        memo_put_func(memo, FORM_LITERAL, &self.form_literal);
+        memo_put_func(memo, FORM_REF, &self.form_ref);
+        memo_put_func(memo, FORM_EVAL, &self.form_eval);
+        memo_put_func(memo, EVAL_ID, &self.eval_id);
+        memo_put_func(memo, EVAL_LITERAL, &self.eval_literal);
+        memo_put_func(memo, EVAL_REF, &self.eval_ref);
+        memo_put_func(memo, EVAL_EVAL, &self.eval_eval);
+        self.apply.prelude(memo);
     }
 }
 

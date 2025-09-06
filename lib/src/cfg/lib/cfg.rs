@@ -6,14 +6,14 @@ use crate::cfg::CfgMod;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::Library;
-use crate::cfg::lib::ctx_put_func;
 use crate::cfg::lib::free_impl;
+use crate::cfg::lib::memo_put_func;
 use crate::cfg::lib::mut_impl;
 use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::func::MutFn;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -47,10 +47,10 @@ impl CfgMod for CfgLib {
 }
 
 impl Library for CfgLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        ctx_put_func(ctx, "import", &self.import);
-        ctx_put_func(ctx, "export", &self.export);
-        ctx_put_func(ctx, "with", &self.with);
+    fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "import", &self.import);
+        memo_put_func(memo, "export", &self.export);
+        memo_put_func(memo, "with", &self.with);
     }
 }
 

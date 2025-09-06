@@ -1,7 +1,7 @@
 use super::Library;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 
 // todo design
 #[derive(Clone)]
@@ -19,5 +19,5 @@ impl CfgMod for NumberLib {
 }
 
 impl Library for NumberLib {
-    fn prelude(&self, _ctx: &mut Ctx) {}
+    fn prelude(&self, _memo: &mut Memo) {}
 }

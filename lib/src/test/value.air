@@ -116,14 +116,14 @@ _ do [
 -----
 link
 =====
-any context
+any memory
 -----
 _ do [
-    c = _ any context,
-    c which _ type .
+    m = _ any memory,
+    m which _ type .
 ]
 -----
-context
+memory
 =====
 any function
 -----
@@ -243,15 +243,15 @@ _ do [
 -----
 link
 =====
-type context
+type memory
 -----
 _ do [
-    new_context = _ import .context.new,
-    a = _ new_context {},
+    new_memory = _ import .memory.new,
+    a = _ new_memory {},
     a which _ type .
 ]
 -----
-context
+memory
 =====
 type function
 -----
@@ -339,12 +339,12 @@ _ do [
 -----
 true
 =====
-== context
+== memory
 -----
 _ do [
-    new_context = _ import .context.new,
-    a = _ new_context {},
-    b = _ new_context {},
+    new_memory = _ import .memory.new,
+    a = _ new_memory {},
+    b = _ new_memory {},
     (a == b) and _ not a == .
 ]
 -----

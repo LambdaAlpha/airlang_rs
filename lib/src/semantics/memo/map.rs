@@ -4,7 +4,7 @@ use std::fmt::Formatter;
 
 use derive_more::IsVariant;
 
-use super::CtxError;
+use super::MemoError;
 use crate::semantics::val::Val;
 use crate::type_::Map;
 use crate::type_::Symbol;
@@ -12,8 +12,8 @@ use crate::type_::ref_::DynRef;
 
 // todo impl arena
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
-pub struct CtxMap {
-    map: Map<Symbol, CtxValue>,
+pub struct MemoMap {
+    map: Map<Symbol, MemoValue>,
 }
 
 // still -> (none <-> null) -> final
@@ -35,17 +35,17 @@ pub enum Contract {
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct CtxValue {
+pub struct MemoValue {
     pub(crate) val: Val,
     pub(crate) contract: Contract,
 }
 
-impl CtxMap {
-    pub(crate) fn new(map: Map<Symbol, CtxValue>) -> Self {
+impl MemoMap {
+    pub(crate) fn new(map: Map<Symbol, MemoValue>) -> Self {
         Self { map }
     }
 
-    pub(crate) fn unwrap(self) -> Map<Symbol, CtxValue> {
+    pub(crate) fn unwrap(self) -> Map<Symbol, MemoValue> {
         self.map
     }
 
@@ -57,56 +57,56 @@ impl CtxMap {
         self.map.get(&name).is_none()
     }
 
-    pub fn get_ref(&self, name: Symbol) -> Result<&Val, CtxError> {
+    pub fn get_ref(&self, name: Symbol) -> Result<&Val, MemoError> {
         let Some(value) = self.map.get(&name) else {
-            return Err(CtxError::NotFound);
+            return Err(MemoError::NotFound);
         };
         Ok(&value.val)
     }
 
-    pub fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, CtxError> {
+    pub fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, MemoError> {
         let Some(value) = self.map.get_mut(&name) else {
-            return Err(CtxError::NotFound);
+            return Err(MemoError::NotFound);
         };
         if !value.contract.is_mutable() {
-            return Err(CtxError::AccessDenied);
+            return Err(MemoError::AccessDenied);
         }
         Ok(&mut value.val)
     }
 
-    pub fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<'_, Val>, CtxError> {
+    pub fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<'_, Val>, MemoError> {
         let Some(value) = self.map.get_mut(&name) else {
-            return Err(CtxError::NotFound);
+            return Err(MemoError::NotFound);
         };
         Ok(DynRef::new(&mut value.val, !value.contract.is_mutable()))
     }
 
-    pub fn remove(&mut self, name: Symbol) -> Result<Val, CtxError> {
+    pub fn remove(&mut self, name: Symbol) -> Result<Val, MemoError> {
         let Entry::Occupied(entry) = self.map.entry(name) else {
-            return Err(CtxError::NotFound);
+            return Err(MemoError::NotFound);
         };
         if !entry.get().contract.is_removable() {
-            return Err(CtxError::AccessDenied);
+            return Err(MemoError::AccessDenied);
         }
         Ok(entry.remove().val)
     }
 
     pub fn put(
         &mut self, name: Symbol, val: Val, contract: Contract,
-    ) -> Result<Option<Val>, CtxError> {
+    ) -> Result<Option<Val>, MemoError> {
         match self.map.entry(name) {
             Entry::Occupied(mut entry) => {
                 let old = entry.get().contract;
                 if !old.is_replaceable(contract) {
-                    return Err(CtxError::AccessDenied);
+                    return Err(MemoError::AccessDenied);
                 }
-                Ok(Some(entry.insert(CtxValue::new(val, contract)).val))
+                Ok(Some(entry.insert(MemoValue::new(val, contract)).val))
             }
             Entry::Vacant(entry) => {
                 if !contract.is_insertable() {
-                    return Err(CtxError::AccessDenied);
+                    return Err(MemoError::AccessDenied);
                 }
-                entry.insert(CtxValue::new(val, contract));
+                entry.insert(MemoValue::new(val, contract));
                 Ok(None)
             }
         }
@@ -124,12 +124,12 @@ impl CtxMap {
         Some(value.contract)
     }
 
-    pub fn set_contract(&mut self, name: Symbol, contract: Contract) -> Result<(), CtxError> {
+    pub fn set_contract(&mut self, name: Symbol, contract: Contract) -> Result<(), MemoError> {
         let Some(old) = self.map.get_mut(&name) else {
-            return Err(CtxError::NotFound);
+            return Err(MemoError::NotFound);
         };
         if !old.contract.is_valid_transition(contract) {
-            return Err(CtxError::AccessDenied);
+            return Err(MemoError::AccessDenied);
         }
         old.contract = contract;
         Ok(())
@@ -143,12 +143,12 @@ impl CtxMap {
     }
 
     pub(in crate::semantics) fn put_unchecked(
-        &mut self, name: Symbol, val: CtxValue,
+        &mut self, name: Symbol, val: MemoValue,
     ) -> Option<Val> {
-        self.map.insert(name, val).map(|ctx_value| ctx_value.val)
+        self.map.insert(name, val).map(|memo_value| memo_value.val)
     }
 
-    pub(in crate::semantics) fn remove_unchecked(&mut self, name: &Symbol) -> Option<CtxValue> {
+    pub(in crate::semantics) fn remove_unchecked(&mut self, name: &Symbol) -> Option<MemoValue> {
         self.map.remove(name)
     }
 }
@@ -194,13 +194,13 @@ impl Contract {
     }
 }
 
-impl CtxValue {
+impl MemoValue {
     pub(crate) fn new(val: Val, contract: Contract) -> Self {
         Self { val, contract }
     }
 }
 
-impl Debug for CtxValue {
+impl Debug for MemoValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut tuple = f.debug_tuple("");
         tuple.field(&self.val);

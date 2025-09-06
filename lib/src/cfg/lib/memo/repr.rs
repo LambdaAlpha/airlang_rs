@@ -5,11 +5,11 @@ use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::Mode;
 use crate::cfg::mode::SymbolMode;
 use crate::cfg::utils::symbol;
-use crate::semantics::ctx::Contract;
-use crate::semantics::ctx::Ctx;
-use crate::semantics::ctx::CtxMap;
-use crate::semantics::ctx::CtxValue;
-use crate::semantics::val::CtxVal;
+use crate::semantics::memo::Contract;
+use crate::semantics::memo::Memo;
+use crate::semantics::memo::MemoMap;
+use crate::semantics::memo::MemoValue;
+use crate::semantics::val::MemoVal;
 use crate::semantics::val::Val;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -32,18 +32,18 @@ pub(in crate::cfg) fn parse_mode() -> Mode {
     )
 }
 
-pub(in crate::cfg) fn parse_ctx(input: Val) -> Option<CtxVal> {
+pub(in crate::cfg) fn parse_memo(input: Val) -> Option<MemoVal> {
     let Val::Map(map) = input else {
         error!("input {input:?} should be a map");
         return None;
     };
     let variables = parse_variables(Map::from(map))?;
-    let variables = CtxMap::new(variables);
-    let ctx = Ctx::new(variables);
-    Some(ctx.into())
+    let variables = MemoMap::new(variables);
+    let memo = Memo::new(variables);
+    Some(memo.into())
 }
 
-fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
+fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, MemoValue>> {
     map.into_iter()
         .map(|(name, val)| {
             let Val::Symbol(name) = name else {
@@ -54,7 +54,7 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, CtxValue>> {
             };
             let pair = Pair::from(pair);
             let contract = parse_contract(&pair.first)?;
-            Some((name, CtxValue::new(pair.second, contract)))
+            Some((name, MemoValue::new(pair.second, contract)))
         })
         .collect()
 }
@@ -85,13 +85,13 @@ pub(in crate::cfg) fn parse_contract(contract: &Val) -> Option<Contract> {
     }
 }
 
-pub(in crate::cfg) fn generate_ctx(ctx: CtxVal) -> Val {
-    let ctx = Ctx::from(ctx).destruct();
-    generate_variables(ctx.variables)
+pub(in crate::cfg) fn generate_memo(memo: MemoVal) -> Val {
+    let map = Memo::from(memo).unwrap();
+    generate_variables(map)
 }
 
-fn generate_variables(ctx_map: CtxMap) -> Val {
-    let map: Map<Val, Val> = ctx_map
+fn generate_variables(memo_map: MemoMap) -> Val {
+    let map: Map<Val, Val> = memo_map
         .unwrap()
         .into_iter()
         .map(|(name, v)| {

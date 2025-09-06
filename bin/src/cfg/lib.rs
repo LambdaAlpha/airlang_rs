@@ -1,7 +1,7 @@
 use airlang::cfg::CfgMod;
 use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 use airlang_ext::cfg::lib::StdLib;
 
 use self::eval::EvalLib;
@@ -26,11 +26,11 @@ impl CfgMod for BinLib {
 }
 
 impl Library for BinLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.std.prelude(ctx);
-        self.repl.prelude(ctx);
-        self.eval.prelude(ctx);
-        self.process.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.std.prelude(memo);
+        self.repl.prelude(memo);
+        self.eval.prelude(memo);
+        self.process.prelude(memo);
     }
 }
 

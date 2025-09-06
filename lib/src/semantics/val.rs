@@ -1,7 +1,6 @@
 pub use self::byte::ByteVal;
 pub use self::call::CallVal;
 pub use self::cfg::CfgVal;
-pub use self::ctx::CtxVal;
 pub use self::func::ConstCompFuncVal;
 pub use self::func::ConstPrimFuncVal;
 pub use self::func::FreeCompFuncVal;
@@ -12,6 +11,7 @@ pub use self::func::MutPrimFuncVal;
 pub use self::int::IntVal;
 pub use self::list::ListVal;
 pub use self::map::MapVal;
+pub use self::memo::MemoVal;
 pub use self::number::NumberVal;
 pub use self::pair::PairVal;
 pub use self::text::TextVal;
@@ -66,7 +66,7 @@ pub enum Val {
 
     Link(LinkVal),
     Cfg(CfgVal),
-    Ctx(CtxVal),
+    Memo(MemoVal),
     Func(FuncVal),
 
     Dyn(Box<dyn DynVal>),
@@ -87,7 +87,7 @@ pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const LINK: &str = "link";
 pub(crate) const CFG: &str = "configuration";
-pub(crate) const CTX: &str = "context";
+pub(crate) const MEMO: &str = "memory";
 pub(crate) const FUNC: &str = "function";
 
 impl Default for Val {
@@ -160,7 +160,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Map($name) => $body,
             $crate::semantics::val::Val::Link($name) => $body,
             $crate::semantics::val::Val::Cfg($name) => $body,
-            $crate::semantics::val::Val::Ctx($name) => $body,
+            $crate::semantics::val::Val::Memo($name) => $body,
             $crate::semantics::val::Val::Func($name) => $body,
             $crate::semantics::val::Val::Dyn($name) => $body,
         }
@@ -194,6 +194,6 @@ mod map;
 
 mod cfg;
 
-mod ctx;
+mod memo;
 
 mod func;

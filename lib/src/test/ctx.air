@@ -19,141 +19,6 @@ _ do [
 -----
 true
 =====
-read none
------
-_ do [
-    read = _ import .context.read,
-    a = _ any .,
-    a == .a read _
-]
------
-true
-=====
-read final
------
-_ do [
-    new = _ import .context.new,
-    read = _ import .context.read,
-    v = _ any .,
-    a = _ new {b : final : v},
-    v == a which _ read .b
-]
------
-true
-=====
-read still
------
-_ do [
-    new = _ import .context.new,
-    read = _ import .context.read,
-    v = _ any .,
-    a = _ new {b : still : v},
-    v == a which _ read .b
-]
------
-true
-=====
-read static
------
-_ do [
-    new = _ import .context.new,
-    read = _ import .context.read,
-    v = _ any .,
-    a = _ new {b : static : v},
-    v == a which _ read .b
-]
------
-true
-=====
-read const
------
-_ do [
-    new = _ import .context.new,
-    read = _ import .context.read,
-    v = _ any .,
-    a = _ new {b : constant : v},
-    v == a which _ read .b
-]
------
-true
-=====
-move ref
------
-_ do [
-    move = _ import .context.move,
-    is_null = _ import .context.is_null,
-    a = _ any .,
-    b = a,
-    (b == .a move _) and (.a is_null _)
-]
------
-true
-=====
-move indirect
------
-_ do [
-    move = _ import .context.move,
-    is_null = _ import .context.is_null,
-    a = _ any .,
-    b = .a,
-    c = a,
-    (c == b move _) and (.a is_null _)
-]
------
-true
-=====
-move final
------
-_ do [
-    move = _ import .context.move,
-    new = _ import .context.new,
-    is_null = _ import .context.is_null,
-    v = _ any .,
-    a = _ new {b : final : v},
-    (. == a which _ move .b) and (_ not a which _ is_null .b)
-]
------
-true
-=====
-move still
------
-_ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
-    is_null = _ import .context.is_null,
-    v = _ any .,
-    a = _ new {b : still : v},
-    (v == a which _ move .b) and (a which _ is_null .b)
-]
------
-true
-=====
-move static
------
-_ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
-    is_null = _ import .context.is_null,
-    v = _ any .,
-    a = _ new {b : static : v},
-    (. == a which _ move .b) and (_ not a which _ is_null .b)
-]
------
-true
-=====
-move const
------
-_ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
-    is_null = _ import .context.is_null,
-    v = _ any .,
-    a = _ new {b : constant : v},
-    (. == a which _ move .b) and (_ not a which _ is_null .b)
-]
------
-true
-=====
 = read
 -----
 _ do [
@@ -238,16 +103,6 @@ _ do [
 ]
 -----
 1
-=====
-= none
------
-_ do [
-    contract = _ import .context.contract,
-    a = 1,
-    [a, .a contract _]
-]
------
-[1, none]
 =====
 = destruct pair
 -----
@@ -437,235 +292,6 @@ _ do [
 -----
 3
 =====
-= const
------
-_ do [
-    set_contract = _ import .context.set_contract,
-    first = _ import .pair.first,
-    p = 1 : 2,
-    .p set_contract .final,
-    p which first = 3,
-    p which _ first .
-]
------
-1
-=====
-none = return
------
-_ do [
-    a = 1,
-    1 == a = _ any .
-]
------
-true
-=====
-none mutate
------
-_ do [
-    set_first = _ import .pair.set_first,
-    a = 1 : 2,
-    a which _ set_first 3,
-    a
-]
------
-3 : 2
-=====
-final mutate
------
-_ do [
-    set_contract = _ import .context.set_contract,
-    set_first = _ import .pair.set_first,
-    a = 1 : 2,
-    .a set_contract .final,
-    a which _ set_first _ any .,
-    a
-]
------
-1 : 2
-=====
-final =
------
-_ do [
-    set_contract = _ import .context.set_contract,
-    a = 1,
-    .a set_contract .final,
-    a = _ any ., a
-]
------
-1
-=====
-set_contract still none
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : still : _ any .},
-    c which .a set_contract .none,
-    c which _ contract .a
-]
------
-none
-=====
-set_contract still none
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : still : _ any .},
-    c which .a set_contract .final,
-    c which _ contract .a
-]
------
-final
-=====
-set_contract none final
------
-_ do [
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    a = _ any .,
-    .a set_contract .final,
-    .a contract _
-]
------
-final
-=====
-set_contract none still
------
-_ do [
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    a = _ any .,
-    .a set_contract .still,
-    .a contract _
-]
------
-none
-=====
-set_contract final still
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : final : _ any .},
-    c which .a set_contract .still,
-    c which _ contract .a
-]
------
-final
-=====
-set_contract final none
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : final : _ any .},
-    c which .a set_contract .none,
-    c which _ contract .a
-]
------
-final
-=====
-set_contract static const
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : static : _ any .},
-    c which .a set_contract .constant,
-    c which _ contract .a
-]
------
-static
-=====
-set_contract static still
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : static : _ any .},
-    c which .a set_contract .still,
-    c which _ contract .a
-]
------
-static
-=====
-set_contract static final
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : static : _ any .},
-    c which .a set_contract .final,
-    c which _ contract .a
-]
------
-static
-=====
-set_contract static none
------
-_ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
-    contract = _ import .context.contract,
-    c = _ new {a : static : _ any .},
-    c which .a set_contract .none,
-    c which _ contract .a
-]
------
-static
-=====
-is_null true
------
-_ do [
-    is_null = _ import .context.is_null,
-    .a is_null _
-]
------
-true
-=====
-is_null false
------
-_ do [
-    is_null = _ import .context.is_null,
-    a = _ any .,
-    .a is_null _
-]
------
-false
-=====
-static move
------
-_ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
-    read = _ import .context.read,
-    c = _ new {a : static : 1},
-    c which _ move .a,
-    c which _ read .a
-]
------
-1
-=====
-static = to static
------
-_ do [
-    new = _ import .context.new,
-    read = _ import .context.read,
-    c = _ new {a : static : 1},
-    c which a = 2,
-    c which _ read .a
-]
------
-1
-=====
 is_constant default
 -----
 _ do [
@@ -678,8 +304,8 @@ false
 is_constant true
 -----
 _ do [
-    new = _ import .context.new,
-    set_contract = _ import .context.set_contract,
+    new = _ import .memory.new,
+    set_contract = _ import .memory.set_contract,
     is_constant = _ import .context.is_constant,
     a = _ new {},
     .a set_contract .final,
@@ -691,7 +317,7 @@ true
 is_constant false
 -----
 _ do [
-    new = _ import .context.new,
+    new = _ import .memory.new,
     is_constant = _ import .context.is_constant,
     a = _ new {},
     a which _ is_constant .
@@ -702,8 +328,8 @@ false
 which 1
 -----
 _ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
+    new = _ import .memory.new,
+    move = _ import .memory.move,
     set_first = _ import .pair.set_first,
     a = _ new {p : . : 1 : 2},
     b = 3,
@@ -716,8 +342,8 @@ _ do [
 which 2
 -----
 _ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
+    new = _ import .memory.new,
+    move = _ import .memory.move,
     set_first = _ import .pair.set_first,
     a = _ new {
         p : . : 1 : 2,
@@ -732,8 +358,8 @@ _ do [
 which 3
 -----
 _ do [
-    new = _ import .context.new,
-    move = _ import .context.move,
+    new = _ import .memory.new,
+    move = _ import .memory.move,
     set_first = _ import .pair.set_first,
     a = _ new {
         set_first : . : set_first,
@@ -749,7 +375,7 @@ _ do [
 which recursive
 -----
 _ do [
-    new = _ import .context.new,
+    new = _ import .memory.new,
     a = _ new {b : . : _ new {c : . : 1}},
     a which _ apply .b which _ apply ..c
 ]
@@ -766,86 +392,6 @@ _ do [
 -----
 1
 =====
-which free free
------
-_ do [
-    u = .,
-    u which 1 + 1
-]
------
-2
-=====
-which free mutate
------
-_ do [
-    move = _ import .context.move,
-    u = .,
-    a = 1,
-    u which _ move .a,
-    a
-]
------
-1
-=====
-represent default
------
-_ do [
-    new = _ import .context.new,
-    represent = _ import .context.represent,
-    _ represent _ new {}
-]
------
-{}
-=====
-represent else
------
-_ do [
-    new = _ import .context.new,
-    represent = _ import .context.represent,
-    _ represent _ new {a : constant : 1}
-]
------
-{a : constant : 1}
-=====
-represent non-recursive
------
-_ do [
-    new = _ import .context.new,
-    represent = _ import .context.represent,
-    remove = _ import .map.remove,
-    second = _ import .pair.second,
-    m = _ represent _ new {b : . : _ new {}},
-    b = m which _ remove .b,
-    b = b which _ second .,
-    b which _ type .
-]
------
-context
-=====
-reverse
------
-_ do [
-    new = _ import .context.new,
-    reverse = _ import .context.reverse,
-    c1 = _ new {
-        a : none : 1,
-        b : still : 2,
-        c : final : 3,
-        d : static : 4,
-        e : constant : 5,
-    },
-    c2 = _ new {
-        a : none : 1,
-        b : final : 2,
-        c : still : 3,
-        d : static : 4,
-        e : constant : 5,
-    },
-    (c1 == _ reverse c2) and (c2 == _ reverse c1)
-]
------
-true
-=====
 self
 -----
 _ do [
@@ -861,7 +407,7 @@ self non-sync
 -----
 _ do [
     self = _ import .context.self,
-    is_null = _ import .context.is_null,
+    is_null = _ import .memory.is_null,
     a = _ self .,
     b = _ any .,
     a which _ is_null .b

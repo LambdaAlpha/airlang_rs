@@ -140,7 +140,7 @@ _ do [
 -----
 1
 =====
-ctx ctx name
+memo ctx name
 -----
 _ do [
     first = _ import .pair.first,

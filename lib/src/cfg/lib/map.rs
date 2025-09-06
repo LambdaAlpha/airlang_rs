@@ -11,7 +11,7 @@ use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -101,7 +101,7 @@ impl CfgMod for MapLib {
 }
 
 impl Library for MapLib {
-    fn prelude(&self, _ctx: &mut Ctx) {}
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn length() -> ConstPrimFuncVal {

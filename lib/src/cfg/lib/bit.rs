@@ -1,11 +1,11 @@
 use super::FreePrimFn;
 use super::Library;
-use super::ctx_put_func;
 use super::free_impl;
+use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 
@@ -35,12 +35,12 @@ impl CfgMod for BitLib {
 }
 
 impl Library for BitLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        ctx_put_func(ctx, "not", &self.not);
-        ctx_put_func(ctx, "and", &self.and);
-        ctx_put_func(ctx, "or", &self.or);
-        ctx_put_func(ctx, "xor", &self.xor);
-        ctx_put_func(ctx, "imply", &self.imply);
+    fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "not", &self.not);
+        memo_put_func(memo, "and", &self.and);
+        memo_put_func(memo, "or", &self.or);
+        memo_put_func(memo, "xor", &self.xor);
+        memo_put_func(memo, "imply", &self.imply);
     }
 }
 

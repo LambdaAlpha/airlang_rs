@@ -6,19 +6,19 @@ use crate::cfg::mode::Mode;
 use crate::cfg::mode::SymbolMode;
 use crate::cfg::utils::map_remove;
 use crate::cfg::utils::symbol;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
 use crate::semantics::func::MutCompFunc;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstCompFuncVal;
 use crate::semantics::val::ConstPrimFuncVal;
-use crate::semantics::val::CtxVal;
 use crate::semantics::val::FreeCompFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::MemoVal;
 use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -28,7 +28,7 @@ use crate::type_::Symbol;
 
 // todo rename
 const CODE: &str = "code";
-const CTX: &str = "context";
+const MEMO: &str = "memory";
 const ID: &str = "id";
 const SETUP: &str = "setup";
 // todo rename
@@ -54,26 +54,26 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     let id = parse_id(map_remove(&mut map, ID))?;
     // todo design
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
-    let ctx = parse_ctx(map_remove(&mut map, CTX))?;
+    let memo = parse_memo(map_remove(&mut map, MEMO))?;
     let setup = parse_setup(map_remove(&mut map, SETUP))?;
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let free_comp = FreeComposite { body, input_name };
     let func = match ctx_access {
         FREE => {
-            let func = FreeCompFunc { id, comp: free_comp, ctx, setup };
+            let func = FreeCompFunc { id, comp: free_comp, memo, setup };
             FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
         CONST => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            let func = ConstCompFunc { id, comp, ctx, setup };
+            let func = ConstCompFunc { id, comp, memo, setup };
             FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            let func = MutCompFunc { id, comp, ctx, setup };
+            let func = MutCompFunc { id, comp, memo, setup };
             FuncVal::MutComp(MutCompFuncVal::from(func))
         }
         s => {
@@ -140,12 +140,12 @@ fn parse_code(code: Val) -> Option<FuncCode> {
     Some(code)
 }
 
-fn parse_ctx(ctx: Val) -> Option<Ctx> {
-    match ctx {
-        Val::Ctx(ctx) => Some(Ctx::from(ctx)),
-        Val::Unit(_) => Some(Ctx::default()),
+fn parse_memo(memo: Val) -> Option<Memo> {
+    match memo {
+        Val::Memo(memo) => Some(Memo::from(memo)),
+        Val::Unit(_) => Some(Memo::default()),
         v => {
-            error!("ctx {v:?} should be a ctx or a unit");
+            error!("memo {v:?} should be a memo or a unit");
             None
         }
     }
@@ -192,7 +192,7 @@ fn generate_free_comp(f: FreeCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
     let comp =
-        CompRepr { id: f.id.clone(), access: FREE, setup: f.setup.clone(), ctx: f.ctx.clone() };
+        CompRepr { id: f.id.clone(), access: FREE, setup: f.setup.clone(), memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -205,7 +205,7 @@ fn generate_const_comp(f: ConstCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
     let comp =
-        CompRepr { id: f.id.clone(), access: CONST, setup: f.setup.clone(), ctx: f.ctx.clone() };
+        CompRepr { id: f.id.clone(), access: CONST, setup: f.setup.clone(), memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -217,8 +217,12 @@ fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
 fn generate_mut_comp(f: MutCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp =
-        CompRepr { id: f.id.clone(), access: MUTABLE, setup: f.setup.clone(), ctx: f.ctx.clone() };
+    let comp = CompRepr {
+        id: f.id.clone(),
+        access: MUTABLE,
+        setup: f.setup.clone(),
+        memo: f.memo.clone(),
+    };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -257,7 +261,7 @@ struct CompRepr {
     id: Symbol,
     access: &'static str,
     setup: Option<FuncVal>,
-    ctx: Ctx,
+    memo: Memo,
 }
 
 fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
@@ -270,8 +274,8 @@ fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     if let Some(setup) = comp.setup {
         repr.insert(symbol(SETUP), Val::Func(setup));
     }
-    if comp.ctx != Ctx::default() {
-        repr.insert(symbol(CTX), Val::Ctx(CtxVal::from(comp.ctx)));
+    if comp.memo != Memo::default() {
+        repr.insert(symbol(MEMO), Val::Memo(MemoVal::from(comp.memo)));
     }
 }
 

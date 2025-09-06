@@ -11,7 +11,7 @@ use airlang::cfg::lib::free_impl;
 use airlang::cfg::lib::mut_impl;
 use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
@@ -55,14 +55,14 @@ impl CfgMod for IoLib {
 }
 
 impl Library for IoLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.read_line.prelude(ctx);
-        self.print.prelude(ctx);
-        self.print_line.prelude(ctx);
-        self.flush.prelude(ctx);
-        self.error_print.prelude(ctx);
-        self.error_print_line.prelude(ctx);
-        self.error_flush.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.read_line.prelude(memo);
+        self.print.prelude(memo);
+        self.print_line.prelude(memo);
+        self.flush.prelude(memo);
+        self.error_print.prelude(memo);
+        self.error_print_line.prelude(memo);
+        self.error_flush.prelude(memo);
     }
 }
 

@@ -4,7 +4,7 @@ use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
 use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 
@@ -26,8 +26,8 @@ impl CfgMod for ReplLib {
 }
 
 impl Library for ReplLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.help.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.help.prelude(memo);
     }
 }
 

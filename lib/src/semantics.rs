@@ -6,4 +6,6 @@ pub mod func;
 
 pub mod ctx;
 
+pub mod memo;
+
 pub mod cfg;

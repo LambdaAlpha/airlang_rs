@@ -1,18 +1,5 @@
-pub use self::map::Contract;
-pub use self::map::CtxMap;
-pub use self::map::CtxValue;
-
-_____!();
-
-use std::error::Error;
-use std::fmt::Debug;
-use std::fmt::Display;
-use std::fmt::Formatter;
-use std::hash::Hash;
 use std::ops::BitAnd;
 
-use derive_more::Deref;
-use derive_more::DerefMut;
 use derive_more::IsVariant;
 
 use crate::type_::DynRef;
@@ -22,50 +9,12 @@ pub trait DynCtx<Input, Output> {
     fn set(&mut self, input: Input, value: Output) -> Option<Output>;
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum CtxError {
-    NotFound,
-    AccessDenied,
-}
-
-#[derive(Debug, Default, Clone, Eq, PartialEq, Hash, Deref, DerefMut)]
-pub struct Ctx {
-    variables: CtxMap,
-}
-
-pub(crate) struct PubCtx {
-    pub(crate) variables: CtxMap,
-}
-
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, IsVariant)]
 pub enum CtxAccess {
     Free,
     Const,
     #[default]
     Mut,
-}
-
-impl Ctx {
-    pub(crate) fn new(variables: CtxMap) -> Self {
-        Self { variables }
-    }
-
-    pub(crate) fn destruct(self) -> PubCtx {
-        PubCtx { variables: self.variables }
-    }
-
-    pub(crate) fn reverse(self) -> Self {
-        Self { variables: self.variables.reverse() }
-    }
-}
-
-impl Display for CtxError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CtxError::NotFound => write!(f, "not found"),
-            CtxError::AccessDenied => write!(f, "access denied"),
-        }
-    }
 }
 
 impl BitAnd for CtxAccess {
@@ -80,7 +29,3 @@ impl BitAnd for CtxAccess {
         CtxAccess::Free
     }
 }
-
-impl Error for CtxError {}
-
-mod map;

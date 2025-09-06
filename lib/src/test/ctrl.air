@@ -267,7 +267,7 @@ match pattern
 match order
 -----
 _ do [
-    is_null = _ import .context.is_null,
+    is_null = _ import .memory.is_null,
     [1, 2, 3] match [
         [2, a, b] : [x = 1],
         [1, c, d] : [y = 1],
@@ -321,7 +321,7 @@ match default
 match conditional eval exist
 -----
 _ do [
-    is_null = _ import .context.is_null,
+    is_null = _ import .memory.is_null,
     1 match [
         1 : [a = 1],
         2 : [b = 2],
@@ -335,7 +335,7 @@ _ do [
 match conditional eval default
 -----
 _ do [
-    is_null = _ import .context.is_null,
+    is_null = _ import .memory.is_null,
     3 match [
         1 : [a = 1],
         2 : [b = 2],

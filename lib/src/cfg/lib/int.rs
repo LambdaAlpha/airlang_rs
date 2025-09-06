@@ -2,12 +2,12 @@ use log::error;
 
 use super::FreePrimFn;
 use super::Library;
-use super::ctx_put_func;
 use super::free_impl;
+use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Ctx;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -63,15 +63,15 @@ impl CfgMod for IntLib {
 }
 
 impl Library for IntLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        ctx_put_func(ctx, "+", &self.add);
-        ctx_put_func(ctx, "-", &self.subtract);
-        ctx_put_func(ctx, "*", &self.multiply);
-        ctx_put_func(ctx, "/", &self.divide);
-        ctx_put_func(ctx, "<", &self.less_than);
-        ctx_put_func(ctx, "<=", &self.less_equal);
-        ctx_put_func(ctx, ">", &self.greater_than);
-        ctx_put_func(ctx, ">=", &self.greater_equal);
+    fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "+", &self.add);
+        memo_put_func(memo, "-", &self.subtract);
+        memo_put_func(memo, "*", &self.multiply);
+        memo_put_func(memo, "/", &self.divide);
+        memo_put_func(memo, "<", &self.less_than);
+        memo_put_func(memo, "<=", &self.less_equal);
+        memo_put_func(memo, ">", &self.greater_than);
+        memo_put_func(memo, ">=", &self.greater_equal);
     }
 }
 

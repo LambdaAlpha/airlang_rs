@@ -9,7 +9,7 @@ use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
@@ -35,8 +35,8 @@ impl CfgMod for BuildLib {
 }
 
 impl Library for BuildLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.load.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.load.prelude(memo);
     }
 }
 

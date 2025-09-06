@@ -5,12 +5,12 @@ use self::byte::ByteLib;
 use self::call::CallLib;
 use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
-use self::ctx::CtxLib;
 use self::func::FuncLib;
 use self::int::IntLib;
 use self::link::LinkLib;
 use self::list::ListLib;
 use self::map::MapLib;
+use self::memo::MemoLib;
 use self::meta::MetaLib;
 use self::mode::ModeLib;
 use self::number::NumberLib;
@@ -22,17 +22,18 @@ use self::unit::UnitLib;
 use self::value::ValueLib;
 use super::Named;
 use crate::cfg::CfgMod;
+use crate::cfg::lib::ctx::CtxLib;
 use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::Mode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::Contract;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
+use crate::semantics::memo::Contract;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -43,7 +44,7 @@ use crate::type_::DynRef;
 use crate::type_::Symbol;
 
 pub trait Library: CfgMod {
-    fn prelude(&self, ctx: &mut Ctx);
+    fn prelude(&self, memo: &mut Memo);
 }
 
 #[derive(Default, Clone)]
@@ -61,13 +62,14 @@ pub struct CoreLib {
     pub map: MapLib,
     pub link: LinkLib,
     pub cfg: CfgLib,
-    pub ctx: CtxLib,
+    pub memo: MemoLib,
     pub func: FuncLib,
+    pub ctx: CtxLib,
+    pub mode: ModeLib,
+    pub ctrl: CtrlLib,
     pub meta: MetaLib,
     pub syntax: SyntaxLib,
     pub value: ValueLib,
-    pub ctrl: CtrlLib,
-    pub mode: ModeLib,
 }
 
 impl CfgMod for CoreLib {
@@ -85,44 +87,46 @@ impl CfgMod for CoreLib {
         self.map.extend(cfg);
         self.link.extend(cfg);
         self.cfg.extend(cfg);
-        self.ctx.extend(cfg);
+        self.memo.extend(cfg);
         self.func.extend(cfg);
+        self.ctx.extend(cfg);
+        self.mode.extend(cfg);
+        self.ctrl.extend(cfg);
         self.meta.extend(cfg);
         self.syntax.extend(cfg);
         self.value.extend(cfg);
-        self.ctrl.extend(cfg);
-        self.mode.extend(cfg);
     }
 }
 
 impl Library for CoreLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.unit.prelude(ctx);
-        self.bool.prelude(ctx);
-        self.symbol.prelude(ctx);
-        self.text.prelude(ctx);
-        self.int.prelude(ctx);
-        self.number.prelude(ctx);
-        self.byte.prelude(ctx);
-        self.pair.prelude(ctx);
-        self.call.prelude(ctx);
-        self.list.prelude(ctx);
-        self.map.prelude(ctx);
-        self.link.prelude(ctx);
-        self.cfg.prelude(ctx);
-        self.ctx.prelude(ctx);
-        self.func.prelude(ctx);
-        self.meta.prelude(ctx);
-        self.syntax.prelude(ctx);
-        self.value.prelude(ctx);
-        self.ctrl.prelude(ctx);
-        self.mode.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.unit.prelude(memo);
+        self.bool.prelude(memo);
+        self.symbol.prelude(memo);
+        self.text.prelude(memo);
+        self.int.prelude(memo);
+        self.number.prelude(memo);
+        self.byte.prelude(memo);
+        self.pair.prelude(memo);
+        self.call.prelude(memo);
+        self.list.prelude(memo);
+        self.map.prelude(memo);
+        self.link.prelude(memo);
+        self.cfg.prelude(memo);
+        self.memo.prelude(memo);
+        self.func.prelude(memo);
+        self.ctx.prelude(memo);
+        self.mode.prelude(memo);
+        self.ctrl.prelude(memo);
+        self.meta.prelude(memo);
+        self.syntax.prelude(memo);
+        self.value.prelude(memo);
     }
 }
 
 impl<T: Named + Clone + Into<FuncVal>> Library for T {
-    fn prelude(&self, ctx: &mut Ctx) {
-        let v = ctx.put(self.name(), Val::Func(self.clone().into()), Contract::None);
+    fn prelude(&self, memo: &mut Memo) {
+        let v = memo.put(self.name(), Val::Func(self.clone().into()), Contract::None);
         assert!(matches!(v, Ok(None)), "names of preludes should be unique");
     }
 }
@@ -172,9 +176,9 @@ impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     }
 }
 
-fn ctx_put_func<V: Clone + Into<FuncVal>>(ctx: &mut Ctx, name: &'static str, val: &V) {
+fn memo_put_func<V: Clone + Into<FuncVal>>(memo: &mut Memo, name: &'static str, val: &V) {
     let name = Symbol::from_str_unchecked(name);
-    let v = ctx.put(name, Val::Func(val.clone().into()), Contract::None);
+    let v = memo.put(name, Val::Func(val.clone().into()), Contract::None);
     assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }
 
@@ -303,18 +307,20 @@ pub mod link;
 
 pub mod cfg;
 
-pub mod ctx;
+pub mod memo;
 
 pub mod func;
 
 // -----
+
+pub mod ctx;
+
+pub mod mode;
+
+pub mod ctrl;
 
 pub mod meta;
 
 pub mod syntax;
 
 pub mod value;
-
-pub mod ctrl;
-
-pub mod mode;

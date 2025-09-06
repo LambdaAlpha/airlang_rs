@@ -2,7 +2,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::CoreLib;
 use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 
 use self::build::BuildLib;
 use self::file::FileLib;
@@ -29,12 +29,12 @@ impl CfgMod for StdLib {
 }
 
 impl Library for StdLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.core.prelude(ctx);
-        self.io.prelude(ctx);
-        self.file.prelude(ctx);
-        self.process.prelude(ctx);
-        self.build.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.core.prelude(memo);
+        self.io.prelude(memo);
+        self.file.prelude(memo);
+        self.process.prelude(memo);
+        self.build.prelude(memo);
     }
 }
 

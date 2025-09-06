@@ -4,7 +4,7 @@ use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
 use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
@@ -28,8 +28,8 @@ impl CfgMod for FileLib {
 }
 
 impl Library for FileLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.read_to_text.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.read_to_text.prelude(memo);
     }
 }
 

@@ -8,7 +8,7 @@ use num_traits::ToPrimitive;
 use super::DynPrimFn;
 use super::FuncMode;
 use super::Library;
-use super::ctx_put_func;
+use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
@@ -20,9 +20,9 @@ use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
-use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -71,13 +71,13 @@ impl CfgMod for CtrlLib {
 }
 
 impl Library for CtrlLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        ctx_put_func(ctx, "do", &self.do_);
-        ctx_put_func(ctx, "test", &self.test);
-        ctx_put_func(ctx, "switch", &self.switch);
-        ctx_put_func(ctx, "match", &self.match_);
-        ctx_put_func(ctx, "loop", &self.loop_);
-        ctx_put_func(ctx, "iterate", &self.iterate);
+    fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "do", &self.do_);
+        memo_put_func(memo, "test", &self.test);
+        memo_put_func(memo, "switch", &self.switch);
+        memo_put_func(memo, "match", &self.match_);
+        memo_put_func(memo, "loop", &self.loop_);
+        memo_put_func(memo, "iterate", &self.iterate);
     }
 }
 

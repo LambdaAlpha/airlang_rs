@@ -5,7 +5,7 @@ use airlang::cfg::lib::Library;
 use airlang::cfg::lib::mut_impl;
 use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::ctx::Ctx;
+use airlang::semantics::memo::Memo;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Symbol;
@@ -29,8 +29,8 @@ impl CfgMod for EvalLib {
 }
 
 impl Library for EvalLib {
-    fn prelude(&self, ctx: &mut Ctx) {
-        self.reset.prelude(ctx);
+    fn prelude(&self, memo: &mut Memo) {
+        self.reset.prelude(memo);
     }
 }
 
@@ -40,12 +40,12 @@ pub fn reset() -> MutPrimFuncVal {
 }
 
 fn fn_reset(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
-    let Val::Ctx(ctx) = ctx else {
-        error!("ctx {ctx:?} should be a ctx");
+    let Val::Memo(memo) = ctx else {
+        error!("ctx {ctx:?} should be a memo");
         return Val::default();
     };
-    if let Some(Val::Ctx(prelude)) = cfg.import(Symbol::from_str_unchecked(CoreCfg::PRELUDE)) {
-        *ctx = prelude;
+    if let Some(Val::Memo(prelude)) = cfg.import(Symbol::from_str_unchecked(CoreCfg::PRELUDE)) {
+        *memo = prelude;
     }
     Val::default()
 }
