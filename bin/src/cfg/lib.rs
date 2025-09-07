@@ -1,27 +1,28 @@
 use airlang::cfg::CfgMod;
 use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::memo::Contract;
 use airlang::semantics::memo::Memo;
+use airlang::semantics::val::FuncVal;
+use airlang::semantics::val::Val;
+use airlang::type_::Symbol;
 use airlang_ext::cfg::lib::StdLib;
 
-use self::eval::EvalLib;
-use self::process::ProcessLib;
+use self::cmd::CmdLib;
 use self::repl::ReplLib;
 
 #[derive(Default, Clone)]
 pub struct BinLib {
     pub std: StdLib,
     pub repl: ReplLib,
-    pub eval: EvalLib,
-    pub process: ProcessLib,
+    pub cmd: CmdLib,
 }
 
 impl CfgMod for BinLib {
     fn extend(self, cfg: &Cfg) {
         self.std.extend(cfg);
         self.repl.extend(cfg);
-        self.eval.extend(cfg);
-        self.process.extend(cfg);
+        self.cmd.extend(cfg);
     }
 }
 
@@ -29,13 +30,16 @@ impl Library for BinLib {
     fn prelude(&self, memo: &mut Memo) {
         self.std.prelude(memo);
         self.repl.prelude(memo);
-        self.eval.prelude(memo);
-        self.process.prelude(memo);
+        self.cmd.prelude(memo);
     }
+}
+
+fn memo_put_func<V: Clone + Into<FuncVal>>(memo: &mut Memo, name: &'static str, val: &V) {
+    let name = Symbol::from_str_unchecked(name);
+    let v = memo.put(name, Val::Func(val.clone().into()), Contract::None);
+    assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }
 
 pub mod repl;
 
-pub mod eval;
-
-pub mod process;
+pub mod cmd;

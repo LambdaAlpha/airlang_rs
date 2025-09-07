@@ -35,9 +35,7 @@ impl CfgMod for BuildLib {
 }
 
 impl Library for BuildLib {
-    fn prelude(&self, memo: &mut Memo) {
-        self.load.prelude(memo);
-    }
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 // todo rename

@@ -13,26 +13,28 @@ use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use log::error;
 
+use crate::cfg::lib::memo_put_func;
+
 #[derive(Clone)]
-pub struct ProcessLib {
+pub struct CmdLib {
     pub call: FreePrimFuncVal,
 }
 
-impl Default for ProcessLib {
+impl Default for CmdLib {
     fn default() -> Self {
         Self { call: call() }
     }
 }
 
-impl CfgMod for ProcessLib {
+impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
         self.call.extend(cfg);
     }
 }
 
-impl Library for ProcessLib {
+impl Library for CmdLib {
     fn prelude(&self, memo: &mut Memo) {
-        self.call.prelude(memo);
+        memo_put_func(memo, ";", &self.call);
     }
 }
 
@@ -41,7 +43,7 @@ impl Library for ProcessLib {
 // todo impl
 pub fn call() -> FreePrimFuncVal {
     FreePrimFn {
-        id: "$",
+        id: "command.call",
         f: free_impl(fn_call),
         mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval),
     }

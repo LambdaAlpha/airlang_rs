@@ -28,9 +28,7 @@ impl CfgMod for FileLib {
 }
 
 impl Library for FileLib {
-    fn prelude(&self, memo: &mut Memo) {
-        self.read_to_text.prelude(memo);
-    }
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn read_to_text() -> FreePrimFuncVal {

@@ -1,16 +1,16 @@
 use airlang::cfg::CfgMod;
-use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
-use airlang::cfg::lib::free_impl;
-use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::memo::Contract;
 use airlang::semantics::memo::Memo;
-use airlang::semantics::val::FreePrimFuncVal;
+use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
+use airlang::type_::Symbol;
+use airlang::type_::Text;
 
 #[derive(Clone)]
 pub struct ReplLib {
-    pub help: FreePrimFuncVal,
+    pub help: TextVal,
 }
 
 impl Default for ReplLib {
@@ -21,34 +21,35 @@ impl Default for ReplLib {
 
 impl CfgMod for ReplLib {
     fn extend(self, cfg: &Cfg) {
-        self.help.extend(cfg);
+        cfg.extend_scope(Symbol::from_str_unchecked("repl.help"), Val::Text(self.help));
     }
 }
 
 impl Library for ReplLib {
     fn prelude(&self, memo: &mut Memo) {
-        self.help.prelude(memo);
+        let _ = memo.put(
+            Symbol::from_str_unchecked("help"),
+            Val::Text(self.help.clone()),
+            Contract::default(),
+        );
     }
 }
 
-// todo design
-pub fn help() -> FreePrimFuncVal {
-    FreePrimFn { id: "help", f: free_impl(fn_help), mode: FuncMode::default_mode() }.free()
+pub fn help() -> TextVal {
+    Text::from(HELP_DOC).into()
 }
 
-const HELP_DOC: &str = "\
-functions:
-    help: display this message
-    $: call a program, i.e. `git $ [status]`
-    repl.reset: reset the repl context to its initial state
-
+const HELP_DOC: &str = r##"
 keyboard shortcuts:
     Ctrl + C: exit this program
     Up/Down: switch through command history
     Alt + M: switch multiline mode
-";
 
-fn fn_help(_cfg: &mut Cfg, _input: Val) -> Val {
-    print!("{HELP_DOC}");
-    Val::default()
-}
+prelude:
+    help: help message
+    ;: call a program, i.e. `git ; .[commit --amend]`
+
+library:
+    repl.help: help message, named "help" in prelude
+    command.call: call a program, named ";" in prelude
+"##;

@@ -1,4 +1,5 @@
 _ do [
-    b = _ build.load "b/b.air",
+    load = _ import .build.load,
+    b = _ load "b/b.air",
     b + 1
 ]

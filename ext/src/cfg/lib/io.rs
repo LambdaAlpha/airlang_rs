@@ -55,15 +55,7 @@ impl CfgMod for IoLib {
 }
 
 impl Library for IoLib {
-    fn prelude(&self, memo: &mut Memo) {
-        self.read_line.prelude(memo);
-        self.print.prelude(memo);
-        self.print_line.prelude(memo);
-        self.flush.prelude(memo);
-        self.error_print.prelude(memo);
-        self.error_print_line.prelude(memo);
-        self.error_flush.prelude(memo);
-    }
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn read_line() -> MutPrimFuncVal {

@@ -35,9 +35,7 @@ impl CfgMod for ProcessLib {
 }
 
 impl Library for ProcessLib {
-    fn prelude(&self, memo: &mut Memo) {
-        self.call.prelude(memo);
-    }
+    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 const PROGRAM: &str = "program";

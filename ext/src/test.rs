@@ -5,7 +5,6 @@ use airlang::semantics::val::Val;
 use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Int;
-use airlang::type_::Text;
 use airlang_dev::init_logger;
 
 use crate::cfg::StdCfg;
@@ -22,9 +21,12 @@ fn test_build_load() -> Result<(), Box<dyn Error>> {
 }
 
 fn generate_load(path: &str) -> String {
-    let mut src = Text::from("_ build.load \"");
-    escape_text(&mut src, env!("CARGO_MANIFEST_DIR"));
-    src.push_str(path);
-    src.push('"');
-    src.into()
+    let mut path_prefix = String::new();
+    escape_text(&mut path_prefix, env!("CARGO_MANIFEST_DIR"));
+    format!(
+        "_ do [\
+            load = _ import .build.load,\
+            _ load \"{path_prefix}{path}\"\
+        ]"
+    )
 }

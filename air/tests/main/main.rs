@@ -6,7 +6,6 @@ use airlang::semantics::memo::Contract;
 use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Symbol;
-use airlang::type_::Text;
 use airlang_dev::init_logger;
 
 const MAIN_DELIMITER: &str = "=====";
@@ -57,9 +56,12 @@ fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
 }
 
 fn generate_load(path: &str) -> String {
-    let mut src = Text::from("build.load \"");
-    escape_text(&mut src, env!("CARGO_MANIFEST_DIR"));
-    src.push_str(path);
-    src.push('"');
-    src.into()
+    let mut path_prefix = String::new();
+    escape_text(&mut path_prefix, env!("CARGO_MANIFEST_DIR"));
+    format!(
+        "_ do [\
+            load = _ import .build.load,\
+            _ load \"{path_prefix}{path}\"\
+        ]"
+    )
 }
