@@ -10,7 +10,6 @@ use winnow::Parser;
 use winnow::Result;
 use winnow::ascii::digit1;
 use winnow::ascii::line_ending;
-use winnow::ascii::till_line_ending;
 use winnow::combinator::alt;
 use winnow::combinator::cut_err;
 use winnow::combinator::delimited;
@@ -29,10 +28,10 @@ use winnow::error::ErrMode;
 use winnow::error::StrContext;
 use winnow::error::StrContextValue;
 use winnow::stream::Checkpoint;
-use winnow::stream::Range;
 use winnow::stream::Stream;
 use winnow::token::any;
 use winnow::token::one_of;
+use winnow::token::take_till;
 use winnow::token::take_while;
 
 use super::BYTE;
@@ -127,24 +126,25 @@ fn top<T: ParseRepr>(src: &mut &str) -> ModalResult<T> {
 
 fn trim<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
 where F: Parser<&'a str, O, E> {
-    delimited(spaces(0 ..), f, spaces(0 ..))
+    delimited(opt(spaces), f, opt(spaces))
 }
 
 fn trim_comment<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
 where F: Parser<&'a str, O, E> {
-    delimited(spaces_comment(0 ..), f, spaces_comment(0 ..))
+    delimited(opt(spaces_comment), f, opt(spaces_comment))
 }
 
-fn spaces<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
-    repeat(occurrences, alt((" ", "\t", "\n", "\r\n")).void()).context(label("spaces"))
+fn spaces(i: &mut &str) -> ModalResult<()> {
+    let spaces = take_while(1 .., |c| matches!(c, ' ' | '\t' | '\n'));
+    repeat(1 .., alt((spaces, "\r\n")).void()).context(label("spaces")).parse_next(i)
 }
 
-fn space_tab<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
-    take_while(occurrences, [' ', '\t']).void().context(label("space_tab"))
+fn space_tab(i: &mut &str) -> ModalResult<()> {
+    take_while(1 .., |c| matches!(c, ' ' | '\t')).void().context(label("space_tab")).parse_next(i)
 }
 
-fn spaces_comment<'a>(occurrences: impl Into<Range>) -> impl Parser<&'a str, (), E> {
-    repeat(occurrences, alt((spaces(1 ..), comment)))
+fn spaces_comment(i: &mut &str) -> ModalResult<()> {
+    repeat(1 .., alt((spaces, comment))).parse_next(i)
 }
 
 fn comment(i: &mut &str) -> ModalResult<()> {
@@ -166,13 +166,13 @@ fn comment_token(i: &mut &str) -> ModalResult<()> {
         SCOPE_LEFT => delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT).parse_next(i),
         SCOPE_RIGHT => fail.parse_next(i),
         SEPARATOR => any.void().parse_next(i),
-        ' ' | '\t' | '\r' | '\n' => spaces(1 ..).parse_next(i),
+        ' ' | '\t' | '\r' | '\n' => spaces.parse_next(i),
         TEXT_QUOTE => {
-            let text = take_while(0 .., |c| c != TEXT_QUOTE).void();
+            let text = take_till(0 .., TEXT_QUOTE).void();
             delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).parse_next(i)
         }
         SYMBOL_QUOTE => {
-            let symbol = take_while(0 .., |c| c != SYMBOL_QUOTE).void();
+            let symbol = take_till(0 .., SYMBOL_QUOTE).void();
             delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE).parse_next(i)
         }
 
@@ -182,7 +182,7 @@ fn comment_token(i: &mut &str) -> ModalResult<()> {
                 return empty.parse_next(i);
             }
             let quote = i.chars().next().unwrap();
-            let line = (till_line_ending, line_ending, space_tab(0 ..), one_of(is_symbol));
+            let line = (take_till(0 .., '\n'), '\n', opt(space_tab), one_of(is_symbol));
             let content = separated(1 .., line, ' ');
             delimited_cut(quote, content, quote).parse_next(i)
         }
@@ -347,8 +347,8 @@ fn compose_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<
 fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let mut left = token(ctx).parse_next(i)?;
-        let next = &mut preceded(spaces_comment(1 ..), token(ctx));
-        let last = &mut preceded(spaces_comment(1 ..), token(ctx));
+        let next = &mut preceded(spaces_comment, token(ctx));
+        let last = &mut preceded(spaces_comment, token(ctx));
         loop {
             let Ok(func) = next.parse_next(i) else {
                 return Ok(left);
@@ -361,8 +361,8 @@ fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T
 fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let left = token(ctx).parse_next(i)?;
-        let next = &mut preceded(spaces_comment(1 ..), token(ctx));
-        let last = &mut preceded(spaces_comment(1 ..), compose_right(ctx));
+        let next = &mut preceded(spaces_comment, token(ctx));
+        let last = &mut preceded(spaces_comment, compose_right(ctx));
         let Ok(func) = next.parse_next(i) else {
             return Ok(left);
         };
@@ -440,7 +440,7 @@ fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
 }
 
 fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment(1 ..));
+    let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment);
     delimited_trim_comment(LIST_LEFT, repr_list, LIST_RIGHT)
         .map(|tokens: Vec<_>| T::from(List::from(tokens)))
         .context(label("raw list"))
@@ -450,9 +450,9 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let mut map = Map::default();
         let mut key = opt(repr(ctx));
-        let mut pair = opt(preceded(spaces_comment(1 ..), PAIR.void()));
+        let mut pair = opt(preceded(spaces_comment, PAIR.void()));
         let mut value = cut_err(preceded(
-            spaces_comment(1 ..).context(expect_desc("space")),
+            spaces_comment.context(expect_desc("space")),
             compose(ctx).context(expect_desc("value")),
         ));
         let mut separator = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR))));
@@ -481,7 +481,7 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
 
 fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
-        let tokens: Vec<_> = separated(0 .., repr::<T>(ctx), spaces_comment(1 ..)).parse_next(i)?;
+        let tokens: Vec<_> = separated(0 .., repr::<T>(ctx), spaces_comment).parse_next(i)?;
         if !tokens.len().is_multiple_of(2) {
             return cut_err(fail.context(expect_desc("even number of tokens"))).parse_next(i);
         }
@@ -514,7 +514,7 @@ fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
         '\\' => empty.value("\\").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
         QUOTE => empty.value(concatcp!(SYMBOL_QUOTE)).parse_next(i),
-        ' ' | '\t' | '\r' | '\n' => spaces(0 ..).value("").parse_next(i),
+        ' ' | '\t' | '\r' | '\n' => opt(spaces).value("").parse_next(i),
         _ => fail.parse_next(i),
     })
     .context(expect_desc("escape character"))
@@ -524,8 +524,8 @@ fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
 // ignore spaces following \n
 fn symbol_space<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     (move |i: &mut _| match any.parse_next(i)? {
-        '\n' => space_tab(0 ..).value("").parse_next(i),
-        '\r' => ('\n', space_tab(0 ..)).value("").parse_next(i),
+        '\n' => opt(space_tab).value("").parse_next(i),
+        '\r' => ('\n', opt(space_tab)).value("").parse_next(i),
         '\t' => take_while(0 .., '\t').value("").parse_next(i),
         _ => fail.parse_next(i),
     })
@@ -544,15 +544,15 @@ fn raw_symbol(i: &mut &str) -> ModalResult<Symbol> {
 }
 
 fn raw_symbol_newline(i: &mut &str) -> ModalResult<()> {
-    (line_ending, space_tab(0 ..), '|'.context(expect_char('|')))
+    (line_ending, opt(space_tab), '|'.context(expect_char('|')))
         .void()
         .context(expect_desc("newline"))
         .parse_next(i)
 }
 
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let literal = take_while(1 .., |c| !matches!(c, '"' | '\\' | '\r' | '\n'));
-    let space = terminated(line_ending, space_tab(0 ..));
+    let literal = take_till(1 .., |c| matches!(c, '"' | '\\' | '\r' | '\n'));
+    let space = terminated(line_ending, opt(space_tab));
     let fragment = alt((literal.map(StrFragment::Str), text_escaped, space.map(StrFragment::Str)));
     let text = repeat(0 .., fragment).fold(String::new, |mut string, fragment| {
         fragment.push(&mut string);
@@ -570,7 +570,7 @@ fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
         '\\' => empty.value(StrFragment::Char('\\')).parse_next(i),
         '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
         QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
-        ' ' | '\t' | '\r' | '\n' => spaces(0 ..).value(StrFragment::Str("")).parse_next(i),
+        ' ' | '\t' | '\r' | '\n' => opt(spaces).value(StrFragment::Str("")).parse_next(i),
         _ => fail.parse_next(i),
     })
     .context(expect_desc("escape character"))
@@ -587,7 +587,7 @@ fn unicode(i: &mut &str) -> ModalResult<char> {
 }
 
 fn raw_text(i: &mut &str) -> ModalResult<Text> {
-    let fragment = separated(1 .., (till_line_ending, raw_text_newline), ' ');
+    let fragment = separated(1 .., (raw_text_until_newline, raw_text_newline), ' ');
     let text = fragment.map(|fragments: Vec<_>| {
         let mut s = String::new();
         for (literal, newline) in fragments {
@@ -602,12 +602,18 @@ fn raw_text(i: &mut &str) -> ModalResult<Text> {
         .parse_next(i)
 }
 
+fn raw_text_until_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
+    let no_rn = take_till(1 .., |c| matches!(c, '\r' | '\n')).void();
+    let only_r = ('\r', peek(not('\n'))).void();
+    repeat(0 .., alt((no_rn, only_r))).map(|()| ()).take().parse_next(i)
+}
+
 fn raw_text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     let newline = alt(('+'.value(true), '|'.value(false)))
         .context(expect_char('+'))
         .context(expect_char('|'));
-    (line_ending, space_tab(0 ..), newline)
-        .map(|(ending, (), newline): (&str, _, _)| if newline { ending } else { "" })
+    (line_ending, opt(space_tab), newline)
+        .map(|(ending, _, newline): (&str, _, _)| if newline { ending } else { "" })
         .context(expect_desc("newline"))
         .parse_next(i)
 }
