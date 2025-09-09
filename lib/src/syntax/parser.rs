@@ -32,6 +32,7 @@ use winnow::stream::Stream;
 use winnow::token::any;
 use winnow::token::one_of;
 use winnow::token::take_till;
+use winnow::token::take_until;
 use winnow::token::take_while;
 
 use super::BYTE;
@@ -168,11 +169,11 @@ fn comment_token(i: &mut &str) -> ModalResult<()> {
         SEPARATOR => any.void().parse_next(i),
         ' ' | '\t' | '\r' | '\n' => spaces.parse_next(i),
         TEXT_QUOTE => {
-            let text = take_till(0 .., TEXT_QUOTE).void();
+            let text = take_until(0 .., TEXT_QUOTE).void();
             delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).parse_next(i)
         }
         SYMBOL_QUOTE => {
-            let symbol = take_till(0 .., SYMBOL_QUOTE).void();
+            let symbol = take_until(0 .., SYMBOL_QUOTE).void();
             delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE).parse_next(i)
         }
 
@@ -182,7 +183,7 @@ fn comment_token(i: &mut &str) -> ModalResult<()> {
                 return empty.parse_next(i);
             }
             let quote = i.chars().next().unwrap();
-            let line = (take_till(0 .., '\n'), '\n', opt(space_tab), one_of(is_symbol));
+            let line = (take_until(0 .., '\n'), '\n', opt(space_tab), one_of(is_symbol));
             let content = separated(1 .., line, ' ');
             delimited_cut(quote, content, quote).parse_next(i)
         }
@@ -603,7 +604,7 @@ fn raw_text(i: &mut &str) -> ModalResult<Text> {
 }
 
 fn raw_text_until_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    let no_rn = take_till(1 .., |c| matches!(c, '\r' | '\n')).void();
+    let no_rn = take_until(1 .., ('\r', '\n')).void();
     let only_r = ('\r', peek(not('\n'))).void();
     repeat(0 .., alt((no_rn, only_r))).map(|()| ()).take().parse_next(i)
 }
