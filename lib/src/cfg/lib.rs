@@ -23,8 +23,6 @@ use self::value::ValueLib;
 use super::Named;
 use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::CtxLib;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::Mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
@@ -134,44 +132,30 @@ impl<T: Named + Clone + Into<FuncVal>> Library for T {
 pub struct FreePrimFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: Mode,
 }
 
 pub struct DynPrimFn<F> {
     pub id: &'static str,
     pub f: F,
-    pub mode: Mode,
 }
 
 impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
     pub fn free(self) -> FreePrimFuncVal {
-        let func = FreePrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Rc::new(self.f),
-            setup: Some(FuncMode::mode_into_func(self.mode)),
-        };
+        let func = FreePrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
         FreePrimFuncVal::from(func)
     }
 }
 
 impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn const_(self) -> ConstPrimFuncVal {
-        let func = ConstPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Rc::new(self.f),
-            setup: Some(FuncMode::mode_into_func(self.mode)),
-        };
+        let func = ConstPrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
         ConstPrimFuncVal::from(func)
     }
 }
 
 impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn mut_(self) -> MutPrimFuncVal {
-        let func = MutPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
-            fn_: Rc::new(self.f),
-            setup: Some(FuncMode::mode_into_func(self.mode)),
-        };
+        let func = MutPrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
         MutPrimFuncVal::from(func)
     }
 }

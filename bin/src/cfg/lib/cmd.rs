@@ -1,6 +1,7 @@
 use std::process::Command;
 
 use airlang::cfg::CfgMod;
+use airlang::cfg::CoreCfg;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
@@ -28,6 +29,8 @@ impl Default for CmdLib {
 
 impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
+        let call_setup = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval);
+        CoreCfg::extend_setup_mode(cfg, &self.call.id(), call_setup);
         self.call.extend(cfg);
     }
 }
@@ -42,12 +45,7 @@ impl Library for CmdLib {
 // todo design
 // todo impl
 pub fn call() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "command.call",
-        f: free_impl(fn_call),
-        mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval),
-    }
-    .free()
+    FreePrimFn { id: "command.call", f: free_impl(fn_call) }.free()
 }
 
 fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {

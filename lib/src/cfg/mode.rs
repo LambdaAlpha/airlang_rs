@@ -10,6 +10,10 @@ pub use self::symbol::SymbolMode;
 
 _____!();
 
+pub(crate) use self::func::MODE_FUNC_ID;
+
+_____!();
+
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;

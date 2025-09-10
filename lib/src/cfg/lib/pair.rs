@@ -7,7 +7,6 @@ use super::Library;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -48,7 +47,7 @@ impl Library for PairLib {
 }
 
 pub fn first() -> ConstPrimFuncVal {
-    DynPrimFn { id: "pair.first", f: const_impl(fn_first), mode: FuncMode::default_mode() }.const_()
+    DynPrimFn { id: "pair.first", f: const_impl(fn_first) }.const_()
 }
 
 fn fn_first(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -60,8 +59,7 @@ fn fn_first(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_first() -> MutPrimFuncVal {
-    DynPrimFn { id: "pair.set_first", f: mut_impl(fn_set_first), mode: FuncMode::default_mode() }
-        .mut_()
+    DynPrimFn { id: "pair.set_first", f: mut_impl(fn_set_first) }.mut_()
 }
 
 fn fn_set_first(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -74,8 +72,7 @@ fn fn_set_first(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn second() -> ConstPrimFuncVal {
-    DynPrimFn { id: "pair.second", f: const_impl(fn_second), mode: FuncMode::default_mode() }
-        .const_()
+    DynPrimFn { id: "pair.second", f: const_impl(fn_second) }.const_()
 }
 
 fn fn_second(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -87,8 +84,7 @@ fn fn_second(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_second() -> MutPrimFuncVal {
-    DynPrimFn { id: "pair.set_second", f: mut_impl(fn_set_second), mode: FuncMode::default_mode() }
-        .mut_()
+    DynPrimFn { id: "pair.set_second", f: mut_impl(fn_set_second) }.mut_()
 }
 
 fn fn_set_second(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

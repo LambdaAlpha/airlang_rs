@@ -26,7 +26,7 @@ pub struct FuncMode;
 
 const DEFAULT_MODE: PrimMode = PrimMode { symbol: SymbolMode::Ref, call: CallPrimMode::Eval };
 
-const MODE_FUNC_ID: &str = "mode.object";
+pub(crate) const MODE_FUNC_ID: &str = "mode.object";
 
 impl FuncMode {
     pub fn mode_into_func(mode: Mode) -> FuncVal {
@@ -38,30 +38,15 @@ impl FuncMode {
     }
 
     pub fn mode_into_free_func(mode: Mode) -> FreePrimFuncVal {
-        FreePrimFunc {
-            id: Symbol::from_str_unchecked(MODE_FUNC_ID),
-            fn_: Rc::new(mode),
-            setup: None,
-        }
-        .into()
+        FreePrimFunc { id: Symbol::from_str_unchecked(MODE_FUNC_ID), fn_: Rc::new(mode) }.into()
     }
 
     pub fn mode_into_const_func(mode: Mode) -> ConstPrimFuncVal {
-        ConstPrimFunc {
-            id: Symbol::from_str_unchecked(MODE_FUNC_ID),
-            fn_: Rc::new(mode),
-            setup: None,
-        }
-        .into()
+        ConstPrimFunc { id: Symbol::from_str_unchecked(MODE_FUNC_ID), fn_: Rc::new(mode) }.into()
     }
 
     pub fn mode_into_mut_func(mode: Mode) -> MutPrimFuncVal {
-        MutPrimFunc {
-            id: Symbol::from_str_unchecked(MODE_FUNC_ID),
-            fn_: Rc::new(mode),
-            setup: None,
-        }
-        .into()
+        MutPrimFunc { id: Symbol::from_str_unchecked(MODE_FUNC_ID), fn_: Rc::new(mode) }.into()
     }
 
     pub const fn default_mode() -> Mode {

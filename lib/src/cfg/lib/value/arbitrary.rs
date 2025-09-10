@@ -434,7 +434,6 @@ impl Arbitrary for FreeCompFuncVal {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             memo: Arbitrary::any(rng, depth),
-            setup: Arbitrary::any(rng, depth),
         };
         FreeCompFuncVal::from(func)
     }
@@ -447,7 +446,6 @@ impl Arbitrary for ConstCompFuncVal {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             memo: Arbitrary::any(rng, depth),
-            setup: Arbitrary::any(rng, depth),
         };
         ConstCompFuncVal::from(func)
     }
@@ -460,7 +458,6 @@ impl Arbitrary for MutCompFuncVal {
             id: Arbitrary::any(rng, depth),
             comp: Arbitrary::any(rng, depth),
             memo: Arbitrary::any(rng, depth),
-            setup: Arbitrary::any(rng, depth),
         };
         MutCompFuncVal::from(func)
     }

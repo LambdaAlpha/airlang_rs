@@ -4,15 +4,15 @@ use self::repr::generate_contract;
 use self::repr::generate_memo;
 use self::repr::parse_contract;
 use self::repr::parse_memo;
-use self::repr::parse_mode;
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::FuncMode;
 use super::Library;
 use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
+use crate::cfg::lib::memo::repr::parse_mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -50,6 +50,7 @@ impl Default for MemoLib {
 
 impl CfgMod for MemoLib {
     fn extend(self, cfg: &Cfg) {
+        CoreCfg::extend_setup_mode(cfg, &self.new.id, parse_mode());
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.reverse.extend(cfg);
@@ -65,7 +66,7 @@ impl Library for MemoLib {
 }
 
 pub fn move_() -> MutPrimFuncVal {
-    DynPrimFn { id: "memory.move", f: mut_impl(fn_move), mode: FuncMode::default_mode() }.mut_()
+    DynPrimFn { id: "memory.move", f: mut_impl(fn_move) }.mut_()
 }
 
 fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -81,8 +82,7 @@ fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn contract() -> ConstPrimFuncVal {
-    DynPrimFn { id: "memory.contract", f: const_impl(fn_contract), mode: FuncMode::default_mode() }
-        .const_()
+    DynPrimFn { id: "memory.contract", f: const_impl(fn_contract) }.const_()
 }
 
 fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -102,12 +102,7 @@ fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_contract() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "memory.set_contract",
-        f: mut_impl(fn_set_contract),
-        mode: FuncMode::default_mode(),
-    }
-    .mut_()
+    DynPrimFn { id: "memory.set_contract", f: mut_impl(fn_set_contract) }.mut_()
 }
 
 fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -133,8 +128,7 @@ fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_null() -> ConstPrimFuncVal {
-    DynPrimFn { id: "memory.is_null", f: const_impl(fn_is_null), mode: FuncMode::default_mode() }
-        .const_()
+    DynPrimFn { id: "memory.is_null", f: const_impl(fn_is_null) }.const_()
 }
 
 fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -150,7 +144,7 @@ fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.new", f: free_impl(fn_new), mode: parse_mode() }.free()
+    FreePrimFn { id: "memory.new", f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -162,8 +156,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.represent", f: free_impl(fn_repr), mode: FuncMode::default_mode() }
-        .free()
+    FreePrimFn { id: "memory.represent", f: free_impl(fn_repr) }.free()
 }
 
 fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
@@ -175,8 +168,7 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn reverse() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.reverse", f: free_impl(fn_reverse), mode: FuncMode::default_mode() }
-        .free()
+    FreePrimFn { id: "memory.reverse", f: free_impl(fn_reverse) }.free()
 }
 
 fn fn_reverse(_cfg: &mut Cfg, input: Val) -> Val {

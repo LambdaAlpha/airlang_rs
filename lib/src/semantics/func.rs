@@ -7,15 +7,12 @@ pub use self::free_prim::FreePrimFunc;
 pub use self::mut_comp::MutCompFunc;
 pub use self::mut_prim::MutFn;
 pub use self::mut_prim::MutPrimFunc;
-pub use self::setup::default_setup;
 
 _____!();
 
 pub(crate) use self::comp::DynComposite;
 pub(crate) use self::comp::FreeComposite;
 pub(crate) use self::comp::composite_call;
-pub(crate) use self::setup::Setup;
-pub(crate) use self::setup::SetupFn;
 
 _____!();
 
@@ -24,8 +21,6 @@ _____!();
 mod prim;
 
 mod comp;
-
-mod setup;
 
 mod free_prim;
 

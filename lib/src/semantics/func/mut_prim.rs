@@ -2,10 +2,8 @@ use std::rc::Rc;
 
 use super::ConstFn;
 use super::FreeFn;
-use super::Setup;
 use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Either;
@@ -52,7 +50,6 @@ where T: MutFn<Cfg, Ctx, I, O>
 pub struct MutPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn MutFn<Cfg, Val, Val, Val>>,
-    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for MutPrimFunc {
@@ -70,12 +67,6 @@ impl ConstFn<Cfg, Val, Val, Val> for MutPrimFunc {
 impl MutFn<Cfg, Val, Val, Val> for MutPrimFunc {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         self.fn_.mut_call(cfg, ctx, input)
-    }
-}
-
-impl Setup for MutPrimFunc {
-    fn setup(&self) -> Option<&FuncVal> {
-        self.setup.as_ref()
     }
 }
 

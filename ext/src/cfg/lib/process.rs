@@ -4,7 +4,6 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
-use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -44,7 +43,7 @@ const ARGUMENTS: &str = "arguments";
 // todo design
 // todo impl
 pub fn call() -> FreePrimFuncVal {
-    FreePrimFn { id: "process.call", f: free_impl(fn_call), mode: FuncMode::default_mode() }.free()
+    FreePrimFn { id: "process.call", f: free_impl(fn_call) }.free()
 }
 
 fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {

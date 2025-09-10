@@ -5,20 +5,21 @@ use pattern::PatternParse;
 
 use super::DynPrimFn;
 use super::FreeImpl;
-use super::FuncMode;
 use super::Library;
 use super::MutImpl;
 use super::const_impl;
 use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
 use crate::cfg::mode::CallPrimMode;
+use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
+use crate::semantics::core::import_setup;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
-use crate::semantics::func::Setup;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -53,9 +54,16 @@ impl Default for CtxLib {
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &Cfg) {
         self.read.extend(cfg);
+        let assign_setup = FuncMode::pair_mode(
+            Map::default(),
+            FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
+            FuncMode::default_mode(),
+        );
+        CoreCfg::extend_setup_mode(cfg, &self.assign.id, assign_setup);
         self.assign.extend(cfg);
         self.is_const.extend(cfg);
         self.self_.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, &self.which.id, FuncMode::id_mode());
         self.which.extend(cfg);
     }
 }
@@ -68,8 +76,7 @@ impl Library for CtxLib {
 }
 
 pub fn read() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.read", f: const_impl(fn_read), mode: FuncMode::default_mode() }
-        .const_()
+    DynPrimFn { id: "context.read", f: const_impl(fn_read) }.const_()
 }
 
 fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -85,16 +92,7 @@ fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn assign() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "context.assign",
-        f: mut_impl(fn_assign),
-        mode: FuncMode::pair_mode(
-            Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
-            FuncMode::default_mode(),
-        ),
-    }
-    .mut_()
+    DynPrimFn { id: "context.assign", f: mut_impl(fn_assign) }.mut_()
 }
 
 fn fn_assign(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -112,12 +110,8 @@ fn fn_assign(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_const() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "context.is_constant",
-        f: MutImpl::new(FreeImpl::default, fn_const, fn_mut),
-        mode: FuncMode::default_mode(),
-    }
-    .mut_()
+    DynPrimFn { id: "context.is_constant", f: MutImpl::new(FreeImpl::default, fn_const, fn_mut) }
+        .mut_()
 }
 
 fn fn_const(_cfg: &mut Cfg, _ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -129,8 +123,7 @@ fn fn_mut(_cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn self_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.self", f: const_impl(fn_self), mode: FuncMode::default_mode() }
-        .const_()
+    DynPrimFn { id: "context.self", f: const_impl(fn_self) }.const_()
 }
 
 fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -138,7 +131,7 @@ fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { id: "context.which", f: mut_impl(fn_which), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "context.which", f: mut_impl(fn_which) }.mut_()
 }
 
 fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -156,7 +149,10 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         error!("input.second.func should be a func");
         return Val::default();
     };
-    let input = func.setup().mut_call(cfg, ctx, call.input);
+    let Some(setup) = import_setup(cfg, func.id()) else {
+        return Val::default();
+    };
+    let input = setup.mut_call(cfg, ctx, call.input);
     let Some(ctx) = ctx.ref_(pair.first) else {
         error!("input.first should be a valid reference");
         return Val::default();

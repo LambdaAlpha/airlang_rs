@@ -2,8 +2,6 @@ use std::rc::Rc;
 
 use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::Setup;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
@@ -31,7 +29,6 @@ where T: FreeFn<Cfg, I, O>
 pub struct FreePrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn FreeFn<Cfg, Val, Val>>,
-    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for FreePrimFunc {
@@ -48,13 +45,7 @@ impl Default for FreePrimFunc {
                 Val::default()
             }
         }
-        Self { id: Symbol::default(), fn_: Rc::new(F), setup: None }
-    }
-}
-
-impl Setup for FreePrimFunc {
-    fn setup(&self) -> Option<&FuncVal> {
-        self.setup.as_ref()
+        Self { id: Symbol::default(), fn_: Rc::new(F) }
     }
 }
 

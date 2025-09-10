@@ -6,7 +6,6 @@ use super::MutImpl;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CallApply;
 use crate::semantics::func::ConstFn;
@@ -54,12 +53,8 @@ impl Library for CallLib {
 }
 
 pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "call.apply",
-        f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut),
-        mode: FuncMode::default_mode(),
-    }
-    .mut_()
+    DynPrimFn { id: "call.apply", f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut) }
+        .mut_()
 }
 
 fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
@@ -84,8 +79,7 @@ fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn func() -> ConstPrimFuncVal {
-    DynPrimFn { id: "call.function", f: const_impl(fn_func), mode: FuncMode::default_mode() }
-        .const_()
+    DynPrimFn { id: "call.function", f: const_impl(fn_func) }.const_()
 }
 
 fn fn_func(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -96,8 +90,7 @@ fn fn_func(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_func() -> MutPrimFuncVal {
-    DynPrimFn { id: "call.set_function", f: mut_impl(fn_set_func), mode: FuncMode::default_mode() }
-        .mut_()
+    DynPrimFn { id: "call.set_function", f: mut_impl(fn_set_func) }.mut_()
 }
 
 fn fn_set_func(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -109,7 +102,7 @@ fn fn_set_func(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn input() -> ConstPrimFuncVal {
-    DynPrimFn { id: "call.input", f: const_impl(fn_input), mode: FuncMode::default_mode() }.const_()
+    DynPrimFn { id: "call.input", f: const_impl(fn_input) }.const_()
 }
 
 fn fn_input(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -120,8 +113,7 @@ fn fn_input(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_input() -> MutPrimFuncVal {
-    DynPrimFn { id: "call.set_input", f: mut_impl(fn_set_input), mode: FuncMode::default_mode() }
-        .mut_()
+    DynPrimFn { id: "call.set_input", f: mut_impl(fn_set_input) }.mut_()
 }
 
 fn fn_set_input(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

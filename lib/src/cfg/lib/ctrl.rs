@@ -6,15 +6,16 @@ use num_traits::Signed;
 use num_traits::ToPrimitive;
 
 use super::DynPrimFn;
-use super::FuncMode;
 use super::Library;
 use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
 use crate::cfg::mode::CallPrimMode;
+use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::PrimMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
@@ -61,11 +62,17 @@ impl Default for CtrlLib {
 
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
+        CoreCfg::extend_setup_mode(cfg, &self.do_.id, FuncMode::id_mode());
         self.do_.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, &self.test.id, FuncMode::id_mode());
         self.test.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, &self.switch.id, FuncMode::id_mode());
         self.switch.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, &self.match_.id, FuncMode::id_mode());
         self.match_.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, &self.loop_.id, FuncMode::id_mode());
         self.loop_.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, &self.iterate.id, FuncMode::id_mode());
         self.iterate.extend(cfg);
     }
 }
@@ -179,7 +186,7 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.do", f: mut_impl(fn_do), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "control.do", f: mut_impl(fn_do) }.mut_()
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -190,7 +197,7 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn test() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.test", f: mut_impl(fn_test), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "control.test", f: mut_impl(fn_test) }.mut_()
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -236,7 +243,7 @@ impl Test {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.switch", f: mut_impl(fn_switch), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "control.switch", f: mut_impl(fn_switch) }.mut_()
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -296,7 +303,7 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.match", f: mut_impl(fn_match), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "control.match", f: mut_impl(fn_match) }.mut_()
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -361,7 +368,7 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.loop", f: mut_impl(fn_loop), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "control.loop", f: mut_impl(fn_loop) }.mut_()
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -410,7 +417,7 @@ impl Loop {
 }
 
 pub fn iterate() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.iterate", f: mut_impl(fn_iterate), mode: FuncMode::id_mode() }.mut_()
+    DynPrimFn { id: "control.iterate", f: mut_impl(fn_iterate) }.mut_()
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

@@ -7,7 +7,6 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
-use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -41,8 +40,7 @@ impl Library for BuildLib {
 // todo rename
 // todo design
 pub fn load() -> FreePrimFuncVal {
-    FreePrimFn { id: "build.load", f: FreeImpl::new(fn_load), mode: FuncMode::default_mode() }
-        .free()
+    FreePrimFn { id: "build.load", f: FreeImpl::new(fn_load) }.free()
 }
 
 const CUR_URL_KEY: &str = "build.this_url";

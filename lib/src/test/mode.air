@@ -460,18 +460,6 @@ _ do [
 -----
 false
 =====
-mode func setup call
------
-_ do [
-    f = _ function {
-        setup : _ mode @not,
-        code : (._ : .i) : .i,
-    },
-    _ f true
-]
------
-false
-=====
 mode access free
 -----
 _ do [

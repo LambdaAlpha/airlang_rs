@@ -1,7 +1,7 @@
 use log::error;
 
-use crate::cfg::lib::FuncMode;
 use crate::cfg::mode::CallPrimMode;
+use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::Mode;
 use crate::cfg::mode::SymbolMode;
 use crate::cfg::utils::map_remove;
@@ -30,7 +30,6 @@ use crate::type_::Symbol;
 const CODE: &str = "code";
 const MEMO: &str = "memory";
 const ID: &str = "id";
-const SETUP: &str = "setup";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
 
@@ -55,25 +54,24 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     // todo design
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let memo = parse_memo(map_remove(&mut map, MEMO))?;
-    let setup = parse_setup(map_remove(&mut map, SETUP))?;
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let free_comp = FreeComposite { body, input_name };
     let func = match ctx_access {
         FREE => {
-            let func = FreeCompFunc { id, comp: free_comp, memo, setup };
+            let func = FreeCompFunc { id, comp: free_comp, memo };
             FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
         CONST => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            let func = ConstCompFunc { id, comp, memo, setup };
+            let func = ConstCompFunc { id, comp, memo };
             FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            let func = MutCompFunc { id, comp, memo, setup };
+            let func = MutCompFunc { id, comp, memo };
             FuncVal::MutComp(MutCompFuncVal::from(func))
         }
         s => {
@@ -151,17 +149,6 @@ fn parse_memo(memo: Val) -> Option<Memo> {
     }
 }
 
-fn parse_setup(setup: Val) -> Option<Option<FuncVal>> {
-    match setup {
-        Val::Unit(_) => Some(None),
-        Val::Func(func) => Some(Some(func)),
-        v => {
-            error!("setup {v:?} should be a function or a unit");
-            None
-        }
-    }
-}
-
 fn parse_ctx_access(access: &Val) -> Option<&str> {
     match &access {
         Val::Symbol(s) => Some(&**s),
@@ -191,8 +178,7 @@ fn generate_free_prim(f: FreePrimFuncVal) -> Val {
 fn generate_free_comp(f: FreeCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), free_code(&f.comp));
-    let comp =
-        CompRepr { id: f.id.clone(), access: FREE, setup: f.setup.clone(), memo: f.memo.clone() };
+    let comp = CompRepr { id: f.id.clone(), access: FREE, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -204,8 +190,7 @@ fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
 fn generate_const_comp(f: ConstCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp =
-        CompRepr { id: f.id.clone(), access: CONST, setup: f.setup.clone(), memo: f.memo.clone() };
+    let comp = CompRepr { id: f.id.clone(), access: CONST, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -217,12 +202,7 @@ fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
 fn generate_mut_comp(f: MutCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
     repr.insert(symbol(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: MUTABLE,
-        setup: f.setup.clone(),
-        memo: f.memo.clone(),
-    };
+    let comp = CompRepr { id: f.id.clone(), access: MUTABLE, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -260,7 +240,6 @@ fn dyn_code(comp: &DynComposite) -> Val {
 struct CompRepr {
     id: Symbol,
     access: &'static str,
-    setup: Option<FuncVal>,
     memo: Memo,
 }
 
@@ -270,9 +249,6 @@ fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     }
     if comp.access != MUTABLE {
         repr.insert(symbol(CTX_ACCESS), symbol(comp.access));
-    }
-    if let Some(setup) = comp.setup {
-        repr.insert(symbol(SETUP), Val::Func(setup));
     }
     if comp.memo != Memo::default() {
         repr.insert(symbol(MEMO), Val::Memo(MemoVal::from(comp.memo)));

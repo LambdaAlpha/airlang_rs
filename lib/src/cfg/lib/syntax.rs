@@ -4,7 +4,6 @@ use super::FreePrimFn;
 use super::Library;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
@@ -42,7 +41,7 @@ impl Library for SyntaxLib {
 }
 
 pub fn parse() -> FreePrimFuncVal {
-    FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse), mode: FuncMode::default_mode() }.free()
+    FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse) }.free()
 }
 
 fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
@@ -58,8 +57,7 @@ fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> FreePrimFuncVal {
-    FreePrimFn { id: "syntax.generate", f: free_impl(fn_generate), mode: FuncMode::default_mode() }
-        .free()
+    FreePrimFn { id: "syntax.generate", f: free_impl(fn_generate) }.free()
 }
 
 fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {

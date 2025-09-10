@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use log::error;
 
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::Library;
@@ -42,6 +43,9 @@ impl CfgMod for CfgLib {
         self.repr.extend(cfg);
         self.import.extend(cfg);
         self.export.extend(cfg);
+        let with_setup =
+            FuncMode::pair_mode(Map::default(), FuncMode::default_mode(), FuncMode::id_mode());
+        CoreCfg::extend_setup_mode(cfg, &self.with.id, with_setup);
         self.with.extend(cfg);
     }
 }
@@ -55,8 +59,7 @@ impl Library for CfgLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.new", f: free_impl(fn_new), mode: FuncMode::default_mode() }
-        .free()
+    FreePrimFn { id: "configuration.new", f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -86,12 +89,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "configuration.represent",
-        f: free_impl(fn_repr),
-        mode: FuncMode::default_mode(),
-    }
-    .free()
+    FreePrimFn { id: "configuration.represent", f: free_impl(fn_repr) }.free()
 }
 
 fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
@@ -117,12 +115,7 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "configuration.import",
-        f: free_impl(fn_import),
-        mode: FuncMode::default_mode(),
-    }
-    .free()
+    FreePrimFn { id: "configuration.import", f: free_impl(fn_import) }.free()
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -134,12 +127,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "configuration.export",
-        f: free_impl(fn_export),
-        mode: FuncMode::default_mode(),
-    }
-    .free()
+    FreePrimFn { id: "configuration.export", f: free_impl(fn_export) }.free()
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -157,12 +145,7 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn with() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "configuration.with",
-        f: mut_impl(fn_with),
-        mode: FuncMode::pair_mode(Map::default(), FuncMode::default_mode(), FuncMode::id_mode()),
-    }
-    .mut_()
+    DynPrimFn { id: "configuration.with", f: mut_impl(fn_with) }.mut_()
 }
 
 fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

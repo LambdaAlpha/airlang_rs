@@ -1,10 +1,8 @@
 use std::rc::Rc;
 
 use super::FreeFn;
-use super::Setup;
 use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 use crate::type_::ref_::ConstRef;
@@ -43,7 +41,6 @@ where T: ConstFn<Cfg, Ctx, I, O>
 pub struct ConstPrimFunc {
     pub(crate) id: Symbol,
     pub(crate) fn_: Rc<dyn ConstFn<Cfg, Val, Val, Val>>,
-    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for ConstPrimFunc {
@@ -55,12 +52,6 @@ impl FreeFn<Cfg, Val, Val> for ConstPrimFunc {
 impl ConstFn<Cfg, Val, Val, Val> for ConstPrimFunc {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         self.fn_.const_call(cfg, ctx, input)
-    }
-}
-
-impl Setup for ConstPrimFunc {
-    fn setup(&self) -> Option<&FuncVal> {
-        self.setup.as_ref()
     }
 }
 

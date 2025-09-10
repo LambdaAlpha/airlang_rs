@@ -14,8 +14,10 @@ use super::mode::repr::FORM_LITERAL;
 use super::mode::repr::FORM_REF;
 use super::mode::repr::parse;
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
 use crate::cfg::mode::CallPrimMode;
 use crate::cfg::mode::FuncMode;
+use crate::cfg::mode::MODE_FUNC_ID;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -62,7 +64,10 @@ impl Default for ModeLib {
 
 impl CfgMod for ModeLib {
     fn extend(self, cfg: &Cfg) {
+        let new_setup = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
+        CoreCfg::extend_setup_mode(cfg, &self.new.id, new_setup);
         self.new.extend(cfg);
+        CoreCfg::extend_setup_mode(cfg, MODE_FUNC_ID, FuncMode::id_mode());
         cfg.extend_scope(Symbol::from_str_unchecked(FORM_ID), Val::Func(self.form_id.into()));
         cfg.extend_scope(
             Symbol::from_str_unchecked(FORM_LITERAL),
@@ -77,6 +82,8 @@ impl CfgMod for ModeLib {
         );
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_REF), Val::Func(self.eval_ref.into()));
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_EVAL), Val::Func(self.eval_eval.into()));
+        let apply_setup = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form);
+        CoreCfg::extend_setup_mode(cfg, &self.apply.id, apply_setup);
         self.apply.extend(cfg);
     }
 }
@@ -97,12 +104,7 @@ impl Library for ModeLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "mode",
-        f: free_impl(fn_new),
-        mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
-    }
-    .free()
+    FreePrimFn { id: "mode", f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -154,12 +156,7 @@ pub fn eval_eval() -> MutPrimFuncVal {
 }
 
 pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "apply",
-        f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut),
-        mode: FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form),
-    }
-    .mut_()
+    DynPrimFn { id: "apply", f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut) }.mut_()
 }
 
 fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {

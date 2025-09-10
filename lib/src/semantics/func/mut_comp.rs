@@ -1,11 +1,9 @@
 use super::ConstFn;
 use super::FreeFn;
 use super::MutFn;
-use super::Setup;
 use super::comp::DynComposite;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
@@ -16,7 +14,6 @@ pub struct MutCompFunc {
     pub(crate) id: Symbol,
     pub(crate) comp: DynComposite,
     pub(crate) memo: Memo,
-    pub(crate) setup: Option<FuncVal>,
 }
 
 impl FreeFn<Cfg, Val, Val> for MutCompFunc {
@@ -34,11 +31,5 @@ impl ConstFn<Cfg, Val, Val, Val> for MutCompFunc {
 impl MutFn<Cfg, Val, Val, Val> for MutCompFunc {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         self.comp.call(cfg, &mut self.memo.clone(), DynRef::new_mut(ctx), input)
-    }
-}
-
-impl Setup for MutCompFunc {
-    fn setup(&self) -> Option<&FuncVal> {
-        self.setup.as_ref()
     }
 }

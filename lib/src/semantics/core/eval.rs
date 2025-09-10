@@ -8,7 +8,6 @@ use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
-use crate::semantics::func::Setup;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
@@ -115,6 +114,23 @@ pub(crate) struct CallEval<'a, Func> {
     pub(crate) func: &'a Func,
 }
 
+pub(crate) const CFG_SETUP: &str = "setup";
+
+pub(crate) fn import_setup(
+    cfg: &mut Cfg, id: Symbol,
+) -> Option<Box<dyn MutFn<Cfg, Val, Val, Val>>> {
+    let id = format!("{CFG_SETUP}.{}", &*id);
+    if let Some(setup) = cfg.import(Symbol::from_string_unchecked(id)) {
+        let Val::Func(setup) = setup else {
+            error!("setup should be valid");
+            return None;
+        };
+        Some(Box::new(setup))
+    } else {
+        Some(Box::new(Eval))
+    }
+}
+
 impl<'a, Func> FreeFn<Cfg, CallVal, Val> for CallEval<'a, Func>
 where Func: FreeFn<Cfg, Val, Val>
 {
@@ -125,7 +141,10 @@ where Func: FreeFn<Cfg, Val, Val>
             error!("func {func:?} should be a func");
             return Val::default();
         };
-        let input = func.setup().free_call(cfg, call.input);
+        let Some(setup) = import_setup(cfg, func.id()) else {
+            return Val::default();
+        };
+        let input = setup.free_call(cfg, call.input);
         func.free_call(cfg, input)
     }
 }
@@ -140,7 +159,10 @@ where Func: ConstFn<Cfg, Val, Val, Val>
             error!("func {func:?} should be a func");
             return Val::default();
         };
-        let input = func.setup().const_call(cfg, ctx.reborrow(), call.input);
+        let Some(setup) = import_setup(cfg, func.id()) else {
+            return Val::default();
+        };
+        let input = setup.const_call(cfg, ctx.reborrow(), call.input);
         func.const_call(cfg, ctx, input)
     }
 }
@@ -155,7 +177,10 @@ where Func: MutFn<Cfg, Val, Val, Val>
             error!("func {func:?} should be a func");
             return Val::default();
         };
-        let input = func.setup().mut_call(cfg, ctx, call.input);
+        let Some(setup) = import_setup(cfg, func.id()) else {
+            return Val::default();
+        };
+        let input = setup.mut_call(cfg, ctx, call.input);
         func.mut_call(cfg, ctx, input)
     }
 }

@@ -11,12 +11,13 @@ use self::arbitrary::arbitrary_ext_type;
 use self::arbitrary::set_arbitrary_val;
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::FuncMode;
 use super::Library;
 use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
 use crate::cfg::mode::CallPrimMode;
+use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
@@ -72,6 +73,8 @@ impl Default for ValueLib {
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
+        let any_setup = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
+        CoreCfg::extend_setup_mode(cfg, &self.any.id, any_setup);
         self.any.extend(cfg);
         self.type_.extend(cfg);
         self.equal.extend(cfg);
@@ -88,12 +91,7 @@ impl Library for ValueLib {
 
 // todo design pick value from ctx
 pub fn any() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "any",
-        f: free_impl(fn_any),
-        mode: FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
-    }
-    .free()
+    FreePrimFn { id: "any", f: free_impl(fn_any) }.free()
 }
 
 fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
@@ -128,7 +126,7 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn type_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "type", f: const_impl(fn_type), mode: FuncMode::default_mode() }.const_()
+    DynPrimFn { id: "type", f: const_impl(fn_type) }.const_()
 }
 
 fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -155,7 +153,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "==", f: free_impl(fn_equal), mode: FuncMode::default_mode() }.free()
+    FreePrimFn { id: "==", f: free_impl(fn_equal) }.free()
 }
 
 fn fn_equal(_cfg: &mut Cfg, input: Val) -> Val {

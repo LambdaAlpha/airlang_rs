@@ -2,7 +2,6 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
-use airlang::cfg::mode::FuncMode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -32,12 +31,7 @@ impl Library for FileLib {
 }
 
 pub fn read_to_text() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "file.read_to_text",
-        f: free_impl(fn_read_to_text),
-        mode: FuncMode::default_mode(),
-    }
-    .free()
+    FreePrimFn { id: "file.read_to_text", f: free_impl(fn_read_to_text) }.free()
 }
 
 fn fn_read_to_text(_cfg: &mut Cfg, input: Val) -> Val {

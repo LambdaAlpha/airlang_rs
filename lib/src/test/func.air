@@ -2,7 +2,6 @@ recursive call
 -----
 _ do [
     f = _ function {
-        setup : eval@,
         code : (._ : .i) : .i,
     },
     _ f _ not true
@@ -14,7 +13,6 @@ call external func
 -----
 _ do [
     f = _ function {
-        setup : eval@,
         code : (._ : .i) : _ not .i
     },
     _ f _ not true
@@ -27,7 +25,6 @@ call internal func
 _ do [
     memory = _ import .memory.new,
     f = _ function {
-        setup : eval@,
         code : (._ : .i) : _ .not .i,
         memory : _ memory {
             not : . : not
@@ -43,7 +40,6 @@ call rename
 _ do [
     memory = _ import .memory.new,
     f = _ function {
-        setup : eval@,
         code : (._ : .a) : _ .n .a,
         memory : _ memory {
             n : . : not
@@ -63,7 +59,6 @@ _ do [
     link_set = _ import .link.set,
     f = _ function {
         context_access : .free,
-        setup : eval@,
         code : ._ : _ do [
             .i = .a link_get _,
             .a link_set .i + 1,
@@ -87,7 +82,6 @@ _ do [
     link_set = _ import .link.set,
     f = _ form _ function {
         context_access : .free,
-        setup : eval@,
         code : ._ : _ do [
             .i = .a link_get _,
             .a link_set .i + 1,
@@ -140,7 +134,7 @@ _ do [
         context_access : .mutable,
     },
     a = 1,
-    _ f a,
+    _ f .a,
     a
 ]
 -----
@@ -154,7 +148,7 @@ _ do [
         context_access : .constant,
     },
     a = 1,
-    _ f a,
+    _ f .a,
     a
 ]
 -----
@@ -197,9 +191,6 @@ _ do [
     set_first = _ import .pair.set_first,
     a = 1 : 2,
     f = _ function {
-        setup : _ mode {
-            pair : {} : {symbol : ..} : eval@
-        },
         code : (.p : .i) : .p which _ set_first .i,
     },
     a which _ f 3,
@@ -254,13 +245,9 @@ repr composite
 -----
 _ do [
     represent = _ import .function.represent,
-    m = _ mode {
-        pair : {} : eval@ : .
-    },
     repr = _ form. {
         id : f,
         code : (ctx : in) : in,
-        setup : @m,
         context_access : constant,
     },
     new_repr = _ represent _ function repr,
@@ -306,78 +293,6 @@ _ do [
 ]
 -----
 mutable
-=====
-call setup primitive
------
-_ do [
-    setup = _ import .function.setup,
-    eval@ == not which _ setup .
-]
------
-true
-=====
-call setup mode
------
-_ do [
-    setup = _ import .function.setup,
-    . == eval@ which _ setup .
-]
------
-true
-=====
-call setup 1
------
-_ do [
-    setup = _ import .function.setup,
-    f = _ function {
-        setup : _ mode {
-            pair : {} : eval@ : form.
-        },
-    },
-    p1 = f which _ setup .,
-    p2 = _ mode {
-        pair : {} : eval@ : form.
-    },
-    p1 == p2
-]
------
-true
-=====
-call setup 2
------
-_ do [
-    setup = _ import .function.setup,
-    f = _ function {
-        setup : _ mode {
-            list : [eval@, form., .] : form.
-        },
-    },
-    p1 = f which _ setup .,
-    p2 = _ mode {
-        list : [eval@, form., .] : form.
-    },
-    p1 == p2
-]
------
-true
-=====
-call setup 3
------
-_ do [
-    setup = _ import .function.setup,
-    f = _ function {
-        setup : _ mode {
-            map : {a : eval@, b : .} : . : form.
-        },
-    },
-    p1 = f which _ setup .,
-    p2 = _ mode {
-        map : {a : eval@, b : .} : . : form.
-    },
-    p1 == p2
-]
------
-true
 =====
 is_primitive primitive
 -----

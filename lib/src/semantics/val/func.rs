@@ -15,8 +15,6 @@ use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::MutCompFunc;
 use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
-use crate::semantics::func::Setup;
-use crate::semantics::func::SetupFn;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -89,14 +87,6 @@ impl MutFn<Cfg, Val, Val, Val> for FuncVal {
         }
     }
 }
-
-impl Setup for FuncVal {
-    fn setup(&self) -> Option<&FuncVal> {
-        match_func_val!(self, f => f.setup())
-    }
-}
-
-impl SetupFn for FuncVal {}
 
 impl FuncVal {
     pub fn id(&self) -> Symbol {

@@ -1,5 +1,11 @@
 macro_rules! impl_prim_func {
     ($func:ty) => {
+        impl $func {
+            pub fn id(&self) -> Symbol {
+                self.id.clone()
+            }
+        }
+
         impl ::std::fmt::Debug for $func {
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 self.id.fmt(f)
