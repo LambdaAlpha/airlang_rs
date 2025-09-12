@@ -159,8 +159,8 @@ fn test_ctx() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_mode() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/mode.air"), "test/mode.air")
+fn test_adapter() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/adapter.air"), "test/adapter.air")
 }
 
 #[test]

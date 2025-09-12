@@ -1,9 +1,9 @@
-use super::CallMode;
-use super::CallPrimMode;
-use super::ListMode;
-use super::MapMode;
-use super::PairMode;
-use super::PrimMode;
+use super::CallAdapter;
+use super::CallPrimAdapter;
+use super::ListAdapter;
+use super::MapAdapter;
+use super::PairAdapter;
+use super::PrimAdapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -17,15 +17,15 @@ use crate::type_::ConstRef;
 use crate::type_::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct CompMode {
-    pub default: PrimMode,
-    pub pair: Option<Box<PairMode>>,
-    pub call: Option<Box<CallMode>>,
-    pub list: Option<Box<ListMode>>,
-    pub map: Option<Box<MapMode>>,
+pub struct CompAdapter {
+    pub default: PrimAdapter,
+    pub pair: Option<Box<PairAdapter>>,
+    pub call: Option<Box<CallAdapter>>,
+    pub list: Option<Box<ListAdapter>>,
+    pub map: Option<Box<MapAdapter>>,
 }
 
-impl FreeFn<Cfg, Val, Val> for CompMode {
+impl FreeFn<Cfg, Val, Val> for CompAdapter {
     fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
         match input {
             Val::Symbol(symbol) => self.free_call(cfg, symbol),
@@ -38,7 +38,7 @@ impl FreeFn<Cfg, Val, Val> for CompMode {
     }
 }
 
-impl ConstFn<Cfg, Val, Val, Val> for CompMode {
+impl ConstFn<Cfg, Val, Val, Val> for CompAdapter {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         match input {
             Val::Symbol(symbol) => self.const_call(cfg, ctx, symbol),
@@ -51,7 +51,7 @@ impl ConstFn<Cfg, Val, Val, Val> for CompMode {
     }
 }
 
-impl MutFn<Cfg, Val, Val, Val> for CompMode {
+impl MutFn<Cfg, Val, Val, Val> for CompAdapter {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         match input {
             Val::Symbol(symbol) => self.mut_call(cfg, ctx, symbol),
@@ -64,25 +64,25 @@ impl MutFn<Cfg, Val, Val, Val> for CompMode {
     }
 }
 
-impl FreeFn<Cfg, Symbol, Val> for CompMode {
+impl FreeFn<Cfg, Symbol, Val> for CompAdapter {
     fn free_call(&self, cfg: &mut Cfg, input: Symbol) -> Val {
         self.default.symbol.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Cfg, Val, Symbol, Val> for CompMode {
+impl ConstFn<Cfg, Val, Symbol, Val> for CompAdapter {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Symbol) -> Val {
         self.default.symbol.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Cfg, Val, Symbol, Val> for CompMode {
+impl MutFn<Cfg, Val, Symbol, Val> for CompAdapter {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Symbol) -> Val {
         self.default.symbol.mut_call(cfg, ctx, input)
     }
 }
 
-impl FreeFn<Cfg, PairVal, Val> for CompMode {
+impl FreeFn<Cfg, PairVal, Val> for CompAdapter {
     fn free_call(&self, cfg: &mut Cfg, input: PairVal) -> Val {
         let Some(pair) = &self.pair else {
             return self.default.free_call(cfg, input);
@@ -91,7 +91,7 @@ impl FreeFn<Cfg, PairVal, Val> for CompMode {
     }
 }
 
-impl ConstFn<Cfg, Val, PairVal, Val> for CompMode {
+impl ConstFn<Cfg, Val, PairVal, Val> for CompAdapter {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: PairVal) -> Val {
         let Some(pair) = &self.pair else {
             return self.default.const_call(cfg, ctx, input);
@@ -100,7 +100,7 @@ impl ConstFn<Cfg, Val, PairVal, Val> for CompMode {
     }
 }
 
-impl MutFn<Cfg, Val, PairVal, Val> for CompMode {
+impl MutFn<Cfg, Val, PairVal, Val> for CompAdapter {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: PairVal) -> Val {
         let Some(pair) = &self.pair else {
             return self.default.mut_call(cfg, ctx, input);
@@ -109,43 +109,43 @@ impl MutFn<Cfg, Val, PairVal, Val> for CompMode {
     }
 }
 
-impl FreeFn<Cfg, CallVal, Val> for CompMode {
+impl FreeFn<Cfg, CallVal, Val> for CompAdapter {
     fn free_call(&self, cfg: &mut Cfg, input: CallVal) -> Val {
         let Some(call) = &self.call else {
             return self.default.free_call(cfg, input);
         };
         match self.default.call {
-            CallPrimMode::Form => call.form().free_call(cfg, input),
-            CallPrimMode::Eval => call.eval().free_call(cfg, input),
+            CallPrimAdapter::Form => call.form().free_call(cfg, input),
+            CallPrimAdapter::Eval => call.eval().free_call(cfg, input),
         }
     }
 }
 
-impl ConstFn<Cfg, Val, CallVal, Val> for CompMode {
+impl ConstFn<Cfg, Val, CallVal, Val> for CompAdapter {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: CallVal) -> Val {
         let Some(call) = &self.call else {
             return self.default.const_call(cfg, ctx, input);
         };
         match self.default.call {
-            CallPrimMode::Form => call.form().const_call(cfg, ctx, input),
-            CallPrimMode::Eval => call.eval().const_call(cfg, ctx, input),
+            CallPrimAdapter::Form => call.form().const_call(cfg, ctx, input),
+            CallPrimAdapter::Eval => call.eval().const_call(cfg, ctx, input),
         }
     }
 }
 
-impl MutFn<Cfg, Val, CallVal, Val> for CompMode {
+impl MutFn<Cfg, Val, CallVal, Val> for CompAdapter {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: CallVal) -> Val {
         let Some(call) = &self.call else {
             return self.default.mut_call(cfg, ctx, input);
         };
         match self.default.call {
-            CallPrimMode::Form => call.form().mut_call(cfg, ctx, input),
-            CallPrimMode::Eval => call.eval().mut_call(cfg, ctx, input),
+            CallPrimAdapter::Form => call.form().mut_call(cfg, ctx, input),
+            CallPrimAdapter::Eval => call.eval().mut_call(cfg, ctx, input),
         }
     }
 }
 
-impl FreeFn<Cfg, ListVal, Val> for CompMode {
+impl FreeFn<Cfg, ListVal, Val> for CompAdapter {
     fn free_call(&self, cfg: &mut Cfg, input: ListVal) -> Val {
         let Some(list) = &self.list else {
             return self.default.free_call(cfg, input);
@@ -154,7 +154,7 @@ impl FreeFn<Cfg, ListVal, Val> for CompMode {
     }
 }
 
-impl ConstFn<Cfg, Val, ListVal, Val> for CompMode {
+impl ConstFn<Cfg, Val, ListVal, Val> for CompAdapter {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: ListVal) -> Val {
         let Some(list) = &self.list else {
             return self.default.const_call(cfg, ctx, input);
@@ -163,7 +163,7 @@ impl ConstFn<Cfg, Val, ListVal, Val> for CompMode {
     }
 }
 
-impl MutFn<Cfg, Val, ListVal, Val> for CompMode {
+impl MutFn<Cfg, Val, ListVal, Val> for CompAdapter {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: ListVal) -> Val {
         let Some(list) = &self.list else {
             return self.default.mut_call(cfg, ctx, input);
@@ -172,7 +172,7 @@ impl MutFn<Cfg, Val, ListVal, Val> for CompMode {
     }
 }
 
-impl FreeFn<Cfg, MapVal, Val> for CompMode {
+impl FreeFn<Cfg, MapVal, Val> for CompAdapter {
     fn free_call(&self, cfg: &mut Cfg, input: MapVal) -> Val {
         let Some(map) = &self.map else {
             return self.default.free_call(cfg, input);
@@ -181,7 +181,7 @@ impl FreeFn<Cfg, MapVal, Val> for CompMode {
     }
 }
 
-impl ConstFn<Cfg, Val, MapVal, Val> for CompMode {
+impl ConstFn<Cfg, Val, MapVal, Val> for CompAdapter {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: MapVal) -> Val {
         let Some(map) = &self.map else {
             return self.default.const_call(cfg, ctx, input);
@@ -190,7 +190,7 @@ impl ConstFn<Cfg, Val, MapVal, Val> for CompMode {
     }
 }
 
-impl MutFn<Cfg, Val, MapVal, Val> for CompMode {
+impl MutFn<Cfg, Val, MapVal, Val> for CompAdapter {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: MapVal) -> Val {
         let Some(map) = &self.map else {
             return self.default.mut_call(cfg, ctx, input);
@@ -199,9 +199,9 @@ impl MutFn<Cfg, Val, MapVal, Val> for CompMode {
     }
 }
 
-impl CompMode {
+impl CompAdapter {
     pub const fn id() -> Self {
-        Self { default: PrimMode::id(), pair: None, call: None, list: None, map: None }
+        Self { default: PrimAdapter::id(), pair: None, call: None, list: None, map: None }
     }
 
     pub const fn is_id(&self) -> bool {
@@ -213,8 +213,8 @@ impl CompMode {
     }
 }
 
-impl From<PrimMode> for CompMode {
-    fn from(default: PrimMode) -> Self {
+impl From<PrimAdapter> for CompAdapter {
+    fn from(default: PrimAdapter) -> Self {
         Self { default, pair: None, call: None, list: None, map: None }
     }
 }

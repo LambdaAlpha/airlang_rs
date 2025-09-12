@@ -1,9 +1,12 @@
 use log::error;
 
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::Mode;
-use crate::cfg::mode::SymbolMode;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::CoreAdapter;
+use crate::cfg::adapter::SymbolAdapter;
+use crate::cfg::adapter::default_adapter;
+use crate::cfg::adapter::map_adapter;
+use crate::cfg::adapter::pair_adapter;
+use crate::cfg::adapter::prim_adapter;
 use crate::cfg::utils::symbol;
 use crate::semantics::memo::Contract;
 use crate::semantics::memo::Memo;
@@ -21,13 +24,13 @@ const FINAL: &str = "final";
 const STATIC: &str = "static";
 const CONST: &str = "constant";
 
-pub(in crate::cfg) fn parse_mode() -> Mode {
-    FuncMode::map_mode(
+pub(in crate::cfg) fn parse_adapter() -> CoreAdapter {
+    map_adapter(
         Map::default(),
-        FuncMode::pair_mode(
+        pair_adapter(
             Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval),
-            FuncMode::default_mode(),
+            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval),
+            default_adapter(),
         ),
     )
 }

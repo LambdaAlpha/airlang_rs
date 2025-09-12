@@ -1,9 +1,11 @@
 use log::error;
 
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::Mode;
-use crate::cfg::mode::SymbolMode;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::CoreAdapter;
+use crate::cfg::adapter::SymbolAdapter;
+use crate::cfg::adapter::default_adapter;
+use crate::cfg::adapter::map_adapter;
+use crate::cfg::adapter::prim_adapter;
 use crate::cfg::utils::map_remove;
 use crate::cfg::utils::symbol;
 use crate::semantics::ctx::CtxAccess;
@@ -37,10 +39,10 @@ const FREE: &str = "free";
 const CONST: &str = "constant";
 const MUTABLE: &str = "mutable";
 
-pub(in crate::cfg) fn parse_mode() -> Mode {
+pub(in crate::cfg) fn parse_adapter() -> CoreAdapter {
     let mut map = Map::default();
-    map.insert(symbol(CODE), FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form));
-    FuncMode::map_mode(map, FuncMode::default_mode())
+    map.insert(symbol(CODE), prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form));
+    map_adapter(map, default_adapter())
 }
 
 // todo design defaults

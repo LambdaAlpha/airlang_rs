@@ -1,38 +1,37 @@
 use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Library;
-use super::MutImpl;
+use super::adapter::repr::EVAL_EVAL;
+use super::adapter::repr::EVAL_ID;
+use super::adapter::repr::EVAL_LITERAL;
+use super::adapter::repr::EVAL_REF;
+use super::adapter::repr::FORM_EVAL;
+use super::adapter::repr::FORM_ID;
+use super::adapter::repr::FORM_LITERAL;
+use super::adapter::repr::FORM_REF;
+use super::adapter::repr::parse;
 use super::free_impl;
 use super::memo_put_func;
-use super::mode::repr::EVAL_EVAL;
-use super::mode::repr::EVAL_ID;
-use super::mode::repr::EVAL_LITERAL;
-use super::mode::repr::EVAL_REF;
-use super::mode::repr::FORM_EVAL;
-use super::mode::repr::FORM_ID;
-use super::mode::repr::FORM_LITERAL;
-use super::mode::repr::FORM_REF;
-use super::mode::repr::parse;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::MODE_FUNC_ID;
-use crate::cfg::mode::SymbolMode;
+use crate::cfg::adapter::ADAPTER_FUNC_ID;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::SymbolAdapter;
+use crate::cfg::adapter::adapter_free_func;
+use crate::cfg::adapter::adapter_func;
+use crate::cfg::adapter::adapter_mut_func;
+use crate::cfg::adapter::id_adapter;
+use crate::cfg::adapter::prim_adapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::func::ConstFn;
-use crate::semantics::func::FreeFn;
-use crate::semantics::func::MutFn;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 use crate::type_::Symbol;
 
 #[derive(Clone)]
-pub struct ModeLib {
+pub struct AdapterLib {
     pub new: FreePrimFuncVal,
     pub form_id: FreePrimFuncVal,
     pub form_literal: MutPrimFuncVal,
@@ -45,7 +44,7 @@ pub struct ModeLib {
     pub apply: MutPrimFuncVal,
 }
 
-impl Default for ModeLib {
+impl Default for AdapterLib {
     fn default() -> Self {
         Self {
             new: new(),
@@ -62,12 +61,12 @@ impl Default for ModeLib {
     }
 }
 
-impl CfgMod for ModeLib {
+impl CfgMod for AdapterLib {
     fn extend(self, cfg: &Cfg) {
-        let new_adapter = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
-        CoreCfg::extend_adapter_mode(cfg, &self.new.id, new_adapter);
+        let new_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form);
+        CoreCfg::extend_adapter(cfg, &self.new.id, new_adapter);
         self.new.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, MODE_FUNC_ID, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, ADAPTER_FUNC_ID, id_adapter());
         cfg.extend_scope(Symbol::from_str_unchecked(FORM_ID), Val::Func(self.form_id.into()));
         cfg.extend_scope(
             Symbol::from_str_unchecked(FORM_LITERAL),
@@ -82,15 +81,14 @@ impl CfgMod for ModeLib {
         );
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_REF), Val::Func(self.eval_ref.into()));
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_EVAL), Val::Func(self.eval_eval.into()));
-        let apply_adapter = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form);
-        CoreCfg::extend_adapter_mode(cfg, &self.apply.id, apply_adapter);
+        let apply_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form);
+        CoreCfg::extend_adapter(cfg, &self.apply.id, apply_adapter);
         self.apply.extend(cfg);
     }
 }
 
-impl Library for ModeLib {
+impl Library for AdapterLib {
     fn prelude(&self, memo: &mut Memo) {
-        self.new.prelude(memo);
         memo_put_func(memo, FORM_ID, &self.form_id);
         memo_put_func(memo, FORM_LITERAL, &self.form_literal);
         memo_put_func(memo, FORM_REF, &self.form_ref);
@@ -99,76 +97,64 @@ impl Library for ModeLib {
         memo_put_func(memo, EVAL_LITERAL, &self.eval_literal);
         memo_put_func(memo, EVAL_REF, &self.eval_ref);
         memo_put_func(memo, EVAL_EVAL, &self.eval_eval);
-        self.apply.prelude(memo);
+        memo_put_func(memo, "apply", &self.apply);
     }
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "mode", f: free_impl(fn_new) }.free()
+    FreePrimFn { id: "adapter.new", f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
-    let Some(mode) = parse(input) else {
+    let Some(adapter) = parse(input) else {
         return Val::default();
     };
-    let func = FuncMode::mode_into_func(mode);
+    let func = adapter_func(adapter);
     Val::Func(func)
 }
 
 pub fn form_id() -> FreePrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Id, CallPrimMode::Form);
-    FuncMode::mode_into_free_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Form);
+    adapter_free_func(adapter)
 }
 
 pub fn form_literal() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form);
+    adapter_mut_func(adapter)
 }
 
 pub fn form_ref() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form);
+    adapter_mut_func(adapter)
 }
 
 pub fn form_eval() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Eval, CallPrimMode::Form);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Form);
+    adapter_mut_func(adapter)
 }
 
 pub fn eval_id() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Id, CallPrimMode::Eval);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Eval);
+    adapter_mut_func(adapter)
 }
 
 pub fn eval_literal() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval);
+    adapter_mut_func(adapter)
 }
 
 pub fn eval_ref() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Eval);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Eval);
+    adapter_mut_func(adapter)
 }
 
 pub fn eval_eval() -> MutPrimFuncVal {
-    let mode = FuncMode::prim_mode(SymbolMode::Eval, CallPrimMode::Eval);
-    FuncMode::mode_into_mut_func(mode)
+    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Eval);
+    adapter_mut_func(adapter)
 }
 
 pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn { id: "apply", f: MutImpl::new(fn_eval_free, fn_eval_const, fn_eval_mut) }.mut_()
-}
-
-fn fn_eval_free(cfg: &mut Cfg, input: Val) -> Val {
-    Eval.free_call(cfg, input)
-}
-
-fn fn_eval_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    Eval.const_call(cfg, ctx, input)
-}
-
-fn fn_eval_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    Eval.mut_call(cfg, ctx, input)
+    DynPrimFn { id: "adapter.apply", f: Eval }.mut_()
 }
 
 mod repr;

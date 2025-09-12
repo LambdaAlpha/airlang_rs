@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use self::adapter::AdapterLib;
 use self::bit::BitLib;
 use self::byte::ByteLib;
 use self::call::CallLib;
@@ -12,7 +13,6 @@ use self::list::ListLib;
 use self::map::MapLib;
 use self::memo::MemoLib;
 use self::meta::MetaLib;
-use self::mode::ModeLib;
 use self::number::NumberLib;
 use self::pair::PairLib;
 use self::symbol::SymbolLib;
@@ -63,7 +63,7 @@ pub struct CoreLib {
     pub memo: MemoLib,
     pub func: FuncLib,
     pub ctx: CtxLib,
-    pub mode: ModeLib,
+    pub adapter: AdapterLib,
     pub ctrl: CtrlLib,
     pub meta: MetaLib,
     pub syntax: SyntaxLib,
@@ -88,7 +88,7 @@ impl CfgMod for CoreLib {
         self.memo.extend(cfg);
         self.func.extend(cfg);
         self.ctx.extend(cfg);
-        self.mode.extend(cfg);
+        self.adapter.extend(cfg);
         self.ctrl.extend(cfg);
         self.meta.extend(cfg);
         self.syntax.extend(cfg);
@@ -114,7 +114,7 @@ impl Library for CoreLib {
         self.memo.prelude(memo);
         self.func.prelude(memo);
         self.ctx.prelude(memo);
-        self.mode.prelude(memo);
+        self.adapter.prelude(memo);
         self.ctrl.prelude(memo);
         self.meta.prelude(memo);
         self.syntax.prelude(memo);
@@ -299,7 +299,7 @@ pub mod func;
 
 pub mod ctx;
 
-pub mod mode;
+pub mod adapter;
 
 pub mod ctrl;
 

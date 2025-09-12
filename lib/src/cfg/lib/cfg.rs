@@ -4,13 +4,15 @@ use log::error;
 
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
+use crate::cfg::adapter::default_adapter;
+use crate::cfg::adapter::id_adapter;
+use crate::cfg::adapter::pair_adapter;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::Library;
 use crate::cfg::lib::free_impl;
 use crate::cfg::lib::memo_put_func;
 use crate::cfg::lib::mut_impl;
-use crate::cfg::mode::FuncMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
@@ -43,9 +45,8 @@ impl CfgMod for CfgLib {
         self.repr.extend(cfg);
         self.import.extend(cfg);
         self.export.extend(cfg);
-        let with_adapter =
-            FuncMode::pair_mode(Map::default(), FuncMode::default_mode(), FuncMode::id_mode());
-        CoreCfg::extend_adapter_mode(cfg, &self.with.id, with_adapter);
+        let with_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
+        CoreCfg::extend_adapter(cfg, &self.with.id, with_adapter);
         self.with.extend(cfg);
     }
 }

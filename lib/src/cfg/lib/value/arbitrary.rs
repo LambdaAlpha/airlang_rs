@@ -10,15 +10,15 @@ use rand::distr::weighted::WeightedIndex;
 use rand::prelude::Distribution;
 use rand::prelude::IndexedRandom;
 
-use crate::cfg::mode::CallMode;
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::CompMode;
-use crate::cfg::mode::ListMode;
-use crate::cfg::mode::MapMode;
-use crate::cfg::mode::Mode;
-use crate::cfg::mode::PairMode;
-use crate::cfg::mode::PrimMode;
-use crate::cfg::mode::SymbolMode;
+use crate::cfg::adapter::CallAdapter;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::CompAdapter;
+use crate::cfg::adapter::CoreAdapter;
+use crate::cfg::adapter::ListAdapter;
+use crate::cfg::adapter::MapAdapter;
+use crate::cfg::adapter::PairAdapter;
+use crate::cfg::adapter::PrimAdapter;
+use crate::cfg::adapter::SymbolAdapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
@@ -306,21 +306,22 @@ impl<T: Arbitrary> Arbitrary for Box<T> {
     }
 }
 
-impl Arbitrary for CallPrimMode {
+impl Arbitrary for CallPrimAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const MODES: [CallPrimMode; 2] = [CallPrimMode::Form, CallPrimMode::Eval];
-        *(MODES.choose(rng).unwrap())
+        const ADAPTERS: [CallPrimAdapter; 2] = [CallPrimAdapter::Form, CallPrimAdapter::Eval];
+        *(ADAPTERS.choose(rng).unwrap())
     }
 }
 
-impl Arbitrary for SymbolMode {
+impl Arbitrary for SymbolAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const MODES: [SymbolMode; 3] = [SymbolMode::Literal, SymbolMode::Ref, SymbolMode::Eval];
-        *(MODES.choose(rng).unwrap())
+        const ADAPTERS: [SymbolAdapter; 3] =
+            [SymbolAdapter::Literal, SymbolAdapter::Ref, SymbolAdapter::Eval];
+        *(ADAPTERS.choose(rng).unwrap())
     }
 }
 
-impl Arbitrary for CompMode {
+impl Arbitrary for CompAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let default = Arbitrary::any(rng, depth);
@@ -328,63 +329,63 @@ impl Arbitrary for CompMode {
         let call = Arbitrary::any(rng, depth);
         let list = Arbitrary::any(rng, depth);
         let map = Arbitrary::any(rng, depth);
-        CompMode { default, pair, call, list, map }
+        CompAdapter { default, pair, call, list, map }
     }
 }
 
-impl Arbitrary for PairMode {
+impl Arbitrary for PairAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let some = Arbitrary::any(rng, depth);
         let first = Arbitrary::any(rng, depth);
         let second = Arbitrary::any(rng, depth);
-        PairMode { some, first, second }
+        PairAdapter { some, first, second }
     }
 }
 
-impl Arbitrary for CallMode {
+impl Arbitrary for CallAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let func = Arbitrary::any(rng, depth);
         let input = Arbitrary::any(rng, depth);
-        CallMode { func, input }
+        CallAdapter { func, input }
     }
 }
 
-impl Arbitrary for ListMode {
+impl Arbitrary for ListAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let head = Arbitrary::any(rng, depth);
         let tail = Arbitrary::any(rng, depth);
-        ListMode { head, tail }
+        ListAdapter { head, tail }
     }
 }
 
-impl Arbitrary for MapMode {
+impl Arbitrary for MapAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let some = Arbitrary::any(rng, depth);
         let else_ = Arbitrary::any(rng, depth);
-        MapMode { some, else_ }
+        MapAdapter { some, else_ }
     }
 }
 
-impl Arbitrary for PrimMode {
+impl Arbitrary for PrimAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let symbol = Arbitrary::any(rng, depth);
         let call = Arbitrary::any(rng, depth);
-        PrimMode { symbol, call }
+        PrimAdapter { symbol, call }
     }
 }
 
-impl Arbitrary for Mode {
+impl Arbitrary for CoreAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         if rng.random() {
-            Mode::Comp(Arbitrary::any(rng, depth))
+            CoreAdapter::Comp(Arbitrary::any(rng, depth))
         } else {
-            Mode::Func(FuncVal::any(rng, depth))
+            CoreAdapter::Func(FuncVal::any(rng, depth))
         }
     }
 }

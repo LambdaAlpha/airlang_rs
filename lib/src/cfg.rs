@@ -1,7 +1,8 @@
+use adapter::CoreAdapter;
+
 use self::lib::CoreLib;
+use crate::cfg::adapter::adapter_func;
 use crate::cfg::lib::Library;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::Mode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CFG_ADAPTER;
 use crate::semantics::memo::Memo;
@@ -51,9 +52,9 @@ impl CoreCfg {
     pub const ADAPTER: &'static str = CFG_ADAPTER;
     pub const REVERSE: &'static str = "reverse";
 
-    pub fn extend_adapter_mode(cfg: &Cfg, id: &str, mode: Mode) -> Option<()> {
+    pub fn extend_adapter(cfg: &Cfg, id: &str, adapter: CoreAdapter) -> Option<()> {
         let id = format!("{}@{id}", Self::ADAPTER);
-        let adapter = Val::Func(FuncMode::mode_into_func(mode));
+        let adapter = Val::Func(adapter_func(adapter));
         cfg.extend_scope(Symbol::from_string_unchecked(id), adapter)
     }
 }
@@ -86,7 +87,7 @@ impl<F: Named + Into<FuncVal>> CfgMod for F {
     }
 }
 
-pub mod mode;
+pub mod adapter;
 
 pub mod lib;
 

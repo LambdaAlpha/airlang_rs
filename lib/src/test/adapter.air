@@ -238,123 +238,126 @@ _ do [
 -----
 false
 =====
-mode form
+new default
 -----
 _ do [
-    f = _ mode .,
+    new = _ import .adapter.new,
+    f = _ new .,
     _ f .a
 ]
 -----
 .a
 =====
-mode primitive from symbol 1
+new primitive from symbol 1
 -----
 _ do [
-    f = _ mode form.,
+    new = _ import .adapter.new,
+    f = _ new form.,
     _ f _ a .b
 ]
 -----
 _ a b
 =====
-mode primitive from symbol 2
+new primitive from symbol 2
 -----
 _ do [
-    f = _ mode eval@,
+    new = _ import .adapter.new,
+    f = _ new eval@,
     _ f _ not true
 ]
 -----
 false
 =====
-default mode
+new primitive form
 -----
 _ do [
-    f = _ mode .,
-    _ f _ not true
-]
------
-_ not true
-=====
-mode primitive form
------
-_ do [
-    f = _ mode {default : form},
+    new = _ import .adapter.new,
+    f = _ new {default : form},
     _ f [@a, _ f a]
 ]
 -----
 [@a, _ f a]
 =====
-mode primitive form.
+new primitive form.
 -----
 _ do [
-    f = _ mode {default : form.},
+    new = _ import .adapter.new,
+    f = _ new {default : form.},
     _ f [.a, _ f a]
 ]
 -----
 [a, _ f a]
 =====
-mode primitive form@
+new primitive form@
 -----
 _ do [
+    new = _ import .adapter.new,
     a = 1,
-    f = _ mode {default : form@},
+    f = _ new {default : form@},
     _ f [a, _ .a a]
 ]
 -----
 [1, _ a 1]
 =====
-mode primitive form$
+new primitive form$
 -----
 _ do [
+    new = _ import .adapter.new,
     a = _ form _ not true,
-    f = _ mode {default : form$},
+    f = _ new {default : form$},
     _ f [a, _ .a a]
 ]
 -----
 [false, _ a false]
 =====
-mode primitive eval
+new primitive eval
 -----
 _ do [
-    f = _ mode {default : eval},
+    new = _ import .adapter.new,
+    f = _ new {default : eval},
     b = _ form@ _ f [.a, _ not true],
     $b
 ]
 -----
 [a, false]
 =====
-mode primitive eval.
+new primitive eval.
 -----
 _ do [
-    f = _ mode {default : eval.},
+    new = _ import .adapter.new,
+    f = _ new {default : eval.},
     _ f [a, _ @not true]
 ]
 -----
 [a, false]
 =====
-mode primitive eval@
+new primitive eval@
 -----
 _ do [
+    new = _ import .adapter.new,
     a = 1,
-    f = _ mode {default : eval@},
+    f = _ new {default : eval@},
     _ f [a, _ not true]
 ]
 -----
 [1, false]
 =====
-mode primitive eval$
+new primitive eval$
 -----
 _ do [
+    new = _ import .adapter.new,
     a = _ form _ not true,
-    f = _ mode {default : eval$},
+    f = _ new {default : eval$},
     _ f [a, _ @not true]
 ]
 -----
 [false, false]
 =====
-mode pair some
+new pair some
 -----
 _ do [
-    f = _ mode {
+    new = _ import .adapter.new,
+    f = _ new {
         pair : {
             this : {},
             that : form.,
@@ -369,12 +372,13 @@ _ do [
 -----
 [this : _ not true, that : a, false : @a : $b]
 =====
-mode multiple
+new multiple
 -----
 _ do [
+    new = _ import .adapter.new,
     c = 1,
     d = 2,
-    f = _ mode {
+    f = _ new {
         pair : {} : form. : {pair : form.}
     },
     _ f a : .b : _ @c $d
@@ -382,10 +386,11 @@ _ do [
 -----
 a : b : _ 1 2
 =====
-mode call
+new call
 -----
 _ do [
-    f = _ mode {
+    new = _ import .adapter.new,
+    f = _ new {
         call : _ eval@ eval@
     },
     _ f _ .g _ not true
@@ -393,10 +398,11 @@ _ do [
 -----
 _ g false
 =====
-mode list list
+new list list
 -----
 _ do [
-    f = _ mode {
+    new = _ import .adapter.new,
+    f = _ new {
         list : [form, eval.]
     },
     _ f [_ not true, _ @not true, _ .not true]
@@ -404,10 +410,11 @@ _ do [
 -----
 [_ not true, false, _ .not true]
 =====
-mode list head tail
+new list head tail
 -----
 _ do [
-    f = _ mode {
+    new = _ import .adapter.new,
+    f = _ new {
         list : [form, eval.] : form.
     },
     _ f [_ not true, _ @not true, _ .not true]
@@ -415,10 +422,11 @@ _ do [
 -----
 [_ not true, false, _ not true]
 =====
-mode map map
+new map map
 -----
 _ do [
-    f = _ mode {
+    new = _ import .adapter.new,
+    f = _ new {
         map : {
             a : form,
             b : eval.,
@@ -433,10 +441,11 @@ _ do [
 -----
 {a : _ not true, b : false, c : _ .not true}
 =====
-mode map some else
+new map some else
 -----
 _ do [
-    f = _ mode {
+    new = _ import .adapter.new,
+    f = _ new {
         map : {
             a : form,
             b : eval.,
@@ -451,16 +460,17 @@ _ do [
 -----
 {a : _ not true, b : false, c : _ not true}
 =====
-mode func
+new func
 -----
 _ do [
-    f = _ mode @not,
+    new = _ import .adapter.new,
+    f = _ new @not,
     _ f true
 ]
 -----
 false
 =====
-mode access free
+access free
 -----
 _ do [
     context_access = _ import .function.context_access,
@@ -469,18 +479,19 @@ _ do [
 -----
 free
 =====
-mode access const
+access const
 -----
 _ do [
+    new = _ import .adapter.new,
     context_access = _ import .function.context_access,
     read = _ import .context.read,
-    f = _ mode @read,
+    f = _ new @read,
     f which _ context_access .
 ]
 -----
 constant
 =====
-mode access mutable
+access mutable
 -----
 _ do [
     context_access = _ import .function.context_access,

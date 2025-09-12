@@ -9,7 +9,7 @@ use super::const_impl;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
-use super::func::repr::parse_mode;
+use super::func::repr::parse_adapter;
 use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -50,7 +50,7 @@ impl Default for FuncLib {
 
 impl CfgMod for FuncLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_adapter_mode(cfg, &self.new.id, parse_mode());
+        CoreCfg::extend_adapter(cfg, &self.new.id, parse_adapter());
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.ctx_access.extend(cfg);

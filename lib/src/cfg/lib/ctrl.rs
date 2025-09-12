@@ -11,13 +11,13 @@ use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::PrimAdapter;
+use crate::cfg::adapter::SymbolAdapter;
+use crate::cfg::adapter::id_adapter;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::PrimMode;
-use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
@@ -62,17 +62,17 @@ impl Default for CtrlLib {
 
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_adapter_mode(cfg, &self.do_.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.do_.id, id_adapter());
         self.do_.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, &self.test.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.test.id, id_adapter());
         self.test.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, &self.switch.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.switch.id, id_adapter());
         self.switch.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, &self.match_.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.match_.id, id_adapter());
         self.match_.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, &self.loop_.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.loop_.id, id_adapter());
         self.loop_.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, &self.iterate.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.iterate.id, id_adapter());
         self.iterate.extend(cfg);
     }
 }
@@ -351,9 +351,9 @@ impl Match {
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         let val = Eval.mut_call(cfg, ctx, self.val);
-        let mode = PrimMode::new(SymbolMode::Literal, CallPrimMode::Form);
+        let adapter = PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Form);
         for (pattern, block) in self.arms {
-            let pattern = mode.mut_call(cfg, ctx, pattern);
+            let pattern = adapter.mut_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
                 return Val::default();

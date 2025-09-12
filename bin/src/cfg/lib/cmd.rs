@@ -2,12 +2,12 @@ use std::process::Command;
 
 use airlang::cfg::CfgMod;
 use airlang::cfg::CoreCfg;
+use airlang::cfg::adapter::CallPrimAdapter;
+use airlang::cfg::adapter::SymbolAdapter;
+use airlang::cfg::adapter::prim_adapter;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
-use airlang::cfg::mode::CallPrimMode;
-use airlang::cfg::mode::FuncMode;
-use airlang::cfg::mode::SymbolMode;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -29,8 +29,8 @@ impl Default for CmdLib {
 
 impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
-        let call_adapter = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval);
-        CoreCfg::extend_adapter_mode(cfg, &self.call.id(), call_adapter);
+        let call_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval);
+        CoreCfg::extend_adapter(cfg, &self.call.id(), call_adapter);
         self.call.extend(cfg);
     }
 }

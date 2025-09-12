@@ -12,9 +12,12 @@ use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::SymbolMode;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::SymbolAdapter;
+use crate::cfg::adapter::default_adapter;
+use crate::cfg::adapter::id_adapter;
+use crate::cfg::adapter::pair_adapter;
+use crate::cfg::adapter::prim_adapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::import_adapter;
@@ -54,16 +57,16 @@ impl Default for CtxLib {
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &Cfg) {
         self.read.extend(cfg);
-        let assign_adapter = FuncMode::pair_mode(
+        let assign_adapter = pair_adapter(
             Map::default(),
-            FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
-            FuncMode::default_mode(),
+            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form),
+            default_adapter(),
         );
-        CoreCfg::extend_adapter_mode(cfg, &self.assign.id, assign_adapter);
+        CoreCfg::extend_adapter(cfg, &self.assign.id, assign_adapter);
         self.assign.extend(cfg);
         self.is_const.extend(cfg);
         self.self_.extend(cfg);
-        CoreCfg::extend_adapter_mode(cfg, &self.which.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter(cfg, &self.which.id, id_adapter());
         self.which.extend(cfg);
     }
 }

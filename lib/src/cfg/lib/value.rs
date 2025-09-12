@@ -16,9 +16,9 @@ use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::mode::CallPrimMode;
-use crate::cfg::mode::FuncMode;
-use crate::cfg::mode::SymbolMode;
+use crate::cfg::adapter::CallPrimAdapter;
+use crate::cfg::adapter::SymbolAdapter;
+use crate::cfg::adapter::prim_adapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::BIT;
@@ -73,8 +73,8 @@ impl Default for ValueLib {
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
-        let any_adapter = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
-        CoreCfg::extend_adapter_mode(cfg, &self.any.id, any_adapter);
+        let any_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form);
+        CoreCfg::extend_adapter(cfg, &self.any.id, any_adapter);
         self.any.extend(cfg);
         self.type_.extend(cfg);
         self.equal.extend(cfg);

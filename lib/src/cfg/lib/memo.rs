@@ -12,7 +12,7 @@ use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::lib::memo::repr::parse_mode;
+use crate::cfg::lib::memo::repr::parse_adapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -50,7 +50,7 @@ impl Default for MemoLib {
 
 impl CfgMod for MemoLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_adapter_mode(cfg, &self.new.id, parse_mode());
+        CoreCfg::extend_adapter(cfg, &self.new.id, parse_adapter());
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.reverse.extend(cfg);
