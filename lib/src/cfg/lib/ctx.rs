@@ -1,8 +1,8 @@
 use log::error;
-use pattern::PatternAssign;
-use pattern::PatternMatch;
-use pattern::PatternParse;
 
+use self::pattern::PatternAssign;
+use self::pattern::PatternMatch;
+use self::pattern::PatternParse;
 use super::DynPrimFn;
 use super::FreeImpl;
 use super::Library;

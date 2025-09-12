@@ -1,5 +1,4 @@
-use adapter::CoreAdapter;
-
+use self::adapter::CoreAdapter;
 use self::lib::CoreLib;
 use crate::cfg::adapter::adapter_func;
 use crate::cfg::lib::Library;
