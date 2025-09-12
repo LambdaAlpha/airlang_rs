@@ -50,7 +50,7 @@ impl Default for MemoLib {
 
 impl CfgMod for MemoLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_setup_mode(cfg, &self.new.id, parse_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.new.id, parse_mode());
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.reverse.extend(cfg);

@@ -17,7 +17,7 @@ use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::SymbolMode;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::import_setup;
+use crate::semantics::core::import_adapter;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
 use crate::semantics::memo::Memo;
@@ -54,16 +54,16 @@ impl Default for CtxLib {
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &Cfg) {
         self.read.extend(cfg);
-        let assign_setup = FuncMode::pair_mode(
+        let assign_adapter = FuncMode::pair_mode(
             Map::default(),
             FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form),
             FuncMode::default_mode(),
         );
-        CoreCfg::extend_setup_mode(cfg, &self.assign.id, assign_setup);
+        CoreCfg::extend_adapter_mode(cfg, &self.assign.id, assign_adapter);
         self.assign.extend(cfg);
         self.is_const.extend(cfg);
         self.self_.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, &self.which.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.which.id, FuncMode::id_mode());
         self.which.extend(cfg);
     }
 }
@@ -149,10 +149,10 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         error!("input.second.func should be a func");
         return Val::default();
     };
-    let Some(setup) = import_setup(cfg, func.id()) else {
+    let Some(adapter) = import_adapter(cfg, func.id()) else {
         return Val::default();
     };
-    let input = setup.mut_call(cfg, ctx, call.input);
+    let input = adapter.mut_call(cfg, ctx, call.input);
     let Some(ctx) = ctx.ref_(pair.first) else {
         error!("input.first should be a valid reference");
         return Val::default();

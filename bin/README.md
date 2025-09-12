@@ -33,7 +33,7 @@ _ do [
             ],
         ],
     },
-    .setup.c_for export form, 
+    .adapter.c_for export form, 
     _ c_for [[i = 1, sum = 0], i <= 10, i = i + 1, sum = sum + i],
     sum
 ]

@@ -29,8 +29,8 @@ impl Default for CmdLib {
 
 impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
-        let call_setup = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval);
-        CoreCfg::extend_setup_mode(cfg, &self.call.id(), call_setup);
+        let call_adapter = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Eval);
+        CoreCfg::extend_adapter_mode(cfg, &self.call.id(), call_adapter);
         self.call.extend(cfg);
     }
 }

@@ -3,7 +3,7 @@ use crate::cfg::lib::Library;
 use crate::cfg::mode::FuncMode;
 use crate::cfg::mode::Mode;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::CFG_SETUP;
+use crate::semantics::core::CFG_ADAPTER;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -48,13 +48,13 @@ impl CfgMod for CoreCfg {
 
 impl CoreCfg {
     pub const PRELUDE: &'static str = "prelude";
-    pub const SETUP: &'static str = CFG_SETUP;
+    pub const ADAPTER: &'static str = CFG_ADAPTER;
     pub const REVERSE: &'static str = "reverse";
 
-    pub fn extend_setup_mode(cfg: &Cfg, id: &str, mode: Mode) -> Option<()> {
-        let id = format!("{}.{id}", Self::SETUP);
-        let setup = Val::Func(FuncMode::mode_into_func(mode));
-        cfg.extend_scope(Symbol::from_string_unchecked(id), setup)
+    pub fn extend_adapter_mode(cfg: &Cfg, id: &str, mode: Mode) -> Option<()> {
+        let id = format!("{}.{id}", Self::ADAPTER);
+        let adapter = Val::Func(FuncMode::mode_into_func(mode));
+        cfg.extend_scope(Symbol::from_string_unchecked(id), adapter)
     }
 }
 

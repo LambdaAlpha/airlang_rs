@@ -114,18 +114,18 @@ pub(crate) struct CallEval<'a, Func> {
     pub(crate) func: &'a Func,
 }
 
-pub(crate) const CFG_SETUP: &str = "setup";
+pub(crate) const CFG_ADAPTER: &str = "adapter";
 
-pub(crate) fn import_setup(
+pub(crate) fn import_adapter(
     cfg: &mut Cfg, id: Symbol,
 ) -> Option<Box<dyn MutFn<Cfg, Val, Val, Val>>> {
-    let id = format!("{CFG_SETUP}.{}", &*id);
-    if let Some(setup) = cfg.import(Symbol::from_string_unchecked(id)) {
-        let Val::Func(setup) = setup else {
-            error!("setup should be valid");
+    let id = format!("{CFG_ADAPTER}.{}", &*id);
+    if let Some(adapter) = cfg.import(Symbol::from_string_unchecked(id)) {
+        let Val::Func(adapter) = adapter else {
+            error!("adapter should be valid");
             return None;
         };
-        Some(Box::new(setup))
+        Some(Box::new(adapter))
     } else {
         Some(Box::new(Eval))
     }
@@ -141,10 +141,10 @@ where Func: FreeFn<Cfg, Val, Val>
             error!("func {func:?} should be a func");
             return Val::default();
         };
-        let Some(setup) = import_setup(cfg, func.id()) else {
+        let Some(adapter) = import_adapter(cfg, func.id()) else {
             return Val::default();
         };
-        let input = setup.free_call(cfg, call.input);
+        let input = adapter.free_call(cfg, call.input);
         func.free_call(cfg, input)
     }
 }
@@ -159,10 +159,10 @@ where Func: ConstFn<Cfg, Val, Val, Val>
             error!("func {func:?} should be a func");
             return Val::default();
         };
-        let Some(setup) = import_setup(cfg, func.id()) else {
+        let Some(adapter) = import_adapter(cfg, func.id()) else {
             return Val::default();
         };
-        let input = setup.const_call(cfg, ctx.reborrow(), call.input);
+        let input = adapter.const_call(cfg, ctx.reborrow(), call.input);
         func.const_call(cfg, ctx, input)
     }
 }
@@ -177,10 +177,10 @@ where Func: MutFn<Cfg, Val, Val, Val>
             error!("func {func:?} should be a func");
             return Val::default();
         };
-        let Some(setup) = import_setup(cfg, func.id()) else {
+        let Some(adapter) = import_adapter(cfg, func.id()) else {
             return Val::default();
         };
-        let input = setup.mut_call(cfg, ctx, call.input);
+        let input = adapter.mut_call(cfg, ctx, call.input);
         func.mut_call(cfg, ctx, input)
     }
 }

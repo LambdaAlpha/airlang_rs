@@ -73,8 +73,8 @@ impl Default for ValueLib {
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
-        let any_setup = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
-        CoreCfg::extend_setup_mode(cfg, &self.any.id, any_setup);
+        let any_adapter = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
+        CoreCfg::extend_adapter_mode(cfg, &self.any.id, any_adapter);
         self.any.extend(cfg);
         self.type_.extend(cfg);
         self.equal.extend(cfg);

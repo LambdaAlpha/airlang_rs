@@ -62,17 +62,17 @@ impl Default for CtrlLib {
 
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_setup_mode(cfg, &self.do_.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.do_.id, FuncMode::id_mode());
         self.do_.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, &self.test.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.test.id, FuncMode::id_mode());
         self.test.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, &self.switch.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.switch.id, FuncMode::id_mode());
         self.switch.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, &self.match_.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.match_.id, FuncMode::id_mode());
         self.match_.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, &self.loop_.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.loop_.id, FuncMode::id_mode());
         self.loop_.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, &self.iterate.id, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, &self.iterate.id, FuncMode::id_mode());
         self.iterate.extend(cfg);
     }
 }

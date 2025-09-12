@@ -64,10 +64,10 @@ impl Default for ModeLib {
 
 impl CfgMod for ModeLib {
     fn extend(self, cfg: &Cfg) {
-        let new_setup = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
-        CoreCfg::extend_setup_mode(cfg, &self.new.id, new_setup);
+        let new_adapter = FuncMode::prim_mode(SymbolMode::Literal, CallPrimMode::Form);
+        CoreCfg::extend_adapter_mode(cfg, &self.new.id, new_adapter);
         self.new.extend(cfg);
-        CoreCfg::extend_setup_mode(cfg, MODE_FUNC_ID, FuncMode::id_mode());
+        CoreCfg::extend_adapter_mode(cfg, MODE_FUNC_ID, FuncMode::id_mode());
         cfg.extend_scope(Symbol::from_str_unchecked(FORM_ID), Val::Func(self.form_id.into()));
         cfg.extend_scope(
             Symbol::from_str_unchecked(FORM_LITERAL),
@@ -82,8 +82,8 @@ impl CfgMod for ModeLib {
         );
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_REF), Val::Func(self.eval_ref.into()));
         cfg.extend_scope(Symbol::from_str_unchecked(EVAL_EVAL), Val::Func(self.eval_eval.into()));
-        let apply_setup = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form);
-        CoreCfg::extend_setup_mode(cfg, &self.apply.id, apply_setup);
+        let apply_adapter = FuncMode::prim_mode(SymbolMode::Ref, CallPrimMode::Form);
+        CoreCfg::extend_adapter_mode(cfg, &self.apply.id, apply_adapter);
         self.apply.extend(cfg);
     }
 }

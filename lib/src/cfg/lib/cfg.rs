@@ -43,9 +43,9 @@ impl CfgMod for CfgLib {
         self.repr.extend(cfg);
         self.import.extend(cfg);
         self.export.extend(cfg);
-        let with_setup =
+        let with_adapter =
             FuncMode::pair_mode(Map::default(), FuncMode::default_mode(), FuncMode::id_mode());
-        CoreCfg::extend_setup_mode(cfg, &self.with.id, with_setup);
+        CoreCfg::extend_adapter_mode(cfg, &self.with.id, with_adapter);
         self.with.extend(cfg);
     }
 }
