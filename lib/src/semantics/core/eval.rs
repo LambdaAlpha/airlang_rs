@@ -119,7 +119,7 @@ pub(crate) const CFG_ADAPTER: &str = "adapter";
 pub(crate) fn import_adapter(
     cfg: &mut Cfg, id: Symbol,
 ) -> Option<Box<dyn MutFn<Cfg, Val, Val, Val>>> {
-    let id = format!("{CFG_ADAPTER}.{}", &*id);
+    let id = format!("{CFG_ADAPTER}@{}", &*id);
     if let Some(adapter) = cfg.import(Symbol::from_string_unchecked(id)) {
         let Val::Func(adapter) = adapter else {
             error!("adapter should be valid");

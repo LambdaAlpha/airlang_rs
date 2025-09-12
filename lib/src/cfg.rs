@@ -52,7 +52,7 @@ impl CoreCfg {
     pub const REVERSE: &'static str = "reverse";
 
     pub fn extend_adapter_mode(cfg: &Cfg, id: &str, mode: Mode) -> Option<()> {
-        let id = format!("{}.{id}", Self::ADAPTER);
+        let id = format!("{}@{id}", Self::ADAPTER);
         let adapter = Val::Func(FuncMode::mode_into_func(mode));
         cfg.extend_scope(Symbol::from_string_unchecked(id), adapter)
     }
