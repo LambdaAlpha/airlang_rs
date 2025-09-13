@@ -239,7 +239,7 @@ _ do [
     _ represent ==
 ]
 -----
-{id : ==}
+{id : value.equal}
 =====
 repr composite
 -----

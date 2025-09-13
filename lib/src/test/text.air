@@ -1,6 +1,7 @@
 length push
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .text.length,
     push = _ import .text.push,
     t = _ any text,
@@ -15,6 +16,7 @@ true
 length join
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .text.length,
     join = _ import .text.join,
     a = _ any text,
@@ -51,6 +53,7 @@ _ do [
 push join
 -----
 _ do [
+    any = _ import .value.any,
     push = _ import .text.push,
     join = _ import .text.join,
     a = _ any text,
@@ -118,6 +121,7 @@ _ do [
 into_utf8 from_utf8
 -----
 _ do [
+    any = _ import .value.any,
     from_utf8 = _ import .text.from_utf8,
     into_utf8 = _ import .text.into_utf8,
     t = _ any text,

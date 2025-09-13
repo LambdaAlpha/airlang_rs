@@ -14,6 +14,7 @@ use super::FreePrimFn;
 use super::Library;
 use super::const_impl;
 use super::free_impl;
+use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::cfg::adapter::CallPrimAdapter;
@@ -83,15 +84,14 @@ impl CfgMod for ValueLib {
 
 impl Library for ValueLib {
     fn prelude(&self, memo: &mut Memo) {
-        self.any.prelude(memo);
-        self.type_.prelude(memo);
-        self.equal.prelude(memo);
+        memo_put_func(memo, "type", &self.type_);
+        memo_put_func(memo, "==", &self.equal);
     }
 }
 
 // todo design pick value from ctx
 pub fn any() -> FreePrimFuncVal {
-    FreePrimFn { id: "any", f: free_impl(fn_any) }.free()
+    FreePrimFn { id: "value.any", f: free_impl(fn_any) }.free()
 }
 
 fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
@@ -126,7 +126,7 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn type_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "type", f: const_impl(fn_type) }.const_()
+    DynPrimFn { id: "value.type", f: const_impl(fn_type) }.const_()
 }
 
 fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -153,7 +153,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "==", f: free_impl(fn_equal) }.free()
+    FreePrimFn { id: "value.equal", f: free_impl(fn_equal) }.free()
 }
 
 fn fn_equal(_cfg: &mut Cfg, input: Val) -> Val {

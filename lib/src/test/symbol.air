@@ -1,6 +1,7 @@
 length join
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .symbol.length,
     join = _ import .symbol.join,
     a = _ any symbol,
@@ -76,6 +77,7 @@ a.b
 into_text from_text
 -----
 _ do [
+    any = _ import .value.any,
     from_text = _ import .symbol.from_text,
     into_text = _ import .symbol.into_text,
     s = _ any symbol,

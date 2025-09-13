@@ -1,6 +1,7 @@
 length set
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .map.length,
     set = _ import .map.set,
     contain = _ import .map.contain,
@@ -19,6 +20,7 @@ true
 length set_many
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .map.length,
     set_many = _ import .map.set_many,
     a = _ any map,
@@ -36,6 +38,7 @@ true
 items new
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .map.new,
     items = _ import .map.items,
     a1 = _ any map,
@@ -48,6 +51,7 @@ true
 into_items new
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .map.new,
     into_items = _ import .map.into_items,
     a1 = _ any map,
@@ -61,6 +65,7 @@ true
 keys set
 -----
 _ do [
+    any = _ import .value.any,
     new_set = _ import .map.new_set,
     keys = _ import .map.keys,
     set_many = _ import .map.set_many,
@@ -75,6 +80,7 @@ true
 into_keys set
 -----
 _ do [
+    any = _ import .value.any,
     new_set = _ import .map.new_set,
     keys = _ import .map.keys,
     into_keys = _ import .map.into_keys,
@@ -89,6 +95,7 @@ true
 values multiset
 -----
 _ do [
+    any = _ import .value.any,
     second = _ import .pair.second,
     multiset = _ import .map.new_multiset,
     values = _ import .map.values,
@@ -110,6 +117,7 @@ true
 into_values multiset
 -----
 _ do [
+    any = _ import .value.any,
     multiset = _ import .map.new_multiset,
     values = _ import .map.values,
     into_values = _ import .map.into_values,
@@ -124,6 +132,7 @@ true
 set contain
 -----
 _ do [
+    any = _ import .value.any,
     set = _ import .map.set,
     contain = _ import .map.contain,
     a = _ any map,
@@ -138,6 +147,7 @@ true
 set get
 -----
 _ do [
+    any = _ import .value.any,
     set = _ import .map.set,
     get = _ import .map.get,
     a = _ any map,
@@ -153,6 +163,7 @@ true
 set_many contain_all
 -----
 _ do [
+    any = _ import .value.any,
     set_many = _ import .map.set_many,
     contain_all = _ import .map.contain_all,
     keys = _ import .map.keys,
@@ -167,6 +178,7 @@ true
 remove_many contain_any
 -----
 _ do [
+    any = _ import .value.any,
     remove_many = _ import .map.remove_many,
     contain_any = _ import .map.contain_any,
     a = _ any map,
@@ -180,6 +192,7 @@ true
 set_many get_many
 -----
 _ do [
+    any = _ import .value.any,
     set_many = _ import .map.set_many,
     get_many = _ import .map.get_many,
     keys = _ import .map.keys,
@@ -195,6 +208,7 @@ true
 get remove
 -----
 _ do [
+    any = _ import .value.any,
     get = _ import .map.get,
     remove = _ import .map.remove,
     contain = _ import .map.contain,
@@ -211,6 +225,7 @@ true
 get_many remove_many
 -----
 _ do [
+    any = _ import .value.any,
     get_many = _ import .map.get_many,
     remove_many = _ import .map.remove_many,
     contain_any = _ import .map.contain_any,
@@ -227,6 +242,7 @@ true
 clear
 -----
 _ do [
+    any = _ import .value.any,
     clear = _ import .map.clear,
     a = _ any map,
     a which _ clear .,

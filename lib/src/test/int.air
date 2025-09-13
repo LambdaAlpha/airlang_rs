@@ -1,6 +1,7 @@
 + 0
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     a == a + 0
 ]
@@ -10,6 +11,7 @@ true
 - 0
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     a == a - 0
 ]
@@ -19,6 +21,7 @@ true
 + -
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     a == <(a + b - b)
@@ -29,6 +32,7 @@ true
 - +
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     a == <(a - b + b)
@@ -51,6 +55,7 @@ true
 * 0
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     0 == a * 0
 ]
@@ -60,6 +65,7 @@ true
 * 1
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     a == a * 1
 ]
@@ -69,6 +75,7 @@ true
 * -1
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     0 == a + a * 0-1
 ]
@@ -78,6 +85,7 @@ true
 / 0
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     . == a / 0
 ]
@@ -87,6 +95,7 @@ true
 / 1
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     a == a / 1
 ]
@@ -96,6 +105,7 @@ true
 / -1
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     0 == a + a / 0-1
 ]
@@ -105,6 +115,7 @@ true
 0 /
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     (a == 0) .return true,
     0 == 0 / a
@@ -115,6 +126,7 @@ true
 0 remainder
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     (a == 0) .return true,
     % = _ import .integer.remainder,
@@ -126,6 +138,7 @@ true
 remainder 0
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     % = _ import .integer.remainder,
     . == a % 0
@@ -136,6 +149,7 @@ true
 remainder 1
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     % = _ import .integer.remainder,
     0 == a % 1
@@ -146,6 +160,7 @@ true
 remainder exact
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -158,6 +173,7 @@ true
 sign(a remainder b) == sign(a)
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -170,6 +186,7 @@ true
 abs(a remainder b) < abs(b)
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -182,6 +199,7 @@ true
 * /
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -193,6 +211,7 @@ true
 exact / *
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -205,6 +224,7 @@ true
 inexact / abs(a) > abs(a / b * b)
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -216,6 +236,7 @@ true
 a == b * a / b + a remainder b
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -324,6 +345,7 @@ _ do [
 a divide_remainder b == (a / b) : (a remainder b)
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     (b == 0) .return true,
@@ -373,6 +395,7 @@ _ do [
 order relations
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any integer,
     b = _ any integer,
     c = _ any integer,

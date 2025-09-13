@@ -1,5 +1,9 @@
 unit return .
 -----
-_ do [unit = _ import .unit.unit, _ unit _ any .]
+_ do [
+    any = _ import .value.any,
+    unit = _ import .unit.unit,
+    _ unit _ any .
+]
 -----
 .

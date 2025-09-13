@@ -8,11 +8,11 @@ use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
 use self::func::FuncLib;
 use self::int::IntLib;
+use self::lang::LangLib;
 use self::link::LinkLib;
 use self::list::ListLib;
 use self::map::MapLib;
 use self::memo::MemoLib;
-use self::meta::MetaLib;
 use self::number::NumberLib;
 use self::pair::PairLib;
 use self::symbol::SymbolLib;
@@ -65,9 +65,9 @@ pub struct CoreLib {
     pub ctx: CtxLib,
     pub adapter: AdapterLib,
     pub ctrl: CtrlLib,
-    pub meta: MetaLib,
-    pub syntax: SyntaxLib,
     pub value: ValueLib,
+    pub syntax: SyntaxLib,
+    pub lang: LangLib,
 }
 
 impl CfgMod for CoreLib {
@@ -90,9 +90,9 @@ impl CfgMod for CoreLib {
         self.ctx.extend(cfg);
         self.adapter.extend(cfg);
         self.ctrl.extend(cfg);
-        self.meta.extend(cfg);
-        self.syntax.extend(cfg);
         self.value.extend(cfg);
+        self.syntax.extend(cfg);
+        self.lang.extend(cfg);
     }
 }
 
@@ -116,9 +116,9 @@ impl Library for CoreLib {
         self.ctx.prelude(memo);
         self.adapter.prelude(memo);
         self.ctrl.prelude(memo);
-        self.meta.prelude(memo);
-        self.syntax.prelude(memo);
         self.value.prelude(memo);
+        self.syntax.prelude(memo);
+        self.lang.prelude(memo);
     }
 }
 
@@ -303,8 +303,8 @@ pub mod adapter;
 
 pub mod ctrl;
 
-pub mod meta;
+pub mod value;
 
 pub mod syntax;
 
-pub mod value;
+pub mod lang;

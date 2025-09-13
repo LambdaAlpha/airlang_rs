@@ -1,6 +1,7 @@
 get
 -----
 _ do [
+    any = _ import .value.any,
     first = _ import .pair.first,
     second = _ import .pair.second,
     f = _ any .,
@@ -14,6 +15,7 @@ true
 set get
 -----
 _ do [
+    any = _ import .value.any,
     first = _ import .pair.first,
     second = _ import .pair.second,
     set_first = _ import .pair.set_first,
@@ -33,6 +35,7 @@ true
 set return
 -----
 _ do [
+    any = _ import .value.any,
     set_first = _ import .pair.set_first,
     set_second = _ import .pair.set_second,
     f1 = _ any .,

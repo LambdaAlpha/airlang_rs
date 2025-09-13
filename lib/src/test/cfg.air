@@ -1,6 +1,7 @@
 new repr
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .configuration.new,
     represent = _ import .configuration.represent,
     c = [
@@ -19,6 +20,7 @@ true
 export import
 -----
 _ do [
+    any = _ import .value.any,
     ab = _ any .,
     .a.b export ab,
     ab1 = _ import .a.b,
@@ -30,6 +32,7 @@ true
 with
 -----
 _ do [
+    any = _ import .value.any,
     a1 = _ any .,
     a2 = _ any .,
     {a : a1} with _ do [
@@ -44,6 +47,7 @@ true
 cfg func call
 -----
 _ do [
+    any = _ import .value.any,
     a0 = _ any .,
     f = _ function {
         context_access : .free,

@@ -1,6 +1,7 @@
 read none
 -----
 _ do [
+    any = _ import .value.any,
     read = _ import .context.read,
     a = _ any .,
     a == .a read _
@@ -11,6 +12,7 @@ true
 read final
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     read = _ import .context.read,
     v = _ any .,
@@ -23,6 +25,7 @@ true
 read still
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     read = _ import .context.read,
     v = _ any .,
@@ -35,6 +38,7 @@ true
 read static
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     read = _ import .context.read,
     v = _ any .,
@@ -47,6 +51,7 @@ true
 read const
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     read = _ import .context.read,
     v = _ any .,
@@ -59,6 +64,7 @@ true
 move ref
 -----
 _ do [
+    any = _ import .value.any,
     move = _ import .memory.move,
     is_null = _ import .memory.is_null,
     a = _ any .,
@@ -71,6 +77,7 @@ true
 move indirect
 -----
 _ do [
+    any = _ import .value.any,
     move = _ import .memory.move,
     is_null = _ import .memory.is_null,
     a = _ any .,
@@ -84,6 +91,7 @@ true
 move final
 -----
 _ do [
+    any = _ import .value.any,
     move = _ import .memory.move,
     new = _ import .memory.new,
     is_null = _ import .memory.is_null,
@@ -97,6 +105,7 @@ true
 move still
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     move = _ import .memory.move,
     is_null = _ import .memory.is_null,
@@ -110,6 +119,7 @@ true
 move static
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     move = _ import .memory.move,
     is_null = _ import .memory.is_null,
@@ -123,6 +133,7 @@ true
 move const
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     move = _ import .memory.move,
     is_null = _ import .memory.is_null,
@@ -159,6 +170,7 @@ _ do [
 none = return
 -----
 _ do [
+    any = _ import .value.any,
     a = 1,
     1 == a = _ any .
 ]
@@ -179,6 +191,7 @@ _ do [
 final mutate
 -----
 _ do [
+    any = _ import .value.any,
     set_contract = _ import .memory.set_contract,
     set_first = _ import .pair.set_first,
     a = 1 : 2,
@@ -192,6 +205,7 @@ _ do [
 final =
 -----
 _ do [
+    any = _ import .value.any,
     set_contract = _ import .memory.set_contract,
     a = 1,
     .a set_contract .final,
@@ -203,6 +217,7 @@ _ do [
 set_contract still none
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -216,6 +231,7 @@ none
 set_contract still none
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -229,6 +245,7 @@ final
 set_contract none final
 -----
 _ do [
+    any = _ import .value.any,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
     a = _ any .,
@@ -241,6 +258,7 @@ final
 set_contract none still
 -----
 _ do [
+    any = _ import .value.any,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
     a = _ any .,
@@ -253,6 +271,7 @@ none
 set_contract final still
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -266,6 +285,7 @@ final
 set_contract final none
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -279,6 +299,7 @@ final
 set_contract static const
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -292,6 +313,7 @@ static
 set_contract static still
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -305,6 +327,7 @@ static
 set_contract static final
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -318,6 +341,7 @@ static
 set_contract static none
 -----
 _ do [
+    any = _ import .value.any,
     new = _ import .memory.new,
     set_contract = _ import .memory.set_contract,
     contract = _ import .memory.contract,
@@ -340,6 +364,7 @@ true
 is_null false
 -----
 _ do [
+    any = _ import .value.any,
     is_null = _ import .memory.is_null,
     a = _ any .,
     .a is_null _

@@ -1,5 +1,5 @@
 _ do [
-    version = _ import .air.version,
+    version = _ import .language.version,
     generate = _ import .syntax.generate,
     join = _ import .text.join,
     [major, minor, patch] = version,

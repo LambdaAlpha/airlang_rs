@@ -1,6 +1,7 @@
 length push
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     push = _ import .list.push,
     a = _ any list,
@@ -15,6 +16,7 @@ true
 length push_many
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     push_many = _ import .list.push_many,
     a = _ any list,
@@ -31,6 +33,7 @@ true
 length pop_many
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     pop_many = _ import .list.pop_many,
     % = _ import .integer.remainder,
@@ -48,6 +51,7 @@ true
 set get
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     set = _ import .list.set,
     get = _ import .list.get,
@@ -70,6 +74,7 @@ true
 set_many get_many
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     get_many = _ import .list.get_many,
     set_many = _ import .list.set_many,
@@ -103,6 +108,7 @@ true
 insert get length
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     insert = _ import .list.insert,
     get = _ import .list.get,
@@ -122,6 +128,7 @@ true
 insert remove
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     insert = _ import .list.insert,
     remove = _ import .list.remove,
@@ -141,6 +148,7 @@ true
 insert_many get_many length
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     insert_many = _ import .list.insert_many,
     get_many = _ import .list.get_many,
@@ -161,6 +169,7 @@ true
 insert_many remove_many
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     insert_many = _ import .list.insert_many,
     remove_many = _ import .list.remove_many,
@@ -181,6 +190,7 @@ true
 push pop
 -----
 _ do [
+    any = _ import .value.any,
     push = _ import .list.push,
     pop = _ import .list.pop,
     a1 = _ any list,
@@ -196,6 +206,7 @@ true
 push_many pop_many
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .list.length,
     push_many = _ import .list.push_many,
     pop_many = _ import .list.pop_many,
@@ -213,6 +224,7 @@ true
 clear
 -----
 _ do [
+    any = _ import .value.any,
     clear = _ import .list.clear,
     a = _ any list,
     a which _ clear .,

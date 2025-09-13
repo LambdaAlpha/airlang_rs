@@ -13,23 +13,23 @@ use crate::type_::List;
 use crate::type_::Symbol;
 
 #[derive(Clone)]
-pub struct MetaLib {
+pub struct LangLib {
     pub version: ListVal,
 }
 
-impl Default for MetaLib {
+impl Default for LangLib {
     fn default() -> Self {
-        MetaLib { version: version() }
+        LangLib { version: version() }
     }
 }
 
-impl CfgMod for MetaLib {
+impl CfgMod for LangLib {
     fn extend(self, cfg: &Cfg) {
-        cfg.extend_scope(Symbol::from_str_unchecked("air.version"), Val::List(self.version));
+        cfg.extend_scope(Symbol::from_str_unchecked("language.version"), Val::List(self.version));
     }
 }
 
-impl Library for MetaLib {
+impl Library for LangLib {
     fn prelude(&self, _memo: &mut Memo) {}
 }
 

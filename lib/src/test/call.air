@@ -1,6 +1,7 @@
 get
 -----
 _ do [
+    any = _ import .value.any,
     function = _ import .call.function,
     input = _ import .call.input,
     f = _ any .,
@@ -14,6 +15,7 @@ true
 set get
 -----
 _ do [
+    any = _ import .value.any,
     function = _ import .call.function,
     input = _ import .call.input,
     set_function = _ import .call.set_function,
@@ -31,6 +33,7 @@ true
 set return
 -----
 _ do [
+    any = _ import .value.any,
     set_function = _ import .call.set_function,
     set_input = _ import .call.set_input,
     f1 = _ any .,

@@ -1,6 +1,7 @@
 read ref
 -----
 _ do [
+    any = _ import .value.any,
     read = _ import .context.read,
     a = _ any .,
     a == .a read _
@@ -11,6 +12,7 @@ true
 read indirect
 -----
 _ do [
+    any = _ import .value.any,
     read = _ import .context.read,
     a = _ any .,
     b = .a,
@@ -31,6 +33,7 @@ _ do [
 = return
 -----
 _ do [
+    any = _ import .value.any,
     a = 1,
     a = _ any .
 ]
@@ -40,6 +43,7 @@ _ do [
 = another
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any .,
     a = 2,
     a
@@ -406,6 +410,7 @@ _ do [
 self non-sync
 -----
 _ do [
+    any = _ import .value.any,
     self = _ import .context.self,
     is_null = _ import .memory.is_null,
     a = _ self .,

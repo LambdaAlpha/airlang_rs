@@ -1,6 +1,7 @@
 == true
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any .,
     b = a,
     a == b
@@ -11,6 +12,7 @@ true
 any unit
 -----
 _ do [
+    any = _ import .value.any,
     u = _ any unit,
     u which _ type .
 ]
@@ -20,6 +22,7 @@ unit
 any bit
 -----
 _ do [
+    any = _ import .value.any,
     b = _ any bit,
     b which _ type .
 ]
@@ -29,6 +32,7 @@ bit
 any symbol
 -----
 _ do [
+    any = _ import .value.any,
     s = _ any symbol,
     s which _ type .
 ]
@@ -38,6 +42,7 @@ symbol
 any text
 -----
 _ do [
+    any = _ import .value.any,
     t = _ any text,
     t which _ type .
 ]
@@ -47,6 +52,7 @@ text
 any integer
 -----
 _ do [
+    any = _ import .value.any,
     i = _ any integer,
     i which _ type .
 ]
@@ -56,6 +62,7 @@ integer
 any number
 -----
 _ do [
+    any = _ import .value.any,
     n = _ any number,
     n which _ type .
 ]
@@ -65,6 +72,7 @@ number
 any byte
 -----
 _ do [
+    any = _ import .value.any,
     b = _ any byte,
     b which _ type .
 ]
@@ -74,6 +82,7 @@ byte
 any pair
 -----
 _ do [
+    any = _ import .value.any,
     p = _ any pair,
     p which _ type .
 ]
@@ -83,6 +92,7 @@ pair
 any call
 -----
 _ do [
+    any = _ import .value.any,
     c = _ any call,
     c which _ type .
 ]
@@ -92,6 +102,7 @@ call
 any list
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any list,
     a which _ type .
 ]
@@ -101,6 +112,7 @@ list
 any map
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any map,
     a which _ type .
 ]
@@ -110,6 +122,7 @@ map
 any link
 -----
 _ do [
+    any = _ import .value.any,
     a = _ any link,
     a which _ type .
 ]
@@ -119,6 +132,7 @@ link
 any memory
 -----
 _ do [
+    any = _ import .value.any,
     m = _ any memory,
     m which _ type .
 ]
@@ -128,6 +142,7 @@ memory
 any function
 -----
 _ do [
+    any = _ import .value.any,
     f = _ any function,
     f which _ type .
 ]

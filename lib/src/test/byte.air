@@ -1,6 +1,7 @@
 length push
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .byte.length,
     push = _ import .byte.push,
     b = _ any byte,
@@ -15,6 +16,7 @@ true
 length join
 -----
 _ do [
+    any = _ import .value.any,
     length = _ import .byte.length,
     join = _ import .byte.join,
     a = _ any byte,
@@ -51,6 +53,7 @@ _ do [
 push join
 -----
 _ do [
+    any = _ import .value.any,
     push = _ import .byte.push,
     join = _ import .byte.join,
     a = _ any byte,

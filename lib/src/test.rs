@@ -169,11 +169,11 @@ fn test_ctrl() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_syntax() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/syntax.air"), "test/syntax.air")
+fn test_value() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/value.air"), "test/value.air")
 }
 
 #[test]
-fn test_value() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/value.air"), "test/value.air")
+fn test_syntax() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/syntax.air"), "test/syntax.air")
 }
