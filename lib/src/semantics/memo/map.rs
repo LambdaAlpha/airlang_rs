@@ -53,6 +53,10 @@ impl MemoMap {
         self.map.is_empty()
     }
 
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
+
     pub fn is_null(&self, name: Symbol) -> bool {
         self.map.get(&name).is_none()
     }

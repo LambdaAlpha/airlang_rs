@@ -1,3 +1,5 @@
+use log::info;
+
 use self::adapter::CoreAdapter;
 use self::lib::CoreLib;
 use crate::cfg::adapter::adapter_func;
@@ -20,6 +22,7 @@ impl<T: CfgMod> From<T> for Cfg {
     fn from(t: T) -> Cfg {
         let cfg = Cfg::default();
         t.extend(&cfg);
+        info!("cfg len {}", cfg.len());
         cfg
     }
 }
@@ -35,6 +38,7 @@ impl Default for CoreCfg {
         let lib = CoreLib::default();
         let mut prelude = Memo::default();
         lib.prelude(&mut prelude);
+        info!("prelude len {}", prelude.len());
         Self { lib, prelude }
     }
 }

@@ -17,7 +17,7 @@ pub fn bench_semantics(c: &mut Criterion) {
 
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
-        let mut air = Air::new(CoreCfg::default().into());
+        let mut air = Air::new(CoreCfg::default().into()).unwrap();
         let s = include_str!("interpret.air");
         let src_val: Val = parse(s).expect("parse failed");
         b.iter_batched(

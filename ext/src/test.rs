@@ -14,7 +14,7 @@ fn test_build_load() -> Result<(), Box<dyn Error>> {
     init_logger();
     let src = generate_load("/src/test/build_load/case_1/main.air");
     let src = parse(&src)?;
-    let mut air = Air::new(StdCfg::default().into());
+    let mut air = Air::new(StdCfg::default().into()).unwrap();
     let output = air.interpret(src);
     assert_eq!(output, Val::Int(Int::from(5).into()));
     Ok(())

@@ -13,24 +13,24 @@ use self::repl::ReplLib;
 
 #[derive(Default, Clone)]
 pub struct BinLib {
-    pub std: StdLib,
     pub repl: ReplLib,
     pub cmd: CmdLib,
+    pub std: StdLib,
 }
 
 impl CfgMod for BinLib {
     fn extend(self, cfg: &Cfg) {
-        self.std.extend(cfg);
         self.repl.extend(cfg);
         self.cmd.extend(cfg);
+        self.std.extend(cfg);
     }
 }
 
 impl Library for BinLib {
     fn prelude(&self, memo: &mut Memo) {
-        self.std.prelude(memo);
         self.repl.prelude(memo);
         self.cmd.prelude(memo);
+        self.std.prelude(memo);
     }
 }
 

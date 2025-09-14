@@ -30,7 +30,7 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
-    let air = Air::new(CoreCfg::default().into());
+    let air = Air::new(CoreCfg::default().into()).unwrap();
     test_interpret(air, input, file_name)
 }
 

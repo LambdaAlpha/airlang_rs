@@ -82,7 +82,7 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub fn new(out: T) -> Self {
-        let air = Air::new(BinCfg::default().into());
+        let air = Air::new(BinCfg::default().into()).unwrap();
         let terminal = Terminal(out);
         Self {
             air,

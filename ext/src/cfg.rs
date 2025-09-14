@@ -5,6 +5,7 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::memo::Memo;
 use airlang::semantics::val::Val;
 use airlang::type_::Symbol;
+use log::info;
 
 use self::lib::StdLib;
 
@@ -19,6 +20,7 @@ impl Default for StdCfg {
         let lib = StdLib::default();
         let mut prelude = Memo::default();
         lib.prelude(&mut prelude);
+        info!("prelude len {}", prelude.len());
         Self { lib, prelude }
     }
 }

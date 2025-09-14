@@ -48,7 +48,7 @@ fn test_main(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 fn generate_air_with_main() -> Result<Air, Box<dyn Error>> {
     let src = generate_load("/main/main.air");
     let src = parse(&src)?;
-    let mut air = Air::new(CoreCfg::default().into());
+    let mut air = Air::new(CoreCfg::default().into()).unwrap();
     let main = air.interpret(src);
     let main_name = Symbol::from_str_unchecked(MAIN_NAME);
     air.memo_mut().put(main_name, main, Contract::Final)?;

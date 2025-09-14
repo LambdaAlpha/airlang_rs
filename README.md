@@ -17,7 +17,7 @@ It is an experimental proof-of-concept project and is still in the very early st
 ## Demo
 
 ```air
-_("A demo of implementing a C-like for function")
+_("A demo of implementing a C-style for function")
 
 _ do [
     c_for = _ function {

@@ -59,6 +59,14 @@ impl Cfg {
     pub fn scope_level(&self) -> usize {
         self.max_scope
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.map.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
 }
 
 impl IntoIterator for Cfg {

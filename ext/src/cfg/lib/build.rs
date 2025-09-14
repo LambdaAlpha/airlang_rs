@@ -71,7 +71,10 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         return Val::default();
     };
 
-    let mut mod_air = Air::new(cfg.clone());
+    let Some(mut mod_air) = Air::new(cfg.clone()) else {
+        error!("prelude should exist in cfg");
+        return Val::default();
+    };
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     mod_air.cfg_mut().begin_scope();
     mod_air.cfg_mut().extend_scope(cur_url_key, Val::Text(Text::from(url).into()));

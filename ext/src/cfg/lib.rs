@@ -11,30 +11,30 @@ use self::process::ProcessLib;
 
 #[derive(Default, Clone)]
 pub struct StdLib {
-    pub core: CoreLib,
     pub io: IoLib,
     pub file: FileLib,
     pub process: ProcessLib,
     pub build: BuildLib,
+    pub core: CoreLib,
 }
 
 impl CfgMod for StdLib {
     fn extend(self, cfg: &Cfg) {
-        self.core.extend(cfg);
         self.io.extend(cfg);
         self.file.extend(cfg);
         self.process.extend(cfg);
         self.build.extend(cfg);
+        self.core.extend(cfg);
     }
 }
 
 impl Library for StdLib {
     fn prelude(&self, memo: &mut Memo) {
-        self.core.prelude(memo);
         self.io.prelude(memo);
         self.file.prelude(memo);
         self.process.prelude(memo);
         self.build.prelude(memo);
+        self.core.prelude(memo);
     }
 }
 

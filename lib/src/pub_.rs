@@ -1,3 +1,5 @@
+use log::error;
+
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::composite_call;
@@ -12,14 +14,18 @@ pub struct Air {
 }
 
 impl Air {
-    pub fn new(cfg: Cfg) -> Self {
+    pub fn new(cfg: Cfg) -> Option<Self> {
         let prelude = cfg.import(Symbol::from_str_unchecked(CoreCfg::PRELUDE));
-        let prelude = prelude.expect("prelude should exist in cfg");
+        let Some(prelude) = prelude else {
+            error!("prelude should exist in cfg");
+            return None;
+        };
         let Val::Memo(prelude) = prelude else {
-            panic!("prelude in cfg should be a memo");
+            error!("prelude in cfg should be a memo");
+            return None;
         };
         let memo = Memo::from(prelude);
-        Self { cfg, memo }
+        Some(Self { cfg, memo })
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {

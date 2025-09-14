@@ -5,6 +5,7 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::memo::Memo;
 use airlang::semantics::val::Val;
 use airlang::type_::Symbol;
+use log::info;
 
 use crate::cfg::lib::BinLib;
 
@@ -19,6 +20,7 @@ impl Default for BinCfg {
         let lib = BinLib::default();
         let mut prelude = Memo::default();
         lib.prelude(&mut prelude);
+        info!("prelude len {}", prelude.len());
         Self { lib, prelude }
     }
 }

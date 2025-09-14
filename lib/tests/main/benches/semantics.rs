@@ -9,7 +9,7 @@ use airlang::type_::Int;
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
-    let mut air = Air::new(CoreCfg::default().into());
+    let mut air = Air::new(CoreCfg::default().into()).unwrap();
     let s = include_str!("../../../benches/main/interpret.air");
     let src_val = parse(s)?;
     let output = air.interpret(src_val);
