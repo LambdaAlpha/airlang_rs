@@ -1,5 +1,4 @@
 pub use self::arbitrary::Arbitrary;
-pub use self::arbitrary::ArbitraryVal;
 
 _____!();
 
@@ -7,8 +6,6 @@ use log::error;
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
-use self::arbitrary::arbitrary_ext_type;
-use self::arbitrary::set_arbitrary_val;
 use super::DynPrimFn;
 use super::FreePrimFn;
 use super::Library;
@@ -55,12 +52,9 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-pub fn init_arbitrary(arbitrary_val: Box<dyn ArbitraryVal>) {
-    set_arbitrary_val(arbitrary_val);
-}
-
 #[derive(Clone)]
 pub struct ValueLib {
+    /// should be overridden if there are extension types
     pub any: FreePrimFuncVal,
     pub type_: ConstPrimFuncVal,
     pub equal: FreePrimFuncVal,
@@ -89,7 +83,7 @@ impl Library for ValueLib {
     }
 }
 
-// todo design pick value from ctx
+// todo design pick value from cfg or ctx
 pub fn any() -> FreePrimFuncVal {
     FreePrimFn { id: "value.any", f: free_impl(fn_any) }.free()
 }
@@ -116,7 +110,7 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
             CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
-            _ => arbitrary_ext_type(s),
+            _ => Val::default(),
         },
         v => {
             error!("input {v:?} should be a symbol or a unit");

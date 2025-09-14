@@ -1,4 +1,3 @@
-use std::cell::OnceCell;
 use std::cmp::min;
 use std::hash::Hash;
 
@@ -48,20 +47,6 @@ use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-thread_local!(pub(in crate::cfg) static ARBITRARY: OnceCell<Box<dyn ArbitraryVal>> = OnceCell::new());
-
-pub trait ArbitraryVal {
-    fn arbitrary(&self) -> Val;
-
-    fn arbitrary_type(&self, type_: Symbol) -> Val;
-}
-
-pub(crate) fn set_arbitrary_val(arbitrary: Box<dyn ArbitraryVal>) {
-    ARBITRARY.with(|arb| {
-        let _ = arb.set(arbitrary);
-    });
-}
-
 pub trait Arbitrary {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self;
 }
@@ -85,7 +70,6 @@ impl Arbitrary for Val {
             1,      // cfg
             1,      // memo
             1,      // func
-            1,      // extension
         ];
         let i = sample(rng, weights);
         let depth = depth + 1;
@@ -106,7 +90,6 @@ impl Arbitrary for Val {
             12 => Val::Cfg(Cfg::any(rng, depth).into()),
             13 => Val::Memo(Memo::any(rng, depth).into()),
             14 => Val::Func(FuncVal::any(rng, depth)),
-            15 => arbitrary_ext(),
             _ => unreachable!(),
         }
     }
@@ -462,24 +445,6 @@ impl Arbitrary for MutCompFuncVal {
         };
         MutCompFuncVal::from(func)
     }
-}
-
-pub(in crate::cfg) fn arbitrary_ext() -> Val {
-    ARBITRARY.with(|ext| {
-        let Some(ext) = ext.get() else {
-            return Val::default();
-        };
-        ext.arbitrary()
-    })
-}
-
-pub(in crate::cfg) fn arbitrary_ext_type(type_: Symbol) -> Val {
-    ARBITRARY.with(|ext| {
-        let Some(ext) = ext.get() else {
-            return Val::default();
-        };
-        ext.arbitrary_type(type_)
-    })
 }
 
 fn sample<const N: usize, R: Rng + ?Sized>(rng: &mut R, weights: [usize; N]) -> usize {
