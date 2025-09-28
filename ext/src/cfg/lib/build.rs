@@ -43,6 +43,7 @@ pub fn load() -> FreePrimFuncVal {
     FreePrimFn { id: "build.load", f: FreeImpl::new(fn_load) }.free()
 }
 
+// todo rename
 const CUR_URL_KEY: &str = "build.this_url";
 
 fn fn_load(cfg: &mut Cfg, input: Val) -> Val {

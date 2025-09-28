@@ -24,6 +24,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 
+// todo design more
 #[derive(Clone)]
 pub struct CfgLib {
     pub new: FreePrimFuncVal,

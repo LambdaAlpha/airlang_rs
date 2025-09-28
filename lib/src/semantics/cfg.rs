@@ -12,6 +12,7 @@ use stable_deref_trait::StableDeref;
 use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
+// todo design invariant
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub struct Cfg {
     max_scope: usize,

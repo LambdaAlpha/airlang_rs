@@ -16,8 +16,6 @@ pub(crate) use self::comp::composite_call;
 
 _____!();
 
-// todo design self free/const/mut
-
 mod prim;
 
 mod comp;
