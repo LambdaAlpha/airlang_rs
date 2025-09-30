@@ -201,9 +201,10 @@ final =
 _ do [
     any = _ import .value.any,
     set_contract = _ import .memory.set_contract,
-    a = 1,
-    .a set_contract .final,
-    a = _ any ., a
+    final_a = 1,
+    .final_a set_contract .final,
+    final_a = _ any .,
+    final_a
 ]
 -----
 1
@@ -383,9 +384,9 @@ static = to static
 _ do [
     new = _ import .memory.new,
     read = _ import .context.read,
-    c = _ new {a : static : 1},
-    c which a = 2,
-    c which _ read .a
+    c = _ new {static_a : static : 1},
+    c which static_a = 2,
+    c which _ read .static_a
 ]
 -----
 1

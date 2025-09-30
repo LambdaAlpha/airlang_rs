@@ -426,7 +426,7 @@ true
 =====
 == null null
 -----
-a == b
+non_exist1 == non_exist2
 -----
 true
 =====
