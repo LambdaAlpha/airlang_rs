@@ -9,6 +9,7 @@ use super::FreePrimFn;
 use super::Library;
 use super::const_impl;
 use super::free_impl;
+use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -28,10 +29,10 @@ pub struct MemoLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
     pub reverse: FreePrimFuncVal,
-    pub move_: MutPrimFuncVal,
+    pub remove: MutPrimFuncVal,
     pub contract: ConstPrimFuncVal,
     pub set_contract: MutPrimFuncVal,
-    pub is_null: ConstPrimFuncVal,
+    pub exist: ConstPrimFuncVal,
 }
 
 impl Default for MemoLib {
@@ -40,10 +41,10 @@ impl Default for MemoLib {
             new: new(),
             repr: repr(),
             reverse: reverse(),
-            move_: move_(),
+            remove: remove(),
             contract: contract(),
             set_contract: set_contract(),
-            is_null: is_null(),
+            exist: exist(),
         }
     }
 }
@@ -54,22 +55,62 @@ impl CfgMod for MemoLib {
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.reverse.extend(cfg);
-        self.move_.extend(cfg);
+        self.remove.extend(cfg);
         self.contract.extend(cfg);
         self.set_contract.extend(cfg);
-        self.is_null.extend(cfg);
+        self.exist.extend(cfg);
     }
 }
 
 impl Library for MemoLib {
-    fn prelude(&self, _memo: &mut Memo) {}
+    fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "move", &self.remove);
+    }
 }
 
-pub fn move_() -> MutPrimFuncVal {
-    DynPrimFn { id: "memory.move", f: mut_impl(fn_move) }.mut_()
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn { id: "memory.new", f: free_impl(fn_new) }.free()
 }
 
-fn fn_move(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
+    let Some(memo) = parse_memo(input) else {
+        error!("parse_memo failed");
+        return Val::default();
+    };
+    Val::Memo(memo)
+}
+
+pub fn repr() -> FreePrimFuncVal {
+    FreePrimFn { id: "memory.represent", f: free_impl(fn_repr) }.free()
+}
+
+fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Memo(memo) = input else {
+        error!("input {input:?} should be a memo");
+        return Val::default();
+    };
+    generate_memo(memo)
+}
+
+pub fn reverse() -> FreePrimFuncVal {
+    FreePrimFn { id: "memory.reverse", f: free_impl(fn_reverse) }.free()
+}
+
+fn fn_reverse(_cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Memo(memo) = input else {
+        error!("input {input:?} should be a memo");
+        return Val::default();
+    };
+    let ctx = Memo::from(memo);
+    let reverse = ctx.reverse();
+    Val::Memo(reverse.into())
+}
+
+pub fn remove() -> MutPrimFuncVal {
+    DynPrimFn { id: "memory.remove", f: mut_impl(fn_remove) }.mut_()
+}
+
+fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Memo(memo) = ctx else {
         error!("ctx {ctx:?} should be a memo");
         return Val::default();
@@ -127,11 +168,11 @@ fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn is_null() -> ConstPrimFuncVal {
-    DynPrimFn { id: "memory.is_null", f: const_impl(fn_is_null) }.const_()
+pub fn exist() -> ConstPrimFuncVal {
+    DynPrimFn { id: "memory.exist", f: const_impl(fn_exist) }.const_()
 }
 
-fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_exist(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Memo(memo) = &*ctx else {
         error!("ctx {ctx:?} should be a memo");
         return Val::default();
@@ -140,45 +181,7 @@ fn fn_is_null(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input {input:?} should be a symbol");
         return Val::default();
     };
-    Val::Bit(Bit::from(memo.is_null(s)))
-}
-
-pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.new", f: free_impl(fn_new) }.free()
-}
-
-fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
-    let Some(memo) = parse_memo(input) else {
-        error!("parse_memo failed");
-        return Val::default();
-    };
-    Val::Memo(memo)
-}
-
-pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.represent", f: free_impl(fn_repr) }.free()
-}
-
-fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Memo(memo) = input else {
-        error!("input {input:?} should be a memo");
-        return Val::default();
-    };
-    generate_memo(memo)
-}
-
-pub fn reverse() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.reverse", f: free_impl(fn_reverse) }.free()
-}
-
-fn fn_reverse(_cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Memo(memo) = input else {
-        error!("input {input:?} should be a memo");
-        return Val::default();
-    };
-    let ctx = Memo::from(memo);
-    let reverse = ctx.reverse();
-    Val::Memo(reverse.into())
+    Val::Bit(Bit::from(memo.exist(s)))
 }
 
 pub(in crate::cfg) mod repr;

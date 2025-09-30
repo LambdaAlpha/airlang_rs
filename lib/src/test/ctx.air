@@ -333,7 +333,6 @@ which 1
 -----
 _ do [
     new = _ import .memory.new,
-    move = _ import .memory.move,
     set_first = _ import .pair.set_first,
     a = _ new {p : . : 1 : 2},
     b = 3,
@@ -347,7 +346,6 @@ which 2
 -----
 _ do [
     new = _ import .memory.new,
-    move = _ import .memory.move,
     set_first = _ import .pair.set_first,
     a = _ new {
         p : . : 1 : 2,
@@ -363,7 +361,6 @@ which 3
 -----
 _ do [
     new = _ import .memory.new,
-    move = _ import .memory.move,
     set_first = _ import .pair.set_first,
     a = _ new {
         set_first : . : set_first,
@@ -412,10 +409,10 @@ self non-sync
 _ do [
     any = _ import .value.any,
     self = _ import .context.self,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     a = _ self .,
     b = _ any .,
-    a which _ is_null .b
+    a which _ exist .b
 ]
 -----
-true
+false

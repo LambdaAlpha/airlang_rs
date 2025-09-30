@@ -65,11 +65,10 @@ move ref
 -----
 _ do [
     any = _ import .value.any,
-    move = _ import .memory.move,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     a = _ any .,
     b = a,
-    (b == .a move _) and (.a is_null _)
+    (b == .a move _) and (_ not .a exist _)
 ]
 -----
 true
@@ -78,12 +77,11 @@ move indirect
 -----
 _ do [
     any = _ import .value.any,
-    move = _ import .memory.move,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     a = _ any .,
     b = .a,
     c = a,
-    (c == b move _) and (.a is_null _)
+    (c == b move _) and (_ not .a exist _)
 ]
 -----
 true
@@ -92,12 +90,11 @@ move final
 -----
 _ do [
     any = _ import .value.any,
-    move = _ import .memory.move,
     new = _ import .memory.new,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     v = _ any .,
     a = _ new {b : final : v},
-    (. == a which _ move .b) and (_ not a which _ is_null .b)
+    (. == a which _ move .b) and (a which _ exist .b)
 ]
 -----
 true
@@ -107,11 +104,10 @@ move still
 _ do [
     any = _ import .value.any,
     new = _ import .memory.new,
-    move = _ import .memory.move,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     v = _ any .,
     a = _ new {b : still : v},
-    (v == a which _ move .b) and (a which _ is_null .b)
+    (v == a which _ move .b) and (_ not a which _ exist .b)
 ]
 -----
 true
@@ -121,11 +117,10 @@ move static
 _ do [
     any = _ import .value.any,
     new = _ import .memory.new,
-    move = _ import .memory.move,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     v = _ any .,
     a = _ new {b : static : v},
-    (. == a which _ move .b) and (_ not a which _ is_null .b)
+    (. == a which _ move .b) and (a which _ exist .b)
 ]
 -----
 true
@@ -135,11 +130,10 @@ move const
 _ do [
     any = _ import .value.any,
     new = _ import .memory.new,
-    move = _ import .memory.move,
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     v = _ any .,
     a = _ new {b : constant : v},
-    (. == a which _ move .b) and (_ not a which _ is_null .b)
+    (. == a which _ move .b) and (a which _ exist .b)
 ]
 -----
 true
@@ -352,31 +346,30 @@ _ do [
 -----
 static
 =====
-is_null true
+exist false
 -----
 _ do [
-    is_null = _ import .memory.is_null,
-    .a is_null _
-]
------
-true
-=====
-is_null false
------
-_ do [
-    any = _ import .value.any,
-    is_null = _ import .memory.is_null,
-    a = _ any .,
-    .a is_null _
+    exist = _ import .memory.exist,
+    .a exist _
 ]
 -----
 false
+=====
+exist true
+-----
+_ do [
+    any = _ import .value.any,
+    exist = _ import .memory.exist,
+    a = _ any .,
+    .a exist _
+]
+-----
+true
 =====
 static move
 -----
 _ do [
     new = _ import .memory.new,
-    move = _ import .memory.move,
     read = _ import .context.read,
     c = _ new {a : static : 1},
     c which _ move .a,
@@ -409,7 +402,6 @@ _ do [
 which free mutate
 -----
 _ do [
-    move = _ import .memory.move,
     u = .,
     a = 1,
     u which _ move .a,

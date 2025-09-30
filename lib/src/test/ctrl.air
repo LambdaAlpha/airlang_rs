@@ -267,26 +267,26 @@ match pattern
 match order
 -----
 _ do [
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     [1, 2, 3] match [
         [2, a, b] : [x = 1],
         [1, c, d] : [y = 1],
         [e, 2, f] : [z = 1],
     ],
     [
-        .a is_null _,
-        .b is_null _,
+        .a exist _,
+        .b exist _,
         c,
         d,
-        .e is_null _,
-        .f is_null _,
-        .x is_null _,
+        .e exist _,
+        .f exist _,
+        .x exist _,
         y,
-        .z is_null _
+        .z exist _
     ]
 ]
 -----
-[true, true, 2, 3, true, true, true, 1, true]
+[false, false, 2, 3, false, false, false, 1, false]
 =====
 match eval
 -----
@@ -321,30 +321,30 @@ match default
 match conditional eval exist
 -----
 _ do [
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     1 match [
         1 : [a = 1],
         2 : [b = 2],
         _ : [c = 3]
     ],
-    [a, .b is_null _, .c is_null _]
+    [a, .b exist _, .c exist _]
 ]
 -----
-[1, true, true]
+[1, false, false]
 =====
 match conditional eval default
 -----
 _ do [
-    is_null = _ import .memory.is_null,
+    exist = _ import .memory.exist,
     3 match [
         1 : [a = 1],
         2 : [b = 2],
         _ : [c = 3]
     ],
-    [.a is_null _, .b is_null _, c]
+    [.a exist _, .b exist _, c]
 ]
 -----
-[true, true, 3]
+[false, false, 3]
 =====
 match symbol
 -----

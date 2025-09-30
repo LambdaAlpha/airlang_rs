@@ -57,8 +57,8 @@ impl MemoMap {
         self.map.len()
     }
 
-    pub fn is_null(&self, name: Symbol) -> bool {
-        self.map.get(&name).is_none()
+    pub fn exist(&self, name: Symbol) -> bool {
+        self.map.get(&name).is_some()
     }
 
     pub fn get_ref(&self, name: Symbol) -> Result<&Val, MemoError> {

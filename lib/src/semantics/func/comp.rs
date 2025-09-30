@@ -60,7 +60,7 @@ fn put_input(memo: &mut Memo, input_name: Symbol, input: Val) -> Result<(), Memo
 fn with_ctx(
     memo: &mut Memo, mut ctx: DynRef<Val>, name: Symbol, f: impl FnOnce(&mut Memo) -> Val,
 ) -> Val {
-    if !memo.is_null(name.clone()) {
+    if memo.exist(name.clone()) {
         return Val::default();
     }
     keep_ctx(memo, ctx.reborrow(), name.clone());
