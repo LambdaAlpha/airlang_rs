@@ -29,8 +29,15 @@ impl Cfg {
     }
 
     pub fn end_scope(&mut self) {
-        for v in self.map.values_mut() {
+        let mut to_remove = Vec::new();
+        for (k, v) in self.map.iter_mut() {
             v.remove(&self.max_scope);
+            if v.is_empty() {
+                to_remove.push(k.clone());
+            }
+        }
+        for k in to_remove {
+            self.map.remove(&k);
         }
         self.max_scope -= 1;
     }
@@ -44,10 +51,15 @@ impl Cfg {
         Some(())
     }
 
+    pub fn exist(&self, name: Symbol) -> bool {
+        self.map.get(&name).is_some()
+    }
+
     pub fn import(&self, name: Symbol) -> Option<Val> {
         let scopes = self.map.get(&name)?;
-        let max_scope = *scopes.read_only_view().keys().max()?;
-        scopes.get(&max_scope).cloned()
+        let max_scope = *scopes.read_only_view().keys().max().expect("scopes should not be empty");
+        let val = scopes.get(&max_scope).unwrap().clone();
+        Some(val)
     }
 
     pub fn export(&self, name: Symbol, val: Val) -> Option<()> {
@@ -67,6 +79,23 @@ impl Cfg {
 
     pub fn len(&self) -> usize {
         self.map.len()
+    }
+
+    pub fn snapshot(&self) -> Self {
+        let map = self
+            .map
+            .read_only_view()
+            .iter()
+            .map(|(k, scopes)| {
+                let max_scope =
+                    *scopes.read_only_view().keys().max().expect("scopes should not be empty");
+                let val = scopes.get(&max_scope).unwrap().clone();
+                let new_scopes = OnceMap(Default::default());
+                new_scopes.insert(0usize, |_| Box::new(val));
+                (k.clone(), Box::new(new_scopes))
+            })
+            .collect();
+        Self { max_scope: 0, map }
     }
 }
 
@@ -122,5 +151,13 @@ impl<K: Hash, V: Hash> Hash for OnceMap<K, V> {
         let view = self.read_only_view();
         let hash = view.iter().map(|kv| view.hasher().hash_one(kv)).fold(0, u64::wrapping_add);
         state.write_u64(hash);
+    }
+}
+
+impl<K, V> FromIterator<(K, V)> for OnceMap<K, V>
+where K: Eq + Hash
+{
+    fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
+        Self(FromIterator::from_iter(iter))
     }
 }

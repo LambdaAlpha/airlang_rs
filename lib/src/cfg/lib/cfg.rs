@@ -20,6 +20,7 @@ use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Bit;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -29,14 +30,26 @@ use crate::type_::Pair;
 pub struct CfgLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
+    pub snapshot: FreePrimFuncVal,
+    pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
     pub export: FreePrimFuncVal,
     pub with: MutPrimFuncVal,
+    pub where_: MutPrimFuncVal,
 }
 
 impl Default for CfgLib {
     fn default() -> Self {
-        CfgLib { new: new(), repr: repr(), import: import(), export: export(), with: with() }
+        CfgLib {
+            new: new(),
+            repr: repr(),
+            snapshot: snapshot(),
+            exist: exist(),
+            import: import(),
+            export: export(),
+            with: with(),
+            where_: where_(),
+        }
     }
 }
 
@@ -44,16 +57,22 @@ impl CfgMod for CfgLib {
     fn extend(self, cfg: &Cfg) {
         self.new.extend(cfg);
         self.repr.extend(cfg);
+        self.snapshot.extend(cfg);
+        self.exist.extend(cfg);
         self.import.extend(cfg);
         self.export.extend(cfg);
         let with_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
         CoreCfg::extend_adapter(cfg, &self.with.id, with_adapter);
         self.with.extend(cfg);
+        let where_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
+        CoreCfg::extend_adapter(cfg, &self.where_.id, where_adapter);
+        self.where_.extend(cfg);
     }
 }
 
 impl Library for CfgLib {
     fn prelude(&self, memo: &mut Memo) {
+        memo_put_func(memo, "exist", &self.exist);
         memo_put_func(memo, "import", &self.import);
         memo_put_func(memo, "export", &self.export);
         memo_put_func(memo, "with", &self.with);
@@ -116,6 +135,27 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
     Val::List(list.into())
 }
 
+pub fn snapshot() -> FreePrimFuncVal {
+    FreePrimFn { id: "configuration.snapshot", f: free_impl(fn_snapshot) }.free()
+}
+
+fn fn_snapshot(cfg: &mut Cfg, _input: Val) -> Val {
+    Val::Cfg(cfg.snapshot().into())
+}
+
+pub fn exist() -> FreePrimFuncVal {
+    FreePrimFn { id: "configuration.exist", f: free_impl(fn_exist) }.free()
+}
+
+fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Symbol(name) = input else {
+        error!("input {input:?} should be a symbol");
+        return Val::default();
+    };
+    let exist = cfg.exist(name);
+    Val::Bit(Bit::from(exist))
+}
+
 pub fn import() -> FreePrimFuncVal {
     FreePrimFn { id: "configuration.import", f: free_impl(fn_import) }.free()
 }
@@ -174,4 +214,22 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     };
     cfg.end_scope();
     output
+}
+
+pub fn where_() -> MutPrimFuncVal {
+    DynPrimFn { id: "configuration.where", f: mut_impl(fn_where) }.mut_()
+}
+
+fn fn_where(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return Val::default();
+    };
+    let pair = Pair::from(pair);
+    let Val::Cfg(cfg) = pair.first else {
+        error!("input.first {:?} should be a cfg", pair.first);
+        return Val::default();
+    };
+    let mut cfg = Cfg::from(cfg);
+    Eval.mut_call(&mut cfg, ctx, pair.second)
 }

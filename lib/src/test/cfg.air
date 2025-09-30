@@ -17,6 +17,40 @@ _ do [
 -----
 true
 =====
+snapshot
+-----
+_ do [
+    any = _ import .value.any,
+    new = _ import .configuration.new,
+    snapshot = _ import .configuration.snapshot,
+    where = _ import .configuration.where,
+    represent = _ import .configuration.represent,
+    a1 = _ any .,
+    a2 = _ any .,
+    b1 = _ any .,
+    b2 = _ any .,
+    c = _ new [
+        {a : a1, b1 : b1},
+        {a : a2, b2 : b2},
+    ],
+    c1 = c where _ snapshot _,
+    repr = _ represent c1,
+    repr == [{a : a2, b1 : b1, b2 : b2}]
+]
+-----
+true
+=====
+export exist
+-----
+_ do [
+    any = _ import .value.any,
+    ab = _ any .,
+    .a.b export ab,
+    _ exist .a.b
+]
+-----
+true
+=====
 export import
 -----
 _ do [
@@ -29,7 +63,7 @@ _ do [
 -----
 true
 =====
-with
+with override
 -----
 _ do [
     any = _ import .value.any,
@@ -40,6 +74,37 @@ _ do [
         a3 = _ import .a,
     ],
     (a1 == a3) and (a2 == a4)
+]
+-----
+true
+=====
+with exist
+-----
+_ do [
+    any = _ import .value.any,
+    a = _ any .,
+    b = _ any .,
+    {a : a} with _ do [
+        c1 = _ exist .a,
+        c2 = {b : b} with _ exist .b,
+        c3 = _ exist .b,
+    ],
+    c4 = _ exist .a,
+    c1 and c2 and (_ not c3) and (_ not c4)
+]
+-----
+true
+=====
+where
+-----
+_ do [
+    any = _ import .value.any,
+    new = _ import .configuration.new,
+    where = _ import .configuration.where,
+    a = _ any .,
+    c = _ new [{a : a}],
+    a1 = c where _ import .a,
+    a == a1
 ]
 -----
 true
