@@ -28,7 +28,6 @@ use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Symbol;
 
 #[derive(Clone)]
 pub struct AdapterLib {
@@ -67,20 +66,6 @@ impl CfgMod for AdapterLib {
         CoreCfg::extend_adapter(cfg, &self.new.id, new_adapter);
         self.new.extend(cfg);
         CoreCfg::extend_adapter(cfg, ADAPTER_FUNC_ID, id_adapter());
-        cfg.extend_scope(Symbol::from_str_unchecked(FORM_ID), Val::Func(self.form_id.into()));
-        cfg.extend_scope(
-            Symbol::from_str_unchecked(FORM_LITERAL),
-            Val::Func(self.form_literal.into()),
-        );
-        cfg.extend_scope(Symbol::from_str_unchecked(FORM_REF), Val::Func(self.form_ref.into()));
-        cfg.extend_scope(Symbol::from_str_unchecked(FORM_EVAL), Val::Func(self.form_eval.into()));
-        cfg.extend_scope(Symbol::from_str_unchecked(EVAL_ID), Val::Func(self.eval_id.into()));
-        cfg.extend_scope(
-            Symbol::from_str_unchecked(EVAL_LITERAL),
-            Val::Func(self.eval_literal.into()),
-        );
-        cfg.extend_scope(Symbol::from_str_unchecked(EVAL_REF), Val::Func(self.eval_ref.into()));
-        cfg.extend_scope(Symbol::from_str_unchecked(EVAL_EVAL), Val::Func(self.eval_eval.into()));
         let apply_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form);
         CoreCfg::extend_adapter(cfg, &self.apply.id, apply_adapter);
         self.apply.extend(cfg);
