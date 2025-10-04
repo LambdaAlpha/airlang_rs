@@ -1,5 +1,6 @@
 use std::env::current_dir;
-use std::fs::read_to_string;
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 
 use airlang::Air;
@@ -60,14 +61,15 @@ fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
-    let content = match read_to_string(&url) {
+    let mut buffer = String::new();
+    let content = match read_to_string(&url, &mut buffer) {
         Ok(content) => content,
         Err(err) => {
             eprintln!("failed to read {url}: {err}");
             return Val::default();
         }
     };
-    let Ok(val) = parse(&content) else {
+    let Ok(val) = parse(content) else {
         error!("{content} should be a valid air source code");
         return Val::default();
     };
@@ -80,6 +82,14 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
     mod_air.cfg_mut().begin_scope();
     mod_air.cfg_mut().extend_scope(cur_url_key, Val::Text(Text::from(url).into()));
     mod_air.interpret(val)
+}
+
+fn read_to_string<'a>(url: &str, buffer: &'a mut String) -> std::io::Result<&'a str> {
+    let mut file = File::open(url)?;
+    file.read_to_string(buffer)?;
+    // remove bom
+    let content = buffer.strip_prefix('\u{feff}').unwrap_or(&**buffer);
+    Ok(content)
 }
 
 fn get_cur_url(cfg: &Cfg, key: Symbol) -> Option<String> {
