@@ -1,12 +1,9 @@
-use std::io::stdout;
-
-use crate::repl::Repl;
-
 fn main() -> std::io::Result<()> {
-    let mut repl = Repl::new(stdout());
-    repl.run()
+    cmd::main()
 }
 
 mod repl;
+
+mod cmd;
 
 mod cfg;
