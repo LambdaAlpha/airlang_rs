@@ -5,10 +5,8 @@ use self::pattern::PatternMatch;
 use self::pattern::PatternParse;
 use super::DynPrimFn;
 use super::FreeImpl;
-use super::Library;
 use super::MutImpl;
 use super::const_impl;
-use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -23,7 +21,6 @@ use crate::semantics::core::Eval;
 use crate::semantics::core::import_adapter;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -68,13 +65,6 @@ impl CfgMod for CtxLib {
         self.self_.extend(cfg);
         CoreCfg::extend_adapter(cfg, &self.which.id, id_adapter());
         self.which.extend(cfg);
-    }
-}
-
-impl Library for CtxLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "=", &self.assign);
-        memo_put_func(memo, "which", &self.which);
     }
 }
 

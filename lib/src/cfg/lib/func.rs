@@ -4,17 +4,14 @@ use self::repr::generate_func;
 use self::repr::parse_func;
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::Library;
 use super::const_impl;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
 use super::func::repr::parse_adapter;
-use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MemoVal;
@@ -58,12 +55,6 @@ impl CfgMod for FuncLib {
         self.id.extend(cfg);
         self.code.extend(cfg);
         self.memo.extend(cfg);
-    }
-}
-
-impl Library for FuncLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "function", &self.new);
     }
 }
 

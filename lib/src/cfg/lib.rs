@@ -20,7 +20,6 @@ use self::syntax::SyntaxLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
-use super::Named;
 use crate::cfg::CfgMod;
 use crate::cfg::lib::ctx::CtxLib;
 use crate::semantics::cfg::Cfg;
@@ -30,25 +29,18 @@ use crate::semantics::func::FreeFn;
 use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
-use crate::semantics::memo::Contract;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Symbol;
 
-pub trait Library: CfgMod {
-    fn prelude(&self, memo: &mut Memo);
-}
-
 #[derive(Default, Clone)]
 pub struct CoreLib {
     pub unit: UnitLib,
-    pub bool: BitLib,
+    pub bit: BitLib,
     pub symbol: SymbolLib,
     pub text: TextLib,
     pub int: IntLib,
@@ -73,7 +65,7 @@ pub struct CoreLib {
 impl CfgMod for CoreLib {
     fn extend(self, cfg: &Cfg) {
         self.unit.extend(cfg);
-        self.bool.extend(cfg);
+        self.bit.extend(cfg);
         self.symbol.extend(cfg);
         self.text.extend(cfg);
         self.int.extend(cfg);
@@ -93,39 +85,6 @@ impl CfgMod for CoreLib {
         self.value.extend(cfg);
         self.syntax.extend(cfg);
         self.lang.extend(cfg);
-    }
-}
-
-impl Library for CoreLib {
-    fn prelude(&self, memo: &mut Memo) {
-        self.unit.prelude(memo);
-        self.bool.prelude(memo);
-        self.symbol.prelude(memo);
-        self.text.prelude(memo);
-        self.int.prelude(memo);
-        self.number.prelude(memo);
-        self.byte.prelude(memo);
-        self.pair.prelude(memo);
-        self.call.prelude(memo);
-        self.list.prelude(memo);
-        self.map.prelude(memo);
-        self.link.prelude(memo);
-        self.cfg.prelude(memo);
-        self.memo.prelude(memo);
-        self.func.prelude(memo);
-        self.ctx.prelude(memo);
-        self.adapter.prelude(memo);
-        self.ctrl.prelude(memo);
-        self.value.prelude(memo);
-        self.syntax.prelude(memo);
-        self.lang.prelude(memo);
-    }
-}
-
-impl<T: Named + Clone + Into<FuncVal>> Library for T {
-    fn prelude(&self, memo: &mut Memo) {
-        let v = memo.put(self.name(), Val::Func(self.clone().into()), Contract::None);
-        assert!(matches!(v, Ok(None)), "names of preludes should be unique");
     }
 }
 
@@ -158,12 +117,6 @@ impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
         let func = MutPrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
         MutPrimFuncVal::from(func)
     }
-}
-
-fn memo_put_func<V: Clone + Into<FuncVal>>(memo: &mut Memo, name: &'static str, val: &V) {
-    let name = Symbol::from_str_unchecked(name);
-    let v = memo.put(name, Val::Func(val.clone().into()), Contract::None);
-    assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }
 
 pub struct FreeImpl<Cfg, I, O> {

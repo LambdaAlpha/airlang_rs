@@ -6,11 +6,9 @@ use std::io::stdout;
 use airlang::cfg::CfgMod;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::FreePrimFn;
-use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
 use airlang::cfg::lib::mut_impl;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
@@ -51,10 +49,6 @@ impl CfgMod for IoLib {
         self.error_print_line.extend(cfg);
         self.error_flush.extend(cfg);
     }
-}
-
-impl Library for IoLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn read_line() -> MutPrimFuncVal {

@@ -7,9 +7,7 @@ use airlang::Air;
 use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::FreePrimFn;
-use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
@@ -32,10 +30,6 @@ impl CfgMod for BuildLib {
     fn extend(self, cfg: &Cfg) {
         self.load.extend(cfg);
     }
-}
-
-impl Library for BuildLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 // todo rename

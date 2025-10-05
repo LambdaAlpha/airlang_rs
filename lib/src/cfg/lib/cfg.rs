@@ -9,14 +9,11 @@ use crate::cfg::adapter::id_adapter;
 use crate::cfg::adapter::pair_adapter;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::Library;
 use crate::cfg::lib::free_impl;
-use crate::cfg::lib::memo_put_func;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -67,15 +64,6 @@ impl CfgMod for CfgLib {
         let where_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
         CoreCfg::extend_adapter(cfg, &self.where_.id, where_adapter);
         self.where_.extend(cfg);
-    }
-}
-
-impl Library for CfgLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "exist", &self.exist);
-        memo_put_func(memo, "import", &self.import);
-        memo_put_func(memo, "export", &self.export);
-        memo_put_func(memo, "with", &self.with);
     }
 }
 

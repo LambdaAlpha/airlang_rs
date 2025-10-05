@@ -6,10 +6,8 @@ use self::repr::parse_contract;
 use self::repr::parse_memo;
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::Library;
 use super::const_impl;
 use super::free_impl;
-use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -59,12 +57,6 @@ impl CfgMod for MemoLib {
         self.contract.extend(cfg);
         self.set_contract.extend(cfg);
         self.exist.extend(cfg);
-    }
-}
-
-impl Library for MemoLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "move", &self.remove);
     }
 }
 

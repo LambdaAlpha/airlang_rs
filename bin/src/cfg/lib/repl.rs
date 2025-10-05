@@ -1,8 +1,5 @@
 use airlang::cfg::CfgMod;
-use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Contract;
-use airlang::semantics::memo::Memo;
 use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Symbol;
@@ -22,16 +19,6 @@ impl Default for ReplLib {
 impl CfgMod for ReplLib {
     fn extend(self, cfg: &Cfg) {
         cfg.extend_scope(Symbol::from_str_unchecked("repl.help"), Val::Text(self.help));
-    }
-}
-
-impl Library for ReplLib {
-    fn prelude(&self, memo: &mut Memo) {
-        let _ = memo.put(
-            Symbol::from_str_unchecked("help"),
-            Val::Text(self.help.clone()),
-            Contract::default(),
-        );
     }
 }
 

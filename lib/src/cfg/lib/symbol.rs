@@ -2,12 +2,10 @@ use log::error;
 
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::Library;
 use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -38,10 +36,6 @@ impl CfgMod for SymbolLib {
         self.length.extend(cfg);
         self.join.extend(cfg);
     }
-}
-
-impl Library for SymbolLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn from_text() -> FreePrimFuncVal {

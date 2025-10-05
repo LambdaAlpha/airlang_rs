@@ -1,11 +1,9 @@
 use log::error;
 
 use super::FreePrimFn;
-use super::Library;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Link;
@@ -31,10 +29,6 @@ impl CfgMod for LinkLib {
         self.get.extend(cfg);
         self.set.extend(cfg);
     }
-}
-
-impl Library for LinkLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn new() -> FreePrimFuncVal {

@@ -8,10 +8,8 @@ use rand::prelude::SmallRng;
 
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::Library;
 use super::const_impl;
 use super::free_impl;
-use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::cfg::adapter::CallPrimAdapter;
@@ -73,13 +71,6 @@ impl CfgMod for ValueLib {
         self.any.extend(cfg);
         self.type_.extend(cfg);
         self.equal.extend(cfg);
-    }
-}
-
-impl Library for ValueLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "type", &self.type_);
-        memo_put_func(memo, "==", &self.equal);
     }
 }
 

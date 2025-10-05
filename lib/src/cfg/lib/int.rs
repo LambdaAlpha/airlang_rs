@@ -1,12 +1,9 @@
 use log::error;
 
 use super::FreePrimFn;
-use super::Library;
 use super::free_impl;
-use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -58,19 +55,6 @@ impl CfgMod for IntLib {
         self.greater_than.extend(cfg);
         self.greater_equal.extend(cfg);
         self.less_greater.extend(cfg);
-    }
-}
-
-impl Library for IntLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "+", &self.add);
-        memo_put_func(memo, "-", &self.subtract);
-        memo_put_func(memo, "*", &self.multiply);
-        memo_put_func(memo, "/", &self.divide);
-        memo_put_func(memo, "<", &self.less_than);
-        memo_put_func(memo, "<=", &self.less_equal);
-        memo_put_func(memo, ">", &self.greater_than);
-        memo_put_func(memo, ">=", &self.greater_equal);
     }
 }
 

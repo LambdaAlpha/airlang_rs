@@ -6,15 +6,11 @@ use airlang::cfg::adapter::CallPrimAdapter;
 use airlang::cfg::adapter::SymbolAdapter;
 use airlang::cfg::adapter::prim_adapter;
 use airlang::cfg::lib::FreePrimFn;
-use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use log::error;
-
-use crate::cfg::lib::memo_put_func;
 
 #[derive(Clone)]
 pub struct CmdLib {
@@ -32,12 +28,6 @@ impl CfgMod for CmdLib {
         let call_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval);
         CoreCfg::extend_adapter(cfg, &self.call.id(), call_adapter);
         self.call.extend(cfg);
-    }
-}
-
-impl Library for CmdLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, ";", &self.call);
     }
 }
 

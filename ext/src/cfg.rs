@@ -1,26 +1,24 @@
 use airlang::cfg::CfgMod;
 use airlang::cfg::CoreCfg;
-use airlang::cfg::lib::Library;
+use airlang::cfg::prelude::prelude_repr;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Memo;
 use airlang::semantics::val::Val;
 use airlang::type_::Symbol;
 use log::info;
 
 use self::lib::StdLib;
+use crate::cfg::prelude::StdPrelude;
 
 #[derive(Clone)]
 pub struct StdCfg {
     pub lib: StdLib,
-    pub prelude: Memo,
+    pub prelude: StdPrelude,
 }
 
 impl Default for StdCfg {
     fn default() -> Self {
         let lib = StdLib::default();
-        let mut prelude = Memo::default();
-        lib.prelude(&mut prelude);
-        info!("prelude len {}", prelude.len());
+        let prelude = StdPrelude::new(&lib);
         Self { lib, prelude }
     }
 }
@@ -28,11 +26,12 @@ impl Default for StdCfg {
 impl CfgMod for StdCfg {
     fn extend(self, cfg: &Cfg) {
         self.lib.extend(cfg);
-        cfg.extend_scope(
-            Symbol::from_str_unchecked(CoreCfg::PRELUDE),
-            Val::Memo(self.prelude.into()),
-        );
+        let prelude = prelude_repr(self.prelude);
+        info!("std prelude len {}", prelude.len());
+        cfg.extend_scope(Symbol::from_str_unchecked(CoreCfg::PRELUDE), Val::Memo(prelude.into()));
     }
 }
 
 pub mod lib;
+
+pub mod prelude;

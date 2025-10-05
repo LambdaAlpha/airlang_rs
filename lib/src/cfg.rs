@@ -3,10 +3,10 @@ use log::info;
 use self::adapter::CoreAdapter;
 use self::lib::CoreLib;
 use crate::cfg::adapter::adapter_func;
-use crate::cfg::lib::Library;
+use crate::cfg::prelude::CorePrelude;
+use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CFG_ADAPTER;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -18,27 +18,16 @@ pub trait CfgMod {
     fn extend(self, cfg: &Cfg);
 }
 
-impl<T: CfgMod> From<T> for Cfg {
-    fn from(t: T) -> Cfg {
-        let cfg = Cfg::default();
-        t.extend(&cfg);
-        info!("cfg len {}", cfg.len());
-        cfg
-    }
-}
-
 #[derive(Clone)]
 pub struct CoreCfg {
     pub lib: CoreLib,
-    pub prelude: Memo,
+    pub prelude: CorePrelude,
 }
 
 impl Default for CoreCfg {
     fn default() -> Self {
         let lib = CoreLib::default();
-        let mut prelude = Memo::default();
-        lib.prelude(&mut prelude);
-        info!("prelude len {}", prelude.len());
+        let prelude = CorePrelude::new(&lib);
         Self { lib, prelude }
     }
 }
@@ -46,7 +35,9 @@ impl Default for CoreCfg {
 impl CfgMod for CoreCfg {
     fn extend(self, cfg: &Cfg) {
         self.lib.extend(cfg);
-        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Memo(self.prelude.into()));
+        let prelude = prelude_repr(self.prelude);
+        info!("core prelude len {}", prelude.len());
+        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Memo(prelude.into()));
     }
 }
 
@@ -60,6 +51,12 @@ impl CoreCfg {
         let adapter = Val::Func(adapter_func(adapter));
         cfg.extend_scope(Symbol::from_string_unchecked(id), adapter)
     }
+}
+
+pub fn cfg_repr<T: CfgMod>(t: T) -> Cfg {
+    let cfg = Cfg::default();
+    t.extend(&cfg);
+    cfg
 }
 
 pub(crate) trait Named {
@@ -93,5 +90,7 @@ impl<F: Named + Into<FuncVal>> CfgMod for F {
 pub mod adapter;
 
 pub mod lib;
+
+pub mod prelude;
 
 mod utils;

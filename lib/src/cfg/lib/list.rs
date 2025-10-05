@@ -4,12 +4,10 @@ use log::error;
 use num_traits::ToPrimitive;
 
 use super::DynPrimFn;
-use super::Library;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -75,10 +73,6 @@ impl CfgMod for ListLib {
         self.pop_many.extend(cfg);
         self.clear.extend(cfg);
     }
-}
-
-impl Library for ListLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn length() -> ConstPrimFuncVal {

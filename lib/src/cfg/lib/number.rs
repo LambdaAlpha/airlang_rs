@@ -1,7 +1,5 @@
-use super::Library;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 
 // todo design
 #[derive(Clone)]
@@ -16,8 +14,4 @@ impl Default for NumberLib {
 
 impl CfgMod for NumberLib {
     fn extend(self, _cfg: &Cfg) {}
-}
-
-impl Library for NumberLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }

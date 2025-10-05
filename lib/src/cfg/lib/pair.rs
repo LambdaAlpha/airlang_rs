@@ -3,12 +3,10 @@ use std::mem::swap;
 use log::error;
 
 use super::DynPrimFn;
-use super::Library;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -40,10 +38,6 @@ impl CfgMod for PairLib {
         self.second.extend(cfg);
         self.set_second.extend(cfg);
     }
-}
-
-impl Library for PairLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn first() -> ConstPrimFuncVal {

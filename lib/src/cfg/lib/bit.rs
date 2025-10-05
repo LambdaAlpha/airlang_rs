@@ -1,10 +1,7 @@
 use super::FreePrimFn;
-use super::Library;
 use super::free_impl;
-use super::memo_put_func;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 
@@ -30,16 +27,6 @@ impl CfgMod for BitLib {
         self.or.extend(cfg);
         self.xor.extend(cfg);
         self.imply.extend(cfg);
-    }
-}
-
-impl Library for BitLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "not", &self.not);
-        memo_put_func(memo, "and", &self.and);
-        memo_put_func(memo, "or", &self.or);
-        memo_put_func(memo, "xor", &self.xor);
-        memo_put_func(memo, "imply", &self.imply);
     }
 }
 

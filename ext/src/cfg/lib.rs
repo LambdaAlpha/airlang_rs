@@ -1,8 +1,6 @@
 use airlang::cfg::CfgMod;
 use airlang::cfg::lib::CoreLib;
-use airlang::cfg::lib::Library;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Memo;
 
 use self::build::BuildLib;
 use self::file::FileLib;
@@ -25,16 +23,6 @@ impl CfgMod for StdLib {
         self.process.extend(cfg);
         self.build.extend(cfg);
         self.core.extend(cfg);
-    }
-}
-
-impl Library for StdLib {
-    fn prelude(&self, memo: &mut Memo) {
-        self.io.prelude(memo);
-        self.file.prelude(memo);
-        self.process.prelude(memo);
-        self.build.prelude(memo);
-        self.core.prelude(memo);
     }
 }
 

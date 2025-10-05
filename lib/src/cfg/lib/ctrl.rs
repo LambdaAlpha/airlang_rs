@@ -6,8 +6,6 @@ use num_traits::Signed;
 use num_traits::ToPrimitive;
 
 use super::DynPrimFn;
-use super::Library;
-use super::memo_put_func;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -23,7 +21,6 @@ use crate::semantics::core::Eval;
 use crate::semantics::core::SYMBOL_LITERAL_CHAR;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -74,17 +71,6 @@ impl CfgMod for CtrlLib {
         self.loop_.extend(cfg);
         CoreCfg::extend_adapter(cfg, &self.iterate.id, id_adapter());
         self.iterate.extend(cfg);
-    }
-}
-
-impl Library for CtrlLib {
-    fn prelude(&self, memo: &mut Memo) {
-        memo_put_func(memo, "do", &self.do_);
-        memo_put_func(memo, "test", &self.test);
-        memo_put_func(memo, "switch", &self.switch);
-        memo_put_func(memo, "match", &self.match_);
-        memo_put_func(memo, "loop", &self.loop_);
-        memo_put_func(memo, "iterate", &self.iterate);
     }
 }
 

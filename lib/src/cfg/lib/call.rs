@@ -1,7 +1,6 @@
 use std::mem::swap;
 
 use super::DynPrimFn;
-use super::Library;
 use super::MutImpl;
 use super::const_impl;
 use super::mut_impl;
@@ -11,7 +10,6 @@ use crate::semantics::core::CallApply;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -46,10 +44,6 @@ impl CfgMod for CallLib {
         self.input.extend(cfg);
         self.set_input.extend(cfg);
     }
-}
-
-impl Library for CallLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn apply() -> MutPrimFuncVal {

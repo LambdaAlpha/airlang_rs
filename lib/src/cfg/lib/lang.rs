@@ -2,10 +2,8 @@ use std::str::FromStr;
 
 use num_bigint::BigInt;
 
-use super::Library;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
@@ -27,10 +25,6 @@ impl CfgMod for LangLib {
     fn extend(self, cfg: &Cfg) {
         cfg.extend_scope(Symbol::from_str_unchecked("language.version"), Val::List(self.version));
     }
-}
-
-impl Library for LangLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn version() -> ListVal {

@@ -7,6 +7,7 @@ use std::io::stdin;
 use std::mem::take;
 
 use airlang::Air;
+use airlang::cfg::cfg_repr;
 use airlang::semantics::val::Val;
 use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
@@ -82,7 +83,7 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub fn new(out: T) -> Self {
-        let air = Air::new(BinCfg::default().into()).unwrap();
+        let air = Air::new(cfg_repr(BinCfg::default())).unwrap();
         let terminal = Terminal(out);
         Self {
             air,

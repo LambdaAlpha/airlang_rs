@@ -4,13 +4,11 @@ use log::error;
 
 use super::DynPrimFn;
 use super::FreePrimFn;
-use super::Library;
 use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -97,10 +95,6 @@ impl CfgMod for MapLib {
         self.new_set.extend(cfg);
         self.new_multiset.extend(cfg);
     }
-}
-
-impl Library for MapLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 pub fn length() -> ConstPrimFuncVal {

@@ -2,10 +2,8 @@ use std::process::Command;
 
 use airlang::cfg::CfgMod;
 use airlang::cfg::lib::FreePrimFn;
-use airlang::cfg::lib::Library;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
@@ -31,10 +29,6 @@ impl CfgMod for ProcessLib {
     fn extend(self, cfg: &Cfg) {
         self.call.extend(cfg);
     }
-}
-
-impl Library for ProcessLib {
-    fn prelude(&self, _memo: &mut Memo) {}
 }
 
 const PROGRAM: &str = "program";

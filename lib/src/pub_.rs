@@ -1,4 +1,5 @@
 use log::error;
+use log::info;
 
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
@@ -15,6 +16,7 @@ pub struct Air {
 
 impl Air {
     pub fn new(cfg: Cfg) -> Option<Self> {
+        info!("cfg len {}", cfg.len());
         let prelude = cfg.import(Symbol::from_str_unchecked(CoreCfg::PRELUDE));
         let Some(prelude) = prelude else {
             error!("prelude should exist in cfg");
